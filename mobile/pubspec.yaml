@@ -12,7 +12,7 @@ description: ente photos application
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 
-version: 1.0.11+1042
+version: 1.1.2+1056
 publish_to: none
 
 environment:
@@ -86,7 +86,7 @@ dependencies:
   flutter_email_sender: ^7.0.0
   flutter_image_compress: ^2.4.0
   flutter_inappwebview: ^6.1.4
-  flutter_local_notifications: ^17.2.2
+  flutter_local_notifications: ^19.2.1
   flutter_localizations:
     sdk: flutter
   flutter_map: ^6.2.0
@@ -103,6 +103,7 @@ dependencies:
   flutter_sodium:
   flutter_staggered_grid_view: ^0.6.2
   flutter_svg: ^2.0.10+1
+  flutter_timezone: ^4.1.0
   fluttertoast: ^8.0.6
   fraction: ^5.0.2
   freezed_annotation: ^2.4.1
@@ -170,7 +171,6 @@ dependencies:
     git:
       url: https://github.com/eddyuan/privacy_screen.git
       ref: 855418e
-  protobuf: ^3.1.0
   receive_sharing_intent: # pub.dev is behind
     git:
       url: https://github.com/KasemJaffer/receive_sharing_intent.git
@@ -193,6 +193,7 @@ dependencies:
   syncfusion_flutter_sliders: ^25.2.5
   synchronized: ^3.3.0+3
   system_info_plus: ^0.0.6
+  timezone: ^0.10.0
   tuple: ^2.0.0
   ua_client_hints: ^1.4.0
   url_launcher: ^6.3.0
@@ -237,6 +238,7 @@ dependency_overrides:
     git:
       url: https://github.com/media-kit/media-kit
       path: media_kit_video
+  protobuf: ^3.1.0
   video_player: # remove this dep as soon as we move to one player for all
     git:
       url: https://github.com/ente-io/packages.git

@@ -41,6 +41,16 @@ Usually, this discrepancy occurs because the time in your browser might be
 incorrect. In particular, multiple users have reported that Firefox provides
 incorrect time when certain privacy settings are enabled.
 
+> [!TIP]
+>
+> Newer Ente Auth clients (upcoming 4.4.0+) will automatically try to correct
+> for incorrect system time, so you should be seeing correct codes even if your
+> system time is out of sync. However, this automatic correction will not work
+> if you're using Ente Auth in offline mode.
+>
+> If you've recently changed your system time and the codes are still incorrect,
+> try to refresh / restart the app if needed.
+
 ### Can I access my codes on web?
 
 You can access your codes on the web at [auth.ente.io](https://auth.ente.io).

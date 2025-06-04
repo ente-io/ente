@@ -85,9 +85,10 @@ export class SearchWorker {
     ) {
         return suggestionsForString(
             s,
-            // Case insensitive word prefix match, considering underscores also
-            // as a word separator.
-            new RegExp("(\\b|_)" + s, "i"),
+            // Case insensitive word prefix match.  Note that \b doesn't work
+            // with unicode characters, so we use instead a set of common
+            // punctuation (and spaces) to discern the word boundary.
+            new RegExp("(^|[\\s.,!?\"'-_])" + s, "i"),
             searchString,
             this.collectionsAndFiles,
             this.people,

@@ -14,6 +14,8 @@ class TitleBarWidget extends StatelessWidget {
   final bool isOnTopOfScreen;
   final Color? backgroundColor;
   final bool isSliver;
+  final double? expandedHeight;
+
   const TitleBarWidget({
     this.leading,
     this.title,
@@ -26,6 +28,7 @@ class TitleBarWidget extends StatelessWidget {
     this.isOnTopOfScreen = true,
     this.backgroundColor,
     this.isSliver = true,
+    this.expandedHeight,
     super.key,
   });
 
@@ -40,7 +43,8 @@ class TitleBarWidget extends StatelessWidget {
         leadingWidth: 48,
         automaticallyImplyLeading: false,
         pinned: true,
-        expandedHeight: isFlexibleSpaceDisabled ? toolbarHeight : 102,
+        expandedHeight:
+            expandedHeight ?? (isFlexibleSpaceDisabled ? toolbarHeight : 102),
         centerTitle: false,
         titleSpacing: 4,
         title: TitleWidget(
@@ -72,6 +76,7 @@ class TitleBarWidget extends StatelessWidget {
                 flexibleSpaceTitle,
                 flexibleSpaceCaption,
                 toolbarHeight,
+                maxLines: expandedHeight == null ? 1 : 2,
               ),
       );
     } else {
@@ -112,6 +117,7 @@ class TitleBarWidget extends StatelessWidget {
                 flexibleSpaceTitle,
                 flexibleSpaceCaption,
                 toolbarHeight,
+                maxLines: expandedHeight == null ? 1 : 2,
               ),
       );
     }
@@ -189,11 +195,14 @@ class FlexibleSpaceBarWidget extends StatelessWidget {
   final Widget? flexibleSpaceTitle;
   final String? flexibleSpaceCaption;
   final double toolbarHeight;
+  final int maxLines;
+
   const FlexibleSpaceBarWidget(
     this.flexibleSpaceTitle,
     this.flexibleSpaceCaption,
     this.toolbarHeight, {
     super.key,
+    required this.maxLines,
   });
 
   @override
@@ -223,7 +232,7 @@ class FlexibleSpaceBarWidget extends StatelessWidget {
                           flexibleSpaceCaption!,
                           style: textTheme.smallMuted,
                           overflow: TextOverflow.ellipsis,
-                          maxLines: 1,
+                          maxLines: maxLines,
                         ),
                 ],
               ),

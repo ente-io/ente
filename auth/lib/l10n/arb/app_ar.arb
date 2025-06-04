@@ -47,7 +47,7 @@
   "saveAction": "حفظ",
   "nextTotpTitle": "التالي",
   "deleteCodeTitle": "حذف الرمز؟",
-  "deleteCodeMessage": "هل أنت متأكد من أنك تريد حذف هذه الشيفرة؟ هذا الإجراء لا رجعة فيه.",
+  "deleteCodeMessage": "هل أنت متيقِّن من أنك تريد حذف هذه الشيفرة؟ هذا الإجراء لا رجعة فيه.",
   "trashCode": "حذف الكود؟",
   "trashCodeMessage": "هل أنت متيقِّن أنك تريد حذف الكود الخاص بـ {account}؟",
   "trash": "سلة المهملات",
@@ -173,6 +173,7 @@
   "invalidQRCode": "شيفرة استجابة سريعة غير صالحة",
   "noRecoveryKeyTitle": "لا يوجد مفتاح استرجاع؟",
   "enterEmailHint": "أدخل عنوان البريد الإلكتروني الخاص بك",
+  "enterNewEmailHint": "أدخل عنوان بريدك الإلكتروني الجديد",
   "invalidEmailTitle": "عنوان البريد الإلكتروني غير صالح",
   "invalidEmailMessage": "الرجاء إدخال بريد إلكتروني صالح.",
   "deleteAccount": "إزالة الحساب",
@@ -513,5 +514,10 @@
   "free5GB": "5GB  مجانًا على <bold-green>ente</bold-green> صور",
   "loginWithAuthAccount": "سجّل الدخول باستخدام حساب المُصادقة",
   "freeStorageOffer": "خَصْم 10٪ على صور <bold-green>ente</bold-green>",
-  "freeStorageOfferDescription": "استخدم الكود \"AUTH\" وأحصل على 10٪ خَصْم في السنة الأولى"
+  "freeStorageOfferDescription": "استخدم الكود \"AUTH\" وأحصل على 10٪ خَصْم في السنة الأولى",
+  "advanced": "متقدم",
+  "algorithm": "الخوارزمية",
+  "type": "النوع",
+  "period": "المدّة",
+  "digits": "الأرقام"
 }

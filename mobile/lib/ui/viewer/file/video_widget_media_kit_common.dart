@@ -7,7 +7,7 @@ import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/actions/file/file_actions.dart";
 import "package:photos/ui/common/loading_widget.dart";
-import "package:photos/ui/viewer/file/preview_status_widget.dart";
+import "package:photos/ui/viewer/file/video_stream_change.dart";
 import "package:photos/utils/standalone/date_time.dart";
 import "package:photos/utils/standalone/debouncer.dart";
 
@@ -100,6 +100,7 @@ class _VideoWidgetState extends State<VideoWidget> {
                   GestureDetector(
                     behavior: HitTestBehavior.opaque,
                     onTap: () {
+                      if (widget.isFromMemories) return;
                       showControlsNotifier.value = !showControlsNotifier.value;
                       if (widget.playbackCallback != null) {
                         widget.playbackCallback!(
@@ -107,48 +108,62 @@ class _VideoWidgetState extends State<VideoWidget> {
                         );
                       }
                     },
+                    onLongPress: () {
+                      if (widget.isFromMemories) {
+                        widget.controller.player.stop();
+                      }
+                    },
+                    onLongPressUp: () {
+                      if (widget.isFromMemories) {
+                        widget.controller.player.play();
+                      }
+                    },
                     child: Container(
                       constraints: const BoxConstraints.expand(),
                     ),
                   ),
-                  IgnorePointer(
-                    ignoring: !value,
-                    child: PlayPauseButtonMediaKit(widget.controller),
-                  ),
-                  Positioned(
-                    bottom: verticalMargin,
-                    right: 0,
-                    left: 0,
-                    child: IgnorePointer(
-                      ignoring: !value,
-                      child: SafeArea(
-                        top: false,
-                        left: false,
-                        right: false,
-                        child: Padding(
-                          padding: EdgeInsets.only(
-                            bottom: widget.isFromMemories ? 32 : 0,
-                          ),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              PreviewStatusWidget(
-                                showControls: value,
-                                file: widget.file,
-                                isPreviewPlayer: widget.isPreviewPlayer,
-                                onStreamChange: widget.onStreamChange,
+                  widget.isFromMemories
+                      ? const SizedBox.shrink()
+                      : IgnorePointer(
+                          ignoring: !value,
+                          child: PlayPauseButtonMediaKit(widget.controller),
+                        ),
+                  widget.isFromMemories
+                      ? const SizedBox.shrink()
+                      : Positioned(
+                          bottom: verticalMargin,
+                          right: 0,
+                          left: 0,
+                          child: IgnorePointer(
+                            ignoring: !value,
+                            child: SafeArea(
+                              top: false,
+                              left: false,
+                              right: false,
+                              child: Padding(
+                                padding: EdgeInsets.only(
+                                  bottom: widget.isFromMemories ? 32 : 0,
+                                ),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    VideoStreamChangeWidget(
+                                      showControls: value,
+                                      file: widget.file,
+                                      isPreviewPlayer: widget.isPreviewPlayer,
+                                      onStreamChange: widget.onStreamChange,
+                                    ),
+                                    SeekBarAndDuration(
+                                      controller: widget.controller,
+                                      isSeekingNotifier: _isSeekingNotifier,
+                                      file: widget.file,
+                                    ),
+                                  ],
+                                ),
                               ),
-                              SeekBarAndDuration(
-                                controller: widget.controller,
-                                isSeekingNotifier: _isSeekingNotifier,
-                                file: widget.file,
-                              ),
-                            ],
+                            ),
                           ),
                         ),
-                      ),
-                    ),
-                  ),
                 ],
               ),
             );
@@ -420,13 +435,12 @@ class _SeekBarState extends State<SeekBar> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
     return SliderTheme(
       data: SliderTheme.of(context).copyWith(
         trackHeight: 1.0,
         thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8.0),
         overlayShape: const RoundSliderOverlayShape(overlayRadius: 14.0),
-        activeTrackColor: colorScheme.primary300,
+        activeTrackColor: backgroundElevatedLight,
         inactiveTrackColor: fillMutedDark,
         thumbColor: backgroundElevatedLight,
         overlayColor: fillMutedDark,

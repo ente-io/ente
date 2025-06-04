@@ -18,12 +18,26 @@ import 'package:photos/ui/components/models/button_type.dart';
 import "package:photos/ui/notification/toast.dart";
 import 'package:photos/ui/sharing/user_avator_widget.dart';
 import "package:photos/ui/sharing/verify_identity_dialog.dart";
+import "package:photos/utils/separators_util.dart";
+
+enum ActionTypesToShow {
+  addViewer,
+  addCollaborator,
+}
 
 class AddParticipantPage extends StatefulWidget {
-  final Collection collection;
-  final bool isAddingViewer;
+  /// Cannot be empty
+  final List<ActionTypesToShow> actionTypesToShow;
+  final List<Collection> collections;
 
-  const AddParticipantPage(this.collection, this.isAddingViewer, {super.key});
+  AddParticipantPage(
+    this.collections,
+    this.actionTypesToShow, {
+    super.key,
+  }) : assert(
+          actionTypesToShow.isNotEmpty,
+          'actionTypesToShow cannot be empty',
+        );
 
   @override
   State<StatefulWidget> createState() => _AddParticipantPage();
@@ -72,9 +86,7 @@ class _AddParticipantPage extends State<AddParticipantPage> {
       resizeToAvoidBottomInset: isKeypadOpen,
       appBar: AppBar(
         title: Text(
-          widget.isAddingViewer
-              ? S.of(context).addViewer
-              : S.of(context).addCollaborator,
+          _getTitle(),
         ),
       ),
       body: Column(
@@ -124,13 +136,15 @@ class _AddParticipantPage extends State<AddParticipantPage> {
                                             .longPressAnEmailToVerifyEndToEndEncryption,
                                       )
                                     : const SizedBox.shrink(),
-                                widget.isAddingViewer
-                                    ? const SizedBox.shrink()
-                                    : MenuSectionDescriptionWidget(
+                                widget.actionTypesToShow.contains(
+                                  ActionTypesToShow.addCollaborator,
+                                )
+                                    ? MenuSectionDescriptionWidget(
                                         content: S
                                             .of(context)
                                             .collaboratorsCanAddPhotosAndVideosToTheSharedAlbum,
-                                      ),
+                                      )
+                                    : const SizedBox.shrink(),
                               ],
                             ),
                           );
@@ -216,48 +230,7 @@ class _AddParticipantPage extends State<AddParticipantPage> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   const SizedBox(height: 8),
-                  ButtonWidget(
-                    buttonType: ButtonType.primary,
-                    buttonSize: ButtonSize.large,
-                    labelText: widget.isAddingViewer
-                        ? S.of(context).addViewers(_selectedEmails.length)
-                        : S
-                            .of(context)
-                            .addCollaborators(_selectedEmails.length),
-                    isDisabled: _selectedEmails.isEmpty,
-                    onTap: () async {
-                      final results = <bool>[];
-                      for (String email in _selectedEmails) {
-                        results.add(
-                          await collectionActions.addEmailToCollection(
-                            context,
-                            widget.collection,
-                            email,
-                            widget.isAddingViewer
-                                ? CollectionParticipantRole.viewer
-                                : CollectionParticipantRole.collaborator,
-                          ),
-                        );
-                      }
-
-                      final noOfSuccessfullAdds =
-                          results.where((e) => e).length;
-                      showToast(
-                        context,
-                        widget.isAddingViewer
-                            ? S
-                                .of(context)
-                                .viewersSuccessfullyAdded(noOfSuccessfullAdds)
-                            : S.of(context).collaboratorsSuccessfullyAdded(
-                                  noOfSuccessfullAdds,
-                                ),
-                      );
-
-                      if (!results.any((e) => e == false) && mounted) {
-                        Navigator.of(context).pop(true);
-                      }
-                    },
-                  ),
+                  ..._actionButtons(),
                   const SizedBox(height: 12),
                 ],
               ),
@@ -266,6 +239,100 @@ class _AddParticipantPage extends State<AddParticipantPage> {
         ],
       ),
     );
+  }
+
+  List<Widget> _actionButtons() {
+    final widgets = <Widget>[];
+    if (widget.actionTypesToShow.contains(ActionTypesToShow.addViewer)) {
+      widgets.add(
+        ButtonWidget(
+          buttonType: ButtonType.primary,
+          buttonSize: ButtonSize.large,
+          labelText: S.of(context).addViewers(_selectedEmails.length),
+          isDisabled: _selectedEmails.isEmpty,
+          onTap: () async {
+            final results = <bool>[];
+            final collections = widget.collections;
+
+            for (String email in _selectedEmails) {
+              bool result = false;
+              for (Collection collection in collections) {
+                result = await collectionActions.addEmailToCollection(
+                  context,
+                  collection,
+                  email,
+                  CollectionParticipantRole.viewer,
+                );
+              }
+              results.add(result);
+            }
+
+            final noOfSuccessfullAdds = results.where((e) => e).length;
+            showToast(
+              context,
+              S.of(context).viewersSuccessfullyAdded(noOfSuccessfullAdds),
+            );
+
+            if (!results.any((e) => e == false) && mounted) {
+              Navigator.of(context).pop(true);
+            }
+          },
+        ),
+      );
+    }
+    if (widget.actionTypesToShow.contains(
+      ActionTypesToShow.addCollaborator,
+    )) {
+      widgets.add(
+        ButtonWidget(
+          buttonType:
+              widget.actionTypesToShow.contains(ActionTypesToShow.addViewer)
+                  ? ButtonType.neutral
+                  : ButtonType.primary,
+          buttonSize: ButtonSize.large,
+          labelText: S.of(context).addCollaborators(_selectedEmails.length),
+          isDisabled: _selectedEmails.isEmpty,
+          onTap: () async {
+            // TODO: This is not currently designed for best UX for action on
+            // multiple collections and emails, especially if some operations
+            // fail. Can be improved by using a different 'addEmailToCollection'
+            // that accepts list of emails and list of collections.
+            final results = <bool>[];
+            final collections = widget.collections;
+
+            for (String email in _selectedEmails) {
+              bool result = false;
+              for (Collection collection in collections) {
+                result = await collectionActions.addEmailToCollection(
+                  context,
+                  collection,
+                  email,
+                  CollectionParticipantRole.collaborator,
+                );
+              }
+              results.add(result);
+            }
+
+            final noOfSuccessfullAdds = results.where((e) => e).length;
+            showToast(
+              context,
+              S.of(context).collaboratorsSuccessfullyAdded(noOfSuccessfullAdds),
+            );
+
+            if (!results.any((e) => e == false) && mounted) {
+              Navigator.of(context).pop(true);
+            }
+          },
+        ),
+      );
+    }
+    final widgetsWithSpaceBetween = addSeparators(
+      widgets,
+      const SizedBox(
+        height: 8,
+      ),
+    );
+    return widgetsWithSpaceBetween;
   }
 
   void clearFocus() {
@@ -363,9 +430,16 @@ class _AddParticipantPage extends State<AddParticipantPage> {
 
   List<User> _getSuggestedUser() {
     final Set<String> existingEmails = {};
-    for (final User u in widget.collection.sharees) {
-      if (u.id != null && u.email.isNotEmpty) {
-        existingEmails.add(u.email);
+    final collections = widget.collections;
+    if (collections.isEmpty) {
+      return [];
+    }
+
+    for (final Collection collection in collections) {
+      for (final User u in collection.sharees) {
+        if (u.id != null && u.email.isNotEmpty) {
+          existingEmails.add(u.email);
+        }
       }
     }
 
@@ -384,5 +458,15 @@ class _AddParticipantPage extends State<AddParticipantPage> {
     suggestedUsers.sort((a, b) => a.email.compareTo(b.email));
 
     return suggestedUsers;
+  }
+
+  String _getTitle() {
+    if (widget.actionTypesToShow.length > 1) {
+      return S.of(context).addParticipants;
+    } else if (widget.actionTypesToShow.first == ActionTypesToShow.addViewer) {
+      return S.of(context).addViewer;
+    } else {
+      return S.of(context).addCollaborator;
+    }
   }
 }

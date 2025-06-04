@@ -4,12 +4,11 @@ import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart';
 import 'package:photo_manager/photo_manager.dart';
-import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/models/file/file_type.dart';
 import 'package:photos/models/location/location.dart';
 import "package:photos/models/metadata/file_magic.dart";
-import "package:photos/service_locator.dart";
+import "package:photos/module/download/file_url.dart";
 import 'package:photos/utils/exif_util.dart';
 import 'package:photos/utils/file_uploader_util.dart';
 import "package:photos/utils/panorama_util.dart";
@@ -242,65 +241,14 @@ class EnteFile {
     return metadata;
   }
 
-  String get downloadUrl {
-    if (localFileServer.isNotEmpty) {
-      return "$localFileServer/$uploadedFileID";
-    }
-    final endpoint = Configuration.instance.getHttpEndpoint();
-    if (endpoint != kDefaultProductionEndpoint || flagService.disableCFWorker) {
-      return endpoint + "/files/download/" + uploadedFileID.toString();
-    } else {
-      return "https://files.ente.io/?fileID=" + uploadedFileID.toString();
-    }
-  }
-
-  String get publicDownloadUrl {
-    if (localFileServer.isNotEmpty) {
-      return "$localFileServer/$uploadedFileID";
-    }
-    final endpoint = Configuration.instance.getHttpEndpoint();
-    if (endpoint != kDefaultProductionEndpoint || flagService.disableCFWorker) {
-      return endpoint +
-          "/public-collection/files/download/" +
-          uploadedFileID.toString();
-    } else {
-      return "https://public-albums.ente.io/download/?fileID=" +
-          uploadedFileID.toString();
-    }
-  }
-
-  String get pubPreviewUrl {
-    if (localFileServer.isNotEmpty) {
-      return "$localFileServer/thumb/$uploadedFileID";
-    }
-    final endpoint = Configuration.instance.getHttpEndpoint();
-    if (endpoint != kDefaultProductionEndpoint || flagService.disableCFWorker) {
-      return endpoint +
-          "/public-collection/files/preview/" +
-          uploadedFileID.toString();
-    } else {
-      return "https://public-albums.ente.io/preview/?fileID=" +
-          uploadedFileID.toString();
-    }
-  }
+  String get downloadUrl =>
+      FileUrl.getUrl(uploadedFileID!, FileUrlType.download);
 
   String? get caption {
     return pubMagicMetadata?.caption;
   }
 
   String? debugCaption;
-
-  String get thumbnailUrl {
-    if (localFileServer.isNotEmpty) {
-      return "$localFileServer/thumb/$uploadedFileID";
-    }
-    final endpoint = Configuration.instance.getHttpEndpoint();
-    if (endpoint != kDefaultProductionEndpoint || flagService.disableCFWorker) {
-      return endpoint + "/files/preview/" + uploadedFileID.toString();
-    } else {
-      return "https://thumbnails.ente.io/?fileID=" + uploadedFileID.toString();
-    }
-  }
 
   String get displayName {
     if (pubMagicMetadata != null && pubMagicMetadata!.editedName != null) {

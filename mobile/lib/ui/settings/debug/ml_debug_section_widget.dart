@@ -21,6 +21,7 @@ import "package:photos/services/machine_learning/ml_indexing_isolate.dart";
 import 'package:photos/services/machine_learning/ml_service.dart';
 import "package:photos/services/machine_learning/semantic_search/semantic_search_service.dart";
 import "package:photos/services/memory_home_widget_service.dart";
+import "package:photos/services/notification_service.dart";
 import "package:photos/src/rust/api/simple.dart";
 import "package:photos/src/rust/api/usearch_api.dart";
 import 'package:photos/theme/ente_theme.dart';
@@ -77,6 +78,120 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
     logger.info("Building ML Debug section options");
     return Column(
       children: [
+        sectionOptionSpacing,
+        MenuItemWidget(
+          captionedTextWidget: const CaptionedTextWidget(
+            title: "Show pending notifications",
+          ),
+          pressedColor: getEnteColorScheme(context).fillFaint,
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          onTap: () async {
+            try {
+              final amount =
+                  await NotificationService.instance.pendingNotifications();
+              showShortToast(context, '$amount pending notifications');
+            } catch (e, s) {
+              logger.severe('pendingNotifications failed ', e, s);
+              await showGenericErrorDialog(context: context, error: e);
+            }
+          },
+        ),
+        sectionOptionSpacing,
+        MenuItemWidget(
+          captionedTextWidget: const CaptionedTextWidget(
+            title: "Clear pending notifications",
+          ),
+          pressedColor: getEnteColorScheme(context).fillFaint,
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          onTap: () async {
+            try {
+              await NotificationService.instance.clearAllScheduledNotifications(
+                containingPayload: "onThisDay",
+              );
+              showShortToast(context, 'Done');
+            } catch (e, s) {
+              logger.severe('clearAllScheduledNotifications failed ', e, s);
+              await showGenericErrorDialog(context: context, error: e);
+            }
+          },
+        ),
+        sectionOptionSpacing,
+        MenuItemWidget(
+          captionedTextWidget: const CaptionedTextWidget(
+            title: "Schedule notification 10 seconds",
+          ),
+          pressedColor: getEnteColorScheme(context).fillFaint,
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          onTap: () async {
+            try {
+              await NotificationService.instance.scheduleNotification(
+                "test",
+                "test",
+                id: 10,
+                dateTime: DateTime.now().add(
+                  const Duration(seconds: 10),
+                ),
+              );
+              showShortToast(context, 'done');
+            } catch (e, s) {
+              logger.severe('schedule notification failed ', e, s);
+              await showGenericErrorDialog(context: context, error: e);
+            }
+          },
+        ),
+        sectionOptionSpacing,
+        MenuItemWidget(
+          captionedTextWidget: const CaptionedTextWidget(
+            title: "Schedule notification 1 hour",
+          ),
+          pressedColor: getEnteColorScheme(context).fillFaint,
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          onTap: () async {
+            try {
+              await NotificationService.instance.scheduleNotification(
+                "test",
+                "test",
+                id: 11,
+                dateTime: DateTime.now().add(
+                  const Duration(hours: 1),
+                ),
+              );
+              showShortToast(context, 'done');
+            } catch (e, s) {
+              logger.severe('schedule notification failed ', e, s);
+              await showGenericErrorDialog(context: context, error: e);
+            }
+          },
+        ),
+        sectionOptionSpacing,
+        MenuItemWidget(
+          captionedTextWidget: const CaptionedTextWidget(
+            title: "Schedule notification 12 hours",
+          ),
+          pressedColor: getEnteColorScheme(context).fillFaint,
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          onTap: () async {
+            try {
+              await NotificationService.instance.scheduleNotification(
+                "test",
+                "test",
+                id: 12,
+                dateTime: DateTime.now().add(
+                  const Duration(hours: 12),
+                ),
+              );
+              showShortToast(context, 'done');
+            } catch (e, s) {
+              logger.severe('schedule notification failed ', e, s);
+              await showGenericErrorDialog(context: context, error: e);
+            }
+          },
+        ),
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: const CaptionedTextWidget(
@@ -713,7 +828,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async =>
-              await MemoryHomeWidgetService.instance.initMemoryHW(true),
+              await MemoryHomeWidgetService.instance.initMemoryHomeWidget(true),
         ),
         sectionOptionSpacing,
         MenuItemWidget(
@@ -723,8 +838,8 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
-          onTap: () async =>
-              await MemoryHomeWidgetService.instance.initMemoryHW(false),
+          onTap: () async => await MemoryHomeWidgetService.instance
+              .initMemoryHomeWidget(false),
         ),
         sectionOptionSpacing,
         MenuItemWidget(

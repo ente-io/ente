@@ -1,13 +1,11 @@
 import "package:flutter/material.dart";
 import "package:photos/core/constants.dart";
-import "package:photos/models/file/file.dart";
 import "package:photos/theme/ente_theme.dart";
-import "package:photos/ui/viewer/search/result/person_face_widget.dart";
+import "package:photos/ui/viewer/people/person_face_widget.dart";
 
 class FaceFilterChip extends StatefulWidget {
   final String? personId;
   final String? clusterId;
-  final EnteFile faceThumbnailFile;
   final VoidCallback apply;
   final VoidCallback remove;
   final bool isApplied;
@@ -16,7 +14,6 @@ class FaceFilterChip extends StatefulWidget {
   const FaceFilterChip({
     required this.personId,
     required this.clusterId,
-    required this.faceThumbnailFile,
     required this.apply,
     required this.remove,
     required this.isApplied,
@@ -72,12 +69,9 @@ class _FaceFilterChipState extends State<FaceFilterChip> {
                     width: kFilterChipHeight * scale,
                     height: kFilterChipHeight * scale,
                     child: PersonFaceWidget(
-                      widget.faceThumbnailFile,
                       personId: widget.personId,
                       clusterID: widget.clusterId,
-                      thumbnailFallback: false,
                       useFullFile: false,
-                      cannotTrustFile: true,
                     ),
                   ),
                 ),

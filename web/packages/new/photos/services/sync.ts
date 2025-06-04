@@ -1,5 +1,8 @@
 import { resetFileViewerDataSourceOnClose } from "ente-gallery/components/viewer/data-source";
-import { videoProcessingSyncIfNeeded } from "ente-gallery/services/video";
+import {
+    videoProcessingSyncIfNeeded,
+    videoPrunePermanentlyDeletedFileIDsIfNeeded,
+} from "ente-gallery/services/video";
 import type { Collection } from "ente-media/collection";
 import type { EnteFile } from "ente-media/file";
 import { isHiddenCollection } from "ente-new/photos/services/collection";
@@ -141,7 +144,11 @@ export const syncCollectionAndFiles = async (
         opts?.onResetHiddenFiles,
         opts?.onFetchHiddenFiles,
     );
-    await syncTrash(collections, opts?.onResetTrashedFiles);
+    await syncTrash(
+        collections,
+        opts?.onResetTrashedFiles,
+        videoPrunePermanentlyDeletedFileIDsIfNeeded,
+    );
     if (didUpdateNormalFiles || didUpdateHiddenFiles) {
         // TODO: Ok for now since its is only commented for the deduper (gallery
         // does this on the return value), but still needs fixing instead of a

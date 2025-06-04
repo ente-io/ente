@@ -4,6 +4,23 @@ import { nullToUndefined } from "ente-utils/transform";
 import { z } from "zod";
 
 /**
+ * Fetch the public key from remote for the user (if any) who has registered
+ * with remote with the given {@link email}.
+ *
+ * @returns the base64 encoded public key of the user with {@link email}.
+ */
+export const getPublicKey = async (email: string) => {
+    const params = new URLSearchParams({ email });
+    const url = await apiURL("/users/public-key");
+    const res = await fetch(`${url}?${params.toString()}`, {
+        headers: await authenticatedRequestHeaders(),
+    });
+    ensureOk(res);
+    return z.object({ publicKey: z.string() }).parse(await res.json())
+        .publicKey;
+};
+
+/**
  * Fetch the two-factor status (whether or not it is enabled) from remote.
  */
 export const get2FAStatus = async () => {
@@ -31,7 +48,7 @@ const DeleteChallengeResponse = z.object({
     allowDelete: z.boolean(),
     // An encrypted challenge that the client needs to decrypt and provide in
     // the actual account deletion request.
-    encryptedChallenge: z.string().nullable().transform(nullToUndefined),
+    encryptedChallenge: z.string().nullish().transform(nullToUndefined),
 });
 
 export const getAccountDeleteChallenge = async () => {

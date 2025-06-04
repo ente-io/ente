@@ -1,4 +1,3 @@
-import { Canceler } from "axios";
 import { isDesktop } from "ente-base/app";
 import { createComlinkCryptoWorker } from "ente-base/crypto";
 import { type CryptoWorker } from "ente-base/crypto/worker";
@@ -7,7 +6,6 @@ import type { PublicAlbumsCredentials } from "ente-base/http";
 import log from "ente-base/log";
 import { ComlinkWorker } from "ente-base/worker/comlink-worker";
 import {
-    RANDOM_PERCENTAGE_PROGRESS_FOR_PUT,
     markUploadedAndObtainProcessableItem,
     shouldDisableCFUploadProxy,
     type ClusteredUploadItem,
@@ -19,7 +17,7 @@ import {
     metadataJSONMapKeyForJSON,
     tryParseTakeoutMetadataJSON,
     type ParsedMetadataJSON,
-} from "ente-gallery/services/upload/takeout";
+} from "ente-gallery/services/upload/metadata-json";
 import UploadService, {
     areLivePhotoAssets,
     upload,
@@ -64,16 +62,23 @@ export interface InProgressUpload {
     progress: PercentageUploaded;
 }
 
+/**
+ * A variant of {@link UploadResult} used when segregating finished uploads in
+ * the UI. "addedSymlink" is treated as "uploaded", everything else remains as
+ * it were.
+ */
+export type FinishedUploadResult = Exclude<UploadResult, "addedSymlink">;
+
 export interface FinishedUpload {
     localFileID: FileID;
-    result: UploadResult;
+    result: FinishedUploadResult;
 }
 
 export type InProgressUploads = Map<FileID, PercentageUploaded>;
 
-export type FinishedUploads = Map<FileID, UploadResult>;
+export type FinishedUploads = Map<FileID, FinishedUploadResult>;
 
-export type SegregatedFinishedUploads = Map<UploadResult, FileID[]>;
+export type SegregatedFinishedUploads = Map<FinishedUploadResult, FileID[]>;
 
 export interface ProgressUpdater {
     setPercentComplete: React.Dispatch<React.SetStateAction<number>>;
@@ -158,7 +163,7 @@ class UIService {
         this.setTotalFileCount(count);
         this.filesUploadedCount = 0;
         this.inProgressUploads = new Map<number, number>();
-        this.finishedUploads = new Map<number, UploadResult>();
+        this.finishedUploads = new Map<number, FinishedUploadResult>();
         this.updateProgressBarUI();
     }
 
@@ -202,7 +207,7 @@ class UIService {
         this.updateProgressBarUI();
     }
 
-    moveFileToResultList(key: number, uploadResult: UploadResult) {
+    moveFileToResultList(key: number, uploadResult: FinishedUploadResult) {
         this.finishedUploads.set(key, uploadResult);
         this.inProgressUploads.delete(key);
         this.updateProgressBarUI();
@@ -244,48 +249,16 @@ class UIService {
         setFinishedUploads(groupByResult(this.finishedUploads));
     }
 
-    trackUploadProgress(
-        fileLocalID: number,
-        percentPerPart = RANDOM_PERCENTAGE_PROGRESS_FOR_PUT(),
-        index = 0,
-    ) {
-        const cancel: { exec: Canceler } = { exec: () => {} };
-        const cancelTimedOutRequest = () => cancel.exec("Request timed out");
-
-        const cancelCancelledUploadRequest = () =>
-            cancel.exec(CustomError.UPLOAD_CANCELLED);
-
-        let timeout = null;
-        const resetTimeout = () => {
-            if (timeout) {
-                clearTimeout(timeout);
-            }
-            timeout = setTimeout(cancelTimedOutRequest, 30 * 1000 /* 30 sec */);
-        };
-        return {
-            cancel,
-            onUploadProgress: (event) => {
-                this.inProgressUploads.set(
-                    fileLocalID,
-                    Math.min(
-                        Math.round(
-                            percentPerPart * index +
-                                (percentPerPart * event.loaded) / event.total,
-                        ),
-                        98,
-                    ),
-                );
-                this.updateProgressBarUI();
-                if (event.loaded === event.total) {
-                    clearTimeout(timeout);
-                } else {
-                    resetTimeout();
-                }
-                if (uploadCancelService.isUploadCancelationRequested()) {
-                    cancelCancelledUploadRequest();
-                }
-            },
-        };
+    /**
+     * Update the upload progress shown in the UI to {@link percentage} for the
+     * file with the given {@link fileLocalID}.
+     *
+     * @param percentage The upload completion percentage. It should be a value
+     * between 0 and 100 (inclusive).
+     */
+    updateUploadProgress(fileLocalID: number, percentage: number) {
+        this.inProgressUploads.set(fileLocalID, Math.round(percentage));
+        this.updateProgressBarUI();
     }
 }
 
@@ -352,10 +325,17 @@ class UploadManager {
         this.uploaderName = null;
     }
 
-    public prepareForNewUpload() {
+    public prepareForNewUpload(
+        parsedMetadataJSONMap?: Map<string, ParsedMetadataJSON>,
+    ) {
         this.resetState();
         this.uiService.reset();
         uploadCancelService.reset();
+
+        if (parsedMetadataJSONMap) {
+            this.parsedMetadataJSONMap = parsedMetadataJSONMap;
+        }
+
         this.uiService.setUploadPhase("preparing");
     }
 
@@ -474,6 +454,7 @@ class UploadManager {
 
         const item = {
             uploadItem: file,
+            pathPrefix: undefined,
             localID: 1,
             collectionID: collection.id,
             externalParsedMetadata: { creationDate, creationTime },
@@ -508,16 +489,19 @@ class UploadManager {
     ) {
         this.uiService.reset(items.length);
 
-        for (const { uploadItem, fileName, collectionID } of items) {
+        for (const item of items) {
             this.abortIfCancelled();
 
+            const { uploadItem, pathPrefix, fileName, collectionID } = item;
             log.info(`Parsing metadata JSON ${fileName}`);
             const metadataJSON = await tryParseTakeoutMetadataJSON(uploadItem!);
             if (metadataJSON) {
-                this.parsedMetadataJSONMap.set(
-                    metadataJSONMapKeyForJSON(collectionID, fileName),
-                    metadataJSON,
+                const key = metadataJSONMapKeyForJSON(
+                    pathPrefix,
+                    collectionID,
+                    fileName,
                 );
+                this.parsedMetadataJSONMap.set(key, metadataJSON);
                 this.uiService.increaseFileUploaded();
             }
         }
@@ -544,6 +528,12 @@ class UploadManager {
 
     private async uploadNextItemInQueue(worker: CryptoWorker) {
         const uiService = this.uiService;
+        const uploadContext = {
+            isCFUploadProxyDisabled: shouldDisableCFUploadProxy(),
+            abortIfCancelled: this.abortIfCancelled.bind(this),
+            updateUploadProgress:
+                uiService.updateUploadProgress.bind(uiService),
+        };
 
         while (this.itemsToBeUploaded.length > 0) {
             this.abortIfCancelled();
@@ -563,20 +553,7 @@ class UploadManager {
                 this.existingFiles,
                 this.parsedMetadataJSONMap,
                 worker,
-                shouldDisableCFUploadProxy(),
-                () => {
-                    this.abortIfCancelled();
-                },
-                (
-                    fileLocalID: number,
-                    percentPerPart?: number,
-                    index?: number,
-                ) =>
-                    uiService.trackUploadProgress(
-                        fileLocalID,
-                        percentPerPart,
-                        index,
-                    ),
+                uploadContext,
             );
 
             const finalUploadResult = await this.postUploadTask(
@@ -585,8 +562,8 @@ class UploadManager {
                 uploadedFile,
             );
 
-            this.uiService.moveFileToResultList(localID, finalUploadResult);
-            this.uiService.increaseFileUploaded();
+            uiService.moveFileToResultList(localID, finalUploadResult);
+            uiService.increaseFileUploaded();
             UploadService.reducePendingUploadCount();
         }
     }
@@ -595,8 +572,10 @@ class UploadManager {
         uploadableItem: UploadableUploadItem,
         uploadResult: UploadResult,
         uploadedFile: EncryptedEnteFile | EnteFile | undefined,
-    ) {
+    ): Promise<FinishedUploadResult> {
         log.info(`Upload ${uploadableItem.fileName} | ${uploadResult}`);
+        const finishedUploadResult =
+            uploadResult == "addedSymlink" ? "uploaded" : uploadResult;
         try {
             const processableUploadItem =
                 await markUploadedAndObtainProcessableItem(uploadableItem);
@@ -608,11 +587,8 @@ class UploadManager {
                     this.failedItems.push(uploadableItem);
                     break;
                 case "alreadyUploaded":
-                    decryptedFile = uploadedFile as EnteFile;
-                    break;
                 case "addedSymlink":
                     decryptedFile = uploadedFile as EnteFile;
-                    uploadResult = "uploaded";
                     break;
                 case "uploaded":
                 case "uploadedWithStaticThumbnail":
@@ -653,7 +629,7 @@ class UploadManager {
                 uploadableItem,
                 uploadedFile as EncryptedEnteFile,
             );
-            return uploadResult;
+            return finishedUploadResult;
         } catch (e) {
             log.error("Post file upload action failed", e);
             return "failed";
@@ -682,10 +658,15 @@ class UploadManager {
         uploadCancelService.requestUploadCancelation();
     }
 
-    public getFailedItemsWithCollections() {
+    /**
+     * Return the list of failed items from the last upload, along with other
+     * state needed to attempt to reupload them.
+     */
+    public failedItemState() {
         return {
-            items: this.failedItems,
+            items: [...this.failedItems],
             collections: [...this.collections.values()],
+            parsedMetadataJSONMap: this.parsedMetadataJSONMap,
         };
     }
 
@@ -701,8 +682,13 @@ class UploadManager {
         this.onUploadFile(decryptedFile);
     }
 
-    public shouldAllowNewUpload = () => {
-        return !this.uploadInProgress || watcher.isUploadRunning();
+    /**
+     * `true` if an upload is currently in-progress (either a bunch of files
+     * directly uploaded by the user, or files being uploaded by the folder
+     * watch functionality).
+     */
+    public isUploadInProgress = () => {
+        return this.uploadInProgress || watcher.isUploadRunning();
     };
 }
 
@@ -760,6 +746,7 @@ const makeUploadItemWithCollectionIDAndName = (
         : uploadItemFileName(f.uploadItem))!,
     isLivePhoto: f.isLivePhoto,
     uploadItem: f.uploadItem,
+    pathPrefix: f.pathPrefix,
     livePhotoAssets: f.livePhotoAssets,
     externalParsedMetadata: f.externalParsedMetadata,
 });
@@ -806,12 +793,14 @@ const clusterLivePhotos = async (
             fileType: fFileType,
             collectionID: f.collectionID,
             uploadItem: f.uploadItem,
+            pathPrefix: f.pathPrefix,
         };
         const ga: PotentialLivePhotoAsset = {
             fileName: g.fileName,
             fileType: gFileType,
             collectionID: g.collectionID,
             uploadItem: g.uploadItem,
+            pathPrefix: g.pathPrefix,
         };
         if (await areLivePhotoAssets(fa, ga, parsedMetadataJSONMap)) {
             const [image, video] =
@@ -821,6 +810,7 @@ const clusterLivePhotos = async (
                 collectionID: f.collectionID,
                 fileName: image.fileName,
                 isLivePhoto: true,
+                pathPrefix: image.pathPrefix,
                 livePhotoAssets: {
                     image: image.uploadItem,
                     video: video.uploadItem,
@@ -828,12 +818,15 @@ const clusterLivePhotos = async (
             });
             index += 2;
         } else {
-            result.push({ ...f, isLivePhoto: false });
+            // They may already be a live photo (we might be retrying a
+            // previously failed upload).
+            result.push({ ...f, isLivePhoto: f.isLivePhoto ?? false });
             index += 1;
         }
     }
-    if (index === items.length - 1) {
-        result.push({ ...items[index], isLivePhoto: false });
+    if (index == items.length - 1) {
+        const f = items[index]!;
+        result.push({ ...f, isLivePhoto: f.isLivePhoto ?? false });
     }
     return result;
 };

@@ -1,6 +1,7 @@
 {
   "@@locale ": "en",
   "enterYourEmailAddress": "Gib deine E-Mail-Adresse ein",
+  "enterYourNewEmailAddress": "Gib Deine neue E-Mail-Adresse ein",
   "accountWelcomeBack": "Willkommen zurück!",
   "emailAlreadyRegistered": "E-Mail ist bereits registriert.",
   "emailNotRegistered": "E-Mail nicht registriert.",
@@ -1281,6 +1282,8 @@
   "createCollaborativeLink": "Gemeinschaftlichen Link erstellen",
   "search": "Suche",
   "enterPersonName": "Namen der Person eingeben",
+  "editEmailAlreadyLinked": "Diese E-Mail ist bereits verknüpft mit {name}.",
+  "viewPersonToUnlink": "{name} zum Entfernen des Links anzeigen",
   "enterName": "Name eingeben",
   "savePerson": "Person speichern",
   "editPerson": "Person bearbeiten",
@@ -1411,7 +1414,7 @@
     },
     "description": "Number of viewers that were successfully added to an album."
   },
-  "collaboratorsSuccessfullyAdded": "{count, plural, one {}=0 {0 Mitarbeiter hinzugefügt} =1 {1 Mitarbeiter hinzugefügt} other {{count} Mitarbeiter hinzugefügt}}",
+  "collaboratorsSuccessfullyAdded": "{count, plural, =0 {0 Mitarbeiter hinzugefügt} =1 {1 Mitarbeiter hinzugefügt} other {{count} Mitarbeiter hinzugefügt}}",
   "@collaboratorsSuccessfullyAdded": {
     "placeholders": {
       "count": {
@@ -1660,7 +1663,7 @@
   "@linkPersonCaption": {
     "description": "Caption for the 'Link person' title. It should be a continuation of the 'Link person' title. Just like how 'Link person' + 'for better sharing experience' forms a proper sentence in English, the combination of these two strings should also be a proper sentence in other languages."
   },
-  "videoStreaming": "Video-Streaming",
+  "videoStreaming": "Streambare Videos",
   "processingVideos": "Verarbeite Videos",
   "streamDetails": "Stream-Details",
   "processing": "In Bearbeitung",
@@ -1737,5 +1740,10 @@
   "cLFamilyPlanDesc": "Du kannst jetzt festlegen, wie viel Speicherplatz deine Familienmitglieder nutzen können.",
   "cLBulkEdit": "Massenbearbeitung von Datumsangaben",
   "cLBulkEditDesc": "Du kannst jetzt mehrere Fotos auswählen, und das Datum/Uhrzeit für alle mit einer Aktion ändern. Das Verschieben von Daten wird auch unterstützt.",
-  "curatedMemories": "Ausgewählte Erinnerungen"
+  "curatedMemories": "Ausgewählte Erinnerungen",
+  "onThisDay": "An diesem Tag",
+  "deleteMultipleAlbumDialog": "Sollen die Fotos (und Videos) aus diesen {count} Alben auch aus <bold>allen</bold> anderen Alben gelöscht werden, in denen sie enthalten sind?",
+  "addParticipants": "Teilnehmer hinzufügen",
+  "selectedAlbums": "{count} ausgewählt",
+  "actionNotSupportedOnFavouritesAlbum": "Aktion für das Favoritenalbum nicht unterstützt"
 }

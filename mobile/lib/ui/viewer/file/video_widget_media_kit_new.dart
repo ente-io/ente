@@ -14,10 +14,12 @@ import "package:photos/events/stream_switched_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import "package:photos/models/file/file.dart";
+import "package:photos/module/download/task.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/files_service.dart";
 import "package:photos/services/wake_lock_service.dart";
 import "package:photos/theme/colors.dart";
+import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/actions/file/file_actions.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/notification/toast.dart";
@@ -34,6 +36,7 @@ class VideoWidgetMediaKitNew extends StatefulWidget {
   final void Function() onStreamChange;
   final File? preview;
   final bool selectedPreview;
+  final Function(int)? onFinalFileLoad;
 
   const VideoWidgetMediaKitNew(
     this.file, {
@@ -43,6 +46,7 @@ class VideoWidgetMediaKitNew extends StatefulWidget {
     required this.onStreamChange,
     this.preview,
     required this.selectedPreview,
+    this.onFinalFileLoad,
     super.key,
   });
 
@@ -62,6 +66,7 @@ class _VideoWidgetMediaKitNewState extends State<VideoWidgetMediaKitNew>
   late final StreamSubscription<GuestViewEvent> _guestViewEventSubscription;
   bool _isGuestView = false;
   StreamSubscription<StreamSwitchedEvent>? _streamSwitchedSubscription;
+  StreamSubscription<DownloadTask>? _downloadTaskSubscription;
   late final StreamSubscription<FileCaptionUpdatedEvent>
       _captionUpdatedSubscription;
 
@@ -88,6 +93,17 @@ class _VideoWidgetMediaKitNewState extends State<VideoWidgetMediaKitNew>
         _isGuestView = event.isGuestView;
       });
     });
+    if (widget.file.isUploaded) {
+      _downloadTaskSubscription = downloadManager
+          .watchDownload(widget.file.uploadedFileID!)
+          .listen((event) {
+        if (mounted) {
+          setState(() {
+            _progressNotifier.value = event.progress;
+          });
+        }
+      });
+    }
 
     _streamSwitchedSubscription =
         Bus.instance.on<StreamSwitchedEvent>().listen((event) {
@@ -160,6 +176,10 @@ class _VideoWidgetMediaKitNewState extends State<VideoWidgetMediaKitNew>
     removeCallBack(widget.file);
     _progressNotifier.dispose();
     WidgetsBinding.instance.removeObserver(this);
+    if (_downloadTaskSubscription != null) {
+      _downloadTaskSubscription!.cancel();
+      downloadManager.pause(widget.file.uploadedFileID!).ignore();
+    }
     player.dispose();
     _captionUpdatedSubscription.cancel();
     if (EnteWakeLockService.instance.shouldKeepAppAwakeAcrossSessions) {
@@ -196,11 +216,40 @@ class _VideoWidgetMediaKitNewState extends State<VideoWidgetMediaKitNew>
                 onStreamChange: widget.onStreamChange,
                 isPreviewPlayer: widget.selectedPreview,
               )
-            : const Center(
-                child: EnteLoadingWidget(
-                  size: 32,
-                  color: fillBaseDark,
-                  padding: 0,
+            : Center(
+                child: ValueListenableBuilder(
+                  valueListenable: _progressNotifier,
+                  builder: (BuildContext context, double? progress, _) {
+                    return progress == null || progress == 1
+                        ? const EnteLoadingWidget(
+                            size: 32,
+                            color: fillBaseDark,
+                            padding: 0,
+                          )
+                        : Stack(
+                            children: [
+                              CircularProgressIndicator(
+                                backgroundColor: Colors.transparent,
+                                value: progress,
+                                valueColor: const AlwaysStoppedAnimation<Color>(
+                                  Color.fromRGBO(45, 194, 98, 1.0),
+                                ),
+                                strokeWidth: 2,
+                                strokeCap: StrokeCap.round,
+                              ),
+                              if (flagService.internalUser)
+                                Center(
+                                  child: Text(
+                                    "${(progress * 100).toStringAsFixed(0)}%",
+                                    style:
+                                        getEnteTextTheme(context).tiny.copyWith(
+                                              color: textBaseDark,
+                                            ),
+                                  ),
+                                ),
+                            ],
+                          );
+                  },
                 ),
               ),
       ),
@@ -260,6 +309,8 @@ class _VideoWidgetMediaKitNewState extends State<VideoWidgetMediaKitNew>
         }
         player.open(Media(url), play: _isAppInFG);
       });
+      final duration = controller!.player.state.duration.inSeconds;
+      widget.onFinalFileLoad?.call(duration);
     }
   }
 }

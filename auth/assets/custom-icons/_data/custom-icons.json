@@ -44,6 +44,12 @@
       "slug": "anycoindirect"
     },
     {
+      "title": "AR24",
+      "altNames": [
+        "Docaposte AR24"
+      ]
+    },
+    {
       "title": "Aruba",
       "slug": "aruba",
       "hex": "ef8a33"
@@ -192,7 +198,11 @@
       "slug": "blue_sky"
     },
     {
-      "title": "bonify"
+      "title": "bonify",
+      "slug": "bonify",
+      "altNames": [
+        "bonify.de"
+      ]
     },
     {
       "title": "Booking",
@@ -297,11 +307,24 @@
       "title": "CSAM"
     },
     {
+      "title": "CSSBuy",
+      "slug": "cssbuy",
+      "altNames": [
+        "CSS Buy",
+        "CSS-Buy",
+        "cssbuy.com"
+      ]
+    },
+    {
       "title": "CSFloat"
     },
     {
       "title": "CSGORoll",
       "slug": "csgoroll"
+    },
+    {
+      "title": "Cryptee",
+      "slug": "cryptee"
     },
     {
       "title": "Cwallet",
@@ -436,6 +459,9 @@
       "slug": "finanzfluss"
     },
     {
+      "title": "Finary"
+    },
+    {
       "title": "Firefox",
       "slug": "mozilla"
     },
@@ -455,6 +481,9 @@
     {
       "title": "Gate.io",
       "slug": "gateio.svg"
+    },
+    {
+      "title": "GERID"
     },
     {
       "title": "GitHub"
@@ -737,6 +766,7 @@
     {
       "title": "Mistral",
       "altNames": [
+        "Le Chat",
         "Mistral AI",
         "MistralAI"
       ]
@@ -885,6 +915,10 @@
       "title": "OnShape",
       "slug": "onshape",
       "hex": "7abb5e"
+    },
+    {
+      "title": "Oracle Cloud",
+      "slug": "oracle_cloud"
     },
     {
       "title": "Parqet",
@@ -1271,6 +1305,14 @@
     {
       "title": "US Mobile",
       "slug": "us_mobile"
+    },
+    {
+      "title": "uollet",
+      "slug": "uollet",
+      "altNames": [
+        "UOLLET",
+        "uollet.com.br"
+      ]
     },
     {
       "title": "Vikunja"

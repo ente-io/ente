@@ -47,6 +47,7 @@ import "package:photos/utils/file_download_util.dart";
 import 'package:photos/utils/magic_util.dart';
 import 'package:photos/utils/navigation_util.dart';
 import "package:photos/utils/share_util.dart";
+import "package:photos/utils/standalone/simple_task_queue.dart";
 import "package:screenshot/screenshot.dart";
 
 class FileSelectionActionsWidget extends StatefulWidget {
@@ -886,12 +887,12 @@ class _FileSelectionActionsWidgetState
     );
     await dialog.show();
     try {
-      final downloadQueue = DownloadQueue(maxConcurrent: 5);
+      final taskQueue = SimpleTaskQueue(maxConcurrent: 5);
       final futures = <Future>[];
       for (final file in files) {
         if (file.localID == null) {
           futures.add(
-            downloadQueue.add(() async {
+            taskQueue.add(() async {
               await downloadToGallery(file);
               downloadedFiles++;
               dialog.update(

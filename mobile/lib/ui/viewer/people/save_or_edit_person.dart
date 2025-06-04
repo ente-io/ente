@@ -21,7 +21,6 @@ import "package:photos/models/ml/face/person.dart";
 import "package:photos/services/account/user_service.dart";
 import "package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
-import "package:photos/services/machine_learning/ml_result.dart";
 import "package:photos/services/search_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/date_input.dart";
@@ -37,8 +36,8 @@ import "package:photos/ui/viewer/gallery/hooks/pick_person_avatar.dart";
 import "package:photos/ui/viewer/people/link_email_screen.dart";
 import "package:photos/ui/viewer/people/people_util.dart";
 import "package:photos/ui/viewer/people/person_clusters_page.dart";
+import "package:photos/ui/viewer/people/person_face_widget.dart";
 import "package:photos/ui/viewer/people/person_row_item.dart";
-import "package:photos/ui/viewer/search/result/person_face_widget.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/navigation_util.dart";
 import "package:photos/utils/person_contact_linking_util.dart";
@@ -155,94 +154,72 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
                       children: [
                         const SizedBox(height: 48),
                         if (person != null)
-                          FutureBuilder<(String, EnteFile)>(
-                            future: _getRecentFileWithClusterID(person!),
-                            builder: (context, snapshot) {
-                              if (snapshot.hasData) {
-                                final String personClusterID =
-                                    snapshot.data!.$1;
-                                final personFile = snapshot.data!.$2;
-                                return Stack(
-                                  children: [
-                                    SizedBox(
-                                      height: 110,
-                                      width: 110,
-                                      child: ClipPath(
-                                        clipper: ShapeBorderClipper(
-                                          shape: ContinuousRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(80),
-                                          ),
-                                        ),
-                                        child: snapshot.hasData
-                                            ? PersonFaceWidget(
-                                                key: ValueKey(
-                                                  person?.data.avatarFaceID ??
-                                                      "",
-                                                ),
-                                                personFile,
-                                                clusterID: personClusterID,
-                                                personId: person!.remoteID,
-                                              )
-                                            : const NoThumbnailWidget(
-                                                addBorder: false,
-                                              ),
-                                      ),
+                          Stack(
+                            children: [
+                              SizedBox(
+                                height: 110,
+                                width: 110,
+                                child: ClipPath(
+                                  clipper: ShapeBorderClipper(
+                                    shape: ContinuousRectangleBorder(
+                                      borderRadius: BorderRadius.circular(80),
                                     ),
-                                    if (person != null)
-                                      Positioned(
-                                        right: 0,
-                                        bottom: 0,
-                                        child: Container(
-                                          width: 28,
-                                          height: 28,
-                                          decoration: BoxDecoration(
-                                            borderRadius:
-                                                BorderRadius.circular(8.0),
-                                            boxShadow: Theme.of(context)
-                                                .colorScheme
-                                                .enteTheme
-                                                .shadowMenu,
-                                            color: getEnteColorScheme(context)
-                                                .backgroundElevated2,
-                                          ),
-                                          child: IconButton(
-                                            icon: const Icon(Icons.edit),
-                                            iconSize:
-                                                16, // specify the size of the icon
-                                            onPressed: () async {
-                                              final result =
-                                                  await showPersonAvatarPhotoSheet(
-                                                context,
-                                                person!,
-                                              );
-                                              if (result != null) {
-                                                _logger.info(
-                                                  'Person avatar updated',
-                                                );
-                                                setState(() {
-                                                  person = result;
-                                                });
-                                                Bus.instance.fire(
-                                                  PeopleChangedEvent(
-                                                    type: PeopleEventType
-                                                        .saveOrEditPerson,
-                                                    source:
-                                                        "_SaveOrEditPersonState",
-                                                    person: result,
-                                                  ),
-                                                );
-                                              }
-                                            },
-                                          ),
-                                        ),
-                                      ),
-                                  ],
-                                );
-                              } else {
-                                return const SizedBox.shrink();
-                              }
-                            },
+                                  ),
+                                  child: PersonFaceWidget(
+                                    key: ValueKey(
+                                      person?.data.avatarFaceID ?? "",
+                                    ),
+                                    personId: person!.remoteID,
+                                  ),
+                                ),
+                              ),
+                              if (person != null)
+                                Positioned(
+                                  right: 0,
+                                  bottom: 0,
+                                  child: Container(
+                                    width: 28,
+                                    height: 28,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(8.0),
+                                      boxShadow: Theme.of(context)
+                                          .colorScheme
+                                          .enteTheme
+                                          .shadowMenu,
+                                      color: getEnteColorScheme(context)
+                                          .backgroundElevated2,
+                                    ),
+                                    child: IconButton(
+                                      icon: const Icon(Icons.edit),
+                                      iconSize:
+                                          16, // specify the size of the icon
+                                      onPressed: () async {
+                                        final result =
+                                            await showPersonAvatarPhotoSheet(
+                                          context,
+                                          person!,
+                                        );
+                                        if (result != null) {
+                                          _logger.info(
+                                            'Person avatar updated',
+                                          );
+                                          setState(() {
+                                            person = result;
+                                          });
+                                          Bus.instance.fire(
+                                            PeopleChangedEvent(
+                                              type: PeopleEventType
+                                                  .saveOrEditPerson,
+                                              source: "_SaveOrEditPersonState",
+                                              person: result,
+                                            ),
+                                          );
+                                        }
+                                      },
+                                    ),
+                                  ),
+                                ),
+                            ],
                           ),
                         if (person == null)
                           SizedBox(
@@ -256,7 +233,6 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
                               ),
                               child: widget.file != null
                                   ? PersonFaceWidget(
-                                      widget.file!,
                                       clusterID: widget.clusterID,
                                     )
                                   : const NoThumbnailWidget(
@@ -628,10 +604,7 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
       _logger.severe(
         "Failed to addNewPerson, email is already assigned to a person",
       );
-      await showGenericErrorDialog(
-        context: context,
-        error: "Email already assigned",
-      );
+      await showAlreadyLinkedEmailDialog(context, email);
       return null;
     }
 
@@ -685,7 +658,8 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
           _email!.isNotEmpty &&
           _email != person!.data.email &&
           await checkIfEmailAlreadyAssignedToAPerson(_email!)) {
-        throw Exception("Email already assigned to a person");
+        await showAlreadyLinkedEmailDialog(context, _email!);
+        return null;
       }
       final String name = _inputName.trim();
       final String? birthDate = _selectedDate;
@@ -734,40 +708,6 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
       personAndFileID.add((person, files.first));
     }
     return personAndFileID;
-  }
-
-  Future<(String, EnteFile)> _getRecentFileWithClusterID(
-    PersonEntity person,
-  ) async {
-    final clustersToFiles =
-        await SearchService.instance.getClusterFilesForPersonID(
-      person.remoteID,
-    );
-    int? avatarFileID;
-    if (person.data.hasAvatar()) {
-      avatarFileID = tryGetFileIdFromFaceId(person.data.avatarFaceID!);
-    }
-    EnteFile? resultFile;
-    // iterate over all clusters and get the first file
-    for (final clusterFiles in clustersToFiles.values) {
-      for (final file in clusterFiles) {
-        if (avatarFileID != null && file.uploadedFileID! == avatarFileID) {
-          resultFile = file;
-          break;
-        }
-        resultFile ??= file;
-        if (resultFile.creationTime! < file.creationTime!) {
-          resultFile = file;
-        }
-      }
-    }
-    if (resultFile == null) {
-      debugPrint(
-        "Person ${kDebugMode ? person.data.name : person.remoteID} has no files",
-      );
-      return ("", EnteFile());
-    }
-    return (person.remoteID, resultFile);
   }
 }
 
@@ -911,13 +851,9 @@ class _EmailSectionState extends State<_EmailSection> {
                           "Error getting isMeAssigned",
                           snapshot.error,
                         );
-                        return const RepaintBoundary(
-                          child: EnteLoadingWidget(),
-                        );
+                        return const EnteLoadingWidget();
                       } else {
-                        return const RepaintBoundary(
-                          child: EnteLoadingWidget(),
-                        );
+                        return const EnteLoadingWidget();
                       }
                     },
                   ),

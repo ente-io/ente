@@ -18,6 +18,7 @@ import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/preview/playlist_data.dart";
+import "package:photos/module/download/task.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/files_service.dart";
 import "package:photos/services/wake_lock_service.dart";
@@ -28,8 +29,8 @@ import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/notification/toast.dart";
 import "package:photos/ui/viewer/file/native_video_player_controls/play_pause_button.dart";
 import "package:photos/ui/viewer/file/native_video_player_controls/seek_bar.dart";
-import "package:photos/ui/viewer/file/preview_status_widget.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
+import "package:photos/ui/viewer/file/video_stream_change.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/exif_util.dart";
 import "package:photos/utils/file_util.dart";
@@ -45,6 +46,7 @@ class VideoWidgetNative extends StatefulWidget {
   final void Function()? onStreamChange;
   final PlaylistData? playlistData;
   final bool selectedPreview;
+  final Function(int)? onFinalFileLoad;
 
   const VideoWidgetNative(
     this.file, {
@@ -54,6 +56,7 @@ class VideoWidgetNative extends StatefulWidget {
     required this.onStreamChange,
     super.key,
     this.playlistData,
+    this.onFinalFileLoad,
     required this.selectedPreview,
   });
 
@@ -82,6 +85,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
   final _elTooltipController = ElTooltipController();
   StreamSubscription<PlaybackEvent>? _subscription;
   StreamSubscription<StreamSwitchedEvent>? _streamSwitchedSubscription;
+  StreamSubscription<DownloadTask>? downloadTaskSubscription;
   late final StreamSubscription<FileCaptionUpdatedEvent>
       _captionUpdatedSubscription;
   int position = 0;
@@ -112,6 +116,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
     _streamSwitchedSubscription =
         Bus.instance.on<StreamSwitchedEvent>().listen((event) {
       if (event.type != PlayerType.nativeVideoPlayer) return;
+      _filePath = null;
       if (event.selectedPreview) {
         loadPreview(update: true);
       } else {
@@ -127,12 +132,30 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
         }
       }
     });
+    if (widget.file.isUploaded) {
+      downloadTaskSubscription = downloadManager
+          .watchDownload(
+        widget.file.uploadedFileID!,
+      )
+          .listen((event) {
+        if (mounted) {
+          setState(() {
+            _progressNotifier.value = event.progress;
+          });
+        }
+      });
+    }
 
     EnteWakeLockService.instance
         .updateWakeLock(enable: true, wakeLockFor: WakeLockFor.videoPlayback);
   }
 
   Future<void> setVideoSource() async {
+    if (_filePath == null) {
+      _logger.info('Stop video player, file path is null');
+      await _controller?.stop();
+      return;
+    }
     final videoSource = VideoSource(
       path: _filePath!,
       type: VideoSourceType.file,
@@ -195,6 +218,10 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
   void dispose() {
     _subscription?.cancel();
     _controller?.dispose();
+    if (downloadTaskSubscription != null) {
+      downloadTaskSubscription!.cancel();
+      downloadManager.pause(widget.file.uploadedFileID!).ignore();
+    }
 
     //https://github.com/fluttercandies/flutter_photo_manager/blob/8afba2745ebaac6af8af75de9cbded9157bc2690/README.md#clear-caches
     if (_shouldClearCache) {
@@ -277,11 +304,22 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
                       GestureDetector(
                         behavior: HitTestBehavior.opaque,
                         onTap: () {
+                          if (widget.isFromMemories) return;
                           _showControls.value = !_showControls.value;
                           if (widget.playbackCallback != null) {
                             widget.playbackCallback!(!_showControls.value);
                           }
                           _elTooltipController.hide();
+                        },
+                        onLongPress: () {
+                          if (widget.isFromMemories) {
+                            _controller?.pause();
+                          }
+                        },
+                        onLongPressUp: () {
+                          if (widget.isFromMemories) {
+                            _controller?.play();
+                          }
                         },
                         child: Container(
                           constraints: const BoxConstraints.expand(),
@@ -306,32 +344,38 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
                               ),
                             )
                           : const SizedBox.shrink(),
-                      Positioned.fill(
-                        child: Center(
-                          child: ValueListenableBuilder(
-                            builder: (BuildContext context, bool value, _) {
-                              return value
-                                  ? ValueListenableBuilder(
-                                      builder: (context, bool value, _) {
-                                        return AnimatedOpacity(
-                                          duration:
-                                              const Duration(milliseconds: 200),
-                                          opacity: value ? 1 : 0,
-                                          curve: Curves.easeInOutQuad,
-                                          child: IgnorePointer(
-                                            ignoring: !value,
-                                            child: PlayPauseButton(_controller),
-                                          ),
-                                        );
-                                      },
-                                      valueListenable: _showControls,
-                                    )
-                                  : const SizedBox();
-                            },
-                            valueListenable: _isPlaybackReady,
-                          ),
-                        ),
-                      ),
+                      widget.isFromMemories
+                          ? const SizedBox.shrink()
+                          : Positioned.fill(
+                              child: Center(
+                                child: ValueListenableBuilder(
+                                  builder:
+                                      (BuildContext context, bool value, _) {
+                                    return value
+                                        ? ValueListenableBuilder(
+                                            builder: (context, bool value, _) {
+                                              return AnimatedOpacity(
+                                                duration: const Duration(
+                                                  milliseconds: 200,
+                                                ),
+                                                opacity: value ? 1 : 0,
+                                                curve: Curves.easeInOutQuad,
+                                                child: IgnorePointer(
+                                                  ignoring: !value,
+                                                  child: PlayPauseButton(
+                                                    _controller,
+                                                  ),
+                                                ),
+                                              );
+                                            },
+                                            valueListenable: _showControls,
+                                          )
+                                        : const SizedBox();
+                                  },
+                                  valueListenable: _isPlaybackReady,
+                                ),
+                              ),
+                            ),
                       Positioned(
                         bottom: verticalMargin,
                         right: 0,
@@ -357,7 +401,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
                                 ValueListenableBuilder(
                                   valueListenable: _showControls,
                                   builder: (context, value, _) {
-                                    return PreviewStatusWidget(
+                                    return VideoStreamChangeWidget(
                                       showControls: value,
                                       file: widget.file,
                                       isPreviewPlayer: widget.selectedPreview,
@@ -369,7 +413,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
                                   valueListenable: _isPlaybackReady,
                                   builder:
                                       (BuildContext context, bool value, _) {
-                                    return value
+                                    return value && !widget.isFromMemories
                                         ? _SeekBarAndDuration(
                                             controller: _controller,
                                             duration: duration,
@@ -500,6 +544,8 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
   Future<void> _onPlaybackReady() async {
     if (_isPlaybackReady.value) return;
     await _controller!.play();
+    final durationInSeconds = durationToSeconds(duration) ?? 0;
+    widget.onFinalFileLoad?.call(durationInSeconds);
     unawaited(_controller!.setVolume(1));
     _isPlaybackReady.value = true;
   }
@@ -598,14 +644,27 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
                         color: fillBaseDark,
                         padding: 0,
                       )
-                    : CircularProgressIndicator(
-                        backgroundColor: Colors.transparent,
-                        value: progress,
-                        valueColor: const AlwaysStoppedAnimation<Color>(
-                          Color.fromRGBO(45, 194, 98, 1.0),
-                        ),
-                        strokeWidth: 2,
-                        strokeCap: StrokeCap.round,
+                    : Stack(
+                        children: [
+                          CircularProgressIndicator(
+                            backgroundColor: Colors.transparent,
+                            value: progress,
+                            valueColor: const AlwaysStoppedAnimation<Color>(
+                              Color.fromRGBO(45, 194, 98, 1.0),
+                            ),
+                            strokeWidth: 2,
+                            strokeCap: StrokeCap.round,
+                          ),
+                          if (flagService.internalUser)
+                            Center(
+                              child: Text(
+                                "${(progress * 100).toStringAsFixed(0)}%",
+                                style: getEnteTextTheme(context).tiny.copyWith(
+                                      color: textBaseDark,
+                                    ),
+                              ),
+                            ),
+                        ],
                       );
               },
             ),
@@ -646,9 +705,14 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
 
     if (widget.playlistData != null && widget.selectedPreview) {
       aspectRatio = widget.playlistData!.width! / widget.playlistData!.height!;
-      if (widget.file.duration != null &&
-          (duration == "0:00" || duration == null)) {
-        duration = secondsToDuration(widget.file.duration!);
+      if (duration == "0:00" || duration == null) {
+        if ((widget.file.duration ?? 0) > 0) {
+          duration = secondsToDuration(widget.file.duration!);
+        } else if (widget.playlistData!.durationInSeconds != null) {
+          duration = secondsToDuration(
+            widget.playlistData!.durationInSeconds!,
+          );
+        }
       }
       _logger.info("Getting aspect ratio from preview video");
       return;
@@ -696,11 +760,7 @@ class _SeekBarAndDuration extends StatelessWidget {
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
       valueListenable: showControls,
-      builder: (
-        BuildContext context,
-        bool value,
-        _,
-      ) {
+      builder: (BuildContext context, bool value, _) {
         return AnimatedOpacity(
           duration: const Duration(
             milliseconds: 200,

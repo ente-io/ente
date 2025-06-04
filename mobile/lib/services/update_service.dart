@@ -5,6 +5,7 @@ import 'package:logging/logging.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/network/network.dart';
+import "package:photos/services/language_service.dart";
 import 'package:photos/services/notification_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tuple/tuple.dart';
@@ -13,7 +14,7 @@ import 'package:url_launcher/url_launcher_string.dart';
 class UpdateService {
   static const kUpdateAvailableShownTimeKey = "update_available_shown_time_key";
   static const changeLogVersionKey = "update_change_log_key";
-  static const currentChangeLogVersion = 27;
+  static const currentChangeLogVersion = 28;
 
   LatestVersionInfo? _latestVersion;
   final _logger = Logger("UpdateService");
@@ -90,10 +91,11 @@ class UpdateService {
 
   Future<void> showUpdateNotification() async {
     if (await shouldShowUpdateNotification()) {
+      final s = await LanguageService.s;
       // ignore: unawaited_futures
       NotificationService.instance.showNotification(
-        "Update available",
-        "Click to install our best version yet",
+        s.updateAvailable,
+        s.clickToInstallOurBestVersionYet,
       );
       await resetUpdateAvailableShownTime();
     } else {

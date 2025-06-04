@@ -60,6 +60,16 @@ class S {
     );
   }
 
+  /// `Enter your new email address`
+  String get enterYourNewEmailAddress {
+    return Intl.message(
+      'Enter your new email address',
+      name: 'enterYourNewEmailAddress',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Welcome back!`
   String get accountWelcomeBack {
     return Intl.message(
@@ -9096,6 +9106,26 @@ class S {
     );
   }
 
+  /// `This email is already linked to {name}.`
+  String editEmailAlreadyLinked(Object name) {
+    return Intl.message(
+      'This email is already linked to $name.',
+      name: 'editEmailAlreadyLinked',
+      desc: '',
+      args: [name],
+    );
+  }
+
+  /// `View {name} to unlink`
+  String viewPersonToUnlink(Object name) {
+    return Intl.message(
+      'View $name to unlink',
+      name: 'viewPersonToUnlink',
+      desc: '',
+      args: [name],
+    );
+  }
+
   /// `Enter name`
   String get enterName {
     return Intl.message(
@@ -11081,10 +11111,10 @@ class S {
     );
   }
 
-  /// `Generate streamable video`
+  /// `Streamable videos`
   String get videoStreaming {
     return Intl.message(
-      'Generate streamable video',
+      'Streamable videos',
       name: 'videoStreaming',
       desc: '',
       args: [],
@@ -11676,111 +11706,221 @@ class S {
     );
   }
 
-  /// `New Icon`
-  String get cLIcon {
+  /// `Curated memories`
+  String get curatedMemories {
     return Intl.message(
-      'New Icon',
-      name: 'cLIcon',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Finally, a new app icon, that we think best represents our work. We've also added an icon-switcher so you can continue using the old icon.`
-  String get cLIconDesc {
-    return Intl.message(
-      'Finally, a new app icon, that we think best represents our work. We\'ve also added an icon-switcher so you can continue using the old icon.',
-      name: 'cLIconDesc',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Memories`
-  String get cLMemories {
-    return Intl.message(
-      'Memories',
-      name: 'cLMemories',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Rediscover your special moments - spotlight on your favorite people, your trips and holidays, your best clicks, and much more. Turn on machine learning, tag yourself and name your friends for the best experience.`
-  String get cLMemoriesDesc {
-    return Intl.message(
-      'Rediscover your special moments - spotlight on your favorite people, your trips and holidays, your best clicks, and much more. Turn on machine learning, tag yourself and name your friends for the best experience.',
-      name: 'cLMemoriesDesc',
+      'Curated memories',
+      name: 'curatedMemories',
       desc: '',
       args: [],
     );
   }
 
   /// `Widgets`
-  String get cLWidgets {
+  String get widgets {
     return Intl.message(
       'Widgets',
-      name: 'cLWidgets',
+      name: 'widgets',
       desc: '',
       args: [],
     );
   }
 
-  /// `Home screen widgets that are integrated with memories are now available. They will show your special moments without opening the app.`
-  String get cLWidgetsDesc {
+  /// `Memories`
+  String get memories {
     return Intl.message(
-      'Home screen widgets that are integrated with memories are now available. They will show your special moments without opening the app.',
-      name: 'cLWidgetsDesc',
+      'Memories',
+      name: 'memories',
       desc: '',
       args: [],
     );
   }
 
-  /// `Family Plan Limits`
-  String get cLFamilyPlan {
+  /// `Select the people you wish to see on your homescreen.`
+  String get peopleWidgetDesc {
     return Intl.message(
-      'Family Plan Limits',
-      name: 'cLFamilyPlan',
+      'Select the people you wish to see on your homescreen.',
+      name: 'peopleWidgetDesc',
       desc: '',
       args: [],
     );
   }
 
-  /// `You can now set limits on how much storage your family members can use.`
-  String get cLFamilyPlanDesc {
+  /// `Select the albums you wish to see on your homescreen.`
+  String get albumsWidgetDesc {
     return Intl.message(
-      'You can now set limits on how much storage your family members can use.',
-      name: 'cLFamilyPlanDesc',
+      'Select the albums you wish to see on your homescreen.',
+      name: 'albumsWidgetDesc',
       desc: '',
       args: [],
     );
   }
 
-  /// `Bulk Edit dates`
-  String get cLBulkEdit {
+  /// `Select the kind of memories you wish to see on your homescreen.`
+  String get memoriesWidgetDesc {
     return Intl.message(
-      'Bulk Edit dates',
-      name: 'cLBulkEdit',
+      'Select the kind of memories you wish to see on your homescreen.',
+      name: 'memoriesWidgetDesc',
       desc: '',
       args: [],
     );
   }
 
-  /// `You can now select multiple photos, and edit date/time for all of them with one quick action. Shifting dates is also supported.`
-  String get cLBulkEditDesc {
+  /// `Smart memories`
+  String get smartMemories {
     return Intl.message(
-      'You can now select multiple photos, and edit date/time for all of them with one quick action. Shifting dates is also supported.',
-      name: 'cLBulkEditDesc',
+      'Smart memories',
+      name: 'smartMemories',
       desc: '',
       args: [],
     );
   }
 
-  /// `Curated memories`
-  String get curatedMemories {
+  /// `Past years' memories`
+  String get pastYearsMemories {
     return Intl.message(
-      'Curated memories',
-      name: 'curatedMemories',
+      'Past years\' memories',
+      name: 'pastYearsMemories',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Also delete the photos (and videos) present in these {count} albums from <bold>all</bold> other albums they are part of?`
+  String deleteMultipleAlbumDialog(Object count) {
+    return Intl.message(
+      'Also delete the photos (and videos) present in these $count albums from <bold>all</bold> other albums they are part of?',
+      name: 'deleteMultipleAlbumDialog',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `Add participants`
+  String get addParticipants {
+    return Intl.message(
+      'Add participants',
+      name: 'addParticipants',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{count} selected`
+  String selectedAlbums(Object count) {
+    return Intl.message(
+      '$count selected',
+      name: 'selectedAlbums',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `Action not supported on Favourites album`
+  String get actionNotSupportedOnFavouritesAlbum {
+    return Intl.message(
+      'Action not supported on Favourites album',
+      name: 'actionNotSupportedOnFavouritesAlbum',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `On this day memories`
+  String get onThisDayMemories {
+    return Intl.message(
+      'On this day memories',
+      name: 'onThisDayMemories',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `On this day`
+  String get onThisDay {
+    return Intl.message(
+      'On this day',
+      name: 'onThisDay',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Look back on your memories 🌄`
+  String get lookBackOnYourMemories {
+    return Intl.message(
+      'Look back on your memories 🌄',
+      name: 'lookBackOnYourMemories',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// ` new 📸`
+  String get newPhotosEmoji {
+    return Intl.message(
+      ' new 📸',
+      name: 'newPhotosEmoji',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Sorry, we had to pause your backups`
+  String get sorryWeHadToPauseYourBackups {
+    return Intl.message(
+      'Sorry, we had to pause your backups',
+      name: 'sorryWeHadToPauseYourBackups',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Click to install our best version yet`
+  String get clickToInstallOurBestVersionYet {
+    return Intl.message(
+      'Click to install our best version yet',
+      name: 'clickToInstallOurBestVersionYet',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Receive reminders about memories from this day in previous years.`
+  String get onThisDayNotificationExplanation {
+    return Intl.message(
+      'Receive reminders about memories from this day in previous years.',
+      name: 'onThisDayNotificationExplanation',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add a memories widget to your homescreen and come back here to customize.`
+  String get addMemoriesWidgetPrompt {
+    return Intl.message(
+      'Add a memories widget to your homescreen and come back here to customize.',
+      name: 'addMemoriesWidgetPrompt',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add an album widget to your homescreen and come back here to customize.`
+  String get addAlbumWidgetPrompt {
+    return Intl.message(
+      'Add an album widget to your homescreen and come back here to customize.',
+      name: 'addAlbumWidgetPrompt',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add a people widget to your homescreen and come back here to customize.`
+  String get addPeopleWidgetPrompt {
+    return Intl.message(
+      'Add a people widget to your homescreen and come back here to customize.',
+      name: 'addPeopleWidgetPrompt',
       desc: '',
       args: [],
     );

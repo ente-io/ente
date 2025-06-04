@@ -177,18 +177,18 @@ const NoWatches: React.FC = () => (
             <Typography variant="small" sx={{ py: 1, color: "text.muted" }}>
                 {t("watch_folders_hint_1")}
             </Typography>
-            <Typography variant="small" sx={{ color: "text.muted" }}>
-                <Stack direction="row" sx={{ gap: 1 }}>
-                    <Check />
+            <Stack direction="row" sx={{ gap: 1 }}>
+                <Check />
+                <Typography variant="small" sx={{ color: "text.muted" }}>
                     {t("watch_folders_hint_2")}
-                </Stack>
-            </Typography>
-            <Typography variant="small" sx={{ color: "text.muted" }}>
-                <Stack direction="row" sx={{ gap: 1 }}>
-                    <Check />
+                </Typography>
+            </Stack>
+            <Stack direction="row" sx={{ gap: 1 }}>
+                <Check />
+                <Typography variant="small" sx={{ color: "text.muted" }}>
                     {t("watch_folders_hint_3")}
-                </Stack>
-            </Typography>
+                </Typography>
+            </Stack>
         </Stack>
     </CenteredFill>
 );

@@ -26,7 +26,9 @@ export type LocalUser = z.infer<typeof LocalUser>;
  * Return the logged-in user, if someone is indeed logged in. Otherwise return
  * `undefined`.
  *
- * The user's data is stored in the browser's localStorage.
+ * The user's data is stored in the browser's localStorage. Thus, this function
+ * only works from the main thread, not from web workers (local storage is not
+ * accessible to web workers).
  */
 export const localUser = (): LocalUser | undefined => {
     // TODO: duplicate of getData("user")
@@ -45,19 +47,25 @@ export const ensureLocalUser = (): LocalUser => {
 };
 
 /**
- * Return the user's auth token, or throw an error.
+ * Return the user's auth token, if present.
  *
  * The user's auth token is stored in KV DB after they have successfully logged
  * in. This function returns that saved auth token.
  *
- * If no such token is found (which should only happen if the user is not logged
- * in), then it throws an error.
- *
  * The underlying data is stored in IndexedDB, and can be accessed from web
  * workers.
  */
+export const getAuthToken = () => getKVS("token");
+
+/**
+ * Return the user's auth token, or throw an error.
+ *
+ * The user's auth token can be retrieved using {@link getAuthToken}. This
+ * function is a wrapper which throws an error if the token is not found (which
+ * should only happen if the user is not logged in).
+ */
 export const ensureAuthToken = async () => {
-    const token = await getKVS("token");
+    const token = await getAuthToken();
     if (!token) throw new Error("Not logged in");
     return token;
 };

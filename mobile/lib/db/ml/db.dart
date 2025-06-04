@@ -38,6 +38,8 @@ import 'package:sqlite_async/sqlite_async.dart';
 ///
 /// [clipTable] - Stores the embeddings of the CLIP model
 /// [fileDataTable] - Stores data about the files that are already processed by the ML models
+///
+/// [faceCacheTable] - Stores a all the mappings from personID or clusterID to the faceID that has been used as cover face.
 class MLDataDB with SqlDbBase implements IMLDataDB<int> {
   static final Logger _logger = Logger("MLDataDB");
 
@@ -60,6 +62,7 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
     fcClusterIDIndex,
     createClipEmbeddingsTable,
     createFileDataTable,
+    createFaceCacheTable,
   ];
 
   // only have a single app-wide reference to the database
@@ -476,6 +479,22 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
     return maps.map((e) => e[faceIDColumn] as String).toSet();
   }
 
+  Future<List<String>> getFaceIDsForClusterOrderedByScore(
+    String clusterID, {
+    int limit = 10,
+  }) async {
+    final db = await instance.asyncDB;
+    final faceIdsResult = await db.getAll(
+      'SELECT $facesTable.$faceIDColumn FROM $facesTable '
+      'JOIN $faceClustersTable ON $facesTable.$faceIDColumn = $faceClustersTable.$faceIDColumn '
+      'WHERE $faceClustersTable.$clusterIDColumn = ? '
+      'ORDER BY $facesTable.$faceScore DESC '
+      'LIMIT ?',
+      [clusterID, limit],
+    );
+    return faceIdsResult.map((e) => e[faceIDColumn] as String).toList();
+  }
+
   // Get Map of personID to Map of clusterID to faceIDs
   @override
   Future<Map<String, Map<String, Set<String>>>>
@@ -544,6 +563,23 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
       [personID],
     );
     return faceIdsResult.map((e) => e[faceIDColumn] as String).toSet();
+  }
+
+  Future<List<String>> getFaceIDsForPersonOrderedByScore(
+    String personID, {
+    int limit = 10,
+  }) async {
+    final db = await instance.asyncDB;
+    final faceIdsResult = await db.getAll(
+      'SELECT $facesTable.$faceIDColumn FROM $facesTable '
+      'JOIN $faceClustersTable ON $facesTable.$faceIDColumn = $faceClustersTable.$faceIDColumn '
+      'JOIN $clusterPersonTable ON $faceClustersTable.$clusterIDColumn = $clusterPersonTable.$clusterIDColumn '
+      'WHERE $clusterPersonTable.$personIdColumn = ? '
+      'ORDER BY $facesTable.$faceScore DESC '
+      'LIMIT ?',
+      [personID, limit],
+    );
+    return faceIdsResult.map((e) => e[faceIDColumn] as String).toList();
   }
 
   @override
@@ -1387,5 +1423,50 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
       Float32List.fromList(embedding.embedding).buffer.asUint8List(),
       embedding.version,
     ];
+  }
+
+  /// WARNING: Better to use the similarly named [putFaceIdCachedForPersonOrCluster]
+  /// method from face_thumbnail_cache instead!
+  Future<void> putFaceIdCachedForPersonOrCluster(
+    String personOrClusterId,
+    String faceID,
+  ) async {
+    final db = await instance.asyncDB;
+    await db.execute(
+      '''
+      INSERT OR REPLACE INTO $faceCacheTable ($personOrClusterIdColumn, $faceIDColumn)
+      VALUES (?, ?)
+    ''',
+      [personOrClusterId, faceID],
+    );
+  }
+
+  Future<String?> getFaceIdUsedForPersonOrCluster(
+    String personOrClusterId,
+  ) async {
+    final db = await instance.asyncDB;
+    final List<Map<String, dynamic>> maps = await db.getAll(
+      '''
+      SELECT $faceIDColumn FROM $faceCacheTable
+      WHERE $personOrClusterIdColumn = ?
+    ''',
+      [personOrClusterId],
+    );
+    if (maps.isNotEmpty) {
+      return maps.first[faceIDColumn] as String;
+    }
+    return null;
+  }
+
+  Future<void> removeFaceIdCachedForPersonOrCluster(
+    String personOrClusterID,
+  ) async {
+    final db = await instance.asyncDB;
+    const String sql = '''
+      DELETE FROM $faceCacheTable
+      WHERE $personOrClusterIdColumn = ?'
+    ''';
+    final List<Object?> params = [personOrClusterID];
+    await db.execute(sql, params);
   }
 }
