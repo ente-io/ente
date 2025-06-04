@@ -1696,6 +1696,7 @@ const SetPublicLinkPassword: React.FC<SetPublicLinkPasswordProps> = ({
                 <SingleInputForm
                     inputType="password"
                     label={t("password")}
+                    submitButtonColor="primary"
                     submitButtonTitle={t("lock")}
                     onCancel={onClose}
                     onSubmit={savePassword}

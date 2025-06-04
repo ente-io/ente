@@ -522,6 +522,7 @@ const CollectionOptions: React.FC<CollectionHeaderProps> = ({
                 label={t("album_name")}
                 autoFocus
                 initialValue={activeCollection?.name}
+                submitButtonColor="primary"
                 submitButtonTitle={t("rename")}
                 onSubmit={renameCollection}
             />

@@ -13,13 +13,14 @@ import {
 } from "ente-accounts/services/user";
 import { LinkButton } from "ente-base/components/LinkButton";
 import type { MiniDialogAttributes } from "ente-base/components/MiniDialog";
+import {
+    SingleInputForm,
+    type SingleInputFormProps,
+} from "ente-base/components/SingleInputForm";
 import { useBaseContext } from "ente-base/context";
 import { decryptBoxB64 } from "ente-base/crypto";
 import type { B64EncryptionResult } from "ente-base/crypto/libsodium";
 import log from "ente-base/log";
-import SingleInputForm, {
-    type SingleInputFormProps,
-} from "ente-shared/components/SingleInputForm";
 import { ApiError } from "ente-shared/error";
 import { getData, setData, setLSUser } from "ente-shared/storage/localStorage";
 import { t } from "i18next";
@@ -86,7 +87,7 @@ const Page: React.FC<RecoverPageProps> = ({ twoFactorType }) => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    const recover: SingleInputFormProps["callback"] = async (
+    const recover: SingleInputFormProps["onSubmit"] = async (
         recoveryKey: string,
         setFieldError,
     ) => {
@@ -142,11 +143,10 @@ const Page: React.FC<RecoverPageProps> = ({ twoFactorType }) => {
         <AccountsPageContents>
             <AccountsPageTitle>{t("recover_two_factor")}</AccountsPageTitle>
             <SingleInputForm
-                callback={recover}
-                fieldType="text"
-                placeholder={t("recovery_key")}
-                buttonText={t("recover")}
-                disableAutoComplete
+                autoComplete="off"
+                label={t("recovery_key")}
+                submitButtonTitle={t("recover")}
+                onSubmit={recover}
             />
             <AccountsPageFooter>
                 <LinkButton onClick={() => showContactSupportDialog()}>
