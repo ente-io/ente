@@ -171,9 +171,11 @@ export const VerifyMasterPasswordForm: React.FC<
 
         let key: string;
         try {
-            key = await cryptoWorker.decryptB64(
-                keyAttributes.encryptedKey,
-                keyAttributes.keyDecryptionNonce,
+            key = await cryptoWorker.decryptBoxB64(
+                {
+                    encryptedData: keyAttributes.encryptedKey,
+                    nonce: keyAttributes.keyDecryptionNonce,
+                },
                 kek,
             );
         } catch (e) {
