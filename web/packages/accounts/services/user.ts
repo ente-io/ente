@@ -98,6 +98,13 @@ export interface KeyAttributes {
      * being the {@link publicKey}) encrypted with their master key.
      *
      * Base 64 encoded.
+     *
+     * [Note: Public and secret key nomenclature]
+     *
+     * The nomenclature for the key pair follows libsodium's conventions
+     * (https://doc.libsodium.org/public-key_cryptography/authenticated_encryption#key-pair-generation),
+     * who possibly chose public + secret instead of public + private to avoid
+     * confusion with shorthand notation (pk).
      */
     encryptedSecretKey: string;
     /**
