@@ -8,7 +8,7 @@ import HTTPService from "ente-shared/network/HTTPService";
 import { getToken } from "ente-shared/storage/localStorage/helpers";
 import type { KeyAttributes } from "ente-shared/user/types";
 import { nullToUndefined } from "ente-utils/transform";
-import { z } from "zod";
+import { z } from "zod/v4";
 
 export interface UserVerificationResponse {
     id: number;

@@ -10,7 +10,7 @@ import {
     type FilePublicMagicMetadata,
 } from "ente-media/file";
 import { nullToUndefined } from "ente-utils/transform";
-import { z } from "zod";
+import { z } from "zod/v4";
 import { mergeMetadata1 } from "./file";
 import { FileType } from "./file-type";
 

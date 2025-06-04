@@ -1,6 +1,6 @@
 // TODO: This file belongs to the accounts package
 
-import { z } from "zod";
+import { z } from "zod/v4";
 import { getKVS } from "./kv";
 
 // TODO: During login the only field present is email. Which makes this
