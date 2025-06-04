@@ -39,7 +39,7 @@
         "next-electron-server": "^1.0.0",
         "node-stream-zip": "^1.15.0",
         "onnxruntime-node": "^1.20.1",
-        "zod": "^3.25.50"
+        "zod": "^3.25.51"
     },
     "devDependencies": {
         "@eslint/js": "^9.28.0",
@@ -49,7 +49,7 @@
         "ajv": "^8.17.1",
         "concurrently": "^9.1.2",
         "cross-env": "^7.0.3",
-        "electron": "^36.3.2",
+        "electron": "^36.4.0",
         "electron-builder": "^26.0.14",
         "eslint": "^9",
         "prettier": "3.5.3",
@@ -57,7 +57,7 @@
         "prettier-plugin-packagejson": "^2.5.15",
         "shx": "^0.4.0",
         "typescript": "^5.8.3",
-        "typescript-eslint": "^8.33.0"
+        "typescript-eslint": "^8.33.1"
     },
     "packageManager": "yarn@1.22.22",
     "productName": "ente"
