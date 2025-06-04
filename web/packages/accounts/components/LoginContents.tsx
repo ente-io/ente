@@ -1,8 +1,5 @@
 import { Input, Stack, TextField, Typography } from "@mui/material";
-import {
-    AccountsPageFooter,
-    AccountsPageTitle,
-} from "ente-accounts/components/layouts/centered-paper";
+import { AccountsPageFooter } from "ente-accounts/components/layouts/centered-paper";
 import { getSRPAttributes } from "ente-accounts/services/srp-remote";
 import { sendOTT } from "ente-accounts/services/user";
 import { LinkButton } from "ente-base/components/LinkButton";
@@ -82,7 +79,10 @@ export const LoginContents: React.FC<LoginContentsProps> = ({
 
     return (
         <>
-            <AccountsPageTitle>{t("login")}</AccountsPageTitle>
+            {/* AccountsPageTitle, inlined to tweak mb */}
+            <Typography variant="h3" sx={{ flex: 1, mb: 4 }}>
+                {t("login")}
+            </Typography>
             <form onSubmit={formik.handleSubmit}>
                 <TextField
                     name="value"
