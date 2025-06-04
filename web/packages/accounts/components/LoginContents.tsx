@@ -12,6 +12,7 @@ import { t } from "i18next";
 import { useRouter } from "next/router";
 import React, { useCallback } from "react";
 import { z } from "zod/v4";
+import { AccountsPageTitleWithCaption } from "./LoginComponents";
 
 interface LoginContentsProps {
     /** Called when the user clicks the signup option instead.  */
@@ -85,10 +86,9 @@ export const LoginContents: React.FC<LoginContentsProps> = ({
 
     return (
         <>
-            {/* AccountsPageTitle, inlined to tweak mb */}
-            <Typography variant="h3" sx={{ flex: 1, mb: 4 }}>
+            <AccountsPageTitleWithCaption>
                 {t("login")}
-            </Typography>
+            </AccountsPageTitleWithCaption>
             <form onSubmit={formik.handleSubmit}>
                 <TextField
                     name="email"

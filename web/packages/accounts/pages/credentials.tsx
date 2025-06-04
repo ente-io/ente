@@ -334,7 +334,7 @@ const Page: React.FC = () => {
     // possibility using types.
     return (
         <AccountsPageContents>
-            <PasswordHeader>{user?.email ?? ""}</PasswordHeader>
+            <PasswordHeader caption={user?.email} />
             <VerifyMasterPasswordForm
                 user={user}
                 keyAttributes={keyAttributes}
