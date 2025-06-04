@@ -129,7 +129,7 @@ const RemoteCLIPIndex = z.object({
 /**
  * Zod schema for the {@link RawRemoteMLData} type.
  */
-const RawRemoteMLData = z.object({}).passthrough();
+const RawRemoteMLData = z.looseObject({});
 
 /**
  * Zod schema for the {@link ParsedRemoteMLData} type.

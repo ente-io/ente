@@ -37,7 +37,7 @@ export interface LocalUserEntity {
 const LocalUserEntity = z.object({
     id: z.string(),
     // Retain the data verbatim.
-    data: z.object({}).passthrough(),
+    data: z.looseObject({}),
     updatedAt: z.number(),
 });
 

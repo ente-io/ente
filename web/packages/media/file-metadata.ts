@@ -326,21 +326,19 @@ export interface PublicMagicMetadata {
  * might be other, newer, clients out there adding fields that the current
  * client might not we aware of, and we don't want to overwrite them.
  */
-const PublicMagicMetadata = z
-    .object({
-        // [Note: Zod doesn't work with `exactOptionalPropertyTypes` yet]
-        //
-        // Using `optional` is not accurate here. The key is optional, but the
-        // value itself is not optional.
-        //
-        // Zod doesn't work with `exactOptionalPropertyTypes` yet, but it seems
-        // to be on the roadmap so we suppress these mismatches.
-        //
-        // See:
-        // https://github.com/colinhacks/zod/issues/635#issuecomment-2196579063
-        editedTime: z.number().optional(),
-    })
-    .passthrough();
+const PublicMagicMetadata = z.looseObject({
+    // [Note: Zod doesn't work with `exactOptionalPropertyTypes` yet]
+    //
+    // Using `optional` is not accurate here. The key is optional, but the
+    // value itself is not optional.
+    //
+    // Zod doesn't work with `exactOptionalPropertyTypes` yet, but it seems
+    // to be on the roadmap so we suppress these mismatches.
+    //
+    // See:
+    // https://github.com/colinhacks/zod/issues/635#issuecomment-2196579063
+    editedTime: z.number().optional(),
+});
 
 /**
  * Return the private magic metadata for an {@link EnteFile}.
