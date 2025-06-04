@@ -13,7 +13,7 @@ class FileWidget extends StatelessWidget {
   final BoxDecoration? backgroundDecoration;
   final bool? autoPlay;
   final bool? isFromMemories;
-  final Function(bool, int)? onFinalFileLoad;
+  final Function(int)? onFinalFileLoad;
 
   const FileWidget(
     this.file, {

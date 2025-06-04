@@ -24,7 +24,7 @@ class ZoomableLiveImageNew extends StatefulWidget {
   final String? tagPrefix;
   final Decoration? backgroundDecoration;
   final bool isFromMemories;
-  final Function(bool, int)? onFinalFileLoad;
+  final Function(int)? onFinalFileLoad;
 
   const ZoomableLiveImageNew(
     this.enteFile, {

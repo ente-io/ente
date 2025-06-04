@@ -24,7 +24,7 @@ class VideoWidget extends StatefulWidget {
   final EnteFile file;
   final String? tagPrefix;
   final Function(bool)? playbackCallback;
-  final Function(bool, int)? onFinalFileLoad;
+  final Function(int)? onFinalFileLoad;
   final bool isFromMemories;
 
   const VideoWidget(

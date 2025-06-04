@@ -187,7 +187,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
       ..reset();
   }
 
-  void onFinalFileLoad(bool isLoaded, int duration) {
+  void onFinalFileLoad(int duration) {
     if (_progressAnimationController!.isAnimating == true) {
       _progressAnimationController!.stop();
     }
@@ -364,8 +364,8 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                           ? _toggleAnimation(false)
                           : _toggleAnimation(true);
                     },
-                    onFinalFileLoad: (isLoaded, duration) {
-                      onFinalFileLoad(isLoaded, duration);
+                    onFinalFileLoad: (duration) {
+                      onFinalFileLoad(duration);
                     },
                   ),
                 ),
