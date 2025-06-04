@@ -504,7 +504,6 @@ class MLService {
         instruction.file,
         dataEntity,
       );
-      _logger.info("ML results for fileID ${result.fileId} stored on remote");
       // Storing results locally
       if (result.facesRan) await mlDataDB.bulkInsertFaces(faces);
       if (result.clipRan) {
@@ -512,7 +511,7 @@ class MLService {
           result.clip!,
         );
       }
-      _logger.info("ML results for fileID ${result.fileId} stored locally");
+      _logger.info("ML result for fileID ${result.fileId} stored remote+local");
       return actuallyRanML;
     } catch (e, s) {
       final String errorString = e.toString();
