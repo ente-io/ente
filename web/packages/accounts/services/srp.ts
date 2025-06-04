@@ -1,8 +1,8 @@
+import type { KeyAttributes } from "ente-accounts/services/user";
 import { sharedCryptoWorker } from "ente-base/crypto";
 import log from "ente-base/log";
 import { generateLoginSubKey } from "ente-shared/crypto/helpers";
 import { getToken } from "ente-shared/storage/localStorage/helpers";
-import type { KeyAttributes } from "ente-shared/user/types";
 import { SRP, SrpClient } from "fast-srp-hap";
 import { v4 as uuidv4 } from "uuid";
 import {

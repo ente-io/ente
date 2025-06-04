@@ -1,3 +1,4 @@
+import type { User } from "ente-accounts/services/user";
 import { encryptMetadataJSON, sharedCryptoWorker } from "ente-base/crypto";
 import { ensureLocalUser } from "ente-base/local-user";
 import log from "ente-base/log";
@@ -43,7 +44,6 @@ import HTTPService from "ente-shared/network/HTTPService";
 import { getData } from "ente-shared/storage/localStorage";
 import { getToken } from "ente-shared/storage/localStorage/helpers";
 import { getActualKey } from "ente-shared/user";
-import type { User } from "ente-shared/user/types";
 import { batch } from "ente-utils/array";
 import {
     changeCollectionSubType,

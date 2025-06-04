@@ -12,6 +12,7 @@ import {
     configureSRP,
     generateKeyAndSRPAttributes,
 } from "ente-accounts/services/srp";
+import type { KeyAttributes, User } from "ente-accounts/services/user";
 import { putUserKeyAttributes } from "ente-accounts/services/user";
 import { LinkButton } from "ente-base/components/LinkButton";
 import { LoadingIndicator } from "ente-base/components/loaders";
@@ -27,7 +28,6 @@ import {
     setJustSignedUp,
 } from "ente-shared/storage/localStorage/helpers";
 import { getKey } from "ente-shared/storage/sessionStorage";
-import type { KeyAttributes, User } from "ente-shared/user/types";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";

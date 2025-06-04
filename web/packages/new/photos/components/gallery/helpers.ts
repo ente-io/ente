@@ -11,10 +11,10 @@
  */
 
 import { getUserRecoveryKeyB64 } from "ente-accounts/services/recovery-key";
+import type { User } from "ente-accounts/services/user";
 import log from "ente-base/log";
 import type { Collection } from "ente-media/collection";
 import type { FamilyData } from "ente-new/photos/services/user-details";
-import type { User } from "ente-shared/user/types";
 
 /**
  * Ensure that the keys in local storage are not malformed by verifying that the

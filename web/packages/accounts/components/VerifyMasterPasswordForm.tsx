@@ -1,11 +1,11 @@
 import { Input, TextField } from "@mui/material";
 import type { SRPAttributes } from "ente-accounts/services/srp-remote";
+import type { KeyAttributes, User } from "ente-accounts/services/user";
 import { LoadingButton } from "ente-base/components/mui/LoadingButton";
 import { ShowHidePasswordInputAdornment } from "ente-base/components/mui/PasswordInputAdornment";
 import { sharedCryptoWorker } from "ente-base/crypto";
 import log from "ente-base/log";
 import { CustomError } from "ente-shared/error";
-import type { KeyAttributes, User } from "ente-shared/user/types";
 import { useFormik } from "formik";
 import { t } from "i18next";
 import { useCallback, useState } from "react";

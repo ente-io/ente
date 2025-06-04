@@ -1,10 +1,10 @@
+import type { User } from "ente-accounts/services/user";
 import { encryptBoxB64 } from "ente-base/crypto";
 import { authenticatedRequestHeaders, ensureOk } from "ente-base/http";
 import { apiURL } from "ente-base/origins";
 import { CollectionSubType, type Collection } from "ente-media/collection";
 import { type EnteFile } from "ente-media/file";
 import { ItemVisibility } from "ente-media/file-metadata";
-import type { User } from "ente-shared/user/types";
 import { batch } from "ente-utils/array";
 
 /**

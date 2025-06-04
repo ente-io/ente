@@ -1,8 +1,8 @@
+import type { KeyAttributes } from "ente-accounts/services/user";
 import { sharedCryptoWorker } from "ente-base/crypto";
 import { masterKeyFromSession } from "ente-base/session";
 import { getData, setData, setLSUser } from "ente-shared/storage/localStorage";
 import { type SessionKey, setKey } from "ente-shared/storage/sessionStorage";
-import type { KeyAttributes } from "ente-shared/user/types";
 
 const LOGIN_SUB_KEY_LENGTH = 32;
 const LOGIN_SUB_KEY_ID = 1;
