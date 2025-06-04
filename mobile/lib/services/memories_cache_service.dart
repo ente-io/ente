@@ -353,6 +353,8 @@ class MemoriesCacheService {
         memory.personName != null
             ? "Happy birthday to ${memory.personName}! 🎉"
             : "Happy birthday! 🥳",
+        // TODO:lau (after mergin main): change `scheduleNotification` api to make message optional
+        // TODO:lau (after mergin main): extract strings
         id: memory.id.hashCode,
         channelID: "birthday",
         channelName: "Birthdays",

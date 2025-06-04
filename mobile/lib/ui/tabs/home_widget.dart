@@ -862,6 +862,7 @@ class _HomeWidgetState extends State<HomeWidget> {
           payload,
         );
       } else {
+        // TODO:lau (after mergin main): add another case here for birthday notifications
         final collectionID = Uri.parse(payload).queryParameters["collectionID"];
         if (collectionID != null) {
           final collection = CollectionsService.instance
