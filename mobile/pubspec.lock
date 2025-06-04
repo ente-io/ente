@@ -167,6 +167,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.1"
+  brotli:
+    dependency: transitive
+    description:
+      name: brotli
+      sha256: "7f891558ed779aab2bed874f0a36b8123f9ff3f19cf6efbee89e18ed294945ae"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.6.0"
   build:
     dependency: transitive
     description:
@@ -566,14 +574,15 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.1"
-  exif:
+  exif_reader:
     dependency: "direct main"
     description:
-      name: exif
-      sha256: a7980fdb3b7ffcd0b035e5b8a5e1eef7cadfe90ea6a4e85ebb62f87b96c7a172
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.3.0"
+      path: "."
+      ref: "476f701c084861a8e9de5f4f4e5e067fc85fda96"
+      resolved-ref: "476f701c084861a8e9de5f4f4e5e067fc85fda96"
+      url: "https://github.com/mgenware/exif_reader.git"
+    source: git
+    version: "3.16.1"
   expandable:
     dependency: "direct main"
     description:
@@ -1347,6 +1356,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.5"
+  iso_base_media:
+    dependency: transitive
+    description:
+      name: iso_base_media
+      sha256: "0f5594feef1fba98179a2df95d1afbdda952de0c7a2e35e6815093f7c00aaf06"
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.5.2"
   jni:
     dependency: transitive
     description:
@@ -2103,6 +2120,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.2.2"
+  random_access_source:
+    dependency: transitive
+    description:
+      name: random_access_source
+      sha256: dc86934da2cc4777334f43916234410f232032738c519c0c3452147c5d4fec89
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.1.0"
   receive_sharing_intent:
     dependency: "direct main"
     description:
