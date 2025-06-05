@@ -8,7 +8,7 @@ import { CenteredFill } from "ente-base/components/containers";
 import { LinkButton } from "ente-base/components/LinkButton";
 import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
 import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
-import { encryptBoxB64 } from "ente-base/crypto";
+import { encryptBox } from "ente-base/crypto";
 import { getData, setLSUser } from "ente-shared/storage/localStorage";
 import { t } from "i18next";
 import { useRouter } from "next/router";
@@ -27,7 +27,7 @@ const Page: React.FC = () => {
     }, []);
 
     const handleSubmit = async (otp: string) => {
-        const box = await encryptBoxB64(
+        const box = await encryptBox(
             twoFactorSecret!.secretCode,
             await getUserRecoveryKeyB64(),
         );

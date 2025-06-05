@@ -266,7 +266,7 @@ export const generateBlobOrStreamKey = async () => {
  * without chunking, whilst the *Stream routines first break it into
  * {@link streamEncryptionChunkSize} chunks.
  */
-export const encryptBoxB64 = async (
+export const encryptBox = async (
     data: BytesOrB64,
     key: BytesOrB64,
 ): Promise<EncryptedBoxB64> => {
@@ -469,7 +469,7 @@ export const encryptStreamChunk = async (
 };
 
 /**
- * Decrypt the result of {@link encryptBoxB64} and return the decrypted bytes.
+ * Decrypt the result of {@link encryptBox} and return the decrypted bytes.
  */
 export const decryptBoxBytes = async (
     { encryptedData, nonce }: EncryptedBox,
@@ -611,10 +611,10 @@ export interface B64EncryptionResult {
     nonce: string;
 }
 
-/** Deprecated, use {@link encryptBoxB64} instead */
+/** Deprecated, use {@link encryptBox} instead */
 export async function encryptToB64(data: string, keyB64: string) {
     await sodium.ready;
-    const encrypted = await encryptBoxB64(data, keyB64);
+    const encrypted = await encryptBox(data, keyB64);
     return {
         encryptedData: encrypted.encryptedData,
         key: keyB64,

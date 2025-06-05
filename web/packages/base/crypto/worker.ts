@@ -20,7 +20,7 @@ export class CryptoWorker {
     fromHex = ei._fromHex;
     generateKey = ei._generateKey;
     generateBlobOrStreamKey = ei._generateBlobOrStreamKey;
-    encryptBoxB64 = ei._encryptBoxB64;
+    encryptBox = ei._encryptBox;
     encryptThumbnail = ei._encryptThumbnail;
     encryptBlob = ei._encryptBlob;
     encryptStreamBytes = ei._encryptStreamBytes;

@@ -169,10 +169,10 @@ export const generateBlobOrStreamKey = () =>
  * >
  * > See: [Note: 3 forms of encryption (Box | Blob | Stream)]
  */
-export const encryptBoxB64 = (data: BytesOrB64, key: BytesOrB64) =>
+export const encryptBox = (data: BytesOrB64, key: BytesOrB64) =>
     inWorker()
-        ? ei._encryptBoxB64(data, key)
-        : sharedWorker().then((w) => w.encryptBoxB64(data, key));
+        ? ei._encryptBox(data, key)
+        : sharedWorker().then((w) => w.encryptBox(data, key));
 
 /**
  * Encrypt the given data, returning a blob containing the encrypted data and a
@@ -284,7 +284,7 @@ export const encryptMetadataJSON = async (r: {
         : sharedWorker().then((w) => w.encryptMetadataJSON(r));
 
 /**
- * Decrypt a box encrypted using {@link encryptBoxB64} and returns the decrypted
+ * Decrypt a box encrypted using {@link encryptBox} and returns the decrypted
  * bytes as a base64 string.
  */
 export const decryptBox = (box: EncryptedBox, key: BytesOrB64) =>

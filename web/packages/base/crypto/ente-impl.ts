@@ -16,7 +16,7 @@ export const _generateKey = libsodium.generateKey;
 
 export const _generateBlobOrStreamKey = libsodium.generateBlobOrStreamKey;
 
-export const _encryptBoxB64 = libsodium.encryptBoxB64;
+export const _encryptBox = libsodium.encryptBox;
 
 export const _encryptBlob = libsodium.encryptBlob;
 

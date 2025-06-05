@@ -95,11 +95,11 @@ const createNewRecoveryKey = async (masterKey: Uint8Array) => {
 
     const cryptoWorker = await sharedCryptoWorker();
     const recoveryKey = await cryptoWorker.generateKey();
-    const encryptedMasterKey = await cryptoWorker.encryptBoxB64(
+    const encryptedMasterKey = await cryptoWorker.encryptBox(
         masterKey,
         recoveryKey,
     );
-    const encryptedRecoveryKey = await cryptoWorker.encryptBoxB64(
+    const encryptedRecoveryKey = await cryptoWorker.encryptBox(
         recoveryKey,
         masterKey,
     );

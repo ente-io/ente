@@ -1,7 +1,7 @@
 import {
     decryptBox,
     encryptBlob,
-    encryptBoxB64,
+    encryptBox,
     generateBlobOrStreamKey,
 } from "ente-base/crypto";
 import { nullishToEmpty, nullToUndefined } from "ente-utils/transform";
@@ -265,7 +265,7 @@ const getOrCreateEntityKeyB64 = async (
 };
 
 const generateEncryptedEntityKey = async (masterKey: Uint8Array) => {
-    const { encryptedData, nonce } = await encryptBoxB64(
+    const { encryptedData, nonce } = await encryptBox(
         await generateBlobOrStreamKey(),
         masterKey,
     );
