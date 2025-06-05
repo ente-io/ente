@@ -9,7 +9,7 @@
  * To see where this code fits, see [Note: Crypto code hierarchy].
  */
 import { mergeUint8Arrays } from "ente-utils/array";
-import sodium, { type StateAddress } from "libsodium-wrappers-sumo";
+import sodium from "libsodium-wrappers-sumo";
 import type {
     BytesOrB64,
     DerivedKey,
@@ -19,6 +19,9 @@ import type {
     EncryptedBox,
     EncryptedBoxB64,
     EncryptedFile,
+    InitChunkDecryptionResult,
+    InitChunkEncryptionResult,
+    SodiumStateAddress,
 } from "./types";
 
 /**
@@ -448,7 +451,9 @@ export const encryptStreamBytes = async (
  * to subsequent calls to {@link encryptStreamChunk} along with the chunks's
  * contents.
  */
-export const initChunkEncryption = async (key: BytesOrB64) => {
+export const initChunkEncryption = async (
+    key: BytesOrB64,
+): Promise<InitChunkEncryptionResult> => {
     await sodium.ready;
     const keyBytes = await bytes(key);
     const { state, header } =
@@ -476,7 +481,7 @@ export const initChunkEncryption = async (key: BytesOrB64) => {
  */
 export const encryptStreamChunk = async (
     data: Uint8Array,
-    pushState: sodium.StateAddress,
+    pushState: SodiumStateAddress,
     isFinalChunk: boolean,
 ): Promise<Uint8Array> => {
     await sodium.ready;
@@ -623,7 +628,7 @@ export const decryptStreamBytes = async (
 export const initChunkDecryption = async (
     decryptionHeader: string,
     key: BytesOrB64,
-) => {
+): Promise<InitChunkDecryptionResult> => {
     await sodium.ready;
     const pullState = sodium.crypto_secretstream_xchacha20poly1305_init_pull(
         await fromB64(decryptionHeader),
@@ -646,7 +651,7 @@ export const initChunkDecryption = async (
  */
 export const decryptStreamChunk = async (
     data: Uint8Array,
-    pullState: StateAddress,
+    pullState: SodiumStateAddress,
 ): Promise<Uint8Array> => {
     await sodium.ready;
     const pullResult = sodium.crypto_secretstream_xchacha20poly1305_pull(
@@ -680,12 +685,6 @@ export async function generateKeyAndEncryptToB64(data: string) {
 }
 
 /**
- * An opaque object meant to be threaded through {@link chunkHashInit},
- * {@link chunkHashUpdate} and {@link chunkHashFinal}.
- */
-export type ChunkHashState = sodium.StateAddress;
-
-/**
  * Initialize and return new state that can be used to hash the chunks of data
  * in a streaming manner.
  *
@@ -701,7 +700,7 @@ export type ChunkHashState = sodium.StateAddress;
  * (along with the data to hash) to {@link chunkHashUpdate}, and the final hash
  * obtained using {@link chunkHashFinal}.
  */
-export const chunkHashInit = async (): Promise<ChunkHashState> => {
+export const chunkHashInit = async (): Promise<SodiumStateAddress> => {
     await sodium.ready;
     return sodium.crypto_generichash_init(
         null,
@@ -719,7 +718,7 @@ export const chunkHashInit = async (): Promise<ChunkHashState> => {
  * @param chunk The data (bytes) to hash.
  */
 export const chunkHashUpdate = async (
-    hashState: ChunkHashState,
+    hashState: SodiumStateAddress,
     chunk: Uint8Array,
 ) => {
     await sodium.ready;
@@ -736,7 +735,7 @@ export const chunkHashUpdate = async (
  *
  * @returns The hash of all the chunks (as a base64 string).
  */
-export const chunkHashFinal = async (hashState: ChunkHashState) => {
+export const chunkHashFinal = async (hashState: SodiumStateAddress) => {
     await sodium.ready;
     const hash = sodium.crypto_generichash_final(
         hashState,

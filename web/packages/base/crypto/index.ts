@@ -88,7 +88,6 @@
  *    dealing with them.
  */
 import { ComlinkWorker } from "ente-base/worker/comlink-worker";
-import { type StateAddress } from "libsodium-wrappers-sumo";
 import { inWorker } from "../env";
 import * as ei from "./ente-impl";
 import type {
@@ -100,6 +99,9 @@ import type {
     EncryptedBox,
     EncryptedBoxB64,
     EncryptedFile,
+    InitChunkDecryptionResult,
+    InitChunkEncryptionResult,
+    SodiumStateAddress,
 } from "./types";
 import type { CryptoWorker } from "./worker";
 
@@ -297,7 +299,9 @@ export const encryptStreamBytes = (
 /**
  * Prepare for chunked streaming encryption using {@link encryptStreamChunk}.
  */
-export const initChunkEncryption = async (key: BytesOrB64) =>
+export const initChunkEncryption = (
+    key: BytesOrB64,
+): Promise<InitChunkEncryptionResult> =>
     inWorker()
         ? ei._initChunkEncryption(key)
         : sharedWorker().then((w) => w.initChunkEncryption(key));
@@ -307,7 +311,7 @@ export const initChunkEncryption = async (key: BytesOrB64) =>
  */
 export const encryptStreamChunk = (
     data: Uint8Array,
-    state: StateAddress,
+    state: SodiumStateAddress,
     isFinalChunk: boolean,
 ): Promise<Uint8Array> =>
     inWorker()
@@ -392,7 +396,10 @@ export const decryptStreamBytes = (
  * Prepare to decrypt the encrypted result produced using {@link initChunkEncryption} and
  * {@link encryptStreamChunk}.
  */
-export const initChunkDecryption = async (header: string, key: BytesOrB64) =>
+export const initChunkDecryption = (
+    header: string,
+    key: BytesOrB64,
+): Promise<InitChunkDecryptionResult> =>
     inWorker()
         ? ei._initChunkDecryption(header, key)
         : sharedWorker().then((w) => w.initChunkDecryption(header, key));
@@ -404,7 +411,7 @@ export const initChunkDecryption = async (header: string, key: BytesOrB64) =>
  */
 export const decryptStreamChunk = (
     data: Uint8Array,
-    state: StateAddress,
+    state: SodiumStateAddress,
 ): Promise<Uint8Array> =>
     inWorker()
         ? ei._decryptStreamChunk(data, state)
