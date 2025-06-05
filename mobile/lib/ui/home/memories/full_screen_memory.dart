@@ -236,7 +236,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                     ? ValueListenableBuilder<Duration>(
                         valueListenable: durationNotifier,
                         builder: (context, duration, _) {
-                          return NewProgressIndicator(
+                          return MemoryProgressIndicator(
                             totalSteps: inheritedData.memories.length,
                             currentIndex: value,
                             selectedColor: Colors.white,

@@ -1,6 +1,6 @@
 import "package:flutter/material.dart";
 
-class NewProgressIndicator extends StatefulWidget {
+class MemoryProgressIndicator extends StatefulWidget {
   final int totalSteps;
   final int currentIndex;
   final Duration duration;
@@ -11,7 +11,7 @@ class NewProgressIndicator extends StatefulWidget {
   final void Function(AnimationController)? animationController;
   final VoidCallback? onComplete;
 
-  const NewProgressIndicator({
+  const MemoryProgressIndicator({
     super.key,
     required this.totalSteps,
     required this.currentIndex,
@@ -25,10 +25,10 @@ class NewProgressIndicator extends StatefulWidget {
   });
 
   @override
-  State<NewProgressIndicator> createState() => _NewProgressIndicatorState();
+  State<MemoryProgressIndicator> createState() => _MemoryProgressIndicatorState();
 }
 
-class _NewProgressIndicatorState extends State<NewProgressIndicator>
+class _MemoryProgressIndicatorState extends State<MemoryProgressIndicator>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _animation;
