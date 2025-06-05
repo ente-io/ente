@@ -1,5 +1,5 @@
 import type { User } from "ente-accounts/services/user";
-import { encryptBoxB64 } from "ente-base/crypto";
+import { encryptBox } from "ente-base/crypto";
 import { authenticatedRequestHeaders, ensureOk } from "ente-base/http";
 import { apiURL } from "ente-base/origins";
 import { CollectionSubType, type Collection } from "ente-media/collection";
@@ -212,7 +212,7 @@ const encryptWithCollectionKey = async (
 ): Promise<CollectionFileItem[]> =>
     Promise.all(
         files.map(async (file) => {
-            const box = await encryptBoxB64(file.key, collection.key);
+            const box = await encryptBox(file.key, collection.key);
             return {
                 id: file.id,
                 encryptedKey: box.encryptedData,

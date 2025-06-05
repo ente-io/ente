@@ -326,12 +326,24 @@ interface EncryptedFileStream {
 }
 
 interface EncryptedFilePieces {
+    /**
+     * The encrypted contents of the file (as bytes or a stream of bytes), and
+     * the decryption header that was used during encryption (base64 string).
+     */
     file: {
         encryptedData: Uint8Array | EncryptedFileStream;
         decryptionHeader: string;
     };
+    /**
+     * The encrypted contents of the file's thumbnail (as bytes), and the
+     * decryption header that was used during encryption (base64 string).
+     */
     thumbnail: { encryptedData: Uint8Array; decryptionHeader: string };
-    metadata: { encryptedDataB64: string; decryptionHeaderB64: string };
+    /**
+     * The encrypted contents of the file's metadata (as a base64 string), and
+     * the decryption header that was used during encryption (base64 string).
+     */
+    metadata: { encryptedData: string; decryptionHeader: string };
     pubMagicMetadata: EncryptedMagicMetadata;
     localID: number;
 }
@@ -1426,29 +1438,32 @@ const encryptFile = async (
             ? await worker.encryptStreamBytes(fileStreamOrData, fileKey)
             : await encryptFileStream(fileStreamOrData, fileKey, worker);
 
-    const encryptedThumbnail = await worker.encryptThumbnail(
-        thumbnail,
+    const {
+        encryptedData: encryptedThumbnailData,
+        decryptionHeader: thumbnailDecryptionHeaderBytes,
+    } = await worker.encryptBlobBytes(thumbnail, fileKey);
+
+    const encryptedThumbnail = {
+        encryptedData: encryptedThumbnailData,
+        decryptionHeader: await worker.toB64(thumbnailDecryptionHeaderBytes),
+    };
+
+    const encryptedMetadata = await worker.encryptMetadataJSON(
+        metadata,
         fileKey,
     );
-
-    const encryptedMetadata = await worker.encryptMetadataJSON({
-        jsonValue: metadata,
-        keyB64: fileKey,
-    });
 
     let encryptedPubMagicMetadata: EncryptedMagicMetadata;
     // Keep defensive check until the underlying type is audited.
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (pubMagicMetadata) {
-        const encryptedPubMagicMetadataData = await worker.encryptMetadataJSON({
-            jsonValue: pubMagicMetadata.data,
-            keyB64: fileKey,
-        });
+        const { encryptedData, decryptionHeader } =
+            await worker.encryptMetadataJSON(pubMagicMetadata.data, fileKey);
         encryptedPubMagicMetadata = {
             version: pubMagicMetadata.version,
             count: pubMagicMetadata.count,
-            data: encryptedPubMagicMetadataData.encryptedDataB64,
-            header: encryptedPubMagicMetadataData.decryptionHeaderB64,
+            data: encryptedData,
+            header: decryptionHeader,
         };
     }
 
@@ -1582,11 +1597,8 @@ const uploadToBucket = async (
             objectKey: thumbnailUploadURL.objectKey,
             size: thumbnail.encryptedData.length,
         },
-        metadata: {
-            encryptedData: metadata.encryptedDataB64,
-            decryptionHeader: metadata.decryptionHeaderB64,
-        },
-        pubMagicMetadata: pubMagicMetadata,
+        metadata,
+        pubMagicMetadata,
     };
 };
 

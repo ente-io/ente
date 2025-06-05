@@ -18,9 +18,11 @@ export async function decryptAndStoreToken(
     let decryptedToken = null;
     const { encryptedToken } = user;
     if (encryptedToken && encryptedToken.length > 0) {
-        const secretKey = await cryptoWorker.decryptB64(
-            keyAttributes.encryptedSecretKey,
-            keyAttributes.secretKeyDecryptionNonce,
+        const secretKey = await cryptoWorker.decryptBox(
+            {
+                encryptedData: keyAttributes.encryptedSecretKey,
+                nonce: keyAttributes.secretKeyDecryptionNonce,
+            },
             masterKey,
         );
         const urlUnsafeB64DecryptedToken = await cryptoWorker.boxSealOpen(
@@ -116,7 +118,7 @@ export const decryptDeleteAccountChallenge = async (
     const cryptoWorker = await sharedCryptoWorker();
     const masterKey = await masterKeyFromSession();
     const keyAttributes = getData("keyAttributes");
-    const secretKey = await cryptoWorker.decryptBoxB64(
+    const secretKey = await cryptoWorker.decryptBox(
         {
             encryptedData: keyAttributes.encryptedSecretKey,
             nonce: keyAttributes.secretKeyDecryptionNonce,

@@ -140,14 +140,14 @@ const Page: React.FC = () => {
             if (kekEncryptedAttributes && keyAttributes) {
                 removeKey("keyEncryptionKey");
                 const cryptoWorker = await sharedCryptoWorker();
-                const kek = await cryptoWorker.decryptBoxB64(
+                const kek = await cryptoWorker.decryptBox(
                     {
                         encryptedData: kekEncryptedAttributes.encryptedData,
                         nonce: kekEncryptedAttributes.nonce,
                     },
                     kekEncryptedAttributes.key,
                 );
-                const key = await cryptoWorker.decryptBoxB64(
+                const key = await cryptoWorker.decryptBox(
                     {
                         encryptedData: keyAttributes.encryptedKey,
                         nonce: keyAttributes.keyDecryptionNonce,

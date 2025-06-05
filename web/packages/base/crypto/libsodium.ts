@@ -111,7 +111,7 @@ export const toHex = async (input: string) => {
 };
 
 /**
- * Convert a hex string to the base 64 representation of the bytes that the hex
+ * Convert a hex string to the base64 representation of the bytes that the hex
  * string encodes.
  *
  * This is the inverse of {@link toHex}.
@@ -150,7 +150,7 @@ const bytes = async (bob: BytesOrB64) =>
  * hypothetical "generateBoxKey") and {@link generateBlobOrStreamKey} produce
  * 256-bits of entropy that does not have any ties to a particular algorithm.
  *
- * @returns A new randomly generated 256-bit key.
+ * @returns A new randomly generated 256-bit key (as a base64 string).
  */
 export const generateKey = async () => {
     await sodium.ready;
@@ -161,8 +161,8 @@ export const generateKey = async () => {
  * Generate a new key for use with the *Blob or *Stream encryption functions,
  * and return its base64 string representation.
  *
- * This returns a new randomly generated 256-bit key suitable for being used
- * with libsodium's secretstream APIs.
+ * This returns a new randomly generated 256-bit key (as a base64 string)
+ * suitable for being used with libsodium's secretstream APIs.
  */
 export const generateBlobOrStreamKey = async () => {
     await sodium.ready;
@@ -173,7 +173,7 @@ export const generateBlobOrStreamKey = async () => {
  * Encrypt the given data using libsodium's secretbox APIs, using a randomly
  * generated nonce.
  *
- * Use {@link decryptBox} to decrypt the result.
+ * Use {@link decryptBox} or {@link decryptBoxBytes} to decrypt the result.
  *
  * @param data The data to encrypt.
  *
@@ -266,7 +266,7 @@ export const generateBlobOrStreamKey = async () => {
  * without chunking, whilst the *Stream routines first break it into
  * {@link streamEncryptionChunkSize} chunks.
  */
-export const encryptBoxB64 = async (
+export const encryptBox = async (
     data: BytesOrB64,
     key: BytesOrB64,
 ): Promise<EncryptedBoxB64> => {
@@ -286,7 +286,7 @@ export const encryptBoxB64 = async (
 /**
  * Encrypt the given data using libsodium's secretstream APIs without chunking.
  *
- * Use {@link decryptBlob} to decrypt the result.
+ * Use {@link decryptBlobBytes} to decrypt the result.
  *
  * @param data The data to encrypt.
  *
@@ -298,7 +298,7 @@ export const encryptBoxB64 = async (
  *
  * - See: https://doc.libsodium.org/secret-key_cryptography/secretstream
  */
-export const encryptBlob = async (
+export const encryptBlobBytes = async (
     data: BytesOrB64,
     key: BytesOrB64,
 ): Promise<EncryptedBlobBytes> => {
@@ -319,19 +319,34 @@ export const encryptBlob = async (
 };
 
 /**
- * A variant of {@link encryptBlob} that returns the both the encrypted data and
- * decryption header as base64 strings.
+ * A higher level variant of {@link encryptBlobBytes} that returns the both the
+ * encrypted data and decryption header as base64 strings.
+ *
+ * This is the variant expected to serve majority of the public API use cases.
  */
-export const encryptBlobB64 = async (
+export const encryptBlob = async (
     data: BytesOrB64,
     key: BytesOrB64,
 ): Promise<EncryptedBlobB64> => {
-    const { encryptedData, decryptionHeader } = await encryptBlob(data, key);
+    const { encryptedData, decryptionHeader } = await encryptBlobBytes(
+        data,
+        key,
+    );
     return {
         encryptedData: await toB64(encryptedData),
         decryptionHeader: await toB64(decryptionHeader),
     };
 };
+
+/**
+ * Encrypt the provided JSON value (using {@link encryptBlob}) after converting
+ * it to a JSON string (and utf-8 encoding it to obtain bytes).
+ *
+ * Use {@link decryptMetadataJSON} to decrypt the result and convert it back to
+ * a JSON value.
+ */
+export const encryptMetadataJSON = (jsonValue: unknown, key: BytesOrB64) =>
+    encryptBlob(new TextEncoder().encode(JSON.stringify(jsonValue)), key);
 
 /**
  * The various *Stream encryption functions break up the input into chunks of
@@ -464,9 +479,9 @@ export const encryptStreamChunk = async (
 };
 
 /**
- * Decrypt the result of {@link encryptBoxB64} and return the decrypted bytes.
+ * Decrypt the result of {@link encryptBox} and return the decrypted bytes.
  */
-export const decryptBox = async (
+export const decryptBoxBytes = async (
     { encryptedData, nonce }: EncryptedBox,
     key: BytesOrB64,
 ): Promise<Uint8Array> => {
@@ -479,17 +494,17 @@ export const decryptBox = async (
 };
 
 /**
- * Variant of {@link decryptBox} that returns the data as a base64 string.
+ * Variant of {@link decryptBoxBytes} that returns the data as a base64 string.
  */
-export const decryptBoxB64 = (
+export const decryptBox = (
     box: EncryptedBox,
     key: BytesOrB64,
-): Promise<string> => decryptBox(box, key).then(toB64);
+): Promise<string> => decryptBoxBytes(box, key).then(toB64);
 
 /**
- * Decrypt the result of {@link encryptBlob} or {@link encryptBlobB64}.
+ * Decrypt the result of {@link encryptBlobBytes} or {@link encryptBlob}.
  */
-export const decryptBlob = async (
+export const decryptBlobBytes = async (
     { encryptedData, decryptionHeader }: EncryptedBlob,
     key: BytesOrB64,
 ): Promise<Uint8Array> => {
@@ -507,12 +522,29 @@ export const decryptBlob = async (
 };
 
 /**
- * A variant of {@link decryptBlob} that returns the result as a base64 string.
+ * A variant of {@link decryptBlobBytes} that returns the result as a base64
+ * string.
  */
-export const decryptBlobB64 = (
+export const decryptBlob = (
     blob: EncryptedBlob,
     key: BytesOrB64,
-): Promise<string> => decryptBlob(blob, key).then(toB64);
+): Promise<string> => decryptBlobBytes(blob, key).then(toB64);
+
+/**
+ * Decrypt the result of {@link encryptMetadataJSON} and return the JSON value
+ * obtained by parsing the decrypted JSON string (which is obtained by utf-8
+ * decoding the decrypted bytes).
+ *
+ * Since TypeScript doesn't currently have a native JSON type, the returned
+ * value is casted as an `unknown`.
+ */
+export const decryptMetadataJSON = async (
+    blob: EncryptedBlob,
+    key: BytesOrB64,
+) =>
+    JSON.parse(
+        new TextDecoder().decode(await decryptBlobBytes(blob, key)),
+    ) as unknown;
 
 /**
  * Decrypt the result of {@link encryptStreamBytes}.
@@ -605,10 +637,10 @@ export interface B64EncryptionResult {
     nonce: string;
 }
 
-/** Deprecated, use {@link encryptBoxB64} instead */
+/** Deprecated, use {@link encryptBox} instead */
 export async function encryptToB64(data: string, keyB64: string) {
     await sodium.ready;
-    const encrypted = await encryptBoxB64(data, keyB64);
+    const encrypted = await encryptBox(data, keyB64);
     return {
         encryptedData: encrypted.encryptedData,
         key: keyB64,
@@ -628,15 +660,6 @@ export async function encryptUTF8(data: string, key: string) {
     return await encryptToB64(b64Data, key);
 }
 
-/** Deprecated, use {@link decryptBoxB64} instead. */
-export async function decryptB64(
-    encryptedData: string,
-    nonce: string,
-    keyB64: string,
-) {
-    return decryptBoxB64({ encryptedData, nonce }, keyB64);
-}
-
 /** Deprecated */
 export async function decryptToUTF8(
     encryptedData: string,
@@ -644,7 +667,7 @@ export async function decryptToUTF8(
     keyB64: string,
 ) {
     await sodium.ready;
-    const decrypted = await decryptBox({ encryptedData, nonce }, keyB64);
+    const decrypted = await decryptBoxBytes({ encryptedData, nonce }, keyB64);
     return sodium.to_string(decrypted);
 }
 
@@ -861,7 +884,7 @@ export const deriveSensitiveKey = async (passphrase: string, salt: string) => {
             memLimit /= 2;
         }
     }
-    throw new Error("Failed to derive key: Memory limit exceeded");
+    throw new Error("Failed to derive key: memory limit exceeded");
 };
 
 /**

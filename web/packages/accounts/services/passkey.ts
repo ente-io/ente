@@ -1,6 +1,6 @@
 import { TwoFactorAuthorizationResponse } from "ente-accounts/services/user";
 import { clientPackageName, isDesktop } from "ente-base/app";
-import { encryptBoxB64, generateKey } from "ente-base/crypto";
+import { encryptBox, generateKey } from "ente-base/crypto";
 import {
     authenticatedRequestHeaders,
     ensureOk,
@@ -108,7 +108,7 @@ export const openAccountsManagePasskeysPage = async () => {
         // If not, enable it for them by creating the necessary recovery
         // information to prevent them from getting locked out.
         const resetSecret = await generateKey();
-        const box = await encryptBoxB64(
+        const box = await encryptBox(
             resetSecret,
             await getUserRecoveryKeyB64(),
         );

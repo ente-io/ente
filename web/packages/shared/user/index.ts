@@ -10,9 +10,11 @@ export const getActualKey = async () => {
         getKey("encryptionKey");
 
     const cryptoWorker = await sharedCryptoWorker();
-    const key = await cryptoWorker.decryptB64(
-        encryptionKeyAttributes.encryptedData,
-        encryptionKeyAttributes.nonce,
+    const key = await cryptoWorker.decryptBox(
+        {
+            encryptedData: encryptionKeyAttributes.encryptedData,
+            nonce: encryptionKeyAttributes.nonce,
+        },
         encryptionKeyAttributes.key,
     );
     return key;
