@@ -20,9 +20,11 @@ import "package:photos/models/memories/smart_memory.dart";
 import "package:photos/models/memories/smart_memory_constants.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/language_service.dart";
+import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/services/notification_service.dart";
 import "package:photos/services/search_service.dart";
 import "package:photos/ui/home/memories/full_screen_memory.dart";
+import "package:photos/ui/viewer/people/people_page.dart";
 import "package:photos/utils/navigation_util.dart";
 import "package:shared_preferences/shared_preferences.dart";
 import "package:synchronized/synchronized.dart";
@@ -521,6 +523,57 @@ class MemoriesCacheService {
         initialIndex: 0,
         memories: allMemories[memoryIdx].memories,
         child: FullScreenMemory(allMemories[memoryIdx].title, 0),
+      ),
+      forceCustomPageRoute: true,
+    );
+  }
+
+  Future<void> goToPersonMemory(BuildContext context, String personID) async {
+    final allMemories = await getMemories();
+    if (allMemories.isEmpty) return;
+    final personMemories = <PeopleMemory>[];
+    for (final memory in allMemories) {
+      if (memory is PeopleMemory &&
+          (memory.isBirthday ?? false) &&
+          memory.personID == personID) {
+        personMemories.add(memory);
+      }
+    }
+    PeopleMemory? personMemory;
+    for (final memory in personMemories) {
+      if (memory.peopleMemoryType == PeopleMemoryType.youAndThem) {
+        personMemory = memory;
+        break; // breaking to prefer youAndThem over spotlight
+      }
+      if (memory.peopleMemoryType == PeopleMemoryType.spotlight) {
+        personMemory = memory;
+      }
+    }
+
+    if (personMemory == null) {
+      _logger.severe(
+        "Could not find person memory, routing to person page instead",
+      );
+      final person = await PersonService.instance.getPerson(personID);
+      if (person == null) {
+        _logger.severe("Person with ID $personID not found");
+        return;
+      }
+      await routeToPage(
+        context,
+        PeoplePage(
+          person: person,
+          searchResult: null,
+        ),
+        forceCustomPageRoute: true,
+      );
+    }
+    await routeToPage(
+      context,
+      FullScreenMemoryDataUpdater(
+        initialIndex: 0,
+        memories: personMemory!.memories,
+        child: FullScreenMemory(personMemory.title, 0),
       ),
       forceCustomPageRoute: true,
     );

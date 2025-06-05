@@ -864,8 +864,11 @@ class _HomeWidgetState extends State<HomeWidget> {
       if (payload.toLowerCase().contains("onthisday")) {
         // ignore: unawaited_futures
         memoriesCacheService.goToOnThisDayMemory(context);
+      } else if (payload.toLowerCase().contains("birthday")) {
+        final personID = payload.substring("birthday_".length);
+        // ignore: unawaited_futures
+        memoriesCacheService.goToPersonMemory(context, personID);
       } else {
-        // TODO:lau (after mergin main): add another case here for birthday notifications
         final collectionID = Uri.parse(payload).queryParameters["collectionID"];
         if (collectionID != null) {
           final collection = CollectionsService.instance
