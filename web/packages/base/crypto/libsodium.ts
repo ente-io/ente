@@ -638,7 +638,7 @@ export interface B64EncryptionResult {
 }
 
 /** Deprecated, use {@link encryptBox} instead */
-export async function encryptToB64(data: string, keyB64: string) {
+async function encryptToB64(data: string, keyB64: string) {
     await sodium.ready;
     const encrypted = await encryptBox(data, keyB64);
     return {
