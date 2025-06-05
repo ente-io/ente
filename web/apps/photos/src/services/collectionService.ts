@@ -72,7 +72,7 @@ const createCollection = async (
         const token = getToken();
         const collectionKey = await cryptoWorker.generateKey();
         const { encryptedData: encryptedKey, nonce: keyDecryptionNonce } =
-            await cryptoWorker.encryptToB64(collectionKey, encryptionKey);
+            await cryptoWorker.encryptBox(collectionKey, encryptionKey);
         const { encryptedData: encryptedName, nonce: nameDecryptionNonce } =
             await cryptoWorker.encryptUTF8(collectionName, collectionKey);
         let encryptedMagicMetadata: EncryptedMagicMetadata;
