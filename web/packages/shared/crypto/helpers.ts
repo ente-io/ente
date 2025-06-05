@@ -69,7 +69,7 @@ export async function generateAndSaveIntermediateKeyAttributes(
 
 export const generateLoginSubKey = async (kek: string) => {
     const cryptoWorker = await sharedCryptoWorker();
-    const kekSubKeyString = await cryptoWorker.generateSubKey(
+    const kekSubKeyString = await cryptoWorker.deriveSubKey(
         kek,
         LOGIN_SUB_KEY_LENGTH,
         LOGIN_SUB_KEY_ID,
