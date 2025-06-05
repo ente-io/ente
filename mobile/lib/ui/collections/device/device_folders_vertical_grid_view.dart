@@ -120,7 +120,7 @@ class _DeviceFolderVerticalGridViewBodyState
                   sliver: SliverGrid(
                     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: albumsCountInCrossAxis,
-                      mainAxisSpacing: 2,
+                      mainAxisSpacing: 8,
                       crossAxisSpacing: crossAxisSpacing,
                       childAspectRatio:
                           sideOfThumbnail / (sideOfThumbnail + 46),

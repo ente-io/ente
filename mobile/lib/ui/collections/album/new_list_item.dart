@@ -27,7 +27,9 @@ class NewAlbumListItemWidget extends StatelessWidget {
                   child: Container(
                     height: sideOfThumbnail,
                     width: sideOfThumbnail,
-                    color: colorScheme.fillFaintPressed,
+                    color: Theme.of(context).brightness == Brightness.light
+                        ? const Color.fromRGBO(245, 245, 245, 100)
+                        : const Color.fromRGBO(39, 39, 39, 100),
                     child: Icon(
                       Icons.add_outlined,
                       color: colorScheme.strokeMuted,

@@ -67,8 +67,10 @@ class NewAlbumRowItemWidget extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
             child: Container(
               height: height,
-              width: width, 
-              color: colorScheme.fillFaintPressed,
+              width: width,
+              color: Theme.of(context).brightness == Brightness.light
+                  ? const Color.fromRGBO(245, 245, 245, 100)
+                  : const Color.fromRGBO(39, 39, 39, 100),
               child: DottedBorder(
                 borderType: BorderType.RRect,
                 strokeWidth: 1.75,

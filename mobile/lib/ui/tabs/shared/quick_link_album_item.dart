@@ -35,7 +35,7 @@ class QuickLinkAlbumItem extends StatelessWidget {
               isSelected ? colorScheme.strokeMuted : colorScheme.strokeFainter,
         ),
         borderRadius: const BorderRadius.all(
-          Radius.circular(2),
+          Radius.circular(6),
         ),
       ),
       child: Row(

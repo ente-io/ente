@@ -36,7 +36,7 @@ class AlbumColumnItemWidget extends StatelessWidget {
               isSelected ? colorScheme.strokeMuted : colorScheme.strokeFainter,
         ),
         borderRadius: const BorderRadius.all(
-          Radius.circular(4),
+          Radius.circular(6),
         ),
       ),
       child: Row(
@@ -92,9 +92,7 @@ class AlbumColumnItemWidget extends StatelessWidget {
                                       snapshot.data!,
                                       NumberFormat().format(snapshot.data!),
                                     ),
-                                style: textTheme.small.copyWith(
-                                  color: colorScheme.textMuted,
-                                ),
+                                style: textTheme.miniMuted,
                               );
                             } else {
                               if (snapshot.hasError) {

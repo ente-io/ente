@@ -172,7 +172,7 @@ class AlbumRecommendation extends StatelessWidget {
                     : const NoThumbnailWidget(),
               ),
             ),
-            const SizedBox(height: 2),
+            const SizedBox(height: 6),
             ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: _width),
               child: Column(
@@ -185,7 +185,7 @@ class AlbumRecommendation extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 3),
+                  const SizedBox(height: 2),
                   FutureBuilder(
                     future: CollectionsService.instance.getFileCount(
                       albumSearchResult.collectionWithThumbnail.collection,
@@ -237,7 +237,9 @@ class AlbumCTA extends StatelessWidget {
                 padding: EdgeInsets.zero,
                 color: enteColorScheme.strokeFaint,
                 child: Container( 
-                  color: enteColorScheme.fillFaintPressed,
+                  color: Theme.of(context).brightness == Brightness.light
+                  ? const Color.fromRGBO(245, 245, 245, 100)
+                  : const Color.fromRGBO(39, 39, 39, 100),
                   height: 100,
                   width: 100,
                   child: Icon(

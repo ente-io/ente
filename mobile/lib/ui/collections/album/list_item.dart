@@ -121,7 +121,7 @@ class AlbumListItemWidget extends StatelessWidget {
                     ? colorScheme.strokeMuted
                     : colorScheme.strokeFainter,
               ),
-              borderRadius: const BorderRadius.all(Radius.circular(4)),
+              borderRadius: const BorderRadius.all(Radius.circular(6)),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
