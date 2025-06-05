@@ -703,7 +703,6 @@ class MemoriesCacheService {
         firstDateToShow.year,
         firstDateToShow.month,
         firstDateToShow.day,
-        7,
       );
       if (scheduleTime.isBefore(DateTime.now())) {
         _logger.info(
@@ -727,7 +726,7 @@ class MemoriesCacheService {
         channelName: s.birthdays,
         payload: "birthday_${memory.personID}",
         dateTime: scheduleTime,
-        timeoutDurationAndroid: const Duration(hours: 17),
+        timeoutDurationAndroid: const Duration(hours: 24),
       );
       scheduledPersons.add(memory.personID);
       _logger.info(
