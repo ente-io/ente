@@ -1,8 +1,8 @@
 import { blobCache, type BlobCache } from "ente-base/blob-cache";
 import {
+    decryptBlobBytes,
     decryptStreamBytes,
     decryptStreamChunk,
-    decryptThumbnail,
     initChunkDecryption,
 } from "ente-base/crypto";
 import {
@@ -295,7 +295,7 @@ class DownloadManager {
             this._downloadThumbnail(file),
         );
         const decryptionHeader = file.thumbnail.decryptionHeader;
-        return decryptThumbnail({ encryptedData, decryptionHeader }, file.key);
+        return decryptBlobBytes({ encryptedData, decryptionHeader }, file.key);
     };
 
     private async _downloadThumbnail(file: EnteFile) {

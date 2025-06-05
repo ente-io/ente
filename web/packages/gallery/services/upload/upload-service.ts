@@ -1426,10 +1426,15 @@ const encryptFile = async (
             ? await worker.encryptStreamBytes(fileStreamOrData, fileKey)
             : await encryptFileStream(fileStreamOrData, fileKey, worker);
 
-    const encryptedThumbnail = await worker.encryptThumbnail(
-        thumbnail,
-        fileKey,
-    );
+    const {
+        encryptedData: encryptedThumbnailData,
+        decryptionHeader: thumbnailDecryptionHeaderBytes,
+    } = await worker.encryptBlobBytes(thumbnail, fileKey);
+
+    const encryptedThumbnail = {
+        encryptedData: encryptedThumbnailData,
+        decryptionHeader: await worker.toB64(thumbnailDecryptionHeaderBytes),
+    };
 
     const encryptedMetadata = await worker.encryptMetadataJSON({
         jsonValue: metadata,

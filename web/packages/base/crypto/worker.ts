@@ -21,7 +21,7 @@ export class CryptoWorker {
     generateKey = ei._generateKey;
     generateBlobOrStreamKey = ei._generateBlobOrStreamKey;
     encryptBox = ei._encryptBox;
-    encryptThumbnail = ei._encryptThumbnail;
+    encryptBlobBytes = ei._encryptBlobBytes;
     encryptBlob = ei._encryptBlob;
     encryptStreamBytes = ei._encryptStreamBytes;
     initChunkEncryption = ei._initChunkEncryption;
@@ -32,7 +32,6 @@ export class CryptoWorker {
     decryptBox = ei._decryptBox;
     decryptBlobBytes = ei._decryptBlobBytes;
     decryptBlob = ei._decryptBlob;
-    decryptThumbnail = ei._decryptThumbnail;
     decryptStreamBytes = ei._decryptStreamBytes;
     initChunkDecryption = ei._initChunkDecryption;
     decryptStreamChunk = ei._decryptStreamChunk;

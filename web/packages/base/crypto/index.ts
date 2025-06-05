@@ -203,20 +203,6 @@ export const encryptBlobBytes = (data: BytesOrB64, key: BytesOrB64) =>
     assertInWorker(ei._encryptBlobBytes(data, key));
 
 /**
- * Encrypt the thumbnail for a file.
- *
- * This is midway variant of {@link encryptBlobBytes} and {@link encryptBlob}
- * that returns the decryption header as a base64 string, but leaves the data
- * unchanged.
- *
- * Use {@link decryptThumbnail} to decrypt the result.
- */
-export const encryptThumbnail = (data: BytesOrB64, key: BytesOrB64) =>
-    inWorker()
-        ? ei._encryptThumbnail(data, key)
-        : sharedWorker().then((w) => w.encryptThumbnail(data, key));
-
-/**
  * Encrypt the given data using chunked streaming encryption, but process all
  * the chunks in one go.
  */
@@ -318,14 +304,6 @@ export const decryptBlobBytes = (blob: EncryptedBlob, key: BytesOrB64) =>
     inWorker()
         ? ei._decryptBlobBytes(blob, key)
         : sharedWorker().then((w) => w.decryptBlobBytes(blob, key));
-
-/**
- * Decrypt the thumbnail encrypted using {@link encryptThumbnail}.
- */
-export const decryptThumbnail = (blob: EncryptedBlob, key: BytesOrB64) =>
-    inWorker()
-        ? ei._decryptThumbnail(blob, key)
-        : sharedWorker().then((w) => w.decryptThumbnail(blob, key));
 
 /**
  * Decrypt the result of {@link encryptStreamBytes}.
