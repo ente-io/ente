@@ -123,18 +123,15 @@ export const savedCGroups = (): Promise<CGroup[]> =>
  * It uses local state to remember the latest entry the last time it did a pull,
  * so each subsequent pull is a lightweight diff.
  *
- * @param masterKey The user's masterKey, which is is used to encrypt and
- * decrypt the entity key.
+ * @param masterKey The user's masterKey (as a base64 string), which is is used
+ * to encrypt and decrypt the entity key.
  */
-export const pullUserEntities = async (
-    type: EntityType,
-    masterKey: Uint8Array,
-) => {
-    const entityKeyB64 = await getOrCreateEntityKeyB64(type, masterKey);
+export const pullUserEntities = async (type: EntityType, masterKey: string) => {
+    const entityKey = await getOrCreateEntityKey(type, masterKey);
 
     let sinceTime = (await savedLatestUpdatedAt(type)) ?? 0;
     while (true) {
-        const diff = await userEntityDiff(type, sinceTime, entityKeyB64);
+        const diff = await userEntityDiff(type, sinceTime, entityKey);
         if (diff.length == 0) break;
 
         const entityByID = new Map(
@@ -176,38 +173,38 @@ const isGzipped = (type: EntityType) => type == "cgroup";
 export const addUserEntity = async (
     type: EntityType,
     data: unknown,
-    masterKey: Uint8Array,
+    masterKey: string,
 ) =>
     await postUserEntity(
         type,
         await encryptedUserEntityData(type, data, masterKey),
     );
 
-export const encryptedUserEntityData = async (
+const encryptedUserEntityData = async (
     type: EntityType,
     data: unknown,
-    masterKey: Uint8Array,
+    masterKey: string,
 ) => {
-    const entityKeyB64 = await getOrCreateEntityKeyB64(type, masterKey);
+    const entityKey = await getOrCreateEntityKey(type, masterKey);
 
     const json = JSON.stringify(data);
     const bytes = isGzipped(type)
         ? await gzip(json)
         : new TextEncoder().encode(json);
-    return encryptBlob(bytes, entityKeyB64);
+    return encryptBlob(bytes, entityKey);
 };
 
 /**
  * Update the given user entities (both on remote and locally), creating them if
  * they don't exist.
  *
- * @param masterKey The user's masterKey, which is is used to encrypt and
- * decrypt the entity key.
+ * @param masterKey The user's masterKey (as a base64 string), which is is used
+ * to encrypt and decrypt the entity key.
  */
 export const updateOrCreateUserEntities = async (
     type: EntityType,
     entities: LocalUserEntity[],
-    masterKey: Uint8Array,
+    masterKey: string,
 ) =>
     await Promise.all(
         entities.map(({ id, data }) =>
@@ -218,8 +215,8 @@ export const updateOrCreateUserEntities = async (
     );
 
 /**
- * Return the entity key that can be used to decrypt the encrypted contents of
- * user entities of the given {@link type}.
+ * Return the entity key (base64 string) that can be used to decrypt the
+ * encrypted contents of user entities of the given {@link type}.
  *
  * 1. See if we have the encrypted entity key present locally. If so, return the
  *    entity key by decrypting it using with the user's master key.
@@ -234,10 +231,7 @@ export const updateOrCreateUserEntities = async (
  *
  * See also, [Note: User entity keys].
  */
-const getOrCreateEntityKeyB64 = async (
-    type: EntityType,
-    masterKey: Uint8Array,
-) => {
+const getOrCreateEntityKey = async (type: EntityType, masterKey: string) => {
     // See if we already have it locally.
     const saved = await savedRemoteUserEntityKey(type);
     if (saved) return decryptEntityKey(saved, masterKey);
@@ -264,7 +258,7 @@ const getOrCreateEntityKeyB64 = async (
     return result;
 };
 
-const generateEncryptedEntityKey = async (masterKey: Uint8Array) => {
+const generateEncryptedEntityKey = async (masterKey: string) => {
     const { encryptedData, nonce } = await encryptBox(
         await generateBlobOrStreamKey(),
         masterKey,
@@ -274,11 +268,12 @@ const generateEncryptedEntityKey = async (masterKey: Uint8Array) => {
 };
 
 /**
- * Decrypt an encrypted entity key using the user's master key.
+ * Decrypt an encrypted entity key (as a base64 string) using the provided
+ * user's {@link masterKey}.
  */
 const decryptEntityKey = async (
     remote: RemoteUserEntityKey,
-    masterKey: Uint8Array,
+    masterKey: string,
 ) =>
     decryptBox(
         {

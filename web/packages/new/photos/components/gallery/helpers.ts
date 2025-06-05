@@ -10,7 +10,7 @@
  * is a needed for fast refresh to work.
  */
 
-import { getUserRecoveryKeyB64 } from "ente-accounts/services/recovery-key";
+import { getUserRecoveryKey } from "ente-accounts/services/recovery-key";
 import type { User } from "ente-accounts/services/user";
 import log from "ente-base/log";
 import type { Collection } from "ente-media/collection";
@@ -28,7 +28,7 @@ import type { FamilyData } from "ente-new/photos/services/user-details";
  */
 export const validateKey = async () => {
     try {
-        await getUserRecoveryKeyB64();
+        await getUserRecoveryKey();
         return true;
     } catch (e) {
         log.warn("Failed to validate key" /*, caller will logout */, e);

@@ -3,6 +3,7 @@ import log from "ente-base/log";
 
 export type LocalStorageKey =
     | "user"
+    // See also savedKeyAttributes.
     | "keyAttributes"
     | "originalKeyAttributes"
     | "isFirstLogin"

@@ -18,6 +18,55 @@ export interface User {
     twoFactorSessionID: string;
 }
 
+// TODO: During login the only field present is email. Which makes this
+// optionality indicated by these types incorrect.
+const LocalUser = z.object({
+    /** The user's ID. */
+    id: z.number(),
+    /** The user's email. */
+    email: z.string(),
+    /**
+     * The user's (plaintext) auth token.
+     *
+     * It is used for making API calls on their behalf, by passing this token as
+     * the value of the X-Auth-Token header in the HTTP request.
+     */
+    token: z.string(),
+});
+
+/** Locally available data for the logged in user */
+export type LocalUser = z.infer<typeof LocalUser>;
+
+/**
+ * Return the logged-in user, if someone is indeed logged in. Otherwise return
+ * `undefined`.
+ *
+ * The user's data is stored in the browser's localStorage. Thus, this function
+ * only works from the main thread, not from web workers (local storage is not
+ * accessible to web workers).
+ */
+export const localUser = (): LocalUser | undefined => {
+    // TODO: duplicate of getData("user")
+    const s = localStorage.getItem("user");
+    if (!s) return undefined;
+    return LocalUser.parse(JSON.parse(s));
+};
+
+/**
+ * A wrapper over {@link localUser} with that throws if no one is logged in.
+ */
+export const ensureLocalUser = (): LocalUser =>
+    ensureExpectedLoggedInValue(localUser());
+
+/**
+ * A helper function that throws an error if a value that is expected to be
+ * truthy when the user is logged in is instead falsey.
+ */
+const ensureExpectedLoggedInValue = <T>(t: T | undefined): T => {
+    if (!t) throw new Error("Not logged in");
+    return t;
+};
+
 /**
  * The user's various encrypted keys and their related attributes.
  *
@@ -177,6 +226,26 @@ export const RemoteKeyAttributes = z.object({
         .transform(nullToUndefined),
     recoveryKeyDecryptionNonce: z.string().nullish().transform(nullToUndefined),
 });
+
+/**
+ * Return {@link KeyAttributes} if they are present in local storage.
+ *
+ * The key attributes are stored in the browser's localStorage. Thus, this
+ * function only works from the main thread, not from web workers (local storage
+ * is not accessible to web workers).
+ */
+export const savedKeyAttributes = (): KeyAttributes | undefined => {
+    const jsonString = localStorage.getItem("keyAttributes");
+    if (!jsonString) return undefined;
+    return RemoteKeyAttributes.parse(JSON.parse(jsonString));
+};
+
+/**
+ * A variant of {@link savedKeyAttributes} that throws if keyAttributes are not
+ * present in local storage.
+ */
+export const ensureSavedKeyAttributes = (): KeyAttributes =>
+    ensureExpectedLoggedInValue(savedKeyAttributes());
 
 export interface UserVerificationResponse {
     id: number;

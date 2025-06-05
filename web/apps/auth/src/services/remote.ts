@@ -20,8 +20,14 @@ export interface AuthCodesAndTimeOffset {
     timeOffset?: number;
 }
 
+/**
+ * Fetch the user's auth codes from remote and decrypt them using the user's
+ * master key.
+ *
+ * @param masterKey The user's base64 encoded master key.
+ */
 export const getAuthCodesAndTimeOffset = async (
-    masterKey: Uint8Array,
+    masterKey: string,
 ): Promise<AuthCodesAndTimeOffset> => {
     const authenticatorEntityKey = await getAuthenticatorEntityKey();
     if (!authenticatorEntityKey) {
@@ -263,7 +269,7 @@ export const getAuthenticatorEntityKey = async (): Promise<
  */
 const decryptAuthenticatorKey = async (
     remote: AuthenticatorEntityKey,
-    masterKey: Uint8Array,
+    masterKey: string,
 ) =>
     decryptBox(
         {

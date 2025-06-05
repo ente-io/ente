@@ -1,6 +1,6 @@
 import type { User } from "ente-accounts/services/user";
+import { ensureLocalUser } from "ente-accounts/services/user";
 import { encryptMetadataJSON, sharedCryptoWorker } from "ente-base/crypto";
-import { ensureLocalUser } from "ente-base/local-user";
 import log from "ente-base/log";
 import { apiURL } from "ente-base/origins";
 import { UpdateMagicMetadataRequest } from "ente-gallery/services/file";

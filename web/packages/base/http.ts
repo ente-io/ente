@@ -2,8 +2,8 @@ import { desktopAppVersion, isDesktop } from "ente-base/app";
 import { wait } from "ente-utils/promise";
 import { z } from "zod/v4";
 import { clientPackageName } from "./app";
-import { ensureAuthToken } from "./local-user";
 import log from "./log";
+import { ensureAuthToken } from "./token";
 
 /**
  * Return headers that should be passed alongwith (almost) all authenticated

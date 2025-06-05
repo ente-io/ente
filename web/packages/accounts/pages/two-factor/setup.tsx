@@ -1,6 +1,7 @@
 import { Paper, Stack, styled, Typography } from "@mui/material";
 import { CodeBlock } from "ente-accounts/components/CodeBlock";
 import { Verify2FACodeForm } from "ente-accounts/components/Verify2FACodeForm";
+import { getUserRecoveryKey } from "ente-accounts/services/recovery-key";
 import { appHomeRoute } from "ente-accounts/services/redirect";
 import type { TwoFactorSecret } from "ente-accounts/services/user";
 import { enableTwoFactor, setupTwoFactor } from "ente-accounts/services/user";
@@ -13,7 +14,6 @@ import { getData, setLSUser } from "ente-shared/storage/localStorage";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
-import { getUserRecoveryKeyB64 } from "../../services/recovery-key";
 
 const Page: React.FC = () => {
     const [twoFactorSecret, setTwoFactorSecret] = useState<
@@ -29,7 +29,7 @@ const Page: React.FC = () => {
     const handleSubmit = async (otp: string) => {
         const box = await encryptBox(
             twoFactorSecret!.secretCode,
-            await getUserRecoveryKeyB64(),
+            await getUserRecoveryKey(),
         );
         await enableTwoFactor({
             code: otp,
