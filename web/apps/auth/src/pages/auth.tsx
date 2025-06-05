@@ -41,8 +41,8 @@ const Page: React.FC = () => {
 
     useEffect(() => {
         const fetchCodes = async () => {
-            const masterKey = await masterKeyBytesFromSessionIfLoggedIn();
-            if (!masterKey) {
+            const masterKeyBytes = await masterKeyBytesFromSessionIfLoggedIn();
+            if (!masterKeyBytes) {
                 stashRedirect("/auth");
                 void router.push("/");
                 return;
@@ -50,7 +50,7 @@ const Page: React.FC = () => {
 
             try {
                 const { codes, timeOffset } =
-                    await getAuthCodesAndTimeOffset(masterKey);
+                    await getAuthCodesAndTimeOffset(masterKeyBytes);
                 setCodes(codes);
                 setTimeOffset(timeOffset ?? 0);
             } catch (e) {

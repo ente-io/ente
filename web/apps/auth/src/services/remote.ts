@@ -21,7 +21,7 @@ export interface AuthCodesAndTimeOffset {
 }
 
 export const getAuthCodesAndTimeOffset = async (
-    masterKey: Uint8Array,
+    masterKeyBytes: Uint8Array,
 ): Promise<AuthCodesAndTimeOffset> => {
     const authenticatorEntityKey = await getAuthenticatorEntityKey();
     if (!authenticatorEntityKey) {
@@ -31,7 +31,7 @@ export const getAuthCodesAndTimeOffset = async (
 
     const authenticatorKey = await decryptAuthenticatorKey(
         authenticatorEntityKey,
-        masterKey,
+        masterKeyBytes,
     );
 
     const { entities, timeOffset } =
@@ -263,7 +263,7 @@ export const getAuthenticatorEntityKey = async (): Promise<
  */
 const decryptAuthenticatorKey = async (
     remote: AuthenticatorEntityKey,
-    masterKey: Uint8Array,
+    masterKeyBytes: Uint8Array,
 ) =>
     decryptBox(
         {
@@ -271,5 +271,5 @@ const decryptAuthenticatorKey = async (
             // Remote calls it the header, but it really is the nonce.
             nonce: remote.header,
         },
-        masterKey,
+        masterKeyBytes,
     );
