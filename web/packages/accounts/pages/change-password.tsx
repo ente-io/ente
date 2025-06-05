@@ -68,14 +68,12 @@ const Page: React.FC = () => {
             setFieldError("confirm", t("password_generation_failed"));
             return;
         }
-        const encryptedKeyAttributes = await cryptoWorker.encryptToB64(
-            key,
-            kek.key,
-        );
+        const { encryptedData: encryptedKey, nonce: keyDecryptionNonce } =
+            await cryptoWorker.encryptBox(key, kek.key);
         const updatedKey: UpdatedKey = {
             kekSalt,
-            encryptedKey: encryptedKeyAttributes.encryptedData,
-            keyDecryptionNonce: encryptedKeyAttributes.nonce,
+            encryptedKey,
+            keyDecryptionNonce,
             opsLimit: kek.opsLimit,
             memLimit: kek.memLimit,
         };

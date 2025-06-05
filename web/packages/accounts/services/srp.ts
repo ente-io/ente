@@ -176,24 +176,22 @@ export async function generateKeyAndSRPAttributes(
     const kekSalt = await cryptoWorker.generateSaltToDeriveKey();
     const kek = await cryptoWorker.deriveSensitiveKey(passphrase, kekSalt);
 
-    const masterKeyEncryptedWithKek = await cryptoWorker.encryptToB64(
-        masterKey,
-        kek.key,
-    );
-    const masterKeyEncryptedWithRecoveryKey = await cryptoWorker.encryptToB64(
-        masterKey,
-        recoveryKey,
-    );
-    const recoveryKeyEncryptedWithMasterKey = await cryptoWorker.encryptToB64(
-        recoveryKey,
-        masterKey,
-    );
+    const { encryptedData: encryptedKey, nonce: keyDecryptionNonce } =
+        await cryptoWorker.encryptBox(masterKey, kek.key);
+    const {
+        encryptedData: masterKeyEncryptedWithRecoveryKey,
+        nonce: masterKeyDecryptionNonce,
+    } = await cryptoWorker.encryptBox(masterKey, recoveryKey);
+    const {
+        encryptedData: recoveryKeyEncryptedWithMasterKey,
+        nonce: recoveryKeyDecryptionNonce,
+    } = await cryptoWorker.encryptBox(recoveryKey, masterKey);
 
     const keyPair = await cryptoWorker.generateKeyPair();
-    const encryptedKeyPairAttributes = await cryptoWorker.encryptToB64(
-        keyPair.privateKey,
-        masterKey,
-    );
+    const {
+        encryptedData: encryptedSecretKey,
+        nonce: secretKeyDecryptionNonce,
+    } = await cryptoWorker.encryptBox(keyPair.privateKey, masterKey);
 
     const loginSubKey = await generateLoginSubKey(kek.key);
 
@@ -201,19 +199,17 @@ export async function generateKeyAndSRPAttributes(
 
     const keyAttributes: KeyAttributes = {
         kekSalt,
-        encryptedKey: masterKeyEncryptedWithKek.encryptedData,
-        keyDecryptionNonce: masterKeyEncryptedWithKek.nonce,
+        encryptedKey,
+        keyDecryptionNonce,
         publicKey: keyPair.publicKey,
-        encryptedSecretKey: encryptedKeyPairAttributes.encryptedData,
-        secretKeyDecryptionNonce: encryptedKeyPairAttributes.nonce,
+        encryptedSecretKey,
+        secretKeyDecryptionNonce,
         opsLimit: kek.opsLimit,
         memLimit: kek.memLimit,
-        masterKeyEncryptedWithRecoveryKey:
-            masterKeyEncryptedWithRecoveryKey.encryptedData,
-        masterKeyDecryptionNonce: masterKeyEncryptedWithRecoveryKey.nonce,
-        recoveryKeyEncryptedWithMasterKey:
-            recoveryKeyEncryptedWithMasterKey.encryptedData,
-        recoveryKeyDecryptionNonce: recoveryKeyEncryptedWithMasterKey.nonce,
+        masterKeyEncryptedWithRecoveryKey,
+        masterKeyDecryptionNonce,
+        recoveryKeyEncryptedWithMasterKey,
+        recoveryKeyDecryptionNonce,
     };
 
     return { keyAttributes, masterKey, srpSetupAttributes };
