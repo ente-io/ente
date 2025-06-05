@@ -20,6 +20,7 @@ export const _encryptStreamBytes = libsodium.encryptStreamBytes;
 export const _initChunkEncryption = libsodium.initChunkEncryption;
 export const _encryptStreamChunk = libsodium.encryptStreamChunk;
 export const _decryptBoxBytes = libsodium.decryptBoxBytes;
+export const _decryptBoxUTF8 = libsodium.decryptBoxUTF8;
 export const _decryptBox = libsodium.decryptBox;
 export const _decryptBlobBytes = libsodium.decryptBlobBytes;
 export const _decryptBlob = libsodium.decryptBlob;

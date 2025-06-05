@@ -27,6 +27,8 @@
  * to functions exposed by `crypto/libsodium.ts`, but they automatically defer
  * to a worker thread if we're not already running on one.
  *
+ * ---
+ *
  * [Note: Using libsodium in worker thread]
  *
  * `crypto/ente-impl.ts` and `crypto/worker.ts` are logic-less internal files
@@ -53,6 +55,34 @@
  * Also, some code (e.g. the uploader) creates it own crypto worker instances,
  * and thus directly calls the functions in the web worker that it created
  * instead of going through this file.
+ *
+ * ---
+ *
+ * [Note: Crypto layer API data types]
+ *
+ * There are two primary types used when exchanging data with these functions:
+ *
+ * 1. Base64 strings. Unqualified strings are taken as base64 encoded
+ *    representations of the underlying data.
+ *
+ * 2. Raw bytes. Uint8Arrays are byte arrays.
+ *
+ * Where possible and useful, functions also accept a union of these two - a
+ * {@link BytesOrB64} where the implementation will automatically convert
+ * to/from base64 to bytes if needed, thus saving on unnecessary conversions at
+ * the caller side.
+ *
+ * Apart from these two, there are other secondary and one off types.
+ *
+ * 1. "Regular" JavaScript strings. These are indicated by the *UTF8 suffix on
+ *    the function that deals with them. These strings will be obtained by utf-8
+ *    encoding (or decoding) the underlying bytes.
+ *
+ * 2. Hex representations of the bytes. These are indicated by the *Hex suffix
+ *    on the functions dealing with them.
+ *
+ * 2. JSON values. These are indicated by the *JSON suffix on the functions
+ *    dealing with them.
  */
 import { ComlinkWorker } from "ente-base/worker/comlink-worker";
 import { type StateAddress } from "libsodium-wrappers-sumo";
@@ -269,6 +299,16 @@ export const decryptBoxBytes = (box: EncryptedBox, key: BytesOrB64) =>
     inWorker()
         ? ei._decryptBoxBytes(box, key)
         : sharedWorker().then((w) => w.decryptBoxBytes(box, key));
+
+/**
+ * Variant of {@link decryptBoxBytes} that returns the decrypted bytes as a
+ * "JavaScript string", specifically a UTF-8 string. That is, after decryption
+ * we obtain raw bytes, which we interpret as a UTF-8 string.
+ */
+export const decryptBoxUTF8 = (box: EncryptedBox, key: BytesOrB64) =>
+    inWorker()
+        ? ei._decryptBoxUTF8(box, key)
+        : sharedWorker().then((w) => w.decryptBoxUTF8(box, key));
 
 /**
  * Decrypt a blob encrypted using either {@link encryptBlobBytes} or
