@@ -55,10 +55,16 @@ export const localUser = (): LocalUser | undefined => {
 /**
  * A wrapper over {@link localUser} with that throws if no one is logged in.
  */
-export const ensureLocalUser = (): LocalUser => {
-    const user = localUser();
-    if (!user) throw new Error("Not logged in");
-    return user;
+export const ensureLocalUser = (): LocalUser =>
+    ensureExpectedLoggedInValue(localUser());
+
+/**
+ * A helper function that throws an error if a value that is expected to be
+ * truthy when the user is logged in is instead falsey.
+ */
+const ensureExpectedLoggedInValue = <T>(t: T | undefined): T => {
+    if (!t) throw new Error("Not logged in");
+    return t;
 };
 
 /**
@@ -233,6 +239,13 @@ export const savedKeyAttributes = (): KeyAttributes | undefined => {
     if (!jsonString) return undefined;
     return RemoteKeyAttributes.parse(JSON.parse(jsonString));
 };
+
+/**
+ * A variant of {@link savedKeyAttributes} that throws if keyAttributes are not
+ * present in local storage.
+ */
+export const ensureSavedKeyAttributes = (): KeyAttributes =>
+    ensureExpectedLoggedInValue(savedKeyAttributes());
 
 export interface UserVerificationResponse {
     id: number;
