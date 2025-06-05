@@ -178,6 +178,15 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
     }
   }
 
+  void _resetAnimation() {
+    _progressAnimationController
+      ?..stop()
+      ..reset();
+    _zoomAnimationController
+      ?..stop()
+      ..reset();
+  }
+
   void onFinalFileLoad(int duration) {
     if (_progressAnimationController!.isAnimating == true) {
       _progressAnimationController!.stop();
@@ -328,10 +337,10 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                   }
                 },
                 onLongPress: () {
-                  _toggleAnimation(true);
+                 isVideo ? null: _toggleAnimation(true);
                 },
                 onLongPressUp: () {
-                  _toggleAnimation(false);
+                 isVideo ? null : _toggleAnimation(false);
                 },
                 child: MemoriesZoomWidget(
                   scaleController: (controller) {
@@ -348,9 +357,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                     ),
                     isFromMemories: true,
                     playbackCallback: (isPlaying) {
-                      isPlaying
-                          ? _toggleAnimation(false)
-                          : _toggleAnimation(true);
+                      _toggleAnimation(!isPlaying);
                     },
                     onFinalFileLoad: ({required int memoryDuration}) {
                       onFinalFileLoad(memoryDuration);
@@ -367,6 +374,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                 ),
               );
               inheritedData.indexNotifier.value = index;
+              _resetAnimation();
             },
             itemCount: inheritedData.memories.length,
           ),
