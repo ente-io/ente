@@ -64,11 +64,11 @@ export const _decryptBoxBytes = libsodium.decryptBoxBytes;
 
 export const _decryptBox = libsodium.decryptBox;
 
+export const _decryptBlobBytes = libsodium.decryptBlobBytes;
+
 export const _decryptBlob = libsodium.decryptBlob;
 
-export const _decryptBlobB64 = libsodium.decryptBlobB64;
-
-export const _decryptThumbnail = _decryptBlob;
+export const _decryptThumbnail = _decryptBlobBytes;
 
 export const _decryptStreamBytes = libsodium.decryptStreamBytes;
 
@@ -81,7 +81,7 @@ export const _decryptMetadataJSON_New = async (
     key: BytesOrB64,
 ) =>
     JSON.parse(
-        new TextDecoder().decode(await _decryptBlob(blob, key)),
+        new TextDecoder().decode(await _decryptBlobBytes(blob, key)),
     ) as unknown;
 
 export const _decryptMetadataJSON = async (r: {

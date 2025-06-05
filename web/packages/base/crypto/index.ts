@@ -181,7 +181,7 @@ export const encryptBoxB64 = (data: BytesOrB64, key: BytesOrB64) =>
  * This function is usually used to encrypt data associated with an Ente object
  * (file, collection, entity) using the object's key.
  *
- * Use {@link decryptBlob} to decrypt the result.
+ * Use {@link decryptBlob} or {@link decryptBlobBytes} to decrypt the result.
  *
  * > The suffix "Blob" comes from our convention of naming functions that use
  * > the secretstream APIs without breaking the data into chunks.
@@ -197,7 +197,7 @@ export const encryptBlob = (data: BytesOrB64, key: BytesOrB64) =>
  * A variant of {@link encryptBlob} that returns the result components as bytes
  * instead of as base64 strings.
  *
- * Use {@link decryptBlob} to decrypt the result.
+ * Use {@link decryptBlob} or {@link decryptBlobBytes} to decrypt the result.
  */
 export const encryptBlobBytes = (data: BytesOrB64, key: BytesOrB64) =>
     assertInWorker(ei._encryptBlobBytes(data, key));
@@ -303,7 +303,7 @@ export const decryptBoxBytes = (box: EncryptedBox, key: BytesOrB64) =>
 
 /**
  * Decrypt a blob encrypted using either {@link encryptBlobBytes} or
- * {@link encryptBlob}.
+ * {@link encryptBlob} and return it as a base64 encoded string.
  */
 export const decryptBlob = (blob: EncryptedBlob, key: BytesOrB64) =>
     inWorker()
@@ -311,12 +311,13 @@ export const decryptBlob = (blob: EncryptedBlob, key: BytesOrB64) =>
         : sharedWorker().then((w) => w.decryptBlob(blob, key));
 
 /**
- * A variant of {@link decryptBlob} that returns the result as a base64 string.
+ * A variant of {@link decryptBlobBytes} that returns the result bytes directly
+ * (instead of encoding them as a base64 string).
  */
-export const decryptBlobB64 = (blob: EncryptedBlob, key: BytesOrB64) =>
+export const decryptBlobBytes = (blob: EncryptedBlob, key: BytesOrB64) =>
     inWorker()
-        ? ei._decryptBlobB64(blob, key)
-        : sharedWorker().then((w) => w.decryptBlobB64(blob, key));
+        ? ei._decryptBlobBytes(blob, key)
+        : sharedWorker().then((w) => w.decryptBlobBytes(blob, key));
 
 /**
  * Decrypt the thumbnail encrypted using {@link encryptThumbnail}.

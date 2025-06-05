@@ -173,7 +173,7 @@ export const generateBlobOrStreamKey = async () => {
  * Encrypt the given data using libsodium's secretbox APIs, using a randomly
  * generated nonce.
  *
- * Use {@link decryptBoxBytes} to decrypt the result.
+ * Use {@link decryptBox} or {@link decryptBoxBytes} to decrypt the result.
  *
  * @param data The data to encrypt.
  *
@@ -286,7 +286,7 @@ export const encryptBoxB64 = async (
 /**
  * Encrypt the given data using libsodium's secretstream APIs without chunking.
  *
- * Use {@link decryptBlob} to decrypt the result.
+ * Use {@link decryptBlobBytes} to decrypt the result.
  *
  * @param data The data to encrypt.
  *
@@ -494,7 +494,7 @@ export const decryptBox = (
 /**
  * Decrypt the result of {@link encryptBlobBytes} or {@link encryptBlob}.
  */
-export const decryptBlob = async (
+export const decryptBlobBytes = async (
     { encryptedData, decryptionHeader }: EncryptedBlob,
     key: BytesOrB64,
 ): Promise<Uint8Array> => {
@@ -512,12 +512,13 @@ export const decryptBlob = async (
 };
 
 /**
- * A variant of {@link decryptBlob} that returns the result as a base64 string.
+ * A variant of {@link decryptBlobBytes} that returns the result as a base64
+ * string.
  */
-export const decryptBlobB64 = (
+export const decryptBlob = (
     blob: EncryptedBlob,
     key: BytesOrB64,
-): Promise<string> => decryptBlob(blob, key).then(toB64);
+): Promise<string> => decryptBlobBytes(blob, key).then(toB64);
 
 /**
  * Decrypt the result of {@link encryptStreamBytes}.
