@@ -1,7 +1,7 @@
 /* TODO: Audit this file */
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 
-import { encryptMetadataJSON } from "ente-base/crypto";
+import { encryptMetadataJSON_New } from "ente-base/crypto";
 import { apiURL } from "ente-base/origins";
 import { updateMagicMetadata } from "ente-gallery/services/magic-metadata";
 import type {
@@ -37,18 +37,15 @@ export const updateFileMagicMetadata = async (
         file,
         updatedMagicMetadata,
     } of fileWithUpdatedMagicMetadataList) {
-        const { encryptedDataB64, decryptionHeaderB64 } =
-            await encryptMetadataJSON({
-                jsonValue: updatedMagicMetadata.data,
-                keyB64: file.key,
-            });
+        const { encryptedData, decryptionHeader } =
+            await encryptMetadataJSON_New(updatedMagicMetadata.data, file.key);
         reqBody.metadataList.push({
             id: file.id,
             magicMetadata: {
                 version: updatedMagicMetadata.version,
                 count: updatedMagicMetadata.count,
-                data: encryptedDataB64,
-                header: decryptionHeaderB64,
+                data: encryptedData,
+                header: decryptionHeader,
             },
         });
     }
@@ -83,18 +80,18 @@ export const updateFilePublicMagicMetadata = async (
         file,
         updatedPublicMagicMetadata,
     } of fileWithUpdatedPublicMagicMetadataList) {
-        const { encryptedDataB64, decryptionHeaderB64 } =
-            await encryptMetadataJSON({
-                jsonValue: updatedPublicMagicMetadata.data,
-                keyB64: file.key,
-            });
+        const { encryptedData, decryptionHeader } =
+            await encryptMetadataJSON_New(
+                updatedPublicMagicMetadata.data,
+                file.key,
+            );
         reqBody.metadataList.push({
             id: file.id,
             magicMetadata: {
                 version: updatedPublicMagicMetadata.version,
                 count: updatedPublicMagicMetadata.count,
-                data: encryptedDataB64,
-                header: decryptionHeaderB64,
+                data: encryptedData,
+                header: decryptionHeader,
             },
         });
     }

@@ -1,5 +1,5 @@
 import type { User } from "ente-accounts/services/user";
-import { encryptMetadataJSON, sharedCryptoWorker } from "ente-base/crypto";
+import { encryptMetadataJSON_New, sharedCryptoWorker } from "ente-base/crypto";
 import { ensureLocalUser } from "ente-base/local-user";
 import log from "ente-base/log";
 import { apiURL } from "ente-base/origins";
@@ -78,16 +78,15 @@ const createCollection = async (
         let encryptedMagicMetadata: EncryptedMagicMetadata;
         if (magicMetadataProps) {
             const magicMetadata = await updateMagicMetadata(magicMetadataProps);
-            const encryptedMagicMetadataProps =
-                await cryptoWorker.encryptMetadataJSON({
-                    jsonValue: magicMetadataProps,
-                    keyB64: collectionKey,
-                });
-
+            const { encryptedData, decryptionHeader } =
+                await cryptoWorker.encryptMetadataJSON_New(
+                    magicMetadataProps,
+                    collectionKey,
+                );
             encryptedMagicMetadata = {
                 ...magicMetadata,
-                data: encryptedMagicMetadataProps.encryptedDataB64,
-                header: encryptedMagicMetadataProps.decryptionHeaderB64,
+                data: encryptedData,
+                header: decryptionHeader,
             };
         }
         const newCollection: EncryptedCollection = {
@@ -357,8 +356,9 @@ export const updateCollectionMagicMetadata = async (
         return;
     }
 
-    const { encryptedDataB64, decryptionHeaderB64 } = await encryptMetadataJSON(
-        { jsonValue: updatedMagicMetadata.data, keyB64: collection.key },
+    const { encryptedData, decryptionHeader } = await encryptMetadataJSON_New(
+        updatedMagicMetadata.data,
+        collection.key,
     );
 
     const reqBody: UpdateMagicMetadataRequest = {
@@ -366,8 +366,8 @@ export const updateCollectionMagicMetadata = async (
         magicMetadata: {
             version: updatedMagicMetadata.version,
             count: updatedMagicMetadata.count,
-            data: encryptedDataB64,
-            header: decryptionHeaderB64,
+            data: encryptedData,
+            header: decryptionHeader,
         },
     };
 
@@ -396,16 +396,17 @@ export const updateSharedCollectionMagicMetadata = async (
         return;
     }
 
-    const { encryptedDataB64, decryptionHeaderB64 } = await encryptMetadataJSON(
-        { jsonValue: updatedMagicMetadata.data, keyB64: collection.key },
+    const { encryptedData, decryptionHeader } = await encryptMetadataJSON_New(
+        updatedMagicMetadata.data,
+        collection.key,
     );
     const reqBody: UpdateMagicMetadataRequest = {
         id: collection.id,
         magicMetadata: {
             version: updatedMagicMetadata.version,
             count: updatedMagicMetadata.count,
-            data: encryptedDataB64,
-            header: decryptionHeaderB64,
+            data: encryptedData,
+            header: decryptionHeader,
         },
     };
 
@@ -434,9 +435,11 @@ export const updatePublicCollectionMagicMetadata = async (
         return;
     }
 
-    const { encryptedDataB64, decryptionHeaderB64 } = await encryptMetadataJSON(
-        { jsonValue: updatedPublicMagicMetadata.data, keyB64: collection.key },
-    );
+    const { encryptedDataB64, decryptionHeaderB64 } =
+        await encryptMetadataJSON_New({
+            jsonValue: updatedPublicMagicMetadata.data,
+            keyB64: collection.key,
+        });
     const reqBody: UpdateMagicMetadataRequest = {
         id: collection.id,
         magicMetadata: {
