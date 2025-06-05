@@ -22,7 +22,7 @@ import {
 import { useBaseContext } from "ente-base/context";
 import { isHTTP401Error } from "ente-base/http";
 import log from "ente-base/log";
-import { masterKeyBytesFromSessionIfLoggedIn } from "ente-base/session";
+import { masterKeyB64FromSessionIfLoggedIn } from "ente-base/session";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import React, { useCallback, useEffect, useState } from "react";
@@ -41,8 +41,8 @@ const Page: React.FC = () => {
 
     useEffect(() => {
         const fetchCodes = async () => {
-            const masterKeyBytes = await masterKeyBytesFromSessionIfLoggedIn();
-            if (!masterKeyBytes) {
+            const masterKey = await masterKeyB64FromSessionIfLoggedIn();
+            if (!masterKey) {
                 stashRedirect("/auth");
                 void router.push("/");
                 return;
@@ -50,7 +50,7 @@ const Page: React.FC = () => {
 
             try {
                 const { codes, timeOffset } =
-                    await getAuthCodesAndTimeOffset(masterKeyBytes);
+                    await getAuthCodesAndTimeOffset(masterKey);
                 setCodes(codes);
                 setTimeOffset(timeOffset ?? 0);
             } catch (e) {
