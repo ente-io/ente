@@ -434,11 +434,13 @@ export const decryptPublicMagicMetadata = async (
 
     const jsonValue =
         typeof envelope.data == "string"
-            ? await decryptMetadataJSON({
-                  encryptedDataB64: envelope.data,
-                  decryptionHeaderB64: envelope.header,
-                  keyB64: file.key,
-              })
+            ? await decryptMetadataJSON(
+                  {
+                      encryptedData: envelope.data,
+                      decryptionHeader: envelope.header,
+                  },
+                  file.key,
+              )
             : envelope.data;
     const result = PublicMagicMetadata.parse(
         // TODO: Can we avoid this cast?
@@ -677,8 +679,9 @@ const updateMagicMetadataRequest = async (
         ([, v]) => v !== null && v !== undefined,
     );
 
-    const { encryptedDataB64, decryptionHeaderB64 } = await encryptMetadataJSON(
-        { jsonValue: Object.fromEntries(validEntries), keyB64: file.key },
+    const { encryptedData, decryptionHeader } = await encryptMetadataJSON(
+        Object.fromEntries(validEntries),
+        file.key,
     );
 
     return {
@@ -688,8 +691,8 @@ const updateMagicMetadataRequest = async (
                 magicMetadata: {
                     version: metadataVersion,
                     count: validEntries.length,
-                    data: encryptedDataB64,
-                    header: decryptionHeaderB64,
+                    data: encryptedData,
+                    header: decryptionHeader,
                 },
             },
         ],

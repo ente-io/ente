@@ -1,5 +1,5 @@
 import { z } from "zod/v4";
-import { decryptBox } from "./crypto";
+import { decryptBoxBytes } from "./crypto";
 import { toB64 } from "./crypto/libsodium";
 
 /**
@@ -81,7 +81,7 @@ export const masterKeyFromSessionIfLoggedIn = async () => {
     const { encryptedData, key, nonce } = SessionKeyData.parse(
         JSON.parse(value),
     );
-    return decryptBox({ encryptedData, nonce }, key);
+    return decryptBoxBytes({ encryptedData, nonce }, key);
 };
 
 /**
@@ -116,5 +116,5 @@ export const unstashKeyEncryptionKeyFromSession = async () => {
     const { encryptedData, key, nonce } = SessionKeyData.parse(
         JSON.parse(value),
     );
-    return decryptBox({ encryptedData, nonce }, key);
+    return decryptBoxBytes({ encryptedData, nonce }, key);
 };

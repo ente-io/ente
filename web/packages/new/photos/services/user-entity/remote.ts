@@ -1,4 +1,4 @@
-import { decryptBlob } from "ente-base/crypto";
+import { decryptBlobBytes } from "ente-base/crypto";
 import type { EncryptedBlobB64 } from "ente-base/crypto/types";
 import {
     authenticatedRequestHeaders,
@@ -132,7 +132,7 @@ export const userEntityDiff = async (
     entityKeyB64: string,
 ): Promise<UserEntityChange[]> => {
     const decrypt = (encryptedData: string, decryptionHeader: string) =>
-        decryptBlob({ encryptedData, decryptionHeader }, entityKeyB64);
+        decryptBlobBytes({ encryptedData, decryptionHeader }, entityKeyB64);
 
     const params = new URLSearchParams({
         type,

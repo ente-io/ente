@@ -202,16 +202,20 @@ export const getCollectionWithSecrets = async (
     const userID = getData("user").id;
     let collectionKey: string;
     if (collection.owner.id === userID) {
-        collectionKey = await cryptoWorker.decryptB64(
-            collection.encryptedKey,
-            collection.keyDecryptionNonce,
+        collectionKey = await cryptoWorker.decryptBox(
+            {
+                encryptedData: collection.encryptedKey,
+                nonce: collection.keyDecryptionNonce,
+            },
             masterKey,
         );
     } else {
         const keyAttributes = getData("keyAttributes");
-        const secretKey = await cryptoWorker.decryptB64(
-            keyAttributes.encryptedSecretKey,
-            keyAttributes.secretKeyDecryptionNonce,
+        const secretKey = await cryptoWorker.decryptBox(
+            {
+                encryptedData: keyAttributes.encryptedSecretKey,
+                nonce: keyAttributes.secretKeyDecryptionNonce,
+            },
             masterKey,
         );
         collectionKey = await cryptoWorker.boxSealOpen(
@@ -234,11 +238,13 @@ export const getCollectionWithSecrets = async (
             ...collection.magicMetadata,
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
-            data: await cryptoWorker.decryptMetadataJSON({
-                encryptedDataB64: collection.magicMetadata.data,
-                decryptionHeaderB64: collection.magicMetadata.header,
-                keyB64: collectionKey,
-            }),
+            data: await cryptoWorker.decryptMetadataJSON(
+                {
+                    encryptedData: collection.magicMetadata.data,
+                    decryptionHeader: collection.magicMetadata.header,
+                },
+                collectionKey,
+            ),
         };
     }
     let collectionPublicMagicMetadata: CollectionPublicMagicMetadata;
@@ -247,11 +253,13 @@ export const getCollectionWithSecrets = async (
             ...collection.pubMagicMetadata,
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
-            data: await cryptoWorker.decryptMetadataJSON({
-                encryptedDataB64: collection.pubMagicMetadata.data,
-                decryptionHeaderB64: collection.pubMagicMetadata.header,
-                keyB64: collectionKey,
-            }),
+            data: await cryptoWorker.decryptMetadataJSON(
+                {
+                    encryptedData: collection.pubMagicMetadata.data,
+                    decryptionHeader: collection.pubMagicMetadata.header,
+                },
+                collectionKey,
+            ),
         };
     }
 
@@ -261,11 +269,13 @@ export const getCollectionWithSecrets = async (
             ...collection.sharedMagicMetadata,
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
-            data: await cryptoWorker.decryptMetadataJSON({
-                encryptedDataB64: collection.sharedMagicMetadata.data,
-                decryptionHeaderB64: collection.sharedMagicMetadata.header,
-                keyB64: collectionKey,
-            }),
+            data: await cryptoWorker.decryptMetadataJSON(
+                {
+                    encryptedData: collection.sharedMagicMetadata.data,
+                    decryptionHeader: collection.sharedMagicMetadata.header,
+                },
+                collectionKey,
+            ),
         };
     }
 

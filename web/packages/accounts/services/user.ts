@@ -34,7 +34,7 @@ export interface KeyAttributes {
     /**
      * The user's master key encrypted with the key encryption key.
      *
-     * Base 64 encoded.
+     * Base64 encoded.
      *
      * [Note: Key encryption key]
      *
@@ -56,7 +56,7 @@ export interface KeyAttributes {
     /**
      * The nonce used during the encryption of the master key.
      *
-     * Base 64 encoded.
+     * Base64 encoded.
      *
      * @see {@link encryptedKey}.
      */
@@ -64,7 +64,7 @@ export interface KeyAttributes {
     /**
      * The salt used during the derivation of the kek.
      *
-     * Base 64 encoded.
+     * Base64 encoded.
      *
      * See: [Note: Key encryption key].
      */
@@ -90,14 +90,14 @@ export interface KeyAttributes {
      * The user's public key (part of their public-key keypair, the other half
      * being the {@link encryptedSecretKey}).
      *
-     * Base 64 encoded.
+     * Base64 encoded.
      */
     publicKey: string;
     /**
      * The user's private key (part of their public-key keypair, the other half
      * being the {@link publicKey}) encrypted with their master key.
      *
-     * Base 64 encoded.
+     * Base64 encoded.
      *
      * [Note: Public and secret key nomenclature]
      *
@@ -114,7 +114,7 @@ export interface KeyAttributes {
     /**
      * The user's master key after being encrypted with their recovery key.
      *
-     * Base 64 encoded.
+     * Base64 encoded.
      *
      * This allows the user to recover their master key if they forget their
      * passphrase but still have their recovery key.
@@ -126,13 +126,13 @@ export interface KeyAttributes {
      * The nonce used during the encryption of
      * {@link masterKeyEncryptedWithRecoveryKey}.
      *
-     * Base 64 encoded.
+     * Base64 encoded.
      */
     masterKeyDecryptionNonce?: string;
     /**
      * The user's recovery key after being encrypted with their master key.
      *
-     * Base 64 encoded.
+     * Base64 encoded.
      *
      * Note: This value doesn't change after being initially created.
      */
@@ -141,7 +141,7 @@ export interface KeyAttributes {
      * The nonce used during the encryption of
      * {@link recoveryKeyEncryptedWithMasterKey}.
      *
-     * Base 64 encoded.
+     * Base64 encoded.
      */
     recoveryKeyDecryptionNonce?: string;
 }

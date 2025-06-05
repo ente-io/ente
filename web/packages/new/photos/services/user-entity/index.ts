@@ -1,7 +1,7 @@
 import {
-    decryptBoxB64,
-    encryptBlobB64,
-    encryptBoxB64,
+    decryptBox,
+    encryptBlob,
+    encryptBox,
     generateBlobOrStreamKey,
 } from "ente-base/crypto";
 import { nullishToEmpty, nullToUndefined } from "ente-utils/transform";
@@ -194,7 +194,7 @@ export const encryptedUserEntityData = async (
     const bytes = isGzipped(type)
         ? await gzip(json)
         : new TextEncoder().encode(json);
-    return encryptBlobB64(bytes, entityKeyB64);
+    return encryptBlob(bytes, entityKeyB64);
 };
 
 /**
@@ -265,7 +265,7 @@ const getOrCreateEntityKeyB64 = async (
 };
 
 const generateEncryptedEntityKey = async (masterKey: Uint8Array) => {
-    const { encryptedData, nonce } = await encryptBoxB64(
+    const { encryptedData, nonce } = await encryptBox(
         await generateBlobOrStreamKey(),
         masterKey,
     );
@@ -280,7 +280,7 @@ const decryptEntityKey = async (
     remote: RemoteUserEntityKey,
     masterKey: Uint8Array,
 ) =>
-    decryptBoxB64(
+    decryptBox(
         {
             encryptedData: remote.encryptedKey,
             // Remote calls it the header, but it really is the nonce.

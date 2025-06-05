@@ -1,4 +1,4 @@
-import { decryptBlob } from "ente-base/crypto";
+import { decryptBlobBytes } from "ente-base/crypto";
 import log from "ente-base/log";
 import { fetchFilesData, putFileData } from "ente-gallery/services/file-data";
 import type { EnteFile } from "ente-media/file";
@@ -169,11 +169,14 @@ export const fetchMLData = async (
         }
 
         try {
-            // See: [Note: strict mode migration]
-            //
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
-            const decryptedBytes = await decryptBlob(remoteFileData, file.key);
+            const decryptedBytes = await decryptBlobBytes(
+                remoteFileData,
+                // See: [Note: strict mode migration]
+                //
+                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                // @ts-ignore
+                file.key,
+            );
             const jsonString = await gunzip(decryptedBytes);
             result.set(
                 fileID,

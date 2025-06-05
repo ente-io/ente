@@ -1,4 +1,4 @@
-import { decryptBoxB64, decryptMetadataJSON_New } from "ente-base/crypto";
+import { decryptBox, decryptMetadataJSON } from "ente-base/crypto";
 import {
     authenticatedRequestHeaders,
     ensureOk,
@@ -156,7 +156,7 @@ export const authenticatorEntityDiff = async (
     authenticatorKey: string,
 ): Promise<AuthenticatorEntityDiffResult> => {
     const decrypt = (encryptedData: string, decryptionHeader: string) =>
-        decryptMetadataJSON_New(
+        decryptMetadataJSON(
             { encryptedData, decryptionHeader },
             authenticatorKey,
         );
@@ -222,7 +222,7 @@ export const authenticatorEntityDiff = async (
 
 export const AuthenticatorEntityKey = z.object({
     /**
-     * The authenticator entity key (base 64 string), encrypted with the user's
+     * The authenticator entity key (base64 string), encrypted with the user's
      * master key.
      */
     encryptedKey: z.string(),
@@ -265,7 +265,7 @@ const decryptAuthenticatorKey = async (
     remote: AuthenticatorEntityKey,
     masterKey: Uint8Array,
 ) =>
-    decryptBoxB64(
+    decryptBox(
         {
             encryptedData: remote.encryptedKey,
             // Remote calls it the header, but it really is the nonce.

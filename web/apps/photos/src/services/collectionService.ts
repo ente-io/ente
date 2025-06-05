@@ -78,16 +78,15 @@ const createCollection = async (
         let encryptedMagicMetadata: EncryptedMagicMetadata;
         if (magicMetadataProps) {
             const magicMetadata = await updateMagicMetadata(magicMetadataProps);
-            const encryptedMagicMetadataProps =
-                await cryptoWorker.encryptMetadataJSON({
-                    jsonValue: magicMetadataProps,
-                    keyB64: collectionKey,
-                });
-
+            const { encryptedData, decryptionHeader } =
+                await cryptoWorker.encryptMetadataJSON(
+                    magicMetadataProps,
+                    collectionKey,
+                );
             encryptedMagicMetadata = {
                 ...magicMetadata,
-                data: encryptedMagicMetadataProps.encryptedDataB64,
-                header: encryptedMagicMetadataProps.decryptionHeaderB64,
+                data: encryptedData,
+                header: decryptionHeader,
             };
         }
         const newCollection: EncryptedCollection = {
@@ -357,8 +356,9 @@ export const updateCollectionMagicMetadata = async (
         return;
     }
 
-    const { encryptedDataB64, decryptionHeaderB64 } = await encryptMetadataJSON(
-        { jsonValue: updatedMagicMetadata.data, keyB64: collection.key },
+    const { encryptedData, decryptionHeader } = await encryptMetadataJSON(
+        updatedMagicMetadata.data,
+        collection.key,
     );
 
     const reqBody: UpdateMagicMetadataRequest = {
@@ -366,8 +366,8 @@ export const updateCollectionMagicMetadata = async (
         magicMetadata: {
             version: updatedMagicMetadata.version,
             count: updatedMagicMetadata.count,
-            data: encryptedDataB64,
-            header: decryptionHeaderB64,
+            data: encryptedData,
+            header: decryptionHeader,
         },
     };
 
@@ -396,16 +396,17 @@ export const updateSharedCollectionMagicMetadata = async (
         return;
     }
 
-    const { encryptedDataB64, decryptionHeaderB64 } = await encryptMetadataJSON(
-        { jsonValue: updatedMagicMetadata.data, keyB64: collection.key },
+    const { encryptedData, decryptionHeader } = await encryptMetadataJSON(
+        updatedMagicMetadata.data,
+        collection.key,
     );
     const reqBody: UpdateMagicMetadataRequest = {
         id: collection.id,
         magicMetadata: {
             version: updatedMagicMetadata.version,
             count: updatedMagicMetadata.count,
-            data: encryptedDataB64,
-            header: decryptionHeaderB64,
+            data: encryptedData,
+            header: decryptionHeader,
         },
     };
 
@@ -434,16 +435,17 @@ export const updatePublicCollectionMagicMetadata = async (
         return;
     }
 
-    const { encryptedDataB64, decryptionHeaderB64 } = await encryptMetadataJSON(
-        { jsonValue: updatedPublicMagicMetadata.data, keyB64: collection.key },
+    const { encryptedData, decryptionHeader } = await encryptMetadataJSON(
+        updatedPublicMagicMetadata.data,
+        collection.key,
     );
     const reqBody: UpdateMagicMetadataRequest = {
         id: collection.id,
         magicMetadata: {
             version: updatedPublicMagicMetadata.version,
             count: updatedPublicMagicMetadata.count,
-            data: encryptedDataB64,
-            header: decryptionHeaderB64,
+            data: encryptedData,
+            header: decryptionHeader,
         },
     };
 
