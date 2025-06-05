@@ -63,9 +63,12 @@
  * There are two primary types used when exchanging data with these functions:
  *
  * 1. Base64 strings. Unqualified strings are taken as base64 encoded
- *    representations of the underlying data.
+ *    representations of the underlying data. Usually, the unqualified "base"
+ *    function deals with Base64 strings, since they also are the data type in
+ *    which we usually send the encryted data etc to remote.
  *
- * 2. Raw bytes. Uint8Arrays are byte arrays.
+ * 2. Raw bytes. Uint8Arrays are byte arrays. The functions that deal with bytes
+ *    are indicated by a *Bytes suffix in their name.
  *
  * Where possible and useful, functions also accept a union of these two - a
  * {@link BytesOrB64} where the implementation will automatically convert
@@ -195,6 +198,15 @@ export const encryptBox = (data: BytesOrB64, key: BytesOrB64) =>
     inWorker()
         ? ei._encryptBox(data, key)
         : sharedWorker().then((w) => w.encryptBox(data, key));
+
+/**
+ * A variant of {@link encryptBox} that first UTF-8 encodes the input string to
+ * obtain bytes, which it then encrypts.
+ */
+export const encryptBoxUTF8 = (data: string, key: BytesOrB64) =>
+    inWorker()
+        ? ei._encryptBoxUTF8(data, key)
+        : sharedWorker().then((w) => w.encryptBoxUTF8(data, key));
 
 /**
  * Encrypt the given data, returning a blob containing the encrypted data and a

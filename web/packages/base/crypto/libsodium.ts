@@ -284,6 +284,18 @@ export const encryptBox = async (
 };
 
 /**
+ * A variant of {@link encryptBox} that first converts the input string into
+ * bytes using a UTF-8 encoding, and then encrypts those bytes.
+ */
+export const encryptBoxUTF8 = async (
+    data: string,
+    key: BytesOrB64,
+): Promise<EncryptedBoxB64> => {
+    await sodium.ready;
+    return encryptBox(sodium.from_string(data), key);
+};
+
+/**
  * Encrypt the given data using libsodium's secretstream APIs without chunking.
  *
  * Use {@link decryptBlobBytes} to decrypt the result.
