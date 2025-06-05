@@ -678,17 +678,6 @@ export async function generateKeyAndEncryptToB64(data: string) {
     return await encryptToB64(data, await toB64(key));
 }
 
-/** Deprecated */
-export async function decryptToUTF8(
-    encryptedData: string,
-    nonce: string,
-    keyB64: string,
-) {
-    await sodium.ready;
-    const decrypted = await decryptBoxBytes({ encryptedData, nonce }, keyB64);
-    return sodium.to_string(decrypted);
-}
-
 /**
  * An opaque object meant to be threaded through {@link chunkHashInit},
  * {@link chunkHashUpdate} and {@link chunkHashFinal}.

@@ -226,9 +226,11 @@ export const getCollectionWithSecrets = async (
     }
     const collectionName =
         collection.name ||
-        (await cryptoWorker.decryptToUTF8(
-            collection.encryptedName,
-            collection.nameDecryptionNonce,
+        (await cryptoWorker.decryptBoxUTF8(
+            {
+                encryptedData: collection.encryptedName,
+                nonce: collection.nameDecryptionNonce,
+            },
             collectionKey,
         ));
 
