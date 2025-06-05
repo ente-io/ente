@@ -18,6 +18,49 @@ export interface User {
     twoFactorSessionID: string;
 }
 
+// TODO: During login the only field present is email. Which makes this
+// optionality indicated by these types incorrect.
+const LocalUser = z.object({
+    /** The user's ID. */
+    id: z.number(),
+    /** The user's email. */
+    email: z.string(),
+    /**
+     * The user's (plaintext) auth token.
+     *
+     * It is used for making API calls on their behalf, by passing this token as
+     * the value of the X-Auth-Token header in the HTTP request.
+     */
+    token: z.string(),
+});
+
+/** Locally available data for the logged in user */
+export type LocalUser = z.infer<typeof LocalUser>;
+
+/**
+ * Return the logged-in user, if someone is indeed logged in. Otherwise return
+ * `undefined`.
+ *
+ * The user's data is stored in the browser's localStorage. Thus, this function
+ * only works from the main thread, not from web workers (local storage is not
+ * accessible to web workers).
+ */
+export const localUser = (): LocalUser | undefined => {
+    // TODO: duplicate of getData("user")
+    const s = localStorage.getItem("user");
+    if (!s) return undefined;
+    return LocalUser.parse(JSON.parse(s));
+};
+
+/**
+ * A wrapper over {@link localUser} with that throws if no one is logged in.
+ */
+export const ensureLocalUser = (): LocalUser => {
+    const user = localUser();
+    if (!user) throw new Error("Not logged in");
+    return user;
+};
+
 /**
  * The user's various encrypted keys and their related attributes.
  *

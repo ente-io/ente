@@ -12,9 +12,9 @@ import {
     retryEnsuringHTTPOk,
     type PublicAlbumsCredentials,
 } from "ente-base/http";
-import { ensureAuthToken } from "ente-base/local-user";
 import log from "ente-base/log";
 import { apiURL, customAPIOrigin } from "ente-base/origins";
+import { ensureAuthToken } from "ente-base/token";
 import type { EnteFile } from "ente-media/file";
 import { FileType } from "ente-media/file-type";
 import { decodeLivePhoto } from "ente-media/live-photo";
