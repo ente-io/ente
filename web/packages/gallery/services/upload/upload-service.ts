@@ -326,12 +326,24 @@ interface EncryptedFileStream {
 }
 
 interface EncryptedFilePieces {
+    /**
+     * The encrypted contents of the file (as bytes or a stream of bytes), and
+     * the decryption header that was used during encryption (base64 string).
+     */
     file: {
         encryptedData: Uint8Array | EncryptedFileStream;
         decryptionHeader: string;
     };
+    /**
+     * The encrypted contents of the file's thumbnail (as bytes), and the
+     * decryption header that was used during encryption (base64 string).
+     */
     thumbnail: { encryptedData: Uint8Array; decryptionHeader: string };
-    metadata: { encryptedDataB64: string; decryptionHeaderB64: string };
+    /**
+     * The encrypted contents of the file's metadata (as a base64 string), and
+     * the decryption header that was used during encryption (base64 string).
+     */
+    metadata: { encryptedData: string; decryptionHeader: string };
     pubMagicMetadata: EncryptedMagicMetadata;
     localID: number;
 }
@@ -1436,10 +1448,10 @@ const encryptFile = async (
         decryptionHeader: await worker.toB64(thumbnailDecryptionHeaderBytes),
     };
 
-    const encryptedMetadata = await worker.encryptMetadataJSON({
-        jsonValue: metadata,
-        keyB64: fileKey,
-    });
+    const encryptedMetadata = await worker.encryptMetadataJSON_New(
+        metadata,
+        fileKey,
+    );
 
     let encryptedPubMagicMetadata: EncryptedMagicMetadata;
     // Keep defensive check until the underlying type is audited.
@@ -1587,11 +1599,8 @@ const uploadToBucket = async (
             objectKey: thumbnailUploadURL.objectKey,
             size: thumbnail.encryptedData.length,
         },
-        metadata: {
-            encryptedData: metadata.encryptedDataB64,
-            decryptionHeader: metadata.decryptionHeaderB64,
-        },
-        pubMagicMetadata: pubMagicMetadata,
+        metadata,
+        pubMagicMetadata,
     };
 };
 
