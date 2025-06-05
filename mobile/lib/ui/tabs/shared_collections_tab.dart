@@ -60,6 +60,10 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
     const Duration(milliseconds: 500),
   );
 
+  static const maxThumbnailWidth = 224.0;
+  static const crossAxisSpacing = 8.0;
+  static const horizontalPadding = 16.0;
+
   @override
   void initState() {
     super.initState();
@@ -135,9 +139,14 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
   }
 
   Widget _getSharedCollectionsGallery(SharedCollections collections) {
-    const maxThumbnailWidth = 160.0;
     const maxQuickLinks = 4;
     final numberOfQuickLinks = collections.quickLinks.length;
+    final double screenWidth = MediaQuery.sizeOf(context).width;
+    final int albumsCountInRow = max(screenWidth ~/ maxThumbnailWidth, 3);
+    final totalHorizontalPadding = (albumsCountInRow - 1) * crossAxisSpacing;
+    final sideOfThumbnail =
+        (screenWidth - totalHorizontalPadding - horizontalPadding) /
+            albumsCountInRow;
     const quickLinkTitleHeroTag = "quick_link_title";
     final SectionTitle sharedWithYou =
         SectionTitle(title: S.of(context).sharedWithYou);
@@ -184,20 +193,22 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
                   const SizedBox(height: 2),
                   collections.incoming.isNotEmpty
                       ? SizedBox(
-                          height: maxThumbnailWidth + 24,
+                          height: sideOfThumbnail + 46,
                           child: ListView.builder(
                             padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
+                              horizontal: horizontalPadding / 2,
                             ),
                             scrollDirection: Axis.horizontal,
                             itemBuilder: (context, index) {
                               return Padding(
-                                padding: const EdgeInsets.only(right: 8.0),
+                                padding: const EdgeInsets.only(
+                                  right: horizontalPadding / 2,
+                                ),
                                 child: AlbumRowItemWidget(
                                   collections.incoming[index],
-                                  maxThumbnailWidth,
+                                  sideOfThumbnail,
                                   tag: "incoming",
-                                  showFileCount: false,
+                                  showFileCount: true,
                                 ),
                               );
                             },
@@ -242,7 +253,7 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
                   const SizedBox(height: 2),
                   collections.outgoing.isNotEmpty
                       ? SizedBox(
-                          height: maxThumbnailWidth + 24,
+                          height: sideOfThumbnail + 46,
                           child: ListView.builder(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 8,
@@ -250,12 +261,14 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
                             scrollDirection: Axis.horizontal,
                             itemBuilder: (context, index) {
                               return Padding(
-                                padding: const EdgeInsets.only(right: 8.0),
+                                padding: const EdgeInsets.only(
+                                  right: horizontalPadding / 2,
+                                ),
                                 child: AlbumRowItemWidget(
                                   collections.outgoing[index],
-                                  maxThumbnailWidth,
+                                  sideOfThumbnail,
                                   tag: "outgoing",
-                                  showFileCount: false,
+                                  showFileCount: true,
                                 ),
                               );
                             },
