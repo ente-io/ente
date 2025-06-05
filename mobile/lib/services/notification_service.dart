@@ -229,7 +229,6 @@ class NotificationService {
       dateTime.minute,
       dateTime.second,
     );
-    // final tz.TZDateTime scheduledDate = tz.TZDateTime.now(tz.local).add(delay);
     await _notificationsPlugin.zonedSchedule(
       id,
       title,
