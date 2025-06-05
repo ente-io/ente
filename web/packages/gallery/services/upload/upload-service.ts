@@ -1457,15 +1457,16 @@ const encryptFile = async (
     // Keep defensive check until the underlying type is audited.
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (pubMagicMetadata) {
-        const encryptedPubMagicMetadataData = await worker.encryptMetadataJSON({
-            jsonValue: pubMagicMetadata.data,
-            keyB64: fileKey,
-        });
+        const { encryptedData, decryptionHeader } =
+            await worker.encryptMetadataJSON_New(
+                pubMagicMetadata.data,
+                fileKey,
+            );
         encryptedPubMagicMetadata = {
             version: pubMagicMetadata.version,
             count: pubMagicMetadata.count,
-            data: encryptedPubMagicMetadataData.encryptedDataB64,
-            header: encryptedPubMagicMetadataData.decryptionHeaderB64,
+            data: encryptedData,
+            header: decryptionHeader,
         };
     }
 
