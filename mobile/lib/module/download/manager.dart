@@ -187,6 +187,7 @@ class DownloadManager {
       }
     } catch (e) {
       if (e is DioException && e.type == DioExceptionType.cancel) {
+        _logger.info('Download cancelled for ${task.filename}');
         // Complete future with current task state (paused or cancelled)
         final currentTask = _tasks[task.id];
         if (currentTask != null && !completer.isCompleted) {
@@ -194,7 +195,7 @@ class DownloadManager {
         }
         return;
       }
-
+      _logger.warning('Error downloading ${task.filename}', e);
       task = task.copyWith(status: DownloadStatus.error, error: e.toString());
       _updateTask(task);
       if (!completer.isCompleted) {
