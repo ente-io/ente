@@ -58,8 +58,8 @@ export const recoveryKeyToMnemonic = async (recoveryKey: string) =>
  * Return the (decrypted) recovery key of the logged in user, reading it from
  * local storage.
  *
- * As a fallback for pre-recovery-key accounts, this function will also generate
- * a new recovery key if needed.
+ * As a fallback for old accounts that generated recovery keys on first view,
+ * this function will also generate a new recovery key if needed.
  *
  * @returns The user's base64 encoded recovery key.
  */
@@ -87,8 +87,8 @@ export const getUserRecoveryKey = async () => {
  * Generate a new recovery key, tell remote about it, update our local state,
  * and then return it.
  *
- * This function will be used only for (_very_) old accounts for whom we did not
- * generate recovery keys during sign up.
+ * This function is meant only for (very!) old accounts for whom the app did not
+ * generate recovery keys on sign up but instead generated them on first view.
  *
  * @returns a new base64 encoded recovery key.
  */

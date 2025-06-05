@@ -1,6 +1,6 @@
+import { ensureLocalUser } from "ente-accounts/services/user";
 import { assertionFailed } from "ente-base/assert";
 import { newID } from "ente-base/id";
-import { ensureLocalUser } from "ente-accounts/services/user";
 import type { EnteFile } from "ente-media/file";
 import {
     filePublicMagicMetadata,
