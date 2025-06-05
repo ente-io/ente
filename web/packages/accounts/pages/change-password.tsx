@@ -10,6 +10,7 @@ import { appHomeRoute, stashRedirect } from "ente-accounts/services/redirect";
 import {
     convertBase64ToBuffer,
     convertBufferToBase64,
+    deriveSRPPassword,
     generateSRPClient,
     generateSRPSetupAttributes,
 } from "ente-accounts/services/srp";
@@ -25,9 +26,9 @@ import type {
 } from "ente-accounts/services/user";
 import { LinkButton } from "ente-base/components/LinkButton";
 import { sharedCryptoWorker } from "ente-base/crypto";
+import type { DerivedKey } from "ente-base/crypto/types";
 import {
     generateAndSaveIntermediateKeyAttributes,
-    generateLoginSubKey,
     saveKeyInSessionStore,
 } from "ente-shared/crypto/helpers";
 import { getData, setData } from "ente-shared/storage/localStorage";
@@ -60,27 +61,24 @@ const Page: React.FC = () => {
         const cryptoWorker = await sharedCryptoWorker();
         const key = await getActualKey();
         const keyAttributes: KeyAttributes = getData("keyAttributes");
-        const kekSalt = await cryptoWorker.generateSaltToDeriveKey();
-        let kek: { key: string; opsLimit: number; memLimit: number };
+        let kek: DerivedKey;
         try {
-            kek = await cryptoWorker.deriveSensitiveKey(passphrase, kekSalt);
+            kek = await cryptoWorker.deriveSensitiveKey(passphrase);
         } catch {
             setFieldError("confirm", t("password_generation_failed"));
             return;
         }
-        const encryptedKeyAttributes = await cryptoWorker.encryptToB64(
-            key,
-            kek.key,
-        );
+        const { encryptedData: encryptedKey, nonce: keyDecryptionNonce } =
+            await cryptoWorker.encryptBox(key, kek.key);
         const updatedKey: UpdatedKey = {
-            kekSalt,
-            encryptedKey: encryptedKeyAttributes.encryptedData,
-            keyDecryptionNonce: encryptedKeyAttributes.nonce,
+            encryptedKey,
+            keyDecryptionNonce,
+            kekSalt: kek.salt,
             opsLimit: kek.opsLimit,
             memLimit: kek.memLimit,
         };
 
-        const loginSubKey = await generateLoginSubKey(kek.key);
+        const loginSubKey = await deriveSRPPassword(kek.key);
 
         const { srpUserID, srpSalt, srpVerifier } =
             await generateSRPSetupAttributes(loginSubKey);

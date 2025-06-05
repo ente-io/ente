@@ -27,6 +27,8 @@
  * to functions exposed by `crypto/libsodium.ts`, but they automatically defer
  * to a worker thread if we're not already running on one.
  *
+ * ---
+ *
  * [Note: Using libsodium in worker thread]
  *
  * `crypto/ente-impl.ts` and `crypto/worker.ts` are logic-less internal files
@@ -53,16 +55,53 @@
  * Also, some code (e.g. the uploader) creates it own crypto worker instances,
  * and thus directly calls the functions in the web worker that it created
  * instead of going through this file.
+ *
+ * ---
+ *
+ * [Note: Crypto layer API data types]
+ *
+ * There are two primary types used when exchanging data with these functions:
+ *
+ * 1. Base64 strings. Unqualified strings are taken as base64 encoded
+ *    representations of the underlying data. Usually, the unqualified "base"
+ *    function deals with Base64 strings, since they also are the data type in
+ *    which we usually send the encryted data etc to remote.
+ *
+ * 2. Raw bytes. Uint8Arrays are byte arrays. The functions that deal with bytes
+ *    are indicated by a *Bytes suffix in their name.
+ *
+ * Where possible and useful, functions also accept a union of these two - a
+ * {@link BytesOrB64} where the implementation will automatically convert
+ * to/from base64 to bytes if needed, thus saving on unnecessary conversions at
+ * the caller side.
+ *
+ * Apart from these two, there are other secondary and one off types.
+ *
+ * 1. "Regular" JavaScript strings. These are indicated by the *UTF8 suffix on
+ *    the function that deals with them. These strings will be obtained by utf-8
+ *    encoding (or decoding) the underlying bytes.
+ *
+ * 2. Hex representations of the bytes. These are indicated by the *Hex suffix
+ *    on the functions dealing with them.
+ *
+ * 2. JSON values. These are indicated by the *JSON suffix on the functions
+ *    dealing with them.
  */
 import { ComlinkWorker } from "ente-base/worker/comlink-worker";
-import { type StateAddress } from "libsodium-wrappers-sumo";
 import { inWorker } from "../env";
 import * as ei from "./ente-impl";
 import type {
     BytesOrB64,
+    DerivedKey,
     EncryptedBlob,
+    EncryptedBlobB64,
+    EncryptedBlobBytes,
     EncryptedBox,
+    EncryptedBoxB64,
     EncryptedFile,
+    InitChunkDecryptionResult,
+    InitChunkEncryptionResult,
+    SodiumStateAddress,
 } from "./types";
 import type { CryptoWorker } from "./worker";
 
@@ -74,7 +113,7 @@ let _comlinkWorker: ComlinkWorker<typeof CryptoWorker> | undefined;
 /**
  * Lazily created, cached, instance of a CryptoWorker web worker.
  */
-export const sharedCryptoWorker = async () =>
+export const sharedCryptoWorker = () =>
     (_comlinkWorker ??= createComlinkCryptoWorker()).remote;
 
 /** A shorter alias of {@link sharedCryptoWorker} for use within this file. */
@@ -93,13 +132,13 @@ export const createComlinkCryptoWorker = () =>
 /**
  * Convert bytes ({@link Uint8Array}) to a base64 string.
  */
-export const toB64 = (bytes: Uint8Array) =>
+export const toB64 = (bytes: Uint8Array): Promise<string> =>
     inWorker() ? ei._toB64(bytes) : sharedWorker().then((w) => w.toB64(bytes));
 
 /**
  * URL safe variant of {@link toB64}.
  */
-export const toB64URLSafe = (bytes: Uint8Array) =>
+export const toB64URLSafe = (bytes: Uint8Array): Promise<string> =>
     inWorker()
         ? ei._toB64URLSafe(bytes)
         : sharedWorker().then((w) => w.toB64URLSafe(bytes));
@@ -107,7 +146,7 @@ export const toB64URLSafe = (bytes: Uint8Array) =>
 /**
  * Convert a base64 string to bytes ({@link Uint8Array}).
  */
-export const fromB64 = (b64String: string) =>
+export const fromB64 = (b64String: string): Promise<Uint8Array> =>
     inWorker()
         ? ei._fromB64(b64String)
         : sharedWorker().then((w) => w.fromB64(b64String));
@@ -115,7 +154,7 @@ export const fromB64 = (b64String: string) =>
 /**
  * Convert a base64 string to the hex representation of the underlying bytes.
  */
-export const toHex = (b64String: string) =>
+export const toHex = (b64String: string): Promise<string> =>
     inWorker()
         ? ei._toHex(b64String)
         : sharedWorker().then((w) => w.toHex(b64String));
@@ -123,7 +162,7 @@ export const toHex = (b64String: string) =>
 /**
  * Convert a hex string to the base64 representation of the underlying bytes.
  */
-export const fromHex = (hexString: string) =>
+export const fromHex = (hexString: string): Promise<string> =>
     inWorker()
         ? ei._fromHex(hexString)
         : sharedWorker().then((w) => w.fromHex(hexString));
@@ -134,7 +173,7 @@ export const fromHex = (hexString: string) =>
  * The returned key is suitable for use with the *Box encryption functions, and
  * as a general encryption key (e.g. as the user's master key or recovery key).
  */
-export const generateKey = () =>
+export const generateKey = (): Promise<string> =>
     inWorker()
         ? ei._generateKey()
         : sharedWorker().then((w) => w.generateKey());
@@ -143,7 +182,7 @@ export const generateKey = () =>
  * Return a new randomly generated 256-bit key (as a base64 string) suitable for
  * use with the *Blob or *Stream encryption functions.
  */
-export const generateBlobOrStreamKey = () =>
+export const generateBlobOrStreamKey = (): Promise<string> =>
     inWorker()
         ? ei._generateBlobOrStreamKey()
         : sharedWorker().then((w) => w.generateBlobOrStreamKey());
@@ -161,10 +200,25 @@ export const generateBlobOrStreamKey = () =>
  * >
  * > See: [Note: 3 forms of encryption (Box | Blob | Stream)]
  */
-export const encryptBox = (data: BytesOrB64, key: BytesOrB64) =>
+export const encryptBox = (
+    data: BytesOrB64,
+    key: BytesOrB64,
+): Promise<EncryptedBoxB64> =>
     inWorker()
         ? ei._encryptBox(data, key)
         : sharedWorker().then((w) => w.encryptBox(data, key));
+
+/**
+ * A variant of {@link encryptBox} that first UTF-8 encodes the input string to
+ * obtain bytes, which it then encrypts.
+ */
+export const encryptBoxUTF8 = (
+    data: string,
+    key: BytesOrB64,
+): Promise<EncryptedBoxB64> =>
+    inWorker()
+        ? ei._encryptBoxUTF8(data, key)
+        : sharedWorker().then((w) => w.encryptBoxUTF8(data, key));
 
 /**
  * Encrypt the given data, returning a blob containing the encrypted data and a
@@ -180,7 +234,10 @@ export const encryptBox = (data: BytesOrB64, key: BytesOrB64) =>
  * >
  * > See: [Note: 3 forms of encryption (Box | Blob | Stream)]
  */
-export const encryptBlob = (data: BytesOrB64, key: BytesOrB64) =>
+export const encryptBlob = (
+    data: BytesOrB64,
+    key: BytesOrB64,
+): Promise<EncryptedBlobB64> =>
     inWorker()
         ? ei._encryptBlob(data, key)
         : sharedWorker().then((w) => w.encryptBlob(data, key));
@@ -191,41 +248,13 @@ export const encryptBlob = (data: BytesOrB64, key: BytesOrB64) =>
  *
  * Use {@link decryptBlob} or {@link decryptBlobBytes} to decrypt the result.
  */
-export const encryptBlobBytes = (data: BytesOrB64, key: BytesOrB64) =>
+export const encryptBlobBytes = (
+    data: BytesOrB64,
+    key: BytesOrB64,
+): Promise<EncryptedBlobBytes> =>
     inWorker()
         ? ei._encryptBlobBytes(data, key)
         : sharedWorker().then((w) => w.encryptBlobBytes(data, key));
-
-/**
- * Encrypt the given data using chunked streaming encryption, but process all
- * the chunks in one go.
- */
-export const encryptStreamBytes = async (data: Uint8Array, key: BytesOrB64) =>
-    inWorker()
-        ? ei._encryptStreamBytes(data, key)
-        : sharedWorker().then((w) => w.encryptStreamBytes(data, key));
-
-/**
- * Prepare for chunked streaming encryption using {@link encryptStreamChunk}.
- */
-export const initChunkEncryption = async (key: BytesOrB64) =>
-    inWorker()
-        ? ei._initChunkEncryption(key)
-        : sharedWorker().then((w) => w.initChunkEncryption(key));
-
-/**
- * Encrypt a chunk as part of a chunked streaming encryption.
- */
-export const encryptStreamChunk = async (
-    data: Uint8Array,
-    state: StateAddress,
-    isFinalChunk: boolean,
-) =>
-    inWorker()
-        ? ei._encryptStreamChunk(data, state, isFinalChunk)
-        : sharedWorker().then((w) =>
-              w.encryptStreamChunk(data, state, isFinalChunk),
-          );
 
 /**
  * Encrypt the JSON metadata associated with an Ente object (file, collection or
@@ -247,16 +276,58 @@ export const encryptStreamChunk = async (
  *
  * @param key The encryption key.
  */
-export const encryptMetadataJSON = (jsonValue: unknown, key: BytesOrB64) =>
+export const encryptMetadataJSON = (
+    jsonValue: unknown,
+    key: BytesOrB64,
+): Promise<EncryptedBlobB64> =>
     inWorker()
         ? ei._encryptMetadataJSON(jsonValue, key)
         : sharedWorker().then((w) => w.encryptMetadataJSON(jsonValue, key));
 
 /**
+ * Encrypt the given data using chunked streaming encryption, but process all
+ * the chunks in one go.
+ */
+export const encryptStreamBytes = (
+    data: Uint8Array,
+    key: BytesOrB64,
+): Promise<EncryptedFile> =>
+    inWorker()
+        ? ei._encryptStreamBytes(data, key)
+        : sharedWorker().then((w) => w.encryptStreamBytes(data, key));
+
+/**
+ * Prepare for chunked streaming encryption using {@link encryptStreamChunk}.
+ */
+export const initChunkEncryption = (
+    key: BytesOrB64,
+): Promise<InitChunkEncryptionResult> =>
+    inWorker()
+        ? ei._initChunkEncryption(key)
+        : sharedWorker().then((w) => w.initChunkEncryption(key));
+
+/**
+ * Encrypt a chunk as part of a chunked streaming encryption.
+ */
+export const encryptStreamChunk = (
+    data: Uint8Array,
+    state: SodiumStateAddress,
+    isFinalChunk: boolean,
+): Promise<Uint8Array> =>
+    inWorker()
+        ? ei._encryptStreamChunk(data, state, isFinalChunk)
+        : sharedWorker().then((w) =>
+              w.encryptStreamChunk(data, state, isFinalChunk),
+          );
+
+/**
  * Decrypt a box encrypted using {@link encryptBox} and returns the decrypted
  * bytes as a base64 string.
  */
-export const decryptBox = (box: EncryptedBox, key: BytesOrB64) =>
+export const decryptBox = (
+    box: EncryptedBox,
+    key: BytesOrB64,
+): Promise<string> =>
     inWorker()
         ? ei._decryptBox(box, key)
         : sharedWorker().then((w) => w.decryptBox(box, key));
@@ -265,16 +336,35 @@ export const decryptBox = (box: EncryptedBox, key: BytesOrB64) =>
  * Variant of {@link decryptBox} that returns the decrypted bytes as it is
  * (without encoding them to base64).
  */
-export const decryptBoxBytes = (box: EncryptedBox, key: BytesOrB64) =>
+export const decryptBoxBytes = (
+    box: EncryptedBox,
+    key: BytesOrB64,
+): Promise<Uint8Array> =>
     inWorker()
         ? ei._decryptBoxBytes(box, key)
         : sharedWorker().then((w) => w.decryptBoxBytes(box, key));
 
 /**
+ * Variant of {@link decryptBoxBytes} that returns the decrypted bytes as a
+ * "JavaScript string", specifically a UTF-8 string. That is, after decryption
+ * we obtain raw bytes, which we interpret as a UTF-8 string.
+ */
+export const decryptBoxUTF8 = (
+    box: EncryptedBox,
+    key: BytesOrB64,
+): Promise<string> =>
+    inWorker()
+        ? ei._decryptBoxUTF8(box, key)
+        : sharedWorker().then((w) => w.decryptBoxUTF8(box, key));
+
+/**
  * Decrypt a blob encrypted using either {@link encryptBlobBytes} or
  * {@link encryptBlob} and return it as a base64 encoded string.
  */
-export const decryptBlob = (blob: EncryptedBlob, key: BytesOrB64) =>
+export const decryptBlob = (
+    blob: EncryptedBlob,
+    key: BytesOrB64,
+): Promise<string> =>
     inWorker()
         ? ei._decryptBlob(blob, key)
         : sharedWorker().then((w) => w.decryptBlob(blob, key));
@@ -283,7 +373,10 @@ export const decryptBlob = (blob: EncryptedBlob, key: BytesOrB64) =>
  * A variant of {@link decryptBlobBytes} that returns the result bytes directly
  * (instead of encoding them as a base64 string).
  */
-export const decryptBlobBytes = (blob: EncryptedBlob, key: BytesOrB64) =>
+export const decryptBlobBytes = (
+    blob: EncryptedBlob,
+    key: BytesOrB64,
+): Promise<Uint8Array> =>
     inWorker()
         ? ei._decryptBlobBytes(blob, key)
         : sharedWorker().then((w) => w.decryptBlobBytes(blob, key));
@@ -291,10 +384,10 @@ export const decryptBlobBytes = (blob: EncryptedBlob, key: BytesOrB64) =>
 /**
  * Decrypt the result of {@link encryptStreamBytes}.
  */
-export const decryptStreamBytes = async (
+export const decryptStreamBytes = (
     file: EncryptedFile,
     key: BytesOrB64,
-) =>
+): Promise<Uint8Array> =>
     inWorker()
         ? ei._decryptStreamBytes(file, key)
         : sharedWorker().then((w) => w.decryptStreamBytes(file, key));
@@ -303,7 +396,10 @@ export const decryptStreamBytes = async (
  * Prepare to decrypt the encrypted result produced using {@link initChunkEncryption} and
  * {@link encryptStreamChunk}.
  */
-export const initChunkDecryption = async (header: string, key: BytesOrB64) =>
+export const initChunkDecryption = (
+    header: string,
+    key: BytesOrB64,
+): Promise<InitChunkDecryptionResult> =>
     inWorker()
         ? ei._initChunkDecryption(header, key)
         : sharedWorker().then((w) => w.initChunkDecryption(header, key));
@@ -313,10 +409,10 @@ export const initChunkDecryption = async (header: string, key: BytesOrB64) =>
  *
  * This function is used in tandem with {@link initChunkDecryption}.
  */
-export const decryptStreamChunk = async (
+export const decryptStreamChunk = (
     data: Uint8Array,
-    state: StateAddress,
-) =>
+    state: SodiumStateAddress,
+): Promise<Uint8Array> =>
     inWorker()
         ? ei._decryptStreamChunk(data, state)
         : sharedWorker().then((w) => w.decryptStreamChunk(data, state));
@@ -327,7 +423,10 @@ export const decryptStreamChunk = async (
  * @returns The decrypted JSON value. Since TypeScript does not have a native
  * JSON type, we need to return it as an `unknown`.
  */
-export const decryptMetadataJSON = (blob: EncryptedBlob, key: BytesOrB64) =>
+export const decryptMetadataJSON = (
+    blob: EncryptedBlob,
+    key: BytesOrB64,
+): Promise<unknown> =>
     inWorker()
         ? ei._decryptMetadataJSON(blob, key)
         : sharedWorker().then((w) => w.decryptMetadataJSON(blob, key));
@@ -335,7 +434,10 @@ export const decryptMetadataJSON = (blob: EncryptedBlob, key: BytesOrB64) =>
 /**
  * Generate a new public/private keypair.
  */
-export const generateKeyPair = async () =>
+export const generateKeyPair = (): Promise<{
+    publicKey: string;
+    privateKey: string;
+}> =>
     inWorker()
         ? ei._generateKeyPair()
         : sharedWorker().then((w) => w.generateKeyPair());
@@ -343,7 +445,7 @@ export const generateKeyPair = async () =>
 /**
  * Public key encryption.
  */
-export const boxSeal = async (data: string, publicKey: string) =>
+export const boxSeal = (data: string, publicKey: string): Promise<string> =>
     inWorker()
         ? ei._boxSeal(data, publicKey)
         : sharedWorker().then((w) => w.boxSeal(data, publicKey));
@@ -351,11 +453,11 @@ export const boxSeal = async (data: string, publicKey: string) =>
 /**
  * Decrypt the result of {@link boxSeal}.
  */
-export const boxSealOpen = async (
+export const boxSealOpen = (
     encryptedData: string,
     publicKey: string,
     secretKey: string,
-) =>
+): Promise<string> =>
     inWorker()
         ? ei._boxSealOpen(encryptedData, publicKey, secretKey)
         : sharedWorker().then((w) =>
@@ -363,14 +465,25 @@ export const boxSealOpen = async (
           );
 
 /**
+ * Return a new randomly generated 128-bit salt (as a base64 string).
+ *
+ * The returned salt is suitable for use with {@link deriveKey}, and also as a
+ * general 128-bit salt.
+ */
+export const generateDeriveKeySalt = (): Promise<string> =>
+    inWorker()
+        ? ei._generateDeriveKeySalt()
+        : sharedWorker().then((w) => w.generateDeriveKeySalt());
+
+/**
  * Derive a key by hashing the given {@link passphrase} using Argon 2id.
  */
-export const deriveKey = async (
+export const deriveKey = (
     passphrase: string,
     salt: string,
     opsLimit: number,
     memLimit: number,
-) =>
+): Promise<string> =>
     inWorker()
         ? ei._deriveKey(passphrase, salt, opsLimit, memLimit)
         : sharedWorker().then((w) =>
@@ -380,15 +493,34 @@ export const deriveKey = async (
 /**
  * Derive a sensitive key from the given {@link passphrase}.
  */
-export const deriveSensitiveKey = async (passphrase: string, salt: string) =>
+export const deriveSensitiveKey = (passphrase: string): Promise<DerivedKey> =>
     inWorker()
-        ? ei._deriveSensitiveKey(passphrase, salt)
-        : sharedWorker().then((w) => w.deriveSensitiveKey(passphrase, salt));
+        ? ei._deriveSensitiveKey(passphrase)
+        : sharedWorker().then((w) => w.deriveSensitiveKey(passphrase));
 
 /**
- * Derive an interactive key from the given {@link passphrase}.
+ * Derive an key suitable for interactive use from the given {@link passphrase}.
  */
-export const deriveInteractiveKey = async (passphrase: string, salt: string) =>
+export const deriveInteractiveKey = (
+    passphrase: string,
+): Promise<DerivedKey> =>
     inWorker()
-        ? ei._deriveInteractiveKey(passphrase, salt)
-        : sharedWorker().then((w) => w.deriveInteractiveKey(passphrase, salt));
+        ? ei._deriveInteractiveKey(passphrase)
+        : sharedWorker().then((w) => w.deriveInteractiveKey(passphrase));
+
+/**
+ * Derive a subkey of the given {@link key} using the specified parameters.
+ *
+ * @returns the bytes of the derived subkey.
+ */
+export const deriveSubKeyBytes = async (
+    key: string,
+    subKeyLength: number,
+    subKeyID: number,
+    context: string,
+): Promise<Uint8Array> =>
+    inWorker()
+        ? ei._deriveSubKeyBytes(key, subKeyLength, subKeyID, context)
+        : sharedWorker().then((w) =>
+              w.deriveSubKeyBytes(key, subKeyLength, subKeyID, context),
+          );

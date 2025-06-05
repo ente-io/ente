@@ -23,6 +23,7 @@ import {
 import { checkSessionValidity } from "ente-accounts/services/session";
 import {
     configureSRP,
+    deriveSRPPassword,
     generateSRPSetupAttributes,
     loginViaSRP,
 } from "ente-accounts/services/srp";
@@ -39,7 +40,6 @@ import log from "ente-base/log";
 import {
     decryptAndStoreToken,
     generateAndSaveIntermediateKeyAttributes,
-    generateLoginSubKey,
     saveKeyInSessionStore,
 } from "ente-shared/crypto/helpers";
 import { CustomError } from "ente-shared/error";
@@ -292,7 +292,7 @@ const Page: React.FC = () => {
             }
             log.debug(() => `userSRPSetupPending ${!srpAttributes}`);
             if (!srpAttributes) {
-                const loginSubKey = await generateLoginSubKey(kek);
+                const loginSubKey = await deriveSRPPassword(kek);
                 const srpSetupAttributes =
                     await generateSRPSetupAttributes(loginSubKey);
                 await configureSRP(srpSetupAttributes);

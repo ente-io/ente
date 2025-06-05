@@ -4,11 +4,6 @@ import { masterKeyFromSession } from "ente-base/session";
 import { getData, setData, setLSUser } from "ente-shared/storage/localStorage";
 import { type SessionKey, setKey } from "ente-shared/storage/sessionStorage";
 
-const LOGIN_SUB_KEY_LENGTH = 32;
-const LOGIN_SUB_KEY_ID = 1;
-const LOGIN_SUB_KEY_CONTEXT = "loginctx";
-const LOGIN_SUB_KEY_BYTE_LENGTH = 16;
-
 export async function decryptAndStoreToken(
     keyAttributes: KeyAttributes,
     masterKey: string,
@@ -52,44 +47,20 @@ export async function generateAndSaveIntermediateKeyAttributes(
     key: string,
 ): Promise<KeyAttributes> {
     const cryptoWorker = await sharedCryptoWorker();
-    const intermediateKekSalt = await cryptoWorker.generateSaltToDeriveKey();
-    const intermediateKek = await cryptoWorker.deriveInteractiveKey(
-        passphrase,
-        intermediateKekSalt,
-    );
-    const encryptedKeyAttributes = await cryptoWorker.encryptToB64(
-        key,
-        intermediateKek.key,
-    );
+    const intermediateKek = await cryptoWorker.deriveInteractiveKey(passphrase);
+    const { encryptedData: encryptedKey, nonce: keyDecryptionNonce } =
+        await cryptoWorker.encryptBox(key, intermediateKek.key);
 
     const intermediateKeyAttributes = Object.assign(existingKeyAttributes, {
-        kekSalt: intermediateKekSalt,
-        encryptedKey: encryptedKeyAttributes.encryptedData,
-        keyDecryptionNonce: encryptedKeyAttributes.nonce,
+        encryptedKey,
+        keyDecryptionNonce,
+        kekSalt: intermediateKek.salt,
         opsLimit: intermediateKek.opsLimit,
         memLimit: intermediateKek.memLimit,
     });
     setData("keyAttributes", intermediateKeyAttributes);
     return intermediateKeyAttributes;
 }
-
-export const generateLoginSubKey = async (kek: string) => {
-    const cryptoWorker = await sharedCryptoWorker();
-    const kekSubKeyString = await cryptoWorker.generateSubKey(
-        kek,
-        LOGIN_SUB_KEY_LENGTH,
-        LOGIN_SUB_KEY_ID,
-        LOGIN_SUB_KEY_CONTEXT,
-    );
-    const kekSubKey = await cryptoWorker.fromB64(kekSubKeyString);
-
-    // use first 16 bytes of generated kekSubKey as loginSubKey
-    const loginSubKey = await cryptoWorker.toB64(
-        kekSubKey.slice(0, LOGIN_SUB_KEY_BYTE_LENGTH),
-    );
-
-    return loginSubKey;
-};
 
 export const saveKeyInSessionStore = async (
     keyType: SessionKey,

@@ -1425,7 +1425,7 @@ const constructPublicMagicMetadata = async (
 
 const encryptFile = async (
     file: FileWithMetadata,
-    encryptionKey: string,
+    collectionKey: string,
     worker: CryptoWorker,
 ) => {
     const fileKey = await worker.generateBlobOrStreamKey();
@@ -1467,7 +1467,7 @@ const encryptFile = async (
         };
     }
 
-    const encryptedKey = await worker.encryptToB64(fileKey, encryptionKey);
+    const encryptedFileKey = await worker.encryptBox(fileKey, collectionKey);
 
     return {
         encryptedFilePieces: {
@@ -1478,10 +1478,7 @@ const encryptFile = async (
             pubMagicMetadata: encryptedPubMagicMetadata,
             localID: localID,
         },
-        encryptedFileKey: {
-            encryptedData: encryptedKey.encryptedData,
-            nonce: encryptedKey.nonce,
-        },
+        encryptedFileKey,
     };
 };
 

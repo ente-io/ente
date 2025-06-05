@@ -105,6 +105,14 @@ export interface KeyAttributes {
      * (https://doc.libsodium.org/public-key_cryptography/authenticated_encryption#key-pair-generation),
      * who possibly chose public + secret instead of public + private to avoid
      * confusion with shorthand notation (pk).
+     *
+     * However, the library author later changed their mind on this, so while
+     * libsodium itself (the C library) and the documentation uses "secretKey",
+     * the JavaScript implementation (libsodium.js) uses "privateKey".
+     *
+     * This structure uses the term "secretKey" since that is what the remote
+     * protocol already was based on. Within the web app codebase, we use
+     * "privateKey" since that is what the underlying libsodium.js uses.
      */
     encryptedSecretKey: string;
     /**

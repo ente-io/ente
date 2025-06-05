@@ -9,15 +9,19 @@
  * To see where this code fits, see [Note: Crypto code hierarchy].
  */
 import { mergeUint8Arrays } from "ente-utils/array";
-import sodium, { type StateAddress } from "libsodium-wrappers-sumo";
+import sodium from "libsodium-wrappers-sumo";
 import type {
     BytesOrB64,
+    DerivedKey,
     EncryptedBlob,
     EncryptedBlobB64,
     EncryptedBlobBytes,
     EncryptedBox,
     EncryptedBoxB64,
     EncryptedFile,
+    InitChunkDecryptionResult,
+    InitChunkEncryptionResult,
+    SodiumStateAddress,
 } from "./types";
 
 /**
@@ -35,7 +39,7 @@ export const toB64 = async (input: Uint8Array) => {
  *
  * This is the converse of {@link toBase64}.
  */
-export const fromB64 = async (input: string) => {
+export const fromB64 = async (input: string): Promise<Uint8Array> => {
     await sodium.ready;
     return sodium.from_base64(input, sodium.base64_variants.ORIGINAL);
 };
@@ -116,7 +120,7 @@ export const toHex = async (input: string) => {
  *
  * This is the inverse of {@link toHex}.
  */
-export const fromHex = async (input: string) => {
+export const fromHex = async (input: string): Promise<string> => {
     await sodium.ready;
     return await toB64(sodium.from_hex(input));
 };
@@ -284,6 +288,18 @@ export const encryptBox = async (
 };
 
 /**
+ * A variant of {@link encryptBox} that first converts the input string into
+ * bytes using a UTF-8 encoding, and then encrypts those bytes.
+ */
+export const encryptBoxUTF8 = async (
+    data: string,
+    key: BytesOrB64,
+): Promise<EncryptedBoxB64> => {
+    await sodium.ready;
+    return encryptBox(sodium.from_string(data), key);
+};
+
+/**
  * Encrypt the given data using libsodium's secretstream APIs without chunking.
  *
  * Use {@link decryptBlobBytes} to decrypt the result.
@@ -435,7 +451,9 @@ export const encryptStreamBytes = async (
  * to subsequent calls to {@link encryptStreamChunk} along with the chunks's
  * contents.
  */
-export const initChunkEncryption = async (key: BytesOrB64) => {
+export const initChunkEncryption = async (
+    key: BytesOrB64,
+): Promise<InitChunkEncryptionResult> => {
     await sodium.ready;
     const keyBytes = await bytes(key);
     const { state, header } =
@@ -463,9 +481,9 @@ export const initChunkEncryption = async (key: BytesOrB64) => {
  */
 export const encryptStreamChunk = async (
     data: Uint8Array,
-    pushState: sodium.StateAddress,
+    pushState: SodiumStateAddress,
     isFinalChunk: boolean,
-) => {
+): Promise<Uint8Array> => {
     await sodium.ready;
     const tag = isFinalChunk
         ? sodium.crypto_secretstream_xchacha20poly1305_TAG_FINAL
@@ -500,6 +518,18 @@ export const decryptBox = (
     box: EncryptedBox,
     key: BytesOrB64,
 ): Promise<string> => decryptBoxBytes(box, key).then(toB64);
+
+/**
+ * Variant of {@link decryptBoxBytes} that returns the data after decoding the
+ * decrypted bytes as a utf-8 string.
+ */
+export const decryptBoxUTF8 = async (
+    box: EncryptedBox,
+    key: BytesOrB64,
+): Promise<string> => {
+    await sodium.ready;
+    return sodium.to_string(await decryptBoxBytes(box, key));
+};
 
 /**
  * Decrypt the result of {@link encryptBlobBytes} or {@link encryptBlob}.
@@ -552,7 +582,7 @@ export const decryptMetadataJSON = async (
 export const decryptStreamBytes = async (
     { encryptedData, decryptionHeader }: EncryptedFile,
     key: BytesOrB64,
-) => {
+): Promise<Uint8Array> => {
     await sodium.ready;
     const pullState = sodium.crypto_secretstream_xchacha20poly1305_init_pull(
         await fromB64(decryptionHeader),
@@ -598,7 +628,7 @@ export const decryptStreamBytes = async (
 export const initChunkDecryption = async (
     decryptionHeader: string,
     key: BytesOrB64,
-) => {
+): Promise<InitChunkDecryptionResult> => {
     await sodium.ready;
     const pullState = sodium.crypto_secretstream_xchacha20poly1305_init_pull(
         await fromB64(decryptionHeader),
@@ -621,8 +651,8 @@ export const initChunkDecryption = async (
  */
 export const decryptStreamChunk = async (
     data: Uint8Array,
-    pullState: StateAddress,
-) => {
+    pullState: SodiumStateAddress,
+): Promise<Uint8Array> => {
     await sodium.ready;
     const pullResult = sodium.crypto_secretstream_xchacha20poly1305_pull(
         pullState,
@@ -638,7 +668,7 @@ export interface B64EncryptionResult {
 }
 
 /** Deprecated, use {@link encryptBox} instead */
-export async function encryptToB64(data: string, keyB64: string) {
+async function encryptToB64(data: string, keyB64: string) {
     await sodium.ready;
     const encrypted = await encryptBox(data, keyB64);
     return {
@@ -653,29 +683,6 @@ export async function generateKeyAndEncryptToB64(data: string) {
     const key = sodium.crypto_secretbox_keygen();
     return await encryptToB64(data, await toB64(key));
 }
-
-export async function encryptUTF8(data: string, key: string) {
-    await sodium.ready;
-    const b64Data = await toB64(sodium.from_string(data));
-    return await encryptToB64(b64Data, key);
-}
-
-/** Deprecated */
-export async function decryptToUTF8(
-    encryptedData: string,
-    nonce: string,
-    keyB64: string,
-) {
-    await sodium.ready;
-    const decrypted = await decryptBoxBytes({ encryptedData, nonce }, keyB64);
-    return sodium.to_string(decrypted);
-}
-
-/**
- * An opaque object meant to be threaded through {@link chunkHashInit},
- * {@link chunkHashUpdate} and {@link chunkHashFinal}.
- */
-export type ChunkHashState = sodium.StateAddress;
 
 /**
  * Initialize and return new state that can be used to hash the chunks of data
@@ -693,7 +700,7 @@ export type ChunkHashState = sodium.StateAddress;
  * (along with the data to hash) to {@link chunkHashUpdate}, and the final hash
  * obtained using {@link chunkHashFinal}.
  */
-export const chunkHashInit = async (): Promise<ChunkHashState> => {
+export const chunkHashInit = async (): Promise<SodiumStateAddress> => {
     await sodium.ready;
     return sodium.crypto_generichash_init(
         null,
@@ -711,7 +718,7 @@ export const chunkHashInit = async (): Promise<ChunkHashState> => {
  * @param chunk The data (bytes) to hash.
  */
 export const chunkHashUpdate = async (
-    hashState: ChunkHashState,
+    hashState: SodiumStateAddress,
     chunk: Uint8Array,
 ) => {
     await sodium.ready;
@@ -728,7 +735,7 @@ export const chunkHashUpdate = async (
  *
  * @returns The hash of all the chunks (as a base64 string).
  */
-export const chunkHashFinal = async (hashState: ChunkHashState) => {
+export const chunkHashFinal = async (hashState: SodiumStateAddress) => {
     await sodium.ready;
     const hash = sodium.crypto_generichash_final(
         hashState,
@@ -796,6 +803,17 @@ export const boxSealOpen = async (
 };
 
 /**
+ * Generate a new randomly generated 128-bit salt suitable for use with the key
+ * derivation functions ({@link deriveKey} and its variants).
+ *
+ * @returns The base64 representation of a randomly generated 128-bit salt.
+ */
+export const generateDeriveKeySalt = async () => {
+    await sodium.ready;
+    return await toB64(sodium.randombytes_buf(sodium.crypto_pwhash_SALTBYTES));
+};
+
+/**
  * Derive a key by hashing the given {@link passphrase} using Argon 2id.
  *
  * While the underlying primitive is a password hash (e.g for its storage), this
@@ -847,8 +865,12 @@ export const deriveKey = async (
  * during the derivation (this information will be needed the user's other
  * clients to derive the same result).
  */
-export const deriveSensitiveKey = async (passphrase: string, salt: string) => {
+export const deriveSensitiveKey = async (
+    passphrase: string,
+): Promise<DerivedKey> => {
     await sodium.ready;
+
+    const salt = await generateDeriveKeySalt();
 
     const desiredStrength =
         sodium.crypto_pwhash_MEMLIMIT_SENSITIVE *
@@ -878,7 +900,7 @@ export const deriveSensitiveKey = async (passphrase: string, salt: string) => {
     while (memLimit > minMemLimit) {
         try {
             const key = await deriveKey(passphrase, salt, opsLimit, memLimit);
-            return { key, opsLimit, memLimit };
+            return { key, salt, opsLimit, memLimit };
         } catch {
             opsLimit *= 2;
             memLimit /= 2;
@@ -893,33 +915,54 @@ export const deriveSensitiveKey = async (passphrase: string, salt: string) => {
  */
 export const deriveInteractiveKey = async (
     passphrase: string,
-    salt: string,
-) => {
+): Promise<DerivedKey> => {
+    const salt = await generateDeriveKeySalt();
     const opsLimit = sodium.crypto_pwhash_OPSLIMIT_INTERACTIVE;
     const memLimit = sodium.crypto_pwhash_MEMLIMIT_INTERACTIVE;
 
     const key = await deriveKey(passphrase, salt, opsLimit, memLimit);
-    return { key, opsLimit, memLimit };
+    return { key, salt, opsLimit, memLimit };
 };
 
-export async function generateSaltToDeriveKey() {
-    await sodium.ready;
-    return await toB64(sodium.randombytes_buf(sodium.crypto_pwhash_SALTBYTES));
-}
-
-export async function generateSubKey(
-    key: string,
+/**
+ * Derive a {@link subKeyID}-th subkey of length {@link subKeyLength} bytes by
+ * applying a KDF (Key Derivation Function) for the given {@link key} and the
+ * {@link context}.
+ *
+ * Multiple secret subkeys can be (deterministically) derived from a single
+ * high-entropy key. Knowledge of the derived key does not impact the security
+ * of the key from which it was derived, or of its potential sibling subkeys.
+ *
+ * See: https://doc.libsodium.org/key_derivation
+ *
+ * @param key The key whose subkey we are deriving. In the context of
+ * key derivation, this is usually referred to as the "master key", but we
+ * deemphasize that nomenclature to avoid confusion with the user's master key.
+ *
+ * @param subKeyLength The length of the required subkey.
+ *
+ * @param subKeyID An identifier of the subkey.
+ *
+ * @param context A short but otherwise arbitrary string (non-secret) used to
+ * separate domains in which the subkeys are going to be used.
+ *
+ * @returns The bytes of the subkey.
+ *
+ * Note that returning bytes is a bit unusual, usually we'd return the base64
+ * string from functions. However, this particular function is used in only one
+ * place in our code, and so we adapt the interface for its convenience.
+ */
+export const deriveSubKeyBytes = async (
+    key: BytesOrB64,
     subKeyLength: number,
     subKeyID: number,
     context: string,
-) {
+): Promise<Uint8Array> => {
     await sodium.ready;
-    return await toB64(
-        sodium.crypto_kdf_derive_from_key(
-            subKeyLength,
-            subKeyID,
-            context,
-            await fromB64(key),
-        ),
+    return sodium.crypto_kdf_derive_from_key(
+        subKeyLength,
+        subKeyID,
+        context,
+        await bytes(key),
     );
-}
+};

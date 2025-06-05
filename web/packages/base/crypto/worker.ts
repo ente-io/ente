@@ -21,16 +21,18 @@ export class CryptoWorker {
     generateKey = ei._generateKey;
     generateBlobOrStreamKey = ei._generateBlobOrStreamKey;
     encryptBox = ei._encryptBox;
-    encryptBlobBytes = ei._encryptBlobBytes;
+    encryptBoxUTF8 = ei._encryptBoxUTF8;
     encryptBlob = ei._encryptBlob;
+    encryptBlobBytes = ei._encryptBlobBytes;
     encryptMetadataJSON = ei._encryptMetadataJSON;
     encryptStreamBytes = ei._encryptStreamBytes;
     initChunkEncryption = ei._initChunkEncryption;
     encryptStreamChunk = ei._encryptStreamChunk;
-    decryptBoxBytes = ei._decryptBoxBytes;
     decryptBox = ei._decryptBox;
-    decryptBlobBytes = ei._decryptBlobBytes;
+    decryptBoxBytes = ei._decryptBoxBytes;
+    decryptBoxUTF8 = ei._decryptBoxUTF8;
     decryptBlob = ei._decryptBlob;
+    decryptBlobBytes = ei._decryptBlobBytes;
     decryptMetadataJSON = ei._decryptMetadataJSON;
     decryptStreamBytes = ei._decryptStreamBytes;
     initChunkDecryption = ei._initChunkDecryption;
@@ -41,39 +43,16 @@ export class CryptoWorker {
     generateKeyPair = ei._generateKeyPair;
     boxSeal = ei._boxSeal;
     boxSealOpen = ei._boxSealOpen;
+    generateDeriveKeySalt = ei._generateDeriveKeySalt;
     deriveKey = ei._deriveKey;
     deriveSensitiveKey = ei._deriveSensitiveKey;
     deriveInteractiveKey = ei._deriveInteractiveKey;
+    deriveSubKeyBytes = ei._deriveSubKeyBytes;
 
     // TODO: -- AUDIT BELOW --
 
-    async decryptToUTF8(data: string, nonce: string, key: string) {
-        return libsodium.decryptToUTF8(data, nonce, key);
-    }
-
-    async encryptToB64(data: string, key: string) {
-        return libsodium.encryptToB64(data, key);
-    }
-
     async generateKeyAndEncryptToB64(data: string) {
         return libsodium.generateKeyAndEncryptToB64(data);
-    }
-
-    async encryptUTF8(data: string, key: string) {
-        return libsodium.encryptUTF8(data, key);
-    }
-
-    async generateSaltToDeriveKey() {
-        return libsodium.generateSaltToDeriveKey();
-    }
-
-    async generateSubKey(
-        key: string,
-        subKeyLength: number,
-        subKeyID: number,
-        context: string,
-    ) {
-        return libsodium.generateSubKey(key, subKeyLength, subKeyID, context);
     }
 }
 

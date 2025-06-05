@@ -325,9 +325,11 @@ export const getPublicCollection = async (
 
         const collectionName = (fetchedCollection.name =
             fetchedCollection.name ||
-            (await cryptoWorker.decryptToUTF8(
-                fetchedCollection.encryptedName,
-                fetchedCollection.nameDecryptionNonce,
+            (await cryptoWorker.decryptBoxUTF8(
+                {
+                    encryptedData: fetchedCollection.encryptedName,
+                    nonce: fetchedCollection.nameDecryptionNonce,
+                },
                 collectionKey,
             )));
 
