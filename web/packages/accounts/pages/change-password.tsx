@@ -10,7 +10,7 @@ import { appHomeRoute, stashRedirect } from "ente-accounts/services/redirect";
 import {
     convertBase64ToBuffer,
     convertBufferToBase64,
-    generateLoginSubKey,
+    deriveSRPPassword,
     generateSRPClient,
     generateSRPSetupAttributes,
 } from "ente-accounts/services/srp";
@@ -78,7 +78,7 @@ const Page: React.FC = () => {
             memLimit: kek.memLimit,
         };
 
-        const loginSubKey = await generateLoginSubKey(kek.key);
+        const loginSubKey = await deriveSRPPassword(kek.key);
 
         const { srpUserID, srpSalt, srpVerifier } =
             await generateSRPSetupAttributes(loginSubKey);

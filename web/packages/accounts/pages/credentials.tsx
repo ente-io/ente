@@ -23,7 +23,7 @@ import {
 import { checkSessionValidity } from "ente-accounts/services/session";
 import {
     configureSRP,
-    generateLoginSubKey,
+    deriveSRPPassword,
     generateSRPSetupAttributes,
     loginViaSRP,
 } from "ente-accounts/services/srp";
@@ -292,7 +292,7 @@ const Page: React.FC = () => {
             }
             log.debug(() => `userSRPSetupPending ${!srpAttributes}`);
             if (!srpAttributes) {
-                const loginSubKey = await generateLoginSubKey(kek);
+                const loginSubKey = await deriveSRPPassword(kek);
                 const srpSetupAttributes =
                     await generateSRPSetupAttributes(loginSubKey);
                 await configureSRP(srpSetupAttributes);

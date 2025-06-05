@@ -16,27 +16,28 @@ import type { UserVerificationResponse } from "./user";
 
 const SRP_PARAMS = SRP.params["4096"];
 
-const LOGIN_SUB_KEY_LENGTH = 32;
-const LOGIN_SUB_KEY_ID = 1;
-const LOGIN_SUB_KEY_CONTEXT = "loginctx";
-const LOGIN_SUB_KEY_BYTE_LENGTH = 16;
-
-export const generateLoginSubKey = async (kek: string) => {
+/**
+ * Derive a "password" (which is really an arbitrary binary value, not human
+ * generated) for use as the SRP user password by applying a deterministic KDF
+ * (Key Derivation Function) to the provided {@link kek}.
+ *
+ * @param kek The user's kek (key encryption key) as a base64 string.
+ *
+ * @returns A string that can be used as the SRP user password.
+ */
+export const deriveSRPPassword = async (kek: string) => {
     const cryptoWorker = await sharedCryptoWorker();
     const kekSubKeyString = await cryptoWorker.deriveSubKey(
         kek,
-        LOGIN_SUB_KEY_LENGTH,
-        LOGIN_SUB_KEY_ID,
-        LOGIN_SUB_KEY_CONTEXT,
+        32,
+        1,
+        "loginctx",
     );
     const kekSubKey = await cryptoWorker.fromB64(kekSubKeyString);
 
-    // use first 16 bytes of generated kekSubKey as loginSubKey
-    const loginSubKey = await cryptoWorker.toB64(
-        kekSubKey.slice(0, LOGIN_SUB_KEY_BYTE_LENGTH),
-    );
-
-    return loginSubKey;
+    // Use the first 16 bytes (128 bits) of the KEK's KDF subkey as the SRP
+    // password (instead of entire 32 bytes).
+    return await cryptoWorker.toB64(kekSubKey.slice(0, 16));
 };
 
 export const configureSRP = async ({
@@ -109,7 +110,7 @@ export const loginViaSRP = async (
     kek: string,
 ): Promise<UserVerificationResponse> => {
     try {
-        const loginSubKey = await generateLoginSubKey(kek);
+        const loginSubKey = await deriveSRPPassword(kek);
         const srpClient = await generateSRPClient(
             srpAttributes.srpSalt,
             srpAttributes.srpUserID,
@@ -214,7 +215,7 @@ export async function generateKeyAndSRPAttributes(
         nonce: secretKeyDecryptionNonce,
     } = await cryptoWorker.encryptBox(keyPair.privateKey, masterKey);
 
-    const loginSubKey = await generateLoginSubKey(kek.key);
+    const loginSubKey = await deriveSRPPassword(kek.key);
 
     const srpSetupAttributes = await generateSRPSetupAttributes(loginSubKey);
 

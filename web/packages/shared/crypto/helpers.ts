@@ -4,7 +4,6 @@ import { masterKeyFromSession } from "ente-base/session";
 import { getData, setData, setLSUser } from "ente-shared/storage/localStorage";
 import { type SessionKey, setKey } from "ente-shared/storage/sessionStorage";
 
-
 export async function decryptAndStoreToken(
     keyAttributes: KeyAttributes,
     masterKey: string,
@@ -62,7 +61,6 @@ export async function generateAndSaveIntermediateKeyAttributes(
     setData("keyAttributes", intermediateKeyAttributes);
     return intermediateKeyAttributes;
 }
-
 
 export const saveKeyInSessionStore = async (
     keyType: SessionKey,
