@@ -507,3 +507,18 @@ export const deriveInteractiveKey = (
     inWorker()
         ? ei._deriveInteractiveKey(passphrase)
         : sharedWorker().then((w) => w.deriveInteractiveKey(passphrase));
+
+/**
+ * Derive a subkey of the given {@link key} using the specified parameters.
+ */
+export const deriveSubKey = async (
+    key: string,
+    subKeyLength: number,
+    subKeyID: number,
+    context: string,
+) =>
+    inWorker()
+        ? ei._deriveSubKey(key, subKeyLength, subKeyID, context)
+        : sharedWorker().then((w) =>
+              w.deriveSubKey(key, subKeyLength, subKeyID, context),
+          );

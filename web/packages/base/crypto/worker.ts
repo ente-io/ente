@@ -47,20 +47,12 @@ export class CryptoWorker {
     deriveKey = ei._deriveKey;
     deriveSensitiveKey = ei._deriveSensitiveKey;
     deriveInteractiveKey = ei._deriveInteractiveKey;
+    deriveSubKey = ei._deriveSubKey;
 
     // TODO: -- AUDIT BELOW --
 
     async generateKeyAndEncryptToB64(data: string) {
         return libsodium.generateKeyAndEncryptToB64(data);
-    }
-
-    async generateSubKey(
-        key: string,
-        subKeyLength: number,
-        subKeyID: number,
-        context: string,
-    ) {
-        return libsodium.generateSubKey(key, subKeyLength, subKeyID, context);
     }
 }
 

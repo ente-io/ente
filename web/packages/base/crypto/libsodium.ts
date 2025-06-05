@@ -924,12 +924,33 @@ export const deriveInteractiveKey = async (
     return { key, salt, opsLimit, memLimit };
 };
 
-export async function generateSubKey(
+/**
+ * Derive a {@link subKeyID}-th subkey of length {@link subKeyLength} bytes
+ * using the given {@link key} and the {@link context}.
+ *
+ * Multiple secret subkeys can be (deterministically) derived from a single
+ * high-entropy key. Knowledge of the derived key does not impact the security
+ * of the key from which it was derived, or of its potential sibling subkeys.
+ *
+ * See: https://doc.libsodium.org/key_derivation
+ *
+ * @param key The key whose subkey we are deriving. In the context of key
+ * derivation, this is usually referred to as the "master key", but we try to
+ * deemphasize that nomenclature to avoid confusion with the user's master key.
+ *
+ * @param subKeyLength The length of the required subkey.
+ *
+ * @param subKeyID An identifier of the subkey.
+ *
+ * @param context A short but otherwise arbitrary string (non-secret) used to
+ * separate domains in which the subkeys are going to be used.
+ */
+export const deriveSubKey = async (
     key: string,
     subKeyLength: number,
     subKeyID: number,
     context: string,
-) {
+) => {
     await sodium.ready;
     return await toB64(
         sodium.crypto_kdf_derive_from_key(
@@ -939,4 +960,4 @@ export async function generateSubKey(
             await fromB64(key),
         ),
     );
-}
+};
