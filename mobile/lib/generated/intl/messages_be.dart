@@ -49,6 +49,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
             "Якая асноўная прычына выдалення вашага ўліковага запісу?"),
         "backup": MessageLookupByLibrary.simpleMessage("Рэзервовая копія"),
+        "birhtdayNotifications":
+            MessageLookupByLibrary.simpleMessage("Birhtday notifications"),
+        "birthdays": MessageLookupByLibrary.simpleMessage("Birthdays"),
         "cancel": MessageLookupByLibrary.simpleMessage("Скасаваць"),
         "change": MessageLookupByLibrary.simpleMessage("Змяніць"),
         "changeEmail": MessageLookupByLibrary.simpleMessage(
@@ -143,6 +146,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "general": MessageLookupByLibrary.simpleMessage("Асноўныя"),
         "generatingEncryptionKeys": MessageLookupByLibrary.simpleMessage(
             "Генерацыя ключоў шыфравання..."),
+        "happyBirthday":
+            MessageLookupByLibrary.simpleMessage("Happy birthday! 🥳"),
         "howItWorks": MessageLookupByLibrary.simpleMessage("Як гэта працуе"),
         "ignoreUpdate": MessageLookupByLibrary.simpleMessage("Iгнараваць"),
         "incorrectPasswordTitle":
@@ -205,6 +210,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "privacyPolicyTitle":
             MessageLookupByLibrary.simpleMessage("Палітыка прыватнасці"),
         "rateUs": MessageLookupByLibrary.simpleMessage("Ацаніце нас"),
+        "receiveRemindersOnBirthdays": MessageLookupByLibrary.simpleMessage(
+            "Receive reminders when it\'s someone\'s birthday. Tapping on the notification will take you to photos of the birthday person."),
         "recover": MessageLookupByLibrary.simpleMessage("Аднавіць"),
         "recoverAccount":
             MessageLookupByLibrary.simpleMessage("Аднавіць уліковы запіс"),

@@ -110,7 +110,7 @@ class NotificationSettingsScreen extends StatelessWidget {
                             sectionOptionSpacing,
                             MenuItemWidget(
                               captionedTextWidget: CaptionedTextWidget(
-                                title: "Birhtday notifications",
+                                title: S.of(context).birhtdayNotifications,
                               ),
                               menuItemColor: colorScheme.fillFaint,
                               trailingWidget: ToggleSwitchWidget(
@@ -130,8 +130,9 @@ class NotificationSettingsScreen extends StatelessWidget {
                               isGestureDetectorDisabled: true,
                             ),
                             MenuSectionDescriptionWidget(
-                                content:
-                                    "Receive reminders when it's someone's birthday. Tapping on the notification will take you to photos of the birthday person."),
+                              content:
+                                  S.of(context).receiveRemindersOnBirthdays,
+                            ),
                           ],
                         ),
                       ],

@@ -26,6 +26,9 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("மீண்டும் வருக!"),
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
             "உங்கள் கணக்கை நீக்குவதற்கான முக்கிய காரணம் என்ன?"),
+        "birhtdayNotifications":
+            MessageLookupByLibrary.simpleMessage("Birhtday notifications"),
+        "birthdays": MessageLookupByLibrary.simpleMessage("Birthdays"),
         "cancel": MessageLookupByLibrary.simpleMessage("ரத்து செய்"),
         "clickToInstallOurBestVersionYet": MessageLookupByLibrary.simpleMessage(
             "Click to install our best version yet"),
@@ -50,6 +53,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "enterYourEmailAddress": MessageLookupByLibrary.simpleMessage(
             "உங்கள் மின்னஞ்சல் முகவரியை உள்ளிடவும்"),
         "feedback": MessageLookupByLibrary.simpleMessage("பின்னூட்டம்"),
+        "happyBirthday":
+            MessageLookupByLibrary.simpleMessage("Happy birthday! 🥳"),
         "invalidEmailAddress":
             MessageLookupByLibrary.simpleMessage("தவறான மின்னஞ்சல் முகவரி"),
         "kindlyHelpUsWithThisInformation": MessageLookupByLibrary.simpleMessage(
@@ -60,6 +65,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "onThisDay": MessageLookupByLibrary.simpleMessage("On this day"),
         "onThisDayNotificationExplanation": MessageLookupByLibrary.simpleMessage(
             "Receive reminders about memories from this day in previous years."),
+        "receiveRemindersOnBirthdays": MessageLookupByLibrary.simpleMessage(
+            "Receive reminders when it\'s someone\'s birthday. Tapping on the notification will take you to photos of the birthday person."),
         "selectReason": MessageLookupByLibrary.simpleMessage(
             "காரணத்தைத் தேர்ந்தெடுக்கவும்"),
         "sorryWeHadToPauseYourBackups": MessageLookupByLibrary.simpleMessage(

@@ -664,14 +664,14 @@ class MemoriesCacheService {
         );
         continue;
       }
+      final s = await LanguageService.s;
       await NotificationService.instance.scheduleNotification(
         memory.personName != null
-            ? "Happy birthday to ${memory.personName}! 🎉"
-            : "Happy birthday! 🥳",
-        // TODO:lau (after mergin main): extract strings
+            ? s.happyBirthdayToPerson(memory.personName!)
+            : s.happyBirthday,
         id: memory.id.hashCode,
         channelID: "birthday",
-        channelName: "Birthdays",
+        channelName: s.birthdays,
         payload: "birthday_${memory.personID}",
         dateTime: scheduleTime,
         timeoutDurationAndroid: const Duration(hours: 17),

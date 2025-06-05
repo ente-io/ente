@@ -458,7 +458,10 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("バックアップされたアイテムがここに表示されます"),
         "backupVideos": MessageLookupByLibrary.simpleMessage("動画をバックアップ"),
         "beach": MessageLookupByLibrary.simpleMessage("砂浜と海"),
+        "birhtdayNotifications":
+            MessageLookupByLibrary.simpleMessage("Birhtday notifications"),
         "birthday": MessageLookupByLibrary.simpleMessage("誕生日"),
+        "birthdays": MessageLookupByLibrary.simpleMessage("Birthdays"),
         "blackFridaySale": MessageLookupByLibrary.simpleMessage("ブラックフライデーセール"),
         "blog": MessageLookupByLibrary.simpleMessage("ブログ"),
         "cachedData": MessageLookupByLibrary.simpleMessage("キャッシュデータ"),
@@ -888,6 +891,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "guestView": MessageLookupByLibrary.simpleMessage("ゲストビュー"),
         "guestViewEnablePreSteps": MessageLookupByLibrary.simpleMessage(
             "アプリのロックを有効にするには、システム設定でデバイスのパスコードまたは画面ロックを設定してください。"),
+        "happyBirthday":
+            MessageLookupByLibrary.simpleMessage("Happy birthday! 🥳"),
         "hearUsExplanation": MessageLookupByLibrary.simpleMessage(
             "私たちはアプリのインストールを追跡していませんが、もしよければ、Enteをお知りになった場所を教えてください！"),
         "hearUsWhereTitle": MessageLookupByLibrary.simpleMessage(
@@ -1319,6 +1324,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "reassignMe": MessageLookupByLibrary.simpleMessage("\"自分\" を再割り当て"),
         "reassignedToName": m68,
         "reassigningLoading": MessageLookupByLibrary.simpleMessage("再割り当て中..."),
+        "receiveRemindersOnBirthdays": MessageLookupByLibrary.simpleMessage(
+            "Receive reminders when it\'s someone\'s birthday. Tapping on the notification will take you to photos of the birthday person."),
         "recover": MessageLookupByLibrary.simpleMessage("復元"),
         "recoverAccount": MessageLookupByLibrary.simpleMessage("アカウントを復元"),
         "recoverButton": MessageLookupByLibrary.simpleMessage("復元"),

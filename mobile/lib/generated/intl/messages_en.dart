@@ -137,6 +137,8 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m41(currentlyProcessing, totalCount) =>
       "Processing ${currentlyProcessing} / ${totalCount}";
 
+  static String m117(name) => "Happy birthday to ${name}! 🎉";
+
   static String m42(name) => "Hiking with ${name}";
 
   static String m43(count) =>
@@ -226,7 +228,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m77(snapshotLength, searchLength) =>
       "Sections length mismatch: ${snapshotLength} != ${searchLength}";
 
-  static String m117(count) => "${count} selected";
+  static String m118(count) => "${count} selected";
 
   static String m78(count) => "${count} selected";
 
@@ -551,7 +553,10 @@ class MessageLookup extends MessageLookupByLibrary {
             "Items that have been backed up will show up here"),
         "backupVideos": MessageLookupByLibrary.simpleMessage("Backup videos"),
         "beach": MessageLookupByLibrary.simpleMessage("Sand and sea"),
+        "birhtdayNotifications":
+            MessageLookupByLibrary.simpleMessage("Birhtday notifications"),
         "birthday": MessageLookupByLibrary.simpleMessage("Birthday"),
+        "birthdays": MessageLookupByLibrary.simpleMessage("Birthdays"),
         "blackFridaySale":
             MessageLookupByLibrary.simpleMessage("Black Friday Sale"),
         "blog": MessageLookupByLibrary.simpleMessage("Blog"),
@@ -1058,6 +1063,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "guestView": MessageLookupByLibrary.simpleMessage("Guest view"),
         "guestViewEnablePreSteps": MessageLookupByLibrary.simpleMessage(
             "To enable guest view, please setup device passcode or screen lock in your system settings."),
+        "happyBirthday":
+            MessageLookupByLibrary.simpleMessage("Happy birthday! 🥳"),
+        "happyBirthdayToPerson": m117,
         "hearUsExplanation": MessageLookupByLibrary.simpleMessage(
             "We don\'t track app installs. It\'d help if you told us where you found us!"),
         "hearUsWhereTitle": MessageLookupByLibrary.simpleMessage(
@@ -1546,6 +1554,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "reassignedToName": m68,
         "reassigningLoading":
             MessageLookupByLibrary.simpleMessage("Reassigning..."),
+        "receiveRemindersOnBirthdays": MessageLookupByLibrary.simpleMessage(
+            "Receive reminders when it\'s someone\'s birthday. Tapping on the notification will take you to photos of the birthday person."),
         "recover": MessageLookupByLibrary.simpleMessage("Recover"),
         "recoverAccount":
             MessageLookupByLibrary.simpleMessage("Recover account"),
@@ -1755,7 +1765,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Select your face"),
         "selectYourPlan":
             MessageLookupByLibrary.simpleMessage("Select your plan"),
-        "selectedAlbums": m117,
+        "selectedAlbums": m118,
         "selectedFilesAreNotOnEnte": MessageLookupByLibrary.simpleMessage(
             "Selected files are not on Ente"),
         "selectedFoldersWillBeEncryptedAndBackedUp":

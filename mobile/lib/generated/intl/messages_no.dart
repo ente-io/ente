@@ -517,7 +517,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "backupVideos":
             MessageLookupByLibrary.simpleMessage("Sikkerhetskopier videoer"),
         "beach": MessageLookupByLibrary.simpleMessage("Sand og sjø"),
+        "birhtdayNotifications":
+            MessageLookupByLibrary.simpleMessage("Birhtday notifications"),
         "birthday": MessageLookupByLibrary.simpleMessage("Bursdag"),
+        "birthdays": MessageLookupByLibrary.simpleMessage("Birthdays"),
         "blackFridaySale":
             MessageLookupByLibrary.simpleMessage("Black Friday salg"),
         "blog": MessageLookupByLibrary.simpleMessage("Blogg"),
@@ -1027,6 +1030,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "guestView": MessageLookupByLibrary.simpleMessage("Gjestevisning"),
         "guestViewEnablePreSteps": MessageLookupByLibrary.simpleMessage(
             "For å aktivere gjestevisning, vennligst konfigurer enhetens passord eller skjermlås i systeminnstillingene."),
+        "happyBirthday":
+            MessageLookupByLibrary.simpleMessage("Happy birthday! 🥳"),
         "hearUsExplanation": MessageLookupByLibrary.simpleMessage(
             "Vi sporer ikke app-installasjoner. Det hadde vært til hjelp om du fortalte oss hvor du fant oss!"),
         "hearUsWhereTitle": MessageLookupByLibrary.simpleMessage(
@@ -1516,6 +1521,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "reassignedToName": m68,
         "reassigningLoading":
             MessageLookupByLibrary.simpleMessage("Tildeler..."),
+        "receiveRemindersOnBirthdays": MessageLookupByLibrary.simpleMessage(
+            "Receive reminders when it\'s someone\'s birthday. Tapping on the notification will take you to photos of the birthday person."),
         "recover": MessageLookupByLibrary.simpleMessage("Gjenopprett"),
         "recoverAccount":
             MessageLookupByLibrary.simpleMessage("Gjenopprett konto"),

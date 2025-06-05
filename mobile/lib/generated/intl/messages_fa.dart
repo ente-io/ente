@@ -90,6 +90,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "backedUpFolders":
             MessageLookupByLibrary.simpleMessage("پوشه‌های پشتیبان گیری شده"),
         "backup": MessageLookupByLibrary.simpleMessage("پشتیبان گیری"),
+        "birhtdayNotifications":
+            MessageLookupByLibrary.simpleMessage("Birhtday notifications"),
+        "birthdays": MessageLookupByLibrary.simpleMessage("Birthdays"),
         "blog": MessageLookupByLibrary.simpleMessage("وبلاگ"),
         "cancel": MessageLookupByLibrary.simpleMessage("لغو"),
         "cannotDeleteSharedFiles": MessageLookupByLibrary.simpleMessage(
@@ -220,6 +223,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "grantFullAccessPrompt": MessageLookupByLibrary.simpleMessage(
             "لطفا اجازه دسترسی به تمام عکس‌ها را در تنظیمات برنامه بدهید"),
         "grantPermission": MessageLookupByLibrary.simpleMessage("دسترسی دادن"),
+        "happyBirthday":
+            MessageLookupByLibrary.simpleMessage("Happy birthday! 🥳"),
         "hearUsExplanation": MessageLookupByLibrary.simpleMessage(
             "ما نصب برنامه را ردیابی نمی‌کنیم. اگر بگویید کجا ما را پیدا کردید، به ما کمک می‌کند!"),
         "hearUsWhereTitle": MessageLookupByLibrary.simpleMessage(
@@ -299,6 +304,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "privateSharing":
             MessageLookupByLibrary.simpleMessage("اشتراک گذاری خصوصی"),
         "rateUsOnStore": m67,
+        "receiveRemindersOnBirthdays": MessageLookupByLibrary.simpleMessage(
+            "Receive reminders when it\'s someone\'s birthday. Tapping on the notification will take you to photos of the birthday person."),
         "recover": MessageLookupByLibrary.simpleMessage("بازیابی"),
         "recoverAccount":
             MessageLookupByLibrary.simpleMessage("بازیابی حساب کاربری"),
