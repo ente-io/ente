@@ -615,13 +615,13 @@ export type PersonSuggestionUpdates = Map<
  *
  * @param updates The changes to make. See {@link PersonSuggestionUpdates}.
  *
- * @param masterKey The user's masterKey, which is is used to encrypt and
- * decrypt the entity key associated with cgroups.
+ * @param masterKey The user's masterKey (as a base64 string), which is is used
+ * to encrypt and decrypt the entity key associated with cgroups.
  */
 export const _applyPersonSuggestionUpdates = async (
     cgroup: CGroup,
     updates: PersonSuggestionUpdates,
-    masterKey: Uint8Array,
+    masterKey: string,
 ) => {
     const localClusters = await savedFaceClusters();
 

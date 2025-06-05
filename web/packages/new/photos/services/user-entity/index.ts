@@ -123,13 +123,10 @@ export const savedCGroups = (): Promise<CGroup[]> =>
  * It uses local state to remember the latest entry the last time it did a pull,
  * so each subsequent pull is a lightweight diff.
  *
- * @param masterKey The user's masterKey, which is is used to encrypt and
- * decrypt the entity key.
+ * @param masterKey The user's masterKey (as a base64 string), which is is used
+ * to encrypt and decrypt the entity key.
  */
-export const pullUserEntities = async (
-    type: EntityType,
-    masterKey: Uint8Array,
-) => {
+export const pullUserEntities = async (type: EntityType, masterKey: string) => {
     const entityKeyB64 = await getOrCreateEntityKeyB64(type, masterKey);
 
     let sinceTime = (await savedLatestUpdatedAt(type)) ?? 0;
@@ -176,17 +173,17 @@ const isGzipped = (type: EntityType) => type == "cgroup";
 export const addUserEntity = async (
     type: EntityType,
     data: unknown,
-    masterKey: Uint8Array,
+    masterKey: string,
 ) =>
     await postUserEntity(
         type,
         await encryptedUserEntityData(type, data, masterKey),
     );
 
-export const encryptedUserEntityData = async (
+const encryptedUserEntityData = async (
     type: EntityType,
     data: unknown,
-    masterKey: Uint8Array,
+    masterKey: string,
 ) => {
     const entityKeyB64 = await getOrCreateEntityKeyB64(type, masterKey);
 
@@ -201,13 +198,13 @@ export const encryptedUserEntityData = async (
  * Update the given user entities (both on remote and locally), creating them if
  * they don't exist.
  *
- * @param masterKey The user's masterKey, which is is used to encrypt and
- * decrypt the entity key.
+ * @param masterKey The user's masterKey (as a base64 string), which is is used
+ * to encrypt and decrypt the entity key.
  */
 export const updateOrCreateUserEntities = async (
     type: EntityType,
     entities: LocalUserEntity[],
-    masterKey: Uint8Array,
+    masterKey: string,
 ) =>
     await Promise.all(
         entities.map(({ id, data }) =>
@@ -234,10 +231,7 @@ export const updateOrCreateUserEntities = async (
  *
  * See also, [Note: User entity keys].
  */
-const getOrCreateEntityKeyB64 = async (
-    type: EntityType,
-    masterKey: Uint8Array,
-) => {
+const getOrCreateEntityKeyB64 = async (type: EntityType, masterKey: string) => {
     // See if we already have it locally.
     const saved = await savedRemoteUserEntityKey(type);
     if (saved) return decryptEntityKey(saved, masterKey);
@@ -264,7 +258,7 @@ const getOrCreateEntityKeyB64 = async (
     return result;
 };
 
-const generateEncryptedEntityKey = async (masterKey: Uint8Array) => {
+const generateEncryptedEntityKey = async (masterKey: string) => {
     const { encryptedData, nonce } = await encryptBox(
         await generateBlobOrStreamKey(),
         masterKey,
@@ -278,7 +272,7 @@ const generateEncryptedEntityKey = async (masterKey: Uint8Array) => {
  */
 const decryptEntityKey = async (
     remote: RemoteUserEntityKey,
-    masterKey: Uint8Array,
+    masterKey: string,
 ) =>
     decryptBox(
         {
