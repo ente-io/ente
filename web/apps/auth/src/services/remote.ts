@@ -222,7 +222,7 @@ export const authenticatorEntityDiff = async (
 
 export const AuthenticatorEntityKey = z.object({
     /**
-     * The authenticator entity key (base 64 string), encrypted with the user's
+     * The authenticator entity key (base64 string), encrypted with the user's
      * master key.
      */
     encryptedKey: z.string(),

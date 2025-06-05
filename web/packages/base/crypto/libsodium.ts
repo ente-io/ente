@@ -111,7 +111,7 @@ export const toHex = async (input: string) => {
 };
 
 /**
- * Convert a hex string to the base 64 representation of the bytes that the hex
+ * Convert a hex string to the base64 representation of the bytes that the hex
  * string encodes.
  *
  * This is the inverse of {@link toHex}.
