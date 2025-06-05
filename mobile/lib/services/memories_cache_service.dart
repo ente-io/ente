@@ -6,6 +6,7 @@ import "package:flutter/material.dart" show BuildContext;
 import "package:logging/logging.dart";
 import "package:path_provider/path_provider.dart";
 import "package:photos/core/event_bus.dart";
+import "package:photos/db/files_db.dart";
 import "package:photos/db/memories_db.dart";
 import "package:photos/events/files_updated_event.dart";
 import "package:photos/events/memories_changed_event.dart";
@@ -205,20 +206,10 @@ class MemoriesCacheService {
       _logger.info("No memories cache found");
       return null;
     }
-    final allFiles = Set<EnteFile>.from(
-      await SearchService.instance.getAllFilesForSearch(),
-    );
-    final allFileIdsToFile = <int, EnteFile>{};
-    for (final file in allFiles) {
-      if (file.uploadedFileID != null) {
-        allFileIdsToFile[file.uploadedFileID!] = file;
-      }
-    }
     try {
       final bytes = await file.readAsBytes();
       final jsonString = String.fromCharCodes(bytes);
-      final cache =
-          MemoriesCache.decodeFromJsonString(jsonString, allFileIdsToFile);
+      final cache = MemoriesCache.decodeFromJsonString(jsonString);
       _logger.info("Reading memories cache result from disk done");
       return cache;
     } catch (e, s) {
@@ -232,25 +223,32 @@ class MemoriesCacheService {
     try {
       _logger.info('Processing disk cache memories to smart memories');
       final List<SmartMemory> memories = [];
-      final allFiles = Set<EnteFile>.from(
-        await SearchService.instance.getAllFilesForSearch(),
-      );
-      final allFileIdsToFile = <int, EnteFile>{};
-      for (final file in allFiles) {
-        if (file.uploadedFileID != null) {
-          allFileIdsToFile[file.uploadedFileID!] = file;
+      final seenTimes = await _memoriesDB.getSeenTimes();
+      final minimalFileIDs = <int>{};
+      for (final ToShowMemory memory in cache.toShowMemories) {
+        if (memory.shouldShowNow()) {
+          minimalFileIDs.addAll(memory.fileUploadedIDs);
         }
       }
-      final seenTimes = await _memoriesDB.getSeenTimes();
+      final minimalFiles = await FilesDB.instance.getFilesFromIDs(
+        minimalFileIDs.toList(),
+        collectionsToIgnore: SearchService.instance.ignoreCollections(),
+      );
+      final minimalFileIdsToFile = <int, EnteFile>{};
+      for (final file in minimalFiles) {
+        if (file.uploadedFileID != null) {
+          minimalFileIdsToFile[file.uploadedFileID!] = file;
+        }
+      }
 
       for (final ToShowMemory memory in cache.toShowMemories) {
         if (memory.shouldShowNow()) {
           final smartMemory = SmartMemory(
             memory.fileUploadedIDs
-                .where((fileID) => allFileIdsToFile.containsKey(fileID))
+                .where((fileID) => minimalFileIdsToFile.containsKey(fileID))
                 .map(
                   (fileID) =>
-                      Memory.fromFile(allFileIdsToFile[fileID]!, seenTimes),
+                      Memory.fromFile(minimalFileIdsToFile[fileID]!, seenTimes),
                 )
                 .toList(),
             memory.type,

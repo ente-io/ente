@@ -272,6 +272,7 @@ class SmartMemoriesService {
       // Trip memories
       final (tripMemories, bases) = await _getTripsResults(
         allFiles,
+        allFileIdsToFile,
         now,
         oldCache.tripsShownLogs,
         surfaceAll: debugSurfaceAll,
@@ -851,6 +852,7 @@ class SmartMemoriesService {
 
   static Future<(List<TripMemory>, List<BaseLocation>)> _getTripsResults(
     Iterable<EnteFile> allFiles,
+    Map<int, EnteFile> allFileIdsToFile,
     DateTime currentTime,
     List<TripsShownLog> shownTrips, {
     bool surfaceAll = false,
@@ -956,7 +958,13 @@ class SmartMemoriesService {
           const Duration(days: 90),
         ),
       );
-      baseLocations.add(BaseLocation(files, location, isCurrent));
+      baseLocations.add(
+        BaseLocation(
+          files.map((file) => file.uploadedFileID!).toList(),
+          location,
+          isCurrent,
+        ),
+      );
     }
 
     // Identify trip locations
@@ -1108,8 +1116,11 @@ class SmartMemoriesService {
       for (final baseLocation in baseLocations) {
         String name =
             "Base (${baseLocation.isCurrentBase ? 'current' : 'old'})";
+        final files = baseLocation.fileIDs
+            .map((fileID) => allFileIdsToFile[fileID]!)
+            .toList();
         final String? locationName = _tryFindLocationName(
-          Memory.fromFiles(baseLocation.files, seenTimes),
+          Memory.fromFiles(files, seenTimes),
           cities,
           base: true,
         );
@@ -1119,7 +1130,7 @@ class SmartMemoriesService {
         }
         memoryResults.add(
           TripMemory(
-            Memory.fromFiles(baseLocation.files, seenTimes),
+            Memory.fromFiles(files, seenTimes),
             nowInMicroseconds,
             windowEnd,
             baseLocation.location,
