@@ -510,15 +510,17 @@ export const deriveInteractiveKey = (
 
 /**
  * Derive a subkey of the given {@link key} using the specified parameters.
+ *
+ * @returns the bytes of the derived subkey.
  */
-export const deriveSubKey = async (
+export const deriveSubKeyBytes = async (
     key: string,
     subKeyLength: number,
     subKeyID: number,
     context: string,
-) =>
+): Promise<Uint8Array> =>
     inWorker()
-        ? ei._deriveSubKey(key, subKeyLength, subKeyID, context)
+        ? ei._deriveSubKeyBytes(key, subKeyLength, subKeyID, context)
         : sharedWorker().then((w) =>
-              w.deriveSubKey(key, subKeyLength, subKeyID, context),
+              w.deriveSubKeyBytes(key, subKeyLength, subKeyID, context),
           );

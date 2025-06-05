@@ -1,5 +1,5 @@
 import type { KeyAttributes } from "ente-accounts/services/user";
-import { sharedCryptoWorker } from "ente-base/crypto";
+import { deriveSubKeyBytes, sharedCryptoWorker, toB64 } from "ente-base/crypto";
 import log from "ente-base/log";
 import { getToken } from "ente-shared/storage/localStorage/helpers";
 import { SRP, SrpClient } from "fast-srp-hap";
@@ -26,18 +26,10 @@ const SRP_PARAMS = SRP.params["4096"];
  * @returns A string that can be used as the SRP user password.
  */
 export const deriveSRPPassword = async (kek: string) => {
-    const cryptoWorker = await sharedCryptoWorker();
-    const kekSubKeyString = await cryptoWorker.deriveSubKey(
-        kek,
-        32,
-        1,
-        "loginctx",
-    );
-    const kekSubKey = await cryptoWorker.fromB64(kekSubKeyString);
-
+    const kekSubKeyBytes = await deriveSubKeyBytes(kek, 32, 1, "loginctx");
     // Use the first 16 bytes (128 bits) of the KEK's KDF subkey as the SRP
     // password (instead of entire 32 bytes).
-    return await cryptoWorker.toB64(kekSubKey.slice(0, 16));
+    return toB64(kekSubKeyBytes.slice(0, 16));
 };
 
 export const configureSRP = async ({

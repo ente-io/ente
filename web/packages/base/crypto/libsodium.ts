@@ -935,7 +935,7 @@ export const deriveInteractiveKey = async (
  *
  * See: https://doc.libsodium.org/key_derivation
  *
- * @param key The key (base64) whose subkey we are deriving. In the context of
+ * @param key The key whose subkey we are deriving. In the context of
  * key derivation, this is usually referred to as the "master key", but we
  * deemphasize that nomenclature to avoid confusion with the user's master key.
  *
@@ -946,21 +946,23 @@ export const deriveInteractiveKey = async (
  * @param context A short but otherwise arbitrary string (non-secret) used to
  * separate domains in which the subkeys are going to be used.
  *
- * @returns The subkey as a base64 string.
+ * @returns The bytes of the subkey.
+ *
+ * Note that returning bytes is a bit unusual, usually we'd return the base64
+ * string from functions. However, this particular function is used in only one
+ * place in our code, and so we adapt the interface for its convenience.
  */
-export const deriveSubKey = async (
-    key: string,
+export const deriveSubKeyBytes = async (
+    key: BytesOrB64,
     subKeyLength: number,
     subKeyID: number,
     context: string,
-) => {
+): Promise<Uint8Array> => {
     await sodium.ready;
-    return toB64(
-        sodium.crypto_kdf_derive_from_key(
-            subKeyLength,
-            subKeyID,
-            context,
-            await fromB64(key),
-        ),
+    return sodium.crypto_kdf_derive_from_key(
+        subKeyLength,
+        subKeyID,
+        context,
+        await bytes(key),
     );
 };

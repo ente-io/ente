@@ -39,4 +39,4 @@ export const _generateDeriveKeySalt = libsodium.generateDeriveKeySalt;
 export const _deriveKey = libsodium.deriveKey;
 export const _deriveSensitiveKey = libsodium.deriveSensitiveKey;
 export const _deriveInteractiveKey = libsodium.deriveInteractiveKey;
-export const _deriveSubKey = libsodium.deriveSubKey;
+export const _deriveSubKeyBytes = libsodium.deriveSubKeyBytes;

@@ -47,7 +47,7 @@ export class CryptoWorker {
     deriveKey = ei._deriveKey;
     deriveSensitiveKey = ei._deriveSensitiveKey;
     deriveInteractiveKey = ei._deriveInteractiveKey;
-    deriveSubKey = ei._deriveSubKey;
+    deriveSubKeyBytes = ei._deriveSubKeyBytes;
 
     // TODO: -- AUDIT BELOW --
 
