@@ -6,7 +6,7 @@ import {
     sharedCryptoWorker,
     toHex,
 } from "ente-base/crypto";
-import { masterKeyFromSession } from "ente-base/session";
+import { masterKeyB64FromSession } from "ente-base/session";
 import { getData, setData } from "ente-shared/storage/localStorage";
 import { putUserRecoveryKeyAttributes } from "./user";
 
@@ -57,12 +57,16 @@ export const recoveryKeyB64ToMnemonic = async (recoveryKeyB64: string) =>
     bip39.entropyToMnemonic(await toHex(recoveryKeyB64));
 
 /**
- * Return the (decrypted) recovery key of the logged in user.
+ * Return the (decrypted) recovery key of the logged in user, reading it from
+ * local storage.
+ *
+ * As a fallback for pre-recovery-key accounts, this function will also generate
+ * a new recovery key if needed.
  *
  * @returns The user's base64 encoded recovery key.
  */
 export const getUserRecoveryKeyB64 = async () => {
-    const masterKey = await masterKeyFromSession();
+    const masterKey = await masterKeyB64FromSession();
 
     const keyAttributes: KeyAttributes = getData("keyAttributes");
     const { recoveryKeyEncryptedWithMasterKey, recoveryKeyDecryptionNonce } =
@@ -85,12 +89,12 @@ export const getUserRecoveryKeyB64 = async () => {
  * Generate a new recovery key, tell remote about it, update our local state,
  * and then return it.
  *
- * This function will be used only for legacy users for whom we did not generate
- * recovery keys during sign up.
+ * This function will be used only for (_very_) old accounts for whom we did not
+ * generate recovery keys during sign up.
  *
  * @returns a new base64 encoded recovery key.
  */
-const createNewRecoveryKey = async (masterKey: Uint8Array) => {
+const createNewRecoveryKey = async (masterKey: string) => {
     const existingAttributes = getData("keyAttributes");
 
     const cryptoWorker = await sharedCryptoWorker();

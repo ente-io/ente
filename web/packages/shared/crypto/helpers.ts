@@ -1,6 +1,6 @@
 import type { KeyAttributes } from "ente-accounts/services/user";
 import { sharedCryptoWorker } from "ente-base/crypto";
-import { masterKeyFromSession } from "ente-base/session";
+import { masterKeyB64FromSession } from "ente-base/session";
 import { getData, setData, setLSUser } from "ente-shared/storage/localStorage";
 import { type SessionKey, setKey } from "ente-shared/storage/sessionStorage";
 
@@ -87,7 +87,7 @@ export const decryptDeleteAccountChallenge = async (
     encryptedChallenge: string,
 ) => {
     const cryptoWorker = await sharedCryptoWorker();
-    const masterKey = await masterKeyFromSession();
+    const masterKey = await masterKeyB64FromSession();
     const keyAttributes = getData("keyAttributes");
     const secretKey = await cryptoWorker.decryptBox(
         {
