@@ -1,6 +1,5 @@
 import { z } from "zod/v4";
-import { decryptBoxBytes } from "./crypto";
-import { toB64 } from "./crypto/libsodium";
+import { decryptBoxBytes, toB64 } from "./crypto";
 
 /**
  * Remove all data stored in session storage (data tied to the browser tab).
