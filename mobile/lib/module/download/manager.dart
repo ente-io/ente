@@ -304,8 +304,7 @@ class DownloadManager {
     try {
       for (int i = 1; i <= totalChunks; i++) {
         final chunkFile = File(_getChunkPath(basePath, i));
-        final bytes = await chunkFile.readAsBytes();
-        sink.add(bytes);
+        await sink.addStream(chunkFile.openRead());
         await chunkFile.delete();
       }
     } finally {
