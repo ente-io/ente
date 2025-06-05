@@ -339,6 +339,16 @@ export const encryptBlob = async (
 };
 
 /**
+ * Encrypt the provided JSON value (using {@link encryptBlob}) after converting
+ * it to a JSON string (and utf-8 encoding it to obtain bytes).
+ *
+ * Use {@link decryptMetadataJSON} to decrypt the result and convert it back to
+ * a JSON value.
+ */
+export const encryptMetadataJSON = (jsonValue: unknown, key: BytesOrB64) =>
+    encryptBlob(new TextEncoder().encode(JSON.stringify(jsonValue)), key);
+
+/**
  * The various *Stream encryption functions break up the input into chunks of
  * {@link streamEncryptionChunkSize} bytes during encryption (except the last
  * chunk which can be smaller since a file would rarely align exactly to a
@@ -519,6 +529,22 @@ export const decryptBlob = (
     blob: EncryptedBlob,
     key: BytesOrB64,
 ): Promise<string> => decryptBlobBytes(blob, key).then(toB64);
+
+/**
+ * Decrypt the result of {@link encryptMetadataJSON} and return the JSON value
+ * obtained by parsing the decrypted JSON string (which is obtained by utf-8
+ * decoding the decrypted bytes).
+ *
+ * Since TypeScript doesn't currently have a native JSON type, the returned
+ * value is casted as an `unknown`.
+ */
+export const decryptMetadataJSON = async (
+    blob: EncryptedBlob,
+    key: BytesOrB64,
+) =>
+    JSON.parse(
+        new TextDecoder().decode(await decryptBlobBytes(blob, key)),
+    ) as unknown;
 
 /**
  * Decrypt the result of {@link encryptStreamBytes}.

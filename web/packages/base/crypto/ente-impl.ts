@@ -1,6 +1,5 @@
 /** Careful when adding add other imports! */
 import * as libsodium from "./libsodium";
-import type { BytesOrB64, EncryptedBlob } from "./types";
 
 export const _toB64 = libsodium.toB64;
 
@@ -22,14 +21,13 @@ export const _encryptBlob = libsodium.encryptBlob;
 
 export const _encryptBlobBytes = libsodium.encryptBlobBytes;
 
+export const _encryptMetadataJSON = libsodium.encryptMetadataJSON;
+
 export const _encryptStreamBytes = libsodium.encryptStreamBytes;
 
 export const _initChunkEncryption = libsodium.initChunkEncryption;
 
 export const _encryptStreamChunk = libsodium.encryptStreamChunk;
-
-export const _encryptMetadataJSON = (jsonValue: unknown, key: BytesOrB64) =>
-    _encryptBlob(new TextEncoder().encode(JSON.stringify(jsonValue)), key);
 
 export const _decryptBoxBytes = libsodium.decryptBoxBytes;
 
@@ -39,19 +37,13 @@ export const _decryptBlobBytes = libsodium.decryptBlobBytes;
 
 export const _decryptBlob = libsodium.decryptBlob;
 
+export const _decryptMetadataJSON = libsodium.decryptMetadataJSON;
+
 export const _decryptStreamBytes = libsodium.decryptStreamBytes;
 
 export const _initChunkDecryption = libsodium.initChunkDecryption;
 
 export const _decryptStreamChunk = libsodium.decryptStreamChunk;
-
-export const _decryptMetadataJSON = async (
-    blob: EncryptedBlob,
-    key: BytesOrB64,
-) =>
-    JSON.parse(
-        new TextDecoder().decode(await _decryptBlobBytes(blob, key)),
-    ) as unknown;
 
 export const _chunkHashInit = libsodium.chunkHashInit;
 
