@@ -253,10 +253,10 @@ export const encryptStreamChunk = async (
  *
  * @param key The encryption key.
  */
-export const encryptMetadataJSON_New = (jsonValue: unknown, key: BytesOrB64) =>
+export const encryptMetadataJSON = (jsonValue: unknown, key: BytesOrB64) =>
     inWorker()
-        ? ei._encryptMetadataJSON_New(jsonValue, key)
-        : sharedWorker().then((w) => w.encryptMetadataJSON_New(jsonValue, key));
+        ? ei._encryptMetadataJSON(jsonValue, key)
+        : sharedWorker().then((w) => w.encryptMetadataJSON(jsonValue, key));
 
 /**
  * Decrypt a box encrypted using {@link encryptBox} and returns the decrypted
@@ -333,13 +333,10 @@ export const decryptStreamChunk = async (
  * @returns The decrypted JSON value. Since TypeScript does not have a native
  * JSON type, we need to return it as an `unknown`.
  */
-export const decryptMetadataJSON_New = (
-    blob: EncryptedBlob,
-    key: BytesOrB64,
-) =>
+export const decryptMetadataJSON = (blob: EncryptedBlob, key: BytesOrB64) =>
     inWorker()
-        ? ei._decryptMetadataJSON_New(blob, key)
-        : sharedWorker().then((w) => w.decryptMetadataJSON_New(blob, key));
+        ? ei._decryptMetadataJSON(blob, key)
+        : sharedWorker().then((w) => w.decryptMetadataJSON(blob, key));
 
 /**
  * Generate a new public/private keypair.

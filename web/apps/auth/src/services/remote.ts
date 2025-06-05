@@ -1,4 +1,4 @@
-import { decryptBox, decryptMetadataJSON_New } from "ente-base/crypto";
+import { decryptBox, decryptMetadataJSON } from "ente-base/crypto";
 import {
     authenticatedRequestHeaders,
     ensureOk,
@@ -156,7 +156,7 @@ export const authenticatorEntityDiff = async (
     authenticatorKey: string,
 ): Promise<AuthenticatorEntityDiffResult> => {
     const decrypt = (encryptedData: string, decryptionHeader: string) =>
-        decryptMetadataJSON_New(
+        decryptMetadataJSON(
             { encryptedData, decryptionHeader },
             authenticatorKey,
         );

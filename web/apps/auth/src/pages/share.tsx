@@ -1,6 +1,6 @@
 import { Box, Button, Stack, Typography, useTheme } from "@mui/material";
 import { EnteLogo } from "ente-base/components/EnteLogo";
-import { decryptMetadataJSON_New } from "ente-base/crypto";
+import { decryptMetadataJSON } from "ente-base/crypto";
 import React, { useEffect, useMemo, useState } from "react";
 import { prettyFormatCode } from "utils/format";
 
@@ -47,12 +47,12 @@ const Page: React.FC = () => {
             }
 
             try {
-                const decryptedCode = (await decryptMetadataJSON_New(
+                const decryptedCode = (await decryptMetadataJSON(
                     {
-                        encryptedData: base64UrlToBytes(data),
-                        decryptionHeader: base64UrlToBytes(header),
+                        encryptedData: base64URLToBytes(data),
+                        decryptionHeader: base64URLToBytes(header),
                     },
-                    base64UrlToBytes(key),
+                    base64URLToBytes(key),
                 )) as SharedCode;
                 setSharedCode(decryptedCode);
             } catch (error) {
@@ -228,8 +228,8 @@ const Page: React.FC = () => {
 
 export default Page;
 
-const base64UrlToBytes = (base64Url: string): Uint8Array => {
-    const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+const base64URLToBytes = (base64URL: string): Uint8Array => {
+    const base64 = base64URL.replace(/-/g, "+").replace(/_/g, "/");
     return Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
 };
 

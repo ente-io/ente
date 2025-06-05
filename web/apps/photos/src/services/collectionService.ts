@@ -1,5 +1,5 @@
 import type { User } from "ente-accounts/services/user";
-import { encryptMetadataJSON_New, sharedCryptoWorker } from "ente-base/crypto";
+import { encryptMetadataJSON, sharedCryptoWorker } from "ente-base/crypto";
 import { ensureLocalUser } from "ente-base/local-user";
 import log from "ente-base/log";
 import { apiURL } from "ente-base/origins";
@@ -79,7 +79,7 @@ const createCollection = async (
         if (magicMetadataProps) {
             const magicMetadata = await updateMagicMetadata(magicMetadataProps);
             const { encryptedData, decryptionHeader } =
-                await cryptoWorker.encryptMetadataJSON_New(
+                await cryptoWorker.encryptMetadataJSON(
                     magicMetadataProps,
                     collectionKey,
                 );
@@ -356,7 +356,7 @@ export const updateCollectionMagicMetadata = async (
         return;
     }
 
-    const { encryptedData, decryptionHeader } = await encryptMetadataJSON_New(
+    const { encryptedData, decryptionHeader } = await encryptMetadataJSON(
         updatedMagicMetadata.data,
         collection.key,
     );
@@ -396,7 +396,7 @@ export const updateSharedCollectionMagicMetadata = async (
         return;
     }
 
-    const { encryptedData, decryptionHeader } = await encryptMetadataJSON_New(
+    const { encryptedData, decryptionHeader } = await encryptMetadataJSON(
         updatedMagicMetadata.data,
         collection.key,
     );
@@ -435,7 +435,7 @@ export const updatePublicCollectionMagicMetadata = async (
         return;
     }
 
-    const { encryptedData, decryptionHeader } = await encryptMetadataJSON_New(
+    const { encryptedData, decryptionHeader } = await encryptMetadataJSON(
         updatedPublicMagicMetadata.data,
         collection.key,
     );

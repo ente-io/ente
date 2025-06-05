@@ -1448,7 +1448,7 @@ const encryptFile = async (
         decryptionHeader: await worker.toB64(thumbnailDecryptionHeaderBytes),
     };
 
-    const encryptedMetadata = await worker.encryptMetadataJSON_New(
+    const encryptedMetadata = await worker.encryptMetadataJSON(
         metadata,
         fileKey,
     );
@@ -1458,10 +1458,7 @@ const encryptFile = async (
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (pubMagicMetadata) {
         const { encryptedData, decryptionHeader } =
-            await worker.encryptMetadataJSON_New(
-                pubMagicMetadata.data,
-                fileKey,
-            );
+            await worker.encryptMetadataJSON(pubMagicMetadata.data, fileKey);
         encryptedPubMagicMetadata = {
             version: pubMagicMetadata.version,
             count: pubMagicMetadata.count,

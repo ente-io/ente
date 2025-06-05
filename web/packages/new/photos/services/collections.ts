@@ -234,7 +234,7 @@ export const getCollectionWithSecrets = async (
             ...collection.magicMetadata,
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
-            data: await cryptoWorker.decryptMetadataJSON_New(
+            data: await cryptoWorker.decryptMetadataJSON(
                 {
                     encryptedData: collection.magicMetadata.data,
                     decryptionHeader: collection.magicMetadata.header,
@@ -249,7 +249,7 @@ export const getCollectionWithSecrets = async (
             ...collection.pubMagicMetadata,
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
-            data: await cryptoWorker.decryptMetadataJSON_New(
+            data: await cryptoWorker.decryptMetadataJSON(
                 {
                     encryptedData: collection.pubMagicMetadata.data,
                     decryptionHeader: collection.pubMagicMetadata.header,
@@ -265,7 +265,7 @@ export const getCollectionWithSecrets = async (
             ...collection.sharedMagicMetadata,
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
-            data: await cryptoWorker.decryptMetadataJSON_New(
+            data: await cryptoWorker.decryptMetadataJSON(
                 {
                     encryptedData: collection.sharedMagicMetadata.data,
                     decryptionHeader: collection.sharedMagicMetadata.header,

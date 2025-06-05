@@ -53,7 +53,7 @@ export async function updateMagicMetadata<T>(
         //
         // See: [Note: Use passthrough for metadata Zod schemas]
         // @ts-expect-error TODO: Need to use zod here.
-        originalMagicMetadata.data = await cryptoWorker.decryptMetadataJSON_New(
+        originalMagicMetadata.data = await cryptoWorker.decryptMetadataJSON(
             {
                 encryptedData: originalMagicMetadata.data,
                 decryptionHeader: originalMagicMetadata.header,

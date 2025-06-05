@@ -199,17 +199,14 @@ const decryptEnteFile = async (
         { encryptedData: encryptedKey, nonce: keyDecryptionNonce },
         collectionKey,
     );
-    const fileMetadata = await worker.decryptMetadataJSON_New(
-        metadata,
-        fileKey,
-    );
+    const fileMetadata = await worker.decryptMetadataJSON(metadata, fileKey);
     let fileMagicMetadata: FileMagicMetadata | undefined;
     let filePubMagicMetadata: FilePublicMagicMetadata | undefined;
     if (magicMetadata?.data) {
         fileMagicMetadata = {
             ...encryptedFile.magicMetadata,
             // @ts-expect-error TODO: Need to use zod here.
-            data: await worker.decryptMetadataJSON_New(
+            data: await worker.decryptMetadataJSON(
                 {
                     encryptedData: magicMetadata.data,
                     decryptionHeader: magicMetadata.header,
@@ -222,7 +219,7 @@ const decryptEnteFile = async (
         filePubMagicMetadata = {
             ...pubMagicMetadata,
             // @ts-expect-error TODO: Need to use zod here.
-            data: await worker.decryptMetadataJSON_New(
+            data: await worker.decryptMetadataJSON(
                 {
                     encryptedData: pubMagicMetadata.data,
                     decryptionHeader: pubMagicMetadata.header,

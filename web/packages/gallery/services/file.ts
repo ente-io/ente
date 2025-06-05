@@ -1,7 +1,7 @@
 /* TODO: Audit this file */
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 
-import { encryptMetadataJSON_New } from "ente-base/crypto";
+import { encryptMetadataJSON } from "ente-base/crypto";
 import { apiURL } from "ente-base/origins";
 import { updateMagicMetadata } from "ente-gallery/services/magic-metadata";
 import type {
@@ -37,8 +37,10 @@ export const updateFileMagicMetadata = async (
         file,
         updatedMagicMetadata,
     } of fileWithUpdatedMagicMetadataList) {
-        const { encryptedData, decryptionHeader } =
-            await encryptMetadataJSON_New(updatedMagicMetadata.data, file.key);
+        const { encryptedData, decryptionHeader } = await encryptMetadataJSON(
+            updatedMagicMetadata.data,
+            file.key,
+        );
         reqBody.metadataList.push({
             id: file.id,
             magicMetadata: {
@@ -80,11 +82,10 @@ export const updateFilePublicMagicMetadata = async (
         file,
         updatedPublicMagicMetadata,
     } of fileWithUpdatedPublicMagicMetadataList) {
-        const { encryptedData, decryptionHeader } =
-            await encryptMetadataJSON_New(
-                updatedPublicMagicMetadata.data,
-                file.key,
-            );
+        const { encryptedData, decryptionHeader } = await encryptMetadataJSON(
+            updatedPublicMagicMetadata.data,
+            file.key,
+        );
         reqBody.metadataList.push({
             id: file.id,
             magicMetadata: {

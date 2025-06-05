@@ -325,7 +325,7 @@ export async function decryptFile(
             { encryptedData: encryptedKey, nonce: keyDecryptionNonce },
             collectionKey,
         );
-        const fileMetadata = await worker.decryptMetadataJSON_New(
+        const fileMetadata = await worker.decryptMetadataJSON(
             metadata,
             fileKey,
         );
@@ -338,7 +338,7 @@ export async function decryptFile(
                 ...file.magicMetadata,
                 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                 // @ts-ignore
-                data: await worker.decryptMetadataJSON_New(
+                data: await worker.decryptMetadataJSON(
                     {
                         encryptedData: magicMetadata.data,
                         decryptionHeader: magicMetadata.header,
@@ -353,7 +353,7 @@ export async function decryptFile(
                 ...pubMagicMetadata,
                 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                 // @ts-ignore
-                data: await worker.decryptMetadataJSON_New(
+                data: await worker.decryptMetadataJSON(
                     {
                         encryptedData: pubMagicMetadata.data,
                         decryptionHeader: pubMagicMetadata.header,

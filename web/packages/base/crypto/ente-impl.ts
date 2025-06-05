@@ -28,7 +28,7 @@ export const _initChunkEncryption = libsodium.initChunkEncryption;
 
 export const _encryptStreamChunk = libsodium.encryptStreamChunk;
 
-export const _encryptMetadataJSON_New = (jsonValue: unknown, key: BytesOrB64) =>
+export const _encryptMetadataJSON = (jsonValue: unknown, key: BytesOrB64) =>
     _encryptBlob(new TextEncoder().encode(JSON.stringify(jsonValue)), key);
 
 export const _decryptBoxBytes = libsodium.decryptBoxBytes;
@@ -45,7 +45,7 @@ export const _initChunkDecryption = libsodium.initChunkDecryption;
 
 export const _decryptStreamChunk = libsodium.decryptStreamChunk;
 
-export const _decryptMetadataJSON_New = async (
+export const _decryptMetadataJSON = async (
     blob: EncryptedBlob,
     key: BytesOrB64,
 ) =>
