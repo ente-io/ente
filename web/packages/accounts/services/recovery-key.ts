@@ -1,7 +1,7 @@
 import * as bip39 from "bip39";
 import type { KeyAttributes } from "ente-accounts/services/user";
 import {
-    decryptBoxB64,
+    decryptBox,
     fromHex,
     sharedCryptoWorker,
     toHex,
@@ -69,7 +69,7 @@ export const getUserRecoveryKeyB64 = async () => {
         keyAttributes;
 
     if (recoveryKeyEncryptedWithMasterKey && recoveryKeyDecryptionNonce) {
-        return decryptBoxB64(
+        return decryptBox(
             {
                 encryptedData: recoveryKeyEncryptedWithMasterKey,
                 nonce: recoveryKeyDecryptionNonce,

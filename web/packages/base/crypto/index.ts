@@ -162,7 +162,7 @@ export const generateBlobOrStreamKey = () =>
  *
  * Both the encrypted data and the nonce are returned as base64 strings.
  *
- * Use {@link decryptBoxB64} to decrypt the result.
+ * Use {@link decryptBox} to decrypt the result.
  *
  * > The suffix "Box" comes from the fact that it uses the so called secretbox
  * > APIs provided by libsodium under the hood.
@@ -176,7 +176,7 @@ export const encryptBoxB64 = (data: BytesOrB64, key: BytesOrB64) =>
 
 /**
  * Encrypt the given data, returning a blob containing the encrypted data and a
- * decryption header.
+ * decryption header as base64 strings.
  *
  * This function is usually used to encrypt data associated with an Ente object
  * (file, collection, entity) using the object's key.
@@ -189,22 +189,24 @@ export const encryptBoxB64 = (data: BytesOrB64, key: BytesOrB64) =>
  * > See: [Note: 3 forms of encryption (Box | Blob | Stream)]
  */
 export const encryptBlob = (data: BytesOrB64, key: BytesOrB64) =>
-    assertInWorker(ei._encryptBlob(data, key));
+    inWorker()
+        ? ei._encryptBlob(data, key)
+        : sharedWorker().then((w) => w.encryptBlob(data, key));
 
 /**
- * A variant of {@link encryptBlob} that returns the result components as base64
- * strings.
+ * A variant of {@link encryptBlob} that returns the result components as bytes
+ * instead of as base64 strings.
+ *
+ * Use {@link decryptBlob} to decrypt the result.
  */
-export const encryptBlobB64 = (data: BytesOrB64, key: BytesOrB64) =>
-    inWorker()
-        ? ei._encryptBlobB64(data, key)
-        : sharedWorker().then((w) => w.encryptBlobB64(data, key));
+export const encryptBlobBytes = (data: BytesOrB64, key: BytesOrB64) =>
+    assertInWorker(ei._encryptBlobBytes(data, key));
 
 /**
  * Encrypt the thumbnail for a file.
  *
- * This is midway variant of {@link encryptBlob} and {@link encryptBlobB64} that
- * returns the decryption header as a base64 string, but leaves the data
+ * This is midway variant of {@link encryptBlobBytes} and {@link encryptBlob}
+ * that returns the decryption header as a base64 string, but leaves the data
  * unchanged.
  *
  * Use {@link decryptThumbnail} to decrypt the result.
@@ -249,7 +251,7 @@ export const encryptStreamChunk = async (
  * Encrypt the JSON metadata associated with an Ente object (file, collection or
  * entity) using the object's key.
  *
- * This is a variant of {@link encryptBlobB64} tailored for encrypting any
+ * This is a variant of {@link encryptBlob} tailored for encrypting any
  * arbitrary metadata associated with an Ente object. For example, it is used
  * for encrypting the various metadata fields associated with a file, using that
  * file's key.
@@ -283,7 +285,7 @@ export const encryptMetadataJSON = async (r: {
 
 /**
  * Decrypt a box encrypted using {@link encryptBoxB64} and returns the decrypted
- * bytes.
+ * bytes as a base64 string.
  */
 export const decryptBox = (box: EncryptedBox, key: BytesOrB64) =>
     inWorker()
@@ -291,16 +293,17 @@ export const decryptBox = (box: EncryptedBox, key: BytesOrB64) =>
         : sharedWorker().then((w) => w.decryptBox(box, key));
 
 /**
- * Variant of {@link decryptBox} that returns the result as a base64 string.
+ * Variant of {@link decryptBox} that returns the decrypted bytes as it is
+ * (without encoding them to base64).
  */
-export const decryptBoxB64 = (box: EncryptedBox, key: BytesOrB64) =>
+export const decryptBoxBytes = (box: EncryptedBox, key: BytesOrB64) =>
     inWorker()
-        ? ei._decryptBoxB64(box, key)
-        : sharedWorker().then((w) => w.decryptBoxB64(box, key));
+        ? ei._decryptBoxBytes(box, key)
+        : sharedWorker().then((w) => w.decryptBoxBytes(box, key));
 
 /**
- * Decrypt a blob encrypted using either {@link encryptBlob} or
- * {@link encryptBlobB64}.
+ * Decrypt a blob encrypted using either {@link encryptBlobBytes} or
+ * {@link encryptBlob}.
  */
 export const decryptBlob = (blob: EncryptedBlob, key: BytesOrB64) =>
     inWorker()

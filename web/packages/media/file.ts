@@ -321,7 +321,7 @@ export async function decryptFile(
             pubMagicMetadata,
             ...restFileProps
         } = file;
-        const fileKey = await worker.decryptBoxB64(
+        const fileKey = await worker.decryptBox(
             { encryptedData: encryptedKey, nonce: keyDecryptionNonce },
             collectionKey,
         );

@@ -1,4 +1,4 @@
-import { decryptBoxB64, decryptMetadataJSON_New } from "ente-base/crypto";
+import { decryptBox, decryptMetadataJSON_New } from "ente-base/crypto";
 import {
     authenticatedRequestHeaders,
     ensureOk,
@@ -265,7 +265,7 @@ const decryptAuthenticatorKey = async (
     remote: AuthenticatorEntityKey,
     masterKey: Uint8Array,
 ) =>
-    decryptBoxB64(
+    decryptBox(
         {
             encryptedData: remote.encryptedKey,
             // Remote calls it the header, but it really is the nonce.

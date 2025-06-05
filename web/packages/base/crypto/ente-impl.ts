@@ -20,13 +20,16 @@ export const _encryptBoxB64 = libsodium.encryptBoxB64;
 
 export const _encryptBlob = libsodium.encryptBlob;
 
-export const _encryptBlobB64 = libsodium.encryptBlobB64;
+export const _encryptBlobBytes = libsodium.encryptBlobBytes;
 
 export const _encryptThumbnail = async (
     data: BytesOrB64,
     key: BytesOrB64,
 ): Promise<EncryptedFile> => {
-    const { encryptedData, decryptionHeader } = await _encryptBlob(data, key);
+    const { encryptedData, decryptionHeader } = await _encryptBlobBytes(
+        data,
+        key,
+    );
     return {
         encryptedData,
         decryptionHeader: await libsodium.toB64(decryptionHeader),
@@ -40,7 +43,7 @@ export const _initChunkEncryption = libsodium.initChunkEncryption;
 export const _encryptStreamChunk = libsodium.encryptStreamChunk;
 
 export const _encryptMetadataJSON_New = (jsonValue: unknown, key: BytesOrB64) =>
-    _encryptBlobB64(new TextEncoder().encode(JSON.stringify(jsonValue)), key);
+    _encryptBlob(new TextEncoder().encode(JSON.stringify(jsonValue)), key);
 
 // Deprecated, translates to the old API for now.
 export const _encryptMetadataJSON = async (r: {
@@ -57,9 +60,9 @@ export const _encryptMetadataJSON = async (r: {
     };
 };
 
-export const _decryptBox = libsodium.decryptBox;
+export const _decryptBoxBytes = libsodium.decryptBoxBytes;
 
-export const _decryptBoxB64 = libsodium.decryptBoxB64;
+export const _decryptBox = libsodium.decryptBox;
 
 export const _decryptBlob = libsodium.decryptBlob;
 

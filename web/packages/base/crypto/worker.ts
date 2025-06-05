@@ -22,14 +22,14 @@ export class CryptoWorker {
     generateBlobOrStreamKey = ei._generateBlobOrStreamKey;
     encryptBoxB64 = ei._encryptBoxB64;
     encryptThumbnail = ei._encryptThumbnail;
-    encryptBlobB64 = ei._encryptBlobB64;
+    encryptBlob = ei._encryptBlob;
     encryptStreamBytes = ei._encryptStreamBytes;
     initChunkEncryption = ei._initChunkEncryption;
     encryptStreamChunk = ei._encryptStreamChunk;
     encryptMetadataJSON_New = ei._encryptMetadataJSON_New;
     encryptMetadataJSON = ei._encryptMetadataJSON;
+    decryptBoxBytes = ei._decryptBoxBytes;
     decryptBox = ei._decryptBox;
-    decryptBoxB64 = ei._decryptBoxB64;
     decryptBlob = ei._decryptBlob;
     decryptBlobB64 = ei._decryptBlobB64;
     decryptThumbnail = ei._decryptThumbnail;

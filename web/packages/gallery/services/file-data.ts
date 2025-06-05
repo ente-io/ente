@@ -1,4 +1,4 @@
-import { encryptBlobB64 } from "ente-base/crypto";
+import { encryptBlob } from "ente-base/crypto";
 import type { EncryptedBlobB64 } from "ente-base/crypto/types";
 import {
     authenticatedPublicAlbumsRequestHeaders,
@@ -293,7 +293,7 @@ export const putFileData = async (
     data: Uint8Array,
     lastUpdatedAt: number,
 ) => {
-    const { encryptedData, decryptionHeader } = await encryptBlobB64(
+    const { encryptedData, decryptionHeader } = await encryptBlob(
         data,
         file.key,
     );

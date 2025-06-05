@@ -116,7 +116,7 @@ export const decryptDeleteAccountChallenge = async (
     const cryptoWorker = await sharedCryptoWorker();
     const masterKey = await masterKeyFromSession();
     const keyAttributes = getData("keyAttributes");
-    const secretKey = await cryptoWorker.decryptBoxB64(
+    const secretKey = await cryptoWorker.decryptBox(
         {
             encryptedData: keyAttributes.encryptedSecretKey,
             nonce: keyAttributes.secretKeyDecryptionNonce,

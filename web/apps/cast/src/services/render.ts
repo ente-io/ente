@@ -195,7 +195,7 @@ const decryptEnteFile = async (
         pubMagicMetadata,
         ...restFileProps
     } = encryptedFile;
-    const fileKey = await worker.decryptBoxB64(
+    const fileKey = await worker.decryptBox(
         { encryptedData: encryptedKey, nonce: keyDecryptionNonce },
         collectionKey,
     );

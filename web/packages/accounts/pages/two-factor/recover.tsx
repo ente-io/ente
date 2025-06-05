@@ -18,7 +18,7 @@ import {
     type SingleInputFormProps,
 } from "ente-base/components/SingleInputForm";
 import { useBaseContext } from "ente-base/context";
-import { decryptBoxB64 } from "ente-base/crypto";
+import { decryptBox } from "ente-base/crypto";
 import type { B64EncryptionResult } from "ente-base/crypto/libsodium";
 import log from "ente-base/log";
 import { ApiError } from "ente-shared/error";
@@ -93,7 +93,7 @@ const Page: React.FC<RecoverPageProps> = ({ twoFactorType }) => {
     ) => {
         try {
             const { encryptedData, nonce } = encryptedTwoFactorSecret!;
-            const twoFactorSecret = await decryptBoxB64(
+            const twoFactorSecret = await decryptBox(
                 { encryptedData, nonce },
                 await recoveryKeyB64FromMnemonic(recoveryKey),
             );

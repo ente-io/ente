@@ -1,6 +1,6 @@
 import { isDesktop } from "ente-base/app";
 import { assertionFailed } from "ente-base/assert";
-import { decryptBlob, encryptBlobB64 } from "ente-base/crypto";
+import { decryptBlob, encryptBlob } from "ente-base/crypto";
 import type { EncryptedBlob } from "ente-base/crypto/types";
 import { ensureElectron } from "ente-base/electron";
 import { isHTTP4xxError, type PublicAlbumsCredentials } from "ente-base/http";
@@ -1056,7 +1056,7 @@ const processQueueItem = async ({
             size: videoSize,
         });
 
-        const encryptedPlaylist = await encryptBlobB64(playlistData, file.key);
+        const encryptedPlaylist = await encryptBlob(playlistData, file.key);
 
         try {
             await putVideoData(

@@ -13,7 +13,7 @@ import {
     type SingleInputFormProps,
 } from "ente-base/components/SingleInputForm";
 import { useBaseContext } from "ente-base/context";
-import { decryptBoxB64 } from "ente-base/crypto";
+import { decryptBox } from "ente-base/crypto";
 import log from "ente-base/log";
 import {
     decryptAndStoreToken,
@@ -63,7 +63,7 @@ const Page: React.FC = () => {
     ) => {
         try {
             const keyAttr = keyAttributes!;
-            const masterKey = await decryptBoxB64(
+            const masterKey = await decryptBox(
                 {
                     encryptedData: keyAttr.masterKeyEncryptedWithRecoveryKey!,
                     nonce: keyAttr.masterKeyDecryptionNonce!,
