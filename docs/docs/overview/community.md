@@ -7,8 +7,7 @@ description: >
 # Community
 
 We are building Ente in the open with our community on
-[GitHub](https://github.com/ente-io/ente) and
-[Discord](https://ente.io/discord)
+[GitHub](https://github.com/ente-io/ente) and [Discord](https://ente.io/discord)
 
 ## Blog
 
