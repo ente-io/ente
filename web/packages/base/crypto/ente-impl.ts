@@ -1,6 +1,10 @@
 /** Careful when adding add other imports! */
 import * as libsodium from "./libsodium";
 
+// Trivial proxies to the actual implementation.
+//
+// See: [Note: Using libsodium in worker thread]
+
 export const _toB64 = libsodium.toB64;
 export const _toB64URLSafe = libsodium.toB64URLSafe;
 export const _fromB64 = libsodium.fromB64;
@@ -9,8 +13,8 @@ export const _fromHex = libsodium.fromHex;
 export const _generateKey = libsodium.generateKey;
 export const _generateBlobOrStreamKey = libsodium.generateBlobOrStreamKey;
 export const _encryptBox = libsodium.encryptBox;
-export const _encryptBlob = libsodium.encryptBlob;
 export const _encryptBlobBytes = libsodium.encryptBlobBytes;
+export const _encryptBlob = libsodium.encryptBlob;
 export const _encryptMetadataJSON = libsodium.encryptMetadataJSON;
 export const _encryptStreamBytes = libsodium.encryptStreamBytes;
 export const _initChunkEncryption = libsodium.initChunkEncryption;

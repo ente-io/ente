@@ -56,7 +56,6 @@
  */
 import { ComlinkWorker } from "ente-base/worker/comlink-worker";
 import { type StateAddress } from "libsodium-wrappers-sumo";
-import { assertionFailed } from "../assert";
 import { inWorker } from "../env";
 import * as ei from "./ente-impl";
 import type {
@@ -90,20 +89,6 @@ export const createComlinkCryptoWorker = () =>
         "crypto",
         new Worker(new URL("worker.ts", import.meta.url)),
     );
-
-/**
- * Some of the potentially CPU intensive functions below have not yet been
- * needed on the main thread, and for these we don't have a corresponding
- * sharedCryptoWorker method.
- *
- * This assertion will let us know when we need to implement them. This will
- * gracefully degrade in production: the functionality will work, just that the
- * crypto operations will happen on the main thread itself.
- */
-const assertInWorker = <T>(x: T): T => {
-    if (!inWorker()) assertionFailed("Currently only usable in a web worker");
-    return x;
-};
 
 /**
  * Convert bytes ({@link Uint8Array}) to a base64 string.
@@ -207,7 +192,9 @@ export const encryptBlob = (data: BytesOrB64, key: BytesOrB64) =>
  * Use {@link decryptBlob} or {@link decryptBlobBytes} to decrypt the result.
  */
 export const encryptBlobBytes = (data: BytesOrB64, key: BytesOrB64) =>
-    assertInWorker(ei._encryptBlobBytes(data, key));
+    inWorker()
+        ? ei._encryptBlobBytes(data, key)
+        : sharedWorker().then((w) => w.encryptBlobBytes(data, key));
 
 /**
  * Encrypt the given data using chunked streaming encryption, but process all
