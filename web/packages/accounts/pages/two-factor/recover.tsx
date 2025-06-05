@@ -5,7 +5,7 @@ import {
     AccountsPageFooter,
     AccountsPageTitle,
 } from "ente-accounts/components/layouts/centered-paper";
-import { recoveryKeyB64FromMnemonic } from "ente-accounts/services/recovery-key";
+import { recoveryKeyFromMnemonic } from "ente-accounts/services/recovery-key";
 import {
     recoverTwoFactor,
     removeTwoFactor,
@@ -87,15 +87,15 @@ const Page: React.FC<RecoverPageProps> = ({ twoFactorType }) => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    const recover: SingleInputFormProps["onSubmit"] = async (
-        recoveryKey: string,
+    const handleSubmit: SingleInputFormProps["onSubmit"] = async (
+        recoveryKeyMnemonic: string,
         setFieldError,
     ) => {
         try {
             const { encryptedData, nonce } = encryptedTwoFactorSecret!;
             const twoFactorSecret = await decryptBox(
                 { encryptedData, nonce },
-                await recoveryKeyB64FromMnemonic(recoveryKey),
+                await recoveryKeyFromMnemonic(recoveryKeyMnemonic),
             );
             const resp = await removeTwoFactor(
                 sessionID!,
@@ -146,7 +146,7 @@ const Page: React.FC<RecoverPageProps> = ({ twoFactorType }) => {
                 autoComplete="off"
                 label={t("recovery_key")}
                 submitButtonTitle={t("recover")}
-                onSubmit={recover}
+                onSubmit={handleSubmit}
             />
             <AccountsPageFooter>
                 <LinkButton onClick={() => showContactSupportDialog()}>

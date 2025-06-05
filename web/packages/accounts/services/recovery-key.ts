@@ -22,9 +22,7 @@ bip39.setDefaultWordlist("english");
  *
  * @returns A base64 string representing the underlying bytes of the recovery key.
  */
-export const recoveryKeyB64FromMnemonic = (
-    recoveryKeyMnemonicOrHex: string,
-) => {
+export const recoveryKeyFromMnemonic = (recoveryKeyMnemonicOrHex: string) => {
     const trimmedInput = recoveryKeyMnemonicOrHex
         .trim()
         .split(" ")

@@ -3,7 +3,7 @@ import {
     AccountsPageFooter,
     AccountsPageTitle,
 } from "ente-accounts/components/layouts/centered-paper";
-import { recoveryKeyB64FromMnemonic } from "ente-accounts/services/recovery-key";
+import { recoveryKeyFromMnemonic } from "ente-accounts/services/recovery-key";
 import { appHomeRoute, stashRedirect } from "ente-accounts/services/redirect";
 import type { KeyAttributes, User } from "ente-accounts/services/user";
 import { sendOTT } from "ente-accounts/services/user";
@@ -57,8 +57,8 @@ const Page: React.FC = () => {
         }
     }, [router]);
 
-    const recover: SingleInputFormProps["onSubmit"] = async (
-        recoveryKey: string,
+    const handleSubmit: SingleInputFormProps["onSubmit"] = async (
+        recoveryKeyMnemonic: string,
         setFieldError,
     ) => {
         try {
@@ -68,7 +68,7 @@ const Page: React.FC = () => {
                     encryptedData: keyAttr.masterKeyEncryptedWithRecoveryKey!,
                     nonce: keyAttr.masterKeyDecryptionNonce!,
                 },
-                await recoveryKeyB64FromMnemonic(recoveryKey),
+                await recoveryKeyFromMnemonic(recoveryKeyMnemonic),
             );
             await saveKeyInSessionStore("encryptionKey", masterKey);
             await decryptAndStoreToken(keyAttr, masterKey);
@@ -96,7 +96,7 @@ const Page: React.FC = () => {
                 autoComplete="off"
                 label={t("recovery_key")}
                 submitButtonTitle={t("recover")}
-                onSubmit={recover}
+                onSubmit={handleSubmit}
             />
             <AccountsPageFooter>
                 <LinkButton onClick={showNoRecoveryKeyMessage}>
