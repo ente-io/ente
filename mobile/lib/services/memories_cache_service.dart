@@ -50,6 +50,7 @@ class MemoriesCacheService {
   bool get isUpdatingMemories => _isUpdatingMemories;
 
   final _memoriesUpdateLock = Lock();
+  final _memoriesGetLock = Lock();
 
   MemoriesCacheService(this._prefs) {
     _logger.fine("MemoriesCacheService constructor");
@@ -143,37 +144,41 @@ class MemoriesCacheService {
   }
 
   Future<List<SmartMemory>> getMemories() async {
+    _logger.info("getMemories called");
     if (!showAnyMemories) {
       _logger.info('Showing memories is disabled in settings, showing none');
       return [];
     }
-    if (_cachedMemories != null && _cachedMemories!.isNotEmpty) {
-      return _cachedMemories!;
-    }
-    try {
-      if (!enableSmartMemories) {
-        await _calculateRegularFillers();
+    return _memoriesGetLock.synchronized(() async {
+      if (_cachedMemories != null && _cachedMemories!.isNotEmpty) {
+        _logger.info("Found memories in memory cache");
         return _cachedMemories!;
       }
-      _cachedMemories = await _getMemoriesFromCache();
-      if (_cachedMemories == null || _cachedMemories!.isEmpty) {
-        _logger.warning(
-          "No memories found in cache, force updating cache. Possible severe caching issue",
-        );
-        await updateCache(forced: true);
-      } else {
-        _logger.info("Found memories in cache");
+      try {
+        if (!enableSmartMemories) {
+          await _calculateRegularFillers();
+          return _cachedMemories!;
+        }
+        _cachedMemories = await _getMemoriesFromCache();
+        if (_cachedMemories == null || _cachedMemories!.isEmpty) {
+          _logger.warning(
+            "No memories found in cache, force updating cache. Possible severe caching issue",
+          );
+          await updateCache(forced: true);
+        } else {
+          _logger.info("Found memories in cache");
+        }
+        if (_cachedMemories == null || _cachedMemories!.isEmpty) {
+          _logger
+              .severe("No memories found in (computed) cache, getting fillers");
+          await _calculateRegularFillers();
+        }
+        return _cachedMemories!;
+      } catch (e, s) {
+        _logger.severe("Error in getMemories", e, s);
+        return [];
       }
-      if (_cachedMemories == null || _cachedMemories!.isEmpty) {
-        _logger
-            .severe("No memories found in (computed) cache, getting fillers");
-        await _calculateRegularFillers();
-      }
-      return _cachedMemories!;
-    } catch (e, s) {
-      _logger.severe("Error in getMemories", e, s);
-      return [];
-    }
+    });
   }
 
   Future<void> _calculateRegularFillers() async {
