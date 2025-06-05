@@ -738,7 +738,7 @@ class SmartMemoriesService {
               'Something is going wrong, ${potentialMemory.peopleMemoryType} has multiple memories for same person',
             );
           } else {
-            final randIdx = Random().nextInt(potentialMemory.memories.length);
+            final randIdx = Random().nextInt(memoriesForCategory.length);
             potentialMemory = memoriesForCategory[randIdx];
           }
         }
