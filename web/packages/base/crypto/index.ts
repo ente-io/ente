@@ -415,6 +415,17 @@ export const boxSealOpen = async (
           );
 
 /**
+ * Return a new randomly generated 128-bit salt (as a base64 string).
+ *
+ * The returned salt is suitable for use with {@link deriveKey}, and also as a
+ * general 128-bit salt.
+ */
+export const generateDeriveKeySalt = async () =>
+    inWorker()
+        ? ei._generateDeriveKeySalt()
+        : sharedWorker().then((w) => w.generateDeriveKeySalt());
+
+/**
  * Derive a key by hashing the given {@link passphrase} using Argon 2id.
  */
 export const deriveKey = async (

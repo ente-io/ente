@@ -59,7 +59,7 @@ export const generateSRPSetupAttributes = async (
 ): Promise<SRPSetupAttributes> => {
     const cryptoWorker = await sharedCryptoWorker();
 
-    const srpSalt = await cryptoWorker.generateSaltToDeriveKey();
+    const srpSalt = await cryptoWorker.generateDeriveKeySalt();
 
     // Museum schema requires this to be a UUID.
     const srpUserID = uuidv4();
@@ -173,7 +173,7 @@ export async function generateKeyAndSRPAttributes(
     const cryptoWorker = await sharedCryptoWorker();
     const masterKey = await cryptoWorker.generateKey();
     const recoveryKey = await cryptoWorker.generateKey();
-    const kekSalt = await cryptoWorker.generateSaltToDeriveKey();
+    const kekSalt = await cryptoWorker.generateDeriveKeySalt();
     const kek = await cryptoWorker.deriveSensitiveKey(passphrase, kekSalt);
 
     const { encryptedData: encryptedKey, nonce: keyDecryptionNonce } =

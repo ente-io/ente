@@ -1660,7 +1660,7 @@ const SetPublicLinkPassword: React.FC<SetPublicLinkPasswordProps> = ({
 
     const enablePublicUrlPassword = async (password: string) => {
         const cryptoWorker = await sharedCryptoWorker();
-        const kekSalt = await cryptoWorker.generateSaltToDeriveKey();
+        const kekSalt = await cryptoWorker.generateDeriveKeySalt();
         const kek = await cryptoWorker.deriveInteractiveKey(password, kekSalt);
 
         return updatePublicShareURLHelper({

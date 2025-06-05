@@ -60,7 +60,7 @@ const Page: React.FC = () => {
         const cryptoWorker = await sharedCryptoWorker();
         const key = await getActualKey();
         const keyAttributes: KeyAttributes = getData("keyAttributes");
-        const kekSalt = await cryptoWorker.generateSaltToDeriveKey();
+        const kekSalt = await cryptoWorker.generateDeriveKeySalt();
         let kek: { key: string; opsLimit: number; memLimit: number };
         try {
             kek = await cryptoWorker.deriveSensitiveKey(passphrase, kekSalt);

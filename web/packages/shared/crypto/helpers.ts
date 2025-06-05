@@ -52,7 +52,7 @@ export async function generateAndSaveIntermediateKeyAttributes(
     key: string,
 ): Promise<KeyAttributes> {
     const cryptoWorker = await sharedCryptoWorker();
-    const intermediateKekSalt = await cryptoWorker.generateSaltToDeriveKey();
+    const intermediateKekSalt = await cryptoWorker.generateDeriveKeySalt();
     const intermediateKek = await cryptoWorker.deriveInteractiveKey(
         passphrase,
         intermediateKekSalt,

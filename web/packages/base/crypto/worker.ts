@@ -43,6 +43,7 @@ export class CryptoWorker {
     generateKeyPair = ei._generateKeyPair;
     boxSeal = ei._boxSeal;
     boxSealOpen = ei._boxSealOpen;
+    generateDeriveKeySalt = ei._generateDeriveKeySalt;
     deriveKey = ei._deriveKey;
     deriveSensitiveKey = ei._deriveSensitiveKey;
     deriveInteractiveKey = ei._deriveInteractiveKey;
@@ -51,10 +52,6 @@ export class CryptoWorker {
 
     async generateKeyAndEncryptToB64(data: string) {
         return libsodium.generateKeyAndEncryptToB64(data);
-    }
-
-    async generateSaltToDeriveKey() {
-        return libsodium.generateSaltToDeriveKey();
     }
 
     async generateSubKey(

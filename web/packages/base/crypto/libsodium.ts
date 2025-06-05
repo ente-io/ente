@@ -803,6 +803,17 @@ export const boxSealOpen = async (
 };
 
 /**
+ * Generate a new randomly generated 128-bit salt suitable for use with the key
+ * derivation functions ({@link deriveKey} and its variants).
+ *
+ * @returns The base64 representation of a randomly generated 128-bit salt.
+ */
+export const generateDeriveKeySalt = async () => {
+    await sodium.ready;
+    return await toB64(sodium.randombytes_buf(sodium.crypto_pwhash_SALTBYTES));
+};
+
+/**
  * Derive a key by hashing the given {@link passphrase} using Argon 2id.
  *
  * While the underlying primitive is a password hash (e.g for its storage), this
@@ -908,11 +919,6 @@ export const deriveInteractiveKey = async (
     const key = await deriveKey(passphrase, salt, opsLimit, memLimit);
     return { key, opsLimit, memLimit };
 };
-
-export async function generateSaltToDeriveKey() {
-    await sodium.ready;
-    return await toB64(sodium.randombytes_buf(sodium.crypto_pwhash_SALTBYTES));
-}
 
 export async function generateSubKey(
     key: string,
