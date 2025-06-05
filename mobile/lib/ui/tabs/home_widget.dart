@@ -611,15 +611,16 @@ class _HomeWidgetState extends State<HomeWidget> {
             } else {
               Navigator.pop(context);
             }
-          } else if (_selectedTabIndex == 1) {
+            return;
+          }
+          if (_selectedTabIndex == 1) {
             if (_selectedAlbums.albums.isNotEmpty) {
               _selectedAlbums.clearAll();
               return;
             }
-          } else {
-            Bus.instance
-                .fire(TabChangedEvent(0, TabChangedEventSource.backButton));
           }
+          Bus.instance
+              .fire(TabChangedEvent(0, TabChangedEventSource.backButton));
         },
         child: Scaffold(
           drawerScrimColor: getEnteColorScheme(context).strokeFainter,
