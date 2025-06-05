@@ -317,6 +317,9 @@ class MemoriesCacheService {
         timeoutDurationAndroid: const Duration(hours: 16),
       );
       scheduledDates.add(scheduleTime);
+      _logger.info(
+        "Scheduled notification for memory ${memory.id} on date: $scheduleTime",
+      );
     }
   }
 
@@ -385,6 +388,9 @@ class MemoriesCacheService {
         timeoutDurationAndroid: const Duration(hours: 17),
       );
       scheduledPersons.add(memory.personID);
+      _logger.info(
+        "Scheduled birthday notification for person ${memory.personName} on date: $scheduleTime",
+      );
     }
   }
 
