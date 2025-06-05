@@ -335,12 +335,14 @@ export const getPublicCollection = async (
         if (fetchedCollection.pubMagicMetadata?.data) {
             collectionPublicMagicMetadata = {
                 ...fetchedCollection.pubMagicMetadata,
-                data: await cryptoWorker.decryptMetadataJSON({
-                    encryptedDataB64: fetchedCollection.pubMagicMetadata.data,
-                    decryptionHeaderB64:
-                        fetchedCollection.pubMagicMetadata.header,
-                    keyB64: collectionKey,
-                }),
+                data: await cryptoWorker.decryptMetadataJSON_New(
+                    {
+                        encryptedData: fetchedCollection.pubMagicMetadata.data,
+                        decryptionHeader:
+                            fetchedCollection.pubMagicMetadata.header,
+                    },
+                    collectionKey,
+                ),
             };
         }
 

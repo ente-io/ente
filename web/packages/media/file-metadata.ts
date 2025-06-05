@@ -1,4 +1,7 @@
-import { decryptMetadataJSON, encryptMetadataJSON_New } from "ente-base/crypto";
+import {
+    decryptMetadataJSON_New,
+    encryptMetadataJSON_New,
+} from "ente-base/crypto";
 import { authenticatedRequestHeaders, ensureOk } from "ente-base/http";
 import { apiURL } from "ente-base/origins";
 import { type Location } from "ente-base/types";
@@ -434,11 +437,13 @@ export const decryptPublicMagicMetadata = async (
 
     const jsonValue =
         typeof envelope.data == "string"
-            ? await decryptMetadataJSON({
-                  encryptedDataB64: envelope.data,
-                  decryptionHeaderB64: envelope.header,
-                  keyB64: file.key,
-              })
+            ? await decryptMetadataJSON_New(
+                  {
+                      encryptedData: envelope.data,
+                      decryptionHeader: envelope.header,
+                  },
+                  file.key,
+              )
             : envelope.data;
     const result = PublicMagicMetadata.parse(
         // TODO: Can we avoid this cast?

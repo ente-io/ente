@@ -234,11 +234,13 @@ export const getCollectionWithSecrets = async (
             ...collection.magicMetadata,
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
-            data: await cryptoWorker.decryptMetadataJSON({
-                encryptedDataB64: collection.magicMetadata.data,
-                decryptionHeaderB64: collection.magicMetadata.header,
-                keyB64: collectionKey,
-            }),
+            data: await cryptoWorker.decryptMetadataJSON_New(
+                {
+                    encryptedData: collection.magicMetadata.data,
+                    decryptionHeader: collection.magicMetadata.header,
+                },
+                collectionKey,
+            ),
         };
     }
     let collectionPublicMagicMetadata: CollectionPublicMagicMetadata;
@@ -247,11 +249,13 @@ export const getCollectionWithSecrets = async (
             ...collection.pubMagicMetadata,
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
-            data: await cryptoWorker.decryptMetadataJSON({
-                encryptedDataB64: collection.pubMagicMetadata.data,
-                decryptionHeaderB64: collection.pubMagicMetadata.header,
-                keyB64: collectionKey,
-            }),
+            data: await cryptoWorker.decryptMetadataJSON_New(
+                {
+                    encryptedData: collection.pubMagicMetadata.data,
+                    decryptionHeader: collection.pubMagicMetadata.header,
+                },
+                collectionKey,
+            ),
         };
     }
 
@@ -261,11 +265,13 @@ export const getCollectionWithSecrets = async (
             ...collection.sharedMagicMetadata,
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
-            data: await cryptoWorker.decryptMetadataJSON({
-                encryptedDataB64: collection.sharedMagicMetadata.data,
-                decryptionHeaderB64: collection.sharedMagicMetadata.header,
-                keyB64: collectionKey,
-            }),
+            data: await cryptoWorker.decryptMetadataJSON_New(
+                {
+                    encryptedData: collection.sharedMagicMetadata.data,
+                    decryptionHeader: collection.sharedMagicMetadata.header,
+                },
+                collectionKey,
+            ),
         };
     }
 

@@ -209,22 +209,26 @@ const decryptEnteFile = async (
         fileMagicMetadata = {
             ...encryptedFile.magicMetadata,
             // @ts-expect-error TODO: Need to use zod here.
-            data: await worker.decryptMetadataJSON({
-                encryptedDataB64: magicMetadata.data,
-                decryptionHeaderB64: magicMetadata.header,
-                keyB64: fileKey,
-            }),
+            data: await worker.decryptMetadataJSON_New(
+                {
+                    encryptedData: magicMetadata.data,
+                    decryptionHeader: magicMetadata.header,
+                },
+                fileKey,
+            ),
         };
     }
     if (pubMagicMetadata?.data) {
         filePubMagicMetadata = {
             ...pubMagicMetadata,
             // @ts-expect-error TODO: Need to use zod here.
-            data: await worker.decryptMetadataJSON({
-                encryptedDataB64: pubMagicMetadata.data,
-                decryptionHeaderB64: pubMagicMetadata.header,
-                keyB64: fileKey,
-            }),
+            data: await worker.decryptMetadataJSON_New(
+                {
+                    encryptedData: pubMagicMetadata.data,
+                    decryptionHeader: pubMagicMetadata.header,
+                },
+                fileKey,
+            ),
         };
     }
     return mergeMetadata1({
