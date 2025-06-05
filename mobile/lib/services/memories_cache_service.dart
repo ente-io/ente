@@ -107,6 +107,17 @@ class MemoriesCacheService {
     }
   }
 
+  Future<void> toggleBirthdayNotifications() async {
+    final oldValue = localSettings.birthdayNotificationsEnabled;
+    await localSettings.setBirthdayNotificationsEnabled(!oldValue);
+    _logger.info("Turning birhtdayNotifications ${oldValue ? "off" : "on"}");
+    if (oldValue) {
+      await _clearAllScheduledBirthdayNotifications();
+    } else {
+      queueUpdateCache();
+    }
+  }
+
   bool get enableSmartMemories =>
       flagService.hasGrantedMLConsent &&
       localSettings.isMLLocalIndexingEnabled &&
@@ -262,6 +273,12 @@ class MemoriesCacheService {
         .clearAllScheduledNotifications(containingPayload: "onThisDay");
   }
 
+  Future<void> _clearAllScheduledBirthdayNotifications() async {
+    _logger.info('Clearing all scheduled birthday notifications');
+    await NotificationService.instance
+        .clearAllScheduledNotifications(containingPayload: "birthday");
+  }
+
   Future<void> _scheduleMemoryNotifications(
     List<SmartMemory> allMemories,
   ) async {
@@ -326,8 +343,11 @@ class MemoriesCacheService {
   Future<void> _scheduleBirthdayNotifications(
     List<SmartMemory> allMemories,
   ) async {
-    await NotificationService.instance
-        .clearAllScheduledNotifications(containingPayload: "birthday");
+    if (!localSettings.birthdayNotificationsEnabled) {
+      _logger.info("birthday notifications are disabled, skipping scheduling");
+      return;
+    }
+    await _clearAllScheduledBirthdayNotifications();
     final scheduledPersons = <String>{};
     final toSchedule = <PeopleMemory>[];
     final peopleToBirthdayMemories = <String, List<PeopleMemory>>{};

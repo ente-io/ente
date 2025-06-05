@@ -103,9 +103,35 @@ class NotificationSettingsScreen extends StatelessWidget {
                               isGestureDetectorDisabled: true,
                             ),
                             MenuSectionDescriptionWidget(
-                              content:
-                                  S.of(context).onThisDayNotificationExplanation,
+                              content: S
+                                  .of(context)
+                                  .onThisDayNotificationExplanation,
                             ),
+                            sectionOptionSpacing,
+                            MenuItemWidget(
+                              captionedTextWidget: CaptionedTextWidget(
+                                title: "Birhtday notifications",
+                              ),
+                              menuItemColor: colorScheme.fillFaint,
+                              trailingWidget: ToggleSwitchWidget(
+                                value: () =>
+                                    NotificationService.instance
+                                        .hasGrantedPermissions() &&
+                                    localSettings.birthdayNotificationsEnabled,
+                                onChanged: () async {
+                                  await NotificationService.instance
+                                      .requestPermissions();
+                                  await memoriesCacheService
+                                      .toggleBirthdayNotifications();
+                                },
+                              ),
+                              singleBorderRadius: 8,
+                              alignCaptionedTextToLeft: true,
+                              isGestureDetectorDisabled: true,
+                            ),
+                            MenuSectionDescriptionWidget(
+                                content:
+                                    "Receive reminders when it's someone's birthday. Tapping on the notification will take you to photos of the birthday person."),
                           ],
                         ),
                       ],
