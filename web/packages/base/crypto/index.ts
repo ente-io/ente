@@ -9,7 +9,7 @@
  * [Note: Crypto code hierarchy]
  *
  * 1. ente-base/crypto            (Crypto API for our code)
- * 2. ente-base/crypto/libsodium  (Lower level wrappers over libsodium)
+ * 2. ente-base/crypto/libsodium  (The actual implementation)
  * 3. libsodium-wrappers          (JavaScript bindings to libsodium)
  *
  * Our cryptography primitives are provided by libsodium, specifically, its
@@ -23,9 +23,16 @@
  * ensure that sodium.ready has been called before accessing libsodium's APIs,
  * thus all the functions it exposes are async.
  *
- * The highest layer is this file, `crypto/index.ts`. These are usually direct
- * proxies (or simple compositions) of functionality exposed by
- * `crypto/libsodium.ts`, but they automatically defer to a worker thread.
+ * The highest layer is this file, `crypto/index.ts`. These are direct proxies
+ * to functions exposed by `crypto/libsodium.ts`, but they automatically defer
+ * to a worker thread if we're not already running on one.
+ *
+ * [Note: Using libsodium in worker thread]
+ *
+ * `crypto/ente-impl.ts` and `crypto/worker.ts` are logic-less internal files
+ * meant to allow us to seamlessly use the the same API both from the main
+ * thread or from a web worker whilst ensuring that the implementation never
+ * runs on the main thread.
  *
  * Cryptographic operations like encryption are CPU intensive and would cause
  * the UI to stutter if used directly on the main thread. To keep the UI smooth,
