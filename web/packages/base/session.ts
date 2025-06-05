@@ -1,5 +1,5 @@
 import { z } from "zod/v4";
-import { decryptBoxBytes, toB64 } from "./crypto";
+import { decryptBox, decryptBoxBytes } from "./crypto";
 
 /**
  * Remove all data stored in session storage (data tied to the browser tab).
@@ -43,12 +43,29 @@ const SessionKeyData = z.object({
 // };
 
 /**
- * Return the user's decrypted master key from session storage.
+ * Return the user's decrypted master key bytes from session storage.
  *
  * Precondition: The user should be logged in.
  */
 export const masterKeyFromSession = async () => {
-    const key = await masterKeyFromSessionIfLoggedIn();
+    const key = await masterKeyBytesFromSessionIfLoggedIn();
+    if (key) {
+        return key;
+    } else {
+        throw new Error(
+            "The user's master key was not found in session storage. Likely they are not logged in.",
+        );
+    }
+};
+
+/**
+ * Variant of {@link masterKeyFromSession} that returns the master key as a
+ * base64 string.
+ *
+ * TODO(RE): Undup
+ */
+export const masterKeyB64FromSession = async () => {
+    const key = await masterKeyB64FromSessionIfLoggedIn();
     if (key) {
         return key;
     } else {
@@ -62,17 +79,18 @@ export const masterKeyFromSession = async () => {
  * Return `true` if the user's encrypted master key is present in the session.
  *
  * Use {@link masterKeyFromSessionIfLoggedIn} to get the actual master key after
- * decrypting it. This function is instead useful as a quick check to verify if
- * we have credentials at hand or not.
+ * decrypting it. This function is a similar and quicker check to verify if we
+ * have credentials at hand or not, but it doesn't attempt to verify that the
+ * key present in the session can actually be decrypted.
  */
 export const haveCredentialsInSession = () =>
     !!sessionStorage.getItem("encryptionKey");
 
 /**
- * Return the decrypted user's master key from session storage if they are
- * logged in, otherwise return `undefined`.
+ * Return the decrypted user's master key (as bytes) from session storage if
+ * they are logged in, otherwise return `undefined`.
  */
-export const masterKeyFromSessionIfLoggedIn = async () => {
+export const masterKeyBytesFromSessionIfLoggedIn = async () => {
     // TODO: Same value as the deprecated getKey("encryptionKey")
     const value = sessionStorage.getItem("encryptionKey");
     if (!value) return undefined;
@@ -84,10 +102,21 @@ export const masterKeyFromSessionIfLoggedIn = async () => {
 };
 
 /**
- * Variant of {@link masterKeyFromSession} that returns the master key as a
- * base64 string.
+ * Return the decrypted user's master key (as a base64 string) from session
+ * storage if they are logged in, otherwise return `undefined`.
+ *
+ * TODO(RE): Undup.
  */
-export const masterKeyB64FromSession = () => masterKeyFromSession().then(toB64);
+export const masterKeyB64FromSessionIfLoggedIn = async () => {
+    // TODO: Same value as the deprecated getKey("encryptionKey")
+    const value = sessionStorage.getItem("encryptionKey");
+    if (!value) return undefined;
+
+    const { encryptedData, key, nonce } = SessionKeyData.parse(
+        JSON.parse(value),
+    );
+    return decryptBox({ encryptedData, nonce }, key);
+};
 
 /**
  * Return the decrypted user's key encryption key ("kek") from session storage
