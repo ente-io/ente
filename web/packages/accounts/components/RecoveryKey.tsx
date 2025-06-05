@@ -18,8 +18,8 @@ import { downloadString } from "ente-base/utils/web";
 import { t } from "i18next";
 import { useCallback, useEffect, useState } from "react";
 import {
-    getUserRecoveryKeyB64,
-    recoveryKeyB64ToMnemonic,
+    getUserRecoveryKey,
+    recoveryKeyToMnemonic,
 } from "../services/recovery-key";
 import { CodeBlock } from "./CodeBlock";
 
@@ -49,7 +49,7 @@ export const RecoveryKey: React.FC<RecoveryKeyProps> = ({
     useEffect(() => {
         if (!open) return;
 
-        void getRecoveryKeyMnemonic()
+        void getUserRecoveryKeyMnemonic()
             .then((key) => setRecoveryKey(key))
             .catch(handleLoadError);
     }, [open, handleLoadError]);
@@ -114,8 +114,8 @@ export const RecoveryKey: React.FC<RecoveryKeyProps> = ({
     );
 };
 
-const getRecoveryKeyMnemonic = async () =>
-    recoveryKeyB64ToMnemonic(await getUserRecoveryKeyB64());
+const getUserRecoveryKeyMnemonic = async () =>
+    recoveryKeyToMnemonic(await getUserRecoveryKey());
 
 const downloadRecoveryKeyMnemonic = (key: string) =>
     downloadString(key, "ente-recovery-key.txt");

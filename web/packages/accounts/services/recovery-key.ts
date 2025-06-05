@@ -6,7 +6,7 @@ import {
     sharedCryptoWorker,
     toHex,
 } from "ente-base/crypto";
-import { masterKeyB64FromSession } from "ente-base/session";
+import { ensureMasterKeyFromSession } from "ente-base/session";
 import { getData, setData } from "ente-shared/storage/localStorage";
 import { putUserRecoveryKeyAttributes } from "./user";
 
@@ -49,12 +49,12 @@ export const recoveryKeyB64FromMnemonic = (
 /**
  * Convert the provided base64 encoded recovery key into its BIP-39 mnemonic.
  *
- * @param recoveryKeyB64 The base64 encoded recovery key to mnemonize.
+ * @param recoveryKey The base64 encoded recovery key to mnemonize.
  *
  * @returns A 24-word mnemonic that serves as the user visible recovery key.
  */
-export const recoveryKeyB64ToMnemonic = async (recoveryKeyB64: string) =>
-    bip39.entropyToMnemonic(await toHex(recoveryKeyB64));
+export const recoveryKeyToMnemonic = async (recoveryKey: string) =>
+    bip39.entropyToMnemonic(await toHex(recoveryKey));
 
 /**
  * Return the (decrypted) recovery key of the logged in user, reading it from
@@ -65,8 +65,8 @@ export const recoveryKeyB64ToMnemonic = async (recoveryKeyB64: string) =>
  *
  * @returns The user's base64 encoded recovery key.
  */
-export const getUserRecoveryKeyB64 = async () => {
-    const masterKey = await masterKeyB64FromSession();
+export const getUserRecoveryKey = async () => {
+    const masterKey = await ensureMasterKeyFromSession();
 
     const keyAttributes: KeyAttributes = getData("keyAttributes");
     const { recoveryKeyEncryptedWithMasterKey, recoveryKeyDecryptionNonce } =

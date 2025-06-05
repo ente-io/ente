@@ -1,5 +1,5 @@
 import log from "ente-base/log";
-import { masterKeyB64FromSession } from "ente-base/session";
+import { ensureMasterKeyFromSession } from "ente-base/session";
 import { ComlinkWorker } from "ente-base/worker/comlink-worker";
 import { FileType } from "ente-media/file-type";
 import i18n, { t } from "i18next";
@@ -50,7 +50,7 @@ export const logoutSearch = () => {
  * Fetch any data that would be needed if the user were to search.
  */
 export const searchDataSync = () =>
-    worker().then((w) => masterKeyB64FromSession().then((k) => w.sync(k)));
+    worker().then((w) => ensureMasterKeyFromSession().then((k) => w.sync(k)));
 
 /**
  * Set the collections and files over which we should search.

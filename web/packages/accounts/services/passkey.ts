@@ -13,7 +13,7 @@ import HTTPService from "ente-shared/network/HTTPService";
 import { getData, setData, setLSUser } from "ente-shared/storage/localStorage";
 import { getToken } from "ente-shared/storage/localStorage/helpers";
 import { z } from "zod/v4";
-import { getUserRecoveryKeyB64 } from "./recovery-key";
+import { getUserRecoveryKey } from "./recovery-key";
 import { unstashRedirect } from "./redirect";
 
 /**
@@ -108,10 +108,7 @@ export const openAccountsManagePasskeysPage = async () => {
         // If not, enable it for them by creating the necessary recovery
         // information to prevent them from getting locked out.
         const resetSecret = await generateKey();
-        const box = await encryptBox(
-            resetSecret,
-            await getUserRecoveryKeyB64(),
-        );
+        const box = await encryptBox(resetSecret, await getUserRecoveryKey());
         await configurePasskeyRecovery(
             resetSecret,
             box.encryptedData,

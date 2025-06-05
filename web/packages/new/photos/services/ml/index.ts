@@ -7,7 +7,7 @@ import { isDesktop } from "ente-base/app";
 import { blobCache } from "ente-base/blob-cache";
 import { ensureElectron } from "ente-base/electron";
 import log from "ente-base/log";
-import { masterKeyB64FromSession } from "ente-base/session";
+import { ensureMasterKeyFromSession } from "ente-base/session";
 import { ComlinkWorker } from "ente-base/worker/comlink-worker";
 import { type ProcessableUploadItem } from "ente-gallery/services/upload";
 import { createUtilityProcess } from "ente-gallery/utils/native-worker";
@@ -360,7 +360,7 @@ export const mlSync = async () => {
 };
 
 const updateClustersAndPeople = async () => {
-    const masterKey = await masterKeyB64FromSession();
+    const masterKey = await ensureMasterKeyFromSession();
 
     // Fetch existing cgroups from remote.
     await pullUserEntities("cgroup", masterKey);
@@ -751,7 +751,7 @@ export const addCGroup = async (name: string, cluster: FaceCluster) => {
     const id = await addUserEntity(
         "cgroup",
         { name, assigned: [cluster], isHidden: false },
-        await masterKeyB64FromSession(),
+        await ensureMasterKeyFromSession(),
     );
     await mlSync();
     return id;
@@ -782,7 +782,7 @@ export const addClusterToCGroup = async (
     await updateOrCreateUserEntities(
         "cgroup",
         [{ ...cgroup, data: { ...cgroup.data, assigned, rejectedFaceIDs } }],
-        await masterKeyB64FromSession(),
+        await ensureMasterKeyFromSession(),
     );
     return mlSync();
 };
@@ -799,7 +799,7 @@ export const renameCGroup = async (cgroup: CGroup, name: string) => {
     await updateOrCreateUserEntities(
         "cgroup",
         [{ ...cgroup, data: { ...cgroup.data, name } }],
-        await masterKeyB64FromSession(),
+        await ensureMasterKeyFromSession(),
     );
     return mlSync();
 };
@@ -834,7 +834,7 @@ export const applyPersonSuggestionUpdates = async (
     await _applyPersonSuggestionUpdates(
         cgroup,
         updates,
-        await masterKeyB64FromSession(),
+        await ensureMasterKeyFromSession(),
     );
     return mlSync();
 };
@@ -851,7 +851,7 @@ export const ignoreCluster = async (cluster: FaceCluster) => {
     await addUserEntity(
         "cgroup",
         { name: "", assigned: [cluster], isHidden: true },
-        await masterKeyB64FromSession(),
+        await ensureMasterKeyFromSession(),
     );
     return mlSync();
 };

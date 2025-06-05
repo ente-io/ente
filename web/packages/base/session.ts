@@ -44,28 +44,22 @@ const SessionKeyData = z.object({
 
 /**
  * Return the user's decrypted master key (as a base64 string) from session
- * storage.
- *
- * Precondition: The user should be logged in.
+ * storage, or throw if the session storage does not have the master key (which
+ * likely indicates that the user is not logged in).
  */
-export const masterKeyB64FromSession = async () => {
-    const key = await masterKeyB64FromSessionIfLoggedIn();
-    if (key) {
-        return key;
-    } else {
-        throw new Error(
-            "The user's master key was not found in session storage. Likely they are not logged in.",
-        );
-    }
+export const ensureMasterKeyFromSession = async () => {
+    const key = await masterKeyFromSession();
+    if (!key) throw new Error("Master key not found in session");
+    return key;
 };
 
 /**
  * Return `true` if the user's encrypted master key is present in the session.
  *
- * Use {@link masterKeyFromSessionIfLoggedIn} to get the actual master key after
- * decrypting it. This function is a similar and quicker check to verify if we
- * have credentials at hand or not, but it doesn't attempt to verify that the
- * key present in the session can actually be decrypted.
+ * Use {@link masterKeyFromSession} to get the actual master key after
+ * decrypting it. This function is a similar but quicker check to verify if we
+ * have credentials at hand or not, however it doesn't attempt to verify that
+ * the key present in the session can actually be decrypted.
  */
 export const haveCredentialsInSession = () =>
     !!sessionStorage.getItem("encryptionKey");
@@ -73,8 +67,10 @@ export const haveCredentialsInSession = () =>
 /**
  * Return the decrypted user's master key (as a base64 string) from session
  * storage if they are logged in, otherwise return `undefined`.
+ *
+ * See also {@link ensureMasterKeyFromSession}, which is usually what we need.
  */
-export const masterKeyB64FromSessionIfLoggedIn = async () => {
+export const masterKeyFromSession = async () => {
     // TODO: Same value as the deprecated getKey("encryptionKey")
     const value = sessionStorage.getItem("encryptionKey");
     if (!value) return undefined;

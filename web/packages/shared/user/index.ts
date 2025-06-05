@@ -3,7 +3,7 @@ import type { B64EncryptionResult } from "ente-base/crypto/libsodium";
 import { getKey } from "ente-shared/storage/sessionStorage";
 
 /**
- * Deprecated, use {@link masterKeyFromSessionIfLoggedIn} instead.
+ * Deprecated, use {@link ensureMasterKeyFromSession} instead.
  */
 export const getActualKey = async () => {
     const encryptionKeyAttributes: B64EncryptionResult =

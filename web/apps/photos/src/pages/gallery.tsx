@@ -32,7 +32,7 @@ import log from "ente-base/log";
 import {
     clearSessionStorage,
     haveCredentialsInSession,
-    masterKeyB64FromSessionIfLoggedIn,
+    masterKeyFromSession,
 } from "ente-base/session";
 import { FullScreenDropZone } from "ente-gallery/components/FullScreenDropZone";
 import { type UploadTypeSelectorIntent } from "ente-gallery/components/Upload";
@@ -561,7 +561,7 @@ const Page: React.FC = () => {
                 showSessionExpiredDialog();
                 return;
             }
-            if (!(await masterKeyB64FromSessionIfLoggedIn())) {
+            if (!(await masterKeyFromSession())) {
                 clearSessionStorage();
                 router.push("/credentials");
                 return;
