@@ -111,7 +111,7 @@ let _comlinkWorker: ComlinkWorker<typeof CryptoWorker> | undefined;
 /**
  * Lazily created, cached, instance of a CryptoWorker web worker.
  */
-export const sharedCryptoWorker = async () =>
+export const sharedCryptoWorker = () =>
     (_comlinkWorker ??= createComlinkCryptoWorker()).remote;
 
 /** A shorter alias of {@link sharedCryptoWorker} for use within this file. */
@@ -144,7 +144,7 @@ export const toB64URLSafe = (bytes: Uint8Array): Promise<string> =>
 /**
  * Convert a base64 string to bytes ({@link Uint8Array}).
  */
-export const fromB64 = (b64String: string) =>
+export const fromB64 = (b64String: string): Promise<Uint8Array> =>
     inWorker()
         ? ei._fromB64(b64String)
         : sharedWorker().then((w) => w.fromB64(b64String));
@@ -160,7 +160,7 @@ export const toHex = (b64String: string): Promise<string> =>
 /**
  * Convert a hex string to the base64 representation of the underlying bytes.
  */
-export const fromHex = (hexString: string) =>
+export const fromHex = (hexString: string): Promise<string> =>
     inWorker()
         ? ei._fromHex(hexString)
         : sharedWorker().then((w) => w.fromHex(hexString));
@@ -286,7 +286,7 @@ export const encryptMetadataJSON = (
  * Encrypt the given data using chunked streaming encryption, but process all
  * the chunks in one go.
  */
-export const encryptStreamBytes = async (
+export const encryptStreamBytes = (
     data: Uint8Array,
     key: BytesOrB64,
 ): Promise<EncryptedFile> =>
@@ -305,11 +305,11 @@ export const initChunkEncryption = async (key: BytesOrB64) =>
 /**
  * Encrypt a chunk as part of a chunked streaming encryption.
  */
-export const encryptStreamChunk = async (
+export const encryptStreamChunk = (
     data: Uint8Array,
     state: StateAddress,
     isFinalChunk: boolean,
-) =>
+): Promise<Uint8Array> =>
     inWorker()
         ? ei._encryptStreamChunk(data, state, isFinalChunk)
         : sharedWorker().then((w) =>
@@ -332,7 +332,10 @@ export const decryptBox = (
  * Variant of {@link decryptBox} that returns the decrypted bytes as it is
  * (without encoding them to base64).
  */
-export const decryptBoxBytes = (box: EncryptedBox, key: BytesOrB64) =>
+export const decryptBoxBytes = (
+    box: EncryptedBox,
+    key: BytesOrB64,
+): Promise<Uint8Array> =>
     inWorker()
         ? ei._decryptBoxBytes(box, key)
         : sharedWorker().then((w) => w.decryptBoxBytes(box, key));
@@ -366,7 +369,10 @@ export const decryptBlob = (
  * A variant of {@link decryptBlobBytes} that returns the result bytes directly
  * (instead of encoding them as a base64 string).
  */
-export const decryptBlobBytes = (blob: EncryptedBlob, key: BytesOrB64) =>
+export const decryptBlobBytes = (
+    blob: EncryptedBlob,
+    key: BytesOrB64,
+): Promise<Uint8Array> =>
     inWorker()
         ? ei._decryptBlobBytes(blob, key)
         : sharedWorker().then((w) => w.decryptBlobBytes(blob, key));
@@ -374,10 +380,10 @@ export const decryptBlobBytes = (blob: EncryptedBlob, key: BytesOrB64) =>
 /**
  * Decrypt the result of {@link encryptStreamBytes}.
  */
-export const decryptStreamBytes = async (
+export const decryptStreamBytes = (
     file: EncryptedFile,
     key: BytesOrB64,
-) =>
+): Promise<Uint8Array> =>
     inWorker()
         ? ei._decryptStreamBytes(file, key)
         : sharedWorker().then((w) => w.decryptStreamBytes(file, key));
@@ -396,10 +402,10 @@ export const initChunkDecryption = async (header: string, key: BytesOrB64) =>
  *
  * This function is used in tandem with {@link initChunkDecryption}.
  */
-export const decryptStreamChunk = async (
+export const decryptStreamChunk = (
     data: Uint8Array,
     state: StateAddress,
-) =>
+): Promise<Uint8Array> =>
     inWorker()
         ? ei._decryptStreamChunk(data, state)
         : sharedWorker().then((w) => w.decryptStreamChunk(data, state));

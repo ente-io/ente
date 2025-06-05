@@ -36,7 +36,7 @@ export const toB64 = async (input: Uint8Array) => {
  *
  * This is the converse of {@link toBase64}.
  */
-export const fromB64 = async (input: string) => {
+export const fromB64 = async (input: string): Promise<Uint8Array> => {
     await sodium.ready;
     return sodium.from_base64(input, sodium.base64_variants.ORIGINAL);
 };
@@ -117,7 +117,7 @@ export const toHex = async (input: string) => {
  *
  * This is the inverse of {@link toHex}.
  */
-export const fromHex = async (input: string) => {
+export const fromHex = async (input: string): Promise<string> => {
     await sodium.ready;
     return await toB64(sodium.from_hex(input));
 };
@@ -478,7 +478,7 @@ export const encryptStreamChunk = async (
     data: Uint8Array,
     pushState: sodium.StateAddress,
     isFinalChunk: boolean,
-) => {
+): Promise<Uint8Array> => {
     await sodium.ready;
     const tag = isFinalChunk
         ? sodium.crypto_secretstream_xchacha20poly1305_TAG_FINAL
@@ -577,7 +577,7 @@ export const decryptMetadataJSON = async (
 export const decryptStreamBytes = async (
     { encryptedData, decryptionHeader }: EncryptedFile,
     key: BytesOrB64,
-) => {
+): Promise<Uint8Array> => {
     await sodium.ready;
     const pullState = sodium.crypto_secretstream_xchacha20poly1305_init_pull(
         await fromB64(decryptionHeader),
@@ -647,7 +647,7 @@ export const initChunkDecryption = async (
 export const decryptStreamChunk = async (
     data: Uint8Array,
     pullState: StateAddress,
-) => {
+): Promise<Uint8Array> => {
     await sodium.ready;
     const pullResult = sodium.crypto_secretstream_xchacha20poly1305_pull(
         pullState,
