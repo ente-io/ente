@@ -236,9 +236,6 @@ class NotificationService {
       message,
       scheduledDate,
       platformChannelSpecs,
-      // TODO(prateek): check if this is needed, app won't compile with this
-      // uiLocalNotificationDateInterpretation:
-      //     UILocalNotificationDateInterpretation.wallClockTime,
       androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
       payload: payload,
     );
