@@ -259,17 +259,6 @@ export const encryptMetadataJSON_New = (jsonValue: unknown, key: BytesOrB64) =>
         : sharedWorker().then((w) => w.encryptMetadataJSON_New(jsonValue, key));
 
 /**
- * Deprecated, use {@link encryptMetadataJSON_New} instead.
- */
-export const encryptMetadataJSON = async (r: {
-    jsonValue: unknown;
-    keyB64: string;
-}) =>
-    inWorker()
-        ? ei._encryptMetadataJSON(r)
-        : sharedWorker().then((w) => w.encryptMetadataJSON(r));
-
-/**
  * Decrypt a box encrypted using {@link encryptBox} and returns the decrypted
  * bytes as a base64 string.
  */

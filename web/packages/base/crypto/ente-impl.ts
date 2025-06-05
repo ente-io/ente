@@ -31,21 +31,6 @@ export const _encryptStreamChunk = libsodium.encryptStreamChunk;
 export const _encryptMetadataJSON_New = (jsonValue: unknown, key: BytesOrB64) =>
     _encryptBlob(new TextEncoder().encode(JSON.stringify(jsonValue)), key);
 
-// Deprecated, translates to the old API for now.
-export const _encryptMetadataJSON = async (r: {
-    jsonValue: unknown;
-    keyB64: string;
-}) => {
-    const { encryptedData, decryptionHeader } = await _encryptMetadataJSON_New(
-        r.jsonValue,
-        r.keyB64,
-    );
-    return {
-        encryptedDataB64: encryptedData,
-        decryptionHeaderB64: decryptionHeader,
-    };
-};
-
 export const _decryptBoxBytes = libsodium.decryptBoxBytes;
 
 export const _decryptBox = libsodium.decryptBox;

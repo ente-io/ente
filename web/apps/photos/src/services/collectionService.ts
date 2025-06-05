@@ -435,18 +435,17 @@ export const updatePublicCollectionMagicMetadata = async (
         return;
     }
 
-    const { encryptedDataB64, decryptionHeaderB64 } =
-        await encryptMetadataJSON_New({
-            jsonValue: updatedPublicMagicMetadata.data,
-            keyB64: collection.key,
-        });
+    const { encryptedData, decryptionHeader } = await encryptMetadataJSON_New(
+        updatedPublicMagicMetadata.data,
+        collection.key,
+    );
     const reqBody: UpdateMagicMetadataRequest = {
         id: collection.id,
         magicMetadata: {
             version: updatedPublicMagicMetadata.version,
             count: updatedPublicMagicMetadata.count,
-            data: encryptedDataB64,
-            header: decryptionHeaderB64,
+            data: encryptedData,
+            header: decryptionHeader,
         },
     };
 
