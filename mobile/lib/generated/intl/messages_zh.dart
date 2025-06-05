@@ -476,8 +476,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("已备份的项目将显示在此处"),
         "backupVideos": MessageLookupByLibrary.simpleMessage("备份视频"),
         "beach": MessageLookupByLibrary.simpleMessage("沙滩与大海"),
-        "birhtdayNotifications":
-            MessageLookupByLibrary.simpleMessage("Birhtday notifications"),
         "birthday": MessageLookupByLibrary.simpleMessage("生日"),
         "birthdays": MessageLookupByLibrary.simpleMessage("Birthdays"),
         "blackFridaySale": MessageLookupByLibrary.simpleMessage("黑色星期五特惠"),

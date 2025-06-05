@@ -458,8 +458,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("バックアップされたアイテムがここに表示されます"),
         "backupVideos": MessageLookupByLibrary.simpleMessage("動画をバックアップ"),
         "beach": MessageLookupByLibrary.simpleMessage("砂浜と海"),
-        "birhtdayNotifications":
-            MessageLookupByLibrary.simpleMessage("Birhtday notifications"),
         "birthday": MessageLookupByLibrary.simpleMessage("誕生日"),
         "birthdays": MessageLookupByLibrary.simpleMessage("Birthdays"),
         "blackFridaySale": MessageLookupByLibrary.simpleMessage("ブラックフライデーセール"),

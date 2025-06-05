@@ -448,8 +448,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "backupStatusDescription": MessageLookupByLibrary.simpleMessage(
             "Các mục đã được sao lưu sẽ hiển thị ở đây"),
         "backupVideos": MessageLookupByLibrary.simpleMessage("Sao lưu video"),
-        "birhtdayNotifications":
-            MessageLookupByLibrary.simpleMessage("Birhtday notifications"),
         "birthday": MessageLookupByLibrary.simpleMessage("Sinh nhật"),
         "birthdays": MessageLookupByLibrary.simpleMessage("Birthdays"),
         "blackFridaySale":

@@ -89,8 +89,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "backup": MessageLookupByLibrary.simpleMessage("Zálohovat"),
         "backupFile": MessageLookupByLibrary.simpleMessage("Zálohovat soubor"),
         "backupStatus": MessageLookupByLibrary.simpleMessage("Stav zálohování"),
-        "birhtdayNotifications":
-            MessageLookupByLibrary.simpleMessage("Birhtday notifications"),
         "birthday": MessageLookupByLibrary.simpleMessage("Narozeniny"),
         "birthdays": MessageLookupByLibrary.simpleMessage("Birthdays"),
         "blog": MessageLookupByLibrary.simpleMessage("Blog"),

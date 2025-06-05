@@ -11926,11 +11926,11 @@ class S {
     );
   }
 
-  /// `Birhtday notifications`
-  String get birhtdayNotifications {
+  /// `Birthday notifications`
+  String get birthdayNotifications {
     return Intl.message(
-      'Birhtday notifications',
-      name: 'birhtdayNotifications',
+      'Birthday notifications',
+      name: 'birthdayNotifications',
       desc: '',
       args: [],
     );

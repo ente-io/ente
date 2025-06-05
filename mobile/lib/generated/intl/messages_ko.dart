@@ -26,8 +26,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("다시 오신 것을 환영합니다!"),
         "askDeleteReason":
             MessageLookupByLibrary.simpleMessage("계정을 삭제하는 가장 큰 이유가 무엇인가요?"),
-        "birhtdayNotifications":
-            MessageLookupByLibrary.simpleMessage("Birhtday notifications"),
         "birthdays": MessageLookupByLibrary.simpleMessage("Birthdays"),
         "cancel": MessageLookupByLibrary.simpleMessage("닫기"),
         "clickToInstallOurBestVersionYet": MessageLookupByLibrary.simpleMessage(

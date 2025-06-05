@@ -27,8 +27,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "activeSessions": MessageLookupByLibrary.simpleMessage("एक्टिव सेशन"),
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
             "आपका अकाउंट हटाने का मुख्य कारण क्या है?"),
-        "birhtdayNotifications":
-            MessageLookupByLibrary.simpleMessage("Birhtday notifications"),
         "birthdays": MessageLookupByLibrary.simpleMessage("Birthdays"),
         "cancel": MessageLookupByLibrary.simpleMessage("रद्द करें"),
         "clickToInstallOurBestVersionYet": MessageLookupByLibrary.simpleMessage(

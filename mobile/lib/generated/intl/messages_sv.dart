@@ -164,8 +164,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Säkerhetskopieringsinställningar"),
         "backupStatus":
             MessageLookupByLibrary.simpleMessage("Säkerhetskopieringsstatus"),
-        "birhtdayNotifications":
-            MessageLookupByLibrary.simpleMessage("Birhtday notifications"),
         "birthdays": MessageLookupByLibrary.simpleMessage("Birthdays"),
         "blog": MessageLookupByLibrary.simpleMessage("Blogg"),
         "canNotOpenBody": MessageLookupByLibrary.simpleMessage(

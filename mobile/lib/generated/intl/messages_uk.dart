@@ -445,8 +445,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Елементи, для яких було створено резервну копію, показуватимуться тут"),
         "backupVideos":
             MessageLookupByLibrary.simpleMessage("Резервне копіювання відео"),
-        "birhtdayNotifications":
-            MessageLookupByLibrary.simpleMessage("Birhtday notifications"),
         "birthday": MessageLookupByLibrary.simpleMessage("День народження"),
         "birthdays": MessageLookupByLibrary.simpleMessage("Birthdays"),
         "blackFridaySale": MessageLookupByLibrary.simpleMessage(

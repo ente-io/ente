@@ -342,8 +342,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "backupStatusDescription": MessageLookupByLibrary.simpleMessage(
             "Item yang sudah dicadangkan akan terlihat di sini"),
         "backupVideos": MessageLookupByLibrary.simpleMessage("Cadangkan video"),
-        "birhtdayNotifications":
-            MessageLookupByLibrary.simpleMessage("Birhtday notifications"),
         "birthdays": MessageLookupByLibrary.simpleMessage("Birthdays"),
         "blackFridaySale":
             MessageLookupByLibrary.simpleMessage("Penawaran Black Friday"),

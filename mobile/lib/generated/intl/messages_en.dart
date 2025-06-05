@@ -553,9 +553,9 @@ class MessageLookup extends MessageLookupByLibrary {
             "Items that have been backed up will show up here"),
         "backupVideos": MessageLookupByLibrary.simpleMessage("Backup videos"),
         "beach": MessageLookupByLibrary.simpleMessage("Sand and sea"),
-        "birhtdayNotifications":
-            MessageLookupByLibrary.simpleMessage("Birhtday notifications"),
         "birthday": MessageLookupByLibrary.simpleMessage("Birthday"),
+        "birthdayNotifications":
+            MessageLookupByLibrary.simpleMessage("Birthday notifications"),
         "birthdays": MessageLookupByLibrary.simpleMessage("Birthdays"),
         "blackFridaySale":
             MessageLookupByLibrary.simpleMessage("Black Friday Sale"),

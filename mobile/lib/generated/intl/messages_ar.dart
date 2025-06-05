@@ -532,8 +532,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "backupVideos": MessageLookupByLibrary.simpleMessage(
             "النسخ الاحتياطي لمقاطع الفيديو"),
         "beach": MessageLookupByLibrary.simpleMessage("رمال وبحر"),
-        "birhtdayNotifications":
-            MessageLookupByLibrary.simpleMessage("Birhtday notifications"),
         "birthday": MessageLookupByLibrary.simpleMessage("تاريخ الميلاد"),
         "birthdays": MessageLookupByLibrary.simpleMessage("Birthdays"),
         "blackFridaySale":

@@ -161,8 +161,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Mesedez, autentifikatu zure ezkutatutako fitxategiak ikusteko"),
         "authToViewYourRecoveryKey": MessageLookupByLibrary.simpleMessage(
             "Mesedez, autentifikatu zure berreskuratze giltza ikusteko"),
-        "birhtdayNotifications":
-            MessageLookupByLibrary.simpleMessage("Birhtday notifications"),
         "birthdays": MessageLookupByLibrary.simpleMessage("Birthdays"),
         "canNotOpenBody": MessageLookupByLibrary.simpleMessage(
             "Sentitzen dugu, album hau ezin da aplikazioan ireki."),

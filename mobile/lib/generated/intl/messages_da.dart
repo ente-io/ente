@@ -90,8 +90,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Sikkerhedskopierede mapper"),
         "backupStatusDescription": MessageLookupByLibrary.simpleMessage(
             "Elementer, der er blevet sikkerhedskopieret, vil blive vist her"),
-        "birhtdayNotifications":
-            MessageLookupByLibrary.simpleMessage("Birhtday notifications"),
         "birthdays": MessageLookupByLibrary.simpleMessage("Birthdays"),
         "canNotOpenBody": MessageLookupByLibrary.simpleMessage(
             "Beklager, dette album kan ikke åbnes i appen."),

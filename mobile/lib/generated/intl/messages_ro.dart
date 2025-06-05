@@ -451,8 +451,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Articolele care au fost salvate vor apărea aici"),
         "backupVideos": MessageLookupByLibrary.simpleMessage(
             "Copie de rezervă videoclipuri"),
-        "birhtdayNotifications":
-            MessageLookupByLibrary.simpleMessage("Birhtday notifications"),
         "birthday": MessageLookupByLibrary.simpleMessage("Ziua de naștere"),
         "birthdays": MessageLookupByLibrary.simpleMessage("Birthdays"),
         "blackFridaySale":

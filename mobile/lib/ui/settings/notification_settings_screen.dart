@@ -110,7 +110,7 @@ class NotificationSettingsScreen extends StatelessWidget {
                             sectionOptionSpacing,
                             MenuItemWidget(
                               captionedTextWidget: CaptionedTextWidget(
-                                title: S.of(context).birhtdayNotifications,
+                                title: S.of(context).birthdayNotifications,
                               ),
                               menuItemColor: colorScheme.fillFaint,
                               trailingWidget: ToggleSwitchWidget(

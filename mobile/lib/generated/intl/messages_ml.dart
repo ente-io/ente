@@ -28,8 +28,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
             "അക്കൗണ്ട് ഉപേക്ഷിക്കുവാൻ പ്രധാന കാരണമെന്താണ്?"),
         "available": MessageLookupByLibrary.simpleMessage("ലഭ്യമാണ്"),
-        "birhtdayNotifications":
-            MessageLookupByLibrary.simpleMessage("Birhtday notifications"),
         "birthdays": MessageLookupByLibrary.simpleMessage("Birthdays"),
         "calculating":
             MessageLookupByLibrary.simpleMessage("കണക്കുകൂട്ടുന്നു..."),

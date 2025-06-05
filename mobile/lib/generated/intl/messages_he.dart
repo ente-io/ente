@@ -223,8 +223,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("גבה על רשת סלולרית"),
         "backupSettings": MessageLookupByLibrary.simpleMessage("הגדרות גיבוי"),
         "backupVideos": MessageLookupByLibrary.simpleMessage("גבה סרטונים"),
-        "birhtdayNotifications":
-            MessageLookupByLibrary.simpleMessage("Birhtday notifications"),
         "birthdays": MessageLookupByLibrary.simpleMessage("Birthdays"),
         "blog": MessageLookupByLibrary.simpleMessage("בלוג"),
         "cachedData": MessageLookupByLibrary.simpleMessage("נתונים מוטמנים"),
