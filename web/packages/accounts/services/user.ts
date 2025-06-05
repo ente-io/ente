@@ -221,6 +221,19 @@ export const RemoteKeyAttributes = z.object({
     recoveryKeyDecryptionNonce: z.string().nullish().transform(nullToUndefined),
 });
 
+/**
+ * Return {@link KeyAttributes} if they are present in local storage.
+ *
+ * The key attributes are stored in the browser's localStorage. Thus, this
+ * function only works from the main thread, not from web workers (local storage
+ * is not accessible to web workers).
+ */
+export const savedKeyAttributes = (): KeyAttributes | undefined => {
+    const jsonString = localStorage.getItem("keyAttributes");
+    if (!jsonString) return undefined;
+    return RemoteKeyAttributes.parse(JSON.parse(jsonString));
+};
+
 export interface UserVerificationResponse {
     id: number;
     keyAttributes?: KeyAttributes | undefined;
