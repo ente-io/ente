@@ -173,8 +173,7 @@ export async function generateKeyAndSRPAttributes(
     const cryptoWorker = await sharedCryptoWorker();
     const masterKey = await cryptoWorker.generateKey();
     const recoveryKey = await cryptoWorker.generateKey();
-    const kekSalt = await cryptoWorker.generateDeriveKeySalt();
-    const kek = await cryptoWorker.deriveSensitiveKey(passphrase, kekSalt);
+    const kek = await cryptoWorker.deriveSensitiveKey(passphrase);
 
     const { encryptedData: encryptedKey, nonce: keyDecryptionNonce } =
         await cryptoWorker.encryptBox(masterKey, kek.key);
@@ -198,14 +197,14 @@ export async function generateKeyAndSRPAttributes(
     const srpSetupAttributes = await generateSRPSetupAttributes(loginSubKey);
 
     const keyAttributes: KeyAttributes = {
-        kekSalt,
         encryptedKey,
         keyDecryptionNonce,
+        kekSalt: kek.salt,
+        opsLimit: kek.opsLimit,
+        memLimit: kek.memLimit,
         publicKey: keyPair.publicKey,
         encryptedSecretKey,
         secretKeyDecryptionNonce,
-        opsLimit: kek.opsLimit,
-        memLimit: kek.memLimit,
         masterKeyEncryptedWithRecoveryKey,
         masterKeyDecryptionNonce,
         recoveryKeyEncryptedWithMasterKey,

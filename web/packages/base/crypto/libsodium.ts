@@ -868,9 +868,10 @@ export const deriveKey = async (
  */
 export const deriveSensitiveKey = async (
     passphrase: string,
-    salt: string,
 ): Promise<DerivedKey> => {
     await sodium.ready;
+
+    const salt = await generateDeriveKeySalt();
 
     const desiredStrength =
         sodium.crypto_pwhash_MEMLIMIT_SENSITIVE *
@@ -915,8 +916,8 @@ export const deriveSensitiveKey = async (
  */
 export const deriveInteractiveKey = async (
     passphrase: string,
-    salt: string,
 ): Promise<DerivedKey> => {
+    const salt = await generateDeriveKeySalt();
     const opsLimit = sodium.crypto_pwhash_OPSLIMIT_INTERACTIVE;
     const memLimit = sodium.crypto_pwhash_MEMLIMIT_INTERACTIVE;
 

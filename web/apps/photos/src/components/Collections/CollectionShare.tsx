@@ -41,7 +41,7 @@ import {
     type ModalVisibilityProps,
 } from "ente-base/components/utils/modal";
 import { useBaseContext } from "ente-base/context";
-import { sharedCryptoWorker } from "ente-base/crypto";
+import { deriveInteractiveKey } from "ente-base/crypto";
 import { isHTTP4xxError } from "ente-base/http";
 import { formattedDateTime } from "ente-base/i18n-date";
 import log from "ente-base/log";
@@ -1659,14 +1659,11 @@ const SetPublicLinkPassword: React.FC<SetPublicLinkPasswordProps> = ({
     };
 
     const enablePublicUrlPassword = async (password: string) => {
-        const cryptoWorker = await sharedCryptoWorker();
-        const kekSalt = await cryptoWorker.generateDeriveKeySalt();
-        const kek = await cryptoWorker.deriveInteractiveKey(password, kekSalt);
-
+        const kek = await deriveInteractiveKey(password);
         return updatePublicShareURLHelper({
             collectionID: collection.id,
             passHash: kek.key,
-            nonce: kekSalt,
+            nonce: kek.salt,
             opsLimit: kek.opsLimit,
             memLimit: kek.memLimit,
         });

@@ -25,6 +25,7 @@ import type {
 } from "ente-accounts/services/user";
 import { LinkButton } from "ente-base/components/LinkButton";
 import { sharedCryptoWorker } from "ente-base/crypto";
+import type { DerivedKey } from "ente-base/crypto/types";
 import {
     generateAndSaveIntermediateKeyAttributes,
     generateLoginSubKey,
@@ -60,10 +61,9 @@ const Page: React.FC = () => {
         const cryptoWorker = await sharedCryptoWorker();
         const key = await getActualKey();
         const keyAttributes: KeyAttributes = getData("keyAttributes");
-        const kekSalt = await cryptoWorker.generateDeriveKeySalt();
-        let kek: { key: string; opsLimit: number; memLimit: number };
+        let kek: DerivedKey;
         try {
-            kek = await cryptoWorker.deriveSensitiveKey(passphrase, kekSalt);
+            kek = await cryptoWorker.deriveSensitiveKey(passphrase);
         } catch {
             setFieldError("confirm", t("password_generation_failed"));
             return;
@@ -71,9 +71,9 @@ const Page: React.FC = () => {
         const { encryptedData: encryptedKey, nonce: keyDecryptionNonce } =
             await cryptoWorker.encryptBox(key, kek.key);
         const updatedKey: UpdatedKey = {
-            kekSalt,
             encryptedKey,
             keyDecryptionNonce,
+            kekSalt: kek.salt,
             opsLimit: kek.opsLimit,
             memLimit: kek.memLimit,
         };

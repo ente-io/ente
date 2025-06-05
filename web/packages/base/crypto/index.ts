@@ -93,6 +93,7 @@ import { inWorker } from "../env";
 import * as ei from "./ente-impl";
 import type {
     BytesOrB64,
+    DerivedKey,
     EncryptedBlob,
     EncryptedBox,
     EncryptedFile,
@@ -443,15 +444,19 @@ export const deriveKey = async (
 /**
  * Derive a sensitive key from the given {@link passphrase}.
  */
-export const deriveSensitiveKey = async (passphrase: string, salt: string) =>
+export const deriveSensitiveKey = async (
+    passphrase: string,
+): Promise<DerivedKey> =>
     inWorker()
-        ? ei._deriveSensitiveKey(passphrase, salt)
-        : sharedWorker().then((w) => w.deriveSensitiveKey(passphrase, salt));
+        ? ei._deriveSensitiveKey(passphrase)
+        : sharedWorker().then((w) => w.deriveSensitiveKey(passphrase));
 
 /**
- * Derive an interactive key from the given {@link passphrase}.
+ * Derive an key suitable for interactive use from the given {@link passphrase}.
  */
-export const deriveInteractiveKey = async (passphrase: string, salt: string) =>
+export const deriveInteractiveKey = async (
+    passphrase: string,
+): Promise<DerivedKey> =>
     inWorker()
-        ? ei._deriveInteractiveKey(passphrase, salt)
-        : sharedWorker().then((w) => w.deriveInteractiveKey(passphrase, salt));
+        ? ei._deriveInteractiveKey(passphrase)
+        : sharedWorker().then((w) => w.deriveInteractiveKey(passphrase));
