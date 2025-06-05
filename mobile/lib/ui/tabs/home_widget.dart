@@ -611,6 +611,11 @@ class _HomeWidgetState extends State<HomeWidget> {
             } else {
               Navigator.pop(context);
             }
+          } else if (_selectedTabIndex == 1) {
+            if (_selectedAlbums.albums.isNotEmpty) {
+              _selectedAlbums.clearAll();
+              return;
+            }
           } else {
             Bus.instance
                 .fire(TabChangedEvent(0, TabChangedEventSource.backButton));
