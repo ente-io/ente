@@ -1,4 +1,4 @@
-import { decryptMetadataJSON, encryptMetadataJSON } from "ente-base/crypto";
+import { decryptMetadataJSON, encryptMetadataJSON_New } from "ente-base/crypto";
 import { authenticatedRequestHeaders, ensureOk } from "ente-base/http";
 import { apiURL } from "ente-base/origins";
 import { type Location } from "ente-base/types";
@@ -677,8 +677,9 @@ const updateMagicMetadataRequest = async (
         ([, v]) => v !== null && v !== undefined,
     );
 
-    const { encryptedDataB64, decryptionHeaderB64 } = await encryptMetadataJSON(
-        { jsonValue: Object.fromEntries(validEntries), keyB64: file.key },
+    const { encryptedData, decryptionHeader } = await encryptMetadataJSON_New(
+        Object.fromEntries(validEntries),
+        file.key,
     );
 
     return {
@@ -688,8 +689,8 @@ const updateMagicMetadataRequest = async (
                 magicMetadata: {
                     version: metadataVersion,
                     count: validEntries.length,
-                    data: encryptedDataB64,
-                    header: decryptionHeaderB64,
+                    data: encryptedData,
+                    header: decryptionHeader,
                 },
             },
         ],
