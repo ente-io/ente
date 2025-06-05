@@ -1,11 +1,11 @@
+import type { KeyAttributes } from "ente-accounts/services/user";
 import { authenticatedRequestHeaders, HTTPError } from "ente-base/http";
 import { ensureLocalUser, getAuthToken } from "ente-base/local-user";
 import log from "ente-base/log";
 import { apiURL } from "ente-base/origins";
 import { getData } from "ente-shared/storage/localStorage";
-import type { KeyAttributes } from "ente-shared/user/types";
 import { nullToUndefined } from "ente-utils/transform";
-import { z } from "zod";
+import { z } from "zod/v4";
 import type { SRPAttributes } from "./srp-remote";
 import { getSRPAttributes } from "./srp-remote";
 import { putUserKeyAttributes, RemoteKeyAttributes } from "./user";

@@ -19,6 +19,7 @@ import "package:photos/models/memories/people_memory.dart";
 import "package:photos/models/memories/smart_memory.dart";
 import "package:photos/models/memories/smart_memory_constants.dart";
 import "package:photos/service_locator.dart";
+import "package:photos/services/language_service.dart";
 import "package:photos/services/notification_service.dart";
 import "package:photos/services/search_service.dart";
 import "package:photos/ui/home/memories/full_screen_memory.dart";
@@ -93,6 +94,17 @@ class MemoriesCacheService {
   Future<void> setShowAnyMemories(bool value) async {
     await _prefs.setBool(_showAnyMemoryKey, value);
     Bus.instance.fire(MemoriesSettingChanged());
+  }
+
+  Future<void> toggleOnThisDayNotifications() async {
+    final oldValue = localSettings.isOnThisDayNotificationsEnabled;
+    await localSettings.setOnThisDayNotificationsEnabled(!oldValue);
+    _logger.info("Turning onThisDayNotifications ${oldValue ? "off" : "on"}");
+    if (oldValue) {
+      await _clearAllScheduledOnThisDayNotifications();
+    } else {
+      queueUpdateCache();
+    }
   }
 
   bool get enableSmartMemories =>
@@ -244,6 +256,12 @@ class MemoriesCacheService {
     return newCache;
   }
 
+  Future<void> _clearAllScheduledOnThisDayNotifications() async {
+    _logger.info('Clearing all scheduled On This Day notifications');
+    await NotificationService.instance
+        .clearAllScheduledNotifications(containingPayload: "onThisDay");
+  }
+
   Future<void> _scheduleMemoryNotifications(
     List<SmartMemory> allMemories,
   ) async {
@@ -254,8 +272,12 @@ class MemoriesCacheService {
   Future<void> _scheduleOnThisDayNotifications(
     List<SmartMemory> allMemories,
   ) async {
-    await NotificationService.instance
-        .clearAllScheduledNotifications(containingPayload: "onThisDay");
+    if (!localSettings.isOnThisDayNotificationsEnabled) {
+      _logger
+          .info("On this day notifications are disabled, skipping scheduling");
+      return;
+    }
+    await _clearAllScheduledOnThisDayNotifications();
     final scheduledDates = <DateTime>{};
     for (final memory in allMemories) {
       if (memory.type != MemoryType.onThisDay) {
@@ -273,22 +295,23 @@ class MemoriesCacheService {
       );
       if (scheduleTime.isBefore(DateTime.now())) {
         _logger.info(
-          "Skipping scheduling notification for memory ${memory.id} because the date is in the past",
+          "Skipping scheduling notification for memory ${memory.id} because the date is in the past (date: $scheduleTime)",
         );
         continue;
       }
       if (scheduledDates.contains(scheduleTime)) {
         _logger.info(
-          "Skipping scheduling notification for memory ${memory.id} because the date is already scheduled",
+          "Skipping scheduling notification for memory ${memory.id} because the date is already scheduled (date: $scheduleTime)",
         );
         continue;
       }
+      final s = await LanguageService.s;
       await NotificationService.instance.scheduleNotification(
-        "On this day",
-        "Look back on $numberOfMemories memories 🌄",
+        s.onThisDay,
+        s.lookBackOnYourMemories,
         id: memory.id.hashCode,
         channelID: "onThisDay",
-        channelName: "On this day",
+        channelName: s.onThisDay,
         payload: memory.id,
         dateTime: scheduleTime,
         timeoutDurationAndroid: const Duration(hours: 16),
@@ -585,17 +608,14 @@ class MemoriesCacheService {
     );
   }
 
-  Future<void> goToMemoryFromMemoryID(
-    BuildContext context,
-    String memoryID,
-  ) async {
+  Future<void> goToOnThisDayMemory(BuildContext context) async {
     final allMemories = await getMemories();
     if (allMemories.isEmpty) return;
     int memoryIdx = 0;
     bool found = false;
     memoryLoop:
-    for (final memory in _cachedMemories!) {
-      if (memory.id == memoryID) {
+    for (final memory in allMemories) {
+      if (memory.type == MemoryType.onThisDay) {
         found = true;
         break memoryLoop;
       }
@@ -603,7 +623,7 @@ class MemoriesCacheService {
     }
     if (!found) {
       _logger.warning(
-        "Could not find memory with memoryID: $memoryID",
+        "Could not find onThisDay memory",
       );
       return;
     }

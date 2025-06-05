@@ -22,6 +22,7 @@ import type {
     SRPSetupAttributes,
 } from "ente-accounts/services/srp-remote";
 import { getSRPAttributes } from "ente-accounts/services/srp-remote";
+import type { KeyAttributes, User } from "ente-accounts/services/user";
 import {
     putUserKeyAttributes,
     sendOTT,
@@ -44,7 +45,6 @@ import {
     getLocalReferralSource,
     setIsFirstLogin,
 } from "ente-shared/storage/localStorage/helpers";
-import type { KeyAttributes, User } from "ente-shared/user/types";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";

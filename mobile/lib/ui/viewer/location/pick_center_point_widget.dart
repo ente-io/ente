@@ -40,7 +40,7 @@ Future<Location?> showPickCenterPointSheet(
     topControl: const SizedBox.shrink(),
     backgroundColor: getEnteColorScheme(context).backgroundElevated,
     barrierColor: backdropFaintDark,
-    enableDrag: false,
+    enableDrag: true,
   );
 }
 
@@ -82,6 +82,7 @@ class PickCenterPointWidget extends StatelessWidget {
                             title: S.of(context).pickCenterPoint,
                           ),
                           caption: locationTagName ?? S.of(context).newLocation,
+                          showCloseButton: true,
                         ),
                         Expanded(
                           child: GalleryFilesState(
@@ -138,39 +139,26 @@ class PickCenterPointWidget extends StatelessWidget {
                           ),
                         ),
                       ),
-                      child: Column(
-                        children: [
-                          ValueListenableBuilder(
-                            valueListenable: isFileSelected,
-                            builder: (context, bool value, _) {
-                              return AnimatedSwitcher(
-                                duration: const Duration(milliseconds: 300),
-                                switchInCurve: Curves.easeInOutExpo,
-                                switchOutCurve: Curves.easeInOutExpo,
-                                child: ButtonWidget(
-                                  key: ValueKey(value),
-                                  isDisabled: !value,
-                                  buttonType: ButtonType.neutral,
-                                  labelText: S.of(context).useSelectedPhoto,
-                                  onTap: () async {
-                                    final selectedLocation =
-                                        selectedFiles.files.first.location;
-                                    Navigator.pop(context, selectedLocation);
-                                  },
-                                ),
-                              );
-                            },
-                          ),
-                          const SizedBox(height: 8),
-                          ButtonWidget(
-                            buttonType: ButtonType.secondary,
-                            buttonAction: ButtonAction.cancel,
-                            labelText: S.of(context).cancel,
-                            onTap: () async {
-                              Navigator.of(context).pop();
-                            },
-                          ),
-                        ],
+                      child: ValueListenableBuilder(
+                        valueListenable: isFileSelected,
+                        builder: (context, bool value, _) {
+                          return AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 300),
+                            switchInCurve: Curves.easeInOutExpo,
+                            switchOutCurve: Curves.easeInOutExpo,
+                            child: ButtonWidget(
+                              key: ValueKey(value),
+                              isDisabled: !value,
+                              buttonType: ButtonType.neutral,
+                              labelText: S.of(context).useSelectedPhoto,
+                              onTap: () async {
+                                final selectedLocation =
+                                    selectedFiles.files.first.location;
+                                Navigator.pop(context, selectedLocation);
+                              },
+                            ),
+                          );
+                        },
                       ),
                     ),
                   ),

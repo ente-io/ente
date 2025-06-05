@@ -1640,7 +1640,7 @@ class SmartMemoriesService {
     final List<OnThisDayMemory> memoryResults = [];
     if (allFiles.isEmpty) return [];
 
-    final daysToCompute = kMemoriesUpdateFrequency.inDays + 1;
+    final daysToCompute = kMemoriesUpdateFrequency.inDays;
     final currentYear = currentTime.year;
     final currentMonth = currentTime.month;
     final currentDay = currentTime.day;

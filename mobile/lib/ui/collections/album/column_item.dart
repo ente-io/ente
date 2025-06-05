@@ -6,16 +6,19 @@ import 'package:photos/models/collection/collection.dart';
 import 'package:photos/models/file/file.dart';
 import "package:photos/services/collections_service.dart";
 import 'package:photos/theme/ente_theme.dart';
+import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import 'package:photos/ui/viewer/file/no_thumbnail_widget.dart';
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
 
 ///https://www.figma.com/file/SYtMyLBs5SAOkTbfMMzhqt/ente-Visual-Design?node-id=7480%3A33462&t=H5AvR79OYDnB9ekw-4
 class AlbumColumnItemWidget extends StatelessWidget {
   final Collection collection;
+  final List<Collection> selectedCollections;
 
   const AlbumColumnItemWidget(
     this.collection, {
     super.key,
+    this.selectedCollections = const [],
   });
 
   @override
@@ -23,12 +26,25 @@ class AlbumColumnItemWidget extends StatelessWidget {
     final textTheme = getEnteTextTheme(context);
     final colorScheme = getEnteColorScheme(context);
     const sideOfThumbnail = 60.0;
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        return Stack(
-          alignment: Alignment.center,
-          children: [
-            Row(
+    final isSelected = selectedCollections.contains(collection);
+    return AnimatedContainer(
+      curve: Curves.easeOut,
+      duration: const Duration(milliseconds: 200),
+      decoration: BoxDecoration(
+        border: Border.all(
+          color:
+              isSelected ? colorScheme.strokeMuted : colorScheme.strokeFainter,
+        ),
+        borderRadius: const BorderRadius.all(
+          Radius.circular(4),
+        ),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Flexible(
+            flex: 6,
+            child: Row(
               children: [
                 ClipRRect(
                   borderRadius: const BorderRadius.horizontal(
@@ -57,62 +73,72 @@ class AlbumColumnItemWidget extends StatelessWidget {
                     ),
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.only(left: 12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(collection.displayName),
-                      FutureBuilder<int>(
-                        future: CollectionsService.instance.getFileCount
-                          (collection),
-                        builder: (context, snapshot) {
-                          if (snapshot.hasData) {
-                            return Text(
-                              S.of(context).memoryCount(
-                                    snapshot.data!,
-                                    NumberFormat().format(snapshot.data!),
-                                  ),
-                              style: textTheme.small.copyWith(
-                                color: colorScheme.textMuted,
-                              ),
-                            );
-                          } else {
-                            if (snapshot.hasError) {
-                              Logger("AlbumListItemWidget").severe(
-                                "Failed to fetch file count of collection",
-                                snapshot.error,
+                const SizedBox(width: 12),
+                Flexible(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          collection.displayName,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        FutureBuilder<int>(
+                          future: CollectionsService.instance
+                              .getFileCount(collection),
+                          builder: (context, snapshot) {
+                            if (snapshot.hasData) {
+                              return Text(
+                                S.of(context).memoryCount(
+                                      snapshot.data!,
+                                      NumberFormat().format(snapshot.data!),
+                                    ),
+                                style: textTheme.small.copyWith(
+                                  color: colorScheme.textMuted,
+                                ),
+                              );
+                            } else {
+                              if (snapshot.hasError) {
+                                Logger("AlbumListItemWidget").severe(
+                                  "Failed to fetch file count of collection",
+                                  snapshot.error,
+                                );
+                              }
+                              return Text(
+                                "",
+                                style: textTheme.small.copyWith(
+                                  color: colorScheme.textMuted,
+                                ),
                               );
                             }
-                            return Text(
-                              "",
-                              style: textTheme.small.copyWith(
-                                color: colorScheme.textMuted,
-                              ),
-                            );
-                          }
-                        },
-                      ),
-                    ],
+                          },
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ],
             ),
-            IgnorePointer(
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: const BorderRadius.all(Radius.circular(4)),
-                  border: Border.all(
-                    color: colorScheme.strokeFainter,
-                  ),
-                ),
-                height: sideOfThumbnail,
-                width: constraints.maxWidth,
-              ),
+          ),
+          Flexible(
+            flex: 1,
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 200),
+              switchInCurve: Curves.easeOut,
+              switchOutCurve: Curves.easeIn,
+              child: isSelected
+                  ? IconButtonWidget(
+                      key: const ValueKey("selected"),
+                      icon: Icons.check_circle_rounded,
+                      iconButtonType: IconButtonType.secondary,
+                      iconColor: colorScheme.blurStrokeBase,
+                    )
+                  : null,
             ),
-          ],
-        );
-      },
+          ),
+        ],
+      ),
     );
   }
 }

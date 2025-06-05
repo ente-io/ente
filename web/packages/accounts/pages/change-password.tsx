@@ -18,7 +18,11 @@ import {
     startSRPSetup,
     updateSRPAndKeys,
 } from "ente-accounts/services/srp-remote";
-import type { UpdatedKey } from "ente-accounts/services/user";
+import type {
+    KeyAttributes,
+    UpdatedKey,
+    User,
+} from "ente-accounts/services/user";
 import { LinkButton } from "ente-base/components/LinkButton";
 import { sharedCryptoWorker } from "ente-base/crypto";
 import {
@@ -28,7 +32,6 @@ import {
 } from "ente-shared/crypto/helpers";
 import { getData, setData } from "ente-shared/storage/localStorage";
 import { getActualKey } from "ente-shared/user";
-import type { KEK, KeyAttributes, User } from "ente-shared/user/types";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
@@ -58,7 +61,7 @@ const Page: React.FC = () => {
         const key = await getActualKey();
         const keyAttributes: KeyAttributes = getData("keyAttributes");
         const kekSalt = await cryptoWorker.generateSaltToDeriveKey();
-        let kek: KEK;
+        let kek: { key: string; opsLimit: number; memLimit: number };
         try {
             kek = await cryptoWorker.deriveSensitiveKey(passphrase, kekSalt);
         } catch {

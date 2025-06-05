@@ -111,7 +111,6 @@ class MLIndexingIsolate extends SuperIsolate {
     }
     return _downloadModelLock.synchronized(() async {
       if (areModelsDownloaded) {
-        _logger.finest("Models already downloaded");
         return;
       }
       final goodInternet = await canUseHighBandwidth();
@@ -128,6 +127,7 @@ class MLIndexingIsolate extends SuperIsolate {
         ClipImageEncoder.instance.downloadModel(forceRefresh),
       ]);
       areModelsDownloaded = true;
+      _logger.info('Downloaded models');
     });
   }
 

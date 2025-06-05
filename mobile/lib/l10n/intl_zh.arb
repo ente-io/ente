@@ -1723,5 +1723,21 @@
   "moon": "月光之下",
   "onTheRoad": "再次踏上旅途",
   "food": "美食盛宴",
-  "pets": "毛茸茸的伙伴"
+  "pets": "毛茸茸的伙伴",
+  "cLIcon": "新图标",
+  "cLIconDesc": "终于迎来了一个全新的应用图标，我们认为它最能代表我们的作品。同时，我们还添加了图标切换功能，所以您可以继续使用旧图标。",
+  "cLMemories": "回忆",
+  "cLMemoriesDesc": "重新发现你的珍贵时刻——聚焦你最爱的亲友、旅行与假期、美妙瞬间等精彩回忆。启用机器学习，标记自己并为朋友命名，享受最佳体验。",
+  "cLWidgets": "小组件",
+  "cLWidgetsDesc": "全新首页小组件，与回忆深度集成。无需打开应用，即可在主屏幕上查看你的特别时刻。",
+  "cLFamilyPlan": "家庭计划存储限制",
+  "cLFamilyPlanDesc": "你现在可以为家庭成员设置存储空间使用上限。",
+  "cLBulkEdit": "批量编辑日期",
+  "cLBulkEditDesc": "你现在可以选择多张照片，一键批量修改日期/时间，并支持日期顺移。",
+  "onThisDay": "On this day",
+  "lookBackOnYourMemories": "Look back on your memories 🌄",
+  "newPhotosEmoji": " new 📸",
+  "sorryWeHadToPauseYourBackups": "Sorry, we had to pause your backups",
+  "clickToInstallOurBestVersionYet": "Click to install our best version yet",
+  "onThisDayNotificationExplanation": "Receive reminders about memories from this day in previous years."
 }
