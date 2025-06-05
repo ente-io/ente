@@ -35,7 +35,6 @@ export class CryptoWorker {
     initChunkDecryption = ei._initChunkDecryption;
     decryptStreamChunk = ei._decryptStreamChunk;
     decryptMetadataJSON_New = ei._decryptMetadataJSON_New;
-    decryptMetadataJSON = ei._decryptMetadataJSON;
     chunkHashInit = ei._chunkHashInit;
     chunkHashUpdate = ei._chunkHashUpdate;
     chunkHashFinal = ei._chunkHashFinal;

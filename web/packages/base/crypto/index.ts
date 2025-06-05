@@ -342,18 +342,6 @@ export const decryptMetadataJSON_New = (
         : sharedWorker().then((w) => w.decryptMetadataJSON_New(blob, key));
 
 /**
- * Deprecated, retains the old API.
- */
-export const decryptMetadataJSON = (r: {
-    encryptedDataB64: string;
-    decryptionHeaderB64: string;
-    keyB64: string;
-}) =>
-    inWorker()
-        ? ei._decryptMetadataJSON(r)
-        : sharedWorker().then((w) => w.decryptMetadataJSON(r));
-
-/**
  * Generate a new public/private keypair.
  */
 export const generateKeyPair = async () =>

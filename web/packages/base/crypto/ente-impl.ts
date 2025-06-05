@@ -53,19 +53,6 @@ export const _decryptMetadataJSON_New = async (
         new TextDecoder().decode(await _decryptBlobBytes(blob, key)),
     ) as unknown;
 
-export const _decryptMetadataJSON = async (r: {
-    encryptedDataB64: string;
-    decryptionHeaderB64: string;
-    keyB64: string;
-}) =>
-    _decryptMetadataJSON_New(
-        {
-            encryptedData: r.encryptedDataB64,
-            decryptionHeader: r.decryptionHeaderB64,
-        },
-        r.keyB64,
-    );
-
 export const _chunkHashInit = libsodium.chunkHashInit;
 
 export const _chunkHashUpdate = libsodium.chunkHashUpdate;
