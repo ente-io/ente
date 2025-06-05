@@ -274,9 +274,11 @@ class DownloadManager {
     await _dio.download(
       FileUrl.getUrl(task.id, FileUrlType.directDownload),
       chunkPath,
+      queryParameters: {
+        "token": Configuration.instance.getToken(),
+      },
       options: Options(
         headers: {
-          "X-Auth-Token": Configuration.instance.getToken(),
           "Range": "bytes=$startByte-$endByte",
         },
       ),
