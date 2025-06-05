@@ -12,6 +12,7 @@ import { mergeUint8Arrays } from "ente-utils/array";
 import sodium, { type StateAddress } from "libsodium-wrappers-sumo";
 import type {
     BytesOrB64,
+    DerivedKey,
     EncryptedBlob,
     EncryptedBlobB64,
     EncryptedBlobBytes,
@@ -865,7 +866,10 @@ export const deriveKey = async (
  * during the derivation (this information will be needed the user's other
  * clients to derive the same result).
  */
-export const deriveSensitiveKey = async (passphrase: string, salt: string) => {
+export const deriveSensitiveKey = async (
+    passphrase: string,
+    salt: string,
+): Promise<DerivedKey> => {
     await sodium.ready;
 
     const desiredStrength =
@@ -896,7 +900,7 @@ export const deriveSensitiveKey = async (passphrase: string, salt: string) => {
     while (memLimit > minMemLimit) {
         try {
             const key = await deriveKey(passphrase, salt, opsLimit, memLimit);
-            return { key, opsLimit, memLimit };
+            return { key, salt, opsLimit, memLimit };
         } catch {
             opsLimit *= 2;
             memLimit /= 2;
@@ -912,12 +916,12 @@ export const deriveSensitiveKey = async (passphrase: string, salt: string) => {
 export const deriveInteractiveKey = async (
     passphrase: string,
     salt: string,
-) => {
+): Promise<DerivedKey> => {
     const opsLimit = sodium.crypto_pwhash_OPSLIMIT_INTERACTIVE;
     const memLimit = sodium.crypto_pwhash_MEMLIMIT_INTERACTIVE;
 
     const key = await deriveKey(passphrase, salt, opsLimit, memLimit);
-    return { key, opsLimit, memLimit };
+    return { key, salt, opsLimit, memLimit };
 };
 
 export async function generateSubKey(

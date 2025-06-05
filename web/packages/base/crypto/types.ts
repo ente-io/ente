@@ -129,3 +129,26 @@ export interface EncryptedFile {
      */
     decryptionHeader: string;
 }
+
+/**
+ * A key derived from a user provided passphrase, and the various attributes
+ * that were used during the key derivation.
+ */
+export interface DerivedKey {
+    /**
+     * The newly derived key itself, as a base64 encoded string.
+     */
+    key: string;
+    /**
+     * The randomly generated salt (as a base64 string) that was used when deriving the key.
+     */
+    salt: string;
+    /**
+     * opsLimit used during key derivation.
+     */
+    opsLimit: number;
+    /**
+     * memLimit used during key derivation.
+     * */
+    memLimit: number;
+}
