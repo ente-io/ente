@@ -57,15 +57,13 @@ export async function generateAndSaveIntermediateKeyAttributes(
         passphrase,
         intermediateKekSalt,
     );
-    const encryptedKeyAttributes = await cryptoWorker.encryptToB64(
-        key,
-        intermediateKek.key,
-    );
+    const { encryptedData: encryptedKey, nonce: keyDecryptionNonce } =
+        await cryptoWorker.encryptBox(key, intermediateKek.key);
 
     const intermediateKeyAttributes = Object.assign(existingKeyAttributes, {
         kekSalt: intermediateKekSalt,
-        encryptedKey: encryptedKeyAttributes.encryptedData,
-        keyDecryptionNonce: encryptedKeyAttributes.nonce,
+        encryptedKey,
+        keyDecryptionNonce,
         opsLimit: intermediateKek.opsLimit,
         memLimit: intermediateKek.memLimit,
     });
