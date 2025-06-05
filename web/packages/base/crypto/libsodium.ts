@@ -660,15 +660,6 @@ export async function encryptUTF8(data: string, key: string) {
     return await encryptToB64(b64Data, key);
 }
 
-/** Deprecated, use {@link decryptBox} instead. */
-export async function decryptB64(
-    encryptedData: string,
-    nonce: string,
-    keyB64: string,
-) {
-    return decryptBox({ encryptedData, nonce }, keyB64);
-}
-
 /** Deprecated */
 export async function decryptToUTF8(
     encryptedData: string,

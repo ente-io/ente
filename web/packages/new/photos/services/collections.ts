@@ -202,16 +202,20 @@ export const getCollectionWithSecrets = async (
     const userID = getData("user").id;
     let collectionKey: string;
     if (collection.owner.id === userID) {
-        collectionKey = await cryptoWorker.decryptB64(
-            collection.encryptedKey,
-            collection.keyDecryptionNonce,
+        collectionKey = await cryptoWorker.decryptBox(
+            {
+                encryptedData: collection.encryptedKey,
+                nonce: collection.keyDecryptionNonce,
+            },
             masterKey,
         );
     } else {
         const keyAttributes = getData("keyAttributes");
-        const secretKey = await cryptoWorker.decryptB64(
-            keyAttributes.encryptedSecretKey,
-            keyAttributes.secretKeyDecryptionNonce,
+        const secretKey = await cryptoWorker.decryptBox(
+            {
+                encryptedData: keyAttributes.encryptedSecretKey,
+                nonce: keyAttributes.secretKeyDecryptionNonce,
+            },
             masterKey,
         );
         collectionKey = await cryptoWorker.boxSealOpen(

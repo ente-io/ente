@@ -47,10 +47,6 @@ export class CryptoWorker {
 
     // TODO: -- AUDIT BELOW --
 
-    async decryptB64(data: string, nonce: string, key: string) {
-        return libsodium.decryptB64(data, nonce, key);
-    }
-
     async decryptToUTF8(data: string, nonce: string, key: string) {
         return libsodium.decryptToUTF8(data, nonce, key);
     }

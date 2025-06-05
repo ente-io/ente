@@ -18,9 +18,11 @@ export async function decryptAndStoreToken(
     let decryptedToken = null;
     const { encryptedToken } = user;
     if (encryptedToken && encryptedToken.length > 0) {
-        const secretKey = await cryptoWorker.decryptB64(
-            keyAttributes.encryptedSecretKey,
-            keyAttributes.secretKeyDecryptionNonce,
+        const secretKey = await cryptoWorker.decryptBox(
+            {
+                encryptedData: keyAttributes.encryptedSecretKey,
+                nonce: keyAttributes.secretKeyDecryptionNonce,
+            },
             masterKey,
         );
         const urlUnsafeB64DecryptedToken = await cryptoWorker.boxSealOpen(
