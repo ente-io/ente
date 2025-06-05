@@ -23,6 +23,7 @@ import {
 import { checkSessionValidity } from "ente-accounts/services/session";
 import {
     configureSRP,
+    generateLoginSubKey,
     generateSRPSetupAttributes,
     loginViaSRP,
 } from "ente-accounts/services/srp";
@@ -39,7 +40,6 @@ import log from "ente-base/log";
 import {
     decryptAndStoreToken,
     generateAndSaveIntermediateKeyAttributes,
-    generateLoginSubKey,
     saveKeyInSessionStore,
 } from "ente-shared/crypto/helpers";
 import { CustomError } from "ente-shared/error";

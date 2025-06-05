@@ -10,6 +10,7 @@ import { appHomeRoute, stashRedirect } from "ente-accounts/services/redirect";
 import {
     convertBase64ToBuffer,
     convertBufferToBase64,
+    generateLoginSubKey,
     generateSRPClient,
     generateSRPSetupAttributes,
 } from "ente-accounts/services/srp";
@@ -28,7 +29,6 @@ import { sharedCryptoWorker } from "ente-base/crypto";
 import type { DerivedKey } from "ente-base/crypto/types";
 import {
     generateAndSaveIntermediateKeyAttributes,
-    generateLoginSubKey,
     saveKeyInSessionStore,
 } from "ente-shared/crypto/helpers";
 import { getData, setData } from "ente-shared/storage/localStorage";

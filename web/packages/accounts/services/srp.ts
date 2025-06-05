@@ -1,7 +1,6 @@
 import type { KeyAttributes } from "ente-accounts/services/user";
 import { sharedCryptoWorker } from "ente-base/crypto";
 import log from "ente-base/log";
-import { generateLoginSubKey } from "ente-shared/crypto/helpers";
 import { getToken } from "ente-shared/storage/localStorage/helpers";
 import { SRP, SrpClient } from "fast-srp-hap";
 import { v4 as uuidv4 } from "uuid";
@@ -16,6 +15,29 @@ import {
 import type { UserVerificationResponse } from "./user";
 
 const SRP_PARAMS = SRP.params["4096"];
+
+const LOGIN_SUB_KEY_LENGTH = 32;
+const LOGIN_SUB_KEY_ID = 1;
+const LOGIN_SUB_KEY_CONTEXT = "loginctx";
+const LOGIN_SUB_KEY_BYTE_LENGTH = 16;
+
+export const generateLoginSubKey = async (kek: string) => {
+    const cryptoWorker = await sharedCryptoWorker();
+    const kekSubKeyString = await cryptoWorker.deriveSubKey(
+        kek,
+        LOGIN_SUB_KEY_LENGTH,
+        LOGIN_SUB_KEY_ID,
+        LOGIN_SUB_KEY_CONTEXT,
+    );
+    const kekSubKey = await cryptoWorker.fromB64(kekSubKeyString);
+
+    // use first 16 bytes of generated kekSubKey as loginSubKey
+    const loginSubKey = await cryptoWorker.toB64(
+        kekSubKey.slice(0, LOGIN_SUB_KEY_BYTE_LENGTH),
+    );
+
+    return loginSubKey;
+};
 
 export const configureSRP = async ({
     srpSalt,
