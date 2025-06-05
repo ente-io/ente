@@ -308,7 +308,7 @@ class MemoriesCacheService {
       final s = await LanguageService.s;
       await NotificationService.instance.scheduleNotification(
         s.onThisDay,
-        s.lookBackOnYourMemories,
+        message: s.lookBackOnYourMemories,
         id: memory.id.hashCode,
         channelID: "onThisDay",
         channelName: s.onThisDay,
@@ -376,7 +376,6 @@ class MemoriesCacheService {
         memory.personName != null
             ? "Happy birthday to ${memory.personName}! 🎉"
             : "Happy birthday! 🥳",
-        // TODO:lau (after mergin main): change `scheduleNotification` api to make message optional
         // TODO:lau (after mergin main): extract strings
         id: memory.id.hashCode,
         channelID: "birthday",

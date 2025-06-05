@@ -143,8 +143,8 @@ class NotificationService {
   }
 
   Future<void> scheduleNotification(
-    String title,
-    String message, {
+    String title, {
+    String? message,
     required int id,
     String channelID = "io.ente.photos",
     String channelName = "ente",
