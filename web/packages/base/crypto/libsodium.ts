@@ -867,7 +867,7 @@ export const deriveSensitiveKey = async (passphrase: string, salt: string) => {
             memLimit /= 2;
         }
     }
-    throw new Error("Failed to derive key: Memory limit exceeded");
+    throw new Error("Failed to derive key: memory limit exceeded");
 };
 
 /**
