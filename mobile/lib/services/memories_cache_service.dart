@@ -529,6 +529,7 @@ class MemoriesCacheService {
   }
 
   Future<void> goToPersonMemory(BuildContext context, String personID) async {
+    _logger.info("Going to person memory for personID: $personID");
     final allMemories = await getMemories();
     if (allMemories.isEmpty) return;
     final personMemories = <PeopleMemory>[];
@@ -730,7 +731,7 @@ class MemoriesCacheService {
       );
       scheduledPersons.add(memory.personID);
       _logger.info(
-        "Scheduled birthday notification for person ${memory.personName} on date: $scheduleTime",
+        "Scheduled birthday notification for person ${memory.personID} on date: $scheduleTime",
       );
     }
   }
