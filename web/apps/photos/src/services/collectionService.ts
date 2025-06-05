@@ -74,7 +74,8 @@ const createCollection = async (
         const { encryptedData: encryptedKey, nonce: keyDecryptionNonce } =
             await cryptoWorker.encryptBox(collectionKey, encryptionKey);
         const { encryptedData: encryptedName, nonce: nameDecryptionNonce } =
-            await cryptoWorker.encryptUTF8(collectionName, collectionKey);
+            await cryptoWorker.encryptBoxUTF8(collectionName, collectionKey);
+
         let encryptedMagicMetadata: EncryptedMagicMetadata;
         if (magicMetadataProps) {
             const magicMetadata = await updateMagicMetadata(magicMetadataProps);
@@ -476,7 +477,7 @@ export const renameCollection = async (
     const token = getToken();
     const cryptoWorker = await sharedCryptoWorker();
     const { encryptedData: encryptedName, nonce: nameDecryptionNonce } =
-        await cryptoWorker.encryptUTF8(newCollectionName, collection.key);
+        await cryptoWorker.encryptBoxUTF8(newCollectionName, collection.key);
     const collectionRenameRequest = {
         collectionID: collection.id,
         encryptedName,

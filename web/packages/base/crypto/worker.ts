@@ -57,10 +57,6 @@ export class CryptoWorker {
         return libsodium.generateKeyAndEncryptToB64(data);
     }
 
-    async encryptUTF8(data: string, key: string) {
-        return libsodium.encryptUTF8(data, key);
-    }
-
     async generateSaltToDeriveKey() {
         return libsodium.generateSaltToDeriveKey();
     }

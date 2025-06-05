@@ -678,12 +678,6 @@ export async function generateKeyAndEncryptToB64(data: string) {
     return await encryptToB64(data, await toB64(key));
 }
 
-export async function encryptUTF8(data: string, key: string) {
-    await sodium.ready;
-    const b64Data = await toB64(sodium.from_string(data));
-    return await encryptToB64(b64Data, key);
-}
-
 /** Deprecated */
 export async function decryptToUTF8(
     encryptedData: string,
