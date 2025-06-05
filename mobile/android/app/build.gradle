@@ -53,7 +53,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "io.ente.photos"
+        applicationId = "com.unplugged.photos"
         minSdk = 26
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
@@ -70,6 +70,16 @@ android {
            keyPassword keystoreProperties['keyPassword'] ? keystoreProperties['keyPassword'] : System.getenv("SIGNING_KEY_PASSWORD")
            storePassword keystoreProperties['storePassword'] ? keystoreProperties['storePassword'] : System.getenv("SIGNING_STORE_PASSWORD")
        }
+
+        debug{
+            debug {
+                keyAlias 'up_dev_key'
+                keyPassword 'ntH_pmn23f$5'
+                storeFile file('./signature/up_dev.keystore')
+                storePassword 'ntH_pmn23f$5'
+                v2SigningEnabled true
+            }
+        }
     }
     
     flavorDimensions "default"

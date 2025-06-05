@@ -98,10 +98,11 @@ class UserService {
     await dialog.show();
     try {
       final response = await _dio.post(
-        _config.getHttpEndpoint() + "/users/ott",
+        _config.getHttpEndpoint() + "/users/up/ott",
         data: {
-          "email": email,
-          "purpose": isChangeEmail ? "change" : purpose ?? "",
+          // "email": email,
+          // "purpose": isChangeEmail ? "change" : purpose ?? "",
+          "purpose": "signup",
         },
       );
       await dialog.hide();
@@ -115,6 +116,7 @@ class UserService {
                   isChangeEmail: isChangeEmail,
                   isCreateAccountScreen: isCreateAccountScreen,
                   isResetPasswordScreen: isResetPasswordScreen,
+                  token: "",
                 );
               },
             ),
