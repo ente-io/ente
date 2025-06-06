@@ -22,8 +22,8 @@ import { LoadingButton } from "ente-base/components/mui/LoadingButton";
 import { ShowHidePasswordInputAdornment } from "ente-base/components/mui/PasswordInputAdornment";
 import { isMuseumHTTPError } from "ente-base/http";
 import log from "ente-base/log";
+import { saveMasterKeyInSessionAndSafeStore } from "ente-base/session";
 import { setLSUser } from "ente-shared//storage/localStorage";
-import { saveKeyInSessionStore } from "ente-shared/crypto/helpers";
 import { setData } from "ente-shared/storage/localStorage";
 import {
     setJustSignedUp,
@@ -107,7 +107,7 @@ export const SignUpContents: React.FC<SignUpContentsProps> = ({
                     masterKey,
                 );
 
-                await saveKeyInSessionStore("encryptionKey", masterKey);
+                await saveMasterKeyInSessionAndSafeStore(masterKey);
                 setJustSignedUp(true);
                 void router.push("/verify");
             } catch (e) {

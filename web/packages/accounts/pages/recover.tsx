@@ -16,7 +16,7 @@ import {
 import { useBaseContext } from "ente-base/context";
 import { decryptBox } from "ente-base/crypto";
 import log from "ente-base/log";
-import { saveKeyInSessionStore } from "ente-shared/crypto/helpers";
+import { saveMasterKeyInSessionAndSafeStore } from "ente-base/session";
 import { getData, setData } from "ente-shared/storage/localStorage";
 import { getKey } from "ente-shared/storage/sessionStorage";
 import { t } from "i18next";
@@ -68,7 +68,7 @@ const Page: React.FC = () => {
                 },
                 await recoveryKeyFromMnemonic(recoveryKeyMnemonic),
             );
-            await saveKeyInSessionStore("encryptionKey", masterKey);
+            await saveMasterKeyInSessionAndSafeStore(masterKey);
             await decryptAndStoreToken(keyAttr, masterKey);
 
             setData("showBackButton", { value: false });

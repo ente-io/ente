@@ -74,11 +74,14 @@ export const masterKeyFromSession = async () => {
 };
 
 /**
- * Save the user's encrypted master key in the session storage.
+ * Save the user's encrypted master key in the session storage. If we're running
+ * in the context of our desktop app, also save it in the OS safe storage.
+ *
+ * See: [Note: Safe storage and interactive KEK attributes]
  *
  * @param masterKey The user's master key (as a base64 encoded string).
  */
-export const saveMasterKeyInSessionStore = async (
+export const saveMasterKeyInSessionAndSafeStore = async (
     masterKey: string,
     // TODO: ?
     fromDesktop?: boolean,

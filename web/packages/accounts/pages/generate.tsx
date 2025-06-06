@@ -19,7 +19,7 @@ import { LinkButton } from "ente-base/components/LinkButton";
 import { LoadingIndicator } from "ente-base/components/loaders";
 import { useBaseContext } from "ente-base/context";
 import log from "ente-base/log";
-import { saveKeyInSessionStore } from "ente-shared/crypto/helpers";
+import { saveMasterKeyInSessionAndSafeStore } from "ente-base/session";
 import { getData } from "ente-shared/storage/localStorage";
 import {
     justSignedUp,
@@ -75,7 +75,7 @@ const Page: React.FC = () => {
                 keyAttributes,
                 masterKey,
             );
-            await saveKeyInSessionStore("encryptionKey", masterKey);
+            await saveMasterKeyInSessionAndSafeStore(masterKey);
             setJustSignedUp(true);
             setOpenRecoveryKey(true);
         } catch (e) {

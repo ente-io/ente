@@ -43,9 +43,9 @@ import { clearLocalStorage } from "ente-base/local-storage";
 import log from "ente-base/log";
 import {
     haveAuthenticatedSession,
+    saveMasterKeyInSessionAndSafeStore,
     updateSessionFromElectronSafeStorageIfNeeded,
 } from "ente-base/session";
-import { saveKeyInSessionStore } from "ente-shared/crypto/helpers";
 import { CustomError } from "ente-shared/error";
 import { getData, setData, setLSUser } from "ente-shared/storage/localStorage";
 import {
@@ -268,12 +268,12 @@ const Page: React.FC = () => {
         };
 
     const postVerification = async (
-        key: string,
+        masterKey: string,
         kek: string,
         keyAttributes: KeyAttributes,
     ) => {
-        await saveKeyInSessionStore("encryptionKey", key);
-        await decryptAndStoreToken(keyAttributes, key);
+        await saveMasterKeyInSessionAndSafeStore(masterKey);
+        await decryptAndStoreToken(keyAttributes, masterKey);
         try {
             let srpAttributes: SRPAttributes | null = getData("srpAttributes");
             if (!srpAttributes && user) {

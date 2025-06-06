@@ -28,7 +28,7 @@ import { generateAndSaveIntermediateKeyAttributes } from "ente-accounts/utils/he
 import { LinkButton } from "ente-base/components/LinkButton";
 import { sharedCryptoWorker } from "ente-base/crypto";
 import type { DerivedKey } from "ente-base/crypto/types";
-import { saveKeyInSessionStore } from "ente-shared/crypto/helpers";
+import { saveMasterKeyInSessionAndSafeStore } from "ente-base/session";
 import { getData, setData } from "ente-shared/storage/localStorage";
 import { getActualKey } from "ente-shared/user";
 import { t } from "i18next";
@@ -121,7 +121,7 @@ const Page: React.FC = () => {
             key,
         );
 
-        await saveKeyInSessionStore("encryptionKey", key);
+        await saveMasterKeyInSessionAndSafeStore(key);
 
         redirectToAppHome();
     };
