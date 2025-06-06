@@ -638,29 +638,6 @@ export const decryptStreamChunk = async (
     return pullResult.message;
 };
 
-export interface B64EncryptionResult {
-    encryptedData: string;
-    key: string;
-    nonce: string;
-}
-
-/** Deprecated, use {@link encryptBox} instead */
-async function encryptToB64(data: string, keyB64: string) {
-    await sodium.ready;
-    const encrypted = await encryptBox(data, keyB64);
-    return {
-        encryptedData: encrypted.encryptedData,
-        key: keyB64,
-        nonce: encrypted.nonce,
-    } as B64EncryptionResult;
-}
-
-export async function generateKeyAndEncryptToB64(data: string) {
-    await sodium.ready;
-    const key = sodium.crypto_secretbox_keygen();
-    return await encryptToB64(data, await toB64(key));
-}
-
 /**
  * Initialize and return new state that can be used to hash the chunks of data
  * in a streaming manner.

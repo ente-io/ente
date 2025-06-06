@@ -1,7 +1,6 @@
 import { expose } from "comlink";
 import { logUnhandledErrorsAndRejectionsInWorker } from "ente-base/log-web";
 import * as ei from "./ente-impl";
-import * as libsodium from "./libsodium";
 
 /**
  * A web worker that exposes some of the functions defined in either the Ente
@@ -47,12 +46,6 @@ export class CryptoWorker {
     deriveSensitiveKey = ei._deriveSensitiveKey;
     deriveInteractiveKey = ei._deriveInteractiveKey;
     deriveSubKeyBytes = ei._deriveSubKeyBytes;
-
-    // TODO: -- AUDIT BELOW --
-
-    async generateKeyAndEncryptToB64(data: string) {
-        return libsodium.generateKeyAndEncryptToB64(data);
-    }
 }
 
 expose(CryptoWorker);
