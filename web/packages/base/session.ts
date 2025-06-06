@@ -1,5 +1,5 @@
 import { z } from "zod/v4";
-import { decryptBox, decryptBoxBytes } from "./crypto";
+import { decryptBox, decryptBoxBytes, encryptBox, generateKey } from "./crypto";
 
 /**
  * Remove all data stored in session storage (data tied to the browser tab).
@@ -22,25 +22,13 @@ const SessionKeyData = z.object({
     nonce: z.string(),
 });
 
-/**
- * Save the user's encrypted master key in the session storage.
- *
- * @param keyB64 The user's master key as a base64 encoded string.
- */
-// TODO(RE):
-// export const saveMasterKeyInSessionStore = async (
-//     keyB64: string,
-//     fromDesktop?: boolean,
-// ) => {
-//     const cryptoWorker = await sharedCryptoWorker();
-//     const sessionKeyAttributes =
-//         await cryptoWorker.generateKeyAndEncryptToB64(key);
-//     setKey(keyType, sessionKeyAttributes);
-//     const electron = globalThis.electron;
-//     if (electron && !fromDesktop) {
-//         electron.saveMasterKeyB64(key);
-//     }
-// };
+type SessionKeyData = z.infer<typeof SessionKeyData>;
+
+const sessionKeyData = async (keyData: string): Promise<SessionKeyData> => {
+    const key = await generateKey();
+    const box = await encryptBox(keyData, key);
+    return { key, ...box };
+};
 
 /**
  * Return the user's decrypted master key (as a base64 string) from session
@@ -79,6 +67,37 @@ export const masterKeyFromSession = async () => {
         JSON.parse(value),
     );
     return decryptBox({ encryptedData, nonce }, key);
+};
+
+/**
+ * Save the user's encrypted master key in the session storage.
+ *
+ * @param masterKey The user's master key (as a base64 encoded string).
+ */
+export const saveMasterKeyInSessionStore = async (
+    masterKey: string,
+    // TODO: ?
+    fromDesktop?: boolean,
+) => {
+    await saveKeyInSessionStore("encryptionKey", masterKey);
+    const electron = globalThis.electron;
+    if (electron && !fromDesktop) {
+        await electron.saveMasterKeyB64(masterKey);
+    }
+};
+
+/**
+ * Save the provided key in session storage.
+ *
+ * @param keyName The name of the key use for the session storage entry.
+ *
+ * @param keyData The base64 encoded bytes of the key.
+ */
+const saveKeyInSessionStore = async (keyName: string, keyData: string) => {
+    sessionStorage.setItem(
+        keyName,
+        JSON.stringify(await sessionKeyData(keyData)),
+    );
 };
 
 /**
