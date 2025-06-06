@@ -8,6 +8,7 @@
 import { sharedCryptoWorker } from "ente-base/crypto";
 import log from "ente-base/log";
 import { apiURL } from "ente-base/origins";
+import { ensureMasterKeyFromSession } from "ente-base/session";
 import {
     type Collection,
     type CollectionMagicMetadata,
@@ -30,7 +31,6 @@ import HTTPService from "ente-shared/network/HTTPService";
 import localForage from "ente-shared/storage/localForage";
 import { getData } from "ente-shared/storage/localStorage";
 import { getToken } from "ente-shared/storage/localStorage/helpers";
-import { getActualKey } from "ente-shared/user";
 import { isHiddenCollection } from "./collection";
 import { ensureUserKeyPair } from "./user";
 
@@ -89,9 +89,10 @@ export const syncCollections = async () => {
     let lastCollectionUpdationTime = await getCollectionUpdationTime();
     const hiddenCollectionIDs = await getHiddenCollectionIDs();
     const token = getToken();
-    const key = await getActualKey();
+    const masterKey = await ensureMasterKeyFromSession();
     const updatedCollections =
-        (await getCollections(token, lastCollectionUpdationTime, key)) ?? [];
+        (await getCollections(token, lastCollectionUpdationTime, masterKey)) ??
+        [];
     if (updatedCollections.length === 0) {
         return localCollections;
     }
@@ -308,10 +309,9 @@ export const getCollection = async (
             null,
             { "X-Auth-Token": token },
         );
-        const key = await getActualKey();
         const collectionWithSecrets = await getCollectionWithSecrets(
             resp.data?.collection,
-            key,
+            await ensureMasterKeyFromSession(),
         );
         return collectionWithSecrets;
     } catch (e) {
