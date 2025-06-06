@@ -1,5 +1,10 @@
 import { type KeyAttributes } from "ente-accounts/services/user";
-import { sharedCryptoWorker } from "ente-base/crypto";
+import {
+    boxSealOpenBytes,
+    decryptBox,
+    sharedCryptoWorker,
+    toB64URLSafe,
+} from "ente-base/crypto";
 import { getData, setData, setLSUser } from "ente-shared/storage/localStorage";
 import { setKey, type SessionKey } from "ente-shared/storage/sessionStorage";
 
@@ -7,27 +12,24 @@ export async function decryptAndStoreToken(
     keyAttributes: KeyAttributes,
     masterKey: string,
 ) {
-    const cryptoWorker = await sharedCryptoWorker();
     const user = getData("user");
-    let decryptedToken = null;
     const { encryptedToken } = user;
+
     if (encryptedToken && encryptedToken.length > 0) {
-        const secretKey = await cryptoWorker.decryptBox(
+        const { encryptedSecretKey, secretKeyDecryptionNonce, publicKey } =
+            keyAttributes;
+        const privateKey = await decryptBox(
             {
-                encryptedData: keyAttributes.encryptedSecretKey,
-                nonce: keyAttributes.secretKeyDecryptionNonce,
+                encryptedData: encryptedSecretKey,
+                nonce: secretKeyDecryptionNonce,
             },
             masterKey,
         );
-        const urlUnsafeB64DecryptedToken = await cryptoWorker.boxSealOpen(
-            encryptedToken,
-            keyAttributes.publicKey,
-            secretKey,
+
+        const decryptedToken = await toB64URLSafe(
+            await boxSealOpenBytes(encryptedToken, { publicKey, privateKey }),
         );
-        const decryptedTokenBytes = await cryptoWorker.fromB64(
-            urlUnsafeB64DecryptedToken,
-        );
-        decryptedToken = await cryptoWorker.toB64URLSafe(decryptedTokenBytes);
+
         await setLSUser({
             ...user,
             token: decryptedToken,
