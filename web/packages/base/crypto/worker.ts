@@ -13,8 +13,10 @@ import * as ei from "./ente-impl";
  */
 export class CryptoWorker {
     toB64 = ei._toB64;
-    toB64URLSafe = ei._toB64URLSafe;
     fromB64 = ei._fromB64;
+    toB64URLSafe = ei._toB64URLSafe;
+    toB64URLSafeNoPadding = ei._toB64URLSafeNoPadding;
+    fromB64URLSafeNoPadding = ei._fromB64URLSafeNoPadding;
     toHex = ei._toHex;
     fromHex = ei._fromHex;
     generateKey = ei._generateKey;

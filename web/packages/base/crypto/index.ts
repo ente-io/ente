@@ -151,6 +151,25 @@ export const toB64URLSafe = (bytes: Uint8Array): Promise<string> =>
         : sharedWorker().then((w) => w.toB64URLSafe(bytes));
 
 /**
+ * URL safe variant of {@link toB64} that does not add any padding ("="
+ * characters).
+ */
+export const toB64URLSafeNoPadding = (bytes: Uint8Array): Promise<string> =>
+    inWorker()
+        ? ei._toB64URLSafeNoPadding(bytes)
+        : sharedWorker().then((w) => w.toB64URLSafeNoPadding(bytes));
+
+/**
+ * URL safe unpadded variant of {@link fromB64}.
+ */
+export const fromB64URLSafeNoPadding = (
+    b64String: string,
+): Promise<Uint8Array> =>
+    inWorker()
+        ? ei._fromB64URLSafeNoPadding(b64String)
+        : sharedWorker().then((w) => w.fromB64URLSafeNoPadding(b64String));
+
+/**
  * Convert a base64 string to the hex representation of the underlying bytes.
  */
 export const toHex = (b64String: string): Promise<string> =>

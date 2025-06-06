@@ -6,8 +6,10 @@ import * as libsodium from "./libsodium";
 // See: [Note: Using libsodium in worker thread]
 
 export const _toB64 = libsodium.toB64;
-export const _toB64URLSafe = libsodium.toB64URLSafe;
 export const _fromB64 = libsodium.fromB64;
+export const _toB64URLSafe = libsodium.toB64URLSafe;
+export const _toB64URLSafeNoPadding = libsodium.toB64URLSafeNoPadding;
+export const _fromB64URLSafeNoPadding = libsodium.fromB64URLSafeNoPadding;
 export const _toHex = libsodium.toHex;
 export const _fromHex = libsodium.fromHex;
 export const _generateKey = libsodium.generateKey;
