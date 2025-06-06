@@ -36,9 +36,7 @@ class AlbumListItemWidget extends StatelessWidget {
       child: Row(
         children: [
           ClipRRect(
-            borderRadius: const BorderRadius.horizontal(
-              left: Radius.circular(4),
-            ),
+            borderRadius: BorderRadius.circular(4),
             child: SizedBox(
               height: sideOfThumbnail,
               width: sideOfThumbnail,
@@ -123,7 +121,7 @@ class AlbumListItemWidget extends StatelessWidget {
                     ? colorScheme.strokeMuted
                     : colorScheme.strokeFainter,
               ),
-              borderRadius: const BorderRadius.all(Radius.circular(4)),
+              borderRadius: const BorderRadius.all(Radius.circular(6)),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
