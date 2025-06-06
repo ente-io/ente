@@ -30,6 +30,10 @@ import {
 import type { SRPAttributes } from "ente-accounts/services/srp-remote";
 import { getSRPAttributes } from "ente-accounts/services/srp-remote";
 import type { KeyAttributes, User } from "ente-accounts/services/user";
+import {
+    decryptAndStoreToken,
+    generateAndSaveIntermediateKeyAttributes,
+} from "ente-accounts/utils/helpers";
 import { LinkButton } from "ente-base/components/LinkButton";
 import { LoadingIndicator } from "ente-base/components/loaders";
 import { useBaseContext } from "ente-base/context";
@@ -37,11 +41,7 @@ import { sharedCryptoWorker } from "ente-base/crypto";
 import type { B64EncryptionResult } from "ente-base/crypto/libsodium";
 import { clearLocalStorage } from "ente-base/local-storage";
 import log from "ente-base/log";
-import {
-    decryptAndStoreToken,
-    generateAndSaveIntermediateKeyAttributes,
-    saveKeyInSessionStore,
-} from "ente-shared/crypto/helpers";
+import { saveKeyInSessionStore } from "ente-shared/crypto/helpers";
 import { CustomError } from "ente-shared/error";
 import { getData, setData, setLSUser } from "ente-shared/storage/localStorage";
 import {

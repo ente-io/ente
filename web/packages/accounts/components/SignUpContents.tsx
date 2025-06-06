@@ -15,6 +15,7 @@ import {
 } from "@mui/material";
 import { generateKeyAndSRPAttributes } from "ente-accounts/services/srp";
 import { sendOTT } from "ente-accounts/services/user";
+import { generateAndSaveIntermediateKeyAttributes } from "ente-accounts/utils/helpers";
 import { isWeakPassword } from "ente-accounts/utils/password";
 import { LinkButton } from "ente-base/components/LinkButton";
 import { LoadingButton } from "ente-base/components/mui/LoadingButton";
@@ -22,10 +23,7 @@ import { ShowHidePasswordInputAdornment } from "ente-base/components/mui/Passwor
 import { isMuseumHTTPError } from "ente-base/http";
 import log from "ente-base/log";
 import { setLSUser } from "ente-shared//storage/localStorage";
-import {
-    generateAndSaveIntermediateKeyAttributes,
-    saveKeyInSessionStore,
-} from "ente-shared/crypto/helpers";
+import { saveKeyInSessionStore } from "ente-shared/crypto/helpers";
 import { setData } from "ente-shared/storage/localStorage";
 import {
     setJustSignedUp,

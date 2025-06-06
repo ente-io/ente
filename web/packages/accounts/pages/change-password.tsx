@@ -24,13 +24,11 @@ import type {
     UpdatedKey,
     User,
 } from "ente-accounts/services/user";
+import { generateAndSaveIntermediateKeyAttributes } from "ente-accounts/utils/helpers";
 import { LinkButton } from "ente-base/components/LinkButton";
 import { sharedCryptoWorker } from "ente-base/crypto";
 import type { DerivedKey } from "ente-base/crypto/types";
-import {
-    generateAndSaveIntermediateKeyAttributes,
-    saveKeyInSessionStore,
-} from "ente-shared/crypto/helpers";
+import { saveKeyInSessionStore } from "ente-shared/crypto/helpers";
 import { getData, setData } from "ente-shared/storage/localStorage";
 import { getActualKey } from "ente-shared/user";
 import { t } from "i18next";

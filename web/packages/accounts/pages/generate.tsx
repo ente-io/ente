@@ -14,14 +14,12 @@ import {
 } from "ente-accounts/services/srp";
 import type { KeyAttributes, User } from "ente-accounts/services/user";
 import { putUserKeyAttributes } from "ente-accounts/services/user";
+import { generateAndSaveIntermediateKeyAttributes } from "ente-accounts/utils/helpers";
 import { LinkButton } from "ente-base/components/LinkButton";
 import { LoadingIndicator } from "ente-base/components/loaders";
 import { useBaseContext } from "ente-base/context";
 import log from "ente-base/log";
-import {
-    generateAndSaveIntermediateKeyAttributes,
-    saveKeyInSessionStore,
-} from "ente-shared/crypto/helpers";
+import { saveKeyInSessionStore } from "ente-shared/crypto/helpers";
 import { getData } from "ente-shared/storage/localStorage";
 import {
     justSignedUp,

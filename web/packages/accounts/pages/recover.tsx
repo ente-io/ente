@@ -7,6 +7,7 @@ import { recoveryKeyFromMnemonic } from "ente-accounts/services/recovery-key";
 import { appHomeRoute, stashRedirect } from "ente-accounts/services/redirect";
 import type { KeyAttributes, User } from "ente-accounts/services/user";
 import { sendOTT } from "ente-accounts/services/user";
+import { decryptAndStoreToken } from "ente-accounts/utils/helpers";
 import { LinkButton } from "ente-base/components/LinkButton";
 import {
     SingleInputForm,
@@ -15,10 +16,7 @@ import {
 import { useBaseContext } from "ente-base/context";
 import { decryptBox } from "ente-base/crypto";
 import log from "ente-base/log";
-import {
-    decryptAndStoreToken,
-    saveKeyInSessionStore,
-} from "ente-shared/crypto/helpers";
+import { saveKeyInSessionStore } from "ente-shared/crypto/helpers";
 import { getData, setData } from "ente-shared/storage/localStorage";
 import { getKey } from "ente-shared/storage/sessionStorage";
 import { t } from "i18next";
