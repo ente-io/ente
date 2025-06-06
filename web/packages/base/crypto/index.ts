@@ -135,20 +135,20 @@ export const toB64 = (bytes: Uint8Array): Promise<string> =>
     inWorker() ? ei._toB64(bytes) : sharedWorker().then((w) => w.toB64(bytes));
 
 /**
- * URL safe variant of {@link toB64}.
- */
-export const toB64URLSafe = (bytes: Uint8Array): Promise<string> =>
-    inWorker()
-        ? ei._toB64URLSafe(bytes)
-        : sharedWorker().then((w) => w.toB64URLSafe(bytes));
-
-/**
  * Convert a base64 string to bytes ({@link Uint8Array}).
  */
 export const fromB64 = (b64String: string): Promise<Uint8Array> =>
     inWorker()
         ? ei._fromB64(b64String)
         : sharedWorker().then((w) => w.fromB64(b64String));
+
+/**
+ * URL safe variant of {@link toB64}.
+ */
+export const toB64URLSafe = (bytes: Uint8Array): Promise<string> =>
+    inWorker()
+        ? ei._toB64URLSafe(bytes)
+        : sharedWorker().then((w) => w.toB64URLSafe(bytes));
 
 /**
  * Convert a base64 string to the hex representation of the underlying bytes.
