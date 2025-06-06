@@ -476,6 +476,16 @@
       "slug": "freetaxusa"
     },
     {
+      "title": "FZJ",
+      "slug": "fzj",
+      "hex": "023d6b",
+      "altNames": [
+        "Forschungszentrum Jülich",
+        "FZJ IdP",
+        "iffLogin"
+      ]
+    },
+    {
       "title": "G2A"
     },
     {
