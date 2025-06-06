@@ -131,8 +131,12 @@ Future<void> runBackgroundTask(String taskId, {String mode = 'normal'}) async {
       final PackageInfo packageInfo = await PackageInfo.fromPlatform();
       await Configuration.instance.init();
       await NetworkClient.instance.init(packageInfo);
-      ServiceLocator.instance
-          .init(prefs, NetworkClient.instance.enteDio, packageInfo);
+      ServiceLocator.instance.init(
+        prefs,
+        NetworkClient.instance.enteDio,
+        NetworkClient.instance.getDio(),
+        packageInfo,
+      );
       await CollectionsService.instance.init(prefs);
       await FileUploader.instance.init(prefs, true);
       LocalFileUpdateService.instance.init(prefs);
@@ -220,8 +224,12 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     await NetworkClient.instance.init(packageInfo);
     _logger.info("NetworkClient init done $tlog");
 
-    ServiceLocator.instance
-        .init(preferences, NetworkClient.instance.enteDio,NetworkClient.instance.getDio(), packageInfo);
+    ServiceLocator.instance.init(
+      preferences,
+      NetworkClient.instance.enteDio,
+      NetworkClient.instance.getDio(),
+      packageInfo,
+    );
 
     _logger.info("UserService init $tlog");
     await UserService.instance.init();
