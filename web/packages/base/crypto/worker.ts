@@ -41,6 +41,7 @@ export class CryptoWorker {
     generateKeyPair = ei._generateKeyPair;
     boxSeal = ei._boxSeal;
     boxSealOpen = ei._boxSealOpen;
+    boxSealOpenBytes = ei._boxSealOpenBytes;
     generateDeriveKeySalt = ei._generateDeriveKeySalt;
     deriveKey = ei._deriveKey;
     deriveSensitiveKey = ei._deriveSensitiveKey;

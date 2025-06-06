@@ -148,7 +148,7 @@ export interface KeyAttributes {
      *
      * Base64 encoded.
      *
-     * [Note: Public and secret key nomenclature]
+     * [Note: privateKey and secretKey]
      *
      * The nomenclature for the key pair follows libsodium's conventions
      * (https://doc.libsodium.org/public-key_cryptography/authenticated_encryption#key-pair-generation),

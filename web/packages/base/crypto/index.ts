@@ -99,6 +99,7 @@ import type {
     EncryptedFile,
     InitChunkDecryptionResult,
     InitChunkEncryptionResult,
+    KeyPair,
     SodiumStateAddress,
 } from "./types";
 import type { CryptoWorker } from "./worker";
@@ -407,10 +408,7 @@ export const decryptMetadataJSON = (
 /**
  * Generate a new public/private keypair.
  */
-export const generateKeyPair = (): Promise<{
-    publicKey: string;
-    privateKey: string;
-}> =>
+export const generateKeyPair = (): Promise<KeyPair> =>
     inWorker()
         ? ei._generateKeyPair()
         : sharedWorker().then((w) => w.generateKeyPair());
@@ -435,6 +433,19 @@ export const boxSealOpen = (
         ? ei._boxSealOpen(encryptedData, publicKey, secretKey)
         : sharedWorker().then((w) =>
               w.boxSealOpen(encryptedData, publicKey, secretKey),
+          );
+/**
+ * Variant of {@link boxSealOpen} that returns the decrypted bytes as it is
+ * (without encoding them to base64).
+ */
+export const boxSealOpenBytes = (
+    encryptedData: string,
+    keyPair: KeyPair,
+): Promise<string> =>
+    inWorker()
+        ? ei._boxSealOpenBytes(encryptedData, keyPair)
+        : sharedWorker().then((w) =>
+              w._boxSealOpenBytes(encryptedData, keyPair),
           );
 
 /**

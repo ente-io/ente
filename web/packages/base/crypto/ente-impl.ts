@@ -33,6 +33,7 @@ export const _chunkHashFinal = libsodium.chunkHashFinal;
 export const _generateKeyPair = libsodium.generateKeyPair;
 export const _boxSeal = libsodium.boxSeal;
 export const _boxSealOpen = libsodium.boxSealOpen;
+export const _boxSealOpenBytes = libsodium.boxSealOpenBytes;
 export const _generateDeriveKeySalt = libsodium.generateDeriveKeySalt;
 export const _deriveKey = libsodium.deriveKey;
 export const _deriveSensitiveKey = libsodium.deriveSensitiveKey;

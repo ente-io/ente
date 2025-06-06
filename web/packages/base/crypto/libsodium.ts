@@ -21,6 +21,7 @@ import type {
     EncryptedFile,
     InitChunkDecryptionResult,
     InitChunkEncryptionResult,
+    KeyPair,
     SodiumStateAddress,
 } from "./types";
 
@@ -765,14 +766,13 @@ export const boxSeal = async (data: string, publicKey: string) => {
  */
 export const boxSealOpenBytes = async (
     encryptedData: string,
-    publicKey: string,
-    secretKey: string,
+    { publicKey, privateKey }: KeyPair,
 ) => {
     await sodium.ready;
     return sodium.crypto_box_seal_open(
         await fromB64(encryptedData),
         await fromB64(publicKey),
-        await fromB64(secretKey),
+        await fromB64(privateKey),
     );
 };
 
