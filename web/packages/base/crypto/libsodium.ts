@@ -88,24 +88,6 @@ export const fromB64URLSafeNoPadding = async (input: string) => {
 };
 
 /**
- * Variant of {@link toB64URLSafeNoPadding} that works with {@link string}
- * inputs. See also its sibling method {@link fromB64URLSafeNoPaddingString}.
- */
-export const toB64URLSafeNoPaddingString = async (input: string) => {
-    await sodium.ready;
-    return toB64URLSafeNoPadding(sodium.from_string(input));
-};
-
-/**
- * Variant of {@link fromB64URLSafeNoPadding} that works with {@link strings}. See also
- * its sibling method {@link toB64URLSafeNoPaddingString}.
- */
-export const fromB64URLSafeNoPaddingString = async (input: string) => {
-    await sodium.ready;
-    return sodium.to_string(await fromB64URLSafeNoPadding(input));
-};
-
-/**
  * Convert a base64 string to the hex representation of the bytes that the base
  * 64 string encodes.
  *
