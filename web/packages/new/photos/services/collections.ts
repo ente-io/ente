@@ -32,6 +32,7 @@ import { getData } from "ente-shared/storage/localStorage";
 import { getToken } from "ente-shared/storage/localStorage/helpers";
 import { getActualKey } from "ente-shared/user";
 import { isHiddenCollection } from "./collection";
+import { ensureUserKeyPair } from "./user";
 
 const COLLECTION_TABLE = "collections";
 const HIDDEN_COLLECTION_IDS = "hidden-collection-ids";
@@ -210,18 +211,9 @@ export const getCollectionWithSecrets = async (
             masterKey,
         );
     } else {
-        const keyAttributes = getData("keyAttributes");
-        const secretKey = await cryptoWorker.decryptBox(
-            {
-                encryptedData: keyAttributes.encryptedSecretKey,
-                nonce: keyAttributes.secretKeyDecryptionNonce,
-            },
-            masterKey,
-        );
         collectionKey = await cryptoWorker.boxSealOpen(
             collection.encryptedKey,
-            keyAttributes.publicKey,
-            secretKey,
+            await ensureUserKeyPair(),
         );
     }
     const collectionName =

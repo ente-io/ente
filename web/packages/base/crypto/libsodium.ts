@@ -780,20 +780,8 @@ export const boxSealOpenBytes = async (
  * A variant of {@link boxSealOpenBytes} that returns the result as a base64
  * string.
  */
-export const boxSealOpen = async (
-    encryptedData: string,
-    publicKey: string,
-    secretKey: string,
-) => {
-    await sodium.ready;
-    return toB64(
-        sodium.crypto_box_seal_open(
-            await fromB64(encryptedData),
-            await fromB64(publicKey),
-            await fromB64(secretKey),
-        ),
-    );
-};
+export const boxSealOpen = async (encryptedData: string, keyPair: KeyPair) =>
+    toB64(await boxSealOpenBytes(encryptedData, keyPair));
 
 /**
  * Generate a new randomly generated 128-bit salt suitable for use with the key

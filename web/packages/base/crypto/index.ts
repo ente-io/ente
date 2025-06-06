@@ -426,14 +426,12 @@ export const boxSeal = (data: string, publicKey: string): Promise<string> =>
  */
 export const boxSealOpen = (
     encryptedData: string,
-    publicKey: string,
-    secretKey: string,
+    keyPair: KeyPair,
 ): Promise<string> =>
     inWorker()
-        ? ei._boxSealOpen(encryptedData, publicKey, secretKey)
-        : sharedWorker().then((w) =>
-              w.boxSealOpen(encryptedData, publicKey, secretKey),
-          );
+        ? ei._boxSealOpen(encryptedData, keyPair)
+        : sharedWorker().then((w) => w.boxSealOpen(encryptedData, keyPair));
+
 /**
  * Variant of {@link boxSealOpen} that returns the decrypted bytes as it is
  * (without encoding them to base64).
