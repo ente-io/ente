@@ -16,9 +16,11 @@ import {
 import { useBaseContext } from "ente-base/context";
 import { decryptBox } from "ente-base/crypto";
 import log from "ente-base/log";
-import { saveMasterKeyInSessionAndSafeStore } from "ente-base/session";
+import {
+    haveCredentialsInSession,
+    saveMasterKeyInSessionAndSafeStore,
+} from "ente-base/session";
 import { getData, setData } from "ente-shared/storage/localStorage";
-import { getKey } from "ente-shared/storage/sessionStorage";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
@@ -35,7 +37,6 @@ const Page: React.FC = () => {
     useEffect(() => {
         const user: User = getData("user");
         const keyAttributes: KeyAttributes = getData("keyAttributes");
-        const key = getKey("encryptionKey");
         if (!user?.email) {
             void router.push("/");
             return;
@@ -48,7 +49,7 @@ const Page: React.FC = () => {
         }
         if (!keyAttributes) {
             void router.push("/generate");
-        } else if (key) {
+        } else if (haveCredentialsInSession()) {
             void router.push(appHomeRoute);
         } else {
             setKeyAttributes(keyAttributes);

@@ -19,13 +19,15 @@ import { LinkButton } from "ente-base/components/LinkButton";
 import { LoadingIndicator } from "ente-base/components/loaders";
 import { useBaseContext } from "ente-base/context";
 import log from "ente-base/log";
-import { saveMasterKeyInSessionAndSafeStore } from "ente-base/session";
+import {
+    haveCredentialsInSession,
+    saveMasterKeyInSessionAndSafeStore,
+} from "ente-base/session";
 import { getData } from "ente-shared/storage/localStorage";
 import {
     justSignedUp,
     setJustSignedUp,
 } from "ente-shared/storage/localStorage/helpers";
-import { getKey } from "ente-shared/storage/sessionStorage";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
@@ -40,13 +42,12 @@ const Page: React.FC = () => {
     const router = useRouter();
 
     useEffect(() => {
-        const key: string = getKey("encryptionKey");
         const keyAttributes: KeyAttributes = getData("originalKeyAttributes");
         const user: User = getData("user");
         setUser(user);
         if (!user?.token) {
             void router.push("/");
-        } else if (key) {
+        } else if (haveCredentialsInSession()) {
             if (justSignedUp()) {
                 setOpenRecoveryKey(true);
                 setLoading(false);
