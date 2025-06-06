@@ -445,7 +445,7 @@ export const boxSealOpenBytes = (
     inWorker()
         ? ei._boxSealOpenBytes(encryptedData, keyPair)
         : sharedWorker().then((w) =>
-              w._boxSealOpenBytes(encryptedData, keyPair),
+              w.boxSealOpenBytes(encryptedData, keyPair),
           );
 
 /**
