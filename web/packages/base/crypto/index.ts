@@ -78,7 +78,7 @@
  * Apart from these two, there are other secondary and one off types.
  *
  * 1. "Regular" JavaScript strings. These are indicated by the *UTF8 suffix on
- *    the function that deals with them. These strings will be obtained by utf-8
+ *    the function that deals with them. These strings will be obtained by UTF-8
  *    encoding (or decoding) the underlying bytes.
  *
  * 2. Hex representations of the bytes. These are indicated by the *Hex suffix

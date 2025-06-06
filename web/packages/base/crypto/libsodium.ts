@@ -356,7 +356,7 @@ export const encryptBlob = async (
 
 /**
  * Encrypt the provided JSON value (using {@link encryptBlob}) after converting
- * it to a JSON string (and utf-8 encoding it to obtain bytes).
+ * it to a JSON string (and UTF-8 encoding it to obtain bytes).
  *
  * Use {@link decryptMetadataJSON} to decrypt the result and convert it back to
  * a JSON value.
@@ -521,7 +521,7 @@ export const decryptBox = (
 
 /**
  * Variant of {@link decryptBoxBytes} that returns the data after decoding the
- * decrypted bytes as a utf-8 string.
+ * decrypted bytes as a UTF-8 string.
  */
 export const decryptBoxUTF8 = async (
     box: EncryptedBox,
@@ -784,8 +784,25 @@ export const boxSeal = async (data: string, publicKey: string) => {
 /**
  * Decrypt the result of {@link boxSeal}.
  *
- * All parameters, and the result, are base64 string representations of the
- * underlying data.
+ * All parameters are base64 string representations of the underlying data. The
+ * result is the bytes obtained by decryption.
+ */
+export const boxSealOpenBytes = async (
+    encryptedData: string,
+    publicKey: string,
+    secretKey: string,
+) => {
+    await sodium.ready;
+    return sodium.crypto_box_seal_open(
+        await fromB64(encryptedData),
+        await fromB64(publicKey),
+        await fromB64(secretKey),
+    );
+};
+
+/**
+ * A variant of {@link boxSealOpenBytes} that returns the result as a base64
+ * string.
  */
 export const boxSealOpen = async (
     encryptedData: string,
