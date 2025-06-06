@@ -13,48 +13,47 @@
  * 3. libsodium-wrappers          (JavaScript bindings to libsodium)
  *
  * Our cryptography primitives are provided by libsodium, specifically, its
- * JavaScript bindings ("libsodium-wrappers"). This is the lowest layer. Note
- * that we use the sumo variant, "libsodium-wrappers-sumo", since the standard
- * variant does not provide the `crypto_pwhash_*` functions.
+ * JavaScript bindings ("libsodium-wrappers"). That is the lowest layer.
+ *
+ * > Note that we use the sumo variant, "libsodium-wrappers-sumo", since the
+ *   standard variant does not provide the `crypto_pwhash_*` functions.
  *
  * Direct usage of "libsodium-wrappers" is restricted to `crypto/libsodium.ts`.
- * This is the next higher layer. Usually the functions in this file are thin
+ * That is the next higher layer. Usually the functions in this file are thin
  * wrappers over the raw libsodium APIs, with a bit of massaging. They also
  * ensure that sodium.ready has been called before accessing libsodium's APIs,
  * thus all the functions it exposes are async.
  *
- * The highest layer is this file, `crypto/index.ts`. These are direct proxies
- * to functions exposed by `crypto/libsodium.ts`, but they automatically defer
- * to a worker thread if we're not already running on one.
+ * Direct usage of "libsodium-wrappers" is restricted to this file,
+ * `crypto/index.ts`. This is the highest layer. These are direct proxies to
+ * functions exposed by `crypto/libsodium.ts`, but they automatically defer to a
+ * worker thread if we're not already running on one. More on this below.
  *
  * ---
  *
  * [Note: Using libsodium in worker thread]
  *
- * `crypto/ente-impl.ts` and `crypto/worker.ts` are logic-less internal files
- * meant to allow us to seamlessly use the the same API both from the main
- * thread or from a web worker whilst ensuring that the implementation never
- * runs on the main thread.
+ * This file, `crypto/index.ts`, and `crypto/worker.ts` are mostly logic-less
+ * trampolines meant to allow us to seamlessly use the the same API both from
+ * the main thread or from a web worker whilst ensuring that the implementation
+ * never runs on the main thread.
  *
  * Cryptographic operations like encryption are CPU intensive and would cause
  * the UI to stutter if used directly on the main thread. To keep the UI smooth,
  * we instead want to run them in a web worker. However, sometimes we already
  * _are_ running in a web worker, and delegating to another worker is wasteful.
  *
- * To handle both these scenario, the implementation of the functions in this
- * file are split into the external API, and the underlying implementation
- * (denoted by an "_" prefix). To avoid a circular dependency during webpack
- * imports, we need to keep the implementation functions in a separate file
- * (`ente-impl.ts`).
+ * The external API functions provided by this file check to see if we're
+ * already in a web worker, and if so directly invoke the implementation.
+ * Otherwise the call the sibling function in a shared "crypto" web worker
+ * (which then invokes the implementation function, but this time in the context
+ * of a web worker).
  *
- * The external API functions check to see if we're already in a web worker, and
- * if so directly invoke the implementation. Otherwise the call the sibling
- * function in a shared "crypto" web worker (which then invokes the
- * implementation function, but this time in the context of a web worker).
- *
- * Also, some code (e.g. the uploader) creates it own crypto worker instances,
- * and thus directly calls the functions in the web worker that it created
- * instead of going through this file.
+ * As a consumer, it is safe to just call functions in this file, and they'll
+ * just do the right thing based on the context. However, it is also fine to
+ * explicitly get an handle to a crypto web worker and use that. e.g., the
+ * uploader creates it own crypto worker instances and directly calls the
+ * functions in the workers that it created instead of going through this file.
  *
  * ---
  *
@@ -87,7 +86,7 @@
  */
 import { ComlinkWorker } from "ente-base/worker/comlink-worker";
 import { inWorker } from "../env";
-import * as ei from "./ente-impl";
+import * as libsodium from "./libsodium";
 import type {
     BytesOrB64,
     DerivedKey,
@@ -132,14 +131,16 @@ export const createComlinkCryptoWorker = () =>
  * Convert bytes ({@link Uint8Array}) to a base64 string.
  */
 export const toB64 = (bytes: Uint8Array): Promise<string> =>
-    inWorker() ? ei._toB64(bytes) : sharedWorker().then((w) => w.toB64(bytes));
+    inWorker()
+        ? libsodium.toB64(bytes)
+        : sharedWorker().then((w) => w.toB64(bytes));
 
 /**
  * Convert a base64 string to bytes ({@link Uint8Array}).
  */
 export const fromB64 = (b64String: string): Promise<Uint8Array> =>
     inWorker()
-        ? ei._fromB64(b64String)
+        ? libsodium.fromB64(b64String)
         : sharedWorker().then((w) => w.fromB64(b64String));
 
 /**
@@ -147,7 +148,7 @@ export const fromB64 = (b64String: string): Promise<Uint8Array> =>
  */
 export const toB64URLSafe = (bytes: Uint8Array): Promise<string> =>
     inWorker()
-        ? ei._toB64URLSafe(bytes)
+        ? libsodium.toB64URLSafe(bytes)
         : sharedWorker().then((w) => w.toB64URLSafe(bytes));
 
 /**
@@ -156,7 +157,7 @@ export const toB64URLSafe = (bytes: Uint8Array): Promise<string> =>
  */
 export const toB64URLSafeNoPadding = (bytes: Uint8Array): Promise<string> =>
     inWorker()
-        ? ei._toB64URLSafeNoPadding(bytes)
+        ? libsodium.toB64URLSafeNoPadding(bytes)
         : sharedWorker().then((w) => w.toB64URLSafeNoPadding(bytes));
 
 /**
@@ -166,7 +167,7 @@ export const fromB64URLSafeNoPadding = (
     b64String: string,
 ): Promise<Uint8Array> =>
     inWorker()
-        ? ei._fromB64URLSafeNoPadding(b64String)
+        ? libsodium.fromB64URLSafeNoPadding(b64String)
         : sharedWorker().then((w) => w.fromB64URLSafeNoPadding(b64String));
 
 /**
@@ -174,7 +175,7 @@ export const fromB64URLSafeNoPadding = (
  */
 export const toHex = (b64String: string): Promise<string> =>
     inWorker()
-        ? ei._toHex(b64String)
+        ? libsodium.toHex(b64String)
         : sharedWorker().then((w) => w.toHex(b64String));
 
 /**
@@ -182,7 +183,7 @@ export const toHex = (b64String: string): Promise<string> =>
  */
 export const fromHex = (hexString: string): Promise<string> =>
     inWorker()
-        ? ei._fromHex(hexString)
+        ? libsodium.fromHex(hexString)
         : sharedWorker().then((w) => w.fromHex(hexString));
 
 /**
@@ -193,7 +194,7 @@ export const fromHex = (hexString: string): Promise<string> =>
  */
 export const generateKey = (): Promise<string> =>
     inWorker()
-        ? ei._generateKey()
+        ? libsodium.generateKey()
         : sharedWorker().then((w) => w.generateKey());
 
 /**
@@ -202,7 +203,7 @@ export const generateKey = (): Promise<string> =>
  */
 export const generateBlobOrStreamKey = (): Promise<string> =>
     inWorker()
-        ? ei._generateBlobOrStreamKey()
+        ? libsodium.generateBlobOrStreamKey()
         : sharedWorker().then((w) => w.generateBlobOrStreamKey());
 
 /**
@@ -223,7 +224,7 @@ export const encryptBox = (
     key: BytesOrB64,
 ): Promise<EncryptedBoxB64> =>
     inWorker()
-        ? ei._encryptBox(data, key)
+        ? libsodium.encryptBox(data, key)
         : sharedWorker().then((w) => w.encryptBox(data, key));
 
 /**
@@ -245,7 +246,7 @@ export const encryptBlob = (
     key: BytesOrB64,
 ): Promise<EncryptedBlobB64> =>
     inWorker()
-        ? ei._encryptBlob(data, key)
+        ? libsodium.encryptBlob(data, key)
         : sharedWorker().then((w) => w.encryptBlob(data, key));
 
 /**
@@ -259,7 +260,7 @@ export const encryptBlobBytes = (
     key: BytesOrB64,
 ): Promise<EncryptedBlobBytes> =>
     inWorker()
-        ? ei._encryptBlobBytes(data, key)
+        ? libsodium.encryptBlobBytes(data, key)
         : sharedWorker().then((w) => w.encryptBlobBytes(data, key));
 
 /**
@@ -287,7 +288,7 @@ export const encryptMetadataJSON = (
     key: BytesOrB64,
 ): Promise<EncryptedBlobB64> =>
     inWorker()
-        ? ei._encryptMetadataJSON(jsonValue, key)
+        ? libsodium.encryptMetadataJSON(jsonValue, key)
         : sharedWorker().then((w) => w.encryptMetadataJSON(jsonValue, key));
 
 /**
@@ -299,7 +300,7 @@ export const encryptStreamBytes = (
     key: BytesOrB64,
 ): Promise<EncryptedFile> =>
     inWorker()
-        ? ei._encryptStreamBytes(data, key)
+        ? libsodium.encryptStreamBytes(data, key)
         : sharedWorker().then((w) => w.encryptStreamBytes(data, key));
 
 /**
@@ -309,7 +310,7 @@ export const initChunkEncryption = (
     key: BytesOrB64,
 ): Promise<InitChunkEncryptionResult> =>
     inWorker()
-        ? ei._initChunkEncryption(key)
+        ? libsodium.initChunkEncryption(key)
         : sharedWorker().then((w) => w.initChunkEncryption(key));
 
 /**
@@ -321,7 +322,7 @@ export const encryptStreamChunk = (
     isFinalChunk: boolean,
 ): Promise<Uint8Array> =>
     inWorker()
-        ? ei._encryptStreamChunk(data, state, isFinalChunk)
+        ? libsodium.encryptStreamChunk(data, state, isFinalChunk)
         : sharedWorker().then((w) =>
               w.encryptStreamChunk(data, state, isFinalChunk),
           );
@@ -335,7 +336,7 @@ export const decryptBox = (
     key: BytesOrB64,
 ): Promise<string> =>
     inWorker()
-        ? ei._decryptBox(box, key)
+        ? libsodium.decryptBox(box, key)
         : sharedWorker().then((w) => w.decryptBox(box, key));
 
 /**
@@ -347,7 +348,7 @@ export const decryptBoxBytes = (
     key: BytesOrB64,
 ): Promise<Uint8Array> =>
     inWorker()
-        ? ei._decryptBoxBytes(box, key)
+        ? libsodium.decryptBoxBytes(box, key)
         : sharedWorker().then((w) => w.decryptBoxBytes(box, key));
 
 /**
@@ -359,7 +360,7 @@ export const decryptBlob = (
     key: BytesOrB64,
 ): Promise<string> =>
     inWorker()
-        ? ei._decryptBlob(blob, key)
+        ? libsodium.decryptBlob(blob, key)
         : sharedWorker().then((w) => w.decryptBlob(blob, key));
 
 /**
@@ -371,7 +372,7 @@ export const decryptBlobBytes = (
     key: BytesOrB64,
 ): Promise<Uint8Array> =>
     inWorker()
-        ? ei._decryptBlobBytes(blob, key)
+        ? libsodium.decryptBlobBytes(blob, key)
         : sharedWorker().then((w) => w.decryptBlobBytes(blob, key));
 
 /**
@@ -382,7 +383,7 @@ export const decryptStreamBytes = (
     key: BytesOrB64,
 ): Promise<Uint8Array> =>
     inWorker()
-        ? ei._decryptStreamBytes(file, key)
+        ? libsodium.decryptStreamBytes(file, key)
         : sharedWorker().then((w) => w.decryptStreamBytes(file, key));
 
 /**
@@ -394,7 +395,7 @@ export const initChunkDecryption = (
     key: BytesOrB64,
 ): Promise<InitChunkDecryptionResult> =>
     inWorker()
-        ? ei._initChunkDecryption(header, key)
+        ? libsodium.initChunkDecryption(header, key)
         : sharedWorker().then((w) => w.initChunkDecryption(header, key));
 
 /**
@@ -407,7 +408,7 @@ export const decryptStreamChunk = (
     state: SodiumStateAddress,
 ): Promise<Uint8Array> =>
     inWorker()
-        ? ei._decryptStreamChunk(data, state)
+        ? libsodium.decryptStreamChunk(data, state)
         : sharedWorker().then((w) => w.decryptStreamChunk(data, state));
 
 /**
@@ -421,7 +422,7 @@ export const decryptMetadataJSON = (
     key: BytesOrB64,
 ): Promise<unknown> =>
     inWorker()
-        ? ei._decryptMetadataJSON(blob, key)
+        ? libsodium.decryptMetadataJSON(blob, key)
         : sharedWorker().then((w) => w.decryptMetadataJSON(blob, key));
 
 /**
@@ -429,7 +430,7 @@ export const decryptMetadataJSON = (
  */
 export const generateKeyPair = (): Promise<KeyPair> =>
     inWorker()
-        ? ei._generateKeyPair()
+        ? libsodium.generateKeyPair()
         : sharedWorker().then((w) => w.generateKeyPair());
 
 /**
@@ -437,7 +438,7 @@ export const generateKeyPair = (): Promise<KeyPair> =>
  */
 export const boxSeal = (data: string, publicKey: string): Promise<string> =>
     inWorker()
-        ? ei._boxSeal(data, publicKey)
+        ? libsodium.boxSeal(data, publicKey)
         : sharedWorker().then((w) => w.boxSeal(data, publicKey));
 
 /**
@@ -448,7 +449,7 @@ export const boxSealOpen = (
     keyPair: KeyPair,
 ): Promise<string> =>
     inWorker()
-        ? ei._boxSealOpen(encryptedData, keyPair)
+        ? libsodium.boxSealOpen(encryptedData, keyPair)
         : sharedWorker().then((w) => w.boxSealOpen(encryptedData, keyPair));
 
 /**
@@ -460,7 +461,7 @@ export const boxSealOpenBytes = (
     keyPair: KeyPair,
 ): Promise<Uint8Array> =>
     inWorker()
-        ? ei._boxSealOpenBytes(encryptedData, keyPair)
+        ? libsodium.boxSealOpenBytes(encryptedData, keyPair)
         : sharedWorker().then((w) =>
               w.boxSealOpenBytes(encryptedData, keyPair),
           );
@@ -473,7 +474,7 @@ export const boxSealOpenBytes = (
  */
 export const generateDeriveKeySalt = (): Promise<string> =>
     inWorker()
-        ? ei._generateDeriveKeySalt()
+        ? libsodium.generateDeriveKeySalt()
         : sharedWorker().then((w) => w.generateDeriveKeySalt());
 
 /**
@@ -486,7 +487,7 @@ export const deriveKey = (
     memLimit: number,
 ): Promise<string> =>
     inWorker()
-        ? ei._deriveKey(passphrase, salt, opsLimit, memLimit)
+        ? libsodium.deriveKey(passphrase, salt, opsLimit, memLimit)
         : sharedWorker().then((w) =>
               w.deriveKey(passphrase, salt, opsLimit, memLimit),
           );
@@ -496,7 +497,7 @@ export const deriveKey = (
  */
 export const deriveSensitiveKey = (passphrase: string): Promise<DerivedKey> =>
     inWorker()
-        ? ei._deriveSensitiveKey(passphrase)
+        ? libsodium.deriveSensitiveKey(passphrase)
         : sharedWorker().then((w) => w.deriveSensitiveKey(passphrase));
 
 /**
@@ -506,7 +507,7 @@ export const deriveInteractiveKey = (
     passphrase: string,
 ): Promise<DerivedKey> =>
     inWorker()
-        ? ei._deriveInteractiveKey(passphrase)
+        ? libsodium.deriveInteractiveKey(passphrase)
         : sharedWorker().then((w) => w.deriveInteractiveKey(passphrase));
 
 /**
@@ -521,7 +522,7 @@ export const deriveSubKeyBytes = async (
     context: string,
 ): Promise<Uint8Array> =>
     inWorker()
-        ? ei._deriveSubKeyBytes(key, subKeyLength, subKeyID, context)
+        ? libsodium.deriveSubKeyBytes(key, subKeyLength, subKeyID, context)
         : sharedWorker().then((w) =>
               w.deriveSubKeyBytes(key, subKeyLength, subKeyID, context),
           );
