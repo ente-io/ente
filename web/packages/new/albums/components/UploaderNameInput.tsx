@@ -96,6 +96,7 @@ export const UploaderNameInput: React.FC<UploaderNameInput> = ({
                         onChange={formik.handleChange}
                         type={"text"}
                         fullWidth
+                        autoFocus
                         margin="normal"
                         hiddenLabel
                         aria-label={t("name")}
