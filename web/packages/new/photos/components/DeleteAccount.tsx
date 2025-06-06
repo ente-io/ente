@@ -17,11 +17,11 @@ import {
     type DropdownOption,
 } from "ente-new/photos/components/DropdownInput";
 import {
+    decryptDeleteAccountChallenge,
     deleteAccount,
     getAccountDeleteChallenge,
 } from "ente-new/photos/services/user";
 import { initiateEmail } from "ente-new/photos/utils/web";
-import { decryptDeleteAccountChallenge } from "ente-shared/crypto/helpers";
 import { useFormik } from "formik";
 import { t } from "i18next";
 import React, { useState } from "react";

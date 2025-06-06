@@ -1,5 +1,8 @@
+import { ensureSavedKeyAttributes } from "ente-accounts/services/user";
+import { sharedCryptoWorker } from "ente-base/crypto";
 import { authenticatedRequestHeaders, ensureOk } from "ente-base/http";
 import { apiURL } from "ente-base/origins";
+import { ensureMasterKeyFromSession } from "ente-base/session";
 import { nullToUndefined } from "ente-utils/transform";
 import { z } from "zod/v4";
 
@@ -51,12 +54,54 @@ const DeleteChallengeResponse = z.object({
     encryptedChallenge: z.string().nullish().transform(nullToUndefined),
 });
 
+/**
+ * Initiate an account deletion by obtaining a delete challenge from remote.
+ *
+ * Account deletion is a three step process:
+ *
+ * 1. Client obtains a encrypted challenge from remote by using
+ *    {@link getAccountDeleteChallenge}.
+ *
+ * 2. Client asks the user to reverify their password to solve the challenge and
+ *    obtain the decrypted challenge ({@link decryptDeleteAccountChallenge}).
+ *
+ * 3. Client performs the account deletion using the solved challenge
+ *    ({@link deleteAccount}).
+ */
 export const getAccountDeleteChallenge = async () => {
     const res = await fetch(await apiURL("/users/delete-challenge"), {
         headers: await authenticatedRequestHeaders(),
     });
     ensureOk(res);
     return DeleteChallengeResponse.parse(await res.json());
+};
+
+/**
+ * Decrypt the {@link encryptedChallenge} sent by remote during the delete
+ * account flow ({@link getAccountDeleteChallenge}), returning a value that can
+ * then directly be passed to the actual delete account request
+ * ({@link deleteAccount}).
+ */
+export const decryptDeleteAccountChallenge = async (
+    encryptedChallenge: string,
+) => {
+    const cryptoWorker = await sharedCryptoWorker();
+    const masterKey = await ensureMasterKeyFromSession();
+    const keyAttributes = ensureSavedKeyAttributes();
+    const secretKey = await cryptoWorker.decryptBox(
+        {
+            encryptedData: keyAttributes.encryptedSecretKey,
+            nonce: keyAttributes.secretKeyDecryptionNonce,
+        },
+        masterKey,
+    );
+    const b64DecryptedChallenge = await cryptoWorker.boxSealOpen(
+        encryptedChallenge,
+        keyAttributes.publicKey,
+        secretKey,
+    );
+    const utf8DecryptedChallenge = atob(b64DecryptedChallenge);
+    return utf8DecryptedChallenge;
 };
 
 /**
