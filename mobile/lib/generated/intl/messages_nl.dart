@@ -84,9 +84,6 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m21(count) =>
       "${Intl.plural(count, one: 'Verwijder ${count} bestand', other: 'Verwijder ${count} bestanden')}";
 
-  static String m116(count) =>
-      "Verwijder de foto\'s (en video\'s) van deze ${count} albums ook uit <bold>alle</bold> andere albums waar deze deel van uitmaken?";
-
   static String m22(currentlyDeleting, totalCount) =>
       "Verwijderen van ${currentlyDeleting} / ${totalCount}";
 
@@ -229,8 +226,6 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m77(snapshotLength, searchLength) =>
       "Lengte van secties komt niet overeen: ${snapshotLength} != ${searchLength}";
 
-  static String m117(count) => "${count} geselecteerd";
-
   static String m78(count) => "${count} geselecteerd";
 
   static String m79(count, yourCount) =>
@@ -345,9 +340,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Welkom terug!"),
         "ackPasswordLostWarning": MessageLookupByLibrary.simpleMessage(
             "Ik begrijp dat als ik mijn wachtwoord verlies, ik mijn gegevens kan verliezen omdat mijn gegevens <underline>end-to-end versleuteld</underline> zijn."),
-        "actionNotSupportedOnFavouritesAlbum":
-            MessageLookupByLibrary.simpleMessage(
-                "Actie niet ondersteund op Favorieten album"),
         "activeSessions":
             MessageLookupByLibrary.simpleMessage("Actieve sessies"),
         "add": MessageLookupByLibrary.simpleMessage("Toevoegen"),
@@ -375,8 +367,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Details van add-ons"),
         "addOnValidTill": m3,
         "addOns": MessageLookupByLibrary.simpleMessage("Add-ons"),
-        "addParticipants":
-            MessageLookupByLibrary.simpleMessage("Voeg deelnemers toe"),
         "addPhotos": MessageLookupByLibrary.simpleMessage("Foto\'s toevoegen"),
         "addSelected":
             MessageLookupByLibrary.simpleMessage("Voeg geselecteerde toe"),
@@ -559,6 +549,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Back-up video\'s"),
         "beach": MessageLookupByLibrary.simpleMessage("Zand en zee"),
         "birthday": MessageLookupByLibrary.simpleMessage("Verjaardag"),
+        "birthdays": MessageLookupByLibrary.simpleMessage("Birthdays"),
         "blackFridaySale":
             MessageLookupByLibrary.simpleMessage("Black Friday-aanbieding"),
         "blog": MessageLookupByLibrary.simpleMessage("Blog"),
@@ -631,6 +622,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "click": MessageLookupByLibrary.simpleMessage("• Click"),
         "clickOnTheOverflowMenu":
             MessageLookupByLibrary.simpleMessage("• Klik op het menu"),
+        "clickToInstallOurBestVersionYet": MessageLookupByLibrary.simpleMessage(
+            "Click to install our best version yet"),
         "close": MessageLookupByLibrary.simpleMessage("Sluiten"),
         "clubByCaptureTime":
             MessageLookupByLibrary.simpleMessage("Samenvoegen op tijd"),
@@ -731,8 +724,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "criticalUpdateAvailable": MessageLookupByLibrary.simpleMessage(
             "Belangrijke update beschikbaar"),
         "crop": MessageLookupByLibrary.simpleMessage("Bijsnijden"),
-        "curatedMemories":
-            MessageLookupByLibrary.simpleMessage("Samengestelde herinneringen"),
         "currentUsageIs":
             MessageLookupByLibrary.simpleMessage("Huidig gebruik is "),
         "currentlyRunning":
@@ -779,7 +770,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "deleteItemCount": m21,
         "deleteLocation":
             MessageLookupByLibrary.simpleMessage("Verwijder locatie"),
-        "deleteMultipleAlbumDialog": m116,
         "deletePhotos":
             MessageLookupByLibrary.simpleMessage("Foto\'s verwijderen"),
         "deleteProgress": m22,
@@ -1084,6 +1074,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "guestView": MessageLookupByLibrary.simpleMessage("Gasten weergave"),
         "guestViewEnablePreSteps": MessageLookupByLibrary.simpleMessage(
             "Om gasten weergave in te schakelen, moet u een toegangscode of schermvergrendeling instellen in uw systeeminstellingen."),
+        "happyBirthday":
+            MessageLookupByLibrary.simpleMessage("Happy birthday! 🥳"),
         "hearUsExplanation": MessageLookupByLibrary.simpleMessage(
             "Wij gebruiken geen tracking. Het zou helpen als je ons vertelt waar je ons gevonden hebt!"),
         "hearUsWhereTitle": MessageLookupByLibrary.simpleMessage(
@@ -1277,6 +1269,8 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Druk lang op een e-mail om de versleuteling te verifiëren."),
         "longpressOnAnItemToViewInFullscreen": MessageLookupByLibrary.simpleMessage(
             "Houd een bestand lang ingedrukt om te bekijken op volledig scherm"),
+        "lookBackOnYourMemories": MessageLookupByLibrary.simpleMessage(
+            "Look back on your memories 🌄"),
         "loopVideoOff":
             MessageLookupByLibrary.simpleMessage("Video in lus afspelen uit"),
         "loopVideoOn":
@@ -1361,6 +1355,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "newAlbum": MessageLookupByLibrary.simpleMessage("Nieuw album"),
         "newLocation": MessageLookupByLibrary.simpleMessage("Nieuwe locatie"),
         "newPerson": MessageLookupByLibrary.simpleMessage("Nieuw persoon"),
+        "newPhotosEmoji": MessageLookupByLibrary.simpleMessage(" new 📸"),
         "newRange": MessageLookupByLibrary.simpleMessage("Nieuwe reeks"),
         "newToEnte": MessageLookupByLibrary.simpleMessage("Nieuw bij Ente"),
         "newest": MessageLookupByLibrary.simpleMessage("Nieuwste"),
@@ -1417,7 +1412,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "onEnte": MessageLookupByLibrary.simpleMessage(
             "Op <branding>ente</branding>"),
         "onTheRoad": MessageLookupByLibrary.simpleMessage("Onderweg"),
-        "onThisDay": MessageLookupByLibrary.simpleMessage("Op deze dag"),
+        "onThisDay": MessageLookupByLibrary.simpleMessage("On this day"),
+        "onThisDayNotificationExplanation": MessageLookupByLibrary.simpleMessage(
+            "Receive reminders about memories from this day in previous years."),
         "onlyFamilyAdminCanChangeCode": m54,
         "onlyThem": MessageLookupByLibrary.simpleMessage("Alleen hen"),
         "oops": MessageLookupByLibrary.simpleMessage("Oeps"),
@@ -1582,6 +1579,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "reassignedToName": m68,
         "reassigningLoading":
             MessageLookupByLibrary.simpleMessage("Opnieuw toewijzen..."),
+        "receiveRemindersOnBirthdays": MessageLookupByLibrary.simpleMessage(
+            "Receive reminders when it\'s someone\'s birthday. Tapping on the notification will take you to photos of the birthday person."),
         "recover": MessageLookupByLibrary.simpleMessage("Herstellen"),
         "recoverAccount":
             MessageLookupByLibrary.simpleMessage("Account herstellen"),
@@ -1800,7 +1799,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Selecteer je gezicht"),
         "selectYourPlan":
             MessageLookupByLibrary.simpleMessage("Kies uw abonnement"),
-        "selectedAlbums": m117,
         "selectedFilesAreNotOnEnte": MessageLookupByLibrary.simpleMessage(
             "Geselecteerde bestanden staan niet op Ente"),
         "selectedFoldersWillBeEncryptedAndBackedUp":
@@ -1918,6 +1916,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease":
             MessageLookupByLibrary.simpleMessage(
                 "Sorry, we konden geen beveiligde sleutels genereren op dit apparaat.\n\nGelieve je aan te melden vanaf een ander apparaat."),
+        "sorryWeHadToPauseYourBackups": MessageLookupByLibrary.simpleMessage(
+            "Sorry, we had to pause your backups"),
         "sort": MessageLookupByLibrary.simpleMessage("Sorteren"),
         "sortAlbumsBy": MessageLookupByLibrary.simpleMessage("Sorteren op"),
         "sortNewestFirst":

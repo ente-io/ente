@@ -143,7 +143,8 @@ class _LinkContactToPersonSelectionPageState
     required PersonEntity personEntity,
   }) async {
     if (await checkIfEmailAlreadyAssignedToAPerson(emailToLink)) {
-      throw Exception("Email already linked to a person");
+      await showAlreadyLinkedEmailDialog(context, emailToLink);
+      return null;
     }
 
     final personName = personEntity.data.name;

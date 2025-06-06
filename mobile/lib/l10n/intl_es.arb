@@ -1734,5 +1734,15 @@
   "cLFamilyPlanDesc": "Ahora puede establecer límites en cuanto al almacenamiento que los miembros de tu familia pueden utilizar.",
   "cLBulkEdit": "Edición masiva de fechas",
   "cLBulkEditDesc": "Ahora puedes seleccionar múltiples fotos y editar la fecha/hora para todas ellas con una acción rápida. También es posible cambiar las fechas.",
-  "curatedMemories": "Memorias revisadas"
+  "curatedMemories": "Memorias revisadas",
+  "onThisDay": "On this day",
+  "lookBackOnYourMemories": "Look back on your memories 🌄",
+  "newPhotosEmoji": " new 📸",
+  "sorryWeHadToPauseYourBackups": "Sorry, we had to pause your backups",
+  "clickToInstallOurBestVersionYet": "Click to install our best version yet",
+  "onThisDayNotificationExplanation": "Receive reminders about memories from this day in previous years.",
+  "birhtdayNotifications": "Birhtday notifications",
+  "receiveRemindersOnBirthdays": "Receive reminders when it's someone's birthday. Tapping on the notification will take you to photos of the birthday person.",
+  "happyBirthday": "Happy birthday! 🥳",
+  "birthdays": "Birthdays"
 }

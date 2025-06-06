@@ -4,6 +4,7 @@
 /* eslint-disable @typescript-eslint/no-unnecessary-condition */
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/prefer-promise-reject-errors */
+/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import CloseIcon from "@mui/icons-material/Close";
@@ -767,7 +768,6 @@ const canvasToFile = async (
             break;
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
     const blob = (await new Promise<Blob>((resolve) =>
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore

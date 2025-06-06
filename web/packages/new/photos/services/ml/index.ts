@@ -7,7 +7,7 @@ import { isDesktop } from "ente-base/app";
 import { blobCache } from "ente-base/blob-cache";
 import { ensureElectron } from "ente-base/electron";
 import log from "ente-base/log";
-import { masterKeyFromSession } from "ente-base/session";
+import { ensureMasterKeyFromSession } from "ente-base/session";
 import { ComlinkWorker } from "ente-base/worker/comlink-worker";
 import { type ProcessableUploadItem } from "ente-gallery/services/upload";
 import { createUtilityProcess } from "ente-gallery/utils/native-worker";
@@ -360,7 +360,7 @@ export const mlSync = async () => {
 };
 
 const updateClustersAndPeople = async () => {
-    const masterKey = await masterKeyFromSession();
+    const masterKey = await ensureMasterKeyFromSession();
 
     // Fetch existing cgroups from remote.
     await pullUserEntities("cgroup", masterKey);
@@ -748,11 +748,10 @@ const regenerateFaceCropsIfNeeded = async (file: EnteFile) => {
  * @returns The entity ID of the newly created cgroup.
  */
 export const addCGroup = async (name: string, cluster: FaceCluster) => {
-    const masterKey = await masterKeyFromSession();
     const id = await addUserEntity(
         "cgroup",
         { name, assigned: [cluster], isHidden: false },
-        masterKey,
+        await ensureMasterKeyFromSession(),
     );
     await mlSync();
     return id;
@@ -780,11 +779,10 @@ export const addClusterToCGroup = async (
         (id) => !clusterFaceIDs.has(id),
     );
 
-    const masterKey = await masterKeyFromSession();
     await updateOrCreateUserEntities(
         "cgroup",
         [{ ...cgroup, data: { ...cgroup.data, assigned, rejectedFaceIDs } }],
-        masterKey,
+        await ensureMasterKeyFromSession(),
     );
     return mlSync();
 };
@@ -798,11 +796,10 @@ export const addClusterToCGroup = async (
  * user entity that will get updated.
  */
 export const renameCGroup = async (cgroup: CGroup, name: string) => {
-    const masterKey = await masterKeyFromSession();
     await updateOrCreateUserEntities(
         "cgroup",
         [{ ...cgroup, data: { ...cgroup.data, name } }],
-        masterKey,
+        await ensureMasterKeyFromSession(),
     );
     return mlSync();
 };
@@ -834,8 +831,11 @@ export const applyPersonSuggestionUpdates = async (
     cgroup: CGroup,
     updates: PersonSuggestionUpdates,
 ) => {
-    const masterKey = await masterKeyFromSession();
-    await _applyPersonSuggestionUpdates(cgroup, updates, masterKey);
+    await _applyPersonSuggestionUpdates(
+        cgroup,
+        updates,
+        await ensureMasterKeyFromSession(),
+    );
     return mlSync();
 };
 
@@ -848,11 +848,10 @@ export const applyPersonSuggestionUpdates = async (
  * @param cluster The {@link FaceCluster} to hide.
  */
 export const ignoreCluster = async (cluster: FaceCluster) => {
-    const masterKey = await masterKeyFromSession();
     await addUserEntity(
         "cgroup",
         { name: "", assigned: [cluster], isHidden: true },
-        masterKey,
+        await ensureMasterKeyFromSession(),
     );
     return mlSync();
 };

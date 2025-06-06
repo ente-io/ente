@@ -1548,5 +1548,15 @@
     "description": "Caption for the 'Link person' title. It should be a continuation of the 'Link person' title. Just like how 'Link person' + 'for better sharing experience' forms a proper sentence in English, the combination of these two strings should also be a proper sentence in other languages."
   },
   "processingVideos": "Elaborando video",
-  "joinAlbumConfirmationDialogBody": "Unirsi a un album renderà visibile la tua email ai suoi partecipanti."
+  "onThisDay": "On this day",
+  "joinAlbumConfirmationDialogBody": "Unirsi a un album renderà visibile la tua email ai suoi partecipanti.",
+  "lookBackOnYourMemories": "Look back on your memories 🌄",
+  "newPhotosEmoji": " new 📸",
+  "sorryWeHadToPauseYourBackups": "Sorry, we had to pause your backups",
+  "clickToInstallOurBestVersionYet": "Click to install our best version yet",
+  "onThisDayNotificationExplanation": "Receive reminders about memories from this day in previous years.",
+  "birhtdayNotifications": "Birhtday notifications",
+  "receiveRemindersOnBirthdays": "Receive reminders when it's someone's birthday. Tapping on the notification will take you to photos of the birthday person.",
+  "happyBirthday": "Happy birthday! 🥳",
+  "birthdays": "Birthdays"
 }

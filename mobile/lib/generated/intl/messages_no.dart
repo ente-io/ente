@@ -518,6 +518,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Sikkerhetskopier videoer"),
         "beach": MessageLookupByLibrary.simpleMessage("Sand og sjø"),
         "birthday": MessageLookupByLibrary.simpleMessage("Bursdag"),
+        "birthdays": MessageLookupByLibrary.simpleMessage("Birthdays"),
         "blackFridaySale":
             MessageLookupByLibrary.simpleMessage("Black Friday salg"),
         "blog": MessageLookupByLibrary.simpleMessage("Blogg"),
@@ -590,6 +591,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "click": MessageLookupByLibrary.simpleMessage("• Klikk"),
         "clickOnTheOverflowMenu": MessageLookupByLibrary.simpleMessage(
             "• Klikk på menyen med tre prikker"),
+        "clickToInstallOurBestVersionYet": MessageLookupByLibrary.simpleMessage(
+            "Click to install our best version yet"),
         "close": MessageLookupByLibrary.simpleMessage("Lukk"),
         "clubByCaptureTime": MessageLookupByLibrary.simpleMessage(
             "Grupper etter tidspunkt for opptak"),
@@ -1025,6 +1028,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "guestView": MessageLookupByLibrary.simpleMessage("Gjestevisning"),
         "guestViewEnablePreSteps": MessageLookupByLibrary.simpleMessage(
             "For å aktivere gjestevisning, vennligst konfigurer enhetens passord eller skjermlås i systeminnstillingene."),
+        "happyBirthday":
+            MessageLookupByLibrary.simpleMessage("Happy birthday! 🥳"),
         "hearUsExplanation": MessageLookupByLibrary.simpleMessage(
             "Vi sporer ikke app-installasjoner. Det hadde vært til hjelp om du fortalte oss hvor du fant oss!"),
         "hearUsWhereTitle": MessageLookupByLibrary.simpleMessage(
@@ -1213,6 +1218,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "longpressOnAnItemToViewInFullscreen":
             MessageLookupByLibrary.simpleMessage(
                 "Lang-trykk på en gjenstand for å vise i fullskjerm"),
+        "lookBackOnYourMemories": MessageLookupByLibrary.simpleMessage(
+            "Look back on your memories 🌄"),
         "loopVideoOff": MessageLookupByLibrary.simpleMessage("Gjenta video av"),
         "loopVideoOn": MessageLookupByLibrary.simpleMessage("Gjenta video på"),
         "lostDevice": MessageLookupByLibrary.simpleMessage("Mistet enhet?"),
@@ -1292,6 +1299,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "newAlbum": MessageLookupByLibrary.simpleMessage("Nytt album"),
         "newLocation": MessageLookupByLibrary.simpleMessage("Ny plassering"),
         "newPerson": MessageLookupByLibrary.simpleMessage("Ny person"),
+        "newPhotosEmoji": MessageLookupByLibrary.simpleMessage(" new 📸"),
         "newRange": MessageLookupByLibrary.simpleMessage("Ny rekkevidde"),
         "newToEnte": MessageLookupByLibrary.simpleMessage("Ny til Ente"),
         "newest": MessageLookupByLibrary.simpleMessage("Nyeste"),
@@ -1347,6 +1355,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "onEnte": MessageLookupByLibrary.simpleMessage(
             "På <branding>ente</branding>"),
         "onTheRoad": MessageLookupByLibrary.simpleMessage("På veien igjen"),
+        "onThisDay": MessageLookupByLibrary.simpleMessage("On this day"),
+        "onThisDayNotificationExplanation": MessageLookupByLibrary.simpleMessage(
+            "Receive reminders about memories from this day in previous years."),
         "onlyFamilyAdminCanChangeCode": m54,
         "onlyThem": MessageLookupByLibrary.simpleMessage("Bare de"),
         "oops": MessageLookupByLibrary.simpleMessage("Oisann"),
@@ -1508,6 +1519,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "reassignedToName": m68,
         "reassigningLoading":
             MessageLookupByLibrary.simpleMessage("Tildeler..."),
+        "receiveRemindersOnBirthdays": MessageLookupByLibrary.simpleMessage(
+            "Receive reminders when it\'s someone\'s birthday. Tapping on the notification will take you to photos of the birthday person."),
         "recover": MessageLookupByLibrary.simpleMessage("Gjenopprett"),
         "recoverAccount":
             MessageLookupByLibrary.simpleMessage("Gjenopprett konto"),
@@ -1835,6 +1848,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease":
             MessageLookupByLibrary.simpleMessage(
                 "Beklager, vi kunne ikke generere sikre nøkler på denne enheten.\n\nvennligst registrer deg fra en annen enhet."),
+        "sorryWeHadToPauseYourBackups": MessageLookupByLibrary.simpleMessage(
+            "Sorry, we had to pause your backups"),
         "sort": MessageLookupByLibrary.simpleMessage("Sorter"),
         "sortAlbumsBy": MessageLookupByLibrary.simpleMessage("Sorter etter"),
         "sortNewestFirst": MessageLookupByLibrary.simpleMessage("Nyeste først"),

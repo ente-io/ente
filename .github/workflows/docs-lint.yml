@@ -1,0 +1,32 @@
+name: "Lint (docs)"
+
+on:
+    # Run on every pull request (open or push to it) that changes docs/
+    pull_request:
+        paths:
+            - "docs/**"
+            - ".github/workflows/docs-lint.yml"
+
+permissions:
+    contents: read
+
+jobs:
+    lint:
+        runs-on: ubuntu-latest
+        defaults:
+            run:
+                working-directory: docs
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Setup node and enable yarn caching
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 22
+                  cache: "yarn"
+                  cache-dependency-path: "web/yarn.lock"
+
+            - run: yarn install
+
+            - run: yarn pretty:check

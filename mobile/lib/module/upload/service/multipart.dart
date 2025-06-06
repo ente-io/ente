@@ -54,7 +54,7 @@ class MultiPartUploader {
     return multipartPartSize;
   }
 
-  Future<int> calculatePartCount(int fileSize) async {
+  int calculatePartCount(int fileSize) {
     // If the feature flag is disabled, return 1
     if (!_featureFlagService.enableMobMultiPart) return 1;
     if (!localSettings.userEnabledMultiplePart) return 1;
