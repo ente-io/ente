@@ -1,10 +1,24 @@
 import { ensureSavedKeyAttributes } from "ente-accounts/services/user";
-import { sharedCryptoWorker } from "ente-base/crypto";
+import { boxSealOpenBytes, decryptBox } from "ente-base/crypto";
+import type { KeyPair } from "ente-base/crypto/types";
 import { authenticatedRequestHeaders, ensureOk } from "ente-base/http";
 import { apiURL } from "ente-base/origins";
 import { ensureMasterKeyFromSession } from "ente-base/session";
 import { nullToUndefined } from "ente-utils/transform";
 import { z } from "zod/v4";
+
+/**
+ * Return the public/private keypair of the currently logged in user.
+ */
+export const ensureUserKeyPair = async (): Promise<KeyPair> => {
+    const { encryptedSecretKey, secretKeyDecryptionNonce, publicKey } =
+        ensureSavedKeyAttributes();
+    const privateKey = await decryptBox(
+        { encryptedData: encryptedSecretKey, nonce: secretKeyDecryptionNonce },
+        await ensureMasterKeyFromSession(),
+    );
+    return { publicKey, privateKey };
+};
 
 /**
  * Fetch the public key from remote for the user (if any) who has registered
@@ -84,25 +98,10 @@ export const getAccountDeleteChallenge = async () => {
  */
 export const decryptDeleteAccountChallenge = async (
     encryptedChallenge: string,
-) => {
-    const cryptoWorker = await sharedCryptoWorker();
-    const masterKey = await ensureMasterKeyFromSession();
-    const keyAttributes = ensureSavedKeyAttributes();
-    const secretKey = await cryptoWorker.decryptBox(
-        {
-            encryptedData: keyAttributes.encryptedSecretKey,
-            nonce: keyAttributes.secretKeyDecryptionNonce,
-        },
-        masterKey,
+) =>
+    new TextDecoder().decode(
+        await boxSealOpenBytes(encryptedChallenge, await ensureUserKeyPair()),
     );
-    const b64DecryptedChallenge = await cryptoWorker.boxSealOpen(
-        encryptedChallenge,
-        keyAttributes.publicKey,
-        secretKey,
-    );
-    const utf8DecryptedChallenge = atob(b64DecryptedChallenge);
-    return utf8DecryptedChallenge;
-};
 
 /**
  * Delete the logged in user's account on remote.

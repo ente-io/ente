@@ -767,7 +767,7 @@ export const boxSeal = async (data: string, publicKey: string) => {
 export const boxSealOpenBytes = async (
     encryptedData: string,
     { publicKey, privateKey }: KeyPair,
-) => {
+): Promise<Uint8Array> => {
     await sodium.ready;
     return sodium.crypto_box_seal_open(
         await fromB64(encryptedData),

@@ -441,7 +441,7 @@ export const boxSealOpen = (
 export const boxSealOpenBytes = (
     encryptedData: string,
     keyPair: KeyPair,
-): Promise<string> =>
+): Promise<Uint8Array> =>
     inWorker()
         ? ei._boxSealOpenBytes(encryptedData, keyPair)
         : sharedWorker().then((w) =>

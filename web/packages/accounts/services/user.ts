@@ -59,10 +59,13 @@ export const ensureLocalUser = (): LocalUser =>
     ensureExpectedLoggedInValue(localUser());
 
 /**
- * A helper function that throws an error if a value that is expected to be
- * truthy when the user is logged in is instead falsey.
+ * A function throws an error if a value that is expected to be truthy when the
+ * user is logged in is instead falsey.
+ *
+ * This is meant as a convenience wrapper to assert that a value we expect when
+ * the user is logged in is indeed there.
  */
-const ensureExpectedLoggedInValue = <T>(t: T | undefined): T => {
+export const ensureExpectedLoggedInValue = <T>(t: T | undefined): T => {
     if (!t) throw new Error("Not logged in");
     return t;
 };
