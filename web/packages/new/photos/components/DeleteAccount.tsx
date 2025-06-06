@@ -40,8 +40,17 @@ type DeleteAccountProps = ModalVisibilityProps & {
 export const DeleteAccount: React.FC<DeleteAccountProps> = ({
     open,
     onClose,
-    onAuthenticateUser,
-}) => {
+    ...rest
+}) => (
+    <TitledMiniDialog open={open} onClose={onClose} title={t("delete_account")}>
+        <DeleteAccountDialogContents {...{ open, onClose }} {...rest} />
+    </TitledMiniDialog>
+);
+
+// See: [Note: MUI dialog state reset]
+const DeleteAccountDialogContents: React.FC<
+    Omit<DeleteAccountProps, "open">
+> = ({ onClose, onAuthenticateUser }) => {
     const { logout, showMiniDialog, onGenericError } = useBaseContext();
 
     const [acceptDataDeletion, setAcceptDataDeletion] = useState(false);
@@ -132,64 +141,56 @@ export const DeleteAccount: React.FC<DeleteAccountProps> = ({
     };
 
     return (
-        <TitledMiniDialog
-            open={open}
-            onClose={onClose}
-            title={t("delete_account")}
-        >
-            <form onSubmit={handleSubmit}>
-                <Stack sx={{ gap: "24px" }}>
-                    <Stack sx={{ gap: "4px" }}>
-                        <Typography>
-                            {t("delete_account_reason_label")}
+        <form onSubmit={handleSubmit}>
+            <Stack sx={{ gap: "24px" }}>
+                <Stack sx={{ gap: "4px" }}>
+                    <Typography>{t("delete_account_reason_label")}</Typography>
+                    <DropdownInput
+                        options={deleteReasonOptions()}
+                        placeholder={t("delete_account_reason_placeholder")}
+                        selected={values.reason}
+                        onSelect={handleChange("reason")}
+                    />
+                    {touched.reason && errors.reason && (
+                        <Typography
+                            variant="small"
+                            sx={{ px: 1, color: "critical.main" }}
+                        >
+                            {errors.reason}
                         </Typography>
-                        <DropdownInput
-                            options={deleteReasonOptions()}
-                            placeholder={t("delete_account_reason_placeholder")}
-                            selected={values.reason}
-                            onSelect={handleChange("reason")}
-                        />
-                        {touched.reason && errors.reason && (
-                            <Typography
-                                variant="small"
-                                sx={{ px: 1, color: "critical.main" }}
-                            >
-                                {errors.reason}
-                            </Typography>
-                        )}
-                    </Stack>
-                    <FeedbackInput
-                        value={values.feedback}
-                        onChange={handleChange("feedback")}
-                        errorMessage={
-                            touched.feedback ? errors.feedback : undefined
-                        }
-                    />
-                    <ConfirmationCheckboxInput
-                        checked={acceptDataDeletion}
-                        onChange={setAcceptDataDeletion}
-                    />
-                    <Stack sx={{ gap: "8px" }}>
-                        <LoadingButton
-                            type="submit"
-                            fullWidth
-                            color="critical"
-                            disabled={!acceptDataDeletion}
-                            loading={loading}
-                        >
-                            {t("delete_account_confirm")}
-                        </LoadingButton>
-                        <FocusVisibleButton
-                            fullWidth
-                            color="secondary"
-                            onClick={onClose}
-                        >
-                            {t("cancel")}
-                        </FocusVisibleButton>
-                    </Stack>
+                    )}
                 </Stack>
-            </form>
-        </TitledMiniDialog>
+                <FeedbackInput
+                    value={values.feedback}
+                    onChange={handleChange("feedback")}
+                    errorMessage={
+                        touched.feedback ? errors.feedback : undefined
+                    }
+                />
+                <ConfirmationCheckboxInput
+                    checked={acceptDataDeletion}
+                    onChange={setAcceptDataDeletion}
+                />
+                <Stack sx={{ gap: "8px" }}>
+                    <LoadingButton
+                        type="submit"
+                        fullWidth
+                        color="critical"
+                        disabled={!acceptDataDeletion}
+                        loading={loading}
+                    >
+                        {t("delete_account_confirm")}
+                    </LoadingButton>
+                    <FocusVisibleButton
+                        fullWidth
+                        color="secondary"
+                        onClick={onClose}
+                    >
+                        {t("cancel")}
+                    </FocusVisibleButton>
+                </Stack>
+            </Stack>
+        </form>
     );
 };
 
