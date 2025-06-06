@@ -19,7 +19,6 @@ import {
 } from "ente-base/components/SingleInputForm";
 import { useBaseContext } from "ente-base/context";
 import { decryptBox } from "ente-base/crypto";
-import type { B64EncryptionResult } from "ente-base/crypto/libsodium";
 import log from "ente-base/log";
 import { ApiError } from "ente-shared/error";
 import { getData, setData, setLSUser } from "ente-shared/storage/localStorage";
@@ -35,8 +34,10 @@ export interface RecoverPageProps {
 const Page: React.FC<RecoverPageProps> = ({ twoFactorType }) => {
     const { logout, showMiniDialog } = useBaseContext();
 
-    const [encryptedTwoFactorSecret, setEncryptedTwoFactorSecret] =
-        useState<Omit<B64EncryptionResult, "key"> | null>(null);
+    const [encryptedTwoFactorSecret, setEncryptedTwoFactorSecret] = useState<{
+        encryptedData: string;
+        nonce: string;
+    } | null>(null);
     const [sessionID, setSessionID] = useState<string | null>(null);
     const [doesHaveEncryptedRecoveryKey, setDoesHaveEncryptedRecoveryKey] =
         useState(false);

@@ -15,17 +15,15 @@ import {
 } from "@mui/material";
 import { generateKeyAndSRPAttributes } from "ente-accounts/services/srp";
 import { sendOTT } from "ente-accounts/services/user";
+import { generateAndSaveIntermediateKeyAttributes } from "ente-accounts/utils/helpers";
 import { isWeakPassword } from "ente-accounts/utils/password";
 import { LinkButton } from "ente-base/components/LinkButton";
 import { LoadingButton } from "ente-base/components/mui/LoadingButton";
 import { ShowHidePasswordInputAdornment } from "ente-base/components/mui/PasswordInputAdornment";
 import { isMuseumHTTPError } from "ente-base/http";
 import log from "ente-base/log";
+import { saveMasterKeyInSessionAndSafeStore } from "ente-base/session";
 import { setLSUser } from "ente-shared//storage/localStorage";
-import {
-    generateAndSaveIntermediateKeyAttributes,
-    saveKeyInSessionStore,
-} from "ente-shared/crypto/helpers";
 import { setData } from "ente-shared/storage/localStorage";
 import {
     setJustSignedUp,
@@ -109,7 +107,7 @@ export const SignUpContents: React.FC<SignUpContentsProps> = ({
                     masterKey,
                 );
 
-                await saveKeyInSessionStore("encryptionKey", masterKey);
+                await saveMasterKeyInSessionAndSafeStore(masterKey);
                 setJustSignedUp(true);
                 void router.push("/verify");
             } catch (e) {

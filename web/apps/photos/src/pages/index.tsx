@@ -8,12 +8,13 @@ import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton"
 import { useBaseContext } from "ente-base/context";
 import log from "ente-base/log";
 import { albumsAppOrigin, customAPIHost } from "ente-base/origins";
+import {
+    haveAuthenticatedSession,
+    updateSessionFromElectronSafeStorageIfNeeded,
+} from "ente-base/session";
 import { DevSettings } from "ente-new/photos/components/DevSettings";
-import { saveKeyInSessionStore } from "ente-shared/crypto/helpers";
 import localForage from "ente-shared/storage/localForage";
 import { getData } from "ente-shared/storage/localStorage";
-import { getToken } from "ente-shared/storage/localStorage/helpers";
-import { getKey } from "ente-shared/storage/sessionStorage";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import React, { useCallback, useEffect, useRef, useState } from "react";
@@ -61,20 +62,8 @@ const Page: React.FC = () => {
 
     const handleNormalRedirect = async () => {
         const user = getData("user");
-        let key = getKey("encryptionKey");
-        const electron = globalThis.electron;
-        if (!key && electron) {
-            try {
-                key = await electron.masterKeyB64();
-            } catch (e) {
-                log.error("Failed to read master key from safe storage", e);
-            }
-            if (key) {
-                await saveKeyInSessionStore("encryptionKey", key, true);
-            }
-        }
-        const token = getToken();
-        if (key && token) {
+        await updateSessionFromElectronSafeStorageIfNeeded();
+        if (await haveAuthenticatedSession()) {
             await router.push("/gallery");
         } else if (user?.email) {
             await router.push("/verify");

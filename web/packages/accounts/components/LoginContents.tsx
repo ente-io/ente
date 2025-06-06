@@ -98,6 +98,7 @@ export const LoginContents: React.FC<LoginContentsProps> = ({
                     autoComplete="username"
                     label={t("enter_email")}
                     fullWidth
+                    autoFocus
                     margin="normal"
                     disabled={formik.isSubmitting}
                     error={!!formik.errors.email}

@@ -24,15 +24,15 @@ import type {
     UpdatedKey,
     User,
 } from "ente-accounts/services/user";
+import { generateAndSaveIntermediateKeyAttributes } from "ente-accounts/utils/helpers";
 import { LinkButton } from "ente-base/components/LinkButton";
 import { sharedCryptoWorker } from "ente-base/crypto";
 import type { DerivedKey } from "ente-base/crypto/types";
 import {
-    generateAndSaveIntermediateKeyAttributes,
-    saveKeyInSessionStore,
-} from "ente-shared/crypto/helpers";
+    ensureMasterKeyFromSession,
+    saveMasterKeyInSessionAndSafeStore,
+} from "ente-base/session";
 import { getData, setData } from "ente-shared/storage/localStorage";
-import { getActualKey } from "ente-shared/user";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
@@ -59,7 +59,7 @@ const Page: React.FC = () => {
         setFieldError,
     ) => {
         const cryptoWorker = await sharedCryptoWorker();
-        const key = await getActualKey();
+        const masterKey = await ensureMasterKeyFromSession();
         const keyAttributes: KeyAttributes = getData("keyAttributes");
         let kek: DerivedKey;
         try {
@@ -69,7 +69,7 @@ const Page: React.FC = () => {
             return;
         }
         const { encryptedData: encryptedKey, nonce: keyDecryptionNonce } =
-            await cryptoWorker.encryptBox(key, kek.key);
+            await cryptoWorker.encryptBox(masterKey, kek.key);
         const updatedKey: UpdatedKey = {
             encryptedKey,
             keyDecryptionNonce,
@@ -120,10 +120,10 @@ const Page: React.FC = () => {
         await generateAndSaveIntermediateKeyAttributes(
             passphrase,
             updatedKeyAttributes,
-            key,
+            masterKey,
         );
 
-        await saveKeyInSessionStore("encryptionKey", key);
+        await saveMasterKeyInSessionAndSafeStore(masterKey);
 
         redirectToAppHome();
     };
