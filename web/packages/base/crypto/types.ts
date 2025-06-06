@@ -7,6 +7,19 @@ import { type StateAddress } from "libsodium-wrappers-sumo";
 export type SodiumStateAddress = StateAddress;
 
 /**
+ * The various *Stream encryption functions break up the input into chunks of
+ * {@link streamEncryptionChunkSize} bytes during encryption (except the last
+ * chunk which can be smaller since a file would rarely align exactly to a
+ * {@link streamEncryptionChunkSize} multiple).
+ *
+ * The various *Stream decryption functions also assume that each potential
+ * chunk is {@link streamEncryptionChunkSize} long.
+ *
+ * This value of this constant is 4 MB (and is unlikely to change).
+ */
+export const streamEncryptionChunkSize = 4 * 1024 * 1024;
+
+/**
  * Data provided either as bytes ({@link Uint8Array}) or their base64 string
  * representation.
  */

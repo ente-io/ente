@@ -1,8 +1,8 @@
 // TODO: Audit this file
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 
-import { streamEncryptionChunkSize } from "ente-base/crypto/libsodium";
 import type { BytesOrB64 } from "ente-base/crypto/types";
+import { streamEncryptionChunkSize } from "ente-base/crypto/types";
 import { type CryptoWorker } from "ente-base/crypto/worker";
 import { ensureElectron } from "ente-base/electron";
 import { basename, nameAndExtension } from "ente-base/file-name";

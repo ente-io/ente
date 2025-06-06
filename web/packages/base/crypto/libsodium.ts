@@ -10,19 +10,20 @@
  */
 import { mergeUint8Arrays } from "ente-utils/array";
 import sodium from "libsodium-wrappers-sumo";
-import type {
-    BytesOrB64,
-    DerivedKey,
-    EncryptedBlob,
-    EncryptedBlobB64,
-    EncryptedBlobBytes,
-    EncryptedBox,
-    EncryptedBoxB64,
-    EncryptedFile,
-    InitChunkDecryptionResult,
-    InitChunkEncryptionResult,
-    KeyPair,
-    SodiumStateAddress,
+import {
+    streamEncryptionChunkSize,
+    type BytesOrB64,
+    type DerivedKey,
+    type EncryptedBlob,
+    type EncryptedBlobB64,
+    type EncryptedBlobBytes,
+    type EncryptedBox,
+    type EncryptedBoxB64,
+    type EncryptedFile,
+    type InitChunkDecryptionResult,
+    type InitChunkEncryptionResult,
+    type KeyPair,
+    type SodiumStateAddress,
 } from "./types";
 
 /**
@@ -350,21 +351,11 @@ export const encryptBlob = async (
  * Use {@link decryptMetadataJSON} to decrypt the result and convert it back to
  * a JSON value.
  */
-export const encryptMetadataJSON = (jsonValue: unknown, key: BytesOrB64) =>
+export const encryptMetadataJSON = (
+    jsonValue: unknown,
+    key: BytesOrB64,
+): Promise<EncryptedBlobB64> =>
     encryptBlob(new TextEncoder().encode(JSON.stringify(jsonValue)), key);
-
-/**
- * The various *Stream encryption functions break up the input into chunks of
- * {@link streamEncryptionChunkSize} bytes during encryption (except the last
- * chunk which can be smaller since a file would rarely align exactly to a
- * {@link streamEncryptionChunkSize} multiple).
- *
- * The various *Stream decryption functions also assume that each potential
- * chunk is {@link streamEncryptionChunkSize} long.
- *
- * This value of this constant is 4 MB (and is unlikely to change).
- */
-export const streamEncryptionChunkSize = 4 * 1024 * 1024;
 
 /**
  * Encrypt the given data using libsodium's secretstream APIs after breaking it
@@ -548,7 +539,7 @@ export const decryptBlob = (
 export const decryptMetadataJSON = async (
     blob: EncryptedBlob,
     key: BytesOrB64,
-) =>
+): Promise<unknown> =>
     JSON.parse(
         new TextDecoder().decode(await decryptBlobBytes(blob, key)),
     ) as unknown;
