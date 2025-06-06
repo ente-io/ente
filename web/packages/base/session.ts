@@ -1,5 +1,9 @@
+import { getToken } from "ente-shared/storage/localStorage/helpers";
 import { z } from "zod/v4";
 import { decryptBox, decryptBoxBytes, encryptBox, generateKey } from "./crypto";
+import { isDevBuild } from "./env";
+import log from "./log";
+import { getAuthToken } from "./token";
 
 /**
  * Remove all data stored in session storage (data tied to the browser tab).
@@ -98,6 +102,69 @@ const saveKeyInSessionStore = async (keyName: string, keyData: string) => {
         keyName,
         JSON.stringify(await sessionKeyData(keyData)),
     );
+};
+
+/**
+ * If we're running in the context of the desktop app, then read the master key
+ * from the OS safe storage and put it into the session storage (if it is not
+ * already present there).
+ *
+ * [Note: Safe storage and interactive KEK attributes]
+ *
+ * In the electron app we have the option of using the OS's safe storage (if
+ * available) to store the master key so that the user does not have to reenter
+ * their password each time they open the app.
+ *
+ * Such an ability is not present on browsers currently, so we need to ask the
+ * user for their password to derive the KEK for decrypting their master key
+ * each time they open the app in a new time (See: [Note: Key encryption key]).
+ *
+ * However, the default KEK parameters are not suitable for such frequent
+ * interactive usage. So for the user's convenience, we also derive an new (so
+ * called "intermediate") KEK using parameters suitable for interactive usage.
+ * This KEK is not saved to remote, it is only maintained locally.
+ *
+ * In either case, eventually we want the encrypted key to be available in the
+ * session for decrypting the user's files etc. In the web case, the page where
+ * the user reenters their password will put it there, while on desktop
+ * (assuming the key has already been saved to the OS safe storage), this
+ * {@link updateSessionFromElectronSafeStorageIfNeeded} function will do it.
+ */
+export const updateSessionFromElectronSafeStorageIfNeeded = async () => {
+    const electron = globalThis.electron;
+    if (!electron) return;
+
+    if (haveCredentialsInSession()) return;
+
+    let masterKey: string | undefined;
+    try {
+        masterKey = await electron.masterKeyB64();
+    } catch (e) {
+        log.error("Failed to read master key from safe storage", e);
+    }
+    if (masterKey) {
+        // Do not use `saveMasterKeyInSessionStore`, that will (unnecessarily)
+        // overwrite the OS safe storage again.
+        await saveKeyInSessionStore("encryptionKey", masterKey);
+    }
+};
+
+/**
+ * Return true if we both have the user's master key in session storage, and
+ * their auth token in KV DB.
+ */
+export const haveAuthenticatedSession = async () => {
+    if (!(await masterKeyFromSession())) return false;
+    const lsToken = getToken();
+    const kvToken = await getAuthToken();
+    // TODO: To avoid changing old behaviour, this currently relies on the token
+    // from local storage. Both should be the same though, so it throws an error
+    // on dev build (tag: Migration).
+    if (isDevBuild) {
+        if (lsToken != kvToken)
+            throw new Error("Local storage and indexed DB mismatch");
+    }
+    return !!lsToken;
 };
 
 /**

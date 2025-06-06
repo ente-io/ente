@@ -39,10 +39,15 @@ export async function decryptAndStoreToken(
     }
 }
 
-// We encrypt the masterKey, with an intermediate key derived from the
-// passphrase (with Interactive mem and ops limits) to avoid saving it to local
-// storage in plain text. This means that on the web user will always have to
-// enter their passphrase to access their masterKey.
+/**
+ * Encrypt the user's masterKey with an intermediate kek (key encryption key)
+ * derived from the passphrase (with interactive mem and ops limits) to avoid
+ * saving it to local storage in plain text.
+ *
+ * This means that on the web user will always have to enter their passphrase to
+ * access their masterKey when repopening the app in a new tab (on desktop we
+ * can use OS storage, see [Note: Safe storage and interactive KEK attributes]).
+ */
 export async function generateAndSaveIntermediateKeyAttributes(
     passphrase: string,
     existingKeyAttributes: KeyAttributes,
