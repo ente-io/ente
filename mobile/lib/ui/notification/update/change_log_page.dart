@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import "package:photos/generated/l10n.dart";
-import "package:photos/l10n/l10n.dart";
 import "package:photos/service_locator.dart";
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/buttons/button_widget.dart';
@@ -38,7 +37,7 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
                 padding: EdgeInsets.symmetric(horizontal: 16.0),
                 child: TitleBarTitleWidget(
                   // title: S.of(context).whatsNew,
-                  title: "v1.0",
+                  title: "v1.1.0",
                 ),
               ),
             ),
@@ -102,24 +101,28 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
     final List<ChangeLogEntry> items = [];
     items.addAll([
       ChangeLogEntry(
-        context.l10n.cLIcon,
-        context.l10n.cLIconDesc,
+        "On This Day",
+        "You can now see a new memory called \"On This Day\" showing photos of a date across multiple years. Moreover, you will receive an opt-out notification every morning to check out this new memory.",
       ),
       ChangeLogEntry(
-        context.l10n.cLMemories,
-        context.l10n.cLMemoriesDesc,
+        "New Widgets",
+        "We have added new widgets for albums and people. You can customise which albums or people you want to see in these widgets as well.",
       ),
       ChangeLogEntry(
-        context.l10n.cLWidgets,
-        context.l10n.cLWidgetsDesc,
+        "Shareable Favorites",
+        "You can now share your favorites to your contacts just like any other album.",
       ),
       ChangeLogEntry(
-        context.l10n.cLFamilyPlan,
-        context.l10n.cLFamilyPlanDesc,
+        "Albums Improvements",
+        "We have redesigned the albums screen so you can select multiple albums and take actions like share, hide, archive, delete on all selected albums quickly.",
       ),
       ChangeLogEntry(
-        context.l10n.cLBulkEdit,
-        context.l10n.cLBulkEditDesc,
+        "Add to Multiple Albums",
+        "You can now select multiple albums when you want to add a photo to an album.",
+      ),
+      ChangeLogEntry(
+        "Albums in Contact Page",
+        "We have updated the contacts page to show you all the albums shared with you by the contact, so you can browse someone's shared library easily.",
       ),
     ]);
 

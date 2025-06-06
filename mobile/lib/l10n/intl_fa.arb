@@ -307,5 +307,15 @@
   "developerSettings": "تنظیمات توسعه‌دهنده",
   "search": "جستجو",
   "whatsNew": "تغییرات جدید",
-  "reviewSuggestions": "مرور پیشنهادها"
+  "reviewSuggestions": "مرور پیشنهادها",
+  "onThisDay": "On this day",
+  "lookBackOnYourMemories": "Look back on your memories 🌄",
+  "newPhotosEmoji": " new 📸",
+  "sorryWeHadToPauseYourBackups": "Sorry, we had to pause your backups",
+  "clickToInstallOurBestVersionYet": "Click to install our best version yet",
+  "onThisDayNotificationExplanation": "Receive reminders about memories from this day in previous years.",
+  "birhtdayNotifications": "Birhtday notifications",
+  "receiveRemindersOnBirthdays": "Receive reminders when it's someone's birthday. Tapping on the notification will take you to photos of the birthday person.",
+  "happyBirthday": "Happy birthday! 🥳",
+  "birthdays": "Birthdays"
 }

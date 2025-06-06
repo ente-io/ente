@@ -1,28 +1,48 @@
 ---
 title: Video streaming FAQ
-description:
-    Frequently asked questions about Ente's video streaming feature
+description: Frequently asked questions about Ente's video streaming feature
 ---
 
 # Video streaming
 
 > [!NOTE]
 >
-> Video streaming is available in beta on mobile apps starting v0.9.98.
+> Video streaming is available in beta on mobile apps starting v0.9.98 and on
+> desktop starting v1.7.13.
 
 ### How to enable video streaming?
 
+#### On mobile
+
 - Open Settings -> General -> Advanced
-- Switch on the toggle for `Video streaming`
+- Enable the toggle for `Streamable videos`
+
+#### On desktop
+
+- Open Settings -> Preferences
+- Enable the toggle for `Streamable videos`
 
 ### What happens when I enable video streaming?
+
+#### On mobile
 
 Enabling video streaming will start processing videos captured in the last 30
 days, generating streams for each. Both local and remote videos will be
 processed, so this may consume bandwidth for downloading of remote files and
 uploading of the generated streams.
 
+#### On desktop
+
+When enabled, the desktop app will generate streams both for new uploads, and
+also for all existing videos that were previously uploaded.
+
+Stream generation is CPU intensive and can take time so the app will continue
+processing them in the background. Clicking on search bar will show "Processing
+videos..." when stream generation is happening.
+
 ### How can I view video streams?
+
+### On mobile
 
 Settings -> Backup > Backup status will show details regarding the processing
 status for videos. Processed videos will have a green play button next to them.
@@ -33,6 +53,12 @@ play the stream.
 
 Clicking on the `Info` icon within the original video will show details about
 the generated stream.
+
+### On desktop and web
+
+Desktop and web app will automatically play the streaming version of a video if
+it has been already generated. The quality selector will show "Auto" when
+playing the stream.
 
 ### What is a stream?
 
@@ -51,6 +77,7 @@ generated stream.
 While this feature is in beta, we will not count the storage consumed by your
 streams against your storage quota. This may change in the future. If it does,
 we will provide an option to opt-in to one of the following:
+
 1. Original videos only
 2. Compressed streams only
 3. Both

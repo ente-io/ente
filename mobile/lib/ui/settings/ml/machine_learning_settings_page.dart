@@ -54,7 +54,7 @@ class _MachineLearningSettingsPageState
       enable: true,
       wakeLockFor: WakeLockFor.machineLearningSettingsScreen,
     );
-    machineLearningController.forceOverrideML(turnOn: true);
+    computeController.forceOverrideML(turnOn: true);
     if (!MLIndexingIsolate.instance.areModelsDownloaded) {
       _timer = Timer.periodic(const Duration(seconds: 10), (timer) {
         if (mounted) {
@@ -74,7 +74,7 @@ class _MachineLearningSettingsPageState
       enable: false,
       wakeLockFor: WakeLockFor.machineLearningSettingsScreen,
     );
-    machineLearningController.forceOverrideML(turnOn: false);
+    computeController.forceOverrideML(turnOn: false);
     _timer?.cancel();
     _advancedOptionsTimer?.cancel();
   }
@@ -429,13 +429,13 @@ class MLStatusWidget extends StatefulWidget {
 
 class MLStatusWidgetState extends State<MLStatusWidget> {
   Timer? _timer;
-  bool _isDeviceHealthy = machineLearningController.isDeviceHealthy;
+  bool _isDeviceHealthy = computeController.isDeviceHealthy;
   @override
   void initState() {
     super.initState();
     _timer = Timer.periodic(const Duration(seconds: 10), (timer) {
       MLService.instance.triggerML();
-      _isDeviceHealthy = machineLearningController.isDeviceHealthy;
+      _isDeviceHealthy = computeController.isDeviceHealthy;
       setState(() {});
     });
   }

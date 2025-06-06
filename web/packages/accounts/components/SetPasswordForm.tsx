@@ -1,10 +1,10 @@
 import { Box, Input, TextField, Typography } from "@mui/material";
 import { isWeakPassword } from "ente-accounts/utils/password";
 import { LoadingButton } from "ente-base/components/mui/LoadingButton";
-import ShowHidePassword from "ente-shared/components/Form/ShowHidePassword";
+import { ShowHidePasswordInputAdornment } from "ente-base/components/mui/PasswordInputAdornment";
 import { Formik } from "formik";
 import { t } from "i18next";
-import React, { useState } from "react";
+import { useCallback, useState } from "react";
 import { Trans } from "react-i18next";
 import * as Yup from "yup";
 import { PasswordStrengthHint } from "./PasswordStrength";
@@ -30,15 +30,10 @@ function SetPasswordForm(props: SetPasswordFormProps) {
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
 
-    const handleClickShowPassword = () => {
-        setShowPassword(!showPassword);
-    };
-
-    const handleMouseDownPassword = (
-        event: React.MouseEvent<HTMLButtonElement>,
-    ) => {
-        event.preventDefault();
-    };
+    const handleToggleShowHidePassword = useCallback(
+        () => setShowPassword((show) => !show),
+        [],
+    );
 
     const onSubmit = async (
         values: SetPasswordFormValues,
@@ -111,14 +106,9 @@ function SetPasswordForm(props: SetPasswordFormProps) {
                         slotProps={{
                             input: {
                                 endAdornment: (
-                                    <ShowHidePassword
+                                    <ShowHidePasswordInputAdornment
                                         showPassword={showPassword}
-                                        handleClickShowPassword={
-                                            handleClickShowPassword
-                                        }
-                                        handleMouseDownPassword={
-                                            handleMouseDownPassword
-                                        }
+                                        onToggle={handleToggleShowHidePassword}
                                     />
                                 ),
                             },

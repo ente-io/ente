@@ -10,7 +10,7 @@ import {
     type FilePublicMagicMetadata,
 } from "ente-media/file";
 import { nullToUndefined } from "ente-utils/transform";
-import { z } from "zod";
+import { z } from "zod/v4";
 import { mergeMetadata1 } from "./file";
 import { FileType } from "./file-type";
 
@@ -140,6 +140,14 @@ export interface Metadata {
      * older clients.
      */
     videoHash?: string;
+    /**
+     * The duration (in integral seconds) of the video.
+     *
+     * Only present for videos (`fileType == FileType.video`). For compatibility
+     * with other clients, this must be a integer number of seconds, without any
+     * sub-second fraction.
+     */
+    duration?: number;
     hasStaticThumbnail?: boolean;
     localID?: number;
     version?: number;
@@ -274,6 +282,33 @@ export interface PublicMagicMetadata {
      */
     caption?: string;
     uploaderName?: string;
+    /**
+     * An arbitrary integer set to indicate that this file should be skipped for
+     * the purpose of HLS generation.
+     *
+     * Current semantics:
+     *
+     * - if 1, skip this file
+     * - otherwise attempt processing
+     *
+     * [Note: Marking files which do not need video processing]
+     *
+     * Some video files do not require generation of a HLS stream. The current
+     * logic is H.264 files less than 10 MB, but this might change in future
+     * clients.
+     *
+     * For such skipped files, there thus won't be a HLS playlist generated.
+     * However, we still need a way to indicate to other clients that this file
+     * has already been looked at.
+     *
+     * To that end, we add a flag to the public magic metadata for the file. To
+     * allow future flexibility, this flag is an integer "streaming version".
+     * Currently it is set to 1 by a client who recognizes that this file does
+     * not need processing, and other clients can ignore this file if they find
+     * sv == 1. In the future, there might be other values for sv (e.g. if the
+     * skip logic changes).
+     */
+    sv?: number;
 }
 
 /**
@@ -291,21 +326,19 @@ export interface PublicMagicMetadata {
  * might be other, newer, clients out there adding fields that the current
  * client might not we aware of, and we don't want to overwrite them.
  */
-const PublicMagicMetadata = z
-    .object({
-        // [Note: Zod doesn't work with `exactOptionalPropertyTypes` yet]
-        //
-        // Using `optional` is not accurate here. The key is optional, but the
-        // value itself is not optional.
-        //
-        // Zod doesn't work with `exactOptionalPropertyTypes` yet, but it seems
-        // to be on the roadmap so we suppress these mismatches.
-        //
-        // See:
-        // https://github.com/colinhacks/zod/issues/635#issuecomment-2196579063
-        editedTime: z.number().optional(),
-    })
-    .passthrough();
+const PublicMagicMetadata = z.looseObject({
+    // [Note: Zod doesn't work with `exactOptionalPropertyTypes` yet]
+    //
+    // Using `optional` is not accurate here. The key is optional, but the
+    // value itself is not optional.
+    //
+    // Zod doesn't work with `exactOptionalPropertyTypes` yet, but it seems
+    // to be on the roadmap so we suppress these mismatches.
+    //
+    // See:
+    // https://github.com/colinhacks/zod/issues/635#issuecomment-2196579063
+    editedTime: z.number().optional(),
+});
 
 /**
  * Return the private magic metadata for an {@link EnteFile}.
@@ -401,11 +434,13 @@ export const decryptPublicMagicMetadata = async (
 
     const jsonValue =
         typeof envelope.data == "string"
-            ? await decryptMetadataJSON({
-                  encryptedDataB64: envelope.data,
-                  decryptionHeaderB64: envelope.header,
-                  keyB64: file.key,
-              })
+            ? await decryptMetadataJSON(
+                  {
+                      encryptedData: envelope.data,
+                      decryptionHeader: envelope.header,
+                  },
+                  file.key,
+              )
             : envelope.data;
     const result = PublicMagicMetadata.parse(
         // TODO: Can we avoid this cast?
@@ -644,8 +679,9 @@ const updateMagicMetadataRequest = async (
         ([, v]) => v !== null && v !== undefined,
     );
 
-    const { encryptedDataB64, decryptionHeaderB64 } = await encryptMetadataJSON(
-        { jsonValue: Object.fromEntries(validEntries), keyB64: file.key },
+    const { encryptedData, decryptionHeader } = await encryptMetadataJSON(
+        Object.fromEntries(validEntries),
+        file.key,
     );
 
     return {
@@ -655,8 +691,8 @@ const updateMagicMetadataRequest = async (
                 magicMetadata: {
                     version: metadataVersion,
                     count: validEntries.length,
-                    data: encryptedDataB64,
-                    header: decryptionHeaderB64,
+                    data: encryptedData,
+                    header: decryptionHeader,
                 },
             },
         ],
@@ -730,6 +766,44 @@ export const fileLocation = (file: EnteFile): Location | undefined => {
     if (Number.isNaN(latitude) || Number.isNaN(longitude)) return undefined;
 
     return { latitude, longitude };
+};
+
+/**
+ * Return the duration of the video as a formatted "HH:mm:ss" string (when
+ * present) for the given {@link EnteFile}.
+ *
+ * Only files with type `FileType.video` are expected to have a duration.
+ *
+ * @returns The duration of the video as a string of the form "HH:mm:ss". The
+ * underlying duration present in the file's metadata is guaranteed to be
+ * integral, so there will never be a subsecond component.
+ *
+ * - If the hour component is all zeroes, it will be omitted.
+ *
+ * - Leading zeros in the minutes component will be trimmed off if an hour
+ *   component is not present. If minutes is all zeros, then "0" will be used.
+ *
+ * - For example, an underlying duration of 595 seconds will result in a
+ *   formatted string of the form "9:55". While an underlying duration of 9
+ *   seconds will be returned as a string "0:09".
+ *
+ * - A zero duration will be treated as undefined.
+ */
+export const fileDurationString = (file: EnteFile): string | undefined => {
+    const d = file.metadata.duration;
+    if (!d) return undefined;
+
+    const s = d % 60;
+    const m = Math.floor(d / 60) % 60;
+    const h = Math.floor(d / 3600);
+
+    const ss = s > 9 ? `${s}` : `0${s}`;
+    if (h) {
+        const mm = m > 9 ? `${m}` : `0${m}`;
+        return `${h}:${mm}:${ss}`;
+    } else {
+        return `${m}:${ss}`;
+    }
 };
 
 /**

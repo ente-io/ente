@@ -1,3 +1,5 @@
+import type { User } from "ente-accounts/services/user";
+import { ensureLocalUser } from "ente-accounts/services/user";
 import { encryptMetadataJSON, sharedCryptoWorker } from "ente-base/crypto";
 import log from "ente-base/log";
 import { apiURL } from "ente-base/origins";
@@ -37,18 +39,17 @@ import {
     groupFilesByCollectionID,
     sortFiles,
 } from "ente-new/photos/services/files";
+import { getPublicKey } from "ente-new/photos/services/user";
 import HTTPService from "ente-shared/network/HTTPService";
 import { getData } from "ente-shared/storage/localStorage";
 import { getToken } from "ente-shared/storage/localStorage/helpers";
 import { getActualKey } from "ente-shared/user";
-import type { User } from "ente-shared/user/types";
 import { batch } from "ente-utils/array";
 import {
     changeCollectionSubType,
     isQuickLinkCollection,
     isValidMoveTarget,
 } from "utils/collection";
-import { getPublicKey } from "./userService";
 
 const UNCATEGORIZED_COLLECTION_NAME = "Uncategorized";
 export const HIDDEN_COLLECTION_NAME = ".hidden";
@@ -69,24 +70,27 @@ const createCollection = async (
         const cryptoWorker = await sharedCryptoWorker();
         const encryptionKey = await getActualKey();
         const token = getToken();
-        const collectionKey = await cryptoWorker.generateEncryptionKey();
+        const collectionKey = await cryptoWorker.generateKey();
         const { encryptedData: encryptedKey, nonce: keyDecryptionNonce } =
-            await cryptoWorker.encryptToB64(collectionKey, encryptionKey);
+            await cryptoWorker.encryptBox(collectionKey, encryptionKey);
         const { encryptedData: encryptedName, nonce: nameDecryptionNonce } =
-            await cryptoWorker.encryptUTF8(collectionName, collectionKey);
+            await cryptoWorker.encryptBox(
+                new TextEncoder().encode(collectionName),
+                collectionKey,
+            );
+
         let encryptedMagicMetadata: EncryptedMagicMetadata;
         if (magicMetadataProps) {
             const magicMetadata = await updateMagicMetadata(magicMetadataProps);
-            const encryptedMagicMetadataProps =
-                await cryptoWorker.encryptMetadataJSON({
-                    jsonValue: magicMetadataProps,
-                    keyB64: collectionKey,
-                });
-
+            const { encryptedData, decryptionHeader } =
+                await cryptoWorker.encryptMetadataJSON(
+                    magicMetadataProps,
+                    collectionKey,
+                );
             encryptedMagicMetadata = {
                 ...magicMetadata,
-                data: encryptedMagicMetadataProps.encryptedDataB64,
-                header: encryptedMagicMetadataProps.decryptionHeaderB64,
+                data: encryptedData,
+                header: decryptionHeader,
             };
         }
         const newCollection: EncryptedCollection = {
@@ -356,8 +360,9 @@ export const updateCollectionMagicMetadata = async (
         return;
     }
 
-    const { encryptedDataB64, decryptionHeaderB64 } = await encryptMetadataJSON(
-        { jsonValue: updatedMagicMetadata.data, keyB64: collection.key },
+    const { encryptedData, decryptionHeader } = await encryptMetadataJSON(
+        updatedMagicMetadata.data,
+        collection.key,
     );
 
     const reqBody: UpdateMagicMetadataRequest = {
@@ -365,8 +370,8 @@ export const updateCollectionMagicMetadata = async (
         magicMetadata: {
             version: updatedMagicMetadata.version,
             count: updatedMagicMetadata.count,
-            data: encryptedDataB64,
-            header: decryptionHeaderB64,
+            data: encryptedData,
+            header: decryptionHeader,
         },
     };
 
@@ -395,16 +400,17 @@ export const updateSharedCollectionMagicMetadata = async (
         return;
     }
 
-    const { encryptedDataB64, decryptionHeaderB64 } = await encryptMetadataJSON(
-        { jsonValue: updatedMagicMetadata.data, keyB64: collection.key },
+    const { encryptedData, decryptionHeader } = await encryptMetadataJSON(
+        updatedMagicMetadata.data,
+        collection.key,
     );
     const reqBody: UpdateMagicMetadataRequest = {
         id: collection.id,
         magicMetadata: {
             version: updatedMagicMetadata.version,
             count: updatedMagicMetadata.count,
-            data: encryptedDataB64,
-            header: decryptionHeaderB64,
+            data: encryptedData,
+            header: decryptionHeader,
         },
     };
 
@@ -433,16 +439,17 @@ export const updatePublicCollectionMagicMetadata = async (
         return;
     }
 
-    const { encryptedDataB64, decryptionHeaderB64 } = await encryptMetadataJSON(
-        { jsonValue: updatedPublicMagicMetadata.data, keyB64: collection.key },
+    const { encryptedData, decryptionHeader } = await encryptMetadataJSON(
+        updatedPublicMagicMetadata.data,
+        collection.key,
     );
     const reqBody: UpdateMagicMetadataRequest = {
         id: collection.id,
         magicMetadata: {
             version: updatedPublicMagicMetadata.version,
             count: updatedPublicMagicMetadata.count,
-            data: encryptedDataB64,
-            header: decryptionHeaderB64,
+            data: encryptedData,
+            header: decryptionHeader,
         },
     };
 
@@ -473,7 +480,10 @@ export const renameCollection = async (
     const token = getToken();
     const cryptoWorker = await sharedCryptoWorker();
     const { encryptedData: encryptedName, nonce: nameDecryptionNonce } =
-        await cryptoWorker.encryptUTF8(newCollectionName, collection.key);
+        await cryptoWorker.encryptBox(
+            new TextEncoder().encode(newCollectionName),
+            collection.key,
+        );
     const collectionRenameRequest = {
         collectionID: collection.id,
         encryptedName,
@@ -600,10 +610,15 @@ export const updateShareableURL = async (
     }
 };
 
+/**
+ * Return the user's own favorites collection, if any.
+ */
 export const getFavCollection = async () => {
     const collections = await getLocalCollections();
+    const userID = ensureLocalUser().id;
     for (const collection of collections) {
-        if (collection.type == "favorites") {
+        // See: [Note: User and shared favorites]
+        if (collection.type == "favorites" && collection.owner.id == userID) {
             return collection;
         }
     }
@@ -627,9 +642,7 @@ export const sortCollectionSummaries = (
                     return (b.updationTime ?? 0) - (a.updationTime ?? 0);
             }
         })
-        // TODO:
-        // eslint-disable-next-line no-constant-binary-expression
-        .sort((a, b) => b.order ?? 0 - a.order ?? 0)
+        .sort((a, b) => (b.order ?? 0) - (a.order ?? 0))
         .sort(
             (a, b) =>
                 CollectionSummaryOrder.get(a.type) -

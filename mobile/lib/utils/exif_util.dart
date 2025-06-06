@@ -3,7 +3,7 @@ import "dart:developer";
 import "dart:io";
 
 import "package:computer/computer.dart";
-import 'package:exif/exif.dart';
+import 'package:exif_reader/exif_reader.dart';
 import "package:ffmpeg_kit_flutter/ffprobe_kit.dart";
 import "package:ffmpeg_kit_flutter/media_information.dart";
 import "package:ffmpeg_kit_flutter/media_information_session.dart";
@@ -103,9 +103,10 @@ Future<FFProbeProps?> getVideoPropsAsync(File originalFile) async {
     await session.getReturnCode();
     final mediaInfo = await completer.future;
     if (kDebugMode) {
-      logs.forEach((key, value) {
-        log("log for session $key: $value", name: "FFprobeKit");
-      });
+      log("uncomment below line to see ffprobe logs");
+      // logs.forEach((key, value) {
+      //   log("log for session $key: $value", name: "FFprobeKit");
+      // });
     }
     if (mediaInfo == null) {
       return null;

@@ -640,7 +640,6 @@ class FilesDB with SqlDbBase {
     int visibility = visibleVisibility,
     DBFilterOptions? filterOptions,
     bool applyOwnerCheck = false,
-    bool ignoreSharedFiles = false,
   }) async {
     final stopWatch = EnteWatch('getAllPendingOrUploadedFiles')..start();
     final order = (asc ?? false ? 'ASC' : 'DESC');
@@ -663,7 +662,7 @@ class FilesDB with SqlDbBase {
     subQueries.add(' AND $columnMMdVisibility = ?');
     args.add(visibility);
 
-    if (ignoreSharedFiles == true) {
+    if (filterOptions?.ignoreSharedItems ?? false) {
       subQueries.add(' AND $columnOwnerID = ?');
       args.add(ownerID);
     }
@@ -696,7 +695,6 @@ class FilesDB with SqlDbBase {
     int ownerID, {
     int? limit,
     bool? asc,
-    bool ignoreSharedFiles = false,
     required DBFilterOptions filterOptions,
   }) async {
     final db = await instance.sqliteAsyncDB;
@@ -708,7 +706,7 @@ class FilesDB with SqlDbBase {
         'SELECT * FROM $filesTable WHERE $columnCreationTime >= ? AND $columnCreationTime <= ?  AND ($columnMMdVisibility IS NULL OR $columnMMdVisibility = ?)'
         ' AND ($columnLocalID IS NOT NULL OR ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1))');
 
-    if (ignoreSharedFiles == true) {
+    if (filterOptions.ignoreSharedItems) {
       subQueries.add(' AND $columnOwnerID = ?');
       args.add(ownerID);
     }
@@ -1685,8 +1683,8 @@ class FilesDB with SqlDbBase {
       AND $columnUploadedFileID  != -1
       AND $columnOwnerID = $userID
       AND $columnLocalID IS NOT NULL
-      AND ($columnFileSize IS NULL OR $columnFileSize <= 524288000)
-      AND ($columnDuration IS NULL OR $columnDuration <= 60)
+      AND ($columnFileSize IS NOT NULL AND $columnFileSize <= 524288000)
+      AND ($columnDuration IS NOT NULL AND ($columnDuration <= 60 AND $columnDuration > 0))
       ORDER BY $columnCreationTime DESC
     ''',
       [getInt(fileType), beginDate.microsecondsSinceEpoch],

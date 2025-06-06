@@ -53,15 +53,17 @@ export async function updateMagicMetadata<T>(
         //
         // See: [Note: Use passthrough for metadata Zod schemas]
         // @ts-expect-error TODO: Need to use zod here.
-        originalMagicMetadata.data = await cryptoWorker.decryptMetadataJSON({
-            encryptedDataB64: originalMagicMetadata.data,
-            decryptionHeaderB64: originalMagicMetadata.header,
+        originalMagicMetadata.data = await cryptoWorker.decryptMetadataJSON(
+            {
+                encryptedData: originalMagicMetadata.data,
+                decryptionHeader: originalMagicMetadata.header,
+            },
             // See: [Note: strict mode migration]
             //
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
-            keyB64: decryptionKey,
-        });
+            decryptionKey,
+        );
     }
     // copies the existing magic metadata properties of the files and updates the visibility value
     // The expected behavior while updating magic metadata is to let the existing property as it is and update/add the property you want

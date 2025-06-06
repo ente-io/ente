@@ -65,7 +65,7 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
                   showErrorDialog(
                     context,
                     S.of(context).invalidEndpoint,
-                    S.of(context).invalidEndpointMessage,
+                    S.of(context).invalidEndpointMessage + "\n" + e.toString(),
                   );
                 }
               },

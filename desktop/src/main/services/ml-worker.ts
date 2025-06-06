@@ -15,6 +15,7 @@ import { existsSync } from "fs";
 import fs from "node:fs/promises";
 import path from "node:path";
 import * as ort from "onnxruntime-node";
+import { z } from "zod/v4";
 import log from "../log-worker";
 import { messagePortMainEndpoint } from "../utils/comlink";
 import { wait } from "../utils/common";
@@ -22,6 +23,8 @@ import { writeStream } from "../utils/stream";
 import { fsStatMtime } from "./fs";
 
 log.debugString("Started ML utility process");
+
+process.on("uncaughtException", (e, origin) => log.error(origin, e));
 
 process.parentPort.once("message", (e) => {
     // Initialize ourselves with the data we got from our parent.
@@ -50,17 +53,10 @@ let _userDataPath: string | undefined;
 /** Equivalent to app.getPath("userData") */
 const userDataPath = () => _userDataPath!;
 
+const MLWorkerInitData = z.object({ userDataPath: z.string() });
+
 const parseInitData = (data: unknown) => {
-    if (
-        data &&
-        typeof data == "object" &&
-        "userDataPath" in data &&
-        typeof data.userDataPath == "string"
-    ) {
-        _userDataPath = data.userDataPath;
-    } else {
-        log.error("Unparseable initialization data");
-    }
+    _userDataPath = MLWorkerInitData.parse(data).userDataPath;
 };
 
 /**

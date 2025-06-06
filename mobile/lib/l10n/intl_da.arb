@@ -207,7 +207,7 @@
   "after1Month": "Efter 1 måned",
   "after1Year": "Efter 1 år",
   "manageParticipants": "Administrer",
-  "albumParticipantsCount": "{count, plural, one {}=0 {Ingen Deltagere} =1 {1 Deltager} other {{count} Deltagere}}",
+  "albumParticipantsCount": "{count, plural, =0 {Ingen Deltagere} =1 {1 Deltager} other {{count} Deltagere}}",
   "@albumParticipantsCount": {
     "placeholders": {
       "count": {
@@ -322,5 +322,15 @@
   "longPressAnEmailToVerifyEndToEndEncryption": "Langt tryk på en e-mail for at bekræfte slutningen af krypteringen.",
   "developerSettingsWarning": "Er du sikker på, at du vil ændre udviklerindstillingerne?",
   "next": "Næste",
-  "enterPin": "Indtast PIN"
+  "enterPin": "Indtast PIN",
+  "onThisDay": "On this day",
+  "lookBackOnYourMemories": "Look back on your memories 🌄",
+  "newPhotosEmoji": " new 📸",
+  "sorryWeHadToPauseYourBackups": "Sorry, we had to pause your backups",
+  "clickToInstallOurBestVersionYet": "Click to install our best version yet",
+  "onThisDayNotificationExplanation": "Receive reminders about memories from this day in previous years.",
+  "birhtdayNotifications": "Birhtday notifications",
+  "receiveRemindersOnBirthdays": "Receive reminders when it's someone's birthday. Tapping on the notification will take you to photos of the birthday person.",
+  "happyBirthday": "Happy birthday! 🥳",
+  "birthdays": "Birthdays"
 }

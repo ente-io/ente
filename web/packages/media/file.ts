@@ -321,16 +321,15 @@ export async function decryptFile(
             pubMagicMetadata,
             ...restFileProps
         } = file;
-        const fileKey = await worker.decryptB64(
-            encryptedKey,
-            keyDecryptionNonce,
+        const fileKey = await worker.decryptBox(
+            { encryptedData: encryptedKey, nonce: keyDecryptionNonce },
             collectionKey,
         );
-        const fileMetadata = await worker.decryptMetadataJSON({
-            encryptedDataB64: metadata.encryptedData,
-            decryptionHeaderB64: metadata.decryptionHeader,
-            keyB64: fileKey,
-        });
+        const fileMetadata = await worker.decryptMetadataJSON(
+            metadata,
+            fileKey,
+        );
+
         let fileMagicMetadata: FileMagicMetadata;
         let filePubMagicMetadata: FilePublicMagicMetadata;
         /* eslint-disable @typescript-eslint/no-unnecessary-condition */
@@ -339,11 +338,13 @@ export async function decryptFile(
                 ...file.magicMetadata,
                 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                 // @ts-ignore
-                data: await worker.decryptMetadataJSON({
-                    encryptedDataB64: magicMetadata.data,
-                    decryptionHeaderB64: magicMetadata.header,
-                    keyB64: fileKey,
-                }),
+                data: await worker.decryptMetadataJSON(
+                    {
+                        encryptedData: magicMetadata.data,
+                        decryptionHeader: magicMetadata.header,
+                    },
+                    fileKey,
+                ),
             };
         }
         /* eslint-disable @typescript-eslint/no-unnecessary-condition */
@@ -352,11 +353,13 @@ export async function decryptFile(
                 ...pubMagicMetadata,
                 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                 // @ts-ignore
-                data: await worker.decryptMetadataJSON({
-                    encryptedDataB64: pubMagicMetadata.data,
-                    decryptionHeaderB64: pubMagicMetadata.header,
-                    keyB64: fileKey,
-                }),
+                data: await worker.decryptMetadataJSON(
+                    {
+                        encryptedData: pubMagicMetadata.data,
+                        decryptionHeader: pubMagicMetadata.header,
+                    },
+                    fileKey,
+                ),
             };
         }
         return {

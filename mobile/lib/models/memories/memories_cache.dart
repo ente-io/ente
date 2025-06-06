@@ -1,7 +1,7 @@
 import "dart:convert";
 
+import "package:photos/models/base/id.dart";
 import "package:photos/models/base_location.dart";
-import "package:photos/models/file/file.dart";
 import "package:photos/models/location/location.dart";
 import "package:photos/models/memories/clip_memory.dart";
 import "package:photos/models/memories/people_memory.dart";
@@ -38,7 +38,6 @@ class MemoriesCache {
 
   factory MemoriesCache.fromJson(
     Map<String, dynamic> json,
-    Map<int, EnteFile> filesMap,
   ) {
     return MemoriesCache(
       toShowMemories: ToShowMemory.decodeJsonToList(json['toShowMemories']),
@@ -46,10 +45,7 @@ class MemoriesCache {
       clipShownLogs: ClipShownLog.decodeJsonToList(json['clipShownLogs']),
       tripsShownLogs: TripsShownLog.decodeJsonToList(json['tripsShownLogs']),
       baseLocations: json['baseLocations'] != null
-          ? BaseLocation.decodeJsonToList(
-              json['baseLocations'],
-              filesMap,
-            )
+          ? BaseLocation.decodeJsonToList(json['baseLocations'])
           : [],
     );
   }
@@ -70,9 +66,8 @@ class MemoriesCache {
 
   static MemoriesCache decodeFromJsonString(
     String jsonString,
-    Map<int, EnteFile> filesMap,
   ) {
-    return MemoriesCache.fromJson(jsonDecode(jsonString), filesMap);
+    return MemoriesCache.fromJson(jsonDecode(jsonString));
   }
 }
 
@@ -83,6 +78,7 @@ class ToShowMemory {
   final int firstTimeToShow;
   final int lastTimeToShow;
   final int calculationTime;
+  final String id;
 
   final String? personID;
   final PeopleMemoryType? peopleMemoryType;
@@ -99,7 +95,7 @@ class ToShowMemory {
     final relevantForNow = now >= firstTimeToShow && now < lastTimeToShow;
     final calculatedForNow = (now >= calculationTime) &&
         (now < calculationTime + kMemoriesUpdateFrequency.inMicroseconds);
-    return relevantForNow && calculatedForNow;
+    return relevantForNow && (calculatedForNow || type == MemoryType.onThisDay);
   }
 
   ToShowMemory(
@@ -108,6 +104,7 @@ class ToShowMemory {
     this.type,
     this.firstTimeToShow,
     this.lastTimeToShow,
+    this.id,
     this.calculationTime, {
     this.personID,
     this.peopleMemoryType,
@@ -147,6 +144,7 @@ class ToShowMemory {
       memory.type,
       memory.firstDateToShow,
       memory.lastDateToShow,
+      memory.id,
       calcTime.microsecondsSinceEpoch,
       personID: personID,
       peopleMemoryType: peopleMemoryType,
@@ -162,6 +160,7 @@ class ToShowMemory {
       memoryTypeFromString(json['type']),
       json['firstTimeToShow'],
       json['lastTimeToShow'],
+      json['id'] ?? newID(json['type'] as String),
       json['calculationTime'],
       personID: json['personID'],
       peopleMemoryType: json['peopleMemoryType'] != null
@@ -186,6 +185,7 @@ class ToShowMemory {
       'type': type.toString().split('.').last,
       'firstTimeToShow': firstTimeToShow,
       'lastTimeToShow': lastTimeToShow,
+      'id': id,
       'calculationTime': calculationTime,
       'personID': personID,
       'peopleMemoryType': peopleMemoryType?.toString().split('.').last,

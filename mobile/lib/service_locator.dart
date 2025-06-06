@@ -4,11 +4,13 @@ import "package:ente_cast_normal/ente_cast_normal.dart";
 import "package:ente_feature_flag/ente_feature_flag.dart";
 import "package:package_info_plus/package_info_plus.dart";
 import "package:photos/gateways/entity_gw.dart";
+import "package:photos/module/download/manager.dart";
 import "package:photos/services/account/billing_service.dart";
 import "package:photos/services/entity_service.dart";
+import "package:photos/services/filedata/filedata_service.dart";
 import "package:photos/services/location_service.dart";
+import "package:photos/services/machine_learning/compute_controller.dart";
 import "package:photos/services/machine_learning/face_ml/face_recognition_service.dart";
-import "package:photos/services/machine_learning/machine_learning_controller.dart";
 import "package:photos/services/magic_cache_service.dart";
 import "package:photos/services/memories_cache_service.dart";
 import "package:photos/services/permission/service.dart";
@@ -22,6 +24,7 @@ import "package:shared_preferences/shared_preferences.dart";
 class ServiceLocator {
   late final SharedPreferences prefs;
   late final Dio enteDio;
+  late final Dio nonEnteDio;
   late final PackageInfo packageInfo;
 
   // instance
@@ -29,9 +32,15 @@ class ServiceLocator {
 
   static final ServiceLocator instance = ServiceLocator._privateConstructor();
 
-  init(SharedPreferences prefs, Dio enteDio, PackageInfo packageInfo) {
+  init(
+    SharedPreferences prefs,
+    Dio enteDio,
+    Dio nonEnteDio,
+    PackageInfo packageInfo,
+  ) {
     this.prefs = prefs;
     this.enteDio = enteDio;
+    this.nonEnteDio = nonEnteDio;
     this.packageInfo = packageInfo;
   }
 }
@@ -133,10 +142,10 @@ BillingService get billingService {
   return _billingService!;
 }
 
-MachineLearningController? _machineLearningController;
-MachineLearningController get machineLearningController {
-  _machineLearningController ??= MachineLearningController();
-  return _machineLearningController!;
+ComputeController? _computeController;
+ComputeController get computeController {
+  _computeController ??= ComputeController();
+  return _computeController!;
 }
 
 FaceRecognitionService? _faceRecognitionService;
@@ -149,4 +158,21 @@ PermissionService? _permissionService;
 PermissionService get permissionService {
   _permissionService ??= PermissionService(ServiceLocator.instance.prefs);
   return _permissionService!;
+}
+
+FileDataService? _fileDataService;
+FileDataService get fileDataService {
+  _fileDataService ??= FileDataService(
+    ServiceLocator.instance.prefs,
+    ServiceLocator.instance.enteDio,
+  );
+  return _fileDataService!;
+}
+
+DownloadManager? _downloadManager;
+DownloadManager get downloadManager {
+  _downloadManager ??= DownloadManager(
+    ServiceLocator.instance.nonEnteDio,
+  );
+  return _downloadManager!;
 }

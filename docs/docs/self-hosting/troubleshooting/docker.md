@@ -1,5 +1,5 @@
 ---
-title: Docker errors
+title: Docker Errors
 description: Fixing docker related errors when trying to self host Ente
 ---
 
@@ -34,30 +34,30 @@ perform the same configuration by removing the "post_start" hook, and adding a
 new service definition:
 
 ```yaml
-  minio-provision:
+minio-provision:
     image: minio/mc
     depends_on:
-      - minio
+        - minio
     volumes:
-      - minio-data:/data
+        - minio-data:/data
     networks:
-      - internal
+        - internal
     entrypoint: |
-      sh -c '
-      #!/bin/sh
+        sh -c '
+        #!/bin/sh
 
-      while ! mc config host add h0 http://minio:3200 changeme changeme1234
-      do
-        echo "waiting for minio..."
-        sleep 0.5
-      done
+        while ! mc config host add h0 http://minio:3200 changeme changeme1234
+        do
+          echo "waiting for minio..."
+          sleep 0.5
+        done
 
-      cd /data
+        cd /data
 
-      mc mb -p b2-eu-cen
-      mc mb -p wasabi-eu-central-2-v3
-      mc mb -p scw-eu-fr-v3
-      '
+        mc mb -p b2-eu-cen
+        mc mb -p wasabi-eu-central-2-v3
+        mc mb -p scw-eu-fr-v3
+        '
 ```
 
 ## start_interval
@@ -114,7 +114,7 @@ volumes.
 
 If you're sure of what you're doing, the volumes can be deleted by
 
-```
+```sh
 docker volume ls
 ```
 
@@ -123,6 +123,13 @@ to list them, and then delete the ones that begin with `my-ente` using
 `docker system prune` with the `--volumes` flag, but be _really_ careful,
 that'll delete all volumes (Ente or otherwise) on your machine that are not
 currently in use by a running docker container.
+
+An alternative way is to delete the volumes along with removal of cluster's
+containers using `docker compose` inside `my-ente` directory.
+
+```sh
+docker compose down --volumes
+```
 
 If you're unsure about removing volumes, another alternative is to rename your
 `my-ente` folder. Docker uses the folder name to determine the volume name

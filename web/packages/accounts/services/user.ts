@@ -6,9 +6,249 @@ import {
 import { apiURL } from "ente-base/origins";
 import HTTPService from "ente-shared/network/HTTPService";
 import { getToken } from "ente-shared/storage/localStorage/helpers";
-import type { KeyAttributes } from "ente-shared/user/types";
 import { nullToUndefined } from "ente-utils/transform";
-import { z } from "zod";
+import { z } from "zod/v4";
+
+export interface User {
+    id: number;
+    email: string;
+    token: string;
+    encryptedToken: string;
+    isTwoFactorEnabled: boolean;
+    twoFactorSessionID: string;
+}
+
+// TODO: During login the only field present is email. Which makes this
+// optionality indicated by these types incorrect.
+const LocalUser = z.object({
+    /** The user's ID. */
+    id: z.number(),
+    /** The user's email. */
+    email: z.string(),
+    /**
+     * The user's (plaintext) auth token.
+     *
+     * It is used for making API calls on their behalf, by passing this token as
+     * the value of the X-Auth-Token header in the HTTP request.
+     */
+    token: z.string(),
+});
+
+/** Locally available data for the logged in user */
+export type LocalUser = z.infer<typeof LocalUser>;
+
+/**
+ * Return the logged-in user, if someone is indeed logged in. Otherwise return
+ * `undefined`.
+ *
+ * The user's data is stored in the browser's localStorage. Thus, this function
+ * only works from the main thread, not from web workers (local storage is not
+ * accessible to web workers).
+ */
+export const localUser = (): LocalUser | undefined => {
+    // TODO: duplicate of getData("user")
+    const s = localStorage.getItem("user");
+    if (!s) return undefined;
+    return LocalUser.parse(JSON.parse(s));
+};
+
+/**
+ * A wrapper over {@link localUser} with that throws if no one is logged in.
+ */
+export const ensureLocalUser = (): LocalUser =>
+    ensureExpectedLoggedInValue(localUser());
+
+/**
+ * A function throws an error if a value that is expected to be truthy when the
+ * user is logged in is instead falsey.
+ *
+ * This is meant as a convenience wrapper to assert that a value we expect when
+ * the user is logged in is indeed there.
+ */
+export const ensureExpectedLoggedInValue = <T>(t: T | undefined): T => {
+    if (!t) throw new Error("Not logged in");
+    return t;
+};
+
+/**
+ * The user's various encrypted keys and their related attributes.
+ *
+ * - Attributes to derive the KEK, the (master) key encryption key.
+ * - Encrypted master key (with KEK)
+ * - Encrypted master key (with recovery key)
+ * - Encrypted recovery key (with master key).
+ * - Public key and encrypted private key (with master key).
+ *
+ * The various "key" attributes are base64 encoded representations of the
+ * underlying binary data.
+ */
+export interface KeyAttributes {
+    /**
+     * The user's master key encrypted with the key encryption key.
+     *
+     * Base64 encoded.
+     *
+     * [Note: Key encryption key]
+     *
+     * The user's master key is encrypted with a "key encryption key" (lovingly
+     * called a "kek" sometimes).
+     *
+     * The kek itself is derived from the user's passphrase.
+     *
+     * 1. User enters passphrase on new device.
+     *
+     * 2. Client derives kek from this passphrase (using the {@link kekSalt},
+     *    {@link opsLimit} and {@link memLimit} as parameters for the
+     *    derivation).
+     *
+     * 3. Client use kek to decrypt the master key from {@link encryptedKey} and
+     *    {@link keyDecryptionNonce}.
+     */
+    encryptedKey: string;
+    /**
+     * The nonce used during the encryption of the master key.
+     *
+     * Base64 encoded.
+     *
+     * @see {@link encryptedKey}.
+     */
+    keyDecryptionNonce: string;
+    /**
+     * The salt used during the derivation of the kek.
+     *
+     * Base64 encoded.
+     *
+     * See: [Note: Key encryption key].
+     */
+    kekSalt: string;
+    /**
+     * The operation limit used during the derivation of the kek.
+     *
+     * The {@link opsLimit} and {@link memLimit} are complementary parameters
+     * that define the amount of work done by the key derivation function. See
+     * the {@link deriveKey}, {@link deriveSensitiveKey} and
+     * {@link deriveInteractiveKey} functions for more detail about them.
+     *
+     * See: [Note: Key encryption key].
+     */
+    opsLimit: number;
+    /**
+     * The memory limit used during the derivation of the kek.
+     *
+     * See {@link opsLimit} for more details.
+     */
+    memLimit: number;
+    /**
+     * The user's public key (part of their public-key keypair, the other half
+     * being the {@link encryptedSecretKey}).
+     *
+     * Base64 encoded.
+     */
+    publicKey: string;
+    /**
+     * The user's private key (part of their public-key keypair, the other half
+     * being the {@link publicKey}) encrypted with their master key.
+     *
+     * Base64 encoded.
+     *
+     * [Note: privateKey and secretKey]
+     *
+     * The nomenclature for the key pair follows libsodium's conventions
+     * (https://doc.libsodium.org/public-key_cryptography/authenticated_encryption#key-pair-generation),
+     * who possibly chose public + secret instead of public + private to avoid
+     * confusion with shorthand notation (pk).
+     *
+     * However, the library author later changed their mind on this, so while
+     * libsodium itself (the C library) and the documentation uses "secretKey",
+     * the JavaScript implementation (libsodium.js) uses "privateKey".
+     *
+     * This structure uses the term "secretKey" since that is what the remote
+     * protocol already was based on. Within the web app codebase, we use
+     * "privateKey" since that is what the underlying libsodium.js uses.
+     */
+    encryptedSecretKey: string;
+    /**
+     * The nonce used during the encryption of {@link encryptedSecretKey}.
+     */
+    secretKeyDecryptionNonce: string;
+    /**
+     * The user's master key after being encrypted with their recovery key.
+     *
+     * Base64 encoded.
+     *
+     * This allows the user to recover their master key if they forget their
+     * passphrase but still have their recovery key.
+     *
+     * Note: This value doesn't change after being initially created.
+     */
+    masterKeyEncryptedWithRecoveryKey?: string;
+    /**
+     * The nonce used during the encryption of
+     * {@link masterKeyEncryptedWithRecoveryKey}.
+     *
+     * Base64 encoded.
+     */
+    masterKeyDecryptionNonce?: string;
+    /**
+     * The user's recovery key after being encrypted with their master key.
+     *
+     * Base64 encoded.
+     *
+     * Note: This value doesn't change after being initially created.
+     */
+    recoveryKeyEncryptedWithMasterKey?: string;
+    /**
+     * The nonce used during the encryption of
+     * {@link recoveryKeyEncryptedWithMasterKey}.
+     *
+     * Base64 encoded.
+     */
+    recoveryKeyDecryptionNonce?: string;
+}
+
+/**
+ * Zod schema for {@link KeyAttributes}.
+ */
+export const RemoteKeyAttributes = z.object({
+    kekSalt: z.string(),
+    encryptedKey: z.string(),
+    keyDecryptionNonce: z.string(),
+    publicKey: z.string(),
+    encryptedSecretKey: z.string(),
+    secretKeyDecryptionNonce: z.string(),
+    memLimit: z.number(),
+    opsLimit: z.number(),
+    masterKeyEncryptedWithRecoveryKey: z
+        .string()
+        .nullish()
+        .transform(nullToUndefined),
+    masterKeyDecryptionNonce: z.string().nullish().transform(nullToUndefined),
+    recoveryKeyEncryptedWithMasterKey: z
+        .string()
+        .nullish()
+        .transform(nullToUndefined),
+    recoveryKeyDecryptionNonce: z.string().nullish().transform(nullToUndefined),
+});
+
+/**
+ * Return {@link KeyAttributes} if they are present in local storage.
+ *
+ * The key attributes are stored in the browser's localStorage. Thus, this
+ * function only works from the main thread, not from web workers (local storage
+ * is not accessible to web workers).
+ */
+export const savedKeyAttributes = (): KeyAttributes | undefined => {
+    const jsonString = localStorage.getItem("keyAttributes");
+    if (!jsonString) return undefined;
+    return RemoteKeyAttributes.parse(JSON.parse(jsonString));
+};
+
+/**
+ * A variant of {@link savedKeyAttributes} that throws if keyAttributes are not
+ * present in local storage.
+ */
+export const ensureSavedKeyAttributes = (): KeyAttributes =>
+    ensureExpectedLoggedInValue(savedKeyAttributes());
 
 export interface UserVerificationResponse {
     id: number;
@@ -59,13 +299,6 @@ export interface UpdatedKey {
     keyDecryptionNonce: string;
     memLimit: number;
     opsLimit: number;
-}
-
-export interface RecoveryKey {
-    masterKeyEncryptedWithRecoveryKey: string;
-    masterKeyDecryptionNonce: string;
-    recoveryKeyEncryptedWithMasterKey: string;
-    recoveryKeyDecryptionNonce: string;
 }
 
 /**
@@ -125,30 +358,6 @@ export const verifyEmail = async (
 };
 
 /**
- * Zod schema for {@link KeyAttributes}.
- */
-const RemoteKeyAttributes = z.object({
-    kekSalt: z.string(),
-    encryptedKey: z.string(),
-    keyDecryptionNonce: z.string(),
-    publicKey: z.string(),
-    encryptedSecretKey: z.string(),
-    secretKeyDecryptionNonce: z.string(),
-    memLimit: z.number(),
-    opsLimit: z.number(),
-    masterKeyEncryptedWithRecoveryKey: z
-        .string()
-        .nullish()
-        .transform(nullToUndefined),
-    masterKeyDecryptionNonce: z.string().nullish().transform(nullToUndefined),
-    recoveryKeyEncryptedWithMasterKey: z
-        .string()
-        .nullish()
-        .transform(nullToUndefined),
-    recoveryKeyDecryptionNonce: z.string().nullish().transform(nullToUndefined),
-});
-
-/**
  * Zod schema for response from remote on a successful user verification, either
  * via {@link verifyEmail} or {@link verifySRPSession}.
  *
@@ -195,17 +404,17 @@ export type TwoFactorAuthorizationResponse = z.infer<
     typeof TwoFactorAuthorizationResponse
 >;
 
-export const putAttributes = async (
-    token: string,
-    keyAttributes: KeyAttributes,
-) =>
-    HTTPService.put(
-        await apiURL("/users/attributes"),
-        { keyAttributes },
-        undefined,
-        { "X-Auth-Token": token },
+/**
+ * Update or set the user's {@link KeyAttributes} on remote.
+ */
+export const putUserKeyAttributes = async (keyAttributes: KeyAttributes) =>
+    ensureOk(
+        await fetch(await apiURL("/users/attributes"), {
+            method: "PUT",
+            headers: await authenticatedRequestHeaders(),
+            body: JSON.stringify({ keyAttributes }),
+        }),
     );
-
 /**
  * Log the user out on remote, if possible and needed.
  */
@@ -311,10 +520,28 @@ export const enableTwoFactor = async (req: EnableTwoFactorRequest) =>
         }),
     );
 
-export const setRecoveryKey = async (token: string, recoveryKey: RecoveryKey) =>
-    HTTPService.put(
-        await apiURL("/users/recovery-key"),
-        recoveryKey,
-        undefined,
-        { "X-Auth-Token": token },
+export interface RecoveryKeyAttributes {
+    masterKeyEncryptedWithRecoveryKey: string;
+    masterKeyDecryptionNonce: string;
+    recoveryKeyEncryptedWithMasterKey: string;
+    recoveryKeyDecryptionNonce: string;
+}
+
+/**
+ * Update the encrypted recovery key attributes for the logged in user.
+ *
+ * In practice, this is not expected to be called and is meant as a rare
+ * fallback for very old accounts created prior to recovery key related
+ * attributes being assigned on account setup. Even for these, it'll be called
+ * only once.
+ */
+export const putUserRecoveryKeyAttributes = async (
+    recoveryKeyAttributes: RecoveryKeyAttributes,
+) =>
+    ensureOk(
+        await fetch(await apiURL("/users/recovery-key"), {
+            method: "PUT",
+            headers: await authenticatedRequestHeaders(),
+            body: JSON.stringify(recoveryKeyAttributes),
+        }),
     );

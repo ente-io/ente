@@ -173,6 +173,7 @@
   "invalidQRCode": "Ungültiger QR-Code",
   "noRecoveryKeyTitle": "Kein Wiederherstellungsschlüssel?",
   "enterEmailHint": "Geben Sie Ihre E-Mail-Adresse ein",
+  "enterNewEmailHint": "Gib deine neue E-Mail-Adresse ein",
   "invalidEmailTitle": "Ungültige E-Mail-Adresse",
   "invalidEmailMessage": "Bitte geben Sie eine gültige E-Mail-Adresse ein.",
   "deleteAccount": "Konto löschen",
@@ -513,5 +514,10 @@
   "free5GB": "5GB kostenlos auf <bold-green>ente</bold-green> Photos",
   "loginWithAuthAccount": "Mit Ihrem Auth Account anmelden",
   "freeStorageOffer": "10% Rabatt für <bold-green>ente</bold-green> Photos",
-  "freeStorageOfferDescription": "Verwende den Code \"AUTH\", um 10% im ersten Jahr zu sparen"
+  "freeStorageOfferDescription": "Verwende den Code \"AUTH\", um 10% im ersten Jahr zu sparen",
+  "advanced": "Erweitert",
+  "algorithm": "Algorithmus",
+  "type": "Typ",
+  "period": "Periode",
+  "digits": "Ziffern"
 }

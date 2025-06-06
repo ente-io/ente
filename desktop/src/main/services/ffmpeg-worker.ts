@@ -4,6 +4,7 @@
 
 // See [Note: Using Electron APIs in UtilityProcess] about what we can and
 // cannot import.
+import shellescape from "any-shell-escape";
 import { expose } from "comlink";
 import pathToFfmpeg from "ffmpeg-static";
 import { randomBytes } from "node:crypto";
@@ -11,11 +12,16 @@ import fs_ from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { Readable } from "node:stream";
+import { z } from "zod/v4";
 import type { FFmpegCommand } from "../../types/ipc";
 import log from "../log-worker";
 import { messagePortMainEndpoint } from "../utils/comlink";
-import { wait } from "../utils/common";
+import { nullToUndefined, wait } from "../utils/common";
 import { execAsyncWorker } from "../utils/exec-worker";
+import {
+    authenticatedRequestHeaders,
+    publicRequestHeaders,
+} from "../utils/http";
 
 /* Ditto in the web app's code (used by the Wasm FFmpeg invocation). */
 const ffmpegPathPlaceholder = "FFMPEG";
@@ -43,13 +49,21 @@ export interface FFmpegUtilityProcess {
     ffmpegGenerateHLSPlaylistAndSegments: (
         inputFilePath: string,
         outputPathPrefix: string,
-        outputUploadURL: string,
+        fileID: number,
+        fetchURL: string,
+        authToken: string,
     ) => Promise<FFmpegGenerateHLSPlaylistAndSegmentsResult | undefined>;
+
+    ffmpegDetermineVideoDuration: (inputFilePath: string) => Promise<number>;
 }
 
 log.debugString("Started ffmpeg utility process");
 
+process.on("uncaughtException", (e, origin) => log.error(origin, e));
+
 process.parentPort.once("message", (e) => {
+    // Initialize ourselves with the data we got from our parent.
+    parseInitData(e.data);
     // Expose an instance of `FFmpegUtilityProcess` on the port we got from our
     // parent.
     expose(
@@ -57,11 +71,29 @@ process.parentPort.once("message", (e) => {
             ffmpegExec,
             ffmpegConvertToMP4,
             ffmpegGenerateHLSPlaylistAndSegments,
+            ffmpegDetermineVideoDuration,
         } satisfies FFmpegUtilityProcess,
         messagePortMainEndpoint(e.ports[0]!),
     );
+    // Let the main process know we're ready.
     mainProcess("ack", undefined);
 });
+
+/**
+ * We cannot access Electron's {@link app} object within a utility process, so
+ * we pass the value of `app.getVersion()` during initialization, and it can be
+ * subsequently retrieved from here.
+ */
+let _desktopAppVersion: string | undefined;
+
+/** Equivalent to `app.getVersion()` */
+const desktopAppVersion = () => _desktopAppVersion!;
+
+const FFmpegWorkerInitData = z.object({ appVersion: z.string() });
+
+const parseInitData = (data: unknown) => {
+    _desktopAppVersion = FFmpegWorkerInitData.parse(data).appVersion;
+};
 
 /**
  * Send a message to the main process using a barebones RPC protocol.
@@ -180,6 +212,7 @@ export interface FFmpegGenerateHLSPlaylistAndSegmentsResult {
     playlistPath: string;
     dimensions: { width: number; height: number };
     videoSize: number;
+    videoObjectID: string;
 }
 
 /**
@@ -190,12 +223,12 @@ export interface FFmpegGenerateHLSPlaylistAndSegmentsResult {
  *
  *     H.264, <= 10 MB              - Skip
  *     H.264, <= 4000 kb/s bitrate  - Don't re-encode video stream
- *     BT.709, <= 2000 kb/s bitrate - Don't apply the scale+fps filter
- *     !BT.709                      - Apply tonemap (zscale+tonemap+zscale)
+ *     !HDR, <= 2000 kb/s bitrate   - Don't apply the scale+fps filter
+ *     HDR                          - Apply tonemap (zscale+tonemap+zscale)
  *
  * Example invocation:
  *
- *     ffmpeg -i in.mov -vf 'scale=-2:720,fps=30,zscale=transfer=linear,tonemap=tonemap=hable:desat=0,zscale=primaries=709:transfer=709:matrix=709,format=yuv420p' -c:v libx264 -c:a aac -f hls -hls_key_info_file out.m3u8.info -hls_list_size 0 -hls_flags single_file out.m3u8
+ *     ffmpeg -i in.mov -vf "scale=-2:'min(720,ih)',fps=30,zscale=transfer=linear,tonemap=tonemap=hable:desat=0,zscale=primaries=709:transfer=709:matrix=709,format=yuv420p" -c:v libx264 -c:a aac -f hls -hls_key_info_file out.m3u8.info -hls_list_size 0 -hls_flags single_file out.m3u8
  *
  * See: [Note: Preview variant of videos]
  *
@@ -206,9 +239,17 @@ export interface FFmpegGenerateHLSPlaylistAndSegmentsResult {
  * the user's local file system. This function will write the generated HLS
  * playlist and video segments under this prefix.
  *
- * @returns The paths to two files on the user's local file system - one
- * containing the generated HLS playlist, and the other containing the
- * transcoded and encrypted video segments that the HLS playlist refers to.
+ * @param fileID The ID of the {@link EnteFile} whose HLS playlist we are
+ * generating.
+ *
+ * @param fetchURL The fully resolved API URL for obtaining pre-signed S3 URLs
+ * for uploading the generated video segment file.
+ *
+ * @param authToken A token that can be used to make API request to
+ * {@link fetchURL}.
+ *
+ * @returns The path to the file on the user's file system containing the
+ * generated HLS playlist, and other metadata about the generated video stream.
  *
  * If the video is such that it doesn't require stream generation, then this
  * function returns `undefined`.
@@ -216,16 +257,20 @@ export interface FFmpegGenerateHLSPlaylistAndSegmentsResult {
 const ffmpegGenerateHLSPlaylistAndSegments = async (
     inputFilePath: string,
     outputPathPrefix: string,
-    outputUploadURL: string,
+    fileID: number,
+    fetchURL: string,
+    authToken: string,
 ): Promise<FFmpegGenerateHLSPlaylistAndSegmentsResult | undefined> => {
-    const { isH264, isBT709, bitrate } =
+    const { isH264, isHDR, bitrate } =
         await detectVideoCharacteristics(inputFilePath);
 
-    log.debugString(JSON.stringify({ isH264, isBT709, bitrate }));
+    log.debugString(JSON.stringify({ isH264, isHDR, bitrate }));
 
     // If the video is smaller than 10 MB, and already H.264 (the codec we are
     // going to use for the conversion), then a streaming variant is not much
     // use. Skip such cases.
+    //
+    // See also: [Note: Marking files which do not need video processing]
     //
     // ---
     //
@@ -274,8 +319,10 @@ const ffmpegGenerateHLSPlaylistAndSegments = async (
     // - BT.709 ("High-Definition" or HD)
     // - BT.2020 ("Ultra-High-Definition" or UHD, aka HDR^).
     //
-    // ^ HDR ("High-Dynamic-Range") is an addendum to BT.2020, but for our
-    //   purpose here we can treat it as as alias.
+    // ^ HDR ("High-Dynamic-Range") is an addendum to BT.2020, but for the
+    //   discussion here we can treat it as as alias. In particular, not all
+    //   BT.2020 videos are HDR, the check we use instead looks for particular
+    //   color transfers (see the `isHDRVideo` function below).
     //
     // BT.709 is the most common amongst these for older files out stored on
     // computers, and they conform mostly to the standard (one notable exception
@@ -292,15 +339,14 @@ const ffmpegGenerateHLSPlaylistAndSegments = async (
     // that uses the tonemap filter.
     //
     // However applying this tonemap to videos that are already HD leads to a
-    // brightness drop. So we conditionally apply this filter chain only if the
-    // colorspace is not already BT.709.
+    // brightness drop. So we conditionally apply this filter chain only if we
+    // can heuristically detect that the video is HDR.
     //
-    // See also: [Note: Alternative FFmpeg command for HDR videos], although
-    // that uses a allow-list based check (while here we use deny-list).
+    // See also: [Note: Alternative FFmpeg command for HDR videos].
     //
     // Reference:
     // - https://trac.ffmpeg.org/wiki/colorspace
-    const tonemap = !isBT709;
+    const tonemap = isHDR;
 
     // We want the generated playlist to refer to the chunks as "output.ts".
     //
@@ -317,6 +363,20 @@ const ffmpegGenerateHLSPlaylistAndSegments = async (
 
     const playlistPath = path.join(outputPathPrefix, "output.m3u8");
     const videoPath = path.join(outputPathPrefix, "output.ts");
+
+    // A file into which we'll redirect ffmpeg's stderr.
+    //
+    // [Note: ERR_CHILD_PROCESS_STDIO_MAXBUFFER]
+    //
+    // For very large videos, the stderr output of ffmpeg may cause the stdio
+    // max buffer size limits to be exceeded, raising the following error:
+    //
+    //     RangeError [ERR_CHILD_PROCESS_STDIO_MAXBUFFER]: stderr maxBuffer length exceeded
+    //
+    // So instead of capturing the stderr normally, we redirect it to a
+    // temporary file, and then read it from there to extract the video
+    // dimensions.
+    const stderrPath = path.join(outputPathPrefix, "stderr.txt");
 
     // Generate a cryptographically secure random key (16 bytes).
     const keyBytes = randomBytes(16);
@@ -336,11 +396,23 @@ const ffmpegGenerateHLSPlaylistAndSegments = async (
     // - the first line specifies the key URI that is written into the playlist.
     // - the second line specifies the path to the local file system file from
     //   where ffmpeg should read the key.
+    //
+    // [Note: ffmpeg newlines]
+    //
+    // Tested on Windows that ffmpeg recognizes these lines correctly. In
+    // general, ffmpeg tends to expect input and write output the Unix way (\n),
+    // even when we're running on Windows.
+    //
+    // - The ffmetadata and the HLS playlist file generated by ffmpeg uses \n
+    //   separators, even on Windows.
+    // - The HLS key info file, expected as an input by ffmpeg, works fine when
+    //   \n separated even on Windows.
+    //
     const keyInfo = [keyURI, keyPath].join("\n");
 
     // Overview:
     //
-    // - Video H.264 HD 720p 30fps.
+    // - Video H.264 HD 720p (max) 30fps.
     // - Audio AAC 128kbps.
     // - Encrypted HLS playlist with a single file containing all the chunks.
     //
@@ -378,16 +450,15 @@ const ffmpegGenerateHLSPlaylistAndSegments = async (
                                 // keeping aspect ratio and the calculated
                                 // dimension divisible by 2 (some of the other
                                 // operations require an even pixel count).
-                                "scale=-2:720",
+                                "scale=-2:'min(720,ih)'",
                                 // Convert the video to a constant 30 fps,
                                 // duplicating or dropping frames as necessary.
                                 "fps=30",
                             ]
                           : [],
-                      // Convert the colorspace if the video is not in the HD
-                      // color space (bt709). Before conversion, tone map colors
-                      // so that they work the same across the change in the
-                      // dyamic range.
+                      // Convert the colorspace if the video is HDR. Before
+                      // conversion, tone map colors so that they work the same
+                      // across the change in the dyamic range.
                       //
                       // 1. The tonemap filter only works linear light, so we
                       //    first use zscale with transfer=linear to linearize
@@ -453,8 +524,9 @@ const ffmpegGenerateHLSPlaylistAndSegments = async (
         playlistPath,
     ].flat();
 
-    let dimensions: ReturnType<typeof detectVideoDimensions>;
+    let dimensions: { width: number; height: number };
     let videoSize: number;
+    let videoObjectID: string;
 
     try {
         // Write the key and the keyInfo to their desired paths.
@@ -463,26 +535,45 @@ const ffmpegGenerateHLSPlaylistAndSegments = async (
             fs.writeFile(keyInfoPath, keyInfo, { encoding: "utf8" }),
         ]);
 
+        // Tack on the redirection after constructing the command.
+        const commandWithRedirection = `${shellescape(command)} 2>${stderrPath}`;
+
         // Run the ffmpeg command to generate the HLS playlist and segments.
         //
         // Note: Depending on the size of the input file, this may take long!
-        const { stderr: conversionStderr } = await execAsyncWorker(command);
+        await execAsyncWorker(commandWithRedirection);
+
+        // While ffmpeg uses \n as the line separator in the generated playlist
+        // file on Windows too, add an extra safety check that should fail the
+        // HLS generation if this doesn't hold. See: [Note: ffmpeg newlines].
+        if (process.platform == "win32") {
+            const playlistText = await fs.readFile(playlistPath, "utf-8");
+            if (playlistText.includes("\r\n"))
+                throw new Error("Unexpected Windows newlines in playlist");
+        }
 
         // Determine the dimensions of the generated video from the stderr
         // output produced by ffmpeg during the conversion.
-        dimensions = detectVideoDimensions(conversionStderr);
+        dimensions = await detectVideoDimensions(stderrPath);
 
         // Find the size of the generated video segments by reading the size of
         // the generated .ts file.
         videoSize = await fs.stat(videoPath).then((st) => st.size);
 
-        await uploadVideoSegments(videoPath, videoSize, outputUploadURL);
+        videoObjectID = await uploadVideoSegments(
+            videoPath,
+            videoSize,
+            fileID,
+            fetchURL,
+            authToken,
+        );
     } catch (e) {
         log.error("HLS generation failed", e);
         await Promise.all([deletePathIgnoringErrors(playlistPath)]);
         throw e;
     } finally {
         await Promise.all([
+            deletePathIgnoringErrors(stderrPath),
             deletePathIgnoringErrors(keyInfoPath),
             deletePathIgnoringErrors(keyPath),
             deletePathIgnoringErrors(videoPath),
@@ -491,7 +582,7 @@ const ffmpegGenerateHLSPlaylistAndSegments = async (
         ]);
     }
 
-    return { playlistPath, dimensions, videoSize };
+    return { playlistPath, dimensions, videoSize, videoObjectID };
 };
 
 /**
@@ -520,10 +611,10 @@ const deletePathIgnoringErrors = async (tempFilePath: string) => {
  *
  *     Stream #0:1[0x2](und): Video: h264 (Constrained Baseline) (avc1 / 0x31637661), yuv420p(progressive), 480x270 [SAR 1:1 DAR 16:9], 539 kb/s, 29.97 fps, 29.97 tbr, 30k tbn (default)
  */
-const videoStreamLineRegex = /Stream #.+: Video:(.+)\n/;
+const videoStreamLineRegex = /Stream #.+: Video:(.+)\r?\n/;
 
 /** {@link videoStreamLineRegex}, but global. */
-const videoStreamLinesRegex = /Stream #.+: Video:(.+)\n/g;
+const videoStreamLinesRegex = /Stream #.+: Video:(.+)\r?\n/g;
 
 /**
  * A regex that matches "<digits> kb/s" preceded by a space. See
@@ -543,15 +634,16 @@ const videoDimensionsRegex = / ([1-9]\d*)x([1-9]\d*)/;
 
 interface VideoCharacteristics {
     isH264: boolean;
-    isBT709: boolean;
+    isHDR: boolean;
     bitrate: number | undefined;
 }
+
 /**
  * Heuristically determine information about the video at the given
  * {@link inputFilePath}:
  *
  * - If is encoded using H.264 codec.
- * - If it uses the BT.709 colorspace.
+ * - If it is HDR.
  * - Its bitrate.
  *
  * The defaults are tailored for the cases in which these conditions are used,
@@ -586,13 +678,18 @@ const detectVideoCharacteristics = async (inputFilePath: string) => {
     // codec conversion to happen, even if it is unnecessary.
     const res: VideoCharacteristics = {
         isH264: false,
-        isBT709: false,
+        isHDR: false,
         bitrate: undefined,
     };
     if (!videoStreamLine) return res;
 
     res.isH264 = videoStreamLine.startsWith("h264 ");
-    res.isBT709 = videoStreamLine.includes("bt709");
+
+    // Same check as `isHDRVideo`.
+    res.isHDR =
+        videoStreamLine.includes("smpte2084") ||
+        videoStreamLine.includes("arib-std-b67");
+
     // The regex matches "\d kb/s", but there can be other units for the
     // bitrate. However, (a) "kb/s" is the most common for videos out in the
     // wild, and (b) even if we guess wrong it we'll just do "-v:c x264" instead
@@ -600,7 +697,7 @@ const detectVideoCharacteristics = async (inputFilePath: string) => {
     const brs = videoBitrateRegex.exec(videoStreamLine)?.at(0);
     if (brs) {
         const br = parseInt(brs, 10);
-        if (br) res.bitrate = br;
+        if (br) res.bitrate = br * 1000;
     }
 
     return res;
@@ -617,7 +714,12 @@ const detectVideoCharacteristics = async (inputFilePath: string) => {
  *
  * See: [Note: Parsing CLI output might break on ffmpeg updates].
  */
-const detectVideoDimensions = (conversionStderr: string) => {
+const detectVideoDimensions = async (stderrPath: string) => {
+    // Instead of reading the stderr directly off the child_process.exec, we
+    // wrote it to a file to avoid hitting the max stdio buffer limits. Read it
+    // from there.
+    const conversionStderr = await fs.readFile(stderrPath, "utf-8");
+
     // There is a nicer way to do it - by running `pseudoFFProbeVideo` on the
     // generated playlist. However, that playlist includes a data URL that
     // specifies the encryption info, and ffmpeg refuses to read that unless we
@@ -657,22 +759,21 @@ const detectVideoDimensions = (conversionStderr: string) => {
  * Heuristically detect if the file at given path is a HDR video.
  *
  * This is similar to {@link detectVideoCharacteristics}, and see that
- * function's documentation for all the caveats. However, this function uses an
- * allow-list instead, and considers any file with color transfer "smpte2084" or
- * "arib-std-b67" to be HDR. While this is in some sense a more exact check, it
- * comes with different caveats:
+ * function's documentation for all the caveats. Specifically, this function
+ * uses an allow-list, and considers any file with color transfer "smpte2084" or
+ * "arib-std-b67" to be HDR. Caveats:
  *
- * - These particular constants are not guaranteed to be correct; these are just
- *   what I saw on the internet as being used / recommended for detecting HDR.
+ * 1. These particular constants are not guaranteed to be correct; these are
+ *    from various internet posts as being used / recommended for detecting HDR.
  *
- * - Since we don't have ffprobe, we're not checking the color space value
- *   itself but a substring of the stream line in the ffmpeg stderr output.
+ * 2. Since we don't have ffprobe, we're not checking the color space value
+ *    itself but a substring of the stream line in the ffmpeg stderr output.
  *
- * In particular, we use this more exact check for places where we have less
- * leeway. e.g. when generating thumbnails, if we apply the tonemapping to any
- * non-BT.709 file (as the HLS stream generation does), we start getting the
- * "code 3074: no path between colorspaces" error during the JPEG conversion
- * (this is not a problem in the H.264 conversion).
+ * This check should generally not have false positives (unless something else
+ * in the log line triggers #2), but it can have false negative. This is the
+ * lesser of the two evils since if we apply the tonemapping to any non-BT.709
+ * file, we start getting the "code 3074: no path between colorspaces" error
+ * during the JPEG or H.264 conversion.
  *
  * - See: [Note: Alternative FFmpeg command for HDR videos]
  * - See: [Note: Tonemapping HDR to HD]
@@ -728,10 +829,11 @@ const pseudoFFProbeVideo = async (inputFilePath: string) => {
 };
 
 /**
- * Upload the file at the given {@link videoFilePath} to the provided presigned
- * {@link objectUploadURL} using a HTTP PUT request.
+ * Upload the file at the given {@link videoFilePath} to the provided pre-signed
+ * URL(s) using a HTTP PUT request.
  *
- * In case on non-HTTP-4xx errors, retry up to 3 times with exponential backoff.
+ * All HTTP requests are retried up to 4 times (1 original + 3 retries) with
+ * exponential backoff.
  *
  * See: [Note: Upload HLS video segment from node side].
  *
@@ -740,20 +842,155 @@ const pseudoFFProbeVideo = async (inputFilePath: string) => {
  *
  * @param videoSize The size in bytes of the file at {@link videoFilePath}.
  *
- * @param objectUploadURL A pre-signed URL to upload the file.
+ * @param fileID The ID of the {@link EnteFile} whose video segment this is.
  *
- * ---
+ * @param fetchURL The API URL for fetching pre-signed upload URLs.
  *
- * This is an inlined but bespoke reimplementation of `retryEnsuringHTTPOkOr4xx`
- * from `web/packages/base/http.ts`
+ * @param authToken The user's auth token for use with {@link fetchURL}.
+ *
+ * @return The object ID of the uploaded file on remote storage.
+ */
+const uploadVideoSegments = async (
+    videoFilePath: string,
+    videoSize: number,
+    fileID: number,
+    fetchURL: string,
+    authToken: string,
+) => {
+    // Self hosters might be using Cloudflare's free plan which (currently) has
+    // a maximum request size of 100 MB. Keeping a bit of margin for headers,
+    const partSize = 96 * 1024 * 1024; /* 96 MB */
+    const partCount = Math.ceil(videoSize / partSize);
+
+    const { objectID, url, partURLs, completeURL } =
+        await getFilePreviewDataUploadURL(
+            partCount,
+            fileID,
+            fetchURL,
+            authToken,
+        );
+
+    if (url) {
+        await uploadVideoSegmentsSingle(videoFilePath, videoSize, url);
+    } else if (partURLs && completeURL) {
+        await uploadVideoSegmentsMultipart(
+            videoFilePath,
+            videoSize,
+            partSize,
+            partURLs,
+            completeURL,
+        );
+    } else {
+        throw new Error("Malformed upload URLs");
+    }
+
+    return objectID;
+};
+
+const FilePreviewDataUploadURLResponse = z.object({
+    /**
+     * The objectID with which this uploaded data can be referred to post upload
+     * (e.g. when invoking {@link putVideoData}).
+     */
+    objectID: z.string(),
+    /**
+     * A pre-signed URL that can be used to upload the file.
+     *
+     * This will be present only if we requested a singular object upload URL.
+     */
+    url: z.string().nullish().transform(nullToUndefined),
+    /**
+     * A list of pre-signed URLs that can be used to upload parts of a multipart
+     * upload of the uploaded data.
+     *
+     * This will be present only if we requested a multipart upload URLs for the
+     * object by setting `isMultiPart` true in the request.
+     */
+    partURLs: z.string().array().nullish().transform(nullToUndefined),
+    /**
+     * A pre-signed URL that can be used to finalize the multipart upload.
+     *
+     * This will be present only if we requested a multipart upload URLs for the
+     * object by setting `isMultiPart` true in the request.
+     */
+    completeURL: z.string().nullish().transform(nullToUndefined),
+});
+
+/**
+ * Obtain a pre-signed URL(s) that can be used to upload the "file preview data"
+ * of type "vid_preview".
+ *
+ * This will be the file containing the encrypted video segments which the
+ * "vid_preview" HLS playlist for the file would refer to.
+ *
+ * @param partCount If greater than 1, then we request for a multipart upload.
+ */
+export const getFilePreviewDataUploadURL = async (
+    partCount: number,
+    fileID: number,
+    fetchURL: string,
+    authToken: string,
+) => {
+    const params = new URLSearchParams({
+        fileID: fileID.toString(),
+        type: "vid_preview",
+    });
+    if (partCount > 1) {
+        params.set("isMultiPart", "true");
+        params.set("count", partCount.toString());
+    }
+
+    const res = await retryEnsuringHTTPOk(() =>
+        fetch(`${fetchURL}?${params.toString()}`, {
+            headers: authenticatedRequestHeaders(
+                desktopAppVersion(),
+                authToken,
+            ),
+        }),
+    );
+
+    return FilePreviewDataUploadURLResponse.parse(await res.json());
+};
+
+const uploadVideoSegmentsSingle = (
+    videoFilePath: string,
+    videoSize: number,
+    objectUploadURL: string,
+) =>
+    retryEnsuringHTTPOk(() =>
+        // net.fetch is 40-50x slower than the native fetch for this particular
+        // PUT request. This is easily reproducible - replace `fetch` with
+        // `net.fetch`, then even on localhost the PUT requests start taking a
+        // minute or so, while they take second(s) with node's native fetch.
+        fetch(objectUploadURL, {
+            method: "PUT",
+            // net.fetch deduces and inserts a content-length for us, when we
+            // use the node native fetch then we need to provide it explicitly.
+            headers: {
+                ...publicRequestHeaders(desktopAppVersion()),
+                "Content-Length": `${videoSize}`,
+            },
+            // See: [Note: duplex param required for stream body]
+            // @ts-expect-error ^see note above
+            duplex: "half",
+            body: Readable.toWeb(fs_.createReadStream(videoFilePath)),
+        }),
+    );
+
+/**
+ * Retry a async operation on failure up to 4 times (1 original + 3 retries)
+ * with exponential backoff.
+ *
+ * This is an inlined but bespoke reimplementation of `retryEnsuringHTTPOk` from
+ * `web/packages/base/http.ts`
  *
  * - We don't have the rest of the scaffolding used by that function, which is
  *   why it is intially inlined bespoked.
  *
  * - It handles the specific use case of uploading videos since generating the
  *   HLS stream is a fairly expensive operation, so a retry to discount
- *   transient network issues is called for. There are only 2 retries for a
- *   total of 3 attempts, and the retry gaps are more spaced out.
+ *   transient network issues is called for. The number of retries and their
+ *   gaps are same as the "background" `retryProfile` of the web implementation.
  *
  * - Later it was discovered that net.fetch is much slower than node's native
  *   fetch, so this implementation has further diverged.
@@ -761,61 +998,136 @@ const pseudoFFProbeVideo = async (inputFilePath: string) => {
  * - This also moved to a utility process, where we also have a more restricted
  *   ability to import electron API.
  */
-const uploadVideoSegments = async (
-    videoFilePath: string,
-    videoSize: number,
-    objectUploadURL: string,
-) => {
-    const waitTimeBeforeNextTry = [5000, 20000];
+const retryEnsuringHTTPOk = async (request: () => Promise<Response>) => {
+    const waitTimeBeforeNextTry = [10000, 30000, 120000];
 
     while (true) {
-        let abort = false;
         try {
-            const nodeStream = fs_.createReadStream(videoFilePath);
-            const webStream = Readable.toWeb(nodeStream);
-
-            // net.fetch is 40-50x slower than the native fetch for this
-            // particular PUT request. This is easily reproducible - replace
-            // `fetch` with `net.fetch`, then even on localhost the PUT requests
-            // start taking a minute or so, while they take second(s) with
-            // node's native fetch.
-            const res = await fetch(objectUploadURL, {
-                method: "PUT",
-                // net.fetch apparently deduces and inserts a content-length,
-                // because when we use the node native fetch then we need to
-                // provide it explicitly.
-                headers: { "Content-Length": `${videoSize}` },
-                // The duplex option is required since we're passing a stream.
-                //
-                // @ts-expect-error TypeScript's libdom.d.ts does not include
-                // the "duplex" parameter, e.g. see
-                // https://github.com/node-fetch/node-fetch/issues/1769.
-                duplex: "half",
-                body: webStream,
-            });
-
-            if (res.ok) {
-                // Success.
-                return;
-            }
-            if (res.status >= 400 && res.status < 500) {
-                // HTTP 4xx.
-                abort = true;
-            }
+            const res = await request();
+            if (res.ok) /* Success. */ return res;
             throw new Error(
-                `Failed to upload generated HLS video: HTTP ${res.status} ${res.statusText}`,
+                `Request failed: HTTP ${res.status} ${res.statusText}`,
             );
         } catch (e) {
-            if (abort) {
-                throw e;
-            }
             const t = waitTimeBeforeNextTry.shift();
             if (!t) {
                 throw e;
             } else {
                 log.warn("Will retry potentially transient request failure", e);
+                await wait(t);
             }
-            await wait(t);
         }
     }
+};
+
+const uploadVideoSegmentsMultipart = async (
+    videoFilePath: string,
+    videoSize: number,
+    partSize: number,
+    partUploadURLs: string[],
+    completionURL: string,
+) => {
+    // The part we're currently uploading.
+    let partNumber = 0;
+    // A rolling offset into the file.
+    let start = 0;
+    // See `createMultipartUploadRequestBody` in the web code for a more
+    // expansive and documented version of this XML body construction.
+    const completionXML = ["<CompleteMultipartUpload>"];
+    for (const partUploadURL of partUploadURLs) {
+        partNumber += 1;
+        const size = Math.min(start + partSize, videoSize) - start;
+        const end = start + size - 1;
+        const res = await retryEnsuringHTTPOk(() =>
+            fetch(partUploadURL, {
+                method: "PUT",
+                headers: {
+                    ...publicRequestHeaders(desktopAppVersion()),
+                    "Content-Length": `${size}`,
+                },
+                // See: [Note: duplex param required for stream body]
+                // @ts-expect-error ^see note above
+                duplex: "half",
+                body: Readable.toWeb(
+                    // start and end are inclusive 0-indexed range of bytes to
+                    // read from the file.
+                    fs_.createReadStream(videoFilePath, { start, end }),
+                ),
+            }),
+        );
+        const eTag = res.headers.get("etag");
+        if (!eTag) throw new Error("Response did not have an ETag");
+        start += size;
+        completionXML.push(
+            `<Part><PartNumber>${partNumber}</PartNumber><ETag>${eTag}</ETag></Part>`,
+        );
+    }
+    completionXML.push("</CompleteMultipartUpload>");
+    const completionBody = completionXML.join("");
+    return await retryEnsuringHTTPOk(() =>
+        fetch(completionURL, {
+            method: "POST",
+            headers: {
+                ...publicRequestHeaders(desktopAppVersion()),
+                "Content-Type": "text/xml",
+            },
+            body: completionBody,
+        }),
+    );
+};
+
+/**
+ * A regex that matches the first line of the form
+ *
+ *   Duration: 00:00:03.13, start: 0.000000, bitrate: 16088 kb/s
+ *
+ * The part after Duration: and until the first non-digit or colon is the first
+ * capture group, while after the dot is an optional second capture group.
+ */
+const videoDurationLineRegex = /\s\sDuration: ([0-9:]+)(.[0-9]+)?/;
+
+/**
+ * Determine the duration of the video at the given {@link inputFilePath}.
+ *
+ * While the detection works for all known cases, it is still heuristic because
+ * it uses ffmpeg output instead of ffprobe (which we don't have access to).
+ * See: [Note: Parsing CLI output might break on ffmpeg updates].
+ */
+export const ffmpegDetermineVideoDuration = async (inputFilePath: string) => {
+    const videoInfo = await pseudoFFProbeVideo(inputFilePath);
+    const matches = videoDurationLineRegex.exec(videoInfo);
+
+    const fail = () => {
+        throw new Error(`Cannot parse video duration '${matches?.at(0)}'`);
+    };
+
+    // The HH:mm:ss.
+    const ints = (matches?.at(1) ?? "")
+        .split(":")
+        .map((s) => parseInt(s, 10) || 0);
+    let [h, m, s] = [0, 0, 0];
+    switch (ints.length) {
+        case 1:
+            s = ints[0]!;
+            break;
+        case 2:
+            m = ints[0]!;
+            s = ints[1]!;
+            break;
+        case 3:
+            h = ints[0]!;
+            m = ints[1]!;
+            s = ints[2]!;
+            break;
+        default:
+            fail();
+    }
+
+    // Optional subseconds.
+    const ss = parseFloat(`0${matches?.at(2) ?? ""}`);
+
+    // Follow the same round up behaviour that the web side uses.
+    const duration = Math.ceil(h * 3600 + m * 60 + s + ss);
+    if (!duration) fail();
+    return duration;
 };

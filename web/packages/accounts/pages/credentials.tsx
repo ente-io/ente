@@ -8,6 +8,10 @@ import { SecondFactorChoice } from "ente-accounts/components/SecondFactorChoice"
 import { sessionExpiredDialogAttributes } from "ente-accounts/components/utils/dialog";
 import { useSecondFactorChoiceIfNeeded } from "ente-accounts/components/utils/second-factor-choice";
 import {
+    VerifyMasterPasswordForm,
+    type VerifyMasterPasswordFormProps,
+} from "ente-accounts/components/VerifyMasterPasswordForm";
+import {
     openPasskeyVerificationURL,
     passkeyVerificationRedirectURL,
 } from "ente-accounts/services/passkey";
@@ -19,11 +23,13 @@ import {
 import { checkSessionValidity } from "ente-accounts/services/session";
 import {
     configureSRP,
+    deriveSRPPassword,
     generateSRPSetupAttributes,
     loginViaSRP,
 } from "ente-accounts/services/srp";
 import type { SRPAttributes } from "ente-accounts/services/srp-remote";
 import { getSRPAttributes } from "ente-accounts/services/srp-remote";
+import type { KeyAttributes, User } from "ente-accounts/services/user";
 import { LinkButton } from "ente-base/components/LinkButton";
 import { LoadingIndicator } from "ente-base/components/loaders";
 import { useBaseContext } from "ente-base/context";
@@ -31,13 +37,9 @@ import { sharedCryptoWorker } from "ente-base/crypto";
 import type { B64EncryptionResult } from "ente-base/crypto/libsodium";
 import { clearLocalStorage } from "ente-base/local-storage";
 import log from "ente-base/log";
-import VerifyMasterPasswordForm, {
-    type VerifyMasterPasswordFormProps,
-} from "ente-shared/components/VerifyMasterPasswordForm";
 import {
     decryptAndStoreToken,
     generateAndSaveIntermediateKeyAttributes,
-    generateLoginSubKey,
     saveKeyInSessionStore,
 } from "ente-shared/crypto/helpers";
 import { CustomError } from "ente-shared/error";
@@ -48,7 +50,6 @@ import {
     setIsFirstLogin,
 } from "ente-shared/storage/localStorage/helpers";
 import { getKey, removeKey, setKey } from "ente-shared/storage/sessionStorage";
-import type { KeyAttributes, User } from "ente-shared/user/types";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useState } from "react";
@@ -139,18 +140,21 @@ const Page: React.FC = () => {
             if (kekEncryptedAttributes && keyAttributes) {
                 removeKey("keyEncryptionKey");
                 const cryptoWorker = await sharedCryptoWorker();
-                const kek = await cryptoWorker.decryptB64(
-                    kekEncryptedAttributes.encryptedData,
-                    kekEncryptedAttributes.nonce,
+                const kek = await cryptoWorker.decryptBox(
+                    {
+                        encryptedData: kekEncryptedAttributes.encryptedData,
+                        nonce: kekEncryptedAttributes.nonce,
+                    },
                     kekEncryptedAttributes.key,
                 );
-                const key = await cryptoWorker.decryptB64(
-                    keyAttributes.encryptedKey,
-                    keyAttributes.keyDecryptionNonce,
+                const key = await cryptoWorker.decryptBox(
+                    {
+                        encryptedData: keyAttributes.encryptedKey,
+                        nonce: keyAttributes.keyDecryptionNonce,
+                    },
                     kek,
                 );
-                // eslint-disable-next-line react-hooks/rules-of-hooks
-                useMasterPassword(key, kek, keyAttributes);
+                void postVerification(key, kek, keyAttributes);
                 return;
             }
             if (keyAttributes) {
@@ -257,46 +261,46 @@ const Page: React.FC = () => {
             }
         };
 
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    const useMasterPassword: VerifyMasterPasswordFormProps["callback"] = async (
-        key,
-        kek,
-        keyAttributes,
-        passphrase,
+    const handleVerifyMasterPassword: VerifyMasterPasswordFormProps["onVerify"] =
+        (key, kek, keyAttributes, passphrase) => {
+            void (async () => {
+                if (isFirstLogin()) {
+                    await generateAndSaveIntermediateKeyAttributes(
+                        passphrase,
+                        keyAttributes,
+                        key,
+                    );
+                }
+                await postVerification(key, kek, keyAttributes);
+            })();
+        };
+
+    const postVerification = async (
+        key: string,
+        kek: string,
+        keyAttributes: KeyAttributes,
     ) => {
+        await saveKeyInSessionStore("encryptionKey", key);
+        await decryptAndStoreToken(keyAttributes, key);
         try {
-            if (isFirstLogin() && passphrase) {
-                await generateAndSaveIntermediateKeyAttributes(
-                    passphrase,
-                    keyAttributes,
-                    key,
-                );
-            }
-            await saveKeyInSessionStore("encryptionKey", key);
-            await decryptAndStoreToken(keyAttributes, key);
-            try {
-                let srpAttributes: SRPAttributes | null =
-                    getData("srpAttributes");
-                if (!srpAttributes && user) {
-                    srpAttributes = await getSRPAttributes(user.email);
-                    if (srpAttributes) {
-                        setData("srpAttributes", srpAttributes);
-                    }
+            let srpAttributes: SRPAttributes | null = getData("srpAttributes");
+            if (!srpAttributes && user) {
+                srpAttributes = await getSRPAttributes(user.email);
+                if (srpAttributes) {
+                    setData("srpAttributes", srpAttributes);
                 }
-                log.debug(() => `userSRPSetupPending ${!srpAttributes}`);
-                if (!srpAttributes) {
-                    const loginSubKey = await generateLoginSubKey(kek);
-                    const srpSetupAttributes =
-                        await generateSRPSetupAttributes(loginSubKey);
-                    await configureSRP(srpSetupAttributes);
-                }
-            } catch (e) {
-                log.error("migrate to srp failed", e);
             }
-            void router.push(unstashRedirect() ?? appHomeRoute);
+            log.debug(() => `userSRPSetupPending ${!srpAttributes}`);
+            if (!srpAttributes) {
+                const loginSubKey = await deriveSRPPassword(kek);
+                const srpSetupAttributes =
+                    await generateSRPSetupAttributes(loginSubKey);
+                await configureSRP(srpSetupAttributes);
+            }
         } catch (e) {
-            log.error("useMasterPassword failed", e);
+            log.error("migrate to srp failed", e);
         }
+        void router.push(unstashRedirect() ?? appHomeRoute);
     };
 
     if (!keyAttributes && !srpAttributes) {
@@ -333,17 +337,15 @@ const Page: React.FC = () => {
     // possibility using types.
     return (
         <AccountsPageContents>
-            <PasswordHeader>{user?.email ?? ""}</PasswordHeader>
-
+            <PasswordHeader caption={user?.email} />
             <VerifyMasterPasswordForm
-                buttonText={t("sign_in")}
-                callback={useMasterPassword}
                 user={user}
                 keyAttributes={keyAttributes}
                 getKeyAttributes={getKeyAttributes}
                 srpAttributes={srpAttributes}
+                submitButtonTitle={t("sign_in")}
+                onVerify={handleVerifyMasterPassword}
             />
-
             <AccountsPageFooterWithHost>
                 <LinkButton onClick={() => router.push("/recover")}>
                     {t("forgot_password")}

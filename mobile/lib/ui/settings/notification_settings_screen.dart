@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import "package:photos/generated/l10n.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/services/notification_service.dart";
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/buttons/icon_button_widget.dart';
@@ -9,6 +10,7 @@ import 'package:photos/ui/components/menu_section_description_widget.dart';
 import 'package:photos/ui/components/title_bar_title_widget.dart';
 import 'package:photos/ui/components/title_bar_widget.dart';
 import 'package:photos/ui/components/toggle_switch_widget.dart';
+import "package:photos/ui/settings/common_settings.dart";
 
 class NotificationSettingsScreen extends StatelessWidget {
   const NotificationSettingsScreen({super.key});
@@ -76,6 +78,60 @@ class NotificationSettingsScreen extends StatelessWidget {
                               content: S
                                   .of(context)
                                   .sharedPhotoNotificationsExplanation,
+                            ),
+                            sectionOptionSpacing,
+                            MenuItemWidget(
+                              captionedTextWidget: CaptionedTextWidget(
+                                title: S.of(context).onThisDayMemories,
+                              ),
+                              menuItemColor: colorScheme.fillFaint,
+                              trailingWidget: ToggleSwitchWidget(
+                                value: () =>
+                                    NotificationService.instance
+                                        .hasGrantedPermissions() &&
+                                    localSettings
+                                        .isOnThisDayNotificationsEnabled,
+                                onChanged: () async {
+                                  await NotificationService.instance
+                                      .requestPermissions();
+                                  await memoriesCacheService
+                                      .toggleOnThisDayNotifications();
+                                },
+                              ),
+                              singleBorderRadius: 8,
+                              alignCaptionedTextToLeft: true,
+                              isGestureDetectorDisabled: true,
+                            ),
+                            MenuSectionDescriptionWidget(
+                              content: S
+                                  .of(context)
+                                  .onThisDayNotificationExplanation,
+                            ),
+                            sectionOptionSpacing,
+                            MenuItemWidget(
+                              captionedTextWidget: CaptionedTextWidget(
+                                title: S.of(context).birthdayNotifications,
+                              ),
+                              menuItemColor: colorScheme.fillFaint,
+                              trailingWidget: ToggleSwitchWidget(
+                                value: () =>
+                                    NotificationService.instance
+                                        .hasGrantedPermissions() &&
+                                    localSettings.birthdayNotificationsEnabled,
+                                onChanged: () async {
+                                  await NotificationService.instance
+                                      .requestPermissions();
+                                  await memoriesCacheService
+                                      .toggleBirthdayNotifications();
+                                },
+                              ),
+                              singleBorderRadius: 8,
+                              alignCaptionedTextToLeft: true,
+                              isGestureDetectorDisabled: true,
+                            ),
+                            MenuSectionDescriptionWidget(
+                              content:
+                                  S.of(context).receiveRemindersOnBirthdays,
                             ),
                           ],
                         ),

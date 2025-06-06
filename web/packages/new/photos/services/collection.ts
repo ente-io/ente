@@ -1,10 +1,10 @@
-import { encryptBoxB64 } from "ente-base/crypto";
+import type { User } from "ente-accounts/services/user";
+import { encryptBox } from "ente-base/crypto";
 import { authenticatedRequestHeaders, ensureOk } from "ente-base/http";
 import { apiURL } from "ente-base/origins";
 import { CollectionSubType, type Collection } from "ente-media/collection";
 import { type EnteFile } from "ente-media/file";
 import { ItemVisibility } from "ente-media/file-metadata";
-import type { User } from "ente-shared/user/types";
 import { batch } from "ente-utils/array";
 
 /**
@@ -50,6 +50,9 @@ export const findDefaultHiddenCollectionIDs = (collections: Collection[]) =>
             .map((collection) => collection.id),
     );
 
+/**
+ * Return true if this is a collection that the user doesn't own.
+ */
 export const isIncomingShare = (collection: Collection, user: User) =>
     collection.owner.id !== user.id;
 
@@ -209,7 +212,7 @@ const encryptWithCollectionKey = async (
 ): Promise<CollectionFileItem[]> =>
     Promise.all(
         files.map(async (file) => {
-            const box = await encryptBoxB64(file.key, collection.key);
+            const box = await encryptBox(file.key, collection.key);
             return {
                 id: file.id,
                 encryptedKey: box.encryptedData,

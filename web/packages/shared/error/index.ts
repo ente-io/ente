@@ -21,27 +21,30 @@ export function isApiErrorResponse(object: any): object is ApiErrorResponse {
     return object && "code" in object && "message" in object;
 }
 
+/**
+ * Constant string values used mark custom errors that we need to subsequently
+ * catch and identify to deal with in a particular manner.
+ */
+export const CustomErrorMessage = {
+    eTagMissing: "ETag header not present in response",
+};
+
 export const CustomError = {
     ETAG_MISSING: "no header/etag present in response body",
-    KEY_MISSING: "encrypted key missing from localStorage",
     FILE_TOO_LARGE: "file too large",
     SUBSCRIPTION_EXPIRED: "subscription expired",
     STORAGE_QUOTA_EXCEEDED: "storage quota exceeded",
     SESSION_EXPIRED: "session expired",
     TOKEN_EXPIRED: "token expired",
-    TOKEN_MISSING: "token missing",
     TOO_MANY_REQUESTS: "too many requests",
     BAD_REQUEST: "bad request",
     SUBSCRIPTION_NEEDED: "subscription not present",
     NOT_FOUND: "not found ",
-    WEAK_DEVICE: "password decryption failed on the device",
-    INCORRECT_PASSWORD: "incorrect password",
     INCORRECT_PASSWORD_OR_NO_ACCOUNT: "incorrect password or no such account",
     UPLOAD_CANCELLED: "upload cancelled",
     UPDATE_EXPORTED_RECORD_FAILED: "update file exported record failed",
     EXPORT_STOPPED: "export stopped",
     EXPORT_FOLDER_DOES_NOT_EXIST: "export folder does not exist",
-    AUTH_KEY_NOT_FOUND: "auth key not found",
     TWO_FACTOR_ENABLED: "two factor enabled",
 };
 

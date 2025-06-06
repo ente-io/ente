@@ -15,7 +15,6 @@ import UnarchiveIcon from "@mui/icons-material/Unarchive";
 import VisibilityOffOutlinedIcon from "@mui/icons-material/VisibilityOffOutlined";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import { Box, IconButton, Menu, Stack, Tooltip } from "@mui/material";
-import { SetCollectionNamerAttributes } from "components/Collections/CollectionNamer";
 import { assertionFailed } from "ente-base/assert";
 import { SpacedRow } from "ente-base/components/containers";
 import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
@@ -23,6 +22,7 @@ import {
     OverflowMenu,
     OverflowMenuOption,
 } from "ente-base/components/OverflowMenu";
+import { SingleInputDialog } from "ente-base/components/SingleInputDialog";
 import { useModalVisibility } from "ente-base/components/utils/modal";
 import { useBaseContext } from "ente-base/context";
 import {
@@ -70,7 +70,6 @@ interface CollectionHeaderProps {
     isActiveCollectionDownloadInProgress: () => boolean;
     onCollectionShare: () => void;
     onCollectionCast: () => void;
-    setCollectionNamerAttributes: SetCollectionNamerAttributes;
     setFilesDownloadProgressAttributesCreator: SetFilesDownloadProgressAttributesCreator;
 }
 
@@ -128,7 +127,6 @@ const CollectionOptions: React.FC<CollectionHeaderProps> = ({
     setActiveCollectionID,
     onCollectionShare,
     onCollectionCast,
-    setCollectionNamerAttributes,
     setFilesDownloadProgressAttributesCreator,
     isActiveCollectionDownloadInProgress,
 }) => {
@@ -138,6 +136,8 @@ const CollectionOptions: React.FC<CollectionHeaderProps> = ({
     const overFlowMenuIconRef = useRef<SVGSVGElement>(null);
 
     const { show: showSortOrderMenu, props: sortOrderMenuVisibilityProps } =
+        useModalVisibility();
+    const { show: showAlbumNameInput, props: albumNameInputVisibilityProps } =
         useModalVisibility();
 
     const { type: collectionSummaryType } = collectionSummary;
@@ -165,23 +165,15 @@ const CollectionOptions: React.FC<CollectionHeaderProps> = ({
         [showLoadingBar, hideLoadingBar, onGenericError, syncWithRemote],
     );
 
-    const showRenameCollectionModal = () => {
-        setCollectionNamerAttributes({
-            title: t("rename_album"),
-            buttonText: t("rename"),
-            autoFilledName: activeCollection.name,
-            callback: renameCollection,
-        });
-    };
-
-    const _renameCollection = async (newName: string) => {
-        if (activeCollection.name !== newName) {
-            await CollectionAPI.renameCollection(activeCollection, newName);
-        }
-    };
-
-    const renameCollection = (newName: string) =>
-        wrap(() => _renameCollection(newName))();
+    const renameCollection = useCallback(
+        async (newName: string) => {
+            if (activeCollection.name !== newName) {
+                await CollectionAPI.renameCollection(activeCollection, newName);
+                void syncWithRemote(false, true);
+            }
+        },
+        [activeCollection],
+    );
 
     const confirmDeleteCollection = () => {
         showMiniDialog({
@@ -313,6 +305,195 @@ const CollectionOptions: React.FC<CollectionHeaderProps> = ({
         changeCollectionSortOrder(activeCollection, false),
     );
 
+    let menuOptions: React.ReactNode[] = [];
+    // MUI doesn't let us use fragments to pass multiple menu items, so we need
+    // to instead put them in an array. This also necessitates giving each a
+    // unique key.
+    switch (collectionSummaryType) {
+        case "trash":
+            menuOptions = [
+                <EmptyTrashOption key="trash" onClick={confirmEmptyTrash} />,
+            ];
+            break;
+
+        case "favorites":
+            menuOptions = [
+                <DownloadOption
+                    key="download"
+                    isDownloadInProgress={isActiveCollectionDownloadInProgress}
+                    onClick={downloadCollection}
+                >
+                    {t("download_favorites")}
+                </DownloadOption>,
+                <OverflowMenuOption
+                    key="share"
+                    onClick={onCollectionShare}
+                    startIcon={<PeopleIcon />}
+                >
+                    {t("share_favorites")}
+                </OverflowMenuOption>,
+                <OverflowMenuOption
+                    key="cast"
+                    startIcon={<TvIcon />}
+                    onClick={onCollectionCast}
+                >
+                    {t("cast_to_tv")}
+                </OverflowMenuOption>,
+            ];
+            break;
+
+        case "uncategorized":
+            menuOptions = [
+                <DownloadOption key="download" onClick={downloadCollection}>
+                    {t("download_uncategorized")}
+                </DownloadOption>,
+            ];
+            break;
+
+        case "hiddenItems":
+            menuOptions = [
+                <DownloadOption
+                    key="download-hidden"
+                    onClick={downloadCollection}
+                >
+                    {t("download_hidden_items")}
+                </DownloadOption>,
+            ];
+            break;
+
+        case "incomingShareViewer":
+        case "incomingShareCollaborator":
+            menuOptions = [
+                isArchivedCollection(activeCollection) ? (
+                    <OverflowMenuOption
+                        key="unarchive"
+                        onClick={unarchiveAlbum}
+                        startIcon={<UnarchiveIcon />}
+                    >
+                        {t("unarchive_album")}
+                    </OverflowMenuOption>
+                ) : (
+                    <OverflowMenuOption
+                        key="archive"
+                        onClick={archiveAlbum}
+                        startIcon={<ArchiveOutlinedIcon />}
+                    >
+                        {t("archive_album")}
+                    </OverflowMenuOption>
+                ),
+                <OverflowMenuOption
+                    key="leave"
+                    startIcon={<LogoutIcon />}
+                    onClick={confirmLeaveSharedAlbum}
+                >
+                    {t("leave_album")}
+                </OverflowMenuOption>,
+                <OverflowMenuOption
+                    key="cast"
+                    startIcon={<TvIcon />}
+                    onClick={onCollectionCast}
+                >
+                    {t("cast_album_to_tv")}
+                </OverflowMenuOption>,
+            ];
+            break;
+
+        default:
+            menuOptions = [
+                <OverflowMenuOption
+                    key="rename"
+                    onClick={showAlbumNameInput}
+                    startIcon={<EditIcon />}
+                >
+                    {t("rename_album")}
+                </OverflowMenuOption>,
+                <OverflowMenuOption
+                    key="sort"
+                    onClick={showSortOrderMenu}
+                    startIcon={<SortIcon />}
+                >
+                    {t("sort_by")}
+                </OverflowMenuOption>,
+                isPinnedCollection(activeCollection) ? (
+                    <OverflowMenuOption
+                        key="unpin"
+                        onClick={unpinAlbum}
+                        startIcon={<PushPinOutlinedIcon />}
+                    >
+                        {t("unpin_album")}
+                    </OverflowMenuOption>
+                ) : (
+                    <OverflowMenuOption
+                        key="pin"
+                        onClick={pinAlbum}
+                        startIcon={<PushPinIcon />}
+                    >
+                        {t("pin_album")}
+                    </OverflowMenuOption>
+                ),
+                ...(!isHiddenCollection(activeCollection)
+                    ? [
+                          isArchivedCollection(activeCollection) ? (
+                              <OverflowMenuOption
+                                  key="unarchive"
+                                  onClick={unarchiveAlbum}
+                                  startIcon={<UnarchiveIcon />}
+                              >
+                                  {t("unarchive_album")}
+                              </OverflowMenuOption>
+                          ) : (
+                              <OverflowMenuOption
+                                  key="archive"
+                                  onClick={archiveAlbum}
+                                  startIcon={<ArchiveOutlinedIcon />}
+                              >
+                                  {t("archive_album")}
+                              </OverflowMenuOption>
+                          ),
+                      ]
+                    : []),
+                isHiddenCollection(activeCollection) ? (
+                    <OverflowMenuOption
+                        key="unhide"
+                        onClick={unhideAlbum}
+                        startIcon={<VisibilityOutlinedIcon />}
+                    >
+                        {t("unhide_collection")}
+                    </OverflowMenuOption>
+                ) : (
+                    <OverflowMenuOption
+                        key="hide"
+                        onClick={hideAlbum}
+                        startIcon={<VisibilityOffOutlinedIcon />}
+                    >
+                        {t("hide_collection")}
+                    </OverflowMenuOption>
+                ),
+                <OverflowMenuOption
+                    key="delete"
+                    startIcon={<DeleteOutlinedIcon />}
+                    onClick={confirmDeleteCollection}
+                >
+                    {t("delete_album")}
+                </OverflowMenuOption>,
+                <OverflowMenuOption
+                    key="share"
+                    onClick={onCollectionShare}
+                    startIcon={<PeopleIcon />}
+                >
+                    {t("share_album")}
+                </OverflowMenuOption>,
+                <OverflowMenuOption
+                    key="cast"
+                    startIcon={<TvIcon />}
+                    onClick={onCollectionCast}
+                >
+                    {t("cast_album_to_tv")}
+                </OverflowMenuOption>,
+            ];
+            break;
+    }
+
     return (
         <Box sx={{ display: "inline-flex", gap: "16px" }}>
             <QuickOptions
@@ -327,58 +508,23 @@ const CollectionOptions: React.FC<CollectionHeaderProps> = ({
                 ariaID="collection-options"
                 triggerButtonIcon={<MoreHorizIcon ref={overFlowMenuIconRef} />}
             >
-                {collectionSummaryType == "trash" ? (
-                    <EmptyTrashOption onClick={confirmEmptyTrash} />
-                ) : collectionSummaryType == "favorites" ? (
-                    <DownloadOption
-                        isDownloadInProgress={
-                            isActiveCollectionDownloadInProgress
-                        }
-                        onClick={downloadCollection}
-                    >
-                        {t("download_favorites")}
-                    </DownloadOption>
-                ) : collectionSummaryType == "uncategorized" ? (
-                    <DownloadOption onClick={downloadCollection}>
-                        {t("download_uncategorized")}
-                    </DownloadOption>
-                ) : collectionSummaryType == "hiddenItems" ? (
-                    <DownloadOption onClick={downloadCollection}>
-                        {t("download_hidden_items")}
-                    </DownloadOption>
-                ) : collectionSummaryType == "incomingShareViewer" ||
-                  collectionSummaryType == "incomingShareCollaborator" ? (
-                    <SharedCollectionOptions
-                        isArchived={isArchivedCollection(activeCollection)}
-                        onArchiveClick={archiveAlbum}
-                        onUnarchiveClick={unarchiveAlbum}
-                        onLeaveSharedAlbumClick={confirmLeaveSharedAlbum}
-                        onCastClick={onCollectionCast}
-                    />
-                ) : (
-                    <AlbumCollectionOptions
-                        isArchived={isArchivedCollection(activeCollection)}
-                        isHidden={isHiddenCollection(activeCollection)}
-                        isPinned={isPinnedCollection(activeCollection)}
-                        onRenameClick={showRenameCollectionModal}
-                        onSortClick={showSortOrderMenu}
-                        onArchiveClick={archiveAlbum}
-                        onUnarchiveClick={unarchiveAlbum}
-                        onPinClick={pinAlbum}
-                        onUnpinClick={unpinAlbum}
-                        onHideClick={hideAlbum}
-                        onUnhideClick={unhideAlbum}
-                        onDeleteClick={confirmDeleteCollection}
-                        onShareClick={onCollectionShare}
-                        onCastClick={onCollectionCast}
-                    />
-                )}
+                {...menuOptions}
             </OverflowMenu>
             <CollectionSortOrderMenu
                 {...sortOrderMenuVisibilityProps}
                 overFlowMenuIconRef={overFlowMenuIconRef}
                 onAscClick={changeSortOrderAsc}
                 onDescClick={changeSortOrderDesc}
+            />
+            <SingleInputDialog
+                {...albumNameInputVisibilityProps}
+                title={t("rename_album")}
+                label={t("album_name")}
+                autoFocus
+                initialValue={activeCollection?.name}
+                submitButtonColor="primary"
+                submitButtonTitle={t("rename")}
+                onSubmit={renameCollection}
             />
         </Box>
     );
@@ -438,9 +584,9 @@ const EmptyTrashQuickOption: React.FC<OptionProps> = ({ onClick }) => (
 );
 
 const showDownloadQuickOption = (type: CollectionSummaryType) =>
+    type == "album" ||
     type == "folder" ||
     type == "favorites" ||
-    type == "album" ||
     type == "uncategorized" ||
     type == "hiddenItems" ||
     type == "incomingShareViewer" ||
@@ -476,8 +622,9 @@ const DownloadQuickOption: React.FC<DownloadQuickOptionProps> = ({
 );
 
 const showShareQuickOption = (type: CollectionSummaryType) =>
-    type == "folder" ||
     type == "album" ||
+    type == "folder" ||
+    type == "favorites" ||
     type == "outgoingShare" ||
     type == "sharedOnlyViaLink" ||
     type == "archived" ||
@@ -502,7 +649,9 @@ const ShareQuickOption: React.FC<ShareQuickOptionProps> = ({
                 : collectionSummaryType == "outgoingShare" ||
                     collectionSummaryType == "sharedOnlyViaLink"
                   ? t("modify_sharing")
-                  : t("share_album")
+                  : collectionSummaryType == "favorites"
+                    ? t("share_favorites")
+                    : t("share_album")
         }
     >
         <IconButton onClick={onClick}>
@@ -540,153 +689,6 @@ const DownloadOption: React.FC<
     >
         {children}
     </OverflowMenuOption>
-);
-
-interface SharedCollectionOptionProps {
-    isArchived: boolean;
-    onArchiveClick: () => void;
-    onUnarchiveClick: () => void;
-    onLeaveSharedAlbumClick: () => void;
-    onCastClick: () => void;
-}
-
-const SharedCollectionOptions: React.FC<SharedCollectionOptionProps> = ({
-    isArchived,
-    onArchiveClick,
-    onUnarchiveClick,
-    onLeaveSharedAlbumClick,
-    onCastClick,
-}) => (
-    <>
-        {isArchived ? (
-            <OverflowMenuOption
-                onClick={onUnarchiveClick}
-                startIcon={<UnarchiveIcon />}
-            >
-                {t("unarchive_album")}
-            </OverflowMenuOption>
-        ) : (
-            <OverflowMenuOption
-                onClick={onArchiveClick}
-                startIcon={<ArchiveOutlinedIcon />}
-            >
-                {t("archive_album")}
-            </OverflowMenuOption>
-        )}
-        <OverflowMenuOption
-            startIcon={<LogoutIcon />}
-            onClick={onLeaveSharedAlbumClick}
-        >
-            {t("leave_album")}
-        </OverflowMenuOption>
-        <OverflowMenuOption startIcon={<TvIcon />} onClick={onCastClick}>
-            {t("cast_album_to_tv")}
-        </OverflowMenuOption>
-    </>
-);
-
-interface AlbumCollectionOptionsProps {
-    isArchived: boolean;
-    isPinned: boolean;
-    isHidden: boolean;
-    onRenameClick: () => void;
-    onSortClick: () => void;
-    onArchiveClick: () => void;
-    onUnarchiveClick: () => void;
-    onPinClick: () => void;
-    onUnpinClick: () => void;
-    onHideClick: () => void;
-    onUnhideClick: () => void;
-    onDeleteClick: () => void;
-    onShareClick: () => void;
-    onCastClick: () => void;
-}
-
-const AlbumCollectionOptions: React.FC<AlbumCollectionOptionsProps> = ({
-    isArchived,
-    isPinned,
-    isHidden,
-    onRenameClick,
-    onSortClick,
-    onArchiveClick,
-    onUnarchiveClick,
-    onPinClick,
-    onUnpinClick,
-    onHideClick,
-    onUnhideClick,
-    onDeleteClick,
-    onShareClick,
-    onCastClick,
-}) => (
-    <>
-        <OverflowMenuOption onClick={onRenameClick} startIcon={<EditIcon />}>
-            {t("rename_album")}
-        </OverflowMenuOption>
-        <OverflowMenuOption onClick={onSortClick} startIcon={<SortIcon />}>
-            {t("sort_by")}
-        </OverflowMenuOption>
-        {isPinned ? (
-            <OverflowMenuOption
-                onClick={onUnpinClick}
-                startIcon={<PushPinOutlinedIcon />}
-            >
-                {t("unpin_album")}
-            </OverflowMenuOption>
-        ) : (
-            <OverflowMenuOption
-                onClick={onPinClick}
-                startIcon={<PushPinIcon />}
-            >
-                {t("pin_album")}
-            </OverflowMenuOption>
-        )}
-        {!isHidden && (
-            <>
-                {isArchived ? (
-                    <OverflowMenuOption
-                        onClick={onUnarchiveClick}
-                        startIcon={<UnarchiveIcon />}
-                    >
-                        {t("unarchive_album")}
-                    </OverflowMenuOption>
-                ) : (
-                    <OverflowMenuOption
-                        onClick={onArchiveClick}
-                        startIcon={<ArchiveOutlinedIcon />}
-                    >
-                        {t("archive_album")}
-                    </OverflowMenuOption>
-                )}
-            </>
-        )}
-        {isHidden ? (
-            <OverflowMenuOption
-                onClick={onUnhideClick}
-                startIcon={<VisibilityOutlinedIcon />}
-            >
-                {t("unhide_collection")}
-            </OverflowMenuOption>
-        ) : (
-            <OverflowMenuOption
-                onClick={onHideClick}
-                startIcon={<VisibilityOffOutlinedIcon />}
-            >
-                {t("hide_collection")}
-            </OverflowMenuOption>
-        )}
-        <OverflowMenuOption
-            startIcon={<DeleteOutlinedIcon />}
-            onClick={onDeleteClick}
-        >
-            {t("delete_album")}
-        </OverflowMenuOption>
-        <OverflowMenuOption onClick={onShareClick} startIcon={<PeopleIcon />}>
-            {t("share_album")}
-        </OverflowMenuOption>
-        <OverflowMenuOption startIcon={<TvIcon />} onClick={onCastClick}>
-            {t("cast_album_to_tv")}
-        </OverflowMenuOption>
-    </>
 );
 
 interface CollectionSortOrderMenuProps {

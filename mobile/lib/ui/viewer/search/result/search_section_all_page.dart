@@ -120,13 +120,6 @@ class _SearchSectionAllPageState extends State<SearchSectionAllPage> {
                       );
                     }
 
-                    if (widget.sectionType == SectionType.contacts) {
-                      final split = sectionResults.splitMatch(
-                        (e) => e.resultFiles().isNotEmpty,
-                      );
-                      sectionResults = split.matched + split.unmatched;
-                    }
-
                     if (widget.sectionType == SectionType.location) {
                       final result = sectionResults.splitMatch(
                         (e) => e.type() == ResultType.location,

@@ -3,7 +3,7 @@ import "package:photos/core/constants.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/search/hierarchical/face_filter.dart";
 import "package:photos/theme/ente_theme.dart";
-import "package:photos/ui/viewer/search/result/person_face_widget.dart";
+import "package:photos/ui/viewer/people/person_face_widget.dart";
 
 class OnlyThemFilterChip extends StatelessWidget {
   final List<FaceFilter> faceFilters;
@@ -88,12 +88,9 @@ class _OnlyThemFilterThumbnail extends StatelessWidget {
           width: kFilterChipHeight,
           height: kFilterChipHeight,
           child: PersonFaceWidget(
-            faceFilters.first.faceFile,
             personId: faceFilters.first.personId,
             clusterID: faceFilters.first.clusterId,
-            thumbnailFallback: false,
             useFullFile: false,
-            cannotTrustFile: true,
           ),
         ),
       );
@@ -105,12 +102,9 @@ class _OnlyThemFilterThumbnail extends StatelessWidget {
               width: kFilterChipHeight / 2,
               height: kFilterChipHeight,
               child: PersonFaceWidget(
-                faceFilters.first.faceFile,
                 personId: faceFilters.first.personId,
                 clusterID: faceFilters.first.clusterId,
-                thumbnailFallback: false,
                 useFullFile: false,
-                cannotTrustFile: true,
               ),
             ),
             const SizedBox(width: 1),
@@ -118,12 +112,9 @@ class _OnlyThemFilterThumbnail extends StatelessWidget {
               width: kFilterChipHeight / 2,
               height: kFilterChipHeight,
               child: PersonFaceWidget(
-                faceFilters.last.faceFile,
                 personId: faceFilters.last.personId,
                 clusterID: faceFilters.last.clusterId,
-                thumbnailFallback: false,
                 useFullFile: false,
-                cannotTrustFile: true,
               ),
             ),
           ],
@@ -138,12 +129,9 @@ class _OnlyThemFilterThumbnail extends StatelessWidget {
               height: kFilterChipHeight,
               width: kFilterChipHeight / 2 - 0.5,
               child: PersonFaceWidget(
-                faceFilters[0].faceFile,
                 personId: faceFilters[0].personId,
                 clusterID: faceFilters[0].clusterId,
-                thumbnailFallback: false,
                 useFullFile: false,
-                cannotTrustFile: true,
               ),
             ),
             const SizedBox(width: 1),
@@ -158,12 +146,9 @@ class _OnlyThemFilterThumbnail extends StatelessWidget {
                       bottomLeft: Radius.circular(1),
                     ),
                     child: PersonFaceWidget(
-                      faceFilters[1].faceFile,
                       personId: faceFilters[1].personId,
                       clusterID: faceFilters[1].clusterId,
-                      thumbnailFallback: false,
                       useFullFile: false,
-                      cannotTrustFile: true,
                     ),
                   ),
                 ),
@@ -176,12 +161,9 @@ class _OnlyThemFilterThumbnail extends StatelessWidget {
                       topLeft: Radius.circular(1),
                     ),
                     child: PersonFaceWidget(
-                      faceFilters[2].faceFile,
                       personId: faceFilters[2].personId,
                       clusterID: faceFilters[2].clusterId,
-                      thumbnailFallback: false,
                       useFullFile: false,
-                      cannotTrustFile: true,
                     ),
                   ),
                 ),
@@ -206,12 +188,9 @@ class _OnlyThemFilterThumbnail extends StatelessWidget {
                       bottomRight: Radius.circular(1),
                     ),
                     child: PersonFaceWidget(
-                      faceFilters[0].faceFile,
                       personId: faceFilters[0].personId,
                       clusterID: faceFilters[0].clusterId,
-                      thumbnailFallback: false,
                       useFullFile: false,
-                      cannotTrustFile: true,
                     ),
                   ),
                 ),
@@ -224,12 +203,9 @@ class _OnlyThemFilterThumbnail extends StatelessWidget {
                       bottomLeft: Radius.circular(1),
                     ),
                     child: PersonFaceWidget(
-                      faceFilters[1].faceFile,
                       personId: faceFilters[1].personId,
                       clusterID: faceFilters[1].clusterId,
-                      thumbnailFallback: false,
                       useFullFile: false,
-                      cannotTrustFile: true,
                     ),
                   ),
                 ),
@@ -247,12 +223,9 @@ class _OnlyThemFilterThumbnail extends StatelessWidget {
                       topRight: Radius.circular(1),
                     ),
                     child: PersonFaceWidget(
-                      faceFilters[2].faceFile,
                       personId: faceFilters[2].personId,
                       clusterID: faceFilters[2].clusterId,
-                      thumbnailFallback: false,
                       useFullFile: false,
-                      cannotTrustFile: true,
                     ),
                   ),
                 ),
@@ -265,12 +238,9 @@ class _OnlyThemFilterThumbnail extends StatelessWidget {
                       topLeft: Radius.circular(1),
                     ),
                     child: PersonFaceWidget(
-                      faceFilters[3].faceFile,
                       personId: faceFilters[3].personId,
                       clusterID: faceFilters[3].clusterId,
-                      thumbnailFallback: false,
                       useFullFile: false,
-                      cannotTrustFile: true,
                     ),
                   ),
                 ),
