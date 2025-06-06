@@ -81,16 +81,9 @@ export const masterKeyFromSession = async () => {
  *
  * @param masterKey The user's master key (as a base64 encoded string).
  */
-export const saveMasterKeyInSessionAndSafeStore = async (
-    masterKey: string,
-    // TODO: ?
-    fromDesktop?: boolean,
-) => {
+export const saveMasterKeyInSessionAndSafeStore = async (masterKey: string) => {
     await saveKeyInSessionStore("encryptionKey", masterKey);
-    const electron = globalThis.electron;
-    if (electron && !fromDesktop) {
-        await electron.saveMasterKeyInSafeStorage(masterKey);
-    }
+    await globalThis.electron?.saveMasterKeyInSafeStorage(masterKey);
 };
 
 /**
