@@ -40,6 +40,7 @@
     "referral_source_hint": "Como você descobriu o Ente? (opcional)",
     "referral_source_info": "Não rastreamos instalações do aplicativo. Seria útil se você nos contasse onde nos encontrou!",
     "password_mismatch_error": "As senhas não correspondem",
+    "show_or_hide_password": "Exibir ou ocultar senha",
     "welcome_to_ente_title": "Bem-vindo à <a/>",
     "welcome_to_ente_subtitle": "Armazenamento de fotos e compartilhamento criptografado de ponta a ponta",
     "new_album": "Novo álbum",
@@ -677,5 +678,9 @@
     "light": "Claro",
     "dark": "Escuro",
     "streamable_videos": "Vídeos transmissíveis",
-    "processing_videos_status": "Processando vídeos..."
+    "processing_videos_status": "Processando vídeos...",
+    "share_favorites": "Compartilhar favoritos",
+    "person_favorites": "Favoritos de {{name}}",
+    "shared_favorites": "Favoritos compartilhados",
+    "added_by_name": "Adicionado por {{name}}"
 }

@@ -552,11 +552,26 @@ const components: Components = {
     MuiPaper: {
         styleOverrides: {
             root: {
-                // MUI applies a semi-transparent background image for elevation
-                // in dark mode. Remove it to match background for our designs.
-                backgroundImage: "none",
-                // Use our paper shadow.
-                boxShadow: "var(--mui-palette-boxShadow-paper)",
+                variants: [
+                    {
+                        // Use our "paper" shadow for elevated Paper.
+                        props: { variant: "elevation" },
+                        style: {
+                            // MUI applies a semi-transparent background image
+                            // for elevation in dark mode. Remove it to match
+                            // background for our designs.
+                            backgroundImage: "none",
+                            // Use our paper shadow.
+                            boxShadow: "var(--mui-palette-boxShadow-paper)",
+                        },
+                    },
+                    {
+                        // Undo the effects of variant "elevation" case above
+                        // case when elevation is 0.
+                        props: { elevation: 0 },
+                        style: { boxShadow: "none" },
+                    },
+                ],
             },
         },
     },
@@ -708,6 +723,13 @@ const components: Components = {
                 // notification popups).
                 borderRadius: "8px",
             },
+        },
+    },
+
+    MuiAlert: {
+        defaultProps: {
+            // Use the outlined variant by default (instead of "standard").
+            variant: "outlined",
         },
     },
 };

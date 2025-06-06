@@ -1,6 +1,7 @@
 {
   "@@locale ": "en",
   "enterYourEmailAddress": "Gib deine E-Mail-Adresse ein",
+  "enterYourNewEmailAddress": "Gib Deine neue E-Mail-Adresse ein",
   "accountWelcomeBack": "Willkommen zurück!",
   "emailAlreadyRegistered": "E-Mail ist bereits registriert.",
   "emailNotRegistered": "E-Mail nicht registriert.",
@@ -1662,6 +1663,7 @@
   "@linkPersonCaption": {
     "description": "Caption for the 'Link person' title. It should be a continuation of the 'Link person' title. Just like how 'Link person' + 'for better sharing experience' forms a proper sentence in English, the combination of these two strings should also be a proper sentence in other languages."
   },
+  "videoStreaming": "Streambare Videos",
   "processingVideos": "Verarbeite Videos",
   "streamDetails": "Stream-Details",
   "processing": "In Bearbeitung",
@@ -1739,9 +1741,17 @@
   "cLBulkEdit": "Massenbearbeitung von Datumsangaben",
   "cLBulkEditDesc": "Du kannst jetzt mehrere Fotos auswählen, und das Datum/Uhrzeit für alle mit einer Aktion ändern. Das Verschieben von Daten wird auch unterstützt.",
   "curatedMemories": "Ausgewählte Erinnerungen",
+<<<<<<< HEAD
   "onThisDay": "On this day",
   "lookBackOnYourMemories": "Look back on your memories 🌄",
   "newPhotosEmoji": " new 📸",
   "sorryWeHadToPauseYourBackups": "Sorry, we had to pause your backups",
   "clickToInstallOurBestVersionYet": "Click to install our best version yet"
+=======
+  "onThisDay": "An diesem Tag",
+  "deleteMultipleAlbumDialog": "Sollen die Fotos (und Videos) aus diesen {count} Alben auch aus <bold>allen</bold> anderen Alben gelöscht werden, in denen sie enthalten sind?",
+  "addParticipants": "Teilnehmer hinzufügen",
+  "selectedAlbums": "{count} ausgewählt",
+  "actionNotSupportedOnFavouritesAlbum": "Aktion für das Favoritenalbum nicht unterstützt"
+>>>>>>> main
 }

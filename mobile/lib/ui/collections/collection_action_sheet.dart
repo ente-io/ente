@@ -32,7 +32,6 @@ enum CollectionActionType {
   restoreFiles,
   unHide,
   shareCollection,
-  collectPhotos,
   addToHiddenAlbum,
   moveToHiddenCollection,
 }
@@ -57,9 +56,6 @@ String _actionName(
       text = S.of(context).unhideToAlbum;
       break;
     case CollectionActionType.shareCollection:
-      text = S.of(context).share;
-      break;
-    case CollectionActionType.collectPhotos:
       text = S.of(context).share;
       break;
     case CollectionActionType.addToHiddenAlbum:
@@ -348,7 +344,7 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
       for (final collection in hiddenCollections) {
         if (_recentlyCreatedCollections.contains(collection)) {
           recentlyCreated.add(collection);
-        }else{
+        } else {
           hidden.add(collection);
         }
       }
@@ -360,14 +356,12 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
       });
       return recentlyCreated + hidden;
     } else {
-      final bool includeUncategorized =
-          widget.actionType == CollectionActionType.restoreFiles;
       final List<Collection> collections =
           CollectionsService.instance.getCollectionsForUI(
         // in collections where user is a collaborator, only addTo and remove
         // action can to be performed
         includeCollab: widget.actionType == CollectionActionType.addFiles,
-        includeUncategorized: includeUncategorized,
+        includeUncategorized: true,
       );
       collections.sort((first, second) {
         return compareAsciiLowerCaseNatural(
@@ -384,8 +378,7 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
         if (collection.isQuickLinkCollection() ||
             collection.type == CollectionType.favorites ||
             collection.type == CollectionType.uncategorized) {
-          if (collection.type == CollectionType.uncategorized &&
-              includeUncategorized) {
+          if (collection.type == CollectionType.uncategorized) {
             uncategorized = collection;
           }
           continue;
@@ -408,8 +401,7 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
   }
 
   void _removeIncomingCollections(List<Collection> items) {
-    if (widget.actionType == CollectionActionType.shareCollection ||
-        widget.actionType == CollectionActionType.collectPhotos) {
+    if (widget.actionType == CollectionActionType.shareCollection) {
       final ownerID = Configuration.instance.getUserID();
       items.removeWhere(
         (e) => !e.isOwner(ownerID!),

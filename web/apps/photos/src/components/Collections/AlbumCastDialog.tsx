@@ -2,6 +2,12 @@ import { Link, Stack, Typography } from "@mui/material";
 import { TitledMiniDialog } from "ente-base/components/MiniDialog";
 import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
 import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
+import {
+    SingleInputForm,
+    type SingleInputFormProps,
+} from "ente-base/components/SingleInputForm";
+import type { ModalVisibilityProps } from "ente-base/components/utils/modal";
+import { ut } from "ente-base/i18n";
 import log from "ente-base/log";
 import type { Collection } from "ente-media/collection";
 import { useSettingsSnapshot } from "ente-new/photos/components/utils/use-snapshot";
@@ -11,21 +17,14 @@ import {
     unknownDeviceCodeErrorMessage,
 } from "ente-new/photos/services/cast";
 import { loadCast } from "ente-new/photos/utils/chromecast-sender";
-import SingleInputForm, {
-    type SingleInputFormProps,
-} from "ente-shared/components/SingleInputForm";
 import { t } from "i18next";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Trans } from "react-i18next";
 
-interface AlbumCastDialogProps {
-    /** If `true`, the dialog is shown. */
-    open: boolean;
-    /** Callback fired when the dialog wants to be closed. */
-    onClose: () => void;
+type AlbumCastDialogProps = ModalVisibilityProps & {
     /** The collection that we want to cast. */
     collection: Collection;
-}
+};
 
 /**
  * A dialog that shows various options that the user has for casting an album.
@@ -56,25 +55,25 @@ export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
         setBrowserCanCast(typeof window["chrome"] != "undefined");
     }, []);
 
-    const onSubmit: SingleInputFormProps["callback"] = async (
-        value,
-        setFieldError,
-    ) => {
-        try {
-            await publishCastPayload(value.trim(), collection);
-            onClose();
-        } catch (e) {
-            log.error("Failed to cast", e);
-            if (
-                e instanceof Error &&
-                e.message == unknownDeviceCodeErrorMessage
-            ) {
-                setFieldError(t("tv_not_found"));
-            } else {
-                setFieldError(t("generic_error_retry"));
+    const onSubmit: SingleInputFormProps["onSubmit"] = useCallback(
+        async (value, showError) => {
+            try {
+                await publishCastPayload(value.trim(), collection);
+                onClose();
+            } catch (e) {
+                log.error("Failed to cast", e);
+                if (
+                    e instanceof Error &&
+                    e.message == unknownDeviceCodeErrorMessage
+                ) {
+                    showError(t("tv_not_found"));
+                } else {
+                    throw e;
+                }
             }
-        }
-    };
+        },
+        [onClose, collection],
+    );
 
     useEffect(() => {
         if (view == "auto") {
@@ -195,17 +194,17 @@ export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
                         </Typography>
                     </Stack>
                     <SingleInputForm
-                        callback={onSubmit}
-                        fieldType="text"
-                        realLabel={t("code")}
-                        realPlaceholder={"123456"}
-                        buttonText={t("pair_device_to_tv")}
-                        submitButtonProps={{ sx: { mt: 1, mb: 2 } }}
+                        label={t("code")}
+                        placeholder={ut("123456")}
+                        submitButtonTitle={t("pair_device_to_tv")}
+                        submitButtonColor="accent"
+                        onSubmit={onSubmit}
                     />
                     <FocusVisibleButton
                         variant="text"
                         fullWidth
                         onClick={() => setView("choose")}
+                        sx={{ mt: 1 }}
                     >
                         {t("go_back")}
                     </FocusVisibleButton>

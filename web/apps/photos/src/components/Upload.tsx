@@ -27,12 +27,17 @@ import { useBaseContext } from "ente-base/context";
 import { basename, dirname, joinPath } from "ente-base/file-name";
 import log from "ente-base/log";
 import type { CollectionMapping, Electron, ZipItem } from "ente-base/types/ipc";
+import { type UploadTypeSelectorIntent } from "ente-gallery/components/Upload";
 import { useFileInput } from "ente-gallery/components/utils/use-file-input";
-import type {
-    FileAndPath,
-    UploadItem,
-    UploadPhase,
+import {
+    groupItemsBasedOnParentFolder,
+    uploadPathPrefix,
+    type FileAndPath,
+    type UploadItem,
+    type UploadItemAndPath,
+    type UploadPhase,
 } from "ente-gallery/services/upload";
+import type { ParsedMetadataJSON } from "ente-gallery/services/upload/metadata-json";
 import type { Collection } from "ente-media/collection";
 import type { EnteFile } from "ente-media/file";
 import { UploaderNameInput } from "ente-new/albums/components/UploaderNameInput";
@@ -40,7 +45,6 @@ import { CollectionMappingChoice } from "ente-new/photos/components/CollectionMa
 import type { CollectionSelectorAttributes } from "ente-new/photos/components/CollectionSelector";
 import { downloadAppDialogAttributes } from "ente-new/photos/components/utils/download";
 import { getLatestCollections } from "ente-new/photos/services/collections";
-import { exportMetadataDirectoryName } from "ente-new/photos/services/export";
 import { redirectToCustomerPortal } from "ente-new/photos/services/user-details";
 import { usePhotosAppContext } from "ente-new/photos/types/context";
 import { CustomError } from "ente-shared/error";
@@ -73,8 +77,6 @@ import { getOrCreateAlbum } from "utils/collection";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
 import { SetCollectionNamerAttributes } from "./Collections/CollectionNamer";
 import { UploadProgress } from "./UploadProgress";
-
-export type UploadTypeSelectorIntent = "upload" | "import" | "collect";
 
 interface UploadProps {
     syncWithRemote: (force?: boolean, silent?: boolean) => Promise<void>;
@@ -117,8 +119,6 @@ interface UploadProps {
 }
 
 type UploadType = "files" | "folders" | "zips";
-
-type UploadItemAndPath = [UploadItem, string];
 
 /**
  * Top level component that houses the infrastructure for handling uploads.
@@ -550,7 +550,7 @@ export const Upload: React.FC<UploadProps> = ({
 
     const preCollectionCreationAction = async () => {
         props.onCloseCollectionSelector?.();
-        props.setShouldDisableDropzone(!uploadManager.shouldAllowNewUpload());
+        props.setShouldDisableDropzone(uploadManager.isUploadInProgress());
         setUploadPhase("preparing");
         setUploadProgressView(true);
     };
@@ -561,8 +561,9 @@ export const Upload: React.FC<UploadProps> = ({
     ) => {
         await preCollectionCreationAction();
         const uploadItemsWithCollection = uploadItemsAndPaths.current.map(
-            ([uploadItem], index) => ({
+            ([uploadItem, path], index) => ({
                 uploadItem,
+                pathPrefix: uploadPathPrefix(path),
                 localID: index,
                 collectionID: collection.id,
             }),
@@ -582,14 +583,17 @@ export const Upload: React.FC<UploadProps> = ({
         await preCollectionCreationAction();
         let uploadItemsWithCollection: UploadItemWithCollection[] = [];
         const collections: Collection[] = [];
-        let collectionNameToUploadItems = new Map<string, UploadItem[]>();
+        let collectionNameToUploadItems = new Map<
+            string,
+            UploadItemAndPath[]
+        >();
         if (mapping == "root") {
             collectionNameToUploadItems.set(
                 collectionName,
-                uploadItemsAndPaths.current.map(([i]) => i),
+                uploadItemsAndPaths.current,
             );
         } else {
-            collectionNameToUploadItems = groupFilesBasedOnParentFolder(
+            collectionNameToUploadItems = groupItemsBasedOnParentFolder(
                 uploadItemsAndPaths.current,
                 collectionName,
             );
@@ -609,8 +613,9 @@ export const Upload: React.FC<UploadProps> = ({
                 props.setCollections([...existingCollections, ...collections]);
                 uploadItemsWithCollection = [
                     ...uploadItemsWithCollection,
-                    ...uploadItems.map((uploadItem) => ({
+                    ...uploadItems.map(([uploadItem, path]) => ({
                         localID: index++,
+                        pathPrefix: uploadPathPrefix(path),
                         collectionID: collection.id,
                         uploadItem,
                     })),
@@ -642,8 +647,10 @@ export const Upload: React.FC<UploadProps> = ({
         await currentUploadPromise.current;
     };
 
-    const preUploadAction = async () => {
-        uploadManager.prepareForNewUpload();
+    const preUploadAction = async (
+        parsedMetadataJSONMap?: Map<string, ParsedMetadataJSON>,
+    ) => {
+        uploadManager.prepareForNewUpload(parsedMetadataJSONMap);
         setUploadProgressView(true);
         await props.syncWithRemote(true, true);
     };
@@ -704,10 +711,10 @@ export const Upload: React.FC<UploadProps> = ({
     const retryFailed = async () => {
         try {
             log.info("Retrying failed uploads");
-            const { items, collections } =
-                uploadManager.getFailedItemsWithCollections();
+            const { items, collections, parsedMetadataJSONMap } =
+                uploadManager.failedItemState();
             const uploaderName = uploadManager.getUploaderName();
-            await preUploadAction();
+            await preUploadAction(parsedMetadataJSONMap);
             await uploadManager.uploadItems(items, collections, uploaderName);
         } catch (e) {
             log.error("Retrying failed uploads failed", e);
@@ -987,61 +994,6 @@ const deriveImportSuggestion = (
         rootFolderName: commonPathPrefix || null,
         hasNestedFolders: firstFileFolder !== lastFileFolder,
     };
-};
-
-/**
- * Group files that are that have the same parent folder into collections.
- *
- * For Example, if the user selects files have a directory structure like:
- *
- *               a
- *             / |  \
- *            b  j   c
- *           /|\    /  \
- *          e f g   h  i
- *
- * The files will grouped into 3 collections:
- *
- *     [
- *       a => [j],
- *       b => [e,f,g],
- *       c => [h, i]
- *     ]
- *
- * @param defaultFolderName Optional collection name to use for any rooted files
- * that do not have a parent folder. The function will throw if a default is not
- * provided and we encounter any such files without a parent.
- */
-const groupFilesBasedOnParentFolder = (
-    uploadItemAndPaths: UploadItemAndPath[],
-    defaultFolderName: string | undefined,
-) => {
-    const result = new Map<string, UploadItem[]>();
-    for (const [uploadItem, pathOrName] of uploadItemAndPaths) {
-        let folderPath = pathOrName.substring(0, pathOrName.lastIndexOf("/"));
-        // If the parent folder of a file is "metadata", then we consider it to
-        // be part of the parent folder.
-        //
-        // e.g. for FileList
-        //
-        //    [a/x.png, a/metadata/x.png.json]
-        //
-        // they will both be grouped into the collection "a". This is so that we
-        // cluster the metadata json files in the same collection as the file it
-        // is for.
-        if (folderPath.endsWith(exportMetadataDirectoryName)) {
-            folderPath = folderPath.substring(0, folderPath.lastIndexOf("/"));
-        }
-        let folderName = folderPath.substring(folderPath.lastIndexOf("/") + 1);
-        if (!folderName) {
-            if (!defaultFolderName)
-                throw Error(`Leaf file (without default): ${folderPath}`);
-            folderName = defaultFolderName;
-        }
-        if (!result.has(folderName)) result.set(folderName, []);
-        result.get(folderName).push(uploadItem);
-    }
-    return result;
 };
 
 const setPendingUploads = async (

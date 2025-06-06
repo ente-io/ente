@@ -173,6 +173,7 @@
   "invalidQRCode": "Nieprawidłowy kod QR",
   "noRecoveryKeyTitle": "Brak klucza odzyskiwania?",
   "enterEmailHint": "Wprowadź adres e-mail",
+  "enterNewEmailHint": "Wprowadź nowy adres e-mail",
   "invalidEmailTitle": "Nieprawidłowy adres e-mail",
   "invalidEmailMessage": "Prosimy podać prawidłowy adres e-mail.",
   "deleteAccount": "Usuń konto",

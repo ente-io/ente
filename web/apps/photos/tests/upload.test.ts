@@ -4,9 +4,9 @@ import {
     tryParseEpochMicrosecondsFromFileName,
 } from "ente-gallery/services/upload/date";
 import {
-    matchTakeoutMetadata,
+    matchJSONMetadata,
     metadataJSONMapKeyForJSON,
-} from "ente-gallery/services/upload/takeout";
+} from "ente-gallery/services/upload/metadata-json";
 import { FileType } from "ente-media/file-type";
 import { getLocalCollections } from "ente-new/photos/services/collections";
 import {
@@ -447,14 +447,14 @@ function parseDateTimeFromFileNameTest() {
 
 const fileNameToJSONMappingTests = () => {
     for (const { filename, jsonFilename } of fileNameToJSONMappingCases) {
-        const jsonKey = metadataJSONMapKeyForJSON(0, jsonFilename);
+        const jsonKey = metadataJSONMapKeyForJSON(undefined, 0, jsonFilename);
 
         // See the docs for the file name matcher as to why it doesn't return
         // the key but instead indexes into the map for us. To test it, we
         // construct a placeholder map with a dummy entry for the expected key.
 
         const map = new Map([[jsonKey, {}]]);
-        if (!matchTakeoutMetadata(filename, 0, map)) {
+        if (!matchJSONMetadata(undefined, 0, filename, map)) {
             throw Error(
                 `fileNameToJSONMappingTests failed ❌ for ${filename} and ${jsonFilename}`,
             );

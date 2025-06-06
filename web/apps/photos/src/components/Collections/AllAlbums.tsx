@@ -20,7 +20,6 @@ import {
 } from "ente-new/photos/components/Tiles";
 import type { CollectionSummary } from "ente-new/photos/services/collection/ui";
 import { CollectionsSortBy } from "ente-new/photos/services/collection/ui";
-import { FlexWrapper, FluidContainer } from "ente-shared/components/Container";
 import { t } from "i18next";
 import memoize from "memoize-one";
 import React, { useEffect, useRef, useState } from "react";
@@ -104,8 +103,8 @@ const Title = ({
     isInHiddenSection,
 }) => (
     <DialogTitle>
-        <FlexWrapper>
-            <FluidContainer mr={1.5}>
+        <Stack direction="row" sx={{ gap: 1.5 }}>
+            <Stack sx={{ flex: 1 }}>
                 <Box>
                     <Typography variant="h5">
                         {isInHiddenSection
@@ -123,18 +122,16 @@ const Title = ({
                         {t("albums_count", { count: collectionCount })}
                     </Typography>
                 </Box>
-            </FluidContainer>
-            <Stack direction="row" sx={{ gap: 1.5 }}>
-                <CollectionsSortOptions
-                    activeSortBy={collectionsSortBy}
-                    onChangeSortBy={onChangeCollectionsSortBy}
-                    nestedInDialog
-                />
-                <FilledIconButton onClick={onClose}>
-                    <CloseIcon />
-                </FilledIconButton>
             </Stack>
-        </FlexWrapper>
+            <CollectionsSortOptions
+                activeSortBy={collectionsSortBy}
+                onChangeSortBy={onChangeCollectionsSortBy}
+                nestedInDialog
+            />
+            <FilledIconButton onClick={onClose}>
+                <CloseIcon />
+            </FilledIconButton>
+        </Stack>
     </DialogTitle>
 );
 
@@ -170,7 +167,7 @@ const AlbumsRow = React.memo(
         const collectionRow = collectionRowList[index];
         return (
             <div style={style}>
-                <FlexWrapper gap={"4px"} padding={"16px"}>
+                <Stack direction="row" sx={{ p: 2, gap: 0.5 }}>
                     {collectionRow.map((item: any) => (
                         <AlbumCard
                             isScrolling={isScrolling}
@@ -179,7 +176,7 @@ const AlbumsRow = React.memo(
                             key={item.id}
                         />
                     ))}
-                </FlexWrapper>
+                </Stack>
             </div>
         );
     },

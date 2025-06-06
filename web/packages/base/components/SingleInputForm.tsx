@@ -1,4 +1,9 @@
-import { Stack, TextField, type TextFieldProps } from "@mui/material";
+import {
+    Stack,
+    TextField,
+    type ButtonProps,
+    type TextFieldProps,
+} from "@mui/material";
 import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
 import { LoadingButton } from "ente-base/components/mui/LoadingButton";
 import log from "ente-base/log";
@@ -19,12 +24,21 @@ export type SingleInputFormProps = Pick<
      */
     submitButtonTitle: string;
     /**
+     * Color of the submit button.
+     *
+     * Default: "primary".
+     */
+    submitButtonColor?: ButtonProps["color"];
+    /**
      * Cancellation handler.
      *
      * This function is called when the user activates the cancel button in the
      * form.
+     *
+     * If this is not provided, then only a full width submit button will be
+     * shown in the form (below the input).
      */
-    onCancel: () => void;
+    onCancel?: () => void;
     /**
      * Submission handler. A callback invoked when the submit button is pressed.
      *
@@ -34,13 +48,29 @@ export type SingleInputFormProps = Pick<
      * If this function rejects then a generic error helper text is shown below
      * the text input, and the input (/ buttons) reenabled.
      *
+     * This function is also passed an function that can be used to explicitly
+     * set the error message that as shown below the text input when a specific
+     * problem occurs during submission.
+     *
      * @param name The current value of the text input.
+     *
+     * @param showError A function that can be called to set the error message
+     * shown below the text input if submission fails.
+     *
+     * Note that if {@link showError} is called, then the {@link onSubmit}
+     * function should not throw, otherwise the error message shown by
+     * {@link showError} will get overwritten by the generic error message.
      */
-    onSubmit: ((name: string) => void) | ((name: string) => Promise<void>);
+    onSubmit:
+        | ((name: string, showError: (message: string) => void) => void)
+        | ((
+              name: string,
+              showError: (message: string) => void,
+          ) => Promise<void>);
 };
 
 /**
- * A TextField and two buttons.
+ * A TextField and cancel/submit buttons.
  *
  * A common requirement is taking a single textual input from the user. This is
  * a form suitable for that purpose. It contains a single MUI {@link TextField}
@@ -53,6 +83,7 @@ export type SingleInputFormProps = Pick<
 export const SingleInputForm: React.FC<SingleInputFormProps> = ({
     initialValue,
     submitButtonTitle,
+    submitButtonColor,
     onCancel,
     onSubmit,
     ...rest
@@ -61,18 +92,32 @@ export const SingleInputForm: React.FC<SingleInputFormProps> = ({
         initialValues: { value: initialValue ?? "" },
         onSubmit: async (values, { setFieldError }) => {
             const value = values.value;
+            const showError = (message: string) =>
+                setFieldError("value", message);
+
             if (!value) {
-                setFieldError("value", t("required"));
+                showError(t("required"));
                 return;
             }
             try {
-                await onSubmit(value);
+                await onSubmit(value, showError);
             } catch (e) {
                 log.error(`Failed to submit input ${value}`, e);
-                setFieldError("value", t("generic_error"));
+                showError(t("generic_error"));
             }
         },
     });
+
+    const submitButton = (
+        <LoadingButton
+            fullWidth
+            type="submit"
+            loading={formik.isSubmitting}
+            color={submitButtonColor ?? "primary"}
+        >
+            {submitButtonTitle}
+        </LoadingButton>
+    );
 
     // Note: [Use space as default TextField helperText]
     //
@@ -94,23 +139,20 @@ export const SingleInputForm: React.FC<SingleInputFormProps> = ({
                 helperText={formik.errors.value ?? " "}
                 {...rest}
             />
-            <Stack direction="row" sx={{ gap: "12px" }}>
-                <FocusVisibleButton
-                    fullWidth
-                    color="secondary"
-                    onClick={onCancel}
-                >
-                    {t("cancel")}
-                </FocusVisibleButton>
-                <LoadingButton
-                    fullWidth
-                    color="primary"
-                    type="submit"
-                    loading={formik.isSubmitting}
-                >
-                    {submitButtonTitle}
-                </LoadingButton>
-            </Stack>
+            {onCancel ? (
+                <Stack direction="row" sx={{ gap: "12px" }}>
+                    <FocusVisibleButton
+                        fullWidth
+                        color="secondary"
+                        onClick={onCancel}
+                    >
+                        {t("cancel")}
+                    </FocusVisibleButton>
+                    {submitButton}
+                </Stack>
+            ) : (
+                submitButton
+            )}
         </form>
     );
 };

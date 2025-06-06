@@ -1533,10 +1533,14 @@
   "joinAlbumSubtextViewer": "aby dodać to do udostępnionych albumów",
   "join": "Dołącz",
   "linkEmail": "Połącz adres e-mail",
+<<<<<<< HEAD
   "noEnteAccountExclamation": "Brak konta Ente!",
   "onThisDay": "On this day",
   "lookBackOnYourMemories": "Look back on your memories 🌄",
   "newPhotosEmoji": " new 📸",
   "sorryWeHadToPauseYourBackups": "Sorry, we had to pause your backups",
   "clickToInstallOurBestVersionYet": "Click to install our best version yet"
+=======
+  "noEnteAccountExclamation": "Brak konta Ente!"
+>>>>>>> main
 }

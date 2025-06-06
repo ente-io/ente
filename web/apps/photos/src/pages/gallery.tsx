@@ -7,7 +7,6 @@ import CollectionNamer, {
     CollectionNamerAttributes,
 } from "components/Collections/CollectionNamer";
 import { GalleryBarAndListHeader } from "components/Collections/GalleryBarAndListHeader";
-import { Export } from "components/Export";
 import { TimeStampListItem } from "components/FileList";
 import { FileListWithViewer } from "components/FileListWithViewer";
 import {
@@ -15,9 +14,8 @@ import {
     FilesDownloadProgressAttributes,
 } from "components/FilesDownloadProgress";
 import { FixCreationTime } from "components/FixCreationTime";
-import GalleryEmptyState from "components/GalleryEmptyState";
 import { Sidebar } from "components/Sidebar";
-import { Upload, type UploadTypeSelectorIntent } from "components/Upload";
+import { Upload } from "components/Upload";
 import SelectedFileOptions from "components/pages/gallery/SelectedFileOptions";
 import { sessionExpiredDialogAttributes } from "ente-accounts/components/utils/dialog";
 import { stashRedirect } from "ente-accounts/services/redirect";
@@ -39,6 +37,7 @@ import {
     masterKeyFromSessionIfLoggedIn,
 } from "ente-base/session";
 import { FullScreenDropZone } from "ente-gallery/components/FullScreenDropZone";
+import { type UploadTypeSelectorIntent } from "ente-gallery/components/Upload";
 import { type Collection } from "ente-media/collection";
 import { type EnteFile } from "ente-media/file";
 import {
@@ -49,6 +48,7 @@ import {
     CollectionSelector,
     type CollectionSelectorAttributes,
 } from "ente-new/photos/components/CollectionSelector";
+import { Export } from "ente-new/photos/components/Export";
 import { PlanSelector } from "ente-new/photos/components/PlanSelector";
 import {
     SearchBar,
@@ -56,6 +56,7 @@ import {
 } from "ente-new/photos/components/SearchBar";
 import { WhatsNew } from "ente-new/photos/components/WhatsNew";
 import {
+    GalleryEmptyState,
     PeopleEmptyState,
     SearchResultsHeader,
 } from "ente-new/photos/components/gallery";
@@ -77,6 +78,7 @@ import {
 } from "ente-new/photos/services/collection";
 import { areOnlySystemCollections } from "ente-new/photos/services/collection/ui";
 import { getAllLocalCollections } from "ente-new/photos/services/collections";
+import exportService from "ente-new/photos/services/export";
 import {
     getLocalFiles,
     getLocalTrashedFiles,
@@ -99,7 +101,6 @@ import {
     verifyStripeSubscription,
 } from "ente-new/photos/services/user-details";
 import { usePhotosAppContext } from "ente-new/photos/types/context";
-import { FlexWrapper } from "ente-shared/components/Container";
 import { getData } from "ente-shared/storage/localStorage";
 import {
     getToken,
@@ -120,7 +121,6 @@ import {
     createUnCategorizedCollection,
     removeFromFavorites,
 } from "services/collectionService";
-import exportService from "services/export";
 import { uploadManager } from "services/upload-manager";
 import {
     GalleryContextType,
@@ -785,9 +785,7 @@ const Page: React.FC = () => {
     };
 
     const openUploader = (intent?: UploadTypeSelectorIntent) => {
-        if (!uploadManager.shouldAllowNewUpload()) {
-            return;
-        }
+        if (uploadManager.isUploadInProgress()) return;
         setUploadTypeSelectorView(true);
         setUploadTypeSelectorIntent(intent ?? "upload");
     };
@@ -1094,7 +1092,10 @@ const Page: React.FC = () => {
                 !normalFiles?.length &&
                 !hiddenFiles?.length &&
                 activeCollectionID === ALL_SECTION ? (
-                    <GalleryEmptyState openUploader={openUploader} />
+                    <GalleryEmptyState
+                        isUploadInProgress={uploadManager.isUploadInProgress()}
+                        onUpload={openUploader}
+                    />
                 ) : !isInSearchMode &&
                   !isFirstLoad &&
                   state.view.type == "people" &&
@@ -1146,7 +1147,7 @@ const Page: React.FC = () => {
                 )}
                 <Export
                     {...exportVisibilityProps}
-                    allCollectionsNameByID={collectionNameByID}
+                    {...{ collectionNameByID }}
                 />
                 <AuthenticateUser
                     {...authenticateUserVisibilityProps}
@@ -1215,7 +1216,7 @@ const SidebarButton: React.FC<ButtonishProps> = ({ onClick }) => (
 );
 
 const UploadButton: React.FC<ButtonishProps> = ({ onClick }) => {
-    const disabled = !uploadManager.shouldAllowNewUpload();
+    const disabled = uploadManager.isUploadInProgress();
     const isSmallWidth = useIsSmallWidth();
 
     const icon = <FileUploadOutlinedIcon />;
@@ -1248,16 +1249,15 @@ const HiddenSectionNavbarContents: React.FC<
         direction="row"
         sx={(theme) => ({
             gap: "24px",
-            width: "100%",
+            flex: 1,
+            alignItems: "center",
             background: theme.vars.palette.background.default,
         })}
     >
         <IconButton onClick={onBack}>
             <ArrowBackIcon />
         </IconButton>
-        <FlexWrapper>
-            <Typography>{t("section_hidden")}</Typography>
-        </FlexWrapper>
+        <Typography sx={{ flex: 1 }}>{t("section_hidden")}</Typography>
     </Stack>
 );
 

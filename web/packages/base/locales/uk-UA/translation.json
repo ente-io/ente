@@ -40,6 +40,7 @@
     "referral_source_hint": "Як ви дізналися про Ente? (необов'язково)",
     "referral_source_info": "Ми не відстежуємо встановлення застосунку. Але, якщо ви скажете нам, де ви нас знайшли, це допоможе!",
     "password_mismatch_error": "Паролі не співпадають",
+    "show_or_hide_password": "",
     "welcome_to_ente_title": "Вітаємо в <a/>",
     "welcome_to_ente_subtitle": "Наскрізне зашифроване зберігання та спільний доступ до фотографій",
     "new_album": "Новий альбом",
@@ -677,5 +678,9 @@
     "light": "",
     "dark": "",
     "streamable_videos": "",
-    "processing_videos_status": ""
+    "processing_videos_status": "",
+    "share_favorites": "",
+    "person_favorites": "",
+    "shared_favorites": "",
+    "added_by_name": ""
 }

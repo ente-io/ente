@@ -536,24 +536,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "blackFridaySale":
             MessageLookupByLibrary.simpleMessage("تخفيضات الجمعة السوداء"),
         "blog": MessageLookupByLibrary.simpleMessage("المدونة"),
-        "cLBulkEdit":
-            MessageLookupByLibrary.simpleMessage("تعديل التواريخ بشكل جماعي"),
-        "cLBulkEditDesc": MessageLookupByLibrary.simpleMessage(
-            "يمكنك الآن تحديد صور متعددة، وتعديل التاريخ/الوقت لجميعها بإجراء سريع واحد. تغيير التواريخ مدعوم أيضًا."),
-        "cLFamilyPlan":
-            MessageLookupByLibrary.simpleMessage("حدود الخطة العائلية"),
-        "cLFamilyPlanDesc": MessageLookupByLibrary.simpleMessage(
-            "يمكنك الآن تعيين حدود لمقدار التخزين الذي يمكن لأفراد عائلتك استخدامه."),
-        "cLIcon": MessageLookupByLibrary.simpleMessage("أيقونة جديدة"),
-        "cLIconDesc": MessageLookupByLibrary.simpleMessage(
-            "أخيرًا، أيقونة تطبيق جديدة، نعتقد أنها تمثل عملنا على أفضل وجه. أضفنا أيضًا مبدل أيقونات حتى تتمكن من الاستمرار في استخدام الأيقونة القديمة."),
-        "cLMemories": MessageLookupByLibrary.simpleMessage("الذكريات"),
-        "cLMemoriesDesc": MessageLookupByLibrary.simpleMessage(
-            "أعد اكتشاف لحظاتك الخاصة - تسليط الضوء على الأشخاص المفضلين لديك، رحلاتك وعطلاتك، أفضل لقطاتك، وأكثر من ذلك بكثير. قم بتشغيل تعلم الآلة، ضع علامة على نفسك وقم بتسمية أصدقائك للحصول على أفضل تجربة."),
-        "cLWidgets":
-            MessageLookupByLibrary.simpleMessage("الأدوات المصغرة (Widgets)"),
-        "cLWidgetsDesc": MessageLookupByLibrary.simpleMessage(
-            "الأدوات المصغرة للشاشة الرئيسية المدمجة مع الذكريات متاحة الآن. ستعرض لحظاتك الخاصة دون فتح التطبيق."),
         "cachedData": MessageLookupByLibrary.simpleMessage("البيانات المؤقتة"),
         "calculating": MessageLookupByLibrary.simpleMessage("جارٍ الحساب..."),
         "canNotOpenBody": MessageLookupByLibrary.simpleMessage(

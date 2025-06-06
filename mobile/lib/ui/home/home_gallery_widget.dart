@@ -88,6 +88,7 @@ class _HomeGalleryWidgetState extends State<HomeGalleryWidget> {
           dedupeUploadID: true,
           ignoredCollectionIDs: collectionsToHide,
           ignoreSavedFiles: true,
+          ignoreSharedItems: _shouldHideSharedItems,
         );
         if (hasSelectedAllForBackup) {
           result = await FilesDB.instance.getAllLocalAndUploadedFiles(
@@ -97,7 +98,6 @@ class _HomeGalleryWidgetState extends State<HomeGalleryWidget> {
             limit: limit,
             asc: asc,
             filterOptions: filterOptions,
-            ignoreSharedFiles: _shouldHideSharedItems,
           );
         } else {
           result = await FilesDB.instance.getAllPendingOrUploadedFiles(
@@ -107,7 +107,6 @@ class _HomeGalleryWidgetState extends State<HomeGalleryWidget> {
             limit: limit,
             asc: asc,
             filterOptions: filterOptions,
-            ignoreSharedFiles: _shouldHideSharedItems,
           );
         }
 

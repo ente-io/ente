@@ -43,6 +43,48 @@ func (c *Controller) getUploadURL(dc string, objectKey string) (*ente.UploadURL,
 		URL:       url,
 	}, nil
 }
+func (c *Controller) getMultiPartUploadURL(dc string, objectKey string, count *int64) (*ente.MultipartUploadURLs, error) {
+	s3Client := c.S3Config.GetS3Client(dc)
+	bucket := c.S3Config.GetBucket(dc)
+	r, err := s3Client.CreateMultipartUpload(&s3.CreateMultipartUploadInput{
+		Bucket: bucket,
+		Key:    &objectKey,
+	})
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "")
+	}
+	err = c.ObjectCleanupController.AddMultipartTempObjectKey(objectKey, *r.UploadId, dc)
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "")
+	}
+	multipartUploadURLs := ente.MultipartUploadURLs{ObjectKey: objectKey}
+	urls := make([]string, 0)
+	for i := int64(1); i <= *count; i++ {
+		partReq, _ := s3Client.UploadPartRequest(&s3.UploadPartInput{
+			Bucket:     bucket,
+			Key:        &objectKey,
+			UploadId:   r.UploadId,
+			PartNumber: &i,
+		})
+		partUrl, partUrlErr := partReq.Presign(PreSignedRequestValidityDuration)
+		if partUrlErr != nil {
+			return nil, stacktrace.Propagate(partUrlErr, "")
+		}
+		urls = append(urls, partUrl)
+	}
+	multipartUploadURLs.PartURLs = urls
+	r2, _ := s3Client.CompleteMultipartUploadRequest(&s3.CompleteMultipartUploadInput{
+		Bucket:   bucket,
+		Key:      &objectKey,
+		UploadId: r.UploadId,
+	})
+	url, err := r2.Presign(PreSignedRequestValidityDuration)
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "")
+	}
+	multipartUploadURLs.CompleteURL = url
+	return &multipartUploadURLs, nil
+}
 
 func (c *Controller) signedUrlGet(dc string, objectKey string) (*ente.UploadURL, error) {
 	s3Client := c.S3Config.GetS3Client(dc)

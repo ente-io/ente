@@ -518,23 +518,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "blackFridaySale":
             MessageLookupByLibrary.simpleMessage("Black Friday-aanbieding"),
         "blog": MessageLookupByLibrary.simpleMessage("Blog"),
-        "cLBulkEdit":
-            MessageLookupByLibrary.simpleMessage("Bulk datums wijzigen"),
-        "cLBulkEditDesc": MessageLookupByLibrary.simpleMessage(
-            "Je kunt nu meerdere foto\'s selecteren en de datum/tijd van ze allemaal bewerken met één snelle actie. Verschuiven van datums wordt ook ondersteund."),
-        "cLFamilyPlan":
-            MessageLookupByLibrary.simpleMessage("Familieplan limieten"),
-        "cLFamilyPlanDesc": MessageLookupByLibrary.simpleMessage(
-            "Je kunt nu limieten instellen voor hoeveel opslag je familieleden kunnen gebruiken."),
-        "cLIcon": MessageLookupByLibrary.simpleMessage("Nieuw icoon"),
-        "cLIconDesc": MessageLookupByLibrary.simpleMessage(
-            "Tot slot, een nieuwe app icoon waarvan we denken dat het ons werk het beste weergeeft. We hebben ook een icon-switcher toegevoegd zodat je het oude icoon kunt blijven gebruiken."),
-        "cLMemories": MessageLookupByLibrary.simpleMessage("Herinneringen"),
-        "cLMemoriesDesc": MessageLookupByLibrary.simpleMessage(
-            "Ontdek nog eens je speciale momenten - spotlicht op je favoriete mensen, op je reizen en vakanties, op de beste plaatjes, en nog veel meer. Zet Machine Learning aan, tag jezelf en benoem je vrienden voor de beste ervaring."),
-        "cLWidgets": MessageLookupByLibrary.simpleMessage("Widgets"),
-        "cLWidgetsDesc": MessageLookupByLibrary.simpleMessage(
-            "Widgets die zijn geïntegreerd met herinneringen zijn nu beschikbaar. Ze tonen je speciale momenten zonder de app te openen."),
         "cachedData": MessageLookupByLibrary.simpleMessage("Cachegegevens"),
         "calculating": MessageLookupByLibrary.simpleMessage("Berekenen..."),
         "canNotOpenBody": MessageLookupByLibrary.simpleMessage(

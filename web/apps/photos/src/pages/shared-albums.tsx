@@ -15,7 +15,11 @@ import {
     AccountsPageContents,
     AccountsPageTitle,
 } from "ente-accounts/components/layouts/centered-paper";
-import { SpacedRow, Stack100vhCenter } from "ente-base/components/containers";
+import {
+    CenteredFill,
+    SpacedRow,
+    Stack100vhCenter,
+} from "ente-base/components/containers";
 import { EnteLogo } from "ente-base/components/EnteLogo";
 import {
     LoadingIndicator,
@@ -52,7 +56,6 @@ import {
 } from "ente-new/photos/services/collection";
 import { sortFiles } from "ente-new/photos/services/files";
 import { usePhotosAppContext } from "ente-new/photos/types/context";
-import { CenteredFlex } from "ente-shared/components/Container";
 import SingleInputForm, {
     type SingleInputFormProps,
 } from "ente-shared/components/SingleInputForm";
@@ -275,9 +278,9 @@ export default function PublicCollectionGallery() {
             onAddPhotos
                 ? {
                       item: (
-                          <CenteredFlex sx={{ marginTop: "56px" }}>
+                          <CenteredFill sx={{ marginTop: "56px" }}>
                               <AddMorePhotosButton onClick={onAddPhotos} />
-                          </CenteredFlex>
+                          </CenteredFill>
                       ),
                       height: 104,
                   }
@@ -285,7 +288,7 @@ export default function PublicCollectionGallery() {
         );
     }, [onAddPhotos]);
 
-    const handleSyncWithRemote = useCallback(async () => {
+    const syncWithRemote = useCallback(async () => {
         const collectionUID = getPublicCollectionUID(
             credentials.current.accessToken,
         );
@@ -366,9 +369,6 @@ export default function PublicCollectionGallery() {
             setLoading(false);
         }
     }, [showLoadingBar, hideLoadingBar]);
-
-    // TODO: See gallery
-    const syncWithRemote = handleSyncWithRemote;
 
     // See: [Note: Visual feedback to acknowledge user actions]
     const handleVisualFeedback = useCallback(() => {
@@ -523,7 +523,7 @@ export default function PublicCollectionGallery() {
                     setFilesDownloadProgressAttributesCreator={
                         setFilesDownloadProgressAttributesCreator
                     }
-                    onSyncWithRemote={handleSyncWithRemote}
+                    onSyncWithRemote={syncWithRemote}
                     onVisualFeedback={handleVisualFeedback}
                 />
                 {blockingLoad && <TranslucentLoadingOverlay />}
@@ -558,7 +558,7 @@ const EnteLogoLink = styled("a")(({ theme }) => ({
 }));
 
 const AddPhotosButton: React.FC<ButtonishProps> = ({ onClick }) => {
-    const disabled = !uploadManager.shouldAllowNewUpload();
+    const disabled = uploadManager.isUploadInProgress();
     const isSmallWidth = useIsSmallWidth();
 
     const icon = <AddPhotoAlternateOutlinedIcon />;
@@ -585,7 +585,7 @@ const AddPhotosButton: React.FC<ButtonishProps> = ({ onClick }) => {
  * shrink on mobile sized screens.
  */
 const AddMorePhotosButton: React.FC<ButtonishProps> = ({ onClick }) => {
-    const disabled = !uploadManager.shouldAllowNewUpload();
+    const disabled = uploadManager.isUploadInProgress();
 
     return (
         <FocusVisibleButton

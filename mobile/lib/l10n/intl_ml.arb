@@ -99,10 +99,14 @@
   "nothingToSeeHere": "ഇവിടൊന്നും കാണ്മാനില്ല! 👀",
   "calculating": "കണക്കുകൂട്ടുന്നു...",
   "close": "അടക്കുക",
+<<<<<<< HEAD
   "count": "എണ്ണം",
   "onThisDay": "On this day",
   "lookBackOnYourMemories": "Look back on your memories 🌄",
   "newPhotosEmoji": " new 📸",
   "sorryWeHadToPauseYourBackups": "Sorry, we had to pause your backups",
   "clickToInstallOurBestVersionYet": "Click to install our best version yet"
+=======
+  "count": "എണ്ണം"
+>>>>>>> main
 }

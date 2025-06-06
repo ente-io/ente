@@ -1,13 +1,18 @@
+// TODO: Audit this file
+/* eslint-disable @typescript-eslint/require-await */
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unnecessary-condition */
 import { ensureElectron } from "ente-base/electron";
 import { joinPath, nameAndExtension } from "ente-base/file-name";
 import log from "ente-base/log";
+import { exportMetadataDirectoryName } from "ente-gallery/export-dirs";
 import { downloadManager } from "ente-gallery/services/download";
 import type { Collection } from "ente-media/collection";
 import { mergeMetadata, type EnteFile } from "ente-media/file";
 import { FileType } from "ente-media/file-type";
 import { decodeLivePhoto } from "ente-media/live-photo";
 import { getLocalCollections } from "ente-new/photos/services/collections";
-import { exportMetadataDirectoryName } from "ente-new/photos/services/export";
 import { getAllLocalFiles } from "ente-new/photos/services/files";
 import {
     safeDirectoryName,
@@ -17,8 +22,7 @@ import {
 import { getData } from "ente-shared/storage/localStorage";
 import type { User } from "ente-shared/user/types";
 import { wait } from "ente-utils/promise";
-import { getIDBasedSortedFiles, getPersonalFiles } from "utils/file";
-import {
+import exportService, {
     getCollectionIDFromFileUID,
     getExportRecordFileUID,
     getLivePhotoExportName,
@@ -27,8 +31,7 @@ import {
     type ExportProgress,
     type ExportStage,
     type FileExportNames,
-} from ".";
-import exportService from "./index";
+} from "./export";
 
 type ExportedCollectionPaths = Record<number, string>;
 
@@ -139,7 +142,7 @@ async function migrationV0ToV1(
     const localFiles = mergeMetadata(await getAllLocalFiles());
     const localCollections = await getLocalCollections();
     const personalFiles = getIDBasedSortedFiles(
-        getPersonalFiles(localFiles, user),
+        localFiles.filter((file) => file.ownerID == user.id),
     );
     const personalCollections = localCollections.filter(
         (collection) => collection.owner.id === user?.id,
@@ -154,6 +157,10 @@ async function migrationV0ToV1(
         collectionIDPathMap,
     );
 }
+
+const getIDBasedSortedFiles = (files: EnteFile[]) => {
+    return files.sort((a, b) => a.id - b.id);
+};
 
 async function migrationV1ToV2(
     exportRecord: ExportRecordV1,
@@ -173,7 +180,7 @@ async function migrationV2ToV3(
     const user: User = getData("user");
     const localFiles = mergeMetadata(await getAllLocalFiles());
     const personalFiles = getIDBasedSortedFiles(
-        getPersonalFiles(localFiles, user),
+        localFiles.filter((file) => file.ownerID == user.id),
     );
 
     const collectionExportNames =
@@ -185,7 +192,9 @@ async function migrationV2ToV3(
         updateProgress,
     );
 
+    // @ts-ignore
     exportRecord.exportedCollectionPaths = undefined;
+    // @ts-ignore
     exportRecord.exportedFiles = undefined;
     const updatedExportRecord: ExportRecord = {
         ...exportRecord,
@@ -253,11 +262,13 @@ async function migrateFiles(
     for (const file of files) {
         const collectionPath = collectionIDPathMap.get(file.collectionID);
         const metadataPath = joinPath(
+            // @ts-ignore
             collectionPath,
             exportMetadataDirectoryName,
         );
 
         const oldFileName = `${file.id}_${oldSanitizeName(file.metadata.title)}`;
+        // @ts-ignore
         const oldFilePath = joinPath(collectionPath, oldFileName);
         const oldFileMetadataPath = joinPath(
             metadataPath,
@@ -265,10 +276,12 @@ async function migrateFiles(
         );
 
         const newFileName = await safeFileName(
+            // @ts-ignore
             collectionPath,
             file.metadata.title,
             fs.exists,
         );
+        // @ts-ignore
         const newFilePath = joinPath(collectionPath, newFileName);
         const newFileMetadataPath = joinPath(
             metadataPath,
@@ -287,12 +300,15 @@ async function removeDeprecatedExportRecordProperties(
     exportDir: string,
 ) {
     if (exportRecord?.queuedFiles) {
+        // @ts-ignore
         exportRecord.queuedFiles = undefined;
     }
     if (exportRecord?.progress) {
+        // @ts-ignore
         exportRecord.progress = undefined;
     }
     if (exportRecord?.failedFiles) {
+        // @ts-ignore
         exportRecord.failedFiles = undefined;
     }
     await exportService.updateExportRecord(exportDir, exportRecord);
@@ -302,6 +318,7 @@ async function getCollectionExportNamesFromExportedCollectionPaths(
     exportRecord: ExportRecordV2,
 ): Promise<CollectionExportNames> {
     if (!exportRecord.exportedCollectionPaths) {
+        // @ts-ignore
         return;
     }
     const exportedCollectionNames = Object.fromEntries(
@@ -314,6 +331,7 @@ async function getCollectionExportNamesFromExportedCollectionPaths(
             },
         ),
     );
+    // @ts-ignore
     return exportedCollectionNames;
 }
 
@@ -330,6 +348,7 @@ async function getFileExportNamesFromExportedFiles(
     updateProgress: (progress: ExportProgress) => void,
 ): Promise<FileExportNames> {
     if (!exportedFiles.length) {
+        // @ts-ignore
         return;
     }
     log.info(
@@ -359,11 +378,13 @@ async function getFileExportNamesFromExportedFiles(
                 fileBlob,
             );
             const imageExportName = getUniqueFileExportNameForMigration(
+                // @ts-ignore
                 collectionPath,
                 imageFileName,
                 usedFilePaths,
             );
             const videoExportName = getUniqueFileExportNameForMigration(
+                // @ts-ignore
                 collectionPath,
                 videoFileName,
                 usedFilePaths,
@@ -374,6 +395,7 @@ async function getFileExportNamesFromExportedFiles(
             );
         } else {
             fileExportName = getUniqueFileExportNameForMigration(
+                // @ts-ignore
                 collectionPath,
                 file.metadata.title,
                 usedFilePaths,
@@ -384,6 +406,7 @@ async function getFileExportNamesFromExportedFiles(
                 `file export name for ${file.metadata.title} is ${fileExportName}`,
         );
         exportedFileNames = {
+            // @ts-ignore
             ...exportedFileNames,
             [getExportRecordFileUID(file)]: fileExportName,
         };
@@ -393,6 +416,7 @@ async function getFileExportNamesFromExportedFiles(
             failed: 0,
         });
     }
+    // @ts-ignore
     return exportedFileNames;
 }
 
@@ -409,6 +433,7 @@ function reMigrateCollectionExportNames(
             },
         ),
     );
+    // @ts-ignore
     return exportedCollectionNames;
 }
 
@@ -548,6 +573,7 @@ const getUniqueFileExportNameForMigration = (
     if (!usedFilePaths.has(collectionPath)) {
         usedFilePaths.set(collectionPath, new Set());
     }
+    // @ts-ignore
     usedFilePaths
         .get(collectionPath)
         .add(getFileSavePath(collectionPath, fileExportName));

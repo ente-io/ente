@@ -15,3 +15,11 @@
  */
 export const wait = (ms: number) =>
     new Promise((resolve) => setTimeout(resolve, ms));
+
+/**
+ * Convert `null` to `undefined`, passthrough everything else unchanged.
+ *
+ * Duplicated from `web/packages/utils/transform.ts`.
+ */
+export const nullToUndefined = <T>(v: T | null | undefined): T | undefined =>
+    v === null ? undefined : v;

@@ -277,9 +277,9 @@ const handleVideoDone = async (token: string) => {
  *
  * The difference here is that we the conversion generates two streams^ - one
  * for the HLS playlist itself, and one for the file containing the encrypted
- * and transcoded video chunks. The video stream we write to the objectUploadURL
- * (provided via {@link params}), and then we return a JSON object containing
- * the token for the playlist, and other metadata for use by the renderer.
+ * and transcoded video chunks. The video stream we write to the pre-signed
+ * object upload URL(s), and then we return a JSON object containing the token
+ * for the playlist, and other metadata for use by the renderer.
  *
  * ^ if the video doesn't require a stream to be generated (e.g. it is very
  *   small and already uses a compatible codec) then a HTT 204 is returned and
@@ -289,8 +289,10 @@ const handleGenerateHLSWrite = async (
     request: Request,
     params: URLSearchParams,
 ) => {
-    const objectUploadURL = params.get("objectUploadURL");
-    if (!objectUploadURL) throw new Error("Missing objectUploadURL");
+    const fileID = parseInt(params.get("fileID") ?? "", 10);
+    const fetchURL = params.get("fetchURL");
+    const authToken = params.get("authToken");
+    if (!fileID || !fetchURL || !authToken) throw new Error("Missing params");
 
     let inputItem: Parameters<typeof makeFileForStreamOrPathOrZipItem>[0];
     const path = params.get("path");
@@ -324,7 +326,9 @@ const handleGenerateHLSWrite = async (
         result = await worker.ffmpegGenerateHLSPlaylistAndSegments(
             inputFilePath,
             outputFilePathPrefix,
-            objectUploadURL,
+            fileID,
+            fetchURL,
+            authToken,
         );
 
         if (!result) {
@@ -332,13 +336,18 @@ const handleGenerateHLSWrite = async (
             return new Response(null, { status: 204 });
         }
 
-        const { playlistPath, videoSize, dimensions } = result;
+        const { playlistPath, dimensions, videoSize, videoObjectID } = result;
 
         const playlistToken = randomUUID();
         pendingVideoResults.set(playlistToken, playlistPath);
 
         return new Response(
-            JSON.stringify({ playlistToken, videoSize, dimensions }),
+            JSON.stringify({
+                playlistToken,
+                dimensions,
+                videoSize,
+                videoObjectID,
+            }),
             { status: 200 },
         );
     } finally {

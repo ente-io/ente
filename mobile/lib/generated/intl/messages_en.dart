@@ -549,22 +549,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "blackFridaySale":
             MessageLookupByLibrary.simpleMessage("Black Friday Sale"),
         "blog": MessageLookupByLibrary.simpleMessage("Blog"),
-        "cLBulkEdit": MessageLookupByLibrary.simpleMessage("Bulk Edit dates"),
-        "cLBulkEditDesc": MessageLookupByLibrary.simpleMessage(
-            "You can now select multiple photos, and edit date/time for all of them with one quick action. Shifting dates is also supported."),
-        "cLFamilyPlan":
-            MessageLookupByLibrary.simpleMessage("Family Plan Limits"),
-        "cLFamilyPlanDesc": MessageLookupByLibrary.simpleMessage(
-            "You can now set limits on how much storage your family members can use."),
-        "cLIcon": MessageLookupByLibrary.simpleMessage("New Icon"),
-        "cLIconDesc": MessageLookupByLibrary.simpleMessage(
-            "Finally, a new app icon, that we think best represents our work. We\'ve also added an icon-switcher so you can continue using the old icon."),
-        "cLMemories": MessageLookupByLibrary.simpleMessage("Memories"),
-        "cLMemoriesDesc": MessageLookupByLibrary.simpleMessage(
-            "Rediscover your special moments - spotlight on your favorite people, your trips and holidays, your best clicks, and much more. Turn on machine learning, tag yourself and name your friends for the best experience."),
-        "cLWidgets": MessageLookupByLibrary.simpleMessage("Widgets"),
-        "cLWidgetsDesc": MessageLookupByLibrary.simpleMessage(
-            "Home screen widgets that are integrated with memories are now available. They will show your special moments without opening the app."),
         "cachedData": MessageLookupByLibrary.simpleMessage("Cached data"),
         "calculating": MessageLookupByLibrary.simpleMessage("Calculating..."),
         "canNotOpenBody": MessageLookupByLibrary.simpleMessage(

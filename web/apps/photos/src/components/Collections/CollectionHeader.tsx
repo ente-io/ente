@@ -25,7 +25,6 @@ import {
 } from "ente-base/components/OverflowMenu";
 import { useModalVisibility } from "ente-base/components/utils/modal";
 import { useBaseContext } from "ente-base/context";
-import { pt } from "ente-base/i18n";
 import {
     isArchivedCollection,
     isPinnedCollection,
@@ -49,7 +48,6 @@ import {
     clearLocalTrash,
     emptyTrash,
 } from "ente-new/photos/services/collections";
-import { settingsSnapshot } from "ente-new/photos/services/settings";
 import { usePhotosAppContext } from "ente-new/photos/types/context";
 import { t } from "i18next";
 import { GalleryContext } from "pages/gallery";
@@ -335,18 +333,13 @@ const CollectionOptions: React.FC<CollectionHeaderProps> = ({
                 >
                     {t("download_favorites")}
                 </DownloadOption>,
-                // TODO(FAV):
-                ...(settingsSnapshot().isInternalUser
-                    ? [
-                          <OverflowMenuOption
-                              key="share"
-                              onClick={onCollectionShare}
-                              startIcon={<PeopleIcon />}
-                          >
-                              {/*TODO(FAV):*/ pt("Share favorites")}
-                          </OverflowMenuOption>,
-                      ]
-                    : []),
+                <OverflowMenuOption
+                    key="share"
+                    onClick={onCollectionShare}
+                    startIcon={<PeopleIcon />}
+                >
+                    {t("share_favorites")}
+                </OverflowMenuOption>,
             ];
             break;
 
@@ -622,8 +615,7 @@ const DownloadQuickOption: React.FC<DownloadQuickOptionProps> = ({
 const showShareQuickOption = (type: CollectionSummaryType) =>
     type == "album" ||
     type == "folder" ||
-    (type == "favorites" &&
-        /* TODO(FAV): */ settingsSnapshot().isInternalUser) ||
+    type == "favorites" ||
     type == "outgoingShare" ||
     type == "sharedOnlyViaLink" ||
     type == "archived" ||
@@ -649,7 +641,7 @@ const ShareQuickOption: React.FC<ShareQuickOptionProps> = ({
                     collectionSummaryType == "sharedOnlyViaLink"
                   ? t("modify_sharing")
                   : collectionSummaryType == "favorites"
-                    ? /*TODO(FAV):*/ pt("Share favorites")
+                    ? t("share_favorites")
                     : t("share_album")
         }
     >

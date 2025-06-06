@@ -15,7 +15,6 @@ import "package:photos/models/ml/face/dimension.dart";
 import "package:photos/models/ml/face/face.dart";
 import "package:photos/models/ml/ml_versions.dart";
 import "package:photos/service_locator.dart";
-import "package:photos/services/filedata/filedata_service.dart";
 import "package:photos/services/filedata/model/file_data.dart";
 import "package:photos/services/machine_learning/face_ml/face_recognition_service.dart";
 import "package:photos/services/machine_learning/ml_exceptions.dart";
@@ -205,7 +204,7 @@ Stream<List<FileMLInstruction>> fetchEmbeddingsAndInstructions(
       pendingIndex[instruction.file.uploadedFileID!] = instruction;
     }
     _logger.info("fetching embeddings for ${ids.length} files");
-    final res = await FileDataService.instance.getFilesData(ids);
+    final res = await fileDataService.getFilesData(ids);
     _logger.info("embeddingResponse ${res.debugLog()}");
     final List<Face> faces = [];
     final List<ClipEmbedding> clipEmbeddings = [];

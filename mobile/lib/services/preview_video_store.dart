@@ -21,7 +21,6 @@ import "package:photos/core/event_bus.dart";
 import "package:photos/core/network/network.dart";
 import 'package:photos/db/files_db.dart';
 import "package:photos/db/upload_locks_db.dart";
-import "package:photos/events/preview_updated_event.dart";
 import "package:photos/events/video_streaming_changed.dart";
 import "package:photos/models/base/id.dart";
 import "package:photos/models/ffmpeg/ffprobe_props.dart";
@@ -30,8 +29,9 @@ import "package:photos/models/file/file_type.dart";
 import "package:photos/models/preview/playlist_data.dart";
 import "package:photos/models/preview/preview_item.dart";
 import "package:photos/models/preview/preview_item_status.dart";
-import "package:photos/services/filedata/filedata_service.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/services/filedata/model/file_data.dart";
+import "package:photos/services/machine_learning/ml_service.dart";
 import "package:photos/ui/notification/toast.dart";
 import "package:photos/utils/exif_util.dart";
 import "package:photos/utils/file_key.dart";
@@ -44,10 +44,11 @@ const _maxRetryCount = 3;
 
 class PreviewVideoStore {
   final LinkedHashMap<int, PreviewItem> _items = LinkedHashMap();
-  LinkedHashMap<int, PreviewItem> get previews => _items;
+  LinkedHashMap<int, EnteFile> fileQueue = LinkedHashMap();
+  final int _minPreviewSizeForCache = 50 * 1024 * 1024; // 50 MB
   Set<int>? _failureFiles;
 
-  bool _initSuccess = false;
+  bool _hasQueuedFile = false;
 
   PreviewVideoStore._privateConstructor();
 
@@ -58,7 +59,6 @@ class PreviewVideoStore {
   final cacheManager = DefaultCacheManager();
   final videoCacheManager = VideoCacheManager.instance;
 
-  LinkedHashSet<EnteFile> fileQueue = LinkedHashSet();
   int uploadingFileId = -1;
 
   final _dio = NetworkClient.instance.enteDio;
@@ -87,7 +87,7 @@ class PreviewVideoStore {
     Bus.instance.fire(VideoStreamingChanged());
 
     if (isVideoStreamingEnabled) {
-      await FileDataService.instance.syncFDStatus();
+      await fileDataService.syncFDStatus();
       _putFilesForPreviewCreation().ignore();
     } else {
       clearQueue();
@@ -97,7 +97,7 @@ class PreviewVideoStore {
   void clearQueue() {
     fileQueue.clear();
     _items.clear();
-    Bus.instance.fire(PreviewUpdatedEvent(_items));
+    _hasQueuedFile = false;
   }
 
   DateTime? get videoStreamingCutoff {
@@ -108,9 +108,7 @@ class PreviewVideoStore {
 
   Future<bool> isSharedFileStreamble(EnteFile file) async {
     try {
-      if (FileDataService.instance.previewIds
-              ?.containsKey(file.uploadedFileID) ??
-          false) {
+      if (fileDataService.previewIds.containsKey(file.uploadedFileID)) {
         return true;
       }
       await _getPreviewUrl(file);
@@ -125,7 +123,10 @@ class PreviewVideoStore {
     EnteFile enteFile, [
     bool forceUpload = false,
   ]) async {
-    if (!isVideoStreamingEnabled) {
+    if (!isVideoStreamingEnabled || MLService.instance.isRunningML) {
+      _logger.info(
+        "Pause preview due to disabledSteaming($isVideoStreamingEnabled) or MLRunning (${MLService.instance.isRunningML})",
+      );
       clearQueue();
       return;
     }
@@ -137,17 +138,15 @@ class PreviewVideoStore {
         removeFile = true;
         return;
       }
-
       try {
         // check if playlist already exist
-        await getPlaylist(enteFile);
-        final _ = await _getPreviewUrl(enteFile);
-
-        if (ctx != null && ctx.mounted) {
-          showShortToast(ctx, 'Video preview already exists');
+        if (await getPlaylist(enteFile) != null) {
+          if (ctx != null && ctx.mounted) {
+            showShortToast(ctx, 'Video preview already exists');
+          }
+          removeFile = true;
+          return;
         }
-        removeFile = true;
-        return;
       } catch (e, s) {
         if (e is DioException && e.response?.statusCode == 404) {
           _logger.info("No preview found for $enteFile");
@@ -157,7 +156,6 @@ class PreviewVideoStore {
           return;
         }
       }
-
       // elimination case for <=10 MB with H.264
       var (props, result, file) = await _checkFileForPreviewCreation(enteFile);
       if (result) {
@@ -177,8 +175,7 @@ class PreviewVideoStore {
               : _items[enteFile.uploadedFileID!]?.retryCount ?? 0,
           collectionID: enteFile.collectionID ?? 0,
         );
-        Bus.instance.fire(PreviewUpdatedEvent(_items));
-        fileQueue.add(enteFile);
+        fileQueue[enteFile.uploadedFileID!] = enteFile;
         return;
       }
 
@@ -191,7 +188,6 @@ class PreviewVideoStore {
             forceUpload ? 0 : _items[enteFile.uploadedFileID!]?.retryCount ?? 0,
         collectionID: enteFile.collectionID ?? 0,
       );
-      Bus.instance.fire(PreviewUpdatedEvent(_items));
 
       // get file
       file ??= await getFile(enteFile, isOrigin: true);
@@ -299,7 +295,6 @@ class PreviewVideoStore {
             collectionID: enteFile.collectionID ?? 0,
             retryCount: _items[enteFile.uploadedFileID!]?.retryCount ?? 0,
           );
-          Bus.instance.fire(PreviewUpdatedEvent(_items));
 
           _logger.info('Playlist Generated ${enteFile.displayName}');
 
@@ -357,7 +352,7 @@ class PreviewVideoStore {
 
       if (error == null) {
         // update previewIds
-        FileDataService.instance.appendPreview(
+        fileDataService.appendPreview(
           enteFile.uploadedFileID!,
           objectId!,
           objectSize!,
@@ -371,17 +366,13 @@ class PreviewVideoStore {
         );
         _removeFromLocks(enteFile).ignore();
         Directory(prefix).delete(recursive: true).ignore();
-
-        Bus.instance.fire(PreviewUpdatedEvent(_items));
       }
     } finally {
       if (error != null) {
         _retryFile(enteFile, error);
-        Bus.instance.fire(PreviewUpdatedEvent(_items));
       } else if (removeFile) {
         _removeFile(enteFile);
         _removeFromLocks(enteFile).ignore();
-        Bus.instance.fire(PreviewUpdatedEvent(_items));
       }
       // reset uploading status if this was getting processed
       if (uploadingFileId == enteFile.uploadedFileID!) {
@@ -390,8 +381,9 @@ class PreviewVideoStore {
       _logger.info("[chunk] Processing ${_items.length} items for streaming");
       // process next file
       if (fileQueue.isNotEmpty) {
-        final file = fileQueue.first;
-        fileQueue.remove(file);
+        final entry = fileQueue.entries.first;
+        final file = entry.value;
+        fileQueue.remove(entry.key);
         await chunkAndUploadVideo(ctx, file);
       }
     }
@@ -420,7 +412,7 @@ class PreviewVideoStore {
         retryCount: _items[enteFile.uploadedFileID!]!.retryCount + 1,
         collectionID: enteFile.collectionID ?? 0,
       );
-      fileQueue.add(enteFile);
+      fileQueue[enteFile.uploadedFileID!] = enteFile;
     } else {
       _items[enteFile.uploadedFileID!] = PreviewItem(
         status: PreviewItemStatus.failed,
@@ -537,7 +529,7 @@ class PreviewVideoStore {
     try {
       late final String objectID;
       final PreviewInfo? previewInfo =
-          FileDataService.instance.previewIds?[file.uploadedFileID!];
+          fileDataService.previewIds[file.uploadedFileID!];
       bool shouldAppendPreview = false;
       (String, String)? previewURLResult;
       if (previewInfo == null) {
@@ -609,12 +601,14 @@ class PreviewVideoStore {
           ?.file;
       if (videoFile == null) {
         previewURLResult = previewURLResult ?? await _getPreviewUrl(file);
-        unawaited(
-          videoCacheManager.downloadFile(
-            previewURLResult.$1,
-            key: _getVideoPreviewKey(objectID),
-          ),
-        );
+        if (size != null && size < _minPreviewSizeForCache) {
+          unawaited(
+            videoCacheManager.downloadFile(
+              previewURLResult.$1,
+              key: _getVideoPreviewKey(objectID),
+            ),
+          );
+        }
         finalPlaylist =
             finalPlaylist.replaceAll('\noutput.ts', '\n${previewURLResult.$1}');
       } else {
@@ -639,7 +633,7 @@ class PreviewVideoStore {
         durationInSeconds: parseDurationFromHLS(finalPlaylist),
       );
       if (shouldAppendPreview) {
-        FileDataService.instance.appendPreview(
+        fileDataService.appendPreview(
           file.uploadedFileID!,
           objectID,
           size!,
@@ -696,20 +690,37 @@ class PreviewVideoStore {
   Future<(FFProbeProps?, bool, File?)> _checkFileForPreviewCreation(
     EnteFile enteFile,
   ) async {
-    final fileSize = enteFile.fileSize;
+    if ((enteFile.pubMagicMetadata?.sv ?? 0) == 1) {
+      _logger.info(
+        "Skip Preview due to sv=1 for  ${enteFile.displayName}",
+      );
+      return (null, true, null);
+    }
+    if (enteFile.fileSize == null || enteFile.duration == null) {
+      _logger.warning(
+        "Skip Preview due to misisng size/duration for ${enteFile.displayName}",
+      );
+      return (null, true, null);
+    }
+    final int size = enteFile.fileSize!;
+    final int duration = enteFile.duration!;
+    if (size >= 500 * 1024 * 1024 || duration > 60) {
+      _logger.info(
+        "Skip Preview due to size: $size or duration: $duration",
+      );
+      return (null, true, null);
+    }
     FFProbeProps? props;
     File? file;
     bool skipFile = false;
-
     try {
-      final isFileUnder10MB = fileSize != null && fileSize <= 10 * 1024 * 1024;
+      final isFileUnder10MB = size <= 10 * 1024 * 1024;
       if (isFileUnder10MB) {
         file = await getFile(enteFile, isOrigin: true);
         if (file != null) {
           props = await getVideoPropsAsync(file);
           final videoData = List.from(props?.propData?["streams"] ?? [])
               .firstWhereOrNull((e) => e["type"] == "video");
-
           final codec = videoData["codec_name"]?.toString().toLowerCase();
           skipFile = codec?.contains("h264") ?? false;
 
@@ -720,28 +731,6 @@ class PreviewVideoStore {
             return (props, skipFile, file);
           }
         }
-      }
-
-      int? size = enteFile.fileSize;
-      int? duration = enteFile.duration;
-
-      if (size == null) {
-        file = await getFile(enteFile, isOrigin: true);
-        size = file?.lengthSync();
-      }
-
-      if (duration == null) {
-        file ??= await getFile(enteFile, isOrigin: true);
-        props = await getVideoPropsAsync(file!);
-        duration = props?.duration?.inSeconds;
-      }
-
-      if ((size == null || duration == null) ||
-          (size >= 500 * 1024 * 1024 || duration > 60)) {
-        skipFile = true;
-        _logger.info(
-          "[init] Ignoring file ${enteFile.displayName} for preview due to size: $size and duration: $duration",
-        );
       }
     } catch (e, sT) {
       _logger.warning("Failed to check props", e, sT);
@@ -755,7 +744,7 @@ class PreviewVideoStore {
 
     final cutoff = videoStreamingCutoff;
     if (cutoff == null) return;
-    if (updateInit) _initSuccess = true;
+    if (updateInit) _hasQueuedFile = true;
 
     Map<int, String> failureFiles = {};
     try {
@@ -764,7 +753,7 @@ class PreviewVideoStore {
 
       // handle case when failures are already previewed
       for (final failure in _failureFiles!) {
-        if (previews.containsKey(failure)) {
+        if (_items.containsKey(failure)) {
           UploadLocksDB.instance.deleteStreamUploadErrorEntry(failure).ignore();
         }
       }
@@ -776,28 +765,16 @@ class PreviewVideoStore {
       userID: Configuration.instance.getUserID()!,
     );
 
-    final previewIds = FileDataService.instance.previewIds;
-    final allFiles = files
-        .where((file) => previewIds?[file.uploadedFileID] == null)
-        .sorted((a, b) {
-      // put higher duration videos last along with remote files
-      final first = (a.localID == null ? 2 : 0) +
-          (a.duration == null || a.duration! >= 10 * 60 ? 1 : 0);
-      final second = (b.localID == null ? 2 : 0) +
-          (b.duration == null || b.duration! >= 10 * 60 ? 1 : 0);
-      return first.compareTo(second);
-    }).toList();
+    final previewIds = fileDataService.previewIds;
+    final allFiles =
+        files.where((file) => previewIds[file.uploadedFileID] == null).toList();
 
     // set all video status to in queue
     var n = allFiles.length, i = 0;
     while (i < n) {
       final enteFile = allFiles[i];
-
-      // elimination case for <=10 MB with H.264
-      final (_, result, _) = await _checkFileForPreviewCreation(enteFile);
       final isFailure =
           _failureFiles?.contains(enteFile.uploadedFileID!) ?? false;
-
       if (isFailure) {
         _items[enteFile.uploadedFileID!] = PreviewItem(
           status: PreviewItemStatus.failed,
@@ -807,7 +784,7 @@ class PreviewVideoStore {
           error: failureFiles[enteFile.uploadedFileID!],
         );
       }
-      if (result || isFailure) {
+      if (isFailure) {
         _logger.info(
           "[init] Ignoring file ${enteFile.displayName} for preview",
         );
@@ -825,7 +802,6 @@ class PreviewVideoStore {
       i++;
     }
 
-    Bus.instance.fire(PreviewUpdatedEvent(_items));
     if (allFiles.isEmpty) {
       _logger.info("[init] No preview to cache");
       return;
@@ -835,15 +811,22 @@ class PreviewVideoStore {
 
     // take first file and put it for stream generation
     final file = allFiles.removeAt(0);
-    fileQueue.addAll(allFiles);
+    for (final enteFile in allFiles) {
+      if (_items.containsKey(enteFile.uploadedFileID!)) {
+        continue;
+      }
+      fileQueue[enteFile.uploadedFileID!] = enteFile;
+    }
     chunkAndUploadVideo(null, file).ignore();
   }
 
   void queueFiles() {
-    if (!_initSuccess) {
-      _putFilesForPreviewCreation(true).catchError((_) {
-        _initSuccess = false;
-      });
-    }
+    Future.delayed(const Duration(seconds: 5), () {
+      if (!_hasQueuedFile) {
+        _putFilesForPreviewCreation(true).catchError((_) {
+          _hasQueuedFile = false;
+        });
+      }
+    });
   }
 }
