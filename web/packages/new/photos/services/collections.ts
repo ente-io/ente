@@ -226,13 +226,15 @@ export const getCollectionWithSecrets = async (
     }
     const collectionName =
         collection.name ||
-        (await cryptoWorker.decryptBoxUTF8(
-            {
-                encryptedData: collection.encryptedName,
-                nonce: collection.nameDecryptionNonce,
-            },
-            collectionKey,
-        ));
+        new TextDecoder().decode(
+            await cryptoWorker.decryptBoxBytes(
+                {
+                    encryptedData: collection.encryptedName,
+                    nonce: collection.nameDecryptionNonce,
+                },
+                collectionKey,
+            ),
+        );
 
     let collectionMagicMetadata: CollectionMagicMetadata;
     if (collection.magicMetadata?.data) {

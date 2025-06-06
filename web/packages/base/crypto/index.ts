@@ -345,19 +345,6 @@ export const decryptBoxBytes = (
         : sharedWorker().then((w) => w.decryptBoxBytes(box, key));
 
 /**
- * Variant of {@link decryptBoxBytes} that returns the decrypted bytes as a
- * "JavaScript string", specifically a UTF-8 string. That is, after decryption
- * we obtain raw bytes, which we interpret as a UTF-8 string.
- */
-export const decryptBoxUTF8 = (
-    box: EncryptedBox,
-    key: BytesOrB64,
-): Promise<string> =>
-    inWorker()
-        ? ei._decryptBoxUTF8(box, key)
-        : sharedWorker().then((w) => w.decryptBoxUTF8(box, key));
-
-/**
  * Decrypt a blob encrypted using either {@link encryptBlobBytes} or
  * {@link encryptBlob} and return it as a base64 encoded string.
  */

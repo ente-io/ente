@@ -30,7 +30,6 @@ export class CryptoWorker {
     encryptStreamChunk = ei._encryptStreamChunk;
     decryptBox = ei._decryptBox;
     decryptBoxBytes = ei._decryptBoxBytes;
-    decryptBoxUTF8 = ei._decryptBoxUTF8;
     decryptBlob = ei._decryptBlob;
     decryptBlobBytes = ei._decryptBlobBytes;
     decryptMetadataJSON = ei._decryptMetadataJSON;

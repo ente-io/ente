@@ -520,18 +520,6 @@ export const decryptBox = (
 ): Promise<string> => decryptBoxBytes(box, key).then(toB64);
 
 /**
- * Variant of {@link decryptBoxBytes} that returns the data after decoding the
- * decrypted bytes as a UTF-8 string.
- */
-export const decryptBoxUTF8 = async (
-    box: EncryptedBox,
-    key: BytesOrB64,
-): Promise<string> => {
-    await sodium.ready;
-    return sodium.to_string(await decryptBoxBytes(box, key));
-};
-
-/**
  * Decrypt the result of {@link encryptBlobBytes} or {@link encryptBlob}.
  */
 export const decryptBlobBytes = async (
