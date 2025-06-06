@@ -185,7 +185,7 @@ class _AlbumVerticalListWidgetState extends State<AlbumVerticalListWidget> {
 
       if (collection != null) {
         if (widget.enableSelection) {
-          Bus.instance.fire(CreateNewAlbumEvent());
+          Bus.instance.fire(CreateNewAlbumEvent(collection));
         } else {
           if (await _runCollectionAction(
             context,

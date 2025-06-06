@@ -125,6 +125,7 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
   static const int okButtonSize = 80;
   String _searchQuery = "";
   final _selectedCollections = <Collection>[];
+  final _recentlyCreatedCollections = <Collection>[];
   late StreamSubscription<CreateNewAlbumEvent> _createNewAlbumSubscription;
 
   @override
@@ -137,7 +138,12 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
             widget.actionType == CollectionActionType.addToHiddenAlbum) &&
         (widget.sharedFiles == null || widget.sharedFiles!.isEmpty);
     _createNewAlbumSubscription =
-        Bus.instance.on<CreateNewAlbumEvent>().listen((event) {});
+        Bus.instance.on<CreateNewAlbumEvent>().listen((event) {
+      setState(() {
+        _recentlyCreatedCollections.insert(0, event.collection);
+        _selectedCollections.add(event.collection);
+      });
+    });
   }
 
   @override
@@ -334,15 +340,25 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
 
   Future<List<Collection>> _getCollections() async {
     if (_showOnlyHiddenCollections) {
+      final List<Collection> recentlyCreated = [];
+      final List<Collection> hidden = [];
+
       final hiddenCollections = CollectionsService.instance
           .getHiddenCollections(includeDefaultHidden: false);
-      hiddenCollections.sort((first, second) {
+      for (final collection in hiddenCollections) {
+        if (_recentlyCreatedCollections.contains(collection)) {
+          recentlyCreated.add(collection);
+        }else{
+          hidden.add(collection);
+        }
+      }
+      hidden.sort((first, second) {
         return compareAsciiLowerCaseNatural(
           first.displayName,
           second.displayName,
         );
       });
-      return hiddenCollections;
+      return recentlyCreated + hidden;
     } else {
       final bool includeUncategorized =
           widget.actionType == CollectionActionType.restoreFiles;
@@ -361,6 +377,7 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
       });
       final List<Collection> pinned = [];
       final List<Collection> unpinned = [];
+      final List<Collection> recentlyCreated = [];
       // show uncategorized collection only for restore files action
       Collection? uncategorized;
       for (final collection in collections) {
@@ -373,13 +390,20 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
           }
           continue;
         }
+        if (_recentlyCreatedCollections.contains(collection)) {
+          recentlyCreated.add(collection);
+          continue;
+        }
         if (collection.isPinned) {
           pinned.add(collection);
         } else {
           unpinned.add(collection);
         }
       }
-      return pinned + unpinned + (uncategorized != null ? [uncategorized] : []);
+      return recentlyCreated +
+          pinned +
+          unpinned +
+          (uncategorized != null ? [uncategorized] : []);
     }
   }
 
