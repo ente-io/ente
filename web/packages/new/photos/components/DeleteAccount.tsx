@@ -106,6 +106,7 @@ const DeleteAccountDialogContents: React.FC<
                     color: "critical",
                     action: resolve,
                 },
+                cancel: { text: t("cancel"), action: () => setLoading(false) },
             }),
         );
 
