@@ -86,7 +86,7 @@ export const saveMasterKeyInSessionStore = async (
     await saveKeyInSessionStore("encryptionKey", masterKey);
     const electron = globalThis.electron;
     if (electron && !fromDesktop) {
-        await electron.saveMasterKeyB64(masterKey);
+        await electron.saveMasterKeyInSafeStorage(masterKey);
     }
 };
 
@@ -138,7 +138,7 @@ export const updateSessionFromElectronSafeStorageIfNeeded = async () => {
 
     let masterKey: string | undefined;
     try {
-        masterKey = await electron.masterKeyB64();
+        masterKey = await electron.masterKeyFromSafeStorage();
     } catch (e) {
         log.error("Failed to read master key from safe storage", e);
     }

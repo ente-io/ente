@@ -12,6 +12,6 @@ export const saveKeyInSessionStore = async (
     setKey(keyType, sessionKeyAttributes);
     const electron = globalThis.electron;
     if (electron && !fromDesktop && keyType == "encryptionKey") {
-        electron.saveMasterKeyB64(key);
+        electron.saveMasterKeyInSafeStorage(key);
     }
 };
