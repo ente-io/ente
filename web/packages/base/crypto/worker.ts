@@ -21,7 +21,6 @@ export class CryptoWorker {
     generateKey = ei._generateKey;
     generateBlobOrStreamKey = ei._generateBlobOrStreamKey;
     encryptBox = ei._encryptBox;
-    encryptBoxUTF8 = ei._encryptBoxUTF8;
     encryptBlob = ei._encryptBlob;
     encryptBlobBytes = ei._encryptBlobBytes;
     encryptMetadataJSON = ei._encryptMetadataJSON;

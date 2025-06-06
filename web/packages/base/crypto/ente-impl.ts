@@ -13,7 +13,6 @@ export const _fromHex = libsodium.fromHex;
 export const _generateKey = libsodium.generateKey;
 export const _generateBlobOrStreamKey = libsodium.generateBlobOrStreamKey;
 export const _encryptBox = libsodium.encryptBox;
-export const _encryptBoxUTF8 = libsodium.encryptBoxUTF8;
 export const _encryptBlob = libsodium.encryptBlob;
 export const _encryptBlobBytes = libsodium.encryptBlobBytes;
 export const _encryptMetadataJSON = libsodium.encryptMetadataJSON;

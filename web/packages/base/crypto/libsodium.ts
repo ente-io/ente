@@ -288,18 +288,6 @@ export const encryptBox = async (
 };
 
 /**
- * A variant of {@link encryptBox} that first converts the input string into
- * bytes using a UTF-8 encoding, and then encrypts those bytes.
- */
-export const encryptBoxUTF8 = async (
-    data: string,
-    key: BytesOrB64,
-): Promise<EncryptedBoxB64> => {
-    await sodium.ready;
-    return encryptBox(sodium.from_string(data), key);
-};
-
-/**
  * Encrypt the given data using libsodium's secretstream APIs without chunking.
  *
  * Use {@link decryptBlobBytes} to decrypt the result.
@@ -550,7 +538,7 @@ export const decryptBlob = (
 
 /**
  * Decrypt the result of {@link encryptMetadataJSON} and return the JSON value
- * obtained by parsing the decrypted JSON string (which is obtained by utf-8
+ * obtained by parsing the decrypted JSON string (which is obtained by UTF-8
  * decoding the decrypted bytes).
  *
  * Since TypeScript doesn't currently have a native JSON type, the returned
