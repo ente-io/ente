@@ -11,22 +11,18 @@ import "package:photos/utils/navigation_util.dart";
 class MemoryCoverWidget extends StatefulWidget {
   final List<Memory> memories;
   final ScrollController controller;
-  final double offsetOfItem;
   final double maxHeight;
   final double maxWidth;
   static const outerStrokeWidth = 1.0;
   static const aspectRatio = 0.68;
   static const horizontalPadding = 2.5;
-  final double maxScaleOffsetX;
   final String title;
 
   const MemoryCoverWidget({
     required this.memories,
     required this.controller,
-    required this.offsetOfItem,
     required this.maxHeight,
     required this.maxWidth,
-    required this.maxScaleOffsetX,
     required this.title,
     super.key,
   });
@@ -44,7 +40,6 @@ class _MemoryCoverWidgetState extends State<MemoryCoverWidget> {
       return const SizedBox.shrink();
     }
 
-    final widthOfScreen = MediaQuery.sizeOf(context).width;
     final index = _getNextMemoryIndex();
     final title = widget.title;
 
@@ -56,9 +51,6 @@ class _MemoryCoverWidgetState extends State<MemoryCoverWidget> {
     return AnimatedBuilder(
       animation: widget.controller,
       builder: (context, child) {
-        final diff = (widget.controller.offset - widget.offsetOfItem) +
-            widget.maxScaleOffsetX;
-        final scale = 1 - (diff / widthOfScreen).abs() / 3.7;
         return Padding(
           padding: const EdgeInsets.symmetric(
             horizontal: MemoryCoverWidget.horizontalPadding,
@@ -81,8 +73,8 @@ class _MemoryCoverWidgetState extends State<MemoryCoverWidget> {
             child: Row(
               children: [
                 Container(
-                  height: widget.maxHeight * scale,
-                  width: widget.maxWidth * scale,
+                  height: widget.maxHeight ,
+                  width: widget.maxWidth ,
                   decoration: BoxDecoration(
                     boxShadow: brightness == Brightness.dark
                         ? [
@@ -122,29 +114,26 @@ class _MemoryCoverWidgetState extends State<MemoryCoverWidget> {
                                   ),
                                 ),
                                 Positioned(
-                                  bottom: 8 * scale,
-                                  child: Transform.scale(
-                                    scale: scale,
-                                    child: SizedBox(
-                                      width: widget.maxWidth,
-                                      child: Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 8.0,
-                                        ),
-                                        child: Hero(
-                                          tag: title,
-                                          child: Center(
-                                            child: Text(
-                                              title,
-                                              style: getEnteTextTheme(context)
-                                                  .miniBold
-                                                  .copyWith(
-                                                    color: isSeen
-                                                        ? textFaintDark
-                                                        : Colors.white,
-                                                  ),
-                                              textAlign: TextAlign.left,
-                                            ),
+                                  bottom: 8 ,
+                                  child: SizedBox(
+                                    width: widget.maxWidth,
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 8.0,
+                                      ),
+                                      child: Hero(
+                                        tag: title,
+                                        child: Center(
+                                          child: Text(
+                                            title,
+                                            style: getEnteTextTheme(context)
+                                                .miniBold
+                                                .copyWith(
+                                                  color: isSeen
+                                                      ? textFaintDark
+                                                      : Colors.white,
+                                                ),
+                                            textAlign: TextAlign.left,
                                           ),
                                         ),
                                       ),
@@ -173,27 +162,24 @@ class _MemoryCoverWidgetState extends State<MemoryCoverWidget> {
                                 ),
                               ),
                               Positioned(
-                                bottom: 8 * scale,
-                                child: Transform.scale(
-                                  scale: scale,
-                                  child: SizedBox(
-                                    width: widget.maxWidth,
-                                    child: Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 8.0,
-                                      ),
-                                      child: Hero(
-                                        tag: title,
-                                        child: Center(
-                                          child: Text(
-                                            title,
-                                            style: getEnteTextTheme(context)
-                                                .miniBold
-                                                .copyWith(
-                                                  color: Colors.white,
-                                                ),
-                                            textAlign: TextAlign.left,
-                                          ),
+                                bottom: 8 ,
+                                child: SizedBox(
+                                  width: widget.maxWidth,
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8.0,
+                                    ),
+                                    child: Hero(
+                                      tag: title,
+                                      child: Center(
+                                        child: Text(
+                                          title,
+                                          style: getEnteTextTheme(context)
+                                              .miniBold
+                                              .copyWith(
+                                                color: Colors.white,
+                                              ),
+                                          textAlign: TextAlign.left,
                                         ),
                                       ),
                                     ),
