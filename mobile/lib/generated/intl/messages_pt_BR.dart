@@ -82,9 +82,6 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m21(count) =>
       "${Intl.plural(count, one: 'Excluir ${count} item', other: 'Excluir ${count} itens')}";
 
-  static String m116(count) =>
-      "E também excluir todas as fotos (e vídeos) presente dentro desses ${count} álbuns e de <bold>todos</bold> os álbuns que eles fazem parte?";
-
   static String m22(currentlyDeleting, totalCount) =>
       "Excluindo ${currentlyDeleting} / ${totalCount}";
 
@@ -226,8 +223,6 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m77(snapshotLength, searchLength) =>
       "Incompatibilidade de comprimento de seções: ${snapshotLength} != ${searchLength}";
 
-  static String m117(count) => "${count} selecionado(s)";
-
   static String m78(count) => "${count} selecionado(s)";
 
   static String m79(count, yourCount) =>
@@ -340,9 +335,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Bem-vindo(a) de volta!"),
         "ackPasswordLostWarning": MessageLookupByLibrary.simpleMessage(
             "Eu entendo que se eu perder minha senha, posso perder meus dados, já que meus dados são <underline>criptografados de ponta a ponta</underline>."),
-        "actionNotSupportedOnFavouritesAlbum":
-            MessageLookupByLibrary.simpleMessage(
-                "Ação não suportada em álbum favorito"),
         "activeSessions":
             MessageLookupByLibrary.simpleMessage("Sessões ativas"),
         "add": MessageLookupByLibrary.simpleMessage("Adicionar"),
@@ -370,8 +362,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Detalhes dos complementos"),
         "addOnValidTill": m3,
         "addOns": MessageLookupByLibrary.simpleMessage("Complementos"),
-        "addParticipants":
-            MessageLookupByLibrary.simpleMessage("Adicionar participante"),
         "addPhotos": MessageLookupByLibrary.simpleMessage("Adicionar fotos"),
         "addSelected":
             MessageLookupByLibrary.simpleMessage("Adicionar selecionado"),
@@ -556,6 +546,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Cópia de segurança de vídeos"),
         "beach": MessageLookupByLibrary.simpleMessage("Areia e o mar"),
         "birthday": MessageLookupByLibrary.simpleMessage("Aniversário"),
+        "birthdays": MessageLookupByLibrary.simpleMessage("Birthdays"),
         "blackFridaySale":
             MessageLookupByLibrary.simpleMessage("Promoção Black Friday"),
         "blog": MessageLookupByLibrary.simpleMessage("Blog"),
@@ -774,7 +765,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "deleteItemCount": m21,
         "deleteLocation":
             MessageLookupByLibrary.simpleMessage("Excluir localização"),
-        "deleteMultipleAlbumDialog": m116,
         "deletePhotos": MessageLookupByLibrary.simpleMessage("Excluir fotos"),
         "deleteProgress": m22,
         "deleteReason1": MessageLookupByLibrary.simpleMessage(
@@ -1076,6 +1066,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "guestView": MessageLookupByLibrary.simpleMessage("Vista do convidado"),
         "guestViewEnablePreSteps": MessageLookupByLibrary.simpleMessage(
             "Para ativar a vista do convidado, defina uma senha de acesso no dispositivo ou bloqueie sua tela nas opções do sistema."),
+        "happyBirthday":
+            MessageLookupByLibrary.simpleMessage("Happy birthday! 🥳"),
         "hearUsExplanation": MessageLookupByLibrary.simpleMessage(
             "Não rastreamos instalações de aplicativo. Seria útil se você contasse onde nos encontrou!"),
         "hearUsWhereTitle": MessageLookupByLibrary.simpleMessage(
@@ -1579,6 +1571,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "reassignedToName": m68,
         "reassigningLoading":
             MessageLookupByLibrary.simpleMessage("Reatribuindo..."),
+        "receiveRemindersOnBirthdays": MessageLookupByLibrary.simpleMessage(
+            "Receive reminders when it\'s someone\'s birthday. Tapping on the notification will take you to photos of the birthday person."),
         "recover": MessageLookupByLibrary.simpleMessage("Recuperar"),
         "recoverAccount":
             MessageLookupByLibrary.simpleMessage("Recuperar conta"),
@@ -1793,7 +1787,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Selecione seu rosto"),
         "selectYourPlan":
             MessageLookupByLibrary.simpleMessage("Selecione seu plano"),
-        "selectedAlbums": m117,
         "selectedFilesAreNotOnEnte": MessageLookupByLibrary.simpleMessage(
             "Os arquivos selecionados não estão no Ente"),
         "selectedFoldersWillBeEncryptedAndBackedUp":

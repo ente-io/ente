@@ -143,8 +143,8 @@ class NotificationService {
   }
 
   Future<void> scheduleNotification(
-    String title,
-    String message, {
+    String title, {
+    String? message,
     required int id,
     String channelID = "io.ente.photos",
     String channelName = "ente",
@@ -229,16 +229,12 @@ class NotificationService {
       dateTime.minute,
       dateTime.second,
     );
-    // final tz.TZDateTime scheduledDate = tz.TZDateTime.now(tz.local).add(delay);
     await _notificationsPlugin.zonedSchedule(
       id,
       title,
       message,
       scheduledDate,
       platformChannelSpecs,
-      // TODO(prateek): check if this is needed, app won't compile with this
-      // uiLocalNotificationDateInterpretation:
-      //     UILocalNotificationDateInterpretation.wallClockTime,
       androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
       payload: payload,
     );

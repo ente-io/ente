@@ -21,6 +21,7 @@ import type {
     EncryptedFile,
     InitChunkDecryptionResult,
     InitChunkEncryptionResult,
+    KeyPair,
     SodiumStateAddress,
 } from "./types";
 
@@ -288,18 +289,6 @@ export const encryptBox = async (
 };
 
 /**
- * A variant of {@link encryptBox} that first converts the input string into
- * bytes using a UTF-8 encoding, and then encrypts those bytes.
- */
-export const encryptBoxUTF8 = async (
-    data: string,
-    key: BytesOrB64,
-): Promise<EncryptedBoxB64> => {
-    await sodium.ready;
-    return encryptBox(sodium.from_string(data), key);
-};
-
-/**
  * Encrypt the given data using libsodium's secretstream APIs without chunking.
  *
  * Use {@link decryptBlobBytes} to decrypt the result.
@@ -356,7 +345,7 @@ export const encryptBlob = async (
 
 /**
  * Encrypt the provided JSON value (using {@link encryptBlob}) after converting
- * it to a JSON string (and utf-8 encoding it to obtain bytes).
+ * it to a JSON string (and UTF-8 encoding it to obtain bytes).
  *
  * Use {@link decryptMetadataJSON} to decrypt the result and convert it back to
  * a JSON value.
@@ -520,18 +509,6 @@ export const decryptBox = (
 ): Promise<string> => decryptBoxBytes(box, key).then(toB64);
 
 /**
- * Variant of {@link decryptBoxBytes} that returns the data after decoding the
- * decrypted bytes as a utf-8 string.
- */
-export const decryptBoxUTF8 = async (
-    box: EncryptedBox,
-    key: BytesOrB64,
-): Promise<string> => {
-    await sodium.ready;
-    return sodium.to_string(await decryptBoxBytes(box, key));
-};
-
-/**
  * Decrypt the result of {@link encryptBlobBytes} or {@link encryptBlob}.
  */
 export const decryptBlobBytes = async (
@@ -562,7 +539,7 @@ export const decryptBlob = (
 
 /**
  * Decrypt the result of {@link encryptMetadataJSON} and return the JSON value
- * obtained by parsing the decrypted JSON string (which is obtained by utf-8
+ * obtained by parsing the decrypted JSON string (which is obtained by UTF-8
  * decoding the decrypted bytes).
  *
  * Since TypeScript doesn't currently have a native JSON type, the returned
@@ -784,8 +761,24 @@ export const boxSeal = async (data: string, publicKey: string) => {
 /**
  * Decrypt the result of {@link boxSeal}.
  *
- * All parameters, and the result, are base64 string representations of the
- * underlying data.
+ * All parameters are base64 string representations of the underlying data. The
+ * result is the bytes obtained by decryption.
+ */
+export const boxSealOpenBytes = async (
+    encryptedData: string,
+    { publicKey, privateKey }: KeyPair,
+): Promise<Uint8Array> => {
+    await sodium.ready;
+    return sodium.crypto_box_seal_open(
+        await fromB64(encryptedData),
+        await fromB64(publicKey),
+        await fromB64(privateKey),
+    );
+};
+
+/**
+ * A variant of {@link boxSealOpenBytes} that returns the result as a base64
+ * string.
  */
 export const boxSealOpen = async (
     encryptedData: string,

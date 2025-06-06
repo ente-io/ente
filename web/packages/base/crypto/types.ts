@@ -173,6 +173,24 @@ export interface InitChunkDecryptionResult {
 }
 
 /**
+ * A pair of public and private keys.
+ */
+export interface KeyPair {
+    /**
+     * The public key of the keypair, as a base64 encoded string.
+     */
+    publicKey: string;
+    /**
+     * The private key of the keypair, as a base64 encoded string.
+     *
+     * Some places also refer to it as the "secret key".
+     *
+     * See: [Note: privateKey and secretKey].
+     */
+    privateKey: string;
+}
+
+/**
  * A key derived from a user provided passphrase, and the various attributes
  * that were used during the key derivation.
  */

@@ -1,9 +1,5 @@
-import {
-    ensureSavedKeyAttributes,
-    type KeyAttributes,
-} from "ente-accounts/services/user";
+import { type KeyAttributes } from "ente-accounts/services/user";
 import { sharedCryptoWorker } from "ente-base/crypto";
-import { ensureMasterKeyFromSession } from "ente-base/session";
 import { getData, setData, setLSUser } from "ente-shared/storage/localStorage";
 import { setKey, type SessionKey } from "ente-shared/storage/sessionStorage";
 
@@ -78,32 +74,4 @@ export const saveKeyInSessionStore = async (
     if (electron && !fromDesktop && keyType == "encryptionKey") {
         electron.saveMasterKeyB64(key);
     }
-};
-
-/**
- * Decrypt the {@link encryptedChallenge} sent by remote during the delete
- * account flow ({@link getAccountDeleteChallenge}), returning a value that can
- * then directly be passed to the actual delete account request
- * ({@link deleteAccount}).
- */
-export const decryptDeleteAccountChallenge = async (
-    encryptedChallenge: string,
-) => {
-    const cryptoWorker = await sharedCryptoWorker();
-    const masterKey = await ensureMasterKeyFromSession();
-    const keyAttributes = ensureSavedKeyAttributes();
-    const secretKey = await cryptoWorker.decryptBox(
-        {
-            encryptedData: keyAttributes.encryptedSecretKey,
-            nonce: keyAttributes.secretKeyDecryptionNonce,
-        },
-        masterKey,
-    );
-    const b64DecryptedChallenge = await cryptoWorker.boxSealOpen(
-        encryptedChallenge,
-        keyAttributes.publicKey,
-        secretKey,
-    );
-    const utf8DecryptedChallenge = atob(b64DecryptedChallenge);
-    return utf8DecryptedChallenge;
 };
