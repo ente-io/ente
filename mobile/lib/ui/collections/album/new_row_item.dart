@@ -69,8 +69,8 @@ class NewAlbumRowItemWidget extends StatelessWidget {
               height: height,
               width: width,
               color: Theme.of(context).brightness == Brightness.light
-                  ? const Color.fromRGBO(245, 245, 245, 100)
-                  : const Color.fromRGBO(39, 39, 39, 100),
+                  ? colorScheme.backdropBase
+                  : colorScheme.backdropFaint,
               child: DottedBorder(
                 borderType: BorderType.RRect,
                 strokeWidth: 1.75,

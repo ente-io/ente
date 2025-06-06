@@ -28,8 +28,8 @@ class NewAlbumListItemWidget extends StatelessWidget {
                     height: sideOfThumbnail,
                     width: sideOfThumbnail,
                     color: Theme.of(context).brightness == Brightness.light
-                        ? const Color.fromRGBO(245, 245, 245, 100)
-                        : const Color.fromRGBO(39, 39, 39, 100),
+                        ? colorScheme.backdropBase
+                        : colorScheme.backdropFaint,
                     child: Icon(
                       Icons.add_outlined,
                       color: colorScheme.strokeMuted,

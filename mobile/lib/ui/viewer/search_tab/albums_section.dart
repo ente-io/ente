@@ -236,10 +236,10 @@ class AlbumCTA extends StatelessWidget {
                 radius: const Radius.circular(8),
                 padding: EdgeInsets.zero,
                 color: enteColorScheme.strokeFaint,
-                child: Container( 
+                child: Container(
                   color: Theme.of(context).brightness == Brightness.light
-                  ? const Color.fromRGBO(245, 245, 245, 100)
-                  : const Color.fromRGBO(39, 39, 39, 100),
+                      ? enteColorScheme.backdropBase
+                      : enteColorScheme.backdropFaint,
                   height: 100,
                   width: 100,
                   child: Icon(
