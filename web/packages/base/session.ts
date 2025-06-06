@@ -1,6 +1,6 @@
 import { getToken } from "ente-shared/storage/localStorage/helpers";
 import { z } from "zod/v4";
-import { decryptBox, decryptBoxBytes, encryptBox, generateKey } from "./crypto";
+import { decryptBox, encryptBox, generateKey } from "./crypto";
 import { isDevBuild } from "./env";
 import log from "./log";
 import { getAuthToken } from "./token";
@@ -63,7 +63,6 @@ export const haveCredentialsInSession = () =>
  * See also {@link ensureMasterKeyFromSession}, which is usually what we need.
  */
 export const masterKeyFromSession = async () => {
-    // TODO: Same value as the deprecated getKey("encryptionKey")
     const value = sessionStorage.getItem("encryptionKey");
     if (!value) return undefined;
 
@@ -139,8 +138,6 @@ export const updateSessionFromElectronSafeStorageIfNeeded = async () => {
         log.error("Failed to read master key from safe storage", e);
     }
     if (masterKey) {
-        // Do not use `saveMasterKeyInSessionStore`, that will (unnecessarily)
-        // overwrite the OS safe storage again.
         await saveKeyInSessionStore("encryptionKey", masterKey);
     }
 };
@@ -178,6 +175,10 @@ export const stashKeyEncryptionKeyInSessionStore = (kek: string) =>
  * Return the decrypted user's key encryption key ("kek") from session storage
  * if present, otherwise return `undefined`.
  *
+ * The key (if it was present) is also removed from session storage.
+ *
+ * @returns the previously stashed key (if any) as a base64 string.
+ *
  * [Note: Stashing KEK in session store]
  *
  * During login, if the user has set a second factor (passkey or TOTP), then we
@@ -187,11 +188,10 @@ export const stashKeyEncryptionKeyInSessionStore = (kek: string) =>
  * second factor redirect can happen to a separate accounts app altogether.
  *
  * So instead, we stash the encrypted kek in session store (using
- * {@link stashKeyEncryptionKeyInSessionStore}), and after redirect, retrieve
- * it (after clearing it) using {@link unstashKeyEncryptionKeyFromSession}.
+ * {@link stashKeyEncryptionKeyInSessionStore}), and after redirect, retrieve it
+ * (after clearing it) using {@link unstashKeyEncryptionKeyFromSession}.
  */
 export const unstashKeyEncryptionKeyFromSession = async () => {
-    // TODO: Same value as the deprecated getKey("keyEncryptionKey")
     const value = sessionStorage.getItem("keyEncryptionKey");
     if (!value) return undefined;
 
@@ -200,5 +200,5 @@ export const unstashKeyEncryptionKeyFromSession = async () => {
     const { encryptedData, key, nonce } = SessionKeyData.parse(
         JSON.parse(value),
     );
-    return decryptBoxBytes({ encryptedData, nonce }, key);
+    return decryptBox({ encryptedData, nonce }, key);
 };
