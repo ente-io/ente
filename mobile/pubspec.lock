@@ -134,14 +134,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.11.0"
-  background_fetch:
-    dependency: "direct main"
-    description:
-      name: background_fetch
-      sha256: e9f26ae54d88310b7ac2a68f2f9fcee0081a4d5f11100f233a70702021e7ac4f
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.3.7"
   battery_info:
     dependency: "direct main"
     description:
@@ -2197,18 +2189,18 @@ packages:
     dependency: "direct main"
     description:
       name: sentry
-      sha256: "077b03f9ee44cfb1eaadbf8af58255e670de62b3f240ca154ce96a5591dc3885"
+      sha256: "599701ca0693a74da361bc780b0752e1abc98226cf5095f6b069648116c896bb"
       url: "https://pub.dev"
     source: hosted
-    version: "8.14.1"
+    version: "8.14.2"
   sentry_flutter:
     dependency: "direct main"
     description:
       name: sentry_flutter
-      sha256: a348e2a365a8ad7682dd09db54f50f19f1c87180b8278f088bc393c511aea5e0
+      sha256: "5ba2cf40646a77d113b37a07bd69f61bb3ec8a73cbabe5537b05a7c89d2656f8"
       url: "https://pub.dev"
     source: hosted
-    version: "8.14.1"
+    version: "8.14.2"
   share_plus:
     dependency: "direct main"
     description:
@@ -2945,6 +2937,15 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.0"
+  workmanager:
+    dependency: "direct main"
+    description:
+      path: workmanager
+      ref: "4ce0651"
+      resolved-ref: "4ce065135dc1b91fee918f81596b42a56850391d"
+      url: "https://github.com/fluttercommunity/flutter_workmanager"
+    source: git
+    version: "0.5.2"
   xdg_directories:
     dependency: transitive
     description:
