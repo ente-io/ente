@@ -3,7 +3,6 @@ import { clientPackageName } from "ente-base/app";
 import {
     fromB64URLSafeNoPadding,
     toB64URLSafeNoPadding,
-    toB64URLSafeNoPaddingString,
 } from "ente-base/crypto/libsodium";
 import { isDevBuild } from "ente-base/env";
 import { ensureOk, HTTPError, publicRequestHeaders } from "ente-base/http";
@@ -619,8 +618,10 @@ export const passkeyAuthenticationSuccessRedirectURL = async (
     passkeySessionID: string,
     twoFactorAuthorizationResponse: TwoFactorAuthorizationResponse,
 ) => {
-    const encodedResponse = await toB64URLSafeNoPaddingString(
-        JSON.stringify(twoFactorAuthorizationResponse),
+    const encodedResponse = await toB64URLSafeNoPadding(
+        new TextEncoder().encode(
+            JSON.stringify(twoFactorAuthorizationResponse),
+        ),
     );
     redirectURL.searchParams.set("passkeySessionID", passkeySessionID);
     redirectURL.searchParams.set("response", encodedResponse);
