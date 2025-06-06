@@ -62,26 +62,24 @@
  *
  * There are two primary types used when exchanging data with these functions:
  *
- * 1. Base64 strings. Unqualified strings are taken as base64 encoded
- *    representations of the underlying data. Usually, the unqualified "base"
- *    function deals with Base64 strings, since they also are the data type in
- *    which we usually send the encryted data etc to remote.
+ * 1. Base64 strings. Unless stated otherwise, all strings are taken as base64
+ *    encoded representations of the underlying data. Usually, the unqualified
+ *    function deals with base64 strings, since they also are the data type in
+ *    which we usually store and send the data.
  *
  * 2. Raw bytes. Uint8Arrays are byte arrays. The functions that deal with bytes
- *    are indicated by a *Bytes suffix in their name.
+ *    are usually indicated by a *Bytes suffix in their name, but not always
+ *    since it might also be the natural choice for functions that deal with
+ *    larger amounts of data.
  *
- * Where possible and useful, functions also accept a union of these two - a
+ * Where relevant and useful, functions also accept a union of these two - a
  * {@link BytesOrB64} where the implementation will automatically convert
  * to/from base64 to bytes if needed, thus saving on unnecessary conversions at
  * the caller side.
  *
- * Apart from these two, there are other secondary and one off types.
+ * Apart from these two, there are other secondary, one off types.
  *
- * 1. "Regular" JavaScript strings. These are indicated by the *UTF8 suffix on
- *    the function that deals with them. These strings will be obtained by utf-8
- *    encoding (or decoding) the underlying bytes.
- *
- * 2. Hex representations of the bytes. These are indicated by the *Hex suffix
+ * 1. Hex representations of the bytes. These are indicated by the *Hex suffix
  *    on the functions dealing with them.
  *
  * 2. JSON values. These are indicated by the *JSON suffix on the functions
@@ -101,6 +99,7 @@ import type {
     EncryptedFile,
     InitChunkDecryptionResult,
     InitChunkEncryptionResult,
+    KeyPair,
     SodiumStateAddress,
 } from "./types";
 import type { CryptoWorker } from "./worker";
@@ -207,18 +206,6 @@ export const encryptBox = (
     inWorker()
         ? ei._encryptBox(data, key)
         : sharedWorker().then((w) => w.encryptBox(data, key));
-
-/**
- * A variant of {@link encryptBox} that first UTF-8 encodes the input string to
- * obtain bytes, which it then encrypts.
- */
-export const encryptBoxUTF8 = (
-    data: string,
-    key: BytesOrB64,
-): Promise<EncryptedBoxB64> =>
-    inWorker()
-        ? ei._encryptBoxUTF8(data, key)
-        : sharedWorker().then((w) => w.encryptBoxUTF8(data, key));
 
 /**
  * Encrypt the given data, returning a blob containing the encrypted data and a
@@ -345,19 +332,6 @@ export const decryptBoxBytes = (
         : sharedWorker().then((w) => w.decryptBoxBytes(box, key));
 
 /**
- * Variant of {@link decryptBoxBytes} that returns the decrypted bytes as a
- * "JavaScript string", specifically a UTF-8 string. That is, after decryption
- * we obtain raw bytes, which we interpret as a UTF-8 string.
- */
-export const decryptBoxUTF8 = (
-    box: EncryptedBox,
-    key: BytesOrB64,
-): Promise<string> =>
-    inWorker()
-        ? ei._decryptBoxUTF8(box, key)
-        : sharedWorker().then((w) => w.decryptBoxUTF8(box, key));
-
-/**
  * Decrypt a blob encrypted using either {@link encryptBlobBytes} or
  * {@link encryptBlob} and return it as a base64 encoded string.
  */
@@ -434,10 +408,7 @@ export const decryptMetadataJSON = (
 /**
  * Generate a new public/private keypair.
  */
-export const generateKeyPair = (): Promise<{
-    publicKey: string;
-    privateKey: string;
-}> =>
+export const generateKeyPair = (): Promise<KeyPair> =>
     inWorker()
         ? ei._generateKeyPair()
         : sharedWorker().then((w) => w.generateKeyPair());
@@ -462,6 +433,19 @@ export const boxSealOpen = (
         ? ei._boxSealOpen(encryptedData, publicKey, secretKey)
         : sharedWorker().then((w) =>
               w.boxSealOpen(encryptedData, publicKey, secretKey),
+          );
+/**
+ * Variant of {@link boxSealOpen} that returns the decrypted bytes as it is
+ * (without encoding them to base64).
+ */
+export const boxSealOpenBytes = (
+    encryptedData: string,
+    keyPair: KeyPair,
+): Promise<Uint8Array> =>
+    inWorker()
+        ? ei._boxSealOpenBytes(encryptedData, keyPair)
+        : sharedWorker().then((w) =>
+              w.boxSealOpenBytes(encryptedData, keyPair),
           );
 
 /**
