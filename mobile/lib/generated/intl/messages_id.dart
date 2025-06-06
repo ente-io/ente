@@ -342,6 +342,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "backupStatusDescription": MessageLookupByLibrary.simpleMessage(
             "Item yang sudah dicadangkan akan terlihat di sini"),
         "backupVideos": MessageLookupByLibrary.simpleMessage("Cadangkan video"),
+        "birthdays": MessageLookupByLibrary.simpleMessage("Birthdays"),
         "blackFridaySale":
             MessageLookupByLibrary.simpleMessage("Penawaran Black Friday"),
         "blog": MessageLookupByLibrary.simpleMessage("Blog"),
@@ -589,6 +590,8 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Perubahan lokasi hanya akan terlihat di Ente"),
         "eligible": MessageLookupByLibrary.simpleMessage("memenuhi syarat"),
         "email": MessageLookupByLibrary.simpleMessage("Email"),
+        "emailAlreadyRegistered":
+            MessageLookupByLibrary.simpleMessage("Email sudah terdaftar."),
         "emailChangedTo": m28,
         "emailNoEnteAccount": m30,
         "emailVerificationToggle":
@@ -638,6 +641,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Harap masukkan alamat email yang sah."),
         "enterYourEmailAddress":
             MessageLookupByLibrary.simpleMessage("Masukkan alamat email kamu"),
+        "enterYourNewEmailAddress": MessageLookupByLibrary.simpleMessage(
+            "Masukkan alamat email baru anda"),
         "enterYourPassword":
             MessageLookupByLibrary.simpleMessage("Masukkan sandi kamu"),
         "enterYourRecoveryKey": MessageLookupByLibrary.simpleMessage(
@@ -725,6 +730,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "grantPermission": MessageLookupByLibrary.simpleMessage("Berikan izin"),
         "groupNearbyPhotos": MessageLookupByLibrary.simpleMessage(
             "Kelompokkan foto yang berdekatan"),
+        "happyBirthday":
+            MessageLookupByLibrary.simpleMessage("Happy birthday! 🥳"),
         "hearUsWhereTitle": MessageLookupByLibrary.simpleMessage(
             "Dari mana Anda menemukan Ente? (opsional)"),
         "help": MessageLookupByLibrary.simpleMessage("Bantuan"),
@@ -1053,6 +1060,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "rateTheApp": MessageLookupByLibrary.simpleMessage("Nilai app ini"),
         "rateUs": MessageLookupByLibrary.simpleMessage("Beri kami nilai"),
         "rateUsOnStore": m67,
+        "receiveRemindersOnBirthdays": MessageLookupByLibrary.simpleMessage(
+            "Receive reminders when it\'s someone\'s birthday. Tapping on the notification will take you to photos of the birthday person."),
         "recover": MessageLookupByLibrary.simpleMessage("Pulihkan"),
         "recoverAccount": MessageLookupByLibrary.simpleMessage("Pulihkan akun"),
         "recoverButton": MessageLookupByLibrary.simpleMessage("Pulihkan"),

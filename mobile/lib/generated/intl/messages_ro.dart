@@ -452,6 +452,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "backupVideos": MessageLookupByLibrary.simpleMessage(
             "Copie de rezervă videoclipuri"),
         "birthday": MessageLookupByLibrary.simpleMessage("Ziua de naștere"),
+        "birthdays": MessageLookupByLibrary.simpleMessage("Birthdays"),
         "blackFridaySale":
             MessageLookupByLibrary.simpleMessage("Ofertă Black Friday"),
         "blog": MessageLookupByLibrary.simpleMessage("Blog"),
@@ -959,6 +960,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "guestView": MessageLookupByLibrary.simpleMessage("Mod oaspete"),
         "guestViewEnablePreSteps": MessageLookupByLibrary.simpleMessage(
             "Pentru a activa modul oaspete, vă rugăm să configurați codul de acces al dispozitivului sau blocarea ecranului în setările sistemului."),
+        "happyBirthday":
+            MessageLookupByLibrary.simpleMessage("Happy birthday! 🥳"),
         "hearUsExplanation": MessageLookupByLibrary.simpleMessage(
             "Nu urmărim instalările aplicației. Ne-ar ajuta dacă ne-ați spune unde ne-ați găsit!"),
         "hearUsWhereTitle": MessageLookupByLibrary.simpleMessage(
@@ -1415,6 +1418,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Evaluați aplicația"),
         "rateUs": MessageLookupByLibrary.simpleMessage("Evaluați-ne"),
         "rateUsOnStore": m67,
+        "receiveRemindersOnBirthdays": MessageLookupByLibrary.simpleMessage(
+            "Receive reminders when it\'s someone\'s birthday. Tapping on the notification will take you to photos of the birthday person."),
         "recover": MessageLookupByLibrary.simpleMessage("Recuperare"),
         "recoverAccount":
             MessageLookupByLibrary.simpleMessage("Recuperare cont"),

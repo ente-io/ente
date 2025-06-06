@@ -223,6 +223,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("גבה על רשת סלולרית"),
         "backupSettings": MessageLookupByLibrary.simpleMessage("הגדרות גיבוי"),
         "backupVideos": MessageLookupByLibrary.simpleMessage("גבה סרטונים"),
+        "birthdays": MessageLookupByLibrary.simpleMessage("Birthdays"),
         "blog": MessageLookupByLibrary.simpleMessage("בלוג"),
         "cachedData": MessageLookupByLibrary.simpleMessage("נתונים מוטמנים"),
         "canNotUploadToAlbumsOwnedByOthers":
@@ -482,6 +483,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "grantFullAccessPrompt": MessageLookupByLibrary.simpleMessage(
             "נא לתת גישה לכל התמונות בתוך ההגדרות של הטלפון"),
         "grantPermission": MessageLookupByLibrary.simpleMessage("הענק הרשאה"),
+        "happyBirthday":
+            MessageLookupByLibrary.simpleMessage("Happy birthday! 🥳"),
         "hidden": MessageLookupByLibrary.simpleMessage("מוסתר"),
         "hide": MessageLookupByLibrary.simpleMessage("הסתר"),
         "hiding": MessageLookupByLibrary.simpleMessage("מחביא..."),
@@ -654,6 +657,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "rateTheApp": MessageLookupByLibrary.simpleMessage("דרג את האפליקציה"),
         "rateUs": MessageLookupByLibrary.simpleMessage("דרג אותנו"),
         "rateUsOnStore": m67,
+        "receiveRemindersOnBirthdays": MessageLookupByLibrary.simpleMessage(
+            "Receive reminders when it\'s someone\'s birthday. Tapping on the notification will take you to photos of the birthday person."),
         "recover": MessageLookupByLibrary.simpleMessage("שחזר"),
         "recoverAccount": MessageLookupByLibrary.simpleMessage("שחזר חשבון"),
         "recoverButton": MessageLookupByLibrary.simpleMessage("שחזר"),

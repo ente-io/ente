@@ -272,6 +272,7 @@ class SmartMemoriesService {
       // Trip memories
       final (tripMemories, bases) = await _getTripsResults(
         allFiles,
+        allFileIdsToFile,
         now,
         oldCache.tripsShownLogs,
         surfaceAll: debugSurfaceAll,
@@ -686,9 +687,19 @@ class SmartMemoriesService {
           if (youAndThemMem != null) {
             memoryResults.add(
               youAndThemMem.copyWith(
+                isBirthday: false,
+                newAge: newAge,
                 firstDateToShow: thisBirthday
                     .subtract(const Duration(days: 5))
                     .microsecondsSinceEpoch,
+                lastDateToShow: thisBirthday.microsecondsSinceEpoch,
+              ),
+            );
+            memoryResults.add(
+              youAndThemMem.copyWith(
+                isBirthday: true,
+                newAge: newAge,
+                firstDateToShow: thisBirthday.microsecondsSinceEpoch,
                 lastDateToShow:
                     thisBirthday.add(kDayItself).microsecondsSinceEpoch,
               ),
@@ -728,7 +739,7 @@ class SmartMemoriesService {
               'Something is going wrong, ${potentialMemory.peopleMemoryType} has multiple memories for same person',
             );
           } else {
-            final randIdx = Random().nextInt(potentialMemory.memories.length);
+            final randIdx = Random().nextInt(memoriesForCategory.length);
             potentialMemory = memoriesForCategory[randIdx];
           }
         }
@@ -841,6 +852,7 @@ class SmartMemoriesService {
 
   static Future<(List<TripMemory>, List<BaseLocation>)> _getTripsResults(
     Iterable<EnteFile> allFiles,
+    Map<int, EnteFile> allFileIdsToFile,
     DateTime currentTime,
     List<TripsShownLog> shownTrips, {
     bool surfaceAll = false,
@@ -946,7 +958,13 @@ class SmartMemoriesService {
           const Duration(days: 90),
         ),
       );
-      baseLocations.add(BaseLocation(files, location, isCurrent));
+      baseLocations.add(
+        BaseLocation(
+          files.map((file) => file.uploadedFileID!).toList(),
+          location,
+          isCurrent,
+        ),
+      );
     }
 
     // Identify trip locations
@@ -1098,8 +1116,11 @@ class SmartMemoriesService {
       for (final baseLocation in baseLocations) {
         String name =
             "Base (${baseLocation.isCurrentBase ? 'current' : 'old'})";
+        final files = baseLocation.fileIDs
+            .map((fileID) => allFileIdsToFile[fileID]!)
+            .toList();
         final String? locationName = _tryFindLocationName(
-          Memory.fromFiles(baseLocation.files, seenTimes),
+          Memory.fromFiles(files, seenTimes),
           cities,
           base: true,
         );
@@ -1109,7 +1130,7 @@ class SmartMemoriesService {
         }
         memoryResults.add(
           TripMemory(
-            Memory.fromFiles(baseLocation.files, seenTimes),
+            Memory.fromFiles(files, seenTimes),
             nowInMicroseconds,
             windowEnd,
             baseLocation.location,
