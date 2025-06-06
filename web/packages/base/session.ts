@@ -164,10 +164,21 @@ export const haveAuthenticatedSession = async () => {
 };
 
 /**
+ * Save the user's encypted key encryption key ("key") in session store
+ * temporarily, until we get back here after completing the second factor.
+ *
+ * See:  [Note: Stashing KEK in session store]
+ *
+ * @param kek The user's key encryption key (as a base64 string).
+ */
+export const stashKeyEncryptionKeyInSessionStore = (kek: string) =>
+    saveKeyInSessionStore("keyEncryptionKey", kek);
+
+/**
  * Return the decrypted user's key encryption key ("kek") from session storage
  * if present, otherwise return `undefined`.
  *
- * [Note: Stashing kek in session store]
+ * [Note: Stashing KEK in session store]
  *
  * During login, if the user has set a second factor (passkey or TOTP), then we
  * need to redirect them to the accounts app or TOTP page to verify the second
