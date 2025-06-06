@@ -41,6 +41,10 @@ import { sharedCryptoWorker } from "ente-base/crypto";
 import type { B64EncryptionResult } from "ente-base/crypto/libsodium";
 import { clearLocalStorage } from "ente-base/local-storage";
 import log from "ente-base/log";
+import {
+    haveAuthenticatedSession,
+    updateSessionFromElectronSafeStorageIfNeeded,
+} from "ente-base/session";
 import { saveKeyInSessionStore } from "ente-shared/crypto/helpers";
 import { CustomError } from "ente-shared/error";
 import { getData, setData, setLSUser } from "ente-shared/storage/localStorage";
@@ -111,20 +115,8 @@ const Page: React.FC = () => {
                 return;
             }
             setUser(user);
-            let key = getKey("encryptionKey");
-            const electron = globalThis.electron;
-            if (!key && electron) {
-                try {
-                    key = await electron.masterKeyB64();
-                } catch (e) {
-                    log.error("Failed to read master key from safe storage", e);
-                }
-                if (key) {
-                    await saveKeyInSessionStore("encryptionKey", key, true);
-                }
-            }
-            const token = getToken();
-            if (key && token) {
+            await updateSessionFromElectronSafeStorageIfNeeded();
+            if (await haveAuthenticatedSession()) {
                 void router.push(appHomeRoute);
                 return;
             }
@@ -133,7 +125,7 @@ const Page: React.FC = () => {
             const keyAttributes: KeyAttributes = getData("keyAttributes");
             const srpAttributes: SRPAttributes = getData("srpAttributes");
 
-            if (token) {
+            if (getToken()) {
                 setSessionValidityCheck(validateSession());
             }
 
