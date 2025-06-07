@@ -35,7 +35,8 @@ class NewAlbumRowItemWidget extends StatelessWidget {
           textCapitalization: TextCapitalization.words,
           popnavAfterSubmission: true,
           onSubmit: (String text) async {
-            if (text.trim() == "") {
+            text = text.trim();
+            if (text == "") {
               return;
             }
 

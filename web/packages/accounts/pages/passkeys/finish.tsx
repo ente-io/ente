@@ -1,6 +1,6 @@
 import { unstashRedirect } from "ente-accounts/services/redirect";
 import { LoadingIndicator } from "ente-base/components/loaders";
-import { fromB64URLSafeNoPaddingString } from "ente-base/crypto/libsodium";
+import { fromB64URLSafeNoPadding } from "ente-base/crypto";
 import log from "ente-base/log";
 import { getData, setData, setLSUser } from "ente-shared/storage/localStorage";
 import { nullToUndefined } from "ente-utils/transform";
@@ -72,7 +72,7 @@ const saveCredentialsAndNavigateTo = async (
     // Decode response string (inverse of the steps we perform in
     // `passkeyAuthenticationSuccessRedirectURL`).
     const decodedResponse = JSON.parse(
-        await fromB64URLSafeNoPaddingString(response),
+        new TextDecoder().decode(await fromB64URLSafeNoPadding(response)),
     );
 
     // Only one of `encryptedToken` or `token` will be present depending on the

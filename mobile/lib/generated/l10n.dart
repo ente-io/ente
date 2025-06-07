@@ -11925,6 +11925,56 @@ class S {
       args: [],
     );
   }
+
+  /// `Birthday notifications`
+  String get birthdayNotifications {
+    return Intl.message(
+      'Birthday notifications',
+      name: 'birthdayNotifications',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Receive reminders when it's someone's birthday. Tapping on the notification will take you to photos of the birthday person.`
+  String get receiveRemindersOnBirthdays {
+    return Intl.message(
+      'Receive reminders when it\'s someone\'s birthday. Tapping on the notification will take you to photos of the birthday person.',
+      name: 'receiveRemindersOnBirthdays',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Happy birthday! 🥳`
+  String get happyBirthday {
+    return Intl.message(
+      'Happy birthday! 🥳',
+      name: 'happyBirthday',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Happy birthday to {name}! 🎉`
+  String happyBirthdayToPerson(Object name) {
+    return Intl.message(
+      'Happy birthday to $name! 🎉',
+      name: 'happyBirthdayToPerson',
+      desc: '',
+      args: [name],
+    );
+  }
+
+  /// `Birthdays`
+  String get birthdays {
+    return Intl.message(
+      'Birthdays',
+      name: 'birthdays',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
@@ -11968,6 +12018,7 @@ class AppLocalizationDelegate extends LocalizationsDelegate<S> {
       Locale.fromSubtags(languageCode: 'ro'),
       Locale.fromSubtags(languageCode: 'ru'),
       Locale.fromSubtags(languageCode: 'sl'),
+      Locale.fromSubtags(languageCode: 'sr'),
       Locale.fromSubtags(languageCode: 'sv'),
       Locale.fromSubtags(languageCode: 'ta'),
       Locale.fromSubtags(languageCode: 'te'),

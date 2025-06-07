@@ -325,13 +325,15 @@ export const getPublicCollection = async (
 
         const collectionName = (fetchedCollection.name =
             fetchedCollection.name ||
-            (await cryptoWorker.decryptBoxUTF8(
-                {
-                    encryptedData: fetchedCollection.encryptedName,
-                    nonce: fetchedCollection.nameDecryptionNonce,
-                },
-                collectionKey,
-            )));
+            new TextDecoder().decode(
+                await cryptoWorker.decryptBoxBytes(
+                    {
+                        encryptedData: fetchedCollection.encryptedName,
+                        nonce: fetchedCollection.nameDecryptionNonce,
+                    },
+                    collectionKey,
+                ),
+            ));
 
         let collectionPublicMagicMetadata: CollectionPublicMagicMetadata;
         if (fetchedCollection.pubMagicMetadata?.data) {

@@ -611,10 +611,16 @@ class _HomeWidgetState extends State<HomeWidget> {
             } else {
               Navigator.pop(context);
             }
-          } else {
-            Bus.instance
-                .fire(TabChangedEvent(0, TabChangedEventSource.backButton));
+            return;
           }
+          if (_selectedTabIndex == 1) {
+            if (_selectedAlbums.albums.isNotEmpty) {
+              _selectedAlbums.clearAll();
+              return;
+            }
+          }
+          Bus.instance
+              .fire(TabChangedEvent(0, TabChangedEventSource.backButton));
         },
         child: Scaffold(
           drawerScrimColor: getEnteColorScheme(context).strokeFainter,
@@ -864,6 +870,10 @@ class _HomeWidgetState extends State<HomeWidget> {
       if (payload.toLowerCase().contains("onthisday")) {
         // ignore: unawaited_futures
         memoriesCacheService.goToOnThisDayMemory(context);
+      } else if (payload.toLowerCase().contains("birthday")) {
+        final personID = payload.substring("birthday_".length);
+        // ignore: unawaited_futures
+        memoriesCacheService.goToPersonMemory(context, personID);
       } else {
         final collectionID = Uri.parse(payload).queryParameters["collectionID"];
         if (collectionID != null) {

@@ -204,6 +204,7 @@ export const VerifyMasterPasswordForm: React.FC<
                 autoComplete="current-password"
                 label={t("password")}
                 fullWidth
+                autoFocus
                 margin="normal"
                 disabled={formik.isSubmitting}
                 error={!!formik.errors.password}
