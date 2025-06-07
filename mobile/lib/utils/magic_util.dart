@@ -167,6 +167,54 @@ Future<void> changeCoverPhoto(
   }
 }
 
+Future<bool> editUploaderName(
+  BuildContext context,
+  Map<EnteFile, String> filesToEditedUploaderNames,
+) async {
+  try {
+    final files = filesToEditedUploaderNames.keys
+        .where((file) => file.uploadedFileID != null)
+        .toList();
+    if (files.isEmpty) {
+      _logger.severe('No files to edit uploader name for');
+      return false;
+    }
+    final fileIdtoUploaderNameUpdate = <int, Map<String, dynamic>>{};
+    for (final entry in filesToEditedUploaderNames.entries) {
+      final file = entry.key;
+      if (file.uploadedFileID == null) continue;
+      final editedUploaderName = entry.value;
+      fileIdtoUploaderNameUpdate[file.uploadedFileID!] = {
+        uploaderNameKey: editedUploaderName,
+      };
+    }
+    final dialog = createProgressDialog(context, S.of(context).pleaseWait);
+    await dialog.show();
+    try {
+      await FileMagicService.instance.updatePublicMagicMetadata(
+        files,
+        null,
+        metadataUpdateMap: fileIdtoUploaderNameUpdate,
+      );
+      if (_shouldReloadGallery(uploaderNameKey)) {
+        Bus.instance.fire(
+          ForceReloadHomeGalleryEvent("FileMetadataChange-$uploaderNameKey"),
+        );
+      }
+      showShortToast(context, S.of(context).done);
+      await dialog.hide();
+    } catch (e, s) {
+      _logger.severe("failed to update $uploaderNameKey", e, s);
+      await dialog.hide();
+      rethrow;
+    }
+    return true;
+  } catch (e) {
+    showShortToast(context, S.of(context).somethingWentWrong);
+    return false;
+  }
+}
+
 Future<bool> editTime(
   BuildContext context,
   Map<EnteFile, int> filesToEditedTimes,
