@@ -50,7 +50,7 @@ class _AddedByWidgetState extends State<AddedByWidget> {
           }
           final result = await showTextInputDialog(
             context,
-            title: "Rename Uploader",
+            title: S.of(context).renameUploader,
             submitButtonLabel: S.of(context).rename,
             initialValue: widget.file.uploaderName,
             maxLength: 50,

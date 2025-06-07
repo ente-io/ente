@@ -6026,6 +6026,16 @@ class S {
     );
   }
 
+  /// `Rename uploader`
+  String get renameUploader {
+    return Intl.message(
+      'Rename uploader',
+      name: 'renameUploader',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Leave shared album?`
   String get leaveSharedAlbum {
     return Intl.message(
