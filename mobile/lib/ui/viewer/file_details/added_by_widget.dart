@@ -1,5 +1,6 @@
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
+import "package:photos/db/files_db.dart";
 import "package:photos/extensions/user_extension.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/extensions/file_props.dart";
@@ -85,6 +86,16 @@ class _AddedByWidgetState extends State<AddedByWidget> {
   ) async {
     final filesToNewUploaderName = <EnteFile, String>{};
     filesToNewUploaderName[widget.file] = newUploaderName;
+    if (widget.file.collectionID != null) {
+      // Also rename all other uploader names in the same collection.
+      final files = await FilesDB.instance
+          .getAllFilesCollection(widget.file.collectionID!);
+      for (final file in files) {
+        if (file.uploaderName == widget.file.uploaderName) {
+          filesToNewUploaderName[file] = newUploaderName;
+        }
+      }
+    }
     return await editUploaderName(context, filesToNewUploaderName);
   }
 }
