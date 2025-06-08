@@ -100,7 +100,7 @@ export const UploaderNameInput: React.FC<UploaderNameInput> = ({
                         margin="normal"
                         hiddenLabel
                         aria-label={t("name")}
-                        placeholder={t("name_placeholder")}
+                        placeholder={t("your_name_placeholder")}
                         disabled={formik.isSubmitting}
                         error={!!formik.errors.value}
                         // As an exception, we don't use an space character
