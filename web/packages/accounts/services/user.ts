@@ -571,7 +571,7 @@ const enableTwoFactor = async (req: EnableTwoFactorRequest) =>
  */
 export const TwoFactorAuthorizationResponse = z.object({
     /**
-     * The user's ID
+     * The user's ID.
      */
     id: z.number(),
     /**
@@ -609,6 +609,35 @@ export interface TwoFactorRecoveryResponse {
     secretDecryptionNonce: string;
 }
 
+/**
+ * Initiate second factor reset or bypass by requesting the encrypted second
+ * factor recovery secret (and nonce) from remote. The user can then decrypt
+ * these using their recovery key to reset or bypass their second factor.
+ *
+ * @param sessionID A two factor session ID ({@link twoFactorSessionID} or
+ * {@link passkeySessionID}) for the user.
+ *
+ * @param twoFactorType The type of second factor to reset or bypass.
+ *
+ * [Note: Second factor recovery]
+ *
+ * 1. When setting up a TOTP based second factor, client sends a (encrypted 2fa
+ *    recovery secret, nonce) pair to remote. This is a randomly generated
+ *    secret (and nonce) encrypted using the user's recovery key.
+ *
+ * 2. Similarly, when setting up a passkey as the second factor, the client
+ *    sends a encrypted recovery secret (see {@link configurePasskeyRecovery}).
+ *
+ * 3. When the user wishes to reset or bypass their second factor, the client
+ *    asks remote for these encrypted secrets (using {@link recoverTwoFactor}).
+ *
+ * 4. User then enters their recovery key, which the client uses to decrypt the
+ *    recovery secret and provide it back to remote for verification (using
+ *    {@link removeTwoFactor}).
+ *
+ * 5. If the recovery secret matches, then remote resets (TOTP based) or bypass
+ *    (passkey based) the user's second factor.
+ */
 export const recoverTwoFactor = async (
     sessionID: string,
     twoFactorType: TwoFactorType,
