@@ -314,7 +314,7 @@ export const sidebar = [
                 items: [
                     {
                         text: "Ente via Tailscale",
-                        link: "/self-hosting/guides/Tailscale",
+                        link: "/self-hosting/guides/tailscale",
                     },
                     {
                         text: "Ente with External S3",
