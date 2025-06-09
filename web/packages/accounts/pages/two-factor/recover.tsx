@@ -25,7 +25,7 @@ import log from "ente-base/log";
 import { getData, setData, setLSUser } from "ente-shared/storage/localStorage";
 import { t } from "i18next";
 import { useRouter } from "next/router";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Trans } from "react-i18next";
 
 export interface RecoverPageProps {
@@ -91,48 +91,54 @@ const Page: React.FC<RecoverPageProps> = ({ twoFactorType }) => {
                 });
         }
     }, [
-        router,
+        twoFactorType,
         logout,
         showContactSupportDialog,
         onGenericError,
-        twoFactorType,
+        router,
     ]);
 
-    const handleSubmit: SingleInputFormProps["onSubmit"] = async (
-        recoveryKeyMnemonic: string,
-        setFieldError,
-    ) => {
-        try {
-            const {
-                encryptedSecret: encryptedData,
-                secretDecryptionNonce: nonce,
-            } = recoveryResponse!;
-            const twoFactorSecret = await decryptBox(
-                { encryptedData, nonce },
-                await recoveryKeyFromMnemonic(recoveryKeyMnemonic),
-            );
-            const resp = await removeTwoFactor(
-                sessionID!,
-                twoFactorSecret,
-                twoFactorType,
-            );
-            const { keyAttributes, encryptedToken, token, id } = resp;
-            await setLSUser({
-                ...getData("user"),
-                token,
-                encryptedToken,
-                id,
-                isTwoFactorEnabled: false,
-            });
-            setData("keyAttributes", keyAttributes);
-            void router.push("/credentials");
-        } catch (e) {
-            log.error("Second factor recovery failed", e);
-            setFieldError(t("incorrect_recovery_key"));
-        }
-    };
+    const handleSubmit: SingleInputFormProps["onSubmit"] | undefined = useMemo(
+        () =>
+            sessionID && recoveryResponse
+                ? async (recoveryKeyMnemonic: string, setFieldError) => {
+                      try {
+                          const {
+                              encryptedSecret: encryptedData,
+                              secretDecryptionNonce: nonce,
+                          } = recoveryResponse;
+                          const twoFactorSecret = await decryptBox(
+                              { encryptedData, nonce },
+                              await recoveryKeyFromMnemonic(
+                                  recoveryKeyMnemonic,
+                              ),
+                          );
+                          const resp = await removeTwoFactor(
+                              sessionID,
+                              twoFactorSecret,
+                              twoFactorType,
+                          );
+                          const { keyAttributes, encryptedToken, token, id } =
+                              resp;
+                          await setLSUser({
+                              ...getData("user"),
+                              token,
+                              encryptedToken,
+                              id,
+                              isTwoFactorEnabled: false,
+                          });
+                          setData("keyAttributes", keyAttributes);
+                          void router.push("/credentials");
+                      } catch (e) {
+                          log.error("Second factor recovery failed", e);
+                          setFieldError(t("incorrect_recovery_key"));
+                      }
+                  }
+                : undefined,
+        [twoFactorType, router, sessionID, recoveryResponse],
+    );
 
-    if (!recoveryResponse) {
+    if (!handleSubmit) {
         return <LoadingIndicator />;
     }
 
