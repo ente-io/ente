@@ -537,16 +537,22 @@ const enableTwoFactor = async (req: EnableTwoFactorRequest) =>
     );
 
 /**
- * The result of a successful two factor verification (totp or passkey).
+ * The result of a successful two factor verification (TOTP or passkey),
+ * recovery removal (TOTP) or recovery bypass (passkey).
  */
 export const TwoFactorAuthorizationResponse = z.object({
+    /**
+     * The user's ID
+     */
     id: z.number(),
-    /** TODO: keyAttributes is guaranteed to be returned by museum, update the
-     * types to reflect that. */
-    keyAttributes: RemoteKeyAttributes.nullish().transform(nullToUndefined),
-    /** TODO: encryptedToken is guaranteed to be returned by museum, update the
-     * types to reflect that. */
-    encryptedToken: z.string().nullish().transform(nullToUndefined),
+    /**
+     * The user's key attributes.
+     */
+    keyAttributes: RemoteKeyAttributes,
+    /**
+     * A encrypted auth token.
+     */
+    encryptedToken: z.string(),
 });
 
 export type TwoFactorAuthorizationResponse = z.infer<
