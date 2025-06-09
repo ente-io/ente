@@ -1,3 +1,4 @@
+import { ensureLocalUser } from "ente-accounts/services/user";
 import { isDesktop } from "ente-base/app";
 import { authenticatedRequestHeaders, ensureOk } from "ente-base/http";
 import { getKV, setKV } from "ente-base/kv";
@@ -235,18 +236,9 @@ export const syncUserDetails = async () => {
     await setKV("userDetails", userDetails);
     setUserDetailsSnapshot(userDetails);
 
-    // Update the email for the local storage user (the user might've changed
-    // their email on a different client).
-
-    const oldLSUser = getData("user") as unknown;
-    const hasMatchingEmail =
-        oldLSUser &&
-        typeof oldLSUser == "object" &&
-        "email" in oldLSUser &&
-        typeof oldLSUser.email == "string" &&
-        oldLSUser.email == userDetails.email;
-
-    if (!hasMatchingEmail) {
+    // Update the email for the local storage user if needed (the user might've
+    // changed their email on a different client).
+    if (ensureLocalUser().email != userDetails.email) {
         log.info("Updating user email to match fetched user details");
         // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
         await setLSUser({ ...getData("user"), email: userDetails.email });
