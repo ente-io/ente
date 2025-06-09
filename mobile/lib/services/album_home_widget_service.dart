@@ -14,7 +14,7 @@ import 'package:photos/service_locator.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/favorites_service.dart';
 import 'package:photos/services/home_widget_service.dart';
-import 'package:photos/services/sync/local_sync_service.dart';
+import "package:photos/services/local/local_import.dart";
 import "package:photos/ui/viewer/file/detail_page.dart";
 import 'package:photos/ui/viewer/gallery/collection_page.dart';
 import 'package:photos/utils/navigation_util.dart';
@@ -246,7 +246,7 @@ class AlbumHomeWidgetService {
   Future<bool> _hasAnyBlockers() async {
     // Check if first import is completed
     final hasCompletedFirstImport =
-        LocalSyncService.instance.hasCompletedFirstImport();
+        LocalImportService.instance.hasCompletedFirstImport();
     if (!hasCompletedFirstImport) {
       _logger.warning("First import not completed");
       return true;
@@ -372,8 +372,7 @@ class AlbumHomeWidgetService {
         final files =
             await FilesDB.instance.getAllFilesCollection(collection.id);
         if (files.isNotEmpty) {
-          albumsWithFiles[collection.id] =
-              (collection.decryptedName ?? "Album", files);
+          albumsWithFiles[collection.id] = (collection.name ?? "Album", files);
         }
       }
     }

@@ -11,9 +11,9 @@ import "package:photos/models/search/search_constants.dart";
 import "package:photos/models/search/search_types.dart";
 import 'package:photos/service_locator.dart';
 import 'package:photos/services/home_widget_service.dart';
+import "package:photos/services/local/local_import.dart";
 import 'package:photos/services/machine_learning/face_ml/person/person_service.dart';
 import 'package:photos/services/search_service.dart';
-import 'package:photos/services/sync/local_sync_service.dart';
 import "package:photos/ui/viewer/file/detail_page.dart";
 import "package:photos/ui/viewer/people/people_page.dart";
 import 'package:photos/utils/navigation_util.dart';
@@ -222,7 +222,7 @@ class PeopleHomeWidgetService {
   Future<bool> _hasAnyBlockers() async {
     // Check if first import is completed
     final hasCompletedFirstImport =
-        LocalSyncService.instance.hasCompletedFirstImport();
+        LocalImportService.instance.hasCompletedFirstImport();
     if (!hasCompletedFirstImport) {
       _logger.warning("First import not completed");
       return true;
