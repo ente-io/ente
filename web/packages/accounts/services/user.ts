@@ -1,15 +1,15 @@
-import { encryptBox } from "ente-base/crypto";
+import { decryptBox, encryptBox } from "ente-base/crypto";
 import {
     authenticatedRequestHeaders,
     ensureOk,
     publicRequestHeaders,
 } from "ente-base/http";
 import { apiURL } from "ente-base/origins";
-import HTTPService from "ente-shared/network/HTTPService";
+import { getAuthToken } from "ente-base/token";
 import { getData, setLSUser } from "ente-shared/storage/localStorage";
 import { nullToUndefined } from "ente-utils/transform";
 import { z } from "zod/v4";
-import { getUserRecoveryKey } from "./recovery-key";
+import { getUserRecoveryKey, recoveryKeyFromMnemonic } from "./recovery-key";
 
 export interface User {
     id: number;
@@ -281,6 +281,14 @@ export const ensureSavedKeyAttributes = (): KeyAttributes =>
     ensureExpectedLoggedInValue(savedKeyAttributes());
 
 /**
+ * Save the user's {@link KeyAttributes} in local storage.
+ *
+ * Use {@link savedKeyAttributes} to retrieve them.
+ */
+export const saveKeyAttributes = (keyAttributes: KeyAttributes) =>
+    localStorage.setItem("keyAttributes", JSON.stringify(keyAttributes));
+
+/**
  * Update or set the user's {@link KeyAttributes} on remote.
  */
 export const putUserKeyAttributes = async (keyAttributes: KeyAttributes) =>
@@ -432,10 +440,7 @@ export const EmailOrSRPAuthorizationResponse = z.object({
  * Log the user out on remote, if possible and needed.
  */
 export const remoteLogoutIfNeeded = async () => {
-    let headers: HeadersInit;
-    try {
-        headers = await authenticatedRequestHeaders();
-    } catch {
+    if (!(await getAuthToken())) {
         // If the logout is attempted during the signup flow itself, then we
         // won't have an auth token.
         return;
@@ -443,7 +448,7 @@ export const remoteLogoutIfNeeded = async () => {
 
     const res = await fetch(await apiURL("/users/logout"), {
         method: "POST",
-        headers,
+        headers: await authenticatedRequestHeaders(),
     });
     if (res.status == 401) {
         // Ignore if we get a 401 Unauthorized, this is expected to happen on
@@ -614,17 +619,19 @@ const TwoFactorRecoveryResponse = z.object({
     secretDecryptionNonce: z.string(),
 });
 
-type TwoFactorRecoveryResponse = z.infer<typeof TwoFactorRecoveryResponse>;
+export type TwoFactorRecoveryResponse = z.infer<
+    typeof TwoFactorRecoveryResponse
+>;
 
 /**
  * Initiate second factor reset or bypass by requesting the encrypted second
  * factor recovery secret (and nonce) from remote. The user can then decrypt
  * these using their recovery key to reset or bypass their second factor.
  *
+ * @param twoFactorType The type of second factor to reset or bypass.
+ *
  * @param sessionID A two factor session ID ({@link twoFactorSessionID} or
  * {@link passkeySessionID}) for the user.
- *
- * @param twoFactorType The type of second factor to reset or bypass.
  *
  * [Note: Second factor recovery]
  *
@@ -646,32 +653,76 @@ type TwoFactorRecoveryResponse = z.infer<typeof TwoFactorRecoveryResponse>;
  *    (passkey based) the user's second factor.
  */
 export const recoverTwoFactor = async (
-    sessionID: string,
     twoFactorType: TwoFactorType,
+    sessionID: string,
 ): Promise<TwoFactorRecoveryResponse> => {
     const res = await fetch(
-        await apiURL("/users/two-factor/recover", { sessionID, twoFactorType }),
+        await apiURL("/users/two-factor/recover", { twoFactorType, sessionID }),
         { headers: publicRequestHeaders() },
     );
     ensureOk(res);
     return TwoFactorRecoveryResponse.parse(await res.json());
 };
 
-export interface TwoFactorVerificationResponse {
-    id: number;
-    keyAttributes: KeyAttributes;
-    encryptedToken?: string;
-    token?: string;
-}
+/**
+ * Finish the second factor recovery / bypass initiated by
+ * {@link recoverTwoFactor} using the provided recovery key mnemonic entered by
+ * the user.
+ *
+ * See: [Note: Second factor recovery].
+ *
+ * This completes the recovery process both locally, and on remote.
+ *
+ * @param twoFactorType The second factor type (same value as what would've been
+ * passed to {@link recoverTwoFactor} for obtaining {@link recoveryResponse}).
+ *
+ * @param sessionID The second factor session ID (same value as what would've
+ * been passed to {@link recoverTwoFactor} for obtaining
+ * {@link recoveryResponse}).
+ *
+ * @param recoveryResponse The response to a previous call to
+ * {@link recoverTwoFactor}.
+ *
+ * @param recoveryKeyMnemonic The 24-word BIP-39 recovery key mnemonic provided
+ * by the user to complete recovery.
+ */
+export const recoverTwoFactorFinish = async (
+    twoFactorType: TwoFactorType,
+    sessionID: string,
+    recoveryResponse: TwoFactorRecoveryResponse,
+    recoveryKeyMnemonic: string,
+) => {
+    const { encryptedSecret: encryptedData, secretDecryptionNonce: nonce } =
+        recoveryResponse;
+    const twoFactorSecret = await decryptBox(
+        { encryptedData, nonce },
+        await recoveryKeyFromMnemonic(recoveryKeyMnemonic),
+    );
+    const { id, keyAttributes, encryptedToken } = await removeTwoFactor(
+        twoFactorType,
+        sessionID,
+        twoFactorSecret,
+    );
+    await setLSUser({
+        ...getData("user"),
+        id,
+        isTwoFactorEnabled: false,
+        encryptedToken,
+        token: undefined,
+    });
+    saveKeyAttributes(keyAttributes);
+};
 
-export const removeTwoFactor = async (
+const removeTwoFactor = async (
+    twoFactorType: TwoFactorType,
     sessionID: string,
     secret: string,
-    twoFactorType: TwoFactorType,
-) => {
-    const resp = await HTTPService.post(
-        await apiURL("/users/two-factor/remove"),
-        { sessionID, secret, twoFactorType },
-    );
-    return resp.data as TwoFactorVerificationResponse;
+): Promise<TwoFactorAuthorizationResponse> => {
+    const res = await fetch(await apiURL("/users/two-factor/remove"), {
+        method: "POST",
+        headers: publicRequestHeaders(),
+        body: JSON.stringify({ twoFactorType, sessionID, secret }),
+    });
+    ensureOk(res);
+    return TwoFactorAuthorizationResponse.parse(await res.json());
 };

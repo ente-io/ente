@@ -1,20 +1,15 @@
+import { HttpStatusCode } from "axios";
 import type { KeyAttributes } from "ente-accounts/services/user";
 import { deriveSubKeyBytes, sharedCryptoWorker, toB64 } from "ente-base/crypto";
+import { ensureOk, publicRequestHeaders } from "ente-base/http";
 import log from "ente-base/log";
+import { apiURL } from "ente-base/origins";
+import { ApiError, CustomError } from "ente-shared/error";
+import HTTPService from "ente-shared/network/HTTPService";
 import { getToken } from "ente-shared/storage/localStorage/helpers";
 import { SRP, SrpClient } from "fast-srp-hap";
 import { v4 as uuidv4 } from "uuid";
-import {
-    completeSRPSetup,
-    createSRPSession,
-    startSRPSetup,
-    verifySRPSession,
-    type SRPAttributes,
-    type SRPSetupAttributes,
-} from "./srp-remote";
-import type { UserVerificationResponse } from "./user";
-
-const SRP_PARAMS = SRP.params["4096"];
+import type { UpdatedKey, UserVerificationResponse } from "./user";
 
 /**
  * Derive a "password" (which is really an arbitrary binary value, not human
@@ -30,6 +25,183 @@ export const deriveSRPPassword = async (kek: string) => {
     // Use the first 16 bytes (128 bits) of the KEK's KDF subkey as the SRP
     // password (instead of entire 32 bytes).
     return toB64(kekSubKeyBytes.slice(0, 16));
+};
+
+export interface SRPAttributes {
+    srpUserID: string;
+    srpSalt: string;
+    memLimit: number;
+    opsLimit: number;
+    kekSalt: string;
+    isEmailMFAEnabled: boolean;
+}
+
+export interface GetSRPAttributesResponse {
+    attributes: SRPAttributes;
+}
+
+export interface SRPSetupAttributes {
+    srpSalt: string;
+    srpVerifier: string;
+    srpUserID: string;
+    loginSubKey: string;
+}
+
+export interface SetupSRPRequest {
+    srpUserID: string;
+    srpSalt: string;
+    srpVerifier: string;
+    srpA: string;
+}
+
+export interface SetupSRPResponse {
+    setupID: string;
+    srpB: string;
+}
+
+export interface CompleteSRPSetupRequest {
+    setupID: string;
+    srpM1: string;
+}
+
+export interface CompleteSRPSetupResponse {
+    setupID: string;
+    srpM2: string;
+}
+
+export interface CreateSRPSessionResponse {
+    sessionID: string;
+    srpB: string;
+}
+
+export interface SRPVerificationResponse extends UserVerificationResponse {
+    srpM2: string;
+}
+
+export interface UpdateSRPAndKeysRequest {
+    srpM1: string;
+    setupID: string;
+    updatedKeyAttr: UpdatedKey;
+    /**
+     * If true (default), then all existing sessions for the user will be
+     * invalidated.
+     */
+    logOutOtherDevices?: boolean;
+}
+
+export interface UpdateSRPAndKeysResponse {
+    srpM2: string;
+    setupID: string;
+}
+
+export const getSRPAttributes = async (
+    email: string,
+): Promise<SRPAttributes | null> => {
+    try {
+        const resp = await HTTPService.get(
+            await apiURL("/users/srp/attributes"),
+            { email },
+        );
+        return (resp.data as GetSRPAttributesResponse).attributes;
+    } catch (e) {
+        log.error("failed to get SRP attributes", e);
+        return null;
+    }
+};
+
+export const startSRPSetup = async (
+    token: string,
+    setupSRPRequest: SetupSRPRequest,
+): Promise<SetupSRPResponse> => {
+    try {
+        const resp = await HTTPService.post(
+            await apiURL("/users/srp/setup"),
+            setupSRPRequest,
+            undefined,
+            { "X-Auth-Token": token },
+        );
+
+        return resp.data as SetupSRPResponse;
+    } catch (e) {
+        log.error("failed to post SRP attributes", e);
+        throw e;
+    }
+};
+
+export const completeSRPSetup = async (
+    token: string,
+    completeSRPSetupRequest: CompleteSRPSetupRequest,
+) => {
+    try {
+        const resp = await HTTPService.post(
+            await apiURL("/users/srp/complete"),
+            completeSRPSetupRequest,
+            undefined,
+            { "X-Auth-Token": token },
+        );
+        return resp.data as CompleteSRPSetupResponse;
+    } catch (e) {
+        log.error("failed to complete SRP setup", e);
+        throw e;
+    }
+};
+
+export const createSRPSession = async (srpUserID: string, srpA: string) => {
+    const res = await fetch(await apiURL("/users/srp/create-session"), {
+        method: "POST",
+        headers: publicRequestHeaders(),
+        body: JSON.stringify({ srpUserID, srpA }),
+    });
+    ensureOk(res);
+    const data = await res.json();
+    // TODO: Use zod
+    return data as CreateSRPSessionResponse;
+};
+
+export const verifySRPSession = async (
+    sessionID: string,
+    srpUserID: string,
+    srpM1: string,
+) => {
+    try {
+        const resp = await HTTPService.post(
+            await apiURL("/users/srp/verify-session"),
+            { sessionID, srpUserID, srpM1 },
+            undefined,
+        );
+        return resp.data as SRPVerificationResponse;
+    } catch (e) {
+        log.error("verifySRPSession failed", e);
+        if (
+            e instanceof ApiError &&
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
+            e.httpStatusCode === HttpStatusCode.Unauthorized
+        ) {
+            // The API contract allows for a SRP verification 401 both because
+            // of incorrect credentials or a non existent account.
+            throw Error(CustomError.INCORRECT_PASSWORD_OR_NO_ACCOUNT);
+        } else {
+            throw e;
+        }
+    }
+};
+
+export const updateSRPAndKeys = async (
+    token: string,
+    updateSRPAndKeyRequest: UpdateSRPAndKeysRequest,
+): Promise<UpdateSRPAndKeysResponse> => {
+    try {
+        const resp = await HTTPService.post(
+            await apiURL("/users/srp/update"),
+            updateSRPAndKeyRequest,
+            undefined,
+            { "X-Auth-Token": token },
+        );
+        return resp.data as UpdateSRPAndKeysResponse;
+    } catch (e) {
+        log.error("updateSRPAndKeys failed", e);
+        throw e;
+    }
 };
 
 export const configureSRP = async ({
@@ -80,7 +252,7 @@ export const generateSRPSetupAttributes = async (
     const srpUserID = uuidv4();
 
     const srpVerifierBuffer = SRP.computeVerifier(
-        SRP_PARAMS,
+        SRP.params["4096"],
         convertBase64ToBuffer(srpSalt),
         Buffer.from(srpUserID),
         convertBase64ToBuffer(loginSubKey),
@@ -153,7 +325,7 @@ export const generateSRPClient = async (
                     throw Error("secret1 gen failed");
                 }
                 const srpClient = new SrpClient(
-                    SRP_PARAMS,
+                    SRP.params["4096"],
                     convertBase64ToBuffer(srpSalt),
                     Buffer.from(srpUserID),
                     convertBase64ToBuffer(loginSubKey),

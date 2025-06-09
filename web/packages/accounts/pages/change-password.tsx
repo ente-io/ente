@@ -13,12 +13,10 @@ import {
     deriveSRPPassword,
     generateSRPClient,
     generateSRPSetupAttributes,
-} from "ente-accounts/services/srp";
-import {
     getSRPAttributes,
     startSRPSetup,
     updateSRPAndKeys,
-} from "ente-accounts/services/srp-remote";
+} from "ente-accounts/services/srp";
 import type {
     KeyAttributes,
     UpdatedKey,

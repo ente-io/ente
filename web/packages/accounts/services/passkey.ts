@@ -7,11 +7,8 @@ import {
     HTTPError,
     publicRequestHeaders,
 } from "ente-base/http";
-import log from "ente-base/log";
 import { apiURL } from "ente-base/origins";
-import HTTPService from "ente-shared/network/HTTPService";
 import { getData, setData, setLSUser } from "ente-shared/storage/localStorage";
-import { getToken } from "ente-shared/storage/localStorage/helpers";
 import { z } from "zod/v4";
 import { getUserRecoveryKey } from "./recovery-key";
 import { unstashRedirect } from "./redirect";
@@ -102,18 +99,17 @@ export const openPasskeyVerificationURL = ({
  * see and their manage their passkeys.
  */
 export const openAccountsManagePasskeysPage = async () => {
-    // Check if the user has passkey recovery enabled
-    const recoveryEnabled = await isPasskeyRecoveryEnabled();
-    if (!recoveryEnabled) {
+    // Check if the user has passkey recovery enabled.
+    const { isPasskeyRecoveryEnabled } = await getTwoFactorRecoveryStatus();
+    if (!isPasskeyRecoveryEnabled) {
         // If not, enable it for them by creating the necessary recovery
         // information to prevent them from getting locked out.
         const resetSecret = await generateKey();
-        const box = await encryptBox(resetSecret, await getUserRecoveryKey());
-        await configurePasskeyRecovery(
+        const { encryptedData, nonce } = await encryptBox(
             resetSecret,
-            box.encryptedData,
-            box.nonce,
+            await getUserRecoveryKey(),
         );
+        await configurePasskeyRecovery(resetSecret, encryptedData, nonce);
     }
 
     // Redirect to the Ente Accounts app where they can view and add and manage
@@ -125,50 +121,47 @@ export const openAccountsManagePasskeysPage = async () => {
     window.open(`${accountsURL}/passkeys?${params.toString()}`);
 };
 
-export const isPasskeyRecoveryEnabled = async () => {
-    try {
-        const token = getToken();
+const TwoFactorRecoveryStatus = z.object({
+    /**
+     * `true` if the passkey recovery setup has been completed.
+     */
+    isPasskeyRecoveryEnabled: z.boolean(),
+});
 
-        const resp = await HTTPService.get(
-            await apiURL("/users/two-factor/recovery-status"),
-            {},
-            { "X-Auth-Token": token },
-        );
-
-        if (typeof resp.data == "undefined") {
-            throw Error("request failed");
-        }
-
-        return resp.data.isPasskeyRecoveryEnabled as boolean;
-    } catch (e) {
-        log.error("failed to get passkey recovery status", e);
-        throw e;
-    }
+/**
+ * Obtain the second factor recovery status from remote.
+ */
+export const getTwoFactorRecoveryStatus = async () => {
+    const res = await fetch(await apiURL("/users/two-factor/recovery-status"), {
+        headers: await authenticatedRequestHeaders(),
+    });
+    ensureOk(res);
+    return TwoFactorRecoveryStatus.parse(await res.json());
 };
 
+/**
+ * Allow the user to bypass their passkeys by saving the provided recovery
+ * credentials on remote.
+ */
 const configurePasskeyRecovery = async (
     secret: string,
     userSecretCipher: string,
     userSecretNonce: string,
-) => {
-    try {
-        const token = getToken();
-
-        const resp = await HTTPService.post(
+) =>
+    ensureOk(
+        await fetch(
             await apiURL("/users/two-factor/passkeys/configure-recovery"),
-            { secret, userSecretCipher, userSecretNonce },
-            undefined,
-            { "X-Auth-Token": token },
-        );
-
-        if (typeof resp.data == "undefined") {
-            throw Error("request failed");
-        }
-    } catch (e) {
-        log.error("failed to configure passkey recovery", e);
-        throw e;
-    }
-};
+            {
+                method: "POST",
+                headers: await authenticatedRequestHeaders(),
+                body: JSON.stringify({
+                    secret,
+                    userSecretCipher,
+                    userSecretNonce,
+                }),
+            },
+        ),
+    );
 
 /**
  * Fetch an Ente Accounts specific JWT token.

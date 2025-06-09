@@ -16,12 +16,11 @@ import {
     stashedRedirect,
     unstashRedirect,
 } from "ente-accounts/services/redirect";
-import { configureSRP } from "ente-accounts/services/srp";
 import type {
     SRPAttributes,
     SRPSetupAttributes,
-} from "ente-accounts/services/srp-remote";
-import { getSRPAttributes } from "ente-accounts/services/srp-remote";
+} from "ente-accounts/services/srp";
+import { configureSRP, getSRPAttributes } from "ente-accounts/services/srp";
 import type { KeyAttributes, User } from "ente-accounts/services/user";
 import {
     putUserKeyAttributes,

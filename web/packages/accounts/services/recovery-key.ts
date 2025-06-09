@@ -7,8 +7,8 @@ import {
     toHex,
 } from "ente-base/crypto";
 import { ensureMasterKeyFromSession } from "ente-base/session";
-import { getData, setData } from "ente-shared/storage/localStorage";
-import { putUserRecoveryKeyAttributes } from "./user";
+import { getData } from "ente-shared/storage/localStorage";
+import { putUserRecoveryKeyAttributes, saveKeyAttributes } from "./user";
 
 // Mobile client library only supports English.
 bip39.setDefaultWordlist("english");
@@ -115,10 +115,7 @@ const createNewRecoveryKey = async (masterKey: string) => {
 
     await putUserRecoveryKeyAttributes(recoveryKeyAttributes);
 
-    setData("keyAttributes", {
-        ...existingAttributes,
-        ...recoveryKeyAttributes,
-    });
+    saveKeyAttributes({ ...existingAttributes, ...recoveryKeyAttributes });
 
     return recoveryKey;
 };
