@@ -604,10 +604,18 @@ export const verifyTwoFactor = async (
 /** The type of the second factor we're trying to act on */
 export type TwoFactorType = "totp" | "passkey";
 
-export interface TwoFactorRecoveryResponse {
-    encryptedSecret: string;
-    secretDecryptionNonce: string;
-}
+const TwoFactorRecoveryResponse = z.object({
+    /**
+     * The recovery secret, encrypted using the user's recovery key.
+     */
+    encryptedSecret: z.string(),
+    /**
+     * The nonce used during encryption of {@link encryptedSecret}.
+     */
+    secretDecryptionNonce: z.string(),
+});
+
+type TwoFactorRecoveryResponse = z.infer<typeof TwoFactorRecoveryResponse>;
 
 /**
  * Initiate second factor reset or bypass by requesting the encrypted second
@@ -641,12 +649,13 @@ export interface TwoFactorRecoveryResponse {
 export const recoverTwoFactor = async (
     sessionID: string,
     twoFactorType: TwoFactorType,
-) => {
-    const resp = await HTTPService.get(
-        await apiURL("/users/two-factor/recover"),
-        { sessionID, twoFactorType },
+): Promise<TwoFactorRecoveryResponse> => {
+    const res = await fetch(
+        await apiURL("/users/two-factor/recover", { sessionID, twoFactorType }),
+        { headers: publicRequestHeaders() },
     );
-    return resp.data as TwoFactorRecoveryResponse;
+    ensureOk(res);
+    return TwoFactorRecoveryResponse.parse(await res.json());
 };
 
 export interface TwoFactorVerificationResponse {
