@@ -505,14 +505,27 @@ export const setupTwoFactorFinish = async (
 };
 
 interface EnableTwoFactorRequest {
+    /**
+     * The current value of the TOTP corresponding to the two factor {@link
+     * secretCode} obtained from a previous call to {@link setupTwoFactor}.
+     */
     code: string;
+    /**
+     * The {@link secretCode} encrypted with the user's recovery key.
+     *
+     * This is used in the case of second factor recovery.
+     */
     encryptedTwoFactorSecret: string;
+    /**
+     * The nonce that was used when encrypting {@link encryptedTwoFactorSecret}.
+     */
     twoFactorSecretDecryptionNonce: string;
 }
 
 /**
- * Enable two factor for the user by providing the 2FA code and the encrypted
- * secret from a previous call to {@link setupTwoFactor}.
+ * Enable the TOTP based two factor for the user by providing the current 2FA
+ * code corresponding the two factor secret, and encrypted secrets for future
+ * recovery (if needed).
  */
 const enableTwoFactor = async (req: EnableTwoFactorRequest) =>
     ensureOk(
