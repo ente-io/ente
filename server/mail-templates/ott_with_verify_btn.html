@@ -33,7 +33,7 @@
     .wrap {
       background-color: #fff;
       padding: 30px;
-      max-width: 525px;
+      max-width: auto;
       margin: 0 auto;
       border-radius: 5px;
     }
@@ -64,7 +64,7 @@
     }
 
     .gutter {
-      padding: 30px;
+      padding: 10px;
     }
 
     img {
@@ -80,37 +80,9 @@
       color: #111;
     }
 
-    @media screen and (max-width: 600px) {
-      .wrap {
-        max-width: auto;
-      }
-
-      .gutter {
-        padding: 10px;
-      }
-    }
-
     .footer-icons {
       padding: 4px !important;
       width: 24px !important;
-    }
-
-    .desktop-section {
-      display: block;
-    }
-
-    .mobile-section {
-      display: none;
-    }
-
-    @media screen and (max-width: 600px) {
-      .desktop-section {
-        display: none;
-      }
-
-      .mobile-section {
-        display: block;
-      }
     }
   </style>
 
@@ -131,7 +103,7 @@
         Verify your email address
       </h2>
       <hr style="margin: 32px 0; border: none; border-top: 1px solid #ddd" />
-      <div class="mobile-section">
+      <div>
         <p style="text-align: center">
           Click on the button to verify your email.
         </p>
@@ -174,36 +146,6 @@
                 padding: 8px 14px;
                 text-align: center;
                 font-size: 16px;
-                font-weight: bold;
-              "
-              target="_blank"
-            >
-              {{.VerificationCode}}
-            </div>
-          </center>
-        </div>
-      </div>
-      <div class="desktop-section">
-        <p style="text-align: center">Use this code to verify your email</p>
-        <div
-          style="
-            text-align: center;
-            font-size: 14px;
-            color: #666;
-            margin-top: 20px;
-          "
-        >
-          <center>
-            <div
-              style="
-                background-color: #f6f6f6;
-                border-radius: 6px;
-                color: #787878;
-                display: inline-block;
-                letter-spacing: 3px;
-                padding: 8px 14px;
-                text-align: center;
-                font-size: 18px;
                 font-weight: bold;
               "
               target="_blank"
