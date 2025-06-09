@@ -5,7 +5,6 @@ import {
     publicRequestHeaders,
 } from "ente-base/http";
 import { apiURL } from "ente-base/origins";
-import HTTPService from "ente-shared/network/HTTPService";
 import { getData, setData, setLSUser } from "ente-shared/storage/localStorage";
 import { nullToUndefined } from "ente-utils/transform";
 import { z } from "zod/v4";
@@ -693,36 +692,31 @@ export const recoverTwoFactorFinish = async (
         { encryptedData, nonce },
         await recoveryKeyFromMnemonic(recoveryKeyMnemonic),
     );
-    const { keyAttributes, encryptedToken, token, id } = await removeTwoFactor(
+    const { id, keyAttributes, encryptedToken } = await removeTwoFactor(
         twoFactorType,
         sessionID,
         twoFactorSecret,
     );
     await setLSUser({
         ...getData("user"),
-        token,
-        encryptedToken,
         id,
         isTwoFactorEnabled: false,
+        encryptedToken,
+        token: undefined,
     });
     setData("keyAttributes", keyAttributes);
 };
 
-export interface TwoFactorVerificationResponse {
-    id: number;
-    keyAttributes: KeyAttributes;
-    encryptedToken?: string;
-    token?: string;
-}
-
-export const removeTwoFactor = async (
+const removeTwoFactor = async (
     twoFactorType: TwoFactorType,
     sessionID: string,
     secret: string,
-) => {
-    const resp = await HTTPService.post(
-        await apiURL("/users/two-factor/remove"),
-        { twoFactorType, sessionID, secret },
-    );
-    return resp.data as TwoFactorVerificationResponse;
+): Promise<TwoFactorAuthorizationResponse> => {
+    const res = await fetch(await apiURL("/users/two-factor/remove"), {
+        method: "POST",
+        headers: publicRequestHeaders(),
+        body: JSON.stringify({ twoFactorType, sessionID, secret }),
+    });
+    ensureOk(res);
+    return TwoFactorAuthorizationResponse.parse(await res.json());
 };
