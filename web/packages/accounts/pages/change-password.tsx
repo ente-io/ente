@@ -17,10 +17,10 @@ import {
     startSRPSetup,
     updateSRPAndKeys,
 } from "ente-accounts/services/srp";
-import type {
-    KeyAttributes,
-    UpdatedKey,
-    User,
+import {
+    ensureSavedKeyAttributes,
+    type UpdatedKey,
+    type User,
 } from "ente-accounts/services/user";
 import { generateAndSaveIntermediateKeyAttributes } from "ente-accounts/utils/helpers";
 import { LinkButton } from "ente-base/components/LinkButton";
@@ -58,7 +58,7 @@ const Page: React.FC = () => {
     ) => {
         const cryptoWorker = await sharedCryptoWorker();
         const masterKey = await ensureMasterKeyFromSession();
-        const keyAttributes: KeyAttributes = getData("keyAttributes");
+        const keyAttributes = ensureSavedKeyAttributes();
         let kek: DerivedKey;
         try {
             kek = await cryptoWorker.deriveSensitiveKey(passphrase);
