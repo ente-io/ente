@@ -250,6 +250,44 @@ export const savedKeyAttributes = (): KeyAttributes | undefined => {
 export const ensureSavedKeyAttributes = (): KeyAttributes =>
     ensureExpectedLoggedInValue(savedKeyAttributes());
 
+/**
+ * Update or set the user's {@link KeyAttributes} on remote.
+ */
+export const putUserKeyAttributes = async (keyAttributes: KeyAttributes) =>
+    ensureOk(
+        await fetch(await apiURL("/users/attributes"), {
+            method: "PUT",
+            headers: await authenticatedRequestHeaders(),
+            body: JSON.stringify({ keyAttributes }),
+        }),
+    );
+
+export interface RecoveryKeyAttributes {
+    masterKeyEncryptedWithRecoveryKey: string;
+    masterKeyDecryptionNonce: string;
+    recoveryKeyEncryptedWithMasterKey: string;
+    recoveryKeyDecryptionNonce: string;
+}
+
+/**
+ * Update the encrypted recovery key attributes for the logged in user.
+ *
+ * In practice, this is not expected to be called and is meant as a rare
+ * fallback for very old accounts created prior to recovery key related
+ * attributes being assigned on account setup. Even for these, it'll be called
+ * only once.
+ */
+export const putUserRecoveryKeyAttributes = async (
+    recoveryKeyAttributes: RecoveryKeyAttributes,
+) =>
+    ensureOk(
+        await fetch(await apiURL("/users/recovery-key"), {
+            method: "PUT",
+            headers: await authenticatedRequestHeaders(),
+            body: JSON.stringify(recoveryKeyAttributes),
+        }),
+    );
+
 export interface UserVerificationResponse {
     id: number;
     keyAttributes?: KeyAttributes | undefined;
@@ -272,33 +310,6 @@ export interface UserVerificationResponse {
      */
     twoFactorSessionIDV2?: string | undefined;
     srpM2?: string | undefined;
-}
-
-export interface TwoFactorVerificationResponse {
-    id: number;
-    keyAttributes: KeyAttributes;
-    encryptedToken?: string;
-    token?: string;
-}
-
-const TwoFactorSecret = z.object({
-    secretCode: z.string(),
-    qrCode: z.string(),
-});
-
-export type TwoFactorSecret = z.infer<typeof TwoFactorSecret>;
-
-export interface TwoFactorRecoveryResponse {
-    encryptedSecret: string;
-    secretDecryptionNonce: string;
-}
-
-export interface UpdatedKey {
-    kekSalt: string;
-    encryptedKey: string;
-    keyDecryptionNonce: string;
-    memLimit: number;
-    opsLimit: number;
 }
 
 /**
@@ -388,34 +399,6 @@ export const EmailOrSRPAuthorizationResponse = z.object({
 });
 
 /**
- * The result of a successful two factor verification (totp or passkey).
- */
-export const TwoFactorAuthorizationResponse = z.object({
-    id: z.number(),
-    /** TODO: keyAttributes is guaranteed to be returned by museum, update the
-     * types to reflect that. */
-    keyAttributes: RemoteKeyAttributes.nullish().transform(nullToUndefined),
-    /** TODO: encryptedToken is guaranteed to be returned by museum, update the
-     * types to reflect that. */
-    encryptedToken: z.string().nullish().transform(nullToUndefined),
-});
-
-export type TwoFactorAuthorizationResponse = z.infer<
-    typeof TwoFactorAuthorizationResponse
->;
-
-/**
- * Update or set the user's {@link KeyAttributes} on remote.
- */
-export const putUserKeyAttributes = async (keyAttributes: KeyAttributes) =>
-    ensureOk(
-        await fetch(await apiURL("/users/attributes"), {
-            method: "PUT",
-            headers: await authenticatedRequestHeaders(),
-            body: JSON.stringify({ keyAttributes }),
-        }),
-    );
-/**
  * Log the user out on remote, if possible and needed.
  */
 export const remoteLogoutIfNeeded = async () => {
@@ -441,43 +424,13 @@ export const remoteLogoutIfNeeded = async () => {
     ensureOk(res);
 };
 
-export const verifyTwoFactor = async (code: string, sessionID: string) => {
-    const res = await fetch(await apiURL("/users/two-factor/verify"), {
-        method: "POST",
-        headers: publicRequestHeaders(),
-        body: JSON.stringify({ code, sessionID }),
-    });
-    ensureOk(res);
-    const json = await res.json();
-    // TODO: Use zod here
-    return json as UserVerificationResponse;
-};
-
-/** The type of the second factor we're trying to act on */
-export type TwoFactorType = "totp" | "passkey";
-
-export const recoverTwoFactor = async (
-    sessionID: string,
-    twoFactorType: TwoFactorType,
-) => {
-    const resp = await HTTPService.get(
-        await apiURL("/users/two-factor/recover"),
-        { sessionID, twoFactorType },
-    );
-    return resp.data as TwoFactorRecoveryResponse;
-};
-
-export const removeTwoFactor = async (
-    sessionID: string,
-    secret: string,
-    twoFactorType: TwoFactorType,
-) => {
-    const resp = await HTTPService.post(
-        await apiURL("/users/two-factor/remove"),
-        { sessionID, secret, twoFactorType },
-    );
-    return resp.data as TwoFactorVerificationResponse;
-};
+export interface UpdatedKey {
+    kekSalt: string;
+    encryptedKey: string;
+    keyDecryptionNonce: string;
+    memLimit: number;
+    opsLimit: number;
+}
 
 export const changeEmail = async (email: string, ott: string) => {
     await HTTPService.post(
@@ -487,6 +440,13 @@ export const changeEmail = async (email: string, ott: string) => {
         { "X-Auth-Token": getToken() },
     );
 };
+
+const TwoFactorSecret = z.object({
+    secretCode: z.string(),
+    qrCode: z.string(),
+});
+
+export type TwoFactorSecret = z.infer<typeof TwoFactorSecret>;
 
 /**
  * Start the two factor setup process by fetching a secret code (and the
@@ -520,28 +480,69 @@ export const enableTwoFactor = async (req: EnableTwoFactorRequest) =>
         }),
     );
 
-export interface RecoveryKeyAttributes {
-    masterKeyEncryptedWithRecoveryKey: string;
-    masterKeyDecryptionNonce: string;
-    recoveryKeyEncryptedWithMasterKey: string;
-    recoveryKeyDecryptionNonce: string;
+/**
+ * The result of a successful two factor verification (totp or passkey).
+ */
+export const TwoFactorAuthorizationResponse = z.object({
+    id: z.number(),
+    /** TODO: keyAttributes is guaranteed to be returned by museum, update the
+     * types to reflect that. */
+    keyAttributes: RemoteKeyAttributes.nullish().transform(nullToUndefined),
+    /** TODO: encryptedToken is guaranteed to be returned by museum, update the
+     * types to reflect that. */
+    encryptedToken: z.string().nullish().transform(nullToUndefined),
+});
+
+export type TwoFactorAuthorizationResponse = z.infer<
+    typeof TwoFactorAuthorizationResponse
+>;
+
+export const verifyTwoFactor = async (code: string, sessionID: string) => {
+    const res = await fetch(await apiURL("/users/two-factor/verify"), {
+        method: "POST",
+        headers: publicRequestHeaders(),
+        body: JSON.stringify({ code, sessionID }),
+    });
+    ensureOk(res);
+    const json = await res.json();
+    // TODO: Use zod here
+    return json as UserVerificationResponse;
+};
+
+/** The type of the second factor we're trying to act on */
+export type TwoFactorType = "totp" | "passkey";
+
+export interface TwoFactorRecoveryResponse {
+    encryptedSecret: string;
+    secretDecryptionNonce: string;
 }
 
-/**
- * Update the encrypted recovery key attributes for the logged in user.
- *
- * In practice, this is not expected to be called and is meant as a rare
- * fallback for very old accounts created prior to recovery key related
- * attributes being assigned on account setup. Even for these, it'll be called
- * only once.
- */
-export const putUserRecoveryKeyAttributes = async (
-    recoveryKeyAttributes: RecoveryKeyAttributes,
-) =>
-    ensureOk(
-        await fetch(await apiURL("/users/recovery-key"), {
-            method: "PUT",
-            headers: await authenticatedRequestHeaders(),
-            body: JSON.stringify(recoveryKeyAttributes),
-        }),
+export const recoverTwoFactor = async (
+    sessionID: string,
+    twoFactorType: TwoFactorType,
+) => {
+    const resp = await HTTPService.get(
+        await apiURL("/users/two-factor/recover"),
+        { sessionID, twoFactorType },
     );
+    return resp.data as TwoFactorRecoveryResponse;
+};
+
+export interface TwoFactorVerificationResponse {
+    id: number;
+    keyAttributes: KeyAttributes;
+    encryptedToken?: string;
+    token?: string;
+}
+
+export const removeTwoFactor = async (
+    sessionID: string,
+    secret: string,
+    twoFactorType: TwoFactorType,
+) => {
+    const resp = await HTTPService.post(
+        await apiURL("/users/two-factor/remove"),
+        { sessionID, secret, twoFactorType },
+    );
+    return resp.data as TwoFactorVerificationResponse;
+};

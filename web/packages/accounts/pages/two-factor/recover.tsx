@@ -34,11 +34,11 @@ export interface RecoverPageProps {
 const Page: React.FC<RecoverPageProps> = ({ twoFactorType }) => {
     const { logout, showMiniDialog } = useBaseContext();
 
+    const [sessionID, setSessionID] = useState<string | null>(null);
     const [encryptedTwoFactorSecret, setEncryptedTwoFactorSecret] = useState<{
         encryptedData: string;
         nonce: string;
     } | null>(null);
-    const [sessionID, setSessionID] = useState<string | null>(null);
     const [doesHaveEncryptedRecoveryKey, setDoesHaveEncryptedRecoveryKey] =
         useState(false);
 
