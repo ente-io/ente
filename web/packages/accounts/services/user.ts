@@ -5,7 +5,7 @@ import {
     publicRequestHeaders,
 } from "ente-base/http";
 import { apiURL } from "ente-base/origins";
-import { getData, setData, setLSUser } from "ente-shared/storage/localStorage";
+import { getData, setLSUser } from "ente-shared/storage/localStorage";
 import { nullToUndefined } from "ente-utils/transform";
 import { z } from "zod/v4";
 import { getUserRecoveryKey, recoveryKeyFromMnemonic } from "./recovery-key";
@@ -278,6 +278,14 @@ export const savedKeyAttributes = (): KeyAttributes | undefined => {
  */
 export const ensureSavedKeyAttributes = (): KeyAttributes =>
     ensureExpectedLoggedInValue(savedKeyAttributes());
+
+/**
+ * Save the user's {@link KeyAttributes} in local storage.
+ *
+ * Use {@link savedKeyAttributes} to retrieve them.
+ */
+export const saveKeyAttributes = (keyAttributes: KeyAttributes) =>
+    localStorage.setItem("keyAttributes", JSON.stringify(keyAttributes));
 
 /**
  * Update or set the user's {@link KeyAttributes} on remote.
@@ -704,7 +712,7 @@ export const recoverTwoFactorFinish = async (
         encryptedToken,
         token: undefined,
     });
-    setData("keyAttributes", keyAttributes);
+    saveKeyAttributes(keyAttributes);
 };
 
 const removeTwoFactor = async (
