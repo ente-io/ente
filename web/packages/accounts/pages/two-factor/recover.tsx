@@ -37,7 +37,7 @@ export interface RecoverPageProps {
 const Page: React.FC<RecoverPageProps> = ({ twoFactorType }) => {
     const { logout, showMiniDialog, onGenericError } = useBaseContext();
 
-    const [sessionID, setSessionID] = useState<string | null>(null);
+    const [sessionID, setSessionID] = useState<string | undefined>(undefined);
     const [recoveryResponse, setRecoveryResponse] = useState<
         TwoFactorRecoveryResponse | undefined
     >(undefined);
@@ -65,8 +65,8 @@ const Page: React.FC<RecoverPageProps> = ({ twoFactorType }) => {
 
     useEffect(() => {
         const user = getData("user");
-        const sid = user.passkeySessionID || user.twoFactorSessionID;
-        if (!user?.email || !sid) {
+        const sessionID = user.passkeySessionID || user.twoFactorSessionID;
+        if (!user?.email || !sessionID) {
             void router.push("/");
         } else if (
             !(user.isTwoFactorEnabled || user.isTwoFactorEnabledPasskey) &&
@@ -74,8 +74,8 @@ const Page: React.FC<RecoverPageProps> = ({ twoFactorType }) => {
         ) {
             void router.push("/generate");
         } else {
-            setSessionID(sid);
-            void recoverTwoFactor(sid, twoFactorType)
+            setSessionID(sessionID);
+            void recoverTwoFactor(twoFactorType, sessionID)
                 .then(setRecoveryResponse)
                 .catch((e: unknown) => {
                     log.error("Second factor recovery page setup failed", e);
@@ -99,20 +99,18 @@ const Page: React.FC<RecoverPageProps> = ({ twoFactorType }) => {
     const handleSubmit: SingleInputFormProps["onSubmit"] | undefined = useMemo(
         () =>
             sessionID && recoveryResponse
-                ? async (recoveryKeyMnemonic: string, setFieldError) => {
-                      try {
-                          await recoverTwoFactorFinish(
-                              sessionID,
-                              twoFactorType,
-                              recoveryResponse,
-                              recoveryKeyMnemonic,
-                          );
-                          void router.push("/credentials");
-                      } catch (e) {
-                          log.error("Second factor recovery failed", e);
-                          setFieldError(t("incorrect_recovery_key"));
-                      }
-                  }
+                ? (recoveryKeyMnemonic, setFieldError) =>
+                      recoverTwoFactorFinish(
+                          twoFactorType,
+                          sessionID,
+                          recoveryResponse,
+                          recoveryKeyMnemonic,
+                      )
+                          .then(() => router.push("/credentials"))
+                          .catch((e: unknown) => {
+                              log.error("Second factor recovery failed", e);
+                              setFieldError(t("incorrect_recovery_key"));
+                          })
                 : undefined,
         [twoFactorType, router, sessionID, recoveryResponse],
     );

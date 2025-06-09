@@ -623,10 +623,10 @@ export type TwoFactorRecoveryResponse = z.infer<
  * factor recovery secret (and nonce) from remote. The user can then decrypt
  * these using their recovery key to reset or bypass their second factor.
  *
+ * @param twoFactorType The type of second factor to reset or bypass.
+ *
  * @param sessionID A two factor session ID ({@link twoFactorSessionID} or
  * {@link passkeySessionID}) for the user.
- *
- * @param twoFactorType The type of second factor to reset or bypass.
  *
  * [Note: Second factor recovery]
  *
@@ -648,11 +648,11 @@ export type TwoFactorRecoveryResponse = z.infer<
  *    (passkey based) the user's second factor.
  */
 export const recoverTwoFactor = async (
-    sessionID: string,
     twoFactorType: TwoFactorType,
+    sessionID: string,
 ): Promise<TwoFactorRecoveryResponse> => {
     const res = await fetch(
-        await apiURL("/users/two-factor/recover", { sessionID, twoFactorType }),
+        await apiURL("/users/two-factor/recover", { twoFactorType, sessionID }),
         { headers: publicRequestHeaders() },
     );
     ensureOk(res);
@@ -668,12 +668,12 @@ export const recoverTwoFactor = async (
  *
  * This completes the recovery process both locally, and on remote.
  *
+ * @param twoFactorType The second factor type (same value as what would've been
+ * passed to {@link recoverTwoFactor} for obtaining {@link recoveryResponse}).
+ *
  * @param sessionID The second factor session ID (same value as what would've
  * been passed to {@link recoverTwoFactor} for obtaining
  * {@link recoveryResponse}).
- *
- * @param twoFactorType The second factor type (same value as what would've been
- * passed to {@link recoverTwoFactor} for obtaining {@link recoveryResponse}).
  *
  * @param recoveryResponse The response to a previous call to
  * {@link recoverTwoFactor}.
@@ -682,8 +682,8 @@ export const recoverTwoFactor = async (
  * by the user to complete recovery.
  */
 export const recoverTwoFactorFinish = async (
-    sessionID: string,
     twoFactorType: TwoFactorType,
+    sessionID: string,
     recoveryResponse: TwoFactorRecoveryResponse,
     recoveryKeyMnemonic: string,
 ) => {
@@ -694,8 +694,8 @@ export const recoverTwoFactorFinish = async (
         await recoveryKeyFromMnemonic(recoveryKeyMnemonic),
     );
     const { keyAttributes, encryptedToken, token, id } = await removeTwoFactor(
-        sessionID,
         twoFactorType,
+        sessionID,
         twoFactorSecret,
     );
     await setLSUser({
@@ -716,13 +716,13 @@ export interface TwoFactorVerificationResponse {
 }
 
 export const removeTwoFactor = async (
-    sessionID: string,
     twoFactorType: TwoFactorType,
+    sessionID: string,
     secret: string,
 ) => {
     const resp = await HTTPService.post(
         await apiURL("/users/two-factor/remove"),
-        { sessionID, twoFactorType, secret },
+        { twoFactorType, sessionID, secret },
     );
     return resp.data as TwoFactorVerificationResponse;
 };
