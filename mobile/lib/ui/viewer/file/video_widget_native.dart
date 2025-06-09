@@ -465,6 +465,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
   }
 
   void _seekListener() {
+    if (widget.isFromMemories) return;
     if (!_isSeeking.value &&
         _controller?.playbackStatus == PlaybackStatus.playing) {
       _debouncer.run(() async {
@@ -483,6 +484,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
   }
 
   void _onPlaybackStatusChanged() {
+    if (widget.isFromMemories) return;
     final duration = widget.file.duration != null
         ? widget.file.duration! * 1000
         : _controller?.videoInfo?.durationInMilliseconds;
@@ -527,7 +529,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
   Future<void> _onPlaybackReady() async {
     if (_isPlaybackReady.value) return;
     await _controller!.play();
-    final durationInSeconds = durationToSeconds(duration) ?? 0;
+    final durationInSeconds = durationToSeconds(duration) ?? 10;
     widget.onFinalFileLoad?.call(memoryDuration: durationInSeconds);
     unawaited(_controller!.setVolume(1));
     _isPlaybackReady.value = true;

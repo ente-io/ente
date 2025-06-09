@@ -262,8 +262,11 @@ class _VideoWidgetMediaKitNewState extends State<VideoWidgetMediaKitNew>
         }
         player.open(Media(url), play: _isAppInFG);
       });
-      final duration = controller!.player.state.duration.inSeconds;
-      widget.onFinalFileLoad?.call( 
+      int duration = controller!.player.state.duration.inSeconds;
+      if (duration == 0) {
+        duration = 10;
+      }
+      widget.onFinalFileLoad?.call(
         memoryDuration: duration,
       );
     }
