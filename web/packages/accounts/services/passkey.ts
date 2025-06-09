@@ -7,11 +7,8 @@ import {
     HTTPError,
     publicRequestHeaders,
 } from "ente-base/http";
-import log from "ente-base/log";
 import { apiURL } from "ente-base/origins";
-import HTTPService from "ente-shared/network/HTTPService";
 import { getData, setData, setLSUser } from "ente-shared/storage/localStorage";
-import { getToken } from "ente-shared/storage/localStorage/helpers";
 import { z } from "zod/v4";
 import { getUserRecoveryKey } from "./recovery-key";
 import { unstashRedirect } from "./redirect";
@@ -142,29 +139,29 @@ export const getTwoFactorRecoveryStatus = async () => {
     return TwoFactorRecoveryStatus.parse(await res.json());
 };
 
+/**
+ * Allow the user to bypass their passkeys by saving the provided recovery
+ * credentials on remote.
+ */
 const configurePasskeyRecovery = async (
     secret: string,
     userSecretCipher: string,
     userSecretNonce: string,
-) => {
-    try {
-        const token = getToken();
-
-        const resp = await HTTPService.post(
+) =>
+    ensureOk(
+        await fetch(
             await apiURL("/users/two-factor/passkeys/configure-recovery"),
-            { secret, userSecretCipher, userSecretNonce },
-            undefined,
-            { "X-Auth-Token": token },
-        );
-
-        if (typeof resp.data == "undefined") {
-            throw Error("request failed");
-        }
-    } catch (e) {
-        log.error("failed to configure passkey recovery", e);
-        throw e;
-    }
-};
+            {
+                method: "POST",
+                headers: await authenticatedRequestHeaders(),
+                body: JSON.stringify({
+                    secret,
+                    userSecretCipher,
+                    userSecretNonce,
+                }),
+            },
+        ),
+    );
 
 /**
  * Fetch an Ente Accounts specific JWT token.
