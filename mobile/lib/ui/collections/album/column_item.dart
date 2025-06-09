@@ -64,7 +64,7 @@ class AlbumColumnItemWidget extends StatelessWidget {
                           );
                         } else {
                           return const NoThumbnailWidget(
-                            addBorder: false,
+                            addBorder: false, 
                           );
                         }
                       },

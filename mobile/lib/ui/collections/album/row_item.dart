@@ -107,7 +107,9 @@ class AlbumRowItemWidget extends StatelessWidget {
                                   : thumbnailWidget,
                             );
                           } else {
-                            return const NoThumbnailWidget();
+                            return const NoThumbnailWidget(
+                              borderRadius: 12,
+                            );
                           }
                         },
                       ),

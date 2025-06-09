@@ -51,7 +51,9 @@ class AlbumListItemWidget extends StatelessWidget {
                       shouldShowOwnerAvatar: false,
                     );
                   } else {
-                    return const NoThumbnailWidget(addBorder: false);
+                    return const NoThumbnailWidget(
+                      addBorder: false, 
+                    );
                   }
                 },
               ),

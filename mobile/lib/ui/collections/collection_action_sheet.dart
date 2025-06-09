@@ -36,6 +36,12 @@ enum CollectionActionType {
   moveToHiddenCollection,
 }
 
+extension CollectionActionTypeExtension on CollectionActionType {
+  bool get isHiddenAction =>
+      this == CollectionActionType.moveToHiddenCollection ||
+      this == CollectionActionType.addToHiddenAlbum;
+}
+
 String _actionName(
   BuildContext context,
   CollectionActionType type,
@@ -127,9 +133,7 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
   @override
   void initState() {
     super.initState();
-    _showOnlyHiddenCollections =
-        widget.actionType == CollectionActionType.moveToHiddenCollection ||
-            widget.actionType == CollectionActionType.addToHiddenAlbum;
+    _showOnlyHiddenCollections = widget.actionType.isHiddenAction;
     _enableSelection = (widget.actionType == CollectionActionType.addFiles ||
             widget.actionType == CollectionActionType.addToHiddenAlbum) &&
         (widget.sharedFiles == null || widget.sharedFiles!.isEmpty);
