@@ -571,24 +571,6 @@ export const createShareableURL = async (collection: Collection) => {
     }
 };
 
-export const deleteShareableURL = async (collection: Collection) => {
-    try {
-        const token = getToken();
-        if (!token) {
-            return null;
-        }
-        await HTTPService.delete(
-            await apiURL(`/collections/share-url/${collection.id}`),
-            null,
-            null,
-            { "X-Auth-Token": token },
-        );
-    } catch (e) {
-        log.error("deleteShareableURL failed ", e);
-        throw e;
-    }
-};
-
 export const updateShareableURL = async (
     request: UpdatePublicURL,
 ): Promise<PublicURL> => {

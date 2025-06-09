@@ -1,3 +1,4 @@
+import { encryptBox } from "ente-base/crypto";
 import {
     authenticatedRequestHeaders,
     ensureOk,
@@ -5,9 +6,10 @@ import {
 } from "ente-base/http";
 import { apiURL } from "ente-base/origins";
 import HTTPService from "ente-shared/network/HTTPService";
-import { getToken } from "ente-shared/storage/localStorage/helpers";
+import { getData, setLSUser } from "ente-shared/storage/localStorage";
 import { nullToUndefined } from "ente-utils/transform";
 import { z } from "zod/v4";
+import { getUserRecoveryKey } from "./recovery-key";
 
 export interface User {
     id: number;
@@ -18,18 +20,25 @@ export interface User {
     twoFactorSessionID: string;
 }
 
-// TODO: During login the only field present is email. Which makes this
-// optionality indicated by these types incorrect.
+/**
+ * The local storage data about the user after they've logged in.
+ */
 const LocalUser = z.object({
-    /** The user's ID. */
+    /**
+     * The user's ID.
+     */
     id: z.number(),
-    /** The user's email. */
+    /**
+     * The user's email.
+     */
     email: z.string(),
     /**
      * The user's (plaintext) auth token.
      *
      * It is used for making API calls on their behalf, by passing this token as
      * the value of the X-Auth-Token header in the HTTP request.
+     *
+     * Deprecated, use `getAuthToken()` instead (which fetches it from IDB).
      */
     token: z.string(),
 });
@@ -38,8 +47,29 @@ const LocalUser = z.object({
 export type LocalUser = z.infer<typeof LocalUser>;
 
 /**
+ * The local storage data about the user before login or signup is complete.
+ *
+ * During login or signup, the user object exists in various partial states in
+ * local storage.
+ *
+ * - Initially, there is no user object in local storage.
+ *
+ * - When the user enters their email, the email property of the stored object
+ *   is set, but nothing else.
+ *
+ * - If they have second factor verification set, then after entering their
+ *   password {@link isTwoFactorEnabled} and {@link twoFactorSessionID} will
+ *   also get filled in.
+ *
+ * - Once they verify their TOTP based second factor, their {@link id} and
+ *   {@link encryptedToken} will also get filled in.
+ */
+// TODO: Start using me.
+export const PreLoginLocalUser = LocalUser.partial();
+
+/**
  * Return the logged-in user, if someone is indeed logged in. Otherwise return
- * `undefined`.
+ * `undefined` (TODO: That's not what it is doing...).
  *
  * The user's data is stored in the browser's localStorage. Thus, this function
  * only works from the main thread, not from web workers (local storage is not
@@ -250,6 +280,44 @@ export const savedKeyAttributes = (): KeyAttributes | undefined => {
 export const ensureSavedKeyAttributes = (): KeyAttributes =>
     ensureExpectedLoggedInValue(savedKeyAttributes());
 
+/**
+ * Update or set the user's {@link KeyAttributes} on remote.
+ */
+export const putUserKeyAttributes = async (keyAttributes: KeyAttributes) =>
+    ensureOk(
+        await fetch(await apiURL("/users/attributes"), {
+            method: "PUT",
+            headers: await authenticatedRequestHeaders(),
+            body: JSON.stringify({ keyAttributes }),
+        }),
+    );
+
+export interface RecoveryKeyAttributes {
+    masterKeyEncryptedWithRecoveryKey: string;
+    masterKeyDecryptionNonce: string;
+    recoveryKeyEncryptedWithMasterKey: string;
+    recoveryKeyDecryptionNonce: string;
+}
+
+/**
+ * Update the encrypted recovery key attributes for the logged in user.
+ *
+ * In practice, this is not expected to be called and is meant as a rare
+ * fallback for very old accounts created prior to recovery key related
+ * attributes being assigned on account setup. Even for these, it'll be called
+ * only once.
+ */
+export const putUserRecoveryKeyAttributes = async (
+    recoveryKeyAttributes: RecoveryKeyAttributes,
+) =>
+    ensureOk(
+        await fetch(await apiURL("/users/recovery-key"), {
+            method: "PUT",
+            headers: await authenticatedRequestHeaders(),
+            body: JSON.stringify(recoveryKeyAttributes),
+        }),
+    );
+
 export interface UserVerificationResponse {
     id: number;
     keyAttributes?: KeyAttributes | undefined;
@@ -272,33 +340,6 @@ export interface UserVerificationResponse {
      */
     twoFactorSessionIDV2?: string | undefined;
     srpM2?: string | undefined;
-}
-
-export interface TwoFactorVerificationResponse {
-    id: number;
-    keyAttributes: KeyAttributes;
-    encryptedToken?: string;
-    token?: string;
-}
-
-const TwoFactorSecret = z.object({
-    secretCode: z.string(),
-    qrCode: z.string(),
-});
-
-export type TwoFactorSecret = z.infer<typeof TwoFactorSecret>;
-
-export interface TwoFactorRecoveryResponse {
-    encryptedSecret: string;
-    secretDecryptionNonce: string;
-}
-
-export interface UpdatedKey {
-    kekSalt: string;
-    encryptedKey: string;
-    keyDecryptionNonce: string;
-    memLimit: number;
-    opsLimit: number;
 }
 
 /**
@@ -388,34 +429,6 @@ export const EmailOrSRPAuthorizationResponse = z.object({
 });
 
 /**
- * The result of a successful two factor verification (totp or passkey).
- */
-export const TwoFactorAuthorizationResponse = z.object({
-    id: z.number(),
-    /** TODO: keyAttributes is guaranteed to be returned by museum, update the
-     * types to reflect that. */
-    keyAttributes: RemoteKeyAttributes.nullish().transform(nullToUndefined),
-    /** TODO: encryptedToken is guaranteed to be returned by museum, update the
-     * types to reflect that. */
-    encryptedToken: z.string().nullish().transform(nullToUndefined),
-});
-
-export type TwoFactorAuthorizationResponse = z.infer<
-    typeof TwoFactorAuthorizationResponse
->;
-
-/**
- * Update or set the user's {@link KeyAttributes} on remote.
- */
-export const putUserKeyAttributes = async (keyAttributes: KeyAttributes) =>
-    ensureOk(
-        await fetch(await apiURL("/users/attributes"), {
-            method: "PUT",
-            headers: await authenticatedRequestHeaders(),
-            body: JSON.stringify({ keyAttributes }),
-        }),
-    );
-/**
  * Log the user out on remote, if possible and needed.
  */
 export const remoteLogoutIfNeeded = async () => {
@@ -441,31 +454,215 @@ export const remoteLogoutIfNeeded = async () => {
     ensureOk(res);
 };
 
-export const verifyTwoFactor = async (code: string, sessionID: string) => {
+export interface UpdatedKey {
+    kekSalt: string;
+    encryptedKey: string;
+    keyDecryptionNonce: string;
+    memLimit: number;
+    opsLimit: number;
+}
+
+/**
+ * Change the email associated with the user's account on remote.
+ *
+ * @param email The new email.
+ *
+ * @param ott The verification code that was sent to the new email.
+ */
+export const changeEmail = async (email: string, ott: string) =>
+    ensureOk(
+        await fetch(await apiURL("/users/change-email"), {
+            method: "POST",
+            headers: await authenticatedRequestHeaders(),
+            body: JSON.stringify({ email, ott }),
+        }),
+    );
+
+const TwoFactorSecret = z.object({
+    /**
+     * The 2FA secret code.
+     */
+    secretCode: z.string(),
+    /**
+     * A base64 encoded "image/png".
+     */
+    qrCode: z.string(),
+});
+
+export type TwoFactorSecret = z.infer<typeof TwoFactorSecret>;
+
+/**
+ * Start a TOTP based two factor setup process by fetching a secret code (and
+ * the corresponding QR code) from remote.
+ *
+ * Once the user provides us with a TOTP generated using the provided secret, we
+ * can finish the setup with {@link setupTwoFactorFinish}.
+ */
+export const setupTwoFactor = async (): Promise<TwoFactorSecret> => {
+    const res = await fetch(await apiURL("/users/two-factor/setup"), {
+        method: "POST",
+        headers: await authenticatedRequestHeaders(),
+    });
+    ensureOk(res);
+    return TwoFactorSecret.parse(await res.json());
+};
+
+/**
+ * Finish the TOTP based two factor setup by provided a previously obtained
+ * secret (using {@link setupTwoFactor}) and the current TOTP generated using
+ * that secret.
+ *
+ * This updates both the state both locally and on remote.
+ *
+ * @param secretCode The value of {@link secretCode} from the
+ * {@link TwoFactorSecret} obtained by {@link setupTwoFactor}.
+ *
+ * @param totp The current TOTP corresponding to {@link secretCode}.
+ */
+export const setupTwoFactorFinish = async (
+    secretCode: string,
+    totp: string,
+) => {
+    const box = await encryptBox(secretCode, await getUserRecoveryKey());
+    await enableTwoFactor({
+        code: totp,
+        encryptedTwoFactorSecret: box.encryptedData,
+        twoFactorSecretDecryptionNonce: box.nonce,
+    });
+    await setLSUser({ ...getData("user"), isTwoFactorEnabled: true });
+};
+
+interface EnableTwoFactorRequest {
+    /**
+     * The current value of the TOTP corresponding to the two factor {@link
+     * secretCode} obtained from a previous call to {@link setupTwoFactor}.
+     */
+    code: string;
+    /**
+     * The {@link secretCode} encrypted with the user's recovery key.
+     *
+     * This is used in the case of second factor recovery.
+     */
+    encryptedTwoFactorSecret: string;
+    /**
+     * The nonce that was used when encrypting {@link encryptedTwoFactorSecret}.
+     */
+    twoFactorSecretDecryptionNonce: string;
+}
+
+/**
+ * Enable the TOTP based two factor for the user by providing the current 2FA
+ * code corresponding the two factor secret, and encrypted secrets for future
+ * recovery (if needed).
+ */
+const enableTwoFactor = async (req: EnableTwoFactorRequest) =>
+    ensureOk(
+        await fetch(await apiURL("/users/two-factor/enable"), {
+            method: "POST",
+            headers: await authenticatedRequestHeaders(),
+            body: JSON.stringify(req),
+        }),
+    );
+
+/**
+ * The result of a successful two factor verification (TOTP or passkey),
+ * recovery removal (TOTP) or recovery bypass (passkey).
+ */
+export const TwoFactorAuthorizationResponse = z.object({
+    /**
+     * The user's ID.
+     */
+    id: z.number(),
+    /**
+     * The user's key attributes.
+     */
+    keyAttributes: RemoteKeyAttributes,
+    /**
+     * A encrypted auth token.
+     */
+    encryptedToken: z.string(),
+});
+
+export type TwoFactorAuthorizationResponse = z.infer<
+    typeof TwoFactorAuthorizationResponse
+>;
+
+export const verifyTwoFactor = async (
+    code: string,
+    sessionID: string,
+): Promise<TwoFactorAuthorizationResponse> => {
     const res = await fetch(await apiURL("/users/two-factor/verify"), {
         method: "POST",
         headers: publicRequestHeaders(),
         body: JSON.stringify({ code, sessionID }),
     });
     ensureOk(res);
-    const json = await res.json();
-    // TODO: Use zod here
-    return json as UserVerificationResponse;
+    return TwoFactorAuthorizationResponse.parse(await res.json());
 };
 
 /** The type of the second factor we're trying to act on */
 export type TwoFactorType = "totp" | "passkey";
 
+const TwoFactorRecoveryResponse = z.object({
+    /**
+     * The recovery secret, encrypted using the user's recovery key.
+     */
+    encryptedSecret: z.string(),
+    /**
+     * The nonce used during encryption of {@link encryptedSecret}.
+     */
+    secretDecryptionNonce: z.string(),
+});
+
+type TwoFactorRecoveryResponse = z.infer<typeof TwoFactorRecoveryResponse>;
+
+/**
+ * Initiate second factor reset or bypass by requesting the encrypted second
+ * factor recovery secret (and nonce) from remote. The user can then decrypt
+ * these using their recovery key to reset or bypass their second factor.
+ *
+ * @param sessionID A two factor session ID ({@link twoFactorSessionID} or
+ * {@link passkeySessionID}) for the user.
+ *
+ * @param twoFactorType The type of second factor to reset or bypass.
+ *
+ * [Note: Second factor recovery]
+ *
+ * 1. When setting up a TOTP based second factor, client sends a (encrypted 2fa
+ *    recovery secret, nonce) pair to remote. This is a randomly generated
+ *    secret (and nonce) encrypted using the user's recovery key.
+ *
+ * 2. Similarly, when setting up a passkey as the second factor, the client
+ *    sends a encrypted recovery secret (see {@link configurePasskeyRecovery}).
+ *
+ * 3. When the user wishes to reset or bypass their second factor, the client
+ *    asks remote for these encrypted secrets (using {@link recoverTwoFactor}).
+ *
+ * 4. User then enters their recovery key, which the client uses to decrypt the
+ *    recovery secret and provide it back to remote for verification (using
+ *    {@link removeTwoFactor}).
+ *
+ * 5. If the recovery secret matches, then remote resets (TOTP based) or bypass
+ *    (passkey based) the user's second factor.
+ */
 export const recoverTwoFactor = async (
     sessionID: string,
     twoFactorType: TwoFactorType,
-) => {
-    const resp = await HTTPService.get(
-        await apiURL("/users/two-factor/recover"),
-        { sessionID, twoFactorType },
+): Promise<TwoFactorRecoveryResponse> => {
+    const res = await fetch(
+        await apiURL("/users/two-factor/recover", { sessionID, twoFactorType }),
+        { headers: publicRequestHeaders() },
     );
-    return resp.data as TwoFactorRecoveryResponse;
+    ensureOk(res);
+    return TwoFactorRecoveryResponse.parse(await res.json());
 };
+
+export interface TwoFactorVerificationResponse {
+    id: number;
+    keyAttributes: KeyAttributes;
+    encryptedToken?: string;
+    token?: string;
+}
 
 export const removeTwoFactor = async (
     sessionID: string,
@@ -478,70 +675,3 @@ export const removeTwoFactor = async (
     );
     return resp.data as TwoFactorVerificationResponse;
 };
-
-export const changeEmail = async (email: string, ott: string) => {
-    await HTTPService.post(
-        await apiURL("/users/change-email"),
-        { email, ott },
-        undefined,
-        { "X-Auth-Token": getToken() },
-    );
-};
-
-/**
- * Start the two factor setup process by fetching a secret code (and the
- * corresponding QR code) from remote.
- */
-export const setupTwoFactor = async () => {
-    const res = await fetch(await apiURL("/users/two-factor/setup"), {
-        method: "POST",
-        headers: await authenticatedRequestHeaders(),
-    });
-    ensureOk(res);
-    return TwoFactorSecret.parse(await res.json());
-};
-
-interface EnableTwoFactorRequest {
-    code: string;
-    encryptedTwoFactorSecret: string;
-    twoFactorSecretDecryptionNonce: string;
-}
-
-/**
- * Enable two factor for the user by providing the 2FA code and the encrypted
- * secret from a previous call to {@link setupTwoFactor}.
- */
-export const enableTwoFactor = async (req: EnableTwoFactorRequest) =>
-    ensureOk(
-        await fetch(await apiURL("/users/two-factor/enable"), {
-            method: "POST",
-            headers: await authenticatedRequestHeaders(),
-            body: JSON.stringify(req),
-        }),
-    );
-
-export interface RecoveryKeyAttributes {
-    masterKeyEncryptedWithRecoveryKey: string;
-    masterKeyDecryptionNonce: string;
-    recoveryKeyEncryptedWithMasterKey: string;
-    recoveryKeyDecryptionNonce: string;
-}
-
-/**
- * Update the encrypted recovery key attributes for the logged in user.
- *
- * In practice, this is not expected to be called and is meant as a rare
- * fallback for very old accounts created prior to recovery key related
- * attributes being assigned on account setup. Even for these, it'll be called
- * only once.
- */
-export const putUserRecoveryKeyAttributes = async (
-    recoveryKeyAttributes: RecoveryKeyAttributes,
-) =>
-    ensureOk(
-        await fetch(await apiURL("/users/recovery-key"), {
-            method: "PUT",
-            headers: await authenticatedRequestHeaders(),
-            body: JSON.stringify(recoveryKeyAttributes),
-        }),
-    );
