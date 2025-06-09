@@ -614,7 +614,9 @@ const TwoFactorRecoveryResponse = z.object({
     secretDecryptionNonce: z.string(),
 });
 
-type TwoFactorRecoveryResponse = z.infer<typeof TwoFactorRecoveryResponse>;
+export type TwoFactorRecoveryResponse = z.infer<
+    typeof TwoFactorRecoveryResponse
+>;
 
 /**
  * Initiate second factor reset or bypass by requesting the encrypted second

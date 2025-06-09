@@ -8,6 +8,7 @@ import { recoveryKeyFromMnemonic } from "ente-accounts/services/recovery-key";
 import {
     recoverTwoFactor,
     removeTwoFactor,
+    type TwoFactorRecoveryResponse,
     type TwoFactorType,
 } from "ente-accounts/services/user";
 import { LinkButton } from "ente-base/components/LinkButton";
@@ -39,10 +40,9 @@ const Page: React.FC<RecoverPageProps> = ({ twoFactorType }) => {
     const { logout, showMiniDialog, onGenericError } = useBaseContext();
 
     const [sessionID, setSessionID] = useState<string | null>(null);
-    const [encryptedTwoFactorSecret, setEncryptedTwoFactorSecret] = useState<{
-        encryptedData: string;
-        nonce: string;
-    } | null>(null);
+    const [recoveryResponse, setRecoveryResponse] = useState<
+        TwoFactorRecoveryResponse | undefined
+    >(undefined);
 
     const router = useRouter();
 
@@ -77,26 +77,19 @@ const Page: React.FC<RecoverPageProps> = ({ twoFactorType }) => {
             void router.push("/generate");
         } else {
             setSessionID(sid);
-        }
-
-        void (async () => {
-            try {
-                const resp = await recoverTwoFactor(sid, twoFactorType);
-                setEncryptedTwoFactorSecret({
-                    encryptedData: resp.encryptedSecret,
-                    nonce: resp.secretDecryptionNonce,
+            void recoverTwoFactor(sid, twoFactorType)
+                .then(setRecoveryResponse)
+                .catch((e: unknown) => {
+                    log.error("Second factor recovery page setup failed", e);
+                    if (isHTTPErrorWithStatus(e, 404)) {
+                        logout();
+                    } else if (isHTTP4xxError(e)) {
+                        showContactSupportDialog({ action: router.back });
+                    } else {
+                        onGenericError(e);
+                    }
                 });
-            } catch (e) {
-                log.error("Second factor recovery page setup failed", e);
-                if (isHTTPErrorWithStatus(e, 404)) {
-                    logout();
-                } else if (isHTTP4xxError(e)) {
-                    showContactSupportDialog({ action: router.back });
-                } else {
-                    onGenericError(e);
-                }
-            }
-        })();
+        }
     }, [
         router,
         logout,
@@ -110,7 +103,10 @@ const Page: React.FC<RecoverPageProps> = ({ twoFactorType }) => {
         setFieldError,
     ) => {
         try {
-            const { encryptedData, nonce } = encryptedTwoFactorSecret!;
+            const {
+                encryptedSecret: encryptedData,
+                secretDecryptionNonce: nonce,
+            } = recoveryResponse!;
             const twoFactorSecret = await decryptBox(
                 { encryptedData, nonce },
                 await recoveryKeyFromMnemonic(recoveryKeyMnemonic),
@@ -131,12 +127,12 @@ const Page: React.FC<RecoverPageProps> = ({ twoFactorType }) => {
             setData("keyAttributes", keyAttributes);
             void router.push("/credentials");
         } catch (e) {
-            log.error("two factor recovery failed", e);
+            log.error("Second factor recovery failed", e);
             setFieldError(t("incorrect_recovery_key"));
         }
     };
 
-    if (!encryptedTwoFactorSecret) {
+    if (!recoveryResponse) {
         return <LoadingIndicator />;
     }
 
