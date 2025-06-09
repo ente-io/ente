@@ -1,6 +1,7 @@
 import { isDesktop } from "ente-base/app";
 import { authenticatedRequestHeaders, ensureOk } from "ente-base/http";
 import { getKV, setKV } from "ente-base/kv";
+import log from "ente-base/log";
 import { apiURL } from "ente-base/origins";
 import { getData, setLSUser } from "ente-shared/storage/localStorage";
 import {
@@ -234,14 +235,8 @@ export const syncUserDetails = async () => {
     await setKV("userDetails", userDetails);
     setUserDetailsSnapshot(userDetails);
 
-    // TODO: The existing code used to also set the email for the local storage
-    // user whenever it updated the user details. I don't see why this would be
-    // needed though.
-    //
-    // Retaining the existing behaviour for now, except we throw. The intent is
-    // to remove this entire copy-over after a bit.
-    //
-    // Added Nov 2024, and can be removed after a while (tag: Migration).
+    // Update the email for the local storage user (the user might've changed
+    // their email on a different client).
 
     const oldLSUser = getData("user") as unknown;
     const hasMatchingEmail =
@@ -252,9 +247,9 @@ export const syncUserDetails = async () => {
         oldLSUser.email == userDetails.email;
 
     if (!hasMatchingEmail) {
+        log.info("Updating user email to match fetched user details");
         // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
         await setLSUser({ ...getData("user"), email: userDetails.email });
-        throw new Error("Email in local storage did not match user details");
     }
 };
 
