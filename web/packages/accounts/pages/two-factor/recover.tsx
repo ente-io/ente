@@ -1,5 +1,4 @@
 import { Link } from "@mui/material";
-import { HttpStatusCode } from "axios";
 import {
     AccountsPageContents,
     AccountsPageFooter,
@@ -20,20 +19,24 @@ import {
 } from "ente-base/components/SingleInputForm";
 import { useBaseContext } from "ente-base/context";
 import { decryptBox } from "ente-base/crypto";
+import { isHTTP4xxError, isHTTPErrorWithStatus } from "ente-base/http";
 import log from "ente-base/log";
-import { ApiError } from "ente-shared/error";
 import { getData, setData, setLSUser } from "ente-shared/storage/localStorage";
 import { t } from "i18next";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Trans } from "react-i18next";
 
 export interface RecoverPageProps {
     twoFactorType: TwoFactorType;
 }
 
+/**
+ * A page where the user can enter their recovery key to reset or bypass their
+ * second factor in case they no longer have access to it.
+ */
 const Page: React.FC<RecoverPageProps> = ({ twoFactorType }) => {
-    const { logout, showMiniDialog } = useBaseContext();
+    const { logout, showMiniDialog, onGenericError } = useBaseContext();
 
     const [sessionID, setSessionID] = useState<string | null>(null);
     const [encryptedTwoFactorSecret, setEncryptedTwoFactorSecret] = useState<{
@@ -42,6 +45,25 @@ const Page: React.FC<RecoverPageProps> = ({ twoFactorType }) => {
     } | null>(null);
 
     const router = useRouter();
+
+    const showContactSupportDialog = useCallback(
+        (dialogContinue?: MiniDialogAttributes["continue"]) =>
+            showMiniDialog({
+                title: t("contact_support"),
+                message: (
+                    <Trans
+                        i18nKey={"no_two_factor_recovery_key_message"}
+                        components={{
+                            a: <Link href="mailto:support@ente.io" />,
+                        }}
+                        values={{ emailID: "support@ente.io" }}
+                    />
+                ),
+                continue: { color: "secondary", ...(dialogContinue ?? {}) },
+                cancel: false,
+            }),
+        [showMiniDialog],
+    );
 
     useEffect(() => {
         const user = getData("user");
@@ -56,7 +78,8 @@ const Page: React.FC<RecoverPageProps> = ({ twoFactorType }) => {
         } else {
             setSessionID(sid);
         }
-        const main = async () => {
+
+        void (async () => {
             try {
                 const resp = await recoverTwoFactor(sid, twoFactorType);
                 setEncryptedTwoFactorSecret({
@@ -64,23 +87,23 @@ const Page: React.FC<RecoverPageProps> = ({ twoFactorType }) => {
                     nonce: resp.secretDecryptionNonce,
                 });
             } catch (e) {
-                if (
-                    e instanceof ApiError &&
-                    // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
-                    e.httpStatusCode === HttpStatusCode.NotFound
-                ) {
+                log.error("Second factor recovery page setup failed", e);
+                if (isHTTPErrorWithStatus(e, 404)) {
                     logout();
-                } else {
-                    log.error("two factor recovery page setup failed", e);
-
+                } else if (isHTTP4xxError(e)) {
                     showContactSupportDialog({ action: router.back });
+                } else {
+                    onGenericError(e);
                 }
             }
-        };
-        void main();
-        // TODO:
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+        })();
+    }, [
+        router,
+        logout,
+        showContactSupportDialog,
+        onGenericError,
+        twoFactorType,
+    ]);
 
     const handleSubmit: SingleInputFormProps["onSubmit"] = async (
         recoveryKeyMnemonic: string,
@@ -111,23 +134,6 @@ const Page: React.FC<RecoverPageProps> = ({ twoFactorType }) => {
             log.error("two factor recovery failed", e);
             setFieldError(t("incorrect_recovery_key"));
         }
-    };
-
-    const showContactSupportDialog = (
-        dialogContinue?: MiniDialogAttributes["continue"],
-    ) => {
-        showMiniDialog({
-            title: t("contact_support"),
-            message: (
-                <Trans
-                    i18nKey={"no_two_factor_recovery_key_message"}
-                    components={{ a: <Link href="mailto:support@ente.io" /> }}
-                    values={{ emailID: "support@ente.io" }}
-                />
-            ),
-            continue: { color: "secondary", ...(dialogContinue ?? {}) },
-            cancel: false,
-        });
     };
 
     if (!encryptedTwoFactorSecret) {
