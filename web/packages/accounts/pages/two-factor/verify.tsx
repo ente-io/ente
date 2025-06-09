@@ -38,10 +38,20 @@ const Page: React.FC = () => {
 
     const handleSubmit = async (otp: string) => {
         try {
-            const resp = await verifyTwoFactor(otp, sessionID);
-            const { keyAttributes, encryptedToken, token, id } = resp;
-            await setLSUser({ ...getData("user"), token, encryptedToken, id });
-            setData("keyAttributes", keyAttributes!);
+            const { keyAttributes, encryptedToken, id } = await verifyTwoFactor(
+                otp,
+                sessionID,
+            );
+            await setLSUser({
+                ...getData("user"),
+                id,
+                // The original code was parsing an token which is never going
+                // to be present in the response, so effectively was always
+                // setting token to undefined. So this works, but is it needed?
+                token: undefined,
+                encryptedToken,
+            });
+            setData("keyAttributes", keyAttributes);
             await router.push(unstashRedirect() ?? "/credentials");
         } catch (e) {
             if (e instanceof HTTPError && e.res.status == 404) {

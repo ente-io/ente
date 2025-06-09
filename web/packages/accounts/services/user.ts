@@ -559,16 +559,17 @@ export type TwoFactorAuthorizationResponse = z.infer<
     typeof TwoFactorAuthorizationResponse
 >;
 
-export const verifyTwoFactor = async (code: string, sessionID: string) => {
+export const verifyTwoFactor = async (
+    code: string,
+    sessionID: string,
+): Promise<TwoFactorAuthorizationResponse> => {
     const res = await fetch(await apiURL("/users/two-factor/verify"), {
         method: "POST",
         headers: publicRequestHeaders(),
         body: JSON.stringify({ code, sessionID }),
     });
     ensureOk(res);
-    const json = await res.json();
-    // TODO: Use zod here
-    return json as UserVerificationResponse;
+    return TwoFactorAuthorizationResponse.parse(await res.json());
 };
 
 /** The type of the second factor we're trying to act on */
