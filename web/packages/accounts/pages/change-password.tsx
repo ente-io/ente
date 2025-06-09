@@ -16,12 +16,12 @@ import {
     getSRPAttributes,
     startSRPSetup,
     updateSRPAndKeys,
+    type UpdatedKeyAttr,
 } from "ente-accounts/services/srp";
 import {
     ensureSavedKeyAttributes,
     localUser,
     type LocalUser,
-    type UpdatedKey,
 } from "ente-accounts/services/user";
 import { generateAndSaveIntermediateKeyAttributes } from "ente-accounts/utils/helpers";
 import { LinkButton } from "ente-base/components/LinkButton";
@@ -38,7 +38,7 @@ import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 
 /**
- * A page that allows a logged-in user to change their password.
+ * A page that allows a user to reset or change their password.
  */
 const Page: React.FC = () => {
     const [user, setUser] = useState<LocalUser>();
@@ -85,7 +85,7 @@ const PageContents: React.FC<PageContentsProps> = ({ user }) => {
         }
         const { encryptedData: encryptedKey, nonce: keyDecryptionNonce } =
             await cryptoWorker.encryptBox(masterKey, kek.key);
-        const updatedKey: UpdatedKey = {
+        const updatedKeyAttr: UpdatedKeyAttr = {
             encryptedKey,
             keyDecryptionNonce,
             kekSalt: kek.salt,
@@ -117,11 +117,7 @@ const PageContents: React.FC<PageContentsProps> = ({ user }) => {
 
         const srpM1 = convertBufferToBase64(srpClient.computeM1());
 
-        await updateSRPAndKeys(token, {
-            setupID,
-            srpM1,
-            updatedKeyAttr: updatedKey,
-        });
+        await updateSRPAndKeys(token, { setupID, srpM1, updatedKeyAttr });
 
         // Update the SRP attributes that are stored locally.
         const srpAttributes = await getSRPAttributes(user.email);
@@ -129,10 +125,9 @@ const PageContents: React.FC<PageContentsProps> = ({ user }) => {
             setData("srpAttributes", srpAttributes);
         }
 
-        const updatedKeyAttributes = Object.assign(keyAttributes, updatedKey);
         await generateAndSaveIntermediateKeyAttributes(
             passphrase,
-            updatedKeyAttributes,
+            { ...keyAttributes, ...updatedKeyAttr },
             masterKey,
         );
 

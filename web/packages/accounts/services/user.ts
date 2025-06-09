@@ -486,14 +486,6 @@ export const remoteLogoutIfNeeded = async () => {
     ensureOk(res);
 };
 
-export interface UpdatedKey {
-    kekSalt: string;
-    encryptedKey: string;
-    keyDecryptionNonce: string;
-    memLimit: number;
-    opsLimit: number;
-}
-
 /**
  * Change the email associated with the user's account on remote.
  *

@@ -9,7 +9,7 @@ import HTTPService from "ente-shared/network/HTTPService";
 import { getToken } from "ente-shared/storage/localStorage/helpers";
 import { SRP, SrpClient } from "fast-srp-hap";
 import { v4 as uuidv4 } from "uuid";
-import type { UpdatedKey, UserVerificationResponse } from "./user";
+import type { UserVerificationResponse } from "./user";
 
 /**
  * Derive a "password" (which is really an arbitrary binary value, not human
@@ -54,7 +54,7 @@ interface SetupSRPRequest {
     srpA: string;
 }
 
- interface SetupSRPResponse {
+interface SetupSRPResponse {
     setupID: string;
     srpB: string;
 }
@@ -78,10 +78,18 @@ export interface SRPVerificationResponse extends UserVerificationResponse {
     srpM2: string;
 }
 
+export interface UpdatedKeyAttr {
+    kekSalt: string;
+    encryptedKey: string;
+    keyDecryptionNonce: string;
+    memLimit: number;
+    opsLimit: number;
+}
+
 export interface UpdateSRPAndKeysRequest {
     srpM1: string;
     setupID: string;
-    updatedKeyAttr: UpdatedKey;
+    updatedKeyAttr: UpdatedKeyAttr;
     /**
      * If true (default), then all existing sessions for the user will be
      * invalidated.
