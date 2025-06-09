@@ -12,6 +12,7 @@ import {
     type TwoFactorType,
 } from "ente-accounts/services/user";
 import { LinkButton } from "ente-base/components/LinkButton";
+import { LoadingIndicator } from "ente-base/components/loaders";
 import type { MiniDialogAttributes } from "ente-base/components/MiniDialog";
 import {
     SingleInputForm,
@@ -39,8 +40,6 @@ const Page: React.FC<RecoverPageProps> = ({ twoFactorType }) => {
         encryptedData: string;
         nonce: string;
     } | null>(null);
-    const [doesHaveEncryptedRecoveryKey, setDoesHaveEncryptedRecoveryKey] =
-        useState(false);
 
     const router = useRouter();
 
@@ -60,15 +59,10 @@ const Page: React.FC<RecoverPageProps> = ({ twoFactorType }) => {
         const main = async () => {
             try {
                 const resp = await recoverTwoFactor(sid, twoFactorType);
-                setDoesHaveEncryptedRecoveryKey(!!resp.encryptedSecret);
-                if (!resp.encryptedSecret) {
-                    showContactSupportDialog({ action: router.back });
-                } else {
-                    setEncryptedTwoFactorSecret({
-                        encryptedData: resp.encryptedSecret,
-                        nonce: resp.secretDecryptionNonce,
-                    });
-                }
+                setEncryptedTwoFactorSecret({
+                    encryptedData: resp.encryptedSecret,
+                    nonce: resp.secretDecryptionNonce,
+                });
             } catch (e) {
                 if (
                     e instanceof ApiError &&
@@ -78,7 +72,7 @@ const Page: React.FC<RecoverPageProps> = ({ twoFactorType }) => {
                     logout();
                 } else {
                     log.error("two factor recovery page setup failed", e);
-                    setDoesHaveEncryptedRecoveryKey(false);
+
                     showContactSupportDialog({ action: router.back });
                 }
             }
@@ -136,8 +130,8 @@ const Page: React.FC<RecoverPageProps> = ({ twoFactorType }) => {
         });
     };
 
-    if (!doesHaveEncryptedRecoveryKey) {
-        return <></>;
+    if (!encryptedTwoFactorSecret) {
+        return <LoadingIndicator />;
     }
 
     return (
