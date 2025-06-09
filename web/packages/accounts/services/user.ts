@@ -1,3 +1,4 @@
+import { encryptBox } from "ente-base/crypto";
 import {
     authenticatedRequestHeaders,
     ensureOk,
@@ -5,8 +6,10 @@ import {
 } from "ente-base/http";
 import { apiURL } from "ente-base/origins";
 import HTTPService from "ente-shared/network/HTTPService";
+import { getData, setLSUser } from "ente-shared/storage/localStorage";
 import { nullToUndefined } from "ente-utils/transform";
 import { z } from "zod/v4";
+import { getUserRecoveryKey } from "./recovery-key";
 
 export interface User {
     id: number;
@@ -448,23 +451,57 @@ export const changeEmail = async (email: string, ott: string) =>
     );
 
 const TwoFactorSecret = z.object({
+    /**
+     * The 2FA secret code.
+     */
     secretCode: z.string(),
+    /**
+     * A base64 encoded "image/png".
+     */
     qrCode: z.string(),
 });
 
 export type TwoFactorSecret = z.infer<typeof TwoFactorSecret>;
 
 /**
- * Start the two factor setup process by fetching a secret code (and the
- * corresponding QR code) from remote.
+ * Start a TOTP based two factor setup process by fetching a secret code (and
+ * the corresponding QR code) from remote.
+ *
+ * Once the user provides us with a TOTP generated using the provided secret, we
+ * can finish the setup with {@link setupTwoFactorFinish}.
  */
-export const setupTwoFactor = async () => {
+export const setupTwoFactor = async (): Promise<TwoFactorSecret> => {
     const res = await fetch(await apiURL("/users/two-factor/setup"), {
         method: "POST",
         headers: await authenticatedRequestHeaders(),
     });
     ensureOk(res);
     return TwoFactorSecret.parse(await res.json());
+};
+
+/**
+ * Finish the TOTP based two factor setup by provided a previously obtained
+ * secret (using {@link setupTwoFactor}) and the current TOTP generated using
+ * that secret.
+ *
+ * This updates both the state both locally and on remote.
+ *
+ * @param secretCode The value of {@link secretCode} from the
+ * {@link TwoFactorSecret} obtained by {@link setupTwoFactor}.
+ *
+ * @param totp The current TOTP corresponding to {@link secretCode}.
+ */
+export const setupTwoFactorFinish = async (
+    secretCode: string,
+    totp: string,
+) => {
+    const box = await encryptBox(secretCode, await getUserRecoveryKey());
+    await enableTwoFactor({
+        code: totp,
+        encryptedTwoFactorSecret: box.encryptedData,
+        twoFactorSecretDecryptionNonce: box.nonce,
+    });
+    await setLSUser({ ...getData("user"), isTwoFactorEnabled: true });
 };
 
 interface EnableTwoFactorRequest {
@@ -477,7 +514,7 @@ interface EnableTwoFactorRequest {
  * Enable two factor for the user by providing the 2FA code and the encrypted
  * secret from a previous call to {@link setupTwoFactor}.
  */
-export const enableTwoFactor = async (req: EnableTwoFactorRequest) =>
+const enableTwoFactor = async (req: EnableTwoFactorRequest) =>
     ensureOk(
         await fetch(await apiURL("/users/two-factor/enable"), {
             method: "POST",
