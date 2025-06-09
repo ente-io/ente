@@ -169,7 +169,9 @@ class AlbumRecommendation extends StatelessWidget {
                           shouldShowSyncStatus: false,
                         ),
                       )
-                    : const NoThumbnailWidget(),
+                    : const NoThumbnailWidget(
+                        borderRadius: 8,
+                      ),
               ),
             ),
             const SizedBox(height: 6),
@@ -228,23 +230,25 @@ class AlbumCTA extends StatelessWidget {
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(8),
-              child: DottedBorder(
-                borderType: BorderType.RRect,
-                strokeWidth: 1.5,
-                borderPadding: const EdgeInsets.all(0.75),
-                dashPattern: const [3.75, 3.75],
-                radius: const Radius.circular(8),
-                padding: EdgeInsets.zero,
-                color: enteColorScheme.strokeFaint,
-                child: Container(
-                  color: Theme.of(context).brightness == Brightness.light
-                      ? enteColorScheme.backdropBase
-                      : enteColorScheme.backdropFaint,
-                  height: 100,
-                  width: 100,
-                  child: Icon(
-                    Icons.add,
-                    color: enteColorScheme.strokeFaint,
+              child: Container(
+                color: Theme.of(context).brightness == Brightness.light
+                    ? enteColorScheme.backdropBase
+                    : enteColorScheme.backdropFaint,
+                height: 100,
+                width: 100,
+                child: DottedBorder(
+                  borderType: BorderType.RRect,
+                  strokeWidth: 1.5,
+                  borderPadding: const EdgeInsets.all(0.75),
+                  dashPattern: const [3.75, 3.75],
+                  radius: const Radius.circular(8),
+                  padding: EdgeInsets.zero,
+                  color: enteColorScheme.strokeFaint,
+                  child: Center(
+                    child: Icon(
+                      Icons.add,
+                      color: enteColorScheme.strokeFaint,
+                    ),
                   ),
                 ),
               ),
