@@ -36,7 +36,7 @@ export interface SRPAttributes {
     isEmailMFAEnabled: boolean;
 }
 
-export interface GetSRPAttributesResponse {
+interface GetSRPAttributesResponse {
     attributes: SRPAttributes;
 }
 
@@ -47,29 +47,29 @@ export interface SRPSetupAttributes {
     loginSubKey: string;
 }
 
-export interface SetupSRPRequest {
+interface SetupSRPRequest {
     srpUserID: string;
     srpSalt: string;
     srpVerifier: string;
     srpA: string;
 }
 
-export interface SetupSRPResponse {
+ interface SetupSRPResponse {
     setupID: string;
     srpB: string;
 }
 
-export interface CompleteSRPSetupRequest {
+interface CompleteSRPSetupRequest {
     setupID: string;
     srpM1: string;
 }
 
-export interface CompleteSRPSetupResponse {
+interface CompleteSRPSetupResponse {
     setupID: string;
     srpM2: string;
 }
 
-export interface CreateSRPSessionResponse {
+interface CreateSRPSessionResponse {
     sessionID: string;
     srpB: string;
 }
@@ -128,7 +128,7 @@ export const startSRPSetup = async (
     }
 };
 
-export const completeSRPSetup = async (
+const completeSRPSetup = async (
     token: string,
     completeSRPSetupRequest: CompleteSRPSetupRequest,
 ) => {
