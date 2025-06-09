@@ -4,10 +4,9 @@ import {
     AccountsPageFooter,
     AccountsPageTitle,
 } from "ente-accounts/components/layouts/centered-paper";
-import { recoveryKeyFromMnemonic } from "ente-accounts/services/recovery-key";
 import {
     recoverTwoFactor,
-    removeTwoFactor,
+    recoverTwoFactorFinish,
     type TwoFactorRecoveryResponse,
     type TwoFactorType,
 } from "ente-accounts/services/user";
@@ -19,10 +18,9 @@ import {
     type SingleInputFormProps,
 } from "ente-base/components/SingleInputForm";
 import { useBaseContext } from "ente-base/context";
-import { decryptBox } from "ente-base/crypto";
 import { isHTTP4xxError, isHTTPErrorWithStatus } from "ente-base/http";
 import log from "ente-base/log";
-import { getData, setData, setLSUser } from "ente-shared/storage/localStorage";
+import { getData } from "ente-shared/storage/localStorage";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -103,31 +101,12 @@ const Page: React.FC<RecoverPageProps> = ({ twoFactorType }) => {
             sessionID && recoveryResponse
                 ? async (recoveryKeyMnemonic: string, setFieldError) => {
                       try {
-                          const {
-                              encryptedSecret: encryptedData,
-                              secretDecryptionNonce: nonce,
-                          } = recoveryResponse;
-                          const twoFactorSecret = await decryptBox(
-                              { encryptedData, nonce },
-                              await recoveryKeyFromMnemonic(
-                                  recoveryKeyMnemonic,
-                              ),
-                          );
-                          const resp = await removeTwoFactor(
+                          await recoverTwoFactorFinish(
                               sessionID,
-                              twoFactorSecret,
                               twoFactorType,
+                              recoveryResponse,
+                              recoveryKeyMnemonic,
                           );
-                          const { keyAttributes, encryptedToken, token, id } =
-                              resp;
-                          await setLSUser({
-                              ...getData("user"),
-                              token,
-                              encryptedToken,
-                              id,
-                              isTwoFactorEnabled: false,
-                          });
-                          setData("keyAttributes", keyAttributes);
                           void router.push("/credentials");
                       } catch (e) {
                           log.error("Second factor recovery failed", e);

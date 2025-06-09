@@ -1,4 +1,4 @@
-import { encryptBox } from "ente-base/crypto";
+import { decryptBox, encryptBox } from "ente-base/crypto";
 import {
     authenticatedRequestHeaders,
     ensureOk,
@@ -6,10 +6,10 @@ import {
 } from "ente-base/http";
 import { apiURL } from "ente-base/origins";
 import HTTPService from "ente-shared/network/HTTPService";
-import { getData, setLSUser } from "ente-shared/storage/localStorage";
+import { getData, setData, setLSUser } from "ente-shared/storage/localStorage";
 import { nullToUndefined } from "ente-utils/transform";
 import { z } from "zod/v4";
-import { getUserRecoveryKey } from "./recovery-key";
+import { getUserRecoveryKey, recoveryKeyFromMnemonic } from "./recovery-key";
 
 export interface User {
     id: number;
@@ -659,6 +659,55 @@ export const recoverTwoFactor = async (
     return TwoFactorRecoveryResponse.parse(await res.json());
 };
 
+/**
+ * Finish the second factor recovery / bypass initiated by
+ * {@link recoverTwoFactor} using the provided recovery key mnemonic entered by
+ * the user.
+ *
+ * See: [Note: Second factor recovery].
+ *
+ * This completes the recovery process both locally, and on remote.
+ *
+ * @param sessionID The second factor session ID (same value as what would've
+ * been passed to {@link recoverTwoFactor} for obtaining
+ * {@link recoveryResponse}).
+ *
+ * @param twoFactorType The second factor type (same value as what would've been
+ * passed to {@link recoverTwoFactor} for obtaining {@link recoveryResponse}).
+ *
+ * @param recoveryResponse The response to a previous call to
+ * {@link recoverTwoFactor}.
+ *
+ * @param recoveryKeyMnemonic The 24-word BIP-39 recovery key mnemonic provided
+ * by the user to complete recovery.
+ */
+export const recoverTwoFactorFinish = async (
+    sessionID: string,
+    twoFactorType: TwoFactorType,
+    recoveryResponse: TwoFactorRecoveryResponse,
+    recoveryKeyMnemonic: string,
+) => {
+    const { encryptedSecret: encryptedData, secretDecryptionNonce: nonce } =
+        recoveryResponse;
+    const twoFactorSecret = await decryptBox(
+        { encryptedData, nonce },
+        await recoveryKeyFromMnemonic(recoveryKeyMnemonic),
+    );
+    const { keyAttributes, encryptedToken, token, id } = await removeTwoFactor(
+        sessionID,
+        twoFactorType,
+        twoFactorSecret,
+    );
+    await setLSUser({
+        ...getData("user"),
+        token,
+        encryptedToken,
+        id,
+        isTwoFactorEnabled: false,
+    });
+    setData("keyAttributes", keyAttributes);
+};
+
 export interface TwoFactorVerificationResponse {
     id: number;
     keyAttributes: KeyAttributes;
@@ -668,12 +717,12 @@ export interface TwoFactorVerificationResponse {
 
 export const removeTwoFactor = async (
     sessionID: string,
-    secret: string,
     twoFactorType: TwoFactorType,
+    secret: string,
 ) => {
     const resp = await HTTPService.post(
         await apiURL("/users/two-factor/remove"),
-        { sessionID, secret, twoFactorType },
+        { sessionID, twoFactorType, secret },
     );
     return resp.data as TwoFactorVerificationResponse;
 };
