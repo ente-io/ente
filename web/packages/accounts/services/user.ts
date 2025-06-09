@@ -43,11 +43,15 @@ const LocalUser = z.object({
     token: z.string(),
 });
 
-/** Locally available data for the logged in user */
+/**
+ * The local storage data about the user after they've logged in.
+ */
 export type LocalUser = z.infer<typeof LocalUser>;
 
 /**
  * The local storage data about the user before login or signup is complete.
+ *
+ * [Note: Partial local user]
  *
  * During login or signup, the user object exists in various partial states in
  * local storage.
@@ -63,13 +67,32 @@ export type LocalUser = z.infer<typeof LocalUser>;
  *
  * - Once they verify their TOTP based second factor, their {@link id} and
  *   {@link encryptedToken} will also get filled in.
+ *
+ * - TODO add more steps...
+ *
+ * So while the underlying storage is the same, we offer two APIs for code to
+ * obtain the user:
+ *
+ * - Before login is complete, or when it is unknown if login is complete or
+ *   not, then {@link partialLocalUser} can be used to obtain a
+ *   {@link LocalUser} with all of its properties set to be optional.
+ *
+ * - When we know that the login has completed, we can use either
+ *   {@link localUser} (which returns `undefined` if our presumption is false)
+ *   or {@link ensureLocalUser} (which throws if our presumption is false) to
+ *   obtain an object with all the properties expected to be present for a
+ *   locally persisted user set to be required.
  */
-// TODO: Start using me.
-export const PreLoginLocalUser = LocalUser.partial();
+export const partialLocalUser = (): Partial<LocalUser> | undefined => {
+    // TODO: duplicate of getData("user")
+    const s = localStorage.getItem("user");
+    if (!s) return undefined;
+    return LocalUser.partial().parse(JSON.parse(s));
+};
 
 /**
  * Return the logged-in user, if someone is indeed logged in. Otherwise return
- * `undefined` (TODO: That's not what it is doing...).
+ * `undefined`.
  *
  * The user's data is stored in the browser's localStorage. Thus, this function
  * only works from the main thread, not from web workers (local storage is not
@@ -79,7 +102,8 @@ export const localUser = (): LocalUser | undefined => {
     // TODO: duplicate of getData("user")
     const s = localStorage.getItem("user");
     if (!s) return undefined;
-    return LocalUser.parse(JSON.parse(s));
+    const { success, data } = LocalUser.safeParse(JSON.parse(s));
+    return success ? data : undefined;
 };
 
 /**
