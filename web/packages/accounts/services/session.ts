@@ -6,8 +6,8 @@ import { getAuthToken } from "ente-base/token";
 import { getData } from "ente-shared/storage/localStorage";
 import { nullToUndefined } from "ente-utils/transform";
 import { z } from "zod/v4";
-import type { SRPAttributes } from "./srp-remote";
-import { getSRPAttributes } from "./srp-remote";
+import type { SRPAttributes } from "./srp";
+import { getSRPAttributes } from "./srp";
 import {
     ensureLocalUser,
     putUserKeyAttributes,

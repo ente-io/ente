@@ -1,6 +1,6 @@
 import { Input, Stack, TextField, Typography } from "@mui/material";
 import { AccountsPageFooter } from "ente-accounts/components/layouts/centered-paper";
-import { getSRPAttributes } from "ente-accounts/services/srp-remote";
+import { getSRPAttributes } from "ente-accounts/services/srp";
 import { sendOTT } from "ente-accounts/services/user";
 import { LinkButton } from "ente-base/components/LinkButton";
 import { LoadingButton } from "ente-base/components/mui/LoadingButton";
