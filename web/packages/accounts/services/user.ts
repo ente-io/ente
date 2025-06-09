@@ -65,8 +65,7 @@ export type LocalUser = z.infer<typeof LocalUser>;
  *   {@link encryptedToken} will also get filled in.
  */
 // TODO: Start using me.
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const PreLoginLocalUser = LocalUser.partial();
+export const PreLoginLocalUser = LocalUser.partial();
 
 /**
  * Return the logged-in user, if someone is indeed logged in. Otherwise return

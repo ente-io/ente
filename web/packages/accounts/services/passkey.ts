@@ -252,7 +252,7 @@ export const saveCredentialsAndNavigateTo = async (
     const { id, encryptedToken, keyAttributes } = response;
 
     await setLSUser({ ...getData("user"), encryptedToken, id });
-    setData("keyAttributes", keyAttributes!);
+    setData("keyAttributes", keyAttributes);
 
     return unstashRedirect() ?? "/credentials";
 };
