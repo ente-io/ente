@@ -5,6 +5,7 @@ import {
     publicRequestHeaders,
 } from "ente-base/http";
 import { apiURL } from "ente-base/origins";
+import { getAuthToken } from "ente-base/token";
 import { getData, setLSUser } from "ente-shared/storage/localStorage";
 import { nullToUndefined } from "ente-utils/transform";
 import { z } from "zod/v4";
@@ -439,10 +440,7 @@ export const EmailOrSRPAuthorizationResponse = z.object({
  * Log the user out on remote, if possible and needed.
  */
 export const remoteLogoutIfNeeded = async () => {
-    let headers: HeadersInit;
-    try {
-        headers = await authenticatedRequestHeaders();
-    } catch {
+    if (!(await getAuthToken())) {
         // If the logout is attempted during the signup flow itself, then we
         // won't have an auth token.
         return;
@@ -450,7 +448,7 @@ export const remoteLogoutIfNeeded = async () => {
 
     const res = await fetch(await apiURL("/users/logout"), {
         method: "POST",
-        headers,
+        headers: await authenticatedRequestHeaders(),
     });
     if (res.status == 401) {
         // Ignore if we get a 401 Unauthorized, this is expected to happen on
