@@ -26,6 +26,10 @@ class LocalSettings {
   static const kRateUsShownCount = "rate_us_shown_count";
   static const kEnableMultiplePart = "ls.enable_multiple_part";
   static const kCuratedMemoriesEnabled = "ls.curated_memories_enabled";
+  static const kOnThisDayNotificationsEnabled =
+      "ls.on_this_day_notifications_enabled";
+  static const kBirthdayNotificationsEnabled =
+      "ls.birthday_notifications_enabled";
   static const kRateUsPromptThreshold = 2;
   static const shouldLoopVideoKey = "video.should_loop";
   static const onGuestViewKey = "on_guest_view";
@@ -116,6 +120,22 @@ class LocalSettings {
 
   Future<bool> setSmartMemories(bool value) async {
     await _prefs.setBool(kCuratedMemoriesEnabled, value);
+    return value;
+  }
+
+  bool get isOnThisDayNotificationsEnabled =>
+      _prefs.getBool(kOnThisDayNotificationsEnabled) ?? true;
+
+  Future<bool> setOnThisDayNotificationsEnabled(bool value) async {
+    await _prefs.setBool(kOnThisDayNotificationsEnabled, value);
+    return value;
+  }
+
+  bool get birthdayNotificationsEnabled =>
+      _prefs.getBool(kBirthdayNotificationsEnabled) ?? true;
+
+  Future<bool> setBirthdayNotificationsEnabled(bool value) async {
+    await _prefs.setBool(kBirthdayNotificationsEnabled, value);
     return value;
   }
 

@@ -238,7 +238,7 @@ export const Upload: React.FC<UploadProps> = ({
 
     const currentUploadPromise = useRef<Promise<void> | undefined>(undefined);
     const uploadRunning = useRef(false);
-    const uploaderNameRef = useRef<string>(null);
+    const uploaderNameRef = useRef("");
     const isDragAndDrop = useRef(false);
 
     /**
@@ -494,7 +494,7 @@ export const Upload: React.FC<UploadProps> = ({
                         publicCollectionGalleryContext.credentials.accessToken,
                     ),
                 );
-                uploaderNameRef.current = uploaderName;
+                uploaderNameRef.current = uploaderName ?? "";
                 showUploaderNameInput();
                 return;
             }
@@ -791,26 +791,18 @@ export const Upload: React.FC<UploadProps> = ({
         }
     };
 
-    const handlePublicUpload = async (
-        uploaderName: string,
-        skipSave?: boolean,
-    ) => {
-        try {
-            if (!skipSave) {
-                savePublicCollectionUploaderName(
-                    getPublicCollectionUID(
-                        publicCollectionGalleryContext.credentials.accessToken,
-                    ),
-                    uploaderName,
-                );
-            }
-            await uploadFilesToExistingCollection(
-                props.uploadCollection,
-                uploaderName,
-            );
-        } catch (e) {
-            log.error("public upload failed ", e);
-        }
+    const handlePublicUpload = async (uploaderName: string) => {
+        savePublicCollectionUploaderName(
+            getPublicCollectionUID(
+                publicCollectionGalleryContext.credentials.accessToken,
+            ),
+            uploaderName,
+        );
+
+        await uploadFilesToExistingCollection(
+            props.uploadCollection,
+            uploaderName,
+        );
     };
 
     const handleCollectionMappingSelect = (mapping: CollectionMapping) =>
@@ -860,9 +852,7 @@ export const Upload: React.FC<UploadProps> = ({
                 {...newAlbumNameInputVisibilityProps}
                 title={t("new_album")}
                 label={t("album_name")}
-                autoFocus
                 initialValue={prefilledNewAlbumName}
-                submitButtonColor="accent"
                 submitButtonTitle={t("create")}
                 onSubmit={uploadToSingleNewCollection}
             />

@@ -32,7 +32,7 @@ import log from "ente-base/log";
 import {
     clearSessionStorage,
     haveCredentialsInSession,
-    masterKeyFromSessionIfLoggedIn,
+    masterKeyFromSession,
 } from "ente-base/session";
 import { FullScreenDropZone } from "ente-gallery/components/FullScreenDropZone";
 import { type UploadTypeSelectorIntent } from "ente-gallery/components/Upload";
@@ -107,7 +107,6 @@ import {
     setIsFirstLogin,
     setJustSignedUp,
 } from "ente-shared/storage/localStorage/helpers";
-import { getKey } from "ente-shared/storage/sessionStorage";
 import { t } from "i18next";
 import { useRouter, type NextRouter } from "next/router";
 import { createContext, useCallback, useEffect, useRef, useState } from "react";
@@ -389,7 +388,7 @@ const Page: React.FC = () => {
     }, [activeCollectionID, router.isReady]);
 
     useEffect(() => {
-        if (router.isReady && getKey("encryptionKey")) {
+        if (router.isReady && haveCredentialsInSession()) {
             handleSubscriptionCompletionRedirectIfNeeded(
                 showMiniDialog,
                 showLoadingBar,
@@ -561,7 +560,7 @@ const Page: React.FC = () => {
                 showSessionExpiredDialog();
                 return;
             }
-            if (!(await masterKeyFromSessionIfLoggedIn())) {
+            if (!(await masterKeyFromSession())) {
                 clearSessionStorage();
                 router.push("/credentials");
                 return;
@@ -1144,8 +1143,6 @@ const Page: React.FC = () => {
                     {...albumNameInputVisibilityProps}
                     title={t("new_album")}
                     label={t("album_name")}
-                    autoFocus
-                    submitButtonColor="accent"
                     submitButtonTitle={t("create")}
                     onSubmit={handleAlbumNameSubmit}
                 />

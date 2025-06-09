@@ -39,7 +39,7 @@ Future<int?> showPickCoverPhotoSheet(
     topControl: const SizedBox.shrink(),
     backgroundColor: getEnteColorScheme(context).backgroundElevated,
     barrierColor: backdropFaintDark,
-    enableDrag: false,
+    enableDrag: true,
   );
 }
 

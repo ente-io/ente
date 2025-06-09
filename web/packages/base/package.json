@@ -22,7 +22,7 @@
         "react-dom": "^19.1.0",
         "react-i18next": "^15.5.2",
         "yup": "^1.6.1",
-        "zod": "^3.25.48"
+        "zod": "^3.25.51"
     },
     "devDependencies": {
         "@types/libsodium-wrappers-sumo": "^0.7.8",

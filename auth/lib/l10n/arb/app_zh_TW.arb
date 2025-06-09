@@ -173,6 +173,7 @@
   "invalidQRCode": "QR 碼無效",
   "noRecoveryKeyTitle": "沒有復原密鑰嗎？",
   "enterEmailHint": "請輸入您的電子郵件地址",
+  "enterNewEmailHint": "輸入你的新電子郵件地址",
   "invalidEmailTitle": "無效的電子郵件地址",
   "invalidEmailMessage": "請輸入一個有效的電子郵件地址。",
   "deleteAccount": "刪除帳戶",

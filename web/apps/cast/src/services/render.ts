@@ -195,38 +195,37 @@ const decryptEnteFile = async (
         pubMagicMetadata,
         ...restFileProps
     } = encryptedFile;
-    const fileKey = await worker.decryptB64(
-        encryptedKey,
-        keyDecryptionNonce,
+    const fileKey = await worker.decryptBox(
+        { encryptedData: encryptedKey, nonce: keyDecryptionNonce },
         collectionKey,
     );
-    const fileMetadata = await worker.decryptMetadataJSON({
-        encryptedDataB64: metadata.encryptedData,
-        decryptionHeaderB64: metadata.decryptionHeader,
-        keyB64: fileKey,
-    });
+    const fileMetadata = await worker.decryptMetadataJSON(metadata, fileKey);
     let fileMagicMetadata: FileMagicMetadata | undefined;
     let filePubMagicMetadata: FilePublicMagicMetadata | undefined;
     if (magicMetadata?.data) {
         fileMagicMetadata = {
             ...encryptedFile.magicMetadata,
             // @ts-expect-error TODO: Need to use zod here.
-            data: await worker.decryptMetadataJSON({
-                encryptedDataB64: magicMetadata.data,
-                decryptionHeaderB64: magicMetadata.header,
-                keyB64: fileKey,
-            }),
+            data: await worker.decryptMetadataJSON(
+                {
+                    encryptedData: magicMetadata.data,
+                    decryptionHeader: magicMetadata.header,
+                },
+                fileKey,
+            ),
         };
     }
     if (pubMagicMetadata?.data) {
         filePubMagicMetadata = {
             ...pubMagicMetadata,
             // @ts-expect-error TODO: Need to use zod here.
-            data: await worker.decryptMetadataJSON({
-                encryptedDataB64: pubMagicMetadata.data,
-                decryptionHeaderB64: pubMagicMetadata.header,
-                keyB64: fileKey,
-            }),
+            data: await worker.decryptMetadataJSON(
+                {
+                    encryptedData: pubMagicMetadata.data,
+                    decryptionHeader: pubMagicMetadata.header,
+                },
+                fileKey,
+            ),
         };
     }
     return mergeMetadata1({

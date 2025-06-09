@@ -360,13 +360,13 @@ const clusterBatchLinear = async (
  * Use the output of the clustering phase to (a) update any remote cgroups that
  * have changed, and (b) update our locally persisted clusters.
  *
- * @param masterKey The user's master key, required for updating the cgroups on
- * remote if needed.
+ * @param masterKey The user's master key (as a base64 string), required for
+ * updating the cgroups on remote if needed.
  */
 export const reconcileClusters = async (
     clusters: FaceCluster[],
     modifiedClusterIDs: Set<string>,
-    masterKey: Uint8Array,
+    masterKey: string,
 ) => {
     // Index clusters by their ID for fast lookup.
     const clusterByID = new Map(clusters.map((c) => [c.id, c]));

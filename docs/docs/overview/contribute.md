@@ -5,7 +5,13 @@ description: Details about how to contribute to Ente
 
 # Contributing
 
-## Suggest a feature
+There are many ways to contribute to Ente. By spreading the word, engaging with
+our community, helping us with translations or documentation.
+
+You can find our contribution guidelines
+[here](https://github.com/ente-io/ente/blob/main/CONTRIBUTING.md).
+
+## Suggesting features
 
 To suggest new features and/or offer your perspective on how we should design
 (planned and upcoming features), use our

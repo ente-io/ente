@@ -1,8 +1,8 @@
 import { blobCache, type BlobCache } from "ente-base/blob-cache";
 import {
+    decryptBlobBytes,
     decryptStreamBytes,
     decryptStreamChunk,
-    decryptThumbnail,
     initChunkDecryption,
 } from "ente-base/crypto";
 import {
@@ -12,9 +12,9 @@ import {
     retryEnsuringHTTPOk,
     type PublicAlbumsCredentials,
 } from "ente-base/http";
-import { ensureAuthToken } from "ente-base/local-user";
 import log from "ente-base/log";
 import { apiURL, customAPIOrigin } from "ente-base/origins";
+import { ensureAuthToken } from "ente-base/token";
 import type { EnteFile } from "ente-media/file";
 import { FileType } from "ente-media/file-type";
 import { decodeLivePhoto } from "ente-media/live-photo";
@@ -295,7 +295,7 @@ class DownloadManager {
             this._downloadThumbnail(file),
         );
         const decryptionHeader = file.thumbnail.decryptionHeader;
-        return decryptThumbnail({ encryptedData, decryptionHeader }, file.key);
+        return decryptBlobBytes({ encryptedData, decryptionHeader }, file.key);
     };
 
     private async _downloadThumbnail(file: EnteFile) {

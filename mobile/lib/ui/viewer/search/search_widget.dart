@@ -114,7 +114,7 @@ class SearchWidgetState extends State<SearchWidget> {
     isLoading.value = true;
     _debouncer.run(() async {
       if (mounted) {
-        query = textController.text;
+        query = textController.text.trim();
         IndexOfStackNotifier().isSearchQueryEmpty = query.isEmpty;
         searchResultsStreamNotifier.value =
             _getSearchResultsStream(context, query);

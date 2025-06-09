@@ -113,10 +113,11 @@ const logout = () => {
     return ipcRenderer.invoke("logout");
 };
 
-const masterKeyB64 = () => ipcRenderer.invoke("masterKeyB64");
+const masterKeyFromSafeStorage = () =>
+    ipcRenderer.invoke("masterKeyFromSafeStorage");
 
-const saveMasterKeyB64 = (masterKeyB64: string) =>
-    ipcRenderer.invoke("saveMasterKeyB64", masterKeyB64);
+const saveMasterKeyInSafeStorage = (masterKey: string) =>
+    ipcRenderer.invoke("saveMasterKeyInSafeStorage", masterKey);
 
 const lastShownChangelogVersion = () =>
     ipcRenderer.invoke("lastShownChangelogVersion");
@@ -358,8 +359,8 @@ contextBridge.exposeInMainWorld("electron", {
     selectDirectory,
     pathForFile,
     logout,
-    masterKeyB64,
-    saveMasterKeyB64,
+    masterKeyFromSafeStorage,
+    saveMasterKeyInSafeStorage,
     lastShownChangelogVersion,
     setLastShownChangelogVersion,
     isAutoLaunchEnabled,

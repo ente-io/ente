@@ -446,6 +446,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "backupVideos":
             MessageLookupByLibrary.simpleMessage("Резервне копіювання відео"),
         "birthday": MessageLookupByLibrary.simpleMessage("День народження"),
+        "birthdays": MessageLookupByLibrary.simpleMessage("Birthdays"),
         "blackFridaySale": MessageLookupByLibrary.simpleMessage(
             "Розпродаж у «Чорну п\'ятницю»"),
         "blog": MessageLookupByLibrary.simpleMessage("Блог"),
@@ -514,6 +515,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "click": MessageLookupByLibrary.simpleMessage("• Натисніть"),
         "clickOnTheOverflowMenu": MessageLookupByLibrary.simpleMessage(
             "• Натисніть на меню переповнення"),
+        "clickToInstallOurBestVersionYet": MessageLookupByLibrary.simpleMessage(
+            "Click to install our best version yet"),
         "close": MessageLookupByLibrary.simpleMessage("Закрити"),
         "clubByCaptureTime":
             MessageLookupByLibrary.simpleMessage("Клуб за часом захоплення"),
@@ -938,6 +941,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "guestView": MessageLookupByLibrary.simpleMessage("Гостьовий перегляд"),
         "guestViewEnablePreSteps": MessageLookupByLibrary.simpleMessage(
             "Щоб увімкнути гостьовий перегляд, встановіть пароль або блокування екрана в налаштуваннях системи."),
+        "happyBirthday":
+            MessageLookupByLibrary.simpleMessage("Happy birthday! 🥳"),
         "hearUsExplanation": MessageLookupByLibrary.simpleMessage(
             "Ми не відстежуємо встановлення застосунку. Але, якщо ви скажете нам, де ви нас знайшли, це допоможе!"),
         "hearUsWhereTitle": MessageLookupByLibrary.simpleMessage(
@@ -1109,6 +1114,8 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Довго утримуйте поштову адресу, щоб перевірити наскрізне шифрування."),
         "longpressOnAnItemToViewInFullscreen": MessageLookupByLibrary.simpleMessage(
             "Натисніть і утримуйте елемент для перегляду в повноекранному режимі"),
+        "lookBackOnYourMemories": MessageLookupByLibrary.simpleMessage(
+            "Look back on your memories 🌄"),
         "loopVideoOff":
             MessageLookupByLibrary.simpleMessage("Вимкнено зациклювання відео"),
         "loopVideoOn": MessageLookupByLibrary.simpleMessage(
@@ -1187,6 +1194,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "newLocation":
             MessageLookupByLibrary.simpleMessage("Нове розташування"),
         "newPerson": MessageLookupByLibrary.simpleMessage("Нова особа"),
+        "newPhotosEmoji": MessageLookupByLibrary.simpleMessage(" new 📸"),
         "newToEnte": MessageLookupByLibrary.simpleMessage("Уперше на Ente"),
         "newest": MessageLookupByLibrary.simpleMessage("Найновіші"),
         "next": MessageLookupByLibrary.simpleMessage("Далі"),
@@ -1236,6 +1244,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "onDevice": MessageLookupByLibrary.simpleMessage("На пристрої"),
         "onEnte":
             MessageLookupByLibrary.simpleMessage("В <branding>Ente</branding>"),
+        "onThisDay": MessageLookupByLibrary.simpleMessage("On this day"),
+        "onThisDayNotificationExplanation": MessageLookupByLibrary.simpleMessage(
+            "Receive reminders about memories from this day in previous years."),
         "onlyFamilyAdminCanChangeCode": m54,
         "onlyThem": MessageLookupByLibrary.simpleMessage("Тільки вони"),
         "oops": MessageLookupByLibrary.simpleMessage("От халепа"),
@@ -1375,6 +1386,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Оцініть застосунок"),
         "rateUs": MessageLookupByLibrary.simpleMessage("Оцініть нас"),
         "rateUsOnStore": m67,
+        "receiveRemindersOnBirthdays": MessageLookupByLibrary.simpleMessage(
+            "Receive reminders when it\'s someone\'s birthday. Tapping on the notification will take you to photos of the birthday person."),
         "recover": MessageLookupByLibrary.simpleMessage("Відновити"),
         "recoverAccount":
             MessageLookupByLibrary.simpleMessage("Відновити обліковий запис"),
@@ -1693,6 +1706,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease":
             MessageLookupByLibrary.simpleMessage(
                 "На жаль, на цьому пристрої не вдалося створити безпечні ключі.\n\nЗареєструйтесь з іншого пристрою."),
+        "sorryWeHadToPauseYourBackups": MessageLookupByLibrary.simpleMessage(
+            "Sorry, we had to pause your backups"),
         "sort": MessageLookupByLibrary.simpleMessage("Сортувати"),
         "sortAlbumsBy": MessageLookupByLibrary.simpleMessage("Сортувати за"),
         "sortNewestFirst":

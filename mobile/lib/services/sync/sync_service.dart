@@ -14,6 +14,7 @@ import 'package:photos/events/sync_status_update_event.dart';
 import 'package:photos/events/trigger_logout_event.dart';
 import "package:photos/extensions/stop_watch.dart";
 import 'package:photos/models/file/file_type.dart';
+import "package:photos/services/language_service.dart";
 import "package:photos/services/local/local_import.dart";
 import 'package:photos/services/notification_service.dart';
 import 'package:photos/services/sync/remote_sync_service.dart';
@@ -219,10 +220,11 @@ class SyncService {
     final now = DateTime.now().microsecondsSinceEpoch;
     if ((now - lastNotificationShownTime) > microSecondsInDay) {
       await _prefs.setInt(kLastStorageLimitExceededNotificationPushTime, now);
+      final s = await LanguageService.s;
       // ignore: unawaited_futures
       NotificationService.instance.showNotification(
-        "Storage limit exceeded",
-        "Sorry, we had to pause your backups",
+        s.storageLimitExceeded,
+        s.sorryWeHadToPauseYourBackups,
       );
     }
   }

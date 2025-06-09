@@ -22,6 +22,7 @@ import "package:photos/services/machine_learning/face_ml/face_clustering/face_db
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/services/machine_learning/ml_indexing_isolate.dart";
 import 'package:photos/services/machine_learning/ml_result.dart';
+import "package:photos/services/preview_video_store.dart";
 import "package:photos/utils/ml_util.dart";
 import "package:photos/utils/network_util.dart";
 import "package:photos/utils/ram_check_util.dart";
@@ -134,6 +135,7 @@ class MLService {
       }
       return;
       if (!_canRunMLFunction(function: "AllML") && !force) return;
+      if (!force && !computeController.requestCompute(ml: true)) return;
       _isRunningML = true;
       await sync();
       final mlDataDB = localMode
@@ -171,6 +173,8 @@ class MLService {
       rethrow;
     } finally {
       _isRunningML = false;
+      computeController.releaseCompute(ml: true);
+      PreviewVideoStore.instance.queueFiles();
     }
   }
 
@@ -553,7 +557,6 @@ class MLService {
           ),
         ]);
       }
-
       _logger.info("ML results for fileID ${result.fileId} stored locally");
       return actuallyRanML;
     } catch (e, s) {

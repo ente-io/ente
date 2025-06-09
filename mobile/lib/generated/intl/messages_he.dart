@@ -223,6 +223,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("גבה על רשת סלולרית"),
         "backupSettings": MessageLookupByLibrary.simpleMessage("הגדרות גיבוי"),
         "backupVideos": MessageLookupByLibrary.simpleMessage("גבה סרטונים"),
+        "birthdays": MessageLookupByLibrary.simpleMessage("Birthdays"),
         "blog": MessageLookupByLibrary.simpleMessage("בלוג"),
         "cachedData": MessageLookupByLibrary.simpleMessage("נתונים מוטמנים"),
         "canNotUploadToAlbumsOwnedByOthers":
@@ -254,6 +255,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "claimed": MessageLookupByLibrary.simpleMessage("נתבע"),
         "claimedStorageSoFar": m14,
         "click": MessageLookupByLibrary.simpleMessage("• לחץ"),
+        "clickToInstallOurBestVersionYet": MessageLookupByLibrary.simpleMessage(
+            "Click to install our best version yet"),
         "close": MessageLookupByLibrary.simpleMessage("סגור"),
         "clubByCaptureTime":
             MessageLookupByLibrary.simpleMessage("קבץ לפי זמן הצילום"),
@@ -480,6 +483,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "grantFullAccessPrompt": MessageLookupByLibrary.simpleMessage(
             "נא לתת גישה לכל התמונות בתוך ההגדרות של הטלפון"),
         "grantPermission": MessageLookupByLibrary.simpleMessage("הענק הרשאה"),
+        "happyBirthday":
+            MessageLookupByLibrary.simpleMessage("Happy birthday! 🥳"),
         "hidden": MessageLookupByLibrary.simpleMessage("מוסתר"),
         "hide": MessageLookupByLibrary.simpleMessage("הסתר"),
         "hiding": MessageLookupByLibrary.simpleMessage("מחביא..."),
@@ -545,6 +550,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "longpressOnAnItemToViewInFullscreen":
             MessageLookupByLibrary.simpleMessage(
                 "לחץ לחיצה ארוכה על פריט על מנת לראות אותו במסך מלא"),
+        "lookBackOnYourMemories": MessageLookupByLibrary.simpleMessage(
+            "Look back on your memories 🌄"),
         "lostDevice": MessageLookupByLibrary.simpleMessage("איבדת את המכשיר?"),
         "manage": MessageLookupByLibrary.simpleMessage("נהל"),
         "manageFamily": MessageLookupByLibrary.simpleMessage("נהל משפחה"),
@@ -567,6 +574,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "name": MessageLookupByLibrary.simpleMessage("שם"),
         "never": MessageLookupByLibrary.simpleMessage("לעולם לא"),
         "newAlbum": MessageLookupByLibrary.simpleMessage("אלבום חדש"),
+        "newPhotosEmoji": MessageLookupByLibrary.simpleMessage(" new 📸"),
         "newest": MessageLookupByLibrary.simpleMessage("החדש ביותר"),
         "no": MessageLookupByLibrary.simpleMessage("לא"),
         "noDeviceLimit": MessageLookupByLibrary.simpleMessage("אין"),
@@ -586,6 +594,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "onDevice": MessageLookupByLibrary.simpleMessage("על המכשיר"),
         "onEnte":
             MessageLookupByLibrary.simpleMessage("ב<branding>אנטע</branding>"),
+        "onThisDay": MessageLookupByLibrary.simpleMessage("On this day"),
+        "onThisDayNotificationExplanation": MessageLookupByLibrary.simpleMessage(
+            "Receive reminders about memories from this day in previous years."),
         "oops": MessageLookupByLibrary.simpleMessage("אופס"),
         "oopsSomethingWentWrong":
             MessageLookupByLibrary.simpleMessage("אופס, משהו השתבש"),
@@ -646,6 +657,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "rateTheApp": MessageLookupByLibrary.simpleMessage("דרג את האפליקציה"),
         "rateUs": MessageLookupByLibrary.simpleMessage("דרג אותנו"),
         "rateUsOnStore": m67,
+        "receiveRemindersOnBirthdays": MessageLookupByLibrary.simpleMessage(
+            "Receive reminders when it\'s someone\'s birthday. Tapping on the notification will take you to photos of the birthday person."),
         "recover": MessageLookupByLibrary.simpleMessage("שחזר"),
         "recoverAccount": MessageLookupByLibrary.simpleMessage("שחזר חשבון"),
         "recoverButton": MessageLookupByLibrary.simpleMessage("שחזר"),
@@ -804,6 +817,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease":
             MessageLookupByLibrary.simpleMessage(
                 "אנחנו מצטערים, לא הצלחנו ליצור מפתחות מאובטחים על מכשיר זה.\n\nאנא הירשם ממכשיר אחר."),
+        "sorryWeHadToPauseYourBackups": MessageLookupByLibrary.simpleMessage(
+            "Sorry, we had to pause your backups"),
         "sortAlbumsBy": MessageLookupByLibrary.simpleMessage("מיין לפי"),
         "sortOldestFirst":
             MessageLookupByLibrary.simpleMessage("הישן ביותר קודם"),
