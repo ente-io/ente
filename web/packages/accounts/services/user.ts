@@ -20,18 +20,25 @@ export interface User {
     twoFactorSessionID: string;
 }
 
-// TODO: During login the only field present is email. Which makes this
-// optionality indicated by these types incorrect.
+/**
+ * The local storage data about the user after they've logged in.
+ */
 const LocalUser = z.object({
-    /** The user's ID. */
+    /**
+     * The user's ID.
+     */
     id: z.number(),
-    /** The user's email. */
+    /**
+     * The user's email.
+     */
     email: z.string(),
     /**
      * The user's (plaintext) auth token.
      *
      * It is used for making API calls on their behalf, by passing this token as
      * the value of the X-Auth-Token header in the HTTP request.
+     *
+     * Deprecated, use `getAuthToken()` instead (which fetches it from IDB).
      */
     token: z.string(),
 });
@@ -40,8 +47,30 @@ const LocalUser = z.object({
 export type LocalUser = z.infer<typeof LocalUser>;
 
 /**
+ * The local storage data about the user before login or signup is complete.
+ *
+ * During login or signup, the user object exists in various partial states in
+ * local storage.
+ *
+ * - Initially, there is no user object in local storage.
+ *
+ * - When the user enters their email, the email property of the stored object
+ *   is set, but nothing else.
+ *
+ * - If they have second factor verification set, then after entering their
+ *   password {@link isTwoFactorEnabled} and {@link twoFactorSessionID} will
+ *   also get filled in.
+ *
+ * - Once they verify their TOTP based second factor, their {@link id} and
+ *   {@link encryptedToken} will also get filled in.
+ */
+// TODO: Start using me.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const PreLoginLocalUser = LocalUser.partial();
+
+/**
  * Return the logged-in user, if someone is indeed logged in. Otherwise return
- * `undefined`.
+ * `undefined` (TODO: That's not what it is doing...).
  *
  * The user's data is stored in the browser's localStorage. Thus, this function
  * only works from the main thread, not from web workers (local storage is not
