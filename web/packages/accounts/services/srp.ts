@@ -14,8 +14,6 @@ import {
 } from "./srp-remote";
 import type { UserVerificationResponse } from "./user";
 
-const SRP_PARAMS = SRP.params["4096"];
-
 /**
  * Derive a "password" (which is really an arbitrary binary value, not human
  * generated) for use as the SRP user password by applying a deterministic KDF
@@ -80,7 +78,7 @@ export const generateSRPSetupAttributes = async (
     const srpUserID = uuidv4();
 
     const srpVerifierBuffer = SRP.computeVerifier(
-        SRP_PARAMS,
+        SRP.params["4096"],
         convertBase64ToBuffer(srpSalt),
         Buffer.from(srpUserID),
         convertBase64ToBuffer(loginSubKey),
@@ -153,7 +151,7 @@ export const generateSRPClient = async (
                     throw Error("secret1 gen failed");
                 }
                 const srpClient = new SrpClient(
-                    SRP_PARAMS,
+                    SRP.params["4096"],
                     convertBase64ToBuffer(srpSalt),
                     Buffer.from(srpUserID),
                     convertBase64ToBuffer(loginSubKey),
