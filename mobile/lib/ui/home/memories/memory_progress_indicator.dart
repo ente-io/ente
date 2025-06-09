@@ -25,7 +25,8 @@ class MemoryProgressIndicator extends StatefulWidget {
   });
 
   @override
-  State<MemoryProgressIndicator> createState() => _MemoryProgressIndicatorState();
+  State<MemoryProgressIndicator> createState() =>
+      _MemoryProgressIndicatorState();
 }
 
 class _MemoryProgressIndicatorState extends State<MemoryProgressIndicator>
@@ -67,13 +68,13 @@ class _MemoryProgressIndicatorState extends State<MemoryProgressIndicator>
       children: List.generate(widget.totalSteps, (index) {
         return Expanded(
           child: Padding(
-            padding: const EdgeInsets.only(left: 4, right: 4),
+            padding: EdgeInsets.only(right: widget.gap),
             child: index < widget.currentIndex
                 ? Container(
                     height: widget.height,
                     decoration: BoxDecoration(
                       color: widget.selectedColor,
-                      borderRadius: BorderRadius.circular(2),
+                      borderRadius: BorderRadius.circular(12),
                     ),
                   )
                 : index == widget.currentIndex
@@ -87,7 +88,7 @@ class _MemoryProgressIndicatorState extends State<MemoryProgressIndicator>
                               widget.selectedColor,
                             ),
                             minHeight: widget.height,
-                            borderRadius: BorderRadius.circular(2),
+                            borderRadius: BorderRadius.circular(12),
                           );
                         },
                       )
@@ -95,7 +96,7 @@ class _MemoryProgressIndicatorState extends State<MemoryProgressIndicator>
                         height: widget.height,
                         decoration: BoxDecoration(
                           color: widget.unselectedColor,
-                          borderRadius: BorderRadius.circular(2),
+                          borderRadius: BorderRadius.circular(12),
                         ),
                       ),
           ),
