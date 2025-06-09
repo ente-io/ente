@@ -1699,14 +1699,5 @@
   "cLFamilyPlan": "Begrensninger for familieabonnement",
   "cLFamilyPlanDesc": "Du kan nå sette grenser for hvor mye lagringsplass familiemedlemmer kan bruke.",
   "cLBulkEdit": "Masseendring av datoer",
-<<<<<<< HEAD
-  "cLBulkEditDesc": "Du kan nå velge flere bilder, og redigere dato/klokkeslett for alle med en rask handling. Forskyving av datoer støttes også.",
-  "onThisDay": "On this day",
-  "lookBackOnYourMemories": "Look back on your memories 🌄",
-  "newPhotosEmoji": " new 📸",
-  "sorryWeHadToPauseYourBackups": "Sorry, we had to pause your backups",
-  "clickToInstallOurBestVersionYet": "Click to install our best version yet"
-=======
   "cLBulkEditDesc": "Du kan nå velge flere bilder, og redigere dato/klokkeslett for alle med en rask handling. Forskyving av datoer støttes også."
->>>>>>> main
 }

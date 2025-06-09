@@ -1740,18 +1740,10 @@
   "cLFamilyPlanDesc": "Je kunt nu limieten instellen voor hoeveel opslag je familieleden kunnen gebruiken.",
   "cLBulkEdit": "Bulk datums wijzigen",
   "cLBulkEditDesc": "Je kunt nu meerdere foto's selecteren en de datum/tijd van ze allemaal bewerken met één snelle actie. Verschuiven van datums wordt ook ondersteund.",
-<<<<<<< HEAD
-  "onThisDay": "On this day",
-  "lookBackOnYourMemories": "Look back on your memories 🌄",
-  "newPhotosEmoji": " new 📸",
-  "sorryWeHadToPauseYourBackups": "Sorry, we had to pause your backups",
-  "clickToInstallOurBestVersionYet": "Click to install our best version yet"
-=======
   "curatedMemories": "Samengestelde herinneringen",
   "onThisDay": "Op deze dag",
   "deleteMultipleAlbumDialog": "Verwijder de foto's (en video's) van deze {count} albums ook uit <bold>alle</bold> andere albums waar deze deel van uitmaken?",
   "addParticipants": "Voeg deelnemers toe",
   "selectedAlbums": "{count} geselecteerd",
   "actionNotSupportedOnFavouritesAlbum": "Actie niet ondersteund op Favorieten album"
->>>>>>> main
 }

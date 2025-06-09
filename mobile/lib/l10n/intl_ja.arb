@@ -1676,14 +1676,5 @@
   "cLFamilyPlan": "ファミリープランの制限",
   "cLFamilyPlanDesc": "ファミリーメンバーが使用できるストレージ容量の制限を設定できるようになりました。",
   "cLBulkEdit": "日付を一括編集",
-<<<<<<< HEAD
-  "cLBulkEditDesc": "複数の写真を、1回の操作で日付/時刻を編集することもできるようになりました。",
-  "onThisDay": "On this day",
-  "lookBackOnYourMemories": "Look back on your memories 🌄",
-  "newPhotosEmoji": " new 📸",
-  "sorryWeHadToPauseYourBackups": "Sorry, we had to pause your backups",
-  "clickToInstallOurBestVersionYet": "Click to install our best version yet"
-=======
   "cLBulkEditDesc": "複数の写真を、1回の操作で日付/時刻を編集することもできるようになりました。"
->>>>>>> main
 }

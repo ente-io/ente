@@ -1741,17 +1741,9 @@
   "cLBulkEdit": "Massenbearbeitung von Datumsangaben",
   "cLBulkEditDesc": "Du kannst jetzt mehrere Fotos auswählen, und das Datum/Uhrzeit für alle mit einer Aktion ändern. Das Verschieben von Daten wird auch unterstützt.",
   "curatedMemories": "Ausgewählte Erinnerungen",
-<<<<<<< HEAD
-  "onThisDay": "On this day",
-  "lookBackOnYourMemories": "Look back on your memories 🌄",
-  "newPhotosEmoji": " new 📸",
-  "sorryWeHadToPauseYourBackups": "Sorry, we had to pause your backups",
-  "clickToInstallOurBestVersionYet": "Click to install our best version yet"
-=======
   "onThisDay": "An diesem Tag",
   "deleteMultipleAlbumDialog": "Sollen die Fotos (und Videos) aus diesen {count} Alben auch aus <bold>allen</bold> anderen Alben gelöscht werden, in denen sie enthalten sind?",
   "addParticipants": "Teilnehmer hinzufügen",
   "selectedAlbums": "{count} ausgewählt",
   "actionNotSupportedOnFavouritesAlbum": "Aktion für das Favoritenalbum nicht unterstützt"
->>>>>>> main
 }

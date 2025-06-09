@@ -1741,17 +1741,9 @@
   "cLBulkEdit": "Editar todas as datas",
   "cLBulkEditDesc": "Agora você pode selecionar várias fotos, editar data e hora de todos com um só clique. Alternar datas também são suportados.",
   "curatedMemories": "Memórias restauradas",
-<<<<<<< HEAD
-  "onThisDay": "On this day",
-  "lookBackOnYourMemories": "Look back on your memories 🌄",
-  "newPhotosEmoji": " new 📸",
-  "sorryWeHadToPauseYourBackups": "Sorry, we had to pause your backups",
-  "clickToInstallOurBestVersionYet": "Click to install our best version yet"
-=======
   "onThisDay": "Neste dia",
   "deleteMultipleAlbumDialog": "E também excluir todas as fotos (e vídeos) presente dentro desses {count} álbuns e de <bold>todos</bold> os álbuns que eles fazem parte?",
   "addParticipants": "Adicionar participante",
   "selectedAlbums": "{count} selecionado(s)",
   "actionNotSupportedOnFavouritesAlbum": "Ação não suportada em álbum favorito"
->>>>>>> main
 }
