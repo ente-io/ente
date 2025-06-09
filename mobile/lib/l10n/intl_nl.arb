@@ -1740,10 +1740,14 @@
   "cLFamilyPlanDesc": "Je kunt nu limieten instellen voor hoeveel opslag je familieleden kunnen gebruiken.",
   "cLBulkEdit": "Bulk datums wijzigen",
   "cLBulkEditDesc": "Je kunt nu meerdere foto's selecteren en de datum/tijd van ze allemaal bewerken met één snelle actie. Verschuiven van datums wordt ook ondersteund.",
-  "curatedMemories": "Samengestelde herinneringen",
-  "onThisDay": "Op deze dag",
-  "deleteMultipleAlbumDialog": "Verwijder de foto's (en video's) van deze {count} albums ook uit <bold>alle</bold> andere albums waar deze deel van uitmaken?",
-  "addParticipants": "Voeg deelnemers toe",
-  "selectedAlbums": "{count} geselecteerd",
-  "actionNotSupportedOnFavouritesAlbum": "Actie niet ondersteund op Favorieten album"
+  "onThisDay": "On this day",
+  "lookBackOnYourMemories": "Look back on your memories 🌄",
+  "newPhotosEmoji": " new 📸",
+  "sorryWeHadToPauseYourBackups": "Sorry, we had to pause your backups",
+  "clickToInstallOurBestVersionYet": "Click to install our best version yet",
+  "onThisDayNotificationExplanation": "Receive reminders about memories from this day in previous years.",
+  "birhtdayNotifications": "Birhtday notifications",
+  "receiveRemindersOnBirthdays": "Receive reminders when it's someone's birthday. Tapping on the notification will take you to photos of the birthday person.",
+  "happyBirthday": "Happy birthday! 🥳",
+  "birthdays": "Birthdays"
 }

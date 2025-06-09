@@ -20,6 +20,7 @@ import "package:photos/services/machine_learning/face_ml/person/person_service.d
 import "package:photos/services/machine_learning/ml_indexing_isolate.dart";
 import 'package:photos/services/machine_learning/ml_result.dart';
 import "package:photos/services/machine_learning/semantic_search/semantic_search_service.dart";
+import "package:photos/services/preview_video_store.dart";
 import "package:photos/utils/ml_util.dart";
 import "package:photos/utils/network_util.dart";
 import "package:photos/utils/ram_check_util.dart";
@@ -128,6 +129,7 @@ class MLService {
         _mlControllerStatus = true;
       }
       if (!_canRunMLFunction(function: "AllML") && !force) return;
+      if (!force && !computeController.requestCompute(ml: true)) return;
       _isRunningML = true;
       await sync();
 
@@ -162,6 +164,8 @@ class MLService {
       rethrow;
     } finally {
       _isRunningML = false;
+      computeController.releaseCompute(ml: true);
+      PreviewVideoStore.instance.queueFiles();
     }
   }
 
@@ -500,7 +504,6 @@ class MLService {
         instruction.file,
         dataEntity,
       );
-      _logger.info("ML results for fileID ${result.fileId} stored on remote");
       // Storing results locally
       if (result.facesRan) await mlDataDB.bulkInsertFaces(faces);
       if (result.clipRan) {
@@ -508,7 +511,7 @@ class MLService {
           result.clip!,
         );
       }
-      _logger.info("ML results for fileID ${result.fileId} stored locally");
+      _logger.info("ML result for fileID ${result.fileId} stored remote+local");
       return actuallyRanML;
     } catch (e, s) {
       final String errorString = e.toString();

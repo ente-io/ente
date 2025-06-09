@@ -457,6 +457,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "backupVideos":
             MessageLookupByLibrary.simpleMessage("Backup dei video"),
         "birthday": MessageLookupByLibrary.simpleMessage("Compleanno"),
+        "birthdays": MessageLookupByLibrary.simpleMessage("Birthdays"),
         "blackFridaySale":
             MessageLookupByLibrary.simpleMessage("Offerta del Black Friday"),
         "blog": MessageLookupByLibrary.simpleMessage("Blog"),
@@ -528,6 +529,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "click": MessageLookupByLibrary.simpleMessage("• Clic"),
         "clickOnTheOverflowMenu":
             MessageLookupByLibrary.simpleMessage("• Fai clic sul menu"),
+        "clickToInstallOurBestVersionYet": MessageLookupByLibrary.simpleMessage(
+            "Click to install our best version yet"),
         "close": MessageLookupByLibrary.simpleMessage("Chiudi"),
         "clubByCaptureTime":
             MessageLookupByLibrary.simpleMessage("Club per tempo di cattura"),
@@ -957,6 +960,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "guestView": MessageLookupByLibrary.simpleMessage("Vista ospite"),
         "guestViewEnablePreSteps": MessageLookupByLibrary.simpleMessage(
             "Per abilitare la vista ospite, configura il codice di accesso del dispositivo o il blocco schermo nelle impostazioni di sistema."),
+        "happyBirthday":
+            MessageLookupByLibrary.simpleMessage("Happy birthday! 🥳"),
         "hearUsExplanation": MessageLookupByLibrary.simpleMessage(
             "Non teniamo traccia del numero di installazioni dell\'app. Sarebbe utile se ci dicesse dove ci ha trovato!"),
         "hearUsWhereTitle": MessageLookupByLibrary.simpleMessage(
@@ -1142,6 +1147,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "longpressOnAnItemToViewInFullscreen":
             MessageLookupByLibrary.simpleMessage(
                 "Premi a lungo su un elemento per visualizzarlo a schermo intero"),
+        "lookBackOnYourMemories": MessageLookupByLibrary.simpleMessage(
+            "Look back on your memories 🌄"),
         "loopVideoOff":
             MessageLookupByLibrary.simpleMessage("Loop video disattivo"),
         "loopVideoOn":
@@ -1218,6 +1225,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "newAlbum": MessageLookupByLibrary.simpleMessage("Nuovo album"),
         "newLocation": MessageLookupByLibrary.simpleMessage("Nuova posizione"),
         "newPerson": MessageLookupByLibrary.simpleMessage("Nuova persona"),
+        "newPhotosEmoji": MessageLookupByLibrary.simpleMessage(" new 📸"),
         "newToEnte":
             MessageLookupByLibrary.simpleMessage("Prima volta con Ente"),
         "newest": MessageLookupByLibrary.simpleMessage("Più recenti"),
@@ -1268,6 +1276,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "onDevice": MessageLookupByLibrary.simpleMessage("Sul dispositivo"),
         "onEnte": MessageLookupByLibrary.simpleMessage(
             "Su <branding>ente</branding>"),
+        "onThisDay": MessageLookupByLibrary.simpleMessage("On this day"),
+        "onThisDayNotificationExplanation": MessageLookupByLibrary.simpleMessage(
+            "Receive reminders about memories from this day in previous years."),
         "onlyFamilyAdminCanChangeCode": m54,
         "onlyThem": MessageLookupByLibrary.simpleMessage("Solo loro"),
         "oops": MessageLookupByLibrary.simpleMessage("Oops"),
@@ -1411,6 +1422,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "reassignedToName": m68,
         "reassigningLoading":
             MessageLookupByLibrary.simpleMessage("Riassegnando..."),
+        "receiveRemindersOnBirthdays": MessageLookupByLibrary.simpleMessage(
+            "Receive reminders when it\'s someone\'s birthday. Tapping on the notification will take you to photos of the birthday person."),
         "recover": MessageLookupByLibrary.simpleMessage("Recupera"),
         "recoverAccount":
             MessageLookupByLibrary.simpleMessage("Recupera account"),
@@ -1715,6 +1728,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease":
             MessageLookupByLibrary.simpleMessage(
                 "Siamo spiacenti, non possiamo generare le chiavi sicure su questo dispositivo.\n\nPer favore, accedi da un altro dispositivo."),
+        "sorryWeHadToPauseYourBackups": MessageLookupByLibrary.simpleMessage(
+            "Sorry, we had to pause your backups"),
         "sort": MessageLookupByLibrary.simpleMessage("Ordina"),
         "sortAlbumsBy": MessageLookupByLibrary.simpleMessage("Ordina per"),
         "sortNewestFirst":

@@ -164,6 +164,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Säkerhetskopieringsinställningar"),
         "backupStatus":
             MessageLookupByLibrary.simpleMessage("Säkerhetskopieringsstatus"),
+        "birthdays": MessageLookupByLibrary.simpleMessage("Birthdays"),
         "blog": MessageLookupByLibrary.simpleMessage("Blogg"),
         "canNotOpenBody": MessageLookupByLibrary.simpleMessage(
             "Tyvärr kan detta album inte öppnas i appen."),
@@ -192,6 +193,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "claimed": MessageLookupByLibrary.simpleMessage("Nyttjad"),
         "claimedStorageSoFar": m14,
         "clearIndexes": MessageLookupByLibrary.simpleMessage("Rensa index"),
+        "clickToInstallOurBestVersionYet": MessageLookupByLibrary.simpleMessage(
+            "Click to install our best version yet"),
         "close": MessageLookupByLibrary.simpleMessage("Stäng"),
         "codeAppliedPageTitle":
             MessageLookupByLibrary.simpleMessage("Kod tillämpad"),
@@ -351,6 +354,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "goToSettings":
             MessageLookupByLibrary.simpleMessage("Gå till inställningar"),
         "guestView": MessageLookupByLibrary.simpleMessage("Gästvy"),
+        "happyBirthday":
+            MessageLookupByLibrary.simpleMessage("Happy birthday! 🥳"),
         "help": MessageLookupByLibrary.simpleMessage("Hjälp"),
         "howItWorks":
             MessageLookupByLibrary.simpleMessage("Så här fungerar det"),
@@ -404,6 +409,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "loginTerms": MessageLookupByLibrary.simpleMessage(
             "Genom att klicka på logga in godkänner jag <u-terms>användarvillkoren</u-terms> och våran <u-policy>integritetspolicy</u-policy>"),
         "logout": MessageLookupByLibrary.simpleMessage("Logga ut"),
+        "lookBackOnYourMemories": MessageLookupByLibrary.simpleMessage(
+            "Look back on your memories 🌄"),
         "lostDevice": MessageLookupByLibrary.simpleMessage("Förlorad enhet?"),
         "machineLearning":
             MessageLookupByLibrary.simpleMessage("Maskininlärning"),
@@ -427,6 +434,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "never": MessageLookupByLibrary.simpleMessage("Aldrig"),
         "newAlbum": MessageLookupByLibrary.simpleMessage("Nytt album"),
         "newPerson": MessageLookupByLibrary.simpleMessage("Ny person"),
+        "newPhotosEmoji": MessageLookupByLibrary.simpleMessage(" new 📸"),
         "next": MessageLookupByLibrary.simpleMessage("Nästa"),
         "no": MessageLookupByLibrary.simpleMessage("Nej"),
         "noDeviceLimit": MessageLookupByLibrary.simpleMessage("Ingen"),
@@ -442,6 +450,9 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Inga resultat hittades"),
         "notPersonLabel": m53,
         "ok": MessageLookupByLibrary.simpleMessage("OK"),
+        "onThisDay": MessageLookupByLibrary.simpleMessage("On this day"),
+        "onThisDayNotificationExplanation": MessageLookupByLibrary.simpleMessage(
+            "Receive reminders about memories from this day in previous years."),
         "onlyFamilyAdminCanChangeCode": m54,
         "oops": MessageLookupByLibrary.simpleMessage("Hoppsan"),
         "oopsSomethingWentWrong":
@@ -471,6 +482,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "publicLinkEnabled":
             MessageLookupByLibrary.simpleMessage("Offentlig länk aktiverad"),
         "rateUsOnStore": m67,
+        "receiveRemindersOnBirthdays": MessageLookupByLibrary.simpleMessage(
+            "Receive reminders when it\'s someone\'s birthday. Tapping on the notification will take you to photos of the birthday person."),
         "recover": MessageLookupByLibrary.simpleMessage("Återställ"),
         "recoverAccount":
             MessageLookupByLibrary.simpleMessage("Återställ konto"),
@@ -601,6 +614,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease":
             MessageLookupByLibrary.simpleMessage(
                 "Tyvärr, vi kunde inte generera säkra nycklar på den här enheten.\n\nVänligen registrera dig från en annan enhet."),
+        "sorryWeHadToPauseYourBackups": MessageLookupByLibrary.simpleMessage(
+            "Sorry, we had to pause your backups"),
         "sort": MessageLookupByLibrary.simpleMessage("Sortera"),
         "sortAlbumsBy": MessageLookupByLibrary.simpleMessage("Sortera efter"),
         "status": MessageLookupByLibrary.simpleMessage("Status"),

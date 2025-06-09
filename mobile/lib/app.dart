@@ -25,6 +25,7 @@ import 'package:photos/services/sync/sync_service.dart';
 import 'package:photos/ui/tabs/home_widget.dart';
 import "package:photos/ui/viewer/actions/file_viewer.dart";
 import "package:photos/utils/intent_util.dart";
+import "package:photos/utils/standalone/debouncer.dart";
 
 class EnteApp extends StatefulWidget {
   final Future<void> Function(String) runBackgroundTask;
@@ -54,6 +55,7 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
   late Locale? locale;
   late StreamSubscription<MemoriesChangedEvent> _memoriesChangedSubscription;
   late StreamSubscription<PeopleChangedEvent> _peopleChangedSubscription;
+  late Debouncer _changeCallbackDebouncer;
 
   @override
   void initState() {
@@ -72,9 +74,13 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
         await MemoryHomeWidgetService.instance.memoryChanged();
       },
     );
+    _changeCallbackDebouncer = Debouncer(const Duration(milliseconds: 1500));
     _peopleChangedSubscription = Bus.instance.on<PeopleChangedEvent>().listen(
       (event) async {
-        await PeopleHomeWidgetService.instance.peopleChanged();
+        _changeCallbackDebouncer.run(
+          () async =>
+              unawaited(PeopleHomeWidgetService.instance.peopleChanged()),
+        );
       },
     );
   }
@@ -115,7 +121,7 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
     if (Platform.isAndroid || kDebugMode) {
       return Listener(
         onPointerDown: (event) {
-          machineLearningController.onUserInteraction();
+          computeController.onUserInteraction();
         },
         child: AdaptiveTheme(
           light: lightThemeData,
@@ -150,7 +156,7 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
     } else {
       return Listener(
         onPointerDown: (event) {
-          machineLearningController.onUserInteraction();
+          computeController.onUserInteraction();
         },
         child: MaterialApp(
           title: "ente",

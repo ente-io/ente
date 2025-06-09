@@ -1,3 +1,4 @@
+import type { User } from "ente-accounts/services/user";
 import { joinPath } from "ente-base/file-name";
 import log from "ente-base/log";
 import { type Electron } from "ente-base/types/ipc";
@@ -21,7 +22,6 @@ import {
 } from "ente-new/photos/services/collection";
 import { safeFileName } from "ente-new/photos/utils/native-fs";
 import { getData } from "ente-shared/storage/localStorage";
-import type { User } from "ente-shared/user/types";
 import { wait } from "ente-utils/promise";
 import { t } from "i18next";
 import {

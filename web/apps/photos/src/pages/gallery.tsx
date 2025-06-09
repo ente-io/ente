@@ -32,7 +32,7 @@ import log from "ente-base/log";
 import {
     clearSessionStorage,
     haveCredentialsInSession,
-    masterKeyFromSessionIfLoggedIn,
+    masterKeyFromSession,
 } from "ente-base/session";
 import { FullScreenDropZone } from "ente-gallery/components/FullScreenDropZone";
 import { type UploadTypeSelectorIntent } from "ente-gallery/components/Upload";
@@ -561,7 +561,7 @@ const Page: React.FC = () => {
                 showSessionExpiredDialog();
                 return;
             }
-            if (!(await masterKeyFromSessionIfLoggedIn())) {
+            if (!(await masterKeyFromSession())) {
                 clearSessionStorage();
                 router.push("/credentials");
                 return;
@@ -1145,7 +1145,6 @@ const Page: React.FC = () => {
                     title={t("new_album")}
                     label={t("album_name")}
                     autoFocus
-                    submitButtonColor="accent"
                     submitButtonTitle={t("create")}
                     onSubmit={handleAlbumNameSubmit}
                 />

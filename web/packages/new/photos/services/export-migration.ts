@@ -3,6 +3,7 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unnecessary-condition */
+import type { User } from "ente-accounts/services/user";
 import { ensureElectron } from "ente-base/electron";
 import { joinPath, nameAndExtension } from "ente-base/file-name";
 import log from "ente-base/log";
@@ -20,7 +21,6 @@ import {
     sanitizeFilename,
 } from "ente-new/photos/utils/native-fs";
 import { getData } from "ente-shared/storage/localStorage";
-import type { User } from "ente-shared/user/types";
 import { wait } from "ente-utils/promise";
 import exportService, {
     getCollectionIDFromFileUID,

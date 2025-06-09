@@ -1,4 +1,4 @@
-import { decryptBoxB64, decryptMetadataJSON_New } from "ente-base/crypto";
+import { decryptBox, decryptMetadataJSON } from "ente-base/crypto";
 import {
     authenticatedRequestHeaders,
     ensureOk,
@@ -9,7 +9,7 @@ import { apiURL } from "ente-base/origins";
 import { ensureString } from "ente-utils/ensure";
 import { nullToUndefined } from "ente-utils/transform";
 import { codeFromURIString, type Code } from "services/code";
-import { z } from "zod";
+import { z } from "zod/v4";
 
 export interface AuthCodesAndTimeOffset {
     codes: Code[];
@@ -20,8 +20,14 @@ export interface AuthCodesAndTimeOffset {
     timeOffset?: number;
 }
 
+/**
+ * Fetch the user's auth codes from remote and decrypt them using the user's
+ * master key.
+ *
+ * @param masterKey The user's base64 encoded master key.
+ */
 export const getAuthCodesAndTimeOffset = async (
-    masterKey: Uint8Array,
+    masterKey: string,
 ): Promise<AuthCodesAndTimeOffset> => {
     const authenticatorEntityKey = await getAuthenticatorEntityKey();
     if (!authenticatorEntityKey) {
@@ -156,7 +162,7 @@ export const authenticatorEntityDiff = async (
     authenticatorKey: string,
 ): Promise<AuthenticatorEntityDiffResult> => {
     const decrypt = (encryptedData: string, decryptionHeader: string) =>
-        decryptMetadataJSON_New(
+        decryptMetadataJSON(
             { encryptedData, decryptionHeader },
             authenticatorKey,
         );
@@ -222,7 +228,7 @@ export const authenticatorEntityDiff = async (
 
 export const AuthenticatorEntityKey = z.object({
     /**
-     * The authenticator entity key (base 64 string), encrypted with the user's
+     * The authenticator entity key (base64 string), encrypted with the user's
      * master key.
      */
     encryptedKey: z.string(),
@@ -263,9 +269,9 @@ export const getAuthenticatorEntityKey = async (): Promise<
  */
 const decryptAuthenticatorKey = async (
     remote: AuthenticatorEntityKey,
-    masterKey: Uint8Array,
+    masterKey: string,
 ) =>
-    decryptBoxB64(
+    decryptBox(
         {
             encryptedData: remote.encryptedKey,
             // Remote calls it the header, but it really is the nonce.

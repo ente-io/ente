@@ -5,6 +5,7 @@ import {
     AccountsPageFooter,
     AccountsPageTitle,
 } from "ente-accounts/components/layouts/centered-paper";
+import { recoveryKeyFromMnemonic } from "ente-accounts/services/recovery-key";
 import {
     recoverTwoFactor,
     removeTwoFactor,
@@ -12,24 +13,20 @@ import {
 } from "ente-accounts/services/user";
 import { LinkButton } from "ente-base/components/LinkButton";
 import type { MiniDialogAttributes } from "ente-base/components/MiniDialog";
+import {
+    SingleInputForm,
+    type SingleInputFormProps,
+} from "ente-base/components/SingleInputForm";
 import { useBaseContext } from "ente-base/context";
-import { sharedCryptoWorker } from "ente-base/crypto";
+import { decryptBox } from "ente-base/crypto";
 import type { B64EncryptionResult } from "ente-base/crypto/libsodium";
 import log from "ente-base/log";
-import SingleInputForm, {
-    type SingleInputFormProps,
-} from "ente-shared/components/SingleInputForm";
 import { ApiError } from "ente-shared/error";
 import { getData, setData, setLSUser } from "ente-shared/storage/localStorage";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { Trans } from "react-i18next";
-
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const bip39 = require("bip39");
-// mobile client library only supports english.
-bip39.setDefaultWordlist("english");
 
 export interface RecoverPageProps {
     twoFactorType: TwoFactorType;
@@ -90,30 +87,15 @@ const Page: React.FC<RecoverPageProps> = ({ twoFactorType }) => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    const recover: SingleInputFormProps["callback"] = async (
-        recoveryKey: string,
+    const handleSubmit: SingleInputFormProps["onSubmit"] = async (
+        recoveryKeyMnemonic: string,
         setFieldError,
     ) => {
         try {
-            recoveryKey = recoveryKey
-                .trim()
-                .split(" ")
-                .map((part) => part.trim())
-                .filter((part) => !!part)
-                .join(" ");
-            // check if user is entering mnemonic recovery key
-            if (recoveryKey.indexOf(" ") > 0) {
-                if (recoveryKey.split(" ").length !== 24) {
-                    throw new Error("recovery code should have 24 words");
-                }
-                recoveryKey = bip39.mnemonicToEntropy(recoveryKey);
-            }
-            const cryptoWorker = await sharedCryptoWorker();
             const { encryptedData, nonce } = encryptedTwoFactorSecret!;
-            const twoFactorSecret = await cryptoWorker.decryptB64(
-                encryptedData,
-                nonce,
-                await cryptoWorker.fromHex(recoveryKey),
+            const twoFactorSecret = await decryptBox(
+                { encryptedData, nonce },
+                await recoveryKeyFromMnemonic(recoveryKeyMnemonic),
             );
             const resp = await removeTwoFactor(
                 sessionID!,
@@ -161,11 +143,10 @@ const Page: React.FC<RecoverPageProps> = ({ twoFactorType }) => {
         <AccountsPageContents>
             <AccountsPageTitle>{t("recover_two_factor")}</AccountsPageTitle>
             <SingleInputForm
-                callback={recover}
-                fieldType="text"
-                placeholder={t("recovery_key")}
-                buttonText={t("recover")}
-                disableAutoComplete
+                autoComplete="off"
+                label={t("recovery_key")}
+                submitButtonTitle={t("recover")}
+                onSubmit={handleSubmit}
             />
             <AccountsPageFooter>
                 <LinkButton onClick={() => showContactSupportDialog()}>

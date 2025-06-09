@@ -183,7 +183,7 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
                             prefixIcon: Icons.search_rounded,
                             onChange: (value) {
                               setState(() {
-                                _searchQuery = value;
+                                _searchQuery = value.trim();
                               });
                             },
                             isClearable: true,

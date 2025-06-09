@@ -2,7 +2,7 @@ import "dart:async";
 import "dart:developer";
 import "dart:io";
 
-import "package:exif/exif.dart";
+import "package:exif_reader/exif_reader.dart";
 import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";

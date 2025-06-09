@@ -458,6 +458,7 @@ export default function PublicCollectionGallery() {
                     <SingleInputForm
                         inputType="password"
                         label={t("password")}
+                        submitButtonColor="primary"
                         submitButtonTitle={t("unlock")}
                         onSubmit={handleSubmitPassword}
                     />

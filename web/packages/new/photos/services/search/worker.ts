@@ -12,7 +12,7 @@ import {
     filePublicMagicMetadata,
 } from "ente-media/file-metadata";
 import { nullToUndefined } from "ente-utils/transform";
-import { z } from "zod";
+import { z } from "zod/v4";
 import type { NamedPerson } from "../ml/people";
 import {
     pullUserEntities,
@@ -46,10 +46,11 @@ export class SearchWorker {
     /**
      * Fetch any state we might need when the actual search happens.
      *
-     * @param masterKey The user's master key. Web workers do not have access to
-     * session storage so this key needs to be passed to us explicitly.
+     * @param masterKey The user's master key (as a base64 string). Web workers
+     * do not have access to session storage so this key needs to be passed to
+     * us explicitly.
      */
-    async sync(masterKey: Uint8Array) {
+    async sync(masterKey: string) {
         // Let the cities fetch complete async. And do it only once per app
         // startup (this list is static and doesn't change).
         if (this.cities.length == 0) {

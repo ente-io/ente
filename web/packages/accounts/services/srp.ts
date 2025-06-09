@@ -1,8 +1,7 @@
-import { sharedCryptoWorker } from "ente-base/crypto";
+import type { KeyAttributes } from "ente-accounts/services/user";
+import { deriveSubKeyBytes, sharedCryptoWorker, toB64 } from "ente-base/crypto";
 import log from "ente-base/log";
-import { generateLoginSubKey } from "ente-shared/crypto/helpers";
 import { getToken } from "ente-shared/storage/localStorage/helpers";
-import type { KeyAttributes } from "ente-shared/user/types";
 import { SRP, SrpClient } from "fast-srp-hap";
 import { v4 as uuidv4 } from "uuid";
 import {
@@ -16,6 +15,22 @@ import {
 import type { UserVerificationResponse } from "./user";
 
 const SRP_PARAMS = SRP.params["4096"];
+
+/**
+ * Derive a "password" (which is really an arbitrary binary value, not human
+ * generated) for use as the SRP user password by applying a deterministic KDF
+ * (Key Derivation Function) to the provided {@link kek}.
+ *
+ * @param kek The user's kek (key encryption key) as a base64 string.
+ *
+ * @returns A string that can be used as the SRP user password.
+ */
+export const deriveSRPPassword = async (kek: string) => {
+    const kekSubKeyBytes = await deriveSubKeyBytes(kek, 32, 1, "loginctx");
+    // Use the first 16 bytes (128 bits) of the KEK's KDF subkey as the SRP
+    // password (instead of entire 32 bytes).
+    return toB64(kekSubKeyBytes.slice(0, 16));
+};
 
 export const configureSRP = async ({
     srpSalt,
@@ -59,7 +74,7 @@ export const generateSRPSetupAttributes = async (
 ): Promise<SRPSetupAttributes> => {
     const cryptoWorker = await sharedCryptoWorker();
 
-    const srpSalt = await cryptoWorker.generateSaltToDeriveKey();
+    const srpSalt = await cryptoWorker.generateDeriveKeySalt();
 
     // Museum schema requires this to be a UUID.
     const srpUserID = uuidv4();
@@ -87,7 +102,7 @@ export const loginViaSRP = async (
     kek: string,
 ): Promise<UserVerificationResponse> => {
     try {
-        const loginSubKey = await generateLoginSubKey(kek);
+        const loginSubKey = await deriveSRPPassword(kek);
         const srpClient = await generateSRPClient(
             srpAttributes.srpSalt,
             srpAttributes.srpUserID,
@@ -171,49 +186,44 @@ export async function generateKeyAndSRPAttributes(
     srpSetupAttributes: SRPSetupAttributes;
 }> {
     const cryptoWorker = await sharedCryptoWorker();
-    const masterKey = await cryptoWorker.generateEncryptionKey();
-    const recoveryKey = await cryptoWorker.generateEncryptionKey();
-    const kekSalt = await cryptoWorker.generateSaltToDeriveKey();
-    const kek = await cryptoWorker.deriveSensitiveKey(passphrase, kekSalt);
+    const masterKey = await cryptoWorker.generateKey();
+    const recoveryKey = await cryptoWorker.generateKey();
+    const kek = await cryptoWorker.deriveSensitiveKey(passphrase);
 
-    const masterKeyEncryptedWithKek = await cryptoWorker.encryptToB64(
-        masterKey,
-        kek.key,
-    );
-    const masterKeyEncryptedWithRecoveryKey = await cryptoWorker.encryptToB64(
-        masterKey,
-        recoveryKey,
-    );
-    const recoveryKeyEncryptedWithMasterKey = await cryptoWorker.encryptToB64(
-        recoveryKey,
-        masterKey,
-    );
+    const { encryptedData: encryptedKey, nonce: keyDecryptionNonce } =
+        await cryptoWorker.encryptBox(masterKey, kek.key);
+    const {
+        encryptedData: masterKeyEncryptedWithRecoveryKey,
+        nonce: masterKeyDecryptionNonce,
+    } = await cryptoWorker.encryptBox(masterKey, recoveryKey);
+    const {
+        encryptedData: recoveryKeyEncryptedWithMasterKey,
+        nonce: recoveryKeyDecryptionNonce,
+    } = await cryptoWorker.encryptBox(recoveryKey, masterKey);
 
     const keyPair = await cryptoWorker.generateKeyPair();
-    const encryptedKeyPairAttributes = await cryptoWorker.encryptToB64(
-        keyPair.privateKey,
-        masterKey,
-    );
+    const {
+        encryptedData: encryptedSecretKey,
+        nonce: secretKeyDecryptionNonce,
+    } = await cryptoWorker.encryptBox(keyPair.privateKey, masterKey);
 
-    const loginSubKey = await generateLoginSubKey(kek.key);
+    const loginSubKey = await deriveSRPPassword(kek.key);
 
     const srpSetupAttributes = await generateSRPSetupAttributes(loginSubKey);
 
     const keyAttributes: KeyAttributes = {
-        kekSalt,
-        encryptedKey: masterKeyEncryptedWithKek.encryptedData,
-        keyDecryptionNonce: masterKeyEncryptedWithKek.nonce,
-        publicKey: keyPair.publicKey,
-        encryptedSecretKey: encryptedKeyPairAttributes.encryptedData,
-        secretKeyDecryptionNonce: encryptedKeyPairAttributes.nonce,
+        encryptedKey,
+        keyDecryptionNonce,
+        kekSalt: kek.salt,
         opsLimit: kek.opsLimit,
         memLimit: kek.memLimit,
-        masterKeyEncryptedWithRecoveryKey:
-            masterKeyEncryptedWithRecoveryKey.encryptedData,
-        masterKeyDecryptionNonce: masterKeyEncryptedWithRecoveryKey.nonce,
-        recoveryKeyEncryptedWithMasterKey:
-            recoveryKeyEncryptedWithMasterKey.encryptedData,
-        recoveryKeyDecryptionNonce: recoveryKeyEncryptedWithMasterKey.nonce,
+        publicKey: keyPair.publicKey,
+        encryptedSecretKey,
+        secretKeyDecryptionNonce,
+        masterKeyEncryptedWithRecoveryKey,
+        masterKeyDecryptionNonce,
+        recoveryKeyEncryptedWithMasterKey,
+        recoveryKeyDecryptionNonce,
     };
 
     return { keyAttributes, masterKey, srpSetupAttributes };

@@ -143,8 +143,8 @@ class NotificationService {
   }
 
   Future<void> scheduleNotification(
-    String title,
-    String message, {
+    String title, {
+    String? message,
     required int id,
     String channelID = "io.ente.photos",
     String channelName = "ente",
@@ -229,7 +229,6 @@ class NotificationService {
       dateTime.minute,
       dateTime.second,
     );
-    // final tz.TZDateTime scheduledDate = tz.TZDateTime.now(tz.local).add(delay);
     await _notificationsPlugin.zonedSchedule(
       id,
       title,

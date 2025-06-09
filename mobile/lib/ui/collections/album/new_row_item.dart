@@ -35,13 +35,18 @@ class NewAlbumRowItemWidget extends StatelessWidget {
           textCapitalization: TextCapitalization.words,
           popnavAfterSubmission: true,
           onSubmit: (String text) async {
-            if (text.trim() == "") {
+            text = text.trim();
+            if (text == "") {
               return;
             }
 
             try {
               final Collection c =
                   await CollectionsService.instance.createAlbum(text);
+
+              // Close the dialog now so that it does not flash when leaving the album again.
+              Navigator.of(context).pop();
+
               // ignore: unawaited_futures
               await routeToPage(
                 context,

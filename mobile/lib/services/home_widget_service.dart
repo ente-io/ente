@@ -218,6 +218,17 @@ class HomeWidgetService {
       PeopleHomeWidgetService.instance.clearWidget(),
       AlbumHomeWidgetService.instance.clearWidget(),
     ]);
+
+    try {
+      final String widgetParent = await _getWidgetStorageDirectory();
+      final String widgetPath = '$widgetParent/$WIDGET_DIRECTORY';
+      final dir = Directory(widgetPath);
+
+      await dir.delete(recursive: true);
+      _logger.info("Widget directory cleared successfully");
+    } catch (e) {
+      _logger.severe("Failed to clear widget directory", e);
+    }
   }
 
   /// Handle app launch from a widget

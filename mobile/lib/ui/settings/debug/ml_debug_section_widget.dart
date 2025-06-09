@@ -129,7 +129,6 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
             try {
               await NotificationService.instance.scheduleNotification(
                 "test",
-                "test",
                 id: 10,
                 dateTime: DateTime.now().add(
                   const Duration(seconds: 10),
@@ -154,7 +153,6 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
             try {
               await NotificationService.instance.scheduleNotification(
                 "test",
-                "test",
                 id: 11,
                 dateTime: DateTime.now().add(
                   const Duration(hours: 1),
@@ -178,7 +176,6 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
           onTap: () async {
             try {
               await NotificationService.instance.scheduleNotification(
-                "test",
                 "test",
                 id: 12,
                 dateTime: DateTime.now().add(

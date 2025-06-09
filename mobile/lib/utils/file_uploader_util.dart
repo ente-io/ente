@@ -7,7 +7,7 @@ import 'dart:ui' as ui;
 import "package:archive/archive_io.dart";
 import "package:computer/computer.dart";
 import 'package:ente_crypto/ente_crypto.dart';
-import "package:exif/exif.dart";
+import "package:exif_reader/exif_reader.dart";
 import 'package:logging/logging.dart';
 import "package:motion_photos/motion_photos.dart";
 import 'package:motionphoto/motionphoto.dart';

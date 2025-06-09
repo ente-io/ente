@@ -9,11 +9,11 @@ export default defineConfig({
     cleanUrls: true,
     ignoreDeadLinks: "localhostLinks",
     vite: {
-      build: {
-        rollupOptions: {
-          external: ['client-museum-s3.png'] // Added to handle static asset import
-        }
-      }
+        build: {
+            rollupOptions: {
+                external: ["client-museum-s3.png"], // Added to handle static asset import
+            },
+        },
     },
     themeConfig: {
         // We use the default theme (with some CSS color overrides). This

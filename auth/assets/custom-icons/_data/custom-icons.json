@@ -739,8 +739,8 @@
       ]
     },
     {
-      "title": "Mercado Livre",
-      "slug": "mercado_livre",
+      "title": "Mercado Libre",
+      "slug": "mercado_libre",
       "altNames": [
         "Mercado Libre",
         "MercadoLibre",
@@ -1018,6 +1018,14 @@
       "altNames": [
         "七牛云",
         "qiniu"
+      ]
+    },
+    {
+      "title": "R10.net",
+      "slug": "r10",
+      "altNames": [
+        "R10",
+        "r10.net"
       ]
     },
     {
@@ -1399,6 +1407,25 @@
     },
     {
       "title": "CoinSpot"
+    },
+    {
+      "title": "Aternos",
+      "slug": "aternos"
+    },
+    {
+      "title": "Toshl Finance",
+      "slug": "toshl_finance",
+      "altNames": [
+        "Toshl"
+      ]
+    },
+    {
+      "title": "xAI",
+      "slug": "xai"
+    },
+    {
+      "title": "Cronometer",
+      "slug": "cronometer"
     }
   ]
 }

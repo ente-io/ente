@@ -1,6 +1,7 @@
 import { Paper, Stack, styled, Typography } from "@mui/material";
 import { CodeBlock } from "ente-accounts/components/CodeBlock";
 import { Verify2FACodeForm } from "ente-accounts/components/Verify2FACodeForm";
+import { getUserRecoveryKey } from "ente-accounts/services/recovery-key";
 import { appHomeRoute } from "ente-accounts/services/redirect";
 import type { TwoFactorSecret } from "ente-accounts/services/user";
 import { enableTwoFactor, setupTwoFactor } from "ente-accounts/services/user";
@@ -8,7 +9,7 @@ import { CenteredFill } from "ente-base/components/containers";
 import { LinkButton } from "ente-base/components/LinkButton";
 import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
 import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
-import { encryptWithRecoveryKey } from "ente-shared/crypto/helpers";
+import { encryptBox } from "ente-base/crypto";
 import { getData, setLSUser } from "ente-shared/storage/localStorage";
 import { t } from "i18next";
 import { useRouter } from "next/router";
@@ -26,14 +27,14 @@ const Page: React.FC = () => {
     }, []);
 
     const handleSubmit = async (otp: string) => {
-        const {
-            encryptedData: encryptedTwoFactorSecret,
-            nonce: twoFactorSecretDecryptionNonce,
-        } = await encryptWithRecoveryKey(twoFactorSecret!.secretCode);
+        const box = await encryptBox(
+            twoFactorSecret!.secretCode,
+            await getUserRecoveryKey(),
+        );
         await enableTwoFactor({
             code: otp,
-            encryptedTwoFactorSecret,
-            twoFactorSecretDecryptionNonce,
+            encryptedTwoFactorSecret: box.encryptedData,
+            twoFactorSecretDecryptionNonce: box.nonce,
         });
         await setLSUser({ ...getData("user"), isTwoFactorEnabled: true });
         await router.push(appHomeRoute);
