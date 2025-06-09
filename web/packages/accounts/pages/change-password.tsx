@@ -19,11 +19,13 @@ import {
 } from "ente-accounts/services/srp";
 import {
     ensureSavedKeyAttributes,
+    localUser,
+    type LocalUser,
     type UpdatedKey,
-    type User,
 } from "ente-accounts/services/user";
 import { generateAndSaveIntermediateKeyAttributes } from "ente-accounts/utils/helpers";
 import { LinkButton } from "ente-base/components/LinkButton";
+import { LoadingIndicator } from "ente-base/components/loaders";
 import { sharedCryptoWorker } from "ente-base/crypto";
 import type { DerivedKey } from "ente-base/crypto/types";
 import {
@@ -33,24 +35,39 @@ import {
 import { getData, setData } from "ente-shared/storage/localStorage";
 import { t } from "i18next";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 
+/**
+ * A page that allows a logged-in user to change their password.
+ */
 const Page: React.FC = () => {
-    const [token, setToken] = useState<string>();
-    const [user, setUser] = useState<User>();
+    const [user, setUser] = useState<LocalUser>();
 
     const router = useRouter();
 
     useEffect(() => {
-        const user = getData("user");
-        setUser(user);
-        if (!user?.token) {
+        const user = localUser();
+        if (user) {
+            setUser(user);
+        } else {
             stashRedirect("/change-password");
             void router.push("/");
-        } else {
-            setToken(user.token);
         }
     }, [router]);
+
+    return user ? <PageContents {...{ user }} /> : <LoadingIndicator />;
+};
+
+export default Page;
+
+interface PageContentsProps {
+    user: LocalUser;
+}
+
+const PageContents: React.FC<PageContentsProps> = ({ user }) => {
+    const token = user.token;
+
+    const router = useRouter();
 
     const onSubmit: SetPasswordFormProps["callback"] = async (
         passphrase,
@@ -89,7 +106,7 @@ const Page: React.FC = () => {
 
         const srpA = convertBufferToBase64(srpClient.computeA());
 
-        const { setupID, srpB } = await startSRPSetup(token!, {
+        const { setupID, srpB } = await startSRPSetup(token, {
             srpUserID,
             srpSalt,
             srpVerifier,
@@ -100,18 +117,16 @@ const Page: React.FC = () => {
 
         const srpM1 = convertBufferToBase64(srpClient.computeM1());
 
-        await updateSRPAndKeys(token!, {
+        await updateSRPAndKeys(token, {
             setupID,
             srpM1,
             updatedKeyAttr: updatedKey,
         });
 
         // Update the SRP attributes that are stored locally.
-        if (user?.email) {
-            const srpAttributes = await getSRPAttributes(user.email);
-            if (srpAttributes) {
-                setData("srpAttributes", srpAttributes);
-            }
+        const srpAttributes = await getSRPAttributes(user.email);
+        if (srpAttributes) {
+            setData("srpAttributes", srpAttributes);
         }
 
         const updatedKeyAttributes = Object.assign(keyAttributes, updatedKey);
@@ -131,12 +146,11 @@ const Page: React.FC = () => {
         void router.push(appHomeRoute);
     };
 
-    // TODO: Handle the case where user is not loaded yet.
     return (
         <AccountsPageContents>
             <AccountsPageTitle>{t("change_password")}</AccountsPageTitle>
             <SetPasswordForm
-                userEmail={user?.email ?? ""}
+                userEmail={user.email}
                 callback={onSubmit}
                 buttonText={t("change_password")}
             />
@@ -150,5 +164,3 @@ const Page: React.FC = () => {
         </AccountsPageContents>
     );
 };
-
-export default Page;

@@ -61,14 +61,17 @@ export type LocalUser = z.infer<typeof LocalUser>;
  * - When the user enters their email, the email property of the stored object
  *   is set, but nothing else.
  *
- * - If they have second factor verification set, then after entering their
+ * - After they verify their password, we have two cases: if second factor
+ *   verification is not set, and when it is set.
+ *
+ * - If second factor verification is not set, then after verifying their
+ *   password their {@link id} and {@link encryptedToken} will get filled in,
+ *   and {@link isTwoFactorEnabled} will be set to false.
+ *
+ * - If they have second factor verification set, then after verifying their
  *   password {@link isTwoFactorEnabled} and {@link twoFactorSessionID} will
- *   also get filled in.
- *
- * - Once they verify their TOTP based second factor, their {@link id} and
- *   {@link encryptedToken} will also get filled in.
- *
- * - TODO add more steps...
+ *   also get filled in. Once they verify their TOTP based second factor, their
+ *   {@link id} and {@link encryptedToken} will also get filled in.
  *
  * So while the underlying storage is the same, we offer two APIs for code to
  * obtain the user:
