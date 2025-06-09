@@ -5,7 +5,6 @@ import {
 } from "ente-base/http";
 import { apiURL } from "ente-base/origins";
 import HTTPService from "ente-shared/network/HTTPService";
-import { getToken } from "ente-shared/storage/localStorage/helpers";
 import { nullToUndefined } from "ente-utils/transform";
 import { z } from "zod/v4";
 
@@ -432,14 +431,21 @@ export interface UpdatedKey {
     opsLimit: number;
 }
 
-export const changeEmail = async (email: string, ott: string) => {
-    await HTTPService.post(
-        await apiURL("/users/change-email"),
-        { email, ott },
-        undefined,
-        { "X-Auth-Token": getToken() },
+/**
+ * Change the email associated with the user's account on remote.
+ *
+ * @param email The new email.
+ *
+ * @param ott The verification code that was sent to the new email.
+ */
+export const changeEmail = async (email: string, ott: string) =>
+    ensureOk(
+        await fetch(await apiURL("/users/change-email"), {
+            method: "POST",
+            headers: await authenticatedRequestHeaders(),
+            body: JSON.stringify({ email, ott }),
+        }),
     );
-};
 
 const TwoFactorSecret = z.object({
     secretCode: z.string(),
