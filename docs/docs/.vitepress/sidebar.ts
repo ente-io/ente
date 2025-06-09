@@ -3,27 +3,6 @@
 
 export const sidebar = [
     {
-        text: "Overview",
-        items: [
-            {
-                text: "Introduction",
-                link: "/overview/",
-            },
-            {
-                text: "Community",
-                link: "/overview/community",
-            },
-            {
-                text: "Contributing",
-                link: "/overview/contribute",
-            },
-            {
-                text: "Help",
-                link: "/overview/help",
-            },
-        ],
-    },
-    {
         text: "Photos",
         items: [
             { text: "Introduction", link: "/photos/" },
@@ -335,7 +314,7 @@ export const sidebar = [
                 items: [
                     {
                         text: "Ente via Tailscale",
-                        link: "/self-hosting/guides/Tailscale",
+                        link: "/self-hosting/guides/tailscale",
                     },
                     {
                         text: "Ente with External S3",
