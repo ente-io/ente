@@ -9,6 +9,7 @@ import 'package:photos/core/event_bus.dart';
 import "package:photos/core/network/network.dart";
 import 'package:photos/db/device_files_db.dart';
 import 'package:photos/db/files_db.dart';
+import "package:photos/db/local/table/path_config_table.dart";
 import 'package:photos/events/backup_folders_updated_event.dart';
 import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/files_updated_event.dart';
@@ -218,7 +219,7 @@ class RemoteSyncService {
 
   Future<void> _pullDiff() async {
     await newService.syncFromRemote();
-  return;
+    return;
     _logger.info("Pulling remote diff");
     final isFirstSync = !_collectionsService.hasSyncedCollections();
     if (isFirstSync && !_isExistingSyncSilent) {
@@ -344,15 +345,17 @@ class RemoteSyncService {
   Future<void> updateDeviceFolderSyncStatus(
     Map<String, bool> syncStatusUpdate,
   ) async {
-    final Set<int> oldCollectionIDsForAutoSync =
-        await _db.getDeviceSyncCollectionIDs();
-    await _db.updateDevicePathSyncStatus(syncStatusUpdate);
-    final Set<int> newCollectionIDsForAutoSync =
-        await _db.getDeviceSyncCollectionIDs();
-    SyncService.instance.onDeviceCollectionSet(newCollectionIDsForAutoSync);
+    final int ownerID = _config.getUserID()!;
+    final Set<int> oldDestCollection =
+        await localDB.destCollectionWithBackup(ownerID);
+    await localDB.insertOrUpdatePathConfigs(syncStatusUpdate, ownerID);
+    final Set<int> newDestCollection =
+        await localDB.destCollectionWithBackup(ownerID);
+    // Cancel any existing sync if the destination collection has changed
+    SyncService.instance.onDeviceCollectionSet(newDestCollection);
     // remove all collectionIDs which are still marked for backup
-    oldCollectionIDsForAutoSync.removeAll(newCollectionIDsForAutoSync);
-    await removeFilesQueuedForUpload(oldCollectionIDsForAutoSync.toList());
+    oldDestCollection.removeAll(newDestCollection);
+    await removeFilesQueuedForUpload(oldDestCollection.toList());
     if (syncStatusUpdate.values.any((syncStatus) => syncStatus == false)) {
       Configuration.instance.setSelectAllFoldersForBackup(false).ignore();
     }

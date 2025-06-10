@@ -7,9 +7,11 @@ import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import "package:photo_manager/photo_manager.dart";
 import 'package:photos/core/configuration.dart';
+import "package:photos/db/local/table/path_config_table.dart";
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/generated/l10n.dart';
 import "package:photos/models/file/file.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/services/local/local_assets_cache.dart";
 import "package:photos/services/local/local_import.dart";
 import 'package:photos/services/sync/remote_sync_service.dart';
@@ -39,12 +41,29 @@ class _BackupFolderSelectionPageV2State
   final Logger _logger = Logger((_BackupFolderSelectionPageV2State).toString());
   final Set<String> _allDevicePathIDs = <String>{};
   final Set<String> _selectedDevicePathIDs = <String>{};
+  final Set<String> _existingBackupPathIDs = <String>{};
   List<AssetPathEntity>? _assetPathEntities;
   Map<String, Set<String>> _assetCount = {};
   final Map<String, EnteFile> _pathToLatestAsset = {};
 
   @override
   void initState() {
+    localDB.getBackedUpPathIDs(Configuration.instance.getUserID() ?? 0).then(
+      (Set<String> paths) {
+        _existingBackupPathIDs.addAll(paths);
+        if (mounted) {
+          setState(() {
+            _selectedDevicePathIDs.addAll(_existingBackupPathIDs);
+          });
+        }
+      },
+    ).onError((e, s) {
+      _logger.warning(
+        "Failed to get existing backup path IDs",
+        e,
+        s,
+      );
+    });
     LocalImportService.instance
         .getLocalAssetsCache()
         .then((LocalAssetsCache c) async {
@@ -77,12 +96,6 @@ class _BackupFolderSelectionPageV2State
         });
         for (final path in _assetPathEntities!) {
           _allDevicePathIDs.add(path.id);
-          // todo: replace this logic based on where we decide to store mapping
-          // of folders that needs to be backed up.
-          final bool shouldBackup = false || path.albumTypeEx != null;
-          if (shouldBackup) {
-            _selectedDevicePathIDs.add(path.id);
-          }
         }
         if (widget.isOnboarding) {
           _selectedDevicePathIDs.addAll(_allDevicePathIDs);

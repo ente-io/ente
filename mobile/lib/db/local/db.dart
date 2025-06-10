@@ -15,9 +15,10 @@ import "package:sqlite_async/sqlite_async.dart";
 
 class LocalDB with SqlDbBase {
   static const _databaseName = "local_5.db";
-  static const _batchInsertMaxCount = 1000;
+  static const batchInsertMaxCount = 1000;
   static const _smallTableBatchInsertMaxCount = 5000;
   late final SqliteDatabase _sqliteDB;
+  SqliteDatabase get sqliteDB => _sqliteDB;
 
   Future<void> init() async {
     devLog("LocalDB init");
@@ -34,7 +35,7 @@ class LocalDB with SqlDbBase {
   Future<void> insertAssets(List<AssetEntity> entries) async {
     if (entries.isEmpty) return;
     final stopwatch = Stopwatch()..start();
-    await Future.forEach(entries.slices(_batchInsertMaxCount), (slice) async {
+    await Future.forEach(entries.slices(batchInsertMaxCount), (slice) async {
       final List<List<Object?>> values =
           slice.map((e) => LocalDBMappers.assetsRow(e)).toList();
       await _sqliteDB.executeBatch(

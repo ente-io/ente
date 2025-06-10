@@ -170,6 +170,22 @@ class LocalDBMigration {
       should_backup INTEGER NOT NULL DEFAULT 0,
       upload_strategy INTEGER NOT NULL DEFAULT 0
     );
+    
+  ''',
+    '''
+    CREATE TABLE asset_upload_queue (
+      id TEXT NOT NULL,
+      dest_collection_id INTEGER NOT NULL,
+      PRIMARY KEY (dest_collection_id, id),
+      path_id TEXT,
+      owner_id INTEGER NOT NULL
+    );
+    CREATE INDEX IF NOT EXISTS idx_asset_upload_queue_collection_id 
+      ON asset_upload_queue(dest_collection_id) 
+      WHERE dest_collection_id IS NOT NULL;
+    CREATE INDEX IF NOT EXISTS idx_asset_upload_queue_owner_id 
+      ON asset_upload_queue(owner_id) 
+      WHERE owner_id IS NOT NULL;
   ''',
   ];
 

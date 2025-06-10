@@ -17,6 +17,7 @@ import 'package:photos/core/network/network.dart';
 import 'package:photos/db/collections_db.dart';
 import 'package:photos/db/device_files_db.dart';
 import 'package:photos/db/files_db.dart';
+import "package:photos/db/local/table/path_config_table.dart";
 import "package:photos/db/remote/db.dart";
 import "package:photos/db/remote/table/collection_files.dart";
 import 'package:photos/db/trash_db.dart';
@@ -681,11 +682,12 @@ class CollectionsService {
   }
 
   Future<void> _turnOffDeviceFolderSync(Collection collection) async {
-    final deviceCollections = await _filesDB.getDeviceCollections();
+    final deviceCollections =
+        await localDB.getPathConfigs(_config.getUserID()!);
     final Map<String, bool> devicePathIDsToUnSync = Map.fromEntries(
       deviceCollections
-          .where((e) => e.shouldBackup && e.collectionID == collection.id)
-          .map((e) => MapEntry(e.id, false)),
+          .where((e) => e.shouldBackup && e.destCollectionID == collection.id)
+          .map((e) => MapEntry(e.pathID, false)),
     );
 
     if (devicePathIDsToUnSync.isNotEmpty) {
