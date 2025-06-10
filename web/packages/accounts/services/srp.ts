@@ -285,14 +285,14 @@ export const generateSRPSetupAttributes = async (
     const srpUserID = uuidv4();
     const srpSalt = await generateDeriveKeySalt();
 
-    const srpVerifierBuffer = SRP.computeVerifier(
-        SRP.params["4096"],
-        convertBase64ToBuffer(srpSalt),
-        Buffer.from(srpUserID),
-        convertBase64ToBuffer(loginSubKey),
+    const srpVerifier = bufferToB64(
+        SRP.computeVerifier(
+            SRP.params["4096"],
+            b64ToBuffer(srpSalt),
+            Buffer.from(srpUserID),
+            b64ToBuffer(loginSubKey),
+        ),
     );
-
-    const srpVerifier = convertBufferToBase64(srpVerifierBuffer);
 
     return { srpUserID, srpSalt, srpVerifier, loginSubKey };
 };
@@ -313,13 +313,9 @@ const deriveSRPLoginSubKey = async (kek: string) => {
     return toB64(kekSubKeyBytes.slice(0, 16));
 };
 
-export const convertBufferToBase64 = (buffer: Buffer) => {
-    return buffer.toString("base64");
-};
+const b64ToBuffer = (base64: string) => Buffer.from(base64, "base64");
 
-export const convertBase64ToBuffer = (base64: string) => {
-    return Buffer.from(base64, "base64");
-};
+const bufferToB64 = (buffer: Buffer) => buffer.toString("base64");
 
 /**
  * Save {@link SRPSetupAttributes} in local storage for later use via
@@ -482,7 +478,7 @@ export const srpSetupOrReconfigure = async (
 ) => {
     const srpClient = await generateSRPClient(srpSalt, srpUserID, loginSubKey);
 
-    const srpA = convertBufferToBase64(srpClient.computeA());
+    const srpA = bufferToB64(srpClient.computeA());
 
     const token = getToken();
     const { setupID, srpB } = await startSRPSetup(token, {
@@ -492,13 +488,13 @@ export const srpSetupOrReconfigure = async (
         srpVerifier,
     });
 
-    srpClient.setB(convertBase64ToBuffer(srpB));
+    srpClient.setB(b64ToBuffer(srpB));
 
-    const srpM1 = convertBufferToBase64(srpClient.computeM1());
+    const srpM1 = bufferToB64(srpClient.computeM1());
 
     const { srpM2 } = await cb({ srpM1, setupID });
 
-    srpClient.checkM2(convertBase64ToBuffer(srpM2));
+    srpClient.checkM2(b64ToBuffer(srpM2));
 };
 
 export const generateSRPClient = async (
@@ -517,9 +513,9 @@ export const generateSRPClient = async (
                 }
                 const srpClient = new SrpClient(
                     SRP.params["4096"],
-                    convertBase64ToBuffer(srpSalt),
+                    b64ToBuffer(srpSalt),
                     Buffer.from(srpUserID),
-                    convertBase64ToBuffer(loginSubKey),
+                    b64ToBuffer(loginSubKey),
                     secret1,
                     false,
                 );
@@ -547,20 +543,20 @@ export const loginViaSRP = async (
         const srpA = srpClient.computeA();
         const { srpB, sessionID } = await createSRPSession(
             srpAttributes.srpUserID,
-            convertBufferToBase64(srpA),
+            bufferToB64(srpA),
         );
-        srpClient.setB(convertBase64ToBuffer(srpB));
+        srpClient.setB(b64ToBuffer(srpB));
 
         const m1 = srpClient.computeM1();
-        log.debug(() => `srp m1: ${convertBufferToBase64(m1)}`);
+        log.debug(() => `srp m1: ${bufferToB64(m1)}`);
         const { srpM2, ...rest } = await verifySRPSession(
             sessionID,
             srpAttributes.srpUserID,
-            convertBufferToBase64(m1),
+            bufferToB64(m1),
         );
         log.debug(() => `srp verify session successful,srpM2: ${srpM2}`);
 
-        srpClient.checkM2(convertBase64ToBuffer(srpM2));
+        srpClient.checkM2(b64ToBuffer(srpM2));
 
         log.debug(() => `srp server verify successful`);
         return rest;
