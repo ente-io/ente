@@ -61,7 +61,6 @@ export const SignUpContents: React.FC<SignUpContentsProps> = ({
     onLogin,
     host,
 }) => {
-    const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
 
     const handleToggleShowHidePassword = useCallback(
@@ -95,7 +94,6 @@ export const SignUpContents: React.FC<SignUpContentsProps> = ({
                     setFieldError("confirm", t("password_mismatch_error"));
                     return;
                 }
-                setLoading(true);
                 try {
                     setLocalReferralSource(referral);
                     await sendOTT(email, "signup");
@@ -141,7 +139,6 @@ export const SignUpContents: React.FC<SignUpContentsProps> = ({
             } catch (e) {
                 log.error("signup failed", e);
             }
-            setLoading(false);
         },
     });
 
@@ -157,7 +154,7 @@ export const SignUpContents: React.FC<SignUpContentsProps> = ({
                     onChange={formik.handleChange}
                     error={!!formik.errors.email}
                     helperText={formik.errors.email}
-                    disabled={loading}
+                    disabled={formik.isSubmitting}
                     fullWidth
                     autoFocus
                 />
@@ -170,7 +167,7 @@ export const SignUpContents: React.FC<SignUpContentsProps> = ({
                     onChange={formik.handleChange}
                     error={!!formik.errors.password}
                     helperText={formik.errors.password}
-                    disabled={loading}
+                    disabled={formik.isSubmitting}
                     fullWidth
                     slotProps={{
                         input: {
@@ -192,7 +189,7 @@ export const SignUpContents: React.FC<SignUpContentsProps> = ({
                     onChange={formik.handleChange}
                     error={!!formik.errors.confirmPassword}
                     helperText={formik.errors.confirmPassword}
-                    disabled={loading}
+                    disabled={formik.isSubmitting}
                     fullWidth
                 />
                 <PasswordStrengthHint password={formik.values.password} />
@@ -209,7 +206,7 @@ export const SignUpContents: React.FC<SignUpContentsProps> = ({
                     value={formik.values.referral}
                     onChange={formik.handleChange}
                     error={!!formik.errors.referral}
-                    disabled={loading}
+                    disabled={formik.isSubmitting}
                     fullWidth
                     slotProps={{
                         input: {
@@ -237,10 +234,10 @@ export const SignUpContents: React.FC<SignUpContentsProps> = ({
                             <Checkbox
                                 name="acceptedTerms"
                                 size="small"
-                                disabled={loading}
+                                color="accent"
                                 checked={formik.values.acceptedTerms}
                                 onChange={formik.handleChange}
-                                color="accent"
+                                disabled={formik.isSubmitting}
                             />
                         }
                         label={
@@ -272,7 +269,7 @@ export const SignUpContents: React.FC<SignUpContentsProps> = ({
                     fullWidth
                     color="accent"
                     type="submit"
-                    loading={loading}
+                    loading={formik.isSubmitting}
                     disabled={
                         !formik.values.acceptedTerms ||
                         isWeakPassword(formik.values.password)
@@ -280,7 +277,7 @@ export const SignUpContents: React.FC<SignUpContentsProps> = ({
                 >
                     {t("create_account")}
                 </LoadingButton>
-                {loading && (
+                {formik.isSubmitting && (
                     <Typography
                         variant="small"
                         sx={{ mt: 1, textAlign: "center", color: "text.muted" }}
