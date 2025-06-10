@@ -29,11 +29,12 @@ import {
     getSRPAttributes,
     loginViaSRP,
 } from "ente-accounts/services/srp";
-import { generateAndSaveInteractiveKeyAttributes, type KeyAttributes, type User } from "ente-accounts/services/user";
 import {
-    decryptAndStoreToken,
-    generateAndSaveIntermediateKeyAttributes,
-} from "ente-accounts/utils/helpers";
+    generateAndSaveInteractiveKeyAttributes,
+    type KeyAttributes,
+    type User,
+} from "ente-accounts/services/user";
+import { decryptAndStoreToken } from "ente-accounts/utils/helpers";
 import { LinkButton } from "ente-base/components/LinkButton";
 import { LoadingIndicator } from "ente-base/components/loaders";
 import { useBaseContext } from "ente-base/context";

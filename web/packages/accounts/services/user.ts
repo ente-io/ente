@@ -571,13 +571,29 @@ export const remoteLogoutIfNeeded = async () => {
 };
 
 /**
- * Encrypt the user's masterKey with an intermediate kek (key encryption key)
- * derived from the passphrase (with interactive mem and ops limits) to avoid
- * saving it to local storage in plain text.
+ * Generate a new local-only kek (key encryption key) suitable for interactive
+ * use and update the locally saved key attributes to reflect it.
  *
- * This means that on the web user will always have to enter their passphrase to
+ * See {@link deriveInteractiveKey} for more details. In brief, after the
+ * initial passphrase verification, we create a new kek derived from the same
+ * passphrase as the original kek, but with so called interactive mem and ops
+ * limits which result in a noticeably faster key derivation.
+ *
+ * We then overwrite the KEK tuple (See: [Note: KEK three tuple]) in the locally
+ * persisted {@link KeyAttributes} so that these interactive parameters get used
+ * subsequent reauthentication. These never leave the device, and are meant to
+ * be local only "intermediate" key attributes which are more ergonomic for the
+ * user, especially on the web app where they need to enter their passphrase to
  * access their masterKey when repopening the app in a new tab (on desktop we
  * can use OS storage, see [Note: Safe storage and interactive KEK attributes]).
+ *
+ * @param passphrase The user's passphrase.
+ *
+ * @param keyAttributes The existing "original" key attributes, which we
+ * might've generated locally (new signup) or fetched from remote (existing
+ * login).
+ *
+ * @param masterKey The user's master key (base64 encoded).
  */
 export async function generateAndSaveInteractiveKeyAttributes(
     passphrase: string,
