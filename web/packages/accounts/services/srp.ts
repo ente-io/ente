@@ -13,7 +13,6 @@ import log from "ente-base/log";
 import { apiURL } from "ente-base/origins";
 import { ApiError, CustomError } from "ente-shared/error";
 import HTTPService from "ente-shared/network/HTTPService";
-import { getToken } from "ente-shared/storage/localStorage/helpers";
 import { SRP, SrpClient } from "fast-srp-hap";
 import { v4 as uuidv4 } from "uuid";
 import { z } from "zod/v4";
@@ -365,9 +364,7 @@ export const unstashAndUseSRPSetupAttributes = async (
  * @param srpSetupAttributes SRP setup attributes.
  */
 export const configureSRP = async (srpSetupAttributes: SRPSetupAttributes) =>
-    srpSetupOrReconfigure(srpSetupAttributes, (cbAttr) =>
-        completeSRPSetup(getToken(), cbAttr),
-    );
+    srpSetupOrReconfigure(srpSetupAttributes, completeSRPSetup);
 
 /**
  * A function that is called by {@link srpSetupOrReconfigure} to exchange the
@@ -454,6 +451,8 @@ type SetupSRPResponse = z.infer<typeof SetupSRPResponse>;
 
 /**
  * Initiate SRP setup on remote.
+ *
+ * Part of the [Note: SRP setup] sequence.
  */
 const startSRPSetup = async (
     setupSRPRequest: SetupSRPRequest,
@@ -472,10 +471,29 @@ interface CompleteSRPSetupRequest {
     srpM1: string;
 }
 
-interface CompleteSRPSetupResponse {
-    setupID: string;
-    srpM2: string;
-}
+const CompleteSRPSetupResponse = z.object({
+    setupID: z.string(),
+    srpM2: z.string(),
+});
+
+type CompleteSRPSetupResponse = z.infer<typeof CompleteSRPSetupResponse>;
+
+/**
+ * Complete a previously initiated SRP setup on remote.
+ *
+ * Part of the [Note: SRP setup] sequence.
+ */
+const completeSRPSetup = async (
+    completeSRPSetupRequest: CompleteSRPSetupRequest,
+) => {
+    const res = await fetch(await apiURL("/users/srp/complete"), {
+        method: "POST",
+        headers: await authenticatedRequestHeaders(),
+        body: JSON.stringify(completeSRPSetupRequest),
+    });
+    ensureOk(res);
+    return CompleteSRPSetupResponse.parse(await res.json());
+};
 
 interface CreateSRPSessionResponse {
     sessionID: string;
@@ -509,24 +527,6 @@ export interface UpdateSRPAndKeysResponse {
     srpM2: string;
     setupID: string;
 }
-
-const completeSRPSetup = async (
-    token: string,
-    completeSRPSetupRequest: CompleteSRPSetupRequest,
-) => {
-    try {
-        const resp = await HTTPService.post(
-            await apiURL("/users/srp/complete"),
-            completeSRPSetupRequest,
-            undefined,
-            { "X-Auth-Token": token },
-        );
-        return resp.data as CompleteSRPSetupResponse;
-    } catch (e) {
-        log.error("failed to complete SRP setup", e);
-        throw e;
-    }
-};
 
 export const updateSRPAndKeys = async (
     token: string,
