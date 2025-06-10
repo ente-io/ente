@@ -13,8 +13,14 @@ import {
     Tooltip,
     Typography,
 } from "@mui/material";
-import { generateKeyAndSRPAttributes } from "ente-accounts/services/srp";
-import { sendOTT } from "ente-accounts/services/user";
+import {
+    deriveSRPPassword,
+    generateSRPSetupAttributes,
+} from "ente-accounts/services/srp";
+import {
+    generateKeysAndAttributes,
+    sendOTT,
+} from "ente-accounts/services/user";
 import { generateAndSaveIntermediateKeyAttributes } from "ente-accounts/utils/helpers";
 import { isWeakPassword } from "ente-accounts/utils/password";
 import { LinkButton } from "ente-base/components/LinkButton";
@@ -96,8 +102,12 @@ export const SignUpContents: React.FC<SignUpContentsProps> = ({
                 throw e;
             }
             try {
-                const { keyAttributes, masterKey, srpSetupAttributes } =
-                    await generateKeyAndSRPAttributes(passphrase);
+                const { masterKey, kek, keyAttributes } =
+                    await generateKeysAndAttributes(passphrase);
+
+                const srpSetupAttributes = await generateSRPSetupAttributes(
+                    await deriveSRPPassword(kek),
+                );
 
                 setData("originalKeyAttributes", keyAttributes);
                 setData("srpSetupAttributes", srpSetupAttributes);

@@ -82,7 +82,20 @@ export const masterKeyFromSession = async () => {
  */
 export const saveMasterKeyInSessionAndSafeStore = async (masterKey: string) => {
     await saveKeyInSessionStore("encryptionKey", masterKey);
-    await globalThis.electron?.saveMasterKeyInSafeStorage(masterKey);
+    try {
+        await globalThis.electron?.saveMasterKeyInSafeStorage(masterKey);
+    } catch (e) {
+        // [Note: Safe storage is best effort]
+        //
+        // The user might be running on an OS which does not provide secure
+        // storage. Practically this is rare, but it can happen, especially on
+        // Linux if the app is run in a desktop environment without libsecret.
+        //
+        // So intercept failures to read and write to safe storage, and
+        // gracefully degrade to how the web app behaves (ask the user for their
+        // password in each session).
+        log.warn("Failed to save master key in safe storage", e);
+    }
 };
 
 /**
@@ -135,7 +148,8 @@ export const updateSessionFromElectronSafeStorageIfNeeded = async () => {
     try {
         masterKey = await electron.masterKeyFromSafeStorage();
     } catch (e) {
-        log.error("Failed to read master key from safe storage", e);
+        // See: [Note: Safe storage is best effort]
+        log.warn("Failed to read master key from safe storage", e);
     }
     if (masterKey) {
         await saveKeyInSessionStore("encryptionKey", masterKey);
