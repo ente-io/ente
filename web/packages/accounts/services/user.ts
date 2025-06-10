@@ -155,17 +155,17 @@ export interface KeyAttributes {
      * [Note: Key encryption key]
      *
      * The user's master key is encrypted with a "key encryption key" (lovingly
-     * called a "kek" sometimes).
+     * called a "KEK" sometimes).
      *
-     * The kek itself is derived from the user's passphrase.
+     * The KEK itself is derived from the user's passphrase.
      *
      * 1. User enters passphrase on new device.
      *
-     * 2. Client derives kek from this passphrase (using the {@link kekSalt},
+     * 2. Client derives KEK from this passphrase (using the {@link kekSalt},
      *    {@link opsLimit} and {@link memLimit} as parameters for the
      *    derivation).
      *
-     * 3. Client use kek to decrypt the master key from {@link encryptedKey} and
+     * 3. Client use KEK to decrypt the master key from {@link encryptedKey} and
      *    {@link keyDecryptionNonce}.
      */
     encryptedKey: string;
@@ -178,7 +178,7 @@ export interface KeyAttributes {
      */
     keyDecryptionNonce: string;
     /**
-     * The salt used during the derivation of the kek.
+     * The salt used during the derivation of the KEK.
      *
      * Base64 encoded.
      *
@@ -208,7 +208,7 @@ export interface KeyAttributes {
      */
     kekSalt: string;
     /**
-     * The operation limit used during the derivation of the kek.
+     * The operation limit used during the derivation of the KEK.
      *
      * The {@link opsLimit} and {@link memLimit} are complementary parameters
      * that define the amount of work done by the key derivation function. See
@@ -219,7 +219,7 @@ export interface KeyAttributes {
      */
     opsLimit: number;
     /**
-     * The memory limit used during the derivation of the kek.
+     * The memory limit used during the derivation of the KEK.
      *
      * See {@link opsLimit} for more details.
      */
@@ -571,15 +571,15 @@ export const remoteLogoutIfNeeded = async () => {
 };
 
 /**
- * Generate a new local-only kek (key encryption key) suitable for interactive
+ * Generate a new local-only KEK (key encryption key) suitable for interactive
  * use and update the locally saved key attributes to reflect it.
  *
  * See {@link deriveInteractiveKey} for more details.
  *
- * In brief, after the initial passphrase verification, we create a new kek
- * derived from the same passphrase as the original kek, but with so called
- * interactive mem and ops limits which result in a noticeably faster key
- * derivation.
+ * In brief, after the initial passphrase verification, we create a new
+ * inetractive KEK derived from the same passphrase as the original KEK, but
+ * with so called interactive mem and ops limits which result in a noticeably
+ * faster key derivation.
  *
  * We then overwrite the encrypted master key, encryption nonce and the KEK
  * derivation parameters (see: [Note: KEK three tuple]) in the locally persisted

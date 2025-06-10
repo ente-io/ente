@@ -49,7 +49,7 @@ export interface VerifyMasterPasswordFormProps {
      * auxillary information that was ascertained when verifying it.
      *
      * @param key The user's master key obtained after decrypting it by using
-     * the kek derived from their passphrase.
+     * the KEK derived from their passphrase.
      *
      * @param kek The key used for encrypting the user's master key.
      *

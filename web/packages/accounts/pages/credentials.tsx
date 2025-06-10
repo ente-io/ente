@@ -170,7 +170,7 @@ const Page: React.FC = () => {
         async (kek: string) => {
             try {
                 // Currently the page will get reloaded if any of the attributes
-                // have changed, so we don't need to worry about the kek having
+                // have changed, so we don't need to worry about the KEK having
                 // been generated using stale credentials. This await on the
                 // promise is here to only ensure we're done with the check
                 // before we let the user in.
