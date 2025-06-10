@@ -171,41 +171,40 @@ export const updateSRPAndKeys = async (
     }
 };
 
-export const configureSRP = async ({
-    srpSalt,
-    srpUserID,
-    srpVerifier,
-    loginSubKey,
-}: SRPSetupAttributes) => {
-    try {
-        const srpClient = await generateSRPClient(
-            srpSalt,
-            srpUserID,
-            loginSubKey,
-        );
+export const configureSRP = async (attr: SRPSetupAttributes) =>
+    srpSetupOrReconfigure(attr, (cbAttr) =>
+        completeSRPSetup(getToken(), cbAttr),
+    );
 
-        const srpA = convertBufferToBase64(srpClient.computeA());
+export const srpSetupOrReconfigure = async (
+    { srpSalt, srpUserID, srpVerifier, loginSubKey }: SRPSetupAttributes,
+    cb: ({
+        setupID,
+        srpM1,
+    }: {
+        setupID: string;
+        srpM1: string;
+    }) => Promise<{ srpM2: string }>,
+) => {
+    const srpClient = await generateSRPClient(srpSalt, srpUserID, loginSubKey);
 
-        log.debug(() => `srp a: ${srpA}`);
-        const token = getToken();
-        const { setupID, srpB } = await startSRPSetup(token, {
-            srpA,
-            srpUserID,
-            srpSalt,
-            srpVerifier,
-        });
+    const srpA = convertBufferToBase64(srpClient.computeA());
 
-        srpClient.setB(convertBase64ToBuffer(srpB));
+    const token = getToken();
+    const { setupID, srpB } = await startSRPSetup(token, {
+        srpA,
+        srpUserID,
+        srpSalt,
+        srpVerifier,
+    });
 
-        const srpM1 = convertBufferToBase64(srpClient.computeM1());
+    srpClient.setB(convertBase64ToBuffer(srpB));
 
-        const { srpM2 } = await completeSRPSetup(token, { srpM1, setupID });
+    const srpM1 = convertBufferToBase64(srpClient.computeM1());
 
-        srpClient.checkM2(convertBase64ToBuffer(srpM2));
-    } catch (e) {
-        log.error("Failed to configure SRP", e);
-        throw e;
-    }
+    const { srpM2 } = await cb({ srpM1, setupID });
+
+    srpClient.checkM2(convertBase64ToBuffer(srpM2));
 };
 
 export const generateSRPClient = async (

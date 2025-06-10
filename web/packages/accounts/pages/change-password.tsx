@@ -8,13 +8,10 @@ import SetPasswordForm, {
 } from "ente-accounts/components/SetPasswordForm";
 import { appHomeRoute, stashRedirect } from "ente-accounts/services/redirect";
 import {
-    convertBase64ToBuffer,
-    convertBufferToBase64,
     deriveSRPPassword,
-    generateSRPClient,
     generateSRPSetupAttributes,
     getSRPAttributes,
-    startSRPSetup,
+    srpSetupOrReconfigure,
     updateSRPAndKeys,
     type UpdatedKeyAttr,
 } from "ente-accounts/services/srp";
@@ -113,26 +110,11 @@ const PageContents: React.FC<PageContentsProps> = ({ user }) => {
         const { srpUserID, srpSalt, srpVerifier } =
             await generateSRPSetupAttributes(loginSubKey);
 
-        const srpClient = await generateSRPClient(
-            srpSalt,
-            srpUserID,
-            loginSubKey,
+        await srpSetupOrReconfigure(
+            { srpSalt, srpUserID, srpVerifier, loginSubKey },
+            ({ setupID, srpM1 }) =>
+                updateSRPAndKeys(token, { setupID, srpM1, updatedKeyAttr }),
         );
-
-        const srpA = convertBufferToBase64(srpClient.computeA());
-
-        const { setupID, srpB } = await startSRPSetup(token, {
-            srpUserID,
-            srpSalt,
-            srpVerifier,
-            srpA,
-        });
-
-        srpClient.setB(convertBase64ToBuffer(srpB));
-
-        const srpM1 = convertBufferToBase64(srpClient.computeM1());
-
-        await updateSRPAndKeys(token, { setupID, srpM1, updatedKeyAttr });
 
         // Update the SRP attributes that are stored locally.
         const srpAttributes = await getSRPAttributes(user.email);
