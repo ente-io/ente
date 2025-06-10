@@ -11,6 +11,91 @@ import { v4 as uuidv4 } from "uuid";
 import type { UserVerificationResponse } from "./user";
 
 /**
+ * The SRP attributes for a user.
+ *
+ * [Note: SRP]
+ *
+ * The SRP (Secure Remote Password) protocol is a modified Diffie-Hellman key
+ * exchange that allows the remote to verify the user's possession of a
+ * passphrase, and the user to ensure that remote is not being impersonated,
+ * without the passphrase ever leaving the device.
+ *
+ * It is used as an alternative to email verification flows, though the user
+ * also has an option to enable it in addition to SRP.
+ *
+ * For more about the what and why, see the announcement blog post
+ * https://ente.io/blog/ente-adopts-secure-remote-passwords/
+ *
+ * Here we do not focus on the math (the above blog post links to reference
+ * material, and there is also an RFC), but instead of the various bits of
+ * information that get exchanged.
+ *
+ * Broadly, there are two scenarios: SRP setup, and SRP verification.
+ *
+ * [Note: SRP setup]
+ *
+ * During SRP setup, client generates
+ *
+ * 01. A SRP user ID (a new UUID-v4)
+ * 02. A SRP password (deterministically derived from their regular KEK)
+ * 03. A SRP salt (randomly generated)
+ *
+ * These 3 things are enough to create a SRP verifier and client
+ *
+ * 04. verifier = computeSRPVerifier({ userID, password, salt })
+ * 05. client = new SRPClient({ userID, password, salt })
+ *
+ * The SRP client can just be thought of an ephemeral stateful mechanism to
+ * avoid passing all the state accrued so far to each operation.
+ *
+ * The client (app) then starts the setup ceremony with remote:
+ *
+ * 06. Use SRP client to conjure secret `a` and use that to compute a public A
+ * 07. Send { userID, salt, verifier, A } to remote ("/users/srp/setup")
+ *
+ * Remote then:
+ *
+ * 08. Generates a SRP serverKey (random)
+ * 09. Saves { userID, serverKey, A } into SRP sessions table
+ * 10. Creates server = new SRPServer({ verifier, serverKey })
+ * 11. Uses SRP server to conjure secret `b` and use that to compute a public B
+ * 12. Stashes { sessionID, userID, salt, verifier } into SRP setups table
+ * 13. Returns { setupID, B } to client
+ *
+ * Client then
+ *
+ * 14. Tells its SRP client about B
+ * 15. Computes SRP M1 (evidence message) using the SRP client
+ * 16. Sends { setupID, M1 } to remote ("/users/srp/complete")
+ *
+ * Remote then
+ *
+ * 17. Uses setupID to read the stashed { sessionID, userID, salt, verifier }
+ * 18. Uses sessionID to read { serverKey, A }
+ * 19. Recreates server = new SRPServer({ verifier, serverKey }), sets server.A
+ * 20. Verifies M1 using the SRP server, obtaining a SRP M2 (evidence message)
+ * 21. Returns M2
+ *
+ * Client then
+ *
+ * 22. Verifies M2
+ *
+ * SRP setup is now complete.
+ *
+ * A similar flow is used when the user changes their passphrase. On passphrase
+ * change, a new KEK is generated, thus the SRP password also changes, and so a
+ * subset of the steps above are done to update both client and remote.
+ */
+export interface SRPAttributes {
+    srpUserID: string;
+    srpSalt: string;
+    memLimit: number;
+    opsLimit: number;
+    kekSalt: string;
+    isEmailMFAEnabled: boolean;
+}
+
+/**
  * Derive a "password" (which is really an arbitrary binary value, not human
  * generated) for use as the SRP user password by applying a deterministic KDF
  * (Key Derivation Function) to the provided {@link kek}.
@@ -25,15 +110,6 @@ export const deriveSRPPassword = async (kek: string) => {
     // password (instead of entire 32 bytes).
     return toB64(kekSubKeyBytes.slice(0, 16));
 };
-
-export interface SRPAttributes {
-    srpUserID: string;
-    srpSalt: string;
-    memLimit: number;
-    opsLimit: number;
-    kekSalt: string;
-    isEmailMFAEnabled: boolean;
-}
 
 interface GetSRPAttributesResponse {
     attributes: SRPAttributes;
