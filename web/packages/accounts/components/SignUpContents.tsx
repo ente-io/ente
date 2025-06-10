@@ -13,10 +13,7 @@ import {
     Tooltip,
     Typography,
 } from "@mui/material";
-import {
-    deriveSRPPassword,
-    generateSRPSetupAttributes,
-} from "ente-accounts/services/srp";
+import { generateSRPSetupAttributes } from "ente-accounts/services/srp";
 import {
     generateAndSaveInteractiveKeyAttributes,
     generateKeysAndAttributes,
@@ -146,9 +143,8 @@ export const SignUpContents: React.FC<SignUpContentsProps> = ({
 
                 const { masterKey, kek, keyAttributes } = gkResult;
 
-                const srpSetupAttributes = await generateSRPSetupAttributes(
-                    await deriveSRPPassword(kek),
-                );
+                const srpSetupAttributes =
+                    await generateSRPSetupAttributes(kek);
 
                 setData("originalKeyAttributes", keyAttributes);
                 setData("srpSetupAttributes", srpSetupAttributes);
