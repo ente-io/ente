@@ -43,7 +43,7 @@ import { t } from "i18next";
 import type { NextRouter } from "next/router";
 import React, { useCallback, useState } from "react";
 import { Trans } from "react-i18next";
-import * as Yup from "yup";
+import { z } from "zod/v4";
 import { PasswordStrengthHint } from "./PasswordStrength";
 import {
     AccountsPageFooter,
@@ -78,21 +78,32 @@ export const SignUpContents: React.FC<SignUpContentsProps> = ({
             referral: "",
             acceptedTerms: false,
         },
-        validationSchema: Yup.object().shape({
-            email: Yup.string()
-                .email(t("invalid_email_error"))
-                .required(t("required")),
-            password: Yup.string().required(t("required")),
-            confirmPassword: Yup.string().required(t("required")),
-        }),
-        validateOnChange: false,
-        validateOnBlur: false,
         onSubmit: async (
             { email, password, confirmPassword, referral },
             { setFieldError },
         ) => {
+            if (!email) {
+                setFieldError("email", t("required"));
+                return;
+            }
+
+            if (!z.email().safeParse(email).success) {
+                setFieldError("email", t("invalid_email_error"));
+                return;
+            }
+
+            if (!password) {
+                setFieldError("password", t("required"));
+                return;
+            }
+
+            if (!confirmPassword) {
+                setFieldError("confirmPassword", t("required"));
+                return;
+            }
+
             if (password != confirmPassword) {
-                setFieldError("confirm", t("password_mismatch_error"));
+                setFieldError("confirmPassword", t("password_mismatch_error"));
                 return;
             }
 
@@ -159,7 +170,7 @@ export const SignUpContents: React.FC<SignUpContentsProps> = ({
     });
 
     const form = (
-        <form noValidate onSubmit={formik.handleSubmit}>
+        <form onSubmit={formik.handleSubmit}>
             <Stack sx={{ mb: 2 }}>
                 <TextField
                     name="email"
