@@ -152,7 +152,7 @@ const DeleteAccountDialogContents: React.FC<
                         options={deleteReasonOptions()}
                         placeholder={t("delete_account_reason_placeholder")}
                         selected={formik.values.reason}
-                        onSelect={formik.handleChange}
+                        onSelect={formik.handleChange("reason")}
                     />
                     {formik.touched.reason && formik.errors.reason && (
                         <Typography
@@ -165,7 +165,7 @@ const DeleteAccountDialogContents: React.FC<
                 </Stack>
                 <FeedbackInput
                     value={formik.values.feedback}
-                    onChange={formik.handleChange}
+                    onChange={formik.handleChange("feedback")}
                     errorMessage={
                         formik.touched.feedback
                             ? formik.errors.feedback
