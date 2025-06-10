@@ -1,7 +1,6 @@
 import "dart:async";
 
 import 'package:flutter/material.dart';
-import "package:flutter_animate/flutter_animate.dart";
 import "package:photos/events/event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/search/generic_search_result.dart";
@@ -138,19 +137,7 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
                 searchResult: results[index],
                 size: itemSize,
                 selectedPeople: widget.selectedPeople,
-              )
-                  .animate(delay: Duration(milliseconds: index * 13))
-                  .fadeIn(
-                    duration: const Duration(milliseconds: 225),
-                    curve: Curves.easeIn,
-                  )
-                  .slide(
-                    begin: const Offset(0, -0.06),
-                    curve: Curves.easeInOut,
-                    duration: const Duration(
-                      milliseconds: 225,
-                    ),
-                  );
+              );
             },
           );
         }
