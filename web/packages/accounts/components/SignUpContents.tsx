@@ -226,10 +226,8 @@ export const SignUpContents: React.FC<SignUpContentsProps> = ({
                         },
                     }}
                 />
-
-                <FormGroup sx={{ width: "100%" }}>
+                <FormGroup sx={{ color: "text.muted", mt: 2, mx: "4px" }}>
                     <FormControlLabel
-                        sx={{ color: "text.muted", ml: 0, mt: 2, mb: 0 }}
                         control={
                             <Checkbox
                                 name="acceptedTerms"
