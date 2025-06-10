@@ -10,14 +10,19 @@ import SetPasswordForm, {
 import { appHomeRoute } from "ente-accounts/services/redirect";
 import {
     configureSRP,
-    generateKeyAndSRPAttributes,
+    deriveSRPPassword,
+    generateSRPSetupAttributes,
 } from "ente-accounts/services/srp";
 import type { KeyAttributes, User } from "ente-accounts/services/user";
-import { putUserKeyAttributes } from "ente-accounts/services/user";
+import {
+    generateKeysAndAttributes,
+    putUserKeyAttributes,
+} from "ente-accounts/services/user";
 import { generateAndSaveIntermediateKeyAttributes } from "ente-accounts/utils/helpers";
 import { LinkButton } from "ente-base/components/LinkButton";
 import { LoadingIndicator } from "ente-base/components/loaders";
 import { useBaseContext } from "ente-base/context";
+import { deriveKeyInsufficientMemoryErrorMessage } from "ente-base/crypto/types";
 import log from "ente-base/log";
 import {
     haveCredentialsInSession,
@@ -66,8 +71,12 @@ const Page: React.FC = () => {
         setFieldError,
     ) => {
         try {
-            const { keyAttributes, masterKey, srpSetupAttributes } =
-                await generateKeyAndSRPAttributes(passphrase);
+            const { masterKey, kek, keyAttributes } =
+                await generateKeysAndAttributes(passphrase);
+
+            const srpSetupAttributes = await generateSRPSetupAttributes(
+                await deriveSRPPassword(kek),
+            );
 
             await putUserKeyAttributes(keyAttributes);
             await configureSRP(srpSetupAttributes);
@@ -81,7 +90,13 @@ const Page: React.FC = () => {
             setOpenRecoveryKey(true);
         } catch (e) {
             log.error("failed to generate password", e);
-            setFieldError("passphrase", t("password_generation_failed"));
+            setFieldError(
+                "passphrase",
+                e instanceof Error &&
+                    e.message == deriveKeyInsufficientMemoryErrorMessage
+                    ? t("password_generation_failed")
+                    : t("generic_error"),
+            );
         }
     };
 

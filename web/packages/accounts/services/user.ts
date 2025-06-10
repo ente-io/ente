@@ -1,4 +1,10 @@
-import { decryptBox, encryptBox } from "ente-base/crypto";
+import {
+    decryptBox,
+    deriveSensitiveKey,
+    encryptBox,
+    generateKey,
+    generateKeyPair,
+} from "ente-base/crypto";
 import {
     authenticatedRequestHeaders,
     ensureOk,
@@ -43,11 +49,15 @@ const LocalUser = z.object({
     token: z.string(),
 });
 
-/** Locally available data for the logged in user */
+/**
+ * The local storage data about the user after they've logged in.
+ */
 export type LocalUser = z.infer<typeof LocalUser>;
 
 /**
  * The local storage data about the user before login or signup is complete.
+ *
+ * [Note: Partial local user]
  *
  * During login or signup, the user object exists in various partial states in
  * local storage.
@@ -57,19 +67,41 @@ export type LocalUser = z.infer<typeof LocalUser>;
  * - When the user enters their email, the email property of the stored object
  *   is set, but nothing else.
  *
- * - If they have second factor verification set, then after entering their
- *   password {@link isTwoFactorEnabled} and {@link twoFactorSessionID} will
- *   also get filled in.
+ * - After they verify their password, we have two cases: if second factor
+ *   verification is not set, and when it is set.
  *
- * - Once they verify their TOTP based second factor, their {@link id} and
- *   {@link encryptedToken} will also get filled in.
+ * - If second factor verification is not set, then after verifying their
+ *   password their {@link id} and {@link encryptedToken} will get filled in,
+ *   and {@link isTwoFactorEnabled} will be set to false.
+ *
+ * - If they have second factor verification set, then after verifying their
+ *   password {@link isTwoFactorEnabled} and {@link twoFactorSessionID} will
+ *   also get filled in. Once they verify their TOTP based second factor, their
+ *   {@link id} and {@link encryptedToken} will also get filled in.
+ *
+ * So while the underlying storage is the same, we offer two APIs for code to
+ * obtain the user:
+ *
+ * - Before login is complete, or when it is unknown if login is complete or
+ *   not, then {@link partialLocalUser} can be used to obtain a
+ *   {@link LocalUser} with all of its properties set to be optional.
+ *
+ * - When we know that the login has completed, we can use either
+ *   {@link localUser} (which returns `undefined` if our presumption is false)
+ *   or {@link ensureLocalUser} (which throws if our presumption is false) to
+ *   obtain an object with all the properties expected to be present for a
+ *   locally persisted user set to be required.
  */
-// TODO: Start using me.
-export const PreLoginLocalUser = LocalUser.partial();
+export const partialLocalUser = (): Partial<LocalUser> | undefined => {
+    // TODO: duplicate of getData("user")
+    const s = localStorage.getItem("user");
+    if (!s) return undefined;
+    return LocalUser.partial().parse(JSON.parse(s));
+};
 
 /**
  * Return the logged-in user, if someone is indeed logged in. Otherwise return
- * `undefined` (TODO: That's not what it is doing...).
+ * `undefined`.
  *
  * The user's data is stored in the browser's localStorage. Thus, this function
  * only works from the main thread, not from web workers (local storage is not
@@ -79,7 +111,8 @@ export const localUser = (): LocalUser | undefined => {
     // TODO: duplicate of getData("user")
     const s = localStorage.getItem("user");
     if (!s) return undefined;
-    return LocalUser.parse(JSON.parse(s));
+    const { success, data } = LocalUser.safeParse(JSON.parse(s));
+    return success ? data : undefined;
 };
 
 /**
@@ -289,6 +322,61 @@ export const saveKeyAttributes = (keyAttributes: KeyAttributes) =>
     localStorage.setItem("keyAttributes", JSON.stringify(keyAttributes));
 
 /**
+ * Generate a new set of key attributes.
+ *
+ * @param passphrase The passphrase to use for deriving the key encryption key.
+ *
+ * @returns a newly generated master key (base64 string), kek (base64 string)
+ * and the key attributes associated with the combination.
+ */
+export async function generateKeysAndAttributes(
+    passphrase: string,
+): Promise<{ masterKey: string; kek: string; keyAttributes: KeyAttributes }> {
+    const masterKey = await generateKey();
+    const recoveryKey = await generateKey();
+    const {
+        key: kek,
+        salt: kekSalt,
+        opsLimit,
+        memLimit,
+    } = await deriveSensitiveKey(passphrase);
+
+    const { encryptedData: encryptedKey, nonce: keyDecryptionNonce } =
+        await encryptBox(masterKey, kek);
+    const {
+        encryptedData: masterKeyEncryptedWithRecoveryKey,
+        nonce: masterKeyDecryptionNonce,
+    } = await encryptBox(masterKey, recoveryKey);
+    const {
+        encryptedData: recoveryKeyEncryptedWithMasterKey,
+        nonce: recoveryKeyDecryptionNonce,
+    } = await encryptBox(recoveryKey, masterKey);
+
+    const keyPair = await generateKeyPair();
+    const {
+        encryptedData: encryptedSecretKey,
+        nonce: secretKeyDecryptionNonce,
+    } = await encryptBox(keyPair.privateKey, masterKey);
+
+    const keyAttributes: KeyAttributes = {
+        encryptedKey,
+        keyDecryptionNonce,
+        kekSalt,
+        opsLimit,
+        memLimit,
+        publicKey: keyPair.publicKey,
+        encryptedSecretKey,
+        secretKeyDecryptionNonce,
+        masterKeyEncryptedWithRecoveryKey,
+        masterKeyDecryptionNonce,
+        recoveryKeyEncryptedWithMasterKey,
+        recoveryKeyDecryptionNonce,
+    };
+
+    return { masterKey, kek, keyAttributes };
+}
+
+/**
  * Update or set the user's {@link KeyAttributes} on remote.
  */
 export const putUserKeyAttributes = async (keyAttributes: KeyAttributes) =>
@@ -458,14 +546,6 @@ export const remoteLogoutIfNeeded = async () => {
 
     ensureOk(res);
 };
-
-export interface UpdatedKey {
-    kekSalt: string;
-    encryptedKey: string;
-    keyDecryptionNonce: string;
-    memLimit: number;
-    opsLimit: number;
-}
 
 /**
  * Change the email associated with the user's account on remote.

@@ -21,13 +21,13 @@ import {
     unstashRedirect,
 } from "ente-accounts/services/redirect";
 import { checkSessionValidity } from "ente-accounts/services/session";
-import type { SRPAttributes } from "ente-accounts/services/srp";
 import {
     configureSRP,
     deriveSRPPassword,
     generateSRPSetupAttributes,
     getSRPAttributes,
     loginViaSRP,
+    type SRPAttributes,
 } from "ente-accounts/services/srp";
 import type { KeyAttributes, User } from "ente-accounts/services/user";
 import {

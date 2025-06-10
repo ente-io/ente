@@ -11,6 +11,7 @@
 import { mergeUint8Arrays } from "ente-utils/array";
 import sodium from "libsodium-wrappers-sumo";
 import {
+    deriveKeyInsufficientMemoryErrorMessage,
     streamEncryptionChunkSize,
     type BytesOrB64,
     type DerivedKey,
@@ -837,7 +838,7 @@ export const deriveSensitiveKey = async (
             memLimit /= 2;
         }
     }
-    throw new Error("Failed to derive key: memory limit exceeded");
+    throw new Error(deriveKeyInsufficientMemoryErrorMessage);
 };
 
 /**
