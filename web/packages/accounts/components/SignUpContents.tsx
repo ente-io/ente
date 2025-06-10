@@ -35,7 +35,7 @@ import {
     setJustSignedUp,
     setLocalReferralSource,
 } from "ente-shared/storage/localStorage/helpers";
-import { Formik, type FormikHelpers } from "formik";
+import { useFormik, type FormikHelpers } from "formik";
 import { t } from "i18next";
 import type { NextRouter } from "next/router";
 import React, { useCallback, useState } from "react";
@@ -130,203 +130,175 @@ export const SignUpContents: React.FC<SignUpContentsProps> = ({
         setLoading(false);
     };
 
+    const { values, errors, handleChange, handleSubmit } = useFormik({
+        initialValues: { email: "", passphrase: "", confirm: "", referral: "" },
+        validationSchema: Yup.object().shape({
+            email: Yup.string()
+                .email(t("invalid_email_error"))
+                .required(t("required")),
+            passphrase: Yup.string().required(t("required")),
+            confirm: Yup.string().required(t("required")),
+        }),
+        validateOnChange: false,
+        validateOnBlur: false,
+        onSubmit: registerUser,
+    });
+
     const form = (
-        <Formik<FormValues>
-            initialValues={{
-                email: "",
-                passphrase: "",
-                confirm: "",
-                referral: "",
-            }}
-            validationSchema={Yup.object().shape({
-                email: Yup.string()
-                    .email(t("invalid_email_error"))
-                    .required(t("required")),
-                passphrase: Yup.string().required(t("required")),
-                confirm: Yup.string().required(t("required")),
-            })}
-            validateOnChange={false}
-            validateOnBlur={false}
-            onSubmit={registerUser}
-        >
-            {({
-                values,
-                errors,
-                handleChange,
-                handleSubmit,
-            }): React.JSX.Element => (
-                <form noValidate onSubmit={handleSubmit}>
-                    <Stack sx={{ mb: 2 }}>
-                        <TextField
-                            fullWidth
-                            id="email"
-                            name="email"
-                            autoComplete="username"
-                            type="email"
-                            label={t("enter_email")}
-                            value={values.email}
-                            onChange={handleChange("email")}
-                            error={Boolean(errors.email)}
-                            helperText={errors.email}
-                            autoFocus
-                            disabled={loading}
-                        />
+        <form noValidate onSubmit={handleSubmit}>
+            <Stack sx={{ mb: 2 }}>
+                <TextField
+                    fullWidth
+                    id="email"
+                    name="email"
+                    autoComplete="username"
+                    type="email"
+                    label={t("enter_email")}
+                    value={values.email}
+                    onChange={handleChange("email")}
+                    error={Boolean(errors.email)}
+                    helperText={errors.email}
+                    autoFocus
+                    disabled={loading}
+                />
 
-                        <TextField
-                            fullWidth
-                            id="password"
-                            name="password"
-                            autoComplete="new-password"
-                            type={showPassword ? "text" : "password"}
-                            label={t("password")}
-                            value={values.passphrase}
-                            onChange={handleChange("passphrase")}
-                            error={Boolean(errors.passphrase)}
-                            helperText={errors.passphrase}
-                            disabled={loading}
-                            slotProps={{
-                                input: {
-                                    endAdornment: (
-                                        <ShowHidePasswordInputAdornment
-                                            showPassword={showPassword}
-                                            onToggle={
-                                                handleToggleShowHidePassword
-                                            }
-                                        />
-                                    ),
-                                },
-                            }}
-                        />
+                <TextField
+                    fullWidth
+                    id="password"
+                    name="password"
+                    autoComplete="new-password"
+                    type={showPassword ? "text" : "password"}
+                    label={t("password")}
+                    value={values.passphrase}
+                    onChange={handleChange("passphrase")}
+                    error={Boolean(errors.passphrase)}
+                    helperText={errors.passphrase}
+                    disabled={loading}
+                    slotProps={{
+                        input: {
+                            endAdornment: (
+                                <ShowHidePasswordInputAdornment
+                                    showPassword={showPassword}
+                                    onToggle={handleToggleShowHidePassword}
+                                />
+                            ),
+                        },
+                    }}
+                />
 
-                        <TextField
-                            fullWidth
-                            id="confirm-password"
-                            name="confirm-password"
-                            autoComplete="new-password"
-                            type="password"
-                            label={t("confirm_password")}
-                            value={values.confirm}
-                            onChange={handleChange("confirm")}
-                            error={Boolean(errors.confirm)}
-                            helperText={errors.confirm}
-                            disabled={loading}
-                        />
-                        <PasswordStrengthHint password={values.passphrase} />
+                <TextField
+                    fullWidth
+                    id="confirm-password"
+                    name="confirm-password"
+                    autoComplete="new-password"
+                    type="password"
+                    label={t("confirm_password")}
+                    value={values.confirm}
+                    onChange={handleChange("confirm")}
+                    error={Boolean(errors.confirm)}
+                    helperText={errors.confirm}
+                    disabled={loading}
+                />
+                <PasswordStrengthHint password={values.passphrase} />
 
-                        <Box sx={{ width: "100%" }}>
-                            <Typography
-                                sx={{
-                                    textAlign: "left",
-                                    color: "text.muted",
-                                    mt: "24px",
-                                }}
-                            >
-                                {t("referral_source_hint")}
-                            </Typography>
-                            <TextField
-                                hiddenLabel
-                                fullWidth
-                                name="referral"
-                                type="text"
-                                value={values.referral}
-                                onChange={handleChange("referral")}
-                                error={Boolean(errors.referral)}
+                <Box sx={{ width: "100%" }}>
+                    <Typography
+                        sx={{
+                            textAlign: "left",
+                            color: "text.muted",
+                            mt: "24px",
+                        }}
+                    >
+                        {t("referral_source_hint")}
+                    </Typography>
+                    <TextField
+                        hiddenLabel
+                        fullWidth
+                        name="referral"
+                        type="text"
+                        value={values.referral}
+                        onChange={handleChange("referral")}
+                        error={Boolean(errors.referral)}
+                        disabled={loading}
+                        slotProps={{
+                            input: {
+                                endAdornment: (
+                                    <InputAdornment position="end">
+                                        <Tooltip
+                                            title={t("referral_source_info")}
+                                        >
+                                            <IconButton
+                                                tabIndex={-1}
+                                                color="secondary"
+                                                edge={"end"}
+                                            >
+                                                <InfoOutlinedIcon />
+                                            </IconButton>
+                                        </Tooltip>
+                                    </InputAdornment>
+                                ),
+                            },
+                        }}
+                    />
+                </Box>
+                <FormGroup sx={{ width: "100%" }}>
+                    <FormControlLabel
+                        sx={{ color: "text.muted", ml: 0, mt: 2, mb: 0 }}
+                        control={
+                            <Checkbox
+                                size="small"
                                 disabled={loading}
-                                slotProps={{
-                                    input: {
-                                        endAdornment: (
-                                            <InputAdornment position="end">
-                                                <Tooltip
-                                                    title={t(
-                                                        "referral_source_info",
-                                                    )}
-                                                >
-                                                    <IconButton
-                                                        tabIndex={-1}
-                                                        color="secondary"
-                                                        edge={"end"}
-                                                    >
-                                                        <InfoOutlinedIcon />
-                                                    </IconButton>
-                                                </Tooltip>
-                                            </InputAdornment>
+                                checked={acceptTerms}
+                                onChange={(e) =>
+                                    setAcceptTerms(e.target.checked)
+                                }
+                                color="accent"
+                            />
+                        }
+                        label={
+                            <Typography variant="small">
+                                <Trans
+                                    i18nKey={"terms_and_conditions"}
+                                    components={{
+                                        a: (
+                                            <Link
+                                                href="https://ente.io/terms"
+                                                target="_blank"
+                                            />
                                         ),
-                                    },
-                                }}
-                            />
-                        </Box>
-                        <FormGroup sx={{ width: "100%" }}>
-                            <FormControlLabel
-                                sx={{
-                                    color: "text.muted",
-                                    ml: 0,
-                                    mt: 2,
-                                    mb: 0,
-                                }}
-                                control={
-                                    <Checkbox
-                                        size="small"
-                                        disabled={loading}
-                                        checked={acceptTerms}
-                                        onChange={(e) =>
-                                            setAcceptTerms(e.target.checked)
-                                        }
-                                        color="accent"
-                                    />
-                                }
-                                label={
-                                    <Typography variant="small">
-                                        <Trans
-                                            i18nKey={"terms_and_conditions"}
-                                            components={{
-                                                a: (
-                                                    <Link
-                                                        href="https://ente.io/terms"
-                                                        target="_blank"
-                                                    />
-                                                ),
-                                                b: (
-                                                    <Link
-                                                        href="https://ente.io/privacy"
-                                                        target="_blank"
-                                                    />
-                                                ),
-                                            }}
-                                        />
-                                    </Typography>
-                                }
-                            />
-                        </FormGroup>
-                    </Stack>
-                    <Box sx={{ mb: 1 }}>
-                        <LoadingButton
-                            fullWidth
-                            color="accent"
-                            type="submit"
-                            loading={loading}
-                            disabled={
-                                !acceptTerms ||
-                                isWeakPassword(values.passphrase)
-                            }
-                        >
-                            {t("create_account")}
-                        </LoadingButton>
-                        {loading && (
-                            <Typography
-                                variant="small"
-                                sx={{
-                                    mt: 1,
-                                    textAlign: "center",
-                                    color: "text.muted",
-                                }}
-                            >
-                                {t("key_generation_in_progress")}
+                                        b: (
+                                            <Link
+                                                href="https://ente.io/privacy"
+                                                target="_blank"
+                                            />
+                                        ),
+                                    }}
+                                />
                             </Typography>
-                        )}
-                    </Box>
-                </form>
-            )}
-        </Formik>
+                        }
+                    />
+                </FormGroup>
+            </Stack>
+            <Box sx={{ mb: 1 }}>
+                <LoadingButton
+                    fullWidth
+                    color="accent"
+                    type="submit"
+                    loading={loading}
+                    disabled={!acceptTerms || isWeakPassword(values.passphrase)}
+                >
+                    {t("create_account")}
+                </LoadingButton>
+                {loading && (
+                    <Typography
+                        variant="small"
+                        sx={{ mt: 1, textAlign: "center", color: "text.muted" }}
+                    >
+                        {t("key_generation_in_progress")}
+                    </Typography>
+                )}
+            </Box>
+        </form>
     );
 
     return (
