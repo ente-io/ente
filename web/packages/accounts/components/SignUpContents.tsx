@@ -35,7 +35,7 @@ import {
     setJustSignedUp,
     setLocalReferralSource,
 } from "ente-shared/storage/localStorage/helpers";
-import { useFormik, type FormikHelpers } from "formik";
+import { useFormik } from "formik";
 import { t } from "i18next";
 import type { NextRouter } from "next/router";
 import React, { useCallback, useState } from "react";
@@ -46,13 +46,6 @@ import {
     AccountsPageFooter,
     AccountsPageTitle,
 } from "./layouts/centered-paper";
-
-interface FormValues {
-    email: string;
-    passphrase: string;
-    confirm: string;
-    referral: string;
-}
 
 interface SignUpContentsProps {
     router: NextRouter;
@@ -76,104 +69,108 @@ export const SignUpContents: React.FC<SignUpContentsProps> = ({
         [],
     );
 
-    const registerUser = async (
-        { email, passphrase, confirm, referral }: FormValues,
-        { setFieldError }: FormikHelpers<FormValues>,
-    ) => {
-        try {
-            if (passphrase !== confirm) {
-                setFieldError("confirm", t("password_mismatch_error"));
-                return;
-            }
-            setLoading(true);
-            try {
-                setLocalReferralSource(referral);
-                await sendOTT(email, "signup");
-                await setLSUser({ email });
-            } catch (e) {
-                log.error("Signup failed", e);
-                if (
-                    await isMuseumHTTPError(e, 409, "USER_ALREADY_REGISTERED")
-                ) {
-                    setFieldError("email", t("email_already_registered"));
-                } else {
-                    setFieldError("email", t("generic_error"));
-                }
-                throw e;
-            }
-            try {
-                const { masterKey, kek, keyAttributes } =
-                    await generateKeysAndAttributes(passphrase);
-
-                const srpSetupAttributes = await generateSRPSetupAttributes(
-                    await deriveSRPPassword(kek),
-                );
-
-                setData("originalKeyAttributes", keyAttributes);
-                setData("srpSetupAttributes", srpSetupAttributes);
-                await generateAndSaveInteractiveKeyAttributes(
-                    passphrase,
-                    keyAttributes,
-                    masterKey,
-                );
-
-                await saveMasterKeyInSessionAndSafeStore(masterKey);
-                setJustSignedUp(true);
-                void router.push("/verify");
-            } catch (e) {
-                setFieldError("confirm", t("password_generation_failed"));
-                throw e;
-            }
-        } catch (e) {
-            log.error("signup failed", e);
-        }
-        setLoading(false);
-    };
-
-    const { values, errors, handleChange, handleSubmit } = useFormik({
-        initialValues: { email: "", passphrase: "", confirm: "", referral: "" },
+    const formik = useFormik({
+        initialValues: {
+            email: "",
+            password: "",
+            confirmPassword: "",
+            referral: "",
+        },
         validationSchema: Yup.object().shape({
             email: Yup.string()
                 .email(t("invalid_email_error"))
                 .required(t("required")),
-            passphrase: Yup.string().required(t("required")),
-            confirm: Yup.string().required(t("required")),
+            password: Yup.string().required(t("required")),
+            confirmPassword: Yup.string().required(t("required")),
         }),
         validateOnChange: false,
         validateOnBlur: false,
-        onSubmit: registerUser,
+        onSubmit: async (
+            { email, password, confirmPassword, referral },
+            { setFieldError },
+        ) => {
+            try {
+                if (password != confirmPassword) {
+                    setFieldError("confirm", t("password_mismatch_error"));
+                    return;
+                }
+                setLoading(true);
+                try {
+                    setLocalReferralSource(referral);
+                    await sendOTT(email, "signup");
+                    await setLSUser({ email });
+                } catch (e) {
+                    log.error("Signup failed", e);
+                    if (
+                        await isMuseumHTTPError(
+                            e,
+                            409,
+                            "USER_ALREADY_REGISTERED",
+                        )
+                    ) {
+                        setFieldError("email", t("email_already_registered"));
+                    } else {
+                        setFieldError("email", t("generic_error"));
+                    }
+                    throw e;
+                }
+                try {
+                    const { masterKey, kek, keyAttributes } =
+                        await generateKeysAndAttributes(password);
+
+                    const srpSetupAttributes = await generateSRPSetupAttributes(
+                        await deriveSRPPassword(kek),
+                    );
+
+                    setData("originalKeyAttributes", keyAttributes);
+                    setData("srpSetupAttributes", srpSetupAttributes);
+                    await generateAndSaveInteractiveKeyAttributes(
+                        password,
+                        keyAttributes,
+                        masterKey,
+                    );
+
+                    await saveMasterKeyInSessionAndSafeStore(masterKey);
+                    setJustSignedUp(true);
+                    void router.push("/verify");
+                } catch (e) {
+                    setFieldError("confirm", t("password_generation_failed"));
+                    throw e;
+                }
+            } catch (e) {
+                log.error("signup failed", e);
+            }
+            setLoading(false);
+        },
     });
 
     const form = (
-        <form noValidate onSubmit={handleSubmit}>
+        <form noValidate onSubmit={formik.handleSubmit}>
             <Stack sx={{ mb: 2 }}>
                 <TextField
-                    fullWidth
-                    id="email"
                     name="email"
-                    autoComplete="username"
                     type="email"
+                    autoComplete="username"
                     label={t("enter_email")}
-                    value={values.email}
-                    onChange={handleChange("email")}
-                    error={Boolean(errors.email)}
-                    helperText={errors.email}
-                    autoFocus
+                    value={formik.values.email}
+                    onChange={formik.handleChange}
+                    error={!!formik.errors.email}
+                    helperText={formik.errors.email}
                     disabled={loading}
-                />
-
-                <TextField
                     fullWidth
-                    id="password"
+                    autoFocus
+                />
+                <TextField
                     name="password"
                     autoComplete="new-password"
                     type={showPassword ? "text" : "password"}
                     label={t("password")}
-                    value={values.passphrase}
-                    onChange={handleChange("passphrase")}
-                    error={Boolean(errors.passphrase)}
-                    helperText={errors.passphrase}
+                    value={formik.values.password}
+                    onChange={formik.handleChange}
+                    error={!!formik.errors.password}
+                    helperText={formik.errors.password}
                     disabled={loading}
+                    fullWidth
                     slotProps={{
                         input: {
                             endAdornment: (
@@ -185,22 +182,19 @@ export const SignUpContents: React.FC<SignUpContentsProps> = ({
                         },
                     }}
                 />
-
                 <TextField
-                    fullWidth
-                    id="confirm-password"
-                    name="confirm-password"
+                    name="confirmPassword"
                     autoComplete="new-password"
                     type="password"
                     label={t("confirm_password")}
-                    value={values.confirm}
-                    onChange={handleChange("confirm")}
-                    error={Boolean(errors.confirm)}
-                    helperText={errors.confirm}
+                    value={formik.values.confirmPassword}
+                    onChange={formik.handleChange}
+                    error={!!formik.errors.confirmPassword}
+                    helperText={formik.errors.confirmPassword}
                     disabled={loading}
+                    fullWidth
                 />
-                <PasswordStrengthHint password={values.passphrase} />
-
+                <PasswordStrengthHint password={formik.values.password} />
                 <Box sx={{ width: "100%" }}>
                     <Typography
                         sx={{
@@ -213,13 +207,13 @@ export const SignUpContents: React.FC<SignUpContentsProps> = ({
                     </Typography>
                     <TextField
                         hiddenLabel
-                        fullWidth
                         name="referral"
                         type="text"
-                        value={values.referral}
-                        onChange={handleChange("referral")}
-                        error={Boolean(errors.referral)}
+                        value={formik.values.referral}
+                        onChange={formik.handleChange}
+                        error={!!formik.errors.referral}
                         disabled={loading}
+                        fullWidth
                         slotProps={{
                             input: {
                                 endAdornment: (
@@ -285,7 +279,9 @@ export const SignUpContents: React.FC<SignUpContentsProps> = ({
                     color="accent"
                     type="submit"
                     loading={loading}
-                    disabled={!acceptTerms || isWeakPassword(values.passphrase)}
+                    disabled={
+                        !acceptTerms || isWeakPassword(formik.values.password)
+                    }
                 >
                     {t("create_account")}
                 </LoadingButton>
