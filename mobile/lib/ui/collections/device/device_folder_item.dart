@@ -24,7 +24,7 @@ class DeviceFolderItem extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           ClipRRect(
-            borderRadius: BorderRadius.circular(1),
+            borderRadius: BorderRadius.circular(12),
             child: SizedBox(
               height: sideOfThumbnail,
               width: sideOfThumbnail,
@@ -50,15 +50,23 @@ class DeviceFolderItem extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(
-            height: 2,
-          ),
+          const SizedBox(height: 6),
           SizedBox(
             width: sideOfThumbnail,
             child: Text(
               deviceCollection.name,
               textAlign: TextAlign.left,
               style: Theme.of(context).colorScheme.enteTheme.textTheme.small,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          const SizedBox(height: 2),
+          SizedBox(
+            width: sideOfThumbnail,
+            child: Text(
+              deviceCollection.count.toString(),
+              textAlign: TextAlign.left,
+              style: Theme.of(context).colorScheme.enteTheme.textTheme.miniMuted,
               overflow: TextOverflow.ellipsis,
             ),
           ),

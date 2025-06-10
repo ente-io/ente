@@ -1,6 +1,6 @@
 import "package:flutter/material.dart";
+import "package:flutter_svg/flutter_svg.dart";
 import "package:photos/theme/ente_theme.dart";
-import "package:photos/ui/components/buttons/icon_button_widget.dart";
 
 class SearchableAppBar extends StatefulWidget {
   final Widget title;
@@ -56,6 +56,7 @@ class _SearchableAppBarState extends State<SearchableAppBar> {
 
   @override
   Widget build(BuildContext context) {
+    final isLightMode = Theme.of(context).brightness == Brightness.light;
     return SliverAppBar(
       floating: true,
       elevation: 0,
@@ -81,11 +82,20 @@ class _SearchableAppBarState extends State<SearchableAppBar> {
       actions: _isSearchActive
           ? null
           : [
-              IconButtonWidget(
-                icon: Icons.search,
-                iconButtonType: IconButtonType.secondary,
+              GestureDetector(
                 onTap: _activateSearch,
-                iconColor: getEnteColorScheme(context).blurStrokePressed,
+                child: Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: SizedBox(
+                    height: 18,
+                    width: 18,
+                    child: SvgPicture.asset(
+                      isLightMode
+                          ? "assets/icons/search_icon_light.svg"
+                          : "assets/icons/search_icon_dark.svg",
+                    ),
+                  ),
+                ),
               ),
               ...?widget.actions,
             ],

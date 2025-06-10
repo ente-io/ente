@@ -1,7 +1,6 @@
 import "dart:async";
 
 import "package:dotted_border/dotted_border.dart";
-import "package:figma_squircle/figma_squircle.dart";
 import "package:flutter/material.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/events/event.dart";
@@ -156,9 +155,8 @@ class AlbumRecommendation extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ClipSmoothRect(
-              radius:
-                  SmoothBorderRadius(cornerRadius: 2.35, cornerSmoothing: 1),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
               child: SizedBox(
                 width: _width,
                 height: 100,
@@ -171,10 +169,12 @@ class AlbumRecommendation extends StatelessWidget {
                           shouldShowSyncStatus: false,
                         ),
                       )
-                    : const NoThumbnailWidget(),
+                    : const NoThumbnailWidget(
+                        borderRadius: 8,
+                      ),
               ),
             ),
-            const SizedBox(height: 2),
+            const SizedBox(height: 6),
             ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: _width),
               child: Column(
@@ -187,7 +187,7 @@ class AlbumRecommendation extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 3),
+                  const SizedBox(height: 2),
                   FutureBuilder(
                     future: CollectionsService.instance.getFileCount(
                       albumSearchResult.collectionWithThumbnail.collection,
@@ -198,7 +198,7 @@ class AlbumRecommendation extends StatelessWidget {
                           snapshot.data != 0) {
                         return Text(
                           snapshot.data.toString(),
-                          style: enteTextTheme.smallMuted,
+                          style: enteTextTheme.miniMuted,
                         );
                       } else {
                         return const SizedBox.shrink();
@@ -228,20 +228,28 @@ class AlbumCTA extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            DottedBorder(
-              borderType: BorderType.RRect,
-              strokeWidth: 1.5,
-              borderPadding: const EdgeInsets.all(0.75),
-              dashPattern: const [3.75, 3.75],
-              radius: const Radius.circular(2.35),
-              padding: EdgeInsets.zero,
-              color: enteColorScheme.strokeFaint,
-              child: SizedBox(
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Container(
+                color: Theme.of(context).brightness == Brightness.light
+                    ? enteColorScheme.backdropBase
+                    : enteColorScheme.backdropFaint,
                 height: 100,
                 width: 100,
-                child: Icon(
-                  Icons.add,
+                child: DottedBorder(
+                  borderType: BorderType.RRect,
+                  strokeWidth: 1.5,
+                  borderPadding: const EdgeInsets.all(0.75),
+                  dashPattern: const [3.75, 3.75],
+                  radius: const Radius.circular(8),
+                  padding: EdgeInsets.zero,
                   color: enteColorScheme.strokeFaint,
+                  child: Center(
+                    child: Icon(
+                      Icons.add,
+                      color: enteColorScheme.strokeFaint,
+                    ),
+                  ),
                 ),
               ),
             ),

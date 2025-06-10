@@ -3,14 +3,19 @@ import 'package:photos/theme/ente_theme.dart';
 
 class NoThumbnailWidget extends StatelessWidget {
   final bool addBorder;
-  const NoThumbnailWidget({this.addBorder = true, super.key});
+  final double borderRadius;
+  const NoThumbnailWidget({
+    this.addBorder = true,
+    this.borderRadius = 1,
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
     final enteColorScheme = getEnteColorScheme(context);
     return Container(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(1),
+        borderRadius: BorderRadius.circular(borderRadius),
         border: addBorder
             ? Border.all(
                 color: enteColorScheme.strokeFaint,
