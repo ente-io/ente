@@ -13,6 +13,10 @@ import type { UserVerificationResponse } from "./user";
 /**
  * The SRP attributes for a user.
  *
+ * These are created by a client on signup, saved to remote. During logins, they
+ * are fetched from remote. In both cases they are also persisted in local
+ * storage (both network ops and local storage use the same schema).
+ *
  * [Note: SRP]
  *
  * The SRP (Secure Remote Password) protocol is a modified Diffie-Hellman key
@@ -94,7 +98,7 @@ import type { UserVerificationResponse } from "./user";
  * 01. Fetches SRP attributes for a user to get { (SRP) userID, (SRP) salt }
  * 02. Rederives SRP password from their KEK
  * 03. Generates a new (ephemeral and random) clientSecret
- * 04. Creates SRP client = new SRPClient({ userID, password, salt, clientSecret })
+ * 04. Creates client = new SRPClient({ userID, password, salt, clientSecret })
  * 05. Uses SRP client to conjure secret `a` and use that to compute a public A
  * 06. Sends { userID, A } to remote ("/users/srp/create-session")
  *
@@ -130,11 +134,44 @@ import type { UserVerificationResponse } from "./user";
  * SRP verification is now complete.
  */
 export interface SRPAttributes {
+    /**
+     * The SRP user ID for the (Ente) user.
+     *
+     * Each Ente user gets a new randomly generated UUID v4 assigned as their
+     * SRP user ID during SRP setup.
+     */
     srpUserID: string;
+    /**
+     * The SRP salt.
+     *
+     * This is a randomly generated salt created for each SRP user during SRP
+     * setup. It is not meant to be secret.
+     */
     srpSalt: string;
+    /**
+     * The mem limit used during the KEK derivation from the passphrase.
+     *
+     * This is the same value as the {@link memLimit} in {@link KeyAttributes},
+     * made available by remote also as part of SRP attributes for convenience.
+     */
     memLimit: number;
+    /**
+     * The ops limit used during the KEK derivation from the passphrase.
+     *
+     * This is the same value as the {@link opsLimit} in {@link KeyAttributes},
+     * made available by remote also as part of SRP attributes for convenience.
+     */
     opsLimit: number;
+    /**
+     * The salt used during the KEK derivation from the passphrase.
+     *
+     * This is the same value as the {@link kekSalt} in {@link KeyAttributes},
+     * made available by remote also as part of SRP attributes for convenience.
+     */
     kekSalt: string;
+    /**
+     * If true, then the client should use email verification instead of SRP.
+     */
     isEmailMFAEnabled: boolean;
 }
 
