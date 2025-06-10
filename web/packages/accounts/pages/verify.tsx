@@ -35,6 +35,7 @@ import {
     type SingleInputFormProps,
 } from "ente-base/components/SingleInputForm";
 import { useBaseContext } from "ente-base/context";
+import { isDevBuild } from "ente-base/env";
 import { isHTTPErrorWithStatus } from "ente-base/http";
 import log from "ente-base/log";
 import { clearSessionStorage } from "ente-base/session";
@@ -150,6 +151,11 @@ const Page: React.FC = () => {
                             getData("srpSetupAttributes");
                         await configureSRP(srpSetupAttributes);
                     }
+                }
+                // TODO(RE): Temporary safety valve before removing the
+                // unnecessary clear (tag: Migration)
+                if (isDevBuild && (await localForage.length()) > 0) {
+                    throw new Error("Local forage is not empty");
                 }
                 await localForage.clear();
                 setIsFirstLogin(true);
