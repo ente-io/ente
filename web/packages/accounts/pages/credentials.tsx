@@ -21,15 +21,15 @@ import {
     unstashRedirect,
 } from "ente-accounts/services/redirect";
 import { checkSessionValidity } from "ente-accounts/services/session";
+import type { SRPAttributes } from "ente-accounts/services/srp";
 import {
     configureSRP,
     deriveSRPPassword,
     generateSRPSetupAttributes,
     getSRPAttributes,
     loginViaSRP,
-    type SRPAttributes,
 } from "ente-accounts/services/srp";
-import type { KeyAttributes, User } from "ente-accounts/services/user";
+import { generateAndSaveInteractiveKeyAttributes, type KeyAttributes, type User } from "ente-accounts/services/user";
 import {
     decryptAndStoreToken,
     generateAndSaveIntermediateKeyAttributes,
@@ -243,7 +243,7 @@ const Page: React.FC = () => {
         (key, kek, keyAttributes, passphrase) => {
             void (async () => {
                 if (isFirstLogin()) {
-                    await generateAndSaveIntermediateKeyAttributes(
+                    await generateAndSaveInteractiveKeyAttributes(
                         passphrase,
                         keyAttributes,
                         key,

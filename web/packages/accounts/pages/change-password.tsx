@@ -17,10 +17,10 @@ import {
 } from "ente-accounts/services/srp";
 import {
     ensureSavedKeyAttributes,
+    generateAndSaveInteractiveKeyAttributes,
     localUser,
     type LocalUser,
 } from "ente-accounts/services/user";
-import { generateAndSaveIntermediateKeyAttributes } from "ente-accounts/utils/helpers";
 import { LinkButton } from "ente-base/components/LinkButton";
 import { LoadingIndicator } from "ente-base/components/loaders";
 import { sharedCryptoWorker } from "ente-base/crypto";
@@ -122,7 +122,7 @@ const PageContents: React.FC<PageContentsProps> = ({ user }) => {
             setData("srpAttributes", srpAttributes);
         }
 
-        await generateAndSaveIntermediateKeyAttributes(
+        await generateAndSaveInteractiveKeyAttributes(
             passphrase,
             { ...keyAttributes, ...updatedKeyAttr },
             masterKey,

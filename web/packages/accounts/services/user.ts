@@ -4,6 +4,7 @@ import {
     encryptBox,
     generateKey,
     generateKeyPair,
+    sharedCryptoWorker,
 } from "ente-base/crypto";
 import {
     authenticatedRequestHeaders,
@@ -12,7 +13,7 @@ import {
 } from "ente-base/http";
 import { apiURL } from "ente-base/origins";
 import { getAuthToken } from "ente-base/token";
-import { getData, setLSUser } from "ente-shared/storage/localStorage";
+import { getData, setData, setLSUser } from "ente-shared/storage/localStorage";
 import { nullToUndefined } from "ente-utils/transform";
 import { z } from "zod/v4";
 import { getUserRecoveryKey, recoveryKeyFromMnemonic } from "./recovery-key";
@@ -568,6 +569,36 @@ export const remoteLogoutIfNeeded = async () => {
 
     ensureOk(res);
 };
+
+/**
+ * Encrypt the user's masterKey with an intermediate kek (key encryption key)
+ * derived from the passphrase (with interactive mem and ops limits) to avoid
+ * saving it to local storage in plain text.
+ *
+ * This means that on the web user will always have to enter their passphrase to
+ * access their masterKey when repopening the app in a new tab (on desktop we
+ * can use OS storage, see [Note: Safe storage and interactive KEK attributes]).
+ */
+export async function generateAndSaveInteractiveKeyAttributes(
+    passphrase: string,
+    existingKeyAttributes: KeyAttributes,
+    key: string,
+): Promise<KeyAttributes> {
+    const cryptoWorker = await sharedCryptoWorker();
+    const intermediateKek = await cryptoWorker.deriveInteractiveKey(passphrase);
+    const { encryptedData: encryptedKey, nonce: keyDecryptionNonce } =
+        await cryptoWorker.encryptBox(key, intermediateKek.key);
+
+    const intermediateKeyAttributes = Object.assign(existingKeyAttributes, {
+        encryptedKey,
+        keyDecryptionNonce,
+        kekSalt: intermediateKek.salt,
+        opsLimit: intermediateKek.opsLimit,
+        memLimit: intermediateKek.memLimit,
+    });
+    setData("keyAttributes", intermediateKeyAttributes);
+    return intermediateKeyAttributes;
+}
 
 /**
  * Change the email associated with the user's account on remote.

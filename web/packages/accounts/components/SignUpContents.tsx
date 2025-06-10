@@ -18,10 +18,11 @@ import {
     generateSRPSetupAttributes,
 } from "ente-accounts/services/srp";
 import {
+    generateAndSaveInteractiveKeyAttributes,
     generateKeysAndAttributes,
     sendOTT,
 } from "ente-accounts/services/user";
-import { generateAndSaveIntermediateKeyAttributes } from "ente-accounts/utils/helpers";
+
 import { isWeakPassword } from "ente-accounts/utils/password";
 import { LinkButton } from "ente-base/components/LinkButton";
 import { LoadingButton } from "ente-base/components/mui/LoadingButton";
@@ -111,7 +112,7 @@ export const SignUpContents: React.FC<SignUpContentsProps> = ({
 
                 setData("originalKeyAttributes", keyAttributes);
                 setData("srpSetupAttributes", srpSetupAttributes);
-                await generateAndSaveIntermediateKeyAttributes(
+                await generateAndSaveInteractiveKeyAttributes(
                     passphrase,
                     keyAttributes,
                     masterKey,
