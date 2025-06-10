@@ -123,9 +123,14 @@ class FullScreenMemoryData extends InheritedWidget {
 class FullScreenMemory extends StatefulWidget {
   final String title;
   final int initialIndex;
+  final VoidCallback? onNextMemory;
+  final VoidCallback? onPreviousMemory;
+
   const FullScreenMemory(
     this.title,
     this.initialIndex, {
+    this.onNextMemory,
+    this.onPreviousMemory,
     super.key,
   });
 
@@ -194,7 +199,9 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
     final currentIndex = inheritedData.indexNotifier.value;
     if (currentIndex < inheritedData.memories.length - 1) {
       inheritedData.indexNotifier.value += 1;
-      _resetAnimation();
+      _onPageChange(inheritedData, currentIndex + 1);
+    } else if (widget.onNextMemory != null) {
+      widget.onNextMemory!();
     }
   }
 
@@ -202,8 +209,21 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
     final currentIndex = inheritedData.indexNotifier.value;
     if (currentIndex > 0) {
       inheritedData.indexNotifier.value -= 1;
-      _resetAnimation();
+      _onPageChange(inheritedData, currentIndex - 1);
+    } else if (widget.onPreviousMemory != null) {
+      widget.onPreviousMemory!();
     }
+  }
+
+  void _onPageChange(FullScreenMemoryData inheritedData, int index) {
+    unawaited(
+      memoriesCacheService.markMemoryAsSeen(
+        inheritedData.memories[index],
+        inheritedData.memories.length == index + 1,
+      ),
+    );
+    inheritedData.indexNotifier.value = index;
+    _resetAnimation();
   }
 
   @override
