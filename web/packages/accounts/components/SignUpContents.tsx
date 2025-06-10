@@ -1,6 +1,5 @@
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import {
-    Box,
     Checkbox,
     Divider,
     FormControlLabel,
@@ -289,28 +288,26 @@ export const SignUpContents: React.FC<SignUpContentsProps> = ({
                     />
                 </FormGroup>
             </Stack>
-            <Box sx={{ mb: 1 }}>
-                <LoadingButton
-                    fullWidth
-                    color="accent"
-                    type="submit"
-                    loading={formik.isSubmitting}
-                    disabled={
-                        !formik.values.acceptedTerms ||
-                        isWeakPassword(formik.values.password)
-                    }
+            <LoadingButton
+                fullWidth
+                color="accent"
+                type="submit"
+                loading={formik.isSubmitting}
+                disabled={
+                    !formik.values.acceptedTerms ||
+                    isWeakPassword(formik.values.password)
+                }
+            >
+                {t("create_account")}
+            </LoadingButton>
+            {formik.isSubmitting && (
+                <Typography
+                    variant="small"
+                    sx={{ mt: 1, textAlign: "center", color: "text.muted" }}
                 >
-                    {t("create_account")}
-                </LoadingButton>
-                {formik.isSubmitting && (
-                    <Typography
-                        variant="small"
-                        sx={{ mt: 1, textAlign: "center", color: "text.muted" }}
-                    >
-                        {t("key_generation_in_progress")}
-                    </Typography>
-                )}
-            </Box>
+                    {t("key_generation_in_progress")}
+                </Typography>
+            )}
         </form>
     );
 
@@ -318,7 +315,7 @@ export const SignUpContents: React.FC<SignUpContentsProps> = ({
         <>
             <AccountsPageTitle>{t("sign_up")}</AccountsPageTitle>
             {form}
-            <Divider />
+            <Divider sx={{ mt: 1.5 }} />
             <AccountsPageFooter>
                 <Stack sx={{ gap: 3, textAlign: "center" }}>
                     <LinkButton onClick={onLogin}>
