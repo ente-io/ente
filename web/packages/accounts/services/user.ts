@@ -101,6 +101,18 @@ export const partialLocalUser = (): Partial<LocalUser> | undefined => {
 };
 
 /**
+ * Save the users data as we accrue it during the signup or login flow.
+ *
+ * See: [Note: Partial local user].
+ *
+ * TODO: WARNING: This does not update the KV token. The idea is to gradually
+ * move over uses of setLSUser to this while explicitly setting the KV token
+ * where needed.
+ */
+export const savePartialLocalUser = (partialLocalUser: Partial<LocalUser>) =>
+    localStorage.setItem("user", JSON.stringify(partialLocalUser));
+
+/**
  * Return the logged-in user, if someone is indeed logged in. Otherwise return
  * `undefined`.
  *
