@@ -351,6 +351,81 @@ export const unstashAndUseSRPSetupAttributes = async (
     localStorage.removeItem("srpSetupAttributes");
 };
 
+/**
+ * Use the provided {@link SRPSetupAttributes} to, well, setup SRP.
+ *
+ * See: [Note: SRP setup]
+ *
+ * @param srpSetupAttributes SRP setup attributes.
+ */
+export const configureSRP = async (srpSetupAttributes: SRPSetupAttributes) =>
+    srpSetupOrReconfigure(srpSetupAttributes, (cbAttr) =>
+        completeSRPSetup(getToken(), cbAttr),
+    );
+
+export const srpSetupOrReconfigure = async (
+    { srpSalt, srpUserID, srpVerifier, loginSubKey }: SRPSetupAttributes,
+    cb: ({
+        setupID,
+        srpM1,
+    }: {
+        setupID: string;
+        srpM1: string;
+    }) => Promise<{ srpM2: string }>,
+) => {
+    const srpClient = await generateSRPClient(srpSalt, srpUserID, loginSubKey);
+
+    const srpA = bufferToB64(srpClient.computeA());
+
+    const token = getToken();
+    const { setupID, srpB } = await startSRPSetup(token, {
+        srpA,
+        srpUserID,
+        srpSalt,
+        srpVerifier,
+    });
+
+    srpClient.setB(b64ToBuffer(srpB));
+
+    const srpM1 = bufferToB64(srpClient.computeM1());
+
+    const { srpM2 } = await cb({ srpM1, setupID });
+
+    srpClient.checkM2(b64ToBuffer(srpM2));
+};
+
+export const generateSRPClient = async (
+    srpSalt: string,
+    srpUserID: string,
+    loginSubKey: string,
+) => {
+    return new Promise<SrpClient>((resolve, reject) => {
+        SRP.genKey(function (err, secret1) {
+            try {
+                if (err) {
+                    reject(err);
+                }
+                if (!secret1) {
+                    throw Error("secret1 gen failed");
+                }
+                const srpClient = new SrpClient(
+                    SRP.params["4096"],
+                    b64ToBuffer(srpSalt),
+                    Buffer.from(srpUserID),
+                    b64ToBuffer(loginSubKey),
+                    secret1,
+                    false,
+                );
+
+                resolve(srpClient);
+            } catch (e) {
+                // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
+                reject(e);
+            }
+        });
+    });
+};
+
 interface SetupSRPRequest {
     srpUserID: string;
     srpSalt: string;
@@ -461,80 +536,6 @@ export const updateSRPAndKeys = async (
     }
 };
 
-/**
- * Use the provided {@link SRPSetupAttributes} to, well, setup SRP.
- *
- * See: [Note: SRP setup]
- *
- * @param srpSetupAttributes SRP setup attributes.
- */
-export const configureSRP = async (srpSetupAttributes: SRPSetupAttributes) =>
-    srpSetupOrReconfigure(srpSetupAttributes, (cbAttr) =>
-        completeSRPSetup(getToken(), cbAttr),
-    );
-
-export const srpSetupOrReconfigure = async (
-    { srpSalt, srpUserID, srpVerifier, loginSubKey }: SRPSetupAttributes,
-    cb: ({
-        setupID,
-        srpM1,
-    }: {
-        setupID: string;
-        srpM1: string;
-    }) => Promise<{ srpM2: string }>,
-) => {
-    const srpClient = await generateSRPClient(srpSalt, srpUserID, loginSubKey);
-
-    const srpA = bufferToB64(srpClient.computeA());
-
-    const token = getToken();
-    const { setupID, srpB } = await startSRPSetup(token, {
-        srpA,
-        srpUserID,
-        srpSalt,
-        srpVerifier,
-    });
-
-    srpClient.setB(b64ToBuffer(srpB));
-
-    const srpM1 = bufferToB64(srpClient.computeM1());
-
-    const { srpM2 } = await cb({ srpM1, setupID });
-
-    srpClient.checkM2(b64ToBuffer(srpM2));
-};
-
-export const generateSRPClient = async (
-    srpSalt: string,
-    srpUserID: string,
-    loginSubKey: string,
-) => {
-    return new Promise<SrpClient>((resolve, reject) => {
-        SRP.genKey(function (err, secret1) {
-            try {
-                if (err) {
-                    reject(err);
-                }
-                if (!secret1) {
-                    throw Error("secret1 gen failed");
-                }
-                const srpClient = new SrpClient(
-                    SRP.params["4096"],
-                    b64ToBuffer(srpSalt),
-                    Buffer.from(srpUserID),
-                    b64ToBuffer(loginSubKey),
-                    secret1,
-                    false,
-                );
-
-                resolve(srpClient);
-            } catch (e) {
-                // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
-                reject(e);
-            }
-        });
-    });
-};
 
 export const loginViaSRP = async (
     srpAttributes: SRPAttributes,
