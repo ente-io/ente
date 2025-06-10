@@ -14,12 +14,13 @@ import {
     Typography,
 } from "@mui/material";
 import {
-    deriveSRPPassword,
     generateSRPSetupAttributes,
+    stashSRPSetupAttributes,
 } from "ente-accounts/services/srp";
 import {
     generateAndSaveInteractiveKeyAttributes,
     generateKeysAndAttributes,
+    savePartialLocalUser,
     sendOTT,
     type GenerateKeysAndAttributesResult,
 } from "ente-accounts/services/user";
@@ -31,7 +32,6 @@ import { deriveKeyInsufficientMemoryErrorMessage } from "ente-base/crypto/types"
 import { isMuseumHTTPError } from "ente-base/http";
 import log from "ente-base/log";
 import { saveMasterKeyInSessionAndSafeStore } from "ente-base/session";
-import { setLSUser } from "ente-shared//storage/localStorage";
 import { setData } from "ente-shared/storage/localStorage";
 import {
     setJustSignedUp,
@@ -125,7 +125,7 @@ export const SignUpContents: React.FC<SignUpContentsProps> = ({
                     throw e;
                 }
 
-                await setLSUser({ email });
+                savePartialLocalUser({ email });
 
                 let gkResult: GenerateKeysAndAttributesResult;
                 try {
@@ -145,20 +145,15 @@ export const SignUpContents: React.FC<SignUpContentsProps> = ({
                 }
 
                 const { masterKey, kek, keyAttributes } = gkResult;
-
-                const srpSetupAttributes = await generateSRPSetupAttributes(
-                    await deriveSRPPassword(kek),
-                );
-
                 setData("originalKeyAttributes", keyAttributes);
-                setData("srpSetupAttributes", srpSetupAttributes);
+                stashSRPSetupAttributes(await generateSRPSetupAttributes(kek));
                 await generateAndSaveInteractiveKeyAttributes(
                     password,
                     keyAttributes,
                     masterKey,
                 );
-
                 await saveMasterKeyInSessionAndSafeStore(masterKey);
+
                 setJustSignedUp(true);
                 void router.push("/verify");
             } catch (e) {
@@ -170,124 +165,122 @@ export const SignUpContents: React.FC<SignUpContentsProps> = ({
 
     const form = (
         <form onSubmit={formik.handleSubmit}>
-            <Stack sx={{ mb: 2 }}>
-                <TextField
-                    name="email"
-                    type="email"
-                    autoComplete="username"
-                    label={t("enter_email")}
-                    value={formik.values.email}
-                    onChange={formik.handleChange}
-                    error={!!formik.errors.email}
-                    helperText={formik.errors.email}
-                    disabled={formik.isSubmitting}
-                    fullWidth
-                    autoFocus
-                />
-                <TextField
-                    name="password"
-                    autoComplete="new-password"
-                    type={showPassword ? "text" : "password"}
-                    label={t("password")}
-                    value={formik.values.password}
-                    onChange={formik.handleChange}
-                    error={!!formik.errors.password}
-                    helperText={formik.errors.password}
-                    disabled={formik.isSubmitting}
-                    fullWidth
-                    slotProps={{
-                        input: {
-                            endAdornment: (
-                                <ShowHidePasswordInputAdornment
-                                    showPassword={showPassword}
-                                    onToggle={handleToggleShowHidePassword}
-                                />
-                            ),
-                        },
-                    }}
-                />
-                <TextField
-                    name="confirmPassword"
-                    autoComplete="new-password"
-                    type="password"
-                    label={t("confirm_password")}
-                    value={formik.values.confirmPassword}
-                    onChange={formik.handleChange}
-                    error={!!formik.errors.confirmPassword}
-                    helperText={formik.errors.confirmPassword}
-                    disabled={formik.isSubmitting}
-                    fullWidth
-                />
-                <PasswordStrengthHint password={formik.values.password} />
-                <InputLabel
-                    htmlFor="referral"
-                    sx={{ color: "text.muted", mt: "24px", mx: "2px" }}
-                >
-                    {t("referral_source_hint")}
-                </InputLabel>
-                <TextField
-                    hiddenLabel
-                    id="referral"
-                    type="text"
-                    value={formik.values.referral}
-                    onChange={formik.handleChange}
-                    error={!!formik.errors.referral}
-                    disabled={formik.isSubmitting}
-                    fullWidth
-                    slotProps={{
-                        input: {
-                            endAdornment: (
-                                <InputAdornment position="end">
-                                    <Tooltip title={t("referral_source_info")}>
-                                        <IconButton
-                                            tabIndex={-1}
-                                            color="secondary"
-                                            edge={"end"}
-                                        >
-                                            <InfoOutlinedIcon />
-                                        </IconButton>
-                                    </Tooltip>
-                                </InputAdornment>
-                            ),
-                        },
-                    }}
-                />
-                <FormGroup sx={{ color: "text.muted", mt: 2, mx: "4px" }}>
-                    <FormControlLabel
-                        control={
-                            <Checkbox
-                                name="acceptedTerms"
-                                size="small"
-                                color="accent"
-                                checked={formik.values.acceptedTerms}
-                                onChange={formik.handleChange}
-                                disabled={formik.isSubmitting}
+            <TextField
+                name="email"
+                type="email"
+                autoComplete="username"
+                label={t("enter_email")}
+                value={formik.values.email}
+                onChange={formik.handleChange}
+                error={!!formik.errors.email}
+                helperText={formik.errors.email}
+                disabled={formik.isSubmitting}
+                fullWidth
+                autoFocus
+            />
+            <TextField
+                name="password"
+                autoComplete="new-password"
+                type={showPassword ? "text" : "password"}
+                label={t("password")}
+                value={formik.values.password}
+                onChange={formik.handleChange}
+                error={!!formik.errors.password}
+                helperText={formik.errors.password}
+                disabled={formik.isSubmitting}
+                fullWidth
+                slotProps={{
+                    input: {
+                        endAdornment: (
+                            <ShowHidePasswordInputAdornment
+                                showPassword={showPassword}
+                                onToggle={handleToggleShowHidePassword}
                             />
-                        }
-                        label={
-                            <Typography variant="small">
-                                <Trans
-                                    i18nKey={"terms_and_conditions"}
-                                    components={{
-                                        a: (
-                                            <Link
-                                                href="https://ente.io/terms"
-                                                target="_blank"
-                                            />
-                                        ),
-                                        b: (
-                                            <Link
-                                                href="https://ente.io/privacy"
-                                                target="_blank"
-                                            />
-                                        ),
-                                    }}
-                                />
-                            </Typography>
-                        }
-                    />
-                </FormGroup>
-            </Stack>
+                        ),
+                    },
+                }}
+            />
+            <TextField
+                name="confirmPassword"
+                autoComplete="new-password"
+                type="password"
+                label={t("confirm_password")}
+                value={formik.values.confirmPassword}
+                onChange={formik.handleChange}
+                error={!!formik.errors.confirmPassword}
+                helperText={formik.errors.confirmPassword}
+                disabled={formik.isSubmitting}
+                fullWidth
+            />
+            <PasswordStrengthHint password={formik.values.password} />
+            <InputLabel
+                htmlFor="referral"
+                sx={{ color: "text.muted", mt: "24px", mx: "2px" }}
+            >
+                {t("referral_source_hint")}
+            </InputLabel>
+            <TextField
+                hiddenLabel
+                id="referral"
+                type="text"
+                value={formik.values.referral}
+                onChange={formik.handleChange}
+                error={!!formik.errors.referral}
+                disabled={formik.isSubmitting}
+                fullWidth
+                slotProps={{
+                    input: {
+                        endAdornment: (
+                            <InputAdornment position="end">
+                                <Tooltip title={t("referral_source_info")}>
+                                    <IconButton
+                                        tabIndex={-1}
+                                        color="secondary"
+                                        edge={"end"}
+                                    >
+                                        <InfoOutlinedIcon />
+                                    </IconButton>
+                                </Tooltip>
+                            </InputAdornment>
+                        ),
+                    },
+                }}
+            />
+            <FormGroup sx={{ color: "text.muted", mt: 2, mb: 2.5, mx: "4px" }}>
+                <FormControlLabel
+                    control={
+                        <Checkbox
+                            name="acceptedTerms"
+                            size="small"
+                            color="accent"
+                            checked={formik.values.acceptedTerms}
+                            onChange={formik.handleChange}
+                            disabled={formik.isSubmitting}
+                        />
+                    }
+                    label={
+                        <Typography variant="small">
+                            <Trans
+                                i18nKey={"terms_and_conditions"}
+                                components={{
+                                    a: (
+                                        <Link
+                                            href="https://ente.io/terms"
+                                            target="_blank"
+                                        />
+                                    ),
+                                    b: (
+                                        <Link
+                                            href="https://ente.io/privacy"
+                                            target="_blank"
+                                        />
+                                    ),
+                                }}
+                            />
+                        </Typography>
+                    }
+                />
+            </FormGroup>
             <LoadingButton
                 fullWidth
                 color="accent"

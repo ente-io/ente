@@ -24,7 +24,6 @@ import { checkSessionValidity } from "ente-accounts/services/session";
 import type { SRPAttributes } from "ente-accounts/services/srp";
 import {
     configureSRP,
-    deriveSRPPassword,
     generateSRPSetupAttributes,
     getSRPAttributes,
     loginViaSRP,
@@ -272,10 +271,7 @@ const Page: React.FC = () => {
             }
             log.debug(() => `userSRPSetupPending ${!srpAttributes}`);
             if (!srpAttributes) {
-                const loginSubKey = await deriveSRPPassword(kek);
-                const srpSetupAttributes =
-                    await generateSRPSetupAttributes(loginSubKey);
-                await configureSRP(srpSetupAttributes);
+                await configureSRP(await generateSRPSetupAttributes(kek));
             }
         } catch (e) {
             log.error("migrate to srp failed", e);

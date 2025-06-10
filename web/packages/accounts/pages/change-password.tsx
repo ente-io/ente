@@ -8,7 +8,6 @@ import SetPasswordForm, {
 } from "ente-accounts/components/SetPasswordForm";
 import { appHomeRoute, stashRedirect } from "ente-accounts/services/redirect";
 import {
-    deriveSRPPassword,
     generateSRPSetupAttributes,
     getSRPAttributes,
     srpSetupOrReconfigure,
@@ -105,13 +104,8 @@ const PageContents: React.FC<PageContentsProps> = ({ user }) => {
             memLimit,
         };
 
-        const loginSubKey = await deriveSRPPassword(kek);
-
-        const { srpUserID, srpSalt, srpVerifier } =
-            await generateSRPSetupAttributes(loginSubKey);
-
         await srpSetupOrReconfigure(
-            { srpSalt, srpUserID, srpVerifier, loginSubKey },
+            await generateSRPSetupAttributes(kek),
             ({ setupID, srpM1 }) =>
                 updateSRPAndKeys(token, { setupID, srpM1, updatedKeyAttr }),
         );

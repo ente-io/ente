@@ -1,11 +1,18 @@
 import { HttpStatusCode } from "axios";
-import { deriveSubKeyBytes, sharedCryptoWorker, toB64 } from "ente-base/crypto";
-import { ensureOk, publicRequestHeaders } from "ente-base/http";
+import {
+    deriveSubKeyBytes,
+    generateDeriveKeySalt,
+    toB64,
+} from "ente-base/crypto";
+import {
+    authenticatedRequestHeaders,
+    ensureOk,
+    publicRequestHeaders,
+} from "ente-base/http";
 import log from "ente-base/log";
 import { apiURL } from "ente-base/origins";
 import { ApiError, CustomError } from "ente-shared/error";
 import HTTPService from "ente-shared/network/HTTPService";
-import { getToken } from "ente-shared/storage/localStorage/helpers";
 import { SRP, SrpClient } from "fast-srp-hap";
 import { v4 as uuidv4 } from "uuid";
 import { z } from "zod/v4";
@@ -236,27 +243,200 @@ export const saveSRPAttributes = (srpAttributes: SRPAttributes) =>
     localStorage.setItem("srpAttributes", JSON.stringify(srpAttributes));
 
 /**
- * Derive a "password" (which is really an arbitrary binary value, not human
- * generated) for use as the SRP user password by applying a deterministic KDF
- * (Key Derivation Function) to the provided {@link kek}.
+ * A local-only structure holding information required for SRP setup.
+ *
+ * [Note: SRP setup attributes]
+ *
+ * In some cases, there might be a step between the client having access to the
+ * KEK (which we need for generating the SRP attributes, in particular the SRP
+ * password) and the time where the client can proceed with the SRP setup (which
+ * can only happen once we have an auth token).
+ *
+ * For example, when the user is signing up for a new account, the client has
+ * the KEK on the signup screen since the user just set their password, but then
+ * has to redirect to the screen for email verification, and it is only after
+ * email verification that the client obtains an auth token and the SRP setup
+ * can proceed (at which point it doesn't have access to the password and so
+ * cannot derive the KEK).
+ *
+ * This gap is not just about different screens, but since there is an email
+ * verification step involved, it might take time enough for the browser tab to
+ * get closed and reopened. So instead of keeping the attributes we need to
+ * continue with the SRP setup after email verification in memory, we
+ * temporarily stash them in local storage using an object that conforms to the
+ * following {@link SRPSetupAttributes} schema.
+ */
+const SRPSetupAttributes = z.object({
+    srpUserID: z.string(),
+    srpSalt: z.string(),
+    srpVerifier: z.string(),
+    loginSubKey: z.string(),
+});
+
+export type SRPSetupAttributes = z.infer<typeof SRPSetupAttributes>;
+
+/**
+ * Generate {@link SRPSetupAttributes} from the provided {@link kek}.
+ *
+ * @param kek The designated key encryption key (base64 encoded) for the user.
+ * This will be used to (deterministically) derive a SRP password.
+ */
+export const generateSRPSetupAttributes = async (
+    kek: string,
+): Promise<SRPSetupAttributes> => {
+    const loginSubKey = await deriveSRPLoginSubKey(kek);
+
+    // Museum schema requires this to be a UUID.
+    const srpUserID = uuidv4();
+    const srpSalt = await generateDeriveKeySalt();
+
+    const srpVerifier = bufferToB64(
+        SRP.computeVerifier(
+            SRP.params["4096"],
+            b64ToBuffer(srpSalt),
+            Buffer.from(srpUserID),
+            b64ToBuffer(loginSubKey),
+        ),
+    );
+
+    return { srpUserID, srpSalt, srpVerifier, loginSubKey };
+};
+
+/**
+ * Derive a "login sub-key" (which is really an arbitrary binary value, not
+ * human generated) for use as the SRP user password by applying a deterministic
+ * KDF (Key Derivation Function) to the provided {@link kek}.
  *
  * @param kek The user's KEK (key encryption key) as a base64 string.
  *
- * @returns A string that can be used as the SRP user password.
+ * @returns A base64 encoded key that can be used as the SRP user password.
  */
-export const deriveSRPPassword = async (kek: string) => {
+const deriveSRPLoginSubKey = async (kek: string) => {
     const kekSubKeyBytes = await deriveSubKeyBytes(kek, 32, 1, "loginctx");
     // Use the first 16 bytes (128 bits) of the KEK's KDF subkey as the SRP
     // password (instead of entire 32 bytes).
     return toB64(kekSubKeyBytes.slice(0, 16));
 };
 
-export interface SRPSetupAttributes {
-    srpSalt: string;
-    srpVerifier: string;
-    srpUserID: string;
-    loginSubKey: string;
-}
+const b64ToBuffer = (base64: string) => Buffer.from(base64, "base64");
+
+const bufferToB64 = (buffer: Buffer) => buffer.toString("base64");
+
+/**
+ * Save {@link SRPSetupAttributes} in local storage for later use via
+ * {@link unstashAndUseSRPSetupAttributes}.
+ *
+ * See: [Note: SRP setup attributes]
+ */
+export const stashSRPSetupAttributes = (
+    srpSetupAttributes: SRPSetupAttributes,
+) =>
+    localStorage.setItem(
+        "srpSetupAttributes",
+        JSON.stringify(srpSetupAttributes),
+    );
+
+/**
+ * Retrieve the {@link SRPSetupAttributes}, if any, that were stashed by a
+ * previous call to {@link stashSRPSetupAttributes}.
+ *
+ * - If they are found, then invoke the provided callback ({@link cb}) with the
+ *   value. If the promise returned by the callback fulfills, then remove the
+ *   stashed value from local storage.
+ *
+ * - If they are not found, then the callback is not invoked.
+ */
+export const unstashAndUseSRPSetupAttributes = async (
+    cb: (srpSetupAttributes: SRPSetupAttributes) => Promise<void>,
+) => {
+    const jsonString = localStorage.getItem("srpSetupAttributes");
+    if (!jsonString) return;
+    const srpSetupAttributes = SRPSetupAttributes.parse(JSON.parse(jsonString));
+    await cb(srpSetupAttributes);
+    localStorage.removeItem("srpSetupAttributes");
+};
+
+/**
+ * Use the provided {@link SRPSetupAttributes} to, well, setup SRP.
+ *
+ * See: [Note: SRP setup]
+ *
+ * @param srpSetupAttributes SRP setup attributes.
+ */
+export const configureSRP = async (srpSetupAttributes: SRPSetupAttributes) =>
+    srpSetupOrReconfigure(srpSetupAttributes, completeSRPSetup);
+
+/**
+ * A function that is called by {@link srpSetupOrReconfigure} to exchange the
+ * evidence message M1 for the evidence message M2 from remote.
+ *
+ * It is passed M1, and is expected to fulfill with M2.
+ */
+type SRPSetupOrReconfigureExchangeCallback = ({
+    setupID,
+    srpM1,
+}: {
+    setupID: string;
+    srpM1: string;
+}) => Promise<{ srpM2: string }>;
+
+/**
+ * Use the provided {@link SRPSetupAttributes} to either setup (afresh) or
+ * reconfigure SRP (when the user changes their password).
+ *
+ * The flow (described in [Note: SRP setup]) is mostly the same except the tail
+ * end of the process where we exchange the evidence message M1 for the evidence
+ * message M2 from remote. To handle this variance, we provide a callback
+ * {@link exchangeCB}) that is invoked at this point in the sequence.
+ *
+ * @param srpSetupAttributes SRP setup attributes.
+ */
+export const srpSetupOrReconfigure = async (
+    { srpSalt, srpUserID, srpVerifier, loginSubKey }: SRPSetupAttributes,
+    exchangeCB: SRPSetupOrReconfigureExchangeCallback,
+) => {
+    const srpClient = await generateSRPClient(srpSalt, srpUserID, loginSubKey);
+
+    const srpA = bufferToB64(srpClient.computeA());
+
+    const { setupID, srpB } = await startSRPSetup({
+        srpUserID,
+        srpSalt,
+        srpVerifier,
+        srpA,
+    });
+
+    srpClient.setB(b64ToBuffer(srpB));
+
+    const srpM1 = bufferToB64(srpClient.computeM1());
+
+    const { srpM2 } = await exchangeCB({ srpM1, setupID });
+
+    srpClient.checkM2(b64ToBuffer(srpM2));
+};
+
+const generateSRPClient = async (
+    srpSalt: string,
+    srpUserID: string,
+    loginSubKey: string,
+) =>
+    new Promise<SrpClient>((resolve, reject) => {
+        SRP.genKey((err, clientKey) => {
+            if (err) reject(err);
+            resolve(
+                new SrpClient(
+                    SRP.params["4096"],
+                    b64ToBuffer(srpSalt),
+                    Buffer.from(srpUserID),
+                    b64ToBuffer(loginSubKey),
+                    // The random `clientKey` parameterizes the current instance
+                    // of the SRP client.
+                    clientKey!,
+                    false,
+                ),
+            );
+        });
+    });
 
 interface SetupSRPRequest {
     srpUserID: string;
@@ -265,20 +445,55 @@ interface SetupSRPRequest {
     srpA: string;
 }
 
-interface SetupSRPResponse {
-    setupID: string;
-    srpB: string;
-}
+const SetupSRPResponse = z.object({ setupID: z.string(), srpB: z.string() });
+
+type SetupSRPResponse = z.infer<typeof SetupSRPResponse>;
+
+/**
+ * Initiate SRP setup on remote.
+ *
+ * Part of the [Note: SRP setup] sequence.
+ */
+const startSRPSetup = async (
+    setupSRPRequest: SetupSRPRequest,
+): Promise<SetupSRPResponse> => {
+    const res = await fetch(await apiURL("/users/srp/setup"), {
+        method: "POST",
+        headers: await authenticatedRequestHeaders(),
+        body: JSON.stringify(setupSRPRequest),
+    });
+    ensureOk(res);
+    return SetupSRPResponse.parse(await res.json());
+};
 
 interface CompleteSRPSetupRequest {
     setupID: string;
     srpM1: string;
 }
 
-interface CompleteSRPSetupResponse {
-    setupID: string;
-    srpM2: string;
-}
+const CompleteSRPSetupResponse = z.object({
+    setupID: z.string(),
+    srpM2: z.string(),
+});
+
+type CompleteSRPSetupResponse = z.infer<typeof CompleteSRPSetupResponse>;
+
+/**
+ * Complete a previously initiated SRP setup on remote.
+ *
+ * Part of the [Note: SRP setup] sequence.
+ */
+const completeSRPSetup = async (
+    completeSRPSetupRequest: CompleteSRPSetupRequest,
+) => {
+    const res = await fetch(await apiURL("/users/srp/complete"), {
+        method: "POST",
+        headers: await authenticatedRequestHeaders(),
+        body: JSON.stringify(completeSRPSetupRequest),
+    });
+    ensureOk(res);
+    return CompleteSRPSetupResponse.parse(await res.json());
+};
 
 interface CreateSRPSessionResponse {
     sessionID: string;
@@ -313,43 +528,6 @@ export interface UpdateSRPAndKeysResponse {
     setupID: string;
 }
 
-export const startSRPSetup = async (
-    token: string,
-    setupSRPRequest: SetupSRPRequest,
-): Promise<SetupSRPResponse> => {
-    try {
-        const resp = await HTTPService.post(
-            await apiURL("/users/srp/setup"),
-            setupSRPRequest,
-            undefined,
-            { "X-Auth-Token": token },
-        );
-
-        return resp.data as SetupSRPResponse;
-    } catch (e) {
-        log.error("failed to post SRP attributes", e);
-        throw e;
-    }
-};
-
-const completeSRPSetup = async (
-    token: string,
-    completeSRPSetupRequest: CompleteSRPSetupRequest,
-) => {
-    try {
-        const resp = await HTTPService.post(
-            await apiURL("/users/srp/complete"),
-            completeSRPSetupRequest,
-            undefined,
-            { "X-Auth-Token": token },
-        );
-        return resp.data as CompleteSRPSetupResponse;
-    } catch (e) {
-        log.error("failed to complete SRP setup", e);
-        throw e;
-    }
-};
-
 export const updateSRPAndKeys = async (
     token: string,
     updateSRPAndKeyRequest: UpdateSRPAndKeysRequest,
@@ -368,123 +546,12 @@ export const updateSRPAndKeys = async (
     }
 };
 
-export const configureSRP = async (attr: SRPSetupAttributes) =>
-    srpSetupOrReconfigure(attr, (cbAttr) =>
-        completeSRPSetup(getToken(), cbAttr),
-    );
-
-export const srpSetupOrReconfigure = async (
-    { srpSalt, srpUserID, srpVerifier, loginSubKey }: SRPSetupAttributes,
-    cb: ({
-        setupID,
-        srpM1,
-    }: {
-        setupID: string;
-        srpM1: string;
-    }) => Promise<{ srpM2: string }>,
-) => {
-    const srpClient = await generateSRPClient(srpSalt, srpUserID, loginSubKey);
-
-    const srpA = convertBufferToBase64(srpClient.computeA());
-
-    const token = getToken();
-    const { setupID, srpB } = await startSRPSetup(token, {
-        srpA,
-        srpUserID,
-        srpSalt,
-        srpVerifier,
-    });
-
-    srpClient.setB(convertBase64ToBuffer(srpB));
-
-    const srpM1 = convertBufferToBase64(srpClient.computeM1());
-
-    const { srpM2 } = await cb({ srpM1, setupID });
-
-    srpClient.checkM2(convertBase64ToBuffer(srpM2));
-};
-
-export const generateSRPClient = async (
-    srpSalt: string,
-    srpUserID: string,
-    loginSubKey: string,
-) => {
-    return new Promise<SrpClient>((resolve, reject) => {
-        SRP.genKey(function (err, secret1) {
-            try {
-                if (err) {
-                    reject(err);
-                }
-                if (!secret1) {
-                    throw Error("secret1 gen failed");
-                }
-                const srpClient = new SrpClient(
-                    SRP.params["4096"],
-                    convertBase64ToBuffer(srpSalt),
-                    Buffer.from(srpUserID),
-                    convertBase64ToBuffer(loginSubKey),
-                    secret1,
-                    false,
-                );
-
-                resolve(srpClient);
-            } catch (e) {
-                // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
-                reject(e);
-            }
-        });
-    });
-};
-
-export const convertBufferToBase64 = (buffer: Buffer) => {
-    return buffer.toString("base64");
-};
-
-export const convertBase64ToBuffer = (base64: string) => {
-    return Buffer.from(base64, "base64");
-};
-
-/**
- *
- * @param loginSubKey The user's SRP password (autogenerated, derived
- * deterministically from their KEK by {@link deriveSRPPassword}).
- *
- * @returns
- */
-export const generateSRPSetupAttributes = async (
-    loginSubKey: string,
-): Promise<SRPSetupAttributes> => {
-    const cryptoWorker = await sharedCryptoWorker();
-
-    const srpSalt = await cryptoWorker.generateDeriveKeySalt();
-
-    // Museum schema requires this to be a UUID.
-    const srpUserID = uuidv4();
-
-    const srpVerifierBuffer = SRP.computeVerifier(
-        SRP.params["4096"],
-        convertBase64ToBuffer(srpSalt),
-        Buffer.from(srpUserID),
-        convertBase64ToBuffer(loginSubKey),
-    );
-
-    const srpVerifier = convertBufferToBase64(srpVerifierBuffer);
-
-    const result = { srpUserID, srpSalt, srpVerifier, loginSubKey };
-
-    log.debug(
-        () => `SRP setup attributes generated: ${JSON.stringify(result)}`,
-    );
-
-    return result;
-};
-
 export const loginViaSRP = async (
     srpAttributes: SRPAttributes,
     kek: string,
 ): Promise<UserVerificationResponse> => {
     try {
-        const loginSubKey = await deriveSRPPassword(kek);
+        const loginSubKey = await deriveSRPLoginSubKey(kek);
         const srpClient = await generateSRPClient(
             srpAttributes.srpSalt,
             srpAttributes.srpUserID,
@@ -493,20 +560,20 @@ export const loginViaSRP = async (
         const srpA = srpClient.computeA();
         const { srpB, sessionID } = await createSRPSession(
             srpAttributes.srpUserID,
-            convertBufferToBase64(srpA),
+            bufferToB64(srpA),
         );
-        srpClient.setB(convertBase64ToBuffer(srpB));
+        srpClient.setB(b64ToBuffer(srpB));
 
         const m1 = srpClient.computeM1();
-        log.debug(() => `srp m1: ${convertBufferToBase64(m1)}`);
+        log.debug(() => `srp m1: ${bufferToB64(m1)}`);
         const { srpM2, ...rest } = await verifySRPSession(
             sessionID,
             srpAttributes.srpUserID,
-            convertBufferToBase64(m1),
+            bufferToB64(m1),
         );
         log.debug(() => `srp verify session successful,srpM2: ${srpM2}`);
 
-        srpClient.checkM2(convertBase64ToBuffer(srpM2));
+        srpClient.checkM2(b64ToBuffer(srpM2));
 
         log.debug(() => `srp server verify successful`);
         return rest;

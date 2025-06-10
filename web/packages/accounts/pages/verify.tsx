@@ -19,8 +19,8 @@ import {
 import {
     configureSRP,
     getSRPAttributes,
+    unstashAndUseSRPSetupAttributes,
     type SRPAttributes,
-    type SRPSetupAttributes,
 } from "ente-accounts/services/srp";
 import type { KeyAttributes, User } from "ente-accounts/services/user";
 import {
@@ -146,11 +146,7 @@ const Page: React.FC = () => {
                     if (originalKeyAttributes) {
                         await putUserKeyAttributes(originalKeyAttributes);
                     }
-                    if (getData("srpSetupAttributes")) {
-                        const srpSetupAttributes: SRPSetupAttributes =
-                            getData("srpSetupAttributes");
-                        await configureSRP(srpSetupAttributes);
-                    }
+                    await unstashAndUseSRPSetupAttributes(configureSRP);
                 }
                 // TODO(RE): Temporary safety valve before removing the
                 // unnecessary clear (tag: Migration)
