@@ -121,6 +121,8 @@ class _VideoWidgetMediaKitState extends State<VideoWidgetMediaKit>
         }
       }
     });
+    EnteWakeLockService.instance
+        .updateWakeLock(enable: true, wakeLockFor: WakeLockFor.videoPlayback);
   }
 
   void loadPreview() {
@@ -184,6 +186,11 @@ class _VideoWidgetMediaKitState extends State<VideoWidgetMediaKit>
       EnteWakeLockService.instance.updateWakeLock(
         enable: true,
         wakeLockFor: WakeLockFor.handlingMediaKitEdgeCase,
+      );
+    } else {
+      EnteWakeLockService.instance.updateWakeLock(
+        enable: false,
+        wakeLockFor: WakeLockFor.videoPlayback,
       );
     }
     super.dispose();
