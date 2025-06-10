@@ -16,7 +16,7 @@ export type LocalStorageKey =
     // Moved to the new wrapper ente-base/local-storage
     // LOCALE = 'locale',
     // Moved to ente-accounts
-    | "srpSetupAttributes"
+    // "srpSetupAttributes"
     | "srpAttributes"
     | "referralSource";
 

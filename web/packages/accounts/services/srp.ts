@@ -461,8 +461,15 @@ export const updateSRPAndKeys = async (
     }
 };
 
-export const configureSRP = async (attr: SRPSetupAttributes) =>
-    srpSetupOrReconfigure(attr, (cbAttr) =>
+/**
+ * Use the provided {@link SRPSetupAttributes} to, well, setup SRP.
+ *
+ * See: [Note: SRP setup]
+ *
+ * @param srpSetupAttributes SRP setup attributes.
+ */
+export const configureSRP = async (srpSetupAttributes: SRPSetupAttributes) =>
+    srpSetupOrReconfigure(srpSetupAttributes, (cbAttr) =>
         completeSRPSetup(getToken(), cbAttr),
     );
 
