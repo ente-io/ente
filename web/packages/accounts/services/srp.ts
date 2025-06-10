@@ -154,46 +154,6 @@ const completeSRPSetup = async (
     }
 };
 
-export const createSRPSession = async (srpUserID: string, srpA: string) => {
-    const res = await fetch(await apiURL("/users/srp/create-session"), {
-        method: "POST",
-        headers: publicRequestHeaders(),
-        body: JSON.stringify({ srpUserID, srpA }),
-    });
-    ensureOk(res);
-    const data = await res.json();
-    // TODO: Use zod
-    return data as CreateSRPSessionResponse;
-};
-
-export const verifySRPSession = async (
-    sessionID: string,
-    srpUserID: string,
-    srpM1: string,
-) => {
-    try {
-        const resp = await HTTPService.post(
-            await apiURL("/users/srp/verify-session"),
-            { sessionID, srpUserID, srpM1 },
-            undefined,
-        );
-        return resp.data as SRPVerificationResponse;
-    } catch (e) {
-        log.error("verifySRPSession failed", e);
-        if (
-            e instanceof ApiError &&
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
-            e.httpStatusCode === HttpStatusCode.Unauthorized
-        ) {
-            // The API contract allows for a SRP verification 401 both because
-            // of incorrect credentials or a non existent account.
-            throw Error(CustomError.INCORRECT_PASSWORD_OR_NO_ACCOUNT);
-        } else {
-            throw e;
-        }
-    }
-};
-
 export const updateSRPAndKeys = async (
     token: string,
     updateSRPAndKeyRequest: UpdateSRPAndKeysRequest,
@@ -249,75 +209,6 @@ export const configureSRP = async ({
     }
 };
 
-export const generateSRPSetupAttributes = async (
-    loginSubKey: string,
-): Promise<SRPSetupAttributes> => {
-    const cryptoWorker = await sharedCryptoWorker();
-
-    const srpSalt = await cryptoWorker.generateDeriveKeySalt();
-
-    // Museum schema requires this to be a UUID.
-    const srpUserID = uuidv4();
-
-    const srpVerifierBuffer = SRP.computeVerifier(
-        SRP.params["4096"],
-        convertBase64ToBuffer(srpSalt),
-        Buffer.from(srpUserID),
-        convertBase64ToBuffer(loginSubKey),
-    );
-
-    const srpVerifier = convertBufferToBase64(srpVerifierBuffer);
-
-    const result = { srpUserID, srpSalt, srpVerifier, loginSubKey };
-
-    log.debug(
-        () => `SRP setup attributes generated: ${JSON.stringify(result)}`,
-    );
-
-    return result;
-};
-
-export const loginViaSRP = async (
-    srpAttributes: SRPAttributes,
-    kek: string,
-): Promise<UserVerificationResponse> => {
-    try {
-        const loginSubKey = await deriveSRPPassword(kek);
-        const srpClient = await generateSRPClient(
-            srpAttributes.srpSalt,
-            srpAttributes.srpUserID,
-            loginSubKey,
-        );
-        const srpA = srpClient.computeA();
-        const { srpB, sessionID } = await createSRPSession(
-            srpAttributes.srpUserID,
-            convertBufferToBase64(srpA),
-        );
-        srpClient.setB(convertBase64ToBuffer(srpB));
-
-        const m1 = srpClient.computeM1();
-        log.debug(() => `srp m1: ${convertBufferToBase64(m1)}`);
-        const { srpM2, ...rest } = await verifySRPSession(
-            sessionID,
-            srpAttributes.srpUserID,
-            convertBufferToBase64(m1),
-        );
-        log.debug(() => `srp verify session successful,srpM2: ${srpM2}`);
-
-        srpClient.checkM2(convertBase64ToBuffer(srpM2));
-
-        log.debug(() => `srp server verify successful`);
-        return rest;
-    } catch (e) {
-        log.error("srp verify failed", e);
-        throw e;
-    }
-};
-
-// ====================
-// HELPERS
-// ====================
-
 export const generateSRPClient = async (
     srpSalt: string,
     srpUserID: string,
@@ -356,6 +247,34 @@ export const convertBufferToBase64 = (buffer: Buffer) => {
 
 export const convertBase64ToBuffer = (base64: string) => {
     return Buffer.from(base64, "base64");
+};
+
+export const generateSRPSetupAttributes = async (
+    loginSubKey: string,
+): Promise<SRPSetupAttributes> => {
+    const cryptoWorker = await sharedCryptoWorker();
+
+    const srpSalt = await cryptoWorker.generateDeriveKeySalt();
+
+    // Museum schema requires this to be a UUID.
+    const srpUserID = uuidv4();
+
+    const srpVerifierBuffer = SRP.computeVerifier(
+        SRP.params["4096"],
+        convertBase64ToBuffer(srpSalt),
+        Buffer.from(srpUserID),
+        convertBase64ToBuffer(loginSubKey),
+    );
+
+    const srpVerifier = convertBufferToBase64(srpVerifierBuffer);
+
+    const result = { srpUserID, srpSalt, srpVerifier, loginSubKey };
+
+    log.debug(
+        () => `SRP setup attributes generated: ${JSON.stringify(result)}`,
+    );
+
+    return result;
 };
 
 export async function generateKeyAndSRPAttributes(
@@ -408,3 +327,80 @@ export async function generateKeyAndSRPAttributes(
 
     return { keyAttributes, masterKey, srpSetupAttributes };
 }
+
+export const loginViaSRP = async (
+    srpAttributes: SRPAttributes,
+    kek: string,
+): Promise<UserVerificationResponse> => {
+    try {
+        const loginSubKey = await deriveSRPPassword(kek);
+        const srpClient = await generateSRPClient(
+            srpAttributes.srpSalt,
+            srpAttributes.srpUserID,
+            loginSubKey,
+        );
+        const srpA = srpClient.computeA();
+        const { srpB, sessionID } = await createSRPSession(
+            srpAttributes.srpUserID,
+            convertBufferToBase64(srpA),
+        );
+        srpClient.setB(convertBase64ToBuffer(srpB));
+
+        const m1 = srpClient.computeM1();
+        log.debug(() => `srp m1: ${convertBufferToBase64(m1)}`);
+        const { srpM2, ...rest } = await verifySRPSession(
+            sessionID,
+            srpAttributes.srpUserID,
+            convertBufferToBase64(m1),
+        );
+        log.debug(() => `srp verify session successful,srpM2: ${srpM2}`);
+
+        srpClient.checkM2(convertBase64ToBuffer(srpM2));
+
+        log.debug(() => `srp server verify successful`);
+        return rest;
+    } catch (e) {
+        log.error("srp verify failed", e);
+        throw e;
+    }
+};
+
+export const createSRPSession = async (srpUserID: string, srpA: string) => {
+    const res = await fetch(await apiURL("/users/srp/create-session"), {
+        method: "POST",
+        headers: publicRequestHeaders(),
+        body: JSON.stringify({ srpUserID, srpA }),
+    });
+    ensureOk(res);
+    const data = await res.json();
+    // TODO: Use zod
+    return data as CreateSRPSessionResponse;
+};
+
+export const verifySRPSession = async (
+    sessionID: string,
+    srpUserID: string,
+    srpM1: string,
+) => {
+    try {
+        const resp = await HTTPService.post(
+            await apiURL("/users/srp/verify-session"),
+            { sessionID, srpUserID, srpM1 },
+            undefined,
+        );
+        return resp.data as SRPVerificationResponse;
+    } catch (e) {
+        log.error("verifySRPSession failed", e);
+        if (
+            e instanceof ApiError &&
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
+            e.httpStatusCode === HttpStatusCode.Unauthorized
+        ) {
+            // The API contract allows for a SRP verification 401 both because
+            // of incorrect credentials or a non existent account.
+            throw Error(CustomError.INCORRECT_PASSWORD_OR_NO_ACCOUNT);
+        } else {
+            throw e;
+        }
+    }
+};
