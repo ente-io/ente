@@ -262,7 +262,8 @@ const Page: React.FC = () => {
         await saveMasterKeyInSessionAndSafeStore(masterKey);
         await decryptAndStoreToken(keyAttributes, masterKey);
         try {
-            let srpAttributes: SRPAttributes | null = getData("srpAttributes");
+            let srpAttributes: SRPAttributes | null | undefined =
+                getData("srpAttributes");
             if (!srpAttributes && user) {
                 srpAttributes = await getSRPAttributes(user.email);
                 if (srpAttributes) {

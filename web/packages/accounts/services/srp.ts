@@ -184,13 +184,37 @@ export interface SRPAttributes {
  * the local storage type.
  */
 const SRPAttributes = z.object({
-    srpUserIDsrpUserID: z.string(),
+    srpUserID: z.string(),
     srpSalt: z.string(),
     memLimit: z.number(),
     opsLimit: z.number(),
     kekSalt: z.string(),
     isEmailMFAEnabled: z.boolean(),
 });
+
+/**
+ * Fetch the {@link SRPAttributes} from remote for the Ente user with the
+ * provided email.
+ *
+ * Returns `undefined` if either there is no Ente user with the given
+ * {@link email}, or if there is a a user but they've not yet completed the SRP
+ * setup ceremony.
+ *
+ * @param email The email of the user whose SRP attributes we're fetching.
+ */
+export const getSRPAttributes = async (
+    email: string,
+): Promise<SRPAttributes | undefined> => {
+    const res = await fetch(await apiURL("/users/srp/attributes", { email }), {
+        headers: publicRequestHeaders(),
+    });
+    if (res.status == 404) {
+        return undefined;
+    }
+    ensureOk(res);
+    return z.object({ attributes: SRPAttributes }).parse(await res.json())
+        .attributes;
+};
 
 /**
  * Derive a "password" (which is really an arbitrary binary value, not human
@@ -207,10 +231,6 @@ export const deriveSRPPassword = async (kek: string) => {
     // password (instead of entire 32 bytes).
     return toB64(kekSubKeyBytes.slice(0, 16));
 };
-
-interface GetSRPAttributesResponse {
-    attributes: SRPAttributes;
-}
 
 export interface SRPSetupAttributes {
     srpSalt: string;
@@ -438,21 +458,6 @@ export const generateSRPSetupAttributes = async (
     );
 
     return result;
-};
-
-export const getSRPAttributes = async (
-    email: string,
-): Promise<SRPAttributes | null> => {
-    try {
-        const resp = await HTTPService.get(
-            await apiURL("/users/srp/attributes"),
-            { email },
-        );
-        return (resp.data as GetSRPAttributesResponse).attributes;
-    } catch (e) {
-        log.error("failed to get SRP attributes", e);
-        return null;
-    }
 };
 
 export const loginViaSRP = async (
