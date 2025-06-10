@@ -10,6 +10,7 @@ import { SRP, SrpClient } from "fast-srp-hap";
 import { v4 as uuidv4 } from "uuid";
 import { z } from "zod/v4";
 import type { UserVerificationResponse } from "./user";
+
 /**
  * The SRP attributes for a user.
  *
@@ -183,7 +184,7 @@ export interface SRPAttributes {
  * it to local storage, so the same schema describes both the remote type and
  * the local storage type.
  */
-const SRPAttributes = z.object({
+const RemoteSRPAttributes = z.object({
     srpUserID: z.string(),
     srpSalt: z.string(),
     memLimit: z.number(),
@@ -208,13 +209,31 @@ export const getSRPAttributes = async (
     const res = await fetch(await apiURL("/users/srp/attributes", { email }), {
         headers: publicRequestHeaders(),
     });
-    if (res.status == 404) {
-        return undefined;
-    }
+    if (res.status == 404) return undefined;
     ensureOk(res);
-    return z.object({ attributes: SRPAttributes }).parse(await res.json())
+    return z.object({ attributes: RemoteSRPAttributes }).parse(await res.json())
         .attributes;
 };
+
+/**
+ * Return the user's {@link SRPAttributes} if they are present in local storage.
+ *
+ * Like key attributes, SRP attributes are also stored in the browser's local
+ * storage so will not be accessible to web workers.
+ */
+export const savedSRPAttributes = (): SRPAttributes | undefined => {
+    const jsonString = localStorage.getItem("srpAttributes");
+    if (!jsonString) return undefined;
+    return RemoteSRPAttributes.parse(JSON.parse(jsonString));
+};
+
+/**
+ * Save the user's {@link SRPAttributes} in local storage.
+ *
+ * Use {@link savedSRPAttributes} to retrieve them.
+ */
+export const saveSRPAttributes = (srpAttributes: SRPAttributes) =>
+    localStorage.setItem("srpAttributes", JSON.stringify(srpAttributes));
 
 /**
  * Derive a "password" (which is really an arbitrary binary value, not human

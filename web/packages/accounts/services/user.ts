@@ -317,7 +317,7 @@ export const RemoteKeyAttributes = z.object({
 });
 
 /**
- * Return {@link KeyAttributes} if they are present in local storage.
+ * Return the user's {@link KeyAttributes} if they are present in local storage.
  *
  * The key attributes are stored in the browser's localStorage. Thus, this
  * function only works from the main thread, not from web workers (local storage
