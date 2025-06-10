@@ -134,7 +134,6 @@ class FullScreenMemory extends StatefulWidget {
 }
 
 class _FullScreenMemoryState extends State<FullScreenMemory> {
-  PageController? _pageController;
   final _showTitle = ValueNotifier<bool>(true);
   AnimationController? _progressAnimationController;
   AnimationController? _zoomAnimationController;
@@ -145,36 +144,24 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
   void initState() {
     super.initState();
     Future.delayed(const Duration(seconds: 3), () {
-      if (mounted) {
-        setState(() {
-          _showTitle.value = false;
-        });
-      }
+      if (mounted) _showTitle.value = false;
     });
   }
 
   @override
   void dispose() {
-    _pageController?.dispose();
     _showTitle.dispose();
     durationNotifier.dispose();
     super.dispose();
   }
 
   void _toggleAnimation(bool pause) {
-    if (_progressAnimationController != null) {
-      if (pause) {
-        _progressAnimationController!.stop();
-      } else {
-        _progressAnimationController!.forward();
-      }
-    }
-    if (_zoomAnimationController != null) {
-      if (pause) {
-        _zoomAnimationController!.stop();
-      } else {
-        _zoomAnimationController!.forward();
-      }
+    if (pause) {
+      _progressAnimationController?.stop();
+      _zoomAnimationController?.stop();
+    } else {
+      _progressAnimationController?.forward();
+      _zoomAnimationController?.forward();
     }
   }
 
@@ -188,7 +175,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
   }
 
   void onFinalFileLoad(int duration) {
-    if (_progressAnimationController!.isAnimating == true) {
+    if (_progressAnimationController?.isAnimating == true) {
       _progressAnimationController!.stop();
     }
     durationNotifier.value = Duration(seconds: duration);
@@ -201,6 +188,22 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
       ?..stop()
       ..reset()
       ..forward();
+  }
+
+  void _goToNext(FullScreenMemoryData inheritedData) {
+    final currentIndex = inheritedData.indexNotifier.value;
+    if (currentIndex < inheritedData.memories.length - 1) {
+      inheritedData.indexNotifier.value += 1;
+      _resetAnimation();
+    }
+  }
+
+  void _goToPrevious(FullScreenMemoryData inheritedData) {
+    final currentIndex = inheritedData.indexNotifier.value;
+    if (currentIndex > 0) {
+      inheritedData.indexNotifier.value -= 1;
+      _resetAnimation();
+    }
   }
 
   @override
@@ -217,15 +220,10 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
         title: ValueListenableBuilder(
           valueListenable: inheritedData.indexNotifier,
           child: InkWell(
-            onTap: () {
-              Navigator.pop(context);
-            },
+            onTap: () => Navigator.pop(context),
             child: const Padding(
               padding: EdgeInsets.fromLTRB(4, 8, 8, 8),
-              child: Icon(
-                Icons.close,
-                color: Colors.white, //same for both themes
-              ),
+              child: Icon(Icons.close, color: Colors.white),
             ),
           ),
           builder: (context, value, child) {
@@ -246,15 +244,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                               _progressAnimationController = controller;
                             },
                             onComplete: () {
-                              final currentIndex =
-                                  inheritedData.indexNotifier.value;
-                              if (currentIndex <
-                                  inheritedData.memories.length - 1) {
-                                _pageController!.nextPage(
-                                  duration: const Duration(milliseconds: 250),
-                                  curve: Curves.ease,
-                                );
-                              }
+                              _goToNext(inheritedData);
                             },
                           );
                         },
@@ -273,7 +263,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                       style: Theme.of(context).textTheme.titleMedium!.copyWith(
                             fontSize: 14,
                             color: Colors.white,
-                          ), //same for both themes
+                          ),
                     ),
                   ],
                 ),
@@ -282,66 +272,51 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
           },
         ),
         flexibleSpace: Container(
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                Colors.black.withOpacity(0.6),
-                Colors.black.withOpacity(0.5),
+                Colors.black54,
+                Colors.black45,
                 Colors.transparent,
               ],
-              stops: const [0, 0.6, 1],
+              stops: [0, 0.6, 1],
             ),
           ),
         ),
-        backgroundColor: const Color(0x00000000),
+        backgroundColor: Colors.transparent,
         elevation: 0,
       ),
       body: Stack(
         alignment: Alignment.bottomCenter,
         children: [
           const MemoryBackDrop(),
-          PageView.builder(
-            controller: _pageController ??= PageController(
-              initialPage: widget.initialIndex,
-            ),
-            physics: const BouncingScrollPhysics(),
-            itemBuilder: (context, index) {
+          ValueListenableBuilder<int>(
+            valueListenable: inheritedData.indexNotifier,
+            builder: (context, index, _) {
               if (index < inheritedData.memories.length - 1) {
                 final nextFile = inheritedData.memories[index + 1].file;
                 preloadThumbnail(nextFile);
                 preloadFile(nextFile);
               }
-              final currentFile = inheritedData.memories[index].file;
-              final isVideo = currentFile.fileType == FileType.video;
+              final currentMemory = inheritedData.memories[index];
+              final isVideo = currentMemory.file.fileType == FileType.video;
+              final currentFile = currentMemory.file;
+
               return GestureDetector(
                 onTapDown: (TapDownDetails details) {
                   final screenWidth = MediaQuery.of(context).size.width;
                   final edgeWidth = screenWidth * 0.20;
                   if (details.localPosition.dx < edgeWidth) {
-                    if (index > 0) {
-                      _pageController!.previousPage(
-                        duration: const Duration(milliseconds: 250),
-                        curve: Curves.ease,
-                      );
-                    }
+                    _goToPrevious(inheritedData);
                   } else if (details.localPosition.dx >
                       screenWidth - edgeWidth) {
-                    if (index < (inheritedData.memories.length - 1)) {
-                      _pageController!.nextPage(
-                        duration: const Duration(milliseconds: 250),
-                        curve: Curves.ease,
-                      );
-                    }
+                    _goToNext(inheritedData);
                   }
                 },
-                onLongPress: () {
-                 isVideo ? null: _toggleAnimation(true);
-                },
-                onLongPressUp: () {
-                 isVideo ? null : _toggleAnimation(false);
-                },
+                onLongPress: () => isVideo ? null : _toggleAnimation(true),
+                onLongPressUp: () => isVideo ? null : _toggleAnimation(false),
                 child: MemoriesZoomWidget(
                   scaleController: (controller) {
                     _zoomAnimationController = controller;
@@ -349,12 +324,11 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                   zoomIn: index % 2 == 0,
                   isVideo: isVideo,
                   child: FileWidget(
-                    inheritedData.memories[index].file,
+                    currentFile,
                     autoPlay: false,
                     tagPrefix: "memories",
-                    backgroundDecoration: const BoxDecoration(
-                      color: Colors.transparent,
-                    ),
+                    backgroundDecoration:
+                        const BoxDecoration(color: Colors.transparent),
                     isFromMemories: true,
                     playbackCallback: (isPlaying) {
                       _toggleAnimation(!isPlaying);
@@ -366,23 +340,13 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                 ),
               );
             },
-            onPageChanged: (index) async {
-              unawaited(
-                memoriesCacheService.markMemoryAsSeen(
-                  inheritedData.memories[index],
-                  inheritedData.memories.length == index + 1,
-                ),
-              );
-              inheritedData.indexNotifier.value = index;
-              _resetAnimation();
-            },
-            itemCount: inheritedData.memories.length,
           ),
           SafeArea(
             top: false,
             child: Padding(
               padding: const EdgeInsets.only(bottom: 72),
               child: ValueListenableBuilder(
+                valueListenable: _showTitle,
                 builder: (context, value, _) {
                   return AnimatedSwitcher(
                     duration: const Duration(milliseconds: 250),
@@ -398,8 +362,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                                 style: getEnteTextTheme(context)
                                     .largeBold
                                     .copyWith(
-                                      color:
-                                          Colors.white, //same for both themes
+                                      color: Colors.white,
                                     ),
                               ),
                             ),
@@ -409,7 +372,6 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                             : const MemoryCounter(),
                   );
                 },
-                valueListenable: _showTitle,
               ),
             ),
           ),
