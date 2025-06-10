@@ -61,7 +61,6 @@ export const SignUpContents: React.FC<SignUpContentsProps> = ({
     onLogin,
     host,
 }) => {
-    const [acceptTerms, setAcceptTerms] = useState(false);
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
 
@@ -76,6 +75,7 @@ export const SignUpContents: React.FC<SignUpContentsProps> = ({
             password: "",
             confirmPassword: "",
             referral: "",
+            acceptedTerms: false,
         },
         validationSchema: Yup.object().shape({
             email: Yup.string()
@@ -235,12 +235,11 @@ export const SignUpContents: React.FC<SignUpContentsProps> = ({
                         sx={{ color: "text.muted", ml: 0, mt: 2, mb: 0 }}
                         control={
                             <Checkbox
+                                name="acceptedTerms"
                                 size="small"
                                 disabled={loading}
-                                checked={acceptTerms}
-                                onChange={(e) =>
-                                    setAcceptTerms(e.target.checked)
-                                }
+                                checked={formik.values.acceptedTerms}
+                                onChange={formik.handleChange}
                                 color="accent"
                             />
                         }
@@ -275,7 +274,8 @@ export const SignUpContents: React.FC<SignUpContentsProps> = ({
                     type="submit"
                     loading={loading}
                     disabled={
-                        !acceptTerms || isWeakPassword(formik.values.password)
+                        !formik.values.acceptedTerms ||
+                        isWeakPassword(formik.values.password)
                     }
                 >
                     {t("create_account")}
