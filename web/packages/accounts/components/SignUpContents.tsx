@@ -22,7 +22,6 @@ import {
     generateKeysAndAttributes,
     sendOTT,
 } from "ente-accounts/services/user";
-
 import { isWeakPassword } from "ente-accounts/utils/password";
 import { LinkButton } from "ente-base/components/LinkButton";
 import { LoadingButton } from "ente-base/components/mui/LoadingButton";
