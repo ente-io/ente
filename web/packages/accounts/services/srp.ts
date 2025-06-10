@@ -8,8 +8,8 @@ import HTTPService from "ente-shared/network/HTTPService";
 import { getToken } from "ente-shared/storage/localStorage/helpers";
 import { SRP, SrpClient } from "fast-srp-hap";
 import { v4 as uuidv4 } from "uuid";
+import { z } from "zod/v4";
 import type { UserVerificationResponse } from "./user";
-
 /**
  * The SRP attributes for a user.
  *
@@ -163,6 +163,8 @@ export interface SRPAttributes {
     /**
      * The salt used during the KEK derivation from the passphrase.
      *
+     * Base64 encoded.
+     *
      * This is the same value as the {@link kekSalt} in {@link KeyAttributes},
      * made available by remote also as part of SRP attributes for convenience.
      * See: [Note: KEK three tuple] for more details.
@@ -173,6 +175,22 @@ export interface SRPAttributes {
      */
     isEmailMFAEnabled: boolean;
 }
+
+/**
+ * Zod schema for the {@link SRPAttributes} TypeScript type.
+ *
+ * We retain the SRP attributes response we get from remote verbatim when saving
+ * it to local storage, so the same schema describes both the remote type and
+ * the local storage type.
+ */
+const SRPAttributes = z.object({
+    srpUserIDsrpUserID: z.string(),
+    srpSalt: z.string(),
+    memLimit: z.number(),
+    opsLimit: z.number(),
+    kekSalt: z.string(),
+    isEmailMFAEnabled: z.boolean(),
+});
 
 /**
  * Derive a "password" (which is really an arbitrary binary value, not human
