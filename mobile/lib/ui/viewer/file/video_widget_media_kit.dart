@@ -28,7 +28,7 @@ import "package:photos/ui/viewer/file/video_widget_media_kit_common.dart"
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/file_util.dart";
 
-class VideoWidgetMediaKitNew extends StatefulWidget {
+class VideoWidgetMediaKit extends StatefulWidget {
   final EnteFile file;
   final String? tagPrefix;
   final Function(bool)? playbackCallback;
@@ -37,7 +37,7 @@ class VideoWidgetMediaKitNew extends StatefulWidget {
   final File? preview;
   final bool selectedPreview;
 
-  const VideoWidgetMediaKitNew(
+  const VideoWidgetMediaKit(
     this.file, {
     this.tagPrefix,
     this.playbackCallback,
@@ -49,10 +49,10 @@ class VideoWidgetMediaKitNew extends StatefulWidget {
   });
 
   @override
-  State<VideoWidgetMediaKitNew> createState() => _VideoWidgetMediaKitNewState();
+  State<VideoWidgetMediaKit> createState() => _VideoWidgetMediaKitState();
 }
 
-class _VideoWidgetMediaKitNewState extends State<VideoWidgetMediaKitNew>
+class _VideoWidgetMediaKitState extends State<VideoWidgetMediaKit>
     with WidgetsBindingObserver {
   final Logger _logger = Logger("VideoWidgetMediaKitNew");
   late final player = Player();
