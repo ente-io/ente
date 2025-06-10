@@ -40,43 +40,32 @@ class _AllMemoriesPageState extends State<AllMemoriesPage>
       body: PageView.builder(
         controller: pageController,
         physics: const BouncingScrollPhysics(),
+        hitTestBehavior: HitTestBehavior.translucent,
         itemCount: widget.allMemories.length,
         itemBuilder: (context, index) {
-          return AnimatedBuilder(
-            animation: pageController,
-            builder: (context, child) {
-              double value = 1.0;
-              if (pageController.position.haveDimensions) {
-                value = pageController.page! - index;
-                value = (1 - (value.abs() * 0.5)).clamp(0.0, 1.0);
-              }
-              return Transform.scale(
-                scale: value,
-                child: Opacity(
-                  opacity: value,
-                  child: FullScreenMemoryDataUpdater(
-                    initialIndex: _getNextMemoryIndex(index),
-                    memories: widget.allMemories[index],
-                    child: FullScreenMemory(
-                      widget.allTitles[index],
-                      _getNextMemoryIndex(index),
-                      onNextMemory: index < widget.allMemories.length - 1
-                          ? () => pageController.nextPage(
-                                duration: const Duration(milliseconds: 250),
-                                curve: Curves.ease,
-                              )
-                          : null,
-                      onPreviousMemory: index > 0
-                          ? () => pageController.previousPage(
-                                duration: const Duration(milliseconds: 250),
-                                curve: Curves.ease,
-                              )
-                          : null,
-                    ),
-                  ),
-                ),
-              );
-            },
+          final initialMemoryIndex = _getNextMemoryIndex(index);
+          if (widget.allMemories[index].isEmpty) {
+            return const SizedBox.shrink();
+          }
+          return FullScreenMemoryDataUpdater(
+            initialIndex: initialMemoryIndex,
+            memories: widget.allMemories[index],
+            child: FullScreenMemory(
+              widget.allTitles[index],
+              initialMemoryIndex,
+              onNextMemory: index < widget.allMemories.length - 1
+                  ? () => pageController.nextPage(
+                        duration: const Duration(milliseconds: 250),
+                        curve: Curves.ease,
+                      )
+                  : null,
+              onPreviousMemory: index > 0
+                  ? () => pageController.previousPage(
+                        duration: const Duration(milliseconds: 250),
+                        curve: Curves.ease,
+                      )
+                  : null,
+            ),
           );
         },
       ),

@@ -4,8 +4,7 @@ import "package:photos/models/memories/memory.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/effects.dart";
 import "package:photos/theme/ente_theme.dart";
-// import "package:photos/ui/home/memories/full_screen_memory.dart";
-import "package:photos/ui/home/memories/temp.dart";
+import "package:photos/ui/home/memories/all_memories_page.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/utils/navigation_util.dart";
 
@@ -19,6 +18,8 @@ class MemoryCoverWidget extends StatefulWidget {
   static const aspectRatio = 0.68;
   static const horizontalPadding = 2.5;
   final String title;
+  final List<String> allTitle;
+  final int currentMemoryIndex;
 
   const MemoryCoverWidget({
     required this.memories,
@@ -27,6 +28,8 @@ class MemoryCoverWidget extends StatefulWidget {
     required this.maxHeight,
     required this.maxWidth,
     required this.title,
+    required this.allTitle,
+    required this.currentMemoryIndex,
     super.key,
   });
 
@@ -59,19 +62,13 @@ class _MemoryCoverWidgetState extends State<MemoryCoverWidget> {
             horizontal: MemoryCoverWidget.horizontalPadding,
           ),
           child: GestureDetector(
-            onTap: () async {
+            onTap: () async { 
               await routeToPage(
                 context,
-                // FullScreenMemoryDataUpdater(
-                //   initialIndex: index,
-                //   memories: widget.memories,
-                //   child: FullScreenMemory(title, index),
-                // ),
-                // forceCustomPageRoute: true,
-                TempPage(
+                AllMemoriesPage( 
+                  initialPageIndex: widget.currentMemoryIndex,
                   allMemories: widget.allMemories,
-                  page: widget.allMemories.length,
-                  initialIndex: index,
+                  allTitles: widget.allTitle,
                 ),
               );
               setState(() {});

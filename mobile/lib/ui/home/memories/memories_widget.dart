@@ -137,6 +137,8 @@ class _MemoriesWidgetState extends State<MemoriesWidget> {
             maxHeight: _maxHeight,
             maxWidth: _maxWidth,
             title: collatedMemories[itemIndex].$2,
+            allTitle: collatedMemories.map((e) => e.$2).toList(),
+            currentMemoryIndex: itemIndex,
           );
         },
       ),
