@@ -28,6 +28,7 @@ export const PasswordStrengthHint: React.FC<PasswordStrengthHintProps> = ({
             variant="small"
             sx={{
                 mt: "8px",
+                mx: "2px",
                 alignSelf: "flex-start",
                 whiteSpace: "pre",
                 color: "var(--et-color)",

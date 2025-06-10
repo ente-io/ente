@@ -1,5 +1,6 @@
 import {
     decryptBox,
+    deriveInteractiveKey,
     deriveSensitiveKey,
     encryptBox,
     generateKey,
@@ -100,6 +101,18 @@ export const partialLocalUser = (): Partial<LocalUser> | undefined => {
 };
 
 /**
+ * Save the users data as we accrue it during the signup or login flow.
+ *
+ * See: [Note: Partial local user].
+ *
+ * TODO: WARNING: This does not update the KV token. The idea is to gradually
+ * move over uses of setLSUser to this while explicitly setting the KV token
+ * where needed.
+ */
+export const savePartialLocalUser = (partialLocalUser: Partial<LocalUser>) =>
+    localStorage.setItem("user", JSON.stringify(partialLocalUser));
+
+/**
  * Return the logged-in user, if someone is indeed logged in. Otherwise return
  * `undefined`.
  *
@@ -154,17 +167,17 @@ export interface KeyAttributes {
      * [Note: Key encryption key]
      *
      * The user's master key is encrypted with a "key encryption key" (lovingly
-     * called a "kek" sometimes).
+     * called a "KEK" sometimes).
      *
-     * The kek itself is derived from the user's passphrase.
+     * The KEK itself is derived from the user's password.
      *
-     * 1. User enters passphrase on new device.
+     * 1. User enters password on new device.
      *
-     * 2. Client derives kek from this passphrase (using the {@link kekSalt},
+     * 2. Client derives KEK from this password (using the {@link kekSalt},
      *    {@link opsLimit} and {@link memLimit} as parameters for the
      *    derivation).
      *
-     * 3. Client use kek to decrypt the master key from {@link encryptedKey} and
+     * 3. Client use KEK to decrypt the master key from {@link encryptedKey} and
      *    {@link keyDecryptionNonce}.
      */
     encryptedKey: string;
@@ -177,15 +190,37 @@ export interface KeyAttributes {
      */
     keyDecryptionNonce: string;
     /**
-     * The salt used during the derivation of the kek.
+     * The salt used during the derivation of the KEK.
      *
      * Base64 encoded.
      *
-     * See: [Note: Key encryption key].
+     * [Note: KEK three tuple]
+     *
+     * The three tuple (kekSalt, opsLimit, memLimit) is needed (along with the
+     * user's password) to rederive the KEK when the user logs in on a new
+     * client (See: [Note: Key encryption key]).
+     *
+     * The client can obtain these three by fetching their key attributes from
+     * remote, however unless {@link isEmailMFAEnabled} is enabled (which is not
+     * by default), then the user's credentials are verified using SRP instead
+     * of email verification. So as a convenience for this (majority) flow,
+     * remote also provides this exact same three tuple as part of the
+     * {@link SRPAttributes} fetched from remote.
+     *
+     * So on remote the KEK three tuple is the same whether it be part of key
+     * attributes or SRP attributes. When the user changes their password, both
+     * of them also get updated simulataneously (they use the same storage).
+     *
+     * However, on the client side these two sets of three tuples might diverge
+     * because of the client generating interactive key attributes. When that
+     * happens, the locally saved key attributes will be overwritten by the KEK
+     * three tuple for the new generated interactive KEK parameters, while the
+     * SRP attributes will continue to reflect the "original" KEK three tuple we
+     * got from remote.
      */
     kekSalt: string;
     /**
-     * The operation limit used during the derivation of the kek.
+     * The operation limit used during the derivation of the KEK.
      *
      * The {@link opsLimit} and {@link memLimit} are complementary parameters
      * that define the amount of work done by the key derivation function. See
@@ -196,7 +231,7 @@ export interface KeyAttributes {
      */
     opsLimit: number;
     /**
-     * The memory limit used during the derivation of the kek.
+     * The memory limit used during the derivation of the KEK.
      *
      * See {@link opsLimit} for more details.
      */
@@ -240,7 +275,7 @@ export interface KeyAttributes {
      * Base64 encoded.
      *
      * This allows the user to recover their master key if they forget their
-     * passphrase but still have their recovery key.
+     * password but still have their recovery key.
      *
      * Note: This value doesn't change after being initially created.
      */
@@ -294,7 +329,7 @@ export const RemoteKeyAttributes = z.object({
 });
 
 /**
- * Return {@link KeyAttributes} if they are present in local storage.
+ * Return the user's {@link KeyAttributes} if they are present in local storage.
  *
  * The key attributes are stored in the browser's localStorage. Thus, this
  * function only works from the main thread, not from web workers (local storage
@@ -321,17 +356,23 @@ export const ensureSavedKeyAttributes = (): KeyAttributes =>
 export const saveKeyAttributes = (keyAttributes: KeyAttributes) =>
     localStorage.setItem("keyAttributes", JSON.stringify(keyAttributes));
 
+export interface GenerateKeysAndAttributesResult {
+    masterKey: string;
+    kek: string;
+    keyAttributes: KeyAttributes;
+}
+
 /**
  * Generate a new set of key attributes.
  *
- * @param passphrase The passphrase to use for deriving the key encryption key.
+ * @param password The password to use for deriving the key encryption key.
  *
  * @returns a newly generated master key (base64 string), kek (base64 string)
  * and the key attributes associated with the combination.
  */
 export async function generateKeysAndAttributes(
-    passphrase: string,
-): Promise<{ masterKey: string; kek: string; keyAttributes: KeyAttributes }> {
+    password: string,
+): Promise<GenerateKeysAndAttributesResult> {
     const masterKey = await generateKey();
     const recoveryKey = await generateKey();
     const {
@@ -339,7 +380,7 @@ export async function generateKeysAndAttributes(
         salt: kekSalt,
         opsLimit,
         memLimit,
-    } = await deriveSensitiveKey(passphrase);
+    } = await deriveSensitiveKey(password);
 
     const { encryptedData: encryptedKey, nonce: keyDecryptionNonce } =
         await encryptBox(masterKey, kek);
@@ -545,6 +586,64 @@ export const remoteLogoutIfNeeded = async () => {
     }
 
     ensureOk(res);
+};
+
+/**
+ * Generate a new local-only KEK (key encryption key) suitable for interactive
+ * use and update the locally saved key attributes to reflect it.
+ *
+ * See {@link deriveInteractiveKey} for more details.
+ *
+ * In brief, after the initial password verification, we create a new
+ * inetractive KEK derived from the same password as the original KEK, but with
+ * so called interactive mem and ops limits which result in a noticeably faster
+ * key derivation.
+ *
+ * We then overwrite the encrypted master key, encryption nonce and the KEK
+ * derivation parameters (see: [Note: KEK three tuple]) in the locally persisted
+ * {@link KeyAttributes} so that these interactive parameters get used
+ * subsequent reauthentication.
+ *
+ * These are more ergonomic for the user especially in the web app where they
+ * need to enter their password to access their masterKey when repopening the
+ * app in a new tab (on desktop we can avoid this by using OS storage, see
+ * [Note: Safe storage and interactive KEK attributes]).
+ *
+ * @param password The user's password.
+ *
+ * @param keyAttributes The existing "original" key attributes, which we
+ * might've generated locally (new signup) or fetched from remote (existing
+ * login).
+ *
+ * @param masterKey The user's master key (base64 encoded).
+ *
+ * @returns the update key attributes.
+ */
+export const generateAndSaveInteractiveKeyAttributes = async (
+    password: string,
+    keyAttributes: KeyAttributes,
+    key: string,
+): Promise<KeyAttributes> => {
+    const {
+        key: interactiveKEK,
+        salt: kekSalt,
+        opsLimit,
+        memLimit,
+    } = await deriveInteractiveKey(password);
+
+    const { encryptedData: encryptedKey, nonce: keyDecryptionNonce } =
+        await encryptBox(key, interactiveKEK);
+
+    const interactiveKeyAttributes = {
+        ...keyAttributes,
+        encryptedKey,
+        keyDecryptionNonce,
+        kekSalt,
+        opsLimit,
+        memLimit,
+    };
+    saveKeyAttributes(interactiveKeyAttributes);
+    return interactiveKeyAttributes;
 };
 
 /**
