@@ -4,7 +4,11 @@ import {
     generateDeriveKeySalt,
     toB64,
 } from "ente-base/crypto";
-import { ensureOk, publicRequestHeaders } from "ente-base/http";
+import {
+    authenticatedRequestHeaders,
+    ensureOk,
+    publicRequestHeaders,
+} from "ente-base/http";
 import log from "ente-base/log";
 import { apiURL } from "ente-base/origins";
 import { ApiError, CustomError } from "ente-shared/error";
@@ -246,13 +250,15 @@ export const saveSRPAttributes = (srpAttributes: SRPAttributes) =>
  *
  * In some cases, there might be a step between the client having access to the
  * KEK (which we need for generating the SRP attributes, in particular the SRP
- * password) and the time where the client can proceed with the SRP setup.
+ * password) and the time where the client can proceed with the SRP setup (which
+ * can only happen once we have an auth token).
  *
  * For example, when the user is signing up for a new account, the client has
  * the KEK on the signup screen since the user just set their password, but then
  * has to redirect to the screen for email verification, and it is only after
- * email verification that SRP setup can proceed (at which point it doesn't have
- * access to the password and so cannot derive the KEK).
+ * email verification that the client obtains an auth token and the SRP setup
+ * can proceed (at which point it doesn't have access to the password and so
+ * cannot derive the KEK).
  *
  * This gap is not just about different screens, but since there is an email
  * verification step involved, it might take time enough for the browser tab to
@@ -363,33 +369,51 @@ export const configureSRP = async (srpSetupAttributes: SRPSetupAttributes) =>
         completeSRPSetup(getToken(), cbAttr),
     );
 
+/**
+ * A function that is called by {@link srpSetupOrReconfigure} to exchange the
+ * evidence message M1 for the evidence message M2 from remote.
+ *
+ * It is passed M1, and is expected to fulfill with M2.
+ */
+type SRPSetupOrReconfigureExchangeCallback = ({
+    setupID,
+    srpM1,
+}: {
+    setupID: string;
+    srpM1: string;
+}) => Promise<{ srpM2: string }>;
+
+/**
+ * Use the provided {@link SRPSetupAttributes} to either setup (afresh) or
+ * reconfigure SRP (when the user changes their password).
+ *
+ * The flow (described in [Note: SRP setup]) is mostly the same except the tail
+ * end of the process where we exchange the evidence message M1 for the evidence
+ * message M2 from remote. To handle this variance, we provide a callback
+ * {@link exchangeCB}) that is invoked at this point in the sequence.
+ *
+ * @param srpSetupAttributes SRP setup attributes.
+ */
 export const srpSetupOrReconfigure = async (
     { srpSalt, srpUserID, srpVerifier, loginSubKey }: SRPSetupAttributes,
-    cb: ({
-        setupID,
-        srpM1,
-    }: {
-        setupID: string;
-        srpM1: string;
-    }) => Promise<{ srpM2: string }>,
+    exchangeCB: SRPSetupOrReconfigureExchangeCallback,
 ) => {
     const srpClient = await generateSRPClient(srpSalt, srpUserID, loginSubKey);
 
     const srpA = bufferToB64(srpClient.computeA());
 
-    const token = getToken();
-    const { setupID, srpB } = await startSRPSetup(token, {
-        srpA,
+    const { setupID, srpB } = await startSRPSetup({
         srpUserID,
         srpSalt,
         srpVerifier,
+        srpA,
     });
 
     srpClient.setB(b64ToBuffer(srpB));
 
     const srpM1 = bufferToB64(srpClient.computeM1());
 
-    const { srpM2 } = await cb({ srpM1, setupID });
+    const { srpM2 } = await exchangeCB({ srpM1, setupID });
 
     srpClient.checkM2(b64ToBuffer(srpM2));
 };
@@ -424,10 +448,24 @@ interface SetupSRPRequest {
     srpA: string;
 }
 
-interface SetupSRPResponse {
-    setupID: string;
-    srpB: string;
-}
+const SetupSRPResponse = z.object({ setupID: z.string(), srpB: z.string() });
+
+type SetupSRPResponse = z.infer<typeof SetupSRPResponse>;
+
+/**
+ * Initiate SRP setup on remote.
+ */
+const startSRPSetup = async (
+    setupSRPRequest: SetupSRPRequest,
+): Promise<SetupSRPResponse> => {
+    const res = await fetch(await apiURL("/users/srp/setup"), {
+        method: "POST",
+        headers: await authenticatedRequestHeaders(),
+        body: JSON.stringify(setupSRPRequest),
+    });
+    ensureOk(res);
+    return SetupSRPResponse.parse(await res.json());
+};
 
 interface CompleteSRPSetupRequest {
     setupID: string;
@@ -471,25 +509,6 @@ export interface UpdateSRPAndKeysResponse {
     srpM2: string;
     setupID: string;
 }
-
-export const startSRPSetup = async (
-    token: string,
-    setupSRPRequest: SetupSRPRequest,
-): Promise<SetupSRPResponse> => {
-    try {
-        const resp = await HTTPService.post(
-            await apiURL("/users/srp/setup"),
-            setupSRPRequest,
-            undefined,
-            { "X-Auth-Token": token },
-        );
-
-        return resp.data as SetupSRPResponse;
-    } catch (e) {
-        log.error("failed to post SRP attributes", e);
-        throw e;
-    }
-};
 
 const completeSRPSetup = async (
     token: string,
