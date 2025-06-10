@@ -7,6 +7,7 @@ import {
     FormGroup,
     IconButton,
     InputAdornment,
+    InputLabel,
     Link,
     Stack,
     TextField,
@@ -195,46 +196,40 @@ export const SignUpContents: React.FC<SignUpContentsProps> = ({
                     fullWidth
                 />
                 <PasswordStrengthHint password={formik.values.password} />
-                <Box sx={{ width: "100%" }}>
-                    <Typography
-                        sx={{
-                            textAlign: "left",
-                            color: "text.muted",
-                            mt: "24px",
-                        }}
-                    >
-                        {t("referral_source_hint")}
-                    </Typography>
-                    <TextField
-                        hiddenLabel
-                        name="referral"
-                        type="text"
-                        value={formik.values.referral}
-                        onChange={formik.handleChange}
-                        error={!!formik.errors.referral}
-                        disabled={loading}
-                        fullWidth
-                        slotProps={{
-                            input: {
-                                endAdornment: (
-                                    <InputAdornment position="end">
-                                        <Tooltip
-                                            title={t("referral_source_info")}
+                <InputLabel
+                    htmlFor="referral"
+                    sx={{ color: "text.muted", mt: "24px", mx: "2px" }}
+                >
+                    {t("referral_source_hint")}
+                </InputLabel>
+                <TextField
+                    hiddenLabel
+                    id="referral"
+                    type="text"
+                    value={formik.values.referral}
+                    onChange={formik.handleChange}
+                    error={!!formik.errors.referral}
+                    disabled={loading}
+                    fullWidth
+                    slotProps={{
+                        input: {
+                            endAdornment: (
+                                <InputAdornment position="end">
+                                    <Tooltip title={t("referral_source_info")}>
+                                        <IconButton
+                                            tabIndex={-1}
+                                            color="secondary"
+                                            edge={"end"}
                                         >
-                                            <IconButton
-                                                tabIndex={-1}
-                                                color="secondary"
-                                                edge={"end"}
-                                            >
-                                                <InfoOutlinedIcon />
-                                            </IconButton>
-                                        </Tooltip>
-                                    </InputAdornment>
-                                ),
-                            },
-                        }}
-                    />
-                </Box>
+                                            <InfoOutlinedIcon />
+                                        </IconButton>
+                                    </Tooltip>
+                                </InputAdornment>
+                            ),
+                        },
+                    }}
+                />
+
                 <FormGroup sx={{ width: "100%" }}>
                     <FormControlLabel
                         sx={{ color: "text.muted", ml: 0, mt: 2, mb: 0 }}
