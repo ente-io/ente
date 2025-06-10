@@ -1,5 +1,9 @@
 import { HttpStatusCode } from "axios";
-import { deriveSubKeyBytes, sharedCryptoWorker, toB64 } from "ente-base/crypto";
+import {
+    deriveSubKeyBytes,
+    generateDeriveKeySalt,
+    toB64,
+} from "ente-base/crypto";
 import { ensureOk, publicRequestHeaders } from "ente-base/http";
 import log from "ente-base/log";
 import { apiURL } from "ente-base/origins";
@@ -236,15 +240,15 @@ export const saveSRPAttributes = (srpAttributes: SRPAttributes) =>
     localStorage.setItem("srpAttributes", JSON.stringify(srpAttributes));
 
 /**
- * Derive a "password" (which is really an arbitrary binary value, not human
- * generated) for use as the SRP user password by applying a deterministic KDF
- * (Key Derivation Function) to the provided {@link kek}.
+ * Derive a "login sub-key" (which is really an arbitrary binary value, not
+ * human generated) for use as the SRP user password by applying a deterministic
+ * KDF (Key Derivation Function) to the provided {@link kek}.
  *
  * @param kek The user's KEK (key encryption key) as a base64 string.
  *
- * @returns A string that can be used as the SRP user password.
+ * @returns A base64 encoded key that can be used as the SRP user password.
  */
-export const deriveSRPPassword = async (kek: string) => {
+const deriveSRPLoginSubKey = async (kek: string) => {
     const kekSubKeyBytes = await deriveSubKeyBytes(kek, 32, 1, "loginctx");
     // Use the first 16 bytes (128 bits) of the KEK's KDF subkey as the SRP
     // password (instead of entire 32 bytes).
@@ -291,13 +295,11 @@ export type SRPSetupAttributes = z.infer<typeof SRPSetupAttributes>;
 export const generateSRPSetupAttributes = async (
     kek: string,
 ): Promise<SRPSetupAttributes> => {
-    const cryptoWorker = await sharedCryptoWorker();
-
-    const loginSubKey = await deriveSRPPassword(kek);
-    const srpSalt = await cryptoWorker.generateDeriveKeySalt();
+    const loginSubKey = await deriveSRPLoginSubKey(kek);
 
     // Museum schema requires this to be a UUID.
     const srpUserID = uuidv4();
+    const srpSalt = await generateDeriveKeySalt();
 
     const srpVerifierBuffer = SRP.computeVerifier(
         SRP.params["4096"],
@@ -308,13 +310,7 @@ export const generateSRPSetupAttributes = async (
 
     const srpVerifier = convertBufferToBase64(srpVerifierBuffer);
 
-    const result = { srpUserID, srpSalt, srpVerifier, loginSubKey };
-
-    log.debug(
-        () => `SRP setup attributes generated: ${JSON.stringify(result)}`,
-    );
-
-    return result;
+    return { srpUserID, srpSalt, srpVerifier, loginSubKey };
 };
 
 /**
@@ -542,7 +538,7 @@ export const loginViaSRP = async (
     kek: string,
 ): Promise<UserVerificationResponse> => {
     try {
-        const loginSubKey = await deriveSRPPassword(kek);
+        const loginSubKey = await deriveSRPLoginSubKey(kek);
         const srpClient = await generateSRPClient(
             srpAttributes.srpSalt,
             srpAttributes.srpUserID,
