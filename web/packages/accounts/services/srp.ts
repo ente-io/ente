@@ -20,8 +20,7 @@ import type { UserVerificationResponse } from "./user";
  * passphrase, and the user to ensure that remote is not being impersonated,
  * without the passphrase ever leaving the device.
  *
- * It is used as an alternative to email verification flows, though the user
- * also has an option to enable it in addition to SRP.
+ * It is used as an (user selectable) alternative to email verification.
  *
  * For more about the what and why, see the announcement blog post
  * https://ente.io/blog/ente-adopts-secure-remote-passwords/
@@ -32,7 +31,7 @@ import type { UserVerificationResponse } from "./user";
  *
  * Broadly, there are two scenarios: SRP setup, and SRP verification.
  *
- * [Note: SRP setup]
+ * [Note: SRP setup] -------------------
  *
  * During SRP setup, client generates
  *
@@ -40,39 +39,87 @@ import type { UserVerificationResponse } from "./user";
  * 02. A SRP password (deterministically derived from their regular KEK)
  * 03. A SRP salt (randomly generated)
  *
- * These 3 things are enough to create a SRP verifier and client
+ * These 3 things are enough to create a SRP verifier and client. The SRP client
+ * can just be thought of an ephemeral stateful mechanism to avoid passing all
+ * the state accrued so far to each operation. Each time when creating a SRP
+ * client, the app generates a new random secret and uses it during init.
  *
- * 04. verifier = computeSRPVerifier({ userID, password, salt })
- * 05. client = new SRPClient({ userID, password, salt })
- *
- * The SRP client can just be thought of an ephemeral stateful mechanism to
- * avoid passing all the state accrued so far to each operation.
+ * 04. Compute verifier = computeSRPVerifier({ userID, password, salt })
+ * 05. Generates a new (ephemeral and random) clientSecret
+ * 06. Create client = new SRPClient({ userID, password, salt, clientSecret })
  *
  * The client (app) then starts the setup ceremony with remote:
  *
- * 06. Use SRP client to conjure secret `a` and use that to compute a public A
- * 07. Send { userID, salt, verifier, A } to remote ("/users/srp/setup")
+ * 07. Use SRP client to conjure secret `a` and use that to compute a public A
+ * 08. Send { userID, salt, verifier, A } to remote ("/users/srp/setup")
  *
  * Remote then:
  *
- * 08. Generates a SRP serverKey (random)
- * 09. Saves { userID, serverKey, A } into SRP sessions table
- * 10. Creates server = new SRPServer({ verifier, serverKey })
- * 11. Uses SRP server to conjure secret `b` and use that to compute a public B
- * 12. Stashes { sessionID, userID, salt, verifier } into SRP setups table
- * 13. Returns { setupID, B } to client
+ * 09. Generates a new (ephemeral and random) serverSecret
+ * 10. Saves { userID, serverSecret, A } into SRP sessions table
+ * 11. Creates server = new SRPServer({ verifier, serverSecret })
+ * 12. Uses SRP server to conjure secret `b` and use that to compute a public B
+ * 13. Stashes { sessionID, userID, salt, verifier } into SRP setups table
+ * 14. Returns { setupID, B } to client
  *
  * Client then
  *
- * 14. Tells its SRP client about B
- * 15. Computes SRP M1 (evidence message) using the SRP client
- * 16. Sends { setupID, M1 } to remote ("/users/srp/complete")
+ * 15. Tells its SRP client about B
+ * 16. Computes SRP M1 (evidence message) using the SRP client
+ * 17. Sends { setupID, M1 } to remote ("/users/srp/complete")
  *
  * Remote then
  *
- * 17. Uses setupID to read the stashed { sessionID, userID, salt, verifier }
- * 18. Uses sessionID to read { serverKey, A }
- * 19. Recreates server = new SRPServer({ verifier, serverKey }), sets server.A
+ * 18. Uses setupID to read the stashed { sessionID, verifier }
+ * 19. Uses sessionID to read { serverSecret, A }
+ * 20. Recreates server = new SRPServer({ verifier, serverSecret })
+ * 21. Sets server.A
+ * 22. Verifies M1 using the SRP server, obtaining a SRP M2 (evidence message)
+ * 23. Returns M2
+ *
+ * Client then
+ *
+ * 24. Verifies M2
+ *
+ * SRP setup is now complete.
+ *
+ * A similar flow is used when the user changes their passphrase. On passphrase
+ * change, a new KEK is generated, thus the SRP password also changes, and so a
+ * subset of the steps above are done to update both client and remote.
+ *
+ * [Note: SRP verification] -----------------------
+ *
+ * When the user is signing on a new device, the client
+ *
+ * 01. Fetches SRP attributes for a user to get { (SRP) userID, (SRP) salt }
+ * 02. Rederives SRP password from their KEK
+ * 03. Generates a new (ephemeral and random) clientSecret
+ * 04. Creates SRP client = new SRPClient({ userID, password, salt, clientSecret })
+ * 05. Uses SRP client to conjure secret `a` and use that to compute a public A
+ * 06. Sends { userID, A } to remote ("/users/srp/create-session")
+ *
+ * Remote
+ *
+ * 07. Retrieves { verifier } corresponding to the userID
+ * 08. Generates a new (ephemeral and random) serverSecret
+ * 09. Saves { userID, serverSecret, A } into SRP sessions table
+ * 10. Creates server = new SRPServer({ verifier, serverSecret })
+ * 11. Sets server.A
+ * 12. Uses SRP server to conjure secret `b` and use that to compute a public B
+ * 13. Returns { sessionID, B } to client
+ *
+ * Client then
+ *
+ * 14. Sets client.B
+ * 15. Computes M1 (evidence message)
+ * 16. Sends { userID, sessionID, M1 } to remote ("/users/srp/verify-session")
+ *
+ * Remote
+ *
+ * 17. Retrieves { verifier } corresponding to the userID
+ * 17. Retrieves { serverSecret, A } using sessionID
+ * 18. Recreates server = new SRPServer({ verifier, serverSecret })
+ * 19. Sets server.A
  * 20. Verifies M1 using the SRP server, obtaining a SRP M2 (evidence message)
  * 21. Returns M2
  *
@@ -80,11 +127,7 @@ import type { UserVerificationResponse } from "./user";
  *
  * 22. Verifies M2
  *
- * SRP setup is now complete.
- *
- * A similar flow is used when the user changes their passphrase. On passphrase
- * change, a new KEK is generated, thus the SRP password also changes, and so a
- * subset of the steps above are done to update both client and remote.
+ * SRP verification is now complete.
  */
 export interface SRPAttributes {
     srpUserID: string;
@@ -176,21 +219,6 @@ export interface UpdateSRPAndKeysResponse {
     srpM2: string;
     setupID: string;
 }
-
-export const getSRPAttributes = async (
-    email: string,
-): Promise<SRPAttributes | null> => {
-    try {
-        const resp = await HTTPService.get(
-            await apiURL("/users/srp/attributes"),
-            { email },
-        );
-        return (resp.data as GetSRPAttributesResponse).attributes;
-    } catch (e) {
-        log.error("failed to get SRP attributes", e);
-        return null;
-    }
-};
 
 export const startSRPSetup = async (
     token: string,
@@ -358,6 +386,21 @@ export const generateSRPSetupAttributes = async (
     return result;
 };
 
+export const getSRPAttributes = async (
+    email: string,
+): Promise<SRPAttributes | null> => {
+    try {
+        const resp = await HTTPService.get(
+            await apiURL("/users/srp/attributes"),
+            { email },
+        );
+        return (resp.data as GetSRPAttributesResponse).attributes;
+    } catch (e) {
+        log.error("failed to get SRP attributes", e);
+        return null;
+    }
+};
+
 export const loginViaSRP = async (
     srpAttributes: SRPAttributes,
     kek: string,
@@ -395,7 +438,7 @@ export const loginViaSRP = async (
     }
 };
 
-export const createSRPSession = async (srpUserID: string, srpA: string) => {
+const createSRPSession = async (srpUserID: string, srpA: string) => {
     const res = await fetch(await apiURL("/users/srp/create-session"), {
         method: "POST",
         headers: publicRequestHeaders(),
@@ -407,7 +450,7 @@ export const createSRPSession = async (srpUserID: string, srpA: string) => {
     return data as CreateSRPSessionResponse;
 };
 
-export const verifySRPSession = async (
+const verifySRPSession = async (
     sessionID: string,
     srpUserID: string,
     srpM1: string,
