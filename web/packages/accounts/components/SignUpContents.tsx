@@ -13,7 +13,10 @@ import {
     Tooltip,
     Typography,
 } from "@mui/material";
-import { generateSRPSetupAttributes } from "ente-accounts/services/srp";
+import {
+    generateSRPSetupAttributes,
+    stashSRPSetupAttributes,
+} from "ente-accounts/services/srp";
 import {
     generateAndSaveInteractiveKeyAttributes,
     generateKeysAndAttributes,
@@ -142,19 +145,15 @@ export const SignUpContents: React.FC<SignUpContentsProps> = ({
                 }
 
                 const { masterKey, kek, keyAttributes } = gkResult;
-
-                const srpSetupAttributes =
-                    await generateSRPSetupAttributes(kek);
-
                 setData("originalKeyAttributes", keyAttributes);
-                setData("srpSetupAttributes", srpSetupAttributes);
+                stashSRPSetupAttributes(await generateSRPSetupAttributes(kek));
                 await generateAndSaveInteractiveKeyAttributes(
                     password,
                     keyAttributes,
                     masterKey,
                 );
-
                 await saveMasterKeyInSessionAndSafeStore(masterKey);
+
                 setJustSignedUp(true);
                 void router.push("/verify");
             } catch (e) {
