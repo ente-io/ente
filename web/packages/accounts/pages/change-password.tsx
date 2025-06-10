@@ -92,18 +92,23 @@ const PageContents: React.FC<PageContentsProps> = ({ user }) => {
         const cryptoWorker = await sharedCryptoWorker();
         const masterKey = await ensureMasterKeyFromSession();
         const keyAttributes = ensureSavedKeyAttributes();
-        const kek = await cryptoWorker.deriveSensitiveKey(passphrase);
+        const {
+            key: kek,
+            salt: kekSalt,
+            opsLimit,
+            memLimit,
+        } = await cryptoWorker.deriveSensitiveKey(passphrase);
         const { encryptedData: encryptedKey, nonce: keyDecryptionNonce } =
-            await cryptoWorker.encryptBox(masterKey, kek.key);
+            await cryptoWorker.encryptBox(masterKey, kek);
         const updatedKeyAttr: UpdatedKeyAttr = {
             encryptedKey,
             keyDecryptionNonce,
-            kekSalt: kek.salt,
-            opsLimit: kek.opsLimit,
-            memLimit: kek.memLimit,
+            kekSalt,
+            opsLimit,
+            memLimit,
         };
 
-        const loginSubKey = await deriveSRPPassword(kek.key);
+        const loginSubKey = await deriveSRPPassword(kek);
 
         const { srpUserID, srpSalt, srpVerifier } =
             await generateSRPSetupAttributes(loginSubKey);

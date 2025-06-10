@@ -10,10 +10,14 @@ import SetPasswordForm, {
 import { appHomeRoute } from "ente-accounts/services/redirect";
 import {
     configureSRP,
-    generateKeyAndSRPAttributes,
+    deriveSRPPassword,
+    generateSRPSetupAttributes,
 } from "ente-accounts/services/srp";
 import type { KeyAttributes, User } from "ente-accounts/services/user";
-import { putUserKeyAttributes } from "ente-accounts/services/user";
+import {
+    generateKeysAndAttributes,
+    putUserKeyAttributes,
+} from "ente-accounts/services/user";
 import { generateAndSaveIntermediateKeyAttributes } from "ente-accounts/utils/helpers";
 import { LinkButton } from "ente-base/components/LinkButton";
 import { LoadingIndicator } from "ente-base/components/loaders";
@@ -67,8 +71,12 @@ const Page: React.FC = () => {
         setFieldError,
     ) => {
         try {
-            const { keyAttributes, masterKey, srpSetupAttributes } =
-                await generateKeyAndSRPAttributes(passphrase);
+            const { masterKey, kek, keyAttributes } =
+                await generateKeysAndAttributes(passphrase);
+
+            const srpSetupAttributes = await generateSRPSetupAttributes(
+                await deriveSRPPassword(kek),
+            );
 
             await putUserKeyAttributes(keyAttributes);
             await configureSRP(srpSetupAttributes);

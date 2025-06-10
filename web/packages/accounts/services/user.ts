@@ -1,4 +1,10 @@
-import { decryptBox, encryptBox } from "ente-base/crypto";
+import {
+    decryptBox,
+    deriveSensitiveKey,
+    encryptBox,
+    generateKey,
+    generateKeyPair,
+} from "ente-base/crypto";
 import {
     authenticatedRequestHeaders,
     ensureOk,
@@ -314,6 +320,61 @@ export const ensureSavedKeyAttributes = (): KeyAttributes =>
  */
 export const saveKeyAttributes = (keyAttributes: KeyAttributes) =>
     localStorage.setItem("keyAttributes", JSON.stringify(keyAttributes));
+
+/**
+ * Generate a new set of key attributes.
+ *
+ * @param passphrase The passphrase to use for deriving the key encryption key.
+ *
+ * @returns a newly generated master key (base64 string), kek (base64 string)
+ * and the key attributes associated with the combination.
+ */
+export async function generateKeysAndAttributes(
+    passphrase: string,
+): Promise<{ masterKey: string; kek: string; keyAttributes: KeyAttributes }> {
+    const masterKey = await generateKey();
+    const recoveryKey = await generateKey();
+    const {
+        key: kek,
+        salt: kekSalt,
+        opsLimit,
+        memLimit,
+    } = await deriveSensitiveKey(passphrase);
+
+    const { encryptedData: encryptedKey, nonce: keyDecryptionNonce } =
+        await encryptBox(masterKey, kek);
+    const {
+        encryptedData: masterKeyEncryptedWithRecoveryKey,
+        nonce: masterKeyDecryptionNonce,
+    } = await encryptBox(masterKey, recoveryKey);
+    const {
+        encryptedData: recoveryKeyEncryptedWithMasterKey,
+        nonce: recoveryKeyDecryptionNonce,
+    } = await encryptBox(recoveryKey, masterKey);
+
+    const keyPair = await generateKeyPair();
+    const {
+        encryptedData: encryptedSecretKey,
+        nonce: secretKeyDecryptionNonce,
+    } = await encryptBox(keyPair.privateKey, masterKey);
+
+    const keyAttributes: KeyAttributes = {
+        encryptedKey,
+        keyDecryptionNonce,
+        kekSalt,
+        opsLimit,
+        memLimit,
+        publicKey: keyPair.publicKey,
+        encryptedSecretKey,
+        secretKeyDecryptionNonce,
+        masterKeyEncryptedWithRecoveryKey,
+        masterKeyDecryptionNonce,
+        recoveryKeyEncryptedWithMasterKey,
+        recoveryKeyDecryptionNonce,
+    };
+
+    return { masterKey, kek, keyAttributes };
+}
 
 /**
  * Update or set the user's {@link KeyAttributes} on remote.
