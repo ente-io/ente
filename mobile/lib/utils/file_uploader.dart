@@ -54,6 +54,7 @@ class FileUploader {
   static const kMaximumThumbnailCompressionAttempts = 2;
   static const kMaximumUploadAttempts = 4;
   static const kMaxFileSize5Gib = 5368709120;
+  static const kMaxFileSize10Gib = 10737418240;
   static const kBlockedUploadsPollFrequency = Duration(seconds: 2);
   static const kFileUploadTimeout = Duration(minutes: 50);
   static const k20MBStorageBuffer = 20 * 1024 * 1024;
@@ -1086,10 +1087,12 @@ class FileUploader {
             'freeStorage $freeStorage');
         throw StorageLimitExceededError();
       }
-      if (fileSize > kMaxFileSize5Gib) {
-        _logger.warning('File size exceeds 5GiB fileSize $fileSize');
+      final int maxSize =
+          flagService.internalUser ? kMaxFileSize10Gib : kMaxFileSize5Gib;
+      if (fileSize > maxSize) {
+        _logger.warning('File size exceeds $maxSize fileSize $fileSize');
         throw InvalidFileError(
-          'file size above 5GiB',
+          'file size above $maxSize',
           InvalidReason.tooLargeFile,
         );
       }
