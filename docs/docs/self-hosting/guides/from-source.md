@@ -197,7 +197,7 @@ ports). The web server of choice in this guide is
 [Caddy](https://caddyserver.com) because with caddy you don't have to manually
 configure/setup SSL ceritifcates as caddy will take care of that.
 
-``` groovy
+```groovy
 photos.yourdomain.com {
 	reverse_proxy http://localhost:3001
     # for logging

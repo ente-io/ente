@@ -5,19 +5,31 @@ description: Getting started self hosting Ente Photos and/or Ente Auth
 
 # Self Hosting
 
-The entire source code for Ente is open source, including the servers. This is
+The entire source code for Ente is open source,
+[including the servers](https://ente.io/blog/open-sourcing-our-server/). This is
 the same code we use for our own cloud service.
 
-> [!TIP]
->
-> You might find our [blog post](https://ente.io/blog/open-sourcing-our-server/)
-> announcing the open sourcing of our server useful.
+## Requirements
 
-## System requirements
+### Hardware
 
-The server has minimal resource requirements, running as a lightweight Go
-binary. It performs well on small cloud instances, old laptops, and even
+The server is capable of running on minimal resource requirements as a
+lightweight Go binary, since most of the intensive computational tasks are done
+on the client. It performs well on small cloud instances, old laptops, and even
 [low-end embedded devices](https://github.com/ente-io/ente/discussions/594).
+
+### Software
+
+#### Operating System
+
+Any Linux or \*nix operating system, preferably Ubuntu or Debian is recommended
+to have a good Docker experience. The reason being poor experience on non-Linux
+systems and difficulty with troubleshooting and assistance.
+
+#### Docker
+
+Required for running Ente's server, web application and dependent services
+(database and object storage)
 
 ## Getting started
 
