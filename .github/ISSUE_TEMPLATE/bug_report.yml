@@ -1,24 +1,21 @@
 name: Report a bug
-description: Let us know if something's not working the way you expected.
+description: For regressions only (things that were working earlier)
 labels: []
 body:
     - type: markdown
       attributes:
           value: |
-              Before opening a new bug report, please ensure
-              1. you are on the latest version (it might've already been fixed),
-              2. you've searched for existing issues (please add your observations as a comment there instead of creating a duplicate).
-
-              If you are self hosting, please create a community [Q&A](https://github.com/ente-io/ente/discussions/categories/q-a) instead.
+              Before opening a new issue, **please** ensure
+              1. You are on the latest version,
+              2. You've searched for existing issues,
+              3. It was working earlier (otherwise use [this](https://github.com/ente-io/ente/discussions/categories/enhancements))
+              4. It is not about self hosting (otherwise use [this](https://github.com/ente-io/ente/discussions/categories/q-a))
     - type: textarea
       attributes:
           label: Description
           description: >
-              Please describe the bug. If possible, also include the steps to
-              reproduce the behaviour, and the expected behaviour (sometimes
-              bugs are just expectation mismatches, in which case this would be
-              a good fit for [feature
-              requests](https://github.com/ente-io/ente/discussions/categories/feature-requests)).
+              Describe the bug and steps to reproduce the behaviour, and how it
+              differs from the previously working behaviour.
       validations:
           required: true
     - type: input
@@ -30,15 +27,12 @@ body:
       attributes:
           label: Last working version
           description: >
-              The version where the feature was last known to be working. It is
-              fine if you don't remember the exact version (mention roughly
-              then), but if there just isn't a last known working version, then
-              it is likely that what is being reported is not an issue but a
-              feature request. The difference between the two categories is not
-              just semantic - feature requests use GitHub discussions and so can
-              be [upvoted by the
-              community](https://github.com/ente-io/ente/discussions/categories/feature-requests)
-              (issues can't be).
+              The version where things were last known to be working. It is fine
+              if you don't remember the exact version (mention roughly then),
+              but **if there just isn't a last working version, then please file
+              it as an
+              [enhancement](https://github.com/ente-io/ente/discussions/categories/enhancements))**
+              (where the community upvotes can be used to help prioritize).
           placeholder: e.g. v1.2.3
     - type: dropdown
       attributes:

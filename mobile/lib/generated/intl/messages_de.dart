@@ -551,6 +551,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "backupVideos": MessageLookupByLibrary.simpleMessage("Videos sichern"),
         "beach": MessageLookupByLibrary.simpleMessage("Am Strand"),
         "birthday": MessageLookupByLibrary.simpleMessage("Geburtstag"),
+        "birthdays": MessageLookupByLibrary.simpleMessage("Birthdays"),
         "blackFridaySale":
             MessageLookupByLibrary.simpleMessage("Black-Friday-Aktion"),
         "blog": MessageLookupByLibrary.simpleMessage("Blog"),
@@ -949,6 +950,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Bitte gib eine gültige E-Mail-Adresse ein."),
         "enterYourEmailAddress": MessageLookupByLibrary.simpleMessage(
             "Gib deine E-Mail-Adresse ein"),
+        "enterYourNewEmailAddress": MessageLookupByLibrary.simpleMessage(
+            "Gib Deine neue E-Mail-Adresse ein"),
         "enterYourPassword":
             MessageLookupByLibrary.simpleMessage("Passwort eingeben"),
         "enterYourRecoveryKey": MessageLookupByLibrary.simpleMessage(
@@ -1073,6 +1076,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "guestView": MessageLookupByLibrary.simpleMessage("Gastansicht"),
         "guestViewEnablePreSteps": MessageLookupByLibrary.simpleMessage(
             "Bitte richte einen Gerätepasscode oder eine Bildschirmsperre ein, um die Gastansicht zu nutzen."),
+        "happyBirthday":
+            MessageLookupByLibrary.simpleMessage("Happy birthday! 🥳"),
         "hearUsExplanation": MessageLookupByLibrary.simpleMessage(
             "Wir tracken keine App-Installationen. Es würde uns jedoch helfen, wenn du uns mitteilst, wie du von uns erfahren hast!"),
         "hearUsWhereTitle": MessageLookupByLibrary.simpleMessage(
@@ -1412,6 +1417,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Auf <branding>ente</branding>"),
         "onTheRoad": MessageLookupByLibrary.simpleMessage("Wieder unterwegs"),
         "onThisDay": MessageLookupByLibrary.simpleMessage("On this day"),
+        "onThisDayNotificationExplanation": MessageLookupByLibrary.simpleMessage(
+            "Receive reminders about memories from this day in previous years."),
         "onlyFamilyAdminCanChangeCode": m54,
         "onlyThem": MessageLookupByLibrary.simpleMessage("Nur diese"),
         "oops": MessageLookupByLibrary.simpleMessage("Hoppla"),
@@ -1576,6 +1583,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "reassignedToName": m68,
         "reassigningLoading":
             MessageLookupByLibrary.simpleMessage("Ordne neu zu..."),
+        "receiveRemindersOnBirthdays": MessageLookupByLibrary.simpleMessage(
+            "Receive reminders when it\'s someone\'s birthday. Tapping on the notification will take you to photos of the birthday person."),
         "recover": MessageLookupByLibrary.simpleMessage("Wiederherstellen"),
         "recoverAccount":
             MessageLookupByLibrary.simpleMessage("Konto wiederherstellen"),
@@ -2141,6 +2150,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "videoInfo":
             MessageLookupByLibrary.simpleMessage("Video-Informationen"),
         "videoSmallCase": MessageLookupByLibrary.simpleMessage("Video"),
+        "videoStreaming":
+            MessageLookupByLibrary.simpleMessage("Streambare Videos"),
         "videos": MessageLookupByLibrary.simpleMessage("Videos"),
         "viewActiveSessions":
             MessageLookupByLibrary.simpleMessage("Aktive Sitzungen anzeigen"),

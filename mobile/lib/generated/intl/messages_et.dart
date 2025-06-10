@@ -39,6 +39,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Luba allalaadimised"),
         "appleId": MessageLookupByLibrary.simpleMessage("Apple ID"),
         "apply": MessageLookupByLibrary.simpleMessage("Rakenda"),
+        "birthdays": MessageLookupByLibrary.simpleMessage("Birthdays"),
         "blog": MessageLookupByLibrary.simpleMessage("Blogi"),
         "cancel": MessageLookupByLibrary.simpleMessage("Loobu"),
         "changeEmail": MessageLookupByLibrary.simpleMessage("Muuda e-posti"),
@@ -121,6 +122,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "googlePlayId": MessageLookupByLibrary.simpleMessage("Google Play ID"),
         "groupNearbyPhotos": MessageLookupByLibrary.simpleMessage(
             "Grupeeri lähedal olevad fotod"),
+        "happyBirthday":
+            MessageLookupByLibrary.simpleMessage("Happy birthday! 🥳"),
         "help": MessageLookupByLibrary.simpleMessage("Abiinfo"),
         "hidden": MessageLookupByLibrary.simpleMessage("Peidetud"),
         "hide": MessageLookupByLibrary.simpleMessage("Peida"),
@@ -172,6 +175,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "noDeviceLimit": MessageLookupByLibrary.simpleMessage("Puudub"),
         "ok": MessageLookupByLibrary.simpleMessage("OK"),
         "onThisDay": MessageLookupByLibrary.simpleMessage("On this day"),
+        "onThisDayNotificationExplanation": MessageLookupByLibrary.simpleMessage(
+            "Receive reminders about memories from this day in previous years."),
         "oops": MessageLookupByLibrary.simpleMessage("Oih"),
         "oopsSomethingWentWrong":
             MessageLookupByLibrary.simpleMessage("Oih, midagi läks valesti"),
@@ -184,6 +189,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "privacyPolicyTitle":
             MessageLookupByLibrary.simpleMessage("Privaatsus"),
         "radius": MessageLookupByLibrary.simpleMessage("Raadius"),
+        "receiveRemindersOnBirthdays": MessageLookupByLibrary.simpleMessage(
+            "Receive reminders when it\'s someone\'s birthday. Tapping on the notification will take you to photos of the birthday person."),
         "recoverButton": MessageLookupByLibrary.simpleMessage("Taasta"),
         "reddit": MessageLookupByLibrary.simpleMessage("Reddit"),
         "remove": MessageLookupByLibrary.simpleMessage("Eemalda"),

@@ -29,7 +29,7 @@ A file upload flows as follows:
 The upshot of this is that _both_ the client and museum should be able to reach
 your S3 bucket.
 
-## Configuring S3 
+## Configuring S3
 
 The URL for the S3 bucket is configured in
 [scripts/compose/credentials.yaml](https://github.com/ente-io/ente/blob/main/server/scripts/compose/credentials.yaml#L10).
@@ -38,9 +38,8 @@ You can edit this file directly while testing, though it is more robust to
 create a `museum.yaml` (in the same folder as the Docker compose file) and to
 setup your custom configuration there.
 
-> [!TIP]
-> For more details about these configuration objects, see the documentation for
-> the `s3` object in
+> [!TIP] For more details about these configuration objects, see the
+> documentation for the `s3` object in
 > [configurations/local.yaml](https://github.com/ente-io/ente/blob/main/server/configurations/local.yaml).
 
 By default, you only need to configure the endpoint for the first bucket.
@@ -56,13 +55,14 @@ components of the setup to communicate with each other seamlessly.
 
 The same principle applies if you're deploying to your custom domain.
 
-## Replication 
+## Replication
 
 ![Replication](/replication.png)
+
 <p align="center">Community contributed diagram of Ente's replication process</p>
 
 > [!IMPORTANT]
-> 
+>
 > As of now, replication works only if all the 3 storage type needs are
 > fulfilled (1 hot, 1 cold and 1 glacier storage).
 >
@@ -72,10 +72,10 @@ If you're wondering why there are 3 buckets on the MinIO UI - that's because our
 production instance uses these to perform
 [replication](https://ente.io/reliability/).
 
-If you're also wondering about why the bucket names are specifically what they are, 
-it's because that is exactly what we are using on our production instance. 
-We use `b2-eu-cen` as hot, `wasabi-eu-central-2-v3` as cold (also the secondary hot) 
-and `scw-eu-fr-v3` as glacier storage. As of now, all of this is hardcoded. 
+If you're also wondering about why the bucket names are specifically what they
+are, it's because that is exactly what we are using on our production instance.
+We use `b2-eu-cen` as hot, `wasabi-eu-central-2-v3` as cold (also the secondary
+hot) and `scw-eu-fr-v3` as glacier storage. As of now, all of this is hardcoded.
 Hence, the same hardcoded configuration is applied when you self host Ente.
 
 In a self hosted Ente instance replication is turned off by default. When
@@ -84,16 +84,15 @@ other two are ignored. Only the names here are specifically fixed, but in the
 configuration body you can put any other keys. It does not have any relation
 with `b2`, `wasabi` or even `scaleway`.
 
-Use the `s3.hot_storage.primary` option if you'd like to set one of the other 
+Use the `s3.hot_storage.primary` option if you'd like to set one of the other
 predefined buckets as the primary bucket.
 
-## SSL Configuration 
+## SSL Configuration
 
 > [!NOTE]
 >
 > If you need to configure SSL, you'll need to turn off `s3.are_local_buckets`
 > (which disables SSL in the default starter compose template).
->
 
 Disabling `s3.are_local_buckets` also switches to the subdomain style URLs for
 the buckets. However, not all S3 providers support these. In particular, MinIO

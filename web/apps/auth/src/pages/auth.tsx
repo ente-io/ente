@@ -22,12 +22,13 @@ import {
 import { useBaseContext } from "ente-base/context";
 import { isHTTP401Error } from "ente-base/http";
 import log from "ente-base/log";
-import { masterKeyFromSessionIfLoggedIn } from "ente-base/session";
+import { masterKeyFromSession } from "ente-base/session";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import React, { useCallback, useEffect, useState } from "react";
 import { generateOTPs, type Code } from "services/code";
 import { getAuthCodesAndTimeOffset } from "services/remote";
+import { prettyFormatCode } from "utils/format";
 
 const Page: React.FC = () => {
     const { logout, showMiniDialog } = useBaseContext();
@@ -40,7 +41,7 @@ const Page: React.FC = () => {
 
     useEffect(() => {
         const fetchCodes = async () => {
-            const masterKey = await masterKeyFromSessionIfLoggedIn();
+            const masterKey = await masterKeyFromSession();
             if (!masterKey) {
                 stashRedirect("/auth");
                 void router.push("/");
@@ -221,7 +222,11 @@ const CodeDisplay: React.FC<CodeDisplayProps> = ({ code, timeOffset }) => {
                 <UnparseableCode {...{ code, errorMessage }} />
             ) : (
                 <ButtonBase component="div" onClick={copyCode}>
-                    <OTPDisplay {...{ code, timeOffset, otp, nextOTP }} />
+                    <OTPDisplay
+                        {...{ code, timeOffset }}
+                        otp={prettyFormatCode(otp)}
+                        nextOTP={prettyFormatCode(nextOTP)}
+                    />
                     <Snackbar
                         open={openCopied}
                         message={t("copied")}

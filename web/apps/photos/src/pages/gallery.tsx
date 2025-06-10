@@ -3,9 +3,6 @@ import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined";
 import MenuIcon from "@mui/icons-material/Menu";
 import { IconButton, Stack, Typography } from "@mui/material";
 import { AuthenticateUser } from "components/AuthenticateUser";
-import CollectionNamer, {
-    CollectionNamerAttributes,
-} from "components/Collections/CollectionNamer";
 import { GalleryBarAndListHeader } from "components/Collections/GalleryBarAndListHeader";
 import { TimeStampListItem } from "components/FileList";
 import { FileListWithViewer } from "components/FileListWithViewer";
@@ -22,6 +19,7 @@ import { stashRedirect } from "ente-accounts/services/redirect";
 import { isSessionInvalid } from "ente-accounts/services/session";
 import type { MiniDialogAttributes } from "ente-base/components/MiniDialog";
 import { NavbarBase } from "ente-base/components/Navbar";
+import { SingleInputDialog } from "ente-base/components/SingleInputDialog";
 import { CenteredRow } from "ente-base/components/containers";
 import { TranslucentLoadingOverlay } from "ente-base/components/loaders";
 import type { ButtonishProps } from "ente-base/components/mui";
@@ -34,7 +32,7 @@ import log from "ente-base/log";
 import {
     clearSessionStorage,
     haveCredentialsInSession,
-    masterKeyFromSessionIfLoggedIn,
+    masterKeyFromSession,
 } from "ente-base/session";
 import { FullScreenDropZone } from "ente-gallery/components/FullScreenDropZone";
 import { type UploadTypeSelectorIntent } from "ente-gallery/components/Upload";
@@ -109,7 +107,6 @@ import {
     setIsFirstLogin,
     setJustSignedUp,
 } from "ente-shared/storage/localStorage/helpers";
-import { getKey } from "ente-shared/storage/sessionStorage";
 import { t } from "i18next";
 import { useRouter, type NextRouter } from "next/router";
 import { createContext, useCallback, useEffect, useRef, useState } from "react";
@@ -193,9 +190,6 @@ const Page: React.FC = () => {
         context: { mode: "albums", collectionID: ALL_SECTION },
     });
     const [blockingLoad, setBlockingLoad] = useState(false);
-    const [collectionNamerAttributes, setCollectionNamerAttributes] =
-        useState<CollectionNamerAttributes>(null);
-    const [collectionNamerView, setCollectionNamerView] = useState(false);
     const [shouldDisableDropzone, setShouldDisableDropzone] = useState(false);
     const [dragAndDropFiles, setDragAndDropFiles] = useState<FileWithPath[]>(
         [],
@@ -235,6 +229,9 @@ const Page: React.FC = () => {
         filesDownloadProgressAttributesList,
         setFilesDownloadProgressAttributesList,
     ] = useState<FilesDownloadProgressAttributes[]>([]);
+    const [, setPostCreateAlbumOp] = useState<CollectionOp | undefined>(
+        undefined,
+    );
 
     const [openCollectionSelector, setOpenCollectionSelector] = useState(false);
     const [collectionSelectorAttributes, setCollectionSelectorAttributes] =
@@ -254,6 +251,8 @@ const Page: React.FC = () => {
         show: showAuthenticateUser,
         props: authenticateUserVisibilityProps,
     } = useModalVisibility();
+    const { show: showAlbumNameInput, props: albumNameInputVisibilityProps } =
+        useModalVisibility();
 
     const onAuthenticateCallback = useRef<(() => void) | undefined>(undefined);
 
@@ -376,10 +375,6 @@ const Page: React.FC = () => {
     }, [user, normalCollections, familyData]);
 
     useEffect(() => {
-        collectionNamerAttributes && setCollectionNamerView(true);
-    }, [collectionNamerAttributes]);
-
-    useEffect(() => {
         if (typeof activeCollectionID == "undefined" || !router.isReady) {
             return;
         }
@@ -393,7 +388,7 @@ const Page: React.FC = () => {
     }, [activeCollectionID, router.isReady]);
 
     useEffect(() => {
-        if (router.isReady && getKey("encryptionKey")) {
+        if (router.isReady && haveCredentialsInSession()) {
             handleSubscriptionCompletionRedirectIfNeeded(
                 showMiniDialog,
                 showLoadingBar,
@@ -455,12 +450,12 @@ const Page: React.FC = () => {
             // - Any of the modals are open.
             uploadTypeSelectorView ||
             openCollectionSelector ||
-            collectionNamerView ||
             sidebarVisibilityProps.open ||
             planSelectorVisibilityProps.open ||
             fixCreationTimeVisibilityProps.open ||
             exportVisibilityProps.open ||
             authenticateUserVisibilityProps.open ||
+            albumNameInputVisibilityProps.open ||
             isFileViewerOpen
         ) {
             return;
@@ -565,7 +560,7 @@ const Page: React.FC = () => {
                 showSessionExpiredDialog();
                 return;
             }
-            if (!(await masterKeyFromSessionIfLoggedIn())) {
+            if (!(await masterKeyFromSession())) {
                 clearSessionStorage();
                 router.push("/credentials");
                 return;
@@ -736,26 +731,26 @@ const Page: React.FC = () => {
         }
     };
 
-    const showCreateCollectionModal = (op: CollectionOp) => {
-        const callback = async (collectionName: string) => {
-            try {
-                showLoadingBar();
-                const collection = await createAlbum(collectionName);
-                await collectionOpsHelper(op)(collection);
-            } catch (e) {
-                onGenericError(e);
-            } finally {
-                hideLoadingBar();
-            }
-        };
-        return () =>
-            setCollectionNamerAttributes({
-                title: t("new_album"),
-                buttonText: t("create"),
-                autoFilledName: "",
-                callback,
+    const handleCreateAlbumForOp = useCallback(
+        (op: CollectionOp) => {
+            setPostCreateAlbumOp(op);
+            return showAlbumNameInput;
+        },
+        [showAlbumNameInput],
+    );
+
+    const handleAlbumNameSubmit = useCallback(
+        async (name: string) => {
+            const collection = await createAlbum(name);
+            setPostCreateAlbumOp((postCreateAlbumOp) => {
+                // collectionOpsHelper does its own progress and error
+                // reporting, defer to that.
+                void collectionOpsHelper(postCreateAlbumOp!)(collection);
+                return undefined;
             });
-    };
+        },
+        [collectionOpsHelper],
+    );
 
     const handleSelectSearchOption = (
         searchOption: SearchOption | undefined,
@@ -926,11 +921,6 @@ const Page: React.FC = () => {
                     {...planSelectorVisibilityProps}
                     setLoading={(v) => setBlockingLoad(v)}
                 />
-                <CollectionNamer
-                    show={collectionNamerView}
-                    onHide={setCollectionNamerView.bind(null, false)}
-                    attributes={collectionNamerAttributes}
-                />
                 <CollectionSelector
                     open={openCollectionSelector}
                     onClose={handleCloseCollectionSelector}
@@ -965,9 +955,7 @@ const Page: React.FC = () => {
                         <SelectedFileOptions
                             handleCollectionOp={collectionOpsHelper}
                             handleFileOp={fileOpHelper}
-                            showCreateCollectionModal={
-                                showCreateCollectionModal
-                            }
+                            showCreateCollectionModal={handleCreateAlbumForOp}
                             onOpenCollectionSelector={
                                 handleOpenCollectionSelector
                             }
@@ -1029,7 +1017,6 @@ const Page: React.FC = () => {
                         activeCollection,
                         activeCollectionID,
                         activePerson,
-                        setCollectionNamerAttributes,
                         setPhotoListHeader,
                         setFilesDownloadProgressAttributesCreator,
                         filesDownloadProgressAttributesList,
@@ -1060,7 +1047,6 @@ const Page: React.FC = () => {
                     onOpenCollectionSelector={handleOpenCollectionSelector}
                     onCloseCollectionSelector={handleCloseCollectionSelector}
                     setLoading={setBlockingLoad}
-                    setCollectionNamerAttributes={setCollectionNamerAttributes}
                     setShouldDisableDropzone={setShouldDisableDropzone}
                     onUploadFile={(file) =>
                         dispatch({ type: "uploadNormalFile", file })
@@ -1152,6 +1138,13 @@ const Page: React.FC = () => {
                 <AuthenticateUser
                     {...authenticateUserVisibilityProps}
                     onAuthenticate={onAuthenticateCallback.current!}
+                />
+                <SingleInputDialog
+                    {...albumNameInputVisibilityProps}
+                    title={t("new_album")}
+                    label={t("album_name")}
+                    submitButtonTitle={t("create")}
+                    onSubmit={handleAlbumNameSubmit}
                 />
             </FullScreenDropZone>
         </GalleryContext.Provider>

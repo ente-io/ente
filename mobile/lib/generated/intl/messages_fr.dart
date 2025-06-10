@@ -22,8 +22,17 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m0(title) => "${title} (Moi)";
 
+  static String m1(count) =>
+      "${Intl.plural(count, zero: 'Ajouter un collaborateur', one: 'Ajouter un collaborateur', other: 'Ajouter des collaborateurs')}";
+
+  static String m2(count) =>
+      "${Intl.plural(count, one: 'Ajouter un élément', other: 'Ajouter des éléments')}";
+
   static String m3(storageAmount, endDate) =>
       "Votre extension de ${storageAmount} est valable jusqu\'au ${endDate}";
+
+  static String m4(count) =>
+      "${Intl.plural(count, zero: 'Ajouter un spectateur', one: 'Ajouter une spectateur', other: 'Ajouter des spectateurs')}";
 
   static String m5(emailOrName) => "Ajouté par ${emailOrName}";
 
@@ -91,6 +100,8 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m26(count, formattedSize) =>
       "${count} fichiers, ${formattedSize} chacun";
 
+  static String m27(name) => "Cet e-mail est déjà lié à ${name}.";
+
   static String m28(newEmail) => "L\'email a été changé par ${newEmail}";
 
   static String m29(email) => "${email} n\'a pas de compte Ente.";
@@ -115,7 +126,13 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m37(endDate) => "Essai gratuit valide jusqu’au ${endDate}";
 
+  static String m38(count) =>
+      "Vous pouvez toujours ${Intl.plural(count, one: 'l\'', other: 'les')} accéder sur Ente tant que vous avez un abonnement actif";
+
   static String m39(sizeInMBorGB) => "Libérer ${sizeInMBorGB}";
+
+  static String m40(count, formattedSize) =>
+      "${Intl.plural(count, one: 'Il peut être supprimé de l\'appareil pour libérer ${formattedSize}', other: 'Ils peuvent être supprimés de l\'appareil pour libérer ${formattedSize}')}";
 
   static String m41(currentlyProcessing, totalCount) =>
       "Traitement en cours ${currentlyProcessing} / ${totalCount}";
@@ -140,6 +157,9 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m49(count, formattedCount) =>
       "${Intl.plural(count, zero: 'aucun souvenir', one: '${formattedCount} souvenir', other: '${formattedCount} souvenirs')}";
 
+  static String m50(count) =>
+      "${Intl.plural(count, one: 'Déplacer un élément', other: 'Déplacer des éléments')}";
+
   static String m51(albumName) => "Déplacé avec succès vers ${albumName}";
 
   static String m52(personName) => "Aucune suggestion pour ${personName}";
@@ -163,6 +183,9 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m60(count) =>
       "${Intl.plural(count, zero: 'No photos', one: '1 photo', other: '${count} photos')}";
+
+  static String m61(count) =>
+      "${Intl.plural(count, zero: '0 photo', one: '1 photo', other: '${count} photos')}";
 
   static String m62(endDate) =>
       "Essai gratuit valable jusqu\'à ${endDate}.\nVous pouvez choisir un plan payant par la suite.";
@@ -287,6 +310,9 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m110(name) => "Voir ${name} pour délier";
 
+  static String m111(count) =>
+      "${Intl.plural(count, zero: '0 spectateur ajouté', one: 'Un spectateur ajouté', other: '${count} spectateurs ajoutés')}";
+
   static String m112(email) =>
       "Nous avons envoyé un email à <green>${email}</green>";
 
@@ -321,10 +347,12 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Ajouter un nouvel email"),
         "addCollaborator":
             MessageLookupByLibrary.simpleMessage("Ajouter un collaborateur"),
+        "addCollaborators": m1,
         "addFiles":
             MessageLookupByLibrary.simpleMessage("Ajouter des fichiers"),
         "addFromDevice":
             MessageLookupByLibrary.simpleMessage("Ajouter depuis l\'appareil"),
+        "addItem": m2,
         "addLocation":
             MessageLookupByLibrary.simpleMessage("Ajouter la localisation"),
         "addLocationButton": MessageLookupByLibrary.simpleMessage("Ajouter"),
@@ -352,6 +380,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Ajouter un contact de confiance"),
         "addViewer":
             MessageLookupByLibrary.simpleMessage("Ajouter un observateur"),
+        "addViewers": m4,
         "addYourPhotosNow": MessageLookupByLibrary.simpleMessage(
             "Ajoutez vos photos maintenant"),
         "addedAs": MessageLookupByLibrary.simpleMessage("Ajouté comme"),
@@ -527,6 +556,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Sauvegarde des vidéos"),
         "beach": MessageLookupByLibrary.simpleMessage("Sable et mer"),
         "birthday": MessageLookupByLibrary.simpleMessage("Anniversaire"),
+        "birthdays": MessageLookupByLibrary.simpleMessage("Birthdays"),
         "blackFridaySale":
             MessageLookupByLibrary.simpleMessage("Offre Black Friday"),
         "blog": MessageLookupByLibrary.simpleMessage("Blog"),
@@ -849,6 +879,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "duplicateFileCountWithStorageSaved": m25,
         "duplicateItemsGroup": m26,
         "edit": MessageLookupByLibrary.simpleMessage("Éditer"),
+        "editEmailAlreadyLinked": m27,
         "editLocation":
             MessageLookupByLibrary.simpleMessage("Modifier l’emplacement"),
         "editLocationTagTitle":
@@ -936,6 +967,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Veuillez entrer une adresse email valide."),
         "enterYourEmailAddress":
             MessageLookupByLibrary.simpleMessage("Entrez votre adresse e-mail"),
+        "enterYourNewEmailAddress": MessageLookupByLibrary.simpleMessage(
+            "Entrez votre nouvelle adresse e-mail"),
         "enterYourPassword":
             MessageLookupByLibrary.simpleMessage("Entrez votre mot de passe"),
         "enterYourRecoveryKey": MessageLookupByLibrary.simpleMessage(
@@ -1029,6 +1062,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Stockage gratuit disponible"),
         "freeTrial": MessageLookupByLibrary.simpleMessage("Essai gratuit"),
         "freeTrialValidTill": m37,
+        "freeUpAccessPostDelete": m38,
         "freeUpAmount": m39,
         "freeUpDeviceSpace": MessageLookupByLibrary.simpleMessage(
             "Libérer de l\'espace sur l\'appareil"),
@@ -1036,6 +1070,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Économisez de l\'espace sur votre appareil en effaçant les fichiers qui ont déjà été sauvegardés."),
         "freeUpSpace":
             MessageLookupByLibrary.simpleMessage("Libérer de l\'espace"),
+        "freeUpSpaceSaving": m40,
         "gallery": MessageLookupByLibrary.simpleMessage("Galerie"),
         "galleryMemoryLimitInfo": MessageLookupByLibrary.simpleMessage(
             "Jusqu\'à 1000 souvenirs affichés dans la galerie"),
@@ -1057,6 +1092,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "guestView": MessageLookupByLibrary.simpleMessage("Vue invité"),
         "guestViewEnablePreSteps": MessageLookupByLibrary.simpleMessage(
             "Pour activer la vue invité, veuillez configurer le code d\'accès de l\'appareil ou le verrouillage de l\'écran dans les paramètres de votre système."),
+        "happyBirthday":
+            MessageLookupByLibrary.simpleMessage("Happy birthday! 🥳"),
         "hearUsExplanation": MessageLookupByLibrary.simpleMessage(
             "Nous ne suivons pas les installations d\'applications. Il serait utile que vous nous disiez comment vous nous avez trouvés !"),
         "hearUsWhereTitle": MessageLookupByLibrary.simpleMessage(
@@ -1201,6 +1238,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "livePhotos": MessageLookupByLibrary.simpleMessage("Photos en direct"),
         "loadMessage1": MessageLookupByLibrary.simpleMessage(
             "Vous pouvez partager votre abonnement avec votre famille"),
+        "loadMessage2": MessageLookupByLibrary.simpleMessage(
+            "Nous avons préservé plus de 200 millions de souvenirs jusqu\'à présent"),
         "loadMessage3": MessageLookupByLibrary.simpleMessage(
             "Nous conservons 3 copies de vos données, l\'une dans un abri anti-atomique"),
         "loadMessage4": MessageLookupByLibrary.simpleMessage(
@@ -1322,6 +1361,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Les plus pertinents"),
         "mountains":
             MessageLookupByLibrary.simpleMessage("Au-dessus des collines"),
+        "moveItem": m50,
         "moveSelectedPhotosToOneDate": MessageLookupByLibrary.simpleMessage(
             "Déplacer les photos sélectionnées vers une date"),
         "moveToAlbum":
@@ -1401,6 +1441,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "onTheRoad":
             MessageLookupByLibrary.simpleMessage("De nouveau sur la route"),
         "onThisDay": MessageLookupByLibrary.simpleMessage("On this day"),
+        "onThisDayNotificationExplanation": MessageLookupByLibrary.simpleMessage(
+            "Receive reminders about memories from this day in previous years."),
         "onlyFamilyAdminCanChangeCode": m54,
         "onlyThem": MessageLookupByLibrary.simpleMessage("Seulement eux"),
         "oops": MessageLookupByLibrary.simpleMessage("Oups"),
@@ -1486,6 +1528,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "photosAddedByYouWillBeRemovedFromTheAlbum":
             MessageLookupByLibrary.simpleMessage(
                 "Les photos ajoutées par vous seront retirées de l\'album"),
+        "photosCount": m61,
         "photosKeepRelativeTimeDifference":
             MessageLookupByLibrary.simpleMessage(
                 "Les photos gardent une différence de temps relative"),
@@ -1573,6 +1616,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "reassignedToName": m68,
         "reassigningLoading":
             MessageLookupByLibrary.simpleMessage("Réassignation..."),
+        "receiveRemindersOnBirthdays": MessageLookupByLibrary.simpleMessage(
+            "Receive reminders when it\'s someone\'s birthday. Tapping on the notification will take you to photos of the birthday person."),
         "recover": MessageLookupByLibrary.simpleMessage("Récupérer"),
         "recoverAccount":
             MessageLookupByLibrary.simpleMessage("Récupérer un compte"),
@@ -1908,6 +1953,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage(
                 "Quelque chose s\'est mal passé, veuillez recommencer"),
         "sorry": MessageLookupByLibrary.simpleMessage("Désolé"),
+        "sorryBackupFailedDesc": MessageLookupByLibrary.simpleMessage(
+            "Désolé, nous n\'avons pas pu sauvegarder ce fichier maintenant, nous allons réessayer plus tard."),
         "sorryCouldNotAddToFavorites": MessageLookupByLibrary.simpleMessage(
             "Désolé, impossible d\'ajouter aux favoris !"),
         "sorryCouldNotRemoveFromFavorites":
@@ -2152,6 +2199,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Vérification de la clé de récupération..."),
         "videoInfo": MessageLookupByLibrary.simpleMessage("Informations vidéo"),
         "videoSmallCase": MessageLookupByLibrary.simpleMessage("vidéo"),
+        "videoStreaming":
+            MessageLookupByLibrary.simpleMessage("Vidéos diffusables"),
         "videos": MessageLookupByLibrary.simpleMessage("Vidéos"),
         "viewActiveSessions": MessageLookupByLibrary.simpleMessage(
             "Afficher les connexions actives"),
@@ -2170,6 +2219,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "viewRecoveryKey":
             MessageLookupByLibrary.simpleMessage("Voir la clé de récupération"),
         "viewer": MessageLookupByLibrary.simpleMessage("Observateur"),
+        "viewersSuccessfullyAdded": m111,
         "visitWebToManage": MessageLookupByLibrary.simpleMessage(
             "Vous pouvez gérer votre abonnement sur web.ente.io"),
         "waitingForVerification": MessageLookupByLibrary.simpleMessage(

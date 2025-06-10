@@ -446,6 +446,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "backupVideos":
             MessageLookupByLibrary.simpleMessage("Резервне копіювання відео"),
         "birthday": MessageLookupByLibrary.simpleMessage("День народження"),
+        "birthdays": MessageLookupByLibrary.simpleMessage("Birthdays"),
         "blackFridaySale": MessageLookupByLibrary.simpleMessage(
             "Розпродаж у «Чорну п\'ятницю»"),
         "blog": MessageLookupByLibrary.simpleMessage("Блог"),
@@ -940,6 +941,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "guestView": MessageLookupByLibrary.simpleMessage("Гостьовий перегляд"),
         "guestViewEnablePreSteps": MessageLookupByLibrary.simpleMessage(
             "Щоб увімкнути гостьовий перегляд, встановіть пароль або блокування екрана в налаштуваннях системи."),
+        "happyBirthday":
+            MessageLookupByLibrary.simpleMessage("Happy birthday! 🥳"),
         "hearUsExplanation": MessageLookupByLibrary.simpleMessage(
             "Ми не відстежуємо встановлення застосунку. Але, якщо ви скажете нам, де ви нас знайшли, це допоможе!"),
         "hearUsWhereTitle": MessageLookupByLibrary.simpleMessage(
@@ -1242,6 +1245,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "onEnte":
             MessageLookupByLibrary.simpleMessage("В <branding>Ente</branding>"),
         "onThisDay": MessageLookupByLibrary.simpleMessage("On this day"),
+        "onThisDayNotificationExplanation": MessageLookupByLibrary.simpleMessage(
+            "Receive reminders about memories from this day in previous years."),
         "onlyFamilyAdminCanChangeCode": m54,
         "onlyThem": MessageLookupByLibrary.simpleMessage("Тільки вони"),
         "oops": MessageLookupByLibrary.simpleMessage("От халепа"),
@@ -1381,6 +1386,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Оцініть застосунок"),
         "rateUs": MessageLookupByLibrary.simpleMessage("Оцініть нас"),
         "rateUsOnStore": m67,
+        "receiveRemindersOnBirthdays": MessageLookupByLibrary.simpleMessage(
+            "Receive reminders when it\'s someone\'s birthday. Tapping on the notification will take you to photos of the birthday person."),
         "recover": MessageLookupByLibrary.simpleMessage("Відновити"),
         "recoverAccount":
             MessageLookupByLibrary.simpleMessage("Відновити обліковий запис"),

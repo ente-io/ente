@@ -1747,5 +1747,14 @@
   "lookBackOnYourMemories": "Look back on your memories 🌄",
   "newPhotosEmoji": " new 📸",
   "sorryWeHadToPauseYourBackups": "Sorry, we had to pause your backups",
-  "clickToInstallOurBestVersionYet": "Click to install our best version yet"
+  "clickToInstallOurBestVersionYet": "Click to install our best version yet",
+  "onThisDayNotificationExplanation": "Receive reminders about memories from this day in previous years.",
+  "addMemoriesWidgetPrompt": "Add a memories widget to your homescreen and come back here to customize.",
+  "addAlbumWidgetPrompt": "Add an album widget to your homescreen and come back here to customize.",
+  "addPeopleWidgetPrompt": "Add a people widget to your homescreen and come back here to customize.",
+  "birthdayNotifications": "Birthday notifications",
+  "receiveRemindersOnBirthdays": "Receive reminders when it's someone's birthday. Tapping on the notification will take you to photos of the birthday person.",
+  "happyBirthday": "Happy birthday! 🥳",
+  "happyBirthdayToPerson": "Happy birthday to {name}! 🎉",
+  "birthdays": "Birthdays"
 }

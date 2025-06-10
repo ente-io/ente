@@ -1,3 +1,5 @@
+import "dart:math";
+
 import "package:collection/collection.dart";
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -5,7 +7,7 @@ import 'package:logging/logging.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/search/generic_search_result.dart";
-import "package:photos/models/search/hierarchical/face_filter.dart";
+import "package:photos/models/search/search_constants.dart";
 import "package:photos/models/search/search_types.dart";
 import 'package:photos/service_locator.dart';
 import 'package:photos/services/home_widget_service.dart';
@@ -289,17 +291,15 @@ class PeopleHomeWidgetService {
     if (peopleIds == null || peopleIds.isEmpty) {
       // Search Filter with face and pick top two faces
       final searchFilter = await SectionType.face.getData(null).then(
-            (value) => List<GenericSearchResult>.from(value).where(
-              (element) =>
-                  (element.hierarchicalSearchFilter as FaceFilter).personId !=
-                  null,
+            (value) => (value as List<GenericSearchResult>).where(
+              (element) => (element.params[kPersonParamID] as String?) != null,
             ),
           );
 
       if (searchFilter.isNotEmpty) {
         peopleIds = searchFilter
             .take(2)
-            .map((e) => (e.hierarchicalSearchFilter as FaceFilter).personId!)
+            .map((e) => e.params[kPersonParamID] as String)
             .toList();
       } else {
         _logger.warning("No selected people found");
@@ -374,59 +374,70 @@ class PeopleHomeWidgetService {
     final currentTotal = await _getTotalPeople();
     _logger.info("Current total people in widget: $currentTotal");
 
-    int renderedCount = 0;
-
     final bool isWidgetPresent = await countHomeWidgets() > 0;
+
     final limit = isWidgetPresent ? MAX_PEOPLE_LIMIT : 5;
+    final maxAttempts = limit * 10;
+
+    int renderedCount = 0;
+    int attemptsCount = 0;
+
     await updatePeopleStatus(WidgetStatus.notSynced);
 
-    for (final entry in peopleWithFiles.entries) {
-      final personId = entry.key;
-      final personName = entry.value.$1;
-      final personFiles = entry.value.$2;
+    final peopleWithFilesLength = peopleWithFiles.length;
+    final peopleWithFilesEntries = peopleWithFiles.entries.toList();
+    final random = Random();
 
-      for (final file in personFiles) {
-        final renderResult = await HomeWidgetService.instance
-            .renderFile(
-          file,
-          "people_widget_$renderedCount",
-          personName,
-          personId,
-        )
-            .catchError((e, stackTrace) {
-          _logger.severe("Error rendering widget", e, stackTrace);
-          return null;
-        });
+    while (renderedCount < limit && attemptsCount < maxAttempts) {
+      final randomEntry =
+          peopleWithFilesEntries[random.nextInt(peopleWithFilesLength)];
 
-        if (renderResult != null) {
-          // Check for blockers again before continuing
-          if (await _hasAnyBlockers()) {
-            return;
-          }
+      if (randomEntry.value.$2.isEmpty) continue;
 
-          await _setTotalPeople(renderedCount);
+      final randomPersonFile = randomEntry.value.$2.elementAt(
+        random.nextInt(randomEntry.value.$2.length),
+      );
+      final personId = randomEntry.key;
+      final personName = randomEntry.value.$1;
 
-          // Show update toast after first item is rendered
-          if (renderedCount == 1) {
-            await _refreshWidget(
-              message: "First person fetched, updating widget",
-            );
-            await updatePeopleStatus(WidgetStatus.syncedPartially);
-          }
+      final renderResult = await HomeWidgetService.instance
+          .renderFile(
+        randomPersonFile,
+        "people_widget_$renderedCount",
+        personName,
+        personId,
+      )
+          .catchError((e, stackTrace) {
+        _logger.severe("Error rendering widget", e, stackTrace);
+        return null;
+      });
 
-          renderedCount++;
-
-          // Limit the number of people to avoid performance issues
-          if (renderedCount >= limit) {
-            _logger.warning("Maximum people limit ($limit) reached");
-            break;
-          }
+      if (renderResult != null) {
+        // Check for blockers again before continuing
+        if (await _hasAnyBlockers()) {
+          return;
         }
+
+        await _setTotalPeople(renderedCount);
+
+        // Show update toast after first item is rendered
+        if (renderedCount == 1) {
+          await _refreshWidget(
+            message: "First person fetched, updating widget",
+          );
+          await updatePeopleStatus(WidgetStatus.syncedPartially);
+        }
+
+        renderedCount++;
       }
 
-      if (renderedCount >= limit) {
-        break;
-      }
+      attemptsCount++;
+    }
+
+    if (attemptsCount >= maxAttempts) {
+      _logger.warning(
+        "Hit max attempts $maxAttempts. Only rendered $renderedCount of limit $limit.",
+      );
     }
 
     if (renderedCount == 0) {

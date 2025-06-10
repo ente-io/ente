@@ -45,7 +45,7 @@
     "welcome_to_ente_subtitle": "Stockage et partage de photos chiffrés de bout en bout",
     "new_album": "Nouvel album",
     "create_albums": "Créer des albums",
-    "enter_album_name": "Nom de l'album",
+    "album_name": "Nom de l'album",
     "close": "Fermer",
     "yes": "Oui",
     "no": "Non",
@@ -626,6 +626,7 @@
     "faster_upload_description": "Router les chargements vers les serveurs à proximité",
     "open_ente_on_startup": "Ouvrir Ente au démarrage",
     "cast_album_to_tv": "Jouer l'album sur la TV",
+    "cast_to_tv": "Afficher sur la TV",
     "enter_cast_pin_code": "Entrez le code que vous voyez sur la TV ci-dessous pour appairer cet appareil.",
     "code": "Code",
     "pair_device_to_tv": "Associer les appareils",
@@ -682,5 +683,5 @@
     "share_favorites": "Partager les favoris",
     "person_favorites": "Favoris de {{name}}",
     "shared_favorites": "Favoris partagés",
-    "added_by_name": ""
+    "added_by_name": "Ajouté par {{name}}"
 }

@@ -540,6 +540,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Резервное копирование видео"),
         "beach": MessageLookupByLibrary.simpleMessage("Песок и море"),
         "birthday": MessageLookupByLibrary.simpleMessage("День рождения"),
+        "birthdays": MessageLookupByLibrary.simpleMessage("Birthdays"),
         "blackFridaySale": MessageLookupByLibrary.simpleMessage(
             "Распродажа в \"Черную пятницу\""),
         "blog": MessageLookupByLibrary.simpleMessage("Блог"),
@@ -1057,6 +1058,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "guestView": MessageLookupByLibrary.simpleMessage("Гостевой просмотр"),
         "guestViewEnablePreSteps": MessageLookupByLibrary.simpleMessage(
             "Для включения гостевого просмотра, пожалуйста, настройте код или блокировку экрана в настройках устройства."),
+        "happyBirthday":
+            MessageLookupByLibrary.simpleMessage("Happy birthday! 🥳"),
         "hearUsExplanation": MessageLookupByLibrary.simpleMessage(
             "Мы не отслеживаем установки приложений. Нам поможет, если скажете, как вы нас нашли!"),
         "hearUsWhereTitle": MessageLookupByLibrary.simpleMessage(
@@ -1399,6 +1402,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("В <branding>ente</branding>"),
         "onTheRoad": MessageLookupByLibrary.simpleMessage("Снова в пути"),
         "onThisDay": MessageLookupByLibrary.simpleMessage("On this day"),
+        "onThisDayNotificationExplanation": MessageLookupByLibrary.simpleMessage(
+            "Receive reminders about memories from this day in previous years."),
         "onlyFamilyAdminCanChangeCode": m54,
         "onlyThem": MessageLookupByLibrary.simpleMessage("Только он(а)"),
         "oops": MessageLookupByLibrary.simpleMessage("Ой"),
@@ -1567,6 +1572,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "reassignedToName": m68,
         "reassigningLoading":
             MessageLookupByLibrary.simpleMessage("Переназначение..."),
+        "receiveRemindersOnBirthdays": MessageLookupByLibrary.simpleMessage(
+            "Receive reminders when it\'s someone\'s birthday. Tapping on the notification will take you to photos of the birthday person."),
         "recover": MessageLookupByLibrary.simpleMessage("Восстановить"),
         "recoverAccount":
             MessageLookupByLibrary.simpleMessage("Восстановить аккаунт"),

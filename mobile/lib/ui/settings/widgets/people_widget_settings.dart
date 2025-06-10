@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import "package:photos/generated/l10n.dart";
+import "package:photos/l10n/l10n.dart";
 import "package:photos/models/selected_people.dart";
 import "package:photos/services/people_home_widget_service.dart";
-import 'package:photos/theme/ente_theme.dart';
 import "package:photos/ui/components/buttons/button_widget.dart";
 import 'package:photos/ui/components/buttons/icon_button_widget.dart';
 import "package:photos/ui/components/models/button_type.dart";
@@ -21,12 +21,9 @@ class _PeopleWidgetSettingsState extends State<PeopleWidgetSettings> {
   bool hasInstalledAny = false;
   final _selectedPeople = SelectedPeople();
 
-  Set<String> people = <String>{};
-
   @override
   void initState() {
     super.initState();
-    _selectedPeople.addListener(_selectedPeopleListener);
     getSelections();
     checkIfAnyWidgetInstalled();
   }
@@ -46,20 +43,8 @@ class _PeopleWidgetSettingsState extends State<PeopleWidgetSettings> {
     });
   }
 
-  void _selectedPeopleListener() {
-    people = _selectedPeople.personIds;
-    setState(() {});
-  }
-
-  @override
-  void dispose() {
-    _selectedPeople.removeListener(_selectedPeopleListener);
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
-    final textTheme = getEnteTextTheme(context);
     return Scaffold(
       bottomNavigationBar: hasInstalledAny
           ? Padding(
@@ -69,20 +54,28 @@ class _PeopleWidgetSettingsState extends State<PeopleWidgetSettings> {
                 16,
                 8 + MediaQuery.viewPaddingOf(context).bottom,
               ),
-              child: ButtonWidget(
-                buttonType: ButtonType.primary,
-                buttonSize: ButtonSize.large,
-                labelText: S.of(context).save,
-                shouldSurfaceExecutionStates: false,
-                isDisabled: people.isEmpty,
-                onTap: people.isEmpty
-                    ? null
-                    : () async {
-                        await PeopleHomeWidgetService.instance
-                            .setSelectedPeople(people.toList());
-                        Navigator.pop(context);
-                        await PeopleHomeWidgetService.instance.peopleChanged();
-                      },
+              child: ListenableBuilder(
+                listenable: _selectedPeople,
+                builder: (context, _) {
+                  return ButtonWidget(
+                    buttonType: ButtonType.primary,
+                    buttonSize: ButtonSize.large,
+                    labelText: S.of(context).save,
+                    shouldSurfaceExecutionStates: false,
+                    isDisabled: _selectedPeople.personIds.isEmpty,
+                    onTap: _selectedPeople.personIds.isEmpty
+                        ? null
+                        : () async {
+                            await PeopleHomeWidgetService.instance
+                                .setSelectedPeople(
+                              _selectedPeople.personIds.toList(),
+                            );
+                            Navigator.pop(context);
+                            await PeopleHomeWidgetService.instance
+                                .peopleChanged();
+                          },
+                  );
+                },
               ),
             )
           : null,
@@ -94,7 +87,9 @@ class _PeopleWidgetSettingsState extends State<PeopleWidgetSettings> {
               title: S.of(context).people,
             ),
             expandedHeight: 120,
-            flexibleSpaceCaption: S.of(context).peopleWidgetDesc,
+            flexibleSpaceCaption: hasInstalledAny
+                ? S.of(context).peopleWidgetDesc
+                : context.l10n.addPeopleWidgetPrompt,
             actionIcons: [
               IconButtonWidget(
                 icon: Icons.close_outlined,
@@ -122,18 +117,12 @@ class _PeopleWidgetSettingsState extends State<PeopleWidgetSettings> {
                       "assets/people-widget-static.png",
                       height: 160,
                     ),
-                    const SizedBox(height: 20),
-                    Text(
-                      "Add a people widget to your homescreen and come back here to customize",
-                      style: textTheme.smallFaint,
-                      textAlign: TextAlign.center,
-                    ),
                   ],
                 ),
               ),
             )
           else
-            SliverToBoxAdapter(
+            SliverFillRemaining(
               child: PeopleSectionAllWidget(
                 selectedPeople: _selectedPeople,
                 namedOnly: true,

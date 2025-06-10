@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import "package:flutter_svg/flutter_svg.dart";
 import "package:photos/generated/l10n.dart";
+import "package:photos/l10n/l10n.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/memory_home_widget_service.dart";
 import 'package:photos/theme/ente_theme.dart';
@@ -88,7 +89,6 @@ class _MemoriesWidgetSettingsState extends State<MemoriesWidgetSettings> {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = getEnteTextTheme(context);
     final colorScheme = getEnteColorScheme(context);
 
     return Scaffold(
@@ -100,7 +100,9 @@ class _MemoriesWidgetSettingsState extends State<MemoriesWidgetSettings> {
               title: S.of(context).memories,
             ),
             expandedHeight: 120,
-            flexibleSpaceCaption: S.of(context).memoriesWidgetDesc,
+            flexibleSpaceCaption: hasInstalledAny
+                ? S.of(context).memoriesWidgetDesc
+                : context.l10n.addMemoriesWidgetPrompt,
             actionIcons: [
               IconButtonWidget(
                 icon: Icons.close_outlined,
@@ -127,12 +129,6 @@ class _MemoriesWidgetSettingsState extends State<MemoriesWidgetSettings> {
                     Image.asset(
                       "assets/memories-widget-static.png",
                       height: 160,
-                    ),
-                    const SizedBox(height: 20),
-                    Text(
-                      "Add a memories widget to your homescreen and come back here to customize",
-                      style: textTheme.smallFaint,
-                      textAlign: TextAlign.center,
                     ),
                   ],
                 ),

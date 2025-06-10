@@ -28,6 +28,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
             "അക്കൗണ്ട് ഉപേക്ഷിക്കുവാൻ പ്രധാന കാരണമെന്താണ്?"),
         "available": MessageLookupByLibrary.simpleMessage("ലഭ്യമാണ്"),
+        "birthdays": MessageLookupByLibrary.simpleMessage("Birthdays"),
         "calculating":
             MessageLookupByLibrary.simpleMessage("കണക്കുകൂട്ടുന്നു..."),
         "cancel": MessageLookupByLibrary.simpleMessage("റദ്ദാക്കുക"),
@@ -70,6 +71,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "forgotPassword":
             MessageLookupByLibrary.simpleMessage("സങ്കേതക്കുറി മറന്നുപോയി"),
         "general": MessageLookupByLibrary.simpleMessage("പൊതുവായവ"),
+        "happyBirthday":
+            MessageLookupByLibrary.simpleMessage("Happy birthday! 🥳"),
         "hide": MessageLookupByLibrary.simpleMessage("മറയ്ക്കുക"),
         "howItWorks": MessageLookupByLibrary.simpleMessage("പ്രവർത്തന രീതി"),
         "ignoreUpdate": MessageLookupByLibrary.simpleMessage("അവഗണിക്കുക"),
@@ -95,6 +98,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("ഇവിടൊന്നും കാണ്മാനില്ല! 👀"),
         "ok": MessageLookupByLibrary.simpleMessage("ശരി"),
         "onThisDay": MessageLookupByLibrary.simpleMessage("On this day"),
+        "onThisDayNotificationExplanation": MessageLookupByLibrary.simpleMessage(
+            "Receive reminders about memories from this day in previous years."),
         "oops": MessageLookupByLibrary.simpleMessage("അയ്യോ"),
         "password": MessageLookupByLibrary.simpleMessage("സങ്കേതക്കുറി"),
         "pleaseTryAgain":
@@ -102,6 +107,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "privacy": MessageLookupByLibrary.simpleMessage("സ്വകാര്യത"),
         "privacyPolicyTitle":
             MessageLookupByLibrary.simpleMessage("സ്വകാര്യതാനയം"),
+        "receiveRemindersOnBirthdays": MessageLookupByLibrary.simpleMessage(
+            "Receive reminders when it\'s someone\'s birthday. Tapping on the notification will take you to photos of the birthday person."),
         "recoverButton": MessageLookupByLibrary.simpleMessage("വീണ്ടെടുക്കുക"),
         "recoverySuccessful":
             MessageLookupByLibrary.simpleMessage("വീണ്ടെടുക്കൽ വിജയകരം!"),

@@ -1,8 +1,8 @@
 // TODO: Audit this file
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 
-import { streamEncryptionChunkSize } from "ente-base/crypto/libsodium";
 import type { BytesOrB64 } from "ente-base/crypto/types";
+import { streamEncryptionChunkSize } from "ente-base/crypto/types";
 import { type CryptoWorker } from "ente-base/crypto/worker";
 import { ensureElectron } from "ente-base/electron";
 import { basename, nameAndExtension } from "ente-base/file-name";
@@ -45,6 +45,7 @@ import {
 import { FileType, type FileTypeInfo } from "ente-media/file-type";
 import { encodeLivePhoto } from "ente-media/live-photo";
 import { addToCollection } from "ente-new/photos/services/collection";
+import { settingsSnapshot } from "ente-new/photos/services/settings";
 import {
     CustomError,
     CustomErrorMessage,
@@ -325,12 +326,24 @@ interface EncryptedFileStream {
 }
 
 interface EncryptedFilePieces {
+    /**
+     * The encrypted contents of the file (as bytes or a stream of bytes), and
+     * the decryption header that was used during encryption (base64 string).
+     */
     file: {
         encryptedData: Uint8Array | EncryptedFileStream;
         decryptionHeader: string;
     };
+    /**
+     * The encrypted contents of the file's thumbnail (as bytes), and the
+     * decryption header that was used during encryption (base64 string).
+     */
     thumbnail: { encryptedData: Uint8Array; decryptionHeader: string };
-    metadata: { encryptedDataB64: string; decryptionHeaderB64: string };
+    /**
+     * The encrypted contents of the file's metadata (as a base64 string), and
+     * the decryption header that was used during encryption (base64 string).
+     */
+    metadata: { encryptedData: string; decryptionHeader: string };
     pubMagicMetadata: EncryptedMagicMetadata;
     localID: number;
 }
@@ -635,7 +648,10 @@ export const upload = async (
 
         const { fileTypeInfo, fileSize, lastModifiedMs } = assetDetails;
 
-        const maxFileSize = 4 * 1024 * 1024 * 1024; /* 4 GB */
+        // TODO(REL):
+        const maxFileSize = settingsSnapshot().isInternalUser
+            ? 10 * 1024 * 1024 * 1024 /* 10 GB */
+            : 4 * 1024 * 1024 * 1024; /* 4 GB */
         if (fileSize >= maxFileSize) return { uploadResult: "tooLarge" };
 
         abortIfCancelled();
@@ -1409,7 +1425,7 @@ const constructPublicMagicMetadata = async (
 
 const encryptFile = async (
     file: FileWithMetadata,
-    encryptionKey: string,
+    collectionKey: string,
     worker: CryptoWorker,
 ) => {
     const fileKey = await worker.generateBlobOrStreamKey();
@@ -1422,33 +1438,36 @@ const encryptFile = async (
             ? await worker.encryptStreamBytes(fileStreamOrData, fileKey)
             : await encryptFileStream(fileStreamOrData, fileKey, worker);
 
-    const encryptedThumbnail = await worker.encryptThumbnail(
-        thumbnail,
+    const {
+        encryptedData: encryptedThumbnailData,
+        decryptionHeader: thumbnailDecryptionHeaderBytes,
+    } = await worker.encryptBlobBytes(thumbnail, fileKey);
+
+    const encryptedThumbnail = {
+        encryptedData: encryptedThumbnailData,
+        decryptionHeader: await worker.toB64(thumbnailDecryptionHeaderBytes),
+    };
+
+    const encryptedMetadata = await worker.encryptMetadataJSON(
+        metadata,
         fileKey,
     );
-
-    const encryptedMetadata = await worker.encryptMetadataJSON({
-        jsonValue: metadata,
-        keyB64: fileKey,
-    });
 
     let encryptedPubMagicMetadata: EncryptedMagicMetadata;
     // Keep defensive check until the underlying type is audited.
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (pubMagicMetadata) {
-        const encryptedPubMagicMetadataData = await worker.encryptMetadataJSON({
-            jsonValue: pubMagicMetadata.data,
-            keyB64: fileKey,
-        });
+        const { encryptedData, decryptionHeader } =
+            await worker.encryptMetadataJSON(pubMagicMetadata.data, fileKey);
         encryptedPubMagicMetadata = {
             version: pubMagicMetadata.version,
             count: pubMagicMetadata.count,
-            data: encryptedPubMagicMetadataData.encryptedDataB64,
-            header: encryptedPubMagicMetadataData.decryptionHeaderB64,
+            data: encryptedData,
+            header: decryptionHeader,
         };
     }
 
-    const encryptedKey = await worker.encryptToB64(fileKey, encryptionKey);
+    const encryptedFileKey = await worker.encryptBox(fileKey, collectionKey);
 
     return {
         encryptedFilePieces: {
@@ -1459,10 +1478,7 @@ const encryptFile = async (
             pubMagicMetadata: encryptedPubMagicMetadata,
             localID: localID,
         },
-        encryptedFileKey: {
-            encryptedData: encryptedKey.encryptedData,
-            nonce: encryptedKey.nonce,
-        },
+        encryptedFileKey,
     };
 };
 
@@ -1578,11 +1594,8 @@ const uploadToBucket = async (
             objectKey: thumbnailUploadURL.objectKey,
             size: thumbnail.encryptedData.length,
         },
-        metadata: {
-            encryptedData: metadata.encryptedDataB64,
-            decryptionHeader: metadata.decryptionHeaderB64,
-        },
-        pubMagicMetadata: pubMagicMetadata,
+        metadata,
+        pubMagicMetadata,
     };
 };
 
@@ -1604,7 +1617,7 @@ const uploadToBucket = async (
  */
 const createAbortableRetryEnsuringHTTPOk =
     (abortIfCancelled: () => void): HTTPRequestRetrier =>
-    (request: () => Promise<Response>) =>
+    (request, opts) =>
         retryAsyncOperation(
             async () => {
                 abortIfCancelled();
@@ -1613,6 +1626,7 @@ const createAbortableRetryEnsuringHTTPOk =
                 return r;
             },
             {
+                ...opts,
                 abortIfNeeded(e) {
                     if (
                         e instanceof Error &&

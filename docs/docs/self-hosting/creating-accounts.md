@@ -3,7 +3,7 @@ title: Creating accounts
 description: Creating accounts on your deployment
 ---
 
-# Creating accounts 
+# Creating accounts
 
 Once Ente is up and running, the Ente Photos web app will be accessible on
 `http://localhost:3000`. Open this URL in your browser and proceed with creating
@@ -20,7 +20,7 @@ This code can be found in the server logs, which should already be shown in your
 quickstart terminal. Alternatively, you can open the server logs with the
 following command from inside the `my-ente` folder:
 
-```sh 
+```sh
 sudo docker compose logs
 ```
 

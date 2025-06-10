@@ -90,6 +90,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Sikkerhedskopierede mapper"),
         "backupStatusDescription": MessageLookupByLibrary.simpleMessage(
             "Elementer, der er blevet sikkerhedskopieret, vil blive vist her"),
+        "birthdays": MessageLookupByLibrary.simpleMessage("Birthdays"),
         "canNotOpenBody": MessageLookupByLibrary.simpleMessage(
             "Beklager, dette album kan ikke åbnes i appen."),
         "canOnlyRemoveFilesOwnedByYou": MessageLookupByLibrary.simpleMessage(
@@ -228,6 +229,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Spar plads på din enhed ved at rydde filer, der allerede er sikkerhedskopieret."),
         "generatingEncryptionKeys": MessageLookupByLibrary.simpleMessage(
             "Genererer krypteringsnøgler..."),
+        "happyBirthday":
+            MessageLookupByLibrary.simpleMessage("Happy birthday! 🥳"),
         "help": MessageLookupByLibrary.simpleMessage("Hjælp"),
         "howItWorks":
             MessageLookupByLibrary.simpleMessage("Sådan fungerer det"),
@@ -300,6 +303,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Ingen gendannelsesnøgle?"),
         "ok": MessageLookupByLibrary.simpleMessage("Ok"),
         "onThisDay": MessageLookupByLibrary.simpleMessage("On this day"),
+        "onThisDayNotificationExplanation": MessageLookupByLibrary.simpleMessage(
+            "Receive reminders about memories from this day in previous years."),
         "oops": MessageLookupByLibrary.simpleMessage("Ups"),
         "oopsSomethingWentWrong":
             MessageLookupByLibrary.simpleMessage("Ups, noget gik galt"),
@@ -326,6 +331,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Privatlivspolitik"),
         "publicLinkEnabled":
             MessageLookupByLibrary.simpleMessage("Offentligt link aktiveret"),
+        "receiveRemindersOnBirthdays": MessageLookupByLibrary.simpleMessage(
+            "Receive reminders when it\'s someone\'s birthday. Tapping on the notification will take you to photos of the birthday person."),
         "recover": MessageLookupByLibrary.simpleMessage("Gendan"),
         "recoverAccount": MessageLookupByLibrary.simpleMessage("Gendan konto"),
         "recoverButton": MessageLookupByLibrary.simpleMessage("Gendan"),

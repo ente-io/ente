@@ -10,24 +10,29 @@ import SetPasswordForm, {
 import { appHomeRoute } from "ente-accounts/services/redirect";
 import {
     configureSRP,
-    generateKeyAndSRPAttributes,
+    deriveSRPPassword,
+    generateSRPSetupAttributes,
 } from "ente-accounts/services/srp";
-import { putUserKeyAttributes } from "ente-accounts/services/user";
+import type { KeyAttributes, User } from "ente-accounts/services/user";
+import {
+    generateKeysAndAttributes,
+    putUserKeyAttributes,
+} from "ente-accounts/services/user";
+import { generateAndSaveIntermediateKeyAttributes } from "ente-accounts/utils/helpers";
 import { LinkButton } from "ente-base/components/LinkButton";
 import { LoadingIndicator } from "ente-base/components/loaders";
 import { useBaseContext } from "ente-base/context";
+import { deriveKeyInsufficientMemoryErrorMessage } from "ente-base/crypto/types";
 import log from "ente-base/log";
 import {
-    generateAndSaveIntermediateKeyAttributes,
-    saveKeyInSessionStore,
-} from "ente-shared/crypto/helpers";
+    haveCredentialsInSession,
+    saveMasterKeyInSessionAndSafeStore,
+} from "ente-base/session";
 import { getData } from "ente-shared/storage/localStorage";
 import {
     justSignedUp,
     setJustSignedUp,
 } from "ente-shared/storage/localStorage/helpers";
-import { getKey } from "ente-shared/storage/sessionStorage";
-import type { KeyAttributes, User } from "ente-shared/user/types";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
@@ -42,13 +47,12 @@ const Page: React.FC = () => {
     const router = useRouter();
 
     useEffect(() => {
-        const key: string = getKey("encryptionKey");
         const keyAttributes: KeyAttributes = getData("originalKeyAttributes");
         const user: User = getData("user");
         setUser(user);
         if (!user?.token) {
             void router.push("/");
-        } else if (key) {
+        } else if (haveCredentialsInSession()) {
             if (justSignedUp()) {
                 setOpenRecoveryKey(true);
                 setLoading(false);
@@ -67,8 +71,12 @@ const Page: React.FC = () => {
         setFieldError,
     ) => {
         try {
-            const { keyAttributes, masterKey, srpSetupAttributes } =
-                await generateKeyAndSRPAttributes(passphrase);
+            const { masterKey, kek, keyAttributes } =
+                await generateKeysAndAttributes(passphrase);
+
+            const srpSetupAttributes = await generateSRPSetupAttributes(
+                await deriveSRPPassword(kek),
+            );
 
             await putUserKeyAttributes(keyAttributes);
             await configureSRP(srpSetupAttributes);
@@ -77,12 +85,18 @@ const Page: React.FC = () => {
                 keyAttributes,
                 masterKey,
             );
-            await saveKeyInSessionStore("encryptionKey", masterKey);
+            await saveMasterKeyInSessionAndSafeStore(masterKey);
             setJustSignedUp(true);
             setOpenRecoveryKey(true);
         } catch (e) {
             log.error("failed to generate password", e);
-            setFieldError("passphrase", t("password_generation_failed"));
+            setFieldError(
+                "passphrase",
+                e instanceof Error &&
+                    e.message == deriveKeyInsufficientMemoryErrorMessage
+                    ? t("password_generation_failed")
+                    : t("generic_error"),
+            );
         }
     };
 

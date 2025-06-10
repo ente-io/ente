@@ -1,12 +1,11 @@
 import "dart:async";
 
-import "package:collection/collection.dart";
 import 'package:flutter/material.dart';
 import "package:flutter_animate/flutter_animate.dart";
 import "package:photos/events/event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/search/generic_search_result.dart";
-import "package:photos/models/search/hierarchical/face_filter.dart";
+import "package:photos/models/search/search_constants.dart";
 import "package:photos/models/search/search_types.dart";
 import "package:photos/models/selected_people.dart";
 import "package:photos/theme/ente_theme.dart";
@@ -67,18 +66,17 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
 
   Future<List<GenericSearchResult>> getResults() async {
     final results =
-        List<GenericSearchResult>.from(await SectionType.face.getData(context));
+        await SectionType.face.getData(context) as List<GenericSearchResult>;
 
     if (widget.namedOnly) {
       results.removeWhere(
-        (element) =>
-            (element.hierarchicalSearchFilter as FaceFilter).personId == null,
+        (element) => element.params[kPersonParamID] == null,
       );
       if (widget.selectedPeople?.personIds.isEmpty ?? false) {
         widget.selectedPeople!.select(
           results
               .take(2)
-              .map((e) => (e.hierarchicalSearchFilter as FaceFilter).personId!)
+              .map((e) => e.params[kPersonParamID] as String)
               .toSet(),
         );
       }
@@ -121,18 +119,6 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
                       ((crossAxisCount - 1) * gridPadding))) /
               crossAxisCount;
 
-          List<GenericSearchResult> data = results;
-
-          if (widget.namedOnly && widget.selectedPeople != null) {
-            data = data.sorted(
-              (a, b) => widget.selectedPeople!.isPersonSelected(
-                (b.hierarchicalSearchFilter as FaceFilter).personId!,
-              )
-                  ? 1
-                  : -1,
-            );
-          }
-
           return GridView.builder(
             padding: const EdgeInsets.fromLTRB(
               horizontalEdgePadding,
@@ -140,8 +126,6 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
               horizontalEdgePadding,
               96,
             ),
-            shrinkWrap: true,
-            primary: false,
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               mainAxisSpacing: gridPadding,
               crossAxisSpacing: gridPadding,
@@ -151,7 +135,7 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
             itemCount: results.length,
             itemBuilder: (context, index) {
               return PersonSearchExample(
-                searchResult: data[index],
+                searchResult: results[index],
                 size: itemSize,
                 selectedPeople: widget.selectedPeople,
               )

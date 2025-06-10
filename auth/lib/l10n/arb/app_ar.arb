@@ -173,6 +173,7 @@
   "invalidQRCode": "شيفرة استجابة سريعة غير صالحة",
   "noRecoveryKeyTitle": "لا يوجد مفتاح استرجاع؟",
   "enterEmailHint": "أدخل عنوان البريد الإلكتروني الخاص بك",
+  "enterNewEmailHint": "أدخل عنوان بريدك الإلكتروني الجديد",
   "invalidEmailTitle": "عنوان البريد الإلكتروني غير صالح",
   "invalidEmailMessage": "الرجاء إدخال بريد إلكتروني صالح.",
   "deleteAccount": "إزالة الحساب",

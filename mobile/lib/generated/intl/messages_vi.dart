@@ -449,6 +449,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Các mục đã được sao lưu sẽ hiển thị ở đây"),
         "backupVideos": MessageLookupByLibrary.simpleMessage("Sao lưu video"),
         "birthday": MessageLookupByLibrary.simpleMessage("Sinh nhật"),
+        "birthdays": MessageLookupByLibrary.simpleMessage("Birthdays"),
         "blackFridaySale":
             MessageLookupByLibrary.simpleMessage("Giảm giá Black Friday"),
         "blog": MessageLookupByLibrary.simpleMessage("Blog"),
@@ -937,6 +938,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "guestView": MessageLookupByLibrary.simpleMessage("Chế độ khách"),
         "guestViewEnablePreSteps": MessageLookupByLibrary.simpleMessage(
             "Để bật chế độ khách, vui lòng thiết lập mã khóa thiết bị hoặc khóa màn hình trong cài đặt hệ thống của bạn."),
+        "happyBirthday":
+            MessageLookupByLibrary.simpleMessage("Happy birthday! 🥳"),
         "hearUsExplanation": MessageLookupByLibrary.simpleMessage(
             "Chúng tôi không theo dõi cài đặt ứng dụng. Sẽ rất hữu ích nếu bạn cho chúng tôi biết bạn đã tìm thấy chúng ở đâu!"),
         "hearUsWhereTitle": MessageLookupByLibrary.simpleMessage(
@@ -1240,6 +1243,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "onEnte": MessageLookupByLibrary.simpleMessage(
             "Trên <branding>ente</branding>"),
         "onThisDay": MessageLookupByLibrary.simpleMessage("On this day"),
+        "onThisDayNotificationExplanation": MessageLookupByLibrary.simpleMessage(
+            "Receive reminders about memories from this day in previous years."),
         "onlyFamilyAdminCanChangeCode": m54,
         "onlyThem": MessageLookupByLibrary.simpleMessage("Chỉ họ"),
         "oops": MessageLookupByLibrary.simpleMessage("Ôi"),
@@ -1375,6 +1380,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "rateTheApp": MessageLookupByLibrary.simpleMessage("Đánh giá ứng dụng"),
         "rateUs": MessageLookupByLibrary.simpleMessage("Đánh giá chúng tôi"),
         "rateUsOnStore": m67,
+        "receiveRemindersOnBirthdays": MessageLookupByLibrary.simpleMessage(
+            "Receive reminders when it\'s someone\'s birthday. Tapping on the notification will take you to photos of the birthday person."),
         "recover": MessageLookupByLibrary.simpleMessage("Khôi phục"),
         "recoverAccount":
             MessageLookupByLibrary.simpleMessage("Khôi phục tài khoản"),

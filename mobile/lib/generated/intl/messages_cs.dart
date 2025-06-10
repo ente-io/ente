@@ -90,6 +90,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "backupFile": MessageLookupByLibrary.simpleMessage("Zálohovat soubor"),
         "backupStatus": MessageLookupByLibrary.simpleMessage("Stav zálohování"),
         "birthday": MessageLookupByLibrary.simpleMessage("Narozeniny"),
+        "birthdays": MessageLookupByLibrary.simpleMessage("Birthdays"),
         "blog": MessageLookupByLibrary.simpleMessage("Blog"),
         "cachedData":
             MessageLookupByLibrary.simpleMessage("Data uložená v mezipaměti"),
@@ -261,6 +262,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Generování šifrovacích klíčů..."),
         "goToSettings":
             MessageLookupByLibrary.simpleMessage("Jít do nastavení"),
+        "happyBirthday":
+            MessageLookupByLibrary.simpleMessage("Happy birthday! 🥳"),
         "hidden": MessageLookupByLibrary.simpleMessage("Skryté"),
         "hide": MessageLookupByLibrary.simpleMessage("Skrýt"),
         "howItWorks": MessageLookupByLibrary.simpleMessage("Jak to funguje"),
@@ -357,6 +360,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "onEnte": MessageLookupByLibrary.simpleMessage(
             "Na <branding>ente</branding>"),
         "onThisDay": MessageLookupByLibrary.simpleMessage("On this day"),
+        "onThisDayNotificationExplanation": MessageLookupByLibrary.simpleMessage(
+            "Receive reminders about memories from this day in previous years."),
         "oops": MessageLookupByLibrary.simpleMessage("Jejda"),
         "oopsSomethingWentWrong":
             MessageLookupByLibrary.simpleMessage("Jejda, něco se pokazilo"),
@@ -392,6 +397,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "radius": MessageLookupByLibrary.simpleMessage("Rádius"),
         "rateUs": MessageLookupByLibrary.simpleMessage("Ohodnoť nás"),
         "rateUsOnStore": m67,
+        "receiveRemindersOnBirthdays": MessageLookupByLibrary.simpleMessage(
+            "Receive reminders when it\'s someone\'s birthday. Tapping on the notification will take you to photos of the birthday person."),
         "recoverButton": MessageLookupByLibrary.simpleMessage("Obnovit"),
         "recoveryKeyVerified":
             MessageLookupByLibrary.simpleMessage("Obnovovací klíč byl ověřen"),

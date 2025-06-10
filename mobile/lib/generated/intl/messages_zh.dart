@@ -477,6 +477,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "backupVideos": MessageLookupByLibrary.simpleMessage("备份视频"),
         "beach": MessageLookupByLibrary.simpleMessage("沙滩与大海"),
         "birthday": MessageLookupByLibrary.simpleMessage("生日"),
+        "birthdays": MessageLookupByLibrary.simpleMessage("Birthdays"),
         "blackFridaySale": MessageLookupByLibrary.simpleMessage("黑色星期五特惠"),
         "blog": MessageLookupByLibrary.simpleMessage("博客"),
         "cachedData": MessageLookupByLibrary.simpleMessage("缓存数据"),
@@ -876,6 +877,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "guestView": MessageLookupByLibrary.simpleMessage("访客视图"),
         "guestViewEnablePreSteps":
             MessageLookupByLibrary.simpleMessage("要启用访客视图，请在系统设置中设置设备密码或屏幕锁。"),
+        "happyBirthday":
+            MessageLookupByLibrary.simpleMessage("Happy birthday! 🥳"),
         "hearUsExplanation": MessageLookupByLibrary.simpleMessage(
             "我们不跟踪应用程序安装情况。如果您告诉我们您是在哪里找到我们的，将会有所帮助！"),
         "hearUsWhereTitle":
@@ -1154,6 +1157,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "在 <branding>ente</branding> 上"),
         "onTheRoad": MessageLookupByLibrary.simpleMessage("再次踏上旅途"),
         "onThisDay": MessageLookupByLibrary.simpleMessage("On this day"),
+        "onThisDayNotificationExplanation": MessageLookupByLibrary.simpleMessage(
+            "Receive reminders about memories from this day in previous years."),
         "onlyFamilyAdminCanChangeCode": m54,
         "onlyThem": MessageLookupByLibrary.simpleMessage("仅限他们"),
         "oops": MessageLookupByLibrary.simpleMessage("哎呀"),
@@ -1284,6 +1289,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "reassignMe": MessageLookupByLibrary.simpleMessage("重新分配“我”"),
         "reassignedToName": m68,
         "reassigningLoading": MessageLookupByLibrary.simpleMessage("正在重新分配..."),
+        "receiveRemindersOnBirthdays": MessageLookupByLibrary.simpleMessage(
+            "Receive reminders when it\'s someone\'s birthday. Tapping on the notification will take you to photos of the birthday person."),
         "recover": MessageLookupByLibrary.simpleMessage("恢复"),
         "recoverAccount": MessageLookupByLibrary.simpleMessage("恢复账户"),
         "recoverButton": MessageLookupByLibrary.simpleMessage("恢复"),

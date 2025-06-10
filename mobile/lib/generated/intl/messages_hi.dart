@@ -27,6 +27,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "activeSessions": MessageLookupByLibrary.simpleMessage("एक्टिव सेशन"),
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
             "आपका अकाउंट हटाने का मुख्य कारण क्या है?"),
+        "birthdays": MessageLookupByLibrary.simpleMessage("Birthdays"),
         "cancel": MessageLookupByLibrary.simpleMessage("रद्द करें"),
         "clickToInstallOurBestVersionYet": MessageLookupByLibrary.simpleMessage(
             "Click to install our best version yet"),
@@ -69,6 +70,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "feedback": MessageLookupByLibrary.simpleMessage("प्रतिपुष्टि"),
         "forgotPassword":
             MessageLookupByLibrary.simpleMessage("पासवर्ड भूल गए"),
+        "happyBirthday":
+            MessageLookupByLibrary.simpleMessage("Happy birthday! 🥳"),
         "incorrectRecoveryKeyBody": MessageLookupByLibrary.simpleMessage(
             "आपके द्वारा दर्ज रिकवरी कुंजी ग़लत है"),
         "incorrectRecoveryKeyTitle":
@@ -86,8 +89,12 @@ class MessageLookup extends MessageLookupByLibrary {
             "हमारे एंड-टू-एंड एन्क्रिप्शन प्रोटोकॉल की प्रकृति के कारण, आपके डेटा को आपके पासवर्ड या रिकवरी कुंजी के बिना डिक्रिप्ट नहीं किया जा सकता है"),
         "ok": MessageLookupByLibrary.simpleMessage("ठीक है"),
         "onThisDay": MessageLookupByLibrary.simpleMessage("On this day"),
+        "onThisDayNotificationExplanation": MessageLookupByLibrary.simpleMessage(
+            "Receive reminders about memories from this day in previous years."),
         "oops": MessageLookupByLibrary.simpleMessage("ओह!"),
         "password": MessageLookupByLibrary.simpleMessage("पासवर्ड"),
+        "receiveRemindersOnBirthdays": MessageLookupByLibrary.simpleMessage(
+            "Receive reminders when it\'s someone\'s birthday. Tapping on the notification will take you to photos of the birthday person."),
         "recoverButton": MessageLookupByLibrary.simpleMessage("पुनः प्राप्त"),
         "recoverySuccessful":
             MessageLookupByLibrary.simpleMessage("रिकवरी सफल हुई!"),

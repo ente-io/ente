@@ -96,8 +96,9 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
           trailingIconIsMuted: true,
           onTap: () async {
             try {
-              await NotificationService.instance
-                  .clearAllScheduledNotifications();
+              await NotificationService.instance.clearAllScheduledNotifications(
+                containingPayload: "onThisDay",
+              );
               showShortToast(context, 'Done');
             } catch (e, s) {
               logger.severe('clearAllScheduledNotifications failed ', e, s);
@@ -116,7 +117,6 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
           onTap: () async {
             try {
               await NotificationService.instance.scheduleNotification(
-                "test",
                 "test",
                 id: 10,
                 dateTime: DateTime.now().add(
@@ -142,7 +142,6 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
             try {
               await NotificationService.instance.scheduleNotification(
                 "test",
-                "test",
                 id: 11,
                 dateTime: DateTime.now().add(
                   const Duration(hours: 1),
@@ -166,7 +165,6 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
           onTap: () async {
             try {
               await NotificationService.instance.scheduleNotification(
-                "test",
                 "test",
                 id: 12,
                 dateTime: DateTime.now().add(

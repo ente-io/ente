@@ -11885,6 +11885,96 @@ class S {
       args: [],
     );
   }
+
+  /// `Receive reminders about memories from this day in previous years.`
+  String get onThisDayNotificationExplanation {
+    return Intl.message(
+      'Receive reminders about memories from this day in previous years.',
+      name: 'onThisDayNotificationExplanation',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add a memories widget to your homescreen and come back here to customize.`
+  String get addMemoriesWidgetPrompt {
+    return Intl.message(
+      'Add a memories widget to your homescreen and come back here to customize.',
+      name: 'addMemoriesWidgetPrompt',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add an album widget to your homescreen and come back here to customize.`
+  String get addAlbumWidgetPrompt {
+    return Intl.message(
+      'Add an album widget to your homescreen and come back here to customize.',
+      name: 'addAlbumWidgetPrompt',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add a people widget to your homescreen and come back here to customize.`
+  String get addPeopleWidgetPrompt {
+    return Intl.message(
+      'Add a people widget to your homescreen and come back here to customize.',
+      name: 'addPeopleWidgetPrompt',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Birthday notifications`
+  String get birthdayNotifications {
+    return Intl.message(
+      'Birthday notifications',
+      name: 'birthdayNotifications',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Receive reminders when it's someone's birthday. Tapping on the notification will take you to photos of the birthday person.`
+  String get receiveRemindersOnBirthdays {
+    return Intl.message(
+      'Receive reminders when it\'s someone\'s birthday. Tapping on the notification will take you to photos of the birthday person.',
+      name: 'receiveRemindersOnBirthdays',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Happy birthday! 🥳`
+  String get happyBirthday {
+    return Intl.message(
+      'Happy birthday! 🥳',
+      name: 'happyBirthday',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Happy birthday to {name}! 🎉`
+  String happyBirthdayToPerson(Object name) {
+    return Intl.message(
+      'Happy birthday to $name! 🎉',
+      name: 'happyBirthdayToPerson',
+      desc: '',
+      args: [name],
+    );
+  }
+
+  /// `Birthdays`
+  String get birthdays {
+    return Intl.message(
+      'Birthdays',
+      name: 'birthdays',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
@@ -11928,6 +12018,7 @@ class AppLocalizationDelegate extends LocalizationsDelegate<S> {
       Locale.fromSubtags(languageCode: 'ro'),
       Locale.fromSubtags(languageCode: 'ru'),
       Locale.fromSubtags(languageCode: 'sl'),
+      Locale.fromSubtags(languageCode: 'sr'),
       Locale.fromSubtags(languageCode: 'sv'),
       Locale.fromSubtags(languageCode: 'ta'),
       Locale.fromSubtags(languageCode: 'te'),

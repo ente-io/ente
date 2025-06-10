@@ -285,6 +285,9 @@ func (c *BillingController) VerifySubscription(
 			}
 		}
 	}
+	if isUpgradingFromFreePlan {
+		newSubscription.UpgradedAt = time.Microseconds()
+	}
 	err = c.BillingRepo.ReplaceSubscription(
 		currentSubscription.ID,
 		newSubscription,

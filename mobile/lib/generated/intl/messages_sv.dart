@@ -164,6 +164,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Säkerhetskopieringsinställningar"),
         "backupStatus":
             MessageLookupByLibrary.simpleMessage("Säkerhetskopieringsstatus"),
+        "birthdays": MessageLookupByLibrary.simpleMessage("Birthdays"),
         "blog": MessageLookupByLibrary.simpleMessage("Blogg"),
         "canNotOpenBody": MessageLookupByLibrary.simpleMessage(
             "Tyvärr kan detta album inte öppnas i appen."),
@@ -353,6 +354,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "goToSettings":
             MessageLookupByLibrary.simpleMessage("Gå till inställningar"),
         "guestView": MessageLookupByLibrary.simpleMessage("Gästvy"),
+        "happyBirthday":
+            MessageLookupByLibrary.simpleMessage("Happy birthday! 🥳"),
         "help": MessageLookupByLibrary.simpleMessage("Hjälp"),
         "howItWorks":
             MessageLookupByLibrary.simpleMessage("Så här fungerar det"),
@@ -448,6 +451,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "notPersonLabel": m53,
         "ok": MessageLookupByLibrary.simpleMessage("OK"),
         "onThisDay": MessageLookupByLibrary.simpleMessage("On this day"),
+        "onThisDayNotificationExplanation": MessageLookupByLibrary.simpleMessage(
+            "Receive reminders about memories from this day in previous years."),
         "onlyFamilyAdminCanChangeCode": m54,
         "oops": MessageLookupByLibrary.simpleMessage("Hoppsan"),
         "oopsSomethingWentWrong":
@@ -477,6 +482,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "publicLinkEnabled":
             MessageLookupByLibrary.simpleMessage("Offentlig länk aktiverad"),
         "rateUsOnStore": m67,
+        "receiveRemindersOnBirthdays": MessageLookupByLibrary.simpleMessage(
+            "Receive reminders when it\'s someone\'s birthday. Tapping on the notification will take you to photos of the birthday person."),
         "recover": MessageLookupByLibrary.simpleMessage("Återställ"),
         "recoverAccount":
             MessageLookupByLibrary.simpleMessage("Återställ konto"),

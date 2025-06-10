@@ -161,6 +161,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Mesedez, autentifikatu zure ezkutatutako fitxategiak ikusteko"),
         "authToViewYourRecoveryKey": MessageLookupByLibrary.simpleMessage(
             "Mesedez, autentifikatu zure berreskuratze giltza ikusteko"),
+        "birthdays": MessageLookupByLibrary.simpleMessage("Birthdays"),
         "canNotOpenBody": MessageLookupByLibrary.simpleMessage(
             "Sentitzen dugu, album hau ezin da aplikazioan ireki."),
         "canNotOpenTitle":
@@ -353,6 +354,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Debaldeko biltegiratzea erabilgarri"),
         "generatingEncryptionKeys":
             MessageLookupByLibrary.simpleMessage("Zifratze giltzak sortzen..."),
+        "happyBirthday":
+            MessageLookupByLibrary.simpleMessage("Happy birthday! 🥳"),
         "help": MessageLookupByLibrary.simpleMessage("Laguntza"),
         "hidden": MessageLookupByLibrary.simpleMessage("Ezkutatuta"),
         "howItWorks":
@@ -433,6 +436,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Gure puntutik-puntura zifratze protokoloa dela eta, zure data ezin da deszifratu zure pasahitza edo berreskuratze giltzarik gabe"),
         "ok": MessageLookupByLibrary.simpleMessage("Ondo"),
         "onThisDay": MessageLookupByLibrary.simpleMessage("On this day"),
+        "onThisDayNotificationExplanation": MessageLookupByLibrary.simpleMessage(
+            "Receive reminders about memories from this day in previous years."),
         "onlyFamilyAdminCanChangeCode": m54,
         "oops": MessageLookupByLibrary.simpleMessage("Ai!"),
         "oopsSomethingWentWrong": MessageLookupByLibrary.simpleMessage(
@@ -460,6 +465,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Pribatutasun Politikak"),
         "publicLinkEnabled":
             MessageLookupByLibrary.simpleMessage("Esteka publikoa indarrean"),
+        "receiveRemindersOnBirthdays": MessageLookupByLibrary.simpleMessage(
+            "Receive reminders when it\'s someone\'s birthday. Tapping on the notification will take you to photos of the birthday person."),
         "recover": MessageLookupByLibrary.simpleMessage("Berreskuratu"),
         "recoverAccount":
             MessageLookupByLibrary.simpleMessage("Berreskuratu kontua"),

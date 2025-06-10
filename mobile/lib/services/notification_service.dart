@@ -143,13 +143,14 @@ class NotificationService {
   }
 
   Future<void> scheduleNotification(
-    String title,
-    String message, {
+    String title, {
+    String? message,
     required int id,
     String channelID = "io.ente.photos",
     String channelName = "ente",
     String payload = "ente://home",
     required DateTime dateTime,
+    Duration? timeoutDurationAndroid,
   }) async {
     try {
       _logger.info(
@@ -197,7 +198,7 @@ class NotificationService {
         payload: payload,
       );
       _logger.info(
-        "Scheduled notification with: $title, $message, $channelID, $channelName, $payload",
+        "Scheduled notification with: $title, $message, $channelID, $channelName, $payload for $dateTime",
       );
     } catch (e, s) {
       // For now we're swallowing any exceptions here because we don't want the memories logic to get disturbed
@@ -207,6 +208,39 @@ class NotificationService {
         s,
       );
     }
+    final androidSpecs = AndroidNotificationDetails(
+      channelID,
+      channelName,
+      channelDescription: 'ente alerts',
+      importance: Importance.max,
+      priority: Priority.high,
+      category: AndroidNotificationCategory.reminder,
+      showWhen: false,
+      timeoutAfter: timeoutDurationAndroid?.inMilliseconds,
+    );
+    final iosSpecs = DarwinNotificationDetails(threadIdentifier: channelID);
+    final platformChannelSpecs =
+        NotificationDetails(android: androidSpecs, iOS: iosSpecs);
+    final scheduledDate = tz.TZDateTime.local(
+      dateTime.year,
+      dateTime.month,
+      dateTime.day,
+      dateTime.hour,
+      dateTime.minute,
+      dateTime.second,
+    );
+    await _notificationsPlugin.zonedSchedule(
+      id,
+      title,
+      message,
+      scheduledDate,
+      platformChannelSpecs,
+      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+      payload: payload,
+    );
+    _logger.info(
+      "Scheduled notification with: $title, $message, $channelID, $channelName, $payload",
+    );
   }
 
   Future<void> clearAllScheduledNotifications({
@@ -227,8 +261,13 @@ class NotificationService {
           );
           continue;
         }
-        _logger.info("Clearing notification with id: ${request.id}");
+        _logger.info(
+          "Clearing notification with id: ${request.id} and payload: ${request.payload}",
+        );
         await _notificationsPlugin.cancel(request.id);
+        _logger.info(
+          "Cleared notification with id: ${request.id} and payload: ${request.payload}",
+        );
       }
     } catch (e, s) {
       _logger.severe("Something is wrong with scheduled notifications", e, s);

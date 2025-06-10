@@ -16,7 +16,7 @@ import { type EnteFile } from "ente-media/file";
 import { handleUploadError } from "ente-shared/error";
 import HTTPService from "ente-shared/network/HTTPService";
 import { nullToUndefined } from "ente-utils/transform";
-import { z } from "zod";
+import { z } from "zod/v4";
 import type { UploadFile } from "./upload-service";
 
 /**

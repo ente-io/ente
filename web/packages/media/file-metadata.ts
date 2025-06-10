@@ -10,7 +10,7 @@ import {
     type FilePublicMagicMetadata,
 } from "ente-media/file";
 import { nullToUndefined } from "ente-utils/transform";
-import { z } from "zod";
+import { z } from "zod/v4";
 import { mergeMetadata1 } from "./file";
 import { FileType } from "./file-type";
 
@@ -326,21 +326,19 @@ export interface PublicMagicMetadata {
  * might be other, newer, clients out there adding fields that the current
  * client might not we aware of, and we don't want to overwrite them.
  */
-const PublicMagicMetadata = z
-    .object({
-        // [Note: Zod doesn't work with `exactOptionalPropertyTypes` yet]
-        //
-        // Using `optional` is not accurate here. The key is optional, but the
-        // value itself is not optional.
-        //
-        // Zod doesn't work with `exactOptionalPropertyTypes` yet, but it seems
-        // to be on the roadmap so we suppress these mismatches.
-        //
-        // See:
-        // https://github.com/colinhacks/zod/issues/635#issuecomment-2196579063
-        editedTime: z.number().optional(),
-    })
-    .passthrough();
+const PublicMagicMetadata = z.looseObject({
+    // [Note: Zod doesn't work with `exactOptionalPropertyTypes` yet]
+    //
+    // Using `optional` is not accurate here. The key is optional, but the
+    // value itself is not optional.
+    //
+    // Zod doesn't work with `exactOptionalPropertyTypes` yet, but it seems
+    // to be on the roadmap so we suppress these mismatches.
+    //
+    // See:
+    // https://github.com/colinhacks/zod/issues/635#issuecomment-2196579063
+    editedTime: z.number().optional(),
+});
 
 /**
  * Return the private magic metadata for an {@link EnteFile}.
@@ -436,11 +434,13 @@ export const decryptPublicMagicMetadata = async (
 
     const jsonValue =
         typeof envelope.data == "string"
-            ? await decryptMetadataJSON({
-                  encryptedDataB64: envelope.data,
-                  decryptionHeaderB64: envelope.header,
-                  keyB64: file.key,
-              })
+            ? await decryptMetadataJSON(
+                  {
+                      encryptedData: envelope.data,
+                      decryptionHeader: envelope.header,
+                  },
+                  file.key,
+              )
             : envelope.data;
     const result = PublicMagicMetadata.parse(
         // TODO: Can we avoid this cast?
@@ -679,8 +679,9 @@ const updateMagicMetadataRequest = async (
         ([, v]) => v !== null && v !== undefined,
     );
 
-    const { encryptedDataB64, decryptionHeaderB64 } = await encryptMetadataJSON(
-        { jsonValue: Object.fromEntries(validEntries), keyB64: file.key },
+    const { encryptedData, decryptionHeader } = await encryptMetadataJSON(
+        Object.fromEntries(validEntries),
+        file.key,
     );
 
     return {
@@ -690,8 +691,8 @@ const updateMagicMetadataRequest = async (
                 magicMetadata: {
                     version: metadataVersion,
                     count: validEntries.length,
-                    data: encryptedDataB64,
-                    header: decryptionHeaderB64,
+                    data: encryptedData,
+                    header: decryptionHeader,
                 },
             },
         ],

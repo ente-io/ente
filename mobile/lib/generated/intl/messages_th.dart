@@ -78,6 +78,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "เหตุผลหลักที่คุณลบบัญชีคืออะไร?"),
         "authToViewYourRecoveryKey": MessageLookupByLibrary.simpleMessage(
             "โปรดตรวจสอบสิทธิ์เพื่อดูคีย์การกู้คืนของคุณ"),
+        "birthdays": MessageLookupByLibrary.simpleMessage("Birthdays"),
         "canOnlyCreateLinkForFilesOwnedByYou":
             MessageLookupByLibrary.simpleMessage(
                 "สามารถสร้างลิงก์ได้เฉพาะไฟล์ที่คุณเป็นเจ้าของ"),
@@ -171,6 +172,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "freeTrial": MessageLookupByLibrary.simpleMessage("ทดลองใช้ฟรี"),
         "genericProgress": m41,
         "goToSettings": MessageLookupByLibrary.simpleMessage("ไปที่การตั้งค่า"),
+        "happyBirthday":
+            MessageLookupByLibrary.simpleMessage("Happy birthday! 🥳"),
         "hide": MessageLookupByLibrary.simpleMessage("ซ่อน"),
         "hostedAtOsmFrance":
             MessageLookupByLibrary.simpleMessage("โฮสต์ที่ OSM ฝรั่งเศส"),
@@ -224,6 +227,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "onEnte": MessageLookupByLibrary.simpleMessage(
             "บน <branding>ente</branding>"),
         "onThisDay": MessageLookupByLibrary.simpleMessage("On this day"),
+        "onThisDayNotificationExplanation": MessageLookupByLibrary.simpleMessage(
+            "Receive reminders about memories from this day in previous years."),
         "oops": MessageLookupByLibrary.simpleMessage("อ๊ะ"),
         "oopsSomethingWentWrong":
             MessageLookupByLibrary.simpleMessage("อ๊ะ มีบางอย่างผิดพลาด"),
@@ -251,6 +256,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("สร้างลิงก์สาธารณะแล้ว"),
         "publicLinkEnabled":
             MessageLookupByLibrary.simpleMessage("เปิดใช้ลิงก์สาธารณะแล้ว"),
+        "receiveRemindersOnBirthdays": MessageLookupByLibrary.simpleMessage(
+            "Receive reminders when it\'s someone\'s birthday. Tapping on the notification will take you to photos of the birthday person."),
         "recover": MessageLookupByLibrary.simpleMessage("กู้คืน"),
         "recoverAccount": MessageLookupByLibrary.simpleMessage("กู้คืนบัญชี"),
         "recoverButton": MessageLookupByLibrary.simpleMessage("กู้คืน"),

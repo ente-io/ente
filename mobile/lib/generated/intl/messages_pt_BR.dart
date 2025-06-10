@@ -546,6 +546,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Cópia de segurança de vídeos"),
         "beach": MessageLookupByLibrary.simpleMessage("Areia e o mar"),
         "birthday": MessageLookupByLibrary.simpleMessage("Aniversário"),
+        "birthdays": MessageLookupByLibrary.simpleMessage("Birthdays"),
         "blackFridaySale":
             MessageLookupByLibrary.simpleMessage("Promoção Black Friday"),
         "blog": MessageLookupByLibrary.simpleMessage("Blog"),
@@ -939,6 +940,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Insira um endereço de e-mail válido."),
         "enterYourEmailAddress": MessageLookupByLibrary.simpleMessage(
             "Insira seu endereço de e-mail"),
+        "enterYourNewEmailAddress":
+            MessageLookupByLibrary.simpleMessage("Insira seu novo e-mail"),
         "enterYourPassword":
             MessageLookupByLibrary.simpleMessage("Insira sua senha"),
         "enterYourRecoveryKey": MessageLookupByLibrary.simpleMessage(
@@ -1063,6 +1066,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "guestView": MessageLookupByLibrary.simpleMessage("Vista do convidado"),
         "guestViewEnablePreSteps": MessageLookupByLibrary.simpleMessage(
             "Para ativar a vista do convidado, defina uma senha de acesso no dispositivo ou bloqueie sua tela nas opções do sistema."),
+        "happyBirthday":
+            MessageLookupByLibrary.simpleMessage("Happy birthday! 🥳"),
         "hearUsExplanation": MessageLookupByLibrary.simpleMessage(
             "Não rastreamos instalações de aplicativo. Seria útil se você contasse onde nos encontrou!"),
         "hearUsWhereTitle": MessageLookupByLibrary.simpleMessage(
@@ -1401,6 +1406,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "onTheRoad":
             MessageLookupByLibrary.simpleMessage("Na estrada novamente"),
         "onThisDay": MessageLookupByLibrary.simpleMessage("On this day"),
+        "onThisDayNotificationExplanation": MessageLookupByLibrary.simpleMessage(
+            "Receive reminders about memories from this day in previous years."),
         "onlyFamilyAdminCanChangeCode": m54,
         "onlyThem": MessageLookupByLibrary.simpleMessage("Apenas eles"),
         "oops": MessageLookupByLibrary.simpleMessage("Ops"),
@@ -1564,6 +1571,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "reassignedToName": m68,
         "reassigningLoading":
             MessageLookupByLibrary.simpleMessage("Reatribuindo..."),
+        "receiveRemindersOnBirthdays": MessageLookupByLibrary.simpleMessage(
+            "Receive reminders when it\'s someone\'s birthday. Tapping on the notification will take you to photos of the birthday person."),
         "recover": MessageLookupByLibrary.simpleMessage("Recuperar"),
         "recoverAccount":
             MessageLookupByLibrary.simpleMessage("Recuperar conta"),

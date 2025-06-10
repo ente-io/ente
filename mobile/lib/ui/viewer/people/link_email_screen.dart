@@ -318,7 +318,8 @@ class _LinkEmailScreen extends State<LinkEmailScreen> {
     BuildContext context,
   ) async {
     if (await checkIfEmailAlreadyAssignedToAPerson(email)) {
-      throw Exception("Email already linked to a person");
+      await showAlreadyLinkedEmailDialog(context, email);
+      return false;
     }
 
     String? publicKey;
