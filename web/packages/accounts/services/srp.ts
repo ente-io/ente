@@ -151,15 +151,13 @@ export interface SRPAttributes {
     /**
      * The mem limit used during the KEK derivation from the passphrase.
      *
-     * This is the same value as the {@link memLimit} in {@link KeyAttributes},
-     * made available by remote also as part of SRP attributes for convenience.
+     * See also the discussion in {@link kekSalt}.
      */
     memLimit: number;
     /**
      * The ops limit used during the KEK derivation from the passphrase.
      *
-     * This is the same value as the {@link opsLimit} in {@link KeyAttributes},
-     * made available by remote also as part of SRP attributes for convenience.
+     * See also the discussion in {@link kekSalt}.
      */
     opsLimit: number;
     /**
@@ -167,6 +165,7 @@ export interface SRPAttributes {
      *
      * This is the same value as the {@link kekSalt} in {@link KeyAttributes},
      * made available by remote also as part of SRP attributes for convenience.
+     * See: [Note: KEK three tuple] for more details.
      */
     kekSalt: string;
     /**

@@ -181,7 +181,29 @@ export interface KeyAttributes {
      *
      * Base64 encoded.
      *
-     * See: [Note: Key encryption key].
+     * [Note: KEK three tuple]
+     *
+     * The three tuple (kekSalt, opsLimit, memLimit) is needed (along with the
+     * user's passphrase) to rederive the KEK when the user logs in on a new
+     * client (See: [Note: Key encryption key]).
+     *
+     * The client can obtain these three by fetching their key attributes from
+     * remote, however unless {@link isEmailMFAEnabled} is enabled (which is not
+     * by default), then the user's credentials are verified using SRP instead
+     * of email verification. So as a convenience for this (majority) flow,
+     * remote also provides this exact same three tuple as part of the
+     * {@link SRPAttributes} fetched from remote.
+     *
+     * So on remote the KEK three tuple is the same whether it be part of key
+     * attributes or SRP attributes. When the user changes their password, both
+     * of them also get updated simulataneously (they use the same storage).
+     *
+     * However, on the client side these two sets of three tuples might diverge
+     * because of the client generating interactive key attributes. When that
+     * happens, the locally saved key attributes will be overwritten by the KEK
+     * three tuple for the new generated interactive KEK parameters, while the
+     * SRP attributes will continue to reflect the "original" KEK three tuple we
+     * got from remote.
      */
     kekSalt: string;
     /**
