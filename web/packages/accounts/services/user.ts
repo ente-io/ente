@@ -574,18 +574,22 @@ export const remoteLogoutIfNeeded = async () => {
  * Generate a new local-only kek (key encryption key) suitable for interactive
  * use and update the locally saved key attributes to reflect it.
  *
- * See {@link deriveInteractiveKey} for more details. In brief, after the
- * initial passphrase verification, we create a new kek derived from the same
- * passphrase as the original kek, but with so called interactive mem and ops
- * limits which result in a noticeably faster key derivation.
+ * See {@link deriveInteractiveKey} for more details.
  *
- * We then overwrite the KEK tuple (See: [Note: KEK three tuple]) in the locally
- * persisted {@link KeyAttributes} so that these interactive parameters get used
- * subsequent reauthentication. These never leave the device, and are meant to
- * be local only "intermediate" key attributes which are more ergonomic for the
- * user, especially on the web app where they need to enter their passphrase to
- * access their masterKey when repopening the app in a new tab (on desktop we
- * can use OS storage, see [Note: Safe storage and interactive KEK attributes]).
+ * In brief, after the initial passphrase verification, we create a new kek
+ * derived from the same passphrase as the original kek, but with so called
+ * interactive mem and ops limits which result in a noticeably faster key
+ * derivation.
+ *
+ * We then overwrite the encrypted master key, encryption nonce and the KEK
+ * derivation parameters (see: [Note: KEK three tuple]) in the locally persisted
+ * {@link KeyAttributes} so that these interactive parameters get used
+ * subsequent reauthentication.
+ *
+ * These are more ergonomic for the user especially in the web app where they
+ * need to enter their passphrase to access their masterKey when repopening the
+ * app in a new tab (on desktop we can avoid this by using OS storage, see
+ * [Note: Safe storage and interactive KEK attributes]).
  *
  * @param passphrase The user's passphrase.
  *
@@ -594,6 +598,8 @@ export const remoteLogoutIfNeeded = async () => {
  * login).
  *
  * @param masterKey The user's master key (base64 encoded).
+ *
+ * @returns the update key attributes.
  */
 export async function generateAndSaveInteractiveKeyAttributes(
     passphrase: string,
