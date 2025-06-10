@@ -22,11 +22,13 @@ import {
     generateAndSaveInteractiveKeyAttributes,
     generateKeysAndAttributes,
     sendOTT,
+    type GenerateKeysAndAttributesResult,
 } from "ente-accounts/services/user";
 import { isWeakPassword } from "ente-accounts/utils/password";
 import { LinkButton } from "ente-base/components/LinkButton";
 import { LoadingButton } from "ente-base/components/mui/LoadingButton";
 import { ShowHidePasswordInputAdornment } from "ente-base/components/mui/PasswordInputAdornment";
+import { deriveKeyInsufficientMemoryErrorMessage } from "ente-base/crypto/types";
 import { isMuseumHTTPError } from "ente-base/http";
 import log from "ente-base/log";
 import { saveMasterKeyInSessionAndSafeStore } from "ente-base/session";
@@ -89,17 +91,17 @@ export const SignUpContents: React.FC<SignUpContentsProps> = ({
             { email, password, confirmPassword, referral },
             { setFieldError },
         ) => {
+            if (password != confirmPassword) {
+                setFieldError("confirm", t("password_mismatch_error"));
+                return;
+            }
+
             try {
-                if (password != confirmPassword) {
-                    setFieldError("confirm", t("password_mismatch_error"));
-                    return;
-                }
+                setLocalReferralSource(referral);
+
                 try {
-                    setLocalReferralSource(referral);
                     await sendOTT(email, "signup");
-                    await setLSUser({ email });
                 } catch (e) {
-                    log.error("Signup failed", e);
                     if (
                         await isMuseumHTTPError(
                             e,
@@ -108,36 +110,50 @@ export const SignUpContents: React.FC<SignUpContentsProps> = ({
                         )
                     ) {
                         setFieldError("email", t("email_already_registered"));
-                    } else {
-                        setFieldError("email", t("generic_error"));
+                        return;
                     }
                     throw e;
                 }
+
+                await setLSUser({ email });
+
+                let gkResult: GenerateKeysAndAttributesResult;
                 try {
-                    const { masterKey, kek, keyAttributes } =
-                        await generateKeysAndAttributes(password);
-
-                    const srpSetupAttributes = await generateSRPSetupAttributes(
-                        await deriveSRPPassword(kek),
-                    );
-
-                    setData("originalKeyAttributes", keyAttributes);
-                    setData("srpSetupAttributes", srpSetupAttributes);
-                    await generateAndSaveInteractiveKeyAttributes(
-                        password,
-                        keyAttributes,
-                        masterKey,
-                    );
-
-                    await saveMasterKeyInSessionAndSafeStore(masterKey);
-                    setJustSignedUp(true);
-                    void router.push("/verify");
+                    gkResult = await generateKeysAndAttributes(password);
                 } catch (e) {
-                    setFieldError("confirm", t("password_generation_failed"));
+                    if (
+                        e instanceof Error &&
+                        e.message == deriveKeyInsufficientMemoryErrorMessage
+                    ) {
+                        setFieldError(
+                            "confirmPassword",
+                            t("password_generation_failed"),
+                        );
+                        return;
+                    }
                     throw e;
                 }
+
+                const { masterKey, kek, keyAttributes } = gkResult;
+
+                const srpSetupAttributes = await generateSRPSetupAttributes(
+                    await deriveSRPPassword(kek),
+                );
+
+                setData("originalKeyAttributes", keyAttributes);
+                setData("srpSetupAttributes", srpSetupAttributes);
+                await generateAndSaveInteractiveKeyAttributes(
+                    password,
+                    keyAttributes,
+                    masterKey,
+                );
+
+                await saveMasterKeyInSessionAndSafeStore(masterKey);
+                setJustSignedUp(true);
+                void router.push("/verify");
             } catch (e) {
-                log.error("signup failed", e);
+                log.error("Signup failed", e);
+                setFieldError("confirmPassword", t("generic_error"));
             }
         },
     });

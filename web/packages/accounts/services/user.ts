@@ -356,6 +356,12 @@ export const ensureSavedKeyAttributes = (): KeyAttributes =>
 export const saveKeyAttributes = (keyAttributes: KeyAttributes) =>
     localStorage.setItem("keyAttributes", JSON.stringify(keyAttributes));
 
+export interface GenerateKeysAndAttributesResult {
+    masterKey: string;
+    kek: string;
+    keyAttributes: KeyAttributes;
+}
+
 /**
  * Generate a new set of key attributes.
  *
@@ -366,7 +372,7 @@ export const saveKeyAttributes = (keyAttributes: KeyAttributes) =>
  */
 export async function generateKeysAndAttributes(
     password: string,
-): Promise<{ masterKey: string; kek: string; keyAttributes: KeyAttributes }> {
+): Promise<GenerateKeysAndAttributesResult> {
     const masterKey = await generateKey();
     const recoveryKey = await generateKey();
     const {
