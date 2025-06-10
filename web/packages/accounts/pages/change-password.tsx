@@ -27,7 +27,8 @@ import { generateAndSaveIntermediateKeyAttributes } from "ente-accounts/utils/he
 import { LinkButton } from "ente-base/components/LinkButton";
 import { LoadingIndicator } from "ente-base/components/loaders";
 import { sharedCryptoWorker } from "ente-base/crypto";
-import type { DerivedKey } from "ente-base/crypto/types";
+import { deriveKeyInsufficientMemoryErrorMessage } from "ente-base/crypto/types";
+import log from "ente-base/log";
 import {
     ensureMasterKeyFromSession,
     saveMasterKeyInSessionAndSafeStore,
@@ -73,16 +74,25 @@ const PageContents: React.FC<PageContentsProps> = ({ user }) => {
         passphrase,
         setFieldError,
     ) => {
+        try {
+            await onSubmit2(passphrase);
+        } catch (e) {
+            log.error("Could not change password", e);
+            setFieldError(
+                "confirm",
+                e instanceof Error &&
+                    e.message == deriveKeyInsufficientMemoryErrorMessage
+                    ? t("password_generation_failed")
+                    : t("generic_error"),
+            );
+        }
+    };
+
+    const onSubmit2 = async (passphrase: string) => {
         const cryptoWorker = await sharedCryptoWorker();
         const masterKey = await ensureMasterKeyFromSession();
         const keyAttributes = ensureSavedKeyAttributes();
-        let kek: DerivedKey;
-        try {
-            kek = await cryptoWorker.deriveSensitiveKey(passphrase);
-        } catch {
-            setFieldError("confirm", t("password_generation_failed"));
-            return;
-        }
+        const kek = await cryptoWorker.deriveSensitiveKey(passphrase);
         const { encryptedData: encryptedKey, nonce: keyDecryptionNonce } =
             await cryptoWorker.encryptBox(masterKey, kek.key);
         const updatedKeyAttr: UpdatedKeyAttr = {

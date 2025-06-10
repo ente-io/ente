@@ -18,6 +18,7 @@ import { generateAndSaveIntermediateKeyAttributes } from "ente-accounts/utils/he
 import { LinkButton } from "ente-base/components/LinkButton";
 import { LoadingIndicator } from "ente-base/components/loaders";
 import { useBaseContext } from "ente-base/context";
+import { deriveKeyInsufficientMemoryErrorMessage } from "ente-base/crypto/types";
 import log from "ente-base/log";
 import {
     haveCredentialsInSession,
@@ -81,7 +82,13 @@ const Page: React.FC = () => {
             setOpenRecoveryKey(true);
         } catch (e) {
             log.error("failed to generate password", e);
-            setFieldError("passphrase", t("password_generation_failed"));
+            setFieldError(
+                "passphrase",
+                e instanceof Error &&
+                    e.message == deriveKeyInsufficientMemoryErrorMessage
+                    ? t("password_generation_failed")
+                    : t("generic_error"),
+            );
         }
     };
 
