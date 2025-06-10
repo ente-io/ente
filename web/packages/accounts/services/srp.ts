@@ -22,8 +22,8 @@ import type { UserVerificationResponse } from "./user";
  *
  * The SRP (Secure Remote Password) protocol is a modified Diffie-Hellman key
  * exchange that allows the remote to verify the user's possession of a
- * passphrase, and the user to ensure that remote is not being impersonated,
- * without the passphrase ever leaving the device.
+ * password, and the user to ensure that remote is not being impersonated,
+ * without the password ever leaving the device.
  *
  * It is used as an (user selectable) alternative to email verification.
  *
@@ -88,7 +88,7 @@ import type { UserVerificationResponse } from "./user";
  *
  * SRP setup is now complete.
  *
- * A similar flow is used when the user changes their passphrase. On passphrase
+ * A similar flow is used when the user changes their password. On password
  * change, a new KEK is generated, thus the SRP password also changes, and so a
  * subset of the steps above are done to update both client and remote.
  *
@@ -150,19 +150,19 @@ export interface SRPAttributes {
      */
     srpSalt: string;
     /**
-     * The mem limit used during the KEK derivation from the passphrase.
+     * The mem limit used during the KEK derivation from the password.
      *
      * See also the discussion in {@link kekSalt}.
      */
     memLimit: number;
     /**
-     * The ops limit used during the KEK derivation from the passphrase.
+     * The ops limit used during the KEK derivation from the password.
      *
      * See also the discussion in {@link kekSalt}.
      */
     opsLimit: number;
     /**
-     * The salt used during the KEK derivation from the passphrase.
+     * The salt used during the KEK derivation from the password.
      *
      * Base64 encoded.
      *

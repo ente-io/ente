@@ -241,11 +241,11 @@ const Page: React.FC = () => {
         };
 
     const handleVerifyMasterPassword: VerifyMasterPasswordFormProps["onVerify"] =
-        (key, kek, keyAttributes, passphrase) => {
+        (key, kek, keyAttributes, password) => {
             void (async () => {
                 const updatedKeyAttributes = isFirstLogin()
                     ? await generateAndSaveInteractiveKeyAttributes(
-                          passphrase,
+                          password,
                           keyAttributes,
                           key,
                       )

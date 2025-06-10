@@ -169,11 +169,11 @@ export interface KeyAttributes {
      * The user's master key is encrypted with a "key encryption key" (lovingly
      * called a "KEK" sometimes).
      *
-     * The KEK itself is derived from the user's passphrase.
+     * The KEK itself is derived from the user's password.
      *
-     * 1. User enters passphrase on new device.
+     * 1. User enters password on new device.
      *
-     * 2. Client derives KEK from this passphrase (using the {@link kekSalt},
+     * 2. Client derives KEK from this password (using the {@link kekSalt},
      *    {@link opsLimit} and {@link memLimit} as parameters for the
      *    derivation).
      *
@@ -197,7 +197,7 @@ export interface KeyAttributes {
      * [Note: KEK three tuple]
      *
      * The three tuple (kekSalt, opsLimit, memLimit) is needed (along with the
-     * user's passphrase) to rederive the KEK when the user logs in on a new
+     * user's password) to rederive the KEK when the user logs in on a new
      * client (See: [Note: Key encryption key]).
      *
      * The client can obtain these three by fetching their key attributes from
@@ -275,7 +275,7 @@ export interface KeyAttributes {
      * Base64 encoded.
      *
      * This allows the user to recover their master key if they forget their
-     * passphrase but still have their recovery key.
+     * password but still have their recovery key.
      *
      * Note: This value doesn't change after being initially created.
      */
@@ -359,13 +359,13 @@ export const saveKeyAttributes = (keyAttributes: KeyAttributes) =>
 /**
  * Generate a new set of key attributes.
  *
- * @param passphrase The passphrase to use for deriving the key encryption key.
+ * @param password The password to use for deriving the key encryption key.
  *
  * @returns a newly generated master key (base64 string), kek (base64 string)
  * and the key attributes associated with the combination.
  */
 export async function generateKeysAndAttributes(
-    passphrase: string,
+    password: string,
 ): Promise<{ masterKey: string; kek: string; keyAttributes: KeyAttributes }> {
     const masterKey = await generateKey();
     const recoveryKey = await generateKey();
@@ -374,7 +374,7 @@ export async function generateKeysAndAttributes(
         salt: kekSalt,
         opsLimit,
         memLimit,
-    } = await deriveSensitiveKey(passphrase);
+    } = await deriveSensitiveKey(password);
 
     const { encryptedData: encryptedKey, nonce: keyDecryptionNonce } =
         await encryptBox(masterKey, kek);
@@ -588,10 +588,10 @@ export const remoteLogoutIfNeeded = async () => {
  *
  * See {@link deriveInteractiveKey} for more details.
  *
- * In brief, after the initial passphrase verification, we create a new
- * inetractive KEK derived from the same passphrase as the original KEK, but
- * with so called interactive mem and ops limits which result in a noticeably
- * faster key derivation.
+ * In brief, after the initial password verification, we create a new
+ * inetractive KEK derived from the same password as the original KEK, but with
+ * so called interactive mem and ops limits which result in a noticeably faster
+ * key derivation.
  *
  * We then overwrite the encrypted master key, encryption nonce and the KEK
  * derivation parameters (see: [Note: KEK three tuple]) in the locally persisted
@@ -599,11 +599,11 @@ export const remoteLogoutIfNeeded = async () => {
  * subsequent reauthentication.
  *
  * These are more ergonomic for the user especially in the web app where they
- * need to enter their passphrase to access their masterKey when repopening the
+ * need to enter their password to access their masterKey when repopening the
  * app in a new tab (on desktop we can avoid this by using OS storage, see
  * [Note: Safe storage and interactive KEK attributes]).
  *
- * @param passphrase The user's passphrase.
+ * @param password The user's password.
  *
  * @param keyAttributes The existing "original" key attributes, which we
  * might've generated locally (new signup) or fetched from remote (existing
@@ -614,7 +614,7 @@ export const remoteLogoutIfNeeded = async () => {
  * @returns the update key attributes.
  */
 export const generateAndSaveInteractiveKeyAttributes = async (
-    passphrase: string,
+    password: string,
     keyAttributes: KeyAttributes,
     key: string,
 ): Promise<KeyAttributes> => {
@@ -623,7 +623,7 @@ export const generateAndSaveInteractiveKeyAttributes = async (
         salt: kekSalt,
         opsLimit,
         memLimit,
-    } = await deriveInteractiveKey(passphrase);
+    } = await deriveInteractiveKey(password);
 
     const { encryptedData: encryptedKey, nonce: keyDecryptionNonce } =
         await encryptBox(key, interactiveKEK);

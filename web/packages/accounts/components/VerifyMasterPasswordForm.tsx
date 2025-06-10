@@ -49,7 +49,7 @@ export interface VerifyMasterPasswordFormProps {
      * auxillary information that was ascertained when verifying it.
      *
      * @param key The user's master key obtained after decrypting it by using
-     * the KEK derived from their passphrase.
+     * the KEK derived from their password.
      *
      * @param kek The key used for encrypting the user's master key.
      *
@@ -57,15 +57,15 @@ export interface VerifyMasterPasswordFormProps {
      * started with, or those that we fetched on the way using
      * {@link getKeyAttributes}).
      *
-     * @param passphrase The plaintext passphrase. This can be used during login
-     * to derive another encrypted key using interactive mem/ops limits for
-     * faster reauthentication after the initial login.
+     * @param password The plaintext password. This can be used during login to
+     * derive another encrypted key using interactive mem/ops limits for faster
+     * reauthentication after the initial login.
      */
     onVerify: (
         key: string,
         kek: string,
         keyAttributes: KeyAttributes,
-        passphrase: string,
+        password: string,
     ) => void;
 }
 
@@ -102,16 +102,16 @@ export const VerifyMasterPasswordForm: React.FC<
             }
 
             try {
-                await verifyPassphrase(password, setPasswordFieldError);
+                await verifyPassword(password, setPasswordFieldError);
             } catch (e) {
-                log.error("Failed to to verify passphrase", e);
+                log.error("Failed to to verify password", e);
                 setPasswordFieldError(t("generic_error"));
             }
         },
     });
 
-    const verifyPassphrase = async (
-        passphrase: string,
+    const verifyPassword = async (
+        password: string,
         setFieldError: (message: string) => void,
     ) => {
         const cryptoWorker = await sharedCryptoWorker();
@@ -119,7 +119,7 @@ export const VerifyMasterPasswordForm: React.FC<
         if (srpAttributes) {
             try {
                 kek = await cryptoWorker.deriveKey(
-                    passphrase,
+                    password,
                     srpAttributes.kekSalt,
                     srpAttributes.opsLimit,
                     srpAttributes.memLimit,
@@ -132,7 +132,7 @@ export const VerifyMasterPasswordForm: React.FC<
         } else if (keyAttributes) {
             try {
                 kek = await cryptoWorker.deriveKey(
-                    passphrase,
+                    password,
                     keyAttributes.kekSalt,
                     keyAttributes.opsLimit,
                     keyAttributes.memLimit,
@@ -184,7 +184,7 @@ export const VerifyMasterPasswordForm: React.FC<
             return;
         }
 
-        onVerify(key, kek, keyAttributes, passphrase);
+        onVerify(key, kek, keyAttributes, password);
     };
 
     return (
