@@ -38,7 +38,7 @@
     "key_generation_in_progress": "Genererar krypteringsnycklar...",
     "confirm_password": "Bekräfta lösenord",
     "referral_source_hint": "Hur hörde du talas om Ente? (valfritt)",
-    "referral_source_info": "Vi spårar inte appinstallationer, Det skulle hjälpa oss om du berättade var du hittade oss!",
+    "referral_source_info": "Vi spårar inte appinstallationer, det skulle hjälpa oss om du berättade var du hittade oss!",
     "password_mismatch_error": "Lösenorden matchar inte",
     "show_or_hide_password": "",
     "welcome_to_ente_title": "Välkommen till <a/>",
