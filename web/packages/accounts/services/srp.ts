@@ -251,12 +251,34 @@ export const deriveSRPPassword = async (kek: string) => {
     return toB64(kekSubKeyBytes.slice(0, 16));
 };
 
-export interface SRPSetupAttributes {
-    srpSalt: string;
-    srpVerifier: string;
-    srpUserID: string;
-    loginSubKey: string;
-}
+/**
+ * [Note: SRP setup attributes]
+ *
+ * In some cases, there might be a step between the client having access to the
+ * KEK (which we need for generating the SRP attributes, in particular the SRP
+ * password) and the time where the client can proceed with the SRP setup.
+ *
+ * For example, when the user is signing up for a new account, the client has
+ * the KEK on the signup screen since the user just set their password, but then
+ * has to redirect to the screen for email verification, and it is only after
+ * email verification that SRP setup can proceed (at which point it doesn't have
+ * access to the password and so cannot derive the KEK).
+ *
+ * This gap is not just about different screens, but since there is an email
+ * verification step involved, it might take time enough for the browser tab to
+ * get closed and reopened. So instead of keeping the attributes we need to
+ * continue with the SRP setup after email verification in memory, we
+ * temporarily stash them in local storage using an object that conforms to the
+ * following {@link SRPSetupAttributes} schema.
+ */
+const SRPSetupAttributes = z.object({
+    srpUserID: z.string(),
+    srpSalt: z.string(),
+    srpVerifier: z.string(),
+    loginSubKey: z.string(),
+});
+
+export type SRPSetupAttributes = z.infer<typeof SRPSetupAttributes>;
 
 /**
  *
