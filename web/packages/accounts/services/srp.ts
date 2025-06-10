@@ -394,37 +394,28 @@ export const srpSetupOrReconfigure = async (
     srpClient.checkM2(b64ToBuffer(srpM2));
 };
 
-export const generateSRPClient = async (
+const generateSRPClient = async (
     srpSalt: string,
     srpUserID: string,
     loginSubKey: string,
-) => {
-    return new Promise<SrpClient>((resolve, reject) => {
-        SRP.genKey(function (err, secret1) {
-            try {
-                if (err) {
-                    reject(err);
-                }
-                if (!secret1) {
-                    throw Error("secret1 gen failed");
-                }
-                const srpClient = new SrpClient(
+) =>
+    new Promise<SrpClient>((resolve, reject) => {
+        SRP.genKey((err, clientKey) => {
+            if (err) reject(err);
+            resolve(
+                new SrpClient(
                     SRP.params["4096"],
                     b64ToBuffer(srpSalt),
                     Buffer.from(srpUserID),
                     b64ToBuffer(loginSubKey),
-                    secret1,
+                    // The random `clientKey` parameterizes the current instance
+                    // of the SRP client.
+                    clientKey!,
                     false,
-                );
-
-                resolve(srpClient);
-            } catch (e) {
-                // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
-                reject(e);
-            }
+                ),
+            );
         });
     });
-};
 
 interface SetupSRPRequest {
     srpUserID: string;
@@ -535,7 +526,6 @@ export const updateSRPAndKeys = async (
         throw e;
     }
 };
-
 
 export const loginViaSRP = async (
     srpAttributes: SRPAttributes,
