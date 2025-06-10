@@ -240,22 +240,6 @@ export const saveSRPAttributes = (srpAttributes: SRPAttributes) =>
     localStorage.setItem("srpAttributes", JSON.stringify(srpAttributes));
 
 /**
- * Derive a "login sub-key" (which is really an arbitrary binary value, not
- * human generated) for use as the SRP user password by applying a deterministic
- * KDF (Key Derivation Function) to the provided {@link kek}.
- *
- * @param kek The user's KEK (key encryption key) as a base64 string.
- *
- * @returns A base64 encoded key that can be used as the SRP user password.
- */
-const deriveSRPLoginSubKey = async (kek: string) => {
-    const kekSubKeyBytes = await deriveSubKeyBytes(kek, 32, 1, "loginctx");
-    // Use the first 16 bytes (128 bits) of the KEK's KDF subkey as the SRP
-    // password (instead of entire 32 bytes).
-    return toB64(kekSubKeyBytes.slice(0, 16));
-};
-
-/**
  * A local-only structure holding information required for SRP setup.
  *
  * [Note: SRP setup attributes]
@@ -311,6 +295,30 @@ export const generateSRPSetupAttributes = async (
     const srpVerifier = convertBufferToBase64(srpVerifierBuffer);
 
     return { srpUserID, srpSalt, srpVerifier, loginSubKey };
+};
+
+/**
+ * Derive a "login sub-key" (which is really an arbitrary binary value, not
+ * human generated) for use as the SRP user password by applying a deterministic
+ * KDF (Key Derivation Function) to the provided {@link kek}.
+ *
+ * @param kek The user's KEK (key encryption key) as a base64 string.
+ *
+ * @returns A base64 encoded key that can be used as the SRP user password.
+ */
+const deriveSRPLoginSubKey = async (kek: string) => {
+    const kekSubKeyBytes = await deriveSubKeyBytes(kek, 32, 1, "loginctx");
+    // Use the first 16 bytes (128 bits) of the KEK's KDF subkey as the SRP
+    // password (instead of entire 32 bytes).
+    return toB64(kekSubKeyBytes.slice(0, 16));
+};
+
+export const convertBufferToBase64 = (buffer: Buffer) => {
+    return buffer.toString("base64");
+};
+
+export const convertBase64ToBuffer = (base64: string) => {
+    return Buffer.from(base64, "base64");
 };
 
 /**
@@ -523,14 +531,6 @@ export const generateSRPClient = async (
             }
         });
     });
-};
-
-export const convertBufferToBase64 = (buffer: Buffer) => {
-    return buffer.toString("base64");
-};
-
-export const convertBase64ToBuffer = (base64: string) => {
-    return Buffer.from(base64, "base64");
 };
 
 export const loginViaSRP = async (
