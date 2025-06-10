@@ -13,7 +13,7 @@ import {
 } from "ente-base/http";
 import { apiURL } from "ente-base/origins";
 import { getAuthToken } from "ente-base/token";
-import { getData, setData, setLSUser } from "ente-shared/storage/localStorage";
+import { getData, setLSUser } from "ente-shared/storage/localStorage";
 import { nullToUndefined } from "ente-utils/transform";
 import { z } from "zod/v4";
 import { getUserRecoveryKey, recoveryKeyFromMnemonic } from "./recovery-key";
@@ -624,7 +624,7 @@ export const generateAndSaveInteractiveKeyAttributes = async (
         opsLimit,
         memLimit,
     };
-    setData("keyAttributes", interactiveKeyAttributes);
+    saveKeyAttributes(interactiveKeyAttributes);
     return interactiveKeyAttributes;
 };
 
