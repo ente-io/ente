@@ -1,10 +1,10 @@
 import {
     decryptBox,
+    deriveInteractiveKey,
     deriveSensitiveKey,
     encryptBox,
     generateKey,
     generateKeyPair,
-    sharedCryptoWorker,
 } from "ente-base/crypto";
 import {
     authenticatedRequestHeaders,
@@ -601,26 +601,32 @@ export const remoteLogoutIfNeeded = async () => {
  *
  * @returns the update key attributes.
  */
-export async function generateAndSaveInteractiveKeyAttributes(
+export const generateAndSaveInteractiveKeyAttributes = async (
     passphrase: string,
-    existingKeyAttributes: KeyAttributes,
+    keyAttributes: KeyAttributes,
     key: string,
-): Promise<KeyAttributes> {
-    const cryptoWorker = await sharedCryptoWorker();
-    const intermediateKek = await cryptoWorker.deriveInteractiveKey(passphrase);
-    const { encryptedData: encryptedKey, nonce: keyDecryptionNonce } =
-        await cryptoWorker.encryptBox(key, intermediateKek.key);
+): Promise<KeyAttributes> => {
+    const {
+        key: interactiveKEK,
+        salt: kekSalt,
+        opsLimit,
+        memLimit,
+    } = await deriveInteractiveKey(passphrase);
 
-    const intermediateKeyAttributes = Object.assign(existingKeyAttributes, {
+    const { encryptedData: encryptedKey, nonce: keyDecryptionNonce } =
+        await encryptBox(key, interactiveKEK);
+
+    const interactiveKeyAttributes = {
+        ...keyAttributes,
         encryptedKey,
         keyDecryptionNonce,
-        kekSalt: intermediateKek.salt,
-        opsLimit: intermediateKek.opsLimit,
-        memLimit: intermediateKek.memLimit,
-    });
-    setData("keyAttributes", intermediateKeyAttributes);
-    return intermediateKeyAttributes;
-}
+        kekSalt,
+        opsLimit,
+        memLimit,
+    };
+    setData("keyAttributes", interactiveKeyAttributes);
+    return interactiveKeyAttributes;
+};
 
 /**
  * Change the email associated with the user's account on remote.
