@@ -20,6 +20,7 @@ import {
 import {
     generateAndSaveInteractiveKeyAttributes,
     generateKeysAndAttributes,
+    savePartialLocalUser,
     sendOTT,
     type GenerateKeysAndAttributesResult,
 } from "ente-accounts/services/user";
@@ -31,7 +32,6 @@ import { deriveKeyInsufficientMemoryErrorMessage } from "ente-base/crypto/types"
 import { isMuseumHTTPError } from "ente-base/http";
 import log from "ente-base/log";
 import { saveMasterKeyInSessionAndSafeStore } from "ente-base/session";
-import { setLSUser } from "ente-shared//storage/localStorage";
 import { setData } from "ente-shared/storage/localStorage";
 import {
     setJustSignedUp,
@@ -125,7 +125,7 @@ export const SignUpContents: React.FC<SignUpContentsProps> = ({
                     throw e;
                 }
 
-                await setLSUser({ email });
+                savePartialLocalUser({ email });
 
                 let gkResult: GenerateKeysAndAttributesResult;
                 try {
