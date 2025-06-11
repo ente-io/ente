@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:photo_manager/photo_manager.dart';
+import "package:photos/core/cache/lru_map.dart";
 import 'package:photos/core/configuration.dart';
 import "package:photos/core/errors.dart";
 import 'package:photos/core/event_bus.dart';
@@ -28,6 +29,11 @@ import "package:photos/utils/standalone/debouncer.dart";
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:synchronized/synchronized.dart';
 import 'package:tuple/tuple.dart';
+
+// This map is used to track if a iOS origin file is being fetched for uploading
+// or ML processing. In such cases, we want to ignore these files if they come in response
+// from the local sync service. When a file is download
+final LRUMap<String, bool> trackOriginFetchForUploadOrML = LRUMap(200);
 
 class LocalSyncService {
   final _logger = Logger("LocalSyncService");
@@ -297,13 +303,39 @@ class LocalSyncService {
         conflictAlgorithm: SqliteAsyncConflictAlgorithm.ignore,
       );
       _logger.info('Inserted ${files.length} out of ${allFiles.length} files');
-      if (allFiles.isNotEmpty) {
+      _checkAndFireLocalAssetUpdateEvent(allFiles, files);
+    }
+    await _prefs.setInt(kDbUpdationTimeKey, toTime);
+  }
+
+  void _checkAndFireLocalAssetUpdateEvent(
+    List<EnteFile> allFiles,
+    List<EnteFile> files,
+  ) {
+    if (allFiles.isNotEmpty) {
+      // If there's no new file, verify that the all files don't just contain
+      // the files that are recently fetched for upload or ML processing
+      if (files.isEmpty) {
+        allFiles.removeWhere(
+          (file) =>
+              trackOriginFetchForUploadOrML.get(file.localID ?? '') ?? false,
+        );
+        if (allFiles.isNotEmpty) {
+          _logger.info(
+            "Firing LocalPhotosUpdatedEvent with ${allFiles.length} files",
+          );
+          Bus.instance.fire(
+            LocalPhotosUpdatedEvent(allFiles, source: "loadedPhoto"),
+          );
+        } else {
+          _logger.info("No new files to update after filtering");
+        }
+      } else {
         Bus.instance.fire(
           LocalPhotosUpdatedEvent(allFiles, source: "loadedPhoto"),
         );
       }
     }
-    await _prefs.setInt(kDbUpdationTimeKey, toTime);
   }
 
   Future<void> _trackUpdatedFiles(
@@ -318,11 +350,20 @@ class LocalSyncService {
         )
         .map((e) => e.localID!)
         .toList();
+
     if (updatedLocalIDs.isNotEmpty) {
-      await FileUpdationDB.instance.insertMultiple(
-        updatedLocalIDs,
-        FileUpdationDB.modificationTimeUpdated,
+      final int updateCount = updatedLocalIDs.length;
+      updatedLocalIDs
+          .removeWhere((x) => trackOriginFetchForUploadOrML.get(x) ?? false);
+      _logger.info(
+        "track ${updatedLocalIDs.length}/ $updateCount files due to modification change",
       );
+      if (updatedLocalIDs.isEmpty) {
+        await FileUpdationDB.instance.insertMultiple(
+          updatedLocalIDs,
+          FileUpdationDB.modificationTimeUpdated,
+        );
+      }
     }
   }
 
