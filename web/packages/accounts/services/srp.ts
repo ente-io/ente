@@ -495,15 +495,6 @@ const completeSRPSetup = async (
     return CompleteSRPSetupResponse.parse(await res.json());
 };
 
-interface CreateSRPSessionResponse {
-    sessionID: string;
-    srpB: string;
-}
-
-export interface SRPVerificationResponse extends UserVerificationResponse {
-    srpM2: string;
-}
-
 export interface UpdatedKeyAttr {
     kekSalt: string;
     encryptedKey: string;
@@ -583,6 +574,11 @@ export const loginViaSRP = async (
     }
 };
 
+interface CreateSRPSessionResponse {
+    sessionID: string;
+    srpB: string;
+}
+
 const createSRPSession = async (srpUserID: string, srpA: string) => {
     const res = await fetch(await apiURL("/users/srp/create-session"), {
         method: "POST",
@@ -594,6 +590,10 @@ const createSRPSession = async (srpUserID: string, srpA: string) => {
     // TODO: Use zod
     return data as CreateSRPSessionResponse;
 };
+
+export interface SRPVerificationResponse extends UserVerificationResponse {
+    srpM2: string;
+}
 
 const verifySRPSession = async (
     sessionID: string,
