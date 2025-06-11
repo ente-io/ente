@@ -3,7 +3,6 @@ import {
     type MagicMetadataCore,
 } from "ente-media/file";
 import { ItemVisibility } from "ente-media/file-metadata";
-import { falseyToUndefined } from "ente-utils/transform";
 import { z } from "zod/v4";
 
 // TODO: Audit this file
@@ -97,52 +96,27 @@ export interface CollectionUser {
      *
      * - The email is present for the {@link owner} only for shared collections.
      * - The email is present for all {@link sharees}.
-     * - Remote uses a blank string to indicate absent values, but we convert
-     *   those into `undefined` in {@link parseRemoteCollectionUser}.
+     * - Remote uses a blank string to indicate absent values.
      */
     email?: string;
     /**
      * The association / privilege level of the user with the collection.
      *
+     * Expected to be one of {@link CollectionParticipantRole}.
+     *
      * - The role is not present (blank string) for the {@link owner}.
      * - The role is present, and one of "VIEWER" and "COLLABORATOR" for the
      *   {@link sharees}.
-     * - Remote uses a blank string to indicate absent values, but we convert
-     *   those into `undefined` in {@link parseRemoteCollectionParticipantRole}.
-     * - That function also converts any role strings apart from "VIEWER",
-     *   "COLLABORATOR" and "OWNER" to `undefined`.
+     * - Remote uses a blank string to indicate absent values.
      */
-    role?: CollectionParticipantRole;
+    role?: string;
 }
 
 /**
  * Zod schema for {@link CollectionUser}.
- *
- * [Note: String enums and looseObject for persisted remote objects]
- *
- * The zod schema does not enforce the enum types, e.g. in the role field. This
- * allows the client to gracefully handle future enum values that might be sent
- * by remote. Such future proofing is not always necessary, but since the
- * collection type is persisted locally, such flexibility can help.
- *
- * This means that there is a translation step. The typed object we get from
- * remote (and what gets persisted to local storage) does not enforce the enum,
- * and instead retains the enum as the underlying primitive type (usually a
- * string), and before using it in our code (as the TypeScript type), we need to
- * validate the enum's conformance (unknown values are usually converted to
- * `undefined`).
- *
- * In these cases, we also persist the object we get from remote as-is (by using
- * looseObject), instead of discarding fields that we currently don't know of,
- * because a future version of the client might gain support for them, and thus
- * can read the already persisted data instead of requiring a fresh pull.
- *
- * Since we're also doing a translation step, we also use this to do some
- * trivial clean up for the object used by our code:
- *
- * - Converting blank strings (where expected) to undefined.
  */
-const RemoteCollectionUser = z.looseObject({
+// TODO: Use me.
+export const RemoteCollectionUser = z.looseObject({
     id: z.number(),
     email: z.string().nullish(),
     role: z.string().nullish(),
@@ -151,25 +125,67 @@ const RemoteCollectionUser = z.looseObject({
 type RemoteCollectionUser = z.infer<typeof RemoteCollectionUser>;
 
 /**
- * Convert a {@link RemoteCollectionUser} into a {@link CollectionUser}.
+ * Zod schema for {@link Collection}.
  *
- * See: [Note: String enums and looseObject for persisted remote objects]
+ * [Note: Schema validation for bulk persisted remote objects]
+ *
+ * Objects like files and collections that we get from remote are treated
+ * specially when it comes to schema validation.
+ *
+ * 1. Enum conversion.
+ * 2. Loose objects.
+ * 3. Blank handling.
+ * 4. Casting instead of validating when reading local values.
+ *
+ * Let us take a concrete example of the {@link Collection} TypeScript type,
+ * whose zod schema is defined by {@link RemoteCollection}.
+ *
+ * The collection that we get from remote contains (nested) enum types - a
+ * {@link CollectionParticipantRole}. While zod allows us to validate enum types
+ * during a parse, this would cause existing clients to break if remote were to
+ * in the future add new enum cases. So when parsing we'd like to keep the role
+ * value as a string.
+ *
+ * This is especially important for a object like {@link Collection} which is
+ * also persisted locally, because a current client code might persist a object
+ * which might be read by future client code that understands more fields. So we
+ * use zod's {@link looseObject} directive on the {@link RemoteCollection} to
+ * ensure we don't discard fields we don't recognize, in a manner similar to
+ * [Note: Use looseObject for metadata Zod schemas].
+ *
+ * In keeping with this general principle of retaining the object we get from
+ * remote as vintage as possible, we also don't do transformations to deal with
+ * various remote idiosyncracies. For example, for the role field remote (in
+ * some cases) uses blanks to indicate missing values. While zod would allow to
+ * transform these, we just let it be as remote had sent it.
+ *
+ * Finally, while we always use the {@link RemoteCollection} schema validator
+ * when parsing remote network responses, we don't do the same when reading the
+ * persisted values. This is to retain the performance characteristics of the
+ * existing code. This might seem miniscule for the {@link Collection} example,
+ * but users can easily have hundreds of thousands of {@link EnteFile}s
+ * persisted locally, and while the overhead of validation when reading from DB
+ * might not matter, but it needs to be profiled first before adding it to the
+ * existing code paths.
+ *
+ * So when reading arrays of these objects from local DB, we do a cast instead
+ * of do a runtime zod validation.
+ *
+ * To summarize, for certain remote objects which are also persisted to disk in
+ * potentially large numbers, we (a) try to retain the remote semantics as much
+ * as possible to avoid the need for a parsing / transform step, and (b) we
+ * don't even do a parsing / transform step when reading them from local DB.
+ *
+ * This means that the "types might lie". On the other hand, we need to special
+ * case only very specific objects this way:
+ *
+ * 1. {@link EnteFile}
+ * 2. {@link Collection}
+ * 3. {@link Trash}
+ *
  */
 // TODO: Use me
-export const parseRemoteCollectionUser = (
-    remote: RemoteCollectionUser,
-): CollectionUser => ({
-    id: remote.id,
-    email: falseyToUndefined(remote.email),
-    role: parseRemoteCollectionParticipantRole(remote.role),
-});
-
-const parseRemoteCollectionParticipantRole = (
-    role: string | null | undefined,
-): CollectionParticipantRole | undefined =>
-    role == "VIEWER" || role == "COLLABORATOR" || role == "OWNER"
-        ? role
-        : undefined;
+export const RemoteCollection = z.looseObject({});
 
 export interface EncryptedCollection {
     /**

@@ -272,7 +272,6 @@ const CollectionOptions: React.FC<CollectionHeaderProps> = ({
             },
         });
 
-
     const leaveSharedAlbum = wrap(async () => {
         await leaveSharedCollection(activeCollection.id);
         setActiveCollectionID(ALL_SECTION);
