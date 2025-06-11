@@ -219,7 +219,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
     unawaited(
       memoriesCacheService.markMemoryAsSeen(
         inheritedData.memories[index],
-        inheritedData.memories.length == index + 1,
+        false,
       ),
     );
     inheritedData.indexNotifier.value = index;
