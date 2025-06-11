@@ -59,7 +59,7 @@ import type { CollectionSummary } from "ente-new/photos/services/collection/ui";
 import { usePhotosAppContext } from "ente-new/photos/types/context";
 import { CustomError, parseSharingErrorCodes } from "ente-shared/error";
 import { wait } from "ente-utils/promise";
-import { useFormik, type FormikHelpers } from "formik";
+import { useFormik } from "formik";
 import { t } from "i18next";
 import { GalleryContext } from "pages/gallery";
 import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
@@ -546,26 +546,6 @@ interface AddParticipantFormProps {
 const AddParticipantForm: React.FC<AddParticipantFormProps> = (props) => {
     const [loading, SetLoading] = useState(false);
 
-    const submitForm = async (
-        values: AddParticipantFormValues,
-        { setFieldError, resetForm }: FormikHelpers<AddParticipantFormValues>,
-    ) => {
-        try {
-            SetLoading(true);
-            if (values.inputValue !== "") {
-                await props.callback({ email: values.inputValue });
-            } else if (values.selectedOptions.length !== 0) {
-                await props.callback({ emails: values.selectedOptions });
-            }
-            SetLoading(false);
-            props.onClose();
-            resetForm();
-        } catch (e) {
-            setFieldError("inputValue", e?.message);
-            SetLoading(false);
-        }
-    };
-
     const validationSchema = useMemo(() => {
         return Yup.object().shape({
             inputValue: Yup.string().email(t("invalid_email_error")),
@@ -577,7 +557,25 @@ const AddParticipantForm: React.FC<AddParticipantFormProps> = (props) => {
     };
     const formik = useFormik({
         initialValues: { inputValue: "", selectedOptions: [] },
-        onSubmit: submitForm,
+        onSubmit: async (
+            { inputValue, selectedOptions },
+            { setFieldError, resetForm },
+        ) => {
+            try {
+                SetLoading(true);
+                if (inputValue !== "") {
+                    await props.callback({ email: inputValue });
+                } else if (selectedOptions.length !== 0) {
+                    await props.callback({ emails: selectedOptions });
+                }
+                SetLoading(false);
+                props.onClose();
+                resetForm();
+            } catch (e) {
+                setFieldError("inputValue", e?.message);
+                SetLoading(false);
+            }
+        },
         validationSchema: validationSchema,
         validateOnChange: false,
         validateOnBlur: false,
