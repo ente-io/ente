@@ -3,6 +3,8 @@ import {
     type MagicMetadataCore,
 } from "ente-media/file";
 import { ItemVisibility } from "ente-media/file-metadata";
+import { falseyToUndefined } from "ente-utils/transform";
+import { z } from "zod/v4";
 
 // TODO: Audit this file
 
@@ -108,6 +110,34 @@ export interface CollectionUser {
      */
     role?: CollectionParticipantRole;
 }
+
+/**
+ * Zod schema for {@link CollectionUser}.
+ *
+ * [Note: String enums and looseObject for persisted remote objects]
+ *
+ * The zod schema does not enforce the enum types, e.g. in the role field. This
+ * allows the client to gracefully handle future enum values that might be sent
+ * by remote. Such future proofing is not always necessary, but since the
+ * collection type is persisted locally, such flexibility can help.
+ *
+ * This means that there is a translation step. The typed object we get from
+ * remote (and what gets persisted to local storage) does not enforce the enum,
+ * and instead retains the enum as the underlying primitive type (usually a
+ * string), and before using it in our code (as the TypeScript type), we need to
+ * validate the enum's conformance (unknown values are usually converted to
+ * `undefined`).
+ *
+ * In these cases, we also persist the object we get from remote as-is (by using
+ * looseObject), instead of discarding fields that we currently don't know of,
+ * because a future version of the client might gain support for them, and thus
+ * can read the already persisted data instead of requiring a fresh pull.
+ */
+const CollectionUser = z.looseObject({
+    id: z.number(),
+    email: z.string().nullish().transform(falseyToUndefined),
+    role: z.string().nullish().transform(falseyToUndefined),
+});
 
 export interface EncryptedCollection {
     /**

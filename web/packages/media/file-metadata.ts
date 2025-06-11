@@ -318,9 +318,9 @@ export interface PublicMagicMetadata {
  *
  * ---
  *
- * [Note: Use passthrough for metadata Zod schemas]
+ * [Note: Use looseObject for metadata Zod schemas]
  *
- * It is important to (recursively) use the {@link passthrough} option when
+ * It is important to (recursively) use the {@link looseObject} option when
  * defining Zod schemas for the various metadata types (the plaintext JSON
  * objects) because we want to retain all the fields we get from remote. There
  * might be other, newer, clients out there adding fields that the current
