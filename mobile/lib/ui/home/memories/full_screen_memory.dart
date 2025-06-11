@@ -325,7 +325,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
               final currentFile = currentMemory.file;
 
               return GestureDetector(
-                onTapDown: (TapDownDetails details) {
+                onTapUp: (TapUpDetails details) {
                   final screenWidth = MediaQuery.of(context).size.width;
                   final edgeWidth = screenWidth * 0.20;
                   if (details.localPosition.dx < edgeWidth) {
@@ -409,6 +409,8 @@ class BottomIcons extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final inheritedData = FullScreenMemoryData.of(context)!;
+    final fullScreenState =
+        context.findAncestorStateOfType<_FullScreenMemoryState>();
 
     return ValueListenableBuilder(
       valueListenable: inheritedData.indexNotifier,
@@ -420,8 +422,10 @@ class BottomIcons extends StatelessWidget {
               Platform.isAndroid ? Icons.info_outline : CupertinoIcons.info,
               color: Colors.white, //same for both themes
             ),
-            onPressed: () {
-              showDetailsSheet(context, currentFile);
+            onPressed: () async {
+              fullScreenState?._toggleAnimation(true);
+              await showDetailsSheet(context, currentFile);
+              fullScreenState?._toggleAnimation(false);
             },
           ),
         ];
@@ -437,6 +441,7 @@ class BottomIcons extends StatelessWidget {
                 color: Colors.white, //same for both themes
               ),
               onPressed: () async {
+                fullScreenState?._toggleAnimation(true);
                 await showSingleFileDeleteSheet(
                   context,
                   inheritedData
@@ -449,6 +454,7 @@ class BottomIcons extends StatelessWidget {
                       },
                   },
                 );
+                fullScreenState?._toggleAnimation(false);
               },
             ),
             SizedBox(
@@ -463,8 +469,10 @@ class BottomIcons extends StatelessWidget {
               Icons.adaptive.share,
               color: Colors.white, //same for both themes
             ),
-            onPressed: () {
-              share(context, [currentFile]);
+            onPressed: () async {
+              fullScreenState?._toggleAnimation(true);
+              await share(context, [currentFile]);
+              fullScreenState?._toggleAnimation(false);
             },
           ),
         );
