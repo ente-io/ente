@@ -563,69 +563,84 @@ const updateSRPAndKeys = async (
     return UpdateSRPAndKeysResponse.parse(await res.json());
 };
 
-export const loginViaSRP = async (
-    srpAttributes: SRPAttributes,
+/**
+ * Log the user in to a new device by performing SRP verification.
+ *
+ * This function implements the flow described in [Note: SRP verification].
+ *
+ * @param srpAttributes The user's SRP attributes.
+ *
+ * @param kek The user's key encryption key as a base64 string.
+ *
+ * @returns If SRP verification is successful, it returns a
+ * {@link UserVerificationResponse} (both email and SRP verification resolve to
+ * this same structure).
+ */
+export const verifySRP = async (
+    { srpUserID, srpSalt }: SRPAttributes,
     kek: string,
 ): Promise<UserVerificationResponse> => {
-    try {
-        const loginSubKey = await deriveSRPLoginSubKey(kek);
-        const srpClient = await generateSRPClient(
-            srpAttributes.srpSalt,
-            srpAttributes.srpUserID,
-            loginSubKey,
-        );
-        const srpA = srpClient.computeA();
-        const { srpB, sessionID } = await createSRPSession(
-            srpAttributes.srpUserID,
-            bufferToB64(srpA),
-        );
-        srpClient.setB(b64ToBuffer(srpB));
+    const loginSubKey = await deriveSRPLoginSubKey(kek);
+    const srpClient = await generateSRPClient(srpSalt, srpUserID, loginSubKey);
 
-        const m1 = srpClient.computeM1();
-        log.debug(() => `srp m1: ${bufferToB64(m1)}`);
-        const { srpM2, ...rest } = await verifySRPSession(
-            sessionID,
-            srpAttributes.srpUserID,
-            bufferToB64(m1),
-        );
-        log.debug(() => `srp verify session successful,srpM2: ${srpM2}`);
+    // Send A, obtain B.
+    const { srpB, sessionID } = await createSRPSession({
+        srpUserID,
+        srpA: bufferToB64(srpClient.computeA()),
+    });
 
-        srpClient.checkM2(b64ToBuffer(srpM2));
+    srpClient.setB(b64ToBuffer(srpB));
 
-        log.debug(() => `srp server verify successful`);
-        return rest;
-    } catch (e) {
-        log.error("srp verify failed", e);
-        throw e;
-    }
+    // Send M1, obtain M2.
+    const { srpM2, ...rest } = await verifySRPSession({
+        sessionID,
+        srpUserID,
+        srpM1: bufferToB64(srpClient.computeM1()),
+    });
+
+    srpClient.checkM2(b64ToBuffer(srpM2));
+
+    return rest;
 };
 
-interface CreateSRPSessionResponse {
-    sessionID: string;
-    srpB: string;
+interface CreateSRPSessionRequest {
+    srpUserID: string;
+    srpA: string;
 }
 
-const createSRPSession = async (srpUserID: string, srpA: string) => {
+const CreateSRPSessionResponse = z.object({
+    sessionID: z.string(),
+    srpB: z.string(),
+});
+
+type CreateSRPSessionResponse = z.infer<typeof CreateSRPSessionResponse>;
+
+const createSRPSession = async (
+    createSRPSessionRequest: CreateSRPSessionRequest,
+): Promise<CreateSRPSessionResponse> => {
     const res = await fetch(await apiURL("/users/srp/create-session"), {
         method: "POST",
         headers: publicRequestHeaders(),
-        body: JSON.stringify({ srpUserID, srpA }),
+        body: JSON.stringify(createSRPSessionRequest),
     });
     ensureOk(res);
-    const data = await res.json();
-    // TODO: Use zod
-    return data as CreateSRPSessionResponse;
+    return CreateSRPSessionResponse.parse(await res.json());
 };
 
 export interface SRPVerificationResponse extends UserVerificationResponse {
     srpM2: string;
 }
 
+interface VerifySRPSessionRequest {
+    sessionID: string;
+    srpUserID: string;
+    srpM1: string;
+}
+
 const verifySRPSession = async (
-    sessionID: string,
-    srpUserID: string,
-    srpM1: string,
-) => {
+    VerifySRPSessionRequest: VerifySRPSessionRequest,
+): Promise<SRPVerificationResponse> => {
+    const { sessionID, srpUserID, srpM1 } = VerifySRPSessionRequest;
     try {
         const resp = await HTTPService.post(
             await apiURL("/users/srp/verify-session"),

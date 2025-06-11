@@ -25,8 +25,8 @@ import type { SRPAttributes } from "ente-accounts/services/srp";
 import {
     generateSRPSetupAttributes,
     getSRPAttributes,
-    loginViaSRP,
     setupSRP,
+    verifySRP,
 } from "ente-accounts/services/srp";
 import {
     generateAndSaveInteractiveKeyAttributes,
@@ -185,7 +185,7 @@ const Page: React.FC = () => {
                     accountsUrl,
                 } =
                     await userVerificationResultAfterResolvingSecondFactorChoice(
-                        await loginViaSRP(srpAttributes!, kek),
+                        await verifySRP(srpAttributes!, kek),
                     );
                 setIsFirstLogin(true);
 
