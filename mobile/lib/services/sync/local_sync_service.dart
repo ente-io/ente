@@ -303,39 +303,29 @@ class LocalSyncService {
         conflictAlgorithm: SqliteAsyncConflictAlgorithm.ignore,
       );
       _logger.info('Inserted ${files.length} out of ${allFiles.length} files');
-      _checkAndFireLocalAssetUpdateEvent(allFiles, files);
+      _checkAndFireLocalAssetUpdateEvent(allFiles, files.isNotEmpty);
     }
     await _prefs.setInt(kDbUpdationTimeKey, toTime);
   }
 
   void _checkAndFireLocalAssetUpdateEvent(
     List<EnteFile> allFiles,
-    List<EnteFile> files,
+    bool discoveredNewFiles,
   ) {
-    if (allFiles.isNotEmpty) {
-      // If there's no new file, verify that the all files don't just contain
-      // the files that are recently fetched for upload or ML processing
-      if (files.isEmpty) {
-        allFiles.removeWhere(
-          (file) =>
-              trackOriginFetchForUploadOrML.get(file.localID ?? '') ?? false,
-        );
-        if (allFiles.isNotEmpty) {
-          _logger.info(
-            "Firing LocalPhotosUpdatedEvent with ${allFiles.length} files",
-          );
-          Bus.instance.fire(
-            LocalPhotosUpdatedEvent(allFiles, source: "loadedPhoto"),
-          );
-        } else {
-          _logger.info("No new files to update after filtering");
-        }
-      } else {
-        Bus.instance.fire(
-          LocalPhotosUpdatedEvent(allFiles, source: "loadedPhoto"),
-        );
+    if (allFiles.isEmpty) return;
+    if (!discoveredNewFiles) {
+      allFiles.removeWhere(
+        (file) =>
+            trackOriginFetchForUploadOrML.get(file.localID ?? '') ?? false,
+      );
+      if (allFiles.isEmpty) {
+        _logger.info("skipping firing LocalPhotosUpdatedEvent as no new files");
+        return;
       }
     }
+    Bus.instance.fire(
+      LocalPhotosUpdatedEvent(allFiles, source: "loadedPhoto"),
+    );
   }
 
   Future<void> _trackUpdatedFiles(
