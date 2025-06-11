@@ -202,7 +202,7 @@ via [@fontsource-variable/inter](https://fontsource.org/fonts/inter/install).
 
 - [debounce](https://github.com/sindresorhus/debounce) and its
   promise-supporting sibling
-  [pDebounce](https://github.com/sindresorhus/p-debounce) are used for
+  [p-debounce](https://github.com/sindresorhus/p-debounce) are used for
   debouncing operations (See also: `[Note: Throttle and debounce]`).
 
 - [bip39](https://github.com/bitcoinjs/bip39) is used for generating the 24-word
@@ -216,12 +216,12 @@ via [@fontsource-variable/inter](https://fontsource.org/fonts/inter/install).
 
 ## Media
 
-- [ffmpeg.wasm](https://github.com/ffmpegwasm/ffmpeg.wasm) is used to run FFmpeg
-  in the browser using WebAssembly (Wasm). Note that this is substantially
-  slower than native ffmpeg (the desktop app can, and does, bundle the faster
-  native ffmpeg implementation too).
+- [@ffmpeg/ffmpeg](https://github.com/ffmpegwasm/ffmpeg.wasm) is used to run
+  FFmpeg in the browser using WebAssembly (Wasm). Note that this is
+  substantially slower than native ffmpeg (the desktop app can, and does, bundle
+  the faster native ffmpeg implementation too).
 
-- [ExifReader](https://github.com/mattiasw/ExifReader) is used for Exif parsing.
+- [exifreader](https://github.com/mattiasw/ExifReader) is used for Exif parsing.
 
 - [jszip](https://github.com/Stuk/jszip) is used for reading zip files in the
   web code (Live photos are zip files under the hood). Note that the desktop app
@@ -238,7 +238,7 @@ via [@fontsource-variable/inter](https://fontsource.org/fonts/inter/install).
 
 ## Photos app specific
 
-- [PhotoSwipe](https://photoswipe.com) provides the base image viewer on top of
+- [photoswipe](https://photoswipe.com) provides the base image viewer on top of
   which we've built our file viewer.
 
 - For streaming video (HLS), we use three libraries:
@@ -270,8 +270,8 @@ via [@fontsource-variable/inter](https://fontsource.org/fonts/inter/install).
 - [chrono-node](https://github.com/wanasit/chrono) is used for parsing natural
   language queries into dates for showing search results.
 
-- [matrix](https://github.com/mljs/matrix) is mathematical matrix abstraction by
-  the machine learning code. It is used alongwith
+- [ml-matrix](https://github.com/mljs/matrix) is mathematical matrix abstraction
+  by the machine learning code. It is used alongwith
   [similarity-transformation](https://github.com/shaileshpandit/similarity-transformation-js)
   during face alignment.
 
