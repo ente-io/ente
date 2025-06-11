@@ -24,6 +24,7 @@ dependencies:
   animated_list_plus: ^0.5.2
   app_links: ^6.4.0
   archive: ^3.6.1
+  async: ^2.11.0
   battery_info: # replace with battery_plus
     git:
       url: https://github.com/ente-io/battery_info
@@ -211,11 +212,7 @@ dependencies:
   wakelock_plus: ^1.1.1
   wechat_assets_picker: ^9.5.1
   widgets_to_image: ^0.0.2
-  workmanager: # pub.dev is behind
-    git:
-      url: https://github.com/fluttercommunity/flutter_workmanager
-      ref: 4ce0651
-      path: workmanager
+  workmanager: ^0.6.0
   xml: ^6.3.0
 
 dependency_overrides:

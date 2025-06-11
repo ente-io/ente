@@ -127,7 +127,7 @@ packages:
     source: hosted
     version: "1.5.8"
   async:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: async
       sha256: "947bfcf187f74dbc5e146c9eb9c0f10c9f8b30743e341481c1e2ed3ecc18c20c"
@@ -2940,12 +2940,11 @@ packages:
   workmanager:
     dependency: "direct main"
     description:
-      path: workmanager
-      ref: "4ce0651"
-      resolved-ref: "4ce065135dc1b91fee918f81596b42a56850391d"
-      url: "https://github.com/fluttercommunity/flutter_workmanager"
-    source: git
-    version: "0.5.2"
+      name: workmanager
+      sha256: f3c3ce6d79cce53eee4a29dd2e8328c25db5ba5d9062fcc5e8f3c71e0af9b7e4
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.6.0"
   xdg_directories:
     dependency: transitive
     description:
