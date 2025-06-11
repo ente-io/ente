@@ -459,11 +459,12 @@ const AddParticipant: React.FC<AddParticipantProps> = ({
 }) => {
     const { user, syncWithRemote, emailList } = useContext(GalleryContext);
 
-    const nonSharedEmails = useMemo(
+    const eligibleEmails = useMemo(
         () =>
             emailList.filter(
                 (email) =>
-                    !collection.sharees?.find((value) => value.email === email),
+                    email != user.email &&
+                    !collection?.sharees?.find((value) => value.email == email),
             ),
         [emailList, collection.sharees],
     );
@@ -477,41 +478,47 @@ const AddParticipant: React.FC<AddParticipantProps> = ({
 
     const collectionShare: AddParticipantFormProps["onSubmit"] = async (
         emailOrEmails,
+        setEmailFieldError,
     ) => {
-        let emails = Array.isArray(emailOrEmails) ? emailOrEmails : [];
-        // if email is provided, means user has custom entered email, so, will need to validate for self sharing
-        // and already shared
+        let emails: string[];
         if (typeof emailOrEmails == "string") {
+            // If email is a string, it means the user entered a custom email
+            // string, so validate it to skip self sharing and duplicate share.
             const email = emailOrEmails;
-            if (email === user.email) {
-                throw new Error(t("sharing_with_self"));
+            if (email == user.email) {
+                setEmailFieldError(t("sharing_with_self"));
+                return;
             } else if (
                 collection?.sharees?.find((value) => value.email === email)
             ) {
-                throw new Error(t("sharing_already_shared", { email: email }));
+                setEmailFieldError(
+                    t("sharing_already_shared", { email: email }),
+                );
+                return;
             }
-            // set emails to array of one email
+            // Looks valid. Use it as if were a selection.
             emails = [email];
+        } else {
+            emails = emailOrEmails;
         }
+
         for (const email of emails) {
-            if (
-                email === user.email ||
-                collection?.sharees?.find((value) => value.email === email)
-            ) {
-                // can just skip this email
-                continue;
-            }
             try {
                 await shareCollection(collection, email, type);
-                await syncWithRemote(false, true);
             } catch (e) {
                 if (isHTTP4xxError(e)) {
-                    throw new Error(t("sharing_user_does_not_exist"));
+                    setEmailFieldError(t("sharing_user_does_not_exist"));
+                    return;
                 }
-                const errorMessage = handleSharingErrors(e);
-                throw new Error(errorMessage);
+                setEmailFieldError(handleSharingErrors(e));
+                return;
             }
         }
+
+        if (emails.length > 1) {
+            await syncWithRemote(false, true);
+        }
+        onClose();
     };
 
     return (
@@ -523,9 +530,8 @@ const AddParticipant: React.FC<AddParticipantProps> = ({
             caption={collection.name}
         >
             <AddParticipantForm
-                existingEmails={nonSharedEmails}
+                existingEmails={eligibleEmails}
                 submitButtonTitle={title}
-                onClose={onClose}
                 onSubmit={collectionShare}
             />
         </TitledNestedSidebarDrawer>
@@ -544,44 +550,43 @@ interface AddParticipantFormProps {
     /**
      * Submission handler. A callback invoked when the submit button is pressed.
      *
-     * It is passed either the new email that the user entered, or the list of
-     * selections taht the user made from the provided {@link existingEmails}.
+     * @param emailOrEmail Either the new email that the user entered, or the
+     * subset of {@link existingEmails} selected by the user.
+     *
+     * @param setEmailFieldError A function that can be called to set the error
+     * message shown below the email input field.
      */
-    onSubmit: (emailOrEmails: string | string[]) => Promise<void>;
-    onClose?: () => void;
+    onSubmit: (
+        emailOrEmails: string | string[],
+        setEmailFieldError: (message: string) => void,
+    ) => Promise<void>;
 }
 
 const AddParticipantForm: React.FC<AddParticipantFormProps> = ({
     existingEmails,
     submitButtonTitle,
     onSubmit,
-    onClose,
 }) => {
     const formik = useFormik({
         initialValues: { email: "", selectedEmails: [] },
-        onSubmit: async (
-            { email, selectedEmails },
-            { setFieldError, resetForm },
-        ) => {
+        onSubmit: async ({ email, selectedEmails }, { setFieldError }) => {
+            const setEmailFieldError = (message: string) =>
+                setFieldError("email", message);
             try {
                 if (email) {
                     if (!z.email().safeParse(email).success) {
-                        setFieldError("email", t("invalid_email_error"));
+                        setEmailFieldError(t("invalid_email_error"));
                         return;
                     }
 
-                    await onSubmit(email);
+                    await onSubmit(email, setEmailFieldError);
                 } else {
-                    await onSubmit(selectedEmails);
+                    await onSubmit(selectedEmails, setEmailFieldError);
                 }
             } catch (e) {
                 log.error("Could not add participant", e);
-                setFieldError("email", e?.message);
-                return;
+                setEmailFieldError(t("generic_error"));
             }
-
-            onClose();
-            resetForm();
         },
     });
 
