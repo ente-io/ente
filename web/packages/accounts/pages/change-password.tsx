@@ -1,11 +1,9 @@
+import { Divider } from "@mui/material";
 import {
     AccountsPageContents,
     AccountsPageFooter,
     AccountsPageTitle,
 } from "ente-accounts/components/layouts/centered-paper";
-import SetPasswordForm, {
-    type SetPasswordFormProps,
-} from "ente-accounts/components/SetPasswordForm";
 import { appHomeRoute, stashRedirect } from "ente-accounts/services/redirect";
 import {
     changePassword,
@@ -20,6 +18,10 @@ import { getData, setData } from "ente-shared/storage/localStorage";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import React, { useCallback, useEffect, useState } from "react";
+import {
+    NewPasswordForm,
+    type NewPasswordFormProps,
+} from "../components/NewPasswordForm";
 
 /**
  * A page that allows a user to reset or change their password.
@@ -56,16 +58,15 @@ const PageContents: React.FC<PageContentsProps> = ({ user }) => {
         void router.push(appHomeRoute);
     }, [router]);
 
-    const onSubmit: SetPasswordFormProps["callback"] = async (
+    const handleSubmit: NewPasswordFormProps["onSubmit"] = async (
         password,
-        setFieldError,
+        setPasswordsFieldError,
     ) =>
         changePassword(password)
             .then(redirectToAppHome)
             .catch((e: unknown) => {
                 log.error("Could not change password", e);
-                setFieldError(
-                    "confirm",
+                setPasswordsFieldError(
                     e instanceof Error &&
                         e.message == deriveKeyInsufficientMemoryErrorMessage
                         ? t("password_generation_failed")
@@ -76,17 +77,20 @@ const PageContents: React.FC<PageContentsProps> = ({ user }) => {
     return (
         <AccountsPageContents>
             <AccountsPageTitle>{t("change_password")}</AccountsPageTitle>
-            <SetPasswordForm
+            <NewPasswordForm
                 userEmail={user.email}
-                callback={onSubmit}
-                buttonText={t("change_password")}
+                submitButtonTitle={t("change_password")}
+                onSubmit={handleSubmit}
             />
             {(getData("showBackButton")?.value ?? true) && (
-                <AccountsPageFooter>
-                    <LinkButton onClick={router.back}>
-                        {t("go_back")}
-                    </LinkButton>
-                </AccountsPageFooter>
+                <>
+                    <Divider sx={{ mt: 1 }} />
+                    <AccountsPageFooter>
+                        <LinkButton onClick={router.back}>
+                            {t("go_back")}
+                        </LinkButton>
+                    </AccountsPageFooter>
+                </>
             )}
         </AccountsPageContents>
     );

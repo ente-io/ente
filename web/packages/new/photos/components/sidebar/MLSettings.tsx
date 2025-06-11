@@ -108,7 +108,7 @@ export const EnableML: React.FC<EnableMLProps> = ({
         openURL("https://help.ente.io/photos/features/machine-learning");
 
     return (
-        <Stack sx={{ gap: "32px", py: "20px", px: "16px" }}>
+        <Stack sx={{ gap: "32px", py: "20px", px: 2 }}>
             <Typography sx={{ color: "text.muted" }}>
                 {t("ml_search_description")}
             </Typography>
