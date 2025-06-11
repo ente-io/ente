@@ -17,7 +17,7 @@ import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { Trans } from "react-i18next";
-import * as Yup from "yup";
+import { z } from "zod/v4";
 
 const Page: React.FC = () => {
     useRedirectIfNeedsCredentials("/change-email");
@@ -44,25 +44,26 @@ const ChangeEmailForm: React.FC = () => {
 
     const formik = useFormik({
         initialValues: { email: "", ott: "" },
-        validationSchema: ottInputVisible
-            ? Yup.object().shape({
-                  email: Yup.string()
-                      .email(t("invalid_email_error"))
-                      .required(t("required")),
-                  ott: Yup.string().required(t("required")),
-              })
-            : Yup.object().shape({
-                  email: Yup.string()
-                      .email(t("invalid_email_error"))
-                      .required(t("required")),
-              }),
-        validateOnChange: false,
-        validateOnBlur: false,
         onSubmit: async ({ email, ott }, { setFieldError }) => {
+            if (!email) {
+                setFieldError("email", t("required"));
+                return;
+            }
+
+            if (!z.email().safeParse(email).success) {
+                setFieldError("email", t("invalid_email_error"));
+                return;
+            }
+
             if (ottInputVisible) {
+                if (!ott) {
+                    setFieldError("ott", t("required"));
+                    return;
+                }
+
                 try {
                     setLoading(true);
-                    await changeEmail(email, ott!);
+                    await changeEmail(email, ott);
                     setLoading(false);
                     void goToApp();
                 } catch (e) {
@@ -118,7 +119,7 @@ const ChangeEmailForm: React.FC = () => {
                     />
                 </Alert>
             )}
-            <form noValidate onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit}>
                 <Stack>
                     <TextField
                         fullWidth
