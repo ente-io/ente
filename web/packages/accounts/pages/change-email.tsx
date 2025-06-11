@@ -81,7 +81,14 @@ const ChangeEmailForm: React.FC = () => {
                     await changeEmail(email, ott);
                 } catch (e) {
                     log.error("Could not change email", e);
-                    setFieldError("ott", t("incorrect_code"));
+                    setFieldError(
+                        "ott",
+                        isHTTPErrorWithStatus(e, 401)
+                            ? t("incorrect_code")
+                            : isHTTPErrorWithStatus(e, 410)
+                              ? t("expired_code_error")
+                              : t("generic_error"),
+                    );
                     return;
                 }
 
