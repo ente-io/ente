@@ -157,6 +157,15 @@ export const ensureExpectedLoggedInValue = <T>(t: T | undefined): T => {
  *
  * The various "key" attributes are base64 encoded representations of the
  * underlying binary data.
+ *
+ * [Note: Key attribute mutability]
+ *
+ * The key attributes contain two subsets:
+ *
+ * - Attributes that changes when the user changes their password. These are the
+ *   {@link UpdatedKeyAttr}.
+ *
+ * - All other attributes never change after initial setup.
  */
 export interface KeyAttributes {
     /**

@@ -10,8 +10,7 @@ import { appHomeRoute, stashRedirect } from "ente-accounts/services/redirect";
 import {
     generateSRPSetupAttributes,
     getSRPAttributes,
-    srpSetupOrReconfigure,
-    updateSRPAndKeys,
+    updateSRPAndKeyAttributes,
     type UpdatedKeyAttr,
 } from "ente-accounts/services/srp";
 import {
@@ -22,7 +21,7 @@ import {
 } from "ente-accounts/services/user";
 import { LinkButton } from "ente-base/components/LinkButton";
 import { LoadingIndicator } from "ente-base/components/loaders";
-import { sharedCryptoWorker } from "ente-base/crypto";
+import { deriveSensitiveKey, encryptBox } from "ente-base/crypto";
 import { deriveKeyInsufficientMemoryErrorMessage } from "ente-base/crypto/types";
 import log from "ente-base/log";
 import {
@@ -62,16 +61,14 @@ interface PageContentsProps {
 }
 
 const PageContents: React.FC<PageContentsProps> = ({ user }) => {
-    const token = user.token;
-
     const router = useRouter();
 
     const onSubmit: SetPasswordFormProps["callback"] = async (
-        passphrase,
+        password,
         setFieldError,
     ) => {
         try {
-            await onSubmit2(passphrase);
+            await onSubmit2(password);
         } catch (e) {
             log.error("Could not change password", e);
             setFieldError(
@@ -84,18 +81,19 @@ const PageContents: React.FC<PageContentsProps> = ({ user }) => {
         }
     };
 
-    const onSubmit2 = async (passphrase: string) => {
-        const cryptoWorker = await sharedCryptoWorker();
+    const onSubmit2 = async (password: string) => {
         const masterKey = await ensureMasterKeyFromSession();
         const keyAttributes = ensureSavedKeyAttributes();
+
         const {
             key: kek,
             salt: kekSalt,
             opsLimit,
             memLimit,
-        } = await cryptoWorker.deriveSensitiveKey(passphrase);
+        } = await deriveSensitiveKey(password);
+
         const { encryptedData: encryptedKey, nonce: keyDecryptionNonce } =
-            await cryptoWorker.encryptBox(masterKey, kek);
+            await encryptBox(masterKey, kek);
         const updatedKeyAttr: UpdatedKeyAttr = {
             encryptedKey,
             keyDecryptionNonce,
@@ -104,10 +102,9 @@ const PageContents: React.FC<PageContentsProps> = ({ user }) => {
             memLimit,
         };
 
-        await srpSetupOrReconfigure(
+        await updateSRPAndKeyAttributes(
             await generateSRPSetupAttributes(kek),
-            ({ setupID, srpM1 }) =>
-                updateSRPAndKeys(token, { setupID, srpM1, updatedKeyAttr }),
+            updatedKeyAttr,
         );
 
         // Update the SRP attributes that are stored locally.
@@ -117,7 +114,7 @@ const PageContents: React.FC<PageContentsProps> = ({ user }) => {
         }
 
         await generateAndSaveInteractiveKeyAttributes(
-            passphrase,
+            password,
             { ...keyAttributes, ...updatedKeyAttr },
             masterKey,
         );

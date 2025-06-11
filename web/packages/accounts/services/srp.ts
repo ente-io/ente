@@ -13,6 +13,7 @@ import log from "ente-base/log";
 import { apiURL } from "ente-base/origins";
 import { ApiError, CustomError } from "ente-shared/error";
 import HTTPService from "ente-shared/network/HTTPService";
+import { getToken } from "ente-shared/storage/localStorage/helpers";
 import { SRP, SrpClient } from "fast-srp-hap";
 import { v4 as uuidv4 } from "uuid";
 import { z } from "zod/v4";
@@ -391,7 +392,7 @@ type SRPSetupOrReconfigureExchangeCallback = ({
  *
  * @param srpSetupAttributes SRP setup attributes.
  */
-export const srpSetupOrReconfigure = async (
+const srpSetupOrReconfigure = async (
     { srpSalt, srpUserID, srpVerifier, loginSubKey }: SRPSetupAttributes,
     exchangeCB: SRPSetupOrReconfigureExchangeCallback,
 ) => {
@@ -495,6 +496,10 @@ const completeSRPSetup = async (
     return CompleteSRPSetupResponse.parse(await res.json());
 };
 
+/**
+ * The subset of {@link KeyAttributes} that get updated when the user changes
+ * their password.
+ */
 export interface UpdatedKeyAttr {
     kekSalt: string;
     encryptedKey: string;
@@ -502,6 +507,26 @@ export interface UpdatedKeyAttr {
     opsLimit: number;
     memLimit: number;
 }
+
+/**
+ * Update the user's affected key and SRP attributes when they change their
+ * password.
+ *
+ * The flow on changing password is similar to the flow on initial SRP setup,
+ * with some differences at the tail end of the flow. See: [Note: SRP setup].
+ *
+ * @param srpSetupAttributes Attributes for the user's updated SRP setup.
+ *
+ * @param updatedKeyAttr The subset of the user's key attributes which need to
+ * be updated to reflect their changed password.
+ */
+export const updateSRPAndKeyAttributes = (
+    srpSetupAttributes: SRPSetupAttributes,
+    updatedKeyAttr: UpdatedKeyAttr,
+) =>
+    srpSetupOrReconfigure(srpSetupAttributes, ({ setupID, srpM1 }) =>
+        updateSRPAndKeys({ setupID, srpM1, updatedKeyAttr }),
+    );
 
 export interface UpdateSRPAndKeysRequest {
     srpM1: string;
@@ -520,7 +545,6 @@ export interface UpdateSRPAndKeysResponse {
 }
 
 export const updateSRPAndKeys = async (
-    token: string,
     updateSRPAndKeyRequest: UpdateSRPAndKeysRequest,
 ): Promise<UpdateSRPAndKeysResponse> => {
     try {
@@ -528,7 +552,7 @@ export const updateSRPAndKeys = async (
             await apiURL("/users/srp/update"),
             updateSRPAndKeyRequest,
             undefined,
-            { "X-Auth-Token": token },
+            { "X-Auth-Token": getToken() },
         );
         return resp.data as UpdateSRPAndKeysResponse;
     } catch (e) {
