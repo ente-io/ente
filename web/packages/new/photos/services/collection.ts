@@ -304,12 +304,27 @@ export const shareCollection = async (
 /**
  * Delete the public link for the collection with given {@link collectionID}.
  *
- * Does not modify local state.
+ * Remote only, does not modify local state.
  */
 export const deleteShareURL = async (collectionID: number) =>
     ensureOk(
         await fetch(await apiURL(`/collections/share-url/${collectionID}`), {
             method: "DELETE",
+            headers: await authenticatedRequestHeaders(),
+        }),
+    );
+
+/**
+ * Leave a collection which had previously been shared with the user.
+ *
+ * Remote only, does not modify local state.
+ *
+ * @param collectionID The ID of the shared collection to leave.
+ */
+export const leaveSharedCollection = async (collectionID: number) =>
+    ensureOk(
+        await fetch(await apiURL(`/collections/leave/${collectionID}`), {
+            method: "POST",
             headers: await authenticatedRequestHeaders(),
         }),
     );
