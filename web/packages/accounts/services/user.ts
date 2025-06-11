@@ -654,10 +654,6 @@ export const verifyEmail = async (
         body: JSON.stringify({ email, ott, ...(source ? { source } : {}) }),
     });
     ensureOk(res);
-    // See: [Note: strict mode migration]
-    //
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
     return RemoteEmailOrSRPVerificationResponse.parse(await res.json());
 };
 
