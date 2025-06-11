@@ -295,9 +295,16 @@ export const SignUpContents: React.FC<SignUpContentsProps> = ({
             </LoadingButton>
             <Typography
                 variant="small"
-                sx={{ mt: 1, textAlign: "center", color: "text.muted" }}
+                sx={(theme) => ({
+                    mt: 1,
+                    textAlign: "center",
+                    color: "text.muted",
+                    // Prevent layout shift by using a minHeight equal to the
+                    // lineHeight of the eventual content that'll be shown.
+                    minHeight: theme.typography.small.lineHeight,
+                })}
             >
-                {formik.isSubmitting ? t("key_generation_in_progress") : " "}
+                {formik.isSubmitting ? t("key_generation_in_progress") : ""}
             </Typography>
         </form>
     );

@@ -149,7 +149,12 @@ export const NewPasswordForm: React.FC<NewPasswordFormProps> = ({
             </LoadingButton>
             <Typography
                 variant="small"
-                sx={{ textAlign: "center", mt: 1, color: "text.muted" }}
+                sx={(theme) => ({
+                    textAlign: "center",
+                    mt: 1,
+                    color: "text.muted",
+                    minHeight: theme.typography.small.lineHeight,
+                })}
             >
                 {formik.isSubmitting ? t("key_generation_in_progress") : ""}
             </Typography>
