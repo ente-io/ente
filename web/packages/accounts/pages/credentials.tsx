@@ -21,27 +21,32 @@ import {
     unstashRedirect,
 } from "ente-accounts/services/redirect";
 import { checkSessionValidity } from "ente-accounts/services/session";
+import type { SRPAttributes } from "ente-accounts/services/srp";
 import {
-    configureSRP,
-    deriveSRPPassword,
     generateSRPSetupAttributes,
-    loginViaSRP,
+    getSRPAttributes,
+    setupSRP,
+    verifySRP,
 } from "ente-accounts/services/srp";
-import type { SRPAttributes } from "ente-accounts/services/srp-remote";
-import { getSRPAttributes } from "ente-accounts/services/srp-remote";
-import type { KeyAttributes, User } from "ente-accounts/services/user";
+import {
+    generateAndSaveInteractiveKeyAttributes,
+    type KeyAttributes,
+    type User,
+} from "ente-accounts/services/user";
+import { decryptAndStoreToken } from "ente-accounts/utils/helpers";
 import { LinkButton } from "ente-base/components/LinkButton";
 import { LoadingIndicator } from "ente-base/components/loaders";
 import { useBaseContext } from "ente-base/context";
-import { sharedCryptoWorker } from "ente-base/crypto";
-import type { B64EncryptionResult } from "ente-base/crypto/libsodium";
+import { decryptBox } from "ente-base/crypto";
 import { clearLocalStorage } from "ente-base/local-storage";
 import log from "ente-base/log";
 import {
-    decryptAndStoreToken,
-    generateAndSaveIntermediateKeyAttributes,
-    saveKeyInSessionStore,
-} from "ente-shared/crypto/helpers";
+    haveAuthenticatedSession,
+    saveMasterKeyInSessionAndSafeStore,
+    stashKeyEncryptionKeyInSessionStore,
+    unstashKeyEncryptionKeyFromSession,
+    updateSessionFromElectronSafeStorageIfNeeded,
+} from "ente-base/session";
 import { CustomError } from "ente-shared/error";
 import { getData, setData, setLSUser } from "ente-shared/storage/localStorage";
 import {
@@ -49,7 +54,6 @@ import {
     isFirstLogin,
     setIsFirstLogin,
 } from "ente-shared/storage/localStorage/helpers";
-import { getKey, removeKey, setKey } from "ente-shared/storage/sessionStorage";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useState } from "react";
@@ -111,52 +115,31 @@ const Page: React.FC = () => {
                 return;
             }
             setUser(user);
-            let key = getKey("encryptionKey");
-            const electron = globalThis.electron;
-            if (!key && electron) {
-                try {
-                    key = await electron.masterKeyB64();
-                } catch (e) {
-                    log.error("Failed to read master key from safe storage", e);
-                }
-                if (key) {
-                    await saveKeyInSessionStore("encryptionKey", key, true);
-                }
-            }
-            const token = getToken();
-            if (key && token) {
+            await updateSessionFromElectronSafeStorageIfNeeded();
+            if (await haveAuthenticatedSession()) {
                 void router.push(appHomeRoute);
                 return;
             }
-            const kekEncryptedAttributes: B64EncryptionResult =
-                getKey("keyEncryptionKey");
+            const kek = await unstashKeyEncryptionKeyFromSession();
             const keyAttributes: KeyAttributes = getData("keyAttributes");
             const srpAttributes: SRPAttributes = getData("srpAttributes");
 
-            if (token) {
+            if (getToken()) {
                 setSessionValidityCheck(validateSession());
             }
 
-            if (kekEncryptedAttributes && keyAttributes) {
-                removeKey("keyEncryptionKey");
-                const cryptoWorker = await sharedCryptoWorker();
-                const kek = await cryptoWorker.decryptBox(
-                    {
-                        encryptedData: kekEncryptedAttributes.encryptedData,
-                        nonce: kekEncryptedAttributes.nonce,
-                    },
-                    kekEncryptedAttributes.key,
-                );
-                const key = await cryptoWorker.decryptBox(
+            if (kek && keyAttributes) {
+                const masterKey = await decryptBox(
                     {
                         encryptedData: keyAttributes.encryptedKey,
                         nonce: keyAttributes.keyDecryptionNonce,
                     },
                     kek,
                 );
-                void postVerification(key, kek, keyAttributes);
+                void postVerification(masterKey, kek, keyAttributes);
                 return;
             }
+
             if (keyAttributes) {
                 if (
                     (!user?.token && !user?.encryptedToken) ||
@@ -186,13 +169,12 @@ const Page: React.FC = () => {
         async (kek: string) => {
             try {
                 // Currently the page will get reloaded if any of the attributes
-                // have changed, so we don't need to worry about the kek having
+                // have changed, so we don't need to worry about the KEK having
                 // been generated using stale credentials. This await on the
                 // promise is here to only ensure we're done with the check
                 // before we let the user in.
                 if (sessionValidityCheck) await sessionValidityCheck;
 
-                const cryptoWorker = await sharedCryptoWorker();
                 const {
                     keyAttributes,
                     encryptedToken,
@@ -203,14 +185,12 @@ const Page: React.FC = () => {
                     accountsUrl,
                 } =
                     await userVerificationResultAfterResolvingSecondFactorChoice(
-                        await loginViaSRP(srpAttributes!, kek),
+                        await verifySRP(srpAttributes!, kek),
                     );
                 setIsFirstLogin(true);
 
                 if (passkeySessionID) {
-                    const sessionKeyAttributes =
-                        await cryptoWorker.generateKeyAndEncryptToB64(kek);
-                    setKey("keyEncryptionKey", sessionKeyAttributes);
+                    await stashKeyEncryptionKeyInSessionStore(kek);
                     const user = getData("user");
                     await setLSUser({
                         ...user,
@@ -227,9 +207,7 @@ const Page: React.FC = () => {
                     openPasskeyVerificationURL({ passkeySessionID, url });
                     throw Error(CustomError.TWO_FACTOR_ENABLED);
                 } else if (twoFactorSessionID) {
-                    const sessionKeyAttributes =
-                        await cryptoWorker.generateKeyAndEncryptToB64(kek);
-                    setKey("keyEncryptionKey", sessionKeyAttributes);
+                    await stashKeyEncryptionKeyInSessionStore(kek);
                     const user = getData("user");
                     await setLSUser({
                         ...user,
@@ -262,28 +240,29 @@ const Page: React.FC = () => {
         };
 
     const handleVerifyMasterPassword: VerifyMasterPasswordFormProps["onVerify"] =
-        (key, kek, keyAttributes, passphrase) => {
+        (key, kek, keyAttributes, password) => {
             void (async () => {
-                if (isFirstLogin()) {
-                    await generateAndSaveIntermediateKeyAttributes(
-                        passphrase,
-                        keyAttributes,
-                        key,
-                    );
-                }
-                await postVerification(key, kek, keyAttributes);
+                const updatedKeyAttributes = isFirstLogin()
+                    ? await generateAndSaveInteractiveKeyAttributes(
+                          password,
+                          keyAttributes,
+                          key,
+                      )
+                    : keyAttributes;
+                await postVerification(key, kek, updatedKeyAttributes);
             })();
         };
 
     const postVerification = async (
-        key: string,
+        masterKey: string,
         kek: string,
         keyAttributes: KeyAttributes,
     ) => {
-        await saveKeyInSessionStore("encryptionKey", key);
-        await decryptAndStoreToken(keyAttributes, key);
+        await saveMasterKeyInSessionAndSafeStore(masterKey);
+        await decryptAndStoreToken(keyAttributes, masterKey);
         try {
-            let srpAttributes: SRPAttributes | null = getData("srpAttributes");
+            let srpAttributes: SRPAttributes | null | undefined =
+                getData("srpAttributes");
             if (!srpAttributes && user) {
                 srpAttributes = await getSRPAttributes(user.email);
                 if (srpAttributes) {
@@ -292,10 +271,7 @@ const Page: React.FC = () => {
             }
             log.debug(() => `userSRPSetupPending ${!srpAttributes}`);
             if (!srpAttributes) {
-                const loginSubKey = await deriveSRPPassword(kek);
-                const srpSetupAttributes =
-                    await generateSRPSetupAttributes(loginSubKey);
-                await configureSRP(srpSetupAttributes);
+                await setupSRP(await generateSRPSetupAttributes(kek));
             }
         } catch (e) {
             log.error("migrate to srp failed", e);

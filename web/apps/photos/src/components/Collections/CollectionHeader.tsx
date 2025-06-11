@@ -520,7 +520,6 @@ const CollectionOptions: React.FC<CollectionHeaderProps> = ({
                 {...albumNameInputVisibilityProps}
                 title={t("rename_album")}
                 label={t("album_name")}
-                autoFocus
                 initialValue={activeCollection?.name}
                 submitButtonColor="primary"
                 submitButtonTitle={t("rename")}

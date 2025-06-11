@@ -374,7 +374,6 @@ const ManagePasskeyDrawer: React.FC<ManagePasskeyDrawerProps> = ({
                     title={t("rename_passkey")}
                     label={t("name")}
                     placeholder={t("enter_passkey_name")}
-                    autoFocus
                     initialValue={passkey.friendlyName}
                     submitButtonTitle={t("rename")}
                     onSubmit={handleRenamePasskeySubmit}

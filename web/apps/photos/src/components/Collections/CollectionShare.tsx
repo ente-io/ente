@@ -54,6 +54,7 @@ import type {
 import { type CollectionUser } from "ente-media/collection";
 import { PublicLinkCreated } from "ente-new/photos/components/share/PublicLinkCreated";
 import { avatarTextColor } from "ente-new/photos/services/avatar";
+import { deleteShareURL } from "ente-new/photos/services/collection";
 import type { CollectionSummary } from "ente-new/photos/services/collection/ui";
 import { usePhotosAppContext } from "ente-new/photos/types/context";
 import { CustomError, parseSharingErrorCodes } from "ente-shared/error";
@@ -65,7 +66,6 @@ import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { Trans } from "react-i18next";
 import {
     createShareableURL,
-    deleteShareableURL,
     shareCollection,
     unshareCollection,
     updateShareableURL,
@@ -1222,16 +1222,16 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
             galleryContext.setBlockingLoad(false);
         }
     };
-    const disablePublicSharing = async () => {
+    const handleRemovePublicLink = async () => {
         try {
             galleryContext.setBlockingLoad(true);
-            await deleteShareableURL(collection);
+            await deleteShareURL(collection.id);
             setPublicShareProp(null);
             galleryContext.syncWithRemote(false, true);
             onClose();
         } catch (e) {
-            const errorMessage = handleSharingErrors(e);
-            setSharableLinkError(errorMessage);
+            log.error("Failed to remove public link", e);
+            setSharableLinkError(t("generic_error"));
         } finally {
             galleryContext.setBlockingLoad(false);
         }
@@ -1293,7 +1293,7 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
                     <RowButton
                         color="critical"
                         startIcon={<RemoveCircleOutlineIcon />}
-                        onClick={disablePublicSharing}
+                        onClick={handleRemovePublicLink}
                         label={t("remove_link")}
                     />
                 </RowButtonGroup>
