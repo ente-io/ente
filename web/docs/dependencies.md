@@ -211,6 +211,9 @@ via [@fontsource-variable/inter](https://fontsource.org/fonts/inter/install).
 - [zxcvbn](https://github.com/dropbox/zxcvbn) is used for password strength
   estimation.
 
+- [fast-srp-hap](https://github.com/homebridge/fast-srp) is used for the maths
+  underlying the SRP protocol.
+
 ## Media
 
 - [ffmpeg.wasm](https://github.com/ffmpegwasm/ffmpeg.wasm) is used to run FFmpeg
