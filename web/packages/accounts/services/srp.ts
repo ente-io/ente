@@ -1,4 +1,3 @@
-import { HttpStatusCode } from "axios";
 import {
     deriveSubKeyBytes,
     generateDeriveKeySalt,
@@ -9,14 +8,14 @@ import {
     ensureOk,
     publicRequestHeaders,
 } from "ente-base/http";
-import log from "ente-base/log";
 import { apiURL } from "ente-base/origins";
-import { ApiError, CustomError } from "ente-shared/error";
-import HTTPService from "ente-shared/network/HTTPService";
 import { SRP, SrpClient } from "fast-srp-hap";
 import { v4 as uuidv4 } from "uuid";
 import { z } from "zod/v4";
-import type { UserVerificationResponse } from "./user";
+import {
+    RemoteSRPVerificationResponse,
+    type EmailOrSRPVerificationResponse,
+} from "./user";
 
 /**
  * The SRP attributes for a user.
@@ -363,7 +362,7 @@ export const unstashAndUseSRPSetupAttributes = async (
  *
  * @param srpSetupAttributes SRP setup attributes.
  */
-export const configureSRP = async (srpSetupAttributes: SRPSetupAttributes) =>
+export const setupSRP = async (srpSetupAttributes: SRPSetupAttributes) =>
     srpSetupOrReconfigure(srpSetupAttributes, completeSRPSetup);
 
 /**
@@ -391,7 +390,7 @@ type SRPSetupOrReconfigureExchangeCallback = ({
  *
  * @param srpSetupAttributes SRP setup attributes.
  */
-export const srpSetupOrReconfigure = async (
+const srpSetupOrReconfigure = async (
     { srpSalt, srpUserID, srpVerifier, loginSubKey }: SRPSetupAttributes,
     exchangeCB: SRPSetupOrReconfigureExchangeCallback,
 ) => {
@@ -495,15 +494,10 @@ const completeSRPSetup = async (
     return CompleteSRPSetupResponse.parse(await res.json());
 };
 
-interface CreateSRPSessionResponse {
-    sessionID: string;
-    srpB: string;
-}
-
-export interface SRPVerificationResponse extends UserVerificationResponse {
-    srpM2: string;
-}
-
+/**
+ * The subset of {@link KeyAttributes} that get updated when the user changes
+ * their password.
+ */
 export interface UpdatedKeyAttr {
     kekSalt: string;
     encryptedKey: string;
@@ -512,9 +506,29 @@ export interface UpdatedKeyAttr {
     memLimit: number;
 }
 
+/**
+ * Update the user's affected key and SRP attributes when they change their
+ * password.
+ *
+ * The flow on changing password is similar to the flow on initial SRP setup,
+ * with some differences at the tail end of the flow. See: [Note: SRP setup].
+ *
+ * @param srpSetupAttributes Attributes for the user's updated SRP setup.
+ *
+ * @param updatedKeyAttr The subset of the user's key attributes which need to
+ * be updated to reflect their changed password.
+ */
+export const updateSRPAndKeyAttributes = (
+    srpSetupAttributes: SRPSetupAttributes,
+    updatedKeyAttr: UpdatedKeyAttr,
+) =>
+    srpSetupOrReconfigure(srpSetupAttributes, ({ setupID, srpM1 }) =>
+        updateSRPAndKeys({ setupID, srpM1, updatedKeyAttr }),
+    );
+
 export interface UpdateSRPAndKeysRequest {
-    srpM1: string;
     setupID: string;
+    srpM1: string;
     updatedKeyAttr: UpdatedKeyAttr;
     /**
      * If true (default), then all existing sessions for the user will be
@@ -523,102 +537,126 @@ export interface UpdateSRPAndKeysRequest {
     logOutOtherDevices?: boolean;
 }
 
-export interface UpdateSRPAndKeysResponse {
-    srpM2: string;
-    setupID: string;
+const UpdateSRPAndKeysResponse = z.object({
+    srpM2: z.string(),
+    setupID: z.string(),
+});
+
+type UpdateSRPAndKeysResponse = z.infer<typeof UpdateSRPAndKeysResponse>;
+
+/**
+ * Update the SRP attributes and a subset of the key attributes on remote.
+ *
+ * This is invoked during the flow when the user changes their password, and SRP
+ * needs to be reconfigured. See: [Note: SRP setup].
+ */
+const updateSRPAndKeys = async (
+    updateSRPAndKeysRequest: UpdateSRPAndKeysRequest,
+): Promise<UpdateSRPAndKeysResponse> => {
+    const res = await fetch(await apiURL("/users/srp/update"), {
+        method: "POST",
+        headers: await authenticatedRequestHeaders(),
+        body: JSON.stringify(updateSRPAndKeysRequest),
+    });
+    ensureOk(res);
+    return UpdateSRPAndKeysResponse.parse(await res.json());
+};
+
+/**
+ * The message of the {@link Error} that is thrown by {@link verifySRP} if
+ * remote fails SRP verification with a HTTP 401.
+ *
+ * The API contract allows for a SRP verification 401 both because of incorrect
+ * credentials or a non existent account.
+ */
+export const srpVerificationUnauthorizedErrorMessage =
+    "SRP verification failed (HTTP 401 Unauthorized)";
+
+/**
+ * Log the user in to a new device by performing SRP verification.
+ *
+ * This function implements the flow described in [Note: SRP verification].
+ *
+ * @param srpAttributes The user's SRP attributes.
+ *
+ * @param kek The user's key encryption key as a base64 string.
+ *
+ * @returns If SRP verification is successful, it returns a
+ * {@link EmailOrSRPVerificationResponse}.
+ *
+ * @throws An Error with {@link srpVerificationUnauthorizedErrorMessage} in case
+ * there is no such account, or if the credentials (kek) are incorrect.
+ */
+export const verifySRP = async (
+    { srpUserID, srpSalt }: SRPAttributes,
+    kek: string,
+): Promise<EmailOrSRPVerificationResponse> => {
+    const loginSubKey = await deriveSRPLoginSubKey(kek);
+    const srpClient = await generateSRPClient(srpSalt, srpUserID, loginSubKey);
+
+    // Send A, obtain B.
+    const { srpB, sessionID } = await createSRPSession({
+        srpUserID,
+        srpA: bufferToB64(srpClient.computeA()),
+    });
+
+    srpClient.setB(b64ToBuffer(srpB));
+
+    // Send M1, obtain M2.
+    const { srpM2, ...rest } = await verifySRPSession({
+        sessionID,
+        srpUserID,
+        srpM1: bufferToB64(srpClient.computeM1()),
+    });
+
+    srpClient.checkM2(b64ToBuffer(srpM2));
+
+    return rest;
+};
+
+interface CreateSRPSessionRequest {
+    srpUserID: string;
+    srpA: string;
 }
 
-export const updateSRPAndKeys = async (
-    token: string,
-    updateSRPAndKeyRequest: UpdateSRPAndKeysRequest,
-): Promise<UpdateSRPAndKeysResponse> => {
-    try {
-        const resp = await HTTPService.post(
-            await apiURL("/users/srp/update"),
-            updateSRPAndKeyRequest,
-            undefined,
-            { "X-Auth-Token": token },
-        );
-        return resp.data as UpdateSRPAndKeysResponse;
-    } catch (e) {
-        log.error("updateSRPAndKeys failed", e);
-        throw e;
-    }
-};
+const CreateSRPSessionResponse = z.object({
+    sessionID: z.string(),
+    srpB: z.string(),
+});
 
-export const loginViaSRP = async (
-    srpAttributes: SRPAttributes,
-    kek: string,
-): Promise<UserVerificationResponse> => {
-    try {
-        const loginSubKey = await deriveSRPLoginSubKey(kek);
-        const srpClient = await generateSRPClient(
-            srpAttributes.srpSalt,
-            srpAttributes.srpUserID,
-            loginSubKey,
-        );
-        const srpA = srpClient.computeA();
-        const { srpB, sessionID } = await createSRPSession(
-            srpAttributes.srpUserID,
-            bufferToB64(srpA),
-        );
-        srpClient.setB(b64ToBuffer(srpB));
+type CreateSRPSessionResponse = z.infer<typeof CreateSRPSessionResponse>;
 
-        const m1 = srpClient.computeM1();
-        log.debug(() => `srp m1: ${bufferToB64(m1)}`);
-        const { srpM2, ...rest } = await verifySRPSession(
-            sessionID,
-            srpAttributes.srpUserID,
-            bufferToB64(m1),
-        );
-        log.debug(() => `srp verify session successful,srpM2: ${srpM2}`);
-
-        srpClient.checkM2(b64ToBuffer(srpM2));
-
-        log.debug(() => `srp server verify successful`);
-        return rest;
-    } catch (e) {
-        log.error("srp verify failed", e);
-        throw e;
-    }
-};
-
-const createSRPSession = async (srpUserID: string, srpA: string) => {
+const createSRPSession = async (
+    createSRPSessionRequest: CreateSRPSessionRequest,
+): Promise<CreateSRPSessionResponse> => {
     const res = await fetch(await apiURL("/users/srp/create-session"), {
         method: "POST",
         headers: publicRequestHeaders(),
-        body: JSON.stringify({ srpUserID, srpA }),
+        body: JSON.stringify(createSRPSessionRequest),
     });
     ensureOk(res);
-    const data = await res.json();
-    // TODO: Use zod
-    return data as CreateSRPSessionResponse;
+    return CreateSRPSessionResponse.parse(await res.json());
 };
 
+interface VerifySRPSessionRequest {
+    sessionID: string;
+    srpUserID: string;
+    srpM1: string;
+}
+
+type SRPVerificationResponse = z.infer<typeof RemoteSRPVerificationResponse>;
+
 const verifySRPSession = async (
-    sessionID: string,
-    srpUserID: string,
-    srpM1: string,
-) => {
-    try {
-        const resp = await HTTPService.post(
-            await apiURL("/users/srp/verify-session"),
-            { sessionID, srpUserID, srpM1 },
-            undefined,
-        );
-        return resp.data as SRPVerificationResponse;
-    } catch (e) {
-        log.error("verifySRPSession failed", e);
-        if (
-            e instanceof ApiError &&
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
-            e.httpStatusCode === HttpStatusCode.Unauthorized
-        ) {
-            // The API contract allows for a SRP verification 401 both because
-            // of incorrect credentials or a non existent account.
-            throw Error(CustomError.INCORRECT_PASSWORD_OR_NO_ACCOUNT);
-        } else {
-            throw e;
-        }
+    verifySRPSessionRequest: VerifySRPSessionRequest,
+): Promise<SRPVerificationResponse> => {
+    const res = await fetch(await apiURL("/users/srp/verify-session"), {
+        method: "POST",
+        headers: publicRequestHeaders(),
+        body: JSON.stringify(verifySRPSessionRequest),
+    });
+    if (res.status == 401) {
+        throw new Error(srpVerificationUnauthorizedErrorMessage);
     }
+    ensureOk(res);
+    return RemoteSRPVerificationResponse.parse(await res.json());
 };

@@ -23,10 +23,10 @@ import {
 import { checkSessionValidity } from "ente-accounts/services/session";
 import type { SRPAttributes } from "ente-accounts/services/srp";
 import {
-    configureSRP,
     generateSRPSetupAttributes,
     getSRPAttributes,
-    loginViaSRP,
+    setupSRP,
+    verifySRP,
 } from "ente-accounts/services/srp";
 import {
     generateAndSaveInteractiveKeyAttributes,
@@ -185,7 +185,7 @@ const Page: React.FC = () => {
                     accountsUrl,
                 } =
                     await userVerificationResultAfterResolvingSecondFactorChoice(
-                        await loginViaSRP(srpAttributes!, kek),
+                        await verifySRP(srpAttributes!, kek),
                     );
                 setIsFirstLogin(true);
 
@@ -271,7 +271,7 @@ const Page: React.FC = () => {
             }
             log.debug(() => `userSRPSetupPending ${!srpAttributes}`);
             if (!srpAttributes) {
-                await configureSRP(await generateSRPSetupAttributes(kek));
+                await setupSRP(await generateSRPSetupAttributes(kek));
             }
         } catch (e) {
             log.error("migrate to srp failed", e);
