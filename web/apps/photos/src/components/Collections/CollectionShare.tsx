@@ -59,7 +59,7 @@ import type { CollectionSummary } from "ente-new/photos/services/collection/ui";
 import { usePhotosAppContext } from "ente-new/photos/types/context";
 import { CustomError, parseSharingErrorCodes } from "ente-shared/error";
 import { wait } from "ente-utils/promise";
-import { Formik, type FormikHelpers } from "formik";
+import { useFormik, type FormikHelpers } from "formik";
 import { t } from "i18next";
 import { GalleryContext } from "pages/gallery";
 import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
@@ -575,117 +575,104 @@ const AddParticipantForm: React.FC<AddParticipantFormProps> = (props) => {
     const handleInputFieldClick = (setFieldValue) => {
         setFieldValue("selectedOptions", []);
     };
+    const formik = useFormik({
+        initialValues: { inputValue: "", selectedOptions: [] },
+        onSubmit: submitForm,
+        validationSchema: validationSchema,
+        validateOnChange: false,
+        validateOnBlur: false,
+    });
 
+    const { values, errors, handleChange, handleSubmit, setFieldValue } =
+        formik;
     return (
-        <Formik<AddParticipantFormValues>
-            initialValues={{ inputValue: "", selectedOptions: [] }}
-            onSubmit={submitForm}
-            validationSchema={validationSchema}
-            validateOnChange={false}
-            validateOnBlur={false}
-        >
-            {({
-                values,
-                errors,
-                handleChange,
-                handleSubmit,
-                setFieldValue,
-            }) => (
-                <form noValidate onSubmit={handleSubmit}>
-                    <Stack sx={{ gap: "24px", py: "20px", px: "12px" }}>
-                        <Stack>
-                            <RowButtonGroupTitle>
-                                {t("add_new_email")}
-                            </RowButtonGroupTitle>
-                            <TextField
-                                fullWidth
-                                id={"email"}
-                                name={"email"}
-                                type={"email"}
-                                label={t("enter_email")}
-                                sx={{ mt: 0 }}
-                                disabled={loading}
-                                onChange={handleChange("inputValue")}
-                                onClick={() =>
-                                    handleInputFieldClick(setFieldValue)
-                                }
-                                error={Boolean(errors.inputValue)}
-                                helperText={errors.inputValue}
-                                value={values.inputValue}
-                            />
-                        </Stack>
+        <form noValidate onSubmit={handleSubmit}>
+            <Stack sx={{ gap: "24px", py: "20px", px: "12px" }}>
+                <Stack>
+                    <RowButtonGroupTitle>
+                        {t("add_new_email")}
+                    </RowButtonGroupTitle>
+                    <TextField
+                        fullWidth
+                        id={"email"}
+                        name={"email"}
+                        type={"email"}
+                        label={t("enter_email")}
+                        sx={{ mt: 0 }}
+                        disabled={loading}
+                        onChange={handleChange("inputValue")}
+                        onClick={() => handleInputFieldClick(setFieldValue)}
+                        error={Boolean(errors.inputValue)}
+                        helperText={errors.inputValue}
+                        value={values.inputValue}
+                    />
+                </Stack>
 
-                        {props.optionsList.length > 0 && (
-                            <Stack>
-                                <RowButtonGroupTitle>
-                                    {t("or_add_existing")}
-                                </RowButtonGroupTitle>
-                                <RowButtonGroup>
-                                    {props.optionsList.map((item, index) => (
-                                        <React.Fragment key={item}>
-                                            <RowButton
-                                                fontWeight="regular"
-                                                onClick={() => {
-                                                    if (
-                                                        values.selectedOptions.includes(
+                {props.optionsList.length > 0 && (
+                    <Stack>
+                        <RowButtonGroupTitle>
+                            {t("or_add_existing")}
+                        </RowButtonGroupTitle>
+                        <RowButtonGroup>
+                            {props.optionsList.map((item, index) => (
+                                <React.Fragment key={item}>
+                                    <RowButton
+                                        fontWeight="regular"
+                                        onClick={() => {
+                                            if (
+                                                values.selectedOptions.includes(
+                                                    item,
+                                                )
+                                            ) {
+                                                setFieldValue(
+                                                    "selectedOptions",
+                                                    values.selectedOptions.filter(
+                                                        (selectedOption) =>
+                                                            selectedOption !==
                                                             item,
-                                                        )
-                                                    ) {
-                                                        setFieldValue(
-                                                            "selectedOptions",
-                                                            values.selectedOptions.filter(
-                                                                (
-                                                                    selectedOption,
-                                                                ) =>
-                                                                    selectedOption !==
-                                                                    item,
-                                                            ),
-                                                        );
-                                                    } else {
-                                                        setFieldValue(
-                                                            "selectedOptions",
-                                                            [
-                                                                ...values.selectedOptions,
-                                                                item,
-                                                            ],
-                                                        );
-                                                    }
-                                                }}
-                                                label={item}
-                                                startIcon={
-                                                    <Avatar email={item} />
-                                                }
-                                                endIcon={
-                                                    values.selectedOptions.includes(
+                                                    ),
+                                                );
+                                            } else {
+                                                setFieldValue(
+                                                    "selectedOptions",
+                                                    [
+                                                        ...values.selectedOptions,
                                                         item,
-                                                    ) ? (
-                                                        <DoneIcon />
-                                                    ) : null
-                                                }
-                                            />
-                                            {index !==
-                                                props.optionsList.length -
-                                                    1 && <RowButtonDivider />}
-                                        </React.Fragment>
-                                    ))}
-                                </RowButtonGroup>
-                            </Stack>
-                        )}
+                                                    ],
+                                                );
+                                            }
+                                        }}
+                                        label={item}
+                                        startIcon={<Avatar email={item} />}
+                                        endIcon={
+                                            values.selectedOptions.includes(
+                                                item,
+                                            ) ? (
+                                                <DoneIcon />
+                                            ) : null
+                                        }
+                                    />
+                                    {index !== props.optionsList.length - 1 && (
+                                        <RowButtonDivider />
+                                    )}
+                                </React.Fragment>
+                            ))}
+                        </RowButtonGroup>
                     </Stack>
-                    <Stack sx={{ px: 2 }}>
-                        <LoadingButton
-                            type="submit"
-                            color="accent"
-                            fullWidth
-                            loading={loading}
-                            sx={{ mt: 4, mb: 4 }}
-                        >
-                            {props.buttonText}
-                        </LoadingButton>
-                    </Stack>
-                </form>
-            )}
-        </Formik>
+                )}
+            </Stack>
+            <Stack sx={{ px: 2 }}>
+                <LoadingButton
+                    type="submit"
+                    color="accent"
+                    fullWidth
+                    loading={loading}
+                    sx={{ mt: 4, mb: 4 }}
+                >
+                    {props.buttonText}
+                </LoadingButton>
+            </Stack>
+        </form>
     );
 };
 
