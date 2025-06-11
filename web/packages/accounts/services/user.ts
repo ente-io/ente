@@ -1,4 +1,11 @@
 import {
+    generateSRPSetupAttributes,
+    getSRPAttributes,
+    saveSRPAttributes,
+    updateSRPAndKeyAttributes,
+    type UpdatedKeyAttr,
+} from "ente-accounts/services/srp";
+import {
     decryptBox,
     deriveInteractiveKey,
     deriveSensitiveKey,
@@ -6,14 +13,20 @@ import {
     generateKey,
     generateKeyPair,
 } from "ente-base/crypto";
+import { isDevBuild } from "ente-base/env";
 import {
     authenticatedRequestHeaders,
     ensureOk,
     publicRequestHeaders,
 } from "ente-base/http";
 import { apiURL } from "ente-base/origins";
+import {
+    ensureMasterKeyFromSession,
+    saveMasterKeyInSessionAndSafeStore,
+} from "ente-base/session";
 import { getAuthToken } from "ente-base/token";
 import { getData, setLSUser } from "ente-shared/storage/localStorage";
+import { ensure } from "ente-utils/ensure";
 import { nullToUndefined } from "ente-utils/transform";
 import { z } from "zod/v4";
 import { getUserRecoveryKey, recoveryKeyFromMnemonic } from "./recovery-key";
@@ -656,13 +669,22 @@ export const generateAndSaveInteractiveKeyAttributes = async (
 };
 
 /**
- * Change the email associated with the user's account on remote.
+ * Change the email associated with the user's account (both locally and on
+ * remote)
  *
  * @param email The new email.
  *
  * @param ott The verification code that was sent to the new email.
  */
-export const changeEmail = async (email: string, ott: string) =>
+export const changeEmail = async (email: string, ott: string) => {
+    await postChangeEmail(email, ott);
+    await setLSUser({ ...getData("user"), email });
+};
+
+/**
+ * Change the email associated with the user's account on remote.
+ */
+const postChangeEmail = async (email: string, ott: string) =>
     ensureOk(
         await fetch(await apiURL("/users/change-email"), {
             method: "POST",
@@ -670,6 +692,60 @@ export const changeEmail = async (email: string, ott: string) =>
             body: JSON.stringify({ email, ott }),
         }),
     );
+
+/**
+ * Change the user's password on both remote and locally.
+ *
+ * @param password The new password.
+ */
+export const changePassword = async (password: string) => {
+    const user = ensureLocalUser();
+    const masterKey = await ensureMasterKeyFromSession();
+    const keyAttributes = ensureSavedKeyAttributes();
+
+    // Generate new KEK.
+    const {
+        key: kek,
+        salt: kekSalt,
+        opsLimit,
+        memLimit,
+    } = await deriveSensitiveKey(password);
+
+    // Generate new key attributes.
+    const { encryptedData: encryptedKey, nonce: keyDecryptionNonce } =
+        await encryptBox(masterKey, kek);
+    const updatedKeyAttr: UpdatedKeyAttr = {
+        encryptedKey,
+        keyDecryptionNonce,
+        kekSalt,
+        opsLimit,
+        memLimit,
+    };
+
+    // Update SRP and key attributes on remote.
+    await updateSRPAndKeyAttributes(
+        await generateSRPSetupAttributes(kek),
+        updatedKeyAttr,
+    );
+
+    // Update SRP attributes locally.
+    const srpAttributes = await getSRPAttributes(user.email);
+    saveSRPAttributes(ensure(srpAttributes));
+
+    // Update key attributes locally, generating a new interactive kek while
+    // we're at it.
+    await generateAndSaveInteractiveKeyAttributes(
+        password,
+        { ...keyAttributes, ...updatedKeyAttr },
+        masterKey,
+    );
+
+    // TODO(RE): This shouldn't be needed, remove me. As a soft remove,
+    // disabling it for dev builds. (tag: Migration)
+    if (!isDevBuild) {
+        await saveMasterKeyInSessionAndSafeStore(masterKey);
+    }
+};
 
 const TwoFactorSecret = z.object({
     /**

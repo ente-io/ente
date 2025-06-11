@@ -11,7 +11,7 @@ import { LinkButton } from "ente-base/components/LinkButton";
 import { LoadingButton } from "ente-base/components/mui/LoadingButton";
 import { isHTTPErrorWithStatus } from "ente-base/http";
 import log from "ente-base/log";
-import { getData, setLSUser } from "ente-shared/storage/localStorage";
+import { getData } from "ente-shared/storage/localStorage";
 import { Formik, type FormikHelpers } from "formik";
 import { t } from "i18next";
 import { useRouter } from "next/router";
@@ -86,7 +86,6 @@ const ChangeEmailForm: React.FC = () => {
         try {
             setLoading(true);
             await changeEmail(email, ott!);
-            await setLSUser({ ...getData("user"), email });
             setLoading(false);
             void goToApp();
         } catch (e) {
