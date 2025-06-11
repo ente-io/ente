@@ -45,7 +45,7 @@
     "welcome_to_ente_subtitle": "Archiviazione e condivisione di foto crittografate end-to-end",
     "new_album": "Nuovo album",
     "create_albums": "Crea album",
-    "enter_album_name": "Nome album",
+    "album_name": "Nome album",
     "close": "Chiudi",
     "yes": "",
     "no": "No",
@@ -531,9 +531,9 @@
     "ml_consent_description": "<p>Se abiliti l'apprendimento automatico, Ente estrarrà informazioni come la geometria del volto dai file, inclusi quelli condivisi con te.</p><p>Questo sarà fatto sul tuo dispositivo e qualsiasi informazione biometrica generata sarà crittografata end-to-end.</p><p><a>Clicca qui per maggiori dettagli su questa funzione nella nostra informativa sulla privacy</a></p>",
     "ml_consent_confirmation": "Comprendo e desidero abilitare l'apprendimento automatico",
     "labs": "Laboratori",
-    "passphrase_strength_weak": "Sicurezza password: Debole",
-    "passphrase_strength_moderate": "Sicurezza password: Moderata",
-    "passphrase_strength_strong": "Sicurezza password: Forte",
+    "password_strength_weak": "Sicurezza password: Debole",
+    "password_strength_moderate": "Sicurezza password: Moderata",
+    "password_strength_strong": "Sicurezza password: Forte",
     "preferences": "Preferenze",
     "language": "Lingua",
     "advanced": "Avanzate",
@@ -626,6 +626,7 @@
     "faster_upload_description": "Effettua l'upload attraverso i server vicini",
     "open_ente_on_startup": "",
     "cast_album_to_tv": "Riproduci album sulla TV",
+    "cast_to_tv": "",
     "enter_cast_pin_code": "Inserisci il codice che vedi sulla TV qui sotto per associare questo dispositivo.",
     "code": "",
     "pair_device_to_tv": "Associa dispositivi",
@@ -681,5 +682,6 @@
     "processing_videos_status": "",
     "share_favorites": "",
     "person_favorites": "",
-    "shared_favorites": ""
+    "shared_favorites": "",
+    "added_by_name": ""
 }

@@ -36,11 +36,13 @@ import "package:photos/models/selected_albums.dart";
 import 'package:photos/models/selected_files.dart';
 import "package:photos/service_locator.dart";
 import 'package:photos/services/account/user_service.dart';
+import "package:photos/services/album_home_widget_service.dart";
 import 'package:photos/services/app_lifecycle_service.dart';
 import 'package:photos/services/collections_service.dart';
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/services/memory_home_widget_service.dart";
 import "package:photos/services/notification_service.dart";
+import "package:photos/services/people_home_widget_service.dart";
 import "package:photos/services/sync/diff_fetcher.dart";
 import 'package:photos/services/sync/local_sync_service.dart';
 import "package:photos/services/sync/remote_sync_service.dart";
@@ -126,6 +128,8 @@ class _HomeWidgetState extends State<HomeWidget> {
 
     if (LocalSyncService.instance.hasCompletedFirstImport()) {
       MemoryHomeWidgetService.instance.checkPendingMemorySync();
+      PeopleHomeWidgetService.instance.checkPendingPeopleSync();
+      AlbumHomeWidgetService.instance.checkPendingAlbumsSync();
     }
     _tabChangedEventSubscription =
         Bus.instance.on<TabChangedEvent>().listen((event) {
@@ -190,6 +194,8 @@ class _HomeWidgetState extends State<HomeWidget> {
             if (mounted) {
               setState(() {});
               MemoryHomeWidgetService.instance.checkPendingMemorySync();
+              AlbumHomeWidgetService.instance.checkPendingAlbumsSync();
+              PeopleHomeWidgetService.instance.checkPendingPeopleSync();
             }
           },
         );
@@ -605,10 +611,16 @@ class _HomeWidgetState extends State<HomeWidget> {
             } else {
               Navigator.pop(context);
             }
-          } else {
-            Bus.instance
-                .fire(TabChangedEvent(0, TabChangedEventSource.backButton));
+            return;
           }
+          if (_selectedTabIndex == 1) {
+            if (_selectedAlbums.albums.isNotEmpty) {
+              _selectedAlbums.clearAll();
+              return;
+            }
+          }
+          Bus.instance
+              .fire(TabChangedEvent(0, TabChangedEventSource.backButton));
         },
         child: Scaffold(
           drawerScrimColor: getEnteColorScheme(context).strokeFainter,
@@ -857,10 +869,11 @@ class _HomeWidgetState extends State<HomeWidget> {
       debugPrint('notification payload: $payload');
       if (payload.toLowerCase().contains("onthisday")) {
         // ignore: unawaited_futures
-        memoriesCacheService.goToMemoryFromMemoryID(
-          context,
-          payload,
-        );
+        memoriesCacheService.goToOnThisDayMemory(context);
+      } else if (payload.toLowerCase().contains("birthday")) {
+        final personID = payload.substring("birthday_".length);
+        // ignore: unawaited_futures
+        memoriesCacheService.goToPersonMemory(context, personID);
       } else {
         final collectionID = Uri.parse(payload).queryParameters["collectionID"];
         if (collectionID != null) {

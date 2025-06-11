@@ -3,6 +3,7 @@ import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { CssBaseline, Typography } from "@mui/material";
 import { styled, ThemeProvider } from "@mui/material/styles";
 import { useNotification } from "components/utils/hooks-app";
+import type { User } from "ente-accounts/services/user";
 import { clientPackageName, isDesktop, staticAppTitle } from "ente-base/app";
 import { CenteredRow } from "ente-base/components/containers";
 import { CustomHead } from "ente-base/components/Head";
@@ -22,6 +23,10 @@ import { BaseContext, deriveBaseContext } from "ente-base/context";
 import log from "ente-base/log";
 import { logStartupBanner } from "ente-base/log-web";
 import { AppUpdate } from "ente-base/types/ipc";
+import {
+    initVideoProcessing,
+    isHLSGenerationSupported,
+} from "ente-gallery/services/video";
 import { Notification } from "ente-new/photos/components/Notification";
 import { ThemedLoadingBar } from "ente-new/photos/components/ThemedLoadingBar";
 import {
@@ -39,17 +44,12 @@ import {
     getData,
     isLocalStorageAndIndexedDBMismatch,
 } from "ente-shared/storage/localStorage";
-import type { User } from "ente-shared/user/types";
 import { t } from "i18next";
 import type { AppProps } from "next/app";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { photosLogout } from "services/logout";
 
-import {
-    initVideoProcessing,
-    isHLSGenerationSupportedTemp,
-} from "ente-gallery/services/video";
 import "photoswipe/dist/photoswipe.css";
 import "styles/global.css";
 import "styles/photoswipe.css";
@@ -112,7 +112,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
         };
 
         if (isMLSupported) initML();
-        if (isHLSGenerationSupportedTemp()) void initVideoProcessing();
+        if (isHLSGenerationSupported) void initVideoProcessing();
 
         electron.onOpenEnteURL(handleOpenEnteURL);
         electron.onAppUpdateAvailable(showUpdateDialog);

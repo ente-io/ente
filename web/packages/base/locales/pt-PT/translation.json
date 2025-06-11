@@ -45,7 +45,7 @@
     "welcome_to_ente_subtitle": "Armazenamento criptografado de ponta a ponta de fotos e compartilhamento",
     "new_album": "Novo álbum",
     "create_albums": "Criar álbuns",
-    "enter_album_name": "Nome do álbum",
+    "album_name": "Nome do álbum",
     "close": "Fechar",
     "yes": "Sim",
     "no": "Não",
@@ -531,9 +531,9 @@
     "ml_consent_description": "<p>Se ativar a aprendizagem automática, o Ente extrairá informações como a geometria do rosto de ficheiros, incluindo os partilhados consigo.</p><p>Isto acontecerá no seu dispositivo e qualquer informação biométrica gerada será encriptada de ponta a ponta.</p><p><a>Clique aqui para obter mais detalhes sobre esta funcionalidade na nossa política de privacidade</a></p>",
     "ml_consent_confirmation": "Eu entendo, e desejo ativar a aprendizagem automática",
     "labs": "Laboratórios",
-    "passphrase_strength_weak": "Força da palavra-passe: Fraca",
-    "passphrase_strength_moderate": "Força da palavra-passe: Moderada",
-    "passphrase_strength_strong": "Força da palavra-passe: Forte",
+    "password_strength_weak": "Força da palavra-passe: Fraca",
+    "password_strength_moderate": "Força da palavra-passe: Moderada",
+    "password_strength_strong": "Força da palavra-passe: Forte",
     "preferences": "Preferências",
     "language": "Idioma",
     "advanced": "Avançado",
@@ -626,6 +626,7 @@
     "faster_upload_description": "Rotas enviam em servidores próximos",
     "open_ente_on_startup": "",
     "cast_album_to_tv": "Reproduzir álbum na TV",
+    "cast_to_tv": "",
     "enter_cast_pin_code": "Introduza o código que vê na TV abaixo para emparelhar este dispositivo.",
     "code": "",
     "pair_device_to_tv": "Emparelhar dispositivos",
@@ -681,5 +682,6 @@
     "processing_videos_status": "",
     "share_favorites": "",
     "person_favorites": "",
-    "shared_favorites": ""
+    "shared_favorites": "",
+    "added_by_name": ""
 }

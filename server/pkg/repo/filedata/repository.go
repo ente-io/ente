@@ -32,7 +32,7 @@ func (r *Repository) InsertOrUpdate(ctx context.Context, data filedata.Row) erro
         INSERT INTO file_data 
             (file_id, user_id, data_type, size, latest_bucket, sync_locked_till) 
         VALUES 
-            ($1, $2, $3, $4, $5, now_utc_micro_seconds() + 5 * 60 * 1000*1000)
+            ($1, $2, $3, $4, $5, now_utc_micro_seconds() + 10 * 60 * 1000*1000)
         ON CONFLICT (file_id, data_type)
         DO UPDATE SET 
             size = EXCLUDED.size,
@@ -65,9 +65,9 @@ func (r *Repository) InsertOrUpdatePreviewData(ctx context.Context, data filedat
 	}
 	query := `
         INSERT INTO file_data 
-            (file_id, user_id, data_type, size, latest_bucket, obj_id, obj_nonce, obj_size ) 
+            (file_id, user_id, data_type, size, latest_bucket, obj_id, obj_nonce, obj_size, sync_locked_till) 
         VALUES 
-            ($1, $2, $3, $4, $5, $6, $7, $8)
+            ($1, $2, $3, $4, $5, $6, $7, $8, now_utc_micro_seconds() + 10 * 60 * 1000*1000)
         ON CONFLICT (file_id, data_type)
         DO UPDATE SET 
             size = EXCLUDED.size,

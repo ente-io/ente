@@ -17,6 +17,7 @@ import {
     Typography,
     type ModalProps,
 } from "@mui/material";
+import type { LocalUser } from "ente-accounts/services/user";
 import { isDesktop } from "ente-base/app";
 import { SpacedRow } from "ente-base/components/containers";
 import { InlineErrorIndicator } from "ente-base/components/ErrorIndicator";
@@ -29,7 +30,6 @@ import { type ModalVisibilityProps } from "ente-base/components/utils/modal";
 import { useBaseContext } from "ente-base/context";
 import { lowercaseExtension } from "ente-base/file-name";
 import { formattedListJoin, ut } from "ente-base/i18n";
-import type { LocalUser } from "ente-base/local-user";
 import log from "ente-base/log";
 import {
     FileInfo,

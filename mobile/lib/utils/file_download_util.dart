@@ -16,6 +16,8 @@ import 'package:photos/models/file/file.dart';
 import "package:photos/models/file/file_type.dart";
 import "package:photos/models/ignored_file.dart";
 import "package:photos/module/download/file_url.dart";
+import "package:photos/module/download/task.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/services/ignored_files_service.dart";
 import "package:photos/services/sync/local_sync_service.dart";
@@ -114,30 +116,48 @@ Future<File?> downloadAndDecrypt(
   _logger
       .info('$logPrefix starting download ${formatBytes(file.fileSize ?? 0)}');
   final String tempDir = Configuration.instance.getTempDirectory();
-  final String encryptedFilePath = "$tempDir${file.generatedID}.encrypted";
-  final encryptedFile = File(encryptedFilePath);
+  String encryptedFilePath = "$tempDir${file.generatedID}.encrypted";
+  File encryptedFile = File(encryptedFilePath);
 
   final startTime = DateTime.now().millisecondsSinceEpoch;
 
   try {
-    final response = await NetworkClient.instance.getDio().download(
-      file.downloadUrl,
-      encryptedFilePath,
-      options: Options(
-        headers: {"X-Auth-Token": Configuration.instance.getToken()},
-      ),
-      onReceiveProgress: (a, b) {
-        if (kDebugMode && a >= 0 && b >= 0) {
-          // _logger.fine(
-          //   "$logPrefix download progress: ${formatBytes(a)} / ${formatBytes(b)}",
-          // );
-        }
-        progressCallback?.call(a, b);
-      },
-    );
-    if (response.statusCode != 200 || !encryptedFile.existsSync()) {
-      _logger.warning('$logPrefix download failed ${response.toString()}');
-      return null;
+    if (downloadManager.enableResumableDownload(file.fileSize)) {
+      final DownloadResult result = await downloadManager.download(
+        file.uploadedFileID!,
+        file.displayName,
+        file.fileSize!,
+      );
+      if (result.success) {
+        encryptedFilePath = result.task.filePath!;
+        encryptedFile = File(encryptedFilePath);
+      } else {
+        _logger.warning(
+          '$logPrefix download failed ${result.task.error} ${result.task.status}',
+        );
+        return null;
+      }
+    } else {
+      // If the file is small, download it directly to the final location
+      final response = await NetworkClient.instance.getDio().download(
+        file.downloadUrl,
+        encryptedFilePath,
+        options: Options(
+          headers: {"X-Auth-Token": Configuration.instance.getToken()},
+        ),
+        onReceiveProgress: (a, b) {
+          if (kDebugMode && a >= 0 && b >= 0) {
+            // _logger.fine(
+            //   "$logPrefix download progress: ${formatBytes(a)} / ${formatBytes(b)}",
+            // );
+          }
+          progressCallback?.call(a, b);
+        },
+      );
+      if (response.statusCode != 200 || !encryptedFile.existsSync()) {
+        _logger.warning('$logPrefix download failed ${response.toString()}');
+        return null;
+      }
     }
 
     final int sizeInBytes = file.fileSize ?? await encryptedFile.length();

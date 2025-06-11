@@ -7,6 +7,7 @@ enum FileUrlType {
   publicDownload,
   thumbnail,
   publicThumbnail,
+  directDownload,
 }
 
 class FileUrl {
@@ -16,6 +17,8 @@ class FileUrl {
         endpoint != kDefaultProductionEndpoint || flagService.disableCFWorker;
 
     switch (type) {
+      case FileUrlType.directDownload:
+        return "$endpoint/files/download/$fileID";
       case FileUrlType.download:
         return disableWorker
             ? "$endpoint/files/download/$fileID"

@@ -45,7 +45,7 @@
     "welcome_to_ente_subtitle": "",
     "new_album": "Νέο άλμπουμ",
     "create_albums": "",
-    "enter_album_name": "Όνομα άλμπουμ",
+    "album_name": "Όνομα άλμπουμ",
     "close": "Κλείσιμο",
     "yes": "",
     "no": "Όχι",
@@ -531,9 +531,9 @@
     "ml_consent_description": "",
     "ml_consent_confirmation": "",
     "labs": "Εργαστήρια",
-    "passphrase_strength_weak": "Ισχύς κωδικού πρόσβασης: Ασθενής",
-    "passphrase_strength_moderate": "Ισχύς κωδικού πρόσβασης: Μέτριος",
-    "passphrase_strength_strong": "Ισχύς κωδικού πρόσβασης: Ισχυρός",
+    "password_strength_weak": "Ισχύς κωδικού πρόσβασης: Ασθενής",
+    "password_strength_moderate": "Ισχύς κωδικού πρόσβασης: Μέτριος",
+    "password_strength_strong": "Ισχύς κωδικού πρόσβασης: Ισχυρός",
     "preferences": "Προτιμήσεις",
     "language": "Γλώσσα",
     "advanced": "",
@@ -626,6 +626,7 @@
     "faster_upload_description": "",
     "open_ente_on_startup": "",
     "cast_album_to_tv": "Αναπαραγωγή άλμπουμ στην τηλεόραση",
+    "cast_to_tv": "",
     "enter_cast_pin_code": "",
     "code": "",
     "pair_device_to_tv": "Ζεύξη συσκευών",
@@ -681,5 +682,6 @@
     "processing_videos_status": "",
     "share_favorites": "",
     "person_favorites": "",
-    "shared_favorites": ""
+    "shared_favorites": "",
+    "added_by_name": ""
 }

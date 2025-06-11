@@ -551,6 +551,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "backupVideos": MessageLookupByLibrary.simpleMessage("Videos sichern"),
         "beach": MessageLookupByLibrary.simpleMessage("Am Strand"),
         "birthday": MessageLookupByLibrary.simpleMessage("Geburtstag"),
+        "birthdays": MessageLookupByLibrary.simpleMessage("Birthdays"),
         "blackFridaySale":
             MessageLookupByLibrary.simpleMessage("Black-Friday-Aktion"),
         "blog": MessageLookupByLibrary.simpleMessage("Blog"),
@@ -625,6 +626,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "click": MessageLookupByLibrary.simpleMessage("• Klick"),
         "clickOnTheOverflowMenu": MessageLookupByLibrary.simpleMessage(
             "• Klicken Sie auf das Überlaufmenü"),
+        "clickToInstallOurBestVersionYet": MessageLookupByLibrary.simpleMessage(
+            "Click to install our best version yet"),
         "close": MessageLookupByLibrary.simpleMessage("Schließen"),
         "clubByCaptureTime": MessageLookupByLibrary.simpleMessage(
             "Nach Aufnahmezeit gruppieren"),
@@ -947,6 +950,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Bitte gib eine gültige E-Mail-Adresse ein."),
         "enterYourEmailAddress": MessageLookupByLibrary.simpleMessage(
             "Gib deine E-Mail-Adresse ein"),
+        "enterYourNewEmailAddress": MessageLookupByLibrary.simpleMessage(
+            "Gib Deine neue E-Mail-Adresse ein"),
         "enterYourPassword":
             MessageLookupByLibrary.simpleMessage("Passwort eingeben"),
         "enterYourRecoveryKey": MessageLookupByLibrary.simpleMessage(
@@ -1071,6 +1076,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "guestView": MessageLookupByLibrary.simpleMessage("Gastansicht"),
         "guestViewEnablePreSteps": MessageLookupByLibrary.simpleMessage(
             "Bitte richte einen Gerätepasscode oder eine Bildschirmsperre ein, um die Gastansicht zu nutzen."),
+        "happyBirthday":
+            MessageLookupByLibrary.simpleMessage("Happy birthday! 🥳"),
         "hearUsExplanation": MessageLookupByLibrary.simpleMessage(
             "Wir tracken keine App-Installationen. Es würde uns jedoch helfen, wenn du uns mitteilst, wie du von uns erfahren hast!"),
         "hearUsWhereTitle": MessageLookupByLibrary.simpleMessage(
@@ -1269,6 +1276,8 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Lange auf eine E-Mail drücken, um die Ende-zu-Ende-Verschlüsselung zu überprüfen."),
         "longpressOnAnItemToViewInFullscreen": MessageLookupByLibrary.simpleMessage(
             "Drücken Sie lange auf ein Element, um es im Vollbildmodus anzuzeigen"),
+        "lookBackOnYourMemories": MessageLookupByLibrary.simpleMessage(
+            "Look back on your memories 🌄"),
         "loopVideoOff":
             MessageLookupByLibrary.simpleMessage("Videoschleife aus"),
         "loopVideoOn": MessageLookupByLibrary.simpleMessage("Videoschleife an"),
@@ -1350,6 +1359,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "newAlbum": MessageLookupByLibrary.simpleMessage("Neues Album"),
         "newLocation": MessageLookupByLibrary.simpleMessage("Neuer Ort"),
         "newPerson": MessageLookupByLibrary.simpleMessage("Neue Person"),
+        "newPhotosEmoji": MessageLookupByLibrary.simpleMessage(" new 📸"),
         "newRange": MessageLookupByLibrary.simpleMessage("Neue Auswahl"),
         "newToEnte": MessageLookupByLibrary.simpleMessage("Neu bei Ente"),
         "newest": MessageLookupByLibrary.simpleMessage("Zuletzt"),
@@ -1407,6 +1417,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Auf <branding>ente</branding>"),
         "onTheRoad": MessageLookupByLibrary.simpleMessage("Wieder unterwegs"),
         "onThisDay": MessageLookupByLibrary.simpleMessage("On this day"),
+        "onThisDayNotificationExplanation": MessageLookupByLibrary.simpleMessage(
+            "Receive reminders about memories from this day in previous years."),
         "onlyFamilyAdminCanChangeCode": m54,
         "onlyThem": MessageLookupByLibrary.simpleMessage("Nur diese"),
         "oops": MessageLookupByLibrary.simpleMessage("Hoppla"),
@@ -1571,6 +1583,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "reassignedToName": m68,
         "reassigningLoading":
             MessageLookupByLibrary.simpleMessage("Ordne neu zu..."),
+        "receiveRemindersOnBirthdays": MessageLookupByLibrary.simpleMessage(
+            "Receive reminders when it\'s someone\'s birthday. Tapping on the notification will take you to photos of the birthday person."),
         "recover": MessageLookupByLibrary.simpleMessage("Wiederherstellen"),
         "recoverAccount":
             MessageLookupByLibrary.simpleMessage("Konto wiederherstellen"),
@@ -1906,6 +1920,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease":
             MessageLookupByLibrary.simpleMessage(
                 "Es tut uns leid, wir konnten keine sicheren Schlüssel auf diesem Gerät generieren.\n\nBitte starte die Registrierung auf einem anderen Gerät."),
+        "sorryWeHadToPauseYourBackups": MessageLookupByLibrary.simpleMessage(
+            "Sorry, we had to pause your backups"),
         "sort": MessageLookupByLibrary.simpleMessage("Sortierung"),
         "sortAlbumsBy": MessageLookupByLibrary.simpleMessage("Sortieren nach"),
         "sortNewestFirst":
@@ -2134,6 +2150,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "videoInfo":
             MessageLookupByLibrary.simpleMessage("Video-Informationen"),
         "videoSmallCase": MessageLookupByLibrary.simpleMessage("Video"),
+        "videoStreaming":
+            MessageLookupByLibrary.simpleMessage("Streambare Videos"),
         "videos": MessageLookupByLibrary.simpleMessage("Videos"),
         "viewActiveSessions":
             MessageLookupByLibrary.simpleMessage("Aktive Sitzungen anzeigen"),

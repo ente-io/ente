@@ -1,4 +1,5 @@
-import { Alert, Box, TextField } from "@mui/material";
+import CheckIcon from "@mui/icons-material/Check";
+import { Alert, Box, Stack, TextField } from "@mui/material";
 import {
     AccountsPageContents,
     AccountsPageFooter,
@@ -10,8 +11,7 @@ import { LinkButton } from "ente-base/components/LinkButton";
 import { LoadingButton } from "ente-base/components/mui/LoadingButton";
 import { isHTTPErrorWithStatus } from "ente-base/http";
 import log from "ente-base/log";
-import { VerticallyCentered } from "ente-shared/components/Container";
-import { getData, setLSUser } from "ente-shared/storage/localStorage";
+import { getData } from "ente-shared/storage/localStorage";
 import { Formik, type FormikHelpers } from "formik";
 import { t } from "i18next";
 import { useRouter } from "next/router";
@@ -86,7 +86,6 @@ const ChangeEmailForm: React.FC = () => {
         try {
             setLoading(true);
             await changeEmail(email, ott!);
-            await setLSUser({ ...getData("user"), email });
             setLoading(false);
             void goToApp();
         } catch (e) {
@@ -123,7 +122,8 @@ const ChangeEmailForm: React.FC = () => {
                 <>
                     {showMessage && (
                         <Alert
-                            color="success"
+                            icon={<CheckIcon fontSize="inherit" />}
+                            severity="success"
                             onClose={() => setShowMessage(false)}
                         >
                             <Trans
@@ -141,7 +141,7 @@ const ChangeEmailForm: React.FC = () => {
                         </Alert>
                     )}
                     <form noValidate onSubmit={handleSubmit}>
-                        <VerticallyCentered>
+                        <Stack>
                             <TextField
                                 fullWidth
                                 type="email"
@@ -177,7 +177,7 @@ const ChangeEmailForm: React.FC = () => {
                             >
                                 {!ottInputVisible ? t("send_otp") : t("verify")}
                             </LoadingButton>
-                        </VerticallyCentered>
+                        </Stack>
                     </form>
 
                     <AccountsPageFooter>

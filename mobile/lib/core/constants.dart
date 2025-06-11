@@ -71,7 +71,7 @@ const kSearchSectionLimit = 9;
 
 const maxPickAssetLimit = 50;
 
-const iOSGroupID = "group.io.ente.frame.EnteMemoryWidget";
+const iOSGroupIDMemory = "group.io.ente.frame.EnteMemoryWidget";
 
 const blackThumbnailBase64 = '/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAEBAQEBAQEB'
     'AQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQH/2wBDAQEBAQEBAQ'
@@ -103,7 +103,7 @@ const blackThumbnailBase64 = '/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAEBAQEBAQEB'
 
 const uploadTempFilePrefix = "upload_file_";
 final tempDirCleanUpInterval = kDebugMode
-    ? const Duration(seconds: 30).inMicroseconds
+    ? const Duration(hours: 1).inMicroseconds
     : const Duration(hours: 6).inMicroseconds;
 
 const kFilterChipHeight = 32.0;

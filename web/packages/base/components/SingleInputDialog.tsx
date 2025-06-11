@@ -1,6 +1,6 @@
 import { Dialog, DialogContent, DialogTitle } from "@mui/material";
 import type { ModalVisibilityProps } from "ente-base/components/utils/modal";
-import React from "react";
+import React, { useCallback } from "react";
 import { SingleInputForm, type SingleInputFormProps } from "./SingleInputForm";
 
 type SingleInputDialogProps = ModalVisibilityProps &
@@ -25,10 +25,13 @@ export const SingleInputDialog: React.FC<SingleInputDialogProps> = ({
     title,
     ...rest
 }) => {
-    const handleSubmit = async (value: string) => {
-        await onSubmit(value);
-        onClose();
-    };
+    const handleSubmit: SingleInputFormProps["onSubmit"] = useCallback(
+        async (value, setFieldError) => {
+            await onSubmit(value, setFieldError);
+            onClose();
+        },
+        [onClose, onSubmit],
+    );
 
     return (
         <Dialog

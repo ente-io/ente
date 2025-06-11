@@ -69,9 +69,9 @@ func (repo *BillingRepository) UpdateTransactionIDOnDeletion(userID int64) error
 // ReplaceSubscription replaces a subscription with a new one
 func (repo *BillingRepository) ReplaceSubscription(subscriptionID int64, s ente.Subscription) error {
 	_, err := repo.DB.Exec(`UPDATE subscriptions
-		SET storage = $2, original_transaction_id = $3, expiry_time = $4, product_id = $5, payment_provider = $6, attributes = $7
+		SET storage = $2, original_transaction_id = $3, expiry_time = $4, product_id = $5, payment_provider = $6, attributes = $7, upgraded_at = $8
 		WHERE subscription_id = $1`,
-		subscriptionID, s.Storage, s.OriginalTransactionID, s.ExpiryTime, s.ProductID, s.PaymentProvider, s.Attributes)
+		subscriptionID, s.Storage, s.OriginalTransactionID, s.ExpiryTime, s.ProductID, s.PaymentProvider, s.Attributes, s.UpgradedAt)
 	return stacktrace.Propagate(err, "")
 }
 
@@ -155,7 +155,7 @@ func (repo *BillingRepository) LogStripePush(eventLog ente.StripeEventLog) error
 	return stacktrace.Propagate(err, "")
 }
 
-// LogStripePush logs a subscription modification by an admin
+// LogAdminTriggeredSubscriptionUpdate logs a subscription modification by an admin
 func (repo *BillingRepository) LogAdminTriggeredSubscriptionUpdate(r ente.UpdateSubscriptionRequest) error {
 	requestJSON, _ := json.Marshal(r)
 	_, err := repo.DB.Exec(`INSERT INTO subscription_logs(user_id, payment_provider, notification, verification_response) VALUES($1, $2, $3, '{}'::json)`,

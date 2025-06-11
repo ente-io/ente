@@ -80,7 +80,8 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
               final amount =
                   await NotificationService.instance.pendingNotifications();
               showShortToast(context, '$amount pending notifications');
-            } catch (e) {
+            } catch (e, s) {
+              logger.severe('pendingNotifications failed ', e, s);
               await showGenericErrorDialog(context: context, error: e);
             }
           },
@@ -95,10 +96,84 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
           trailingIconIsMuted: true,
           onTap: () async {
             try {
-              await NotificationService.instance
-                  .clearAllScheduledNotifications();
+              await NotificationService.instance.clearAllScheduledNotifications(
+                containingPayload: "onThisDay",
+              );
               showShortToast(context, 'Done');
-            } catch (e) {
+            } catch (e, s) {
+              logger.severe('clearAllScheduledNotifications failed ', e, s);
+              await showGenericErrorDialog(context: context, error: e);
+            }
+          },
+        ),
+        sectionOptionSpacing,
+        MenuItemWidget(
+          captionedTextWidget: const CaptionedTextWidget(
+            title: "Schedule notification 10 seconds",
+          ),
+          pressedColor: getEnteColorScheme(context).fillFaint,
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          onTap: () async {
+            try {
+              await NotificationService.instance.scheduleNotification(
+                "test",
+                id: 10,
+                dateTime: DateTime.now().add(
+                  const Duration(seconds: 10),
+                ),
+              );
+              showShortToast(context, 'done');
+            } catch (e, s) {
+              logger.severe('schedule notification failed ', e, s);
+              await showGenericErrorDialog(context: context, error: e);
+            }
+          },
+        ),
+        sectionOptionSpacing,
+        MenuItemWidget(
+          captionedTextWidget: const CaptionedTextWidget(
+            title: "Schedule notification 1 hour",
+          ),
+          pressedColor: getEnteColorScheme(context).fillFaint,
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          onTap: () async {
+            try {
+              await NotificationService.instance.scheduleNotification(
+                "test",
+                id: 11,
+                dateTime: DateTime.now().add(
+                  const Duration(hours: 1),
+                ),
+              );
+              showShortToast(context, 'done');
+            } catch (e, s) {
+              logger.severe('schedule notification failed ', e, s);
+              await showGenericErrorDialog(context: context, error: e);
+            }
+          },
+        ),
+        sectionOptionSpacing,
+        MenuItemWidget(
+          captionedTextWidget: const CaptionedTextWidget(
+            title: "Schedule notification 12 hours",
+          ),
+          pressedColor: getEnteColorScheme(context).fillFaint,
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          onTap: () async {
+            try {
+              await NotificationService.instance.scheduleNotification(
+                "test",
+                id: 12,
+                dateTime: DateTime.now().add(
+                  const Duration(hours: 12),
+                ),
+              );
+              showShortToast(context, 'done');
+            } catch (e, s) {
+              logger.severe('schedule notification failed ', e, s);
               await showGenericErrorDialog(context: context, error: e);
             }
           },
@@ -365,7 +440,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async =>
-              await MemoryHomeWidgetService.instance.initMemoryHW(true),
+              await MemoryHomeWidgetService.instance.initMemoryHomeWidget(true),
         ),
         sectionOptionSpacing,
         MenuItemWidget(
@@ -375,8 +450,8 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
-          onTap: () async =>
-              await MemoryHomeWidgetService.instance.initMemoryHW(false),
+          onTap: () async => await MemoryHomeWidgetService.instance
+              .initMemoryHomeWidget(false),
         ),
         sectionOptionSpacing,
         MenuItemWidget(

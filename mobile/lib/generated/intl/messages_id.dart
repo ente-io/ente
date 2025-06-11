@@ -342,6 +342,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "backupStatusDescription": MessageLookupByLibrary.simpleMessage(
             "Item yang sudah dicadangkan akan terlihat di sini"),
         "backupVideos": MessageLookupByLibrary.simpleMessage("Cadangkan video"),
+        "birthdays": MessageLookupByLibrary.simpleMessage("Birthdays"),
         "blackFridaySale":
             MessageLookupByLibrary.simpleMessage("Penawaran Black Friday"),
         "blog": MessageLookupByLibrary.simpleMessage("Blog"),
@@ -388,6 +389,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "claimedStorageSoFar": m14,
         "clearIndexes": MessageLookupByLibrary.simpleMessage("Hapus indeks"),
         "click": MessageLookupByLibrary.simpleMessage("• Click"),
+        "clickToInstallOurBestVersionYet": MessageLookupByLibrary.simpleMessage(
+            "Click to install our best version yet"),
         "close": MessageLookupByLibrary.simpleMessage("Tutup"),
         "codeAppliedPageTitle":
             MessageLookupByLibrary.simpleMessage("Kode diterapkan"),
@@ -587,6 +590,8 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Perubahan lokasi hanya akan terlihat di Ente"),
         "eligible": MessageLookupByLibrary.simpleMessage("memenuhi syarat"),
         "email": MessageLookupByLibrary.simpleMessage("Email"),
+        "emailAlreadyRegistered":
+            MessageLookupByLibrary.simpleMessage("Email sudah terdaftar."),
         "emailChangedTo": m28,
         "emailNoEnteAccount": m30,
         "emailVerificationToggle":
@@ -636,6 +641,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Harap masukkan alamat email yang sah."),
         "enterYourEmailAddress":
             MessageLookupByLibrary.simpleMessage("Masukkan alamat email kamu"),
+        "enterYourNewEmailAddress": MessageLookupByLibrary.simpleMessage(
+            "Masukkan alamat email baru anda"),
         "enterYourPassword":
             MessageLookupByLibrary.simpleMessage("Masukkan sandi kamu"),
         "enterYourRecoveryKey": MessageLookupByLibrary.simpleMessage(
@@ -723,6 +730,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "grantPermission": MessageLookupByLibrary.simpleMessage("Berikan izin"),
         "groupNearbyPhotos": MessageLookupByLibrary.simpleMessage(
             "Kelompokkan foto yang berdekatan"),
+        "happyBirthday":
+            MessageLookupByLibrary.simpleMessage("Happy birthday! 🥳"),
         "hearUsWhereTitle": MessageLookupByLibrary.simpleMessage(
             "Dari mana Anda menemukan Ente? (opsional)"),
         "help": MessageLookupByLibrary.simpleMessage("Bantuan"),
@@ -844,6 +853,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "longPressAnEmailToVerifyEndToEndEncryption":
             MessageLookupByLibrary.simpleMessage(
                 "Tekan dan tahan email untuk membuktikan enkripsi ujung ke ujung."),
+        "lookBackOnYourMemories": MessageLookupByLibrary.simpleMessage(
+            "Look back on your memories 🌄"),
         "lostDevice": MessageLookupByLibrary.simpleMessage("Perangkat hilang?"),
         "machineLearning":
             MessageLookupByLibrary.simpleMessage("Pemelajaran mesin"),
@@ -895,6 +906,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Tidak dapat terhubung dengan Ente, harap periksa pengaturan jaringan kamu dan hubungi dukungan jika masalah berlanjut."),
         "never": MessageLookupByLibrary.simpleMessage("Tidak pernah"),
         "newAlbum": MessageLookupByLibrary.simpleMessage("Album baru"),
+        "newPhotosEmoji": MessageLookupByLibrary.simpleMessage(" new 📸"),
         "newToEnte": MessageLookupByLibrary.simpleMessage("Baru di Ente"),
         "newest": MessageLookupByLibrary.simpleMessage("Terbaru"),
         "no": MessageLookupByLibrary.simpleMessage("Tidak"),
@@ -935,6 +947,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "onEnte": MessageLookupByLibrary.simpleMessage(
             "Di <branding>ente</branding>"),
         "onThisDay": MessageLookupByLibrary.simpleMessage("On this day"),
+        "onThisDayNotificationExplanation": MessageLookupByLibrary.simpleMessage(
+            "Receive reminders about memories from this day in previous years."),
         "onlyFamilyAdminCanChangeCode": m54,
         "oops": MessageLookupByLibrary.simpleMessage("Aduh"),
         "oopsCouldNotSaveEdits": MessageLookupByLibrary.simpleMessage(
@@ -1046,6 +1060,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "rateTheApp": MessageLookupByLibrary.simpleMessage("Nilai app ini"),
         "rateUs": MessageLookupByLibrary.simpleMessage("Beri kami nilai"),
         "rateUsOnStore": m67,
+        "receiveRemindersOnBirthdays": MessageLookupByLibrary.simpleMessage(
+            "Receive reminders when it\'s someone\'s birthday. Tapping on the notification will take you to photos of the birthday person."),
         "recover": MessageLookupByLibrary.simpleMessage("Pulihkan"),
         "recoverAccount": MessageLookupByLibrary.simpleMessage("Pulihkan akun"),
         "recoverButton": MessageLookupByLibrary.simpleMessage("Pulihkan"),
@@ -1276,6 +1292,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease":
             MessageLookupByLibrary.simpleMessage(
                 "Maaf, kami tidak dapat menghasilkan kunci yang aman di perangkat ini.\n\nHarap mendaftar dengan perangkat lain."),
+        "sorryWeHadToPauseYourBackups": MessageLookupByLibrary.simpleMessage(
+            "Sorry, we had to pause your backups"),
         "sortAlbumsBy":
             MessageLookupByLibrary.simpleMessage("Urut berdasarkan"),
         "sortNewestFirst": MessageLookupByLibrary.simpleMessage("Terbaru dulu"),

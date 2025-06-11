@@ -546,6 +546,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Cópia de segurança de vídeos"),
         "beach": MessageLookupByLibrary.simpleMessage("Areia e o mar"),
         "birthday": MessageLookupByLibrary.simpleMessage("Aniversário"),
+        "birthdays": MessageLookupByLibrary.simpleMessage("Birthdays"),
         "blackFridaySale":
             MessageLookupByLibrary.simpleMessage("Promoção Black Friday"),
         "blog": MessageLookupByLibrary.simpleMessage("Blog"),
@@ -617,6 +618,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "click": MessageLookupByLibrary.simpleMessage("• Clique"),
         "clickOnTheOverflowMenu":
             MessageLookupByLibrary.simpleMessage("• Clique no menu adicional"),
+        "clickToInstallOurBestVersionYet": MessageLookupByLibrary.simpleMessage(
+            "Click to install our best version yet"),
         "close": MessageLookupByLibrary.simpleMessage("Fechar"),
         "clubByCaptureTime": MessageLookupByLibrary.simpleMessage(
             "Agrupar por tempo de captura"),
@@ -937,6 +940,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Insira um endereço de e-mail válido."),
         "enterYourEmailAddress": MessageLookupByLibrary.simpleMessage(
             "Insira seu endereço de e-mail"),
+        "enterYourNewEmailAddress":
+            MessageLookupByLibrary.simpleMessage("Insira seu novo e-mail"),
         "enterYourPassword":
             MessageLookupByLibrary.simpleMessage("Insira sua senha"),
         "enterYourRecoveryKey": MessageLookupByLibrary.simpleMessage(
@@ -1061,6 +1066,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "guestView": MessageLookupByLibrary.simpleMessage("Vista do convidado"),
         "guestViewEnablePreSteps": MessageLookupByLibrary.simpleMessage(
             "Para ativar a vista do convidado, defina uma senha de acesso no dispositivo ou bloqueie sua tela nas opções do sistema."),
+        "happyBirthday":
+            MessageLookupByLibrary.simpleMessage("Happy birthday! 🥳"),
         "hearUsExplanation": MessageLookupByLibrary.simpleMessage(
             "Não rastreamos instalações de aplicativo. Seria útil se você contasse onde nos encontrou!"),
         "hearUsWhereTitle": MessageLookupByLibrary.simpleMessage(
@@ -1257,6 +1264,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "longpressOnAnItemToViewInFullscreen":
             MessageLookupByLibrary.simpleMessage(
                 "Mantenha pressionado em um item para visualizá-lo em tela cheia"),
+        "lookBackOnYourMemories": MessageLookupByLibrary.simpleMessage(
+            "Look back on your memories 🌄"),
         "loopVideoOff":
             MessageLookupByLibrary.simpleMessage("Repetir vídeo desativado"),
         "loopVideoOn":
@@ -1339,6 +1348,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "newAlbum": MessageLookupByLibrary.simpleMessage("Novo álbum"),
         "newLocation": MessageLookupByLibrary.simpleMessage("Nova localização"),
         "newPerson": MessageLookupByLibrary.simpleMessage("Nova pessoa"),
+        "newPhotosEmoji": MessageLookupByLibrary.simpleMessage(" new 📸"),
         "newRange": MessageLookupByLibrary.simpleMessage("Novo intervalo"),
         "newToEnte": MessageLookupByLibrary.simpleMessage("Novo no Ente"),
         "newest": MessageLookupByLibrary.simpleMessage("Mais recente"),
@@ -1396,6 +1406,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "onTheRoad":
             MessageLookupByLibrary.simpleMessage("Na estrada novamente"),
         "onThisDay": MessageLookupByLibrary.simpleMessage("On this day"),
+        "onThisDayNotificationExplanation": MessageLookupByLibrary.simpleMessage(
+            "Receive reminders about memories from this day in previous years."),
         "onlyFamilyAdminCanChangeCode": m54,
         "onlyThem": MessageLookupByLibrary.simpleMessage("Apenas eles"),
         "oops": MessageLookupByLibrary.simpleMessage("Ops"),
@@ -1559,6 +1571,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "reassignedToName": m68,
         "reassigningLoading":
             MessageLookupByLibrary.simpleMessage("Reatribuindo..."),
+        "receiveRemindersOnBirthdays": MessageLookupByLibrary.simpleMessage(
+            "Receive reminders when it\'s someone\'s birthday. Tapping on the notification will take you to photos of the birthday person."),
         "recover": MessageLookupByLibrary.simpleMessage("Recuperar"),
         "recoverAccount":
             MessageLookupByLibrary.simpleMessage("Recuperar conta"),
@@ -1892,6 +1906,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease":
             MessageLookupByLibrary.simpleMessage(
                 "Desculpe, não foi possível gerar chaves seguras neste dispositivo.\n\ninicie sessão com um dispositivo diferente."),
+        "sorryWeHadToPauseYourBackups": MessageLookupByLibrary.simpleMessage(
+            "Sorry, we had to pause your backups"),
         "sort": MessageLookupByLibrary.simpleMessage("Ordenar"),
         "sortAlbumsBy": MessageLookupByLibrary.simpleMessage("Ordenar por"),
         "sortNewestFirst":

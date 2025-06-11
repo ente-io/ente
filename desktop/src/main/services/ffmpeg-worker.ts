@@ -12,7 +12,7 @@ import fs_ from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { Readable } from "node:stream";
-import { z } from "zod";
+import { z } from "zod/v4";
 import type { FFmpegCommand } from "../../types/ipc";
 import log from "../log-worker";
 import { messagePortMainEndpoint } from "../utils/comlink";
@@ -832,7 +832,8 @@ const pseudoFFProbeVideo = async (inputFilePath: string) => {
  * Upload the file at the given {@link videoFilePath} to the provided pre-signed
  * URL(s) using a HTTP PUT request.
  *
- * All HTTP requests are retried up to 3 times with exponential backoff.
+ * All HTTP requests are retried up to 4 times (1 original + 3 retries) with
+ * exponential backoff.
  *
  * See: [Note: Upload HLS video segment from node side].
  *
@@ -977,19 +978,19 @@ const uploadVideoSegmentsSingle = (
     );
 
 /**
- * Retry a async operation on failure up to 3 times (1 original + 2 retries)
+ * Retry a async operation on failure up to 4 times (1 original + 3 retries)
  * with exponential backoff.
  *
- * This is an inlined but bespoke reimplementation of `retryEnsuringHTTPOk`
- * from `web/packages/base/http.ts`
+ * This is an inlined but bespoke reimplementation of `retryEnsuringHTTPOk` from
+ * `web/packages/base/http.ts`
  *
  * - We don't have the rest of the scaffolding used by that function, which is
  *   why it is intially inlined bespoked.
  *
  * - It handles the specific use case of uploading videos since generating the
  *   HLS stream is a fairly expensive operation, so a retry to discount
- *   transient network issues is called for. There are only 2 retries for a
- *   total of 3 attempts, and the retry gaps are more spaced out.
+ *   transient network issues is called for. The number of retries and their
+ *   gaps are same as the "background" `retryProfile` of the web implementation.
  *
  * - Later it was discovered that net.fetch is much slower than node's native
  *   fetch, so this implementation has further diverged.
@@ -998,7 +999,7 @@ const uploadVideoSegmentsSingle = (
  *   ability to import electron API.
  */
 const retryEnsuringHTTPOk = async (request: () => Promise<Response>) => {
-    const waitTimeBeforeNextTry = [10000, 30000];
+    const waitTimeBeforeNextTry = [10000, 30000, 120000];
 
     while (true) {
         try {

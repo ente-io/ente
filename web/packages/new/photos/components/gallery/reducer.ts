@@ -1,3 +1,4 @@
+import type { User } from "ente-accounts/services/user";
 import {
     isArchivedCollection,
     isPinnedCollection,
@@ -10,7 +11,6 @@ import {
     createCollectionNameByID,
     isHiddenCollection,
 } from "ente-new/photos/services/collection";
-import type { User } from "ente-shared/user/types";
 import { splitByPredicate } from "ente-utils/array";
 import { t } from "i18next";
 import React, { useReducer } from "react";

@@ -31,7 +31,6 @@ import "package:photos/services/account/user_service.dart";
 import 'package:photos/services/app_lifecycle_service.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/favorites_service.dart';
-import "package:photos/services/filedata/filedata_service.dart";
 import 'package:photos/services/home_widget_service.dart';
 import 'package:photos/services/local_file_update_service.dart';
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
@@ -224,7 +223,7 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     _logger.info("NetworkClient init done $tlog");
 
     ServiceLocator.instance
-        .init(preferences, NetworkClient.instance.enteDio, packageInfo);
+        .init(preferences, NetworkClient.instance.enteDio,NetworkClient.instance.getDio(), packageInfo);
 
     _logger.info("UserService init $tlog");
     await UserService.instance.init();
@@ -237,7 +236,6 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     FavoritesService.instance.initFav().ignore();
     LocalFileUpdateService.instance.init(preferences);
     SearchService.instance.init();
-    FileDataService.instance.init(preferences);
 
     _logger.info("FileUploader init $tlog");
     await FileUploader.instance.init(preferences, isBackground);
@@ -254,7 +252,7 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     await SyncService.instance.init(preferences);
     _logger.info("SyncService init done $tlog");
 
-    await HomeWidgetService.instance.init(preferences);
+    HomeWidgetService.instance.init(preferences);
 
     if (!isBackground) {
       await _scheduleFGHomeWidgetSync();

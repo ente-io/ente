@@ -1676,5 +1676,14 @@
   "cLBulkEdit": "Editar todas as datas",
   "cLBulkEditDesc": "Agora você pode selecionar várias fotos, editar data e hora de todos com um só clique. Alternar datas também são suportados.",
   "curatedMemories": "Curated memories",
-  "onThisDay": "On this day"
+  "onThisDay": "On this day",
+  "lookBackOnYourMemories": "Look back on your memories 🌄",
+  "newPhotosEmoji": " new 📸",
+  "sorryWeHadToPauseYourBackups": "Sorry, we had to pause your backups",
+  "clickToInstallOurBestVersionYet": "Click to install our best version yet",
+  "onThisDayNotificationExplanation": "Receive reminders about memories from this day in previous years.",
+  "birhtdayNotifications": "Birhtday notifications",
+  "receiveRemindersOnBirthdays": "Receive reminders when it's someone's birthday. Tapping on the notification will take you to photos of the birthday person.",
+  "happyBirthday": "Happy birthday! 🥳",
+  "birthdays": "Birthdays"
 }

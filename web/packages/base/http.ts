@@ -1,9 +1,9 @@
 import { desktopAppVersion, isDesktop } from "ente-base/app";
 import { wait } from "ente-utils/promise";
-import { z } from "zod";
+import { z } from "zod/v4";
 import { clientPackageName } from "./app";
-import { ensureAuthToken } from "./local-user";
 import log from "./log";
+import { ensureAuthToken } from "./token";
 
 /**
  * Return headers that should be passed alongwith (almost) all authenticated
@@ -141,6 +141,8 @@ export const isHTTP401Error = (e: unknown) =>
  * Return `true` if this is an error because of a HTTP failure response returned
  * by museum with the given "code" and HTTP status.
  *
+ * > The function is async because it needs to parse the payload.
+ *
  * For some known set of errors, museum returns a payload of the form
  *
  *     {"code":"USER_NOT_REGISTERED","message":"User is not registered"}
@@ -193,6 +195,16 @@ interface RetryAsyncOperationOpts {
  * Retry a async operation on failure up to 4 times (1 original + 3 retries)
  * with exponential backoff.
  *
+ * [Note: Retries of network requests should be idempotent]
+ *
+ * When dealing with network requests, avoid using this function directly, use
+ * one of its wrappers like {@link retryEnsuringHTTPOk} instead. Those wrappers
+ * ultimately use this function only, and there is nothing wrong with this
+ * function generally, however since this function allows retrying arbitrary
+ * promises, it is easy accidentally try and attempt retries of non-idemponent
+ * requests, while the more restricted API of {@link retryEnsuringHTTPOk} and
+ * other {@link HTTPRequestRetrier}s makes such misuse less likely.
+ *
  * @param op A function that performs the operation, returning the promise for
  * its completion.
  *
@@ -211,7 +223,7 @@ export const retryAsyncOperation = async <T>(
     const { retryProfile, abortIfNeeded } = opts ?? {};
     const waitTimeBeforeNextTry =
         retryProfile == "background"
-            ? [5000, 25000, 120000]
+            ? [10000, 30000, 120000]
             : [2000, 5000, 10000];
 
     while (true) {
@@ -235,10 +247,15 @@ export const retryAsyncOperation = async <T>(
  * See {@link retryEnsuringHTTPOk} for the canonical example. This typedef is to
  * allow us to talk about and pass functions that behave similar to
  * {@link retryEnsuringHTTPOk}, but perhaps with other additional checks.
+ *
+ * See also: [Note: Retries of network requests should be idempotent]
  */
 export type HTTPRequestRetrier = (
     request: () => Promise<Response>,
+    opts?: HTTPRequestRetrierOpts,
 ) => Promise<Response>;
+
+type HTTPRequestRetrierOpts = Pick<RetryAsyncOperationOpts, "retryProfile">;
 
 /**
  * A helper function to adapt {@link retryAsyncOperation} for HTTP fetches.
@@ -248,12 +265,13 @@ export type HTTPRequestRetrier = (
  */
 export const retryEnsuringHTTPOk: HTTPRequestRetrier = (
     request: () => Promise<Response>,
+    opts?: HTTPRequestRetrierOpts,
 ) =>
     retryAsyncOperation(async () => {
         const r = await request();
         ensureOk(r);
         return r;
-    });
+    }, opts);
 
 /**
  * A helper function to adapt {@link retryAsyncOperation} for HTTP fetches, but
@@ -264,6 +282,7 @@ export const retryEnsuringHTTPOk: HTTPRequestRetrier = (
  */
 export const retryEnsuringHTTPOkOr4xx: HTTPRequestRetrier = (
     request: () => Promise<Response>,
+    opts?: HTTPRequestRetrierOpts,
 ) =>
     retryAsyncOperation(
         async () => {
@@ -272,6 +291,7 @@ export const retryEnsuringHTTPOkOr4xx: HTTPRequestRetrier = (
             return r;
         },
         {
+            ...opts,
             abortIfNeeded(e) {
                 if (isHTTP4xxError(e)) throw e;
             },

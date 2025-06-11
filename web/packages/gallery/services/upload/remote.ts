@@ -16,7 +16,7 @@ import { type EnteFile } from "ente-media/file";
 import { handleUploadError } from "ente-shared/error";
 import HTTPService from "ente-shared/network/HTTPService";
 import { nullToUndefined } from "ente-utils/transform";
-import { z } from "zod";
+import { z } from "zod/v4";
 import type { UploadFile } from "./upload-service";
 
 /**
@@ -355,8 +355,7 @@ const createMultipartUploadRequestBody = (
  * b. Using workers, where the requests are proxied via a worker near to the
  *    user's network to speed the requests up.
  *
- * See the documentation of {@link shouldDisableCFUploadProxy} for more details
- * about the via-worker flow.
+ * See [Note: Faster uploads via workers] for more details on the worker flow.
  *
  * In both cases, the overall flow is roughly like the following:
  *

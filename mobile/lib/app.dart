@@ -13,16 +13,19 @@ import 'package:media_extension/media_extension_action_types.dart';
 import "package:photos/core/event_bus.dart";
 import 'package:photos/ente_theme_data.dart';
 import "package:photos/events/memories_changed_event.dart";
+import "package:photos/events/people_changed_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/service_locator.dart";
 import 'package:photos/services/app_lifecycle_service.dart';
 import "package:photos/services/home_widget_service.dart";
 import "package:photos/services/memory_home_widget_service.dart";
+import "package:photos/services/people_home_widget_service.dart";
 import 'package:photos/services/sync/sync_service.dart';
 import 'package:photos/ui/tabs/home_widget.dart';
 import "package:photos/ui/viewer/actions/file_viewer.dart";
 import "package:photos/utils/intent_util.dart";
+import "package:photos/utils/standalone/debouncer.dart";
 
 class EnteApp extends StatefulWidget {
   final Future<void> Function(String) runBackgroundTask;
@@ -51,6 +54,8 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
   final _logger = Logger("EnteAppState");
   late Locale? locale;
   late StreamSubscription<MemoriesChangedEvent> _memoriesChangedSubscription;
+  late StreamSubscription<PeopleChangedEvent> _peopleChangedSubscription;
+  late Debouncer _changeCallbackDebouncer;
 
   @override
   void initState() {
@@ -67,6 +72,15 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
         Bus.instance.on<MemoriesChangedEvent>().listen(
       (event) async {
         await MemoryHomeWidgetService.instance.memoryChanged();
+      },
+    );
+    _changeCallbackDebouncer = Debouncer(const Duration(milliseconds: 1500));
+    _peopleChangedSubscription = Bus.instance.on<PeopleChangedEvent>().listen(
+      (event) async {
+        _changeCallbackDebouncer.run(
+          () async =>
+              unawaited(PeopleHomeWidgetService.instance.peopleChanged()),
+        );
       },
     );
   }
@@ -107,7 +121,7 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
     if (Platform.isAndroid || kDebugMode) {
       return Listener(
         onPointerDown: (event) {
-          machineLearningController.onUserInteraction();
+          computeController.onUserInteraction();
         },
         child: AdaptiveTheme(
           light: lightThemeData,
@@ -142,7 +156,7 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
     } else {
       return Listener(
         onPointerDown: (event) {
-          machineLearningController.onUserInteraction();
+          computeController.onUserInteraction();
         },
         child: MaterialApp(
           title: "ente",
@@ -168,6 +182,7 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _memoriesChangedSubscription.cancel();
+    _peopleChangedSubscription.cancel();
     super.dispose();
   }
 

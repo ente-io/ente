@@ -1,17 +1,14 @@
+import { ensureLocalUser } from "ente-accounts/services/user";
 import { isDesktop } from "ente-base/app";
 import { assertionFailed } from "ente-base/assert";
-import { decryptBlob } from "ente-base/crypto";
+import { decryptBlobBytes, encryptBlob } from "ente-base/crypto";
 import type { EncryptedBlob } from "ente-base/crypto/types";
 import { ensureElectron } from "ente-base/electron";
-import {
-    isHTTP4xxError,
-    retryAsyncOperation,
-    type PublicAlbumsCredentials,
-} from "ente-base/http";
+import { isHTTP4xxError, type PublicAlbumsCredentials } from "ente-base/http";
 import { getKV, getKVB, getKVN, setKV } from "ente-base/kv";
-import { ensureAuthToken, ensureLocalUser } from "ente-base/local-user";
 import log from "ente-base/log";
 import { apiURL } from "ente-base/origins";
+import { ensureAuthToken } from "ente-base/token";
 import { fileLogID, type EnteFile } from "ente-media/file";
 import {
     filePublicMagicMetadata,
@@ -23,12 +20,11 @@ import {
     getLocalTrashFileIDs,
     uniqueFilesByID,
 } from "ente-new/photos/services/files";
-import { settingsSnapshot } from "ente-new/photos/services/settings";
 import { gunzip, gzip } from "ente-new/photos/utils/gzip";
 import { randomSample } from "ente-utils/array";
 import { ensurePrecondition } from "ente-utils/ensure";
 import { wait } from "ente-utils/promise";
-import { z } from "zod";
+import { z } from "zod/v4";
 import {
     initiateGenerateHLS,
     readVideoStream,
@@ -208,18 +204,8 @@ const updateSnapshotIfNeeded = (
 /**
  * Return `true` if this client is capable of generating HLS streams for
  * uploaded videos.
- *
- * This function implementation is fast and can be called many times (e.g.
- * during UI rendering).
  */
-export const isHLSGenerationSupported = () =>
-    // Keep this check fast, we get called many times.
-    isDesktop &&
-    // TODO(HLS):
-    settingsSnapshot().isInternalUser;
-
-// TODO(HLS): Only the isDesktop flag is needed eventually.
-export const isHLSGenerationSupportedTemp = () => isDesktop;
+export const isHLSGenerationSupported = isDesktop;
 
 /**
  * Initialize the video processing subsystem if the user has enabled HLS
@@ -257,7 +243,7 @@ const saveGenerateHLS = (enabled: boolean) => setKV("generateHLS", enabled);
  * Precondition: {@link isHLSGenerationSupported} must be `true`.
  */
 export const toggleHLSGeneration = async () => {
-    if (!isHLSGenerationSupported()) {
+    if (!isHLSGenerationSupported) {
         assertionFailed();
         return;
     }
@@ -499,7 +485,7 @@ const decryptPlaylistJSON = async (
     encryptedPlaylist: EncryptedBlob,
     file: EnteFile,
 ) => {
-    const decryptedBytes = await decryptBlob(encryptedPlaylist, file.key);
+    const decryptedBytes = await decryptBlobBytes(encryptedPlaylist, file.key);
     const jsonString = await gunzip(decryptedBytes);
     return PlaylistJSON.parse(JSON.parse(jsonString));
 };
@@ -673,7 +659,7 @@ const syncProcessedFileIDs = async () =>
 export const videoPrunePermanentlyDeletedFileIDsIfNeeded = async (
     deletedFileIDs: Set<number>,
 ) => {
-    if (!isHLSGenerationSupported()) return;
+    if (!isHLSGenerationSupported) return;
 
     const existing = await savedProcessedVideoFileIDs();
     if (existing.size > 0) {
@@ -702,7 +688,7 @@ export const videoPrunePermanentlyDeletedFileIDsIfNeeded = async (
  * that have already been processed elsewhere.
  */
 export const videoProcessingSyncIfNeeded = async () => {
-    if (!isHLSGenerationSupported()) return;
+    if (!isHLSGenerationSupported) return;
 
     // The `haveSyncedOnce` flag tracks whether or not a sync has happened for
     // the app, and is not specific to video processing. We always set it even
@@ -745,7 +731,7 @@ export const processVideoNewUpload = (
     file: EnteFile,
     processableUploadItem: ProcessableUploadItem,
 ) => {
-    if (!isHLSGenerationSupported()) return;
+    if (!isHLSGenerationSupported) return;
     if (!isHLSGenerationEnabled()) return;
     if (file.metadata.fileType !== FileType.video) return;
     if (processableUploadItem instanceof File) {
@@ -830,7 +816,7 @@ export const isHLSGenerationEnabled = () => _state.isHLSGenerationEnabled;
  * batches, and the externally triggered processing of live uploads.
  */
 const processQueue = async () => {
-    if (!isHLSGenerationSupported() || !isHLSGenerationEnabled()) {
+    if (!isHLSGenerationSupported || !isHLSGenerationEnabled()) {
         assertionFailed(); /* we shouldn't have come here */
         return;
     }
@@ -980,7 +966,9 @@ const processQueueItem = async ({
         uploadItem;
     if (!sourceVideo) {
         try {
-            sourceVideo = (await downloadManager.fileStream(file))!;
+            sourceVideo = (await downloadManager.fileStream(file, {
+                background: true,
+            }))!;
         } catch (e) {
             if (!isNetworkDownloadError(e)) await markFailedVideoFile(file);
             throw e;
@@ -1069,11 +1057,14 @@ const processQueueItem = async ({
             size: videoSize,
         });
 
+        const encryptedPlaylist = await encryptBlob(playlistData, file.key);
+
         try {
-            await retryAsyncOperation(
-                () =>
-                    putVideoData(file, playlistData, videoObjectID, videoSize),
-                { retryProfile: "background" },
+            await putVideoData(
+                file,
+                encryptedPlaylist,
+                videoObjectID,
+                videoSize,
             );
         } catch (e) {
             if (isHTTP4xxError(e)) await markFailedVideoFile(file);

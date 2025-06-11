@@ -542,6 +542,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Videoları yedekle"),
         "beach": MessageLookupByLibrary.simpleMessage("Kum ve deniz"),
         "birthday": MessageLookupByLibrary.simpleMessage("Doğum Günü"),
+        "birthdays": MessageLookupByLibrary.simpleMessage("Birthdays"),
         "blackFridaySale":
             MessageLookupByLibrary.simpleMessage("Muhteşem Cuma kampanyası"),
         "blog": MessageLookupByLibrary.simpleMessage("Blog"),
@@ -618,6 +619,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "click": MessageLookupByLibrary.simpleMessage("• Tıklamak"),
         "clickOnTheOverflowMenu":
             MessageLookupByLibrary.simpleMessage("• Taşma menüsüne tıklayın"),
+        "clickToInstallOurBestVersionYet": MessageLookupByLibrary.simpleMessage(
+            "Click to install our best version yet"),
         "close": MessageLookupByLibrary.simpleMessage("Kapat"),
         "clubByCaptureTime": MessageLookupByLibrary.simpleMessage(
             "Yakalama zamanına göre kulüp"),
@@ -939,6 +942,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Lütfen geçerli bir E-posta adresi girin."),
         "enterYourEmailAddress":
             MessageLookupByLibrary.simpleMessage("E-posta adresinizi girin"),
+        "enterYourNewEmailAddress": MessageLookupByLibrary.simpleMessage(
+            "Yeni e-posta adresinizi girin"),
         "enterYourPassword":
             MessageLookupByLibrary.simpleMessage("Lütfen şifrenizi giriniz"),
         "enterYourRecoveryKey":
@@ -1018,7 +1023,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "flip": MessageLookupByLibrary.simpleMessage("Çevir"),
         "food": MessageLookupByLibrary.simpleMessage("Yemek keyfi"),
         "forYourMemories":
-            MessageLookupByLibrary.simpleMessage("anıların için"),
+            MessageLookupByLibrary.simpleMessage("anılarınız için"),
         "forgotPassword":
             MessageLookupByLibrary.simpleMessage("Şifremi unuttum"),
         "foundFaces": MessageLookupByLibrary.simpleMessage("Yüzler bulundu"),
@@ -1056,6 +1061,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "guestView": MessageLookupByLibrary.simpleMessage("Misafir Görünümü"),
         "guestViewEnablePreSteps": MessageLookupByLibrary.simpleMessage(
             "Misafir görünümünü etkinleştirmek için lütfen sistem ayarlarınızda cihaz şifresi veya ekran kilidi ayarlayın."),
+        "happyBirthday":
+            MessageLookupByLibrary.simpleMessage("Happy birthday! 🥳"),
         "hearUsExplanation": MessageLookupByLibrary.simpleMessage(
             "Biz uygulama kurulumlarını takip etmiyoruz. Bizi nereden duyduğunuzdan bahsetmeniz bize çok yardımcı olacak!"),
         "hearUsWhereTitle": MessageLookupByLibrary.simpleMessage(
@@ -1254,6 +1261,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "longpressOnAnItemToViewInFullscreen":
             MessageLookupByLibrary.simpleMessage(
                 "Tam ekranda görüntülemek için bir öğeye uzun basın"),
+        "lookBackOnYourMemories": MessageLookupByLibrary.simpleMessage(
+            "Look back on your memories 🌄"),
         "loopVideoOff":
             MessageLookupByLibrary.simpleMessage("Video Döngüsü Kapalı"),
         "loopVideoOn":
@@ -1335,6 +1344,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "newAlbum": MessageLookupByLibrary.simpleMessage("Yeni albüm"),
         "newLocation": MessageLookupByLibrary.simpleMessage("Yeni konum"),
         "newPerson": MessageLookupByLibrary.simpleMessage("Yeni Kişi"),
+        "newPhotosEmoji": MessageLookupByLibrary.simpleMessage(" new 📸"),
         "newRange": MessageLookupByLibrary.simpleMessage("Yeni aralık"),
         "newToEnte": MessageLookupByLibrary.simpleMessage("Ente\'de yeniyim"),
         "newest": MessageLookupByLibrary.simpleMessage("En yeni"),
@@ -1390,6 +1400,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "<branding>ente</branding> üzerinde"),
         "onTheRoad": MessageLookupByLibrary.simpleMessage("Yeniden yollarda"),
         "onThisDay": MessageLookupByLibrary.simpleMessage("On this day"),
+        "onThisDayNotificationExplanation": MessageLookupByLibrary.simpleMessage(
+            "Receive reminders about memories from this day in previous years."),
         "onlyFamilyAdminCanChangeCode": m54,
         "onlyThem": MessageLookupByLibrary.simpleMessage("Sadece onlar"),
         "oops": MessageLookupByLibrary.simpleMessage("Hay aksi"),
@@ -1551,6 +1563,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "reassignedToName": m68,
         "reassigningLoading":
             MessageLookupByLibrary.simpleMessage("Yeniden atanıyor..."),
+        "receiveRemindersOnBirthdays": MessageLookupByLibrary.simpleMessage(
+            "Receive reminders when it\'s someone\'s birthday. Tapping on the notification will take you to photos of the birthday person."),
         "recover": MessageLookupByLibrary.simpleMessage("Kurtarma"),
         "recoverAccount": MessageLookupByLibrary.simpleMessage("Hesabı kurtar"),
         "recoverButton": MessageLookupByLibrary.simpleMessage("Kurtar"),
@@ -1635,7 +1649,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "removeShareItemsWarning": MessageLookupByLibrary.simpleMessage(
             "Kaldırdığınız öğelerden bazıları başkaları tarafından eklenmiştir ve bunlara erişiminizi kaybedeceksiniz"),
         "removeWithQuestionMark":
-            MessageLookupByLibrary.simpleMessage("Kaldır?"),
+            MessageLookupByLibrary.simpleMessage("Kaldırılsın mı?"),
         "removeYourselfAsTrustedContact": MessageLookupByLibrary.simpleMessage(
             "Kendinizi güvenilir kişi olarak kaldırın"),
         "removingFromFavorites":
@@ -1886,6 +1900,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease":
             MessageLookupByLibrary.simpleMessage(
                 "Üzgünüm, bu cihazda güvenli anahtarlarını oluşturamadık.\n\nLütfen başka bir cihazdan giriş yapmayı deneyiniz."),
+        "sorryWeHadToPauseYourBackups": MessageLookupByLibrary.simpleMessage(
+            "Sorry, we had to pause your backups"),
         "sort": MessageLookupByLibrary.simpleMessage("Sırala"),
         "sortAlbumsBy": MessageLookupByLibrary.simpleMessage("Sırala"),
         "sortNewestFirst":
@@ -2191,7 +2207,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage(
                 "Planınız başarıyla düşürüldü"),
         "yourPlanWasSuccessfullyUpgraded": MessageLookupByLibrary.simpleMessage(
-            "Planınız başarılı şekilde yükseltildi"),
+            "Planınız başarıyla yükseltildi"),
         "yourPurchaseWasSuccessful":
             MessageLookupByLibrary.simpleMessage("Satın alım başarılı"),
         "yourStorageDetailsCouldNotBeFetched":

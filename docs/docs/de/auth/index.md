@@ -10,4 +10,4 @@ Ende-zu-Ende-verschlüsselte Authenticator-App für jedermann. Wir sind froh, da
 du hier bist!
 
 **Please note that this German translation is currently just a placeholder.**
-Know German? [Help us fill this in!](/about/contribute).
+Know German? [Help us fill this in!](/#contribute).

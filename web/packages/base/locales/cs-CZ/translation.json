@@ -45,7 +45,7 @@
     "welcome_to_ente_subtitle": "End to end šifrované úložiště fotek a sdílení",
     "new_album": "Nové album",
     "create_albums": "Vytvořit alba",
-    "enter_album_name": "Název alba",
+    "album_name": "Název alba",
     "close": "Zavřít",
     "yes": "Ano",
     "no": "Ne",
@@ -531,9 +531,9 @@
     "ml_consent_description": "",
     "ml_consent_confirmation": "",
     "labs": "Experimentální",
-    "passphrase_strength_weak": "Síla hesla: Slabá",
-    "passphrase_strength_moderate": "",
-    "passphrase_strength_strong": "Síla hesla: Silná",
+    "password_strength_weak": "Síla hesla: Slabá",
+    "password_strength_moderate": "",
+    "password_strength_strong": "Síla hesla: Silná",
     "preferences": "Předvolby",
     "language": "Jazyk",
     "advanced": "Pokročilé",
@@ -626,6 +626,7 @@
     "faster_upload_description": "",
     "open_ente_on_startup": "",
     "cast_album_to_tv": "Přehrát album v televizi",
+    "cast_to_tv": "",
     "enter_cast_pin_code": "",
     "code": "Kód",
     "pair_device_to_tv": "Párovat zařízení",
@@ -681,5 +682,6 @@
     "processing_videos_status": "",
     "share_favorites": "",
     "person_favorites": "",
-    "shared_favorites": ""
+    "shared_favorites": "",
+    "added_by_name": ""
 }

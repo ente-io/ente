@@ -161,6 +161,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Mesedez, autentifikatu zure ezkutatutako fitxategiak ikusteko"),
         "authToViewYourRecoveryKey": MessageLookupByLibrary.simpleMessage(
             "Mesedez, autentifikatu zure berreskuratze giltza ikusteko"),
+        "birthdays": MessageLookupByLibrary.simpleMessage("Birthdays"),
         "canNotOpenBody": MessageLookupByLibrary.simpleMessage(
             "Sentitzen dugu, album hau ezin da aplikazioan ireki."),
         "canNotOpenTitle":
@@ -184,6 +185,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "claimMore": MessageLookupByLibrary.simpleMessage("Eskatu gehiago!"),
         "claimed": MessageLookupByLibrary.simpleMessage("Eskatuta"),
         "claimedStorageSoFar": m14,
+        "clickToInstallOurBestVersionYet": MessageLookupByLibrary.simpleMessage(
+            "Click to install our best version yet"),
         "codeAppliedPageTitle":
             MessageLookupByLibrary.simpleMessage("Kodea aplikatuta"),
         "codeChangeLimitReached": MessageLookupByLibrary.simpleMessage(
@@ -351,6 +354,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Debaldeko biltegiratzea erabilgarri"),
         "generatingEncryptionKeys":
             MessageLookupByLibrary.simpleMessage("Zifratze giltzak sortzen..."),
+        "happyBirthday":
+            MessageLookupByLibrary.simpleMessage("Happy birthday! 🥳"),
         "help": MessageLookupByLibrary.simpleMessage("Laguntza"),
         "hidden": MessageLookupByLibrary.simpleMessage("Ezkutatuta"),
         "howItWorks":
@@ -394,6 +399,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "logInLabel": MessageLookupByLibrary.simpleMessage("Sartu"),
         "loginTerms": MessageLookupByLibrary.simpleMessage(
             "Sartzeko klikatuz, <u-terms>zerbitzu baldintzak</u-terms> eta <u-policy>pribatutasun politikak</u-policy> onartzen ditut"),
+        "lookBackOnYourMemories": MessageLookupByLibrary.simpleMessage(
+            "Look back on your memories 🌄"),
         "lostDevice":
             MessageLookupByLibrary.simpleMessage("Gailua galdu duzu?"),
         "machineLearning":
@@ -421,6 +428,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "movedToTrash": MessageLookupByLibrary.simpleMessage("Zarama mugituta"),
         "never": MessageLookupByLibrary.simpleMessage("Inoiz ez"),
         "newAlbum": MessageLookupByLibrary.simpleMessage("Album berria"),
+        "newPhotosEmoji": MessageLookupByLibrary.simpleMessage(" new 📸"),
         "noDeviceLimit": MessageLookupByLibrary.simpleMessage("Bat ere ez"),
         "noRecoveryKey":
             MessageLookupByLibrary.simpleMessage("Berreskuratze giltzarik ez?"),
@@ -428,6 +436,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Gure puntutik-puntura zifratze protokoloa dela eta, zure data ezin da deszifratu zure pasahitza edo berreskuratze giltzarik gabe"),
         "ok": MessageLookupByLibrary.simpleMessage("Ondo"),
         "onThisDay": MessageLookupByLibrary.simpleMessage("On this day"),
+        "onThisDayNotificationExplanation": MessageLookupByLibrary.simpleMessage(
+            "Receive reminders about memories from this day in previous years."),
         "onlyFamilyAdminCanChangeCode": m54,
         "oops": MessageLookupByLibrary.simpleMessage("Ai!"),
         "oopsSomethingWentWrong": MessageLookupByLibrary.simpleMessage(
@@ -455,6 +465,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Pribatutasun Politikak"),
         "publicLinkEnabled":
             MessageLookupByLibrary.simpleMessage("Esteka publikoa indarrean"),
+        "receiveRemindersOnBirthdays": MessageLookupByLibrary.simpleMessage(
+            "Receive reminders when it\'s someone\'s birthday. Tapping on the notification will take you to photos of the birthday person."),
         "recover": MessageLookupByLibrary.simpleMessage("Berreskuratu"),
         "recoverAccount":
             MessageLookupByLibrary.simpleMessage("Berreskuratu kontua"),
@@ -565,6 +577,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease":
             MessageLookupByLibrary.simpleMessage(
                 "Tamalez, ezin dugu giltza segururik sortu gailu honetan. \n\nMesedez, eman izena beste gailu batetik."),
+        "sorryWeHadToPauseYourBackups": MessageLookupByLibrary.simpleMessage(
+            "Sorry, we had to pause your backups"),
         "storageInGB": m91,
         "strongStrength": MessageLookupByLibrary.simpleMessage("Gogorra"),
         "subscribe": MessageLookupByLibrary.simpleMessage("Harpidetu"),

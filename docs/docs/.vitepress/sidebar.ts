@@ -53,6 +53,10 @@ export const sidebar = [
                     },
                     { text: "Map", link: "/photos/features/map" },
                     {
+                        text: "Notifications",
+                        link: "/photos/features/notifications",
+                    },
+                    {
                         text: "Passkeys",
                         link: "/photos/features/passkeys",
                     },
@@ -292,7 +296,7 @@ export const sidebar = [
                     },
                     {
                         text: "Bucket CORS",
-                        link: '/self-hosting/troubleshooting/bucket-cors'
+                        link: "/self-hosting/troubleshooting/bucket-cors",
                     },
                     {
                         text: "Uploads",
@@ -311,16 +315,16 @@ export const sidebar = [
             {
                 text: "Community Guides",
                 collapsed: true,
-                items :[
+                items: [
                     {
                         text: "Ente via Tailscale",
-                        link: "/self-hosting/guides/Tailscale",
+                        link: "/self-hosting/guides/tailscale",
                     },
                     {
                         text: "Ente with External S3",
                         link: "/self-hosting/guides/external-s3",
-                    }                
-                ]
+                    },
+                ],
             },
             {
                 text: "FAQ",
@@ -346,13 +350,5 @@ export const sidebar = [
                 ],
             },
         ],
-    },
-    {
-        text: "About",
-        link: "/about/",
-    },
-    {
-        text: "Contribute",
-        link: "/about/contribute",
     },
 ];
