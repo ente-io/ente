@@ -118,9 +118,30 @@ Future<Map<String, Uint8List>?> getCachedFaceCrops(
       } else {
         final faceCropCacheFile = cachedFaceCropPath(face.faceID);
         if ((await faceCropCacheFile.exists())) {
-          final data = await faceCropCacheFile.readAsBytes();
-          await _putCachedCropForFaceID(face.faceID, data, personOrClusterID);
-          faceIdToCrop[face.faceID] = data;
+          try {
+            final data = await faceCropCacheFile.readAsBytes();
+            if (data.isNotEmpty) {
+              await _putCachedCropForFaceID(
+                face.faceID,
+                data,
+                personOrClusterID,
+              );
+              faceIdToCrop[face.faceID] = data;
+            } else {
+              _logger.warning(
+                "Cached face crop for faceID ${face.faceID} is empty, deleting file ${faceCropCacheFile.path}",
+              );
+              await faceCropCacheFile.delete();
+              facesWithoutCrops[face.faceID] = face.detection.box;
+            }
+          } catch (e, s) {
+            _logger.severe(
+              "Error reading cached face crop for faceID ${face.faceID} from file ${faceCropCacheFile.path}",
+              e,
+              s,
+            );
+            facesWithoutCrops[face.faceID] = face.detection.box;
+          }
         } else {
           facesWithoutCrops[face.faceID] = face.detection.box;
         }
@@ -165,7 +186,16 @@ Future<Map<String, Uint8List>?> getCachedFaceCrops(
             personOrClusterID,
           );
           final faceCropCacheFile = cachedFaceCropPath(entry.key);
-          faceCropCacheFile.writeAsBytes(computedCrop).ignore();
+          try {
+            // ignore: unawaited_futures
+            faceCropCacheFile.writeAsBytes(computedCrop);
+          } catch (e, s) {
+            _logger.severe(
+              "Error writing cached face crop for faceID ${entry.key} to file ${faceCropCacheFile.path}",
+              e,
+              s,
+            );
+          }
         } else {
           _faceCropThumbnailCache.put(entry.key, computedCrop);
         }
