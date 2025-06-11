@@ -10,18 +10,21 @@
  */
 import { mergeUint8Arrays } from "ente-utils/array";
 import sodium from "libsodium-wrappers-sumo";
-import type {
-    BytesOrB64,
-    DerivedKey,
-    EncryptedBlob,
-    EncryptedBlobB64,
-    EncryptedBlobBytes,
-    EncryptedBox,
-    EncryptedBoxB64,
-    EncryptedFile,
-    InitChunkDecryptionResult,
-    InitChunkEncryptionResult,
-    SodiumStateAddress,
+import {
+    deriveKeyInsufficientMemoryErrorMessage,
+    streamEncryptionChunkSize,
+    type BytesOrB64,
+    type DerivedKey,
+    type EncryptedBlob,
+    type EncryptedBlobB64,
+    type EncryptedBlobBytes,
+    type EncryptedBox,
+    type EncryptedBoxB64,
+    type EncryptedFile,
+    type InitChunkDecryptionResult,
+    type InitChunkEncryptionResult,
+    type KeyPair,
+    type SodiumStateAddress,
 } from "./types";
 
 /**
@@ -83,24 +86,6 @@ export const toB64URLSafeNoPadding = async (input: Uint8Array) => {
 export const fromB64URLSafeNoPadding = async (input: string) => {
     await sodium.ready;
     return sodium.from_base64(input, sodium.base64_variants.URLSAFE_NO_PADDING);
-};
-
-/**
- * Variant of {@link toB64URLSafeNoPadding} that works with {@link string}
- * inputs. See also its sibling method {@link fromB64URLSafeNoPaddingString}.
- */
-export const toB64URLSafeNoPaddingString = async (input: string) => {
-    await sodium.ready;
-    return toB64URLSafeNoPadding(sodium.from_string(input));
-};
-
-/**
- * Variant of {@link fromB64URLSafeNoPadding} that works with {@link strings}. See also
- * its sibling method {@link toB64URLSafeNoPaddingString}.
- */
-export const fromB64URLSafeNoPaddingString = async (input: string) => {
-    await sodium.ready;
-    return sodium.to_string(await fromB64URLSafeNoPadding(input));
 };
 
 /**
@@ -288,18 +273,6 @@ export const encryptBox = async (
 };
 
 /**
- * A variant of {@link encryptBox} that first converts the input string into
- * bytes using a UTF-8 encoding, and then encrypts those bytes.
- */
-export const encryptBoxUTF8 = async (
-    data: string,
-    key: BytesOrB64,
-): Promise<EncryptedBoxB64> => {
-    await sodium.ready;
-    return encryptBox(sodium.from_string(data), key);
-};
-
-/**
  * Encrypt the given data using libsodium's secretstream APIs without chunking.
  *
  * Use {@link decryptBlobBytes} to decrypt the result.
@@ -356,26 +329,16 @@ export const encryptBlob = async (
 
 /**
  * Encrypt the provided JSON value (using {@link encryptBlob}) after converting
- * it to a JSON string (and utf-8 encoding it to obtain bytes).
+ * it to a JSON string (and UTF-8 encoding it to obtain bytes).
  *
  * Use {@link decryptMetadataJSON} to decrypt the result and convert it back to
  * a JSON value.
  */
-export const encryptMetadataJSON = (jsonValue: unknown, key: BytesOrB64) =>
+export const encryptMetadataJSON = (
+    jsonValue: unknown,
+    key: BytesOrB64,
+): Promise<EncryptedBlobB64> =>
     encryptBlob(new TextEncoder().encode(JSON.stringify(jsonValue)), key);
-
-/**
- * The various *Stream encryption functions break up the input into chunks of
- * {@link streamEncryptionChunkSize} bytes during encryption (except the last
- * chunk which can be smaller since a file would rarely align exactly to a
- * {@link streamEncryptionChunkSize} multiple).
- *
- * The various *Stream decryption functions also assume that each potential
- * chunk is {@link streamEncryptionChunkSize} long.
- *
- * This value of this constant is 4 MB (and is unlikely to change).
- */
-export const streamEncryptionChunkSize = 4 * 1024 * 1024;
 
 /**
  * Encrypt the given data using libsodium's secretstream APIs after breaking it
@@ -520,18 +483,6 @@ export const decryptBox = (
 ): Promise<string> => decryptBoxBytes(box, key).then(toB64);
 
 /**
- * Variant of {@link decryptBoxBytes} that returns the data after decoding the
- * decrypted bytes as a utf-8 string.
- */
-export const decryptBoxUTF8 = async (
-    box: EncryptedBox,
-    key: BytesOrB64,
-): Promise<string> => {
-    await sodium.ready;
-    return sodium.to_string(await decryptBoxBytes(box, key));
-};
-
-/**
  * Decrypt the result of {@link encryptBlobBytes} or {@link encryptBlob}.
  */
 export const decryptBlobBytes = async (
@@ -562,7 +513,7 @@ export const decryptBlob = (
 
 /**
  * Decrypt the result of {@link encryptMetadataJSON} and return the JSON value
- * obtained by parsing the decrypted JSON string (which is obtained by utf-8
+ * obtained by parsing the decrypted JSON string (which is obtained by UTF-8
  * decoding the decrypted bytes).
  *
  * Since TypeScript doesn't currently have a native JSON type, the returned
@@ -571,7 +522,7 @@ export const decryptBlob = (
 export const decryptMetadataJSON = async (
     blob: EncryptedBlob,
     key: BytesOrB64,
-) =>
+): Promise<unknown> =>
     JSON.parse(
         new TextDecoder().decode(await decryptBlobBytes(blob, key)),
     ) as unknown;
@@ -660,29 +611,6 @@ export const decryptStreamChunk = async (
     );
     return pullResult.message;
 };
-
-export interface B64EncryptionResult {
-    encryptedData: string;
-    key: string;
-    nonce: string;
-}
-
-/** Deprecated, use {@link encryptBox} instead */
-async function encryptToB64(data: string, keyB64: string) {
-    await sodium.ready;
-    const encrypted = await encryptBox(data, keyB64);
-    return {
-        encryptedData: encrypted.encryptedData,
-        key: keyB64,
-        nonce: encrypted.nonce,
-    } as B64EncryptionResult;
-}
-
-export async function generateKeyAndEncryptToB64(data: string) {
-    await sodium.ready;
-    const key = sodium.crypto_secretbox_keygen();
-    return await encryptToB64(data, await toB64(key));
-}
 
 /**
  * Initialize and return new state that can be used to hash the chunks of data
@@ -784,23 +712,27 @@ export const boxSeal = async (data: string, publicKey: string) => {
 /**
  * Decrypt the result of {@link boxSeal}.
  *
- * All parameters, and the result, are base64 string representations of the
- * underlying data.
+ * All parameters are base64 string representations of the underlying data. The
+ * result is the bytes obtained by decryption.
  */
-export const boxSealOpen = async (
+export const boxSealOpenBytes = async (
     encryptedData: string,
-    publicKey: string,
-    secretKey: string,
-) => {
+    { publicKey, privateKey }: KeyPair,
+): Promise<Uint8Array> => {
     await sodium.ready;
-    return toB64(
-        sodium.crypto_box_seal_open(
-            await fromB64(encryptedData),
-            await fromB64(publicKey),
-            await fromB64(secretKey),
-        ),
+    return sodium.crypto_box_seal_open(
+        await fromB64(encryptedData),
+        await fromB64(publicKey),
+        await fromB64(privateKey),
     );
 };
+
+/**
+ * A variant of {@link boxSealOpenBytes} that returns the result as a base64
+ * string.
+ */
+export const boxSealOpen = async (encryptedData: string, keyPair: KeyPair) =>
+    toB64(await boxSealOpenBytes(encryptedData, keyPair));
 
 /**
  * Generate a new randomly generated 128-bit salt suitable for use with the key
@@ -855,7 +787,7 @@ export const deriveKey = async (
 
 /**
  * A variant of {@link deriveKey} with (dynamic) parameters for deriving
- * sensitive keys (like the user's master key kek (key encryption key).
+ * sensitive keys (like the user's master key KEK (key encryption key).
  *
  * This function defers to {@link deriveKey} after choosing the most secure ops
  * and mem limits that the current device can handle. For details about these
@@ -906,7 +838,7 @@ export const deriveSensitiveKey = async (
             memLimit /= 2;
         }
     }
-    throw new Error("Failed to derive key: memory limit exceeded");
+    throw new Error(deriveKeyInsufficientMemoryErrorMessage);
 };
 
 /**

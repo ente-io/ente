@@ -132,10 +132,13 @@ class _MemoriesWidgetState extends State<MemoriesWidget> {
         itemBuilder: (context, itemIndex) {
           return MemoryCoverWidget(
             memories: collatedMemories[itemIndex].$1,
+            allMemories: collatedMemories.map((e) => e.$1).toList(),
             controller: _controller,
             maxHeight: _maxHeight,
             maxWidth: _maxWidth,
             title: collatedMemories[itemIndex].$2,
+            allTitle: collatedMemories.map((e) => e.$2).toList(),
+            currentMemoryIndex: itemIndex,
           );
         },
       ),

@@ -109,9 +109,23 @@ class _CollectionsFlexiGridViewWidgetState
 
   @override
   Widget build(BuildContext context) {
-    return widget.albumViewType == AlbumViewType.grid
-        ? _buildGridView(context, const ValueKey("grid_view"))
-        : _buildListView(context, const ValueKey("list_view"));
+    return PopScope(
+      canPop: !isAnyAlbumSelected,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) {
+          return;
+        }
+        if (isAnyAlbumSelected) {
+          widget.selectedAlbums!.clearAll();
+          setState(() {
+            isAnyAlbumSelected = false;
+          });
+        }
+      },
+      child: widget.albumViewType == AlbumViewType.grid
+          ? _buildGridView(context, const ValueKey("grid_view"))
+          : _buildListView(context, const ValueKey("list_view")),
+    );
   }
 
   Widget _buildGridView(BuildContext context, Key key) {

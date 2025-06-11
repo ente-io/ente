@@ -14,7 +14,7 @@ import "package:photos/service_locator.dart";
 import "package:photos/services/preview_video_store.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/ui/common/loading_widget.dart";
-import "package:photos/ui/notification/toast.dart";
+import "package:photos/ui/notification/toast.dart"; 
 import "package:photos/ui/viewer/file/video_widget_media_kit_new.dart";
 import "package:photos/ui/viewer/file/video_widget_native.dart";
 import "package:photos/utils/standalone/data.dart";
@@ -23,7 +23,7 @@ class VideoWidget extends StatefulWidget {
   final EnteFile file;
   final String? tagPrefix;
   final Function(bool)? playbackCallback;
-  final Function(int)? onFinalFileLoad;
+  final Function({required int memoryDuration})? onFinalFileLoad;
   final bool isFromMemories;
 
   const VideoWidget(

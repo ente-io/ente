@@ -46,7 +46,7 @@ class VideoWidgetNative extends StatefulWidget {
   final void Function()? onStreamChange;
   final PlaylistData? playlistData;
   final bool selectedPreview;
-  final Function(int)? onFinalFileLoad;
+  final Function({required int memoryDuration})? onFinalFileLoad;
 
   const VideoWidgetNative(
     this.file, {
@@ -303,21 +303,25 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
                       ),
                       GestureDetector(
                         behavior: HitTestBehavior.opaque,
-                        onTap: () {
-                          if (widget.isFromMemories) return;
-                          _showControls.value = !_showControls.value;
-                          if (widget.playbackCallback != null) {
-                            widget.playbackCallback!(!_showControls.value);
-                          }
-                          _elTooltipController.hide();
-                        },
+                        onTap: widget.isFromMemories
+                            ? null
+                            : () {
+                                _showControls.value = !_showControls.value;
+                                if (widget.playbackCallback != null) {
+                                  widget
+                                      .playbackCallback!(!_showControls.value);
+                                }
+                                _elTooltipController.hide();
+                              },
                         onLongPress: () {
                           if (widget.isFromMemories) {
+                            widget.playbackCallback?.call(false);
                             _controller?.pause();
                           }
                         },
                         onLongPressUp: () {
                           if (widget.isFromMemories) {
+                            widget.playbackCallback?.call(true);
                             _controller?.play();
                           }
                         },
@@ -482,6 +486,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
   }
 
   void _seekListener() {
+    if (widget.isFromMemories) return;
     if (!_isSeeking.value &&
         _controller?.playbackStatus == PlaybackStatus.playing) {
       _debouncer.run(() async {
@@ -500,6 +505,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
   }
 
   void _onPlaybackStatusChanged() {
+    if (widget.isFromMemories) return;
     final duration = widget.file.duration != null
         ? widget.file.duration! * 1000
         : _controller?.videoInfo?.durationInMilliseconds;
@@ -544,8 +550,8 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
   Future<void> _onPlaybackReady() async {
     if (_isPlaybackReady.value) return;
     await _controller!.play();
-    final durationInSeconds = durationToSeconds(duration) ?? 0;
-    widget.onFinalFileLoad?.call(durationInSeconds);
+    final durationInSeconds = durationToSeconds(duration) ?? 10;
+    widget.onFinalFileLoad?.call(memoryDuration: durationInSeconds);
     unawaited(_controller!.setVolume(1));
     _isPlaybackReady.value = true;
   }

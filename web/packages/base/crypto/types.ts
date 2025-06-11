@@ -1,3 +1,7 @@
+/**
+ * @file types shared between the public API (main thread) and implementation
+ * (worker thread). Also some constants, but no code.
+ */
 import { type StateAddress } from "libsodium-wrappers-sumo";
 
 /**
@@ -5,6 +9,31 @@ import { type StateAddress } from "libsodium-wrappers-sumo";
  * with resumable chunk based processing.
  */
 export type SodiumStateAddress = StateAddress;
+
+/**
+ * The various *Stream encryption functions break up the input into chunks of
+ * {@link streamEncryptionChunkSize} bytes during encryption (except the last
+ * chunk which can be smaller since a file would rarely align exactly to a
+ * {@link streamEncryptionChunkSize} multiple).
+ *
+ * The various *Stream decryption functions also assume that each potential
+ * chunk is {@link streamEncryptionChunkSize} long.
+ *
+ * This value of this constant is 4 MB (and is unlikely to change).
+ */
+export const streamEncryptionChunkSize = 4 * 1024 * 1024;
+
+/**
+ * The message of the {@link Error} that is thrown by {@link deriveSensitiveKey}
+ * if we could not find acceptable ops and mem limit combinations without
+ * exceeded the maximum mem limit.
+ *
+ * Generally, this indicates that the current device is not powerful enough to
+ * perform the key derivation. This is rare for computers, but can happen with
+ * older mobile devices with too little RAM.
+ */
+export const deriveKeyInsufficientMemoryErrorMessage =
+    "Failed to derive key (insufficient memory)";
 
 /**
  * Data provided either as bytes ({@link Uint8Array}) or their base64 string
@@ -170,6 +199,24 @@ export interface InitChunkDecryptionResult {
      * The expected size of each chunk.
      */
     decryptionChunkSize: number;
+}
+
+/**
+ * A pair of public and private keys.
+ */
+export interface KeyPair {
+    /**
+     * The public key of the keypair, as a base64 encoded string.
+     */
+    publicKey: string;
+    /**
+     * The private key of the keypair, as a base64 encoded string.
+     *
+     * Some places also refer to it as the "secret key".
+     *
+     * See: [Note: privateKey and secretKey].
+     */
+    privateKey: string;
 }
 
 /**

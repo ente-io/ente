@@ -1,6 +1,6 @@
 import "package:flutter/material.dart";
 
-class NewProgressIndicator extends StatefulWidget {
+class MemoryProgressIndicator extends StatefulWidget {
   final int totalSteps;
   final int currentIndex;
   final Duration duration;
@@ -11,7 +11,7 @@ class NewProgressIndicator extends StatefulWidget {
   final void Function(AnimationController)? animationController;
   final VoidCallback? onComplete;
 
-  const NewProgressIndicator({
+  const MemoryProgressIndicator({
     super.key,
     required this.totalSteps,
     required this.currentIndex,
@@ -25,10 +25,11 @@ class NewProgressIndicator extends StatefulWidget {
   });
 
   @override
-  State<NewProgressIndicator> createState() => _NewProgressIndicatorState();
+  State<MemoryProgressIndicator> createState() =>
+      _MemoryProgressIndicatorState();
 }
 
-class _NewProgressIndicatorState extends State<NewProgressIndicator>
+class _MemoryProgressIndicatorState extends State<MemoryProgressIndicator>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _animation;
@@ -67,13 +68,13 @@ class _NewProgressIndicatorState extends State<NewProgressIndicator>
       children: List.generate(widget.totalSteps, (index) {
         return Expanded(
           child: Padding(
-            padding: const EdgeInsets.only(left: 4, right: 4),
+            padding: EdgeInsets.only(right: widget.gap),
             child: index < widget.currentIndex
                 ? Container(
                     height: widget.height,
                     decoration: BoxDecoration(
                       color: widget.selectedColor,
-                      borderRadius: BorderRadius.circular(2),
+                      borderRadius: BorderRadius.circular(12),
                     ),
                   )
                 : index == widget.currentIndex
@@ -87,7 +88,7 @@ class _NewProgressIndicatorState extends State<NewProgressIndicator>
                               widget.selectedColor,
                             ),
                             minHeight: widget.height,
-                            borderRadius: BorderRadius.circular(2),
+                            borderRadius: BorderRadius.circular(12),
                           );
                         },
                       )
@@ -95,7 +96,7 @@ class _NewProgressIndicatorState extends State<NewProgressIndicator>
                         height: widget.height,
                         decoration: BoxDecoration(
                           color: widget.unselectedColor,
-                          borderRadius: BorderRadius.circular(2),
+                          borderRadius: BorderRadius.circular(12),
                         ),
                       ),
           ),

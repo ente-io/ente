@@ -4,12 +4,13 @@ import "package:photos/models/memories/memory.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/effects.dart";
 import "package:photos/theme/ente_theme.dart";
-import "package:photos/ui/home/memories/full_screen_memory.dart";
+import "package:photos/ui/home/memories/all_memories_page.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/utils/navigation_util.dart";
 
 class MemoryCoverWidget extends StatefulWidget {
   final List<Memory> memories;
+  final List<List<Memory>> allMemories;
   final ScrollController controller;
   final double maxHeight;
   final double maxWidth;
@@ -17,13 +18,18 @@ class MemoryCoverWidget extends StatefulWidget {
   static const aspectRatio = 0.68;
   static const horizontalPadding = 2.5;
   final String title;
+  final List<String> allTitle;
+  final int currentMemoryIndex;
 
   const MemoryCoverWidget({
     required this.memories,
+    required this.allMemories,
     required this.controller,
     required this.maxHeight,
     required this.maxWidth,
     required this.title,
+    required this.allTitle,
+    required this.currentMemoryIndex,
     super.key,
   });
 
@@ -56,15 +62,14 @@ class _MemoryCoverWidgetState extends State<MemoryCoverWidget> {
             horizontal: MemoryCoverWidget.horizontalPadding,
           ),
           child: GestureDetector(
-            onTap: () async {
+            onTap: () async { 
               await routeToPage(
                 context,
-                FullScreenMemoryDataUpdater(
-                  initialIndex: index,
-                  memories: widget.memories,
-                  child: FullScreenMemory(title, index),
+                AllMemoriesPage( 
+                  initialPageIndex: widget.currentMemoryIndex,
+                  allMemories: widget.allMemories,
+                  allTitles: widget.allTitle,
                 ),
-                forceCustomPageRoute: true,
               );
               setState(() {});
             }, //Adding this row is a workaround for making height of memory cover
@@ -73,8 +78,8 @@ class _MemoryCoverWidgetState extends State<MemoryCoverWidget> {
             child: Row(
               children: [
                 Container(
-                  height: widget.maxHeight ,
-                  width: widget.maxWidth ,
+                  height: widget.maxHeight,
+                  width: widget.maxWidth,
                   decoration: BoxDecoration(
                     boxShadow: brightness == Brightness.dark
                         ? [
@@ -114,7 +119,7 @@ class _MemoryCoverWidgetState extends State<MemoryCoverWidget> {
                                   ),
                                 ),
                                 Positioned(
-                                  bottom: 8 ,
+                                  bottom: 8,
                                   child: SizedBox(
                                     width: widget.maxWidth,
                                     child: Padding(
@@ -162,7 +167,7 @@ class _MemoryCoverWidgetState extends State<MemoryCoverWidget> {
                                 ),
                               ),
                               Positioned(
-                                bottom: 8 ,
+                                bottom: 8,
                                 child: SizedBox(
                                   width: widget.maxWidth,
                                   child: Padding(
