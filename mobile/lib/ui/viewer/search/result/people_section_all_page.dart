@@ -48,7 +48,6 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
   late Future<List<GenericSearchResult>> sectionData;
   List<GenericSearchResult> normalFaces = [];
   List<GenericSearchResult> extraFaces = [];
-  List<GenericSearchResult> displayedResults = [];
   final streamSubscriptions = <StreamSubscription>[];
   bool _showingAllFaces = false;
   bool _isLoaded = false;
@@ -105,7 +104,6 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
         );
       }
     }
-    displayedResults = results;
     _isLoaded = true;
     return results;
   }
@@ -133,10 +131,9 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
           return const Center(child: EnteLoadingWidget());
         } else if (snapshot.hasError) {
           return const Center(child: Icon(Icons.error_outline_rounded));
-        } else if (displayedResults.isEmpty && _isLoaded) {
+        } else if (normalFaces.isEmpty && _isLoaded) {
           return Center(child: Text(S.of(context).noResultsFound + '.'));
         } else {
-          final results = displayedResults;
           final screenWidth = MediaQuery.of(context).size.width;
           final crossAxisCount = (screenWidth / 100).floor();
 
@@ -152,7 +149,7 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
                   horizontalEdgePadding,
                   16,
                   horizontalEdgePadding,
-                  96,
+                  16,
                 ),
                 sliver: SliverGrid(
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -163,10 +160,10 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
                         itemSize / (itemSize + (24 * textScaleFactor)),
                   ),
                   delegate: SliverChildBuilderDelegate(
-                    childCount: results.length,
+                    childCount: normalFaces.length,
                     (context, index) {
                       return PersonSearchExample(
-                        searchResult: results[index],
+                        searchResult: normalFaces[index],
                         size: itemSize,
                         selectedPeople: widget.selectedPeople,
                       );
@@ -175,10 +172,42 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
                 ),
               ),
               if (_showMoreLessOption)
-                SliverToBoxAdapter(child: _buildShowMoreButton(context)),
+                SliverToBoxAdapter(child: _buildShowMoreOrLessButton(context)),
               const SliverToBoxAdapter(
-                child: SizedBox(height: 96),
+                child: SizedBox(height: 16),
               ),
+              if (_showingAllFaces)
+                SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(
+                    horizontalEdgePadding,
+                    16,
+                    horizontalEdgePadding,
+                    16,
+                  ),
+                  sliver: SliverGrid(
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      mainAxisSpacing: gridPadding,
+                      crossAxisSpacing: gridPadding,
+                      crossAxisCount: crossAxisCount,
+                      childAspectRatio:
+                          itemSize / (itemSize + (24 * textScaleFactor)),
+                    ),
+                    delegate: SliverChildBuilderDelegate(
+                      childCount: extraFaces.length,
+                      (context, index) {
+                        return PersonSearchExample(
+                          searchResult: extraFaces[index],
+                          size: itemSize,
+                          selectedPeople: widget.selectedPeople,
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              if (_showingAllFaces)
+                const SliverToBoxAdapter(
+                  child: SizedBox(height: 16),
+                ),
             ],
           );
         }
@@ -186,7 +215,7 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
     );
   }
 
-  Widget _buildShowMoreButton(BuildContext context) {
+  Widget _buildShowMoreOrLessButton(BuildContext context) {
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
       child: SizedBox(
@@ -196,12 +225,10 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
             if (_showingAllFaces) {
               setState(() {
                 _showingAllFaces = false;
-                displayedResults = List.from(normalFaces);
               });
             } else {
               setState(() {
                 _showingAllFaces = true;
-                displayedResults = [...normalFaces, ...extraFaces];
               });
             }
           },
