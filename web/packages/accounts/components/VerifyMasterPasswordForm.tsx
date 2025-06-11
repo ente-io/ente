@@ -178,8 +178,7 @@ export const VerifyMasterPasswordForm: React.FC<
                 },
                 kek,
             );
-        } catch (e) {
-            log.warn("Incorrect password", e);
+        } catch {
             setFieldError(t("incorrect_password"));
             return;
         }
