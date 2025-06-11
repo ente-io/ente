@@ -1,3 +1,4 @@
+import { Divider } from "@mui/material";
 import {
     AccountsPageContents,
     AccountsPageFooter,
@@ -112,6 +113,7 @@ const Page: React.FC = () => {
                         submitButtonTitle={t("set_password")}
                         onSubmit={handleSubmit}
                     />
+                    <Divider sx={{ mt: 1 }} />
                     <AccountsPageFooter>
                         <LinkButton onClick={logout}>{t("go_back")}</LinkButton>
                     </AccountsPageFooter>

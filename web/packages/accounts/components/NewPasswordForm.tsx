@@ -1,4 +1,4 @@
-import { Box, Input, TextField, Typography } from "@mui/material";
+import { Input, TextField, Typography } from "@mui/material";
 import { isWeakPassword } from "ente-accounts/utils/password";
 import { LoadingButton } from "ente-base/components/mui/LoadingButton";
 import { ShowHidePasswordInputAdornment } from "ente-base/components/mui/PasswordInputAdornment";
@@ -131,29 +131,28 @@ export const NewPasswordForm: React.FC<NewPasswordFormProps> = ({
             />
             <PasswordStrengthHint password={formik.values.password} />
 
-            <Typography variant="small" sx={{ my: 2 }}>
+            <Typography
+                variant="small"
+                sx={{ color: "text.muted", my: 2, mb: 4 }}
+            >
                 <Trans i18nKey={"pick_password_caution"} />
             </Typography>
 
-            <Box sx={{ mt: 4, mb: 2 }}>
-                <LoadingButton
-                    color="accent"
-                    type="submit"
-                    loading={formik.isSubmitting}
-                    disabled={isWeakPassword(formik.values.password)}
-                    fullWidth
-                >
-                    {submitButtonTitle}
-                </LoadingButton>
-                {formik.isSubmitting && (
-                    <Typography
-                        variant="small"
-                        sx={{ textAlign: "center", mt: 1, color: "text.muted" }}
-                    >
-                        {t("key_generation_in_progress")}
-                    </Typography>
-                )}
-            </Box>
+            <LoadingButton
+                color="accent"
+                type="submit"
+                loading={formik.isSubmitting}
+                disabled={isWeakPassword(formik.values.password)}
+                fullWidth
+            >
+                {submitButtonTitle}
+            </LoadingButton>
+            <Typography
+                variant="small"
+                sx={{ textAlign: "center", mt: 1, color: "text.muted" }}
+            >
+                {formik.isSubmitting ? t("key_generation_in_progress") : ""}
+            </Typography>
         </form>
     );
 };

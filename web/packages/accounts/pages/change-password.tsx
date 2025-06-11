@@ -1,3 +1,4 @@
+import { Divider } from "@mui/material";
 import {
     AccountsPageContents,
     AccountsPageFooter,
@@ -82,11 +83,14 @@ const PageContents: React.FC<PageContentsProps> = ({ user }) => {
                 onSubmit={handleSubmit}
             />
             {(getData("showBackButton")?.value ?? true) && (
-                <AccountsPageFooter>
-                    <LinkButton onClick={router.back}>
-                        {t("go_back")}
-                    </LinkButton>
-                </AccountsPageFooter>
+                <>
+                    <Divider sx={{ mt: 1 }} />
+                    <AccountsPageFooter>
+                        <LinkButton onClick={router.back}>
+                            {t("go_back")}
+                        </LinkButton>
+                    </AccountsPageFooter>
+                </>
             )}
         </AccountsPageContents>
     );
