@@ -983,20 +983,6 @@ class SearchService {
           ),
         );
       }
-      if (facesResult.isEmpty) {
-        int newMinimum = minClusterSize;
-        for (final int minimum in kLowerMinimumClusterSizes) {
-          if (minimum < minClusterSize) {
-            newMinimum = minimum;
-            break;
-          }
-        }
-        if (newMinimum < minClusterSize) {
-          return getAllFace(limit, minClusterSize: newMinimum);
-        } else {
-          return [];
-        }
-      }
       if (limit != null) {
         return facesResult.sublist(0, min(limit, facesResult.length));
       } else {
