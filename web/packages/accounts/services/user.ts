@@ -477,30 +477,6 @@ export const putUserRecoveryKeyAttributes = async (
         }),
     );
 
-export interface UserVerificationResponse {
-    id: number;
-    keyAttributes?: KeyAttributes | undefined;
-    encryptedToken?: string | undefined;
-    token?: string;
-    twoFactorSessionID?: string | undefined;
-    passkeySessionID?: string | undefined;
-    /**
-     * Base URL for the accounts app where we should redirect to for passkey
-     * verification.
-     *
-     * This will only be set if the user has setup a passkey (i.e., whenever
-     * {@link passkeySessionID} is defined).
-     */
-    accountsUrl: string | undefined;
-    /**
-     * If both passkeys and TOTP based two factors are enabled, then {@link
-     * twoFactorSessionIDV2} will be set to the TOTP session ID instead of
-     * {@link twoFactorSessionID}.
-     */
-    twoFactorSessionIDV2?: string | undefined;
-    srpM2?: string | undefined;
-}
-
 /**
  * Ask remote to send a OTP / OTT to the given email to verify that the user has
  * access to it. Subsequent the app will pass this OTT back via the
@@ -527,35 +503,29 @@ export const sendOTT = async (
         }),
     );
 
-/**
- * Verify user's access to the given {@link email} by comparing the OTT that
- * remote previously sent to that email.
- *
- * @param email The email to verify.
- *
- * @param ott The OTT that the user entered.
- *
- * @param source During signup, we ask the user the referral "source" through
- * which they heard about Ente. When present (i.e. during signup, and if the
- * user indeed provided it), that source should be passed as this parameter.
- */
-export const verifyEmail = async (
-    email: string,
-    ott: string,
-    source: string | undefined,
-): Promise<UserVerificationResponse> => {
-    const res = await fetch(await apiURL("/users/verify-email"), {
-        method: "POST",
-        headers: publicRequestHeaders(),
-        body: JSON.stringify({ email, ott, ...(source ? { source } : {}) }),
-    });
-    ensureOk(res);
-    // See: [Note: strict mode migration]
-    //
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    return EmailOrSRPVerificationResponse.parse(await res.json());
-};
+export interface UserVerificationResponse {
+    id: number;
+    keyAttributes?: KeyAttributes | undefined;
+    encryptedToken?: string | undefined;
+    token?: string;
+    twoFactorSessionID?: string | undefined;
+    passkeySessionID?: string | undefined;
+    /**
+     * Base URL for the accounts app where we should redirect to for passkey
+     * verification.
+     *
+     * This will only be set if the user has setup a passkey (i.e., whenever
+     * {@link passkeySessionID} is defined).
+     */
+    accountsUrl: string | undefined;
+    /**
+     * If both passkeys and TOTP based two factors are enabled, then {@link
+     * twoFactorSessionIDV2} will be set to the TOTP session ID instead of
+     * {@link twoFactorSessionID}.
+     */
+    twoFactorSessionIDV2?: string | undefined;
+    srpM2?: string | undefined;
+}
 
 /**
  * Zod schema for response from remote on a successful user verification, either
@@ -586,6 +556,36 @@ export const EmailOrSRPVerificationResponse = z.object({
     // value aka the proof that the server has the verifier.
     srpM2: z.string().nullish().transform(nullToUndefined),
 });
+
+/**
+ * Verify user's access to the given {@link email} by comparing the OTT that
+ * remote previously sent to that email.
+ *
+ * @param email The email to verify.
+ *
+ * @param ott The OTT that the user entered.
+ *
+ * @param source During signup, we ask the user the referral "source" through
+ * which they heard about Ente. When present (i.e. during signup, and if the
+ * user indeed provided it), that source should be passed as this parameter.
+ */
+export const verifyEmail = async (
+    email: string,
+    ott: string,
+    source: string | undefined,
+): Promise<UserVerificationResponse> => {
+    const res = await fetch(await apiURL("/users/verify-email"), {
+        method: "POST",
+        headers: publicRequestHeaders(),
+        body: JSON.stringify({ email, ott, ...(source ? { source } : {}) }),
+    });
+    ensureOk(res);
+    // See: [Note: strict mode migration]
+    //
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    return EmailOrSRPVerificationResponse.parse(await res.json());
+};
 
 /**
  * Log the user out on remote, if possible and needed.

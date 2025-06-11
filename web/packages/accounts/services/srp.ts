@@ -582,8 +582,7 @@ export const srpVerificationUnauthorizedErrorMessage =
  * @param kek The user's key encryption key as a base64 string.
  *
  * @returns If SRP verification is successful, it returns a
- * {@link UserVerificationResponse} (both email and SRP verification resolve to
- * this same structure).
+ * {@link UserVerificationResponse}.
  *
  * @throws An Error with {@link srpVerificationUnauthorizedErrorMessage} in case
  * there is no such account, or if the credentials (kek) are incorrect.
@@ -647,6 +646,10 @@ interface VerifySRPSessionRequest {
 
 const SRPVerificationResponse = z.object({
     ...EmailOrSRPVerificationResponse.shape,
+    /**
+     * The SRP M2 (evidence message), the proof that the server has the
+     * verifier.
+     */
     srpM2: z.string(),
 });
 
