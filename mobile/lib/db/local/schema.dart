@@ -135,6 +135,19 @@ class LocalDBMigration {
     );
     ''',
     '''
+        CREATE INDEX IF NOT EXISTS assets_created_at ON assets(created_at);
+    ''',
+    '''
+      CREATE TABLE shared_assets (
+       id TEXT PRIMARY KEY,
+       type INTEGER NOT NULL,
+       created_at INTEGER NOT NULL,
+       duration_in_sec INTEGER DEFAULT 0,
+       dest_collection_id INTEGER NOT NULL,
+       owner_id INTEGER NOT NULL,
+    );
+  ''',
+    '''
     CREATE TABLE device_path (
       path_id TEXT PRIMARY KEY,
       name TEXT NOT NULL,
@@ -147,9 +160,9 @@ class LocalDBMigration {
     CREATE TABLE device_path_assets (
       path_id TEXT NOT NULL,
       asset_id TEXT NOT NULL,
-      PRIMARY KEY (path_id, asset_id)
-      FOREIGN KEY (path_id) REFERENCES device_path(path_id)
-      FOREIGN KEY (asset_id) REFERENCES assets(id)
+      PRIMARY KEY (path_id, asset_id),
+      FOREIGN KEY (path_id) REFERENCES device_path(path_id)  ON DELETE CASCADE,
+      FOREIGN KEY (asset_id) REFERENCES assets(id) ON DELETE CASCADE
     );
     ''',
     '''
@@ -160,9 +173,6 @@ class LocalDBMigration {
     );
     ''',
     '''
-        CREATE INDEX IF NOT EXISTS assets_created_at ON assets(created_at);
-    ''',
-    '''
     CREATE TABLE path_backup_config(
       device_path_id TEXT PRIMARY KEY,
       owner_id INTEGER NOT NULL,
@@ -170,19 +180,16 @@ class LocalDBMigration {
       should_backup INTEGER NOT NULL DEFAULT 0,
       upload_strategy INTEGER NOT NULL DEFAULT 0
     );
-    
   ''',
     '''
     CREATE TABLE asset_upload_queue (
-      id TEXT NOT NULL,
       dest_collection_id INTEGER NOT NULL,
+      id TEXT NOT NULL,
       PRIMARY KEY (dest_collection_id, id),
       path_id TEXT,
-      owner_id INTEGER NOT NULL
-    );
-    CREATE INDEX IF NOT EXISTS idx_asset_upload_queue_collection_id 
-      ON asset_upload_queue(dest_collection_id) 
-      WHERE dest_collection_id IS NOT NULL;
+      owner_id INTEGER NOT NULL,
+      FOREIGN KEY(id) REFERENCES assets(id) ON DELETE CASCADE
+    ); 
     CREATE INDEX IF NOT EXISTS idx_asset_upload_queue_owner_id 
       ON asset_upload_queue(owner_id) 
       WHERE owner_id IS NOT NULL;
