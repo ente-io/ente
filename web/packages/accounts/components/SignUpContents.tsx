@@ -293,14 +293,19 @@ export const SignUpContents: React.FC<SignUpContentsProps> = ({
             >
                 {t("create_account")}
             </LoadingButton>
-            {formik.isSubmitting && (
-                <Typography
-                    variant="small"
-                    sx={{ mt: 1, textAlign: "center", color: "text.muted" }}
-                >
-                    {t("key_generation_in_progress")}
-                </Typography>
-            )}
+            <Typography
+                variant="small"
+                sx={(theme) => ({
+                    mt: 1,
+                    textAlign: "center",
+                    color: "text.muted",
+                    // Prevent layout shift by using a minHeight equal to the
+                    // lineHeight of the eventual content that'll be shown.
+                    minHeight: theme.typography.small.lineHeight,
+                })}
+            >
+                {formik.isSubmitting ? t("key_generation_in_progress") : ""}
+            </Typography>
         </form>
     );
 
@@ -308,7 +313,7 @@ export const SignUpContents: React.FC<SignUpContentsProps> = ({
         <>
             <AccountsPageTitle>{t("sign_up")}</AccountsPageTitle>
             {form}
-            <Divider sx={{ mt: 1.5 }} />
+            <Divider sx={{ mt: 1 }} />
             <AccountsPageFooter>
                 <Stack sx={{ gap: 3, textAlign: "center" }}>
                     <LinkButton onClick={onLogin}>
