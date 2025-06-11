@@ -62,12 +62,9 @@ export const NewPasswordForm: React.FC<NewPasswordFormProps> = ({
         onSubmit: async ({ password, confirmPassword }, { setFieldError }) => {
             const setPasswordsFieldError = (message: string) =>
                 setFieldError("confirmPassword", message);
-            if (!password) {
-                setFieldError("password", t("required"));
-                return;
-            }
+
             if (!confirmPassword) {
-                setFieldError("confirmPassword", t("required"));
+                setPasswordsFieldError(t("required"));
                 return;
             }
 
@@ -105,8 +102,6 @@ export const NewPasswordForm: React.FC<NewPasswordFormProps> = ({
                 label={t("password")}
                 value={formik.values.password}
                 onChange={formik.handleChange}
-                error={!!formik.errors.password}
-                helperText={formik.errors.password}
                 disabled={formik.isSubmitting}
                 fullWidth
                 autoFocus
@@ -130,11 +125,6 @@ export const NewPasswordForm: React.FC<NewPasswordFormProps> = ({
                 onChange={formik.handleChange}
                 error={!!formik.errors.confirmPassword}
                 // See: [Note: Use space as default TextField helperText]
-                //
-                // We only do this for the second field for a better
-                // visual look. Technically it is possible that the
-                // first field also has an error if the user doesn't
-                // enter a password there, but that should be rare.
                 helperText={formik.errors.confirmPassword ?? " "}
                 disabled={formik.isSubmitting}
                 fullWidth
