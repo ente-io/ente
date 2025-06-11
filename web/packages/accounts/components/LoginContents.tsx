@@ -103,7 +103,7 @@ export const LoginContents: React.FC<LoginContentsProps> = ({
                     margin="normal"
                     disabled={formik.isSubmitting}
                     error={!!formik.errors.email}
-                    // See: Note: [Use space as default TextField helperText]
+                    // See: [Note: Use space as default TextField helperText]
                     helperText={formik.errors.email ?? " "}
                 />
                 <Input sx={{ display: "none" }} type="password" value="" />

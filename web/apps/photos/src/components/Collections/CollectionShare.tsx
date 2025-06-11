@@ -1631,10 +1631,8 @@ const SetPublicLinkPassword: React.FC<SetPublicLinkPasswordProps> = ({
     publicShareProp,
     updatePublicShareURLHelper,
 }) => {
-    const savePassword: SingleInputFormProps["onSubmit"] = async (
-        passphrase,
-    ) => {
-        await enablePublicUrlPassword(passphrase);
+    const savePassword: SingleInputFormProps["onSubmit"] = async (password) => {
+        await enablePublicUrlPassword(password);
         publicShareProp.passwordEnabled = true;
         onClose();
         // The onClose above will close the dialog, but if we return immediately

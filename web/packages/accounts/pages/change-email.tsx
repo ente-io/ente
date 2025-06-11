@@ -127,7 +127,7 @@ const ChangeEmailForm: React.FC = () => {
                     value={formik.values.email}
                     onChange={formik.handleChange}
                     error={!!formik.errors.email}
-                    // See: Note: [Use space as default TextField helperText]
+                    // See: [Note: Use space as default TextField helperText]
                     //
                     // Also, we only need keep the extra space until the email
                     // has been entered (since the email field is read only
