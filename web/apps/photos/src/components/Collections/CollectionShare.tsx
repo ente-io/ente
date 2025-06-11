@@ -508,19 +508,24 @@ const AddParticipant: React.FC<AddParticipantProps> = ({
             try {
                 await shareCollection(collection, email, role);
             } catch (e) {
+                if (isHTTPErrorWithStatus(e, 402)) {
+                    setEmailFieldError(t("sharing_disabled_for_free_accounts"));
+                    return;
+                }
+
                 if (isHTTPErrorWithStatus(e, 404)) {
                     setEmailFieldError(t("sharing_user_does_not_exist"));
                     return;
                 }
-                // TODO(RE):
-                setEmailFieldError(handleSharingErrors(e));
-                return;
+
+                throw e;
             }
         }
 
         if (emails.length) {
             await syncWithRemote(false, true);
         }
+
         onClose();
     };
 
@@ -594,7 +599,7 @@ const AddParticipantForm: React.FC<AddParticipantFormProps> = ({
     });
 
     const resetExistingSelection = () =>
-        formik.setFieldValue("selectedOptions", []);
+        formik.setFieldValue("selectedEmails", []);
 
     return (
         <form onSubmit={formik.handleSubmit}>
