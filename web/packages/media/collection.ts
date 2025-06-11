@@ -97,16 +97,20 @@ export interface CollectionUser {
      *
      * - The email is present for the {@link owner} only for shared collections.
      * - The email is present for all {@link sharees}.
-     * - Remote uses a blank string to indicate absent values.
+     * - Remote uses a blank string to indicate absent values, but we convert
+     *   those into `undefined` in {@link parseRemoteCollectionUser}.
      */
     email?: string;
     /**
      * The association / privilege level of the user with the collection.
      *
-     * - The role is not present blank for the {@link owner}.
+     * - The role is not present (blank string) for the {@link owner}.
      * - The role is present, and one of "VIEWER" and "COLLABORATOR" for the
      *   {@link sharees}.
-     * - Remote uses a blank string to indicate absent values.
+     * - Remote uses a blank string to indicate absent values, but we convert
+     *   those into `undefined` in {@link parseRemoteCollectionParticipantRole}.
+     * - That function also converts any role strings apart from "VIEWER",
+     *   "COLLABORATOR" and "OWNER" to `undefined`.
      */
     role?: CollectionParticipantRole;
 }
@@ -132,12 +136,40 @@ export interface CollectionUser {
  * looseObject), instead of discarding fields that we currently don't know of,
  * because a future version of the client might gain support for them, and thus
  * can read the already persisted data instead of requiring a fresh pull.
+ *
+ * Since we're also doing a translation step, we also use this to do some
+ * trivial clean up for the object used by our code:
+ *
+ * - Converting blank strings (where expected) to undefined.
  */
-const CollectionUser = z.looseObject({
+const RemoteCollectionUser = z.looseObject({
     id: z.number(),
-    email: z.string().nullish().transform(falseyToUndefined),
-    role: z.string().nullish().transform(falseyToUndefined),
+    email: z.string().nullish(),
+    role: z.string().nullish(),
 });
+
+type RemoteCollectionUser = z.infer<typeof RemoteCollectionUser>;
+
+/**
+ * Convert a {@link RemoteCollectionUser} into a {@link CollectionUser}.
+ *
+ * See: [Note: String enums and looseObject for persisted remote objects]
+ */
+// TODO: Use me
+export const parseRemoteCollectionUser = (
+    remote: RemoteCollectionUser,
+): CollectionUser => ({
+    id: remote.id,
+    email: falseyToUndefined(remote.email),
+    role: parseRemoteCollectionParticipantRole(remote.role),
+});
+
+const parseRemoteCollectionParticipantRole = (
+    role: string | null | undefined,
+): CollectionParticipantRole | undefined =>
+    role == "VIEWER" || role == "COLLABORATOR" || role == "OWNER"
+        ? role
+        : undefined;
 
 export interface EncryptedCollection {
     /**
