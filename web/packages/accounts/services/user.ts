@@ -524,7 +524,6 @@ export interface UserVerificationResponse {
      * {@link twoFactorSessionID}.
      */
     twoFactorSessionIDV2?: string | undefined;
-    srpM2?: string | undefined;
 }
 
 /**
@@ -552,9 +551,6 @@ export const EmailOrSRPVerificationResponse = z.object({
     //
     // See `useSecondFactorChoiceIfNeeded`.
     twoFactorSessionIDV2: z.string().nullish().transform(nullToUndefined),
-    // srpM2 is sent only if the user is logging via SRP. It is is the SRP M2
-    // value aka the proof that the server has the verifier.
-    srpM2: z.string().nullish().transform(nullToUndefined),
 });
 
 /**
