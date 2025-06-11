@@ -503,13 +503,74 @@ export const sendOTT = async (
         }),
     );
 
+/**
+ * The response from remote on a successful user verification, either via
+ * {@link verifyEmail} or {@link verifySRP}.
+ *
+ * The {@link id} is always present. The rest of the values are are optional
+ * since only a subset of them will be returned depending on the case:
+ *
+ * 1. If the user has both passkeys and TOTP based second factor enabled, then
+ *    the following will be set:
+ *    - {@link passkeySessionID}, {@link accountsUrl}
+ *    - {@link twoFactorSessionIDV2}
+ *
+ * 2. If the user has only passkeys enabled, then the following will be set:
+ *    - {@link passkeySessionID}, {@link accountsUrl}
+ *
+ * 3. If the user has only TOTP based second factor enabled, then the following
+ *    will be set:
+ *    - {@link twoFactorSessionID}
+ *
+ * 4. If the user doesn't have any second factor, but has already setup their
+ *    key attributes, then the following will be set:
+ *    - {@link keyAttributes}
+ *    - {@link encryptedToken}
+ *
+ * 5. Finally, in the rare case that the user has not yet setup their key
+ *    attributes, then the following will be set:
+ *    - {@link token}
+ */
 export interface UserVerificationResponse {
+    /**
+     * The user's ID.
+     */
     id: number;
-    keyAttributes?: KeyAttributes | undefined;
-    encryptedToken?: string | undefined;
+    /**
+     * The user's key attributes.
+     *
+     * These will be set (along with the {@link encryptedToken}) if the user
+     * does not have a second factor.
+     */
+    keyAttributes?: KeyAttributes;
+    /**
+     * The base64 representation of an encrypted auth token, encrypted using the
+     * user's public key.
+     *
+     * These will be set (along with the {@link keyAttributes}) if the user
+     * does not have a second factor.
+     */
+    encryptedToken?: string;
+    /**
+     * The base64 representation of an auth token.
+     *
+     * This will be set in the rare edge case for when the user has not yet
+     * setup their key attributes.
+     */
     token?: string;
-    twoFactorSessionID?: string | undefined;
-    passkeySessionID?: string | undefined;
+    /**
+     * A session ID that can be used to complete the TOTP based second factor.
+     *
+     * This will be set if the user has enabled a TOTP based second factor but
+     * has not enabled passkeys.
+     */
+    twoFactorSessionID?: string;
+    /**
+     * A session ID that can be used to complete passkey verification.
+     *
+     * This will be set if the user has added a passkey to their account.
+     */
+    passkeySessionID?: string;
     /**
      * Base URL for the accounts app where we should redirect to for passkey
      * verification.
@@ -517,39 +578,39 @@ export interface UserVerificationResponse {
      * This will only be set if the user has setup a passkey (i.e., whenever
      * {@link passkeySessionID} is defined).
      */
-    accountsUrl: string | undefined;
+    accountsUrl?: string;
     /**
-     * If both passkeys and TOTP based two factors are enabled, then {@link
-     * twoFactorSessionIDV2} will be set to the TOTP session ID instead of
-     * {@link twoFactorSessionID}.
+     * A session ID that can be used to complete the TOTP based second fator.
+     *
+     * This will be set in lieu of {@link twoFactorSessionID} if the user has
+     * setup both passkeys and TOTP based two factors are enabled for their
+     * account.
+     *
+     * ---
+     *
+     * Historical context: {@link twoFactorSessionIDV2} is only set if user has
+     * both passkey and two factor enabled. This is to ensure older clients keep
+     * using passkey flow when both are set. It is intended to be removed once
+     * all clients starts surfacing both options for performing 2FA.
+     *
+     * See also {@link useSecondFactorChoiceIfNeeded}.
      */
-    twoFactorSessionIDV2?: string | undefined;
+    twoFactorSessionIDV2?: string;
 }
 
 /**
- * Zod schema for response from remote on a successful user verification, either
- * via {@link verifyEmail} or {@link verifySRP}.
+ * Zod schema for the {@link EmailOrSRPVerificationResponse} type.
  *
- * If a second factor is enabled than one of the two factor session IDs
- * (`passkeySessionID`, `twoFactorSessionID` / `twoFactorSessionIDV2`) will be
- * set. Otherwise `keyAttributes` and `encryptedToken` will be set.
+ * See: [Note: Duplicated Zod schema and TypeScript type]
  */
-export const EmailOrSRPVerificationResponse = z.object({
+export const RemoteEmailOrSRPVerificationResponse = z.object({
     id: z.number(),
     keyAttributes: RemoteKeyAttributes.nullish().transform(nullToUndefined),
     encryptedToken: z.string().nullish().transform(nullToUndefined),
     token: z.string().nullish().transform(nullToUndefined),
     twoFactorSessionID: z.string().nullish().transform(nullToUndefined),
     passkeySessionID: z.string().nullish().transform(nullToUndefined),
-    // Base URL for the accounts app where we should redirect to for passkey
-    // verification.
     accountsUrl: z.string().nullish().transform(nullToUndefined),
-    // TwoFactorSessionIDV2 is only set if user has both passkey and two factor
-    // enabled. This is to ensure older clients keep using passkey flow when
-    // both are set. It is intended to be removed once all clients starts
-    // surfacing both options for performing 2FA.
-    //
-    // See `useSecondFactorChoiceIfNeeded`.
     twoFactorSessionIDV2: z.string().nullish().transform(nullToUndefined),
 });
 
@@ -580,7 +641,7 @@ export const verifyEmail = async (
     //
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    return EmailOrSRPVerificationResponse.parse(await res.json());
+    return RemoteEmailOrSRPVerificationResponse.parse(await res.json());
 };
 
 /**

@@ -13,7 +13,7 @@ import { SRP, SrpClient } from "fast-srp-hap";
 import { v4 as uuidv4 } from "uuid";
 import { z } from "zod/v4";
 import {
-    EmailOrSRPVerificationResponse,
+    RemoteEmailOrSRPVerificationResponse,
     type UserVerificationResponse,
 } from "./user";
 
@@ -645,7 +645,7 @@ interface VerifySRPSessionRequest {
 }
 
 const SRPVerificationResponse = z.object({
-    ...EmailOrSRPVerificationResponse.shape,
+    ...RemoteEmailOrSRPVerificationResponse.shape,
     /**
      * The SRP M2 (evidence message), the proof that the server has the
      * verifier.
