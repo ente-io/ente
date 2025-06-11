@@ -14,7 +14,7 @@ import { v4 as uuidv4 } from "uuid";
 import { z } from "zod/v4";
 import {
     RemoteEmailOrSRPVerificationResponse,
-    type UserVerificationResponse,
+    type EmailOrSRPVerificationResponse,
 } from "./user";
 
 /**
@@ -582,7 +582,7 @@ export const srpVerificationUnauthorizedErrorMessage =
  * @param kek The user's key encryption key as a base64 string.
  *
  * @returns If SRP verification is successful, it returns a
- * {@link UserVerificationResponse}.
+ * {@link EmailOrSRPVerificationResponse}.
  *
  * @throws An Error with {@link srpVerificationUnauthorizedErrorMessage} in case
  * there is no such account, or if the credentials (kek) are incorrect.
@@ -590,7 +590,7 @@ export const srpVerificationUnauthorizedErrorMessage =
 export const verifySRP = async (
     { srpUserID, srpSalt }: SRPAttributes,
     kek: string,
-): Promise<UserVerificationResponse> => {
+): Promise<EmailOrSRPVerificationResponse> => {
     const loginSubKey = await deriveSRPLoginSubKey(kek);
     const srpClient = await generateSRPClient(srpSalt, srpUserID, loginSubKey);
 

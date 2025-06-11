@@ -531,7 +531,7 @@ export const sendOTT = async (
  *    attributes, then the following will be set:
  *    - {@link token}
  */
-export interface UserVerificationResponse {
+export interface EmailOrSRPVerificationResponse {
     /**
      * The user's ID.
      */
@@ -630,7 +630,7 @@ export const verifyEmail = async (
     email: string,
     ott: string,
     source: string | undefined,
-): Promise<UserVerificationResponse> => {
+): Promise<EmailOrSRPVerificationResponse> => {
     const res = await fetch(await apiURL("/users/verify-email"), {
         method: "POST",
         headers: publicRequestHeaders(),
