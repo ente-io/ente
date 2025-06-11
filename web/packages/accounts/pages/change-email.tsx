@@ -58,8 +58,6 @@ const ChangeEmailForm: React.FC = () => {
             if (!requestedEmail) {
                 try {
                     await sendOTT(email, "change");
-                    setRequestedEmail(email);
-                    setShowSentConfirmation(true);
                 } catch (e) {
                     log.error("Could not send OTT for email change", e);
                     setFieldError(
@@ -68,7 +66,11 @@ const ChangeEmailForm: React.FC = () => {
                             ? t("email_already_taken")
                             : t("generic_error"),
                     );
+                    return;
                 }
+
+                setRequestedEmail(email);
+                setShowSentConfirmation(true);
             } else {
                 if (!ott) {
                     setFieldError("ott", t("required"));
@@ -77,18 +79,20 @@ const ChangeEmailForm: React.FC = () => {
 
                 try {
                     await changeEmail(email, ott);
-                    redirectToAppHome();
                 } catch (e) {
                     log.error("Could not change email", e);
                     setFieldError("ott", t("incorrect_code"));
+                    return;
                 }
+
+                redirectToAppHome();
             }
         },
     });
 
     return (
         <>
-            {showSentConfirmation && (
+            {requestedEmail && showSentConfirmation && (
                 <Alert
                     icon={<CheckIcon fontSize="inherit" />}
                     severity="success"
@@ -116,7 +120,14 @@ const ChangeEmailForm: React.FC = () => {
                     value={formik.values.email}
                     onChange={formik.handleChange}
                     error={!!formik.errors.email}
-                    helperText={formik.errors.email}
+                    // See: Note: [Use space as default TextField helperText]
+                    //
+                    // Also, we only need keep the extra space until the email
+                    // has been entered (since the email field is read only
+                    // after that).
+                    helperText={
+                        formik.errors.email ?? (requestedEmail ? "" : " ")
+                    }
                     disabled={formik.isSubmitting}
                     autoFocus
                     fullWidth
@@ -130,7 +141,7 @@ const ChangeEmailForm: React.FC = () => {
                         value={formik.values.ott}
                         onChange={formik.handleChange}
                         error={!!formik.errors.ott}
-                        helperText={formik.errors.ott}
+                        helperText={formik.errors.ott ?? " "}
                         disabled={formik.isSubmitting}
                         fullWidth
                     />
@@ -140,7 +151,7 @@ const ChangeEmailForm: React.FC = () => {
                     color="accent"
                     fullWidth
                     loading={formik.isSubmitting}
-                    sx={{ mt: 2, mb: 4 }}
+                    sx={{ mt: 1, mb: 3 }}
                 >
                     {!requestedEmail ? t("send_otp") : t("verify")}
                 </LoadingButton>
