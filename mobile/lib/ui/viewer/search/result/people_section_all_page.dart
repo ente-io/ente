@@ -7,6 +7,8 @@ import "package:photos/models/search/generic_search_result.dart";
 import "package:photos/models/search/search_constants.dart";
 import "package:photos/models/search/search_types.dart";
 import "package:photos/models/selected_people.dart";
+import "package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart";
+import "package:photos/services/search_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/viewer/search_tab/people_section.dart";
@@ -44,7 +46,12 @@ class PeopleSectionAllWidget extends StatefulWidget {
 
 class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
   late Future<List<GenericSearchResult>> sectionData;
+  List<GenericSearchResult> normalFaces = [];
+  List<GenericSearchResult> extraFaces = [];
   final streamSubscriptions = <StreamSubscription>[];
+  bool _showingAllFaces = false;
+
+  bool get _showMoreLessOption => !widget.namedOnly && extraFaces.isNotEmpty;
 
   @override
   void initState() {
@@ -64,8 +71,23 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
   }
 
   Future<List<GenericSearchResult>> getResults() async {
+    final allFaces = await SearchService.instance
+        .getAllFace(null, minClusterSize: kMinimumClusterSizeAllFaces);
+    normalFaces.clear();
+    extraFaces.clear();
+    for (final face in allFaces) {
+      if (face.fileCount() >= kMinimumClusterSizeSearchResult) {
+        normalFaces.add(face);
+      } else {
+        extraFaces.add(face);
+      }
+    }
+    if (normalFaces.isEmpty && extraFaces.isNotEmpty) {
+      normalFaces = extraFaces;
+      extraFaces = [];
+    }
     final results =
-        await SectionType.face.getData(context) as List<GenericSearchResult>;
+        _showingAllFaces ? [...normalFaces, ...extraFaces] : normalFaces;
 
     if (widget.namedOnly) {
       results.removeWhere(
@@ -118,30 +140,96 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
                       ((crossAxisCount - 1) * gridPadding))) /
               crossAxisCount;
 
-          return GridView.builder(
-            padding: const EdgeInsets.fromLTRB(
-              horizontalEdgePadding,
-              16,
-              horizontalEdgePadding,
-              96,
-            ),
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              mainAxisSpacing: gridPadding,
-              crossAxisSpacing: gridPadding,
-              crossAxisCount: crossAxisCount,
-              childAspectRatio: itemSize / (itemSize + (24 * textScaleFactor)),
-            ),
-            itemCount: results.length,
-            itemBuilder: (context, index) {
-              return PersonSearchExample(
-                searchResult: results[index],
-                size: itemSize,
-                selectedPeople: widget.selectedPeople,
-              );
-            },
+          return Column(
+            children: [
+              Expanded(
+                child: GridView.builder(
+                  padding: const EdgeInsets.fromLTRB(
+                    horizontalEdgePadding,
+                    16,
+                    horizontalEdgePadding,
+                    96,
+                  ),
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    mainAxisSpacing: gridPadding,
+                    crossAxisSpacing: gridPadding,
+                    crossAxisCount: crossAxisCount,
+                    childAspectRatio:
+                        itemSize / (itemSize + (24 * textScaleFactor)),
+                  ),
+                  itemCount: results.length,
+                  itemBuilder: (context, index) {
+                    return PersonSearchExample(
+                      searchResult: results[index],
+                      size: itemSize,
+                      selectedPeople: widget.selectedPeople,
+                    );
+                  },
+                ),
+              ),
+              if (_showMoreLessOption) _buildShowMoreButton(context),
+            ],
           );
         }
       },
+    );
+  }
+
+  Widget _buildShowMoreButton(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+      child: SizedBox(
+        width: double.infinity,
+        child: TextButton(
+          onPressed: () async {
+            if (_showingAllFaces) {
+              setState(() {
+                _showingAllFaces = false;
+                sectionData = normalFaces.isNotEmpty
+                    ? Future.value(normalFaces)
+                    : getResults();
+              });
+            } else {
+              setState(() {
+                _showingAllFaces = true;
+
+                sectionData = (normalFaces.isNotEmpty && extraFaces.isNotEmpty)
+                    ? Future.value([...normalFaces, ...extraFaces])
+                    : getResults();
+              });
+            }
+          },
+          style: TextButton.styleFrom(
+            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+              side: BorderSide(
+                color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
+                width: 1,
+              ),
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                _showingAllFaces ? "Show less faces" : "Show more faces",
+                style: getEnteTextTheme(context).small.copyWith(
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+              ),
+              const SizedBox(width: 8),
+              Icon(
+                _showingAllFaces
+                    ? Icons.keyboard_double_arrow_up_outlined
+                    : Icons.keyboard_double_arrow_down_outlined,
+                size: 16,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
