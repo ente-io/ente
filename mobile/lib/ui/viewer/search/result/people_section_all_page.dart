@@ -48,8 +48,10 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
   late Future<List<GenericSearchResult>> sectionData;
   List<GenericSearchResult> normalFaces = [];
   List<GenericSearchResult> extraFaces = [];
+  List<GenericSearchResult> displayedResults = [];
   final streamSubscriptions = <StreamSubscription>[];
   bool _showingAllFaces = false;
+  bool _isLoaded = false;
 
   bool get _showMoreLessOption => !widget.namedOnly && extraFaces.isNotEmpty;
 
@@ -63,6 +65,7 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
       streamSubscriptions.add(
         stream.listen((event) async {
           setState(() {
+            _isLoaded = false;
             sectionData = getResults();
           });
         }),
@@ -102,6 +105,8 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
         );
       }
     }
+    displayedResults = results;
+    _isLoaded = true;
     return results;
   }
 
@@ -124,14 +129,14 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
     return FutureBuilder<List<GenericSearchResult>>(
       future: sectionData,
       builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
+        if (!_isLoaded && snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: EnteLoadingWidget());
         } else if (snapshot.hasError) {
           return const Center(child: Icon(Icons.error_outline_rounded));
-        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+        } else if (displayedResults.isEmpty && _isLoaded) {
           return Center(child: Text(S.of(context).noResultsFound + '.'));
         } else {
-          final results = snapshot.data!;
+          final results = displayedResults;
           final screenWidth = MediaQuery.of(context).size.width;
           final crossAxisCount = (screenWidth / 100).floor();
 
@@ -191,16 +196,12 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
             if (_showingAllFaces) {
               setState(() {
                 _showingAllFaces = false;
-                sectionData = normalFaces.isNotEmpty
-                    ? Future.value(normalFaces)
-                    : getResults();
+                displayedResults = List.from(normalFaces);
               });
             } else {
               setState(() {
                 _showingAllFaces = true;
-                sectionData = (normalFaces.isNotEmpty && extraFaces.isNotEmpty)
-                    ? Future.value([...normalFaces, ...extraFaces])
-                    : getResults();
+                displayedResults = [...normalFaces, ...extraFaces];
               });
             }
           },
