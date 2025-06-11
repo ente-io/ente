@@ -925,6 +925,9 @@ class SearchService {
         );
 
       for (final clusterId in sortedClusterIds) {
+        if (limit != null && facesResult.length >= limit) {
+          break;
+        }
         final files = clusterIdToFiles[clusterId]!;
         final String clusterName = clusterId;
 
