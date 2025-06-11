@@ -940,7 +940,8 @@ class RemoteSyncService {
   }
 
   bool _shouldThrottleSync() {
-    return Platform.isIOS && !AppLifecycleService.instance.isForeground;
+    return !flagService.enableMobMultiPart ||
+        !localSettings.userEnabledMultiplePart;
   }
 
   // _sortByTime sort by creation time (desc).
