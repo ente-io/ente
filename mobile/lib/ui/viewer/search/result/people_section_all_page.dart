@@ -140,16 +140,16 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
                       ((crossAxisCount - 1) * gridPadding))) /
               crossAxisCount;
 
-          return Column(
-            children: [
-              Expanded(
-                child: GridView.builder(
-                  padding: const EdgeInsets.fromLTRB(
-                    horizontalEdgePadding,
-                    16,
-                    horizontalEdgePadding,
-                    96,
-                  ),
+          return CustomScrollView(
+            slivers: [
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(
+                  horizontalEdgePadding,
+                  16,
+                  horizontalEdgePadding,
+                  96,
+                ),
+                sliver: SliverGrid(
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     mainAxisSpacing: gridPadding,
                     crossAxisSpacing: gridPadding,
@@ -157,17 +157,23 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
                     childAspectRatio:
                         itemSize / (itemSize + (24 * textScaleFactor)),
                   ),
-                  itemCount: results.length,
-                  itemBuilder: (context, index) {
-                    return PersonSearchExample(
-                      searchResult: results[index],
-                      size: itemSize,
-                      selectedPeople: widget.selectedPeople,
-                    );
-                  },
+                  delegate: SliverChildBuilderDelegate(
+                    childCount: results.length,
+                    (context, index) {
+                      return PersonSearchExample(
+                        searchResult: results[index],
+                        size: itemSize,
+                        selectedPeople: widget.selectedPeople,
+                      );
+                    },
+                  ),
                 ),
               ),
-              if (_showMoreLessOption) _buildShowMoreButton(context),
+              if (_showMoreLessOption)
+                SliverToBoxAdapter(child: _buildShowMoreButton(context)),
+              const SliverToBoxAdapter(
+                child: SizedBox(height: 96),
+              ),
             ],
           );
         }
@@ -181,7 +187,7 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
       child: SizedBox(
         width: double.infinity,
         child: TextButton(
-          onPressed: () async {
+          onPressed: () {
             if (_showingAllFaces) {
               setState(() {
                 _showingAllFaces = false;
@@ -192,7 +198,6 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
             } else {
               setState(() {
                 _showingAllFaces = true;
-
                 sectionData = (normalFaces.isNotEmpty && extraFaces.isNotEmpty)
                     ? Future.value([...normalFaces, ...extraFaces])
                     : getResults();
