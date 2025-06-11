@@ -554,18 +554,18 @@ export const verifyEmail = async (
     //
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    return EmailOrSRPAuthorizationResponse.parse(await res.json());
+    return EmailOrSRPVerificationResponse.parse(await res.json());
 };
 
 /**
  * Zod schema for response from remote on a successful user verification, either
- * via {@link verifyEmail} or {@link verifySRPSession}.
+ * via {@link verifyEmail} or {@link verifySRP}.
  *
  * If a second factor is enabled than one of the two factor session IDs
  * (`passkeySessionID`, `twoFactorSessionID` / `twoFactorSessionIDV2`) will be
  * set. Otherwise `keyAttributes` and `encryptedToken` will be set.
  */
-export const EmailOrSRPAuthorizationResponse = z.object({
+export const EmailOrSRPVerificationResponse = z.object({
     id: z.number(),
     keyAttributes: RemoteKeyAttributes.nullish().transform(nullToUndefined),
     encryptedToken: z.string().nullish().transform(nullToUndefined),

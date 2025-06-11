@@ -1,4 +1,3 @@
-import { HttpStatusCode } from "axios";
 import {
     deriveSubKeyBytes,
     generateDeriveKeySalt,
@@ -9,14 +8,14 @@ import {
     ensureOk,
     publicRequestHeaders,
 } from "ente-base/http";
-import log from "ente-base/log";
 import { apiURL } from "ente-base/origins";
-import { ApiError, CustomError } from "ente-shared/error";
-import HTTPService from "ente-shared/network/HTTPService";
 import { SRP, SrpClient } from "fast-srp-hap";
 import { v4 as uuidv4 } from "uuid";
 import { z } from "zod/v4";
-import type { UserVerificationResponse } from "./user";
+import {
+    EmailOrSRPVerificationResponse,
+    type UserVerificationResponse,
+} from "./user";
 
 /**
  * The SRP attributes for a user.
@@ -564,6 +563,16 @@ const updateSRPAndKeys = async (
 };
 
 /**
+ * The message of the {@link Error} that is thrown by {@link verifySRP} if
+ * remote fails SRP verification with a HTTP 401.
+ *
+ * The API contract allows for a SRP verification 401 both because of incorrect
+ * credentials or a non existent account.
+ */
+export const srpVerificationUnauthorizedErrorMessage =
+    "SRP verification failed (HTTP 401 Unauthorized)";
+
+/**
  * Log the user in to a new device by performing SRP verification.
  *
  * This function implements the flow described in [Note: SRP verification].
@@ -575,6 +584,9 @@ const updateSRPAndKeys = async (
  * @returns If SRP verification is successful, it returns a
  * {@link UserVerificationResponse} (both email and SRP verification resolve to
  * this same structure).
+ *
+ * @throws An Error with {@link srpVerificationUnauthorizedErrorMessage} in case
+ * there is no such account, or if the credentials (kek) are incorrect.
  */
 export const verifySRP = async (
     { srpUserID, srpSalt }: SRPAttributes,
@@ -627,39 +639,30 @@ const createSRPSession = async (
     return CreateSRPSessionResponse.parse(await res.json());
 };
 
-export interface SRPVerificationResponse extends UserVerificationResponse {
-    srpM2: string;
-}
-
 interface VerifySRPSessionRequest {
     sessionID: string;
     srpUserID: string;
     srpM1: string;
 }
 
+const SRPVerificationResponse = z.object({
+    ...EmailOrSRPVerificationResponse.shape,
+    srpM2: z.string(),
+});
+
+type SRPVerificationResponse = z.infer<typeof SRPVerificationResponse>;
+
 const verifySRPSession = async (
-    VerifySRPSessionRequest: VerifySRPSessionRequest,
+    verifySRPSessionRequest: VerifySRPSessionRequest,
 ): Promise<SRPVerificationResponse> => {
-    const { sessionID, srpUserID, srpM1 } = VerifySRPSessionRequest;
-    try {
-        const resp = await HTTPService.post(
-            await apiURL("/users/srp/verify-session"),
-            { sessionID, srpUserID, srpM1 },
-            undefined,
-        );
-        return resp.data as SRPVerificationResponse;
-    } catch (e) {
-        log.error("verifySRPSession failed", e);
-        if (
-            e instanceof ApiError &&
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
-            e.httpStatusCode === HttpStatusCode.Unauthorized
-        ) {
-            // The API contract allows for a SRP verification 401 both because
-            // of incorrect credentials or a non existent account.
-            throw Error(CustomError.INCORRECT_PASSWORD_OR_NO_ACCOUNT);
-        } else {
-            throw e;
-        }
+    const res = await fetch(await apiURL("/users/srp/verify-session"), {
+        method: "POST",
+        headers: publicRequestHeaders(),
+        body: JSON.stringify(verifySRPSessionRequest),
+    });
+    if (res.status == 401) {
+        throw new Error(srpVerificationUnauthorizedErrorMessage);
     }
+    ensureOk(res);
+    return SRPVerificationResponse.parse(await res.json());
 };
