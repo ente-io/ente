@@ -99,15 +99,17 @@ class _VideoWidgetState extends State<VideoWidget> {
                 children: [
                   GestureDetector(
                     behavior: HitTestBehavior.opaque,
-                    onTap: () {
-                      if (widget.isFromMemories) return;
-                      showControlsNotifier.value = !showControlsNotifier.value;
-                      if (widget.playbackCallback != null) {
-                        widget.playbackCallback!(
-                          !showControlsNotifier.value,
-                        );
-                      }
-                    },
+                    onTap: widget.isFromMemories
+                        ? null
+                        : () {
+                            showControlsNotifier.value =
+                                !showControlsNotifier.value;
+                            if (widget.playbackCallback != null) {
+                              widget.playbackCallback!(
+                                !showControlsNotifier.value,
+                              );
+                            }
+                          },
                     onLongPress: () {
                       if (widget.isFromMemories) {
                         widget.playbackCallback?.call(false);

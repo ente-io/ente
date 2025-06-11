@@ -284,14 +284,16 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
                       ),
                       GestureDetector(
                         behavior: HitTestBehavior.opaque,
-                        onTap: () {
-                          if (widget.isFromMemories) return;
-                          _showControls.value = !_showControls.value;
-                          if (widget.playbackCallback != null) {
-                            widget.playbackCallback!(!_showControls.value);
-                          }
-                          _elTooltipController.hide();
-                        },
+                        onTap: widget.isFromMemories
+                            ? null
+                            : () {
+                                _showControls.value = !_showControls.value;
+                                if (widget.playbackCallback != null) {
+                                  widget
+                                      .playbackCallback!(!_showControls.value);
+                                }
+                                _elTooltipController.hide();
+                              },
                         onLongPress: () {
                           if (widget.isFromMemories) {
                             widget.playbackCallback?.call(false);
