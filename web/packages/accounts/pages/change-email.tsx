@@ -12,7 +12,7 @@ import { LinkButton } from "ente-base/components/LinkButton";
 import { LoadingButton } from "ente-base/components/mui/LoadingButton";
 import { isHTTPErrorWithStatus } from "ente-base/http";
 import log from "ente-base/log";
-import { Formik, type FormikHelpers } from "formik";
+import { useFormik, type FormikHelpers } from "formik";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useState } from "react";
@@ -90,103 +90,95 @@ const ChangeEmailForm: React.FC = () => {
 
     const goToApp = () => router.push(appHomeRoute);
 
+    const formik = useFormik({
+        initialValues: { email: "" },
+        validationSchema: ottInputVisible
+            ? Yup.object().shape({
+                  email: Yup.string()
+                      .email(t("invalid_email_error"))
+                      .required(t("required")),
+                  ott: Yup.string().required(t("required")),
+              })
+            : Yup.object().shape({
+                  email: Yup.string()
+                      .email(t("invalid_email_error"))
+                      .required(t("required")),
+              }),
+        validateOnChange: false,
+        validateOnBlur: false,
+        onSubmit: !ottInputVisible ? requestOTT : requestEmailChange,
+    });
+    const { values, errors, handleChange, handleSubmit } = formik;
     return (
-        <Formik<formValues>
-            initialValues={{ email: "" }}
-            validationSchema={
-                ottInputVisible
-                    ? Yup.object().shape({
-                          email: Yup.string()
-                              .email(t("invalid_email_error"))
-                              .required(t("required")),
-                          ott: Yup.string().required(t("required")),
-                      })
-                    : Yup.object().shape({
-                          email: Yup.string()
-                              .email(t("invalid_email_error"))
-                              .required(t("required")),
-                      })
-            }
-            validateOnChange={false}
-            validateOnBlur={false}
-            onSubmit={!ottInputVisible ? requestOTT : requestEmailChange}
-        >
-            {({ values, errors, handleChange, handleSubmit }) => (
-                <>
-                    {showMessage && (
-                        <Alert
-                            icon={<CheckIcon fontSize="inherit" />}
-                            severity="success"
-                            onClose={() => setShowMessage(false)}
-                        >
-                            <Trans
-                                i18nKey="email_sent"
-                                components={{
-                                    a: (
-                                        <Box
-                                            component={"span"}
-                                            sx={{ color: "text.muted" }}
-                                        />
-                                    ),
-                                }}
-                                values={{ email }}
-                            />
-                        </Alert>
-                    )}
-                    <form noValidate onSubmit={handleSubmit}>
-                        <Stack>
-                            <TextField
-                                fullWidth
-                                type="email"
-                                label={t("enter_email")}
-                                value={values.email}
-                                onChange={handleChange("email")}
-                                error={Boolean(errors.email)}
-                                helperText={errors.email}
-                                autoFocus
-                                disabled={loading}
-                                slotProps={{
-                                    input: { readOnly: ottInputVisible },
-                                }}
-                            />
-                            {ottInputVisible && (
-                                <TextField
-                                    fullWidth
-                                    type="text"
-                                    label={t("verification_code")}
-                                    value={values.ott}
-                                    onChange={handleChange("ott")}
-                                    error={Boolean(errors.ott)}
-                                    helperText={errors.ott}
-                                    disabled={loading}
+        <>
+            {showMessage && (
+                <Alert
+                    icon={<CheckIcon fontSize="inherit" />}
+                    severity="success"
+                    onClose={() => setShowMessage(false)}
+                >
+                    <Trans
+                        i18nKey="email_sent"
+                        components={{
+                            a: (
+                                <Box
+                                    component={"span"}
+                                    sx={{ color: "text.muted" }}
                                 />
-                            )}
-                            <LoadingButton
-                                fullWidth
-                                color="accent"
-                                type="submit"
-                                sx={{ mt: 2, mb: 4 }}
-                                loading={loading}
-                            >
-                                {!ottInputVisible ? t("send_otp") : t("verify")}
-                            </LoadingButton>
-                        </Stack>
-                    </form>
-
-                    <AccountsPageFooter>
-                        {ottInputVisible && (
-                            <LinkButton
-                                onClick={() => setShowOttInputVisibility(false)}
-                            >
-                                {t("change_email")}?
-                            </LinkButton>
-                        )}
-                        <LinkButton onClick={goToApp}>
-                            {t("go_back")}
-                        </LinkButton>
-                    </AccountsPageFooter>
-                </>
+                            ),
+                        }}
+                        values={{ email }}
+                    />
+                </Alert>
             )}
-        </Formik>
+            <form noValidate onSubmit={handleSubmit}>
+                <Stack>
+                    <TextField
+                        fullWidth
+                        type="email"
+                        label={t("enter_email")}
+                        value={values.email}
+                        onChange={handleChange("email")}
+                        error={Boolean(errors.email)}
+                        helperText={errors.email}
+                        autoFocus
+                        disabled={loading}
+                        slotProps={{ input: { readOnly: ottInputVisible } }}
+                    />
+                    {ottInputVisible && (
+                        <TextField
+                            fullWidth
+                            type="text"
+                            label={t("verification_code")}
+                            value={values.ott}
+                            onChange={handleChange("ott")}
+                            error={Boolean(errors.ott)}
+                            helperText={errors.ott}
+                            disabled={loading}
+                        />
+                    )}
+                    <LoadingButton
+                        fullWidth
+                        color="accent"
+                        type="submit"
+                        sx={{ mt: 2, mb: 4 }}
+                        loading={loading}
+                    >
+                        {!ottInputVisible ? t("send_otp") : t("verify")}
+                    </LoadingButton>
+                </Stack>
+            </form>
+
+            <AccountsPageFooter>
+                {ottInputVisible && (
+                    <LinkButton
+                        onClick={() => setShowOttInputVisibility(false)}
+                    >
+                        {t("change_email")}?
+                    </LinkButton>
+                )}
+                <LinkButton onClick={goToApp}>{t("go_back")}</LinkButton>
+            </AccountsPageFooter>
+        </>
     );
 };
