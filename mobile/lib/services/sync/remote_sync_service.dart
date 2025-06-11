@@ -91,11 +91,6 @@ class RemoteSyncService {
   }
 
   Future<void> sync({bool silently = false}) async {
-    // TODO(prateekmedia): Remove this to enable foregroung uploads
-    if (AppLifecycleService.instance.isForeground) {
-      _logger.info("Skipping remote sync since app is in foreground");
-      return;
-    }
     if (!_config.hasConfiguredAccount()) {
       _logger.info("Skipping remote sync since account is not configured");
       return;
