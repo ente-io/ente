@@ -5,29 +5,22 @@ import {
     AccountsPageFooter,
     AccountsPageTitle,
 } from "ente-accounts/components/layouts/centered-paper";
+import { useRedirectIfNeedsCredentials } from "ente-accounts/components/utils/use-redirect";
 import { appHomeRoute } from "ente-accounts/services/redirect";
 import { changeEmail, sendOTT } from "ente-accounts/services/user";
 import { LinkButton } from "ente-base/components/LinkButton";
 import { LoadingButton } from "ente-base/components/mui/LoadingButton";
 import { isHTTPErrorWithStatus } from "ente-base/http";
 import log from "ente-base/log";
-import { getData } from "ente-shared/storage/localStorage";
 import { Formik, type FormikHelpers } from "formik";
 import { t } from "i18next";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Trans } from "react-i18next";
 import * as Yup from "yup";
 
 const Page: React.FC = () => {
-    const router = useRouter();
-
-    useEffect(() => {
-        const user = getData("user");
-        if (!user?.token) {
-            void router.push("/");
-        }
-    }, [router]);
+    useRedirectIfNeedsCredentials("/change-email");
 
     return (
         <AccountsPageContents>
