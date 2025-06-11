@@ -165,6 +165,7 @@ Future<void> _runMinimally(String taskId) async {
   RemoteSyncService.instance.init(prefs);
   await SyncService.instance.init(prefs);
   NotificationService.instance.init(prefs);
+  HomeWidgetService.instance.init(prefs);
 
   await Future.wait(
     [
