@@ -15,7 +15,7 @@ import "package:photos/services/preview_video_store.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/notification/toast.dart";
-import "package:photos/ui/viewer/file/video_widget_media_kit_new.dart";
+import "package:photos/ui/viewer/file/video_widget_media_kit.dart";
 import "package:photos/ui/viewer/file/video_widget_native.dart";
 import "package:photos/utils/standalone/data.dart";
 
@@ -164,7 +164,7 @@ class _VideoWidgetState extends State<VideoWidget> {
         },
       );
     }
-    return VideoWidgetMediaKitNew(
+    return VideoWidgetMediaKit(
       widget.file,
       key: mediaKitKey,
       tagPrefix: widget.tagPrefix,

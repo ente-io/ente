@@ -47,8 +47,20 @@ device.
 The indexes are synced across all your devices automatically using the same
 end-to-end encrypted security that we use for syncing your photos.
 
-Note that the desktop app does not currently support modifying the face
-groupings, that is only supported by the mobile app.
+---
+
+#### Local indexing on mobile
+
+In general the machine learning is optimized to work well on most mobile device.
+However, devices with low RAM (4-6GB) and large photo libraries might struggle
+to complete the indexing without affecting performance of the app. In such case,
+you might want to disable local indexing and let the desktop run it instead.
+
+You can disable local indexing from the settings, under
+`General > Advanced > Machine learning > Configuration`. This way, you can
+continue to use the ML features without your phone performance taking any hit.
+
+---
 
 For more information on how to use Machine Learning for face recognition please
 check out [the FAQ](../faq/face-recognition).

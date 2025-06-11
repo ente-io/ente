@@ -263,3 +263,16 @@ export const deleteFromTrash = async (fileIDs: number[]) => {
         );
     }
 };
+
+/**
+ * Delete the public link for the collection with given {@link collectionID}.
+ *
+ * Does not modify local state.
+ */
+export const deleteShareURL = async (collectionID: number) =>
+    ensureOk(
+        await fetch(await apiURL(`/collections/share-url/${collectionID}`), {
+            method: "DELETE",
+            headers: await authenticatedRequestHeaders(),
+        }),
+    );
