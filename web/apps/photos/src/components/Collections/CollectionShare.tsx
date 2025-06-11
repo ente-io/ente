@@ -42,19 +42,23 @@ import {
 } from "ente-base/components/utils/modal";
 import { useBaseContext } from "ente-base/context";
 import { deriveInteractiveKey } from "ente-base/crypto";
-import { isHTTP4xxError } from "ente-base/http";
+import { isHTTPErrorWithStatus } from "ente-base/http";
 import { formattedDateTime } from "ente-base/i18n-date";
 import log from "ente-base/log";
 import { appendCollectionKeyToShareURL } from "ente-gallery/services/share";
 import type {
     Collection,
+    CollectionNewParticipantRole,
     PublicURL,
     UpdatePublicURL,
 } from "ente-media/collection";
 import { type CollectionUser } from "ente-media/collection";
 import { PublicLinkCreated } from "ente-new/photos/components/share/PublicLinkCreated";
 import { avatarTextColor } from "ente-new/photos/services/avatar";
-import { deleteShareURL } from "ente-new/photos/services/collection";
+import {
+    deleteShareURL,
+    shareCollection,
+} from "ente-new/photos/services/collection";
 import type { CollectionSummary } from "ente-new/photos/services/collection/ui";
 import { usePhotosAppContext } from "ente-new/photos/types/context";
 import { CustomError, parseSharingErrorCodes } from "ente-shared/error";
@@ -66,7 +70,6 @@ import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { Trans } from "react-i18next";
 import {
     createShareableURL,
-    shareCollection,
     unshareCollection,
     updateShareableURL,
 } from "services/collectionService";
@@ -318,23 +321,23 @@ interface EmailShareProps {
 const EmailShare: React.FC<EmailShareProps> = ({ collection, onRootClose }) => {
     const [addParticipantView, setAddParticipantView] = useState(false);
     const [manageEmailShareView, setManageEmailShareView] = useState(false);
+    const [participantRole, setParticipantRole] = useState<
+        CollectionNewParticipantRole | undefined
+    >(undefined);
 
     const closeAddParticipant = () => setAddParticipantView(false);
-    const openAddParticipant = () => setAddParticipantView(true);
 
     const closeManageEmailShare = () => setManageEmailShareView(false);
     const openManageEmailShare = () => setManageEmailShareView(true);
 
-    const participantType = useRef<"COLLABORATOR" | "VIEWER">(undefined);
-
-    const openAddCollab = () => {
-        participantType.current = "COLLABORATOR";
-        openAddParticipant();
+    const openAddViewer = () => {
+        setParticipantRole("VIEWER");
+        setAddParticipantView(true);
     };
 
-    const openAddViewer = () => {
-        participantType.current = "VIEWER";
-        openAddParticipant();
+    const openAddCollaborator = () => {
+        setParticipantRole("COLLABORATOR");
+        setAddParticipantView(true);
     };
 
     return (
@@ -372,7 +375,7 @@ const EmailShare: React.FC<EmailShareProps> = ({ collection, onRootClose }) => {
                     <RowButtonDivider />
                     <RowButton
                         startIcon={<AddIcon />}
-                        onClick={openAddCollab}
+                        onClick={openAddCollaborator}
                         label={t("add_collaborators")}
                     />
                 </RowButtonGroup>
@@ -382,7 +385,7 @@ const EmailShare: React.FC<EmailShareProps> = ({ collection, onRootClose }) => {
                 onClose={closeAddParticipant}
                 onRootClose={onRootClose}
                 collection={collection}
-                type={participantType.current}
+                role={participantRole}
             />
             <ManageEmailShare
                 peopleCount={collection.sharees.length}
@@ -447,7 +450,7 @@ interface AddParticipantProps {
     open: boolean;
     onClose: () => void;
     onRootClose: () => void;
-    type: "VIEWER" | "COLLABORATOR";
+    role: CollectionNewParticipantRole;
 }
 
 const AddParticipant: React.FC<AddParticipantProps> = ({
@@ -455,7 +458,7 @@ const AddParticipant: React.FC<AddParticipantProps> = ({
     collection,
     onClose,
     onRootClose,
-    type,
+    role,
 }) => {
     const { user, syncWithRemote, emailList } = useContext(GalleryContext);
 
@@ -474,7 +477,7 @@ const AddParticipant: React.FC<AddParticipantProps> = ({
         onRootClose();
     };
 
-    const title = type == "VIEWER" ? t("add_viewers") : t("add_collaborators");
+    const title = role == "VIEWER" ? t("add_viewers") : t("add_collaborators");
 
     const collectionShare: AddParticipantFormProps["onSubmit"] = async (
         emailOrEmails,
@@ -496,7 +499,6 @@ const AddParticipant: React.FC<AddParticipantProps> = ({
                 );
                 return;
             }
-            // Looks valid. Use it as if were a selection.
             emails = [email];
         } else {
             emails = emailOrEmails;
@@ -504,18 +506,19 @@ const AddParticipant: React.FC<AddParticipantProps> = ({
 
         for (const email of emails) {
             try {
-                await shareCollection(collection, email, type);
+                await shareCollection(collection, email, role);
             } catch (e) {
-                if (isHTTP4xxError(e)) {
+                if (isHTTPErrorWithStatus(e, 404)) {
                     setEmailFieldError(t("sharing_user_does_not_exist"));
                     return;
                 }
+                // TODO(RE):
                 setEmailFieldError(handleSharingErrors(e));
                 return;
             }
         }
 
-        if (emails.length > 1) {
+        if (emails.length) {
             await syncWithRemote(false, true);
         }
         onClose();
@@ -834,7 +837,7 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
                 {...addParticipantVisibilityProps}
                 onRootClose={onRootClose}
                 collection={collection}
-                type={participantType.current}
+                role={participantType.current}
             />
             <ManageParticipant
                 {...manageParticipantVisibilityProps}
