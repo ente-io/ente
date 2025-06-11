@@ -13,7 +13,6 @@ import log from "ente-base/log";
 import { apiURL } from "ente-base/origins";
 import { ApiError, CustomError } from "ente-shared/error";
 import HTTPService from "ente-shared/network/HTTPService";
-import { getToken } from "ente-shared/storage/localStorage/helpers";
 import { SRP, SrpClient } from "fast-srp-hap";
 import { v4 as uuidv4 } from "uuid";
 import { z } from "zod/v4";
@@ -529,8 +528,8 @@ export const updateSRPAndKeyAttributes = (
     );
 
 export interface UpdateSRPAndKeysRequest {
-    srpM1: string;
     setupID: string;
+    srpM1: string;
     updatedKeyAttr: UpdatedKeyAttr;
     /**
      * If true (default), then all existing sessions for the user will be
@@ -539,26 +538,29 @@ export interface UpdateSRPAndKeysRequest {
     logOutOtherDevices?: boolean;
 }
 
-export interface UpdateSRPAndKeysResponse {
-    srpM2: string;
-    setupID: string;
-}
+const UpdateSRPAndKeysResponse = z.object({
+    srpM2: z.string(),
+    setupID: z.string(),
+});
 
-export const updateSRPAndKeys = async (
-    updateSRPAndKeyRequest: UpdateSRPAndKeysRequest,
+type UpdateSRPAndKeysResponse = z.infer<typeof UpdateSRPAndKeysResponse>;
+
+/**
+ * Update the SRP attributes and a subset of the key attributes on remote.
+ *
+ * This is invoked during the flow when the user changes their password, and SRP
+ * needs to be reconfigured. See: [Note: SRP setup].
+ */
+const updateSRPAndKeys = async (
+    updateSRPAndKeysRequest: UpdateSRPAndKeysRequest,
 ): Promise<UpdateSRPAndKeysResponse> => {
-    try {
-        const resp = await HTTPService.post(
-            await apiURL("/users/srp/update"),
-            updateSRPAndKeyRequest,
-            undefined,
-            { "X-Auth-Token": getToken() },
-        );
-        return resp.data as UpdateSRPAndKeysResponse;
-    } catch (e) {
-        log.error("updateSRPAndKeys failed", e);
-        throw e;
-    }
+    const res = await fetch(await apiURL("/users/srp/update"), {
+        method: "POST",
+        headers: await authenticatedRequestHeaders(),
+        body: JSON.stringify(updateSRPAndKeysRequest),
+    });
+    ensureOk(res);
+    return UpdateSRPAndKeysResponse.parse(await res.json());
 };
 
 export const loginViaSRP = async (
