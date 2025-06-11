@@ -12,7 +12,7 @@ import Photo, { default as PhotoIcon } from "@mui/icons-material/Photo";
 import PublicIcon from "@mui/icons-material/Public";
 import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
 import WorkspacesIcon from "@mui/icons-material/Workspaces";
-import { Box, Dialog, Stack, styled, Typography } from "@mui/material";
+import { Dialog, Stack, styled, Typography } from "@mui/material";
 import NumberAvatar from "@mui/material/Avatar";
 import TextField from "@mui/material/TextField";
 import Avatar from "components/pages/gallery/Avatar";
@@ -590,7 +590,7 @@ const AddParticipantForm: React.FC<AddParticipantFormProps> = ({
 
     return (
         <form onSubmit={formik.handleSubmit}>
-            <Stack sx={{ gap: "24px", py: "20px", px: 2 }}>
+            <Stack sx={{ gap: 1, py: "20px", px: 2 }}>
                 <div>
                     <RowButtonGroupTitle>
                         {t("add_new_email")}
@@ -650,18 +650,16 @@ const AddParticipantForm: React.FC<AddParticipantFormProps> = ({
                         </RowButtonGroup>
                     </div>
                 )}
-            </Stack>
-            <Box sx={{ px: 2 }}>
                 <LoadingButton
                     type="submit"
                     color="accent"
-                    fullWidth
                     loading={formik.isSubmitting}
-                    sx={{ mt: 4, mb: 4 }}
+                    fullWidth
+                    sx={{ my: 6 }}
                 >
                     {submitButtonTitle}
                 </LoadingButton>
-            </Box>
+            </Stack>
         </form>
     );
 };
@@ -752,7 +750,7 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
                 title={collection.name}
                 caption={t("participants_count", { count: peopleCount })}
             >
-                <Stack sx={{ gap: "24px", py: "20px", px: "12px" }}>
+                <Stack sx={{ gap: 3, py: "20px", px: "12px" }}>
                     <Stack>
                         <RowButtonGroupTitle icon={<AdminPanelSettingsIcon />}>
                             {t("owner")}
