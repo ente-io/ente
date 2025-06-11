@@ -19,8 +19,8 @@ const kHighQualityFaceScore = 0.90;
 /// The minimum score for a face to be detected, regardless of quality. Use [kMinimumQualityFaceScore] for high quality faces.
 const kMinFaceDetectionScore = FaceDetectionService.kMinScoreSigmoidThreshold;
 
-/// The minimum cluster size for displaying a cluster in the UI
+/// The minimum cluster size for displaying a cluster in the UI by default
 const kMinimumClusterSizeSearchResult = 10;
 
-/// The minimum cluster sizes to try when the normal minimum doesn't return any results
-const kLowerMinimumClusterSizes = [5, 3, 2, 1];
+/// The minimum cluster size for displaying a cluster when the user wants to see all faces
+const kMinimumClusterSizeAllFaces = 3;

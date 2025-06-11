@@ -986,6 +986,13 @@ class SearchService {
           ),
         );
       }
+      if (facesResult.isEmpty) {
+        if (kMinimumClusterSizeAllFaces < minClusterSize) {
+          return getAllFace(limit, minClusterSize: kMinimumClusterSizeAllFaces);
+        } else {
+          return [];
+        }
+      }
       if (limit != null) {
         return facesResult.sublist(0, min(limit, facesResult.length));
       } else {
