@@ -12,7 +12,7 @@ import { LinkButton } from "ente-base/components/LinkButton";
 import { LoadingButton } from "ente-base/components/mui/LoadingButton";
 import { isHTTPErrorWithStatus } from "ente-base/http";
 import log from "ente-base/log";
-import { useFormik, type FormikHelpers } from "formik";
+import { useFormik } from "formik";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useState } from "react";
@@ -32,11 +32,6 @@ const Page: React.FC = () => {
 
 export default Page;
 
-interface formValues {
-    email: string;
-    ott?: string;
-}
-
 const ChangeEmailForm: React.FC = () => {
     const [loading, setLoading] = useState(false);
     const [ottInputVisible, setShowOttInputVisibility] = useState(false);
@@ -45,53 +40,10 @@ const ChangeEmailForm: React.FC = () => {
 
     const router = useRouter();
 
-    const requestOTT = async (
-        { email }: formValues,
-        { setFieldError }: FormikHelpers<formValues>,
-    ) => {
-        try {
-            setLoading(true);
-            await sendOTT(email, "change");
-            setEmail(email);
-            setShowOttInputVisibility(true);
-            setShowMessage(true);
-            // TODO: What was this meant to focus on? The ref referred to an
-            // Form element that was removed. Is this still needed.
-            // setTimeout(() => {
-            //     ottInputRef.current?.focus();
-            // }, 250);
-        } catch (e) {
-            log.error(e);
-            setFieldError(
-                "email",
-                isHTTPErrorWithStatus(e, 403)
-                    ? t("email_already_taken")
-                    : t("generic_error"),
-            );
-        }
-        setLoading(false);
-    };
-
-    const requestEmailChange = async (
-        { email, ott }: formValues,
-        { setFieldError }: FormikHelpers<formValues>,
-    ) => {
-        try {
-            setLoading(true);
-            await changeEmail(email, ott!);
-            setLoading(false);
-            void goToApp();
-        } catch (e) {
-            log.error(e);
-            setLoading(false);
-            setFieldError("ott", t("incorrect_code"));
-        }
-    };
-
     const goToApp = () => router.push(appHomeRoute);
 
     const formik = useFormik({
-        initialValues: { email: "" },
+        initialValues: { email: "", ott: "" },
         validationSchema: ottInputVisible
             ? Yup.object().shape({
                   email: Yup.string()
@@ -106,7 +58,42 @@ const ChangeEmailForm: React.FC = () => {
               }),
         validateOnChange: false,
         validateOnBlur: false,
-        onSubmit: !ottInputVisible ? requestOTT : requestEmailChange,
+        onSubmit: async ({ email, ott }, { setFieldError }) => {
+            if (ottInputVisible) {
+                try {
+                    setLoading(true);
+                    await changeEmail(email, ott!);
+                    setLoading(false);
+                    void goToApp();
+                } catch (e) {
+                    log.error(e);
+                    setLoading(false);
+                    setFieldError("ott", t("incorrect_code"));
+                }
+            } else {
+                try {
+                    setLoading(true);
+                    await sendOTT(email, "change");
+                    setEmail(email);
+                    setShowOttInputVisibility(true);
+                    setShowMessage(true);
+                    // TODO: What was this meant to focus on? The ref referred to an
+                    // Form element that was removed. Is this still needed.
+                    // setTimeout(() => {
+                    //     ottInputRef.current?.focus();
+                    // }, 250);
+                } catch (e) {
+                    log.error(e);
+                    setFieldError(
+                        "email",
+                        isHTTPErrorWithStatus(e, 403)
+                            ? t("email_already_taken")
+                            : t("generic_error"),
+                    );
+                }
+                setLoading(false);
+            }
+        },
     });
     const { values, errors, handleChange, handleSubmit } = formik;
     return (
