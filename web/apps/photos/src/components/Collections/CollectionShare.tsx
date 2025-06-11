@@ -70,7 +70,7 @@ import {
     unshareCollection,
     updateShareableURL,
 } from "services/collectionService";
-import * as Yup from "yup";
+import { z } from "zod/v4";
 
 type CollectionShareProps = ModalVisibilityProps & {
     collection: Collection;
@@ -475,13 +475,14 @@ const AddParticipant: React.FC<AddParticipantProps> = ({
 
     const title = type == "VIEWER" ? t("add_viewers") : t("add_collaborators");
 
-    const collectionShare: AddParticipantFormProps["onSubmit"] = async ({
-        email,
-        emails,
-    }) => {
+    const collectionShare: AddParticipantFormProps["onSubmit"] = async (
+        emailOrEmails,
+    ) => {
+        let emails = Array.isArray(emailOrEmails) ? emailOrEmails : [];
         // if email is provided, means user has custom entered email, so, will need to validate for self sharing
         // and already shared
-        if (email) {
+        if (typeof emailOrEmails == "string") {
+            const email = emailOrEmails;
             if (email === user.email) {
                 throw new Error(t("sharing_with_self"));
             } else if (
@@ -543,11 +544,10 @@ interface AddParticipantFormProps {
     /**
      * Submission handler. A callback invoked when the submit button is pressed.
      *
-     * It is passed the new email that the user entered (if any), and the
-     * selections (if any) that the user made from the provided
-     * {@link existingEmails} list.
+     * It is passed either the new email that the user entered, or the list of
+     * selections taht the user made from the provided {@link existingEmails}.
      */
-    onSubmit: (_: { email?: string; emails?: string[] }) => Promise<void>;
+    onSubmit: (emailOrEmails: string | string[]) => Promise<void>;
     onClose?: () => void;
 }
 
@@ -557,65 +557,56 @@ const AddParticipantForm: React.FC<AddParticipantFormProps> = ({
     onSubmit,
     onClose,
 }) => {
-    const [loading, SetLoading] = useState(false);
-
-    const validationSchema = useMemo(() => {
-        return Yup.object().shape({
-            inputValue: Yup.string().email(t("invalid_email_error")),
-        });
-    }, []);
-
-    const handleInputFieldClick = (setFieldValue) => {
-        setFieldValue("selectedOptions", []);
-    };
     const formik = useFormik({
-        initialValues: { inputValue: "", selectedOptions: [] },
+        initialValues: { email: "", selectedEmails: [] },
         onSubmit: async (
-            { inputValue, selectedOptions },
+            { email, selectedEmails },
             { setFieldError, resetForm },
         ) => {
             try {
-                SetLoading(true);
-                if (inputValue !== "") {
-                    await onSubmit({ email: inputValue });
-                } else if (selectedOptions.length !== 0) {
-                    await onSubmit({ emails: selectedOptions });
+                if (email) {
+                    if (!z.email().safeParse(email).success) {
+                        setFieldError("email", t("invalid_email_error"));
+                        return;
+                    }
+
+                    await onSubmit(email);
+                } else {
+                    await onSubmit(selectedEmails);
                 }
-                SetLoading(false);
-                onClose();
-                resetForm();
             } catch (e) {
-                setFieldError("inputValue", e?.message);
-                SetLoading(false);
+                log.error("Could not add participant", e);
+                setFieldError("email", e?.message);
+                return;
             }
+
+            onClose();
+            resetForm();
         },
-        validationSchema: validationSchema,
-        validateOnChange: false,
-        validateOnBlur: false,
     });
 
-    const { values, errors, handleChange, handleSubmit, setFieldValue } =
-        formik;
+    const resetExistingSelection = () =>
+        formik.setFieldValue("selectedOptions", []);
+
     return (
-        <form noValidate onSubmit={handleSubmit}>
+        <form onSubmit={formik.handleSubmit}>
             <Stack sx={{ gap: "24px", py: "20px", px: 2 }}>
                 <div>
                     <RowButtonGroupTitle>
                         {t("add_new_email")}
                     </RowButtonGroupTitle>
                     <TextField
-                        fullWidth
-                        id={"email"}
-                        name={"email"}
-                        type={"email"}
+                        name="email"
+                        type="email"
                         label={t("enter_email")}
-                        sx={{ mt: 0 }}
-                        disabled={loading}
-                        onChange={handleChange("inputValue")}
-                        onClick={() => handleInputFieldClick(setFieldValue)}
-                        error={Boolean(errors.inputValue)}
-                        helperText={errors.inputValue}
-                        value={values.inputValue}
+                        margin="none"
+                        value={formik.values.email}
+                        onChange={formik.handleChange}
+                        error={!!formik.errors.email}
+                        helperText={formik.errors.email ?? " "}
+                        disabled={formik.isSubmitting}
+                        onClick={resetExistingSelection}
+                        fullWidth
                     />
                 </div>
 
@@ -630,33 +621,21 @@ const AddParticipantForm: React.FC<AddParticipantFormProps> = ({
                                     <RowButton
                                         fontWeight="regular"
                                         onClick={() => {
-                                            if (
-                                                values.selectedOptions.includes(
-                                                    email,
-                                                )
-                                            ) {
-                                                setFieldValue(
-                                                    "selectedOptions",
-                                                    values.selectedOptions.filter(
-                                                        (selectedOption) =>
-                                                            selectedOption !==
-                                                            email,
-                                                    ),
-                                                );
-                                            } else {
-                                                setFieldValue(
-                                                    "selectedOptions",
-                                                    [
-                                                        ...values.selectedOptions,
-                                                        email,
-                                                    ],
-                                                );
-                                            }
+                                            const emails =
+                                                formik.values.selectedEmails;
+                                            formik.setFieldValue(
+                                                "selectedEmails",
+                                                emails.includes(email)
+                                                    ? emails.filter(
+                                                          (e) => e != email,
+                                                      )
+                                                    : emails.concat(email),
+                                            );
                                         }}
                                         label={email}
                                         startIcon={<Avatar email={email} />}
                                         endIcon={
-                                            values.selectedOptions.includes(
+                                            formik.values.selectedEmails.includes(
                                                 email,
                                             ) ? (
                                                 <DoneIcon />
@@ -677,7 +656,7 @@ const AddParticipantForm: React.FC<AddParticipantFormProps> = ({
                     type="submit"
                     color="accent"
                     fullWidth
-                    loading={loading}
+                    loading={formik.isSubmitting}
                     sx={{ mt: 4, mb: 4 }}
                 >
                     {submitButtonTitle}
