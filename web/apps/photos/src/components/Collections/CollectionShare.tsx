@@ -12,7 +12,7 @@ import Photo, { default as PhotoIcon } from "@mui/icons-material/Photo";
 import PublicIcon from "@mui/icons-material/Public";
 import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
 import WorkspacesIcon from "@mui/icons-material/Workspaces";
-import { Dialog, Stack, styled, Typography } from "@mui/material";
+import { Box, Dialog, Stack, styled, Typography } from "@mui/material";
 import NumberAvatar from "@mui/material/Avatar";
 import TextField from "@mui/material/TextField";
 import Avatar from "components/pages/gallery/Avatar";
@@ -587,8 +587,8 @@ const AddParticipantForm: React.FC<AddParticipantFormProps> = (props) => {
         formik;
     return (
         <form noValidate onSubmit={handleSubmit}>
-            <Stack sx={{ gap: "24px", py: "20px", px: "12px" }}>
-                <Stack>
+            <Stack sx={{ gap: "24px", py: "20px", px: 2 }}>
+                <div>
                     <RowButtonGroupTitle>
                         {t("add_new_email")}
                     </RowButtonGroupTitle>
@@ -606,10 +606,10 @@ const AddParticipantForm: React.FC<AddParticipantFormProps> = (props) => {
                         helperText={errors.inputValue}
                         value={values.inputValue}
                     />
-                </Stack>
+                </div>
 
                 {props.optionsList.length > 0 && (
-                    <Stack>
+                    <div>
                         <RowButtonGroupTitle>
                             {t("or_add_existing")}
                         </RowButtonGroupTitle>
@@ -658,10 +658,10 @@ const AddParticipantForm: React.FC<AddParticipantFormProps> = (props) => {
                                 </React.Fragment>
                             ))}
                         </RowButtonGroup>
-                    </Stack>
+                    </div>
                 )}
             </Stack>
-            <Stack sx={{ px: 2 }}>
+            <Box sx={{ px: 2 }}>
                 <LoadingButton
                     type="submit"
                     color="accent"
@@ -671,7 +671,7 @@ const AddParticipantForm: React.FC<AddParticipantFormProps> = (props) => {
                 >
                     {props.buttonText}
                 </LoadingButton>
-            </Stack>
+            </Box>
         </form>
     );
 };
