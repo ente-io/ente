@@ -791,5 +791,7 @@
   "addPhotos": "הוסף תמונות",
   "create": "צור",
   "viewAll": "הצג הכל",
-  "hiding": "מחביא..."
+  "hiding": "מחביא...",
+  "showMoreFaces": "Show more faces",
+  "showLessFaces": "Show less faces"
 }

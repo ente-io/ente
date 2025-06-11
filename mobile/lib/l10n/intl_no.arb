@@ -1689,5 +1689,7 @@
   "moon": "I månelyset",
   "onTheRoad": "På veien igjen",
   "food": "Kulinær glede",
-  "pets": "Pelsvenner"
+  "pets": "Pelsvenner",
+  "showMoreFaces": "Show more faces",
+  "showLessFaces": "Show less faces"
 }

@@ -1751,5 +1751,7 @@
   "onThisDayNotificationExplanation": "Recevoir des rappels sur les souvenirs de cette journée des années précédentes.",
   "addMemoriesWidgetPrompt": "Ajoutez un gadget des souvenirs à votre écran d'accueil et revenez ici pour le personnaliser.",
   "addAlbumWidgetPrompt": "Ajoutez un gadget d'album à votre écran d'accueil et revenez ici pour le personnaliser.",
-  "addPeopleWidgetPrompt": "Ajoutez un gadget des personnes à votre écran d'accueil et revenez ici pour le personnaliser."
+  "addPeopleWidgetPrompt": "Ajoutez un gadget des personnes à votre écran d'accueil et revenez ici pour le personnaliser.",
+  "showMoreFaces": "Show more faces",
+  "showLessFaces": "Show less faces"
 }

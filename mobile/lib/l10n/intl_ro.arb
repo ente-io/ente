@@ -1522,5 +1522,7 @@
   "joinAlbum": "Alăturați-vă albumului",
   "joinAlbumSubtext": "pentru a vedea și a adăuga fotografii",
   "joinAlbumSubtextViewer": "pentru a adăuga la albumele distribuite",
-  "join": "Alăturare"
+  "join": "Alăturare",
+  "showMoreFaces": "Show more faces",
+  "showLessFaces": "Show less faces"
 }

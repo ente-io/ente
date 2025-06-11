@@ -1111,5 +1111,7 @@
   "rotate": "Putar",
   "left": "Kiri",
   "right": "Kanan",
-  "whatsNew": "Hal yang baru"
+  "whatsNew": "Hal yang baru",
+  "showMoreFaces": "Show more faces",
+  "showLessFaces": "Show less faces"
 }

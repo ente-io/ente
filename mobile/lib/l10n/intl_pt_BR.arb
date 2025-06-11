@@ -1756,5 +1756,7 @@
   "receiveRemindersOnBirthdays": "Receba notificações quando alguém fizer um aniversário. Tocar na notificação o levará às fotos do aniversariante.",
   "happyBirthday": "Feliz aniversário! 🥳",
   "happyBirthdayToPerson": "Feliz aniversário a {name}! 🎉",
-  "birthdays": "Aniversários"
+  "birthdays": "Aniversários",
+  "showMoreFaces": "Show more faces",
+  "showLessFaces": "Show less faces"
 }

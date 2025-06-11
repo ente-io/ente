@@ -1387,5 +1387,7 @@
         "example": "no network"
       }
     }
-  }
+  },
+  "showMoreFaces": "Show more faces",
+  "showLessFaces": "Show less faces"
 }

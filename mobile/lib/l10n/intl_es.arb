@@ -1724,5 +1724,7 @@
   "onTheRoad": "De nuevo en la carretera",
   "food": "Delicia culinaria",
   "pets": "Compañeros peludos",
-  "curatedMemories": "Memorias revisadas"
+  "curatedMemories": "Memorias revisadas",
+  "showMoreFaces": "Show more faces",
+  "showLessFaces": "Show less faces"
 }

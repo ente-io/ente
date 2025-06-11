@@ -246,7 +246,7 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                _showingAllFaces ? "Show less faces" : "Show more faces",
+                _showingAllFaces ? S.of(context).showLessFaces : S.of(context).showMoreFaces,
                 style: getEnteTextTheme(context).small.copyWith(
                       color: Theme.of(context).colorScheme.primary,
                     ),

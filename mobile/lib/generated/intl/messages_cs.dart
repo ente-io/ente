@@ -22,17 +22,17 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m6(albumName) => "Úspěšně přidáno do  ${albumName}";
 
-  static String m46(expiryTime) => "Platnost odkazu vyprší ${expiryTime}";
+  static String m48(expiryTime) => "Platnost odkazu vyprší ${expiryTime}";
 
-  static String m67(storeName) => "Ohodnoťte nás na ${storeName}";
+  static String m69(storeName) => "Ohodnoťte nás na ${storeName}";
 
-  static String m74(endDate) => "Předplatné se obnoví ${endDate}";
+  static String m76(endDate) => "Předplatné se obnoví ${endDate}";
 
-  static String m80(name) => "Selfie s ${name}";
+  static String m83(name) => "Selfie s ${name}";
 
-  static String m109(email) => "Ověřit ${email}";
+  static String m112(email) => "Ověřit ${email}";
 
-  static String m114(name) => "Vy a ${name}";
+  static String m117(name) => "Vy a ${name}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -90,7 +90,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "backupFile": MessageLookupByLibrary.simpleMessage("Zálohovat soubor"),
         "backupStatus": MessageLookupByLibrary.simpleMessage("Stav zálohování"),
         "birthday": MessageLookupByLibrary.simpleMessage("Narozeniny"),
-        "birthdays": MessageLookupByLibrary.simpleMessage("Birthdays"),
         "blog": MessageLookupByLibrary.simpleMessage("Blog"),
         "cachedData":
             MessageLookupByLibrary.simpleMessage("Data uložená v mezipaměti"),
@@ -113,8 +112,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "clearCaches":
             MessageLookupByLibrary.simpleMessage("Vymazat mezipaměť"),
         "clearIndexes": MessageLookupByLibrary.simpleMessage("Smazat indexy"),
-        "clickToInstallOurBestVersionYet": MessageLookupByLibrary.simpleMessage(
-            "Click to install our best version yet"),
         "close": MessageLookupByLibrary.simpleMessage("Zavřít"),
         "codeAppliedPageTitle":
             MessageLookupByLibrary.simpleMessage("Kód byl použit"),
@@ -262,8 +259,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Generování šifrovacích klíčů..."),
         "goToSettings":
             MessageLookupByLibrary.simpleMessage("Jít do nastavení"),
-        "happyBirthday":
-            MessageLookupByLibrary.simpleMessage("Happy birthday! 🥳"),
         "hidden": MessageLookupByLibrary.simpleMessage("Skryté"),
         "hide": MessageLookupByLibrary.simpleMessage("Skrýt"),
         "howItWorks": MessageLookupByLibrary.simpleMessage("Jak to funguje"),
@@ -294,7 +289,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "leaveAlbum": MessageLookupByLibrary.simpleMessage("Opustit album"),
         "left": MessageLookupByLibrary.simpleMessage("Doleva"),
         "lightTheme": MessageLookupByLibrary.simpleMessage("Světlý"),
-        "linkExpiresOn": m46,
+        "linkExpiresOn": m48,
         "linkHasExpired":
             MessageLookupByLibrary.simpleMessage("Platnost odkazu vypršela"),
         "linkNeverExpires": MessageLookupByLibrary.simpleMessage("Nikdy"),
@@ -310,8 +305,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "loginWithTOTP":
             MessageLookupByLibrary.simpleMessage("Přihlášení pomocí TOTP"),
         "logout": MessageLookupByLibrary.simpleMessage("Odhlásit se"),
-        "lookBackOnYourMemories": MessageLookupByLibrary.simpleMessage(
-            "Look back on your memories 🌄"),
         "lostDevice":
             MessageLookupByLibrary.simpleMessage("Ztratili jste zařízení?"),
         "manage": MessageLookupByLibrary.simpleMessage("Spravovat"),
@@ -337,7 +330,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "never": MessageLookupByLibrary.simpleMessage("Nikdy"),
         "newAlbum": MessageLookupByLibrary.simpleMessage("Nové album"),
         "newPerson": MessageLookupByLibrary.simpleMessage("Nová osoba"),
-        "newPhotosEmoji": MessageLookupByLibrary.simpleMessage(" new 📸"),
         "newRange": MessageLookupByLibrary.simpleMessage("Nový rozsah"),
         "newest": MessageLookupByLibrary.simpleMessage("Nejnovější"),
         "next": MessageLookupByLibrary.simpleMessage("Další"),
@@ -359,9 +351,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "onDevice": MessageLookupByLibrary.simpleMessage("V zařízení"),
         "onEnte": MessageLookupByLibrary.simpleMessage(
             "Na <branding>ente</branding>"),
-        "onThisDay": MessageLookupByLibrary.simpleMessage("On this day"),
-        "onThisDayNotificationExplanation": MessageLookupByLibrary.simpleMessage(
-            "Receive reminders about memories from this day in previous years."),
         "oops": MessageLookupByLibrary.simpleMessage("Jejda"),
         "oopsSomethingWentWrong":
             MessageLookupByLibrary.simpleMessage("Jejda, něco se pokazilo"),
@@ -396,9 +385,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "queued": MessageLookupByLibrary.simpleMessage("Ve frontě"),
         "radius": MessageLookupByLibrary.simpleMessage("Rádius"),
         "rateUs": MessageLookupByLibrary.simpleMessage("Ohodnoť nás"),
-        "rateUsOnStore": m67,
-        "receiveRemindersOnBirthdays": MessageLookupByLibrary.simpleMessage(
-            "Receive reminders when it\'s someone\'s birthday. Tapping on the notification will take you to photos of the birthday person."),
+        "rateUsOnStore": m69,
         "recoverButton": MessageLookupByLibrary.simpleMessage("Obnovit"),
         "recoveryKeyVerified":
             MessageLookupByLibrary.simpleMessage("Obnovovací klíč byl ověřen"),
@@ -427,7 +414,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Přejmenovat album"),
         "renameFile":
             MessageLookupByLibrary.simpleMessage("Přejmenovat soubor"),
-        "renewsOn": m74,
+        "renewsOn": m76,
         "reportABug": MessageLookupByLibrary.simpleMessage("Nahlásit chybu"),
         "reportBug": MessageLookupByLibrary.simpleMessage("Nahlásit chybu"),
         "resendEmail":
@@ -469,7 +456,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "selectTime": MessageLookupByLibrary.simpleMessage("Vybrat čas"),
         "selectYourPlan":
             MessageLookupByLibrary.simpleMessage("Vyberte svůj plán"),
-        "selfiesWithThem": m80,
+        "selfiesWithThem": m83,
         "send": MessageLookupByLibrary.simpleMessage("Odeslat"),
         "sendEmail": MessageLookupByLibrary.simpleMessage("Odeslat e-mail"),
         "sendInvite": MessageLookupByLibrary.simpleMessage("Odeslat pozvánku"),
@@ -488,10 +475,12 @@ class MessageLookup extends MessageLookupByLibrary {
         "sharedWithMe": MessageLookupByLibrary.simpleMessage("Sdíleno se mnou"),
         "sharedWithYou": MessageLookupByLibrary.simpleMessage("Sdíleno s vámi"),
         "sharing": MessageLookupByLibrary.simpleMessage("Sdílení..."),
+        "showLessFaces":
+            MessageLookupByLibrary.simpleMessage("Show less faces"),
+        "showMoreFaces":
+            MessageLookupByLibrary.simpleMessage("Show more faces"),
         "skip": MessageLookupByLibrary.simpleMessage("Přeskočit"),
         "sorry": MessageLookupByLibrary.simpleMessage("Omlouváme se"),
-        "sorryWeHadToPauseYourBackups": MessageLookupByLibrary.simpleMessage(
-            "Sorry, we had to pause your backups"),
         "sort": MessageLookupByLibrary.simpleMessage("Seřadit"),
         "sortAlbumsBy": MessageLookupByLibrary.simpleMessage("Seřadit podle"),
         "sortNewestFirst":
@@ -539,7 +528,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "usedSpace": MessageLookupByLibrary.simpleMessage("Využité místo"),
         "verify": MessageLookupByLibrary.simpleMessage("Ověřit"),
         "verifyEmail": MessageLookupByLibrary.simpleMessage("Ověřit e-mail"),
-        "verifyEmailID": m109,
+        "verifyEmailID": m112,
         "verifyIDLabel": MessageLookupByLibrary.simpleMessage("Ověřit"),
         "verifying": MessageLookupByLibrary.simpleMessage("Ověřování..."),
         "verifyingRecoveryKey": MessageLookupByLibrary.simpleMessage(
@@ -563,7 +552,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "yesRemove": MessageLookupByLibrary.simpleMessage("Ano, odstranit"),
         "yesRenew": MessageLookupByLibrary.simpleMessage("Ano, obnovit"),
         "you": MessageLookupByLibrary.simpleMessage("Vy"),
-        "youAndThem": m114,
+        "youAndThem": m117,
         "yourAccountHasBeenDeleted":
             MessageLookupByLibrary.simpleMessage("Váš účet byl smazán"),
         "yourMap": MessageLookupByLibrary.simpleMessage("Vaše mapa")

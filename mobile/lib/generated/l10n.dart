@@ -11975,6 +11975,26 @@ class S {
       args: [],
     );
   }
+
+  /// `Show more faces`
+  String get showMoreFaces {
+    return Intl.message(
+      'Show more faces',
+      name: 'showMoreFaces',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Show less faces`
+  String get showLessFaces {
+    return Intl.message(
+      'Show less faces',
+      name: 'showLessFaces',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

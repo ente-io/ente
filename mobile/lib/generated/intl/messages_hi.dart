@@ -27,10 +27,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "activeSessions": MessageLookupByLibrary.simpleMessage("एक्टिव सेशन"),
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
             "आपका अकाउंट हटाने का मुख्य कारण क्या है?"),
-        "birthdays": MessageLookupByLibrary.simpleMessage("Birthdays"),
         "cancel": MessageLookupByLibrary.simpleMessage("रद्द करें"),
-        "clickToInstallOurBestVersionYet": MessageLookupByLibrary.simpleMessage(
-            "Click to install our best version yet"),
         "confirmAccountDeletion": MessageLookupByLibrary.simpleMessage(
             "अकाउंट डिलीट करने की पुष्टि करें"),
         "confirmPassword":
@@ -70,8 +67,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "feedback": MessageLookupByLibrary.simpleMessage("प्रतिपुष्टि"),
         "forgotPassword":
             MessageLookupByLibrary.simpleMessage("पासवर्ड भूल गए"),
-        "happyBirthday":
-            MessageLookupByLibrary.simpleMessage("Happy birthday! 🥳"),
         "incorrectRecoveryKeyBody": MessageLookupByLibrary.simpleMessage(
             "आपके द्वारा दर्ज रिकवरी कुंजी ग़लत है"),
         "incorrectRecoveryKeyTitle":
@@ -80,32 +75,26 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("अमान्य ईमेल ऐड्रेस"),
         "kindlyHelpUsWithThisInformation": MessageLookupByLibrary.simpleMessage(
             "कृपया हमें इस जानकारी के लिए सहायता करें"),
-        "lookBackOnYourMemories": MessageLookupByLibrary.simpleMessage(
-            "Look back on your memories 🌄"),
-        "newPhotosEmoji": MessageLookupByLibrary.simpleMessage(" new 📸"),
         "noRecoveryKey":
             MessageLookupByLibrary.simpleMessage("रिकवरी कुंजी नहीं है?"),
         "noRecoveryKeyNoDecryption": MessageLookupByLibrary.simpleMessage(
             "हमारे एंड-टू-एंड एन्क्रिप्शन प्रोटोकॉल की प्रकृति के कारण, आपके डेटा को आपके पासवर्ड या रिकवरी कुंजी के बिना डिक्रिप्ट नहीं किया जा सकता है"),
         "ok": MessageLookupByLibrary.simpleMessage("ठीक है"),
-        "onThisDay": MessageLookupByLibrary.simpleMessage("On this day"),
-        "onThisDayNotificationExplanation": MessageLookupByLibrary.simpleMessage(
-            "Receive reminders about memories from this day in previous years."),
         "oops": MessageLookupByLibrary.simpleMessage("ओह!"),
         "password": MessageLookupByLibrary.simpleMessage("पासवर्ड"),
-        "receiveRemindersOnBirthdays": MessageLookupByLibrary.simpleMessage(
-            "Receive reminders when it\'s someone\'s birthday. Tapping on the notification will take you to photos of the birthday person."),
         "recoverButton": MessageLookupByLibrary.simpleMessage("पुनः प्राप्त"),
         "recoverySuccessful":
             MessageLookupByLibrary.simpleMessage("रिकवरी सफल हुई!"),
         "selectReason": MessageLookupByLibrary.simpleMessage("कारण चुनें"),
         "sendEmail": MessageLookupByLibrary.simpleMessage("ईमेल भेजें"),
+        "showLessFaces":
+            MessageLookupByLibrary.simpleMessage("Show less faces"),
+        "showMoreFaces":
+            MessageLookupByLibrary.simpleMessage("Show more faces"),
         "somethingWentWrongPleaseTryAgain":
             MessageLookupByLibrary.simpleMessage(
                 "कुछ गड़बड़ हुई है। कृपया दोबारा प्रयास करें।"),
         "sorry": MessageLookupByLibrary.simpleMessage("क्षमा करें!"),
-        "sorryWeHadToPauseYourBackups": MessageLookupByLibrary.simpleMessage(
-            "Sorry, we had to pause your backups"),
         "terminate": MessageLookupByLibrary.simpleMessage("रद्द करें"),
         "terminateSession":
             MessageLookupByLibrary.simpleMessage("सेशन रद्द करें?"),

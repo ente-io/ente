@@ -1532,5 +1532,7 @@
   "joinAlbum": "Tham gia album",
   "joinAlbumSubtext": "để xem và thêm ảnh của bạn",
   "joinAlbumSubtextViewer": "thêm vào album được chia sẻ",
-  "join": "Tham gia"
+  "join": "Tham gia",
+  "showMoreFaces": "Show more faces",
+  "showLessFaces": "Show less faces"
 }

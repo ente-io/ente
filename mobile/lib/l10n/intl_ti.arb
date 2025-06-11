@@ -1,3 +1,5 @@
 {
-  "@@locale ": "en"
+  "@@locale ": "en",
+  "showMoreFaces": "Show more faces",
+  "showLessFaces": "Show less faces"
 }

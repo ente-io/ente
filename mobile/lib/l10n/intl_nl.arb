@@ -1751,5 +1751,7 @@
   "onThisDayNotificationExplanation": "Ontvang meldingen over herinneringen op deze dag door de jaren heen.",
   "addMemoriesWidgetPrompt": "Voeg een widget toe aan je beginscherm en kom hier terug om aan te passen.",
   "addAlbumWidgetPrompt": "Voeg een widget toe aan je beginscherm en kom hier terug om aan te passen.",
-  "addPeopleWidgetPrompt": "Voeg een widget toe aan je beginscherm en kom hier terug om aan te passen."
+  "addPeopleWidgetPrompt": "Voeg een widget toe aan je beginscherm en kom hier terug om aan te passen.",
+  "showMoreFaces": "Show more faces",
+  "showLessFaces": "Show less faces"
 }

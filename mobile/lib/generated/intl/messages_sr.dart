@@ -22,10 +22,8 @@ class MessageLookup extends MessageLookupByLibrary {
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
-        "birthdays": MessageLookupByLibrary.simpleMessage("Birthdays"),
-        "happyBirthday":
-            MessageLookupByLibrary.simpleMessage("Happy birthday! 🥳"),
-        "receiveRemindersOnBirthdays": MessageLookupByLibrary.simpleMessage(
-            "Receive reminders when it\'s someone\'s birthday. Tapping on the notification will take you to photos of the birthday person.")
+        "showLessFaces":
+            MessageLookupByLibrary.simpleMessage("Show less faces"),
+        "showMoreFaces": MessageLookupByLibrary.simpleMessage("Show more faces")
       };
 }

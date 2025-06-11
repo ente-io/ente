@@ -1740,5 +1740,7 @@
   "newPhotosEmoji": " جديد 📸",
   "happyBirthday": "عيد ميلاد سعيد! 🥳",
   "happyBirthdayToPerson": "عيد ميلاد سعيد إلى {name}! 🎉",
-  "birthdays": "أعياد الميلاد"
+  "birthdays": "أعياد الميلاد",
+  "showMoreFaces": "Show more faces",
+  "showLessFaces": "Show less faces"
 }

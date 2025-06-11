@@ -1724,5 +1724,7 @@
   "onTheRoad": "Снова в пути",
   "food": "Кулинарное наслаждение",
   "pets": "Пушистые спутники",
-  "curatedMemories": "Отобранные воспоминания"
+  "curatedMemories": "Отобранные воспоминания",
+  "showMoreFaces": "Show more faces",
+  "showLessFaces": "Show less faces"
 }

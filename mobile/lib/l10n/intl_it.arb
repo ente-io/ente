@@ -1741,5 +1741,7 @@
   "onThisDayNotificationExplanation": "Ricevi promemoria sui ricordi da questo giorno negli anni precedenti.",
   "addMemoriesWidgetPrompt": "Aggiungi un widget dei ricordi nella schermata iniziale e torna qui per personalizzarlo.",
   "addAlbumWidgetPrompt": "Aggiungi un widget per gli album nella schermata iniziale e torna qui per personalizzarlo.",
-  "addPeopleWidgetPrompt": "Aggiungi un widget delle persone nella schermata iniziale e torna qui per personalizzarlo."
+  "addPeopleWidgetPrompt": "Aggiungi un widget delle persone nella schermata iniziale e torna qui per personalizzarlo.",
+  "showMoreFaces": "Show more faces",
+  "showLessFaces": "Show less faces"
 }
