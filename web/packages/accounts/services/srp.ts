@@ -364,7 +364,7 @@ export const unstashAndUseSRPSetupAttributes = async (
  *
  * @param srpSetupAttributes SRP setup attributes.
  */
-export const configureSRP = async (srpSetupAttributes: SRPSetupAttributes) =>
+export const setupSRP = async (srpSetupAttributes: SRPSetupAttributes) =>
     srpSetupOrReconfigure(srpSetupAttributes, completeSRPSetup);
 
 /**

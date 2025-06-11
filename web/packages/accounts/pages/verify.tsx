@@ -17,8 +17,8 @@ import {
     unstashRedirect,
 } from "ente-accounts/services/redirect";
 import {
-    configureSRP,
     getSRPAttributes,
+    setupSRP,
     unstashAndUseSRPSetupAttributes,
     type SRPAttributes,
 } from "ente-accounts/services/srp";
@@ -146,7 +146,7 @@ const Page: React.FC = () => {
                     if (originalKeyAttributes) {
                         await putUserKeyAttributes(originalKeyAttributes);
                     }
-                    await unstashAndUseSRPSetupAttributes(configureSRP);
+                    await unstashAndUseSRPSetupAttributes(setupSRP);
                 }
                 // TODO(RE): Temporary safety valve before removing the
                 // unnecessary clear (tag: Migration)

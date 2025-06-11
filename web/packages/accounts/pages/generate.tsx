@@ -9,8 +9,8 @@ import SetPasswordForm, {
 } from "ente-accounts/components/SetPasswordForm";
 import { appHomeRoute } from "ente-accounts/services/redirect";
 import {
-    configureSRP,
     generateSRPSetupAttributes,
+    setupSRP,
 } from "ente-accounts/services/srp";
 import type { KeyAttributes, User } from "ente-accounts/services/user";
 import {
@@ -74,7 +74,7 @@ const Page: React.FC = () => {
                 await generateKeysAndAttributes(passphrase);
 
             await putUserKeyAttributes(keyAttributes);
-            await configureSRP(await generateSRPSetupAttributes(kek));
+            await setupSRP(await generateSRPSetupAttributes(kek));
             await generateAndSaveInteractiveKeyAttributes(
                 passphrase,
                 keyAttributes,
