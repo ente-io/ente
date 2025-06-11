@@ -475,7 +475,7 @@ const AddParticipant: React.FC<AddParticipantProps> = ({
 
     const title = type == "VIEWER" ? t("add_viewers") : t("add_collaborators");
 
-    const collectionShare: AddParticipantFormProps["callback"] = async ({
+    const collectionShare: AddParticipantFormProps["onSubmit"] = async ({
         email,
         emails,
     }) => {
@@ -522,28 +522,41 @@ const AddParticipant: React.FC<AddParticipantProps> = ({
             caption={collection.name}
         >
             <AddParticipantForm
+                existingEmails={nonSharedEmails}
+                submitButtonTitle={title}
                 onClose={onClose}
-                callback={collectionShare}
-                optionsList={nonSharedEmails}
-                buttonText={title}
+                onSubmit={collectionShare}
             />
         </TitledNestedSidebarDrawer>
     );
 };
 
-interface AddParticipantFormValues {
-    inputValue: string;
-    selectedOptions: string[];
-}
-
 interface AddParticipantFormProps {
-    callback: (props: { email?: string; emails?: string[] }) => Promise<void>;
-    buttonText: string;
+    /**
+     * Title for the submit button.
+     */
+    submitButtonTitle: string;
+    /**
+     * A list of emails the user can user to pick from.
+     */
+    existingEmails: string[];
+    /**
+     * Submission handler. A callback invoked when the submit button is pressed.
+     *
+     * It is passed the new email that the user entered (if any), and the
+     * selections (if any) that the user made from the provided
+     * {@link existingEmails} list.
+     */
+    onSubmit: (_: { email?: string; emails?: string[] }) => Promise<void>;
     onClose?: () => void;
-    optionsList?: string[];
 }
 
-const AddParticipantForm: React.FC<AddParticipantFormProps> = (props) => {
+const AddParticipantForm: React.FC<AddParticipantFormProps> = ({
+    existingEmails,
+    submitButtonTitle,
+    onSubmit,
+    onClose,
+}) => {
     const [loading, SetLoading] = useState(false);
 
     const validationSchema = useMemo(() => {
@@ -564,12 +577,12 @@ const AddParticipantForm: React.FC<AddParticipantFormProps> = (props) => {
             try {
                 SetLoading(true);
                 if (inputValue !== "") {
-                    await props.callback({ email: inputValue });
+                    await onSubmit({ email: inputValue });
                 } else if (selectedOptions.length !== 0) {
-                    await props.callback({ emails: selectedOptions });
+                    await onSubmit({ emails: selectedOptions });
                 }
                 SetLoading(false);
-                props.onClose();
+                onClose();
                 resetForm();
             } catch (e) {
                 setFieldError("inputValue", e?.message);
@@ -606,20 +619,20 @@ const AddParticipantForm: React.FC<AddParticipantFormProps> = (props) => {
                     />
                 </div>
 
-                {props.optionsList.length > 0 && (
+                {existingEmails.length > 0 && (
                     <div>
                         <RowButtonGroupTitle>
                             {t("or_add_existing")}
                         </RowButtonGroupTitle>
                         <RowButtonGroup>
-                            {props.optionsList.map((item, index) => (
-                                <React.Fragment key={item}>
+                            {existingEmails.map((email, index) => (
+                                <React.Fragment key={email}>
                                     <RowButton
                                         fontWeight="regular"
                                         onClick={() => {
                                             if (
                                                 values.selectedOptions.includes(
-                                                    item,
+                                                    email,
                                                 )
                                             ) {
                                                 setFieldValue(
@@ -627,7 +640,7 @@ const AddParticipantForm: React.FC<AddParticipantFormProps> = (props) => {
                                                     values.selectedOptions.filter(
                                                         (selectedOption) =>
                                                             selectedOption !==
-                                                            item,
+                                                            email,
                                                     ),
                                                 );
                                             } else {
@@ -635,22 +648,22 @@ const AddParticipantForm: React.FC<AddParticipantFormProps> = (props) => {
                                                     "selectedOptions",
                                                     [
                                                         ...values.selectedOptions,
-                                                        item,
+                                                        email,
                                                     ],
                                                 );
                                             }
                                         }}
-                                        label={item}
-                                        startIcon={<Avatar email={item} />}
+                                        label={email}
+                                        startIcon={<Avatar email={email} />}
                                         endIcon={
                                             values.selectedOptions.includes(
-                                                item,
+                                                email,
                                             ) ? (
                                                 <DoneIcon />
                                             ) : null
                                         }
                                     />
-                                    {index !== props.optionsList.length - 1 && (
+                                    {index != existingEmails.length - 1 && (
                                         <RowButtonDivider />
                                     )}
                                 </React.Fragment>
@@ -667,7 +680,7 @@ const AddParticipantForm: React.FC<AddParticipantFormProps> = (props) => {
                     loading={loading}
                     sx={{ mt: 4, mb: 4 }}
                 >
-                    {props.buttonText}
+                    {submitButtonTitle}
                 </LoadingButton>
             </Box>
         </form>
