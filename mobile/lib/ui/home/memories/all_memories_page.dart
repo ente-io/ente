@@ -44,9 +44,6 @@ class _AllMemoriesPageState extends State<AllMemoriesPage>
         itemCount: widget.allMemories.length,
         itemBuilder: (context, index) {
           final initialMemoryIndex = _getNextMemoryIndex(index);
-          if (widget.allMemories[index].isEmpty) {
-            return const SizedBox.shrink();
-          }
           return FullScreenMemoryDataUpdater(
             initialIndex: initialMemoryIndex,
             memories: widget.allMemories[index],
