@@ -13,7 +13,7 @@ import { SRP, SrpClient } from "fast-srp-hap";
 import { v4 as uuidv4 } from "uuid";
 import { z } from "zod/v4";
 import {
-    RemoteEmailOrSRPVerificationResponse,
+    RemoteSRPVerificationResponse,
     type EmailOrSRPVerificationResponse,
 } from "./user";
 
@@ -644,16 +644,7 @@ interface VerifySRPSessionRequest {
     srpM1: string;
 }
 
-const SRPVerificationResponse = z.object({
-    ...RemoteEmailOrSRPVerificationResponse.shape,
-    /**
-     * The SRP M2 (evidence message), the proof that the server has the
-     * verifier.
-     */
-    srpM2: z.string(),
-});
-
-type SRPVerificationResponse = z.infer<typeof SRPVerificationResponse>;
+type SRPVerificationResponse = z.infer<typeof RemoteSRPVerificationResponse>;
 
 const verifySRPSession = async (
     verifySRPSessionRequest: VerifySRPSessionRequest,
@@ -667,5 +658,5 @@ const verifySRPSession = async (
         throw new Error(srpVerificationUnauthorizedErrorMessage);
     }
     ensureOk(res);
-    return SRPVerificationResponse.parse(await res.json());
+    return RemoteSRPVerificationResponse.parse(await res.json());
 };

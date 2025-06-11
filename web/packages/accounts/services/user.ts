@@ -603,7 +603,7 @@ export interface EmailOrSRPVerificationResponse {
  *
  * See: [Note: Duplicated Zod schema and TypeScript type]
  */
-export const RemoteEmailOrSRPVerificationResponse = z.object({
+const RemoteEmailOrSRPVerificationResponse = z.object({
     id: z.number(),
     keyAttributes: RemoteKeyAttributes.nullish().transform(nullToUndefined),
     encryptedToken: z.string().nullish().transform(nullToUndefined),
@@ -612,6 +612,23 @@ export const RemoteEmailOrSRPVerificationResponse = z.object({
     passkeySessionID: z.string().nullish().transform(nullToUndefined),
     accountsUrl: z.string().nullish().transform(nullToUndefined),
     twoFactorSessionIDV2: z.string().nullish().transform(nullToUndefined),
+});
+
+/**
+ * A specialization of {@link RemoteEmailOrSRPVerificationResponse} for SRP
+ * verification, which results in the {@link srpM2} field in addition to the
+ * other ones.
+ *
+ * The declaration conceptually belongs to `srp.ts`, but is here to avoid cyclic
+ * dependencies.
+ */
+export const RemoteSRPVerificationResponse = z.object({
+    ...RemoteEmailOrSRPVerificationResponse.shape,
+    /**
+     * The SRP M2 (evidence message), the proof that the server has the
+     * verifier.
+     */
+    srpM2: z.string(),
 });
 
 /**
