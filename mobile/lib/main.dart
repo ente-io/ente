@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import "package:adaptive_theme/adaptive_theme.dart";
+import "package:async/async.dart";
 import "package:computer/computer.dart";
 import 'package:ente_crypto/ente_crypto.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -57,7 +58,7 @@ const kLastFGTaskHeartBeatTime = "fg_task_hb_time";
 const kHeartBeatFrequency = Duration(seconds: 1);
 const kFGSyncFrequency = Duration(minutes: 5);
 const kFGHomeWidgetSyncFrequency = Duration(minutes: 15);
-const kBGTaskTimeout = Duration(seconds: 25);
+const kBGTaskTimeout = Duration(seconds: 45);
 const kBGPushTimeout = Duration(seconds: 28);
 const kFGTaskDeathTimeoutInMicroseconds = 5000000;
 
@@ -120,62 +121,57 @@ Future<void> _homeWidgetSync() async {
 }
 
 Future<void> runBackgroundTask(String taskId, {String mode = 'normal'}) async {
-  if (Platform.isIOS) {
-    _scheduleSuicide(kBGTaskTimeout, taskId); // To prevent OS from punishing us
-  }
   try {
-    if (await _isRunningInForeground()) {
-      _logger
-          .info("Background task triggered when process was already running");
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      final PackageInfo packageInfo = await PackageInfo.fromPlatform();
-      await Configuration.instance.init();
-      await NetworkClient.instance.init(packageInfo);
-      ServiceLocator.instance.init(
-        prefs,
-        NetworkClient.instance.enteDio,
-        NetworkClient.instance.getDio(),
-        packageInfo,
-      );
-      await CollectionsService.instance.init(prefs);
-      await FileUploader.instance.init(prefs, true);
-      LocalFileUpdateService.instance.init(prefs);
-      AppLifecycleService.instance.init(prefs);
+    final cancellableOp = CancelableOperation.fromFuture(_runMinimally(taskId));
 
-      await LocalSyncService.instance.init(prefs);
-      RemoteSyncService.instance.init(prefs);
-      await SyncService.instance.init(prefs);
-
-      await _sync('bgTaskActiveProcess');
-    } else {
-      await _runWithLogs(
-        () async {
-          _logger.info("Starting background task in $mode mode");
-          await _runInBackground(taskId);
-        },
-        prefix: "[bg]",
+    if (Platform.isIOS) {
+      _scheduleSuicide(
+        kBGTaskTimeout,
+        taskId,
+        cancellableOp,
       );
     }
+    await cancellableOp.valueOrCancellation();
   } catch (e, s) {
     _logger.severe("Error in background task", e, s);
   }
 }
 
-Future<void> _runInBackground(String taskId) async {
-  if (await _isRunningInForeground()) {
-    _logger.info("FG task running, skipping BG taskID: $taskId");
-    return;
+Future<void> _runMinimally(String taskId) async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  if (AppLifecycleService.instance.isForeground) {
+    _logger.info("Background task triggered when process was already running");
+  } else {
+    _logger.info("Background task triggered when process was not running");
   }
-  _logger.info("[WorkManager] Event received: $taskId");
-  _scheduleBGTaskKill(taskId);
+  final PackageInfo packageInfo = await PackageInfo.fromPlatform();
+  await Configuration.instance.init();
+  await Computer.shared().turnOn(workersCount: 4);
+  CryptoUtil.init();
 
-  await _init(true, via: 'runViaBackgroundTask');
+  await NetworkClient.instance.init(packageInfo);
+  ServiceLocator.instance.init(
+    prefs,
+    NetworkClient.instance.enteDio,
+    NetworkClient.instance.getDio(),
+    packageInfo,
+  );
+  await CollectionsService.instance.init(prefs);
+  await FileUploader.instance.init(prefs, true);
+  LocalFileUpdateService.instance.init(prefs);
+  AppLifecycleService.instance.init(prefs);
+
+  await LocalSyncService.instance.init(prefs);
+  RemoteSyncService.instance.init(prefs);
+  await SyncService.instance.init(prefs);
+  NotificationService.instance.init(prefs);
+
   await Future.wait(
     [
       _homeWidgetSync(),
       () async {
         updateService.showUpdateNotification().ignore();
-        await _sync('bgSync');
+        await _sync('bgTaskActiveProcess');
       }(),
     ],
   );
@@ -379,17 +375,6 @@ Future<void> _scheduleFGSync(String caller) async {
   });
 }
 
-void _scheduleBGTaskKill(String taskId) async {
-  if (await _isRunningInForeground()) {
-    _logger.info("Found app in FG, committing seppuku. $taskId");
-    await BgTaskUtils.killBGTask(taskId);
-    return;
-  }
-  Future.delayed(kHeartBeatFrequency, () async {
-    _scheduleBGTaskKill(taskId);
-  });
-}
-
 Future<bool> _isRunningInForeground() async {
   final prefs = await SharedPreferences.getInstance();
   await prefs.reload();
@@ -436,11 +421,16 @@ Future<void> _logFGHeartBeatInfo(SharedPreferences prefs) async {
   _logger.info('isAlreadyRunningFG: $isRunningInFG, last Beat: $lastRun');
 }
 
-void _scheduleSuicide(Duration duration, [String? taskID]) {
-  final taskIDVal = taskID ?? 'no taskID';
-  _logger.warning("Schedule seppuku taskID: $taskIDVal");
-  Future.delayed(duration, () {
-    _logger.warning("TLE, committing seppuku for taskID: $taskIDVal");
-    BgTaskUtils.killBGTask(taskID);
+void _scheduleSuicide(
+  Duration duration,
+  String taskID,
+  CancelableOperation cancellableOp,
+) async {
+  _logger.warning("Schedule seppuku taskID: $taskID");
+  final prefs = await SharedPreferences.getInstance();
+  Future.delayed(duration, () async {
+    _logger.warning("TLE, committing seppuku for taskID: $taskID");
+    await BgTaskUtils.releaseResourcesForKill(taskID, prefs);
+    await cancellableOp.cancel();
   });
 }

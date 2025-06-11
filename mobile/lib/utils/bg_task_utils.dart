@@ -7,7 +7,6 @@ import "package:photos/main.dart";
 import "package:photos/utils/file_uploader.dart";
 import "package:shared_preferences/shared_preferences.dart";
 import "package:workmanager/workmanager.dart" as workmanager;
-import "package:workmanager/workmanager.dart";
 
 @pragma('vm:entry-point')
 void callbackDispatcher() {
@@ -17,7 +16,8 @@ void callbackDispatcher() {
       return true;
     } catch (e) {
       BgTaskUtils.$.info('Task error: $e');
-      await BgTaskUtils.killBGTask(taskName);
+      final prefs = await SharedPreferences.getInstance();
+      await BgTaskUtils.releaseResourcesForKill(taskName, prefs);
       return Future.error(e.toString());
     }
   });
@@ -26,16 +26,15 @@ void callbackDispatcher() {
 class BgTaskUtils {
   static final $ = Logger("BgTaskUtils");
 
-  static Future<void> killBGTask([String? taskId]) async {
+  static Future<void> releaseResourcesForKill(
+    String taskId,
+    SharedPreferences prefs,
+  ) async {
     await UploadLocksDB.instance.releaseLocksAcquiredByOwnerBefore(
       ProcessType.background.toString(),
       DateTime.now().microsecondsSinceEpoch,
     );
-    final prefs = await SharedPreferences.getInstance();
     await prefs.remove(kLastBGTaskHeartBeatTime);
-    if (taskId != null) {
-      await Workmanager().cancelByUniqueName(taskId);
-    }
   }
 
   static Future configureWorkmanager() async {
@@ -51,17 +50,21 @@ class BgTaskUtils {
     $.warning("Configuring Work Manager for background tasks");
     const iOSBackgroundAppRefresh = "io.ente.frame.iOSBackgroundAppRefresh";
     const androidPeriodicTask = "io.ente.photos.androidPeriodicTask";
-    final backgrounTaskIdentifier =
+    final backgroundTaskIdentifier =
         Platform.isIOS ? iOSBackgroundAppRefresh : androidPeriodicTask;
     try {
       await workmanager.Workmanager().initialize(
         callbackDispatcher,
-        isInDebugMode: true, // TODO: Remove when merged to production
+        isInDebugMode:
+            true, // TODO(prateekmedia): Remove when merged to production
       );
       await workmanager.Workmanager().registerPeriodicTask(
-        backgrounTaskIdentifier,
-        backgrounTaskIdentifier,
-        frequency: const Duration(minutes: 15),
+        backgroundTaskIdentifier,
+        backgroundTaskIdentifier,
+        frequency: Platform.isIOS
+            ? const Duration(minutes: 60)
+            : const Duration(minutes: 15),
+        // TODO(prateekmedia): uncomment at last
         // initialDelay: const Duration(minutes: 10),
         constraints: workmanager.Constraints(
           networkType: workmanager.NetworkType.connected,
