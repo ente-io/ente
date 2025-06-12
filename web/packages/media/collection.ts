@@ -426,6 +426,28 @@ export const decryptRemoteCollection = (
 ): Promise<Collection> => {};
 
 /**
+ * Decrypt a remote collection using the provided key.
+ *
+ * This is the lower level implementation of {@link decryptRemoteCollection} for
+ * use by code that already has determined which key should be used for
+ * decrypting the collection.
+ *
+ * @param remoteCollection The collection to decrypt.
+ *
+ * @param key The base64 encoded key to use for decrypting the various encrypted
+ * fields in {@link remoteCollection}.
+ *
+ * @returns A decrypted collection ({@link Collection2}).
+ */
+export const decryptRemoteCollectionUsingKey = (
+    remoteCollection: RemoteCollection,
+    key: string,
+): Promise<Collection2> => {
+    // eslint-disable-next-line @typescript-eslint/no-base-to-string
+    throw new Error("TODO" + remoteCollection.toString() + key.toString());
+};
+
+/**
  * Additional context stored as part of the collection's magic metadata to
  * augment the {@link type} associated with a {@link Collection}.
  */
