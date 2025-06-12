@@ -239,6 +239,7 @@ export interface EncryptedCollection {
     encryptedName: string;
     nameDecryptionNonce: string;
     type: CollectionType;
+    attributes: unknown;
     sharees: CollectionUser[];
     publicURLs?: PublicURL[];
     updationTime: number;

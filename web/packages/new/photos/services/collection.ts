@@ -82,6 +82,22 @@ export const getCollectionUserFacingName = (collection: Collection) => {
 };
 
 /**
+ * Create a new collection on remote, and return its local representation.
+ *
+ * Remote only, does not modify local state.
+ *
+ * @param name The name of the new collection.
+ *
+ * @param type The type of the new collection.
+ *
+ * @param magicMetadata Optional metadata to use as the collection's private
+ * mutable metadata when creating the new collection.
+ */
+export const createCollection => {
+
+}
+
+/**
  * Return a map of the (user-facing) collection name, indexed by collection ID.
  */
 export const createCollectionNameByID = (collections: Collection[]) =>
