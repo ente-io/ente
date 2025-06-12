@@ -6,11 +6,7 @@ import {
 import { ItemVisibility } from "ente-media/file-metadata";
 import { nullishToEmpty, nullToUndefined } from "ente-utils/transform";
 import { z } from "zod/v4";
-import {
-    decryptMagicMetadata,
-    RemoteMagicMetadataSchema,
-    type RemoteMagicMetadata,
-} from "./magic-metadata";
+import { decryptMagicMetadata, RemoteMagicMetadata } from "./magic-metadata";
 
 /**
  * The type of a collection.
@@ -151,10 +147,8 @@ type RemoteCollectionUser = z.infer<typeof RemoteCollectionUser>;
 
 /**
  * Zod schema for {@link Collection}.
- *
- * See: [Note: Schema suffix for exported Zod schemas].
  */
-export const RemoteCollectionSchema = z.object({
+export const RemoteCollection = z.object({
     id: z.number(),
     owner: RemoteCollectionUser,
     encryptedKey: z.string(),
@@ -192,15 +186,13 @@ export const RemoteCollectionSchema = z.object({
      * have been deleted and should thus be pruned by the client locally.
      */
     isDeleted: z.boolean().nullish().transform(nullToUndefined),
-    magicMetadata:
-        RemoteMagicMetadataSchema.nullish().transform(nullToUndefined),
-    pubMagicMetadata:
-        RemoteMagicMetadataSchema.nullish().transform(nullToUndefined),
+    magicMetadata: RemoteMagicMetadata.nullish().transform(nullToUndefined),
+    pubMagicMetadata: RemoteMagicMetadata.nullish().transform(nullToUndefined),
     sharedMagicMetadata:
-        RemoteMagicMetadataSchema.nullish().transform(nullToUndefined),
+        RemoteMagicMetadata.nullish().transform(nullToUndefined),
 });
 
-export type RemoteCollection = z.infer<typeof RemoteCollectionSchema>;
+export type RemoteCollection = z.infer<typeof RemoteCollection>;
 
 export interface EncryptedCollection {
     id: number;
