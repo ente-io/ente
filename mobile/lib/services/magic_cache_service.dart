@@ -24,6 +24,7 @@ import "package:photos/services/machine_learning/semantic_search/semantic_search
 import "package:photos/services/remote_assets_service.dart";
 import "package:photos/services/search_service.dart";
 import "package:photos/ui/viewer/search/result/magic_result_screen.dart";
+import "package:photos/utils/cache_util.dart";
 import "package:photos/utils/file_util.dart";
 import "package:photos/utils/navigation_util.dart";
 import "package:shared_preferences/shared_preferences.dart";
