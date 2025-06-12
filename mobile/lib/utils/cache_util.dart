@@ -1,4 +1,5 @@
 import "dart:convert" show utf8;
+import "dart:developer" show log;
 import "dart:io";
 
 import "package:computer/computer.dart";
@@ -39,7 +40,7 @@ Future<void> _writeToJsonFile<P>(Map<String, dynamic> args) async {
     final encodedData = utf8.encode(jsonString);
     await file.writeAsBytes(encodedData);
   } catch (e, s) {
-    _logger.severe("Error writing to JSON file with UTF-8", e, s);
+    log("Error writing to JSON file with UTF-, $e, \n $s");
   }
 }
 
@@ -54,47 +55,44 @@ Future<P?> decodeJsonFile<P>(
     "filePath": filePath,
     "jsonDecode": jsonDecodeMethod,
   };
-  return await _computer.compute<Map<String, dynamic>, dynamic>(
+  final cache = await _computer.compute<Map<String, dynamic>, P?>(
     _decodeJsonFile<P>,
     param: args,
     taskName: "decodeJsonFile",
   );
+  if (cache == null) {
+    _logger.warning("Failed to decode JSON file at $filePath");
+  } else {
+    _logger.info("Successfully decoded JSON file at $filePath");
+  }
+  return cache;
 }
 
 Future<P?> _decodeJsonFile<P>(Map<String, dynamic> args) async {
-  try {
-    final file = File(args["filePath"] as String);
-    if (!file.existsSync()) {
-      _logger.warning("File does not exist: ${args["filePath"]}");
-      return null;
-    }
-    final bytes = await file.readAsBytes();
-    final jsonString = utf8.decode(bytes);
-    final jsonDecodeMethod = args["jsonDecode"] as P Function(String);
-    final decodedData = jsonDecodeMethod(jsonString);
-    return decodedData;
-  } catch (e, s) {
-    _logger.severe("Error decoding JSON file of UTF-8", e, s);
+  final file = File(args["filePath"] as String);
+  if (!file.existsSync()) {
+    log("File does not exist: ${args["filePath"]}");
     return null;
   }
-}
-
-Future<P?> decodeJsonFileUTF16<P>(
-  String filePath,
-  P Function(String) jsonDecodeMethod,
-) async {
   try {
-    final file = File(filePath);
-    if (!file.existsSync()) {
-      _logger.warning("File does not exist: $filePath");
-      return null;
-    }
     final bytes = await file.readAsBytes();
-    final jsonString = String.fromCharCodes(bytes); // UTF-16 decoding
-    final decodedData = jsonDecodeMethod(jsonString);
+    final jsonDecodeMethod = args["jsonDecode"] as P Function(String);
+    P decodedData;
+    try {
+      final jsonString = utf8.decode(bytes);
+      decodedData = jsonDecodeMethod(jsonString);
+      log("Successfully decoded JSON file as UTF-8");
+    } catch (e, s) {
+      log("Failed to decode bytes as UTF-8, trying UTF-16 $e \n $s");
+      final jsonString =
+          String.fromCharCodes(bytes); // Fallback to UTF-16 decoding
+      decodedData = jsonDecodeMethod(jsonString);
+      log("Successfully decoded JSON file as UTF-16");
+    }
     return decodedData;
   } catch (e, s) {
-    _logger.severe("Error decoding JSON file of UTF-16", e, s);
+    log("Error decoding JSON file, deleting this cache $e, \n $s");
+    await file.delete();
     return null;
   }
 }
