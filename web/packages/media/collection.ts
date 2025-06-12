@@ -195,7 +195,7 @@ type RemoteCollectionUser = z.infer<typeof RemoteCollectionUser>;
 // TODO: Use me
 export const RemoteCollection = z.object({
     id: z.number(),
-    owner: RemoteCollectionUser, // ?
+    owner: RemoteCollectionUser,
     encryptedKey: z.string(),
     keyDecryptionNonce: z.string(),
     /**
@@ -215,8 +215,9 @@ export const RemoteCollection = z.object({
     nameDecryptionNonce: z.string().nullish().transform(nullToUndefined),
     /* Expected to be one of {@link CollectionType} */
     type: z.string(),
+    // TODO(RE): Use nullishToEmpty?
     sharees: z.array(RemoteCollectionUser).nullish().transform(nullToUndefined), // ?
-    // TODO(RE):
+    // TODO(RE): Use nullishToEmpty?
     publicURLs: z.array(z.looseObject({})).nullish().transform(nullToUndefined), // ?
     updationTime: z.number(),
     /**
