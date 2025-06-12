@@ -112,7 +112,12 @@ ThemeMode _themeMode(AdaptiveThemeMode? savedThemeMode) {
   return ThemeMode.system;
 }
 
-Future<void> _homeWidgetSync() async {
+Future<void> _homeWidgetSync([bool isBackground = false]) async {
+  if (isBackground && Platform.isIOS) {
+    _logger.info("Home widget sync skipped in background on iOS");
+    return;
+  }
+
   try {
     await HomeWidgetService.instance.initHomeWidget();
   } catch (e, s) {
@@ -138,38 +143,49 @@ Future<void> runBackgroundTask(String taskId, {String mode = 'normal'}) async {
 }
 
 Future<void> _runMinimally(String taskId) async {
-  final SharedPreferences prefs = await SharedPreferences.getInstance();
-  if (AppLifecycleService.instance.isForeground) {
-    _logger.info("Background task triggered when process was already running");
-  } else {
-    _logger.info("Background task triggered when process was not running");
-  }
+  final TimeLogger tlog = TimeLogger();
   final PackageInfo packageInfo = await PackageInfo.fromPlatform();
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+
   await Configuration.instance.init();
+
+  // App LifeCycle
+  AppLifecycleService.instance.init(prefs);
+  AppLifecycleService.instance.onAppInBackground('init via: WorkManager $tlog');
+
+  // Crypto rel.
   await Computer.shared().turnOn(workersCount: 4);
   CryptoUtil.init();
 
+  // Init Network Utils
   await NetworkClient.instance.init(packageInfo);
+
+  // Global Services
   ServiceLocator.instance.init(
     prefs,
     NetworkClient.instance.enteDio,
     NetworkClient.instance.getDio(),
     packageInfo,
   );
+
   await CollectionsService.instance.init(prefs);
+
+  // Upload & Sync Related
   await FileUploader.instance.init(prefs, true);
   LocalFileUpdateService.instance.init(prefs);
-  AppLifecycleService.instance.init(prefs);
-
   await LocalSyncService.instance.init(prefs);
   RemoteSyncService.instance.init(prefs);
   await SyncService.instance.init(prefs);
-  NotificationService.instance.init(prefs);
-  HomeWidgetService.instance.init(prefs);
 
+  // Misc Services
+  NotificationService.instance.init(prefs);
+  if (Platform.isAndroid) HomeWidgetService.instance.init(prefs);
+
+  // Begin Execution
   await Future.wait(
     [
-      _homeWidgetSync(),
+      // only runs for android
+      _homeWidgetSync(true),
       () async {
         updateService.showUpdateNotification().ignore();
         await _sync('bgTaskActiveProcess');
