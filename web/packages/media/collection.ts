@@ -391,6 +391,16 @@ export const decryptRemoteCollection = async (
         magicMetadata = { ...genericMM, data };
     }
 
+    let pubMagicMetadata: Collection2["pubMagicMetadata"];
+    if (collection.pubMagicMetadata) {
+        const genericMM = await decryptMagicMetadata(
+            collection.pubMagicMetadata,
+            collectionKey,
+        );
+        const data = CollectionPublicMagicMetadataData.parse(genericMM.data);
+        pubMagicMetadata = { ...genericMM, data };
+    }
+
     return {
         id,
         owner,
@@ -401,6 +411,7 @@ export const decryptRemoteCollection = async (
         publicURLs,
         updationTime,
         magicMetadata,
+        pubMagicMetadata,
         // TODO(RE):
         // pubMagicMetadata: await decryptMM(collection.pubMagicMetadata),
         // sharedMagicMetadata: await decryptMM(collection.sharedMagicMetadata),
@@ -474,12 +485,44 @@ export interface CollectionPrivateMagicMetadataData {
 /**
  * Zod schema for {@link CollectionPrivateMagicMetadataData}.
  *
- *  See: [Note: Use looseObject for metadata Zod schemas]
+ * See: [Note: Use looseObject for metadata Zod schemas]
  */
 const CollectionPrivateMagicMetadataData = z.looseObject({
     visibility: z.number().nullish().transform(nullToUndefined),
     subType: z.number().nullish().transform(nullToUndefined),
     order: z.number().nullish().transform(nullToUndefined),
+});
+
+/**
+ * Mutable public metadata associated with an {@link Collection}.
+ *
+ * - Unlike {@link CollectionPrivateMagicMetadataData}, this is available to all
+ *   people with whom the collection has been shared.
+ *
+ * For more details, see [Note: Metadatum].
+ */
+export interface CollectionPublicMagicMetadataData {
+    /**
+     * If true, then the files within the collection are sorted in ascending
+     * order of their time ("Oldest first").
+     *
+     * The default is desc ("Newest first").
+     */
+    asc?: boolean;
+    /**
+     * The file ID of the file to use as the cover for the collection.
+     *
+     * To reset to the default cover, set this to 0.
+     */
+    coverID?: number;
+}
+
+/**
+ * Zod schema for {@link CollectionPublicMagicMetadataData}.
+ */
+const CollectionPublicMagicMetadataData = z.looseObject({
+    asc: z.boolean().nullish().transform(nullToUndefined),
+    coverID: z.number().nullish().transform(nullToUndefined),
 });
 
 export interface UpdatePublicURL {
@@ -529,6 +572,11 @@ export interface CollectionPublicMagicMetadataProps {
      * The default is desc ("Newest first").
      */
     asc?: boolean;
+    /**
+     * The file ID of the file to use as the cover for the collection.
+     *
+     * To reset to the default cover, set this to 0.
+     */
     coverID?: number;
 }
 
