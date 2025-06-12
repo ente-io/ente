@@ -18,13 +18,6 @@ Before getting start keep the following NOTE in mind.
 > and uploading will not work. This is not necessary for those who are not
 > behing CGNAT. This guide also work on docker rootless and normal.
 
-> [!CAUTION] Remember that current docker update 28.0.0 has some bug and cannot
-> connect to external network. Make sure to install docker-ce 27.5.0,
-> docker-ce-rootless-extras 27.5.0 and docker-ce-cli 27.5.0. Hopefully docker
-> 28.1.0 will resolve this issue in next week. Refrence links are
-> [Moby Github Repo Issues 49511](https://github.com/moby/moby/issues/49511) and
-> [Moby Github Repo Issues 49519](https://github.com/moby/moby/issues/49519)
-
 > [!IMPORTANT] For Docker rootless, the user must have local permissions for all
 > directories required by the Ente-photos self-hosted server. This can be
 > achieved by running `sudo chown -R 1000:1000 /home/ubuntu/docker/ente`. In the

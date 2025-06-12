@@ -39,6 +39,7 @@ import {
     ALL_SECTION,
     HIDDEN_ITEMS_SECTION,
     isHiddenCollection,
+    leaveSharedCollection,
 } from "ente-new/photos/services/collection";
 import type {
     CollectionSummary,
@@ -260,7 +261,7 @@ const CollectionOptions: React.FC<CollectionHeaderProps> = ({
         changeCollectionVisibility(activeCollection, ItemVisibility.visible),
     );
 
-    const confirmLeaveSharedAlbum = () => {
+    const confirmLeaveSharedAlbum = () =>
         showMiniDialog({
             title: t("leave_shared_album_title"),
             message: t("leave_shared_album_message"),
@@ -270,10 +271,9 @@ const CollectionOptions: React.FC<CollectionHeaderProps> = ({
                 action: leaveSharedAlbum,
             },
         });
-    };
 
     const leaveSharedAlbum = wrap(async () => {
-        await CollectionAPI.leaveSharedAlbum(activeCollection.id);
+        await leaveSharedCollection(activeCollection.id);
         setActiveCollectionID(ALL_SECTION);
     });
 
@@ -520,7 +520,6 @@ const CollectionOptions: React.FC<CollectionHeaderProps> = ({
                 {...albumNameInputVisibilityProps}
                 title={t("rename_album")}
                 label={t("album_name")}
-                autoFocus
                 initialValue={activeCollection?.name}
                 submitButtonColor="primary"
                 submitButtonTitle={t("rename")}

@@ -42,35 +42,38 @@ import {
 } from "ente-base/components/utils/modal";
 import { useBaseContext } from "ente-base/context";
 import { deriveInteractiveKey } from "ente-base/crypto";
-import { isHTTP4xxError } from "ente-base/http";
+import { isHTTPErrorWithStatus } from "ente-base/http";
 import { formattedDateTime } from "ente-base/i18n-date";
 import log from "ente-base/log";
 import { appendCollectionKeyToShareURL } from "ente-gallery/services/share";
 import type {
     Collection,
+    CollectionNewParticipantRole,
     PublicURL,
     UpdatePublicURL,
 } from "ente-media/collection";
 import { type CollectionUser } from "ente-media/collection";
 import { PublicLinkCreated } from "ente-new/photos/components/share/PublicLinkCreated";
 import { avatarTextColor } from "ente-new/photos/services/avatar";
+import {
+    deleteShareURL,
+    shareCollection,
+} from "ente-new/photos/services/collection";
 import type { CollectionSummary } from "ente-new/photos/services/collection/ui";
 import { usePhotosAppContext } from "ente-new/photos/types/context";
 import { CustomError, parseSharingErrorCodes } from "ente-shared/error";
 import { wait } from "ente-utils/promise";
-import { Formik, type FormikHelpers } from "formik";
+import { useFormik } from "formik";
 import { t } from "i18next";
 import { GalleryContext } from "pages/gallery";
 import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { Trans } from "react-i18next";
 import {
     createShareableURL,
-    deleteShareableURL,
-    shareCollection,
     unshareCollection,
     updateShareableURL,
 } from "services/collectionService";
-import * as Yup from "yup";
+import { z } from "zod/v4";
 
 type CollectionShareProps = ModalVisibilityProps & {
     collection: Collection;
@@ -318,23 +321,23 @@ interface EmailShareProps {
 const EmailShare: React.FC<EmailShareProps> = ({ collection, onRootClose }) => {
     const [addParticipantView, setAddParticipantView] = useState(false);
     const [manageEmailShareView, setManageEmailShareView] = useState(false);
+    const [participantRole, setParticipantRole] = useState<
+        CollectionNewParticipantRole | undefined
+    >(undefined);
 
     const closeAddParticipant = () => setAddParticipantView(false);
-    const openAddParticipant = () => setAddParticipantView(true);
 
     const closeManageEmailShare = () => setManageEmailShareView(false);
     const openManageEmailShare = () => setManageEmailShareView(true);
 
-    const participantType = useRef<"COLLABORATOR" | "VIEWER">(undefined);
-
-    const openAddCollab = () => {
-        participantType.current = "COLLABORATOR";
-        openAddParticipant();
+    const openAddViewer = () => {
+        setParticipantRole("VIEWER");
+        setAddParticipantView(true);
     };
 
-    const openAddViewer = () => {
-        participantType.current = "VIEWER";
-        openAddParticipant();
+    const openAddCollaborator = () => {
+        setParticipantRole("COLLABORATOR");
+        setAddParticipantView(true);
     };
 
     return (
@@ -372,7 +375,7 @@ const EmailShare: React.FC<EmailShareProps> = ({ collection, onRootClose }) => {
                     <RowButtonDivider />
                     <RowButton
                         startIcon={<AddIcon />}
-                        onClick={openAddCollab}
+                        onClick={openAddCollaborator}
                         label={t("add_collaborators")}
                     />
                 </RowButtonGroup>
@@ -382,7 +385,7 @@ const EmailShare: React.FC<EmailShareProps> = ({ collection, onRootClose }) => {
                 onClose={closeAddParticipant}
                 onRootClose={onRootClose}
                 collection={collection}
-                type={participantType.current}
+                role={participantRole}
             />
             <ManageEmailShare
                 peopleCount={collection.sharees.length}
@@ -447,7 +450,7 @@ interface AddParticipantProps {
     open: boolean;
     onClose: () => void;
     onRootClose: () => void;
-    type: "VIEWER" | "COLLABORATOR";
+    role: CollectionNewParticipantRole;
 }
 
 const AddParticipant: React.FC<AddParticipantProps> = ({
@@ -455,15 +458,16 @@ const AddParticipant: React.FC<AddParticipantProps> = ({
     collection,
     onClose,
     onRootClose,
-    type,
+    role,
 }) => {
     const { user, syncWithRemote, emailList } = useContext(GalleryContext);
 
-    const nonSharedEmails = useMemo(
+    const eligibleEmails = useMemo(
         () =>
             emailList.filter(
                 (email) =>
-                    !collection.sharees?.find((value) => value.email === email),
+                    email != user.email &&
+                    !collection?.sharees?.find((value) => value.email == email),
             ),
         [emailList, collection.sharees],
     );
@@ -473,44 +477,56 @@ const AddParticipant: React.FC<AddParticipantProps> = ({
         onRootClose();
     };
 
-    const title = type == "VIEWER" ? t("add_viewers") : t("add_collaborators");
+    const title = role == "VIEWER" ? t("add_viewers") : t("add_collaborators");
 
-    const collectionShare: AddParticipantFormProps["callback"] = async ({
-        email,
-        emails,
-    }) => {
-        // if email is provided, means user has custom entered email, so, will need to validate for self sharing
-        // and already shared
-        if (email) {
-            if (email === user.email) {
-                throw new Error(t("sharing_with_self"));
+    const collectionShare: AddParticipantFormProps["onSubmit"] = async (
+        emailOrEmails,
+        setEmailFieldError,
+    ) => {
+        let emails: string[];
+        if (typeof emailOrEmails == "string") {
+            // If email is a string, it means the user entered a custom email
+            // string, so validate it to skip self sharing and duplicate share.
+            const email = emailOrEmails;
+            if (email == user.email) {
+                setEmailFieldError(t("sharing_with_self"));
+                return;
             } else if (
                 collection?.sharees?.find((value) => value.email === email)
             ) {
-                throw new Error(t("sharing_already_shared", { email: email }));
+                setEmailFieldError(
+                    t("sharing_already_shared", { email: email }),
+                );
+                return;
             }
-            // set emails to array of one email
             emails = [email];
+        } else {
+            emails = emailOrEmails;
         }
+
         for (const email of emails) {
-            if (
-                email === user.email ||
-                collection?.sharees?.find((value) => value.email === email)
-            ) {
-                // can just skip this email
-                continue;
-            }
             try {
-                await shareCollection(collection, email, type);
-                await syncWithRemote(false, true);
+                await shareCollection(collection, email, role);
             } catch (e) {
-                if (isHTTP4xxError(e)) {
-                    throw new Error(t("sharing_user_does_not_exist"));
+                if (isHTTPErrorWithStatus(e, 402)) {
+                    setEmailFieldError(t("sharing_disabled_for_free_accounts"));
+                    return;
                 }
-                const errorMessage = handleSharingErrors(e);
-                throw new Error(errorMessage);
+
+                if (isHTTPErrorWithStatus(e, 404)) {
+                    setEmailFieldError(t("sharing_user_does_not_exist"));
+                    return;
+                }
+
+                throw e;
             }
         }
+
+        if (emails.length) {
+            await syncWithRemote(false, true);
+        }
+
+        onClose();
     };
 
     return (
@@ -522,170 +538,142 @@ const AddParticipant: React.FC<AddParticipantProps> = ({
             caption={collection.name}
         >
             <AddParticipantForm
-                onClose={onClose}
-                callback={collectionShare}
-                optionsList={nonSharedEmails}
-                buttonText={title}
+                existingEmails={eligibleEmails}
+                submitButtonTitle={title}
+                onSubmit={collectionShare}
             />
         </TitledNestedSidebarDrawer>
     );
 };
 
-interface AddParticipantFormValues {
-    inputValue: string;
-    selectedOptions: string[];
-}
-
 interface AddParticipantFormProps {
-    callback: (props: { email?: string; emails?: string[] }) => Promise<void>;
-    buttonText: string;
-    onClose?: () => void;
-    optionsList?: string[];
+    /**
+     * Title for the submit button.
+     */
+    submitButtonTitle: string;
+    /**
+     * A list of emails the user can user to pick from.
+     */
+    existingEmails: string[];
+    /**
+     * Submission handler. A callback invoked when the submit button is pressed.
+     *
+     * @param emailOrEmail Either the new email that the user entered, or the
+     * subset of {@link existingEmails} selected by the user.
+     *
+     * @param setEmailFieldError A function that can be called to set the error
+     * message shown below the email input field.
+     */
+    onSubmit: (
+        emailOrEmails: string | string[],
+        setEmailFieldError: (message: string) => void,
+    ) => Promise<void>;
 }
 
-const AddParticipantForm: React.FC<AddParticipantFormProps> = (props) => {
-    const [loading, SetLoading] = useState(false);
+const AddParticipantForm: React.FC<AddParticipantFormProps> = ({
+    existingEmails,
+    submitButtonTitle,
+    onSubmit,
+}) => {
+    const formik = useFormik({
+        initialValues: { email: "", selectedEmails: [] },
+        onSubmit: async ({ email, selectedEmails }, { setFieldError }) => {
+            const setEmailFieldError = (message: string) =>
+                setFieldError("email", message);
+            try {
+                if (email) {
+                    if (!z.email().safeParse(email).success) {
+                        setEmailFieldError(t("invalid_email_error"));
+                        return;
+                    }
 
-    const submitForm = async (
-        values: AddParticipantFormValues,
-        { setFieldError, resetForm }: FormikHelpers<AddParticipantFormValues>,
-    ) => {
-        try {
-            SetLoading(true);
-            if (values.inputValue !== "") {
-                await props.callback({ email: values.inputValue });
-            } else if (values.selectedOptions.length !== 0) {
-                await props.callback({ emails: values.selectedOptions });
+                    await onSubmit(email, setEmailFieldError);
+                } else {
+                    await onSubmit(selectedEmails, setEmailFieldError);
+                }
+            } catch (e) {
+                log.error("Could not add participant", e);
+                setEmailFieldError(t("generic_error"));
             }
-            SetLoading(false);
-            props.onClose();
-            resetForm();
-        } catch (e) {
-            setFieldError("inputValue", e?.message);
-            SetLoading(false);
-        }
-    };
+        },
+    });
 
-    const validationSchema = useMemo(() => {
-        return Yup.object().shape({
-            inputValue: Yup.string().email(t("invalid_email_error")),
-        });
-    }, []);
-
-    const handleInputFieldClick = (setFieldValue) => {
-        setFieldValue("selectedOptions", []);
-    };
+    const resetExistingSelection = () =>
+        formik.setFieldValue("selectedEmails", []);
 
     return (
-        <Formik<AddParticipantFormValues>
-            initialValues={{ inputValue: "", selectedOptions: [] }}
-            onSubmit={submitForm}
-            validationSchema={validationSchema}
-            validateOnChange={false}
-            validateOnBlur={false}
-        >
-            {({
-                values,
-                errors,
-                handleChange,
-                handleSubmit,
-                setFieldValue,
-            }) => (
-                <form noValidate onSubmit={handleSubmit}>
-                    <Stack sx={{ gap: "24px", py: "20px", px: "12px" }}>
-                        <Stack>
-                            <RowButtonGroupTitle>
-                                {t("add_new_email")}
-                            </RowButtonGroupTitle>
-                            <TextField
-                                fullWidth
-                                id={"email"}
-                                name={"email"}
-                                type={"email"}
-                                label={t("enter_email")}
-                                sx={{ mt: 0 }}
-                                disabled={loading}
-                                onChange={handleChange("inputValue")}
-                                onClick={() =>
-                                    handleInputFieldClick(setFieldValue)
-                                }
-                                error={Boolean(errors.inputValue)}
-                                helperText={errors.inputValue}
-                                value={values.inputValue}
-                            />
-                        </Stack>
+        <form onSubmit={formik.handleSubmit}>
+            <Stack sx={{ gap: 1, py: "20px", px: 2 }}>
+                <div>
+                    <RowButtonGroupTitle>
+                        {t("add_new_email")}
+                    </RowButtonGroupTitle>
+                    <TextField
+                        name="email"
+                        type="email"
+                        label={t("enter_email")}
+                        margin="none"
+                        value={formik.values.email}
+                        onChange={formik.handleChange}
+                        error={!!formik.errors.email}
+                        helperText={formik.errors.email ?? " "}
+                        disabled={formik.isSubmitting}
+                        onClick={resetExistingSelection}
+                        fullWidth
+                    />
+                </div>
 
-                        {props.optionsList.length > 0 && (
-                            <Stack>
-                                <RowButtonGroupTitle>
-                                    {t("or_add_existing")}
-                                </RowButtonGroupTitle>
-                                <RowButtonGroup>
-                                    {props.optionsList.map((item, index) => (
-                                        <React.Fragment key={item}>
-                                            <RowButton
-                                                fontWeight="regular"
-                                                onClick={() => {
-                                                    if (
-                                                        values.selectedOptions.includes(
-                                                            item,
-                                                        )
-                                                    ) {
-                                                        setFieldValue(
-                                                            "selectedOptions",
-                                                            values.selectedOptions.filter(
-                                                                (
-                                                                    selectedOption,
-                                                                ) =>
-                                                                    selectedOption !==
-                                                                    item,
-                                                            ),
-                                                        );
-                                                    } else {
-                                                        setFieldValue(
-                                                            "selectedOptions",
-                                                            [
-                                                                ...values.selectedOptions,
-                                                                item,
-                                                            ],
-                                                        );
-                                                    }
-                                                }}
-                                                label={item}
-                                                startIcon={
-                                                    <Avatar email={item} />
-                                                }
-                                                endIcon={
-                                                    values.selectedOptions.includes(
-                                                        item,
-                                                    ) ? (
-                                                        <DoneIcon />
-                                                    ) : null
-                                                }
-                                            />
-                                            {index !==
-                                                props.optionsList.length -
-                                                    1 && <RowButtonDivider />}
-                                        </React.Fragment>
-                                    ))}
-                                </RowButtonGroup>
-                            </Stack>
-                        )}
-                    </Stack>
-                    <Stack sx={{ px: 2 }}>
-                        <LoadingButton
-                            type="submit"
-                            color="accent"
-                            fullWidth
-                            loading={loading}
-                            sx={{ mt: 4, mb: 4 }}
-                        >
-                            {props.buttonText}
-                        </LoadingButton>
-                    </Stack>
-                </form>
-            )}
-        </Formik>
+                {existingEmails.length > 0 && (
+                    <div>
+                        <RowButtonGroupTitle>
+                            {t("or_add_existing")}
+                        </RowButtonGroupTitle>
+                        <RowButtonGroup>
+                            {existingEmails.map((email, index) => (
+                                <React.Fragment key={email}>
+                                    <RowButton
+                                        fontWeight="regular"
+                                        onClick={() => {
+                                            const emails =
+                                                formik.values.selectedEmails;
+                                            formik.setFieldValue(
+                                                "selectedEmails",
+                                                emails.includes(email)
+                                                    ? emails.filter(
+                                                          (e) => e != email,
+                                                      )
+                                                    : emails.concat(email),
+                                            );
+                                        }}
+                                        label={email}
+                                        startIcon={<Avatar email={email} />}
+                                        endIcon={
+                                            formik.values.selectedEmails.includes(
+                                                email,
+                                            ) ? (
+                                                <DoneIcon />
+                                            ) : null
+                                        }
+                                    />
+                                    {index != existingEmails.length - 1 && (
+                                        <RowButtonDivider />
+                                    )}
+                                </React.Fragment>
+                            ))}
+                        </RowButtonGroup>
+                    </div>
+                )}
+                <LoadingButton
+                    type="submit"
+                    color="accent"
+                    loading={formik.isSubmitting}
+                    fullWidth
+                    sx={{ my: 6 }}
+                >
+                    {submitButtonTitle}
+                </LoadingButton>
+            </Stack>
+        </form>
     );
 };
 
@@ -775,7 +763,7 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
                 title={collection.name}
                 caption={t("participants_count", { count: peopleCount })}
             >
-                <Stack sx={{ gap: "24px", py: "20px", px: "12px" }}>
+                <Stack sx={{ gap: 3, py: "20px", px: "12px" }}>
                     <Stack>
                         <RowButtonGroupTitle icon={<AdminPanelSettingsIcon />}>
                             {t("owner")}
@@ -854,7 +842,7 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
                 {...addParticipantVisibilityProps}
                 onRootClose={onRootClose}
                 collection={collection}
-                type={participantType.current}
+                role={participantType.current}
             />
             <ManageParticipant
                 {...manageParticipantVisibilityProps}
@@ -1222,16 +1210,16 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
             galleryContext.setBlockingLoad(false);
         }
     };
-    const disablePublicSharing = async () => {
+    const handleRemovePublicLink = async () => {
         try {
             galleryContext.setBlockingLoad(true);
-            await deleteShareableURL(collection);
+            await deleteShareURL(collection.id);
             setPublicShareProp(null);
             galleryContext.syncWithRemote(false, true);
             onClose();
         } catch (e) {
-            const errorMessage = handleSharingErrors(e);
-            setSharableLinkError(errorMessage);
+            log.error("Failed to remove public link", e);
+            setSharableLinkError(t("generic_error"));
         } finally {
             galleryContext.setBlockingLoad(false);
         }
@@ -1293,7 +1281,7 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
                     <RowButton
                         color="critical"
                         startIcon={<RemoveCircleOutlineIcon />}
-                        onClick={disablePublicSharing}
+                        onClick={handleRemovePublicLink}
                         label={t("remove_link")}
                     />
                 </RowButtonGroup>
@@ -1643,10 +1631,8 @@ const SetPublicLinkPassword: React.FC<SetPublicLinkPasswordProps> = ({
     publicShareProp,
     updatePublicShareURLHelper,
 }) => {
-    const savePassword: SingleInputFormProps["onSubmit"] = async (
-        passphrase,
-    ) => {
-        await enablePublicUrlPassword(passphrase);
+    const savePassword: SingleInputFormProps["onSubmit"] = async (password) => {
+        await enablePublicUrlPassword(password);
         publicShareProp.passwordEnabled = true;
         onClose();
         // The onClose above will close the dialog, but if we return immediately

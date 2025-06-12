@@ -3,6 +3,7 @@ import { ensureLocalUser } from "ente-accounts/services/user";
 import { encryptMetadataJSON, sharedCryptoWorker } from "ente-base/crypto";
 import log from "ente-base/log";
 import { apiURL } from "ente-base/origins";
+import { ensureMasterKeyFromSession } from "ente-base/session";
 import { UpdateMagicMetadataRequest } from "ente-gallery/services/file";
 import { updateMagicMetadata } from "ente-gallery/services/magic-metadata";
 import {
@@ -39,11 +40,9 @@ import {
     groupFilesByCollectionID,
     sortFiles,
 } from "ente-new/photos/services/files";
-import { getPublicKey } from "ente-new/photos/services/user";
 import HTTPService from "ente-shared/network/HTTPService";
 import { getData } from "ente-shared/storage/localStorage";
 import { getToken } from "ente-shared/storage/localStorage/helpers";
-import { getActualKey } from "ente-shared/user";
 import { batch } from "ente-utils/array";
 import {
     changeCollectionSubType,
@@ -68,11 +67,11 @@ const createCollection = async (
 ): Promise<Collection> => {
     try {
         const cryptoWorker = await sharedCryptoWorker();
-        const encryptionKey = await getActualKey();
+        const masterKey = await ensureMasterKeyFromSession();
         const token = getToken();
         const collectionKey = await cryptoWorker.generateKey();
         const { encryptedData: encryptedKey, nonce: keyDecryptionNonce } =
-            await cryptoWorker.encryptBox(collectionKey, encryptionKey);
+            await cryptoWorker.encryptBox(collectionKey, masterKey);
         const { encryptedData: encryptedName, nonce: nameDecryptionNonce } =
             await cryptoWorker.encryptBox(
                 new TextEncoder().encode(collectionName),
@@ -112,7 +111,7 @@ const createCollection = async (
         const createdCollection = await postCollection(newCollection, token);
         const decryptedCreatedCollection = await getCollectionWithSecrets(
             createdCollection,
-            encryptionKey,
+            masterKey,
         );
         return decryptedCreatedCollection;
     } catch (e) {
@@ -335,22 +334,6 @@ export const deleteCollection = async (
     }
 };
 
-export const leaveSharedAlbum = async (collectionID: number) => {
-    try {
-        const token = getToken();
-
-        await HTTPService.post(
-            await apiURL(`/collections/leave/${collectionID}`),
-            null,
-            null,
-            { "X-Auth-Token": token },
-        );
-    } catch (e) {
-        log.error("leave shared album failed ", e);
-        throw e;
-    }
-};
-
 export const updateCollectionMagicMetadata = async (
     collection: Collection,
     updatedMagicMetadata: CollectionMagicMetadata,
@@ -497,37 +480,6 @@ export const renameCollection = async (
     );
 };
 
-export const shareCollection = async (
-    collection: Collection,
-    withUserEmail: string,
-    role: string,
-) => {
-    try {
-        const cryptoWorker = await sharedCryptoWorker();
-        const token = getToken();
-        const publicKey: string = await getPublicKey(withUserEmail);
-        const encryptedKey = await cryptoWorker.boxSeal(
-            collection.key,
-            publicKey,
-        );
-        const shareCollectionRequest = {
-            collectionID: collection.id,
-            email: withUserEmail,
-            role: role,
-            encryptedKey,
-        };
-        await HTTPService.post(
-            await apiURL("/collections/share"),
-            shareCollectionRequest,
-            null,
-            { "X-Auth-Token": token },
-        );
-    } catch (e) {
-        log.error("share collection failed ", e);
-        throw e;
-    }
-};
-
 export const unshareCollection = async (
     collection: Collection,
     withUserEmail: string,
@@ -567,24 +519,6 @@ export const createShareableURL = async (collection: Collection) => {
         return resp.data.result as PublicURL;
     } catch (e) {
         log.error("createShareableURL failed ", e);
-        throw e;
-    }
-};
-
-export const deleteShareableURL = async (collection: Collection) => {
-    try {
-        const token = getToken();
-        if (!token) {
-            return null;
-        }
-        await HTTPService.delete(
-            await apiURL(`/collections/share-url/${collection.id}`),
-            null,
-            null,
-            { "X-Auth-Token": token },
-        );
-    } catch (e) {
-        log.error("deleteShareableURL failed ", e);
         throw e;
     }
 };

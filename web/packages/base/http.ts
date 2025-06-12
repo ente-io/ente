@@ -141,6 +141,8 @@ export const isHTTP401Error = (e: unknown) =>
  * Return `true` if this is an error because of a HTTP failure response returned
  * by museum with the given "code" and HTTP status.
  *
+ * > The function is async because it needs to parse the payload.
+ *
  * For some known set of errors, museum returns a payload of the form
  *
  *     {"code":"USER_NOT_REGISTERED","message":"User is not registered"}

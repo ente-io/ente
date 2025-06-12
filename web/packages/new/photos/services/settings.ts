@@ -2,7 +2,7 @@
  * @file Storage (in-memory, local, remote) and update of various settings.
  */
 
-import { localUser } from "ente-accounts/services/user";
+import { partialLocalUser } from "ente-accounts/services/user";
 import { isDevBuild } from "ente-base/env";
 import log from "ente-base/log";
 import { updateShouldDisableCFUploadProxy } from "ente-gallery/services/upload";
@@ -188,16 +188,16 @@ const setSettingsSnapshot = (snapshot: Settings) => {
 };
 
 /**
- * Return `true` if this is a development build, and the current user is marked
- * as an "development" user.
+ * Return `true` if this is a development build, and the current user (if any)
+ * is marked as an "development" user.
  *
  * Emails that end in "@ente.io" are considered as dev users.
  */
 export const isDevBuildAndUser = () => isDevBuild && isDevUserViaEmail();
 
 const isDevUserViaEmail = () => {
-    const user = localUser();
-    return !!user?.email.endsWith("@ente.io");
+    const user = partialLocalUser();
+    return !!user?.email?.endsWith("@ente.io");
 };
 
 /**

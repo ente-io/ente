@@ -852,7 +852,6 @@ export const Upload: React.FC<UploadProps> = ({
                 {...newAlbumNameInputVisibilityProps}
                 title={t("new_album")}
                 label={t("album_name")}
-                autoFocus
                 initialValue={prefilledNewAlbumName}
                 submitButtonTitle={t("create")}
                 onSubmit={uploadToSingleNewCollection}

@@ -1699,14 +1699,7 @@ class SmartMemoriesService {
       if (memories == null) continue;
       if (memories.length < 5) continue;
       final years = daysToYears[day]!;
-      if (years.toSet().length < 3) continue;
-      final yearCounts = <int, int>{};
-      for (final year in years) {
-        yearCounts[year] = (yearCounts[year] ?? 0) + 1;
-      }
-      final bool hasThreeInAtLeastThreeYears =
-          yearCounts.values.where((count) => count >= 3).length >= 3;
-      if (!hasThreeInAtLeastThreeYears) continue;
+      if (years.toSet().length < 2) continue;
 
       final filteredMemories = <Memory>[];
       if (memories.length > 20) {
