@@ -13,6 +13,7 @@ import { nullToUndefined } from "ente-utils/transform";
 import { z } from "zod/v4";
 import { mergeMetadata1 } from "./file";
 import { FileType } from "./file-type";
+import type { RemoteMagicMetadata } from "./magic-metadata";
 
 /**
  * Information about the file that never changes post upload.
@@ -620,49 +621,6 @@ export const updateRemotePublicMagicMetadata = async (
     // metadata.
     mergeMetadata1(file);
 };
-
-/**
- * Magic metadata, either public and private, as persisted and used by remote.
- *
- * This is the encrypted magic metadata as persisted on remote, and this is what
- * clients get back when they sync with remote. Alongwith the encrypted blob and
- * decryption header, it also contains a few properties useful for clients to
- * track changes and ensure that they have the latest metadata synced locally.
- *
- * Both public and private magic metadata fields use the same structure.
- */
-interface RemoteMagicMetadata {
-    /**
-     * Monotonically increasing iteration of this metadata object.
-     *
-     * The version starts at 1. Remote increments this version number each time
-     * a client updates the corresponding magic metadata field for the file.
-     */
-    version: number;
-    /**
-     * The number of keys with non-null (and non-undefined) values in the
-     * encrypted JSON object that the encrypted metadata blob contains.
-     *
-     * During edits and updates, this number should be greater than or equal to
-     * the previous version.
-     *
-     * > Clients are expected to retain the magic metadata verbatim so that they
-     * > don't accidentally overwrite fields that they might not understand.
-     */
-    count: number;
-    /**
-     * The encrypted data.
-     *
-     * This is a base64 string representing the bytes obtained by encrypting the
-     * string representation of the underlying magic metadata JSON object.
-     */
-    data: string;
-    /**
-     * The base64 encoded decryption header that will be needed for the client
-     * for decrypting {@link data}.
-     */
-    header: string;
-}
 
 /**
  * The shape of the JSON body payload expected by the APIs that update the

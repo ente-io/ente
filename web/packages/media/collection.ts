@@ -5,6 +5,7 @@ import {
 import { ItemVisibility } from "ente-media/file-metadata";
 import { nullToUndefined } from "ente-utils/transform";
 import { z } from "zod/v4";
+import { RemoteMagicMetadataSchema } from "./magic-metadata";
 
 // TODO: Audit this file
 
@@ -225,12 +226,12 @@ export const RemoteCollection = z.object({
      * have been deleted and should thus be pruned by the client locally.
      */
     isDeleted: z.boolean().nullish().transform(nullToUndefined),
-    // TODO(RE):
-    magicMetadata: z.looseObject({}).nullish().transform(nullToUndefined), // ?
-    // TODO(RE):
-    pubMagicMetadata: z.looseObject({}).nullish().transform(nullToUndefined), // ?
-    // TODO(RE):
-    sharedMagicMetadata: z.looseObject({}).nullish().transform(nullToUndefined), // ?
+    magicMetadata:
+        RemoteMagicMetadataSchema.nullish().transform(nullToUndefined),
+    pubMagicMetadata:
+        RemoteMagicMetadataSchema.nullish().transform(nullToUndefined),
+    sharedMagicMetadata:
+        RemoteMagicMetadataSchema.nullish().transform(nullToUndefined),
 });
 
 export interface EncryptedCollection {
