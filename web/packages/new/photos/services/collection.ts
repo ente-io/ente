@@ -17,7 +17,7 @@ import {
 import { type EnteFile } from "ente-media/file";
 import { ItemVisibility } from "ente-media/file-metadata";
 import {
-    createMagicMetadataEnvelope,
+    createMagicMetadata,
     encryptMagicMetadata,
 } from "ente-media/magic-metadata";
 import { batch } from "ente-utils/array";
@@ -102,13 +102,13 @@ export const getCollectionUserFacingName = (collection: Collection) => {
  *
  * @param type The type of the new collection.
  *
- * @param magicMetadata Optional metadata to use as the collection's private
+ * @param magicMetadataData Optional metadata to use as the collection's private
  * mutable metadata when creating the new collection.
  */
 export const createCollection2 = async (
     name: string,
     type: CollectionType,
-    magicMetadata?: CollectionPrivateMagicMetadata,
+    magicMetadataData?: CollectionPrivateMagicMetadata,
 ): Promise<Collection2> => {
     const masterKey = await ensureMasterKeyFromSession();
     const collectionKey = await generateKey();
@@ -116,10 +116,12 @@ export const createCollection2 = async (
         await encryptBox(collectionKey, masterKey);
     const { encryptedData: encryptedName, nonce: nameDecryptionNonce } =
         await encryptBox(new TextEncoder().encode(name), collectionKey);
-    const remoteMagicMetadata = await encryptMagicMetadata(
-        createMagicMetadataEnvelope(magicMetadata),
-        collectionKey,
-    );
+    const magicMetadata = magicMetadataData
+        ? await encryptMagicMetadata(
+              createMagicMetadata(magicMetadataData),
+              collectionKey,
+          )
+        : undefined;
 
     const remoteCollection = await postCollections({
         encryptedKey,
@@ -127,9 +129,8 @@ export const createCollection2 = async (
         encryptedName,
         nameDecryptionNonce,
         type,
-        ...(remoteMagicMetadata ? { magicMetadata: remoteMagicMetadata } : {}),
+        ...(magicMetadata ? { magicMetadata } : {}),
     });
-
     return decryptRemoteCollectionUsingKey(remoteCollection, masterKey);
 };
 

@@ -463,12 +463,12 @@ export type CollectionSubType =
 /**
  * Mutable private metadata associated with an {@link Collection}.
  *
- * - Unlike {@link CollectionPublicMagicMetadata} this is only available to the
- *   owner of the file.
+ * - Unlike {@link CollectionPublicMagicMetadataData} this is only available to
+ *   the owner of the file.
  *
  * See: [Note: Private magic metadata is called magic metadata on remote]
  */
-export interface CollectionPrivateMagicMetadata {
+export interface CollectionPrivateMagicMetadataData {
     /**
      * The (owner specific) visibility of the collection.
      *

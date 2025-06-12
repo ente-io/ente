@@ -3,8 +3,7 @@ import { z } from "zod/v4";
 
 /**
  * Zod schema of the mutable metadatum objects that we send to or receive from
- * remote. Even though it is named so, it is not the metadata itself, but an
- * envelope containing the encrypted metadata contents with some bookkeeping
+ * remote. It contains an encrypted metadata JSON object with some bookkeeping
  * information attached.
  *
  * See {@link RemoteMagicMetadata} for the corresponding type.
@@ -32,12 +31,12 @@ export const RemoteMagicMetadataSchema = z.object({
  *
  * See: [Note: Metadatum]
  *
- * This is the magic metadata envelope that we send to and receive from remote.
- * It contains the encrypted contents, and a version + count of fields that help
- * ensure that clients do not overwrite updates with stale objects.
+ * This is the magic metadata that we send to and receive from remote. It
+ * contains an encrypted JSON object, and a version + count of entries to ensure
+ * that clients do not overwrite already applied updates with stale objects.
  *
- * When decrypt these into specific local {@link MagicMetadataEnvelope}
- * instantiations before using and storing them on the client.
+ * When decrypt these into specific local {@link MagicMetadata} instantiations
+ * before using and storing them on the client.
  *
  * See {@link RemoteMagicMetadataSchema} for the corresponding Zod schema. The
  * same structure is used to store the metadata for various kinds of objects
@@ -89,11 +88,13 @@ export interface RemoteMagicMetadata {
  * by the client.
  *
  * The bookkeeping fields ({@link version} and {@link count}) are copied over
- * from the remote envelope ({@link RemoteMagicMetadata}), while the encrypted
- * contents ({@link data} and {@link header}) are decrypted into a JSON object.
+ * from the remote object ({@link RemoteMagicMetadata}), while the encrypted
+ * contents ({@link data} and {@link header} of {@link RemoteMagicMetadata}) are
+ * decrypted into a JSON object that is stored as {@link data}.
  *
- * Since different types of magic metadata fields have different JSON contents,
- * so this decrypted JSON object is parameterized as `T` in this generic type.
+ * Since different types of magic metadata fields are expected to contain
+ * different JSON objects as {@link data}, the type is generic, with the generic
+ * parameter `T` standing for the type of the JSON object.
  *
  * > Since TypeScript does not currently have a native JSON type, this T doesn't
  * > have other constraints enforced by the type system, but it is meant to be a
@@ -106,71 +107,64 @@ export interface RemoteMagicMetadata {
  * sense - to describe the shape of any of the magic metadata like fields used
  * in various types. See: [Note: Metadatum].
  */
-export interface MagicMetadataEnvelope<T = unknown> {
+export interface MagicMetadata<T = unknown> {
     version: number;
     count: number;
     /**
      * The "metadata" itself.
      *
      * This is expected to be a JSON object, whose exact schema depends on the
-     * field for which this envelope is being used.
+     * magic metadata field in the parent object.
      */
     data: T;
 }
 
 /**
- * Encrypt the provided magic metadata envelope into a form that can be used in
- * communication with remote, updating the count if needed.
+ * Encrypt the provided magic metadata into a form that can be used in
+ * communication with remote, trimming the JSON object and updating the count.
  *
- * @param envelope The decrypted {@link MagicMetadataEnvelope} that
- * is being used by the client.
+ * @param magicMetadata The decrypted {@link MagicMetadata} that is being used
+ * by the client.
  *
- * As a usability convenience, this function allows passing `undefined` as the
- * {@link envelope}. In such cases, it will return `undefined` too.
+ * Any entries in {@link magicMetadata}'s {@link data} that are `null` or
+ * `undefined` are discarded before obtaining the final object that will be
+ * encrypted (and whose count will be used).
  *
- * It is okay for the count in the envelope to be out of sync with the count in
- * the actual JSON object contents, this function will update the envelope count
- * with the number of entries in the JSON object.
- *
- * Any entries in {@link envelope} that are `null` or `undefined`
- * are discarded before obtaining the final object that will be encrypted (and
- * whose count will be used).
+ * So in particular, it is okay for the count in the {@link magicMetadata} to be
+ * out of sync with the count in the `data` JSON object because this function
+ * will recompute the count using the trimmed JSON object.
  *
  * @param key The base64 encoded key to use for encrypting the {@link data}
- * contents of {@link envelope}.
+ * contents of {@link magicMetadata}.
  *
- * The specific key used depends on the object whose metadata this is. For
- * example, if this were the {@link pubMagicMetadata} associated with an
- * {@link EnteFile}, then this would be the file's key.
+ * The specific key used depends on the object whose magic metadata field this
+ * is meant for. For example, if this were the {@link pubMagicMetadata}
+ * associated with an {@link EnteFile}, then this would be the file's key.
  *
  * @returns a {@link RemoteMagicMetadata} object that contains the encrypted
- * contents of the {@link data} present in the provided
- * {@link envelope}. The {@link version} is copied over from the
- * provided {@link envelope}, while the {@link count} is obtained
- * from the number of entries in the trimmed JSON object obtained from the
- * {@link data} property of {@link envelope}.
- *
+ * contents of the {@link data} present in the provided {@link magicMetadata}.
+ * The {@link version} is copied over from the provided {@link magicMetadata},
+ * while the {@link count} is obtained from the number of entries in the trimmed
+ * JSON object that was encrypted.
  */
 export const encryptMagicMetadata = async (
-    envelope: MagicMetadataEnvelope | undefined,
+    magicMetadata: MagicMetadata,
     key: string,
 ): Promise<RemoteMagicMetadata | undefined> => {
-    if (!envelope) return undefined;
+    const { version } = magicMetadata;
 
-    const { version } = envelope;
-
-    const newEnvelope = createMagicMetadataEnvelope(envelope.data);
-    const { count } = newEnvelope;
+    const newMM = createMagicMetadata(magicMetadata.data);
+    const { count } = newMM;
 
     const { encryptedData: data, decryptionHeader: header } =
-        await encryptMetadataJSON(newEnvelope.data, key);
+        await encryptMetadataJSON(newMM.data, key);
 
     return { version, count, data, header };
 };
 
 /**
- * A function to wrap an arbitrary JSON object in an envelope expected of
- * various magic metadata fields.
+ * A function to wrap an arbitrary JSON object in the {@link MagicMetadata}
+ * envelope used for the various magic metadata fields.
  *
  * A trimmed JSON object is obtained from the provided JSON object by removing
  * any entries whose values is `undefined` or `null`.
@@ -182,14 +176,14 @@ export const encryptMagicMetadata = async (
  * - The `data` is set to the trimmed JSON object.
  *
  * {@link encryptMagicMetadata} internally uses this function to obtain an
- * up-to-date envelope before computing the count and encrypting the contents.
- * This function is also exported for use in places where we don't have an
- * existing envelope, and would like to create one from scratch.
+ * trimmed `data` and its corresponding `count`. This function is also exported
+ * for use in places where we just have a JSON object and would like to a new
+ * {@link MagicMetadata} object to house it from scratch.
  *
- * @param data The "metadata" JSON object. Since TypeScript does not have a JSON
- * type, this uses the `unknown` type.
+ * @param data A JSON object. Since TypeScript does not have a JSON type, this
+ * uses the `unknown` type.
  */
-export const createMagicMetadataEnvelope = (data: unknown) => {
+export const createMagicMetadata = (data: unknown) => {
     // Discard any entries that are `undefined` or `null`.
     const jsonObject = Object.fromEntries(
         Object.entries(data ?? {}).filter(
@@ -203,16 +197,19 @@ export const createMagicMetadataEnvelope = (data: unknown) => {
 };
 
 /**
- * Decrypt the magic metadata (envelope) received from remote into an object
- * suitable for use and persistence by the client.
+ * Decrypt the magic metadata received from remote into an object suitable for
+ * use and persistence by the client.
  *
  * This is meant as the inverse of {@link encryptMagicMetadata}, see that
- * function's documentation for more information.
+ * function's documentation for details.
+ *
+ * As a usability convenience, this function allows passing `undefined` as the
+ * {@link remoteMagicMetadata}. In such cases, it will return `undefined` too.
  */
 export const decryptMagicMetadata = async (
     remoteMagicMetadata: RemoteMagicMetadata | undefined,
     key: string,
-): Promise<MagicMetadataEnvelope | undefined> => {
+): Promise<MagicMetadata | undefined> => {
     if (!remoteMagicMetadata) return undefined;
 
     const {
