@@ -202,16 +202,11 @@ export const createMagicMetadata = (data: unknown) => {
  *
  * This is meant as the inverse of {@link encryptMagicMetadata}, see that
  * function's documentation for details.
- *
- * As a usability convenience, this function allows passing `undefined` as the
- * {@link remoteMagicMetadata}. In such cases, it will return `undefined` too.
  */
 export const decryptMagicMetadata = async (
-    remoteMagicMetadata: RemoteMagicMetadata | undefined,
+    remoteMagicMetadata: RemoteMagicMetadata,
     key: string,
 ): Promise<MagicMetadata | undefined> => {
-    if (!remoteMagicMetadata) return undefined;
-
     const {
         version,
         count,
