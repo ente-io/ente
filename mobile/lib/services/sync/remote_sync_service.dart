@@ -127,14 +127,16 @@ class RemoteSyncService {
         await syncDeviceCollectionFilesForUpload();
       }
 
-      if (AppLifecycleService.instance.isForeground) {
+      if (
+          // Only Uploading Previews in fg to prevent heating issues
+          AppLifecycleService.instance.isForeground &&
+              // if ML is enabled the MLService will queue when ML is done
+              !flagService.hasGrantedMLConsent) {
         fileDataService.syncFDStatus().then((_) {
-          if (!flagService.hasGrantedMLConsent) {
-            PreviewVideoStore.instance
-                .queueFiles(); // if ML is enabled the MLService will queue when ML is done
-          }
+          PreviewVideoStore.instance.queueFiles();
         }).ignore();
       }
+
       final filesToBeUploaded = await _getFilesToBeUploaded();
       final hasUploadedFiles = await _uploadFiles(filesToBeUploaded);
       if (filesToBeUploaded.isNotEmpty) {
@@ -154,7 +156,6 @@ class RemoteSyncService {
         if (hasMoreFilesToBackup && !_shouldThrottleSync()) {
           // Skipping a resync to ensure that files that were ignored in this
           // session are not processed now
-          // ignore: unawaited_futures
           await sync();
         } else {
           _logger.info("Fire backup completed event");
@@ -177,20 +178,19 @@ class RemoteSyncService {
     } catch (e, s) {
       _existingSync?.complete();
       _existingSync = null;
-      // rethrow whitelisted error so that UI status can be updated correctly.
-      if (e is UnauthorizedError ||
-          e is NoActiveSubscriptionError ||
-          e is WiFiUnavailableError ||
-          e is StorageLimitExceededError ||
-          e is SyncStopRequestedError ||
-          e is NoMediaLocationAccessError) {
-        _logger.warning("Error executing remote sync", e, s);
+      _logger.warning("Error executing remote sync", e, s);
+
+      if (flagService.internalUser ||
+          // rethrow whitelisted error so that UI status can be updated correctly.
+          {
+            UnauthorizedError,
+            NoActiveSubscriptionError,
+            WiFiUnavailableError,
+            StorageLimitExceededError,
+            SyncStopRequestedError,
+            NoMediaLocationAccessError,
+          }.contains(e.runtimeType)) {
         rethrow;
-      } else {
-        _logger.severe("Error executing remote sync ", e, s);
-        if (flagService.internalUser) {
-          rethrow;
-        }
       }
     } finally {
       _isExistingSyncSilent = false;
