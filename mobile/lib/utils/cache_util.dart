@@ -43,24 +43,6 @@ Future<void> _writeToJsonFile<P>(Map<String, dynamic> args) async {
   }
 }
 
-Future<void> writeToJsonFileUTF16<P>(
-  String filePath,
-  P data,
-  String Function(P) toJsonString,
-) async {
-  try {
-    final file = File(filePath);
-    if (!file.existsSync()) {
-      file.createSync(recursive: true);
-    }
-    final jsonString = toJsonString(data);
-    final encodedData = jsonString.codeUnits; // UTF-16 encoding
-    await file.writeAsBytes(encodedData);
-  } catch (e, s) {
-    _logger.severe("Error writing to JSON file with UTF-16", e, s);
-  }
-}
-
 /// Reads a JSON file from the specified path using the provided method, inside computer.
 /// The method should decode the JSON string into an object.
 /// The JSON string is expected to be UTF-8 encoded.
