@@ -251,13 +251,12 @@ class MagicCacheService {
       final List<MagicCache> magicCaches =
           await _nonEmptyMagicResults(magicPromptsData);
       w?.log("resultComputed");
-      final file = File(await _getCachePath());
-      if (!file.existsSync()) {
-        file.createSync(recursive: true);
-      }
       _magicCacheFuture = Future.value(magicCaches);
-      await file
-          .writeAsBytes(MagicCache.encodeListToJson(magicCaches).codeUnits);
+      await writeToJsonFile<List<MagicCache>>(
+        await _getCachePath(),
+        magicCaches,
+        MagicCache.encodeListToJson,
+      );
       w?.log("cacheWritten");
       await _resetLastMagicCacheUpdateTime();
       w?.logAndReset('done');
@@ -300,20 +299,11 @@ class MagicCacheService {
 
   Future<List<MagicCache>> _readResultFromDisk() async {
     _logger.info("Reading magic cache result from disk");
-    final file = File(await _getCachePath());
-    if (!file.existsSync()) {
-      _logger.info("No magic cache found");
-      return [];
-    }
-    try {
-      final bytes = await file.readAsBytes();
-      final jsonString = String.fromCharCodes(bytes);
-      return MagicCache.decodeJsonToList(jsonString);
-    } catch (e, s) {
-      _logger.severe("Error reading or decoding cache file", e, s);
-      await file.delete();
-      rethrow;
-    }
+    final cache = await decodeJsonFile<List<MagicCache>>(
+      await _getCachePath(),
+      MagicCache.decodeJsonToList,
+    );
+    return cache ?? [];
   }
 
   Future<void> clearMagicCache() async {
