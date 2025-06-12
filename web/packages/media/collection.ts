@@ -325,7 +325,7 @@ export interface Collection2 {
      *
      * See: [Note: Metadatum]
      */
-    pubMagicMetadata?: unknown; //CollectionPublicMagicMetadata;
+    pubMagicMetadata?: MagicMetadata<CollectionPublicMagicMetadataData>;
     /**
      * Private mutable metadata associated with the collection that is only
      * visible to the current user, if they're not the owner.
@@ -338,7 +338,7 @@ export interface Collection2 {
      *
      * See: [Note: Metadatum]
      */
-    sharedMagicMetadata?: unknown; // CollectionShareeMagicMetadata;
+    sharedMagicMetadata?: MagicMetadata<CollectionShareeMagicMetadataData>;
 }
 
 export interface PublicURL {
@@ -401,6 +401,16 @@ export const decryptRemoteCollection = async (
         pubMagicMetadata = { ...genericMM, data };
     }
 
+    let sharedMagicMetadata: Collection2["sharedMagicMetadata"];
+    if (collection.sharedMagicMetadata) {
+        const genericMM = await decryptMagicMetadata(
+            collection.sharedMagicMetadata,
+            collectionKey,
+        );
+        const data = CollectionShareeMagicMetadataData.parse(genericMM.data);
+        sharedMagicMetadata = { ...genericMM, data };
+    }
+
     return {
         id,
         owner,
@@ -412,9 +422,7 @@ export const decryptRemoteCollection = async (
         updationTime,
         magicMetadata,
         pubMagicMetadata,
-        // TODO(RE):
-        // pubMagicMetadata: await decryptMM(collection.pubMagicMetadata),
-        // sharedMagicMetadata: await decryptMM(collection.sharedMagicMetadata),
+        sharedMagicMetadata,
     };
 };
 
@@ -442,7 +450,7 @@ export type CollectionSubType =
     (typeof CollectionSubType)[keyof typeof CollectionSubType];
 
 /**
- * Mutable private metadata associated with an {@link Collection}.
+ * Mutable private metadata associated with a {@link Collection}.
  *
  * - Unlike {@link CollectionPublicMagicMetadataData} this is only available to
  *   the owner of the file.
@@ -494,7 +502,7 @@ const CollectionPrivateMagicMetadataData = z.looseObject({
 });
 
 /**
- * Mutable public metadata associated with an {@link Collection}.
+ * Mutable public metadata associated with a {@link Collection}.
  *
  * - Unlike {@link CollectionPrivateMagicMetadataData}, this is available to all
  *   people with whom the collection has been shared.
@@ -523,6 +531,38 @@ export interface CollectionPublicMagicMetadataData {
 const CollectionPublicMagicMetadataData = z.looseObject({
     asc: z.boolean().nullish().transform(nullToUndefined),
     coverID: z.number().nullish().transform(nullToUndefined),
+});
+
+/**
+ * Per-sharee mutable metadata associated with a shared {@link Collection}.
+ *
+ * [Note: Share specific metadata]
+ *
+ * When a collection is shared with a particular user, then remote creates a new
+ * "share" entity defined by the (collectionID, fromUserID, toUserID) tuple
+ * (this entity is not exposed to us directly, but it is helpful to know the
+ * underlying implementation for this discussion).
+ *
+ * Remote also allows us to store mutable metadata (aka "magic metadata") with
+ * each such share entity. This effectively acts as a private space where each
+ * user with whom a collection has been shared can store and mutate metadata
+ * about this shared collection without affecting either the owner or other
+ * users with whom the collection has been shared.
+ */
+export interface CollectionShareeMagicMetadataData {
+    /**
+     * The (sharee specific) visibility of the collection.
+     *
+     * Expected to be one of {@link ItemVisibility}.
+     */
+    visibility?: number;
+}
+
+/**
+ * Zod schema for {@link CollectionShareeMagicMetadataData}.
+ */
+const CollectionShareeMagicMetadataData = z.looseObject({
+    visibility: z.number().nullish().transform(nullToUndefined),
 });
 
 export interface UpdatePublicURL {
@@ -565,18 +605,7 @@ export type CollectionShareeMagicMetadata =
     MagicMetadataCore<CollectionShareeMetadataProps>;
 
 export interface CollectionPublicMagicMetadataProps {
-    /**
-     * If true, then the files within the collection are sorted in ascending
-     * order of their time ("Oldest first").
-     *
-     * The default is desc ("Newest first").
-     */
     asc?: boolean;
-    /**
-     * The file ID of the file to use as the cover for the collection.
-     *
-     * To reset to the default cover, set this to 0.
-     */
     coverID?: number;
 }
 
