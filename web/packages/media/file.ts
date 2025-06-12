@@ -79,7 +79,7 @@ export interface EncryptedEnteFile {
      *
      * The same file (ID) may be associated with multiple collectionID, in which
      * case there will be multiple {@link EnteFile} entries for each
-     * ({@link id}, {@link collectionID}) pair. See: [Note: Collection File].
+     * ({@link id}, {@link collectionID}) pair. See: [Note: Collection file].
      */
     collectionID: number;
     /**
@@ -152,7 +152,7 @@ export interface EncryptedEnteFile {
  * While the file ID is unique, we'd can still have multiple entries for each
  * file ID in our local state, one per collection IDs to which the file belongs.
  * That is, the uniqueness is across the (fileID, collectionID) pairs. See
- * [Note: Collection File].
+ * [Note: Collection file].
  */
 export interface EnteFile
     extends Omit<

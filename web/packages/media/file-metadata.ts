@@ -200,11 +200,17 @@ export interface PrivateMagicMetadata {
  * The visibility of an Ente file or collection.
  */
 export const ItemVisibility = {
-    /** The normal state - The item is visible. */
+    /**
+     * The normal state - The item is visible.
+     */
     visible: 0,
-    /** The item has been archived. */
+    /**
+     * The item has been archived.
+     */
     archived: 1,
-    /** The item has been hidden. */
+    /**
+     * The item has been hidden.
+     */
     hidden: 2,
 } as const;
 

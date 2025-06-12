@@ -1,6 +1,7 @@
 import type { User } from "ente-accounts/services/user";
 import { ensureLocalUser } from "ente-accounts/services/user";
 import { encryptMetadataJSON, sharedCryptoWorker } from "ente-base/crypto";
+import { isDevBuild } from "ente-base/env";
 import log from "ente-base/log";
 import { apiURL } from "ente-base/origins";
 import { ensureMasterKeyFromSession } from "ente-base/session";
@@ -23,6 +24,7 @@ import { EncryptedMagicMetadata, EnteFile } from "ente-media/file";
 import { ItemVisibility } from "ente-media/file-metadata";
 import {
     addToCollection,
+    createCollection2,
     isDefaultHiddenCollection,
     moveToCollection,
 } from "ente-new/photos/services/collection";
@@ -57,6 +59,11 @@ const FAVORITE_COLLECTION_NAME = "Favorites";
 const REQUEST_BATCH_SIZE = 1000;
 
 export const createAlbum = (albumName: string) => {
+    if (isDevBuild && process.env.NEXT_PUBLIC_ENTE_WIP_NEWIMPL) {
+        // TODO: WIP
+        console.log(createCollection2);
+        // return createCollection2(albumName, "album");
+    }
     return createCollection(albumName, "album");
 };
 
