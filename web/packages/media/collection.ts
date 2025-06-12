@@ -43,7 +43,7 @@ import { RemoteMagicMetadataSchema } from "./magic-metadata";
  *
  *   In the remote schema, each item ({@link EnteFile}) is always associated
  *   with a collection. The same item may belong to multiple collections (See:
- *   [Note: Collection File]), but it must belong to at least one collection.
+ *   [Note: Collection file]), but it must belong to at least one collection.
  *
  *   In some scenarios, e.g. when deleting the last collection to which a file
  *   belongs, the file would thus get orphaned and violate the schema
@@ -231,6 +231,57 @@ export const RemoteCollectionSchema = z.object({
 export type RemoteCollection = z.infer<typeof RemoteCollectionSchema>;
 
 export interface EncryptedCollection {
+    id: number;
+    owner: CollectionUser;
+    encryptedKey: string;
+    keyDecryptionNonce: string;
+    name?: string;
+    encryptedName: string;
+    nameDecryptionNonce: string;
+    type: CollectionType;
+    sharees: CollectionUser[];
+    publicURLs?: PublicURL[];
+    updationTime: number;
+    isDeleted: boolean;
+    magicMetadata: EncryptedMagicMetadata;
+    pubMagicMetadata: EncryptedMagicMetadata;
+    sharedMagicMetadata: EncryptedMagicMetadata;
+}
+
+export interface Collection
+    extends Omit<
+        EncryptedCollection,
+        | "encryptedKey"
+        | "keyDecryptionNonce"
+        | "encryptedName"
+        | "nameDecryptionNonce"
+        | "magicMetadata"
+        | "pubMagicMetadata"
+        | "sharedMagicMetadata"
+    > {
+    key: string;
+    name: string;
+    magicMetadata: CollectionMagicMetadata;
+    pubMagicMetadata: CollectionPublicMagicMetadata;
+    sharedMagicMetadata: CollectionShareeMagicMetadata;
+}
+
+/**
+ * A collection, as used and persisted locally by the client.
+ *
+ * A collection is roughly equivalent to an "album", though there can be special
+ * type of collections (like "favorites") which have special behaviours attached
+ * to them.
+ *
+ * A collection contains zero or more files ({@link EnteFile}).
+ *
+ * A collection can be owned by the user (in whose context this code is
+ * running), or might be a collection that is shared with them.
+ *
+ * TODO: This type supercedes {@link Collection}. Once migration is done, rename
+ * this to drop the "2" suffix.
+ */
+export interface Collection2 {
     /**
      * The collection's globally unique ID.
      *
@@ -253,34 +304,36 @@ export interface EncryptedCollection {
      * - {@link role} will be blank.
      */
     owner: CollectionUser;
-    encryptedKey: string;
-    keyDecryptionNonce: string;
-    name?: string;
-    encryptedName: string;
-    nameDecryptionNonce: string;
+    /**
+     * The "collection key" (base64 encoded).
+     *
+     * The collection key is used to encrypt and decrypt that files that are
+     * associated with the collection. See: [Note: Collection file].
+     */
+    key: string;
+    /**
+     * The name of the collection.
+     */
+    name: string;
     /**
      * The type of the collection.
      *
-     * See the documentation of {@link CollectionType} for more details.
+     * Expected to be one of {@link CollectionType}.
      */
-    type: CollectionType;
-    /**
-     * TODO(RE): Remove me?
-     */
-    attributes: collectionAttributes;
+    type: string; // CollectionType;
     /**
      * The other Ente users with whom the collection has been shared with.
      *
      * Within the {@link CollectionUser} instances of the {@link sharee} field:
      *
      * - {@link email} will be set.
-     * - {@link role} will be one of "VIEWER" or "COLLABORATOR".
+     * - {@link role} is expected to be one of "VIEWER" or "COLLABORATOR".
      */
-    sharees: CollectionUser[];
+    sharees?: CollectionUser[];
     /**
-     * Public links for the collection.
+     * Public links that can be used to access and update the collection.
      */
-    publicURLs?: PublicURL[];
+    publicURLs?: unknown; // PublicURL[];
     /**
      * The last time the collection was updated (epoch microseconds).
      *
@@ -290,45 +343,20 @@ export interface EncryptedCollection {
      * - When the collection's own fields are modified.
      */
     updationTime: number;
-    isDeleted: boolean;
-    magicMetadata: EncryptedMagicMetadata;
-    pubMagicMetadata: EncryptedMagicMetadata;
-    sharedMagicMetadata: EncryptedMagicMetadata;
-}
-
-export interface Collection
-    extends Omit<
-        EncryptedCollection,
-        | "encryptedKey"
-        | "keyDecryptionNonce"
-        | "encryptedName"
-        | "nameDecryptionNonce"
-        | "magicMetadata"
-        | "pubMagicMetadata"
-        | "sharedMagicMetadata"
-    > {
-    /**
-     * The "collection key" (base64 encoded).
-     */
-    key: string;
-    /**
-     * The name of the collection.
-     */
-    name: string;
     /**
      * Mutable metadata associated with the collection that is only visible to
      * the owner of the collection.
      *
      * See: [Note: Metadatum]
      */
-    magicMetadata: CollectionMagicMetadata;
+    magicMetadata?: unknown; //CollectionMagicMetadata;
     /**
      * Public mutable metadata associated with the collection that is visible to
      * all users with whom the collection has been shared.
      *
      * See: [Note: Metadatum]
      */
-    pubMagicMetadata: CollectionPublicMagicMetadata;
+    pubMagicMetadata?: unknown; //CollectionPublicMagicMetadata;
     /**
      * Private mutable metadata associated with the collection that is only
      * visible to the current user, if they're not the owner.
@@ -341,7 +369,7 @@ export interface Collection
      *
      * See: [Note: Metadatum]
      */
-    sharedMagicMetadata: CollectionShareeMagicMetadata;
+    sharedMagicMetadata?: unknown; // CollectionShareeMagicMetadata;
 }
 
 export interface PublicURL {
@@ -394,7 +422,7 @@ interface CollectionDecryptionUser {
 export const decryptRemoteCollection = (
     remoteCollection: RemoteCollection,
     user: CollectionDecryptionUser,
-) => {};
+): Promise<Collection> => {};
 
 export interface UpdatePublicURL {
     collectionID: number;
@@ -413,11 +441,6 @@ export interface CreatePublicAccessTokenRequest {
     collectionID: number;
     validTill?: number;
     deviceLimit?: number;
-}
-
-export interface collectionAttributes {
-    encryptedPath?: string;
-    pathDecryptionNonce?: string;
 }
 
 export interface RemoveFromCollectionRequest {
