@@ -171,7 +171,7 @@ export const encryptMagicMetadata = async (
  *
  * Then,
  *
- * - The `version` is set to 0.
+ * - The `version` is set to 1.
  * - The `count` is set to the number of entries in the trimmed JSON object.
  * - The `data` is set to the trimmed JSON object.
  *
@@ -193,7 +193,7 @@ export const createMagicMetadata = (data: unknown) => {
 
     const count = Object.keys(jsonObject).length;
 
-    return { version: 0, count, data: jsonObject };
+    return { version: 1, count, data: jsonObject };
 };
 
 /**
