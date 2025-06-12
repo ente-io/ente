@@ -94,7 +94,8 @@ export interface CollectionUser {
     /**
      * The email of the user.
      *
-     * - The email is present for the {@link owner} only for shared collections.
+     * - The email is present for the {@link owner} only for shared collections
+     *   that do not belong to the current user.
      * - The email is present for all {@link sharees}.
      * - Remote uses a blank string to indicate absent values.
      */
@@ -116,7 +117,7 @@ export interface CollectionUser {
  * Zod schema for {@link CollectionUser}.
  */
 // TODO: Use me.
-export const RemoteCollectionUser = z.looseObject({
+export const RemoteCollectionUser = z.object({
     id: z.number(),
     email: z.string().nullish(),
     role: z.string().nullish(),
@@ -126,6 +127,11 @@ type RemoteCollectionUser = z.infer<typeof RemoteCollectionUser>;
 
 /**
  * Zod schema for {@link Collection}.
+ *
+ * TODO(RE): The following reasoning is not fully correct, since we anyways need
+ * to do a conversion when decrypting the collection's fields. The intent is to
+ * update this once we've figured out something that also works with the current
+ * persistence mechanism (trying to avoid a migration).
  *
  * [Note: Schema validation for bulk persisted remote objects]
  *
@@ -185,7 +191,7 @@ type RemoteCollectionUser = z.infer<typeof RemoteCollectionUser>;
  *
  */
 // TODO: Use me
-export const RemoteCollection = z.looseObject({});
+export const RemoteCollection = z.object({});
 
 export interface EncryptedCollection {
     /**
@@ -202,18 +208,62 @@ export interface EncryptedCollection {
      * Each collection is owned by exactly one user. The owner may optionally
      * choose to share it with additional users, granting them varying level of
      * privileges.
+     *
+     * Within the {@link CollectionUser} instance of the {@link owner} field:
+     *
+     * - {@link email} will be set only if this is a shared collection that does
+     *   not belong to the current user.
+     * - {@link role} will be blank.
      */
     owner: CollectionUser;
-    // collection name was unencrypted in the past, so we need to keep it as optional
-    name?: string;
     encryptedKey: string;
     keyDecryptionNonce: string;
+    /**
+     * Not used anymore, but still might be present for very old collections.
+     *
+     * Before public launch, collection names were stored unencrypted. For
+     * backward compatibility, client should use {@link name} if present,
+     * otherwise obtain it by decrypting it from {@link encryptedName} and
+     * {@link nameDecryptionNonce}.
+     */
+    name?: string;
+    /**
+     * TODO: This optionality is incorrect, these might not be present if
+     * {@link name} is present.
+     */
     encryptedName: string;
     nameDecryptionNonce: string;
+    /**
+     * The type of the collection.
+     *
+     * See the documentation of {@link CollectionType} for more details.
+     */
     type: CollectionType;
+    /**
+     * TODO(RE): Remove me?
+     */
     attributes: collectionAttributes;
+    /**
+     * The other Ente users with whom the collection has been shared with.
+     *
+     * Within the {@link CollectionUser} instances of the {@link sharee} field:
+     *
+     * - {@link email} will be set.
+     * - {@link role} will be one of "VIEWER" or "COLLABORATOR".
+     */
     sharees: CollectionUser[];
+    /**
+     * Public links for the collection.
+     */
     publicURLs?: PublicURL[];
+    /**
+     * The last time the collection was updated (epoch microseconds).
+     *
+     * The collection is considered updated both
+     *
+     * - When the files associated with it modified (added, removed); and
+     * - When the collection's own fields are modified.
+     */
     updationTime: number;
     isDeleted: boolean;
     magicMetadata: EncryptedMagicMetadata;
@@ -232,10 +282,40 @@ export interface Collection
         | "pubMagicMetadata"
         | "sharedMagicMetadata"
     > {
+    /**
+     * The "collection key" (base64 encoded).
+     */
     key: string;
+    /**
+     * The name of the collection.
+     */
     name: string;
+    /**
+     * Mutable metadata associated with the collection that is only visible to
+     * the owner of the collection.
+     *
+     * See: [Note: Metadatum]
+     */
     magicMetadata: CollectionMagicMetadata;
+    /**
+     * Public mutable metadata associated with the collection that is visible to
+     * all users with whom the collection has been shared.
+     *
+     * See: [Note: Metadatum]
+     */
     pubMagicMetadata: CollectionPublicMagicMetadata;
+    /**
+     * Private mutable metadata associated with the collection that is only
+     * visible to the current user, if they're not the owner.
+     *
+     * This is metadata associated with each "share", and is only visible to
+     * (and editable by) the user with which the collection has been shared, not
+     * the owner. Each user with whom the collection has been shared gets their
+     * own private copy. This allows each user to keep their own metadata
+     * associated with a shared album (e.g. archive status).
+     *
+     * See: [Note: Metadatum]
+     */
     sharedMagicMetadata: CollectionShareeMagicMetadata;
 }
 

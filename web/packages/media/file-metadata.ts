@@ -30,7 +30,7 @@ import { FileType } from "./file-type";
  *
  * 1. Metadata
  * 2. Private mutable metadata
- * 3. Shared mutable metadata
+ * 3. Public mutable metadata
  *
  * Metadata is the original metadata that we attached to the file when it was
  * uploaded. It is immutable, and it never changes.
@@ -47,8 +47,8 @@ import { FileType } from "./file-type";
  * people with whom this file is shared can see the new edited name. Such
  * modifications get written to (3), Shared Mutable Metadata.
  *
- * When the client needs to show a file, it needs to "merge" in 2 or 3 of these
- * sources.
+ * When the client needs to show a file, it needs to "merge" in two or three of
+ * these sources (nb: remote will only send the permissible ones):
  *
  * - When showing a shared file, (1) and (3) are merged, with changes from (3)
  *   taking precedence, to obtain the full metadata pertinent to the file.
@@ -64,6 +64,21 @@ import { FileType } from "./file-type";
  * yet understand, so when updating some key, say filename in (3), it should
  * only edit the key it knows about but retain the rest of the source JSON
  * unchanged.
+ *
+ * A similar concept applies to collections, which can (like files) have
+ * metadata associated with them with varying axis of mutability and access.
+ *
+ * Collections also have another type of metadata.
+ *
+ * 4. Shared magic metadata
+ *
+ * which in our hypothetical naming scheme can be thought of as
+ *
+ * 4. Per-sharee private mutable metadata
+ *
+ * This is "magic metadata" associated with each share. Each user with whom the
+ * collection has been shared with can use it store metadata (e.g. archive
+ * status) that is private to them, and can only be edited by them.
  */
 export interface Metadata {
     /**
