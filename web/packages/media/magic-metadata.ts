@@ -1,4 +1,5 @@
-import { encryptMetadataJSON } from "ente-base/crypto";
+import { decryptMetadataJSON, encryptMetadataJSON } from "ente-base/crypto";
+import type { BytesOrB64 } from "ente-base/crypto/types";
 import { z } from "zod/v4";
 
 /**
@@ -120,8 +121,8 @@ export interface MagicMetadata<T> {
  * discarded before obtaining the final object that will be encrypted (and whose
  * count will be used).
  *
- * @param key The key (as a base64 string) to use for encrypting the
- * {@link data} contents of {@link magicMetadata}.
+ * @param key The key to use for encrypting the {@link data} contents of
+ * {@link magicMetadata}.
  *
  * The specific key used depends on the object whose metadata this is. For
  * example, if this were the {@link pubMagicMetadata} associated with an
@@ -136,7 +137,7 @@ export interface MagicMetadata<T> {
  */
 export const encryptMagicMetadata = async <T>(
     magicMetadata: MagicMetadata<T> | undefined,
-    key: string,
+    key: BytesOrB64,
 ): Promise<RemoteMagicMetadata | undefined> => {
     if (!magicMetadata) return undefined;
 
@@ -154,4 +155,32 @@ export const encryptMagicMetadata = async <T>(
         await encryptMetadataJSON(jsonObject, key);
 
     return { version, count, data, header };
+};
+
+/**
+ * Decrypt the magic metadata received from remote into an object suitable for
+ * use and persistence by us (the client).
+ *
+ * This is meant as the inverse of {@link encryptMagicMetadata}, see that
+ * function's documentation for more information.
+ */
+export const decryptMagicMetadata = async (
+    remoteMagicMetadata: RemoteMagicMetadata | undefined,
+    key: BytesOrB64,
+): Promise<MagicMetadata<unknown> | undefined> => {
+    if (!remoteMagicMetadata) return undefined;
+
+    const {
+        version,
+        count,
+        data: encryptedData,
+        header: decryptionHeader,
+    } = remoteMagicMetadata;
+
+    const data = await decryptMetadataJSON(
+        { encryptedData, decryptionHeader },
+        key,
+    );
+
+    return { version, count, data };
 };
