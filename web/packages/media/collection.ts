@@ -13,6 +13,112 @@ import {
 } from "./magic-metadata";
 
 /**
+ * A collection, as used and persisted locally by the client.
+ *
+ * A collection is, well, a collection of files. It is roughly equivalent to an
+ * "album" (which is also the term we use in the UI), bute there can also be
+ * special type of collections like "favorites" which have special behaviour.
+ *
+ * A collection contains zero or more files ({@link EnteFile}).
+ *
+ * A collection can be owned by the user (in whose context this code is
+ * running), or might be a collection that is shared with them.
+ *
+ * TODO: This type supercedes {@link Collection}. Once migration is done, rename
+ * this to drop the "2" suffix.
+ */
+export interface Collection2 {
+    /**
+     * The collection's globally unique ID.
+     *
+     * The collection's ID is a integer assigned by remote as the identifier for
+     * an {@link Collection} when it is created. It is globally unique across
+     * all collections on an Ente instance (i.e., it is not scoped to a user).
+     */
+    id: number;
+    /**
+     * Information about the user who owns the collection.
+     *
+     * Each collection is owned by exactly one user. The owner may optionally
+     * choose to share it with additional users, granting them varying level of
+     * privileges.
+     *
+     * Within the {@link CollectionUser} instance of the {@link owner} field:
+     *
+     * - {@link email} will be set only if this is a shared collection that does
+     *   not belong to the current user.
+     * - {@link role} will be blank.
+     */
+    owner: CollectionUser;
+    /**
+     * The "collection key" (base64 encoded).
+     *
+     * The collection key is used to encrypt and decrypt that files that are
+     * associated with the collection. See: [Note: Collection file].
+     */
+    key: string;
+    /**
+     * The name of the collection.
+     */
+    name: string;
+    /**
+     * The type of the collection.
+     *
+     * Expected to be one of {@link CollectionType}.
+     */
+    type: string;
+    /**
+     * The other Ente users with whom the collection has been shared with.
+     *
+     * Within the {@link CollectionUser} instances of the {@link sharee} field:
+     *
+     * - {@link email} will be set.
+     * - {@link role} is expected to be one of "VIEWER" or "COLLABORATOR".
+     */
+    sharees: CollectionUser[];
+    /**
+     * Public links that can be used to access and update the collection.
+     */
+    publicURLs?: unknown; // PublicURL[];
+    /**
+     * The last time the collection was updated (epoch microseconds).
+     *
+     * The collection is considered updated both
+     *
+     * - When the files associated with it modified (added, removed); and
+     * - When the collection's own fields are modified.
+     */
+    updationTime: number;
+    /**
+     * Mutable metadata associated with the collection that is only visible to
+     * the owner of the collection.
+     *
+     * See: [Note: Metadatum]
+     */
+    magicMetadata?: MagicMetadata<CollectionPrivateMagicMetadataData>;
+    /**
+     * Public mutable metadata associated with the collection that is visible to
+     * all users with whom the collection has been shared.
+     *
+     * See: [Note: Metadatum]
+     */
+    pubMagicMetadata?: MagicMetadata<CollectionPublicMagicMetadataData>;
+    /**
+     * Private mutable metadata associated with the collection that is only
+     * visible to the current user, if they're not the owner.
+     *
+     * This is metadata associated with each "share", and is only visible to
+     * (and editable by) the user with which the collection has been shared, not
+     * the owner. Each user with whom the collection has been shared gets their
+     * own private copy. This allows each user to keep their own metadata
+     * associated with a shared album (e.g. archive status).
+     *
+     * See: [Note: Metadatum]
+     */
+    sharedMagicMetadata?: MagicMetadata<CollectionShareeMagicMetadataData>;
+}
+
+/**
  * The type of a collection.
  *
  * - "album" - A regular "Ente Album" that the user sees in their library.
@@ -233,112 +339,6 @@ export interface Collection
     magicMetadata: CollectionMagicMetadata;
     pubMagicMetadata: CollectionPublicMagicMetadata;
     sharedMagicMetadata: CollectionShareeMagicMetadata;
-}
-
-/**
- * A collection, as used and persisted locally by the client.
- *
- * A collection is, well, a collection of files. It is roughly equivalent to an
- * "album" (which is also the term we use in the UI), bute there can also be
- * special type of collections like "favorites" which have special behaviour.
- *
- * A collection contains zero or more files ({@link EnteFile}).
- *
- * A collection can be owned by the user (in whose context this code is
- * running), or might be a collection that is shared with them.
- *
- * TODO: This type supercedes {@link Collection}. Once migration is done, rename
- * this to drop the "2" suffix.
- */
-export interface Collection2 {
-    /**
-     * The collection's globally unique ID.
-     *
-     * The collection's ID is a integer assigned by remote as the identifier for
-     * an {@link Collection} when it is created. It is globally unique across
-     * all collections on an Ente instance (i.e., it is not scoped to a user).
-     */
-    id: number;
-    /**
-     * Information about the user who owns the collection.
-     *
-     * Each collection is owned by exactly one user. The owner may optionally
-     * choose to share it with additional users, granting them varying level of
-     * privileges.
-     *
-     * Within the {@link CollectionUser} instance of the {@link owner} field:
-     *
-     * - {@link email} will be set only if this is a shared collection that does
-     *   not belong to the current user.
-     * - {@link role} will be blank.
-     */
-    owner: CollectionUser;
-    /**
-     * The "collection key" (base64 encoded).
-     *
-     * The collection key is used to encrypt and decrypt that files that are
-     * associated with the collection. See: [Note: Collection file].
-     */
-    key: string;
-    /**
-     * The name of the collection.
-     */
-    name: string;
-    /**
-     * The type of the collection.
-     *
-     * Expected to be one of {@link CollectionType}.
-     */
-    type: string;
-    /**
-     * The other Ente users with whom the collection has been shared with.
-     *
-     * Within the {@link CollectionUser} instances of the {@link sharee} field:
-     *
-     * - {@link email} will be set.
-     * - {@link role} is expected to be one of "VIEWER" or "COLLABORATOR".
-     */
-    sharees: CollectionUser[];
-    /**
-     * Public links that can be used to access and update the collection.
-     */
-    publicURLs?: unknown; // PublicURL[];
-    /**
-     * The last time the collection was updated (epoch microseconds).
-     *
-     * The collection is considered updated both
-     *
-     * - When the files associated with it modified (added, removed); and
-     * - When the collection's own fields are modified.
-     */
-    updationTime: number;
-    /**
-     * Mutable metadata associated with the collection that is only visible to
-     * the owner of the collection.
-     *
-     * See: [Note: Metadatum]
-     */
-    magicMetadata?: MagicMetadata<CollectionPrivateMagicMetadataData>;
-    /**
-     * Public mutable metadata associated with the collection that is visible to
-     * all users with whom the collection has been shared.
-     *
-     * See: [Note: Metadatum]
-     */
-    pubMagicMetadata?: MagicMetadata<CollectionPublicMagicMetadataData>;
-    /**
-     * Private mutable metadata associated with the collection that is only
-     * visible to the current user, if they're not the owner.
-     *
-     * This is metadata associated with each "share", and is only visible to
-     * (and editable by) the user with which the collection has been shared, not
-     * the owner. Each user with whom the collection has been shared gets their
-     * own private copy. This allows each user to keep their own metadata
-     * associated with a shared album (e.g. archive status).
-     *
-     * See: [Note: Metadatum]
-     */
-    sharedMagicMetadata?: MagicMetadata<CollectionShareeMagicMetadataData>;
 }
 
 export interface PublicURL {
