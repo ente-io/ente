@@ -1,4 +1,4 @@
-import { decryptBox, decryptBoxBytes } from "ente-base/crypto";
+import { decryptBoxBytes } from "ente-base/crypto";
 import {
     type EncryptedMagicMetadata,
     type MagicMetadataCore,
@@ -391,69 +391,20 @@ export interface PublicURL {
 }
 
 /**
- * Pertinent information about the Ente user on whose behalf we are trying to
- * decrypt a collection received from remote.
+ * Decrypt a remote collection using the provided {@link collectionKey}.
+ *
+ * @param collection The remote collection to decrypt.
+ *
+ * @param collectionKey The base64 encoded key to use for decrypting the various
+ * encrypted fields in {@link collection}.
+ *
+ * @returns A decrypted collection.
  */
-interface CollectionDecryptionUser {
-    /**
-     * The ID of the currently logged in user.
-     */
-    userID: number;
-    /**
-     * The base64 encoded master key of the currently logged in user.
-     *
-     * This is used for decrypting collections that the user owns.
-     */
-    masterKey: string;
-    /**
-     * The base64 encoded private key of the currently logged in user.
-     *
-     * This is used for decrypting collections that have been shared with the
-     * user.
-     */
-    privateKey: string;
-}
-
-/**
- * Decrypt a collection obtained from remote ({@link RemoteCollection}) into the
- * collection object that we use and persist on the client ({@link Collection}).
- *
- * @param remoteCollection The collection object we received from remote. This
- * can be thought of as an envelope, the actual consumables within it are
- * encrypted using the user's master key or public key.
- *
- * @param user The ID of the currently logged in user, and their keys. This is
- * needed to decrypt the encrypted remote collection.
- */
-export const decryptRemoteCollection = (
-    remoteCollection: RemoteCollection,
-    user: CollectionDecryptionUser,
-): Promise<Collection> => {};
-
-/**
- * Decrypt a remote collection using the provided key.
- *
- * This is the lower level implementation of {@link decryptRemoteCollection} for
- * use by code that has already determined which key should be used for
- * decrypting the collection.
- *
- * @param collection The collection to decrypt.
- *
- * @param decryptionKey The base64 encoded key to use for decrypting the various encrypted
- * fields in {@link collection}.
- *
- * @returns A decrypted collection ({@link Collection2}).
- */
-export const decryptRemoteCollectionUsingKey = async (
+export const decryptRemoteCollection = async (
     collection: RemoteCollection,
-    decryptionKey: string,
+    collectionKey: string,
 ): Promise<Collection2> => {
     const { id, owner, type, sharees, publicURLs, updationTime } = collection;
-    const { encryptedKey, keyDecryptionNonce } = collection;
-    const collectionKey = await decryptBox(
-        { encryptedData: encryptedKey, nonce: keyDecryptionNonce },
-        decryptionKey,
-    );
 
     const name =
         collection.name ??
