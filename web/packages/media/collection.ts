@@ -3,6 +3,7 @@ import {
     type MagicMetadataCore,
 } from "ente-media/file";
 import { ItemVisibility } from "ente-media/file-metadata";
+import { nullToUndefined } from "ente-utils/transform";
 import { z } from "zod/v4";
 
 // TODO: Audit this file
@@ -191,7 +192,46 @@ type RemoteCollectionUser = z.infer<typeof RemoteCollectionUser>;
  *
  */
 // TODO: Use me
-export const RemoteCollection = z.object({});
+export const RemoteCollection = z.object({
+    id: z.number(),
+    owner: RemoteCollectionUser, // ?
+    encryptedKey: z.string(),
+    keyDecryptionNonce: z.string(),
+    /**
+     * Not used anymore, but still might be present for very old collections.
+     *
+     * Before public launch, collection names were stored unencrypted. For
+     * backward compatibility, client should use {@link name} if present,
+     * otherwise obtain it by decrypting it from {@link encryptedName} and
+     * {@link nameDecryptionNonce}.
+     */
+    name: z.string().nullish().transform(nullToUndefined),
+    /**
+     * Expected to be present (along with {@link nameDecryptionNonce}), but it
+     * is still optional since it might not be present if {@link name} is present.
+     */
+    encryptedName: z.string().nullish().transform(nullToUndefined),
+    nameDecryptionNonce: z.string().nullish().transform(nullToUndefined),
+    /* Expected to be one of {@link CollectionType} */
+    type: z.string(),
+    sharees: z.array(RemoteCollectionUser).nullish().transform(nullToUndefined), // ?
+    // TODO(RE):
+    publicURLs: z.array(z.looseObject({})).nullish().transform(nullToUndefined), // ?
+    updationTime: z.number(),
+    /**
+     * Tombstone marker.
+     *
+     * This is set to true in the diff response to indicate collections which
+     * have been deleted and should thus be pruned by the client locally.
+     */
+    isDeleted: z.boolean().nullish().transform(nullToUndefined),
+    // TODO(RE):
+    magicMetadata: z.looseObject({}).nullish().transform(nullToUndefined), // ?
+    // TODO(RE):
+    pubMagicMetadata: z.looseObject({}).nullish().transform(nullToUndefined), // ?
+    // TODO(RE):
+    sharedMagicMetadata: z.looseObject({}).nullish().transform(nullToUndefined), // ?
+});
 
 export interface EncryptedCollection {
     /**
@@ -218,19 +258,7 @@ export interface EncryptedCollection {
     owner: CollectionUser;
     encryptedKey: string;
     keyDecryptionNonce: string;
-    /**
-     * Not used anymore, but still might be present for very old collections.
-     *
-     * Before public launch, collection names were stored unencrypted. For
-     * backward compatibility, client should use {@link name} if present,
-     * otherwise obtain it by decrypting it from {@link encryptedName} and
-     * {@link nameDecryptionNonce}.
-     */
     name?: string;
-    /**
-     * TODO: This optionality is incorrect, these might not be present if
-     * {@link name} is present.
-     */
     encryptedName: string;
     nameDecryptionNonce: string;
     /**
