@@ -40,7 +40,6 @@ import {
     groupFilesByCollectionID,
     sortFiles,
 } from "ente-new/photos/services/files";
-import { getPublicKey } from "ente-new/photos/services/user";
 import HTTPService from "ente-shared/network/HTTPService";
 import { getData } from "ente-shared/storage/localStorage";
 import { getToken } from "ente-shared/storage/localStorage/helpers";
@@ -495,37 +494,6 @@ export const renameCollection = async (
         null,
         { "X-Auth-Token": token },
     );
-};
-
-export const shareCollection = async (
-    collection: Collection,
-    withUserEmail: string,
-    role: string,
-) => {
-    try {
-        const cryptoWorker = await sharedCryptoWorker();
-        const token = getToken();
-        const publicKey: string = await getPublicKey(withUserEmail);
-        const encryptedKey = await cryptoWorker.boxSeal(
-            collection.key,
-            publicKey,
-        );
-        const shareCollectionRequest = {
-            collectionID: collection.id,
-            email: withUserEmail,
-            role: role,
-            encryptedKey,
-        };
-        await HTTPService.post(
-            await apiURL("/collections/share"),
-            shareCollectionRequest,
-            null,
-            { "X-Auth-Token": token },
-        );
-    } catch (e) {
-        log.error("share collection failed ", e);
-        throw e;
-    }
 };
 
 export const unshareCollection = async (
