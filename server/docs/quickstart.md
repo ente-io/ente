@@ -18,6 +18,7 @@ sh -c "$(curl -fsSL https://raw.githubusercontent.com/ente-io/ente/main/server/q
 > [quickstart.sh](https://github.com/ente-io/ente/blob/main/server/quickstart.sh),
 > `chmod +x` it and then run it with `./quickstart.sh`.
 
+
 After the Docker compose cluster starts, you can open the Ente web app at
 http://localhost:3000.
 

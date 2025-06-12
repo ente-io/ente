@@ -22,9 +22,9 @@ on the client. It performs well on small cloud instances, old laptops, and even
 
 #### Operating System
 
-Any Linux or \*nix operating system, preferably Ubuntu or Debian is recommended
-to have a good Docker experience. The reason being poor experience on non-Linux
-systems and difficulty with troubleshooting and assistance.
+Any Linux or \*nix operating system, Ubuntu or Debian is recommended
+to have a good Docker experience. Non-Linux operating systems tend to provide
+poor experience with Docker and difficulty with troubleshooting and assistance.
 
 #### Docker
 
