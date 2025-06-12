@@ -604,6 +604,22 @@ class RemoteSyncService {
       await _uploader.fetchUploadURLs(toBeUploaded);
     }
     final List<Future> futures = [];
+
+    for (final file in filesToBeUploaded) {
+      if (_shouldThrottleSync() &&
+          futures.length >= kMaximumPermissibleUploadsInThrottledMode) {
+        _logger.info("Skipping some new files as we are throttling uploads");
+        break;
+      }
+      // prefer existing collection ID for manually uploaded files.
+      // See https://github.com/ente-io/photos-app/pull/187
+      final collectionID = file.collectionID ??
+          (await _collectionsService
+                  .getOrCreateForPath(file.deviceFolder ?? 'Unknown Folder'))
+              .id;
+      _uploadFile(file, collectionID, futures);
+    }
+
     for (final uploadedFileID in updatedFileIDs) {
       if (_shouldThrottleSync() &&
           futures.length >= kMaximumPermissibleUploadsInThrottledMode) {
@@ -633,21 +649,6 @@ class RemoteSyncService {
           futures,
         );
       }
-    }
-
-    for (final file in filesToBeUploaded) {
-      if (_shouldThrottleSync() &&
-          futures.length >= kMaximumPermissibleUploadsInThrottledMode) {
-        _logger.info("Skipping some new files as we are throttling uploads");
-        break;
-      }
-      // prefer existing collection ID for manually uploaded files.
-      // See https://github.com/ente-io/photos-app/pull/187
-      final collectionID = file.collectionID ??
-          (await _collectionsService
-                  .getOrCreateForPath(file.deviceFolder ?? 'Unknown Folder'))
-              .id;
-      _uploadFile(file, collectionID, futures);
     }
 
     try {
@@ -943,18 +944,15 @@ class RemoteSyncService {
   // This is done to upload most recent photo first.
   void _sortByTime(List<EnteFile> file) {
     file.sort((first, second) {
+      // 1. fileType: move videos to end when in bg
+      if (!AppLifecycleService.instance.isForeground &&
+          first.fileType != second.fileType) {
+        if (first.fileType == FileType.video) return 1;
+        if (second.fileType == FileType.video) return -1;
+      }
+
+      // 2. creationTime descending
       return second.creationTime!.compareTo(first.creationTime!);
-    });
-    // move updated files towards the end
-    file.sort((first, second) {
-      if (first.updationTime == second.updationTime) {
-        return 0;
-      }
-      if (first.updationTime == -1) {
-        return 1;
-      } else {
-        return -1;
-      }
     });
   }
 
