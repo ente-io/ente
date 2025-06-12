@@ -22,9 +22,9 @@ on the client. It performs well on small cloud instances, old laptops, and even
 
 #### Operating System
 
-Any Linux or \*nix operating system, Ubuntu or Debian is recommended
-to have a good Docker experience. Non-Linux operating systems tend to provide
-poor experience with Docker and difficulty with troubleshooting and assistance.
+Any Linux or \*nix operating system, Ubuntu or Debian is recommended to have a
+good Docker experience. Non-Linux operating systems tend to provide poor
+experience with Docker and difficulty with troubleshooting and assistance.
 
 #### Docker
 
@@ -40,7 +40,8 @@ sh -c "$(curl -fsSL https://raw.githubusercontent.com/ente-io/ente/main/server/q
 ```
 
 The above `curl` command pulls the Docker image, creates a directory `my-ente`
-in the current working directory and starts all containers required to run Ente.
+in the current working directory and prompts to start the cluster, which upon
+entering `y`, starts all the containers required to run Ente.
 
 ![quickstart](/quickstart.png)
 
