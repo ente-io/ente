@@ -26,6 +26,7 @@ import "package:photos/services/notification_service.dart";
 import "package:photos/services/search_service.dart";
 import "package:photos/ui/home/memories/full_screen_memory.dart";
 import "package:photos/ui/viewer/people/people_page.dart";
+import "package:photos/utils/cache_util.dart";
 import "package:photos/utils/navigation_util.dart";
 import "package:shared_preferences/shared_preferences.dart";
 import "package:synchronized/synchronized.dart";
@@ -40,7 +41,7 @@ class MemoriesCacheService {
   static const _kCacheUpdateDelay = Duration(seconds: 5);
 
   final SharedPreferences _prefs;
-  late final Logger _logger = Logger("MemoriesCacheService");
+  static final Logger _logger = Logger("MemoriesCacheService");
 
   final _memoriesDB = MemoriesDB.instance;
 
@@ -195,7 +196,7 @@ class MemoriesCacheService {
     if (cache == null) {
       return null;
     }
-    final result = await _fromCacheToMemories(cache);
+    final result = await fromCacheToMemories(cache);
     return result;
   }
 
@@ -208,11 +209,13 @@ class MemoriesCacheService {
     return cache;
   }
 
-  Future<List<SmartMemory>> _fromCacheToMemories(MemoriesCache cache) async {
+  static Future<List<SmartMemory>> fromCacheToMemories(
+    MemoriesCache cache,
+  ) async {
     try {
       _logger.info('Processing disk cache memories to smart memories');
       final List<SmartMemory> memories = [];
-      final seenTimes = await _memoriesDB.getSeenTimes();
+      final seenTimes = await MemoriesDB.instance.getSeenTimes();
       final minimalFileIDs = <int>{};
       for (final ToShowMemory memory in cache.toShowMemories) {
         if (memory.shouldShowNow()) {
