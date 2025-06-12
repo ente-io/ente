@@ -85,6 +85,7 @@ const Page: React.FC = () => {
         setFieldError,
     ) => {
         try {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             const referralSource = getLocalReferralSource()?.trim();
             const cleanedReferral = referralSource
                 ? `web:${referralSource}`
