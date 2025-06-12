@@ -6,6 +6,8 @@ import {
     CollectionSubType,
     type Collection,
     type CollectionNewParticipantRole,
+    type CollectionPrivateMagicMetadata,
+    type CollectionType,
 } from "ente-media/collection";
 import { type EnteFile } from "ente-media/file";
 import { ItemVisibility } from "ente-media/file-metadata";
@@ -93,9 +95,11 @@ export const getCollectionUserFacingName = (collection: Collection) => {
  * @param magicMetadata Optional metadata to use as the collection's private
  * mutable metadata when creating the new collection.
  */
-export const createCollection => {
-
-}
+export const createCollection = (
+    name: string,
+    type: CollectionType,
+    magicMetadata?: CollectionPrivateMagicMetadata,
+): Promise<Collection> => {};
 
 /**
  * Return a map of the (user-facing) collection name, indexed by collection ID.

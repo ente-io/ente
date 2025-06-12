@@ -425,6 +425,51 @@ export const decryptRemoteCollection = (
     user: CollectionDecryptionUser,
 ): Promise<Collection> => {};
 
+/**
+ * Additional context stored as part of the collection's magic metadata to
+ * augment the {@link type} associated with a {@link Collection}.
+ */
+export const CollectionSubType = {
+    default: 0,
+    defaultHidden: 1,
+    quicklink: 2,
+} as const;
+
+export type CollectionSubType =
+    (typeof CollectionSubType)[keyof typeof CollectionSubType];
+
+/**
+ * Mutable private metadata associated with an {@link Collection}.
+ *
+ * - Unlike {@link CollectionPublicMagicMetadata} this is only available to the
+ *   owner of the file.
+ *
+ * See: [Note: Private magic metadata is called magic metadata on remote]
+ */
+export interface CollectionPrivateMagicMetadata {
+    /**
+     * The (owner specific) visibility of the collection.
+     *
+     * and independently edit its visibility without revealing their visibility
+     * preference to the other people with whom they have shared the file.
+     */
+    visibility?: ItemVisibility;
+    /**
+     * The {@link CollectionSubType}, if applicable.
+     */
+    subType?: CollectionSubType;
+    /**
+     * An overrride to the sort ordering used for the collection.
+     *
+     * - For pinned collections, this will be set to `1`. Pinned collections
+     *   will be moved to the beginning of the sort order.
+     *
+     * - Otherwise, the collection is a normal (unpinned) collection, and will
+     *   retain its natural sort position.
+     */
+    order?: number;
+}
+
 export interface UpdatePublicURL {
     collectionID: number;
     disablePassword?: boolean;
@@ -448,15 +493,6 @@ export interface RemoveFromCollectionRequest {
     collectionID: number;
     fileIDs: number[];
 }
-
-export const CollectionSubType = {
-    default: 0,
-    defaultHidden: 1,
-    quicklink: 2,
-} as const;
-
-export type CollectionSubType =
-    (typeof CollectionSubType)[keyof typeof CollectionSubType];
 
 export interface CollectionMagicMetadataProps {
     visibility?: ItemVisibility;
