@@ -190,7 +190,7 @@ export const createMagicMetadata = (data: unknown) => {
 export const decryptMagicMetadata = async (
     remoteMagicMetadata: RemoteMagicMetadata,
     key: string,
-): Promise<MagicMetadata | undefined> => {
+): Promise<MagicMetadata> => {
     const {
         version,
         count,

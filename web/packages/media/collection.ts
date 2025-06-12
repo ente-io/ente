@@ -6,7 +6,11 @@ import {
 import { ItemVisibility } from "ente-media/file-metadata";
 import { nullishToEmpty, nullToUndefined } from "ente-utils/transform";
 import { z } from "zod/v4";
-import { decryptMagicMetadata, RemoteMagicMetadata } from "./magic-metadata";
+import {
+    decryptMagicMetadata,
+    RemoteMagicMetadata,
+    type MagicMetadata,
+} from "./magic-metadata";
 
 /**
  * The type of a collection.
@@ -234,9 +238,9 @@ export interface Collection
 /**
  * A collection, as used and persisted locally by the client.
  *
- * A collection is roughly equivalent to an "album", though there can be special
- * type of collections (like "favorites") which have special behaviours attached
- * to them.
+ * A collection is, well, a collection of files. It is roughly equivalent to an
+ * "album" (which is also the term we use in the UI), bute there can also be
+ * special type of collections like "favorites" which have special behaviour.
  *
  * A collection contains zero or more files ({@link EnteFile}).
  *
@@ -314,7 +318,7 @@ export interface Collection2 {
      *
      * See: [Note: Metadatum]
      */
-    magicMetadata?: unknown; //CollectionMagicMetadata;
+    magicMetadata?: MagicMetadata<CollectionPrivateMagicMetadataData>;
     /**
      * Public mutable metadata associated with the collection that is visible to
      * all users with whom the collection has been shared.
@@ -377,8 +381,15 @@ export const decryptRemoteCollection = async (
             ),
         );
 
-    const decryptMM = async (mm: RemoteMagicMetadata | undefined) =>
-        mm ? await decryptMagicMetadata(mm, collectionKey) : undefined;
+    let magicMetadata: Collection2["magicMetadata"];
+    if (collection.magicMetadata) {
+        const genericMM = await decryptMagicMetadata(
+            collection.magicMetadata,
+            collectionKey,
+        );
+        const data = CollectionPrivateMagicMetadataData.parse(genericMM.data);
+        magicMetadata = { ...genericMM, data };
+    }
 
     return {
         id,
@@ -389,9 +400,10 @@ export const decryptRemoteCollection = async (
         sharees,
         publicURLs,
         updationTime,
-        magicMetadata: await decryptMM(collection.magicMetadata),
-        pubMagicMetadata: await decryptMM(collection.pubMagicMetadata),
-        sharedMagicMetadata: await decryptMM(collection.sharedMagicMetadata),
+        magicMetadata,
+        // TODO(RE):
+        // pubMagicMetadata: await decryptMM(collection.pubMagicMetadata),
+        // sharedMagicMetadata: await decryptMM(collection.sharedMagicMetadata),
     };
 };
 
@@ -400,8 +412,18 @@ export const decryptRemoteCollection = async (
  * augment the {@link type} associated with a {@link Collection}.
  */
 export const CollectionSubType = {
+    /**
+     * The default / normal value. No special semantics.
+     */
     default: 0,
+    /**
+     * The user's default hidden collection, which contains the individually
+     * hidden files.
+     */
     defaultHidden: 1,
+    /**
+     * A collection created for sharing selected files.
+     */
     quicklink: 2,
 } as const;
 
@@ -420,14 +442,23 @@ export interface CollectionPrivateMagicMetadataData {
     /**
      * The (owner specific) visibility of the collection.
      *
+     * The file's visibility is user specific attribute, and thus we keep it in
+     * the private magic metadata. This allows the file's owner to share a file
      * and independently edit its visibility without revealing their visibility
      * preference to the other people with whom they have shared the file.
+     *
+     * Expected to be one of {@link ItemVisibility}.
+     *
+     * See: [Note: Enums in remote objects] for why we keep it as a number
+     * instead of the expected enum.
      */
-    visibility?: ItemVisibility;
+    visibility?: number;
     /**
-     * The {@link CollectionSubType}, if applicable.
+     * The subtype of the collection type (if applicable).
+     *
+     * Expected to be one of {@link CollectionSubType}.
      */
-    subType?: CollectionSubType;
+    subType?: number;
     /**
      * An overrride to the sort ordering used for the collection.
      *
@@ -439,6 +470,17 @@ export interface CollectionPrivateMagicMetadataData {
      */
     order?: number;
 }
+
+/**
+ * Zod schema for {@link CollectionPrivateMagicMetadataData}.
+ *
+ *  See: [Note: Use looseObject for metadata Zod schemas]
+ */
+const CollectionPrivateMagicMetadataData = z.looseObject({
+    visibility: z.number().nullish().transform(nullToUndefined),
+    subType: z.number().nullish().transform(nullToUndefined),
+    order: z.number().nullish().transform(nullToUndefined),
+});
 
 export interface UpdatePublicURL {
     collectionID: number;
