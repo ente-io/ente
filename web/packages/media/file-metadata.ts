@@ -13,6 +13,7 @@ import { nullToUndefined } from "ente-utils/transform";
 import { z } from "zod/v4";
 import { mergeMetadata1 } from "./file";
 import { FileType } from "./file-type";
+import type { RemoteMagicMetadata } from "./magic-metadata";
 
 /**
  * Information about the file that never changes post upload.
@@ -30,7 +31,7 @@ import { FileType } from "./file-type";
  *
  * 1. Metadata
  * 2. Private mutable metadata
- * 3. Shared mutable metadata
+ * 3. Public mutable metadata
  *
  * Metadata is the original metadata that we attached to the file when it was
  * uploaded. It is immutable, and it never changes.
@@ -47,8 +48,8 @@ import { FileType } from "./file-type";
  * people with whom this file is shared can see the new edited name. Such
  * modifications get written to (3), Shared Mutable Metadata.
  *
- * When the client needs to show a file, it needs to "merge" in 2 or 3 of these
- * sources.
+ * When the client needs to show a file, it needs to "merge" in two or three of
+ * these sources (nb: remote will only send the permissible ones):
  *
  * - When showing a shared file, (1) and (3) are merged, with changes from (3)
  *   taking precedence, to obtain the full metadata pertinent to the file.
@@ -64,6 +65,21 @@ import { FileType } from "./file-type";
  * yet understand, so when updating some key, say filename in (3), it should
  * only edit the key it knows about but retain the rest of the source JSON
  * unchanged.
+ *
+ * A similar concept applies to collections, which can (like files) have
+ * metadata associated with them with varying axis of mutability and access.
+ *
+ * Collections also have another type of metadata.
+ *
+ * 4. Shared magic metadata
+ *
+ * which in our hypothetical naming scheme can be thought of as
+ *
+ * 4. Per-sharee private mutable metadata
+ *
+ * This is "magic metadata" associated with each share. Each user with whom the
+ * collection has been shared with can use it store metadata (e.g. archive
+ * status) that is private to them, and can only be edited by them.
  */
 export interface Metadata {
     /**
@@ -318,9 +334,9 @@ export interface PublicMagicMetadata {
  *
  * ---
  *
- * [Note: Use passthrough for metadata Zod schemas]
+ * [Note: Use looseObject for metadata Zod schemas]
  *
- * It is important to (recursively) use the {@link passthrough} option when
+ * It is important to (recursively) use the {@link looseObject} option when
  * defining Zod schemas for the various metadata types (the plaintext JSON
  * objects) because we want to retain all the fields we get from remote. There
  * might be other, newer, clients out there adding fields that the current
@@ -605,49 +621,6 @@ export const updateRemotePublicMagicMetadata = async (
     // metadata.
     mergeMetadata1(file);
 };
-
-/**
- * Magic metadata, either public and private, as persisted and used by remote.
- *
- * This is the encrypted magic metadata as persisted on remote, and this is what
- * clients get back when they sync with remote. Alongwith the encrypted blob and
- * decryption header, it also contains a few properties useful for clients to
- * track changes and ensure that they have the latest metadata synced locally.
- *
- * Both public and private magic metadata fields use the same structure.
- */
-interface RemoteMagicMetadata {
-    /**
-     * Monotonically increasing iteration of this metadata object.
-     *
-     * The version starts at 1. Remote increments this version number each time
-     * a client updates the corresponding magic metadata field for the file.
-     */
-    version: number;
-    /**
-     * The number of keys with non-null (and non-undefined) values in the
-     * encrypted JSON object that the encrypted metadata blob contains.
-     *
-     * During edits and updates, this number should be greater than or equal to
-     * the previous version.
-     *
-     * > Clients are expected to retain the magic metadata verbatim so that they
-     * > don't accidentally overwrite fields that they might not understand.
-     */
-    count: number;
-    /**
-     * The encrypted data.
-     *
-     * This is a base64 string representing the bytes obtained by encrypting the
-     * string representation of the underlying magic metadata JSON object.
-     */
-    data: string;
-    /**
-     * The base64 encoded decryption header that will be needed for the client
-     * for decrypting {@link data}.
-     */
-    header: string;
-}
 
 /**
  * The shape of the JSON body payload expected by the APIs that update the
