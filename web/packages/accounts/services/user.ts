@@ -1,18 +1,32 @@
 import {
+    generateSRPSetupAttributes,
+    getSRPAttributes,
+    saveSRPAttributes,
+    updateSRPAndKeyAttributes,
+    type UpdatedKeyAttr,
+} from "ente-accounts/services/srp";
+import {
     decryptBox,
+    deriveInteractiveKey,
     deriveSensitiveKey,
     encryptBox,
     generateKey,
     generateKeyPair,
 } from "ente-base/crypto";
+import { isDevBuild } from "ente-base/env";
 import {
     authenticatedRequestHeaders,
     ensureOk,
     publicRequestHeaders,
 } from "ente-base/http";
 import { apiURL } from "ente-base/origins";
+import {
+    ensureMasterKeyFromSession,
+    saveMasterKeyInSessionAndSafeStore,
+} from "ente-base/session";
 import { getAuthToken } from "ente-base/token";
 import { getData, setLSUser } from "ente-shared/storage/localStorage";
+import { ensure } from "ente-utils/ensure";
 import { nullToUndefined } from "ente-utils/transform";
 import { z } from "zod/v4";
 import { getUserRecoveryKey, recoveryKeyFromMnemonic } from "./recovery-key";
@@ -100,6 +114,18 @@ export const partialLocalUser = (): Partial<LocalUser> | undefined => {
 };
 
 /**
+ * Save the users data as we accrue it during the signup or login flow.
+ *
+ * See: [Note: Partial local user].
+ *
+ * TODO: WARNING: This does not update the KV token. The idea is to gradually
+ * move over uses of setLSUser to this while explicitly setting the KV token
+ * where needed.
+ */
+export const savePartialLocalUser = (partialLocalUser: Partial<LocalUser>) =>
+    localStorage.setItem("user", JSON.stringify(partialLocalUser));
+
+/**
  * Return the logged-in user, if someone is indeed logged in. Otherwise return
  * `undefined`.
  *
@@ -144,6 +170,15 @@ export const ensureExpectedLoggedInValue = <T>(t: T | undefined): T => {
  *
  * The various "key" attributes are base64 encoded representations of the
  * underlying binary data.
+ *
+ * [Note: Key attribute mutability]
+ *
+ * The key attributes contain two subsets:
+ *
+ * - Attributes that changes when the user changes their password. These are the
+ *   {@link UpdatedKeyAttr}.
+ *
+ * - All other attributes never change after initial setup.
  */
 export interface KeyAttributes {
     /**
@@ -154,17 +189,17 @@ export interface KeyAttributes {
      * [Note: Key encryption key]
      *
      * The user's master key is encrypted with a "key encryption key" (lovingly
-     * called a "kek" sometimes).
+     * called a "KEK" sometimes).
      *
-     * The kek itself is derived from the user's passphrase.
+     * The KEK itself is derived from the user's password.
      *
-     * 1. User enters passphrase on new device.
+     * 1. User enters password on new device.
      *
-     * 2. Client derives kek from this passphrase (using the {@link kekSalt},
+     * 2. Client derives KEK from this password (using the {@link kekSalt},
      *    {@link opsLimit} and {@link memLimit} as parameters for the
      *    derivation).
      *
-     * 3. Client use kek to decrypt the master key from {@link encryptedKey} and
+     * 3. Client use KEK to decrypt the master key from {@link encryptedKey} and
      *    {@link keyDecryptionNonce}.
      */
     encryptedKey: string;
@@ -177,15 +212,37 @@ export interface KeyAttributes {
      */
     keyDecryptionNonce: string;
     /**
-     * The salt used during the derivation of the kek.
+     * The salt used during the derivation of the KEK.
      *
      * Base64 encoded.
      *
-     * See: [Note: Key encryption key].
+     * [Note: KEK three tuple]
+     *
+     * The three tuple (kekSalt, opsLimit, memLimit) is needed (along with the
+     * user's password) to rederive the KEK when the user logs in on a new
+     * client (See: [Note: Key encryption key]).
+     *
+     * The client can obtain these three by fetching their key attributes from
+     * remote, however unless {@link isEmailMFAEnabled} is enabled (which is not
+     * by default), then the user's credentials are verified using SRP instead
+     * of email verification. So as a convenience for this (majority) flow,
+     * remote also provides this exact same three tuple as part of the
+     * {@link SRPAttributes} fetched from remote.
+     *
+     * So on remote the KEK three tuple is the same whether it be part of key
+     * attributes or SRP attributes. When the user changes their password, both
+     * of them also get updated simulataneously (they use the same storage).
+     *
+     * However, on the client side these two sets of three tuples might diverge
+     * because of the client generating interactive key attributes. When that
+     * happens, the locally saved key attributes will be overwritten by the KEK
+     * three tuple for the new generated interactive KEK parameters, while the
+     * SRP attributes will continue to reflect the "original" KEK three tuple we
+     * got from remote.
      */
     kekSalt: string;
     /**
-     * The operation limit used during the derivation of the kek.
+     * The operation limit used during the derivation of the KEK.
      *
      * The {@link opsLimit} and {@link memLimit} are complementary parameters
      * that define the amount of work done by the key derivation function. See
@@ -196,7 +253,7 @@ export interface KeyAttributes {
      */
     opsLimit: number;
     /**
-     * The memory limit used during the derivation of the kek.
+     * The memory limit used during the derivation of the KEK.
      *
      * See {@link opsLimit} for more details.
      */
@@ -240,7 +297,7 @@ export interface KeyAttributes {
      * Base64 encoded.
      *
      * This allows the user to recover their master key if they forget their
-     * passphrase but still have their recovery key.
+     * password but still have their recovery key.
      *
      * Note: This value doesn't change after being initially created.
      */
@@ -294,7 +351,7 @@ export const RemoteKeyAttributes = z.object({
 });
 
 /**
- * Return {@link KeyAttributes} if they are present in local storage.
+ * Return the user's {@link KeyAttributes} if they are present in local storage.
  *
  * The key attributes are stored in the browser's localStorage. Thus, this
  * function only works from the main thread, not from web workers (local storage
@@ -321,17 +378,23 @@ export const ensureSavedKeyAttributes = (): KeyAttributes =>
 export const saveKeyAttributes = (keyAttributes: KeyAttributes) =>
     localStorage.setItem("keyAttributes", JSON.stringify(keyAttributes));
 
+export interface GenerateKeysAndAttributesResult {
+    masterKey: string;
+    kek: string;
+    keyAttributes: KeyAttributes;
+}
+
 /**
  * Generate a new set of key attributes.
  *
- * @param passphrase The passphrase to use for deriving the key encryption key.
+ * @param password The password to use for deriving the key encryption key.
  *
  * @returns a newly generated master key (base64 string), kek (base64 string)
  * and the key attributes associated with the combination.
  */
 export async function generateKeysAndAttributes(
-    passphrase: string,
-): Promise<{ masterKey: string; kek: string; keyAttributes: KeyAttributes }> {
+    password: string,
+): Promise<GenerateKeysAndAttributesResult> {
     const masterKey = await generateKey();
     const recoveryKey = await generateKey();
     const {
@@ -339,7 +402,7 @@ export async function generateKeysAndAttributes(
         salt: kekSalt,
         opsLimit,
         memLimit,
-    } = await deriveSensitiveKey(passphrase);
+    } = await deriveSensitiveKey(password);
 
     const { encryptedData: encryptedKey, nonce: keyDecryptionNonce } =
         await encryptBox(masterKey, kek);
@@ -414,30 +477,6 @@ export const putUserRecoveryKeyAttributes = async (
         }),
     );
 
-export interface UserVerificationResponse {
-    id: number;
-    keyAttributes?: KeyAttributes | undefined;
-    encryptedToken?: string | undefined;
-    token?: string;
-    twoFactorSessionID?: string | undefined;
-    passkeySessionID?: string | undefined;
-    /**
-     * Base URL for the accounts app where we should redirect to for passkey
-     * verification.
-     *
-     * This will only be set if the user has setup a passkey (i.e., whenever
-     * {@link passkeySessionID} is defined).
-     */
-    accountsUrl: string | undefined;
-    /**
-     * If both passkeys and TOTP based two factors are enabled, then {@link
-     * twoFactorSessionIDV2} will be set to the TOTP session ID instead of
-     * {@link twoFactorSessionID}.
-     */
-    twoFactorSessionIDV2?: string | undefined;
-    srpM2?: string | undefined;
-}
-
 /**
  * Ask remote to send a OTP / OTT to the given email to verify that the user has
  * access to it. Subsequent the app will pass this OTT back via the
@@ -465,6 +504,134 @@ export const sendOTT = async (
     );
 
 /**
+ * The response from remote on a successful user verification, either via
+ * {@link verifyEmail} or {@link verifySRP}.
+ *
+ * The {@link id} is always present. The rest of the values are are optional
+ * since only a subset of them will be returned depending on the case:
+ *
+ * 1. If the user has both passkeys and TOTP based second factor enabled, then
+ *    the following will be set:
+ *    - {@link passkeySessionID}, {@link accountsUrl}
+ *    - {@link twoFactorSessionIDV2}
+ *
+ * 2. If the user has only passkeys enabled, then the following will be set:
+ *    - {@link passkeySessionID}, {@link accountsUrl}
+ *
+ * 3. If the user has only TOTP based second factor enabled, then the following
+ *    will be set:
+ *    - {@link twoFactorSessionID}
+ *
+ * 4. If the user doesn't have any second factor, but has already setup their
+ *    key attributes, then the following will be set:
+ *    - {@link keyAttributes}
+ *    - {@link encryptedToken}
+ *
+ * 5. Finally, in the rare case that the user has not yet setup their key
+ *    attributes, then the following will be set:
+ *    - {@link token}
+ */
+export interface EmailOrSRPVerificationResponse {
+    /**
+     * The user's ID.
+     */
+    id: number;
+    /**
+     * The user's key attributes.
+     *
+     * These will be set (along with the {@link encryptedToken}) if the user
+     * does not have a second factor.
+     */
+    keyAttributes?: KeyAttributes;
+    /**
+     * The base64 representation of an encrypted auth token, encrypted using the
+     * user's public key.
+     *
+     * These will be set (along with the {@link keyAttributes}) if the user
+     * does not have a second factor.
+     */
+    encryptedToken?: string;
+    /**
+     * The base64 representation of an auth token.
+     *
+     * This will be set in the rare edge case for when the user has not yet
+     * setup their key attributes.
+     */
+    token?: string;
+    /**
+     * A session ID that can be used to complete the TOTP based second factor.
+     *
+     * This will be set if the user has enabled a TOTP based second factor but
+     * has not enabled passkeys.
+     */
+    twoFactorSessionID?: string;
+    /**
+     * A session ID that can be used to complete passkey verification.
+     *
+     * This will be set if the user has added a passkey to their account.
+     */
+    passkeySessionID?: string;
+    /**
+     * Base URL for the accounts app where we should redirect to for passkey
+     * verification.
+     *
+     * This will only be set if the user has setup a passkey (i.e., whenever
+     * {@link passkeySessionID} is defined).
+     */
+    accountsUrl?: string;
+    /**
+     * A session ID that can be used to complete the TOTP based second fator.
+     *
+     * This will be set in lieu of {@link twoFactorSessionID} if the user has
+     * setup both passkeys and TOTP based two factors are enabled for their
+     * account.
+     *
+     * ---
+     *
+     * Historical context: {@link twoFactorSessionIDV2} is only set if user has
+     * both passkey and two factor enabled. This is to ensure older clients keep
+     * using passkey flow when both are set. It is intended to be removed once
+     * all clients starts surfacing both options for performing 2FA.
+     *
+     * See also {@link useSecondFactorChoiceIfNeeded}.
+     */
+    twoFactorSessionIDV2?: string;
+}
+
+/**
+ * Zod schema for the {@link EmailOrSRPVerificationResponse} type.
+ *
+ * See: [Note: Duplicated Zod schema and TypeScript type]
+ */
+const RemoteEmailOrSRPVerificationResponse = z.object({
+    id: z.number(),
+    keyAttributes: RemoteKeyAttributes.nullish().transform(nullToUndefined),
+    encryptedToken: z.string().nullish().transform(nullToUndefined),
+    token: z.string().nullish().transform(nullToUndefined),
+    twoFactorSessionID: z.string().nullish().transform(nullToUndefined),
+    passkeySessionID: z.string().nullish().transform(nullToUndefined),
+    accountsUrl: z.string().nullish().transform(nullToUndefined),
+    twoFactorSessionIDV2: z.string().nullish().transform(nullToUndefined),
+});
+
+/**
+ * A specialization of {@link RemoteEmailOrSRPVerificationResponse} for SRP
+ * verification, which results in the {@link srpM2} field in addition to the
+ * other ones.
+ *
+ * The declaration conceptually belongs to `srp.ts`, but is here to avoid cyclic
+ * dependencies.
+ */
+export const RemoteSRPVerificationResponse = z.object({
+    ...RemoteEmailOrSRPVerificationResponse.shape,
+    /**
+     * The SRP M2 (evidence message), the proof that the server has the
+     * verifier.
+     */
+    srpM2: z.string(),
+});
+
+/**
  * Verify user's access to the given {@link email} by comparing the OTT that
  * remote previously sent to that email.
  *
@@ -480,49 +647,15 @@ export const verifyEmail = async (
     email: string,
     ott: string,
     source: string | undefined,
-): Promise<UserVerificationResponse> => {
+): Promise<EmailOrSRPVerificationResponse> => {
     const res = await fetch(await apiURL("/users/verify-email"), {
         method: "POST",
         headers: publicRequestHeaders(),
         body: JSON.stringify({ email, ott, ...(source ? { source } : {}) }),
     });
     ensureOk(res);
-    // See: [Note: strict mode migration]
-    //
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    return EmailOrSRPAuthorizationResponse.parse(await res.json());
+    return RemoteEmailOrSRPVerificationResponse.parse(await res.json());
 };
-
-/**
- * Zod schema for response from remote on a successful user verification, either
- * via {@link verifyEmail} or {@link verifySRPSession}.
- *
- * If a second factor is enabled than one of the two factor session IDs
- * (`passkeySessionID`, `twoFactorSessionID` / `twoFactorSessionIDV2`) will be
- * set. Otherwise `keyAttributes` and `encryptedToken` will be set.
- */
-export const EmailOrSRPAuthorizationResponse = z.object({
-    id: z.number(),
-    keyAttributes: RemoteKeyAttributes.nullish().transform(nullToUndefined),
-    encryptedToken: z.string().nullish().transform(nullToUndefined),
-    token: z.string().nullish().transform(nullToUndefined),
-    twoFactorSessionID: z.string().nullish().transform(nullToUndefined),
-    passkeySessionID: z.string().nullish().transform(nullToUndefined),
-    // Base URL for the accounts app where we should redirect to for passkey
-    // verification.
-    accountsUrl: z.string().nullish().transform(nullToUndefined),
-    // TwoFactorSessionIDV2 is only set if user has both passkey and two factor
-    // enabled. This is to ensure older clients keep using passkey flow when
-    // both are set. It is intended to be removed once all clients starts
-    // surfacing both options for performing 2FA.
-    //
-    // See `useSecondFactorChoiceIfNeeded`.
-    twoFactorSessionIDV2: z.string().nullish().transform(nullToUndefined),
-    // srpM2 is sent only if the user is logging via SRP. It is is the SRP M2
-    // value aka the proof that the server has the verifier.
-    srpM2: z.string().nullish().transform(nullToUndefined),
-});
 
 /**
  * Log the user out on remote, if possible and needed.
@@ -548,13 +681,80 @@ export const remoteLogoutIfNeeded = async () => {
 };
 
 /**
- * Change the email associated with the user's account on remote.
+ * Generate a new local-only KEK (key encryption key) suitable for interactive
+ * use and update the locally saved key attributes to reflect it.
+ *
+ * See {@link deriveInteractiveKey} for more details.
+ *
+ * In brief, after the initial password verification, we create a new
+ * inetractive KEK derived from the same password as the original KEK, but with
+ * so called interactive mem and ops limits which result in a noticeably faster
+ * key derivation.
+ *
+ * We then overwrite the encrypted master key, encryption nonce and the KEK
+ * derivation parameters (see: [Note: KEK three tuple]) in the locally persisted
+ * {@link KeyAttributes} so that these interactive parameters get used
+ * subsequent reauthentication.
+ *
+ * These are more ergonomic for the user especially in the web app where they
+ * need to enter their password to access their masterKey when repopening the
+ * app in a new tab (on desktop we can avoid this by using OS storage, see
+ * [Note: Safe storage and interactive KEK attributes]).
+ *
+ * @param password The user's password.
+ *
+ * @param keyAttributes The existing "original" key attributes, which we
+ * might've generated locally (new signup) or fetched from remote (existing
+ * login).
+ *
+ * @param masterKey The user's master key (base64 encoded).
+ *
+ * @returns the update key attributes.
+ */
+export const generateAndSaveInteractiveKeyAttributes = async (
+    password: string,
+    keyAttributes: KeyAttributes,
+    key: string,
+): Promise<KeyAttributes> => {
+    const {
+        key: interactiveKEK,
+        salt: kekSalt,
+        opsLimit,
+        memLimit,
+    } = await deriveInteractiveKey(password);
+
+    const { encryptedData: encryptedKey, nonce: keyDecryptionNonce } =
+        await encryptBox(key, interactiveKEK);
+
+    const interactiveKeyAttributes = {
+        ...keyAttributes,
+        encryptedKey,
+        keyDecryptionNonce,
+        kekSalt,
+        opsLimit,
+        memLimit,
+    };
+    saveKeyAttributes(interactiveKeyAttributes);
+    return interactiveKeyAttributes;
+};
+
+/**
+ * Change the email associated with the user's account (both locally and on
+ * remote)
  *
  * @param email The new email.
  *
  * @param ott The verification code that was sent to the new email.
  */
-export const changeEmail = async (email: string, ott: string) =>
+export const changeEmail = async (email: string, ott: string) => {
+    await postChangeEmail(email, ott);
+    await setLSUser({ ...getData("user"), email });
+};
+
+/**
+ * Change the email associated with the user's account on remote.
+ */
+const postChangeEmail = async (email: string, ott: string) =>
     ensureOk(
         await fetch(await apiURL("/users/change-email"), {
             method: "POST",
@@ -562,6 +762,60 @@ export const changeEmail = async (email: string, ott: string) =>
             body: JSON.stringify({ email, ott }),
         }),
     );
+
+/**
+ * Change the user's password on both remote and locally.
+ *
+ * @param password The new password.
+ */
+export const changePassword = async (password: string) => {
+    const user = ensureLocalUser();
+    const masterKey = await ensureMasterKeyFromSession();
+    const keyAttributes = ensureSavedKeyAttributes();
+
+    // Generate new KEK.
+    const {
+        key: kek,
+        salt: kekSalt,
+        opsLimit,
+        memLimit,
+    } = await deriveSensitiveKey(password);
+
+    // Generate new key attributes.
+    const { encryptedData: encryptedKey, nonce: keyDecryptionNonce } =
+        await encryptBox(masterKey, kek);
+    const updatedKeyAttr: UpdatedKeyAttr = {
+        encryptedKey,
+        keyDecryptionNonce,
+        kekSalt,
+        opsLimit,
+        memLimit,
+    };
+
+    // Update SRP and key attributes on remote.
+    await updateSRPAndKeyAttributes(
+        await generateSRPSetupAttributes(kek),
+        updatedKeyAttr,
+    );
+
+    // Update SRP attributes locally.
+    const srpAttributes = await getSRPAttributes(user.email);
+    saveSRPAttributes(ensure(srpAttributes));
+
+    // Update key attributes locally, generating a new interactive kek while
+    // we're at it.
+    await generateAndSaveInteractiveKeyAttributes(
+        password,
+        { ...keyAttributes, ...updatedKeyAttr },
+        masterKey,
+    );
+
+    // TODO(RE): This shouldn't be needed, remove me. As a soft remove,
+    // disabling it for dev builds. (tag: Migration)
+    if (!isDevBuild) {
+        await saveMasterKeyInSessionAndSafeStore(masterKey);
+    }
+};
 
 const TwoFactorSecret = z.object({
     /**

@@ -1,4 +1,4 @@
-import "dart:io" show File;
+import "dart:io" show File, Platform;
 import "dart:math" as math show sqrt, min, max;
 
 import "package:flutter/services.dart" show PlatformException;
@@ -21,6 +21,7 @@ import "package:photos/services/machine_learning/ml_exceptions.dart";
 import "package:photos/services/machine_learning/ml_result.dart";
 import "package:photos/services/machine_learning/semantic_search/semantic_search_service.dart";
 import "package:photos/services/search_service.dart";
+import "package:photos/services/sync/local_sync_service.dart";
 import "package:photos/utils/file_util.dart";
 import "package:photos/utils/image_ml_util.dart";
 import "package:photos/utils/network_util.dart";
@@ -348,6 +349,9 @@ Future<String> getImagePathForML(EnteFile enteFile) async {
       );
     }
     try {
+      if (Platform.isIOS && enteFile.localID != null) {
+        trackOriginFetchForUploadOrML.put(enteFile.localID!, true);
+      }
       file = await getFile(enteFile, isOrigin: true);
     } catch (e, s) {
       _logger.severe(

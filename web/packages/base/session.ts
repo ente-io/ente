@@ -186,7 +186,7 @@ export const stashKeyEncryptionKeyInSessionStore = (kek: string) =>
     saveKeyInSessionStore("keyEncryptionKey", kek);
 
 /**
- * Return the decrypted user's key encryption key ("kek") from session storage
+ * Return the decrypted user's key encryption key ("KEK") from session storage
  * if present, otherwise return `undefined`.
  *
  * The key (if it was present) is also removed from session storage.
@@ -198,10 +198,10 @@ export const stashKeyEncryptionKeyInSessionStore = (kek: string) =>
  * During login, if the user has set a second factor (passkey or TOTP), then we
  * need to redirect them to the accounts app or TOTP page to verify the second
  * factor. This second factor verification happens after password verification,
- * but simply storing the decrypted kek in-memory wouldn't work because the
+ * but simply storing the decrypted KEK in-memory wouldn't work because the
  * second factor redirect can happen to a separate accounts app altogether.
  *
- * So instead, we stash the encrypted kek in session store (using
+ * So instead, we stash the encrypted KEK in session store (using
  * {@link stashKeyEncryptionKeyInSessionStore}), and after redirect, retrieve it
  * (after clearing it) using {@link unstashKeyEncryptionKeyFromSession}.
  */

@@ -56,7 +56,7 @@ const DeleteAccountDialogContents: React.FC<
     const [acceptDataDeletion, setAcceptDataDeletion] = useState(false);
     const [loading, setLoading] = useState(false);
 
-    const { values, touched, errors, handleChange, handleSubmit } = useFormik({
+    const formik = useFormik({
         initialValues: { reason: "", feedback: "" },
         validate: ({ reason, feedback }) => {
             if (!reason) return { reason: t("required") };
@@ -144,30 +144,32 @@ const DeleteAccountDialogContents: React.FC<
     };
 
     return (
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={formik.handleSubmit}>
             <Stack sx={{ gap: "24px" }}>
                 <Stack sx={{ gap: "4px" }}>
                     <Typography>{t("delete_account_reason_label")}</Typography>
                     <DropdownInput
                         options={deleteReasonOptions()}
                         placeholder={t("delete_account_reason_placeholder")}
-                        selected={values.reason}
-                        onSelect={handleChange("reason")}
+                        selected={formik.values.reason}
+                        onSelect={formik.handleChange("reason")}
                     />
-                    {touched.reason && errors.reason && (
+                    {formik.touched.reason && formik.errors.reason && (
                         <Typography
                             variant="small"
                             sx={{ px: 1, color: "critical.main" }}
                         >
-                            {errors.reason}
+                            {formik.errors.reason}
                         </Typography>
                     )}
                 </Stack>
                 <FeedbackInput
-                    value={values.feedback}
-                    onChange={handleChange("feedback")}
+                    value={formik.values.feedback}
+                    onChange={formik.handleChange("feedback")}
                     errorMessage={
-                        touched.feedback ? errors.feedback : undefined
+                        formik.touched.feedback
+                            ? formik.errors.feedback
+                            : undefined
                     }
                 />
                 <ConfirmationCheckboxInput

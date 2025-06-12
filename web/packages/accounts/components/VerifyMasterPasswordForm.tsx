@@ -1,5 +1,8 @@
 import { Input, TextField } from "@mui/material";
-import type { SRPAttributes } from "ente-accounts/services/srp";
+import {
+    srpVerificationUnauthorizedErrorMessage,
+    type SRPAttributes,
+} from "ente-accounts/services/srp";
 import type { KeyAttributes, User } from "ente-accounts/services/user";
 import { LoadingButton } from "ente-base/components/mui/LoadingButton";
 import { ShowHidePasswordInputAdornment } from "ente-base/components/mui/PasswordInputAdornment";
@@ -31,9 +34,10 @@ export interface VerifyMasterPasswordFormProps {
      * the form that some other form of second factor is enabled and the user
      * has been redirected to a two factor verification page.
      *
-     * This function can throw an `CustomError.INCORRECT_PASSWORD_OR_NO_ACCOUNT`
-     * to signal that either that the password is incorrect, or no account with
-     * the provided email exists.
+     * @throws A Error with message
+     * {@link srpVerificationUnauthorizedErrorMessage} to signal that either
+     * that the password is incorrect, or no account with the provided email
+     * exists.
      */
     getKeyAttributes?: (kek: string) => Promise<KeyAttributes | undefined>;
     /**
@@ -49,7 +53,7 @@ export interface VerifyMasterPasswordFormProps {
      * auxillary information that was ascertained when verifying it.
      *
      * @param key The user's master key obtained after decrypting it by using
-     * the kek derived from their passphrase.
+     * the KEK derived from their password.
      *
      * @param kek The key used for encrypting the user's master key.
      *
@@ -57,15 +61,15 @@ export interface VerifyMasterPasswordFormProps {
      * started with, or those that we fetched on the way using
      * {@link getKeyAttributes}).
      *
-     * @param passphrase The plaintext passphrase. This can be used during login
-     * to derive another encrypted key using interactive mem/ops limits for
-     * faster reauthentication after the initial login.
+     * @param password The plaintext password. This can be used during login to
+     * derive another encrypted key using interactive mem/ops limits for faster
+     * reauthentication after the initial login.
      */
     onVerify: (
         key: string,
         kek: string,
         keyAttributes: KeyAttributes,
-        passphrase: string,
+        password: string,
     ) => void;
 }
 
@@ -102,16 +106,16 @@ export const VerifyMasterPasswordForm: React.FC<
             }
 
             try {
-                await verifyPassphrase(password, setPasswordFieldError);
+                await verifyPassword(password, setPasswordFieldError);
             } catch (e) {
-                log.error("Failed to to verify passphrase", e);
+                log.error("Failed to to verify password", e);
                 setPasswordFieldError(t("generic_error"));
             }
         },
     });
 
-    const verifyPassphrase = async (
-        passphrase: string,
+    const verifyPassword = async (
+        password: string,
         setFieldError: (message: string) => void,
     ) => {
         const cryptoWorker = await sharedCryptoWorker();
@@ -119,7 +123,7 @@ export const VerifyMasterPasswordForm: React.FC<
         if (srpAttributes) {
             try {
                 kek = await cryptoWorker.deriveKey(
-                    passphrase,
+                    password,
                     srpAttributes.kekSalt,
                     srpAttributes.opsLimit,
                     srpAttributes.memLimit,
@@ -132,7 +136,7 @@ export const VerifyMasterPasswordForm: React.FC<
         } else if (keyAttributes) {
             try {
                 kek = await cryptoWorker.deriveKey(
-                    passphrase,
+                    password,
                     keyAttributes.kekSalt,
                     keyAttributes.opsLimit,
                     keyAttributes.memLimit,
@@ -155,7 +159,7 @@ export const VerifyMasterPasswordForm: React.FC<
                             // the two-factor verification page.
                             return;
 
-                        case CustomError.INCORRECT_PASSWORD_OR_NO_ACCOUNT:
+                        case srpVerificationUnauthorizedErrorMessage:
                             log.error("Incorrect password or no account", e);
                             setFieldError(
                                 t("incorrect_password_or_no_account"),
@@ -178,13 +182,12 @@ export const VerifyMasterPasswordForm: React.FC<
                 },
                 kek,
             );
-        } catch (e) {
-            log.warn("Incorrect password", e);
+        } catch {
             setFieldError(t("incorrect_password"));
             return;
         }
 
-        onVerify(key, kek, keyAttributes, passphrase);
+        onVerify(key, kek, keyAttributes, password);
     };
 
     return (

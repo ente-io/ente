@@ -24,9 +24,9 @@ export type SodiumStateAddress = StateAddress;
 export const streamEncryptionChunkSize = 4 * 1024 * 1024;
 
 /**
- * The {@link message} of {@link Error} that is thrown by
- * {@link deriveSensitiveKey} if we could not find acceptable ops and mem limit
- * combinations without exceeded the maximum mem limit.
+ * The message of the {@link Error} that is thrown by {@link deriveSensitiveKey}
+ * if we could not find acceptable ops and mem limit combinations without
+ * exceeded the maximum mem limit.
  *
  * Generally, this indicates that the current device is not powerful enough to
  * perform the key derivation. This is rare for computers, but can happen with

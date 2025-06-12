@@ -68,11 +68,17 @@ export type CollectionType = "album" | "folder" | "favorites" | "uncategorized";
  * It is guaranteed that a there will be exactly one participant of type OWNER,
  * and their user ID will be the same as the collection `owner.id`.
  */
-export type CollectionUserRole =
+export type CollectionParticipantRole =
     | "VIEWER"
     | "COLLABORATOR"
     | "OWNER"
     | "UNKNOWN";
+
+/**
+ * A subset of {@link CollectionParticipantRole} that are applicable when
+ * sharing a collection with another Ente user.
+ */
+export type CollectionNewParticipantRole = "VIEWER" | "COLLABORATOR";
 
 /**
  * Information about the user associated with a collection, either as an owner,
@@ -100,7 +106,7 @@ export interface CollectionUser {
      *   {@link sharees}.
      * - Remote uses a blank string to indicate absent values.
      */
-    role?: CollectionUserRole;
+    role?: CollectionParticipantRole;
 }
 
 export interface EncryptedCollection {
