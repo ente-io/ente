@@ -10,7 +10,7 @@ import {
     type Collection,
     type Collection2,
     type CollectionNewParticipantRole,
-    type CollectionPrivateMagicMetadata,
+    type CollectionPrivateMagicMetadataData,
     type CollectionType,
     type RemoteCollection,
 } from "ente-media/collection";
@@ -108,7 +108,7 @@ export const getCollectionUserFacingName = (collection: Collection) => {
 export const createCollection2 = async (
     name: string,
     type: CollectionType,
-    magicMetadataData?: CollectionPrivateMagicMetadata,
+    magicMetadataData?: CollectionPrivateMagicMetadataData,
 ): Promise<Collection2> => {
     const masterKey = await ensureMasterKeyFromSession();
     const collectionKey = await generateKey();
@@ -131,6 +131,7 @@ export const createCollection2 = async (
         type,
         ...(magicMetadata ? { magicMetadata } : {}),
     });
+
     return decryptRemoteCollectionUsingKey(remoteCollection, masterKey);
 };
 

@@ -1,3 +1,4 @@
+import { decryptBox, decryptBoxBytes } from "ente-base/crypto";
 import {
     type EncryptedMagicMetadata,
     type MagicMetadataCore,
@@ -5,7 +6,11 @@ import {
 import { ItemVisibility } from "ente-media/file-metadata";
 import { nullToUndefined } from "ente-utils/transform";
 import { z } from "zod/v4";
-import { RemoteMagicMetadataSchema } from "./magic-metadata";
+import {
+    decryptMagicMetadata,
+    RemoteMagicMetadataSchema,
+    type RemoteMagicMetadata,
+} from "./magic-metadata";
 
 // TODO: Audit this file
 
@@ -140,8 +145,8 @@ export interface CollectionUser {
  */
 export const RemoteCollectionUser = z.object({
     id: z.number(),
-    email: z.string().nullish(),
-    role: z.string().nullish(),
+    email: z.string().nullish().transform(nullToUndefined),
+    role: z.string().nullish().transform(nullToUndefined),
 });
 
 type RemoteCollectionUser = z.infer<typeof RemoteCollectionUser>;
@@ -429,22 +434,55 @@ export const decryptRemoteCollection = (
  * Decrypt a remote collection using the provided key.
  *
  * This is the lower level implementation of {@link decryptRemoteCollection} for
- * use by code that already has determined which key should be used for
+ * use by code that has already determined which key should be used for
  * decrypting the collection.
  *
- * @param remoteCollection The collection to decrypt.
+ * @param collection The collection to decrypt.
  *
- * @param key The base64 encoded key to use for decrypting the various encrypted
- * fields in {@link remoteCollection}.
+ * @param decryptionKey The base64 encoded key to use for decrypting the various encrypted
+ * fields in {@link collection}.
  *
  * @returns A decrypted collection ({@link Collection2}).
  */
-export const decryptRemoteCollectionUsingKey = (
-    remoteCollection: RemoteCollection,
-    key: string,
+export const decryptRemoteCollectionUsingKey = async (
+    collection: RemoteCollection,
+    decryptionKey: string,
 ): Promise<Collection2> => {
-    // eslint-disable-next-line @typescript-eslint/no-base-to-string
-    throw new Error("TODO" + remoteCollection.toString() + key.toString());
+    const { id, owner, type, sharees, publicURLs, updationTime } = collection;
+    const { encryptedKey, keyDecryptionNonce } = collection;
+    const collectionKey = await decryptBox(
+        { encryptedData: encryptedKey, nonce: keyDecryptionNonce },
+        decryptionKey,
+    );
+
+    const name =
+        collection.name ??
+        new TextDecoder().decode(
+            await decryptBoxBytes(
+                {
+                    encryptedData: collection.encryptedName!,
+                    nonce: collection.nameDecryptionNonce!,
+                },
+                collectionKey,
+            ),
+        );
+
+    const decryptMM = async (mm: RemoteMagicMetadata | undefined) =>
+        mm ? await decryptMagicMetadata(mm, collectionKey) : undefined;
+
+    return {
+        id,
+        owner,
+        key: collectionKey,
+        name,
+        type,
+        sharees,
+        publicURLs,
+        updationTime,
+        magicMetadata: await decryptMM(collection.magicMetadata),
+        pubMagicMetadata: await decryptMM(collection.pubMagicMetadata),
+        sharedMagicMetadata: await decryptMM(collection.sharedMagicMetadata),
+    };
 };
 
 /**
