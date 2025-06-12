@@ -1,16 +1,34 @@
-import type { User } from "ente-accounts/services/user";
-import { boxSeal, encryptBox } from "ente-base/crypto";
+import { ensureLocalUser, type User } from "ente-accounts/services/user";
+import {
+    boxSeal,
+    boxSealOpen,
+    decryptBox,
+    encryptBox,
+    generateKey,
+} from "ente-base/crypto";
 import { authenticatedRequestHeaders, ensureOk } from "ente-base/http";
 import { apiURL } from "ente-base/origins";
+import { ensureMasterKeyFromSession } from "ente-base/session";
 import {
     CollectionSubType,
+    decryptRemoteCollection,
+    RemoteCollectionSchema,
     type Collection,
+    type Collection2,
     type CollectionNewParticipantRole,
+    type CollectionPrivateMagicMetadataData,
+    type CollectionType,
+    type RemoteCollection,
 } from "ente-media/collection";
 import { type EnteFile } from "ente-media/file";
 import { ItemVisibility } from "ente-media/file-metadata";
+import {
+    createMagicMetadata,
+    encryptMagicMetadata,
+} from "ente-media/magic-metadata";
 import { batch } from "ente-utils/array";
-import { getPublicKey } from "./user";
+import { z } from "zod/v4";
+import { ensureUserKeyPair, getPublicKey } from "./user";
 
 /**
  * An reasonable but otherwise arbitrary number of items (e.g. files) to include
@@ -79,6 +97,91 @@ export const getCollectionUserFacingName = (collection: Collection) => {
         return DEFAULT_HIDDEN_COLLECTION_USER_FACING_NAME;
     }
     return collection.name;
+};
+
+/**
+ * Create a new collection on remote, and return its local representation.
+ *
+ * Remote only, does not modify local state.
+ *
+ * @param name The name of the new collection.
+ *
+ * @param type The type of the new collection.
+ *
+ * @param magicMetadataData Optional metadata to use as the collection's private
+ * mutable metadata when creating the new collection.
+ */
+export const createCollection2 = async (
+    name: string,
+    type: CollectionType,
+    magicMetadataData?: CollectionPrivateMagicMetadataData,
+): Promise<Collection2> => {
+    const masterKey = await ensureMasterKeyFromSession();
+    const collectionKey = await generateKey();
+    const { encryptedData: encryptedKey, nonce: keyDecryptionNonce } =
+        await encryptBox(collectionKey, masterKey);
+    const { encryptedData: encryptedName, nonce: nameDecryptionNonce } =
+        await encryptBox(new TextEncoder().encode(name), collectionKey);
+    const magicMetadata = magicMetadataData
+        ? await encryptMagicMetadata(
+              createMagicMetadata(magicMetadataData),
+              collectionKey,
+          )
+        : undefined;
+
+    const collection = await postCollections({
+        encryptedKey,
+        keyDecryptionNonce,
+        encryptedName,
+        nameDecryptionNonce,
+        type,
+        ...(magicMetadata ? { magicMetadata } : {}),
+    });
+
+    return decryptRemoteCollection(
+        collection,
+        await decryptCollectionKey(collection),
+    );
+};
+
+/**
+ * Return the decrypted collection key (as a base64 string) for the given
+ * {@link RemoteCollection}.
+ */
+export const decryptCollectionKey = async (
+    collection: RemoteCollection,
+): Promise<string> => {
+    const { owner, encryptedKey, keyDecryptionNonce } = collection;
+    if (owner.id == ensureLocalUser().id) {
+        // The collection key of collections owned by the user is encrypted with
+        // the user's master key.
+        return decryptBox(
+            { encryptedData: encryptedKey, nonce: keyDecryptionNonce },
+            await ensureMasterKeyFromSession(),
+        );
+    } else {
+        // The collection key of collections shared with the user is encrypted
+        // with the user's public key.
+        return boxSealOpen(encryptedKey, await ensureUserKeyPair());
+    }
+};
+
+/**
+ * Create a collection on remote with the provided data, and return the new
+ * remote collection object returned by remote on success.
+ */
+const postCollections = async (
+    collectionData: Partial<RemoteCollection>,
+): Promise<RemoteCollection> => {
+    const res = await fetch(await apiURL("/collections"), {
+        method: "POST",
+        headers: await authenticatedRequestHeaders(),
+        body: JSON.stringify(collectionData),
+    });
+    ensureOk(res);
+    return z
+        .object({ collection: RemoteCollectionSchema })
+        .parse(await res.json()).collection;
 };
 
 /**
