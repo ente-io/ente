@@ -1,5 +1,4 @@
 import { decryptMetadataJSON, encryptMetadataJSON } from "ente-base/crypto";
-import type { BytesOrB64 } from "ente-base/crypto/types";
 import { z } from "zod/v4";
 
 /**
@@ -7,9 +6,18 @@ import { z } from "zod/v4";
  * remote. It is effectively an envelope of the encrypted metadata contents with
  * some bookkeeping information attached.
  *
- * See {@link RemoteMagicMetadata} for the corresponding type. Since this module
- * exports both the Zod schema and the TypeScript type, to avoid confusion the
- * schema is suffixed by "Schema".
+ * See {@link RemoteMagicMetadata} for the corresponding type.
+ *
+ * [Note: Schema suffix for exported Zod schemas]
+ *
+ * Since this module exports both the Zod schema and the TypeScript type, to
+ * avoid confusion the schema is suffixed by "Schema".
+ *
+ * This is a general pattern we follow in all cases where we need to export the
+ * Zod schema so that it can be used as a composition block when defining other
+ * schemas. These are meant to be exceptions though, whenever possible, the
+ * schema should be internal to the module (and can thus have the same name as
+ * the TypeScript type, without the need for a disambiguating suffix).
  */
 export const RemoteMagicMetadataSchema = z.object({
     version: z.number(),
@@ -121,8 +129,8 @@ export interface MagicMetadata<T> {
  * discarded before obtaining the final object that will be encrypted (and whose
  * count will be used).
  *
- * @param key The key to use for encrypting the {@link data} contents of
- * {@link magicMetadata}.
+ * @param key The base64 encoded key to use for encrypting the {@link data}
+ * contents of {@link magicMetadata}.
  *
  * The specific key used depends on the object whose metadata this is. For
  * example, if this were the {@link pubMagicMetadata} associated with an
@@ -137,7 +145,7 @@ export interface MagicMetadata<T> {
  */
 export const encryptMagicMetadata = async <T>(
     magicMetadata: MagicMetadata<T> | undefined,
-    key: BytesOrB64,
+    key: string,
 ): Promise<RemoteMagicMetadata | undefined> => {
     if (!magicMetadata) return undefined;
 
@@ -166,7 +174,7 @@ export const encryptMagicMetadata = async <T>(
  */
 export const decryptMagicMetadata = async (
     remoteMagicMetadata: RemoteMagicMetadata | undefined,
-    key: BytesOrB64,
+    key: string,
 ): Promise<MagicMetadata<unknown> | undefined> => {
     if (!remoteMagicMetadata) return undefined;
 

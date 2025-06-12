@@ -117,8 +117,27 @@ export interface CollectionUser {
 
 /**
  * Zod schema for {@link CollectionUser}.
+ *
+ * [Note: Enums in remote objects]
+ *
+ * In some cases remote returns a value which is part of a known set. The
+ * underlying type might be an integer or a string.
+ *
+ * While Zod allows us to validate enum types during a parse, we refrain from
+ * doing this as this would cause existing clients to break if remote were to in
+ * the future add new enum cases.
+ *
+ * This is especially pertinent for objects which we might persist locally,
+ * since the client code which persists the object might not know about a
+ * particular enum case but a future client which reads the saved value might.
+ *
+ * So we keep the underlying data type (string or number) as it is instead of
+ * converting / validating to an enum or discarding unknown values.
+ *
+ * As an example consider the {@link role} item in {@link RemoteCollectionUser}.
+ * There is a known set of values ({@link CollectionParticipantRole}) this can
+ * be, but in the Zod schema we keep the data type as a string.
  */
-// TODO: Use me.
 export const RemoteCollectionUser = z.object({
     id: z.number(),
     email: z.string().nullish(),
@@ -130,6 +149,8 @@ type RemoteCollectionUser = z.infer<typeof RemoteCollectionUser>;
 /**
  * Zod schema for {@link Collection}.
  *
+ * See: [Note: Schema suffix for exported Zod schemas].
+ *
  * TODO(RE): The following reasoning is not fully correct, since we anyways need
  * to do a conversion when decrypting the collection's fields. The intent is to
  * update this once we've figured out something that also works with the current
@@ -140,35 +161,13 @@ type RemoteCollectionUser = z.infer<typeof RemoteCollectionUser>;
  * Objects like files and collections that we get from remote are treated
  * specially when it comes to schema validation.
  *
- * 1. Enum conversion.
- * 2. Loose objects.
- * 3. Blank handling.
  * 4. Casting instead of validating when reading local values.
  *
  * Let us take a concrete example of the {@link Collection} TypeScript type,
  * whose zod schema is defined by {@link RemoteCollection}.
  *
- * The collection that we get from remote contains (nested) enum types - a
- * {@link CollectionParticipantRole}. While zod allows us to validate enum types
- * during a parse, this would cause existing clients to break if remote were to
- * in the future add new enum cases. So when parsing we'd like to keep the role
- * value as a string.
- *
- * This is especially important for a object like {@link Collection} which is
- * also persisted locally, because a current client code might persist a object
- * which might be read by future client code that understands more fields. So we
- * use zod's {@link looseObject} directive on the {@link RemoteCollection} to
- * ensure we don't discard fields we don't recognize, in a manner similar to
- * [Note: Use looseObject for metadata Zod schemas].
- *
- * In keeping with this general principle of retaining the object we get from
- * remote as vintage as possible, we also don't do transformations to deal with
- * various remote idiosyncracies. For example, for the role field remote (in
- * some cases) uses blanks to indicate missing values. While zod would allow to
- * transform these, we just let it be as remote had sent it.
- *
- * Finally, while we always use the {@link RemoteCollection} schema validator
- * when parsing remote network responses, we don't do the same when reading the
+ * While we always use the {@link RemoteCollection} schema validator when
+ * parsing remote network responses, we don't do the same when reading the
  * persisted values. This is to retain the performance characteristics of the
  * existing code. This might seem miniscule for the {@link Collection} example,
  * but users can easily have hundreds of thousands of {@link EnteFile}s
@@ -179,11 +178,6 @@ type RemoteCollectionUser = z.infer<typeof RemoteCollectionUser>;
  * So when reading arrays of these objects from local DB, we do a cast instead
  * of do a runtime zod validation.
  *
- * To summarize, for certain remote objects which are also persisted to disk in
- * potentially large numbers, we (a) try to retain the remote semantics as much
- * as possible to avoid the need for a parsing / transform step, and (b) we
- * don't even do a parsing / transform step when reading them from local DB.
- *
  * This means that the "types might lie". On the other hand, we need to special
  * case only very specific objects this way:
  *
@@ -192,8 +186,7 @@ type RemoteCollectionUser = z.infer<typeof RemoteCollectionUser>;
  * 3. {@link Trash}
  *
  */
-// TODO: Use me
-export const RemoteCollection = z.object({
+export const RemoteCollectionSchema = z.object({
     id: z.number(),
     owner: RemoteCollectionUser,
     encryptedKey: z.string(),
@@ -234,6 +227,8 @@ export const RemoteCollection = z.object({
     sharedMagicMetadata:
         RemoteMagicMetadataSchema.nullish().transform(nullToUndefined),
 });
+
+export type RemoteCollection = z.infer<typeof RemoteCollectionSchema>;
 
 export interface EncryptedCollection {
     /**
@@ -360,6 +355,46 @@ export interface PublicURL {
     opsLimit?: number;
     memLimit?: number;
 }
+
+/**
+ * Pertinent information about the Ente user on whose behalf we are trying to
+ * decrypt a collection received from remote.
+ */
+interface CollectionDecryptionUser {
+    /**
+     * The ID of the currently logged in user.
+     */
+    userID: number;
+    /**
+     * The base64 encoded master key of the currently logged in user.
+     *
+     * This is used for decrypting collections that the user owns.
+     */
+    masterKey: string;
+    /**
+     * The base64 encoded private key of the currently logged in user.
+     *
+     * This is used for decrypting collections that have been shared with the
+     * user.
+     */
+    privateKey: string;
+}
+
+/**
+ * Decrypt a collection obtained from remote ({@link RemoteCollection}) into the
+ * collection object that we use and persist on the client ({@link Collection}).
+ *
+ * @param remoteCollection The collection object we received from remote. This
+ * can be thought of as an envelope, the actual consumables within it are
+ * encrypted using the user's master key or public key.
+ *
+ * @param user The ID of the currently logged in user, and their keys. This is
+ * needed to decrypt the encrypted remote collection.
+ */
+export const decryptRemoteCollection = (
+    remoteCollection: RemoteCollection,
+    user: CollectionDecryptionUser,
+) => {};
 
 export interface UpdatePublicURL {
     collectionID: number;
