@@ -4,15 +4,13 @@ import {
     type MagicMetadataCore,
 } from "ente-media/file";
 import { ItemVisibility } from "ente-media/file-metadata";
-import { nullToUndefined } from "ente-utils/transform";
+import { nullishToEmpty, nullToUndefined } from "ente-utils/transform";
 import { z } from "zod/v4";
 import {
     decryptMagicMetadata,
     RemoteMagicMetadataSchema,
     type RemoteMagicMetadata,
 } from "./magic-metadata";
-
-// TODO: Audit this file
 
 /**
  * The type of a collection.
@@ -155,47 +153,22 @@ type RemoteCollectionUser = z.infer<typeof RemoteCollectionUser>;
  * Zod schema for {@link Collection}.
  *
  * See: [Note: Schema suffix for exported Zod schemas].
- *
- * TODO(RE): The following reasoning is not fully correct, since we anyways need
- * to do a conversion when decrypting the collection's fields. The intent is to
- * update this once we've figured out something that also works with the current
- * persistence mechanism (trying to avoid a migration).
- *
- * [Note: Schema validation for bulk persisted remote objects]
- *
- * Objects like files and collections that we get from remote are treated
- * specially when it comes to schema validation.
- *
- * 4. Casting instead of validating when reading local values.
- *
- * Let us take a concrete example of the {@link Collection} TypeScript type,
- * whose zod schema is defined by {@link RemoteCollection}.
- *
- * While we always use the {@link RemoteCollection} schema validator when
- * parsing remote network responses, we don't do the same when reading the
- * persisted values. This is to retain the performance characteristics of the
- * existing code. This might seem miniscule for the {@link Collection} example,
- * but users can easily have hundreds of thousands of {@link EnteFile}s
- * persisted locally, and while the overhead of validation when reading from DB
- * might not matter, but it needs to be profiled first before adding it to the
- * existing code paths.
- *
- * So when reading arrays of these objects from local DB, we do a cast instead
- * of do a runtime zod validation.
- *
- * This means that the "types might lie". On the other hand, we need to special
- * case only very specific objects this way:
- *
- * 1. {@link EnteFile}
- * 2. {@link Collection}
- * 3. {@link Trash}
- *
  */
 export const RemoteCollectionSchema = z.object({
     id: z.number(),
     owner: RemoteCollectionUser,
     encryptedKey: z.string(),
+    /**
+     * Remote will set this to a blank string for albums which have been shared
+     * with the user (the decryption pipeline for those doesn't use the nonce).
+     */
     keyDecryptionNonce: z.string(),
+    /**
+     * Expected to be present (along with {@link nameDecryptionNonce}), but it
+     * is still optional since it might not be present if {@link name} is present.
+     */
+    encryptedName: z.string().nullish().transform(nullToUndefined),
+    nameDecryptionNonce: z.string().nullish().transform(nullToUndefined),
     /**
      * Not used anymore, but still might be present for very old collections.
      *
@@ -206,17 +179,11 @@ export const RemoteCollectionSchema = z.object({
      */
     name: z.string().nullish().transform(nullToUndefined),
     /**
-     * Expected to be present (along with {@link nameDecryptionNonce}), but it
-     * is still optional since it might not be present if {@link name} is present.
+     * Expected to be one of {@link CollectionType}
      */
-    encryptedName: z.string().nullish().transform(nullToUndefined),
-    nameDecryptionNonce: z.string().nullish().transform(nullToUndefined),
-    /* Expected to be one of {@link CollectionType} */
     type: z.string(),
-    // TODO(RE): Use nullishToEmpty?
-    sharees: z.array(RemoteCollectionUser).nullish().transform(nullToUndefined), // ?
-    // TODO(RE): Use nullishToEmpty?
-    publicURLs: z.array(z.looseObject({})).nullish().transform(nullToUndefined), // ?
+    sharees: z.array(RemoteCollectionUser).nullish().transform(nullishToEmpty),
+    publicURLs: z.array(z.looseObject({})).nullish().transform(nullishToEmpty),
     updationTime: z.number(),
     /**
      * Tombstone marker.
@@ -326,7 +293,7 @@ export interface Collection2 {
      *
      * Expected to be one of {@link CollectionType}.
      */
-    type: string; // CollectionType;
+    type: string;
     /**
      * The other Ente users with whom the collection has been shared with.
      *
@@ -335,7 +302,7 @@ export interface Collection2 {
      * - {@link email} will be set.
      * - {@link role} is expected to be one of "VIEWER" or "COLLABORATOR".
      */
-    sharees?: CollectionUser[];
+    sharees: CollectionUser[];
     /**
      * Public links that can be used to access and update the collection.
      */

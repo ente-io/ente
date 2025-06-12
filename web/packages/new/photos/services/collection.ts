@@ -1,5 +1,11 @@
-import type { User } from "ente-accounts/services/user";
-import { boxSeal, decryptBox, encryptBox, generateKey } from "ente-base/crypto";
+import { ensureLocalUser, type User } from "ente-accounts/services/user";
+import {
+    boxSeal,
+    boxSealOpen,
+    decryptBox,
+    encryptBox,
+    generateKey,
+} from "ente-base/crypto";
 import { authenticatedRequestHeaders, ensureOk } from "ente-base/http";
 import { apiURL } from "ente-base/origins";
 import { ensureMasterKeyFromSession } from "ente-base/session";
@@ -22,7 +28,7 @@ import {
 } from "ente-media/magic-metadata";
 import { batch } from "ente-utils/array";
 import { z } from "zod/v4";
-import { getPublicKey } from "./user";
+import { ensureUserKeyPair, getPublicKey } from "./user";
 
 /**
  * An reasonable but otherwise arbitrary number of items (e.g. files) to include
@@ -123,7 +129,7 @@ export const createCollection2 = async (
           )
         : undefined;
 
-    const remoteCollection = await postCollections({
+    const collection = await postCollections({
         encryptedKey,
         keyDecryptionNonce,
         encryptedName,
@@ -132,30 +138,32 @@ export const createCollection2 = async (
         ...(magicMetadata ? { magicMetadata } : {}),
     });
 
-    return decryptRemoteCollectionUsingMasterKey(remoteCollection);
+    return decryptRemoteCollection(
+        collection,
+        await decryptCollectionKey(collection),
+    );
 };
 
 /**
- * Decrypt a collection obtained from remote ({@link RemoteCollection}) into the
- * collection object that we use and persist on the client ({@link Collection}).
- *
- * @param collection The collection object we received from remote. This
- * can be thought of as an envelope, the actual consumables within it are
- * encrypted using the user's master key or public key.
- *
- * @param user The ID of the currently logged in user, and their keys. This is
- * needed to decrypt the encrypted remote collection.
+ * Return the decrypted collection key (as a base64 string) for the given
+ * {@link RemoteCollection}.
  */
-export const decryptRemoteCollectionUsingMasterKey = async (
+export const decryptCollectionKey = async (
     collection: RemoteCollection,
-): Promise<Collection2> => {
-    const { encryptedKey, keyDecryptionNonce } = collection;
-    const collectionKey = await decryptBox(
-        { encryptedData: encryptedKey, nonce: keyDecryptionNonce },
-        await ensureMasterKeyFromSession(),
-    );
-
-    return decryptRemoteCollection(collection, collectionKey);
+): Promise<string> => {
+    const { owner, encryptedKey, keyDecryptionNonce } = collection;
+    if (owner.id == ensureLocalUser().id) {
+        // The collection key of collections owned by the user is encrypted with
+        // the user's master key.
+        return decryptBox(
+            { encryptedData: encryptedKey, nonce: keyDecryptionNonce },
+            await ensureMasterKeyFromSession(),
+        );
+    } else {
+        // The collection key of collections shared with the user is encrypted
+        // with the user's public key.
+        return boxSealOpen(encryptedKey, await ensureUserKeyPair());
+    }
 };
 
 /**
