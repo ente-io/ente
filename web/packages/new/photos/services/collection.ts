@@ -557,7 +557,6 @@ export const unshareCollection = async (collectionID: number, email: string) =>
  * The subset of public URL attributes that can be customized by the user when
  * creating a link.
  */
-
 export type CreatePublicURLAttributes = Pick<
     Partial<PublicURL>,
     "enableCollect" | "enableJoin" | "validTill" | "deviceLimit"
@@ -572,9 +571,6 @@ export type CreatePublicURLAttributes = Pick<
  * be created.
  *
  * @param attributes Optional attributes to set when creating the public link.
- *
- * the . If true, then the link is created
- * with the {@link enableCollect} attribute
  */
 export const createPublicURL = async (
     collectionID: number,
