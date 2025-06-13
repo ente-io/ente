@@ -55,11 +55,13 @@ import { type CollectionUser } from "ente-media/collection";
 import { PublicLinkCreated } from "ente-new/photos/components/share/PublicLinkCreated";
 import { avatarTextColor } from "ente-new/photos/services/avatar";
 import {
+    createPublicURL,
     deleteShareURL,
     shareCollection,
     unshareCollection,
     updatePublicURL,
-    type PublicURLUpdatableAttributes,
+    type CreatePublicURLAttributes,
+    type UpdatePublicURLAttributes,
 } from "ente-new/photos/services/collection";
 import type { CollectionSummary } from "ente-new/photos/services/collection/ui";
 import { usePhotosAppContext } from "ente-new/photos/types/context";
@@ -77,7 +79,6 @@ import React, {
     useState,
 } from "react";
 import { Trans } from "react-i18next";
-import { createShareableURL } from "services/collectionService";
 import { z } from "zod/v4";
 
 type CollectionShareProps = ModalVisibilityProps & {
@@ -1045,28 +1046,11 @@ const EnablePublicShareOptions: React.FC<EnablePublicShareOptionsProps> = ({
     const galleryContext = useContext(GalleryContext);
     const [sharableLinkError, setSharableLinkError] = useState(null);
 
-    const createSharableURLHelper = async () => {
+    const handleCreateURL = async (attributes?: CreatePublicURLAttributes) => {
         try {
             setSharableLinkError(null);
             galleryContext.setBlockingLoad(true);
-            setPublicURL(await createShareableURL(collection));
-            onLinkCreated();
-            galleryContext.syncWithRemote(false, true);
-        } catch (e) {
-            const errorMessage = handleSharingErrors(e);
-            setSharableLinkError(errorMessage);
-        } finally {
-            galleryContext.setBlockingLoad(false);
-        }
-    };
-
-    const createCollectPhotoShareableURLHelper = async () => {
-        try {
-            setSharableLinkError(null);
-            galleryContext.setBlockingLoad(true);
-            const publicURL = await createShareableURL(collection);
-            await updatePublicURL(collection.id, { enableCollect: true });
-            setPublicURL(publicURL);
+            setPublicURL(await createPublicURL(collection.id, attributes));
             onLinkCreated();
             galleryContext.syncWithRemote(false, true);
         } catch (e) {
@@ -1086,13 +1070,13 @@ const EnablePublicShareOptions: React.FC<EnablePublicShareOptionsProps> = ({
                 <RowButton
                     label={t("create_public_link")}
                     startIcon={<LinkIcon />}
-                    onClick={createSharableURLHelper}
+                    onClick={handleCreateURL}
                 />
                 <RowButtonDivider />
                 <RowButton
                     label={t("collect_photos")}
                     startIcon={<DownloadSharpIcon />}
-                    onClick={createCollectPhotoShareableURLHelper}
+                    onClick={() => handleCreateURL({ enableCollect: true })}
                 />
             </RowButtonGroup>
             {sharableLinkError && (
@@ -1214,7 +1198,7 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
     };
 
     const handlePublicURLUpdate = async (
-        updates: PublicURLUpdatableAttributes,
+        updates: UpdatePublicURLAttributes,
     ) => {
         try {
             galleryContext.setBlockingLoad(true);
@@ -1314,7 +1298,7 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
  */
 interface ManagePublicLinkSettingProps {
     publicURL: PublicURL;
-    onUpdate: (req: PublicURLUpdatableAttributes) => Promise<void>;
+    onUpdate: (req: UpdatePublicURLAttributes) => Promise<void>;
 }
 
 /**

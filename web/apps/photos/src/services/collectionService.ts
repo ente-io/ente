@@ -505,28 +505,6 @@ const renameCollection1 = async (
     );
 };
 
-export const createShareableURL = async (collection: Collection) => {
-    try {
-        const token = getToken();
-        if (!token) {
-            return null;
-        }
-        const createPublicAccessTokenRequest: CreatePublicAccessTokenRequest = {
-            collectionID: collection.id,
-        };
-        const resp = await HTTPService.post(
-            await apiURL("/collections/share-url"),
-            createPublicAccessTokenRequest,
-            null,
-            { "X-Auth-Token": token },
-        );
-        return resp.data.result as PublicURL;
-    } catch (e) {
-        log.error("createShareableURL failed ", e);
-        throw e;
-    }
-};
-
 /**
  * Return the user's own favorites collection, if any.
  */

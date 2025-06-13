@@ -558,7 +558,7 @@ export const unshareCollection = async (collectionID: number, email: string) =>
  * creating a link.
  */
 
-type CreatePublicLinkOpts = Pick<
+export type CreatePublicURLAttributes = Pick<
     Partial<PublicURL>,
     "enableCollect" | "enableJoin" | "validTill" | "deviceLimit"
 >;
@@ -571,19 +571,19 @@ type CreatePublicLinkOpts = Pick<
  * @param collectionID The ID of the collection for which the public link should
  * be created.
  *
- * @param opts Optional attributes to set when creating the public link.
+ * @param attributes Optional attributes to set when creating the public link.
  *
  * the . If true, then the link is created
  * with the {@link enableCollect} attribute
  */
 export const createPublicURL = async (
     collectionID: number,
-    opts?: CreatePublicLinkOpts,
-) => {
+    attributes?: CreatePublicURLAttributes,
+): Promise<PublicURL> => {
     const res = await fetch(await apiURL("/collections/share-url"), {
         method: "POST",
         headers: await authenticatedRequestHeaders(),
-        body: JSON.stringify({ collectionID, ...opts }),
+        body: JSON.stringify({ collectionID, ...attributes }),
     });
     ensureOk(res);
     return z.object({ result: RemotePublicURL }).parse(await res.json()).result;
@@ -593,7 +593,7 @@ export const createPublicURL = async (
  * The subset of public URL attributes that can be updated by the user after the
  * link has already been created.
  */
-export type PublicURLUpdatableAttributes = Omit<
+export type UpdatePublicURLAttributes = Omit<
     Partial<PublicURL>,
     "url" | "enablePassword"
 > & { disablePassword?: boolean; passHash?: string };
@@ -613,7 +613,7 @@ export type PublicURLUpdatableAttributes = Omit<
  */
 export const updatePublicURL = async (
     collectionID: number,
-    updates: PublicURLUpdatableAttributes,
+    updates: UpdatePublicURLAttributes,
 ): Promise<PublicURL> => {
     const res = await fetch(await apiURL("/collections/share-url"), {
         method: "PUT",
