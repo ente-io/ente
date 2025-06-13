@@ -14,6 +14,7 @@ import {
     decryptRemoteCollection,
     RemoteCollection,
     type Collection,
+    type Collection2,
     type CollectionNewParticipantRole,
     type CollectionPrivateMagicMetadataData,
     type CollectionType,
@@ -223,7 +224,7 @@ export interface MoveToCollectionRequest {
  * Make a remote request to add the given {@link files} to the given
  * {@link collection}.
  *
- * Does not modify local state.
+ * Remote only, does not modify local state.
  */
 export const addToCollection = async (
     collection: Collection,
@@ -251,7 +252,7 @@ export const addToCollection = async (
  * Make a remote request to restore the given {@link files} to the given
  * {@link collection}.
  *
- * Does not modify local state.
+ * Remote only, does not modify local state.
  */
 export const restoreToCollection = async (
     collection: Collection,
@@ -280,7 +281,7 @@ export const restoreToCollection = async (
  * identified by its {@link fromCollectionID}) to the given
  * {@link toCollection}.
  *
- * Does not modify local state.
+ * Remote only, does not modify local state.
  */
 export const moveToCollection = async (
     fromCollectionID: number,
@@ -333,7 +334,7 @@ const encryptWithCollectionKey = async (
  * both a file ID and a collection ID, but there should be at most one entry for
  * a particular fileID in this array.
  *
- * Does not modify local state.
+ * Remote only, does not modify local state.
  */
 export const moveToTrash = async (files: EnteFile[]) => {
     for (const batchFiles of batch(files, requestBatchSize)) {
@@ -355,7 +356,7 @@ export const moveToTrash = async (files: EnteFile[]) => {
 /**
  * Make a remote request to delete the given {@link fileIDs} from trash.
  *
- * Does not modify local state.
+ * Remote only, does not modify local state.
  */
 export const deleteFromTrash = async (fileIDs: number[]) => {
     for (const batchIDs of batch(fileIDs, requestBatchSize)) {
@@ -367,6 +368,28 @@ export const deleteFromTrash = async (fileIDs: number[]) => {
             }),
         );
     }
+};
+
+/**
+ * Update the private magic metadata contents of a collection on remote.
+ *
+ * Remote only, does not modify local state.
+ *
+ * @param collection The collection whose magic metadata we want to update. In
+ * particular, the existing magic metadata of this collection is used both to
+ * obtain the current magic metadata version, and the existing contents on top
+ * of which the updates are applied.
+ *
+ * @param updates A non-empty subset of
+ * {@link CollectionPrivateMagicMetadataData} entries.
+ *
+ * See: [Note: Magic metadata data cannot have nullish values]
+ */
+export const updateCollectionPrivateMagicMetadata = async (
+    collection: Collection2,
+    updates: CollectionPrivateMagicMetadataData,
+) => {
+    throw new Error("TODO");
 };
 
 /**
