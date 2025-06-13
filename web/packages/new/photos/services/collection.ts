@@ -372,6 +372,49 @@ export const deleteFromTrash = async (fileIDs: number[]) => {
 };
 
 /**
+ * Rename a collection on remote.
+ *
+ * Remote only, does not modify local state.
+ *
+ * @param collection The collection to rename.
+ *
+ * @param newName The new name of the collection
+ */
+export const renameCollection = async (
+    collection: Collection2,
+    newName: string,
+) => {
+    if (collection.magicMetadata?.data.subType == CollectionSubType.quicklink) {
+        // Convert quicklinks to a regular collection before giving them a name.
+        await updateCollectionPrivateMagicMetadata(collection, {
+            subType: CollectionSubType.default,
+        });
+    }
+    const { encryptedData: encryptedName, nonce: nameDecryptionNonce } =
+        await encryptBox(new TextEncoder().encode(newName), collection.key);
+    await postCollectionsRename({
+        collectionID: collection.id,
+        encryptedName,
+        nameDecryptionNonce,
+    });
+};
+
+interface RenameRequest {
+    collectionID: number;
+    encryptedName: string;
+    nameDecryptionNonce: string;
+}
+
+const postCollectionsRename = async (renameRequest: RenameRequest) =>
+    ensureOk(
+        await fetch(await apiURL("/collections/rename"), {
+            method: "POST",
+            headers: await authenticatedRequestHeaders(),
+            body: JSON.stringify(renameRequest),
+        }),
+    );
+
+/**
  * Update the private magic metadata contents of a collection on remote.
  *
  * Remote only, does not modify local state.
