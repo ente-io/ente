@@ -560,7 +560,8 @@ export const decryptRemoteCollection = async (
     // Temporary scaffolding for the migration.
     return {
         ...collection,
-        c2,
+        // See: [Note: strict mode migration]
+        c2: c2 as Collection2,
         key: collectionKey,
         name,
         type: collection.type as CollectionType,
