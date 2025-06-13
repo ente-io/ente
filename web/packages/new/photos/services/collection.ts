@@ -135,7 +135,7 @@ export const createCollection2 = async (
         encryptedName,
         nameDecryptionNonce,
         type,
-        ...(magicMetadata ? { magicMetadata } : {}),
+        ...(magicMetadata && { magicMetadata }),
     });
 
     return decryptRemoteCollection(
