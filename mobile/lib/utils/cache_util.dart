@@ -40,7 +40,7 @@ Future<void> _writeToJsonFile<P>(Map<String, dynamic> args) async {
     final encodedData = utf8.encode(jsonString);
     await file.writeAsBytes(encodedData);
   } catch (e, s) {
-    log("Error writing to JSON file with UTF-, $e, \n $s");
+    log("Error writing to JSON file with UTF-8 encoding, $e, \n $s");
   }
 }
 
