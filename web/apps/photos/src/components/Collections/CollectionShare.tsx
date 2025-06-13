@@ -1046,18 +1046,18 @@ const EnablePublicShareOptions: React.FC<EnablePublicShareOptionsProps> = ({
 }) => {
     const { syncWithRemote } = useContext(GalleryContext);
 
-    const [loading, setLoading] = useState(false);
+    const [pending, setPending] = useState("");
     const [errorMessage, setErrorMessage] = useState("");
 
     const handleCreateURL = async (attributes?: CreatePublicURLAttributes) => {
         setErrorMessage("");
-        setLoading(true);
+        setPending(attributes ? "collect" : "link");
 
         try {
             setPublicURL(await createPublicURL(collection.id, attributes));
         } catch (e) {
             log.error("Could not create public link", e);
-            setLoading(false);
+            setPending("");
             setErrorMessage(
                 isHTTPErrorWithStatus(e, 402)
                     ? t("sharing_disabled_for_free_accounts")
@@ -1079,16 +1079,25 @@ const EnablePublicShareOptions: React.FC<EnablePublicShareOptionsProps> = ({
                 <RowButton
                     label={t("create_public_link")}
                     startIcon={<LinkIcon />}
+                    disabled={!!pending}
+                    endIcon={
+                        pending == "link" && <ActivityIndicator size="20px" />
+                    }
                     onClick={handleCreateURL}
                 />
                 <RowButtonDivider />
                 <RowButton
                     label={t("collect_photos")}
                     startIcon={<DownloadSharpIcon />}
+                    disabled={!!pending}
+                    endIcon={
+                        pending == "collect" && (
+                            <ActivityIndicator size="20px" />
+                        )
+                    }
                     onClick={() => handleCreateURL({ enableCollect: true })}
                 />
             </RowButtonGroup>
-            {loading && <ActivityIndicator />}
             {errorMessage && (
                 <Typography
                     variant="small"
