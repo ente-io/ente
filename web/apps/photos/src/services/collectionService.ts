@@ -24,9 +24,11 @@ import { EncryptedMagicMetadata, EnteFile } from "ente-media/file";
 import { ItemVisibility } from "ente-media/file-metadata";
 import {
     addToCollection,
+    collection1To2,
     createCollection2,
     isDefaultHiddenCollection,
     moveToCollection,
+    renameCollection2,
 } from "ente-new/photos/services/collection";
 import type { CollectionSummary } from "ente-new/photos/services/collection/ui";
 import {
@@ -59,15 +61,17 @@ const favoritesCollectionName = "Favorites";
 const REQUEST_BATCH_SIZE = 1000;
 
 export const createAlbum = (albumName: string) =>
-    createCollectionReroute(albumName, "album");
+    createCollection(albumName, "album");
 
-const createCollectionReroute = async (
+// TODO(C2):
+const enableC2 = () => isDevBuild && process.env.NEXT_PUBLIC_ENTE_WIP_NEWIMPL;
+
+const createCollection = async (
     collectionName: string,
     type: CollectionType,
     magicMetadataProps?: CollectionMagicMetadataProps,
 ): Promise<Collection> => {
-    // TODO(C2):
-    if (isDevBuild && process.env.NEXT_PUBLIC_ENTE_WIP_NEWIMPL) {
+    if (enableC2()) {
         const z = createCollection2(collectionName, type, magicMetadataProps);
         z.then((x) => console.log(x));
         return z;
@@ -153,7 +157,7 @@ const postCollection = async (
 };
 
 export const createFavoritesCollection = () =>
-    createCollectionReroute(favoritesCollectionName, "favorites");
+    createCollection(favoritesCollectionName, "favorites");
 
 export const addToFavorites = async (
     file: EnteFile,
@@ -469,6 +473,14 @@ export const updatePublicCollectionMagicMetadata = async (
 export const renameCollection = async (
     collection: Collection,
     newCollectionName: string,
+) =>
+    enableC2()
+        ? renameCollection2(await collection1To2(collection), newCollectionName)
+        : renameCollection1(collection, newCollectionName);
+
+const renameCollection1 = async (
+    collection: Collection,
+    newCollectionName: string,
 ) => {
     if (isQuickLinkCollection(collection)) {
         // Convert quick link collection to normal collection on rename
@@ -629,7 +641,7 @@ export async function getUncategorizedCollection(
 }
 
 export const createUnCategorizedCollection = () =>
-    createCollectionReroute(uncategorizedCollectionName, "uncategorized");
+    createCollection(uncategorizedCollectionName, "uncategorized");
 
 export async function getDefaultHiddenCollection(): Promise<Collection> {
     const collections = await getLocalCollections("hidden");
@@ -641,7 +653,7 @@ export async function getDefaultHiddenCollection(): Promise<Collection> {
 }
 
 const createDefaultHiddenCollection = () =>
-    createCollectionReroute(defaultHiddenCollectionName, "album", {
+    createCollection(defaultHiddenCollectionName, "album", {
         subType: CollectionSubType.defaultHidden,
         visibility: ItemVisibility.hidden,
     });

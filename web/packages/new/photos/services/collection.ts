@@ -144,6 +144,26 @@ export const createCollection2 = async (
     );
 };
 
+// TODO(C2): Temporary method to convert to the newer type.
+export const collection1To2 = async (c1: Collection): Promise<Collection2> => {
+    const collection = RemoteCollection.parse({
+        ...c1,
+        magicMetadata: undefined,
+        pubMagicMetadata: undefined,
+        sharedMagicMetadata: undefined,
+    });
+    const c2 = await decryptRemoteCollection(
+        collection,
+        await decryptCollectionKey(collection),
+    );
+    return {
+        ...c2,
+        magicMetadata: c1.magicMetadata,
+        pubMagicMetadata: c1.pubMagicMetadata,
+        sharedMagicMetadata: c1.sharedMagicMetadata,
+    };
+};
+
 /**
  * Return the decrypted collection key (as a base64 string) for the given
  * {@link RemoteCollection}.
@@ -380,7 +400,7 @@ export const deleteFromTrash = async (fileIDs: number[]) => {
  *
  * @param newName The new name of the collection
  */
-export const renameCollection = async (
+export const renameCollection2 = async (
     collection: Collection2,
     newName: string,
 ) => {
@@ -473,7 +493,7 @@ const putCollectionsMagicMetadata = async (
 ) =>
     ensureOk(
         await fetch(await apiURL("/collections/magic-metadata"), {
-            method: "POST",
+            method: "PUT",
             headers: await authenticatedRequestHeaders(),
             body: JSON.stringify(updateRequest),
         }),
