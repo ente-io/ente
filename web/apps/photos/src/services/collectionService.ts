@@ -59,10 +59,13 @@ const FAVORITE_COLLECTION_NAME = "Favorites";
 const REQUEST_BATCH_SIZE = 1000;
 
 export const createAlbum = (albumName: string) => {
+    // TODO(C2):
     if (isDevBuild && process.env.NEXT_PUBLIC_ENTE_WIP_NEWIMPL) {
-        // TODO: WIP
-        console.log(createCollection2);
-        // return createCollection2(albumName, "album");
+        // TODO(C2):
+        // In general this cast would not necessarily be correct, but we still
+        // need to add it as temporary scaffolding as part of the migration to
+        // the new type.
+        return createCollection2(albumName, "album") as Promise<Collection>;
     }
     return createCollection(albumName, "album");
 };

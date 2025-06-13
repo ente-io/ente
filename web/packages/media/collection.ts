@@ -116,6 +116,10 @@ export interface Collection2 {
      * See: [Note: Metadatum]
      */
     sharedMagicMetadata?: MagicMetadata<CollectionShareeMagicMetadataData>;
+    // TODO(C2): Temporarily forwarded for compatilibity with the existing
+    // collection type.
+    isDeleted: boolean;
+    attributes: unknown;
 }
 
 /**
@@ -318,9 +322,9 @@ export interface EncryptedCollection {
     publicURLs?: PublicURL[];
     updationTime: number;
     isDeleted: boolean;
-    magicMetadata: EncryptedMagicMetadata;
-    pubMagicMetadata: EncryptedMagicMetadata;
-    sharedMagicMetadata: EncryptedMagicMetadata;
+    magicMetadata?: EncryptedMagicMetadata;
+    pubMagicMetadata?: EncryptedMagicMetadata;
+    sharedMagicMetadata?: EncryptedMagicMetadata;
 }
 
 export interface Collection
@@ -423,6 +427,9 @@ export const decryptRemoteCollection = async (
         magicMetadata,
         pubMagicMetadata,
         sharedMagicMetadata,
+        // TODO(C2):
+        isDeleted: !!collection.isDeleted,
+        attributes: {},
     };
 };
 
@@ -590,13 +597,14 @@ export interface RemoveFromCollectionRequest {
 }
 
 export interface CollectionMagicMetadataProps {
-    visibility?: ItemVisibility;
-    subType?: CollectionSubType;
+    visibility?: number; // ItemVisibility;
+    subType?: number; // CollectionSubType;
     order?: number;
 }
 
 export type CollectionMagicMetadata =
-    MagicMetadataCore<CollectionMagicMetadataProps>;
+    // TODO(C2):
+    Omit<MagicMetadataCore<CollectionMagicMetadataProps>, "header">;
 
 export interface CollectionShareeMetadataProps {
     visibility?: ItemVisibility;
