@@ -554,6 +554,42 @@ export const unshareCollection = async (collectionID: number, email: string) =>
     );
 
 /**
+ * The subset of public URL attributes that can be customized by the user when
+ * creating a link.
+ */
+
+type CreatePublicLinkOpts = Pick<
+    Partial<PublicURL>,
+    "enableCollect" | "enableJoin" | "validTill" | "deviceLimit"
+>;
+
+/**
+ * Create a new public link for the given collection.
+ *
+ * Remote only, does not modify local state.
+ *
+ * @param collectionID The ID of the collection for which the public link should
+ * be created.
+ *
+ * @param opts Optional attributes to set when creating the public link.
+ *
+ * the . If true, then the link is created
+ * with the {@link enableCollect} attribute
+ */
+export const createPublicURL = async (
+    collectionID: number,
+    opts?: CreatePublicLinkOpts,
+) => {
+    const res = await fetch(await apiURL("/collections/share-url"), {
+        method: "POST",
+        headers: await authenticatedRequestHeaders(),
+        body: JSON.stringify({ collectionID, ...opts }),
+    });
+    ensureOk(res);
+    return z.object({ result: RemotePublicURL }).parse(await res.json()).result;
+};
+
+/**
  * The subset of public URL attributes that can be updated by the user after the
  * link has already been created.
  */
