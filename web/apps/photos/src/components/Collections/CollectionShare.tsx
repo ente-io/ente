@@ -16,7 +16,6 @@ import { Dialog, Stack, styled, Typography } from "@mui/material";
 import NumberAvatar from "@mui/material/Avatar";
 import TextField from "@mui/material/TextField";
 import Avatar from "components/pages/gallery/Avatar";
-import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
 import { LoadingButton } from "ente-base/components/mui/LoadingButton";
 import {
     SidebarDrawer,
@@ -26,6 +25,7 @@ import {
 import {
     RowButton,
     RowButtonDivider,
+    RowButtonEndActivityIndicator,
     RowButtonGroup,
     RowButtonGroupHint,
     RowButtonGroupTitle,
@@ -1049,25 +1049,26 @@ const EnablePublicShareOptions: React.FC<EnablePublicShareOptionsProps> = ({
     const [pending, setPending] = useState("");
     const [errorMessage, setErrorMessage] = useState("");
 
-    const handleCreateURL = async (attributes?: CreatePublicURLAttributes) => {
+    const create = (attributes?: CreatePublicURLAttributes) => {
         setErrorMessage("");
         setPending(attributes ? "collect" : "link");
 
-        try {
-            setPublicURL(await createPublicURL(collection.id, attributes));
-        } catch (e) {
-            log.error("Could not create public link", e);
-            setPending("");
-            setErrorMessage(
-                isHTTPErrorWithStatus(e, 402)
-                    ? t("sharing_disabled_for_free_accounts")
-                    : t("generic_error"),
-            );
-            return;
-        }
-
-        onLinkCreated();
-        void syncWithRemote(false, true);
+        void createPublicURL(collection.id, attributes)
+            .then((publicURL) => {
+                setPending("");
+                setPublicURL(publicURL);
+                onLinkCreated();
+                void syncWithRemote(false, true);
+            })
+            .catch((e: unknown) => {
+                log.error("Could not create public link", e);
+                setErrorMessage(
+                    isHTTPErrorWithStatus(e, 402)
+                        ? t("sharing_disabled_for_free_accounts")
+                        : t("generic_error"),
+                );
+                setPending("");
+            });
     };
 
     return (
@@ -1081,9 +1082,9 @@ const EnablePublicShareOptions: React.FC<EnablePublicShareOptionsProps> = ({
                     startIcon={<LinkIcon />}
                     disabled={!!pending}
                     endIcon={
-                        pending == "link" && <ActivityIndicator size="20px" />
+                        pending == "link" && <RowButtonEndActivityIndicator />
                     }
-                    onClick={handleCreateURL}
+                    onClick={() => create()}
                 />
                 <RowButtonDivider />
                 <RowButton
@@ -1092,10 +1093,10 @@ const EnablePublicShareOptions: React.FC<EnablePublicShareOptionsProps> = ({
                     disabled={!!pending}
                     endIcon={
                         pending == "collect" && (
-                            <ActivityIndicator size="20px" />
+                            <RowButtonEndActivityIndicator />
                         )
                     }
-                    onClick={() => handleCreateURL({ enableCollect: true })}
+                    onClick={() => create({ enableCollect: true })}
                 />
             </RowButtonGroup>
             {errorMessage && (
@@ -1224,8 +1225,8 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
             setPublicURL(await updatePublicURL(collection.id, updates));
             galleryContext.syncWithRemote(false, true);
         } catch (e) {
-            const errorMessage = handleSharingErrors(e);
-            setSharableLinkError(errorMessage);
+            log.error("Could not update public link", e);
+            setSharableLinkError(t("generic_error"));
         } finally {
             galleryContext.setBlockingLoad(false);
         }
