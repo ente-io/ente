@@ -1267,34 +1267,27 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
         >
             <Stack sx={{ gap: 3, py: "20px", px: "8px" }}>
                 <ManagePublicCollect
-                    collection={collection}
-                    publicShareProp={publicShareProp}
-                    updatePublicShareURLHelper={updatePublicShareURLHelper}
+                    {...{ collection, publicShareProp }}
+                    onUpdate={updatePublicShareURLHelper}
                 />
                 <ManageLinkExpiry
-                    onRootClose={onRootClose}
-                    collection={collection}
-                    publicShareProp={publicShareProp}
-                    updatePublicShareURLHelper={updatePublicShareURLHelper}
+                    {...{ onRootClose, collection, publicShareProp }}
+                    onUpdate={updatePublicShareURLHelper}
                 />
                 <RowButtonGroup>
                     <ManageDeviceLimit
-                        onRootClose={onRootClose}
-                        collection={collection}
-                        publicShareProp={publicShareProp}
-                        updatePublicShareURLHelper={updatePublicShareURLHelper}
+                        {...{ onRootClose, collection, publicShareProp }}
+                        onUpdate={updatePublicShareURLHelper}
                     />
                     <RowButtonDivider />
                     <ManageDownloadAccess
-                        collection={collection}
-                        publicShareProp={publicShareProp}
-                        updatePublicShareURLHelper={updatePublicShareURLHelper}
+                        {...{ collection, publicShareProp }}
+                        onUpdate={updatePublicShareURLHelper}
                     />
                     <RowButtonDivider />
                     <ManageLinkPassword
-                        collection={collection}
-                        publicShareProp={publicShareProp}
-                        updatePublicShareURLHelper={updatePublicShareURLHelper}
+                        {...{ collection, publicShareProp }}
+                        onUpdate={updatePublicShareURLHelper}
                     />
                 </RowButtonGroup>
                 <RowButtonGroup>
@@ -1331,19 +1324,31 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
     );
 };
 
-interface ManagePublicCollectProps {
-    publicShareProp: PublicURL;
+/**
+ * The Prop type used by components that allow the use to modify some setting
+ * related to a public link.
+ */
+interface ManagePublicLinkSettingProps {
     collection: Collection;
-    updatePublicShareURLHelper: (req: UpdatePublicURL) => Promise<void>;
+    publicShareProp: PublicURL;
+    onUpdate: (req: UpdatePublicURL) => Promise<void>;
 }
 
-const ManagePublicCollect: React.FC<ManagePublicCollectProps> = ({
-    publicShareProp,
-    updatePublicShareURLHelper,
+/**
+ * An extension of {@link ManagePublicLinkSettingProps} for use when the
+ * component shows update options in a (nested) drawer.
+ */
+type ManagePublicLinkSettingDrawerProps = ManagePublicLinkSettingProps & {
+    onRootClose: () => void;
+};
+
+const ManagePublicCollect: React.FC<ManagePublicLinkSettingProps> = ({
     collection,
+    publicShareProp,
+    onUpdate,
 }) => {
     const handleFileDownloadSetting = () => {
-        updatePublicShareURLHelper({
+        onUpdate({
             collectionID: collection.id,
             enableCollect: !publicShareProp.enableCollect,
         });
@@ -1365,33 +1370,19 @@ const ManagePublicCollect: React.FC<ManagePublicCollectProps> = ({
     );
 };
 
-interface ManageLinkExpiryProps {
-    onRootClose: () => void;
-    collection: Collection;
-    publicShareProp: PublicURL;
-    updatePublicShareURLHelper: (req: UpdatePublicURL) => Promise<void>;
-}
-
-const ManageLinkExpiry: React.FC<ManageLinkExpiryProps> = ({
+const ManageLinkExpiry: React.FC<ManagePublicLinkSettingDrawerProps> = ({
     onRootClose,
     collection,
     publicShareProp,
-    updatePublicShareURLHelper,
+    onUpdate,
 }) => {
     const { show: showExpiryOptions, props: expiryOptionsVisibilityProps } =
         useModalVisibility();
 
     const options = useMemo(() => shareExpiryOptions(), []);
 
-    const updateDeviceExpiry = async (optionFn) => {
-        return updatePublicShareURLHelper({
-            collectionID: collection.id,
-            validTill: optionFn,
-        });
-    };
-
     const changeShareExpiryValue = (value: number) => async () => {
-        await updateDeviceExpiry(value);
+        await onUpdate({ collectionID: collection.id, validTill: value });
         publicShareProp.validTill = value;
         expiryOptionsVisibilityProps.onClose();
     };
@@ -1475,33 +1466,19 @@ const microsecsAfter = (after: "hour" | "day" | "week" | "month" | "year") => {
     return date.getTime() * 1000;
 };
 
-interface ManageDeviceLimitProps {
-    onRootClose: () => void;
-    collection: Collection;
-    publicShareProp: PublicURL;
-    updatePublicShareURLHelper: (req: UpdatePublicURL) => Promise<void>;
-}
-
-const ManageDeviceLimit: React.FC<ManageDeviceLimitProps> = ({
+const ManageDeviceLimit: React.FC<ManagePublicLinkSettingDrawerProps> = ({
     onRootClose,
     collection,
     publicShareProp,
-    updatePublicShareURLHelper,
+    onUpdate,
 }) => {
     const { show: showDeviceOptions, props: deviceOptionsVisibilityProps } =
         useModalVisibility();
 
     const options = useMemo(() => deviceLimitOptions(), []);
 
-    const updateDeviceLimit = async (newLimit: number) => {
-        return updatePublicShareURLHelper({
-            collectionID: collection.id,
-            deviceLimit: newLimit,
-        });
-    };
-
     const changeDeviceLimitValue = (value: number) => async () => {
-        await updateDeviceLimit(value);
+        await onUpdate({ collectionID: collection.id, deviceLimit: value });
         deviceOptionsVisibilityProps.onClose();
     };
 
@@ -1550,45 +1527,33 @@ const deviceLimitOptions = () =>
         value: i,
     }));
 
-interface ManageDownloadAccessProps {
-    collection: Collection;
-    publicShareProp: PublicURL;
-    updatePublicShareURLHelper: (req: UpdatePublicURL) => Promise<void>;
-}
-
-const ManageDownloadAccess: React.FC<ManageDownloadAccessProps> = ({
+const ManageDownloadAccess: React.FC<ManagePublicLinkSettingProps> = ({
     collection,
     publicShareProp,
-    updatePublicShareURLHelper,
+    onUpdate,
 }) => {
     const { showMiniDialog } = useBaseContext();
 
     const handleFileDownloadSetting = () => {
         if (publicShareProp.enableDownload) {
-            disableFileDownload();
-        } else {
-            updatePublicShareURLHelper({
-                collectionID: collection.id,
-                enableDownload: true,
+            showMiniDialog({
+                title: t("disable_file_download"),
+                message: <Trans i18nKey={"disable_file_download_message"} />,
+                continue: {
+                    text: t("disable"),
+                    color: "critical",
+                    action: () =>
+                        onUpdate({
+                            collectionID: collection.id,
+                            enableDownload: false,
+                        }),
+                },
             });
+        } else {
+            onUpdate({ collectionID: collection.id, enableDownload: true });
         }
     };
 
-    const disableFileDownload = () => {
-        showMiniDialog({
-            title: t("disable_file_download"),
-            message: <Trans i18nKey={"disable_file_download_message"} />,
-            continue: {
-                text: t("disable"),
-                color: "critical",
-                action: () =>
-                    updatePublicShareURLHelper({
-                        collectionID: collection.id,
-                        enableDownload: false,
-                    }),
-            },
-        });
-    };
     return (
         <RowSwitch
             label={t("allow_downloads")}
@@ -1598,16 +1563,10 @@ const ManageDownloadAccess: React.FC<ManageDownloadAccessProps> = ({
     );
 };
 
-interface ManageLinkPasswordProps {
-    collection: Collection;
-    publicShareProp: PublicURL;
-    updatePublicShareURLHelper: (req: UpdatePublicURL) => Promise<void>;
-}
-
-const ManageLinkPassword: React.FC<ManageLinkPasswordProps> = ({
+const ManageLinkPassword: React.FC<ManagePublicLinkSettingProps> = ({
     collection,
     publicShareProp,
-    updatePublicShareURLHelper,
+    onUpdate,
 }) => {
     const { showMiniDialog } = useBaseContext();
     const { show: showSetPassword, props: setPasswordVisibilityProps } =
@@ -1615,26 +1574,22 @@ const ManageLinkPassword: React.FC<ManageLinkPasswordProps> = ({
 
     const handlePasswordChangeSetting = async () => {
         if (publicShareProp.passwordEnabled) {
-            await confirmDisablePublicUrlPassword();
+            showMiniDialog({
+                title: t("disable_password"),
+                message: t("disable_password_message"),
+                continue: {
+                    text: t("disable"),
+                    color: "critical",
+                    action: () =>
+                        onUpdate({
+                            collectionID: collection.id,
+                            disablePassword: true,
+                        }),
+                },
+            });
         } else {
             showSetPassword();
         }
-    };
-
-    const confirmDisablePublicUrlPassword = async () => {
-        showMiniDialog({
-            title: t("disable_password"),
-            message: t("disable_password_message"),
-            continue: {
-                text: t("disable"),
-                color: "critical",
-                action: () =>
-                    updatePublicShareURLHelper({
-                        collectionID: collection.id,
-                        disablePassword: true,
-                    }),
-            },
-        });
     };
 
     return (
@@ -1646,23 +1601,21 @@ const ManageLinkPassword: React.FC<ManageLinkPasswordProps> = ({
             />
             <SetPublicLinkPassword
                 {...setPasswordVisibilityProps}
-                collection={collection}
-                publicShareProp={publicShareProp}
-                updatePublicShareURLHelper={updatePublicShareURLHelper}
+                {...{ collection, publicShareProp, onUpdate }}
             />
         </>
     );
 };
 
 type SetPublicLinkPasswordProps = ModalVisibilityProps &
-    ManageLinkPasswordProps;
+    ManagePublicLinkSettingProps;
 
 const SetPublicLinkPassword: React.FC<SetPublicLinkPasswordProps> = ({
     open,
     onClose,
     collection,
     publicShareProp,
-    updatePublicShareURLHelper,
+    onUpdate,
 }) => {
     const savePassword: SingleInputFormProps["onSubmit"] = async (password) => {
         await enablePublicUrlPassword(password);
@@ -1679,7 +1632,7 @@ const SetPublicLinkPassword: React.FC<SetPublicLinkPasswordProps> = ({
 
     const enablePublicUrlPassword = async (password: string) => {
         const kek = await deriveInteractiveKey(password);
-        return updatePublicShareURLHelper({
+        return onUpdate({
             collectionID: collection.id,
             passHash: kek.key,
             nonce: kek.salt,
