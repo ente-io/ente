@@ -1272,17 +1272,17 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
                     updatePublicShareURLHelper={updatePublicShareURLHelper}
                 />
                 <ManageLinkExpiry
+                    onRootClose={onRootClose}
                     collection={collection}
                     publicShareProp={publicShareProp}
                     updatePublicShareURLHelper={updatePublicShareURLHelper}
-                    onRootClose={onRootClose}
                 />
                 <RowButtonGroup>
                     <ManageDeviceLimit
+                        onRootClose={onRootClose}
                         collection={collection}
                         publicShareProp={publicShareProp}
                         updatePublicShareURLHelper={updatePublicShareURLHelper}
-                        onRootClose={onRootClose}
                     />
                     <RowButtonDivider />
                     <ManageDownloadAccess
@@ -1366,17 +1366,17 @@ const ManagePublicCollect: React.FC<ManagePublicCollectProps> = ({
 };
 
 interface ManageLinkExpiryProps {
-    publicShareProp: PublicURL;
-    collection: Collection;
-    updatePublicShareURLHelper: (req: UpdatePublicURL) => Promise<void>;
     onRootClose: () => void;
+    collection: Collection;
+    publicShareProp: PublicURL;
+    updatePublicShareURLHelper: (req: UpdatePublicURL) => Promise<void>;
 }
 
 const ManageLinkExpiry: React.FC<ManageLinkExpiryProps> = ({
-    publicShareProp,
-    collection,
-    updatePublicShareURLHelper,
     onRootClose,
+    collection,
+    publicShareProp,
+    updatePublicShareURLHelper,
 }) => {
     const { show: showExpiryOptions, props: expiryOptionsVisibilityProps } =
         useModalVisibility();
@@ -1476,17 +1476,17 @@ const microsecsAfter = (after: "hour" | "day" | "week" | "month" | "year") => {
 };
 
 interface ManageDeviceLimitProps {
-    publicShareProp: PublicURL;
-    collection: Collection;
-    updatePublicShareURLHelper: (req: UpdatePublicURL) => Promise<void>;
     onRootClose: () => void;
+    collection: Collection;
+    publicShareProp: PublicURL;
+    updatePublicShareURLHelper: (req: UpdatePublicURL) => Promise<void>;
 }
 
 const ManageDeviceLimit: React.FC<ManageDeviceLimitProps> = ({
+    onRootClose,
     collection,
     publicShareProp,
     updatePublicShareURLHelper,
-    onRootClose,
 }) => {
     const { show: showDeviceOptions, props: deviceOptionsVisibilityProps } =
         useModalVisibility();
@@ -1551,15 +1551,15 @@ const deviceLimitOptions = () =>
     }));
 
 interface ManageDownloadAccessProps {
-    publicShareProp: PublicURL;
     collection: Collection;
+    publicShareProp: PublicURL;
     updatePublicShareURLHelper: (req: UpdatePublicURL) => Promise<void>;
 }
 
 const ManageDownloadAccess: React.FC<ManageDownloadAccessProps> = ({
+    collection,
     publicShareProp,
     updatePublicShareURLHelper,
-    collection,
 }) => {
     const { showMiniDialog } = useBaseContext();
 
@@ -1599,8 +1599,8 @@ const ManageDownloadAccess: React.FC<ManageDownloadAccessProps> = ({
 };
 
 interface ManageLinkPasswordProps {
-    publicShareProp: PublicURL;
     collection: Collection;
+    publicShareProp: PublicURL;
     updatePublicShareURLHelper: (req: UpdatePublicURL) => Promise<void>;
 }
 
