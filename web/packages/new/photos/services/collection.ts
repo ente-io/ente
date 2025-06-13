@@ -586,6 +586,10 @@ export const createPublicURL = async (
         body: JSON.stringify({ collectionID, ...attributes }),
     });
     ensureOk(res);
+    // See: [Note: strict mode migration]
+    //
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     return z.object({ result: RemotePublicURL }).parse(await res.json()).result;
 };
 
@@ -621,6 +625,10 @@ export const updatePublicURL = async (
         body: JSON.stringify({ collectionID, ...updates }),
     });
     ensureOk(res);
+    // See: [Note: strict mode migration]
+    //
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     return z.object({ result: RemotePublicURL }).parse(await res.json()).result;
 };
 
