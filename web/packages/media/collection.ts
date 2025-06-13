@@ -747,19 +747,6 @@ const CollectionShareeMagicMetadataData = z.looseObject({
     visibility: z.number().nullish().transform(nullToUndefined),
 });
 
-export interface UpdatePublicURL {
-    collectionID: number;
-    disablePassword?: boolean;
-    enableDownload?: boolean;
-    enableCollect?: boolean;
-    validTill?: number;
-    deviceLimit?: number;
-    passHash?: string;
-    nonce?: string;
-    opsLimit?: number;
-    memLimit?: number;
-}
-
 export interface CreatePublicAccessTokenRequest {
     collectionID: number;
     validTill?: number;

@@ -18,7 +18,6 @@ import {
     EncryptedCollection,
     PublicURL,
     RemoveFromCollectionRequest,
-    UpdatePublicURL,
 } from "ente-media/collection";
 import { EncryptedMagicMetadata, EnteFile } from "ente-media/file";
 import { ItemVisibility } from "ente-media/file-metadata";
@@ -524,27 +523,6 @@ export const createShareableURL = async (collection: Collection) => {
         return resp.data.result as PublicURL;
     } catch (e) {
         log.error("createShareableURL failed ", e);
-        throw e;
-    }
-};
-
-export const updateShareableURL = async (
-    request: UpdatePublicURL,
-): Promise<PublicURL> => {
-    try {
-        const token = getToken();
-        if (!token) {
-            return null;
-        }
-        const res = await HTTPService.put(
-            await apiURL("/collections/share-url"),
-            request,
-            null,
-            { "X-Auth-Token": token },
-        );
-        return res.data.result as PublicURL;
-    } catch (e) {
-        log.error("updateShareableURL failed ", e);
         throw e;
     }
 };

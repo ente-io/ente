@@ -13,11 +13,13 @@ import {
     CollectionSubType,
     decryptRemoteCollection,
     RemoteCollection,
+    RemotePublicURL,
     type Collection,
     type Collection2,
     type CollectionNewParticipantRole,
     type CollectionPrivateMagicMetadataData,
     type CollectionType,
+    type PublicURL,
 } from "ente-media/collection";
 import { type EnteFile } from "ente-media/file";
 import { ItemVisibility } from "ente-media/file-metadata";
@@ -550,6 +552,41 @@ export const unshareCollection = async (collectionID: number, email: string) =>
             body: JSON.stringify({ collectionID, email }),
         }),
     );
+
+/**
+ * The subset of public URL attributes that can be updated by the user after the
+ * link has already been created.
+ */
+export type PublicURLUpdatableAttributes = Omit<
+    Partial<PublicURL>,
+    "url" | "enablePassword"
+> & { disablePassword?: boolean; passHash?: string };
+
+/**
+ * Update the attributes of an existing public link for a shared collection.
+ *
+ * Remote only, does not modify local state.
+ *
+ * @param collectionID The ID of the collection whose public link to update.
+ *
+ * @param updates The public link attributes to modify. Only attributes
+ * corresponding to entries with non nullish values will be updated, all the
+ * other existing attributes will remain unmodified.
+ *
+ * @returns the updated public URL.
+ */
+export const updatePublicURL = async (
+    collectionID: number,
+    updates: PublicURLUpdatableAttributes,
+): Promise<PublicURL> => {
+    const res = await fetch(await apiURL("/collections/share-url"), {
+        method: "PUT",
+        headers: await authenticatedRequestHeaders(),
+        body: JSON.stringify({ collectionID, ...updates }),
+    });
+    ensureOk(res);
+    return z.object({ result: RemotePublicURL }).parse(await res.json()).result;
+};
 
 /**
  * Delete the public link for the collection with given {@link collectionID}.
