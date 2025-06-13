@@ -82,7 +82,7 @@ export interface Collection2 {
     /**
      * Public links that can be used to access and update the collection.
      */
-    publicURLs?: PublicURL2[];
+    publicURLs?: PublicURL[];
     /**
      * The last time the collection was updated (epoch microseconds).
      *
@@ -250,15 +250,10 @@ export interface CollectionUser {
  * There is a known set of values ({@link CollectionParticipantRole}) this can
  * be, but in the Zod schema we keep the data type as a string.
  */
-export const LocalCollectionUser = z.looseObject({
+export const RemoteCollectionUser = z.looseObject({
     id: z.number(),
     email: z.string().nullish().transform(nullToUndefined),
     role: z.string().nullish().transform(nullToUndefined),
-});
-
-export const RemoteCollectionUser = z.looseObject({
-    ...LocalCollectionUser.shape,
-    name: z.unknown(),
 });
 
 type RemoteCollectionUser = z.infer<typeof RemoteCollectionUser>;
@@ -272,7 +267,7 @@ type RemoteCollectionUser = z.infer<typeof RemoteCollectionUser>;
  * ^ The URL is partial because it doesn't have the URL fragment, which is
  *   client side only as it contains the decryption key
  */
-export interface PublicURL2 {
+export interface PublicURL {
     /**
      * A URL that can be used access the shared collection.
      *
@@ -472,18 +467,6 @@ export interface Collection
     c2?: Collection2;
 }
 
-export interface PublicURL {
-    url: string;
-    deviceLimit: number;
-    validTill: number;
-    enableDownload: boolean;
-    enableCollect: boolean;
-    passwordEnabled: boolean;
-    nonce?: string;
-    opsLimit?: number;
-    memLimit?: number;
-}
-
 /**
  * Decrypt a remote collection using the provided {@link collectionKey}.
  *
@@ -500,24 +483,42 @@ export const decryptRemoteCollection = async (
     collection: RemoteCollection,
     collectionKey: string,
 ): Promise<Collection> => {
-    const { id, owner, type, sharees, publicURLs, updationTime } = collection;
+    // RemoteCollection is a looseObject, and we want to retain that semantic
+    // for the parsed Collection. Mention all fields that we want to explicitly
+    // drop or transform, passthrough the rest unchanged in the return value.
+    const {
+        owner,
+        encryptedKey,
+        keyDecryptionNonce,
+        encryptedName,
+        nameDecryptionNonce,
+        sharees,
+        attributes,
+        magicMetadata: encryptedMagicMetadata,
+        pubMagicMetadata: encryptedPubMagicMetadata,
+        sharedMagicMetadata: encryptedSharedMagicMetadata,
+        ...rest
+    } = collection;
+
+    // We've already used them to derive the `collectionKey`
+    drop([encryptedKey, keyDecryptionNonce]);
+    // Mobile specific attribute not currently used by us.
+    drop(attributes);
 
     const name =
-        collection.name ??
+        // `||` is used because remote sets name to blank to indicate absence.
+        collection.name ||
         new TextDecoder().decode(
             await decryptBoxBytes(
-                {
-                    encryptedData: collection.encryptedName!,
-                    nonce: collection.nameDecryptionNonce!,
-                },
+                { encryptedData: encryptedName!, nonce: nameDecryptionNonce! },
                 collectionKey,
             ),
         );
 
     let magicMetadata: Collection2["magicMetadata"];
-    if (collection.magicMetadata) {
+    if (encryptedMagicMetadata) {
         const genericMM = await decryptMagicMetadata(
-            collection.magicMetadata,
+            encryptedMagicMetadata,
             collectionKey,
         );
         const data = CollectionPrivateMagicMetadataData.parse(genericMM.data);
@@ -525,9 +526,9 @@ export const decryptRemoteCollection = async (
     }
 
     let pubMagicMetadata: Collection2["pubMagicMetadata"];
-    if (collection.pubMagicMetadata) {
+    if (encryptedPubMagicMetadata) {
         const genericMM = await decryptMagicMetadata(
-            collection.pubMagicMetadata,
+            encryptedPubMagicMetadata,
             collectionKey,
         );
         const data = CollectionPublicMagicMetadataData.parse(genericMM.data);
@@ -535,9 +536,9 @@ export const decryptRemoteCollection = async (
     }
 
     let sharedMagicMetadata: Collection2["sharedMagicMetadata"];
-    if (collection.sharedMagicMetadata) {
+    if (encryptedSharedMagicMetadata) {
         const genericMM = await decryptMagicMetadata(
-            collection.sharedMagicMetadata,
+            encryptedSharedMagicMetadata,
             collectionKey,
         );
         const data = CollectionShareeMagicMetadataData.parse(genericMM.data);
@@ -546,27 +547,30 @@ export const decryptRemoteCollection = async (
 
     // return {
     const c2 = {
-        id,
-        owner,
+        ...rest,
         key: collectionKey,
+        owner: parseRemoteCollectionUser(owner),
         name,
-        type,
-        sharees,
-        publicURLs,
-        updationTime,
+        sharees: sharees.map(parseRemoteCollectionUser),
         magicMetadata,
         pubMagicMetadata,
         sharedMagicMetadata,
     };
 
     // Temporary scaffolding for the migration.
-    const c = {
+    return {
         ...collection,
         c2,
         key: collectionKey,
         name,
         type: collection.type as CollectionType,
-        attributes: {},
+        // Not used anyway, but just pass what we have.
+        attributes: attributes,
+        // Some temporary scaffolding to impersonate types.
+        //
+        // See: [Note: strict mode migration]
+        sharees: sharees as CollectionUser[],
+        publicURLs: collection.publicURLs as PublicURL[],
         isDeleted: !!collection.isDeleted,
         magicMetadata: (magicMetadata
             ? { ...magicMetadata, header: collection.magicMetadata!.header }
@@ -584,8 +588,23 @@ export const decryptRemoteCollection = async (
               }
             : undefined)!,
     };
+};
 
-    return c;
+// A no-op function to pretend that we're using some values. This is handy when
+// we want to destructure some fields so that they don't get forwarded, but
+// otherwise don't need to use them.
+const drop = (xs: unknown) => typeof xs;
+
+/**
+ * A convenience function to discard the unused name field from the collection
+ * user objects that we receive from remote.
+ */
+const parseRemoteCollectionUser = ({
+    name,
+    ...rest
+}: RemoteCollectionUser): CollectionUser => {
+    drop(name);
+    return rest;
 };
 
 /**
