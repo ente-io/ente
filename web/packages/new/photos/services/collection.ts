@@ -24,6 +24,7 @@ import { ItemVisibility } from "ente-media/file-metadata";
 import {
     createMagicMetadata,
     encryptMagicMetadata,
+    type RemoteMagicMetadata,
 } from "ente-media/magic-metadata";
 import { batch } from "ente-utils/array";
 import { z } from "zod/v4";
@@ -386,11 +387,54 @@ export const deleteFromTrash = async (fileIDs: number[]) => {
  * See: [Note: Magic metadata data cannot have nullish values]
  */
 export const updateCollectionPrivateMagicMetadata = async (
-    collection: Collection2,
+    { id, key, magicMetadata }: Collection2,
     updates: CollectionPrivateMagicMetadataData,
-) => {
-    throw new Error("TODO");
-};
+) =>
+    putCollectionsMagicMetadata({
+        id,
+        magicMetadata: await encryptMagicMetadata(
+            createMagicMetadata(
+                { ...magicMetadata?.data, ...updates },
+                magicMetadata?.version,
+            ),
+            key,
+        ),
+    });
+
+/**
+ * The payload of the remote requests for updating the magic metadata of a
+ * single collection.
+ */
+interface UpdateCollectionMagicMetadataRequest {
+    /**
+     * Collection ID
+     */
+    id: number;
+    /**
+     * The updated magic metadata.
+     *
+     * Remote usually enforces the following constraints when we're trying to
+     * update already existing data.
+     *
+     * - The version should be same as the existing version.
+     * - The count should be greater than or equal to the existing count.
+     */
+    magicMetadata: RemoteMagicMetadata;
+}
+
+/**
+ * Update the private magic metadata of a single collection on remote.
+ */
+const putCollectionsMagicMetadata = async (
+    updateRequest: UpdateCollectionMagicMetadataRequest,
+) =>
+    ensureOk(
+        await fetch(await apiURL("/collections/magic-metadata"), {
+            method: "POST",
+            headers: await authenticatedRequestHeaders(),
+            body: JSON.stringify(updateRequest),
+        }),
+    );
 
 /**
  * Share the provided collection with another Ente user.

@@ -146,7 +146,7 @@ export interface MagicMetadata<T = unknown> {
 export const encryptMagicMetadata = async (
     magicMetadata: MagicMetadata,
     key: string,
-): Promise<RemoteMagicMetadata | undefined> => {
+): Promise<RemoteMagicMetadata> => {
     const { version } = magicMetadata;
 
     const newMM = createMagicMetadata(magicMetadata.data);
