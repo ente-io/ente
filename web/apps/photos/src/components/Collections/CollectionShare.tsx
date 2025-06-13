@@ -16,6 +16,7 @@ import { Dialog, Stack, styled, Typography } from "@mui/material";
 import NumberAvatar from "@mui/material/Avatar";
 import TextField from "@mui/material/TextField";
 import Avatar from "components/pages/gallery/Avatar";
+import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
 import { LoadingButton } from "ente-base/components/mui/LoadingButton";
 import {
     SidebarDrawer,
@@ -1043,22 +1044,30 @@ const EnablePublicShareOptions: React.FC<EnablePublicShareOptionsProps> = ({
     setPublicURL,
     onLinkCreated,
 }) => {
-    const galleryContext = useContext(GalleryContext);
-    const [sharableLinkError, setSharableLinkError] = useState(null);
+    const { syncWithRemote } = useContext(GalleryContext);
+
+    const [loading, setLoading] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("");
 
     const handleCreateURL = async (attributes?: CreatePublicURLAttributes) => {
+        setErrorMessage("");
+        setLoading(true);
+
         try {
-            setSharableLinkError(null);
-            galleryContext.setBlockingLoad(true);
             setPublicURL(await createPublicURL(collection.id, attributes));
-            onLinkCreated();
-            galleryContext.syncWithRemote(false, true);
         } catch (e) {
-            const errorMessage = handleSharingErrors(e);
-            setSharableLinkError(errorMessage);
-        } finally {
-            galleryContext.setBlockingLoad(false);
+            log.error("Could not create public link", e);
+            setLoading(false);
+            setErrorMessage(
+                isHTTPErrorWithStatus(e, 402)
+                    ? t("sharing_disabled_for_free_accounts")
+                    : t("generic_error"),
+            );
+            return;
         }
+
+        onLinkCreated();
+        void syncWithRemote(false, true);
     };
 
     return (
@@ -1079,7 +1088,8 @@ const EnablePublicShareOptions: React.FC<EnablePublicShareOptionsProps> = ({
                     onClick={() => handleCreateURL({ enableCollect: true })}
                 />
             </RowButtonGroup>
-            {sharableLinkError && (
+            {loading && <ActivityIndicator />}
+            {errorMessage && (
                 <Typography
                     variant="small"
                     sx={{
@@ -1088,7 +1098,7 @@ const EnablePublicShareOptions: React.FC<EnablePublicShareOptionsProps> = ({
                         textAlign: "center",
                     }}
                 >
-                    {sharableLinkError}
+                    {errorMessage}
                 </Typography>
             )}
         </Stack>
