@@ -196,7 +196,7 @@ printf " \033[1;32mE\033[0m   Do you want to start Ente? (y/n): "
 read choice
 
 if [[ "$choice" == "y" || "$choice" == "Y" ]]; then
-    printf " \033[1;32mE\033[0m   Starting docker compose\n"
+    printf "\nStarting docker compose\n"
     printf "\nAfter the cluster has started, open web app at \033[1mhttp://localhost:3000\033[0m\n"
     printf "(Verification code will be in the logs here)\n\n"
     docker compose up
