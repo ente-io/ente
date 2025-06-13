@@ -52,22 +52,30 @@ import {
     isValidMoveTarget,
 } from "utils/collection";
 
-const UNCATEGORIZED_COLLECTION_NAME = "Uncategorized";
-export const HIDDEN_COLLECTION_NAME = ".hidden";
-const FAVORITE_COLLECTION_NAME = "Favorites";
+const uncategorizedCollectionName = "Uncategorized";
+const defaultHiddenCollectionName = ".hidden";
+const favoritesCollectionName = "Favorites";
 
 const REQUEST_BATCH_SIZE = 1000;
 
-export const createAlbum = (albumName: string) => {
+export const createAlbum = (albumName: string) =>
+    createCollectionReroute(albumName, "album");
+
+const createCollectionReroute = async (
+    collectionName: string,
+    type: CollectionType,
+    magicMetadataProps?: CollectionMagicMetadataProps,
+): Promise<Collection> => {
+    // TODO(C2):
     if (isDevBuild && process.env.NEXT_PUBLIC_ENTE_WIP_NEWIMPL) {
-        // TODO: WIP
-        console.log(createCollection2);
-        // return createCollection2(albumName, "album");
+        const z = createCollection2(collectionName, type, magicMetadataProps);
+        z.then((x) => console.log(x));
+        return z;
     }
-    return createCollection(albumName, "album");
+    return createCollection1(collectionName, type, magicMetadataProps);
 };
 
-const createCollection = async (
+const createCollection1 = async (
     collectionName: string,
     type: CollectionType,
     magicMetadataProps?: CollectionMagicMetadataProps,
@@ -144,9 +152,8 @@ const postCollection = async (
     }
 };
 
-export const createFavoritesCollection = () => {
-    return createCollection(FAVORITE_COLLECTION_NAME, "favorites");
-};
+export const createFavoritesCollection = () =>
+    createCollectionReroute(favoritesCollectionName, "favorites");
 
 export const addToFavorites = async (
     file: EnteFile,
@@ -621,9 +628,8 @@ export async function getUncategorizedCollection(
     return uncategorizedCollection;
 }
 
-export function createUnCategorizedCollection() {
-    return createCollection(UNCATEGORIZED_COLLECTION_NAME, "uncategorized");
-}
+export const createUnCategorizedCollection = () =>
+    createCollectionReroute(uncategorizedCollectionName, "uncategorized");
 
 export async function getDefaultHiddenCollection(): Promise<Collection> {
     const collections = await getLocalCollections("hidden");
@@ -634,18 +640,17 @@ export async function getDefaultHiddenCollection(): Promise<Collection> {
     return hiddenCollection;
 }
 
-export function createHiddenCollection() {
-    return createCollection(HIDDEN_COLLECTION_NAME, "album", {
+const createDefaultHiddenCollection = () =>
+    createCollectionReroute(defaultHiddenCollectionName, "album", {
         subType: CollectionSubType.defaultHidden,
         visibility: ItemVisibility.hidden,
     });
-}
 
 export async function moveToHiddenCollection(files: EnteFile[]) {
     try {
         let hiddenCollection = await getDefaultHiddenCollection();
         if (!hiddenCollection) {
-            hiddenCollection = await createHiddenCollection();
+            hiddenCollection = await createDefaultHiddenCollection();
         }
         const groupedFiles = groupFilesByCollectionID(files);
         for (const [collectionID, files] of groupedFiles.entries()) {

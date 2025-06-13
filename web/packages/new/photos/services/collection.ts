@@ -12,13 +12,11 @@ import { ensureMasterKeyFromSession } from "ente-base/session";
 import {
     CollectionSubType,
     decryptRemoteCollection,
-    RemoteCollectionSchema,
+    RemoteCollection,
     type Collection,
-    type Collection2,
     type CollectionNewParticipantRole,
     type CollectionPrivateMagicMetadataData,
     type CollectionType,
-    type RemoteCollection,
 } from "ente-media/collection";
 import { type EnteFile } from "ente-media/file";
 import { ItemVisibility } from "ente-media/file-metadata";
@@ -115,7 +113,7 @@ export const createCollection2 = async (
     name: string,
     type: CollectionType,
     magicMetadataData?: CollectionPrivateMagicMetadataData,
-): Promise<Collection2> => {
+): Promise<Collection> => {
     const masterKey = await ensureMasterKeyFromSession();
     const collectionKey = await generateKey();
     const { encryptedData: encryptedKey, nonce: keyDecryptionNonce } =
@@ -179,9 +177,8 @@ const postCollections = async (
         body: JSON.stringify(collectionData),
     });
     ensureOk(res);
-    return z
-        .object({ collection: RemoteCollectionSchema })
-        .parse(await res.json()).collection;
+    return z.object({ collection: RemoteCollection }).parse(await res.json())
+        .collection;
 };
 
 /**

@@ -594,7 +594,7 @@ const createItemData: <T>(
     items,
 }));
 
-// @ts-expect-error "TODO(MR): Understand and fix the type error here"
+// @ts-expect-error "TODO: Understand and fix the type error here"
 const Row: <T>({
     index,
     style,

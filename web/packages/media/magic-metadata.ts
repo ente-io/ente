@@ -7,19 +7,8 @@ import { z } from "zod/v4";
  * information attached.
  *
  * See {@link RemoteMagicMetadata} for the corresponding type.
- *
- * [Note: Schema suffix for exported Zod schemas]
- *
- * Since this module exports both the Zod schema and the TypeScript type, to
- * avoid confusion the schema is suffixed by "Schema".
- *
- * This is a general pattern we follow in all cases where we need to export the
- * Zod schema so other modules can compose schema definitions. Such exports are
- * meant to be exceptions though; usually the schema should be internal to the
- * module (and so can have the same name as the TypeScript type without the need
- * for a disambiguating suffix).
  */
-export const RemoteMagicMetadataSchema = z.object({
+export const RemoteMagicMetadata = z.object({
     version: z.number(),
     count: z.number(),
     data: z.string(),
@@ -37,11 +26,6 @@ export const RemoteMagicMetadataSchema = z.object({
  *
  * When decrypt these into specific local {@link MagicMetadata} instantiations
  * before using and storing them on the client.
- *
- * See {@link RemoteMagicMetadataSchema} for the corresponding Zod schema. The
- * same structure is used to store the metadata for various kinds of objects
- * (files, collections), so this module exports both the TypeScript type and
- * also the Zod schema so that other modules can compose schema definitions.
  */
 export interface RemoteMagicMetadata {
     /**
@@ -171,7 +155,7 @@ export const encryptMagicMetadata = async (
  *
  * Then,
  *
- * - The `version` is set to 0.
+ * - The `version` is set to 1.
  * - The `count` is set to the number of entries in the trimmed JSON object.
  * - The `data` is set to the trimmed JSON object.
  *
@@ -193,7 +177,7 @@ export const createMagicMetadata = (data: unknown) => {
 
     const count = Object.keys(jsonObject).length;
 
-    return { version: 0, count, data: jsonObject };
+    return { version: 1, count, data: jsonObject };
 };
 
 /**
@@ -206,7 +190,7 @@ export const createMagicMetadata = (data: unknown) => {
 export const decryptMagicMetadata = async (
     remoteMagicMetadata: RemoteMagicMetadata,
     key: string,
-): Promise<MagicMetadata | undefined> => {
+): Promise<MagicMetadata> => {
     const {
         version,
         count,

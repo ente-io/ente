@@ -79,7 +79,8 @@ import type { RemoteMagicMetadata } from "./magic-metadata";
  *
  * This is "magic metadata" associated with each share. Each user with whom the
  * collection has been shared with can use it store metadata (e.g. archive
- * status) that is private to them, and can only be edited by them.
+ * status) that is private to them, and can only be edited by them. For more
+ * details on this type of metadata, see [Note: Share specific metadata].
  */
 export interface Metadata {
     /**
@@ -644,7 +645,7 @@ interface UpdateMagicMetadataRequest {
 
 /**
  * Construct an remote update request payload from the public or private magic
- * metadata JSON object for an {@link file}, using the provided
+ * metadata JSON object for a {@link file}, using the provided
  * {@link encryptMetadataF} function to encrypt the JSON.
  */
 const updateMagicMetadataRequest = async (

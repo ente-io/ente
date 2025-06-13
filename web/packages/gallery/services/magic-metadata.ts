@@ -49,7 +49,7 @@ export async function updateMagicMetadata<T>(
 
     if (typeof originalMagicMetadata?.data == "string") {
         // TODO: When converting this (and other parses of magic metadata) to
-        // use zod, remember to use looseObject.
+        // use Zod, remember to use looseObject.
         //
         // See: [Note: Use looseObject for metadata Zod schemas]
         // @ts-expect-error TODO: Need to use zod here.

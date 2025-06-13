@@ -519,10 +519,10 @@ const blobToDataURL = (blob: Blob) =>
  * an array.
  */
 const savedProcessedVideoFileIDs = () =>
-    // [Note: Avoiding zod parsing overhead for DB arrays]
+    // [Note: Avoiding Zod parsing overhead for DB arrays]
     //
     // Validating that the value we read from the DB is indeed the same as the
-    // type we expect can be done using zod, but for potentially very large
+    // type we expect can be done using Zod, but for potentially very large
     // arrays, this has an overhead that is perhaps not justified when dealing
     // with DB entries we ourselves wrote.
     //
@@ -538,7 +538,7 @@ const savedProcessedVideoFileIDs = () =>
  * @see also {@link savedProcessedVideoFileIDs}.
  */
 const savedFailedVideoFileIDs = () =>
-    // See: [Note: Avoiding zod parsing overhead for DB arrays]
+    // See: [Note: Avoiding Zod parsing overhead for DB arrays]
     getKV("videoPreviewFailedFileIDs").then((v) => new Set(v as number[]));
 
 /**
