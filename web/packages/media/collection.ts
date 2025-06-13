@@ -3,8 +3,11 @@ import {
     type EncryptedMagicMetadata,
     type MagicMetadataCore,
 } from "ente-media/file";
-import { ItemVisibility } from "ente-media/file-metadata";
-import { nullishToEmpty, nullToUndefined } from "ente-utils/transform";
+import {
+    nullishToEmpty,
+    nullishToFalse,
+    nullToUndefined,
+} from "ente-utils/transform";
 import { z } from "zod/v4";
 import {
     decryptMagicMetadata,
@@ -16,7 +19,7 @@ import {
  * A collection, as used and persisted locally by the client.
  *
  * A collection is, well, a collection of files. It is roughly equivalent to an
- * "album" (which is also the term we use in the UI), bute there can also be
+ * "album" (which is also the term we use in the UI), but there can also be
  * special type of collections like "favorites" which have special behaviour.
  *
  * A collection contains zero or more files ({@link EnteFile}).
@@ -79,7 +82,7 @@ export interface Collection2 {
     /**
      * Public links that can be used to access and update the collection.
      */
-    publicURLs?: unknown; // PublicURL[];
+    publicURLs?: PublicURL2[];
     /**
      * The last time the collection was updated (epoch microseconds).
      *
@@ -116,10 +119,6 @@ export interface Collection2 {
      * See: [Note: Metadatum]
      */
     sharedMagicMetadata?: MagicMetadata<CollectionShareeMagicMetadataData>;
-    // TODO(C2): Temporarily forwarded for compatilibity with the existing
-    // collection type.
-    isDeleted: boolean;
-    attributes: unknown;
 }
 
 /**
@@ -251,18 +250,144 @@ export interface CollectionUser {
  * There is a known set of values ({@link CollectionParticipantRole}) this can
  * be, but in the Zod schema we keep the data type as a string.
  */
-export const RemoteCollectionUser = z.object({
+export const LocalCollectionUser = z.looseObject({
     id: z.number(),
     email: z.string().nullish().transform(nullToUndefined),
     role: z.string().nullish().transform(nullToUndefined),
 });
 
+export const RemoteCollectionUser = z.looseObject({
+    ...LocalCollectionUser.shape,
+    name: z.unknown(),
+});
+
 type RemoteCollectionUser = z.infer<typeof RemoteCollectionUser>;
 
 /**
- * Zod schema for {@link Collection}.
+ * A public link for a shared collection.
+ *
+ * This structure contains a (partial^) URL that can be used to access the
+ * shared collection, along with other attributes of the link.
+ *
+ * ^ The URL is partial because it doesn't have the URL fragment, which is
+ *   client side only as it contains the decryption key
  */
-export const RemoteCollection = z.object({
+export interface PublicURL2 {
+    /**
+     * A URL that can be used access the shared collection.
+     *
+     * This will be of the form "https://<public-albums-app>/?t=<token>", e.g.,
+     * "https://albums.ente.io/?t=xxxxxx".
+     *
+     * In particular, this URL does not contain the URL fragment (the part after
+     * the "#"). URL fragments are client side only, and not sent to remote.
+     * They contain the decryption key.
+     *
+     * The client can use this field to form the fully usable URL (e.g.
+     * "https://albums.ente.io/?t=xxxxxx#yyy...yyy") and provide it to the user
+     * for sharing.
+     */
+    url: string;
+    /**
+     * The number of unique devices which can access the collection using the
+     * public URL.
+     *
+     * Set to 0 to indicate no device limit.
+     */
+    deviceLimit: number;
+    /**
+     * The epoch microseconds until which the link is valid.
+     *
+     * Set to 0 to indicate no expiry.
+     */
+    validTill: number;
+    /**
+     * `true` if downloads are enabled from this link.
+     *
+     * When creating a new link this is `true` by default, and can optionally be
+     * disabled in the public link settings.
+     */
+    enableDownload: boolean;
+    enableJoin: boolean;
+    /**
+     * `true` if people can use the public link to upload new files to the
+     * shared collection.
+     */
+    enableCollect: boolean;
+    /**
+     * `true` if the link is password protected.
+     *
+     * When this is `true`, {@link nonce}, {@link memLimit} and {@link opsLimit}
+     * will also be set.
+     */
+    passwordEnabled: boolean;
+    /**
+     * The nonce to use when hashing the password.
+     *
+     * Only present when {@link passwordEnabled} is `true`.
+     */
+    nonce?: string;
+    /**
+     * The ops limit to use when hashing the password.
+     *
+     * Only present when {@link passwordEnabled} is `true`.
+     */
+    opsLimit?: number;
+    /**
+     * The mem limit to use when hashing the password.
+     *
+     * Only present when {@link passwordEnabled} is `true`.
+     */
+    memLimit?: number;
+}
+
+/**
+ * Zod schema for the {@link PublicURL2} we use in our interactions with remote.
+ *
+ * We also use the same schema when persisting the collection locally.
+ */
+export const RemotePublicURL = z.looseObject({
+    url: z.string(),
+    deviceLimit: z.number(),
+    validTill: z.number(),
+    enableDownload: z.boolean().nullish().transform(nullishToFalse),
+    enableJoin: z.boolean().nullish().transform(nullishToFalse),
+    enableCollect: z.boolean().nullish().transform(nullishToFalse),
+    passwordEnabled: z.boolean().nullish().transform(nullishToFalse),
+    nonce: z.string().nullish().transform(nullToUndefined),
+    memLimit: z.number().nullish().transform(nullToUndefined),
+    opsLimit: z.number().nullish().transform(nullToUndefined),
+});
+
+/**
+ * Zod schema for {@link Collection}.
+ *
+ * [Note: Use looseObject when parsing JSON that will get persisted]
+ *
+ * While not always necessary, for a few cases (files and collections being the
+ * most prominent and important) we try to retain any unknown fields in the JSON
+ * we get from remote, so that future versions of the client with support for
+ * fields unbeknownst to the current one can read and use them.
+ *
+ * In such cases, the nested objects should also (recursively) use the
+ * looseObject schema. But not always - in some cases where the structures we
+ * use are well established, e.g. {@link RemoteMagicMetadata} - we use the
+ * default Zod behaviour of discarding unknown fields.
+ *
+ * > Note that even in the case of {@link RemoteMagicMetadata}, we still apply
+ * > looseObject to the payload itself.
+ * >
+ * > See: [Note: Use looseObject for metadata Zod schemas]
+ *
+ * Unlike metadata, where we do strictly want to retain unknown or unacted on
+ * fields, in the more general case we are okay with being a bit loose with
+ * looseObject, and even intentionally dropping fields that we know we're not
+ * going to use on the current client. Such looseness is okay because even if we
+ * need to use them in the future, we can always refetch the objects again
+ * (while in the case of metadata, we need to also push our changes to remote,
+ * so it is functionally important for us to retain the source verbatim).
+ */
+export const RemoteCollection = z.looseObject({
     id: z.number(),
     owner: RemoteCollectionUser,
     encryptedKey: z.string(),
@@ -291,7 +416,7 @@ export const RemoteCollection = z.object({
      */
     type: z.string(),
     sharees: z.array(RemoteCollectionUser).nullish().transform(nullishToEmpty),
-    publicURLs: z.array(z.looseObject({})).nullish().transform(nullishToEmpty),
+    publicURLs: z.array(RemotePublicURL).nullish().transform(nullishToEmpty),
     updationTime: z.number(),
     /**
      * Tombstone marker.
@@ -343,6 +468,8 @@ export interface Collection
     magicMetadata: CollectionMagicMetadata;
     pubMagicMetadata: CollectionPublicMagicMetadata;
     sharedMagicMetadata: CollectionShareeMagicMetadata;
+    // TODO(C2): Gradual conversion to new structure.
+    c2?: Collection2;
 }
 
 export interface PublicURL {
@@ -366,11 +493,13 @@ export interface PublicURL {
  * encrypted fields in {@link collection}.
  *
  * @returns A decrypted collection.
+ *
+ * TODO(C2): For legacy compat, it returns the older structure.
  */
 export const decryptRemoteCollection = async (
     collection: RemoteCollection,
     collectionKey: string,
-): Promise<Collection2> => {
+): Promise<Collection> => {
     const { id, owner, type, sharees, publicURLs, updationTime } = collection;
 
     const name =
@@ -415,7 +544,8 @@ export const decryptRemoteCollection = async (
         sharedMagicMetadata = { ...genericMM, data };
     }
 
-    return {
+    // return {
+    const c2 = {
         id,
         owner,
         key: collectionKey,
@@ -427,10 +557,35 @@ export const decryptRemoteCollection = async (
         magicMetadata,
         pubMagicMetadata,
         sharedMagicMetadata,
-        // TODO(C2):
-        isDeleted: !!collection.isDeleted,
-        attributes: {},
     };
+
+    // Temporary scaffolding for the migration.
+    const c = {
+        ...collection,
+        c2,
+        key: collectionKey,
+        name,
+        type: collection.type as CollectionType,
+        attributes: {},
+        isDeleted: !!collection.isDeleted,
+        magicMetadata: (magicMetadata
+            ? { ...magicMetadata, header: collection.magicMetadata!.header }
+            : undefined)!,
+        pubMagicMetadata: (pubMagicMetadata
+            ? {
+                  ...pubMagicMetadata,
+                  header: collection.pubMagicMetadata!.header,
+              }
+            : undefined)!,
+        sharedMagicMetadata: (sharedMagicMetadata
+            ? {
+                  ...sharedMagicMetadata,
+                  header: collection.sharedMagicMetadata!.header,
+              }
+            : undefined)!,
+    };
+
+    return c;
 };
 
 /**
@@ -603,11 +758,10 @@ export interface CollectionMagicMetadataProps {
 }
 
 export type CollectionMagicMetadata =
-    // TODO(C2):
-    Omit<MagicMetadataCore<CollectionMagicMetadataProps>, "header">;
+    MagicMetadataCore<CollectionMagicMetadataProps>;
 
 export interface CollectionShareeMetadataProps {
-    visibility?: ItemVisibility;
+    visibility?: number; // ItemVisibility;
 }
 export type CollectionShareeMagicMetadata =
     MagicMetadataCore<CollectionShareeMetadataProps>;

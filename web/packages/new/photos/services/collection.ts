@@ -14,7 +14,6 @@ import {
     decryptRemoteCollection,
     RemoteCollection,
     type Collection,
-    type Collection2,
     type CollectionNewParticipantRole,
     type CollectionPrivateMagicMetadataData,
     type CollectionType,
@@ -114,7 +113,7 @@ export const createCollection2 = async (
     name: string,
     type: CollectionType,
     magicMetadataData?: CollectionPrivateMagicMetadataData,
-): Promise<Collection2> => {
+): Promise<Collection> => {
     const masterKey = await ensureMasterKeyFromSession();
     const collectionKey = await generateKey();
     const { encryptedData: encryptedKey, nonce: keyDecryptionNonce } =
