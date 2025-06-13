@@ -67,7 +67,14 @@ import { wait } from "ente-utils/promise";
 import { useFormik } from "formik";
 import { t } from "i18next";
 import { GalleryContext } from "pages/gallery";
-import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+    useCallback,
+    useContext,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from "react";
 import { Trans } from "react-i18next";
 import {
     createShareableURL,
@@ -86,6 +93,34 @@ export const CollectionShare: React.FC<CollectionShareProps> = ({
     collection,
     collectionSummary,
 }) => {
+    const { onGenericError } = useBaseContext();
+    const { showLoadingBar, hideLoadingBar } = usePhotosAppContext();
+    const { syncWithRemote } = useContext(GalleryContext);
+
+    // TODO: Duplicated from CollectionHeader.tsx
+    /**
+     * Return a new function by wrapping an async function in an error handler,
+     * showing the global loading bar when the function runs, and syncing with
+     * remote on completion.
+     */
+    const wrap = useCallback(
+        (f: () => Promise<void>) => {
+            const wrapped = async () => {
+                showLoadingBar();
+                try {
+                    await f();
+                } catch (e) {
+                    onGenericError(e);
+                } finally {
+                    void syncWithRemote(false, true);
+                    hideLoadingBar();
+                }
+            };
+            return (): void => void wrapped();
+        },
+        [showLoadingBar, hideLoadingBar, onGenericError, syncWithRemote],
+    );
+
     if (!collection || !collectionSummary) {
         return <></>;
     }
@@ -114,7 +149,7 @@ export const CollectionShare: React.FC<CollectionShareProps> = ({
                         <>
                             <EmailShare
                                 onRootClose={onClose}
-                                {...{ collection }}
+                                {...{ wrap, collection }}
                             />
                             <PublicShare
                                 onRootClose={onClose}
@@ -314,11 +349,16 @@ const handleSharingErrors = (error) => {
 };
 
 interface EmailShareProps {
-    collection: Collection;
     onRootClose: () => void;
+    wrap: (f: () => Promise<void>) => () => void;
+    collection: Collection;
 }
 
-const EmailShare: React.FC<EmailShareProps> = ({ collection, onRootClose }) => {
+const EmailShare: React.FC<EmailShareProps> = ({
+    onRootClose,
+    wrap,
+    collection,
+}) => {
     const [addParticipantView, setAddParticipantView] = useState(false);
     const [manageEmailShareView, setManageEmailShareView] = useState(false);
     const [participantRole, setParticipantRole] = useState<
@@ -388,11 +428,11 @@ const EmailShare: React.FC<EmailShareProps> = ({ collection, onRootClose }) => {
                 role={participantRole}
             />
             <ManageEmailShare
-                peopleCount={collection.sharees.length}
                 open={manageEmailShareView}
                 onClose={closeManageEmailShare}
                 onRootClose={onRootClose}
-                collection={collection}
+                {...{ onRootClose, wrap, collection }}
+                peopleCount={collection.sharees.length}
             />
         </>
     );
@@ -678,21 +718,22 @@ const AddParticipantForm: React.FC<AddParticipantFormProps> = ({
 };
 
 interface ManageEmailShareProps {
-    collection: Collection;
     open: boolean;
     onClose: () => void;
     onRootClose: () => void;
+    wrap: (f: () => Promise<void>) => () => void;
+    collection: Collection;
     peopleCount: number;
 }
 
 const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
     open,
-    collection,
     onClose,
     onRootClose,
+    wrap,
+    collection,
     peopleCount,
 }) => {
-    const { showLoadingBar, hideLoadingBar } = usePhotosAppContext();
     const galleryContext = useContext(GalleryContext);
 
     const { show: showAddParticipant, props: addParticipantVisibilityProps } =
@@ -719,16 +760,6 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
     const handleRootClose = () => {
         onClose();
         onRootClose();
-    };
-
-    const collectionUnshare = async (email: string) => {
-        try {
-            showLoadingBar();
-            await unshareCollection(collection.id, email);
-            await galleryContext.syncWithRemote(false, true);
-        } finally {
-            hideLoadingBar();
-        }
     };
 
     const ownerEmail =
@@ -846,9 +877,7 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
             />
             <ManageParticipant
                 {...manageParticipantVisibilityProps}
-                onRootClose={onRootClose}
-                collectionUnshare={collectionUnshare}
-                collection={collection}
+                {...{ onRootClose, wrap, collection }}
                 selectedParticipant={selectedParticipant.current}
             />
         </>
@@ -857,20 +886,20 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
 
 interface ManageParticipantProps {
     open: boolean;
-    collection: Collection;
     onClose: () => void;
     onRootClose: () => void;
+    wrap: (f: () => Promise<void>) => () => void;
+    collection: Collection;
     selectedParticipant: CollectionUser;
-    collectionUnshare: (email: string) => Promise<void>;
 }
 
 const ManageParticipant: React.FC<ManageParticipantProps> = ({
-    collection,
     open,
     onClose,
     onRootClose,
+    wrap,
+    collection,
     selectedParticipant,
-    collectionUnshare,
 }) => {
     const { showMiniDialog } = useBaseContext();
     const galleryContext = useContext(GalleryContext);
@@ -880,8 +909,12 @@ const ManageParticipant: React.FC<ManageParticipantProps> = ({
         onRootClose();
     };
 
+    const unshare = wrap(() =>
+        unshareCollection(collection.id, selectedParticipant.email),
+    );
+
     const handleRemove = () => {
-        collectionUnshare(selectedParticipant.email);
+        unshare();
         onClose();
     };
 
