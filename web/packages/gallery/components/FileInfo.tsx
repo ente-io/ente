@@ -517,9 +517,7 @@ const InfoItem: React.FC<React.PropsWithChildren<InfoItemProps>> = ({
                 <Typography sx={{ wordBreak: "break-all" }}>{title}</Typography>
                 <Typography
                     variant="small"
-                    {...(typeof caption == "string"
-                        ? {}
-                        : { component: "div" })}
+                    {...(typeof caption != "string" && { component: "div" })}
                     sx={{ color: "text.muted" }}
                 >
                     {caption}

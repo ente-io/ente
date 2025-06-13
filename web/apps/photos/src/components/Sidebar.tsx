@@ -31,13 +31,13 @@ import { LinkButton } from "ente-base/components/LinkButton";
 import {
     RowButton,
     RowButtonDivider,
+    RowButtonEndActivityIndicator,
     RowButtonGroup,
     RowButtonGroupHint,
     RowButtonGroupTitle,
     RowSwitch,
 } from "ente-base/components/RowButton";
 import { SpacedRow } from "ente-base/components/containers";
-import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
 import { DialogCloseIconButton } from "ente-base/components/mui/DialogCloseIconButton";
 import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
 import {
@@ -581,7 +581,7 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({
                 label={t("export_data")}
                 endIcon={
                     exportService.isExportInProgress() && (
-                        <ActivityIndicator size="20px" />
+                        <RowButtonEndActivityIndicator />
                     )
                 }
                 onClick={handleExport}

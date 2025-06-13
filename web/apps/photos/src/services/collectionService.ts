@@ -14,19 +14,18 @@ import {
     CollectionPublicMagicMetadata,
     CollectionSubType,
     type CollectionType,
-    CreatePublicAccessTokenRequest,
     EncryptedCollection,
-    PublicURL,
     RemoveFromCollectionRequest,
-    UpdatePublicURL,
 } from "ente-media/collection";
 import { EncryptedMagicMetadata, EnteFile } from "ente-media/file";
 import { ItemVisibility } from "ente-media/file-metadata";
 import {
     addToCollection,
+    collection1To2,
     createCollection2,
     isDefaultHiddenCollection,
     moveToCollection,
+    renameCollection2,
 } from "ente-new/photos/services/collection";
 import type { CollectionSummary } from "ente-new/photos/services/collection/ui";
 import {
@@ -59,15 +58,17 @@ const favoritesCollectionName = "Favorites";
 const REQUEST_BATCH_SIZE = 1000;
 
 export const createAlbum = (albumName: string) =>
-    createCollectionReroute(albumName, "album");
+    createCollection(albumName, "album");
 
-const createCollectionReroute = async (
+// TODO(C2):
+const enableC2 = () => isDevBuild && process.env.NEXT_PUBLIC_ENTE_WIP_NEWIMPL;
+
+const createCollection = async (
     collectionName: string,
     type: CollectionType,
     magicMetadataProps?: CollectionMagicMetadataProps,
 ): Promise<Collection> => {
-    // TODO(C2):
-    if (isDevBuild && process.env.NEXT_PUBLIC_ENTE_WIP_NEWIMPL) {
+    if (enableC2()) {
         const z = createCollection2(collectionName, type, magicMetadataProps);
         z.then((x) => console.log(x));
         return z;
@@ -153,7 +154,7 @@ const postCollection = async (
 };
 
 export const createFavoritesCollection = () =>
-    createCollectionReroute(favoritesCollectionName, "favorites");
+    createCollection(favoritesCollectionName, "favorites");
 
 export const addToFavorites = async (
     file: EnteFile,
@@ -469,6 +470,14 @@ export const updatePublicCollectionMagicMetadata = async (
 export const renameCollection = async (
     collection: Collection,
     newCollectionName: string,
+) =>
+    enableC2()
+        ? renameCollection2(await collection1To2(collection), newCollectionName)
+        : renameCollection1(collection, newCollectionName);
+
+const renameCollection1 = async (
+    collection: Collection,
+    newCollectionName: string,
 ) => {
     if (isQuickLinkCollection(collection)) {
         // Convert quick link collection to normal collection on rename
@@ -492,70 +501,6 @@ export const renameCollection = async (
         null,
         { "X-Auth-Token": token },
     );
-};
-
-export const unshareCollection = async (
-    collection: Collection,
-    withUserEmail: string,
-) => {
-    try {
-        const token = getToken();
-        const shareCollectionRequest = {
-            collectionID: collection.id,
-            email: withUserEmail,
-        };
-        await HTTPService.post(
-            await apiURL("/collections/unshare"),
-            shareCollectionRequest,
-            null,
-            { "X-Auth-Token": token },
-        );
-    } catch (e) {
-        log.error("unshare collection failed ", e);
-    }
-};
-
-export const createShareableURL = async (collection: Collection) => {
-    try {
-        const token = getToken();
-        if (!token) {
-            return null;
-        }
-        const createPublicAccessTokenRequest: CreatePublicAccessTokenRequest = {
-            collectionID: collection.id,
-        };
-        const resp = await HTTPService.post(
-            await apiURL("/collections/share-url"),
-            createPublicAccessTokenRequest,
-            null,
-            { "X-Auth-Token": token },
-        );
-        return resp.data.result as PublicURL;
-    } catch (e) {
-        log.error("createShareableURL failed ", e);
-        throw e;
-    }
-};
-
-export const updateShareableURL = async (
-    request: UpdatePublicURL,
-): Promise<PublicURL> => {
-    try {
-        const token = getToken();
-        if (!token) {
-            return null;
-        }
-        const res = await HTTPService.put(
-            await apiURL("/collections/share-url"),
-            request,
-            null,
-            { "X-Auth-Token": token },
-        );
-        return res.data.result as PublicURL;
-    } catch (e) {
-        log.error("updateShareableURL failed ", e);
-        throw e;
-    }
 };
 
 /**
@@ -629,7 +574,7 @@ export async function getUncategorizedCollection(
 }
 
 export const createUnCategorizedCollection = () =>
-    createCollectionReroute(uncategorizedCollectionName, "uncategorized");
+    createCollection(uncategorizedCollectionName, "uncategorized");
 
 export async function getDefaultHiddenCollection(): Promise<Collection> {
     const collections = await getLocalCollections("hidden");
@@ -641,7 +586,7 @@ export async function getDefaultHiddenCollection(): Promise<Collection> {
 }
 
 const createDefaultHiddenCollection = () =>
-    createCollectionReroute(defaultHiddenCollectionName, "album", {
+    createCollection(defaultHiddenCollectionName, "album", {
         subType: CollectionSubType.defaultHidden,
         visibility: ItemVisibility.hidden,
     });

@@ -787,7 +787,7 @@ const publicAlbums_downloadThumbnail = async (
             const { accessToken, accessTokenJWT } = credentials;
             const params = new URLSearchParams({
                 accessToken,
-                ...(accessTokenJWT ? { accessTokenJWT } : {}),
+                ...(accessTokenJWT && { accessTokenJWT }),
             });
             return fetch(
                 `${customOrigin}/public-collection/files/preview/${file.id}?${params.toString()}`,
@@ -820,7 +820,7 @@ const publicAlbums_downloadFile = async (
             const { accessToken, accessTokenJWT } = credentials;
             const params = new URLSearchParams({
                 accessToken,
-                ...(accessTokenJWT ? { accessTokenJWT } : {}),
+                ...(accessTokenJWT && { accessTokenJWT }),
             });
             return fetch(
                 `${customOrigin}/public-collection/files/download/${file.id}?${params.toString()}`,

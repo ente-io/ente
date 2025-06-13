@@ -13,16 +13,20 @@ import {
     CollectionSubType,
     decryptRemoteCollection,
     RemoteCollection,
+    RemotePublicURL,
     type Collection,
+    type Collection2,
     type CollectionNewParticipantRole,
     type CollectionPrivateMagicMetadataData,
     type CollectionType,
+    type PublicURL,
 } from "ente-media/collection";
 import { type EnteFile } from "ente-media/file";
 import { ItemVisibility } from "ente-media/file-metadata";
 import {
     createMagicMetadata,
     encryptMagicMetadata,
+    type RemoteMagicMetadata,
 } from "ente-media/magic-metadata";
 import { batch } from "ente-utils/array";
 import { z } from "zod/v4";
@@ -133,13 +137,33 @@ export const createCollection2 = async (
         encryptedName,
         nameDecryptionNonce,
         type,
-        ...(magicMetadata ? { magicMetadata } : {}),
+        ...(magicMetadata && { magicMetadata }),
     });
 
     return decryptRemoteCollection(
         collection,
         await decryptCollectionKey(collection),
     );
+};
+
+// TODO(C2): Temporary method to convert to the newer type.
+export const collection1To2 = async (c1: Collection): Promise<Collection2> => {
+    const collection = RemoteCollection.parse({
+        ...c1,
+        magicMetadata: undefined,
+        pubMagicMetadata: undefined,
+        sharedMagicMetadata: undefined,
+    });
+    const c2 = await decryptRemoteCollection(
+        collection,
+        await decryptCollectionKey(collection),
+    );
+    return {
+        ...c2,
+        magicMetadata: c1.magicMetadata,
+        pubMagicMetadata: c1.pubMagicMetadata,
+        sharedMagicMetadata: c1.sharedMagicMetadata,
+    };
 };
 
 /**
@@ -223,7 +247,7 @@ export interface MoveToCollectionRequest {
  * Make a remote request to add the given {@link files} to the given
  * {@link collection}.
  *
- * Does not modify local state.
+ * Remote only, does not modify local state.
  */
 export const addToCollection = async (
     collection: Collection,
@@ -251,7 +275,7 @@ export const addToCollection = async (
  * Make a remote request to restore the given {@link files} to the given
  * {@link collection}.
  *
- * Does not modify local state.
+ * Remote only, does not modify local state.
  */
 export const restoreToCollection = async (
     collection: Collection,
@@ -280,7 +304,7 @@ export const restoreToCollection = async (
  * identified by its {@link fromCollectionID}) to the given
  * {@link toCollection}.
  *
- * Does not modify local state.
+ * Remote only, does not modify local state.
  */
 export const moveToCollection = async (
     fromCollectionID: number,
@@ -333,7 +357,7 @@ const encryptWithCollectionKey = async (
  * both a file ID and a collection ID, but there should be at most one entry for
  * a particular fileID in this array.
  *
- * Does not modify local state.
+ * Remote only, does not modify local state.
  */
 export const moveToTrash = async (files: EnteFile[]) => {
     for (const batchFiles of batch(files, requestBatchSize)) {
@@ -355,7 +379,7 @@ export const moveToTrash = async (files: EnteFile[]) => {
 /**
  * Make a remote request to delete the given {@link fileIDs} from trash.
  *
- * Does not modify local state.
+ * Remote only, does not modify local state.
  */
 export const deleteFromTrash = async (fileIDs: number[]) => {
     for (const batchIDs of batch(fileIDs, requestBatchSize)) {
@@ -368,6 +392,114 @@ export const deleteFromTrash = async (fileIDs: number[]) => {
         );
     }
 };
+
+/**
+ * Rename a collection on remote.
+ *
+ * Remote only, does not modify local state.
+ *
+ * @param collection The collection to rename.
+ *
+ * @param newName The new name of the collection
+ */
+export const renameCollection2 = async (
+    collection: Collection2,
+    newName: string,
+) => {
+    if (collection.magicMetadata?.data.subType == CollectionSubType.quicklink) {
+        // Convert quicklinks to a regular collection before giving them a name.
+        await updateCollectionPrivateMagicMetadata(collection, {
+            subType: CollectionSubType.default,
+        });
+    }
+    const { encryptedData: encryptedName, nonce: nameDecryptionNonce } =
+        await encryptBox(new TextEncoder().encode(newName), collection.key);
+    await postCollectionsRename({
+        collectionID: collection.id,
+        encryptedName,
+        nameDecryptionNonce,
+    });
+};
+
+interface RenameRequest {
+    collectionID: number;
+    encryptedName: string;
+    nameDecryptionNonce: string;
+}
+
+const postCollectionsRename = async (renameRequest: RenameRequest) =>
+    ensureOk(
+        await fetch(await apiURL("/collections/rename"), {
+            method: "POST",
+            headers: await authenticatedRequestHeaders(),
+            body: JSON.stringify(renameRequest),
+        }),
+    );
+
+/**
+ * Update the private magic metadata contents of a collection on remote.
+ *
+ * Remote only, does not modify local state.
+ *
+ * @param collection The collection whose magic metadata we want to update. In
+ * particular, the existing magic metadata of this collection is used both to
+ * obtain the current magic metadata version, and the existing contents on top
+ * of which the updates are applied.
+ *
+ * @param updates A non-empty subset of
+ * {@link CollectionPrivateMagicMetadataData} entries.
+ *
+ * See: [Note: Magic metadata data cannot have nullish values]
+ */
+export const updateCollectionPrivateMagicMetadata = async (
+    { id, key, magicMetadata }: Collection2,
+    updates: CollectionPrivateMagicMetadataData,
+) =>
+    putCollectionsMagicMetadata({
+        id,
+        magicMetadata: await encryptMagicMetadata(
+            createMagicMetadata(
+                { ...magicMetadata?.data, ...updates },
+                magicMetadata?.version,
+            ),
+            key,
+        ),
+    });
+
+/**
+ * The payload of the remote requests for updating the magic metadata of a
+ * single collection.
+ */
+interface UpdateCollectionMagicMetadataRequest {
+    /**
+     * Collection ID
+     */
+    id: number;
+    /**
+     * The updated magic metadata.
+     *
+     * Remote usually enforces the following constraints when we're trying to
+     * update already existing data.
+     *
+     * - The version should be same as the existing version.
+     * - The count should be greater than or equal to the existing count.
+     */
+    magicMetadata: RemoteMagicMetadata;
+}
+
+/**
+ * Update the private magic metadata of a single collection on remote.
+ */
+const putCollectionsMagicMetadata = async (
+    updateRequest: UpdateCollectionMagicMetadataRequest,
+) =>
+    ensureOk(
+        await fetch(await apiURL("/collections/magic-metadata"), {
+            method: "PUT",
+            headers: await authenticatedRequestHeaders(),
+            body: JSON.stringify(updateRequest),
+        }),
+    );
 
 /**
  * Share the provided collection with another Ente user.
@@ -388,17 +520,112 @@ export const shareCollection = async (
     const publicKey = await getPublicKey(withUserEmail);
     const encryptedKey = await boxSeal(collection.key, publicKey);
 
-    const res = await fetch(await apiURL("/collections/share"), {
+    ensureOk(
+        await fetch(await apiURL("/collections/share"), {
+            method: "POST",
+            headers: await authenticatedRequestHeaders(),
+            body: JSON.stringify({
+                collectionID: collection.id,
+                email: withUserEmail,
+                role,
+                encryptedKey,
+            }),
+        }),
+    );
+};
+
+/**
+ * Stop sharing a collection on remote with the given user.
+ *
+ * Remote only, does not modify local state.
+ *
+ * @param collectionID The ID of the collection to stop sharing with the user
+ * having the given {@link email}.
+ *
+ * @param email The email of the Ente user with whom to stop sharing.
+ */
+export const unshareCollection = async (collectionID: number, email: string) =>
+    ensureOk(
+        await fetch(await apiURL("/collections/unshare"), {
+            method: "POST",
+            headers: await authenticatedRequestHeaders(),
+            body: JSON.stringify({ collectionID, email }),
+        }),
+    );
+
+/**
+ * The subset of public URL attributes that can be customized by the user when
+ * creating a link.
+ */
+export type CreatePublicURLAttributes = Pick<
+    Partial<PublicURL>,
+    "enableCollect" | "enableJoin" | "validTill" | "deviceLimit"
+>;
+
+/**
+ * Create a new public link for the given collection.
+ *
+ * Remote only, does not modify local state.
+ *
+ * @param collectionID The ID of the collection for which the public link should
+ * be created.
+ *
+ * @param attributes Optional attributes to set when creating the public link.
+ */
+export const createPublicURL = async (
+    collectionID: number,
+    attributes?: CreatePublicURLAttributes,
+): Promise<PublicURL> => {
+    const res = await fetch(await apiURL("/collections/share-url"), {
         method: "POST",
         headers: await authenticatedRequestHeaders(),
-        body: JSON.stringify({
-            collectionID: collection.id,
-            email: withUserEmail,
-            role: role,
-            encryptedKey,
-        }),
+        body: JSON.stringify({ collectionID, ...attributes }),
     });
     ensureOk(res);
+    // See: [Note: strict mode migration]
+    //
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    return z.object({ result: RemotePublicURL }).parse(await res.json()).result;
+};
+
+/**
+ * The subset of public URL attributes that can be updated by the user after the
+ * link has already been created.
+ */
+export type UpdatePublicURLAttributes = Omit<
+    Partial<PublicURL>,
+    "url" | "enablePassword"
+> & { disablePassword?: boolean; passHash?: string };
+
+/**
+ * Update the attributes of an existing public link for a shared collection.
+ *
+ * Remote only, does not modify local state.
+ *
+ * @param collectionID The ID of the collection whose public link to update.
+ *
+ * @param updates The public link attributes to modify. Only attributes
+ * corresponding to entries with non nullish values will be updated, all the
+ * other existing attributes will remain unmodified.
+ *
+ * @returns the updated public URL.
+ */
+export const updatePublicURL = async (
+    collectionID: number,
+    updates: UpdatePublicURLAttributes,
+): Promise<PublicURL> => {
+    const res = await fetch(await apiURL("/collections/share-url"), {
+        method: "PUT",
+        headers: await authenticatedRequestHeaders(),
+        body: JSON.stringify({ collectionID, ...updates }),
+    });
+    ensureOk(res);
+    // See: [Note: strict mode migration]
+    //
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    return z.object({ result: RemotePublicURL }).parse(await res.json()).result;
 };
 
 /**

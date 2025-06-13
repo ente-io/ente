@@ -651,7 +651,7 @@ export const verifyEmail = async (
     const res = await fetch(await apiURL("/users/verify-email"), {
         method: "POST",
         headers: publicRequestHeaders(),
-        body: JSON.stringify({ email, ott, ...(source ? { source } : {}) }),
+        body: JSON.stringify({ email, ott, ...(source && { source }) }),
     });
     ensureOk(res);
     return RemoteEmailOrSRPVerificationResponse.parse(await res.json());
