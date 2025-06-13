@@ -58,6 +58,7 @@ import { avatarTextColor } from "ente-new/photos/services/avatar";
 import {
     deleteShareURL,
     shareCollection,
+    unshareCollection,
 } from "ente-new/photos/services/collection";
 import type { CollectionSummary } from "ente-new/photos/services/collection/ui";
 import { usePhotosAppContext } from "ente-new/photos/types/context";
@@ -70,7 +71,6 @@ import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { Trans } from "react-i18next";
 import {
     createShareableURL,
-    unshareCollection,
     updateShareableURL,
 } from "services/collectionService";
 import { z } from "zod/v4";
@@ -724,7 +724,7 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
     const collectionUnshare = async (email: string) => {
         try {
             showLoadingBar();
-            await unshareCollection(collection, email);
+            await unshareCollection(collection.id, email);
             await galleryContext.syncWithRemote(false, true);
         } finally {
             hideLoadingBar();

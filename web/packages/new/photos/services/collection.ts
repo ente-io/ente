@@ -518,18 +518,38 @@ export const shareCollection = async (
     const publicKey = await getPublicKey(withUserEmail);
     const encryptedKey = await boxSeal(collection.key, publicKey);
 
-    const res = await fetch(await apiURL("/collections/share"), {
-        method: "POST",
-        headers: await authenticatedRequestHeaders(),
-        body: JSON.stringify({
-            collectionID: collection.id,
-            email: withUserEmail,
-            role: role,
-            encryptedKey,
+    ensureOk(
+        await fetch(await apiURL("/collections/share"), {
+            method: "POST",
+            headers: await authenticatedRequestHeaders(),
+            body: JSON.stringify({
+                collectionID: collection.id,
+                email: withUserEmail,
+                role,
+                encryptedKey,
+            }),
         }),
-    });
-    ensureOk(res);
+    );
 };
+
+/**
+ * Stop sharing a collection on remote with the given user.
+ *
+ * Remote only, does not modify local state.
+ *
+ * @param collectionID The ID of the collection to stop sharing with the user
+ * having the given {@link email}.
+ *
+ * @param email The email of the Ente user with whom to stop sharing.
+ */
+export const unshareCollection = async (collectionID: number, email: string) =>
+    ensureOk(
+        await fetch(await apiURL("/collections/unshare"), {
+            method: "POST",
+            headers: await authenticatedRequestHeaders(),
+            body: JSON.stringify({ collectionID, email }),
+        }),
+    );
 
 /**
  * Delete the public link for the collection with given {@link collectionID}.

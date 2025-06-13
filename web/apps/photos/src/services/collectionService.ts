@@ -506,27 +506,6 @@ const renameCollection1 = async (
     );
 };
 
-export const unshareCollection = async (
-    collection: Collection,
-    withUserEmail: string,
-) => {
-    try {
-        const token = getToken();
-        const shareCollectionRequest = {
-            collectionID: collection.id,
-            email: withUserEmail,
-        };
-        await HTTPService.post(
-            await apiURL("/collections/unshare"),
-            shareCollectionRequest,
-            null,
-            { "X-Auth-Token": token },
-        );
-    } catch (e) {
-        log.error("unshare collection failed ", e);
-    }
-};
-
 export const createShareableURL = async (collection: Collection) => {
     try {
         const token = getToken();
