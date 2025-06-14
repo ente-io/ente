@@ -7,6 +7,7 @@ import 'package:photos/models/collection/collection.dart';
 import 'package:photos/models/file/file.dart';
 import 'package:photos/services/collections_service.dart';
 import "package:photos/services/sync/remote_sync_service.dart";
+import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/components/action_sheet_widget.dart';
 import 'package:photos/ui/components/buttons/button_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
@@ -59,16 +60,33 @@ class _DeleteEmptyAlbumsState extends State<DeleteEmptyAlbums> {
   }
 
   Widget _buildDeleteButton() {
+    final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
     return Padding(
       padding: const EdgeInsets.fromLTRB(8.5, 4, 8, 12),
       child: Align(
         alignment: Alignment.centerLeft,
-        child: ButtonWidget(
-          buttonSize: ButtonSize.small,
-          buttonType: ButtonType.secondary,
-          labelText: S.of(context).deleteEmptyAlbums,
-          icon: Icons.delete_sweep_outlined,
-          shouldSurfaceExecutionStates: false,
+        child: GestureDetector(
+          child: Container(
+            decoration: BoxDecoration(
+              color: colorScheme.fillFaint,
+              borderRadius: const BorderRadius.all(Radius.circular(4)),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.delete_sweep_outlined, size: 18),
+                  const SizedBox(width: 8),
+                  Text(
+                    S.of(context).deleteEmptyAlbums,
+                    style: textTheme.smallBold,
+                  ),
+                ],
+              ),
+            ),
+          ),
           onTap: () async {
             await showActionSheet(
               context: context,
