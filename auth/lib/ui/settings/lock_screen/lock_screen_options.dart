@@ -30,7 +30,7 @@ class LockScreenOptions extends StatefulWidget {
 }
 
 class _LockScreenOptionsState extends State<LockScreenOptions> {
-  final LockScreenSettings _lockScreenSetting = LockScreenSettings.instance;
+  final LockScreenSettings _lockScreenSettings = LockScreenSettings.instance;
   late bool appLock = false;
   bool isPinEnabled = false;
   bool isPasswordEnabled = false;
@@ -41,18 +41,18 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
   @override
   void initState() {
     super.initState();
-    hideAppContent = _lockScreenSetting.getShouldHideAppContent();
-    autoLockTimeInMilliseconds = _lockScreenSetting.getAutoLockTime();
+    hideAppContent = _lockScreenSettings.getShouldHideAppContent();
+    autoLockTimeInMilliseconds = _lockScreenSettings.getAutoLockTime();
     _initializeSettings();
-    appLock = _lockScreenSetting.getIsAppLockSet();
+    appLock = _lockScreenSettings.getIsAppLockSet();
   }
 
   Future<void> _initializeSettings() async {
-    final bool passwordEnabled = await _lockScreenSetting.isPasswordSet();
-    final bool pinEnabled = await _lockScreenSetting.isPinSet();
+    final bool passwordEnabled = await _lockScreenSettings.isPasswordSet();
+    final bool pinEnabled = await _lockScreenSettings.isPinSet();
     final bool shouldHideAppContent =
-        _lockScreenSetting.getShouldHideAppContent();
-    final bool systemLockEnabled = _lockScreenSetting.shouldShowSystemLockScreen();
+        _lockScreenSettings.getShouldHideAppContent();
+    final bool systemLockEnabled = _lockScreenSettings.shouldShowSystemLockScreen();
     setState(() {
       isPasswordEnabled = passwordEnabled;
       isPinEnabled = pinEnabled;
@@ -64,8 +64,8 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
   Future<void> _deviceLock() async {
     if (await LocalAuthenticationService.instance
         .isLocalAuthSupportedOnDevice()) {
-      await _lockScreenSetting.removePinAndPassword();
-      await _lockScreenSetting.setSystemLockScreen(!isSystemLockEnabled);
+      await _lockScreenSettings.removePinAndPassword();
+      await _lockScreenSettings.setSystemLockScreen(!isSystemLockEnabled);
     } else {
       await showDialogWidget(
         context: context,
@@ -94,10 +94,10 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
     );
 
     if (result) {
-      await _lockScreenSetting.setSystemLockScreen(false);
-      await _lockScreenSetting.setAppLockEnabled(true);
+      await _lockScreenSettings.setSystemLockScreen(false);
+      await _lockScreenSettings.setAppLockEnabled(true);
       setState(() {
-        appLock = _lockScreenSetting.getIsAppLockSet();
+        appLock = _lockScreenSettings.getIsAppLockSet();
       });
     }
     await _initializeSettings();
@@ -112,9 +112,9 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
       ),
     );
     if (result) {
-      await _lockScreenSetting.setSystemLockScreen(false);
+      await _lockScreenSettings.setSystemLockScreen(false);
       setState(() {
-        appLock = _lockScreenSetting.getIsAppLockSet();
+        appLock = _lockScreenSettings.getIsAppLockSet();
       });
     }
     await _initializeSettings();
@@ -124,17 +124,17 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
     AppLock.of(context)!.setEnabled(!appLock);
     if (await LocalAuthenticationService.instance
         .isLocalAuthSupportedOnDevice()) {
-      await _lockScreenSetting.setSystemLockScreen(!appLock);
-      await _lockScreenSetting.setAppLockEnabled(!appLock);
+      await _lockScreenSettings.setSystemLockScreen(!appLock);
+      await _lockScreenSettings.setAppLockEnabled(!appLock);
     } else {
-      await _lockScreenSetting.setSystemLockScreen(false);
-      await _lockScreenSetting.setAppLockEnabled(false);
+      await _lockScreenSettings.setSystemLockScreen(false);
+      await _lockScreenSettings.setAppLockEnabled(false);
     }
-    await _lockScreenSetting.removePinAndPassword();
+    await _lockScreenSettings.removePinAndPassword();
     if (PlatformUtil.isMobile()) {
-      await _lockScreenSetting.setHideAppContent(!appLock);
+      await _lockScreenSettings.setHideAppContent(!appLock);
       setState(() {
-        hideAppContent = _lockScreenSetting.getShouldHideAppContent();
+        hideAppContent = _lockScreenSettings.getShouldHideAppContent();
       });
     }
     await _initializeSettings();
@@ -150,7 +150,7 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
     ).then(
       (value) {
         setState(() {
-          autoLockTimeInMilliseconds = _lockScreenSetting.getAutoLockTime();
+          autoLockTimeInMilliseconds = _lockScreenSettings.getAutoLockTime();
         });
       },
     );
@@ -160,7 +160,7 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
     setState(() {
       hideAppContent = !hideAppContent;
     });
-    await _lockScreenSetting.setHideAppContent(hideAppContent);
+    await _lockScreenSettings.setHideAppContent(hideAppContent);
   }
 
   String _formatTime(Duration duration) {
