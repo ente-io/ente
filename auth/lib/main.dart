@@ -103,7 +103,7 @@ Future<void> _runInForeground() async {
       AppLock(
         builder: (args) => App(locale: locale),
         lockScreen: const LockScreen(),
-        enabled: await Configuration.instance.shouldShowLockScreen(),
+        enabled: await LockScreenSettings.instance.shouldShowLockScreen(),
         locale: locale,
         lightTheme: lightThemeData,
         darkTheme: darkThemeData,
