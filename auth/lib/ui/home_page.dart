@@ -319,7 +319,7 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> navigateToLockScreen() async {
     final bool shouldShowLockScreen =
-        await Configuration.instance.shouldShowLockScreen();
+        await LockScreenSettings.instance.shouldShowLockScreen();
     if (shouldShowLockScreen) {
       await AppLock.of(context)!.showLockScreen();
     } else {
