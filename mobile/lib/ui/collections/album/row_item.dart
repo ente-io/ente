@@ -59,7 +59,7 @@ class AlbumRowItemWidget extends StatelessWidget {
           Stack(
             children: [
               ClipRRect(
-                borderRadius: BorderRadius.circular(1),
+                borderRadius: BorderRadius.circular(12),
                 child: SizedBox(
                   height: sideOfThumbnail,
                   width: sideOfThumbnail,
@@ -107,7 +107,9 @@ class AlbumRowItemWidget extends StatelessWidget {
                                   : thumbnailWidget,
                             );
                           } else {
-                            return const NoThumbnailWidget();
+                            return const NoThumbnailWidget(
+                              borderRadius: 12,
+                            );
                           }
                         },
                       ),
@@ -174,7 +176,7 @@ class AlbumRowItemWidget extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 6),
           Hero(
             tag: tagPrefix + "_title",
             transitionOnUserGestures: true,
@@ -214,7 +216,7 @@ class AlbumRowItemWidget extends StatelessWidget {
                         const SizedBox(height: 2),
                         RichText(
                           text: TextSpan(
-                            style: enteTextTheme.tinyMuted,
+                            style: enteTextTheme.miniMuted,
                             children: [
                               TextSpan(text: textCount),
                             ],

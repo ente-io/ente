@@ -1,4 +1,5 @@
 import 'dart:async';
+import "dart:math";
 
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
@@ -33,6 +34,9 @@ class _DeviceFoldersGridViewState extends State<DeviceFoldersGridView> {
     executionInterval: const Duration(seconds: 5),
     leading: true,
   );
+  static const maxThumbnailWidth = 224.0;
+  static const horizontalPadding = 16.0;
+  static const crossAxisSpacing = 8.0;
 
   @override
   void initState() {
@@ -57,9 +61,18 @@ class _DeviceFoldersGridViewState extends State<DeviceFoldersGridView> {
 
   @override
   Widget build(BuildContext context) {
+    final double screenWidth = MediaQuery.sizeOf(context).width;
+    final int albumsCountInCrossAxis = max(screenWidth ~/ maxThumbnailWidth, 3);
+
+    final double totalCrossAxisSpacing =
+        (albumsCountInCrossAxis - 1) * crossAxisSpacing;
+    final double sideOfThumbnail =
+        (screenWidth - totalCrossAxisSpacing - horizontalPadding) /
+            albumsCountInCrossAxis;
+
     debugPrint("${(DeviceFoldersGridView).toString()} - $_loadReason");
     return SizedBox(
-      height: 170,
+      height: sideOfThumbnail + 46,
       child: Align(
         alignment: Alignment.centerLeft,
         child: FutureBuilder<List<DeviceCollection>>(
@@ -72,19 +85,28 @@ class _DeviceFoldersGridViewState extends State<DeviceFoldersGridView> {
                       padding: EdgeInsets.all(22),
                       child: EmptyState(),
                     )
-                  : ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
-                      physics: const ScrollPhysics(),
-                      // to disable GridView's scrolling
-                      itemBuilder: (context, index) {
-                        final deviceCollection = snapshot.data![index];
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 2),
-                          child: DeviceFolderItem(deviceCollection),
-                        );
-                      },
-                      itemCount: snapshot.data!.length,
+                  : Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: horizontalPadding / 2,
+                      ),
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        physics: const ScrollPhysics(),
+                        // to disable GridView's scrolling
+                        itemBuilder: (context, index) {
+                          final deviceCollection = snapshot.data![index];
+                          return Padding(
+                            padding: const EdgeInsets.only(
+                              right: horizontalPadding / 2,
+                            ),
+                            child: DeviceFolderItem(
+                              deviceCollection,
+                              sideOfThumbnail: sideOfThumbnail,
+                            ),
+                          );
+                        },
+                        itemCount: snapshot.data!.length,
+                      ),
                     );
             } else if (snapshot.hasError) {
               _logger.severe("failed to load device gallery", snapshot.error);

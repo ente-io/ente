@@ -10,7 +10,7 @@ import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import 'package:photos/ui/viewer/file/no_thumbnail_widget.dart';
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
 
-///https://www.figma.com/file/SYtMyLBs5SAOkTbfMMzhqt/ente-Visual-Design?node-id=7480%3A33462&t=H5AvR79OYDnB9ekw-4
+///https://www.figma.com/design/SYtMyLBs5SAOkTbfMMzhqt/Ente-Visual-Design?node-id=39181-172145&t=3qmSZWpXF3ZC4JGN-1
 class AlbumColumnItemWidget extends StatelessWidget {
   final Collection collection;
   final List<Collection> selectedCollections;
@@ -36,7 +36,7 @@ class AlbumColumnItemWidget extends StatelessWidget {
               isSelected ? colorScheme.strokeMuted : colorScheme.strokeFainter,
         ),
         borderRadius: const BorderRadius.all(
-          Radius.circular(4),
+          Radius.circular(6),
         ),
       ),
       child: Row(
@@ -47,9 +47,7 @@ class AlbumColumnItemWidget extends StatelessWidget {
             child: Row(
               children: [
                 ClipRRect(
-                  borderRadius: const BorderRadius.horizontal(
-                    left: Radius.circular(4),
-                  ),
+                  borderRadius: BorderRadius.circular(4),
                   child: SizedBox(
                     height: sideOfThumbnail,
                     width: sideOfThumbnail,
@@ -66,7 +64,7 @@ class AlbumColumnItemWidget extends StatelessWidget {
                           );
                         } else {
                           return const NoThumbnailWidget(
-                            addBorder: false,
+                            addBorder: false, 
                           );
                         }
                       },
@@ -94,9 +92,7 @@ class AlbumColumnItemWidget extends StatelessWidget {
                                       snapshot.data!,
                                       NumberFormat().format(snapshot.data!),
                                     ),
-                                style: textTheme.small.copyWith(
-                                  color: colorScheme.textMuted,
-                                ),
+                                style: textTheme.miniMuted,
                               );
                             } else {
                               if (snapshot.hasError) {
