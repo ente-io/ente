@@ -660,7 +660,7 @@ class FileUploader {
       encThumbSize = await encryptedThumbnailFile.length();
 
       // Calculate the number of parts for the file.
-      final count = await _multiPartUploader.calculatePartCount(encFileSize);
+      final count = _multiPartUploader.calculatePartCount(encFileSize);
 
       late String fileObjectKey;
       late String thumbnailObjectKey;
