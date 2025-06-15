@@ -14,8 +14,8 @@ import "package:photos/service_locator.dart";
 import "package:photos/services/preview_video_store.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/ui/common/loading_widget.dart";
-import "package:photos/ui/notification/toast.dart";
-import "package:photos/ui/viewer/file/video_widget_media_kit.dart";
+import "package:photos/ui/notification/toast.dart"; 
+import "package:photos/ui/viewer/file/video_widget_media_kit_new.dart";
 import "package:photos/ui/viewer/file/video_widget_native.dart";
 import "package:photos/utils/standalone/data.dart";
 
@@ -23,10 +23,15 @@ class VideoWidget extends StatefulWidget {
   final EnteFile file;
   final String? tagPrefix;
   final Function(bool)? playbackCallback;
+  final Function({required int memoryDuration})? onFinalFileLoad;
+  final bool isFromMemories;
+
   const VideoWidget(
     this.file, {
     this.tagPrefix,
     this.playbackCallback,
+    this.onFinalFileLoad,
+    this.isFromMemories = false,
     super.key,
   });
 
@@ -149,6 +154,7 @@ class _VideoWidgetState extends State<VideoWidget> {
         playbackCallback: widget.playbackCallback,
         playlistData: playlistData,
         selectedPreview: playPreview,
+        isFromMemories: widget.isFromMemories,
         onStreamChange: () {
           setState(() {
             selectPreviewForPlay = !selectPreviewForPlay;
@@ -162,15 +168,17 @@ class _VideoWidgetState extends State<VideoWidget> {
             );
           });
         },
+        onFinalFileLoad: widget.onFinalFileLoad,
       );
     }
-    return VideoWidgetMediaKit(
+    return VideoWidgetMediaKitNew(
       widget.file,
       key: mediaKitKey,
       tagPrefix: widget.tagPrefix,
       playbackCallback: widget.playbackCallback,
       preview: playlistData?.preview,
       selectedPreview: playPreview,
+      isFromMemories: widget.isFromMemories,
       onStreamChange: () {
         setState(() {
           selectPreviewForPlay = !selectPreviewForPlay;
@@ -184,6 +192,7 @@ class _VideoWidgetState extends State<VideoWidget> {
           );
         });
       },
+      onFinalFileLoad: widget.onFinalFileLoad,
     );
   }
 }

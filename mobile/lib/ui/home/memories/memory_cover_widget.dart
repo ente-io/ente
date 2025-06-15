@@ -4,30 +4,32 @@ import "package:photos/models/memories/memory.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/effects.dart";
 import "package:photos/theme/ente_theme.dart";
-import "package:photos/ui/home/memories/full_screen_memory.dart";
+import "package:photos/ui/home/memories/all_memories_page.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/utils/navigation_util.dart";
 
 class MemoryCoverWidget extends StatefulWidget {
   final List<Memory> memories;
+  final List<List<Memory>> allMemories;
   final ScrollController controller;
-  final double offsetOfItem;
   final double maxHeight;
   final double maxWidth;
   static const outerStrokeWidth = 1.0;
   static const aspectRatio = 0.68;
   static const horizontalPadding = 2.5;
-  final double maxScaleOffsetX;
   final String title;
+  final List<String> allTitle;
+  final int currentMemoryIndex;
 
   const MemoryCoverWidget({
     required this.memories,
+    required this.allMemories,
     required this.controller,
-    required this.offsetOfItem,
     required this.maxHeight,
     required this.maxWidth,
-    required this.maxScaleOffsetX,
     required this.title,
+    required this.allTitle,
+    required this.currentMemoryIndex,
     super.key,
   });
 
@@ -44,7 +46,6 @@ class _MemoryCoverWidgetState extends State<MemoryCoverWidget> {
       return const SizedBox.shrink();
     }
 
-    final widthOfScreen = MediaQuery.sizeOf(context).width;
     final index = _getNextMemoryIndex();
     final title = widget.title;
 
@@ -56,23 +57,19 @@ class _MemoryCoverWidgetState extends State<MemoryCoverWidget> {
     return AnimatedBuilder(
       animation: widget.controller,
       builder: (context, child) {
-        final diff = (widget.controller.offset - widget.offsetOfItem) +
-            widget.maxScaleOffsetX;
-        final scale = 1 - (diff / widthOfScreen).abs() / 3.7;
         return Padding(
           padding: const EdgeInsets.symmetric(
             horizontal: MemoryCoverWidget.horizontalPadding,
           ),
           child: GestureDetector(
-            onTap: () async {
+            onTap: () async { 
               await routeToPage(
                 context,
-                FullScreenMemoryDataUpdater(
-                  initialIndex: index,
-                  memories: widget.memories,
-                  child: FullScreenMemory(title, index),
+                AllMemoriesPage( 
+                  initialPageIndex: widget.currentMemoryIndex,
+                  allMemories: widget.allMemories,
+                  allTitles: widget.allTitle,
                 ),
-                forceCustomPageRoute: true,
               );
               setState(() {});
             }, //Adding this row is a workaround for making height of memory cover
@@ -81,8 +78,8 @@ class _MemoryCoverWidgetState extends State<MemoryCoverWidget> {
             child: Row(
               children: [
                 Container(
-                  height: widget.maxHeight * scale,
-                  width: widget.maxWidth * scale,
+                  height: widget.maxHeight,
+                  width: widget.maxWidth,
                   decoration: BoxDecoration(
                     boxShadow: brightness == Brightness.dark
                         ? [
@@ -122,29 +119,26 @@ class _MemoryCoverWidgetState extends State<MemoryCoverWidget> {
                                   ),
                                 ),
                                 Positioned(
-                                  bottom: 8 * scale,
-                                  child: Transform.scale(
-                                    scale: scale,
-                                    child: SizedBox(
-                                      width: widget.maxWidth,
-                                      child: Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 8.0,
-                                        ),
-                                        child: Hero(
-                                          tag: title,
-                                          child: Center(
-                                            child: Text(
-                                              title,
-                                              style: getEnteTextTheme(context)
-                                                  .miniBold
-                                                  .copyWith(
-                                                    color: isSeen
-                                                        ? textFaintDark
-                                                        : Colors.white,
-                                                  ),
-                                              textAlign: TextAlign.left,
-                                            ),
+                                  bottom: 8,
+                                  child: SizedBox(
+                                    width: widget.maxWidth,
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 8.0,
+                                      ),
+                                      child: Hero(
+                                        tag: title,
+                                        child: Center(
+                                          child: Text(
+                                            title,
+                                            style: getEnteTextTheme(context)
+                                                .miniBold
+                                                .copyWith(
+                                                  color: isSeen
+                                                      ? textFaintDark
+                                                      : Colors.white,
+                                                ),
+                                            textAlign: TextAlign.left,
                                           ),
                                         ),
                                       ),
@@ -173,27 +167,24 @@ class _MemoryCoverWidgetState extends State<MemoryCoverWidget> {
                                 ),
                               ),
                               Positioned(
-                                bottom: 8 * scale,
-                                child: Transform.scale(
-                                  scale: scale,
-                                  child: SizedBox(
-                                    width: widget.maxWidth,
-                                    child: Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 8.0,
-                                      ),
-                                      child: Hero(
-                                        tag: title,
-                                        child: Center(
-                                          child: Text(
-                                            title,
-                                            style: getEnteTextTheme(context)
-                                                .miniBold
-                                                .copyWith(
-                                                  color: Colors.white,
-                                                ),
-                                            textAlign: TextAlign.left,
-                                          ),
+                                bottom: 8,
+                                child: SizedBox(
+                                  width: widget.maxWidth,
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8.0,
+                                    ),
+                                    child: Hero(
+                                      tag: title,
+                                      child: Center(
+                                        child: Text(
+                                          title,
+                                          style: getEnteTextTheme(context)
+                                              .miniBold
+                                              .copyWith(
+                                                color: Colors.white,
+                                              ),
+                                          textAlign: TextAlign.left,
                                         ),
                                       ),
                                     ),
