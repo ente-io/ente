@@ -2,10 +2,8 @@ import type { User } from "ente-accounts/services/user";
 import { ensureElectron } from "ente-base/electron";
 import { joinPath } from "ente-base/file-name";
 import log from "ente-base/log";
-import { updateMagicMetadata } from "ente-gallery/services/magic-metadata";
 import {
     type Collection,
-    CollectionMagicMetadataProps,
     type CollectionOrder,
     CollectionSubType,
 } from "ente-media/collection";
@@ -39,7 +37,6 @@ import {
     createAlbum,
     removeFromCollection,
     unhideToCollection,
-    updateCollectionMagicMetadata,
 } from "services/collectionService";
 import {
     SetFilesDownloadProgressAttributes,
@@ -199,27 +196,6 @@ export const changeCollectionSortOrder = async (
     asc: boolean,
 ) => updateCollectionSortOrder(await collection1To2(collection), asc);
 
-export const changeCollectionSubType = async (
-    collection: Collection,
-    subType: CollectionSubType,
-) => {
-    try {
-        const updatedMagicMetadataProps: CollectionMagicMetadataProps = {
-            subType: subType,
-        };
-
-        const updatedMagicMetadata = await updateMagicMetadata(
-            updatedMagicMetadataProps,
-            collection.magicMetadata,
-            collection.key,
-        );
-        await updateCollectionMagicMetadata(collection, updatedMagicMetadata);
-    } catch (e) {
-        log.error("change collection subType failed", e);
-        throw e;
-    }
-};
-
 export const getUserOwnedCollections = (collections: Collection[]) => {
     const user: User = getData("user");
     if (!user?.id) {
@@ -228,7 +204,7 @@ export const getUserOwnedCollections = (collections: Collection[]) => {
     return collections.filter((collection) => collection.owner.id === user.id);
 };
 
-export const isQuickLinkCollection = (collection: Collection) =>
+const isQuickLinkCollection = (collection: Collection) =>
     collection.magicMetadata?.data.subType == CollectionSubType.quicklink;
 
 export function isIncomingViewerShare(collection: Collection, user: User) {

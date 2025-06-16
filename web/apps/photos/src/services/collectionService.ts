@@ -1,15 +1,13 @@
 import type { User } from "ente-accounts/services/user";
 import { ensureLocalUser } from "ente-accounts/services/user";
-import { encryptMetadataJSON, sharedCryptoWorker } from "ente-base/crypto";
+import { sharedCryptoWorker } from "ente-base/crypto";
 import { isDevBuild } from "ente-base/env";
 import log from "ente-base/log";
 import { apiURL } from "ente-base/origins";
 import { ensureMasterKeyFromSession } from "ente-base/session";
-import { UpdateMagicMetadataRequest } from "ente-gallery/services/file";
 import { updateMagicMetadata } from "ente-gallery/services/magic-metadata";
 import {
     Collection,
-    CollectionMagicMetadata,
     CollectionMagicMetadataProps,
     CollectionSubType,
     type CollectionType,
@@ -44,11 +42,7 @@ import HTTPService from "ente-shared/network/HTTPService";
 import { getData } from "ente-shared/storage/localStorage";
 import { getToken } from "ente-shared/storage/localStorage/helpers";
 import { batch } from "ente-utils/array";
-import {
-    changeCollectionSubType,
-    isQuickLinkCollection,
-    isValidMoveTarget,
-} from "utils/collection";
+import { isValidMoveTarget } from "utils/collection";
 
 const uncategorizedCollectionName = "Uncategorized";
 const defaultHiddenCollectionName = ".hidden";
@@ -348,81 +342,10 @@ export const deleteCollection = async (
     }
 };
 
-export const updateCollectionMagicMetadata = async (
-    collection: Collection,
-    updatedMagicMetadata: CollectionMagicMetadata,
-) => {
-    const token = getToken();
-    if (!token) {
-        return;
-    }
-
-    const { encryptedData, decryptionHeader } = await encryptMetadataJSON(
-        updatedMagicMetadata.data,
-        collection.key,
-    );
-
-    const reqBody: UpdateMagicMetadataRequest = {
-        id: collection.id,
-        magicMetadata: {
-            version: updatedMagicMetadata.version,
-            count: updatedMagicMetadata.count,
-            data: encryptedData,
-            header: decryptionHeader,
-        },
-    };
-
-    await HTTPService.put(
-        await apiURL("/collections/magic-metadata"),
-        reqBody,
-        null,
-        { "X-Auth-Token": token },
-    );
-    const updatedCollection: Collection = {
-        ...collection,
-        magicMetadata: {
-            ...updatedMagicMetadata,
-            version: updatedMagicMetadata.version + 1,
-        },
-    };
-    return updatedCollection;
-};
-
 export const renameCollection = async (
     collection: Collection,
     newCollectionName: string,
-) =>
-    enableC2()
-        ? renameCollection2(await collection1To2(collection), newCollectionName)
-        : renameCollection1(collection, newCollectionName);
-
-const renameCollection1 = async (
-    collection: Collection,
-    newCollectionName: string,
-) => {
-    if (isQuickLinkCollection(collection)) {
-        // Convert quick link collection to normal collection on rename
-        await changeCollectionSubType(collection, CollectionSubType.default);
-    }
-    const token = getToken();
-    const cryptoWorker = await sharedCryptoWorker();
-    const { encryptedData: encryptedName, nonce: nameDecryptionNonce } =
-        await cryptoWorker.encryptBox(
-            new TextEncoder().encode(newCollectionName),
-            collection.key,
-        );
-    const collectionRenameRequest = {
-        collectionID: collection.id,
-        encryptedName,
-        nameDecryptionNonce,
-    };
-    await HTTPService.post(
-        await apiURL("/collections/rename"),
-        collectionRenameRequest,
-        null,
-        { "X-Auth-Token": token },
-    );
-};
+) => renameCollection2(await collection1To2(collection), newCollectionName);
 
 /**
  * Return the user's own favorites collection, if any.
