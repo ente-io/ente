@@ -61,8 +61,8 @@ export const setCollectionLastSyncTime = async (
     time: number,
 ) => await localForage.setItem<number>(`${collection.id}-time`, time);
 
-export const removeCollectionLastSyncTime = async (collection: Collection) =>
-    await localForage.removeItem(`${collection.id}-time`);
+export const removeCollectionIDLastSyncTime = async (collectionID: number) =>
+    await localForage.removeItem(`${collectionID}-time`);
 
 export const getHiddenCollectionIDs = async (): Promise<number[]> =>
     (await localForage.getItem<number[]>(HIDDEN_COLLECTION_IDS)) ?? [];
@@ -128,7 +128,7 @@ export const syncCollections = async () => {
             isNewlyHiddenCollection ||
             isNewlyUnHiddenCollection
         ) {
-            await removeCollectionLastSyncTime(collection);
+            await removeCollectionIDLastSyncTime(collection.id);
         }
         if (isDeletedCollection) {
             continue;

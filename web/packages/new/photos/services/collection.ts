@@ -221,7 +221,7 @@ const postCollections = async (
  * Remote only, does not use or modify local state.
  *
  * This is not expected to be needed in the normal flow of things, since we
- * fetch collections enmass, and efficiently, using the collection diff
+ * fetch collections en masse, and efficiently, using the collection diff
  * requests.
  *
  * @param collectionID The ID of the collection to fetch.
@@ -237,6 +237,73 @@ export const getCollectionByID = async (
     ensureOk(res);
     const { collection } = CollectionResponse.parse(await res.json());
     return decryptRemoteKeyAndCollection(collection);
+};
+
+/**
+ * Zod schema for a remote response containing a an array of collections.
+ */
+const CollectionsResponse = z.object({
+    collections: z.array(RemoteCollection),
+});
+
+/**
+ * An collection upsert or deletion obtained as a result of
+ * {@link getCollections} invocation.
+ *
+ * Each change either contains the latest data associated with the collection
+ * that has been created or updated, or has a flag set to indicate that the
+ * corresponding collection has been deleted.
+ */
+export interface CollectionChange {
+    /**
+     * The ID of the collection.
+     */
+    id: number;
+    /**
+     * The added or updated collection, or `undefined` for deletions.
+     *
+     * - This will be set to the (decrypted) collection if it was added or
+     *   updated on remote.
+     *
+     * - This will not be set if the corresponding collection was deleted on
+     *   remote.
+     */
+    collection?: Collection;
+    /**
+     * Epoch microseconds denoting when this collection was last changed
+     * (created or updated or deleted).
+     */
+    updationTime: number;
+}
+
+/**
+ * Fetch all collections that have been added or updated on remote since
+ * {@link sinceTime}, with markers for those that have been deleted.
+ *
+ * @param sinceTime The {@link updationTime} of the latest collection that was
+ * fetched in a previous set of changes. This allows us to resume fetching from
+ * that point. Pass 0 to fetch from the beginning.
+ *
+ * @returns An array of {@link CollectionChange}s.
+ */
+export const getCollectionChanges = async (
+    sinceTime: number,
+): Promise<CollectionChange[]> => {
+    const res = await fetch(
+        await apiURL("/collections/v2", { sinceTime: sinceTime.toString() }),
+        { headers: await authenticatedRequestHeaders() },
+    );
+    ensureOk(res);
+    const { collections } = CollectionsResponse.parse(await res.json());
+    return Promise.all(
+        collections.map(async (c) => ({
+            id: c.id,
+            updationTime: c.updationTime,
+            collection: c.isDeleted
+                ? undefined
+                : await decryptRemoteKeyAndCollection(c),
+        })),
+    );
 };
 
 /**
