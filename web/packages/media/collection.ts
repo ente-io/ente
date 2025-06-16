@@ -506,7 +506,7 @@ export const decryptRemoteCollection = async (
         ...rest
     } = collection;
 
-    // We've already used them to derive the `collectionKey`
+    // We've already used them to derive the `collectionKey`.
     drop([encryptedKey, keyDecryptionNonce]);
     // Mobile specific attribute not currently used by us.
     drop(attributes);
