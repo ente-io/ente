@@ -437,6 +437,30 @@ const postCollectionsRename = async (renameRequest: RenameRequest) =>
     );
 
 /**
+ * Change the visibility (normal, archived, hidden) of a collection on remote.
+ *
+ * Remote only, does not modify local state.
+ *
+ * This function works with both collections owned by the user, and collections
+ * shared with the user.
+ *
+ * @param collection The collection whose visibility we want to change.
+ *
+ * @param visibility The new visibility (normal, archived, hidden).
+ */
+export const updateCollectionVisibility = async (
+    collection: Collection2,
+    visibility: ItemVisibility,
+) => {
+    if (collection.owner.id == ensureLocalUser().id) {
+        return updateCollectionPrivateMagicMetadata(collection, { visibility });
+    } else {
+        // TODO(C2):
+        return updateCollectionPrivateMagicMetadata(collection, { visibility });
+    }
+};
+
+/**
  * Update the private magic metadata contents of a collection on remote.
  *
  * Remote only, does not modify local state.
