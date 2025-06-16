@@ -24,8 +24,8 @@ sh -c "$(curl -fsSL https://raw.githubusercontent.com/ente-io/ente/main/server/q
 > ./quickstart.sh
 
 
-If prompted to start the cluster, enter `y` if you wish to start the Docker compose cluster.
-After the Docker compose cluster starts, you can open the Ente web app at
+Which will prompt to start the Docker compose cluster.
+After the Docker compose cluster starts, you can open Ente web app at
 http://localhost:3000.
 
 > [!TIP]
