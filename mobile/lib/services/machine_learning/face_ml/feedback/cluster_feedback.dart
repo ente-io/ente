@@ -271,7 +271,7 @@ class ClusterFeedbackService<T> {
     required String personClusterID,
   }) async {
     final faceIDs = await mlDataDB.getFaceIDsForCluster(personClusterID);
-    final ignoredClusters = await mlDataDB.getPersonIgnoredClusters(p.remoteID);
+    
     if (faceIDs.length < 2 * kMinimumClusterSizeSearchResult) {
       final fileIDs = faceIDs.map(getFileIdFromFaceId<int>).toSet();
       if (fileIDs.length < kMinimumClusterSizeSearchResult) {
@@ -285,6 +285,7 @@ class ClusterFeedbackService<T> {
     _logger.info(
       '${kDebugMode ? p.data.name : "private"} has existing clusterID $personClusterID, checking if we can automatically merge more',
     );
+    final ignoredClusters = await mlDataDB.getPersonIgnoredClusters(p.remoteID);
 
     // Get and update the cluster summary to get the avg (centroid) and count
     final EnteWatch watch = EnteWatch("ClusterFeedbackService")..start();
