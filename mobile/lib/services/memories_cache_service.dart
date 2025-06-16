@@ -26,6 +26,7 @@ import "package:photos/services/notification_service.dart";
 import "package:photos/services/search_service.dart";
 import "package:photos/ui/home/memories/full_screen_memory.dart";
 import "package:photos/ui/viewer/people/people_page.dart";
+import "package:photos/utils/cache_util.dart";
 import "package:photos/utils/navigation_util.dart";
 import "package:shared_preferences/shared_preferences.dart";
 import "package:synchronized/synchronized.dart";
@@ -40,7 +41,7 @@ class MemoriesCacheService {
   static const _kCacheUpdateDelay = Duration(seconds: 5);
 
   final SharedPreferences _prefs;
-  late final Logger _logger = Logger("MemoriesCacheService");
+  static final Logger _logger = Logger("MemoriesCacheService");
 
   final _memoriesDB = MemoriesDB.instance;
 
@@ -195,35 +196,26 @@ class MemoriesCacheService {
     if (cache == null) {
       return null;
     }
-    final result = await _fromCacheToMemories(cache);
+    final result = await fromCacheToMemories(cache);
     return result;
   }
 
   Future<MemoriesCache?> _readCacheFromDisk() async {
     _logger.info("Reading memories cache result from disk");
-    final file = File(await _getCachePath());
-    if (!file.existsSync()) {
-      _logger.info("No memories cache found");
-      return null;
-    }
-    try {
-      final bytes = await file.readAsBytes();
-      final jsonString = String.fromCharCodes(bytes);
-      final cache = MemoriesCache.decodeFromJsonString(jsonString);
-      _logger.info("Reading memories cache result from disk done");
-      return cache;
-    } catch (e, s) {
-      _logger.severe("Error reading or decoding cache file", e, s);
-      await file.delete();
-      return null;
-    }
+    final cache = decodeJsonFile<MemoriesCache>(
+      await _getCachePath(),
+      MemoriesCache.decodeFromJsonString,
+    );
+    return cache;
   }
 
-  Future<List<SmartMemory>> _fromCacheToMemories(MemoriesCache cache) async {
+  static Future<List<SmartMemory>> fromCacheToMemories(
+    MemoriesCache cache,
+  ) async {
     try {
       _logger.info('Processing disk cache memories to smart memories');
       final List<SmartMemory> memories = [];
-      final seenTimes = await _memoriesDB.getSeenTimes();
+      final seenTimes = await MemoriesDB.instance.getSeenTimes();
       final minimalFileIDs = <int>{};
       for (final ToShowMemory memory in cache.toShowMemories) {
         if (memory.shouldShowNow()) {
@@ -325,10 +317,6 @@ class MemoriesCacheService {
         }
         newCache.baseLocations.addAll(nowResult.baseLocations);
         w?.log("added memories to cache");
-        final file = File(await _getCachePath());
-        if (!file.existsSync()) {
-          file.createSync(recursive: true);
-        }
         _cachedMemories = nowResult.memories
             .where((memory) => memory.shouldShowNow())
             .toList();
@@ -336,8 +324,10 @@ class MemoriesCacheService {
           [...nowResult.memories, ...nextResult.memories],
         );
         locationService.baseLocations = nowResult.baseLocations;
-        await file.writeAsBytes(
-          MemoriesCache.encodeToJsonString(newCache).codeUnits,
+        await writeToJsonFile<MemoriesCache>(
+          await _getCachePath(),
+          newCache,
+          MemoriesCache.encodeToJsonString,
         );
         w?.log("cacheWritten");
         await _cacheUpdated();

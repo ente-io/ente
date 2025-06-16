@@ -25,9 +25,9 @@
         "similarity-transformation": "^0.0.1"
     },
     "devDependencies": {
-        "@types/node": "^22.15.29",
-        "@types/react": "^19.1.6",
-        "@types/react-dom": "^19.1.5",
+        "@types/node": "^22.15.31",
+        "@types/react": "^19.1.7",
+        "@types/react-dom": "^19.1.6",
         "@types/react-window": "^1.8.8",
         "ente-build-config": "*"
     }

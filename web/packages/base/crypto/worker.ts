@@ -1,59 +1,51 @@
 import { expose } from "comlink";
 import { logUnhandledErrorsAndRejectionsInWorker } from "ente-base/log-web";
-import * as ei from "./ente-impl";
 import * as libsodium from "./libsodium";
 
 /**
- * A web worker that exposes some of the functions defined in either the Ente
- * specific layer (ente-base/crypto) or the libsodium layer
- * (ente-base/crypto/libsodium.ts).
+ * A web worker that exposes the functions defined by libsodium.ts.
  *
  * See: [Note: Crypto code hierarchy].
  *
  * Note: Keep these methods logic free. They are meant to be trivial proxies.
  */
 export class CryptoWorker {
-    toB64 = ei._toB64;
-    toB64URLSafe = ei._toB64URLSafe;
-    fromB64 = ei._fromB64;
-    toHex = ei._toHex;
-    fromHex = ei._fromHex;
-    generateKey = ei._generateKey;
-    generateBlobOrStreamKey = ei._generateBlobOrStreamKey;
-    encryptBox = ei._encryptBox;
-    encryptBoxUTF8 = ei._encryptBoxUTF8;
-    encryptBlob = ei._encryptBlob;
-    encryptBlobBytes = ei._encryptBlobBytes;
-    encryptMetadataJSON = ei._encryptMetadataJSON;
-    encryptStreamBytes = ei._encryptStreamBytes;
-    initChunkEncryption = ei._initChunkEncryption;
-    encryptStreamChunk = ei._encryptStreamChunk;
-    decryptBox = ei._decryptBox;
-    decryptBoxBytes = ei._decryptBoxBytes;
-    decryptBoxUTF8 = ei._decryptBoxUTF8;
-    decryptBlob = ei._decryptBlob;
-    decryptBlobBytes = ei._decryptBlobBytes;
-    decryptMetadataJSON = ei._decryptMetadataJSON;
-    decryptStreamBytes = ei._decryptStreamBytes;
-    initChunkDecryption = ei._initChunkDecryption;
-    decryptStreamChunk = ei._decryptStreamChunk;
-    chunkHashInit = ei._chunkHashInit;
-    chunkHashUpdate = ei._chunkHashUpdate;
-    chunkHashFinal = ei._chunkHashFinal;
-    generateKeyPair = ei._generateKeyPair;
-    boxSeal = ei._boxSeal;
-    boxSealOpen = ei._boxSealOpen;
-    generateDeriveKeySalt = ei._generateDeriveKeySalt;
-    deriveKey = ei._deriveKey;
-    deriveSensitiveKey = ei._deriveSensitiveKey;
-    deriveInteractiveKey = ei._deriveInteractiveKey;
-    deriveSubKeyBytes = ei._deriveSubKeyBytes;
-
-    // TODO: -- AUDIT BELOW --
-
-    async generateKeyAndEncryptToB64(data: string) {
-        return libsodium.generateKeyAndEncryptToB64(data);
-    }
+    toB64 = libsodium.toB64;
+    fromB64 = libsodium.fromB64;
+    toB64URLSafe = libsodium.toB64URLSafe;
+    toB64URLSafeNoPadding = libsodium.toB64URLSafeNoPadding;
+    fromB64URLSafeNoPadding = libsodium.fromB64URLSafeNoPadding;
+    toHex = libsodium.toHex;
+    fromHex = libsodium.fromHex;
+    generateKey = libsodium.generateKey;
+    generateBlobOrStreamKey = libsodium.generateBlobOrStreamKey;
+    encryptBox = libsodium.encryptBox;
+    encryptBlob = libsodium.encryptBlob;
+    encryptBlobBytes = libsodium.encryptBlobBytes;
+    encryptMetadataJSON = libsodium.encryptMetadataJSON;
+    encryptStreamBytes = libsodium.encryptStreamBytes;
+    initChunkEncryption = libsodium.initChunkEncryption;
+    encryptStreamChunk = libsodium.encryptStreamChunk;
+    decryptBox = libsodium.decryptBox;
+    decryptBoxBytes = libsodium.decryptBoxBytes;
+    decryptBlob = libsodium.decryptBlob;
+    decryptBlobBytes = libsodium.decryptBlobBytes;
+    decryptMetadataJSON = libsodium.decryptMetadataJSON;
+    decryptStreamBytes = libsodium.decryptStreamBytes;
+    initChunkDecryption = libsodium.initChunkDecryption;
+    decryptStreamChunk = libsodium.decryptStreamChunk;
+    chunkHashInit = libsodium.chunkHashInit;
+    chunkHashUpdate = libsodium.chunkHashUpdate;
+    chunkHashFinal = libsodium.chunkHashFinal;
+    generateKeyPair = libsodium.generateKeyPair;
+    boxSeal = libsodium.boxSeal;
+    boxSealOpen = libsodium.boxSealOpen;
+    boxSealOpenBytes = libsodium.boxSealOpenBytes;
+    generateDeriveKeySalt = libsodium.generateDeriveKeySalt;
+    deriveKey = libsodium.deriveKey;
+    deriveSensitiveKey = libsodium.deriveSensitiveKey;
+    deriveInteractiveKey = libsodium.deriveInteractiveKey;
+    deriveSubKeyBytes = libsodium.deriveSubKeyBytes;
 }
 
 expose(CryptoWorker);

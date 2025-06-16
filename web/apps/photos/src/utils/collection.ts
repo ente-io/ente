@@ -2,11 +2,9 @@ import type { User } from "ente-accounts/services/user";
 import { ensureElectron } from "ente-base/electron";
 import { joinPath } from "ente-base/file-name";
 import log from "ente-base/log";
-import { updateMagicMetadata } from "ente-gallery/services/magic-metadata";
 import {
     type Collection,
-    CollectionMagicMetadataProps,
-    CollectionPublicMagicMetadataProps,
+    type CollectionOrder,
     CollectionSubType,
 } from "ente-media/collection";
 import { EnteFile } from "ente-media/file";
@@ -15,11 +13,15 @@ import {
     DEFAULT_HIDDEN_COLLECTION_USER_FACING_NAME,
     HIDDEN_ITEMS_SECTION,
     addToCollection,
+    collection1To2,
     findDefaultHiddenCollectionIDs,
     isHiddenCollection,
     isIncomingShare,
     moveToCollection,
     restoreToCollection,
+    updateCollectionOrder,
+    updateCollectionSortOrder,
+    updateCollectionVisibility,
 } from "ente-new/photos/services/collection";
 import {
     getAllLocalCollections,
@@ -35,9 +37,6 @@ import {
     createAlbum,
     removeFromCollection,
     unhideToCollection,
-    updateCollectionMagicMetadata,
-    updatePublicCollectionMagicMetadata,
-    updateSharedCollectionMagicMetadata,
 } from "services/collectionService";
 import {
     SetFilesDownloadProgressAttributes,
@@ -185,105 +184,17 @@ async function createCollectionDownloadFolder(
 export const changeCollectionVisibility = async (
     collection: Collection,
     visibility: ItemVisibility,
-) => {
-    try {
-        const updatedMagicMetadataProps: CollectionMagicMetadataProps = {
-            visibility,
-        };
+) => updateCollectionVisibility(await collection1To2(collection), visibility);
 
-        const user: User = getData("user");
-        if (collection.owner.id === user.id) {
-            const updatedMagicMetadata = await updateMagicMetadata(
-                updatedMagicMetadataProps,
-                collection.magicMetadata,
-                collection.key,
-            );
-
-            await updateCollectionMagicMetadata(
-                collection,
-                updatedMagicMetadata,
-            );
-        } else {
-            const updatedMagicMetadata = await updateMagicMetadata(
-                updatedMagicMetadataProps,
-                collection.sharedMagicMetadata,
-                collection.key,
-            );
-            await updateSharedCollectionMagicMetadata(
-                collection,
-                updatedMagicMetadata,
-            );
-        }
-    } catch (e) {
-        log.error("change collection visibility failed", e);
-        throw e;
-    }
-};
+export const changeCollectionOrder = async (
+    collection: Collection,
+    order: CollectionOrder,
+) => updateCollectionOrder(await collection1To2(collection), order);
 
 export const changeCollectionSortOrder = async (
     collection: Collection,
     asc: boolean,
-) => {
-    try {
-        const updatedPublicMagicMetadataProps: CollectionPublicMagicMetadataProps =
-            { asc };
-
-        const updatedPubMagicMetadata = await updateMagicMetadata(
-            updatedPublicMagicMetadataProps,
-            collection.pubMagicMetadata,
-            collection.key,
-        );
-
-        await updatePublicCollectionMagicMetadata(
-            collection,
-            updatedPubMagicMetadata,
-        );
-    } catch (e) {
-        log.error("change collection sort order failed", e);
-    }
-};
-
-export const changeCollectionOrder = async (
-    collection: Collection,
-    order: number,
-) => {
-    try {
-        const updatedMagicMetadataProps: CollectionMagicMetadataProps = {
-            order,
-        };
-
-        const updatedMagicMetadata = await updateMagicMetadata(
-            updatedMagicMetadataProps,
-            collection.magicMetadata,
-            collection.key,
-        );
-
-        await updateCollectionMagicMetadata(collection, updatedMagicMetadata);
-    } catch (e) {
-        log.error("change collection order failed", e);
-    }
-};
-
-export const changeCollectionSubType = async (
-    collection: Collection,
-    subType: CollectionSubType,
-) => {
-    try {
-        const updatedMagicMetadataProps: CollectionMagicMetadataProps = {
-            subType: subType,
-        };
-
-        const updatedMagicMetadata = await updateMagicMetadata(
-            updatedMagicMetadataProps,
-            collection.magicMetadata,
-            collection.key,
-        );
-        await updateCollectionMagicMetadata(collection, updatedMagicMetadata);
-    } catch (e) {
-        log.error("change collection subType failed", e);
-        throw e;
-    }
-};
+) => updateCollectionSortOrder(await collection1To2(collection), asc);
 
 export const getUserOwnedCollections = (collections: Collection[]) => {
     const user: User = getData("user");
@@ -293,7 +204,7 @@ export const getUserOwnedCollections = (collections: Collection[]) => {
     return collections.filter((collection) => collection.owner.id === user.id);
 };
 
-export const isQuickLinkCollection = (collection: Collection) =>
+const isQuickLinkCollection = (collection: Collection) =>
     collection.magicMetadata?.data.subType == CollectionSubType.quicklink;
 
 export function isIncomingViewerShare(collection: Collection, user: User) {

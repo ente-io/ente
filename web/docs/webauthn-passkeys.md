@@ -293,8 +293,7 @@ const {
     // ...
     twoFactorSessionID,
     passkeySessionID,
-} = await loginViaSRP(srpAttributes, kek);
-setIsFirstLogin(true);
+} = await verifySRP(srpAttributes, kek);
 if (passkeySessionID) {
     // ...
 }

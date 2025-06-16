@@ -1,8 +1,8 @@
 // TODO: Audit this file
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 
-import { streamEncryptionChunkSize } from "ente-base/crypto/libsodium";
 import type { BytesOrB64 } from "ente-base/crypto/types";
+import { streamEncryptionChunkSize } from "ente-base/crypto/types";
 import { type CryptoWorker } from "ente-base/crypto/worker";
 import { ensureElectron } from "ente-base/electron";
 import { basename, nameAndExtension } from "ente-base/file-name";
@@ -45,7 +45,6 @@ import {
 import { FileType, type FileTypeInfo } from "ente-media/file-type";
 import { encodeLivePhoto } from "ente-media/live-photo";
 import { addToCollection } from "ente-new/photos/services/collection";
-import { settingsSnapshot } from "ente-new/photos/services/settings";
 import {
     CustomError,
     CustomErrorMessage,
@@ -648,10 +647,7 @@ export const upload = async (
 
         const { fileTypeInfo, fileSize, lastModifiedMs } = assetDetails;
 
-        // TODO(REL):
-        const maxFileSize = settingsSnapshot().isInternalUser
-            ? 10 * 1024 * 1024 * 1024 /* 10 GB */
-            : 4 * 1024 * 1024 * 1024; /* 4 GB */
+        const maxFileSize = 10 * 1024 * 1024 * 1024; /* 10 GB */
         if (fileSize >= maxFileSize) return { uploadResult: "tooLarge" };
 
         abortIfCancelled();

@@ -695,10 +695,7 @@ export const Upload: React.FC<UploadProps> = ({
             if (!wereFilesProcessed) closeUploadProgress();
             if (isDesktop) {
                 if (watcher.isUploadRunning()) {
-                    await watcher.allFileUploadsDone(
-                        uploadItemsWithCollection,
-                        collections,
-                    );
+                    await watcher.allFileUploadsDone(uploadItemsWithCollection);
                 } else if (watcher.isSyncPaused()) {
                     // Resume folder watch after the user upload that
                     // interrupted it is done.
@@ -852,7 +849,6 @@ export const Upload: React.FC<UploadProps> = ({
                 {...newAlbumNameInputVisibilityProps}
                 title={t("new_album")}
                 label={t("album_name")}
-                autoFocus
                 initialValue={prefilledNewAlbumName}
                 submitButtonTitle={t("create")}
                 onSubmit={uploadToSingleNewCollection}

@@ -517,9 +517,7 @@ const InfoItem: React.FC<React.PropsWithChildren<InfoItemProps>> = ({
                 <Typography sx={{ wordBreak: "break-all" }}>{title}</Typography>
                 <Typography
                     variant="small"
-                    {...(typeof caption == "string"
-                        ? {}
-                        : { component: "div" })}
+                    {...(typeof caption != "string" && { component: "div" })}
                     sx={{ color: "text.muted" }}
                 >
                     {caption}
@@ -842,7 +840,6 @@ const RenameFileDialog: React.FC<RenameFileDialogProps> = ({
                 <SingleInputForm
                     label={t("file_name")}
                     placeholder={t("file_name")}
-                    autoFocus
                     initialValue={name}
                     submitButtonColor="primary"
                     submitButtonTitle={t("rename")}

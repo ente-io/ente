@@ -40,6 +40,13 @@
       "slug": "ankama"
     },
     {
+      "title": "Ankara University",
+      "slug": "ankara_university",
+      "altNames": [
+        "Ankara Üniversitesi"
+      ]
+    },
+    {
       "title": "Anycoin Direct",
       "slug": "anycoindirect"
     },
@@ -474,6 +481,16 @@
     {
       "title": "FreeTaxUSA",
       "slug": "freetaxusa"
+    },
+    {
+      "title": "FZJ",
+      "slug": "fzj",
+      "hex": "023d6b",
+      "altNames": [
+        "Forschungszentrum Jülich",
+        "FZJ IdP",
+        "iffLogin"
+      ]
     },
     {
       "title": "G2A"
@@ -1417,6 +1434,15 @@
       "slug": "toshl_finance",
       "altNames": [
         "Toshl"
+      ]
+    },
+    {
+      "title": "Tebex",
+      "slug": "tebex",
+      "altNames": [
+        "tebex",
+        "tebex.io",
+        "buycraft"
       ]
     },
     {

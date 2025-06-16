@@ -15,7 +15,7 @@ import { ensureAuthToken } from "./token";
 export const authenticatedRequestHeaders = async () => ({
     "X-Auth-Token": await ensureAuthToken(),
     "X-Client-Package": clientPackageName,
-    ...(isDesktop ? { "X-Client-Version": desktopAppVersion } : {}),
+    ...(isDesktop && { "X-Client-Version": desktopAppVersion }),
 });
 
 /**
@@ -27,7 +27,7 @@ export const authenticatedRequestHeaders = async () => ({
  */
 export const publicRequestHeaders = () => ({
     "X-Client-Package": clientPackageName,
-    ...(isDesktop ? { "X-Client-Version": desktopAppVersion } : {}),
+    ...(isDesktop && { "X-Client-Version": desktopAppVersion }),
 });
 
 /**
@@ -87,7 +87,7 @@ export class HTTPError extends Error {
         super(`HTTP ${res.status} ${res.statusText} (${url.pathname})`);
 
         const requestID = res.headers.get("x-request-id");
-        const details = { url: url.href, ...(requestID ? { requestID } : {}) };
+        const details = { url: url.href, ...(requestID && { requestID }) };
 
         // Cargo culted from
         // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error#custom_error_types
@@ -140,6 +140,8 @@ export const isHTTP401Error = (e: unknown) =>
 /**
  * Return `true` if this is an error because of a HTTP failure response returned
  * by museum with the given "code" and HTTP status.
+ *
+ * > The function is async because it needs to parse the payload.
  *
  * For some known set of errors, museum returns a payload of the form
  *
