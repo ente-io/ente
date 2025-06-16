@@ -284,7 +284,9 @@ export interface CollectionChange {
  * fetched in a previous set of changes. This allows us to resume fetching from
  * that point. Pass 0 to fetch from the beginning.
  *
- * @returns An array of {@link CollectionChange}s.
+ * @returns An array of {@link CollectionChange}s. It is guaranteed that there
+ * will be at most one entry for a given collection in the result array. See:
+ * [Note: Diff response will have at most one entry for an id]
  */
 export const getCollectionChanges = async (
     sinceTime: number,

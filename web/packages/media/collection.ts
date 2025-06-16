@@ -1,8 +1,5 @@
 import { decryptBoxBytes } from "ente-base/crypto";
-import {
-    type EncryptedMagicMetadata,
-    type MagicMetadataCore,
-} from "ente-media/file";
+import { type MagicMetadataCore } from "ente-media/file";
 import {
     nullishToEmpty,
     nullishToFalse,
@@ -434,41 +431,20 @@ export const RemoteCollection = z.looseObject({
 
 export type RemoteCollection = z.infer<typeof RemoteCollection>;
 
-export interface EncryptedCollection {
+export interface Collection {
     id: number;
     owner: CollectionUser;
-    encryptedKey: string;
-    keyDecryptionNonce: string;
-    name?: string;
-    encryptedName: string;
-    nameDecryptionNonce: string;
     type: CollectionType;
     attributes: unknown;
     sharees: CollectionUser[];
     publicURLs?: PublicURL[];
     updationTime: number;
     isDeleted: boolean;
-    magicMetadata?: EncryptedMagicMetadata;
-    pubMagicMetadata?: EncryptedMagicMetadata;
-    sharedMagicMetadata?: EncryptedMagicMetadata;
-}
-
-export interface Collection
-    extends Omit<
-        EncryptedCollection,
-        | "encryptedKey"
-        | "keyDecryptionNonce"
-        | "encryptedName"
-        | "nameDecryptionNonce"
-        | "magicMetadata"
-        | "pubMagicMetadata"
-        | "sharedMagicMetadata"
-    > {
     key: string;
     name: string;
-    magicMetadata: CollectionMagicMetadata;
+    magicMetadata: MagicMetadataCore<CollectionPrivateMagicMetadataData>;
     pubMagicMetadata: CollectionPublicMagicMetadata;
-    sharedMagicMetadata: CollectionShareeMagicMetadata;
+    sharedMagicMetadata: MagicMetadataCore<CollectionShareeMagicMetadataData>;
     // TODO(C2): Gradual conversion to new structure.
     c2?: Collection2;
 }
@@ -787,25 +763,5 @@ export interface RemoveFromCollectionRequest {
     fileIDs: number[];
 }
 
-export interface CollectionMagicMetadataProps {
-    visibility?: number; // ItemVisibility;
-    subType?: number; // CollectionSubType;
-    order?: number;
-}
-
-export type CollectionMagicMetadata =
-    MagicMetadataCore<CollectionMagicMetadataProps>;
-
-export interface CollectionShareeMetadataProps {
-    visibility?: number; // ItemVisibility;
-}
-export type CollectionShareeMagicMetadata =
-    MagicMetadataCore<CollectionShareeMetadataProps>;
-
-export interface CollectionPublicMagicMetadataProps {
-    asc?: boolean;
-    coverID?: number;
-}
-
 export type CollectionPublicMagicMetadata =
-    MagicMetadataCore<CollectionPublicMagicMetadataProps>;
+    MagicMetadataCore<CollectionPublicMagicMetadataData>;

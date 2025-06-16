@@ -4,7 +4,7 @@ import log from "ente-base/log";
 import { apiURL } from "ente-base/origins";
 import {
     Collection,
-    CollectionMagicMetadataProps,
+    CollectionPrivateMagicMetadataData,
     CollectionSubType,
     type CollectionType,
     RemoveFromCollectionRequest,
@@ -48,7 +48,7 @@ export const createAlbum = (albumName: string) =>
 const createCollection = async (
     collectionName: string,
     type: CollectionType,
-    magicMetadataProps?: CollectionMagicMetadataProps,
+    magicMetadataProps?: CollectionPrivateMagicMetadataData,
 ): Promise<Collection> =>
     createCollection2(collectionName, type, magicMetadataProps);
 
