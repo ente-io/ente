@@ -133,7 +133,7 @@ class RemoteSyncService {
               // if ML is enabled the MLService will queue when ML is done
               !flagService.hasGrantedMLConsent) {
         fileDataService.syncFDStatus().then((_) {
-          PreviewVideoStore.instance.queueFiles();
+          VideoPreviewService.instance.queueFiles();
         }).ignore();
       }
 
