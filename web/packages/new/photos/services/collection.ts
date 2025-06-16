@@ -19,6 +19,7 @@ import {
     type CollectionNewParticipantRole,
     type CollectionOrder,
     type CollectionPrivateMagicMetadataData,
+    type CollectionPublicMagicMetadataData,
     type CollectionShareeMagicMetadataData,
     type CollectionType,
     type PublicURL,
@@ -472,8 +473,24 @@ export const updateCollectionVisibility = async (
 export const updateCollectionOrder = async (
     collection: Collection2,
     order: CollectionOrder,
-) =>
-    updateCollectionPrivateMagicMetadata(collection, { order })
+) => updateCollectionPrivateMagicMetadata(collection, { order });
+
+/**
+ * Change the sort order of the files with a collection on remote.
+ *
+ * Remote only, does not modify local state.
+ *
+ * This function works only for collections owned by the user.
+ *
+ * @param collection The collection whose file sort order we want to change.
+ *
+ * @param asc If true, then the files are sorted ascending (oldest first).
+ * Otherwise they are sorted descending (newest first).
+ */
+export const updateCollectionSortOrder = async (
+    collection: Collection2,
+    asc: boolean,
+) => updateCollectionPublicMagicMetadata(collection, { asc });
 
 /**
  * Update the private magic metadata contents of a collection on remote.
@@ -536,6 +553,43 @@ const putCollectionsMagicMetadata = async (
 ) =>
     ensureOk(
         await fetch(await apiURL("/collections/magic-metadata"), {
+            method: "PUT",
+            headers: await authenticatedRequestHeaders(),
+            body: JSON.stringify(updateRequest),
+        }),
+    );
+
+/**
+ * Update the public magic metadata contents of a collection on remote.
+ *
+ * Remote only, does not modify local state.
+ *
+ * This is a variant of {@link updateCollectionPrivateMagicMetadata} that works
+ * with the {@link pubMagicMetadata} of a collection.
+ */
+const updateCollectionPublicMagicMetadata = async (
+    { id, key, pubMagicMetadata }: Collection2,
+    updates: CollectionPublicMagicMetadataData,
+) =>
+    putCollectionsPublicMagicMetadata({
+        id,
+        magicMetadata: await encryptMagicMetadata(
+            createMagicMetadata(
+                { ...pubMagicMetadata?.data, ...updates },
+                pubMagicMetadata?.version,
+            ),
+            key,
+        ),
+    });
+
+/**
+ * Update the public magic metadata of a single collection on remote.
+ */
+const putCollectionsPublicMagicMetadata = async (
+    updateRequest: UpdateCollectionMagicMetadataRequest,
+) =>
+    ensureOk(
+        await fetch(await apiURL("/collections/public-magic-metadata"), {
             method: "PUT",
             headers: await authenticatedRequestHeaders(),
             body: JSON.stringify(updateRequest),

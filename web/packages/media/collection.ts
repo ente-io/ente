@@ -718,10 +718,14 @@ const CollectionPrivateMagicMetadataData = z.looseObject({
  */
 export interface CollectionPublicMagicMetadataData {
     /**
+     * The ordering of the files within the collection.
+     *
+     * The default is desc ("Newest first").
+     *
      * If true, then the files within the collection are sorted in ascending
      * order of their time ("Oldest first").
      *
-     * The default is desc ("Newest first").
+     * To reset to the default, set this to false.
      */
     asc?: boolean;
     /**

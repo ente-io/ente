@@ -11,7 +11,6 @@ import {
     Collection,
     CollectionMagicMetadata,
     CollectionMagicMetadataProps,
-    CollectionPublicMagicMetadata,
     CollectionSubType,
     type CollectionType,
     EncryptedCollection,
@@ -384,84 +383,6 @@ export const updateCollectionMagicMetadata = async (
         magicMetadata: {
             ...updatedMagicMetadata,
             version: updatedMagicMetadata.version + 1,
-        },
-    };
-    return updatedCollection;
-};
-
-export const updateSharedCollectionMagicMetadata = async (
-    collection: Collection,
-    updatedMagicMetadata: CollectionMagicMetadata,
-) => {
-    const token = getToken();
-    if (!token) {
-        return;
-    }
-
-    const { encryptedData, decryptionHeader } = await encryptMetadataJSON(
-        updatedMagicMetadata.data,
-        collection.key,
-    );
-    const reqBody: UpdateMagicMetadataRequest = {
-        id: collection.id,
-        magicMetadata: {
-            version: updatedMagicMetadata.version,
-            count: updatedMagicMetadata.count,
-            data: encryptedData,
-            header: decryptionHeader,
-        },
-    };
-
-    await HTTPService.put(
-        await apiURL("/collections/sharee-magic-metadata"),
-        reqBody,
-        null,
-        { "X-Auth-Token": token },
-    );
-    const updatedCollection: Collection = {
-        ...collection,
-        magicMetadata: {
-            ...updatedMagicMetadata,
-            version: updatedMagicMetadata.version + 1,
-        },
-    };
-    return updatedCollection;
-};
-
-export const updatePublicCollectionMagicMetadata = async (
-    collection: Collection,
-    updatedPublicMagicMetadata: CollectionPublicMagicMetadata,
-) => {
-    const token = getToken();
-    if (!token) {
-        return;
-    }
-
-    const { encryptedData, decryptionHeader } = await encryptMetadataJSON(
-        updatedPublicMagicMetadata.data,
-        collection.key,
-    );
-    const reqBody: UpdateMagicMetadataRequest = {
-        id: collection.id,
-        magicMetadata: {
-            version: updatedPublicMagicMetadata.version,
-            count: updatedPublicMagicMetadata.count,
-            data: encryptedData,
-            header: decryptionHeader,
-        },
-    };
-
-    await HTTPService.put(
-        await apiURL("/collections/public-magic-metadata"),
-        reqBody,
-        null,
-        { "X-Auth-Token": token },
-    );
-    const updatedCollection: Collection = {
-        ...collection,
-        pubMagicMetadata: {
-            ...updatedPublicMagicMetadata,
-            version: updatedPublicMagicMetadata.version + 1,
         },
     };
     return updatedCollection;

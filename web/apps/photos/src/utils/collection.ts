@@ -7,7 +7,6 @@ import {
     type Collection,
     CollectionMagicMetadataProps,
     type CollectionOrder,
-    CollectionPublicMagicMetadataProps,
     CollectionSubType,
 } from "ente-media/collection";
 import { EnteFile } from "ente-media/file";
@@ -23,6 +22,7 @@ import {
     moveToCollection,
     restoreToCollection,
     updateCollectionOrder,
+    updateCollectionSortOrder,
     updateCollectionVisibility,
 } from "ente-new/photos/services/collection";
 import {
@@ -40,7 +40,6 @@ import {
     removeFromCollection,
     unhideToCollection,
     updateCollectionMagicMetadata,
-    updatePublicCollectionMagicMetadata,
 } from "services/collectionService";
 import {
     SetFilesDownloadProgressAttributes,
@@ -190,33 +189,15 @@ export const changeCollectionVisibility = async (
     visibility: ItemVisibility,
 ) => updateCollectionVisibility(await collection1To2(collection), visibility);
 
-export const changeCollectionSortOrder = async (
-    collection: Collection,
-    asc: boolean,
-) => {
-    try {
-        const updatedPublicMagicMetadataProps: CollectionPublicMagicMetadataProps =
-            { asc };
-
-        const updatedPubMagicMetadata = await updateMagicMetadata(
-            updatedPublicMagicMetadataProps,
-            collection.pubMagicMetadata,
-            collection.key,
-        );
-
-        await updatePublicCollectionMagicMetadata(
-            collection,
-            updatedPubMagicMetadata,
-        );
-    } catch (e) {
-        log.error("change collection sort order failed", e);
-    }
-};
-
 export const changeCollectionOrder = async (
     collection: Collection,
     order: CollectionOrder,
 ) => updateCollectionOrder(await collection1To2(collection), order);
+
+export const changeCollectionSortOrder = async (
+    collection: Collection,
+    asc: boolean,
+) => updateCollectionSortOrder(await collection1To2(collection), asc);
 
 export const changeCollectionSubType = async (
     collection: Collection,
