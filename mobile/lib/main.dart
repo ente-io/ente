@@ -126,20 +126,26 @@ Future<void> _homeWidgetSync([bool isBackground = false]) async {
 }
 
 Future<void> runBackgroundTask(String taskId, {String mode = 'normal'}) async {
-  try {
-    final cancellableOp = CancelableOperation.fromFuture(_runMinimally(taskId));
+  await _runWithLogs(
+    () async {
+      try {
+        final cancellableOp =
+            CancelableOperation.fromFuture(_runMinimally(taskId));
 
-    if (Platform.isIOS) {
-      _scheduleSuicide(
-        kBGTaskTimeout,
-        taskId,
-        cancellableOp,
-      );
-    }
-    await cancellableOp.valueOrCancellation();
-  } catch (e, s) {
-    _logger.severe("Error in background task", e, s);
-  }
+        if (Platform.isIOS) {
+          _scheduleSuicide(
+            kBGTaskTimeout,
+            taskId,
+            cancellableOp,
+          );
+        }
+        await cancellableOp.valueOrCancellation();
+      } catch (e, s) {
+        _logger.severe("Error in background task", e, s);
+      }
+    },
+    prefix: "[bg]",
+  );
 }
 
 Future<void> _runMinimally(String taskId) async {
