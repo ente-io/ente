@@ -375,18 +375,16 @@ export async function syncTrash(
 ): Promise<void> {
     const trash = await getLocalTrash();
     collections = [...collections, ...(await getLocalDeletedCollections())];
-    const collectionMap = new Map<number, Collection>(
-        collections.map((collection) => [collection.id, collection]),
-    );
+    const collectionByID = new Map(collections.map((c) => [c.id, c]));
     if (!getToken()) {
         return;
     }
-    const lastSyncTime = await getLastTrashSyncTime();
+    const sinceTime = await getLastTrashSyncTime();
 
     const updatedTrash = await updateTrash(
-        collectionMap,
+        collectionByID,
         trash,
-        lastSyncTime,
+        sinceTime,
         onUpdateTrashFiles,
         onPruneDeletedFileIDs,
     );
@@ -394,7 +392,7 @@ export async function syncTrash(
 }
 
 const updateTrash = async (
-    collections: Map<number, Collection>,
+    collectionByID: Map<number, Collection>,
     currentTrash: Trash,
     sinceTime: number,
     onUpdateTrashFiles: ((files: EnteFile[]) => void) | undefined,
@@ -419,12 +417,12 @@ const updateTrash = async (
             // #Perf: This can be optimized by running the decryption in parallel
             for (const trashItem of resp.data.diff as EncryptedTrashItem[]) {
                 const collectionID = trashItem.file.collectionID;
-                let collection = collections.get(collectionID);
+                let collection = collectionByID.get(collectionID);
                 if (!collection) {
                     collection = await getCollection(collectionID);
-                    collections.set(collectionID, collection);
+                    collectionByID.set(collectionID, collection);
                     await localForage.setItem(DELETED_COLLECTION, [
-                        ...collections.values(),
+                        ...collectionByID.values(),
                     ]);
                 }
                 if (trashItem.isDeleted) {
