@@ -435,15 +435,13 @@ export interface Collection {
     id: number;
     owner: CollectionUser;
     type: CollectionType;
-    attributes: unknown;
     sharees: CollectionUser[];
     publicURLs?: PublicURL[];
     updationTime: number;
-    isDeleted: boolean;
     key: string;
     name: string;
     magicMetadata: MagicMetadataCore<CollectionPrivateMagicMetadataData>;
-    pubMagicMetadata: CollectionPublicMagicMetadata;
+    pubMagicMetadata: MagicMetadataCore<CollectionPublicMagicMetadataData>;
     sharedMagicMetadata: MagicMetadataCore<CollectionShareeMagicMetadataData>;
     // TODO(C2): Gradual conversion to new structure.
     c2?: Collection2;
@@ -547,14 +545,11 @@ export const decryptRemoteCollection = async (
         key: collectionKey,
         name,
         type: collection.type as CollectionType,
-        // Not used anyway, but just pass what we have.
-        attributes: attributes,
         // Some temporary scaffolding to impersonate types.
         //
         // See: [Note: strict mode migration]
         sharees: sharees as CollectionUser[],
         publicURLs: collection.publicURLs as PublicURL[],
-        isDeleted: !!collection.isDeleted,
         magicMetadata: (magicMetadata
             ? { ...magicMetadata, header: collection.magicMetadata!.header }
             : undefined)!,
@@ -751,17 +746,3 @@ export interface CollectionShareeMagicMetadataData {
 const CollectionShareeMagicMetadataData = z.looseObject({
     visibility: z.number().nullish().transform(nullToUndefined),
 });
-
-export interface CreatePublicAccessTokenRequest {
-    collectionID: number;
-    validTill?: number;
-    deviceLimit?: number;
-}
-
-export interface RemoveFromCollectionRequest {
-    collectionID: number;
-    fileIDs: number[];
-}
-
-export type CollectionPublicMagicMetadata =
-    MagicMetadataCore<CollectionPublicMagicMetadataData>;

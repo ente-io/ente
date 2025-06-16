@@ -3,9 +3,13 @@ import log from "ente-base/log";
 import { apiURL } from "ente-base/origins";
 import type {
     Collection,
-    CollectionPublicMagicMetadata,
+    CollectionPublicMagicMetadataData,
 } from "ente-media/collection";
-import type { EncryptedEnteFile, EnteFile } from "ente-media/file";
+import type {
+    EncryptedEnteFile,
+    EnteFile,
+    MagicMetadataCore,
+} from "ente-media/file";
 import { decryptFile, mergeMetadata } from "ente-media/file";
 import { sortFiles } from "ente-new/photos/services/files";
 import { CustomError, parseSharingErrorCodes } from "ente-shared/error";
@@ -335,7 +339,7 @@ export const getPublicCollection = async (
                 ),
             ));
 
-        let collectionPublicMagicMetadata: CollectionPublicMagicMetadata;
+        let collectionPublicMagicMetadata: MagicMetadataCore<CollectionPublicMagicMetadataData>;
         if (fetchedCollection.pubMagicMetadata?.data) {
             collectionPublicMagicMetadata = {
                 ...fetchedCollection.pubMagicMetadata,

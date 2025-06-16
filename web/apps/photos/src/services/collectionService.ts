@@ -7,7 +7,6 @@ import {
     CollectionPrivateMagicMetadataData,
     CollectionSubType,
     type CollectionType,
-    RemoveFromCollectionRequest,
 } from "ente-media/collection";
 import { EnteFile } from "ente-media/file";
 import { ItemVisibility } from "ente-media/file-metadata";
@@ -194,6 +193,11 @@ export const removeUserFiles = async (
         throw e;
     }
 };
+
+export interface RemoveFromCollectionRequest {
+    collectionID: number;
+    fileIDs: number[];
+}
 
 export const removeNonUserFiles = async (
     collectionID: number,
