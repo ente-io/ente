@@ -1180,7 +1180,7 @@ class CollectionsService {
     String passwordHash,
     int collectionID,
   ) async {
-    final authToken = await getSharedPublicAlbumToken(collectionID);
+    final authToken = getSharedPublicAlbumToken(collectionID);
     try {
       final response = await _enteDio.post(
         "/public-collection/verify-password",
@@ -1212,7 +1212,7 @@ class CollectionsService {
     BuildContext context,
     int collectionID,
   ) async {
-    final key = await getSharedPublicAlbumKey(collectionID);
+    final key = getSharedPublicAlbumKey(collectionID);
     if (key.isEmpty) {
       throw Exception("Collection key not found");
     }
@@ -1234,18 +1234,15 @@ class CollectionsService {
     );
   }
 
-  Future<String> getSharedPublicAlbumKey(int collectionID) async {
+  String getSharedPublicAlbumKey(int collectionID) {
     if (_cachedPublicAlbumKey.containsKey(collectionID)) {
       return _cachedPublicAlbumKey[collectionID]!;
     }
     return "";
   }
 
-  Future<String?> getSharedPublicAlbumToken(int collectionID) async {
-    if (_cachedPublicAlbumToken.containsKey(collectionID)) {
-      return _cachedPublicAlbumToken[collectionID];
-    }
-    return null;
+  String? getSharedPublicAlbumToken(int collectionID) {
+    return _cachedPublicAlbumToken[collectionID];
   }
 
   Map<String, String> publicCollectionHeaders(int collectionID) {
