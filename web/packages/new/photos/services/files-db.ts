@@ -27,8 +27,10 @@ import {
     ignore,
     RemoteCollectionUser,
     RemotePublicURL,
+    type Collection2,
 } from "ente-media/collection";
 import { RemoteMagicMetadata } from "ente-media/magic-metadata";
+import localForage from "ente-shared/storage/localForage";
 import { nullishToEmpty } from "ente-utils/transform";
 import { z } from "zod/v4";
 
@@ -39,7 +41,7 @@ import { z } from "zod/v4";
  * too in that it contains the decrypted fields, and some minor refinements.
  */
 // TODO(C2): Use me
-export const LocalCollection = z.looseObject({
+const LocalCollection = z.looseObject({
     id: z.number(),
     owner: RemoteCollectionUser,
     key: z.string(),
@@ -73,3 +75,25 @@ export const LocalCollection = z.looseObject({
         return { ...rest, data };
     }),
 });
+
+const LocalCollections = z.array(LocalCollection);
+
+/**
+ * Return all collections present in our local database.
+ *
+ * This includes both normal (non-hidden) and hidden collections.
+ *
+ * Use {@link saveCollections} to update the database.
+ */
+export const savedCollections = async (): Promise<Collection2[]> =>
+    LocalCollections.parse(await localForage.getItem("collections"));
+
+/**
+ * Replace the list of collections stored in our local database.
+ *
+ * This updates the underlying storage of both normal (non-hidden) and hidden
+ * collections (the split between normal and hidden is not at the database level
+ * but is a filter when they are accessed).
+ */
+export const saveCollections = (collections: Collection2[]) =>
+    localForage.setItem("collections", collections);
