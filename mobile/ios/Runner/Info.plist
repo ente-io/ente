@@ -4,7 +4,7 @@
 	<dict>
 		<key>BGTaskSchedulerPermittedIdentifiers</key>
 		<array>
-			<string>com.transistorsoft.fetch</string>
+			<string>io.ente.frame.iOSBackgroundAppRefresh</string>
 		</array>
 		<key>CFBundleDevelopmentRegion</key>
 		<string>$(DEVELOPMENT_LANGUAGE)</string>

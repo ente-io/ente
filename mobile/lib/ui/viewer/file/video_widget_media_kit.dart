@@ -36,7 +36,7 @@ class VideoWidgetMediaKit extends StatefulWidget {
   final void Function() onStreamChange;
   final File? preview;
   final bool selectedPreview;
-  final Function(int)? onFinalFileLoad;
+  final Function({required int memoryDuration})? onFinalFileLoad;
 
   const VideoWidgetMediaKit(
     this.file, {
@@ -315,8 +315,13 @@ class _VideoWidgetMediaKitState extends State<VideoWidgetMediaKit>
           controller = VideoController(player);
         }
         player.open(Media(url), play: _isAppInFG);
-        final duration = controller!.player.state.duration.inSeconds;
-        widget.onFinalFileLoad?.call(duration);
+        int duration = controller!.player.state.duration.inSeconds;
+        if (duration == 0) {
+          duration = 10;
+        }
+        widget.onFinalFileLoad?.call(
+          memoryDuration: duration,
+        );
       });
     }
   }
