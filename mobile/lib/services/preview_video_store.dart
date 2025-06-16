@@ -43,7 +43,7 @@ const _maxRetryCount = 3;
 class PreviewVideoStore {
   final LinkedHashMap<int, PreviewItem> _items = LinkedHashMap();
   LinkedHashMap<int, EnteFile> fileQueue = LinkedHashMap();
-  final int _minPreviewSizeForCache = 50 * 1024 * 1024; // 50 MB
+  final int _maxPreviewSizeLimitForCache = 50 * 1024 * 1024; // 50 MB
   Set<int>? _failureFiles;
 
   bool _hasQueuedFile = false;
@@ -602,7 +602,7 @@ class PreviewVideoStore {
           ?.file;
       if (videoFile == null) {
         previewURLResult = previewURLResult ?? await _getPreviewUrl(file);
-        if (size != null && size < _minPreviewSizeForCache) {
+        if (size != null && size < _maxPreviewSizeLimitForCache) {
           unawaited(
             videoCacheManager.downloadFile(
               previewURLResult.$1,
