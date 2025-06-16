@@ -22,28 +22,28 @@ class MessageLookup extends MessageLookupByLibrary {
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
-    "accountWelcomeBack": MessageLookupByLibrary.simpleMessage(
-      "Köszöntjük ismét!",
-    ),
-    "askDeleteReason": MessageLookupByLibrary.simpleMessage(
-      "Miért törli a fiókját?",
-    ),
-    "cancel": MessageLookupByLibrary.simpleMessage("Mégse"),
-    "deleteAccount": MessageLookupByLibrary.simpleMessage("Fiók törlése"),
-    "deleteAccountFeedbackPrompt": MessageLookupByLibrary.simpleMessage(
-      "Sajnáljuk, hogy távozik. Kérjük, ossza meg velünk visszajelzéseit, hogy segítsen nekünk a fejlődésben.",
-    ),
-    "email": MessageLookupByLibrary.simpleMessage("E-mail"),
-    "enterValidEmail": MessageLookupByLibrary.simpleMessage(
-      "Kérjük, adjon meg egy érvényes e-mail címet.",
-    ),
-    "enterYourEmailAddress": MessageLookupByLibrary.simpleMessage(
-      "Adja meg az e-mail címét",
-    ),
-    "feedback": MessageLookupByLibrary.simpleMessage("Visszajelzés"),
-    "invalidEmailAddress": MessageLookupByLibrary.simpleMessage(
-      "Érvénytelen e-mail cím",
-    ),
-    "verify": MessageLookupByLibrary.simpleMessage("Hitelesítés"),
-  };
+        "accountWelcomeBack": MessageLookupByLibrary.simpleMessage(
+          "Köszöntjük ismét!",
+        ),
+        "askDeleteReason": MessageLookupByLibrary.simpleMessage(
+          "Miért törli a fiókját?",
+        ),
+        "cancel": MessageLookupByLibrary.simpleMessage("Mégse"),
+        "deleteAccount": MessageLookupByLibrary.simpleMessage("Fiók törlése"),
+        "deleteAccountFeedbackPrompt": MessageLookupByLibrary.simpleMessage(
+          "Sajnáljuk, hogy távozik. Kérjük, ossza meg velünk visszajelzéseit, hogy segítsen nekünk a fejlődésben.",
+        ),
+        "email": MessageLookupByLibrary.simpleMessage("E-mail"),
+        "enterValidEmail": MessageLookupByLibrary.simpleMessage(
+          "Kérjük, adjon meg egy érvényes e-mail címet.",
+        ),
+        "enterYourEmailAddress": MessageLookupByLibrary.simpleMessage(
+          "Adja meg az e-mail címét",
+        ),
+        "feedback": MessageLookupByLibrary.simpleMessage("Visszajelzés"),
+        "invalidEmailAddress": MessageLookupByLibrary.simpleMessage(
+          "Érvénytelen e-mail cím",
+        ),
+        "verify": MessageLookupByLibrary.simpleMessage("Hitelesítés"),
+      };
 }
