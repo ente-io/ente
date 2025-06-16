@@ -17,7 +17,10 @@ import {
     type Collection,
     type Collection2,
     type CollectionNewParticipantRole,
+    type CollectionOrder,
     type CollectionPrivateMagicMetadataData,
+    type CollectionPublicMagicMetadataData,
+    type CollectionShareeMagicMetadataData,
     type CollectionType,
     type PublicURL,
 } from "ente-media/collection";
@@ -176,9 +179,9 @@ export const decryptCollectionKey = async (
     const { owner, encryptedKey, keyDecryptionNonce } = collection;
     if (owner.id == ensureLocalUser().id) {
         // The collection key of collections owned by the user is encrypted with
-        // the user's master key.
+        // the user's master key. The nonce will be present in such cases.
         return decryptBox(
-            { encryptedData: encryptedKey, nonce: keyDecryptionNonce },
+            { encryptedData: encryptedKey, nonce: keyDecryptionNonce! },
             await ensureMasterKeyFromSession(),
         );
     } else {
@@ -437,14 +440,69 @@ const postCollectionsRename = async (renameRequest: RenameRequest) =>
     );
 
 /**
+ * Change the visibility (normal, archived, hidden) of a collection on remote.
+ *
+ * Remote only, does not modify local state.
+ *
+ * This function works with both collections owned by the user, and collections
+ * shared with the user.
+ *
+ * @param collection The collection whose visibility we want to change.
+ *
+ * @param visibility The new visibility (normal, archived, hidden).
+ */
+export const updateCollectionVisibility = async (
+    collection: Collection2,
+    visibility: ItemVisibility,
+) =>
+    collection.owner.id == ensureLocalUser().id
+        ? updateCollectionPrivateMagicMetadata(collection, { visibility })
+        : updateCollectionShareeMagicMetadata(collection, { visibility });
+
+/**
+ * Change the pinned state of a collection on remote.
+ *
+ * Remote only, does not modify local state.
+ *
+ * This function works only for collections owned by the user.
+ *
+ * @param collection The collection whose order we want to change.
+ *
+ * @param order Whether on not the collection is pinned.
+ */
+export const updateCollectionOrder = async (
+    collection: Collection2,
+    order: CollectionOrder,
+) => updateCollectionPrivateMagicMetadata(collection, { order });
+
+/**
+ * Change the sort order of the files with a collection on remote.
+ *
+ * Remote only, does not modify local state.
+ *
+ * This function works only for collections owned by the user.
+ *
+ * @param collection The collection whose file sort order we want to change.
+ *
+ * @param asc If true, then the files are sorted ascending (oldest first).
+ * Otherwise they are sorted descending (newest first).
+ */
+export const updateCollectionSortOrder = async (
+    collection: Collection2,
+    asc: boolean,
+) => updateCollectionPublicMagicMetadata(collection, { asc });
+
+/**
  * Update the private magic metadata contents of a collection on remote.
  *
  * Remote only, does not modify local state.
  *
- * @param collection The collection whose magic metadata we want to update. In
- * particular, the existing magic metadata of this collection is used both to
- * obtain the current magic metadata version, and the existing contents on top
- * of which the updates are applied.
+ * @param collection The collection whose magic metadata we want to update.
+ *
+ * The existing magic metadata of this collection is used both to obtain the
+ * current magic metadata version, and the existing contents on top of which the
+ * updates are applied, so it is imperative that both these values are up to
+ * sync with remote otherwise the update will fail.
  *
  * @param updates A non-empty subset of
  * {@link CollectionPrivateMagicMetadataData} entries.
@@ -495,6 +553,80 @@ const putCollectionsMagicMetadata = async (
 ) =>
     ensureOk(
         await fetch(await apiURL("/collections/magic-metadata"), {
+            method: "PUT",
+            headers: await authenticatedRequestHeaders(),
+            body: JSON.stringify(updateRequest),
+        }),
+    );
+
+/**
+ * Update the public magic metadata contents of a collection on remote.
+ *
+ * Remote only, does not modify local state.
+ *
+ * This is a variant of {@link updateCollectionPrivateMagicMetadata} that works
+ * with the {@link pubMagicMetadata} of a collection.
+ */
+const updateCollectionPublicMagicMetadata = async (
+    { id, key, pubMagicMetadata }: Collection2,
+    updates: CollectionPublicMagicMetadataData,
+) =>
+    putCollectionsPublicMagicMetadata({
+        id,
+        magicMetadata: await encryptMagicMetadata(
+            createMagicMetadata(
+                { ...pubMagicMetadata?.data, ...updates },
+                pubMagicMetadata?.version,
+            ),
+            key,
+        ),
+    });
+
+/**
+ * Update the public magic metadata of a single collection on remote.
+ */
+const putCollectionsPublicMagicMetadata = async (
+    updateRequest: UpdateCollectionMagicMetadataRequest,
+) =>
+    ensureOk(
+        await fetch(await apiURL("/collections/public-magic-metadata"), {
+            method: "PUT",
+            headers: await authenticatedRequestHeaders(),
+            body: JSON.stringify(updateRequest),
+        }),
+    );
+
+/**
+ * Update the per-sharee magic metadata contents of a collection on remote.
+ *
+ * Remote only, does not modify local state.
+ *
+ * This is a variant of {@link updateCollectionPrivateMagicMetadata} that works
+ * with the {@link sharedMagicMetadata} of a collection.
+ */
+const updateCollectionShareeMagicMetadata = async (
+    { id, key, sharedMagicMetadata }: Collection2,
+    updates: CollectionShareeMagicMetadataData,
+) =>
+    putCollectionsShareeMagicMetadata({
+        id,
+        magicMetadata: await encryptMagicMetadata(
+            createMagicMetadata(
+                { ...sharedMagicMetadata?.data, ...updates },
+                sharedMagicMetadata?.version,
+            ),
+            key,
+        ),
+    });
+
+/**
+ * Update the sharee magic metadata of a single shared collection on remote.
+ */
+const putCollectionsShareeMagicMetadata = async (
+    updateRequest: UpdateCollectionMagicMetadataRequest,
+) =>
+    ensureOk(
+        await fetch(await apiURL("/collections/sharee-magic-metadata"), {
             method: "PUT",
             headers: await authenticatedRequestHeaders(),
             body: JSON.stringify(updateRequest),

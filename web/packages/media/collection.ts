@@ -108,7 +108,9 @@ export interface Collection2 {
     pubMagicMetadata?: MagicMetadata<CollectionPublicMagicMetadataData>;
     /**
      * Private mutable metadata associated with the collection that is only
-     * visible to the current user, if they're not the owner.
+     * visible to the current user if they're not the owner of the collection.
+     *
+     * Sometimes also referred to as "shareeMagicMetadata".
      *
      * This is metadata associated with each "share", and is only visible to
      * (and editable by) the user with which the collection has been shared, not
@@ -387,10 +389,14 @@ export const RemoteCollection = z.looseObject({
     owner: RemoteCollectionUser,
     encryptedKey: z.string(),
     /**
-     * Remote will set this to a blank string for albums which have been shared
-     * with the user (the decryption pipeline for those doesn't use the nonce).
+     * The nonce to use when decrypting the {@link encryptedKey} when the album
+     * is owned by the user.
+     *
+     * Not set for shared albums (the decryption for uses the keypair instead).
+     *
+     * Remote might set this to blank to indicate absence.
      */
-    keyDecryptionNonce: z.string(),
+    keyDecryptionNonce: z.string().nullish().transform(nullToUndefined),
     /**
      * Expected to be present (along with {@link nameDecryptionNonce}), but it
      * is still optional since it might not be present if {@link name} is present.
@@ -632,6 +638,29 @@ export type CollectionSubType =
     (typeof CollectionSubType)[keyof typeof CollectionSubType];
 
 /**
+ * Ordering of the collection - Whether it is pinned or not.
+ */
+export const CollectionOrder = {
+    /**
+     * The default / normal value. No special semantics, behaves "unpinned" and
+     * will retain its natural sort position.
+     */
+    default: 0,
+    /**
+     * The collection is "pinned" by moving to the beginning of the sort order.
+     *
+     * Multiple collections can be pinned, in which case they'll be sorted
+     * amongst themselves under the otherwise applicable sort order.
+     *
+     *     -- [pinned collections] -- [other collections] --
+     */
+    pinned: 1,
+} as const;
+
+export type CollectionOrder =
+    (typeof CollectionOrder)[keyof typeof CollectionOrder];
+
+/**
  * Mutable private metadata associated with a {@link Collection}.
  *
  * - Unlike {@link CollectionPublicMagicMetadataData} this is only available to
@@ -640,6 +669,12 @@ export type CollectionSubType =
  * See: [Note: Private magic metadata is called magic metadata on remote]
  */
 export interface CollectionPrivateMagicMetadataData {
+    /**
+     * The subtype of the collection type (if applicable).
+     *
+     * Expected to be one of {@link CollectionSubType}.
+     */
+    subType?: number;
     /**
      * The (owner specific) visibility of the collection.
      *
@@ -655,19 +690,9 @@ export interface CollectionPrivateMagicMetadataData {
      */
     visibility?: number;
     /**
-     * The subtype of the collection type (if applicable).
-     *
-     * Expected to be one of {@link CollectionSubType}.
-     */
-    subType?: number;
-    /**
      * An overrride to the sort ordering used for the collection.
      *
-     * - For pinned collections, this will be set to `1`. Pinned collections
-     *   will be moved to the beginning of the sort order.
-     *
-     * - Otherwise, the collection is a normal (unpinned) collection, and will
-     *   retain its natural sort position.
+     * Expected to be one of {@link CollectionOrder}.
      */
     order?: number;
 }
@@ -678,8 +703,8 @@ export interface CollectionPrivateMagicMetadataData {
  * See: [Note: Use looseObject for metadata Zod schemas]
  */
 const CollectionPrivateMagicMetadataData = z.looseObject({
-    visibility: z.number().nullish().transform(nullToUndefined),
     subType: z.number().nullish().transform(nullToUndefined),
+    visibility: z.number().nullish().transform(nullToUndefined),
     order: z.number().nullish().transform(nullToUndefined),
 });
 
@@ -693,10 +718,14 @@ const CollectionPrivateMagicMetadataData = z.looseObject({
  */
 export interface CollectionPublicMagicMetadataData {
     /**
+     * The ordering of the files within the collection.
+     *
+     * The default is desc ("Newest first").
+     *
      * If true, then the files within the collection are sorted in ascending
      * order of their time ("Oldest first").
      *
-     * The default is desc ("Newest first").
+     * To reset to the default, set this to false.
      */
     asc?: boolean;
     /**
