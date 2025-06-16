@@ -481,9 +481,9 @@ export const decryptRemoteCollection = async (
     } = collection;
 
     // We've already used them to derive the `collectionKey`.
-    drop([encryptedKey, keyDecryptionNonce]);
+    ignore([encryptedKey, keyDecryptionNonce]);
     // Mobile specific attribute not currently used by us.
-    drop(attributes);
+    ignore(attributes);
 
     const name =
         // `||` is used because remote sets name to blank to indicate absence.
@@ -568,10 +568,12 @@ export const decryptRemoteCollection = async (
     };
 };
 
-// A no-op function to pretend that we're using some values. This is handy when
-// we want to destructure some fields so that they don't get forwarded, but
-// otherwise don't need to use them.
-const drop = (xs: unknown) => typeof xs;
+/**
+ * A no-op function to pretend that we're using some values. This is handy when
+ * we want to destructure some fields so that they don't get forwarded, but
+ * otherwise don't need to use them.
+ */
+export const ignore = (xs: unknown) => typeof xs;
 
 /**
  * A convenience function to discard the unused name field from the collection
@@ -581,7 +583,7 @@ const parseRemoteCollectionUser = ({
     name,
     ...rest
 }: RemoteCollectionUser): CollectionUser => {
-    drop(name);
+    ignore(name);
     return rest;
 };
 
@@ -673,7 +675,7 @@ export interface CollectionPrivateMagicMetadataData {
  *
  * See: [Note: Use looseObject for metadata Zod schemas]
  */
-const CollectionPrivateMagicMetadataData = z.looseObject({
+export const CollectionPrivateMagicMetadataData = z.looseObject({
     subType: z.number().nullish().transform(nullToUndefined),
     visibility: z.number().nullish().transform(nullToUndefined),
     order: z.number().nullish().transform(nullToUndefined),
@@ -710,7 +712,7 @@ export interface CollectionPublicMagicMetadataData {
 /**
  * Zod schema for {@link CollectionPublicMagicMetadataData}.
  */
-const CollectionPublicMagicMetadataData = z.looseObject({
+export const CollectionPublicMagicMetadataData = z.looseObject({
     asc: z.boolean().nullish().transform(nullToUndefined),
     coverID: z.number().nullish().transform(nullToUndefined),
 });
@@ -743,6 +745,6 @@ export interface CollectionShareeMagicMetadataData {
 /**
  * Zod schema for {@link CollectionShareeMagicMetadataData}.
  */
-const CollectionShareeMagicMetadataData = z.looseObject({
+export const CollectionShareeMagicMetadataData = z.looseObject({
     visibility: z.number().nullish().transform(nullToUndefined),
 });
