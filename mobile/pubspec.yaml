@@ -35,7 +35,7 @@ dependencies:
     git:
       url: https://github.com/ente-io/chewie.git
       ref: mybranched
-  collection: # dart
+  collection: ^1.19.1 #dart
   computer: # logged task name in verbose in fork
     git: "https://github.com/ente-io/computer.git"
   connectivity_plus: ^6.0.2
@@ -67,7 +67,7 @@ dependencies:
       ref: 476f701c084861a8e9de5f4f4e5e067fc85fda96
   expandable: ^5.0.1
   expansion_tile_card: ^3.0.0
-  extended_image:
+  extended_image: ^9.1.0
   fade_indexed_stack: ^0.2.2
   fast_base58: ^0.2.1
   ffmpeg_kit_flutter:
@@ -161,7 +161,7 @@ dependencies:
       url: https://github.com/ente-io/panorama_blur.git
       ref: blur
   password_strength: ^0.2.0
-  path: #dart
+  path: ^1.9.1
   path_provider: ^2.1.1
   path_provider_foundation: ^2.4.1
   permission_handler: ^12.0.0+1
@@ -189,8 +189,8 @@ dependencies:
   sqlite_async: ^0.11.7
   step_progress_indicator: ^1.0.2
   styled_text: ^8.1.0
-  syncfusion_flutter_core:
-  syncfusion_flutter_sliders:
+  syncfusion_flutter_core: ^29.1.38
+  syncfusion_flutter_sliders: ^29.1.38
   synchronized: ^3.3.0+3
   system_info_plus: ^0.0.6
   thermal: ^1.1.11
@@ -207,7 +207,7 @@ dependencies:
       url: https://github.com/ente-io/packages.git
       ref: android_video_roation_fix
       path: packages/video_player/video_player/
-  video_thumbnail:
+  video_thumbnail: ^0.5.3
   visibility_detector: ^0.4.0+2
   wakelock_plus: ^1.1.1
   wechat_assets_picker: ^9.5.1
