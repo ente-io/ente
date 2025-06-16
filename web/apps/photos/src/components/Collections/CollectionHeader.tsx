@@ -29,7 +29,7 @@ import {
     isArchivedCollection,
     isPinnedCollection,
 } from "ente-gallery/services/magic-metadata";
-import type { Collection } from "ente-media/collection";
+import { CollectionOrder, type Collection } from "ente-media/collection";
 import { ItemVisibility } from "ente-media/file-metadata";
 import {
     GalleryItemsHeaderAdapter,
@@ -277,9 +277,13 @@ const CollectionOptions: React.FC<CollectionHeaderProps> = ({
         setActiveCollectionID(ALL_SECTION);
     });
 
-    const pinAlbum = wrap(() => changeCollectionOrder(activeCollection, 1));
+    const pinAlbum = wrap(() =>
+        changeCollectionOrder(activeCollection, CollectionOrder.pinned),
+    );
 
-    const unpinAlbum = wrap(() => changeCollectionOrder(activeCollection, 0));
+    const unpinAlbum = wrap(() =>
+        changeCollectionOrder(activeCollection, CollectionOrder.default),
+    );
 
     const hideAlbum = wrap(async () => {
         await changeCollectionVisibility(

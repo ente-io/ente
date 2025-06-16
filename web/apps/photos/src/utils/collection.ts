@@ -6,6 +6,7 @@ import { updateMagicMetadata } from "ente-gallery/services/magic-metadata";
 import {
     type Collection,
     CollectionMagicMetadataProps,
+    type CollectionOrder,
     CollectionPublicMagicMetadataProps,
     CollectionSubType,
 } from "ente-media/collection";
@@ -21,6 +22,7 @@ import {
     isIncomingShare,
     moveToCollection,
     restoreToCollection,
+    updateCollectionOrder,
     updateCollectionVisibility,
 } from "ente-new/photos/services/collection";
 import {
@@ -213,24 +215,8 @@ export const changeCollectionSortOrder = async (
 
 export const changeCollectionOrder = async (
     collection: Collection,
-    order: number,
-) => {
-    try {
-        const updatedMagicMetadataProps: CollectionMagicMetadataProps = {
-            order,
-        };
-
-        const updatedMagicMetadata = await updateMagicMetadata(
-            updatedMagicMetadataProps,
-            collection.magicMetadata,
-            collection.key,
-        );
-
-        await updateCollectionMagicMetadata(collection, updatedMagicMetadata);
-    } catch (e) {
-        log.error("change collection order failed", e);
-    }
-};
+    order: CollectionOrder,
+) => updateCollectionOrder(await collection1To2(collection), order);
 
 export const changeCollectionSubType = async (
     collection: Collection,

@@ -17,6 +17,7 @@ import {
     type Collection,
     type Collection2,
     type CollectionNewParticipantRole,
+    type CollectionOrder,
     type CollectionPrivateMagicMetadataData,
     type CollectionShareeMagicMetadataData,
     type CollectionType,
@@ -456,6 +457,23 @@ export const updateCollectionVisibility = async (
     collection.owner.id == ensureLocalUser().id
         ? updateCollectionPrivateMagicMetadata(collection, { visibility })
         : updateCollectionShareeMagicMetadata(collection, { visibility });
+
+/**
+ * Change the pinned state of a collection on remote.
+ *
+ * Remote only, does not modify local state.
+ *
+ * This function works only for collections owned by the user.
+ *
+ * @param collection The collection whose order we want to change.
+ *
+ * @param order Whether on not the collection is pinned.
+ */
+export const updateCollectionOrder = async (
+    collection: Collection2,
+    order: CollectionOrder,
+) =>
+    updateCollectionPrivateMagicMetadata(collection, { order })
 
 /**
  * Update the private magic metadata contents of a collection on remote.

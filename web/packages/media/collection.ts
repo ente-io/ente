@@ -638,6 +638,29 @@ export type CollectionSubType =
     (typeof CollectionSubType)[keyof typeof CollectionSubType];
 
 /**
+ * Ordering of the collection - Whether it is pinned or not.
+ */
+export const CollectionOrder = {
+    /**
+     * The default / normal value. No special semantics, behaves "unpinned" and
+     * will retain its natural sort position.
+     */
+    default: 0,
+    /**
+     * The collection is "pinned" by moving to the beginning of the sort order.
+     *
+     * Multiple collections can be pinned, in which case they'll be sorted
+     * amongst themselves under the otherwise applicable sort order.
+     *
+     *     -- [pinned collections] -- [other collections] --
+     */
+    pinned: 1,
+} as const;
+
+export type CollectionOrder =
+    (typeof CollectionOrder)[keyof typeof CollectionOrder];
+
+/**
  * Mutable private metadata associated with a {@link Collection}.
  *
  * - Unlike {@link CollectionPublicMagicMetadataData} this is only available to
@@ -646,6 +669,12 @@ export type CollectionSubType =
  * See: [Note: Private magic metadata is called magic metadata on remote]
  */
 export interface CollectionPrivateMagicMetadataData {
+    /**
+     * The subtype of the collection type (if applicable).
+     *
+     * Expected to be one of {@link CollectionSubType}.
+     */
+    subType?: number;
     /**
      * The (owner specific) visibility of the collection.
      *
@@ -661,19 +690,9 @@ export interface CollectionPrivateMagicMetadataData {
      */
     visibility?: number;
     /**
-     * The subtype of the collection type (if applicable).
-     *
-     * Expected to be one of {@link CollectionSubType}.
-     */
-    subType?: number;
-    /**
      * An overrride to the sort ordering used for the collection.
      *
-     * - For pinned collections, this will be set to `1`. Pinned collections
-     *   will be moved to the beginning of the sort order.
-     *
-     * - Otherwise, the collection is a normal (unpinned) collection, and will
-     *   retain its natural sort position.
+     * Expected to be one of {@link CollectionOrder}.
      */
     order?: number;
 }
@@ -684,8 +703,8 @@ export interface CollectionPrivateMagicMetadataData {
  * See: [Note: Use looseObject for metadata Zod schemas]
  */
 const CollectionPrivateMagicMetadataData = z.looseObject({
-    visibility: z.number().nullish().transform(nullToUndefined),
     subType: z.number().nullish().transform(nullToUndefined),
+    visibility: z.number().nullish().transform(nullToUndefined),
     order: z.number().nullish().transform(nullToUndefined),
 });
 
