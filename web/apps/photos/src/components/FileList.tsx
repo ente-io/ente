@@ -1235,7 +1235,7 @@ const FileThumbnail: React.FC<FileThumbnailProps> = ({
             onClick={handleClick}
             onMouseEnter={handleHover}
             disabled={!imageURL}
-            {...(selectable ? longPressHandlers : {})}
+            {...(selectable && longPressHandlers)}
         >
             {selectable && (
                 <Check

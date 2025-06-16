@@ -71,7 +71,7 @@ export const OverflowMenu: React.FC<
             </IconButton>
             <Menu
                 id={ariaID}
-                {...(anchorEl ? { anchorEl } : {})}
+                {...(anchorEl && { anchorEl })}
                 open={!!anchorEl}
                 onClose={() => setAnchorEl(undefined)}
                 slotProps={{
@@ -118,11 +118,16 @@ interface OverflowMenuOptionProps {
 export const OverflowMenuOption: React.FC<
     React.PropsWithChildren<OverflowMenuOptionProps>
 > = ({ onClick, color = "primary", startIcon, endIcon, children }) => {
-    const menuContext = useContext(OverflowMenuContext)!;
+    const menuContext = useContext(OverflowMenuContext);
 
     const handleClick = () => {
         onClick();
-        menuContext.close();
+        // We might've already been closed as a result of our containing menu
+        // getting closed. An example of this is the "Sort by" option in the
+        // album options overflow menu, where the `onClick` above will result in
+        // `onClose` being called on our parent menu, so `menuContext` will be
+        // undefined when we get here.
+        menuContext?.close();
     };
 
     return (

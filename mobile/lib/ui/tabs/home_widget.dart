@@ -67,6 +67,7 @@ import "package:photos/ui/settings_page.dart";
 import "package:photos/ui/tabs/shared_collections_tab.dart";
 import "package:photos/ui/tabs/user_collections_tab.dart";
 import "package:photos/ui/viewer/actions/file_viewer.dart";
+import "package:photos/ui/viewer/file/detail_page.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/ui/viewer/gallery/shared_public_collection_page.dart";
 import "package:photos/ui/viewer/search/search_widget.dart";
@@ -372,7 +373,7 @@ class _HomeWidgetState extends State<HomeWidget> {
         );
         await dialog.hide();
 
-        await routeToPage(
+        routeToPage(
           context,
           SharedPublicCollectionPage(
             files: sharedFiles,
@@ -381,7 +382,19 @@ class _HomeWidgetState extends State<HomeWidget> {
               null,
             ),
           ),
-        );
+        ).ignore();
+        if (sharedFiles.length == 1) {
+          await routeToPage(
+            context,
+            DetailPage(
+              DetailPageConfiguration(
+                sharedFiles,
+                0,
+                "sharedPublicCollection",
+              ),
+            ),
+          );
+        }
       }
     } catch (e, s) {
       _logger.severe("Failed to handle public album link", e, s);

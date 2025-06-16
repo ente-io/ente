@@ -3,14 +3,125 @@ import {
     type EncryptedMagicMetadata,
     type MagicMetadataCore,
 } from "ente-media/file";
-import { ItemVisibility } from "ente-media/file-metadata";
-import { nullishToEmpty, nullToUndefined } from "ente-utils/transform";
+import {
+    nullishToEmpty,
+    nullishToFalse,
+    nullToUndefined,
+} from "ente-utils/transform";
 import { z } from "zod/v4";
 import {
     decryptMagicMetadata,
-    RemoteMagicMetadataSchema,
-    type RemoteMagicMetadata,
+    RemoteMagicMetadata,
+    type MagicMetadata,
 } from "./magic-metadata";
+
+/**
+ * A collection, as used and persisted locally by the client.
+ *
+ * A collection is, well, a collection of files. It is roughly equivalent to an
+ * "album" (which is also the term we use in the UI), but there can also be
+ * special type of collections like "favorites" which have special behaviour.
+ *
+ * A collection contains zero or more files ({@link EnteFile}).
+ *
+ * A collection can be owned by the user (in whose context this code is
+ * running), or might be a collection that is shared with them.
+ *
+ * TODO: This type supercedes {@link Collection}. Once migration is done, rename
+ * this to drop the "2" suffix.
+ */
+export interface Collection2 {
+    /**
+     * The collection's globally unique ID.
+     *
+     * The collection's ID is a integer assigned by remote as the identifier for
+     * an {@link Collection} when it is created. It is globally unique across
+     * all collections on an Ente instance (i.e., it is not scoped to a user).
+     */
+    id: number;
+    /**
+     * Information about the user who owns the collection.
+     *
+     * Each collection is owned by exactly one user. The owner may optionally
+     * choose to share it with additional users, granting them varying level of
+     * privileges.
+     *
+     * Within the {@link CollectionUser} instance of the {@link owner} field:
+     *
+     * - {@link email} will be set only if this is a shared collection that does
+     *   not belong to the current user.
+     * - {@link role} will be blank.
+     */
+    owner: CollectionUser;
+    /**
+     * The "collection key" (base64 encoded).
+     *
+     * The collection key is used to encrypt and decrypt that files that are
+     * associated with the collection. See: [Note: Collection file].
+     */
+    key: string;
+    /**
+     * The name of the collection.
+     */
+    name: string;
+    /**
+     * The type of the collection.
+     *
+     * Expected to be one of {@link CollectionType}.
+     */
+    type: string;
+    /**
+     * The other Ente users with whom the collection has been shared with.
+     *
+     * Within the {@link CollectionUser} instances of the {@link sharee} field:
+     *
+     * - {@link email} will be set.
+     * - {@link role} is expected to be one of "VIEWER" or "COLLABORATOR".
+     */
+    sharees: CollectionUser[];
+    /**
+     * Public links that can be used to access and update the collection.
+     */
+    publicURLs?: PublicURL[];
+    /**
+     * The last time the collection was updated (epoch microseconds).
+     *
+     * The collection is considered updated both
+     *
+     * - When the files associated with it modified (added, removed); and
+     * - When the collection's own fields are modified.
+     */
+    updationTime: number;
+    /**
+     * Mutable metadata associated with the collection that is only visible to
+     * the owner of the collection.
+     *
+     * See: [Note: Metadatum]
+     */
+    magicMetadata?: MagicMetadata<CollectionPrivateMagicMetadataData>;
+    /**
+     * Public mutable metadata associated with the collection that is visible to
+     * all users with whom the collection has been shared.
+     *
+     * See: [Note: Metadatum]
+     */
+    pubMagicMetadata?: MagicMetadata<CollectionPublicMagicMetadataData>;
+    /**
+     * Private mutable metadata associated with the collection that is only
+     * visible to the current user if they're not the owner of the collection.
+     *
+     * Sometimes also referred to as "shareeMagicMetadata".
+     *
+     * This is metadata associated with each "share", and is only visible to
+     * (and editable by) the user with which the collection has been shared, not
+     * the owner. Each user with whom the collection has been shared gets their
+     * own private copy. This allows each user to keep their own metadata
+     * associated with a shared album (e.g. archive status).
+     *
+     * See: [Note: Metadatum]
+     */
+    sharedMagicMetadata?: MagicMetadata<CollectionShareeMagicMetadataData>;
+}
 
 /**
  * The type of a collection.
@@ -141,7 +252,7 @@ export interface CollectionUser {
  * There is a known set of values ({@link CollectionParticipantRole}) this can
  * be, but in the Zod schema we keep the data type as a string.
  */
-export const RemoteCollectionUser = z.object({
+export const RemoteCollectionUser = z.looseObject({
     id: z.number(),
     email: z.string().nullish().transform(nullToUndefined),
     role: z.string().nullish().transform(nullToUndefined),
@@ -150,19 +261,142 @@ export const RemoteCollectionUser = z.object({
 type RemoteCollectionUser = z.infer<typeof RemoteCollectionUser>;
 
 /**
+ * A public link for a shared collection.
+ *
+ * This structure contains a (partial^) URL that can be used to access the
+ * shared collection, along with other attributes of the link.
+ *
+ * ^ The URL is partial because it doesn't have the URL fragment, which is
+ *   client side only as it contains the decryption key
+ */
+export interface PublicURL {
+    /**
+     * A URL that can be used access the shared collection.
+     *
+     * This will be of the form "https://<public-albums-app>/?t=<token>", e.g.,
+     * "https://albums.ente.io/?t=xxxxxx".
+     *
+     * In particular, this URL does not contain the URL fragment (the part after
+     * the "#"). URL fragments are client side only, and not sent to remote.
+     * They contain the decryption key.
+     *
+     * The client can use this field to form the fully usable URL (e.g.
+     * "https://albums.ente.io/?t=xxxxxx#yyy...yyy") and provide it to the user
+     * for sharing.
+     */
+    url: string;
+    /**
+     * The number of unique devices which can access the collection using the
+     * public URL.
+     *
+     * Set to 0 to indicate no device limit.
+     */
+    deviceLimit: number;
+    /**
+     * The epoch microseconds until which the link is valid.
+     *
+     * Set to 0 to indicate no expiry.
+     */
+    validTill: number;
+    /**
+     * `true` if downloads are enabled from this link.
+     *
+     * When creating a new link this is `true` by default, and can optionally be
+     * disabled in the public link settings.
+     */
+    enableDownload: boolean;
+    enableJoin: boolean;
+    /**
+     * `true` if people can use the public link to upload new files to the
+     * shared collection.
+     */
+    enableCollect: boolean;
+    /**
+     * `true` if the link is password protected.
+     *
+     * When this is `true`, {@link nonce}, {@link memLimit} and {@link opsLimit}
+     * will also be set.
+     */
+    passwordEnabled: boolean;
+    /**
+     * The nonce to use when hashing the password.
+     *
+     * Only present when {@link passwordEnabled} is `true`.
+     */
+    nonce?: string;
+    /**
+     * The ops limit to use when hashing the password.
+     *
+     * Only present when {@link passwordEnabled} is `true`.
+     */
+    opsLimit?: number;
+    /**
+     * The mem limit to use when hashing the password.
+     *
+     * Only present when {@link passwordEnabled} is `true`.
+     */
+    memLimit?: number;
+}
+
+/**
+ * Zod schema for the {@link PublicURL2} we use in our interactions with remote.
+ *
+ * We also use the same schema when persisting the collection locally.
+ */
+export const RemotePublicURL = z.looseObject({
+    url: z.string(),
+    deviceLimit: z.number(),
+    validTill: z.number(),
+    enableDownload: z.boolean().nullish().transform(nullishToFalse),
+    enableJoin: z.boolean().nullish().transform(nullishToFalse),
+    enableCollect: z.boolean().nullish().transform(nullishToFalse),
+    passwordEnabled: z.boolean().nullish().transform(nullishToFalse),
+    nonce: z.string().nullish().transform(nullToUndefined),
+    memLimit: z.number().nullish().transform(nullToUndefined),
+    opsLimit: z.number().nullish().transform(nullToUndefined),
+});
+
+/**
  * Zod schema for {@link Collection}.
  *
- * See: [Note: Schema suffix for exported Zod schemas].
+ * [Note: Use looseObject when parsing JSON that will get persisted]
+ *
+ * While not always necessary, for a few cases (files and collections being the
+ * most prominent and important) we try to retain any unknown fields in the JSON
+ * we get from remote, so that future versions of the client with support for
+ * fields unbeknownst to the current one can read and use them.
+ *
+ * In such cases, the nested objects should also (recursively) use the
+ * looseObject schema. But not always - in some cases where the structures we
+ * use are well established, e.g. {@link RemoteMagicMetadata} - we use the
+ * default Zod behaviour of discarding unknown fields.
+ *
+ * > Note that even in the case of {@link RemoteMagicMetadata}, we still apply
+ * > looseObject to the payload itself.
+ * >
+ * > See: [Note: Use looseObject for metadata Zod schemas]
+ *
+ * Unlike metadata, where we do strictly want to retain unknown or unacted on
+ * fields, in the more general case we are okay with being a bit loose with
+ * looseObject, and even intentionally dropping fields that we know we're not
+ * going to use on the current client. Such looseness is okay because even if we
+ * need to use them in the future, we can always refetch the objects again
+ * (while in the case of metadata, we need to also push our changes to remote,
+ * so it is functionally important for us to retain the source verbatim).
  */
-export const RemoteCollectionSchema = z.object({
+export const RemoteCollection = z.looseObject({
     id: z.number(),
     owner: RemoteCollectionUser,
     encryptedKey: z.string(),
     /**
-     * Remote will set this to a blank string for albums which have been shared
-     * with the user (the decryption pipeline for those doesn't use the nonce).
+     * The nonce to use when decrypting the {@link encryptedKey} when the album
+     * is owned by the user.
+     *
+     * Not set for shared albums (the decryption for uses the keypair instead).
+     *
+     * Remote might set this to blank to indicate absence.
      */
-    keyDecryptionNonce: z.string(),
+    keyDecryptionNonce: z.string().nullish().transform(nullToUndefined),
     /**
      * Expected to be present (along with {@link nameDecryptionNonce}), but it
      * is still optional since it might not be present if {@link name} is present.
@@ -183,7 +417,7 @@ export const RemoteCollectionSchema = z.object({
      */
     type: z.string(),
     sharees: z.array(RemoteCollectionUser).nullish().transform(nullishToEmpty),
-    publicURLs: z.array(z.looseObject({})).nullish().transform(nullishToEmpty),
+    publicURLs: z.array(RemotePublicURL).nullish().transform(nullishToEmpty),
     updationTime: z.number(),
     /**
      * Tombstone marker.
@@ -192,15 +426,13 @@ export const RemoteCollectionSchema = z.object({
      * have been deleted and should thus be pruned by the client locally.
      */
     isDeleted: z.boolean().nullish().transform(nullToUndefined),
-    magicMetadata:
-        RemoteMagicMetadataSchema.nullish().transform(nullToUndefined),
-    pubMagicMetadata:
-        RemoteMagicMetadataSchema.nullish().transform(nullToUndefined),
+    magicMetadata: RemoteMagicMetadata.nullish().transform(nullToUndefined),
+    pubMagicMetadata: RemoteMagicMetadata.nullish().transform(nullToUndefined),
     sharedMagicMetadata:
-        RemoteMagicMetadataSchema.nullish().transform(nullToUndefined),
+        RemoteMagicMetadata.nullish().transform(nullToUndefined),
 });
 
-export type RemoteCollection = z.infer<typeof RemoteCollectionSchema>;
+export type RemoteCollection = z.infer<typeof RemoteCollection>;
 
 export interface EncryptedCollection {
     id: number;
@@ -216,9 +448,9 @@ export interface EncryptedCollection {
     publicURLs?: PublicURL[];
     updationTime: number;
     isDeleted: boolean;
-    magicMetadata: EncryptedMagicMetadata;
-    pubMagicMetadata: EncryptedMagicMetadata;
-    sharedMagicMetadata: EncryptedMagicMetadata;
+    magicMetadata?: EncryptedMagicMetadata;
+    pubMagicMetadata?: EncryptedMagicMetadata;
+    sharedMagicMetadata?: EncryptedMagicMetadata;
 }
 
 export interface Collection
@@ -237,124 +469,8 @@ export interface Collection
     magicMetadata: CollectionMagicMetadata;
     pubMagicMetadata: CollectionPublicMagicMetadata;
     sharedMagicMetadata: CollectionShareeMagicMetadata;
-}
-
-/**
- * A collection, as used and persisted locally by the client.
- *
- * A collection is roughly equivalent to an "album", though there can be special
- * type of collections (like "favorites") which have special behaviours attached
- * to them.
- *
- * A collection contains zero or more files ({@link EnteFile}).
- *
- * A collection can be owned by the user (in whose context this code is
- * running), or might be a collection that is shared with them.
- *
- * TODO: This type supercedes {@link Collection}. Once migration is done, rename
- * this to drop the "2" suffix.
- */
-export interface Collection2 {
-    /**
-     * The collection's globally unique ID.
-     *
-     * The collection's ID is a integer assigned by remote as the identifier for
-     * an {@link Collection} when it is created. It is globally unique across
-     * all collections on an Ente instance (i.e., it is not scoped to a user).
-     */
-    id: number;
-    /**
-     * Information about the user who owns the collection.
-     *
-     * Each collection is owned by exactly one user. The owner may optionally
-     * choose to share it with additional users, granting them varying level of
-     * privileges.
-     *
-     * Within the {@link CollectionUser} instance of the {@link owner} field:
-     *
-     * - {@link email} will be set only if this is a shared collection that does
-     *   not belong to the current user.
-     * - {@link role} will be blank.
-     */
-    owner: CollectionUser;
-    /**
-     * The "collection key" (base64 encoded).
-     *
-     * The collection key is used to encrypt and decrypt that files that are
-     * associated with the collection. See: [Note: Collection file].
-     */
-    key: string;
-    /**
-     * The name of the collection.
-     */
-    name: string;
-    /**
-     * The type of the collection.
-     *
-     * Expected to be one of {@link CollectionType}.
-     */
-    type: string;
-    /**
-     * The other Ente users with whom the collection has been shared with.
-     *
-     * Within the {@link CollectionUser} instances of the {@link sharee} field:
-     *
-     * - {@link email} will be set.
-     * - {@link role} is expected to be one of "VIEWER" or "COLLABORATOR".
-     */
-    sharees: CollectionUser[];
-    /**
-     * Public links that can be used to access and update the collection.
-     */
-    publicURLs?: unknown; // PublicURL[];
-    /**
-     * The last time the collection was updated (epoch microseconds).
-     *
-     * The collection is considered updated both
-     *
-     * - When the files associated with it modified (added, removed); and
-     * - When the collection's own fields are modified.
-     */
-    updationTime: number;
-    /**
-     * Mutable metadata associated with the collection that is only visible to
-     * the owner of the collection.
-     *
-     * See: [Note: Metadatum]
-     */
-    magicMetadata?: unknown; //CollectionMagicMetadata;
-    /**
-     * Public mutable metadata associated with the collection that is visible to
-     * all users with whom the collection has been shared.
-     *
-     * See: [Note: Metadatum]
-     */
-    pubMagicMetadata?: unknown; //CollectionPublicMagicMetadata;
-    /**
-     * Private mutable metadata associated with the collection that is only
-     * visible to the current user, if they're not the owner.
-     *
-     * This is metadata associated with each "share", and is only visible to
-     * (and editable by) the user with which the collection has been shared, not
-     * the owner. Each user with whom the collection has been shared gets their
-     * own private copy. This allows each user to keep their own metadata
-     * associated with a shared album (e.g. archive status).
-     *
-     * See: [Note: Metadatum]
-     */
-    sharedMagicMetadata?: unknown; // CollectionShareeMagicMetadata;
-}
-
-export interface PublicURL {
-    url: string;
-    deviceLimit: number;
-    validTill: number;
-    enableDownload: boolean;
-    enableCollect: boolean;
-    passwordEnabled: boolean;
-    nonce?: string;
-    opsLimit?: number;
-    memLimit?: number;
+    // TODO(C2): Gradual conversion to new structure.
+    c2?: Collection2;
 }
 
 /**
@@ -366,41 +482,136 @@ export interface PublicURL {
  * encrypted fields in {@link collection}.
  *
  * @returns A decrypted collection.
+ *
+ * TODO(C2): For legacy compat, it returns the older structure.
  */
 export const decryptRemoteCollection = async (
     collection: RemoteCollection,
     collectionKey: string,
-): Promise<Collection2> => {
-    const { id, owner, type, sharees, publicURLs, updationTime } = collection;
+): Promise<Collection> => {
+    // RemoteCollection is a looseObject, and we want to retain that semantic
+    // for the parsed Collection. Mention all fields that we want to explicitly
+    // drop or transform, passthrough the rest unchanged in the return value.
+    const {
+        owner,
+        encryptedKey,
+        keyDecryptionNonce,
+        encryptedName,
+        nameDecryptionNonce,
+        sharees,
+        attributes,
+        magicMetadata: encryptedMagicMetadata,
+        pubMagicMetadata: encryptedPubMagicMetadata,
+        sharedMagicMetadata: encryptedSharedMagicMetadata,
+        ...rest
+    } = collection;
+
+    // We've already used them to derive the `collectionKey`
+    drop([encryptedKey, keyDecryptionNonce]);
+    // Mobile specific attribute not currently used by us.
+    drop(attributes);
 
     const name =
-        collection.name ??
+        // `||` is used because remote sets name to blank to indicate absence.
+        collection.name ||
         new TextDecoder().decode(
             await decryptBoxBytes(
-                {
-                    encryptedData: collection.encryptedName!,
-                    nonce: collection.nameDecryptionNonce!,
-                },
+                { encryptedData: encryptedName!, nonce: nameDecryptionNonce! },
                 collectionKey,
             ),
         );
 
-    const decryptMM = async (mm: RemoteMagicMetadata | undefined) =>
-        mm ? await decryptMagicMetadata(mm, collectionKey) : undefined;
+    let magicMetadata: Collection2["magicMetadata"];
+    if (encryptedMagicMetadata) {
+        const genericMM = await decryptMagicMetadata(
+            encryptedMagicMetadata,
+            collectionKey,
+        );
+        const data = CollectionPrivateMagicMetadataData.parse(genericMM.data);
+        magicMetadata = { ...genericMM, data };
+    }
 
+    let pubMagicMetadata: Collection2["pubMagicMetadata"];
+    if (encryptedPubMagicMetadata) {
+        const genericMM = await decryptMagicMetadata(
+            encryptedPubMagicMetadata,
+            collectionKey,
+        );
+        const data = CollectionPublicMagicMetadataData.parse(genericMM.data);
+        pubMagicMetadata = { ...genericMM, data };
+    }
+
+    let sharedMagicMetadata: Collection2["sharedMagicMetadata"];
+    if (encryptedSharedMagicMetadata) {
+        const genericMM = await decryptMagicMetadata(
+            encryptedSharedMagicMetadata,
+            collectionKey,
+        );
+        const data = CollectionShareeMagicMetadataData.parse(genericMM.data);
+        sharedMagicMetadata = { ...genericMM, data };
+    }
+
+    // return {
+    const c2 = {
+        ...rest,
+        key: collectionKey,
+        owner: parseRemoteCollectionUser(owner),
+        name,
+        sharees: sharees.map(parseRemoteCollectionUser),
+        magicMetadata,
+        pubMagicMetadata,
+        sharedMagicMetadata,
+    };
+
+    // Temporary scaffolding for the migration.
     return {
-        id,
-        owner,
+        ...collection,
+        // See: [Note: strict mode migration]
+        c2: c2 as Collection2,
         key: collectionKey,
         name,
-        type,
-        sharees,
-        publicURLs,
-        updationTime,
-        magicMetadata: await decryptMM(collection.magicMetadata),
-        pubMagicMetadata: await decryptMM(collection.pubMagicMetadata),
-        sharedMagicMetadata: await decryptMM(collection.sharedMagicMetadata),
+        type: collection.type as CollectionType,
+        // Not used anyway, but just pass what we have.
+        attributes: attributes,
+        // Some temporary scaffolding to impersonate types.
+        //
+        // See: [Note: strict mode migration]
+        sharees: sharees as CollectionUser[],
+        publicURLs: collection.publicURLs as PublicURL[],
+        isDeleted: !!collection.isDeleted,
+        magicMetadata: (magicMetadata
+            ? { ...magicMetadata, header: collection.magicMetadata!.header }
+            : undefined)!,
+        pubMagicMetadata: (pubMagicMetadata
+            ? {
+                  ...pubMagicMetadata,
+                  header: collection.pubMagicMetadata!.header,
+              }
+            : undefined)!,
+        sharedMagicMetadata: (sharedMagicMetadata
+            ? {
+                  ...sharedMagicMetadata,
+                  header: collection.sharedMagicMetadata!.header,
+              }
+            : undefined)!,
     };
+};
+
+// A no-op function to pretend that we're using some values. This is handy when
+// we want to destructure some fields so that they don't get forwarded, but
+// otherwise don't need to use them.
+const drop = (xs: unknown) => typeof xs;
+
+/**
+ * A convenience function to discard the unused name field from the collection
+ * user objects that we receive from remote.
+ */
+const parseRemoteCollectionUser = ({
+    name,
+    ...rest
+}: RemoteCollectionUser): CollectionUser => {
+    drop(name);
+    return rest;
 };
 
 /**
@@ -408,8 +619,18 @@ export const decryptRemoteCollection = async (
  * augment the {@link type} associated with a {@link Collection}.
  */
 export const CollectionSubType = {
+    /**
+     * The default / normal value. No special semantics.
+     */
     default: 0,
+    /**
+     * The user's default hidden collection, which contains the individually
+     * hidden files.
+     */
     defaultHidden: 1,
+    /**
+     * A collection created for sharing selected files.
+     */
     quicklink: 2,
 } as const;
 
@@ -417,7 +638,30 @@ export type CollectionSubType =
     (typeof CollectionSubType)[keyof typeof CollectionSubType];
 
 /**
- * Mutable private metadata associated with an {@link Collection}.
+ * Ordering of the collection - Whether it is pinned or not.
+ */
+export const CollectionOrder = {
+    /**
+     * The default / normal value. No special semantics, behaves "unpinned" and
+     * will retain its natural sort position.
+     */
+    default: 0,
+    /**
+     * The collection is "pinned" by moving to the beginning of the sort order.
+     *
+     * Multiple collections can be pinned, in which case they'll be sorted
+     * amongst themselves under the otherwise applicable sort order.
+     *
+     *     -- [pinned collections] -- [other collections] --
+     */
+    pinned: 1,
+} as const;
+
+export type CollectionOrder =
+    (typeof CollectionOrder)[keyof typeof CollectionOrder];
+
+/**
+ * Mutable private metadata associated with a {@link Collection}.
  *
  * - Unlike {@link CollectionPublicMagicMetadataData} this is only available to
  *   the owner of the file.
@@ -426,40 +670,111 @@ export type CollectionSubType =
  */
 export interface CollectionPrivateMagicMetadataData {
     /**
+     * The subtype of the collection type (if applicable).
+     *
+     * Expected to be one of {@link CollectionSubType}.
+     */
+    subType?: number;
+    /**
      * The (owner specific) visibility of the collection.
      *
+     * The file's visibility is user specific attribute, and thus we keep it in
+     * the private magic metadata. This allows the file's owner to share a file
      * and independently edit its visibility without revealing their visibility
      * preference to the other people with whom they have shared the file.
+     *
+     * Expected to be one of {@link ItemVisibility}.
+     *
+     * See: [Note: Enums in remote objects] for why we keep it as a number
+     * instead of the expected enum.
      */
-    visibility?: ItemVisibility;
-    /**
-     * The {@link CollectionSubType}, if applicable.
-     */
-    subType?: CollectionSubType;
+    visibility?: number;
     /**
      * An overrride to the sort ordering used for the collection.
      *
-     * - For pinned collections, this will be set to `1`. Pinned collections
-     *   will be moved to the beginning of the sort order.
-     *
-     * - Otherwise, the collection is a normal (unpinned) collection, and will
-     *   retain its natural sort position.
+     * Expected to be one of {@link CollectionOrder}.
      */
     order?: number;
 }
 
-export interface UpdatePublicURL {
-    collectionID: number;
-    disablePassword?: boolean;
-    enableDownload?: boolean;
-    enableCollect?: boolean;
-    validTill?: number;
-    deviceLimit?: number;
-    passHash?: string;
-    nonce?: string;
-    opsLimit?: number;
-    memLimit?: number;
+/**
+ * Zod schema for {@link CollectionPrivateMagicMetadataData}.
+ *
+ * See: [Note: Use looseObject for metadata Zod schemas]
+ */
+const CollectionPrivateMagicMetadataData = z.looseObject({
+    subType: z.number().nullish().transform(nullToUndefined),
+    visibility: z.number().nullish().transform(nullToUndefined),
+    order: z.number().nullish().transform(nullToUndefined),
+});
+
+/**
+ * Mutable public metadata associated with a {@link Collection}.
+ *
+ * - Unlike {@link CollectionPrivateMagicMetadataData}, this is available to all
+ *   people with whom the collection has been shared.
+ *
+ * For more details, see [Note: Metadatum].
+ */
+export interface CollectionPublicMagicMetadataData {
+    /**
+     * The ordering of the files within the collection.
+     *
+     * The default is desc ("Newest first").
+     *
+     * If true, then the files within the collection are sorted in ascending
+     * order of their time ("Oldest first").
+     *
+     * To reset to the default, set this to false.
+     */
+    asc?: boolean;
+    /**
+     * The file ID of the file to use as the cover for the collection.
+     *
+     * To reset to the default cover, set this to 0.
+     */
+    coverID?: number;
 }
+
+/**
+ * Zod schema for {@link CollectionPublicMagicMetadataData}.
+ */
+const CollectionPublicMagicMetadataData = z.looseObject({
+    asc: z.boolean().nullish().transform(nullToUndefined),
+    coverID: z.number().nullish().transform(nullToUndefined),
+});
+
+/**
+ * Per-sharee mutable metadata associated with a shared {@link Collection}.
+ *
+ * [Note: Share specific metadata]
+ *
+ * When a collection is shared with a particular user, then remote creates a new
+ * "share" entity defined by the (collectionID, fromUserID, toUserID) tuple
+ * (this entity is not exposed to us directly, but it is helpful to know the
+ * underlying implementation for this discussion).
+ *
+ * Remote also allows us to store mutable metadata (aka "magic metadata") with
+ * each such share entity. This effectively acts as a private space where each
+ * user with whom a collection has been shared can store and mutate metadata
+ * about this shared collection without affecting either the owner or other
+ * users with whom the collection has been shared.
+ */
+export interface CollectionShareeMagicMetadataData {
+    /**
+     * The (sharee specific) visibility of the collection.
+     *
+     * Expected to be one of {@link ItemVisibility}.
+     */
+    visibility?: number;
+}
+
+/**
+ * Zod schema for {@link CollectionShareeMagicMetadataData}.
+ */
+const CollectionShareeMagicMetadataData = z.looseObject({
+    visibility: z.number().nullish().transform(nullToUndefined),
+});
 
 export interface CreatePublicAccessTokenRequest {
     collectionID: number;
@@ -473,8 +788,8 @@ export interface RemoveFromCollectionRequest {
 }
 
 export interface CollectionMagicMetadataProps {
-    visibility?: ItemVisibility;
-    subType?: CollectionSubType;
+    visibility?: number; // ItemVisibility;
+    subType?: number; // CollectionSubType;
     order?: number;
 }
 
@@ -482,18 +797,12 @@ export type CollectionMagicMetadata =
     MagicMetadataCore<CollectionMagicMetadataProps>;
 
 export interface CollectionShareeMetadataProps {
-    visibility?: ItemVisibility;
+    visibility?: number; // ItemVisibility;
 }
 export type CollectionShareeMagicMetadata =
     MagicMetadataCore<CollectionShareeMetadataProps>;
 
 export interface CollectionPublicMagicMetadataProps {
-    /**
-     * If true, then the files within the collection are sorted in ascending
-     * order of their time ("Oldest first").
-     *
-     * The default is desc ("Newest first").
-     */
     asc?: boolean;
     coverID?: number;
 }

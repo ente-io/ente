@@ -25,6 +25,7 @@ import {
 import {
     RowButton,
     RowButtonDivider,
+    RowButtonEndActivityIndicator,
     RowButtonGroup,
     RowButtonGroupHint,
     RowButtonGroupTitle,
@@ -50,14 +51,18 @@ import type {
     Collection,
     CollectionNewParticipantRole,
     PublicURL,
-    UpdatePublicURL,
 } from "ente-media/collection";
 import { type CollectionUser } from "ente-media/collection";
 import { PublicLinkCreated } from "ente-new/photos/components/share/PublicLinkCreated";
 import { avatarTextColor } from "ente-new/photos/services/avatar";
 import {
+    createPublicURL,
     deleteShareURL,
     shareCollection,
+    unshareCollection,
+    updatePublicURL,
+    type CreatePublicURLAttributes,
+    type UpdatePublicURLAttributes,
 } from "ente-new/photos/services/collection";
 import type { CollectionSummary } from "ente-new/photos/services/collection/ui";
 import { usePhotosAppContext } from "ente-new/photos/types/context";
@@ -66,13 +71,15 @@ import { wait } from "ente-utils/promise";
 import { useFormik } from "formik";
 import { t } from "i18next";
 import { GalleryContext } from "pages/gallery";
-import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+    useCallback,
+    useContext,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from "react";
 import { Trans } from "react-i18next";
-import {
-    createShareableURL,
-    unshareCollection,
-    updateShareableURL,
-} from "services/collectionService";
 import { z } from "zod/v4";
 
 type CollectionShareProps = ModalVisibilityProps & {
@@ -86,6 +93,34 @@ export const CollectionShare: React.FC<CollectionShareProps> = ({
     collection,
     collectionSummary,
 }) => {
+    const { onGenericError } = useBaseContext();
+    const { showLoadingBar, hideLoadingBar } = usePhotosAppContext();
+    const { syncWithRemote } = useContext(GalleryContext);
+
+    // TODO: Duplicated from CollectionHeader.tsx
+    /**
+     * Return a new function by wrapping an async function in an error handler,
+     * showing the global loading bar when the function runs, and syncing with
+     * remote on completion.
+     */
+    const wrap = useCallback(
+        (f: () => Promise<void>) => {
+            const wrapped = async () => {
+                showLoadingBar();
+                try {
+                    await f();
+                } catch (e) {
+                    onGenericError(e);
+                } finally {
+                    void syncWithRemote(false, true);
+                    hideLoadingBar();
+                }
+            };
+            return (): void => void wrapped();
+        },
+        [showLoadingBar, hideLoadingBar, onGenericError, syncWithRemote],
+    );
+
     if (!collection || !collectionSummary) {
         return <></>;
     }
@@ -114,7 +149,7 @@ export const CollectionShare: React.FC<CollectionShareProps> = ({
                         <>
                             <EmailShare
                                 onRootClose={onClose}
-                                {...{ collection }}
+                                {...{ wrap, collection }}
                             />
                             <PublicShare
                                 onRootClose={onClose}
@@ -208,92 +243,6 @@ function SharingDetails({ collection, type }) {
     );
 }
 
-type SetPublicShareProp = React.Dispatch<React.SetStateAction<PublicURL>>;
-
-interface EnablePublicShareOptionsProps {
-    collection: Collection;
-    setPublicShareProp: (value: PublicURL) => void;
-    onLinkCreated: () => void;
-}
-
-const EnablePublicShareOptions: React.FC<EnablePublicShareOptionsProps> = ({
-    collection,
-    setPublicShareProp,
-    onLinkCreated,
-}) => {
-    const galleryContext = useContext(GalleryContext);
-    const [sharableLinkError, setSharableLinkError] = useState(null);
-
-    const createSharableURLHelper = async () => {
-        try {
-            setSharableLinkError(null);
-            galleryContext.setBlockingLoad(true);
-            const publicURL = await createShareableURL(collection);
-            setPublicShareProp(publicURL);
-            onLinkCreated();
-            galleryContext.syncWithRemote(false, true);
-        } catch (e) {
-            const errorMessage = handleSharingErrors(e);
-            setSharableLinkError(errorMessage);
-        } finally {
-            galleryContext.setBlockingLoad(false);
-        }
-    };
-
-    const createCollectPhotoShareableURLHelper = async () => {
-        try {
-            setSharableLinkError(null);
-            galleryContext.setBlockingLoad(true);
-            const publicURL = await createShareableURL(collection);
-            await updateShareableURL({
-                collectionID: collection.id,
-                enableCollect: true,
-            });
-            setPublicShareProp(publicURL);
-            onLinkCreated();
-            galleryContext.syncWithRemote(false, true);
-        } catch (e) {
-            const errorMessage = handleSharingErrors(e);
-            setSharableLinkError(errorMessage);
-        } finally {
-            galleryContext.setBlockingLoad(false);
-        }
-    };
-
-    return (
-        <Stack>
-            <RowButtonGroupTitle icon={<PublicIcon />}>
-                {t("share_link_section_title")}
-            </RowButtonGroupTitle>
-            <RowButtonGroup>
-                <RowButton
-                    label={t("create_public_link")}
-                    startIcon={<LinkIcon />}
-                    onClick={createSharableURLHelper}
-                />
-                <RowButtonDivider />
-                <RowButton
-                    label={t("collect_photos")}
-                    startIcon={<DownloadSharpIcon />}
-                    onClick={createCollectPhotoShareableURLHelper}
-                />
-            </RowButtonGroup>
-            {sharableLinkError && (
-                <Typography
-                    variant="small"
-                    sx={{
-                        color: "critical.main",
-                        mt: 0.5,
-                        textAlign: "center",
-                    }}
-                >
-                    {sharableLinkError}
-                </Typography>
-            )}
-        </Stack>
-    );
-};
-
 const handleSharingErrors = (error) => {
     const parsedError = parseSharingErrorCodes(error);
     let errorMessage = "";
@@ -314,11 +263,16 @@ const handleSharingErrors = (error) => {
 };
 
 interface EmailShareProps {
-    collection: Collection;
     onRootClose: () => void;
+    wrap: (f: () => Promise<void>) => () => void;
+    collection: Collection;
 }
 
-const EmailShare: React.FC<EmailShareProps> = ({ collection, onRootClose }) => {
+const EmailShare: React.FC<EmailShareProps> = ({
+    onRootClose,
+    wrap,
+    collection,
+}) => {
     const [addParticipantView, setAddParticipantView] = useState(false);
     const [manageEmailShareView, setManageEmailShareView] = useState(false);
     const [participantRole, setParticipantRole] = useState<
@@ -388,11 +342,11 @@ const EmailShare: React.FC<EmailShareProps> = ({ collection, onRootClose }) => {
                 role={participantRole}
             />
             <ManageEmailShare
-                peopleCount={collection.sharees.length}
                 open={manageEmailShareView}
                 onClose={closeManageEmailShare}
                 onRootClose={onRootClose}
-                collection={collection}
+                {...{ onRootClose, wrap, collection }}
+                peopleCount={collection.sharees.length}
             />
         </>
     );
@@ -678,21 +632,22 @@ const AddParticipantForm: React.FC<AddParticipantFormProps> = ({
 };
 
 interface ManageEmailShareProps {
-    collection: Collection;
     open: boolean;
     onClose: () => void;
     onRootClose: () => void;
+    wrap: (f: () => Promise<void>) => () => void;
+    collection: Collection;
     peopleCount: number;
 }
 
 const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
     open,
-    collection,
     onClose,
     onRootClose,
+    wrap,
+    collection,
     peopleCount,
 }) => {
-    const { showLoadingBar, hideLoadingBar } = usePhotosAppContext();
     const galleryContext = useContext(GalleryContext);
 
     const { show: showAddParticipant, props: addParticipantVisibilityProps } =
@@ -719,16 +674,6 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
     const handleRootClose = () => {
         onClose();
         onRootClose();
-    };
-
-    const collectionUnshare = async (email: string) => {
-        try {
-            showLoadingBar();
-            await unshareCollection(collection, email);
-            await galleryContext.syncWithRemote(false, true);
-        } finally {
-            hideLoadingBar();
-        }
     };
 
     const ownerEmail =
@@ -846,9 +791,7 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
             />
             <ManageParticipant
                 {...manageParticipantVisibilityProps}
-                onRootClose={onRootClose}
-                collectionUnshare={collectionUnshare}
-                collection={collection}
+                {...{ onRootClose, wrap, collection }}
                 selectedParticipant={selectedParticipant.current}
             />
         </>
@@ -857,20 +800,20 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
 
 interface ManageParticipantProps {
     open: boolean;
-    collection: Collection;
     onClose: () => void;
     onRootClose: () => void;
+    wrap: (f: () => Promise<void>) => () => void;
+    collection: Collection;
     selectedParticipant: CollectionUser;
-    collectionUnshare: (email: string) => Promise<void>;
 }
 
 const ManageParticipant: React.FC<ManageParticipantProps> = ({
-    collection,
     open,
     onClose,
     onRootClose,
+    wrap,
+    collection,
     selectedParticipant,
-    collectionUnshare,
 }) => {
     const { showMiniDialog } = useBaseContext();
     const galleryContext = useContext(GalleryContext);
@@ -880,8 +823,12 @@ const ManageParticipant: React.FC<ManageParticipantProps> = ({
         onRootClose();
     };
 
+    const unshare = wrap(() =>
+        unshareCollection(collection.id, selectedParticipant.email),
+    );
+
     const handleRemove = () => {
-        collectionUnshare(selectedParticipant.email);
+        unshare();
         onClose();
     };
 
@@ -1038,28 +985,27 @@ const PublicShare: React.FC<PublicShareProps> = ({
     onRootClose,
 }) => {
     const [publicShareUrl, setPublicShareUrl] = useState<string>(null);
-    const [publicShareProp, setPublicShareProp] = useState<PublicURL>(null);
+    const [publicURL, setPublicURL] = useState<PublicURL | undefined>(
+        undefined,
+    );
     const {
         show: showPublicLinkCreated,
         props: publicLinkCreatedVisibilityProps,
     } = useModalVisibility();
 
     useEffect(() => {
-        if (collection.publicURLs?.length) {
-            setPublicShareProp(collection.publicURLs[0]);
-        }
+        setPublicURL(collection.publicURLs[0]);
     }, [collection]);
 
     useEffect(() => {
-        if (publicShareProp?.url) {
-            appendCollectionKeyToShareURL(
-                publicShareProp.url,
-                collection.key,
-            ).then((url) => setPublicShareUrl(url));
+        if (publicURL?.url) {
+            appendCollectionKeyToShareURL(publicURL.url, collection.key).then(
+                (url) => setPublicShareUrl(url),
+            );
         } else {
             setPublicShareUrl(null);
         }
-    }, [publicShareProp]);
+    }, [publicURL]);
 
     const handleCopyLink = () => {
         navigator.clipboard.writeText(publicShareUrl);
@@ -1067,17 +1013,14 @@ const PublicShare: React.FC<PublicShareProps> = ({
 
     return (
         <>
-            {publicShareProp ? (
+            {publicURL ? (
                 <ManagePublicShare
-                    publicShareProp={publicShareProp}
-                    setPublicShareProp={setPublicShareProp}
-                    collection={collection}
+                    {...{ onRootClose, collection, publicURL, setPublicURL }}
                     publicShareUrl={publicShareUrl}
-                    onRootClose={onRootClose}
                 />
             ) : (
                 <EnablePublicShareOptions
-                    setPublicShareProp={setPublicShareProp}
+                    {...{ setPublicURL }}
                     collection={collection}
                     onLinkCreated={showPublicLinkCreated}
                 />
@@ -1090,27 +1033,109 @@ const PublicShare: React.FC<PublicShareProps> = ({
     );
 };
 
-interface ManagePublicShareProps {
-    publicShareProp: PublicURL;
+interface EnablePublicShareOptionsProps {
     collection: Collection;
-    setPublicShareProp: SetPublicShareProp;
+    setPublicURL: (value: PublicURL) => void;
+    onLinkCreated: () => void;
+}
+
+const EnablePublicShareOptions: React.FC<EnablePublicShareOptionsProps> = ({
+    collection,
+    setPublicURL,
+    onLinkCreated,
+}) => {
+    const { syncWithRemote } = useContext(GalleryContext);
+
+    const [pending, setPending] = useState("");
+    const [errorMessage, setErrorMessage] = useState("");
+
+    const create = (attributes?: CreatePublicURLAttributes) => {
+        setErrorMessage("");
+        setPending(attributes ? "collect" : "link");
+
+        void createPublicURL(collection.id, attributes)
+            .then((publicURL) => {
+                setPending("");
+                setPublicURL(publicURL);
+                onLinkCreated();
+                void syncWithRemote(false, true);
+            })
+            .catch((e: unknown) => {
+                log.error("Could not create public link", e);
+                setErrorMessage(
+                    isHTTPErrorWithStatus(e, 402)
+                        ? t("sharing_disabled_for_free_accounts")
+                        : t("generic_error"),
+                );
+                setPending("");
+            });
+    };
+
+    return (
+        <Stack>
+            <RowButtonGroupTitle icon={<PublicIcon />}>
+                {t("share_link_section_title")}
+            </RowButtonGroupTitle>
+            <RowButtonGroup>
+                <RowButton
+                    label={t("create_public_link")}
+                    startIcon={<LinkIcon />}
+                    disabled={!!pending}
+                    endIcon={
+                        pending == "link" && <RowButtonEndActivityIndicator />
+                    }
+                    onClick={() => create()}
+                />
+                <RowButtonDivider />
+                <RowButton
+                    label={t("collect_photos")}
+                    startIcon={<DownloadSharpIcon />}
+                    disabled={!!pending}
+                    endIcon={
+                        pending == "collect" && (
+                            <RowButtonEndActivityIndicator />
+                        )
+                    }
+                    onClick={() => create({ enableCollect: true })}
+                />
+            </RowButtonGroup>
+            {errorMessage && (
+                <Typography
+                    variant="small"
+                    sx={{
+                        color: "critical.main",
+                        mt: 0.5,
+                        textAlign: "center",
+                    }}
+                >
+                    {errorMessage}
+                </Typography>
+            )}
+        </Stack>
+    );
+};
+
+interface ManagePublicShareProps {
     onRootClose: () => void;
+    collection: Collection;
+    publicURL: PublicURL;
+    setPublicURL: (publicURL: PublicURL | undefined) => void;
     publicShareUrl: string;
 }
 
 const ManagePublicShare: React.FC<ManagePublicShareProps> = ({
-    publicShareProp,
-    setPublicShareProp,
-    collection,
     onRootClose,
+    collection,
+    publicURL,
+    setPublicURL,
     publicShareUrl,
 }) => {
-    const [manageShareView, setManageShareView] = useState(false);
+    const {
+        show: showManagePublicShare,
+        props: managePublicShareVisibilityProps,
+    } = useModalVisibility();
 
     const [copied, handleCopyLink] = useClipboardCopy(publicShareUrl);
-
-    const closeManageShare = () => setManageShareView(false);
-    const openManageShare = () => setManageShareView(true);
 
     return (
         <>
@@ -1119,12 +1144,12 @@ const ManagePublicShare: React.FC<ManagePublicShareProps> = ({
                     {t("public_link_enabled")}
                 </RowButtonGroupTitle>
                 <RowButtonGroup>
-                    {isLinkExpired(publicShareProp.validTill) ? (
+                    {isLinkExpired(publicURL.validTill) ? (
                         <RowButton
                             disabled
                             startIcon={<ErrorOutlineIcon />}
                             color="critical"
-                            onClick={openManageShare}
+                            onClick={showManagePublicShare}
                             label={t("link_expired")}
                         />
                     ) : (
@@ -1137,7 +1162,7 @@ const ManagePublicShare: React.FC<ManagePublicShareProps> = ({
                                 )
                             }
                             onClick={handleCopyLink}
-                            disabled={isLinkExpired(publicShareProp.validTill)}
+                            disabled={isLinkExpired(publicURL.validTill)}
                             label={t("copy_link")}
                         />
                     )}
@@ -1145,18 +1170,15 @@ const ManagePublicShare: React.FC<ManagePublicShareProps> = ({
                     <RowButton
                         startIcon={<LinkIcon />}
                         endIcon={<ChevronRightIcon />}
-                        onClick={openManageShare}
+                        onClick={showManagePublicShare}
                         label={t("manage_link")}
                     />
                 </RowButtonGroup>
             </Stack>
             <ManagePublicShareOptions
-                open={manageShareView}
-                onClose={closeManageShare}
+                {...managePublicShareVisibilityProps}
                 onRootClose={onRootClose}
-                publicShareProp={publicShareProp}
-                collection={collection}
-                setPublicShareProp={setPublicShareProp}
+                {...{ onRootClose, collection, publicURL, setPublicURL }}
                 publicShareUrl={publicShareUrl}
             />
         </>
@@ -1167,23 +1189,21 @@ const isLinkExpired = (validTill: number) => {
     return validTill && validTill < Date.now() * 1000;
 };
 
-interface ManagePublicShareOptionsProps {
-    publicShareProp: PublicURL;
-    collection: Collection;
-    setPublicShareProp: SetPublicShareProp;
-    open: boolean;
-    onClose: () => void;
+type ManagePublicShareOptionsProps = ModalVisibilityProps & {
     onRootClose: () => void;
+    collection: Collection;
+    publicURL: PublicURL;
+    setPublicURL: (publicURL: PublicURL | undefined) => void;
     publicShareUrl: string;
-}
+};
 
 const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
-    publicShareProp,
-    collection,
-    setPublicShareProp,
     open,
     onClose,
     onRootClose,
+    collection,
+    publicURL,
+    setPublicURL,
     publicShareUrl,
 }) => {
     const galleryContext = useContext(GalleryContext);
@@ -1197,15 +1217,16 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
         onRootClose();
     };
 
-    const updatePublicShareURLHelper = async (req: UpdatePublicURL) => {
+    const handlePublicURLUpdate = async (
+        updates: UpdatePublicURLAttributes,
+    ) => {
         try {
             galleryContext.setBlockingLoad(true);
-            const response = await updateShareableURL(req);
-            setPublicShareProp(response);
+            setPublicURL(await updatePublicURL(collection.id, updates));
             galleryContext.syncWithRemote(false, true);
         } catch (e) {
-            const errorMessage = handleSharingErrors(e);
-            setSharableLinkError(errorMessage);
+            log.error("Could not update public link", e);
+            setSharableLinkError(t("generic_error"));
         } finally {
             galleryContext.setBlockingLoad(false);
         }
@@ -1214,7 +1235,7 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
         try {
             galleryContext.setBlockingLoad(true);
             await deleteShareURL(collection.id);
-            setPublicShareProp(null);
+            setPublicURL(undefined);
             galleryContext.syncWithRemote(false, true);
             onClose();
         } catch (e) {
@@ -1234,34 +1255,27 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
         >
             <Stack sx={{ gap: 3, py: "20px", px: "8px" }}>
                 <ManagePublicCollect
-                    collection={collection}
-                    publicShareProp={publicShareProp}
-                    updatePublicShareURLHelper={updatePublicShareURLHelper}
+                    {...{ publicURL }}
+                    onUpdate={handlePublicURLUpdate}
                 />
                 <ManageLinkExpiry
-                    collection={collection}
-                    publicShareProp={publicShareProp}
-                    updatePublicShareURLHelper={updatePublicShareURLHelper}
-                    onRootClose={onRootClose}
+                    {...{ onRootClose, publicURL }}
+                    onUpdate={handlePublicURLUpdate}
                 />
                 <RowButtonGroup>
                     <ManageDeviceLimit
-                        collection={collection}
-                        publicShareProp={publicShareProp}
-                        updatePublicShareURLHelper={updatePublicShareURLHelper}
-                        onRootClose={onRootClose}
+                        {...{ onRootClose, publicURL }}
+                        onUpdate={handlePublicURLUpdate}
                     />
                     <RowButtonDivider />
                     <ManageDownloadAccess
-                        collection={collection}
-                        publicShareProp={publicShareProp}
-                        updatePublicShareURLHelper={updatePublicShareURLHelper}
+                        {...{ publicURL }}
+                        onUpdate={handlePublicURLUpdate}
                     />
                     <RowButtonDivider />
                     <ManageLinkPassword
-                        collection={collection}
-                        publicShareProp={publicShareProp}
-                        updatePublicShareURLHelper={updatePublicShareURLHelper}
+                        {...{ publicURL }}
+                        onUpdate={handlePublicURLUpdate}
                     />
                 </RowButtonGroup>
                 <RowButtonGroup>
@@ -1298,22 +1312,29 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
     );
 };
 
-interface ManagePublicCollectProps {
-    publicShareProp: PublicURL;
-    collection: Collection;
-    updatePublicShareURLHelper: (req: UpdatePublicURL) => Promise<void>;
+/**
+ * The Prop type used by components that allow the use to modify some setting
+ * related to a public link.
+ */
+interface ManagePublicLinkSettingProps {
+    publicURL: PublicURL;
+    onUpdate: (req: UpdatePublicURLAttributes) => Promise<void>;
 }
 
-const ManagePublicCollect: React.FC<ManagePublicCollectProps> = ({
-    publicShareProp,
-    updatePublicShareURLHelper,
-    collection,
+/**
+ * An extension of {@link ManagePublicLinkSettingProps} for use when the
+ * component shows update options in a (nested) drawer.
+ */
+type ManagePublicLinkSettingDrawerProps = ManagePublicLinkSettingProps & {
+    onRootClose: () => void;
+};
+
+const ManagePublicCollect: React.FC<ManagePublicLinkSettingProps> = ({
+    publicURL,
+    onUpdate,
 }) => {
     const handleFileDownloadSetting = () => {
-        updatePublicShareURLHelper({
-            collectionID: collection.id,
-            enableCollect: !publicShareProp.enableCollect,
-        });
+        onUpdate({ enableCollect: !publicURL.enableCollect });
     };
 
     return (
@@ -1321,7 +1342,7 @@ const ManagePublicCollect: React.FC<ManagePublicCollectProps> = ({
             <RowButtonGroup>
                 <RowSwitch
                     label={t("allow_adding_photos")}
-                    checked={publicShareProp?.enableCollect}
+                    checked={publicURL.enableCollect}
                     onClick={handleFileDownloadSetting}
                 />
             </RowButtonGroup>
@@ -1332,34 +1353,18 @@ const ManagePublicCollect: React.FC<ManagePublicCollectProps> = ({
     );
 };
 
-interface ManageLinkExpiryProps {
-    publicShareProp: PublicURL;
-    collection: Collection;
-    updatePublicShareURLHelper: (req: UpdatePublicURL) => Promise<void>;
-    onRootClose: () => void;
-}
-
-const ManageLinkExpiry: React.FC<ManageLinkExpiryProps> = ({
-    publicShareProp,
-    collection,
-    updatePublicShareURLHelper,
+const ManageLinkExpiry: React.FC<ManagePublicLinkSettingDrawerProps> = ({
     onRootClose,
+    publicURL,
+    onUpdate,
 }) => {
     const { show: showExpiryOptions, props: expiryOptionsVisibilityProps } =
         useModalVisibility();
 
     const options = useMemo(() => shareExpiryOptions(), []);
 
-    const updateDeviceExpiry = async (optionFn) => {
-        return updatePublicShareURLHelper({
-            collectionID: collection.id,
-            validTill: optionFn,
-        });
-    };
-
     const changeShareExpiryValue = (value: number) => async () => {
-        await updateDeviceExpiry(value);
-        publicShareProp.validTill = value;
+        await onUpdate({ validTill: value });
         expiryOptionsVisibilityProps.onClose();
     };
 
@@ -1371,15 +1376,15 @@ const ManageLinkExpiry: React.FC<ManageLinkExpiryProps> = ({
                     endIcon={<ChevronRightIcon />}
                     label={t("link_expiry")}
                     color={
-                        isLinkExpired(publicShareProp?.validTill)
+                        isLinkExpired(publicURL.validTill)
                             ? "critical"
                             : "primary"
                     }
                     caption={
-                        isLinkExpired(publicShareProp?.validTill)
+                        isLinkExpired(publicURL.validTill)
                             ? t("link_expired")
-                            : publicShareProp?.validTill
-                              ? formattedDateTime(publicShareProp.validTill)
+                            : publicURL.validTill
+                              ? formattedDateTime(publicURL.validTill)
                               : t("never")
                     }
                 />
@@ -1442,33 +1447,18 @@ const microsecsAfter = (after: "hour" | "day" | "week" | "month" | "year") => {
     return date.getTime() * 1000;
 };
 
-interface ManageDeviceLimitProps {
-    publicShareProp: PublicURL;
-    collection: Collection;
-    updatePublicShareURLHelper: (req: UpdatePublicURL) => Promise<void>;
-    onRootClose: () => void;
-}
-
-const ManageDeviceLimit: React.FC<ManageDeviceLimitProps> = ({
-    collection,
-    publicShareProp,
-    updatePublicShareURLHelper,
+const ManageDeviceLimit: React.FC<ManagePublicLinkSettingDrawerProps> = ({
     onRootClose,
+    publicURL,
+    onUpdate,
 }) => {
     const { show: showDeviceOptions, props: deviceOptionsVisibilityProps } =
         useModalVisibility();
 
     const options = useMemo(() => deviceLimitOptions(), []);
 
-    const updateDeviceLimit = async (newLimit: number) => {
-        return updatePublicShareURLHelper({
-            collectionID: collection.id,
-            deviceLimit: newLimit,
-        });
-    };
-
     const changeDeviceLimitValue = (value: number) => async () => {
-        await updateDeviceLimit(value);
+        await onUpdate({ deviceLimit: value });
         deviceOptionsVisibilityProps.onClose();
     };
 
@@ -1477,9 +1467,9 @@ const ManageDeviceLimit: React.FC<ManageDeviceLimitProps> = ({
             <RowButton
                 label={t("device_limit")}
                 caption={
-                    publicShareProp.deviceLimit === 0
+                    publicURL.deviceLimit == 0
                         ? t("none")
-                        : publicShareProp.deviceLimit.toString()
+                        : publicURL.deviceLimit.toString()
                 }
                 onClick={showDeviceOptions}
                 endIcon={<ChevronRightIcon />}
@@ -1517,123 +1507,88 @@ const deviceLimitOptions = () =>
         value: i,
     }));
 
-interface ManageDownloadAccessProps {
-    publicShareProp: PublicURL;
-    collection: Collection;
-    updatePublicShareURLHelper: (req: UpdatePublicURL) => Promise<void>;
-}
-
-const ManageDownloadAccess: React.FC<ManageDownloadAccessProps> = ({
-    publicShareProp,
-    updatePublicShareURLHelper,
-    collection,
+const ManageDownloadAccess: React.FC<ManagePublicLinkSettingProps> = ({
+    publicURL,
+    onUpdate,
 }) => {
     const { showMiniDialog } = useBaseContext();
 
     const handleFileDownloadSetting = () => {
-        if (publicShareProp.enableDownload) {
-            disableFileDownload();
-        } else {
-            updatePublicShareURLHelper({
-                collectionID: collection.id,
-                enableDownload: true,
+        if (publicURL.enableDownload) {
+            showMiniDialog({
+                title: t("disable_file_download"),
+                message: <Trans i18nKey={"disable_file_download_message"} />,
+                continue: {
+                    text: t("disable"),
+                    color: "critical",
+                    action: () => onUpdate({ enableDownload: false }),
+                },
             });
+        } else {
+            onUpdate({ enableDownload: true });
         }
     };
 
-    const disableFileDownload = () => {
-        showMiniDialog({
-            title: t("disable_file_download"),
-            message: <Trans i18nKey={"disable_file_download_message"} />,
-            continue: {
-                text: t("disable"),
-                color: "critical",
-                action: () =>
-                    updatePublicShareURLHelper({
-                        collectionID: collection.id,
-                        enableDownload: false,
-                    }),
-            },
-        });
-    };
     return (
         <RowSwitch
             label={t("allow_downloads")}
-            checked={publicShareProp?.enableDownload ?? true}
+            checked={publicURL.enableDownload}
             onClick={handleFileDownloadSetting}
         />
     );
 };
 
-interface ManageLinkPasswordProps {
-    publicShareProp: PublicURL;
-    collection: Collection;
-    updatePublicShareURLHelper: (req: UpdatePublicURL) => Promise<void>;
-}
-
-const ManageLinkPassword: React.FC<ManageLinkPasswordProps> = ({
-    collection,
-    publicShareProp,
-    updatePublicShareURLHelper,
+const ManageLinkPassword: React.FC<ManagePublicLinkSettingProps> = ({
+    publicURL,
+    onUpdate,
 }) => {
     const { showMiniDialog } = useBaseContext();
     const { show: showSetPassword, props: setPasswordVisibilityProps } =
         useModalVisibility();
 
     const handlePasswordChangeSetting = async () => {
-        if (publicShareProp.passwordEnabled) {
-            await confirmDisablePublicUrlPassword();
+        if (publicURL.passwordEnabled) {
+            showMiniDialog({
+                title: t("disable_password"),
+                message: t("disable_password_message"),
+                continue: {
+                    text: t("disable"),
+                    color: "critical",
+                    action: () => onUpdate({ disablePassword: true }),
+                },
+            });
         } else {
             showSetPassword();
         }
-    };
-
-    const confirmDisablePublicUrlPassword = async () => {
-        showMiniDialog({
-            title: t("disable_password"),
-            message: t("disable_password_message"),
-            continue: {
-                text: t("disable"),
-                color: "critical",
-                action: () =>
-                    updatePublicShareURLHelper({
-                        collectionID: collection.id,
-                        disablePassword: true,
-                    }),
-            },
-        });
     };
 
     return (
         <>
             <RowSwitch
                 label={t("password_lock")}
-                checked={!!publicShareProp?.passwordEnabled}
+                checked={publicURL.passwordEnabled}
                 onClick={handlePasswordChangeSetting}
             />
             <SetPublicLinkPassword
                 {...setPasswordVisibilityProps}
-                collection={collection}
-                publicShareProp={publicShareProp}
-                updatePublicShareURLHelper={updatePublicShareURLHelper}
+                {...{ publicURL, onUpdate }}
             />
         </>
     );
 };
 
 type SetPublicLinkPasswordProps = ModalVisibilityProps &
-    ManageLinkPasswordProps;
+    ManagePublicLinkSettingProps;
 
 const SetPublicLinkPassword: React.FC<SetPublicLinkPasswordProps> = ({
     open,
     onClose,
-    collection,
-    publicShareProp,
-    updatePublicShareURLHelper,
+    publicURL,
+    onUpdate,
 }) => {
     const savePassword: SingleInputFormProps["onSubmit"] = async (password) => {
         await enablePublicUrlPassword(password);
-        publicShareProp.passwordEnabled = true;
+        publicURL.passwordEnabled = true;
         onClose();
         // The onClose above will close the dialog, but if we return immediately
         // from this function, then the dialog will be temporarily rendered
@@ -1646,8 +1601,7 @@ const SetPublicLinkPassword: React.FC<SetPublicLinkPasswordProps> = ({
 
     const enablePublicUrlPassword = async (password: string) => {
         const kek = await deriveInteractiveKey(password);
-        return updatePublicShareURLHelper({
-            collectionID: collection.id,
+        return onUpdate({
             passHash: kek.key,
             nonce: kek.salt,
             opsLimit: kek.opsLimit,

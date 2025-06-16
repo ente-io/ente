@@ -7,7 +7,6 @@ import HealthAndSafetyIcon from "@mui/icons-material/HealthAndSafety";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import NorthEastIcon from "@mui/icons-material/NorthEast";
-import ScienceIcon from "@mui/icons-material/Science";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import {
     Box,
@@ -31,13 +30,12 @@ import { LinkButton } from "ente-base/components/LinkButton";
 import {
     RowButton,
     RowButtonDivider,
+    RowButtonEndActivityIndicator,
     RowButtonGroup,
     RowButtonGroupHint,
-    RowButtonGroupTitle,
     RowSwitch,
 } from "ente-base/components/RowButton";
 import { SpacedRow } from "ente-base/components/containers";
-import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
 import { DialogCloseIconButton } from "ente-base/components/mui/DialogCloseIconButton";
 import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
 import {
@@ -581,7 +579,7 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({
                 label={t("export_data")}
                 endIcon={
                     exportService.isExportInProgress() && (
-                        <ActivityIndicator size="20px" />
+                        <RowButtonEndActivityIndicator />
                     )
                 }
                 onClick={handleExport}
@@ -805,18 +803,13 @@ const Preferences: React.FC<NestedSidebarDrawerVisibilityProps> = ({
                     onClick={showAdvancedSettings}
                 />
                 {isHLSGenerationSupported && (
-                    <Stack>
-                        <RowButtonGroupTitle icon={<ScienceIcon />}>
-                            {t("labs")}
-                        </RowButtonGroupTitle>
-                        <RowButtonGroup>
-                            <RowSwitch
-                                label={t("streamable_videos")}
-                                checked={isHLSGenerationEnabled}
-                                onClick={() => void toggleHLSGeneration()}
-                            />
-                        </RowButtonGroup>
-                    </Stack>
+                    <RowButtonGroup>
+                        <RowSwitch
+                            label={t("streamable_videos")}
+                            checked={isHLSGenerationEnabled}
+                            onClick={() => void toggleHLSGeneration()}
+                        />
+                    </RowButtonGroup>
                 )}
             </Stack>
             <MapSettings

@@ -7,19 +7,8 @@ import { z } from "zod/v4";
  * information attached.
  *
  * See {@link RemoteMagicMetadata} for the corresponding type.
- *
- * [Note: Schema suffix for exported Zod schemas]
- *
- * Since this module exports both the Zod schema and the TypeScript type, to
- * avoid confusion the schema is suffixed by "Schema".
- *
- * This is a general pattern we follow in all cases where we need to export the
- * Zod schema so other modules can compose schema definitions. Such exports are
- * meant to be exceptions though; usually the schema should be internal to the
- * module (and so can have the same name as the TypeScript type without the need
- * for a disambiguating suffix).
  */
-export const RemoteMagicMetadataSchema = z.object({
+export const RemoteMagicMetadata = z.object({
     version: z.number(),
     count: z.number(),
     data: z.string(),
@@ -37,11 +26,6 @@ export const RemoteMagicMetadataSchema = z.object({
  *
  * When decrypt these into specific local {@link MagicMetadata} instantiations
  * before using and storing them on the client.
- *
- * See {@link RemoteMagicMetadataSchema} for the corresponding Zod schema. The
- * same structure is used to store the metadata for various kinds of objects
- * (files, collections), so this module exports both the TypeScript type and
- * also the Zod schema so that other modules can compose schema definitions.
  */
 export interface RemoteMagicMetadata {
     /**
@@ -52,16 +36,28 @@ export interface RemoteMagicMetadata {
      */
     version: number;
     /**
-     * The number of keys with non-null (and non-undefined) values in the
-     * encrypted JSON object that the encrypted metadata blob contains.
+     * The number of keys with non-nullish (i.e. not null and not undefined)
+     * values in the encrypted JSON object that the encrypted metadata blob
+     * contains.
      *
-     * During edits and updates, this number should be greater than or equal to
-     * the previous version.
+     * [Note: Magic metadata data cannot have nullish values]
      *
-     * > Clients are expected to retain the magic metadata verbatim so that they
-     * > don't accidentally overwrite fields that they might not understand.
-     * >
-     * > See: [Note: Use looseObject for metadata Zod schemas]
+     * Clients are expected to retain the magic metadata verbatim so that they
+     * don't accidentally overwrite fields that they might not understand. See:
+     * [Note: Use looseObject for metadata Zod schemas]
+     *
+     * Remote enforces this by requiring that during edits and updates, this
+     * number should be greater than or equal to the previous version.
+     *
+     * Locally we enforce this in the {@link createMagicMetadata} function
+     * (which is used for both creation and updates), which trims off any
+     * entries in the data object whose value is `null` or `undefined` before
+     * arriving at the final object to use.
+     *
+     * This has the side effect that metadata entries cannot be deleted by
+     * setting their value to nullish. However usually the specific field
+     * semantics allow a reset to default behaviour by setting the value of the
+     * entry to the corresponding empty primitive (e.g. 0).
      */
     count: number;
     /**
@@ -150,7 +146,7 @@ export interface MagicMetadata<T = unknown> {
 export const encryptMagicMetadata = async (
     magicMetadata: MagicMetadata,
     key: string,
-): Promise<RemoteMagicMetadata | undefined> => {
+): Promise<RemoteMagicMetadata> => {
     const { version } = magicMetadata;
 
     const newMM = createMagicMetadata(magicMetadata.data);
@@ -167,11 +163,11 @@ export const encryptMagicMetadata = async (
  * envelope used for the various magic metadata fields.
  *
  * A trimmed JSON object is obtained from the provided JSON object by removing
- * any entries whose values is `undefined` or `null`.
+ * any entries whose values is nullish (`null` or `undefined`).
  *
  * Then,
  *
- * - The `version` is set to 0.
+ * - The `version` is set to provided value (or 1).
  * - The `count` is set to the number of entries in the trimmed JSON object.
  * - The `data` is set to the trimmed JSON object.
  *
@@ -182,18 +178,26 @@ export const encryptMagicMetadata = async (
  *
  * @param data A JSON object. Since TypeScript does not have a JSON type, this
  * uses the `unknown` type.
+ *
+ * @param version An optional version number to use. This is useful when
+ * updating existing magic metadata, where the version in the update that we
+ * send to remote must match the existing version.
+ *
+ * If not provided, the 1 is used as the version.
  */
-export const createMagicMetadata = (data: unknown) => {
-    // Discard any entries that are `undefined` or `null`.
+export const createMagicMetadata = (data: unknown, version?: number) => {
+    // Discard any entries that with nullish (`null` or `undefined`) values.
+    //
+    // See: [Note: Magic metadata data cannot have nullish values]
     const jsonObject = Object.fromEntries(
         Object.entries(data ?? {}).filter(
-            ([, v]) => v !== undefined && v !== null,
+            ([, v]) => v !== null && v !== undefined,
         ),
     );
 
     const count = Object.keys(jsonObject).length;
 
-    return { version: 0, count, data: jsonObject };
+    return { version: version ?? 1, count, data: jsonObject };
 };
 
 /**
@@ -206,7 +210,7 @@ export const createMagicMetadata = (data: unknown) => {
 export const decryptMagicMetadata = async (
     remoteMagicMetadata: RemoteMagicMetadata,
     key: string,
-): Promise<MagicMetadata | undefined> => {
+): Promise<MagicMetadata> => {
     const {
         version,
         count,

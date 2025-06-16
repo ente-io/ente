@@ -29,7 +29,7 @@ import {
     isArchivedCollection,
     isPinnedCollection,
 } from "ente-gallery/services/magic-metadata";
-import type { Collection } from "ente-media/collection";
+import { CollectionOrder, type Collection } from "ente-media/collection";
 import { ItemVisibility } from "ente-media/file-metadata";
 import {
     GalleryItemsHeaderAdapter,
@@ -134,7 +134,7 @@ const CollectionOptions: React.FC<CollectionHeaderProps> = ({
     const { showMiniDialog, onGenericError } = useBaseContext();
     const { showLoadingBar, hideLoadingBar } = usePhotosAppContext();
     const { syncWithRemote } = useContext(GalleryContext);
-    const overFlowMenuIconRef = useRef<SVGSVGElement>(null);
+    const overflowMenuIconRef = useRef<SVGSVGElement>(null);
 
     const { show: showSortOrderMenu, props: sortOrderMenuVisibilityProps } =
         useModalVisibility();
@@ -277,9 +277,13 @@ const CollectionOptions: React.FC<CollectionHeaderProps> = ({
         setActiveCollectionID(ALL_SECTION);
     });
 
-    const pinAlbum = wrap(() => changeCollectionOrder(activeCollection, 1));
+    const pinAlbum = wrap(() =>
+        changeCollectionOrder(activeCollection, CollectionOrder.pinned),
+    );
 
-    const unpinAlbum = wrap(() => changeCollectionOrder(activeCollection, 0));
+    const unpinAlbum = wrap(() =>
+        changeCollectionOrder(activeCollection, CollectionOrder.default),
+    );
 
     const hideAlbum = wrap(async () => {
         await changeCollectionVisibility(
@@ -506,13 +510,13 @@ const CollectionOptions: React.FC<CollectionHeaderProps> = ({
 
             <OverflowMenu
                 ariaID="collection-options"
-                triggerButtonIcon={<MoreHorizIcon ref={overFlowMenuIconRef} />}
+                triggerButtonIcon={<MoreHorizIcon ref={overflowMenuIconRef} />}
             >
                 {...menuOptions}
             </OverflowMenu>
             <CollectionSortOrderMenu
                 {...sortOrderMenuVisibilityProps}
-                overFlowMenuIconRef={overFlowMenuIconRef}
+                overflowMenuIconRef={overflowMenuIconRef}
                 onAscClick={changeSortOrderAsc}
                 onDescClick={changeSortOrderDesc}
             />
@@ -693,7 +697,7 @@ const DownloadOption: React.FC<
 interface CollectionSortOrderMenuProps {
     open: boolean;
     onClose: () => void;
-    overFlowMenuIconRef: React.RefObject<SVGSVGElement>;
+    overflowMenuIconRef: React.RefObject<SVGSVGElement>;
     onAscClick: () => void;
     onDescClick: () => void;
 }
@@ -701,24 +705,24 @@ interface CollectionSortOrderMenuProps {
 const CollectionSortOrderMenu: React.FC<CollectionSortOrderMenuProps> = ({
     open,
     onClose,
-    overFlowMenuIconRef,
+    overflowMenuIconRef,
     onAscClick,
     onDescClick,
 }) => {
     const handleAscClick = () => {
-        onClose();
         onAscClick();
+        onClose();
     };
 
     const handleDescClick = () => {
-        onClose();
         onDescClick();
+        onClose();
     };
 
     return (
         <Menu
             id="collection-files-sort"
-            anchorEl={overFlowMenuIconRef.current}
+            anchorEl={overflowMenuIconRef.current}
             open={open}
             onClose={onClose}
             slotProps={{

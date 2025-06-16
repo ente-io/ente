@@ -87,19 +87,6 @@ void main() async {
   }
 }
 
-// Future<void> whiteListLetsEncryptRootCA() async {
-//   try {
-//     // https://stackoverflow.com/a/71090239
-//     // https://github.com/ente-io/ente/issues/2178
-//     ByteData data =
-//         await PlatformAssetBundle().load('assets/ca/lets-encrypt-r3.pem');
-//     SecurityContext.defaultContext
-//         .setTrustedCertificatesBytes(data.buffer.asUint8List());
-//   } catch (e) {
-//     _logger.severe("Failed to whitelist Let's Encrypt Root CA", e);
-//   }
-// }
-
 Future<void> _runInForeground() async {
   final savedThemeMode = _themeMode(await AdaptiveTheme.getThemeMode());
   return await _runWithLogs(() async {
@@ -116,7 +103,7 @@ Future<void> _runInForeground() async {
       AppLock(
         builder: (args) => App(locale: locale),
         lockScreen: const LockScreen(),
-        enabled: await Configuration.instance.shouldShowLockScreen(),
+        enabled: await LockScreenSettings.instance.shouldShowLockScreen(),
         locale: locale,
         lightTheme: lightThemeData,
         darkTheme: darkThemeData,

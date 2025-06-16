@@ -89,7 +89,7 @@ export const FixCreationTime: React.FC<FixCreationTimeProps> = ({
                     pt: "6px",
                     display: "flex",
                     flexDirection: "column",
-                    ...(step == "running" ? { alignItems: "center" } : {}),
+                    ...(step == "running" && { alignItems: "center" }),
                 }}
             >
                 {message && <Typography>{message}</Typography>}

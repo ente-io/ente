@@ -208,7 +208,7 @@ const updateSnapshotIfNeeded = (
 export const isHLSGenerationSupported = isDesktop;
 
 /**
- * Initialize the video processing subsystem if the user has enabled HLS
+ * Initialize the video processing subsystem unless the user has disabled HLS
  * generation in settings.
  */
 export const initVideoProcessing = async () => {
@@ -224,8 +224,10 @@ export const initVideoProcessing = async () => {
 
 /**
  * Return the persisted user preference for HLS generation.
+ *
+ * If unset, defaults to `true`.
  */
-const savedGenerateHLS = () => getKVB("generateHLS");
+const savedGenerateHLS = async () => (await getKVB("generateHLS")) ?? true;
 
 /**
  * Update the persisted user preference for HLS generation.
@@ -519,10 +521,10 @@ const blobToDataURL = (blob: Blob) =>
  * an array.
  */
 const savedProcessedVideoFileIDs = () =>
-    // [Note: Avoiding zod parsing overhead for DB arrays]
+    // [Note: Avoiding Zod parsing overhead for DB arrays]
     //
     // Validating that the value we read from the DB is indeed the same as the
-    // type we expect can be done using zod, but for potentially very large
+    // type we expect can be done using Zod, but for potentially very large
     // arrays, this has an overhead that is perhaps not justified when dealing
     // with DB entries we ourselves wrote.
     //
@@ -538,7 +540,7 @@ const savedProcessedVideoFileIDs = () =>
  * @see also {@link savedProcessedVideoFileIDs}.
  */
 const savedFailedVideoFileIDs = () =>
-    // See: [Note: Avoiding zod parsing overhead for DB arrays]
+    // See: [Note: Avoiding Zod parsing overhead for DB arrays]
     getKV("videoPreviewFailedFileIDs").then((v) => new Set(v as number[]));
 
 /**
