@@ -1212,8 +1212,6 @@ class CollectionsService {
     BuildContext context,
     int collectionID,
   ) async {
-    final authToken = await getSharedPublicAlbumToken(collectionID);
-    final jwtToken = await getSharedPublicAlbumTokenJWT(collectionID);
     final key = await getSharedPublicAlbumKey(collectionID);
     if (key.isEmpty) {
       throw Exception("Collection key not found");
@@ -1231,10 +1229,7 @@ class CollectionsService {
         "encryptedKey": CryptoUtil.bin2base64(encryptedKey),
       },
       options: Options(
-        headers: {
-          "X-Auth-Access-Token": authToken,
-          "X-Auth-Access-Token-JWT": jwtToken,
-        },
+        headers: publicCollectionHeaders(collectionID),
       ),
     );
   }
@@ -1249,13 +1244,6 @@ class CollectionsService {
   Future<String?> getSharedPublicAlbumToken(int collectionID) async {
     if (_cachedPublicAlbumToken.containsKey(collectionID)) {
       return _cachedPublicAlbumToken[collectionID];
-    }
-    return null;
-  }
-
-  Future<String?> getSharedPublicAlbumTokenJWT(int collectionID) async {
-    if (_cachedPublicAlbumJWT.containsKey(collectionID)) {
-      return _cachedPublicAlbumJWT[collectionID];
     }
     return null;
   }
