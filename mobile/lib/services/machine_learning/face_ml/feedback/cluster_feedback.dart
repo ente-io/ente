@@ -266,6 +266,99 @@ class ClusterFeedbackService<T> {
     return;
   }
 
+  Future<List<ClusterSuggestion>> getFastSuggestionForPerson(
+    PersonEntity person,
+  ) async {
+    _logger.info(
+      'getFastSuggestionForPerson ${kDebugMode ? person.data.name : person.remoteID}',
+    );
+
+    // Get the biggest cluster, to be used for quick suggestion calculation
+    final List<ClusterInfo> clusters = person.data.assigned;
+    final ClusterInfo biggestPersonCluster =
+        clusters.reduce((a, b) => a.faces.length > b.faces.length ? a : b);
+
+    try {
+      // Get the suggestions for the person quick check with biggest cluster and centroid
+      final allClusterIdsToCountMap = (await mlDataDB.clusterIdToFaceCount());
+      final ignoredClusters =
+          await mlDataDB.getPersonIgnoredClusters(person.remoteID);
+      final EnteWatch watch = EnteWatch("ClusterFeedbackService")..start();
+      final Map<String, Vector> clusterAvg = await _getUpdateClusterAvg(
+        allClusterIdsToCountMap,
+        ignoredClusters,
+        minClusterSize: kMinimumClusterSizeSearchResult,
+      );
+      watch.log('computed avg for ${clusterAvg.length} clusters');
+
+      // Find the actual closest clusters for the person
+      final List<(String, double)> foundSuggestions =
+          await calcSuggestionsMeanInComputer(
+        clusterAvg,
+        {biggestPersonCluster.id},
+        ignoredClusters,
+        0.24,
+      );
+      final findSuggestionsTime = DateTime.now();
+      watch.log('computed suggestions for ${foundSuggestions.length} clusters');
+
+      // Get the files for the suggestions
+      final suggestionClusterIDs = foundSuggestions.map((e) => e.$1).toSet();
+      final Map<int, Set<String>> fileIdToClusterID =
+          await mlDataDB.getFileIdToClusterIDSetForCluster(
+        suggestionClusterIDs,
+      );
+      final clusterIdToFaceIDs =
+          await mlDataDB.getClusterToFaceIDs(suggestionClusterIDs);
+      final Map<String, List<EnteFile>> clusterIDToFiles = {};
+      final allFiles = await SearchService.instance.getAllFilesForSearch();
+      for (final f in allFiles) {
+        if (!fileIdToClusterID.containsKey(f.uploadedFileID ?? -1)) {
+          continue;
+        }
+        final cluserIds = fileIdToClusterID[f.uploadedFileID ?? -1]!;
+        for (final cluster in cluserIds) {
+          if (clusterIDToFiles.containsKey(cluster)) {
+            clusterIDToFiles[cluster]!.add(f);
+          } else {
+            clusterIDToFiles[cluster] = [f];
+          }
+        }
+      }
+
+      final List<ClusterSuggestion> finalSuggestions = [];
+      for (final clusterSuggestion in foundSuggestions) {
+        if (clusterIDToFiles.containsKey(clusterSuggestion.$1)) {
+          finalSuggestions.add(
+            ClusterSuggestion(
+              clusterSuggestion.$1,
+              clusterSuggestion.$2,
+              true,
+              clusterIDToFiles[clusterSuggestion.$1]!,
+              clusterIdToFaceIDs[clusterSuggestion.$1]!.toList(),
+            ),
+          );
+        }
+      }
+      final getFilesTime = DateTime.now();
+
+      final sortingStartTime = DateTime.now();
+      try {
+        await _sortSuggestionsOnDistanceToPerson(person, finalSuggestions);
+      } catch (e, s) {
+        _logger.severe("Error in sorting suggestions", e, s);
+      }
+      _logger.info(
+        'getFastSuggestionForPerson post-processing suggestions took ${DateTime.now().difference(findSuggestionsTime).inMilliseconds} ms, of which sorting took ${DateTime.now().difference(sortingStartTime).inMilliseconds} ms and getting files took ${getFilesTime.difference(findSuggestionsTime).inMilliseconds} ms',
+      );
+
+      return finalSuggestions;
+    } catch (e, s) {
+      _logger.severe("Error in getClusterFilesForPersonID", e, s);
+      rethrow;
+    }
+  }
+
   Future<bool> checkAndDoAutomaticMerges(
     PersonEntity p, {
     required String personClusterID,
