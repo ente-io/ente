@@ -129,9 +129,6 @@ PODS:
   - libwebp/sharpyuv (1.5.0)
   - libwebp/webp (1.5.0):
     - libwebp/sharpyuv
-  - local_auth_darwin (0.0.1):
-    - Flutter
-    - FlutterMacOS
   - local_auth_ios (0.0.1):
     - Flutter
   - Mantle (2.2.0):
@@ -273,7 +270,6 @@ DEPENDENCIES:
   - in_app_purchase_storekit (from `.symlinks/plugins/in_app_purchase_storekit/darwin`)
   - integration_test (from `.symlinks/plugins/integration_test/ios`)
   - launcher_icon_switcher (from `.symlinks/plugins/launcher_icon_switcher/ios`)
-  - local_auth_darwin (from `.symlinks/plugins/local_auth_darwin/darwin`)
   - local_auth_ios (from `.symlinks/plugins/local_auth_ios/ios`)
   - maps_launcher (from `.symlinks/plugins/maps_launcher/ios`)
   - media_extension (from `.symlinks/plugins/media_extension/ios`)
@@ -307,7 +303,7 @@ DEPENDENCIES:
   - wakelock_plus (from `.symlinks/plugins/wakelock_plus/ios`)
 
 SPEC REPOS:
-  https://github.com/ente-io/ffmpeg-kit-custom-repo-ios.git:
+  https://github.com/ente-io/ffmpeg-kit-custom-repo-ios:
     - ffmpeg_kit_custom
   trunk:
     - Firebase
@@ -382,8 +378,6 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/integration_test/ios"
   launcher_icon_switcher:
     :path: ".symlinks/plugins/launcher_icon_switcher/ios"
-  local_auth_darwin:
-    :path: ".symlinks/plugins/local_auth_darwin/darwin"
   local_auth_ios:
     :path: ".symlinks/plugins/local_auth_ios/ios"
   maps_launcher:
@@ -483,23 +477,22 @@ SPEC CHECKSUMS:
   integration_test: 4a889634ef21a45d28d50d622cf412dc6d9f586e
   launcher_icon_switcher: 84c218d233505aa7d8655d8fa61a3ba802c022da
   libwebp: 02b23773aedb6ff1fd38cec7a77b81414c6842a8
-  local_auth_darwin: 66e40372f1c29f383a314c738c7446e2f7fdadc3
-  local_auth_ios: 5046a18c018dd973247a0564496c8898dbb5adf9
+  local_auth_ios: f7a1841beef3151d140a967c2e46f30637cdf451
   Mantle: c5aa8794a29a022dfbbfc9799af95f477a69b62d
-  maps_launcher: 2e5b6a2d664ec6c27f82ffa81b74228d770ab203
-  media_extension: 6618f07abd762cdbfaadf1b0c56a287e820f0c84
-  media_kit_libs_ios_video: a5fe24bc7875ccd6378a0978c13185e1344651c1
-  media_kit_video: 5da63f157170e5bf303bf85453b7ef6971218a2e
-  motion_sensors: 03f55b7c637a7e365a0b5f9697a449f9059d5d91
-  motionphoto: 8b65ce50c7d7ff3c767534fc3768b2eed9ac24e4
-  move_to_background: cd3091014529ec7829e342ad2d75c0a11f4378a5
+  maps_launcher: edf829809ba9e894d70e569bab11c16352dedb45
+  media_extension: 671e2567880d96c95c65c9a82ccceed8f2e309fd
+  media_kit_libs_ios_video: 5a18affdb97d1f5d466dc79988b13eff6c5e2854
+  media_kit_video: 1746e198cb697d1ffb734b1d05ec429d1fcd1474
+  motion_sensors: 741e702c17467b9569a92165dda8d4d88c6167f1
+  motionphoto: 23e2aeb5c6380112f69468d71f970fa7438e5ed1
+  move_to_background: 7e3467dd2a1d1013e98c9c1cb93fd53cd7ef9d84
   nanopb: fad817b59e0457d11a5dfbde799381cd727c1275
   native_video_player: 6809dec117e8997161dbfb42a6f90d6df71a504d
   objective_c: 89e720c30d716b036faf9c9684022048eee1eee2
   onnxruntime: f9b296392c96c42882be020a59dbeac6310d81b2
   onnxruntime-c: a909204639a1f035f575127ac406f781ac797c9c
   onnxruntime-objc: b6fab0f1787aa6f7190c2013f03037df4718bd8b
-  open_mail_app: 70273c53f768beefdafbe310c3d9086e4da3cb02
+  open_mail_app: 7314a609e88eed22d53671279e189af7a0ab0f11
   OrderedSet: e539b66b644ff081c73a262d24ad552a69be3a94
   package_info_plus: af8e2ca6888548050f16fa2f1938db7b5a5df499
   path_provider_foundation: 080d55be775b7414fd5a5ef3ac137b97b097e564
@@ -507,7 +500,7 @@ SPEC CHECKSUMS:
   photo_manager: 1d80ae07a89a67dfbcae95953a1e5a24af7c3e62
   privacy_screen: 3159a541f5d3a31bea916cfd4e58f9dc722b3fd4
   PromisesObjC: f5707f49cb48b9636751c5b2e7d227e43fba9f47
-  receive_sharing_intent: 79c848f5b045674ad60b9fea3bafea59962ad2c1
+  receive_sharing_intent: 222384f00ffe7e952bbfabaa9e3967cb87e5fe00
   SDWebImage: f84b0feeb08d2d11e6a9b843cb06d75ebf5b8868
   SDWebImageWebPCoder: e38c0a70396191361d60c092933e22c20d5b1380
   Sentry: da60d980b197a46db0b35ea12cb8f39af48d8854
