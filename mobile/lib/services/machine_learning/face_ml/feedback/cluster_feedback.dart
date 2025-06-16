@@ -57,7 +57,7 @@ class ClusterFeedbackService<T> {
   /// 1. clusterID: the ID of the cluster
   /// 2. distance: the distance between the person's cluster and the suggestion
   /// 3. bool: whether the suggestion was found using the mean (true) or the median (false)
-  /// 4. List<EnteFile>: the files in the cluster
+  /// 4. `List<EnteFile>`: the files in the cluster
   Future<List<ClusterSuggestion>> getSuggestionForPerson(
     PersonEntity person, {
     bool extremeFilesFirst = true,

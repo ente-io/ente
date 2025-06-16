@@ -64,7 +64,7 @@ const isDesktop = process.env._ENTE_IS_DESKTOP ? "1" : "";
 
 /**
  * When we're running within the desktop app, also extract the version of the
- * desktop app for use in our "X-Client-Package" string.
+ * desktop app for use in our "X-Client-Version" string.
  *
  * > The web app has continuous deployments, and doesn't have versions.
  */
@@ -116,9 +116,8 @@ const nextConfig = {
     // Ask Next to use a separate dist directory for the desktop during
     // development. This allows us run dev servers simultaneously for both web
     // and desktop code without them stepping on each others toes.
-    ...(process.env.NODE_ENV != "production" && isDesktop
-        ? { distDir: ".next-desktop" }
-        : {}),
+    ...(process.env.NODE_ENV != "production" &&
+        isDesktop && { distDir: ".next-desktop" }),
 
     // Customize the webpack configuration used by Next.js.
     webpack: (config, { isServer }) => {

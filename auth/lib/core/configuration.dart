@@ -14,7 +14,6 @@ import 'package:ente_auth/models/key_gen_result.dart';
 import 'package:ente_auth/models/private_key_attributes.dart';
 import 'package:ente_auth/store/authenticator_db.dart';
 import 'package:ente_auth/utils/directory_utils.dart';
-import 'package:ente_auth/utils/lock_screen_settings.dart';
 import 'package:ente_crypto_dart/ente_crypto_dart.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:logging/logging.dart';
@@ -33,7 +32,6 @@ class Configuration {
   static const emailKey = "email";
   static const keyAttributesKey = "key_attributes";
 
-  static const keyShouldShowLockScreen = "should_show_lock_screen";
   static const lastTempFolderClearTimeKey = "last_temp_folder_clear_time";
   static const keyKey = "key";
   static const secretKeyKey = "secret_key";
@@ -133,7 +131,6 @@ class Configuration {
         key: key,
       );
     }
-    await LockScreenSettings.instance.removePinAndPassword();
     await AuthenticatorDB.instance.clearTable();
     _key = null;
     _cachedToken = null;
@@ -466,24 +463,6 @@ class Configuration {
       );
     }
     await _preferences.setBool(hasOptedForOfflineModeKey, true);
-  }
-
-  Future<bool> shouldShowLockScreen() async {
-    final bool isPin = await LockScreenSettings.instance.isPinSet();
-    final bool isPass = await LockScreenSettings.instance.isPasswordSet();
-    return isPin || isPass || shouldShowSystemLockScreen();
-  }
-
-  bool shouldShowSystemLockScreen() {
-    if (_preferences.containsKey(keyShouldShowLockScreen)) {
-      return _preferences.getBool(keyShouldShowLockScreen)!;
-    } else {
-      return false;
-    }
-  }
-
-  Future<void> setSystemLockScreen(bool value) {
-    return _preferences.setBool(keyShouldShowLockScreen, value);
   }
 
   void setVolatilePassword(String volatilePassword) {

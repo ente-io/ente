@@ -2,6 +2,12 @@ import { Link, Stack, Typography } from "@mui/material";
 import { TitledMiniDialog } from "ente-base/components/MiniDialog";
 import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
 import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
+import {
+    SingleInputForm,
+    type SingleInputFormProps,
+} from "ente-base/components/SingleInputForm";
+import type { ModalVisibilityProps } from "ente-base/components/utils/modal";
+import { ut } from "ente-base/i18n";
 import log from "ente-base/log";
 import type { Collection } from "ente-media/collection";
 import { useSettingsSnapshot } from "ente-new/photos/components/utils/use-snapshot";
@@ -11,26 +17,50 @@ import {
     unknownDeviceCodeErrorMessage,
 } from "ente-new/photos/services/cast";
 import { loadCast } from "ente-new/photos/utils/chromecast-sender";
-import SingleInputForm, {
-    type SingleInputFormProps,
-} from "ente-shared/components/SingleInputForm";
 import { t } from "i18next";
-import { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Trans } from "react-i18next";
 
-interface AlbumCastDialogProps {
-    /** If `true`, the dialog is shown. */
-    open: boolean;
-    /** Callback fired when the dialog wants to be closed. */
-    onClose: () => void;
+type AlbumCastDialogProps = ModalVisibilityProps & {
     /** The collection that we want to cast. */
     collection: Collection;
-}
+};
 
 /**
  * A dialog that shows various options that the user has for casting an album.
  */
 export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
+    open,
+    onClose,
+    collection,
+}) => (
+    <TitledMiniDialog {...{ open, onClose }} title={t("cast_album_to_tv")}>
+        <AlbumCastDialogContents {...{ open, onClose, collection }} />
+    </TitledMiniDialog>
+);
+
+/**
+ * [Note: MUI dialog state reset]
+ *
+ * Keep the dialog contents in a separate component so that they get rendered
+ * afresh when the dialog is unmounted and then shown again.
+ *
+ * Details:
+ *
+ * Any state we keep inside the React component that a MUI Dialog as a child
+ * gets retained across visibility changes. For example, if the
+ * {@link AlbumCastDialogContents} were inlined into {@link AlbumCastDialog},
+ * then if we were to open the dialog, switch over to the "pin" view, then close
+ * the dialog by clicking on the backdrop, and then reopen it again, then we'd
+ * still remain on the "pin" view.
+ *
+ * This behaviour might be desirable or undesirable, depending on the
+ * circumstance. If it is undesirable, there are multiple approaches:
+ * https://github.com/mui/material-ui/issues/16325
+ *
+ * One of those is to keep the dialog contents in a separate component.
+ */
+export const AlbumCastDialogContents: React.FC<AlbumCastDialogProps> = ({
     open,
     onClose,
     collection,
@@ -56,25 +86,25 @@ export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
         setBrowserCanCast(typeof window["chrome"] != "undefined");
     }, []);
 
-    const onSubmit: SingleInputFormProps["callback"] = async (
-        value,
-        setFieldError,
-    ) => {
-        try {
-            await publishCastPayload(value.trim(), collection);
-            onClose();
-        } catch (e) {
-            log.error("Failed to cast", e);
-            if (
-                e instanceof Error &&
-                e.message == unknownDeviceCodeErrorMessage
-            ) {
-                setFieldError(t("tv_not_found"));
-            } else {
-                setFieldError(t("generic_error_retry"));
+    const onSubmit: SingleInputFormProps["onSubmit"] = useCallback(
+        async (value, setFieldError) => {
+            try {
+                await publishCastPayload(value.trim(), collection);
+                onClose();
+            } catch (e) {
+                log.error("Failed to cast", e);
+                if (
+                    e instanceof Error &&
+                    e.message == unknownDeviceCodeErrorMessage
+                ) {
+                    setFieldError(t("tv_not_found"));
+                } else {
+                    throw e;
+                }
             }
-        }
-    };
+        },
+        [onClose, collection],
+    );
 
     useEffect(() => {
         if (view == "auto") {
@@ -129,7 +159,7 @@ export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
     }, [open]);
 
     return (
-        <TitledMiniDialog {...{ open, onClose }} title={t("cast_album_to_tv")}>
+        <>
             {view == "choose" && (
                 <Stack sx={{ py: 1, gap: 4 }}>
                     {browserCanCast && (
@@ -195,22 +225,21 @@ export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
                         </Typography>
                     </Stack>
                     <SingleInputForm
-                        callback={onSubmit}
-                        fieldType="text"
-                        realLabel={t("code")}
-                        realPlaceholder={"123456"}
-                        buttonText={t("pair_device_to_tv")}
-                        submitButtonProps={{ sx: { mt: 1, mb: 2 } }}
+                        label={t("code")}
+                        placeholder={ut("123456")}
+                        submitButtonTitle={t("pair_device_to_tv")}
+                        onSubmit={onSubmit}
                     />
                     <FocusVisibleButton
                         variant="text"
                         fullWidth
                         onClick={() => setView("choose")}
+                        sx={{ mt: 1 }}
                     >
                         {t("go_back")}
                     </FocusVisibleButton>
                 </>
             )}
-        </TitledMiniDialog>
+        </>
     );
 };

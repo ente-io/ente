@@ -10,7 +10,6 @@ import NorthEastIcon from "@mui/icons-material/NorthEast";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import {
     Box,
-    Button,
     Dialog,
     DialogContent,
     Divider,
@@ -31,17 +30,17 @@ import { LinkButton } from "ente-base/components/LinkButton";
 import {
     RowButton,
     RowButtonDivider,
+    RowButtonEndActivityIndicator,
     RowButtonGroup,
     RowButtonGroupHint,
     RowSwitch,
 } from "ente-base/components/RowButton";
 import { SpacedRow } from "ente-base/components/containers";
-import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
 import { DialogCloseIconButton } from "ente-base/components/mui/DialogCloseIconButton";
+import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
 import {
-    NestedSidebarDrawer,
     SidebarDrawer,
-    SidebarDrawerTitlebar,
+    TitledNestedSidebarDrawer,
     type NestedSidebarDrawerVisibilityProps,
 } from "ente-base/components/mui/SidebarDrawer";
 import { useIsSmallWidth } from "ente-base/components/utils/hooks";
@@ -61,6 +60,10 @@ import log from "ente-base/log";
 import { savedLogs } from "ente-base/log-web";
 import { customAPIHost } from "ente-base/origins";
 import { downloadString } from "ente-base/utils/web";
+import {
+    isHLSGenerationSupported,
+    toggleHLSGeneration,
+} from "ente-gallery/services/video";
 import { DeleteAccount } from "ente-new/photos/components/DeleteAccount";
 import { DropdownInput } from "ente-new/photos/components/DropdownInput";
 import { MLSettings } from "ente-new/photos/components/sidebar/MLSettings";
@@ -71,6 +74,7 @@ import {
 } from "ente-new/photos/components/utils/dialog";
 import { downloadAppDialogAttributes } from "ente-new/photos/components/utils/download";
 import {
+    useHLSGenerationStatusSnapshot,
     useSettingsSnapshot,
     useUserDetailsSnapshot,
 } from "ente-new/photos/components/utils/use-snapshot";
@@ -80,6 +84,7 @@ import {
     TRASH_SECTION,
 } from "ente-new/photos/services/collection";
 import type { CollectionSummaries } from "ente-new/photos/services/collection/ui";
+import exportService from "ente-new/photos/services/export";
 import { isMLSupported } from "ente-new/photos/services/ml";
 import {
     isDevBuildAndUser,
@@ -106,10 +111,6 @@ import {
 } from "ente-new/photos/services/user-details";
 import { usePhotosAppContext } from "ente-new/photos/types/context";
 import { initiateEmail, openURL } from "ente-new/photos/utils/web";
-import {
-    FlexWrapper,
-    VerticallyCentered,
-} from "ente-shared/components/Container";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { GalleryContext } from "pages/gallery";
@@ -123,7 +124,6 @@ import React, {
 } from "react";
 import { Trans } from "react-i18next";
 import { getUncategorizedCollection } from "services/collectionService";
-import exportService from "services/export";
 import { testUpload } from "../../tests/upload.test";
 import { SubscriptionCard } from "./SubscriptionCard";
 
@@ -211,13 +211,10 @@ const UserDetailsSection: React.FC<UserDetailsSectionProps> = ({
     onShowPlanSelector,
 }) => {
     const userDetails = useUserDetailsSnapshot();
-    const [memberSubscriptionManageView, setMemberSubscriptionManageView] =
-        useState(false);
-
-    const openMemberSubscriptionManage = () =>
-        setMemberSubscriptionManageView(true);
-    const closeMemberSubscriptionManage = () =>
-        setMemberSubscriptionManageView(false);
+    const {
+        show: showManageMemberSubscription,
+        props: manageMemberSubscriptionVisibilityProps,
+    } = useModalVisibility();
 
     useEffect(() => {
         if (sidebarOpen) void syncUserDetails();
@@ -233,7 +230,7 @@ const UserDetailsSection: React.FC<UserDetailsSectionProps> = ({
 
     const handleSubscriptionCardClick = () => {
         if (isNonAdminFamilyMember) {
-            openMemberSubscriptionManage();
+            showManageMemberSubscription();
         } else {
             if (
                 userDetails &&
@@ -268,11 +265,10 @@ const UserDetailsSection: React.FC<UserDetailsSectionProps> = ({
                     />
                 )}
             </Box>
-            {isNonAdminFamilyMember && (
-                <MemberSubscriptionManage
-                    userDetails={userDetails}
-                    open={memberSubscriptionManageView}
-                    onClose={closeMemberSubscriptionManage}
+            {isNonAdminFamilyMember && userDetails && (
+                <ManageMemberSubscription
+                    {...manageMemberSubscriptionVisibilityProps}
+                    {...{ userDetails }}
                 />
             )}
         </>
@@ -372,7 +368,15 @@ const SubscriptionStatus: React.FC<SubscriptionStatusProps> = ({
     );
 };
 
-function MemberSubscriptionManage({ open, userDetails, onClose }) {
+type ManageMemberSubscriptionProps = ModalVisibilityProps & {
+    userDetails: UserDetails;
+};
+
+const ManageMemberSubscription: React.FC<ManageMemberSubscriptionProps> = ({
+    open,
+    onClose,
+    userDetails,
+}) => {
     const { showMiniDialog } = useBaseContext();
     const fullScreen = useIsSmallWidth();
 
@@ -387,10 +391,6 @@ function MemberSubscriptionManage({ open, userDetails, onClose }) {
             },
         });
 
-    if (!userDetails) {
-        return <></>;
-    }
-
     return (
         <Dialog {...{ open, onClose, fullScreen }} maxWidth="xs" fullWidth>
             <SpacedRow sx={{ p: "20px 8px 12px 16px" }}>
@@ -403,7 +403,7 @@ function MemberSubscriptionManage({ open, userDetails, onClose }) {
                 <DialogCloseIconButton {...{ onClose }} />
             </SpacedRow>
             <DialogContent>
-                <VerticallyCentered>
+                <Stack sx={{ alignItems: "center", mx: 2 }}>
                     <Box sx={{ mb: 4 }}>
                         <Typography sx={{ color: "text.muted" }}>
                             {t("subscription_info_family")}
@@ -412,27 +412,24 @@ function MemberSubscriptionManage({ open, userDetails, onClose }) {
                             {familyAdminEmail(userDetails) ?? ""}
                         </Typography>
                     </Box>
-
                     <img
                         height={256}
                         src="/images/family-plan/1x.png"
                         srcSet="/images/family-plan/2x.png 2x, /images/family-plan/3x.png 3x"
                     />
-                    <FlexWrapper px={2}>
-                        <Button
-                            fullWidth
-                            variant="outlined"
-                            color="critical"
-                            onClick={confirmLeaveFamily}
-                        >
-                            {t("leave_family_plan")}
-                        </Button>
-                    </FlexWrapper>
-                </VerticallyCentered>
+                    <FocusVisibleButton
+                        fullWidth
+                        variant="outlined"
+                        color="critical"
+                        onClick={confirmLeaveFamily}
+                    >
+                        {t("leave_family_plan")}
+                    </FocusVisibleButton>
+                </Stack>
             </DialogContent>
         </Dialog>
     );
-}
+};
 
 type ShortcutSectionProps = SectionProps & {
     collectionSummaries: SidebarProps["collectionSummaries"];
@@ -582,7 +579,7 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({
                 label={t("export_data")}
                 endIcon={
                     exportService.isExportInProgress() && (
-                        <ActivityIndicator size="20px" />
+                        <RowButtonEndActivityIndicator />
                     )
                 }
                 onClick={handleExport}
@@ -658,6 +655,7 @@ const InfoSection: React.FC = () => {
 
 type AccountProps = NestedSidebarDrawerVisibilityProps &
     Pick<SidebarProps, "onAuthenticateUser">;
+
 const Account: React.FC<AccountProps> = ({
     open,
     onClose,
@@ -689,55 +687,49 @@ const Account: React.FC<AccountProps> = ({
     };
 
     return (
-        <NestedSidebarDrawer {...{ open, onClose }} onRootClose={onRootClose}>
-            <Stack sx={{ gap: "4px", py: "12px" }}>
-                <SidebarDrawerTitlebar
-                    onClose={onClose}
-                    title={t("account")}
-                    onRootClose={handleRootClose}
-                />
-                <Stack sx={{ px: "16px", py: "8px", gap: "24px" }}>
-                    <RowButtonGroup>
-                        <RowButton
-                            endIcon={
-                                <HealthAndSafetyIcon
-                                    sx={{ color: "accent.main" }}
-                                />
-                            }
-                            label={t("recovery_key")}
-                            onClick={showRecoveryKey}
-                        />
-                    </RowButtonGroup>
-                    <RowButtonGroup>
-                        <RowButton
-                            label={t("two_factor")}
-                            onClick={showTwoFactor}
-                        />
-                        <RowButtonDivider />
-                        <RowButton
-                            label={t("passkeys")}
-                            onClick={handlePasskeys}
-                        />
-                    </RowButtonGroup>
-                    <RowButtonGroup>
-                        <RowButton
-                            label={t("change_password")}
-                            onClick={handleChangePassword}
-                        />
-                        <RowButtonDivider />
-                        <RowButton
-                            label={t("change_email")}
-                            onClick={handleChangeEmail}
-                        />
-                    </RowButtonGroup>
-                    <RowButtonGroup>
-                        <RowButton
-                            color="critical"
-                            label={t("delete_account")}
-                            onClick={showDeleteAccount}
-                        />
-                    </RowButtonGroup>
-                </Stack>
+        <TitledNestedSidebarDrawer
+            {...{ open, onClose }}
+            onRootClose={handleRootClose}
+            title={t("account")}
+        >
+            <Stack sx={{ px: 2, py: 1, gap: 3 }}>
+                <RowButtonGroup>
+                    <RowButton
+                        endIcon={
+                            <HealthAndSafetyIcon
+                                sx={{ color: "accent.main" }}
+                            />
+                        }
+                        label={t("recovery_key")}
+                        onClick={showRecoveryKey}
+                    />
+                </RowButtonGroup>
+                <RowButtonGroup>
+                    <RowButton
+                        label={t("two_factor")}
+                        onClick={showTwoFactor}
+                    />
+                    <RowButtonDivider />
+                    <RowButton label={t("passkeys")} onClick={handlePasskeys} />
+                </RowButtonGroup>
+                <RowButtonGroup>
+                    <RowButton
+                        label={t("change_password")}
+                        onClick={handleChangePassword}
+                    />
+                    <RowButtonDivider />
+                    <RowButton
+                        label={t("change_email")}
+                        onClick={handleChangeEmail}
+                    />
+                </RowButtonGroup>
+                <RowButtonGroup>
+                    <RowButton
+                        color="critical"
+                        label={t("delete_account")}
+                        onClick={showDeleteAccount}
+                    />
+                </RowButtonGroup>
             </Stack>
             <RecoveryKey
                 {...recoveryKeyVisibilityProps}
@@ -751,7 +743,7 @@ const Account: React.FC<AccountProps> = ({
                 {...deleteAccountVisibilityProps}
                 {...{ onAuthenticateUser }}
             />
-        </NestedSidebarDrawer>
+        </TitledNestedSidebarDrawer>
     );
 };
 
@@ -769,6 +761,9 @@ const Preferences: React.FC<NestedSidebarDrawerVisibilityProps> = ({
     const { show: showMLSettings, props: mlSettingsVisibilityProps } =
         useModalVisibility();
 
+    const hlsGenStatusSnapshot = useHLSGenerationStatusSnapshot();
+    const isHLSGenerationEnabled = !!hlsGenStatusSnapshot?.enabled;
+
     useEffect(() => {
         if (open) void syncSettings();
     }, [open]);
@@ -779,37 +774,43 @@ const Preferences: React.FC<NestedSidebarDrawerVisibilityProps> = ({
     };
 
     return (
-        <NestedSidebarDrawer {...{ open, onClose }} onRootClose={onRootClose}>
-            <Stack sx={{ gap: "4px", py: "12px" }}>
-                <SidebarDrawerTitlebar
-                    onClose={onClose}
-                    title={t("preferences")}
-                    onRootClose={handleRootClose}
+        <TitledNestedSidebarDrawer
+            {...{ open, onClose }}
+            onRootClose={handleRootClose}
+            title={t("preferences")}
+        >
+            <Stack sx={{ px: 2, py: 1, gap: 3 }}>
+                <LanguageSelector />
+                <ThemeSelector />
+                <Divider sx={{ my: "2px", opacity: 0.1 }} />
+                {isMLSupported && (
+                    <RowButtonGroup>
+                        <RowButton
+                            endIcon={<ChevronRightIcon />}
+                            label={t("ml_search")}
+                            onClick={showMLSettings}
+                        />
+                    </RowButtonGroup>
+                )}
+                <RowButton
+                    endIcon={<ChevronRightIcon />}
+                    label={t("map")}
+                    onClick={showMapSettings}
                 />
-                <Stack sx={{ px: "16px", py: "8px", gap: "24px" }}>
-                    <LanguageSelector />
-                    <ThemeSelector />
-                    <Divider sx={{ my: "2px", opacity: 0.1 }} />
-                    {isMLSupported && (
-                        <RowButtonGroup>
-                            <RowButton
-                                endIcon={<ChevronRightIcon />}
-                                label={t("ml_search")}
-                                onClick={showMLSettings}
-                            />
-                        </RowButtonGroup>
-                    )}
-                    <RowButton
-                        endIcon={<ChevronRightIcon />}
-                        label={t("map")}
-                        onClick={showMapSettings}
-                    />
-                    <RowButton
-                        endIcon={<ChevronRightIcon />}
-                        label={t("advanced")}
-                        onClick={showAdvancedSettings}
-                    />
-                </Stack>
+                <RowButton
+                    endIcon={<ChevronRightIcon />}
+                    label={t("advanced")}
+                    onClick={showAdvancedSettings}
+                />
+                {isHLSGenerationSupported && (
+                    <RowButtonGroup>
+                        <RowSwitch
+                            label={t("streamable_videos")}
+                            checked={isHLSGenerationEnabled}
+                            onClick={() => void toggleHLSGeneration()}
+                        />
+                    </RowButtonGroup>
+                )}
             </Stack>
             <MapSettings
                 {...mapSettingsVisibilityProps}
@@ -823,7 +824,7 @@ const Preferences: React.FC<NestedSidebarDrawerVisibilityProps> = ({
                 {...mlSettingsVisibilityProps}
                 onRootClose={handleRootClose}
             />
-        </NestedSidebarDrawer>
+        </TitledNestedSidebarDrawer>
     );
 };
 
@@ -899,6 +900,8 @@ const localeName = (locale: SupportedLocale) => {
             return "日本語";
         case "ar-SA":
             return "اَلْعَرَبِيَّةُ";
+        case "tr-TR":
+            return "Türkçe";
     }
 };
 
@@ -955,28 +958,21 @@ const MapSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
     };
 
     return (
-        <NestedSidebarDrawer
+        <TitledNestedSidebarDrawer
             {...{ open, onClose }}
             onRootClose={handleRootClose}
+            title={t("map")}
         >
-            <Stack sx={{ gap: "4px", py: "12px" }}>
-                <SidebarDrawerTitlebar
-                    onClose={onClose}
-                    onRootClose={handleRootClose}
-                    title={t("map")}
-                />
-
-                <Stack sx={{ px: "16px", py: "20px" }}>
-                    <RowButtonGroup>
-                        <RowSwitch
-                            label={t("enabled")}
-                            checked={mapEnabled}
-                            onClick={confirmToggle}
-                        />
-                    </RowButtonGroup>
-                </Stack>
+            <Stack sx={{ px: 2, py: "20px" }}>
+                <RowButtonGroup>
+                    <RowSwitch
+                        label={t("enabled")}
+                        checked={mapEnabled}
+                        onClick={confirmToggle}
+                    />
+                </RowButtonGroup>
             </Stack>
-        </NestedSidebarDrawer>
+        </TitledNestedSidebarDrawer>
     );
 };
 
@@ -1013,41 +1009,35 @@ const AdvancedSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
         void electron?.toggleAutoLaunch().then(refreshAutoLaunchEnabled);
 
     return (
-        <NestedSidebarDrawer
+        <TitledNestedSidebarDrawer
             {...{ open, onClose }}
             onRootClose={handleRootClose}
+            title={t("advanced")}
         >
-            <Stack sx={{ gap: "4px", py: "12px" }}>
-                <SidebarDrawerTitlebar
-                    onClose={onClose}
-                    onRootClose={handleRootClose}
-                    title={t("advanced")}
-                />
-                <Stack sx={{ px: "16px", py: "20px", gap: "24px" }}>
-                    <Stack>
-                        <RowButtonGroup>
-                            <RowSwitch
-                                label={t("faster_upload")}
-                                checked={!cfUploadProxyDisabled}
-                                onClick={toggleProxy}
-                            />
-                        </RowButtonGroup>
-                        <RowButtonGroupHint>
-                            {t("faster_upload_description")}
-                        </RowButtonGroupHint>
-                    </Stack>
-                    {electron && (
-                        <RowButtonGroup>
-                            <RowSwitch
-                                label={t("open_ente_on_startup")}
-                                checked={isAutoLaunchEnabled}
-                                onClick={toggleAutoLaunch}
-                            />
-                        </RowButtonGroup>
-                    )}
+            <Stack sx={{ px: 2, py: "20px", gap: 3 }}>
+                <Stack>
+                    <RowButtonGroup>
+                        <RowSwitch
+                            label={t("faster_upload")}
+                            checked={!cfUploadProxyDisabled}
+                            onClick={toggleProxy}
+                        />
+                    </RowButtonGroup>
+                    <RowButtonGroupHint>
+                        {t("faster_upload_description")}
+                    </RowButtonGroupHint>
                 </Stack>
+                {electron && (
+                    <RowButtonGroup>
+                        <RowSwitch
+                            label={t("open_ente_on_startup")}
+                            checked={isAutoLaunchEnabled}
+                            onClick={toggleAutoLaunch}
+                        />
+                    </RowButtonGroup>
+                )}
             </Stack>
-        </NestedSidebarDrawer>
+        </TitledNestedSidebarDrawer>
     );
 };
 
@@ -1087,71 +1077,68 @@ const Help: React.FC<NestedSidebarDrawerVisibilityProps> = ({
     };
 
     return (
-        <NestedSidebarDrawer {...{ open, onClose }} onRootClose={onRootClose}>
-            <Stack sx={{ gap: "4px", py: "12px" }}>
-                <SidebarDrawerTitlebar
-                    onClose={onClose}
-                    title={t("help")}
-                    onRootClose={handleRootClose}
+        <TitledNestedSidebarDrawer
+            {...{ open, onClose }}
+            onRootClose={handleRootClose}
+            title={t("help")}
+        >
+            <Stack sx={{ px: 2, py: 1, gap: 3 }}>
+                <RowButtonGroup>
+                    <RowButton
+                        endIcon={<InfoOutlinedIcon />}
+                        label={t("ente_help")}
+                        onClick={handleHelp}
+                    />
+                </RowButtonGroup>
+                <RowButtonGroup>
+                    <RowButton
+                        endIcon={<NorthEastIcon />}
+                        label={t("blog")}
+                        onClick={handleBlog}
+                    />
+                    <RowButtonDivider />
+                    <RowButton
+                        endIcon={<NorthEastIcon />}
+                        label={t("request_feature")}
+                        onClick={handleRequestFeature}
+                    />
+                </RowButtonGroup>
+                <RowButtonGroup>
+                    <RowButton
+                        endIcon={<ChevronRightIcon />}
+                        label={
+                            <Tooltip title="support@ente.io">
+                                <Typography sx={{ fontWeight: "medium" }}>
+                                    {t("support")}
+                                </Typography>
+                            </Tooltip>
+                        }
+                        onClick={handleSupport}
+                    />
+                </RowButtonGroup>
+            </Stack>
+            <Stack sx={{ px: "16px" }}>
+                <RowButton
+                    variant="secondary"
+                    label={
+                        <Typography variant="mini" color="text.muted">
+                            {t("view_logs")}
+                        </Typography>
+                    }
+                    onClick={confirmViewLogs}
                 />
-                <Stack sx={{ px: "16px", py: "8px", gap: "24px" }}>
-                    <RowButtonGroup>
-                        <RowButton
-                            endIcon={<InfoOutlinedIcon />}
-                            label={t("ente_help")}
-                            onClick={handleHelp}
-                        />
-                    </RowButtonGroup>
-                    <RowButtonGroup>
-                        <RowButton
-                            endIcon={<NorthEastIcon />}
-                            label={t("blog")}
-                            onClick={handleBlog}
-                        />
-                        <RowButtonDivider />
-                        <RowButton
-                            endIcon={<NorthEastIcon />}
-                            label={t("request_feature")}
-                            onClick={handleRequestFeature}
-                        />
-                    </RowButtonGroup>
-                    <RowButtonGroup>
-                        <RowButton
-                            endIcon={<ChevronRightIcon />}
-                            label={
-                                <Tooltip title="support@ente.io">
-                                    <Typography sx={{ fontWeight: "medium" }}>
-                                        {t("support")}
-                                    </Typography>
-                                </Tooltip>
-                            }
-                            onClick={handleSupport}
-                        />
-                    </RowButtonGroup>
-                </Stack>
-                <Stack sx={{ px: "16px" }}>
+                {isDevBuildAndUser() && (
                     <RowButton
                         variant="secondary"
                         label={
                             <Typography variant="mini" color="text.muted">
-                                {t("view_logs")}
+                                {ut("Test upload")}
                             </Typography>
                         }
-                        onClick={confirmViewLogs}
+                        onClick={testUpload}
                     />
-                    {isDevBuildAndUser() && (
-                        <RowButton
-                            variant="secondary"
-                            label={
-                                <Typography variant="mini" color="text.muted">
-                                    {ut("Test upload")}
-                                </Typography>
-                            }
-                            onClick={testUpload}
-                        />
-                    )}
-                </Stack>
+                )}
             </Stack>
-        </NestedSidebarDrawer>
+        </TitledNestedSidebarDrawer>
     );
 };

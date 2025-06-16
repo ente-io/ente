@@ -290,5 +290,173 @@
   "details": "Detaileak",
   "claimMore": "Eskatu gehiago!",
   "theyAlsoGetXGb": "Haiek ere lortuko dute {storageAmountInGB} GB",
-  "freeStorageOnReferralSuccess": "{storageAmountInGB} GB norbaitek ordainpeko plan batean sartzen denean zure kodea aplikatzen badu"
+  "freeStorageOnReferralSuccess": "{storageAmountInGB} GB norbaitek ordainpeko plan batean sartzen denean zure kodea aplikatzen badu",
+  "shareTextReferralCode": "Sartu erreferentzia kodea: {referralCode}\n\nAplikatu hemen: Ezarpenak → Orokorra→ Erreferentziak, {referralStorageInGB} GB dohainik izateko ordainpeko plan batean \n\nhttps://ente.io",
+  "claimFreeStorage": "Eskatu debaldeko biltegiratzea",
+  "inviteYourFriends": "Gonbidatu zure lagunak",
+  "failedToFetchReferralDetails": "Ezin dugu zure erreferentziaren detailerik lortu. Mesedez, saiatu berriro geroago.",
+  "referralStep1": "1. Eman kode hau zure lagunei",
+  "referralStep2": "2. Haiek ordainpeko plan batean sinatu behar dute",
+  "referralStep3": "3. Bai zuk bai haiek {storageInGB} GB* dohainik izango duzue",
+  "referralsAreCurrentlyPaused": "Erreferentziak momentuz geldituta daude",
+  "youCanAtMaxDoubleYourStorage": "* Gehienez zure biltegiratzea bikoiztu ahal duzu",
+  "claimedStorageSoFar": "{isFamilyMember, select,true {Zure familiak {storageAmountInGb} GB eskatu du dagoeneko} false {Zuk {storageAmountInGb} GB eskatu duzu dagoeneko} other {Zuk {storageAmountInGb} GB eskatu duzu dagoeneko!}}",
+  "@claimedStorageSoFar": {
+    "placeholders": {
+      "isFamilyMember": {
+        "type": "String",
+        "example": "true"
+      },
+      "storageAmountInGb": {
+        "type": "int",
+        "example": "10"
+      }
+    }
+  },
+  "faq": "FAQ",
+  "help": "Laguntza",
+  "oopsSomethingWentWrong": "Oops, zerbait txarto joan da",
+  "peopleUsingYourCode": "Jendea zure kodea erabiltzen",
+  "eligible": "aukerakoak",
+  "total": "osotara",
+  "codeUsedByYou": "Zuk erabilitako kodea",
+  "freeStorageClaimed": "Debaldeko biltegiratzea eskatuta",
+  "freeStorageUsable": "Debaldeko biltegiratzea erabilgarri",
+  "usableReferralStorageInfo": "Biltegiratze erabilgarria zure oraingo planaren arabera mugatuta dago. Soberan eskatutako biltegiratzea automatikoki erabili ahal izango duzu zure plan gaurkotzen duzunean.",
+  "removeFromAlbumTitle": "Albumetik kendu?",
+  "removeFromAlbum": "Kendu albumetik",
+  "itemsWillBeRemovedFromAlbum": "Hautatutako elementuak album honetatik kenduko dira",
+  "removeShareItemsWarning": "Kentzen ari zaren elementu batzuk beste pertsona batzuek gehitu zituzten, beraz ezin izango dituzu eskuratu",
+  "addingToFavorites": "Gogokoetan gehitzen...",
+  "removingFromFavorites": "Gogokoetatik kentzen...",
+  "sorryCouldNotAddToFavorites": "Sentitzen dut, ezin izan dugu zure gogokoetan gehitu!",
+  "sorryCouldNotRemoveFromFavorites": "Sentitzen dugu, ezin izan dugu zure gogokoetatik kendu!",
+  "subscribeToEnableSharing": "Ordainpeko harpidetza behar duzu partekatzea aktibatzeko.",
+  "subscribe": "Harpidetu",
+  "canOnlyRemoveFilesOwnedByYou": "Zure fitxategiak baino ezin duzu ezabatu",
+  "deleteSharedAlbum": "Partekatutako albuma ezabatu?",
+  "deleteAlbum": "Ezabatu albuma",
+  "deleteAlbumDialog": "Ezabatu nahi dituzu album honetan dauden argazkiak (eta bideoak) parte diren beste album <bold>guztietatik</bold> ere?",
+  "deleteSharedAlbumDialogBody": "Albuma guztiontzat ezabatuko da \n\nAlbum honetan dauden beste pertsonek partekatutako argazkiak ezin izango dituzu eskuratu",
+  "yesRemove": "Bai, ezabatu",
+  "creatingLink": "Esteka sortzen...",
+  "removeWithQuestionMark": "Ezabatuko?",
+  "removeParticipantBody": "{userEmail} partekatutako album honetatik ezabatuko da \n\nHaiek gehitutako argazki guztiak ere ezabatuak izango dira albumetik",
+  "keepPhotos": "Gorde Argazkiak",
+  "deletePhotos": "Ezabatu argazkiak",
+  "inviteToEnte": "Gonbidatu Ente-ra",
+  "removePublicLink": "Ezabatu esteka publikoa",
+  "disableLinkMessage": "Honen bidez {albumName} eskuratzeko esteka publikoa ezabatuko da.",
+  "sharing": "Partekatzen...",
+  "youCannotShareWithYourself": "Ezin duzu zeure buruarekin partekatu",
+  "archive": "Artxiboa",
+  "createAlbumActionHint": "Luze klikatu argazkiak hautatzeko eta klikatu + albuma sortzeko",
+  "importing": "Inportatzen....",
+  "failedToLoadAlbums": "Errorea albumak kargatzen",
+  "hidden": "Ezkutatuta",
+  "authToViewYourHiddenFiles": "Mesedez, autentifikatu zure ezkutatutako fitxategiak ikusteko",
+  "authToViewTrashedFiles": "Mesedez, autentifikatu paperontzira botatako zure fitxategiak ikusteko",
+  "trash": "Zarama",
+  "uncategorized": "Kategori gabekoa",
+  "videoSmallCase": "bideoa",
+  "photoSmallCase": "argazkia",
+  "singleFileDeleteHighlight": "Album guztietatik ezabatuko da.",
+  "singleFileInBothLocalAndRemote": "{fileType} hau Ente-n eta zure gailuan dago.",
+  "singleFileInRemoteOnly": "{fileType} hau Ente-tik ezabatuko da.",
+  "singleFileDeleteFromDevice": "{fileType} hau zure gailutik ezabatuko da.",
+  "deleteFromEnte": "Ezabatu Ente-tik",
+  "yesDelete": "Bai, ezabatu",
+  "movedToTrash": "Zarama mugituta",
+  "deleteFromDevice": "Ezabatu gailutik",
+  "deleteFromBoth": "Ezabatu bietatik",
+  "newAlbum": "Album berria",
+  "albums": "Albumak",
+  "memoryCount": "{count, plural,=0{oroitzapenik ez}one{oroitzapen {formattedCount}} other{{formattedCount} oroitzapen}}",
+  "@memoryCount": {
+    "description": "The text to display the number of memories",
+    "type": "text",
+    "placeholders": {
+      "count": {
+        "example": "1",
+        "type": "int"
+      },
+      "formattedCount": {
+        "type": "String",
+        "example": "11.513, 11,511"
+      }
+    }
+  },
+  "selectedPhotos": "{count} hautatuta",
+  "@selectedPhotos": {
+    "description": "Display the number of selected photos",
+    "type": "text",
+    "placeholders": {
+      "count": {
+        "example": "5",
+        "type": "int"
+      }
+    }
+  },
+  "selectedPhotosWithYours": "{count} hautatuta ({yourCount} zureak)",
+  "@selectedPhotosWithYours": {
+    "description": "Display the number of selected photos, including the number of selected photos owned by the user",
+    "type": "text",
+    "placeholders": {
+      "count": {
+        "example": "12",
+        "type": "int"
+      },
+      "yourCount": {
+        "example": "2",
+        "type": "int"
+      }
+    }
+  },
+  "advancedSettings": "Aurreratuak",
+  "@advancedSettings": {
+    "description": "The text to display in the advanced settings section"
+  },
+  "photoGridSize": "Argazki sarearen tamaina",
+  "manageDeviceStorage": "Kudeatu gailuaren katxea",
+  "manageDeviceStorageDesc": "Berrikusi eta garbitu katxe lokalaren biltegiratzea.",
+  "machineLearning": "Ikasketa automatikoa",
+  "mlConsent": "Aktibatu ikasketa automatikoa",
+  "mlConsentTitle": "Ikasketa automatikoa aktibatuko?",
+  "mlConsentDescription": "Ikasketa automatikoa aktibatuz gero, Ente-k fitxategietatik informazioa aterako du (ad. argazkien geometria), zurekin partekatutako argazkietatik ere.\n\nHau zure gailuan gertatuko da, eta sortutako informazio biometrikoa puntutik puntura zifratuta egongo da.",
+  "mlConsentPrivacy": "Mesedez, klikatu hemen gure pribatutasun politikan ezaugarri honi buruz detaile gehiago izateko",
+  "mlConsentConfirmation": "Ulertzen dut, eta ikasketa automatikoa aktibatu nahi dut",
+  "magicSearch": "Bilaketa magikoa",
+  "discover": "Aurkitu",
+  "@discover": {
+    "description": "The text to display for the discover section under which we show receipts, screenshots, sunsets, greenery, etc."
+  },
+  "discover_identity": "Nortasuna",
+  "discover_screenshots": "Pantaila argazkiak",
+  "discover_receipts": "Ordainagiriak",
+  "discover_notes": "Oharrak",
+  "discover_memes": "Memeak",
+  "discover_visiting_cards": "Bisita txartelak",
+  "discover_babies": "Umeak",
+  "discover_pets": "Etxe-animaliak",
+  "discover_selfies": "Selfiak",
+  "discover_wallpapers": "Horma-paperak",
+  "discover_food": "Janaria",
+  "discover_celebrations": "Ospakizunak",
+  "discover_sunset": "Eguzki-sartzea",
+  "discover_hills": "Muinoak",
+  "discover_greenery": "Hostoa",
+  "authToChangeYourEmail": "Mesedez, autentifikatu zure emaila aldatzeko",
+  "authToChangeYourPassword": "Mesedez, autentifikatu zure pasahitza aldatzeko",
+  "authToChangeEmailVerificationSetting": "Mesedez, autentifikatu emailaren egiaztatzea aldatzeko",
+  "authToInitiateAccountDeletion": "Mesedez, autentifikatu kontu ezabaketa hasteko",
+  "authToViewYourRecoveryKey": "Mesedez, autentifikatu zure berreskuratze giltza ikusteko",
+  "authToConfigureTwofactorAuthentication": "Mesedez, autentifikatu faktore biko autentifikazioa konfiguratzeko",
+  "authToChangeLockscreenSetting": "Mesedez, autentifikatu pantaila blokeatzeko ezarpenak aldatzeko",
+  "authToViewYourActiveSessions": "Mesedez, autentifikatu indarrean dauden zure saioak ikusteko",
+  "confirm2FADisable": "Seguru zaude faktore biko autentifikazioa deuseztatu nahi duzula?",
+  "twofactorAuthenticationHasBeenDisabled": "Faktore biko autentifikazioa deuseztatua izan da",
+  "iOSLockOut": "Autentifikazio biometrikoa deuseztatuta dago. Mesedez, blokeatu eta desblokeatu zure pantaila indarrean jartzeko.",
+  "@iOSLockOut": {
+    "description": "Message advising the user to re-enable biometrics on their device. It shows in a dialog on iOS side."
+  }
 }

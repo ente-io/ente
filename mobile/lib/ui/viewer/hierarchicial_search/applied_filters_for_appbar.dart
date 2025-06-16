@@ -66,7 +66,6 @@ class _AppliedFiltersForAppbarState extends State<AppliedFiltersForAppbar> {
                   ? FaceFilterChip(
                       personId: filter.personId,
                       clusterId: filter.clusterId,
-                      faceThumbnailFile: filter.faceFile,
                       apply: () {
                         _searchFilterDataProvider.applyFilters([filter]);
                       },
@@ -112,7 +111,7 @@ class _AppliedFiltersForAppbarState extends State<AppliedFiltersForAppbar> {
             gradient: LinearGradient(
               colors: [
                 getEnteColorScheme(context).backdropBase,
-                getEnteColorScheme(context).backdropBase.withOpacity(0),
+                getEnteColorScheme(context).backdropBase.withValues(alpha: 0),
               ],
               begin: Alignment.centerLeft,
               end: Alignment.centerRight,

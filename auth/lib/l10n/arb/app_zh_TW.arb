@@ -173,6 +173,7 @@
   "invalidQRCode": "QR 碼無效",
   "noRecoveryKeyTitle": "沒有復原密鑰嗎？",
   "enterEmailHint": "請輸入您的電子郵件地址",
+  "enterNewEmailHint": "輸入你的新電子郵件地址",
   "invalidEmailTitle": "無效的電子郵件地址",
   "invalidEmailMessage": "請輸入一個有效的電子郵件地址。",
   "deleteAccount": "刪除帳戶",
@@ -513,5 +514,10 @@
   "free5GB": "<bold-green>ente</bold-green> Photos 上 5GB 可用空間",
   "loginWithAuthAccount": "使用您的認證帳戶登錄",
   "freeStorageOffer": "購買 <bold-green>ente</bold-green> Photos 可享受 10% 優惠",
-  "freeStorageOfferDescription": "使用優惠碼“AUTH”可享受首年 10% 折扣"
+  "freeStorageOfferDescription": "使用優惠碼“AUTH”可享受首年 10% 折扣",
+  "advanced": "進階",
+  "algorithm": "演算法",
+  "type": "類型",
+  "period": "期間",
+  "digits": "數位"
 }

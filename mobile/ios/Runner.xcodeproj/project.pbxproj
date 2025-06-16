@@ -16,6 +16,12 @@
 		97C146FC1CF9000F007C117D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FA1CF9000F007C117D /* Main.storyboard */; };
 		97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FD1CF9000F007C117D /* Assets.xcassets */; };
 		97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */; };
+		CEE166242DD5E7820012CF61 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6DACD83C2B755B0600BA9516 /* WidgetKit.framework */; };
+		CEE166252DD5E7820012CF61 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6DACD83E2B755B0600BA9516 /* SwiftUI.framework */; };
+		CEE166302DD5E7830012CF61 /* EnteAlbumWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = CEE166232DD5E7820012CF61 /* EnteAlbumWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		CEE1667C2DD5F6F20012CF61 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6DACD83C2B755B0600BA9516 /* WidgetKit.framework */; };
+		CEE1667D2DD5F6F20012CF61 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6DACD83E2B755B0600BA9516 /* SwiftUI.framework */; };
+		CEE166882DD5F6F30012CF61 /* EntePeopleWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = CEE1667B2DD5F6F20012CF61 /* EntePeopleWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		CEE6BE702D7AE7FD00E4048B /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6DACD83C2B755B0600BA9516 /* WidgetKit.framework */; };
 		CEE6BE712D7AE7FD00E4048B /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6DACD83E2B755B0600BA9516 /* SwiftUI.framework */; };
 		CEE6BE7C2D7AE7FE00E4048B /* EnteMemoryWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = CEE6BE6F2D7AE7FD00E4048B /* EnteMemoryWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -23,6 +29,20 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		CEE1662E2DD5E7830012CF61 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 97C146E61CF9000F007C117D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = CEE166222DD5E7820012CF61;
+			remoteInfo = EnteAlbumWidgetExtension;
+		};
+		CEE166862DD5F6F30012CF61 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 97C146E61CF9000F007C117D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = CEE1667A2DD5F6F20012CF61;
+			remoteInfo = EntePeopleWidgetExtension;
+		};
 		CEE6BE7A2D7AE7FE00E4048B /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 97C146E61CF9000F007C117D /* Project object */;
@@ -39,7 +59,9 @@
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
+				CEE166302DD5E7830012CF61 /* EnteAlbumWidgetExtension.appex in Embed Foundation Extensions */,
 				CEE6BE7C2D7AE7FE00E4048B /* EnteMemoryWidgetExtension.appex in Embed Foundation Extensions */,
+				CEE166882DD5F6F30012CF61 /* EntePeopleWidgetExtension.appex in Embed Foundation Extensions */,
 			);
 			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -79,6 +101,10 @@
 		A78E51A260432466D4C456A9 /* Pods-Runner.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.debug.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"; sourceTree = "<group>"; };
 		BB097BB5EB0EEB41344338D2 /* Pods-Runner.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.release.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"; sourceTree = "<group>"; };
 		CE93A9062D808893005CD942 /* EnteMemoryWidgetExtensionDebug.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = EnteMemoryWidgetExtensionDebug.entitlements; sourceTree = "<group>"; };
+		CEE166232DD5E7820012CF61 /* EnteAlbumWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = EnteAlbumWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		CEE166362DD5E7950012CF61 /* EnteAlbumWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = EnteAlbumWidgetExtension.entitlements; sourceTree = "<group>"; };
+		CEE1667B2DD5F6F20012CF61 /* EntePeopleWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = EntePeopleWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		CEE1668E2DD5F70F0012CF61 /* EntePeopleWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = EntePeopleWidgetExtension.entitlements; sourceTree = "<group>"; };
 		CEE6BE6F2D7AE7FD00E4048B /* EnteMemoryWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = EnteMemoryWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		CEE6BE822D7AE8C700E4048B /* EnteMemoryWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = EnteMemoryWidgetExtension.entitlements; sourceTree = "<group>"; };
 		DA8D6672273BBB59007651D4 /* Runner.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Runner.entitlements; sourceTree = "<group>"; };
@@ -86,6 +112,20 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		CEE166342DD5E7830012CF61 /* Exceptions for "EnteAlbumWidget" folder in "EnteAlbumWidgetExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = CEE166222DD5E7820012CF61 /* EnteAlbumWidgetExtension */;
+		};
+		CEE1668C2DD5F6F30012CF61 /* Exceptions for "EntePeopleWidget" folder in "EntePeopleWidgetExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = CEE1667A2DD5F6F20012CF61 /* EntePeopleWidgetExtension */;
+		};
 		CEE6BE802D7AE7FE00E4048B /* Exceptions for "EnteMemoryWidget" folder in "EnteMemoryWidgetExtension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -96,6 +136,30 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		CEE166262DD5E7820012CF61 /* EnteAlbumWidget */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				CEE166342DD5E7830012CF61 /* Exceptions for "EnteAlbumWidget" folder in "EnteAlbumWidgetExtension" target */,
+			);
+			explicitFileTypes = {
+			};
+			explicitFolders = (
+			);
+			path = EnteAlbumWidget;
+			sourceTree = "<group>";
+		};
+		CEE1667E2DD5F6F20012CF61 /* EntePeopleWidget */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				CEE1668C2DD5F6F30012CF61 /* Exceptions for "EntePeopleWidget" folder in "EntePeopleWidgetExtension" target */,
+			);
+			explicitFileTypes = {
+			};
+			explicitFolders = (
+			);
+			path = EntePeopleWidget;
+			sourceTree = "<group>";
+		};
 		CEE6BE722D7AE7FD00E4048B /* EnteMemoryWidget */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
@@ -117,6 +181,24 @@
 			files = (
 				274DC65125920DD100F526A4 /* StoreKit.framework in Frameworks */,
 				0856877A9F80F9E052DBFDB4 /* Pods_Runner.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CEE166202DD5E7820012CF61 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CEE166252DD5E7820012CF61 /* SwiftUI.framework in Frameworks */,
+				CEE166242DD5E7820012CF61 /* WidgetKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CEE166782DD5F6F20012CF61 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CEE1667D2DD5F6F20012CF61 /* SwiftUI.framework in Frameworks */,
+				CEE1667C2DD5F6F20012CF61 /* WidgetKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -146,12 +228,16 @@
 		97C146E51CF9000F007C117D = {
 			isa = PBXGroup;
 			children = (
+				CEE1668E2DD5F70F0012CF61 /* EntePeopleWidgetExtension.entitlements */,
+				CEE166362DD5E7950012CF61 /* EnteAlbumWidgetExtension.entitlements */,
 				CE93A9062D808893005CD942 /* EnteMemoryWidgetExtensionDebug.entitlements */,
 				CEE6BE822D7AE8C700E4048B /* EnteMemoryWidgetExtension.entitlements */,
 				2772189F270F596900FFE3CC /* GoogleService-Info.plist */,
 				9740EEB11CF90186004384FC /* Flutter */,
 				97C146F01CF9000F007C117D /* Runner */,
 				CEE6BE722D7AE7FD00E4048B /* EnteMemoryWidget */,
+				CEE166262DD5E7820012CF61 /* EnteAlbumWidget */,
+				CEE1667E2DD5F6F20012CF61 /* EntePeopleWidget */,
 				97C146EF1CF9000F007C117D /* Products */,
 				AC6CA265BB505D982CB00391 /* Pods */,
 				C6A22658E77FF012720BEDDA /* Frameworks */,
@@ -163,6 +249,8 @@
 			children = (
 				97C146EE1CF9000F007C117D /* Runner.app */,
 				CEE6BE6F2D7AE7FD00E4048B /* EnteMemoryWidgetExtension.appex */,
+				CEE166232DD5E7820012CF61 /* EnteAlbumWidgetExtension.appex */,
+				CEE1667B2DD5F6F20012CF61 /* EntePeopleWidgetExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -235,11 +323,53 @@
 			);
 			dependencies = (
 				CEE6BE7B2D7AE7FE00E4048B /* PBXTargetDependency */,
+				CEE1662F2DD5E7830012CF61 /* PBXTargetDependency */,
+				CEE166872DD5F6F30012CF61 /* PBXTargetDependency */,
 			);
 			name = Runner;
 			productName = Runner;
 			productReference = 97C146EE1CF9000F007C117D /* Runner.app */;
 			productType = "com.apple.product-type.application";
+		};
+		CEE166222DD5E7820012CF61 /* EnteAlbumWidgetExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = CEE166352DD5E7830012CF61 /* Build configuration list for PBXNativeTarget "EnteAlbumWidgetExtension" */;
+			buildPhases = (
+				CEE1661F2DD5E7820012CF61 /* Sources */,
+				CEE166202DD5E7820012CF61 /* Frameworks */,
+				CEE166212DD5E7820012CF61 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				CEE166262DD5E7820012CF61 /* EnteAlbumWidget */,
+			);
+			name = EnteAlbumWidgetExtension;
+			productName = EnteAlbumWidgetExtension;
+			productReference = CEE166232DD5E7820012CF61 /* EnteAlbumWidgetExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+		CEE1667A2DD5F6F20012CF61 /* EntePeopleWidgetExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = CEE1668D2DD5F6F30012CF61 /* Build configuration list for PBXNativeTarget "EntePeopleWidgetExtension" */;
+			buildPhases = (
+				CEE166772DD5F6F20012CF61 /* Sources */,
+				CEE166782DD5F6F20012CF61 /* Frameworks */,
+				CEE166792DD5F6F20012CF61 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				CEE1667E2DD5F6F20012CF61 /* EntePeopleWidget */,
+			);
+			name = EntePeopleWidgetExtension;
+			productName = EntePeopleWidgetExtension;
+			productReference = CEE1667B2DD5F6F20012CF61 /* EntePeopleWidgetExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
 		};
 		CEE6BE6E2D7AE7FD00E4048B /* EnteMemoryWidgetExtension */ = {
 			isa = PBXNativeTarget;
@@ -267,7 +397,7 @@
 		97C146E61CF9000F007C117D /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastSwiftUpdateCheck = 1620;
+				LastSwiftUpdateCheck = 1630;
 				LastUpgradeCheck = 1510;
 				ORGANIZATIONNAME = "The Chromium Authors";
 				TargetAttributes = {
@@ -275,6 +405,12 @@
 						CreatedOnToolsVersion = 7.3.1;
 						LastSwiftMigration = 1100;
 						ProvisioningStyle = Automatic;
+					};
+					CEE166222DD5E7820012CF61 = {
+						CreatedOnToolsVersion = 16.3;
+					};
+					CEE1667A2DD5F6F20012CF61 = {
+						CreatedOnToolsVersion = 16.3;
 					};
 					CEE6BE6E2D7AE7FD00E4048B = {
 						CreatedOnToolsVersion = 16.2;
@@ -296,6 +432,8 @@
 			targets = (
 				97C146ED1CF9000F007C117D /* Runner */,
 				CEE6BE6E2D7AE7FD00E4048B /* EnteMemoryWidgetExtension */,
+				CEE166222DD5E7820012CF61 /* EnteAlbumWidgetExtension */,
+				CEE1667A2DD5F6F20012CF61 /* EntePeopleWidgetExtension */,
 			);
 		};
 /* End PBXProject section */
@@ -311,6 +449,20 @@
 				97C146FC1CF9000F007C117D /* Main.storyboard in Resources */,
 				DA6BE5E826B3BC8600656280 /* BuildFile in Resources */,
 				277218A0270F596900FFE3CC /* GoogleService-Info.plist in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CEE166212DD5E7820012CF61 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CEE166792DD5F6F20012CF61 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -389,6 +541,7 @@
 				"${BUILT_PRODUCTS_DIR}/flutter_native_splash/flutter_native_splash.framework",
 				"${BUILT_PRODUCTS_DIR}/flutter_secure_storage/flutter_secure_storage.framework",
 				"${BUILT_PRODUCTS_DIR}/flutter_sodium/flutter_sodium.framework",
+				"${BUILT_PRODUCTS_DIR}/flutter_timezone/flutter_timezone.framework",
 				"${BUILT_PRODUCTS_DIR}/fluttertoast/fluttertoast.framework",
 				"${BUILT_PRODUCTS_DIR}/home_widget/home_widget.framework",
 				"${BUILT_PRODUCTS_DIR}/image_editor_common/image_editor_common.framework",
@@ -396,7 +549,6 @@
 				"${BUILT_PRODUCTS_DIR}/integration_test/integration_test.framework",
 				"${BUILT_PRODUCTS_DIR}/launcher_icon_switcher/launcher_icon_switcher.framework",
 				"${BUILT_PRODUCTS_DIR}/libwebp/libwebp.framework",
-				"${BUILT_PRODUCTS_DIR}/local_auth_darwin/local_auth_darwin.framework",
 				"${BUILT_PRODUCTS_DIR}/local_auth_ios/local_auth_ios.framework",
 				"${BUILT_PRODUCTS_DIR}/maps_launcher/maps_launcher.framework",
 				"${BUILT_PRODUCTS_DIR}/media_extension/media_extension.framework",
@@ -421,6 +573,7 @@
 				"${BUILT_PRODUCTS_DIR}/sqlite3/sqlite3.framework",
 				"${BUILT_PRODUCTS_DIR}/sqlite3_flutter_libs/sqlite3_flutter_libs.framework",
 				"${BUILT_PRODUCTS_DIR}/system_info_plus/system_info_plus.framework",
+				"${BUILT_PRODUCTS_DIR}/thermal/thermal.framework",
 				"${BUILT_PRODUCTS_DIR}/ua_client_hints/ua_client_hints.framework",
 				"${BUILT_PRODUCTS_DIR}/url_launcher_ios/url_launcher_ios.framework",
 				"${BUILT_PRODUCTS_DIR}/video_player_avfoundation/video_player_avfoundation.framework",
@@ -483,6 +636,7 @@
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/flutter_native_splash.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/flutter_secure_storage.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/flutter_sodium.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/flutter_timezone.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/fluttertoast.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/home_widget.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/image_editor_common.framework",
@@ -490,7 +644,6 @@
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/integration_test.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/launcher_icon_switcher.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/libwebp.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/local_auth_darwin.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/local_auth_ios.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/maps_launcher.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/media_extension.framework",
@@ -515,6 +668,7 @@
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/sqlite3.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/sqlite3_flutter_libs.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/system_info_plus.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/thermal.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/ua_client_hints.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/url_launcher_ios.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/video_player_avfoundation.framework",
@@ -607,6 +761,20 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		CEE1661F2DD5E7820012CF61 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CEE166772DD5F6F20012CF61 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		CEE6BE6B2D7AE7FD00E4048B /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -617,6 +785,16 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		CEE1662F2DD5E7830012CF61 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = CEE166222DD5E7820012CF61 /* EnteAlbumWidgetExtension */;
+			targetProxy = CEE1662E2DD5E7830012CF61 /* PBXContainerItemProxy */;
+		};
+		CEE166872DD5F6F30012CF61 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = CEE1667A2DD5F6F20012CF61 /* EntePeopleWidgetExtension */;
+			targetProxy = CEE166862DD5F6F30012CF61 /* PBXContainerItemProxy */;
+		};
 		CEE6BE7B2D7AE7FE00E4048B /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = CEE6BE6E2D7AE7FD00E4048B /* EnteMemoryWidgetExtension */;
@@ -949,6 +1127,250 @@
 			};
 			name = Release;
 		};
+		CEE166312DD5E7830012CF61 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_ENTITLEMENTS = EnteAlbumWidgetExtension.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 6Z68YJY9Q2;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = EnteAlbumWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = EnteAlbumWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2025 The Chromium Authors. All rights reserved.";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.4;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = io.ente.frame.debug.EnteAlbumWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		CEE166322DD5E7830012CF61 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_ENTITLEMENTS = EnteAlbumWidgetExtension.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 6Z68YJY9Q2;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = EnteAlbumWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = EnteAlbumWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2025 The Chromium Authors. All rights reserved.";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.4;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = io.ente.frame.EnteAlbumWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		CEE166332DD5E7830012CF61 /* Profile */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_ENTITLEMENTS = EnteAlbumWidgetExtension.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 6Z68YJY9Q2;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = EnteAlbumWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = EnteAlbumWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2025 The Chromium Authors. All rights reserved.";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.4;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = io.ente.frame.EnteAlbumWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Profile;
+		};
+		CEE166892DD5F6F30012CF61 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_ENTITLEMENTS = EntePeopleWidgetExtension.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 6Z68YJY9Q2;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = EntePeopleWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = EntePeopleWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2025 The Chromium Authors. All rights reserved.";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.4;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = io.ente.frame.debug.EntePeopleWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		CEE1668A2DD5F6F30012CF61 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_ENTITLEMENTS = EntePeopleWidgetExtension.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 6Z68YJY9Q2;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = EntePeopleWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = EntePeopleWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2025 The Chromium Authors. All rights reserved.";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.4;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = io.ente.frame.EntePeopleWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		CEE1668B2DD5F6F30012CF61 /* Profile */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_ENTITLEMENTS = EntePeopleWidgetExtension.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 6Z68YJY9Q2;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = EntePeopleWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = EntePeopleWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2025 The Chromium Authors. All rights reserved.";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.4;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = io.ente.frame.EntePeopleWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Profile;
+		};
 		CEE6BE7D2D7AE7FE00E4048B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -1090,6 +1512,26 @@
 				97C147061CF9000F007C117D /* Debug */,
 				97C147071CF9000F007C117D /* Release */,
 				249021D4217E4FDB00AE95B9 /* Profile */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		CEE166352DD5E7830012CF61 /* Build configuration list for PBXNativeTarget "EnteAlbumWidgetExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CEE166312DD5E7830012CF61 /* Debug */,
+				CEE166322DD5E7830012CF61 /* Release */,
+				CEE166332DD5E7830012CF61 /* Profile */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		CEE1668D2DD5F6F30012CF61 /* Build configuration list for PBXNativeTarget "EntePeopleWidgetExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CEE166892DD5F6F30012CF61 /* Debug */,
+				CEE1668A2DD5F6F30012CF61 /* Release */,
+				CEE1668B2DD5F6F30012CF61 /* Profile */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

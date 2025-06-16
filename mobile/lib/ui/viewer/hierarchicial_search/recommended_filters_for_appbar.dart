@@ -121,7 +121,6 @@ class _RecommendedFiltersForAppbarState
                     ? FaceFilterChip(
                         personId: filter.personId,
                         clusterId: filter.clusterId,
-                        faceThumbnailFile: filter.faceFile,
                         apply: () {
                           _searchFilterDataProvider.applyFilters([filter]);
                         },

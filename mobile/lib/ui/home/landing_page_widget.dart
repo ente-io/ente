@@ -42,10 +42,6 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
   void initState() {
     super.initState();
     Future(_showAutoLogoutDialogIfRequired);
-    Future.delayed(
-      const Duration(seconds: 1),
-      _autoEnableResumableUpload,
-    );
   }
 
   @override
@@ -308,10 +304,6 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
       }
     }
   }
-
-  void _autoEnableResumableUpload() {
-    localSettings.autoEnableMultiplePart(20).ignore();
-  }
 }
 
 class FeatureItemWidget extends StatelessWidget {
@@ -358,7 +350,10 @@ class FeatureItemWidget extends StatelessWidget {
               subText,
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+                color: Theme.of(context)
+                    .colorScheme
+                    .onSurface
+                    .withValues(alpha: 0.5),
                 fontSize: 16,
               ),
             ),

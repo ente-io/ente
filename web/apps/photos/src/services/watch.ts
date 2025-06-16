@@ -13,17 +13,15 @@ import type {
     FolderWatchSyncedFile,
 } from "ente-base/types/ipc";
 import { type UploadResult } from "ente-gallery/services/upload";
-import type { Collection } from "ente-media/collection";
+import type { UploadAsset } from "ente-gallery/services/upload/upload-service";
 import { EncryptedEnteFile } from "ente-media/file";
 import {
     getLocalFiles,
     groupFilesByCollectionID,
 } from "ente-new/photos/services/files";
 import { ensureString } from "ente-utils/ensure";
-import uploadManager, {
-    type UploadItemWithCollection,
-} from "services/upload/uploadManager";
 import { removeFromCollection } from "./collectionService";
+import { type UploadItemWithCollection, uploadManager } from "./upload-manager";
 
 /**
  * Watch for file system folders and automatically update the corresponding Ente
@@ -372,21 +370,17 @@ class FolderWatcher {
      * Callback invoked by the uploader whenever all the files we requested to
      * {@link upload} get uploaded.
      */
-    async allFileUploadsDone(
-        uploadItemsWithCollection: UploadItemWithCollection[],
-        collections: Collection[],
-    ) {
+    async allFileUploadsDone(uploadedItems: UploadAsset[]) {
         const electron = ensureElectron();
         const watch = this.activeWatch;
 
         log.debug(() => [
             "watch/allFileUploadsDone",
-            JSON.stringify({ uploadItemsWithCollection, collections, watch }),
+            JSON.stringify({ uploadedItems, watch }),
         ]);
 
-        const { syncedFiles, ignoredFiles } = this.deduceSyncedAndIgnored(
-            uploadItemsWithCollection,
-        );
+        const { syncedFiles, ignoredFiles } =
+            this.deduceSyncedAndIgnored(uploadedItems);
 
         if (syncedFiles.length > 0)
             await electron.watch.updateSyncedFiles(
@@ -406,9 +400,7 @@ class FolderWatcher {
         this.debouncedRunNextEvent();
     }
 
-    private deduceSyncedAndIgnored(
-        uploadItemsWithCollection: UploadItemWithCollection[],
-    ) {
+    private deduceSyncedAndIgnored(uploadedItems: UploadAsset[]) {
         const syncedFiles: FolderWatch["syncedFiles"] = [];
         const ignoredFiles: FolderWatch["ignoredFiles"] = [];
 
@@ -427,7 +419,7 @@ class FolderWatcher {
             this.unUploadableFilePaths.delete(path);
         };
 
-        for (const item of uploadItemsWithCollection) {
+        for (const item of uploadedItems) {
             // Re the usage of ensureString: For desktop watch, the only
             // possibility for a UploadItem is for it to be a string (the
             // absolute path to a file on disk).

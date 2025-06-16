@@ -90,15 +90,15 @@ export interface Electron {
      *
      * If the key is not found, return `undefined`.
      *
-     * See also: {@link saveMasterKeyB64}.
+     * See also: {@link saveMasterKeyInSafeStorage}.
      */
-    masterKeyB64: () => Promise<string | undefined>;
+    masterKeyFromSafeStorage: () => Promise<string | undefined>;
 
     /**
-     * Save the given {@link masterKeyB64} (encoded as a base64 string) to the
+     * Save the given {@link masterKey} (encoded as a base64 string) to the
      * persistent safe storage accessible to the desktop app.
      */
-    saveMasterKeyB64: (masterKeyB64: string) => Promise<void>;
+    saveMasterKeyInSafeStorage: (masterKey: string) => Promise<void>;
 
     /**
      * Set or clear the callback {@link cb} to invoke whenever the app comes
@@ -316,10 +316,10 @@ export interface Electron {
      * The behaviour is OS dependent. On macOS we use the `sips` utility, while
      * on Linux and Windows we use a `vips` bundled with our desktop app.
      *
-     * @param dataOrPathOrZipItem The file whose thumbnail we want to generate.
-     * It can be provided as raw image data (the contents of the image file), or
-     * the path to the image file, or a tuple containing the path of the zip
-     * file along with the name of an entry in it.
+     * @param pathOrZipItem The file whose thumbnail we want to generate. It can
+     * be provided as raw image data (the contents of the image file), or the
+     * path to the image file, or a tuple containing the path of the zip file
+     * along with the name of an entry in it.
      *
      * @param maxDimension The maximum width or height of the generated
      * thumbnail.
@@ -329,14 +329,13 @@ export interface Electron {
      * @returns JPEG data of the generated thumbnail.
      */
     generateImageThumbnail: (
-        dataOrPathOrZipItem: Uint8Array | string | ZipItem,
+        pathOrZipItem: string | ZipItem,
         maxDimension: number,
         maxSize: number,
     ) => Promise<Uint8Array>;
 
     /**
-     * Execute a FFmpeg {@link command} on the given
-     * {@link dataOrPathOrZipItem}.
+     * Execute a FFmpeg {@link command} on the given {@link pathOrZipItem}.
      *
      * This executes the command using a FFmpeg executable we bundle with our
      * desktop app. We also have a Wasm FFmpeg implementation that we use when
@@ -349,11 +348,11 @@ export interface Electron {
      * (respectively {@link inputPathPlaceholder},
      * {@link outputPathPlaceholder}, {@link ffmpegPathPlaceholder}).
      *
-     * @param dataOrPathOrZipItem The bytes of the input file, or the path to
-     * the input file on the user's local disk, or the path to a zip file on the
-     * user's disk and the name of an entry in it. In all three cases, the data
-     * gets serialized to a temporary file, and then that path gets substituted
-     * in the FFmpeg {@link command} in lieu of {@link inputPathPlaceholder}.
+     * @param pathOrZipItem The path to the input file on the user's local disk,
+     * or the path to a zip file on the user's disk and the name of an entry in
+     * it. In the second case, the data gets serialized to a temporary file, and
+     * then that path (or if it was already a path) gets substituted in the
+     * FFmpeg {@link command} in lieu of {@link inputPathPlaceholder}.
      *
      * @param outputFileExtension The extension (without the dot, e.g. "jpeg")
      * to use for the output file that we ask FFmpeg to create in
@@ -366,28 +365,52 @@ export interface Electron {
      */
     ffmpegExec: (
         command: FFmpegCommand,
-        dataOrPathOrZipItem: Uint8Array | string | ZipItem,
+        pathOrZipItem: string | ZipItem,
         outputFileExtension: string,
     ) => Promise<Uint8Array>;
 
-    // - ML
+    /**
+     * Determine the duration (in seconds) of the video  present at
+     * {@link pathOrZipItem} using ffmpeg.
+     *
+     * This is a bespoke variant of {@link ffmpegExec} for the sole purpose of
+     * retrieving the video duration.
+     *
+     * @param pathOrZipItem The input file whose duration we want to determine.
+     * For more details, see the documentation of the {@link ffmpegExec}
+     * parameter with the same name.
+     *
+     * @returns The duration (in seconds) of the video referred to by
+     * {@link pathOrZipItem}.
+     */
+    ffmpegDetermineVideoDuration: (
+        pathOrZipItem: string | ZipItem,
+    ) => Promise<number>;
+
+    // - Utility process
 
     /**
-     * Create a new ML worker, terminating the older ones (if any).
+     * Trigger the creation of a new utility process of the given {@link type},
+     * terminating the older ones (if any).
      *
      * This creates a new Node.js utility process, and sets things up so that we
      * can communicate directly with that utility process using a
-     * {@link MessagePort} that gets posted using "createMLWorker/port".
+     * {@link MessagePort} that gets posted on the "utilityProcessPort/<type>"
+     * channel.
      *
-     * At the other end of that port will be an object that conforms to the
-     * {@link ElectronMLWorker} interface.
+     * The code running in the utility process is determined by the specific
+     * value of {@link type}. Thus, att the other end of that port will be an
+     * object that conforms to:
+     *
+     * - {@link ElectronMLWorker} interface, when type is "ml".
      *
      * For more details about the IPC flow, see: [Note: ML IPC].
      *
      * Note: For simplicity of implementation, we assume that there is at most
-     * one outstanding call to {@link createMLWorker}.
+     * one outstanding call to {@link triggerCreateUtilityProcess} for a given
+     * {@link type}.
      */
-    createMLWorker: () => void;
+    triggerCreateUtilityProcess: (type: UtilityProcessType) => void;
 
     // - Watch
 
@@ -590,9 +613,12 @@ export interface Electron {
     clearPendingUploads: () => Promise<void>;
 }
 
+export type UtilityProcessType = "ml";
+
 /**
- * The shape of the object exposed by the Node.js ML worker process on the
- * message port that the web layer obtains by doing {@link createMLWorker}.
+ * The shape of the object exposed by the Node.js utility process listening on
+ * the other side message port that the web layer obtains by doing
+ * {@link triggerCreateUtilityProcess} with type "ml".
  */
 export interface ElectronMLWorker {
     /**

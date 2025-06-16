@@ -1,7 +1,6 @@
 import "dart:async";
 
 import 'package:fast_base58/fast_base58.dart';
-import "package:flutter/cupertino.dart";
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import "package:local_auth/local_auth.dart";
@@ -48,6 +47,7 @@ import "package:photos/utils/file_download_util.dart";
 import 'package:photos/utils/magic_util.dart';
 import 'package:photos/utils/navigation_util.dart';
 import "package:photos/utils/share_util.dart";
+import "package:photos/utils/standalone/simple_task_queue.dart";
 import "package:screenshot/screenshot.dart";
 
 class FileSelectionActionsWidget extends StatefulWidget {
@@ -134,6 +134,8 @@ class _FileSelectionActionsWidgetState
 
     final bool anyOwnedFiles =
         split.pendingUploads.isNotEmpty || split.ownedByCurrentUser.isNotEmpty;
+    final bool allOwnedFiles =
+        ownedAndPendingUploadFilesCount > 0 && split.ownedByOtherUsers.isEmpty;
 
     final bool anyUploadedFiles = split.ownedByCurrentUser.isNotEmpty;
     final showCollageOption = CollageCreatorPage.isValidCount(
@@ -259,7 +261,7 @@ class _FileSelectionActionsWidgetState
           icon: Icons.delete_outline,
           labelText: S.of(context).delete,
           onTap: anyOwnedFiles ? _onDeleteClick : null,
-          shouldShow: ownedAndPendingUploadFilesCount > 0,
+          shouldShow: allOwnedFiles,
         ),
       );
     }
@@ -885,12 +887,12 @@ class _FileSelectionActionsWidgetState
     );
     await dialog.show();
     try {
-      final downloadQueue = DownloadQueue(maxConcurrent: 5);
+      final taskQueue = SimpleTaskQueue(maxConcurrent: 5);
       final futures = <Future>[];
       for (final file in files) {
         if (file.localID == null) {
           futures.add(
-            downloadQueue.add(() async {
+            taskQueue.add(() async {
               await downloadToGallery(file);
               downloadedFiles++;
               dialog.update(

@@ -177,7 +177,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
                     bottom: child as PreferredSizeWidget,
                     surfaceTintColor: Colors.transparent,
                     scrolledUnderElevation: 4,
-                    shadowColor: Colors.black.withOpacity(0.15),
+                    shadowColor: Colors.black.withValues(alpha: 0.15),
                   );
                 },
               )
@@ -817,9 +817,10 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
           (galleryType != GalleryType.ownedCollection &&
               galleryType != GalleryType.sharedCollection &&
               galleryType != GalleryType.hiddenOwnedCollection &&
+              galleryType != GalleryType.favorite &&
               !isQuickLink)) {
         throw Exception(
-          "Cannot share empty collection of type $galleryType",
+          "Cannot share collection of type $galleryType",
         );
       }
       if (Configuration.instance.getUserID() == widget.collection!.owner.id) {

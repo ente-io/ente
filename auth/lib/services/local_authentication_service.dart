@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/ui/settings/lock_screen/lock_screen_password.dart';
 import 'package:ente_auth/ui/settings/lock_screen/lock_screen_pin.dart';
 import 'package:ente_auth/ui/tools/app_lock.dart';
@@ -42,7 +41,7 @@ class LocalAuthenticationService {
         isAuthenticatingForInAppChange: true,
       );
       AppLock.of(context)!.setEnabled(
-        await Configuration.instance.shouldShowLockScreen(),
+        await LockScreenSettings.instance.shouldShowLockScreen(),
       );
       if (!result) {
         showToast(context, infoMessage);
@@ -114,12 +113,13 @@ class LocalAuthenticationService {
       );
       if (result) {
         AppLock.of(context)!.setEnabled(shouldEnableLockScreen);
-        await Configuration.instance
+        await LockScreenSettings.instance
             .setSystemLockScreen(shouldEnableLockScreen);
         return true;
       } else {
-        AppLock.of(context)!
-            .setEnabled(await Configuration.instance.shouldShowLockScreen());
+        AppLock.of(context)!.setEnabled(
+          await LockScreenSettings.instance.shouldShowLockScreen(),
+        );
       }
     } else {
       // ignore: unawaited_futures

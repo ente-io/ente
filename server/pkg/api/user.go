@@ -548,12 +548,14 @@ func (h *UserHandler) SelfAccountRecovery(c *gin.Context) {
 	}
 	err := h.UserController.HandleSelfAccountRecovery(c, token)
 	if err != nil {
-		handler.Error(c, stacktrace.Propagate(err, ""))
+		logrus.WithError(err).
+			WithFields(logrus.Fields{
+				"req_id": requestid.Get(c),
+			}).Warning("Failed to handle self account recovery")
+		c.HTML(http.StatusOK, "account_recovery_error.html", gin.H{})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{
-		"message": "Account recovery successful",
-	})
+	c.HTML(http.StatusOK, "account_recovered.html", gin.H{})
 }
 
 // GetSRPAttributes returns the SRP attributes for a user
@@ -569,6 +571,10 @@ func (h *UserHandler) GetSRPAttributes(c *gin.Context) {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
 	}
+	logrus.WithFields(logrus.Fields{
+		"email":       request.Email,
+		"srp_user_id": response.SRPUserID,
+	}).Info("Sending SRP attributes")
 	c.JSON(http.StatusOK, gin.H{"attributes": response})
 }
 

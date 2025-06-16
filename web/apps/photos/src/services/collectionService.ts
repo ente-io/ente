@@ -1,27 +1,28 @@
-import { encryptMetadataJSON, sharedCryptoWorker } from "ente-base/crypto";
+import type { User } from "ente-accounts/services/user";
+import { ensureLocalUser } from "ente-accounts/services/user";
+import { sharedCryptoWorker } from "ente-base/crypto";
+import { isDevBuild } from "ente-base/env";
 import log from "ente-base/log";
 import { apiURL } from "ente-base/origins";
-import { UpdateMagicMetadataRequest } from "ente-gallery/services/file";
+import { ensureMasterKeyFromSession } from "ente-base/session";
 import { updateMagicMetadata } from "ente-gallery/services/magic-metadata";
 import {
     Collection,
-    CollectionMagicMetadata,
     CollectionMagicMetadataProps,
-    CollectionPublicMagicMetadata,
     CollectionSubType,
     type CollectionType,
-    CreatePublicAccessTokenRequest,
     EncryptedCollection,
-    PublicURL,
     RemoveFromCollectionRequest,
-    UpdatePublicURL,
 } from "ente-media/collection";
 import { EncryptedMagicMetadata, EnteFile } from "ente-media/file";
 import { ItemVisibility } from "ente-media/file-metadata";
 import {
     addToCollection,
+    collection1To2,
+    createCollection2,
     isDefaultHiddenCollection,
     moveToCollection,
+    renameCollection2,
 } from "ente-new/photos/services/collection";
 import type { CollectionSummary } from "ente-new/photos/services/collection/ui";
 import {
@@ -40,53 +41,64 @@ import {
 import HTTPService from "ente-shared/network/HTTPService";
 import { getData } from "ente-shared/storage/localStorage";
 import { getToken } from "ente-shared/storage/localStorage/helpers";
-import { getActualKey } from "ente-shared/user";
-import type { User } from "ente-shared/user/types";
 import { batch } from "ente-utils/array";
-import {
-    changeCollectionSubType,
-    isQuickLinkCollection,
-    isValidMoveTarget,
-} from "utils/collection";
-import { getPublicKey } from "./userService";
+import { isValidMoveTarget } from "utils/collection";
 
-const UNCATEGORIZED_COLLECTION_NAME = "Uncategorized";
-export const HIDDEN_COLLECTION_NAME = ".hidden";
-const FAVORITE_COLLECTION_NAME = "Favorites";
+const uncategorizedCollectionName = "Uncategorized";
+const defaultHiddenCollectionName = ".hidden";
+const favoritesCollectionName = "Favorites";
 
 const REQUEST_BATCH_SIZE = 1000;
 
-export const createAlbum = (albumName: string) => {
-    return createCollection(albumName, "album");
-};
+export const createAlbum = (albumName: string) =>
+    createCollection(albumName, "album");
+
+// TODO(C2):
+const enableC2 = () => isDevBuild && process.env.NEXT_PUBLIC_ENTE_WIP_NEWIMPL;
 
 const createCollection = async (
     collectionName: string,
     type: CollectionType,
     magicMetadataProps?: CollectionMagicMetadataProps,
 ): Promise<Collection> => {
+    if (enableC2()) {
+        const z = createCollection2(collectionName, type, magicMetadataProps);
+        z.then((x) => console.log(x));
+        return z;
+    }
+    return createCollection1(collectionName, type, magicMetadataProps);
+};
+
+const createCollection1 = async (
+    collectionName: string,
+    type: CollectionType,
+    magicMetadataProps?: CollectionMagicMetadataProps,
+): Promise<Collection> => {
     try {
         const cryptoWorker = await sharedCryptoWorker();
-        const encryptionKey = await getActualKey();
+        const masterKey = await ensureMasterKeyFromSession();
         const token = getToken();
-        const collectionKey = await cryptoWorker.generateEncryptionKey();
+        const collectionKey = await cryptoWorker.generateKey();
         const { encryptedData: encryptedKey, nonce: keyDecryptionNonce } =
-            await cryptoWorker.encryptToB64(collectionKey, encryptionKey);
+            await cryptoWorker.encryptBox(collectionKey, masterKey);
         const { encryptedData: encryptedName, nonce: nameDecryptionNonce } =
-            await cryptoWorker.encryptUTF8(collectionName, collectionKey);
+            await cryptoWorker.encryptBox(
+                new TextEncoder().encode(collectionName),
+                collectionKey,
+            );
+
         let encryptedMagicMetadata: EncryptedMagicMetadata;
         if (magicMetadataProps) {
             const magicMetadata = await updateMagicMetadata(magicMetadataProps);
-            const encryptedMagicMetadataProps =
-                await cryptoWorker.encryptMetadataJSON({
-                    jsonValue: magicMetadataProps,
-                    keyB64: collectionKey,
-                });
-
+            const { encryptedData, decryptionHeader } =
+                await cryptoWorker.encryptMetadataJSON(
+                    magicMetadataProps,
+                    collectionKey,
+                );
             encryptedMagicMetadata = {
                 ...magicMetadata,
-                data: encryptedMagicMetadataProps.encryptedDataB64,
-                header: encryptedMagicMetadataProps.decryptionHeaderB64,
+                data: encryptedData,
+                header: decryptionHeader,
             };
         }
         const newCollection: EncryptedCollection = {
@@ -108,7 +120,7 @@ const createCollection = async (
         const createdCollection = await postCollection(newCollection, token);
         const decryptedCreatedCollection = await getCollectionWithSecrets(
             createdCollection,
-            encryptionKey,
+            masterKey,
         );
         return decryptedCreatedCollection;
     } catch (e) {
@@ -134,9 +146,8 @@ const postCollection = async (
     }
 };
 
-export const createFavoritesCollection = () => {
-    return createCollection(FAVORITE_COLLECTION_NAME, "favorites");
-};
+export const createFavoritesCollection = () =>
+    createCollection(favoritesCollectionName, "favorites");
 
 export const addToFavorites = async (
     file: EnteFile,
@@ -331,279 +342,20 @@ export const deleteCollection = async (
     }
 };
 
-export const leaveSharedAlbum = async (collectionID: number) => {
-    try {
-        const token = getToken();
-
-        await HTTPService.post(
-            await apiURL(`/collections/leave/${collectionID}`),
-            null,
-            null,
-            { "X-Auth-Token": token },
-        );
-    } catch (e) {
-        log.error("leave shared album failed ", e);
-        throw e;
-    }
-};
-
-export const updateCollectionMagicMetadata = async (
-    collection: Collection,
-    updatedMagicMetadata: CollectionMagicMetadata,
-) => {
-    const token = getToken();
-    if (!token) {
-        return;
-    }
-
-    const { encryptedDataB64, decryptionHeaderB64 } = await encryptMetadataJSON(
-        { jsonValue: updatedMagicMetadata.data, keyB64: collection.key },
-    );
-
-    const reqBody: UpdateMagicMetadataRequest = {
-        id: collection.id,
-        magicMetadata: {
-            version: updatedMagicMetadata.version,
-            count: updatedMagicMetadata.count,
-            data: encryptedDataB64,
-            header: decryptionHeaderB64,
-        },
-    };
-
-    await HTTPService.put(
-        await apiURL("/collections/magic-metadata"),
-        reqBody,
-        null,
-        { "X-Auth-Token": token },
-    );
-    const updatedCollection: Collection = {
-        ...collection,
-        magicMetadata: {
-            ...updatedMagicMetadata,
-            version: updatedMagicMetadata.version + 1,
-        },
-    };
-    return updatedCollection;
-};
-
-export const updateSharedCollectionMagicMetadata = async (
-    collection: Collection,
-    updatedMagicMetadata: CollectionMagicMetadata,
-) => {
-    const token = getToken();
-    if (!token) {
-        return;
-    }
-
-    const { encryptedDataB64, decryptionHeaderB64 } = await encryptMetadataJSON(
-        { jsonValue: updatedMagicMetadata.data, keyB64: collection.key },
-    );
-    const reqBody: UpdateMagicMetadataRequest = {
-        id: collection.id,
-        magicMetadata: {
-            version: updatedMagicMetadata.version,
-            count: updatedMagicMetadata.count,
-            data: encryptedDataB64,
-            header: decryptionHeaderB64,
-        },
-    };
-
-    await HTTPService.put(
-        await apiURL("/collections/sharee-magic-metadata"),
-        reqBody,
-        null,
-        { "X-Auth-Token": token },
-    );
-    const updatedCollection: Collection = {
-        ...collection,
-        magicMetadata: {
-            ...updatedMagicMetadata,
-            version: updatedMagicMetadata.version + 1,
-        },
-    };
-    return updatedCollection;
-};
-
-export const updatePublicCollectionMagicMetadata = async (
-    collection: Collection,
-    updatedPublicMagicMetadata: CollectionPublicMagicMetadata,
-) => {
-    const token = getToken();
-    if (!token) {
-        return;
-    }
-
-    const { encryptedDataB64, decryptionHeaderB64 } = await encryptMetadataJSON(
-        { jsonValue: updatedPublicMagicMetadata.data, keyB64: collection.key },
-    );
-    const reqBody: UpdateMagicMetadataRequest = {
-        id: collection.id,
-        magicMetadata: {
-            version: updatedPublicMagicMetadata.version,
-            count: updatedPublicMagicMetadata.count,
-            data: encryptedDataB64,
-            header: decryptionHeaderB64,
-        },
-    };
-
-    await HTTPService.put(
-        await apiURL("/collections/public-magic-metadata"),
-        reqBody,
-        null,
-        { "X-Auth-Token": token },
-    );
-    const updatedCollection: Collection = {
-        ...collection,
-        pubMagicMetadata: {
-            ...updatedPublicMagicMetadata,
-            version: updatedPublicMagicMetadata.version + 1,
-        },
-    };
-    return updatedCollection;
-};
-
 export const renameCollection = async (
     collection: Collection,
     newCollectionName: string,
-) => {
-    if (isQuickLinkCollection(collection)) {
-        // Convert quick link collection to normal collection on rename
-        await changeCollectionSubType(collection, CollectionSubType.default);
-    }
-    const token = getToken();
-    const cryptoWorker = await sharedCryptoWorker();
-    const { encryptedData: encryptedName, nonce: nameDecryptionNonce } =
-        await cryptoWorker.encryptUTF8(newCollectionName, collection.key);
-    const collectionRenameRequest = {
-        collectionID: collection.id,
-        encryptedName,
-        nameDecryptionNonce,
-    };
-    await HTTPService.post(
-        await apiURL("/collections/rename"),
-        collectionRenameRequest,
-        null,
-        { "X-Auth-Token": token },
-    );
-};
+) => renameCollection2(await collection1To2(collection), newCollectionName);
 
-export const shareCollection = async (
-    collection: Collection,
-    withUserEmail: string,
-    role: string,
-) => {
-    try {
-        const cryptoWorker = await sharedCryptoWorker();
-        const token = getToken();
-        const publicKey: string = await getPublicKey(withUserEmail);
-        const encryptedKey = await cryptoWorker.boxSeal(
-            collection.key,
-            publicKey,
-        );
-        const shareCollectionRequest = {
-            collectionID: collection.id,
-            email: withUserEmail,
-            role: role,
-            encryptedKey,
-        };
-        await HTTPService.post(
-            await apiURL("/collections/share"),
-            shareCollectionRequest,
-            null,
-            { "X-Auth-Token": token },
-        );
-    } catch (e) {
-        log.error("share collection failed ", e);
-        throw e;
-    }
-};
-
-export const unshareCollection = async (
-    collection: Collection,
-    withUserEmail: string,
-) => {
-    try {
-        const token = getToken();
-        const shareCollectionRequest = {
-            collectionID: collection.id,
-            email: withUserEmail,
-        };
-        await HTTPService.post(
-            await apiURL("/collections/unshare"),
-            shareCollectionRequest,
-            null,
-            { "X-Auth-Token": token },
-        );
-    } catch (e) {
-        log.error("unshare collection failed ", e);
-    }
-};
-
-export const createShareableURL = async (collection: Collection) => {
-    try {
-        const token = getToken();
-        if (!token) {
-            return null;
-        }
-        const createPublicAccessTokenRequest: CreatePublicAccessTokenRequest = {
-            collectionID: collection.id,
-        };
-        const resp = await HTTPService.post(
-            await apiURL("/collections/share-url"),
-            createPublicAccessTokenRequest,
-            null,
-            { "X-Auth-Token": token },
-        );
-        return resp.data.result as PublicURL;
-    } catch (e) {
-        log.error("createShareableURL failed ", e);
-        throw e;
-    }
-};
-
-export const deleteShareableURL = async (collection: Collection) => {
-    try {
-        const token = getToken();
-        if (!token) {
-            return null;
-        }
-        await HTTPService.delete(
-            await apiURL(`/collections/share-url/${collection.id}`),
-            null,
-            null,
-            { "X-Auth-Token": token },
-        );
-    } catch (e) {
-        log.error("deleteShareableURL failed ", e);
-        throw e;
-    }
-};
-
-export const updateShareableURL = async (
-    request: UpdatePublicURL,
-): Promise<PublicURL> => {
-    try {
-        const token = getToken();
-        if (!token) {
-            return null;
-        }
-        const res = await HTTPService.put(
-            await apiURL("/collections/share-url"),
-            request,
-            null,
-            { "X-Auth-Token": token },
-        );
-        return res.data.result as PublicURL;
-    } catch (e) {
-        log.error("updateShareableURL failed ", e);
-        throw e;
-    }
-};
-
+/**
+ * Return the user's own favorites collection, if any.
+ */
 export const getFavCollection = async () => {
     const collections = await getLocalCollections();
+    const userID = ensureLocalUser().id;
     for (const collection of collections) {
-        if (collection.type == "favorites") {
+        // See: [Note: User and shared favorites]
+        if (collection.type == "favorites" && collection.owner.id == userID) {
             return collection;
         }
     }
@@ -627,9 +379,7 @@ export const sortCollectionSummaries = (
                     return (b.updationTime ?? 0) - (a.updationTime ?? 0);
             }
         })
-        // TODO:
-        // eslint-disable-next-line no-constant-binary-expression
-        .sort((a, b) => b.order ?? 0 - a.order ?? 0)
+        .sort((a, b) => (b.order ?? 0) - (a.order ?? 0))
         .sort(
             (a, b) =>
                 CollectionSummaryOrder.get(a.type) -
@@ -667,9 +417,8 @@ export async function getUncategorizedCollection(
     return uncategorizedCollection;
 }
 
-export function createUnCategorizedCollection() {
-    return createCollection(UNCATEGORIZED_COLLECTION_NAME, "uncategorized");
-}
+export const createUnCategorizedCollection = () =>
+    createCollection(uncategorizedCollectionName, "uncategorized");
 
 export async function getDefaultHiddenCollection(): Promise<Collection> {
     const collections = await getLocalCollections("hidden");
@@ -680,18 +429,17 @@ export async function getDefaultHiddenCollection(): Promise<Collection> {
     return hiddenCollection;
 }
 
-export function createHiddenCollection() {
-    return createCollection(HIDDEN_COLLECTION_NAME, "album", {
+const createDefaultHiddenCollection = () =>
+    createCollection(defaultHiddenCollectionName, "album", {
         subType: CollectionSubType.defaultHidden,
         visibility: ItemVisibility.hidden,
     });
-}
 
 export async function moveToHiddenCollection(files: EnteFile[]) {
     try {
         let hiddenCollection = await getDefaultHiddenCollection();
         if (!hiddenCollection) {
-            hiddenCollection = await createHiddenCollection();
+            hiddenCollection = await createDefaultHiddenCollection();
         }
         const groupedFiles = groupFilesByCollectionID(files);
         for (const [collectionID, files] of groupedFiles.entries()) {

@@ -53,6 +53,10 @@ export const sidebar = [
                     },
                     { text: "Map", link: "/photos/features/map" },
                     {
+                        text: "Notifications",
+                        link: "/photos/features/notifications",
+                    },
+                    {
                         text: "Passkeys",
                         link: "/photos/features/passkeys",
                     },
@@ -265,33 +269,26 @@ export const sidebar = [
                 items: [
                     { text: "Introduction", link: "/self-hosting/guides/" },
                     {
-                        text: "Hosting Ente from source",
-                        link: "/self-hosting/guides/from-source",
-                    },
-                    {
-                        text: "Hosting Ente without Docker",
-                        link: "/self-hosting/guides/standalone-ente",
-                    },
-                    {
                         text: "Administering your server",
                         link: "/self-hosting/guides/admin",
                     },
                     {
-                        text: "Configure CLI for self hosted instance",
+                        text: "Configuring CLI for your instance",
                         link: "/self-hosting/guides/selfhost-cli",
                     },
                     {
-                        text: "DB migration",
-                        link: "/self-hosting/guides/db-migration",
+                        text: "Running Ente from source",
+                        link: "/self-hosting/guides/from-source",
                     },
                     {
-                        text: "Mobile build",
-                        link: "/self-hosting/guides/mobile-build",
+                        text: "Running Ente without Docker",
+                        link: "/self-hosting/guides/standalone-ente",
                     },
                 ],
             },
             {
                 text: "Troubleshooting",
+                collapsed: true,
                 items: [
                     {
                         text: "General",
@@ -299,7 +296,7 @@ export const sidebar = [
                     },
                     {
                         text: "Bucket CORS",
-                        link: '/self-hosting/troubleshooting/bucket-cors'
+                        link: "/self-hosting/troubleshooting/bucket-cors",
                     },
                     {
                         text: "Uploads",
@@ -310,10 +307,6 @@ export const sidebar = [
                         link: "/self-hosting/troubleshooting/docker",
                     },
                     {
-                        text: "Yarn",
-                        link: "/self-hosting/troubleshooting/yarn",
-                    },
-                    {
                         text: "Ente CLI secrets",
                         link: "/self-hosting/troubleshooting/keyring",
                     },
@@ -321,19 +314,21 @@ export const sidebar = [
             },
             {
                 text: "Community Guides",
-                items :[
+                collapsed: true,
+                items: [
                     {
                         text: "Ente via Tailscale",
-                        link: "/self-hosting/guides/Tailscale",
+                        link: "/self-hosting/guides/tailscale",
                     },
                     {
                         text: "Ente with External S3",
                         link: "/self-hosting/guides/external-s3",
-                    }                
-                ]
+                    },
+                ],
             },
             {
                 text: "FAQ",
+                collapsed: true,
                 items: [
                     { text: "General", link: "/self-hosting/faq/" },
                     {
@@ -348,16 +343,12 @@ export const sidebar = [
                         text: "Backups",
                         link: "/self-hosting/faq/backup",
                     },
+                    {
+                        text: "Environment variables",
+                        link: "/self-hosting/faq/environment",
+                    },
                 ],
             },
         ],
-    },
-    {
-        text: "About",
-        link: "/about/",
-    },
-    {
-        text: "Contribute",
-        link: "/about/contribute",
     },
 ];

@@ -7,7 +7,7 @@ import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/actions/file/file_actions.dart";
 import "package:photos/ui/common/loading_widget.dart";
-import "package:photos/ui/viewer/file/preview_status_widget.dart";
+import "package:photos/ui/viewer/file/video_stream_change.dart";
 import "package:photos/utils/standalone/date_time.dart";
 import "package:photos/utils/standalone/debouncer.dart";
 
@@ -132,7 +132,7 @@ class _VideoWidgetState extends State<VideoWidget> {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              PreviewStatusWidget(
+                              VideoStreamChangeWidget(
                                 showControls: value,
                                 file: widget.file,
                                 isPreviewPlayer: widget.isPreviewPlayer,
@@ -217,7 +217,7 @@ class _PlayPauseButtonState extends State<PlayPauseButtonMediaKit> {
         width: 54,
         height: 54,
         decoration: BoxDecoration(
-          color: Colors.black.withOpacity(0.3),
+          color: Colors.black.withValues(alpha: 0.3),
           shape: BoxShape.circle,
           border: Border.all(
             color: strokeFaintDark,
@@ -276,7 +276,7 @@ class SeekBarAndDuration extends StatelessWidget {
           4,
         ),
         decoration: BoxDecoration(
-          color: Colors.black.withOpacity(0.3),
+          color: Colors.black.withValues(alpha: 0.3),
           borderRadius: const BorderRadius.all(
             Radius.circular(8),
           ),
@@ -420,13 +420,12 @@ class _SeekBarState extends State<SeekBar> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
     return SliderTheme(
       data: SliderTheme.of(context).copyWith(
         trackHeight: 1.0,
         thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8.0),
         overlayShape: const RoundSliderOverlayShape(overlayRadius: 14.0),
-        activeTrackColor: colorScheme.primary300,
+        activeTrackColor: backgroundElevatedLight,
         inactiveTrackColor: fillMutedDark,
         thumbColor: backgroundElevatedLight,
         overlayColor: fillMutedDark,

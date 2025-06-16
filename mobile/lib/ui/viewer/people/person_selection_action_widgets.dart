@@ -7,7 +7,6 @@ import "package:photos/core/event_bus.dart";
 import "package:photos/events/people_changed_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
-import "package:photos/models/file/file.dart";
 import "package:photos/models/ml/face/person.dart";
 import "package:photos/models/typedefs.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
@@ -17,20 +16,9 @@ import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/dialog_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/notification/toast.dart";
-import "package:photos/ui/viewer/file/no_thumbnail_widget.dart";
-import "package:photos/ui/viewer/search/result/person_face_widget.dart";
+import "package:photos/ui/viewer/people/person_face_widget.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/person_contact_linking_util.dart";
-
-class PersonEntityWithThumbnailFile {
-  final PersonEntity person;
-  final EnteFile? thumbnailFile;
-
-  const PersonEntityWithThumbnailFile(
-    this.person,
-    this.thumbnailFile,
-  );
-}
 
 class LinkContactToPersonSelectionPage extends StatefulWidget {
   final String? emailToLink;
@@ -46,25 +34,21 @@ class LinkContactToPersonSelectionPage extends StatefulWidget {
 
 class _LinkContactToPersonSelectionPageState
     extends State<LinkContactToPersonSelectionPage> {
-  late Future<List<PersonEntityWithThumbnailFile>>
-      _personEntitiesWithThumnailFile;
+  late Future<List<PersonEntity>> _personEntities;
   final _logger = Logger('LinkContactToPersonSelectionPage');
 
   @override
   void initState() {
     super.initState();
 
-    _personEntitiesWithThumnailFile =
-        PersonService.instance.getPersons().then((persons) async {
-      final List<PersonEntityWithThumbnailFile> result = [];
+    _personEntities = PersonService.instance.getPersons().then((persons) async {
+      final List<PersonEntity> result = [];
       for (final person in persons) {
         if ((person.data.email != null && person.data.email!.isNotEmpty) ||
             (person.data.isHidden || person.data.isIgnored)) {
           continue;
         }
-        final file =
-            await PersonService.instance.getThumbnailFileOfPerson(person);
-        result.add(PersonEntityWithThumbnailFile(person, file));
+        result.add(person);
       }
       return result;
     });
@@ -85,14 +69,14 @@ class _LinkContactToPersonSelectionPageState
         ),
         centerTitle: false,
       ),
-      body: FutureBuilder<List<PersonEntityWithThumbnailFile>>(
-        future: _personEntitiesWithThumnailFile,
+      body: FutureBuilder<List<PersonEntity>>(
+        future: _personEntities,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: EnteLoadingWidget());
           } else if (snapshot.hasError) {
             _logger.severe(
-              "Failed to load _personEntitiesWithThumnailFile",
+              "Failed to load _personEntities",
               snapshot.error,
               snapshot.stackTrace,
             );
@@ -131,7 +115,7 @@ class _LinkContactToPersonSelectionPageState
                       final updatedPerson = await linkPersonToContact(
                         context,
                         emailToLink: widget.emailToLink!,
-                        personEntity: results[index].person,
+                        personEntity: results[index],
                       );
 
                       if (updatedPerson != null) {
@@ -143,7 +127,7 @@ class _LinkContactToPersonSelectionPageState
                     }
                   },
                   itemSize: itemSize,
-                  personEntitiesWithThumbnailFile: results[index],
+                  personEntity: results[index],
                 );
               },
             );
@@ -159,7 +143,8 @@ class _LinkContactToPersonSelectionPageState
     required PersonEntity personEntity,
   }) async {
     if (await checkIfEmailAlreadyAssignedToAPerson(emailToLink)) {
-      throw Exception("Email already linked to a person");
+      await showAlreadyLinkedEmailDialog(context, emailToLink);
+      return null;
     }
 
     final personName = personEntity.data.name;
@@ -221,25 +206,21 @@ class ReassignMeSelectionPage extends StatefulWidget {
 }
 
 class _ReassignMeSelectionPageState extends State<ReassignMeSelectionPage> {
-  late Future<List<PersonEntityWithThumbnailFile>>
-      _personEntitiesWithThumnailFile;
+  late Future<List<PersonEntity>> _personEntities;
   final _logger = Logger('ReassignMeSelectionPage');
 
   @override
   void initState() {
     super.initState();
 
-    _personEntitiesWithThumnailFile =
-        PersonService.instance.getPersons().then((persons) async {
-      final List<PersonEntityWithThumbnailFile> result = [];
+    _personEntities = PersonService.instance.getPersons().then((persons) async {
+      final List<PersonEntity> result = [];
       for (final person in persons) {
         if ((person.data.email != null && person.data.email!.isNotEmpty) ||
             (person.data.isHidden || person.data.isIgnored)) {
           continue;
         }
-        final file =
-            await PersonService.instance.getThumbnailFileOfPerson(person);
-        result.add(PersonEntityWithThumbnailFile(person, file));
+        result.add(person);
       }
       return result;
     });
@@ -260,8 +241,8 @@ class _ReassignMeSelectionPageState extends State<ReassignMeSelectionPage> {
         ),
         centerTitle: false,
       ),
-      body: FutureBuilder<List<PersonEntityWithThumbnailFile>>(
-        future: _personEntitiesWithThumnailFile,
+      body: FutureBuilder<List<PersonEntity>>(
+        future: _personEntities,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: EnteLoadingWidget());
@@ -310,12 +291,11 @@ class _ReassignMeSelectionPageState extends State<ReassignMeSelectionPage> {
                     try {
                       await reassignMe(
                         currentPersonID: widget.currentMeId,
-                        newPersonID: results[index].person.remoteID,
+                        newPersonID: results[index].remoteID,
                       );
                       showToast(
                         context,
-                        context.l10n
-                            .reassignedToName(results[index].person.data.name),
+                        context.l10n.reassignedToName(results[index].data.name),
                       );
                       await Future.delayed(const Duration(milliseconds: 1250));
                       unawaited(dialog.hide());
@@ -328,7 +308,7 @@ class _ReassignMeSelectionPageState extends State<ReassignMeSelectionPage> {
                     }
                   },
                   itemSize: itemSize,
-                  personEntitiesWithThumbnailFile: results[index],
+                  personEntity: results[index],
                 );
               },
             );
@@ -374,12 +354,12 @@ class _ReassignMeSelectionPageState extends State<ReassignMeSelectionPage> {
 class _RoundedPersonFaceWidget extends StatelessWidget {
   final FutureVoidCallback onTap;
   final double itemSize;
-  final PersonEntityWithThumbnailFile personEntitiesWithThumbnailFile;
+  final PersonEntity personEntity;
 
   const _RoundedPersonFaceWidget({
     required this.onTap,
     required this.itemSize,
-    required this.personEntitiesWithThumbnailFile,
+    required this.personEntity,
   });
 
   double get borderRadius => 82 * (itemSize / 102);
@@ -425,14 +405,10 @@ class _RoundedPersonFaceWidget extends StatelessWidget {
                         ),
                       ),
                     ),
-                    child: personEntitiesWithThumbnailFile.thumbnailFile == null
-                        ? const NoThumbnailWidget(addBorder: false)
-                        : PersonFaceWidget(
-                            personEntitiesWithThumbnailFile.thumbnailFile!,
-                            personId:
-                                personEntitiesWithThumbnailFile.person.remoteID,
-                            useFullFile: true,
-                          ),
+                    child: PersonFaceWidget(
+                      personId: personEntity.remoteID,
+                      useFullFile: true,
+                    ),
                   ),
                 ),
               ),
@@ -441,7 +417,7 @@ class _RoundedPersonFaceWidget extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(top: 6, bottom: 0),
             child: Text(
-              personEntitiesWithThumbnailFile.person.data.name,
+              personEntity.data.name,
               maxLines: 1,
               textAlign: TextAlign.center,
               overflow: TextOverflow.ellipsis,

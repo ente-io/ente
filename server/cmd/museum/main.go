@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	b64 "encoding/base64"
 	"fmt"
-	"github.com/ente-io/museum/pkg/controller/collections"
 	"net/http"
 	"os"
 	"os/signal"
@@ -14,6 +13,8 @@ import (
 	"strings"
 	"syscall"
 	"time"
+
+	"github.com/ente-io/museum/pkg/controller/collections"
 
 	"github.com/ente-io/museum/ente/base"
 	"github.com/ente-io/museum/pkg/controller/emergency"
@@ -263,6 +264,7 @@ func main() {
 		TrashRepository:       trashRepo,
 		UserRepo:              userRepo,
 		UsageCtrl:             usageController,
+		AccessCtrl:            accessCtrl,
 		CollectionRepo:        collectionRepo,
 		TaskLockingRepo:       taskLockingRepo,
 		DiscordController:     discordController,
@@ -374,6 +376,7 @@ func main() {
 	p.ReqCntURLLabelMappingFn = urlSanitizer
 	server.Use(p.HandlerFunc())
 
+	server.LoadHTMLGlob("web-templates/*")
 	// note: the recover middleware must be in the last
 
 	server.Use(requestid.New(
@@ -920,8 +923,8 @@ func setupAndStartCrons(userAuthRepo *repo.UserAuthRepository, publicCollectionR
 	})
 
 	schedule(c, "@every 24h", func() {
-		_ = userAuthRepo.RemoveDeletedTokens(timeUtil.MicrosecondBeforeDays(30))
-		_ = castDb.DeleteOldSessions(context.Background(), timeUtil.MicrosecondBeforeDays(7))
+		_ = userAuthRepo.RemoveDeletedTokens(timeUtil.MicrosecondsBeforeDays(30))
+		_ = castDb.DeleteOldSessions(context.Background(), timeUtil.MicrosecondsBeforeDays(7))
 		_ = publicCollectionRepo.CleanupAccessHistory(context.Background())
 	})
 
@@ -988,6 +991,10 @@ func setupAndStartCrons(userAuthRepo *repo.UserAuthRepository, publicCollectionR
 		emailNotificationCtrl.SendStorageLimitExceededMails()
 	})
 
+	scheduleAndRun(c, "@every 24h", func() {
+		emailNotificationCtrl.SayHelloToCustomers()
+	})
+
 	schedule(c, "@every 1m", func() {
 		pushController.SendPushes()
 	})
@@ -1008,7 +1015,7 @@ func cors() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Writer.Header().Set("Access-Control-Allow-Origin", c.GetHeader("Origin"))
 		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
-		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, X-Auth-Token, X-Auth-Access-Token, X-Cast-Access-Token, X-Auth-Access-Token-JWT, X-Client-Package, X-Client-Version, Authorization, accept, origin, Cache-Control, X-Requested-With, upgrade-insecure-requests")
+		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, X-Auth-Token, X-Auth-Access-Token, X-Cast-Access-Token, X-Auth-Access-Token-JWT, X-Client-Package, X-Client-Version, Authorization, accept, origin, Cache-Control, X-Requested-With, upgrade-insecure-requests, Range")
 		c.Writer.Header().Set("Access-Control-Expose-Headers", "X-Request-Id")
 		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT, PATCH, DELETE")
 		c.Writer.Header().Set("Access-Control-Max-Age", "1728000")

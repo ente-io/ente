@@ -56,10 +56,11 @@ Future<void> share(
       if (path == null) continue;
       xFiles.add(XFile(path));
     }
-    await Share.shareXFiles(
-      xFiles,
-      // required for ipad https://github.com/flutter/flutter/issues/47220#issuecomment-608453383
-      sharePositionOrigin: shareButtonRect(context, shareButtonKey),
+    await SharePlus.instance.share(
+      ShareParams(
+        files: xFiles,
+        sharePositionOrigin: shareButtonRect(context, shareButtonKey),
+      ),
     );
   } catch (e, s) {
     _logger.severe(
@@ -101,9 +102,11 @@ Future<ShareResult> shareText(
 }) async {
   try {
     final sharePosOrigin = _sharePosOrigin(context, key);
-    return Share.share(
-      text,
-      sharePositionOrigin: sharePosOrigin,
+    return SharePlus.instance.share(
+      ShareParams(
+        text: text,
+        sharePositionOrigin: sharePosOrigin,
+      ),
     );
   } catch (e, s) {
     _logger.severe("failed to share text", e, s);
@@ -234,16 +237,18 @@ Future<void> shareImageAndUrl(
   GlobalKey? key,
 }) async {
   final sharePosOrigin = _sharePosOrigin(context, key);
-  await Share.shareXFiles(
-    [
-      XFile.fromData(
-        imageBytes,
-        name: 'placeholder_image.png',
-        mimeType: 'image/png',
-      ),
-    ],
-    text: url,
-    sharePositionOrigin: sharePosOrigin,
+  await SharePlus.instance.share(
+    ShareParams(
+      files: [
+        XFile.fromData(
+          imageBytes,
+          name: 'placeholder_image.png',
+          mimeType: 'image/png',
+        ),
+      ],
+      text: url,
+      sharePositionOrigin: sharePosOrigin,
+    ),
   );
 }
 

@@ -60,7 +60,7 @@ class NotificationWidget extends StatelessWidget {
         subTextStyle = textTheme.miniMuted;
         strokeColorScheme = colorScheme;
         boxShadow = [
-          BoxShadow(color: Colors.black.withOpacity(0.25), blurRadius: 1),
+          BoxShadow(color: Colors.black.withValues(alpha: 0.25), blurRadius: 1),
         ];
         break;
       case NotificationType.goldenBanner:

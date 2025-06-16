@@ -16,24 +16,29 @@ import {
     stashedRedirect,
     unstashRedirect,
 } from "ente-accounts/services/redirect";
-import { configureSRP } from "ente-accounts/services/srp";
-import type {
-    SRPAttributes,
-    SRPSetupAttributes,
-} from "ente-accounts/services/srp-remote";
-import { getSRPAttributes } from "ente-accounts/services/srp-remote";
 import {
-    putAttributes,
+    getSRPAttributes,
+    setupSRP,
+    unstashAndUseSRPSetupAttributes,
+    type SRPAttributes,
+} from "ente-accounts/services/srp";
+import type { KeyAttributes, User } from "ente-accounts/services/user";
+import {
+    putUserKeyAttributes,
     sendOTT,
     verifyEmail,
 } from "ente-accounts/services/user";
 import { LinkButton } from "ente-base/components/LinkButton";
 import { LoadingIndicator } from "ente-base/components/loaders";
-import { useBaseContext } from "ente-base/context";
-import log from "ente-base/log";
-import SingleInputForm, {
+import {
+    SingleInputForm,
     type SingleInputFormProps,
-} from "ente-shared/components/SingleInputForm";
+} from "ente-base/components/SingleInputForm";
+import { useBaseContext } from "ente-base/context";
+import { isDevBuild } from "ente-base/env";
+import { isHTTPErrorWithStatus } from "ente-base/http";
+import log from "ente-base/log";
+import { clearSessionStorage } from "ente-base/session";
 import { ApiError } from "ente-shared/error";
 import localForage from "ente-shared/storage/localForage";
 import { getData, setData, setLSUser } from "ente-shared/storage/localStorage";
@@ -41,8 +46,6 @@ import {
     getLocalReferralSource,
     setIsFirstLogin,
 } from "ente-shared/storage/localStorage/helpers";
-import { clearKeys } from "ente-shared/storage/sessionStorage";
-import type { KeyAttributes, User } from "ente-shared/user/types";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
@@ -77,11 +80,12 @@ const Page: React.FC = () => {
         void main();
     }, [router]);
 
-    const onSubmit: SingleInputFormProps["callback"] = async (
+    const onSubmit: SingleInputFormProps["onSubmit"] = async (
         ott,
         setFieldError,
     ) => {
         try {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             const referralSource = getLocalReferralSource()?.trim();
             const cleanedReferral = referralSource
                 ? `web:${referralSource}`
@@ -137,30 +141,35 @@ const Page: React.FC = () => {
                     setData("keyAttributes", keyAttributes);
                     setData("originalKeyAttributes", keyAttributes);
                 } else {
-                    if (getData("originalKeyAttributes")) {
-                        await putAttributes(
-                            token!,
-                            getData("originalKeyAttributes"),
-                        );
+                    const originalKeyAttributes = getData(
+                        "originalKeyAttributes",
+                    );
+                    if (originalKeyAttributes) {
+                        await putUserKeyAttributes(originalKeyAttributes);
                     }
-                    if (getData("srpSetupAttributes")) {
-                        const srpSetupAttributes: SRPSetupAttributes =
-                            getData("srpSetupAttributes");
-                        await configureSRP(srpSetupAttributes);
-                    }
+                    await unstashAndUseSRPSetupAttributes(setupSRP);
+                }
+                // TODO(RE): Temporary safety valve before removing the
+                // unnecessary clear (tag: Migration)
+                if (isDevBuild && (await localForage.length()) > 0) {
+                    throw new Error("Local forage is not empty");
                 }
                 await localForage.clear();
                 setIsFirstLogin(true);
                 const redirectURL = unstashRedirect();
                 if (keyAttributes?.encryptedKey) {
-                    clearKeys();
+                    clearSessionStorage();
                     void router.push(redirectURL ?? "/credentials");
                 } else {
                     void router.push(redirectURL ?? "/generate");
                 }
             }
         } catch (e) {
-            if (e instanceof ApiError) {
+            if (isHTTPErrorWithStatus(e, 401)) {
+                setFieldError(t("invalid_code_error"));
+            } else if (isHTTPErrorWithStatus(e, 410)) {
+                setFieldError(t("expired_code_error"));
+            } else if (e instanceof ApiError) {
                 // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
                 if (e?.httpStatusCode === HttpStatusCode.Unauthorized) {
                     setFieldError(t("invalid_code_error"));
@@ -170,7 +179,7 @@ const Page: React.FC = () => {
                 }
             } else {
                 log.error("OTT verification failed", e);
-                setFieldError(t("generic_error_retry"));
+                throw e;
             }
         }
     };
@@ -236,11 +245,10 @@ const Page: React.FC = () => {
                 {t("check_inbox_hint")}
             </Typography>
             <SingleInputForm
-                fieldType="text"
                 autoComplete="one-time-code"
-                placeholder={t("verification_code")}
-                buttonText={t("verify")}
-                callback={onSubmit}
+                label={t("verification_code")}
+                submitButtonTitle={t("verify")}
+                onSubmit={onSubmit}
             />
 
             <AccountsPageFooter>

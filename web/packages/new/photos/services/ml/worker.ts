@@ -1,7 +1,7 @@
 import { expose, wrap } from "comlink";
-import { clientPackageName } from "ente-base/app";
+import { clientIdentifier } from "ente-base/app";
 import { assertionFailed } from "ente-base/assert";
-import { isHTTP4xxError } from "ente-base/http";
+import { isHTTP4xxError, isHTTPErrorWithStatus } from "ente-base/http";
 import log from "ente-base/log";
 import { logUnhandledErrorsAndRejectionsInWorker } from "ente-base/log-web";
 import type { ElectronMLWorker } from "ente-base/types/ipc";
@@ -9,7 +9,7 @@ import { isNetworkDownloadError } from "ente-gallery/services/download";
 import type { ProcessableUploadItem } from "ente-gallery/services/upload";
 import { fileLogID, type EnteFile } from "ente-media/file";
 import { wait } from "ente-utils/promise";
-import { getAllLocalFiles, getLocalTrashedFiles } from "../files";
+import { getAllLocalFiles, getLocalTrashFileIDs } from "../files";
 import {
     createImageBitmapAndData,
     fetchRenderableBlob,
@@ -236,13 +236,15 @@ export class MLWorker {
         // If there is items remaining,
         if (items.length > 0) {
             // Index them.
-            const allSuccess = await indexNextBatch(
+            const indexedCount = await indexNextBatch(
                 items,
                 this.electron!,
                 this.delegate,
             );
-            if (allSuccess) {
-                // Everything is running smoothly. Reset the idle duration.
+            if (indexedCount > 0) {
+                // We made some progress, so there are no complete blockers
+                // (e.g. network being offline). Reset the idle duration and
+                // move on to the next batch (if any).
                 this.idleDuration = idleDurationStart;
                 // And tick again.
                 scheduleTick();
@@ -315,10 +317,10 @@ export class MLWorker {
      * after we have fetched the latest cgroups from remote (so that we do no
      * overwrite any remote updates).
      *
-     * @param masterKey The user's master key, required for updating remote
-     * cgroups if needed.
+     * @param masterKey The user's master key (as a base64 string), required for
+     * updating remote cgroups if needed.
      */
-    async clusterFaces(masterKey: Uint8Array) {
+    async clusterFaces(masterKey: string) {
         const { clusters, modifiedClusterIDs } = await _clusterFaces(
             await savedFaceIndexes(),
             await getAllLocalFiles(),
@@ -348,11 +350,7 @@ logUnhandledErrorsAndRejectionsInWorker();
 /**
  * Index the given batch of items.
  *
- * Returns `false` to indicate that either an error occurred, or that we cannot
- * currently process files since we don't have network connectivity.
- *
- * Which means that when it returns true, all is well and if there are more
- * things pending to process, we should chug along at full speed.
+ * @returns the count of items which were indexed.
  */
 const indexNextBatch = async (
     items: IndexableItem[],
@@ -364,7 +362,7 @@ const indexNextBatch = async (
     // were able to upload just a bit ago but don't have network now.
     if (!self.navigator.onLine) {
         log.info("Skipping ML indexing since we are not online");
-        return false;
+        return 0;
     }
 
     // Keep track if any of the items failed.
@@ -411,14 +409,16 @@ const indexNextBatch = async (
     // Clear any cached CLIP indexes, since now we might have new ones.
     clearCachedCLIPIndexes();
 
+    const indexedCount = items.length - failureCount;
+
     log.info(
         failureCount > 0
-            ? `Indexed ${items.length - failureCount} files (${failureCount} failed)`
+            ? `Indexed ${indexedCount} files (${failureCount} failed)`
             : `Indexed ${items.length} files`,
     );
 
-    // Return true if nothing failed.
-    return failureCount == 0;
+    // Return the count of indexed files.
+    return indexedCount;
 };
 
 /**
@@ -438,11 +438,9 @@ const syncWithLocalFilesAndGetFilesToIndex = async (
     const localFiles = await getAllLocalFiles();
     const localFileByID = new Map(localFiles.map((f) => [f.id, f]));
 
-    const localTrashFileIDs = (await getLocalTrashedFiles()).map((f) => f.id);
-
     await updateAssumingLocalFiles(
         Array.from(localFileByID.keys()),
-        localTrashFileIDs,
+        await getLocalTrashFileIDs(),
     );
 
     const fileIDsToIndex = await getIndexableFileIDs(count);
@@ -592,13 +590,13 @@ const index = async (
 
         const remoteFaceIndex = existingRemoteFaceIndex ?? {
             version: faceIndexingVersion,
-            client: clientPackageName,
+            client: clientIdentifier,
             ...faceIndex,
         };
 
         const remoteCLIPIndex = existingRemoteCLIPIndex ?? {
             version: clipIndexingVersion,
-            client: clientPackageName,
+            client: clientIdentifier,
             ...clipIndex,
         };
 
@@ -616,10 +614,18 @@ const index = async (
         log.debug(() => ["Uploading ML data", rawMLData]);
 
         try {
-            await putMLData(file, rawMLData);
+            const lastUpdatedAt = remoteMLData?.updatedAt ?? 0;
+            await putMLData(file, rawMLData, lastUpdatedAt);
         } catch (e) {
             // See: [Note: Transient and permanent indexing failures]
-            if (isHTTP4xxError(e)) await markIndexingFailed(fileID);
+            if (isHTTP4xxError(e)) {
+                // 409 Conflict indicates that we tried overwriting existing
+                // mldata. Don't mark it as a failure, the file has already been
+                // processed.
+                if (!isHTTPErrorWithStatus(e, 409)) {
+                    await markIndexingFailed(fileID);
+                }
+            }
             throw e;
         }
 

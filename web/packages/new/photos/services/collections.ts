@@ -8,6 +8,7 @@
 import { sharedCryptoWorker } from "ente-base/crypto";
 import log from "ente-base/log";
 import { apiURL } from "ente-base/origins";
+import { ensureMasterKeyFromSession } from "ente-base/session";
 import {
     type Collection,
     type CollectionMagicMetadata,
@@ -30,8 +31,8 @@ import HTTPService from "ente-shared/network/HTTPService";
 import localForage from "ente-shared/storage/localForage";
 import { getData } from "ente-shared/storage/localStorage";
 import { getToken } from "ente-shared/storage/localStorage/helpers";
-import { getActualKey } from "ente-shared/user";
 import { isHiddenCollection } from "./collection";
+import { ensureUserKeyPair } from "./user";
 
 const COLLECTION_TABLE = "collections";
 const HIDDEN_COLLECTION_IDS = "hidden-collection-ids";
@@ -88,9 +89,10 @@ export const syncCollections = async () => {
     let lastCollectionUpdationTime = await getCollectionUpdationTime();
     const hiddenCollectionIDs = await getHiddenCollectionIDs();
     const token = getToken();
-    const key = await getActualKey();
+    const masterKey = await ensureMasterKeyFromSession();
     const updatedCollections =
-        (await getCollections(token, lastCollectionUpdationTime, key)) ?? [];
+        (await getCollections(token, lastCollectionUpdationTime, masterKey)) ??
+        [];
     if (updatedCollections.length === 0) {
         return localCollections;
     }
@@ -202,31 +204,30 @@ export const getCollectionWithSecrets = async (
     const userID = getData("user").id;
     let collectionKey: string;
     if (collection.owner.id === userID) {
-        collectionKey = await cryptoWorker.decryptB64(
-            collection.encryptedKey,
-            collection.keyDecryptionNonce,
+        collectionKey = await cryptoWorker.decryptBox(
+            {
+                encryptedData: collection.encryptedKey,
+                nonce: collection.keyDecryptionNonce,
+            },
             masterKey,
         );
     } else {
-        const keyAttributes = getData("keyAttributes");
-        const secretKey = await cryptoWorker.decryptB64(
-            keyAttributes.encryptedSecretKey,
-            keyAttributes.secretKeyDecryptionNonce,
-            masterKey,
-        );
         collectionKey = await cryptoWorker.boxSealOpen(
             collection.encryptedKey,
-            keyAttributes.publicKey,
-            secretKey,
+            await ensureUserKeyPair(),
         );
     }
     const collectionName =
         collection.name ||
-        (await cryptoWorker.decryptToUTF8(
-            collection.encryptedName,
-            collection.nameDecryptionNonce,
-            collectionKey,
-        ));
+        new TextDecoder().decode(
+            await cryptoWorker.decryptBoxBytes(
+                {
+                    encryptedData: collection.encryptedName,
+                    nonce: collection.nameDecryptionNonce,
+                },
+                collectionKey,
+            ),
+        );
 
     let collectionMagicMetadata: CollectionMagicMetadata;
     if (collection.magicMetadata?.data) {
@@ -234,11 +235,13 @@ export const getCollectionWithSecrets = async (
             ...collection.magicMetadata,
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
-            data: await cryptoWorker.decryptMetadataJSON({
-                encryptedDataB64: collection.magicMetadata.data,
-                decryptionHeaderB64: collection.magicMetadata.header,
-                keyB64: collectionKey,
-            }),
+            data: await cryptoWorker.decryptMetadataJSON(
+                {
+                    encryptedData: collection.magicMetadata.data,
+                    decryptionHeader: collection.magicMetadata.header,
+                },
+                collectionKey,
+            ),
         };
     }
     let collectionPublicMagicMetadata: CollectionPublicMagicMetadata;
@@ -247,11 +250,13 @@ export const getCollectionWithSecrets = async (
             ...collection.pubMagicMetadata,
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
-            data: await cryptoWorker.decryptMetadataJSON({
-                encryptedDataB64: collection.pubMagicMetadata.data,
-                decryptionHeaderB64: collection.pubMagicMetadata.header,
-                keyB64: collectionKey,
-            }),
+            data: await cryptoWorker.decryptMetadataJSON(
+                {
+                    encryptedData: collection.pubMagicMetadata.data,
+                    decryptionHeader: collection.pubMagicMetadata.header,
+                },
+                collectionKey,
+            ),
         };
     }
 
@@ -261,11 +266,13 @@ export const getCollectionWithSecrets = async (
             ...collection.sharedMagicMetadata,
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
-            data: await cryptoWorker.decryptMetadataJSON({
-                encryptedDataB64: collection.sharedMagicMetadata.data,
-                decryptionHeaderB64: collection.sharedMagicMetadata.header,
-                keyB64: collectionKey,
-            }),
+            data: await cryptoWorker.decryptMetadataJSON(
+                {
+                    encryptedData: collection.sharedMagicMetadata.data,
+                    decryptionHeader: collection.sharedMagicMetadata.header,
+                },
+                collectionKey,
+            ),
         };
     }
 
@@ -302,10 +309,9 @@ export const getCollection = async (
             null,
             { "X-Auth-Token": token },
         );
-        const key = await getActualKey();
         const collectionWithSecrets = await getCollectionWithSecrets(
             resp.data?.collection,
-            key,
+            await ensureMasterKeyFromSession(),
         );
         return collectionWithSecrets;
     } catch (e) {
@@ -343,9 +349,29 @@ export async function cleanTrashCollections(fileTrash: Trash) {
 async function getLastTrashSyncTime() {
     return (await localForage.getItem<number>(TRASH_TIME)) ?? 0;
 }
+
+/**
+ * Update our locally saved data about the files and collections in trash by
+ * syncing with remote.
+ *
+ * The sync uses a diff-based mechanism that syncs forward from the last sync
+ * time (also persisted).
+ *
+ * @param onUpdateTrashFiles A callback invoked when the locally persisted trash
+ * items are updated. This can be used for the UI to also update its state. This
+ * callback can be invoked multiple times during the sync (once for each batch
+ * that gets processed).
+ *
+ * @param onPruneDeletedFileIDs A callback invoked when files that were
+ * previously in trash have now been permanently deleted. This can be used by
+ * other subsystems to prune data referring to files that now have been deleted
+ * permanently. This callback can be invoked multiple times during the sync
+ * (once for each batch that gets processed).
+ */
 export async function syncTrash(
     collections: Collection[],
-    setTrashedFiles: ((fs: EnteFile[]) => void) | undefined,
+    onUpdateTrashFiles: ((files: EnteFile[]) => void) | undefined,
+    onPruneDeletedFileIDs: (deletedFileIDs: Set<number>) => Promise<void>,
 ): Promise<void> {
     const trash = await getLocalTrash();
     collections = [...collections, ...(await getLocalDeletedCollections())];
@@ -359,21 +385,23 @@ export async function syncTrash(
 
     const updatedTrash = await updateTrash(
         collectionMap,
-        lastSyncTime,
-        setTrashedFiles,
         trash,
+        lastSyncTime,
+        onUpdateTrashFiles,
+        onPruneDeletedFileIDs,
     );
     await cleanTrashCollections(updatedTrash);
 }
 
-export const updateTrash = async (
+const updateTrash = async (
     collections: Map<number, Collection>,
-    sinceTime: number,
-    setTrashedFiles: ((fs: EnteFile[]) => void) | undefined,
     currentTrash: Trash,
+    sinceTime: number,
+    onUpdateTrashFiles: ((files: EnteFile[]) => void) | undefined,
+    onPruneDeletedFileIDs: (deletedFileIDs: Set<number>) => Promise<void>,
 ): Promise<Trash> => {
+    let updatedTrash: Trash = [...currentTrash];
     try {
-        let updatedTrash: Trash = [...currentTrash];
         let time = sinceTime;
 
         let resp;
@@ -387,6 +415,7 @@ export const updateTrash = async (
                 { sinceTime: time },
                 { "X-Auth-Token": token },
             );
+            const deletedFileIDs = new Set<number>();
             // #Perf: This can be optimized by running the decryption in parallel
             for (const trashItem of resp.data.diff as EncryptedTrashItem[]) {
                 const collectionID = trashItem.file.collectionID;
@@ -397,6 +426,9 @@ export const updateTrash = async (
                     await localForage.setItem(DELETED_COLLECTION, [
                         ...collections.values(),
                     ]);
+                }
+                if (trashItem.isDeleted) {
+                    deletedFileIDs.add(trashItem.file.id);
                 }
                 if (!trashItem.isDeleted && !trashItem.isRestored) {
                     const decryptedFile = await decryptFile(
@@ -415,15 +447,17 @@ export const updateTrash = async (
                 time = resp.data.diff.slice(-1)[0].updatedAt;
             }
 
-            setTrashedFiles?.(getTrashedFiles(updatedTrash));
+            onUpdateTrashFiles?.(getTrashedFiles(updatedTrash));
+            if (deletedFileIDs.size > 0) {
+                await onPruneDeletedFileIDs(deletedFileIDs);
+            }
             await localForage.setItem(TRASH, updatedTrash);
             await localForage.setItem(TRASH_TIME, time);
         } while (resp.data.hasMore);
-        return updatedTrash;
     } catch (e) {
         log.error("Get trash files failed", e);
     }
-    return currentTrash;
+    return updatedTrash;
 };
 
 export const emptyTrash = async () => {

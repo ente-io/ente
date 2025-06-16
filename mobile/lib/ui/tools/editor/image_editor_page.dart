@@ -179,7 +179,8 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
               padding: const EdgeInsets.only(bottom: 2),
               child: Icon(
                 Icons.flip,
-                color: Theme.of(context).iconTheme.color!.withOpacity(0.8),
+                color:
+                    Theme.of(context).iconTheme.color!.withValues(alpha: 0.8),
                 size: 20,
               ),
             ),
@@ -187,7 +188,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
             Text(
               S.of(context).flip,
               style: subtitle2.copyWith(
-                color: subtitle2.color!.withOpacity(0.8),
+                color: subtitle2.color!.withValues(alpha: 0.8),
               ),
               textAlign: TextAlign.center,
             ),
@@ -211,13 +212,13 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
           children: [
             Icon(
               Icons.rotate_left,
-              color: Theme.of(context).iconTheme.color!.withOpacity(0.8),
+              color: Theme.of(context).iconTheme.color!.withValues(alpha: 0.8),
             ),
             const Padding(padding: EdgeInsets.all(2)),
             Text(
               S.of(context).rotateLeft,
               style: subtitle2.copyWith(
-                color: subtitle2.color!.withOpacity(0.8),
+                color: subtitle2.color!.withValues(alpha: 0.8),
               ),
               textAlign: TextAlign.center,
             ),
@@ -241,13 +242,13 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
           children: [
             Icon(
               Icons.rotate_right,
-              color: Theme.of(context).iconTheme.color!.withOpacity(0.8),
+              color: Theme.of(context).iconTheme.color!.withValues(alpha: 0.8),
             ),
             const Padding(padding: EdgeInsets.all(2)),
             Text(
               S.of(context).rotateRight,
               style: subtitle2.copyWith(
-                color: subtitle2.color!.withOpacity(0.8),
+                color: subtitle2.color!.withValues(alpha: 0.8),
               ),
               textAlign: TextAlign.center,
             ),
@@ -271,13 +272,13 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
           children: [
             Icon(
               Icons.save_alt_outlined,
-              color: Theme.of(context).iconTheme.color!.withOpacity(0.8),
+              color: Theme.of(context).iconTheme.color!.withValues(alpha: 0.8),
             ),
             const Padding(padding: EdgeInsets.all(2)),
             Text(
               S.of(context).saveCopy,
               style: subtitle2.copyWith(
-                color: subtitle2.color!.withOpacity(0.8),
+                color: subtitle2.color!.withValues(alpha: 0.8),
               ),
               textAlign: TextAlign.center,
             ),
@@ -299,10 +300,8 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
       return;
     }
     final EditActionDetails action = state.editAction!;
-    final double radian = action.rotateAngle;
+    final degree = action.rotateDegrees.toInt();
 
-    final bool flipHorizontal = action.flipY;
-    final bool flipVertical = action.flipX;
     final Uint8List img = state.rawImageData;
 
     // ignore: unnecessary_null_comparison
@@ -315,11 +314,11 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
     final ImageEditorOption option = ImageEditorOption();
 
     option.addOption(ClipOption.fromRect(rect));
-    option.addOption(
-      FlipOption(horizontal: flipHorizontal, vertical: flipVertical),
-    );
-    if (action.hasRotateAngle) {
-      option.addOption(RotateOption(radian.toInt()));
+    if (action.flipY) {
+      option.addOption(const FlipOption(horizontal: true, vertical: false));
+    }
+    if (action.hasRotateDegrees) {
+      option.addOption(RotateOption(degree));
     }
 
     option.addOption(ColorOption.saturation(_saturation!));
@@ -418,7 +417,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
   }
 
   void rotate(bool right) {
-    editorKey.currentState?.rotate(right: right);
+    editorKey.currentState?.rotate(degree: right ? 90 : -90);
   }
 
   Widget _buildSat() {
@@ -429,11 +428,15 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
       child: Row(
         children: [
           SizedBox(
-            width: 40,
-            child: Text(
-              S.of(context).color,
-              style: subtitle2.copyWith(
-                color: subtitle2.color!.withOpacity(0.8),
+            width: 42,
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Text(
+                S.of(context).color,
+                style: subtitle2.copyWith(
+                  color: subtitle2.color!.withValues(alpha: 0.8),
+                ),
               ),
             ),
           ),
@@ -475,11 +478,15 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
       child: Row(
         children: [
           SizedBox(
-            width: 40,
-            child: Text(
-              S.of(context).light,
-              style: subtitle2.copyWith(
-                color: subtitle2.color!.withOpacity(0.8),
+            width: 42,
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Text(
+                S.of(context).light,
+                style: subtitle2.copyWith(
+                  color: subtitle2.color!.withValues(alpha: 0.8),
+                ),
               ),
             ),
           ),

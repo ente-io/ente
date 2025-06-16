@@ -2,10 +2,10 @@
     "name": "workers",
     "private": true,
     "devDependencies": {
-        "@cloudflare/workers-types": "^4.20240614.0",
-        "typescript": "^5",
-        "wrangler": "^3",
-        "prettier": "^3.3.4"
+        "@cloudflare/workers-types": "^4.20250603.0",
+        "typescript": "^5.8.3",
+        "wrangler": "^4.18.0",
+        "prettier": "^3.5.3"
     },
     "workspaces": [
         "*"

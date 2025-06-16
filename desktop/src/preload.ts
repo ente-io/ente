@@ -69,6 +69,7 @@ import type {
     FFmpegCommand,
     FolderWatch,
     PendingUploads,
+    UtilityProcessType,
     ZipItem,
 } from "./types/ipc";
 
@@ -112,10 +113,11 @@ const logout = () => {
     return ipcRenderer.invoke("logout");
 };
 
-const masterKeyB64 = () => ipcRenderer.invoke("masterKeyB64");
+const masterKeyFromSafeStorage = () =>
+    ipcRenderer.invoke("masterKeyFromSafeStorage");
 
-const saveMasterKeyB64 = (masterKeyB64: string) =>
-    ipcRenderer.invoke("saveMasterKeyB64", masterKeyB64);
+const saveMasterKeyInSafeStorage = (masterKey: string) =>
+    ipcRenderer.invoke("saveMasterKeyInSafeStorage", masterKey);
 
 const lastShownChangelogVersion = () =>
     ipcRenderer.invoke("lastShownChangelogVersion");
@@ -192,41 +194,45 @@ const convertToJPEG = (imageData: Uint8Array) =>
     ipcRenderer.invoke("convertToJPEG", imageData);
 
 const generateImageThumbnail = (
-    dataOrPathOrZipItem: Uint8Array | string | ZipItem,
+    pathOrZipItem: string | ZipItem,
     maxDimension: number,
     maxSize: number,
 ) =>
     ipcRenderer.invoke(
         "generateImageThumbnail",
-        dataOrPathOrZipItem,
+        pathOrZipItem,
         maxDimension,
         maxSize,
     );
 
 const ffmpegExec = (
     command: FFmpegCommand,
-    dataOrPathOrZipItem: Uint8Array | string | ZipItem,
+    pathOrZipItem: string | ZipItem,
     outputFileExtension: string,
 ) =>
     ipcRenderer.invoke(
         "ffmpegExec",
         command,
-        dataOrPathOrZipItem,
+        pathOrZipItem,
         outputFileExtension,
     );
 
-// - ML
+const ffmpegDetermineVideoDuration = (pathOrZipItem: string | ZipItem) =>
+    ipcRenderer.invoke("ffmpegDetermineVideoDuration", pathOrZipItem);
 
-const createMLWorker = () => {
+// - Utility processes
+
+const triggerCreateUtilityProcess = (type: UtilityProcessType) => {
+    const portEvent = `utilityProcessPort/${type}`;
     const l = (event: IpcRendererEvent) => {
         void windowLoaded.then(() => {
             // "*"" is the origin to send to.
-            window.postMessage("createMLWorker/port", "*", event.ports);
-            ipcRenderer.off("createMLWorker/port", l);
+            window.postMessage(portEvent, "*", event.ports);
+            ipcRenderer.off(portEvent, l);
         });
     };
-    ipcRenderer.on("createMLWorker/port", l);
-    ipcRenderer.send("createMLWorker");
+    ipcRenderer.on(portEvent, l);
+    ipcRenderer.send("triggerCreateUtilityProcess", type);
 };
 
 // - Watch
@@ -353,8 +359,8 @@ contextBridge.exposeInMainWorld("electron", {
     selectDirectory,
     pathForFile,
     logout,
-    masterKeyB64,
-    saveMasterKeyB64,
+    masterKeyFromSafeStorage,
+    saveMasterKeyInSafeStorage,
     lastShownChangelogVersion,
     setLastShownChangelogVersion,
     isAutoLaunchEnabled,
@@ -390,10 +396,11 @@ contextBridge.exposeInMainWorld("electron", {
     convertToJPEG,
     generateImageThumbnail,
     ffmpegExec,
+    ffmpegDetermineVideoDuration,
 
     // - ML
 
-    createMLWorker,
+    triggerCreateUtilityProcess,
 
     // - Watch
 

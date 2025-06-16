@@ -8,11 +8,10 @@ import "package:photos/core/event_bus.dart";
 import "package:photos/events/people_changed_event.dart";
 import "package:photos/extensions/user_extension.dart";
 import "package:photos/models/api/collection/user.dart";
-import "package:photos/models/file/file.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/theme/colors.dart";
 import 'package:photos/theme/ente_theme.dart';
-import "package:photos/ui/viewer/search/result/person_face_widget.dart";
+import "package:photos/ui/viewer/people/person_face_widget.dart";
 import "package:photos/utils/standalone/debouncer.dart";
 import 'package:tuple/tuple.dart';
 
@@ -39,7 +38,7 @@ class UserAvatarWidget extends StatefulWidget {
 
 class _UserAvatarWidgetState extends State<UserAvatarWidget> {
   Future<String?>? _personID;
-  EnteFile? _faceThumbnail;
+  bool _canUsePersonFaceWidget = false;
   final _logger = Logger("_UserAvatarWidgetState");
   late final StreamSubscription<PeopleChangedEvent> _peopleChangedSubscription;
   final _debouncer = Debouncer(
@@ -78,10 +77,7 @@ class _UserAvatarWidgetState extends State<UserAvatarWidget> {
             final person = people.firstWhereOrNull(
               (person) => person.data.email == widget.user.email,
             );
-            if (person != null) {
-              _faceThumbnail =
-                  await PersonService.instance.getThumbnailFileOfPerson(person);
-            }
+            _canUsePersonFaceWidget = person != null;
             return person?.remoteID;
           });
         } else {
@@ -117,24 +113,23 @@ class _UserAvatarWidgetState extends State<UserAvatarWidget> {
                   if (snapshot.hasData) {
                     final personID = snapshot.data as String;
                     return ClipOval(
-                      child: _faceThumbnail == null
-                          ? _FirstLetterCircularAvatar(
-                              user: widget.user,
-                              currentUserID: widget.currentUserID,
-                              thumbnailView: widget.thumbnailView,
-                              type: widget.type,
-                            )
-                          : PersonFaceWidget(
-                              _faceThumbnail!,
+                      child: _canUsePersonFaceWidget
+                          ? PersonFaceWidget(
                               personId: personID,
                               onErrorCallback: () {
                                 if (mounted) {
                                   setState(() {
                                     _personID = null;
-                                    _faceThumbnail = null;
+                                    _canUsePersonFaceWidget = false;
                                   });
                                 }
                               },
+                            )
+                          : _FirstLetterCircularAvatar(
+                              user: widget.user,
+                              currentUserID: widget.currentUserID,
+                              thumbnailView: widget.thumbnailView,
+                              type: widget.type,
                             ),
                     );
                   } else if (snapshot.hasError) {

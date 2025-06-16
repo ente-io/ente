@@ -27,6 +27,7 @@ import 'messages_el.dart' as messages_el;
 import 'messages_en.dart' as messages_en;
 import 'messages_es.dart' as messages_es;
 import 'messages_et.dart' as messages_et;
+import 'messages_eu.dart' as messages_eu;
 import 'messages_fa.dart' as messages_fa;
 import 'messages_fr.dart' as messages_fr;
 import 'messages_gu.dart' as messages_gu;
@@ -51,6 +52,7 @@ import 'messages_pt_PT.dart' as messages_pt_pt;
 import 'messages_ro.dart' as messages_ro;
 import 'messages_ru.dart' as messages_ru;
 import 'messages_sl.dart' as messages_sl;
+import 'messages_sr.dart' as messages_sr;
 import 'messages_sv.dart' as messages_sv;
 import 'messages_ta.dart' as messages_ta;
 import 'messages_te.dart' as messages_te;
@@ -74,6 +76,7 @@ Map<String, LibraryLoader> _deferredLibraries = {
   'en': () => new SynchronousFuture(null),
   'es': () => new SynchronousFuture(null),
   'et': () => new SynchronousFuture(null),
+  'eu': () => new SynchronousFuture(null),
   'fa': () => new SynchronousFuture(null),
   'fr': () => new SynchronousFuture(null),
   'gu': () => new SynchronousFuture(null),
@@ -98,6 +101,7 @@ Map<String, LibraryLoader> _deferredLibraries = {
   'ro': () => new SynchronousFuture(null),
   'ru': () => new SynchronousFuture(null),
   'sl': () => new SynchronousFuture(null),
+  'sr': () => new SynchronousFuture(null),
   'sv': () => new SynchronousFuture(null),
   'ta': () => new SynchronousFuture(null),
   'te': () => new SynchronousFuture(null),
@@ -133,6 +137,8 @@ MessageLookupByLibrary? _findExact(String localeName) {
       return messages_es.messages;
     case 'et':
       return messages_et.messages;
+    case 'eu':
+      return messages_eu.messages;
     case 'fa':
       return messages_fa.messages;
     case 'fr':
@@ -181,6 +187,8 @@ MessageLookupByLibrary? _findExact(String localeName) {
       return messages_ru.messages;
     case 'sl':
       return messages_sl.messages;
+    case 'sr':
+      return messages_sr.messages;
     case 'sv':
       return messages_sv.messages;
     case 'ta':

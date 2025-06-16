@@ -43,8 +43,8 @@ need to disable this "Optimize battery usage" mode in the system settings for
 Ente if you wish for Ente to automatically back up your photos in the
 background.
 
-On Android versions 15 and later, if an app is in private space and the private 
-space is locked, Android doesn’t allow the app to run any background processes. 
+On Android versions 15 and later, if an app is in private space and the private
+space is locked, Android doesn’t allow the app to run any background processes.
 As a result, background sync will not work.
 
 ### Desktop

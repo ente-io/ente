@@ -10,9 +10,10 @@ import {
     type FilePublicMagicMetadata,
 } from "ente-media/file";
 import { nullToUndefined } from "ente-utils/transform";
-import { z } from "zod";
+import { z } from "zod/v4";
 import { mergeMetadata1 } from "./file";
 import { FileType } from "./file-type";
+import type { RemoteMagicMetadata } from "./magic-metadata";
 
 /**
  * Information about the file that never changes post upload.
@@ -30,7 +31,7 @@ import { FileType } from "./file-type";
  *
  * 1. Metadata
  * 2. Private mutable metadata
- * 3. Shared mutable metadata
+ * 3. Public mutable metadata
  *
  * Metadata is the original metadata that we attached to the file when it was
  * uploaded. It is immutable, and it never changes.
@@ -47,8 +48,8 @@ import { FileType } from "./file-type";
  * people with whom this file is shared can see the new edited name. Such
  * modifications get written to (3), Shared Mutable Metadata.
  *
- * When the client needs to show a file, it needs to "merge" in 2 or 3 of these
- * sources.
+ * When the client needs to show a file, it needs to "merge" in two or three of
+ * these sources (nb: remote will only send the permissible ones):
  *
  * - When showing a shared file, (1) and (3) are merged, with changes from (3)
  *   taking precedence, to obtain the full metadata pertinent to the file.
@@ -64,6 +65,22 @@ import { FileType } from "./file-type";
  * yet understand, so when updating some key, say filename in (3), it should
  * only edit the key it knows about but retain the rest of the source JSON
  * unchanged.
+ *
+ * A similar concept applies to collections, which can (like files) have
+ * metadata associated with them with varying axis of mutability and access.
+ *
+ * Collections also have another type of metadata.
+ *
+ * 4. Shared magic metadata
+ *
+ * which in our hypothetical naming scheme can be thought of as
+ *
+ * 4. Per-sharee private mutable metadata
+ *
+ * This is "magic metadata" associated with each share. Each user with whom the
+ * collection has been shared with can use it store metadata (e.g. archive
+ * status) that is private to them, and can only be edited by them. For more
+ * details on this type of metadata, see [Note: Share specific metadata].
  */
 export interface Metadata {
     /**
@@ -140,6 +157,14 @@ export interface Metadata {
      * older clients.
      */
     videoHash?: string;
+    /**
+     * The duration (in integral seconds) of the video.
+     *
+     * Only present for videos (`fileType == FileType.video`). For compatibility
+     * with other clients, this must be a integer number of seconds, without any
+     * sub-second fraction.
+     */
+    duration?: number;
     hasStaticThumbnail?: boolean;
     localID?: number;
     version?: number;
@@ -176,11 +201,17 @@ export interface PrivateMagicMetadata {
  * The visibility of an Ente file or collection.
  */
 export const ItemVisibility = {
-    /** The normal state - The item is visible. */
+    /**
+     * The normal state - The item is visible.
+     */
     visible: 0,
-    /** The item has been archived. */
+    /**
+     * The item has been archived.
+     */
     archived: 1,
-    /** The item has been hidden. */
+    /**
+     * The item has been hidden.
+     */
     hidden: 2,
 } as const;
 
@@ -274,6 +305,33 @@ export interface PublicMagicMetadata {
      */
     caption?: string;
     uploaderName?: string;
+    /**
+     * An arbitrary integer set to indicate that this file should be skipped for
+     * the purpose of HLS generation.
+     *
+     * Current semantics:
+     *
+     * - if 1, skip this file
+     * - otherwise attempt processing
+     *
+     * [Note: Marking files which do not need video processing]
+     *
+     * Some video files do not require generation of a HLS stream. The current
+     * logic is H.264 files less than 10 MB, but this might change in future
+     * clients.
+     *
+     * For such skipped files, there thus won't be a HLS playlist generated.
+     * However, we still need a way to indicate to other clients that this file
+     * has already been looked at.
+     *
+     * To that end, we add a flag to the public magic metadata for the file. To
+     * allow future flexibility, this flag is an integer "streaming version".
+     * Currently it is set to 1 by a client who recognizes that this file does
+     * not need processing, and other clients can ignore this file if they find
+     * sv == 1. In the future, there might be other values for sv (e.g. if the
+     * skip logic changes).
+     */
+    sv?: number;
 }
 
 /**
@@ -283,29 +341,27 @@ export interface PublicMagicMetadata {
  *
  * ---
  *
- * [Note: Use passthrough for metadata Zod schemas]
+ * [Note: Use looseObject for metadata Zod schemas]
  *
- * It is important to (recursively) use the {@link passthrough} option when
+ * It is important to (recursively) use the {@link looseObject} option when
  * defining Zod schemas for the various metadata types (the plaintext JSON
  * objects) because we want to retain all the fields we get from remote. There
  * might be other, newer, clients out there adding fields that the current
  * client might not we aware of, and we don't want to overwrite them.
  */
-const PublicMagicMetadata = z
-    .object({
-        // [Note: Zod doesn't work with `exactOptionalPropertyTypes` yet]
-        //
-        // Using `optional` is not accurate here. The key is optional, but the
-        // value itself is not optional.
-        //
-        // Zod doesn't work with `exactOptionalPropertyTypes` yet, but it seems
-        // to be on the roadmap so we suppress these mismatches.
-        //
-        // See:
-        // https://github.com/colinhacks/zod/issues/635#issuecomment-2196579063
-        editedTime: z.number().optional(),
-    })
-    .passthrough();
+const PublicMagicMetadata = z.looseObject({
+    // [Note: Zod doesn't work with `exactOptionalPropertyTypes` yet]
+    //
+    // Using `optional` is not accurate here. The key is optional, but the
+    // value itself is not optional.
+    //
+    // Zod doesn't work with `exactOptionalPropertyTypes` yet, but it seems
+    // to be on the roadmap so we suppress these mismatches.
+    //
+    // See:
+    // https://github.com/colinhacks/zod/issues/635#issuecomment-2196579063
+    editedTime: z.number().optional(),
+});
 
 /**
  * Return the private magic metadata for an {@link EnteFile}.
@@ -401,11 +457,13 @@ export const decryptPublicMagicMetadata = async (
 
     const jsonValue =
         typeof envelope.data == "string"
-            ? await decryptMetadataJSON({
-                  encryptedDataB64: envelope.data,
-                  decryptionHeaderB64: envelope.header,
-                  keyB64: file.key,
-              })
+            ? await decryptMetadataJSON(
+                  {
+                      encryptedData: envelope.data,
+                      decryptionHeader: envelope.header,
+                  },
+                  file.key,
+              )
             : envelope.data;
     const result = PublicMagicMetadata.parse(
         // TODO: Can we avoid this cast?
@@ -572,49 +630,6 @@ export const updateRemotePublicMagicMetadata = async (
 };
 
 /**
- * Magic metadata, either public and private, as persisted and used by remote.
- *
- * This is the encrypted magic metadata as persisted on remote, and this is what
- * clients get back when they sync with remote. Alongwith the encrypted blob and
- * decryption header, it also contains a few properties useful for clients to
- * track changes and ensure that they have the latest metadata synced locally.
- *
- * Both public and private magic metadata fields use the same structure.
- */
-interface RemoteMagicMetadata {
-    /**
-     * Monotonically increasing iteration of this metadata object.
-     *
-     * The version starts at 1. Remote increments this version number each time
-     * a client updates the corresponding magic metadata field for the file.
-     */
-    version: number;
-    /**
-     * The number of keys with non-null (and non-undefined) values in the
-     * encrypted JSON object that the encrypted metadata blob contains.
-     *
-     * During edits and updates, this number should be greater than or equal to
-     * the previous version.
-     *
-     * > Clients are expected to retain the magic metadata verbatim so that they
-     * > don't accidentally overwrite fields that they might not understand.
-     */
-    count: number;
-    /**
-     * The encrypted data.
-     *
-     * This is a base64 string representing the bytes obtained by encrypting the
-     * string representation of the underlying magic metadata JSON object.
-     */
-    data: string;
-    /**
-     * The base64 encoded decryption header that will be needed for the client
-     * for decrypting {@link data}.
-     */
-    header: string;
-}
-
-/**
  * The shape of the JSON body payload expected by the APIs that update the
  * public and private magic metadata fields associated with a file.
  */
@@ -630,7 +645,7 @@ interface UpdateMagicMetadataRequest {
 
 /**
  * Construct an remote update request payload from the public or private magic
- * metadata JSON object for an {@link file}, using the provided
+ * metadata JSON object for a {@link file}, using the provided
  * {@link encryptMetadataF} function to encrypt the JSON.
  */
 const updateMagicMetadataRequest = async (
@@ -644,8 +659,9 @@ const updateMagicMetadataRequest = async (
         ([, v]) => v !== null && v !== undefined,
     );
 
-    const { encryptedDataB64, decryptionHeaderB64 } = await encryptMetadataJSON(
-        { jsonValue: Object.fromEntries(validEntries), keyB64: file.key },
+    const { encryptedData, decryptionHeader } = await encryptMetadataJSON(
+        Object.fromEntries(validEntries),
+        file.key,
     );
 
     return {
@@ -655,8 +671,8 @@ const updateMagicMetadataRequest = async (
                 magicMetadata: {
                     version: metadataVersion,
                     count: validEntries.length,
-                    data: encryptedDataB64,
-                    header: decryptionHeaderB64,
+                    data: encryptedData,
+                    header: decryptionHeader,
                 },
             },
         ],
@@ -730,6 +746,44 @@ export const fileLocation = (file: EnteFile): Location | undefined => {
     if (Number.isNaN(latitude) || Number.isNaN(longitude)) return undefined;
 
     return { latitude, longitude };
+};
+
+/**
+ * Return the duration of the video as a formatted "HH:mm:ss" string (when
+ * present) for the given {@link EnteFile}.
+ *
+ * Only files with type `FileType.video` are expected to have a duration.
+ *
+ * @returns The duration of the video as a string of the form "HH:mm:ss". The
+ * underlying duration present in the file's metadata is guaranteed to be
+ * integral, so there will never be a subsecond component.
+ *
+ * - If the hour component is all zeroes, it will be omitted.
+ *
+ * - Leading zeros in the minutes component will be trimmed off if an hour
+ *   component is not present. If minutes is all zeros, then "0" will be used.
+ *
+ * - For example, an underlying duration of 595 seconds will result in a
+ *   formatted string of the form "9:55". While an underlying duration of 9
+ *   seconds will be returned as a string "0:09".
+ *
+ * - A zero duration will be treated as undefined.
+ */
+export const fileDurationString = (file: EnteFile): string | undefined => {
+    const d = file.metadata.duration;
+    if (!d) return undefined;
+
+    const s = d % 60;
+    const m = Math.floor(d / 60) % 60;
+    const h = Math.floor(d / 3600);
+
+    const ss = s > 9 ? `${s}` : `0${s}`;
+    if (h) {
+        const mm = m > 9 ? `${m}` : `0${m}`;
+        return `${h}:${mm}:${ss}`;
+    } else {
+        return `${m}:${ss}`;
+    }
 };
 
 /**

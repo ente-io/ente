@@ -8,6 +8,7 @@
 import type { AxiosResponse } from "axios";
 import { sharedCryptoWorker } from "ente-base/crypto";
 import { nameAndExtension } from "ente-base/file-name";
+import { publicRequestHeaders } from "ente-base/http";
 import log from "ente-base/log";
 import { apiURL, customAPIOrigin } from "ente-base/origins";
 import type {
@@ -194,38 +195,37 @@ const decryptEnteFile = async (
         pubMagicMetadata,
         ...restFileProps
     } = encryptedFile;
-    const fileKey = await worker.decryptB64(
-        encryptedKey,
-        keyDecryptionNonce,
+    const fileKey = await worker.decryptBox(
+        { encryptedData: encryptedKey, nonce: keyDecryptionNonce },
         collectionKey,
     );
-    const fileMetadata = await worker.decryptMetadataJSON({
-        encryptedDataB64: metadata.encryptedData,
-        decryptionHeaderB64: metadata.decryptionHeader,
-        keyB64: fileKey,
-    });
+    const fileMetadata = await worker.decryptMetadataJSON(metadata, fileKey);
     let fileMagicMetadata: FileMagicMetadata | undefined;
     let filePubMagicMetadata: FilePublicMagicMetadata | undefined;
     if (magicMetadata?.data) {
         fileMagicMetadata = {
             ...encryptedFile.magicMetadata,
             // @ts-expect-error TODO: Need to use zod here.
-            data: await worker.decryptMetadataJSON({
-                encryptedDataB64: magicMetadata.data,
-                decryptionHeaderB64: magicMetadata.header,
-                keyB64: fileKey,
-            }),
+            data: await worker.decryptMetadataJSON(
+                {
+                    encryptedData: magicMetadata.data,
+                    decryptionHeader: magicMetadata.header,
+                },
+                fileKey,
+            ),
         };
     }
     if (pubMagicMetadata?.data) {
         filePubMagicMetadata = {
             ...pubMagicMetadata,
             // @ts-expect-error TODO: Need to use zod here.
-            data: await worker.decryptMetadataJSON({
-                encryptedDataB64: pubMagicMetadata.data,
-                decryptionHeaderB64: pubMagicMetadata.header,
-                keyB64: fileKey,
-            }),
+            data: await worker.decryptMetadataJSON(
+                {
+                    encryptedData: pubMagicMetadata.data,
+                    decryptionHeader: pubMagicMetadata.header,
+                },
+                fileKey,
+            ),
         };
     }
     return mergeMetadata1({
@@ -320,13 +320,18 @@ const downloadFile = async (
             const baseURL = shouldUseThumbnail
                 ? `${customOrigin}/cast/files/preview/${file.id}`
                 : `${customOrigin}/cast/files/download/${file.id}`;
-            return fetch(`${baseURL}?${params.toString()}`);
+            return fetch(`${baseURL}?${params.toString()}`, {
+                headers: publicRequestHeaders(),
+            });
         } else {
             const url = shouldUseThumbnail
                 ? `https://cast-albums.ente.io/preview/?fileID=${file.id}`
                 : `https://cast-albums.ente.io/download/?fileID=${file.id}`;
             return fetch(url, {
-                headers: { "X-Cast-Access-Token": castToken },
+                headers: {
+                    ...publicRequestHeaders(),
+                    "X-Cast-Access-Token": castToken,
+                },
             });
         }
     };

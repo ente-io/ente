@@ -51,6 +51,7 @@ class _UpdateLocationDataWidgetState extends State<UpdateLocationDataWidget> {
           options: MapOptions(
             interactionOptions:
                 const InteractionOptions(enableMultiFingerGestureRace: true),
+            backgroundColor: const Color.fromARGB(255, 246, 246, 246),
             initialZoom: 3,
             maxZoom: 18.0,
             minZoom: 2.8,
@@ -76,11 +77,9 @@ class _UpdateLocationDataWidgetState extends State<UpdateLocationDataWidget> {
               }
             },
           ),
-          nonRotatedChildren: const [
-            OSMFranceTileAttributes(),
-          ],
           children: const [
             OSMFranceTileLayer(),
+            OSMFranceTileAttributes(),
           ],
         ),
         Positioned(

@@ -25,13 +25,13 @@ import 'package:photos/models/upload_strategy.dart';
 import "package:photos/service_locator.dart";
 import 'package:photos/services/app_lifecycle_service.dart';
 import 'package:photos/services/collections_service.dart';
-import "package:photos/services/filedata/filedata_service.dart";
 import 'package:photos/services/ignored_files_service.dart';
+import "package:photos/services/language_service.dart";
 import 'package:photos/services/local_file_update_service.dart';
 import "package:photos/services/notification_service.dart";
-import "package:photos/services/preview_video_store.dart";
 import 'package:photos/services/sync/diff_fetcher.dart';
 import 'package:photos/services/sync/sync_service.dart';
+import "package:photos/services/video_preview_service.dart";
 import 'package:photos/utils/file_uploader.dart';
 import 'package:photos/utils/file_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -127,8 +127,11 @@ class RemoteSyncService {
         await syncDeviceCollectionFilesForUpload();
       }
 
-      FileDataService.instance.syncFDStatus().then((_) {
-        PreviewVideoStore.instance.queueFiles();
+      fileDataService.syncFDStatus().then((_) {
+        if (!flagService.hasGrantedMLConsent) {
+          VideoPreviewService.instance
+              .queueFiles(); // if ML is enabled the MLService will queue when ML is done
+        }
       }).ignore();
       final filesToBeUploaded = await _getFilesToBeUploaded();
       final hasUploadedFiles = await _uploadFiles(filesToBeUploaded);
@@ -572,7 +575,7 @@ class RemoteSyncService {
       _logger.info("Skipped $skippedVideos videos and $ignoredForUpload "
           "ignored files for upload");
     }
-    _sortByTimeAndType(filesToBeUploaded);
+    _sortByTime(filesToBeUploaded);
     _logger.info("${filesToBeUploaded.length} new files to be uploaded.");
     return filesToBeUploaded;
   }
@@ -933,17 +936,11 @@ class RemoteSyncService {
     return Platform.isIOS && !AppLifecycleService.instance.isForeground;
   }
 
-  // _sortByTimeAndType moves videos to end and sort by creation time (desc).
+  // _sortByTime sort by creation time (desc).
   // This is done to upload most recent photo first.
-  void _sortByTimeAndType(List<EnteFile> file) {
+  void _sortByTime(List<EnteFile> file) {
     file.sort((first, second) {
-      if (first.fileType == second.fileType) {
-        return second.creationTime!.compareTo(first.creationTime!);
-      } else if (first.fileType == FileType.video) {
-        return 1;
-      } else {
-        return -1;
-      }
+      return second.creationTime!.compareTo(first.creationTime!);
     });
     // move updated files towards the end
     file.sort((first, second) {
@@ -998,10 +995,11 @@ class RemoteSyncService {
           'creating notification for ${collection?.displayName} '
           'shared: $sharedFilesIDs, collected: $collectedFilesIDs files',
         );
+        final s = await LanguageService.s;
         // ignore: unawaited_futures
         NotificationService.instance.showNotification(
           collection!.displayName,
-          totalCount.toString() + " new 📸",
+          totalCount.toString() + s.newPhotosEmoji,
           channelID: "collection:" + collectionID.toString(),
           channelName: collection.displayName,
           payload: "ente://collection/?collectionID=" + collectionID.toString(),

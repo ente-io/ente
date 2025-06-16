@@ -7,10 +7,10 @@ import { isDesktop } from "ente-base/app";
 import { blobCache } from "ente-base/blob-cache";
 import { ensureElectron } from "ente-base/electron";
 import log from "ente-base/log";
-import { masterKeyFromSession } from "ente-base/session";
-import type { Electron } from "ente-base/types/ipc";
+import { ensureMasterKeyFromSession } from "ente-base/session";
 import { ComlinkWorker } from "ente-base/worker/comlink-worker";
 import { type ProcessableUploadItem } from "ente-gallery/services/upload";
+import { createUtilityProcess } from "ente-gallery/utils/native-worker";
 import type { EnteFile } from "ente-media/file";
 import { FileType } from "ente-media/file-type";
 import { throttled } from "ente-utils/promise";
@@ -135,7 +135,7 @@ const createComlinkWorker = async () => {
     const delegate = { workerDidUpdateStatus, workerDidUnawaitedIndex };
 
     // Obtain a message port from the Electron layer.
-    const messagePort = await createMLWorker(electron);
+    const messagePort = await createUtilityProcess(electron, "ml");
 
     const cw = new ComlinkWorker<typeof MLWorker>(
         "ML",
@@ -164,33 +164,6 @@ export const terminateMLWorker = async () => {
         await _state.comlinkWorker.then((cw) => cw.terminate());
         _state.comlinkWorker = undefined;
     }
-};
-
-/**
- * Obtain a port from the Node.js layer that can be used to communicate with the
- * ML worker process.
- */
-const createMLWorker = (electron: Electron): Promise<MessagePort> => {
-    // The main process will do its thing, and send back the port it created to
-    // us by sending an message on the "createMLWorker/port" channel via the
-    // postMessage API. This roundabout way is needed because MessagePorts
-    // cannot be transferred via the usual send/invoke pattern.
-
-    const port = new Promise<MessagePort>((resolve) => {
-        const l = ({ source, data, ports }: MessageEvent) => {
-            // The source check verifies that the message is coming from our own
-            // preload script. The data is the message that was posted.
-            if (source == window && data == "createMLWorker/port") {
-                window.removeEventListener("message", l);
-                resolve(ports[0]!);
-            }
-        };
-        window.addEventListener("message", l);
-    });
-
-    electron.createMLWorker();
-
-    return port;
 };
 
 /**
@@ -387,7 +360,7 @@ export const mlSync = async () => {
 };
 
 const updateClustersAndPeople = async () => {
-    const masterKey = await masterKeyFromSession();
+    const masterKey = await ensureMasterKeyFromSession();
 
     // Fetch existing cgroups from remote.
     await pullUserEntities("cgroup", masterKey);
@@ -498,10 +471,16 @@ export const mlStatusSubscribe = (onChange: () => void): (() => void) => {
  *
  * See also {@link mlStatusSubscribe}.
  *
+ * This function can be safely called even if {@link isMLSupported} is `false`
+ * (in such cases, it will always return `undefined`). This is so that it can be
+ * unconditionally called as part of a React hook.
+ *
  * A return value of `undefined` indicates that we're still performing the
  * asynchronous tasks that are needed to get the status.
  */
 export const mlStatusSnapshot = (): MLStatus | undefined => {
+    if (!isMLSupported) return undefined;
+
     const result = _state.mlStatusSnapshot;
     // We don't have it yet, trigger an update.
     if (!result) triggerStatusUpdate();
@@ -769,11 +748,10 @@ const regenerateFaceCropsIfNeeded = async (file: EnteFile) => {
  * @returns The entity ID of the newly created cgroup.
  */
 export const addCGroup = async (name: string, cluster: FaceCluster) => {
-    const masterKey = await masterKeyFromSession();
     const id = await addUserEntity(
         "cgroup",
         { name, assigned: [cluster], isHidden: false },
-        masterKey,
+        await ensureMasterKeyFromSession(),
     );
     await mlSync();
     return id;
@@ -801,11 +779,10 @@ export const addClusterToCGroup = async (
         (id) => !clusterFaceIDs.has(id),
     );
 
-    const masterKey = await masterKeyFromSession();
     await updateOrCreateUserEntities(
         "cgroup",
         [{ ...cgroup, data: { ...cgroup.data, assigned, rejectedFaceIDs } }],
-        masterKey,
+        await ensureMasterKeyFromSession(),
     );
     return mlSync();
 };
@@ -819,11 +796,10 @@ export const addClusterToCGroup = async (
  * user entity that will get updated.
  */
 export const renameCGroup = async (cgroup: CGroup, name: string) => {
-    const masterKey = await masterKeyFromSession();
     await updateOrCreateUserEntities(
         "cgroup",
         [{ ...cgroup, data: { ...cgroup.data, name } }],
-        masterKey,
+        await ensureMasterKeyFromSession(),
     );
     return mlSync();
 };
@@ -855,8 +831,11 @@ export const applyPersonSuggestionUpdates = async (
     cgroup: CGroup,
     updates: PersonSuggestionUpdates,
 ) => {
-    const masterKey = await masterKeyFromSession();
-    await _applyPersonSuggestionUpdates(cgroup, updates, masterKey);
+    await _applyPersonSuggestionUpdates(
+        cgroup,
+        updates,
+        await ensureMasterKeyFromSession(),
+    );
     return mlSync();
 };
 
@@ -869,11 +848,10 @@ export const applyPersonSuggestionUpdates = async (
  * @param cluster The {@link FaceCluster} to hide.
  */
 export const ignoreCluster = async (cluster: FaceCluster) => {
-    const masterKey = await masterKeyFromSession();
     await addUserEntity(
         "cgroup",
         { name: "", assigned: [cluster], isHidden: true },
-        masterKey,
+        await ensureMasterKeyFromSession(),
     );
     return mlSync();
 };

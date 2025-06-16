@@ -18,9 +18,9 @@ import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/viewer/people/cluster_page.dart";
+import "package:photos/ui/viewer/people/file_face_widget.dart";
 import "package:photos/ui/viewer/people/person_clusters_page.dart";
-import "package:photos/ui/viewer/search/result/person_face_widget.dart";
-import "package:photos/utils/face/face_box_crop.dart";
+import "package:photos/utils/face/face_thumbnail_cache.dart";
 
 class SuggestionUserFeedback {
   final bool accepted;
@@ -408,11 +408,9 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
                     borderRadius: BorderRadius.circular(75),
                   ),
                 ),
-                child: PersonFaceWidget(
+                child: FileFaceWidget(
                   files[start + index],
                   clusterID: cluserId,
-                  useFullFile: true,
-                  thumbnailFallback: false,
                   faceCrop:
                       faceThumbnails[files[start + index].uploadedFileID!],
                 ),
@@ -426,7 +424,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
                   ),
                   child: Container(
                     decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.7),
+                      color: Colors.black.withValues(alpha: 0.7),
                     ),
                     child: Center(
                       child: Text(

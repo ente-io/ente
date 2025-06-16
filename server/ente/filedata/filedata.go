@@ -26,6 +26,7 @@ type Entity struct {
 	Type             ente.ObjectType `json:"type"`
 	EncryptedData    string          `json:"encryptedData"`
 	DecryptionHeader string          `json:"decryptionHeader"`
+	UpdatedAt        int64           `json:"updatedAt"`
 }
 
 type FDDiffRequest struct {
@@ -63,8 +64,9 @@ func (g *GetFilesData) Validate() error {
 }
 
 type GetFileData struct {
-	FileID int64           `form:"fileID" binding:"required"`
-	Type   ente.ObjectType `form:"type" binding:"required"`
+	FileID          int64           `form:"fileID" binding:"required"`
+	Type            ente.ObjectType `form:"type" binding:"required"`
+	PreferNoContent bool            `form:"preferNoContent"`
 }
 
 func (g *GetFileData) Validate() error {
@@ -103,19 +105,32 @@ func (g *GetPreviewURLRequest) Validate() error {
 }
 
 type PreviewUploadUrlRequest struct {
-	FileID int64           `form:"fileID" binding:"required"`
-	Type   ente.ObjectType `form:"type" binding:"required"`
+	FileID      int64           `form:"fileID" binding:"required"`
+	Type        ente.ObjectType `form:"type" binding:"required"`
+	IsMultiPart bool            `form:"isMultiPart"`
+	Count       *int64          `form:"count"`
 }
 
 type PreviewUploadUrl struct {
-	ObjectID string `json:"objectID" binding:"required"`
-	Url      string `json:"url" binding:"required"`
+	ObjectID    string    `json:"objectID" binding:"required"`
+	Url         *string   `json:"url,omitempty"`
+	PartURLs    *[]string `json:"partURLs,omitempty"`
+	CompleteURL *string   `json:"completeURL,omitempty"`
 }
 
 func (g *PreviewUploadUrlRequest) Validate() error {
 	if g.Type != ente.PreviewVideo && g.Type != ente.PreviewImage {
 		return ente.NewBadRequestWithMessage(fmt.Sprintf("unsupported object type %s", g.Type))
 	}
+	if !g.IsMultiPart {
+		return nil
+	}
+	if g.Count == nil {
+		return ente.NewBadRequestWithMessage("count is required for multipart upload")
+	} else if *g.Count <= 0 || *g.Count > 10000 {
+		return ente.NewBadRequestWithMessage("invalid count, should be between 1 and 10000")
+	}
+
 	return nil
 }
 

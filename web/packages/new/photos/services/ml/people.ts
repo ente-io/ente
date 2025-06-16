@@ -1,7 +1,7 @@
 import { assertionFailed } from "ente-base/assert";
 import log from "ente-base/log";
 import type { EnteFile } from "ente-media/file";
-import { shuffled } from "ente-utils/array";
+import { randomSample } from "ente-utils/array";
 import { getLocalFiles } from "../files";
 import {
     savedCGroups,
@@ -586,32 +586,6 @@ export const _suggestionsAndChoicesForPerson = async (
 };
 
 /**
- * Return a random sample of {@link n} elements from the given {@link items}.
- *
- * Functionally this is equivalent to `shuffled(items).slice(0, n)`, except it
- * tries to be a bit faster for long arrays when we need only a small sample
- * from it. In a few tests, this indeed makes a substantial difference.
- */
-const randomSample = <T>(items: T[], n: number) => {
-    if (items.length <= n) return items;
-    if (n == 0) return [];
-
-    if (n > items.length / 3) {
-        // Avoid using the random sampling without replacement method if a
-        // significant proportion of the original items are needed, otherwise we
-        // might run into long retry loop at the tail end (hitting the same
-        // indexes again an again).
-        return shuffled(items).slice(0, n);
-    }
-
-    const ix = new Set<number>();
-    while (ix.size < n) {
-        ix.add(Math.floor(Math.random() * items.length));
-    }
-    return [...ix].map((i) => items[i]!);
-};
-
-/**
  * A map specifying the changes to make when the user presses the save button on
  * the people suggestions dialog.
  *
@@ -641,13 +615,13 @@ export type PersonSuggestionUpdates = Map<
  *
  * @param updates The changes to make. See {@link PersonSuggestionUpdates}.
  *
- * @param masterKey The user's masterKey, which is is used to encrypt and
- * decrypt the entity key associated with cgroups.
+ * @param masterKey The user's masterKey (as a base64 string), which is is used
+ * to encrypt and decrypt the entity key associated with cgroups.
  */
 export const _applyPersonSuggestionUpdates = async (
     cgroup: CGroup,
     updates: PersonSuggestionUpdates,
-    masterKey: Uint8Array,
+    masterKey: string,
 ) => {
     const localClusters = await savedFaceClusters();
 

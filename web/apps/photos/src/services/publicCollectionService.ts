@@ -325,22 +325,28 @@ export const getPublicCollection = async (
 
         const collectionName = (fetchedCollection.name =
             fetchedCollection.name ||
-            (await cryptoWorker.decryptToUTF8(
-                fetchedCollection.encryptedName,
-                fetchedCollection.nameDecryptionNonce,
-                collectionKey,
-            )));
+            new TextDecoder().decode(
+                await cryptoWorker.decryptBoxBytes(
+                    {
+                        encryptedData: fetchedCollection.encryptedName,
+                        nonce: fetchedCollection.nameDecryptionNonce,
+                    },
+                    collectionKey,
+                ),
+            ));
 
         let collectionPublicMagicMetadata: CollectionPublicMagicMetadata;
         if (fetchedCollection.pubMagicMetadata?.data) {
             collectionPublicMagicMetadata = {
                 ...fetchedCollection.pubMagicMetadata,
-                data: await cryptoWorker.decryptMetadataJSON({
-                    encryptedDataB64: fetchedCollection.pubMagicMetadata.data,
-                    decryptionHeaderB64:
-                        fetchedCollection.pubMagicMetadata.header,
-                    keyB64: collectionKey,
-                }),
+                data: await cryptoWorker.decryptMetadataJSON(
+                    {
+                        encryptedData: fetchedCollection.pubMagicMetadata.data,
+                        decryptionHeader:
+                            fetchedCollection.pubMagicMetadata.header,
+                    },
+                    collectionKey,
+                ),
             };
         }
 

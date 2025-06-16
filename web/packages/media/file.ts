@@ -79,7 +79,7 @@ export interface EncryptedEnteFile {
      *
      * The same file (ID) may be associated with multiple collectionID, in which
      * case there will be multiple {@link EnteFile} entries for each
-     * ({@link id}, {@link collectionID}) pair. See: [Note: Collection File].
+     * ({@link id}, {@link collectionID}) pair. See: [Note: Collection file].
      */
     collectionID: number;
     /**
@@ -152,7 +152,7 @@ export interface EncryptedEnteFile {
  * While the file ID is unique, we'd can still have multiple entries for each
  * file ID in our local state, one per collection IDs to which the file belongs.
  * That is, the uniqueness is across the (fileID, collectionID) pairs. See
- * [Note: Collection File].
+ * [Note: Collection file].
  */
 export interface EnteFile
     extends Omit<
@@ -321,16 +321,15 @@ export async function decryptFile(
             pubMagicMetadata,
             ...restFileProps
         } = file;
-        const fileKey = await worker.decryptB64(
-            encryptedKey,
-            keyDecryptionNonce,
+        const fileKey = await worker.decryptBox(
+            { encryptedData: encryptedKey, nonce: keyDecryptionNonce },
             collectionKey,
         );
-        const fileMetadata = await worker.decryptMetadataJSON({
-            encryptedDataB64: metadata.encryptedData,
-            decryptionHeaderB64: metadata.decryptionHeader,
-            keyB64: fileKey,
-        });
+        const fileMetadata = await worker.decryptMetadataJSON(
+            metadata,
+            fileKey,
+        );
+
         let fileMagicMetadata: FileMagicMetadata;
         let filePubMagicMetadata: FilePublicMagicMetadata;
         /* eslint-disable @typescript-eslint/no-unnecessary-condition */
@@ -339,11 +338,13 @@ export async function decryptFile(
                 ...file.magicMetadata,
                 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                 // @ts-ignore
-                data: await worker.decryptMetadataJSON({
-                    encryptedDataB64: magicMetadata.data,
-                    decryptionHeaderB64: magicMetadata.header,
-                    keyB64: fileKey,
-                }),
+                data: await worker.decryptMetadataJSON(
+                    {
+                        encryptedData: magicMetadata.data,
+                        decryptionHeader: magicMetadata.header,
+                    },
+                    fileKey,
+                ),
             };
         }
         /* eslint-disable @typescript-eslint/no-unnecessary-condition */
@@ -352,11 +353,13 @@ export async function decryptFile(
                 ...pubMagicMetadata,
                 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                 // @ts-ignore
-                data: await worker.decryptMetadataJSON({
-                    encryptedDataB64: pubMagicMetadata.data,
-                    decryptionHeaderB64: pubMagicMetadata.header,
-                    keyB64: fileKey,
-                }),
+                data: await worker.decryptMetadataJSON(
+                    {
+                        encryptedData: pubMagicMetadata.data,
+                        decryptionHeader: pubMagicMetadata.header,
+                    },
+                    fileKey,
+                ),
             };
         }
         return {
