@@ -18,6 +18,7 @@ import {
     type Collection2,
     type CollectionNewParticipantRole,
     type CollectionPrivateMagicMetadataData,
+    type CollectionShareeMagicMetadataData,
     type CollectionType,
     type PublicURL,
 } from "ente-media/collection";
@@ -451,24 +452,22 @@ const postCollectionsRename = async (renameRequest: RenameRequest) =>
 export const updateCollectionVisibility = async (
     collection: Collection2,
     visibility: ItemVisibility,
-) => {
-    if (collection.owner.id == ensureLocalUser().id) {
-        return updateCollectionPrivateMagicMetadata(collection, { visibility });
-    } else {
-        // TODO(C2):
-        return updateCollectionPrivateMagicMetadata(collection, { visibility });
-    }
-};
+) =>
+    collection.owner.id == ensureLocalUser().id
+        ? updateCollectionPrivateMagicMetadata(collection, { visibility })
+        : updateCollectionShareeMagicMetadata(collection, { visibility });
 
 /**
  * Update the private magic metadata contents of a collection on remote.
  *
  * Remote only, does not modify local state.
  *
- * @param collection The collection whose magic metadata we want to update. In
- * particular, the existing magic metadata of this collection is used both to
- * obtain the current magic metadata version, and the existing contents on top
- * of which the updates are applied.
+ * @param collection The collection whose magic metadata we want to update.
+ *
+ * The existing magic metadata of this collection is used both to obtain the
+ * current magic metadata version, and the existing contents on top of which the
+ * updates are applied, so it is imperative that both these values are up to
+ * sync with remote otherwise the update will fail.
  *
  * @param updates A non-empty subset of
  * {@link CollectionPrivateMagicMetadataData} entries.
@@ -519,6 +518,43 @@ const putCollectionsMagicMetadata = async (
 ) =>
     ensureOk(
         await fetch(await apiURL("/collections/magic-metadata"), {
+            method: "PUT",
+            headers: await authenticatedRequestHeaders(),
+            body: JSON.stringify(updateRequest),
+        }),
+    );
+
+/**
+ * Update the per-sharee magic metadata contents of a collection on remote.
+ *
+ * Remote only, does not modify local state.
+ *
+ * This is a variant of {@link updateCollectionPrivateMagicMetadata} that works
+ * with the {@link sharedMagicMetadata} of a collection.
+ */
+const updateCollectionShareeMagicMetadata = async (
+    { id, key, sharedMagicMetadata }: Collection2,
+    updates: CollectionShareeMagicMetadataData,
+) =>
+    putCollectionsShareeMagicMetadata({
+        id,
+        magicMetadata: await encryptMagicMetadata(
+            createMagicMetadata(
+                { ...sharedMagicMetadata?.data, ...updates },
+                sharedMagicMetadata?.version,
+            ),
+            key,
+        ),
+    });
+
+/**
+ * Update the sharee magic metadata of a single shared collection on remote.
+ */
+const putCollectionsShareeMagicMetadata = async (
+    updateRequest: UpdateCollectionMagicMetadataRequest,
+) =>
+    ensureOk(
+        await fetch(await apiURL("/collections/sharee-magic-metadata"), {
             method: "PUT",
             headers: await authenticatedRequestHeaders(),
             body: JSON.stringify(updateRequest),

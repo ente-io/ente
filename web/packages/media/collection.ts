@@ -108,7 +108,9 @@ export interface Collection2 {
     pubMagicMetadata?: MagicMetadata<CollectionPublicMagicMetadataData>;
     /**
      * Private mutable metadata associated with the collection that is only
-     * visible to the current user, if they're not the owner.
+     * visible to the current user if they're not the owner of the collection.
+     *
+     * Sometimes also referred to as "shareeMagicMetadata".
      *
      * This is metadata associated with each "share", and is only visible to
      * (and editable by) the user with which the collection has been shared, not
