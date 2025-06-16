@@ -1,3 +1,5 @@
+import "package:photos/models/upload_strategy.dart";
+
 class PathConfig {
   final String pathID;
   final int ownerId;
@@ -6,7 +8,7 @@ class PathConfig {
   // or create a new collection if no mapping exists
   final int? destCollectionID;
   final bool shouldBackup;
-  final int uploadStrategy;
+  final UploadStrategy uploadStrategy;
 
   PathConfig(
     this.pathID,

@@ -29,4 +29,16 @@ extension UploadMappingTable on RemoteDB {
     }
     return result;
   }
+
+  Future<Map<String, RLMapping>> getLocalIDToMappingForActiveFiles() async {
+    final result = <String, RLMapping>{};
+    final cursor = await sqliteDB.getAll(
+      "SELECT * FROM upload_mapping join files on upload_mapping.file_id = files.id",
+    );
+    for (final row in cursor) {
+      final mapping = rowToUploadLocalMapping(row);
+      result[mapping.localID] = mapping;
+    }
+    return result;
+  }
 }

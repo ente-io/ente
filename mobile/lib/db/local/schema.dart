@@ -6,6 +6,8 @@ import "package:sqlite_async/sqlite_async.dart";
 const assetColumns =
     "id, type, sub_type, width, height, duration_in_sec, orientation, is_fav, title, relative_path, created_at, modified_at, mime_type, latitude, longitude, scan_state";
 
+const assetUploadQueueColumns =
+    "dest_collection_id, id, path_id, owner_id, manual";
 const androidAssetState = 1;
 const androidHashState = 1 << 2;
 const androidMediaType = 1 << 3;
@@ -144,7 +146,7 @@ class LocalDBMigration {
        created_at INTEGER NOT NULL,
        duration_in_sec INTEGER DEFAULT 0,
        dest_collection_id INTEGER NOT NULL,
-       owner_id INTEGER NOT NULL,
+       owner_id INTEGER NOT NULL
     );
   ''',
     '''
@@ -185,11 +187,12 @@ class LocalDBMigration {
     CREATE TABLE asset_upload_queue (
       dest_collection_id INTEGER NOT NULL,
       id TEXT NOT NULL,
-      PRIMARY KEY (dest_collection_id, id),
       path_id TEXT,
       owner_id INTEGER NOT NULL,
+      manual INTEGER NOT NULL DEFAULT 0,
+      PRIMARY KEY (dest_collection_id, id),
       FOREIGN KEY(id) REFERENCES assets(id) ON DELETE CASCADE
-    ); 
+    );
     CREATE INDEX IF NOT EXISTS idx_asset_upload_queue_owner_id 
       ON asset_upload_queue(owner_id) 
       WHERE owner_id IS NOT NULL;

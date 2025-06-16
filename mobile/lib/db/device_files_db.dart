@@ -34,27 +34,6 @@ extension DeviceFiles on FilesDB {
     }
   }
 
-  Future<Map<String, Set<String>>> getDevicePathIDToLocalIDMap() async {
-    try {
-      final db = await sqliteAsyncDB;
-      final rows = await db.getAll(
-        ''' SELECT id, path_id FROM device_files; ''',
-      );
-      final result = <String, Set<String>>{};
-      for (final row in rows) {
-        final String pathID = row['path_id'] as String;
-        if (!result.containsKey(pathID)) {
-          result[pathID] = <String>{};
-        }
-        result[pathID]!.add(row['id'] as String);
-      }
-      return result;
-    } catch (e) {
-      _logger.severe("failed to getDevicePathIDToLocalIDMap", e);
-      rethrow;
-    }
-  }
-
   // getDeviceSyncCollectionIDs returns the collectionIDs for the
   // deviceCollections which are marked for auto-backup
   Future<Set<int>> getDeviceSyncCollectionIDs() async {

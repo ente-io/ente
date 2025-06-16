@@ -3,6 +3,7 @@ import "package:flutter/foundation.dart";
 import "package:photos/db/local/db.dart";
 import "package:photos/log/devlog.dart";
 import "package:photos/models/local/path_config.dart";
+import "package:photos/models/upload_strategy.dart";
 
 extension PathBackupConfigTable on LocalDB {
   Future<void> insertOrUpdatePathConfigs(
@@ -56,6 +57,14 @@ extension PathBackupConfigTable on LocalDB {
     return collectionIDs;
   }
 
+  Future<void> updateDestConnection(
+      String pathID, int destCollection, int ownerID) async {
+    await sqliteDB.execute(
+      'UPDATE path_backup_config SET collection_id = ? WHERE device_path_id = ? AND owner_id = ?',
+      [destCollection, pathID, ownerID],
+    );
+  }
+
   Future<List<PathConfig>> getPathConfigs(int ownerID) async {
     final stopwatch = Stopwatch()..start();
     final result = await sqliteDB.getAll(
@@ -68,7 +77,7 @@ extension PathBackupConfigTable on LocalDB {
         row['owner_id'] as int,
         row['collection_id'] as int?,
         (row['should_backup'] as int) == 1,
-        (row['upload_strategy'] as int),
+        getUploadType(row['upload_strategy'] as int),
       );
     }).toList();
     devLog(

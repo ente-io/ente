@@ -837,57 +837,6 @@ class FilesDB with SqlDbBase {
   }
 
   // todo:rewrite (upload related)
-  Future<Set<String>> getLocalIDsMarkedForOrAlreadyUploaded(int ownerID) async {
-    final db = await instance.sqliteAsyncDB;
-    final rows = await db.getAll(
-      'SELECT DISTINCT $columnLocalID FROM $filesTable '
-      'WHERE $columnLocalID IS NOT NULL AND ($columnCollectionID IS NOT NULL '
-      'AND $columnCollectionID != -1) AND ($columnOwnerID = ? OR '
-      '$columnOwnerID IS NULL)',
-      [ownerID],
-    );
-    final result = <String>{};
-    for (final row in rows) {
-      result.add(row[columnLocalID] as String);
-    }
-    return result;
-  }
-
-// todo:rewrite (upload related)
-  Future<Set<String>> getLocalFileIDsForCollection(int collectionID) async {
-    final db = await instance.sqliteAsyncDB;
-    final rows = await db.getAll(
-      'SELECT $columnLocalID FROM $filesTable '
-      'WHERE $columnLocalID IS NOT NULL AND $columnCollectionID = ?',
-      [collectionID],
-    );
-    final result = <String>{};
-    for (final row in rows) {
-      result.add(row[columnLocalID] as String);
-    }
-    return result;
-  }
-
-  // todo:rewrite (upload related)
-  // Sets the collectionID for the files with given LocalIDs if the
-  // corresponding file entries are not already mapped to some other collection
-  Future<void> setCollectionIDForUnMappedLocalFiles(
-    int collectionID,
-    Set<String> localIDs,
-  ) async {
-    final db = await instance.sqliteAsyncDB;
-    final inParam = localIDs.map((id) => "'$id'").join(',');
-    await db.execute(
-      '''
-      UPDATE $filesTable
-      SET $columnCollectionID = $collectionID
-      WHERE $columnLocalID IN ($inParam) AND ($columnCollectionID IS NULL OR 
-      $columnCollectionID = -1);
-    ''',
-    );
-  }
-
-  // todo:rewrite (upload related)
   Future<void> markFilesForReUpload(
     int ownerID,
     String localID,
@@ -922,51 +871,6 @@ class FilesDB with SqlDbBase {
         ownerID,
       ],
     );
-  }
-
-  // todo:rewrite cleanup (upload related)
-  /*
-    This method should only return localIDs which are not uploaded yet
-    and can be mapped to incoming remote entry
-   */
-  Future<List<EnteFile>> getUnlinkedLocalMatchesForRemoteFile(
-    int ownerID,
-    String localID,
-    FileType fileType, {
-    required String title,
-    required String deviceFolder,
-  }) async {
-    final db = await instance.sqliteAsyncDB;
-    // on iOS, match using localID and fileType. title can either match or
-    // might be null based on how the file was imported
-    String query = '''SELECT * FROM $filesTable WHERE ($columnOwnerID = ?  
-        OR $columnOwnerID IS NULL) AND $columnLocalID = ? 
-        AND $columnFileType = ? AND ($columnTitle=? OR $columnTitle IS NULL) ''';
-    List<Object> whereArgs = [
-      ownerID,
-      localID,
-      getInt(fileType),
-      title,
-    ];
-    if (Platform.isAndroid) {
-      query = '''SELECT * FROM $filesTable WHERE ($columnOwnerID = ? OR  
-          $columnOwnerID IS NULL) AND $columnLocalID = ? AND $columnFileType = ? 
-          AND $columnTitle=? AND $columnDeviceFolder= ? ''';
-      whereArgs = [
-        ownerID,
-        localID,
-        getInt(fileType),
-        title,
-        deviceFolder,
-      ];
-    }
-
-    final rows = await db.getAll(
-      query,
-      whereArgs,
-    );
-
-    return convertToFiles(rows);
   }
 
   // todo:rewrite (copy related)
@@ -1146,42 +1050,6 @@ class FilesDB with SqlDbBase {
       ' = $visibility AND $columnOwnerID = $ownerID AND $columnCollectionID NOT IN (${hiddenCollections.join(', ')})',
     );
     return count.first['COUNT'] as int;
-  }
-
-  // todo:rewrite (upload related)
-  Future<List<EnteFile>> getPendingUploadForCollection(int collectionID) async {
-    final db = await instance.sqliteAsyncDB;
-    final results = await db.getAll(
-      'SELECT * FROM $filesTable WHERE $columnCollectionID = ? AND '
-      '($columnUploadedFileID IS NULL OR $columnUploadedFileID = -1)',
-      [collectionID],
-    );
-    return convertToFiles(results);
-  }
-
-  // todo:rewrite (upload related)
-  Future<Set<String>> getLocalIDsPresentInEntries(
-    List<EnteFile> existingFiles,
-    int collectionID,
-  ) async {
-    final inParam = existingFiles
-        .where((file) => file.localID != null)
-        .map((file) => "'${file.localID}'")
-        .join(',');
-    final db = await instance.sqliteAsyncDB;
-    final rows = await db.getAll(
-      '''
-      SELECT $columnLocalID
-      FROM $filesTable
-      WHERE $columnLocalID IN ($inParam) AND $columnCollectionID != 
-      $collectionID AND $columnLocalID IS NOT NULL;
-    ''',
-    );
-    final result = <String>{};
-    for (final row in rows) {
-      result.add(row[columnLocalID] as String);
-    }
-    return result;
   }
 
   Future<Map<int, int>> getFileIDToCreationTime() async {

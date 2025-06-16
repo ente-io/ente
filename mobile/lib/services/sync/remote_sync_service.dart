@@ -3,23 +3,25 @@ import 'dart:io';
 
 import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
+import "package:photo_manager/photo_manager.dart";
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/errors.dart';
 import 'package:photos/core/event_bus.dart';
 import "package:photos/core/network/network.dart";
-import 'package:photos/db/device_files_db.dart';
 import 'package:photos/db/files_db.dart';
 import "package:photos/db/local/table/path_config_table.dart";
+import "package:photos/db/local/table/upload_queue_table.dart";
+import "package:photos/db/remote/table/mapping_table.dart";
 import 'package:photos/events/backup_folders_updated_event.dart';
 import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/force_reload_home_gallery_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/sync_status_update_event.dart';
-import 'package:photos/models/device_collection.dart';
 import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
+import "package:photos/models/local/path_config.dart";
 import 'package:photos/models/upload_strategy.dart';
 import "package:photos/service_locator.dart";
 import 'package:photos/services/app_lifecycle_service.dart';
@@ -122,13 +124,13 @@ class RemoteSyncService {
       // before.
       final bool hasSyncedBefore = _prefs.containsKey(_isFirstRemoteSyncDone);
       if (hasSyncedBefore) {
-        await syncDeviceCollectionFilesForUpload();
+        await queueLocalAssetForUpload();
       }
       await _pullDiff();
       // await trashSyncService.syncTrash();
       if (!hasSyncedBefore) {
         await _prefs.setBool(_isFirstRemoteSyncDone, true);
-        await syncDeviceCollectionFilesForUpload();
+        await queueLocalAssetForUpload();
       }
 
       fileDataService.syncFDStatus().then((_) {
@@ -150,7 +152,7 @@ class RemoteSyncService {
         await _pullDiff();
         _existingSync?.complete();
         _existingSync = null;
-        await syncDeviceCollectionFilesForUpload();
+        await queueLocalAssetForUpload();
         final hasMoreFilesToBackup = (await _getFilesToBeUploaded()).isNotEmpty;
         _logger.info("hasMoreFilesToBackup?" + hasMoreFilesToBackup.toString());
         if (hasMoreFilesToBackup && !_shouldThrottleSync()) {
@@ -252,89 +254,65 @@ class RemoteSyncService {
     await _syncCollectionFiles(collectionID, 0);
   }
 
-  Future<void> syncDeviceCollectionFilesForUpload() async {
+  Future<void> queueLocalAssetForUpload() async {
     _logger.info("Syncing device collections to be uploaded");
     final int ownerID = _config.getUserID()!;
 
-    final deviceCollections = await _db.getDeviceCollections();
-    deviceCollections.removeWhere((element) => !element.shouldBackup);
+    final devicePathConfigs = await localDB.getPathConfigs(ownerID);
+    final assetPaths = await localDB.getAssetPaths();
+    final Map<String, AssetPathEntity> pathIDToAssetPath = {};
+    for (final assetPath in assetPaths) {
+      pathIDToAssetPath[assetPath.id] = assetPath;
+    }
+    devicePathConfigs.removeWhere((element) => !element.shouldBackup);
+
+    final pathIdToLocalIDs = await localDB.pathToAssetIDs();
+    devicePathConfigs.sort(
+      (a, b) => (pathIdToLocalIDs[a.pathID]?.length ?? 0)
+          .compareTo((pathIdToLocalIDs[b.pathID]?.length ?? 0)),
+    );
     // Sort by count to ensure that photos in iOS are first inserted in
     // smallest album marked for backup. This is to ensure that photo is
     // first attempted to upload in a non-recent album.
-    deviceCollections.sort((a, b) => a.count.compareTo(b.count));
-    final Map<String, Set<String>> pathIdToLocalIDs =
-        await _db.getDevicePathIDToLocalIDMap();
+    final rlMapping = await remoteDB.getLocalIDToMappingForActiveFiles();
+    final Set<String> queuedLocalIDs = await localDB.getQueueAssetIDs(ownerID);
+    queuedLocalIDs.addAll(rlMapping.keys);
     bool moreFilesMarkedForBackup = false;
-    for (final deviceCollection in deviceCollections) {
-      final Set<String> localIDsToSync =
-          pathIdToLocalIDs[deviceCollection.id] ?? {};
-      if (deviceCollection.uploadStrategy == UploadStrategy.ifMissing) {
-        final Set<String> alreadyClaimedLocalIDs =
-            await _db.getLocalIDsMarkedForOrAlreadyUploaded(ownerID);
-        localIDsToSync.removeAll(alreadyClaimedLocalIDs);
+    for (final deviceCollection in devicePathConfigs) {
+      final AssetPathEntity? assetPath =
+          pathIDToAssetPath[deviceCollection.pathID];
+      if (assetPath == null) {
+        _logger.warning(
+          "AssetPathEntity not found for pathID ${deviceCollection.pathID}",
+        );
+        continue;
       }
-
+      final Set<String> localIDsToSync =
+          pathIdToLocalIDs[deviceCollection.pathID] ?? {};
+      if (deviceCollection.uploadStrategy == UploadStrategy.ifMissing) {
+        localIDsToSync.removeAll(queuedLocalIDs);
+      }
       if (localIDsToSync.isEmpty) {
         continue;
       }
-      final collectionID = await _getCollectionID(deviceCollection);
+      final collectionID = await _getCollectionID(deviceCollection, assetPath);
       if (collectionID == null) {
         _logger.warning('DeviceCollection was either deleted or missing');
         continue;
       }
 
       moreFilesMarkedForBackup = true;
-      await _db.setCollectionIDForUnMappedLocalFiles(
-        collectionID,
+      await localDB.insertOrUpdateQueue(
         localIDsToSync,
+        collectionID,
+        ownerID,
+        path: deviceCollection.pathID,
       );
-
-      // mark IDs as already synced if corresponding entry is present in
-      // the collection. This can happen when a user has marked a folder
-      // for sync, then un-synced it and again tries to mark if for sync.
-      final Set<String> existingMapping =
-          await _db.getLocalFileIDsForCollection(collectionID);
-      final Set<String> commonElements =
-          localIDsToSync.intersection(existingMapping);
-      if (commonElements.isNotEmpty) {
-        debugPrint(
-          "${commonElements.length} files already existing in "
-          "collection $collectionID for ${deviceCollection.name}",
-        );
-        localIDsToSync.removeAll(commonElements);
-      }
-
-      // At this point, the remaining localIDsToSync will need to create
-      // new file entries, where we can store mapping for localID and
-      // corresponding collection ID
-      if (localIDsToSync.isNotEmpty) {
-        debugPrint(
-          'Adding new entries for ${localIDsToSync.length} files'
-          ' for ${deviceCollection.name}',
-        );
-        final filesWithCollectionID =
-            await _db.getLocalFiles(localIDsToSync.toList());
-        final List<EnteFile> newFilesToInsert = [];
-        final Set<String> fileFoundForLocalIDs = {};
-        for (var existingFile in filesWithCollectionID) {
-          final String localID = existingFile.localID!;
-          if (!fileFoundForLocalIDs.contains(localID)) {
-            existingFile.generatedID = null;
-            existingFile.collectionID = collectionID;
-            existingFile.uploadedFileID = null;
-            existingFile.ownerID = null;
-            newFilesToInsert.add(existingFile);
-            fileFoundForLocalIDs.add(localID);
-          }
-        }
-        await _db.insertMultiple(newFilesToInsert);
-        if (fileFoundForLocalIDs.length != localIDsToSync.length) {
-          _logger.warning(
-            "mismatch in num of filesToSync ${localIDsToSync.length} to "
-            "fileSynced ${fileFoundForLocalIDs.length}",
-          );
-        }
-      }
+      _logger.info(
+        "Queued ${localIDsToSync.length} files for upload in collection "
+        "$collectionID for path ${deviceCollection.pathID}",
+      );
+      queuedLocalIDs.addAll(localIDsToSync);
     }
     if (moreFilesMarkedForBackup && !_config.hasSelectedAllFoldersForBackup()) {
       // "force reload due to display new files"
@@ -355,7 +333,10 @@ class RemoteSyncService {
     SyncService.instance.onDeviceCollectionSet(newDestCollection);
     // remove all collectionIDs which are still marked for backup
     oldDestCollection.removeAll(newDestCollection);
-    await removeFilesQueuedForUpload(oldDestCollection.toList());
+    await localDB.clearMappingsWithPath(
+      ownerID,
+      oldDestCollection,
+    );
     if (syncStatusUpdate.values.any((syncStatus) => syncStatus == false)) {
       Configuration.instance.setSelectAllFoldersForBackup(false).ignore();
     }
@@ -365,57 +346,14 @@ class RemoteSyncService {
     Bus.instance.fire(BackupFoldersUpdatedEvent());
   }
 
-  Future<void> removeFilesQueuedForUpload(List<int> collectionIDs) async {
-    /*
-      For each collection, perform following action
-      1) Get List of all files not uploaded yet
-      2) Delete files who localIDs is also present in other collections.
-      3) For Remaining files, set the collectionID as -1
-     */
-    _logger.info("Removing files for collections $collectionIDs");
-    for (int collectionID in collectionIDs) {
-      final List<EnteFile> pendingUploads =
-          await _db.getPendingUploadForCollection(collectionID);
-      if (pendingUploads.isEmpty) {
-        continue;
-      } else {
-        _logger.info(
-          "RemovingFiles $collectionIDs: pendingUploads "
-          "${pendingUploads.length}",
-        );
-      }
-      final Set<String> localIDsInOtherFileEntries =
-          await _db.getLocalIDsPresentInEntries(
-        pendingUploads,
-        collectionID,
-      );
-      _logger.info(
-        "RemovingFiles $collectionIDs: filesInOtherCollection "
-        "${localIDsInOtherFileEntries.length}",
-      );
-      final List<EnteFile> entriesToUpdate = [];
-      final List<int> entriesToDelete = [];
-      for (EnteFile pendingUpload in pendingUploads) {
-        if (localIDsInOtherFileEntries.contains(pendingUpload.localID)) {
-          entriesToDelete.add(pendingUpload.generatedID!);
-        } else {
-          pendingUpload.collectionID = null;
-          entriesToUpdate.add(pendingUpload);
-        }
-      }
-      await _db.deleteMultipleByGeneratedIDs(entriesToDelete);
-      await _db.insertMultiple(entriesToUpdate);
-      _logger.info(
-        "RemovingFiles $collectionIDs: deleted "
-        "${entriesToDelete.length} and updated ${entriesToUpdate.length}",
-      );
-    }
-  }
-
-  Future<int?> _getCollectionID(DeviceCollection deviceCollection) async {
-    if (deviceCollection.hasCollectionID()) {
+  Future<int?> _getCollectionID(
+    PathConfig pathConfig,
+    AssetPathEntity assetPath,
+  ) async {
+    if (pathConfig.destCollectionID != null) {
+      final int destCollectionID = pathConfig.destCollectionID!;
       final collection =
-          _collectionsService.getCollectionByID(deviceCollection.collectionID!);
+          _collectionsService.getCollectionByID(destCollectionID);
       if (collection != null && !collection.isDeleted) {
         return collection.id;
       }
@@ -423,25 +361,25 @@ class RemoteSyncService {
         // ideally, this should never happen because the app keeps a track of
         // all collections and their IDs. But, if somehow the collection is
         // deleted, we should fetch it again
-        _logger.severe(
-          "Collection ${deviceCollection.collectionID} missing "
-          "for pathID ${deviceCollection.id}",
-        );
-        _collectionsService
-            .fetchCollectionByID(deviceCollection.collectionID!)
-            .ignore();
+        _logger.severe("Collection $destCollectionID missing "
+            "for pathID ${assetPath.id}");
+        _collectionsService.fetchCollectionByID(destCollectionID).ignore();
         // return, by next run collection should be available.
         // we are not waiting on fetch by choice because device might have wrong
         // mapping which will result in breaking upload for other device path
         return null;
       } else if (collection.isDeleted) {
-        _logger.warning("Collection ${deviceCollection.collectionID} deleted "
-            "for pathID ${deviceCollection.id}, new collection will be created");
+        _logger.warning("Collection $destCollectionID deleted "
+            "for pathID ${assetPath.id}, new collection will be created");
       }
     }
     final collection =
-        await _collectionsService.getOrCreateForPath(deviceCollection.name);
-    await _db.updateDeviceCollection(deviceCollection.id, collection.id);
+        await _collectionsService.getOrCreateForPath(assetPath.name);
+    await localDB.updateDestConnection(
+      assetPath.id,
+      collection.id,
+      _config.getUserID()!,
+    );
     return collection.id;
   }
 
