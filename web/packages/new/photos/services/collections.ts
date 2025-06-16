@@ -381,24 +381,7 @@ export async function syncTrash(
     }
     const sinceTime = await getLastTrashSyncTime();
 
-    const updatedTrash = await updateTrash(
-        collectionByID,
-        trash,
-        sinceTime,
-        onUpdateTrashFiles,
-        onPruneDeletedFileIDs,
-    );
-    await cleanTrashCollections(updatedTrash);
-}
-
-const updateTrash = async (
-    collectionByID: Map<number, Collection>,
-    currentTrash: Trash,
-    sinceTime: number,
-    onUpdateTrashFiles: ((files: EnteFile[]) => void) | undefined,
-    onPruneDeletedFileIDs: (deletedFileIDs: Set<number>) => Promise<void>,
-): Promise<Trash> => {
-    let updatedTrash: Trash = [...currentTrash];
+    let updatedTrash: Trash = [...trash];
     try {
         let time = sinceTime;
 
@@ -455,8 +438,9 @@ const updateTrash = async (
     } catch (e) {
         log.error("Get trash files failed", e);
     }
-    return updatedTrash;
-};
+
+    await cleanTrashCollections(updatedTrash);
+}
 
 export const emptyTrash = async () => {
     try {
