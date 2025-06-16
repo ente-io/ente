@@ -389,10 +389,14 @@ export const RemoteCollection = z.looseObject({
     owner: RemoteCollectionUser,
     encryptedKey: z.string(),
     /**
-     * Remote will set this to a blank string for albums which have been shared
-     * with the user (the decryption pipeline for those doesn't use the nonce).
+     * The nonce to use when decrypting the {@link encryptedKey} when the album
+     * is owned by the user.
+     *
+     * Not set for shared albums (the decryption for uses the keypair instead).
+     *
+     * Remote might set this to blank to indicate absence.
      */
-    keyDecryptionNonce: z.string(),
+    keyDecryptionNonce: z.string().nullish().transform(nullToUndefined),
     /**
      * Expected to be present (along with {@link nameDecryptionNonce}), but it
      * is still optional since it might not be present if {@link name} is present.

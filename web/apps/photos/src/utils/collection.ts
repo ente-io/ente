@@ -15,11 +15,13 @@ import {
     DEFAULT_HIDDEN_COLLECTION_USER_FACING_NAME,
     HIDDEN_ITEMS_SECTION,
     addToCollection,
+    collection1To2,
     findDefaultHiddenCollectionIDs,
     isHiddenCollection,
     isIncomingShare,
     moveToCollection,
     restoreToCollection,
+    updateCollectionVisibility,
 } from "ente-new/photos/services/collection";
 import {
     getAllLocalCollections,
@@ -37,7 +39,6 @@ import {
     unhideToCollection,
     updateCollectionMagicMetadata,
     updatePublicCollectionMagicMetadata,
-    updateSharedCollectionMagicMetadata,
 } from "services/collectionService";
 import {
     SetFilesDownloadProgressAttributes,
@@ -185,40 +186,7 @@ async function createCollectionDownloadFolder(
 export const changeCollectionVisibility = async (
     collection: Collection,
     visibility: ItemVisibility,
-) => {
-    try {
-        const updatedMagicMetadataProps: CollectionMagicMetadataProps = {
-            visibility,
-        };
-
-        const user: User = getData("user");
-        if (collection.owner.id === user.id) {
-            const updatedMagicMetadata = await updateMagicMetadata(
-                updatedMagicMetadataProps,
-                collection.magicMetadata,
-                collection.key,
-            );
-
-            await updateCollectionMagicMetadata(
-                collection,
-                updatedMagicMetadata,
-            );
-        } else {
-            const updatedMagicMetadata = await updateMagicMetadata(
-                updatedMagicMetadataProps,
-                collection.sharedMagicMetadata,
-                collection.key,
-            );
-            await updateSharedCollectionMagicMetadata(
-                collection,
-                updatedMagicMetadata,
-            );
-        }
-    } catch (e) {
-        log.error("change collection visibility failed", e);
-        throw e;
-    }
-};
+) => updateCollectionVisibility(await collection1To2(collection), visibility);
 
 export const changeCollectionSortOrder = async (
     collection: Collection,

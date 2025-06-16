@@ -177,9 +177,9 @@ export const decryptCollectionKey = async (
     const { owner, encryptedKey, keyDecryptionNonce } = collection;
     if (owner.id == ensureLocalUser().id) {
         // The collection key of collections owned by the user is encrypted with
-        // the user's master key.
+        // the user's master key. The nonce will be present in such cases.
         return decryptBox(
-            { encryptedData: encryptedKey, nonce: keyDecryptionNonce },
+            { encryptedData: encryptedKey, nonce: keyDecryptionNonce! },
             await ensureMasterKeyFromSession(),
         );
     } else {
