@@ -300,10 +300,8 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
       return;
     }
     final EditActionDetails action = state.editAction!;
-    final double radian = action.rotateAngle;
+    final degree = action.rotateDegrees.toInt();
 
-    final bool flipHorizontal = action.flipY;
-    final bool flipVertical = action.flipX;
     final Uint8List img = state.rawImageData;
 
     // ignore: unnecessary_null_comparison
@@ -316,11 +314,11 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
     final ImageEditorOption option = ImageEditorOption();
 
     option.addOption(ClipOption.fromRect(rect));
-    option.addOption(
-      FlipOption(horizontal: flipHorizontal, vertical: flipVertical),
-    );
-    if (action.hasRotateAngle) {
-      option.addOption(RotateOption(radian.toInt()));
+    if (action.flipY) {
+      option.addOption(const FlipOption(horizontal: true, vertical: false));
+    }
+    if (action.hasRotateDegrees) {
+      option.addOption(RotateOption(degree));
     }
 
     option.addOption(ColorOption.saturation(_saturation!));
@@ -419,7 +417,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
   }
 
   void rotate(bool right) {
-    editorKey.currentState?.rotate(right: right);
+    editorKey.currentState?.rotate(degree: right ? 90 : -90);
   }
 
   Widget _buildSat() {
