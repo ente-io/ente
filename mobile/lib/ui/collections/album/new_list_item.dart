@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/theme/ente_theme.dart';
 
-///https://www.figma.com/file/SYtMyLBs5SAOkTbfMMzhqt/ente-Visual-Design?node-id=10854%3A57947&t=H5AvR79OYDnB9ekw-4
+//https://www.figma.com/design/SYtMyLBs5SAOkTbfMMzhqt/Ente-Visual-Design?node-id=39181-172209&t=3qmSZWpXF3ZC4JGN-1
+
 class NewAlbumListItemWidget extends StatelessWidget {
   const NewAlbumListItemWidget({
     super.key,
@@ -22,12 +23,13 @@ class NewAlbumListItemWidget extends StatelessWidget {
             Row(
               children: [
                 ClipRRect(
-                  borderRadius: const BorderRadius.horizontal(
-                    left: Radius.circular(4),
-                  ),
-                  child: SizedBox(
+                  borderRadius: BorderRadius.circular(4),
+                  child: Container(
                     height: sideOfThumbnail,
                     width: sideOfThumbnail,
+                    color: Theme.of(context).brightness == Brightness.light
+                        ? colorScheme.backdropBase
+                        : colorScheme.backdropFaint,
                     child: Icon(
                       Icons.add_outlined,
                       color: colorScheme.strokeMuted,

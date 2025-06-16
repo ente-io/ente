@@ -5,6 +5,7 @@ import "package:flutter/services.dart";
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import "package:photos/core/event_bus.dart";
+import "package:photos/events/create_new_album_event.dart";
 import "package:photos/events/tab_changed_event.dart";
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection/collection.dart';
@@ -183,31 +184,35 @@ class _AlbumVerticalListWidgetState extends State<AlbumVerticalListWidget> {
       }
 
       if (collection != null) {
-        if (await _runCollectionAction(
-          context,
-          collection,
-          showProgressDialog: false,
-        )) {
-          if (widget.actionType == CollectionActionType.restoreFiles) {
-            showShortToast(
-              context,
-              'Restored files to album ' + albumName,
-            );
-          } else {
-            showShortToast(
-              context,
-              "Album '" + albumName + "' created.",
-            );
-          }
-
-          Navigator.pop(context);
-          Navigator.pop(context);
-
-          await _navigateToCollection(
+        if (widget.enableSelection) {
+          Bus.instance.fire(CreateNewAlbumEvent(collection));
+        } else {
+          if (await _runCollectionAction(
             context,
             collection,
-            hasVerifiedLock: hasVerifiedLock,
-          );
+            showProgressDialog: false,
+          )) {
+            if (widget.actionType == CollectionActionType.restoreFiles) {
+              showShortToast(
+                context,
+                'Restored files to album ' + albumName,
+              );
+            } else {
+              showShortToast(
+                context,
+                "Album '" + albumName + "' created.",
+              );
+            }
+
+            Navigator.pop(context);
+            Navigator.pop(context);
+
+            await _navigateToCollection(
+              context,
+              collection,
+              hasVerifiedLock: hasVerifiedLock,
+            );
+          }
         }
       }
     }
