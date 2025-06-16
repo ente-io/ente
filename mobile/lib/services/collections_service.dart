@@ -1260,6 +1260,15 @@ class CollectionsService {
     return null;
   }
 
+  Map<String, String> publicCollectionHeaders(int collectionID) {
+    final String? albumToken = _cachedPublicAlbumToken[collectionID];
+    final String? albumJwtToken = _cachedPublicAlbumJWT[collectionID];
+    return {
+      if (albumToken != null) "X-Auth-Access-Token": albumToken,
+      if (albumJwtToken != null) "X-Auth-Access-Token-JWT": albumJwtToken,
+    };
+  }
+
   /// Is a public link opened in the app via deeplink
   bool isSharedPublicLink(int collectionID) {
     return _cachedPublicCollectionID.contains(collectionID);
