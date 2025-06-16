@@ -710,13 +710,13 @@ const CollectionSortOrderMenu: React.FC<CollectionSortOrderMenuProps> = ({
     onDescClick,
 }) => {
     const handleAscClick = () => {
-        onClose();
         onAscClick();
+        onClose();
     };
 
     const handleDescClick = () => {
-        onClose();
         onDescClick();
+        onClose();
     };
 
     return (
