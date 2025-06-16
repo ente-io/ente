@@ -23,13 +23,17 @@ class ZoomableLiveImageNew extends StatefulWidget {
   final Function(bool)? shouldDisableScroll;
   final String? tagPrefix;
   final Decoration? backgroundDecoration;
-
+  final bool isFromMemories;
+  final Function({required int memoryDuration})? onFinalFileLoad;
+  
   const ZoomableLiveImageNew(
     this.enteFile, {
     super.key,
     this.shouldDisableScroll,
     required this.tagPrefix,
     this.backgroundDecoration,
+    this.isFromMemories = false,
+    this.onFinalFileLoad,
   });
 
   @override
@@ -94,13 +98,17 @@ class _ZoomableLiveImageNewState extends State<ZoomableLiveImageNew>
         shouldDisableScroll: widget.shouldDisableScroll,
         backgroundDecoration: widget.backgroundDecoration,
         isGuestView: isGuestView,
+        onFinalFileLoad: widget.onFinalFileLoad,
       );
     }
-    return GestureDetector(
-      onLongPressStart: (_) => {_onLongPressEvent(true)},
-      onLongPressEnd: (_) => {_onLongPressEvent(false)},
-      child: content,
-    );
+    if (!widget.isFromMemories) {
+      return GestureDetector(
+        onLongPressStart: (_) => _onLongPressEvent(true),
+        onLongPressEnd: (_) => _onLongPressEvent(false),
+        child: content,
+      );
+    }
+    return content;
   }
 
   @override

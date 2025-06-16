@@ -46,6 +46,7 @@ class VideoWidgetNative extends StatefulWidget {
   final void Function()? onStreamChange;
   final PlaylistData? playlistData;
   final bool selectedPreview;
+  final Function({required int memoryDuration})? onFinalFileLoad;
 
   const VideoWidgetNative(
     this.file, {
@@ -55,6 +56,7 @@ class VideoWidgetNative extends StatefulWidget {
     required this.onStreamChange,
     super.key,
     this.playlistData,
+    this.onFinalFileLoad,
     required this.selectedPreview,
   });
 
@@ -301,12 +303,27 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
                       ),
                       GestureDetector(
                         behavior: HitTestBehavior.opaque,
-                        onTap: () {
-                          _showControls.value = !_showControls.value;
-                          if (widget.playbackCallback != null) {
-                            widget.playbackCallback!(!_showControls.value);
+                        onTap: widget.isFromMemories
+                            ? null
+                            : () {
+                                _showControls.value = !_showControls.value;
+                                if (widget.playbackCallback != null) {
+                                  widget
+                                      .playbackCallback!(!_showControls.value);
+                                }
+                                _elTooltipController.hide();
+                              },
+                        onLongPress: () {
+                          if (widget.isFromMemories) {
+                            widget.playbackCallback?.call(false);
+                            _controller?.pause();
                           }
-                          _elTooltipController.hide();
+                        },
+                        onLongPressUp: () {
+                          if (widget.isFromMemories) {
+                            widget.playbackCallback?.call(true);
+                            _controller?.play();
+                          }
                         },
                         child: Container(
                           constraints: const BoxConstraints.expand(),
@@ -331,32 +348,38 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
                               ),
                             )
                           : const SizedBox.shrink(),
-                      Positioned.fill(
-                        child: Center(
-                          child: ValueListenableBuilder(
-                            builder: (BuildContext context, bool value, _) {
-                              return value
-                                  ? ValueListenableBuilder(
-                                      builder: (context, bool value, _) {
-                                        return AnimatedOpacity(
-                                          duration:
-                                              const Duration(milliseconds: 200),
-                                          opacity: value ? 1 : 0,
-                                          curve: Curves.easeInOutQuad,
-                                          child: IgnorePointer(
-                                            ignoring: !value,
-                                            child: PlayPauseButton(_controller),
-                                          ),
-                                        );
-                                      },
-                                      valueListenable: _showControls,
-                                    )
-                                  : const SizedBox();
-                            },
-                            valueListenable: _isPlaybackReady,
-                          ),
-                        ),
-                      ),
+                      widget.isFromMemories
+                          ? const SizedBox.shrink()
+                          : Positioned.fill(
+                              child: Center(
+                                child: ValueListenableBuilder(
+                                  builder:
+                                      (BuildContext context, bool value, _) {
+                                    return value
+                                        ? ValueListenableBuilder(
+                                            builder: (context, bool value, _) {
+                                              return AnimatedOpacity(
+                                                duration: const Duration(
+                                                  milliseconds: 200,
+                                                ),
+                                                opacity: value ? 1 : 0,
+                                                curve: Curves.easeInOutQuad,
+                                                child: IgnorePointer(
+                                                  ignoring: !value,
+                                                  child: PlayPauseButton(
+                                                    _controller,
+                                                  ),
+                                                ),
+                                              );
+                                            },
+                                            valueListenable: _showControls,
+                                          )
+                                        : const SizedBox();
+                                  },
+                                  valueListenable: _isPlaybackReady,
+                                ),
+                              ),
+                            ),
                       Positioned(
                         bottom: verticalMargin,
                         right: 0,
@@ -394,7 +417,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
                                   valueListenable: _isPlaybackReady,
                                   builder:
                                       (BuildContext context, bool value, _) {
-                                    return value
+                                    return value && !widget.isFromMemories
                                         ? _SeekBarAndDuration(
                                             controller: _controller,
                                             duration: duration,
@@ -463,6 +486,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
   }
 
   void _seekListener() {
+    if (widget.isFromMemories) return;
     if (!_isSeeking.value &&
         _controller?.playbackStatus == PlaybackStatus.playing) {
       _debouncer.run(() async {
@@ -481,6 +505,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
   }
 
   void _onPlaybackStatusChanged() {
+    if (widget.isFromMemories) return;
     final duration = widget.file.duration != null
         ? widget.file.duration! * 1000
         : _controller?.videoInfo?.durationInMilliseconds;
@@ -525,6 +550,8 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
   Future<void> _onPlaybackReady() async {
     if (_isPlaybackReady.value) return;
     await _controller!.play();
+    final durationInSeconds = durationToSeconds(duration) ?? 10;
+    widget.onFinalFileLoad?.call(memoryDuration: durationInSeconds);
     unawaited(_controller!.setVolume(1));
     _isPlaybackReady.value = true;
   }
@@ -739,11 +766,7 @@ class _SeekBarAndDuration extends StatelessWidget {
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
       valueListenable: showControls,
-      builder: (
-        BuildContext context,
-        bool value,
-        _,
-      ) {
+      builder: (BuildContext context, bool value, _) {
         return AnimatedOpacity(
           duration: const Duration(
             milliseconds: 200,
