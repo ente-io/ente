@@ -29,6 +29,7 @@ import "package:photos/models/preview/playlist_data.dart";
 import "package:photos/models/preview/preview_item.dart";
 import "package:photos/models/preview/preview_item_status.dart";
 import "package:photos/service_locator.dart";
+import "package:photos/services/collections_service.dart";
 import "package:photos/services/filedata/model/file_data.dart";
 import "package:photos/ui/notification/toast.dart";
 import "package:photos/utils/exif_util.dart";
@@ -557,21 +558,7 @@ class VideoPreviewServie {
           size = details["size"];
         }
       } else {
-        final response = await _dio.get(
-          "/files/data/fetch/",
-          queryParameters: {
-            "fileID": file.uploadedFileID,
-            "type": "vid_preview",
-          },
-        );
-        final encryptedData = response.data["data"]["encryptedData"];
-        final header = response.data["data"]["decryptionHeader"];
-        final encryptionKey = getFileKey(file);
-        final playlistData = await decryptAndUnzipJson(
-          encryptionKey,
-          encryptedData: encryptedData,
-          header: header,
-        );
+        final Map<String, dynamic> playlistData = await _getPlaylistData(file);
         finalPlaylist = playlistData["playlist"];
         width = playlistData["width"];
         height = playlistData["height"];
@@ -646,6 +633,40 @@ class VideoPreviewServie {
     }
   }
 
+  Future<Map<String, dynamic>> _getPlaylistData(EnteFile file) async {
+    late Response<dynamic> response;
+    if (CollectionsService.instance.isSharedPublicLink(file.collectionID!)) {
+      response = await NetworkClient.instance.getDio().get(
+            "${Configuration.instance.getHttpEndpoint()}/public-collection/files/data/fetch/",
+            queryParameters: {
+              "fileID": file.uploadedFileID,
+              "type": "vid_preview",
+            },
+            options: Options(
+              headers: CollectionsService.instance
+                  .publicCollectionHeaders(file.collectionID!),
+            ),
+          );
+    } else {
+      response = await _dio.get(
+        "/files/data/fetch/",
+        queryParameters: {
+          "fileID": file.uploadedFileID,
+          "type": "vid_preview",
+        },
+      );
+    }
+    final encryptedData = response.data["data"]["encryptedData"];
+    final header = response.data["data"]["decryptionHeader"];
+    final encryptionKey = getFileKey(file);
+    final playlistData = await decryptAndUnzipJson(
+      encryptionKey,
+      encryptedData: encryptedData,
+      header: header,
+    );
+    return playlistData;
+  }
+
   int? parseDurationFromHLS(String playlist) {
     final lines = playlist.split("\n");
     double totalDuration = 0.0;
@@ -667,16 +688,33 @@ class VideoPreviewServie {
 
   Future<(String, String)> _getPreviewUrl(EnteFile file) async {
     try {
-      final response = await _dio.get(
-        "/files/data/preview",
-        queryParameters: {
-          "fileID": file.uploadedFileID,
-          "type":
-              file.fileType == FileType.video ? "vid_preview" : "img_preview",
-        },
-      );
-
-      final url = (response.data["url"] as String);
+      late String url;
+      if (CollectionsService.instance.isSharedPublicLink(file.collectionID!)) {
+        final response = await NetworkClient.instance.getDio().get(
+              "${Configuration.instance.getHttpEndpoint()}/public-collection/files/data/preview",
+              queryParameters: {
+                "fileID": file.uploadedFileID,
+                "type": file.fileType == FileType.video
+                    ? "vid_preview"
+                    : "img_preview",
+              },
+              options: Options(
+                headers: CollectionsService.instance
+                    .publicCollectionHeaders(file.collectionID!),
+              ),
+            );
+        url = (response.data["url"] as String);
+      } else {
+        final response = await _dio.get(
+          "/files/data/preview",
+          queryParameters: {
+            "fileID": file.uploadedFileID,
+            "type":
+                file.fileType == FileType.video ? "vid_preview" : "img_preview",
+          },
+        );
+        url = (response.data["url"] as String);
+      }
       final uri = Uri.parse(url);
       final segments = uri.pathSegments;
       if (segments.isEmpty) throw Exception("Invalid URL");
