@@ -208,7 +208,7 @@ const updateSnapshotIfNeeded = (
 export const isHLSGenerationSupported = isDesktop;
 
 /**
- * Initialize the video processing subsystem if the user has enabled HLS
+ * Initialize the video processing subsystem unless the user has disabled HLS
  * generation in settings.
  */
 export const initVideoProcessing = async () => {
@@ -224,8 +224,10 @@ export const initVideoProcessing = async () => {
 
 /**
  * Return the persisted user preference for HLS generation.
+ *
+ * If unset, defaults to `true`.
  */
-const savedGenerateHLS = () => getKVB("generateHLS");
+const savedGenerateHLS = async () => (await getKVB("generateHLS")) ?? true;
 
 /**
  * Update the persisted user preference for HLS generation.
