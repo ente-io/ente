@@ -112,7 +112,7 @@ class _MemoryCoverWidgetState extends State<MemoryCoverWidget> {
                                   decoration: BoxDecoration(
                                     gradient: LinearGradient(
                                       colors: [
-                                        Colors.black.withOpacity(0.5),
+                                        Colors.black.withValues(alpha: 0.5),
                                         Colors.transparent,
                                       ],
                                       stops: const [0, 1],
@@ -163,7 +163,7 @@ class _MemoryCoverWidgetState extends State<MemoryCoverWidget> {
                                 decoration: BoxDecoration(
                                   gradient: LinearGradient(
                                     colors: [
-                                      Colors.black.withOpacity(0.5),
+                                      Colors.black.withValues(alpha: 0.5),
                                       Colors.transparent,
                                     ],
                                     stops: const [0, 1],

@@ -185,7 +185,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                         currentStep: value + 1,
                         size: 2,
                         selectedColor: Colors.white, //same for both themes
-                        unselectedColor: Colors.white.withOpacity(0.4),
+                        unselectedColor: Colors.white.withValues(alpha: 0.4),
                       )
                     : const SizedBox.shrink(),
                 const SizedBox(
@@ -217,8 +217,8 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                Colors.black.withOpacity(0.6),
-                Colors.black.withOpacity(0.5),
+                Colors.black.withValues(alpha: 0.6),
+                Colors.black.withValues(alpha: 0.5),
                 Colors.transparent,
               ],
               stops: const [0, 0.6, 1],
@@ -440,7 +440,7 @@ class BottomGradient extends StatelessWidget {
             begin: Alignment.bottomCenter,
             end: Alignment.topCenter,
             colors: [
-              Colors.black.withOpacity(0.5), //same for both themes
+              Colors.black.withValues(alpha: 0.5), //same for both themes
               Colors.transparent,
             ],
             stops: const [0, 0.8],

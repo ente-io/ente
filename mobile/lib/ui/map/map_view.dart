@@ -96,7 +96,7 @@ class _MapViewState extends State<MapView> {
               ),
             ),
             onPositionChanged: (position, hasGesture) {
-              if (position.bounds != null) {
+              if (position.pixelBounds != null) {
                 onChange(position.bounds!);
               }
             },

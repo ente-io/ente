@@ -185,7 +185,7 @@ class LocationRecommendation extends StatelessWidget {
                   cornerSmoothing: cornerSmoothing,
                 ),
                 child: Container(
-                  color: Colors.white.withOpacity(0.1),
+                  color: Colors.white.withValues(alpha: 0.1),
                   width: width + outerStrokeWidth * 2,
                   height: height + outerStrokeWidth * 2,
                 ),
@@ -233,7 +233,7 @@ class LocationRecommendation extends StatelessWidget {
                                   : const NoThumbnailWidget(),
                             ),
                             Container(
-                              color: Colors.black.withOpacity(0.2),
+                              color: Colors.black.withValues(alpha: 0.2),
                             ),
                           ],
                         ),
@@ -257,7 +257,8 @@ class LocationRecommendation extends StatelessWidget {
                                       cornerSmoothing: cornerSmoothing,
                                     ),
                                     child: Container(
-                                      color: Colors.black.withOpacity(0.1),
+                                      color:
+                                          Colors.black.withValues(alpha: 0.1),
                                       width: sideOfThumbnail +
                                           thumbnailBorderWidth * 2,
                                       height: sideOfThumbnail +
@@ -400,7 +401,7 @@ class GoToMapWithBG extends StatelessWidget {
                 cornerSmoothing: LocationRecommendation.cornerSmoothing,
               ),
               child: Container(
-                color: Colors.white.withOpacity(0.1),
+                color: Colors.white.withValues(alpha: 0.1),
                 width: LocationRecommendation.width +
                     LocationRecommendation.outerStrokeWidth * 2,
                 height: LocationRecommendation.height +
@@ -510,7 +511,7 @@ class LocationCTA extends StatelessWidget {
                 cornerSmoothing: LocationRecommendation.cornerSmoothing,
               ),
               child: Container(
-                color: Colors.white.withOpacity(0.1),
+                color: Colors.white.withValues(alpha: 0.1),
                 width: LocationRecommendation.width +
                     LocationRecommendation.outerStrokeWidth * 2,
                 height: LocationRecommendation.height +

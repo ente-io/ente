@@ -124,7 +124,7 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
                   .textTheme
                   .titleMedium!
                   .color!
-                  .withOpacity(0.5),
+                  .withValues(alpha: 0.5),
             );
 
     return Stack(

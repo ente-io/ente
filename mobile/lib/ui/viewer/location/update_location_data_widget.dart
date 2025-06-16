@@ -76,11 +76,9 @@ class _UpdateLocationDataWidgetState extends State<UpdateLocationDataWidget> {
               }
             },
           ),
-          nonRotatedChildren: const [
-            OSMFranceTileAttributes(),
-          ],
           children: const [
             OSMFranceTileLayer(),
+            OSMFranceTileAttributes(),
           ],
         ),
         Positioned(

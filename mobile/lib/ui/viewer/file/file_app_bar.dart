@@ -115,8 +115,8 @@ class FileAppBarState extends State<FileAppBar> {
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                Colors.black.withOpacity(0.72),
-                Colors.black.withOpacity(0.6),
+                Colors.black.withValues(alpha: 0.72),
+                Colors.black.withValues(alpha: 0.6),
                 Colors.transparent,
               ],
               stops: const [0, 0.2, 1],
