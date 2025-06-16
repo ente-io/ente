@@ -42,20 +42,22 @@ final lightThemeData = ThemeData(
     bodyLarge: const TextStyle(color: Colors.orange),
   ),
   cardColor: const Color.fromRGBO(250, 250, 250, 1.0),
-  dialogTheme: const DialogTheme().copyWith(
-    backgroundColor: const Color.fromRGBO(250, 250, 250, 1.0), //
-    titleTextStyle: const TextStyle(
+  dialogTheme: const DialogThemeData(
+    backgroundColor: Color.fromRGBO(250, 250, 250, 1.0), //
+    titleTextStyle: TextStyle(
       color: Colors.black,
       fontSize: 24,
       fontWeight: FontWeight.w600,
     ),
-    contentTextStyle: const TextStyle(
+    contentTextStyle: TextStyle(
       fontFamily: 'Inter-Medium',
       color: Colors.black,
       fontSize: 16,
       fontWeight: FontWeight.w500,
     ),
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.all(Radius.circular(8)),
+    ),
   ),
   inputDecorationTheme: const InputDecorationTheme().copyWith(
     focusedBorder: const UnderlineInputBorder(
@@ -117,20 +119,22 @@ final darkThemeData = ThemeData(
     elevation: 0,
   ),
   cardColor: const Color.fromRGBO(10, 15, 15, 1.0),
-  dialogTheme: const DialogTheme().copyWith(
-    backgroundColor: const Color.fromRGBO(15, 15, 15, 1.0),
-    titleTextStyle: const TextStyle(
+  dialogTheme: const DialogThemeData(
+    backgroundColor: Color.fromRGBO(15, 15, 15, 1.0),
+    titleTextStyle: TextStyle(
       color: Colors.white,
       fontSize: 24,
       fontWeight: FontWeight.w600,
     ),
-    contentTextStyle: const TextStyle(
+    contentTextStyle: TextStyle(
       fontFamily: 'Inter-Medium',
       color: Colors.white,
       fontSize: 16,
       fontWeight: FontWeight.w500,
     ),
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.all(Radius.circular(8)),
+    ),
   ),
   inputDecorationTheme: const InputDecorationTheme().copyWith(
     focusedBorder: const UnderlineInputBorder(
