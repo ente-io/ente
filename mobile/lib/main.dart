@@ -37,7 +37,7 @@ import "package:photos/services/machine_learning/face_ml/person/person_service.d
 import 'package:photos/services/machine_learning/ml_service.dart';
 import 'package:photos/services/machine_learning/semantic_search/semantic_search_service.dart';
 import "package:photos/services/notification_service.dart";
-import "package:photos/services/preview_video_store.dart";
+import "package:photos/services/video_preview_service.dart";
 import 'package:photos/services/push_service.dart';
 import 'package:photos/services/search_service.dart';
 import 'package:photos/services/sync/local_sync_service.dart';
@@ -222,8 +222,8 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     await NetworkClient.instance.init(packageInfo);
     _logger.info("NetworkClient init done $tlog");
 
-    ServiceLocator.instance
-        .init(preferences, NetworkClient.instance.enteDio,NetworkClient.instance.getDio(), packageInfo);
+    ServiceLocator.instance.init(preferences, NetworkClient.instance.enteDio,
+        NetworkClient.instance.getDio(), packageInfo);
 
     _logger.info("UserService init $tlog");
     await UserService.instance.init();
@@ -267,7 +267,7 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
       });
     }
     _logger.info("PushService/HomeWidget done $tlog");
-    PreviewVideoStore.instance.init(preferences);
+    VideoPreviewServie.instance.init(preferences);
     unawaited(SemanticSearchService.instance.init());
     unawaited(MLService.instance.init());
     await PersonService.init(
@@ -298,7 +298,7 @@ void logLocalSettings() {
   );
   _logger.info("Gallery grid size: ${localSettings.getPhotoGridSize()}");
   _logger.info(
-    "Video streaming is enalbed: ${PreviewVideoStore.instance.isVideoStreamingEnabled}",
+    "Video streaming is enalbed: ${VideoPreviewServie.instance.isVideoStreamingEnabled}",
   );
 }
 

@@ -40,7 +40,8 @@ import "package:shared_preferences/shared_preferences.dart";
 
 const _maxRetryCount = 3;
 
-class PreviewVideoStore {
+class VideoPreviewServie {
+  final _logger = Logger("VideoPreviewServie");
   final LinkedHashMap<int, PreviewItem> _items = LinkedHashMap();
   LinkedHashMap<int, EnteFile> fileQueue = LinkedHashMap();
   final int _maxPreviewSizeLimitForCache = 50 * 1024 * 1024; // 50 MB
@@ -48,12 +49,11 @@ class PreviewVideoStore {
 
   bool _hasQueuedFile = false;
 
-  PreviewVideoStore._privateConstructor();
+  VideoPreviewServie._privateConstructor();
 
-  static final PreviewVideoStore instance =
-      PreviewVideoStore._privateConstructor();
+  static final VideoPreviewServie instance =
+      VideoPreviewServie._privateConstructor();
 
-  final _logger = Logger("PreviewVideoStore");
   final cacheManager = DefaultCacheManager();
   final videoCacheManager = VideoCacheManager.instance;
 
