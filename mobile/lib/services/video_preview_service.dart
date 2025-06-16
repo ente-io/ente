@@ -41,8 +41,8 @@ import "package:shared_preferences/shared_preferences.dart";
 
 const _maxRetryCount = 3;
 
-class VideoPreviewServie {
-  final _logger = Logger("VideoPreviewServie");
+class VideoPreviewService {
+  final _logger = Logger("VideoPreviewService");
   final LinkedHashMap<int, PreviewItem> _items = LinkedHashMap();
   LinkedHashMap<int, EnteFile> fileQueue = LinkedHashMap();
   final int _maxPreviewSizeLimitForCache = 50 * 1024 * 1024; // 50 MB
@@ -50,17 +50,19 @@ class VideoPreviewServie {
 
   bool _hasQueuedFile = false;
 
-  VideoPreviewServie._privateConstructor();
+  VideoPreviewService._privateConstructor();
 
-  static final VideoPreviewServie instance =
-      VideoPreviewServie._privateConstructor();
+  static final VideoPreviewService instance =
+      VideoPreviewService._privateConstructor();
 
   final cacheManager = DefaultCacheManager();
   final videoCacheManager = VideoCacheManager.instance;
 
   int uploadingFileId = -1;
 
-  final _dio = NetworkClient.instance.enteDio;
+  final _enteDio = NetworkClient.instance.enteDio;
+  final _nonEnteDio = NetworkClient.instance.getDio();
+  final CollectionsService collectionsService = CollectionsService.instance;
 
   void init(SharedPreferences prefs) {
     _prefs = prefs;
@@ -464,7 +466,7 @@ class VideoPreviewServie {
         },
         encryptionKey,
       );
-      final _ = await _dio.put(
+      final _ = await _enteDio.put(
         "/files/video-data",
         data: {
           "fileID": file.uploadedFileID!,
@@ -483,7 +485,7 @@ class VideoPreviewServie {
   Future<(String, int)> _uploadPreviewVideo(EnteFile file, File preview) async {
     _logger.info("Pushing preview for $file");
     try {
-      final response = await _dio.get(
+      final response = await _enteDio.get(
         "/files/data/preview-upload-url",
         queryParameters: {
           "fileID": file.uploadedFileID!,
@@ -493,7 +495,7 @@ class VideoPreviewServie {
       final uploadURL = response.data["url"];
       final String objectID = response.data["objectID"];
       final objectSize = preview.lengthSync();
-      final _ = await _dio.put(
+      final _ = await _enteDio.put(
         uploadURL,
         data: preview.openRead(),
         options: Options(
@@ -635,20 +637,20 @@ class VideoPreviewServie {
 
   Future<Map<String, dynamic>> _getPlaylistData(EnteFile file) async {
     late Response<dynamic> response;
-    if (CollectionsService.instance.isSharedPublicLink(file.collectionID!)) {
-      response = await NetworkClient.instance.getDio().get(
-            "${Configuration.instance.getHttpEndpoint()}/public-collection/files/data/fetch/",
-            queryParameters: {
-              "fileID": file.uploadedFileID,
-              "type": "vid_preview",
-            },
-            options: Options(
-              headers: CollectionsService.instance
-                  .publicCollectionHeaders(file.collectionID!),
-            ),
-          );
+    if (collectionsService.isSharedPublicLink(file.collectionID!)) {
+      response = await _nonEnteDio.get(
+        "${Configuration.instance.getHttpEndpoint()}/public-collection/files/data/fetch/",
+        queryParameters: {
+          "fileID": file.uploadedFileID,
+          "type": "vid_preview",
+        },
+        options: Options(
+          headers:
+              collectionsService.publicCollectionHeaders(file.collectionID!),
+        ),
+      );
     } else {
-      response = await _dio.get(
+      response = await _enteDio.get(
         "/files/data/fetch/",
         queryParameters: {
           "fileID": file.uploadedFileID,
@@ -689,23 +691,22 @@ class VideoPreviewServie {
   Future<(String, String)> _getPreviewUrl(EnteFile file) async {
     try {
       late String url;
-      if (CollectionsService.instance.isSharedPublicLink(file.collectionID!)) {
-        final response = await NetworkClient.instance.getDio().get(
-              "${Configuration.instance.getHttpEndpoint()}/public-collection/files/data/preview",
-              queryParameters: {
-                "fileID": file.uploadedFileID,
-                "type": file.fileType == FileType.video
-                    ? "vid_preview"
-                    : "img_preview",
-              },
-              options: Options(
-                headers: CollectionsService.instance
-                    .publicCollectionHeaders(file.collectionID!),
-              ),
-            );
+      if (collectionsService.isSharedPublicLink(file.collectionID!)) {
+        final response = await _nonEnteDio.get(
+          "${Configuration.instance.getHttpEndpoint()}/public-collection/files/data/preview",
+          queryParameters: {
+            "fileID": file.uploadedFileID,
+            "type":
+                file.fileType == FileType.video ? "vid_preview" : "img_preview",
+          },
+          options: Options(
+            headers:
+                collectionsService.publicCollectionHeaders(file.collectionID!),
+          ),
+        );
         url = (response.data["url"] as String);
       } else {
-        final response = await _dio.get(
+        final response = await _enteDio.get(
           "/files/data/preview",
           queryParameters: {
             "fileID": file.uploadedFileID,

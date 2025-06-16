@@ -379,7 +379,7 @@ class FileAppBarState extends State<FileAppBar> {
               await _onTapGuestView();
             } else if (value == 99) {
               try {
-                await VideoPreviewServie.instance.chunkAndUploadVideo(
+                await VideoPreviewService.instance.chunkAndUploadVideo(
                   context,
                   widget.file,
                 );

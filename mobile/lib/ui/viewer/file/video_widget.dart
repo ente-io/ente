@@ -77,7 +77,7 @@ class _VideoWidgetState extends State<VideoWidget> {
   Future<void> _checkForPreview() async {
     if (!widget.file.isOwner) {
       final bool isStreamable =
-          await VideoPreviewServie.instance.isSharedFileStreamble(widget.file);
+          await VideoPreviewService.instance.isSharedFileStreamble(widget.file);
       if (!isStreamable && mounted) {
         isPreviewLoadable = false;
         setState(() {});
@@ -87,7 +87,7 @@ class _VideoWidgetState extends State<VideoWidget> {
       return;
     }
     widget.playbackCallback?.call(false);
-    final data = await VideoPreviewServie.instance
+    final data = await VideoPreviewService.instance
         .getPlaylist(widget.file)
         .onError((error, stackTrace) {
       if (!mounted) return;

@@ -165,7 +165,7 @@ class MLService {
     } finally {
       _isRunningML = false;
       computeController.releaseCompute(ml: true);
-      VideoPreviewServie.instance.queueFiles();
+      VideoPreviewService.instance.queueFiles();
     }
   }
 

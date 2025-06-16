@@ -139,13 +139,13 @@ class AdvancedSettingsScreen extends StatelessWidget {
                         singleBorderRadius: 8,
                         alignCaptionedTextToLeft: true,
                         trailingWidget: ToggleSwitchWidget(
-                          value: () => VideoPreviewServie
+                          value: () => VideoPreviewService
                               .instance.isVideoStreamingEnabled,
                           onChanged: () async {
-                            final isEnabled = VideoPreviewServie
+                            final isEnabled = VideoPreviewService
                                 .instance.isVideoStreamingEnabled;
 
-                            await VideoPreviewServie.instance
+                            await VideoPreviewService.instance
                                 .setIsVideoStreamingEnabled(!isEnabled);
                           },
                         ),

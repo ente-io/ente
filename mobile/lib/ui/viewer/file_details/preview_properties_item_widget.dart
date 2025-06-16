@@ -44,7 +44,7 @@ class _PreviewPropertiesItemWidgetState
     final textStyle = getEnteTextTheme(context).miniMuted;
     final subSectionWidgets = <Widget>[];
 
-    final data = await VideoPreviewServie.instance
+    final data = await VideoPreviewService.instance
         .getPlaylist(widget.file)
         .onError((error, stackTrace) {
       if (!mounted) return;

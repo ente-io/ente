@@ -267,7 +267,7 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
       });
     }
     _logger.info("PushService/HomeWidget done $tlog");
-    VideoPreviewServie.instance.init(preferences);
+    VideoPreviewService.instance.init(preferences);
     unawaited(SemanticSearchService.instance.init());
     unawaited(MLService.instance.init());
     await PersonService.init(
@@ -298,7 +298,7 @@ void logLocalSettings() {
   );
   _logger.info("Gallery grid size: ${localSettings.getPhotoGridSize()}");
   _logger.info(
-    "Video streaming is enalbed: ${VideoPreviewServie.instance.isVideoStreamingEnabled}",
+    "Video streaming is enalbed: ${VideoPreviewService.instance.isVideoStreamingEnabled}",
   );
 }
 
