@@ -1751,5 +1751,10 @@
   "onThisDayNotificationExplanation": "Recevoir des rappels sur les souvenirs de cette journée des années précédentes.",
   "addMemoriesWidgetPrompt": "Ajoutez un gadget des souvenirs à votre écran d'accueil et revenez ici pour le personnaliser.",
   "addAlbumWidgetPrompt": "Ajoutez un gadget d'album à votre écran d'accueil et revenez ici pour le personnaliser.",
-  "addPeopleWidgetPrompt": "Ajoutez un gadget des personnes à votre écran d'accueil et revenez ici pour le personnaliser."
+  "addPeopleWidgetPrompt": "Ajoutez un gadget des personnes à votre écran d'accueil et revenez ici pour le personnaliser.",
+  "birthdayNotifications": "Notifications d’anniversaire",
+  "receiveRemindersOnBirthdays": "Recevoir des rappels quand c'est l'anniversaire de quelqu'un. Appuyer sur la notification vous amènera à des photos de son anniversaire.",
+  "happyBirthday": "Joyeux anniversaire ! 🥳",
+  "happyBirthdayToPerson": "Joyeux anniversaire {name}! 🎉",
+  "birthdays": "Anniversaires"
 }

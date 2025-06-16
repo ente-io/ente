@@ -873,6 +873,7 @@
   "authToViewYourMemories": "Vui lòng xác thực để xem kỷ niệm của bạn",
   "unlock": "Mở khóa",
   "freeUpSpace": "Giải phóng không gian",
+  "freeUpSpaceSaving": "{count, plural, =1 {Nó có thể được xóa khỏi thiết bị để giải phóng {formattedSize}} other {Chúng có thể được xóa khỏi thiết bị để giải phóng {formattedSize}}}",
   "filesBackedUpInAlbum": "{count, plural, one {1 tệp} other {{formattedNumber} tệp}} trong album này đã được sao lưu an toàn",
   "@filesBackedUpInAlbum": {
     "description": "Text to tell user how many files have been backed up in the album",
@@ -902,6 +903,9 @@
         "type": "String"
       }
     }
+  },
+  "@freeUpSpaceSaving": {
+    "description": "Text to tell user how much space they can free up by deleting items from the device"
   },
   "freeUpAmount": "Giải phóng {sizeInMBorGB}",
   "thisEmailIsAlreadyInUse": "Email này đã được sử dụng",
