@@ -14,6 +14,11 @@ win:
     target:
         - target: nsis
           arch: [x64, arm64]
+    azureSignOptions:
+        publisherName: ENTE TECHNOLOGIES, INC.
+        endpoint: https://eus.codesigning.azure.net/
+        certificateProfileName: EnteTrustCertProfile
+        codeSigningAccountName: EnteTechnologiesInc
 nsis:
     deleteAppDataOnUninstall: true
 linux:
