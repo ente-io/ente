@@ -280,29 +280,14 @@ class ClusterFeedbackService<T> {
 
     try {
       // Get the suggestions for the person quick check with biggest cluster and centroid
-      final allClusterIdsToCountMap = (await mlDataDB.clusterIdToFaceCount());
-      final ignoredClusters =
-          await mlDataDB.getPersonIgnoredClusters(person.remoteID);
-      final EnteWatch watch = EnteWatch("ClusterFeedbackService")..start();
-      final Map<String, Vector> clusterAvg = await _getUpdateClusterAvg(
-        allClusterIdsToCountMap,
-        ignoredClusters,
-        minClusterSize: kMinimumClusterSizeSearchResult,
+      final foundSuggestions = await _getFastSuggestions(
+        person,
+        biggestPersonCluster.id,
+        0.50,
       );
-      watch.log('computed avg for ${clusterAvg.length} clusters');
-
-      // Find the actual closest clusters for the person
-      final List<(String, double)> foundSuggestions =
-          await calcSuggestionsMeanInComputer(
-        clusterAvg,
-        {biggestPersonCluster.id},
-        ignoredClusters,
-        0.24,
-      );
-      final findSuggestionsTime = DateTime.now();
-      watch.log('computed suggestions for ${foundSuggestions.length} clusters');
 
       // Get the files for the suggestions
+      final startTime = DateTime.now();
       final suggestionClusterIDs = foundSuggestions.map((e) => e.$1).toSet();
       final Map<int, Set<String>> fileIdToClusterID =
           await mlDataDB.getFileIdToClusterIDSetForCluster(
@@ -349,7 +334,7 @@ class ClusterFeedbackService<T> {
         _logger.severe("Error in sorting suggestions", e, s);
       }
       _logger.info(
-        'getFastSuggestionForPerson post-processing suggestions took ${DateTime.now().difference(findSuggestionsTime).inMilliseconds} ms, of which sorting took ${DateTime.now().difference(sortingStartTime).inMilliseconds} ms and getting files took ${getFilesTime.difference(findSuggestionsTime).inMilliseconds} ms',
+        'getFastSuggestionForPerson post-processing suggestions took ${DateTime.now().difference(startTime).inMilliseconds} ms, of which sorting took ${DateTime.now().difference(sortingStartTime).inMilliseconds} ms and getting files took ${getFilesTime.difference(startTime).inMilliseconds} ms',
       );
 
       return finalSuggestions;
@@ -364,7 +349,7 @@ class ClusterFeedbackService<T> {
     required String personClusterID,
   }) async {
     final faceIDs = await mlDataDB.getFaceIDsForCluster(personClusterID);
-    
+
     if (faceIDs.length < 2 * kMinimumClusterSizeSearchResult) {
       final fileIDs = faceIDs.map(getFileIdFromFaceId<int>).toSet();
       if (fileIDs.length < kMinimumClusterSizeSearchResult) {
@@ -374,27 +359,9 @@ class ClusterFeedbackService<T> {
         return false;
       }
     }
-    final allClusterIdsToCountMap = (await mlDataDB.clusterIdToFaceCount());
-    _logger.info(
-      '${kDebugMode ? p.data.name : "private"} has existing clusterID $personClusterID, checking if we can automatically merge more',
-    );
-    final ignoredClusters = await mlDataDB.getPersonIgnoredClusters(p.remoteID);
-
-    // Get and update the cluster summary to get the avg (centroid) and count
-    final EnteWatch watch = EnteWatch("ClusterFeedbackService")..start();
-    final Map<String, Vector> clusterAvg = await _getUpdateClusterAvg(
-      allClusterIdsToCountMap,
-      ignoredClusters,
-      minClusterSize: kMinimumClusterSizeSearchResult,
-    );
-    watch.log('computed avg for ${clusterAvg.length} clusters');
-
-    // Find the actual closest clusters for the person
-    final List<(String, double)> suggestions =
-        await calcSuggestionsMeanInComputer(
-      clusterAvg,
-      {personClusterID},
-      ignoredClusters,
+    final List<(String, double)> suggestions = await _getFastSuggestions(
+      p,
+      personClusterID,
       0.24,
     );
 
@@ -794,6 +761,40 @@ class ClusterFeedbackService<T> {
     }
 
     return finalSuggestionsMedian;
+  }
+
+  /// Returns a list of suggestions. For each suggestion we return a record consisting of the following elements:
+  /// 1. clusterID: the ID of the cluster
+  /// 2. distance: the distance between the person's cluster and the suggestion
+  Future<List<(String, double)>> _getFastSuggestions(
+    PersonEntity person,
+    String clusterID,
+    double threshold,
+  ) async {
+    _logger.fine('Getting fast suggestions');
+    final allClusterIdsToCountMap = (await mlDataDB.clusterIdToFaceCount());
+    final ignoredClusters =
+        await mlDataDB.getPersonIgnoredClusters(person.remoteID);
+    final startTime = DateTime.now();
+    final Map<String, Vector> clusterAvg = await _getUpdateClusterAvg(
+      allClusterIdsToCountMap,
+      ignoredClusters,
+      minClusterSize: kMinimumClusterSizeSearchResult,
+    );
+    final avgCalcTime = DateTime.now();
+
+    // Find the actual closest clusters for the person
+    final List<(String, double)> foundSuggestions =
+        await calcSuggestionsMeanInComputer(
+      clusterAvg,
+      {clusterID},
+      ignoredClusters,
+      threshold,
+    );
+    final suggestionCalcTime = DateTime.now();
+    _logger.info(
+        "Calculated average vectors in ${avgCalcTime.difference(startTime).inMilliseconds}ms and suggestions in ${suggestionCalcTime.difference(avgCalcTime).inMilliseconds}ms",);
+    return foundSuggestions;
   }
 
   Future<Map<String, Vector>> _getUpdateClusterAvg(
