@@ -31,7 +31,7 @@ import HTTPService from "ente-shared/network/HTTPService";
 import localForage from "ente-shared/storage/localForage";
 import { getData } from "ente-shared/storage/localStorage";
 import { getToken } from "ente-shared/storage/localStorage/helpers";
-import { isHiddenCollection } from "./collection";
+import { getCollectionByID, isHiddenCollection } from "./collection";
 import { ensureUserKeyPair } from "./user";
 
 const COLLECTION_TABLE = "collections";
@@ -292,34 +292,6 @@ export const getCollectionWithSecrets = async (
     };
 };
 
-export const getCollection = async (
-    collectionID: number,
-): Promise<Collection> => {
-    try {
-        const token = getToken();
-        if (!token) {
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
-            return;
-        }
-        const resp = await HTTPService.get(
-            await apiURL(`/collections/${collectionID}`),
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
-            null,
-            { "X-Auth-Token": token },
-        );
-        const collectionWithSecrets = await getCollectionWithSecrets(
-            resp.data?.collection,
-            await ensureMasterKeyFromSession(),
-        );
-        return collectionWithSecrets;
-    } catch (e) {
-        log.error("failed to get collection", e);
-        throw e;
-    }
-};
-
 const TRASH_TIME = "trash-time";
 const DELETED_COLLECTION = "deleted-collection";
 
@@ -402,7 +374,7 @@ export async function syncTrash(
                 const collectionID = trashItem.file.collectionID;
                 let collection = collectionByID.get(collectionID);
                 if (!collection) {
-                    collection = await getCollection(collectionID);
+                    collection = await getCollectionByID(collectionID);
                     collectionByID.set(collectionID, collection);
                     await localForage.setItem(DELETED_COLLECTION, [
                         ...collectionByID.values(),

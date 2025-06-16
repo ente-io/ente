@@ -121,10 +121,9 @@ export const createCollection2 = async (
     type: CollectionType,
     magicMetadataData?: CollectionPrivateMagicMetadataData,
 ): Promise<Collection> => {
-    const masterKey = await ensureMasterKeyFromSession();
     const collectionKey = await generateKey();
     const { encryptedData: encryptedKey, nonce: keyDecryptionNonce } =
-        await encryptBox(collectionKey, masterKey);
+        await encryptBox(collectionKey, await ensureMasterKeyFromSession());
     const { encryptedData: encryptedName, nonce: nameDecryptionNonce } =
         await encryptBox(new TextEncoder().encode(name), collectionKey);
     const magicMetadata = magicMetadataData
@@ -134,7 +133,7 @@ export const createCollection2 = async (
           )
         : undefined;
 
-    const collection = await postCollections({
+    const remoteCollection = await postCollections({
         encryptedKey,
         keyDecryptionNonce,
         encryptedName,
@@ -143,11 +142,15 @@ export const createCollection2 = async (
         ...(magicMetadata && { magicMetadata }),
     });
 
-    return decryptRemoteCollection(
-        collection,
-        await decryptCollectionKey(collection),
-    );
+    return decryptRemoteKeyAndCollection(remoteCollection);
 };
+
+/**
+ * Given a {@link RemoteCollection}, first obtain its decryption key, and then
+ * use that to decrypt and return the collection itself.
+ */
+const decryptRemoteKeyAndCollection = async (collection: RemoteCollection) =>
+    decryptRemoteCollection(collection, await decryptCollectionKey(collection));
 
 // TODO(C2): Temporary method to convert to the newer type.
 export const collection1To2 = async (c1: Collection): Promise<Collection2> => {
@@ -192,6 +195,11 @@ export const decryptCollectionKey = async (
 };
 
 /**
+ * Zod schema for a remote response containing a single collection.
+ */
+const CollectionResponse = z.object({ collection: RemoteCollection });
+
+/**
  * Create a collection on remote with the provided data, and return the new
  * remote collection object returned by remote on success.
  */
@@ -204,8 +212,31 @@ const postCollections = async (
         body: JSON.stringify(collectionData),
     });
     ensureOk(res);
-    return z.object({ collection: RemoteCollection }).parse(await res.json())
-        .collection;
+    return CollectionResponse.parse(await res.json()).collection;
+};
+
+/**
+ * Fetch a collection from remote by its ID.
+ *
+ * Remote only, does not use or modify local state.
+ *
+ * This is not expected to be needed in the normal flow of things, since we
+ * fetch collections enmass, and efficiently, using the collection diff
+ * requests.
+ *
+ * @param collectionID The ID of the collection to fetch.
+ *
+ * @returns The collection obtained from remote after decrypting its contents.
+ */
+export const getCollectionByID = async (
+    collectionID: number,
+): Promise<Collection> => {
+    const res = await fetch(await apiURL(`/collections/${collectionID}`), {
+        headers: await authenticatedRequestHeaders(),
+    });
+    ensureOk(res);
+    const { collection } = CollectionResponse.parse(await res.json());
+    return decryptRemoteKeyAndCollection(collection);
 };
 
 /**
