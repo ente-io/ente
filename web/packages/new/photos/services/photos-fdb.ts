@@ -33,3 +33,33 @@ export const savedCollections = async (): Promise<Collection[]> =>
  */
 export const saveCollections = (collections: Collection[]) =>
     localForage.setItem("collections", collections);
+
+/**
+ * Return keys of (potentially deleted) collections referred to by trash items
+ * present in our local database.
+ *
+ * Use {@link saveTrashItemCollectionKeys} to update the database.
+ *
+ * [Note: Trash item collection keys]
+ *
+ * Trash items are erstwhile files, and like collection files, they need a
+ * collection key to decrypt them.
+ *
+ * However, it is possible that the collection which contained the file was also
+ * deleted. Such deleted collections will not be present in the list returned by
+ * {@link savedCollections}.
+ *
+ * So to still be able to access the collection keys in order to process the
+ * trash item, we separately save a list of {collectionID, collectionKey} pairs.
+ *
+ * - This list contains only collectionsIDs for which there is a corresponding
+ *   local trash item.
+ *
+ * - During each trash sync, this list is seeded using {@link savedCollections}.
+ *   Then, whenever we encounter a collection which is not present locally
+ *   (since it might've been deleted), we fetch it from remote and add an entry
+ *   for it in {@link savedTrashItemCollectionKeys}.
+ *
+ * - Once the sync completes, we updated this list to retain only entries that
+ *   are still referred to by items remaining in the trash.
+ */

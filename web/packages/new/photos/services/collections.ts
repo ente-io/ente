@@ -125,7 +125,7 @@ export const syncCollections = async () => {
 const TRASH_TIME = "trash-time";
 const DELETED_COLLECTION = "deleted-collection";
 
-export async function getLocalDeletedCollections() {
+async function getLocalDeletedCollections() {
     const trashedCollections: Collection[] =
         (await localForage.getItem<Collection[]>(DELETED_COLLECTION)) || [];
     const nonUndefinedCollections = trashedCollections.filter(
@@ -204,10 +204,7 @@ export async function syncTrash(
                 const collectionID = trashItem.file.collectionID;
                 let collection = collectionByID.get(collectionID);
                 if (!collection) {
-                    // We might not have the collection locally since it
-                    // might've been deleted. We still need the collection since
-                    // the trash item will be encrypted using the (erstwhile)
-                    // collection's key.
+                    // See: [Note: Trash item collection keys]
                     collection = await getCollectionByID(collectionID);
                     collectionByID.set(collectionID, collection);
                     await localForage.setItem(DELETED_COLLECTION, [

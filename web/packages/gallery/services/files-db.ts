@@ -106,6 +106,7 @@ const LocalCollection = z
             encryptedName,
             nameDecryptionNonce,
             attributes,
+            isDeleted,
             ...rest
         } = c;
         ignore([
@@ -114,6 +115,7 @@ const LocalCollection = z
             encryptedName,
             nameDecryptionNonce,
             attributes,
+            isDeleted,
         ]);
         return rest;
     });
