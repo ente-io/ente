@@ -438,7 +438,7 @@
   "selectAll": "Вибрати все",
   "skip": "Пропустити",
   "updatingFolderSelection": "Оновлення вибору теки...",
-  "itemCount": "{count, plural, one{{count} елемент} few {{count} елементи} many {{count} елементів} other{{count} елементів}}",
+  "itemCount": "{count, plural, one{{count} елемент} other{{count} елементів}}",
   "deleteItemCount": "{count, plural, =1 {Видалено {count} елемент} other {Видалено {count} елементів}}",
   "duplicateItemsGroup": "{count} файлів, кожен по {formattedSize}",
   "@duplicateItemsGroup": {
@@ -1172,7 +1172,7 @@
   "searchHint4": "Розташування",
   "searchHint5": "Незабаром: Обличчя і магічний пошук ✨",
   "addYourPhotosNow": "Додайте свої фотографії",
-  "searchResultCount": "{count, plural, one{Знайдено {count} результат} few {Знайдено {count} результати} many {Знайдено {count} результатів} other{Знайдено {count} результати}}",
+  "searchResultCount": "{count, plural, one{Знайдено {count} результат} other{Знайдено {count} результати}}",
   "@searchResultCount": {
     "description": "Text to tell user how many results were found for their search query",
     "placeholders": {

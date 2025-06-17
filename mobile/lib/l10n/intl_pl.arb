@@ -443,8 +443,8 @@
   "selectAll": "Zaznacz wszystko",
   "skip": "Pomiń",
   "updatingFolderSelection": "Aktualizowanie wyboru folderu...",
-  "itemCount": "{count, plural, one{{count} element} few {{count} elementy} many {{count} elementów} other{{count} elementu}}",
-  "deleteItemCount": "{count, plural, =1 {Usuń {count} element} few {Usuń {count} elementy} many {Usuń {count} elementów} other{Usuń {count} elementu}}",
+  "itemCount": "{count, plural, one{{count} element} other{{count} elementu}}",
+  "deleteItemCount": "{count, plural, =1 {Usuń {count} element} other{Usuń {count} elementu}}",
   "duplicateItemsGroup": "{count} plików, każdy po {formattedSize}",
   "@duplicateItemsGroup": {
     "description": "Display the number of duplicate files and their size",
@@ -461,7 +461,7 @@
     }
   },
   "showMemories": "Pokaż wspomnienia",
-  "yearsAgo": "{count, plural, one{{count} rok temu} few {{count} lata temu} many {{count} lat temu} other{{count} lata temu}}",
+  "yearsAgo": "{count, plural, one{{count} rok temu} other{{count} lata temu}}",
   "backupSettings": "Ustawienia kopii zapasowej",
   "backupStatus": "Status kopii zapasowej",
   "backupStatusDescription": "Elementy, których kopia zapasowa została utworzona, zostaną wyświetlone w tym miejscu",
@@ -800,7 +800,7 @@
   "referFriendsAnd2xYourPlan": "Poleć znajomym i podwój swój plan",
   "shareAlbumHint": "Otwórz album i dotknij przycisk udostępniania w prawym górnym rogu, aby udostępnić.",
   "itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion": "Elementy pokazują liczbę dni pozostałych przed trwałym usunięciem",
-  "trashDaysLeft": "{count, plural, =0 {Wkrótce} =1{1 dzień} few {{count} dni} other{{count} dni}}",
+  "trashDaysLeft": "{count, plural, =0 {Wkrótce} =1{1 dzień} other{{count} dni}}",
   "@trashDaysLeft": {
     "description": "Text to indicate number of days remaining before permanent deletion",
     "placeholders": {
@@ -1177,7 +1177,7 @@
   "searchHint4": "Lokalizacja",
   "searchHint5": "Wkrótce: Twarze i magiczne wyszukiwanie ✨",
   "addYourPhotosNow": "Dodaj swoje zdjęcia teraz",
-  "searchResultCount": "{count, plural, one{Znaleziono {count} wynik} few {Znaleziono {count} wyniki} other{Znaleziono {count} wyników}}",
+  "searchResultCount": "{count, plural, one{Znaleziono {count} wynik} other{Znaleziono {count} wyników}}",
   "@searchResultCount": {
     "description": "Text to tell user how many results were found for their search query",
     "placeholders": {
