@@ -117,6 +117,19 @@ export interface Collection {
 }
 
 /**
+ * The known set of values for the {@link type} field of a {@link Collection}.
+ *
+ * This is the list of values, see {@link CollectionType} for the corresponding
+ * TypeScript type.
+ */
+export const collectionTypes = [
+    "album",
+    "folder",
+    "favorites",
+    "uncategorized",
+] as const;
+
+/**
  * The type of a collection.
  *
  * - "album" - A regular "Ente Album" that the user sees in their library.
@@ -162,7 +175,7 @@ export interface Collection {
  *   collection. However, unlike "favorites", the "uncategorized" collection
  *   cannot be shared.
  */
-export type CollectionType = "album" | "folder" | "favorites" | "uncategorized";
+export type CollectionType = (typeof collectionTypes)[number];
 
 /**
  * The privilege level of a participant associated with a collection.
