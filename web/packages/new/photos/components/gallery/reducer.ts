@@ -17,12 +17,10 @@ import { t } from "i18next";
 import React, { useReducer } from "react";
 import {
     ALL_SECTION,
-    ARCHIVE_SECTION,
     findDefaultHiddenCollectionIDs,
     HIDDEN_ITEMS_SECTION,
     isDefaultHiddenCollection,
     isIncomingShare,
-    TRASH_SECTION,
 } from "../../services/collection";
 import {
     PseudoCollectionID,
@@ -1301,9 +1299,9 @@ const deriveNormalCollectionSummaries = (
         attributes: ["all"],
         name: t("section_all"),
     });
-    normalCollectionSummaries.set(TRASH_SECTION, {
+    normalCollectionSummaries.set(PseudoCollectionID.trash, {
         ...pseudoCollectionOptionsForFiles(trashedFiles),
-        id: TRASH_SECTION,
+        id: PseudoCollectionID.trash,
         name: t("section_trash"),
         type: "trash",
         attributes: ["trash"],
@@ -1312,9 +1310,9 @@ const deriveNormalCollectionSummaries = (
     const archivedFiles = uniqueFilesByID(
         normalFiles.filter((file) => isArchivedFile(file)),
     );
-    normalCollectionSummaries.set(ARCHIVE_SECTION, {
+    normalCollectionSummaries.set(PseudoCollectionID.archiveItems, {
         ...pseudoCollectionOptionsForFiles(archivedFiles),
-        id: ARCHIVE_SECTION,
+        id: PseudoCollectionID.archiveItems,
         name: t("section_archive"),
         type: "archive",
         attributes: ["archive"],
@@ -1829,7 +1827,7 @@ const deriveAlbumsFilteredFiles = (
     const activeCollectionSummaryID = view.activeCollectionSummaryID;
 
     // Trash is dealt with separately.
-    if (activeCollectionSummaryID === TRASH_SECTION) {
+    if (activeCollectionSummaryID == PseudoCollectionID.trash) {
         return uniqueFilesByID([
             ...trashedFiles,
             ...normalFiles.filter((file) => tempDeletedFileIDs.has(file.id)),
@@ -1850,8 +1848,8 @@ const deriveAlbumsFilteredFiles = (
         // needs to be before the following (archived collection) case.
         if (isArchivedFile(file)) {
             return (
-                activeCollectionSummaryID === ARCHIVE_SECTION ||
-                activeCollectionSummaryID === file.collectionID
+                activeCollectionSummaryID == PseudoCollectionID.archiveItems ||
+                activeCollectionSummaryID == file.collectionID
             );
         }
 

@@ -72,8 +72,6 @@ export const PseudoCollectionID = {
     hiddenItems: -4,
 } as const;
 
-export const ARCHIVE_SECTION = -1;
-export const TRASH_SECTION = -2;
 export const HIDDEN_ITEMS_SECTION = -4;
 export const ALL_SECTION = 0;
 

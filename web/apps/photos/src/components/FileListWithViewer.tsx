@@ -7,10 +7,8 @@ import {
 } from "ente-gallery/components/viewer/FileViewer";
 import type { Collection } from "ente-media/collection";
 import { EnteFile } from "ente-media/file";
-import {
-    moveToTrash,
-    TRASH_SECTION,
-} from "ente-new/photos/services/collection";
+import { moveToTrash } from "ente-new/photos/services/collection";
+import { PseudoCollectionID } from "ente-new/photos/services/collection-summary";
 import { t } from "i18next";
 import { useCallback, useMemo, useState } from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
@@ -189,7 +187,9 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
                 onClose={handleCloseFileViewer}
                 initialIndex={currentIndex}
                 disableDownload={!enableDownload}
-                isInTrashSection={activeCollectionID === TRASH_SECTION}
+                isInTrashSection={
+                    activeCollectionID == PseudoCollectionID.trash
+                }
                 {...{
                     user,
                     files,
