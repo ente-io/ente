@@ -47,6 +47,7 @@ const requestBatchSize = 1000;
 
 const uncategorizedCollectionName = "Uncategorized";
 const defaultHiddenCollectionName = ".hidden";
+export const defaultHiddenCollectionUserFacingName = "Hidden";
 const favoritesCollectionName = "Favorites";
 
 export const ARCHIVE_SECTION = -1;
@@ -55,20 +56,16 @@ export const DUMMY_UNCATEGORIZED_COLLECTION = -3;
 export const HIDDEN_ITEMS_SECTION = -4;
 export const ALL_SECTION = 0;
 
-export const DEFAULT_HIDDEN_COLLECTION_USER_FACING_NAME = "Hidden";
-
 /**
  * Return the "user facing" name of the given collection.
  *
  * Usually this is the same as the collection name, but it might be a different
  * string for special collections like default hidden collections.
  */
-export const getCollectionUserFacingName = (collection: Collection) => {
-    if (isDefaultHiddenCollection(collection)) {
-        return DEFAULT_HIDDEN_COLLECTION_USER_FACING_NAME;
-    }
-    return collection.name;
-};
+export const collectionUserFacingName = (collection: Collection) =>
+    isDefaultHiddenCollection(collection)
+        ? defaultHiddenCollectionUserFacingName
+        : collection.name;
 
 /**
  * Create a new album (a collection of type "album") on remote, and return its
@@ -269,7 +266,7 @@ export const getCollectionChanges = async (
  * Return a map of the (user-facing) collection name, indexed by collection ID.
  */
 export const createCollectionNameByID = (collections: Collection[]) =>
-    new Map(collections.map((c) => [c.id, getCollectionUserFacingName(c)]));
+    new Map(collections.map((c) => [c.id, collectionUserFacingName(c)]));
 
 /**
  * A CollectionFileItem represents a file in a API request to add, move or
