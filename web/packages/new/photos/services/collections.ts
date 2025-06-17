@@ -26,6 +26,7 @@ import {
     getCollectionChanges,
     isHiddenCollection,
 } from "./collection";
+import { savedCollections } from "./photos-fdb";
 
 const COLLECTION_TABLE = "collections";
 const HIDDEN_COLLECTION_IDS = "hidden-collection-ids";
@@ -40,11 +41,8 @@ export const getLocalCollections = async (
         : collections.filter((c) => isHiddenCollection(c));
 };
 
-export const getAllLocalCollections = async (): Promise<Collection[]> => {
-    const collections: Collection[] =
-        (await localForage.getItem(COLLECTION_TABLE)) ?? [];
-    return collections;
-};
+export const getAllLocalCollections = async (): Promise<Collection[]> =>
+    savedCollections();
 
 export const getCollectionLastSyncTime = async (collection: Collection) =>
     (await localForage.getItem<number>(`${collection.id}-time`)) ?? 0;

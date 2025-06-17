@@ -18,6 +18,20 @@
  * So this table is not legacy or deprecated, and there is currently no strong
  * reason to migrate this data to another IndexedDB table (it works fine as it
  * is, really). However we do want to avoid adding more items here.
+ *
+ * ---
+ *
+ * This file contains the common code and types. Application layer code should
+ * usually be accessing the app specific files DB:
+ *
+ * - Photos app: `photos-fdb.ts`
+ * - Public albums app: `public-albums-fdb.ts`
+ *
+ * Note that even though both of them refer to the same conceptual "files DB",
+ * the actual storage is distinct since both the apps run on separate domains
+ * and so have their separate IndexedDB storage.
+ *
+ * Still, the key names are (generally) distinct to reduce chances of confusion.
  */
 
 import {
@@ -26,16 +40,14 @@ import {
     CollectionShareeMagicMetadataData,
     RemoteCollectionUser,
     RemotePublicURL,
-    type Collection,
 } from "ente-media/collection";
-import localForage from "ente-shared/storage/localForage";
 import { nullishToEmpty, nullToUndefined } from "ente-utils/transform";
 import { z } from "zod/v4";
 
 /**
  * Zod schema for a {@link Collection} saved in our local persistence.
  *
- * This is similar to {@link RemoteCollection}, but has both significant
+ * This is similar to {@link RemoteCollection}, but also has both significant
  * differences in that it contains the decrypted fields, and some minor tweaks.
  */
 const LocalCollection = z.looseObject({
@@ -73,24 +85,4 @@ const LocalCollection = z.looseObject({
         .transform(nullToUndefined),
 });
 
-const LocalCollections = z.array(LocalCollection);
-
-/**
- * Return all collections present in our local database.
- *
- * This includes both normal (non-hidden) and hidden collections.
- *
- * Use {@link saveCollections} to update the database.
- */
-export const savedCollections = async (): Promise<Collection[]> =>
-    LocalCollections.parse(await localForage.getItem("collections"));
-
-/**
- * Replace the list of collections stored in our local database.
- *
- * This updates the underlying storage of both normal (non-hidden) and hidden
- * collections (the split between normal and hidden is not at the database level
- * but is a filter when they are accessed).
- */
-export const saveCollections = (collections: Collection[]) =>
-    localForage.setItem("collections", collections);
+export const LocalCollections = z.array(LocalCollection);

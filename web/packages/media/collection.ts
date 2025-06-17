@@ -75,7 +75,7 @@ export interface Collection {
     /**
      * Public links that can be used to access and update the collection.
      */
-    publicURLs?: PublicURL[];
+    publicURLs: PublicURL[];
     /**
      * The last time the collection was updated (epoch microseconds).
      *
@@ -522,6 +522,13 @@ export const decryptRemoteCollection = async (
         owner: parseRemoteCollectionUser(owner),
         name,
         sharees: sharees.map(parseRemoteCollectionUser),
+        // TODO:
+        //
+        // See: [Note: strict mode migration]
+        //
+        // We need to add the cast here, otherwise we get a tsc error when this
+        // file is imported in the photos app.
+        publicURLs: rest.publicURLs as PublicURL[],
         magicMetadata,
         pubMagicMetadata,
         sharedMagicMetadata,
