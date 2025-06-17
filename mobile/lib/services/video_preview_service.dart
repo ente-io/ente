@@ -73,7 +73,7 @@ class VideoPreviewService {
   static const String _videoStreamingCutoff = "videoStreamingCutoff";
 
   bool get isVideoStreamingEnabled {
-    return _prefs.getBool(_videoStreamingEnabled) ?? false;
+    return _prefs.getBool(_videoStreamingEnabled) ?? true;
   }
 
   Future<void> setIsVideoStreamingEnabled(bool value) async {
