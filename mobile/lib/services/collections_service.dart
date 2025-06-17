@@ -31,6 +31,7 @@ import 'package:photos/models/api/collection/collection_file_item.dart';
 import 'package:photos/models/api/collection/create_request.dart';
 import "package:photos/models/api/collection/public_url.dart";
 import "package:photos/models/api/collection/user.dart";
+import "package:photos/models/api/diff/diff.dart";
 import "package:photos/models/api/metadata.dart";
 import 'package:photos/models/collection/collection.dart';
 import 'package:photos/models/collection/collection_items.dart';
@@ -1487,11 +1488,14 @@ class CollectionsService {
     }
   }
 
-  Future<void> _addToCollection(int collectionID, List<EnteFile> files) async {
+  Future<void> _addToCollection(
+    int destCollection,
+    List<EnteFile> files,
+  ) async {
     final containsUploadedFile = files.any((e) => e.isUploaded);
     if (containsUploadedFile) {
       final existingFileIDsInCollection =
-          await remoteDB.getUploadedFileIDs(collectionID);
+          await remoteDB.getUploadedFileIDs(destCollection);
       files.removeWhere(
         (element) =>
             element.uploadedFileID != null &&
@@ -1511,37 +1515,53 @@ class CollectionsService {
     }
 
     final params = <String, dynamic>{};
-    params["collectionID"] = collectionID;
+    params["collectionID"] = destCollection;
     final batchedFiles = files.chunks(batchSize);
+
     for (final batch in batchedFiles) {
+      final List<DiffFileItem> diffFiles = [];
       params["files"] = [];
       for (final file in batch) {
         final fileKey = getFileKey(file);
-        file.generatedID =
-            null; // So that a new entry is created in the FilesDB
-        file.collectionID = collectionID;
+        final asset = file.remoteAsset!;
+        final cf = file.fileEntry!;
         final encryptedKeyData =
-            CryptoUtil.encryptSync(fileKey, getCollectionKey(collectionID));
-        file.encryptedKey =
-            CryptoUtil.bin2base64(encryptedKeyData.encryptedData!);
-        file.keyDecryptionNonce =
-            CryptoUtil.bin2base64(encryptedKeyData.nonce!);
+            CryptoUtil.encryptSync(fileKey, getCollectionKey(destCollection));
+        final item = DiffFileItem(
+          collectionID: destCollection,
+          isDeleted: false,
+          updatedAt: cf.updatedAt,
+          createdAt: cf.createdAt,
+          encFileKey: encryptedKeyData.encryptedData!,
+          encFileKeyNonce: encryptedKeyData.nonce!,
+          fileItem: FileItem(
+            fileID: asset.id,
+            ownerID: asset.ownerID,
+            thumnailDecryptionHeader: asset.thumbHeader,
+            fileDecryotionHeader: asset.fileHeader,
+            metadata: asset.metadata,
+            magicMetadata: asset.privateMetadata,
+            pubMagicMetadata: asset.publicMetadata,
+            info: asset.info,
+          ),
+        );
+        diffFiles.add(item);
         params["files"].add(
           CollectionFileItem(
             file.uploadedFileID!,
-            file.encryptedKey!,
-            file.keyDecryptionNonce!,
+            CryptoUtil.bin2base64(item.encFileKey!),
+            CryptoUtil.bin2base64(item.encFileKeyNonce!),
           ).toMap(),
         );
       }
-
       try {
         await _enteDio.post(
           "/collections/add-files",
           data: params,
         );
-        await _filesDB.insertMultiple(batch);
-        Bus.instance.fire(CollectionUpdatedEvent(collectionID, batch, "addTo"));
+        await remoteDB.insertFilesDiff(diffFiles);
+        Bus.instance
+            .fire(CollectionUpdatedEvent(destCollection, batch, "addTo"));
       } catch (e) {
         rethrow;
       }
