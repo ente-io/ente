@@ -10,6 +10,7 @@ import "package:photos/db/files_db.dart";
 import "package:photos/db/ml/base.dart";
 import "package:photos/db/ml/db.dart";
 import "package:photos/db/ml/offlinedb.dart";
+import "package:photos/db/remote/table/files_table.dart";
 import "package:photos/events/machine_learning_control_event.dart";
 import "package:photos/events/people_changed_event.dart";
 import "package:photos/models/ml/clip.dart";
@@ -302,7 +303,7 @@ class MLService {
       final int totalFaces = await mlDataDB.getTotalFaceCount();
       final fileIDToCreationTime = localMode
           ? await localDB.getIDToCreationTime()
-          : await FilesDB.instance.getFileIDToCreationTime();
+          : await remoteDB.getIDToCreationTime();
       final startEmbeddingFetch = DateTime.now();
       // read all embeddings
       final result = await mlDataDB.getFaceInfoForClustering(

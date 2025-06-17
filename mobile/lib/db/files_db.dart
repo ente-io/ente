@@ -1052,23 +1052,6 @@ class FilesDB with SqlDbBase {
     return count.first['COUNT'] as int;
   }
 
-  Future<Map<int, int>> getFileIDToCreationTime() async {
-    final db = await instance.sqliteAsyncDB;
-    final rows = await db.getAll(
-      '''
-      SELECT $columnUploadedFileID, $columnCreationTime
-      FROM $filesTable
-      WHERE 
-      ($columnUploadedFileID IS NOT NULL AND $columnUploadedFileID IS NOT -1);
-    ''',
-    );
-    final result = <int, int>{};
-    for (final row in rows) {
-      result[row[columnUploadedFileID] as int] = row[columnCreationTime] as int;
-    }
-    return result;
-  }
-
   // todo:rewrite (upload related)
   Future<void> markForReUploadIfLocationMissing(List<String> localIDs) async {
     if (localIDs.isEmpty) {

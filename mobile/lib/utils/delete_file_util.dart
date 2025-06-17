@@ -332,7 +332,7 @@ Future<bool> deleteLocalFiles(
   List<String> localIDs,
 ) async {
   _logger.info("Trying to delete local files ");
-  final List<String> deletedIDs = [];
+  final List<String> delLocalIDs = [];
   final List<String> localAssetIDs = [];
   final List<String> localSharedMediaIDs = [];
   try {
@@ -343,17 +343,17 @@ Future<bool> deleteLocalFiles(
         localAssetIDs.add(id);
       }
     }
-    deletedIDs.addAll(await _tryDeleteSharedMediaFiles(localSharedMediaIDs));
+    delLocalIDs.addAll(await _tryDeleteSharedMediaFiles(localSharedMediaIDs));
 
     final bool shouldDeleteInBatches =
         await isAndroidSDKVersionLowerThan(android11SDKINT);
     if (shouldDeleteInBatches) {
       _logger.info("Deleting in batches");
-      deletedIDs
+      delLocalIDs
           .addAll(await deleteLocalFilesInBatches(context, localAssetIDs));
     } else {
       _logger.info("Deleting in one shot");
-      deletedIDs
+      delLocalIDs
           .addAll(await _deleteLocalFilesInOneShot(context, localAssetIDs));
     }
     // In IOS, the library returns no error and fail to delete any file is
@@ -361,15 +361,15 @@ Future<bool> deleteLocalFiles(
     // batches. Similar in Android, for large number of files, we have observed
     // that the library fails to delete any file. So, we initiate deletion in
     // batches.
-    if (deletedIDs.isEmpty && Platform.isIOS) {
-      deletedIDs.addAll(
+    if (delLocalIDs.isEmpty && Platform.isIOS) {
+      delLocalIDs.addAll(
         await _iosDeleteLocalFilesInBatchesFallback(context, localAssetIDs),
       );
     }
 
-    if (deletedIDs.isNotEmpty) {
-      final deletedFiles = await FilesDB.instance.getLocalFiles(deletedIDs);
-      await FilesDB.instance.markLocalIDAsNull(deletedIDs);
+    if (delLocalIDs.isNotEmpty) {
+      final deletedFiles = await FilesDB.instance.getLocalFiles(delLocalIDs);
+      await FilesDB.instance.markLocalIDAsNull(delLocalIDs);
       _logger.info(deletedFiles.length.toString() + " files deleted locally");
       Bus.instance.fire(
         LocalPhotosUpdatedEvent(deletedFiles, source: "deleteLocal"),
@@ -593,7 +593,7 @@ Future<List<String>> deleteLocalFilesInBatches(
     maximumBatchSize,
   );
   _logger.info("Batch size: $batchSize");
-  final List<String> deletedIDs = [];
+  final List<String> delLocalIDs = [];
   for (int index = 0; index < localIDs.length; index += batchSize) {
     if (dialogKey.currentState != null) {
       dialogKey.currentState!.setProgress(index / localIDs.length);
@@ -603,13 +603,13 @@ Future<List<String>> deleteLocalFilesInBatches(
         .toList();
     _logger.info("Trying to delete " + ids.toString());
     try {
-      deletedIDs.addAll(await PhotoManager.editor.deleteWithIds(ids));
+      delLocalIDs.addAll(await PhotoManager.editor.deleteWithIds(ids));
       _logger.info("Deleted " + ids.toString());
     } catch (e, s) {
       _logger.severe("Could not delete batch " + ids.toString(), e, s);
       for (final id in ids) {
         try {
-          deletedIDs.addAll(await PhotoManager.editor.deleteWithIds([id]));
+          delLocalIDs.addAll(await PhotoManager.editor.deleteWithIds([id]));
           _logger.info("Deleted " + id);
         } catch (e, s) {
           _logger.severe("Could not delete file " + id, e, s);
@@ -618,7 +618,7 @@ Future<List<String>> deleteLocalFilesInBatches(
     }
   }
   Navigator.of(dialogKey.currentContext!).pop('dialog');
-  return deletedIDs;
+  return delLocalIDs;
 }
 
 Future<bool> _localFileExist(EnteFile file) {

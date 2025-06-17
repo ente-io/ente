@@ -8,11 +8,13 @@ import "package:ml_linalg/linalg.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/db/ml/db.dart";
+import "package:photos/db/remote/table/files_table.dart";
 import "package:photos/events/people_changed_event.dart";
 import "package:photos/extensions/stop_watch.dart";
 import "package:photos/generated/protos/ente/common/vector.pb.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/ml/face/person.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/services/machine_learning/face_ml/face_clustering/face_clustering_service.dart";
 import "package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
@@ -158,8 +160,7 @@ class ClusterFeedbackService<T> {
         return;
       }
 
-      final fileIDToCreationTime =
-          await FilesDB.instance.getFileIDToCreationTime();
+      final fileIDToCreationTime = await remoteDB.getIDToCreationTime();
 
       // Re-cluster within the deleted faces
       final clusterResult =
@@ -221,8 +222,7 @@ class ClusterFeedbackService<T> {
         return;
       }
 
-      final fileIDToCreationTime =
-          await FilesDB.instance.getFileIDToCreationTime();
+      final fileIDToCreationTime = await remoteDB.getIDToCreationTime();
 
       // Re-cluster within the deleted faces
       final clusterResult =
@@ -370,8 +370,7 @@ class ClusterFeedbackService<T> {
       }
     }
 
-    final fileIDToCreationTime =
-        await FilesDB.instance.getFileIDToCreationTime();
+    final fileIDToCreationTime = await remoteDB.getIDToCreationTime();
 
     final susClusters = <(String, int)>[];
 
@@ -468,8 +467,7 @@ class ClusterFeedbackService<T> {
       return ClusteringResult.empty();
     }
 
-    final fileIDToCreationTime =
-        await FilesDB.instance.getFileIDToCreationTime();
+    final fileIDToCreationTime = await remoteDB.getIDToCreationTime();
 
     final clusterResult =
         await FaceClusteringService.instance.predictWithinClusterComputer(

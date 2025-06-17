@@ -14,6 +14,17 @@ extension FilesTable on RemoteDB {
     return result;
   }
 
+  Future<Map<int, int>> getIDToCreationTime() async {
+    final rows = await sqliteDB.getAll(
+      "SELECT id, creation_time FROM files",
+    );
+    final result = <int, int>{};
+    for (final row in rows) {
+      result[row['id'] as int] = row['creation_time'] as int;
+    }
+    return result;
+  }
+
   // updateSizeForUploadIDs takes a map of upploadedFileID and fileSize and
   // update the fileSize for the given uploadedFileID
   Future<void> updateSize(
