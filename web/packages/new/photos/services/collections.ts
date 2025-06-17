@@ -1,6 +1,5 @@
 // TODO: Audit this file
 /* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unnecessary-condition */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 
@@ -26,7 +25,11 @@ import {
     getCollectionChanges,
     isHiddenCollection,
 } from "./collection";
-import { savedCollections, savedTrashItemCollectionKeys } from "./photos-fdb";
+import {
+    savedCollections,
+    savedTrashItemCollectionKeys,
+    saveTrashItemCollectionKeys,
+} from "./photos-fdb";
 
 const COLLECTION_TABLE = "collections";
 const HIDDEN_COLLECTION_IDS = "hidden-collection-ids";
@@ -123,30 +126,6 @@ export const syncCollections = async () => {
 };
 
 const TRASH_TIME = "trash-time";
-const DELETED_COLLECTION = "deleted-collection";
-
-async function getLocalDeletedCollections() {
-    const trashedCollections: Collection[] =
-        (await localForage.getItem<Collection[]>(DELETED_COLLECTION)) || [];
-    const nonUndefinedCollections = trashedCollections.filter(
-        (collection) => !!collection,
-    );
-    if (nonUndefinedCollections.length !== trashedCollections.length) {
-        await localForage.setItem(DELETED_COLLECTION, nonUndefinedCollections);
-    }
-    return nonUndefinedCollections;
-}
-
-export async function cleanTrashCollections(fileTrash: Trash) {
-    const trashedCollections = await getLocalDeletedCollections();
-    const neededTrashCollections = new Set<number>(
-        fileTrash.map((item) => item.file.collectionID),
-    );
-    const filterCollections = trashedCollections.filter((item) =>
-        neededTrashCollections.has(item.id),
-    );
-    await localForage.setItem(DELETED_COLLECTION, filterCollections);
-}
 
 async function getLastTrashSyncTime() {
     return (await localForage.getItem<number>(TRASH_TIME)) ?? 0;
@@ -178,10 +157,6 @@ export async function syncTrash(
     onUpdateTrashFiles: ((files: EnteFile[]) => void) | undefined,
     onPruneDeletedFileIDs: (deletedFileIDs: Set<number>) => Promise<void>,
 ): Promise<void> {
-    if (!getToken()) {
-        return;
-    }
-
     const trash = await getLocalTrash();
     const sinceTime = await getLastTrashSyncTime();
 
@@ -207,7 +182,7 @@ export async function syncTrash(
 
     const collectionKeyByID = new Map(collections.map((c) => [c.id, c.key]));
     const trashItemCollectionKeys = await savedTrashItemCollectionKeys();
-    for (const {id, key} of trashItemCollectionKeys) {
+    for (const { id, key } of trashItemCollectionKeys) {
         collectionKeyByID.set(id, key);
     }
 
@@ -230,14 +205,17 @@ export async function syncTrash(
             // #Perf: This can be optimized by running the decryption in parallel
             for (const trashItem of resp.data.diff as EncryptedTrashItem[]) {
                 const collectionID = trashItem.file.collectionID;
-                let collection = collectionByID.get(collectionID);
-                if (!collection) {
+                let collectionKey = collectionKeyByID.get(collectionID);
+                if (!collectionKey) {
                     // See: [Note: Trash item collection keys]
-                    collection = await getCollectionByID(collectionID);
-                    collectionByID.set(collectionID, collection);
-                    await localForage.setItem(DELETED_COLLECTION, [
-                        ...collectionByID.values(),
-                    ]);
+                    const collection = await getCollectionByID(collectionID);
+                    collectionKey = collection.key;
+                    collectionKeyByID.set(collectionID, collectionKey);
+                    trashItemCollectionKeys.push({
+                        id: collectionID,
+                        key: collectionKey,
+                    });
+                    await saveTrashItemCollectionKeys(trashItemCollectionKeys);
                 }
                 if (trashItem.isDeleted) {
                     deletedFileIDs.add(trashItem.file.id);
@@ -245,7 +223,7 @@ export async function syncTrash(
                 if (!trashItem.isDeleted && !trashItem.isRestored) {
                     const decryptedFile = await decryptFile(
                         trashItem.file,
-                        collection.key,
+                        collectionKey,
                     );
                     updatedTrash.push({ ...trashItem, file: decryptedFile });
                 } else {
@@ -270,7 +248,14 @@ export async function syncTrash(
         log.error("Get trash files failed", e);
     }
 
-    await cleanTrashCollections(updatedTrash);
+    const trashCollectionIDs = new Set(
+        updatedTrash.map((item) => item.file.collectionID),
+    );
+    await saveTrashItemCollectionKeys(
+        [...collectionKeyByID.entries()]
+            .filter(([id]) => trashCollectionIDs.has(id))
+            .map(([id, key]) => ({ id, key })),
+    );
 }
 
 export const emptyTrash = async () => {
