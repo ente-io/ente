@@ -50,9 +50,6 @@ const defaultHiddenCollectionName = ".hidden";
 export const defaultHiddenCollectionUserFacingName = "Hidden";
 const favoritesCollectionName = "Favorites";
 
-export const HIDDEN_ITEMS_SECTION = -4;
-export const ALL_SECTION = 0;
-
 /**
  * Return the "user facing" name of the given collection.
  *

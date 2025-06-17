@@ -17,7 +17,6 @@ import { useBaseContext } from "ente-base/context";
 import type { Collection } from "ente-media/collection";
 import type { CollectionSelectorAttributes } from "ente-new/photos/components/CollectionSelector";
 import type { GalleryBarMode } from "ente-new/photos/components/gallery/reducer";
-import { ALL_SECTION } from "ente-new/photos/services/collection";
 import { PseudoCollectionID } from "ente-new/photos/services/collection-summary";
 import { t } from "i18next";
 import { type CollectionOp } from "utils/collection";
@@ -338,14 +337,14 @@ const SelectedFileOptions = ({
                             </IconButton>
                         </Tooltip>
                     )}
-                    {activeCollectionID === ALL_SECTION && (
+                    {activeCollectionID === PseudoCollectionID.all && (
                         <Tooltip title={t("archive")}>
                             <IconButton onClick={handleFileOp("archive")}>
                                 <ArchiveIcon />
                             </IconButton>
                         </Tooltip>
                     )}
-                    {activeCollectionID !== ALL_SECTION &&
+                    {activeCollectionID !== PseudoCollectionID.all &&
                         activeCollectionID != PseudoCollectionID.archiveItems &&
                         !isFavoriteCollection && (
                             <>

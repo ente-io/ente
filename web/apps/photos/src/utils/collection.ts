@@ -9,12 +9,12 @@ import {
     createAlbum,
     defaultHiddenCollectionUserFacingName,
     findDefaultHiddenCollectionIDs,
-    HIDDEN_ITEMS_SECTION,
     isHiddenCollection,
     isIncomingShare,
     moveToCollection,
     restoreToCollection,
 } from "ente-new/photos/services/collection";
+import { PseudoCollectionID } from "ente-new/photos/services/collection-summary";
 import {
     getAllLocalCollections,
     getLocalCollections,
@@ -113,7 +113,7 @@ export async function downloadDefaultHiddenCollectionHelper(
         const setFilesDownloadProgressAttributes =
             setFilesDownloadProgressAttributesCreator(
                 defaultHiddenCollectionUserFacingName,
-                HIDDEN_ITEMS_SECTION,
+                PseudoCollectionID.hiddenItems,
                 true,
             );
 

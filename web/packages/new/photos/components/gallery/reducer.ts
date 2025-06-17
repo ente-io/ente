@@ -16,9 +16,7 @@ import { includes } from "ente-utils/type-guards";
 import { t } from "i18next";
 import React, { useReducer } from "react";
 import {
-    ALL_SECTION,
     findDefaultHiddenCollectionIDs,
-    HIDDEN_ITEMS_SECTION,
     isDefaultHiddenCollection,
     isIncomingShare,
 } from "../../services/collection";
@@ -534,7 +532,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
             );
             const view = {
                 type: "albums" as const,
-                activeCollectionSummaryID: ALL_SECTION,
+                activeCollectionSummaryID: PseudoCollectionID.all,
                 activeCollection: undefined,
             };
 
@@ -1011,7 +1009,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 pendingSearchSuggestions: [],
                 view: {
                     type: "albums",
-                    activeCollectionSummaryID: ALL_SECTION,
+                    activeCollectionSummaryID: PseudoCollectionID.all,
                     activeCollection: undefined,
                 },
                 isInSearchMode: false,
@@ -1028,7 +1026,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 pendingSearchSuggestions: [],
                 view: {
                     type: "hidden-albums",
-                    activeCollectionSummaryID: HIDDEN_ITEMS_SECTION,
+                    activeCollectionSummaryID: PseudoCollectionID.hiddenItems,
                     activeCollection: undefined,
                 },
                 isInSearchMode: false,
@@ -1073,7 +1071,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                             ? "hidden-albums"
                             : "albums",
                     activeCollectionSummaryID:
-                        action.collectionSummaryID ?? ALL_SECTION,
+                        action.collectionSummaryID ?? PseudoCollectionID.all,
                     activeCollection: state.normalCollections
                         .concat(state.hiddenCollections)
                         .find(({ id }) => id === action.collectionSummaryID),
@@ -1292,9 +1290,9 @@ const deriveNormalCollectionSummaries = (
         normalFiles,
         archivedFileIDs,
     );
-    normalCollectionSummaries.set(ALL_SECTION, {
+    normalCollectionSummaries.set(PseudoCollectionID.all, {
         ...pseudoCollectionOptionsForFiles(allSectionFiles),
-        id: ALL_SECTION,
+        id: PseudoCollectionID.all,
         type: "all",
         attributes: ["all"],
         name: t("section_all"),
@@ -1347,9 +1345,9 @@ const deriveHiddenCollectionSummaries = (
     const defaultHiddenFiles = uniqueFilesByID(
         hiddenFiles.filter((file) => dhcIDs.has(file.collectionID)),
     );
-    hiddenCollectionSummaries.set(HIDDEN_ITEMS_SECTION, {
+    hiddenCollectionSummaries.set(PseudoCollectionID.hiddenItems, {
         ...pseudoCollectionOptionsForFiles(defaultHiddenFiles),
-        id: HIDDEN_ITEMS_SECTION,
+        id: PseudoCollectionID.hiddenItems,
         name: t("hidden_items"),
         type: "hiddenItems",
         attributes: ["hiddenItems"],
@@ -1579,7 +1577,8 @@ const deriveAlbumsViewAndSelectedID = (
         selectedCollectionSummaryID: activeCollectionSummaryID,
         view: {
             type: "albums" as const,
-            activeCollectionSummaryID: activeCollectionSummaryID ?? ALL_SECTION,
+            activeCollectionSummaryID:
+                activeCollectionSummaryID ?? PseudoCollectionID.all,
             activeCollection,
         },
     };
@@ -1606,7 +1605,7 @@ const deriveHiddenAlbumsViewAndSelectedID = (
         view: {
             type: "hidden-albums" as const,
             activeCollectionSummaryID:
-                activeCollectionSummaryID ?? HIDDEN_ITEMS_SECTION,
+                activeCollectionSummaryID ?? PseudoCollectionID.hiddenItems,
             activeCollection,
         },
     };
@@ -1859,7 +1858,7 @@ const deriveAlbumsFilteredFiles = (
             return activeCollectionSummaryID === file.collectionID;
         }
 
-        if (activeCollectionSummaryID === ALL_SECTION) {
+        if (activeCollectionSummaryID === PseudoCollectionID.all) {
             // Archived files (whether individually archived, or part of some
             // archived album) should not be shown in "All".
             if (archivedFileIDs.has(file.id)) {
@@ -1890,9 +1889,9 @@ const deriveHiddenAlbumsFilteredFiles = (
     const filteredFiles = hiddenFiles.filter((file) => {
         if (tempDeletedFileIDs.has(file.id)) return false;
 
-        // "Hidden" shows all standalone hidden files.
+        // "Hidden items" shows all individually hidden files.
         if (
-            activeCollectionSummaryID === HIDDEN_ITEMS_SECTION &&
+            activeCollectionSummaryID == PseudoCollectionID.hiddenItems &&
             defaultHiddenCollectionIDs.has(file.collectionID)
         ) {
             return true;
