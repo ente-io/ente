@@ -5,63 +5,100 @@ import android.content.ActivityNotFoundException
 import android.content.ComponentName
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 
 class LoginActivity : AppCompatActivity() {
 
+    private var account: AccountModel? = null
+
     companion object {
         const val EXTRA_LOGIN_STATUS = "com.unplugged.photos.LOGIN_STATUS"
-        const val ACTION_CHECK_LOGIN = "com.unplugged.photos.ACTION_CHECK_LOGIN"
 
-        private const val ACCOUNT_ACTION_REQUEST_CREDENTIALS = "com.example.app3.ACTION_REQUEST_CREDENTIALS"
-        private const val ACCOUNT_ACTIVITY_CLASS_NAME = "com.unplugged.account.ui.thirdparty.ThirdPartyCredentialsActivity"
-        private const val ACCOUNT_PACKAGE_NAME = "com.unplugged.account"
-        private const val ACCOUNT_EXTRA_LOGIN_SUCCESS_RESULT = "com.unplugged.account.EXTRA_LOGIN_SUCCESS_RESULT"
+        private const val ACCOUNT_ACTIVITY_CLASS_NAME =
+            "com.unplugged.account.ui.thirdparty.ThirdPartyCredentialsActivity"
+        private const val ACCOUNT_PACKAGE_NAME = "com.unplugged.accountsample.dev"
     }
 
     private val accountLoginLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            var isLoginSuccessful = false
             if (result.resultCode == Activity.RESULT_OK) {
-                isLoginSuccessful = result.data?.getBooleanExtra(ACCOUNT_EXTRA_LOGIN_SUCCESS_RESULT, false) ?: false
+                account = AccountModel(
+                    result.data?.getStringExtra("service_password") ?: "",
+                    result.data?.getStringExtra("up_token") ?: "",
+                    result.data?.getStringExtra("username") ?: ""
+                )
             }
-            handleAccountLoginResponse(isLoginSuccessful)
+            handleAccountLoginResponse(account)
         }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        if (intent?.action == ACTION_CHECK_LOGIN) {
-            // Proceed with launching the third-party app for login
-            val loginIntent = Intent().apply {
-                component = ComponentName(ACCOUNT_PACKAGE_NAME, ACCOUNT_ACTIVITY_CLASS_NAME)
-                action = ACCOUNT_ACTION_REQUEST_CREDENTIALS
-            }
+        val credentialsIntent = Intent().apply {
+            component = ComponentName(
+                ACCOUNT_PACKAGE_NAME, // Assuming these constants are defined in the class
+                ACCOUNT_ACTIVITY_CLASS_NAME
+            )
+            putExtra("service_name", "service_1")
+        }
 
-            try {
-                accountLoginLauncher.launch(loginIntent)
-            } catch (e: ActivityNotFoundException) {
-                handleAccountLoginResponse(false)
-            } catch (e: Exception) {
-                handleAccountLoginResponse(false)
-            }
-        } else {
+        var launchSuccessful = false
+        try {
+            accountLoginLauncher.launch(credentialsIntent)
+            launchSuccessful = true // Assume success if no exception
+        } catch (e: ActivityNotFoundException) {
+            Log.d("LoginActivity", "RESULT_CANCELED (due to $e)")
+            handleAccountLoginResponse()
+            // launchSuccessful remains false
+        } catch (e: Exception) {
+            Log.d("LoginActivity", "RESULT_CANCELED (due to $e)")
+            handleAccountLoginResponse()
+            // launchSuccessful remains false
+        }
+
+        if (!launchSuccessful) { // This is an interpretation of what the 'else' might have meant
+            Log.d("LoginActivity", "RESULT_CANCELED (due to launch exception)")
             setResult(Activity.RESULT_CANCELED)
             finish()
         }
     }
 
-    private fun handleAccountLoginResponse(isLoginSuccessful: Boolean) {
+    private fun handleAccountLoginResponse(retrievedAccount: AccountModel? = null) {
         val resultIntent = Intent()
-        resultIntent.putExtra(EXTRA_LOGIN_STATUS, isLoginSuccessful)
-        setResult(Activity.RESULT_OK, resultIntent)
+        var loginSuccess = false
 
-        if (isLoginSuccessful) {
-            val openFlutterIntent = Intent(this, MainActivity::class.java)
-            openFlutterIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-            startActivity(openFlutterIntent)
+        if (retrievedAccount != null && retrievedAccount.servicePassword.isNotEmpty()) {
+            // Login was successful
+            account = retrievedAccount // Store the valid account details
+            resultIntent.putExtra(EXTRA_LOGIN_STATUS, true)
+            Log.d("LoginActivity", "Login successful. User: ${account?.username}")
+            setResult(Activity.RESULT_OK, resultIntent)
+            loginSuccess = true
+        } else {
+            // Login failed (account is null or password empty)
+            account = null
+            resultIntent.putExtra(EXTRA_LOGIN_STATUS, false)
+            val reason = if (retrievedAccount == null) "Account details null" else "ServicePassword empty"
+            Log.d("LoginActivity", "Login failed: $reason")
+            setResult(Activity.RESULT_CANCELED, resultIntent) // Set result to CANCELED for failure
+            loginSuccess = false
         }
+
+        if (loginSuccess) {
+            // Only start MainActivity if the login was actually successful
+            Log.d("LoginActivity", "Proceeding to MainActivity.")
+            val openFlutterIntent = Intent(this, MainActivity::class.java).apply {
+                putExtra("service_password", account?.servicePassword)
+                putExtra("up_token", account?.upToken)
+                putExtra("username", account?.username)
+            }
+            startActivity(openFlutterIntent)
+        } else {
+            Log.d("LoginActivity", "Not starting MainActivity because login failed.")
+        }
+
         finish()
     }
 }

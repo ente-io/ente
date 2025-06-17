@@ -106,7 +106,8 @@ android {
             signingConfig signingConfigs.release
         }
         debug {
-          applicationIdSuffix '.debug'
+            debuggable true
+            applicationIdSuffix '.debug'
           versionNameSuffix "-debug"
           externalNativeBuild {
             cmake {

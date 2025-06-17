@@ -5,6 +5,7 @@ import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:background_fetch/background_fetch.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import "package:flutter/services.dart";
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:home_widget/home_widget.dart' as hw;
@@ -15,6 +16,7 @@ import 'package:photos/ente_theme_data.dart';
 import "package:photos/events/memories_changed_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
+import 'package:photos/models/account/Account.dart';
 import "package:photos/service_locator.dart";
 import 'package:photos/services/app_lifecycle_service.dart';
 import "package:photos/services/home_widget_service.dart";
@@ -24,17 +26,21 @@ import 'package:photos/ui/tabs/home_widget.dart';
 import "package:photos/ui/viewer/actions/file_viewer.dart";
 import "package:photos/utils/intent_util.dart";
 
+
 class EnteApp extends StatefulWidget {
   final Future<void> Function(String) runBackgroundTask;
   final Future<void> Function(String) killBackgroundTask;
   final AdaptiveThemeMode? savedThemeMode;
   final Locale? locale;
+  final ValueNotifier<Account?> accountNotifier;
+
 
   const EnteApp(
     this.runBackgroundTask,
     this.killBackgroundTask,
     this.locale,
     this.savedThemeMode, {
+    required this.accountNotifier,
     super.key,
   });
 
@@ -46,6 +52,8 @@ class EnteApp extends StatefulWidget {
   @override
   State<EnteApp> createState() => _EnteAppState();
 }
+
+const MethodChannel _accountChannel = MethodChannel('com.unplugged.photos/account');
 
 class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
   final _logger = Logger("EnteAppState");
@@ -60,6 +68,19 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
     setupIntentAction();
     WidgetsBinding.instance.addObserver(this);
     setupSubscription();
+
+    widget.accountNotifier.addListener(_onAccountChanged);
+    _logger.info("Initial account from notifier in EnteAppState: ${widget.accountNotifier.value?.username}");
+
+    _setupAccountChannelHandler();
+  }
+
+  void _onAccountChanged() { // Optional listener
+    _logger.info("Account changed via listener in EnteAppState: ${widget.accountNotifier.value?.username}");
+    if (mounted) {
+      // If other parts of this state need to react directly, you can setState here.
+      // However, for the 'home' widget, ValueListenableBuilder will handle it.
+    }
   }
 
   void setupSubscription() {
@@ -206,5 +227,38 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
     }).catchError((e) {
       _logger.info('[BackgroundFetch] configure ERROR: $e');
     });
+  }
+
+  Future<void> _setupAccountChannelHandler() async {
+    _accountChannel.setMethodCallHandler((MethodCall call) async {
+      _logger.info("Method call received from native: ${call.method}");
+      if (call.method == "onAccountReceived") {
+        final Map<dynamic, dynamic>? accountMap =
+        call.arguments as Map<dynamic, dynamic>?;
+
+        if (accountMap != null) {
+          try {
+            final receivedAccount = Account.fromMap(accountMap);
+            widget.accountNotifier.value = receivedAccount;
+            _logger.info("Account details received in Flutter: ${receivedAccount.toString()}");
+          } catch (e, s) {
+            _logger.severe("Failed to parse account details from native", e, s);
+          }
+        } else {
+          _logger.warning("Received null or invalid account details map from native.");
+        }
+      } else {
+        _logger.warning("Unknown method call from native: ${call.method}");
+        throw MissingPluginException('No such method ${call.method} on channel ${_accountChannel.name}');
+      }
+    });
+
+    // After setting the handler, ask native side to re-send the account details if available
+    try {
+      _logger.info("Requesting account details from native...");
+      await _accountChannel.invokeMethod("requestAccount");
+    } catch (e, s) {
+      _logger.severe("Error while requesting account details from native", e, s);
+    }
   }
 }

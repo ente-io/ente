@@ -26,6 +26,7 @@ import 'package:photos/db/upload_locks_db.dart';
 import 'package:photos/ente_theme_data.dart';
 import "package:photos/extensions/stop_watch.dart";
 import "package:photos/l10n/l10n.dart";
+import 'package:photos/models/account/Account.dart';
 import "package:photos/service_locator.dart";
 import "package:photos/services/account/user_service.dart";
 import 'package:photos/services/app_lifecycle_service.dart';
@@ -52,7 +53,10 @@ import 'package:photos/utils/file_uploader.dart';
 import "package:photos/utils/lock_screen_settings.dart";
 import 'package:shared_preferences/shared_preferences.dart';
 
+
 final _logger = Logger("main");
+final ValueNotifier<Account?> _accountNotifier = ValueNotifier<Account?>(null);
+
 
 bool _isProcessRunning = false;
 const kLastBGTaskHeartBeatTime = "bg_task_hb_time";
@@ -95,7 +99,7 @@ Future<void> _runInForeground(AdaptiveThemeMode? savedThemeMode) async {
     runApp(
       AppLock(
         builder: (args) =>
-            EnteApp(_runBackgroundTask, _killBGTask, locale, savedThemeMode),
+            EnteApp(_runBackgroundTask, _killBGTask, locale, savedThemeMode,  accountNotifier: _accountNotifier,),
         lockScreen: const LockScreen(),
         enabled: await Configuration.instance.shouldShowLockScreen() ||
             localSettings.isOnGuestView(),

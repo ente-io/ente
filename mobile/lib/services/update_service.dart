@@ -72,7 +72,8 @@ class UpdateService {
   }
 
   Future<bool> shouldShowUpdateNotification() async {
-    final shouldUpdate = await this.shouldUpdate();
+    // final shouldUpdate = await this.shouldUpdate();
+    const shouldUpdate = false;
 
     if (!shouldUpdate) {
       return false;
