@@ -53,39 +53,62 @@ import { z } from "zod/v4";
  * This is similar to {@link RemoteCollection}, but also has both significant
  * differences in that it contains the decrypted fields, and some minor tweaks.
  */
-const LocalCollection = z.looseObject({
-    id: z.number(),
-    owner: RemoteCollectionUser,
-    key: z.string(),
-    name: z.string(),
-    type: z.string(),
-    sharees: z.array(RemoteCollectionUser).nullish().transform(nullishToEmpty),
-    publicURLs: z.array(RemotePublicURL).nullish().transform(nullishToEmpty),
-    updationTime: z.number(),
-    magicMetadata: z
-        .object({
-            version: z.number(),
-            count: z.number(),
-            data: CollectionPrivateMagicMetadataData,
-        })
-        .nullish()
-        .transform(nullToUndefined),
-    pubMagicMetadata: z
-        .object({
-            version: z.number(),
-            count: z.number(),
-            data: CollectionPublicMagicMetadataData,
-        })
-        .nullish()
-        .transform(nullToUndefined),
-    sharedMagicMetadata: z
-        .object({
-            version: z.number(),
-            count: z.number(),
-            data: CollectionShareeMagicMetadataData,
-        })
-        .nullish()
-        .transform(nullToUndefined),
-});
+const LocalCollection = z
+    .looseObject({
+        id: z.number(),
+        owner: RemoteCollectionUser,
+        key: z.string(),
+        name: z.string(),
+        type: z.string(),
+        sharees: z
+            .array(RemoteCollectionUser)
+            .nullish()
+            .transform(nullishToEmpty),
+        publicURLs: z
+            .array(RemotePublicURL)
+            .nullish()
+            .transform(nullishToEmpty),
+        updationTime: z.number(),
+        magicMetadata: z
+            .object({
+                version: z.number(),
+                count: z.number(),
+                data: CollectionPrivateMagicMetadataData,
+            })
+            .nullish()
+            .transform(nullToUndefined),
+        pubMagicMetadata: z
+            .object({
+                version: z.number(),
+                count: z.number(),
+                data: CollectionPublicMagicMetadataData,
+            })
+            .nullish()
+            .transform(nullToUndefined),
+        sharedMagicMetadata: z
+            .object({
+                version: z.number(),
+                count: z.number(),
+                data: CollectionShareeMagicMetadataData,
+            })
+            .nullish()
+            .transform(nullToUndefined),
+        // Old data stored locally contained fields which are no longer needed.
+        // Do some zod gymnastics to drop these when reading (so that they're
+        // not written back the next time). This code was added June 2025,
+        // 1.7.14-beta, and can be removed after a bit (tag: Migration).
+        encryptedKey: z.unknown(),
+        keyDecryptionNonce: z.unknown(),
+        encryptedName: z.unknown(),
+        nameDecryptionNonce: z.unknown(),
+        attributes: z.unknown(),
+    })
+    .omit({
+        encryptedKey: true,
+        keyDecryptionNonce: true,
+        encryptedName: true,
+        nameDecryptionNonce: true,
+        attributes: true,
+    });
 
 export const LocalCollections = z.array(LocalCollection);
