@@ -2,26 +2,17 @@ import type { User } from "ente-accounts/services/user";
 import { ensureElectron } from "ente-base/electron";
 import { joinPath } from "ente-base/file-name";
 import log from "ente-base/log";
-import {
-    type Collection,
-    type CollectionOrder,
-    CollectionSubType,
-} from "ente-media/collection";
+import { type Collection, CollectionSubType } from "ente-media/collection";
 import { EnteFile } from "ente-media/file";
-import { ItemVisibility } from "ente-media/file-metadata";
 import {
     DEFAULT_HIDDEN_COLLECTION_USER_FACING_NAME,
     HIDDEN_ITEMS_SECTION,
     addToCollection,
-    collection1To2,
     findDefaultHiddenCollectionIDs,
     isHiddenCollection,
     isIncomingShare,
     moveToCollection,
     restoreToCollection,
-    updateCollectionOrder,
-    updateCollectionSortOrder,
-    updateCollectionVisibility,
 } from "ente-new/photos/services/collection";
 import {
     getAllLocalCollections,
@@ -180,21 +171,6 @@ async function createCollectionDownloadFolder(
     await fs.mkdirIfNeeded(collectionDownloadPath);
     return collectionDownloadPath;
 }
-
-export const changeCollectionVisibility = async (
-    collection: Collection,
-    visibility: ItemVisibility,
-) => updateCollectionVisibility(await collection1To2(collection), visibility);
-
-export const changeCollectionOrder = async (
-    collection: Collection,
-    order: CollectionOrder,
-) => updateCollectionOrder(await collection1To2(collection), order);
-
-export const changeCollectionSortOrder = async (
-    collection: Collection,
-    asc: boolean,
-) => updateCollectionSortOrder(await collection1To2(collection), asc);
 
 export const getUserOwnedCollections = (collections: Collection[]) => {
     const user: User = getData("user");

@@ -1,9 +1,5 @@
 import { decryptBoxBytes } from "ente-base/crypto";
 import {
-    type EncryptedMagicMetadata,
-    type MagicMetadataCore,
-} from "ente-media/file";
-import {
     nullishToEmpty,
     nullishToFalse,
     nullToUndefined,
@@ -26,11 +22,8 @@ import {
  *
  * A collection can be owned by the user (in whose context this code is
  * running), or might be a collection that is shared with them.
- *
- * TODO: This type supercedes {@link Collection}. Once migration is done, rename
- * this to drop the "2" suffix.
  */
-export interface Collection2 {
+export interface Collection {
     /**
      * The collection's globally unique ID.
      *
@@ -82,7 +75,7 @@ export interface Collection2 {
     /**
      * Public links that can be used to access and update the collection.
      */
-    publicURLs?: PublicURL[];
+    publicURLs: PublicURL[];
     /**
      * The last time the collection was updated (epoch microseconds).
      *
@@ -122,6 +115,19 @@ export interface Collection2 {
      */
     sharedMagicMetadata?: MagicMetadata<CollectionShareeMagicMetadataData>;
 }
+
+/**
+ * The known set of values for the {@link type} field of a {@link Collection}.
+ *
+ * This is the list of values, see {@link CollectionType} for the corresponding
+ * TypeScript type.
+ */
+export const collectionTypes = [
+    "album",
+    "folder",
+    "favorites",
+    "uncategorized",
+] as const;
 
 /**
  * The type of a collection.
@@ -169,7 +175,7 @@ export interface Collection2 {
  *   collection. However, unlike "favorites", the "uncategorized" collection
  *   cannot be shared.
  */
-export type CollectionType = "album" | "folder" | "favorites" | "uncategorized";
+export type CollectionType = (typeof collectionTypes)[number];
 
 /**
  * The privilege level of a participant associated with a collection.
@@ -434,45 +440,6 @@ export const RemoteCollection = z.looseObject({
 
 export type RemoteCollection = z.infer<typeof RemoteCollection>;
 
-export interface EncryptedCollection {
-    id: number;
-    owner: CollectionUser;
-    encryptedKey: string;
-    keyDecryptionNonce: string;
-    name?: string;
-    encryptedName: string;
-    nameDecryptionNonce: string;
-    type: CollectionType;
-    attributes: unknown;
-    sharees: CollectionUser[];
-    publicURLs?: PublicURL[];
-    updationTime: number;
-    isDeleted: boolean;
-    magicMetadata?: EncryptedMagicMetadata;
-    pubMagicMetadata?: EncryptedMagicMetadata;
-    sharedMagicMetadata?: EncryptedMagicMetadata;
-}
-
-export interface Collection
-    extends Omit<
-        EncryptedCollection,
-        | "encryptedKey"
-        | "keyDecryptionNonce"
-        | "encryptedName"
-        | "nameDecryptionNonce"
-        | "magicMetadata"
-        | "pubMagicMetadata"
-        | "sharedMagicMetadata"
-    > {
-    key: string;
-    name: string;
-    magicMetadata: CollectionMagicMetadata;
-    pubMagicMetadata: CollectionPublicMagicMetadata;
-    sharedMagicMetadata: CollectionShareeMagicMetadata;
-    // TODO(C2): Gradual conversion to new structure.
-    c2?: Collection2;
-}
-
 /**
  * Decrypt a remote collection using the provided {@link collectionKey}.
  *
@@ -482,8 +449,6 @@ export interface Collection
  * encrypted fields in {@link collection}.
  *
  * @returns A decrypted collection.
- *
- * TODO(C2): For legacy compat, it returns the older structure.
  */
 export const decryptRemoteCollection = async (
     collection: RemoteCollection,
@@ -506,10 +471,10 @@ export const decryptRemoteCollection = async (
         ...rest
     } = collection;
 
-    // We've already used them to derive the `collectionKey`
-    drop([encryptedKey, keyDecryptionNonce]);
+    // We've already used them to derive the `collectionKey`.
+    ignore([encryptedKey, keyDecryptionNonce]);
     // Mobile specific attribute not currently used by us.
-    drop(attributes);
+    ignore(attributes);
 
     const name =
         // `||` is used because remote sets name to blank to indicate absence.
@@ -521,7 +486,7 @@ export const decryptRemoteCollection = async (
             ),
         );
 
-    let magicMetadata: Collection2["magicMetadata"];
+    let magicMetadata: Collection["magicMetadata"];
     if (encryptedMagicMetadata) {
         const genericMM = await decryptMagicMetadata(
             encryptedMagicMetadata,
@@ -531,7 +496,7 @@ export const decryptRemoteCollection = async (
         magicMetadata = { ...genericMM, data };
     }
 
-    let pubMagicMetadata: Collection2["pubMagicMetadata"];
+    let pubMagicMetadata: Collection["pubMagicMetadata"];
     if (encryptedPubMagicMetadata) {
         const genericMM = await decryptMagicMetadata(
             encryptedPubMagicMetadata,
@@ -541,7 +506,7 @@ export const decryptRemoteCollection = async (
         pubMagicMetadata = { ...genericMM, data };
     }
 
-    let sharedMagicMetadata: Collection2["sharedMagicMetadata"];
+    let sharedMagicMetadata: Collection["sharedMagicMetadata"];
     if (encryptedSharedMagicMetadata) {
         const genericMM = await decryptMagicMetadata(
             encryptedSharedMagicMetadata,
@@ -551,56 +516,31 @@ export const decryptRemoteCollection = async (
         sharedMagicMetadata = { ...genericMM, data };
     }
 
-    // return {
-    const c2 = {
+    return {
         ...rest,
         key: collectionKey,
         owner: parseRemoteCollectionUser(owner),
         name,
         sharees: sharees.map(parseRemoteCollectionUser),
+        // TODO:
+        //
+        // See: [Note: strict mode migration]
+        //
+        // We need to add the cast here, otherwise we get a tsc error when this
+        // file is imported in the photos app.
+        publicURLs: rest.publicURLs as PublicURL[],
         magicMetadata,
         pubMagicMetadata,
         sharedMagicMetadata,
     };
-
-    // Temporary scaffolding for the migration.
-    return {
-        ...collection,
-        // See: [Note: strict mode migration]
-        c2: c2 as Collection2,
-        key: collectionKey,
-        name,
-        type: collection.type as CollectionType,
-        // Not used anyway, but just pass what we have.
-        attributes: attributes,
-        // Some temporary scaffolding to impersonate types.
-        //
-        // See: [Note: strict mode migration]
-        sharees: sharees as CollectionUser[],
-        publicURLs: collection.publicURLs as PublicURL[],
-        isDeleted: !!collection.isDeleted,
-        magicMetadata: (magicMetadata
-            ? { ...magicMetadata, header: collection.magicMetadata!.header }
-            : undefined)!,
-        pubMagicMetadata: (pubMagicMetadata
-            ? {
-                  ...pubMagicMetadata,
-                  header: collection.pubMagicMetadata!.header,
-              }
-            : undefined)!,
-        sharedMagicMetadata: (sharedMagicMetadata
-            ? {
-                  ...sharedMagicMetadata,
-                  header: collection.sharedMagicMetadata!.header,
-              }
-            : undefined)!,
-    };
 };
 
-// A no-op function to pretend that we're using some values. This is handy when
-// we want to destructure some fields so that they don't get forwarded, but
-// otherwise don't need to use them.
-const drop = (xs: unknown) => typeof xs;
+/**
+ * A no-op function to pretend that we're using some values. This is handy when
+ * we want to destructure some fields so that they don't get forwarded, but
+ * otherwise don't need to use them.
+ */
+export const ignore = (xs: unknown) => typeof xs;
 
 /**
  * A convenience function to discard the unused name field from the collection
@@ -610,7 +550,7 @@ const parseRemoteCollectionUser = ({
     name,
     ...rest
 }: RemoteCollectionUser): CollectionUser => {
-    drop(name);
+    ignore(name);
     return rest;
 };
 
@@ -702,7 +642,7 @@ export interface CollectionPrivateMagicMetadataData {
  *
  * See: [Note: Use looseObject for metadata Zod schemas]
  */
-const CollectionPrivateMagicMetadataData = z.looseObject({
+export const CollectionPrivateMagicMetadataData = z.looseObject({
     subType: z.number().nullish().transform(nullToUndefined),
     visibility: z.number().nullish().transform(nullToUndefined),
     order: z.number().nullish().transform(nullToUndefined),
@@ -739,7 +679,7 @@ export interface CollectionPublicMagicMetadataData {
 /**
  * Zod schema for {@link CollectionPublicMagicMetadataData}.
  */
-const CollectionPublicMagicMetadataData = z.looseObject({
+export const CollectionPublicMagicMetadataData = z.looseObject({
     asc: z.boolean().nullish().transform(nullToUndefined),
     coverID: z.number().nullish().transform(nullToUndefined),
 });
@@ -772,40 +712,6 @@ export interface CollectionShareeMagicMetadataData {
 /**
  * Zod schema for {@link CollectionShareeMagicMetadataData}.
  */
-const CollectionShareeMagicMetadataData = z.looseObject({
+export const CollectionShareeMagicMetadataData = z.looseObject({
     visibility: z.number().nullish().transform(nullToUndefined),
 });
-
-export interface CreatePublicAccessTokenRequest {
-    collectionID: number;
-    validTill?: number;
-    deviceLimit?: number;
-}
-
-export interface RemoveFromCollectionRequest {
-    collectionID: number;
-    fileIDs: number[];
-}
-
-export interface CollectionMagicMetadataProps {
-    visibility?: number; // ItemVisibility;
-    subType?: number; // CollectionSubType;
-    order?: number;
-}
-
-export type CollectionMagicMetadata =
-    MagicMetadataCore<CollectionMagicMetadataProps>;
-
-export interface CollectionShareeMetadataProps {
-    visibility?: number; // ItemVisibility;
-}
-export type CollectionShareeMagicMetadata =
-    MagicMetadataCore<CollectionShareeMetadataProps>;
-
-export interface CollectionPublicMagicMetadataProps {
-    asc?: boolean;
-    coverID?: number;
-}
-
-export type CollectionPublicMagicMetadata =
-    MagicMetadataCore<CollectionPublicMagicMetadataProps>;

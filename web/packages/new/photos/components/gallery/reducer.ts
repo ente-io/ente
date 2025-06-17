@@ -3,7 +3,7 @@ import {
     isArchivedCollection,
     isPinnedCollection,
 } from "ente-gallery/services/magic-metadata";
-import { type Collection } from "ente-media/collection";
+import { collectionTypes, type Collection } from "ente-media/collection";
 import type { EnteFile, FilePrivateMagicMetadata } from "ente-media/file";
 import { mergeMetadata } from "ente-media/file";
 import { isArchivedFile } from "ente-media/file-metadata";
@@ -12,6 +12,7 @@ import {
     isHiddenCollection,
 } from "ente-new/photos/services/collection";
 import { splitByPredicate } from "ente-utils/array";
+import { includes } from "ente-utils/type-guards";
 import { t } from "i18next";
 import React, { useReducer } from "react";
 import {
@@ -1350,6 +1351,10 @@ const createCollectionSummaries = (
     const coverFiles = findCoverFiles(collections, filesByCollection);
 
     for (const collection of collections) {
+        const collectionType = includes(collectionTypes, collection.type)
+            ? collection.type
+            : "album";
+
         let type: CollectionSummaryType;
         if (isIncomingShare(collection, user)) {
             if (isIncomingCollabShare(collection, user)) {
@@ -1357,7 +1362,7 @@ const createCollectionSummaries = (
             } else {
                 type = "incomingShareViewer";
             }
-        } else if (collection.type == "favorites") {
+        } else if (collectionType == "favorites") {
             // [Note: User and shared favorites]
             //
             // "favorites" can be both the user's own favorites, or favorites of
@@ -1376,7 +1381,7 @@ const createCollectionSummaries = (
             // classification of this collection summary is that it is the
             // user's "favorites", everything else is secondary and can be part
             // of the `attributes` computed below.
-            type = collection.type;
+            type = collectionType;
         } else if (isOutgoingShare(collection, user)) {
             type = "outgoingShare";
         } else if (isSharedOnlyViaLink(collection)) {
@@ -1388,7 +1393,7 @@ const createCollectionSummaries = (
         } else if (isPinnedCollection(collection)) {
             type = "pinned";
         } else {
-            type = collection.type;
+            type = collectionType;
         }
 
         // This block of code duplicates the above. Such duplication is needed
@@ -1416,17 +1421,16 @@ const createCollectionSummaries = (
         if (isPinnedCollection(collection)) {
             attributes.push("pinned");
         }
-        switch (collection.type) {
+        switch (collectionType) {
             case "favorites":
                 // We don't want to treat other folks' favorites specially like
-                // the user's own favorites (giving it a special icon etc).
+                // the user's own favorites (giving it a special icon etc), so
+                // only apply the favorites attribute if it is the user's own.
                 if (collection.owner.id == user.id)
-                    attributes.push(collection.type);
+                    attributes.push(collectionType);
                 break;
             default:
-                // TODO: Verify type before removing the null check.
-                // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-                if (collection.type) attributes.push(collection.type);
+                attributes.push(collectionType);
                 break;
         }
 
@@ -1435,7 +1439,7 @@ const createCollectionSummaries = (
             name = t("section_uncategorized");
         } else if (type == "favorites") {
             name = t("favorites");
-        } else if (collection.type == "favorites") {
+        } else if (collectionType == "favorites") {
             // See: [Note: User and shared favorites] above.
             //
             // Use the first letter of the email of the user who shared this
