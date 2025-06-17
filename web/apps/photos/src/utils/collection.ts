@@ -13,6 +13,7 @@ import {
     isIncomingShare,
     moveToCollection,
     restoreToCollection,
+    createAlbum,
 } from "ente-new/photos/services/collection";
 import {
     getAllLocalCollections,
@@ -25,7 +26,6 @@ import {
 import { safeDirectoryName } from "ente-new/photos/utils/native-fs";
 import { getData } from "ente-shared/storage/localStorage";
 import {
-    createAlbum,
     removeFromCollection,
     unhideToCollection,
 } from "services/collectionService";

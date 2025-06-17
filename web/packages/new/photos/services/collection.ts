@@ -45,44 +45,15 @@ import { ensureUserKeyPair, getPublicKey } from "./user";
  */
 const requestBatchSize = 1000;
 
+const uncategorizedCollectionName = "Uncategorized";
+const defaultHiddenCollectionName = ".hidden";
+const favoritesCollectionName = "Favorites";
+
 export const ARCHIVE_SECTION = -1;
 export const TRASH_SECTION = -2;
 export const DUMMY_UNCATEGORIZED_COLLECTION = -3;
 export const HIDDEN_ITEMS_SECTION = -4;
 export const ALL_SECTION = 0;
-
-/**
- * Return true if this is a default hidden collection.
- *
- * See also: [Note: Multiple "default" hidden collections].
- */
-export const isDefaultHiddenCollection = (collection: Collection) =>
-    collection.magicMetadata?.data.subType == CollectionSubType.defaultHidden;
-
-/**
- * Extract the IDs of all the "default" hidden collections.
- *
- * [Note: Multiple "default" hidden collections].
- *
- * Normally, there is only expected to be one such collection. But to provide
- * clients laxity in synchronization, we don't enforce this and instead allow
- * for multiple such default hidden collections to exist.
- */
-export const findDefaultHiddenCollectionIDs = (collections: Collection[]) =>
-    new Set<number>(
-        collections
-            .filter(isDefaultHiddenCollection)
-            .map((collection) => collection.id),
-    );
-
-/**
- * Return true if this is a collection that the user doesn't own.
- */
-export const isIncomingShare = (collection: Collection, user: User) =>
-    collection.owner.id !== user.id;
-
-export const isHiddenCollection = (collection: Collection) =>
-    collection.magicMetadata?.data.visibility === ItemVisibility.hidden;
 
 export const DEFAULT_HIDDEN_COLLECTION_USER_FACING_NAME = "Hidden";
 
@@ -100,6 +71,17 @@ export const getCollectionUserFacingName = (collection: Collection) => {
 };
 
 /**
+ * Create a new album (a collection of type "album") on remote, and return its
+ * local representation.
+ *
+ * Remote only, does not modify local state.
+ *
+ * @param albumName The name to use for the new album.
+ */
+export const createAlbum = (albumName: string) =>
+    createCollection(albumName, "album");
+
+/**
  * Create a new collection on remote, and return its local representation.
  *
  * Remote only, does not modify local state.
@@ -111,7 +93,7 @@ export const getCollectionUserFacingName = (collection: Collection) => {
  * @param magicMetadataData Optional metadata to use as the collection's private
  * mutable metadata when creating the new collection.
  */
-export const createCollection2 = async (
+const createCollection = async (
     name: string,
     type: CollectionType,
     magicMetadataData?: CollectionPrivateMagicMetadataData,
@@ -707,6 +689,81 @@ const putCollectionsShareeMagicMetadata = async (
             body: JSON.stringify(updateRequest),
         }),
     );
+
+/**
+ * Create a new collection of type "favorites" for the user on remote, and
+ * return its local representation.
+ *
+ * Remote only, does not modify local state.
+ *
+ * Each user can have at most one collection of type "favorites" owned by them.
+ * While this function does not enforce the constraint locally, it will fail
+ * because remote will enforce the constraint and fail the request when we
+ * attempt to create a second collection of type "favorites".
+ */
+export const createFavoritesCollection = () =>
+    createCollection(favoritesCollectionName, "favorites");
+
+/**
+ * Create a new collection of type "uncategorized" for the user on remote, and
+ * return its local representation.
+ *
+ * Remote only, does not modify local state.
+ *
+ * Each user can have at most one collection of type "uncategorized" owned by
+ * them. While this function does not enforce the constraint locally, it will
+ * fail because remote will enforce the constraint and fail the request when we
+ * attempt to create a second collection of type "uncategorized".
+ */
+export const createUncategorizedCollection = () =>
+    createCollection(uncategorizedCollectionName, "uncategorized");
+
+/**
+ * Create a new collection with hidden visibility on remote, marking it as the
+ * default hidden collection, and return its local representation.
+ *
+ * Remote only, does not modify local state.
+ *
+ * See also: [Note: Multiple "default" hidden collections].
+ */
+export const createDefaultHiddenCollection = () =>
+    createCollection(defaultHiddenCollectionName, "album", {
+        subType: CollectionSubType.defaultHidden,
+        visibility: ItemVisibility.hidden,
+    });
+
+/**
+ * Return true if the provided collection is the default hidden collection.
+ *
+ * See also: [Note: Multiple "default" hidden collections].
+ */
+export const isDefaultHiddenCollection = (collection: Collection) =>
+    collection.magicMetadata?.data.subType == CollectionSubType.defaultHidden;
+
+/**
+ * Extract the IDs of all the "default" hidden collections.
+ *
+ * [Note: Multiple "default" hidden collections].
+ *
+ * Normally, there is only expected to be one such collection. But to provide
+ * clients laxity in synchronization, we don't enforce this and instead allow
+ * for multiple such default hidden collections to exist.
+ */
+export const findDefaultHiddenCollectionIDs = (collections: Collection[]) =>
+    new Set<number>(
+        collections
+            .filter(isDefaultHiddenCollection)
+            .map((collection) => collection.id),
+    );
+
+/**
+ * Return true if this is a collection that the user doesn't own.
+ */
+export const isIncomingShare = (collection: Collection, user: User) =>
+    collection.owner.id !== user.id;
+
+export const isHiddenCollection = (collection: Collection) =>
+    collection.magicMetadata?.data.visibility === ItemVisibility.hidden;
 
 /**
  * Share the provided collection with another Ente user.

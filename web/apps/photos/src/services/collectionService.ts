@@ -2,17 +2,13 @@ import type { User } from "ente-accounts/services/user";
 import { ensureLocalUser } from "ente-accounts/services/user";
 import log from "ente-base/log";
 import { apiURL } from "ente-base/origins";
-import {
-    Collection,
-    CollectionPrivateMagicMetadataData,
-    CollectionSubType,
-    type CollectionType,
-} from "ente-media/collection";
+import { Collection } from "ente-media/collection";
 import { EnteFile } from "ente-media/file";
-import { ItemVisibility } from "ente-media/file-metadata";
 import {
     addToCollection,
-    createCollection2,
+    createDefaultHiddenCollection,
+    createFavoritesCollection,
+    createUncategorizedCollection,
     isDefaultHiddenCollection,
     moveToCollection,
 } from "ente-new/photos/services/collection";
@@ -33,24 +29,7 @@ import { getToken } from "ente-shared/storage/localStorage/helpers";
 import { batch } from "ente-utils/array";
 import { isValidMoveTarget } from "utils/collection";
 
-const uncategorizedCollectionName = "Uncategorized";
-const defaultHiddenCollectionName = ".hidden";
-const favoritesCollectionName = "Favorites";
-
 const REQUEST_BATCH_SIZE = 1000;
-
-export const createAlbum = (albumName: string) =>
-    createCollection(albumName, "album");
-
-const createCollection = async (
-    collectionName: string,
-    type: CollectionType,
-    magicMetadataProps?: CollectionPrivateMagicMetadataData,
-): Promise<Collection> =>
-    createCollection2(collectionName, type, magicMetadataProps);
-
-export const createFavoritesCollection = () =>
-    createCollection(favoritesCollectionName, "favorites");
 
 export const addToFavorites = async (
     file: EnteFile,
@@ -179,7 +158,7 @@ export const removeUserFiles = async (
         }
         let uncategorizedCollection = await getUncategorizedCollection();
         if (!uncategorizedCollection) {
-            uncategorizedCollection = await createUnCategorizedCollection();
+            uncategorizedCollection = await createUncategorizedCollection();
         }
         await moveToCollection(
             sourceCollectionID,
@@ -320,9 +299,6 @@ export async function getUncategorizedCollection(
     return uncategorizedCollection;
 }
 
-export const createUnCategorizedCollection = () =>
-    createCollection(uncategorizedCollectionName, "uncategorized");
-
 export async function getDefaultHiddenCollection(): Promise<Collection> {
     const collections = await getLocalCollections("hidden");
     const hiddenCollection = collections.find((collection) =>
@@ -331,12 +307,6 @@ export async function getDefaultHiddenCollection(): Promise<Collection> {
 
     return hiddenCollection;
 }
-
-const createDefaultHiddenCollection = () =>
-    createCollection(defaultHiddenCollectionName, "album", {
-        subType: CollectionSubType.defaultHidden,
-        visibility: ItemVisibility.hidden,
-    });
 
 export async function moveToHiddenCollection(files: EnteFile[]) {
     try {

@@ -72,6 +72,8 @@ import { usePeopleStateSnapshot } from "ente-new/photos/components/utils/use-sna
 import { shouldShowWhatsNew } from "ente-new/photos/services/changelog";
 import {
     ALL_SECTION,
+    createAlbum,
+    createUncategorizedCollection,
     DUMMY_UNCATEGORIZED_COLLECTION,
 } from "ente-new/photos/services/collection";
 import { areOnlySystemCollections } from "ente-new/photos/services/collection/ui";
@@ -114,8 +116,6 @@ import { FileWithPath } from "react-dropzone";
 import { Trans } from "react-i18next";
 import {
     addToFavorites,
-    createAlbum,
-    createUnCategorizedCollection,
     removeFromFavorites,
 } from "services/collectionService";
 import { uploadManager } from "services/upload-manager";
@@ -1342,7 +1342,7 @@ const findCollectionCreatingUncategorizedIfNeeded = async (
     collectionID: number,
 ) => {
     if (collectionID == DUMMY_UNCATEGORIZED_COLLECTION) {
-        return await createUnCategorizedCollection();
+        return await createUncategorizedCollection();
     } else {
         return collections.find((c) => c.id === collectionID);
     }
