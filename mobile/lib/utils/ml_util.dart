@@ -194,7 +194,7 @@ Future<List<FileMLInstruction>> getOfflineFilesForMlIndexing() async {
 
   // Get all regular files and all hidden files
   final enteFiles = await SearchService.instance.getAllFilesForSearch();
-  final List<FileMLInstruction> hiddenFilesToIndex = [];
+  final List<FileMLInstruction> fileMLInstructions = [];
   for (final EnteFile enteFile in enteFiles) {
     if (enteFile.localID == null) {
       continue;
@@ -217,12 +217,12 @@ Future<List<FileMLInstruction>> getOfflineFilesForMlIndexing() async {
       shouldRunFaces: shouldRunFaces,
       shouldRunClip: shouldRunClip,
     );
-    hiddenFilesToIndex.add(instruction);
+    fileMLInstructions.add(instruction);
   }
   _logger.info(
-    "Getting list of  ${hiddenFilesToIndex.length} offline files to index for ML took ${DateTime.now().difference(time).inMilliseconds} ms",
+    "Getting list of  ${fileMLInstructions.length} offline files to index for ML took ${DateTime.now().difference(time).inMilliseconds} ms",
   );
-  return hiddenFilesToIndex;
+  return fileMLInstructions;
 }
 
 Stream<List<FileMLInstruction>> fetchEmbeddingsAndInstructions(
