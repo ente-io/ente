@@ -70,21 +70,13 @@ class VideoPreviewService {
 
   late final SharedPreferences _prefs;
   static const String _videoStreamingEnabled = "videoStreamingEnabled";
-  static const String _videoStreamingCutoff = "videoStreamingCutoff";
 
   bool get isVideoStreamingEnabled {
     return _prefs.getBool(_videoStreamingEnabled) ?? true;
   }
 
   Future<void> setIsVideoStreamingEnabled(bool value) async {
-    final oneMonthBack = DateTime.now().subtract(const Duration(days: 30));
     _prefs.setBool(_videoStreamingEnabled, value).ignore();
-    _prefs
-        .setInt(
-          _videoStreamingCutoff,
-          oneMonthBack.millisecondsSinceEpoch,
-        )
-        .ignore();
     Bus.instance.fire(VideoStreamingChanged());
 
     if (isVideoStreamingEnabled) {
@@ -99,12 +91,6 @@ class VideoPreviewService {
     fileQueue.clear();
     _items.clear();
     _hasQueuedFile = false;
-  }
-
-  DateTime? get videoStreamingCutoff {
-    final milliseconds = _prefs.getInt(_videoStreamingCutoff);
-    if (milliseconds == null) return null;
-    return DateTime.fromMillisecondsSinceEpoch(milliseconds);
   }
 
   Future<bool> isSharedFileStreamble(EnteFile file) async {
@@ -770,8 +756,6 @@ class VideoPreviewService {
   Future<void> _putFilesForPreviewCreation([bool updateInit = false]) async {
     if (!isVideoStreamingEnabled || !await canUseHighBandwidth()) return;
 
-    final cutoff = videoStreamingCutoff;
-    if (cutoff == null) return;
     if (updateInit) _hasQueuedFile = true;
 
     Map<int, String> failureFiles = {};
@@ -789,7 +773,9 @@ class VideoPreviewService {
 
     final files = await FilesDB.instance.getAllFilesAfterDate(
       fileType: FileType.video,
-      beginDate: cutoff,
+      beginDate: DateTime.now().subtract(
+        const Duration(days: 30),
+      ),
       userID: Configuration.instance.getUserID()!,
     );
 
