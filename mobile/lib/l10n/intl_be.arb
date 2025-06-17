@@ -1,7 +1,9 @@
 {
   "@@locale ": "en",
   "enterYourEmailAddress": "Увядзіце свой адрас электроннай пошты",
+  "enterYourNewEmailAddress": "Увядзіце ваш новы адрас электроннай пошты",
   "accountWelcomeBack": "З вяртаннем!",
+  "emailAlreadyRegistered": "Электронная пошта ўжо зарэгістравана.",
   "email": "Электронная пошта",
   "cancel": "Скасаваць",
   "verify": "Праверыць",

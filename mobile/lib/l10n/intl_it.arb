@@ -1694,6 +1694,7 @@
   "thisWeekThroughTheYears": "Questa settimana negli anni",
   "thisWeekXYearsAgo": "{count, plural, one {}=1 {Questa settimana, {count} anno fa} other {Questa settimana, {count} anni fa}}",
   "youAndThem": "Tu e {name}",
+  "admiringThem": "Ammirando {name}",
   "embracingThem": "Abbracciando {name}",
   "partyWithThem": "Festa con {name}",
   "hikingWithThem": "Escursioni con {name}",
@@ -1741,5 +1742,10 @@
   "onThisDayNotificationExplanation": "Ricevi promemoria sui ricordi da questo giorno negli anni precedenti.",
   "addMemoriesWidgetPrompt": "Aggiungi un widget dei ricordi nella schermata iniziale e torna qui per personalizzarlo.",
   "addAlbumWidgetPrompt": "Aggiungi un widget per gli album nella schermata iniziale e torna qui per personalizzarlo.",
-  "addPeopleWidgetPrompt": "Aggiungi un widget delle persone nella schermata iniziale e torna qui per personalizzarlo."
+  "addPeopleWidgetPrompt": "Aggiungi un widget delle persone nella schermata iniziale e torna qui per personalizzarlo.",
+  "birthdayNotifications": "Notifiche dei compleanni",
+  "receiveRemindersOnBirthdays": "Ricevi promemoria quando è il compleanno di qualcuno. Toccare la notifica ti porterà alle foto della persona che compie gli anni.",
+  "happyBirthday": "Buon compleanno! 🥳",
+  "happyBirthdayToPerson": "Buon compleanno a {name}! 🎉",
+  "birthdays": "Compleanni"
 }
