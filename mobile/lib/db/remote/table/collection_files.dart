@@ -106,6 +106,24 @@ extension CollectionFiles on RemoteDB {
     return null;
   }
 
+  Future<List<CollectionFileEntry>> getFilesCreatedWithinDurations(
+    List<List<int>> durations,
+    Set<int> ignoredCollectionIDs, {
+    String order = 'DESC',
+  }) async {
+    final List<CollectionFileEntry> result = [];
+    for (final duration in durations) {
+      final start = duration[0];
+      final end = duration[1];
+      final rows = await sqliteDB.getAll(
+        "SELECT * FROM collection_files join files on files.id=collection_files.file_id WHERE files.creation_time BETWEEN ? AND ? AND collection_id NOT IN (${ignoredCollectionIDs.join(",")}) ORDER BY creation_time $order",
+        [start, end],
+      );
+      result.addAll(rows.map((row) => CollectionFileEntry.fromMap(row)));
+    }
+    return result;
+  }
+
   Future<void> deleteFiles(List<int> fileIDs) async {
     if (fileIDs.isEmpty) return;
     final stopwatch = Stopwatch()..start();

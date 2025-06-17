@@ -730,39 +730,6 @@ class FilesDB with SqlDbBase {
     return files;
   }
 
-  Future<List<EnteFile>> getFilesCreatedWithinDurations(
-    List<List<int>> durations,
-    Set<int> ignoredCollectionIDs, {
-    int? visibility,
-    String order = 'ASC',
-  }) async {
-    if (durations.isEmpty) {
-      return <EnteFile>[];
-    }
-    final db = await instance.sqliteAsyncDB;
-    String whereClause = durations
-        .map(
-          (duration) =>
-              "($columnCreationTime >= ${duration[0]} AND $columnCreationTime < ${duration[1]})",
-        )
-        .join(" OR ");
-
-    whereClause = "( $whereClause )";
-    if (visibility != null) {
-      whereClause += ' AND $columnMMdVisibility = $visibility';
-    }
-    final query =
-        'SELECT * FROM $filesTable WHERE $whereClause ORDER BY $columnCreationTime $order';
-    final results = await db.getAll(
-      query,
-    );
-    final files = convertToFiles(results);
-    return applyDBFilters(
-      files,
-      DBFilterOptions(ignoredCollectionIDs: ignoredCollectionIDs),
-    );
-  }
-
   // Files which user added to a collection manually but they are not
   // uploaded yet or files belonging to a collection which is marked for backup
   Future<List<EnteFile>> getFilesPendingForUpload() async {

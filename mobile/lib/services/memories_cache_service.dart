@@ -20,6 +20,7 @@ import "package:photos/models/memories/people_memory.dart";
 import "package:photos/models/memories/smart_memory.dart";
 import "package:photos/models/memories/smart_memory_constants.dart";
 import "package:photos/service_locator.dart";
+import "package:photos/services/collections_service.dart";
 import "package:photos/services/language_service.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/services/notification_service.dart";
@@ -224,7 +225,8 @@ class MemoriesCacheService {
       }
       final minimalFiles = await FilesDB.instance.getFilesFromIDs(
         minimalFileIDs.toList(),
-        collectionsToIgnore: SearchService.instance.ignoreCollections(),
+        collectionsToIgnore:
+            CollectionsService.instance.getHiddenCollectionIds(),
       );
       final minimalFileIdsToFile = <int, EnteFile>{};
       for (final file in minimalFiles) {

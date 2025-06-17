@@ -30,7 +30,7 @@ class RemoteDB with SqlDbBase {
     final db = SqliteDatabase(path: path);
     await migrate(db, RemoteDBMigration.migrationScripts, onForeignKey: true);
     _sqliteDB = db;
-    devLog("RemoteDB init complete $path");
+    debugPrint("RemoteDB init complete $path");
   }
 
   SqliteDatabase get sqliteDB => _sqliteDB;

@@ -309,7 +309,7 @@ class SearchService {
     final List<GenericSearchResult> searchResults = [];
     for (var month in _getMatchingMonths(context, query)) {
       final matchedFiles =
-          await FilesDB.instance.getFilesCreatedWithinDurations(
+          await remoteCache.getFilesCreatedWithinDurations(
         _getDurationsOfMonthInEveryYear(month.monthNumber),
         ignoreCollections(),
         order: 'DESC',
@@ -340,7 +340,7 @@ class SearchService {
     final months = getMonthData(context)..shuffle();
     for (MonthData month in months) {
       final matchedFiles =
-          await FilesDB.instance.getFilesCreatedWithinDurations(
+          await remoteCache.getFilesCreatedWithinDurations(
         _getDurationsOfMonthInEveryYear(month.monthNumber),
         ignoreCollections(),
         order: 'DESC',
@@ -376,7 +376,7 @@ class SearchService {
     for (var holiday in holidays) {
       if (holiday.name.toLowerCase().contains(query.toLowerCase())) {
         final matchedFiles =
-            await FilesDB.instance.getFilesCreatedWithinDurations(
+            await remoteCache.getFilesCreatedWithinDurations(
           _getDurationsForCalendarDateInEveryYear(holiday.day, holiday.month),
           ignoreCollections(),
           order: 'DESC',
@@ -408,7 +408,7 @@ class SearchService {
     final holidays = getHolidays(context)..shuffle();
     for (var holiday in holidays) {
       final matchedFiles =
-          await FilesDB.instance.getFilesCreatedWithinDurations(
+          await remoteCache.getFilesCreatedWithinDurations(
         _getDurationsForCalendarDateInEveryYear(holiday.day, holiday.month),
         ignoreCollections(),
         order: 'DESC',
@@ -1164,7 +1164,7 @@ class SearchService {
       final int month = potentialDate.item2.monthNumber;
       final int? year = potentialDate.item3; // nullable
       final matchedFiles =
-          await FilesDB.instance.getFilesCreatedWithinDurations(
+          await remoteCache.getFilesCreatedWithinDurations(
         _getDurationsForCalendarDateInEveryYear(day, month, year: year),
         ignoreCollections(),
         order: 'DESC',
@@ -1347,7 +1347,7 @@ class SearchService {
       endOfDay.microsecondsSinceEpoch,
     ];
 
-    final matchedFiles = await FilesDB.instance.getFilesCreatedWithinDurations(
+    final matchedFiles = await remoteCache.getFilesCreatedWithinDurations(
       [durationOfDay],
       ignoreCollections(),
       order: 'DESC',
@@ -1564,7 +1564,7 @@ class SearchService {
   }
 
   Future<List<EnteFile>> _getFilesInYear(List<int> durationOfYear) async {
-    return await FilesDB.instance.getFilesCreatedWithinDurations(
+    return await remoteCache.getFilesCreatedWithinDurations(
       [durationOfYear],
       ignoreCollections(),
       order: "DESC",

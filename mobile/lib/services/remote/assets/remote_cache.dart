@@ -91,4 +91,25 @@ class RemoteCache {
     }
     return EnteFile.fromRemoteAsset(asset, cf);
   }
+
+  Future<List<EnteFile>> getFilesCreatedWithinDurations(
+    List<List<int>> durations,
+    Set<int> ignoredCollectionIDs, {
+    String order = 'DESC',
+  }) async {
+    final collectionFileEntries = await remoteDB.getFilesCreatedWithinDurations(
+      durations,
+      ignoredCollectionIDs,
+      order: order,
+    );
+    final _ = isLoaded ?? await _load();
+    final List<EnteFile> files = [];
+    for (final entry in collectionFileEntries) {
+      final asset = remoteAssets[entry.fileID];
+      if (asset != null) {
+        files.add(EnteFile.fromRemoteAsset(asset, entry));
+      }
+    }
+    return files;
+  }
 }
