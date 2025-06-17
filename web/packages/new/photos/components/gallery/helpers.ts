@@ -15,6 +15,8 @@ import type { User } from "ente-accounts/services/user";
 import log from "ente-base/log";
 import type { Collection } from "ente-media/collection";
 import type { FamilyData } from "ente-new/photos/services/user-details";
+import { createUncategorizedCollection } from "../../services/collection";
+import { CollectionSummaryID } from "../../services/collection-summary";
 
 /**
  * Ensure that the keys in local storage are not malformed by verifying that the
@@ -35,6 +37,20 @@ export const validateKey = async () => {
         return false;
     }
 };
+
+/**
+ * Return the {@link Collection} (from amongst {@link collections}) with the
+ * given {@link collectionID}. As a special case, if collection ID is the ID of
+ * the placeholder uncategorized collection, create a new uncategorized
+ * collection and then return it.
+ */
+export const findCollectionCreatingUncategorizedIfNeeded = async (
+    collections: Collection[],
+    collectionID: number,
+): Promise<Collection | undefined> =>
+    collectionID == CollectionSummaryID.uncategorizedPlaceholder
+        ? createUncategorizedCollection()
+        : collections.find(({ id }) => id == collectionID);
 
 export const constructUserIDToEmailMap = (
     user: User,

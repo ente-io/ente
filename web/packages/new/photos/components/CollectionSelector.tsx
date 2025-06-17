@@ -73,11 +73,13 @@ type CollectionSelectorProps = ModalVisibilityProps & {
      */
     collectionSummaries: CollectionSummaries;
     /**
-     * A function to map from a collection ID to a {@link Collection}.
+     * A function to map from a collection or pseudo-collection ID to a
+     * {@link Collection}.
      *
      * This is invoked when the user makes a selection, to convert the ID of the
-     * selected collection into a collection object that can be passed to the
-     * {@link callback} attribute of {@link CollectionSelectorAttributes}.
+     * selected collection, which can be a pseudo-collection too, into a
+     * collection object that can be passed to the {@link callback} attribute of
+     * {@link CollectionSelectorAttributes}.
      */
     collectionForCollectionID: (collectionID: number) => Promise<Collection>;
 };

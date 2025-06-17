@@ -61,6 +61,7 @@ import {
 import {
     constructUserIDToEmailMap,
     createShareeSuggestionEmails,
+    findCollectionCreatingUncategorizedIfNeeded,
     validateKey,
 } from "ente-new/photos/components/gallery/helpers";
 import {
@@ -70,12 +71,7 @@ import {
 import { useIsOffline } from "ente-new/photos/components/utils/use-is-offline";
 import { usePeopleStateSnapshot } from "ente-new/photos/components/utils/use-snapshot";
 import { shouldShowWhatsNew } from "ente-new/photos/services/changelog";
-import {
-    ALL_SECTION,
-    createAlbum,
-    createUncategorizedCollection,
-    DUMMY_UNCATEGORIZED_COLLECTION,
-} from "ente-new/photos/services/collection";
+import { ALL_SECTION, createAlbum } from "ente-new/photos/services/collection";
 import { areOnlySystemCollections } from "ente-new/photos/services/collection-summary";
 import { getAllLocalCollections } from "ente-new/photos/services/collections";
 import exportService from "ente-new/photos/services/export";
@@ -927,10 +923,12 @@ const Page: React.FC = () => {
                     attributes={collectionSelectorAttributes}
                     collectionSummaries={normalCollectionSummaries}
                     collectionForCollectionID={(id) =>
+                        // Null assert since the collection selector should only
+                        // show selectable normalCollectionSummaries.
                         findCollectionCreatingUncategorizedIfNeeded(
                             normalCollections,
                             id,
-                        )
+                        )!
                     }
                 />
                 <FilesDownloadProgress
@@ -1334,19 +1332,3 @@ export async function handleSubscriptionCompletionRedirectIfNeeded(
         }
     }
 }
-
-/**
- * Return the {@link Collection} (from amongst {@link collections}) with the
- * given {@link collectionID}. As a special case, if collection ID is the
- * placeholder ID of the uncategorized collection, create it and then return it.
- */
-const findCollectionCreatingUncategorizedIfNeeded = async (
-    collections: Collection[],
-    collectionID: number,
-) => {
-    if (collectionID == DUMMY_UNCATEGORIZED_COLLECTION) {
-        return await createUncategorizedCollection();
-    } else {
-        return collections.find((c) => c.id === collectionID);
-    }
-};
