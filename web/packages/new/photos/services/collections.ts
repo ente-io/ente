@@ -26,7 +26,7 @@ import {
     getCollectionChanges,
     isHiddenCollection,
 } from "./collection";
-import { savedCollections } from "./photos-fdb";
+import { savedCollections, savedTrashItemCollectionKeys } from "./photos-fdb";
 
 const COLLECTION_TABLE = "collections";
 const HIDDEN_COLLECTION_IDS = "hidden-collection-ids";
@@ -159,6 +159,9 @@ async function getLastTrashSyncTime() {
  * The sync uses a diff-based mechanism that syncs forward from the last sync
  * time (also persisted).
  *
+ * @param collections All the (non-deleted) collections that we know about
+ * locally.
+ *
  * @param onUpdateTrashFiles A callback invoked when the locally persisted trash
  * items are updated. This can be used for the UI to also update its state. This
  * callback can be invoked multiple times during the sync (once for each batch
@@ -175,13 +178,38 @@ export async function syncTrash(
     onUpdateTrashFiles: ((files: EnteFile[]) => void) | undefined,
     onPruneDeletedFileIDs: (deletedFileIDs: Set<number>) => Promise<void>,
 ): Promise<void> {
-    const trash = await getLocalTrash();
-    collections = [...collections, ...(await getLocalDeletedCollections())];
-    const collectionByID = new Map(collections.map((c) => [c.id, c]));
     if (!getToken()) {
         return;
     }
+
+    const trash = await getLocalTrash();
     const sinceTime = await getLastTrashSyncTime();
+
+    // Data structures:
+    //
+    // `collectionKeyByID` is a map from collection ID => collection key.
+    //
+    // It is prefilled with all the non-deleted collections available locally
+    // (`collections`), and all keys of collections that trash items refererred
+    // to the last time we synced (`trashItemCollectionKeys`).
+    //
+    // > See: [Note: Trash item collection keys]
+    //
+    // As we iterate over the trash items, if we find a collection whose key is
+    // not present in the map, then we fetch that collection from remote, add
+    // its entry to the map, and also updated the persisted value corresponding
+    // to `trashItemCollectionKeys`.
+    //
+    // When we're done, we use `collectionKeyByID` to derive a filtered list of
+    // keys that are still referred to by the current set of trash items, and
+    // set this filtered list as the persisted value of
+    // `trashItemCollectionKeys`.
+
+    const collectionKeyByID = new Map(collections.map((c) => [c.id, c.key]));
+    const trashItemCollectionKeys = await savedTrashItemCollectionKeys();
+    for (const {id, key} of trashItemCollectionKeys) {
+        collectionKeyByID.set(id, key);
+    }
 
     let updatedTrash: Trash = [...trash];
     try {
