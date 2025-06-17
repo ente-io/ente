@@ -6,23 +6,26 @@
  * Prior to us using idb for accessing IndexedDB, we used localForage (another
  * IndexedDB library) for that purpose (See `docs/storage.md` for more context).
  *
- * Our use of localForage was limited to a single IndexedDB table named "files".
- * It stored more than files though - files, collections, trash, and their
- * corresponding sync times.
+ * Our use of localForage was limited to a single IndexedDB database named
+ * "ente-files" with a single (pertinent) table named "files". It stored more
+ * than files though - files, collections, trash, their corresponding sync
+ * times, and other bits and bobs.
  *
- * Since we've now switched to IDB as our preferred IndexedDB library, the data
+ * Since we've now switched to idb as our preferred IndexedDB library, the data
  * stored in this files table could be considered legacy in a sense. But such
  * would be an incorrect characterization - this code has no issues, and it
  * stores core data for us (files and collections are as core as it gets).
  *
  * So this table is not legacy or deprecated, and there is currently no strong
  * reason to migrate this data to another IndexedDB table (it works fine as it
- * is, really). However we do want to avoid adding more items here.
+ * is, really). However we do want to avoid adding more items here, and maybe
+ * gradually move some of the "bits and bobs" elsewhere (e.g. KV DB).
  *
  * ---
  *
  * This file contains the common code and types. Application layer code should
- * usually be accessing the app specific files DB:
+ * usually be accessing the app specific files DB by importing the functions
+ * from the following modules:
  *
  * - Photos app: `photos-fdb.ts`
  * - Public albums app: `public-albums-fdb.ts`
