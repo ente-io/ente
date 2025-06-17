@@ -811,7 +811,7 @@ export const FileList: React.FC<FileListProps> = ({
                       (selected.context.mode == "people"
                           ? selected.context.personID == activePersonID
                           : selected.context.collectionID ==
-                            activeCollectionID)) && selected[file.id]
+                            activeCollectionID)) && !!selected[file.id]
             }
             selectOnClick={selected.count > 0}
             onHover={onHoverOver(index)}
