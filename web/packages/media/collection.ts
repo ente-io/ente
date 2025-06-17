@@ -465,6 +465,7 @@ export const decryptRemoteCollection = async (
         nameDecryptionNonce,
         sharees,
         attributes,
+        isDeleted,
         magicMetadata: encryptedMagicMetadata,
         pubMagicMetadata: encryptedPubMagicMetadata,
         sharedMagicMetadata: encryptedSharedMagicMetadata,
@@ -475,6 +476,9 @@ export const decryptRemoteCollection = async (
     ignore([encryptedKey, keyDecryptionNonce]);
     // Mobile specific attribute not currently used by us.
     ignore(attributes);
+    // The deleted flag is used during collection fetch, but not used by us
+    // beyond this point.
+    ignore(isDeleted);
 
     const name =
         // `||` is used because remote sets name to blank to indicate absence.
