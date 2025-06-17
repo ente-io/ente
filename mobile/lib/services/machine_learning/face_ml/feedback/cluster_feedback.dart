@@ -275,15 +275,29 @@ class ClusterFeedbackService<T> {
 
     // Get the biggest cluster, to be used for quick suggestion calculation
     final List<ClusterInfo> clusters = person.data.assigned;
-    final ClusterInfo biggestPersonCluster =
-        clusters.reduce((a, b) => a.faces.length > b.faces.length ? a : b);
+    String biggestClusterID = '';
+    int biggestClusterSize = 0;
+    final otherPersonClusterIDs = <String>{};
+    for (final cluster in clusters) {
+      final clusterSize = cluster.faces.length;
+      if (clusterSize > biggestClusterSize) {
+        if (biggestClusterSize > 0) {
+          otherPersonClusterIDs.add(biggestClusterID);
+        }
+        biggestClusterID = cluster.id;
+        biggestClusterSize = clusterSize;
+      } else {
+        otherPersonClusterIDs.add(cluster.id);
+      }
+    }
 
     try {
       // Get the suggestions for the person quick check with biggest cluster and centroid
       final foundSuggestions = await _getFastSuggestions(
         person,
-        biggestPersonCluster.id,
+        biggestClusterID,
         0.50,
+        extraIgnoredClusters: otherPersonClusterIDs,
       );
 
       // Get the files for the suggestions
@@ -769,12 +783,15 @@ class ClusterFeedbackService<T> {
   Future<List<(String, double)>> _getFastSuggestions(
     PersonEntity person,
     String clusterID,
-    double threshold,
-  ) async {
+    double threshold, {
+    Set<String>? extraIgnoredClusters,
+  }) async {
     _logger.fine('Getting fast suggestions');
     final allClusterIdsToCountMap = (await mlDataDB.clusterIdToFaceCount());
-    final ignoredClusters =
+    final personignoredClusters =
         await mlDataDB.getPersonIgnoredClusters(person.remoteID);
+    final ignoredClusters =
+        personignoredClusters.union(extraIgnoredClusters ?? {});
     final startTime = DateTime.now();
     final Map<String, Vector> clusterAvg = await _getUpdateClusterAvg(
       allClusterIdsToCountMap,
@@ -793,7 +810,8 @@ class ClusterFeedbackService<T> {
     );
     final suggestionCalcTime = DateTime.now();
     _logger.info(
-        "Calculated average vectors in ${avgCalcTime.difference(startTime).inMilliseconds}ms and suggestions in ${suggestionCalcTime.difference(avgCalcTime).inMilliseconds}ms",);
+      "Calculated average vectors in ${avgCalcTime.difference(startTime).inMilliseconds}ms and suggestions in ${suggestionCalcTime.difference(avgCalcTime).inMilliseconds}ms",
+    );
     return foundSuggestions;
   }
 
