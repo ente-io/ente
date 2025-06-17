@@ -8,7 +8,7 @@ import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/db/ml/db.dart";
-import "package:photos/events/machine_learning_control_event.dart";
+import "package:photos/events/compute_control_event.dart";
 import "package:photos/events/people_changed_event.dart";
 import "package:photos/models/ml/face/face.dart";
 import "package:photos/models/ml/ml_versions.dart";
@@ -73,8 +73,8 @@ class MLService {
     client = "${packageInfo.packageName}/${packageInfo.version}";
     _logger.info("client: $client");
 
-    // Listen on MachineLearningController
-    Bus.instance.on<MachineLearningControlEvent>().listen((event) {
+    // Listen on ComputeController
+    Bus.instance.on<ComputeControlEvent>().listen((event) {
       if (!flagService.hasGrantedMLConsent) {
         return;
       }

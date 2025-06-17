@@ -7,7 +7,7 @@ import "package:battery_info/model/iso_battery_info.dart";
 import "package:flutter/foundation.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
-import "package:photos/events/machine_learning_control_event.dart";
+import "package:photos/events/compute_control_event.dart";
 import "package:thermal/thermal.dart";
 
 enum _ComputeRunState {
@@ -159,7 +159,7 @@ class ComputeController {
       _logger.info(
         "Firing event: $shouldRunCompute      (device health: $_isDeviceHealthy, user interaction: $_isUserInteracting, mlInteractionOverride: $interactionOverride)",
       );
-      Bus.instance.fire(MachineLearningControlEvent(shouldRunCompute));
+      Bus.instance.fire(ComputeControlEvent(shouldRunCompute));
     }
   }
 

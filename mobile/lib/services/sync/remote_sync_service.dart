@@ -130,7 +130,7 @@ class RemoteSyncService {
       fileDataService.syncFDStatus().then((_) {
         if (!flagService.hasGrantedMLConsent) {
           VideoPreviewService.instance
-              .queueFiles(); // if ML is enabled the MLService will queue when ML is done
+              .queueFiles(); // Only in case ML is disabled. if ML is enabled the MLService will queue streaming when ML is done
         }
       }).ignore();
       final filesToBeUploaded = await _getFilesToBeUploaded();
