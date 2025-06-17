@@ -24,6 +24,8 @@ export const savedPublicCollections = async (): Promise<Collection[]> =>
 
 /**
  * Replace the list of public collections stored in our local database.
+ *
+ * This is the setter corresponding to {@link savedPublicCollections}.
  */
 export const savePublicCollections = (collections: Collection[]) =>
     localForage.setItem("public-collections", collections);

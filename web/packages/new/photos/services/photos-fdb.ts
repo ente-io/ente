@@ -5,6 +5,7 @@
 import { LocalCollections } from "ente-gallery/services/files-db";
 import { type Collection } from "ente-media/collection";
 import localForage from "ente-shared/storage/localForage";
+import { z } from "zod/v4";
 
 /**
  * Return all collections present in our local database.
@@ -27,6 +28,8 @@ export const savedCollections = async (): Promise<Collection[]> =>
 /**
  * Replace the list of collections stored in our local database.
  *
+ * This is the setter corresponding to {@link savedCollections}.
+ *
  * This updates the underlying storage of both normal (non-hidden) and hidden
  * collections (the split between normal and hidden is not at the database level
  * but is a filter when they are accessed).
@@ -34,9 +37,24 @@ export const savedCollections = async (): Promise<Collection[]> =>
 export const saveCollections = (collections: Collection[]) =>
     localForage.setItem("collections", collections);
 
+const TrashItemCollectionKey = z.object({
+    /**
+     * Collection ID.
+     */
+    id: z.number(),
+    /**
+     * Decrypted collection key.
+     */
+    key: z.string(),
+});
+
+const TrashItemCollectionKeys = TrashItemCollectionKey.array();
+
+export type TrashItemCollectionKey = z.infer<typeof TrashItemCollectionKey>;
+
 /**
- * Return keys of (potentially deleted) collections referred to by trash items
- * present in our local database.
+ * Return keys of collections (including potentially deleted ones) referred to
+ * by trash items present in our local database.
  *
  * Use {@link saveTrashItemCollectionKeys} to update the database.
  *
@@ -63,3 +81,23 @@ export const saveCollections = (collections: Collection[]) =>
  * - Once the sync completes, we updated this list to retain only entries that
  *   are still referred to by items remaining in the trash.
  */
+export const savedTrashItemCollectionKeys = async (): Promise<
+    TrashItemCollectionKey[]
+> =>
+    TrashItemCollectionKeys.parse(
+        // This key name is not accurate, these are not deleted collections but
+        // collections referred to by deleted items (so they can include deleted
+        // collections, but not exclusively).
+        //
+        // But since the use of this key name is localized to this file so we
+        // let the original name be.
+        (await localForage.getItem("deleted-collection")) ?? [],
+    );
+
+/**
+ * Replace the list of trash item collection keys stored in our local database.
+ *
+ * This is the setter corresponding to {@link saveTrashItemCollectionKeys}.
+ */
+export const saveTrashItemCollectionKeys = (cks: TrashItemCollectionKey[]) =>
+    localForage.setItem("deleted-collection", cks);
