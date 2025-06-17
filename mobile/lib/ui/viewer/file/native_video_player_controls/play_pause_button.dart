@@ -53,7 +53,7 @@ class _PlayPauseButtonState extends State<PlayPauseButton> {
         width: 54,
         height: 54,
         decoration: BoxDecoration(
-          color: Colors.black.withOpacity(0.3),
+          color: Colors.black.withValues(alpha: 0.3),
           shape: BoxShape.circle,
           border: Border.all(
             color: strokeFaintDark,

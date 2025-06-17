@@ -19,7 +19,7 @@ class EmptyState extends StatelessWidget {
             color: Theme.of(context)
                 .colorScheme
                 .defaultTextColor
-                .withOpacity(0.35),
+                .withValues(alpha: 0.35),
           ),
         ),
       ),

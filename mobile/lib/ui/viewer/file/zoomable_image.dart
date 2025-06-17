@@ -213,7 +213,7 @@ class _ZoomableImageState extends State<ZoomableImage> {
                               showDetailsSheet(context, widget.photo);
                             },
                             child: Container(
-                              color: Colors.black.withOpacity(0.1),
+                              color: Colors.black.withValues(alpha: 0.1),
                               width: double.infinity,
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
