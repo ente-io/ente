@@ -15,7 +15,6 @@ import {
     RemoteCollection,
     RemotePublicURL,
     type Collection,
-    type Collection2,
     type CollectionNewParticipantRole,
     type CollectionOrder,
     type CollectionPrivateMagicMetadataData,
@@ -58,8 +57,6 @@ export const ALL_SECTION = 0;
  * See also: [Note: Multiple "default" hidden collections].
  */
 export const isDefaultHiddenCollection = (collection: Collection) =>
-    // TODO: Need to audit the types
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     collection.magicMetadata?.data.subType == CollectionSubType.defaultHidden;
 
 /**
@@ -85,8 +82,6 @@ export const isIncomingShare = (collection: Collection, user: User) =>
     collection.owner.id !== user.id;
 
 export const isHiddenCollection = (collection: Collection) =>
-    // TODO: Need to audit the types
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     collection.magicMetadata?.data.visibility === ItemVisibility.hidden;
 
 export const DEFAULT_HIDDEN_COLLECTION_USER_FACING_NAME = "Hidden";
@@ -121,10 +116,9 @@ export const createCollection2 = async (
     type: CollectionType,
     magicMetadataData?: CollectionPrivateMagicMetadataData,
 ): Promise<Collection> => {
-    const masterKey = await ensureMasterKeyFromSession();
     const collectionKey = await generateKey();
     const { encryptedData: encryptedKey, nonce: keyDecryptionNonce } =
-        await encryptBox(collectionKey, masterKey);
+        await encryptBox(collectionKey, await ensureMasterKeyFromSession());
     const { encryptedData: encryptedName, nonce: nameDecryptionNonce } =
         await encryptBox(new TextEncoder().encode(name), collectionKey);
     const magicMetadata = magicMetadataData
@@ -134,7 +128,7 @@ export const createCollection2 = async (
           )
         : undefined;
 
-    const collection = await postCollections({
+    const remoteCollection = await postCollections({
         encryptedKey,
         keyDecryptionNonce,
         encryptedName,
@@ -143,31 +137,15 @@ export const createCollection2 = async (
         ...(magicMetadata && { magicMetadata }),
     });
 
-    return decryptRemoteCollection(
-        collection,
-        await decryptCollectionKey(collection),
-    );
+    return decryptRemoteKeyAndCollection(remoteCollection);
 };
 
-// TODO(C2): Temporary method to convert to the newer type.
-export const collection1To2 = async (c1: Collection): Promise<Collection2> => {
-    const collection = RemoteCollection.parse({
-        ...c1,
-        magicMetadata: undefined,
-        pubMagicMetadata: undefined,
-        sharedMagicMetadata: undefined,
-    });
-    const c2 = await decryptRemoteCollection(
-        collection,
-        await decryptCollectionKey(collection),
-    );
-    return {
-        ...c2,
-        magicMetadata: c1.magicMetadata,
-        pubMagicMetadata: c1.pubMagicMetadata,
-        sharedMagicMetadata: c1.sharedMagicMetadata,
-    };
-};
+/**
+ * Given a {@link RemoteCollection}, first obtain its decryption key, and then
+ * use that to decrypt and return the collection itself.
+ */
+const decryptRemoteKeyAndCollection = async (collection: RemoteCollection) =>
+    decryptRemoteCollection(collection, await decryptCollectionKey(collection));
 
 /**
  * Return the decrypted collection key (as a base64 string) for the given
@@ -192,6 +170,11 @@ export const decryptCollectionKey = async (
 };
 
 /**
+ * Zod schema for a remote response containing a single collection.
+ */
+const CollectionResponse = z.object({ collection: RemoteCollection });
+
+/**
  * Create a collection on remote with the provided data, and return the new
  * remote collection object returned by remote on success.
  */
@@ -204,8 +187,100 @@ const postCollections = async (
         body: JSON.stringify(collectionData),
     });
     ensureOk(res);
-    return z.object({ collection: RemoteCollection }).parse(await res.json())
-        .collection;
+    return CollectionResponse.parse(await res.json()).collection;
+};
+
+/**
+ * Fetch a collection from remote by its ID.
+ *
+ * Remote only, does not use or modify local state.
+ *
+ * This is not expected to be needed in the normal flow of things, since we
+ * fetch collections en masse, and efficiently, using the collection diff
+ * requests.
+ *
+ * @param collectionID The ID of the collection to fetch.
+ *
+ * @returns The collection obtained from remote after decrypting its contents.
+ */
+export const getCollectionByID = async (
+    collectionID: number,
+): Promise<Collection> => {
+    const res = await fetch(await apiURL(`/collections/${collectionID}`), {
+        headers: await authenticatedRequestHeaders(),
+    });
+    ensureOk(res);
+    const { collection } = CollectionResponse.parse(await res.json());
+    return decryptRemoteKeyAndCollection(collection);
+};
+
+/**
+ * Zod schema for a remote response containing a an array of collections.
+ */
+const CollectionsResponse = z.object({
+    collections: z.array(RemoteCollection),
+});
+
+/**
+ * An collection upsert or deletion obtained as a result of
+ * {@link getCollections} invocation.
+ *
+ * Each change either contains the latest data associated with the collection
+ * that has been created or updated, or has a flag set to indicate that the
+ * corresponding collection has been deleted.
+ */
+export interface CollectionChange {
+    /**
+     * The ID of the collection.
+     */
+    id: number;
+    /**
+     * The added or updated collection, or `undefined` for deletions.
+     *
+     * - This will be set to the (decrypted) collection if it was added or
+     *   updated on remote.
+     *
+     * - This will not be set if the corresponding collection was deleted on
+     *   remote.
+     */
+    collection?: Collection;
+    /**
+     * Epoch microseconds denoting when this collection was last changed
+     * (created or updated or deleted).
+     */
+    updationTime: number;
+}
+
+/**
+ * Fetch all collections that have been added or updated on remote since
+ * {@link sinceTime}, with markers for those that have been deleted.
+ *
+ * @param sinceTime The {@link updationTime} of the latest collection that was
+ * fetched in a previous set of changes. This allows us to resume fetching from
+ * that point. Pass 0 to fetch from the beginning.
+ *
+ * @returns An array of {@link CollectionChange}s. It is guaranteed that there
+ * will be at most one entry for a given collection in the result array. See:
+ * [Note: Diff response will have at most one entry for an id]
+ */
+export const getCollectionChanges = async (
+    sinceTime: number,
+): Promise<CollectionChange[]> => {
+    const res = await fetch(
+        await apiURL("/collections/v2", { sinceTime: sinceTime.toString() }),
+        { headers: await authenticatedRequestHeaders() },
+    );
+    ensureOk(res);
+    const { collections } = CollectionsResponse.parse(await res.json());
+    return Promise.all(
+        collections.map(async (c) => ({
+            id: c.id,
+            updationTime: c.updationTime,
+            collection: c.isDeleted
+                ? undefined
+                : await decryptRemoteKeyAndCollection(c),
+        })),
+    );
 };
 
 /**
@@ -405,8 +480,8 @@ export const deleteFromTrash = async (fileIDs: number[]) => {
  *
  * @param newName The new name of the collection
  */
-export const renameCollection2 = async (
-    collection: Collection2,
+export const renameCollection = async (
+    collection: Collection,
     newName: string,
 ) => {
     if (collection.magicMetadata?.data.subType == CollectionSubType.quicklink) {
@@ -452,7 +527,7 @@ const postCollectionsRename = async (renameRequest: RenameRequest) =>
  * @param visibility The new visibility (normal, archived, hidden).
  */
 export const updateCollectionVisibility = async (
-    collection: Collection2,
+    collection: Collection,
     visibility: ItemVisibility,
 ) =>
     collection.owner.id == ensureLocalUser().id
@@ -471,7 +546,7 @@ export const updateCollectionVisibility = async (
  * @param order Whether on not the collection is pinned.
  */
 export const updateCollectionOrder = async (
-    collection: Collection2,
+    collection: Collection,
     order: CollectionOrder,
 ) => updateCollectionPrivateMagicMetadata(collection, { order });
 
@@ -488,7 +563,7 @@ export const updateCollectionOrder = async (
  * Otherwise they are sorted descending (newest first).
  */
 export const updateCollectionSortOrder = async (
-    collection: Collection2,
+    collection: Collection,
     asc: boolean,
 ) => updateCollectionPublicMagicMetadata(collection, { asc });
 
@@ -510,7 +585,7 @@ export const updateCollectionSortOrder = async (
  * See: [Note: Magic metadata data cannot have nullish values]
  */
 export const updateCollectionPrivateMagicMetadata = async (
-    { id, key, magicMetadata }: Collection2,
+    { id, key, magicMetadata }: Collection,
     updates: CollectionPrivateMagicMetadataData,
 ) =>
     putCollectionsMagicMetadata({
@@ -568,7 +643,7 @@ const putCollectionsMagicMetadata = async (
  * with the {@link pubMagicMetadata} of a collection.
  */
 const updateCollectionPublicMagicMetadata = async (
-    { id, key, pubMagicMetadata }: Collection2,
+    { id, key, pubMagicMetadata }: Collection,
     updates: CollectionPublicMagicMetadataData,
 ) =>
     putCollectionsPublicMagicMetadata({
@@ -605,7 +680,7 @@ const putCollectionsPublicMagicMetadata = async (
  * with the {@link sharedMagicMetadata} of a collection.
  */
 const updateCollectionShareeMagicMetadata = async (
-    { id, key, sharedMagicMetadata }: Collection2,
+    { id, key, sharedMagicMetadata }: Collection,
     updates: CollectionShareeMagicMetadataData,
 ) =>
     putCollectionsShareeMagicMetadata({

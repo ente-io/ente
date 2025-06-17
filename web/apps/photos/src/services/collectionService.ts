@@ -1,38 +1,27 @@
 import type { User } from "ente-accounts/services/user";
 import { ensureLocalUser } from "ente-accounts/services/user";
-import { sharedCryptoWorker } from "ente-base/crypto";
-import { isDevBuild } from "ente-base/env";
 import log from "ente-base/log";
 import { apiURL } from "ente-base/origins";
-import { ensureMasterKeyFromSession } from "ente-base/session";
-import { updateMagicMetadata } from "ente-gallery/services/magic-metadata";
 import {
     Collection,
-    CollectionMagicMetadataProps,
+    CollectionPrivateMagicMetadataData,
     CollectionSubType,
     type CollectionType,
-    EncryptedCollection,
-    RemoveFromCollectionRequest,
 } from "ente-media/collection";
-import { EncryptedMagicMetadata, EnteFile } from "ente-media/file";
+import { EnteFile } from "ente-media/file";
 import { ItemVisibility } from "ente-media/file-metadata";
 import {
     addToCollection,
-    collection1To2,
     createCollection2,
     isDefaultHiddenCollection,
     moveToCollection,
-    renameCollection2,
 } from "ente-new/photos/services/collection";
 import type { CollectionSummary } from "ente-new/photos/services/collection/ui";
 import {
     CollectionSummaryOrder,
     CollectionsSortBy,
 } from "ente-new/photos/services/collection/ui";
-import {
-    getCollectionWithSecrets,
-    getLocalCollections,
-} from "ente-new/photos/services/collections";
+import { getLocalCollections } from "ente-new/photos/services/collections";
 import {
     getLocalFiles,
     groupFilesByCollectionID,
@@ -53,98 +42,12 @@ const REQUEST_BATCH_SIZE = 1000;
 export const createAlbum = (albumName: string) =>
     createCollection(albumName, "album");
 
-// TODO(C2):
-const enableC2 = () => isDevBuild && process.env.NEXT_PUBLIC_ENTE_WIP_NEWIMPL;
-
 const createCollection = async (
     collectionName: string,
     type: CollectionType,
-    magicMetadataProps?: CollectionMagicMetadataProps,
-): Promise<Collection> => {
-    if (enableC2()) {
-        const z = createCollection2(collectionName, type, magicMetadataProps);
-        z.then((x) => console.log(x));
-        return z;
-    }
-    return createCollection1(collectionName, type, magicMetadataProps);
-};
-
-const createCollection1 = async (
-    collectionName: string,
-    type: CollectionType,
-    magicMetadataProps?: CollectionMagicMetadataProps,
-): Promise<Collection> => {
-    try {
-        const cryptoWorker = await sharedCryptoWorker();
-        const masterKey = await ensureMasterKeyFromSession();
-        const token = getToken();
-        const collectionKey = await cryptoWorker.generateKey();
-        const { encryptedData: encryptedKey, nonce: keyDecryptionNonce } =
-            await cryptoWorker.encryptBox(collectionKey, masterKey);
-        const { encryptedData: encryptedName, nonce: nameDecryptionNonce } =
-            await cryptoWorker.encryptBox(
-                new TextEncoder().encode(collectionName),
-                collectionKey,
-            );
-
-        let encryptedMagicMetadata: EncryptedMagicMetadata;
-        if (magicMetadataProps) {
-            const magicMetadata = await updateMagicMetadata(magicMetadataProps);
-            const { encryptedData, decryptionHeader } =
-                await cryptoWorker.encryptMetadataJSON(
-                    magicMetadataProps,
-                    collectionKey,
-                );
-            encryptedMagicMetadata = {
-                ...magicMetadata,
-                data: encryptedData,
-                header: decryptionHeader,
-            };
-        }
-        const newCollection: EncryptedCollection = {
-            id: null,
-            owner: null,
-            encryptedKey,
-            keyDecryptionNonce,
-            encryptedName,
-            nameDecryptionNonce,
-            type,
-            attributes: {},
-            sharees: null,
-            updationTime: null,
-            isDeleted: false,
-            magicMetadata: encryptedMagicMetadata,
-            pubMagicMetadata: null,
-            sharedMagicMetadata: null,
-        };
-        const createdCollection = await postCollection(newCollection, token);
-        const decryptedCreatedCollection = await getCollectionWithSecrets(
-            createdCollection,
-            masterKey,
-        );
-        return decryptedCreatedCollection;
-    } catch (e) {
-        log.error("create collection failed", e);
-        throw e;
-    }
-};
-
-const postCollection = async (
-    collectionData: EncryptedCollection,
-    token: string,
-): Promise<EncryptedCollection> => {
-    try {
-        const response = await HTTPService.post(
-            await apiURL("/collections"),
-            collectionData,
-            null,
-            { "X-Auth-Token": token },
-        );
-        return response.data.collection;
-    } catch (e) {
-        log.error("post Collection failed ", e);
-    }
-};
+    magicMetadataProps?: CollectionPrivateMagicMetadataData,
+): Promise<Collection> =>
+    createCollection2(collectionName, type, magicMetadataProps);
 
 export const createFavoritesCollection = () =>
     createCollection(favoritesCollectionName, "favorites");
@@ -289,6 +192,11 @@ export const removeUserFiles = async (
     }
 };
 
+export interface RemoveFromCollectionRequest {
+    collectionID: number;
+    fileIDs: number[];
+}
+
 export const removeNonUserFiles = async (
     collectionID: number,
     nonUserFiles: EnteFile[],
@@ -341,11 +249,6 @@ export const deleteCollection = async (
         throw e;
     }
 };
-
-export const renameCollection = async (
-    collection: Collection,
-    newCollectionName: string,
-) => renameCollection2(await collection1To2(collection), newCollectionName);
 
 /**
  * Return the user's own favorites collection, if any.

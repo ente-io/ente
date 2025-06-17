@@ -3,10 +3,15 @@ import log from "ente-base/log";
 import { apiURL } from "ente-base/origins";
 import type {
     Collection,
-    CollectionPublicMagicMetadata,
+    CollectionPublicMagicMetadataData,
 } from "ente-media/collection";
-import type { EncryptedEnteFile, EnteFile } from "ente-media/file";
+import type {
+    EncryptedEnteFile,
+    EnteFile,
+    MagicMetadataCore,
+} from "ente-media/file";
 import { decryptFile, mergeMetadata } from "ente-media/file";
+import { savedPublicCollections } from "ente-new/albums/services/public-albums-fdb";
 import { sortFiles } from "ente-new/photos/services/files";
 import { CustomError, parseSharingErrorCodes } from "ente-shared/error";
 import HTTPService from "ente-shared/network/HTTPService";
@@ -102,9 +107,7 @@ export const savePublicCollectionPassword = async (
 };
 
 export const getLocalPublicCollection = async (collectionKey: string) => {
-    const localCollections =
-        (await localForage.getItem<Collection[]>(PUBLIC_COLLECTIONS_TABLE)) ||
-        [];
+    const localCollections = await savedPublicCollections();
     const publicCollection =
         localCollections.find(
             (localSavedPublicCollection) =>
@@ -114,9 +117,7 @@ export const getLocalPublicCollection = async (collectionKey: string) => {
 };
 
 export const savePublicCollection = async (collection: Collection) => {
-    const publicCollections =
-        (await localForage.getItem<Collection[]>(PUBLIC_COLLECTIONS_TABLE)) ??
-        [];
+    const publicCollections = await savedPublicCollections();
     await localForage.setItem(
         PUBLIC_COLLECTIONS_TABLE,
         dedupeCollections([collection, ...publicCollections]),
@@ -335,7 +336,7 @@ export const getPublicCollection = async (
                 ),
             ));
 
-        let collectionPublicMagicMetadata: CollectionPublicMagicMetadata;
+        let collectionPublicMagicMetadata: MagicMetadataCore<CollectionPublicMagicMetadataData>;
         if (fetchedCollection.pubMagicMetadata?.data) {
             collectionPublicMagicMetadata = {
                 ...fetchedCollection.pubMagicMetadata,
@@ -369,9 +370,7 @@ export const removePublicCollectionWithFiles = async (
     collectionUID: string,
     collectionKey: string,
 ) => {
-    const publicCollections =
-        (await localForage.getItem<Collection[]>(PUBLIC_COLLECTIONS_TABLE)) ||
-        [];
+    const publicCollections = await savedPublicCollections();
     await localForage.setItem(
         PUBLIC_COLLECTIONS_TABLE,
         publicCollections.filter(
