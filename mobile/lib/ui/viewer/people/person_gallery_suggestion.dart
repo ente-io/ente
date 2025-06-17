@@ -430,22 +430,16 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
             ),
           ),
           child: ClipRRect(
-            child: ClipPath(
-              clipper: ShapeBorderClipper(
-                shape: ContinuousRectangleBorder(
-                  borderRadius: BorderRadius.circular(52),
-                ),
+            borderRadius: BorderRadius.circular(32),
+            child: FileFaceWidget(
+              key: ValueKey(
+                'face_${currentSuggestionIndex}_${file.uploadedFileID}',
               ),
-              child: FileFaceWidget(
-                key: ValueKey(
-                  'face_${currentSuggestionIndex}_${file.uploadedFileID}',
-                ),
-                file,
-                faceCrop: faceCrop,
-                clusterID: currentSuggestion.clusterIDToMerge,
-                useFullFile: true,
-                thumbnailFallback: true,
-              ),
+              file,
+              faceCrop: faceCrop,
+              clusterID: currentSuggestion.clusterIDToMerge,
+              useFullFile: true,
+              thumbnailFallback: true,
             ),
           ),
         ),
