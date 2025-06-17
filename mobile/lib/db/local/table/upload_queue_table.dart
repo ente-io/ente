@@ -7,7 +7,7 @@ extension UploadQueueTable on LocalDB {
   Future<Set<String>> getQueueAssetIDs(int ownerID) async {
     final stopwatch = Stopwatch()..start();
     final result = await sqliteDB.getAll(
-      'SELECT asset_id FROM asset_upload_queue WHERE   owner_id = ?',
+      'SELECT id FROM asset_upload_queue WHERE   owner_id = ?',
       [ownerID],
     );
     final assetIDs = result.map((row) => row['asset_id'] as String).toSet();

@@ -68,7 +68,7 @@ extension PathBackupConfigTable on LocalDB {
   Future<List<PathConfig>> getPathConfigs(int ownerID) async {
     final stopwatch = Stopwatch()..start();
     final result = await sqliteDB.getAll(
-      'SELECT path, backup_enabled, owner_id FROM path_backup_config WHERE owner_id = ?',
+      'SELECT * FROM path_backup_config WHERE owner_id = ?',
       [ownerID],
     );
     final configs = result.map((row) {
