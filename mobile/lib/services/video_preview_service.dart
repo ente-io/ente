@@ -231,23 +231,35 @@ class VideoPreviewService {
       final needsTonemap = !isHDR;
       final applyFPS = (double.tryParse(props?.fps ?? "") ?? 100) > 30;
 
+      String filters = "";
+
+      if (reencodeVideo) {
+        final videoFilters = <String>[];
+
+        if (rescaleVideo || needsTonemap) {
+          // scale video to 720p or keep original height if less than 720p
+          videoFilters.add("scale=-2:'min(720,ih)'");
+
+          // reduce fps to 30 if it is more than 30
+          if (applyFPS) videoFilters.add("fps=30");
+        }
+
+        if (needsTonemap) {
+          // apply tonemapping for HDR videos
+          videoFilters.addAll([
+            'zscale=transfer=linear',
+            'tonemap=tonemap=hable:desat=0',
+            'zscale=primaries=709:transfer=709:matrix=709',
+          ]);
+        }
+
+        filters = "-vf ${videoFilters.join(",")} ";
+      }
+
       session = await FFmpegKit.execute(
         '-i "${file.path}" '
         // scaling, fps, tonemapping
-        "${reencodeVideo ? '-vf "' + [
-              if (rescaleVideo || needsTonemap) ...[
-                // maximum height of 720p while maintaining aspect ratio
-                'scale=-2:\'min(720,ih)\'',
-                // reduce fps to 30 if needed
-                if (applyFPS) 'fps=30',
-              ],
-              if (needsTonemap) ...[
-                // tonemapping for HDR to SDR conversion
-                'zscale=transfer=linear',
-                'tonemap=tonemap=hable:desat=0',
-                'zscale=primaries=709:transfer=709:matrix=709',
-              ],
-            ].join(',') + '" ' : ''}"
+        '$filters'
         // video encoding
         '${reencodeVideo ? '-c:v libx264 -crf 23 -preset medium ' : '-c:v copy '}'
         // audio encoding
