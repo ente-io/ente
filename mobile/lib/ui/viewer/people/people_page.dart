@@ -29,6 +29,7 @@ import "package:photos/ui/viewer/people/link_email_screen.dart";
 import "package:photos/ui/viewer/people/people_app_bar.dart";
 import "package:photos/ui/viewer/people/people_banner.dart";
 import "package:photos/ui/viewer/people/person_cluster_suggestion.dart";
+import "package:photos/ui/viewer/people/person_gallery_suggestion.dart";
 import "package:photos/utils/navigation_util.dart";
 
 class PeoplePage extends StatefulWidget {
@@ -303,7 +304,8 @@ class _Gallery extends StatelessWidget {
       tagPrefix: tagPrefix + tagPrefix,
       selectedFiles: selectedFiles,
       initialFiles: personFiles.isNotEmpty ? [personFiles.first] : [],
-      header:
+      header: Column(
+        children: [
           personEntity.data.email != null && personEntity.data.email!.isNotEmpty
               ? const SizedBox.shrink()
               : Padding(
@@ -320,6 +322,11 @@ class _Gallery extends StatelessWidget {
                     },
                   ),
                 ),
+          PersonGallerySuggestion(
+            person: personEntity,
+          ),
+        ],
+      ),
     );
   }
 }
