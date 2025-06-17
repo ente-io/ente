@@ -922,9 +922,10 @@ const Page: React.FC = () => {
                     onClose={handleCloseCollectionSelector}
                     attributes={collectionSelectorAttributes}
                     collectionSummaries={normalCollectionSummaries}
-                    collectionForCollectionID={(id) =>
+                    collectionForCollectionSummaryID={(id) =>
                         // Null assert since the collection selector should only
-                        // show selectable normalCollectionSummaries.
+                        // show "selectable" normalCollectionSummaries. See:
+                        // [Note: Picking from selectable collection summaries].
                         findCollectionCreatingUncategorizedIfNeeded(
                             normalCollections,
                             id,

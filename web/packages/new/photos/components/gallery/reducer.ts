@@ -26,7 +26,7 @@ import {
     TRASH_SECTION,
 } from "../../services/collection";
 import {
-    CollectionSummaryID,
+    PseudoCollectionID,
     type CollectionSummary,
     type CollectionSummaryType,
 } from "../../services/collection-summary";
@@ -258,7 +258,7 @@ export interface GalleryState {
      *
      * This will be either the ID of the user's uncategorized collection, if one
      * has already been created, otherwise it will be the predefined
-     * {@link CollectionSummaryID.uncategorizedPlaceholder}.
+     * {@link PseudoCollectionID.uncategorizedPlaceholder}.
      *
      * See: [Note: Uncategorized placeholder]
      */
@@ -486,7 +486,7 @@ const initialGalleryState: GalleryState = {
     normalCollectionSummaries: new Map(),
     hiddenCollectionSummaries: new Map(),
     uncategorizedCollectionSummaryID:
-        CollectionSummaryID.uncategorizedPlaceholder,
+        PseudoCollectionID.uncategorizedPlaceholder,
     tempDeletedFileIDs: new Set(),
     tempHiddenFileIDs: new Set(),
     pendingFavoriteUpdates: new Set(),
@@ -1368,7 +1368,7 @@ const deriveUncategorizedCollectionSummaryID = (
     normalCollections: Collection[],
 ) =>
     normalCollections.find(({ type }) => type == "uncategorized")?.id ??
-    CollectionSummaryID.uncategorizedPlaceholder;
+    PseudoCollectionID.uncategorizedPlaceholder;
 
 const createCollectionSummaries = (
     user: User,

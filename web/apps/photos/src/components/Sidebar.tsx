@@ -79,7 +79,7 @@ import {
     useUserDetailsSnapshot,
 } from "ente-new/photos/components/utils/use-snapshot";
 import {
-    CollectionSummaryID,
+    PseudoCollectionID,
     type CollectionSummaries,
 } from "ente-new/photos/services/collection-summary";
 import exportService from "ente-new/photos/services/export";
@@ -453,12 +453,12 @@ const ShortcutSection: React.FC<ShortcutSectionProps> = ({
     };
 
     const openTrashSection = () => {
-        galleryContext.setActiveCollectionID(CollectionSummaryID.trash);
+        galleryContext.setActiveCollectionID(PseudoCollectionID.trash);
         onCloseSidebar();
     };
 
     const openArchiveSection = () => {
-        galleryContext.setActiveCollectionID(CollectionSummaryID.archiveItems);
+        galleryContext.setActiveCollectionID(PseudoCollectionID.archiveItems);
         onCloseSidebar();
     };
 
@@ -482,7 +482,7 @@ const ShortcutSection: React.FC<ShortcutSectionProps> = ({
             <RowButton
                 startIcon={<ArchiveOutlinedIcon />}
                 label={t("section_archive")}
-                caption={summaryCaption(CollectionSummaryID.archiveItems)}
+                caption={summaryCaption(PseudoCollectionID.archiveItems)}
                 onClick={openArchiveSection}
             />
             <RowButton
@@ -501,7 +501,7 @@ const ShortcutSection: React.FC<ShortcutSectionProps> = ({
             <RowButton
                 startIcon={<DeleteOutlineIcon />}
                 label={t("section_trash")}
-                caption={summaryCaption(CollectionSummaryID.trash)}
+                caption={summaryCaption(PseudoCollectionID.trash)}
                 onClick={openTrashSection}
             />
         </>

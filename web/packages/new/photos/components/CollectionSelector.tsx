@@ -70,18 +70,33 @@ type CollectionSelectorProps = ModalVisibilityProps & {
     attributes: CollectionSelectorAttributes | undefined;
     /**
      * The collections to list.
+     *
+     * The picker does not list all of the collection summaries, it filters
+     * these provided list down to values which make sense for the
+     * {@link attribute}'s {@link action}.
+     *
+     * See: [Note: Picking from selectable collection summaries].
      */
     collectionSummaries: CollectionSummaries;
     /**
-     * A function to map from a collection or pseudo-collection ID to a
-     * {@link Collection}.
+     * A function to map from a collection summary ID to a {@link Collection}.
      *
      * This is invoked when the user makes a selection, to convert the ID of the
-     * selected collection, which can be a pseudo-collection too, into a
-     * collection object that can be passed to the {@link callback} attribute of
-     * {@link CollectionSelectorAttributes}.
+     * selected collection summary into a collection object that can be passed
+     * as the {@link callback} property of {@link CollectionSelectorAttributes}.
+     *
+     * [Note: Picking from selectable collection summaries]
+     *
+     * In general, not all pseudo collections can be converted into a
+     * collection. For example, there is no underlying collection corresponding
+     * to the "All" pseudo collection. However, the implementation of
+     * {@link CollectionSelector} is such that it filters the provided
+     * {@link collectionSummaries} to only show those which, when selected, can
+     * be mapped to an (existing or on-demand created) collection.
      */
-    collectionForCollectionID: (collectionID: number) => Promise<Collection>;
+    collectionForCollectionSummaryID: (
+        collectionID: number,
+    ) => Promise<Collection>;
 };
 
 /**
@@ -93,7 +108,7 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
     onClose,
     attributes,
     collectionSummaries,
-    collectionForCollectionID,
+    collectionForCollectionSummaryID,
 }) => {
     // Make the dialog fullscreen if the screen is <= the dialog's max width.
     const isFullScreen = useMediaQuery("(max-width: 490px)");
@@ -150,8 +165,8 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
     const { action, onSelectCollection, onCancel, onCreateCollection } =
         attributes;
 
-    const handleCollectionClick = async (collectionID: number) => {
-        onSelectCollection(await collectionForCollectionID(collectionID));
+    const handleCollectionSummaryClick = async (id: number) => {
+        onSelectCollection(await collectionForCollectionSummaryID(id));
         onClose();
     };
 
@@ -178,10 +193,10 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
                     {t("create_albums")}
                 </LargeTileCreateNewButton>
                 {filteredCollections.map((collectionSummary) => (
-                    <CollectionButton
+                    <CollectionSummaryButton
                         key={collectionSummary.id}
                         collectionSummary={collectionSummary}
-                        onCollectionClick={handleCollectionClick}
+                        onClick={handleCollectionSummaryClick}
                     />
                 ))}
             </DialogContent_>
@@ -210,19 +225,19 @@ const titleForAction = (action: CollectionSelectorAction) => {
     }
 };
 
-interface CollectionButtonProps {
+interface CollectionSummaryButtonProps {
     collectionSummary: CollectionSummary;
-    onCollectionClick: (collectionID: number) => void;
+    onClick: (collectionSummaryID: number) => void;
 }
 
-const CollectionButton: React.FC<CollectionButtonProps> = ({
+const CollectionSummaryButton: React.FC<CollectionSummaryButtonProps> = ({
     collectionSummary,
-    onCollectionClick,
+    onClick,
 }) => (
     <ItemCard
         TileComponent={LargeTileButton}
         coverFile={collectionSummary.coverFile}
-        onClick={() => onCollectionClick(collectionSummary.id)}
+        onClick={() => onClick(collectionSummary.id)}
     >
         <LargeTileTextOverlay>
             <Typography>{collectionSummary.name}</Typography>
