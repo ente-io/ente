@@ -274,20 +274,21 @@ class ClusterFeedbackService<T> {
     );
 
     // Get the biggest cluster, to be used for quick suggestion calculation
-    final List<ClusterInfo> clusters = person.data.assigned;
+    final personClusters = await mlDataDB.getPersonClusterIDs(person.remoteID);
+    final allClusterIdsToCountMap = (await mlDataDB.clusterIdToFaceCount());
     String biggestClusterID = '';
     int biggestClusterSize = 0;
     final otherPersonClusterIDs = <String>{};
-    for (final cluster in clusters) {
-      final clusterSize = cluster.faces.length;
+    for (final clusterID in personClusters) {
+      final clusterSize = allClusterIdsToCountMap[clusterID] ?? 0;
       if (clusterSize > biggestClusterSize) {
         if (biggestClusterSize > 0) {
           otherPersonClusterIDs.add(biggestClusterID);
         }
-        biggestClusterID = cluster.id;
+        biggestClusterID = clusterID;
         biggestClusterSize = clusterSize;
       } else {
-        otherPersonClusterIDs.add(cluster.id);
+        otherPersonClusterIDs.add(clusterID);
       }
     }
 
@@ -296,7 +297,7 @@ class ClusterFeedbackService<T> {
       final foundSuggestions = await _getFastSuggestions(
         person,
         biggestClusterID,
-        0.50,
+        0.60,
         extraIgnoredClusters: otherPersonClusterIDs,
       );
 
