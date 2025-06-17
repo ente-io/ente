@@ -124,8 +124,7 @@ class VideoPreviewService {
     EnteFile enteFile, [
     bool forceUpload = false,
   ]) async {
-    if (!isVideoStreamingEnabled ||
-        !computeController.requestCompute(stream: true)) {
+    if (!isVideoStreamingEnabled) {
       _logger.info(
         "Pause preview due to disabledSteaming($isVideoStreamingEnabled) or computeController permission)",
       );
@@ -285,7 +284,7 @@ class VideoPreviewService {
         );
       }
 
-      final returnCode = await session.getReturnCode();
+      final returnCode = await session?.getReturnCode();
 
       String? objectId;
       int? objectSize;
@@ -345,7 +344,7 @@ class VideoPreviewService {
         _logger.warning("FFmpeg command cancelled");
         error = "FFmpeg command cancelled";
       } else {
-        final output = await session.getOutput();
+        final output = await session?.getOutput();
         _logger.shout(
           "FFmpeg command failed with return code $returnCode",
           output ?? "Error not found",
@@ -744,12 +743,12 @@ class VideoPreviewService {
     }
     final int size = enteFile.fileSize!;
     final int duration = enteFile.duration!;
-    if (size >= 500 * 1024 * 1024 || duration > 60) {
-      _logger.info(
-        "Skip Preview due to size: $size or duration: $duration",
-      );
-      return (null, true, null);
-    }
+    // if (size >= 500 * 1024 * 1024 || duration > 60) {
+    //   _logger.info(
+    //     "Skip Preview due to size: $size or duration: $duration",
+    //   );
+    //   return (null, true, null);
+    // }
     FFProbeProps? props;
     File? file;
     bool skipFile = false;
@@ -862,11 +861,11 @@ class VideoPreviewService {
 
   void queueFiles() {
     Future.delayed(const Duration(seconds: 5), () {
-      if (!_hasQueuedFile && computeController.requestCompute(stream: true)) {
-        _putFilesForPreviewCreation(true).catchError((_) {
-          _hasQueuedFile = false;
-        });
-      }
+      // if (!_hasQueuedFile && computeController.requestCompute(stream: true)) {
+      _putFilesForPreviewCreation(true).catchError((_) {
+        _hasQueuedFile = false;
+      });
+      // }
     });
   }
 }
