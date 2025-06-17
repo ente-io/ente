@@ -1068,6 +1068,9 @@ const Page: React.FC = () => {
                 <Sidebar
                     {...sidebarVisibilityProps}
                     collectionSummaries={normalCollectionSummaries}
+                    uncategorizedCollectionSummaryID={
+                        state.uncategorizedCollectionSummaryID
+                    }
                     onShowPlanSelector={showPlanSelector}
                     onShowExport={showExport}
                     onAuthenticateUser={authenticateUser}

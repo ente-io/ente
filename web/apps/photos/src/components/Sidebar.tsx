@@ -78,7 +78,6 @@ import {
     useSettingsSnapshot,
     useUserDetailsSnapshot,
 } from "ente-new/photos/components/utils/use-snapshot";
-import { DUMMY_UNCATEGORIZED_COLLECTION } from "ente-new/photos/services/collection";
 import {
     CollectionSummaryID,
     type CollectionSummaries,
@@ -122,18 +121,22 @@ import React, {
     useState,
 } from "react";
 import { Trans } from "react-i18next";
-import { getUncategorizedCollection } from "services/collectionService";
 import { testUpload } from "../../tests/upload.test";
 import { SubscriptionCard } from "./SubscriptionCard";
 
 type SidebarProps = ModalVisibilityProps & {
     /**
-     * The latest UI collections.
+     * The latest set of collections, sections and pseudo-collections.
      *
-     * These are used to obtain data about the uncategorized, hidden and other
-     * items shown in the shortcut section within the sidebar.
+     * These are used to obtain data about the archive, hidden and trash
+     * "section" entries shown within the shortcut section of the sidebar.
      */
     collectionSummaries: CollectionSummaries;
+    /**
+     * The ID of the collection summary that should be shown when the user
+     * activates the "Uncategorized" section shortcut.
+     */
+    uncategorizedCollectionSummaryID: number;
     /**
      * Called when the plan selection modal should be shown.
      */
@@ -155,6 +158,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     open,
     onClose,
     collectionSummaries,
+    uncategorizedCollectionSummaryID,
     onShowPlanSelector,
     onShowExport,
     onAuthenticateUser,
@@ -165,7 +169,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <Stack sx={{ gap: 0.5, mb: 3 }}>
             <ShortcutSection
                 onCloseSidebar={onClose}
-                collectionSummaries={collectionSummaries}
+                {...{ collectionSummaries, uncategorizedCollectionSummaryID }}
             />
             <UtilitySection
                 onCloseSidebar={onClose}
@@ -430,28 +434,21 @@ const ManageMemberSubscription: React.FC<ManageMemberSubscriptionProps> = ({
     );
 };
 
-type ShortcutSectionProps = SectionProps & {
-    collectionSummaries: SidebarProps["collectionSummaries"];
-};
+type ShortcutSectionProps = SectionProps &
+    Pick<
+        SidebarProps,
+        "collectionSummaries" | "uncategorizedCollectionSummaryID"
+    >;
 
 const ShortcutSection: React.FC<ShortcutSectionProps> = ({
     onCloseSidebar,
     collectionSummaries,
+    uncategorizedCollectionSummaryID,
 }) => {
     const galleryContext = useContext(GalleryContext);
-    const [uncategorizedCollectionID, setUncategorizedCollectionID] =
-        useState<number>(CollectionSummaryID.uncategorizedPlaceholder);
-
-    useEffect(() => {
-        void getUncategorizedCollection().then((uncat) =>
-            setUncategorizedCollectionID(
-                uncat?.id ?? DUMMY_UNCATEGORIZED_COLLECTION,
-            ),
-        );
-    }, []);
 
     const openUncategorizedSection = () => {
-        galleryContext.setActiveCollectionID(uncategorizedCollectionID);
+        galleryContext.setActiveCollectionID(uncategorizedCollectionSummaryID);
         onCloseSidebar();
     };
 
@@ -471,22 +468,21 @@ const ShortcutSection: React.FC<ShortcutSectionProps> = ({
         });
     };
 
+    const summaryCaption = (collectionSummaryID: number) =>
+        collectionSummaries.get(collectionSummaryID)?.fileCount.toString();
+
     return (
         <>
             <RowButton
                 startIcon={<CategoryIcon />}
                 label={t("section_uncategorized")}
-                caption={collectionSummaries
-                    .get(uncategorizedCollectionID)
-                    ?.fileCount.toString()}
+                caption={summaryCaption(uncategorizedCollectionSummaryID)}
                 onClick={openUncategorizedSection}
             />
             <RowButton
                 startIcon={<ArchiveOutlinedIcon />}
                 label={t("section_archive")}
-                caption={collectionSummaries
-                    .get(CollectionSummaryID.archiveItems)
-                    ?.fileCount.toString()}
+                caption={summaryCaption(CollectionSummaryID.archiveItems)}
                 onClick={openArchiveSection}
             />
             <RowButton
@@ -505,9 +501,7 @@ const ShortcutSection: React.FC<ShortcutSectionProps> = ({
             <RowButton
                 startIcon={<DeleteOutlineIcon />}
                 label={t("section_trash")}
-                caption={collectionSummaries
-                    .get(CollectionSummaryID.trash)
-                    ?.fileCount.toString()}
+                caption={summaryCaption(CollectionSummaryID.trash)}
                 onClick={openTrashSection}
             />
         </>

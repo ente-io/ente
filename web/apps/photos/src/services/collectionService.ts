@@ -156,10 +156,11 @@ export const removeUserFiles = async (
         if (leftFiles.length === 0) {
             return;
         }
-        let uncategorizedCollection = await getUncategorizedCollection();
-        if (!uncategorizedCollection) {
-            uncategorizedCollection = await createUncategorizedCollection();
-        }
+
+        const uncategorizedCollection =
+            collections.find((c) => c.type == "uncategorized") ??
+            (await createUncategorizedCollection());
+
         await moveToCollection(
             sourceCollectionID,
             uncategorizedCollection,
@@ -284,19 +285,6 @@ function compareCollectionsLatestFile(
             return -1;
         }
     }
-}
-
-export async function getUncategorizedCollection(
-    collections?: Collection[],
-): Promise<Collection> {
-    if (!collections) {
-        collections = await getLocalCollections();
-    }
-    const uncategorizedCollection = collections.find(
-        (collection) => collection.type == "uncategorized",
-    );
-
-    return uncategorizedCollection;
 }
 
 export async function getDefaultHiddenCollection(): Promise<Collection> {
