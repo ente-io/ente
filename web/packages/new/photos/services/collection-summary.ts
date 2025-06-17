@@ -3,21 +3,77 @@ import type { EnteFile } from "ente-media/file";
 
 export type CollectionSummaryType =
     | CollectionType
+    | "all"
     | "archive"
     | "trash"
-    | "all"
+    | "hiddenItems"
+    | "defaultHidden"
     | "outgoingShare"
     | "incomingShareViewer"
     | "incomingShareCollaborator"
     | "sharedOnlyViaLink"
     | "archived"
-    | "defaultHidden"
-    | "hiddenItems"
     | "pinned";
 
 /**
- * A massaged version of a collection or a pseudo "section" suitable for being
- * directly shown in the UI.
+ * ID of the special {@link CollectionSummary} instances that are not backed by
+ * a real {@link Collection}.
+ */
+export const CollectionSummaryID = {
+    /**
+     * The "All" section.
+     *
+     * The default view when the user opens the gallery, showing the unique
+     * non-hidden and non-archived files in their collections.
+     */
+    all: 0,
+    /**
+     * The items shown in the "Archive" section.
+     *
+     * It shows the files that the user has individually archived.
+     */
+    archive: -1,
+    /**
+     * Trash
+     *
+     * This shows files that are in the user's trash - files that have been
+     * deleted, but have not yet been deleted permanently.
+     */
+    trash: -2,
+    /**
+     * A placeholder for the uncategorized collection used till it is empty.
+     *
+     * The user's sole "uncategorized" collection is created on demand the first
+     * time we need to move a file out of the last collection it belonged to
+     * (yet retain the file).
+     *
+     * Until the real uncategorized collection comes into existence, we use this
+     * dummy placeholder collection as the {@link CollectionSummary} that gets
+     * shown if the user navigates to the "Uncategorized" section in the UI.
+     */
+    placeholderUncategorizedCollection: -3,
+    /**
+     * The default collection shown in the "Hidden" section.
+     *
+     * It shows the files that the user has individually hidden; effectively, it
+     * works as a consolidated combination of all of the user's "default hidden"
+     * albums (See: Note: Multiple "default" hidden collections]).
+     *
+     * In addition to this "Hidden items" collection, the "Hidden" section also
+     * shows albums that were hidden.
+     */
+    mergedDefaultHiddenCollection: -4,
+} as const;
+
+export const ARCHIVE_SECTION = -1;
+export const TRASH_SECTION = -2;
+export const DUMMY_UNCATEGORIZED_COLLECTION = -3;
+export const HIDDEN_ITEMS_SECTION = -4;
+export const ALL_SECTION = 0;
+
+/**
+ * A massaged version of a collection (real or placeholder) or a pseudo
+ * "section" suitable for being directly shown in the UI.
  *
  * From one perspective, this can be thought of as a "CollectionOrSection":
  * i.e., a group of files listed together in the UI, with the files coming from
@@ -30,44 +86,42 @@ export type CollectionSummaryType =
  * extra attributes that make it easier and more efficient for the UI elements
  * to render this collection summary directly. From that perspective, this can
  * be thought of as a "UICollection".
- *
- * TODO: Rename me to CollectionOrSection? FileGroup? FileListing? Known
- * sections:
- * - DUMMY_UNCATEGORIZED_COLLECTION
- * - ALL_SECTION
- * - TRASH_SECTION
- * - HIDDEN_ITEMS_SECTION
- * - ARCHIVE_SECTION
  */
 export interface CollectionSummary {
     /**
-     * The ID of the underlying collection, or one of the predefined placeholder
-     * IDs for the pseudo-collections.
+     * The ID of the underlying {@link Collection}, or one of the predefined
+     * {@link CollectionSummaryID}s for sections and other pseudo-collections.
      */
     id: number;
     /**
-     * The "UI" type for the collection or pseudo-collection.
+     * The primary "UI" type for the collection or section or pseudo-collection.
      *
      * For newer code consider using {@link attributes} instead.
      */
     type: CollectionSummaryType;
     /**
-     * Various UI related attributes for the collection or pseudo-collection.
+     * Various UI related attributes of the collection or section or
+     * pseudo-collection.
      *
-     * This is meant to replace {@link type} gradually.
+     * This is meant to replace {@link type} gradually. It defines various
+     * attributes about the underlying file listing that this collection summary
+     * stands for which the UI elements rendering the collection summary might
+     * want to know.
      */
     attributes: CollectionSummaryType[];
     /**
-     * The name of the collection or pseudo-collection.
+     * The name of the collection or section or pseudo-collection surfaced in
+     * the UI.
      */
     name: string;
     /**
-     * The newest file in the collection or pseudo-collection (if it is not
-     * empty).
+     * The newest file in the collection or section or pseudo-collection (if it
+     * is not empty).
      */
     latestFile: EnteFile | undefined;
     /**
-     * The file to show as the cover for the collection or pseudo-collection.
+     * The file to show as the cover for the collection or section or
+     * pseudo-collection.
      *
      * This can be one of
      * - A file explicitly chosen by the user.
@@ -77,18 +131,21 @@ export interface CollectionSummary {
     coverFile: EnteFile | undefined;
     /**
      * The number of files in the underlying collection, or the number of files
-     * that belong to this pseudo-collection.
+     * that belong to this section or pseudo-collection.
      */
     fileCount: number;
     /**
-     * The time when the collection was last updated. For pseudo-collections
-     * this will (usually) be the updation time of the latest file that it
-     * contains.
+     * The time (epoch microseconds) when the collection was last updated. For
+     * sections or pseudo-collections this will (usually) be the updation time
+     * of the latest file that it contains.
      */
     updationTime: number | undefined;
     order?: number;
 }
 
+/**
+ * Collection summaries, indexed by their IDs.
+ */
 export type CollectionSummaries = Map<number, CollectionSummary>;
 
 /**
