@@ -12,11 +12,11 @@ import {
     isDefaultHiddenCollection,
     moveToCollection,
 } from "ente-new/photos/services/collection";
-import type { CollectionSummary } from "ente-new/photos/services/collection/ui";
+import type { CollectionSummary } from "ente-new/photos/services/collection-summary";
 import {
     CollectionSummaryOrder,
     CollectionsSortBy,
-} from "ente-new/photos/services/collection/ui";
+} from "ente-new/photos/services/collection-summary";
 import { getLocalCollections } from "ente-new/photos/services/collections";
 import {
     getLocalFiles,

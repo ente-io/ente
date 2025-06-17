@@ -16,7 +16,7 @@ import {
     shouldShowOnCollectionBar,
     type CollectionsSortBy,
     type CollectionSummaries,
-} from "ente-new/photos/services/collection/ui";
+} from "ente-new/photos/services/collection-summary";
 import { getData, removeData } from "ente-shared/storage/localStorage";
 import { includes } from "ente-utils/type-guards";
 import React, { useCallback, useEffect, useMemo, useState } from "react";

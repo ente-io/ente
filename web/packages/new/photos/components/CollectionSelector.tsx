@@ -22,7 +22,7 @@ import {
     CollectionSummaryOrder,
     type CollectionSummaries,
     type CollectionSummary,
-} from "ente-new/photos/services/collection/ui";
+} from "ente-new/photos/services/collection-summary";
 import { t } from "i18next";
 import React, { useEffect, useState } from "react";
 

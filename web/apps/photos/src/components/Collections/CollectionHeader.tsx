@@ -48,7 +48,7 @@ import {
 import type {
     CollectionSummary,
     CollectionSummaryType,
-} from "ente-new/photos/services/collection/ui";
+} from "ente-new/photos/services/collection-summary";
 import {
     clearLocalTrash,
     emptyTrash,

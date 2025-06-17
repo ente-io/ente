@@ -83,7 +83,7 @@ import {
     DUMMY_UNCATEGORIZED_COLLECTION,
     TRASH_SECTION,
 } from "ente-new/photos/services/collection";
-import type { CollectionSummaries } from "ente-new/photos/services/collection/ui";
+import type { CollectionSummaries } from "ente-new/photos/services/collection-summary";
 import exportService from "ente-new/photos/services/export";
 import { isMLSupported } from "ente-new/photos/services/ml";
 import {

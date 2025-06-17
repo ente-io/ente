@@ -76,7 +76,7 @@ import {
     createUncategorizedCollection,
     DUMMY_UNCATEGORIZED_COLLECTION,
 } from "ente-new/photos/services/collection";
-import { areOnlySystemCollections } from "ente-new/photos/services/collection/ui";
+import { areOnlySystemCollections } from "ente-new/photos/services/collection-summary";
 import { getAllLocalCollections } from "ente-new/photos/services/collections";
 import exportService from "ente-new/photos/services/export";
 import {

@@ -28,7 +28,7 @@ import {
 import type {
     CollectionSummary,
     CollectionSummaryType,
-} from "../../services/collection/ui";
+} from "../../services/collection-summary";
 import {
     createFileCollectionIDs,
     getLatestVersionFiles,
