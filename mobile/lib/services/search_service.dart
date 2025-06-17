@@ -86,10 +86,6 @@ class SearchService {
     });
   }
 
-  Set<int> ignoreCollections() {
-    return CollectionsService.instance.getHiddenCollectionIds();
-  }
-
   Future<List<EnteFile>> getAllFilesForSearch() async {
     if (_cachedFilesFuture != null && _cachedFilesForSearch != null) {
       return _cachedFilesForSearch!;
@@ -220,7 +216,7 @@ class SearchService {
     for (var yearData in YearsData.instance.yearsData) {
       if (yearData.year.startsWith(yearFromQuery)) {
         final List<EnteFile> filesInYear =
-            await _getFilesInYear(yearData.duration);
+            await _getFilesWithDuration([yearData.duration]);
         if (filesInYear.isNotEmpty) {
           searchResults.add(
             GenericSearchResult(
@@ -282,7 +278,7 @@ class SearchService {
   Future<GenericSearchResult?> getRadomYearSearchResult() async {
     for (var yearData in YearsData.instance.yearsData..shuffle()) {
       final List<EnteFile> filesInYear =
-          await _getFilesInYear(yearData.duration);
+          await _getFilesWithDuration([yearData.duration]);
       if (filesInYear.isNotEmpty) {
         return GenericSearchResult(
           ResultType.year,
@@ -308,11 +304,8 @@ class SearchService {
   ) async {
     final List<GenericSearchResult> searchResults = [];
     for (var month in _getMatchingMonths(context, query)) {
-      final matchedFiles =
-          await remoteCache.getFilesCreatedWithinDurations(
+      final matchedFiles = await _getFilesWithDuration(
         _getDurationsOfMonthInEveryYear(month.monthNumber),
-        ignoreCollections(),
-        order: 'DESC',
       );
       if (matchedFiles.isNotEmpty) {
         searchResults.add(
@@ -339,11 +332,8 @@ class SearchService {
   ) async {
     final months = getMonthData(context)..shuffle();
     for (MonthData month in months) {
-      final matchedFiles =
-          await remoteCache.getFilesCreatedWithinDurations(
+      final matchedFiles = await _getFilesWithDuration(
         _getDurationsOfMonthInEveryYear(month.monthNumber),
-        ignoreCollections(),
-        order: 'DESC',
       );
       if (matchedFiles.isNotEmpty) {
         return GenericSearchResult(
@@ -375,11 +365,8 @@ class SearchService {
 
     for (var holiday in holidays) {
       if (holiday.name.toLowerCase().contains(query.toLowerCase())) {
-        final matchedFiles =
-            await remoteCache.getFilesCreatedWithinDurations(
+        final matchedFiles = await _getFilesWithDuration(
           _getDurationsForCalendarDateInEveryYear(holiday.day, holiday.month),
-          ignoreCollections(),
-          order: 'DESC',
         );
         if (matchedFiles.isNotEmpty) {
           searchResults.add(
@@ -407,11 +394,8 @@ class SearchService {
   ) async {
     final holidays = getHolidays(context)..shuffle();
     for (var holiday in holidays) {
-      final matchedFiles =
-          await remoteCache.getFilesCreatedWithinDurations(
+      final matchedFiles = await _getFilesWithDuration(
         _getDurationsForCalendarDateInEveryYear(holiday.day, holiday.month),
-        ignoreCollections(),
-        order: 'DESC',
       );
       if (matchedFiles.isNotEmpty) {
         return GenericSearchResult(
@@ -1163,11 +1147,8 @@ class SearchService {
       final int day = potentialDate.item1;
       final int month = potentialDate.item2.monthNumber;
       final int? year = potentialDate.item3; // nullable
-      final matchedFiles =
-          await remoteCache.getFilesCreatedWithinDurations(
+      final matchedFiles = await _getFilesWithDuration(
         _getDurationsForCalendarDateInEveryYear(day, month, year: year),
-        ignoreCollections(),
-        order: 'DESC',
       );
       if (matchedFiles.isNotEmpty) {
         final name = '$day ${potentialDate.item2.name} ${year ?? ''}';
@@ -1347,10 +1328,8 @@ class SearchService {
       endOfDay.microsecondsSinceEpoch,
     ];
 
-    final matchedFiles = await remoteCache.getFilesCreatedWithinDurations(
+    final matchedFiles = await _getFilesWithDuration(
       [durationOfDay],
-      ignoreCollections(),
-      order: 'DESC',
     );
 
     final name = DateFormat.yMMMd(Localizations.localeOf(context).languageCode)
@@ -1563,10 +1542,12 @@ class SearchService {
         .toList();
   }
 
-  Future<List<EnteFile>> _getFilesInYear(List<int> durationOfYear) async {
+  Future<List<EnteFile>> _getFilesWithDuration(
+    List<List<int>> durations,
+  ) async {
     return await remoteCache.getFilesCreatedWithinDurations(
-      [durationOfYear],
-      ignoreCollections(),
+      durations,
+      CollectionsService.instance.getHiddenCollectionIds(),
       order: "DESC",
     );
   }
