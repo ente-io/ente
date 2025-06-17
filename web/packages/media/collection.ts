@@ -1,5 +1,4 @@
 import { decryptBoxBytes } from "ente-base/crypto";
-import { type MagicMetadataCore } from "ente-media/file";
 import {
     nullishToEmpty,
     nullishToFalse,
@@ -23,11 +22,8 @@ import {
  *
  * A collection can be owned by the user (in whose context this code is
  * running), or might be a collection that is shared with them.
- *
- * TODO: This type supercedes {@link Collection}. Once migration is done, rename
- * this to drop the "2" suffix.
  */
-export interface Collection2 {
+export interface Collection {
     /**
      * The collection's globally unique ID.
      *
@@ -431,22 +427,6 @@ export const RemoteCollection = z.looseObject({
 
 export type RemoteCollection = z.infer<typeof RemoteCollection>;
 
-export interface Collection {
-    id: number;
-    owner: CollectionUser;
-    type: CollectionType;
-    sharees: CollectionUser[];
-    publicURLs?: PublicURL[];
-    updationTime: number;
-    key: string;
-    name: string;
-    magicMetadata: MagicMetadataCore<CollectionPrivateMagicMetadataData>;
-    pubMagicMetadata: MagicMetadataCore<CollectionPublicMagicMetadataData>;
-    sharedMagicMetadata: MagicMetadataCore<CollectionShareeMagicMetadataData>;
-    // TODO(C2): Gradual conversion to new structure.
-    c2?: Collection2;
-}
-
 /**
  * Decrypt a remote collection using the provided {@link collectionKey}.
  *
@@ -456,8 +436,6 @@ export interface Collection {
  * encrypted fields in {@link collection}.
  *
  * @returns A decrypted collection.
- *
- * TODO(C2): For legacy compat, it returns the older structure.
  */
 export const decryptRemoteCollection = async (
     collection: RemoteCollection,
@@ -495,7 +473,7 @@ export const decryptRemoteCollection = async (
             ),
         );
 
-    let magicMetadata: Collection2["magicMetadata"];
+    let magicMetadata: Collection["magicMetadata"];
     if (encryptedMagicMetadata) {
         const genericMM = await decryptMagicMetadata(
             encryptedMagicMetadata,
@@ -505,7 +483,7 @@ export const decryptRemoteCollection = async (
         magicMetadata = { ...genericMM, data };
     }
 
-    let pubMagicMetadata: Collection2["pubMagicMetadata"];
+    let pubMagicMetadata: Collection["pubMagicMetadata"];
     if (encryptedPubMagicMetadata) {
         const genericMM = await decryptMagicMetadata(
             encryptedPubMagicMetadata,
@@ -515,7 +493,7 @@ export const decryptRemoteCollection = async (
         pubMagicMetadata = { ...genericMM, data };
     }
 
-    let sharedMagicMetadata: Collection2["sharedMagicMetadata"];
+    let sharedMagicMetadata: Collection["sharedMagicMetadata"];
     if (encryptedSharedMagicMetadata) {
         const genericMM = await decryptMagicMetadata(
             encryptedSharedMagicMetadata,
@@ -525,8 +503,7 @@ export const decryptRemoteCollection = async (
         sharedMagicMetadata = { ...genericMM, data };
     }
 
-    // return {
-    const c2 = {
+    return {
         ...rest,
         key: collectionKey,
         owner: parseRemoteCollectionUser(owner),
@@ -535,36 +512,6 @@ export const decryptRemoteCollection = async (
         magicMetadata,
         pubMagicMetadata,
         sharedMagicMetadata,
-    };
-
-    // Temporary scaffolding for the migration.
-    return {
-        ...collection,
-        // See: [Note: strict mode migration]
-        c2: c2 as Collection2,
-        key: collectionKey,
-        name,
-        type: collection.type as CollectionType,
-        // Some temporary scaffolding to impersonate types.
-        //
-        // See: [Note: strict mode migration]
-        sharees: sharees as CollectionUser[],
-        publicURLs: collection.publicURLs as PublicURL[],
-        magicMetadata: (magicMetadata
-            ? { ...magicMetadata, header: collection.magicMetadata!.header }
-            : undefined)!,
-        pubMagicMetadata: (pubMagicMetadata
-            ? {
-                  ...pubMagicMetadata,
-                  header: collection.pubMagicMetadata!.header,
-              }
-            : undefined)!,
-        sharedMagicMetadata: (sharedMagicMetadata
-            ? {
-                  ...sharedMagicMetadata,
-                  header: collection.sharedMagicMetadata!.header,
-              }
-            : undefined)!,
     };
 };
 

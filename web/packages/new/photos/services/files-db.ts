@@ -24,23 +24,20 @@ import {
     CollectionPrivateMagicMetadataData,
     CollectionPublicMagicMetadataData,
     CollectionShareeMagicMetadataData,
-    ignore,
     RemoteCollectionUser,
     RemotePublicURL,
-    type Collection2,
+    type Collection,
 } from "ente-media/collection";
-import { RemoteMagicMetadata } from "ente-media/magic-metadata";
 import localForage from "ente-shared/storage/localForage";
-import { nullishToEmpty } from "ente-utils/transform";
+import { nullishToEmpty, nullToUndefined } from "ente-utils/transform";
 import { z } from "zod/v4";
 
 /**
  * Zod schema for a {@link Collection} saved in our local persistence.
  *
- * This is similar to {@link RemoteCollection}, but has significant differences
- * too in that it contains the decrypted fields, and some minor refinements.
+ * This is similar to {@link RemoteCollection}, but has both significant
+ * differences in that it contains the decrypted fields, and some minor tweaks.
  */
-// TODO(C2): Use me
 const LocalCollection = z.looseObject({
     id: z.number(),
     owner: RemoteCollectionUser,
@@ -50,30 +47,30 @@ const LocalCollection = z.looseObject({
     sharees: z.array(RemoteCollectionUser).nullish().transform(nullishToEmpty),
     publicURLs: z.array(RemotePublicURL).nullish().transform(nullishToEmpty),
     updationTime: z.number(),
-    magicMetadata: RemoteMagicMetadata.nullish().transform((mm) => {
-        if (!mm) return undefined;
-        // Old code used to save the header, however it's unnecessary so we drop
-        // it on the next read. New code will not save it, so eventually this
-        // special case can be removed. Note added Jun 2025 (tag: Migration).
-        const { header, ...rest } = mm;
-        ignore(header);
-        const data = CollectionPrivateMagicMetadataData.parse(rest.data);
-        return { ...rest, data };
-    }),
-    pubMagicMetadata: RemoteMagicMetadata.nullish().transform((mm) => {
-        if (!mm) return undefined;
-        const { header, ...rest } = mm;
-        ignore(header);
-        const data = CollectionPublicMagicMetadataData.parse(rest.data);
-        return { ...rest, data };
-    }),
-    sharedMagicMetadata: RemoteMagicMetadata.nullish().transform((mm) => {
-        if (!mm) return undefined;
-        const { header, ...rest } = mm;
-        ignore(header);
-        const data = CollectionShareeMagicMetadataData.parse(rest.data);
-        return { ...rest, data };
-    }),
+    magicMetadata: z
+        .object({
+            version: z.number(),
+            count: z.number(),
+            data: CollectionPrivateMagicMetadataData,
+        })
+        .nullish()
+        .transform(nullToUndefined),
+    pubMagicMetadata: z
+        .object({
+            version: z.number(),
+            count: z.number(),
+            data: CollectionPublicMagicMetadataData,
+        })
+        .nullish()
+        .transform(nullToUndefined),
+    sharedMagicMetadata: z
+        .object({
+            version: z.number(),
+            count: z.number(),
+            data: CollectionShareeMagicMetadataData,
+        })
+        .nullish()
+        .transform(nullToUndefined),
 });
 
 const LocalCollections = z.array(LocalCollection);
@@ -85,7 +82,7 @@ const LocalCollections = z.array(LocalCollection);
  *
  * Use {@link saveCollections} to update the database.
  */
-export const savedCollections = async (): Promise<Collection2[]> =>
+export const savedCollections = async (): Promise<Collection[]> =>
     LocalCollections.parse(await localForage.getItem("collections"));
 
 /**
@@ -95,5 +92,5 @@ export const savedCollections = async (): Promise<Collection2[]> =>
  * collections (the split between normal and hidden is not at the database level
  * but is a filter when they are accessed).
  */
-export const saveCollections = (collections: Collection2[]) =>
+export const saveCollections = (collections: Collection[]) =>
     localForage.setItem("collections", collections);

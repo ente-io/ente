@@ -15,7 +15,6 @@ import {
     RemoteCollection,
     RemotePublicURL,
     type Collection,
-    type Collection2,
     type CollectionNewParticipantRole,
     type CollectionOrder,
     type CollectionPrivateMagicMetadataData,
@@ -58,8 +57,6 @@ export const ALL_SECTION = 0;
  * See also: [Note: Multiple "default" hidden collections].
  */
 export const isDefaultHiddenCollection = (collection: Collection) =>
-    // TODO: Need to audit the types
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     collection.magicMetadata?.data.subType == CollectionSubType.defaultHidden;
 
 /**
@@ -85,8 +82,6 @@ export const isIncomingShare = (collection: Collection, user: User) =>
     collection.owner.id !== user.id;
 
 export const isHiddenCollection = (collection: Collection) =>
-    // TODO: Need to audit the types
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     collection.magicMetadata?.data.visibility === ItemVisibility.hidden;
 
 export const DEFAULT_HIDDEN_COLLECTION_USER_FACING_NAME = "Hidden";
@@ -151,26 +146,6 @@ export const createCollection2 = async (
  */
 const decryptRemoteKeyAndCollection = async (collection: RemoteCollection) =>
     decryptRemoteCollection(collection, await decryptCollectionKey(collection));
-
-// TODO(C2): Temporary method to convert to the newer type.
-export const collection1To2 = async (c1: Collection): Promise<Collection2> => {
-    const collection = RemoteCollection.parse({
-        ...c1,
-        magicMetadata: undefined,
-        pubMagicMetadata: undefined,
-        sharedMagicMetadata: undefined,
-    });
-    const c2 = await decryptRemoteCollection(
-        collection,
-        await decryptCollectionKey(collection),
-    );
-    return {
-        ...c2,
-        magicMetadata: c1.magicMetadata,
-        pubMagicMetadata: c1.pubMagicMetadata,
-        sharedMagicMetadata: c1.sharedMagicMetadata,
-    };
-};
 
 /**
  * Return the decrypted collection key (as a base64 string) for the given
@@ -505,8 +480,8 @@ export const deleteFromTrash = async (fileIDs: number[]) => {
  *
  * @param newName The new name of the collection
  */
-export const renameCollection2 = async (
-    collection: Collection2,
+export const renameCollection = async (
+    collection: Collection,
     newName: string,
 ) => {
     if (collection.magicMetadata?.data.subType == CollectionSubType.quicklink) {
@@ -552,7 +527,7 @@ const postCollectionsRename = async (renameRequest: RenameRequest) =>
  * @param visibility The new visibility (normal, archived, hidden).
  */
 export const updateCollectionVisibility = async (
-    collection: Collection2,
+    collection: Collection,
     visibility: ItemVisibility,
 ) =>
     collection.owner.id == ensureLocalUser().id
@@ -571,7 +546,7 @@ export const updateCollectionVisibility = async (
  * @param order Whether on not the collection is pinned.
  */
 export const updateCollectionOrder = async (
-    collection: Collection2,
+    collection: Collection,
     order: CollectionOrder,
 ) => updateCollectionPrivateMagicMetadata(collection, { order });
 
@@ -588,7 +563,7 @@ export const updateCollectionOrder = async (
  * Otherwise they are sorted descending (newest first).
  */
 export const updateCollectionSortOrder = async (
-    collection: Collection2,
+    collection: Collection,
     asc: boolean,
 ) => updateCollectionPublicMagicMetadata(collection, { asc });
 
@@ -610,7 +585,7 @@ export const updateCollectionSortOrder = async (
  * See: [Note: Magic metadata data cannot have nullish values]
  */
 export const updateCollectionPrivateMagicMetadata = async (
-    { id, key, magicMetadata }: Collection2,
+    { id, key, magicMetadata }: Collection,
     updates: CollectionPrivateMagicMetadataData,
 ) =>
     putCollectionsMagicMetadata({
@@ -668,7 +643,7 @@ const putCollectionsMagicMetadata = async (
  * with the {@link pubMagicMetadata} of a collection.
  */
 const updateCollectionPublicMagicMetadata = async (
-    { id, key, pubMagicMetadata }: Collection2,
+    { id, key, pubMagicMetadata }: Collection,
     updates: CollectionPublicMagicMetadataData,
 ) =>
     putCollectionsPublicMagicMetadata({
@@ -705,7 +680,7 @@ const putCollectionsPublicMagicMetadata = async (
  * with the {@link sharedMagicMetadata} of a collection.
  */
 const updateCollectionShareeMagicMetadata = async (
-    { id, key, sharedMagicMetadata }: Collection2,
+    { id, key, sharedMagicMetadata }: Collection,
     updates: CollectionShareeMagicMetadataData,
 ) =>
     putCollectionsShareeMagicMetadata({

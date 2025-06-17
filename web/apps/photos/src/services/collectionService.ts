@@ -12,11 +12,9 @@ import { EnteFile } from "ente-media/file";
 import { ItemVisibility } from "ente-media/file-metadata";
 import {
     addToCollection,
-    collection1To2,
     createCollection2,
     isDefaultHiddenCollection,
     moveToCollection,
-    renameCollection2,
 } from "ente-new/photos/services/collection";
 import type { CollectionSummary } from "ente-new/photos/services/collection/ui";
 import {
@@ -251,11 +249,6 @@ export const deleteCollection = async (
         throw e;
     }
 };
-
-export const renameCollection = async (
-    collection: Collection,
-    newCollectionName: string,
-) => renameCollection2(await collection1To2(collection), newCollectionName);
 
 /**
  * Return the user's own favorites collection, if any.
