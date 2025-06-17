@@ -5,15 +5,16 @@ import log from "ente-base/log";
 import { type Collection, CollectionSubType } from "ente-media/collection";
 import { EnteFile } from "ente-media/file";
 import {
-    DEFAULT_HIDDEN_COLLECTION_USER_FACING_NAME,
-    HIDDEN_ITEMS_SECTION,
     addToCollection,
+    createAlbum,
+    defaultHiddenCollectionUserFacingName,
     findDefaultHiddenCollectionIDs,
     isHiddenCollection,
     isIncomingShare,
     moveToCollection,
     restoreToCollection,
 } from "ente-new/photos/services/collection";
+import { PseudoCollectionID } from "ente-new/photos/services/collection-summary";
 import {
     getAllLocalCollections,
     getLocalCollections,
@@ -25,7 +26,6 @@ import {
 import { safeDirectoryName } from "ente-new/photos/utils/native-fs";
 import { getData } from "ente-shared/storage/localStorage";
 import {
-    createAlbum,
     removeFromCollection,
     unhideToCollection,
 } from "services/collectionService";
@@ -112,13 +112,13 @@ export async function downloadDefaultHiddenCollectionHelper(
         );
         const setFilesDownloadProgressAttributes =
             setFilesDownloadProgressAttributesCreator(
-                DEFAULT_HIDDEN_COLLECTION_USER_FACING_NAME,
-                HIDDEN_ITEMS_SECTION,
+                defaultHiddenCollectionUserFacingName,
+                PseudoCollectionID.hiddenItems,
                 true,
             );
 
         await downloadCollectionFiles(
-            DEFAULT_HIDDEN_COLLECTION_USER_FACING_NAME,
+            defaultHiddenCollectionUserFacingName,
             defaultHiddenCollectionFiles,
             setFilesDownloadProgressAttributes,
         );

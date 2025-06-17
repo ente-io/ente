@@ -64,7 +64,7 @@ import {
     type CreatePublicURLAttributes,
     type UpdatePublicURLAttributes,
 } from "ente-new/photos/services/collection";
-import type { CollectionSummary } from "ente-new/photos/services/collection/ui";
+import type { CollectionSummary } from "ente-new/photos/services/collection-summary";
 import { usePhotosAppContext } from "ente-new/photos/types/context";
 import { CustomError, parseSharingErrorCodes } from "ente-shared/error";
 import { wait } from "ente-utils/promise";
