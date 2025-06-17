@@ -207,14 +207,16 @@ class VideoPreviewService {
           .firstWhereOrNull((e) => e["type"] == "video");
 
       final codec = videoData["codec_name"]?.toString().toLowerCase();
-      final codecIsH264 = codec?.contains("h264") ?? false;
+      final isH264 = codec?.contains("h264") ?? false;
 
       final bitrate = props?.duration?.inSeconds != null
           ? (fileSize * 8) / props!.duration!.inSeconds
           : null;
 
-      final colorSpace = videoData["color_space"]?.toString().toLowerCase();
-      final isColorGood = colorSpace == "bt709";
+      final colorTransfer =
+          videoData["color_transfer"]?.toString().toLowerCase();
+      final isHDR = colorTransfer != null &&
+          (colorTransfer == "smpte2084" || colorTransfer == "arib-std-b67");
 
       // create temp file & directory for preview generation
       final String tempDir = Configuration.instance.getTempDirectory();
@@ -237,53 +239,39 @@ class VideoPreviewService {
 
       FFmpegSession? session;
 
-      // case 1, if it's already a good stream
-      if (bitrate != null && bitrate <= 4000 * 1000 && codecIsH264) {
-        session = await FFmpegKit.execute(
-          '-i "${file.path}" '
-          '-c:v copy -c:a copy '
-          '-f hls -hls_time 2 -hls_flags single_file '
-          '-hls_list_size 0 -hls_key_info_file ${keyinfo.path} '
-          '$prefix/output.m3u8',
-        );
-      } // case 2, if it's bitrate is good, but codec is not
-      else if (bitrate != null &&
-          codec != null &&
-          bitrate <= 2000 * 1000 &&
-          !codecIsH264) {
-        session = await FFmpegKit.execute(
-          '-i "${file.path}" '
-          '-vf "format=yuv420p10le,zscale=transfer=linear,tonemap=tonemap=hable:desat=0:peak=10,zscale=transfer=bt709:matrix=bt709:primaries=bt709,format=yuv420p" '
-          '-color_primaries bt709 -color_trc bt709 -colorspace bt709 '
-          '-c:v libx264 -crf 23 -preset medium '
-          '-c:a aac -b:a 128k '
-          '-f hls -hls_time 2 -hls_flags single_file '
-          '-hls_list_size 0 -hls_key_info_file ${keyinfo.path} '
-          '$prefix/output.m3u8',
-        );
-      } // case 3, if it's color space is good
-      else if (colorSpace != null && isColorGood) {
-        session = await FFmpegKit.execute(
-          '-i "${file.path}" '
-          '-vf "scale=-2:720,fps=30" '
-          '-c:v libx264 -b:v 2000k -crf 23 -preset medium '
-          '-c:a aac -b:a 128k -f hls -hls_time 2 -hls_flags single_file '
-          '-hls_list_size 0 -hls_key_info_file ${keyinfo.path} '
-          '$prefix/output.m3u8',
-        );
-      } // case 4, make it compatible
-      else {
-        session = await FFmpegKit.execute(
-          '-i "${file.path}" '
-          '-vf "scale=-2:720,fps=30,format=yuv420p10le,zscale=transfer=linear,tonemap=tonemap=hable:desat=0:peak=10,zscale=transfer=bt709:matrix=bt709:primaries=bt709,format=yuv420p" '
-          '-color_primaries bt709 -color_trc bt709 -colorspace bt709 '
-          '-x264-params "colorprim=bt709:transfer=bt709:colormatrix=bt709" '
-          '-c:v libx264 -b:v 2000k -crf 23 -preset medium '
-          '-c:a aac -b:a 128k -f hls -hls_time 2 -hls_flags single_file '
-          '-hls_list_size 0 -hls_key_info_file ${keyinfo.path} '
-          '$prefix/output.m3u8',
-        );
-      }
+      final reencodeVideo =
+          !(isH264 && bitrate != null && bitrate <= 4000 * 1000);
+      final rescaleVideo = !(bitrate != null && bitrate <= 2000 * 1000);
+      final needsTonemap = !isHDR;
+      final applyFPS = (double.tryParse(props?.fps ?? "") ?? 100) > 30;
+
+      session = await FFmpegKit.execute(
+        '-i "${file.path}" '
+        // scaling, fps, tonemapping
+        "${reencodeVideo ? '-vf "' + [
+              if (rescaleVideo || needsTonemap) ...[
+                // maximum height of 720p while maintaining aspect ratio
+                'scale=-2:\'min(720,ih)\'',
+                // reduce fps to 30 if needed
+                if (applyFPS) 'fps=30',
+              ],
+              if (needsTonemap) ...[
+                // tonemapping for HDR to SDR conversion
+                'zscale=transfer=linear',
+                'tonemap=tonemap=hable:desat=0',
+                'zscale=primaries=709:transfer=709:matrix=709',
+              ],
+            ].join(',') + '" ' : ''}"
+        // video encoding
+        '${reencodeVideo ? '-c:v libx264 -crf 23 -preset medium ' : '-c:v copy '}'
+        // audio encoding
+        '-c:a aac -b:a 128k '
+        // hls options
+        '-f hls -hls_flags single_file '
+        '-hls_list_size 0 -hls_key_info_file ${keyinfo.path} '
+        // output file
+        '$prefix/output.m3u8',
+      );
 
       final returnCode = await session.getReturnCode();
 
