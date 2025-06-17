@@ -199,7 +199,7 @@ extension CollectionFileActions on CollectionActions {
         : null;
     await dialog?.show();
     try {
-      final List<EnteFile> files = [];
+      final List<EnteFile> uploadedFiles = [];
       final List<EnteFile> filesPendingUpload = [];
       final int currentUserID = Configuration.instance.getUserID()!;
       if (sharedFiles != null) {
@@ -237,7 +237,7 @@ extension CollectionFileActions on CollectionActions {
             currentFile.collectionID = collectionID;
             filesPendingUpload.add(currentFile);
           } else {
-            files.add(currentFile);
+            uploadedFiles.add(currentFile);
           }
         }
       }
@@ -261,7 +261,7 @@ extension CollectionFileActions on CollectionActions {
               unuploadedFile,
               uncat.id,
             );
-            files.add(uploadedFile);
+            uploadedFiles.add(uploadedFile);
           }
         } else {
           for (final file in filesPendingUpload) {
@@ -281,9 +281,9 @@ extension CollectionFileActions on CollectionActions {
           );
         }
       }
-      if (files.isNotEmpty) {
+      if (uploadedFiles.isNotEmpty) {
         await CollectionsService.instance
-            .addOrCopyToCollection(collectionID, files);
+            .addOrCopyToCollection(collectionID, uploadedFiles);
       }
       unawaited(RemoteSyncService.instance.sync(silently: true));
       await dialog?.hide();
