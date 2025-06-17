@@ -912,7 +912,7 @@
       }
     }
   },
-  "filesBackedUpFromDevice": "{count, plural, one {{formattedNumber} failas šiame įrenginyje saugiai sukurta atsarginė kopija}  other {{formattedNumber} failų šiame įrenginyje saugiai sukurta atsarginių kopijų}}.",
+  "filesBackedUpFromDevice": "{count, plural, one {{formattedNumber} failas šiame įrenginyje saugiai sukurta atsarginė kopija} other {{formattedNumber} failų šiame įrenginyje saugiai sukurta atsarginių kopijų}}.",
   "@filesBackedUpFromDevice": {
     "description": "Text to tell user how many files have been backed up from this device",
     "placeholders": {
@@ -1401,7 +1401,7 @@
   "enableMachineLearningBanner": "Įjunkite mašininį mokymąsi magiškai paieškai ir veidų atpažinimui",
   "searchDiscoverEmptySection": "Vaizdai bus rodomi čia, kai bus užbaigtas apdorojimas ir sinchronizavimas.",
   "searchPersonsEmptySection": "Asmenys bus rodomi čia, kai bus užbaigtas apdorojimas ir sinchronizavimas.",
-  "viewersSuccessfullyAdded": "{count, plural, =1 {Įtrauktas 1 žiūrėtojas} other {Įtraukta {count} žiūrėtojų}}",
+  "viewersSuccessfullyAdded": "{count, plural, =0 {Įtraukta 0 žiūrėtojų} =1 {Įtrauktas 1 žiūrėtojas} other {Įtraukta {count} žiūrėtojų}}",
   "@viewersSuccessfullyAdded": {
     "placeholders": {
       "count": {

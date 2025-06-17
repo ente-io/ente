@@ -29,6 +29,7 @@ import "package:photos/models/preview/playlist_data.dart";
 import "package:photos/models/preview/preview_item.dart";
 import "package:photos/models/preview/preview_item_status.dart";
 import "package:photos/service_locator.dart";
+import "package:photos/services/collections_service.dart";
 import "package:photos/services/filedata/model/file_data.dart";
 import "package:photos/ui/notification/toast.dart";
 import "package:photos/utils/exif_util.dart";
@@ -40,26 +41,28 @@ import "package:shared_preferences/shared_preferences.dart";
 
 const _maxRetryCount = 3;
 
-class PreviewVideoStore {
+class VideoPreviewService {
+  final _logger = Logger("VideoPreviewService");
   final LinkedHashMap<int, PreviewItem> _items = LinkedHashMap();
   LinkedHashMap<int, EnteFile> fileQueue = LinkedHashMap();
-  final int _minPreviewSizeForCache = 50 * 1024 * 1024; // 50 MB
+  final int _maxPreviewSizeLimitForCache = 50 * 1024 * 1024; // 50 MB
   Set<int>? _failureFiles;
 
   bool _hasQueuedFile = false;
 
-  PreviewVideoStore._privateConstructor();
+  VideoPreviewService._privateConstructor();
 
-  static final PreviewVideoStore instance =
-      PreviewVideoStore._privateConstructor();
+  static final VideoPreviewService instance =
+      VideoPreviewService._privateConstructor();
 
-  final _logger = Logger("PreviewVideoStore");
   final cacheManager = DefaultCacheManager();
   final videoCacheManager = VideoCacheManager.instance;
 
   int uploadingFileId = -1;
 
-  final _dio = NetworkClient.instance.enteDio;
+  final _enteDio = NetworkClient.instance.enteDio;
+  final _nonEnteDio = NetworkClient.instance.getDio();
+  final CollectionsService collectionsService = CollectionsService.instance;
 
   void init(SharedPreferences prefs) {
     _prefs = prefs;
@@ -463,7 +466,7 @@ class PreviewVideoStore {
         },
         encryptionKey,
       );
-      final _ = await _dio.put(
+      final _ = await _enteDio.put(
         "/files/video-data",
         data: {
           "fileID": file.uploadedFileID!,
@@ -482,7 +485,7 @@ class PreviewVideoStore {
   Future<(String, int)> _uploadPreviewVideo(EnteFile file, File preview) async {
     _logger.info("Pushing preview for $file");
     try {
-      final response = await _dio.get(
+      final response = await _enteDio.get(
         "/files/data/preview-upload-url",
         queryParameters: {
           "fileID": file.uploadedFileID!,
@@ -492,7 +495,7 @@ class PreviewVideoStore {
       final uploadURL = response.data["url"];
       final String objectID = response.data["objectID"];
       final objectSize = preview.lengthSync();
-      final _ = await _dio.put(
+      final _ = await _enteDio.put(
         uploadURL,
         data: preview.openRead(),
         options: Options(
@@ -557,21 +560,7 @@ class PreviewVideoStore {
           size = details["size"];
         }
       } else {
-        final response = await _dio.get(
-          "/files/data/fetch/",
-          queryParameters: {
-            "fileID": file.uploadedFileID,
-            "type": "vid_preview",
-          },
-        );
-        final encryptedData = response.data["data"]["encryptedData"];
-        final header = response.data["data"]["decryptionHeader"];
-        final encryptionKey = getFileKey(file);
-        final playlistData = await decryptAndUnzipJson(
-          encryptionKey,
-          encryptedData: encryptedData,
-          header: header,
-        );
+        final Map<String, dynamic> playlistData = await _getPlaylistData(file);
         finalPlaylist = playlistData["playlist"];
         width = playlistData["width"];
         height = playlistData["height"];
@@ -602,7 +591,7 @@ class PreviewVideoStore {
           ?.file;
       if (videoFile == null) {
         previewURLResult = previewURLResult ?? await _getPreviewUrl(file);
-        if (size != null && size < _minPreviewSizeForCache) {
+        if (size != null && size < _maxPreviewSizeLimitForCache) {
           unawaited(
             videoCacheManager.downloadFile(
               previewURLResult.$1,
@@ -646,6 +635,40 @@ class PreviewVideoStore {
     }
   }
 
+  Future<Map<String, dynamic>> _getPlaylistData(EnteFile file) async {
+    late Response<dynamic> response;
+    if (collectionsService.isSharedPublicLink(file.collectionID!)) {
+      response = await _nonEnteDio.get(
+        "${Configuration.instance.getHttpEndpoint()}/public-collection/files/data/fetch/",
+        queryParameters: {
+          "fileID": file.uploadedFileID,
+          "type": "vid_preview",
+        },
+        options: Options(
+          headers:
+              collectionsService.publicCollectionHeaders(file.collectionID!),
+        ),
+      );
+    } else {
+      response = await _enteDio.get(
+        "/files/data/fetch/",
+        queryParameters: {
+          "fileID": file.uploadedFileID,
+          "type": "vid_preview",
+        },
+      );
+    }
+    final encryptedData = response.data["data"]["encryptedData"];
+    final header = response.data["data"]["decryptionHeader"];
+    final encryptionKey = getFileKey(file);
+    final playlistData = await decryptAndUnzipJson(
+      encryptionKey,
+      encryptedData: encryptedData,
+      header: header,
+    );
+    return playlistData;
+  }
+
   int? parseDurationFromHLS(String playlist) {
     final lines = playlist.split("\n");
     double totalDuration = 0.0;
@@ -667,16 +690,32 @@ class PreviewVideoStore {
 
   Future<(String, String)> _getPreviewUrl(EnteFile file) async {
     try {
-      final response = await _dio.get(
-        "/files/data/preview",
-        queryParameters: {
-          "fileID": file.uploadedFileID,
-          "type":
-              file.fileType == FileType.video ? "vid_preview" : "img_preview",
-        },
-      );
-
-      final url = (response.data["url"] as String);
+      late String url;
+      if (collectionsService.isSharedPublicLink(file.collectionID!)) {
+        final response = await _nonEnteDio.get(
+          "${Configuration.instance.getHttpEndpoint()}/public-collection/files/data/preview",
+          queryParameters: {
+            "fileID": file.uploadedFileID,
+            "type":
+                file.fileType == FileType.video ? "vid_preview" : "img_preview",
+          },
+          options: Options(
+            headers:
+                collectionsService.publicCollectionHeaders(file.collectionID!),
+          ),
+        );
+        url = (response.data["url"] as String);
+      } else {
+        final response = await _enteDio.get(
+          "/files/data/preview",
+          queryParameters: {
+            "fileID": file.uploadedFileID,
+            "type":
+                file.fileType == FileType.video ? "vid_preview" : "img_preview",
+          },
+        );
+        url = (response.data["url"] as String);
+      }
       final uri = Uri.parse(url);
       final segments = uri.pathSegments;
       if (segments.isEmpty) throw Exception("Invalid URL");

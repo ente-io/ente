@@ -188,13 +188,14 @@ export const sortFiles = (files: EnteFile[], sortAsc = false) => {
 };
 
 /**
- * [Note: Collection File]
+ * [Note: Collection file]
  *
  * File IDs themselves are unique across all the files for the user (in fact,
- * they're unique across all the files in an Ente instance). However, we still
- * can have multiple entries for the same file ID in our local database because
- * the unit of account is not actually a file, but a "Collection File": a
- * collection and file pair.
+ * they're unique across all the files in an Ente instance).
+ *
+ * However, we can have multiple entries for the same file ID in our local
+ * database and/or remote responses because the unit of account is not file, but
+ * a "Collection File" – a collection and file pair.
  *
  * For example, if the same file is symlinked into two collections, then we will
  * have two "Collection File" entries for it, both with the same file ID, but

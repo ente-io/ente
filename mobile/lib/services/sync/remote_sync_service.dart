@@ -30,10 +30,10 @@ import 'package:photos/services/ignored_files_service.dart';
 import "package:photos/services/language_service.dart";
 import 'package:photos/services/local_file_update_service.dart';
 import "package:photos/services/notification_service.dart";
-import "package:photos/services/preview_video_store.dart";
 import "package:photos/services/remote/fetch/collection_files.dart";
 import "package:photos/services/remote/fetch/diff.dart";
 import 'package:photos/services/sync/sync_service.dart';
+import "package:photos/services/video_preview_service.dart";
 import 'package:photos/utils/file_uploader.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -135,7 +135,7 @@ class RemoteSyncService {
 
       fileDataService.syncFDStatus().then((_) {
         if (!flagService.hasGrantedMLConsent) {
-          PreviewVideoStore.instance
+          VideoPreviewService.instance
               .queueFiles(); // if ML is enabled the MLService will queue when ML is done
         }
       }).ignore();

@@ -4,6 +4,7 @@ import 'dart:io';
 import "package:flutter/foundation.dart";
 import 'package:logging/logging.dart';
 import 'package:photo_manager/photo_manager.dart';
+import "package:photos/core/cache/lru_map.dart";
 import 'package:photos/core/event_bus.dart';
 import "package:photos/events/local_photos_updated_event.dart";
 import "package:photos/events/permission_granted_event.dart";
@@ -19,6 +20,11 @@ import "package:photos/services/local/metadata/metadata.service.dart";
 import "package:photos/utils/standalone/debouncer.dart";
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:synchronized/synchronized.dart';
+
+// This map is used to track if a iOS origin file is being fetched for uploading
+// or ML processing. In such cases, we want to ignore these files if they come in response
+// from the local sync service. When a file is download
+final LRUMap<String, bool> trackOriginFetchForUploadOrML = LRUMap(200);
 
 class LocalImportService {
   final _log = Logger("LocalSyncService");

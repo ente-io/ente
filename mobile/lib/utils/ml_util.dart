@@ -1,9 +1,8 @@
-import "dart:io" show File;
+import "dart:io" show File, Platform;
 import "dart:math" as math show sqrt, min, max;
 
 import "package:flutter/services.dart" show PlatformException;
 import "package:logging/logging.dart";
-import "package:photos/db/files_db.dart";
 import "package:photos/db/ml/db.dart";
 import "package:photos/db/ml/filedata.dart";
 import "package:photos/db/ml/offlinedb.dart";
@@ -18,6 +17,7 @@ import "package:photos/models/ml/face/face.dart";
 import "package:photos/models/ml/ml_versions.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/filedata/model/file_data.dart";
+import "package:photos/services/local/local_import.dart";
 import "package:photos/services/machine_learning/face_ml/face_recognition_service.dart";
 import "package:photos/services/machine_learning/ml_exceptions.dart";
 import "package:photos/services/machine_learning/ml_result.dart";
@@ -240,7 +240,8 @@ Stream<List<FileMLInstruction>> fetchEmbeddingsAndInstructions(
   for (final chunk in chunks) {
     if (!localSettings.remoteFetchEnabled || offlineMode) {
       _logger.warning(
-          "remote ml fetch skipped, either disabled false or offline mode $offlineMode");
+        "remote ml fetch skipped, either disabled false or offline mode $offlineMode",
+      );
       final batches = chunk.chunks(yieldSize);
       for (final batch in batches) {
         yield batch;
@@ -398,6 +399,9 @@ Future<String> getImagePathForML(EnteFile enteFile) async {
       );
     }
     try {
+      if (Platform.isIOS && enteFile.localID != null) {
+        trackOriginFetchForUploadOrML.put(enteFile.localID!, true);
+      }
       file = await getFile(enteFile, isOrigin: true);
     } catch (e, s) {
       _logger.severe(

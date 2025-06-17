@@ -24,6 +24,7 @@ import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
 import "package:photos/models/location/location.dart";
 import "package:photos/models/metadata/file_magic.dart";
+import "package:photos/services/local/local_import.dart";
 import "package:photos/utils/exif_util.dart";
 import 'package:photos/utils/file_util.dart';
 import "package:uuid/uuid.dart";
@@ -109,6 +110,9 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(
     throw InvalidFileError("", InvalidReason.assetDeleted);
   }
   _assertFileType(asset, file);
+  if (Platform.isIOS) {
+    trackOriginFetchForUploadOrML.put(file.localID!, true);
+  }
   sourceFile = await asset.originFile
       .timeout(const Duration(seconds: 15))
       .catchError((e) async {

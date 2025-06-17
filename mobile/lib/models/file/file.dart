@@ -329,7 +329,7 @@ class EnteFile {
   }
 
   bool get isUploaded {
-    return uploadedFileID != null;
+    return remoteAsset != null;
   }
 
   bool get isSharedMediaToAppSandbox {
