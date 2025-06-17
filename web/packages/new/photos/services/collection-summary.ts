@@ -16,11 +16,23 @@ export type CollectionSummaryType =
     | "pinned";
 
 /**
- * A massaged version of a real or pseudo- {@link Collection} suitable for being
+ * A massaged version of a collection or a pseudo "section" suitable for being
  * directly shown in the UI.
  *
- * TODO: Rename me to CollectionOrSection? FileGroup? FileListing?
- * Known sections:
+ * From one perspective, this can be thought of as a "CollectionOrSection":
+ * i.e., a group of files listed together in the UI, with the files coming from
+ * a real "collection" or some special "section". In the first case, the
+ * underlying listing will be backed by a {@link Collection}, while in the
+ * second case the files and other attributes comprising the listing will be
+ * determined by the special case-specific rules for that particular section.
+ *
+ * Even when this is backed by a corresponding {@link Collection}, it adds some
+ * extra attributes that make it easier and more efficient for the UI elements
+ * to render this collection summary directly. From that perspective, this can
+ * be thought of as a "UICollection".
+ *
+ * TODO: Rename me to CollectionOrSection? FileGroup? FileListing? Known
+ * sections:
  * - DUMMY_UNCATEGORIZED_COLLECTION
  * - ALL_SECTION
  * - TRASH_SECTION
