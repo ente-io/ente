@@ -18,7 +18,6 @@ import React, { useReducer } from "react";
 import {
     ALL_SECTION,
     ARCHIVE_SECTION,
-    DUMMY_UNCATEGORIZED_COLLECTION,
     findDefaultHiddenCollectionIDs,
     HIDDEN_ITEMS_SECTION,
     isDefaultHiddenCollection,
@@ -1281,9 +1280,10 @@ const deriveNormalCollectionSummaries = (
         ({ type }) => type == "uncategorized",
     );
     if (!uncategorizedCollection) {
-        normalCollectionSummaries.set(DUMMY_UNCATEGORIZED_COLLECTION, {
+        const id = PseudoCollectionID.uncategorizedPlaceholder;
+        normalCollectionSummaries.set(id, {
             ...pseudoCollectionOptionsForFiles([]),
-            id: DUMMY_UNCATEGORIZED_COLLECTION,
+            id,
             type: "uncategorized",
             attributes: ["uncategorized"],
             name: t("section_uncategorized"),
