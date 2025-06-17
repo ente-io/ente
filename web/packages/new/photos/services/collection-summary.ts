@@ -43,6 +43,8 @@ export const CollectionSummaryID = {
     /**
      * A placeholder for the uncategorized collection used till it is empty.
      *
+     * [Note: Uncategorized placeholder]
+     *
      * The user's sole "uncategorized" collection is created on demand the first
      * time we need to move a file out of the last collection it belonged to
      * (yet retain the file).

@@ -25,9 +25,10 @@ import {
     isIncomingShare,
     TRASH_SECTION,
 } from "../../services/collection";
-import type {
-    CollectionSummary,
-    CollectionSummaryType,
+import {
+    CollectionSummaryID,
+    type CollectionSummary,
+    type CollectionSummaryType,
 } from "../../services/collection-summary";
 import {
     createFileCollectionIDs,
@@ -251,6 +252,17 @@ export interface GalleryState {
      * collections.
      */
     hiddenCollectionSummaries: Map<number, CollectionSummary>;
+    /**
+     * The ID of the collection summary that should be shown when the user
+     * navigates to the uncategorized section.
+     *
+     * This will be either the ID of the user's uncategorized collection, if one
+     * has already been created, otherwise it will be the predefined
+     * {@link CollectionSummaryID.uncategorizedPlaceholder}.
+     *
+     * See: [Note: Uncategorized placeholder]
+     */
+    uncategorizedCollectionSummaryID: number;
 
     /*--<  In-flight updates  >--*/
 
@@ -473,6 +485,8 @@ const initialGalleryState: GalleryState = {
     fileNormalCollectionIDs: new Map(),
     normalCollectionSummaries: new Map(),
     hiddenCollectionSummaries: new Map(),
+    uncategorizedCollectionSummaryID:
+        CollectionSummaryID.uncategorizedPlaceholder,
     tempDeletedFileIDs: new Set(),
     tempHiddenFileIDs: new Set(),
     pendingFavoriteUpdates: new Set(),
@@ -565,6 +579,8 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                     hiddenCollections,
                     hiddenFiles,
                 ),
+                uncategorizedCollectionSummaryID:
+                    deriveUncategorizedCollectionSummaryID(normalCollections),
                 view,
             });
         }
@@ -627,6 +643,8 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 collectionNameByID: createCollectionNameByID(collections),
                 normalCollectionSummaries,
                 hiddenCollectionSummaries,
+                uncategorizedCollectionSummaryID:
+                    deriveUncategorizedCollectionSummaryID(normalCollections),
                 selectedCollectionSummaryID,
                 pendingSearchSuggestions:
                     enqueuePendingSearchSuggestionsIfNeeded(
@@ -681,6 +699,8 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                     normalCollections.concat(state.hiddenCollections),
                 ),
                 normalCollectionSummaries,
+                uncategorizedCollectionSummaryID:
+                    deriveUncategorizedCollectionSummaryID(normalCollections),
                 selectedCollectionSummaryID,
                 pendingSearchSuggestions:
                     enqueuePendingSearchSuggestionsIfNeeded(
@@ -1339,6 +1359,16 @@ const deriveHiddenCollectionSummaries = (
 
     return hiddenCollectionSummaries;
 };
+
+/**
+ * Return the ID of the collection summary that should be shown when the user
+ * navigates to the uncategorized section.
+ */
+const deriveUncategorizedCollectionSummaryID = (
+    normalCollections: Collection[],
+) =>
+    normalCollections.find(({ type }) => type == "uncategorized")?.id ??
+    CollectionSummaryID.uncategorizedPlaceholder;
 
 const createCollectionSummaries = (
     user: User,
