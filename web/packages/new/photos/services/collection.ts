@@ -51,17 +51,6 @@ export const defaultHiddenCollectionUserFacingName = "Hidden";
 const favoritesCollectionName = "Favorites";
 
 /**
- * Return the "user facing" name of the given collection.
- *
- * Usually this is the same as the collection name, but it might be a different
- * string for special collections like default hidden collections.
- */
-export const collectionUserFacingName = (collection: Collection) =>
-    isDefaultHiddenCollection(collection)
-        ? defaultHiddenCollectionUserFacingName
-        : collection.name;
-
-/**
  * Create a new album (a collection of type "album") on remote, and return its
  * local representation.
  *
@@ -261,6 +250,17 @@ export const getCollectionChanges = async (
  */
 export const createCollectionNameByID = (collections: Collection[]) =>
     new Map(collections.map((c) => [c.id, collectionUserFacingName(c)]));
+
+/**
+ * Return the "user facing" name of the given collection.
+ *
+ * Usually this is the same as the collection name, but it might be a different
+ * string for special collections like default hidden collections.
+ */
+export const collectionUserFacingName = (collection: Collection) =>
+    isDefaultHiddenCollection(collection)
+        ? defaultHiddenCollectionUserFacingName
+        : collection.name;
 
 /**
  * A CollectionFileItem represents a file in a API request to add, move or
@@ -747,14 +747,14 @@ export const findDefaultHiddenCollectionIDs = (collections: Collection[]) =>
             .map((collection) => collection.id),
     );
 
+export const isHiddenCollection = (collection: Collection) =>
+    collection.magicMetadata?.data.visibility === ItemVisibility.hidden;
+
 /**
  * Return true if this is a collection that the user doesn't own.
  */
 export const isIncomingShare = (collection: Collection, user: User) =>
     collection.owner.id !== user.id;
-
-export const isHiddenCollection = (collection: Collection) =>
-    collection.magicMetadata?.data.visibility === ItemVisibility.hidden;
 
 /**
  * Share the provided collection with another Ente user.
