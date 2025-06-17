@@ -245,7 +245,7 @@ class PersonService {
     personData.logStats();
   }
 
-  Future<void> removeFilesFromPerson({
+  Future<void> removeFacesFromPerson({
     required PersonEntity person,
     required Set<String> faceIDs,
   }) async {

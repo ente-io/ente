@@ -11,6 +11,7 @@ import "package:photos/db/ml/db.dart";
 import "package:photos/events/people_changed_event.dart";
 import "package:photos/extensions/stop_watch.dart";
 import "package:photos/generated/protos/ente/common/vector.pb.dart";
+import "package:photos/models/base/id.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/ml/face/person.dart";
 import "package:photos/services/machine_learning/face_ml/face_clustering/face_clustering_service.dart";
@@ -187,13 +188,43 @@ class ClusterFeedbackService<T> {
 
       // Update remote so new sync does not undo this change
       await PersonService.instance
-          .removeFilesFromPerson(person: p, faceIDs: faceIDs.toSet());
+          .removeFacesFromPerson(person: p, faceIDs: faceIDs.toSet());
 
       Bus.instance.fire(PeopleChangedEvent());
       _logger.info('removeFilesFromPerson done');
       return;
     } catch (e, s) {
       _logger.severe("Error in removeFilesFromPerson", e, s);
+      rethrow;
+    }
+  }
+
+  // TODO: lau:fileinfo
+  Future<void> removeFaceFromPerson(
+    String faceID,
+    PersonEntity p,
+  ) async {
+    _logger.info('removeFaceFromPerson called');
+    try {
+      final newCluster = newClusterID();
+      final newFaceIdToClusterID = {faceID: newCluster};
+      await mlDataDB.forceUpdateClusterIds(newFaceIdToClusterID);
+
+      // Make sure the deleted faces don't get suggested in the future
+      final notClusterIdToPersonId = {newCluster: p.remoteID};
+      await mlDataDB.bulkCaptureNotPersonFeedback(notClusterIdToPersonId);
+
+      // Update remote so new sync does not undo this change
+      await PersonService.instance
+          .removeFacesFromPerson(person: p, faceIDs: {faceID});
+
+      Bus.instance.fire(
+        PeopleChangedEvent(type: PeopleEventType.removedFaceFromCluster),
+      );
+      _logger.info('removeFaceFromPerson done');
+      return;
+    } catch (e, s) {
+      _logger.severe("Error in removeFaceFromPerson", e, s);
       rethrow;
     }
   }
@@ -252,6 +283,31 @@ class ClusterFeedbackService<T> {
       return;
     } catch (e, s) {
       _logger.severe("Error in removeFilesFromCluster", e, s);
+      rethrow;
+    }
+  }
+
+  // TODO: lau:fileinfo
+  Future<String> removeFaceFromCluster(
+    String faceID,
+    String clusterID,
+  ) async {
+    _logger.info('removeFaceFromCluster called');
+    try {
+      final newCluster = newClusterID();
+      final newFaceIdToClusterID = {faceID: newCluster};
+      await mlDataDB.forceUpdateClusterIds(newFaceIdToClusterID);
+
+      Bus.instance.fire(
+        PeopleChangedEvent(
+          type: PeopleEventType.removedFaceFromCluster,
+          source: clusterID,
+        ),
+      );
+      _logger.info('removeFaceFromCluster done');
+      return newCluster;
+    } catch (e, s) {
+      _logger.severe("Error in removeFaceFromCluster", e, s);
       rethrow;
     }
   }

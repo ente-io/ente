@@ -22,6 +22,7 @@ class PeopleChangedEvent extends Event {
 enum PeopleEventType {
   defaultType,
   removedFilesFromCluster,
+  removedFaceFromCluster,
   syncDone,
   saveOrEditPerson,
 }
