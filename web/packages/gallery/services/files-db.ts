@@ -41,6 +41,7 @@ import {
     CollectionPrivateMagicMetadataData,
     CollectionPublicMagicMetadataData,
     CollectionShareeMagicMetadataData,
+    ignore,
     RemoteCollectionUser,
     RemotePublicURL,
 } from "ente-media/collection";
@@ -93,22 +94,28 @@ const LocalCollection = z
             })
             .nullish()
             .transform(nullToUndefined),
+    })
+    .transform((c) => {
         // Old data stored locally contained fields which are no longer needed.
         // Do some zod gymnastics to drop these when reading (so that they're
         // not written back the next time). This code was added June 2025,
         // 1.7.14-beta, and can be removed after a bit (tag: Migration).
-        encryptedKey: z.unknown(),
-        keyDecryptionNonce: z.unknown(),
-        encryptedName: z.unknown(),
-        nameDecryptionNonce: z.unknown(),
-        attributes: z.unknown(),
-    })
-    .omit({
-        encryptedKey: true,
-        keyDecryptionNonce: true,
-        encryptedName: true,
-        nameDecryptionNonce: true,
-        attributes: true,
+        const {
+            encryptedKey,
+            keyDecryptionNonce,
+            encryptedName,
+            nameDecryptionNonce,
+            attributes,
+            ...rest
+        } = c;
+        ignore([
+            encryptedKey,
+            keyDecryptionNonce,
+            encryptedName,
+            nameDecryptionNonce,
+            attributes,
+        ]);
+        return rest;
     });
 
 export const LocalCollections = z.array(LocalCollection);
