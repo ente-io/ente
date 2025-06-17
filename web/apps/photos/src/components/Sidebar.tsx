@@ -78,12 +78,11 @@ import {
     useSettingsSnapshot,
     useUserDetailsSnapshot,
 } from "ente-new/photos/components/utils/use-snapshot";
+import { DUMMY_UNCATEGORIZED_COLLECTION } from "ente-new/photos/services/collection";
 import {
-    ARCHIVE_SECTION,
-    DUMMY_UNCATEGORIZED_COLLECTION,
-    TRASH_SECTION,
-} from "ente-new/photos/services/collection";
-import type { CollectionSummaries } from "ente-new/photos/services/collection-summary";
+    CollectionSummaryID,
+    type CollectionSummaries,
+} from "ente-new/photos/services/collection-summary";
 import exportService from "ente-new/photos/services/export";
 import { isMLSupported } from "ente-new/photos/services/ml";
 import {
@@ -440,8 +439,8 @@ const ShortcutSection: React.FC<ShortcutSectionProps> = ({
     collectionSummaries,
 }) => {
     const galleryContext = useContext(GalleryContext);
-    const [uncategorizedCollectionId, setUncategorizedCollectionID] =
-        useState<number>();
+    const [uncategorizedCollectionID, setUncategorizedCollectionID] =
+        useState<number>(CollectionSummaryID.uncategorizedPlaceholder);
 
     useEffect(() => {
         void getUncategorizedCollection().then((uncat) =>
@@ -452,17 +451,17 @@ const ShortcutSection: React.FC<ShortcutSectionProps> = ({
     }, []);
 
     const openUncategorizedSection = () => {
-        galleryContext.setActiveCollectionID(uncategorizedCollectionId);
+        galleryContext.setActiveCollectionID(uncategorizedCollectionID);
         onCloseSidebar();
     };
 
     const openTrashSection = () => {
-        galleryContext.setActiveCollectionID(TRASH_SECTION);
+        galleryContext.setActiveCollectionID(CollectionSummaryID.trash);
         onCloseSidebar();
     };
 
     const openArchiveSection = () => {
-        galleryContext.setActiveCollectionID(ARCHIVE_SECTION);
+        galleryContext.setActiveCollectionID(CollectionSummaryID.archiveItems);
         onCloseSidebar();
     };
 
@@ -478,7 +477,7 @@ const ShortcutSection: React.FC<ShortcutSectionProps> = ({
                 startIcon={<CategoryIcon />}
                 label={t("section_uncategorized")}
                 caption={collectionSummaries
-                    .get(uncategorizedCollectionId)
+                    .get(uncategorizedCollectionID)
                     ?.fileCount.toString()}
                 onClick={openUncategorizedSection}
             />
@@ -486,7 +485,7 @@ const ShortcutSection: React.FC<ShortcutSectionProps> = ({
                 startIcon={<ArchiveOutlinedIcon />}
                 label={t("section_archive")}
                 caption={collectionSummaries
-                    .get(ARCHIVE_SECTION)
+                    .get(CollectionSummaryID.archiveItems)
                     ?.fileCount.toString()}
                 onClick={openArchiveSection}
             />
@@ -507,7 +506,7 @@ const ShortcutSection: React.FC<ShortcutSectionProps> = ({
                 startIcon={<DeleteOutlineIcon />}
                 label={t("section_trash")}
                 caption={collectionSummaries
-                    .get(TRASH_SECTION)
+                    .get(CollectionSummaryID.trash)
                     ?.fileCount.toString()}
                 onClick={openTrashSection}
             />

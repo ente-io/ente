@@ -32,7 +32,7 @@ export const CollectionSummaryID = {
      *
      * It shows the files that the user has individually archived.
      */
-    archive: -1,
+    archiveItems: -1,
     /**
      * Trash
      *
@@ -51,18 +51,18 @@ export const CollectionSummaryID = {
      * dummy placeholder collection as the {@link CollectionSummary} that gets
      * shown if the user navigates to the "Uncategorized" section in the UI.
      */
-    placeholderUncategorizedCollection: -3,
+    uncategorizedPlaceholder: -3,
     /**
      * The default collection shown in the "Hidden" section.
      *
      * It shows the files that the user has individually hidden; effectively, it
-     * works as a consolidated combination of all of the user's "default hidden"
+     * works as a merged combination of all of the user's "default hidden"
      * albums (See: Note: Multiple "default" hidden collections]).
      *
-     * In addition to this "Hidden items" collection, the "Hidden" section also
-     * shows albums that were hidden.
+     * In addition to this "Hidden items" pseudo-collection, the "Hidden"
+     * section also shows other albums that were hidden.
      */
-    mergedDefaultHiddenCollection: -4,
+    hiddenItems: -4,
 } as const;
 
 export const ARCHIVE_SECTION = -1;
