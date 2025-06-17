@@ -142,6 +142,11 @@ type SidebarProps = ModalVisibilityProps & {
      */
     onShowPlanSelector: () => void;
     /**
+     * Called when the collection summary with the given
+     * {@link collectionSummaryID} should be shown.
+     */
+    onShowCollectionSummary: (collectionSummaryID: number) => void;
+    /**
      * Called when the export dialog should be shown.
      */
     onShowExport: () => void;
@@ -160,6 +165,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     collectionSummaries,
     uncategorizedCollectionSummaryID,
     onShowPlanSelector,
+    onShowCollectionSummary,
     onShowExport,
     onAuthenticateUser,
 }) => (
@@ -169,7 +175,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <Stack sx={{ gap: 0.5, mb: 3 }}>
             <ShortcutSection
                 onCloseSidebar={onClose}
-                {...{ collectionSummaries, uncategorizedCollectionSummaryID }}
+                {...{
+                    collectionSummaries,
+                    uncategorizedCollectionSummaryID,
+                    onShowCollectionSummary,
+                }}
             />
             <UtilitySection
                 onCloseSidebar={onClose}
@@ -437,28 +447,31 @@ const ManageMemberSubscription: React.FC<ManageMemberSubscriptionProps> = ({
 type ShortcutSectionProps = SectionProps &
     Pick<
         SidebarProps,
-        "collectionSummaries" | "uncategorizedCollectionSummaryID"
+        | "collectionSummaries"
+        | "uncategorizedCollectionSummaryID"
+        | "onShowCollectionSummary"
     >;
 
 const ShortcutSection: React.FC<ShortcutSectionProps> = ({
     onCloseSidebar,
     collectionSummaries,
     uncategorizedCollectionSummaryID,
+    onShowCollectionSummary,
 }) => {
     const galleryContext = useContext(GalleryContext);
 
     const openUncategorizedSection = () => {
-        galleryContext.setActiveCollectionID(uncategorizedCollectionSummaryID);
+        onShowCollectionSummary(uncategorizedCollectionSummaryID);
         onCloseSidebar();
     };
 
     const openTrashSection = () => {
-        galleryContext.setActiveCollectionID(PseudoCollectionID.trash);
+        onShowCollectionSummary(PseudoCollectionID.trash);
         onCloseSidebar();
     };
 
     const openArchiveSection = () => {
-        galleryContext.setActiveCollectionID(PseudoCollectionID.archiveItems);
+        onShowCollectionSummary(PseudoCollectionID.archiveItems);
         onCloseSidebar();
     };
 

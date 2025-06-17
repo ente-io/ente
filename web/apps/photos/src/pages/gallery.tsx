@@ -781,7 +781,7 @@ const Page: React.FC = () => {
         setUploadTypeSelectorIntent(intent ?? "upload");
     };
 
-    const handleSetActiveCollectionID = (
+    const handleShowCollectionSummary = (
         collectionSummaryID: number | undefined,
     ) => dispatch({ type: "showCollectionSummary", collectionSummaryID });
 
@@ -889,7 +889,7 @@ const Page: React.FC = () => {
         <GalleryContext.Provider
             value={{
                 ...defaultGalleryContext,
-                setActiveCollectionID: handleSetActiveCollectionID,
+                setActiveCollectionID: handleShowCollectionSummary,
                 syncWithRemote: (force, silent) =>
                     syncWithRemote({ force, silent }),
                 setBlockingLoad,
@@ -1030,7 +1030,7 @@ const Page: React.FC = () => {
                             : undefined) ?? []
                     }
                     onChangeMode={handleChangeBarMode}
-                    setActiveCollectionID={handleSetActiveCollectionID}
+                    setActiveCollectionID={handleShowCollectionSummary}
                     onSelectPerson={handleSelectPerson}
                 />
 
@@ -1071,6 +1071,7 @@ const Page: React.FC = () => {
                         state.uncategorizedCollectionSummaryID
                     }
                     onShowPlanSelector={showPlanSelector}
+                    onShowCollectionSummary={handleShowCollectionSummary}
                     onShowExport={showExport}
                     onAuthenticateUser={authenticateUser}
                 />
