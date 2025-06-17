@@ -20,8 +20,8 @@ import { fileLocation, type Metadata } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
 import { decodeLivePhoto } from "ente-media/live-photo";
 import {
+    collectionUserFacingName,
     createCollectionNameByID,
-    getCollectionUserFacingName,
 } from "ente-new/photos/services/collection";
 import { getAllLocalCollections } from "ente-new/photos/services/collections";
 import { getAllLocalFiles } from "ente-new/photos/services/files";
@@ -504,7 +504,7 @@ class ExportService {
                     );
                     const newCollectionExportName = await safeDirectoryName(
                         exportFolder,
-                        getCollectionUserFacingName(collection),
+                        collectionUserFacingName(collection),
                         fs.exists,
                     );
                     log.info(
@@ -1271,8 +1271,7 @@ const getRenamedExportedCollections = (
                 collection.id,
             );
 
-            const collectionExportName =
-                getCollectionUserFacingName(collection);
+            const collectionExportName = collectionUserFacingName(collection);
 
             if (currentExportName === collectionExportName) {
                 return false;

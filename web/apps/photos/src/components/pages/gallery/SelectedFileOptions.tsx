@@ -17,11 +17,7 @@ import { useBaseContext } from "ente-base/context";
 import type { Collection } from "ente-media/collection";
 import type { CollectionSelectorAttributes } from "ente-new/photos/components/CollectionSelector";
 import type { GalleryBarMode } from "ente-new/photos/components/gallery/reducer";
-import {
-    ALL_SECTION,
-    ARCHIVE_SECTION,
-    TRASH_SECTION,
-} from "ente-new/photos/services/collection";
+import { PseudoCollectionID } from "ente-new/photos/services/collection-summary";
 import { t } from "i18next";
 import { type CollectionOp } from "utils/collection";
 import { type FileOp } from "utils/file";
@@ -252,7 +248,7 @@ const SelectedFileOptions = ({
                         </IconButton>
                     </Tooltip>
                 </>
-            ) : activeCollectionID === TRASH_SECTION ? (
+            ) : activeCollectionID == PseudoCollectionID.trash ? (
                 <>
                     <Tooltip title={t("restore")}>
                         <IconButton onClick={restoreHandler}>
@@ -316,7 +312,8 @@ const SelectedFileOptions = ({
                         </IconButton>
                     </Tooltip>
                     {!isFavoriteCollection &&
-                        activeCollectionID != ARCHIVE_SECTION && (
+                        activeCollectionID !=
+                            PseudoCollectionID.archiveItems && (
                             <Tooltip title={t("favorite")}>
                                 <IconButton onClick={handleFileOp("favorite")}>
                                     <FavoriteBorderIcon />
@@ -333,22 +330,22 @@ const SelectedFileOptions = ({
                             <AddIcon />
                         </IconButton>
                     </Tooltip>
-                    {activeCollectionID === ARCHIVE_SECTION && (
+                    {activeCollectionID == PseudoCollectionID.archiveItems && (
                         <Tooltip title={t("unarchive")}>
                             <IconButton onClick={handleFileOp("unarchive")}>
                                 <UnArchiveIcon />
                             </IconButton>
                         </Tooltip>
                     )}
-                    {activeCollectionID === ALL_SECTION && (
+                    {activeCollectionID === PseudoCollectionID.all && (
                         <Tooltip title={t("archive")}>
                             <IconButton onClick={handleFileOp("archive")}>
                                 <ArchiveIcon />
                             </IconButton>
                         </Tooltip>
                     )}
-                    {activeCollectionID !== ALL_SECTION &&
-                        activeCollectionID !== ARCHIVE_SECTION &&
+                    {activeCollectionID !== PseudoCollectionID.all &&
+                        activeCollectionID != PseudoCollectionID.archiveItems &&
                         !isFavoriteCollection && (
                             <>
                                 <Tooltip title={t("move")}>
