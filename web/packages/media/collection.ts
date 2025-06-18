@@ -458,6 +458,8 @@ export const decryptRemoteCollection = async (
     // RemoteCollection is a looseObject, and we want to retain that semantic
     // for the parsed Collection. Mention all fields that we want to explicitly
     // drop or transform, passthrough the rest unchanged in the return value.
+    //
+    // See: [Note: Use looseObject when parsing JSON that will get persisted].
     const {
         owner,
         encryptedKey,

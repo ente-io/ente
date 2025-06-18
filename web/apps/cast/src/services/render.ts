@@ -1,35 +1,25 @@
-/* TODO: Various lint issues in the decryptEnteFile function */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
-/* eslint-disable @typescript-eslint/no-unnecessary-condition */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-
-import type { AxiosResponse } from "axios";
 import { sharedCryptoWorker } from "ente-base/crypto";
 import { nameAndExtension } from "ente-base/file-name";
 import { ensureOk, publicRequestHeaders } from "ente-base/http";
 import log from "ente-base/log";
 import { apiURL, customAPIOrigin } from "ente-base/origins";
 import {
+    decryptRemoteFile,
+    FileDiffResponse,
     mergeMetadata1,
     RemoteEnteFile,
-    type EncryptedEnteFile,
     type EnteFile,
-    type FileMagicMetadata,
-    type FilePublicMagicMetadata,
+    type EnteFile2,
 } from "ente-media/file";
 import { FileType } from "ente-media/file-type";
 import { isHEICExtension, needsJPEGConversion } from "ente-media/formats";
 import { heicToJPEG } from "ente-media/heic-convert";
 import { decodeLivePhoto } from "ente-media/live-photo";
 import { ApiError } from "ente-shared/error";
-import HTTPService from "ente-shared/network/HTTPService";
 import { shuffled } from "ente-utils/array";
 import { wait } from "ente-utils/promise";
 import type { CastData } from "services/cast-data";
 import { detectMediaMIMEType } from "services/detect-type";
-import { z } from "zod/v4";
 import { isChromecast } from "./chromecast-receiver";
 
 /**
@@ -94,13 +84,19 @@ export const imageURLGenerator = async function* (castData: CastData) {
 
     while (true) {
         const encryptedFiles = shuffled(
-            await getEncryptedCollectionFiles(castToken),
+            await getRemoteCastCollectionFiles(castToken),
         );
 
         let haveEligibleFiles = false;
 
         for (const encryptedFile of encryptedFiles) {
-            const file = await decryptEnteFile(encryptedFile, collectionKey);
+            // TODO(RE):
+            const file = mergeMetadata1(
+                (await decryptRemoteFile(
+                    encryptedFile,
+                    collectionKey,
+                )) as EnteFile,
+            ) as EnteFile2;
 
             if (!isFileEligible(file)) continue;
 
@@ -154,39 +150,6 @@ export const imageURLGenerator = async function* (castData: CastData) {
 };
 
 /**
- * Fetch the list of non-deleted files in the given collection.
- *
- * The returned files are not decrypted yet, so their metadata will not be
- * readable.
- */
-const getEncryptedCollectionFiles = async (
-    castToken: string,
-): Promise<EncryptedEnteFile[]> => {
-    let files: EncryptedEnteFile[] = [];
-    let sinceTime = 0;
-    let resp: AxiosResponse;
-    do {
-        resp = await HTTPService.get(
-            await apiURL("/cast/diff"),
-            { sinceTime },
-            { "X-Cast-Access-Token": castToken },
-        );
-        const diff = resp.data.diff;
-        files = files.concat(diff.filter((file: EnteFile) => !file.isDeleted));
-        sinceTime = diff.reduce(
-            (max: number, file: EnteFile) => Math.max(max, file.updationTime),
-            sinceTime,
-        );
-    } while (resp.data.hasMore);
-    return files;
-};
-
-const CastCollectionFilesResponse = z.object({
-    diff: RemoteEnteFile.array(),
-    hasMore: z.boolean(),
-});
-
-/**
  * Fetch all the {@link RemoteEnteFile}s present in the collection corresponding
  * to the given {@link castToken}.
  *
@@ -198,7 +161,7 @@ const CastCollectionFilesResponse = z.object({
  */
 export const getRemoteCastCollectionFiles = async (
     castToken: string,
-): Promise<RemoteEnteFile> => {
+): Promise<RemoteEnteFile[]> => {
     const files: RemoteEnteFile[] = [];
     let sinceTime = 0;
     while (true) {
@@ -207,85 +170,23 @@ export const getRemoteCastCollectionFiles = async (
             { headers: { "X-Cast-Access-Token": castToken } },
         );
         ensureOk(res);
-        const { diff, hasMore } = CastCollectionFilesResponse.parse(
-            await res.json(),
-        );
+        const { diff, hasMore } = FileDiffResponse.parse(await res.json());
         if (!diff.length) break;
-        if (!hasMore) break;
         for (const change of diff) {
             sinceTime = Math.max(sinceTime, change.updationTime);
             if (!change.isDeleted) {
                 files.push(change);
             }
         }
+        if (!hasMore) break;
     }
     return files;
 };
 
-/**
- * Decrypt the given {@link EncryptedEnteFile}, returning a {@link EnteFile}.
- */
-const decryptEnteFile = async (
-    encryptedFile: EncryptedEnteFile,
-    collectionKey: string,
-): Promise<EnteFile> => {
-    const worker = await sharedCryptoWorker();
-    const {
-        encryptedKey,
-        keyDecryptionNonce,
-        metadata,
-        magicMetadata,
-        pubMagicMetadata,
-        ...restFileProps
-    } = encryptedFile;
-    const fileKey = await worker.decryptBox(
-        { encryptedData: encryptedKey, nonce: keyDecryptionNonce },
-        collectionKey,
-    );
-    const fileMetadata = await worker.decryptMetadataJSON(metadata, fileKey);
-    let fileMagicMetadata: FileMagicMetadata | undefined;
-    let filePubMagicMetadata: FilePublicMagicMetadata | undefined;
-    if (magicMetadata?.data) {
-        fileMagicMetadata = {
-            ...encryptedFile.magicMetadata,
-            // @ts-expect-error TODO: Need to use zod here.
-            data: await worker.decryptMetadataJSON(
-                {
-                    encryptedData: magicMetadata.data,
-                    decryptionHeader: magicMetadata.header,
-                },
-                fileKey,
-            ),
-        };
-    }
-    if (pubMagicMetadata?.data) {
-        filePubMagicMetadata = {
-            ...pubMagicMetadata,
-            // @ts-expect-error TODO: Need to use zod here.
-            data: await worker.decryptMetadataJSON(
-                {
-                    encryptedData: pubMagicMetadata.data,
-                    decryptionHeader: pubMagicMetadata.header,
-                },
-                fileKey,
-            ),
-        };
-    }
-    return mergeMetadata1({
-        ...restFileProps,
-        key: fileKey,
-        // @ts-expect-error The types need to be updated here
-        metadata: fileMetadata,
-        magicMetadata: fileMagicMetadata,
-        pubMagicMetadata: filePubMagicMetadata,
-    });
-};
-
-const isFileEligible = (file: EnteFile) => {
+const isFileEligible = (file: EnteFile2) => {
     if (!isImageOrLivePhoto(file)) return false;
-    // @ts-expect-error TODO: The core types need to be updated to allow the
-    // possibility of missing info fields (or do they?)
-    if (file.info.fileSize > 100 * 1024 * 1024) return false;
+
+    if ((file.info?.fileSize ?? 0) > 100 * 1024 * 1024) return false;
 
     // This check is fast but potentially incorrect because in practice we do
     // encounter files that are incorrectly named and have a misleading
@@ -300,7 +201,7 @@ const isFileEligible = (file: EnteFile) => {
     return true;
 };
 
-const isImageOrLivePhoto = (file: EnteFile) => {
+const isImageOrLivePhoto = (file: EnteFile2) => {
     const fileType = file.metadata.fileType;
     return fileType == FileType.image || fileType == FileType.livePhoto;
 };
@@ -312,12 +213,12 @@ const isImageOrLivePhoto = (file: EnteFile) => {
  * Once we're done showing the file, the URL should be revoked using
  * {@link URL.revokeObjectURL} to free up browser resources.
  */
-const createRenderableURL = async (castToken: string, file: EnteFile) => {
+const createRenderableURL = async (castToken: string, file: EnteFile2) => {
     const imageBlob = await renderableImageBlob(castToken, file);
     return URL.createObjectURL(imageBlob);
 };
 
-const renderableImageBlob = async (castToken: string, file: EnteFile) => {
+const renderableImageBlob = async (castToken: string, file: EnteFile2) => {
     const shouldUseThumbnail = isChromecast();
 
     let blob = await downloadFile(castToken, file, shouldUseThumbnail);
@@ -347,7 +248,7 @@ const renderableImageBlob = async (castToken: string, file: EnteFile) => {
 
 const downloadFile = async (
     castToken: string,
-    file: EnteFile,
+    file: EnteFile2,
     shouldUseThumbnail: boolean,
 ) => {
     if (!isImageOrLivePhoto(file))

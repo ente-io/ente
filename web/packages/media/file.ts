@@ -1,20 +1,177 @@
-import { sharedCryptoWorker } from "ente-base/crypto";
+import {
+    decryptBox,
+    decryptMetadataJSON,
+    sharedCryptoWorker,
+} from "ente-base/crypto";
 import { dateFromEpochMicroseconds } from "ente-base/date";
 import log from "ente-base/log";
 import { nullishToBlank, nullToUndefined } from "ente-utils/transform";
 import { z } from "zod/v4";
+import { ignore } from "./collection";
 import { type Metadata, ItemVisibility } from "./file-metadata";
 import { FileType } from "./file-type";
-import { RemoteMagicMetadata } from "./magic-metadata";
+import { decryptMagicMetadata, RemoteMagicMetadata } from "./magic-metadata";
 
-export interface MagicMetadataCore<T> {
-    version: number;
-    count: number;
-    header: string;
-    data: T;
+/**
+ * A File.
+ *
+ * An EnteFile represents a file in Ente. It does not contain the actual data.
+ *
+ * It is named with an "Ente" prefix to disambiguate it from the web's native
+ * {@link File} type.
+ *
+ * All files have an id (numeric) that is unique across all the files stored by
+ * an Ente instance. Each file is also always associated with a collection, and
+ * has an owner (both of these linkages are stored as the corresponding numeric
+ * IDs within the EnteFile structure).
+ *
+ * > For shared files, the owner of the file is not necessarily the owner of all
+ * > the collections to which the file belongs.
+ *
+ * While the file ID is unique, we'd can still have multiple entries for each
+ * file ID in our local state, one for each {@link Collection} to which the file
+ * belongs. That is, the uniqueness is across the (fileID, collectionID) pairs.
+ * See [Note: Collection file].
+ *
+ * [Note: File lifecycle]
+ *
+ * 1. **Normal**: A file starts off by belonging to at least one collection. It
+ *    can then be added to additional collections, each of which will be an
+ *    EnteFile with a distinct (fileID, collectionID) pair.
+ *
+ * 2. **Trash**: If the user deletes the file, then the file moves to trash.
+ *    Such files will have {@link isDeleted} `true` in their
+ *    {@link RemoteEnteFile} entries when we perform a collection diff to let
+ *    the client know that the corresponding file is no longer part of the
+ *    collection.
+ *
+ *    Such files will now be returned as part of the trash diff, with both
+ *    {@link isDeleted} and {@link isRestored} set to `false` for their trash
+ *    entry.
+ *
+ * 3. **Restore**: If the the user were to restore the file before permanent
+ *    deletion, then it effectively works as moving a normal file to an normal
+ *    collection. In particular, if we were to restore the file back to one of
+ *    the collections it was part of pre-trash, and then fetch the collection
+ *    diff for that collection, we would get back the same file object, except
+ *    with {@link isDeleted} will now be `false`.
+ *
+ *    The trash entry for restored files will have {@link isRestored} set to
+ *    `true` to notify clients that an item that was previously in trash is no
+ *    longer there because it has been restored.
+ *
+ * 4. **Permanent deletion**: If the file remains in trash for 30 days, or if
+ *    the user explictly permanently deletes it from the trash, or if the user
+ *    explicitly clears the trash, then it will get permanently deleted.
+ *
+ *    The trash entry for such permanently deleted files will have
+ *    {@link isDeleted} set to `true` to notify clients that an item that was
+ *    previously in trash is no longer there because it has been permanently
+ *    deleted.
+ *
+ *    When a file is permanently deleted, remote will scrub off data from its
+ *    fields. See: [Note: Optionality of remote file fields].
+ */
+export interface EnteFile2 {
+    /**
+     * The file's globally unique ID.
+     *
+     * The file's ID is a integer assigned by remote as the identifier for an
+     * {@link EnteFile} when it is created. It is globally unique across all
+     * files stored by an Ente instance, and is not scoped to the current user.
+     */
+    id: number;
+    /**
+     * The ID of the collection with which this file as associated.
+     *
+     * The same file (ID) may be associated with multiple collectionID, each of
+     * which will come and stay as distinct {@link EnteFile} instances - all of
+     * which will have the same {@link id} but distinct {@link collectionID}.
+     *
+     * So the ({@link id}, {@link collectionID}) pair is a primary key, not the
+     * {@link id} on its own. See: [Note: Collection file].
+     */
+    collectionID: number;
+    /**
+     * The ID of the Ente user who owns the file.
+     *
+     * Files uploaded by non users on public links belong to the owner of the
+     * collection who created the public link (See {@link uploaderName} in
+     * {@link FilePublicMagicMetadataData}).
+     */
+    ownerID: number;
+    /**
+     * The file's key.
+     *
+     * This is the base64 representation of the decrypted encryption key
+     * associated with this file. When we get the file from remote (as a
+     * {@link RemoteEnteFile}), the file key itself would have been encrypted by
+     * the key of the {@link Collection} to which this file belongs.
+     *
+     * This key is used to encrypt both the file's contents, and any associated
+     * data (e.g., metadatum, thumbnail) for the file.
+     */
+    key: string;
+    /**
+     * Information pertaining to the encrypted S3 object that has the file's
+     * contents.
+     */
+    file: FileObjectAttributes;
+    /**
+     * Information pertaining to the encrypted S3 object that has the contents
+     * of the file's thumbnail.
+     */
+    thumbnail: FileObjectAttributes;
+    /**
+     * Static, remote visible, information associated with a file.
+     *
+     * This is information about storage used by the file and its thumbnail.
+     * Unlike {@link metadata} which is E2EE, the {@link FileInfo} is remote
+     * visible for bookkeeping purposes.
+     *
+     * Files uploaded by very old versions of Ente might not have this field.
+     */
+    info?: FileInfo;
+    /**
+     * The last time the file was updated (epoch microseconds).
+     *
+     * (e.g. magic metadata updates).
+     */
+    updationTime: number;
+    /**
+     * Public static metadata associated with a file.
+     *
+     * This is the immutable metadata that gets associated with a file when it
+     * is uploaded, and there after cannot be changed.
+     *
+     * It is visible to all users with whom the file gets shared.
+     *
+     * > {@link pubMagicMetadata} contains fields that override fields present
+     * > in the metadata. Clients overlay those atop the metadata fields, and
+     * > thus they can be used to implement edits.
+     *
+     * See: [Note: Metadatum].
+     */
+    metadata: Metadata;
+    /**
+     * Private mutable metadata associated with the file that is only visible to
+     * the owner of the file.
+     *
+     * See: [Note: Metadatum]
+     */
+    magicMetadata?: FileMagicMetadata;
+    /**
+     * Public mutable metadata associated with the file that is visible to all
+     * users with whom the file has been shared.
+     *
+     * While in almost all cases, files will have associated public magic
+     * metadata since newer clients have something or the other they need to add
+     * to it, its presence is not guaranteed.
+     *
+     * See: [Note: Metadatum]
+     */
+    pubMagicMetadata?: FilePublicMagicMetadata;
 }
-
-export type EncryptedMagicMetadata = MagicMetadataCore<string>;
 
 export interface EncryptedEnteFile {
     /**
@@ -92,66 +249,6 @@ export interface EncryptedEnteFile {
     updationTime: number;
 }
 
-/**
- * A File.
- *
- * An EnteFile represents a file in Ente. It does not contain the actual data.
- *
- * It is named with an "Ente" prefix to disambiguate it from the web's native
- * {@link File} type.
- *
- * All files have an id (numeric) that is unique across all the files stored by
- * an Ente instance. Each file is also always associated with a collection, and
- * has an owner (both of these linkages are stored as the corresponding numeric
- * IDs within the EnteFile structure).
- *
- * > For shared files, the owner of the file is not necessarily the owner of all
- * > the collections to which the file belongs.
- *
- * While the file ID is unique, we'd can still have multiple entries for each
- * file ID in our local state, one for each {@link Collection} to which the file
- * belongs. That is, the uniqueness is across the (fileID, collectionID) pairs.
- * See [Note: Collection file].
- *
- * [Note: File lifecycle]
- *
- * 1. **Normal**: A file starts off by belonging to at least one collection. It
- *    can then be added to additional collections, each of which will be an
- *    EnteFile with a distinct (fileID, collectionID) pair.
- *
- * 2. **Trash**: If the user deletes the file, then the file moves to trash.
- *    Such files will have {@link isDeleted} `true` in their
- *    {@link RemoteEnteFile} entries when we perform a collection diff to let
- *    the client know that the corresponding file is no longer part of the
- *    collection.
- *
- *    Such files will now be returned as part of the trash diff, with both
- *    {@link isDeleted} and {@link isRestored} set to `false` for their trash
- *    entry.
- *
- * 3. **Restore**: If the the user were to restore the file before permanent
- *    deletion, then it effectively works as moving a normal file to an normal
- *    collection. In particular, if we were to restore the file back to one of
- *    the collections it was part of pre-trash, and then fetch the collection
- *    diff for that collection, we would get back the same file object, except
- *    with {@link isDeleted} will now be `false`.
- *
- *    The trash entry for restored files will have {@link isRestored} set to
- *    `true` to notify clients that an item that was previously in trash is no
- *    longer there because it has been restored.
- *
- * 4. **Permanent deletion**: If the file remains in trash for 30 days, or if
- *    the user explictly permanently deletes it from the trash, or if the user
- *    explicitly clears the trash, then it will get permanently deleted.
- *
- *    The trash entry for such permanently deleted files will have
- *    {@link isDeleted} set to `true` to notify clients that an item that was
- *    previously in trash is no longer there because it has been permanently
- *    deleted.
- *
- *    When a file is permanently deleted, remote will scrub off data from its
- *    fields. See: [Note: Optionality of remote file fields].
- */
 export interface EnteFile
     extends Omit<
         EncryptedEnteFile,
@@ -360,6 +457,28 @@ export const RemoteEnteFile = z.looseObject({
 
 export type RemoteEnteFile = z.infer<typeof RemoteEnteFile>;
 
+/**
+ * Zod schema for a response for various "/diff" APIs that return changes since
+ * a provided timestamp.
+ *
+ * - "/cast/diff"
+ *
+ */
+export const FileDiffResponse = z.object({
+    /**
+     * A batch of changes (upserts or deletions).
+     *
+     * See also: [Note: Diff response will have at most one entry for an id].
+     */
+    diff: RemoteEnteFile.array(),
+    /**
+     * If `true`, then there are more changes that can be fetched by doing
+     * another of the same API call, this time passing it the latest from
+     * amongst the timestamps of entries in {@link diff}.
+     */
+    hasMore: z.boolean(),
+});
+
 export interface FileWithUpdatedMagicMetadata {
     file: EnteFile;
     updatedMagicMetadata: FileMagicMetadata;
@@ -547,6 +666,82 @@ export async function decryptFile(
 }
 
 /**
+ * Decrypt a remote file using the provided {@link collectionKey}.
+ *
+ * @param file The remote file to decrypt.
+ *
+ * @param collectionKey The base64 encoded key of the collection to which this
+ * file belongs. It is needed to decrypt the file's key (which in turn is needed
+ * to decrypt the file's contents and other encrypted fields).
+ *
+ * @returns A decrypted {@link EnteFile}.
+ */
+export const decryptRemoteFile = async (
+    remoteFile: RemoteEnteFile,
+    collectionKey: string,
+): Promise<EnteFile2> => {
+    // RemoteEnteFile is a looseObject, and we want to retain that semantic for
+    // the parsed EnteFile. Mention all fields that we want to explicitly drop
+    // or transform, passthrough the rest unchanged in the return value.
+    //
+    // See: [Note: Use looseObject when parsing JSON that will get persisted].
+    const {
+        encryptedKey,
+        keyDecryptionNonce,
+        isDeleted,
+        metadata: encryptedMetadata,
+        magicMetadata: encryptedMagicMetadata,
+        pubMagicMetadata: encryptedPubMagicMetadata,
+        ...rest
+    } = remoteFile;
+
+    // This flag is relevant only in the diff response, where it indicates that
+    // the file should be removed from the corresponding collection. We would've
+    // already acted on that information, so drop it from our local state.
+    ignore(isDeleted);
+
+    const key = await decryptBox(
+        { encryptedData: encryptedKey, nonce: keyDecryptionNonce },
+        collectionKey,
+    );
+
+    const metadata = await decryptMetadataJSON(encryptedMetadata, key);
+
+    let magicMetadata: EnteFile2["magicMetadata"];
+    if (encryptedMagicMetadata) {
+        const genericMM = await decryptMagicMetadata(
+            encryptedMagicMetadata,
+            key,
+        );
+        // TODO(RE):
+        const data = genericMM.data as FileMagicMetadataProps;
+        // TODO(RE):
+        magicMetadata = { ...genericMM, header: "", data };
+    }
+
+    let pubMagicMetadata: EnteFile2["pubMagicMetadata"];
+    if (encryptedPubMagicMetadata) {
+        const genericMM = await decryptMagicMetadata(
+            encryptedPubMagicMetadata,
+            key,
+        );
+        // TODO(RE):
+        const data = genericMM.data as FilePublicMagicMetadataProps;
+        // TODO(RE):
+        pubMagicMetadata = { ...genericMM, header: "", data };
+    }
+
+    return {
+        ...rest,
+        key,
+        // TODO(RE):n
+        metadata: metadata as Metadata,
+        magicMetadata,
+        pubMagicMetadata,
+    };
+};
+
+/**
  * Update the immutable fields of an (in-memory) {@link EnteFile} with any edits
  * that the user has made to their corresponding mutable metadata fields.
  *
@@ -601,3 +796,12 @@ export const mergeMetadata1 = (file: EnteFile): EnteFile => {
  */
 export const mergeMetadata = (files: EnteFile[]) =>
     files.map((file) => mergeMetadata1(file));
+
+export interface MagicMetadataCore<T> {
+    version: number;
+    count: number;
+    header: string;
+    data: T;
+}
+
+export type EncryptedMagicMetadata = MagicMetadataCore<string>;
