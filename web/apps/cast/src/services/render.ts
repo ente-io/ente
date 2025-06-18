@@ -1,6 +1,6 @@
-import { sharedCryptoWorker } from "ente-base/crypto";
+import { decryptStreamBytes } from "ente-base/crypto";
 import { nameAndExtension } from "ente-base/file-name";
-import { ensureOk, publicRequestHeaders } from "ente-base/http";
+import { ensureOk, isHTTP401Error, publicRequestHeaders } from "ente-base/http";
 import log from "ente-base/log";
 import { apiURL, customAPIOrigin } from "ente-base/origins";
 import {
@@ -15,7 +15,6 @@ import { FileType } from "ente-media/file-type";
 import { isHEICExtension, needsJPEGConversion } from "ente-media/formats";
 import { heicToJPEG } from "ente-media/heic-convert";
 import { decodeLivePhoto } from "ente-media/live-photo";
-import { ApiError } from "ente-shared/error";
 import { shuffled } from "ente-utils/array";
 import { wait } from "ente-utils/promise";
 import type { CastData } from "services/cast-data";
@@ -110,7 +109,7 @@ export const imageURLGenerator = async function* (castData: CastData) {
                 // 1, 2, bang!
                 if (consecutiveFailures == 3) throw e;
 
-                if (e instanceof ApiError && e.httpStatusCode == 401) {
+                if (isHTTP401Error(e)) {
                     // The token has expired. This can happen, e.g., if the user
                     // opens the dialog to cast again, causing the client to
                     // invalidate existing tokens.
@@ -280,13 +279,9 @@ const downloadFile = async (
     };
 
     const res = await getFile();
-    if (!res.ok)
-        throw new Error(
-            `Failed to fetch file with ID ${file.id}: HTTP ${res.status}`,
-        );
+    ensureOk(res);
 
-    const cryptoWorker = await sharedCryptoWorker();
-    const decrypted = await cryptoWorker.decryptStreamBytes(
+    const decrypted = await decryptStreamBytes(
         {
             encryptedData: new Uint8Array(await res.arrayBuffer()),
             decryptionHeader: shouldUseThumbnail
