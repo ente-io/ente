@@ -1756,5 +1756,6 @@
   "receiveRemindersOnBirthdays": "Recevoir des rappels quand c'est l'anniversaire de quelqu'un. Appuyer sur la notification vous amènera à des photos de son anniversaire.",
   "happyBirthday": "Joyeux anniversaire ! 🥳",
   "happyBirthdayToPerson": "Joyeux anniversaire {name}! 🎉",
-  "birthdays": "Anniversaires"
+  "birthdays": "Anniversaires",
+  "wishThemAHappyBirthday": "Wish ${name} a happy birthday! 🎉"
 }

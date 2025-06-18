@@ -1756,5 +1756,6 @@
   "receiveRemindersOnBirthdays": "Obtém lembretes de quando é aniversário de alguém. Apertar na notificação o levará às fotos do aniversariante.",
   "happyBirthday": "Felicidades! 🥳",
   "happyBirthdayToPerson": "Felicidades para {name}! 🎉",
-  "birthdays": "Aniversários"
+  "birthdays": "Aniversários",
+  "wishThemAHappyBirthday": "Wish ${name} a happy birthday! 🎉"
 }
