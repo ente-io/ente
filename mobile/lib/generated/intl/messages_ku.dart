@@ -1,5 +1,5 @@
 // DO NOT EDIT. This is code generated via package:intl/generate_localized.dart
-// This is a library that provides messages for a el locale. All the
+// This is a library that provides messages for a ku locale. All the
 // messages from the main program should be duplicated here with the same
 // function name.
 
@@ -18,14 +18,11 @@ final messages = new MessageLookup();
 typedef String MessageIfAbsent(String messageStr, List<dynamic> args);
 
 class MessageLookup extends MessageLookupByLibrary {
-  String get localeName => 'el';
+  String get localeName => 'ku';
 
   static String m115(name) => "Wish \$${name} a happy birthday! 🎉";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
-  static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
-        "enterYourEmailAddress": MessageLookupByLibrary.simpleMessage(
-            "Εισάγετε την διεύθυνση ηλ. ταχυδρομείου σας"),
-        "wishThemAHappyBirthday": m115
-      };
+  static Map<String, Function> _notInlinedMessages(_) =>
+      <String, Function>{"wishThemAHappyBirthday": m115};
 }
