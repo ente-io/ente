@@ -199,7 +199,6 @@ class ClusterFeedbackService<T> {
     }
   }
 
-  // TODO: lau:fileinfo
   Future<String> removeFaceFromPerson(
     String faceID,
     PersonEntity p,
@@ -287,11 +286,10 @@ class ClusterFeedbackService<T> {
     }
   }
 
-  // TODO: lau:fileinfo
-  Future<String> removeFaceFromCluster(
-    String faceID,
-    String clusterID,
-  ) async {
+  Future<String> removeFaceFromCluster({
+    required String faceID,
+    required String clusterID,
+  }) async {
     _logger.info('removeFaceFromCluster called');
     try {
       final newCluster = newClusterID();
@@ -304,7 +302,7 @@ class ClusterFeedbackService<T> {
           source: clusterID,
         ),
       );
-      _logger.info('removeFaceFromCluster done');
+      _logger.info('removeFaceFromCluster done, with $newFaceIdToClusterID');
       return newCluster;
     } catch (e, s) {
       _logger.severe("Error in removeFaceFromCluster", e, s);

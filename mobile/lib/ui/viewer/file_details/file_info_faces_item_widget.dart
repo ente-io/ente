@@ -1,4 +1,6 @@
-import "package:flutter/foundation.dart" show kDebugMode;
+import "dart:async";
+import "dart:typed_data";
+
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import "package:photos/db/ml/db.dart";
@@ -7,10 +9,11 @@ import "package:photos/models/file/file.dart";
 import "package:photos/models/ml/face/face.dart";
 import "package:photos/models/ml/face/person.dart";
 import "package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart";
-import "package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
+import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/components/buttons/chip_button_widget.dart";
-import "package:photos/ui/components/info_item_widget.dart";
+import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import "package:photos/ui/viewer/file_details/file_info_face_widget.dart";
 import "package:photos/utils/face/face_thumbnail_cache.dart";
 
@@ -25,148 +28,313 @@ class FacesItemWidget extends StatefulWidget {
 }
 
 class _FacesItemWidgetState extends State<FacesItemWidget> {
+  bool _isEditMode = false;
+  bool _showRemainingFaces = false;
+  bool _isLoading = true;
+  List<_FaceInfo> _defaultFaces = [];
+  List<_FaceInfo> _remainingFaces = [];
+
   @override
   void initState() {
     super.initState();
-    setState(() {});
+    loadFaces();
+  }
+
+  Future<void> loadFaces() async {
+    setState(() => _isLoading = true);
+
+    try {
+      final faceData = await _fetchFaceData();
+      setState(() {
+        _defaultFaces = faceData['default'] ?? [];
+        _remainingFaces = faceData['remaining'] ?? [];
+        _isLoading = false;
+      });
+    } catch (e, s) {
+      _logger.severe('Failed to load faces', e, s);
+      setState(() => _isLoading = false);
+    }
+  }
+
+  Future<Map<String, List<_FaceInfo>>> _fetchFaceData() async {
+    if (widget.file.uploadedFileID == null) {
+      return {'default': [], 'remaining': []};
+    }
+
+    final mlDataDB = MLDataDB.instance;
+    final faces =
+        await mlDataDB.getFacesForGivenFileID(widget.file.uploadedFileID!);
+
+    if (faces == null || faces.isEmpty) {
+      return {'default': [], 'remaining': []};
+    }
+
+    // Separate faces by score threshold
+    final defaultFaces = <Face>[];
+    final remainingFaces = <Face>[];
+
+    for (final face in faces) {
+      if (face.score >= kMinimumFaceShowScore) {
+        defaultFaces.add(face);
+      } else {
+        remainingFaces.add(face);
+      }
+    }
+
+    // Get additional data
+    final faceIdsToClusterIds = await mlDataDB.getFaceIdsToClusterIds(
+      faces.map((face) => face.faceID).toList(),
+    );
+    final persons = await PersonService.instance.getPersonsMap();
+    final clusterIDToPerson = await mlDataDB.getClusterIDToPersonID();
+    final faceCrops = await getCachedFaceCrops(widget.file, faces);
+
+    if (faceCrops == null) {
+      return {'default': [], 'remaining': []};
+    }
+
+    return {
+      'default': await _buildFaceInfoList(
+        defaultFaces,
+        faceIdsToClusterIds,
+        persons,
+        clusterIDToPerson,
+        faceCrops,
+      ),
+      'remaining': await _buildFaceInfoList(
+        remainingFaces,
+        faceIdsToClusterIds,
+        persons,
+        clusterIDToPerson,
+        faceCrops,
+      ),
+    };
+  }
+
+  Future<List<_FaceInfo>> _buildFaceInfoList(
+    List<Face> faces,
+    Map<String, String?> faceIdsToClusterIds,
+    Map<String, PersonEntity> persons,
+    Map<String, String> clusterIDToPerson,
+    Map<String, Uint8List> faceCrops,
+  ) async {
+    final faceInfoList = <_FaceInfo>[];
+
+    // Build person mapping for sorting
+    final faceIdToPersonID = <String, String>{};
+    for (final face in faces) {
+      final clusterID = faceIdsToClusterIds[face.faceID];
+      if (clusterID != null) {
+        final personID = clusterIDToPerson[clusterID];
+        if (personID != null) {
+          faceIdToPersonID[face.faceID] = personID;
+        }
+      }
+    }
+
+    // Sort faces: named first, then by score, hidden last
+    faces.sort((a, b) {
+      final aPersonID = faceIdToPersonID[a.faceID];
+      final bPersonID = faceIdToPersonID[b.faceID];
+      final aIsHidden = persons[aPersonID]?.data.isIgnored ?? false;
+      final bIsHidden = persons[bPersonID]?.data.isIgnored ?? false;
+
+      if (aIsHidden != bIsHidden) return aIsHidden ? 1 : -1;
+      if ((aPersonID != null) != (bPersonID != null)) {
+        return aPersonID != null ? -1 : 1;
+      }
+      return b.score.compareTo(a.score);
+    });
+
+    // Create face info objects
+    for (final face in faces) {
+      final faceCrop = faceCrops[face.faceID];
+      if (faceCrop == null) {
+        _logger.severe('Missing face crop for ${face.faceID}');
+        continue;
+      }
+
+      final clusterID = faceIdsToClusterIds[face.faceID];
+      final person = clusterIDToPerson[clusterID] != null
+          ? persons[clusterIDToPerson[clusterID]!]
+          : null;
+
+      faceInfoList.add(
+        _FaceInfo(
+          face: face,
+          faceCrop: faceCrop,
+          clusterID: clusterID,
+          person: person,
+        ),
+      );
+    }
+
+    return faceInfoList;
+  }
+
+  void _toggleEditMode() {
+    setState(() {
+      _isEditMode = !_isEditMode;
+      if (!_isEditMode) _showRemainingFaces = false;
+    });
+  }
+
+  void _toggleRemainingFaces() {
+    setState(() => _showRemainingFaces = !_showRemainingFaces);
   }
 
   @override
   Widget build(BuildContext context) {
-    return InfoItemWidget(
-      key: const ValueKey("Faces"),
-      leadingIcon: Icons.face_retouching_natural_outlined,
-      subtitleSection: _faceWidgets(context, widget.file),
-      hasChipButtons: true,
-      biggerSpinner: true,
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Flexible(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const IconButtonWidget(
+                icon: Icons.face_retouching_natural_outlined,
+                iconButtonType: IconButtonType.secondary,
+              ),
+              Flexible(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(12, 3.5, 16, 3.5),
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          S.of(context).faces,
+                          style: getEnteTextTheme(context).miniMuted,
+                        ),
+                        const SizedBox(height: 8),
+                        _buildContent(),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        IconButtonWidget(
+          icon: _isEditMode ? Icons.check : Icons.edit,
+          iconButtonType: IconButtonType.secondary,
+          onTap: _toggleEditMode,
+        ),
+      ],
     );
   }
 
-  Future<List<Widget>> _faceWidgets(BuildContext context, EnteFile file) async {
-    final mlDataDB = MLDataDB.instance;
-    try {
-      if (file.uploadedFileID == null) {
-        return [const NoFaceChipButtonWidget(NoFacesReason.fileNotUploaded)];
-      }
-
-      final List<Face>? faces =
-          await mlDataDB.getFacesForGivenFileID(file.uploadedFileID!);
-      if (faces == null) {
-        return [const NoFaceChipButtonWidget(NoFacesReason.fileNotAnalyzed)];
-      }
-
-      // Remove faces with low scores
-      if (!kDebugMode) {
-        final beforeLength = faces.length;
-        final lowScores = faces
-            .where((face) => (face.score < kMinimumFaceShowScore))
-            .toList();
-        faces.removeWhere((face) => (face.score < kMinimumFaceShowScore));
-        if (faces.length != beforeLength) {
-          _logger.warning(
-            'File ${file.uploadedFileID} has ${beforeLength - faces.length} faces with low scores ($lowScores) that are not shown in the UI',
-          );
-        }
-      } else {
-        faces.removeWhere((face) => (face.score < 0.5));
-      }
-
-      if (faces.isEmpty) {
-        return [const NoFaceChipButtonWidget(NoFacesReason.noFacesFound)];
-      }
-
-      final faceIdsToClusterIds = await mlDataDB
-          .getFaceIdsToClusterIds(faces.map((face) => face.faceID));
-      final Map<String, PersonEntity> persons =
-          await PersonService.instance.getPersonsMap();
-      final clusterIDToPerson = await mlDataDB.getClusterIDToPersonID();
-
-      // Sort faces by name and score
-      final faceIdToPersonID = <String, String>{};
-      for (final face in faces) {
-        final clusterID = faceIdsToClusterIds[face.faceID];
-        if (clusterID != null) {
-          final personID = clusterIDToPerson[clusterID];
-          if (personID != null) {
-            faceIdToPersonID[face.faceID] = personID;
-          }
-        }
-      }
-      faces.sort((Face a, Face b) {
-        final aPersonID = faceIdToPersonID[a.faceID];
-        final bPersonID = faceIdToPersonID[b.faceID];
-        if (aPersonID != null && bPersonID == null) {
-          return -1;
-        } else if (aPersonID == null && bPersonID != null) {
-          return 1;
-        } else {
-          return b.score.compareTo(a.score);
-        }
-      });
-      // Make sure hidden faces are last
-      faces.sort((Face a, Face b) {
-        final aIsHidden =
-            persons[faceIdToPersonID[a.faceID]]?.data.isIgnored ?? false;
-        final bIsHidden =
-            persons[faceIdToPersonID[b.faceID]]?.data.isIgnored ?? false;
-        if (aIsHidden && !bIsHidden) {
-          return 1;
-        } else if (!aIsHidden && bIsHidden) {
-          return -1;
-        } else {
-          return 0;
-        }
-      });
-
-      final lastViewedClusterID = ClusterFeedbackService.lastViewedClusterID;
-
-      final faceWidgets = <FileInfoFaceWidget>[];
-
-      final faceCrops = await getCachedFaceCrops(file, faces);
-      final List<String> faceIDs = [];
-      final List<double> faceScores = [];
-      for (final Face face in faces) {
-        final faceCrop = faceCrops != null ? faceCrops[face.faceID] : null;
-        if (faceCrop == null) {
-          _logger.severe(
-            'Face crop for face ${face.faceID} in file ${file.uploadedFileID} is null, skipping face widget.',
-          );
-          return [
-            const NoFaceChipButtonWidget(
-              NoFacesReason.faceThumbnailGenerationFailed,
-            ),
-          ];
-        }
-        final String? clusterID = faceIdsToClusterIds[face.faceID];
-        final PersonEntity? person = clusterIDToPerson[clusterID] != null
-            ? persons[clusterIDToPerson[clusterID]!]
-            : null;
-        final highlight =
-            (clusterID == lastViewedClusterID) && (person == null);
-        faceIDs.add(face.faceID);
-        faceScores.add(face.score);
-        faceWidgets.add(
-          FileInfoFaceWidget(
-            file,
-            face,
-            faceCrop: faceCrop,
-            clusterID: clusterID,
-            person: person,
-            highlight: highlight,
-          ),
-        );
-      }
-
-      _logger.info(
-        'File ${file.uploadedFileID} has FaceIDs: $faceIDs with scores: $faceScores',
+  Widget _buildContent() {
+    if (_isLoading) {
+      return const EnteLoadingWidget(
+        padding: 6,
+        size: 20,
+        alignment: Alignment.centerLeft,
       );
-
-      return faceWidgets;
-    } catch (e, s) {
-      _logger.severe('failed to get face widgets in file info', e, s);
-      return <FileInfoFaceWidget>[];
     }
+
+    if (_defaultFaces.isEmpty && _remainingFaces.isEmpty) {
+      return _buildNoFacesWidget();
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (_defaultFaces.isNotEmpty) _buildFaceGrid(_defaultFaces),
+        if (_remainingFaces.isNotEmpty) ...[
+          const SizedBox(height: 16),
+          _buildRemainingFacesSection(),
+        ],
+      ],
+    );
   }
+
+  Widget _buildNoFacesWidget() {
+    NoFacesReason reason;
+    if (widget.file.uploadedFileID == null) {
+      reason = NoFacesReason.fileNotUploaded;
+    } else {
+      reason = NoFacesReason.noFacesFound;
+    }
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 5),
+      child: ChipButtonWidget(
+        getNoFaceReasonText(context, reason),
+        noChips: true,
+      ),
+    );
+  }
+
+  Widget _buildFaceGrid(List<_FaceInfo> faceInfoList) {
+    return Wrap(
+      runSpacing: 8,
+      spacing: 8,
+      children: faceInfoList
+          .map(
+            (faceInfo) => FileInfoFaceWidget(
+              widget.file,
+              faceInfo.face,
+              faceCrop: faceInfo.faceCrop,
+              person: faceInfo.person,
+              clusterID: faceInfo.clusterID,
+              isEditMode: _isEditMode,
+              reloadAllFaces: loadFaces,
+            ),
+          )
+          .toList(),
+    );
+  }
+
+  Widget _buildRemainingFacesSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        GestureDetector(
+          onTap: _toggleRemainingFaces,
+          child: Row(
+            children: [
+              Text(
+                "Other detected faces",
+                style: getEnteTextTheme(context).miniMuted,
+              ),
+              const SizedBox(width: 4),
+              Icon(
+                _showRemainingFaces
+                    ? Icons.keyboard_arrow_up
+                    : Icons.keyboard_arrow_down,
+                size: 16,
+                color: getEnteColorScheme(context).textMuted,
+              ),
+            ],
+          ),
+        ),
+        if (_showRemainingFaces) ...[
+          const SizedBox(height: 8),
+          _buildFaceGrid(_remainingFaces),
+        ],
+      ],
+    );
+  }
+}
+
+class _FaceInfo {
+  final Face face;
+  final Uint8List faceCrop;
+  final String? clusterID;
+  final PersonEntity? person;
+
+  _FaceInfo({
+    required this.face,
+    required this.faceCrop,
+    this.clusterID,
+    this.person,
+  });
 }
 
 enum NoFacesReason {
@@ -176,10 +344,7 @@ enum NoFacesReason {
   faceThumbnailGenerationFailed,
 }
 
-String getNoFaceReasonText(
-  BuildContext context,
-  NoFacesReason reason,
-) {
+String getNoFaceReasonText(BuildContext context, NoFacesReason reason) {
   switch (reason) {
     case NoFacesReason.fileNotUploaded:
       return S.of(context).fileNotUploadedYet;
@@ -189,25 +354,5 @@ String getNoFaceReasonText(
       return S.of(context).noFacesFound;
     case NoFacesReason.faceThumbnailGenerationFailed:
       return "Unable to generate face thumbnails";
-  }
-}
-
-class NoFaceChipButtonWidget extends StatelessWidget {
-  final NoFacesReason reason;
-
-  const NoFaceChipButtonWidget(
-    this.reason, {
-    super.key,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 5),
-      child: ChipButtonWidget(
-        getNoFaceReasonText(context, reason),
-        noChips: true,
-      ),
-    );
   }
 }
