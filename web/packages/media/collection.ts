@@ -345,7 +345,7 @@ export interface PublicURL {
 }
 
 /**
- * Zod schema for the {@link PublicURL2} we use in our interactions with remote.
+ * Zod schema for the {@link PublicURL} we use in our interactions with remote.
  *
  * We also use the same schema when persisting the collection locally.
  */

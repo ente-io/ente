@@ -233,7 +233,6 @@ const decryptEnteFile = async (
         key: fileKey,
         // @ts-expect-error The types need to be updated here
         metadata: fileMetadata,
-        // @ts-expect-error The types need to be updated here
         magicMetadata: fileMagicMetadata,
         pubMagicMetadata: filePubMagicMetadata,
     });

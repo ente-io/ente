@@ -1,10 +1,175 @@
 import { sharedCryptoWorker } from "ente-base/crypto";
 import { dateFromEpochMicroseconds } from "ente-base/date";
 import log from "ente-base/log";
+import { nullToUndefined } from "ente-utils/transform";
+import { z } from "zod/v4";
 import { type Metadata, ItemVisibility } from "./file-metadata";
 import { FileType } from "./file-type";
+import { RemoteMagicMetadata } from "./magic-metadata";
 
-// TODO: Audit this file.
+export interface MagicMetadataCore<T> {
+    version: number;
+    count: number;
+    header: string;
+    data: T;
+}
+
+export type EncryptedMagicMetadata = MagicMetadataCore<string>;
+
+export interface EncryptedEnteFile {
+    /**
+     * The file's globally unique ID.
+     *
+     * The file's ID is a integer assigned by remote as the identifier for an
+     * {@link EnteFile} when it is created. It is globally unique across all
+     * files stored by an Ente instance, and is not scoped to the current user.
+     */
+    id: number;
+    /**
+     * The ID of the collection with which this file as associated.
+     *
+     * The same file (ID) may be associated with multiple collectionID, each of
+     * which will come and stay as distinct {@link EnteFile} instances - all of
+     * which will have the same {@link id} but distinct {@link collectionID}.
+     *
+     * So the ({@link id}, {@link collectionID}) pair is a primary key, not the
+     * {@link id} on its own. See: [Note: Collection file].
+     */
+    collectionID: number;
+    /**
+     * The ID of the Ente user who owns the file.
+     *
+     * Files uploaded by non users on public links belong to the owner of the
+     * collection who created the public link (See {@link uploaderName} in
+     * {@link FilePublicMagicMetadataData}).
+     */
+    ownerID: number;
+    file: S3FileAttributes;
+    thumbnail: S3FileAttributes;
+    metadata: MetadataFileAttributes;
+    /**
+     * Static, remote visible, information associated with a file.
+     *
+     * This is information about storage used by the file and its thumbnail.
+     * Unlike {@link metadata} which is E2EE, the {@link FileInfo} is remote
+     * visible for bookkeeping purposes.
+     *
+     * Files uploaded by very old versions of Ente might not have this field.
+     */
+    info?: FileInfo;
+    magicMetadata: EncryptedMagicMetadata;
+    pubMagicMetadata: EncryptedMagicMetadata;
+    /**
+     * The file's encryption key (as a base64 string), encrypted by the key of
+     * the collection to which it belongs.
+     *
+     * (note: This is always present. retaining this note until we remove
+     * nullability uncertainty from the types).
+     */
+    encryptedKey: string;
+    /**
+     * The nonce (as a base64 string) that was used when encrypting the file's
+     * encryption key.
+     *
+     * (note: This is always present. retaining this note until we remove
+     * nullability uncertainty from the types).
+     */
+    keyDecryptionNonce: string;
+    isDeleted: boolean;
+    /**
+     * The last time the file was updated (epoch microseconds).
+     *
+     * (e.g. magic metadata updates).
+     */
+    updationTime: number;
+}
+
+/**
+ * A File.
+ *
+ * An EnteFile represents a file in Ente. It does not contain the actual data.
+ *
+ * It is named with an "Ente" prefix to disambiguate it from the web's native
+ * {@link File} type.
+ *
+ * All files have an id (numeric) that is unique across all the files stored by
+ * an Ente instance. Each file is also always associated with a collection, and
+ * has an owner (both of these linkages are stored as the corresponding numeric
+ * IDs within the EnteFile structure).
+ *
+ * > For shared files, the owner of the file is not necessarily the owner of all
+ * > the collections to which the file belongs.
+ *
+ * While the file ID is unique, we'd can still have multiple entries for each
+ * file ID in our local state, one for each {@link Collection} to which the file
+ * belongs. That is, the uniqueness is across the (fileID, collectionID) pairs.
+ * See [Note: Collection file].
+ */
+export interface EnteFile
+    extends Omit<
+        EncryptedEnteFile,
+        | "metadata"
+        | "pubMagicMetadata"
+        | "magicMetadata"
+        | "encryptedKey"
+        | "keyDecryptionNonce"
+    > {
+    /**
+     * The file's key.
+     *
+     * This is the base64 representation of the decrypted encryption key
+     * associated with this file. When we get the file from remote (as a
+     * {@link RemoteEnteFile}), the file key itself would have been encrypted by
+     * the key of the {@link Collection} to which this file belongs.
+     *
+     * This key is used to encrypt both the file's contents, and any associated
+     * data (e.g., metadatum, thumbnail) for the file.
+     */
+    key: string;
+    /**
+     * Public static metadata associated with a file.
+     *
+     * This is the immutable metadata that gets associated with a file when it
+     * is uploaded, and there after cannot be changed.
+     *
+     * It is visible to all users with whom the file gets shared.
+     *
+     * > {@link pubMagicMetadata} contains fields that override fields present
+     * > in the metadata. Clients overlay those atop the metadata fields, and
+     * > thus they can be used to implement edits.
+     *
+     * See: [Note: Metadatum].
+     */
+    metadata: Metadata;
+    /**
+     * Private mutable metadata associated with the file that is only visible to
+     * the owner of the file.
+     *
+     * See: [Note: Metadatum]
+     */
+    magicMetadata?: FileMagicMetadata;
+    /**
+     * Public mutable metadata associated with the file that is visible to all
+     * users with whom the file has been shared.
+     *
+     * While in almost all cases, files will have associated public magic
+     * metadata since newer clients have something or the other they need to add
+     * to it, its presence is not guaranteed.
+     *
+     * See: [Note: Metadatum]
+     */
+    pubMagicMetadata?: FilePublicMagicMetadata;
+    /**
+     * `true` if this file is in trash (i.e. it has been deleted by the user,
+     * and will be permanently deleted after 30 days of being moved to trash).
+     */
+    isTrashed?: boolean;
+    /**
+     * If {@link isTrashed} is `true`, then {@link deleteBy} contains the epoch
+     * microseconds when this file will be permanently deleted.
+     */
+    deleteBy?: number;
+}
 
 export interface MetadataFileAttributes {
     encryptedData: string;
@@ -56,159 +221,56 @@ export interface FileInfo {
     thumbSize: number;
 }
 
-export interface MagicMetadataCore<T> {
-    version: number;
-    count: number;
-    header: string;
-    data: T;
-}
-
-export type EncryptedMagicMetadata = MagicMetadataCore<string>;
-
-export interface EncryptedEnteFile {
-    /**
-     * The file's globally unique ID.
-     *
-     * The file's ID is a integer assigned by remote as the identifier for an
-     * {@link EnteFile} when it is created. It is globally unique across all
-     * files stored by an Ente instance, and is not scoped to the current user.
-     */
-    id: number;
-    /**
-     * The ID of the collection with which this file as associated.
-     *
-     * The same file (ID) may be associated with multiple collectionID, each of
-     * which will come and stay as distinct {@link EnteFile} instances - all of
-     * which will have the same {@link id} but distinct {@link collectionID}.
-     *
-     * So the ({@link id}, {@link collectionID}) pair is a primary key, not the
-     * {@link id} on its own. See: [Note: Collection file].
-     */
-    collectionID: number;
-    /**
-     * The ID of the Ente user who owns the file.
-     *
-     * Files uploaded by non users on public links belong to the owner of the
-     * collection who created the public link (See {@link uploaderName} in
-     * {@link FilePublicMagicMetadataData}).
-     */
-    ownerID: number;
-    file: S3FileAttributes;
-    thumbnail: S3FileAttributes;
-    metadata: MetadataFileAttributes;
-    /**
-     * Static, remote visible, information associated with a file.
-     *
-     * This is information about storage used by the file and its metadata (in
-     * the future if needed). Unlike {@link metadata} which is E2EE, the
-     * {@link FileInfo} is remote visible for bookkeeping purposes.
-     *
-     * Files uploaded by very old versions of Ente might not have this structure
-     * present.
-     */
-    info: FileInfo | undefined;
-    magicMetadata: EncryptedMagicMetadata;
-    pubMagicMetadata: EncryptedMagicMetadata;
-    /**
-     * The file's encryption key (as a base64 string), encrypted by the key of
-     * the collection to which it belongs.
-     *
-     * (note: This is always present. retaining this note until we remove
-     * nullability uncertainty from the types).
-     */
-    encryptedKey: string;
-    /**
-     * The nonce (as a base64 string) that was used when encrypting the file's
-     * encryption key.
-     *
-     * (note: This is always present. retaining this note until we remove
-     * nullability uncertainty from the types).
-     */
-    keyDecryptionNonce: string;
-    isDeleted: boolean;
-    updationTime: number;
-}
+const RemoteFileInfo = z.looseObject({
+    fileSize: z.number(),
+    thumbSize: z.number(),
+});
 
 /**
- * A File.
+ * Zod schema for a {@link EnteFile} as represented in our interactions with
+ * remote.
  *
- * An EnteFile represents a file in Ente. It does not contain the actual data.
+ * The contents of the fields are encrypted by the file's key (which itself is
+ * encrypted by the key of the collection that contains the file). EnteFile is
+ * the decrypted local representation.
  *
- * It is named with an "Ente" prefix to disambiguate it from the web's native
- * {@link File} type.
- *
- * All files have an id (numeric) that is unique across all the files stored by
- * an Ente instance. Each file is also always associated with a collection, and
- * has an owner (both of these linkages are stored as the corresponding numeric
- * IDs within the EnteFile structure).
- *
- * > For shared files, the owner of the file is not necessarily the owner of all
- * > the collections to which the file belongs.
- *
- * While the file ID is unique, we'd can still have multiple entries for each
- * file ID in our local state, one for each {@link Collection} to which the file
- * belongs. That is, the uniqueness is across the (fileID, collectionID) pairs.
- * See [Note: Collection file].
+ * See: [Note: Use looseObject when parsing JSON that will get persisted]
  */
-export interface EnteFile
-    extends Omit<
-        EncryptedEnteFile,
-        | "metadata"
-        | "pubMagicMetadata"
-        | "magicMetadata"
-        | "encryptedKey"
-        | "keyDecryptionNonce"
-    > {
+// TODO(RE): Use me
+export const RemoteEnteFile = z.looseObject({
+    id: z.number(),
+    collectionID: z.number(),
+    ownerID: z.number(),
     /**
-     * The file's key.
+     * The file's key, encrypted using the key of the collection that contains
+     * the file.
      *
-     * This is the base64 representation of the decrypted encryption key
-     * associated with this file. When we get the file from remote (as a
-     * {@link RemoteEnteFile}), the file key itself would have been encrypted by
-     * the key of the {@link Collection} to which this file belongs.
-     *
-     * This key is used to encrypt both the file's contents, and any associated
-     * data (e.g., metadatum, thumbnail) for the file.
+     * Base64 encoded.
      */
-    key: string;
+    encryptedKey: z.string(),
     /**
-     * Static metadata associated with a file.
+     * The nonce to use when decrypting {@link encryptedKey}.
      *
-     * This is the immutable metadata that gets associated with a file when it
-     * is uploaded, and there after cannot be changed.
-     *
-     * See: [Note: Metadatum].
+     * Base64 encoded.
      */
-    metadata: Metadata;
+    keyDecryptionNonce: z.string(),
+    file: z.unknown(),
+    thumbnail: z.unknown(),
+    info: RemoteFileInfo.nullish().transform(nullToUndefined),
+    updationTime: z.number(),
     /**
-     * Private mutable metadata associated with the file that is only visible to
-     * the owner of the file.
+     * Tombstone marker.
      *
-     * See: [Note: Metadatum]
+     * This is set to true in the diff response to indicate files which
+     * have been deleted and should thus be pruned by the client locally.
      */
-    magicMetadata: FileMagicMetadata;
-    /**
-     * Public mutable metadata associated with the file that is visible to all
-     * users with whom the file has been shared.
-     *
-     * While in almost all cases, files will have associated public magic
-     * metadata since newer clients have something or the other they need to add
-     * to it, its presence is not guaranteed.
-     *
-     * See: [Note: Metadatum]
-     */
-    pubMagicMetadata?: FilePublicMagicMetadata;
-    /**
-     * `true` if this file is in trash (i.e. it has been deleted by the user,
-     * and will be permanently deleted after 30 days of being moved to trash).
-     */
-    isTrashed?: boolean;
-    /**
-     * If this is a file in trash, then {@link deleteBy} contains the epoch
-     * microseconds when this file will be permanently deleted.
-     */
-    deleteBy?: number;
-}
+    isDeleted: z.boolean().nullish().transform(nullToUndefined),
+    metadata: z.unknown(),
+    magicMetadata: RemoteMagicMetadata.nullish().transform(nullToUndefined),
+    pubMagicMetadata: RemoteMagicMetadata.nullish().transform(nullToUndefined),
+    isTrashed: z.boolean().nullish().transform(nullToUndefined),
+    deleteBy: z.number().nullish().transform(nullToUndefined),
+});
 
 export interface FileWithUpdatedMagicMetadata {
     file: EnteFile;

@@ -385,8 +385,6 @@ const PublicMagicMetadata = z.looseObject({
  * check/cast shouldn't be needed, and this should become a trivial accessor.
  */
 export const filePrivateMagicMetadata = (file: EnteFile) => {
-    // TODO: Audit the types.
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (!file.magicMetadata) return undefined;
     if (typeof file.magicMetadata.data == "string") {
         throw new Error(
@@ -570,7 +568,6 @@ export const updateRemotePrivateMagicMetadata = async (
 
     const updatedMetadata = { ...(existingMetadata ?? {}), ...metadataUpdates };
 
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     const metadataVersion = file.magicMetadata?.version ?? 1;
 
     const updateRequest = await updateMagicMetadataRequest(
