@@ -1751,5 +1751,6 @@
   "onThisDayNotificationExplanation": "Gaukite priminimus apie praėjusių metų šios dienos prisiminimus.",
   "addMemoriesWidgetPrompt": "Pridėkite prisiminimų valdiklį prie savo pradžios ekrano ir grįžkite čia, kad tinkintumėte.",
   "addAlbumWidgetPrompt": "Pridėkite albumo valdiklį prie savo pradžios ekrano ir grįžkite čia, kad tinkintumėte.",
-  "addPeopleWidgetPrompt": "Pridėkite asmenų valdiklį prie savo pradžios ekrano ir grįžkite čia, kad tinkintumėte."
+  "addPeopleWidgetPrompt": "Pridėkite asmenų valdiklį prie savo pradžios ekrano ir grįžkite čia, kad tinkintumėte.",
+  "wishThemAHappyBirthday": "Wish ${name} a happy birthday! 🎉"
 }

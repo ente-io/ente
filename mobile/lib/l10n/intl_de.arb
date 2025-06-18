@@ -1756,5 +1756,6 @@
   "receiveRemindersOnBirthdays": "Erhalte Erinnerungen, wenn jemand Geburtstag hat. Ein Klick auf die Benachrichtigung bringt dich zu den Fotos der Person, die Geburtstag hat.",
   "happyBirthday": "Herzlichen Glückwunsch zum Geburtstag! 🥳",
   "happyBirthdayToPerson": "Alles Gutes zum Geburtstag an {name}! 🎉",
-  "birthdays": "Geburtstage"
+  "birthdays": "Geburtstage",
+  "wishThemAHappyBirthday": "Wish ${name} a happy birthday! 🎉"
 }

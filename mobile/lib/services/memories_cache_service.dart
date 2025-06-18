@@ -527,19 +527,30 @@ class MemoriesCacheService {
     if (allMemories.isEmpty) return;
     final personMemories = <PeopleMemory>[];
     for (final memory in allMemories) {
+      if (memory is PeopleMemory) {
+        _logger.info("Found person memory");
+        _logger.info("Person memory ID: ${memory.id}");
+        _logger.info("Person memory personID: ${memory.personID}");
+        _logger.info("Person memory isBirthday: ${memory.isBirthday}");
+      }
       if (memory is PeopleMemory &&
           (memory.isBirthday ?? false) &&
           memory.personID == personID) {
         personMemories.add(memory);
       }
     }
+    if (personMemories.isEmpty) {
+      _logger.severe("No person memories found");
+    }
     PeopleMemory? personMemory;
     for (final memory in personMemories) {
       if (memory.peopleMemoryType == PeopleMemoryType.youAndThem) {
+        _logger.info("Found youAndThem person memory");
         personMemory = memory;
         break; // breaking to prefer youAndThem over spotlight
       }
       if (memory.peopleMemoryType == PeopleMemoryType.spotlight) {
+        _logger.info("Found spotlight person memory");
         personMemory = memory;
       }
     }
@@ -562,6 +573,7 @@ class MemoriesCacheService {
         forceCustomPageRoute: true,
       );
     }
+    _logger.info("Routing to the birthday memory");
     await routeToPage(
       context,
       FullScreenMemoryDataUpdater(
@@ -713,7 +725,7 @@ class MemoriesCacheService {
       final s = await LanguageService.s;
       await NotificationService.instance.scheduleNotification(
         memory.personName != null
-            ? s.happyBirthdayToPerson(memory.personName!)
+            ? s.wishThemAHappyBirthday(memory.personName!)
             : s.happyBirthday,
         id: memory.id.hashCode,
         channelID: "birthday",

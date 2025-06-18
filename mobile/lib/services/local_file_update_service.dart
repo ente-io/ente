@@ -155,6 +155,11 @@ class LocalFileUpdateService {
       if (processedIDs.contains(file.localID)) {
         continue;
       }
+      if (!file.isUploaded) {
+        _logger.info("File ${file.tag} is not uploaded, skipping hash check");
+        processedIDs.add(file.localID!);
+        continue;
+      }
       MediaUploadData uploadData;
       try {
         uploadData = await getUploadData(file);
@@ -202,8 +207,8 @@ class LocalFileUpdateService {
           _logger.severe("failed to check hash: invalid file ${file.tag}", e);
         }
         processedIDs.add(file.localID!);
-      } catch (e) {
-        _logger.severe("Failed to check hash", e);
+      } catch (e, s) {
+        _logger.severe("Failed to check hash", e, s);
       } finally {}
     }
     await _fileUpdationDB.deleteByLocalIDs(

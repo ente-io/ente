@@ -7,7 +7,7 @@ import "package:battery_info/model/iso_battery_info.dart";
 import "package:flutter/foundation.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
-import "package:photos/events/machine_learning_control_event.dart";
+import "package:photos/events/compute_control_event.dart";
 import "package:thermal/thermal.dart";
 
 enum _ComputeRunState {
@@ -31,8 +31,8 @@ class ComputeController {
 
   bool _isDeviceHealthy = true;
   bool _isUserInteracting = true;
-  bool _canRunML = false;
-  bool mlInteractionOverride = false;
+  bool _canRunCompute = false;
+  bool interactionOverride = false;
   late Timer _userInteractionTimer;
 
   _ComputeRunState _currentRunState = _ComputeRunState.idle;
@@ -41,7 +41,7 @@ class ComputeController {
   bool get isDeviceHealthy => _isDeviceHealthy;
 
   ComputeController() {
-    _logger.info('MachineLearningController constructor');
+    _logger.info('ComputeController constructor');
     _startInteractionTimer(kDefaultInteractionTimeout);
     if (Platform.isIOS) {
       if (kDebugMode) {
@@ -106,7 +106,8 @@ class ComputeController {
       _logger.info("Stream request granted");
       _currentRunState = _ComputeRunState.generatingStream;
       return true;
-    } else if (_currentRunState == _ComputeRunState.generatingStream && !_waitingToRunML) {
+    } else if (_currentRunState == _ComputeRunState.generatingStream &&
+        !_waitingToRunML) {
       return true;
     }
     _logger.info(
@@ -142,23 +143,23 @@ class ComputeController {
   }
 
   bool _canRunGivenUserInteraction() {
-    return !_isUserInteracting || mlInteractionOverride;
+    return !_isUserInteracting || interactionOverride;
   }
 
   void forceOverrideML({required bool turnOn}) {
     _logger.info("Forcing to turn on ML: $turnOn");
-    mlInteractionOverride = turnOn;
+    interactionOverride = turnOn;
     _fireControlEvent();
   }
 
   void _fireControlEvent() {
-    final shouldRunML = _isDeviceHealthy && _canRunGivenUserInteraction();
-    if (shouldRunML != _canRunML) {
-      _canRunML = shouldRunML;
+    final shouldRunCompute = _isDeviceHealthy && _canRunGivenUserInteraction();
+    if (shouldRunCompute != _canRunCompute) {
+      _canRunCompute = shouldRunCompute;
       _logger.info(
-        "Firing event: $shouldRunML      (device health: $_isDeviceHealthy, user interaction: $_isUserInteracting, mlInteractionOverride: $mlInteractionOverride)",
+        "Firing event: $shouldRunCompute      (device health: $_isDeviceHealthy, user interaction: $_isUserInteracting, mlInteractionOverride: $interactionOverride)",
       );
-      Bus.instance.fire(MachineLearningControlEvent(shouldRunML));
+      Bus.instance.fire(ComputeControlEvent(shouldRunCompute));
     }
   }
 
@@ -191,7 +192,9 @@ class ComputeController {
   void _onThermalStateUpdate(ThermalStatus? thermalStatus) {
     _lastThermalStatus = thermalStatus;
     _logger.info("Thermal status: $thermalStatus");
-    _isDeviceHealthy = _computeIsAndroidDeviceHealthy();
+    _isDeviceHealthy = Platform.isAndroid
+        ? _computeIsAndroidDeviceHealthy()
+        : _computeIsiOSDeviceHealthy();
     _fireControlEvent();
   }
 

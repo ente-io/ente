@@ -72,7 +72,7 @@ class VideoPreviewService {
   static const String _videoStreamingEnabled = "videoStreamingEnabled";
 
   bool get isVideoStreamingEnabled {
-    return _prefs.getBool(_videoStreamingEnabled) ?? true;
+    return _prefs.getBool(_videoStreamingEnabled) ?? false;
   }
 
   Future<void> setIsVideoStreamingEnabled(bool value) async {
