@@ -77,22 +77,24 @@ export interface EncryptedEnteFile {
     /**
      * The ID of the collection with which this file as associated.
      *
-     * The same file (ID) may be associated with multiple collectionID, in which
-     * case there will be multiple {@link EnteFile} entries for each
-     * ({@link id}, {@link collectionID}) pair. See: [Note: Collection file].
+     * The same file (ID) may be associated with multiple collectionID, each of
+     * which will come and stay as distinct {@link EnteFile} instances - all of
+     * which will have the same {@link id} but distinct {@link collectionID}.
+     *
+     * So the ({@link id}, {@link collectionID}) pair is a primary key, not the
+     * {@link id} on its own. See: [Note: Collection file].
      */
     collectionID: number;
     /**
-     * The ID of the user who owns the file.
+     * The ID of the Ente user who owns the file.
+     *
+     * Files uploaded by non users on public links belong to the owner of the
+     * collection who created the public link (See {@link uploaderName} in
+     * {@link FilePublicMagicMetadataData}).
      */
     ownerID: number;
     file: S3FileAttributes;
     thumbnail: S3FileAttributes;
-    /**
-     * Static metadata associated with a file.
-     *
-     * See: [Note: Metadatum].
-     */
     metadata: MetadataFileAttributes;
     /**
      * Static, remote visible, information associated with a file.
@@ -105,17 +107,7 @@ export interface EncryptedEnteFile {
      * present.
      */
     info: FileInfo | undefined;
-    /**
-     * Private mutable metadata associated with a file.
-     *
-     * See: [Note: Metadatum].
-     */
     magicMetadata: EncryptedMagicMetadata;
-    /**
-     * Public mutable metadata associated with a file.
-     *
-     * See: [Note: Metadatum].
-     */
     pubMagicMetadata: EncryptedMagicMetadata;
     /**
      * The file's encryption key (as a base64 string), encrypted by the key of
@@ -142,17 +134,21 @@ export interface EncryptedEnteFile {
  *
  * An EnteFile represents a file in Ente. It does not contain the actual data.
  *
- * To disambiguate it from the web {@link File} type, we prefix it with Ente.
+ * It is named with an "Ente" prefix to disambiguate it from the web's native
+ * {@link File} type.
  *
  * All files have an id (numeric) that is unique across all the files stored by
  * an Ente instance. Each file is also always associated with a collection, and
  * has an owner (both of these linkages are stored as the corresponding numeric
  * IDs within the EnteFile structure).
  *
+ * > For shared files, the owner of the file is not necessarily the owner of all
+ * > the collections to which the file belongs.
+ *
  * While the file ID is unique, we'd can still have multiple entries for each
- * file ID in our local state, one per collection IDs to which the file belongs.
- * That is, the uniqueness is across the (fileID, collectionID) pairs. See
- * [Note: Collection file].
+ * file ID in our local state, one for each {@link Collection} to which the file
+ * belongs. That is, the uniqueness is across the (fileID, collectionID) pairs.
+ * See [Note: Collection file].
  */
 export interface EnteFile
     extends Omit<
@@ -163,15 +159,43 @@ export interface EnteFile
         | "encryptedKey"
         | "keyDecryptionNonce"
     > {
+    /**
+     * The file's key.
+     *
+     * This is the base64 representation of the decrypted encryption key
+     * associated with this file. When we get the file from remote (as a
+     * {@link RemoteEnteFile}), the file key itself would have been encrypted by
+     * the key of the {@link Collection} to which this file belongs.
+     *
+     * This key is used to encrypt both the file's contents, and any associated
+     * data (e.g., metadatum, thumbnail) for the file.
+     */
+    key: string;
+    /**
+     * Static metadata associated with a file.
+     *
+     * This is the immutable metadata that gets associated with a file when it
+     * is uploaded, and there after cannot be changed.
+     *
+     * See: [Note: Metadatum].
+     */
     metadata: Metadata;
+    /**
+     * Private mutable metadata associated with the file that is only visible to
+     * the owner of the file.
+     *
+     * See: [Note: Metadatum]
+     */
     magicMetadata: FileMagicMetadata;
     /**
-     * The envelope containing the public magic metadata associated with this
-     * file.
+     * Public mutable metadata associated with the file that is visible to all
+     * users with whom the file has been shared.
      *
-     * In almost all cases, files will have associated public magic metadata
-     * since newer clients have something or the other they need to add to it.
-     * But its presence is not guaranteed.
+     * While in almost all cases, files will have associated public magic
+     * metadata since newer clients have something or the other they need to add
+     * to it, its presence is not guaranteed.
+     *
+     * See: [Note: Metadatum]
      */
     pubMagicMetadata?: FilePublicMagicMetadata;
     /**
@@ -184,14 +208,6 @@ export interface EnteFile
      * microseconds when this file will be permanently deleted.
      */
     deleteBy?: number;
-    /**
-     * The base64 representation of the decrypted encryption key associated with
-     * this file.
-     *
-     * This key is used to encrypt both the file's contents, and any associated
-     * data (e.g., metadatum, thumbnail) for the file.
-     */
-    key: string;
 }
 
 export interface FileWithUpdatedMagicMetadata {

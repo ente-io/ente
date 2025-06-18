@@ -304,6 +304,18 @@ export interface PublicMagicMetadata {
      * side checks.
      */
     caption?: string;
+    /**
+     * The name provided by the person who uploaded the file using an otherwise
+     * anonymous public link upload.
+     *
+     * When sharing an album using a public link, the owner of the collection
+     * can enable public uploads. When uploading files this way, the public
+     * albums app asks the person doing the upload their name, and that gets
+     * persisted here in the file's public magic metadata so that it can be
+     * shown to the Ente users who are participants in the collection.
+     *
+     * (The owner of such files will be the owner of the collection)
+     */
     uploaderName?: string;
     /**
      * An arbitrary integer set to indicate that this file should be skipped for

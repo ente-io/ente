@@ -86,8 +86,8 @@ export interface Collection {
      */
     updationTime: number;
     /**
-     * Mutable metadata associated with the collection that is only visible to
-     * the owner of the collection.
+     * Private mutable metadata associated with the collection that is only
+     * visible to the owner of the collection.
      *
      * See: [Note: Metadatum]
      */
