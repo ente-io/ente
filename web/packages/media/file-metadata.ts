@@ -18,6 +18,8 @@ import type { RemoteMagicMetadata } from "./magic-metadata";
 /**
  * Information about the file that never changes post upload.
  *
+ * ---
+ *
  * [Note: Metadatum]
  *
  * There are three different sources of metadata relating to a file.
@@ -85,6 +87,8 @@ import type { RemoteMagicMetadata } from "./magic-metadata";
 export interface Metadata {
     /**
      * The "Ente" file type - image, video or live photo.
+     *
+     * Expected to be one of {@link FileType}.
      */
     fileType: FileType;
     /**
@@ -165,9 +169,23 @@ export interface Metadata {
      * sub-second fraction.
      */
     duration?: number;
+    /**
+     * `true` if the uploading client was unable to generate a thumbnail for the
+     * file when uploading it (e.g. unsupported format), and so instead a
+     * placeholder thumbnail was used.
+     */
     hasStaticThumbnail?: boolean;
+    /**
+     * Mobile client specific field, not used by us.
+     */
     localID?: number;
+    /**
+     * Mobile client specific field, not used by us.
+     */
     version?: number;
+    /**
+     * Mobile client specific field, not used by us.
+     */
     deviceFolder?: string;
 }
 

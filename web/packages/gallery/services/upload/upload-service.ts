@@ -33,7 +33,7 @@ import type {
     EnteFile,
     FilePublicMagicMetadata,
     FilePublicMagicMetadataProps,
-    MetadataFileAttributes,
+    RemoteFileMetadata,
     S3FileAttributes,
 } from "ente-media/file";
 import {
@@ -350,7 +350,7 @@ interface EncryptedFilePieces {
 export interface BackupedFile {
     file: S3FileAttributes;
     thumbnail: S3FileAttributes;
-    metadata: MetadataFileAttributes;
+    metadata: RemoteFileMetadata;
     pubMagicMetadata: EncryptedMagicMetadata;
 }
 

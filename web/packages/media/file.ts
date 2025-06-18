@@ -46,7 +46,7 @@ export interface EncryptedEnteFile {
     ownerID: number;
     file: S3FileAttributes;
     thumbnail: S3FileAttributes;
-    metadata: MetadataFileAttributes;
+    metadata: RemoteFileMetadata;
     /**
      * Static, remote visible, information associated with a file.
      *
@@ -171,11 +171,6 @@ export interface EnteFile
     deleteBy?: number;
 }
 
-export interface MetadataFileAttributes {
-    encryptedData: string;
-    decryptionHeader: string;
-}
-
 /**
  * Attributes about an object uploaded to S3.
  *
@@ -226,6 +221,23 @@ const RemoteFileInfo = z.looseObject({
     thumbSize: z.number(),
 });
 
+const RemoteFileMetadata = z.object({
+    /**
+     * The metadata JSON object associated with the file, encrypted using the
+     * file's key.
+     *
+     * Base64 encoded.
+     */
+    encryptedData: z.string(),
+    /**
+     * The base64 encoded decryption header that was used during encryption of
+     * {@link encryptedData}.
+     */
+    decryptionHeader: z.string(),
+});
+
+export type RemoteFileMetadata = z.infer<typeof RemoteFileMetadata>;
+
 /**
  * Zod schema for a {@link EnteFile} as represented in our interactions with
  * remote.
@@ -261,11 +273,11 @@ export const RemoteEnteFile = z.looseObject({
     /**
      * Tombstone marker.
      *
-     * This is set to true in the diff response to indicate files which
-     * have been deleted and should thus be pruned by the client locally.
+     * This is set to true in the diff response to indicate files which have
+     * been deleted and should thus be pruned by the client locally.
      */
     isDeleted: z.boolean().nullish().transform(nullToUndefined),
-    metadata: z.unknown(),
+    metadata: RemoteFileMetadata,
     magicMetadata: RemoteMagicMetadata.nullish().transform(nullToUndefined),
     pubMagicMetadata: RemoteMagicMetadata.nullish().transform(nullToUndefined),
     isTrashed: z.boolean().nullish().transform(nullToUndefined),
