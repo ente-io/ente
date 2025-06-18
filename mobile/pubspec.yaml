@@ -35,7 +35,7 @@ dependencies:
     git:
       url: https://github.com/ente-io/chewie.git
       ref: mybranched
-  collection: ^1.19.1 #dart
+  collection: #dart
   computer: # logged task name in verbose in fork
     git: "https://github.com/ente-io/computer.git"
   connectivity_plus: ^6.0.2
@@ -161,7 +161,7 @@ dependencies:
       url: https://github.com/ente-io/panorama_blur.git
       ref: blur
   password_strength: ^0.2.0
-  path: ^1.9.1
+  path: #dart
   path_provider: ^2.1.1
   path_provider_foundation: ^2.4.1
   permission_handler: ^12.0.0+1
