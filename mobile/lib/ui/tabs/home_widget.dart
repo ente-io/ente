@@ -881,13 +881,16 @@ class _HomeWidgetState extends State<HomeWidget> {
     if (payload != null) {
       debugPrint('notification payload: $payload');
       if (payload.toLowerCase().contains("onthisday")) {
+        _logger.info("On this day notification received");
         // ignore: unawaited_futures
         memoriesCacheService.goToOnThisDayMemory(context);
       } else if (payload.toLowerCase().contains("birthday")) {
+        _logger.info("Birthday notification received");
         final personID = payload.substring("birthday_".length);
         // ignore: unawaited_futures
         memoriesCacheService.goToPersonMemory(context, personID);
       } else {
+        _logger.info("Album notification received");
         final collectionID = Uri.parse(payload).queryParameters["collectionID"];
         if (collectionID != null) {
           final collection = CollectionsService.instance
