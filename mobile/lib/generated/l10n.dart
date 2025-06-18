@@ -11956,16 +11956,6 @@ class S {
     );
   }
 
-  /// `Happy birthday to {name}! 🎉`
-  String happyBirthdayToPerson(Object name) {
-    return Intl.message(
-      'Happy birthday to $name! 🎉',
-      name: 'happyBirthdayToPerson',
-      desc: '',
-      args: [name],
-    );
-  }
-
   /// `Birthdays`
   String get birthdays {
     return Intl.message(
@@ -11973,6 +11963,16 @@ class S {
       name: 'birthdays',
       desc: '',
       args: [],
+    );
+  }
+
+  /// `Wish {name} a happy birthday! 🎉`
+  String wishThemAHappyBirthday(Object name) {
+    return Intl.message(
+      'Wish $name a happy birthday! 🎉',
+      name: 'wishThemAHappyBirthday',
+      desc: '',
+      args: [name],
     );
   }
 }
@@ -12005,6 +12005,7 @@ class AppLocalizationDelegate extends LocalizationsDelegate<S> {
       Locale.fromSubtags(languageCode: 'ja'),
       Locale.fromSubtags(languageCode: 'km'),
       Locale.fromSubtags(languageCode: 'ko'),
+      Locale.fromSubtags(languageCode: 'ku'),
       Locale.fromSubtags(languageCode: 'lt'),
       Locale.fromSubtags(languageCode: 'lv'),
       Locale.fromSubtags(languageCode: 'ml'),

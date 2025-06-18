@@ -25,7 +25,7 @@ import type {
     CollectionSummary,
     CollectionSummaryType,
     CollectionsSortBy,
-} from "ente-new/photos/services/collection/ui";
+} from "ente-new/photos/services/collection-summary";
 import type { Person } from "ente-new/photos/services/ml/people";
 import { t } from "i18next";
 import React, {

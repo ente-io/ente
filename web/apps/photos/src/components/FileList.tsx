@@ -25,7 +25,7 @@ import {
     StaticThumbnail,
 } from "ente-new/photos/components/PlaceholderThumbnails";
 import { TileBottomTextOverlay } from "ente-new/photos/components/Tiles";
-import { TRASH_SECTION } from "ente-new/photos/services/collection";
+import { PseudoCollectionID } from "ente-new/photos/services/collection-summary";
 import { t } from "i18next";
 import memoize from "memoize-one";
 import { GalleryContext } from "pages/gallery";
@@ -811,7 +811,7 @@ export const FileList: React.FC<FileListProps> = ({
                       (selected.context.mode == "people"
                           ? selected.context.personID == activePersonID
                           : selected.context.collectionID ==
-                            activeCollectionID)) && selected[file.id]
+                            activeCollectionID)) && !!selected[file.id]
             }
             selectOnClick={selected.count > 0}
             onHover={onHoverOver(index)}
@@ -1235,7 +1235,7 @@ const FileThumbnail: React.FC<FileThumbnailProps> = ({
             onClick={handleClick}
             onMouseEnter={handleHover}
             disabled={!imageURL}
-            {...(selectable ? longPressHandlers : {})}
+            {...(selectable && longPressHandlers)}
         >
             {selectable && (
                 <Check
@@ -1282,13 +1282,14 @@ const FileThumbnail: React.FC<FileThumbnailProps> = ({
                 <InSelectRangeOverlay />
             )}
 
-            {activeCollectionID === TRASH_SECTION && file.isTrashed && (
-                <TileBottomTextOverlay>
-                    <Typography variant="small">
-                        {formattedDateRelative(enteFileDeletionDate(file))}
-                    </Typography>
-                </TileBottomTextOverlay>
-            )}
+            {activeCollectionID == PseudoCollectionID.trash &&
+                file.isTrashed && (
+                    <TileBottomTextOverlay>
+                        <Typography variant="small">
+                            {formattedDateRelative(enteFileDeletionDate(file))}
+                        </Typography>
+                    </TileBottomTextOverlay>
+                )}
         </FileThumbnail_>
     );
 };

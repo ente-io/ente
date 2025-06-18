@@ -372,7 +372,7 @@
   "deleteFromBoth": "Her ikisinden de sil",
   "newAlbum": "Yeni albüm",
   "albums": "Albümler",
-  "memoryCount": "{count, plural, =0{hiç anı yok} one{{formattedCount} anı} other{{formattedCount} anı}}",
+  "memoryCount": "{count, plural, =0{hiç anı yok} other{{formattedCount} anı}}",
   "@memoryCount": {
     "description": "The text to display the number of memories",
     "type": "text",
@@ -477,7 +477,7 @@
     }
   },
   "showMemories": "Anıları göster",
-  "yearsAgo": "{count, plural, one{{count} yıl önce} other{{count} yıl önce}}",
+  "yearsAgo": "{count, plural, other{{count} yıl önce}}",
   "backupSettings": "Yedekleme seçenekleri",
   "backupStatus": "Yedekleme durumu",
   "backupStatusDescription": "Eklenen öğeler burada görünecek",
@@ -1217,7 +1217,7 @@
   "searchHint4": "Konum",
   "searchHint5": "Çok yakında: Yüzler ve sihirli arama ✨",
   "addYourPhotosNow": "Fotoğraflarınızı şimdi ekleyin",
-  "searchResultCount": "{count, plural, one{{count} yıl önce} other{{count} yıl önce}}",
+  "searchResultCount": "{count, plural, other{{count} yıl önce}}",
   "@searchResultCount": {
     "description": "Text to tell user how many results were found for their search query",
     "placeholders": {
@@ -1735,5 +1735,6 @@
   "addParticipants": "Katılımcı ekle",
   "selectedAlbums": "{count} seçildi",
   "actionNotSupportedOnFavouritesAlbum": "Favoriler albümünde eylem desteklenmiyor",
-  "onThisDay": "Bu günde"
+  "onThisDay": "Bu günde",
+  "wishThemAHappyBirthday": "Wish ${name} a happy birthday! 🎉"
 }

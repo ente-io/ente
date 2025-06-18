@@ -851,10 +851,10 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     try {
       if (galleryType == GalleryType.sharedPublicCollection &&
           collection!.isCollectEnabledForPublicLink()) {
-        final authToken = await CollectionsService.instance
+        final authToken = CollectionsService.instance
             .getSharedPublicAlbumToken(collection.id);
-        final albumKey = await CollectionsService.instance
-            .getSharedPublicAlbumKey(collection.id);
+        final albumKey =
+            CollectionsService.instance.getSharedPublicAlbumKey(collection.id);
 
         final res = await showChoiceDialog(
           context,

@@ -5,11 +5,10 @@ export const nullToUndefined = <T>(v: T | null | undefined): T | undefined =>
     v === null ? undefined : v;
 
 /**
- * Convert any falsey value (including blank strings) to `undefined`;
- * passthrough everything else unchanged.
+ * Convert `null` and `undefined` to `false`, passthrough everything else unchanged.
  */
-export const falseyToUndefined = <T>(v: T | null | undefined): T | undefined =>
-    v || undefined;
+export const nullishToFalse = (v: boolean | null | undefined): boolean =>
+    v ?? false;
 
 /**
  * Convert `null` and `undefined` to `0`, passthrough everything else unchanged.

@@ -5,6 +5,7 @@ import "package:flutter/cupertino.dart";
 import "package:flutter/material.dart";
 import "package:intl/intl.dart";
 import 'package:logging/logging.dart';
+import "package:path_provider/path_provider.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/core/constants.dart";
 import 'package:photos/core/event_bus.dart';
@@ -24,6 +25,7 @@ import 'package:photos/models/file/file_type.dart';
 import "package:photos/models/local_entity_data.dart";
 import "package:photos/models/location/location.dart";
 import "package:photos/models/location_tag/location_tag.dart";
+import "package:photos/models/memories/memories_cache.dart";
 import "package:photos/models/memories/memory.dart";
 import "package:photos/models/memories/smart_memory.dart";
 import "package:photos/models/ml/face/person.dart";
@@ -47,12 +49,14 @@ import "package:photos/services/location_service.dart";
 import "package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import 'package:photos/services/machine_learning/semantic_search/semantic_search_service.dart';
+import "package:photos/services/memories_cache_service.dart";
 import "package:photos/states/location_screen_state.dart";
 import "package:photos/ui/viewer/location/add_location_sheet.dart";
 import "package:photos/ui/viewer/location/location_screen.dart";
 import "package:photos/ui/viewer/people/cluster_page.dart";
 import "package:photos/ui/viewer/people/people_page.dart";
 import "package:photos/ui/viewer/search/result/magic_result_screen.dart";
+import "package:photos/utils/cache_util.dart";
 import "package:photos/utils/file_util.dart";
 import "package:photos/utils/navigation_util.dart";
 import 'package:photos/utils/standalone/date_time.dart';
@@ -1275,7 +1279,33 @@ class SearchService {
       final memoriesResult = await smartMemoriesService
           .calcSmartMemories(calcTime, cache, debugSurfaceAll: true);
       locationService.baseLocations = memoriesResult.baseLocations;
-      memories = memoriesResult.memories;
+      for (final nowMemory in memoriesResult.memories) {
+        cache.toShowMemories
+            .add(ToShowMemory.fromSmartMemory(nowMemory, calcTime));
+      }
+      cache.baseLocations.addAll(memoriesResult.baseLocations);
+      // memories = memoriesResult.memories;
+      final tempCachePath = (await getTemporaryDirectory()).path +
+          "/cache/test/memories_cache_test";
+      await writeToJsonFile(
+        tempCachePath,
+        cache,
+        MemoriesCache.encodeToJsonString,
+      );
+      _logger.info(
+        "Smart memories cache written to $tempCachePath",
+      );
+      final decodedCache = await decodeJsonFile(
+        tempCachePath,
+        MemoriesCache.decodeFromJsonString,
+      );
+      _logger.info(
+        "Smart memories cache decoded from $tempCachePath",
+      );
+      memories = await MemoriesCacheService.fromCacheToMemories(decodedCache!);
+      _logger.info(
+        "Smart memories cache converted to memories",
+      );
     }
     final searchResults = <GenericSearchResult>[];
     for (final memory in memories) {

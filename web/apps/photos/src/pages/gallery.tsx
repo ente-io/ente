@@ -61,6 +61,7 @@ import {
 import {
     constructUserIDToEmailMap,
     createShareeSuggestionEmails,
+    findCollectionCreatingUncategorizedIfNeeded,
     validateKey,
 } from "ente-new/photos/components/gallery/helpers";
 import {
@@ -70,11 +71,11 @@ import {
 import { useIsOffline } from "ente-new/photos/components/utils/use-is-offline";
 import { usePeopleStateSnapshot } from "ente-new/photos/components/utils/use-snapshot";
 import { shouldShowWhatsNew } from "ente-new/photos/services/changelog";
+import { createAlbum } from "ente-new/photos/services/collection";
 import {
-    ALL_SECTION,
-    DUMMY_UNCATEGORIZED_COLLECTION,
-} from "ente-new/photos/services/collection";
-import { areOnlySystemCollections } from "ente-new/photos/services/collection/ui";
+    areOnlySystemCollections,
+    PseudoCollectionID,
+} from "ente-new/photos/services/collection-summary";
 import { getAllLocalCollections } from "ente-new/photos/services/collections";
 import exportService from "ente-new/photos/services/export";
 import {
@@ -114,8 +115,6 @@ import { FileWithPath } from "react-dropzone";
 import { Trans } from "react-i18next";
 import {
     addToFavorites,
-    createAlbum,
-    createUnCategorizedCollection,
     removeFromFavorites,
 } from "services/collectionService";
 import { uploadManager } from "services/upload-manager";
@@ -187,7 +186,7 @@ const Page: React.FC = () => {
         ownCount: 0,
         count: 0,
         collectionID: 0,
-        context: { mode: "albums", collectionID: ALL_SECTION },
+        context: { mode: "albums", collectionID: PseudoCollectionID.all },
     });
     const [blockingLoad, setBlockingLoad] = useState(false);
     const [shouldDisableDropzone, setShouldDisableDropzone] = useState(false);
@@ -379,7 +378,7 @@ const Page: React.FC = () => {
             return;
         }
         let collectionURL = "";
-        if (activeCollectionID !== ALL_SECTION) {
+        if (activeCollectionID !== PseudoCollectionID.all) {
             // TODO: Is this URL param even used?
             collectionURL = `?collection=${activeCollectionID}`;
         }
@@ -785,7 +784,7 @@ const Page: React.FC = () => {
         setUploadTypeSelectorIntent(intent ?? "upload");
     };
 
-    const handleSetActiveCollectionID = (
+    const handleShowCollectionSummary = (
         collectionSummaryID: number | undefined,
     ) => dispatch({ type: "showCollectionSummary", collectionSummaryID });
 
@@ -893,7 +892,7 @@ const Page: React.FC = () => {
         <GalleryContext.Provider
             value={{
                 ...defaultGalleryContext,
-                setActiveCollectionID: handleSetActiveCollectionID,
+                setActiveCollectionID: handleShowCollectionSummary,
                 syncWithRemote: (force, silent) =>
                     syncWithRemote({ force, silent }),
                 setBlockingLoad,
@@ -926,11 +925,14 @@ const Page: React.FC = () => {
                     onClose={handleCloseCollectionSelector}
                     attributes={collectionSelectorAttributes}
                     collectionSummaries={normalCollectionSummaries}
-                    collectionForCollectionID={(id) =>
+                    collectionForCollectionSummaryID={(id) =>
+                        // Null assert since the collection selector should only
+                        // show "selectable" normalCollectionSummaries. See:
+                        // [Note: Picking from selectable collection summaries].
                         findCollectionCreatingUncategorizedIfNeeded(
                             normalCollections,
                             id,
-                        )
+                        )!
                     }
                 />
                 <FilesDownloadProgress
@@ -1031,7 +1033,7 @@ const Page: React.FC = () => {
                             : undefined) ?? []
                     }
                     onChangeMode={handleChangeBarMode}
-                    setActiveCollectionID={handleSetActiveCollectionID}
+                    setActiveCollectionID={handleShowCollectionSummary}
                     onSelectPerson={handleSelectPerson}
                 />
 
@@ -1068,7 +1070,11 @@ const Page: React.FC = () => {
                 <Sidebar
                     {...sidebarVisibilityProps}
                     collectionSummaries={normalCollectionSummaries}
+                    uncategorizedCollectionSummaryID={
+                        state.uncategorizedCollectionSummaryID
+                    }
                     onShowPlanSelector={showPlanSelector}
+                    onShowCollectionSummary={handleShowCollectionSummary}
                     onShowExport={showExport}
                     onAuthenticateUser={authenticateUser}
                 />
@@ -1077,7 +1083,7 @@ const Page: React.FC = () => {
                 !isFirstLoad &&
                 !normalFiles?.length &&
                 !hiddenFiles?.length &&
-                activeCollectionID === ALL_SECTION ? (
+                activeCollectionID === PseudoCollectionID.all ? (
                     <GalleryEmptyState
                         isUploadInProgress={uploadManager.isUploadInProgress()}
                         onUpload={openUploader}
@@ -1331,19 +1337,3 @@ export async function handleSubscriptionCompletionRedirectIfNeeded(
         }
     }
 }
-
-/**
- * Return the {@link Collection} (from amongst {@link collections}) with the
- * given {@link collectionID}. As a special case, if collection ID is the
- * placeholder ID of the uncategorized collection, create it and then return it.
- */
-const findCollectionCreatingUncategorizedIfNeeded = async (
-    collections: Collection[],
-    collectionID: number,
-) => {
-    if (collectionID == DUMMY_UNCATEGORIZED_COLLECTION) {
-        return await createUnCategorizedCollection();
-    } else {
-        return collections.find((c) => c.id === collectionID);
-    }
-};

@@ -818,10 +818,18 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     }, [handleClose, files]);
 
     useEffect(() => {
-        if (open) {
+        // This effect might get triggered when the none of the files that were
+        // being shown are eligible to be shown anymore. e.g. suppose we are the
+        // archiveItems pseudo-collection, and the only archived file there is
+        // marked as unarchived by the user within the file viewer.
+        //
+        // In such cases, don't attempt to refresh since that causes various
+        // invariants (like the existence of a "currentFile") to get broken
+        // inside the `FileViewerPhotoSwipe` implementation.
+        if (open && files.length) {
             psRef.current?.refreshCurrentSlideFavoriteButtonIfNeeded();
         }
-    }, [favoriteFileIDs, pendingFavoriteUpdates, open]);
+    }, [favoriteFileIDs, pendingFavoriteUpdates, files, open]);
 
     useEffect(() => {
         if (open) {

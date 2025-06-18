@@ -476,7 +476,7 @@
     }
   },
   "showMemories": "Vis minner",
-  "yearsAgo": "{count, plural, one{{count} år siden} other{{count} år siden}}",
+  "yearsAgo": "{count, plural, other{{count} år siden}}",
   "backupSettings": "Sikkerhetskopier innstillinger",
   "backupStatus": "Status for sikkerhetskopi",
   "backupStatusDescription": "Elementer som har blitt sikkerhetskopiert vil vises her",
@@ -1689,5 +1689,6 @@
   "moon": "I månelyset",
   "onTheRoad": "På veien igjen",
   "food": "Kulinær glede",
-  "pets": "Pelsvenner"
+  "pets": "Pelsvenner",
+  "wishThemAHappyBirthday": "Wish ${name} a happy birthday! 🎉"
 }
