@@ -64,8 +64,9 @@ class BgTaskUtils {
         frequency: Platform.isIOS
             ? const Duration(minutes: 60)
             : const Duration(minutes: 15),
-        // TODO(prateekmedia): uncomment at last
-        // initialDelay: const Duration(minutes: 10),
+        initialDelay: flagService.internalUser
+            ? Duration.zero
+            : const Duration(minutes: 10),
         constraints: workmanager.Constraints(
           networkType: workmanager.NetworkType.connected,
           requiresCharging: false,

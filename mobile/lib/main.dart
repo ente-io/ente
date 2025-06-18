@@ -132,14 +132,15 @@ Future<void> runBackgroundTask(String taskId, {String mode = 'normal'}) async {
         final cancellableOp =
             CancelableOperation.fromFuture(_runMinimally(taskId));
 
-        if (Platform.isIOS) {
-          _scheduleSuicide(
-            kBGTaskTimeout,
-            taskId,
-            cancellableOp,
-          );
-        }
-        await cancellableOp.valueOrCancellation();
+        await Future.wait([
+          if (Platform.isIOS)
+            _scheduleSuicide(
+              kBGTaskTimeout,
+              taskId,
+              cancellableOp,
+            ),
+          cancellableOp.valueOrCancellation(),
+        ]);
       } catch (e, s) {
         _logger.severe("Error in background task", e, s);
       }
@@ -444,16 +445,28 @@ Future<void> _logFGHeartBeatInfo(SharedPreferences prefs) async {
   _logger.info('isAlreadyRunningFG: $isRunningInFG, last Beat: $lastRun');
 }
 
-void _scheduleSuicide(
+Future<void> _scheduleSuicide(
   Duration duration,
   String taskID,
   CancelableOperation cancellableOp,
 ) async {
   _logger.warning("Schedule seppuku taskID: $taskID");
   final prefs = await SharedPreferences.getInstance();
-  Future.delayed(duration, () async {
-    _logger.warning("TLE, committing seppuku for taskID: $taskID");
-    await BgTaskUtils.releaseResourcesForKill(taskID, prefs);
-    await cancellableOp.cancel();
-  });
+
+  for (int i = 0; i < duration.inSeconds; i++) {
+    await Future.delayed(const Duration(seconds: 1));
+    if (flagService.internalUser) {
+      _logger.warning(
+        "Task $taskID is running in internal user mode, T $i seconds",
+      );
+    }
+    if (cancellableOp.isCanceled || cancellableOp.isCompleted) {
+      _logger.warning("Task $taskID cancelled, not scheduling seppuku");
+      return;
+    }
+  }
+
+  _logger.warning("TLE, committing seppuku for taskID: $taskID");
+  await cancellableOp.cancel();
+  await BgTaskUtils.releaseResourcesForKill(taskID, prefs);
 }
