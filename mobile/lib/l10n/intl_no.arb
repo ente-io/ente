@@ -1689,5 +1689,6 @@
   "moon": "I månelyset",
   "onTheRoad": "På veien igjen",
   "food": "Kulinær glede",
-  "pets": "Pelsvenner"
+  "pets": "Pelsvenner",
+  "wishThemAHappyBirthday": "Wish ${memory.personName} a happy birthday! 🎉"
 }

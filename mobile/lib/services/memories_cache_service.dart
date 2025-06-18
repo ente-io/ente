@@ -725,7 +725,7 @@ class MemoriesCacheService {
       final s = await LanguageService.s;
       await NotificationService.instance.scheduleNotification(
         memory.personName != null
-            ? s.happyBirthdayToPerson(memory.personName!)
+            ? s.wishThemAHappyBirthday(memory.personName!)
             : s.happyBirthday,
         id: memory.id.hashCode,
         channelID: "birthday",

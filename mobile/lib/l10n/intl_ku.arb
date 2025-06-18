@@ -1,3 +1,4 @@
 {
-  "@@locale ": "en"
+  "@@locale ": "en",
+  "wishThemAHappyBirthday": "Wish ${memory.personName} a happy birthday! 🎉"
 }

@@ -1735,5 +1735,6 @@
   "addParticipants": "Katılımcı ekle",
   "selectedAlbums": "{count} seçildi",
   "actionNotSupportedOnFavouritesAlbum": "Favoriler albümünde eylem desteklenmiyor",
-  "onThisDay": "Bu günde"
+  "onThisDay": "Bu günde",
+  "wishThemAHappyBirthday": "Wish ${memory.personName} a happy birthday! 🎉"
 }
