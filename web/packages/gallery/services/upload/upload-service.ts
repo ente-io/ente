@@ -63,8 +63,8 @@ import {
     fetchPublicAlbumsMultipartUploadURLs,
     fetchPublicAlbumsUploadURLs,
     fetchUploadURLs,
-    PhotosUploadHTTPClient,
-    PublicAlbumsUploadHTTPClient,
+    postEnteFile,
+    postPublicAlbumsEnteFile,
     putFile,
     putFilePart,
     putFilePartViaWorker,
@@ -77,9 +77,6 @@ import {
     generateThumbnailNative,
     generateThumbnailWeb,
 } from "./thumbnail";
-
-const photosHTTPClient = new PhotosUploadHTTPClient();
-const publicAlbumsHTTPClient = new PublicAlbumsUploadHTTPClient();
 
 /**
  * A readable stream for a file, and its associated size and last modified time.
@@ -178,11 +175,8 @@ class UploadService {
 
     async uploadFile(uploadFile: UploadFile) {
         return this.publicAlbumsCredentials
-            ? publicAlbumsHTTPClient.uploadFile(
-                  uploadFile,
-                  this.publicAlbumsCredentials,
-              )
-            : photosHTTPClient.uploadFile(uploadFile);
+            ? postPublicAlbumsEnteFile(uploadFile, this.publicAlbumsCredentials)
+            : postEnteFile(uploadFile);
     }
 
     private async refillUploadURLs() {

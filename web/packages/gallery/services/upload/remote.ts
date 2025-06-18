@@ -412,59 +412,65 @@ export const completeMultipartUploadViaWorker = async (
     );
 
 /**
- * Lowest layer for file upload related HTTP operations when we're running in
- * the context of the photos app.
+ * Create a new {@link EnteFile} on remote by providing remote with information
+ * about the file's contents (objects) that were uploaded, and other metadata
+ * about the file.
+ *
+ * Remote only, does not modify local state.
+ *
+ * Since this function is the last step after a potentially long upload to S3
+ * remote of the file contents themselves, it has internal retries of the HTTP
+ * request to avoid having transient issues spoil the party.
+ *
+ * @returns the newly created {@link EnteFile}.
  */
-export class PhotosUploadHTTPClient {
-    async uploadFile(uploadFile: UploadFile): Promise<EnteFile> {
-        try {
-            const url = await apiURL("/files");
-            const headers = await authenticatedRequestHeaders();
-            const response = await retryAsyncOperation(
-                () =>
-                    HTTPService.post(
-                        url,
-                        uploadFile,
-                        // @ts-ignore
-                        null,
-                        headers,
-                    ),
-                { abortIfNeeded: handleUploadError },
-            );
-            return response.data;
-        } catch (e) {
-            log.error("upload Files Failed", e);
-            throw e;
-        }
+export const postEnteFile = async (
+    uploadFile: UploadFile,
+): Promise<EnteFile> => {
+    try {
+        const url = await apiURL("/files");
+        const headers = await authenticatedRequestHeaders();
+        const response = await retryAsyncOperation(
+            () =>
+                HTTPService.post(
+                    url,
+                    uploadFile,
+                    // @ts-ignore
+                    null,
+                    headers,
+                ),
+            { abortIfNeeded: handleUploadError },
+        );
+        return response.data;
+    } catch (e) {
+        log.error("upload Files Failed", e);
+        throw e;
     }
-}
+};
 
 /**
- * Lowest layer for file upload related HTTP operations when we're running in
- * the context of the public albums app.
+ * Sibling of {@link postEnteFile} for public albums.
  */
-export class PublicAlbumsUploadHTTPClient {
-    async uploadFile(
-        uploadFile: UploadFile,
-        credentials: PublicAlbumsCredentials,
-    ): Promise<EnteFile> {
-        try {
-            const url = await apiURL("/public-collection/file");
-            const response = await retryAsyncOperation(
-                () =>
-                    HTTPService.post(
-                        url,
-                        uploadFile,
-                        // @ts-ignore
-                        null,
-                        authenticatedPublicAlbumsRequestHeaders(credentials),
-                    ),
-                { abortIfNeeded: handleUploadError },
-            );
-            return response.data;
-        } catch (e) {
-            log.error("upload public File Failed", e);
-            throw e;
-        }
+export const postPublicAlbumsEnteFile = async (
+    uploadFile: UploadFile,
+    credentials: PublicAlbumsCredentials,
+): Promise<EnteFile> => {
+    try {
+        const url = await apiURL("/public-collection/file");
+        const response = await retryAsyncOperation(
+            () =>
+                HTTPService.post(
+                    url,
+                    uploadFile,
+                    // @ts-ignore
+                    null,
+                    authenticatedPublicAlbumsRequestHeaders(credentials),
+                ),
+            { abortIfNeeded: handleUploadError },
+        );
+        return response.data;
+    } catch (e) {
+        log.error("upload public File Failed", e);
+        throw e;
     }
-}
+};
