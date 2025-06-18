@@ -224,10 +224,8 @@ export const initVideoProcessing = async () => {
 
 /**
  * Return the persisted user preference for HLS generation.
- *
- * If unset, defaults to `true`.
  */
-const savedGenerateHLS = async () => (await getKVB("generateHLS")) ?? true;
+const savedGenerateHLS = async () => await getKVB("generateHLS");
 
 /**
  * Update the persisted user preference for HLS generation.
