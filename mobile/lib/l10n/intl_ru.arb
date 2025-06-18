@@ -1725,5 +1725,5 @@
   "food": "Кулинарное наслаждение",
   "pets": "Пушистые спутники",
   "curatedMemories": "Отобранные воспоминания",
-  "wishThemAHappyBirthday": "Wish ${memory.personName} a happy birthday! 🎉"
+  "wishThemAHappyBirthday": "Wish ${name} a happy birthday! 🎉"
 }

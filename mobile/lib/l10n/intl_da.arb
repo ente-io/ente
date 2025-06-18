@@ -323,5 +323,5 @@
   "developerSettingsWarning": "Er du sikker på, at du vil ændre udviklerindstillingerne?",
   "next": "Næste",
   "enterPin": "Indtast PIN",
-  "wishThemAHappyBirthday": "Wish ${memory.personName} a happy birthday! 🎉"
+  "wishThemAHappyBirthday": "Wish ${name} a happy birthday! 🎉"
 }

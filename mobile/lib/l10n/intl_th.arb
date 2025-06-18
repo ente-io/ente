@@ -288,5 +288,5 @@
   },
   "maps": "แผนที่",
   "enableMaps": "เปิดใช้งานแผนที่",
-  "wishThemAHappyBirthday": "Wish ${memory.personName} a happy birthday! 🎉"
+  "wishThemAHappyBirthday": "Wish ${name} a happy birthday! 🎉"
 }

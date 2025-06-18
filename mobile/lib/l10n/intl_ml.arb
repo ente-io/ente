@@ -100,5 +100,5 @@
   "calculating": "കണക്കുകൂട്ടുന്നു...",
   "close": "അടക്കുക",
   "count": "എണ്ണം",
-  "wishThemAHappyBirthday": "Wish ${memory.personName} a happy birthday! 🎉"
+  "wishThemAHappyBirthday": "Wish ${name} a happy birthday! 🎉"
 }

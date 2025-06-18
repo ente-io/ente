@@ -11,5 +11,5 @@
   "askDeleteReason": "Miért törli a fiókját?",
   "deleteAccountFeedbackPrompt": "Sajnáljuk, hogy távozik. Kérjük, ossza meg velünk visszajelzéseit, hogy segítsen nekünk a fejlődésben.",
   "feedback": "Visszajelzés",
-  "wishThemAHappyBirthday": "Wish ${memory.personName} a happy birthday! 🎉"
+  "wishThemAHappyBirthday": "Wish ${name} a happy birthday! 🎉"
 }

@@ -1534,5 +1534,5 @@
   "join": "Dołącz",
   "linkEmail": "Połącz adres e-mail",
   "noEnteAccountExclamation": "Brak konta Ente!",
-  "wishThemAHappyBirthday": "Wish ${memory.personName} a happy birthday! 🎉"
+  "wishThemAHappyBirthday": "Wish ${name} a happy birthday! 🎉"
 }

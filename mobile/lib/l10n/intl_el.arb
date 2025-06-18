@@ -1,5 +1,5 @@
 {
   "@@locale ": "en",
   "enterYourEmailAddress": "Εισάγετε την διεύθυνση ηλ. ταχυδρομείου σας",
-  "wishThemAHappyBirthday": "Wish ${memory.personName} a happy birthday! 🎉"
+  "wishThemAHappyBirthday": "Wish ${name} a happy birthday! 🎉"
 }
