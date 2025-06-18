@@ -1,7 +1,7 @@
 import { sharedCryptoWorker } from "ente-base/crypto";
 import { dateFromEpochMicroseconds } from "ente-base/date";
 import log from "ente-base/log";
-import { nullToUndefined } from "ente-utils/transform";
+import { nullishToBlank, nullToUndefined } from "ente-utils/transform";
 import { z } from "zod/v4";
 import { type Metadata, ItemVisibility } from "./file-metadata";
 import { FileType } from "./file-type";
@@ -279,10 +279,10 @@ const RemoteFileMetadata = z.object({
      * fields (either by nulling them outright, or inserting placeholders,
      * depending on the remote schema).
      *
-     * So the {@link RemoteEnteFile} object present in the trash items for
-     * permanently deleted files in the trash diff response (i.e. trash items
-     * where {@link isDeleted} is set to `true`) may not have the fields which
-     * we normally would expect to always be there for files.
+     * So a {@link RemoteEnteFile} object present in the trash item of a
+     * permanently deleted file in the trash diff response (i.e. a trash item
+     * with {@link isDeleted} is set to `true`) may not have the fields which we
+     * normally would expect to always be there for files.
      *
      * This is not a problem in code flow since the client will not even attempt
      * to decrypt or use such file entries, so the absence of these fields has
@@ -291,10 +291,12 @@ const RemoteFileMetadata = z.object({
      *
      * Luckily, this is simple to handle since most of the data in a
      * {@link RemoteEnteFile} is already optional. The only tweak we require is
-     * making the {@link encryptedData} of the {@link RemoteEnteFile}'s
-     * {@link metadata} field also optional.
+     * handling missing {@link encryptedData} of the {@link RemoteEnteFile}'s
+     * {@link metadata} field in such cases. We could mark it as a optional too,
+     * but since we anyways shouldn't be using this field, so for convenience of
+     * the upstream types, we transform such missing values to a blank string.
      */
-    encryptedData: z.string(),
+    encryptedData: z.string().nullish().transform(nullishToBlank),
     /**
      * The base64 encoded decryption header that was used during encryption of
      * {@link encryptedData}.
@@ -346,7 +348,9 @@ export const RemoteEnteFile = z.looseObject({
      * that are no longer part of the collection.
      *
      * - They may have been removed from the collection.
+     *
      * - They have been deleted (either moved to trash, or permanently deleted).
+     *
      */
     isDeleted: z.boolean().nullish().transform(nullToUndefined),
     metadata: RemoteFileMetadata,
