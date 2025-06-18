@@ -626,6 +626,10 @@ export async function decryptFile(
             collectionKey,
         );
         const fileMetadata = await worker.decryptMetadataJSON(
+            // See: [Note: strict mode migration]
+            //
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
             metadata,
             fileKey,
         );
@@ -720,6 +724,10 @@ export const decryptRemoteFile = async (
         collectionKey,
     );
 
+    // See: [Note: strict mode migration]
+    //
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     const metadata = await decryptMetadataJSON(encryptedMetadata, key);
 
     let magicMetadata: EnteFile2["magicMetadata"];
