@@ -192,7 +192,9 @@ class ComputeController {
   void _onThermalStateUpdate(ThermalStatus? thermalStatus) {
     _lastThermalStatus = thermalStatus;
     _logger.info("Thermal status: $thermalStatus");
-    _isDeviceHealthy = _computeIsAndroidDeviceHealthy();
+    _isDeviceHealthy = Platform.isAndroid
+        ? _computeIsAndroidDeviceHealthy()
+        : _computeIsiOSDeviceHealthy();
     _fireControlEvent();
   }
 
