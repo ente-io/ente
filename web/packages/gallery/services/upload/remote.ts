@@ -16,7 +16,6 @@ import {
     type EncryptedMagicMetadata,
     type EnteFile,
     type RemoteFileMetadata,
-    type S3FileAttributes,
 } from "ente-media/file";
 import { handleUploadError } from "ente-shared/error";
 import HTTPService from "ente-shared/network/HTTPService";
@@ -415,14 +414,65 @@ export const completeMultipartUploadViaWorker = async (
         }),
     );
 
-interface PostEnteFileRequest {
+export interface PostEnteFileRequest {
     collectionID: number;
     encryptedKey: string;
     keyDecryptionNonce: string;
-    file: S3FileAttributes;
-    thumbnail: S3FileAttributes;
+    file: UploadedFileObjectAttributes;
+    thumbnail: UploadedFileObjectAttributes;
     metadata: RemoteFileMetadata;
     pubMagicMetadata: EncryptedMagicMetadata;
+}
+
+/**
+ * Attributes about an object uploaded to S3.
+ *
+ * This is similar to the {@link FileObjectAttributes} that we get back in the
+ * {@link EnteFile} we get from remote, however it contains more fields.
+ *
+ * - When we're finalizing the upload of {@link EnteFile}, we have at our
+ *   disposal the {@link objectKey}, {@link decryptionHeader} and {@link size}
+ *   attributes that we need to set in the POST "/files" request.
+ *
+ * - Later when we get back the file from remote as an {@link EnteFile}, it will
+ *   only have the {@link decryptionHeader}. This is all we need for obtaining
+ *   the decrypted file: the contents of the file get fetched (on demand) using
+ *   a presigned URL, and the file's key is the decryption key, so armed with
+ *   this decryption header we are good to go.
+ */
+export interface UploadedFileObjectAttributes {
+    /**
+     * The "key" (unique ID) of the S3 object that was uploaded.
+     *
+     * This is not related to encryption, it is the "objectKey" that uniquely
+     * identifies the S3 object that was uploaded. We get these as part of the
+     * {@link ObjectUploadURL} we get from remote. We upload the contents of the
+     * object (e.g. file, thumbnail) to the corresponding URL, and then report
+     * back the "objectKey" in the upload finalization request.
+     */
+    objectKey: string;
+    /**
+     * The decryption header that was used when encrypting the objects's
+     * contents (with the file's key) before uploading them to S3 remote.
+     *
+     * The {@link decryptionHeader} is both required when finalizing the upload,
+     * and is also returned as part of the {@link EnteFile} that clients get
+     * back from remote since it is needed (along with the file's key) to
+     * decrypt the object that the client would download from S3 remote.
+     */
+    decryptionHeader: string;
+    /**
+     * The size of the uploaded object, in bytes.
+     *
+     * For both file and thumbnails, the client also sends the size of the
+     * encrypted file (as per the client) while creating a new object on remote.
+     * This allows the server to validate that the size of the objects is same
+     * as what client is reporting.
+     *
+     * This should be present during upload, but is not returned back from
+     * remote in the /diff response.
+     */
+    size: number;
 }
 
 /**

@@ -44,9 +44,16 @@ export interface EncryptedEnteFile {
      * {@link FilePublicMagicMetadataData}).
      */
     ownerID: number;
-    file: S3FileAttributes;
-    thumbnail: S3FileAttributes;
-    metadata: RemoteFileMetadata;
+    /**
+     * Information pertaining to the encrypted S3 object that has the file's
+     * contents.
+     */
+    file: FileObjectAttributes;
+    /**
+     * Information pertaining to the encrypted S3 object that has the contents
+     * of the file's thumbnail.
+     */
+    thumbnail: FileObjectAttributes;
     /**
      * Static, remote visible, information associated with a file.
      *
@@ -57,6 +64,7 @@ export interface EncryptedEnteFile {
      * Files uploaded by very old versions of Ente might not have this field.
      */
     info?: FileInfo;
+    metadata: RemoteFileMetadata;
     magicMetadata: EncryptedMagicMetadata;
     pubMagicMetadata: EncryptedMagicMetadata;
     /**
@@ -172,35 +180,23 @@ export interface EnteFile
 }
 
 /**
- * Attributes about an object uploaded to S3.
+ * Attributes about an object related to the file
  *
- * TODO: Split between fields needed during upload, and the fields we get back
- * from remote in the /diff response.
+ * - The file's contents,
+ *
+ * - The file's thumbnail's contents.
  */
-export interface S3FileAttributes {
+export interface FileObjectAttributes {
     /**
-     * Upload only: This should be present during upload, but is not returned
-     * back from remote in the /diff response.
-     */
-    objectKey: string;
-    /**
-     * Upload and diff: This is present both during upload and also returned by
-     * remote in the /diff response.
+     * The decryption header that was used when encrypting the objects's
+     * contents (with the file's key) before uploading them to S3 remote.
      */
     decryptionHeader: string;
-    /**
-     * The size of the file, in bytes.
-     *
-     * For both file and thumbnails, the client also sends the size of the
-     * encrypted file (as per the client) while creating a new object on remote.
-     * This allows the server to validate that the size of the objects is same
-     * as what client is reporting.
-     *
-     * Upload only: This should be present during upload, but is not returned
-     * back from remote in the /diff response.
-     */
-    size: number;
 }
+
+const RemoteFileObjectAttributes = z.looseObject({
+    decryptionHeader: z.string(),
+});
 
 /**
  * Static information associated with a file.
@@ -266,8 +262,8 @@ export const RemoteEnteFile = z.looseObject({
      * Base64 encoded.
      */
     keyDecryptionNonce: z.string(),
-    file: z.unknown(),
-    thumbnail: z.unknown(),
+    file: RemoteFileObjectAttributes,
+    thumbnail: RemoteFileObjectAttributes,
     info: RemoteFileInfo.nullish().transform(nullToUndefined),
     updationTime: z.number(),
     /**
