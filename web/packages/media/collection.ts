@@ -428,8 +428,9 @@ export const RemoteCollection = z.looseObject({
     /**
      * Tombstone marker.
      *
-     * This is set to true in the diff response to indicate collections which
-     * have been deleted and should thus be pruned by the client locally.
+     * This is set to `true` in the collection fetch response to indicate
+     * collections which have been deleted on remote and should thus be pruned
+     * by the client locally.
      */
     isDeleted: z.boolean().nullish().transform(nullToUndefined),
     magicMetadata: RemoteMagicMetadata.nullish().transform(nullToUndefined),

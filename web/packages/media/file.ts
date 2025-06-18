@@ -112,6 +112,45 @@ export interface EncryptedEnteFile {
  * file ID in our local state, one for each {@link Collection} to which the file
  * belongs. That is, the uniqueness is across the (fileID, collectionID) pairs.
  * See [Note: Collection file].
+ *
+ * [Note: File lifecycle]
+ *
+ * 1. **Normal**: A file starts off by belonging to at least one collection. It
+ *    can then be added to additional collections, each of which will be an
+ *    EnteFile with a distinct (fileID, collectionID) pair.
+ *
+ * 2. **Trash**: If the user deletes the file, then the file moves to trash.
+ *    Such files will have {@link isDeleted} `true` in their
+ *    {@link RemoteEnteFile} entries when we perform a collection diff to let
+ *    the client know that the corresponding file is no longer part of the
+ *    collection.
+ *
+ *    Such files will now be returned as part of the trash diff, with both
+ *    {@link isDeleted} and {@link isRestored} set to `false` for their trash
+ *    entry.
+ *
+ * 3. **Restore**: If the the user were to restore the file before permanent
+ *    deletion, then it effectively works as moving a normal file to an normal
+ *    collection. In particular, if we were to restore the file back to one of
+ *    the collections it was part of pre-trash, and then fetch the collection
+ *    diff for that collection, we would get back the same file object, except
+ *    with {@link isDeleted} will now be `false`.
+ *
+ *    The trash entry for restored files will have {@link isRestored} set to
+ *    `true` to notify clients that an item that was previously in trash is no
+ *    longer there because it has been restored.
+ *
+ * 4. **Permanent deletion**: If the file remains in trash for 30 days, or if
+ *    the user explictly permanently deletes it from the trash, or if the user
+ *    explicitly clears the trash, then it will get permanently deleted.
+ *
+ *    The trash entry for such permanently deleted files will have
+ *    {@link isDeleted} set to `true` to notify clients that an item that was
+ *    previously in trash is no longer there because it has been permanently
+ *    deleted.
+ *
+ *    When a file is permanently deleted, remote will scrub off data from its
+ *    fields. See: [Note: Optionality of remote file fields].
  */
 export interface EnteFile
     extends Omit<
@@ -180,7 +219,7 @@ export interface EnteFile
 }
 
 /**
- * Attributes about an object related to the file
+ * Attributes about an object related to an {@link EnteFile}.
  *
  * - The file's contents,
  *
@@ -195,6 +234,12 @@ export interface FileObjectAttributes {
 }
 
 const RemoteFileObjectAttributes = z.looseObject({
+    /**
+     * The decryption header (base64 string) used when encrypting the object.
+     *
+     * For permanently deleted files, this will still be present, but remote may
+     * scrub it to a blank string or a placeholder.
+     */
     decryptionHeader: z.string(),
 });
 
@@ -223,11 +268,39 @@ const RemoteFileMetadata = z.object({
      * file's key.
      *
      * Base64 encoded.
+     *
+     * There is one case when this will be not be present - for permanently
+     * deleted files when we get them as part of a trash diff (see the longer
+     * note about this below):
+     *
+     * [Note: Optionality of remote file fields]
+     *
+     * When a file is permanently deleted, remote will scrub off data from its
+     * fields (either by nulling them outright, or inserting placeholders,
+     * depending on the remote schema).
+     *
+     * So the {@link RemoteEnteFile} object present in the trash items for
+     * permanently deleted files in the trash diff response (i.e. trash items
+     * where {@link isDeleted} is set to `true`) may not have the fields which
+     * we normally would expect to always be there for files.
+     *
+     * This is not a problem in code flow since the client will not even attempt
+     * to decrypt or use such file entries, so the absence of these fields has
+     * no impact. However, it does impact JSON validation, which might
+     * preemptively (and unnecessarily) fail for such {@link RemoteEnteFile}s.
+     *
+     * Luckily, this is simple to handle since most of the data in a
+     * {@link RemoteEnteFile} is already optional. The only tweak we require is
+     * making the {@link encryptedData} of the {@link RemoteEnteFile}'s
+     * {@link metadata} field also optional.
      */
     encryptedData: z.string(),
     /**
      * The base64 encoded decryption header that was used during encryption of
      * {@link encryptedData}.
+     *
+     * For permanently deleted files, this will still be present, but remote may
+     * scrub it to a blank string or a placeholder.
      */
     decryptionHeader: z.string(),
 });
@@ -267,17 +340,18 @@ export const RemoteEnteFile = z.looseObject({
     info: RemoteFileInfo.nullish().transform(nullToUndefined),
     updationTime: z.number(),
     /**
-     * Tombstone marker.
+     * Removal marker in diff responses.
      *
-     * This is set to true in the diff response to indicate files which have
-     * been deleted and should thus be pruned by the client locally.
+     * This is set to `true` in the collection diff response to indicate files
+     * that are no longer part of the collection.
+     *
+     * - They may have been removed from the collection.
+     * - They have been deleted (either moved to trash, or permanently deleted).
      */
     isDeleted: z.boolean().nullish().transform(nullToUndefined),
     metadata: RemoteFileMetadata,
     magicMetadata: RemoteMagicMetadata.nullish().transform(nullToUndefined),
     pubMagicMetadata: RemoteMagicMetadata.nullish().transform(nullToUndefined),
-    isTrashed: z.boolean().nullish().transform(nullToUndefined),
-    deleteBy: z.number().nullish().transform(nullToUndefined),
 });
 
 export type RemoteEnteFile = z.infer<typeof RemoteEnteFile>;
