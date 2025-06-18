@@ -60,25 +60,23 @@ func (c *Controller) InsertVideoPreview(ctx *gin.Context, req *filedata.VidPrevi
 	dbInsertErr := c.Repo.InsertOrUpdatePreviewData(context.Background(), row, fileObjectKey)
 	if dbInsertErr != nil {
 		if strings.Contains(dbInsertErr.Error(), "failed to remove object from tempObjects") {
-			// This means the object was already inserted, and we can ignore the error
 			isDuplicate, checkErr := c._checkIfDuplicateRequest(ctx, row, fileObjectKey)
 			if checkErr != nil {
 				logger.WithError(checkErr).Error("failed to check for duplicate request")
-				// return the original error
+				// continue with existing dbInsertErr
 			}
 			if isDuplicate {
 				logger.Info("duplicate put request detected, ignoring")
 				return nil
 			}
 		}
-		logger.WithError(dbInsertErr).Error("insert or update failed")
 		return stacktrace.Propagate(dbInsertErr, "failed to insert or update preview data")
 	}
 	return nil
 }
 
 func (c *Controller) _checkIfDuplicateRequest(ctx *gin.Context, row filedata.Row, fileObjectKey string) (bool, error) {
-	exists, err := c.Repo.ObjectCleanupRepo.DoestTempObjectExist(ctx, fileObjectKey, row.LatestBucket)
+	exists, err := c.Repo.ObjectCleanupRepo.DoesTempObjectExist(ctx, fileObjectKey, row.LatestBucket)
 	if err != nil {
 		return false, stacktrace.Propagate(err, "failed to check if duplicate request")
 	}
@@ -96,11 +94,14 @@ func (c *Controller) _checkIfDuplicateRequest(ctx *gin.Context, row filedata.Row
 		return false, stacktrace.NewError("multiple rows found for fileID %d", row.FileID)
 	}
 	if data[0].LatestBucket == row.LatestBucket &&
-		data[0].ObjectID != nil && data[0].ObjectID == row.ObjectID &&
-		data[0].ObjectSize != nil && data[0].ObjectSize == row.ObjectSize {
+		data[0].ObjectID != nil && *data[0].ObjectID == *row.ObjectID &&
+		data[0].ObjectSize != nil && *data[0].ObjectSize == *row.ObjectSize {
 		log.WithField("fileID", row.FileID).WithField("objectID", row.ObjectID).
 			Info("duplicate put request detected")
 		return true, nil
+	} else {
+		log.WithField("fileID", row.FileID).WithField("objectID", row.ObjectID).
+			Info("duplicate put request not detected, existing data does not match")
 	}
 	return false, nil
 }

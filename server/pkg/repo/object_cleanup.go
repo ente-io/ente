@@ -57,7 +57,7 @@ func (repo *ObjectCleanupRepository) RemoveTempObjectFromDC(ctx context.Context,
 	return nil
 }
 
-func (repo *ObjectCleanupRepository) DoestTempObjectExist(ctx context.Context, objectKey string, uploadID string) (bool, error) {
+func (repo *ObjectCleanupRepository) DoesTempObjectExist(ctx context.Context, objectKey string, uploadID string) (bool, error) {
 	var exists bool
 	query := `SELECT EXISTS(SELECT 1 FROM temp_objects WHERE object_key = $1 AND upload_id = $2)`
 	err := repo.DB.QueryRowContext(ctx, query, objectKey, uploadID).Scan(&exists)
