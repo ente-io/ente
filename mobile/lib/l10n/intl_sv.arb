@@ -531,5 +531,6 @@
   "sort": "Sortera",
   "newPerson": "Ny person",
   "addName": "Lägg till namn",
-  "add": "Lägg till"
+  "add": "Lägg till",
+  "wishThemAHappyBirthday": "Wish ${memory.personName} a happy birthday! 🎉"
 }

@@ -1747,5 +1747,6 @@
   "receiveRemindersOnBirthdays": "Ricevi promemoria quando è il compleanno di qualcuno. Toccare la notifica ti porterà alle foto della persona che compie gli anni.",
   "happyBirthday": "Buon compleanno! 🥳",
   "happyBirthdayToPerson": "Buon compleanno a {name}! 🎉",
-  "birthdays": "Compleanni"
+  "birthdays": "Compleanni",
+  "wishThemAHappyBirthday": "Wish ${memory.personName} a happy birthday! 🎉"
 }
