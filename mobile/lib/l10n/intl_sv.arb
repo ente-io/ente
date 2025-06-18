@@ -532,5 +532,5 @@
   "newPerson": "Ny person",
   "addName": "Lägg till namn",
   "add": "Lägg till",
-  "wishThemAHappyBirthday": "Wish ${memory.personName} a happy birthday! 🎉"
+  "wishThemAHappyBirthday": "Wish ${name} a happy birthday! 🎉"
 }

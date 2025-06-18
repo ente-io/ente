@@ -1724,5 +1724,5 @@
   "onTheRoad": "再次踏上旅途",
   "food": "美食盛宴",
   "pets": "毛茸茸的伙伴",
-  "wishThemAHappyBirthday": "Wish ${memory.personName} a happy birthday! 🎉"
+  "wishThemAHappyBirthday": "Wish ${name} a happy birthday! 🎉"
 }

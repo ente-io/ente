@@ -1757,5 +1757,5 @@
   "happyBirthday": "Joyeux anniversaire ! 🥳",
   "happyBirthdayToPerson": "Joyeux anniversaire {name}! 🎉",
   "birthdays": "Anniversaires",
-  "wishThemAHappyBirthday": "Wish ${memory.personName} a happy birthday! 🎉"
+  "wishThemAHappyBirthday": "Wish ${name} a happy birthday! 🎉"
 }

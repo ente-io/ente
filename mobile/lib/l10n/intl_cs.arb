@@ -437,5 +437,5 @@
   "newRange": "Nový rozsah",
   "youAndThem": "Vy a {name}",
   "selfiesWithThem": "Selfie s {name}",
-  "wishThemAHappyBirthday": "Wish ${memory.personName} a happy birthday! 🎉"
+  "wishThemAHappyBirthday": "Wish ${name} a happy birthday! 🎉"
 }

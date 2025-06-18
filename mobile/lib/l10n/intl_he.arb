@@ -792,5 +792,5 @@
   "create": "צור",
   "viewAll": "הצג הכל",
   "hiding": "מחביא...",
-  "wishThemAHappyBirthday": "Wish ${memory.personName} a happy birthday! 🎉"
+  "wishThemAHappyBirthday": "Wish ${name} a happy birthday! 🎉"
 }

@@ -308,5 +308,5 @@
   "search": "جستجو",
   "whatsNew": "تغییرات جدید",
   "reviewSuggestions": "مرور پیشنهادها",
-  "wishThemAHappyBirthday": "Wish ${memory.personName} a happy birthday! 🎉"
+  "wishThemAHappyBirthday": "Wish ${name} a happy birthday! 🎉"
 }

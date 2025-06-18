@@ -1690,5 +1690,5 @@
   "onTheRoad": "På veien igjen",
   "food": "Kulinær glede",
   "pets": "Pelsvenner",
-  "wishThemAHappyBirthday": "Wish ${memory.personName} a happy birthday! 🎉"
+  "wishThemAHappyBirthday": "Wish ${name} a happy birthday! 🎉"
 }

@@ -1112,5 +1112,5 @@
   "left": "Kiri",
   "right": "Kanan",
   "whatsNew": "Hal yang baru",
-  "wishThemAHappyBirthday": "Wish ${memory.personName} a happy birthday! 🎉"
+  "wishThemAHappyBirthday": "Wish ${name} a happy birthday! 🎉"
 }

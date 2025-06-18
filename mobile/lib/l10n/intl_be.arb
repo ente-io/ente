@@ -211,5 +211,5 @@
   "systemTheme": "Сістэма",
   "freeTrial": "Бясплатная пробная версія",
   "faqs": "Частыя пытанні",
-  "wishThemAHappyBirthday": "Wish ${memory.personName} a happy birthday! 🎉"
+  "wishThemAHappyBirthday": "Wish ${name} a happy birthday! 🎉"
 }
