@@ -8,16 +8,17 @@
 import type { AxiosResponse } from "axios";
 import { sharedCryptoWorker } from "ente-base/crypto";
 import { nameAndExtension } from "ente-base/file-name";
-import { publicRequestHeaders } from "ente-base/http";
+import { ensureOk, publicRequestHeaders } from "ente-base/http";
 import log from "ente-base/log";
 import { apiURL, customAPIOrigin } from "ente-base/origins";
-import type {
-    EncryptedEnteFile,
-    EnteFile,
-    FileMagicMetadata,
-    FilePublicMagicMetadata,
+import {
+    mergeMetadata1,
+    RemoteEnteFile,
+    type EncryptedEnteFile,
+    type EnteFile,
+    type FileMagicMetadata,
+    type FilePublicMagicMetadata,
 } from "ente-media/file";
-import { mergeMetadata1 } from "ente-media/file";
 import { FileType } from "ente-media/file-type";
 import { isHEICExtension, needsJPEGConversion } from "ente-media/formats";
 import { heicToJPEG } from "ente-media/heic-convert";
@@ -28,6 +29,7 @@ import { shuffled } from "ente-utils/array";
 import { wait } from "ente-utils/promise";
 import type { CastData } from "services/cast-data";
 import { detectMediaMIMEType } from "services/detect-type";
+import { z } from "zod/v4";
 import { isChromecast } from "./chromecast-receiver";
 
 /**
@@ -176,6 +178,47 @@ const getEncryptedCollectionFiles = async (
             sinceTime,
         );
     } while (resp.data.hasMore);
+    return files;
+};
+
+const CastCollectionFilesResponse = z.object({
+    diff: RemoteEnteFile.array(),
+    hasMore: z.boolean(),
+});
+
+/**
+ * Fetch all the {@link RemoteEnteFile}s present in the collection corresponding
+ * to the given {@link castToken}.
+ *
+ * The remote files are not decrypted or otherwise used at this point, we will
+ * decrypt and use them on demand when they need to be displayed.
+ *
+ * @param castToken A token used both for authentication, and also identifying
+ * the collection corresponding to the cast session.
+ */
+export const getRemoteCastCollectionFiles = async (
+    castToken: string,
+): Promise<RemoteEnteFile> => {
+    const files: RemoteEnteFile[] = [];
+    let sinceTime = 0;
+    while (true) {
+        const res = await fetch(
+            await apiURL("/cast/diff", { sinceTime: sinceTime.toString() }),
+            { headers: { "X-Cast-Access-Token": castToken } },
+        );
+        ensureOk(res);
+        const { diff, hasMore } = CastCollectionFilesResponse.parse(
+            await res.json(),
+        );
+        if (!diff.length) break;
+        if (!hasMore) break;
+        for (const change of diff) {
+            sinceTime = Math.max(sinceTime, change.updationTime);
+            if (!change.isDeleted) {
+                files.push(change);
+            }
+        }
+    }
     return files;
 };
 
