@@ -200,7 +200,7 @@ class ClusterFeedbackService<T> {
   }
 
   // TODO: lau:fileinfo
-  Future<void> removeFaceFromPerson(
+  Future<String> removeFaceFromPerson(
     String faceID,
     PersonEntity p,
   ) async {
@@ -222,7 +222,7 @@ class ClusterFeedbackService<T> {
         PeopleChangedEvent(type: PeopleEventType.removedFaceFromCluster),
       );
       _logger.info('removeFaceFromPerson done');
-      return;
+      return newCluster;
     } catch (e, s) {
       _logger.severe("Error in removeFaceFromPerson", e, s);
       rethrow;
