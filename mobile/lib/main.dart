@@ -302,7 +302,7 @@ void logLocalSettings() {
   );
   _logger.info("Gallery grid size: ${localSettings.getPhotoGridSize()}");
   _logger.info(
-    "Video streaming is enalbed: ${VideoPreviewService.instance.isVideoStreamingEnabled}",
+    "Video streaming is enabled: ${VideoPreviewService.instance.isVideoStreamingEnabled}",
   );
 }
 

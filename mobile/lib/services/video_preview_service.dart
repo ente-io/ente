@@ -6,7 +6,6 @@ import "dart:io";
 import "package:collection/collection.dart";
 import "package:dio/dio.dart";
 import "package:encrypt/encrypt.dart" as enc;
-import "package:ffmpeg_kit_flutter/ffmpeg_kit.dart";
 import "package:ffmpeg_kit_flutter/ffmpeg_session.dart";
 import "package:ffmpeg_kit_flutter/return_code.dart";
 import "package:flutter/foundation.dart";
@@ -31,6 +30,7 @@ import "package:photos/models/preview/preview_item_status.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/services/filedata/model/file_data.dart";
+import "package:photos/services/isolated_ffmpeg_service.dart";
 import "package:photos/ui/notification/toast.dart";
 import "package:photos/utils/exif_util.dart";
 import "package:photos/utils/file_key.dart";
@@ -124,8 +124,7 @@ class VideoPreviewService {
     EnteFile enteFile, [
     bool forceUpload = false,
   ]) async {
-    if (!isVideoStreamingEnabled ||
-        !computeController.requestCompute(stream: true)) {
+    if (!isVideoStreamingEnabled) {
       _logger.info(
         "Pause preview due to disabledSteaming($isVideoStreamingEnabled) or computeController permission)",
       );
@@ -239,7 +238,7 @@ class VideoPreviewService {
 
       // case 1, if it's already a good stream
       if (bitrate != null && bitrate <= 4000 * 1000 && codecIsH264) {
-        session = await FFmpegKit.execute(
+        session = await IsolatedFfmpegService.runFfmpeg(
           '-i "${file.path}" '
           '-c:v copy -c:a copy '
           '-f hls -hls_time 2 -hls_flags single_file '
@@ -251,7 +250,7 @@ class VideoPreviewService {
           codec != null &&
           bitrate <= 2000 * 1000 &&
           !codecIsH264) {
-        session = await FFmpegKit.execute(
+        session = await IsolatedFfmpegService.runFfmpeg(
           '-i "${file.path}" '
           '-vf "format=yuv420p10le,zscale=transfer=linear,tonemap=tonemap=hable:desat=0:peak=10,zscale=transfer=bt709:matrix=bt709:primaries=bt709,format=yuv420p" '
           '-color_primaries bt709 -color_trc bt709 -colorspace bt709 '
@@ -263,7 +262,7 @@ class VideoPreviewService {
         );
       } // case 3, if it's color space is good
       else if (colorSpace != null && isColorGood) {
-        session = await FFmpegKit.execute(
+        session = await IsolatedFfmpegService.runFfmpeg(
           '-i "${file.path}" '
           '-vf "scale=-2:720,fps=30" '
           '-c:v libx264 -b:v 2000k -crf 23 -preset medium '
@@ -273,7 +272,7 @@ class VideoPreviewService {
         );
       } // case 4, make it compatible
       else {
-        session = await FFmpegKit.execute(
+        session = await IsolatedFfmpegService.runFfmpeg(
           '-i "${file.path}" '
           '-vf "scale=-2:720,fps=30,format=yuv420p10le,zscale=transfer=linear,tonemap=tonemap=hable:desat=0:peak=10,zscale=transfer=bt709:matrix=bt709:primaries=bt709,format=yuv420p" '
           '-color_primaries bt709 -color_trc bt709 -colorspace bt709 '
@@ -285,7 +284,7 @@ class VideoPreviewService {
         );
       }
 
-      final returnCode = await session.getReturnCode();
+      final returnCode = await session?.getReturnCode();
 
       String? objectId;
       int? objectSize;
@@ -309,7 +308,7 @@ class VideoPreviewService {
           objectSize = result.$2;
 
           // Fetch resolution of generated stream by decrypting a single frame
-          final FFmpegSession session2 = await FFmpegKit.execute(
+          final FFmpegSession session2 = await IsolatedFfmpegService.runFfmpeg(
             '-allowed_extensions ALL -i "$prefix/output.m3u8" -frames:v 1 -c copy "$prefix/frame.ts"',
           );
           final returnCode2 = await session2.getReturnCode();
@@ -345,7 +344,7 @@ class VideoPreviewService {
         _logger.warning("FFmpeg command cancelled");
         error = "FFmpeg command cancelled";
       } else {
-        final output = await session.getOutput();
+        final output = await session?.getOutput();
         _logger.shout(
           "FFmpeg command failed with return code $returnCode",
           output ?? "Error not found",
@@ -744,12 +743,12 @@ class VideoPreviewService {
     }
     final int size = enteFile.fileSize!;
     final int duration = enteFile.duration!;
-    if (size >= 500 * 1024 * 1024 || duration > 60) {
-      _logger.info(
-        "Skip Preview due to size: $size or duration: $duration",
-      );
-      return (null, true, null);
-    }
+    // if (size >= 500 * 1024 * 1024 || duration > 60) {
+    //   _logger.info(
+    //     "Skip Preview due to size: $size or duration: $duration",
+    //   );
+    //   return (null, true, null);
+    // }
     FFProbeProps? props;
     File? file;
     bool skipFile = false;
@@ -862,11 +861,11 @@ class VideoPreviewService {
 
   void queueFiles() {
     Future.delayed(const Duration(seconds: 5), () {
-      if (!_hasQueuedFile && computeController.requestCompute(stream: true)) {
-        _putFilesForPreviewCreation(true).catchError((_) {
-          _hasQueuedFile = false;
-        });
-      }
+      // if (!_hasQueuedFile && computeController.requestCompute(stream: true)) {
+      _putFilesForPreviewCreation(true).catchError((_) {
+        _hasQueuedFile = false;
+      });
+      // }
     });
   }
 }
