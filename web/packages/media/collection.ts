@@ -86,8 +86,8 @@ export interface Collection {
      */
     updationTime: number;
     /**
-     * Mutable metadata associated with the collection that is only visible to
-     * the owner of the collection.
+     * Private mutable metadata associated with the collection that is only
+     * visible to the owner of the collection.
      *
      * See: [Note: Metadatum]
      */
@@ -345,7 +345,7 @@ export interface PublicURL {
 }
 
 /**
- * Zod schema for the {@link PublicURL2} we use in our interactions with remote.
+ * Zod schema for the {@link PublicURL} we use in our interactions with remote.
  *
  * We also use the same schema when persisting the collection locally.
  */
@@ -428,8 +428,9 @@ export const RemoteCollection = z.looseObject({
     /**
      * Tombstone marker.
      *
-     * This is set to true in the diff response to indicate collections which
-     * have been deleted and should thus be pruned by the client locally.
+     * This is set to `true` in the collection fetch response to indicate
+     * collections which have been deleted on remote and should thus be pruned
+     * by the client locally.
      */
     isDeleted: z.boolean().nullish().transform(nullToUndefined),
     magicMetadata: RemoteMagicMetadata.nullish().transform(nullToUndefined),
@@ -457,6 +458,8 @@ export const decryptRemoteCollection = async (
     // RemoteCollection is a looseObject, and we want to retain that semantic
     // for the parsed Collection. Mention all fields that we want to explicitly
     // drop or transform, passthrough the rest unchanged in the return value.
+    //
+    // See: [Note: Use looseObject when parsing JSON that will get persisted].
     const {
         owner,
         encryptedKey,

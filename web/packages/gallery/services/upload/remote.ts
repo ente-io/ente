@@ -12,12 +12,15 @@ import {
 } from "ente-base/http";
 import log from "ente-base/log";
 import { apiURL, uploaderOrigin } from "ente-base/origins";
-import { type EnteFile } from "ente-media/file";
+import {
+    type EncryptedMagicMetadata,
+    type EnteFile,
+    type RemoteFileMetadata,
+} from "ente-media/file";
 import { handleUploadError } from "ente-shared/error";
 import HTTPService from "ente-shared/network/HTTPService";
 import { nullToUndefined } from "ente-utils/transform";
 import { z } from "zod/v4";
-import type { UploadFile } from "./upload-service";
 
 /**
  * A pre-signed URL alongwith the associated object key that is later used to
@@ -411,60 +414,127 @@ export const completeMultipartUploadViaWorker = async (
         }),
     );
 
-/**
- * Lowest layer for file upload related HTTP operations when we're running in
- * the context of the photos app.
- */
-export class PhotosUploadHTTPClient {
-    async uploadFile(uploadFile: UploadFile): Promise<EnteFile> {
-        try {
-            const url = await apiURL("/files");
-            const headers = await authenticatedRequestHeaders();
-            const response = await retryAsyncOperation(
-                () =>
-                    HTTPService.post(
-                        url,
-                        uploadFile,
-                        // @ts-ignore
-                        null,
-                        headers,
-                    ),
-                { abortIfNeeded: handleUploadError },
-            );
-            return response.data;
-        } catch (e) {
-            log.error("upload Files Failed", e);
-            throw e;
-        }
-    }
+export interface PostEnteFileRequest {
+    collectionID: number;
+    encryptedKey: string;
+    keyDecryptionNonce: string;
+    file: UploadedFileObjectAttributes;
+    thumbnail: UploadedFileObjectAttributes;
+    metadata: RemoteFileMetadata;
+    pubMagicMetadata: EncryptedMagicMetadata;
 }
 
 /**
- * Lowest layer for file upload related HTTP operations when we're running in
- * the context of the public albums app.
+ * Attributes about an object uploaded to S3.
+ *
+ * This is similar to the {@link FileObjectAttributes} that we get back in the
+ * {@link EnteFile} we get from remote, however it contains more fields.
+ *
+ * - When we're finalizing the upload of {@link EnteFile}, we have at our
+ *   disposal the {@link objectKey}, {@link decryptionHeader} and {@link size}
+ *   attributes that we need to set in the POST "/files" request.
+ *
+ * - Later when we get back the file from remote as an {@link EnteFile}, it will
+ *   only have the {@link decryptionHeader}. This is all we need for obtaining
+ *   the decrypted file: the contents of the file get fetched (on demand) using
+ *   a presigned URL, and the file's key is the decryption key, so armed with
+ *   this decryption header we are good to go.
  */
-export class PublicAlbumsUploadHTTPClient {
-    async uploadFile(
-        uploadFile: UploadFile,
-        credentials: PublicAlbumsCredentials,
-    ): Promise<EnteFile> {
-        try {
-            const url = await apiURL("/public-collection/file");
-            const response = await retryAsyncOperation(
-                () =>
-                    HTTPService.post(
-                        url,
-                        uploadFile,
-                        // @ts-ignore
-                        null,
-                        authenticatedPublicAlbumsRequestHeaders(credentials),
-                    ),
-                { abortIfNeeded: handleUploadError },
-            );
-            return response.data;
-        } catch (e) {
-            log.error("upload public File Failed", e);
-            throw e;
-        }
-    }
+export interface UploadedFileObjectAttributes {
+    /**
+     * The "key" (unique ID) of the S3 object that was uploaded.
+     *
+     * This is not related to encryption, it is the "objectKey" that uniquely
+     * identifies the S3 object that was uploaded. We get these as part of the
+     * {@link ObjectUploadURL} we get from remote. We upload the contents of the
+     * object (e.g. file, thumbnail) to the corresponding URL, and then report
+     * back the "objectKey" in the upload finalization request.
+     */
+    objectKey: string;
+    /**
+     * The decryption header that was used when encrypting the objects's
+     * contents (with the file's key) before uploading them to S3 remote.
+     *
+     * The {@link decryptionHeader} is both required when finalizing the upload,
+     * and is also returned as part of the {@link EnteFile} that clients get
+     * back from remote since it is needed (along with the file's key) to
+     * decrypt the object that the client would download from S3 remote.
+     */
+    decryptionHeader: string;
+    /**
+     * The size of the uploaded object, in bytes.
+     *
+     * For both file and thumbnails, the client also sends the size of the
+     * encrypted file (as per the client) while creating a new object on remote.
+     * This allows the server to validate that the size of the objects is same
+     * as what client is reporting.
+     *
+     * This should be present during upload, but is not returned back from
+     * remote in the /diff response.
+     */
+    size: number;
 }
+
+/**
+ * Create a new {@link EnteFile} on remote by providing remote with information
+ * about the file's contents (objects) that were uploaded, and other metadata
+ * about the file.
+ *
+ * Remote only, does not modify local state.
+ *
+ * Since this function is the last step after a potentially long upload to S3
+ * remote of the file contents themselves, it has internal retries of the HTTP
+ * request to avoid having transient issues spoil the party.
+ *
+ * @returns the newly created {@link EnteFile}.
+ */
+export const postEnteFile = async (
+    uploadFile: PostEnteFileRequest,
+): Promise<EnteFile> => {
+    try {
+        const url = await apiURL("/files");
+        const headers = await authenticatedRequestHeaders();
+        const response = await retryAsyncOperation(
+            () =>
+                HTTPService.post(
+                    url,
+                    uploadFile,
+                    // @ts-ignore
+                    null,
+                    headers,
+                ),
+            { abortIfNeeded: handleUploadError },
+        );
+        return response.data;
+    } catch (e) {
+        log.error("upload Files Failed", e);
+        throw e;
+    }
+};
+
+/**
+ * Sibling of {@link postEnteFile} for public albums.
+ */
+export const postPublicAlbumsEnteFile = async (
+    uploadFile: PostEnteFileRequest,
+    credentials: PublicAlbumsCredentials,
+): Promise<EnteFile> => {
+    try {
+        const url = await apiURL("/public-collection/file");
+        const response = await retryAsyncOperation(
+            () =>
+                HTTPService.post(
+                    url,
+                    uploadFile,
+                    // @ts-ignore
+                    null,
+                    authenticatedPublicAlbumsRequestHeaders(credentials),
+                ),
+            { abortIfNeeded: handleUploadError },
+        );
+        return response.data;
+    } catch (e) {
+        log.error("upload public File Failed", e);
+        throw e;
+    }
+};

@@ -33,8 +33,6 @@ import type {
     EnteFile,
     FilePublicMagicMetadata,
     FilePublicMagicMetadataProps,
-    MetadataFileAttributes,
-    S3FileAttributes,
 } from "ente-media/file";
 import {
     metadataHash,
@@ -63,23 +61,21 @@ import {
     fetchPublicAlbumsMultipartUploadURLs,
     fetchPublicAlbumsUploadURLs,
     fetchUploadURLs,
-    PhotosUploadHTTPClient,
-    PublicAlbumsUploadHTTPClient,
+    postEnteFile,
+    postPublicAlbumsEnteFile,
     putFile,
     putFilePart,
     putFilePartViaWorker,
     putFileViaWorker,
     type MultipartCompletedPart,
     type ObjectUploadURL,
+    type PostEnteFileRequest,
 } from "./remote";
 import {
     fallbackThumbnail,
     generateThumbnailNative,
     generateThumbnailWeb,
 } from "./thumbnail";
-
-const photosHTTPClient = new PhotosUploadHTTPClient();
-const publicAlbumsHTTPClient = new PublicAlbumsUploadHTTPClient();
 
 /**
  * A readable stream for a file, and its associated size and last modified time.
@@ -176,13 +172,10 @@ class UploadService {
         this.ensureUniqueUploadURLs();
     }
 
-    async uploadFile(uploadFile: UploadFile) {
+    async postFile(file: PostEnteFileRequest) {
         return this.publicAlbumsCredentials
-            ? publicAlbumsHTTPClient.uploadFile(
-                  uploadFile,
-                  this.publicAlbumsCredentials,
-              )
-            : photosHTTPClient.uploadFile(uploadFile);
+            ? postPublicAlbumsEnteFile(file, this.publicAlbumsCredentials)
+            : postEnteFile(file);
     }
 
     private async refillUploadURLs() {
@@ -345,19 +338,6 @@ interface EncryptedFilePieces {
     metadata: { encryptedData: string; decryptionHeader: string };
     pubMagicMetadata: EncryptedMagicMetadata;
     localID: number;
-}
-
-export interface BackupedFile {
-    file: S3FileAttributes;
-    thumbnail: S3FileAttributes;
-    metadata: MetadataFileAttributes;
-    pubMagicMetadata: EncryptedMagicMetadata;
-}
-
-export interface UploadFile extends BackupedFile {
-    collectionID: number;
-    encryptedKey: string;
-    keyDecryptionNonce: string;
 }
 
 export interface PotentialLivePhotoAsset {
@@ -722,7 +702,7 @@ export const upload = async (
 
         abortIfCancelled();
 
-        const uploadedFile = await uploadService.uploadFile({
+        const uploadedFile = await uploadService.postFile({
             collectionID: collection.id,
             encryptedKey: encryptedFileKey.encryptedData,
             keyDecryptionNonce: encryptedFileKey.nonce,
@@ -1512,7 +1492,12 @@ const encryptFileStream = async (
 const uploadToBucket = async (
     encryptedFilePieces: EncryptedFilePieces,
     uploadContext: UploadContext,
-): Promise<BackupedFile> => {
+): Promise<
+    Pick<
+        PostEnteFileRequest,
+        "file" | "thumbnail" | "metadata" | "pubMagicMetadata"
+    >
+> => {
     const { isCFUploadProxyDisabled, abortIfCancelled, updateUploadProgress } =
         uploadContext;
 
