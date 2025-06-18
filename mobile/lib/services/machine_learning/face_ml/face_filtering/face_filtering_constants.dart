@@ -9,7 +9,7 @@ const kLaplacianVerySoftThreshold = 200;
 const kLapacianDefault = 10000.0;
 
 /// The minimum score for a face to be shown as detected in the UI
-const kMinimumFaceShowScore = 0.70;
+const kMinimumFaceShowScore = 0.75;
 
 /// The minimum score for a face to be considered a high quality face for clustering and person detection
 const kMinimumQualityFaceScore = 0.80;
