@@ -12,12 +12,16 @@ import {
 } from "ente-base/http";
 import log from "ente-base/log";
 import { apiURL, uploaderOrigin } from "ente-base/origins";
-import { type EnteFile } from "ente-media/file";
+import {
+    type EncryptedMagicMetadata,
+    type EnteFile,
+    type RemoteFileMetadata,
+    type S3FileAttributes,
+} from "ente-media/file";
 import { handleUploadError } from "ente-shared/error";
 import HTTPService from "ente-shared/network/HTTPService";
 import { nullToUndefined } from "ente-utils/transform";
 import { z } from "zod/v4";
-import type { UploadFile } from "./upload-service";
 
 /**
  * A pre-signed URL alongwith the associated object key that is later used to
@@ -411,6 +415,16 @@ export const completeMultipartUploadViaWorker = async (
         }),
     );
 
+interface PostEnteFileRequest {
+    collectionID: number;
+    encryptedKey: string;
+    keyDecryptionNonce: string;
+    file: S3FileAttributes;
+    thumbnail: S3FileAttributes;
+    metadata: RemoteFileMetadata;
+    pubMagicMetadata: EncryptedMagicMetadata;
+}
+
 /**
  * Create a new {@link EnteFile} on remote by providing remote with information
  * about the file's contents (objects) that were uploaded, and other metadata
@@ -425,7 +439,7 @@ export const completeMultipartUploadViaWorker = async (
  * @returns the newly created {@link EnteFile}.
  */
 export const postEnteFile = async (
-    uploadFile: UploadFile,
+    uploadFile: PostEnteFileRequest,
 ): Promise<EnteFile> => {
     try {
         const url = await apiURL("/files");
@@ -452,7 +466,7 @@ export const postEnteFile = async (
  * Sibling of {@link postEnteFile} for public albums.
  */
 export const postPublicAlbumsEnteFile = async (
-    uploadFile: UploadFile,
+    uploadFile: PostEnteFileRequest,
     credentials: PublicAlbumsCredentials,
 ): Promise<EnteFile> => {
     try {

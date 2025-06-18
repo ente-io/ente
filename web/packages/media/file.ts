@@ -284,6 +284,8 @@ export const RemoteEnteFile = z.looseObject({
     deleteBy: z.number().nullish().transform(nullToUndefined),
 });
 
+export type RemoteEnteFile = z.infer<typeof RemoteEnteFile>;
+
 export interface FileWithUpdatedMagicMetadata {
     file: EnteFile;
     updatedMagicMetadata: FileMagicMetadata;
