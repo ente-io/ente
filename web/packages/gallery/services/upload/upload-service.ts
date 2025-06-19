@@ -141,7 +141,7 @@ class UploadService {
 
     async setFileCount(fileCount: number) {
         this.pendingUploadCount = fileCount;
-        await this.preFetchUploadURLs();
+        await this.refillUploadURLs(); /* prefetch */
     }
 
     reducePendingUploadCount() {
@@ -149,24 +149,12 @@ class UploadService {
     }
 
     async getUploadURL() {
-        if (this.uploadURLs.length === 0 && this.pendingUploadCount) {
+        if (this.uploadURLs.length == 0 && this.pendingUploadCount) {
             await this.refillUploadURLs();
-            this.ensureUniqueUploadURLs();
         }
         const url = this.uploadURLs.pop();
         if (!url) throw new Error("Failed to obtain upload URL");
         return url;
-    }
-
-    private async preFetchUploadURLs() {
-        try {
-            await this.refillUploadURLs();
-            // checking for any subscription related errors
-        } catch (e) {
-            log.error("prefetch uploadURL failed", e);
-            handleUploadError(e);
-        }
-        this.ensureUniqueUploadURLs();
     }
 
     async postFile(file: PostEnteFileRequest) {
@@ -184,9 +172,9 @@ class UploadService {
         } finally {
             this.activeUploadURLRefill = undefined;
         }
-    }
 
-    private ensureUniqueUploadURLs() {
+        // Ensure that the upload URLs we have are unique.
+        //
         // Sanity check added when this was a new implementation. Have kept it
         // around, but it can be removed too.
         if (
