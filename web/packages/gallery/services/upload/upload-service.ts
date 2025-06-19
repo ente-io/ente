@@ -540,6 +540,28 @@ const uploadItemCreationDate = async (
 };
 
 /**
+ * The message of the {@link Error} that is thrown when the user cancels an
+ * upload.
+ *
+ * [Note: Upload cancellation]
+ *
+ * 1. User cancels the upload by pressing the cancel button on the upload
+ *    progress indicator in the UI.
+ *
+ * 2. This sets the {@link shouldUploadBeCancelled} flag on
+ *    {@link UploadManager}.
+ *
+ * 3. Periodically the code that is performing the upload calls the
+ *    {@link abortIfCancelled} flag. This function is a no-op normally, but if
+ *    the {@link shouldUploadBeCancelled} is set then it throws an {@link Error}
+ *    with the message set to {@link uploadCancelledErrorMessage}.
+ *
+ * 4. The intermediate per-file try catch handlers do not intercept this error,
+ *    and it bubbles all the way to the top of the call stack, ending the upload.
+ */
+export const uploadCancelledErrorMessage = "Upload cancelled";
+
+/**
  * Some state and callbacks used during upload that are not tied to a specific
  * file being uploaded.
  */
@@ -555,7 +577,9 @@ interface UploadContext {
      * and see if the upload has been cancelled by the user.
      *
      * If the upload has been cancelled, it will throw an exception with the
-     * message set to {@link CustomError.UPLOAD_CANCELLED}.
+     * message set to {@link uploadCancelledErrorMessage}.
+     *
+     * See: [Note: Upload cancellation]
      */
     abortIfCancelled: () => void;
     /**

@@ -257,9 +257,8 @@ const groupByResult = (finishedUploads: FinishedUploads) => {
 };
 
 class UploadManager {
-    private comlinkCryptoWorkers = new Array<
-        ComlinkWorker<typeof CryptoWorker>
-    >(maxConcurrentUploads);
+    private comlinkCryptoWorkers: ComlinkWorker<typeof CryptoWorker>[] =
+        new Array(maxConcurrentUploads);
     private parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>;
     private itemsToBeUploaded: ClusteredUploadItem[];
     private failedItems: ClusteredUploadItem[];
@@ -269,15 +268,14 @@ class UploadManager {
     private uploadInProgress: boolean;
     private publicAlbumsCredentials: PublicAlbumsCredentials | undefined;
     private uploaderName: string;
-    private uiService: UIService;
     /**
      * When `true`, then the next call to {@link abortIfCancelled} will throw.
+     *
+     * See: [Note: Upload cancellation]
      */
     private shouldUploadBeCancelled = false;
 
-    constructor() {
-        this.uiService = new UIService();
-    }
+    private uiService = new UIService();
 
     public async init(
         progressUpdater: ProgressUpdater,
