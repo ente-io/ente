@@ -31,7 +31,7 @@ class FaceDetectionService extends MlModel {
   static const int kInputWidth = 640;
   static const int kInputHeight = 640;
   static const double kIouThreshold = 0.4;
-  static const double kMinScoreSigmoidThreshold = 0.7;
+  static const double kMinScoreSigmoidThreshold = 0.5;
   static const int kNumKeypoints = 5;
 
   // Singleton pattern
@@ -82,7 +82,11 @@ class FaceDetectionService extends MlModel {
         'Face detection is finished, in ${inferenceTime.difference(startTime).inMilliseconds} ms (preprocessing: $preprocessingMs ms, inference: $inferenceMs ms)',
       );
     } catch (e, s) {
-      _logger.severe('Error while running inference (PlatformPlugin: ${MlModel.usePlatformPlugin})', e, s);
+      _logger.severe(
+        'Error while running inference (PlatformPlugin: ${MlModel.usePlatformPlugin})',
+        e,
+        s,
+      );
       throw YOLOFaceInterpreterRunException();
     }
     try {
