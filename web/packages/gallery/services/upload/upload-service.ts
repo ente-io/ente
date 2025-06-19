@@ -44,11 +44,7 @@ import {
 import { FileType, type FileTypeInfo } from "ente-media/file-type";
 import { encodeLivePhoto } from "ente-media/live-photo";
 import { addToCollection } from "ente-new/photos/services/collection";
-import {
-    CustomError,
-    CustomErrorMessage,
-    handleUploadError,
-} from "ente-shared/error";
+import { CustomError, handleUploadError } from "ente-shared/error";
 import { mergeUint8Arrays } from "ente-utils/array";
 import { ensureInteger, ensureNumber } from "ente-utils/ensure";
 import type { UploadableUploadItem, UploadItem, UploadPathPrefix } from ".";
@@ -572,6 +568,49 @@ export const isUploadCancelledError = (e: unknown) =>
     e instanceof Error && e.message == uploadCancelledErrorMessage;
 
 /**
+ * The message of the {@link Error} that is thrown when the upload fails because
+ * the user's current session has expired (e.g. maybe they logged this client
+ * out from another session), and that they need to login again.
+ */
+export const sessionExpiredErrorMessage = "Session expired";
+
+/**
+ * The message of the {@link Error} that is thrown when the upload fails because
+ * the user's subscription has expired.
+ */
+export const subscriptionExpiredErrorMessage = "Subscription expired";
+
+/**
+ * The message of the {@link Error} that is thrown when the upload fails because
+ * the user's storage space has been exhausted.
+ */
+export const storageLimitExceededErrorMessage = "Storage limit exceeded";
+
+/**
+ * The message of the {@link Error} that is thrown when the PUT request for the
+ * upload of a part of file (as part of an overall multipart upload) fails
+ * because the response did not have the etag error.
+ *
+ * This usually happens because some browser extension is blocking access to the
+ * ETag header (even when it is present in the remote S3 response). In self
+ * hosted scenarios, this can also happen if the remote S3 bucket does not have
+ * the appropriate CORS rules to allow access to the etag header.
+ */
+const eTagMissingErrorMessage = "ETag header not present in response";
+
+/**
+ * The message of the {@link Error} that is thrown when the size of the file
+ * being uploaded exceeds the maximum allowed file size.
+ *
+ * The client already checks for the size of the file being uploaded, and aborts
+ * the request if the client side limit is exceeded. An error with this message
+ * is thrown if we remote side validation fails.
+ *
+ * The UI outcome is the same in both cases.
+ */
+export const fileTooLargeErrorMessage = "File too large";
+
+/**
  * Some state and callbacks used during upload that are not tied to a specific
  * file being uploaded.
  */
@@ -759,7 +798,7 @@ export const upload = async (
         log.error(`Upload failed for ${fileName}`, e);
         const error = handleUploadError(e);
         switch (error.message) {
-            case CustomErrorMessage.eTagMissing:
+            case eTagMissingErrorMessage:
                 return { uploadResult: "blocked" };
             case CustomError.FILE_TOO_LARGE:
                 return { uploadResult: "largerThanAvailableStorage" };
@@ -1697,7 +1736,7 @@ const uploadStreamUsingMultipart = async (
                   requestRetrier,
               )
             : await putFilePart(partUploadURL, partData, requestRetrier);
-        if (!eTag) throw new Error(CustomErrorMessage.eTagMissing);
+        if (!eTag) throw new Error(eTagMissingErrorMessage);
 
         updateUploadProgress(fileLocalID, percentPerPart * partNumber);
         completedParts.push({ partNumber, eTag });

@@ -22,14 +22,6 @@ export function isApiErrorResponse(object: any): object is ApiErrorResponse {
     return object && "code" in object && "message" in object;
 }
 
-/**
- * Constant string values used mark custom errors that we need to subsequently
- * catch and identify to deal with in a particular manner.
- */
-export const CustomErrorMessage = {
-    eTagMissing: "ETag header not present in response",
-};
-
 export const CustomError = {
     ETAG_MISSING: "no header/etag present in response body",
     FILE_TOO_LARGE: "file too large",
