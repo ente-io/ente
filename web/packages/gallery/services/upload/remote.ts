@@ -14,11 +14,6 @@ import {
 } from "ente-media/file";
 import { nullToUndefined } from "ente-utils/transform";
 import { z } from "zod/v4";
-import {
-    sessionExpiredErrorMessage,
-    storageLimitExceededErrorMessage,
-    subscriptionExpiredErrorMessage,
-} from "./upload-service";
 
 /**
  * A pre-signed URL alongwith the associated object key that is later used to
@@ -58,29 +53,8 @@ export const fetchUploadURLs = async (countHint: number) => {
     const res = await fetch(`${url}?${params.toString()}`, {
         headers: await authenticatedRequestHeaders(),
     });
-    handleURLFetchErrors(res);
     ensureOk(res);
     return ObjectUploadURLResponse.parse(await res.json()).urls;
-};
-
-/**
- * Throw, if needed, custom errors corresponding to specific HTTP responses for
- * the API calls to fetch new upload URLs:
- *
- * - {@link fetchUploadURLs}
- *
- * - {@link fetchMultipartUploadURLs}
- *
- */
-const handleURLFetchErrors = (res: Response) => {
-    switch (res.status) {
-        case 401:
-            throw new Error(sessionExpiredErrorMessage);
-        case 402:
-            throw new Error(subscriptionExpiredErrorMessage);
-        case 426:
-            throw new Error(storageLimitExceededErrorMessage);
-    }
 };
 
 /**
@@ -148,7 +122,6 @@ export const fetchMultipartUploadURLs = async (uploadPartCount: number) => {
     const res = await fetch(`${url}?${params.toString()}`, {
         headers: await authenticatedRequestHeaders(),
     });
-    handleURLFetchErrors(res);
     ensureOk(res);
     return MultipartUploadURLsResponse.parse(await res.json()).urls;
 };

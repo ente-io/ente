@@ -188,18 +188,28 @@ class UploadService {
                 this.publicAlbumsCredentials,
             );
         } else {
-            urls = await fetchUploadURLs(this.pendingUploadCount);
+            try {
+                urls = await fetchUploadURLs(this.pendingUploadCount);
+            } catch (e) {
+                throw translateURLFetchErrorIfNeeded(e);
+            }
         }
         urls.forEach((u) => this.uploadURLs.push(u));
     }
 
     async fetchMultipartUploadURLs(uploadPartCount: number) {
-        return this.publicAlbumsCredentials
-            ? fetchPublicAlbumsMultipartUploadURLs(
-                  uploadPartCount,
-                  this.publicAlbumsCredentials,
-              )
-            : fetchMultipartUploadURLs(uploadPartCount);
+        if (this.publicAlbumsCredentials) {
+            return fetchPublicAlbumsMultipartUploadURLs(
+                uploadPartCount,
+                this.publicAlbumsCredentials,
+            );
+        } else {
+            try {
+                return await fetchMultipartUploadURLs(uploadPartCount);
+            } catch (e) {
+                throw translateURLFetchErrorIfNeeded(e);
+            }
+        }
     }
 }
 
@@ -802,6 +812,30 @@ export const upload = async (
                 return { uploadResult: "failed" };
         }
     }
+};
+
+/**
+ * Convert specific HTTP errors during an API call to remote endpoints for
+ * fetching new upload URLs into error with known messages (if applicable).
+ *
+ * Can be used with the following functions:
+ *
+ * - {@link fetchUploadURLs}
+ * - {@link fetchMultipartUploadURLs}
+ *
+ */
+const translateURLFetchErrorIfNeeded = (e: unknown) => {
+    if (e instanceof HTTPError) {
+        switch (e.res.status) {
+            case 401:
+                return new Error(sessionExpiredErrorMessage);
+            case 402:
+                return new Error(subscriptionExpiredErrorMessage);
+            case 426:
+                return new Error(storageLimitExceededErrorMessage);
+        }
+    }
+    return e;
 };
 
 /**
