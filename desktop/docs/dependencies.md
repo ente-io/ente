@@ -3,6 +3,7 @@
 - [Electron](#electron)
 - [Dev dependencies](#dev)
 - [Functionality](#functionality)
+- [Pinned](#pinned)
 
 ## Electron
 
@@ -140,3 +141,8 @@ handles to avoid reopening them for every operation.
 
 [chokidar](https://github.com/paulmillr/chokidar) is used as a file system
 watcher for the watch folders functionality.
+
+## Pinned
+
+- Electron builder is pinned to 26.0.16 because of
+  https://github.com/electron-userland/electron-builder/issues/9161#issuecomment-2977829326
