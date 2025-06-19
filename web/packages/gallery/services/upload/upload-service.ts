@@ -1782,56 +1782,64 @@ const createRemoteFile = async (
     newFileRequest: PostEnteFileRequest,
     uploadContext: UploadContext,
 ) => {
-    const { publicAlbumsCredentials, abortIfCancelled } = uploadContext;
+    const { publicAlbumsCredentials } = uploadContext;
 
-    if (publicAlbumsCredentials) {
-        return retryAsyncOperation(
-            () => {
-                abortIfCancelled();
-                return postPublicAlbumsEnteFile(
-                    newFileRequest,
-                    publicAlbumsCredentials,
-                );
-            },
-            {
-                abortIfNeeded: (e) => {
-                    if (isUploadCancelledError(e)) throw e;
-                    if (e instanceof HTTPError) {
-                        switch (e.res.status) {
-                            case 413:
-                                throw new Error(fileTooLargeErrorMessage);
-                        }
-                    }
-                },
-            },
-        );
-    } else {
-        return retryAsyncOperation(
-            () => {
-                abortIfCancelled();
-                return postEnteFile(newFileRequest);
-            },
-            {
-                abortIfNeeded: (e) => {
-                    if (isUploadCancelledError(e)) throw e;
-                    if (e instanceof HTTPError) {
-                        switch (e.res.status) {
-                            case 401:
-                                throw new Error(sessionExpiredErrorMessage);
-                            case 402:
-                                throw new Error(
-                                    subscriptionExpiredErrorMessage,
-                                );
-                            case 413:
-                                throw new Error(fileTooLargeErrorMessage);
-                            case 426:
-                                throw new Error(
-                                    storageLimitExceededErrorMessage,
-                                );
-                        }
-                    }
-                },
-            },
-        );
-    }
+    return publicAlbumsCredentials
+        ? retriedPostPublicAlbumsEnteFile(
+              newFileRequest,
+              publicAlbumsCredentials,
+              uploadContext,
+          )
+        : retriedPostEnteFile(newFileRequest, uploadContext);
 };
+
+const retriedPostPublicAlbumsEnteFile = async (
+    newFileRequest: PostEnteFileRequest,
+    credentials: PublicAlbumsCredentials,
+    { abortIfCancelled }: UploadContext,
+) =>
+    retryAsyncOperation(
+        () => {
+            abortIfCancelled();
+            return postPublicAlbumsEnteFile(newFileRequest, credentials);
+        },
+        {
+            abortIfNeeded: (e) => {
+                if (isUploadCancelledError(e)) throw e;
+                if (e instanceof HTTPError) {
+                    switch (e.res.status) {
+                        case 413:
+                            throw new Error(fileTooLargeErrorMessage);
+                    }
+                }
+            },
+        },
+    );
+
+const retriedPostEnteFile = async (
+    newFileRequest: PostEnteFileRequest,
+    { abortIfCancelled }: UploadContext,
+) =>
+    retryAsyncOperation(
+        () => {
+            abortIfCancelled();
+            return postEnteFile(newFileRequest);
+        },
+        {
+            abortIfNeeded: (e) => {
+                if (isUploadCancelledError(e)) throw e;
+                if (e instanceof HTTPError) {
+                    switch (e.res.status) {
+                        case 401:
+                            throw new Error(sessionExpiredErrorMessage);
+                        case 402:
+                            throw new Error(subscriptionExpiredErrorMessage);
+                        case 413:
+                            throw new Error(fileTooLargeErrorMessage);
+                        case 426:
+                            throw new Error(storageLimitExceededErrorMessage);
+                    }
+                }
+            },
+        },
+    );
