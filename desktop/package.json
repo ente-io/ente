@@ -50,7 +50,7 @@
         "concurrently": "^9.1.2",
         "cross-env": "^7.0.3",
         "electron": "^36.4.0",
-        "electron-builder": "26.0.16",
+        "electron-builder": "26.0.15",
         "eslint": "^9",
         "prettier": "3.5.3",
         "prettier-plugin-organize-imports": "^4.1.0",
