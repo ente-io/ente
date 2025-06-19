@@ -1,25 +1,17 @@
-// TODO: Audit this file
-/* eslint-disable @typescript-eslint/ban-ts-comment */
-/* eslint-disable @typescript-eslint/no-unsafe-return */
 import {
     authenticatedPublicAlbumsRequestHeaders,
     authenticatedRequestHeaders,
     ensureOk,
     publicRequestHeaders,
-    retryAsyncOperation,
     type HTTPRequestRetrier,
     type PublicAlbumsCredentials,
 } from "ente-base/http";
-import log from "ente-base/log";
 import { apiURL, uploaderOrigin } from "ente-base/origins";
 import {
     type EncryptedEnteFile,
     type EncryptedMagicMetadata,
-    type EnteFile,
     type RemoteFileMetadata,
 } from "ente-media/file";
-import { handleUploadError } from "ente-shared/error";
-import HTTPService from "ente-shared/network/HTTPService";
 import { nullToUndefined } from "ente-utils/transform";
 import { z } from "zod/v4";
 import {
@@ -529,25 +521,16 @@ export const postEnteFile = async (
  * Sibling of {@link postEnteFile} for public albums.
  */
 export const postPublicAlbumsEnteFile = async (
-    uploadFile: PostEnteFileRequest,
+    postFileRequest: PostEnteFileRequest,
+
     credentials: PublicAlbumsCredentials,
-): Promise<EnteFile> => {
-    try {
-        const url = await apiURL("/public-collection/file");
-        const response = await retryAsyncOperation(
-            () =>
-                HTTPService.post(
-                    url,
-                    uploadFile,
-                    // @ts-ignore
-                    null,
-                    authenticatedPublicAlbumsRequestHeaders(credentials),
-                ),
-            { abortIfNeeded: handleUploadError },
-        );
-        return response.data;
-    } catch (e) {
-        log.error("upload public File Failed", e);
-        throw e;
-    }
+): Promise<EncryptedEnteFile> => {
+    const res = await fetch(await apiURL("/public-collection/file"), {
+        method: "POST",
+        headers: authenticatedPublicAlbumsRequestHeaders(credentials),
+        body: JSON.stringify(postFileRequest),
+    });
+    ensureOk(res);
+    // TODO(RE):
+    return (await res.json()) as EncryptedEnteFile;
 };

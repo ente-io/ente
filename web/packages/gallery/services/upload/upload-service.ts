@@ -1785,9 +1785,25 @@ const createRemoteFile = async (
     const { publicAlbumsCredentials, abortIfCancelled } = uploadContext;
 
     if (publicAlbumsCredentials) {
-        return postPublicAlbumsEnteFile(
-            newFileRequest,
-            publicAlbumsCredentials,
+        return retryAsyncOperation(
+            () => {
+                abortIfCancelled();
+                return postPublicAlbumsEnteFile(
+                    newFileRequest,
+                    publicAlbumsCredentials,
+                );
+            },
+            {
+                abortIfNeeded: (e) => {
+                    if (isUploadCancelledError(e)) throw e;
+                    if (e instanceof HTTPError) {
+                        switch (e.res.status) {
+                            case 413:
+                                throw new Error(fileTooLargeErrorMessage);
+                        }
+                    }
+                },
+            },
         );
     } else {
         return retryAsyncOperation(
