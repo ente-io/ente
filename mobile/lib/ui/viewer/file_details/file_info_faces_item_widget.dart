@@ -208,48 +208,34 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Flexible(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const IconButtonWidget(
-                icon: Icons.face_retouching_natural_outlined,
-                iconButtonType: IconButtonType.secondary,
-              ),
-              Flexible(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(12, 0, 16, 3.5),
-                  child: SizedBox(
-                    width: double.infinity,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          S.of(context).faces,
-                          style: getEnteTextTheme(context).small,
-                        ),
-                        const SizedBox(height: 4),
-                        _buildContent(),
-                      ],
-                    ),
-                  ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                const IconButtonWidget(
+                  icon: Icons.face_retouching_natural_outlined,
+                  iconButtonType: IconButtonType.secondary,
                 ),
-              ),
-            ],
-          ),
+                const SizedBox(width: 12),
+                Text(
+                  S.of(context).faces,
+                  style: getEnteTextTheme(context).small,
+                ),
+              ],
+            ),
+            _editStateButton(),
+          ],
         ),
+        const SizedBox(height: 4),
         Padding(
-          padding: const EdgeInsets.only(top: 3.5),
-          child: IconButtonWidget(
-            icon: _isEditMode ? Icons.check : Icons.edit,
-            iconButtonType: IconButtonType.secondary,
-            onTap: _toggleEditMode,
-          ),
+          padding: const EdgeInsets.only(left: 48),
+          child: _buildContent(),
         ),
       ],
     );
@@ -278,17 +264,6 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
           _buildRemainingFacesSection(),
         ],
       ],
-    );
-  }
-
-  Widget _buildNoFacesWidget() {
-    final reason = _errorReason ?? NoFacesReason.noFacesFound;
-    return Padding(
-      padding: const EdgeInsets.only(top: 5),
-      child: ChipButtonWidget(
-        getNoFaceReasonText(context, reason),
-        noChips: true,
-      ),
     );
   }
 
@@ -321,18 +296,21 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
           child: GestureDetector(
             onTap: _toggleRemainingFaces,
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  "Show other detected faces",
+                  "Other detected faces",
                   style: getEnteTextTheme(context).miniMuted,
                 ),
-                Icon(
-                  _showRemainingFaces
-                      ? Icons.keyboard_arrow_up
-                      : Icons.keyboard_arrow_down,
-                  size: 16,
-                  color: getEnteColorScheme(context).textMuted,
+                const Spacer(),
+                Padding(
+                  padding: const EdgeInsets.only(right: 16.0),
+                  child: Icon(
+                    _showRemainingFaces
+                        ? Icons.keyboard_arrow_up
+                        : Icons.keyboard_arrow_down,
+                    size: 16,
+                    color: getEnteColorScheme(context).textMuted,
+                  ),
                 ),
               ],
             ),
@@ -344,6 +322,50 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
         ],
       ],
     );
+  }
+
+  Widget _buildNoFacesWidget() {
+    final reason = _errorReason ?? NoFacesReason.noFacesFound;
+    return Padding(
+      padding: const EdgeInsets.only(top: 5),
+      child: ChipButtonWidget(
+        getNoFaceReasonText(context, reason),
+        noChips: true,
+      ),
+    );
+  }
+
+  Widget _editStateButton() {
+    if (_isEditMode) {
+      return Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: GestureDetector(
+          onTap: _toggleEditMode,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: getEnteColorScheme(context).primary500,
+                width: 1,
+              ),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Text(
+              "Done",
+              style: getEnteTextTheme(context).small.copyWith(
+                    color: getEnteColorScheme(context).primary500,
+                  ),
+            ),
+          ),
+        ),
+      );
+    } else {
+      return IconButtonWidget(
+        icon: Icons.edit,
+        iconButtonType: IconButtonType.secondary,
+        onTap: _toggleEditMode,
+      );
+    }
   }
 }
 
