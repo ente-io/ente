@@ -41,6 +41,7 @@ import "package:photos/models/files_split.dart";
 import "package:photos/models/metadata/collection_magic.dart";
 import "package:photos/service_locator.dart";
 import 'package:photos/services/app_lifecycle_service.dart';
+import "package:photos/services/collections_service_mapper.dart";
 import "package:photos/services/favorites_service.dart";
 import 'package:photos/services/sync/remote_sync_service.dart';
 import "package:photos/utils/dialog_util.dart";
@@ -1513,42 +1514,21 @@ class CollectionsService {
         'Cannot add files owned by other users, they should be copied',
       );
     }
-
-    final params = <String, dynamic>{};
-    params["collectionID"] = destCollection;
     final batchedFiles = files.chunks(batchSize);
-
     for (final batch in batchedFiles) {
-      final List<DiffFileItem> diffFiles = [];
+      final List<DiffFileItem> collectionDiffItems = [];
+      final params = <String, dynamic>{};
+      params["collectionID"] = destCollection;
       params["files"] = [];
+      final List<EnteFile> newFiles = [];
       for (final file in batch) {
-        final fileKey = getFileKey(file);
-        final asset = file.remoteAsset!;
-        final cf = file.fileEntry!;
-        final encryptedKeyData =
-            CryptoUtil.encryptSync(fileKey, getCollectionKey(destCollection));
-        final item = DiffFileItem(
-          collectionID: destCollection,
-          isDeleted: false,
-          updatedAt: cf.updatedAt,
-          createdAt: cf.createdAt,
-          encFileKey: encryptedKeyData.encryptedData!,
-          encFileKeyNonce: encryptedKeyData.nonce!,
-          fileItem: FileItem(
-            fileID: asset.id,
-            ownerID: asset.ownerID,
-            thumnailDecryptionHeader: asset.thumbHeader,
-            fileDecryotionHeader: asset.fileHeader,
-            metadata: asset.metadata,
-            magicMetadata: asset.privateMetadata,
-            pubMagicMetadata: asset.publicMetadata,
-            info: asset.info,
-          ),
-        );
-        diffFiles.add(item);
+        final newFile = moveOrAddEntry(file, destCollection);
+        final item = mapDiffItem(newFile);
+        collectionDiffItems.add(item);
+        newFiles.add(newFile);
         params["files"].add(
           CollectionFileItem(
-            file.uploadedFileID!,
+            item.fileID,
             CryptoUtil.bin2base64(item.encFileKey!),
             CryptoUtil.bin2base64(item.encFileKeyNonce!),
           ).toMap(),
@@ -1559,9 +1539,9 @@ class CollectionsService {
           "/collections/add-files",
           data: params,
         );
-        await remoteDB.insertFilesDiff(diffFiles);
+        await remoteDB.insertFilesDiff(collectionDiffItems);
         Bus.instance
-            .fire(CollectionUpdatedEvent(destCollection, batch, "addTo"));
+            .fire(CollectionUpdatedEvent(destCollection, newFiles, "addTo"));
       } catch (e) {
         rethrow;
       }
@@ -1580,16 +1560,14 @@ class CollectionsService {
       return;
     }
     // as any non uploaded file
-    final pendingUpload = files.any(
-      (element) => element.uploadedFileID == null,
-    );
+    final pendingUpload = files.any((element) => !element.isUploaded);
     if (pendingUpload) {
       throw ArgumentError('Can only add uploaded files silently');
     }
     final existingFileIDsInCollection =
         await remoteDB.getUploadedFileIDs(collectionID);
     files.removeWhere(
-      (element) => existingFileIDsInCollection.contains(element.uploadedFileID),
+      (element) => existingFileIDsInCollection.contains(element.remoteID),
     );
     if (files.isEmpty) {
       _logger.info("nothing to add to the collection");
@@ -1601,7 +1579,7 @@ class CollectionsService {
     for (final batch in batchedFiles) {
       params["files"] = [];
       for (final file in batch) {
-        final int uploadedFileID = file.uploadedFileID!;
+        final int uploadedFileID = file.remoteID;
         final fileKey = getFileKey(file);
         final encryptedKeyData =
             CryptoUtil.encryptSync(fileKey, getCollectionKey(collectionID));
@@ -1964,7 +1942,7 @@ class CollectionsService {
     for (final batch in batchedFiles) {
       params["fileIDs"] = <int>[];
       for (final file in batch) {
-        params["fileIDs"].add(file.uploadedFileID);
+        params["fileIDs"].add(file.remoteID);
       }
       final resp = await _enteDio.post(
         "/collections/v3/remove-files",
@@ -1973,11 +1951,9 @@ class CollectionsService {
       if (resp.statusCode != 200) {
         throw Exception("Failed to remove files from collection");
       }
-
       await remoteDB.deleteCFEnteries(collectionID, params["fileIDs"]);
       Bus.instance
           .fire(CollectionUpdatedEvent(collectionID, batch, "removeFrom"));
-      Bus.instance.fire(LocalPhotosUpdatedEvent(batch, source: "removeFrom"));
     }
     RemoteSyncService.instance.sync(silently: true).ignore();
   }

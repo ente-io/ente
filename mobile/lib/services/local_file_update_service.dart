@@ -156,7 +156,6 @@ class LocalFileUpdateService {
         continue;
       }
       if (!file.isUploaded) {
-        _logger.info("File ${file.tag} is not uploaded, skipping hash check");
         processedIDs.add(file.localID!);
         continue;
       }

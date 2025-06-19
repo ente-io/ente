@@ -109,31 +109,44 @@ class EnteFile {
     return file;
   }
 
-  static EnteFile fromRemoteAsset(
-    RemoteAsset asset,
-    CollectionFileEntry collection,
-  ) {
-    final EnteFile file = EnteFile();
-    file.remoteAsset = asset;
-    file.fileEntry = collection;
-    file.uploadedFileID = asset.id;
-    file.ownerID = asset.ownerID;
-    file.title = asset.title;
-    file.deviceFolder = asset.deviceFolder;
-    file.location = asset.location;
-    file.fileType = asset.fileType;
-    file.creationTime = asset.creationTime;
-    file.modificationTime = asset.modificationTime;
-    file.fileSubType = asset.subType;
-    file.metadataVersion = kCurrentMetadataVersion;
-    file.duration = asset.durationInSec;
-    file.fileSize = asset.fileSize;
+  int get remoteID {
+    if (remoteAsset != null) {
+      return remoteAsset!.id;
+    } else {
+      throw Exception("Remote ID is not set for the file");
+    }
+  }
 
+  static EnteFile fromRemoteAsset(
+    RemoteAsset remoteAsset,
+    CollectionFileEntry collection, {
+    AssetEntity? asset,
+  }) {
+    final EnteFile file = EnteFile();
+    file.remoteAsset = remoteAsset;
+    file.fileEntry = collection;
+    file.asset = asset;
+
+    file.uploadedFileID = remoteAsset.id;
+    file.ownerID = remoteAsset.ownerID;
+    file.title = remoteAsset.title;
+    file.deviceFolder = remoteAsset.deviceFolder;
+    file.location = remoteAsset.location;
+    file.fileType = remoteAsset.fileType;
+    file.creationTime = remoteAsset.creationTime;
+    file.modificationTime = remoteAsset.modificationTime;
+    file.fileSubType = remoteAsset.subType;
+    file.metadataVersion = kCurrentMetadataVersion;
+    file.duration = remoteAsset.durationInSec;
+    file.fileSize = remoteAsset.fileSize;
     file.collectionID = collection.collectionID;
-    file.encryptedKey = CryptoUtil.bin2base64(collection.fileKey);
-    file.keyDecryptionNonce = CryptoUtil.bin2base64(collection.fileKeyNonce);
+    file.encryptedKey = CryptoUtil.bin2base64(collection.encFileKey);
+    file.keyDecryptionNonce = CryptoUtil.bin2base64(collection.encFileKeyNonce);
+
     file.pubMagicMetadata =
-        PubMagicMetadata.fromMap(asset.publicMetadata?.data);
+        PubMagicMetadata.fromMap(remoteAsset.publicMetadata?.data);
+    file.magicMetadata =
+        MagicMetadata.fromMap(remoteAsset.privateMetadata?.data);
     return file;
   }
 
@@ -412,6 +425,7 @@ class EnteFile {
     return EnteFile()
       ..asset = asset
       ..remoteAsset = remoteAsset
+      ..fileEntry = fileEntry
       ..generatedID = generatedID ?? this.generatedID
       ..uploadedFileID = uploadedFileID ?? this.uploadedFileID
       ..ownerID = ownerID ?? this.ownerID
