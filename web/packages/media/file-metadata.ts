@@ -5,6 +5,7 @@ import { type Location } from "ente-base/types";
 import {
     fileLogID,
     type EnteFile,
+    type EnteFile2,
     type FileMagicMetadata,
     type FilePrivateMagicMetadata,
     type FilePublicMagicMetadata,
@@ -522,6 +523,20 @@ const withoutNullAndUndefinedValues = (o: object) =>
     Object.fromEntries(
         Object.entries(o).filter(([, v]) => v !== null && v !== undefined),
     );
+
+/**
+ * Return the file name of the file (including both the name and the extension).
+ *
+ * This function handles files with edited names. It will first look into the
+ * public magic metadata of a file to see if the file has an edited name, and if
+ * so, return that. Otherwise it will return the original name of the file
+ * stored in its metadata.
+ *
+ * @returns The provided {@link EnteFile}'s filename, including the extension.
+ * e.g. "flower.png".
+ */
+export const fileFileName = (file: EnteFile | EnteFile2) =>
+    file.pubMagicMetadata?.data.editedName ?? file.metadata.title;
 
 /**
  * Return the file's creation date as a Date in the hypothetical "timezone of
