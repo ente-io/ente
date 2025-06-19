@@ -45,7 +45,6 @@ import {
 import { FileType, type FileTypeInfo } from "ente-media/file-type";
 import { encodeLivePhoto } from "ente-media/live-photo";
 import { addToCollection } from "ente-new/photos/services/collection";
-import { CustomError, handleUploadError } from "ente-shared/error";
 import { mergeUint8Arrays } from "ente-utils/array";
 import { ensureInteger, ensureNumber } from "ente-utils/ensure";
 import type { UploadableUploadItem, UploadItem, UploadPathPrefix } from ".";
@@ -597,7 +596,7 @@ const eTagMissingErrorMessage = "ETag header not present in response";
  *
  * The UI outcome is the same in both cases.
  */
-export const fileTooLargeErrorMessage = "File too large";
+const fileTooLargeErrorMessage = "File too large";
 
 /**
  * Some state and callbacks used during upload that are not tied to a specific
@@ -793,16 +792,22 @@ export const upload = async (
         };
     } catch (e) {
         if (isUploadCancelledError(e)) {
-            // Nothing to do for these, just relay them up.
+            /* stop the upload */
             throw e;
         }
 
         log.error(`Upload failed for ${fileName}`, e);
-        const error = handleUploadError(e);
-        switch (error.message) {
+        switch (e instanceof Error && e.message) {
+            /* stop the upload */
+            case sessionExpiredErrorMessage:
+            case subscriptionExpiredErrorMessage:
+            case storageLimitExceededErrorMessage:
+                throw e;
+
+            /* file specific */
             case eTagMissingErrorMessage:
                 return { uploadResult: "blocked" };
-            case CustomError.FILE_TOO_LARGE:
+            case fileTooLargeErrorMessage:
                 return { uploadResult: "largerThanAvailableStorage" };
             default:
                 return { uploadResult: "failed" };
