@@ -272,7 +272,7 @@ class UploadManager {
     /**
      * When `true`, then the next call to {@link abortIfCancelled} will throw.
      *
-     * See: [Note: Upload cancellation]
+     * See: [Note: Upload cancellation].
      */
     private shouldUploadBeCancelled = false;
 

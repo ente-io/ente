@@ -800,7 +800,9 @@ export const Upload: React.FC<UploadProps> = ({
             uploaderName,
         );
 
-        await uploadFilesToExistingCollection(
+        // Do not keep the uploader name input dialog open while the upload is
+        // progressing (the upload progress indicator will take out now).
+        void uploadFilesToExistingCollection(
             props.uploadCollection,
             uploaderName,
         );
