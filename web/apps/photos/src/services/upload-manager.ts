@@ -103,23 +103,19 @@ export type UploadItemWithCollection = UploadAsset & {
     collectionID: number;
 };
 
-interface UploadCancelStatus {
-    value: boolean;
-}
-
 class UploadCancelService {
-    private shouldUploadBeCancelled: UploadCancelStatus = { value: false };
+    private shouldUploadBeCancelled = false;
 
     reset() {
-        this.shouldUploadBeCancelled.value = false;
+        this.shouldUploadBeCancelled = false;
     }
 
     requestUploadCancelation() {
-        this.shouldUploadBeCancelled.value = true;
+        this.shouldUploadBeCancelled = true;
     }
 
     isUploadCancelationRequested(): boolean {
-        return this.shouldUploadBeCancelled.value;
+        return this.shouldUploadBeCancelled;
     }
 }
 
