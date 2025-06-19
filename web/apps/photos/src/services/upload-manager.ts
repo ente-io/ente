@@ -570,6 +570,7 @@ class UploadManager {
                         uploadableItem.collection.key,
                     );
                     break;
+                case "largerThanAvailableStorage":
                 case "unsupported":
                 case "tooLarge":
                     // no-op
