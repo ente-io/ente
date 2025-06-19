@@ -20,6 +20,7 @@ import { fileLogID, type EnteFile } from "ente-media/file";
 import {
     decryptPublicMagicMetadata,
     fileCreationPhotoDate,
+    fileFileName,
     updateRemotePublicMagicMetadata,
     type ParsedMetadataDate,
 } from "ente-media/file-metadata";
@@ -324,7 +325,7 @@ const updateEnteFileDate = async (
         };
     } else if (enteFile.metadata.fileType == FileType.image) {
         const blob = await downloadManager.fileBlob(enteFile);
-        const file = new File([blob], enteFile.metadata.title);
+        const file = new File([blob], fileFileName(enteFile));
         const { DateTimeOriginal, DateTimeDigitized, MetadataDate, DateTime } =
             await extractExifDates(file);
 

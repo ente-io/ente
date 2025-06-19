@@ -6,11 +6,10 @@ import { apiURL, customAPIOrigin } from "ente-base/origins";
 import {
     decryptRemoteFile,
     FileDiffResponse,
-    mergeMetadata1,
     RemoteEnteFile,
-    type EnteFile,
     type EnteFile2,
 } from "ente-media/file";
+import { fileFileName } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
 import { isHEICExtension, needsJPEGConversion } from "ente-media/formats";
 import { heicToJPEG } from "ente-media/heic-convert";
@@ -89,13 +88,7 @@ export const imageURLGenerator = async function* (castData: CastData) {
         let haveEligibleFiles = false;
 
         for (const encryptedFile of encryptedFiles) {
-            // TODO(RE):
-            const file = mergeMetadata1(
-                (await decryptRemoteFile(
-                    encryptedFile,
-                    collectionKey,
-                )) as EnteFile,
-            ) as EnteFile2;
+            const file = await decryptRemoteFile(encryptedFile, collectionKey);
 
             if (!isFileEligible(file)) continue;
 
@@ -191,7 +184,7 @@ const isFileEligible = (file: EnteFile2) => {
     // encounter files that are incorrectly named and have a misleading
     // extension. To detect the actual type, we need to sniff the MIME type, but
     // that requires downloading and decrypting the file first.
-    const [, extension] = nameAndExtension(file.metadata.title);
+    const [, extension] = nameAndExtension(fileFileName(file));
     if (extension && needsJPEGConversion(extension)) {
         // On the web, we only support HEIC conversion.
         return isHEICExtension(extension);
@@ -200,10 +193,9 @@ const isFileEligible = (file: EnteFile2) => {
     return true;
 };
 
-const isImageOrLivePhoto = (file: EnteFile2) => {
-    const fileType = file.metadata.fileType;
-    return fileType == FileType.image || fileType == FileType.livePhoto;
-};
+const isImageOrLivePhoto = (file: EnteFile2) =>
+    file.metadata.fileType == FileType.image ||
+    file.metadata.fileType == FileType.livePhoto;
 
 /**
  * Create and return a new data URL that can be used to show the given
@@ -222,7 +214,7 @@ const renderableImageBlob = async (castToken: string, file: EnteFile2) => {
 
     let blob = await downloadFile(castToken, file, shouldUseThumbnail);
 
-    let fileName = file.metadata.title;
+    let fileName = fileFileName(file);
     if (!shouldUseThumbnail && file.metadata.fileType == FileType.livePhoto) {
         const { imageData, imageFileName } = await decodeLivePhoto(
             fileName,

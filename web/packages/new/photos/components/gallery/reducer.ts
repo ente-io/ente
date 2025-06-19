@@ -1471,7 +1471,7 @@ const createCollectionSummaries = (
             // Use the first letter of the email of the user who shared this
             // particular favorite as a prefix to disambiguate this collection
             // from the user's own favorites.
-            // TODO(FAV): Use the person name when avail
+            // TODO: Use the person name when avail
             const initial = collection.owner.email?.at(0)?.toUpperCase();
             if (initial) {
                 name = t("person_favorites", { name: initial });
