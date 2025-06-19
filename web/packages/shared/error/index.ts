@@ -49,20 +49,6 @@ export const CustomError = {
 };
 
 export function handleUploadError(error: any): Error {
-    const parsedError = parseUploadErrorCodes(error);
-
-    // breaking errors
-    switch (parsedError.message) {
-        case CustomError.SUBSCRIPTION_EXPIRED:
-        case CustomError.STORAGE_QUOTA_EXCEEDED:
-        case CustomError.SESSION_EXPIRED:
-        case CustomError.UPLOAD_CANCELLED:
-            throw parsedError;
-    }
-    return parsedError;
-}
-
-export function parseUploadErrorCodes(error: any) {
     let parsedMessage = null;
     if (error instanceof HTTPError) {
         switch (error.res.status) {
@@ -90,7 +76,18 @@ export function parseUploadErrorCodes(error: any) {
     } else {
         parsedMessage = error.message;
     }
-    return new Error(parsedMessage);
+
+    const parsedError = new Error(parsedMessage);
+
+    // breaking errors
+    switch (parsedError.message) {
+        case CustomError.SUBSCRIPTION_EXPIRED:
+        case CustomError.STORAGE_QUOTA_EXCEEDED:
+        case CustomError.SESSION_EXPIRED:
+        case CustomError.UPLOAD_CANCELLED:
+            throw parsedError;
+    }
+    return parsedError;
 }
 
 export const parseSharingErrorCodes = (error: any) => {
