@@ -17,15 +17,15 @@
         "idb": "^8.0.3",
         "libsodium-wrappers-sumo": "^0.7.15",
         "nanoid": "^5.1.5",
-        "next": "^15.3.3",
+        "next": "^15.3.4",
         "react": "^19.1.0",
         "react-dom": "^19.1.0",
-        "react-i18next": "^15.5.2",
-        "zod": "^3.25.61"
+        "react-i18next": "^15.5.3",
+        "zod": "^3.25.67"
     },
     "devDependencies": {
         "@types/libsodium-wrappers-sumo": "^0.7.8",
-        "@types/react": "^19.1.7",
+        "@types/react": "^19.1.8",
         "@types/react-dom": "^19.1.6",
         "ente-build-config": "*"
     }
