@@ -198,18 +198,14 @@ class UploadService {
     }
 
     async fetchMultipartUploadURLs(uploadPartCount: number) {
-        if (this.publicAlbumsCredentials) {
-            return fetchPublicAlbumsMultipartUploadURLs(
-                uploadPartCount,
-                this.publicAlbumsCredentials,
-            );
-        } else {
-            try {
-                return await fetchMultipartUploadURLs(uploadPartCount);
-            } catch (e) {
-                throw translateURLFetchErrorIfNeeded(e);
-            }
-        }
+        return this.publicAlbumsCredentials
+            ? fetchPublicAlbumsMultipartUploadURLs(
+                  uploadPartCount,
+                  this.publicAlbumsCredentials,
+              )
+            : fetchMultipartUploadURLs(uploadPartCount).catch((e: unknown) => {
+                  throw translateURLFetchErrorIfNeeded(e);
+              });
     }
 }
 
