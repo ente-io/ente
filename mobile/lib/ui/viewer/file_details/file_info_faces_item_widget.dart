@@ -33,6 +33,7 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
   bool _isLoading = true;
   List<_FaceInfo> _defaultFaces = [];
   List<_FaceInfo> _remainingFaces = [];
+  NoFacesReason? _errorReason;
 
   @override
   void initState() {
@@ -44,10 +45,11 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
     setState(() => _isLoading = true);
 
     try {
-      final faceData = await _fetchFaceData();
+      final result = await _fetchFaceData();
       setState(() {
-        _defaultFaces = faceData['default'] ?? [];
-        _remainingFaces = faceData['remaining'] ?? [];
+        _defaultFaces = result.defaultFaces;
+        _remainingFaces = result.remainingFaces;
+        _errorReason = result.errorReason;
       });
     } catch (e, s) {
       _logger.severe('Failed to load faces', e, s);
@@ -56,17 +58,25 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
     }
   }
 
-  Future<Map<String, List<_FaceInfo>>> _fetchFaceData() async {
+  Future<_FaceDataResult> _fetchFaceData() async {
     if (widget.file.uploadedFileID == null) {
-      return {'default': [], 'remaining': []};
+      return _FaceDataResult(
+        defaultFaces: [],
+        remainingFaces: [],
+        errorReason: NoFacesReason.fileNotUploaded,
+      );
     }
 
     final mlDataDB = MLDataDB.instance;
     final faces =
         await mlDataDB.getFacesForGivenFileID(widget.file.uploadedFileID!);
 
-    if (faces == null || faces.isEmpty) {
-      return {'default': [], 'remaining': []};
+    if (faces == null) {
+      return _FaceDataResult(
+        defaultFaces: [],
+        remainingFaces: [],
+        errorReason: NoFacesReason.fileNotAnalyzed,
+      );
     }
 
     final defaultFaces = <Face>[];
@@ -75,9 +85,16 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
     for (final face in faces) {
       if (face.score >= kMinimumFaceShowScore) {
         defaultFaces.add(face);
-      } else {
+      } else if (face.score >= kMinFaceDetectionScore) {
         remainingFaces.add(face);
       }
+    }
+    if (defaultFaces.isEmpty && remainingFaces.isEmpty) {
+      return _FaceDataResult(
+        defaultFaces: [],
+        remainingFaces: [],
+        errorReason: NoFacesReason.noFacesFound,
+      );
     }
 
     // Get additional data
@@ -89,25 +106,38 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
     final faceCrops = await getCachedFaceCrops(widget.file, faces);
 
     if (faceCrops == null) {
-      return {'default': [], 'remaining': []};
+      return _FaceDataResult(
+        defaultFaces: [],
+        remainingFaces: [],
+        errorReason: NoFacesReason.faceThumbnailGenerationFailed,
+      );
+    }
+    for (final face in defaultFaces) {
+      if (faceCrops[face.faceID] == null) {
+        return _FaceDataResult(
+          defaultFaces: [],
+          remainingFaces: [],
+          errorReason: NoFacesReason.faceThumbnailGenerationFailed,
+        );
+      }
     }
 
-    return {
-      'default': await _buildFaceInfoList(
+    return _FaceDataResult(
+      defaultFaces: await _buildFaceInfoList(
         defaultFaces,
         faceIdsToClusterIds,
         persons,
         clusterIDToPerson,
         faceCrops,
       ),
-      'remaining': await _buildFaceInfoList(
+      remainingFaces: await _buildFaceInfoList(
         remainingFaces,
         faceIdsToClusterIds,
         persons,
         clusterIDToPerson,
         faceCrops,
       ),
-    };
+    );
   }
 
   Future<List<_FaceInfo>> _buildFaceInfoList(
@@ -234,7 +264,8 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
       );
     }
 
-    if (_defaultFaces.isEmpty && _remainingFaces.isEmpty) {
+    if (_errorReason != null ||
+        (_defaultFaces.isEmpty && _remainingFaces.isEmpty)) {
       return _buildNoFacesWidget();
     }
 
@@ -251,13 +282,7 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
   }
 
   Widget _buildNoFacesWidget() {
-    NoFacesReason reason;
-    if (widget.file.uploadedFileID == null) {
-      reason = NoFacesReason.fileNotUploaded;
-    } else {
-      reason = NoFacesReason.noFacesFound;
-    }
-
+    final reason = _errorReason ?? NoFacesReason.noFacesFound;
     return Padding(
       padding: const EdgeInsets.only(top: 5),
       child: ChipButtonWidget(
@@ -299,7 +324,7 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  "Other detected faces",
+                  "Show other detected faces",
                   style: getEnteTextTheme(context).miniMuted,
                 ),
                 Icon(
@@ -333,6 +358,18 @@ class _FaceInfo {
     required this.faceCrop,
     this.clusterID,
     this.person,
+  });
+}
+
+class _FaceDataResult {
+  final List<_FaceInfo> defaultFaces;
+  final List<_FaceInfo> remainingFaces;
+  final NoFacesReason? errorReason;
+
+  _FaceDataResult({
+    required this.defaultFaces,
+    required this.remainingFaces,
+    this.errorReason,
   });
 }
 
