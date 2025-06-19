@@ -16,6 +16,7 @@ import log from "ente-base/log";
 import { apiURL, customAPIOrigin } from "ente-base/origins";
 import { ensureAuthToken } from "ente-base/token";
 import type { EnteFile } from "ente-media/file";
+import { fileFileName } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
 import { decodeLivePhoto } from "ente-media/live-photo";
 import { playableVideoURL, renderableImageBlob } from "./convert";
@@ -612,7 +613,7 @@ const createRenderableSourceURLs = async (
 ): Promise<RenderableSourceURLs> => {
     const originalFileURL = await originalFileURLPromise;
     const fileBlob = await fetch(originalFileURL).then((res) => res.blob());
-    const fileName = file.metadata.title;
+    const fileName = fileFileName(file);
     const fileType = file.metadata.fileType;
 
     switch (fileType) {

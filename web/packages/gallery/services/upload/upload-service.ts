@@ -35,6 +35,7 @@ import type {
     FilePublicMagicMetadataProps,
 } from "ente-media/file";
 import {
+    fileFileName,
     metadataHash,
     type FileMetadata,
     type ParsedMetadata,
@@ -642,7 +643,7 @@ export const upload = async (
         );
 
         const matches = existingFiles.filter((file) =>
-            areFilesSame(file.metadata, metadata),
+            areFilesSame(file, metadata),
         );
 
         const anyMatch = matches.length > 0 ? matches[0] : undefined;
@@ -1220,17 +1221,24 @@ const computeHash = async (uploadItem: UploadItem, worker: CryptoWorker) => {
 };
 
 /**
- * Return true if the two files, as represented by their metadata, are same.
+ * Return true if the given file is the same as provided metadata.
  *
  * Note that the metadata includes the hash of the file's contents (when
  * available), so this also in effect compares the contents of the files, not
  * just the "meta" information about them.
  */
-const areFilesSame = (f: FileMetadata, g: FileMetadata) => {
-    if (f.fileType !== g.fileType || f.title !== g.title) return false;
+const areFilesSame = (fFile: EnteFile, gm: FileMetadata) => {
+    const fm = fFile.metadata;
 
-    const fh = metadataHash(f);
-    const gh = metadataHash(g);
+    // File name is different
+    if (fileFileName(fFile) !== gm.title) return false;
+
+    // File type is different
+    if (fm.fileType !== gm.fileType) return false;
+
+    // Name and type is same, compare hash.
+    const fh = metadataHash(fm);
+    const gh = metadataHash(gm);
     return fh && gh && fh == gh;
 };
 

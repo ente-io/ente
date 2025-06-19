@@ -8,7 +8,7 @@ import log from "ente-base/log";
 import { nullishToBlank, nullToUndefined } from "ente-utils/transform";
 import { z } from "zod/v4";
 import { ignore } from "./collection";
-import { FileMetadata, ItemVisibility } from "./file-metadata";
+import { fileFileName, FileMetadata, ItemVisibility } from "./file-metadata";
 import { FileType } from "./file-type";
 import { decryptMagicMetadata, RemoteMagicMetadata } from "./magic-metadata";
 
@@ -588,14 +588,16 @@ export interface EncryptedTrashItem {
 export type Trash = TrashItem[];
 
 /**
+ * A short identifier for a file in log messages.
+ *
+ * e.g. "file flower.png (827233681)"
+ *
  * @returns a string to use as an identifier when logging information about the
  * given {@link file}. The returned string contains the file name (for ease of
  * debugging) and the file ID (for exactness).
  */
 export const fileLogID = (file: EnteFile) =>
-    // TODO: Remove this when file/metadata types have optionality annotations.
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    `file ${file.metadata.title ?? "-"} (${file.id})`;
+    `file ${fileFileName(file)} (${file.id})`;
 
 /**
  * Return the date when the file will be deleted permanently. Only valid for
@@ -819,23 +821,13 @@ const transformDecryptedMetadataJSON = (
  *
  * This function updates a single file, see {@link mergeMetadata} for a
  * convenience function to run it on an array of files.
- *
- * [Note: File name for local EnteFile objects]
- *
- * The title property in a file's metadata is the original file's name. The
- * metadata of a file cannot be edited. So if later on the file's name is
- * changed, then the edit is stored in the `editedName` property of the public
- * metadata of the file.
- *
- * This function merges these edits onto the file object that we use locally.
- * Effectively, post this step, the file's metadata.title can be used in lieu of
- * its filename.
  */
 export const mergeMetadata1 = (file: EnteFile): EnteFile => {
     const mutableMetadata = file.pubMagicMetadata?.data;
     if (mutableMetadata) {
         const { editedTime, editedName, lat, long } = mutableMetadata;
         if (editedTime) file.metadata.creationTime = editedTime;
+        // Not needed, use fileFileName.
         if (editedName) file.metadata.title = editedName;
         // Use (lat, long) only if both are present and nonzero.
         if (lat && long) {

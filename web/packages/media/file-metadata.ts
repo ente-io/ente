@@ -95,7 +95,8 @@ export interface FileMetadata {
     /**
      * The name of the file (including its extension).
      *
-     * See: [Note: File name for local EnteFile objects]
+     * Don't use this property directly, use {@link fileFileName} instead which
+     * takes into account subsequent edits too.
      */
     title: string;
     /**
