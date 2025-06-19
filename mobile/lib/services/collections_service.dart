@@ -1641,26 +1641,26 @@ class CollectionsService {
           "/files/copy",
           data: params,
         );
-        final oldToCopiedFileIDMap = Map<int, int>.from(
+        final srcToCopiedFileIDs = Map<int, int>.from(
           (res.data["oldToNewFileIDMap"] as Map<String, dynamic>).map(
             (key, value) => MapEntry(int.parse(key), value as int),
           ),
         );
         for (final file in batch) {
-          final int uploadIDForOriginalFIle = file.uploadedFileID!;
-          if (oldToCopiedFileIDMap.containsKey(uploadIDForOriginalFIle)) {
+          final int srcRemoteID = file.remoteID;
+          if (srcToCopiedFileIDs.containsKey(srcRemoteID)) {
             file.generatedID = null;
             file.collectionID = dstCollectionID;
-            file.uploadedFileID = oldToCopiedFileIDMap[uploadIDForOriginalFIle];
+            file.uploadedFileID = srcToCopiedFileIDs[srcRemoteID];
             file.ownerID = _config.getUserID();
-            oldToCopiedFileIDMap.remove(uploadIDForOriginalFIle);
+            srcToCopiedFileIDs.remove(srcRemoteID);
           } else {
             throw Exception("Failed to copy file ${file.uploadedFileID}");
           }
         }
-        if (oldToCopiedFileIDMap.isNotEmpty) {
+        if (srcToCopiedFileIDs.isNotEmpty) {
           throw Exception(
-            "Failed to map following uploadKey ${oldToCopiedFileIDMap.keys}",
+            "Failed to map following uploadKey ${srcToCopiedFileIDs.keys}",
           );
         }
         await _filesDB.insertMultiple(batch);
@@ -1845,11 +1845,12 @@ class CollectionsService {
       _logger.info("nothing to move to collection");
       return;
     }
-    final params = <String, dynamic>{};
-    params["toCollectionID"] = toCollectionID;
-    params["fromCollectionID"] = fromCollectionID;
+
     final batchedFiles = files.chunks(batchSize);
     for (final batch in batchedFiles) {
+      final params = <String, dynamic>{};
+      params["toCollectionID"] = toCollectionID;
+      params["fromCollectionID"] = fromCollectionID;
       params["files"] = [];
       for (final file in batch) {
         final fileKey = getFileKey(file);
