@@ -502,6 +502,7 @@ class UploadManager {
         const uiService = this.uiService;
         const uploadContext = {
             isCFUploadProxyDisabled: shouldDisableCFUploadProxy(),
+            publicAlbumsCredentials: this.publicAlbumsCredentials,
             abortIfCancelled: this.abortIfCancelled.bind(this),
             updateUploadProgress:
                 uiService.updateUploadProgress.bind(uiService),

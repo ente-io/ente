@@ -157,12 +157,6 @@ class UploadService {
         return url;
     }
 
-    async postFile(file: PostEnteFileRequest) {
-        return this.publicAlbumsCredentials
-            ? postPublicAlbumsEnteFile(file, this.publicAlbumsCredentials)
-            : postEnteFile(file);
-    }
-
     private async refillUploadURLs() {
         try {
             if (!this.activeUploadURLRefill) {
@@ -610,6 +604,14 @@ interface UploadContext {
      */
     isCFUploadProxyDisabled: boolean;
     /**
+     * If present, then the upload is happening in the context of the public
+     * albums app and these are the credentials that should be used for
+     * performing API requests (instead of trying to obtain and use the
+     * credentials for the logged in user, as happens when we're running in the
+     * context of the photos app).
+     */
+    publicAlbumsCredentials: PublicAlbumsCredentials | undefined;
+    /**
      * A function that the upload sequence should use to periodically check in
      * and see if the upload has been cancelled by the user.
      *
@@ -764,12 +766,17 @@ export const upload = async (
 
         abortIfCancelled();
 
-        const uploadedFile = await uploadService.postFile({
+        const newFileRequest = {
             collectionID: collection.id,
             encryptedKey: encryptedFileKey.encryptedData,
             keyDecryptionNonce: encryptedFileKey.nonce,
             ...backupedFile,
-        });
+        };
+
+        const uploadedFile = await createRemoteFile(
+            newFileRequest,
+            uploadContext,
+        );
 
         return {
             uploadResult: metadata.hasStaticThumbnail
@@ -1765,4 +1772,25 @@ const nextMultipartUploadPart = async (
         chunks.push(chunk);
     }
     return mergeUint8Arrays(chunks);
+};
+
+/**
+ * Finalize an upload by creating an {@link EnteFile} on remote.
+ */
+const createRemoteFile = async (
+    newFileRequest: PostEnteFileRequest,
+    uploadContext: UploadContext,
+) => {
+    const { publicAlbumsCredentials, abortIfCancelled } = uploadContext;
+
+    abortIfCancelled();
+
+    if (publicAlbumsCredentials) {
+        return postPublicAlbumsEnteFile(
+            newFileRequest,
+            publicAlbumsCredentials,
+        );
+    } else {
+        return postEnteFile(newFileRequest);
+    }
 };
