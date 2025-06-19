@@ -193,18 +193,10 @@ export interface FileMetadata {
  * Zod schema for {@link FileMetadata}.
  */
 export const FileMetadata = z.looseObject({
-    /**
-     * This is required but is nullish as a workaround for handling old data.
-     * We'll fill it in during the file decryption.
-     */
-    fileType: z.number().nullish().transform(nullToUndefined),
+    fileType: z.number(),
     title: z.string(),
     creationTime: z.number(),
-    /**
-     * This is required but is nullish as a workaround for handling old data.
-     * We'll fill it in during the file decryption.
-     */
-    modificationTime: z.number().nullish().transform(nullToUndefined),
+    modificationTime: z.number(),
     latitude: z.number().nullish().transform(nullToUndefined),
     longitude: z.number().nullish().transform(nullToUndefined),
     hash: z.string().nullish().transform(nullToUndefined),

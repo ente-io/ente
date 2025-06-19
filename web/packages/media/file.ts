@@ -8,7 +8,7 @@ import log from "ente-base/log";
 import { nullishToBlank, nullToUndefined } from "ente-utils/transform";
 import { z } from "zod/v4";
 import { ignore } from "./collection";
-import { type FileMetadata, ItemVisibility } from "./file-metadata";
+import { FileMetadata, ItemVisibility } from "./file-metadata";
 import { FileType } from "./file-type";
 import { decryptMagicMetadata, RemoteMagicMetadata } from "./magic-metadata";
 
@@ -705,6 +705,7 @@ export const decryptRemoteFile = async (
     //
     // See: [Note: Use looseObject when parsing JSON that will get persisted].
     const {
+        id,
         encryptedKey,
         keyDecryptionNonce,
         isDeleted,
@@ -726,9 +727,12 @@ export const decryptRemoteFile = async (
 
     // See: [Note: strict mode migration]
     //
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    const metadata = await decryptMetadataJSON(encryptedMetadata, key);
+    // -eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // -@ts-ignore
+    const metadataJSON = await decryptMetadataJSON(encryptedMetadata, key);
+    const metadata = FileMetadata.parse(
+        transformDecryptedMetadataJSON(id, metadataJSON),
+    );
 
     let magicMetadata: EnteFile2["magicMetadata"];
     if (encryptedMagicMetadata) {
@@ -756,12 +760,57 @@ export const decryptRemoteFile = async (
 
     return {
         ...rest,
+        id,
         key,
         // TODO(RE):n
         metadata: metadata as FileMetadata,
         magicMetadata,
         pubMagicMetadata,
     };
+};
+
+/**
+ * Apply some transforms to gracefully handle metadata from old clients.
+ *
+ * @param metadataJSON The decrypted and parsed metadata JSON. Since TypeScript
+ * does not have a native JSON type, this is typed as an `unknown`.
+ *
+ * @returns A JSON object with any transformations applied, if needed.
+ */
+const transformDecryptedMetadataJSON = (
+    fileID: number,
+    metadataJSON: unknown,
+) => {
+    // The file ID threshold is an arbitrary cutoff so that this graceful
+    // handling does not mask new issues.
+    if (fileID > 100000000) return metadataJSON;
+
+    if (typeof metadataJSON != "object") return metadataJSON;
+    if (!metadataJSON) return metadataJSON;
+
+    // In very rare cases (have found only one so far, a very old file in
+    // Vishnu's account, uploaded by an initial dev version of Ente) the photo
+    // has no modification time. Gracefully handle such cases.
+    if (
+        !("modificationTime" in metadataJSON) ||
+        !metadataJSON.modificationTime
+    ) {
+        if ("creationTime" in metadataJSON) {
+            log.info(`Patching metadata modification time for file ${fileID}`);
+            (metadataJSON as Record<string, unknown>).modificationTime =
+                metadataJSON.creationTime;
+        }
+    }
+
+    // In very rare cases (again, some files shared with Vishnu's account,
+    // uploaded by dev builds) the photo might not have a file type. Gracefully
+    // handle these too.
+    if (!("fileType" in metadataJSON)) {
+        log.info(`Patching metadata file type for file ${fileID}`);
+        (metadataJSON as Record<string, unknown>).fileType = FileType.image;
+    }
+
+    return metadataJSON;
 };
 
 /**
@@ -795,16 +844,11 @@ export const mergeMetadata1 = (file: EnteFile): EnteFile => {
         }
     }
 
-    // In very rare cases (have found only one so far, a very old file in
-    // Vishnu's account, uploaded by an initial dev version of Ente) the photo
-    // has no modification time. Gracefully handle such cases.
+    // Moved to transformDecryptedMetadataJSON.
     if (!file.metadata.modificationTime)
         file.metadata.modificationTime = file.metadata.creationTime;
 
-    // In very rare cases (again, some files shared with Vishnu's account,
-    // uploaded by dev builds) the photo might not have a file type. Gracefully
-    // handle these too. The file ID threshold is an arbitrary cutoff so that
-    // this graceful handling does not mask new issues.
+    // Moved to transformDecryptedMetadataJSON.
     if (!file.metadata.fileType && file.id < 100000000)
         file.metadata.fileType = FileType.image;
 
