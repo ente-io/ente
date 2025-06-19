@@ -84,7 +84,7 @@ import type { RemoteMagicMetadata } from "./magic-metadata";
  * status) that is private to them, and can only be edited by them. For more
  * details on this type of metadata, see [Note: Share specific metadata].
  */
-export interface Metadata {
+export interface FileMetadata {
     /**
      * The "Ente" file type - image, video or live photo.
      *
@@ -220,7 +220,8 @@ export const FileMetadata = z.looseObject({
 /**
  * Mutable private metadata associated with an {@link EnteFile}.
  *
- * - Unlike {@link Metadata}, this can change after the file has been uploaded.
+ * - Unlike {@link FileMetadata}, this can change after the file has been
+ *   uploaded.
  *
  * - Unlike {@link PublicMagicMetadata}, this is only available to the owner of
  *   the file.
@@ -273,7 +274,8 @@ export type ItemVisibility =
 /**
  * Mutable public metadata associated with an {@link EnteFile}.
  *
- * - Unlike {@link Metadata}, this can change after the file has been uploaded.
+ * - Unlike {@link FileMetadata}, this can change after the file has been
+ *   uploaded.
  *
  * - Unlike {@link PrivateMagicMetadata}, this is available to all the people
  *   with whom the file has been shared.
@@ -320,14 +322,14 @@ export interface PublicMagicMetadata {
      *
      * Epoch microseconds.
      *
-     * This field stores edits to the {@link creationTime} {@link Metadata}
+     * This field stores edits to the {@link creationTime} {@link FileMetadata}
      * field.
      */
     editedTime?: number;
     /**
      * Modified name of the {@link EnteFile}.
      *
-     * This field stores edits to the {@link title} {@link Metadata} field.
+     * This field stores edits to the {@link title} {@link FileMetadata} field.
      */
     editedName?: string;
     /**
@@ -469,9 +471,9 @@ export const filePublicMagicMetadata = (file: EnteFile) => {
  * This is a convenience function that directly reads the information from the
  * metadata in the happy path, but also has branches to handle the legacy format
  * that older clients used to upload. For more details, see the note in the
- * documentation for {@link hash} in {@link Metadata}.
+ * documentation for {@link hash} in {@link FileMetadata}.
  */
-export const metadataHash = (metadata: Metadata) => {
+export const metadataHash = (metadata: FileMetadata) => {
     const hash = metadata.hash;
     if (hash) return hash;
 

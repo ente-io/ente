@@ -36,7 +36,7 @@ import type {
 } from "ente-media/file";
 import {
     metadataHash,
-    type Metadata,
+    type FileMetadata,
     type ParsedMetadata,
     type PublicMagicMetadata,
 } from "ente-media/file-metadata";
@@ -295,7 +295,7 @@ interface ThumbnailedFile {
 }
 
 interface FileWithMetadata extends Omit<ThumbnailedFile, "hasStaticThumbnail"> {
-    metadata: Metadata;
+    metadata: FileMetadata;
     localID: number;
     pubMagicMetadata: FilePublicMagicMetadata;
 }
@@ -941,7 +941,7 @@ const readEntireStream = async (stream: ReadableStream) =>
     new Uint8Array(await new Response(stream).arrayBuffer());
 
 interface ExtractAssetMetadataResult {
-    metadata: Metadata;
+    metadata: FileMetadata;
     publicMagicMetadata: FilePublicMagicMetadataProps;
 }
 
@@ -1109,7 +1109,7 @@ const extractImageOrVideoMetadata = async (
     // the metadata (it should've been an integer). The most probable theory is
     // that somehow it made its way in through malformed Exif.
 
-    const metadata: Metadata = {
+    const metadata: FileMetadata = {
         fileType,
         title: fileName,
         creationTime: ensureInteger(creationTime),
@@ -1226,7 +1226,7 @@ const computeHash = async (uploadItem: UploadItem, worker: CryptoWorker) => {
  * available), so this also in effect compares the contents of the files, not
  * just the "meta" information about them.
  */
-const areFilesSame = (f: Metadata, g: Metadata) => {
+const areFilesSame = (f: FileMetadata, g: FileMetadata) => {
     if (f.fileType !== g.fileType || f.title !== g.title) return false;
 
     const fh = metadataHash(f);

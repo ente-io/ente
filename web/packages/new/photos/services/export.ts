@@ -16,7 +16,7 @@ import { downloadManager } from "ente-gallery/services/download";
 import { writeStream } from "ente-gallery/utils/native-stream";
 import type { Collection } from "ente-media/collection";
 import { mergeMetadata, type EnteFile } from "ente-media/file";
-import { fileLocation, type Metadata } from "ente-media/file-metadata";
+import { fileLocation } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
 import { decodeLivePhoto } from "ente-media/live-photo";
 import {
@@ -1455,7 +1455,7 @@ const getGoogleLikeMetadataFile = (
     file: EnteFile,
     dateTimeFormatter: Intl.DateTimeFormat,
 ) => {
-    const metadata: Metadata = file.metadata;
+    const metadata = file.metadata;
     const publicMagicMetadata = file.pubMagicMetadata?.data;
     const creationTime = Math.floor(
         (publicMagicMetadata?.editedTime ?? metadata.creationTime) / 1e6,

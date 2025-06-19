@@ -8,7 +8,7 @@ import log from "ente-base/log";
 import { nullishToBlank, nullToUndefined } from "ente-utils/transform";
 import { z } from "zod/v4";
 import { ignore } from "./collection";
-import { type Metadata, ItemVisibility } from "./file-metadata";
+import { type FileMetadata, ItemVisibility } from "./file-metadata";
 import { FileType } from "./file-type";
 import { decryptMagicMetadata, RemoteMagicMetadata } from "./magic-metadata";
 
@@ -152,7 +152,7 @@ export interface EnteFile2 {
      *
      * See: [Note: Metadatum].
      */
-    metadata: Metadata;
+    metadata: FileMetadata;
     /**
      * Private mutable metadata associated with the file that is only visible to
      * the owner of the file.
@@ -284,7 +284,7 @@ export interface EnteFile
      *
      * See: [Note: Metadatum].
      */
-    metadata: Metadata;
+    metadata: FileMetadata;
     /**
      * Private mutable metadata associated with the file that is only visible to
      * the owner of the file.
@@ -758,7 +758,7 @@ export const decryptRemoteFile = async (
         ...rest,
         key,
         // TODO(RE):n
-        metadata: metadata as Metadata,
+        metadata: metadata as FileMetadata,
         magicMetadata,
         pubMagicMetadata,
     };
