@@ -277,8 +277,11 @@ class _HomeWidgetState extends State<HomeWidget> {
     }
   }
 
-  Future<void> _handlePublicAlbumLink(Uri uri) async {
+  Future<void> _handlePublicAlbumLink(Uri uri, String via) async {
     try {
+      _logger.info(
+        "Handling public album link: via $via",
+      );
       final Collection collection = await CollectionsService.instance
           .getCollectionFromPublicLink(context, uri);
       final existingCollection =
@@ -466,7 +469,7 @@ class _HomeWidgetState extends State<HomeWidget> {
         }
         if (value[0].path.contains("albums.ente.io")) {
           final uri = Uri.parse(value[0].path);
-          _handlePublicAlbumLink(uri);
+          _handlePublicAlbumLink(uri, "sharedIntent.getMediaStream");
           return;
         }
 
@@ -533,7 +536,7 @@ class _HomeWidgetState extends State<HomeWidget> {
       if (mounted) {
         if (value.isNotEmpty && value[0].path.contains("albums.ente.io")) {
           final uri = Uri.parse(value[0].path);
-          _handlePublicAlbumLink(uri);
+          _handlePublicAlbumLink(uri, "sharedIntent.getInitialMedia");
           return;
         }
 
@@ -566,7 +569,7 @@ class _HomeWidgetState extends State<HomeWidget> {
       final initialUri = await appLinks.getInitialLink();
       if (initialUri != null) {
         if (initialUri.toString().contains("albums.ente.io")) {
-          await _handlePublicAlbumLink(initialUri);
+          await _handlePublicAlbumLink(initialUri, "appLinks.getInitialLink");
         } else {
           _logger.info(
             "uri doesn't contain 'albums.ente.io' in initial public album deep link",
@@ -585,7 +588,7 @@ class _HomeWidgetState extends State<HomeWidget> {
       (Uri? uri) {
         if (uri != null) {
           if (uri.toString().contains("albums.ente.io")) {
-            _handlePublicAlbumLink(uri);
+            _handlePublicAlbumLink(uri, "appLinks.uriLinkStream");
           } else {
             _logger.info(
               "uri doesn't contain 'albums.ente.io' in public album link subscription",
@@ -878,13 +881,16 @@ class _HomeWidgetState extends State<HomeWidget> {
     if (payload != null) {
       debugPrint('notification payload: $payload');
       if (payload.toLowerCase().contains("onthisday")) {
+        _logger.info("On this day notification received");
         // ignore: unawaited_futures
         memoriesCacheService.goToOnThisDayMemory(context);
       } else if (payload.toLowerCase().contains("birthday")) {
+        _logger.info("Birthday notification received");
         final personID = payload.substring("birthday_".length);
         // ignore: unawaited_futures
         memoriesCacheService.goToPersonMemory(context, personID);
       } else {
+        _logger.info("Album notification received");
         final collectionID = Uri.parse(payload).queryParameters["collectionID"];
         if (collectionID != null) {
           final collection = CollectionsService.instance

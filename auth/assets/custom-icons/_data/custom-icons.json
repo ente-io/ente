@@ -756,6 +756,9 @@
       ]
     },
     {
+      "title": "Memed"
+    },
+    {
       "title": "Mercado Libre",
       "slug": "mercado_libre",
       "altNames": [
@@ -1128,6 +1131,16 @@
     {
       "title": "Seafile",
       "slug": "seafile"
+    },
+    {
+      "title": "SEI",
+      "altNames": [
+        "sei",
+        "sei!",
+        "SEI!",
+        "Sistema Eletrônico de Informações",
+        "SEI/SEDE"
+      ]
     },
     {
       "title": "Sendgrid"

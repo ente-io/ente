@@ -18,6 +18,8 @@ import type { RemoteMagicMetadata } from "./magic-metadata";
 /**
  * Information about the file that never changes post upload.
  *
+ * ---
+ *
  * [Note: Metadatum]
  *
  * There are three different sources of metadata relating to a file.
@@ -85,6 +87,8 @@ import type { RemoteMagicMetadata } from "./magic-metadata";
 export interface Metadata {
     /**
      * The "Ente" file type - image, video or live photo.
+     *
+     * Expected to be one of {@link FileType}.
      */
     fileType: FileType;
     /**
@@ -165,9 +169,23 @@ export interface Metadata {
      * sub-second fraction.
      */
     duration?: number;
+    /**
+     * `true` if the uploading client was unable to generate a thumbnail for the
+     * file when uploading it (e.g. unsupported format), and so instead a
+     * placeholder thumbnail was used.
+     */
     hasStaticThumbnail?: boolean;
+    /**
+     * Mobile client specific field, not used by us.
+     */
     localID?: number;
+    /**
+     * Mobile client specific field, not used by us.
+     */
     version?: number;
+    /**
+     * Mobile client specific field, not used by us.
+     */
     deviceFolder?: string;
 }
 
@@ -304,6 +322,18 @@ export interface PublicMagicMetadata {
      * side checks.
      */
     caption?: string;
+    /**
+     * The name provided by the person who uploaded the file using an otherwise
+     * anonymous public link upload.
+     *
+     * When sharing an album using a public link, the owner of the collection
+     * can enable public uploads. When uploading files this way, the public
+     * albums app asks the person doing the upload their name, and that gets
+     * persisted here in the file's public magic metadata so that it can be
+     * shown to the Ente users who are participants in the collection.
+     *
+     * (The owner of such files will be the owner of the collection)
+     */
     uploaderName?: string;
     /**
      * An arbitrary integer set to indicate that this file should be skipped for
@@ -373,8 +403,6 @@ const PublicMagicMetadata = z.looseObject({
  * check/cast shouldn't be needed, and this should become a trivial accessor.
  */
 export const filePrivateMagicMetadata = (file: EnteFile) => {
-    // TODO: Audit the types.
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (!file.magicMetadata) return undefined;
     if (typeof file.magicMetadata.data == "string") {
         throw new Error(
@@ -558,7 +586,6 @@ export const updateRemotePrivateMagicMetadata = async (
 
     const updatedMetadata = { ...(existingMetadata ?? {}), ...metadataUpdates };
 
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     const metadataVersion = file.magicMetadata?.version ?? 1;
 
     const updateRequest = await updateMagicMetadataRequest(

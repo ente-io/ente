@@ -436,5 +436,6 @@
   "previous": "Předchozí",
   "newRange": "Nový rozsah",
   "youAndThem": "Vy a {name}",
-  "selfiesWithThem": "Selfie s {name}"
+  "selfiesWithThem": "Selfie s {name}",
+  "wishThemAHappyBirthday": "Wish ${name} a happy birthday! 🎉"
 }

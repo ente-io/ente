@@ -15,7 +15,6 @@ import {
     RemoteCollection,
     RemotePublicURL,
     type Collection,
-    type Collection2,
     type CollectionNewParticipantRole,
     type CollectionOrder,
     type CollectionPrivateMagicMetadataData,
@@ -46,63 +45,21 @@ import { ensureUserKeyPair, getPublicKey } from "./user";
  */
 const requestBatchSize = 1000;
 
-export const ARCHIVE_SECTION = -1;
-export const TRASH_SECTION = -2;
-export const DUMMY_UNCATEGORIZED_COLLECTION = -3;
-export const HIDDEN_ITEMS_SECTION = -4;
-export const ALL_SECTION = 0;
+const uncategorizedCollectionName = "Uncategorized";
+const defaultHiddenCollectionName = ".hidden";
+export const defaultHiddenCollectionUserFacingName = "Hidden";
+const favoritesCollectionName = "Favorites";
 
 /**
- * Return true if this is a default hidden collection.
+ * Create a new album (a collection of type "album") on remote, and return its
+ * local representation.
  *
- * See also: [Note: Multiple "default" hidden collections].
- */
-export const isDefaultHiddenCollection = (collection: Collection) =>
-    // TODO: Need to audit the types
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    collection.magicMetadata?.data.subType == CollectionSubType.defaultHidden;
-
-/**
- * Extract the IDs of all the "default" hidden collections.
+ * Remote only, does not modify local state.
  *
- * [Note: Multiple "default" hidden collections].
- *
- * Normally, there is only expected to be one such collection. But to provide
- * clients laxity in synchronization, we don't enforce this and instead allow
- * for multiple such default hidden collections to exist.
+ * @param albumName The name to use for the new album.
  */
-export const findDefaultHiddenCollectionIDs = (collections: Collection[]) =>
-    new Set<number>(
-        collections
-            .filter(isDefaultHiddenCollection)
-            .map((collection) => collection.id),
-    );
-
-/**
- * Return true if this is a collection that the user doesn't own.
- */
-export const isIncomingShare = (collection: Collection, user: User) =>
-    collection.owner.id !== user.id;
-
-export const isHiddenCollection = (collection: Collection) =>
-    // TODO: Need to audit the types
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    collection.magicMetadata?.data.visibility === ItemVisibility.hidden;
-
-export const DEFAULT_HIDDEN_COLLECTION_USER_FACING_NAME = "Hidden";
-
-/**
- * Return the "user facing" name of the given collection.
- *
- * Usually this is the same as the collection name, but it might be a different
- * string for special collections like default hidden collections.
- */
-export const getCollectionUserFacingName = (collection: Collection) => {
-    if (isDefaultHiddenCollection(collection)) {
-        return DEFAULT_HIDDEN_COLLECTION_USER_FACING_NAME;
-    }
-    return collection.name;
-};
+export const createAlbum = (albumName: string) =>
+    createCollection(albumName, "album");
 
 /**
  * Create a new collection on remote, and return its local representation.
@@ -116,15 +73,14 @@ export const getCollectionUserFacingName = (collection: Collection) => {
  * @param magicMetadataData Optional metadata to use as the collection's private
  * mutable metadata when creating the new collection.
  */
-export const createCollection2 = async (
+const createCollection = async (
     name: string,
     type: CollectionType,
     magicMetadataData?: CollectionPrivateMagicMetadataData,
 ): Promise<Collection> => {
-    const masterKey = await ensureMasterKeyFromSession();
     const collectionKey = await generateKey();
     const { encryptedData: encryptedKey, nonce: keyDecryptionNonce } =
-        await encryptBox(collectionKey, masterKey);
+        await encryptBox(collectionKey, await ensureMasterKeyFromSession());
     const { encryptedData: encryptedName, nonce: nameDecryptionNonce } =
         await encryptBox(new TextEncoder().encode(name), collectionKey);
     const magicMetadata = magicMetadataData
@@ -134,7 +90,7 @@ export const createCollection2 = async (
           )
         : undefined;
 
-    const collection = await postCollections({
+    const remoteCollection = await postCollections({
         encryptedKey,
         keyDecryptionNonce,
         encryptedName,
@@ -143,31 +99,15 @@ export const createCollection2 = async (
         ...(magicMetadata && { magicMetadata }),
     });
 
-    return decryptRemoteCollection(
-        collection,
-        await decryptCollectionKey(collection),
-    );
+    return decryptRemoteKeyAndCollection(remoteCollection);
 };
 
-// TODO(C2): Temporary method to convert to the newer type.
-export const collection1To2 = async (c1: Collection): Promise<Collection2> => {
-    const collection = RemoteCollection.parse({
-        ...c1,
-        magicMetadata: undefined,
-        pubMagicMetadata: undefined,
-        sharedMagicMetadata: undefined,
-    });
-    const c2 = await decryptRemoteCollection(
-        collection,
-        await decryptCollectionKey(collection),
-    );
-    return {
-        ...c2,
-        magicMetadata: c1.magicMetadata,
-        pubMagicMetadata: c1.pubMagicMetadata,
-        sharedMagicMetadata: c1.sharedMagicMetadata,
-    };
-};
+/**
+ * Given a {@link RemoteCollection}, first obtain its decryption key, and then
+ * use that to decrypt and return the collection itself.
+ */
+const decryptRemoteKeyAndCollection = async (collection: RemoteCollection) =>
+    decryptRemoteCollection(collection, await decryptCollectionKey(collection));
 
 /**
  * Return the decrypted collection key (as a base64 string) for the given
@@ -192,6 +132,11 @@ export const decryptCollectionKey = async (
 };
 
 /**
+ * Zod schema for a remote response containing a single collection.
+ */
+const CollectionResponse = z.object({ collection: RemoteCollection });
+
+/**
  * Create a collection on remote with the provided data, and return the new
  * remote collection object returned by remote on success.
  */
@@ -204,15 +149,118 @@ const postCollections = async (
         body: JSON.stringify(collectionData),
     });
     ensureOk(res);
-    return z.object({ collection: RemoteCollection }).parse(await res.json())
-        .collection;
+    return CollectionResponse.parse(await res.json()).collection;
+};
+
+/**
+ * Fetch a collection from remote by its ID.
+ *
+ * Remote only, does not use or modify local state.
+ *
+ * This is not expected to be needed in the normal flow of things, since we
+ * fetch collections en masse, and efficiently, using the collection diff
+ * requests.
+ *
+ * @param collectionID The ID of the collection to fetch.
+ *
+ * @returns The collection obtained from remote after decrypting its contents.
+ */
+export const getCollectionByID = async (
+    collectionID: number,
+): Promise<Collection> => {
+    const res = await fetch(await apiURL(`/collections/${collectionID}`), {
+        headers: await authenticatedRequestHeaders(),
+    });
+    ensureOk(res);
+    const { collection } = CollectionResponse.parse(await res.json());
+    return decryptRemoteKeyAndCollection(collection);
+};
+
+/**
+ * Zod schema for a remote response containing a an array of collections.
+ */
+const CollectionsResponse = z.object({
+    collections: z.array(RemoteCollection),
+});
+
+/**
+ * An collection upsert or deletion obtained as a result of
+ * {@link getCollections} invocation.
+ *
+ * Each change either contains the latest data associated with the collection
+ * that has been created or updated, or has a flag set to indicate that the
+ * corresponding collection has been deleted.
+ */
+export interface CollectionChange {
+    /**
+     * The ID of the collection.
+     */
+    id: number;
+    /**
+     * The added or updated collection, or `undefined` for deletions.
+     *
+     * - This will be set to the (decrypted) collection if it was added or
+     *   updated on remote.
+     *
+     * - This will not be set if the corresponding collection was deleted on
+     *   remote.
+     */
+    collection?: Collection;
+    /**
+     * Epoch microseconds denoting when this collection was last changed
+     * (created or updated or deleted).
+     */
+    updationTime: number;
+}
+
+/**
+ * Fetch all collections that have been added or updated on remote since
+ * {@link sinceTime}, with markers for those that have been deleted.
+ *
+ * @param sinceTime The {@link updationTime} of the latest collection that was
+ * fetched in a previous set of changes. This allows us to resume fetching from
+ * that point. Pass 0 to fetch from the beginning.
+ *
+ * @returns An array of {@link CollectionChange}s. It is guaranteed that there
+ * will be at most one entry for a given collection in the result array. See:
+ * [Note: Diff response will have at most one entry for an id]
+ */
+export const getCollectionChanges = async (
+    sinceTime: number,
+): Promise<CollectionChange[]> => {
+    const res = await fetch(
+        await apiURL("/collections/v2", { sinceTime: sinceTime.toString() }),
+        { headers: await authenticatedRequestHeaders() },
+    );
+    ensureOk(res);
+    const { collections } = CollectionsResponse.parse(await res.json());
+    return Promise.all(
+        collections.map(async (c) => ({
+            id: c.id,
+            updationTime: c.updationTime,
+            collection: c.isDeleted
+                ? undefined
+                : await decryptRemoteKeyAndCollection(c),
+        })),
+    );
 };
 
 /**
  * Return a map of the (user-facing) collection name, indexed by collection ID.
  */
 export const createCollectionNameByID = (collections: Collection[]) =>
-    new Map(collections.map((c) => [c.id, getCollectionUserFacingName(c)]));
+    new Map(collections.map((c) => [c.id, collectionUserFacingName(c)]));
+
+/**
+ * Return the "user facing" name of the given collection.
+ *
+ * Usually this is the same as the collection name, but it might be a different
+ * string for special collections like default hidden collections.
+ */
+export const collectionUserFacingName = (collection: Collection) =>
+    isDefaultHiddenCollection(collection)
+        ? defaultHiddenCollectionUserFacingName
+        : collection.name;
 
 /**
  * A CollectionFileItem represents a file in a API request to add, move or
@@ -405,8 +453,8 @@ export const deleteFromTrash = async (fileIDs: number[]) => {
  *
  * @param newName The new name of the collection
  */
-export const renameCollection2 = async (
-    collection: Collection2,
+export const renameCollection = async (
+    collection: Collection,
     newName: string,
 ) => {
     if (collection.magicMetadata?.data.subType == CollectionSubType.quicklink) {
@@ -452,7 +500,7 @@ const postCollectionsRename = async (renameRequest: RenameRequest) =>
  * @param visibility The new visibility (normal, archived, hidden).
  */
 export const updateCollectionVisibility = async (
-    collection: Collection2,
+    collection: Collection,
     visibility: ItemVisibility,
 ) =>
     collection.owner.id == ensureLocalUser().id
@@ -471,7 +519,7 @@ export const updateCollectionVisibility = async (
  * @param order Whether on not the collection is pinned.
  */
 export const updateCollectionOrder = async (
-    collection: Collection2,
+    collection: Collection,
     order: CollectionOrder,
 ) => updateCollectionPrivateMagicMetadata(collection, { order });
 
@@ -488,7 +536,7 @@ export const updateCollectionOrder = async (
  * Otherwise they are sorted descending (newest first).
  */
 export const updateCollectionSortOrder = async (
-    collection: Collection2,
+    collection: Collection,
     asc: boolean,
 ) => updateCollectionPublicMagicMetadata(collection, { asc });
 
@@ -510,7 +558,7 @@ export const updateCollectionSortOrder = async (
  * See: [Note: Magic metadata data cannot have nullish values]
  */
 export const updateCollectionPrivateMagicMetadata = async (
-    { id, key, magicMetadata }: Collection2,
+    { id, key, magicMetadata }: Collection,
     updates: CollectionPrivateMagicMetadataData,
 ) =>
     putCollectionsMagicMetadata({
@@ -568,7 +616,7 @@ const putCollectionsMagicMetadata = async (
  * with the {@link pubMagicMetadata} of a collection.
  */
 const updateCollectionPublicMagicMetadata = async (
-    { id, key, pubMagicMetadata }: Collection2,
+    { id, key, pubMagicMetadata }: Collection,
     updates: CollectionPublicMagicMetadataData,
 ) =>
     putCollectionsPublicMagicMetadata({
@@ -605,7 +653,7 @@ const putCollectionsPublicMagicMetadata = async (
  * with the {@link sharedMagicMetadata} of a collection.
  */
 const updateCollectionShareeMagicMetadata = async (
-    { id, key, sharedMagicMetadata }: Collection2,
+    { id, key, sharedMagicMetadata }: Collection,
     updates: CollectionShareeMagicMetadataData,
 ) =>
     putCollectionsShareeMagicMetadata({
@@ -632,6 +680,81 @@ const putCollectionsShareeMagicMetadata = async (
             body: JSON.stringify(updateRequest),
         }),
     );
+
+/**
+ * Create a new collection of type "favorites" for the user on remote, and
+ * return its local representation.
+ *
+ * Remote only, does not modify local state.
+ *
+ * Each user can have at most one collection of type "favorites" owned by them.
+ * While this function does not enforce the constraint locally, it will fail
+ * because remote will enforce the constraint and fail the request when we
+ * attempt to create a second collection of type "favorites".
+ */
+export const createFavoritesCollection = () =>
+    createCollection(favoritesCollectionName, "favorites");
+
+/**
+ * Create a new collection of type "uncategorized" for the user on remote, and
+ * return its local representation.
+ *
+ * Remote only, does not modify local state.
+ *
+ * Each user can have at most one collection of type "uncategorized" owned by
+ * them. While this function does not enforce the constraint locally, it will
+ * fail because remote will enforce the constraint and fail the request when we
+ * attempt to create a second collection of type "uncategorized".
+ */
+export const createUncategorizedCollection = () =>
+    createCollection(uncategorizedCollectionName, "uncategorized");
+
+/**
+ * Create a new collection with hidden visibility on remote, marking it as the
+ * default hidden collection, and return its local representation.
+ *
+ * Remote only, does not modify local state.
+ *
+ * See also: [Note: Multiple "default" hidden collections].
+ */
+export const createDefaultHiddenCollection = () =>
+    createCollection(defaultHiddenCollectionName, "album", {
+        subType: CollectionSubType.defaultHidden,
+        visibility: ItemVisibility.hidden,
+    });
+
+/**
+ * Return true if the provided collection is the default hidden collection.
+ *
+ * See also: [Note: Multiple "default" hidden collections].
+ */
+export const isDefaultHiddenCollection = (collection: Collection) =>
+    collection.magicMetadata?.data.subType == CollectionSubType.defaultHidden;
+
+/**
+ * Extract the IDs of all the "default" hidden collections.
+ *
+ * [Note: Multiple "default" hidden collections].
+ *
+ * Normally, there is only expected to be one such collection. But to provide
+ * clients laxity in synchronization, we don't enforce this and instead allow
+ * for multiple such default hidden collections to exist.
+ */
+export const findDefaultHiddenCollectionIDs = (collections: Collection[]) =>
+    new Set<number>(
+        collections
+            .filter(isDefaultHiddenCollection)
+            .map((collection) => collection.id),
+    );
+
+export const isHiddenCollection = (collection: Collection) =>
+    collection.magicMetadata?.data.visibility === ItemVisibility.hidden;
+
+/**
+ * Return true if this is a collection that the user doesn't own.
+ */
+export const isIncomingShare = (collection: Collection, user: User) =>
+    collection.owner.id !== user.id;
 
 /**
  * Share the provided collection with another Ente user.

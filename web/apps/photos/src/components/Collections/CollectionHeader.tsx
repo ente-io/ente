@@ -36,15 +36,18 @@ import {
     GalleryItemsSummary,
 } from "ente-new/photos/components/gallery/ListHeader";
 import {
-    ALL_SECTION,
-    HIDDEN_ITEMS_SECTION,
     isHiddenCollection,
     leaveSharedCollection,
+    renameCollection,
+    updateCollectionOrder,
+    updateCollectionSortOrder,
+    updateCollectionVisibility,
 } from "ente-new/photos/services/collection";
-import type {
-    CollectionSummary,
-    CollectionSummaryType,
-} from "ente-new/photos/services/collection/ui";
+import {
+    PseudoCollectionID,
+    type CollectionSummary,
+    type CollectionSummaryType,
+} from "ente-new/photos/services/collection-summary";
 import {
     clearLocalTrash,
     emptyTrash,
@@ -57,9 +60,6 @@ import { Trans } from "react-i18next";
 import * as CollectionAPI from "services/collectionService";
 import { SetFilesDownloadProgressAttributesCreator } from "types/gallery";
 import {
-    changeCollectionOrder,
-    changeCollectionSortOrder,
-    changeCollectionVisibility,
     downloadCollectionHelper,
     downloadDefaultHiddenCollectionHelper,
 } from "utils/collection";
@@ -166,10 +166,10 @@ const CollectionOptions: React.FC<CollectionHeaderProps> = ({
         [showLoadingBar, hideLoadingBar, onGenericError, syncWithRemote],
     );
 
-    const renameCollection = useCallback(
+    const handleRenameCollection = useCallback(
         async (newName: string) => {
             if (activeCollection.name !== newName) {
-                await CollectionAPI.renameCollection(activeCollection, newName);
+                await renameCollection(activeCollection, newName);
                 void syncWithRemote(false, true);
             }
         },
@@ -206,12 +206,12 @@ const CollectionOptions: React.FC<CollectionHeaderProps> = ({
 
     const deleteCollectionAlongWithFiles = wrap(async () => {
         await CollectionAPI.deleteCollection(activeCollection.id, false);
-        setActiveCollectionID(ALL_SECTION);
+        setActiveCollectionID(PseudoCollectionID.all);
     });
 
     const deleteCollectionButKeepFiles = wrap(async () => {
         await CollectionAPI.deleteCollection(activeCollection.id, true);
-        setActiveCollectionID(ALL_SECTION);
+        setActiveCollectionID(PseudoCollectionID.all);
     });
 
     const confirmEmptyTrash = () =>
@@ -228,7 +228,7 @@ const CollectionOptions: React.FC<CollectionHeaderProps> = ({
     const doEmptyTrash = wrap(async () => {
         await emptyTrash();
         await clearLocalTrash();
-        setActiveCollectionID(ALL_SECTION);
+        setActiveCollectionID(PseudoCollectionID.all);
     });
 
     const _downloadCollection = () => {
@@ -254,11 +254,11 @@ const CollectionOptions: React.FC<CollectionHeaderProps> = ({
         void _downloadCollection().catch(onGenericError);
 
     const archiveAlbum = wrap(() =>
-        changeCollectionVisibility(activeCollection, ItemVisibility.archived),
+        updateCollectionVisibility(activeCollection, ItemVisibility.archived),
     );
 
     const unarchiveAlbum = wrap(() =>
-        changeCollectionVisibility(activeCollection, ItemVisibility.visible),
+        updateCollectionVisibility(activeCollection, ItemVisibility.visible),
     );
 
     const confirmLeaveSharedAlbum = () =>
@@ -274,39 +274,39 @@ const CollectionOptions: React.FC<CollectionHeaderProps> = ({
 
     const leaveSharedAlbum = wrap(async () => {
         await leaveSharedCollection(activeCollection.id);
-        setActiveCollectionID(ALL_SECTION);
+        setActiveCollectionID(PseudoCollectionID.all);
     });
 
     const pinAlbum = wrap(() =>
-        changeCollectionOrder(activeCollection, CollectionOrder.pinned),
+        updateCollectionOrder(activeCollection, CollectionOrder.pinned),
     );
 
     const unpinAlbum = wrap(() =>
-        changeCollectionOrder(activeCollection, CollectionOrder.default),
+        updateCollectionOrder(activeCollection, CollectionOrder.default),
     );
 
     const hideAlbum = wrap(async () => {
-        await changeCollectionVisibility(
+        await updateCollectionVisibility(
             activeCollection,
             ItemVisibility.hidden,
         );
-        setActiveCollectionID(ALL_SECTION);
+        setActiveCollectionID(PseudoCollectionID.all);
     });
 
     const unhideAlbum = wrap(async () => {
-        await changeCollectionVisibility(
+        await updateCollectionVisibility(
             activeCollection,
             ItemVisibility.visible,
         );
-        setActiveCollectionID(HIDDEN_ITEMS_SECTION);
+        setActiveCollectionID(PseudoCollectionID.hiddenItems);
     });
 
     const changeSortOrderAsc = wrap(() =>
-        changeCollectionSortOrder(activeCollection, true),
+        updateCollectionSortOrder(activeCollection, true),
     );
 
     const changeSortOrderDesc = wrap(() =>
-        changeCollectionSortOrder(activeCollection, false),
+        updateCollectionSortOrder(activeCollection, false),
     );
 
     let menuOptions: React.ReactNode[] = [];
@@ -527,7 +527,7 @@ const CollectionOptions: React.FC<CollectionHeaderProps> = ({
                 initialValue={activeCollection?.name}
                 submitButtonColor="primary"
                 submitButtonTitle={t("rename")}
-                onSubmit={renameCollection}
+                onSubmit={handleRenameCollection}
             />
         </Box>
     );
