@@ -1,4 +1,5 @@
 import { HttpStatusCode } from "axios";
+import { HTTPError } from "ente-base/http";
 
 export interface ApiErrorResponse {
     code: string;
@@ -63,7 +64,13 @@ export function handleUploadError(error: any): Error {
 
 export function parseUploadErrorCodes(error: any) {
     let parsedMessage = null;
-    if (error instanceof ApiError) {
+    if (error instanceof HTTPError) {
+        switch (error.res.status) {
+            case 402:
+                parsedMessage = CustomError.SUBSCRIPTION_EXPIRED;
+                break;
+        }
+    } else if (error instanceof ApiError) {
         switch (error.httpStatusCode) {
             case HttpStatusCode.PaymentRequired:
                 parsedMessage = CustomError.SUBSCRIPTION_EXPIRED;
