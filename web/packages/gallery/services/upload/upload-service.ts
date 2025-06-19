@@ -8,6 +8,7 @@ import { ensureElectron } from "ente-base/electron";
 import { basename, nameAndExtension } from "ente-base/file-name";
 import {
     ensureOk,
+    HTTPError,
     retryAsyncOperation,
     type HTTPRequestRetrier,
     type PublicAlbumsCredentials,
@@ -1783,14 +1784,38 @@ const createRemoteFile = async (
 ) => {
     const { publicAlbumsCredentials, abortIfCancelled } = uploadContext;
 
-    abortIfCancelled();
-
     if (publicAlbumsCredentials) {
         return postPublicAlbumsEnteFile(
             newFileRequest,
             publicAlbumsCredentials,
         );
     } else {
-        return postEnteFile(newFileRequest);
+        return retryAsyncOperation(
+            () => {
+                abortIfCancelled();
+                return postEnteFile(newFileRequest);
+            },
+            {
+                abortIfNeeded: (e) => {
+                    if (isUploadCancelledError(e)) throw e;
+                    if (e instanceof HTTPError) {
+                        switch (e.res.status) {
+                            case 401:
+                                throw new Error(sessionExpiredErrorMessage);
+                            case 402:
+                                throw new Error(
+                                    subscriptionExpiredErrorMessage,
+                                );
+                            case 413:
+                                throw new Error(fileTooLargeErrorMessage);
+                            case 426:
+                                throw new Error(
+                                    storageLimitExceededErrorMessage,
+                                );
+                        }
+                    }
+                },
+            },
+        );
     }
 };

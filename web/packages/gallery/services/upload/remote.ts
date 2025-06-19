@@ -13,6 +13,7 @@ import {
 import log from "ente-base/log";
 import { apiURL, uploaderOrigin } from "ente-base/origins";
 import {
+    type EncryptedEnteFile,
     type EncryptedMagicMetadata,
     type EnteFile,
     type RemoteFileMetadata,
@@ -509,34 +510,19 @@ export interface UploadedFileObjectAttributes {
  *
  * Remote only, does not modify local state.
  *
- * Since this function is the last step after a potentially long upload to S3
- * remote of the file contents themselves, it has internal retries of the HTTP
- * request to avoid having transient issues spoil the party.
- *
  * @returns the newly created {@link EnteFile}.
  */
 export const postEnteFile = async (
-    uploadFile: PostEnteFileRequest,
-): Promise<EnteFile> => {
-    try {
-        const url = await apiURL("/files");
-        const headers = await authenticatedRequestHeaders();
-        const response = await retryAsyncOperation(
-            () =>
-                HTTPService.post(
-                    url,
-                    uploadFile,
-                    // @ts-ignore
-                    null,
-                    headers,
-                ),
-            { abortIfNeeded: handleUploadError },
-        );
-        return response.data;
-    } catch (e) {
-        log.error("upload Files Failed", e);
-        throw e;
-    }
+    postFileRequest: PostEnteFileRequest,
+): Promise<EncryptedEnteFile> => {
+    const res = await fetch(await apiURL("/files"), {
+        method: "POST",
+        headers: await authenticatedRequestHeaders(),
+        body: JSON.stringify(postFileRequest),
+    });
+    ensureOk(res);
+    // TODO(RE):
+    return (await res.json()) as EncryptedEnteFile;
 };
 
 /**
