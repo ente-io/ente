@@ -175,18 +175,6 @@ export interface FileMetadata {
      * placeholder thumbnail was used.
      */
     hasStaticThumbnail?: boolean;
-    /**
-     * Mobile client specific field, not used by us.
-     */
-    localID?: number;
-    /**
-     * Mobile client specific field, not used by us.
-     */
-    version?: number;
-    /**
-     * Mobile client specific field, not used by us.
-     */
-    deviceFolder?: string;
 }
 
 /**
@@ -204,9 +192,6 @@ export const FileMetadata = z.looseObject({
     videoHash: z.string().nullish().transform(nullToUndefined),
     duration: z.number().nullish().transform(nullToUndefined),
     hasStaticThumbnail: z.boolean().nullish().transform(nullToUndefined),
-    localID: z.number().nullish().transform(nullToUndefined),
-    version: z.number().nullish().transform(nullToUndefined),
-    deviceFolder: z.number().nullish().transform(nullToUndefined),
 });
 
 /**

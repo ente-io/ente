@@ -727,8 +727,8 @@ export const decryptRemoteFile = async (
 
     // See: [Note: strict mode migration]
     //
-    // -eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // -@ts-ignore
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     const metadataJSON = await decryptMetadataJSON(encryptedMetadata, key);
     const metadata = FileMetadata.parse(
         transformDecryptedMetadataJSON(id, metadataJSON),
@@ -762,7 +762,7 @@ export const decryptRemoteFile = async (
         ...rest,
         id,
         key,
-        // TODO(RE):n
+        // TODO(RE):
         metadata: metadata as FileMetadata,
         magicMetadata,
         pubMagicMetadata,
