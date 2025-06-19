@@ -37,7 +37,11 @@ import {
     type FileInfoProps,
 } from "ente-gallery/components/FileInfo";
 import type { Collection } from "ente-media/collection";
-import { fileVisibility, ItemVisibility } from "ente-media/file-metadata";
+import {
+    fileFileName,
+    fileVisibility,
+    ItemVisibility,
+} from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
 import type { EnteFile } from "ente-media/file.js";
 import { isHEICExtension, needsJPEGConversion } from "ente-media/formats";
@@ -1253,7 +1257,7 @@ const fileIsEditableImage = (file: EnteFile) => {
     // Only images are editable.
     if (file.metadata.fileType !== FileType.image) return false;
 
-    const extension = lowercaseExtension(file.metadata.title);
+    const extension = lowercaseExtension(fileFileName(file));
     // Assume it is editable;
     let isRenderable = true;
     if (extension && needsJPEGConversion(extension)) {

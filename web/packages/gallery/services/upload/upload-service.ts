@@ -33,12 +33,11 @@ import type {
     EnteFile,
     FilePublicMagicMetadata,
     FilePublicMagicMetadataProps,
-    MetadataFileAttributes,
-    S3FileAttributes,
 } from "ente-media/file";
 import {
+    fileFileName,
     metadataHash,
-    type Metadata,
+    type FileMetadata,
     type ParsedMetadata,
     type PublicMagicMetadata,
 } from "ente-media/file-metadata";
@@ -63,23 +62,21 @@ import {
     fetchPublicAlbumsMultipartUploadURLs,
     fetchPublicAlbumsUploadURLs,
     fetchUploadURLs,
-    PhotosUploadHTTPClient,
-    PublicAlbumsUploadHTTPClient,
+    postEnteFile,
+    postPublicAlbumsEnteFile,
     putFile,
     putFilePart,
     putFilePartViaWorker,
     putFileViaWorker,
     type MultipartCompletedPart,
     type ObjectUploadURL,
+    type PostEnteFileRequest,
 } from "./remote";
 import {
     fallbackThumbnail,
     generateThumbnailNative,
     generateThumbnailWeb,
 } from "./thumbnail";
-
-const photosHTTPClient = new PhotosUploadHTTPClient();
-const publicAlbumsHTTPClient = new PublicAlbumsUploadHTTPClient();
 
 /**
  * A readable stream for a file, and its associated size and last modified time.
@@ -176,13 +173,10 @@ class UploadService {
         this.ensureUniqueUploadURLs();
     }
 
-    async uploadFile(uploadFile: UploadFile) {
+    async postFile(file: PostEnteFileRequest) {
         return this.publicAlbumsCredentials
-            ? publicAlbumsHTTPClient.uploadFile(
-                  uploadFile,
-                  this.publicAlbumsCredentials,
-              )
-            : photosHTTPClient.uploadFile(uploadFile);
+            ? postPublicAlbumsEnteFile(file, this.publicAlbumsCredentials)
+            : postEnteFile(file);
     }
 
     private async refillUploadURLs() {
@@ -302,7 +296,7 @@ interface ThumbnailedFile {
 }
 
 interface FileWithMetadata extends Omit<ThumbnailedFile, "hasStaticThumbnail"> {
-    metadata: Metadata;
+    metadata: FileMetadata;
     localID: number;
     pubMagicMetadata: FilePublicMagicMetadata;
 }
@@ -345,19 +339,6 @@ interface EncryptedFilePieces {
     metadata: { encryptedData: string; decryptionHeader: string };
     pubMagicMetadata: EncryptedMagicMetadata;
     localID: number;
-}
-
-export interface BackupedFile {
-    file: S3FileAttributes;
-    thumbnail: S3FileAttributes;
-    metadata: MetadataFileAttributes;
-    pubMagicMetadata: EncryptedMagicMetadata;
-}
-
-export interface UploadFile extends BackupedFile {
-    collectionID: number;
-    encryptedKey: string;
-    keyDecryptionNonce: string;
 }
 
 export interface PotentialLivePhotoAsset {
@@ -662,7 +643,7 @@ export const upload = async (
         );
 
         const matches = existingFiles.filter((file) =>
-            areFilesSame(file.metadata, metadata),
+            areFilesSame(file, metadata),
         );
 
         const anyMatch = matches.length > 0 ? matches[0] : undefined;
@@ -722,7 +703,7 @@ export const upload = async (
 
         abortIfCancelled();
 
-        const uploadedFile = await uploadService.uploadFile({
+        const uploadedFile = await uploadService.postFile({
             collectionID: collection.id,
             encryptedKey: encryptedFileKey.encryptedData,
             keyDecryptionNonce: encryptedFileKey.nonce,
@@ -961,7 +942,7 @@ const readEntireStream = async (stream: ReadableStream) =>
     new Uint8Array(await new Response(stream).arrayBuffer());
 
 interface ExtractAssetMetadataResult {
-    metadata: Metadata;
+    metadata: FileMetadata;
     publicMagicMetadata: FilePublicMagicMetadataProps;
 }
 
@@ -1129,7 +1110,7 @@ const extractImageOrVideoMetadata = async (
     // the metadata (it should've been an integer). The most probable theory is
     // that somehow it made its way in through malformed Exif.
 
-    const metadata: Metadata = {
+    const metadata: FileMetadata = {
         fileType,
         title: fileName,
         creationTime: ensureInteger(creationTime),
@@ -1240,17 +1221,24 @@ const computeHash = async (uploadItem: UploadItem, worker: CryptoWorker) => {
 };
 
 /**
- * Return true if the two files, as represented by their metadata, are same.
+ * Return true if the given file is the same as provided metadata.
  *
  * Note that the metadata includes the hash of the file's contents (when
  * available), so this also in effect compares the contents of the files, not
  * just the "meta" information about them.
  */
-const areFilesSame = (f: Metadata, g: Metadata) => {
-    if (f.fileType !== g.fileType || f.title !== g.title) return false;
+const areFilesSame = (fFile: EnteFile, gm: FileMetadata) => {
+    const fm = fFile.metadata;
 
-    const fh = metadataHash(f);
-    const gh = metadataHash(g);
+    // File name is different
+    if (fileFileName(fFile) !== gm.title) return false;
+
+    // File type is different
+    if (fm.fileType !== gm.fileType) return false;
+
+    // Name and type is same, compare hash.
+    const fh = metadataHash(fm);
+    const gh = metadataHash(gm);
     return fh && gh && fh == gh;
 };
 
@@ -1512,7 +1500,12 @@ const encryptFileStream = async (
 const uploadToBucket = async (
     encryptedFilePieces: EncryptedFilePieces,
     uploadContext: UploadContext,
-): Promise<BackupedFile> => {
+): Promise<
+    Pick<
+        PostEnteFileRequest,
+        "file" | "thumbnail" | "metadata" | "pubMagicMetadata"
+    >
+> => {
     const { isCFUploadProxyDisabled, abortIfCancelled, updateUploadProgress } =
         uploadContext;
 

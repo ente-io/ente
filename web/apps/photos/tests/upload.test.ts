@@ -7,6 +7,7 @@ import {
     matchJSONMetadata,
     metadataJSONMapKeyForJSON,
 } from "ente-gallery/services/upload/metadata-json";
+import { fileFileName } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
 import { getLocalCollections } from "ente-new/photos/services/collections";
 import {
@@ -233,9 +234,8 @@ async function thumbnailGenerationFailedFilesCheck(expectedState) {
             }
         },
     );
-    const fileNamesWithStaticThumbnail = uniqueFilesWithStaticThumbnail.map(
-        (file) => file.metadata.title,
-    );
+    const fileNamesWithStaticThumbnail =
+        uniqueFilesWithStaticThumbnail.map(fileFileName);
 
     if (
         expectedState.thumbnail_generation_failure.count <
@@ -275,9 +275,7 @@ async function livePhotoClubbingCheck(expectedState) {
         }
     });
 
-    const livePhotoFileNames = uniqueLivePhotos.map(
-        (file) => file.metadata.title,
-    );
+    const livePhotoFileNames = uniqueLivePhotos.map(fileFileName);
 
     if (expectedState.live_photo.count !== livePhotoFileNames.length) {
         throw Error(
@@ -300,7 +298,7 @@ async function exifDataParsingCheck(expectedState) {
     const files = await getLocalFiles();
     Object.entries(expectedState.exif).map(([fileName, exifValues]) => {
         const matchingFile = files.find(
-            (file) => file.metadata.title === fileName,
+            (file) => fileFileName(file) == fileName,
         );
         if (!matchingFile) {
             throw Error(`exifDataParsingCheck failed , ${fileName} missing`);
@@ -340,7 +338,7 @@ async function fileDimensionExtractionCheck(expectedState) {
     Object.entries(expectedState.file_dimensions).map(
         ([fileName, dimensions]) => {
             const matchingFile = files.find(
-                (file) => file.metadata.title === fileName,
+                (file) => fileFileName(file) == fileName,
             );
             if (!matchingFile) {
                 throw Error(
@@ -366,7 +364,7 @@ async function googleMetadataReadingCheck(expectedState) {
     const files = await getLocalFiles();
     Object.entries(expectedState.google_import).map(([fileName, metadata]) => {
         const matchingFile = files.find(
-            (file) => file.metadata.title === fileName,
+            (file) => fileFileName(file) == fileName,
         );
         if (!matchingFile) {
             throw Error(`exifDataParsingCheck failed , ${fileName} missing`);
