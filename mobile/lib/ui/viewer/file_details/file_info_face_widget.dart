@@ -119,41 +119,32 @@ class _FileInfoFaceWidgetState extends State<FileInfoFaceWidget> {
     if (kDebugMode) {
       faceInfo.add(
         Text(
-          'S: ${widget.face.score.toStringAsFixed(3)} (I)',
+          'S: ${widget.face.score.toStringAsFixed(3)}(I)',
           style: Theme.of(context).textTheme.bodySmall,
           maxLines: 1,
         ),
       );
       faceInfo.add(
         Text(
-          'B: ${widget.face.blur.toStringAsFixed(0)} (I)',
+          'B: ${widget.face.blur.toStringAsFixed(0)}(I)',
           style: Theme.of(context).textTheme.bodySmall,
           maxLines: 1,
         ),
       );
       faceInfo.add(
         Text(
-          'D: ${widget.face.detection.getFaceDirection().toDirectionString()} (I)',
+          'D: ${widget.face.detection.getFaceDirection().toDirectionString().substring(0, 3)}(I)',
           style: Theme.of(context).textTheme.bodySmall,
           maxLines: 1,
         ),
       );
       faceInfo.add(
         Text(
-          'Sideways: ${widget.face.detection.faceIsSideways().toString()} (I)',
+          'Si: ${widget.face.detection.faceIsSideways().toString()}(I)',
           style: Theme.of(context).textTheme.bodySmall,
           maxLines: 1,
         ),
       );
-      if (widget.face.score < kMinimumFaceShowScore) {
-        faceInfo.add(
-          Text(
-            'Not visible to user (I)',
-            style: Theme.of(context).textTheme.bodySmall,
-            maxLines: 1,
-          ),
-        );
-      }
     }
     return faceInfo;
   }
