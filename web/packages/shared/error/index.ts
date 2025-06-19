@@ -41,7 +41,6 @@ export const CustomError = {
     BAD_REQUEST: "bad request",
     SUBSCRIPTION_NEEDED: "subscription not present",
     NOT_FOUND: "not found ",
-    UPLOAD_CANCELLED: "upload cancelled",
     UPDATE_EXPORTED_RECORD_FAILED: "update file exported record failed",
     EXPORT_STOPPED: "export stopped",
     EXPORT_FOLDER_DOES_NOT_EXIST: "export folder does not exist",
@@ -84,7 +83,8 @@ export function handleUploadError(error: any): Error {
         case CustomError.SUBSCRIPTION_EXPIRED:
         case CustomError.STORAGE_QUOTA_EXCEEDED:
         case CustomError.SESSION_EXPIRED:
-        case CustomError.UPLOAD_CANCELLED:
+            // Not relevant here, add a hook in postEnteFile
+            // case CustomError.UPLOAD_CANCELLED:
             throw parsedError;
     }
     return parsedError;

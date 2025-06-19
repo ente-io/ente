@@ -543,6 +543,9 @@ const uploadItemCreationDate = async (
  * The message of the {@link Error} that is thrown when the user cancels an
  * upload.
  *
+ * As a convenience, the {@link isUploadCancelledError} matcher can be used to
+ * match such errors.
+ *
  * [Note: Upload cancellation]
  *
  * 1. User cancels the upload by pressing the cancel button on the upload
@@ -560,6 +563,13 @@ const uploadItemCreationDate = async (
  *    and it bubbles all the way to the top of the call stack, ending the upload.
  */
 export const uploadCancelledErrorMessage = "Upload cancelled";
+
+/**
+ * A convenience function to check if the provided value is an {@link Error}
+ * with message {@link uploadCancelledErrorMessage}.
+ */
+export const isUploadCancelledError = (e: unknown) =>
+    e instanceof Error && e.message == uploadCancelledErrorMessage;
 
 /**
  * Some state and callbacks used during upload that are not tied to a specific
@@ -741,12 +751,12 @@ export const upload = async (
             uploadedFile,
         };
     } catch (e) {
-        if (e instanceof Error && e.message == CustomError.UPLOAD_CANCELLED) {
-            log.info(`Upload for ${fileName} cancelled`);
-        } else {
-            log.error(`Upload failed for ${fileName}`, e);
+        if (isUploadCancelledError(e)) {
+            // Nothing to do for these, just relay them up.
+            throw e;
         }
 
+        log.error(`Upload failed for ${fileName}`, e);
         const error = handleUploadError(e);
         switch (error.message) {
             case CustomErrorMessage.eTagMissing:
@@ -1618,8 +1628,8 @@ const uploadToBucket = async (
  * used by the upload subsystem.
  *
  * @param abortIfCancelled A function that aborts the operation by throwing a
- * error with the message set to {@link CustomError.UPLOAD_CANCELLED} if the
- * user has cancelled the upload.
+ * error with the message set to {@link uploadCancelledErrorMessage} if the user
+ * has cancelled the upload.
  *
  * @return A function of type {@link HTTPRequestRetrier} that can be used to
  * retry requests. This function will retry requests (obtained afresh each time
@@ -1641,11 +1651,7 @@ const createAbortableRetryEnsuringHTTPOk =
             {
                 ...opts,
                 abortIfNeeded(e) {
-                    if (
-                        e instanceof Error &&
-                        e.message == CustomError.UPLOAD_CANCELLED
-                    )
-                        throw e;
+                    if (isUploadCancelledError(e)) throw e;
                 },
             },
         );

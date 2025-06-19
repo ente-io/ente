@@ -20,7 +20,9 @@ import {
 } from "ente-gallery/services/upload/metadata-json";
 import UploadService, {
     areLivePhotoAssets,
+    isUploadCancelledError,
     upload,
+    uploadCancelledErrorMessage,
     uploadItemFileName,
     type PotentialLivePhotoAsset,
     type UploadAsset,
@@ -37,7 +39,6 @@ import { FileType } from "ente-media/file-type";
 import { potentialFileTypeFromExtension } from "ente-media/live-photo";
 import { getLocalFiles } from "ente-new/photos/services/files";
 import { indexNewUpload } from "ente-new/photos/services/ml";
-import { CustomError } from "ente-shared/error";
 import { wait } from "ente-utils/promise";
 import {
     getLocalPublicFiles,
@@ -378,7 +379,7 @@ class UploadManager {
                 await this.uploadMediaItems(clusteredMediaItems);
             }
         } catch (e) {
-            if (e.message != CustomError.UPLOAD_CANCELLED) {
+            if (!isUploadCancelledError(e)) {
                 log.error("Upload failed", e);
                 throw e;
             }
@@ -436,7 +437,7 @@ class UploadManager {
 
     private abortIfCancelled = () => {
         if (this.shouldUploadBeCancelled) {
-            throw Error(CustomError.UPLOAD_CANCELLED);
+            throw new Error(uploadCancelledErrorMessage);
         }
     };
 
