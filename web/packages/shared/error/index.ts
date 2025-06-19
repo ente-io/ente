@@ -1,5 +1,4 @@
 import { HttpStatusCode } from "axios";
-import { HTTPError } from "ente-base/http";
 
 export interface ApiErrorResponse {
     code: string;
@@ -23,11 +22,6 @@ export function isApiErrorResponse(object: any): object is ApiErrorResponse {
 }
 
 export const CustomError = {
-    ETAG_MISSING: "no header/etag present in response body",
-    FILE_TOO_LARGE: "file too large",
-    SUBSCRIPTION_EXPIRED: "subscription expired",
-    STORAGE_QUOTA_EXCEEDED: "storage quota exceeded",
-    SESSION_EXPIRED: "session expired",
     TOKEN_EXPIRED: "token expired",
     TOO_MANY_REQUESTS: "too many requests",
     BAD_REQUEST: "bad request",
@@ -38,49 +32,6 @@ export const CustomError = {
     EXPORT_FOLDER_DOES_NOT_EXIST: "export folder does not exist",
     TWO_FACTOR_ENABLED: "two factor enabled",
 };
-
-export function handleUploadError(error: any): Error {
-    let parsedMessage = null;
-    if (error instanceof HTTPError) {
-        switch (error.res.status) {
-            case 402:
-                parsedMessage = CustomError.SUBSCRIPTION_EXPIRED;
-                break;
-        }
-    } else if (error instanceof ApiError) {
-        switch (error.httpStatusCode) {
-            case HttpStatusCode.PaymentRequired:
-                parsedMessage = CustomError.SUBSCRIPTION_EXPIRED;
-                break;
-            case HttpStatusCode.UpgradeRequired:
-                parsedMessage = CustomError.STORAGE_QUOTA_EXCEEDED;
-                break;
-            case HttpStatusCode.Unauthorized:
-                parsedMessage = CustomError.SESSION_EXPIRED;
-                break;
-            case HttpStatusCode.PayloadTooLarge:
-                parsedMessage = CustomError.FILE_TOO_LARGE;
-                break;
-            default:
-                parsedMessage = `Something went wrong (statusCode:${error.httpStatusCode})`;
-        }
-    } else {
-        parsedMessage = error.message;
-    }
-
-    const parsedError = new Error(parsedMessage);
-
-    // breaking errors
-    switch (parsedError.message) {
-        case CustomError.SUBSCRIPTION_EXPIRED:
-        case CustomError.STORAGE_QUOTA_EXCEEDED:
-        case CustomError.SESSION_EXPIRED:
-            // Not relevant here, add a hook in postEnteFile
-            // case CustomError.UPLOAD_CANCELLED:
-            throw parsedError;
-    }
-    return parsedError;
-}
 
 export const parseSharingErrorCodes = (error: any) => {
     let parsedMessage = null;
