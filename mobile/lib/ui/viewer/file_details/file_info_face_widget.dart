@@ -56,14 +56,14 @@ class FileInfoFaceWidget extends StatefulWidget {
 class _FileInfoFaceWidgetState extends State<FileInfoFaceWidget> {
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: widget.isEditMode ? null : _routeToPersonOrClusterPage,
-      child: Column(
-        children: [
-          Stack(
-            clipBehavior: Clip.none,
-            children: [
-              Container(
+    return Column(
+      children: [
+        Stack(
+          clipBehavior: Clip.none,
+          children: [
+            GestureDetector(
+              onTap: widget.isEditMode ? null : _routeToPersonOrClusterPage,
+              child: Container(
                 height: 60,
                 width: 60,
                 decoration: ShapeDecoration(
@@ -92,13 +92,13 @@ class _FileInfoFaceWidgetState extends State<FileInfoFaceWidget> {
                   ),
                 ),
               ),
-              if (widget.isEditMode) _buildEditIcon(context),
-            ],
-          ),
-          const SizedBox(height: 8),
-          ..._buildFaceInfo(),
-        ],
-      ),
+            ),
+            if (widget.isEditMode) _buildEditIcon(context),
+          ],
+        ),
+        const SizedBox(height: 8),
+        ..._buildFaceInfo(),
+      ],
     );
   }
 
@@ -274,7 +274,8 @@ class _FileInfoFaceWidgetState extends State<FileInfoFaceWidget> {
       right: -6,
       top: -6,
       child: GestureDetector(
-        onTap: () => hasPerson ? _onMinusIconTap : _onPlusIconTap,
+        behavior: HitTestBehavior.opaque,
+        onTap: () => hasPerson ? _onMinusIconTap() : _onPlusIconTap(),
         child: Container(
           width: 20,
           height: 20,

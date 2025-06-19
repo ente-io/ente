@@ -48,10 +48,10 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
       setState(() {
         _defaultFaces = faceData['default'] ?? [];
         _remainingFaces = faceData['remaining'] ?? [];
-        _isLoading = false;
       });
     } catch (e, s) {
       _logger.severe('Failed to load faces', e, s);
+    } finally {
       setState(() => _isLoading = false);
     }
   }
@@ -69,7 +69,6 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
       return {'default': [], 'remaining': []};
     }
 
-    // Separate faces by score threshold
     final defaultFaces = <Face>[];
     final remainingFaces = <Face>[];
 
@@ -172,16 +171,10 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
     return faceInfoList;
   }
 
-  void _toggleEditMode() {
-    setState(() {
-      _isEditMode = !_isEditMode;
-      if (!_isEditMode) _showRemainingFaces = false;
-    });
-  }
+  void _toggleEditMode() => setState(() => _isEditMode = !_isEditMode);
 
-  void _toggleRemainingFaces() {
-    setState(() => _showRemainingFaces = !_showRemainingFaces);
-  }
+  void _toggleRemainingFaces() =>
+      setState(() => _showRemainingFaces = !_showRemainingFaces);
 
   @override
   Widget build(BuildContext context) {
