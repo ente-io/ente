@@ -58,6 +58,248 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
     }
   }
 
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const IconButtonWidget(
+          icon: Icons.face_retouching_natural_outlined,
+          iconButtonType: IconButtonType.secondary,
+        ),
+        const SizedBox(width: 12),
+        _buildContent(),
+      ],
+    );
+  }
+
+  Widget _buildContent() {
+    if (_isLoading) {
+      return const Expanded(
+        child: Padding(
+          padding: EdgeInsets.only(top: 8, right: 12),
+          child: Center(
+            child: EnteLoadingWidget(
+              padding: 6,
+              size: 20,
+              alignment: Alignment.center,
+            ),
+          ),
+        ),
+      );
+    }
+
+    if (_errorReason != null ||
+        (_defaultFaces.isEmpty && _remainingFaces.isEmpty)) {
+      return _buildNoFacesWidget();
+    }
+
+    return Expanded(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(top: 12.0),
+                child: SizedBox(
+                  height: 24,
+                  child: Center(
+                    child: Text(
+                      S.of(context).faces,
+                      style: getEnteTextTheme(context).small,
+                    ),
+                  ),
+                ),
+              ),
+              _editStateButton(),
+            ],
+          ),
+          const SizedBox(height: 20),
+          if (_defaultFaces.isNotEmpty) _buildFaceGrid(_defaultFaces),
+          if (_remainingFaces.isNotEmpty) ...[
+            const SizedBox(height: 16),
+            _buildRemainingFacesSection(),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFaceGrid(List<_FaceInfo> faceInfoList) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 12.0),
+      child: Wrap(
+        runSpacing: 8,
+        spacing: 12,
+        children: faceInfoList
+            .map(
+              (faceInfo) => FileInfoFaceWidget(
+                widget.file,
+                faceInfo.face,
+                faceCrop: faceInfo.faceCrop,
+                person: faceInfo.person,
+                clusterID: faceInfo.clusterID,
+                isEditMode: _isEditMode,
+                reloadAllFaces: loadFaces,
+              ),
+            )
+            .toList(),
+      ),
+    );
+  }
+
+  Future<List<_FaceInfo>> _buildFaceInfoList(
+    List<Face> faces,
+    Map<String, String?> faceIdsToClusterIds,
+    Map<String, PersonEntity> persons,
+    Map<String, String> clusterIDToPerson,
+    Map<String, Uint8List> faceCrops,
+  ) async {
+    final faceInfoList = <_FaceInfo>[];
+
+    // Build person mapping for sorting
+    final faceIdToPersonID = <String, String>{};
+    for (final face in faces) {
+      final clusterID = faceIdsToClusterIds[face.faceID];
+      if (clusterID != null) {
+        final personID = clusterIDToPerson[clusterID];
+        if (personID != null) {
+          faceIdToPersonID[face.faceID] = personID;
+        }
+      }
+    }
+
+    // Sort faces: named first, then by score, hidden last
+    faces.sort((a, b) {
+      final aPersonID = faceIdToPersonID[a.faceID];
+      final bPersonID = faceIdToPersonID[b.faceID];
+      final aIsHidden = persons[aPersonID]?.data.isIgnored ?? false;
+      final bIsHidden = persons[bPersonID]?.data.isIgnored ?? false;
+
+      if (aIsHidden != bIsHidden) return aIsHidden ? 1 : -1;
+      if ((aPersonID != null) != (bPersonID != null)) {
+        return aPersonID != null ? -1 : 1;
+      }
+      return b.score.compareTo(a.score);
+    });
+
+    // Create face info objects
+    for (final face in faces) {
+      final faceCrop = faceCrops[face.faceID];
+      if (faceCrop == null) {
+        _logger.severe('Missing face crop for ${face.faceID}');
+        continue;
+      }
+
+      final clusterID = faceIdsToClusterIds[face.faceID];
+      final person = clusterIDToPerson[clusterID] != null
+          ? persons[clusterIDToPerson[clusterID]!]
+          : null;
+
+      faceInfoList.add(
+        _FaceInfo(
+          face: face,
+          faceCrop: faceCrop,
+          clusterID: clusterID,
+          person: person,
+        ),
+      );
+    }
+
+    return faceInfoList;
+  }
+
+  Widget _buildNoFacesWidget() {
+    final reason = _errorReason ?? NoFacesReason.noFacesFound;
+    return Expanded(
+      child: Padding(
+        padding: const EdgeInsets.only(right: 12, top: 8),
+        child: ChipButtonWidget(
+          getNoFaceReasonText(context, reason),
+          noChips: true,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRemainingFacesSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(top: 4.0),
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: _toggleRemainingFaces,
+            child: Row(
+              children: [
+                Text(
+                  "Other detected faces",
+                  style: getEnteTextTheme(context).miniMuted,
+                ),
+                const Spacer(),
+                Padding(
+                  padding: const EdgeInsets.only(right: 12.0),
+                  child: Icon(
+                    _showRemainingFaces
+                        ? Icons.keyboard_arrow_up
+                        : Icons.keyboard_arrow_down,
+                    size: 16,
+                    color: getEnteColorScheme(context).textMuted,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        if (_showRemainingFaces) ...[
+          const SizedBox(height: 16),
+          _buildFaceGrid(_remainingFaces),
+        ],
+      ],
+    );
+  }
+
+  Widget _editStateButton() {
+    return SizedBox(
+      height: 36,
+      child: _isEditMode
+          ? Padding(
+              padding: const EdgeInsets.only(top: 12.0, right: 12.0),
+              child: Center(
+                child: GestureDetector(
+                  onTap: _toggleEditMode,
+                  child: Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: getEnteColorScheme(context).primary500,
+                        width: 1,
+                      ),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      "Done",
+                      style: getEnteTextTheme(context).small.copyWith(
+                            color: getEnteColorScheme(context).primary500,
+                          ),
+                    ),
+                  ),
+                ),
+              ),
+            )
+          : IconButtonWidget(
+              icon: Icons.edit,
+              iconButtonType: IconButtonType.secondary,
+              onTap: _toggleEditMode,
+            ),
+    );
+  }
+
   Future<_FaceDataResult> _fetchFaceData() async {
     if (widget.file.uploadedFileID == null) {
       return _FaceDataResult(
@@ -140,233 +382,22 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
     );
   }
 
-  Future<List<_FaceInfo>> _buildFaceInfoList(
-    List<Face> faces,
-    Map<String, String?> faceIdsToClusterIds,
-    Map<String, PersonEntity> persons,
-    Map<String, String> clusterIDToPerson,
-    Map<String, Uint8List> faceCrops,
-  ) async {
-    final faceInfoList = <_FaceInfo>[];
-
-    // Build person mapping for sorting
-    final faceIdToPersonID = <String, String>{};
-    for (final face in faces) {
-      final clusterID = faceIdsToClusterIds[face.faceID];
-      if (clusterID != null) {
-        final personID = clusterIDToPerson[clusterID];
-        if (personID != null) {
-          faceIdToPersonID[face.faceID] = personID;
-        }
-      }
-    }
-
-    // Sort faces: named first, then by score, hidden last
-    faces.sort((a, b) {
-      final aPersonID = faceIdToPersonID[a.faceID];
-      final bPersonID = faceIdToPersonID[b.faceID];
-      final aIsHidden = persons[aPersonID]?.data.isIgnored ?? false;
-      final bIsHidden = persons[bPersonID]?.data.isIgnored ?? false;
-
-      if (aIsHidden != bIsHidden) return aIsHidden ? 1 : -1;
-      if ((aPersonID != null) != (bPersonID != null)) {
-        return aPersonID != null ? -1 : 1;
-      }
-      return b.score.compareTo(a.score);
-    });
-
-    // Create face info objects
-    for (final face in faces) {
-      final faceCrop = faceCrops[face.faceID];
-      if (faceCrop == null) {
-        _logger.severe('Missing face crop for ${face.faceID}');
-        continue;
-      }
-
-      final clusterID = faceIdsToClusterIds[face.faceID];
-      final person = clusterIDToPerson[clusterID] != null
-          ? persons[clusterIDToPerson[clusterID]!]
-          : null;
-
-      faceInfoList.add(
-        _FaceInfo(
-          face: face,
-          faceCrop: faceCrop,
-          clusterID: clusterID,
-          person: person,
-        ),
-      );
-    }
-
-    return faceInfoList;
-  }
-
   void _toggleEditMode() => setState(() => _isEditMode = !_isEditMode);
 
   void _toggleRemainingFaces() =>
       setState(() => _showRemainingFaces = !_showRemainingFaces);
+}
 
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                const IconButtonWidget(
-                  icon: Icons.face_retouching_natural_outlined,
-                  iconButtonType: IconButtonType.secondary,
-                ),
-                const SizedBox(width: 12),
-                Text(
-                  S.of(context).faces,
-                  style: getEnteTextTheme(context).small,
-                ),
-              ],
-            ),
-            _editStateButton(),
-          ],
-        ),
-        const SizedBox(height: 4),
-        Padding(
-          padding: const EdgeInsets.only(left: 48),
-          child: _buildContent(),
-        ),
-      ],
-    );
-  }
+class _FaceDataResult {
+  final List<_FaceInfo> defaultFaces;
+  final List<_FaceInfo> remainingFaces;
+  final NoFacesReason? errorReason;
 
-  Widget _buildContent() {
-    if (_isLoading) {
-      return const EnteLoadingWidget(
-        padding: 6,
-        size: 20,
-        alignment: Alignment.centerLeft,
-      );
-    }
-
-    if (_errorReason != null ||
-        (_defaultFaces.isEmpty && _remainingFaces.isEmpty)) {
-      return _buildNoFacesWidget();
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (_defaultFaces.isNotEmpty) _buildFaceGrid(_defaultFaces),
-        if (_remainingFaces.isNotEmpty) ...[
-          const SizedBox(height: 16),
-          _buildRemainingFacesSection(),
-        ],
-      ],
-    );
-  }
-
-  Widget _buildFaceGrid(List<_FaceInfo> faceInfoList) {
-    return Wrap(
-      runSpacing: 8,
-      spacing: 8,
-      children: faceInfoList
-          .map(
-            (faceInfo) => FileInfoFaceWidget(
-              widget.file,
-              faceInfo.face,
-              faceCrop: faceInfo.faceCrop,
-              person: faceInfo.person,
-              clusterID: faceInfo.clusterID,
-              isEditMode: _isEditMode,
-              reloadAllFaces: loadFaces,
-            ),
-          )
-          .toList(),
-    );
-  }
-
-  Widget _buildRemainingFacesSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(top: 4.0),
-          child: GestureDetector(
-            onTap: _toggleRemainingFaces,
-            child: Row(
-              children: [
-                Text(
-                  "Other detected faces",
-                  style: getEnteTextTheme(context).miniMuted,
-                ),
-                const Spacer(),
-                Padding(
-                  padding: const EdgeInsets.only(right: 16.0),
-                  child: Icon(
-                    _showRemainingFaces
-                        ? Icons.keyboard_arrow_up
-                        : Icons.keyboard_arrow_down,
-                    size: 16,
-                    color: getEnteColorScheme(context).textMuted,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-        if (_showRemainingFaces) ...[
-          const SizedBox(height: 16),
-          _buildFaceGrid(_remainingFaces),
-        ],
-      ],
-    );
-  }
-
-  Widget _buildNoFacesWidget() {
-    final reason = _errorReason ?? NoFacesReason.noFacesFound;
-    return Padding(
-      padding: const EdgeInsets.only(top: 5),
-      child: ChipButtonWidget(
-        getNoFaceReasonText(context, reason),
-        noChips: true,
-      ),
-    );
-  }
-
-  Widget _editStateButton() {
-    if (_isEditMode) {
-      return Padding(
-        padding: const EdgeInsets.all(12.0),
-        child: GestureDetector(
-          onTap: _toggleEditMode,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-            decoration: BoxDecoration(
-              border: Border.all(
-                color: getEnteColorScheme(context).primary500,
-                width: 1,
-              ),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Text(
-              "Done",
-              style: getEnteTextTheme(context).small.copyWith(
-                    color: getEnteColorScheme(context).primary500,
-                  ),
-            ),
-          ),
-        ),
-      );
-    } else {
-      return IconButtonWidget(
-        icon: Icons.edit,
-        iconButtonType: IconButtonType.secondary,
-        onTap: _toggleEditMode,
-      );
-    }
-  }
+  _FaceDataResult({
+    required this.defaultFaces,
+    required this.remainingFaces,
+    this.errorReason,
+  });
 }
 
 class _FaceInfo {
@@ -380,18 +411,6 @@ class _FaceInfo {
     required this.faceCrop,
     this.clusterID,
     this.person,
-  });
-}
-
-class _FaceDataResult {
-  final List<_FaceInfo> defaultFaces;
-  final List<_FaceInfo> remainingFaces;
-  final NoFacesReason? errorReason;
-
-  _FaceDataResult({
-    required this.defaultFaces,
-    required this.remainingFaces,
-    this.errorReason,
   });
 }
 
