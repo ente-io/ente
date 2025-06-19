@@ -61,9 +61,9 @@ export async function downloadFile(file: EnteFile) {
                 new Blob([imageData], { type: imageType.mimeType }),
             );
             const video = new File([videoData], videoFileName);
-            const videoType = await detectFileTypeInfo(video);
+            const { mimeType } = await detectFileTypeInfo(video);
             const tempVideoURL = URL.createObjectURL(
-                new Blob([videoData], { type: videoType.mimeType }),
+                new Blob([videoData], { type: mimeType }),
             );
             downloadAndRevokeObjectURL(tempImageURL, imageFileName);
             // Downloading multiple works everywhere except, you guessed it,

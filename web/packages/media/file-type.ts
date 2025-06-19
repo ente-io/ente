@@ -50,7 +50,6 @@ export interface FileTypeInfo {
     extension: string;
     mimeType?: string;
     imageType?: string;
-    videoType?: string;
 }
 
 // list of format that were missed by type-detection for some files.

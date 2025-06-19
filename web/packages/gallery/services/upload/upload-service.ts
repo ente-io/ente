@@ -1002,7 +1002,6 @@ const readLivePhotoDetails = async ({ image, video }: LivePhotoAssets) => {
             fileType: FileType.livePhoto,
             extension: `${img.fileTypeInfo.extension}+${vid.fileTypeInfo.extension}`,
             imageType: img.fileTypeInfo.extension,
-            videoType: vid.fileTypeInfo.extension,
         },
         fileSize: img.fileSize + vid.fileSize,
         lastModifiedMs: img.lastModifiedMs,
