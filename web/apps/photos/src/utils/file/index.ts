@@ -52,7 +52,7 @@ export async function downloadFile(file: EnteFile) {
     try {
         let fileBlob = await downloadManager.fileBlob(file);
         const fileName = fileFileName(file);
-        if (file.metadata.fileType === FileType.livePhoto) {
+        if (file.metadata.fileType == FileType.livePhoto) {
             const { imageFileName, imageData, videoFileName, videoData } =
                 await decodeLivePhoto(fileName, fileBlob);
             const image = new File([imageData], imageFileName);
@@ -71,10 +71,10 @@ export async function downloadFile(file: EnteFile) {
             await wait(300) /* arbitrary constant, 300ms */;
             downloadAndRevokeObjectURL(tempVideoURL, videoFileName);
         } else {
-            const fileType = await detectFileTypeInfo(
+            const { mimeType } = await detectFileTypeInfo(
                 new File([fileBlob], fileName),
             );
-            fileBlob = new Blob([fileBlob], { type: fileType.mimeType });
+            fileBlob = new Blob([fileBlob], { type: mimeType });
             const tempURL = URL.createObjectURL(fileBlob);
             downloadAndRevokeObjectURL(tempURL, fileName);
         }
@@ -283,7 +283,7 @@ async function downloadFileDesktop(
     const stream = await downloadManager.fileStream(file);
     const fileName = fileFileName(file);
 
-    if (file.metadata.fileType === FileType.livePhoto) {
+    if (file.metadata.fileType == FileType.livePhoto) {
         const fileBlob = await new Response(stream).blob();
         const { imageFileName, imageData, videoFileName, videoData } =
             await decodeLivePhoto(fileName, fileBlob);
@@ -327,9 +327,6 @@ async function downloadFileDesktop(
         );
     }
 }
-
-export const isImageOrVideo = (fileType: FileType) =>
-    fileType == FileType.image || fileType == FileType.video;
 
 export const getArchivedFiles = (files: EnteFile[]) => {
     return files.filter(isArchivedFile).map((file) => file.id);

@@ -90,8 +90,11 @@ export interface FileMetadata {
      * The "Ente" file type - image, video or live photo.
      *
      * Expected to be one of {@link FileType}.
+     *
+     * See: [Note: Enums in remote objects] for why we keep it as a number
+     * instead of the expected enum.
      */
-    fileType: FileType;
+    fileType: number;
     /**
      * The name of the file (including its extension).
      *

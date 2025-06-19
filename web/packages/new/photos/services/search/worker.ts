@@ -374,7 +374,7 @@ const isMatchingFile = (file: EnteFile, suggestion: SearchSuggestion) => {
             return suggestion.collectionID === file.collectionID;
 
         case "fileType":
-            return suggestion.fileType === file.metadata.fileType;
+            return suggestion.fileType == file.metadata.fileType;
 
         case "fileName":
             return suggestion.fileIDs.includes(file.id);

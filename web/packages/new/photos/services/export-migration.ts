@@ -373,7 +373,7 @@ async function getFileExportNamesFromExportedFiles(
         /*
             For Live Photos we need to download the file to get the image and video name
         */
-        if (file.metadata.fileType === FileType.livePhoto) {
+        if (file.metadata.fileType == FileType.livePhoto) {
             const fileBlob = await downloadManager.fileBlob(file);
             const { imageFileName, videoFileName } = await decodeLivePhoto(
                 fileName,

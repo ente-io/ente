@@ -262,7 +262,7 @@ async function thumbnailGenerationFailedFilesCheck(expectedState) {
 async function livePhotoClubbingCheck(expectedState) {
     const files = await getLocalFiles();
     const livePhotos = files.filter(
-        (file) => file.metadata.fileType === FileType.livePhoto,
+        (file) => file.metadata.fileType == FileType.livePhoto,
     );
 
     const fileIDSet = new Set();

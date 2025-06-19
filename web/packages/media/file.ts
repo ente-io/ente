@@ -807,7 +807,10 @@ const transformDecryptedMetadataJSON = (
     // In very rare cases (again, some files shared with Vishnu's account,
     // uploaded by dev builds) the photo might not have a file type. Gracefully
     // handle these too.
-    if (!("fileType" in metadataJSON)) {
+    if (
+        !("fileType" in metadataJSON) ||
+        typeof metadataJSON.fileType != "number"
+    ) {
         log.info(`Patching metadata file type for file ${fileID}`);
         (metadataJSON as Record<string, unknown>).fileType = FileType.image;
     }
