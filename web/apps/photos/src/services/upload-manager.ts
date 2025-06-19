@@ -103,24 +103,6 @@ export type UploadItemWithCollection = UploadAsset & {
     collectionID: number;
 };
 
-class UploadCancelService {
-    private shouldUploadBeCancelled = false;
-
-    reset() {
-        this.shouldUploadBeCancelled = false;
-    }
-
-    requestUploadCancelation() {
-        this.shouldUploadBeCancelled = true;
-    }
-
-    isUploadCancelationRequested(): boolean {
-        return this.shouldUploadBeCancelled;
-    }
-}
-
-const uploadCancelService = new UploadCancelService();
-
 class UIService {
     private progressUpdater: ProgressUpdater;
 
@@ -288,6 +270,10 @@ class UploadManager {
     private publicAlbumsCredentials: PublicAlbumsCredentials | undefined;
     private uploaderName: string;
     private uiService: UIService;
+    /**
+     * When `true`, then the next call to {@link abortIfCancelled} will throw.
+     */
+    private shouldUploadBeCancelled = false;
 
     constructor() {
         this.uiService = new UIService();
@@ -317,8 +303,8 @@ class UploadManager {
         this.itemsToBeUploaded = [];
         this.failedItems = [];
         this.parsedMetadataJSONMap = new Map<string, ParsedMetadataJSON>();
-
         this.uploaderName = null;
+        this.shouldUploadBeCancelled = false;
     }
 
     public prepareForNewUpload(
@@ -326,7 +312,6 @@ class UploadManager {
     ) {
         this.resetState();
         this.uiService.reset();
-        uploadCancelService.reset();
 
         if (parsedMetadataJSONMap) {
             this.parsedMetadataJSONMap = parsedMetadataJSONMap;
@@ -460,7 +445,7 @@ class UploadManager {
     }
 
     private abortIfCancelled = () => {
-        if (uploadCancelService.isUploadCancelationRequested()) {
+        if (this.shouldUploadBeCancelled) {
             throw Error(CustomError.UPLOAD_CANCELLED);
         }
     };
@@ -649,9 +634,9 @@ class UploadManager {
     }
 
     public cancelRunningUpload() {
-        log.info("User cancelled running upload");
+        log.info("User cancelled upload");
         this.uiService.setUploadPhase("cancelling");
-        uploadCancelService.requestUploadCancelation();
+        this.shouldUploadBeCancelled = true;
     }
 
     /**
