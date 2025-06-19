@@ -190,6 +190,34 @@ export interface Metadata {
 }
 
 /**
+ * Zod schema for {@link FileMetadata}.
+ */
+export const FileMetadata = z.looseObject({
+    /**
+     * This is required but is nullish as a workaround for handling old data.
+     * We'll fill it in during the file decryption.
+     */
+    fileType: z.number().nullish().transform(nullToUndefined),
+    title: z.string(),
+    creationTime: z.number(),
+    /**
+     * This is required but is nullish as a workaround for handling old data.
+     * We'll fill it in during the file decryption.
+     */
+    modificationTime: z.number().nullish().transform(nullToUndefined),
+    latitude: z.number().nullish().transform(nullToUndefined),
+    longitude: z.number().nullish().transform(nullToUndefined),
+    hash: z.string().nullish().transform(nullToUndefined),
+    imageHash: z.string().nullish().transform(nullToUndefined),
+    videoHash: z.string().nullish().transform(nullToUndefined),
+    duration: z.number().nullish().transform(nullToUndefined),
+    hasStaticThumbnail: z.boolean().nullish().transform(nullToUndefined),
+    localID: z.number().nullish().transform(nullToUndefined),
+    version: z.number().nullish().transform(nullToUndefined),
+    deviceFolder: z.number().nullish().transform(nullToUndefined),
+});
+
+/**
  * Mutable private metadata associated with an {@link EnteFile}.
  *
  * - Unlike {@link Metadata}, this can change after the file has been uploaded.
