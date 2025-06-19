@@ -323,7 +323,7 @@ export class FileViewerPhotoSwipe {
                 pswp.refreshSlideContent(index);
             });
 
-            if (itemData.fileType === FileType.video) {
+            if (itemData.fileType == FileType.video) {
                 const { videoPlaylistURL, videoURL } = itemData;
                 if (videoPlaylistURL && videoQuality == "auto") {
                     const mcID = `ente-mc-hls-${file.id}`;

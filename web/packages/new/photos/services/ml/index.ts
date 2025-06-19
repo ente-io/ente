@@ -418,7 +418,7 @@ export const indexNewUpload = (
 ) => {
     if (!isMLEnabled()) return;
     if (!isDesktop) return;
-    if (file.metadata.fileType !== FileType.image) return;
+    if (file.metadata.fileType != FileType.image) return;
     log.debug(() => ["ml/liveq", { file, processableUploadItem }]);
     void worker().then((w) => w.onUpload(file, processableUploadItem));
 };

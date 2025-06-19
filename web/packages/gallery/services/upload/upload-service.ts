@@ -343,7 +343,7 @@ interface EncryptedFilePieces {
 
 export interface PotentialLivePhotoAsset {
     fileName: string;
-    fileType: FileType;
+    fileType: number /* FileType */;
     collectionID: number;
     uploadItem: UploadItem;
     pathPrefix: UploadPathPrefix | undefined;
@@ -519,7 +519,7 @@ const uploadItemSize = async (uploadItem: UploadItem): Promise<number> => {
  */
 const uploadItemCreationDate = async (
     uploadItem: UploadItem,
-    fileType: FileType,
+    fileType: number /* FileType */,
     parsedMetadataJSON: ParsedMetadataJSON | undefined,
 ) => {
     if (parsedMetadataJSON?.creationTime)
@@ -1230,11 +1230,11 @@ const computeHash = async (uploadItem: UploadItem, worker: CryptoWorker) => {
 const areFilesSame = (fFile: EnteFile, gm: FileMetadata) => {
     const fm = fFile.metadata;
 
-    // File name is different
-    if (fileFileName(fFile) !== gm.title) return false;
+    // File name is different.
+    if (fileFileName(fFile) != gm.title) return false;
 
-    // File type is different
-    if (fm.fileType !== gm.fileType) return false;
+    // File type is different.
+    if (fm.fileType != gm.fileType) return false;
 
     // Name and type is same, compare hash.
     const fh = metadataHash(fm);
