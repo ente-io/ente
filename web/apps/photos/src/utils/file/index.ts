@@ -13,7 +13,11 @@ import {
     FileMagicMetadataProps,
     FileWithUpdatedMagicMetadata,
 } from "ente-media/file";
-import { ItemVisibility, isArchivedFile } from "ente-media/file-metadata";
+import {
+    ItemVisibility,
+    fileFileName,
+    isArchivedFile,
+} from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
 import { decodeLivePhoto } from "ente-media/live-photo";
 import {
@@ -47,9 +51,10 @@ export type FileOp =
 export async function downloadFile(file: EnteFile) {
     try {
         let fileBlob = await downloadManager.fileBlob(file);
+        const fileName = fileFileName(file);
         if (file.metadata.fileType === FileType.livePhoto) {
             const { imageFileName, imageData, videoFileName, videoData } =
-                await decodeLivePhoto(file.metadata.title, fileBlob);
+                await decodeLivePhoto(fileName, fileBlob);
             const image = new File([imageData], imageFileName);
             const imageType = await detectFileTypeInfo(image);
             const tempImageURL = URL.createObjectURL(
@@ -67,11 +72,11 @@ export async function downloadFile(file: EnteFile) {
             downloadAndRevokeObjectURL(tempVideoURL, videoFileName);
         } else {
             const fileType = await detectFileTypeInfo(
-                new File([fileBlob], file.metadata.title),
+                new File([fileBlob], fileName),
             );
             fileBlob = new Blob([fileBlob], { type: fileType.mimeType });
             const tempURL = URL.createObjectURL(fileBlob);
-            downloadAndRevokeObjectURL(tempURL, file.metadata.title);
+            downloadAndRevokeObjectURL(tempURL, fileName);
         }
     } catch (e) {
         log.error("failed to download file", e);
@@ -276,11 +281,12 @@ async function downloadFileDesktop(
     const fs = electron.fs;
 
     const stream = await downloadManager.fileStream(file);
+    const fileName = fileFileName(file);
 
     if (file.metadata.fileType === FileType.livePhoto) {
         const fileBlob = await new Response(stream).blob();
         const { imageFileName, imageData, videoFileName, videoData } =
-            await decodeLivePhoto(file.metadata.title, fileBlob);
+            await decodeLivePhoto(fileName, fileBlob);
         const imageExportName = await safeFileName(
             downloadDir,
             imageFileName,
@@ -311,7 +317,7 @@ async function downloadFileDesktop(
     } else {
         const fileExportName = await safeFileName(
             downloadDir,
-            file.metadata.title,
+            fileName,
             fs.exists,
         );
         await writeStream(

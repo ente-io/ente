@@ -8,6 +8,7 @@ import type { Collection } from "ente-media/collection";
 import type { EnteFile } from "ente-media/file";
 import {
     fileCreationPhotoDate,
+    fileFileName,
     fileLocation,
     filePublicMagicMetadata,
 } from "ente-media/file-metadata";
@@ -178,7 +179,7 @@ const fileNameSuggestion = (
     const sn = Number(s) || undefined;
 
     const fileIDs = files
-        .filter(({ id, metadata }) => id === sn || re.test(metadata.title))
+        .filter((f) => f.id === sn || re.test(fileFileName(f)))
         .map((f) => f.id);
 
     return fileIDs.length

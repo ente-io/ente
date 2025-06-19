@@ -49,6 +49,7 @@ import { downloadAndRevokeObjectURL } from "ente-base/utils/web";
 import { downloadManager } from "ente-gallery/services/download";
 import type { Collection } from "ente-media/collection";
 import type { EnteFile } from "ente-media/file";
+import { fileFileName } from "ente-media/file-metadata";
 import { getLocalCollections } from "ente-new/photos/services/collections";
 import { t } from "i18next";
 import React, {
@@ -463,7 +464,7 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = ({
 
     const getEditedFile = async () => {
         const originalSizeCanvas = originalSizeCanvasRef.current!;
-        const originalFileName = file.metadata.title;
+        const originalFileName = fileFileName(file);
         return canvasToFile(originalSizeCanvas, originalFileName, mimeType);
     };
 

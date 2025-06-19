@@ -8,7 +8,7 @@ import log from "ente-base/log";
 import { nullishToBlank, nullToUndefined } from "ente-utils/transform";
 import { z } from "zod/v4";
 import { ignore } from "./collection";
-import { type Metadata, ItemVisibility } from "./file-metadata";
+import { fileFileName, FileMetadata, ItemVisibility } from "./file-metadata";
 import { FileType } from "./file-type";
 import { decryptMagicMetadata, RemoteMagicMetadata } from "./magic-metadata";
 
@@ -152,7 +152,7 @@ export interface EnteFile2 {
      *
      * See: [Note: Metadatum].
      */
-    metadata: Metadata;
+    metadata: FileMetadata;
     /**
      * Private mutable metadata associated with the file that is only visible to
      * the owner of the file.
@@ -284,7 +284,7 @@ export interface EnteFile
      *
      * See: [Note: Metadatum].
      */
-    metadata: Metadata;
+    metadata: FileMetadata;
     /**
      * Private mutable metadata associated with the file that is only visible to
      * the owner of the file.
@@ -588,14 +588,16 @@ export interface EncryptedTrashItem {
 export type Trash = TrashItem[];
 
 /**
+ * A short identifier for a file in log messages.
+ *
+ * e.g. "file flower.png (827233681)"
+ *
  * @returns a string to use as an identifier when logging information about the
  * given {@link file}. The returned string contains the file name (for ease of
  * debugging) and the file ID (for exactness).
  */
 export const fileLogID = (file: EnteFile) =>
-    // TODO: Remove this when file/metadata types have optionality annotations.
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    `file ${file.metadata.title ?? "-"} (${file.id})`;
+    `file ${fileFileName(file)} (${file.id})`;
 
 /**
  * Return the date when the file will be deleted permanently. Only valid for
@@ -705,6 +707,7 @@ export const decryptRemoteFile = async (
     //
     // See: [Note: Use looseObject when parsing JSON that will get persisted].
     const {
+        id,
         encryptedKey,
         keyDecryptionNonce,
         isDeleted,
@@ -728,7 +731,10 @@ export const decryptRemoteFile = async (
     //
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    const metadata = await decryptMetadataJSON(encryptedMetadata, key);
+    const metadataJSON = await decryptMetadataJSON(encryptedMetadata, key);
+    const metadata = FileMetadata.parse(
+        transformDecryptedMetadataJSON(id, metadataJSON),
+    );
 
     let magicMetadata: EnteFile2["magicMetadata"];
     if (encryptedMagicMetadata) {
@@ -756,12 +762,57 @@ export const decryptRemoteFile = async (
 
     return {
         ...rest,
+        id,
         key,
-        // TODO(RE):n
-        metadata: metadata as Metadata,
+        // TODO(RE):
+        metadata: metadata as FileMetadata,
         magicMetadata,
         pubMagicMetadata,
     };
+};
+
+/**
+ * Apply some transforms to gracefully handle metadata from old clients.
+ *
+ * @param metadataJSON The decrypted and parsed metadata JSON. Since TypeScript
+ * does not have a native JSON type, this is typed as an `unknown`.
+ *
+ * @returns A JSON object with any transformations applied, if needed.
+ */
+const transformDecryptedMetadataJSON = (
+    fileID: number,
+    metadataJSON: unknown,
+) => {
+    // The file ID threshold is an arbitrary cutoff so that this graceful
+    // handling does not mask new issues.
+    if (fileID > 100000000) return metadataJSON;
+
+    if (typeof metadataJSON != "object") return metadataJSON;
+    if (!metadataJSON) return metadataJSON;
+
+    // In very rare cases (have found only one so far, a very old file in
+    // Vishnu's account, uploaded by an initial dev version of Ente) the photo
+    // has no modification time. Gracefully handle such cases.
+    if (
+        !("modificationTime" in metadataJSON) ||
+        !metadataJSON.modificationTime
+    ) {
+        if ("creationTime" in metadataJSON) {
+            log.info(`Patching metadata modification time for file ${fileID}`);
+            (metadataJSON as Record<string, unknown>).modificationTime =
+                metadataJSON.creationTime;
+        }
+    }
+
+    // In very rare cases (again, some files shared with Vishnu's account,
+    // uploaded by dev builds) the photo might not have a file type. Gracefully
+    // handle these too.
+    if (!("fileType" in metadataJSON)) {
+        log.info(`Patching metadata file type for file ${fileID}`);
+        (metadataJSON as Record<string, unknown>).fileType = FileType.image;
+    }
+
+    return metadataJSON;
 };
 
 /**
@@ -770,23 +821,13 @@ export const decryptRemoteFile = async (
  *
  * This function updates a single file, see {@link mergeMetadata} for a
  * convenience function to run it on an array of files.
- *
- * [Note: File name for local EnteFile objects]
- *
- * The title property in a file's metadata is the original file's name. The
- * metadata of a file cannot be edited. So if later on the file's name is
- * changed, then the edit is stored in the `editedName` property of the public
- * metadata of the file.
- *
- * This function merges these edits onto the file object that we use locally.
- * Effectively, post this step, the file's metadata.title can be used in lieu of
- * its filename.
  */
 export const mergeMetadata1 = (file: EnteFile): EnteFile => {
     const mutableMetadata = file.pubMagicMetadata?.data;
     if (mutableMetadata) {
         const { editedTime, editedName, lat, long } = mutableMetadata;
         if (editedTime) file.metadata.creationTime = editedTime;
+        // Not needed, use fileFileName.
         if (editedName) file.metadata.title = editedName;
         // Use (lat, long) only if both are present and nonzero.
         if (lat && long) {
@@ -795,16 +836,11 @@ export const mergeMetadata1 = (file: EnteFile): EnteFile => {
         }
     }
 
-    // In very rare cases (have found only one so far, a very old file in
-    // Vishnu's account, uploaded by an initial dev version of Ente) the photo
-    // has no modification time. Gracefully handle such cases.
+    // Moved to transformDecryptedMetadataJSON.
     if (!file.metadata.modificationTime)
         file.metadata.modificationTime = file.metadata.creationTime;
 
-    // In very rare cases (again, some files shared with Vishnu's account,
-    // uploaded by dev builds) the photo might not have a file type. Gracefully
-    // handle these too. The file ID threshold is an arbitrary cutoff so that
-    // this graceful handling does not mask new issues.
+    // Moved to transformDecryptedMetadataJSON.
     if (!file.metadata.fileType && file.id < 100000000)
         file.metadata.fileType = FileType.image;
 
