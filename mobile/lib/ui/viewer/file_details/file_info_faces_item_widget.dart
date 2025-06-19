@@ -192,7 +192,7 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
               ),
               Flexible(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(12, 3.5, 16, 3.5),
+                  padding: const EdgeInsets.fromLTRB(12, 0, 16, 3.5),
                   child: SizedBox(
                     width: double.infinity,
                     child: Column(
@@ -201,9 +201,9 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
                       children: [
                         Text(
                           S.of(context).faces,
-                          style: getEnteTextTheme(context).miniMuted,
+                          style: getEnteTextTheme(context).small,
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: 4),
                         _buildContent(),
                       ],
                     ),
@@ -213,10 +213,13 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
             ],
           ),
         ),
-        IconButtonWidget(
-          icon: _isEditMode ? Icons.check : Icons.edit,
-          iconButtonType: IconButtonType.secondary,
-          onTap: _toggleEditMode,
+        Padding(
+          padding: const EdgeInsets.only(top: 3.5),
+          child: IconButtonWidget(
+            icon: _isEditMode ? Icons.check : Icons.edit,
+            iconButtonType: IconButtonType.secondary,
+            onTap: _toggleEditMode,
+          ),
         ),
       ],
     );
@@ -288,27 +291,30 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        GestureDetector(
-          onTap: _toggleRemainingFaces,
-          child: Row(
-            children: [
-              Text(
-                "Other detected faces",
-                style: getEnteTextTheme(context).miniMuted,
-              ),
-              const SizedBox(width: 4),
-              Icon(
-                _showRemainingFaces
-                    ? Icons.keyboard_arrow_up
-                    : Icons.keyboard_arrow_down,
-                size: 16,
-                color: getEnteColorScheme(context).textMuted,
-              ),
-            ],
+        Padding(
+          padding: const EdgeInsets.only(top: 4.0),
+          child: GestureDetector(
+            onTap: _toggleRemainingFaces,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "Other detected faces",
+                  style: getEnteTextTheme(context).miniMuted,
+                ),
+                Icon(
+                  _showRemainingFaces
+                      ? Icons.keyboard_arrow_up
+                      : Icons.keyboard_arrow_down,
+                  size: 16,
+                  color: getEnteColorScheme(context).textMuted,
+                ),
+              ],
+            ),
           ),
         ),
         if (_showRemainingFaces) ...[
-          const SizedBox(height: 8),
+          const SizedBox(height: 16),
           _buildFaceGrid(_remainingFaces),
         ],
       ],
