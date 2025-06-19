@@ -299,24 +299,16 @@ class UploadManager {
         return this.uploadInProgress;
     }
 
-    private resetState() {
-        this.itemsToBeUploaded = [];
-        this.failedItems = [];
-        this.parsedMetadataJSONMap = new Map<string, ParsedMetadataJSON>();
-        this.uploaderName = null;
-        this.shouldUploadBeCancelled = false;
-    }
-
     public prepareForNewUpload(
         parsedMetadataJSONMap?: Map<string, ParsedMetadataJSON>,
     ) {
-        this.resetState();
+        this.itemsToBeUploaded = [];
+        this.failedItems = [];
+        this.parsedMetadataJSONMap = parsedMetadataJSONMap ?? new Map();
+        this.uploaderName = null;
+        this.shouldUploadBeCancelled = false;
+
         this.uiService.reset();
-
-        if (parsedMetadataJSONMap) {
-            this.parsedMetadataJSONMap = parsedMetadataJSONMap;
-        }
-
         this.uiService.setUploadPhase("preparing");
     }
 
