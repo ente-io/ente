@@ -17,11 +17,9 @@ final _logger = Logger("PersonGallerySuggestion");
 
 class PersonGallerySuggestion extends StatefulWidget {
   final PersonEntity person;
-  final VoidCallback? onSuggestionProcessed;
 
   const PersonGallerySuggestion({
     required this.person,
-    this.onSuggestionProcessed,
     super.key,
   });
 
@@ -291,7 +289,6 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
         isProcessing = false;
       });
     }
-    widget.onSuggestionProcessed?.call();
   }
 
   Future<void> _animateOut() async {
