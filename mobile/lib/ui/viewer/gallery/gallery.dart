@@ -12,7 +12,9 @@ import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file_load_result.dart';
 import "package:photos/models/gallery/gallery_sections.dart";
 import 'package:photos/models/selected_files.dart';
+import "package:photos/service_locator.dart";
 import 'package:photos/ui/common/loading_widget.dart';
+import "package:photos/ui/viewer/gallery/component/group/group_header_widget.dart";
 import "package:photos/ui/viewer/gallery/component/group/type.dart";
 import "package:photos/ui/viewer/gallery/component/sectioned_sliver_list.dart";
 import 'package:photos/ui/viewer/gallery/empty_state.dart';
@@ -22,6 +24,7 @@ import "package:photos/ui/viewer/gallery/state/inherited_search_filter_data.dart
 import "package:photos/utils/hierarchical_search_util.dart";
 import "package:photos/utils/standalone/date_time.dart";
 import "package:photos/utils/standalone/debouncer.dart";
+import "package:photos/utils/widget_util.dart";
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 typedef GalleryLoader = Future<FileLoadResult> Function(
@@ -104,6 +107,7 @@ class Gallery extends StatefulWidget {
 class GalleryState extends State<Gallery> {
   static const int kInitialLoadLimit = 100;
   late final Debouncer _debouncer;
+  late Future<double> headerExtent;
 
   late Logger _logger;
   List<List<EnteFile>> currentGroupedFiles = [];
@@ -200,6 +204,14 @@ class GalleryState extends State<Gallery> {
         _setFilesAndReload(result.files);
       }
     });
+
+    headerExtent = getIntrinsicSizeOfWidget(
+      GroupHeaderWidget(
+        title: "This is a temp title",
+        gridSize: localSettings.getPhotoGridSize(),
+      ),
+      context,
+    ).then((size) => size.height);
   }
 
   void _setFilesAndReload(List<EnteFile> files) {
@@ -407,15 +419,25 @@ class GalleryState extends State<Gallery> {
         interactive: true,
         child: CustomScrollView(
           slivers: [
-            SectionedListSliver(
-              sectionLayouts: GallerySections(
-                allFiles: _allGalleryFiles,
-                groupType: widget.groupType,
-                widthAvailable: MediaQuery.sizeOf(context).width,
-                context: context,
-                selectedFiles: widget.selectedFiles,
-                tagPrefix: widget.tagPrefix,
-              ).getSectionLayouts(),
+            FutureBuilder(
+              future: headerExtent,
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  return SectionedListSliver(
+                    sectionLayouts: GallerySections(
+                      allFiles: _allGalleryFiles,
+                      groupType: widget.groupType,
+                      widthAvailable: MediaQuery.sizeOf(context).width,
+                      context: context,
+                      selectedFiles: widget.selectedFiles,
+                      tagPrefix: widget.tagPrefix,
+                      headerExtent: snapshot.data!,
+                    ).getSectionLayouts(),
+                  );
+                } else {
+                  return const SliverFillRemaining();
+                }
+              },
             ),
           ],
         ),

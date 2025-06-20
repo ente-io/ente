@@ -34,6 +34,9 @@ class GroupHeaderWidget extends StatelessWidget {
           style: (title == S.of(context).dayToday)
               ? textStyle
               : textStyle.copyWith(color: colorScheme.textMuted),
+          maxLines: 1,
+          // TODO: Make it possible to see the full title if overflowing
+          overflow: TextOverflow.ellipsis,
         ),
       ),
     );

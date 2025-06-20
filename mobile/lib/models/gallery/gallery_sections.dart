@@ -8,6 +8,7 @@ import "package:photos/models/gallery/fixed_extent_section_layout.dart";
 import "package:photos/models/selected_files.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/ui/viewer/gallery/component/gallery_file_widget.dart";
+import "package:photos/ui/viewer/gallery/component/group/group_header_widget.dart";
 import "package:photos/ui/viewer/gallery/component/group/type.dart";
 import "package:uuid/uuid.dart";
 
@@ -31,7 +32,7 @@ class GallerySections {
     required this.selectedFiles,
     required this.tagPrefix,
     this.sortOrderAsc = true,
-    this.headerExtent = 85,
+    required this.headerExtent,
     this.limitSelectionToOne = false,
   }) {
     init();
@@ -111,11 +112,9 @@ class GallerySections {
           spacing: 0,
           builder: (context, index) {
             if (index == firstIndex) {
-              return SizedBox(
-                height: headerExtent,
-                child: Placeholder(
-                  child: Text(_groupIdToheaderDataMap[key]!.title),
-                ),
+              return GroupHeaderWidget(
+                title: _groupIdToheaderDataMap[key]!.title,
+                gridSize: crossAxisCount,
               );
             } else {
               final gridRowChildren = <Widget>[];
