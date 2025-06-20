@@ -329,11 +329,21 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
       );
     }
 
+    // Get additional data
+    final faceIdsToClusterIds = await mlDataDB.getFaceIdsToClusterIds(
+      faces.map((face) => face.faceID).toList(),
+    );
+    final persons = await PersonService.instance.getPersonsMap();
+    final clusterIDToPerson = await mlDataDB.getClusterIDToPersonID();
+    final faceCrops = await getCachedFaceCrops(widget.file, faces);
     final defaultFaces = <Face>[];
     final remainingFaces = <Face>[];
 
     for (final face in faces) {
       if (face.score >= kMinimumFaceShowScore) {
+        defaultFaces.add(face);
+      } else if (clusterIDToPerson[faceIdsToClusterIds[face.faceID] ?? ""] !=
+          null) {
         defaultFaces.add(face);
       } else if (face.score >= kMinFaceDetectionScore) {
         remainingFaces.add(face);
@@ -346,14 +356,6 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
         errorReason: NoFacesReason.noFacesFound,
       );
     }
-
-    // Get additional data
-    final faceIdsToClusterIds = await mlDataDB.getFaceIdsToClusterIds(
-      faces.map((face) => face.faceID).toList(),
-    );
-    final persons = await PersonService.instance.getPersonsMap();
-    final clusterIDToPerson = await mlDataDB.getClusterIDToPersonID();
-    final faceCrops = await getCachedFaceCrops(widget.file, faces);
 
     if (faceCrops == null) {
       return _FaceDataResult(

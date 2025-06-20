@@ -219,7 +219,11 @@ class _FileInfoFaceWidgetState extends State<FileInfoFaceWidget> {
       );
       await Navigator.of(context).push(
         MaterialPageRoute(
-          builder: (context) => SaveOrEditPerson(newClusterIDValue),
+          builder: (context) => SaveOrEditPerson(
+            newClusterIDValue,
+            file: widget.file,
+            isEditing: false,
+          ),
         ),
       );
       await widget.reloadAllFaces();
