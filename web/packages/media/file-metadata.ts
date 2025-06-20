@@ -432,9 +432,7 @@ export const filePrivateMagicMetadata = (file: EnteFile) => {
             `Private magic metadata for ${fileLogID(file)} had not been decrypted even when the file reached the UI layer`,
         );
     }
-    // This cast is unavoidable in the current setup. We need to refactor the
-    // types so that this cast in not needed.
-    return file.magicMetadata.data as FilePrivateMagicMetadataData;
+    return file.magicMetadata.data;
 };
 
 /**

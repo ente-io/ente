@@ -8,12 +8,9 @@ import { updateFileMagicMetadata } from "ente-gallery/services/file";
 import { updateMagicMetadata } from "ente-gallery/services/magic-metadata";
 import { detectFileTypeInfo } from "ente-gallery/utils/detect-type";
 import { writeStream } from "ente-gallery/utils/native-stream";
+import { EnteFile, FileWithUpdatedMagicMetadata } from "ente-media/file";
 import {
-    EnteFile,
-    FileMagicMetadataProps,
-    FileWithUpdatedMagicMetadata,
-} from "ente-media/file";
-import {
+    type FilePrivateMagicMetadataData,
     ItemVisibility,
     fileFileName,
     isArchivedFile,
@@ -71,7 +68,7 @@ export async function changeFilesVisibility(
 ): Promise<EnteFile[]> {
     const fileWithUpdatedMagicMetadataList: FileWithUpdatedMagicMetadata[] = [];
     for (const file of files) {
-        const updatedMagicMetadataProps: FileMagicMetadataProps = {
+        const updatedMagicMetadataProps: FilePrivateMagicMetadataData = {
             visibility,
         };
 

@@ -8,7 +8,11 @@ import log from "ente-base/log";
 import { nullishToBlank, nullToUndefined } from "ente-utils/transform";
 import { z } from "zod/v4";
 import { ignore } from "./collection";
-import { fileFileName, FileMetadata, ItemVisibility } from "./file-metadata";
+import {
+    fileFileName,
+    FileMetadata,
+    type FilePrivateMagicMetadataData,
+} from "./file-metadata";
 import { FileType } from "./file-type";
 import { decryptMagicMetadata, RemoteMagicMetadata } from "./magic-metadata";
 
@@ -489,22 +493,9 @@ export interface FileWithUpdatedPublicMagicMetadata {
     updatedPublicMagicMetadata: FilePublicMagicMetadata;
 }
 
-export interface FileMagicMetadataProps {
-    /**
-     * The visibility of the file
-     *
-     * The file's visibility is user specific attribute, and thus we keep it in
-     * the private magic metadata. This allows the file's owner to share a file
-     * and edit its visibility without making revealing their visibility
-     * preference to the people with whom they have shared the file.
-     */
-    visibility?: ItemVisibility;
-    filePaths?: string[];
-}
-
-export type FileMagicMetadata = MagicMetadataCore<FileMagicMetadataProps>;
+export type FileMagicMetadata = MagicMetadataCore<FilePrivateMagicMetadataData>;
 export type FilePrivateMagicMetadata =
-    MagicMetadataCore<FileMagicMetadataProps>;
+    MagicMetadataCore<FilePrivateMagicMetadataData>;
 
 export interface FilePublicMagicMetadataProps {
     /**
@@ -743,7 +734,7 @@ export const decryptRemoteFile = async (
             key,
         );
         // TODO(RE):
-        const data = genericMM.data as FileMagicMetadataProps;
+        const data = genericMM.data as FilePrivateMagicMetadataData;
         // TODO(RE):
         magicMetadata = { ...genericMM, header: "", data };
     }
