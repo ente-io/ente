@@ -44,8 +44,8 @@ import "package:photos/services/machine_learning/face_ml/person/person_service.d
 import "package:photos/services/memory_home_widget_service.dart";
 import "package:photos/services/notification_service.dart";
 import "package:photos/services/people_home_widget_service.dart";
-import "package:photos/services/sync/diff_fetcher.dart";
 import "package:photos/services/sync/remote_sync_service.dart";
+import "package:photos/services/sync/sync_public_collection.dart";
 import 'package:photos/states/user_details_state.dart';
 import 'package:photos/theme/colors.dart';
 import "package:photos/theme/effects.dart";
@@ -119,8 +119,6 @@ class _HomeWidgetState extends State<HomeWidget> {
   late StreamSubscription<AccountConfiguredEvent> _accountConfiguredEvent;
   late StreamSubscription<CollectionUpdatedEvent> _collectionUpdatedEvent;
   late StreamSubscription _publicAlbumLinkSubscription;
-
-  final DiffFetcher _diffFetcher = DiffFetcher();
 
   @override
   void initState() {
@@ -337,8 +335,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                   if (result) {
                     await dialog.show();
 
-                    final List<EnteFile> sharedFiles =
-                        await _diffFetcher.getPublicFiles(
+                    final sharedFiles = await getPublicFiles(
                       context,
                       collection.id,
                       collection.pubMagicMetadata.asc ?? false,
@@ -369,7 +366,7 @@ class _HomeWidgetState extends State<HomeWidget> {
       } else {
         await dialog.show();
 
-        final List<EnteFile> sharedFiles = await _diffFetcher.getPublicFiles(
+        final List<EnteFile> sharedFiles = await getPublicFiles(
           context,
           collection.id,
           collection.pubMagicMetadata.asc ?? false,

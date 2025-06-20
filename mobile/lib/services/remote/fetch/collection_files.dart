@@ -55,6 +55,40 @@ class CollectionFilesService {
     }
   }
 
+  Future<DiffResult> getPublicCollectionDiff(
+    int collectionID,
+    int sinceTime,
+    Uint8List collectionKey,
+    Map<String, String> headers,
+  ) async {
+    final response = await _enteDio.get(
+      "/public-collection/diff",
+      options: Options(headers: headers),
+      queryParameters: {"sinceTime": sinceTime},
+    );
+    final List diff = response.data["diff"] as List;
+    if (diff.isEmpty) {
+      return DiffResult([], [], response.data["hasMore"] as bool, 0);
+    }
+    final String encodedKey = base64Encode(Uint8List.fromList(collectionKey));
+    final startTime = DateTime.now();
+    final DiffResult result =
+        await Computer.shared().compute<Map<String, dynamic>, DiffResult>(
+      _parseDiff,
+      param: {
+        "collectionKey": encodedKey,
+        "diff": diff,
+        "hasMore": response.data["hasMore"] as bool,
+      },
+      taskName: "parseDiff",
+    );
+    devLog(
+      '[Collection-$collectionID] $result in ${DateTime.now().difference(startTime).inMilliseconds} ms',
+      name: "CollectionFilesService.getCollectionItemsDiff",
+    );
+    return result;
+  }
+
   DiffResult _parseDiff(Map<String, dynamic> args) {
     final Uint8List collectionKey = base64Decode(args['collectionKey']);
     final List diff = args['diff'] as List;
