@@ -11,11 +11,15 @@ import { ignore } from "./collection";
 import {
     fileFileName,
     FileMetadata,
-    type FilePrivateMagicMetadataData,
-    type FilePublicMagicMetadataData,
+    FilePrivateMagicMetadataData,
+    FilePublicMagicMetadataData,
 } from "./file-metadata";
 import { FileType } from "./file-type";
-import { decryptMagicMetadata, RemoteMagicMetadata } from "./magic-metadata";
+import {
+    decryptMagicMetadata,
+    RemoteMagicMetadata,
+    type MagicMetadata,
+} from "./magic-metadata";
 
 /**
  * A File.
@@ -164,7 +168,7 @@ export interface EnteFile2 {
      *
      * See: [Note: Metadatum]
      */
-    magicMetadata?: FileMagicMetadata;
+    magicMetadata?: MagicMetadata<FilePrivateMagicMetadataData>;
     /**
      * Public mutable metadata associated with the file that is visible to all
      * users with whom the file has been shared.
@@ -175,7 +179,7 @@ export interface EnteFile2 {
      *
      * See: [Note: Metadatum]
      */
-    pubMagicMetadata?: FilePublicMagicMetadata;
+    pubMagicMetadata?: MagicMetadata<FilePublicMagicMetadataData>;
 }
 
 export interface EncryptedEnteFile {
@@ -624,10 +628,8 @@ export const decryptRemoteFile = async (
             encryptedMagicMetadata,
             key,
         );
-        // TODO(RE):
-        const data = genericMM.data as FilePrivateMagicMetadataData;
-        // TODO(RE):
-        magicMetadata = { ...genericMM, header: "", data };
+        const data = FilePrivateMagicMetadataData.parse(genericMM.data);
+        magicMetadata = { ...genericMM, data };
     }
 
     let pubMagicMetadata: EnteFile2["pubMagicMetadata"];
@@ -636,21 +638,11 @@ export const decryptRemoteFile = async (
             encryptedPubMagicMetadata,
             key,
         );
-        // TODO(RE):
-        const data = genericMM.data as FilePublicMagicMetadataData;
-        // TODO(RE):
-        pubMagicMetadata = { ...genericMM, header: "", data };
+        const data = FilePublicMagicMetadataData.parse(genericMM.data);
+        pubMagicMetadata = { ...genericMM, data };
     }
 
-    return {
-        ...rest,
-        id,
-        key,
-        // TODO(RE):
-        metadata: metadata as FileMetadata,
-        magicMetadata,
-        pubMagicMetadata,
-    };
+    return { ...rest, id, key, metadata, magicMetadata, pubMagicMetadata };
 };
 
 /**
