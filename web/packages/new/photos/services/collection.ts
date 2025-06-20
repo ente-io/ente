@@ -32,18 +32,8 @@ import {
 } from "ente-media/magic-metadata";
 import { batch } from "ente-utils/array";
 import { z } from "zod/v4";
+import { requestBatchSize } from "./file";
 import { ensureUserKeyPair, getPublicKey } from "./user";
-
-/**
- * An reasonable but otherwise arbitrary number of items (e.g. files) to include
- * in a single API request.
- *
- * Remote will reject too big payloads, and requests which affect multiple items
- * (e.g. files when moving files to a collection) are expected to be batched to
- * keep each request of a reasonable size. By default, we break the request into
- * batches of 1000.
- */
-const requestBatchSize = 1000;
 
 const uncategorizedCollectionName = "Uncategorized";
 const defaultHiddenCollectionName = ".hidden";

@@ -10,6 +10,40 @@ import {
     encryptMagicMetadata,
     type RemoteMagicMetadata,
 } from "ente-media/magic-metadata";
+import { batch } from "ente-utils/array";
+
+/**
+ * An reasonable but otherwise arbitrary number of items (e.g. files) to include
+ * in a single API request.
+ *
+ * Remote will reject too big payloads, and requests which affect multiple items
+ * (e.g. files when moving files to a collection, changing the visibility of
+ * selected files) are expected to be batched to keep each request of a
+ * reasonable size. By default, we break the request into batches of 1000.
+ */
+export const requestBatchSize = 1000;
+
+/**
+ * Perform an operation on batches, concurrently.
+ *
+ * The given {@link items} are split into batches, each of
+ * {@link requestBatchSize}. The provided operation is called on all these
+ * batches, in parallel, by using `Promise.all`. When all the operations are
+ * complete, the function returns with an array of results (one from each batch
+ * promise resolution).
+ *
+ * @param items The arbitrary items to break into {@link requestBatchSize}
+ * batches.
+ *
+ * @param op The operation to perform on each batch.
+ *
+ * @returns An array of results, one from each batch operation. For details,
+ * including behaviour on errors, see `Promise.all`.
+ */
+export const performInBatches = <T, U>(
+    items: T[],
+    op: (batchItems: T[]) => Promise<U>,
+): Promise<U[]> => Promise.all(batch(items, requestBatchSize).map(op));
 
 /**
  * Change the visibility (normal, archived, hidden) of a list of files on
@@ -25,7 +59,10 @@ import {
 export const updateFilesVisibility = async (
     files: EnteFile[],
     visibility: ItemVisibility,
-) => updateFilesPrivateMagicMetadata(files, { visibility });
+) =>
+    performInBatches(files, (b) =>
+        updateFilesPrivateMagicMetadata(b, { visibility }),
+    );
 
 /**
  * Update the private magic metadata of a list of files on remote.
