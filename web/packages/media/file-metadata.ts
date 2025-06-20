@@ -214,7 +214,7 @@ export const FileMetadata = z.looseObject({
  * APIs refers to the (this) private metadata, even though the mutable public
  * metadata is the much more frequently used of the two. See: [Note: Metadatum].
  */
-export interface PrivateMagicMetadata {
+export interface FilePrivateMagicMetadataData {
     /**
      * The visibility of the file.
      *
@@ -222,9 +222,20 @@ export interface PrivateMagicMetadata {
      * the private magic metadata. This allows the file's owner to share a file
      * and independently edit its visibility without revealing their visibility
      * preference to the other people with whom they have shared the file.
+     *
+     * Expected to be one of {@link ItemVisibility}.
      */
-    visibility?: ItemVisibility;
+    visibility?: number;
 }
+
+/**
+ * Zod schema for {@link FilePrivateMagicMetadataData}.
+ *
+ * See: [Note: Use looseObject for metadata Zod schemas]
+ */
+export const FilePrivateMagicMetadataData = z.looseObject({
+    visibility: z.number().nullish().transform(nullToUndefined),
+});
 
 /**
  * The visibility of an Ente file or collection.
@@ -259,8 +270,8 @@ export type ItemVisibility =
  * - Unlike {@link FileMetadata}, this can change after the file has been
  *   uploaded.
  *
- * - Unlike {@link PrivateMagicMetadata}, this is available to all the people
- *   with whom the file has been shared.
+ * - Unlike {@link FilePrivateMagicMetadataData}, this is available to all the
+ *   people with whom the file has been shared.
  *
  * For more details, see [Note: Metadatum].
  *
@@ -421,9 +432,7 @@ export const filePrivateMagicMetadata = (file: EnteFile) => {
             `Private magic metadata for ${fileLogID(file)} had not been decrypted even when the file reached the UI layer`,
         );
     }
-    // This cast is unavoidable in the current setup. We need to refactor the
-    // types so that this cast in not needed.
-    return file.magicMetadata.data as PrivateMagicMetadata;
+    return file.magicMetadata.data;
 };
 
 /**
@@ -564,10 +573,10 @@ export const fileCreationPhotoDate = (
  * @param file The {@link EnteFile} whose public magic metadata we want to
  * update.
  *
- * @param metadataUpdates A subset of {@link PrivateMagicMetadata} containing
+ * @param metadataUpdates A subset of {@link FilePrivateMagicMetadataData} containing
  * the fields that we want to add or update.
  *
- * @returns An updated {@link PrivateMagicMetadata} object containing the
+ * @returns An updated {@link FilePrivateMagicMetadataData} object containing the
  * (decrypted) metadata updates we just made. This is effectively what we would
  * get if we to ask the remote for the latest file for this ID, except we don't
  * do an actual sync and instead reconstruct it piecemeal.
@@ -606,7 +615,7 @@ export const fileCreationPhotoDate = (
  */
 export const updateRemotePrivateMagicMetadata = async (
     file: EnteFile,
-    metadataUpdates: Partial<PrivateMagicMetadata>,
+    metadataUpdates: Partial<FilePrivateMagicMetadataData>,
 ): Promise<FilePrivateMagicMetadata> => {
     const existingMetadata = filePrivateMagicMetadata(file);
 
@@ -703,7 +712,7 @@ interface UpdateMagicMetadataRequest {
  */
 const updateMagicMetadataRequest = async (
     file: EnteFile,
-    metadata: PrivateMagicMetadata | PublicMagicMetadata,
+    metadata: FilePrivateMagicMetadataData | PublicMagicMetadata,
     metadataVersion: number,
 ): Promise<UpdateMagicMetadataRequest> => {
     // Drop all null or undefined values to obtain the syncable entries.
