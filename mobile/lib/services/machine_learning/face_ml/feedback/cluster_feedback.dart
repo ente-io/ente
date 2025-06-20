@@ -201,27 +201,27 @@ class ClusterFeedbackService<T> {
 
   Future<String> removeFaceFromPerson(
     String faceID,
-    PersonEntity p,
+    PersonEntity person,
   ) async {
     _logger.info('removeFaceFromPerson called');
     try {
-      final newCluster = newClusterID();
-      final newFaceIdToClusterID = {faceID: newCluster};
+      final updatedClusterID = newClusterID();
+      final newFaceIdToClusterID = {faceID: updatedClusterID};
       await mlDataDB.forceUpdateClusterIds(newFaceIdToClusterID);
 
       // Make sure the deleted faces don't get suggested in the future
-      final notClusterIdToPersonId = {newCluster: p.remoteID};
+      final notClusterIdToPersonId = {updatedClusterID: person.remoteID};
       await mlDataDB.bulkCaptureNotPersonFeedback(notClusterIdToPersonId);
 
       // Update remote so new sync does not undo this change
       await PersonService.instance
-          .removeFacesFromPerson(person: p, faceIDs: {faceID});
+          .removeFacesFromPerson(person: person, faceIDs: {faceID});
 
       Bus.instance.fire(
         PeopleChangedEvent(type: PeopleEventType.removedFaceFromCluster),
       );
       _logger.info('removeFaceFromPerson done');
-      return newCluster;
+      return updatedClusterID;
     } catch (e, s) {
       _logger.severe("Error in removeFaceFromPerson", e, s);
       rethrow;
@@ -288,22 +288,22 @@ class ClusterFeedbackService<T> {
 
   Future<String> removeFaceFromCluster({
     required String faceID,
-    required String clusterID,
+    String? clusterID,
   }) async {
     _logger.info('removeFaceFromCluster called');
     try {
-      final newCluster = newClusterID();
-      final newFaceIdToClusterID = {faceID: newCluster};
+      final updatedClusterID = newClusterID();
+      final newFaceIdToClusterID = {faceID: updatedClusterID};
       await mlDataDB.forceUpdateClusterIds(newFaceIdToClusterID);
 
       Bus.instance.fire(
         PeopleChangedEvent(
           type: PeopleEventType.removedFaceFromCluster,
-          source: clusterID,
+          source: clusterID ?? "",
         ),
       );
       _logger.info('removeFaceFromCluster done, with $newFaceIdToClusterID');
-      return newCluster;
+      return updatedClusterID;
     } catch (e, s) {
       _logger.severe("Error in removeFaceFromCluster", e, s);
       rethrow;

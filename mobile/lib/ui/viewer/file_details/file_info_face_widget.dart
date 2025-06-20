@@ -212,18 +212,11 @@ class _FileInfoFaceWidgetState extends State<FileInfoFaceWidget> {
 
   Future<void> _onPlusIconTap() async {
     try {
-      String? newClusterIDValue;
-      if (widget.clusterID != null) {
-        newClusterIDValue =
-            await ClusterFeedbackService.instance.removeFaceFromCluster(
-          faceID: widget.face.faceID,
-          clusterID: widget.clusterID!,
-        );
-      }
-      newClusterIDValue ??= newClusterID();
-      final mlDataDB = MLDataDB.instance;
-      await mlDataDB
-          .updateFaceIdToClusterId({widget.face.faceID: newClusterIDValue});
+      final newClusterIDValue =
+          await ClusterFeedbackService.instance.removeFaceFromCluster(
+        faceID: widget.face.faceID,
+        clusterID: widget.clusterID,
+      );
       await Navigator.of(context).push(
         MaterialPageRoute(
           builder: (context) => SaveOrEditPerson(newClusterIDValue),
@@ -240,7 +233,7 @@ class _FileInfoFaceWidgetState extends State<FileInfoFaceWidget> {
     final result = await showChoiceActionSheet(
       context,
       title: S.of(context).removePersonLabel,
-      body: "Are you sure you want to remove this person from this photo?",
+      body: "Are you sure you want to remove this face from this person?",
       firstButtonLabel: S.of(context).remove,
       firstButtonType: ButtonType.critical,
       secondButtonLabel: S.of(context).cancel,
