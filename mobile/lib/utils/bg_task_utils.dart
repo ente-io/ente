@@ -14,18 +14,27 @@ import "package:workmanager/workmanager.dart" as workmanager;
 void callbackDispatcher() {
   workmanager.Workmanager().executeTask((taskName, inputData) async {
     Future<bool> result = Future.error("Task didn't run");
+    final prefs = await SharedPreferences.getInstance();
 
     await runWithLogs(
       () async {
         try {
           final TimeLogger tlog = TimeLogger();
+
           BgTaskUtils.$.info('Task started $tlog');
-          await runBackgroundTask(taskName, tlog);
+          await runBackgroundTask(taskName, tlog).timeout(
+            Platform.isIOS ? kBGTaskTimeout : const Duration(hours: 1),
+            onTimeout: () async {
+              BgTaskUtils.$.warning(
+                "TLE, committing seppuku for taskID: $taskName",
+              );
+              await BgTaskUtils.releaseResourcesForKill(taskName, prefs);
+            },
+          );
           BgTaskUtils.$.info('Task run successful $tlog');
           result = Future.value(true);
         } catch (e) {
           BgTaskUtils.$.warning('Task error: $e');
-          final prefs = await SharedPreferences.getInstance();
           await BgTaskUtils.releaseResourcesForKill(taskName, prefs);
           result = Future.error(e.toString());
         }
@@ -78,7 +87,7 @@ class BgTaskUtils {
         backgroundTaskIdentifier,
         backgroundTaskIdentifier,
         frequency: Platform.isIOS
-            ? const Duration(minutes: 60)
+            ? const Duration(minutes: 30)
             : const Duration(minutes: 15),
         initialDelay: flagService.internalUser
             ? Duration.zero
