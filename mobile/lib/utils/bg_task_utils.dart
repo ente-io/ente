@@ -13,14 +13,13 @@ import "package:workmanager/workmanager.dart" as workmanager;
 @pragma('vm:entry-point')
 void callbackDispatcher() {
   workmanager.Workmanager().executeTask((taskName, inputData) async {
+    final TimeLogger tlog = TimeLogger();
     Future<bool> result = Future.error("Task didn't run");
     final prefs = await SharedPreferences.getInstance();
 
     await runWithLogs(
       () async {
         try {
-          final TimeLogger tlog = TimeLogger();
-
           BgTaskUtils.$.info('Task started $tlog');
           await runBackgroundTask(taskName, tlog).timeout(
             Platform.isIOS ? kBGTaskTimeout : const Duration(hours: 1),
