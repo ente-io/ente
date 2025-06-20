@@ -16,8 +16,10 @@ export const LoadingThumbnail = () => (
 interface StaticThumbnailProps {
     /**
      * The type of the file for which we're showing the placeholder thumbnail.
+     *
+     * Expected to be one of {@link FileType}.
      */
-    fileType: FileType;
+    fileType: number;
 }
 
 /**

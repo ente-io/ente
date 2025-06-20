@@ -8,6 +8,7 @@ import { ensureElectron } from "ente-base/electron";
 import { basename, nameAndExtension } from "ente-base/file-name";
 import {
     ensureOk,
+    HTTPError,
     retryAsyncOperation,
     type HTTPRequestRetrier,
     type PublicAlbumsCredentials,
@@ -44,11 +45,6 @@ import {
 import { FileType, type FileTypeInfo } from "ente-media/file-type";
 import { encodeLivePhoto } from "ente-media/live-photo";
 import { addToCollection } from "ente-new/photos/services/collection";
-import {
-    CustomError,
-    CustomErrorMessage,
-    handleUploadError,
-} from "ente-shared/error";
 import { mergeUint8Arrays } from "ente-utils/array";
 import { ensureInteger, ensureNumber } from "ente-utils/ensure";
 import type { UploadableUploadItem, UploadItem, UploadPathPrefix } from ".";
@@ -145,7 +141,7 @@ class UploadService {
 
     async setFileCount(fileCount: number) {
         this.pendingUploadCount = fileCount;
-        await this.preFetchUploadURLs();
+        await this.refillUploadURLs(); /* prefetch */
     }
 
     reducePendingUploadCount() {
@@ -153,30 +149,12 @@ class UploadService {
     }
 
     async getUploadURL() {
-        if (this.uploadURLs.length === 0 && this.pendingUploadCount) {
+        if (this.uploadURLs.length == 0 && this.pendingUploadCount) {
             await this.refillUploadURLs();
-            this.ensureUniqueUploadURLs();
         }
         const url = this.uploadURLs.pop();
         if (!url) throw new Error("Failed to obtain upload URL");
         return url;
-    }
-
-    private async preFetchUploadURLs() {
-        try {
-            await this.refillUploadURLs();
-            // checking for any subscription related errors
-        } catch (e) {
-            log.error("prefetch uploadURL failed", e);
-            handleUploadError(e);
-        }
-        this.ensureUniqueUploadURLs();
-    }
-
-    async postFile(file: PostEnteFileRequest) {
-        return this.publicAlbumsCredentials
-            ? postPublicAlbumsEnteFile(file, this.publicAlbumsCredentials)
-            : postEnteFile(file);
     }
 
     private async refillUploadURLs() {
@@ -188,9 +166,9 @@ class UploadService {
         } finally {
             this.activeUploadURLRefill = undefined;
         }
-    }
 
-    private ensureUniqueUploadURLs() {
+        // Ensure that the upload URLs we have are unique.
+        //
         // Sanity check added when this was a new implementation. Have kept it
         // around, but it can be removed too.
         if (
@@ -209,7 +187,11 @@ class UploadService {
                 this.publicAlbumsCredentials,
             );
         } else {
-            urls = await fetchUploadURLs(this.pendingUploadCount);
+            try {
+                urls = await fetchUploadURLs(this.pendingUploadCount);
+            } catch (e) {
+                throw translateURLFetchErrorIfNeeded(e);
+            }
         }
         urls.forEach((u) => this.uploadURLs.push(u));
     }
@@ -220,7 +202,9 @@ class UploadService {
                   uploadPartCount,
                   this.publicAlbumsCredentials,
               )
-            : fetchMultipartUploadURLs(uploadPartCount);
+            : fetchMultipartUploadURLs(uploadPartCount).catch((e: unknown) => {
+                  throw translateURLFetchErrorIfNeeded(e);
+              });
     }
 }
 
@@ -343,7 +327,7 @@ interface EncryptedFilePieces {
 
 export interface PotentialLivePhotoAsset {
     fileName: string;
-    fileType: FileType;
+    fileType: number /* FileType */;
     collectionID: number;
     uploadItem: UploadItem;
     pathPrefix: UploadPathPrefix | undefined;
@@ -519,7 +503,7 @@ const uploadItemSize = async (uploadItem: UploadItem): Promise<number> => {
  */
 const uploadItemCreationDate = async (
     uploadItem: UploadItem,
-    fileType: FileType,
+    fileType: number /* FileType */,
     parsedMetadataJSON: ParsedMetadataJSON | undefined,
 ) => {
     if (parsedMetadataJSON?.creationTime)
@@ -540,6 +524,81 @@ const uploadItemCreationDate = async (
 };
 
 /**
+ * The message of the {@link Error} that is thrown when the user cancels an
+ * upload.
+ *
+ * As a convenience, the {@link isUploadCancelledError} matcher can be used to
+ * match such errors.
+ *
+ * [Note: Upload cancellation]
+ *
+ * 1. User cancels the upload by pressing the cancel button on the upload
+ *    progress indicator in the UI.
+ *
+ * 2. This sets the {@link shouldUploadBeCancelled} flag on
+ *    {@link UploadManager}.
+ *
+ * 3. Periodically the code that is performing the upload calls the
+ *    {@link abortIfCancelled} flag. This function is a no-op normally, but if
+ *    the {@link shouldUploadBeCancelled} is set then it throws an {@link Error}
+ *    with the message set to {@link uploadCancelledErrorMessage}.
+ *
+ * 4. The intermediate per-file try catch handlers do not intercept this error,
+ *    and it bubbles all the way to the top of the call stack, ending the upload.
+ */
+export const uploadCancelledErrorMessage = "Upload cancelled";
+
+/**
+ * A convenience function to check if the provided value is an {@link Error}
+ * with message {@link uploadCancelledErrorMessage}.
+ */
+export const isUploadCancelledError = (e: unknown) =>
+    e instanceof Error && e.message == uploadCancelledErrorMessage;
+
+/**
+ * The message of the {@link Error} that is thrown when the upload fails because
+ * the user's current session has expired (e.g. maybe they logged this client
+ * out from another session), and that they need to login again.
+ */
+export const sessionExpiredErrorMessage = "Session expired";
+
+/**
+ * The message of the {@link Error} that is thrown when the upload fails because
+ * the user's subscription has expired.
+ */
+export const subscriptionExpiredErrorMessage = "Subscription expired";
+
+/**
+ * The message of the {@link Error} that is thrown when the upload fails because
+ * the user's storage space has been exhausted.
+ */
+export const storageLimitExceededErrorMessage = "Storage limit exceeded";
+
+/**
+ * The message of the {@link Error} that is thrown when the PUT request for the
+ * upload of a part of file (as part of an overall multipart upload) fails
+ * because the response did not have the etag error.
+ *
+ * This usually happens because some browser extension is blocking access to the
+ * ETag header (even when it is present in the remote S3 response). In self
+ * hosted scenarios, this can also happen if the remote S3 bucket does not have
+ * the appropriate CORS rules to allow access to the etag header.
+ */
+const eTagMissingErrorMessage = "ETag header not present in response";
+
+/**
+ * The message of the {@link Error} that is thrown when the size of the file
+ * being uploaded exceeds the maximum allowed file size.
+ *
+ * The client already checks for the size of the file being uploaded, and aborts
+ * the request if the client side limit is exceeded. An error with this message
+ * is thrown if we remote side validation fails.
+ *
+ * The UI outcome is the same in both cases.
+ */
+const fileTooLargeErrorMessage = "File too large";
+
+/**
  * Some state and callbacks used during upload that are not tied to a specific
  * file being uploaded.
  */
@@ -551,11 +610,21 @@ interface UploadContext {
      */
     isCFUploadProxyDisabled: boolean;
     /**
+     * If present, then the upload is happening in the context of the public
+     * albums app and these are the credentials that should be used for
+     * performing API requests (instead of trying to obtain and use the
+     * credentials for the logged in user, as happens when we're running in the
+     * context of the photos app).
+     */
+    publicAlbumsCredentials: PublicAlbumsCredentials | undefined;
+    /**
      * A function that the upload sequence should use to periodically check in
      * and see if the upload has been cancelled by the user.
      *
      * If the upload has been cancelled, it will throw an exception with the
-     * message set to {@link CustomError.UPLOAD_CANCELLED}.
+     * message set to {@link uploadCancelledErrorMessage}.
+     *
+     * See: [Note: Upload cancellation]
      */
     abortIfCancelled: () => void;
     /**
@@ -635,7 +704,7 @@ export const upload = async (
 
         const { metadata, publicMagicMetadata } = await extractAssetMetadata(
             uploadAsset,
-            fileTypeInfo,
+            fileTypeInfo.fileType,
             lastModifiedMs,
             collection.id,
             parsedMetadataJSONMap,
@@ -703,12 +772,17 @@ export const upload = async (
 
         abortIfCancelled();
 
-        const uploadedFile = await uploadService.postFile({
+        const newFileRequest = {
             collectionID: collection.id,
             encryptedKey: encryptedFileKey.encryptedData,
             keyDecryptionNonce: encryptedFileKey.nonce,
             ...backupedFile,
-        });
+        };
+
+        const uploadedFile = await createRemoteFile(
+            newFileRequest,
+            uploadContext,
+        );
 
         return {
             uploadResult: metadata.hasStaticThumbnail
@@ -717,22 +791,52 @@ export const upload = async (
             uploadedFile,
         };
     } catch (e) {
-        if (e instanceof Error && e.message == CustomError.UPLOAD_CANCELLED) {
-            log.info(`Upload for ${fileName} cancelled`);
-        } else {
-            log.error(`Upload failed for ${fileName}`, e);
+        if (isUploadCancelledError(e)) {
+            /* stop the upload */
+            throw e;
         }
 
-        const error = handleUploadError(e);
-        switch (error.message) {
-            case CustomErrorMessage.eTagMissing:
+        log.error(`Upload failed for ${fileName}`, e);
+        switch (e instanceof Error && e.message) {
+            /* stop the upload */
+            case sessionExpiredErrorMessage:
+            case subscriptionExpiredErrorMessage:
+            case storageLimitExceededErrorMessage:
+                throw e;
+
+            /* file specific */
+            case eTagMissingErrorMessage:
                 return { uploadResult: "blocked" };
-            case CustomError.FILE_TOO_LARGE:
+            case fileTooLargeErrorMessage:
                 return { uploadResult: "largerThanAvailableStorage" };
             default:
                 return { uploadResult: "failed" };
         }
     }
+};
+
+/**
+ * Convert specific HTTP errors during an API call to remote endpoints for
+ * fetching new upload URLs into error with known messages (if applicable).
+ *
+ * Can be used with the following functions:
+ *
+ * - {@link fetchUploadURLs}
+ * - {@link fetchMultipartUploadURLs}
+ *
+ */
+const translateURLFetchErrorIfNeeded = (e: unknown) => {
+    if (e instanceof HTTPError) {
+        switch (e.res.status) {
+            case 401:
+                return new Error(sessionExpiredErrorMessage);
+            case 402:
+                return new Error(subscriptionExpiredErrorMessage);
+            case 426:
+                return new Error(storageLimitExceededErrorMessage);
+        }
+    }
+    return e;
 };
 
 /**
@@ -896,9 +1000,9 @@ const readLivePhotoDetails = async ({ image, video }: LivePhotoAssets) => {
     return {
         fileTypeInfo: {
             fileType: FileType.livePhoto,
-            extension: `${img.fileTypeInfo.extension}+${vid.fileTypeInfo.extension}`,
-            imageType: img.fileTypeInfo.extension,
-            videoType: vid.fileTypeInfo.extension,
+            // Use the extension of the image component as the extension of the
+            // live photo.
+            extension: img.fileTypeInfo.extension,
         },
         fileSize: img.fileSize + vid.fileSize,
         lastModifiedMs: img.lastModifiedMs,
@@ -958,7 +1062,7 @@ const extractAssetMetadata = async (
         pathPrefix,
         externalParsedMetadata,
     }: UploadAsset,
-    fileTypeInfo: FileTypeInfo,
+    fileType: FileType,
     lastModifiedMs: number,
     collectionID: number,
     parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>,
@@ -969,7 +1073,6 @@ const extractAssetMetadata = async (
               // @ts-ignore
               livePhotoAssets,
               pathPrefix,
-              fileTypeInfo,
               lastModifiedMs,
               collectionID,
               parsedMetadataJSONMap,
@@ -980,7 +1083,7 @@ const extractAssetMetadata = async (
               uploadItem,
               pathPrefix,
               externalParsedMetadata,
-              fileTypeInfo,
+              fileType,
               lastModifiedMs,
               collectionID,
               parsedMetadataJSONMap,
@@ -990,23 +1093,17 @@ const extractAssetMetadata = async (
 const extractLivePhotoMetadata = async (
     livePhotoAssets: LivePhotoAssets,
     pathPrefix: UploadPathPrefix | undefined,
-    fileTypeInfo: FileTypeInfo,
     lastModifiedMs: number,
     collectionID: number,
     parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>,
     worker: CryptoWorker,
 ) => {
-    const imageFileTypeInfo: FileTypeInfo = {
-        fileType: FileType.image,
-        // @ts-ignore
-        extension: fileTypeInfo.imageType,
-    };
     const { metadata: imageMetadata, publicMagicMetadata } =
         await extractImageOrVideoMetadata(
             livePhotoAssets.image,
             pathPrefix,
             undefined,
-            imageFileTypeInfo,
+            FileType.image,
             lastModifiedMs,
             collectionID,
             parsedMetadataJSONMap,
@@ -1033,14 +1130,13 @@ const extractImageOrVideoMetadata = async (
     uploadItem: UploadItem,
     pathPrefix: UploadPathPrefix | undefined,
     externalParsedMetadata: ExternalParsedMetadata | undefined,
-    fileTypeInfo: FileTypeInfo,
+    fileType: FileType,
     lastModifiedMs: number,
     collectionID: number,
     parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>,
     worker: CryptoWorker,
 ) => {
     const fileName = uploadItemFileName(uploadItem);
-    const { fileType } = fileTypeInfo;
 
     let parsedMetadata: (ParsedMetadata & ExternalParsedMetadata) | undefined;
     if (fileType == FileType.image) {
@@ -1230,11 +1326,11 @@ const computeHash = async (uploadItem: UploadItem, worker: CryptoWorker) => {
 const areFilesSame = (fFile: EnteFile, gm: FileMetadata) => {
     const fm = fFile.metadata;
 
-    // File name is different
-    if (fileFileName(fFile) !== gm.title) return false;
+    // File name is different.
+    if (fileFileName(fFile) != gm.title) return false;
 
-    // File type is different
-    if (fm.fileType !== gm.fileType) return false;
+    // File type is different.
+    if (fm.fileType != gm.fileType) return false;
 
     // Name and type is same, compare hash.
     const fh = metadataHash(fm);
@@ -1260,11 +1356,11 @@ const readLivePhoto = async (
         fileStreamOrData: imageFileStreamOrData,
         thumbnail,
         hasStaticThumbnail,
-    } = await withThumbnail(
+    } = await augmentWithThumbnail(
         livePhotoAssets.image,
-        // TODO: Update underlying type
-        // @ts-ignore
-        { extension: fileTypeInfo.imageType, fileType: FileType.image },
+        // For live photos, the extension field in the file type info is the
+        // extension of the image component of the live photo.
+        { fileType: FileType.image, extension: fileTypeInfo.extension },
         await readUploadItem(livePhotoAssets.image),
     );
     const videoFileStreamOrData = await readUploadItem(livePhotoAssets.video);
@@ -1299,7 +1395,7 @@ const readImageOrVideo = async (
     fileTypeInfo: FileTypeInfo,
 ) => {
     const fileStream = await readUploadItem(uploadItem);
-    return withThumbnail(uploadItem, fileTypeInfo, fileStream);
+    return augmentWithThumbnail(uploadItem, fileTypeInfo, fileStream);
 };
 
 /**
@@ -1314,7 +1410,7 @@ const readImageOrVideo = async (
  * Note: The `fileStream` in the returned {@link ThumbnailedFile} may be
  * different from the one passed to the function.
  */
-const withThumbnail = async (
+const augmentWithThumbnail = async (
     uploadItem: UploadItem,
     fileTypeInfo: FileTypeInfo,
     fileStream: FileStream,
@@ -1594,8 +1690,8 @@ const uploadToBucket = async (
  * used by the upload subsystem.
  *
  * @param abortIfCancelled A function that aborts the operation by throwing a
- * error with the message set to {@link CustomError.UPLOAD_CANCELLED} if the
- * user has cancelled the upload.
+ * error with the message set to {@link uploadCancelledErrorMessage} if the user
+ * has cancelled the upload.
  *
  * @return A function of type {@link HTTPRequestRetrier} that can be used to
  * retry requests. This function will retry requests (obtained afresh each time
@@ -1617,11 +1713,7 @@ const createAbortableRetryEnsuringHTTPOk =
             {
                 ...opts,
                 abortIfNeeded(e) {
-                    if (
-                        e instanceof Error &&
-                        e.message == CustomError.UPLOAD_CANCELLED
-                    )
-                        throw e;
+                    if (isUploadCancelledError(e)) throw e;
                 },
             },
         );
@@ -1667,7 +1759,7 @@ const uploadStreamUsingMultipart = async (
                   requestRetrier,
               )
             : await putFilePart(partUploadURL, partData, requestRetrier);
-        if (!eTag) throw new Error(CustomErrorMessage.eTagMissing);
+        if (!eTag) throw new Error(eTagMissingErrorMessage);
 
         updateUploadProgress(fileLocalID, percentPerPart * partNumber);
         completedParts.push({ partNumber, eTag });
@@ -1709,3 +1801,72 @@ const nextMultipartUploadPart = async (
     }
     return mergeUint8Arrays(chunks);
 };
+
+/**
+ * Finalize an upload by creating an {@link EnteFile} on remote.
+ */
+const createRemoteFile = async (
+    newFileRequest: PostEnteFileRequest,
+    uploadContext: UploadContext,
+) => {
+    const { publicAlbumsCredentials } = uploadContext;
+
+    return publicAlbumsCredentials
+        ? retriedPostPublicAlbumsEnteFile(
+              newFileRequest,
+              publicAlbumsCredentials,
+              uploadContext,
+          )
+        : retriedPostEnteFile(newFileRequest, uploadContext);
+};
+
+const retriedPostPublicAlbumsEnteFile = async (
+    newFileRequest: PostEnteFileRequest,
+    credentials: PublicAlbumsCredentials,
+    { abortIfCancelled }: UploadContext,
+) =>
+    retryAsyncOperation(
+        () => {
+            abortIfCancelled();
+            return postPublicAlbumsEnteFile(newFileRequest, credentials);
+        },
+        {
+            abortIfNeeded: (e) => {
+                if (isUploadCancelledError(e)) throw e;
+                if (e instanceof HTTPError) {
+                    switch (e.res.status) {
+                        case 413:
+                            throw new Error(fileTooLargeErrorMessage);
+                    }
+                }
+            },
+        },
+    );
+
+const retriedPostEnteFile = async (
+    newFileRequest: PostEnteFileRequest,
+    { abortIfCancelled }: UploadContext,
+) =>
+    retryAsyncOperation(
+        () => {
+            abortIfCancelled();
+            return postEnteFile(newFileRequest);
+        },
+        {
+            abortIfNeeded: (e) => {
+                if (isUploadCancelledError(e)) throw e;
+                if (e instanceof HTTPError) {
+                    switch (e.res.status) {
+                        case 401:
+                            throw new Error(sessionExpiredErrorMessage);
+                        case 402:
+                            throw new Error(subscriptionExpiredErrorMessage);
+                        case 413:
+                            throw new Error(fileTooLargeErrorMessage);
+                        case 426:
+                            throw new Error(storageLimitExceededErrorMessage);
+                    }
+                }
+            },
+        },
+    );

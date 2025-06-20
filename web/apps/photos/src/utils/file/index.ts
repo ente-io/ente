@@ -2,17 +2,11 @@ import type { User } from "ente-accounts/services/user";
 import { joinPath } from "ente-base/file-name";
 import log from "ente-base/log";
 import { type Electron } from "ente-base/types/ipc";
-import { downloadAndRevokeObjectURL } from "ente-base/utils/web";
+import { saveAsFileAndRevokeObjectURL } from "ente-base/utils/web";
 import { downloadManager } from "ente-gallery/services/download";
-import { updateFileMagicMetadata } from "ente-gallery/services/file";
-import { updateMagicMetadata } from "ente-gallery/services/magic-metadata";
 import { detectFileTypeInfo } from "ente-gallery/utils/detect-type";
 import { writeStream } from "ente-gallery/utils/native-stream";
-import {
-    EnteFile,
-    FileMagicMetadataProps,
-    FileWithUpdatedMagicMetadata,
-} from "ente-media/file";
+import { EnteFile } from "ente-media/file";
 import {
     ItemVisibility,
     fileFileName,
@@ -24,6 +18,7 @@ import {
     deleteFromTrash,
     moveToTrash,
 } from "ente-new/photos/services/collection";
+import { updateFilesVisibility } from "ente-new/photos/services/file";
 import { safeFileName } from "ente-new/photos/utils/native-fs";
 import { getData } from "ente-shared/storage/localStorage";
 import { wait } from "ente-utils/promise";
@@ -48,42 +43,6 @@ export type FileOp =
     | "trash"
     | "deletePermanently";
 
-export async function downloadFile(file: EnteFile) {
-    try {
-        let fileBlob = await downloadManager.fileBlob(file);
-        const fileName = fileFileName(file);
-        if (file.metadata.fileType === FileType.livePhoto) {
-            const { imageFileName, imageData, videoFileName, videoData } =
-                await decodeLivePhoto(fileName, fileBlob);
-            const image = new File([imageData], imageFileName);
-            const imageType = await detectFileTypeInfo(image);
-            const tempImageURL = URL.createObjectURL(
-                new Blob([imageData], { type: imageType.mimeType }),
-            );
-            const video = new File([videoData], videoFileName);
-            const videoType = await detectFileTypeInfo(video);
-            const tempVideoURL = URL.createObjectURL(
-                new Blob([videoData], { type: videoType.mimeType }),
-            );
-            downloadAndRevokeObjectURL(tempImageURL, imageFileName);
-            // Downloading multiple works everywhere except, you guessed it,
-            // Safari. Make up for their incompetence by adding a setTimeout.
-            await wait(300) /* arbitrary constant, 300ms */;
-            downloadAndRevokeObjectURL(tempVideoURL, videoFileName);
-        } else {
-            const fileType = await detectFileTypeInfo(
-                new File([fileBlob], fileName),
-            );
-            fileBlob = new Blob([fileBlob], { type: fileType.mimeType });
-            const tempURL = URL.createObjectURL(fileBlob);
-            downloadAndRevokeObjectURL(tempURL, fileName);
-        }
-    } catch (e) {
-        log.error("failed to download file", e);
-        throw e;
-    }
-}
-
 function getSelectedFileIds(selectedFiles: SelectedState) {
     const filesIDs: number[] = [];
     for (const [key, val] of Object.entries(selectedFiles)) {
@@ -99,28 +58,6 @@ export function getSelectedFiles(
 ): EnteFile[] {
     const selectedFilesIDs = getSelectedFileIds(selected);
     return files.filter((file) => selectedFilesIDs.has(file.id));
-}
-
-export async function changeFilesVisibility(
-    files: EnteFile[],
-    visibility: ItemVisibility,
-): Promise<EnteFile[]> {
-    const fileWithUpdatedMagicMetadataList: FileWithUpdatedMagicMetadata[] = [];
-    for (const file of files) {
-        const updatedMagicMetadataProps: FileMagicMetadataProps = {
-            visibility,
-        };
-
-        fileWithUpdatedMagicMetadataList.push({
-            file,
-            updatedMagicMetadata: await updateMagicMetadata(
-                updatedMagicMetadataProps,
-                file.magicMetadata,
-                file.key,
-            ),
-        });
-    }
-    return await updateFileMagicMetadata(fileWithUpdatedMagicMetadataList);
 }
 
 export function isSharedFile(user: User, file: EnteFile) {
@@ -240,7 +177,7 @@ export async function downloadFiles(
             if (progressBarUpdater?.isCancelled()) {
                 return;
             }
-            await downloadFile(file);
+            await saveAsFile(file);
             progressBarUpdater?.increaseSuccess();
         } catch (e) {
             log.error("download fail for file", e);
@@ -248,6 +185,41 @@ export async function downloadFiles(
         }
     }
 }
+
+/**
+ * Save the given {@link EnteFile} as a file in the user's download folder.
+ */
+const saveAsFile = async (file: EnteFile) => {
+    const fileBlob = await downloadManager.fileBlob(file);
+    const fileName = fileFileName(file);
+    if (file.metadata.fileType == FileType.livePhoto) {
+        const { imageFileName, imageData, videoFileName, videoData } =
+            await decodeLivePhoto(fileName, fileBlob);
+
+        await saveBlobPartAsFile(imageData, imageFileName);
+
+        // Downloading multiple works everywhere except, you guessed it,
+        // Safari. Make up for their incompetence by adding a setTimeout.
+        await wait(300) /* arbitrary constant, 300ms */;
+        await saveBlobPartAsFile(videoData, videoFileName);
+    } else {
+        await saveBlobPartAsFile(fileBlob, fileName);
+    }
+};
+
+/**
+ * Save the given {@link blob} as a file in the user's download folder.
+ */
+const saveBlobPartAsFile = async (blobPart: BlobPart, fileName: string) =>
+    createTypedObjectURL(blobPart, fileName).then((url) =>
+        saveAsFileAndRevokeObjectURL(url, fileName),
+    );
+
+const createTypedObjectURL = async (blobPart: BlobPart, fileName: string) => {
+    const blob = blobPart instanceof Blob ? blobPart : new Blob([blobPart]);
+    const { mimeType } = await detectFileTypeInfo(new File([blob], fileName));
+    return URL.createObjectURL(new Blob([blob], { type: mimeType }));
+};
 
 async function downloadFilesDesktop(
     electron: Electron,
@@ -283,7 +255,7 @@ async function downloadFileDesktop(
     const stream = await downloadManager.fileStream(file);
     const fileName = fileFileName(file);
 
-    if (file.metadata.fileType === FileType.livePhoto) {
+    if (file.metadata.fileType == FileType.livePhoto) {
         const fileBlob = await new Response(stream).blob();
         const { imageFileName, imageData, videoFileName, videoData } =
             await decodeLivePhoto(fileName, fileBlob);
@@ -328,16 +300,8 @@ async function downloadFileDesktop(
     }
 }
 
-export const isImageOrVideo = (fileType: FileType) =>
-    fileType == FileType.image || fileType == FileType.video;
-
 export const getArchivedFiles = (files: EnteFile[]) => {
     return files.filter(isArchivedFile).map((file) => file.id);
-};
-
-export const createTypedObjectURL = async (blob: Blob, fileName: string) => {
-    const type = await detectFileTypeInfo(new File([blob], fileName));
-    return URL.createObjectURL(new Blob([blob], { type: type.mimeType }));
 };
 
 export const getUserOwnedFiles = (files: EnteFile[]) => {
@@ -396,10 +360,10 @@ export const handleFileOp = async (
             await addMultipleToFavorites(files);
             break;
         case "archive":
-            await changeFilesVisibility(files, ItemVisibility.archived);
+            await updateFilesVisibility(files, ItemVisibility.archived);
             break;
         case "unarchive":
-            await changeFilesVisibility(files, ItemVisibility.visible);
+            await updateFilesVisibility(files, ItemVisibility.visible);
             break;
         case "hide":
             try {

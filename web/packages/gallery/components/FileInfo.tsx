@@ -749,7 +749,7 @@ const FileName: React.FC<FileNameProps> = ({
     };
 
     const icon =
-        file.metadata.fileType === FileType.video ? (
+        file.metadata.fileType == FileType.video ? (
             <VideocamOutlinedIcon />
         ) : (
             <PhotoOutlinedIcon />

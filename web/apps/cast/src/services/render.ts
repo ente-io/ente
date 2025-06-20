@@ -193,10 +193,9 @@ const isFileEligible = (file: EnteFile2) => {
     return true;
 };
 
-const isImageOrLivePhoto = (file: EnteFile2) => {
-    const fileType = file.metadata.fileType;
-    return fileType == FileType.image || fileType == FileType.livePhoto;
-};
+const isImageOrLivePhoto = (file: EnteFile2) =>
+    file.metadata.fileType == FileType.image ||
+    file.metadata.fileType == FileType.livePhoto;
 
 /**
  * Create and return a new data URL that can be used to show the given
