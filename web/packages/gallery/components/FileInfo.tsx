@@ -57,7 +57,6 @@ import { CopyButton } from "ente-gallery/components/FileInfoComponents";
 import { tagNumericValue, type RawExifTags } from "ente-gallery/services/exif";
 import {
     changeCaption,
-    changeFileName,
     updateExistingFilePubMetadata,
 } from "ente-gallery/services/file";
 import { formattedByteSize } from "ente-gallery/utils/units";
@@ -80,6 +79,7 @@ import {
     confirmEnableMapsDialogAttributes,
 } from "ente-new/photos/components/utils/dialog";
 import { useSettingsSnapshot } from "ente-new/photos/components/utils/use-snapshot";
+import { updateFileFileName } from "ente-new/photos/services/file";
 import {
     getAnnotatedFacesForFile,
     isMLEnabled,
@@ -205,6 +205,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
     fileCollectionIDs,
     collectionNameByID,
     onNeedsRemoteSync,
+    onFileAndCollectionSyncWithRemote,
     onUpdateCaption,
     onSelectCollection,
     onSelectPerson,
@@ -290,7 +291,13 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                 />
                 <CreationTime {...{ file, allowEdits, onNeedsRemoteSync }} />
                 <FileName
-                    {...{ file, annotatedExif, allowEdits, onNeedsRemoteSync }}
+                    {...{
+                        file,
+                        annotatedExif,
+                        allowEdits,
+                        onNeedsRemoteSync,
+                        onFileAndCollectionSyncWithRemote,
+                    }}
                 />
 
                 {annotatedExif?.takenOnDevice && (
@@ -737,16 +744,17 @@ const CreationTime: React.FC<CreationTimeProps> = ({
     );
 };
 
-type FileNameProps = Pick<FileInfoProps, "allowEdits" | "onNeedsRemoteSync"> & {
-    file: EnteFile;
-    annotatedExif: AnnotatedExif | undefined;
-};
+type FileNameProps = Pick<
+    FileInfoProps,
+    "allowEdits" | "onNeedsRemoteSync" | "onFileAndCollectionSyncWithRemote"
+> & { file: EnteFile; annotatedExif: AnnotatedExif | undefined };
 
 const FileName: React.FC<FileNameProps> = ({
     file,
     annotatedExif,
     allowEdits,
     onNeedsRemoteSync,
+    onFileAndCollectionSyncWithRemote,
 }) => {
     const { show: showRename, props: renameVisibilityProps } =
         useModalVisibility();
@@ -754,8 +762,9 @@ const FileName: React.FC<FileNameProps> = ({
     const fileName = fileFileName(file);
 
     const handleRename = async (newFileName: string) => {
-        const updatedFile = await changeFileName(file, newFileName);
-        updateExistingFilePubMetadata(file, updatedFile);
+        await updateFileFileName(file, newFileName);
+        await onFileAndCollectionSyncWithRemote();
+        // updateExistingFilePubMetadata(file, updatedFile);
         onNeedsRemoteSync();
     };
 
