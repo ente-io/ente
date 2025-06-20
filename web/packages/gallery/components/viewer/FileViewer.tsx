@@ -830,8 +830,14 @@ export const FileViewer: React.FC<FileViewerProps> = ({
             //   the other attributes of the annotated file currently depend on
             //   the archive status change.
             //
-            // - Similar reasoning applies to updates to the file's fileName in
-            //   the file info panel.
+            // - Similar reasoning applies to updates to the file's file name in
+            //   file info panel.
+            //
+            // - For updates to the file's caption in the file info panel we
+            //   already need special casing (see `updateItemDataAlt`) to reload
+            //   the slide since the PhotoSwipe UI element that displays the
+            //   caption needs to be reloaded. So we'll come here in the caption
+            //   update case too, but this code then isn't strictly necessary.
             return { ...af, file: updatedFile };
         });
     }, [handleClose, files]);
@@ -896,10 +902,13 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         handleMore,
     ]);
 
-    const handleUpdateCaption = useCallback((updatedFile: EnteFile) => {
-        updateItemDataAlt(updatedFile);
-        psRef.current!.refreshCurrentSlideContent();
-    }, []);
+    const handleUpdateCaption = useCallback(
+        (fileID: number, newCaption: string) => {
+            updateItemDataAlt(fileID, newCaption);
+            psRef.current!.refreshCurrentSlideContent();
+        },
+        [],
+    );
 
     useEffect(updateFullscreenStatus, [updateFullscreenStatus]);
 

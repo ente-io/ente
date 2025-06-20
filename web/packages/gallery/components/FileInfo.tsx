@@ -55,10 +55,6 @@ import log from "ente-base/log";
 import type { Location } from "ente-base/types";
 import { CopyButton } from "ente-gallery/components/FileInfoComponents";
 import { tagNumericValue, type RawExifTags } from "ente-gallery/services/exif";
-import {
-    changeCaption,
-    updateExistingFilePubMetadata,
-} from "ente-gallery/services/file";
 import { formattedByteSize } from "ente-gallery/utils/units";
 import { type EnteFile } from "ente-media/file";
 import {
@@ -79,7 +75,10 @@ import {
     confirmEnableMapsDialogAttributes,
 } from "ente-new/photos/components/utils/dialog";
 import { useSettingsSnapshot } from "ente-new/photos/components/utils/use-snapshot";
-import { updateFileFileName } from "ente-new/photos/services/file";
+import {
+    updateFileCaption,
+    updateFileFileName,
+} from "ente-new/photos/services/file";
 import {
     getAnnotatedFacesForFile,
     isMLEnabled,
@@ -179,10 +178,11 @@ export type FileInfoProps = ModalVisibilityProps & {
      * This hook allows the file viewer to update the caption it is displaying
      * for the given file.
      *
-     * @param updatedFile The updated file object, containing the updated
-     * caption.
+     * @param fileID The ID of the file whose caption was updated.
+     *
+     * @param newCaption The updated value of the file's caption.
      */
-    onUpdateCaption: (updatedFile: EnteFile) => void;
+    onUpdateCaption: (fileID: number, newCaption: string) => void;
     /**
      * Called when the user selects a collection from among the collections that
      * the file belongs to.
@@ -286,6 +286,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                         file,
                         allowEdits,
                         onNeedsRemoteSync,
+                        onFileAndCollectionSyncWithRemote,
                         onUpdateCaption,
                     }}
                 />
@@ -577,13 +578,18 @@ const EditButton: React.FC<EditButtonProps> = ({ onClick, loading }) => (
 
 type CaptionProps = Pick<
     FileInfoProps,
-    "file" | "allowEdits" | "onNeedsRemoteSync" | "onUpdateCaption"
+    | "file"
+    | "allowEdits"
+    | "onNeedsRemoteSync"
+    | "onFileAndCollectionSyncWithRemote"
+    | "onUpdateCaption"
 >;
 
 const Caption: React.FC<CaptionProps> = ({
     file,
     allowEdits,
     onNeedsRemoteSync,
+    onFileAndCollectionSyncWithRemote,
     onUpdateCaption,
 }) => {
     const [isSaving, setIsSaving] = useState(false);
@@ -600,9 +606,9 @@ const Caption: React.FC<CaptionProps> = ({
             if (newCaption == caption) return;
             setIsSaving(true);
             try {
-                const updatedFile = await changeCaption(file, newCaption);
-                updateExistingFilePubMetadata(file, updatedFile);
-                onUpdateCaption(file);
+                await updateFileCaption(file, newCaption);
+                await onFileAndCollectionSyncWithRemote();
+                onUpdateCaption(file.id, newCaption);
             } catch (e) {
                 log.error("Failed to update caption", e);
                 setFieldError("caption", t("generic_error"));
