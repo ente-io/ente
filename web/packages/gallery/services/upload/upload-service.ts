@@ -704,7 +704,7 @@ export const upload = async (
 
         const { metadata, publicMagicMetadata } = await extractAssetMetadata(
             uploadAsset,
-            fileTypeInfo,
+            fileTypeInfo.fileType,
             lastModifiedMs,
             collection.id,
             parsedMetadataJSONMap,
@@ -1061,7 +1061,7 @@ const extractAssetMetadata = async (
         pathPrefix,
         externalParsedMetadata,
     }: UploadAsset,
-    fileTypeInfo: FileTypeInfo,
+    fileType: FileType,
     lastModifiedMs: number,
     collectionID: number,
     parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>,
@@ -1072,7 +1072,6 @@ const extractAssetMetadata = async (
               // @ts-ignore
               livePhotoAssets,
               pathPrefix,
-              fileTypeInfo,
               lastModifiedMs,
               collectionID,
               parsedMetadataJSONMap,
@@ -1083,7 +1082,7 @@ const extractAssetMetadata = async (
               uploadItem,
               pathPrefix,
               externalParsedMetadata,
-              fileTypeInfo,
+              fileType,
               lastModifiedMs,
               collectionID,
               parsedMetadataJSONMap,
@@ -1093,23 +1092,17 @@ const extractAssetMetadata = async (
 const extractLivePhotoMetadata = async (
     livePhotoAssets: LivePhotoAssets,
     pathPrefix: UploadPathPrefix | undefined,
-    fileTypeInfo: FileTypeInfo,
     lastModifiedMs: number,
     collectionID: number,
     parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>,
     worker: CryptoWorker,
 ) => {
-    const imageFileTypeInfo: FileTypeInfo = {
-        fileType: FileType.image,
-        // @ts-ignore
-        extension: fileTypeInfo.imageType,
-    };
     const { metadata: imageMetadata, publicMagicMetadata } =
         await extractImageOrVideoMetadata(
             livePhotoAssets.image,
             pathPrefix,
             undefined,
-            imageFileTypeInfo,
+            FileType.image,
             lastModifiedMs,
             collectionID,
             parsedMetadataJSONMap,
@@ -1136,14 +1129,13 @@ const extractImageOrVideoMetadata = async (
     uploadItem: UploadItem,
     pathPrefix: UploadPathPrefix | undefined,
     externalParsedMetadata: ExternalParsedMetadata | undefined,
-    fileTypeInfo: FileTypeInfo,
+    fileType: FileType,
     lastModifiedMs: number,
     collectionID: number,
     parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>,
     worker: CryptoWorker,
 ) => {
     const fileName = uploadItemFileName(uploadItem);
-    const { fileType } = fileTypeInfo;
 
     let parsedMetadata: (ParsedMetadata & ExternalParsedMetadata) | undefined;
     if (fileType == FileType.image) {
