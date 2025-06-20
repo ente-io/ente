@@ -483,11 +483,6 @@ export const FileDiffResponse = z.object({
     hasMore: z.boolean(),
 });
 
-export interface FileWithUpdatedMagicMetadata {
-    file: EnteFile;
-    updatedMagicMetadata: FileMagicMetadata;
-}
-
 export interface FileWithUpdatedPublicMagicMetadata {
     file: EnteFile;
     updatedPublicMagicMetadata: FilePublicMagicMetadata;

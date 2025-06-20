@@ -4,13 +4,10 @@ import log from "ente-base/log";
 import { type Electron } from "ente-base/types/ipc";
 import { saveAsFileAndRevokeObjectURL } from "ente-base/utils/web";
 import { downloadManager } from "ente-gallery/services/download";
-import { updateFileMagicMetadata } from "ente-gallery/services/file";
-import { updateMagicMetadata } from "ente-gallery/services/magic-metadata";
 import { detectFileTypeInfo } from "ente-gallery/utils/detect-type";
 import { writeStream } from "ente-gallery/utils/native-stream";
-import { EnteFile, FileWithUpdatedMagicMetadata } from "ente-media/file";
+import { EnteFile } from "ente-media/file";
 import {
-    type FilePrivateMagicMetadataData,
     ItemVisibility,
     fileFileName,
     isArchivedFile,
@@ -21,6 +18,7 @@ import {
     deleteFromTrash,
     moveToTrash,
 } from "ente-new/photos/services/collection";
+import { updateFilesVisibility } from "ente-new/photos/services/file";
 import { safeFileName } from "ente-new/photos/utils/native-fs";
 import { getData } from "ente-shared/storage/localStorage";
 import { wait } from "ente-utils/promise";
@@ -60,28 +58,6 @@ export function getSelectedFiles(
 ): EnteFile[] {
     const selectedFilesIDs = getSelectedFileIds(selected);
     return files.filter((file) => selectedFilesIDs.has(file.id));
-}
-
-export async function changeFilesVisibility(
-    files: EnteFile[],
-    visibility: ItemVisibility,
-): Promise<EnteFile[]> {
-    const fileWithUpdatedMagicMetadataList: FileWithUpdatedMagicMetadata[] = [];
-    for (const file of files) {
-        const updatedMagicMetadataProps: FilePrivateMagicMetadataData = {
-            visibility,
-        };
-
-        fileWithUpdatedMagicMetadataList.push({
-            file,
-            updatedMagicMetadata: await updateMagicMetadata(
-                updatedMagicMetadataProps,
-                file.magicMetadata,
-                file.key,
-            ),
-        });
-    }
-    return await updateFileMagicMetadata(fileWithUpdatedMagicMetadataList);
 }
 
 export function isSharedFile(user: User, file: EnteFile) {
@@ -384,10 +360,10 @@ export const handleFileOp = async (
             await addMultipleToFavorites(files);
             break;
         case "archive":
-            await changeFilesVisibility(files, ItemVisibility.archived);
+            await updateFilesVisibility(files, ItemVisibility.archived);
             break;
         case "unarchive":
-            await changeFilesVisibility(files, ItemVisibility.visible);
+            await updateFilesVisibility(files, ItemVisibility.visible);
             break;
         case "hide":
             try {
