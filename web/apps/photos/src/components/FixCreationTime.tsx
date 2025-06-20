@@ -18,7 +18,6 @@ import { downloadManager } from "ente-gallery/services/download";
 import { extractExifDates } from "ente-gallery/services/exif";
 import { fileLogID, type EnteFile } from "ente-media/file";
 import {
-    decryptPublicMagicMetadata,
     fileCreationPhotoDate,
     fileFileName,
     type ParsedMetadataDate,
@@ -343,10 +342,7 @@ const updateFileDate = async (
 
     if (!newDate) return;
 
-    const existingDate = fileCreationPhotoDate(
-        file,
-        await decryptPublicMagicMetadata(file),
-    );
+    const existingDate = fileCreationPhotoDate(file);
     if (newDate.timestamp == existingDate.getTime()) return;
 
     await updateFilePublicMagicMetadata(file, {

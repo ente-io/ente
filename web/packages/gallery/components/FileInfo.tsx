@@ -58,11 +58,9 @@ import { tagNumericValue, type RawExifTags } from "ente-gallery/services/exif";
 import { formattedByteSize } from "ente-gallery/utils/units";
 import { type EnteFile } from "ente-media/file";
 import {
-    fileCaption,
     fileCreationPhotoDate,
     fileFileName,
     fileLocation,
-    filePublicMagicMetadata,
     type ParsedMetadata,
     type ParsedMetadataDate,
 } from "ente-media/file-metadata";
@@ -260,7 +258,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
         onSelectPerson?.(personID);
     };
 
-    const uploaderName = filePublicMagicMetadata(file)?.uploaderName;
+    const uploaderName = file.pubMagicMetadata?.data.uploaderName;
 
     return (
         <FileInfoSidebar {...{ open, onClose }}>
@@ -582,7 +580,7 @@ const Caption: React.FC<CaptionProps> = ({
 }) => {
     const [isSaving, setIsSaving] = useState(false);
 
-    const caption = fileCaption(file) ?? "";
+    const caption = file.pubMagicMetadata?.data.caption ?? "";
 
     const formik = useFormik<{ caption: string }>({
         initialValues: { caption },
@@ -675,10 +673,7 @@ const CreationTime: React.FC<CreationTimeProps> = ({
     const [isEditing, setIsEditing] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
 
-    const originalDate = fileCreationPhotoDate(
-        file,
-        filePublicMagicMetadata(file),
-    );
+    const originalDate = fileCreationPhotoDate(file);
 
     const saveEdits = async (pickedTime: ParsedMetadataDate) => {
         setIsEditing(false);

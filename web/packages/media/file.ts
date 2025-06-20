@@ -12,6 +12,7 @@ import {
     fileFileName,
     FileMetadata,
     type FilePrivateMagicMetadataData,
+    type FilePublicMagicMetadataData,
 } from "./file-metadata";
 import { FileType } from "./file-type";
 import { decryptMagicMetadata, RemoteMagicMetadata } from "./magic-metadata";
@@ -306,7 +307,7 @@ export interface EnteFile
      *
      * See: [Note: Metadatum]
      */
-    pubMagicMetadata?: FilePublicMagicMetadata;
+    pubMagicMetadata?: MagicMetadataCore<FilePublicMagicMetadataData>;
     /**
      * `true` if this file is in trash (i.e. it has been deleted by the user,
      * and will be permanently deleted after 30 days of being moved to trash).
@@ -492,56 +493,8 @@ export type FileMagicMetadata = MagicMetadataCore<FilePrivateMagicMetadataData>;
 export type FilePrivateMagicMetadata =
     MagicMetadataCore<FilePrivateMagicMetadataData>;
 
-export interface FilePublicMagicMetadataProps {
-    /**
-     * Modified value of the date time associated with an {@link EnteFile}.
-     *
-     * Epoch microseconds.
-     */
-    editedTime?: number;
-    /** See {@link PublicMagicMetadata} in file-metadata.ts */
-    dateTime?: string;
-    /** See {@link PublicMagicMetadata} in file-metadata.ts */
-    offsetTime?: string;
-    /**
-     * Edited name of the {@link EnteFile}.
-     *
-     * If the user edits the name of the file within Ente, then the edits are
-     * saved in this field.
-     */
-    editedName?: string;
-    /**
-     * A arbitrary textual caption / description that the user has attached to
-     * the {@link EnteFile}.
-     */
-    caption?: string;
-    uploaderName?: string;
-    /**
-     * Width of the image / video, in pixels.
-     */
-    w?: number;
-    /**
-     * Height of the image / video, in pixels.
-     */
-    h?: number;
-    /**
-     * Edited latitude for the {@link EnteFile}.
-     *
-     * If the user edits the location (latitude and longitude) of a file within
-     * Ente, then the edits will be stored as the {@link lat} and {@link long}
-     * properties in the file's public magic metadata.
-     */
-    lat?: number;
-    /**
-     * Edited longitude for the {@link EnteFile}.
-     *
-     * See {@link long}.
-     */
-    long?: number;
-}
-
 export type FilePublicMagicMetadata =
-    MagicMetadataCore<FilePublicMagicMetadataProps>;
+    MagicMetadataCore<FilePublicMagicMetadataData>;
 
 export interface TrashItem extends Omit<EncryptedTrashItem, "file"> {
     file: EnteFile;
@@ -741,7 +694,7 @@ export const decryptRemoteFile = async (
             key,
         );
         // TODO(RE):
-        const data = genericMM.data as FilePublicMagicMetadataProps;
+        const data = genericMM.data as FilePublicMagicMetadataData;
         // TODO(RE):
         pubMagicMetadata = { ...genericMM, header: "", data };
     }
