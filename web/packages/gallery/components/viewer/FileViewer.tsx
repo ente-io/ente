@@ -772,23 +772,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
 
     // Handle updates to files.
     //
-    // [Note: Updates to the files prop for FileViewer]
-    //
-    // On updates to the `files` prop,
-    //
-    // - If the file that was previously being shown is no longer being shown,
-    //   move to the next slide if possible, or close the viewer otherwise (say
-    //   if there are no more files remaining, e.g. we archived the last one
-    //   when in the all section).
-    //
-    // - If the file that was previously being shown has moved to a new index
-    //   (e.g. user changed the date in the file info panel), go to that new
-    //   index.
-    //
-    // - If the file is still the same but the underlying file's updation time
-    //   has changed (e.g. the user changed the name of the file in the file
-    //   info panel), refresh the annotated file data cached by the viewer.
-    //
+    // See: [Note: Updates to the files prop for FileViewer]
     useEffect(() => {
         if (!files.length) {
             // If there are no more files left, close the viewer.

@@ -299,37 +299,88 @@ export class FileViewerPhotoSwipe {
 
         const currentFileAnnotation = () => currentAnnotatedFile().annotation;
 
+        /**
+         * [Note: Updates to the files prop for FileViewer]
+         *
+         * This function is called when the list of underlying files changes.
+         *
+         * These updates can be possibly spurious, since the list changes on
+         * identity and not deep equality. Or they might be real but affect a
+         * file that is not currently being shown.
+         *
+         * Apart from those cases, there are real updates that effect us:
+         *
+         * - If the file that was previously being shown is no longer being
+         *   shown (e.g. it was deleted, or if the marked it archived in a
+         *   context like "All" where archived files are not being shown), move
+         *   to the next slide if possible, or close the viewer otherwise (e.g.
+         *   user deleted the last one).
+         *
+         * - If the file that was previously being shown has moved to a new
+         *   index (e.g. user changed the date in the file info panel), go to
+         *   that new index.
+         *
+         * - If the file is still the same but the underlying file's updation
+         *   time has changed (e.g. the user changed the name of the file in the
+         *   file info panel), refresh the annotated file data cached by the
+         *   viewer.
+         *
+         * When handling these cases, the intent is to minimize the need to call
+         * `refreshSlideContent` as much as possible since that would cause the
+         * zoom and pan state to be reset too.
+         */
         this.refreshSlideOnFilesUpdateIfNeeded = () => {
-            // This function is called when the list of underlying files changes
-            // (possibly spuriously, since the list changes on identity and not
-            // deep equality). In response, it performs the sequence described
-            // in [Note: Updates to the files prop for FileViewer].
-            //
-            // The intent is to minimize the need to call `refreshSlideContent`
-            // since that would cause the zoom and pan state to be reset too.
-
-            const af = _currentAnnotatedFile;
-            if (!af) return;
+            const prevFileID = _currentAnnotatedFile?.file.id;
+            if (!prevFileID) return;
 
             const files = delegate.getFiles();
-            const ci = pswp.currIndex;
-            console.log("goToSlideForFileIDIfNeeded", af, files, ci);
+            const newFileCount = files.length;
 
-            const cf = files[ci];
-            if (!cf || cf.id != af.file.id) {
-                const newIndex = files.findIndex(({ id }) => id == af.file.id);
+            const newFile = files[pswp.currIndex];
+            if (!newFile || newFile.id != prevFileID) {
+                // File is either no longer there, or has moved.
+                //
+                // In either case, after repositioning ourselves to the new
+                // index we also need to refresh the next (or both) neighbours.
+                //
+                // E.g. assume item at index 3 was removed. After refreshing,
+                // the contents of the item previously at index 4, and now at
+                // index 3, would be displayed. But the preloaded slide next to
+                // us (showing item at index 4) would already be displaying the
+                // same item, so that also needs to be refreshed to displaying
+                // the item previously at index 5 (now at index 4).
+
+                const newIndex = files.findIndex(({ id }) => id == prevFileID);
+
                 if (newIndex == -1) {
-                    console.log("refreshCurrentSlideContentAfterRemove");
-                    this.refreshCurrentSlideContentAfterRemove(files.length);
+                    // File is no longer present.
+                    const i = pswp.currIndex;
+
+                    if (i >= newFileCount) {
+                        // If the last slide was removed, take one step back
+                        // first (the code that calls us ensures that we don't
+                        // get called if there are no more slides left).
+                        this.pswp.prev();
+                    }
+
+                    // Refresh the slide at current index (the erstwhile
+                    // neighbour), and refresh its subsequent neighbour (to get
+                    // the new neighbour).
+                    pswp.refreshSlideContent(i);
+                    pswp.refreshSlideContent(i + 1 == newFileCount ? 0 : i + 1);
                 } else {
-                    console.log("going to slide", newIndex);
-                    _currentAnnotatedFile = undefined;
-                    pswp.goTo(newIndex);
-                    pswp.refreshSlideContent(newIndex);
+                    // File has moved. Go to new index, and also refresh both
+                    // its neighbours.
+                    const i = newIndex;
+
+                    pswp.goTo(i);
+                    pswp.refreshSlideContent(i == 0 ? newFileCount - 1 : i - 1);
+                    pswp.refreshSlideContent(i + 1 == newFileCount ? 0 : i + 1);
                 }
             } else {
-                console.log("calling currentAnnotatedFile");
-                // Refresh the current annotated file if needed.
+                // Calling `currentAnnotatedFile` has the side effect of
+                // refreshing the cached annotated file if the `updationTime`
+                // has changed.
                 currentAnnotatedFile();
             }
         };
@@ -1574,40 +1625,6 @@ export class FileViewerPhotoSwipe {
      */
     refreshCurrentSlideContent() {
         this.pswp.refreshSlideContent(this.pswp.currIndex);
-    }
-
-    /**
-     * Reload the PhotoSwipe dialog (without recreating it) if the current slide
-     * that was being viewed is no longer part of the list of files that should
-     * be shown. This can happen when the user deleted the file, or if they
-     * marked it archived in a context (like "All") where archived files are not
-     * being shown.
-     *
-     * @param expectedFileCount The count of files that we expect to show after
-     * the refresh.
-     */
-    private refreshCurrentSlideContentAfterRemove(newFileCount: number) {
-        // Refresh the slide, and its subsequent neighbour.
-        //
-        // To see why, consider item at index 3 was removed. After refreshing,
-        // the contents of the item previously at index 4, and now at index 3,
-        // would be displayed. But the preloaded slide next to us (showing item
-        // at index 4) would already be displaying the same item, so that also
-        // needs to be refreshed to displaying the item previously at index 5
-        // (now at index 4).
-        const refreshSlideAndNextNeighbour = (i: number) => {
-            this.pswp.refreshSlideContent(i);
-            this.pswp.refreshSlideContent(i + 1 == newFileCount ? 0 : i + 1);
-        };
-
-        if (this.pswp.currIndex >= newFileCount) {
-            // If the last slide was removed, take one step back first (the code
-            // that calls us ensures that we don't get called if there are no
-            // more slides left).
-            this.pswp.prev();
-        }
-
-        refreshSlideAndNextNeighbour(this.pswp.currIndex);
     }
 
     /**
