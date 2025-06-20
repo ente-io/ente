@@ -41,20 +41,28 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
     loadFaces();
   }
 
-  Future<void> loadFaces() async {
-    setState(() => _isLoading = true);
+  Future<void> loadFaces({bool isRefresh = false}) async {
+    if (!isRefresh && mounted) {
+      setState(() => _isLoading = true);
+    }
 
     try {
       final result = await _fetchFaceData();
-      setState(() {
-        _defaultFaces = result.defaultFaces;
-        _remainingFaces = result.remainingFaces;
-        _errorReason = result.errorReason;
-      });
+      if (mounted) {
+        setState(() {
+          _defaultFaces = result.defaultFaces;
+          _remainingFaces = result.remainingFaces;
+          _errorReason = result.errorReason;
+          if (!isRefresh) {
+            _isLoading = false;
+          }
+        });
+      }
     } catch (e, s) {
       _logger.severe('Failed to load faces', e, s);
-    } finally {
-      setState(() => _isLoading = false);
+      if (!isRefresh && mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
@@ -143,7 +151,7 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
                 person: faceInfo.person,
                 clusterID: faceInfo.clusterID,
                 isEditMode: _isEditMode,
-                reloadAllFaces: loadFaces,
+                reloadAllFaces: () => loadFaces(isRefresh: true),
               ),
             )
             .toList(),
