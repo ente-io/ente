@@ -185,6 +185,7 @@ Future<void> _runMinimally(String taskId) async {
   await SyncService.instance.init(prefs);
 
   // Misc Services
+  await UserService.instance.init();
   NotificationService.instance.init(prefs);
   if (Platform.isAndroid) HomeWidgetService.instance.init(prefs);
 
