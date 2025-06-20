@@ -6,7 +6,7 @@
 import log from "ente-base/log";
 import { apiURL } from "ente-base/origins";
 import { type Collection } from "ente-media/collection";
-import { decryptFile, type EnteFile } from "ente-media/file";
+import { decryptRemoteFile, type EnteFile } from "ente-media/file";
 import {
     getLocalTrash,
     getTrashedFiles,
@@ -220,7 +220,7 @@ export async function syncTrash(
                     deletedFileIDs.add(trashItem.file.id);
                 }
                 if (!trashItem.isDeleted && !trashItem.isRestored) {
-                    const decryptedFile = await decryptFile(
+                    const decryptedFile = await decryptRemoteFile(
                         trashItem.file,
                         collectionKey,
                     );

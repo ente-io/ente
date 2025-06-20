@@ -8,8 +8,8 @@ import {
 } from "ente-base/http";
 import { apiURL, uploaderOrigin } from "ente-base/origins";
 import {
-    type EncryptedEnteFile,
     type EncryptedMagicMetadata,
+    type RemoteEnteFile,
     type RemoteFileMetadata,
 } from "ente-media/file";
 import { nullToUndefined } from "ente-utils/transform";
@@ -476,7 +476,7 @@ export interface UploadedFileObjectAttributes {
  */
 export const postEnteFile = async (
     postFileRequest: PostEnteFileRequest,
-): Promise<EncryptedEnteFile> => {
+): Promise<RemoteEnteFile> => {
     const res = await fetch(await apiURL("/files"), {
         method: "POST",
         headers: await authenticatedRequestHeaders(),
@@ -484,7 +484,7 @@ export const postEnteFile = async (
     });
     ensureOk(res);
     // TODO(RE):
-    return (await res.json()) as EncryptedEnteFile;
+    return (await res.json()) as RemoteEnteFile;
 };
 
 /**
@@ -494,7 +494,7 @@ export const postPublicAlbumsEnteFile = async (
     postFileRequest: PostEnteFileRequest,
 
     credentials: PublicAlbumsCredentials,
-): Promise<EncryptedEnteFile> => {
+): Promise<RemoteEnteFile> => {
     const res = await fetch(await apiURL("/public-collection/file"), {
         method: "POST",
         headers: authenticatedPublicAlbumsRequestHeaders(credentials),
@@ -502,5 +502,5 @@ export const postPublicAlbumsEnteFile = async (
     });
     ensureOk(res);
     // TODO(RE):
-    return (await res.json()) as EncryptedEnteFile;
+    return (await res.json()) as RemoteEnteFile;
 };

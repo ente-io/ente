@@ -29,10 +29,10 @@ import {
 } from "ente-gallery/utils/detect-type";
 import { readStream } from "ente-gallery/utils/native-stream";
 import type {
-    EncryptedEnteFile,
     EncryptedMagicMetadata,
     EnteFile,
     FilePublicMagicMetadata,
+    RemoteEnteFile,
 } from "ente-media/file";
 import {
     fileFileName,
@@ -641,7 +641,7 @@ interface UploadContext {
 
 interface UploadResponse {
     uploadResult: UploadResult;
-    uploadedFile?: EncryptedEnteFile | EnteFile;
+    uploadedFile?: RemoteEnteFile | EnteFile;
 }
 
 /**

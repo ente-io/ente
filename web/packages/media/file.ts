@@ -1,8 +1,4 @@
-import {
-    decryptBox,
-    decryptMetadataJSON,
-    sharedCryptoWorker,
-} from "ente-base/crypto";
+import { decryptBox, decryptMetadataJSON } from "ente-base/crypto";
 import log from "ente-base/log";
 import { nullishToBlank, nullToUndefined } from "ente-utils/transform";
 import { z } from "zod/v4";
@@ -80,7 +76,7 @@ import {
  *    When a file is permanently deleted, remote will scrub off data from its
  *    fields. See: [Note: Optionality of remote file fields].
  */
-export interface EnteFile2 {
+export interface EnteFile {
     /**
      * The file's globally unique ID.
      *
@@ -179,138 +175,6 @@ export interface EnteFile2 {
      * See: [Note: Metadatum]
      */
     pubMagicMetadata?: MagicMetadata<FilePublicMagicMetadataData>;
-}
-
-export interface EncryptedEnteFile {
-    /**
-     * The file's globally unique ID.
-     *
-     * The file's ID is a integer assigned by remote as the identifier for an
-     * {@link EnteFile} when it is created. It is globally unique across all
-     * files stored by an Ente instance, and is not scoped to the current user.
-     */
-    id: number;
-    /**
-     * The ID of the collection with which this file as associated.
-     *
-     * The same file (ID) may be associated with multiple collectionID, each of
-     * which will come and stay as distinct {@link EnteFile} instances - all of
-     * which will have the same {@link id} but distinct {@link collectionID}.
-     *
-     * So the ({@link id}, {@link collectionID}) pair is a primary key, not the
-     * {@link id} on its own. See: [Note: Collection file].
-     */
-    collectionID: number;
-    /**
-     * The ID of the Ente user who owns the file.
-     *
-     * Files uploaded by non users on public links belong to the owner of the
-     * collection who created the public link (See {@link uploaderName} in
-     * {@link FilePublicMagicMetadataData}).
-     */
-    ownerID: number;
-    /**
-     * Information pertaining to the encrypted S3 object that has the file's
-     * contents.
-     */
-    file: FileObjectAttributes;
-    /**
-     * Information pertaining to the encrypted S3 object that has the contents
-     * of the file's thumbnail.
-     */
-    thumbnail: FileObjectAttributes;
-    /**
-     * Static, remote visible, information associated with a file.
-     *
-     * This is information about storage used by the file and its thumbnail.
-     * Unlike {@link metadata} which is E2EE, the {@link FileInfo} is remote
-     * visible for bookkeeping purposes.
-     *
-     * Files uploaded by very old versions of Ente might not have this field.
-     */
-    info?: FileInfo;
-    metadata: RemoteFileMetadata;
-    magicMetadata: EncryptedMagicMetadata;
-    pubMagicMetadata: EncryptedMagicMetadata;
-    /**
-     * The file's encryption key (as a base64 string), encrypted by the key of
-     * the collection to which it belongs.
-     *
-     * (note: This is always present. retaining this note until we remove
-     * nullability uncertainty from the types).
-     */
-    encryptedKey: string;
-    /**
-     * The nonce (as a base64 string) that was used when encrypting the file's
-     * encryption key.
-     *
-     * (note: This is always present. retaining this note until we remove
-     * nullability uncertainty from the types).
-     */
-    keyDecryptionNonce: string;
-    isDeleted: boolean;
-    /**
-     * The last time the file was updated (epoch microseconds).
-     *
-     * (e.g. magic metadata updates).
-     */
-    updationTime: number;
-}
-
-export interface EnteFile
-    extends Omit<
-        EncryptedEnteFile,
-        | "metadata"
-        | "pubMagicMetadata"
-        | "magicMetadata"
-        | "encryptedKey"
-        | "keyDecryptionNonce"
-    > {
-    /**
-     * The file's key.
-     *
-     * This is the base64 representation of the decrypted encryption key
-     * associated with this file. When we get the file from remote (as a
-     * {@link RemoteEnteFile}), the file key itself would have been encrypted by
-     * the key of the {@link Collection} to which this file belongs.
-     *
-     * This key is used to encrypt both the file's contents, and any associated
-     * data (e.g., metadatum, thumbnail) for the file.
-     */
-    key: string;
-    /**
-     * Public static metadata associated with a file.
-     *
-     * This is the immutable metadata that gets associated with a file when it
-     * is uploaded, and there after cannot be changed.
-     *
-     * It is visible to all users with whom the file gets shared.
-     *
-     * > {@link pubMagicMetadata} contains fields that override fields present
-     * > in the metadata. Clients overlay those atop the metadata fields, and
-     * > thus they can be used to implement edits.
-     *
-     * See: [Note: Metadatum].
-     */
-    metadata: FileMetadata;
-    /**
-     * Private mutable metadata associated with the file that is only visible to
-     * the owner of the file.
-     *
-     * See: [Note: Metadatum]
-     */
-    magicMetadata?: FileMagicMetadata;
-    /**
-     * Public mutable metadata associated with the file that is visible to all
-     * users with whom the file has been shared.
-     *
-     * While in almost all cases, files will have associated public magic
-     * metadata since newer clients have something or the other they need to add
-     * to it, its presence is not guaranteed.
-     *
-     * See: [Note: Metadatum]
-     */
-    pubMagicMetadata?: MagicMetadataCore<FilePublicMagicMetadataData>;
 }
 
 /**
@@ -414,7 +278,6 @@ export type RemoteFileMetadata = z.infer<typeof RemoteFileMetadata>;
  *
  * See: [Note: Use looseObject when parsing JSON that will get persisted]
  */
-// TODO(RE): Use me
 export const RemoteEnteFile = z.looseObject({
     id: z.number(),
     collectionID: z.number(),
@@ -445,7 +308,6 @@ export const RemoteEnteFile = z.looseObject({
      * - They may have been removed from the collection.
      *
      * - They have been deleted (either moved to trash, or permanently deleted).
-     *
      */
     isDeleted: z.boolean().nullish().transform(nullToUndefined),
     metadata: RemoteFileMetadata,
@@ -477,90 +339,6 @@ export const FileDiffResponse = z.object({
     hasMore: z.boolean(),
 });
 
-export type FileMagicMetadata = MagicMetadataCore<FilePrivateMagicMetadataData>;
-export type FilePrivateMagicMetadata =
-    MagicMetadataCore<FilePrivateMagicMetadataData>;
-
-export type FilePublicMagicMetadata =
-    MagicMetadataCore<FilePublicMagicMetadataData>;
-
-export async function decryptFile(
-    file: EncryptedEnteFile,
-    collectionKey: string,
-): Promise<EnteFile> {
-    try {
-        const worker = await sharedCryptoWorker();
-        const {
-            encryptedKey,
-            keyDecryptionNonce,
-            metadata,
-            magicMetadata,
-            pubMagicMetadata,
-            ...restFileProps
-        } = file;
-        const fileKey = await worker.decryptBox(
-            { encryptedData: encryptedKey, nonce: keyDecryptionNonce },
-            collectionKey,
-        );
-        const fileMetadata = await worker.decryptMetadataJSON(
-            // See: [Note: strict mode migration]
-            //
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
-            metadata,
-            fileKey,
-        );
-
-        let fileMagicMetadata: FileMagicMetadata;
-        let filePubMagicMetadata: FilePublicMagicMetadata;
-        /* eslint-disable @typescript-eslint/no-unnecessary-condition */
-        if (magicMetadata?.data) {
-            fileMagicMetadata = {
-                ...file.magicMetadata,
-                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                // @ts-ignore
-                data: await worker.decryptMetadataJSON(
-                    {
-                        encryptedData: magicMetadata.data,
-                        decryptionHeader: magicMetadata.header,
-                    },
-                    fileKey,
-                ),
-            };
-        }
-        /* eslint-disable @typescript-eslint/no-unnecessary-condition */
-        if (pubMagicMetadata?.data) {
-            filePubMagicMetadata = {
-                ...pubMagicMetadata,
-                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                // @ts-ignore
-                data: await worker.decryptMetadataJSON(
-                    {
-                        encryptedData: pubMagicMetadata.data,
-                        decryptionHeader: pubMagicMetadata.header,
-                    },
-                    fileKey,
-                ),
-            };
-        }
-        return {
-            ...restFileProps,
-            key: fileKey,
-            // @ts-expect-error TODO: Need to use zod here.
-            metadata: fileMetadata,
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
-            magicMetadata: fileMagicMetadata,
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
-            pubMagicMetadata: filePubMagicMetadata,
-        };
-    } catch (e) {
-        log.error("file decryption failed", e);
-        throw e;
-    }
-}
-
 /**
  * Decrypt a remote file using the provided {@link collectionKey}.
  *
@@ -575,7 +353,7 @@ export async function decryptFile(
 export const decryptRemoteFile = async (
     remoteFile: RemoteEnteFile,
     collectionKey: string,
-): Promise<EnteFile2> => {
+): Promise<EnteFile> => {
     // RemoteEnteFile is a looseObject, and we want to retain that semantic for
     // the parsed EnteFile. Mention all fields that we want to explicitly drop
     // or transform, passthrough the rest unchanged in the return value.
@@ -611,7 +389,7 @@ export const decryptRemoteFile = async (
         transformDecryptedMetadataJSON(id, metadataJSON),
     );
 
-    let magicMetadata: EnteFile2["magicMetadata"];
+    let magicMetadata: EnteFile["magicMetadata"];
     if (encryptedMagicMetadata) {
         const genericMM = await decryptMagicMetadata(
             encryptedMagicMetadata,
@@ -621,7 +399,7 @@ export const decryptRemoteFile = async (
         magicMetadata = { ...genericMM, data };
     }
 
-    let pubMagicMetadata: EnteFile2["pubMagicMetadata"];
+    let pubMagicMetadata: EnteFile["pubMagicMetadata"];
     if (encryptedPubMagicMetadata) {
         const genericMM = await decryptMagicMetadata(
             encryptedPubMagicMetadata,

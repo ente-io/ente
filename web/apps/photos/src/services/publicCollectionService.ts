@@ -6,11 +6,11 @@ import type {
     CollectionPublicMagicMetadataData,
 } from "ente-media/collection";
 import type {
-    EncryptedEnteFile,
     EnteFile,
     MagicMetadataCore,
+    RemoteEnteFile,
 } from "ente-media/file";
-import { decryptFile, mergeMetadata } from "ente-media/file";
+import { decryptRemoteFile, mergeMetadata } from "ente-media/file";
 import { savedPublicCollections } from "ente-new/albums/services/public-albums-fdb";
 import { sortFiles } from "ente-new/photos/services/files";
 import { CustomError, parseSharingErrorCodes } from "ente-shared/error";
@@ -220,7 +220,8 @@ export const syncPublicFiles = async (
             files = [];
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             for (const [_, file] of latestVersionFiles) {
-                if (file.isDeleted) {
+                // TODO(RE):
+                if ("isDeleted" in file && file.isDeleted) {
                     continue;
                 }
                 files.push(file);
@@ -275,9 +276,12 @@ const getPublicFiles = async (
             decryptedFiles = [
                 ...decryptedFiles,
                 ...(await Promise.all(
-                    resp.data.diff.map(async (file: EncryptedEnteFile) => {
+                    resp.data.diff.map(async (file: RemoteEnteFile) => {
                         if (!file.isDeleted) {
-                            return await decryptFile(file, collection.key);
+                            return await decryptRemoteFile(
+                                file,
+                                collection.key,
+                            );
                         } else {
                             return file;
                         }
@@ -292,7 +296,9 @@ const getPublicFiles = async (
                 sortFiles(
                     mergeMetadata(
                         [...(files || []), ...decryptedFiles].filter(
-                            (item) => !item.isDeleted,
+                            // TODO(RE):
+                            // (item) => !item.isDeleted,
+                            (file) => !("isDeleted" in file && file.isDeleted),
                         ),
                     ),
                     sortAsc,

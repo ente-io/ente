@@ -4,10 +4,10 @@ import log from "ente-base/log";
 import { apiURL } from "ente-base/origins";
 import type { Collection } from "ente-media/collection";
 import {
-    decryptFile,
+    decryptRemoteFile,
     mergeMetadata,
-    type EncryptedEnteFile,
     type EnteFile,
+    type RemoteEnteFile,
 } from "ente-media/file";
 import { metadataHash } from "ente-media/file-metadata";
 import { type Trash } from "ente-new/photos/services/trash";
@@ -123,9 +123,9 @@ export const getFiles = async (
 
             const newDecryptedFilesBatch = await Promise.all(
                 // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-                resp.data.diff.map(async (file: EncryptedEnteFile) => {
+                resp.data.diff.map(async (file: RemoteEnteFile) => {
                     if (!file.isDeleted) {
-                        return await decryptFile(file, collection.key);
+                        return await decryptRemoteFile(file, collection.key);
                     } else {
                         return file;
                     }
@@ -378,6 +378,8 @@ export function getLatestVersionFiles(files: EnteFile[]) {
         }
     });
     return Array.from(latestVersionFiles.values()).filter(
-        (file) => !file.isDeleted,
+        // TODO(RE):
+        // (file) => !file.isDeleted,
+        (file) => !("isDeleted" in file && file.isDeleted),
     );
 }
