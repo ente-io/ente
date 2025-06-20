@@ -151,32 +151,22 @@ export type FileInfoProps = ModalVisibilityProps & {
      */
     collectionNameByID?: Map<number, string>;
     /**
-     * Called when the action on the file info drawer has changed some the
-     * metadata for some file, and we need to sync with remote to get our
-     * locally persisted file objects up to date.
+     * Called when the action on the file info drawer has changed some metadata
+     * for a file.
      *
-     * The sync is not performed immediately by the file info drawer to give
-     * faster feedback to the user, and to allow changes to multiple files to be
-     * batched together into a single sync when the file viewer is closed.
+     * It should return a promise that settles when the changes have been
+     * reflected locally. Until the promise settles the UI element that
+     * triggered the change will show an activity indicator to the user.
      */
-    onNeedsRemoteSync: () => void;
-    /**
-     * Called when an action in the file viewer requires us to sync the local
-     * files and collections with remote.
-     *
-     * Unlinke {@link onNeedsRemoteSync}, which is a trigger, this function
-     * returns a promise that will settle once the sync has completed, and thus
-     * can be used in interactive operations that indicate progress to the user.
-     *
-     * See: [Note: Full sync vs file and collection sync]
-     */
-    onFileAndCollectionSyncWithRemote: () => Promise<void>;
+    onFileMetadataUpdate: () => Promise<void>;
     /**
      * Called when an action on the file info drawer change the caption of the
      * given {@link EnteFile}.
      *
      * This hook allows the file viewer to update the caption it is displaying
-     * for the given file.
+     * for the given file. It is called in addition to, and after the settlement
+     * of, {@link onFileMetadataUpdate} since the caption update requires a
+     * special case refresh of the PhotoSwipe dialog.
      *
      * @param fileID The ID of the file whose caption was updated.
      *
@@ -204,8 +194,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
     showCollections,
     fileCollectionIDs,
     collectionNameByID,
-    onNeedsRemoteSync,
-    onFileAndCollectionSyncWithRemote,
+    onFileMetadataUpdate,
     onUpdateCaption,
     onSelectCollection,
     onSelectPerson,
@@ -285,26 +274,18 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                     {...{
                         file,
                         allowEdits,
-                        onNeedsRemoteSync,
-                        onFileAndCollectionSyncWithRemote,
+                        onFileMetadataUpdate,
                         onUpdateCaption,
+                        onClose,
                     }}
                 />
-                <CreationTime
-                    {...{
-                        file,
-                        allowEdits,
-                        onNeedsRemoteSync,
-                        onFileAndCollectionSyncWithRemote,
-                    }}
-                />
+                <CreationTime {...{ file, allowEdits, onFileMetadataUpdate }} />
                 <FileName
                     {...{
                         file,
                         annotatedExif,
                         allowEdits,
-                        onNeedsRemoteSync,
-                        onFileAndCollectionSyncWithRemote,
+                        onFileMetadataUpdate,
                     }}
                 />
 
@@ -587,17 +568,17 @@ type CaptionProps = Pick<
     FileInfoProps,
     | "file"
     | "allowEdits"
-    | "onNeedsRemoteSync"
-    | "onFileAndCollectionSyncWithRemote"
+    | "onFileMetadataUpdate"
     | "onUpdateCaption"
+    | "onClose"
 >;
 
 const Caption: React.FC<CaptionProps> = ({
     file,
     allowEdits,
-    onNeedsRemoteSync,
-    onFileAndCollectionSyncWithRemote,
+    onFileMetadataUpdate,
     onUpdateCaption,
+    onClose,
 }) => {
     const [isSaving, setIsSaving] = useState(false);
 
@@ -614,14 +595,15 @@ const Caption: React.FC<CaptionProps> = ({
             setIsSaving(true);
             try {
                 await updateFileCaption(file, newCaption);
-                await onFileAndCollectionSyncWithRemote();
+                await onFileMetadataUpdate();
                 onUpdateCaption(file.id, newCaption);
+                setIsSaving(false);
+                onClose();
             } catch (e) {
                 log.error("Failed to update caption", e);
+                setIsSaving(false);
                 setFieldError("caption", t("generic_error"));
             }
-            onNeedsRemoteSync();
-            setIsSaving(false);
         },
     });
 
@@ -680,14 +662,13 @@ const CaptionForm = styled("form")(({ theme }) => ({
 
 type CreationTimeProps = Pick<
     FileInfoProps,
-    "allowEdits" | "onNeedsRemoteSync" | "onFileAndCollectionSyncWithRemote"
+    "allowEdits" | "onFileMetadataUpdate"
 > & { file: EnteFile };
 
 const CreationTime: React.FC<CreationTimeProps> = ({
     file,
     allowEdits,
-    onNeedsRemoteSync,
-    onFileAndCollectionSyncWithRemote,
+    onFileMetadataUpdate,
 }) => {
     const { onGenericError } = useBaseContext();
 
@@ -722,11 +703,10 @@ const CreationTime: React.FC<CreationTimeProps> = ({
             // offset, but right now it is not even surfaced, so don't also
             // potentially overwrite it.
             await updateFilePublicMagicMetadata(file, { dateTime, editedTime });
-            await onFileAndCollectionSyncWithRemote();
+            await onFileMetadataUpdate();
         } catch (e) {
             onGenericError(e);
         }
-        onNeedsRemoteSync();
         setIsSaving(false);
     };
 
@@ -758,15 +738,14 @@ const CreationTime: React.FC<CreationTimeProps> = ({
 
 type FileNameProps = Pick<
     FileInfoProps,
-    "allowEdits" | "onNeedsRemoteSync" | "onFileAndCollectionSyncWithRemote"
+    "allowEdits" | "onFileMetadataUpdate"
 > & { file: EnteFile; annotatedExif: AnnotatedExif | undefined };
 
 const FileName: React.FC<FileNameProps> = ({
     file,
     annotatedExif,
     allowEdits,
-    onNeedsRemoteSync,
-    onFileAndCollectionSyncWithRemote,
+    onFileMetadataUpdate,
 }) => {
     const { show: showRename, props: renameVisibilityProps } =
         useModalVisibility();
@@ -775,9 +754,7 @@ const FileName: React.FC<FileNameProps> = ({
 
     const handleRename = async (newFileName: string) => {
         await updateFileFileName(file, newFileName);
-        await onFileAndCollectionSyncWithRemote();
-        // updateExistingFilePubMetadata(file, updatedFile);
-        onNeedsRemoteSync();
+        await onFileMetadataUpdate();
     };
 
     const icon =

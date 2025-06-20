@@ -217,6 +217,17 @@ export type FileViewerProps = ModalVisibilityProps & {
      */
     onTriggerSyncWithRemote?: () => void;
     /**
+     * Called when an action in the file viewer requires us to sync the local
+     * files and collections with remote.
+     *
+     * Unlike {@link onTriggerSyncWithRemote}, which is a trigger, this function
+     * returns a promise that will settle once the sync has completed, and thus
+     * can be used in interactive operations that indicate activity to the user.
+     *
+     * See: [Note: Full sync vs file and collection sync]
+     */
+    onFileAndCollectionSyncWithRemote: () => Promise<void>;
+    /**
      * Called when the user performs an action which does not otherwise have any
      * immediate visual impact, to acknowledge it.
      *
@@ -268,10 +279,7 @@ export type FileViewerProps = ModalVisibilityProps & {
     onSaveEditedImageCopy?: ImageEditorOverlayProps["onSaveEditedCopy"];
 } & Pick<
         FileInfoProps,
-        | "collectionNameByID"
-        | "onFileAndCollectionSyncWithRemote"
-        | "onSelectCollection"
-        | "onSelectPerson"
+        "collectionNameByID" | "onSelectCollection" | "onSelectPerson"
     >;
 
 /**
@@ -842,6 +850,13 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         handleMore,
     ]);
 
+    const handleFileMetadataUpdate = useCallback(async () => {
+        // Wait for the file and collection sync to complete.
+        await onFileAndCollectionSyncWithRemote();
+        // Set the flag to trigger the full sync to later.
+        handleNeedsRemoteSync();
+    }, [onFileAndCollectionSyncWithRemote, handleNeedsRemoteSync]);
+
     const handleUpdateCaption = useCallback(
         (fileID: number, newCaption: string) => {
             updateItemDataAlt(fileID, newCaption);
@@ -867,7 +882,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                 allowMap={haveUser}
                 showCollections={haveUser && !isInHiddenSection}
                 fileCollectionIDs={fileNormalCollectionIDs}
-                onNeedsRemoteSync={handleNeedsRemoteSync}
+                onFileMetadataUpdate={handleFileMetadataUpdate}
                 onUpdateCaption={handleUpdateCaption}
                 onSelectCollection={handleSelectCollection}
                 onSelectPerson={handleSelectPerson}
