@@ -2,6 +2,7 @@ import "dart:core";
 
 import "package:flutter/material.dart";
 import "package:photos/models/file/file.dart";
+import "package:photos/models/gallery/fixed_extent_grid_row.dart";
 import "package:photos/models/gallery/fixed_extent_section_layout.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/ui/viewer/gallery/component/group/type.dart";
@@ -87,6 +88,8 @@ class GallerySections {
       final minOffset = currentOffset;
       final maxOffset =
           minOffset + (numberOfGridRows * tileHeight) + headerExtent;
+
+      int currentGroupIndex = 0;
       sectionLayouts.add(
         FixedExtentSectionLayout(
           firstIndex: firstIndex,
@@ -105,11 +108,30 @@ class GallerySections {
                 ),
               );
             } else {
-              return SizedBox(
+              final gridRowChildren = <Widget>[];
+              for (int i in Iterable<int>.generate(crossAxisCount)) {
+                if (currentGroupIndex < filesInGroup.length) {
+                  gridRowChildren.add(
+                    SizedBox(
+                      width: tileHeight,
+                      height: tileHeight,
+                      child: Text(
+                        i.toString(),
+                      ),
+                    ),
+                  );
+                  currentGroupIndex++;
+                } else {
+                  break;
+                }
+              }
+              return FixedExtentGridRow(
+                width: tileHeight,
                 height: tileHeight,
-                child: const Placeholder(
-                  child: Text("Grid row"),
-                ),
+                //TODO: spacing
+                spacing: 0,
+                textDirection: TextDirection.ltr,
+                children: gridRowChildren,
               );
             }
           },

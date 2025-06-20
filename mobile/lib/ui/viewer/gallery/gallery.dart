@@ -403,17 +403,20 @@ class GalleryState extends State<Gallery> {
       //       widget.showSelectAllByDefault && widget.groupType.showGroupHeader(),
       //   isScrollablePositionedList: widget.isScrollablePositionedList,
       // ),
-      child: CustomScrollView(
-        slivers: [
-          SectionedListSliver(
-            sectionLayouts: GallerySections(
-              allFiles: _allGalleryFiles,
-              groupType: widget.groupType,
-              widthAvailable: MediaQuery.sizeOf(context).width,
-              context: context,
-            ).getSectionLayouts(),
-          ),
-        ],
+      child: Scrollbar(
+        interactive: true,
+        child: CustomScrollView(
+          slivers: [
+            SectionedListSliver(
+              sectionLayouts: GallerySections(
+                allFiles: _allGalleryFiles,
+                groupType: widget.groupType,
+                widthAvailable: MediaQuery.sizeOf(context).width,
+                context: context,
+              ).getSectionLayouts(),
+            ),
+          ],
+        ),
       ),
     );
   }
