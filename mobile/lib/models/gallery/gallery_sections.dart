@@ -1,16 +1,22 @@
 import "dart:core";
 
 import "package:flutter/material.dart";
+import "package:photos/core/configuration.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/gallery/fixed_extent_grid_row.dart";
 import "package:photos/models/gallery/fixed_extent_section_layout.dart";
+import "package:photos/models/selected_files.dart";
 import "package:photos/service_locator.dart";
+import "package:photos/ui/viewer/gallery/component/gallery_file_widget.dart";
 import "package:photos/ui/viewer/gallery/component/group/type.dart";
 import "package:uuid/uuid.dart";
 
 class GallerySections {
   final List<EnteFile> allFiles;
   final GroupType groupType;
+  final SelectedFiles? selectedFiles;
+  final bool limitSelectionToOne;
+  final String tagPrefix;
 
   //TODO: Add support for sort order
   final bool sortOrderAsc;
@@ -22,8 +28,11 @@ class GallerySections {
     required this.groupType,
     required this.widthAvailable,
     required this.context,
+    required this.selectedFiles,
+    required this.tagPrefix,
     this.sortOrderAsc = true,
     this.headerExtent = 85,
+    this.limitSelectionToOne = false,
   }) {
     init();
   }
@@ -32,6 +41,7 @@ class GallerySections {
   final Map<String, List<EnteFile>> _groupIDToFilesMap = {};
   final Map<String, GroupHeaderData> _groupIdToheaderDataMap = {};
   late final int crossAxisCount;
+  final currentUserID = Configuration.instance.getUserID();
 
   List<String> get groupIDs => _groupIDs;
   Map<String, List<EnteFile>> get groupIDToFilesMap => _groupIDToFilesMap;
@@ -109,15 +119,16 @@ class GallerySections {
               );
             } else {
               final gridRowChildren = <Widget>[];
-              for (int i in Iterable<int>.generate(crossAxisCount)) {
+              for (int _ in Iterable<int>.generate(crossAxisCount)) {
                 if (currentGroupIndex < filesInGroup.length) {
                   gridRowChildren.add(
-                    SizedBox(
-                      width: tileHeight,
-                      height: tileHeight,
-                      child: Text(
-                        i.toString(),
-                      ),
+                    GalleryFileWidget(
+                      file: filesInGroup[currentGroupIndex],
+                      selectedFiles: selectedFiles,
+                      limitSelectionToOne: limitSelectionToOne,
+                      tag: tagPrefix,
+                      photoGridSize: crossAxisCount,
+                      currentUserID: currentUserID,
                     ),
                   );
                   currentGroupIndex++;

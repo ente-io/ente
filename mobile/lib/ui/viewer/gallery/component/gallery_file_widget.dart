@@ -9,7 +9,6 @@ import "package:photos/services/app_lifecycle_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/viewer/file/detail_page.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
-import "package:photos/ui/viewer/gallery/gallery.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_context_state.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
 import "package:photos/utils/file_util.dart";
@@ -22,7 +21,6 @@ class GalleryFileWidget extends StatelessWidget {
   final String tag;
   final int photoGridSize;
   final int? currentUserID;
-  final GalleryLoader asyncLoader;
   const GalleryFileWidget({
     required this.file,
     required this.selectedFiles,
@@ -30,7 +28,6 @@ class GalleryFileWidget extends StatelessWidget {
     required this.tag,
     required this.photoGridSize,
     required this.currentUserID,
-    required this.asyncLoader,
     super.key,
   });
 

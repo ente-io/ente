@@ -413,6 +413,8 @@ class GalleryState extends State<Gallery> {
                 groupType: widget.groupType,
                 widthAvailable: MediaQuery.sizeOf(context).width,
                 context: context,
+                selectedFiles: widget.selectedFiles,
+                tagPrefix: widget.tagPrefix,
               ).getSectionLayouts(),
             ),
           ],
