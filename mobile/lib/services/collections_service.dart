@@ -1523,15 +1523,15 @@ class CollectionsService {
       final List<EnteFile> newFiles = [];
       for (final file in batch) {
         final newFile = moveOrAddEntry(file, destCollection);
-        final item = mapDiffItem(newFile);
-        collectionDiffItems.add(item);
+        final localDiffItem = buildDiffItem(newFile);
+        collectionDiffItems.add(localDiffItem);
         newFiles.add(newFile);
         params["files"].add(
-          CollectionFileItem(
-            item.fileID,
-            CryptoUtil.bin2base64(item.encFileKey!),
-            CryptoUtil.bin2base64(item.encFileKeyNonce!),
-          ).toMap(),
+          CollectionFileItem.req(
+            localDiffItem.fileID,
+            encryptedKey: localDiffItem.encFileKey!,
+            keyDecryptionNonce: localDiffItem.encFileKeyNonce!,
+          ),
         );
       }
       try {
@@ -1618,9 +1618,6 @@ class CollectionsService {
       params["files"] = [];
       for (final batchFile in batch) {
         final fileKey = getFileKey(batchFile);
-        _logger.info(
-          "srcCollection : $srcCollectionID  file: ${batchFile.uploadedFileID}  key: ${CryptoUtil.bin2base64(fileKey)} ",
-        );
         final encryptedKeyData =
             CryptoUtil.encryptSync(fileKey, getCollectionKey(dstCollectionID));
         batchFile.encryptedKey =
@@ -1847,48 +1844,38 @@ class CollectionsService {
     }
 
     final batchedFiles = files.chunks(batchSize);
+    final List<EnteFile> movedFiles = [];
     for (final batch in batchedFiles) {
       final params = <String, dynamic>{};
       params["toCollectionID"] = toCollectionID;
       params["fromCollectionID"] = fromCollectionID;
       params["files"] = [];
+      final List<EnteFile> batchMovedFiles = [];
+      final List<DiffFileItem> collectionDiffItems = [];
       for (final file in batch) {
-        final fileKey = getFileKey(file);
-        file.generatedID =
-            null; // So that a new entry is created in the FilesDB
-        file.collectionID = toCollectionID;
-        final encryptedKeyData =
-            CryptoUtil.encryptSync(fileKey, getCollectionKey(toCollectionID));
-        file.encryptedKey =
-            CryptoUtil.bin2base64(encryptedKeyData.encryptedData!);
-        file.keyDecryptionNonce =
-            CryptoUtil.bin2base64(encryptedKeyData.nonce!);
+        final newFile = moveOrAddEntry(file, toCollectionID);
+        final DiffFileItem localDiffItem = buildDiffItem(newFile);
+        batchMovedFiles.add(newFile);
+        collectionDiffItems.add(localDiffItem);
         params["files"].add(
-          CollectionFileItem(
-            file.uploadedFileID!,
-            file.encryptedKey!,
-            file.keyDecryptionNonce!,
-          ).toMap(),
+          CollectionFileItem.req(
+            localDiffItem.fileID,
+            encryptedKey: localDiffItem.encFileKey!,
+            keyDecryptionNonce: localDiffItem.encFileKeyNonce!,
+          ),
         );
       }
       await _enteDio.post(
         "/collections/move-files",
         data: params,
       );
+      await remoteDB.insertFilesDiff(collectionDiffItems);
+      await remoteDB.deleteCFEnteries(
+        fromCollectionID,
+        files.map((e) => e.uploadedFileID!).toList(),
+      );
+      movedFiles.addAll(batchMovedFiles);
     }
-
-    // insert new files in the toCollection which are not part of the toCollection
-    final existingUploadedIDs =
-        await remoteDB.getUploadedFileIDs(toCollectionID);
-    files.removeWhere(
-      (element) => existingUploadedIDs.contains(element.uploadedFileID),
-    );
-    await _filesDB.insertMultiple(files);
-    // remove files from old collection
-    await remoteDB.deleteCFEnteries(
-      fromCollectionID,
-      files.map((e) => e.uploadedFileID!).toList(),
-    );
     Bus.instance.fire(
       CollectionUpdatedEvent(
         fromCollectionID,
@@ -1898,7 +1885,7 @@ class CollectionsService {
       ),
     );
     Bus.instance.fire(
-      CollectionUpdatedEvent(toCollectionID, files, "moveTo"),
+      CollectionUpdatedEvent(toCollectionID, movedFiles, "moveTo"),
     );
   }
 

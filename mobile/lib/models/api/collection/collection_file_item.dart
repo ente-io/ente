@@ -1,4 +1,6 @@
-import 'dart:convert';
+import "dart:typed_data";
+
+import "package:ente_crypto/ente_crypto.dart";
 
 class CollectionFileItem {
   final int id;
@@ -11,16 +13,16 @@ class CollectionFileItem {
     this.keyDecryptionNonce,
   );
 
-  CollectionFileItem copyWith({
-    int? id,
-    String? encryptedKey,
-    String? keyDecryptionNonce,
+  static Map<String, dynamic> req(
+    int fileID, {
+    required Uint8List encryptedKey,
+    required Uint8List keyDecryptionNonce,
   }) {
-    return CollectionFileItem(
-      id ?? this.id,
-      encryptedKey ?? this.encryptedKey,
-      keyDecryptionNonce ?? this.keyDecryptionNonce,
-    );
+    return {
+      'fileID': fileID,
+      'encryptedKey': CryptoUtil.bin2base64(encryptedKey),
+      'keyDecryptionNonce': CryptoUtil.bin2base64(keyDecryptionNonce),
+    };
   }
 
   Map<String, dynamic> toMap() {
@@ -30,37 +32,4 @@ class CollectionFileItem {
       'keyDecryptionNonce': keyDecryptionNonce,
     };
   }
-
-  static fromMap(Map<String, dynamic>? map) {
-    if (map == null) return null;
-
-    return CollectionFileItem(
-      map['id'],
-      map['encryptedKey'],
-      map['keyDecryptionNonce'],
-    );
-  }
-
-  String toJson() => json.encode(toMap());
-
-  factory CollectionFileItem.fromJson(String source) =>
-      CollectionFileItem.fromMap(json.decode(source));
-
-  @override
-  String toString() =>
-      'CollectionFileItem(id: $id, encryptedKey: $encryptedKey, keyDecryptionNonce: $keyDecryptionNonce)';
-
-  @override
-  bool operator ==(Object o) {
-    if (identical(this, o)) return true;
-
-    return o is CollectionFileItem &&
-        o.id == id &&
-        o.encryptedKey == encryptedKey &&
-        o.keyDecryptionNonce == keyDecryptionNonce;
-  }
-
-  @override
-  int get hashCode =>
-      id.hashCode ^ encryptedKey.hashCode ^ keyDecryptionNonce.hashCode;
 }

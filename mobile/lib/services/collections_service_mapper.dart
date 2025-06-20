@@ -1,7 +1,6 @@
 import "package:ente_crypto/ente_crypto.dart";
 import "package:photos/models/api/diff/diff.dart";
 import "package:photos/models/file/file.dart";
-import "package:photos/models/file/remote/asset.dart";
 import "package:photos/models/file/remote/file_entry.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/utils/file_key.dart";
@@ -33,18 +32,14 @@ extension CollectionsServiceMapper on CollectionsService {
     );
   }
 
-  DiffFileItem mapDiffItem(EnteFile file) {
+  DiffFileItem buildDiffItem(EnteFile file) {
     if (file.remoteAsset == null || file.fileEntry == null) {
-      throw ArgumentError(
-        "File must have remoteAsset and fileEntry to be mapped.",
-      );
+      throw ArgumentError("must have remoteAsset and fileEntry");
     }
     final remoteAsset = file.remoteAsset!;
     final cf = file.fileEntry!;
     if (remoteAsset.id != cf.fileID) {
-      throw ArgumentError(
-        "File ID in remote asset does not match file entry.",
-      );
+      throw ArgumentError("File ID in remote asset does not match file entry.");
     }
 
     return DiffFileItem(
