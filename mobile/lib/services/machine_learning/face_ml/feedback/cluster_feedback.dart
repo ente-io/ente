@@ -484,10 +484,13 @@ class ClusterFeedbackService<T> {
   }
 
   Future<void> ignoreCluster(String clusterID) async {
-    await PersonService.instance
+    final ignoredPerson = await PersonService.instance
         .addPerson(name: '', clusterID: clusterID, isHidden: true);
-    Bus.instance.fire(PeopleChangedEvent());
-    return;
+    final mergedAndFired = await checkAndDoAutomaticMerges(
+      ignoredPerson,
+      personClusterID: clusterID,
+    );
+    if (!mergedAndFired) Bus.instance.fire(PeopleChangedEvent());
   }
 
   Future<List<(String, int)>> checkForMixedClusters() async {
