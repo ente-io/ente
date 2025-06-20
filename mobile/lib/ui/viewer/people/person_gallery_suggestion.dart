@@ -10,6 +10,7 @@ import "package:photos/services/machine_learning/face_ml/feedback/cluster_feedba
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/viewer/people/cluster_page.dart";
 import "package:photos/ui/viewer/people/file_face_widget.dart";
+import "package:photos/ui/viewer/people/save_or_edit_person.dart";
 import "package:photos/utils/face/face_thumbnail_cache.dart";
 
 final _logger = Logger("PersonGallerySuggestion");
@@ -213,44 +214,7 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
           clusterID: currentSuggestion.clusterIDToMerge,
         );
       }
-
-      // Animate out current suggestion first
-      await _animateOut();
-
-      // Move to next suggestion
-      currentSuggestionIndex++;
-
-      // Check if we have more suggestions
-      if (currentSuggestionIndex < allSuggestions.length) {
-        // Get face crops for next suggestion (from precomputed or generate new)
-        Map<int, Uint8List?> nextCrops;
-        if (precomputedFaceCrops.containsKey(currentSuggestionIndex)) {
-          nextCrops = precomputedFaceCrops[currentSuggestionIndex]!;
-        } else {
-          final nextSuggestion = allSuggestions[currentSuggestionIndex];
-          nextCrops = await _generateFaceThumbnails(
-            nextSuggestion.filesInCluster.take(4).toList(),
-            nextSuggestion.clusterIDToMerge,
-          );
-        }
-
-        setState(() {
-          faceCrops = nextCrops;
-          isProcessing = false;
-        });
-
-        await Future.delayed(const Duration(milliseconds: 50));
-        unawaited(_animateIn());
-
-        // Continue precomputing future suggestions
-        unawaited(_precomputeNextSuggestions());
-      } else {
-        setState(() {
-          isProcessing = false;
-        });
-      }
-
-      widget.onSuggestionProcessed?.call();
+      await _animateToNextSuggestion();
     } catch (e, s) {
       _logger.severe("Error handling user choice", e, s);
       if (mounted) {
@@ -259,6 +223,75 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
         });
       }
     }
+  }
+
+  Future<void> _saveAsAnotherPerson() async {
+    if (isProcessing ||
+        allSuggestions.isEmpty ||
+        currentSuggestionIndex >= allSuggestions.length) return;
+
+    setState(() {
+      isProcessing = true;
+    });
+
+    try {
+      final currentSuggestion = allSuggestions[currentSuggestionIndex];
+      final clusterID = currentSuggestion.clusterIDToMerge;
+      final someFile = currentSuggestion.filesInCluster.first;
+
+      await Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => SaveOrEditPerson(
+            clusterID,
+            file: someFile,
+            isEditing: false,
+          ),
+        ),
+      );
+      await _animateToNextSuggestion();
+    } catch (e, s) {
+      _logger.severe("Error handling user choice", e, s);
+      if (mounted) {
+        setState(() {
+          isProcessing = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _animateToNextSuggestion() async {
+    // Animate out current suggestion first
+    await _animateOut();
+    // Move to next suggestion
+    currentSuggestionIndex++;
+    // Check if we have more suggestions
+    if (currentSuggestionIndex < allSuggestions.length) {
+      // Get face crops for next suggestion (from precomputed or generate new)
+      Map<int, Uint8List?> nextCrops;
+      if (precomputedFaceCrops.containsKey(currentSuggestionIndex)) {
+        nextCrops = precomputedFaceCrops[currentSuggestionIndex]!;
+      } else {
+        final nextSuggestion = allSuggestions[currentSuggestionIndex];
+        nextCrops = await _generateFaceThumbnails(
+          nextSuggestion.filesInCluster.take(4).toList(),
+          nextSuggestion.clusterIDToMerge,
+        );
+      }
+      setState(() {
+        faceCrops = nextCrops;
+        isProcessing = false;
+      });
+      await Future.delayed(const Duration(milliseconds: 50));
+      unawaited(_animateIn());
+      // Continue precomputing future suggestions
+      await Future.delayed(const Duration(milliseconds: 50));
+      unawaited(_precomputeNextSuggestions());
+    } else {
+      setState(() {
+        isProcessing = false;
+      });
+    }
+    widget.onSuggestionProcessed?.call();
   }
 
   Future<void> _animateOut() async {
@@ -317,85 +350,112 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // Title
-                Text(
-                  "Are they ${widget.person.data.name}?",
-                  style: textTheme.bodyBold,
+                RichText(
                   textAlign: TextAlign.center,
+                  text: TextSpan(
+                    style: textTheme.body,
+                    children: [
+                      const TextSpan(text: "Are they "),
+                      TextSpan(
+                        text: widget.person.data.name,
+                        style: textTheme.bodyBold,
+                      ),
+                      const TextSpan(text: "?"),
+                    ],
+                  ),
                 ),
                 const SizedBox(height: 12),
-
-                // Face thumbnails
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: _buildFaceThumbnails(),
                 ),
                 const SizedBox(height: 16),
-
-                // Action buttons
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    // No button
-                    GestureDetector(
-                      onTap:
-                          isProcessing ? null : () => _handleUserChoice(false),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 24,
-                          vertical: 12,
-                        ),
-                        decoration: BoxDecoration(
-                          color: colorScheme.fillMuted,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Column(
-                          children: [
-                            Icon(
-                              Icons.close,
-                              color: colorScheme.warning700,
-                              size: 24,
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: isProcessing
+                            ? null
+                            : () => _handleUserChoice(false),
+                        child: Container(
+                          margin: const EdgeInsets.only(right: 6),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
+                          decoration: BoxDecoration(
+                            color: colorScheme.fillFaint,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: colorScheme.strokeMuted,
+                              width: 1,
                             ),
-                            const SizedBox(height: 4),
-                            Text(
-                              "No",
-                              style: textTheme.miniMuted,
-                            ),
-                          ],
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.close,
+                                color: colorScheme.textMuted,
+                                size: 20,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                "No",
+                                style: textTheme.body,
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
-
-                    // Yes button
-                    GestureDetector(
-                      onTap:
-                          isProcessing ? null : () => _handleUserChoice(true),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 24,
-                          vertical: 12,
-                        ),
-                        decoration: BoxDecoration(
-                          color: colorScheme.fillMuted,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Column(
-                          children: [
-                            Icon(
-                              Icons.check,
-                              color: colorScheme.primary700,
-                              size: 24,
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              "Yes",
-                              style: textTheme.miniMuted,
-                            ),
-                          ],
+                    Expanded(
+                      child: GestureDetector(
+                        onTap:
+                            isProcessing ? null : () => _handleUserChoice(true),
+                        child: Container(
+                          margin: const EdgeInsets.only(left: 6),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
+                          decoration: BoxDecoration(
+                            color: colorScheme.primary500,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.check,
+                                color: colorScheme.textBase,
+                                size: 20,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                "Yes",
+                                style: textTheme.body.copyWith(
+                                  color: colorScheme.textBase,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
                   ],
+                ),
+                const SizedBox(height: 12),
+                GestureDetector(
+                  onTap: isProcessing ? null : () => _saveAsAnotherPerson(),
+                  child: Text(
+                    "Save as another person",
+                    style: textTheme.mini.copyWith(
+                      color: colorScheme.textMuted,
+                      decoration: TextDecoration.underline,
+                    ),
+                  ),
                 ),
               ],
             ),
