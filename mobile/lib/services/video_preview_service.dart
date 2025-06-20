@@ -258,7 +258,7 @@ class VideoPreviewService {
         filters = '-vf "${videoFilters.join(",")}" ';
       }
 
-      final command = '-i "${file.path}" '
+      final command =
           // scaling, fps, tonemapping
           '$filters'
           // video encoding
@@ -267,13 +267,18 @@ class VideoPreviewService {
           '-c:a aac -b:a 128k '
           // hls options
           '-f hls -hls_flags single_file '
-          '-hls_list_size 0 -hls_key_info_file ${keyinfo.path} '
-          // output file
-          '$prefix/output.m3u8';
+          '-hls_list_size 0 -hls_key_info_file ${keyinfo.path} ';
 
       _logger.info(command);
 
-      session = await FFmpegKit.execute(command);
+      session = await FFmpegKit.execute(
+        // input file path
+        '-i "${file.path}" ' +
+            // main params for streaming
+            command +
+            // output file path
+            '$prefix/output.m3u8',
+      );
 
       final returnCode = await session.getReturnCode();
 
