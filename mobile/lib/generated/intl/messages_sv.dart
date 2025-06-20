@@ -152,6 +152,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "appVersion": m9,
         "apply": MessageLookupByLibrary.simpleMessage("Verkställ"),
         "applyCodeTitle": MessageLookupByLibrary.simpleMessage("Använd kod"),
+        "areYouSureRemoveThisFaceFromPerson":
+            MessageLookupByLibrary.simpleMessage(
+                "Are you sure you want to remove this face from this person?"),
         "areYouSureYouWantToLogout": MessageLookupByLibrary.simpleMessage(
             "Är du säker på att du vill logga ut?"),
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
@@ -448,6 +451,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Oj, något gick fel"),
         "orPickAnExistingOne":
             MessageLookupByLibrary.simpleMessage("Eller välj en befintlig"),
+        "otherDetectedFaces":
+            MessageLookupByLibrary.simpleMessage("Other detected faces"),
         "passkey": MessageLookupByLibrary.simpleMessage("Nyckel"),
         "password": MessageLookupByLibrary.simpleMessage("Lösenord"),
         "passwordChangedSuccessfully":

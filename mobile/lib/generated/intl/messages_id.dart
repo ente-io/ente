@@ -274,6 +274,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "archive": MessageLookupByLibrary.simpleMessage("Arsip"),
         "archiveAlbum": MessageLookupByLibrary.simpleMessage("Arsipkan album"),
         "archiving": MessageLookupByLibrary.simpleMessage("Mengarsipkan..."),
+        "areYouSureRemoveThisFaceFromPerson":
+            MessageLookupByLibrary.simpleMessage(
+                "Are you sure you want to remove this face from this person?"),
         "areYouSureThatYouWantToLeaveTheFamily":
             MessageLookupByLibrary.simpleMessage(
                 "Apakah kamu yakin ingin meninggalkan paket keluarga ini?"),
@@ -967,6 +970,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Opsional, pendek pun tak apa..."),
         "orPickAnExistingOne":
             MessageLookupByLibrary.simpleMessage("Atau pilih yang sudah ada"),
+        "otherDetectedFaces":
+            MessageLookupByLibrary.simpleMessage("Other detected faces"),
         "pair": MessageLookupByLibrary.simpleMessage("Tautkan"),
         "pairWithPin":
             MessageLookupByLibrary.simpleMessage("Tautkan dengan PIN"),

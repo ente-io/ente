@@ -471,6 +471,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "archiveAlbum":
             MessageLookupByLibrary.simpleMessage("Archyvuoti albumą"),
         "archiving": MessageLookupByLibrary.simpleMessage("Archyvuojama..."),
+        "areYouSureRemoveThisFaceFromPerson":
+            MessageLookupByLibrary.simpleMessage(
+                "Are you sure you want to remove this face from this person?"),
         "areYouSureThatYouWantToLeaveTheFamily":
             MessageLookupByLibrary.simpleMessage(
                 "Ar tikrai norite palikti šeimos planą?"),
@@ -1469,6 +1472,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Arba pasirinkite esamą"),
         "orPickFromYourContacts": MessageLookupByLibrary.simpleMessage(
             "arba pasirinkite iš savo kontaktų"),
+        "otherDetectedFaces":
+            MessageLookupByLibrary.simpleMessage("Other detected faces"),
         "pair": MessageLookupByLibrary.simpleMessage("Susieti"),
         "pairWithPin": MessageLookupByLibrary.simpleMessage("Susieti su PIN"),
         "pairingComplete":

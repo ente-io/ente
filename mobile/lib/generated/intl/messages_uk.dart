@@ -355,6 +355,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "archiveAlbum":
             MessageLookupByLibrary.simpleMessage("Архівувати альбом"),
         "archiving": MessageLookupByLibrary.simpleMessage("Архівуємо..."),
+        "areYouSureRemoveThisFaceFromPerson":
+            MessageLookupByLibrary.simpleMessage(
+                "Are you sure you want to remove this face from this person?"),
         "areYouSureThatYouWantToLeaveTheFamily":
             MessageLookupByLibrary.simpleMessage(
                 "Ви впевнені, що хочете залишити сімейний план?"),
@@ -1260,6 +1263,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Або об\'єднати з наявними"),
         "orPickAnExistingOne":
             MessageLookupByLibrary.simpleMessage("Або виберіть наявну"),
+        "otherDetectedFaces":
+            MessageLookupByLibrary.simpleMessage("Other detected faces"),
         "pair": MessageLookupByLibrary.simpleMessage("Створити пару"),
         "pairWithPin":
             MessageLookupByLibrary.simpleMessage("Під’єднатися через PIN-код"),

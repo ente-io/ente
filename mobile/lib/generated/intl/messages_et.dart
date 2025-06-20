@@ -39,6 +39,9 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Luba allalaadimised"),
         "appleId": MessageLookupByLibrary.simpleMessage("Apple ID"),
         "apply": MessageLookupByLibrary.simpleMessage("Rakenda"),
+        "areYouSureRemoveThisFaceFromPerson":
+            MessageLookupByLibrary.simpleMessage(
+                "Are you sure you want to remove this face from this person?"),
         "blog": MessageLookupByLibrary.simpleMessage("Blogi"),
         "cancel": MessageLookupByLibrary.simpleMessage("Loobu"),
         "changeEmail": MessageLookupByLibrary.simpleMessage("Muuda e-posti"),
@@ -169,6 +172,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "oops": MessageLookupByLibrary.simpleMessage("Oih"),
         "oopsSomethingWentWrong":
             MessageLookupByLibrary.simpleMessage("Oih, midagi läks valesti"),
+        "otherDetectedFaces":
+            MessageLookupByLibrary.simpleMessage("Other detected faces"),
         "password": MessageLookupByLibrary.simpleMessage("Parool"),
         "photoSmallCase": MessageLookupByLibrary.simpleMessage("foto"),
         "pleaseTryAgain":

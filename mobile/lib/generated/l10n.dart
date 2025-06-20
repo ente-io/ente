@@ -11995,6 +11995,26 @@ class S {
       args: [],
     );
   }
+
+  /// `Other detected faces`
+  String get otherDetectedFaces {
+    return Intl.message(
+      'Other detected faces',
+      name: 'otherDetectedFaces',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Are you sure you want to remove this face from this person?`
+  String get areYouSureRemoveThisFaceFromPerson {
+    return Intl.message(
+      'Are you sure you want to remove this face from this person?',
+      name: 'areYouSureRemoveThisFaceFromPerson',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

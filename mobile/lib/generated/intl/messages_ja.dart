@@ -378,6 +378,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "archive": MessageLookupByLibrary.simpleMessage("アーカイブ"),
         "archiveAlbum": MessageLookupByLibrary.simpleMessage("アルバムをアーカイブ"),
         "archiving": MessageLookupByLibrary.simpleMessage("アーカイブ中です"),
+        "areYouSureRemoveThisFaceFromPerson":
+            MessageLookupByLibrary.simpleMessage(
+                "Are you sure you want to remove this face from this person?"),
         "areYouSureThatYouWantToLeaveTheFamily":
             MessageLookupByLibrary.simpleMessage("本当にファミリープランを退会しますか？"),
         "areYouSureYouWantToCancel":
@@ -1200,6 +1203,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("または既存のものを選択"),
         "orPickFromYourContacts":
             MessageLookupByLibrary.simpleMessage("または連絡先から選択"),
+        "otherDetectedFaces":
+            MessageLookupByLibrary.simpleMessage("Other detected faces"),
         "pair": MessageLookupByLibrary.simpleMessage("ペアリング"),
         "pairWithPin": MessageLookupByLibrary.simpleMessage("PINを使ってペアリングする"),
         "pairingComplete": MessageLookupByLibrary.simpleMessage("ペアリング完了"),

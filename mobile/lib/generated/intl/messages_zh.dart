@@ -397,6 +397,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "archive": MessageLookupByLibrary.simpleMessage("存档"),
         "archiveAlbum": MessageLookupByLibrary.simpleMessage("存档相册"),
         "archiving": MessageLookupByLibrary.simpleMessage("正在存档..."),
+        "areYouSureRemoveThisFaceFromPerson":
+            MessageLookupByLibrary.simpleMessage(
+                "Are you sure you want to remove this face from this person?"),
         "areYouSureThatYouWantToLeaveTheFamily":
             MessageLookupByLibrary.simpleMessage("您确定要离开家庭计划吗？"),
         "areYouSureYouWantToCancel":
@@ -1171,6 +1174,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("或者选择一个现有的"),
         "orPickFromYourContacts":
             MessageLookupByLibrary.simpleMessage("或从您的联系人中选择"),
+        "otherDetectedFaces":
+            MessageLookupByLibrary.simpleMessage("Other detected faces"),
         "pair": MessageLookupByLibrary.simpleMessage("配对"),
         "pairWithPin": MessageLookupByLibrary.simpleMessage("用 PIN 配对"),
         "pairingComplete": MessageLookupByLibrary.simpleMessage("配对完成"),

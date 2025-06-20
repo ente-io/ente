@@ -85,6 +85,9 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Tillad tilføjelse af fotos"),
         "allowDownloads":
             MessageLookupByLibrary.simpleMessage("Tillad downloads"),
+        "areYouSureRemoveThisFaceFromPerson":
+            MessageLookupByLibrary.simpleMessage(
+                "Are you sure you want to remove this face from this person?"),
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
             "Hvad er hovedårsagen til, at du sletter din konto?"),
         "backedUpFolders":
@@ -300,6 +303,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Ups, noget gik galt"),
         "orPickAnExistingOne":
             MessageLookupByLibrary.simpleMessage("Eller vælg en eksisterende"),
+        "otherDetectedFaces":
+            MessageLookupByLibrary.simpleMessage("Other detected faces"),
         "password": MessageLookupByLibrary.simpleMessage("Adgangskode"),
         "passwordChangedSuccessfully": MessageLookupByLibrary.simpleMessage(
             "Adgangskoden er blevet ændret"),

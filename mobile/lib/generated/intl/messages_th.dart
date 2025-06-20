@@ -74,6 +74,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "androidCancelButton": MessageLookupByLibrary.simpleMessage("ยกเลิก"),
         "appVersion": m9,
         "apply": MessageLookupByLibrary.simpleMessage("นำไปใช้"),
+        "areYouSureRemoveThisFaceFromPerson":
+            MessageLookupByLibrary.simpleMessage(
+                "Are you sure you want to remove this face from this person?"),
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
             "เหตุผลหลักที่คุณลบบัญชีคืออะไร?"),
         "authToViewYourRecoveryKey": MessageLookupByLibrary.simpleMessage(
@@ -225,6 +228,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("ผู้มีส่วนร่วม OpenStreetMap"),
         "orPickAnExistingOne":
             MessageLookupByLibrary.simpleMessage("หรือเลือกที่มีอยู่แล้ว"),
+        "otherDetectedFaces":
+            MessageLookupByLibrary.simpleMessage("Other detected faces"),
         "password": MessageLookupByLibrary.simpleMessage("รหัสผ่าน"),
         "passwordChangedSuccessfully":
             MessageLookupByLibrary.simpleMessage("เปลี่ยนรหัสผ่านสำเร็จ"),

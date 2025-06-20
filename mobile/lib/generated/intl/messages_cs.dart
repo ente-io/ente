@@ -78,6 +78,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "archiveAlbum":
             MessageLookupByLibrary.simpleMessage("Archivovat album"),
         "archiving": MessageLookupByLibrary.simpleMessage("Archivování..."),
+        "areYouSureRemoveThisFaceFromPerson":
+            MessageLookupByLibrary.simpleMessage(
+                "Are you sure you want to remove this face from this person?"),
         "areYouSureYouWantToLogout":
             MessageLookupByLibrary.simpleMessage("Opravdu se chcete odhlásit?"),
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
@@ -359,6 +362,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "openFile": MessageLookupByLibrary.simpleMessage("Otevřít soubor"),
         "openSettings":
             MessageLookupByLibrary.simpleMessage("Otevřít Nastavení"),
+        "otherDetectedFaces":
+            MessageLookupByLibrary.simpleMessage("Other detected faces"),
         "pair": MessageLookupByLibrary.simpleMessage("Spárovat"),
         "panorama": MessageLookupByLibrary.simpleMessage("Panorama"),
         "password": MessageLookupByLibrary.simpleMessage("Heslo"),

@@ -14,5 +14,7 @@
   "deleteAccountPermanentlyButton": "계정을 영구적으로 삭제",
   "yourAccountHasBeenDeleted": "계정이 삭제되었습니다.",
   "showMoreFaces": "Show more faces",
-  "showLessFaces": "Show less faces"
+  "showLessFaces": "Show less faces",
+  "otherDetectedFaces": "Other detected faces",
+  "areYouSureRemoveThisFaceFromPerson": "Are you sure you want to remove this face from this person?"
 }

@@ -174,6 +174,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "appstoreSubscription":
             MessageLookupByLibrary.simpleMessage("מנוי AppStore"),
         "archive": MessageLookupByLibrary.simpleMessage("שמירה בארכיון"),
+        "areYouSureRemoveThisFaceFromPerson":
+            MessageLookupByLibrary.simpleMessage(
+                "Are you sure you want to remove this face from this person?"),
         "areYouSureThatYouWantToLeaveTheFamily":
             MessageLookupByLibrary.simpleMessage(
                 "אתה בטוח שאתה רוצה לעזוב את התוכנית המשפתחית?"),
@@ -595,6 +598,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("אופציונלי, קצר ככל שתרצה..."),
         "orPickAnExistingOne":
             MessageLookupByLibrary.simpleMessage("או בחר באחד קיים"),
+        "otherDetectedFaces":
+            MessageLookupByLibrary.simpleMessage("Other detected faces"),
         "password": MessageLookupByLibrary.simpleMessage("סיסמא"),
         "passwordChangedSuccessfully":
             MessageLookupByLibrary.simpleMessage("הססמה הוחלפה בהצלחה"),

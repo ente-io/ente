@@ -46,6 +46,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "after1Year": MessageLookupByLibrary.simpleMessage("Праз 1 год"),
         "albumOwner": MessageLookupByLibrary.simpleMessage("Уладальнік"),
         "apply": MessageLookupByLibrary.simpleMessage("Ужыць"),
+        "areYouSureRemoveThisFaceFromPerson":
+            MessageLookupByLibrary.simpleMessage(
+                "Are you sure you want to remove this face from this person?"),
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
             "Якая асноўная прычына выдалення вашага ўліковага запісу?"),
         "backup": MessageLookupByLibrary.simpleMessage("Рэзервовая копія"),
@@ -184,6 +187,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "oops": MessageLookupByLibrary.simpleMessage("Вой"),
         "oopsSomethingWentWrong":
             MessageLookupByLibrary.simpleMessage("Штосьці пайшло не так"),
+        "otherDetectedFaces":
+            MessageLookupByLibrary.simpleMessage("Other detected faces"),
         "password": MessageLookupByLibrary.simpleMessage("Пароль"),
         "passwordChangedSuccessfully":
             MessageLookupByLibrary.simpleMessage("Пароль паспяхова зменены"),

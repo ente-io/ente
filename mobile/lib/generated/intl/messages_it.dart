@@ -468,6 +468,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "archive": MessageLookupByLibrary.simpleMessage("Archivio"),
         "archiveAlbum": MessageLookupByLibrary.simpleMessage("Archivia album"),
         "archiving": MessageLookupByLibrary.simpleMessage("Archiviazione..."),
+        "areYouSureRemoveThisFaceFromPerson":
+            MessageLookupByLibrary.simpleMessage(
+                "Are you sure you want to remove this face from this person?"),
         "areYouSureThatYouWantToLeaveTheFamily":
             MessageLookupByLibrary.simpleMessage(
                 "Sei sicuro di voler uscire dal piano famiglia?"),
@@ -1454,6 +1457,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Oppure scegline una esistente"),
         "orPickFromYourContacts": MessageLookupByLibrary.simpleMessage(
             "o scegli tra i tuoi contatti"),
+        "otherDetectedFaces":
+            MessageLookupByLibrary.simpleMessage("Other detected faces"),
         "pair": MessageLookupByLibrary.simpleMessage("Abbina"),
         "pairWithPin": MessageLookupByLibrary.simpleMessage("Associa con PIN"),
         "pairingComplete":

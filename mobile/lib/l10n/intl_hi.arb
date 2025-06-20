@@ -50,5 +50,7 @@
   "verifyEmail": "ईमेल सत्यापित करें",
   "toResetVerifyEmail": "अपना पासवर्ड रीसेट करने के लिए, कृपया पहले अपना ईमेल सत्यापित करें।",
   "showMoreFaces": "Show more faces",
-  "showLessFaces": "Show less faces"
+  "showLessFaces": "Show less faces",
+  "otherDetectedFaces": "Other detected faces",
+  "areYouSureRemoveThisFaceFromPerson": "Are you sure you want to remove this face from this person?"
 }

@@ -359,6 +359,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "archive": MessageLookupByLibrary.simpleMessage("Lưu trữ"),
         "archiveAlbum": MessageLookupByLibrary.simpleMessage("Lưu trữ album"),
         "archiving": MessageLookupByLibrary.simpleMessage("Đang lưu trữ..."),
+        "areYouSureRemoveThisFaceFromPerson":
+            MessageLookupByLibrary.simpleMessage(
+                "Are you sure you want to remove this face from this person?"),
         "areYouSureThatYouWantToLeaveTheFamily":
             MessageLookupByLibrary.simpleMessage(
                 "Bạn có chắc chắn muốn rời khỏi kế hoạch gia đình không?"),
@@ -1256,6 +1259,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Hoặc hợp nhất với hiện có"),
         "orPickAnExistingOne":
             MessageLookupByLibrary.simpleMessage("Hoặc chọn một cái có sẵn"),
+        "otherDetectedFaces":
+            MessageLookupByLibrary.simpleMessage("Other detected faces"),
         "pair": MessageLookupByLibrary.simpleMessage("Ghép nối"),
         "pairWithPin": MessageLookupByLibrary.simpleMessage("Ghép nối với PIN"),
         "pairingComplete":

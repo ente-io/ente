@@ -459,6 +459,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "archive": MessageLookupByLibrary.simpleMessage("Arşiv"),
         "archiveAlbum": MessageLookupByLibrary.simpleMessage("Albümü arşivle"),
         "archiving": MessageLookupByLibrary.simpleMessage("Arşivleniyor..."),
+        "areYouSureRemoveThisFaceFromPerson":
+            MessageLookupByLibrary.simpleMessage(
+                "Are you sure you want to remove this face from this person?"),
         "areYouSureThatYouWantToLeaveTheFamily":
             MessageLookupByLibrary.simpleMessage(
                 "Aile planından ayrılmak istediğinize emin misiniz?"),
@@ -1427,6 +1430,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Veya mevcut birini seçiniz"),
         "orPickFromYourContacts": MessageLookupByLibrary.simpleMessage(
             "veya kişilerinizden birini seçin"),
+        "otherDetectedFaces":
+            MessageLookupByLibrary.simpleMessage("Other detected faces"),
         "pair": MessageLookupByLibrary.simpleMessage("Eşleştir"),
         "pairWithPin":
             MessageLookupByLibrary.simpleMessage("PIN ile eşleştirin"),

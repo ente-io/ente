@@ -1753,5 +1753,7 @@
   "addAlbumWidgetPrompt": "Ajoutez un gadget d'album à votre écran d'accueil et revenez ici pour le personnaliser.",
   "addPeopleWidgetPrompt": "Ajoutez un gadget des personnes à votre écran d'accueil et revenez ici pour le personnaliser.",
   "showMoreFaces": "Show more faces",
-  "showLessFaces": "Show less faces"
+  "showLessFaces": "Show less faces",
+  "otherDetectedFaces": "Other detected faces",
+  "areYouSureRemoveThisFaceFromPerson": "Are you sure you want to remove this face from this person?"
 }

@@ -137,6 +137,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "applyCodeTitle":
             MessageLookupByLibrary.simpleMessage("Aplikatu kodea"),
         "archive": MessageLookupByLibrary.simpleMessage("Artxiboa"),
+        "areYouSureRemoveThisFaceFromPerson":
+            MessageLookupByLibrary.simpleMessage(
+                "Are you sure you want to remove this face from this person?"),
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
             "Zein da zure kontua ezabatzeko arrazoi nagusia?"),
         "authToChangeEmailVerificationSetting":
@@ -433,6 +436,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Oops, zerbait txarto joan da"),
         "orPickAnExistingOne":
             MessageLookupByLibrary.simpleMessage("Edo aukeratu lehengo bat"),
+        "otherDetectedFaces":
+            MessageLookupByLibrary.simpleMessage("Other detected faces"),
         "password": MessageLookupByLibrary.simpleMessage("Pasahitza"),
         "passwordChangedSuccessfully":
             MessageLookupByLibrary.simpleMessage("Pasahitza zuzenki aldatuta"),

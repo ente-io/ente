@@ -425,6 +425,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "archiveAlbum": MessageLookupByLibrary.simpleMessage("Arkiver album"),
         "archiving":
             MessageLookupByLibrary.simpleMessage("Legger til i arkivet..."),
+        "areYouSureRemoveThisFaceFromPerson":
+            MessageLookupByLibrary.simpleMessage(
+                "Are you sure you want to remove this face from this person?"),
         "areYouSureThatYouWantToLeaveTheFamily":
             MessageLookupByLibrary.simpleMessage(
                 "Er du sikker på at du vil forlate familieabonnementet?"),
@@ -1373,6 +1376,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Eller velg en eksisterende"),
         "orPickFromYourContacts": MessageLookupByLibrary.simpleMessage(
             "Eller velg fra kontaktene dine"),
+        "otherDetectedFaces":
+            MessageLookupByLibrary.simpleMessage("Other detected faces"),
         "pair": MessageLookupByLibrary.simpleMessage("Par"),
         "pairWithPin":
             MessageLookupByLibrary.simpleMessage("Parr sammen med PIN"),

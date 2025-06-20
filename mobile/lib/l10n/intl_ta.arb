@@ -21,5 +21,7 @@
   "selectReason": "காரணத்தைத் தேர்ந்தெடுக்கவும்",
   "deleteReason1": "எனக்கு தேவையான ஒரு முக்கிய அம்சம் இதில் இல்லை",
   "showMoreFaces": "Show more faces",
-  "showLessFaces": "Show less faces"
+  "showLessFaces": "Show less faces",
+  "otherDetectedFaces": "Other detected faces",
+  "areYouSureRemoveThisFaceFromPerson": "Are you sure you want to remove this face from this person?"
 }

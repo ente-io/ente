@@ -245,7 +245,7 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
             child: Row(
               children: [
                 Text(
-                  "Other detected faces",
+                  S.of(context).otherDetectedFaces,
                   style: getEnteTextTheme(context).miniMuted,
                 ),
                 const Spacer(),
@@ -291,7 +291,7 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
-                      "Done",
+                      S.of(context).done,
                       style: getEnteTextTheme(context).small.copyWith(
                             color: getEnteColorScheme(context).primary500,
                           ),

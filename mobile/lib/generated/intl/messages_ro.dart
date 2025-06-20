@@ -361,6 +361,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "archive": MessageLookupByLibrary.simpleMessage("Arhivă"),
         "archiveAlbum": MessageLookupByLibrary.simpleMessage("Arhivare album"),
         "archiving": MessageLookupByLibrary.simpleMessage("Se arhivează..."),
+        "areYouSureRemoveThisFaceFromPerson":
+            MessageLookupByLibrary.simpleMessage(
+                "Are you sure you want to remove this face from this person?"),
         "areYouSureThatYouWantToLeaveTheFamily":
             MessageLookupByLibrary.simpleMessage(
                 "Sunteți sigur că doriți să părăsiți planul de familie?"),
@@ -1290,6 +1293,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Sau îmbinați cu cele existente"),
         "orPickAnExistingOne":
             MessageLookupByLibrary.simpleMessage("Sau alegeți unul existent"),
+        "otherDetectedFaces":
+            MessageLookupByLibrary.simpleMessage("Other detected faces"),
         "pair": MessageLookupByLibrary.simpleMessage("Asociere"),
         "pairWithPin": MessageLookupByLibrary.simpleMessage("Asociere cu PIN"),
         "pairingComplete":

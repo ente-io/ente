@@ -237,7 +237,7 @@ class _FileInfoFaceWidgetState extends State<FileInfoFaceWidget> {
     final result = await showChoiceActionSheet(
       context,
       title: S.of(context).removePersonLabel,
-      body: "Are you sure you want to remove this face from this person?",
+      body: S.of(context).areYouSureRemoveThisFaceFromPerson,
       firstButtonLabel: S.of(context).remove,
       firstButtonType: ButtonType.critical,
       secondButtonLabel: S.of(context).cancel,

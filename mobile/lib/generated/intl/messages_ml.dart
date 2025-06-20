@@ -25,6 +25,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "accountWelcomeBack":
             MessageLookupByLibrary.simpleMessage("വീണ്ടും സ്വാഗതം!"),
         "albumOwner": MessageLookupByLibrary.simpleMessage("ഉടമ"),
+        "areYouSureRemoveThisFaceFromPerson":
+            MessageLookupByLibrary.simpleMessage(
+                "Are you sure you want to remove this face from this person?"),
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
             "അക്കൗണ്ട് ഉപേക്ഷിക്കുവാൻ പ്രധാന കാരണമെന്താണ്?"),
         "available": MessageLookupByLibrary.simpleMessage("ലഭ്യമാണ്"),
@@ -90,6 +93,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("ഇവിടൊന്നും കാണ്മാനില്ല! 👀"),
         "ok": MessageLookupByLibrary.simpleMessage("ശരി"),
         "oops": MessageLookupByLibrary.simpleMessage("അയ്യോ"),
+        "otherDetectedFaces":
+            MessageLookupByLibrary.simpleMessage("Other detected faces"),
         "password": MessageLookupByLibrary.simpleMessage("സങ്കേതക്കുറി"),
         "pleaseTryAgain":
             MessageLookupByLibrary.simpleMessage("ദയവായി വീണ്ടും ശ്രമിക്കുക"),

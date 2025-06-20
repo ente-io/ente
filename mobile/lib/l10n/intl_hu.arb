@@ -12,5 +12,7 @@
   "deleteAccountFeedbackPrompt": "Sajnáljuk, hogy távozik. Kérjük, ossza meg velünk visszajelzéseit, hogy segítsen nekünk a fejlődésben.",
   "feedback": "Visszajelzés",
   "showMoreFaces": "Show more faces",
-  "showLessFaces": "Show less faces"
+  "showLessFaces": "Show less faces",
+  "otherDetectedFaces": "Other detected faces",
+  "areYouSureRemoveThisFaceFromPerson": "Are you sure you want to remove this face from this person?"
 }

@@ -363,6 +363,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "archiveAlbum":
             MessageLookupByLibrary.simpleMessage("Archiwizuj album"),
         "archiving": MessageLookupByLibrary.simpleMessage("Archiwizowanie..."),
+        "areYouSureRemoveThisFaceFromPerson":
+            MessageLookupByLibrary.simpleMessage(
+                "Are you sure you want to remove this face from this person?"),
         "areYouSureThatYouWantToLeaveTheFamily":
             MessageLookupByLibrary.simpleMessage(
                 "Czy jesteś pewien/pewna, że chcesz opuścić plan rodzinny?"),
@@ -1285,6 +1288,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Lub złącz z istniejącymi"),
         "orPickAnExistingOne":
             MessageLookupByLibrary.simpleMessage("Lub wybierz istniejący"),
+        "otherDetectedFaces":
+            MessageLookupByLibrary.simpleMessage("Other detected faces"),
         "pair": MessageLookupByLibrary.simpleMessage("Sparuj"),
         "pairWithPin": MessageLookupByLibrary.simpleMessage("Sparuj kodem PIN"),
         "pairingComplete":

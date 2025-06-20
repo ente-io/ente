@@ -478,6 +478,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "archiveAlbum":
             MessageLookupByLibrary.simpleMessage("Album archivieren"),
         "archiving": MessageLookupByLibrary.simpleMessage("Archiviere …"),
+        "areYouSureRemoveThisFaceFromPerson":
+            MessageLookupByLibrary.simpleMessage(
+                "Are you sure you want to remove this face from this person?"),
         "areYouSureThatYouWantToLeaveTheFamily":
             MessageLookupByLibrary.simpleMessage(
                 "Bist du sicher, dass du den Familien-Tarif verlassen möchtest?"),
@@ -1473,6 +1476,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Oder eine vorherige auswählen"),
         "orPickFromYourContacts": MessageLookupByLibrary.simpleMessage(
             "oder wähle aus deinen Kontakten"),
+        "otherDetectedFaces":
+            MessageLookupByLibrary.simpleMessage("Other detected faces"),
         "pair": MessageLookupByLibrary.simpleMessage("Koppeln"),
         "pairWithPin":
             MessageLookupByLibrary.simpleMessage("Mit PIN verbinden"),

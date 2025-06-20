@@ -452,6 +452,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "archive": MessageLookupByLibrary.simpleMessage("الأرشيف"),
         "archiveAlbum": MessageLookupByLibrary.simpleMessage("أرشفة الألبوم"),
         "archiving": MessageLookupByLibrary.simpleMessage("جارٍ الأرشفة..."),
+        "areYouSureRemoveThisFaceFromPerson":
+            MessageLookupByLibrary.simpleMessage(
+                "Are you sure you want to remove this face from this person?"),
         "areYouSureThatYouWantToLeaveTheFamily":
             MessageLookupByLibrary.simpleMessage(
                 "هل أنت متأكد من رغبتك في مغادرة الخطة العائلية؟"),
@@ -1410,6 +1413,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("أو اختر واحدًا موجودًا"),
         "orPickFromYourContacts":
             MessageLookupByLibrary.simpleMessage("أو اختر من جهات اتصالك"),
+        "otherDetectedFaces":
+            MessageLookupByLibrary.simpleMessage("Other detected faces"),
         "pair": MessageLookupByLibrary.simpleMessage("إقران"),
         "pairWithPin":
             MessageLookupByLibrary.simpleMessage("الإقران بالرمز السري"),

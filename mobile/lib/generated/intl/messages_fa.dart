@@ -77,6 +77,9 @@ class MessageLookup extends MessageLookupByLibrary {
             "اندروید، آی‌اواس، وب، رایانه رومیزی"),
         "appVersion": m9,
         "archive": MessageLookupByLibrary.simpleMessage("بایگانی"),
+        "areYouSureRemoveThisFaceFromPerson":
+            MessageLookupByLibrary.simpleMessage(
+                "Are you sure you want to remove this face from this person?"),
         "areYouSureYouWantToLogout": MessageLookupByLibrary.simpleMessage(
             "آیا برای خارج شدن مطمئن هستید؟"),
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
@@ -267,6 +270,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "notifications": MessageLookupByLibrary.simpleMessage("آگاه‌سازی‌ها"),
         "ok": MessageLookupByLibrary.simpleMessage("تایید"),
         "oops": MessageLookupByLibrary.simpleMessage("اوه"),
+        "otherDetectedFaces":
+            MessageLookupByLibrary.simpleMessage("Other detected faces"),
         "password": MessageLookupByLibrary.simpleMessage("رمز عبور"),
         "passwordChangedSuccessfully": MessageLookupByLibrary.simpleMessage(
             "رمز عبور با موفقیت تغییر کرد"),
