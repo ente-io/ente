@@ -162,6 +162,17 @@ export type FileInfoProps = ModalVisibilityProps & {
      */
     onNeedsRemoteSync: () => void;
     /**
+     * Called when an action in the file viewer requires us to sync the local
+     * files and collections with remote.
+     *
+     * Unlinke {@link onNeedsRemoteSync}, which is a trigger, this function
+     * returns a promise that will settle once the sync has completed, and thus
+     * can be used in interactive operations that indicate progress to the user.
+     *
+     * See: [Note: Full sync vs file and collection sync]
+     */
+    onFileAndCollectionSyncWithRemote: () => Promise<void>;
+    /**
      * Called when an action on the file info drawer change the caption of the
      * given {@link EnteFile}.
      *
