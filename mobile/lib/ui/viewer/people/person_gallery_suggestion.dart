@@ -105,6 +105,7 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
 
         unawaited(_precomputeNextSuggestions());
       } else {
+        _logger.info("No suggestions found");
         setState(() {
           isLoading = false;
         });

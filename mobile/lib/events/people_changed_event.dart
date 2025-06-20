@@ -25,4 +25,5 @@ enum PeopleEventType {
   removedFaceFromCluster,
   syncDone,
   saveOrEditPerson,
+  addedClusterToPerson,
 }

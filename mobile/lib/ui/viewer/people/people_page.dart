@@ -294,7 +294,9 @@ class _Gallery extends StatelessWidget {
       },
       reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
       forceReloadEvents: [
-        Bus.instance.on<PeopleChangedEvent>(),
+        Bus.instance.on<PeopleChangedEvent>().where(
+              (event) => event.type != PeopleEventType.addedClusterToPerson,
+            ),
       ],
       removalEventTypes: const {
         EventType.deletedFromRemote,
