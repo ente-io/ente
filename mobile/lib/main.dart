@@ -85,7 +85,7 @@ void main() async {
 }
 
 Future<void> _runInForeground(AdaptiveThemeMode? savedThemeMode) async {
-  return await _runWithLogs(() async {
+  return await runWithLogs(() async {
     _logger.info("Starting app in foreground");
     await _init(false, via: 'mainMethod');
     final Locale? locale = await getLocale(noFallback: true);
@@ -125,32 +125,30 @@ Future<void> _homeWidgetSync([bool isBackground = false]) async {
   }
 }
 
-Future<void> runBackgroundTask(String taskId, {String mode = 'normal'}) async {
-  await _runWithLogs(
-    () async {
-      try {
-        final cancellableOp =
-            CancelableOperation.fromFuture(_runMinimally(taskId));
+Future<void> runBackgroundTask(
+  String taskId,
+  TimeLogger tlog, {
+  String mode = 'normal',
+}) async {
+  try {
+    final cancellableOp =
+        CancelableOperation.fromFuture(_runMinimally(taskId, tlog));
 
-        await Future.wait([
-          if (Platform.isIOS)
-            _scheduleSuicide(
-              kBGTaskTimeout,
-              taskId,
-              cancellableOp,
-            ),
-          cancellableOp.valueOrCancellation(),
-        ]);
-      } catch (e, s) {
-        _logger.severe("Error in background task", e, s);
-      }
-    },
-    prefix: "[bg]",
-  );
+    await Future.wait([
+      if (Platform.isIOS)
+        _scheduleSuicide(
+          kBGTaskTimeout,
+          taskId,
+          cancellableOp,
+        ),
+      cancellableOp.valueOrCancellation(),
+    ]);
+  } catch (e, s) {
+    _logger.severe("Error in background task", e, s);
+  }
 }
 
-Future<void> _runMinimally(String taskId) async {
-  final TimeLogger tlog = TimeLogger();
+Future<void> _runMinimally(String taskId, TimeLogger tlog) async {
   final PackageInfo packageInfo = await PackageInfo.fromPlatform();
   final SharedPreferences prefs = await SharedPreferences.getInstance();
 
@@ -347,7 +345,7 @@ Future<void> _sync(String caller) async {
   }
 }
 
-Future _runWithLogs(Function() function, {String prefix = ""}) async {
+Future runWithLogs(Function() function, {String prefix = ""}) async {
   await SuperLogging.main(
     LogConfig(
       body: function,
@@ -418,7 +416,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
     }
   } else {
     // App is dead
-    _runWithLogs(
+    runWithLogs(
       () async {
         _logger.info("Background push received");
         await _init(true, via: 'firebasePush');

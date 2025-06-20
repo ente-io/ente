@@ -3,6 +3,7 @@ import "dart:io";
 import "package:logging/logging.dart";
 import "package:permission_handler/permission_handler.dart";
 import "package:photos/db/upload_locks_db.dart";
+import "package:photos/extensions/stop_watch.dart";
 import "package:photos/main.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/utils/file_uploader.dart";
@@ -12,15 +13,30 @@ import "package:workmanager/workmanager.dart" as workmanager;
 @pragma('vm:entry-point')
 void callbackDispatcher() {
   workmanager.Workmanager().executeTask((taskName, inputData) async {
-    try {
-      await runBackgroundTask(taskName);
-      return true;
-    } catch (e) {
-      BgTaskUtils.$.info('Task error: $e');
-      final prefs = await SharedPreferences.getInstance();
-      await BgTaskUtils.releaseResourcesForKill(taskName, prefs);
-      return Future.error(e.toString());
-    }
+    Future<bool> result = Future.error("Task didn't run");
+
+    await runWithLogs(
+      () async {
+        try {
+          final TimeLogger tlog = TimeLogger();
+          BgTaskUtils.$.info('Task started $tlog');
+          await runBackgroundTask(taskName, tlog);
+          BgTaskUtils.$.info('Task run successful $tlog');
+          result = Future.value(true);
+        } catch (e) {
+          BgTaskUtils.$.warning('Task error: $e');
+          final prefs = await SharedPreferences.getInstance();
+          await BgTaskUtils.releaseResourcesForKill(taskName, prefs);
+          result = Future.error(e.toString());
+        }
+      },
+      prefix: "[bg]",
+    ).onError((_, __) {
+      result = Future.error("Didn't finished correctly!");
+      return;
+    });
+
+    return result;
   });
 }
 
