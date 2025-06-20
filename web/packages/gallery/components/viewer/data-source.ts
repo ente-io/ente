@@ -404,12 +404,15 @@ export const forgetItemDataForFileIDIfNeeded = (fileID: number) => {
  * Update the alt attribute of the {@link ItemData}, if any, associated with the
  * given {@link EnteFile}.
  *
- * @param updatedFile The file whose caption was updated.
+ * @param fileID The ID of the file whose {@link alt} attribute we want to
+ * update.
+ *
+ * @param newAlt The new value of the {@link alt} attribute.
  */
-export const updateItemDataAlt = (updatedFile: EnteFile) => {
-    const itemData = _state.itemDataByFileID.get(updatedFile.id);
+export const updateItemDataAlt = (fileID: number, newAlt: string) => {
+    const itemData = _state.itemDataByFileID.get(fileID);
     if (itemData) {
-        itemData.alt = fileCaption(updatedFile);
+        itemData.alt = newAlt;
     }
 };
 
