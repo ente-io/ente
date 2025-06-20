@@ -52,7 +52,7 @@ class AlbumListItemWidget extends StatelessWidget {
                     );
                   } else {
                     return const NoThumbnailWidget(
-                      addBorder: false, 
+                      addBorder: false,
                     );
                   }
                 },
@@ -63,13 +63,15 @@ class AlbumListItemWidget extends StatelessWidget {
           Flexible(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
                   collection.displayName,
                   overflow: TextOverflow.ellipsis,
                 ),
                 FutureBuilder<int>(
-                  future: CollectionsService.instance.getFileCount(collection),
+                  future:
+                      CollectionsService.instance.getFileCount(collection),
                   builder: (context, snapshot) {
                     if (snapshot.hasData) {
                       return Text(
