@@ -846,7 +846,17 @@ const Page: React.FC = () => {
             dispatch({ type: "addPendingVisibilityUpdate", fileID });
             try {
                 await updateFilesVisibility([file], visibility);
-                // TODO: Replace with file fetch?
+                // [Note: Interactive updates to file metadata]
+                //
+                // 1. Update the remote metadata.
+                //
+                // 2. Construct a fake a metadata object with the updates
+                //    reflected in it.
+                //
+                // 3. The caller (eventually) triggers a remote sync in the
+                //    background, but meanwhile uses this updated metadata.
+                //
+                // TODO(RE): Replace with file fetch?
                 dispatch({
                     type: "unsyncedPrivateMagicMetadataUpdate",
                     fileID,
