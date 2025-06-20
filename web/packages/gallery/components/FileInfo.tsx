@@ -63,7 +63,6 @@ import {
     fileFileName,
     fileLocation,
     filePublicMagicMetadata,
-    updateRemotePublicMagicMetadata,
     type ParsedMetadata,
     type ParsedMetadataDate,
 } from "ente-media/file-metadata";
@@ -78,6 +77,7 @@ import { useSettingsSnapshot } from "ente-new/photos/components/utils/use-snapsh
 import {
     updateFileCaption,
     updateFileFileName,
+    updateFilePublicMagicMetadata,
 } from "ente-new/photos/services/file";
 import {
     getAnnotatedFacesForFile,
@@ -290,7 +290,14 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                         onUpdateCaption,
                     }}
                 />
-                <CreationTime {...{ file, allowEdits, onNeedsRemoteSync }} />
+                <CreationTime
+                    {...{
+                        file,
+                        allowEdits,
+                        onNeedsRemoteSync,
+                        onFileAndCollectionSyncWithRemote,
+                    }}
+                />
                 <FileName
                     {...{
                         file,
@@ -673,13 +680,14 @@ const CaptionForm = styled("form")(({ theme }) => ({
 
 type CreationTimeProps = Pick<
     FileInfoProps,
-    "allowEdits" | "onNeedsRemoteSync"
+    "allowEdits" | "onNeedsRemoteSync" | "onFileAndCollectionSyncWithRemote"
 > & { file: EnteFile };
 
 const CreationTime: React.FC<CreationTimeProps> = ({
     file,
     allowEdits,
     onNeedsRemoteSync,
+    onFileAndCollectionSyncWithRemote,
 }) => {
     const { onGenericError } = useBaseContext();
 
@@ -713,10 +721,8 @@ const CreationTime: React.FC<CreationTimeProps> = ({
             // we can provide functionality for the user to edit the associated
             // offset, but right now it is not even surfaced, so don't also
             // potentially overwrite it.
-            await updateRemotePublicMagicMetadata(file, {
-                dateTime,
-                editedTime,
-            });
+            await updateFilePublicMagicMetadata(file, { dateTime, editedTime });
+            await onFileAndCollectionSyncWithRemote();
         } catch (e) {
             onGenericError(e);
         }

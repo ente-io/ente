@@ -166,7 +166,7 @@ const putFilesMagicMetadata = async (
  * @param newFileName The new file name of the file.
  */
 export const updateFileFileName = (file: EnteFile2, newFileName: string) =>
-    updateFilesPublicMagicMetadata([file], { editedName: newFileName });
+    updateFilePublicMagicMetadata(file, { editedName: newFileName });
 
 /**
  * Update the caption associated with the provided file on remote.
@@ -185,10 +185,27 @@ export const updateFileFileName = (file: EnteFile2, newFileName: string) =>
  * caption to the default (no value) state pass a blank string.
  */
 export const updateFileCaption = (file: EnteFile2, caption: string) =>
-    updateFilesPublicMagicMetadata([file], { caption });
+    updateFilePublicMagicMetadata(file, { caption });
 
 /**
- * Update the private magic metadata of a list of files on remote.
+ * Update the public magic metadata of a file on remote.
+ *
+ * Remote only, does not modify local state.
+ *
+ * @param file The list of files whose magic metadata we want to update.
+ *
+ * @param updates A non-empty but otherwise arbitrary subset of
+ * {@link FilePrivateMagicMetadataData} entries.
+ *
+ * See: [Note: Magic metadata data cannot have nullish values]
+ */
+export const updateFilePublicMagicMetadata = async (
+    file: EnteFile2,
+    updates: PublicMagicMetadata,
+) => updateFilesPublicMagicMetadata([file], updates);
+
+/**
+ * Update the public magic metadata of a list of files on remote.
  *
  * Remote only, does not modify local state.
  *

@@ -830,8 +830,8 @@ export const FileViewer: React.FC<FileViewerProps> = ({
             //   the other attributes of the annotated file currently depend on
             //   the archive status change.
             //
-            // - Similar reasoning applies to updates to the file's file name in
-            //   file info panel.
+            // - Similar reasoning applies to updates to the file's file name or
+            //   date in the file info panel.
             //
             // - For updates to the file's caption in the file info panel we
             //   already need special casing (see `updateItemDataAlt`) to reload
