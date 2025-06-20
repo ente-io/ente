@@ -9,7 +9,6 @@ import type {
     EnteFile,
     FilePublicMagicMetadata,
     FilePublicMagicMetadataProps,
-    FileWithUpdatedMagicMetadata,
     FileWithUpdatedPublicMagicMetadata,
 } from "ente-media/file";
 import { mergeMetadata } from "ente-media/file";
@@ -24,50 +23,6 @@ export interface UpdateMagicMetadataRequest {
 interface BulkUpdateMagicMetadataRequest {
     metadataList: UpdateMagicMetadataRequest[];
 }
-
-export const updateFileMagicMetadata = async (
-    fileWithUpdatedMagicMetadataList: FileWithUpdatedMagicMetadata[],
-) => {
-    const token = getToken();
-    if (!token) {
-        return;
-    }
-    const reqBody: BulkUpdateMagicMetadataRequest = { metadataList: [] };
-    for (const {
-        file,
-        updatedMagicMetadata,
-    } of fileWithUpdatedMagicMetadataList) {
-        const { encryptedData, decryptionHeader } = await encryptMetadataJSON(
-            updatedMagicMetadata.data,
-            file.key,
-        );
-        reqBody.metadataList.push({
-            id: file.id,
-            magicMetadata: {
-                version: updatedMagicMetadata.version,
-                count: updatedMagicMetadata.count,
-                data: encryptedData,
-                header: decryptionHeader,
-            },
-        });
-    }
-    await HTTPService.put(
-        await apiURL("/files/magic-metadata"),
-        reqBody,
-        // @ts-ignore
-        null,
-        { "X-Auth-Token": token },
-    );
-    return fileWithUpdatedMagicMetadataList.map(
-        ({ file, updatedMagicMetadata }): EnteFile => ({
-            ...file,
-            magicMetadata: {
-                ...updatedMagicMetadata,
-                version: updatedMagicMetadata.version + 1,
-            },
-        }),
-    );
-};
 
 export const updateFilePublicMagicMetadata = async (
     fileWithUpdatedPublicMagicMetadataList: FileWithUpdatedPublicMagicMetadata[],

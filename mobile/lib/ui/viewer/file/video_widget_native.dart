@@ -634,15 +634,14 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
                             strokeWidth: 2,
                             strokeCap: StrokeCap.round,
                           ),
-                          if (flagService.internalUser)
-                            Center(
-                              child: Text(
-                                "${(progress * 100).toStringAsFixed(0)}%",
-                                style: getEnteTextTheme(context).tiny.copyWith(
-                                      color: textBaseDark,
-                                    ),
-                              ),
+                          Center(
+                            child: Text(
+                              "${(progress * 100).toStringAsFixed(0)}%",
+                              style: getEnteTextTheme(context).tiny.copyWith(
+                                    color: textBaseDark,
+                                  ),
                             ),
+                          ),
                         ],
                       );
               },

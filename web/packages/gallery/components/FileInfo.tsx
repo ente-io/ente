@@ -65,6 +65,7 @@ import { type EnteFile } from "ente-media/file";
 import {
     fileCaption,
     fileCreationPhotoDate,
+    fileFileName,
     fileLocation,
     filePublicMagicMetadata,
     updateRemotePublicMagicMetadata,
@@ -386,7 +387,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                 {...rawExifVisibilityProps}
                 onInfoClose={onClose}
                 tags={exif?.tags}
-                fileName={file.metadata.title}
+                fileName={fileFileName(file)}
             />
         </FileInfoSidebar>
     );
@@ -739,7 +740,7 @@ const FileName: React.FC<FileNameProps> = ({
     const { show: showRename, props: renameVisibilityProps } =
         useModalVisibility();
 
-    const fileName = file.metadata.title;
+    const fileName = fileFileName(file);
 
     const handleRename = async (newFileName: string) => {
         const updatedFile = await changeFileName(file, newFileName);
@@ -748,7 +749,7 @@ const FileName: React.FC<FileNameProps> = ({
     };
 
     const icon =
-        file.metadata.fileType === FileType.video ? (
+        file.metadata.fileType == FileType.video ? (
             <VideocamOutlinedIcon />
         ) : (
             <PhotoOutlinedIcon />

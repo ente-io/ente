@@ -7,6 +7,7 @@ import {
 } from "ente-gallery/components/viewer/FileViewer";
 import type { Collection } from "ente-media/collection";
 import { EnteFile } from "ente-media/file";
+import { fileFileName } from "ente-media/file-metadata";
 import { moveToTrash } from "ente-new/photos/services/collection";
 import { PseudoCollectionID } from "ente-new/photos/services/collection-summary";
 import { t } from "i18next";
@@ -139,7 +140,7 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
     const handleDownload = useCallback(
         (file: EnteFile) => {
             const setSingleFileDownloadProgress =
-                setFilesDownloadProgressAttributesCreator!(file.metadata.title);
+                setFilesDownloadProgressAttributesCreator!(fileFileName(file));
             void downloadSingleFile(file, setSingleFileDownloadProgress);
         },
         [setFilesDownloadProgressAttributesCreator],

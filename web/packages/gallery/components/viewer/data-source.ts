@@ -69,8 +69,10 @@ export type ItemData = PhotoSwipeSlideData & {
     fileID: number;
     /**
      * The {@link EnteFile} type of the file whose data we are.
+     *
+     * Expected to be one of {@link FileType}.
      */
-    fileType: FileType;
+    fileType: number;
     /**
      * The renderable object URL of the image associated with the file.
      *
@@ -727,7 +729,7 @@ export const updateFileInfoExifIfNeeded = async (itemData: ItemData) => {
     };
 
     // For videos, insert a placeholder.
-    if (fileType === FileType.video) {
+    if (fileType == FileType.video) {
         return updateNotifyAndReturn(createPlaceholderFileInfoExif());
     }
 

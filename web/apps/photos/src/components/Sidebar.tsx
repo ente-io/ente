@@ -59,7 +59,7 @@ import {
 import log from "ente-base/log";
 import { savedLogs } from "ente-base/log-web";
 import { customAPIHost } from "ente-base/origins";
-import { downloadString } from "ente-base/utils/web";
+import { saveStringAsFile } from "ente-base/utils/web";
 import {
     isHLSGenerationSupported,
     toggleHLSGeneration,
@@ -1079,7 +1079,7 @@ const Help: React.FC<NestedSidebarDrawerVisibilityProps> = ({
         log.info("Viewing logs");
         const electron = globalThis.electron;
         if (electron) electron.openLogDirectory();
-        else downloadString(savedLogs(), `ente-web-logs-${Date.now()}.txt`);
+        else saveStringAsFile(savedLogs(), `ente-web-logs-${Date.now()}.txt`);
     };
 
     return (
