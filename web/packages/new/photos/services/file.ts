@@ -3,6 +3,7 @@ import { apiURL } from "ente-base/origins";
 import type { EnteFile, EnteFile2 } from "ente-media/file";
 import type {
     FilePrivateMagicMetadataData,
+    FilePublicMagicMetadataData,
     ItemVisibility,
 } from "ente-media/file-metadata";
 import {
@@ -50,6 +51,10 @@ export const performInBatches = <T, U>(
  * remote.
  *
  * Remote only, does not modify local state.
+ *
+ * The visibility of an {@link EnteFile} is stored in its private magic
+ * metadata, so this function in effect updates the private magic metadata of
+ * the given files on remote.
  *
  * @param files The list of files whose visibility we want to change. All the
  * files will get their visibility updated to the new, provided, value.
@@ -141,6 +146,99 @@ const putFilesMagicMetadata = async (
 ) =>
     ensureOk(
         await fetch(await apiURL("/files/magic-metadata"), {
+            method: "PUT",
+            headers: await authenticatedRequestHeaders(),
+            body: JSON.stringify(updateRequest),
+        }),
+    );
+
+/**
+ * Update the file name of the provided file on remote.
+ *
+ * Remote only, does not modify local state.
+ *
+ * The file name of an {@link EnteFile} is stored in its public magic metadata,
+ * so this function in effect updates the public magic metadata of the given
+ * file on remote.
+ *
+ * @param file The file whose file name we want to change.
+ *
+ * @param newFileName The new file name of the file.
+ */
+export const updateFileFileName = (file: EnteFile2, newFileName: string) =>
+    updateFilePublicMagicMetadata(file, { editedName: newFileName });
+
+/**
+ * Update the caption associated with the provided file on remote.
+ *
+ * Remote only, does not modify local state.
+ *
+ * The caption of an {@link EnteFile} is stored in its public magic metadata, so
+ * this function in effect updates the public magic metadata of the given file
+ * on remote.
+ *
+ * @param file The file whose file name we want to change.
+ *
+ * @param caption The caption associated with the file.
+ *
+ * Fields in magic metadata cannot be removed after being added, so to reset the
+ * caption to the default (no value) state pass a blank string.
+ */
+export const updateFileCaption = (file: EnteFile2, caption: string) =>
+    updateFilePublicMagicMetadata(file, { caption });
+
+/**
+ * Update the public magic metadata of a file on remote.
+ *
+ * Remote only, does not modify local state.
+ *
+ * @param file The list of files whose magic metadata we want to update.
+ *
+ * @param updates A non-empty but otherwise arbitrary subset of
+ * {@link FilePrivateMagicMetadataData} entries.
+ *
+ * See: [Note: Magic metadata data cannot have nullish values]
+ */
+export const updateFilePublicMagicMetadata = async (
+    file: EnteFile2,
+    updates: FilePublicMagicMetadataData,
+) => updateFilesPublicMagicMetadata([file], updates);
+
+/**
+ * Update the public magic metadata of a list of files on remote.
+ *
+ * Remote only, does not modify local state.
+ *
+ * This is a variant of {@link updateFilePrivateMagicMetadata} that works with
+ * the {@link pubMagicMetadata} of the given files.
+ */
+const updateFilesPublicMagicMetadata = async (
+    files: EnteFile2[],
+    updates: FilePublicMagicMetadataData,
+) =>
+    putFilesPublicMagicMetadata({
+        metadataList: await Promise.all(
+            files.map(async ({ id, key, pubMagicMetadata }) => ({
+                id,
+                magicMetadata: await encryptMagicMetadata(
+                    createMagicMetadata(
+                        { ...pubMagicMetadata?.data, ...updates },
+                        pubMagicMetadata?.version,
+                    ),
+                    key,
+                ),
+            })),
+        ),
+    });
+
+/**
+ * Update the public magic metadata of a list of files on remote.
+ */
+const putFilesPublicMagicMetadata = async (
+    updateRequest: UpdateMultipleMagicMetadataRequest,
+) =>
+    ensureOk(
+        await fetch(await apiURL("/files/public-magic-metadata"), {
             method: "PUT",
             headers: await authenticatedRequestHeaders(),
             body: JSON.stringify(updateRequest),

@@ -6,17 +6,16 @@
 import log from "ente-base/log";
 import { apiURL } from "ente-base/origins";
 import { type Collection } from "ente-media/collection";
-import {
-    decryptFile,
-    type EncryptedTrashItem,
-    type EnteFile,
-    type Trash,
-} from "ente-media/file";
+import { decryptFile, type EnteFile } from "ente-media/file";
 import {
     getLocalTrash,
     getTrashedFiles,
     TRASH,
 } from "ente-new/photos/services/files";
+import {
+    type EncryptedTrashItem,
+    type Trash,
+} from "ente-new/photos/services/trash";
 import HTTPService from "ente-shared/network/HTTPService";
 import localForage from "ente-shared/storage/localForage";
 import { getToken } from "ente-shared/storage/localStorage/helpers";

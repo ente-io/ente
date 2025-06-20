@@ -33,14 +33,13 @@ import type {
     EncryptedMagicMetadata,
     EnteFile,
     FilePublicMagicMetadata,
-    FilePublicMagicMetadataProps,
 } from "ente-media/file";
 import {
     fileFileName,
     metadataHash,
     type FileMetadata,
+    type FilePublicMagicMetadataData,
     type ParsedMetadata,
-    type PublicMagicMetadata,
 } from "ente-media/file-metadata";
 import { FileType, type FileTypeInfo } from "ente-media/file-type";
 import { encodeLivePhoto } from "ente-media/live-photo";
@@ -1047,7 +1046,7 @@ const readEntireStream = async (stream: ReadableStream) =>
 
 interface ExtractAssetMetadataResult {
     metadata: FileMetadata;
-    publicMagicMetadata: FilePublicMagicMetadataProps;
+    publicMagicMetadata: FilePublicMagicMetadataData;
 }
 
 /**
@@ -1171,7 +1170,7 @@ const extractImageOrVideoMetadata = async (
         parsedMetadataJSONMap,
     );
 
-    const publicMagicMetadata: PublicMagicMetadata = {};
+    const publicMagicMetadata: FilePublicMagicMetadataData = {};
 
     const modificationTime =
         parsedMetadataJSON?.modificationTime ?? lastModifiedMs * 1000;
@@ -1490,7 +1489,7 @@ const augmentWithThumbnail = async (
 };
 
 const constructPublicMagicMetadata = async (
-    publicMagicMetadataProps: FilePublicMagicMetadataProps,
+    publicMagicMetadataProps: FilePublicMagicMetadataData,
 ): Promise<FilePublicMagicMetadata> => {
     const nonEmptyPublicMagicMetadataProps = getNonEmptyMagicMetadataProps(
         publicMagicMetadataProps,
