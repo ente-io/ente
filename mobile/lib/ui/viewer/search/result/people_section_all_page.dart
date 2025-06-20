@@ -78,7 +78,8 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
     normalFaces.clear();
     extraFaces.clear();
     for (final face in allFaces) {
-      if (face.fileCount() >= kMinimumClusterSizeSearchResult) {
+      if (face.fileCount() >= kMinimumClusterSizeSearchResult ||
+          face.name().isNotEmpty) {
         normalFaces.add(face);
       } else {
         extraFaces.add(face);
@@ -246,7 +247,9 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                _showingAllFaces ? S.of(context).showLessFaces : S.of(context).showMoreFaces,
+                _showingAllFaces
+                    ? S.of(context).showLessFaces
+                    : S.of(context).showMoreFaces,
                 style: getEnteTextTheme(context).small.copyWith(
                       color: Theme.of(context).colorScheme.primary,
                     ),
