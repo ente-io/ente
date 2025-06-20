@@ -38,10 +38,7 @@ import { FullScreenDropZone } from "ente-gallery/components/FullScreenDropZone";
 import { type UploadTypeSelectorIntent } from "ente-gallery/components/Upload";
 import { type Collection } from "ente-media/collection";
 import { type EnteFile } from "ente-media/file";
-import {
-    updateRemotePrivateMagicMetadata,
-    type ItemVisibility,
-} from "ente-media/file-metadata";
+import { type ItemVisibility } from "ente-media/file-metadata";
 import {
     CollectionSelector,
     type CollectionSelectorAttributes,
@@ -78,6 +75,7 @@ import {
 } from "ente-new/photos/services/collection-summary";
 import { getAllLocalCollections } from "ente-new/photos/services/collections";
 import exportService from "ente-new/photos/services/export";
+import { updateFilesVisibility } from "ente-new/photos/services/file";
 import {
     getLocalFiles,
     getLocalTrashedFiles,
@@ -847,14 +845,16 @@ const Page: React.FC = () => {
             const fileID = file.id;
             dispatch({ type: "addPendingVisibilityUpdate", fileID });
             try {
-                const privateMagicMetadata =
-                    await updateRemotePrivateMagicMetadata(file, {
-                        visibility,
-                    });
+                await updateFilesVisibility([file], visibility);
+                // TODO: Replace with file fetch?
                 dispatch({
                     type: "unsyncedPrivateMagicMetadataUpdate",
                     fileID,
-                    privateMagicMetadata,
+                    privateMagicMetadata: {
+                        ...file.magicMetadata,
+                        version: (file.magicMetadata?.version ?? 0) + 1,
+                        data: { ...file.magicMetadata?.data, visibility },
+                    },
                 });
             } finally {
                 dispatch({ type: "removePendingVisibilityUpdate", fileID });
