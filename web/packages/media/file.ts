@@ -484,69 +484,12 @@ export const FileDiffResponse = z.object({
     hasMore: z.boolean(),
 });
 
-export interface FileWithUpdatedPublicMagicMetadata {
-    file: EnteFile;
-    updatedPublicMagicMetadata: FilePublicMagicMetadata;
-}
-
 export type FileMagicMetadata = MagicMetadataCore<FilePrivateMagicMetadataData>;
 export type FilePrivateMagicMetadata =
     MagicMetadataCore<FilePrivateMagicMetadataData>;
 
 export type FilePublicMagicMetadata =
     MagicMetadataCore<FilePublicMagicMetadataData>;
-
-export interface TrashItem extends Omit<EncryptedTrashItem, "file"> {
-    file: EnteFile;
-}
-
-export interface EncryptedTrashItem {
-    file: EncryptedEnteFile;
-    /**
-     * `true` if the file no longer in trash because it was permanently deleted.
-     *
-     * This field is relevant when we obtain a trash item as part of the trash
-     * diff. It indicates that the file which was previously in trash is no
-     * longer in the trash because it was permanently deleted.
-     */
-    isDeleted: boolean;
-    /**
-     * `true` if the file no longer in trash because it was restored to some
-     * collection.
-     *
-     * This field is relevant when we obtain a trash item as part of the trash
-     * diff. It indicates that the file which was previously in trash is no
-     * longer in the trash because it was restored to a collection.
-     */
-    isRestored: boolean;
-    deleteBy: number;
-    createdAt: number;
-    updatedAt: number;
-}
-
-export type Trash = TrashItem[];
-
-/**
- * A short identifier for a file in log messages.
- *
- * e.g. "file flower.png (827233681)"
- *
- * @returns a string to use as an identifier when logging information about the
- * given {@link file}. The returned string contains the file name (for ease of
- * debugging) and the file ID (for exactness).
- */
-export const fileLogID = (file: EnteFile) =>
-    `file ${fileFileName(file)} (${file.id})`;
-
-/**
- * Return the date when the file will be deleted permanently. Only valid for
- * files that are in the user's trash.
- *
- * This is a convenience wrapper over the {@link deleteBy} property of a file,
- * converting that epoch microsecond value into a JavaScript date.
- */
-export const enteFileDeletionDate = (file: EnteFile) =>
-    dateFromEpochMicroseconds(file.deleteBy);
 
 export async function decryptFile(
     file: EncryptedEnteFile,
@@ -797,6 +740,28 @@ export const mergeMetadata1 = (file: EnteFile): EnteFile => {
  */
 export const mergeMetadata = (files: EnteFile[]) =>
     files.map((file) => mergeMetadata1(file));
+
+/**
+ * A short identifier for a file in log messages.
+ *
+ * e.g. "file flower.png (827233681)"
+ *
+ * @returns a string to use as an identifier when logging information about the
+ * given {@link file}. The returned string contains the file name (for ease of
+ * debugging) and the file ID (for exactness).
+ */
+export const fileLogID = (file: EnteFile) =>
+    `file ${fileFileName(file)} (${file.id})`;
+
+/**
+ * Return the date when the file will be deleted permanently. Only valid for
+ * files that are in the user's trash.
+ *
+ * This is a convenience wrapper over the {@link deleteBy} property of a file,
+ * converting that epoch microsecond value into a JavaScript date.
+ */
+export const enteFileDeletionDate = (file: EnteFile) =>
+    dateFromEpochMicroseconds(file.deleteBy);
 
 export interface MagicMetadataCore<T> {
     version: number;

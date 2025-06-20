@@ -7,9 +7,9 @@ import {
     mergeMetadata,
     type EncryptedEnteFile,
     type EnteFile,
-    type Trash,
 } from "ente-media/file";
 import { metadataHash } from "ente-media/file-metadata";
+import { type Trash } from "ente-new/photos/services/trash";
 import HTTPService from "ente-shared/network/HTTPService";
 import localForage from "ente-shared/storage/localForage";
 import { getToken } from "ente-shared/storage/localStorage/helpers";
