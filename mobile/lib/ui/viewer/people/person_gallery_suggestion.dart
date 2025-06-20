@@ -123,7 +123,7 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
   Future<void> _precomputeNextSuggestions() async {
     try {
       // Precompute face crops for next few suggestions
-      const maxPrecompute = 3;
+      const maxPrecompute = 2;
       final endIndex = (currentSuggestionIndex + maxPrecompute)
           .clamp(0, allSuggestions.length);
 
