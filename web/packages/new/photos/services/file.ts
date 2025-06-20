@@ -1,6 +1,6 @@
 import { authenticatedRequestHeaders, ensureOk } from "ente-base/http";
 import { apiURL } from "ente-base/origins";
-import type { EnteFile, EnteFile2 } from "ente-media/file";
+import type { EnteFile } from "ente-media/file";
 import type {
     FilePrivateMagicMetadataData,
     FilePublicMagicMetadataData,
@@ -88,7 +88,7 @@ export const updateFilesVisibility = async (
  * See: [Note: Magic metadata data cannot have nullish values]
  */
 const updateFilesPrivateMagicMetadata = async (
-    files: EnteFile2[],
+    files: EnteFile[],
     updates: FilePrivateMagicMetadataData,
 ) =>
     putFilesMagicMetadata({
@@ -165,7 +165,7 @@ const putFilesMagicMetadata = async (
  *
  * @param newFileName The new file name of the file.
  */
-export const updateFileFileName = (file: EnteFile2, newFileName: string) =>
+export const updateFileFileName = (file: EnteFile, newFileName: string) =>
     updateFilePublicMagicMetadata(file, { editedName: newFileName });
 
 /**
@@ -184,7 +184,7 @@ export const updateFileFileName = (file: EnteFile2, newFileName: string) =>
  * Fields in magic metadata cannot be removed after being added, so to reset the
  * caption to the default (no value) state pass a blank string.
  */
-export const updateFileCaption = (file: EnteFile2, caption: string) =>
+export const updateFileCaption = (file: EnteFile, caption: string) =>
     updateFilePublicMagicMetadata(file, { caption });
 
 /**
@@ -200,7 +200,7 @@ export const updateFileCaption = (file: EnteFile2, caption: string) =>
  * See: [Note: Magic metadata data cannot have nullish values]
  */
 export const updateFilePublicMagicMetadata = async (
-    file: EnteFile2,
+    file: EnteFile,
     updates: FilePublicMagicMetadataData,
 ) => updateFilesPublicMagicMetadata([file], updates);
 
@@ -213,7 +213,7 @@ export const updateFilePublicMagicMetadata = async (
  * the {@link pubMagicMetadata} of the given files.
  */
 const updateFilesPublicMagicMetadata = async (
-    files: EnteFile2[],
+    files: EnteFile[],
     updates: FilePublicMagicMetadataData,
 ) =>
     putFilesPublicMagicMetadata({

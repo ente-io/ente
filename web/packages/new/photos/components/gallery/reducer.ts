@@ -4,9 +4,13 @@ import {
     isPinnedCollection,
 } from "ente-gallery/services/magic-metadata";
 import { collectionTypes, type Collection } from "ente-media/collection";
-import type { EnteFile, FilePrivateMagicMetadata } from "ente-media/file";
+import type { EnteFile } from "ente-media/file";
 import { mergeMetadata } from "ente-media/file";
-import { isArchivedFile } from "ente-media/file-metadata";
+import {
+    isArchivedFile,
+    type FilePrivateMagicMetadataData,
+} from "ente-media/file-metadata";
+import type { MagicMetadata } from "ente-media/magic-metadata";
 import {
     createCollectionNameByID,
     isHiddenCollection,
@@ -31,6 +35,7 @@ import {
     groupFilesByCollectionID,
     sortFiles,
     uniqueFilesByID,
+    type TrashedEnteFile,
 } from "../../services/files";
 import type { PeopleState, Person } from "../../services/ml/people";
 import type { SearchSuggestion } from "../../services/search/types";
@@ -315,7 +320,10 @@ export interface GalleryState {
      * thereafter the synced files themselves will reflect the latest private
      * magic metadata.
      */
-    unsyncedPrivateMagicMetadataUpdates: Map<number, FilePrivateMagicMetadata>;
+    unsyncedPrivateMagicMetadataUpdates: Map<
+        number,
+        MagicMetadata<FilePrivateMagicMetadataData>
+    >;
 
     /*--<  State that underlies transient UI state  >--*/
 
@@ -418,7 +426,7 @@ export type GalleryAction =
           collections: Collection[];
           normalFiles: EnteFile[];
           hiddenFiles: EnteFile[];
-          trashedFiles: EnteFile[];
+          trashedFiles: TrashedEnteFile[];
       }
     | {
           type: "setCollections";
@@ -446,7 +454,7 @@ export type GalleryAction =
     | {
           type: "unsyncedPrivateMagicMetadataUpdate";
           fileID: number;
-          privateMagicMetadata: FilePrivateMagicMetadata;
+          privateMagicMetadata: MagicMetadata<FilePrivateMagicMetadataData>;
       }
     | { type: "clearUnsyncedState" }
     | { type: "showAll" }

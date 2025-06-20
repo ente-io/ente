@@ -1,5 +1,5 @@
 import { type Location } from "ente-base/types";
-import { type EnteFile, type EnteFile2 } from "ente-media/file";
+import { type EnteFile } from "ente-media/file";
 import { nullToUndefined } from "ente-utils/transform";
 import { z } from "zod/v4";
 import { FileType } from "./file-type";
@@ -456,7 +456,7 @@ export const isArchivedFile = (file: EnteFile) =>
  * @returns The provided {@link EnteFile}'s filename, including the extension.
  * e.g. "flower.png".
  */
-export const fileFileName = (file: EnteFile | EnteFile2) =>
+export const fileFileName = (file: EnteFile) =>
     file.pubMagicMetadata?.data.editedName ?? file.metadata.title;
 
 /**
