@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 
 import "package:adaptive_theme/adaptive_theme.dart";
-import "package:async/async.dart";
 import "package:computer/computer.dart";
 import 'package:ente_crypto/ente_crypto.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -45,7 +44,6 @@ import "package:photos/services/video_preview_service.dart";
 import "package:photos/services/wake_lock_service.dart";
 import 'package:photos/ui/tools/app_lock.dart';
 import 'package:photos/ui/tools/lock_screen.dart';
-import "package:photos/utils/bg_task_utils.dart";
 import "package:photos/utils/email_util.dart";
 import 'package:photos/utils/file_uploader.dart';
 import "package:photos/utils/lock_screen_settings.dart";
@@ -58,7 +56,7 @@ const kLastFGTaskHeartBeatTime = "fg_task_hb_time";
 const kHeartBeatFrequency = Duration(seconds: 1);
 const kFGSyncFrequency = Duration(minutes: 5);
 const kFGHomeWidgetSyncFrequency = Duration(minutes: 15);
-const kBGTaskTimeout = Duration(seconds: 45);
+const kBGTaskTimeout = Duration(seconds: 28);
 const kBGPushTimeout = Duration(seconds: 28);
 const kFGTaskDeathTimeoutInMicroseconds = 5000000;
 
@@ -85,7 +83,7 @@ void main() async {
 }
 
 Future<void> _runInForeground(AdaptiveThemeMode? savedThemeMode) async {
-  return await _runWithLogs(() async {
+  return await runWithLogs(() async {
     _logger.info("Starting app in foreground");
     await _init(false, via: 'mainMethod');
     final Locale? locale = await getLocale(noFallback: true);
@@ -125,32 +123,15 @@ Future<void> _homeWidgetSync([bool isBackground = false]) async {
   }
 }
 
-Future<void> runBackgroundTask(String taskId, {String mode = 'normal'}) async {
-  await _runWithLogs(
-    () async {
-      try {
-        final cancellableOp =
-            CancelableOperation.fromFuture(_runMinimally(taskId));
-
-        await Future.wait([
-          if (Platform.isIOS)
-            _scheduleSuicide(
-              kBGTaskTimeout,
-              taskId,
-              cancellableOp,
-            ),
-          cancellableOp.valueOrCancellation(),
-        ]);
-      } catch (e, s) {
-        _logger.severe("Error in background task", e, s);
-      }
-    },
-    prefix: "[bg]",
-  );
+Future<void> runBackgroundTask(
+  String taskId,
+  TimeLogger tlog, {
+  String mode = 'normal',
+}) async {
+  await _runMinimally(taskId, tlog);
 }
 
-Future<void> _runMinimally(String taskId) async {
-  final TimeLogger tlog = TimeLogger();
+Future<void> _runMinimally(String taskId, TimeLogger tlog) async {
   final PackageInfo packageInfo = await PackageInfo.fromPlatform();
   final SharedPreferences prefs = await SharedPreferences.getInstance();
 
@@ -347,7 +328,7 @@ Future<void> _sync(String caller) async {
   }
 }
 
-Future _runWithLogs(Function() function, {String prefix = ""}) async {
+Future runWithLogs(Function() function, {String prefix = ""}) async {
   await SuperLogging.main(
     LogConfig(
       body: function,
@@ -418,7 +399,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
     }
   } else {
     // App is dead
-    _runWithLogs(
+    runWithLogs(
       () async {
         _logger.info("Background push received");
         await _init(true, via: 'firebasePush');
@@ -439,30 +420,4 @@ Future<void> _logFGHeartBeatInfo(SharedPreferences prefs) async {
       ? 'never'
       : DateTime.fromMicrosecondsSinceEpoch(lastFGTaskHeartBeatTime).toString();
   _logger.info('isAlreadyRunningFG: $isRunningInFG, last Beat: $lastRun');
-}
-
-Future<void> _scheduleSuicide(
-  Duration duration,
-  String taskID,
-  CancelableOperation cancellableOp,
-) async {
-  _logger.warning("Schedule seppuku taskID: $taskID");
-  final prefs = await SharedPreferences.getInstance();
-
-  for (int i = 0; i < duration.inSeconds; i++) {
-    await Future.delayed(const Duration(seconds: 1));
-    if (flagService.internalUser) {
-      _logger.warning(
-        "Task $taskID is running in internal user mode, T $i seconds",
-      );
-    }
-    if (cancellableOp.isCanceled || cancellableOp.isCompleted) {
-      _logger.warning("Task $taskID cancelled, not scheduling seppuku");
-      return;
-    }
-  }
-
-  _logger.warning("TLE, committing seppuku for taskID: $taskID");
-  await cancellableOp.cancel();
-  await BgTaskUtils.releaseResourcesForKill(taskID, prefs);
 }
