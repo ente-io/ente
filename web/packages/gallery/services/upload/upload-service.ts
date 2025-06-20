@@ -1363,7 +1363,7 @@ const readLivePhoto = async (
         fileStreamOrData: imageFileStreamOrData,
         thumbnail,
         hasStaticThumbnail,
-    } = await withThumbnail(
+    } = await augmentWithThumbnail(
         livePhotoAssets.image,
         // TODO: Update underlying type
         // @ts-ignore
@@ -1402,7 +1402,7 @@ const readImageOrVideo = async (
     fileTypeInfo: FileTypeInfo,
 ) => {
     const fileStream = await readUploadItem(uploadItem);
-    return withThumbnail(uploadItem, fileTypeInfo, fileStream);
+    return augmentWithThumbnail(uploadItem, fileTypeInfo, fileStream);
 };
 
 /**
@@ -1417,7 +1417,7 @@ const readImageOrVideo = async (
  * Note: The `fileStream` in the returned {@link ThumbnailedFile} may be
  * different from the one passed to the function.
  */
-const withThumbnail = async (
+const augmentWithThumbnail = async (
     uploadItem: UploadItem,
     fileTypeInfo: FileTypeInfo,
     fileStream: FileStream,
