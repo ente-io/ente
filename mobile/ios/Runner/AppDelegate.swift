@@ -19,10 +19,11 @@ import workmanager
     WorkmanagerPlugin.setPluginRegistrantCallback { registry in
       GeneratedPluginRegistrant.register(with: registry)
     }
+    var freqInMinutes = 30 * 60
     // Register a periodic task in iOS 13+
     WorkmanagerPlugin.registerPeriodicTask(
       withIdentifier: "io.ente.frame.iOSBackgroundAppRefresh",
-      frequency: NSNumber(value: 60 * 60))
+      frequency: NSNumber(value: freqInMinutes))
 
     // Retrieve the link from parameters
     if let url = AppLinks.shared.getLink(launchOptions: launchOptions) {
