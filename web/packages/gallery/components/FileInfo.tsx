@@ -158,7 +158,7 @@ export type FileInfoProps = ModalVisibilityProps & {
      * reflected locally. Until the promise settles the UI element that
      * triggered the change will show an activity indicator to the user.
      */
-    onFileMetadataUpdate: () => Promise<void>;
+    onFileMetadataUpdate?: () => Promise<void>;
     /**
      * Called when an action on the file info drawer change the caption of the
      * given {@link EnteFile}.
@@ -595,7 +595,7 @@ const Caption: React.FC<CaptionProps> = ({
             setIsSaving(true);
             try {
                 await updateFileCaption(file, newCaption);
-                await onFileMetadataUpdate();
+                await onFileMetadataUpdate?.();
                 onUpdateCaption(file.id, newCaption);
                 setIsSaving(false);
                 onClose();
@@ -703,7 +703,7 @@ const CreationTime: React.FC<CreationTimeProps> = ({
             // offset, but right now it is not even surfaced, so don't also
             // potentially overwrite it.
             await updateFilePublicMagicMetadata(file, { dateTime, editedTime });
-            await onFileMetadataUpdate();
+            await onFileMetadataUpdate?.();
         } catch (e) {
             onGenericError(e);
         }
@@ -754,7 +754,7 @@ const FileName: React.FC<FileNameProps> = ({
 
     const handleRename = async (newFileName: string) => {
         await updateFileFileName(file, newFileName);
-        await onFileMetadataUpdate();
+        await onFileMetadataUpdate?.();
     };
 
     const icon =

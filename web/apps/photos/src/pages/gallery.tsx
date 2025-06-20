@@ -1149,7 +1149,9 @@ const Page: React.FC = () => {
                         onMarkTempDeleted={handleMarkTempDeleted}
                         onSetOpenFileViewer={setIsFileViewerOpen}
                         onSyncWithRemote={syncWithRemote}
-                        onFileAndCollectionSyncWithRemote={fileAndCollectionSyncWithRemote}
+                        onFileAndCollectionSyncWithRemote={
+                            fileAndCollectionSyncWithRemote
+                        }
                         onVisualFeedback={handleVisualFeedback}
                         onSelectCollection={handleSelectCollection}
                         onSelectPerson={handleSelectPerson}
