@@ -278,8 +278,6 @@ export type ItemVisibility =
  * And never like:
  *
  *     foo: T | undefined
- *
- * Also see: [Note: Zod doesn't work with `exactOptionalPropertyTypes` yet].
  */
 export interface FilePublicMagicMetadataData {
     /**
@@ -392,10 +390,6 @@ export interface FilePublicMagicMetadataData {
 /**
  * Zod schema for the {@link PublicMagicMetadata} type.
  *
- * See: [Note: Duplicated Zod schema and TypeScript type]
- *
- * ---
- *
  * [Note: Use looseObject for metadata Zod schemas]
  *
  * It is important to (recursively) use the {@link looseObject} option when
@@ -404,19 +398,18 @@ export interface FilePublicMagicMetadataData {
  * might be other, newer, clients out there adding fields that the current
  * client might not we aware of, and we don't want to overwrite them.
  */
-// TODO(RE): Use me
-export const PublicMagicMetadata = z.looseObject({
-    // [Note: Zod doesn't work with `exactOptionalPropertyTypes` yet]
-    //
-    // Using `optional` is not accurate here. The key is optional, but the
-    // value itself is not optional.
-    //
-    // Zod doesn't work with `exactOptionalPropertyTypes` yet, but it seems
-    // to be on the roadmap so we suppress these mismatches.
-    //
-    // See:
-    // https://github.com/colinhacks/zod/issues/635#issuecomment-2196579063
-    editedTime: z.number().optional(),
+export const FilePublicMagicMetadataData = z.looseObject({
+    dateTime: z.string().nullish().transform(nullToUndefined),
+    offsetTime: z.string().nullish().transform(nullToUndefined),
+    editedTime: z.number().nullish().transform(nullToUndefined),
+    editedName: z.string().nullish().transform(nullToUndefined),
+    w: z.number().nullish().transform(nullToUndefined),
+    h: z.number().nullish().transform(nullToUndefined),
+    caption: z.string().nullish().transform(nullToUndefined),
+    uploaderName: z.string().nullish().transform(nullToUndefined),
+    lat: z.number().nullish().transform(nullToUndefined),
+    long: z.number().nullish().transform(nullToUndefined),
+    sv: z.number().nullish().transform(nullToUndefined),
 });
 
 /**
