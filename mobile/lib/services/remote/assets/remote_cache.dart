@@ -72,11 +72,11 @@ class RemoteCache {
     }
 
     final _ = isLoaded ?? await _load();
-    final asset = remoteAssets[cf.fileID];
-    if (asset == null) {
+    final rAsset = remoteAssets[cf.fileID];
+    if (rAsset == null) {
       return null;
     }
-    return EnteFile.fromRemoteAsset(asset, cf);
+    return EnteFile.fromRemoteAsset(rAsset, cf);
   }
 
   Future<EnteFile?> getAnyCollectionFile(int fileID) async {

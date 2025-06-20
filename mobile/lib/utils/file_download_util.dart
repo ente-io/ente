@@ -176,7 +176,7 @@ Future<File?> downloadAndDecrypt(
       await CryptoUtil.decryptFile(
         encryptedFilePath,
         decryptedFilePath,
-        file.remoteAsset!.fileHeader,
+        file.rAsset!.fileHeader,
         getFileKey(file),
       );
       fakeProgress?.stop();

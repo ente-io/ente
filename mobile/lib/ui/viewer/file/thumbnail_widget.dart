@@ -144,7 +144,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
         _hasLoadedThumbnail = true;
       } else {
         localImageProviderKey = LocalThumbnailProviderKey(
-          asset: widget.file.asset!,
+          asset: widget.file.lAsset!,
           height: widget.thumbnailSize,
           width: widget.thumbnailSize,
         );

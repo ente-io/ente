@@ -75,8 +75,8 @@ class SelectedFiles extends ChangeNotifier {
       }
     } else if (first.uploadedFileID != null && second.uploadedFileID != null) {
       return first.uploadedFileID == second.uploadedFileID;
-    } else if (first.asset != null && second.asset != null) {
-      return first.asset!.id == second.asset!.id;
+    } else if (first.lAsset != null && second.lAsset != null) {
+      return first.lAsset!.id == second.lAsset!.id;
     }
     return false;
   }

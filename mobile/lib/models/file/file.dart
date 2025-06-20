@@ -19,7 +19,7 @@ import 'package:photos/utils/standalone/date_time.dart';
 
 //Todo: files with no location data have lat and long set to 0.0. This should ideally be null.
 class EnteFile {
-  AssetEntity? asset;
+  AssetEntity? lAsset;
   RemoteAsset? remoteAsset;
   CollectionFileEntry? fileEntry;
   int? generatedID;
@@ -78,7 +78,7 @@ class EnteFile {
 
   static Future<EnteFile> fromAsset(String pathName, AssetEntity asset) async {
     final EnteFile file = EnteFile();
-    file.asset = asset;
+    file.lAsset = asset;
     file.localID = asset.id;
     file.title = asset.title;
     file.deviceFolder = pathName;
@@ -94,7 +94,7 @@ class EnteFile {
 
   static EnteFile fromAssetSync(AssetEntity asset) {
     final EnteFile file = EnteFile();
-    file.asset = asset;
+    file.lAsset = asset;
     file.localID = asset.id;
     file.title = asset.title;
     file.deviceFolder = asset.relativePath;
@@ -118,35 +118,34 @@ class EnteFile {
   }
 
   static EnteFile fromRemoteAsset(
-    RemoteAsset remoteAsset,
+    RemoteAsset rAsset,
     CollectionFileEntry collection, {
-    AssetEntity? asset,
+    AssetEntity? lAsset,
   }) {
     final EnteFile file = EnteFile();
-    file.remoteAsset = remoteAsset;
+    file.remoteAsset = rAsset;
     file.fileEntry = collection;
-    file.asset = asset;
+    file.lAsset = lAsset;
 
-    file.uploadedFileID = remoteAsset.id;
-    file.ownerID = remoteAsset.ownerID;
-    file.title = remoteAsset.title;
-    file.deviceFolder = remoteAsset.deviceFolder;
-    file.location = remoteAsset.location;
-    file.fileType = remoteAsset.fileType;
-    file.creationTime = remoteAsset.creationTime;
-    file.modificationTime = remoteAsset.modificationTime;
-    file.fileSubType = remoteAsset.subType;
+    file.uploadedFileID = rAsset.id;
+    file.ownerID = rAsset.ownerID;
+    file.title = rAsset.title;
+    file.deviceFolder = rAsset.deviceFolder;
+    file.location = rAsset.location;
+    file.fileType = rAsset.fileType;
+    file.creationTime = rAsset.creationTime;
+    file.modificationTime = rAsset.modificationTime;
+    file.fileSubType = rAsset.subType;
     file.metadataVersion = kCurrentMetadataVersion;
-    file.duration = remoteAsset.durationInSec;
-    file.fileSize = remoteAsset.fileSize;
+    file.duration = rAsset.durationInSec;
+    file.fileSize = rAsset.fileSize;
     file.collectionID = collection.collectionID;
     file.encryptedKey = CryptoUtil.bin2base64(collection.encFileKey);
     file.keyDecryptionNonce = CryptoUtil.bin2base64(collection.encFileKeyNonce);
 
     file.pubMagicMetadata =
-        PubMagicMetadata.fromMap(remoteAsset.publicMetadata?.data);
-    file.magicMetadata =
-        MagicMetadata.fromMap(remoteAsset.privateMetadata?.data);
+        PubMagicMetadata.fromMap(rAsset.publicMetadata?.data);
+    file.magicMetadata = MagicMetadata.fromMap(rAsset.privateMetadata?.data);
     return file;
   }
 
@@ -423,7 +422,7 @@ class EnteFile {
     PubMagicMetadata? pubMagicMetadata,
   }) {
     return EnteFile()
-      ..asset = asset
+      ..lAsset = lAsset
       ..remoteAsset = remoteAsset
       ..fileEntry = fileEntry
       ..generatedID = generatedID ?? this.generatedID

@@ -7,7 +7,7 @@ import "package:photos/utils/file_key.dart";
 
 extension CollectionsServiceMapper on CollectionsService {
   EnteFile moveOrAddEntry(EnteFile file, int destCollectionID) {
-    if (file.remoteAsset == null || file.fileEntry == null) {
+    if (file.rAsset == null || file.fileEntry == null) {
       throw ArgumentError(
         "File must have remoteAsset and fileEntry to be mapped.",
       );
@@ -15,7 +15,7 @@ extension CollectionsServiceMapper on CollectionsService {
     final fileKey = getFileKey(file);
     final encResult =
         CryptoUtil.encryptSync(fileKey, getCollectionKey(destCollectionID));
-    final remoteAsset = file.remoteAsset!;
+    final remoteAsset = file.rAsset!;
     final oldCF = file.fileEntry!;
     final newCF = CollectionFileEntry(
       collectionID: destCollectionID,
@@ -28,15 +28,15 @@ extension CollectionsServiceMapper on CollectionsService {
     return EnteFile.fromRemoteAsset(
       remoteAsset,
       newCF,
-      asset: file.asset,
+      lAsset: file.lAsset,
     );
   }
 
   DiffFileItem buildDiffItem(EnteFile file) {
-    if (file.remoteAsset == null || file.fileEntry == null) {
+    if (file.rAsset == null || file.fileEntry == null) {
       throw ArgumentError("must have remoteAsset and fileEntry");
     }
-    final remoteAsset = file.remoteAsset!;
+    final remoteAsset = file.rAsset!;
     final cf = file.fileEntry!;
     if (remoteAsset.id != cf.fileID) {
       throw ArgumentError("File ID in remote asset does not match file entry.");

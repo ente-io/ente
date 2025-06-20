@@ -199,7 +199,7 @@ Future<void> _downloadAndDecryptThumbnail(FileDownloadItem item) async {
     data = await CryptoUtil.decryptChaCha(
       encryptedThumbnail,
       thumbnailDecryptionKey,
-      file.remoteAsset!.thumbHeader,
+      file.rAsset!.thumbHeader,
     );
   } catch (e, s) {
     _logger.severe("Failed to decrypt thumbnail ${item.file.toString()}", e, s);
