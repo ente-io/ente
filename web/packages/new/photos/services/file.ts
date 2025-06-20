@@ -12,40 +12,46 @@ import {
 } from "ente-media/magic-metadata";
 
 /**
- * Change the visibility (normal, archived, hidden) of a file on remote.
+ * Change the visibility (normal, archived, hidden) of a list of files on
+ * remote.
  *
  * Remote only, does not modify local state.
+ *
+ * @param files The list of files whose visibility we want to change. All the
+ * files will get their visibility updated to the new, provided, value.
  *
  * @param visibility The new visibility (normal, archived, hidden).
  */
-export const updateFileVisibility = async (
-    file: EnteFile,
+export const updateFilesVisibility = async (
+    files: EnteFile[],
     visibility: ItemVisibility,
-) => updateFilePrivateMagicMetadata(file, { visibility });
+) => updateFilesPrivateMagicMetadata(files, { visibility });
 
 /**
- * Update the private magic metadata of a file on remote.
+ * Update the private magic metadata of a list of files on remote.
  *
  * Remote only, does not modify local state.
  *
- * @param file The file whose magic metadata we want to update.
+ * @param file The list of files whose magic metadata we want to update. The
+ * same updates will be applied to the magic metadata of all the files.
  *
- * The existing magic metadata of this collection is used both to obtain the
+ * The existing magic metadata of the provided files is used both to obtain the
  * current magic metadata version, and the existing contents on top of which the
  * updates are applied, so it is imperative that both these values are up to
  * sync with remote otherwise the update will fail.
  *
- * @param updates A non-empty subset of {@link FilePrivateMagicMetadataData} entries.
+ * @param updates A non-empty subset of {@link FilePrivateMagicMetadataData}
+ * entries.
  *
  * See: [Note: Magic metadata data cannot have nullish values]
  */
-const updateFilePrivateMagicMetadata = async (
-    { id, key, magicMetadata }: EnteFile2,
+const updateFilesPrivateMagicMetadata = async (
+    files: EnteFile2[],
     updates: FilePrivateMagicMetadataData,
 ) =>
     putFilesMagicMetadata({
-        metadataList: [
-            {
+        metadataList: await Promise.all(
+            files.map(async ({ id, key, magicMetadata }) => ({
                 id,
                 magicMetadata: await encryptMagicMetadata(
                     createMagicMetadata(
@@ -54,8 +60,8 @@ const updateFilePrivateMagicMetadata = async (
                     ),
                     key,
                 ),
-            },
-        ],
+            })),
+        ),
     });
 
 /**
