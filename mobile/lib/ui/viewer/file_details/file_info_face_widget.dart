@@ -80,14 +80,19 @@ class _FileInfoFaceWidgetState extends State<FileInfoFaceWidget> {
                   ),
                 ),
                 child: ClipRRect(
-                  borderRadius:
-                      const BorderRadius.all(Radius.elliptical(16, 12)),
                   child: SizedBox(
                     width: 60,
                     height: 60,
-                    child: FileFaceWidget(
-                      widget.file,
-                      faceCrop: widget.faceCrop,
+                    child: ClipPath(
+                      clipper: ShapeBorderClipper(
+                        shape: ContinuousRectangleBorder(
+                          borderRadius: BorderRadius.circular(52),
+                        ),
+                      ),
+                      child: FileFaceWidget(
+                        widget.file,
+                        faceCrop: widget.faceCrop,
+                      ),
                     ),
                   ),
                 ),
@@ -259,8 +264,8 @@ class _FileInfoFaceWidgetState extends State<FileInfoFaceWidget> {
   Widget _buildEditIcon(BuildContext context) {
     final bool hasPerson = widget.person != null;
     return Positioned(
-      right: -6,
-      top: -6,
+      right: -5,
+      top: -5,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: () => hasPerson ? _onMinusIconTap() : _onPlusIconTap(),
