@@ -380,8 +380,15 @@ class PersonService {
       for (var e in entities) {
         final personData = PersonData.fromJson(json.decode(e.data));
         if (personData.rejectedFaceIDs.isNotEmpty) {
+          final personClustersToFaceIDs = dbPeopleClusterInfo[e.id];
+          if (personClustersToFaceIDs == null) {
+            logger.warning(
+              "Person ${e.id} ${personData.name} has rejected faces but no clusters found in local DB",
+            );
+            continue;
+          }
           final personFaceIDs =
-              dbPeopleClusterInfo[e.id]!.values.expand((e) => e).toSet();
+              personClustersToFaceIDs.values.expand((e) => e).toSet();
           final rejectedFaceIDsSet = personData.rejectedFaceIDs.toSet();
           final assignedAndRejectedFaceIDs =
               rejectedFaceIDsSet.intersection(personFaceIDs);
