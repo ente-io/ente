@@ -1000,8 +1000,9 @@ const readLivePhotoDetails = async ({ image, video }: LivePhotoAssets) => {
     return {
         fileTypeInfo: {
             fileType: FileType.livePhoto,
-            extension: `${img.fileTypeInfo.extension}+${vid.fileTypeInfo.extension}`,
-            imageType: img.fileTypeInfo.extension,
+            // Use the extension of the image component as the extension of the
+            // live photo.
+            extension: img.fileTypeInfo.extension,
         },
         fileSize: img.fileSize + vid.fileSize,
         lastModifiedMs: img.lastModifiedMs,
@@ -1357,9 +1358,9 @@ const readLivePhoto = async (
         hasStaticThumbnail,
     } = await augmentWithThumbnail(
         livePhotoAssets.image,
-        // TODO: Update underlying type
-        // @ts-ignore
-        { extension: fileTypeInfo.imageType, fileType: FileType.image },
+        // For live photos, the extension field in the file type info is the
+        // extension of the image component of the live photo.
+        { fileType: FileType.image, extension: fileTypeInfo.extension },
         await readUploadItem(livePhotoAssets.image),
     );
     const videoFileStreamOrData = await readUploadItem(livePhotoAssets.video);

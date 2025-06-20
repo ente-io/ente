@@ -36,11 +36,11 @@ export interface FileTypeInfo {
     /**
      * A lowercased, standardized extension for files of the current type.
      *
-     * TODO(MR): This in not valid for live photos.
+     * For live photos, this is set to the extension of the image component of
+     * the live photo.
      */
     extension: string;
     mimeType?: string;
-    imageType?: string;
 }
 
 // list of format that were missed by type-detection for some files.
