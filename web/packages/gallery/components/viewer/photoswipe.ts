@@ -286,7 +286,11 @@ export class FileViewerPhotoSwipe {
         const currentAnnotatedFile = () => {
             const file = currentFile();
             let annotatedFile = _currentAnnotatedFile;
-            if (!annotatedFile || annotatedFile.file.id != file.id) {
+            if (
+                !annotatedFile ||
+                annotatedFile.file.id != file.id ||
+                annotatedFile.file.updationTime != file.updationTime
+            ) {
                 annotatedFile = onAnnotate(file, currSlideData());
                 _currentAnnotatedFile = annotatedFile;
             }
@@ -294,6 +298,41 @@ export class FileViewerPhotoSwipe {
         };
 
         const currentFileAnnotation = () => currentAnnotatedFile().annotation;
+
+        this.refreshSlideOnFilesUpdateIfNeeded = () => {
+            // This function is called when the list of underlying files changes
+            // (possibly spuriously, since the list changes on identity and not
+            // deep equality). In response, it performs the sequence described
+            // in [Note: Updates to the files prop for FileViewer].
+            //
+            // The intent is to minimize the need to call `refreshSlideContent`
+            // since that would cause the zoom and pan state to be reset too.
+
+            const af = _currentAnnotatedFile;
+            if (!af) return;
+
+            const files = delegate.getFiles();
+            const ci = pswp.currIndex;
+            console.log("goToSlideForFileIDIfNeeded", af, files, ci);
+
+            const cf = files[ci];
+            if (!cf || cf.id != af.file.id) {
+                const newIndex = files.findIndex(({ id }) => id == af.file.id);
+                if (newIndex == -1) {
+                    console.log("refreshCurrentSlideContentAfterRemove");
+                    this.refreshCurrentSlideContentAfterRemove(files.length);
+                } else {
+                    console.log("going to slide", newIndex);
+                    _currentAnnotatedFile = undefined;
+                    pswp.goTo(newIndex);
+                    pswp.refreshSlideContent(newIndex);
+                }
+            } else {
+                console.log("calling currentAnnotatedFile");
+                // Refresh the current annotated file if needed.
+                currentAnnotatedFile();
+            }
+        };
 
         /**
          * File (ID)s for which we should render the original, non-streamable,
@@ -1547,7 +1586,7 @@ export class FileViewerPhotoSwipe {
      * @param expectedFileCount The count of files that we expect to show after
      * the refresh.
      */
-    refreshCurrentSlideContentAfterRemove(newFileCount: number) {
+    private refreshCurrentSlideContentAfterRemove(newFileCount: number) {
         // Refresh the slide, and its subsequent neighbour.
         //
         // To see why, consider item at index 3 was removed. After refreshing,
@@ -1570,6 +1609,12 @@ export class FileViewerPhotoSwipe {
 
         refreshSlideAndNextNeighbour(this.pswp.currIndex);
     }
+
+    /**
+     * Ask the delegate for the files information afresh, and perform the
+     * sequence described in [Note: Updates to the files prop for FileViewer].
+     */
+    refreshSlideOnFilesUpdateIfNeeded: () => void;
 
     /**
      * Refresh the favorite button (if indeed it is visible at all) on the

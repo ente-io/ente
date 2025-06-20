@@ -770,76 +770,32 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         performKeyAction,
     ]);
 
-    // Update the active annotated file, if needed, on updates to files.
+    // Handle updates to files.
     //
-    // If the active annotated file is no longer being shown, move to the next
-    // slide if possible, or close the viewer otherwise.
+    // [Note: Updates to the files prop for FileViewer]
+    //
+    // On updates to the `files` prop,
+    //
+    // - If the file that was previously being shown is no longer being shown,
+    //   move to the next slide if possible, or close the viewer otherwise (say
+    //   if there are no more files remaining, e.g. we archived the last one
+    //   when in the all section).
+    //
+    // - If the file that was previously being shown has moved to a new index
+    //   (e.g. user changed the date in the file info panel), go to that new
+    //   index.
+    //
+    // - If the file is still the same but the underlying file's updation time
+    //   has changed (e.g. the user changed the name of the file in the file
+    //   info panel), refresh the annotated file data cached by the viewer.
+    //
     useEffect(() => {
-        setActiveAnnotatedFile((af) => {
-            // Do nothing if we're not showing a file (we might not be open).
-            if (!af) return af;
-
-            if (!files.length) {
-                // If there are no more files left, close the viewer.
-                handleClose();
-                return af;
-            }
-
-            const updatedFile = files.find(({ id }) => id == af.file.id);
-            if (!updatedFile) {
-                // The file we were displaying is no longer part of the list of
-                // files that should be displayed. Refresh the slides, adjusting
-                // the indexes as necessary.
-                //
-                // A special case is when we might've been the last slide, in
-                // which case we need to go back one slide first. To determine
-                // if this is needed, we also pass the expected count of files
-                // to our PhotoSwipe wrapper.
-                psRef.current?.refreshCurrentSlideContentAfterRemove(
-                    files.length,
-                );
-                return af;
-            }
-
-            // There was an update to the files array, something that might've
-            // also potentially modified the file we're currently viewing, and
-            // we also found a (possibly) file with the same ID in the
-            // (possibly) updated files array.
-            //
-            // > Possibly because these are not deep equality comparisons, and
-            // > we might get here when the array's identity has changed but not
-            // > necessarily its contents.
-            //
-            // We could always refresh the current slide when we get here,
-            // however we want to avoid refreshing the entire UI unnecessarily
-            // lest the user lose their zoom/pan etc.
-            //
-            // So instead we only modify the file property of the active
-            // annotated file.
-            //
-            // This is not correct in its full generality, but it works fine in
-            // the specific cases we need to handle where the file gets updated
-            // from within the file viewer:
-            //
-            // - In case of deleting a file, or toggling its archived status to
-            //   something that that caused the file to no longer part of the
-            //   list that is shown, we'll not get to this code branch.
-            //
-            // - In case of toggling archive otherwise, just updating the file
-            //   attribute is enough, the UI state is derived from it; none of
-            //   the other attributes of the annotated file currently depend on
-            //   the archive status change.
-            //
-            // - Similar reasoning applies to updates to the file's file name or
-            //   date in the file info panel.
-            //
-            // - For updates to the file's caption in the file info panel we
-            //   already need special casing (see `updateItemDataAlt`) to reload
-            //   the slide since the PhotoSwipe UI element that displays the
-            //   caption needs to be reloaded. So we'll come here in the caption
-            //   update case too, but this code then isn't strictly necessary.
-            return { ...af, file: updatedFile };
-        });
+        if (!files.length) {
+            // If there are no more files left, close the viewer.
+            handleClose();
+        } else {
+            psRef.current?.refreshSlideOnFilesUpdateIfNeeded();
+        }
     }, [handleClose, files]);
 
     useEffect(() => {
