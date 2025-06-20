@@ -10,10 +10,11 @@ import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/tab_changed_event.dart';
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file_load_result.dart';
+import "package:photos/models/gallery/gallery_sections.dart";
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/ui/common/loading_widget.dart';
 import "package:photos/ui/viewer/gallery/component/group/type.dart";
-import "package:photos/ui/viewer/gallery/component/multiple_groups_gallery_view.dart";
+import "package:photos/ui/viewer/gallery/component/sectioned_sliver_list.dart";
 import 'package:photos/ui/viewer/gallery/empty_state.dart';
 import "package:photos/ui/viewer/gallery/state/gallery_context_state.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
@@ -380,27 +381,39 @@ class GalleryState extends State<Gallery> {
       inSelectionMode: widget.inSelectionMode,
       type: widget.groupType,
       // Replace this with the new gallery and use `_allGalleryFiles`
-      child: MultipleGroupsGalleryView(
-        itemScroller: _itemScroller,
-        groupedFiles: currentGroupedFiles,
-        disableScroll: widget.disableScroll,
-        emptyState: widget.emptyState,
-        asyncLoader: widget.asyncLoader,
-        removalEventTypes: widget.removalEventTypes,
-        tagPrefix: widget.tagPrefix,
-        scrollBottomSafeArea: widget.scrollBottomSafeArea,
-        limitSelectionToOne: widget.limitSelectionToOne,
-        enableFileGrouping:
-            widget.enableFileGrouping && widget.groupType.showGroupHeader(),
-        logTag: _logTag,
-        logger: _logger,
-        reloadEvent: widget.reloadEvent,
-        header: widget.header,
-        footer: widget.footer,
-        selectedFiles: widget.selectedFiles,
-        showSelectAllByDefault:
-            widget.showSelectAllByDefault && widget.groupType.showGroupHeader(),
-        isScrollablePositionedList: widget.isScrollablePositionedList,
+      // child: MultipleGroupsGalleryView(
+      //   itemScroller: _itemScroller,
+      //   groupedFiles: currentGroupedFiles,
+      //   disableScroll: widget.disableScroll,
+      //   emptyState: widget.emptyState,
+      //   asyncLoader: widget.asyncLoader,
+      //   removalEventTypes: widget.removalEventTypes,
+      //   tagPrefix: widget.tagPrefix,
+      //   scrollBottomSafeArea: widget.scrollBottomSafeArea,
+      //   limitSelectionToOne: widget.limitSelectionToOne,
+      //   enableFileGrouping:
+      //       widget.enableFileGrouping && widget.groupType.showGroupHeader(),
+      //   logTag: _logTag,
+      //   logger: _logger,
+      //   reloadEvent: widget.reloadEvent,
+      //   header: widget.header,
+      //   footer: widget.footer,
+      //   selectedFiles: widget.selectedFiles,
+      //   showSelectAllByDefault:
+      //       widget.showSelectAllByDefault && widget.groupType.showGroupHeader(),
+      //   isScrollablePositionedList: widget.isScrollablePositionedList,
+      // ),
+      child: CustomScrollView(
+        slivers: [
+          SectionedListSliver(
+            sectionLayouts: GallerySections(
+              allFiles: _allGalleryFiles,
+              groupType: widget.groupType,
+              widthAvailable: MediaQuery.sizeOf(context).width,
+              context: context,
+            ).getSectionLayouts(),
+          ),
+        ],
       ),
     );
   }
