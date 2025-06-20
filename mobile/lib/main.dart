@@ -190,16 +190,11 @@ Future<void> _runMinimally(String taskId) async {
   if (Platform.isAndroid) HomeWidgetService.instance.init(prefs);
 
   // Begin Execution
-  await Future.wait(
-    [
-      // only runs for android
-      _homeWidgetSync(true),
-      () async {
-        updateService.showUpdateNotification().ignore();
-        await _sync('bgTaskActiveProcess');
-      }(),
-    ],
-  );
+  // only runs for android
+  updateService.showUpdateNotification().ignore();
+  await _sync('bgTaskActiveProcess');
+  // only runs for android
+  await _homeWidgetSync(true);
 }
 
 Future<void> _init(bool isBackground, {String via = ''}) async {
