@@ -20,20 +20,11 @@ import {
     extractVideoMetadata,
 } from "ente-gallery/services/ffmpeg";
 import {
-    getNonEmptyMagicMetadataProps,
-    updateMagicMetadata,
-} from "ente-gallery/services/magic-metadata";
-import {
     detectFileTypeInfoFromChunk,
     isFileTypeNotSupportedError,
 } from "ente-gallery/utils/detect-type";
 import { readStream } from "ente-gallery/utils/native-stream";
-import type {
-    EncryptedMagicMetadata,
-    EnteFile,
-    FilePublicMagicMetadata,
-    RemoteEnteFile,
-} from "ente-media/file";
+import type { EnteFile, RemoteEnteFile } from "ente-media/file";
 import {
     fileFileName,
     metadataHash,
@@ -43,6 +34,11 @@ import {
 } from "ente-media/file-metadata";
 import { FileType, type FileTypeInfo } from "ente-media/file-type";
 import { encodeLivePhoto } from "ente-media/live-photo";
+import {
+    createMagicMetadata,
+    encryptMagicMetadata,
+    type RemoteMagicMetadata,
+} from "ente-media/magic-metadata";
 import { addToCollection } from "ente-new/photos/services/collection";
 import { mergeUint8Arrays } from "ente-utils/array";
 import { ensureInteger, ensureNumber } from "ente-utils/ensure";
@@ -279,9 +275,9 @@ interface ThumbnailedFile {
 }
 
 interface FileWithMetadata extends Omit<ThumbnailedFile, "hasStaticThumbnail"> {
-    metadata: FileMetadata;
     localID: number;
-    pubMagicMetadata: FilePublicMagicMetadata;
+    metadata: FileMetadata;
+    publicMagicMetadata: FilePublicMagicMetadataData;
 }
 
 interface EncryptedFileStream {
@@ -320,7 +316,7 @@ interface EncryptedFilePieces {
      * the decryption header that was used during encryption (base64 string).
      */
     metadata: { encryptedData: string; decryptionHeader: string };
-    pubMagicMetadata: EncryptedMagicMetadata;
+    pubMagicMetadata: RemoteMagicMetadata | undefined;
     localID: number;
 }
 
@@ -741,11 +737,6 @@ export const upload = async (
 
         if (hasStaticThumbnail) metadata.hasStaticThumbnail = true;
 
-        const pubMagicMetadata = await constructPublicMagicMetadata({
-            ...publicMagicMetadata,
-            uploaderName,
-        });
-
         abortIfCancelled();
 
         const fileWithMetadata: FileWithMetadata = {
@@ -753,7 +744,10 @@ export const upload = async (
             fileStreamOrData,
             thumbnail,
             metadata,
-            pubMagicMetadata,
+            publicMagicMetadata: {
+                ...publicMagicMetadata,
+                ...(uploaderName && { uploaderName }),
+            },
         };
 
         const { encryptedFilePieces, encryptedFileKey } = await encryptFile(
@@ -1488,20 +1482,6 @@ const augmentWithThumbnail = async (
     };
 };
 
-const constructPublicMagicMetadata = async (
-    publicMagicMetadataProps: FilePublicMagicMetadataData,
-): Promise<FilePublicMagicMetadata> => {
-    const nonEmptyPublicMagicMetadataProps = getNonEmptyMagicMetadataProps(
-        publicMagicMetadataProps,
-    );
-
-    if (Object.values(nonEmptyPublicMagicMetadataProps).length === 0) {
-        // @ts-ignore
-        return null;
-    }
-    return await updateMagicMetadata(publicMagicMetadataProps);
-};
-
 const encryptFile = async (
     file: FileWithMetadata,
     collectionKey: string,
@@ -1509,8 +1489,13 @@ const encryptFile = async (
 ) => {
     const fileKey = await worker.generateBlobOrStreamKey();
 
-    const { fileStreamOrData, thumbnail, metadata, pubMagicMetadata, localID } =
-        file;
+    const {
+        fileStreamOrData,
+        thumbnail,
+        metadata,
+        publicMagicMetadata,
+        localID,
+    } = file;
 
     const encryptedFiledata =
         fileStreamOrData instanceof Uint8Array
@@ -1532,18 +1517,13 @@ const encryptFile = async (
         fileKey,
     );
 
-    let encryptedPubMagicMetadata: EncryptedMagicMetadata;
-    // Keep defensive check until the underlying type is audited.
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    if (pubMagicMetadata) {
-        const { encryptedData, decryptionHeader } =
-            await worker.encryptMetadataJSON(pubMagicMetadata.data, fileKey);
-        encryptedPubMagicMetadata = {
-            version: pubMagicMetadata.version,
-            count: pubMagicMetadata.count,
-            data: encryptedData,
-            header: decryptionHeader,
-        };
+    let encryptedPubMagicMetadata: RemoteMagicMetadata | undefined;
+    const pubMagicMetadata = createMagicMetadata(publicMagicMetadata);
+    if (pubMagicMetadata.count) {
+        encryptedPubMagicMetadata = await encryptMagicMetadata(
+            pubMagicMetadata,
+            fileKey,
+        );
     }
 
     const encryptedFileKey = await worker.encryptBox(fileKey, collectionKey);
@@ -1553,7 +1533,6 @@ const encryptFile = async (
             file: encryptedFiledata,
             thumbnail: encryptedThumbnail,
             metadata: encryptedMetadata,
-            // @ts-ignore
             pubMagicMetadata: encryptedPubMagicMetadata,
             localID: localID,
         },

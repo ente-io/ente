@@ -7,11 +7,8 @@ import {
     type PublicAlbumsCredentials,
 } from "ente-base/http";
 import { apiURL, uploaderOrigin } from "ente-base/origins";
-import {
-    type EncryptedMagicMetadata,
-    type RemoteEnteFile,
-    type RemoteFileMetadata,
-} from "ente-media/file";
+import { type RemoteEnteFile, type RemoteFileMetadata } from "ente-media/file";
+import type { RemoteMagicMetadata } from "ente-media/magic-metadata";
 import { nullToUndefined } from "ente-utils/transform";
 import { z } from "zod/v4";
 
@@ -411,7 +408,7 @@ export interface PostEnteFileRequest {
     file: UploadedFileObjectAttributes;
     thumbnail: UploadedFileObjectAttributes;
     metadata: RemoteFileMetadata;
-    pubMagicMetadata: EncryptedMagicMetadata;
+    pubMagicMetadata?: RemoteMagicMetadata;
 }
 
 /**

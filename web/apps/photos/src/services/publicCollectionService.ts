@@ -1,15 +1,12 @@
 import { sharedCryptoWorker } from "ente-base/crypto";
 import log from "ente-base/log";
 import { apiURL } from "ente-base/origins";
+import { type MagicMetadataCore } from "ente-gallery/services/magic-metadata";
 import type {
     Collection,
     CollectionPublicMagicMetadataData,
 } from "ente-media/collection";
-import type {
-    EnteFile,
-    MagicMetadataCore,
-    RemoteEnteFile,
-} from "ente-media/file";
+import type { EnteFile, RemoteEnteFile } from "ente-media/file";
 import { decryptRemoteFile, mergeMetadata } from "ente-media/file";
 import { savedPublicCollections } from "ente-new/albums/services/public-albums-fdb";
 import { sortFiles } from "ente-new/photos/services/files";

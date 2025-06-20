@@ -511,12 +511,3 @@ export const mergeMetadata = (files: EnteFile[]) =>
  */
 export const fileLogID = (file: EnteFile) =>
     `file ${fileFileName(file)} (${file.id})`;
-
-export interface MagicMetadataCore<T> {
-    version: number;
-    count: number;
-    header: string;
-    data: T;
-}
-
-export type EncryptedMagicMetadata = MagicMetadataCore<string>;
