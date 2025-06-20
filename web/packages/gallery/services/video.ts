@@ -10,11 +10,9 @@ import log from "ente-base/log";
 import { apiURL } from "ente-base/origins";
 import { ensureAuthToken } from "ente-base/token";
 import { fileLogID, type EnteFile } from "ente-media/file";
-import {
-    filePublicMagicMetadata,
-    updateRemotePublicMagicMetadata,
-} from "ente-media/file-metadata";
+import { filePublicMagicMetadata } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
+import { updateFilePublicMagicMetadata } from "ente-new/photos/services/file";
 import {
     getAllLocalFiles,
     getLocalTrashFileIDs,
@@ -1040,7 +1038,7 @@ const processQueueItem = async ({
     if (!res) {
         log.info(`Generate HLS for ${fileLogID(file)} | not-required`);
         // See: [Note: Marking files which do not need video processing]
-        await updateRemotePublicMagicMetadata(file, { sv: 1 });
+        await updateFilePublicMagicMetadata(file, { sv: 1 });
         return;
     }
 
