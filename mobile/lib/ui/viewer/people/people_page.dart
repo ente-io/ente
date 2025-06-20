@@ -66,6 +66,7 @@ class _PeoplePageState extends State<PeoplePage> {
       files!.isNotEmpty);
 
   bool userDismissedSuggestionBanner = false;
+  bool userDismissedPersonGallerySuggestion = false;
 
   late final StreamSubscription<LocalPhotosUpdatedEvent> _filesUpdatedEvent;
   late final StreamSubscription<PeopleChangedEvent> _peopleChangedEvent;
@@ -260,7 +261,7 @@ class _PeoplePageState extends State<PeoplePage> {
   }
 }
 
-class _Gallery extends StatelessWidget {
+class _Gallery extends StatefulWidget {
   final String tagPrefix;
   final SelectedFiles selectedFiles;
   final List<EnteFile> personFiles;
@@ -276,6 +277,13 @@ class _Gallery extends StatelessWidget {
   });
 
   @override
+  State<_Gallery> createState() => _GalleryState();
+}
+
+class _GalleryState extends State<_Gallery> {
+  bool userDismissedPersonGallerySuggestion = false;
+
+  @override
   Widget build(BuildContext context) {
     return Gallery(
       asyncLoader: (
@@ -284,7 +292,7 @@ class _Gallery extends StatelessWidget {
         limit,
         asc,
       }) async {
-        final result = await loadPersonFiles();
+        final result = await widget.loadPersonFiles();
         return Future.value(
           FileLoadResult(
             result,
@@ -303,12 +311,14 @@ class _Gallery extends StatelessWidget {
         EventType.deletedFromEverywhere,
         EventType.hide,
       },
-      tagPrefix: tagPrefix + tagPrefix,
-      selectedFiles: selectedFiles,
-      initialFiles: personFiles.isNotEmpty ? [personFiles.first] : [],
+      tagPrefix: widget.tagPrefix + widget.tagPrefix,
+      selectedFiles: widget.selectedFiles,
+      initialFiles:
+          widget.personFiles.isNotEmpty ? [widget.personFiles.first] : [],
       header: Column(
         children: [
-          personEntity.data.email != null && personEntity.data.email!.isNotEmpty
+          widget.personEntity.data.email != null &&
+                  widget.personEntity.data.email!.isNotEmpty
               ? const SizedBox.shrink()
               : Padding(
                   padding: const EdgeInsets.only(top: 12, bottom: 8),
@@ -319,14 +329,25 @@ class _Gallery extends StatelessWidget {
                     onTap: () async {
                       await routeToPage(
                         context,
-                        LinkEmailScreen(personEntity.remoteID),
+                        LinkEmailScreen(widget.personEntity.remoteID),
                       );
                     },
                   ),
                 ),
-          PersonGallerySuggestion(
-            person: personEntity,
-          ),
+          !userDismissedPersonGallerySuggestion
+              ? Dismissible(
+                  key: const Key("personGallerySuggestion"),
+                  direction: DismissDirection.horizontal,
+                  onDismissed: (direction) {
+                    setState(() {
+                      userDismissedPersonGallerySuggestion = true;
+                    });
+                  },
+                  child: PersonGallerySuggestion(
+                    person: widget.personEntity,
+                  ),
+                )
+              : const SizedBox.shrink(),
         ],
       ),
     );
