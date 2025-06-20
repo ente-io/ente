@@ -10,7 +10,7 @@ import { isDevBuild } from "ente-base/env";
 import { formattedDateRelative } from "ente-base/i18n-date";
 import log from "ente-base/log";
 import { downloadManager } from "ente-gallery/services/download";
-import { EnteFile, enteFileDeletionDate } from "ente-media/file";
+import { EnteFile } from "ente-media/file";
 import { fileDurationString } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
 import {
@@ -26,6 +26,7 @@ import {
 } from "ente-new/photos/components/PlaceholderThumbnails";
 import { TileBottomTextOverlay } from "ente-new/photos/components/Tiles";
 import { PseudoCollectionID } from "ente-new/photos/services/collection-summary";
+import { enteFileDeletionDate } from "ente-new/photos/services/files";
 import { t } from "i18next";
 import memoize from "memoize-one";
 import { GalleryContext } from "pages/gallery";
@@ -1283,6 +1284,9 @@ const FileThumbnail: React.FC<FileThumbnailProps> = ({
             )}
 
             {activeCollectionID == PseudoCollectionID.trash &&
+                // TODO(RE):
+                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                // @ts-ignore
                 file.isTrashed && (
                     <TileBottomTextOverlay>
                         <Typography variant="small">

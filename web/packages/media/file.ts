@@ -3,7 +3,6 @@ import {
     decryptMetadataJSON,
     sharedCryptoWorker,
 } from "ente-base/crypto";
-import { dateFromEpochMicroseconds } from "ente-base/date";
 import log from "ente-base/log";
 import { nullishToBlank, nullToUndefined } from "ente-utils/transform";
 import { z } from "zod/v4";
@@ -312,16 +311,6 @@ export interface EnteFile
      * See: [Note: Metadatum]
      */
     pubMagicMetadata?: MagicMetadataCore<FilePublicMagicMetadataData>;
-    /**
-     * `true` if this file is in trash (i.e. it has been deleted by the user,
-     * and will be permanently deleted after 30 days of being moved to trash).
-     */
-    isTrashed?: boolean;
-    /**
-     * If {@link isTrashed} is `true`, then {@link deleteBy} contains the epoch
-     * microseconds when this file will be permanently deleted.
-     */
-    deleteBy?: number;
 }
 
 /**
@@ -744,16 +733,6 @@ export const mergeMetadata = (files: EnteFile[]) =>
  */
 export const fileLogID = (file: EnteFile) =>
     `file ${fileFileName(file)} (${file.id})`;
-
-/**
- * Return the date when the file will be deleted permanently. Only valid for
- * files that are in the user's trash.
- *
- * This is a convenience wrapper over the {@link deleteBy} property of a file,
- * converting that epoch microsecond value into a JavaScript date.
- */
-export const enteFileDeletionDate = (file: EnteFile) =>
-    dateFromEpochMicroseconds(file.deleteBy);
 
 export interface MagicMetadataCore<T> {
     version: number;

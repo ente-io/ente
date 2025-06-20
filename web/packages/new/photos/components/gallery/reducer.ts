@@ -31,6 +31,7 @@ import {
     groupFilesByCollectionID,
     sortFiles,
     uniqueFilesByID,
+    type TrashedEnteFile,
 } from "../../services/files";
 import type { PeopleState, Person } from "../../services/ml/people";
 import type { SearchSuggestion } from "../../services/search/types";
@@ -418,7 +419,7 @@ export type GalleryAction =
           collections: Collection[];
           normalFiles: EnteFile[];
           hiddenFiles: EnteFile[];
-          trashedFiles: EnteFile[];
+          trashedFiles: TrashedEnteFile[];
       }
     | {
           type: "setCollections";

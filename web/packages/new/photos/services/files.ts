@@ -1,4 +1,5 @@
 import { blobCache } from "ente-base/blob-cache";
+import { dateFromEpochMicroseconds } from "ente-base/date";
 import log from "ente-base/log";
 import { apiURL } from "ente-base/origins";
 import type { Collection } from "ente-media/collection";
@@ -230,7 +231,30 @@ export async function getLocalTrashedFiles() {
     return getTrashedFiles(await getLocalTrash());
 }
 
-export function getTrashedFiles(trash: Trash): EnteFile[] {
+export type TrashedEnteFile = EnteFile & {
+    /**
+     * `true` if this file is in trash (i.e. it has been deleted by the user,
+     * and will be permanently deleted after 30 days of being moved to trash).
+     */
+    isTrashed?: boolean;
+    /**
+     * If {@link isTrashed} is `true`, then {@link deleteBy} contains the epoch
+     * microseconds when this file will be permanently deleted.
+     */
+    deleteBy?: number;
+};
+
+/**
+ * Return the date when the file will be deleted permanently. Only valid for
+ * files that are in the user's trash.
+ *
+ * This is a convenience wrapper over the {@link deleteBy} property of a file,
+ * converting that epoch microsecond value into a JavaScript date.
+ */
+export const enteFileDeletionDate = (file: TrashedEnteFile) =>
+    dateFromEpochMicroseconds(file.deleteBy);
+
+export function getTrashedFiles(trash: Trash): TrashedEnteFile[] {
     return sortTrashFiles(
         mergeMetadata(
             trash.map((trashedFile) => ({
@@ -250,7 +274,7 @@ export function getTrashedFiles(trash: Trash): EnteFile[] {
 export const getLocalTrashFileIDs = () =>
     getLocalTrash().then((trash) => new Set(trash.map((f) => f.file.id)));
 
-const sortTrashFiles = (files: EnteFile[]) => {
+const sortTrashFiles = (files: TrashedEnteFile[]) => {
     return files.sort((a, b) => {
         if (a.deleteBy === b.deleteBy) {
             if (a.metadata.creationTime === b.metadata.creationTime) {
