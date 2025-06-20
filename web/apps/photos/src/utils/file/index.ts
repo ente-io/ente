@@ -237,14 +237,15 @@ const saveAsFile = async (file: EnteFile) => {
 /**
  * Save the given {@link blob} as a file in the user's download folder.
  */
-const saveBlobPartAsFile = async (blobPart: BlobPart, fileName: string) => {
-    const { mimeType } = await detectFileTypeInfo(
-        new File([blobPart], fileName),
+const saveBlobPartAsFile = async (blobPart: BlobPart, fileName: string) =>
+    createTypedObjectURL(blobPart, fileName).then((url) =>
+        saveAsFileAndRevokeObjectURL(url, fileName),
     );
-    saveAsFileAndRevokeObjectURL(
-        URL.createObjectURL(new Blob([blobPart], { type: mimeType })),
-        fileName,
-    );
+
+const createTypedObjectURL = async (blobPart: BlobPart, fileName: string) => {
+    const blob = blobPart instanceof Blob ? blobPart : new Blob([blobPart]);
+    const { mimeType } = await detectFileTypeInfo(new File([blob], fileName));
+    return URL.createObjectURL(new Blob([blob], { type: mimeType }));
 };
 
 async function downloadFilesDesktop(
@@ -328,11 +329,6 @@ async function downloadFileDesktop(
 
 export const getArchivedFiles = (files: EnteFile[]) => {
     return files.filter(isArchivedFile).map((file) => file.id);
-};
-
-export const createTypedObjectURL = async (blob: Blob, fileName: string) => {
-    const type = await detectFileTypeInfo(new File([blob], fileName));
-    return URL.createObjectURL(new Blob([blob], { type: type.mimeType }));
 };
 
 export const getUserOwnedFiles = (files: EnteFile[]) => {
