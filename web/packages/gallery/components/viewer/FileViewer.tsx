@@ -37,11 +37,7 @@ import {
     type FileInfoProps,
 } from "ente-gallery/components/FileInfo";
 import type { Collection } from "ente-media/collection";
-import {
-    fileFileName,
-    fileVisibility,
-    ItemVisibility,
-} from "ente-media/file-metadata";
+import { fileFileName, ItemVisibility } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
 import type { EnteFile } from "ente-media/file.js";
 import { isHEICExtension, needsJPEGConversion } from "ente-media/formats";
@@ -670,7 +666,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                 file &&
                 activeAnnotatedFile.annotation.showArchive
             ) {
-                switch (fileVisibility(file)) {
+                switch (file.magicMetadata?.data.visibility) {
                     case undefined:
                     case ItemVisibility.visible:
                         isArchived = false;

@@ -3,8 +3,8 @@ import { apiURL } from "ente-base/origins";
 import type { EnteFile, EnteFile2 } from "ente-media/file";
 import type {
     FilePrivateMagicMetadataData,
+    FilePublicMagicMetadataData,
     ItemVisibility,
-    PublicMagicMetadata,
 } from "ente-media/file-metadata";
 import {
     createMagicMetadata,
@@ -201,7 +201,7 @@ export const updateFileCaption = (file: EnteFile2, caption: string) =>
  */
 export const updateFilePublicMagicMetadata = async (
     file: EnteFile2,
-    updates: PublicMagicMetadata,
+    updates: FilePublicMagicMetadataData,
 ) => updateFilesPublicMagicMetadata([file], updates);
 
 /**
@@ -214,7 +214,7 @@ export const updateFilePublicMagicMetadata = async (
  */
 const updateFilesPublicMagicMetadata = async (
     files: EnteFile2[],
-    updates: PublicMagicMetadata,
+    updates: FilePublicMagicMetadataData,
 ) =>
     putFilesPublicMagicMetadata({
         metadataList: await Promise.all(
