@@ -379,6 +379,7 @@ class GalleryState extends State<Gallery> {
       sortOrderAsc: _sortOrderAsc,
       inSelectionMode: widget.inSelectionMode,
       type: widget.groupType,
+      // Replace this with the new gallery and use `_allGalleryFiles`
       child: MultipleGroupsGalleryView(
         itemScroller: _itemScroller,
         groupedFiles: currentGroupedFiles,
