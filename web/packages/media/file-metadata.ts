@@ -320,7 +320,7 @@ export interface PublicMagicMetadata {
      */
     editedTime?: number;
     /**
-     * Modified name of the {@link EnteFile}.
+     * Modified file name of the {@link EnteFile}.
      *
      * This field stores edits to the {@link title} {@link FileMetadata} field.
      */

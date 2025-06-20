@@ -620,9 +620,6 @@ export const FileViewer: React.FC<FileViewerProps> = ({
 
     const handleShortcutsClose = useCallback(() => setOpenShortcuts(false), []);
 
-    // TODO: Unused translation t("convert") - can be removed post the upcoming
-    // streaming changes as they'll provides the equiv.
-
     const shouldIgnoreKeyboardEvent = useCallback(() => {
         // Don't handle keydowns if any of the modals are open.
         return (
