@@ -228,7 +228,7 @@ class VideoPreviewService {
       final reencodeVideo =
           !(isH264 && bitrate != null && bitrate <= 4000 * 1000);
       final rescaleVideo = !(bitrate != null && bitrate <= 2000 * 1000);
-      final needsTonemap = !isHDR;
+      final needsTonemap = isHDR;
       final applyFPS = (double.tryParse(props?.fps ?? "") ?? 100) > 30;
 
       String filters = "";
