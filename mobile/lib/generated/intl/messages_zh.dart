@@ -397,6 +397,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "archive": MessageLookupByLibrary.simpleMessage("存档"),
         "archiveAlbum": MessageLookupByLibrary.simpleMessage("存档相册"),
         "archiving": MessageLookupByLibrary.simpleMessage("正在存档..."),
+        "areThey": MessageLookupByLibrary.simpleMessage("Are they "),
         "areYouSureRemoveThisFaceFromPerson":
             MessageLookupByLibrary.simpleMessage(
                 "Are you sure you want to remove this face from this person?"),
@@ -1273,6 +1274,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "processingVideos": MessageLookupByLibrary.simpleMessage("正在处理视频"),
         "publicLinkCreated": MessageLookupByLibrary.simpleMessage("公共链接已创建"),
         "publicLinkEnabled": MessageLookupByLibrary.simpleMessage("公开链接已启用"),
+        "questionmark": MessageLookupByLibrary.simpleMessage("?"),
         "queued": MessageLookupByLibrary.simpleMessage("已入列"),
         "quickLinks": MessageLookupByLibrary.simpleMessage("快速链接"),
         "radius": MessageLookupByLibrary.simpleMessage("半径"),
@@ -1378,6 +1380,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "rotateRight": MessageLookupByLibrary.simpleMessage("向右旋转"),
         "safelyStored": MessageLookupByLibrary.simpleMessage("安全存储"),
         "save": MessageLookupByLibrary.simpleMessage("保存"),
+        "saveAsAnotherPerson":
+            MessageLookupByLibrary.simpleMessage("Save as another person"),
         "saveChangesBeforeLeavingQuestion":
             MessageLookupByLibrary.simpleMessage("离开之前要保存更改吗？"),
         "saveCollage": MessageLookupByLibrary.simpleMessage("保存拼贴"),

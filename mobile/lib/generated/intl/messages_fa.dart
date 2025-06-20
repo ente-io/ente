@@ -77,6 +77,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "اندروید، آی‌اواس، وب، رایانه رومیزی"),
         "appVersion": m9,
         "archive": MessageLookupByLibrary.simpleMessage("بایگانی"),
+        "areThey": MessageLookupByLibrary.simpleMessage("Are they "),
         "areYouSureRemoveThisFaceFromPerson":
             MessageLookupByLibrary.simpleMessage(
                 "Are you sure you want to remove this face from this person?"),
@@ -295,6 +296,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("پشتیبان گیری خصوصی"),
         "privateSharing":
             MessageLookupByLibrary.simpleMessage("اشتراک گذاری خصوصی"),
+        "questionmark": MessageLookupByLibrary.simpleMessage("?"),
         "rateUsOnStore": m69,
         "recover": MessageLookupByLibrary.simpleMessage("بازیابی"),
         "recoverAccount":
@@ -325,6 +327,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "reviewSuggestions":
             MessageLookupByLibrary.simpleMessage("مرور پیشنهادها"),
         "safelyStored": MessageLookupByLibrary.simpleMessage("به طور ایمن"),
+        "saveAsAnotherPerson":
+            MessageLookupByLibrary.simpleMessage("Save as another person"),
         "saveKey": MessageLookupByLibrary.simpleMessage("ذخیره کلید"),
         "search": MessageLookupByLibrary.simpleMessage("جستجو"),
         "security": MessageLookupByLibrary.simpleMessage("امنیت"),

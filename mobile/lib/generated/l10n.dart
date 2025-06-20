@@ -12015,6 +12015,36 @@ class S {
       args: [],
     );
   }
+
+  /// `Are they `
+  String get areThey {
+    return Intl.message(
+      'Are they ',
+      name: 'areThey',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `?`
+  String get questionmark {
+    return Intl.message(
+      '?',
+      name: 'questionmark',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Save as another person`
+  String get saveAsAnotherPerson {
+    return Intl.message(
+      'Save as another person',
+      name: 'saveAsAnotherPerson',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

@@ -1391,5 +1391,8 @@
   "showMoreFaces": "Show more faces",
   "showLessFaces": "Show less faces",
   "otherDetectedFaces": "Other detected faces",
-  "areYouSureRemoveThisFaceFromPerson": "Are you sure you want to remove this face from this person?"
+  "areYouSureRemoveThisFaceFromPerson": "Are you sure you want to remove this face from this person?",
+  "areThey": "Are they ",
+  "questionmark": "?",
+  "saveAsAnotherPerson": "Save as another person"
 }

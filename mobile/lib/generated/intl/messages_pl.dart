@@ -363,6 +363,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "archiveAlbum":
             MessageLookupByLibrary.simpleMessage("Archiwizuj album"),
         "archiving": MessageLookupByLibrary.simpleMessage("Archiwizowanie..."),
+        "areThey": MessageLookupByLibrary.simpleMessage("Are they "),
         "areYouSureRemoveThisFaceFromPerson":
             MessageLookupByLibrary.simpleMessage(
                 "Are you sure you want to remove this face from this person?"),
@@ -1397,6 +1398,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Utworzono publiczny link"),
         "publicLinkEnabled":
             MessageLookupByLibrary.simpleMessage("Publiczny link włączony"),
+        "questionmark": MessageLookupByLibrary.simpleMessage("?"),
         "quickLinks": MessageLookupByLibrary.simpleMessage("Szybkie linki"),
         "radius": MessageLookupByLibrary.simpleMessage("Promień"),
         "raiseTicket": MessageLookupByLibrary.simpleMessage("Zgłoś"),
@@ -1530,6 +1532,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "safelyStored":
             MessageLookupByLibrary.simpleMessage("Bezpiecznie przechowywane"),
         "save": MessageLookupByLibrary.simpleMessage("Zapisz"),
+        "saveAsAnotherPerson":
+            MessageLookupByLibrary.simpleMessage("Save as another person"),
         "saveCollage": MessageLookupByLibrary.simpleMessage("Zapisz kolaż"),
         "saveCopy": MessageLookupByLibrary.simpleMessage("Zapisz kopię"),
         "saveKey": MessageLookupByLibrary.simpleMessage("Zapisz klucz"),

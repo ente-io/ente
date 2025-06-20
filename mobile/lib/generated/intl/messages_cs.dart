@@ -78,6 +78,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "archiveAlbum":
             MessageLookupByLibrary.simpleMessage("Archivovat album"),
         "archiving": MessageLookupByLibrary.simpleMessage("Archivování..."),
+        "areThey": MessageLookupByLibrary.simpleMessage("Are they "),
         "areYouSureRemoveThisFaceFromPerson":
             MessageLookupByLibrary.simpleMessage(
                 "Are you sure you want to remove this face from this person?"),
@@ -387,6 +388,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "processing": MessageLookupByLibrary.simpleMessage("Zpracovává se"),
         "publicLinkCreated":
             MessageLookupByLibrary.simpleMessage("Veřejný odkaz vytvořen"),
+        "questionmark": MessageLookupByLibrary.simpleMessage("?"),
         "queued": MessageLookupByLibrary.simpleMessage("Ve frontě"),
         "radius": MessageLookupByLibrary.simpleMessage("Rádius"),
         "rateUs": MessageLookupByLibrary.simpleMessage("Ohodnoť nás"),
@@ -438,6 +440,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "safelyStored":
             MessageLookupByLibrary.simpleMessage("Bezpečně uloženo"),
         "save": MessageLookupByLibrary.simpleMessage("Uložit"),
+        "saveAsAnotherPerson":
+            MessageLookupByLibrary.simpleMessage("Save as another person"),
         "saveCopy": MessageLookupByLibrary.simpleMessage("Uložit kopii"),
         "saveKey": MessageLookupByLibrary.simpleMessage("Uložit klíč"),
         "savePerson": MessageLookupByLibrary.simpleMessage("Uložit osobu"),

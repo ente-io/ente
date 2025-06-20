@@ -152,6 +152,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "appVersion": m9,
         "apply": MessageLookupByLibrary.simpleMessage("Verkställ"),
         "applyCodeTitle": MessageLookupByLibrary.simpleMessage("Använd kod"),
+        "areThey": MessageLookupByLibrary.simpleMessage("Are they "),
         "areYouSureRemoveThisFaceFromPerson":
             MessageLookupByLibrary.simpleMessage(
                 "Are you sure you want to remove this face from this person?"),
@@ -475,6 +476,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Integritetspolicy"),
         "publicLinkEnabled":
             MessageLookupByLibrary.simpleMessage("Offentlig länk aktiverad"),
+        "questionmark": MessageLookupByLibrary.simpleMessage("?"),
         "rateUsOnStore": m69,
         "recover": MessageLookupByLibrary.simpleMessage("Återställ"),
         "recoverAccount":
@@ -533,6 +535,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Återställ till standard"),
         "retry": MessageLookupByLibrary.simpleMessage("Försök igen"),
         "save": MessageLookupByLibrary.simpleMessage("Spara"),
+        "saveAsAnotherPerson":
+            MessageLookupByLibrary.simpleMessage("Save as another person"),
         "saveCopy": MessageLookupByLibrary.simpleMessage("Spara kopia"),
         "saveKey": MessageLookupByLibrary.simpleMessage("Spara nyckel"),
         "saveYourRecoveryKeyIfYouHaventAlready":

@@ -24,6 +24,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
         "accountWelcomeBack":
             MessageLookupByLibrary.simpleMessage("மீண்டும் வருக!"),
+        "areThey": MessageLookupByLibrary.simpleMessage("Are they "),
         "areYouSureRemoveThisFaceFromPerson":
             MessageLookupByLibrary.simpleMessage(
                 "Are you sure you want to remove this face from this person?"),
@@ -57,6 +58,9 @@ class MessageLookup extends MessageLookupByLibrary {
             "இந்த தகவலுடன் தயவுசெய்து எங்களுக்கு உதவுங்கள்"),
         "otherDetectedFaces":
             MessageLookupByLibrary.simpleMessage("Other detected faces"),
+        "questionmark": MessageLookupByLibrary.simpleMessage("?"),
+        "saveAsAnotherPerson":
+            MessageLookupByLibrary.simpleMessage("Save as another person"),
         "selectReason": MessageLookupByLibrary.simpleMessage(
             "காரணத்தைத் தேர்ந்தெடுக்கவும்"),
         "showLessFaces":

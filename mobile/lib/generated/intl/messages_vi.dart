@@ -359,6 +359,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "archive": MessageLookupByLibrary.simpleMessage("Lưu trữ"),
         "archiveAlbum": MessageLookupByLibrary.simpleMessage("Lưu trữ album"),
         "archiving": MessageLookupByLibrary.simpleMessage("Đang lưu trữ..."),
+        "areThey": MessageLookupByLibrary.simpleMessage("Are they "),
         "areYouSureRemoveThisFaceFromPerson":
             MessageLookupByLibrary.simpleMessage(
                 "Are you sure you want to remove this face from this person?"),
@@ -1368,6 +1369,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Liên kết công khai đã được tạo"),
         "publicLinkEnabled": MessageLookupByLibrary.simpleMessage(
             "Liên kết công khai đã được kích hoạt"),
+        "questionmark": MessageLookupByLibrary.simpleMessage("?"),
         "quickLinks": MessageLookupByLibrary.simpleMessage("Liên kết nhanh"),
         "radius": MessageLookupByLibrary.simpleMessage("Bán kính"),
         "raiseTicket": MessageLookupByLibrary.simpleMessage("Tạo vé"),
@@ -1494,6 +1496,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "rotateRight": MessageLookupByLibrary.simpleMessage("Xoay phải"),
         "safelyStored": MessageLookupByLibrary.simpleMessage("Lưu trữ an toàn"),
         "save": MessageLookupByLibrary.simpleMessage("Lưu"),
+        "saveAsAnotherPerson":
+            MessageLookupByLibrary.simpleMessage("Save as another person"),
         "saveCollage": MessageLookupByLibrary.simpleMessage("Lưu ảnh ghép"),
         "saveCopy": MessageLookupByLibrary.simpleMessage("Lưu bản sao"),
         "saveKey": MessageLookupByLibrary.simpleMessage("Lưu khóa"),

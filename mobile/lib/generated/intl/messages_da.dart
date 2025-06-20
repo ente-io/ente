@@ -85,6 +85,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Tillad tilføjelse af fotos"),
         "allowDownloads":
             MessageLookupByLibrary.simpleMessage("Tillad downloads"),
+        "areThey": MessageLookupByLibrary.simpleMessage("Are they "),
         "areYouSureRemoveThisFaceFromPerson":
             MessageLookupByLibrary.simpleMessage(
                 "Are you sure you want to remove this face from this person?"),
@@ -326,6 +327,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Privatlivspolitik"),
         "publicLinkEnabled":
             MessageLookupByLibrary.simpleMessage("Offentligt link aktiveret"),
+        "questionmark": MessageLookupByLibrary.simpleMessage("?"),
         "recover": MessageLookupByLibrary.simpleMessage("Gendan"),
         "recoverAccount": MessageLookupByLibrary.simpleMessage("Gendan konto"),
         "recoverButton": MessageLookupByLibrary.simpleMessage("Gendan"),
@@ -364,6 +366,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "resetPasswordTitle":
             MessageLookupByLibrary.simpleMessage("Nulstil adgangskode"),
         "retry": MessageLookupByLibrary.simpleMessage("Prøv igen"),
+        "saveAsAnotherPerson":
+            MessageLookupByLibrary.simpleMessage("Save as another person"),
         "saveKey": MessageLookupByLibrary.simpleMessage("Gem nøgle"),
         "saveYourRecoveryKeyIfYouHaventAlready":
             MessageLookupByLibrary.simpleMessage(

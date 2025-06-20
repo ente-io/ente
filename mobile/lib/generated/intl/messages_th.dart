@@ -74,6 +74,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "androidCancelButton": MessageLookupByLibrary.simpleMessage("ยกเลิก"),
         "appVersion": m9,
         "apply": MessageLookupByLibrary.simpleMessage("นำไปใช้"),
+        "areThey": MessageLookupByLibrary.simpleMessage("Are they "),
         "areYouSureRemoveThisFaceFromPerson":
             MessageLookupByLibrary.simpleMessage(
                 "Are you sure you want to remove this face from this person?"),
@@ -250,6 +251,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("สร้างลิงก์สาธารณะแล้ว"),
         "publicLinkEnabled":
             MessageLookupByLibrary.simpleMessage("เปิดใช้ลิงก์สาธารณะแล้ว"),
+        "questionmark": MessageLookupByLibrary.simpleMessage("?"),
         "recover": MessageLookupByLibrary.simpleMessage("กู้คืน"),
         "recoverAccount": MessageLookupByLibrary.simpleMessage("กู้คืนบัญชี"),
         "recoverButton": MessageLookupByLibrary.simpleMessage("กู้คืน"),
@@ -277,6 +279,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "restoreToAlbum":
             MessageLookupByLibrary.simpleMessage("กู้คืนไปยังอัลบั้ม"),
         "save": MessageLookupByLibrary.simpleMessage("บันทึก"),
+        "saveAsAnotherPerson":
+            MessageLookupByLibrary.simpleMessage("Save as another person"),
         "saveCopy": MessageLookupByLibrary.simpleMessage("บันทึกสำเนา"),
         "saveKey": MessageLookupByLibrary.simpleMessage("บันทึกคีย์"),
         "saveYourRecoveryKeyIfYouHaventAlready":

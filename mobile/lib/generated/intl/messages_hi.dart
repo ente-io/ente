@@ -25,6 +25,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "accountWelcomeBack":
             MessageLookupByLibrary.simpleMessage("आपका पुनः स्वागत है"),
         "activeSessions": MessageLookupByLibrary.simpleMessage("एक्टिव सेशन"),
+        "areThey": MessageLookupByLibrary.simpleMessage("Are they "),
         "areYouSureRemoveThisFaceFromPerson":
             MessageLookupByLibrary.simpleMessage(
                 "Are you sure you want to remove this face from this person?"),
@@ -87,9 +88,12 @@ class MessageLookup extends MessageLookupByLibrary {
         "otherDetectedFaces":
             MessageLookupByLibrary.simpleMessage("Other detected faces"),
         "password": MessageLookupByLibrary.simpleMessage("पासवर्ड"),
+        "questionmark": MessageLookupByLibrary.simpleMessage("?"),
         "recoverButton": MessageLookupByLibrary.simpleMessage("पुनः प्राप्त"),
         "recoverySuccessful":
             MessageLookupByLibrary.simpleMessage("रिकवरी सफल हुई!"),
+        "saveAsAnotherPerson":
+            MessageLookupByLibrary.simpleMessage("Save as another person"),
         "selectReason": MessageLookupByLibrary.simpleMessage("कारण चुनें"),
         "sendEmail": MessageLookupByLibrary.simpleMessage("ईमेल भेजें"),
         "showLessFaces":

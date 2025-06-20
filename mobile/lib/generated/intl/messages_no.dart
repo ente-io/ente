@@ -425,6 +425,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "archiveAlbum": MessageLookupByLibrary.simpleMessage("Arkiver album"),
         "archiving":
             MessageLookupByLibrary.simpleMessage("Legger til i arkivet..."),
+        "areThey": MessageLookupByLibrary.simpleMessage("Are they "),
         "areYouSureRemoveThisFaceFromPerson":
             MessageLookupByLibrary.simpleMessage(
                 "Are you sure you want to remove this face from this person?"),
@@ -1503,6 +1504,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Offentlig lenke opprettet"),
         "publicLinkEnabled":
             MessageLookupByLibrary.simpleMessage("Offentlig lenke aktivert"),
+        "questionmark": MessageLookupByLibrary.simpleMessage("?"),
         "queued": MessageLookupByLibrary.simpleMessage("I køen"),
         "quickLinks": MessageLookupByLibrary.simpleMessage("Hurtiglenker"),
         "radius": MessageLookupByLibrary.simpleMessage("Radius"),
@@ -1642,6 +1644,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "rotateRight": MessageLookupByLibrary.simpleMessage("Roter mot høyre"),
         "safelyStored": MessageLookupByLibrary.simpleMessage("Trygt lagret"),
         "save": MessageLookupByLibrary.simpleMessage("Lagre"),
+        "saveAsAnotherPerson":
+            MessageLookupByLibrary.simpleMessage("Save as another person"),
         "saveChangesBeforeLeavingQuestion":
             MessageLookupByLibrary.simpleMessage(
                 "Lagre endringer før du drar?"),

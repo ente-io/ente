@@ -471,6 +471,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "archiveAlbum":
             MessageLookupByLibrary.simpleMessage("Archyvuoti albumą"),
         "archiving": MessageLookupByLibrary.simpleMessage("Archyvuojama..."),
+        "areThey": MessageLookupByLibrary.simpleMessage("Are they "),
         "areYouSureRemoveThisFaceFromPerson":
             MessageLookupByLibrary.simpleMessage(
                 "Are you sure you want to remove this face from this person?"),
@@ -1606,6 +1607,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Vieša nuoroda sukurta"),
         "publicLinkEnabled":
             MessageLookupByLibrary.simpleMessage("Įjungta viešoji nuoroda"),
+        "questionmark": MessageLookupByLibrary.simpleMessage("?"),
         "queued": MessageLookupByLibrary.simpleMessage("Įtraukta eilėje"),
         "quickLinks": MessageLookupByLibrary.simpleMessage("Sparčios nuorodos"),
         "radius": MessageLookupByLibrary.simpleMessage("Spindulys"),
@@ -1747,6 +1749,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "rotateRight": MessageLookupByLibrary.simpleMessage("Sukti į dešinę"),
         "safelyStored": MessageLookupByLibrary.simpleMessage("Saugiai saugoma"),
         "save": MessageLookupByLibrary.simpleMessage("Išsaugoti"),
+        "saveAsAnotherPerson":
+            MessageLookupByLibrary.simpleMessage("Save as another person"),
         "saveChangesBeforeLeavingQuestion":
             MessageLookupByLibrary.simpleMessage(
                 "Išsaugoti pakeitimus prieš išeinant?"),

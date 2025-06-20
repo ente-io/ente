@@ -174,6 +174,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "appstoreSubscription":
             MessageLookupByLibrary.simpleMessage("מנוי AppStore"),
         "archive": MessageLookupByLibrary.simpleMessage("שמירה בארכיון"),
+        "areThey": MessageLookupByLibrary.simpleMessage("Are they "),
         "areYouSureRemoveThisFaceFromPerson":
             MessageLookupByLibrary.simpleMessage(
                 "Are you sure you want to remove this face from this person?"),
@@ -647,6 +648,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("קישור ציבורי נוצר"),
         "publicLinkEnabled":
             MessageLookupByLibrary.simpleMessage("לינק ציבורי אופשר"),
+        "questionmark": MessageLookupByLibrary.simpleMessage("?"),
         "radius": MessageLookupByLibrary.simpleMessage("רדיוס"),
         "raiseTicket": MessageLookupByLibrary.simpleMessage("צור ticket"),
         "rateTheApp": MessageLookupByLibrary.simpleMessage("דרג את האפליקציה"),
@@ -719,6 +721,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "rotateLeft": MessageLookupByLibrary.simpleMessage("סובב שמאלה"),
         "safelyStored": MessageLookupByLibrary.simpleMessage("נשמר באופן בטוח"),
         "save": MessageLookupByLibrary.simpleMessage("שמור"),
+        "saveAsAnotherPerson":
+            MessageLookupByLibrary.simpleMessage("Save as another person"),
         "saveCollage": MessageLookupByLibrary.simpleMessage("שמור קולז"),
         "saveCopy": MessageLookupByLibrary.simpleMessage("שמירת עותק"),
         "saveKey": MessageLookupByLibrary.simpleMessage("שמור מפתח"),

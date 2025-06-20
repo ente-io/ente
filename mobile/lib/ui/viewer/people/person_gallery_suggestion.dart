@@ -4,9 +4,11 @@ import "dart:typed_data";
 import 'package:flutter/material.dart';
 import "package:logging/logging.dart";
 import "package:photos/db/ml/db.dart";
+import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/ml/face/person.dart";
 import "package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart";
+import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/viewer/people/cluster_page.dart";
 import "package:photos/ui/viewer/people/file_face_widget.dart";
@@ -395,21 +397,21 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
                   text: TextSpan(
                     style: textTheme.body,
                     children: [
-                      const TextSpan(text: "Are they "),
+                      TextSpan(text: S.of(context).areThey),
                       TextSpan(
                         text: widget.person.data.name,
                         style: textTheme.bodyBold,
                       ),
-                      const TextSpan(text: "?"),
+                      TextSpan(text: S.of(context).questionmark),
                     ],
                   ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 16),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: _buildFaceThumbnails(),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 24),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
@@ -425,10 +427,10 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
                             vertical: 12,
                           ),
                           decoration: BoxDecoration(
-                            color: colorScheme.fillFaint,
+                            color: Colors.transparent,
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(
-                              color: colorScheme.strokeMuted,
+                              color: colorScheme.warning700,
                               width: 1,
                             ),
                           ),
@@ -437,13 +439,15 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
                             children: [
                               Icon(
                                 Icons.close,
-                                color: colorScheme.textMuted,
+                                color: colorScheme.warning500,
                                 size: 20,
                               ),
                               const SizedBox(width: 8),
                               Text(
                                 "No",
-                                style: textTheme.body,
+                                style: textTheme.bodyBold.copyWith(
+                                  color: colorScheme.warning500,
+                                ),
                               ),
                             ],
                           ),
@@ -467,16 +471,16 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(
+                              const Icon(
                                 Icons.check,
-                                color: colorScheme.textBase,
+                                color: textBaseDark,
                                 size: 20,
                               ),
                               const SizedBox(width: 8),
                               Text(
                                 "Yes",
-                                style: textTheme.body.copyWith(
-                                  color: colorScheme.textBase,
+                                style: textTheme.bodyBold.copyWith(
+                                  color: textBaseDark,
                                 ),
                               ),
                             ],
@@ -490,7 +494,7 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
                 GestureDetector(
                   onTap: isProcessing ? null : () => _saveAsAnotherPerson(),
                   child: Text(
-                    "Save as another person",
+                    S.of(context).saveAsAnotherPerson,
                     style: textTheme.mini.copyWith(
                       color: colorScheme.textMuted,
                       decoration: TextDecoration.underline,
@@ -520,8 +524,8 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
 
       thumbnails.add(
         Container(
-          width: 64,
-          height: 64,
+          width: 72,
+          height: 72,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(32),
             border: Border.all(

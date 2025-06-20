@@ -46,6 +46,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "after1Year": MessageLookupByLibrary.simpleMessage("Праз 1 год"),
         "albumOwner": MessageLookupByLibrary.simpleMessage("Уладальнік"),
         "apply": MessageLookupByLibrary.simpleMessage("Ужыць"),
+        "areThey": MessageLookupByLibrary.simpleMessage("Are they "),
         "areYouSureRemoveThisFaceFromPerson":
             MessageLookupByLibrary.simpleMessage(
                 "Are you sure you want to remove this face from this person?"),
@@ -201,6 +202,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "pleaseWait": MessageLookupByLibrary.simpleMessage("Пачакайце..."),
         "privacyPolicyTitle":
             MessageLookupByLibrary.simpleMessage("Палітыка прыватнасці"),
+        "questionmark": MessageLookupByLibrary.simpleMessage("?"),
         "rateUs": MessageLookupByLibrary.simpleMessage("Ацаніце нас"),
         "recover": MessageLookupByLibrary.simpleMessage("Аднавіць"),
         "recoverAccount":
@@ -231,6 +233,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "resetPasswordTitle":
             MessageLookupByLibrary.simpleMessage("Скінуць пароль"),
         "retry": MessageLookupByLibrary.simpleMessage("Паўтарыць"),
+        "saveAsAnotherPerson":
+            MessageLookupByLibrary.simpleMessage("Save as another person"),
         "saveKey": MessageLookupByLibrary.simpleMessage("Захаваць ключ"),
         "scanCode": MessageLookupByLibrary.simpleMessage("Сканіраваць код"),
         "security": MessageLookupByLibrary.simpleMessage("Бяспека"),

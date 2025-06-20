@@ -274,6 +274,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "archive": MessageLookupByLibrary.simpleMessage("Arsip"),
         "archiveAlbum": MessageLookupByLibrary.simpleMessage("Arsipkan album"),
         "archiving": MessageLookupByLibrary.simpleMessage("Mengarsipkan..."),
+        "areThey": MessageLookupByLibrary.simpleMessage("Are they "),
         "areYouSureRemoveThisFaceFromPerson":
             MessageLookupByLibrary.simpleMessage(
                 "Are you sure you want to remove this face from this person?"),
@@ -1063,6 +1064,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Link publik dibuat"),
         "publicLinkEnabled":
             MessageLookupByLibrary.simpleMessage("Link publik aktif"),
+        "questionmark": MessageLookupByLibrary.simpleMessage("?"),
         "radius": MessageLookupByLibrary.simpleMessage("Radius"),
         "raiseTicket":
             MessageLookupByLibrary.simpleMessage("Buat tiket dukungan"),
@@ -1153,6 +1155,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "rotateRight": MessageLookupByLibrary.simpleMessage("Putar ke kanan"),
         "safelyStored": MessageLookupByLibrary.simpleMessage("Tersimpan aman"),
         "save": MessageLookupByLibrary.simpleMessage("Simpan"),
+        "saveAsAnotherPerson":
+            MessageLookupByLibrary.simpleMessage("Save as another person"),
         "saveKey": MessageLookupByLibrary.simpleMessage("Simpan kunci"),
         "saveYourRecoveryKeyIfYouHaventAlready":
             MessageLookupByLibrary.simpleMessage(

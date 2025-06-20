@@ -471,6 +471,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "archive": MessageLookupByLibrary.simpleMessage("Arquive"),
         "archiveAlbum": MessageLookupByLibrary.simpleMessage("Arquivar álbum"),
         "archiving": MessageLookupByLibrary.simpleMessage("Arquivando..."),
+        "areThey": MessageLookupByLibrary.simpleMessage("Are they "),
         "areYouSureRemoveThisFaceFromPerson":
             MessageLookupByLibrary.simpleMessage(
                 "Are you sure you want to remove this face from this person?"),
@@ -1597,6 +1598,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Link público criado"),
         "publicLinkEnabled":
             MessageLookupByLibrary.simpleMessage("Link público ativo"),
+        "questionmark": MessageLookupByLibrary.simpleMessage("?"),
         "queued": MessageLookupByLibrary.simpleMessage("Na fila"),
         "quickLinks": MessageLookupByLibrary.simpleMessage("Links rápidos"),
         "radius": MessageLookupByLibrary.simpleMessage("Raio"),
@@ -1737,6 +1739,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "safelyStored":
             MessageLookupByLibrary.simpleMessage("Armazenado com segurança"),
         "save": MessageLookupByLibrary.simpleMessage("Salvar"),
+        "saveAsAnotherPerson":
+            MessageLookupByLibrary.simpleMessage("Save as another person"),
         "saveChangesBeforeLeavingQuestion":
             MessageLookupByLibrary.simpleMessage(
                 "Salvar mudanças antes de sair?"),

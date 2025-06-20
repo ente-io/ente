@@ -378,6 +378,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "archive": MessageLookupByLibrary.simpleMessage("アーカイブ"),
         "archiveAlbum": MessageLookupByLibrary.simpleMessage("アルバムをアーカイブ"),
         "archiving": MessageLookupByLibrary.simpleMessage("アーカイブ中です"),
+        "areThey": MessageLookupByLibrary.simpleMessage("Are they "),
         "areYouSureRemoveThisFaceFromPerson":
             MessageLookupByLibrary.simpleMessage(
                 "Are you sure you want to remove this face from this person?"),
@@ -1306,6 +1307,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("公開リンクが作成されました"),
         "publicLinkEnabled":
             MessageLookupByLibrary.simpleMessage("公開リンクを有効にしました"),
+        "questionmark": MessageLookupByLibrary.simpleMessage("?"),
         "queued": MessageLookupByLibrary.simpleMessage("処理待ち"),
         "quickLinks": MessageLookupByLibrary.simpleMessage("クイックリンク"),
         "radius": MessageLookupByLibrary.simpleMessage("半径"),
@@ -1423,6 +1425,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "rotateRight": MessageLookupByLibrary.simpleMessage("右に回転"),
         "safelyStored": MessageLookupByLibrary.simpleMessage("保管されています"),
         "save": MessageLookupByLibrary.simpleMessage("保存"),
+        "saveAsAnotherPerson":
+            MessageLookupByLibrary.simpleMessage("Save as another person"),
         "saveChangesBeforeLeavingQuestion":
             MessageLookupByLibrary.simpleMessage("その前に変更を保存しますか？"),
         "saveCollage": MessageLookupByLibrary.simpleMessage("コラージュを保存"),

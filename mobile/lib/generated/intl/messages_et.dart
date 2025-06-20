@@ -39,6 +39,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Luba allalaadimised"),
         "appleId": MessageLookupByLibrary.simpleMessage("Apple ID"),
         "apply": MessageLookupByLibrary.simpleMessage("Rakenda"),
+        "areThey": MessageLookupByLibrary.simpleMessage("Are they "),
         "areYouSureRemoveThisFaceFromPerson":
             MessageLookupByLibrary.simpleMessage(
                 "Are you sure you want to remove this face from this person?"),
@@ -182,6 +183,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "privacy": MessageLookupByLibrary.simpleMessage("Privaatsus"),
         "privacyPolicyTitle":
             MessageLookupByLibrary.simpleMessage("Privaatsus"),
+        "questionmark": MessageLookupByLibrary.simpleMessage("?"),
         "radius": MessageLookupByLibrary.simpleMessage("Raadius"),
         "recoverButton": MessageLookupByLibrary.simpleMessage("Taasta"),
         "reddit": MessageLookupByLibrary.simpleMessage("Reddit"),
@@ -201,6 +203,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "rotateLeft": MessageLookupByLibrary.simpleMessage("Pööra vasakule"),
         "rotateRight": MessageLookupByLibrary.simpleMessage("Pööra paremale"),
         "save": MessageLookupByLibrary.simpleMessage("Salvesta"),
+        "saveAsAnotherPerson":
+            MessageLookupByLibrary.simpleMessage("Save as another person"),
         "saveCopy": MessageLookupByLibrary.simpleMessage("Salvesta koopia"),
         "saveKey": MessageLookupByLibrary.simpleMessage("Salvesta võti"),
         "saving": MessageLookupByLibrary.simpleMessage("Salvestamine..."),

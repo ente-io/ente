@@ -361,6 +361,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "archive": MessageLookupByLibrary.simpleMessage("Arhivă"),
         "archiveAlbum": MessageLookupByLibrary.simpleMessage("Arhivare album"),
         "archiving": MessageLookupByLibrary.simpleMessage("Se arhivează..."),
+        "areThey": MessageLookupByLibrary.simpleMessage("Are they "),
         "areYouSureRemoveThisFaceFromPerson":
             MessageLookupByLibrary.simpleMessage(
                 "Are you sure you want to remove this face from this person?"),
@@ -1404,6 +1405,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Link public creat"),
         "publicLinkEnabled":
             MessageLookupByLibrary.simpleMessage("Link public activat"),
+        "questionmark": MessageLookupByLibrary.simpleMessage("?"),
         "quickLinks": MessageLookupByLibrary.simpleMessage("Link-uri rapide"),
         "radius": MessageLookupByLibrary.simpleMessage("Rază"),
         "raiseTicket":
@@ -1543,6 +1545,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "safelyStored":
             MessageLookupByLibrary.simpleMessage("Stocare în siguranță"),
         "save": MessageLookupByLibrary.simpleMessage("Salvare"),
+        "saveAsAnotherPerson":
+            MessageLookupByLibrary.simpleMessage("Save as another person"),
         "saveCollage": MessageLookupByLibrary.simpleMessage("Salvați colajul"),
         "saveCopy": MessageLookupByLibrary.simpleMessage("Salvare copie"),
         "saveKey": MessageLookupByLibrary.simpleMessage("Salvați cheia"),

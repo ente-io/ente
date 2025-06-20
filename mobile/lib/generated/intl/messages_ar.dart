@@ -452,6 +452,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "archive": MessageLookupByLibrary.simpleMessage("الأرشيف"),
         "archiveAlbum": MessageLookupByLibrary.simpleMessage("أرشفة الألبوم"),
         "archiving": MessageLookupByLibrary.simpleMessage("جارٍ الأرشفة..."),
+        "areThey": MessageLookupByLibrary.simpleMessage("Are they "),
         "areYouSureRemoveThisFaceFromPerson":
             MessageLookupByLibrary.simpleMessage(
                 "Are you sure you want to remove this face from this person?"),
@@ -1535,6 +1536,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("تم إنشاء الرابط العام."),
         "publicLinkEnabled":
             MessageLookupByLibrary.simpleMessage("تمكين الرابط العام"),
+        "questionmark": MessageLookupByLibrary.simpleMessage("?"),
         "queued": MessageLookupByLibrary.simpleMessage("في قائمة الانتظار"),
         "quickLinks": MessageLookupByLibrary.simpleMessage("روابط سريعة"),
         "radius": MessageLookupByLibrary.simpleMessage("نصف القطر"),
@@ -1672,6 +1674,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "rotateRight": MessageLookupByLibrary.simpleMessage("تدوير لليمين"),
         "safelyStored": MessageLookupByLibrary.simpleMessage("مخزنة بأمان"),
         "save": MessageLookupByLibrary.simpleMessage("حفظ"),
+        "saveAsAnotherPerson":
+            MessageLookupByLibrary.simpleMessage("Save as another person"),
         "saveChangesBeforeLeavingQuestion":
             MessageLookupByLibrary.simpleMessage("حفظ التغييرات قبل المغادرة؟"),
         "saveCollage": MessageLookupByLibrary.simpleMessage("حفظ الكولاج"),

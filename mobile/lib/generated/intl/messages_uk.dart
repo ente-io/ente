@@ -355,6 +355,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "archiveAlbum":
             MessageLookupByLibrary.simpleMessage("Архівувати альбом"),
         "archiving": MessageLookupByLibrary.simpleMessage("Архівуємо..."),
+        "areThey": MessageLookupByLibrary.simpleMessage("Are they "),
         "areYouSureRemoveThisFaceFromPerson":
             MessageLookupByLibrary.simpleMessage(
                 "Are you sure you want to remove this face from this person?"),
@@ -1373,6 +1374,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Публічне посилання створено"),
         "publicLinkEnabled": MessageLookupByLibrary.simpleMessage(
             "Публічне посилання увімкнено"),
+        "questionmark": MessageLookupByLibrary.simpleMessage("?"),
         "quickLinks": MessageLookupByLibrary.simpleMessage("Швидкі посилання"),
         "radius": MessageLookupByLibrary.simpleMessage("Радіус"),
         "raiseTicket": MessageLookupByLibrary.simpleMessage("Подати заявку"),
@@ -1512,6 +1514,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "safelyStored":
             MessageLookupByLibrary.simpleMessage("Безпечне збереження"),
         "save": MessageLookupByLibrary.simpleMessage("Зберегти"),
+        "saveAsAnotherPerson":
+            MessageLookupByLibrary.simpleMessage("Save as another person"),
         "saveCollage": MessageLookupByLibrary.simpleMessage("Зберегти колаж"),
         "saveCopy": MessageLookupByLibrary.simpleMessage("Зберегти копію"),
         "saveKey": MessageLookupByLibrary.simpleMessage("Зберегти ключ"),

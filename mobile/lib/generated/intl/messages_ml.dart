@@ -25,6 +25,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "accountWelcomeBack":
             MessageLookupByLibrary.simpleMessage("വീണ്ടും സ്വാഗതം!"),
         "albumOwner": MessageLookupByLibrary.simpleMessage("ഉടമ"),
+        "areThey": MessageLookupByLibrary.simpleMessage("Are they "),
         "areYouSureRemoveThisFaceFromPerson":
             MessageLookupByLibrary.simpleMessage(
                 "Are you sure you want to remove this face from this person?"),
@@ -101,6 +102,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "privacy": MessageLookupByLibrary.simpleMessage("സ്വകാര്യത"),
         "privacyPolicyTitle":
             MessageLookupByLibrary.simpleMessage("സ്വകാര്യതാനയം"),
+        "questionmark": MessageLookupByLibrary.simpleMessage("?"),
         "recoverButton": MessageLookupByLibrary.simpleMessage("വീണ്ടെടുക്കുക"),
         "recoverySuccessful":
             MessageLookupByLibrary.simpleMessage("വീണ്ടെടുക്കൽ വിജയകരം!"),
@@ -108,6 +110,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("സങ്കേതക്കുറി പുനസൃഷ്ടിക്കുക"),
         "reddit": MessageLookupByLibrary.simpleMessage("റെഡ്ഡിറ്റ്"),
         "retry": MessageLookupByLibrary.simpleMessage("പുനശ്രമിക്കുക"),
+        "saveAsAnotherPerson":
+            MessageLookupByLibrary.simpleMessage("Save as another person"),
         "security": MessageLookupByLibrary.simpleMessage("സുരക്ഷ"),
         "selectReason":
             MessageLookupByLibrary.simpleMessage("കാരണം തിരഞ്ഞെടുക്കൂ"),

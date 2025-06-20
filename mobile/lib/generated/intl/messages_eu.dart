@@ -137,6 +137,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "applyCodeTitle":
             MessageLookupByLibrary.simpleMessage("Aplikatu kodea"),
         "archive": MessageLookupByLibrary.simpleMessage("Artxiboa"),
+        "areThey": MessageLookupByLibrary.simpleMessage("Are they "),
         "areYouSureRemoveThisFaceFromPerson":
             MessageLookupByLibrary.simpleMessage(
                 "Are you sure you want to remove this face from this person?"),
@@ -459,6 +460,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Pribatutasun Politikak"),
         "publicLinkEnabled":
             MessageLookupByLibrary.simpleMessage("Esteka publikoa indarrean"),
+        "questionmark": MessageLookupByLibrary.simpleMessage("?"),
         "recover": MessageLookupByLibrary.simpleMessage("Berreskuratu"),
         "recoverAccount":
             MessageLookupByLibrary.simpleMessage("Berreskuratu kontua"),
@@ -511,6 +513,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Birbidali e-maila"),
         "resetPasswordTitle":
             MessageLookupByLibrary.simpleMessage("Berrezarri pasahitza"),
+        "saveAsAnotherPerson":
+            MessageLookupByLibrary.simpleMessage("Save as another person"),
         "saveKey": MessageLookupByLibrary.simpleMessage("Gorde giltza"),
         "saveYourRecoveryKeyIfYouHaventAlready":
             MessageLookupByLibrary.simpleMessage(

@@ -459,6 +459,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "archive": MessageLookupByLibrary.simpleMessage("Arşiv"),
         "archiveAlbum": MessageLookupByLibrary.simpleMessage("Albümü arşivle"),
         "archiving": MessageLookupByLibrary.simpleMessage("Arşivleniyor..."),
+        "areThey": MessageLookupByLibrary.simpleMessage("Are they "),
         "areYouSureRemoveThisFaceFromPerson":
             MessageLookupByLibrary.simpleMessage(
                 "Are you sure you want to remove this face from this person?"),
@@ -1556,6 +1557,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Herkese açık bağlantı oluşturuldu"),
         "publicLinkEnabled": MessageLookupByLibrary.simpleMessage(
             "Herkese açık bağlantı aktive edildi"),
+        "questionmark": MessageLookupByLibrary.simpleMessage("?"),
         "queued": MessageLookupByLibrary.simpleMessage("Kuyrukta"),
         "quickLinks": MessageLookupByLibrary.simpleMessage("Hızlı Erişim"),
         "radius": MessageLookupByLibrary.simpleMessage("Yarıçap"),
@@ -1697,6 +1699,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "safelyStored":
             MessageLookupByLibrary.simpleMessage("Güvenle saklanır"),
         "save": MessageLookupByLibrary.simpleMessage("Kaydet"),
+        "saveAsAnotherPerson":
+            MessageLookupByLibrary.simpleMessage("Save as another person"),
         "saveChangesBeforeLeavingQuestion":
             MessageLookupByLibrary.simpleMessage(
                 "Çıkmadan önce değişiklikler kaydedilsin mi?"),
