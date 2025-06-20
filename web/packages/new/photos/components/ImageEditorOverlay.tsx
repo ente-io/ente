@@ -45,7 +45,7 @@ import type { ModalVisibilityProps } from "ente-base/components/utils/modal";
 import { useBaseContext } from "ente-base/context";
 import { nameAndExtension } from "ente-base/file-name";
 import log from "ente-base/log";
-import { downloadAndRevokeObjectURL } from "ente-base/utils/web";
+import { saveAsFileAndRevokeObjectURL } from "ente-base/utils/web";
 import { downloadManager } from "ente-gallery/services/download";
 import type { Collection } from "ente-media/collection";
 import type { EnteFile } from "ente-media/file";
@@ -472,7 +472,7 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = ({
         if (!canvasRef.current) return;
 
         const f = await getEditedFile();
-        downloadAndRevokeObjectURL(URL.createObjectURL(f), f.name);
+        saveAsFileAndRevokeObjectURL(URL.createObjectURL(f), f.name);
     };
 
     const saveCopyToEnte = async () => {

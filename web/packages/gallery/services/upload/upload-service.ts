@@ -704,7 +704,7 @@ export const upload = async (
 
         const { metadata, publicMagicMetadata } = await extractAssetMetadata(
             uploadAsset,
-            fileTypeInfo,
+            fileTypeInfo.fileType,
             lastModifiedMs,
             collection.id,
             parsedMetadataJSONMap,
@@ -1000,9 +1000,9 @@ const readLivePhotoDetails = async ({ image, video }: LivePhotoAssets) => {
     return {
         fileTypeInfo: {
             fileType: FileType.livePhoto,
-            extension: `${img.fileTypeInfo.extension}+${vid.fileTypeInfo.extension}`,
-            imageType: img.fileTypeInfo.extension,
-            videoType: vid.fileTypeInfo.extension,
+            // Use the extension of the image component as the extension of the
+            // live photo.
+            extension: img.fileTypeInfo.extension,
         },
         fileSize: img.fileSize + vid.fileSize,
         lastModifiedMs: img.lastModifiedMs,
@@ -1062,7 +1062,7 @@ const extractAssetMetadata = async (
         pathPrefix,
         externalParsedMetadata,
     }: UploadAsset,
-    fileTypeInfo: FileTypeInfo,
+    fileType: FileType,
     lastModifiedMs: number,
     collectionID: number,
     parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>,
@@ -1073,7 +1073,6 @@ const extractAssetMetadata = async (
               // @ts-ignore
               livePhotoAssets,
               pathPrefix,
-              fileTypeInfo,
               lastModifiedMs,
               collectionID,
               parsedMetadataJSONMap,
@@ -1084,7 +1083,7 @@ const extractAssetMetadata = async (
               uploadItem,
               pathPrefix,
               externalParsedMetadata,
-              fileTypeInfo,
+              fileType,
               lastModifiedMs,
               collectionID,
               parsedMetadataJSONMap,
@@ -1094,23 +1093,17 @@ const extractAssetMetadata = async (
 const extractLivePhotoMetadata = async (
     livePhotoAssets: LivePhotoAssets,
     pathPrefix: UploadPathPrefix | undefined,
-    fileTypeInfo: FileTypeInfo,
     lastModifiedMs: number,
     collectionID: number,
     parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>,
     worker: CryptoWorker,
 ) => {
-    const imageFileTypeInfo: FileTypeInfo = {
-        fileType: FileType.image,
-        // @ts-ignore
-        extension: fileTypeInfo.imageType,
-    };
     const { metadata: imageMetadata, publicMagicMetadata } =
         await extractImageOrVideoMetadata(
             livePhotoAssets.image,
             pathPrefix,
             undefined,
-            imageFileTypeInfo,
+            FileType.image,
             lastModifiedMs,
             collectionID,
             parsedMetadataJSONMap,
@@ -1137,14 +1130,13 @@ const extractImageOrVideoMetadata = async (
     uploadItem: UploadItem,
     pathPrefix: UploadPathPrefix | undefined,
     externalParsedMetadata: ExternalParsedMetadata | undefined,
-    fileTypeInfo: FileTypeInfo,
+    fileType: FileType,
     lastModifiedMs: number,
     collectionID: number,
     parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>,
     worker: CryptoWorker,
 ) => {
     const fileName = uploadItemFileName(uploadItem);
-    const { fileType } = fileTypeInfo;
 
     let parsedMetadata: (ParsedMetadata & ExternalParsedMetadata) | undefined;
     if (fileType == FileType.image) {
@@ -1364,11 +1356,11 @@ const readLivePhoto = async (
         fileStreamOrData: imageFileStreamOrData,
         thumbnail,
         hasStaticThumbnail,
-    } = await withThumbnail(
+    } = await augmentWithThumbnail(
         livePhotoAssets.image,
-        // TODO: Update underlying type
-        // @ts-ignore
-        { extension: fileTypeInfo.imageType, fileType: FileType.image },
+        // For live photos, the extension field in the file type info is the
+        // extension of the image component of the live photo.
+        { fileType: FileType.image, extension: fileTypeInfo.extension },
         await readUploadItem(livePhotoAssets.image),
     );
     const videoFileStreamOrData = await readUploadItem(livePhotoAssets.video);
@@ -1403,7 +1395,7 @@ const readImageOrVideo = async (
     fileTypeInfo: FileTypeInfo,
 ) => {
     const fileStream = await readUploadItem(uploadItem);
-    return withThumbnail(uploadItem, fileTypeInfo, fileStream);
+    return augmentWithThumbnail(uploadItem, fileTypeInfo, fileStream);
 };
 
 /**
@@ -1418,7 +1410,7 @@ const readImageOrVideo = async (
  * Note: The `fileStream` in the returned {@link ThumbnailedFile} may be
  * different from the one passed to the function.
  */
-const withThumbnail = async (
+const augmentWithThumbnail = async (
     uploadItem: UploadItem,
     fileTypeInfo: FileTypeInfo,
     fileStream: FileStream,
