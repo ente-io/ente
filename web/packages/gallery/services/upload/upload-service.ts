@@ -20,30 +20,25 @@ import {
     extractVideoMetadata,
 } from "ente-gallery/services/ffmpeg";
 import {
-    getNonEmptyMagicMetadataProps,
-    updateMagicMetadata,
-} from "ente-gallery/services/magic-metadata";
-import {
     detectFileTypeInfoFromChunk,
     isFileTypeNotSupportedError,
 } from "ente-gallery/utils/detect-type";
 import { readStream } from "ente-gallery/utils/native-stream";
-import type {
-    EncryptedEnteFile,
-    EncryptedMagicMetadata,
-    EnteFile,
-    FilePublicMagicMetadata,
-    FilePublicMagicMetadataProps,
-} from "ente-media/file";
+import type { EnteFile, RemoteEnteFile } from "ente-media/file";
 import {
     fileFileName,
     metadataHash,
     type FileMetadata,
+    type FilePublicMagicMetadataData,
     type ParsedMetadata,
-    type PublicMagicMetadata,
 } from "ente-media/file-metadata";
 import { FileType, type FileTypeInfo } from "ente-media/file-type";
 import { encodeLivePhoto } from "ente-media/live-photo";
+import {
+    createMagicMetadata,
+    encryptMagicMetadata,
+    type RemoteMagicMetadata,
+} from "ente-media/magic-metadata";
 import { addToCollection } from "ente-new/photos/services/collection";
 import { mergeUint8Arrays } from "ente-utils/array";
 import { ensureInteger, ensureNumber } from "ente-utils/ensure";
@@ -280,9 +275,9 @@ interface ThumbnailedFile {
 }
 
 interface FileWithMetadata extends Omit<ThumbnailedFile, "hasStaticThumbnail"> {
-    metadata: FileMetadata;
     localID: number;
-    pubMagicMetadata: FilePublicMagicMetadata;
+    metadata: FileMetadata;
+    publicMagicMetadata: FilePublicMagicMetadataData;
 }
 
 interface EncryptedFileStream {
@@ -321,7 +316,7 @@ interface EncryptedFilePieces {
      * the decryption header that was used during encryption (base64 string).
      */
     metadata: { encryptedData: string; decryptionHeader: string };
-    pubMagicMetadata: EncryptedMagicMetadata;
+    pubMagicMetadata: RemoteMagicMetadata | undefined;
     localID: number;
 }
 
@@ -642,7 +637,7 @@ interface UploadContext {
 
 interface UploadResponse {
     uploadResult: UploadResult;
-    uploadedFile?: EncryptedEnteFile | EnteFile;
+    uploadedFile?: RemoteEnteFile | EnteFile;
 }
 
 /**
@@ -704,7 +699,7 @@ export const upload = async (
 
         const { metadata, publicMagicMetadata } = await extractAssetMetadata(
             uploadAsset,
-            fileTypeInfo,
+            fileTypeInfo.fileType,
             lastModifiedMs,
             collection.id,
             parsedMetadataJSONMap,
@@ -742,11 +737,6 @@ export const upload = async (
 
         if (hasStaticThumbnail) metadata.hasStaticThumbnail = true;
 
-        const pubMagicMetadata = await constructPublicMagicMetadata({
-            ...publicMagicMetadata,
-            uploaderName,
-        });
-
         abortIfCancelled();
 
         const fileWithMetadata: FileWithMetadata = {
@@ -754,7 +744,10 @@ export const upload = async (
             fileStreamOrData,
             thumbnail,
             metadata,
-            pubMagicMetadata,
+            publicMagicMetadata: {
+                ...publicMagicMetadata,
+                ...(uploaderName && { uploaderName }),
+            },
         };
 
         const { encryptedFilePieces, encryptedFileKey } = await encryptFile(
@@ -1000,9 +993,9 @@ const readLivePhotoDetails = async ({ image, video }: LivePhotoAssets) => {
     return {
         fileTypeInfo: {
             fileType: FileType.livePhoto,
-            extension: `${img.fileTypeInfo.extension}+${vid.fileTypeInfo.extension}`,
-            imageType: img.fileTypeInfo.extension,
-            videoType: vid.fileTypeInfo.extension,
+            // Use the extension of the image component as the extension of the
+            // live photo.
+            extension: img.fileTypeInfo.extension,
         },
         fileSize: img.fileSize + vid.fileSize,
         lastModifiedMs: img.lastModifiedMs,
@@ -1047,7 +1040,7 @@ const readEntireStream = async (stream: ReadableStream) =>
 
 interface ExtractAssetMetadataResult {
     metadata: FileMetadata;
-    publicMagicMetadata: FilePublicMagicMetadataProps;
+    publicMagicMetadata: FilePublicMagicMetadataData;
 }
 
 /**
@@ -1062,7 +1055,7 @@ const extractAssetMetadata = async (
         pathPrefix,
         externalParsedMetadata,
     }: UploadAsset,
-    fileTypeInfo: FileTypeInfo,
+    fileType: FileType,
     lastModifiedMs: number,
     collectionID: number,
     parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>,
@@ -1073,7 +1066,6 @@ const extractAssetMetadata = async (
               // @ts-ignore
               livePhotoAssets,
               pathPrefix,
-              fileTypeInfo,
               lastModifiedMs,
               collectionID,
               parsedMetadataJSONMap,
@@ -1084,7 +1076,7 @@ const extractAssetMetadata = async (
               uploadItem,
               pathPrefix,
               externalParsedMetadata,
-              fileTypeInfo,
+              fileType,
               lastModifiedMs,
               collectionID,
               parsedMetadataJSONMap,
@@ -1094,23 +1086,17 @@ const extractAssetMetadata = async (
 const extractLivePhotoMetadata = async (
     livePhotoAssets: LivePhotoAssets,
     pathPrefix: UploadPathPrefix | undefined,
-    fileTypeInfo: FileTypeInfo,
     lastModifiedMs: number,
     collectionID: number,
     parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>,
     worker: CryptoWorker,
 ) => {
-    const imageFileTypeInfo: FileTypeInfo = {
-        fileType: FileType.image,
-        // @ts-ignore
-        extension: fileTypeInfo.imageType,
-    };
     const { metadata: imageMetadata, publicMagicMetadata } =
         await extractImageOrVideoMetadata(
             livePhotoAssets.image,
             pathPrefix,
             undefined,
-            imageFileTypeInfo,
+            FileType.image,
             lastModifiedMs,
             collectionID,
             parsedMetadataJSONMap,
@@ -1137,14 +1123,13 @@ const extractImageOrVideoMetadata = async (
     uploadItem: UploadItem,
     pathPrefix: UploadPathPrefix | undefined,
     externalParsedMetadata: ExternalParsedMetadata | undefined,
-    fileTypeInfo: FileTypeInfo,
+    fileType: FileType,
     lastModifiedMs: number,
     collectionID: number,
     parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>,
     worker: CryptoWorker,
 ) => {
     const fileName = uploadItemFileName(uploadItem);
-    const { fileType } = fileTypeInfo;
 
     let parsedMetadata: (ParsedMetadata & ExternalParsedMetadata) | undefined;
     if (fileType == FileType.image) {
@@ -1179,7 +1164,7 @@ const extractImageOrVideoMetadata = async (
         parsedMetadataJSONMap,
     );
 
-    const publicMagicMetadata: PublicMagicMetadata = {};
+    const publicMagicMetadata: FilePublicMagicMetadataData = {};
 
     const modificationTime =
         parsedMetadataJSON?.modificationTime ?? lastModifiedMs * 1000;
@@ -1364,11 +1349,11 @@ const readLivePhoto = async (
         fileStreamOrData: imageFileStreamOrData,
         thumbnail,
         hasStaticThumbnail,
-    } = await withThumbnail(
+    } = await augmentWithThumbnail(
         livePhotoAssets.image,
-        // TODO: Update underlying type
-        // @ts-ignore
-        { extension: fileTypeInfo.imageType, fileType: FileType.image },
+        // For live photos, the extension field in the file type info is the
+        // extension of the image component of the live photo.
+        { fileType: FileType.image, extension: fileTypeInfo.extension },
         await readUploadItem(livePhotoAssets.image),
     );
     const videoFileStreamOrData = await readUploadItem(livePhotoAssets.video);
@@ -1403,7 +1388,7 @@ const readImageOrVideo = async (
     fileTypeInfo: FileTypeInfo,
 ) => {
     const fileStream = await readUploadItem(uploadItem);
-    return withThumbnail(uploadItem, fileTypeInfo, fileStream);
+    return augmentWithThumbnail(uploadItem, fileTypeInfo, fileStream);
 };
 
 /**
@@ -1418,7 +1403,7 @@ const readImageOrVideo = async (
  * Note: The `fileStream` in the returned {@link ThumbnailedFile} may be
  * different from the one passed to the function.
  */
-const withThumbnail = async (
+const augmentWithThumbnail = async (
     uploadItem: UploadItem,
     fileTypeInfo: FileTypeInfo,
     fileStream: FileStream,
@@ -1497,20 +1482,6 @@ const withThumbnail = async (
     };
 };
 
-const constructPublicMagicMetadata = async (
-    publicMagicMetadataProps: FilePublicMagicMetadataProps,
-): Promise<FilePublicMagicMetadata> => {
-    const nonEmptyPublicMagicMetadataProps = getNonEmptyMagicMetadataProps(
-        publicMagicMetadataProps,
-    );
-
-    if (Object.values(nonEmptyPublicMagicMetadataProps).length === 0) {
-        // @ts-ignore
-        return null;
-    }
-    return await updateMagicMetadata(publicMagicMetadataProps);
-};
-
 const encryptFile = async (
     file: FileWithMetadata,
     collectionKey: string,
@@ -1518,8 +1489,13 @@ const encryptFile = async (
 ) => {
     const fileKey = await worker.generateBlobOrStreamKey();
 
-    const { fileStreamOrData, thumbnail, metadata, pubMagicMetadata, localID } =
-        file;
+    const {
+        fileStreamOrData,
+        thumbnail,
+        metadata,
+        publicMagicMetadata,
+        localID,
+    } = file;
 
     const encryptedFiledata =
         fileStreamOrData instanceof Uint8Array
@@ -1541,18 +1517,13 @@ const encryptFile = async (
         fileKey,
     );
 
-    let encryptedPubMagicMetadata: EncryptedMagicMetadata;
-    // Keep defensive check until the underlying type is audited.
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    if (pubMagicMetadata) {
-        const { encryptedData, decryptionHeader } =
-            await worker.encryptMetadataJSON(pubMagicMetadata.data, fileKey);
-        encryptedPubMagicMetadata = {
-            version: pubMagicMetadata.version,
-            count: pubMagicMetadata.count,
-            data: encryptedData,
-            header: decryptionHeader,
-        };
+    let encryptedPubMagicMetadata: RemoteMagicMetadata | undefined;
+    const pubMagicMetadata = createMagicMetadata(publicMagicMetadata);
+    if (pubMagicMetadata.count) {
+        encryptedPubMagicMetadata = await encryptMagicMetadata(
+            pubMagicMetadata,
+            fileKey,
+        );
     }
 
     const encryptedFileKey = await worker.encryptBox(fileKey, collectionKey);
@@ -1562,7 +1533,6 @@ const encryptFile = async (
             file: encryptedFiledata,
             thumbnail: encryptedThumbnail,
             metadata: encryptedMetadata,
-            // @ts-ignore
             pubMagicMetadata: encryptedPubMagicMetadata,
             localID: localID,
         },

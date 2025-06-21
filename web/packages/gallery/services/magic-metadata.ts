@@ -3,8 +3,14 @@
 /* eslint-disable @typescript-eslint/no-unnecessary-condition */
 import { sharedCryptoWorker } from "ente-base/crypto";
 import type { Collection } from "ente-media/collection";
-import { type MagicMetadataCore } from "ente-media/file";
 import { ItemVisibility } from "ente-media/file-metadata";
+
+export interface MagicMetadataCore<T> {
+    version: number;
+    count: number;
+    header: string;
+    data: T;
+}
 
 export const isArchivedCollection = (item: Collection) => {
     if (!item) {

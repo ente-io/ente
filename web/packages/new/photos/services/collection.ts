@@ -28,22 +28,11 @@ import { ItemVisibility } from "ente-media/file-metadata";
 import {
     createMagicMetadata,
     encryptMagicMetadata,
-    type RemoteMagicMetadata,
 } from "ente-media/magic-metadata";
 import { batch } from "ente-utils/array";
 import { z } from "zod/v4";
+import { requestBatchSize, type UpdateMagicMetadataRequest } from "./file";
 import { ensureUserKeyPair, getPublicKey } from "./user";
-
-/**
- * An reasonable but otherwise arbitrary number of items (e.g. files) to include
- * in a single API request.
- *
- * Remote will reject too big payloads, and requests which affect multiple items
- * (e.g. files when moving files to a collection) are expected to be batched to
- * keep each request of a reasonable size. By default, we break the request into
- * batches of 1000.
- */
-const requestBatchSize = 1000;
 
 const uncategorizedCollectionName = "Uncategorized";
 const defaultHiddenCollectionName = ".hidden";
@@ -541,7 +530,7 @@ export const updateCollectionSortOrder = async (
 ) => updateCollectionPublicMagicMetadata(collection, { asc });
 
 /**
- * Update the private magic metadata contents of a collection on remote.
+ * Update the private magic metadata of a collection on remote.
  *
  * Remote only, does not modify local state.
  *
@@ -557,7 +546,7 @@ export const updateCollectionSortOrder = async (
  *
  * See: [Note: Magic metadata data cannot have nullish values]
  */
-export const updateCollectionPrivateMagicMetadata = async (
+const updateCollectionPrivateMagicMetadata = async (
     { id, key, magicMetadata }: Collection,
     updates: CollectionPrivateMagicMetadataData,
 ) =>
@@ -573,31 +562,10 @@ export const updateCollectionPrivateMagicMetadata = async (
     });
 
 /**
- * The payload of the remote requests for updating the magic metadata of a
- * single collection.
- */
-interface UpdateCollectionMagicMetadataRequest {
-    /**
-     * Collection ID
-     */
-    id: number;
-    /**
-     * The updated magic metadata.
-     *
-     * Remote usually enforces the following constraints when we're trying to
-     * update already existing data.
-     *
-     * - The version should be same as the existing version.
-     * - The count should be greater than or equal to the existing count.
-     */
-    magicMetadata: RemoteMagicMetadata;
-}
-
-/**
  * Update the private magic metadata of a single collection on remote.
  */
 const putCollectionsMagicMetadata = async (
-    updateRequest: UpdateCollectionMagicMetadataRequest,
+    updateRequest: UpdateMagicMetadataRequest,
 ) =>
     ensureOk(
         await fetch(await apiURL("/collections/magic-metadata"), {
@@ -608,7 +576,7 @@ const putCollectionsMagicMetadata = async (
     );
 
 /**
- * Update the public magic metadata contents of a collection on remote.
+ * Update the public magic metadata of a collection on remote.
  *
  * Remote only, does not modify local state.
  *
@@ -634,7 +602,7 @@ const updateCollectionPublicMagicMetadata = async (
  * Update the public magic metadata of a single collection on remote.
  */
 const putCollectionsPublicMagicMetadata = async (
-    updateRequest: UpdateCollectionMagicMetadataRequest,
+    updateRequest: UpdateMagicMetadataRequest,
 ) =>
     ensureOk(
         await fetch(await apiURL("/collections/public-magic-metadata"), {
@@ -645,7 +613,7 @@ const putCollectionsPublicMagicMetadata = async (
     );
 
 /**
- * Update the per-sharee magic metadata contents of a collection on remote.
+ * Update the per-sharee magic metadata of a collection on remote.
  *
  * Remote only, does not modify local state.
  *
@@ -671,7 +639,7 @@ const updateCollectionShareeMagicMetadata = async (
  * Update the sharee magic metadata of a single shared collection on remote.
  */
 const putCollectionsShareeMagicMetadata = async (
-    updateRequest: UpdateCollectionMagicMetadataRequest,
+    updateRequest: UpdateMagicMetadataRequest,
 ) =>
     ensureOk(
         await fetch(await apiURL("/collections/sharee-magic-metadata"), {

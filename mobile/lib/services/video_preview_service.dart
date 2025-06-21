@@ -81,7 +81,7 @@ class VideoPreviewService {
 
     if (isVideoStreamingEnabled) {
       await fileDataService.syncFDStatus();
-      _putFilesForPreviewCreation().ignore();
+      queueFiles(duration: Duration.zero);
     } else {
       clearQueue();
     }
@@ -228,7 +228,7 @@ class VideoPreviewService {
       final reencodeVideo =
           !(isH264 && bitrate != null && bitrate <= 4000 * 1000);
       final rescaleVideo = !(bitrate != null && bitrate <= 2000 * 1000);
-      final needsTonemap = !isHDR;
+      final needsTonemap = isHDR;
       final applyFPS = (double.tryParse(props?.fps ?? "") ?? 100) > 30;
 
       String filters = "";
@@ -253,22 +253,31 @@ class VideoPreviewService {
           ]);
         }
 
-        filters = "-vf ${videoFilters.join(",")} ";
+        videoFilters.add("format=yuv420p");
+
+        filters = '-vf "${videoFilters.join(",")}" ';
       }
 
+      final command =
+          // scaling, fps, tonemapping
+          '$filters'
+          // video encoding
+          '${reencodeVideo ? '-c:v libx264 -crf 23 -preset medium ' : '-c:v copy '}'
+          // audio encoding
+          '-c:a aac -b:a 128k '
+          // hls options
+          '-f hls -hls_flags single_file '
+          '-hls_list_size 0 -hls_key_info_file ${keyinfo.path} ';
+
+      _logger.info(command);
+
       session = await FFmpegKit.execute(
-        '-i "${file.path}" '
-        // scaling, fps, tonemapping
-        '$filters'
-        // video encoding
-        '${reencodeVideo ? '-c:v libx264 -crf 23 -preset medium ' : '-c:v copy '}'
-        // audio encoding
-        '-c:a aac -b:a 128k '
-        // hls options
-        '-f hls -hls_flags single_file '
-        '-hls_list_size 0 -hls_key_info_file ${keyinfo.path} '
-        // output file
-        '$prefix/output.m3u8',
+        // input file path
+        '-i "${file.path}" ' +
+            // main params for streaming
+            command +
+            // output file path
+            '$prefix/output.m3u8',
       );
 
       final returnCode = await session.getReturnCode();
@@ -846,8 +855,8 @@ class VideoPreviewService {
     chunkAndUploadVideo(null, file).ignore();
   }
 
-  void queueFiles() {
-    Future.delayed(const Duration(seconds: 5), () {
+  void queueFiles({Duration duration = const Duration(seconds: 5)}) {
+    Future.delayed(duration, () {
       if (!_hasQueuedFile && computeController.requestCompute(stream: true)) {
         _putFilesForPreviewCreation(true).catchError((_) {
           _hasQueuedFile = false;

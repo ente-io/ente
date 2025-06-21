@@ -10,7 +10,6 @@ import {
     fileCreationPhotoDate,
     fileFileName,
     fileLocation,
-    filePublicMagicMetadata,
 } from "ente-media/file-metadata";
 import { nullToUndefined } from "ente-utils/transform";
 import { z } from "zod/v4";
@@ -385,7 +384,7 @@ const isMatchingFile = (file: EnteFile, suggestion: SearchSuggestion) => {
         case "date":
             return isDateComponentsMatch(
                 suggestion.dateComponents,
-                fileCreationPhotoDate(file, filePublicMagicMetadata(file)),
+                fileCreationPhotoDate(file),
             );
 
         case "location": {

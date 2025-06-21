@@ -30,9 +30,9 @@ import UploadService, {
 import { processVideoNewUpload } from "ente-gallery/services/video";
 import type { Collection } from "ente-media/collection";
 import {
-    decryptFile,
-    type EncryptedEnteFile,
+    decryptRemoteFile,
     type EnteFile,
+    type RemoteEnteFile,
 } from "ente-media/file";
 import type { ParsedMetadata } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
@@ -544,7 +544,7 @@ class UploadManager {
     private async postUploadTask(
         uploadableItem: UploadableUploadItem,
         uploadResult: UploadResult,
-        uploadedFile: EncryptedEnteFile | EnteFile | undefined,
+        uploadedFile: RemoteEnteFile | EnteFile | undefined,
     ): Promise<FinishedUploadResult> {
         log.info(`Upload ${uploadableItem.fileName} | ${uploadResult}`);
         const finishedUploadResult =
@@ -565,8 +565,8 @@ class UploadManager {
                     break;
                 case "uploaded":
                 case "uploadedWithStaticThumbnail":
-                    decryptedFile = await decryptFile(
-                        uploadedFile as EncryptedEnteFile,
+                    decryptedFile = await decryptRemoteFile(
+                        uploadedFile as RemoteEnteFile,
                         uploadableItem.collection.key,
                     );
                     break;
@@ -598,31 +598,21 @@ class UploadManager {
                 }
                 this.updateExistingFiles(decryptedFile);
             }
-            await this.watchFolderCallback(
-                uploadResult,
-                uploadableItem,
-                uploadedFile as EncryptedEnteFile,
-            );
+
+            if (isDesktop) {
+                if (watcher.isUploadRunning()) {
+                    await watcher.onFileUpload(
+                        uploadResult,
+                        uploadableItem,
+                        uploadedFile,
+                    );
+                }
+            }
+
             return finishedUploadResult;
         } catch (e) {
             log.error("Post file upload action failed", e);
             return "failed";
-        }
-    }
-
-    private async watchFolderCallback(
-        fileUploadResult: UploadResult,
-        fileWithCollection: ClusteredUploadItem,
-        uploadedFile: EncryptedEnteFile,
-    ) {
-        if (isDesktop) {
-            if (watcher.isUploadRunning()) {
-                await watcher.onFileUpload(
-                    fileUploadResult,
-                    fileWithCollection,
-                    uploadedFile,
-                );
-            }
         }
     }
 
