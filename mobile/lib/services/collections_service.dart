@@ -27,7 +27,7 @@ import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/extensions/list.dart';
 import 'package:photos/extensions/stop_watch.dart';
 import "package:photos/generated/l10n.dart";
-import 'package:photos/models/api/collection/collection_file_item.dart';
+import 'package:photos/models/api/collection/collection_file_request.dart';
 import 'package:photos/models/api/collection/create_request.dart';
 import "package:photos/models/api/collection/public_url.dart";
 import "package:photos/models/api/collection/user.dart";
@@ -1527,10 +1527,10 @@ class CollectionsService {
         collectionDiffItems.add(localDiffItem);
         newFiles.add(newFile);
         params["files"].add(
-          CollectionFileItem.req(
+          CollectionFileRequest.req(
             localDiffItem.fileID,
-            encryptedKey: localDiffItem.encFileKey!,
-            keyDecryptionNonce: localDiffItem.encFileKeyNonce!,
+            encKey: localDiffItem.encFileKey!,
+            encKeyNonce: localDiffItem.encFileKeyNonce!,
           ),
         );
       }
@@ -1588,8 +1588,11 @@ class CollectionsService {
         final String keyDecryptionNonce =
             CryptoUtil.bin2base64(encryptedKeyData.nonce!);
         params["files"].add(
-          CollectionFileItem(uploadedFileID, encryptedKey, keyDecryptionNonce)
-              .toMap(),
+          CollectionFileRequest.req(
+            uploadedFileID,
+            encKey: encryptedKeyData.encryptedData!,
+            encKeyNonce: encryptedKeyData.nonce!,
+          ),
         );
       }
       try {
@@ -1625,7 +1628,7 @@ class CollectionsService {
         batchFile.keyDecryptionNonce =
             CryptoUtil.bin2base64(encryptedKeyData.nonce!);
         params["files"].add(
-          CollectionFileItem(
+          CollectionFileRequest(
             batchFile.uploadedFileID!,
             batchFile.encryptedKey!,
             batchFile.keyDecryptionNonce!,
@@ -1742,7 +1745,7 @@ class CollectionsService {
         CryptoUtil.bin2base64(encryptedKeyData.nonce!);
 
     params["files"].add(
-      CollectionFileItem(
+      CollectionFileRequest(
         uploadedFileID,
         localFileToUpload.encryptedKey!,
         localFileToUpload.keyDecryptionNonce!,
@@ -1790,7 +1793,7 @@ class CollectionsService {
         file.keyDecryptionNonce =
             CryptoUtil.bin2base64(encryptedKeyData.nonce!);
         params["files"].add(
-          CollectionFileItem(
+          CollectionFileRequest(
             file.uploadedFileID!,
             file.encryptedKey!,
             file.keyDecryptionNonce!,
@@ -1858,10 +1861,10 @@ class CollectionsService {
         batchMovedFiles.add(newFile);
         collectionDiffItems.add(localDiffItem);
         params["files"].add(
-          CollectionFileItem.req(
+          CollectionFileRequest.req(
             localDiffItem.fileID,
-            encryptedKey: localDiffItem.encFileKey!,
-            keyDecryptionNonce: localDiffItem.encFileKeyNonce!,
+            encKey: localDiffItem.encFileKey!,
+            encKeyNonce: localDiffItem.encFileKeyNonce!,
           ),
         );
       }

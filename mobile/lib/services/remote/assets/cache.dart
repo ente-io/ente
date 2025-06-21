@@ -1,11 +1,11 @@
 import "package:photos/models/file/remote/asset.dart";
-import "package:photos/models/file/remote/file_entry.dart";
+import "package:photos/models/file/remote/collection_file.dart";
 
 class RemoteAssetCache {
   final Map<int, RemoteAsset> _cache = {};
   final Map<int, Set<int>> _collectionsToAssets = {};
   final Map<int, Set<int>> _assetsToCollections = {};
-  final Map<String, CollectionFileEntry> _fileEntries = {};
+  final Map<String, CollectionFile> _fileEntries = {};
 
   List<int>? uncachedAssets(List<int> assetIDs) {
     final missing = <int>[];

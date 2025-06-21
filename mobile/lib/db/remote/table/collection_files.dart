@@ -2,7 +2,7 @@ import "package:flutter/foundation.dart";
 import "package:photos/db/remote/db.dart";
 import "package:photos/db/remote/schema.dart";
 import "package:photos/extensions/stop_watch.dart";
-import "package:photos/models/file/remote/file_entry.dart";
+import "package:photos/models/file/remote/collection_file.dart";
 
 extension CollectionFiles on RemoteDB {
   Future<int> getCollectionFileCount(int collectionID) async {
@@ -46,18 +46,18 @@ extension CollectionFiles on RemoteDB {
     return collectionIdToFileCount;
   }
 
-  Future<List<CollectionFileEntry>> getCollectionFiles(
+  Future<List<CollectionFile>> getCollectionFiles(
     FilterQueryParam? params,
   ) async {
     final rows = await sqliteDB.getAll(
       "SELECT * FROM collection_files  JOIN files on collection_files.file_id=files.id WHERE ${params?.whereClause() ?? "order by creation_time desc"}",
     );
     return rows
-        .map((row) => CollectionFileEntry.fromMap(row))
+        .map((row) => CollectionFile.fromMap(row))
         .toList(growable: false);
   }
 
-  Future<CollectionFileEntry?> coverFile(
+  Future<CollectionFile?> coverFile(
     int collectionID,
     int? fileID, {
     bool sortInAsc = false,
@@ -73,13 +73,13 @@ extension CollectionFiles on RemoteDB {
       [collectionID],
     );
     if (sortedRow != null) {
-      return CollectionFileEntry.fromMap(sortedRow);
+      return CollectionFile.fromMap(sortedRow);
     }
 
     return null;
   }
 
-  Future<CollectionFileEntry?> getCollectionFileEntry(
+  Future<CollectionFile?> getCollectionFileEntry(
     int collectionID,
     int fileID,
   ) async {
@@ -88,12 +88,12 @@ extension CollectionFiles on RemoteDB {
       [collectionID, fileID],
     );
     if (row != null) {
-      return CollectionFileEntry.fromMap(row);
+      return CollectionFile.fromMap(row);
     }
     return null;
   }
 
-  Future<CollectionFileEntry?> getAnyCollectionEntry(
+  Future<CollectionFile?> getAnyCollectionEntry(
     int fileID,
   ) async {
     final row = await sqliteDB.getAll(
@@ -101,17 +101,17 @@ extension CollectionFiles on RemoteDB {
       [fileID],
     );
     if (row.isNotEmpty) {
-      return CollectionFileEntry.fromMap(row.first);
+      return CollectionFile.fromMap(row.first);
     }
     return null;
   }
 
-  Future<List<CollectionFileEntry>> getFilesCreatedWithinDurations(
+  Future<List<CollectionFile>> getFilesCreatedWithinDurations(
     List<List<int>> durations,
     Set<int> ignoredCollectionIDs, {
     String order = 'DESC',
   }) async {
-    final List<CollectionFileEntry> result = [];
+    final List<CollectionFile> result = [];
     for (final duration in durations) {
       final start = duration[0];
       final end = duration[1];
@@ -119,7 +119,7 @@ extension CollectionFiles on RemoteDB {
         "SELECT * FROM collection_files join files on files.id=collection_files.file_id WHERE files.creation_time BETWEEN ? AND ? AND collection_id NOT IN (${ignoredCollectionIDs.join(",")}) ORDER BY creation_time $order",
         [start, end],
       );
-      result.addAll(rows.map((row) => CollectionFileEntry.fromMap(row)));
+      result.addAll(rows.map((row) => CollectionFile.fromMap(row)));
     }
     return result;
   }

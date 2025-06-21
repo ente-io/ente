@@ -4,7 +4,7 @@ import 'package:photos/core/network/network.dart';
 import 'package:photos/generated/l10n.dart';
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/file/remote/asset.dart";
-import "package:photos/models/file/remote/file_entry.dart";
+import "package:photos/models/file/remote/collection_file.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/services/remote/fetch/collection_files.dart";
 import "package:photos/utils/dialog_util.dart";
@@ -32,7 +32,7 @@ Future<List<EnteFile>> getPublicFiles(
         headers,
       );
       for (final item in diffResult.updatedItems) {
-        final cf = CollectionFileEntry(
+        final cf = CollectionFile(
           collectionID: item.collectionID,
           fileID: item.fileID,
           encFileKey: item.encFileKey!,

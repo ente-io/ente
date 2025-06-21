@@ -1,6 +1,6 @@
 import "dart:typed_data";
 
-class CollectionFileEntry {
+class CollectionFile {
   final int collectionID;
   final int fileID;
   final Uint8List encFileKey;
@@ -8,7 +8,7 @@ class CollectionFileEntry {
   final int updatedAt;
   final int createdAt;
 
-  CollectionFileEntry({
+  CollectionFile({
     required this.collectionID,
     required this.fileID,
     required this.encFileKey,
@@ -17,7 +17,7 @@ class CollectionFileEntry {
     required this.createdAt,
   });
 
-  CollectionFileEntry.fromMap(Map<String, dynamic> map)
+  CollectionFile.fromMap(Map<String, dynamic> map)
       : collectionID = map["collection_id"] as int,
         fileID = map["file_id"] as int,
         encFileKey = map["enc_key"] as Uint8List,

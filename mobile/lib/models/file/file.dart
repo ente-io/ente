@@ -8,7 +8,7 @@ import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/models/file/file_type.dart';
 import "package:photos/models/file/remote/asset.dart";
-import "package:photos/models/file/remote/file_entry.dart";
+import "package:photos/models/file/remote/collection_file.dart";
 import 'package:photos/models/location/location.dart';
 import "package:photos/models/metadata/file_magic.dart";
 import "package:photos/module/download/file_url.dart";
@@ -21,7 +21,7 @@ import 'package:photos/utils/standalone/date_time.dart';
 class EnteFile {
   AssetEntity? lAsset;
   RemoteAsset? rAsset;
-  CollectionFileEntry? fileEntry;
+  CollectionFile? cf;
   int? generatedID;
   int? uploadedFileID;
   int? ownerID;
@@ -119,12 +119,12 @@ class EnteFile {
 
   static EnteFile fromRemoteAsset(
     RemoteAsset rAsset,
-    CollectionFileEntry collection, {
+    CollectionFile collection, {
     AssetEntity? lAsset,
   }) {
     final EnteFile file = EnteFile();
     file.rAsset = rAsset;
-    file.fileEntry = collection;
+    file.cf = collection;
     file.lAsset = lAsset;
 
     file.uploadedFileID = rAsset.id;
@@ -424,7 +424,7 @@ class EnteFile {
     return EnteFile()
       ..lAsset = lAsset
       ..rAsset = rAsset
-      ..fileEntry = fileEntry
+      ..cf = cf
       ..generatedID = generatedID ?? this.generatedID
       ..uploadedFileID = uploadedFileID ?? this.uploadedFileID
       ..ownerID = ownerID ?? this.ownerID

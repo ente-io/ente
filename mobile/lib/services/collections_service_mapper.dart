@@ -1,13 +1,13 @@
 import "package:ente_crypto/ente_crypto.dart";
 import "package:photos/models/api/diff/diff.dart";
 import "package:photos/models/file/file.dart";
-import "package:photos/models/file/remote/file_entry.dart";
+import "package:photos/models/file/remote/collection_file.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/utils/file_key.dart";
 
 extension CollectionsServiceMapper on CollectionsService {
   EnteFile moveOrAddEntry(EnteFile file, int destCollectionID) {
-    if (file.rAsset == null || file.fileEntry == null) {
+    if (file.rAsset == null || file.cf == null) {
       throw ArgumentError(
         "File must have remoteAsset and fileEntry to be mapped.",
       );
@@ -16,8 +16,8 @@ extension CollectionsServiceMapper on CollectionsService {
     final encResult =
         CryptoUtil.encryptSync(fileKey, getCollectionKey(destCollectionID));
     final remoteAsset = file.rAsset!;
-    final oldCF = file.fileEntry!;
-    final newCF = CollectionFileEntry(
+    final oldCF = file.cf!;
+    final newCF = CollectionFile(
       collectionID: destCollectionID,
       fileID: oldCF.fileID,
       encFileKey: encResult.encryptedData!,
@@ -33,11 +33,11 @@ extension CollectionsServiceMapper on CollectionsService {
   }
 
   DiffFileItem buildDiffItem(EnteFile file) {
-    if (file.rAsset == null || file.fileEntry == null) {
+    if (file.rAsset == null || file.cf == null) {
       throw ArgumentError("must have remoteAsset and fileEntry");
     }
     final remoteAsset = file.rAsset!;
-    final cf = file.fileEntry!;
+    final cf = file.cf!;
     if (remoteAsset.id != cf.fileID) {
       throw ArgumentError("File ID in remote asset does not match file entry.");
     }
