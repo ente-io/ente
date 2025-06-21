@@ -69,12 +69,9 @@ class SelectedFiles extends ChangeNotifier {
   }
 
   bool _isMatch(EnteFile first, EnteFile second) {
-    if (first.generatedID != null && second.generatedID != null) {
-      if (first.generatedID == second.generatedID) {
-        return true;
-      }
-    } else if (first.uploadedFileID != null && second.uploadedFileID != null) {
-      return first.uploadedFileID == second.uploadedFileID;
+    
+     if (first.isUploaded && second.isUploaded) {
+      return first.remoteID == second.remoteID;
     } else if (first.lAsset != null && second.lAsset != null) {
       return first.lAsset!.id == second.lAsset!.id;
     }
