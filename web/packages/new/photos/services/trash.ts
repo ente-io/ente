@@ -1,11 +1,11 @@
-import type { EncryptedEnteFile, EnteFile } from "ente-media/file";
+import type { EnteFile, RemoteEnteFile } from "ente-media/file";
 
 export interface TrashItem extends Omit<EncryptedTrashItem, "file"> {
     file: EnteFile;
 }
 
 export interface EncryptedTrashItem {
-    file: EncryptedEnteFile;
+    file: RemoteEnteFile;
     /**
      * `true` if the file no longer in trash because it was permanently deleted.
      *

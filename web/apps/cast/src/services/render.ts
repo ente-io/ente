@@ -7,7 +7,7 @@ import {
     decryptRemoteFile,
     FileDiffResponse,
     RemoteEnteFile,
-    type EnteFile2,
+    type EnteFile,
 } from "ente-media/file";
 import { fileFileName } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
@@ -175,7 +175,7 @@ export const getRemoteCastCollectionFiles = async (
     return files;
 };
 
-const isFileEligible = (file: EnteFile2) => {
+const isFileEligible = (file: EnteFile) => {
     if (!isImageOrLivePhoto(file)) return false;
 
     if ((file.info?.fileSize ?? 0) > 100 * 1024 * 1024) return false;
@@ -193,7 +193,7 @@ const isFileEligible = (file: EnteFile2) => {
     return true;
 };
 
-const isImageOrLivePhoto = (file: EnteFile2) =>
+const isImageOrLivePhoto = (file: EnteFile) =>
     file.metadata.fileType == FileType.image ||
     file.metadata.fileType == FileType.livePhoto;
 
@@ -204,12 +204,12 @@ const isImageOrLivePhoto = (file: EnteFile2) =>
  * Once we're done showing the file, the URL should be revoked using
  * {@link URL.revokeObjectURL} to free up browser resources.
  */
-const createRenderableURL = async (castToken: string, file: EnteFile2) => {
+const createRenderableURL = async (castToken: string, file: EnteFile) => {
     const imageBlob = await renderableImageBlob(castToken, file);
     return URL.createObjectURL(imageBlob);
 };
 
-const renderableImageBlob = async (castToken: string, file: EnteFile2) => {
+const renderableImageBlob = async (castToken: string, file: EnteFile) => {
     const shouldUseThumbnail = isChromecast();
 
     let blob = await downloadFile(castToken, file, shouldUseThumbnail);
@@ -239,7 +239,7 @@ const renderableImageBlob = async (castToken: string, file: EnteFile2) => {
 
 const downloadFile = async (
     castToken: string,
-    file: EnteFile2,
+    file: EnteFile,
     shouldUseThumbnail: boolean,
 ) => {
     if (!isImageOrLivePhoto(file))
