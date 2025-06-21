@@ -12,7 +12,7 @@ import 'package:photos/ui/common/bottom_shadow.dart';
 import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/dialog_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
-import "package:photos/ui/settings/backup/backup_folder_selection_page_v2.dart";
+import "package:photos/ui/settings/backup/backup_folder_selection_page.dart";
 import "package:photos/utils/email_util.dart";
 import 'package:photos/utils/navigation_util.dart';
 
@@ -52,7 +52,7 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
           // ignore: unawaited_futures
           routeToPage(
             context,
-            const BackupFolderSelectionPageV2(
+            const BackupFolderSelectionPage(
               isOnboarding: true,
               isFirstBackup: true,
             ),
