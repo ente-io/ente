@@ -186,6 +186,7 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget> {
         [face],
         useFullFile: widget.useFullFile,
         personOrClusterID: personOrClusterId,
+        useTempCache: false,
       );
       return cropMap?[face.faceID];
     } catch (e, s) {

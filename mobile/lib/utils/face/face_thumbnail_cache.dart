@@ -106,6 +106,7 @@ Future<Map<String, Uint8List>?> getCachedFaceCrops(
   int fetchAttempt = 1,
   bool useFullFile = true,
   String? personOrClusterID,
+  required bool useTempCache,
 }) async {
   try {
     final faceIdToCrop = <String, Uint8List>{};
@@ -116,7 +117,7 @@ Future<Map<String, Uint8List>?> getCachedFaceCrops(
       if (cachedFace != null) {
         faceIdToCrop[face.faceID] = cachedFace;
       } else {
-        final faceCropCacheFile = cachedFaceCropPath(face.faceID);
+        final faceCropCacheFile = cachedFaceCropPath(face.faceID, useTempCache);
         if ((await faceCropCacheFile.exists())) {
           try {
             final data = await faceCropCacheFile.readAsBytes();
@@ -185,7 +186,7 @@ Future<Map<String, Uint8List>?> getCachedFaceCrops(
             computedCrop,
             personOrClusterID,
           );
-          final faceCropCacheFile = cachedFaceCropPath(entry.key);
+          final faceCropCacheFile = cachedFaceCropPath(entry.key, useTempCache);
           try {
             // ignore: unawaited_futures
             faceCropCacheFile.writeAsBytes(computedCrop);
@@ -221,6 +222,7 @@ Future<Map<String, Uint8List>?> getCachedFaceCrops(
           faces,
           fetchAttempt: fetchAttempt + 1,
           useFullFile: useFullFile,
+          useTempCache: useTempCache,
         );
       }
       _logger.severe(
@@ -268,6 +270,7 @@ Future<Uint8List?> precomputeClusterFaceCrop(
       fileForFaceCrop,
       [face],
       useFullFile: useFullFile,
+      useTempCache: true,
     );
     w?.logAndReset('getCachedFaceCrops');
     return cropMap?[face.faceID];

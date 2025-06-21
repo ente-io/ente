@@ -335,7 +335,8 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
     );
     final persons = await PersonService.instance.getPersonsMap();
     final clusterIDToPerson = await mlDataDB.getClusterIDToPersonID();
-    final faceCrops = await getCachedFaceCrops(widget.file, faces);
+    final faceCrops =
+        await getCachedFaceCrops(widget.file, faces, useTempCache: true);
     final defaultFaces = <Face>[];
     final remainingFaces = <Face>[];
 
