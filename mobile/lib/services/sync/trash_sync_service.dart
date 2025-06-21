@@ -43,7 +43,6 @@ class TrashSyncService {
   Future<void> syncTrash() async {
     final lastSyncTime = _getSyncTime();
     bool isLocalTrashUpdated = false;
-    _logger.fine('sync trash sinceTime : $lastSyncTime');
     final diff = await getTrashFilesDiff(lastSyncTime);
     if (diff.trashedFiles.isNotEmpty) {
       isLocalTrashUpdated = true;
