@@ -277,11 +277,24 @@ class _HomeWidgetState extends State<HomeWidget> {
     }
   }
 
+  final Map<Uri, (bool, int)> _linkedPublicAlbums = {};
   Future<void> _handlePublicAlbumLink(Uri uri, String via) async {
     try {
-      _logger.info(
-        "Handling public album link: via $via",
-      );
+      _logger.info("Handling public album link: via $via");
+      final int currentTime = DateTime.now().millisecondsSinceEpoch;
+      final bool isInitialStream = via.toLowerCase().contains('initial');
+      if (_linkedPublicAlbums.containsKey(uri)) {
+        final (lastInitialLink, lastTime) = _linkedPublicAlbums[uri]!;
+        // for initial stream, wait for 30 seconds to ignore duplicate links event
+        if (currentTime - lastTime < (lastInitialLink ? 30000 : 2000)) {
+          _logger.info(
+            "ignore was it has handled $lastInitialLink at epoch $lastTime",
+          );
+          return;
+        }
+      }
+      _linkedPublicAlbums[uri] = (isInitialStream, currentTime);
+
       final Collection collection = await CollectionsService.instance
           .getCollectionFromPublicLink(context, uri);
       final existingCollection =
