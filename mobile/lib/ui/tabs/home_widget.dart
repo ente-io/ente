@@ -827,7 +827,7 @@ class _HomeWidgetState extends State<HomeWidget> {
       // Parse the link and warn the user, if it is not correct,
       // but keep in mind it could be `null`.
       if (initialLink != null) {
-        _logger.info("Initial link received: " + initialLink.toString());
+        _logger.info("Initial link received: host ${initialLink.host}");
         _getCredentials(context, initialLink);
         return true;
       } else {
@@ -842,7 +842,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     // Attach a listener to the stream
     appLinks.uriLinkStream.listen(
       (link) {
-        _logger.info("Link received: " + link.toString());
+        _logger.info("Link received: host ${link.host}");
         _getCredentials(context, link);
       },
       onError: (err) {
