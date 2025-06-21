@@ -571,6 +571,14 @@
       ]
     },
     {
+      "title": "IBKR",
+      "slug": "ibkr",
+      "altNames": [
+        "Interactive Brokers", 
+        "IB"
+      ]
+    },
+    {
       "title": "IceDrive",
       "slug": "ice_drive"
     },
