@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:dio/dio.dart';
-import 'package:native_dio_adapter/native_dio_adapter.dart';
+import "package:native_dio_adapter/native_dio_adapter.dart";
 import 'package:package_info_plus/package_info_plus.dart';
 import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";

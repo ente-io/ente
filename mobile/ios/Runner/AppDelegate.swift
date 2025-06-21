@@ -2,6 +2,7 @@ import AVFoundation
 import Flutter
 import UIKit
 import app_links
+import workmanager
 
 @main
 @objc class AppDelegate: FlutterAppDelegate {
@@ -15,6 +16,14 @@ import app_links
     }
 
     GeneratedPluginRegistrant.register(with: self)
+    WorkmanagerPlugin.setPluginRegistrantCallback { registry in
+      GeneratedPluginRegistrant.register(with: registry)
+    }
+    var freqInMinutes = 30 * 60
+    // Register a periodic task in iOS 13+
+    WorkmanagerPlugin.registerPeriodicTask(
+      withIdentifier: "io.ente.frame.iOSBackgroundAppRefresh",
+      frequency: NSNumber(value: freqInMinutes))
 
     // Retrieve the link from parameters
     if let url = AppLinks.shared.getLink(launchOptions: launchOptions) {
