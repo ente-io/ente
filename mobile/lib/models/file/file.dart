@@ -20,7 +20,7 @@ import 'package:photos/utils/standalone/date_time.dart';
 //Todo: files with no location data have lat and long set to 0.0. This should ideally be null.
 class EnteFile {
   AssetEntity? lAsset;
-  RemoteAsset? remoteAsset;
+  RemoteAsset? rAsset;
   CollectionFileEntry? fileEntry;
   int? generatedID;
   int? uploadedFileID;
@@ -110,8 +110,8 @@ class EnteFile {
   }
 
   int get remoteID {
-    if (remoteAsset != null) {
-      return remoteAsset!.id;
+    if (rAsset != null) {
+      return rAsset!.id;
     } else {
       throw Exception("Remote ID is not set for the file");
     }
@@ -123,7 +123,7 @@ class EnteFile {
     AssetEntity? lAsset,
   }) {
     final EnteFile file = EnteFile();
-    file.remoteAsset = rAsset;
+    file.rAsset = rAsset;
     file.fileEntry = collection;
     file.lAsset = lAsset;
 
@@ -341,7 +341,7 @@ class EnteFile {
   }
 
   bool get isUploaded {
-    return remoteAsset != null;
+    return rAsset != null;
   }
 
   bool get isSharedMediaToAppSandbox {
@@ -423,7 +423,7 @@ class EnteFile {
   }) {
     return EnteFile()
       ..lAsset = lAsset
-      ..remoteAsset = remoteAsset
+      ..rAsset = rAsset
       ..fileEntry = fileEntry
       ..generatedID = generatedID ?? this.generatedID
       ..uploadedFileID = uploadedFileID ?? this.uploadedFileID
