@@ -45,7 +45,7 @@ import "package:photos/services/memory_home_widget_service.dart";
 import "package:photos/services/notification_service.dart";
 import "package:photos/services/people_home_widget_service.dart";
 import "package:photos/services/sync/remote_sync_service.dart";
-import "package:photos/services/sync/sync_public_collection.dart";
+import "package:photos/services/remote/fetch/sync_public_collection.dart";
 import 'package:photos/states/user_details_state.dart';
 import 'package:photos/theme/colors.dart';
 import "package:photos/theme/effects.dart";
