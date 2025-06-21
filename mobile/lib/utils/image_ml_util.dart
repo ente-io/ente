@@ -32,6 +32,10 @@ final List<List<double>> gaussianKernel =
 const maxKernelSize = gaussianKernelSize;
 const maxKernelRadius = maxKernelSize ~/ 2;
 
+// Face thumbnail compression constants
+const int _maxFaceThumbnailSizeBytes = 1 * 1024 * 1024; // 1MB
+const int _faceThumbnailCompressionQuality = 85;
+
 class DecodedImage {
   final Image image;
   final Uint8List? rawRgbaBytes;
@@ -536,7 +540,40 @@ Future<Uint8List> _cropAndEncodeCanvas(
     width: width,
     height: height,
   );
-  return await _encodeImageToPng(croppedImage);
+  final pngBytes = await _encodeImageToPng(croppedImage);
+  return await _compressFaceThumbnailIfNeeded(pngBytes);
+}
+
+/// Compresses the face thumbnail if it's too large in size.
+///
+/// Returns compressed bytes if the original size exceeds [_maxFaceThumbnailSizeBytes],
+/// otherwise returns the original bytes.
+Future<Uint8List> _compressFaceThumbnailIfNeeded(Uint8List pngBytes) async {
+  if (pngBytes.length <= _maxFaceThumbnailSizeBytes) {
+    return pngBytes;
+  }
+
+  try {
+    final compressedBytes = await FlutterImageCompress.compressWithList(
+      pngBytes,
+      quality: _faceThumbnailCompressionQuality,
+      format: CompressFormat.jpeg,
+    );
+
+    _logger.info(
+      'Face thumbnail compressed from ${pngBytes.length} bytes to ${compressedBytes.length} bytes '
+      '(${((1 - compressedBytes.length / pngBytes.length) * 100).toStringAsFixed(1)}% reduction)',
+    );
+
+    return compressedBytes;
+  } catch (e, s) {
+    _logger.warning(
+      'Failed to compress face thumbnail, using original. Size: ${pngBytes.length} bytes',
+      e,
+      s,
+    );
+    return pngBytes;
+  }
 }
 
 RGB _getPixelBilinear(
