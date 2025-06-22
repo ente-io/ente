@@ -566,8 +566,8 @@ class MemoryBackDrop extends StatelessWidget {
               ),
               BackdropFilter(
                 filter: ImageFilter.blur(
-                  sigmaX: 100,
-                  sigmaY: 100,
+                  sigmaX: 50,
+                  sigmaY: 50,
                 ),
                 child: Container(
                   color: Colors.transparent,
@@ -663,20 +663,22 @@ class _MemoriesZoomWidgetState extends State<MemoriesZoomWidget>
   Widget build(BuildContext context) {
     return widget.isVideo
         ? widget.child
-        : AnimatedBuilder(
-            animation: _controller,
-            builder: (context, child) {
-              return Transform.scale(
-                scale: _scaleAnimation.value,
-                child: Transform.translate(
-                  offset: Offset(
-                    _panAnimation.value.dx * 100,
-                    _panAnimation.value.dy * 100,
+        : ClipRect(
+          child: AnimatedBuilder(
+              animation: _controller,
+              builder: (context, child) {
+                return Transform.scale(
+                  scale: _scaleAnimation.value,
+                  child: Transform.translate(
+                    offset: Offset(
+                      _panAnimation.value.dx * 100,
+                      _panAnimation.value.dy * 100,
+                    ),
+                    child: widget.child,
                   ),
-                  child: widget.child,
-                ),
-              );
-            },
-          );
+                );
+              },
+            ),
+        );
   }
 }
