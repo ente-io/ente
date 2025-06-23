@@ -86,13 +86,6 @@ void main() async {
   }
 }
 
-class WindowManagerListener with WindowListener {
-  @override
-  void onWindowClose() async {
-    windowManager.destroy();
-  }
-}
-
 Future<void> _runInForeground() async {
   final savedThemeMode = _themeMode(await AdaptiveTheme.getThemeMode());
   return await _runWithLogs(() async {
