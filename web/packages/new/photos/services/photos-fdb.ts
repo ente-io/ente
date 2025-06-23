@@ -2,8 +2,12 @@
  * @file Photos app specific files DB. See: [Note: Files DB].
  */
 
-import { LocalCollections } from "ente-gallery/services/files-db";
+import {
+    LocalCollections,
+    transformFilesIfNeeded,
+} from "ente-gallery/services/files-db";
 import { type Collection } from "ente-media/collection";
+import { type EnteFile } from "ente-media/file";
 import localForage from "ente-shared/storage/localForage";
 import { z } from "zod/v4";
 
@@ -101,3 +105,65 @@ export const savedTrashItemCollectionKeys = async (): Promise<
  */
 export const saveTrashItemCollectionKeys = (cks: TrashItemCollectionKey[]) =>
     localForage.setItem("deleted-collection", cks);
+
+/**
+ * Return all files present in our local database.
+ *
+ * This includes both normal (non-hidden) and hidden files. If you're interested
+ * only in one type (normal or hidden), then it is more efficient to use
+ * {@link savedNormalFiles} or {@link savedHiddenFiles} to obtain them; this
+ * method is only a convenience to concatenate the two.
+ */
+export const savedFiles = async (): Promise<EnteFile[]> =>
+    Promise.all([savedNormalFiles(), savedHiddenFiles()]).then((f) => f.flat());
+
+/**
+ * Return all normal (non-hidden) files present in our local database.
+ *
+ * Use {@link saveNormalFiles} to update the database.
+ */
+export const savedNormalFiles = async (): Promise<EnteFile[]> =>
+    // [Note: Avoiding Zod parsing for large DB arrays]
+    //
+    // Zod can be used to validate that the value we read from the DB is indeed
+    // the same as the type we expect, but for potentially very large arrays,
+    // this has an overhead that is perhaps not justified when dealing with DB
+    // entries we ourselves wrote.
+    //
+    // For example (as a non-rigorous benchmark) parsing 200k files took one
+    // second. Zod is fast, just that these arrays are big and might be accessed
+    // frequently, and the schemas are, while not too complicated, non-trivial.
+    //
+    // As an optimization, we skip the runtime check here and cast. This might
+    // not be the most optimal choice in the future, so (a) use it sparingly,
+    // and (b) mark all such cases with the title of this note.
+    transformFilesIfNeeded(
+        (await localForage.getItem<EnteFile[]>("files")) ?? [],
+    );
+
+/**
+ * Replace the list of files stored in our local database.
+ *
+ * This is the setter corresponding to {@link savedNormalFiles}.
+ */
+export const saveNormalFiles = (files: EnteFile[]) =>
+    localForage.setItem("files", transformFilesIfNeeded(files));
+
+/**
+ * Return all hidden files present in our local database.
+ *
+ * Use {@link saveNormalFiles} to update the database.
+ */
+export const savedHiddenFiles = async (): Promise<EnteFile[]> =>
+    // See: [Note: Avoiding Zod parsing for large DB arrays]
+    transformFilesIfNeeded(
+        (await localForage.getItem<EnteFile[]>("hidden-files")) ?? [],
+    );
+
+/**
+ * Replace the list of files stored in our local database.
+ *
+ * This is the setter corresponding to {@link savedNormalFiles}.
+ */
+export const saveHiddenFiles = (files: EnteFile[]) =>
+    localForage.setItem("hidden-files", transformFilesIfNeeded(files));

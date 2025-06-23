@@ -11,8 +11,6 @@ import {
     getLocalTrash,
     getTrashedFiles,
     TRASH,
-} from "ente-new/photos/services/files";
-import {
     type EncryptedTrashItem,
     type Trash,
 } from "ente-new/photos/services/trash";
@@ -37,14 +35,11 @@ const COLLECTION_UPDATION_TIME = "collection-updation-time";
 export const getLocalCollections = async (
     type: "normal" | "hidden" = "normal",
 ): Promise<Collection[]> => {
-    const collections = await getAllLocalCollections();
+    const collections = await savedCollections();
     return type == "normal"
         ? collections.filter((c) => !isHiddenCollection(c))
         : collections.filter((c) => isHiddenCollection(c));
 };
-
-export const getAllLocalCollections = async (): Promise<Collection[]> =>
-    savedCollections();
 
 export const getCollectionLastSyncTime = async (collection: Collection) =>
     (await localForage.getItem<number>(`${collection.id}-time`)) ?? 0;
@@ -78,7 +73,7 @@ export const getAllLatestCollections = async (): Promise<Collection[]> => {
 };
 
 export const syncCollections = async () => {
-    const localCollections = await getAllLocalCollections();
+    const localCollections = await savedCollections();
     let sinceTime = await getCollectionUpdationTime();
 
     const changes = await getCollectionChanges(sinceTime);

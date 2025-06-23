@@ -2,6 +2,7 @@ import { assertionFailed } from "ente-base/assert";
 import { newNonSecureID } from "ente-base/id-worker";
 import log from "ente-base/log";
 import type { EnteFile } from "ente-media/file";
+import { fileCreationTime } from "ente-media/file-metadata";
 import { wait } from "ente-utils/promise";
 import {
     pullUserEntities,
@@ -229,7 +230,7 @@ const sortFacesNewestOnesFirst = (
             assertionFailed(`Did not find a local file for faceID ${faceID}`);
             return 0;
         }
-        return file.metadata.creationTime;
+        return fileCreationTime(file);
     };
 
     return faces.sort((a, b) => sortTimeForFace(b) - sortTimeForFace(a));

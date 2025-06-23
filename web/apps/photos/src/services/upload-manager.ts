@@ -29,12 +29,11 @@ import UploadService, {
 } from "ente-gallery/services/upload/upload-service";
 import { processVideoNewUpload } from "ente-gallery/services/video";
 import type { Collection } from "ente-media/collection";
+import { type EnteFile } from "ente-media/file";
 import {
-    decryptRemoteFile,
-    type EnteFile,
-    type RemoteEnteFile,
-} from "ente-media/file";
-import type { ParsedMetadata } from "ente-media/file-metadata";
+    fileCreationTime,
+    type ParsedMetadata,
+} from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
 import { potentialFileTypeFromExtension } from "ente-media/live-photo";
 import { getLocalFiles } from "ente-new/photos/services/files";
@@ -64,22 +63,17 @@ export interface InProgressUpload {
 }
 
 /**
- * A variant of {@link UploadResult} used when segregating finished uploads in
- * the UI. "addedSymlink" is treated as "uploaded", everything else remains as
- * it were.
+ * A variant of {@link UploadResult}'s {@link type} values used when segregating
+ * finished uploads in the UI. "addedSymlink" is treated as "uploaded",
+ * everything else remains as it were.
  */
-export type FinishedUploadResult = Exclude<UploadResult, "addedSymlink">;
-
-export interface FinishedUpload {
-    localFileID: FileID;
-    result: FinishedUploadResult;
-}
+export type FinishedUploadType = Exclude<UploadResult["type"], "addedSymlink">;
 
 export type InProgressUploads = Map<FileID, PercentageUploaded>;
 
-export type FinishedUploads = Map<FileID, FinishedUploadResult>;
+export type FinishedUploads = Map<FileID, FinishedUploadType>;
 
-export type SegregatedFinishedUploads = Map<FinishedUploadResult, FileID[]>;
+export type SegregatedFinishedUploads = Map<FinishedUploadType, FileID[]>;
 
 export interface ProgressUpdater {
     setPercentComplete: React.Dispatch<React.SetStateAction<number>>;
@@ -142,7 +136,7 @@ class UIService {
         this.setTotalFileCount(count);
         this.filesUploadedCount = 0;
         this.inProgressUploads = new Map<number, number>();
-        this.finishedUploads = new Map<number, FinishedUploadResult>();
+        this.finishedUploads = new Map<number, FinishedUploadType>();
         this.updateProgressBarUI();
     }
 
@@ -186,8 +180,8 @@ class UIService {
         this.updateProgressBarUI();
     }
 
-    moveFileToResultList(key: number, uploadResult: FinishedUploadResult) {
-        this.finishedUploads.set(key, uploadResult);
+    moveFileToResultList(key: number, type: FinishedUploadType) {
+        this.finishedUploads.set(key, type);
         this.inProgressUploads.delete(key);
         this.updateProgressBarUI();
     }
@@ -413,7 +407,7 @@ class UploadManager {
         collection: Collection,
         sourceEnteFile: EnteFile,
     ) {
-        const timestamp = sourceEnteFile.metadata.creationTime;
+        const timestamp = fileCreationTime(sourceEnteFile);
         const dateTime = sourceEnteFile.pubMagicMetadata?.data.dateTime;
         const offset = sourceEnteFile.pubMagicMetadata?.data.offsetTime;
 
@@ -520,7 +514,7 @@ class UploadManager {
             uiService.setFileProgress(localID, 0);
             await wait(0);
 
-            const { uploadResult, uploadedFile } = await upload(
+            const uploadResult = await upload(
                 uploadableItem,
                 this.uploaderName,
                 this.existingFiles,
@@ -529,13 +523,12 @@ class UploadManager {
                 uploadContext,
             );
 
-            const finalUploadResult = await this.postUploadTask(
+            const finishedUploadType = await this.postUploadTask(
                 uploadableItem,
                 uploadResult,
-                uploadedFile,
             );
 
-            uiService.moveFileToResultList(localID, finalUploadResult);
+            uiService.moveFileToResultList(localID, finishedUploadType);
             uiService.increaseFileUploaded();
             UploadService.reducePendingUploadCount();
         }
@@ -544,72 +537,42 @@ class UploadManager {
     private async postUploadTask(
         uploadableItem: UploadableUploadItem,
         uploadResult: UploadResult,
-        uploadedFile: RemoteEnteFile | EnteFile | undefined,
-    ): Promise<FinishedUploadResult> {
-        log.info(`Upload ${uploadableItem.fileName} | ${uploadResult}`);
-        const finishedUploadResult =
-            uploadResult == "addedSymlink" ? "uploaded" : uploadResult;
+    ): Promise<FinishedUploadType> {
+        const type = uploadResult.type;
+        log.info(`Upload ${uploadableItem.fileName} | ${type}`);
         try {
             const processableUploadItem =
                 await markUploadedAndObtainProcessableItem(uploadableItem);
 
-            let decryptedFile: EnteFile;
-            switch (uploadResult) {
+            switch (uploadResult.type) {
                 case "failed":
                 case "blocked":
+                    // Retriable error.
                     this.failedItems.push(uploadableItem);
                     break;
-                case "alreadyUploaded":
+
                 case "addedSymlink":
-                    decryptedFile = uploadedFile as EnteFile;
+                    this.updateExistingFiles(uploadResult.file);
                     break;
+
                 case "uploaded":
                 case "uploadedWithStaticThumbnail":
-                    decryptedFile = await decryptRemoteFile(
-                        uploadedFile as RemoteEnteFile,
-                        uploadableItem.collection.key,
-                    );
+                    {
+                        const { file } = uploadResult;
+
+                        indexNewUpload(file, processableUploadItem);
+                        processVideoNewUpload(file, processableUploadItem);
+
+                        this.updateExistingFiles(file);
+                    }
                     break;
-                case "largerThanAvailableStorage":
-                case "unsupported":
-                case "tooLarge":
-                    // no-op
-                    break;
-                default:
-                    throw new Error(`Invalid Upload Result ${uploadResult}`);
-            }
-            if (
-                [
-                    "addedSymlink",
-                    "uploaded",
-                    "uploadedWithStaticThumbnail",
-                ].includes(uploadResult)
-            ) {
-                const uploadItem =
-                    uploadableItem.uploadItem ??
-                    uploadableItem.livePhotoAssets.image;
-                if (
-                    uploadItem &&
-                    (uploadResult == "uploaded" ||
-                        uploadResult == "uploadedWithStaticThumbnail")
-                ) {
-                    indexNewUpload(decryptedFile, processableUploadItem);
-                    processVideoNewUpload(decryptedFile, processableUploadItem);
-                }
-                this.updateExistingFiles(decryptedFile);
             }
 
-            if (isDesktop) {
-                if (watcher.isUploadRunning()) {
-                    await watcher.onFileUpload(
-                        uploadResult,
-                        uploadableItem,
-                        uploadedFile,
-                    );
-                }
+            if (isDesktop && watcher.isUploadRunning()) {
+                await watcher.onFileUpload(uploadableItem, uploadResult);
             }
 
-            return finishedUploadResult;
+            return type == "addedSymlink" ? "uploaded" : type;
         } catch (e) {
             log.error("Post file upload action failed", e);
             return "failed";
@@ -638,12 +601,9 @@ class UploadManager {
         return this.uploaderName;
     }
 
-    private updateExistingFiles(decryptedFile: EnteFile) {
-        if (!decryptedFile) {
-            throw Error("decrypted file can't be undefined");
-        }
-        this.existingFiles.push(decryptedFile);
-        this.onUploadFile(decryptedFile);
+    private updateExistingFiles(file: EnteFile) {
+        this.existingFiles.push(file);
+        this.onUploadFile(file);
     }
 
     /**

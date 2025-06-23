@@ -47,8 +47,9 @@ import { FullScreenDropZone } from "ente-gallery/components/FullScreenDropZone";
 import { downloadManager } from "ente-gallery/services/download";
 import { extractCollectionKeyFromShareURL } from "ente-gallery/services/share";
 import { updateShouldDisableCFUploadProxy } from "ente-gallery/services/upload";
+import { sortFiles } from "ente-gallery/utils/files";
 import type { Collection } from "ente-media/collection";
-import { mergeMetadata, type EnteFile } from "ente-media/file";
+import { type EnteFile } from "ente-media/file";
 import { verifyPublicAlbumPassword } from "ente-new/albums/services/publicCollection";
 import {
     GalleryItemsHeaderAdapter,
@@ -56,7 +57,6 @@ import {
 } from "ente-new/photos/components/gallery/ListHeader";
 import { isHiddenCollection } from "ente-new/photos/services/collection";
 import { PseudoCollectionID } from "ente-new/photos/services/collection-summary";
-import { sortFiles } from "ente-new/photos/services/files";
 import { usePhotosAppContext } from "ente-new/photos/types/context";
 import { CustomError, parseSharingErrorCodes } from "ente-shared/error";
 import { t } from "i18next";
@@ -229,10 +229,7 @@ export default function PublicCollectionGallery() {
                     setIsPasswordProtected(isPasswordProtected);
                     const collectionUID = getPublicCollectionUID(accessToken);
                     const localFiles = await getLocalPublicFiles(collectionUID);
-                    const localPublicFiles = sortFiles(
-                        mergeMetadata(localFiles),
-                        sortAsc,
-                    );
+                    const localPublicFiles = sortFiles(localFiles, sortAsc);
                     setPublicFiles(localPublicFiles);
                     accessTokenJWT =
                         await getLocalPublicCollectionPassword(collectionUID);
