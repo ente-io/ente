@@ -1583,10 +1583,6 @@ class CollectionsService {
         final fileKey = getFileKey(file);
         final encryptedKeyData =
             CryptoUtil.encryptSync(fileKey, getCollectionKey(collectionID));
-        final String encryptedKey =
-            CryptoUtil.bin2base64(encryptedKeyData.encryptedData!);
-        final String keyDecryptionNonce =
-            CryptoUtil.bin2base64(encryptedKeyData.nonce!);
         params["files"].add(
           CollectionFileRequest.req(
             uploadedFileID,
@@ -1772,7 +1768,7 @@ class CollectionsService {
     final toCollectionKey = getCollectionKey(toCollectionID);
     final int ownerID = Configuration.instance.getUserID()!;
     final Set<String> existingLocalIDS =
-        await FilesDB.instance.getExistingLocalFileIDs(ownerID);
+        await _filesDB.getExistingLocalFileIDs(ownerID);
     final batchedFiles = files.chunks(batchSize);
     for (final batch in batchedFiles) {
       params["files"] = [];
