@@ -7,7 +7,11 @@ import {
     matchJSONMetadata,
     metadataJSONMapKeyForJSON,
 } from "ente-gallery/services/upload/metadata-json";
-import { fileCreationTime, fileFileName } from "ente-media/file-metadata";
+import {
+    fileCreationTime,
+    fileFileName,
+    fileLocation,
+} from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
 import { getLocalCollections } from "ente-new/photos/services/collections";
 import { groupFilesByCollectionID } from "ente-new/photos/services/files";
@@ -309,23 +313,17 @@ async function exifDataParsingCheck(expectedState) {
                             for ${fileName}
                             expected: ${exifValues["creation_time"]} got: ${fileCreationTime(matchingFile)}`);
         }
+        if (!exifValues["location"]) return;
+        const location = fileLocation(matchingFile);
         if (
-            exifValues["location"] &&
-            (Math.abs(
-                exifValues["location"].latitude -
-                    matchingFile.metadata.latitude,
-            ) > 1 ||
-                Math.abs(
-                    exifValues["location"].longitude -
-                        matchingFile.metadata.longitude,
-                ) > 1)
+            !location ||
+            Math.abs(exifValues["location"].latitude - location.latitude) > 1 ||
+            Math.abs(exifValues["location"].longitude - location.longitude) > 1
         ) {
             throw Error(`exifDataParsingCheck failed ❌  ,
                             for ${fileName}
                             expected: ${JSON.stringify(exifValues["location"])}
-                            got: [${matchingFile.metadata.latitude},${
-                                matchingFile.metadata.longitude
-                            }]`);
+                            got: ${location}`);
         }
     });
     console.log("exif data parsing check passed ✅");
@@ -375,24 +373,19 @@ async function googleMetadataReadingCheck(expectedState) {
                 for ${fileName}
                 expected: ${metadata["creation_time"]} got: ${fileCreationTime(matchingFile)}`);
         }
+        if (!metadata["location"]) return;
+        const location = fileLocation(matchingFile);
         if (
-            metadata["location"] &&
-            (Math.abs(
-                metadata["location"].latitude - matchingFile.metadata.latitude,
-            ) > 1 ||
-                Math.abs(
-                    metadata["location"].longitude -
-                        matchingFile.metadata.longitude,
-                ) > 1)
+            !location ||
+            Math.abs(metadata["location"].latitude - location.latitude) > 1 ||
+            Math.abs(metadata["location"].longitude - location.longitude) > 1
         ) {
             throw Error(`googleMetadataJSON reading check failed ❌  ,
                                 for ${fileName}
                                 expected: ${JSON.stringify(
                                     metadata["location"],
                                 )}
-                                got: [${matchingFile.metadata.latitude},${
-                                    matchingFile.metadata.longitude
-                                }]`);
+                                got: ${location}`);
         }
     });
     console.log("googleMetadataJSON reading check passed ✅");

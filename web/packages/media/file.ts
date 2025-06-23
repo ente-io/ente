@@ -474,7 +474,7 @@ const mergeMetadata1 = (file: EnteFile): EnteFile => {
         if (editedTime) file.metadata.creationTime = editedTime;
         // Not needed, fileFileName is used instead.
         if (editedName) file.metadata.title = editedName;
-        // Use (lat, long) only if both are present and nonzero.
+        // Not needed, fileLocation is used instead.
         if (lat && long) {
             file.metadata.latitude = lat;
             file.metadata.longitude = long;
