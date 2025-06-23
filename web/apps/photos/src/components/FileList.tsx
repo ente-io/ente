@@ -26,7 +26,7 @@ import {
 } from "ente-new/photos/components/PlaceholderThumbnails";
 import { TileBottomTextOverlay } from "ente-new/photos/components/Tiles";
 import { PseudoCollectionID } from "ente-new/photos/services/collection-summary";
-import { enteFileDeletionDate } from "ente-new/photos/services/trash";
+import { type EnteTrashFile } from "ente-new/photos/services/trash";
 import { t } from "i18next";
 import memoize from "memoize-one";
 import { GalleryContext } from "pages/gallery";
@@ -355,21 +355,19 @@ export const FileList: React.FC<FileListProps> = ({
 
     const groupByTime = (timeStampList: TimeStampListItem[]) => {
         let listItemIndex = 0;
-        let currentDate;
+        let lastCreationTime: number | undefined;
         annotatedFiles.forEach((item, index) => {
+            const creationTime = fileCreationTime(item.file) / 1000;
             if (
-                !currentDate ||
-                !isSameDay(
-                    new Date(fileCreationTime(item.file) / 1000),
-                    new Date(currentDate),
-                )
+                !lastCreationTime ||
+                !isSameDay(new Date(creationTime), new Date(lastCreationTime))
             ) {
-                currentDate = fileCreationTime(item.file) / 1000;
+                lastCreationTime = creationTime;
 
                 timeStampList.push({
                     tag: "date",
                     date: item.timelineDateString,
-                    id: currentDate.toString(),
+                    id: lastCreationTime.toString(),
                 });
                 timeStampList.push({
                     tag: "file",
@@ -1285,12 +1283,12 @@ const FileThumbnail: React.FC<FileThumbnailProps> = ({
 
             {activeCollectionID == PseudoCollectionID.trash &&
                 // TODO(RE):
-                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                // @ts-ignore
-                file.isTrashed && (
+                (file as EnteTrashFile).deleteBy && (
                     <TileBottomTextOverlay>
                         <Typography variant="small">
-                            {formattedDateRelative(enteFileDeletionDate(file))}
+                            {formattedDateRelative(
+                                (file as EnteTrashFile).deleteBy,
+                            )}
                         </Typography>
                     </TileBottomTextOverlay>
                 )}

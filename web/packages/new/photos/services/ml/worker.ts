@@ -8,8 +8,8 @@ import type { ElectronMLWorker } from "ente-base/types/ipc";
 import { isNetworkDownloadError } from "ente-gallery/services/download";
 import type { ProcessableUploadItem } from "ente-gallery/services/upload";
 import { fileLogID, type EnteFile } from "ente-media/file";
+import { getLocalTrashFileIDs } from "ente-new/photos/services/trash";
 import { wait } from "ente-utils/promise";
-import { getLocalTrashFileIDs } from "../files";
 import { savedFiles } from "../photos-fdb";
 import {
     createImageBitmapAndData,

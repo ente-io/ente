@@ -20,7 +20,7 @@ import {
     isHiddenCollection,
 } from "ente-new/photos/services/collection";
 import { getLatestVersionFiles } from "ente-new/photos/services/files";
-import { type TrashedEnteFile } from "ente-new/photos/services/trash";
+import { type EnteTrashFile } from "ente-new/photos/services/trash";
 import { splitByPredicate } from "ente-utils/array";
 import { includes } from "ente-utils/type-guards";
 import { t } from "i18next";
@@ -424,7 +424,7 @@ export type GalleryAction =
           collections: Collection[];
           normalFiles: EnteFile[];
           hiddenFiles: EnteFile[];
-          trashedFiles: TrashedEnteFile[];
+          trashedFiles: EnteTrashFile[];
       }
     | {
           type: "setCollections";

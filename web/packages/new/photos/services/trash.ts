@@ -1,4 +1,3 @@
-import { dateFromEpochMicroseconds } from "ente-base/date";
 import type { EnteFile, RemoteEnteFile } from "ente-media/file";
 import { fileCreationTime } from "ente-media/file-metadata";
 import localForage from "ente-shared/storage/localForage";
@@ -44,42 +43,31 @@ export async function getLocalTrashedFiles() {
     return getTrashedFiles(await getLocalTrash());
 }
 
-export type TrashedEnteFile = EnteFile & {
+/**
+ * A file augmented with the date when it will be permanently deleted.
+ */
+export type EnteTrashFile = EnteFile & {
     /**
-     * `true` if this file is in trash (i.e. it has been deleted by the user,
-     * and will be permanently deleted after 30 days of being moved to trash).
-     */
-    isTrashed?: boolean;
-    /**
-     * If {@link isTrashed} is `true`, then {@link deleteBy} contains the epoch
-     * microseconds when this file will be permanently deleted.
+     * Timestamp (epoch microseconds) when this file, which is already in trash,
+     * will be permanently deleted.
+     *
+     * On being deleted by the user, files move to trash, will be permanently
+     * deleted after 30 days of being moved to trash)
      */
     deleteBy?: number;
 };
 
-/**
- * Return the date when the file will be deleted permanently. Only valid for
- * files that are in the user's trash.
- *
- * This is a convenience wrapper over the {@link deleteBy} property of a file,
- * converting that epoch microsecond value into a JavaScript date.
- */
-export const enteFileDeletionDate = (file: TrashedEnteFile) =>
-    dateFromEpochMicroseconds(file.deleteBy);
-
-export function getTrashedFiles(trash: Trash): TrashedEnteFile[] {
-    return sortTrashFiles(
-        trash.map((trashedFile) => ({
-            ...trashedFile.file,
-            updationTime: trashedFile.updatedAt,
-            deleteBy: trashedFile.deleteBy,
-            isTrashed: true,
+export const getTrashedFiles = (trash: Trash): EnteTrashFile[] =>
+    sortTrashFiles(
+        trash.map(({ file, updatedAt, deleteBy }) => ({
+            ...file,
+            updationTime: updatedAt,
+            deleteBy,
         })),
     );
-}
 
-const sortTrashFiles = (files: TrashedEnteFile[]) => {
-    return files.sort((a, b) => {
+const sortTrashFiles = (files: EnteTrashFile[]) =>
+    files.sort((a, b) => {
         if (a.deleteBy === b.deleteBy) {
             const at = fileCreationTime(a);
             const bt = fileCreationTime(b);
@@ -89,7 +77,6 @@ const sortTrashFiles = (files: TrashedEnteFile[]) => {
         }
         return (a.deleteBy ?? 0) - (b.deleteBy ?? 0);
     });
-};
 
 /**
  * Return the IDs of all the files that are part of the trash as per our local
