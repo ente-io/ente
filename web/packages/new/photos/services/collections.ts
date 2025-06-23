@@ -8,11 +8,9 @@ import { apiURL } from "ente-base/origins";
 import { type Collection } from "ente-media/collection";
 import { decryptRemoteFile, type EnteFile } from "ente-media/file";
 import {
-    getLocalTrash,
     getTrashedFiles,
-    TRASH,
-    type EncryptedTrashItem,
-    type Trash,
+    type RemoteTrashItem,
+    type TrashItem,
 } from "ente-new/photos/services/trash";
 import HTTPService from "ente-shared/network/HTTPService";
 import localForage from "ente-shared/storage/localForage";
@@ -25,7 +23,9 @@ import {
 import {
     savedCollections,
     savedTrashItemCollectionKeys,
+    savedTrashItems,
     saveTrashItemCollectionKeys,
+    saveTrashItems,
 } from "./photos-fdb";
 
 const COLLECTION_TABLE = "collections";
@@ -151,7 +151,7 @@ export async function syncTrash(
     onUpdateTrashFiles: ((files: EnteFile[]) => void) | undefined,
     onPruneDeletedFileIDs: (deletedFileIDs: Set<number>) => Promise<void>,
 ): Promise<void> {
-    const trash = await getLocalTrash();
+    const trash = await savedTrashItems();
     const sinceTime = await getLastTrashSyncTime();
 
     // Data structures:
@@ -180,7 +180,7 @@ export async function syncTrash(
         collectionKeyByID.set(id, key);
     }
 
-    let updatedTrash: Trash = [...trash];
+    let updatedTrash: TrashItem[] = [...trash];
     try {
         let time = sinceTime;
 
@@ -197,7 +197,7 @@ export async function syncTrash(
             );
             const deletedFileIDs = new Set<number>();
             // #Perf: This can be optimized by running the decryption in parallel
-            for (const trashItem of resp.data.diff as EncryptedTrashItem[]) {
+            for (const trashItem of resp.data.diff as RemoteTrashItem[]) {
                 const collectionID = trashItem.file.collectionID;
                 let collectionKey = collectionKeyByID.get(collectionID);
                 if (!collectionKey) {
@@ -235,7 +235,7 @@ export async function syncTrash(
             if (deletedFileIDs.size > 0) {
                 await onPruneDeletedFileIDs(deletedFileIDs);
             }
-            await localForage.setItem(TRASH, updatedTrash);
+            await saveTrashItems(updatedTrash);
             await localForage.setItem(TRASH_TIME, time);
         } while (resp.data.hasMore);
     } catch (e) {
@@ -275,5 +275,5 @@ export const emptyTrash = async () => {
 };
 
 export const clearLocalTrash = async () => {
-    await localForage.setItem(TRASH, []);
+    await saveTrashItems([]);
 };

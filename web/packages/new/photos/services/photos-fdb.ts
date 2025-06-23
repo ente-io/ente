@@ -4,12 +4,14 @@
 
 import {
     LocalCollections,
+    LocalEnteFile,
     transformFilesIfNeeded,
 } from "ente-gallery/services/files-db";
 import { type Collection } from "ente-media/collection";
 import { type EnteFile } from "ente-media/file";
 import localForage from "ente-shared/storage/localForage";
 import { z } from "zod/v4";
+import type { TrashItem } from "./trash";
 
 /**
  * Return all collections present in our local database.
@@ -38,8 +40,9 @@ export const savedCollections = async (): Promise<Collection[]> =>
  * collections (the split between normal and hidden is not at the database level
  * but is a filter when they are accessed).
  */
-export const saveCollections = (collections: Collection[]) =>
-    localForage.setItem("collections", collections);
+export const saveCollections = async (collections: Collection[]) => {
+    await localForage.setItem("collections", collections);
+};
 
 const TrashItemCollectionKey = z.object({
     /**
@@ -103,8 +106,11 @@ export const savedTrashItemCollectionKeys = async (): Promise<
  *
  * This is the setter corresponding to {@link saveTrashItemCollectionKeys}.
  */
-export const saveTrashItemCollectionKeys = (cks: TrashItemCollectionKey[]) =>
-    localForage.setItem("deleted-collection", cks);
+export const saveTrashItemCollectionKeys = async (
+    cks: TrashItemCollectionKey[],
+) => {
+    await localForage.setItem("deleted-collection", cks);
+};
 
 /**
  * Return all files present in our local database.
@@ -146,8 +152,9 @@ export const savedNormalFiles = async (): Promise<EnteFile[]> =>
  *
  * This is the setter corresponding to {@link savedNormalFiles}.
  */
-export const saveNormalFiles = (files: EnteFile[]) =>
-    localForage.setItem("files", transformFilesIfNeeded(files));
+export const saveNormalFiles = async (files: EnteFile[]) => {
+    await localForage.setItem("files", transformFilesIfNeeded(files));
+};
 
 /**
  * Return all hidden files present in our local database.
@@ -165,5 +172,33 @@ export const savedHiddenFiles = async (): Promise<EnteFile[]> =>
  *
  * This is the setter corresponding to {@link savedNormalFiles}.
  */
-export const saveHiddenFiles = (files: EnteFile[]) =>
-    localForage.setItem("hidden-files", transformFilesIfNeeded(files));
+export const saveHiddenFiles = async (files: EnteFile[]) => {
+    await localForage.setItem("hidden-files", transformFilesIfNeeded(files));
+};
+
+/**
+ * Zod schema for a trash entry saved in our local database.
+ */
+const LocalTrashItem = z.looseObject({
+    file: LocalEnteFile,
+    updatedAt: z.number(),
+    deleteBy: z.number(),
+});
+
+/**
+ * Return all trash entries present in our local database.
+ *
+ * Use {@link saveTrashItems} to update the database
+ */
+export const savedTrashItems = async (): Promise<TrashItem[]> =>
+    LocalTrashItem.array().parse(
+        (await localForage.getItem("file-trash")) ?? [],
+    );
+/**
+ * Replace the list of trash items stored in our local database.
+ *
+ * This is the setter corresponding to {@link savedTrashItems}.
+ */
+export const saveTrashItems = async (trashItems: TrashItem[]) => {
+    await localForage.setItem("file-trash", trashItems);
+};
