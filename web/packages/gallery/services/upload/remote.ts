@@ -7,7 +7,7 @@ import {
     type PublicAlbumsCredentials,
 } from "ente-base/http";
 import { apiURL, uploaderOrigin } from "ente-base/origins";
-import { type RemoteEnteFile, type RemoteFileMetadata } from "ente-media/file";
+import { RemoteEnteFile, type RemoteFileMetadata } from "ente-media/file";
 import type { RemoteMagicMetadata } from "ente-media/magic-metadata";
 import { nullToUndefined } from "ente-utils/transform";
 import { z } from "zod/v4";
@@ -480,8 +480,7 @@ export const postEnteFile = async (
         body: JSON.stringify(postFileRequest),
     });
     ensureOk(res);
-    // TODO(RE):
-    return (await res.json()) as RemoteEnteFile;
+    return RemoteEnteFile.parse(await res.json());
 };
 
 /**
@@ -498,6 +497,5 @@ export const postPublicAlbumsEnteFile = async (
         body: JSON.stringify(postFileRequest),
     });
     ensureOk(res);
-    // TODO(RE):
-    return (await res.json()) as RemoteEnteFile;
+    return RemoteEnteFile.parse(await res.json());
 };
