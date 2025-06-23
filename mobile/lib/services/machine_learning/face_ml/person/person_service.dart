@@ -78,7 +78,6 @@ class PersonService {
           (e) => PersonEntity(
             e.id,
             PersonData.fromJson(json.decode(e.data)),
-            DateTime.fromMicrosecondsSinceEpoch(e.updatedAt),
           ),
         )
         .toList();
@@ -92,7 +91,6 @@ class PersonService {
       return PersonEntity(
         e.id,
         PersonData.fromJson(json.decode(e.data)),
-        DateTime.fromMicrosecondsSinceEpoch(e.updatedAt),
       );
     });
   }
@@ -104,7 +102,6 @@ class PersonService {
       final person = PersonEntity(
         e.id,
         PersonData.fromJson(json.decode(e.data)),
-        DateTime.fromMicrosecondsSinceEpoch(e.updatedAt),
       );
       map[person.remoteID] = person;
     }
@@ -222,11 +219,7 @@ class PersonService {
       await resetEmailToPartialPersonDataCache();
     }
     memoriesCacheService.queueUpdateCache();
-    return PersonEntity(
-      result.id,
-      data,
-      DateTime.fromMicrosecondsSinceEpoch(result.updatedAt),
-    );
+    return PersonEntity(result.id, data);
   }
 
   Future<void> removeClusterToPerson({
@@ -302,11 +295,8 @@ class PersonService {
       if (entity == null) {
         return;
       }
-      final PersonEntity justName = PersonEntity(
-        personID,
-        PersonData(name: entity.data.name),
-        entity.updatedAt,
-      );
+      final PersonEntity justName =
+          PersonEntity(personID, PersonData(name: entity.data.name));
       await entityService.addOrUpdate(
         EntityType.cgroup,
         justName.data.toJson(),

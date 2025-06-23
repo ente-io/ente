@@ -1,8 +1,6 @@
-import "dart:convert";
 import "dart:math";
 
 import "package:collection/collection.dart";
-import "package:crypto/crypto.dart";
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:logging/logging.dart';
@@ -235,23 +233,7 @@ class PeopleHomeWidgetService {
   }
 
   Future<String> _calculateHash(List<String> peopleIds) async {
-    String updationTimestamps = "";
-    // Check if selected people exist
-    for (final id in peopleIds) {
-      try {
-        final person = await PersonService.instance.getPerson(id);
-        if (person != null) {
-          updationTimestamps += "${person.updatedAt.toString()}_";
-        }
-      } catch (e) {
-        _logger.warning("Error looking up people: $e");
-      }
-    }
-    final hash = md5
-        .convert(utf8.encode(updationTimestamps))
-        .toString()
-        .substring(0, 10);
-    return hash;
+    return await entityService.getHashForIds(peopleIds);
   }
 
   Future<bool> _hasAnyBlockers() async {

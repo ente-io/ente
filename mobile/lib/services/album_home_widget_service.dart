@@ -184,7 +184,7 @@ class AlbumHomeWidgetService {
     for (final albumId in albumIds) {
       final collection = CollectionsService.instance.getCollectionByID(albumId);
       if (collection != null) {
-        updationTimestamps += "${collection.updationTime.toString()}_";
+        updationTimestamps += "$albumId:${collection.updationTime.toString()}_";
       }
     }
 

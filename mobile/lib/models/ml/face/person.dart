@@ -6,11 +6,9 @@ import "package:flutter/foundation.dart";
 class PersonEntity {
   final String remoteID;
   final PersonData data;
-  final DateTime updatedAt;
   PersonEntity(
     this.remoteID,
     this.data,
-    this.updatedAt,
   );
 
   // copyWith
@@ -22,7 +20,6 @@ class PersonEntity {
     return PersonEntity(
       remoteID ?? this.remoteID,
       data ?? this.data,
-      updatedAt ?? this.updatedAt,
     );
   }
 }
