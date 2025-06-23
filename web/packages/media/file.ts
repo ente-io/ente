@@ -420,7 +420,7 @@ export const decryptRemoteFile = async (
  *
  * @returns A JSON object with any transformations applied, if needed.
  */
-const transformDecryptedMetadataJSON = (
+export const transformDecryptedMetadataJSON = (
     fileID: number,
     metadataJSON: unknown,
 ) => {

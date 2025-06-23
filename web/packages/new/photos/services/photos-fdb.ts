@@ -4,7 +4,8 @@
 
 import { LocalCollections } from "ente-gallery/services/files-db";
 import { ignore, type Collection } from "ente-media/collection";
-import type { EnteFile } from "ente-media/file";
+import { transformDecryptedMetadataJSON, type EnteFile } from "ente-media/file";
+import type { FileMetadata } from "ente-media/file-metadata";
 import type { MagicMetadata } from "ente-media/magic-metadata";
 import localForage from "ente-shared/storage/localForage";
 import { z } from "zod/v4";
@@ -135,7 +136,9 @@ export const savedNormalFiles = async (): Promise<EnteFile[]> =>
     // As an optimization, we skip the runtime check here and cast. This might
     // not be the most optimal choice in the future, so (a) use it sparingly,
     // and (b) mark all such cases with the title of this note.
-    (await localForage.getItem<EnteFile[]>("files")) ?? [];
+    transformFilesIfNeeded(
+        (await localForage.getItem<EnteFile[]>("files")) ?? [],
+    );
 
 /**
  * Replace the list of files stored in our local database.
@@ -152,7 +155,9 @@ export const saveNormalFiles = (files: EnteFile[]) =>
  */
 export const savedHiddenFiles = async (): Promise<EnteFile[]> =>
     // See: [Note: Avoiding Zod parsing for large DB arrays]
-    (await localForage.getItem<EnteFile[]>("hidden-files")) ?? [];
+    transformFilesIfNeeded(
+        (await localForage.getItem<EnteFile[]>("hidden-files")) ?? [],
+    );
 
 /**
  * Replace the list of files stored in our local database.
@@ -163,7 +168,25 @@ export const saveHiddenFiles = (files: EnteFile[]) =>
     localForage.setItem("hidden-files", transformFilesIfNeeded(files));
 
 /**
- * Remove unused fields from the file objects when saving them.
+ * Apply transformations when reading files from the DB.
+ *
+ * There are two parts to it -
+ *
+ * 1. the required part (patching old entries that might be present in the local
+ *    database),
+ * 2. the optional part (removing some unused fields).
+ *
+ * Part 1 ---
+ *
+ * Transform metadata in legacy files that might be present in the local
+ * database. Note that this will not be needed for files that are fetched
+ * afresh, since the corresponding transform is already done during
+ * {@link decryptRemoteFile}; this is only for handling potentially items that
+ * might've been already present locally.
+ *
+ * Part 2 ---
+ *
+ * Remove unused fields from the file objects when reading them.
  *
  * This is similar to the transformation we perform when reading collections
  * from the database, to discard fields that are no longer forwarded when we
@@ -171,18 +194,45 @@ export const saveHiddenFiles = (files: EnteFile[]) =>
  * when going forward. They might be present for the existing entries in DB
  * though, which is why these functions are needed.
  *
- * However, since unlike collections, we don't route the files through zod when
- * reading. So instead we do it when we next write. Effectively, the end result
+ * However, since unlike collections, we don't route the files through Zod when
+ * reading. So instead we do it using this function. Effectively, the end result
  * should be the same. In any case, doing this cleanup has no functional impact.
  *
- * Added June 2025, 1.7.14-beta, can be removed after a bit (tag: Migration).
+ * Both parts added June 2025, 1.7.14-beta, prune eventually (tag: Migration).
  */
 const transformFilesIfNeeded = (files: EnteFile[]) =>
-    files.map((f) => ("isDeleted" in f ? transformFile(f) : f));
+    isFilesTransformNeeded(files) ? files.map(transformFile) : files;
+
+// Preflight check to turn the potentially non-trivial overhead (~50ms for 200k
+// files if everything runs through transformFile) into an effective no-op
+// (2-3ms) for the majority happy paths which don't need any transform.
+const isFilesTransformNeeded = (
+    files: (EnteFile & { isDeleted?: unknown })[],
+) =>
+    !!files.find(
+        (file) =>
+            "isDeleted" in file ||
+            !file.metadata.modificationTime ||
+            typeof file.metadata.fileType != "number",
+    );
 
 const transformFile = (file: EnteFile & { isDeleted?: unknown }) => {
-    const { isDeleted, magicMetadata, pubMagicMetadata, ...rest } = file;
+    const {
+        isDeleted,
+        metadata: origMetadata,
+        magicMetadata,
+        pubMagicMetadata,
+        ...rest
+    } = file;
     ignore(isDeleted);
+    // We live with the cast here since this migration code should eventually be
+    // removed. The cast is needed because in the original context,
+    // transformDecryptedMetadataJSON acts on arbitrary JSON objects that have
+    // not yet been validated to be of type FileMetadata.
+    const metadata = transformDecryptedMetadataJSON(
+        file.id,
+        origMetadata,
+    ) as FileMetadata;
     if (magicMetadata) {
         delete (magicMetadata as MagicMetadata & { header?: unknown }).header;
     }
@@ -190,5 +240,10 @@ const transformFile = (file: EnteFile & { isDeleted?: unknown }) => {
         delete (pubMagicMetadata as MagicMetadata & { header?: unknown })
             .header;
     }
-    return { ...rest, magicMetadata, pubMagicMetadata };
+    return {
+        ...rest,
+        metadata,
+        magicMetadata,
+        pubMagicMetadata,
+    } satisfies EnteFile;
 };
