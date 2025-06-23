@@ -150,11 +150,14 @@ export const imageURLGenerator = async function* (castData: CastData) {
  *
  * @param castToken A token used both for authentication, and also identifying
  * the collection corresponding to the cast session.
+ *
+ * @returns All the files in the collection in an arbitrary order. Since we are
+ * anyways going to be shuffling these files, the order has no bearing.
  */
 export const getRemoteCastCollectionFiles = async (
     castToken: string,
 ): Promise<RemoteEnteFile[]> => {
-    const files: RemoteEnteFile[] = [];
+    const filesByID = new Map<number, RemoteEnteFile>();
     let sinceTime = 0;
     while (true) {
         const res = await fetch(
@@ -167,12 +170,12 @@ export const getRemoteCastCollectionFiles = async (
         for (const change of diff) {
             sinceTime = Math.max(sinceTime, change.updationTime);
             if (!change.isDeleted) {
-                files.push(change);
+                filesByID.set(change.id, change);
             }
         }
         if (!hasMore) break;
     }
-    return files;
+    return [...filesByID.values()];
 };
 
 const isFileEligible = (file: EnteFile) => {

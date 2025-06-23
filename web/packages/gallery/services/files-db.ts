@@ -236,3 +236,12 @@ const transformFile = (file: EnteFile & { isDeleted?: unknown }) => {
         pubMagicMetadata,
     } satisfies EnteFile;
 };
+
+/**
+ * A convenience Zod schema for a nullish number, with `null`s being transformed
+ * to `undefined`.
+ *
+ * This is convenient when parsing the various timestamps we keep corresponding
+ * to top level keys in the files DB. Don't use elsewhere!
+ */
+export const LocalTimestamp = z.number().nullish().transform(nullToUndefined);

@@ -5,6 +5,7 @@
 import {
     LocalCollections,
     LocalEnteFile,
+    LocalTimestamp,
     transformFilesIfNeeded,
 } from "ente-gallery/services/files-db";
 import { type Collection } from "ente-media/collection";
@@ -194,6 +195,7 @@ export const savedTrashItems = async (): Promise<TrashItem[]> =>
     LocalTrashItem.array().parse(
         (await localForage.getItem("file-trash")) ?? [],
     );
+
 /**
  * Replace the list of trash items stored in our local database.
  *
@@ -201,4 +203,21 @@ export const savedTrashItems = async (): Promise<TrashItem[]> =>
  */
 export const saveTrashItems = async (trashItems: TrashItem[]) => {
     await localForage.setItem("file-trash", trashItems);
+};
+
+/**
+ * Return the updatedAt of the latest trash items we have obtained from remote.
+ *
+ * Use {@link saveTrashLastUpdatedAt} to update the database.
+ */
+export const savedTrashLastUpdatedAt = async (): Promise<number | undefined> =>
+    LocalTimestamp.parse(await localForage.getItem("trash-time"));
+
+/**
+ * Update the updatedAt of the latest trash items we have obtained from remote.
+ *
+ * This is the setter corresponding to {@link savedTrashLastUpdatedAt}.
+ */
+export const saveTrashLastUpdatedAt = async (updatedAt: number) => {
+    await localForage.setItem("trash-time", updatedAt);
 };

@@ -6,10 +6,7 @@ import {
 import type { Collection } from "ente-media/collection";
 import type { EnteFile } from "ente-media/file";
 import { isHiddenCollection } from "ente-new/photos/services/collection";
-import {
-    getAllLatestCollections,
-    syncTrash,
-} from "ente-new/photos/services/collections";
+import { getAllLatestCollections } from "ente-new/photos/services/collections";
 import { syncFiles } from "ente-new/photos/services/files";
 import {
     isMLSupported,
@@ -19,6 +16,7 @@ import {
 import { searchDataSync } from "ente-new/photos/services/search";
 import { syncSettings } from "ente-new/photos/services/settings";
 import { splitByPredicate } from "ente-utils/array";
+import { pullTrash } from "./trash";
 
 /**
  * Called during a full sync, before doing the collection and file sync.
@@ -144,7 +142,7 @@ export const syncCollectionAndFiles = async (
         opts?.onResetHiddenFiles,
         opts?.onFetchHiddenFiles,
     );
-    await syncTrash(
+    await pullTrash(
         collections,
         opts?.onResetTrashedFiles,
         videoPrunePermanentlyDeletedFileIDsIfNeeded,
