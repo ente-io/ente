@@ -2,6 +2,7 @@ import "dart:convert";
 import "dart:io";
 import "dart:typed_data";
 
+import "package:photos/models/api/diff/trash_time.dart";
 import "package:photos/models/location/location.dart";
 import "package:photos/models/metadata/file_magic.dart";
 
@@ -174,6 +175,7 @@ class DiffFileItem {
   final int updatedAt;
   final int? createdAt;
   final FileItem fileItem;
+  final TrashTime? trashTime;
 
   DiffFileItem({
     required this.collectionID,
@@ -183,6 +185,7 @@ class DiffFileItem {
     this.createdAt,
     this.encFileKey,
     this.encFileKeyNonce,
+    this.trashTime,
   });
   int get fileID => fileItem.fileID;
 
@@ -194,6 +197,25 @@ class DiffFileItem {
       encFileKeyNonce,
       createdAt,
       updatedAt,
+    ];
+  }
+
+  List<Object?> trashRowValues() {
+    return [
+      fileID,
+      fileItem.ownerID,
+      collectionID,
+      encFileKey,
+      encFileKeyNonce,
+      fileItem.fileDecryotionHeader,
+      fileItem.thumnailDecryptionHeader,
+      fileItem.metadata?.toEncodedJson(),
+      fileItem.magicMetadata?.toEncodedJson(),
+      fileItem.pubMagicMetadata?.toEncodedJson(),
+      fileItem.info?.toEncodedJson(),
+      trashTime!.createdAt,
+      trashTime!.updatedAt,
+      trashTime!.deleteBy,
     ];
   }
 }
