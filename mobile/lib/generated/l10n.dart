@@ -11975,6 +11975,76 @@ class S {
       args: [name],
     );
   }
+
+  /// `Are you sure you want to remove this face from this person?`
+  String get areYouSureRemoveThisFaceFromPerson {
+    return Intl.message(
+      'Are you sure you want to remove this face from this person?',
+      name: 'areYouSureRemoveThisFaceFromPerson',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Other detected faces`
+  String get otherDetectedFaces {
+    return Intl.message(
+      'Other detected faces',
+      name: 'otherDetectedFaces',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Are they `
+  String get areThey {
+    return Intl.message(
+      'Are they ',
+      name: 'areThey',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `?`
+  String get questionmark {
+    return Intl.message(
+      '?',
+      name: 'questionmark',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Save as another person`
+  String get saveAsAnotherPerson {
+    return Intl.message(
+      'Save as another person',
+      name: 'saveAsAnotherPerson',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Show less faces`
+  String get showLessFaces {
+    return Intl.message(
+      'Show less faces',
+      name: 'showLessFaces',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Show more faces`
+  String get showMoreFaces {
+    return Intl.message(
+      'Show more faces',
+      name: 'showMoreFaces',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

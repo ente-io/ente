@@ -1756,5 +1756,12 @@
   "receiveRemindersOnBirthdays": "Receive reminders when it's someone's birthday. Tapping on the notification will take you to photos of the birthday person.",
   "happyBirthday": "Happy birthday! 🥳",
   "birthdays": "Birthdays",
-  "wishThemAHappyBirthday": "Wish {name} a happy birthday! 🎉"
+  "wishThemAHappyBirthday": "Wish {name} a happy birthday! 🎉",
+  "areYouSureRemoveThisFaceFromPerson": "Are you sure you want to remove this face from this person?",
+  "otherDetectedFaces": "Other detected faces",
+  "areThey": "Are they ",
+  "questionmark": "?",
+  "saveAsAnotherPerson": "Save as another person",
+  "showLessFaces": "Show less faces",
+  "showMoreFaces": "Show more faces"
 }
