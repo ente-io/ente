@@ -4,6 +4,7 @@
 
 import { LocalCollections } from "ente-gallery/services/files-db";
 import { type Collection } from "ente-media/collection";
+import type { EnteFile } from "ente-media/file";
 import localForage from "ente-shared/storage/localForage";
 import { z } from "zod/v4";
 
@@ -101,3 +102,26 @@ export const savedTrashItemCollectionKeys = async (): Promise<
  */
 export const saveTrashItemCollectionKeys = (cks: TrashItemCollectionKey[]) =>
     localForage.setItem("deleted-collection", cks);
+
+/**
+ * Return all files present in our local database.
+ *
+ * This includes both normal (non-hidden) and hidden files. If you're interested
+ * only in one type (normal or hidden), then it is more efficient to use
+ * {@link savedNormalFiles} or {@link savedHiddenFiles} to obtain them; this
+ * method is only a convenience to concatenate the two.
+ */
+export const savedFiles = async (): Promise<EnteFile[]> => {
+    await Promise.resolve(1);
+    throw new Error("TODO(RE)");
+};
+/**
+ * Return all normal (non-hidden) files present in our local database.
+ *
+ * Use {@link saveNormalFiles} to update the database.
+ */
+export const savedNormalFiles = async (): Promise<EnteFile[]> => {
+    const files: EnteFile[] =
+        (await localForage.getItem<EnteFile[]>("normal")) ?? [];
+    return files;
+};
