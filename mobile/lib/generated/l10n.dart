@@ -12045,6 +12045,96 @@ class S {
       args: [],
     );
   }
+
+  /// `Ignore`
+  String get ignore {
+    return Intl.message(
+      'Ignore',
+      name: 'ignore',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Merge`
+  String get merge {
+    return Intl.message(
+      'Merge',
+      name: 'merge',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Reset`
+  String get reset {
+    return Intl.message(
+      'Reset',
+      name: 'reset',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Are you sure you want to ignore this person?`
+  String get areYouSureYouWantToIgnoreThisPerson {
+    return Intl.message(
+      'Are you sure you want to ignore this person?',
+      name: 'areYouSureYouWantToIgnoreThisPerson',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Are you sure you want to ignore these persons?`
+  String get areYouSureYouWantToIgnoreThesePersons {
+    return Intl.message(
+      'Are you sure you want to ignore these persons?',
+      name: 'areYouSureYouWantToIgnoreThesePersons',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The person groups will not be displayed in the people section anymore. Photos will remain untouched.`
+  String get thePersonGroupsWillNotBeDisplayed {
+    return Intl.message(
+      'The person groups will not be displayed in the people section anymore. Photos will remain untouched.',
+      name: 'thePersonGroupsWillNotBeDisplayed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The person will not be displayed in the people section anymore. Photos will remain untouched.`
+  String get thePersonWillNotBeDisplayed {
+    return Intl.message(
+      'The person will not be displayed in the people section anymore. Photos will remain untouched.',
+      name: 'thePersonWillNotBeDisplayed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Are you sure you want to merge them?`
+  String get areYouSureYouWantToMergeThem {
+    return Intl.message(
+      'Are you sure you want to merge them?',
+      name: 'areYouSureYouWantToMergeThem',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `All unnamed groups will be merged into the selected person. This can still be undone from the suggestions history overview of the person.`
+  String get allUnnamedGroupsWillBeMergedIntoTheSelectedPerson {
+    return Intl.message(
+      'All unnamed groups will be merged into the selected person. This can still be undone from the suggestions history overview of the person.',
+      name: 'allUnnamedGroupsWillBeMergedIntoTheSelectedPerson',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

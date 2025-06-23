@@ -96,7 +96,7 @@ class _PeopleSelectionActionWidgetState
     );
     items.add(
       SelectionActionButton(
-        labelText: "Ignore",
+        labelText: S.of(context).ignore,
         icon: Icons.hide_image_outlined,
         onTap: _onIgnore,
         shouldShow: anythingSelected,
@@ -104,7 +104,7 @@ class _PeopleSelectionActionWidgetState
     );
     items.add(
       SelectionActionButton(
-        labelText: "Merge",
+        labelText: S.of(context).merge,
         icon: Icons.merge_outlined,
         onTap: _onMerge,
         shouldShow: onePersonAndClusters,
@@ -112,7 +112,7 @@ class _PeopleSelectionActionWidgetState
     );
     items.add(
       SelectionActionButton(
-        labelText: "Reset",
+        labelText: S.of(context).reset,
         icon: Icons.remove_outlined,
         onTap: _onResetPerson,
         shouldShow: onlyOnePerson,
@@ -210,12 +210,16 @@ class _PeopleSelectionActionWidgetState
     final selectedPersonIds = _getSelectedPersonIds();
     final selectedClusterIds = _getSelectedClusterIds();
     if (selectedPersonIds.isEmpty && selectedClusterIds.isEmpty) return;
+    final multiple = (selectedPersonIds.length + selectedClusterIds.length) > 1;
 
     await showChoiceDialog(
       context,
-      title: "Are you sure you want to ignore these persons?",
-      body:
-          "The person groups will not be displayed in the people section anymore. Photos will remain untouched.",
+      title: multiple
+          ? S.of(context).areYouSureYouWantToIgnoreThesePersons
+          : S.of(context).areYouSureYouWantToIgnoreThisPerson,
+      body: multiple
+          ? S.of(context).thePersonGroupsWillNotBeDisplayed
+          : S.of(context).thePersonWillNotBeDisplayed,
       firstButtonLabel: "Yes, confirm",
       firstButtonOnTap: () async {
         try {
@@ -247,10 +251,9 @@ class _PeopleSelectionActionWidgetState
 
     await showChoiceDialog(
       context,
-      title: "Are you sure you want to merge them?",
-      body:
-          "All unnamed groups will be merged into the selected person. This can still be undone from the suggestions history overview of the person",
-      firstButtonLabel: "Yes, confirm",
+      title: S.of(context).areYouSureYouWantToMergeThem,
+      body: S.of(context).allUnnamedGroupsWillBeMergedIntoTheSelectedPerson,
+      firstButtonLabel: S.of(context).confirm,
       firstButtonOnTap: () async {
         try {
           final personMap = await personEntitiesMapFuture;
