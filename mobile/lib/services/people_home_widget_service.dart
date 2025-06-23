@@ -171,7 +171,6 @@ class PeopleHomeWidgetService {
       return true;
     });
 
-    _logger.info("People changed, updating widget");
     await updatePeopleChanged(havePeopleChanged);
     if (!havePeopleChanged) {
       _logger.info("No changes detected in people, skipping update");
