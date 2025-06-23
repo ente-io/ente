@@ -45,8 +45,22 @@ import {
     RemoteCollectionUser,
     RemotePublicURL,
 } from "ente-media/collection";
+import {
+    FilePrivateMagicMetadataData,
+    FilePublicMagicMetadataData,
+} from "ente-media/file-metadata";
 import { nullishToEmpty, nullToUndefined } from "ente-utils/transform";
 import { z } from "zod/v4";
+
+/**
+ * Return a Zod schema suitable for being used with the various magic metadata
+ * fields of a file or a collection.
+ */
+const createMagicMetadataSchema = <T extends z.ZodType>(dataSchema: T) =>
+    z
+        .object({ version: z.number(), count: z.number(), data: dataSchema })
+        .nullish()
+        .transform(nullToUndefined);
 
 /**
  * Zod schema for a {@link Collection} stored in our local database.
@@ -71,30 +85,15 @@ const LocalCollection = z
             .nullish()
             .transform(nullishToEmpty),
         updationTime: z.number(),
-        magicMetadata: z
-            .object({
-                version: z.number(),
-                count: z.number(),
-                data: CollectionPrivateMagicMetadataData,
-            })
-            .nullish()
-            .transform(nullToUndefined),
-        pubMagicMetadata: z
-            .object({
-                version: z.number(),
-                count: z.number(),
-                data: CollectionPublicMagicMetadataData,
-            })
-            .nullish()
-            .transform(nullToUndefined),
-        sharedMagicMetadata: z
-            .object({
-                version: z.number(),
-                count: z.number(),
-                data: CollectionShareeMagicMetadataData,
-            })
-            .nullish()
-            .transform(nullToUndefined),
+        magicMetadata: createMagicMetadataSchema(
+            CollectionPrivateMagicMetadataData,
+        ),
+        pubMagicMetadata: createMagicMetadataSchema(
+            CollectionPublicMagicMetadataData,
+        ),
+        sharedMagicMetadata: createMagicMetadataSchema(
+            CollectionShareeMagicMetadataData,
+        ),
     })
     .transform((c) => {
         // Old data stored locally contained fields which are no longer needed.
@@ -134,6 +133,8 @@ export const LocalEnteFile = z.looseObject({
     collectionID: z.number(),
     ownerID: z.number(),
     key: z.string(),
-})
+    magicMetadata: createMagicMetadataSchema(FilePrivateMagicMetadataData),
+    pubMagicMetadata: createMagicMetadataSchema(FilePublicMagicMetadataData),
+});
 
 export const LocalEnteFiles = z.array(LocalEnteFile);
