@@ -24,7 +24,7 @@ import {
     isFileTypeNotSupportedError,
 } from "ente-gallery/utils/detect-type";
 import { readStream } from "ente-gallery/utils/native-stream";
-import type { EnteFile } from "ente-media/file";
+import { decryptRemoteFile, type EnteFile } from "ente-media/file";
 import {
     fileFileName,
     metadataHash,
@@ -778,7 +778,7 @@ export const upload = async (
             type: metadata.hasStaticThumbnail
                 ? "uploadedWithStaticThumbnail"
                 : "uploaded",
-            file: uploadedFile,
+            file: await decryptRemoteFile(uploadedFile, collection.key),
         };
     } catch (e) {
         if (isUploadCancelledError(e)) {

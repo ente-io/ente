@@ -14,6 +14,7 @@ import type {
 } from "ente-base/types/ipc";
 import { type UploadResult } from "ente-gallery/services/upload";
 import type { UploadAsset } from "ente-gallery/services/upload/upload-service";
+import type { EnteFile } from "ente-media/file";
 import {
     getLocalFiles,
     groupFilesByCollectionID,
@@ -21,11 +22,6 @@ import {
 import { ensureString } from "ente-utils/ensure";
 import { removeFromCollection } from "./collectionService";
 import { type UploadItemWithCollection, uploadManager } from "./upload-manager";
-
-interface FolderWatchUploadedFile {
-    id: number;
-    collectionID: number;
-}
 
 /**
  * Watch for file system folders and automatically update the corresponding Ente
@@ -53,7 +49,7 @@ class FolderWatcher {
      * A map from file paths to the (fileID, collectionID) of the file that was
      * uploaded (or symlinked) as part of the most recent upload attempt.
      */
-    private uploadedFileForPath = new Map<string, FolderWatchUploadedFile>();
+    private uploadedFileForPath = new Map<string, EnteFile>();
     /**
      * A set of file paths that could not be uploaded in the most recent upload
      * attempt. These are the uploads that failed due to a permanent error that
@@ -415,7 +411,7 @@ class FolderWatcher {
         const syncedFiles: FolderWatch["syncedFiles"] = [];
         const ignoredFiles: FolderWatch["ignoredFiles"] = [];
 
-        const markSynced = (file: FolderWatchUploadedFile, path: string) => {
+        const markSynced = (file: EnteFile, path: string) => {
             syncedFiles.push({
                 path,
                 uploadedFileID: file.id,

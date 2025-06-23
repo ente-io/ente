@@ -29,7 +29,7 @@ import UploadService, {
 } from "ente-gallery/services/upload/upload-service";
 import { processVideoNewUpload } from "ente-gallery/services/video";
 import type { Collection } from "ente-media/collection";
-import { decryptRemoteFile, type EnteFile } from "ente-media/file";
+import { type EnteFile } from "ente-media/file";
 import {
     fileCreationTime,
     type ParsedMetadata,
@@ -558,10 +558,7 @@ class UploadManager {
                     break;
                 case "uploaded":
                 case "uploadedWithStaticThumbnail":
-                    decryptedFile = await decryptRemoteFile(
-                        uploadResult.file,
-                        uploadableItem.collection.key,
-                    );
+                    decryptedFile = uploadResult.file;
                     break;
                 case "largerThanAvailableStorage":
                 case "unsupported":
