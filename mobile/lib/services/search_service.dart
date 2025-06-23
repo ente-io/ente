@@ -929,10 +929,10 @@ class SearchService {
         );
 
       for (final clusterId in sortedClusterIds) {
+        if (limit != null && facesResult.length >= limit) {
+          break;
+        }
         final files = clusterIdToFiles[clusterId]!;
-        // final String clusterName = "ID:$clusterId,  ${files.length}";
-        // final String clusterName = "${files.length}";
-        // const String clusterName = "";
         final String clusterName = clusterId;
 
         if (clusterIDToPersonID[clusterId] != null) {
@@ -991,15 +991,8 @@ class SearchService {
         );
       }
       if (facesResult.isEmpty) {
-        int newMinimum = minClusterSize;
-        for (final int minimum in kLowerMinimumClusterSizes) {
-          if (minimum < minClusterSize) {
-            newMinimum = minimum;
-            break;
-          }
-        }
-        if (newMinimum < minClusterSize) {
-          return getAllFace(limit, minClusterSize: newMinimum);
+        if (kMinimumClusterSizeAllFaces < minClusterSize) {
+          return getAllFace(limit, minClusterSize: kMinimumClusterSizeAllFaces);
         } else {
           return [];
         }

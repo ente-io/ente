@@ -15,6 +15,7 @@ import "package:photos/models/search/search_result.dart";
 import 'package:photos/models/selected_files.dart';
 import "package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart";
 import "package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart";
+import "package:photos/services/machine_learning/ml_result.dart";
 import "package:photos/services/search_service.dart";
 import "package:photos/ui/components/end_to_end_banner.dart";
 import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
@@ -29,6 +30,7 @@ import "package:photos/ui/viewer/people/link_email_screen.dart";
 import "package:photos/ui/viewer/people/people_app_bar.dart";
 import "package:photos/ui/viewer/people/people_banner.dart";
 import "package:photos/ui/viewer/people/person_cluster_suggestion.dart";
+import "package:photos/ui/viewer/people/person_gallery_suggestion.dart";
 import "package:photos/utils/navigation_util.dart";
 
 class PeoplePage extends StatefulWidget {
@@ -65,6 +67,7 @@ class _PeoplePageState extends State<PeoplePage> {
       files!.isNotEmpty);
 
   bool userDismissedSuggestionBanner = false;
+  bool userDismissedPersonGallerySuggestion = false;
 
   late final StreamSubscription<LocalPhotosUpdatedEvent> _filesUpdatedEvent;
   late final StreamSubscription<PeopleChangedEvent> _peopleChangedEvent;
@@ -75,14 +78,28 @@ class _PeoplePageState extends State<PeoplePage> {
     _person = widget.person;
     ClusterFeedbackService.resetLastViewedClusterID();
     _peopleChangedEvent = Bus.instance.on<PeopleChangedEvent>().listen((event) {
-      setState(() {
-        if (event.type == PeopleEventType.saveOrEditPerson) {
-          if (event.person != null &&
-              event.person!.remoteID == _person.remoteID) {
+      if (event.type == PeopleEventType.saveOrEditPerson) {
+        if (event.person != null &&
+            event.person!.remoteID == _person.remoteID) {
+          setState(() {
             _person = event.person!;
-          }
+          });
         }
-      });
+      }
+      if (event.source == widget.person.remoteID) {
+        if (event.type == PeopleEventType.removedFaceFromCluster) {
+          final filesBefore = files?.length ?? 0;
+          for (final String removedFaceID in event.relevantFaceIDs!) {
+            final int fileID = getFileIdFromFaceId<int>(removedFaceID);
+            files?.removeWhere((file) => file.uploadedFileID == fileID);
+          }
+          final filesAfter = files?.length ?? 0;
+          if (filesBefore != filesAfter) setState(() {});
+        }
+        if (event.type == PeopleEventType.addedClusterToPerson) {
+          if (mounted) setState(() {});
+        }
+      }
     });
 
     filesFuture = loadPersonFiles();
@@ -259,7 +276,7 @@ class _PeoplePageState extends State<PeoplePage> {
   }
 }
 
-class _Gallery extends StatelessWidget {
+class _Gallery extends StatefulWidget {
   final String tagPrefix;
   final SelectedFiles selectedFiles;
   final List<EnteFile> personFiles;
@@ -275,6 +292,13 @@ class _Gallery extends StatelessWidget {
   });
 
   @override
+  State<_Gallery> createState() => _GalleryState();
+}
+
+class _GalleryState extends State<_Gallery> {
+  bool userDismissedPersonGallerySuggestion = false;
+
+  @override
   Widget build(BuildContext context) {
     return Gallery(
       asyncLoader: (
@@ -283,7 +307,7 @@ class _Gallery extends StatelessWidget {
         limit,
         asc,
       }) async {
-        final result = await loadPersonFiles();
+        final result = await widget.loadPersonFiles();
         return Future.value(
           FileLoadResult(
             result,
@@ -293,18 +317,23 @@ class _Gallery extends StatelessWidget {
       },
       reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
       forceReloadEvents: [
-        Bus.instance.on<PeopleChangedEvent>(),
+        Bus.instance.on<PeopleChangedEvent>().where(
+              (event) => event.type != PeopleEventType.addedClusterToPerson,
+            ),
       ],
       removalEventTypes: const {
         EventType.deletedFromRemote,
         EventType.deletedFromEverywhere,
         EventType.hide,
       },
-      tagPrefix: tagPrefix + tagPrefix,
-      selectedFiles: selectedFiles,
-      initialFiles: personFiles.isNotEmpty ? [personFiles.first] : [],
-      header:
-          personEntity.data.email != null && personEntity.data.email!.isNotEmpty
+      tagPrefix: widget.tagPrefix + widget.tagPrefix,
+      selectedFiles: widget.selectedFiles,
+      initialFiles:
+          widget.personFiles.isNotEmpty ? [widget.personFiles.first] : [],
+      header: Column(
+        children: [
+          widget.personEntity.data.email != null &&
+                  widget.personEntity.data.email!.isNotEmpty
               ? const SizedBox.shrink()
               : Padding(
                   padding: const EdgeInsets.only(top: 12, bottom: 8),
@@ -315,11 +344,27 @@ class _Gallery extends StatelessWidget {
                     onTap: () async {
                       await routeToPage(
                         context,
-                        LinkEmailScreen(personEntity.remoteID),
+                        LinkEmailScreen(widget.personEntity.remoteID),
                       );
                     },
                   ),
                 ),
+          !userDismissedPersonGallerySuggestion
+              ? Dismissible(
+                  key: const Key("personGallerySuggestion"),
+                  direction: DismissDirection.horizontal,
+                  onDismissed: (direction) {
+                    setState(() {
+                      userDismissedPersonGallerySuggestion = true;
+                    });
+                  },
+                  child: PersonGallerySuggestion(
+                    person: widget.personEntity,
+                  ),
+                )
+              : const SizedBox.shrink(),
+        ],
+      ),
     );
   }
 }
