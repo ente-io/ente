@@ -48,7 +48,7 @@ import { downloadManager } from "ente-gallery/services/download";
 import { extractCollectionKeyFromShareURL } from "ente-gallery/services/share";
 import { updateShouldDisableCFUploadProxy } from "ente-gallery/services/upload";
 import type { Collection } from "ente-media/collection";
-import { mergeMetadata, type EnteFile } from "ente-media/file";
+import { type EnteFile } from "ente-media/file";
 import { verifyPublicAlbumPassword } from "ente-new/albums/services/publicCollection";
 import {
     GalleryItemsHeaderAdapter,
@@ -229,10 +229,7 @@ export default function PublicCollectionGallery() {
                     setIsPasswordProtected(isPasswordProtected);
                     const collectionUID = getPublicCollectionUID(accessToken);
                     const localFiles = await getLocalPublicFiles(collectionUID);
-                    const localPublicFiles = sortFiles(
-                        mergeMetadata(localFiles),
-                        sortAsc,
-                    );
+                    const localPublicFiles = sortFiles(localFiles, sortAsc);
                     setPublicFiles(localPublicFiles);
                     accessTokenJWT =
                         await getLocalPublicCollectionPassword(collectionUID);

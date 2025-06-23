@@ -5,7 +5,6 @@ import {
 } from "ente-gallery/services/magic-metadata";
 import { collectionTypes, type Collection } from "ente-media/collection";
 import type { EnteFile } from "ente-media/file";
-import { mergeMetadata } from "ente-media/file";
 import {
     isArchivedFile,
     type FilePrivateMagicMetadataData,
@@ -515,12 +514,8 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
     if (process.env.NEXT_PUBLIC_ENTE_TRACE) console.log("dispatch", action);
     switch (action.type) {
         case "mount": {
-            const lastSyncedNormalFiles = sortFiles(
-                mergeMetadata(action.normalFiles),
-            );
-            const lastSyncedHiddenFiles = sortFiles(
-                mergeMetadata(action.hiddenFiles),
-            );
+            const lastSyncedNormalFiles = sortFiles(action.normalFiles);
+            const lastSyncedHiddenFiles = sortFiles(action.hiddenFiles);
 
             // During mount there are no unsynced updates, and we can directly
             // use the provided files.
@@ -721,9 +716,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                     state.unsyncedPrivateMagicMetadataUpdates,
                     action.files,
                 );
-            const lastSyncedNormalFiles = sortFiles(
-                mergeMetadata(action.files),
-            );
+            const lastSyncedNormalFiles = sortFiles(action.files);
             const normalFiles = deriveFiles(
                 lastSyncedNormalFiles,
                 unsyncedPrivateMagicMetadataUpdates,
@@ -743,10 +736,8 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                     action.files,
                 );
             const lastSyncedNormalFiles = sortFiles(
-                mergeMetadata(
-                    getLatestVersionFiles(
-                        state.lastSyncedNormalFiles.concat(action.files),
-                    ),
+                getLatestVersionFiles(
+                    state.lastSyncedNormalFiles.concat(action.files),
                 ),
             );
             const normalFiles = deriveFiles(
@@ -786,9 +777,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                     state.unsyncedPrivateMagicMetadataUpdates,
                     action.files,
                 );
-            const lastSyncedHiddenFiles = sortFiles(
-                mergeMetadata(action.files),
-            );
+            const lastSyncedHiddenFiles = sortFiles(action.files);
             const hiddenFiles = deriveFiles(
                 lastSyncedHiddenFiles,
                 unsyncedPrivateMagicMetadataUpdates,
@@ -808,10 +797,8 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                     action.files,
                 );
             const lastSyncedHiddenFiles = sortFiles(
-                mergeMetadata(
-                    getLatestVersionFiles(
-                        state.lastSyncedHiddenFiles.concat(action.files),
-                    ),
+                getLatestVersionFiles(
+                    state.lastSyncedHiddenFiles.concat(action.files),
                 ),
             );
             const hiddenFiles = deriveFiles(

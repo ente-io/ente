@@ -11,7 +11,7 @@ import { formattedDateRelative } from "ente-base/i18n-date";
 import log from "ente-base/log";
 import { downloadManager } from "ente-gallery/services/download";
 import { EnteFile } from "ente-media/file";
-import { fileDurationString } from "ente-media/file-metadata";
+import { fileCreationTime, fileDurationString } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
 import {
     GAP_BTW_TILES,
@@ -360,11 +360,11 @@ export const FileList: React.FC<FileListProps> = ({
             if (
                 !currentDate ||
                 !isSameDay(
-                    new Date(item.file.metadata.creationTime / 1000),
+                    new Date(fileCreationTime(item.file) / 1000),
                     new Date(currentDate),
                 )
             ) {
-                currentDate = item.file.metadata.creationTime / 1000;
+                currentDate = fileCreationTime(item.file) / 1000;
 
                 timeStampList.push({
                     tag: "date",

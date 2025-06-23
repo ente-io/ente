@@ -5,11 +5,10 @@ import { apiURL } from "ente-base/origins";
 import type { Collection } from "ente-media/collection";
 import {
     decryptRemoteFile,
-    mergeMetadata,
     type EnteFile,
     type RemoteEnteFile,
 } from "ente-media/file";
-import { metadataHash } from "ente-media/file-metadata";
+import { fileCreationTime, metadataHash } from "ente-media/file-metadata";
 import { type Trash } from "ente-new/photos/services/trash";
 import HTTPService from "ente-shared/network/HTTPService";
 import localForage from "ente-shared/storage/localForage";
@@ -18,40 +17,32 @@ import {
     getCollectionLastSyncTime,
     setCollectionLastSyncTime,
 } from "./collections";
-
-const FILES_TABLE = "files";
-const HIDDEN_FILES_TABLE = "hidden-files";
-
-/**
- * Return all files that we know about locally, both "normal" and "hidden".
- */
-export const getAllLocalFiles = async () =>
-    (await getLocalFiles("normal")).concat(await getLocalFiles("hidden"));
+import {
+    savedHiddenFiles,
+    savedNormalFiles,
+    saveHiddenFiles,
+    saveNormalFiles,
+} from "./photos-fdb";
 
 /**
  * Return all files that we know about locally. By default it returns only
  * "normal" (i.e. non-"hidden") files, but it can be passed the {@link type}
  * "hidden" to get it to instead return hidden files that we know about locally.
+ *
+ * Deprecated, use {@link savedNormalFiles} or {@link savedHiddenFiles} instead.
  */
-export const getLocalFiles = async (type: "normal" | "hidden" = "normal") => {
-    const tableName = type == "normal" ? FILES_TABLE : HIDDEN_FILES_TABLE;
-    const files: EnteFile[] =
-        (await localForage.getItem<EnteFile[]>(tableName)) ?? [];
-    return files;
-};
+export const getLocalFiles = async (type: "normal" | "hidden" = "normal") =>
+    type == "normal" ? savedNormalFiles() : savedHiddenFiles();
 
 /**
  * Update the files that we know about locally.
  *
  * Sibling of {@link getLocalFiles}.
+ *
+ * Deprecate, use {@link saveNormalFiles} or {@link saveHiddenFiles} instead.
  */
-export const setLocalFiles = async (
-    type: "normal" | "hidden",
-    files: EnteFile[],
-) => {
-    const tableName = type == "normal" ? FILES_TABLE : HIDDEN_FILES_TABLE;
-    await localForage.setItem(tableName, files);
-};
+export const setLocalFiles = (type: "normal" | "hidden", files: EnteFile[]) =>
+    type == "normal" ? saveNormalFiles(files) : saveHiddenFiles(files);
 
 /**
  * Fetch all files of the given {@link type}, belonging to the given
@@ -178,13 +169,12 @@ export const sortFiles = (files: EnteFile[], sortAsc = false) => {
     // modification.
     const factor = sortAsc ? -1 : 1;
     return files.sort((a, b) => {
-        if (a.metadata.creationTime === b.metadata.creationTime) {
-            return (
-                factor *
-                (b.metadata.modificationTime - a.metadata.modificationTime)
-            );
-        }
-        return factor * (b.metadata.creationTime - a.metadata.creationTime);
+        const at = fileCreationTime(a);
+        const bt = fileCreationTime(b);
+        return at == bt
+            ? factor *
+                  (b.metadata.modificationTime - a.metadata.modificationTime)
+            : factor * (bt - at);
     });
 };
 
@@ -256,14 +246,12 @@ export const enteFileDeletionDate = (file: TrashedEnteFile) =>
 
 export function getTrashedFiles(trash: Trash): TrashedEnteFile[] {
     return sortTrashFiles(
-        mergeMetadata(
-            trash.map((trashedFile) => ({
-                ...trashedFile.file,
-                updationTime: trashedFile.updatedAt,
-                deleteBy: trashedFile.deleteBy,
-                isTrashed: true,
-            })),
-        ),
+        trash.map((trashedFile) => ({
+            ...trashedFile.file,
+            updationTime: trashedFile.updatedAt,
+            deleteBy: trashedFile.deleteBy,
+            isTrashed: true,
+        })),
     );
 }
 
@@ -277,12 +265,11 @@ export const getLocalTrashFileIDs = () =>
 const sortTrashFiles = (files: TrashedEnteFile[]) => {
     return files.sort((a, b) => {
         if (a.deleteBy === b.deleteBy) {
-            if (a.metadata.creationTime === b.metadata.creationTime) {
-                return (
-                    b.metadata.modificationTime - a.metadata.modificationTime
-                );
-            }
-            return b.metadata.creationTime - a.metadata.creationTime;
+            const at = fileCreationTime(a);
+            const bt = fileCreationTime(b);
+            return at == bt
+                ? b.metadata.modificationTime - a.metadata.modificationTime
+                : bt - at;
         }
         return (a.deleteBy ?? 0) - (b.deleteBy ?? 0);
     });

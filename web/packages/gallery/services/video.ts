@@ -13,10 +13,10 @@ import { fileLogID, type EnteFile } from "ente-media/file";
 import { FileType } from "ente-media/file-type";
 import { updateFilePublicMagicMetadata } from "ente-new/photos/services/file";
 import {
-    getAllLocalFiles,
     getLocalTrashFileIDs,
     uniqueFilesByID,
 } from "ente-new/photos/services/files";
+import { savedFiles } from "ente-new/photos/services/photos-fdb";
 import { gunzip, gzip } from "ente-new/photos/utils/gzip";
 import { randomSample } from "ente-utils/array";
 import { ensurePrecondition } from "ente-utils/ensure";
@@ -516,16 +516,7 @@ const blobToDataURL = (blob: Blob) =>
  * an array.
  */
 const savedProcessedVideoFileIDs = () =>
-    // [Note: Avoiding Zod parsing overhead for DB arrays]
-    //
-    // Validating that the value we read from the DB is indeed the same as the
-    // type we expect can be done using Zod, but for potentially very large
-    // arrays, this has an overhead that is perhaps not justified when dealing
-    // with DB entries we ourselves wrote.
-    //
-    // As an optimization, we skip the runtime check here and cast. This might
-    // not be the most optimal choice in the future, so (a) use it sparingly,
-    // and (b) mark all such cases with the title of this note.
+    // See: [Note: Avoiding Zod parsing for large DB arrays]
     getKV("videoPreviewProcessedFileIDs").then((v) => new Set(v as number[]));
 
 /**
@@ -535,7 +526,7 @@ const savedProcessedVideoFileIDs = () =>
  * @see also {@link savedProcessedVideoFileIDs}.
  */
 const savedFailedVideoFileIDs = () =>
-    // See: [Note: Avoiding Zod parsing overhead for DB arrays]
+    // See: [Note: Avoiding Zod parsing for large DB arrays]
     getKV("videoPreviewFailedFileIDs").then((v) => new Set(v as number[]));
 
 /**
@@ -888,7 +879,7 @@ const processQueue = async () => {
 const backfillQueue = async (
     userID: number,
 ): Promise<VideoProcessingQueueItem[]> => {
-    const allCollectionFiles = await getAllLocalFiles();
+    const allCollectionFiles = await savedFiles();
     const localTrashFileIDs = await getLocalTrashFileIDs();
     const videoFiles = uniqueFilesByID(
         allCollectionFiles.filter(
