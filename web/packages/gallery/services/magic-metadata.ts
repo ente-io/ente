@@ -3,8 +3,14 @@
 /* eslint-disable @typescript-eslint/no-unnecessary-condition */
 import { sharedCryptoWorker } from "ente-base/crypto";
 import type { Collection } from "ente-media/collection";
-import { type MagicMetadataCore } from "ente-media/file";
 import { ItemVisibility } from "ente-media/file-metadata";
+
+export interface MagicMetadataCore<T> {
+    version: number;
+    count: number;
+    header: string;
+    data: T;
+}
 
 export const isArchivedCollection = (item: Collection) => {
     if (!item) {
@@ -49,9 +55,9 @@ export async function updateMagicMetadata<T>(
 
     if (typeof originalMagicMetadata?.data == "string") {
         // TODO: When converting this (and other parses of magic metadata) to
-        // use zod, remember to use passthrough.
+        // use Zod, remember to use looseObject.
         //
-        // See: [Note: Use passthrough for metadata Zod schemas]
+        // See: [Note: Use looseObject for metadata Zod schemas]
         // @ts-expect-error TODO: Need to use zod here.
         originalMagicMetadata.data = await cryptoWorker.decryptMetadataJSON(
             {

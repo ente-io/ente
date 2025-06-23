@@ -20,14 +20,12 @@ typedef String MessageIfAbsent(String messageStr, List<dynamic> args);
 class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'ta';
 
+  static String m115(name) => "Wish \$${name} a happy birthday! 🎉";
+
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
         "accountWelcomeBack":
             MessageLookupByLibrary.simpleMessage("மீண்டும் வருக!"),
-        "areThey": MessageLookupByLibrary.simpleMessage("Are they "),
-        "areYouSureRemoveThisFaceFromPerson":
-            MessageLookupByLibrary.simpleMessage(
-                "Are you sure you want to remove this face from this person?"),
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
             "உங்கள் கணக்கை நீக்குவதற்கான முக்கிய காரணம் என்ன?"),
         "cancel": MessageLookupByLibrary.simpleMessage("ரத்து செய்"),
@@ -56,18 +54,10 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("தவறான மின்னஞ்சல் முகவரி"),
         "kindlyHelpUsWithThisInformation": MessageLookupByLibrary.simpleMessage(
             "இந்த தகவலுடன் தயவுசெய்து எங்களுக்கு உதவுங்கள்"),
-        "otherDetectedFaces":
-            MessageLookupByLibrary.simpleMessage("Other detected faces"),
-        "questionmark": MessageLookupByLibrary.simpleMessage("?"),
-        "saveAsAnotherPerson":
-            MessageLookupByLibrary.simpleMessage("Save as another person"),
         "selectReason": MessageLookupByLibrary.simpleMessage(
             "காரணத்தைத் தேர்ந்தெடுக்கவும்"),
-        "showLessFaces":
-            MessageLookupByLibrary.simpleMessage("Show less faces"),
-        "showMoreFaces":
-            MessageLookupByLibrary.simpleMessage("Show more faces"),
         "verify": MessageLookupByLibrary.simpleMessage("சரிபார்க்கவும்"),
+        "wishThemAHappyBirthday": m115,
         "yourAccountHasBeenDeleted":
             MessageLookupByLibrary.simpleMessage("உங்கள் கணக்கு நீக்கப்பட்டது")
       };

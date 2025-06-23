@@ -20,6 +20,8 @@ typedef String MessageIfAbsent(String messageStr, List<dynamic> args);
 class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'et';
 
+  static String m115(name) => "Wish \$${name} a happy birthday! 🎉";
+
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
         "about": MessageLookupByLibrary.simpleMessage("Info"),
@@ -39,10 +41,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Luba allalaadimised"),
         "appleId": MessageLookupByLibrary.simpleMessage("Apple ID"),
         "apply": MessageLookupByLibrary.simpleMessage("Rakenda"),
-        "areThey": MessageLookupByLibrary.simpleMessage("Are they "),
-        "areYouSureRemoveThisFaceFromPerson":
-            MessageLookupByLibrary.simpleMessage(
-                "Are you sure you want to remove this face from this person?"),
         "blog": MessageLookupByLibrary.simpleMessage("Blogi"),
         "cancel": MessageLookupByLibrary.simpleMessage("Loobu"),
         "changeEmail": MessageLookupByLibrary.simpleMessage("Muuda e-posti"),
@@ -173,8 +171,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "oops": MessageLookupByLibrary.simpleMessage("Oih"),
         "oopsSomethingWentWrong":
             MessageLookupByLibrary.simpleMessage("Oih, midagi läks valesti"),
-        "otherDetectedFaces":
-            MessageLookupByLibrary.simpleMessage("Other detected faces"),
         "password": MessageLookupByLibrary.simpleMessage("Parool"),
         "photoSmallCase": MessageLookupByLibrary.simpleMessage("foto"),
         "pleaseTryAgain":
@@ -183,7 +179,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "privacy": MessageLookupByLibrary.simpleMessage("Privaatsus"),
         "privacyPolicyTitle":
             MessageLookupByLibrary.simpleMessage("Privaatsus"),
-        "questionmark": MessageLookupByLibrary.simpleMessage("?"),
         "radius": MessageLookupByLibrary.simpleMessage("Raadius"),
         "recoverButton": MessageLookupByLibrary.simpleMessage("Taasta"),
         "reddit": MessageLookupByLibrary.simpleMessage("Reddit"),
@@ -203,8 +198,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "rotateLeft": MessageLookupByLibrary.simpleMessage("Pööra vasakule"),
         "rotateRight": MessageLookupByLibrary.simpleMessage("Pööra paremale"),
         "save": MessageLookupByLibrary.simpleMessage("Salvesta"),
-        "saveAsAnotherPerson":
-            MessageLookupByLibrary.simpleMessage("Save as another person"),
         "saveCopy": MessageLookupByLibrary.simpleMessage("Salvesta koopia"),
         "saveKey": MessageLookupByLibrary.simpleMessage("Salvesta võti"),
         "saving": MessageLookupByLibrary.simpleMessage("Salvestamine..."),
@@ -225,10 +218,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "share": MessageLookupByLibrary.simpleMessage("Jaga"),
         "shareALink": MessageLookupByLibrary.simpleMessage("Jaga linki"),
         "sharing": MessageLookupByLibrary.simpleMessage("Jagamine..."),
-        "showLessFaces":
-            MessageLookupByLibrary.simpleMessage("Show less faces"),
-        "showMoreFaces":
-            MessageLookupByLibrary.simpleMessage("Show more faces"),
         "skip": MessageLookupByLibrary.simpleMessage("Jäta vahele"),
         "somethingWentWrongPleaseTryAgain":
             MessageLookupByLibrary.simpleMessage(
@@ -271,6 +260,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "weakStrength": MessageLookupByLibrary.simpleMessage("Nõrk"),
         "welcomeBack":
             MessageLookupByLibrary.simpleMessage("Tere tulemast tagasi!"),
+        "wishThemAHappyBirthday": m115,
         "yes": MessageLookupByLibrary.simpleMessage("Jah"),
         "yesConvertToViewer":
             MessageLookupByLibrary.simpleMessage("Jah, muuda vaatajaks"),

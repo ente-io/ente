@@ -20,15 +20,13 @@ typedef String MessageIfAbsent(String messageStr, List<dynamic> args);
 class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'hi';
 
+  static String m115(name) => "Wish \$${name} a happy birthday! 🎉";
+
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
         "accountWelcomeBack":
             MessageLookupByLibrary.simpleMessage("आपका पुनः स्वागत है"),
         "activeSessions": MessageLookupByLibrary.simpleMessage("एक्टिव सेशन"),
-        "areThey": MessageLookupByLibrary.simpleMessage("Are they "),
-        "areYouSureRemoveThisFaceFromPerson":
-            MessageLookupByLibrary.simpleMessage(
-                "Are you sure you want to remove this face from this person?"),
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
             "आपका अकाउंट हटाने का मुख्य कारण क्या है?"),
         "cancel": MessageLookupByLibrary.simpleMessage("रद्द करें"),
@@ -85,21 +83,12 @@ class MessageLookup extends MessageLookupByLibrary {
             "हमारे एंड-टू-एंड एन्क्रिप्शन प्रोटोकॉल की प्रकृति के कारण, आपके डेटा को आपके पासवर्ड या रिकवरी कुंजी के बिना डिक्रिप्ट नहीं किया जा सकता है"),
         "ok": MessageLookupByLibrary.simpleMessage("ठीक है"),
         "oops": MessageLookupByLibrary.simpleMessage("ओह!"),
-        "otherDetectedFaces":
-            MessageLookupByLibrary.simpleMessage("Other detected faces"),
         "password": MessageLookupByLibrary.simpleMessage("पासवर्ड"),
-        "questionmark": MessageLookupByLibrary.simpleMessage("?"),
         "recoverButton": MessageLookupByLibrary.simpleMessage("पुनः प्राप्त"),
         "recoverySuccessful":
             MessageLookupByLibrary.simpleMessage("रिकवरी सफल हुई!"),
-        "saveAsAnotherPerson":
-            MessageLookupByLibrary.simpleMessage("Save as another person"),
         "selectReason": MessageLookupByLibrary.simpleMessage("कारण चुनें"),
         "sendEmail": MessageLookupByLibrary.simpleMessage("ईमेल भेजें"),
-        "showLessFaces":
-            MessageLookupByLibrary.simpleMessage("Show less faces"),
-        "showMoreFaces":
-            MessageLookupByLibrary.simpleMessage("Show more faces"),
         "somethingWentWrongPleaseTryAgain":
             MessageLookupByLibrary.simpleMessage(
                 "कुछ गड़बड़ हुई है। कृपया दोबारा प्रयास करें।"),
@@ -118,6 +107,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "verify": MessageLookupByLibrary.simpleMessage("सत्यापित करें"),
         "verifyEmail":
             MessageLookupByLibrary.simpleMessage("ईमेल सत्यापित करें"),
+        "wishThemAHappyBirthday": m115,
         "yourAccountHasBeenDeleted": MessageLookupByLibrary.simpleMessage(
             "आपका अकाउंट डिलीट कर दिया गया है")
       };

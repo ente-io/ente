@@ -477,7 +477,7 @@
     }
   },
   "showMemories": "Toon herinneringen",
-  "yearsAgo": "{count, plural, one{{count} jaar geleden} other{{count} jaar geleden}}",
+  "yearsAgo": "{count, plural, other{{count} jaar geleden}}",
   "backupSettings": "Back-up instellingen",
   "backupStatus": "Back-up status",
   "backupStatusDescription": "Items die zijn geback-upt, worden hier getoond",
@@ -1752,11 +1752,5 @@
   "addMemoriesWidgetPrompt": "Voeg een widget toe aan je beginscherm en kom hier terug om aan te passen.",
   "addAlbumWidgetPrompt": "Voeg een widget toe aan je beginscherm en kom hier terug om aan te passen.",
   "addPeopleWidgetPrompt": "Voeg een widget toe aan je beginscherm en kom hier terug om aan te passen.",
-  "showMoreFaces": "Show more faces",
-  "showLessFaces": "Show less faces",
-  "otherDetectedFaces": "Other detected faces",
-  "areYouSureRemoveThisFaceFromPerson": "Are you sure you want to remove this face from this person?",
-  "areThey": "Are they ",
-  "questionmark": "?",
-  "saveAsAnotherPerson": "Save as another person"
+  "wishThemAHappyBirthday": "Wish ${name} a happy birthday! 🎉"
 }

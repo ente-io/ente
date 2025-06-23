@@ -476,7 +476,7 @@
     }
   },
   "showMemories": "Показывать воспоминания",
-  "yearsAgo": "{count, plural, one{{count} год назад} few{{count} года назад} other{{count} лет назад}}",
+  "yearsAgo": "{count, plural, one{{count} год назад} other{{count} лет назад}}",
   "backupSettings": "Настройки резервного копирования",
   "backupStatus": "Статус резервного копирования",
   "backupStatusDescription": "Элементы, сохранённые в резервной копии, появятся здесь",
@@ -1725,11 +1725,5 @@
   "food": "Кулинарное наслаждение",
   "pets": "Пушистые спутники",
   "curatedMemories": "Отобранные воспоминания",
-  "showMoreFaces": "Show more faces",
-  "showLessFaces": "Show less faces",
-  "otherDetectedFaces": "Other detected faces",
-  "areYouSureRemoveThisFaceFromPerson": "Are you sure you want to remove this face from this person?",
-  "areThey": "Are they ",
-  "questionmark": "?",
-  "saveAsAnotherPerson": "Save as another person"
+  "wishThemAHappyBirthday": "Wish ${name} a happy birthday! 🎉"
 }

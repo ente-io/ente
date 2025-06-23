@@ -11,6 +11,7 @@ import { exportMetadataDirectoryName } from "ente-gallery/export-dirs";
 import { downloadManager } from "ente-gallery/services/download";
 import type { Collection } from "ente-media/collection";
 import { mergeMetadata, type EnteFile } from "ente-media/file";
+import { fileFileName } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
 import { decodeLivePhoto } from "ente-media/live-photo";
 import { getLocalCollections } from "ente-new/photos/services/collections";
@@ -267,7 +268,7 @@ async function migrateFiles(
             exportMetadataDirectoryName,
         );
 
-        const oldFileName = `${file.id}_${oldSanitizeName(file.metadata.title)}`;
+        const oldFileName = `${file.id}_${oldSanitizeName(fileFileName(file))}`;
         // @ts-ignore
         const oldFilePath = joinPath(collectionPath, oldFileName);
         const oldFileMetadataPath = joinPath(
@@ -278,7 +279,7 @@ async function migrateFiles(
         const newFileName = await safeFileName(
             // @ts-ignore
             collectionPath,
-            file.metadata.title,
+            fileFileName(file),
             fs.exists,
         );
         // @ts-ignore
@@ -367,14 +368,15 @@ async function getFileExportNamesFromExportedFiles(
             () =>
                 `collection path for ${file.collectionID} is ${collectionPath}`,
         );
+        const fileName = fileFileName(file);
         let fileExportName: string;
         /*
             For Live Photos we need to download the file to get the image and video name
         */
-        if (file.metadata.fileType === FileType.livePhoto) {
+        if (file.metadata.fileType == FileType.livePhoto) {
             const fileBlob = await downloadManager.fileBlob(file);
             const { imageFileName, videoFileName } = await decodeLivePhoto(
-                file.metadata.title,
+                fileName,
                 fileBlob,
             );
             const imageExportName = getUniqueFileExportNameForMigration(
@@ -397,13 +399,12 @@ async function getFileExportNamesFromExportedFiles(
             fileExportName = getUniqueFileExportNameForMigration(
                 // @ts-ignore
                 collectionPath,
-                file.metadata.title,
+                fileName,
                 usedFilePaths,
             );
         }
         log.debug(
-            () =>
-                `file export name for ${file.metadata.title} is ${fileExportName}`,
+            () => `file export name for ${fileName} is ${fileExportName}`,
         );
         exportedFileNames = {
             // @ts-ignore

@@ -11956,16 +11956,6 @@ class S {
     );
   }
 
-  /// `Happy birthday to {name}! 🎉`
-  String happyBirthdayToPerson(Object name) {
-    return Intl.message(
-      'Happy birthday to $name! 🎉',
-      name: 'happyBirthdayToPerson',
-      desc: '',
-      args: [name],
-    );
-  }
-
   /// `Birthdays`
   String get birthdays {
     return Intl.message(
@@ -11976,73 +11966,13 @@ class S {
     );
   }
 
-  /// `Show more faces`
-  String get showMoreFaces {
+  /// `Wish {name} a happy birthday! 🎉`
+  String wishThemAHappyBirthday(Object name) {
     return Intl.message(
-      'Show more faces',
-      name: 'showMoreFaces',
+      'Wish $name a happy birthday! 🎉',
+      name: 'wishThemAHappyBirthday',
       desc: '',
-      args: [],
-    );
-  }
-
-  /// `Show less faces`
-  String get showLessFaces {
-    return Intl.message(
-      'Show less faces',
-      name: 'showLessFaces',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Other detected faces`
-  String get otherDetectedFaces {
-    return Intl.message(
-      'Other detected faces',
-      name: 'otherDetectedFaces',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Are you sure you want to remove this face from this person?`
-  String get areYouSureRemoveThisFaceFromPerson {
-    return Intl.message(
-      'Are you sure you want to remove this face from this person?',
-      name: 'areYouSureRemoveThisFaceFromPerson',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Are they `
-  String get areThey {
-    return Intl.message(
-      'Are they ',
-      name: 'areThey',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `?`
-  String get questionmark {
-    return Intl.message(
-      '?',
-      name: 'questionmark',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Save as another person`
-  String get saveAsAnotherPerson {
-    return Intl.message(
-      'Save as another person',
-      name: 'saveAsAnotherPerson',
-      desc: '',
-      args: [],
+      args: [name],
     );
   }
 }
@@ -12075,6 +12005,7 @@ class AppLocalizationDelegate extends LocalizationsDelegate<S> {
       Locale.fromSubtags(languageCode: 'ja'),
       Locale.fromSubtags(languageCode: 'km'),
       Locale.fromSubtags(languageCode: 'ko'),
+      Locale.fromSubtags(languageCode: 'ku'),
       Locale.fromSubtags(languageCode: 'lt'),
       Locale.fromSubtags(languageCode: 'lv'),
       Locale.fromSubtags(languageCode: 'ml'),

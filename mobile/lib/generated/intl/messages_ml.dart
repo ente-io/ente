@@ -20,15 +20,13 @@ typedef String MessageIfAbsent(String messageStr, List<dynamic> args);
 class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'ml';
 
+  static String m115(name) => "Wish \$${name} a happy birthday! 🎉";
+
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
         "accountWelcomeBack":
             MessageLookupByLibrary.simpleMessage("വീണ്ടും സ്വാഗതം!"),
         "albumOwner": MessageLookupByLibrary.simpleMessage("ഉടമ"),
-        "areThey": MessageLookupByLibrary.simpleMessage("Are they "),
-        "areYouSureRemoveThisFaceFromPerson":
-            MessageLookupByLibrary.simpleMessage(
-                "Are you sure you want to remove this face from this person?"),
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
             "അക്കൗണ്ട് ഉപേക്ഷിക്കുവാൻ പ്രധാന കാരണമെന്താണ്?"),
         "available": MessageLookupByLibrary.simpleMessage("ലഭ്യമാണ്"),
@@ -94,15 +92,12 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("ഇവിടൊന്നും കാണ്മാനില്ല! 👀"),
         "ok": MessageLookupByLibrary.simpleMessage("ശരി"),
         "oops": MessageLookupByLibrary.simpleMessage("അയ്യോ"),
-        "otherDetectedFaces":
-            MessageLookupByLibrary.simpleMessage("Other detected faces"),
         "password": MessageLookupByLibrary.simpleMessage("സങ്കേതക്കുറി"),
         "pleaseTryAgain":
             MessageLookupByLibrary.simpleMessage("ദയവായി വീണ്ടും ശ്രമിക്കുക"),
         "privacy": MessageLookupByLibrary.simpleMessage("സ്വകാര്യത"),
         "privacyPolicyTitle":
             MessageLookupByLibrary.simpleMessage("സ്വകാര്യതാനയം"),
-        "questionmark": MessageLookupByLibrary.simpleMessage("?"),
         "recoverButton": MessageLookupByLibrary.simpleMessage("വീണ്ടെടുക്കുക"),
         "recoverySuccessful":
             MessageLookupByLibrary.simpleMessage("വീണ്ടെടുക്കൽ വിജയകരം!"),
@@ -110,8 +105,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("സങ്കേതക്കുറി പുനസൃഷ്ടിക്കുക"),
         "reddit": MessageLookupByLibrary.simpleMessage("റെഡ്ഡിറ്റ്"),
         "retry": MessageLookupByLibrary.simpleMessage("പുനശ്രമിക്കുക"),
-        "saveAsAnotherPerson":
-            MessageLookupByLibrary.simpleMessage("Save as another person"),
         "security": MessageLookupByLibrary.simpleMessage("സുരക്ഷ"),
         "selectReason":
             MessageLookupByLibrary.simpleMessage("കാരണം തിരഞ്ഞെടുക്കൂ"),
@@ -123,10 +116,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "sharedByMe": MessageLookupByLibrary.simpleMessage("ഞാനാൽ പങ്കിട്ടവ"),
         "sharedWithMe":
             MessageLookupByLibrary.simpleMessage("എന്നോട് പങ്കിട്ടവ"),
-        "showLessFaces":
-            MessageLookupByLibrary.simpleMessage("Show less faces"),
-        "showMoreFaces":
-            MessageLookupByLibrary.simpleMessage("Show more faces"),
         "somethingWentWrongPleaseTryAgain":
             MessageLookupByLibrary.simpleMessage(
                 "എന്തോ കുഴപ്പം സംഭവിച്ചു, ദയവായി വീണ്ടും ശ്രമിക്കുക"),
@@ -149,6 +138,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("സങ്കേതക്കുറി ദൃഢീകരിക്കുക"),
         "weakStrength": MessageLookupByLibrary.simpleMessage("ദുർബലം"),
         "welcomeBack": MessageLookupByLibrary.simpleMessage("വീണ്ടും സ്വാഗതം!"),
+        "wishThemAHappyBirthday": m115,
         "yearly": MessageLookupByLibrary.simpleMessage("പ്രതിവർഷം")
       };
 }

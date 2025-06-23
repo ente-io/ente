@@ -34,16 +34,18 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m42(currentlyProcessing, totalCount) =>
       "กำลังประมวลผล ${currentlyProcessing} / ${totalCount}";
 
-  static String m45(count) => "${Intl.plural(count, other: '${count} รายการ')}";
+  static String m44(count) => "${Intl.plural(count, other: '${count} รายการ')}";
 
-  static String m58(passwordStrengthValue) =>
+  static String m57(passwordStrengthValue) =>
       "ความแข็งแรงของรหัสผ่าน: ${passwordStrengthValue}";
 
-  static String m95(
+  static String m94(
           usedAmount, usedStorageUnit, totalAmount, totalStorageUnit) =>
       "ใช้ไป ${usedAmount} ${usedStorageUnit} จาก ${totalAmount} ${totalStorageUnit}";
 
-  static String m115(email) => "เราได้ส่งจดหมายไปยัง <green>${email}</green>";
+  static String m114(email) => "เราได้ส่งจดหมายไปยัง <green>${email}</green>";
+
+  static String m115(name) => "Wish \$${name} a happy birthday! 🎉";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -74,10 +76,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "androidCancelButton": MessageLookupByLibrary.simpleMessage("ยกเลิก"),
         "appVersion": m9,
         "apply": MessageLookupByLibrary.simpleMessage("นำไปใช้"),
-        "areThey": MessageLookupByLibrary.simpleMessage("Are they "),
-        "areYouSureRemoveThisFaceFromPerson":
-            MessageLookupByLibrary.simpleMessage(
-                "Are you sure you want to remove this face from this person?"),
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
             "เหตุผลหลักที่คุณลบบัญชีคืออะไร?"),
         "authToViewYourRecoveryKey": MessageLookupByLibrary.simpleMessage(
@@ -194,7 +192,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "invalidKey": MessageLookupByLibrary.simpleMessage("รหัสไม่ถูกต้อง"),
         "invalidRecoveryKey": MessageLookupByLibrary.simpleMessage(
             "คีย์การกู้คืนที่คุณป้อนไม่ถูกต้อง โปรดตรวจสอบให้แน่ใจว่ามี 24 คำ และตรวจสอบการสะกดของแต่ละคำ\n\nหากคุณป้อนรหัสกู้คืนที่เก่ากว่า ตรวจสอบให้แน่ใจว่ามีความยาว 64 ตัวอักษร และตรวจสอบแต่ละตัวอักษร"),
-        "itemCount": m45,
+        "itemCount": m44,
         "kindlyHelpUsWithThisInformation":
             MessageLookupByLibrary.simpleMessage("กรุณาช่วยเราด้วยข้อมูลนี้"),
         "lastUpdated": MessageLookupByLibrary.simpleMessage("อัปเดตล่าสุด"),
@@ -229,12 +227,10 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("ผู้มีส่วนร่วม OpenStreetMap"),
         "orPickAnExistingOne":
             MessageLookupByLibrary.simpleMessage("หรือเลือกที่มีอยู่แล้ว"),
-        "otherDetectedFaces":
-            MessageLookupByLibrary.simpleMessage("Other detected faces"),
         "password": MessageLookupByLibrary.simpleMessage("รหัสผ่าน"),
         "passwordChangedSuccessfully":
             MessageLookupByLibrary.simpleMessage("เปลี่ยนรหัสผ่านสำเร็จ"),
-        "passwordStrength": m58,
+        "passwordStrength": m57,
         "passwordWarning": MessageLookupByLibrary.simpleMessage(
             "เราไม่จัดเก็บรหัสผ่านนี้ ดังนั้นหากคุณลืม <underline>เราจะไม่สามารถถอดรหัสข้อมูลของคุณ</underline>"),
         "peopleUsingYourCode":
@@ -251,7 +247,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("สร้างลิงก์สาธารณะแล้ว"),
         "publicLinkEnabled":
             MessageLookupByLibrary.simpleMessage("เปิดใช้ลิงก์สาธารณะแล้ว"),
-        "questionmark": MessageLookupByLibrary.simpleMessage("?"),
         "recover": MessageLookupByLibrary.simpleMessage("กู้คืน"),
         "recoverAccount": MessageLookupByLibrary.simpleMessage("กู้คืนบัญชี"),
         "recoverButton": MessageLookupByLibrary.simpleMessage("กู้คืน"),
@@ -279,8 +274,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "restoreToAlbum":
             MessageLookupByLibrary.simpleMessage("กู้คืนไปยังอัลบั้ม"),
         "save": MessageLookupByLibrary.simpleMessage("บันทึก"),
-        "saveAsAnotherPerson":
-            MessageLookupByLibrary.simpleMessage("Save as another person"),
         "saveCopy": MessageLookupByLibrary.simpleMessage("บันทึกสำเนา"),
         "saveKey": MessageLookupByLibrary.simpleMessage("บันทึกคีย์"),
         "saveYourRecoveryKeyIfYouHaventAlready":
@@ -298,10 +291,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "share": MessageLookupByLibrary.simpleMessage("แชร์"),
         "shareALink": MessageLookupByLibrary.simpleMessage("แชร์​ลิงก์"),
         "shareLink": MessageLookupByLibrary.simpleMessage("แชร์​ลิงก์"),
-        "showLessFaces":
-            MessageLookupByLibrary.simpleMessage("Show less faces"),
-        "showMoreFaces":
-            MessageLookupByLibrary.simpleMessage("Show more faces"),
         "signUpTerms": MessageLookupByLibrary.simpleMessage(
             "ฉันยอมรับ<u-terms>เงื่อนไขการให้บริการ</u-terms>และ<u-policy>นโยบายความเป็นส่วนตัว</u-policy>"),
         "skip": MessageLookupByLibrary.simpleMessage("ข้าม"),
@@ -313,7 +302,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "storageBreakupFamily":
             MessageLookupByLibrary.simpleMessage("ครอบครัว"),
         "storageBreakupYou": MessageLookupByLibrary.simpleMessage("คุณ"),
-        "storageUsageInfo": m95,
+        "storageUsageInfo": m94,
         "strongStrength": MessageLookupByLibrary.simpleMessage("แข็งแรง"),
         "syncStopped": MessageLookupByLibrary.simpleMessage("หยุดการซิงค์แล้ว"),
         "syncing": MessageLookupByLibrary.simpleMessage("กำลังซิงค์..."),
@@ -354,10 +343,11 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("ดูคีย์การกู้คืน"),
         "waitingForWifi":
             MessageLookupByLibrary.simpleMessage("กำลังรอ WiFi..."),
-        "weHaveSendEmailTo": m115,
+        "weHaveSendEmailTo": m114,
         "weakStrength": MessageLookupByLibrary.simpleMessage("อ่อน"),
         "welcomeBack":
             MessageLookupByLibrary.simpleMessage("ยินดีต้อนรับกลับมา!"),
+        "wishThemAHappyBirthday": m115,
         "you": MessageLookupByLibrary.simpleMessage("คุณ"),
         "youCanManageYourLinksInTheShareTab":
             MessageLookupByLibrary.simpleMessage(

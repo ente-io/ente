@@ -49,11 +49,5 @@
   "noRecoveryKeyNoDecryption": "हमारे एंड-टू-एंड एन्क्रिप्शन प्रोटोकॉल की प्रकृति के कारण, आपके डेटा को आपके पासवर्ड या रिकवरी कुंजी के बिना डिक्रिप्ट नहीं किया जा सकता है",
   "verifyEmail": "ईमेल सत्यापित करें",
   "toResetVerifyEmail": "अपना पासवर्ड रीसेट करने के लिए, कृपया पहले अपना ईमेल सत्यापित करें।",
-  "showMoreFaces": "Show more faces",
-  "showLessFaces": "Show less faces",
-  "otherDetectedFaces": "Other detected faces",
-  "areYouSureRemoveThisFaceFromPerson": "Are you sure you want to remove this face from this person?",
-  "areThey": "Are they ",
-  "questionmark": "?",
-  "saveAsAnotherPerson": "Save as another person"
+  "wishThemAHappyBirthday": "Wish ${name} a happy birthday! 🎉"
 }

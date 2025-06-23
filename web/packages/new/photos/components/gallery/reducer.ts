@@ -3,37 +3,39 @@ import {
     isArchivedCollection,
     isPinnedCollection,
 } from "ente-gallery/services/magic-metadata";
-import { type Collection } from "ente-media/collection";
-import type { EnteFile, FilePrivateMagicMetadata } from "ente-media/file";
+import { collectionTypes, type Collection } from "ente-media/collection";
+import type { EnteFile } from "ente-media/file";
 import { mergeMetadata } from "ente-media/file";
-import { isArchivedFile } from "ente-media/file-metadata";
+import {
+    isArchivedFile,
+    type FilePrivateMagicMetadataData,
+} from "ente-media/file-metadata";
+import type { MagicMetadata } from "ente-media/magic-metadata";
 import {
     createCollectionNameByID,
     isHiddenCollection,
 } from "ente-new/photos/services/collection";
 import { splitByPredicate } from "ente-utils/array";
+import { includes } from "ente-utils/type-guards";
 import { t } from "i18next";
 import React, { useReducer } from "react";
 import {
-    ALL_SECTION,
-    ARCHIVE_SECTION,
-    DUMMY_UNCATEGORIZED_COLLECTION,
     findDefaultHiddenCollectionIDs,
-    HIDDEN_ITEMS_SECTION,
     isDefaultHiddenCollection,
     isIncomingShare,
-    TRASH_SECTION,
 } from "../../services/collection";
-import type {
-    CollectionSummary,
-    CollectionSummaryType,
-} from "../../services/collection/ui";
+import {
+    PseudoCollectionID,
+    type CollectionSummary,
+    type CollectionSummaryType,
+} from "../../services/collection-summary";
 import {
     createFileCollectionIDs,
     getLatestVersionFiles,
     groupFilesByCollectionID,
     sortFiles,
     uniqueFilesByID,
+    type TrashedEnteFile,
 } from "../../services/files";
 import type { PeopleState, Person } from "../../services/ml/people";
 import type { SearchSuggestion } from "../../services/search/types";
@@ -250,6 +252,17 @@ export interface GalleryState {
      * collections.
      */
     hiddenCollectionSummaries: Map<number, CollectionSummary>;
+    /**
+     * The ID of the collection summary that should be shown when the user
+     * navigates to the uncategorized section.
+     *
+     * This will be either the ID of the user's uncategorized collection, if one
+     * has already been created, otherwise it will be the predefined
+     * {@link PseudoCollectionID.uncategorizedPlaceholder}.
+     *
+     * See: [Note: Uncategorized placeholder]
+     */
+    uncategorizedCollectionSummaryID: number;
 
     /*--<  In-flight updates  >--*/
 
@@ -307,7 +320,10 @@ export interface GalleryState {
      * thereafter the synced files themselves will reflect the latest private
      * magic metadata.
      */
-    unsyncedPrivateMagicMetadataUpdates: Map<number, FilePrivateMagicMetadata>;
+    unsyncedPrivateMagicMetadataUpdates: Map<
+        number,
+        MagicMetadata<FilePrivateMagicMetadataData>
+    >;
 
     /*--<  State that underlies transient UI state  >--*/
 
@@ -410,7 +426,7 @@ export type GalleryAction =
           collections: Collection[];
           normalFiles: EnteFile[];
           hiddenFiles: EnteFile[];
-          trashedFiles: EnteFile[];
+          trashedFiles: TrashedEnteFile[];
       }
     | {
           type: "setCollections";
@@ -438,7 +454,7 @@ export type GalleryAction =
     | {
           type: "unsyncedPrivateMagicMetadataUpdate";
           fileID: number;
-          privateMagicMetadata: FilePrivateMagicMetadata;
+          privateMagicMetadata: MagicMetadata<FilePrivateMagicMetadataData>;
       }
     | { type: "clearUnsyncedState" }
     | { type: "showAll" }
@@ -472,6 +488,8 @@ const initialGalleryState: GalleryState = {
     fileNormalCollectionIDs: new Map(),
     normalCollectionSummaries: new Map(),
     hiddenCollectionSummaries: new Map(),
+    uncategorizedCollectionSummaryID:
+        PseudoCollectionID.uncategorizedPlaceholder,
     tempDeletedFileIDs: new Set(),
     tempHiddenFileIDs: new Set(),
     pendingFavoriteUpdates: new Set(),
@@ -522,7 +540,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
             );
             const view = {
                 type: "albums" as const,
-                activeCollectionSummaryID: ALL_SECTION,
+                activeCollectionSummaryID: PseudoCollectionID.all,
                 activeCollection: undefined,
             };
 
@@ -564,6 +582,8 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                     hiddenCollections,
                     hiddenFiles,
                 ),
+                uncategorizedCollectionSummaryID:
+                    deriveUncategorizedCollectionSummaryID(normalCollections),
                 view,
             });
         }
@@ -626,6 +646,8 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 collectionNameByID: createCollectionNameByID(collections),
                 normalCollectionSummaries,
                 hiddenCollectionSummaries,
+                uncategorizedCollectionSummaryID:
+                    deriveUncategorizedCollectionSummaryID(normalCollections),
                 selectedCollectionSummaryID,
                 pendingSearchSuggestions:
                     enqueuePendingSearchSuggestionsIfNeeded(
@@ -680,6 +702,8 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                     normalCollections.concat(state.hiddenCollections),
                 ),
                 normalCollectionSummaries,
+                uncategorizedCollectionSummaryID:
+                    deriveUncategorizedCollectionSummaryID(normalCollections),
                 selectedCollectionSummaryID,
                 pendingSearchSuggestions:
                     enqueuePendingSearchSuggestionsIfNeeded(
@@ -993,7 +1017,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 pendingSearchSuggestions: [],
                 view: {
                     type: "albums",
-                    activeCollectionSummaryID: ALL_SECTION,
+                    activeCollectionSummaryID: PseudoCollectionID.all,
                     activeCollection: undefined,
                 },
                 isInSearchMode: false,
@@ -1010,7 +1034,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 pendingSearchSuggestions: [],
                 view: {
                     type: "hidden-albums",
-                    activeCollectionSummaryID: HIDDEN_ITEMS_SECTION,
+                    activeCollectionSummaryID: PseudoCollectionID.hiddenItems,
                     activeCollection: undefined,
                 },
                 isInSearchMode: false,
@@ -1055,7 +1079,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                             ? "hidden-albums"
                             : "albums",
                     activeCollectionSummaryID:
-                        action.collectionSummaryID ?? ALL_SECTION,
+                        action.collectionSummaryID ?? PseudoCollectionID.all,
                     activeCollection: state.normalCollections
                         .concat(state.hiddenCollections)
                         .find(({ id }) => id === action.collectionSummaryID),
@@ -1260,9 +1284,10 @@ const deriveNormalCollectionSummaries = (
         ({ type }) => type == "uncategorized",
     );
     if (!uncategorizedCollection) {
-        normalCollectionSummaries.set(DUMMY_UNCATEGORIZED_COLLECTION, {
+        const id = PseudoCollectionID.uncategorizedPlaceholder;
+        normalCollectionSummaries.set(id, {
             ...pseudoCollectionOptionsForFiles([]),
-            id: DUMMY_UNCATEGORIZED_COLLECTION,
+            id,
             type: "uncategorized",
             attributes: ["uncategorized"],
             name: t("section_uncategorized"),
@@ -1273,16 +1298,16 @@ const deriveNormalCollectionSummaries = (
         normalFiles,
         archivedFileIDs,
     );
-    normalCollectionSummaries.set(ALL_SECTION, {
+    normalCollectionSummaries.set(PseudoCollectionID.all, {
         ...pseudoCollectionOptionsForFiles(allSectionFiles),
-        id: ALL_SECTION,
+        id: PseudoCollectionID.all,
         type: "all",
         attributes: ["all"],
         name: t("section_all"),
     });
-    normalCollectionSummaries.set(TRASH_SECTION, {
+    normalCollectionSummaries.set(PseudoCollectionID.trash, {
         ...pseudoCollectionOptionsForFiles(trashedFiles),
-        id: TRASH_SECTION,
+        id: PseudoCollectionID.trash,
         name: t("section_trash"),
         type: "trash",
         attributes: ["trash"],
@@ -1291,9 +1316,9 @@ const deriveNormalCollectionSummaries = (
     const archivedFiles = uniqueFilesByID(
         normalFiles.filter((file) => isArchivedFile(file)),
     );
-    normalCollectionSummaries.set(ARCHIVE_SECTION, {
+    normalCollectionSummaries.set(PseudoCollectionID.archiveItems, {
         ...pseudoCollectionOptionsForFiles(archivedFiles),
-        id: ARCHIVE_SECTION,
+        id: PseudoCollectionID.archiveItems,
         name: t("section_archive"),
         type: "archive",
         attributes: ["archive"],
@@ -1328,9 +1353,9 @@ const deriveHiddenCollectionSummaries = (
     const defaultHiddenFiles = uniqueFilesByID(
         hiddenFiles.filter((file) => dhcIDs.has(file.collectionID)),
     );
-    hiddenCollectionSummaries.set(HIDDEN_ITEMS_SECTION, {
+    hiddenCollectionSummaries.set(PseudoCollectionID.hiddenItems, {
         ...pseudoCollectionOptionsForFiles(defaultHiddenFiles),
-        id: HIDDEN_ITEMS_SECTION,
+        id: PseudoCollectionID.hiddenItems,
         name: t("hidden_items"),
         type: "hiddenItems",
         attributes: ["hiddenItems"],
@@ -1338,6 +1363,16 @@ const deriveHiddenCollectionSummaries = (
 
     return hiddenCollectionSummaries;
 };
+
+/**
+ * Return the ID of the collection summary that should be shown when the user
+ * navigates to the uncategorized section.
+ */
+const deriveUncategorizedCollectionSummaryID = (
+    normalCollections: Collection[],
+) =>
+    normalCollections.find(({ type }) => type == "uncategorized")?.id ??
+    PseudoCollectionID.uncategorizedPlaceholder;
 
 const createCollectionSummaries = (
     user: User,
@@ -1350,6 +1385,10 @@ const createCollectionSummaries = (
     const coverFiles = findCoverFiles(collections, filesByCollection);
 
     for (const collection of collections) {
+        const collectionType = includes(collectionTypes, collection.type)
+            ? collection.type
+            : "album";
+
         let type: CollectionSummaryType;
         if (isIncomingShare(collection, user)) {
             if (isIncomingCollabShare(collection, user)) {
@@ -1357,7 +1396,7 @@ const createCollectionSummaries = (
             } else {
                 type = "incomingShareViewer";
             }
-        } else if (collection.type == "favorites") {
+        } else if (collectionType == "favorites") {
             // [Note: User and shared favorites]
             //
             // "favorites" can be both the user's own favorites, or favorites of
@@ -1376,7 +1415,7 @@ const createCollectionSummaries = (
             // classification of this collection summary is that it is the
             // user's "favorites", everything else is secondary and can be part
             // of the `attributes` computed below.
-            type = collection.type;
+            type = collectionType;
         } else if (isOutgoingShare(collection, user)) {
             type = "outgoingShare";
         } else if (isSharedOnlyViaLink(collection)) {
@@ -1388,7 +1427,7 @@ const createCollectionSummaries = (
         } else if (isPinnedCollection(collection)) {
             type = "pinned";
         } else {
-            type = collection.type;
+            type = collectionType;
         }
 
         // This block of code duplicates the above. Such duplication is needed
@@ -1416,17 +1455,16 @@ const createCollectionSummaries = (
         if (isPinnedCollection(collection)) {
             attributes.push("pinned");
         }
-        switch (collection.type) {
+        switch (collectionType) {
             case "favorites":
                 // We don't want to treat other folks' favorites specially like
-                // the user's own favorites (giving it a special icon etc).
+                // the user's own favorites (giving it a special icon etc), so
+                // only apply the favorites attribute if it is the user's own.
                 if (collection.owner.id == user.id)
-                    attributes.push(collection.type);
+                    attributes.push(collectionType);
                 break;
             default:
-                // TODO: Verify type before removing the null check.
-                // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-                if (collection.type) attributes.push(collection.type);
+                attributes.push(collectionType);
                 break;
         }
 
@@ -1435,13 +1473,13 @@ const createCollectionSummaries = (
             name = t("section_uncategorized");
         } else if (type == "favorites") {
             name = t("favorites");
-        } else if (collection.type == "favorites") {
+        } else if (collectionType == "favorites") {
             // See: [Note: User and shared favorites] above.
             //
             // Use the first letter of the email of the user who shared this
             // particular favorite as a prefix to disambiguate this collection
             // from the user's own favorites.
-            // TODO(FAV): Use the person name when avail
+            // TODO: Use the person name when avail
             const initial = collection.owner.email?.at(0)?.toUpperCase();
             if (initial) {
                 name = t("person_favorites", { name: initial });
@@ -1547,7 +1585,8 @@ const deriveAlbumsViewAndSelectedID = (
         selectedCollectionSummaryID: activeCollectionSummaryID,
         view: {
             type: "albums" as const,
-            activeCollectionSummaryID: activeCollectionSummaryID ?? ALL_SECTION,
+            activeCollectionSummaryID:
+                activeCollectionSummaryID ?? PseudoCollectionID.all,
             activeCollection,
         },
     };
@@ -1574,7 +1613,7 @@ const deriveHiddenAlbumsViewAndSelectedID = (
         view: {
             type: "hidden-albums" as const,
             activeCollectionSummaryID:
-                activeCollectionSummaryID ?? HIDDEN_ITEMS_SECTION,
+                activeCollectionSummaryID ?? PseudoCollectionID.hiddenItems,
             activeCollection,
         },
     };
@@ -1795,7 +1834,7 @@ const deriveAlbumsFilteredFiles = (
     const activeCollectionSummaryID = view.activeCollectionSummaryID;
 
     // Trash is dealt with separately.
-    if (activeCollectionSummaryID === TRASH_SECTION) {
+    if (activeCollectionSummaryID == PseudoCollectionID.trash) {
         return uniqueFilesByID([
             ...trashedFiles,
             ...normalFiles.filter((file) => tempDeletedFileIDs.has(file.id)),
@@ -1816,8 +1855,8 @@ const deriveAlbumsFilteredFiles = (
         // needs to be before the following (archived collection) case.
         if (isArchivedFile(file)) {
             return (
-                activeCollectionSummaryID === ARCHIVE_SECTION ||
-                activeCollectionSummaryID === file.collectionID
+                activeCollectionSummaryID == PseudoCollectionID.archiveItems ||
+                activeCollectionSummaryID == file.collectionID
             );
         }
 
@@ -1827,7 +1866,7 @@ const deriveAlbumsFilteredFiles = (
             return activeCollectionSummaryID === file.collectionID;
         }
 
-        if (activeCollectionSummaryID === ALL_SECTION) {
+        if (activeCollectionSummaryID === PseudoCollectionID.all) {
             // Archived files (whether individually archived, or part of some
             // archived album) should not be shown in "All".
             if (archivedFileIDs.has(file.id)) {
@@ -1858,9 +1897,9 @@ const deriveHiddenAlbumsFilteredFiles = (
     const filteredFiles = hiddenFiles.filter((file) => {
         if (tempDeletedFileIDs.has(file.id)) return false;
 
-        // "Hidden" shows all standalone hidden files.
+        // "Hidden items" shows all individually hidden files.
         if (
-            activeCollectionSummaryID === HIDDEN_ITEMS_SECTION &&
+            activeCollectionSummaryID == PseudoCollectionID.hiddenItems &&
             defaultHiddenCollectionIDs.has(file.collectionID)
         ) {
             return true;

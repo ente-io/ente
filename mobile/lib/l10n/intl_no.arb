@@ -476,7 +476,7 @@
     }
   },
   "showMemories": "Vis minner",
-  "yearsAgo": "{count, plural, one{{count} år siden} other{{count} år siden}}",
+  "yearsAgo": "{count, plural, other{{count} år siden}}",
   "backupSettings": "Sikkerhetskopier innstillinger",
   "backupStatus": "Status for sikkerhetskopi",
   "backupStatusDescription": "Elementer som har blitt sikkerhetskopiert vil vises her",
@@ -1690,11 +1690,5 @@
   "onTheRoad": "På veien igjen",
   "food": "Kulinær glede",
   "pets": "Pelsvenner",
-  "showMoreFaces": "Show more faces",
-  "showLessFaces": "Show less faces",
-  "otherDetectedFaces": "Other detected faces",
-  "areYouSureRemoveThisFaceFromPerson": "Are you sure you want to remove this face from this person?",
-  "areThey": "Are they ",
-  "questionmark": "?",
-  "saveAsAnotherPerson": "Save as another person"
+  "wishThemAHappyBirthday": "Wish ${name} a happy birthday! 🎉"
 }

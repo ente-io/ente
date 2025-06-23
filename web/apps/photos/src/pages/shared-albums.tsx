@@ -54,10 +54,8 @@ import {
     GalleryItemsHeaderAdapter,
     GalleryItemsSummary,
 } from "ente-new/photos/components/gallery/ListHeader";
-import {
-    ALL_SECTION,
-    isHiddenCollection,
-} from "ente-new/photos/services/collection";
+import { isHiddenCollection } from "ente-new/photos/services/collection";
+import { PseudoCollectionID } from "ente-new/photos/services/collection-summary";
 import { sortFiles } from "ente-new/photos/services/files";
 import { usePhotosAppContext } from "ente-new/photos/types/context";
 import { CustomError, parseSharingErrorCodes } from "ente-shared/error";
@@ -520,7 +518,7 @@ export default function PublicCollectionGallery() {
                     selectable={downloadEnabled}
                     selected={selected}
                     setSelected={setSelected}
-                    activeCollectionID={ALL_SECTION}
+                    activeCollectionID={PseudoCollectionID.all}
                     setFilesDownloadProgressAttributesCreator={
                         setFilesDownloadProgressAttributesCreator
                     }

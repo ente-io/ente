@@ -20,7 +20,9 @@ import {
 } from "ente-gallery/services/upload/metadata-json";
 import UploadService, {
     areLivePhotoAssets,
+    isUploadCancelledError,
     upload,
+    uploadCancelledErrorMessage,
     uploadItemFileName,
     type PotentialLivePhotoAsset,
     type UploadAsset,
@@ -28,16 +30,15 @@ import UploadService, {
 import { processVideoNewUpload } from "ente-gallery/services/video";
 import type { Collection } from "ente-media/collection";
 import {
-    decryptFile,
-    type EncryptedEnteFile,
+    decryptRemoteFile,
     type EnteFile,
+    type RemoteEnteFile,
 } from "ente-media/file";
 import type { ParsedMetadata } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
 import { potentialFileTypeFromExtension } from "ente-media/live-photo";
 import { getLocalFiles } from "ente-new/photos/services/files";
 import { indexNewUpload } from "ente-new/photos/services/ml";
-import { CustomError } from "ente-shared/error";
 import { wait } from "ente-utils/promise";
 import {
     getLocalPublicFiles,
@@ -102,28 +103,6 @@ export type UploadItemWithCollection = UploadAsset & {
     localID: number;
     collectionID: number;
 };
-
-interface UploadCancelStatus {
-    value: boolean;
-}
-
-class UploadCancelService {
-    private shouldUploadBeCancelled: UploadCancelStatus = { value: false };
-
-    reset() {
-        this.shouldUploadBeCancelled.value = false;
-    }
-
-    requestUploadCancelation() {
-        this.shouldUploadBeCancelled.value = true;
-    }
-
-    isUploadCancelationRequested(): boolean {
-        return this.shouldUploadBeCancelled.value;
-    }
-}
-
-const uploadCancelService = new UploadCancelService();
 
 class UIService {
     private progressUpdater: ProgressUpdater;
@@ -279,9 +258,8 @@ const groupByResult = (finishedUploads: FinishedUploads) => {
 };
 
 class UploadManager {
-    private comlinkCryptoWorkers = new Array<
-        ComlinkWorker<typeof CryptoWorker>
-    >(maxConcurrentUploads);
+    private comlinkCryptoWorkers: ComlinkWorker<typeof CryptoWorker>[] =
+        new Array(maxConcurrentUploads);
     private parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>;
     private itemsToBeUploaded: ClusteredUploadItem[];
     private failedItems: ClusteredUploadItem[];
@@ -291,11 +269,14 @@ class UploadManager {
     private uploadInProgress: boolean;
     private publicAlbumsCredentials: PublicAlbumsCredentials | undefined;
     private uploaderName: string;
-    private uiService: UIService;
+    /**
+     * When `true`, then the next call to {@link abortIfCancelled} will throw.
+     *
+     * See: [Note: Upload cancellation].
+     */
+    private shouldUploadBeCancelled = false;
 
-    constructor() {
-        this.uiService = new UIService();
-    }
+    private uiService = new UIService();
 
     public async init(
         progressUpdater: ProgressUpdater,
@@ -317,25 +298,16 @@ class UploadManager {
         return this.uploadInProgress;
     }
 
-    private resetState() {
-        this.itemsToBeUploaded = [];
-        this.failedItems = [];
-        this.parsedMetadataJSONMap = new Map<string, ParsedMetadataJSON>();
-
-        this.uploaderName = null;
-    }
-
     public prepareForNewUpload(
         parsedMetadataJSONMap?: Map<string, ParsedMetadataJSON>,
     ) {
-        this.resetState();
+        this.itemsToBeUploaded = [];
+        this.failedItems = [];
+        this.parsedMetadataJSONMap = parsedMetadataJSONMap ?? new Map();
+        this.uploaderName = null;
+        this.shouldUploadBeCancelled = false;
+
         this.uiService.reset();
-        uploadCancelService.reset();
-
-        if (parsedMetadataJSONMap) {
-            this.parsedMetadataJSONMap = parsedMetadataJSONMap;
-        }
-
         this.uiService.setUploadPhase("preparing");
     }
 
@@ -407,7 +379,7 @@ class UploadManager {
                 await this.uploadMediaItems(clusteredMediaItems);
             }
         } catch (e) {
-            if (e.message != CustomError.UPLOAD_CANCELLED) {
+            if (!isUploadCancelledError(e)) {
                 log.error("Upload failed", e);
                 throw e;
             }
@@ -464,8 +436,8 @@ class UploadManager {
     }
 
     private abortIfCancelled = () => {
-        if (uploadCancelService.isUploadCancelationRequested()) {
-            throw Error(CustomError.UPLOAD_CANCELLED);
+        if (this.shouldUploadBeCancelled) {
+            throw new Error(uploadCancelledErrorMessage);
         }
     };
 
@@ -530,6 +502,7 @@ class UploadManager {
         const uiService = this.uiService;
         const uploadContext = {
             isCFUploadProxyDisabled: shouldDisableCFUploadProxy(),
+            publicAlbumsCredentials: this.publicAlbumsCredentials,
             abortIfCancelled: this.abortIfCancelled.bind(this),
             updateUploadProgress:
                 uiService.updateUploadProgress.bind(uiService),
@@ -571,7 +544,7 @@ class UploadManager {
     private async postUploadTask(
         uploadableItem: UploadableUploadItem,
         uploadResult: UploadResult,
-        uploadedFile: EncryptedEnteFile | EnteFile | undefined,
+        uploadedFile: RemoteEnteFile | EnteFile | undefined,
     ): Promise<FinishedUploadResult> {
         log.info(`Upload ${uploadableItem.fileName} | ${uploadResult}`);
         const finishedUploadResult =
@@ -592,11 +565,12 @@ class UploadManager {
                     break;
                 case "uploaded":
                 case "uploadedWithStaticThumbnail":
-                    decryptedFile = await decryptFile(
-                        uploadedFile as EncryptedEnteFile,
+                    decryptedFile = await decryptRemoteFile(
+                        uploadedFile as RemoteEnteFile,
                         uploadableItem.collection.key,
                     );
                     break;
+                case "largerThanAvailableStorage":
                 case "unsupported":
                 case "tooLarge":
                     // no-op
@@ -624,11 +598,17 @@ class UploadManager {
                 }
                 this.updateExistingFiles(decryptedFile);
             }
-            await this.watchFolderCallback(
-                uploadResult,
-                uploadableItem,
-                uploadedFile as EncryptedEnteFile,
-            );
+
+            if (isDesktop) {
+                if (watcher.isUploadRunning()) {
+                    await watcher.onFileUpload(
+                        uploadResult,
+                        uploadableItem,
+                        uploadedFile,
+                    );
+                }
+            }
+
             return finishedUploadResult;
         } catch (e) {
             log.error("Post file upload action failed", e);
@@ -636,26 +616,10 @@ class UploadManager {
         }
     }
 
-    private async watchFolderCallback(
-        fileUploadResult: UploadResult,
-        fileWithCollection: ClusteredUploadItem,
-        uploadedFile: EncryptedEnteFile,
-    ) {
-        if (isDesktop) {
-            if (watcher.isUploadRunning()) {
-                await watcher.onFileUpload(
-                    fileUploadResult,
-                    fileWithCollection,
-                    uploadedFile,
-                );
-            }
-        }
-    }
-
     public cancelRunningUpload() {
-        log.info("User cancelled running upload");
+        log.info("User cancelled upload");
         this.uiService.setUploadPhase("cancelling");
-        uploadCancelService.requestUploadCancelation();
+        this.shouldUploadBeCancelled = true;
     }
 
     /**

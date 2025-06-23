@@ -57,6 +57,19 @@ func (repo *ObjectCleanupRepository) RemoveTempObjectFromDC(ctx context.Context,
 	return nil
 }
 
+func (repo *ObjectCleanupRepository) DoesTempObjectExist(ctx context.Context, objectKey string, uploadID string) (bool, error) {
+	var exists bool
+	query := `SELECT EXISTS(SELECT 1 FROM temp_objects WHERE object_key = $1 AND upload_id = $2)`
+	err := repo.DB.QueryRowContext(ctx, query, objectKey, uploadID).Scan(&exists)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return false, nil
+		}
+		return false, stacktrace.Propagate(err, "failed to check if temp object exists")
+	}
+	return exists, nil
+}
+
 // GetExpiredObjects returns the list of object keys that have expired
 func (repo *ObjectCleanupRepository) GetAndLockExpiredObjects() (*sql.Tx, []ente.TempObject, error) {
 	tx, err := repo.DB.Begin()

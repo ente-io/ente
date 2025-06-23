@@ -437,6 +437,7 @@
   "newRange": "Nový rozsah",
   "youAndThem": "Vy a {name}",
   "selfiesWithThem": "Selfie s {name}",
+  "wishThemAHappyBirthday": "Wish ${name} a happy birthday! 🎉",
   "showMoreFaces": "Show more faces",
   "showLessFaces": "Show less faces",
   "otherDetectedFaces": "Other detected faces",

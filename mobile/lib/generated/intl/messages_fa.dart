@@ -28,19 +28,21 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m25(supportEmail) =>
       "لطفا یک ایمیل از آدرس ایمیلی که ثبت نام کردید به ${supportEmail} ارسال کنید";
 
-  static String m58(passwordStrengthValue) =>
+  static String m57(passwordStrengthValue) =>
       "قدرت رمز عبور: ${passwordStrengthValue}";
 
-  static String m69(storeName) => "به ما در ${storeName} امتیاز دهید";
+  static String m68(storeName) => "به ما در ${storeName} امتیاز دهید";
 
-  static String m95(
+  static String m94(
           usedAmount, usedStorageUnit, totalAmount, totalStorageUnit) =>
       "${usedAmount} ${usedStorageUnit} از ${totalAmount} ${totalStorageUnit} استفاده شده";
 
-  static String m112(email) => "تایید ${email}";
+  static String m111(email) => "تایید ${email}";
 
-  static String m115(email) =>
+  static String m114(email) =>
       "ما یک ایمیل به <green>${email}</green> ارسال کرده‌ایم";
+
+  static String m115(name) => "Wish \$${name} a happy birthday! 🎉";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -77,10 +79,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "اندروید، آی‌اواس، وب، رایانه رومیزی"),
         "appVersion": m9,
         "archive": MessageLookupByLibrary.simpleMessage("بایگانی"),
-        "areThey": MessageLookupByLibrary.simpleMessage("Are they "),
-        "areYouSureRemoveThisFaceFromPerson":
-            MessageLookupByLibrary.simpleMessage(
-                "Are you sure you want to remove this face from this person?"),
         "areYouSureYouWantToLogout": MessageLookupByLibrary.simpleMessage(
             "آیا برای خارج شدن مطمئن هستید؟"),
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
@@ -271,12 +269,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "notifications": MessageLookupByLibrary.simpleMessage("آگاه‌سازی‌ها"),
         "ok": MessageLookupByLibrary.simpleMessage("تایید"),
         "oops": MessageLookupByLibrary.simpleMessage("اوه"),
-        "otherDetectedFaces":
-            MessageLookupByLibrary.simpleMessage("Other detected faces"),
         "password": MessageLookupByLibrary.simpleMessage("رمز عبور"),
         "passwordChangedSuccessfully": MessageLookupByLibrary.simpleMessage(
             "رمز عبور با موفقیت تغییر کرد"),
-        "passwordStrength": m58,
+        "passwordStrength": m57,
         "passwordWarning": MessageLookupByLibrary.simpleMessage(
             "ما این رمز عبور را ذخیره نمی‌کنیم، بنابراین اگر فراموش کنید، <underline>نمی‌توانیم اطلاعات شما را رمزگشایی کنیم</underline>"),
         "photoSmallCase": MessageLookupByLibrary.simpleMessage("عکس"),
@@ -296,8 +292,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("پشتیبان گیری خصوصی"),
         "privateSharing":
             MessageLookupByLibrary.simpleMessage("اشتراک گذاری خصوصی"),
-        "questionmark": MessageLookupByLibrary.simpleMessage("?"),
-        "rateUsOnStore": m69,
+        "rateUsOnStore": m68,
         "recover": MessageLookupByLibrary.simpleMessage("بازیابی"),
         "recoverAccount":
             MessageLookupByLibrary.simpleMessage("بازیابی حساب کاربری"),
@@ -327,8 +322,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "reviewSuggestions":
             MessageLookupByLibrary.simpleMessage("مرور پیشنهادها"),
         "safelyStored": MessageLookupByLibrary.simpleMessage("به طور ایمن"),
-        "saveAsAnotherPerson":
-            MessageLookupByLibrary.simpleMessage("Save as another person"),
         "saveKey": MessageLookupByLibrary.simpleMessage("ذخیره کلید"),
         "search": MessageLookupByLibrary.simpleMessage("جستجو"),
         "security": MessageLookupByLibrary.simpleMessage("امنیت"),
@@ -351,10 +344,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "عکس‌های جدید به اشتراک گذاشته شده"),
         "sharedPhotoNotificationsExplanation": MessageLookupByLibrary.simpleMessage(
             "هنگامی که شخصی عکسی را به آلبوم مشترکی که شما بخشی از آن هستید اضافه می‌کند، آگاه‌سازی دریافت می‌کنید"),
-        "showLessFaces":
-            MessageLookupByLibrary.simpleMessage("Show less faces"),
-        "showMoreFaces":
-            MessageLookupByLibrary.simpleMessage("Show more faces"),
         "signUpTerms": MessageLookupByLibrary.simpleMessage(
             "من با <u-terms>شرایط خدمات</u-terms> و <u-policy>سیاست حفظ حریم خصوصی</u-policy> موافقم"),
         "skip": MessageLookupByLibrary.simpleMessage("رد کردن"),
@@ -379,7 +368,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "storageBreakupFamily":
             MessageLookupByLibrary.simpleMessage("خانوادگی"),
         "storageBreakupYou": MessageLookupByLibrary.simpleMessage("شما"),
-        "storageUsageInfo": m95,
+        "storageUsageInfo": m94,
         "strongStrength": MessageLookupByLibrary.simpleMessage("قوی"),
         "support": MessageLookupByLibrary.simpleMessage("پشتیبانی"),
         "systemTheme": MessageLookupByLibrary.simpleMessage("سیستم"),
@@ -420,7 +409,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "از کلید بازیابی استفاده کنید"),
         "verify": MessageLookupByLibrary.simpleMessage("تایید"),
         "verifyEmail": MessageLookupByLibrary.simpleMessage("تایید ایمیل"),
-        "verifyEmailID": m112,
+        "verifyEmailID": m111,
         "verifyIDLabel": MessageLookupByLibrary.simpleMessage("تایید"),
         "verifyPassword":
             MessageLookupByLibrary.simpleMessage("تایید رمز عبور"),
@@ -433,10 +422,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "viewer": MessageLookupByLibrary.simpleMessage("بیننده"),
         "weAreOpenSource":
             MessageLookupByLibrary.simpleMessage("ما متن‌باز هستیم!"),
-        "weHaveSendEmailTo": m115,
+        "weHaveSendEmailTo": m114,
         "weakStrength": MessageLookupByLibrary.simpleMessage("ضعیف"),
         "welcomeBack": MessageLookupByLibrary.simpleMessage("خوش آمدید!"),
         "whatsNew": MessageLookupByLibrary.simpleMessage("تغییرات جدید"),
+        "wishThemAHappyBirthday": m115,
         "yes": MessageLookupByLibrary.simpleMessage("بله"),
         "yesConvertToViewer":
             MessageLookupByLibrary.simpleMessage("بله، تبدیل به بیننده شود"),

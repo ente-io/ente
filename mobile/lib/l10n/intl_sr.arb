@@ -6,5 +6,6 @@
   "areYouSureRemoveThisFaceFromPerson": "Are you sure you want to remove this face from this person?",
   "areThey": "Are they ",
   "questionmark": "?",
-  "saveAsAnotherPerson": "Save as another person"
+  "saveAsAnotherPerson": "Save as another person",
+  "wishThemAHappyBirthday": "Wish ${name} a happy birthday! 🎉"
 }

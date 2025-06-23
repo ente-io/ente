@@ -18,8 +18,10 @@ import {
     LargeTileButton,
     LargeTileTextOverlay,
 } from "ente-new/photos/components/Tiles";
-import type { CollectionSummary } from "ente-new/photos/services/collection/ui";
-import { CollectionsSortBy } from "ente-new/photos/services/collection/ui";
+import {
+    CollectionsSortBy,
+    type CollectionSummary,
+} from "ente-new/photos/services/collection-summary";
 import { t } from "i18next";
 import memoize from "memoize-one";
 import React, { useEffect, useRef, useState } from "react";
