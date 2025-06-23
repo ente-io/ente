@@ -326,47 +326,54 @@ class FolderWatcher {
      * {@link upload} gets uploaded.
      */
     async onFileUpload(
-        fileUploadResult: UploadResult,
         item: UploadItemWithCollection,
-        file: FolderWatchUploadedFile,
+        uploadResult: UploadResult,
     ) {
         // Re the usage of ensureString: For desktop watch, the only possibility
         // for a UploadItem is for it to be a string (the absolute path to a
         // file on disk).
-        if (
-            [
-                "addedSymlink",
-                "uploaded",
-                "uploadedWithStaticThumbnail",
-                "alreadyUploaded",
-            ].includes(fileUploadResult)
-        ) {
-            if (item.isLivePhoto) {
-                this.uploadedFileForPath.set(
-                    ensureString(item.livePhotoAssets.image),
-                    file,
-                );
-                this.uploadedFileForPath.set(
-                    ensureString(item.livePhotoAssets.video),
-                    file,
-                );
-            } else {
-                this.uploadedFileForPath.set(
-                    ensureString(item.uploadItem),
-                    file,
-                );
-            }
-        } else if (["unsupported", "tooLarge"].includes(fileUploadResult)) {
-            if (item.isLivePhoto) {
-                this.unUploadableFilePaths.add(
-                    ensureString(item.livePhotoAssets.image),
-                );
-                this.unUploadableFilePaths.add(
-                    ensureString(item.livePhotoAssets.video),
-                );
-            } else {
-                this.unUploadableFilePaths.add(ensureString(item.uploadItem));
-            }
+        switch (uploadResult.type) {
+            case "alreadyUploaded":
+            case "addedSymlink":
+            case "uploaded":
+            case "uploadedWithStaticThumbnail":
+                {
+                    // Done.
+                    if (item.isLivePhoto) {
+                        this.uploadedFileForPath.set(
+                            ensureString(item.livePhotoAssets.image),
+                            uploadResult.file,
+                        );
+                        this.uploadedFileForPath.set(
+                            ensureString(item.livePhotoAssets.video),
+                            uploadResult.file,
+                        );
+                    } else {
+                        this.uploadedFileForPath.set(
+                            ensureString(item.uploadItem),
+                            uploadResult.file,
+                        );
+                    }
+                }
+                break;
+            case "unsupported":
+            case "tooLarge":
+                {
+                    // Non-retriable error.
+                    if (item.isLivePhoto) {
+                        this.unUploadableFilePaths.add(
+                            ensureString(item.livePhotoAssets.image),
+                        );
+                        this.unUploadableFilePaths.add(
+                            ensureString(item.livePhotoAssets.video),
+                        );
+                    } else {
+                        this.unUploadableFilePaths.add(
+                            ensureString(item.uploadItem),
+                        );
+                    }
+                }
+                break;
         }
     }
 
