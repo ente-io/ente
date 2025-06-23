@@ -540,51 +540,32 @@ class UploadManager {
     ): Promise<FinishedUploadType> {
         const type = uploadResult.type;
         log.info(`Upload ${uploadableItem.fileName} | ${type}`);
-
         try {
             const processableUploadItem =
                 await markUploadedAndObtainProcessableItem(uploadableItem);
 
-            let decryptedFile: EnteFile;
             switch (uploadResult.type) {
                 case "failed":
                 case "blocked":
-                    // Retriable.
+                    // Retriable error.
                     this.failedItems.push(uploadableItem);
                     break;
-                case "alreadyUploaded":
+
                 case "addedSymlink":
-                    decryptedFile = uploadResult.file;
+                    this.updateExistingFiles(uploadResult.file);
                     break;
+
                 case "uploaded":
                 case "uploadedWithStaticThumbnail":
-                    decryptedFile = uploadResult.file;
+                    {
+                        const { file } = uploadResult;
+
+                        indexNewUpload(file, processableUploadItem);
+                        processVideoNewUpload(file, processableUploadItem);
+
+                        this.updateExistingFiles(file);
+                    }
                     break;
-                case "largerThanAvailableStorage":
-                case "unsupported":
-                case "tooLarge":
-                    // no-op
-                    break;
-            }
-            if (
-                [
-                    "addedSymlink",
-                    "uploaded",
-                    "uploadedWithStaticThumbnail",
-                ].includes(type)
-            ) {
-                const uploadItem =
-                    uploadableItem.uploadItem ??
-                    uploadableItem.livePhotoAssets.image;
-                if (
-                    uploadItem &&
-                    (type == "uploaded" ||
-                        type == "uploadedWithStaticThumbnail")
-                ) {
-                    indexNewUpload(decryptedFile, processableUploadItem);
-                    processVideoNewUpload(decryptedFile, processableUploadItem);
-                }
-                this.updateExistingFiles(decryptedFile);
             }
 
             if (isDesktop && watcher.isUploadRunning()) {
@@ -620,12 +601,9 @@ class UploadManager {
         return this.uploaderName;
     }
 
-    private updateExistingFiles(decryptedFile: EnteFile) {
-        if (!decryptedFile) {
-            throw Error("decrypted file can't be undefined");
-        }
-        this.existingFiles.push(decryptedFile);
-        this.onUploadFile(decryptedFile);
+    private updateExistingFiles(file: EnteFile) {
+        this.existingFiles.push(file);
+        this.onUploadFile(file);
     }
 
     /**

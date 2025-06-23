@@ -279,8 +279,8 @@ export type UploadableUploadItem = ClusteredUploadItem & {
 };
 
 /**
- * Result of {@link markUploadedAndObtainPostProcessableItem}; see the
- * documentation of that function for the meaning and cases of this type.
+ * Result of {@link markUploadedAndObtainProcessableItem}; see the documentation
+ * of that function for the meaning and cases of this type.
  */
 export type ProcessableUploadItem = File | TimestampedFileSystemUploadItem;
 
