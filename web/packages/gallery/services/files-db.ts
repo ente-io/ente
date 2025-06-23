@@ -49,10 +49,11 @@ import { nullishToEmpty, nullToUndefined } from "ente-utils/transform";
 import { z } from "zod/v4";
 
 /**
- * Zod schema for a {@link Collection} saved in our local persistence.
+ * Zod schema for a {@link Collection} stored in our local database.
  *
- * This is similar to {@link RemoteCollection}, but also has both significant
- * differences in that it contains the decrypted fields, and some minor tweaks.
+ * This is similar to {@link RemoteCollection}, but it differs in that it
+ * contains the decrypted values instead of the encrypted data and nonce pairs.
+ * There are also some other minor nullish transforms.
  */
 const LocalCollection = z
     .looseObject({
@@ -121,3 +122,18 @@ const LocalCollection = z
     });
 
 export const LocalCollections = z.array(LocalCollection);
+
+/**
+ * Zod schema for a {@link EnteFile} stored in our local database.
+ *
+ * This is similar to {@link RemoteEnteFile}, but it differs in that it contains
+ * the decrypted values instead of the encrypted data and nonce pairs.
+ */
+export const LocalEnteFile = z.looseObject({
+    id: z.number(),
+    collectionID: z.number(),
+    ownerID: z.number(),
+    key: z.string(),
+})
+
+export const LocalEnteFiles = z.array(LocalEnteFile);
