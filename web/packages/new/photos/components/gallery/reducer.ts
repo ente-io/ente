@@ -3,6 +3,11 @@ import {
     isArchivedCollection,
     isPinnedCollection,
 } from "ente-gallery/services/magic-metadata";
+import {
+    groupFilesByCollectionID,
+    sortFiles,
+    uniqueFilesByID,
+} from "ente-gallery/utils/files";
 import { collectionTypes, type Collection } from "ente-media/collection";
 import type { EnteFile } from "ente-media/file";
 import {
@@ -14,6 +19,8 @@ import {
     createCollectionNameByID,
     isHiddenCollection,
 } from "ente-new/photos/services/collection";
+import { getLatestVersionFiles } from "ente-new/photos/services/files";
+import { type TrashedEnteFile } from "ente-new/photos/services/trash";
 import { splitByPredicate } from "ente-utils/array";
 import { includes } from "ente-utils/type-guards";
 import { t } from "i18next";
@@ -28,14 +35,6 @@ import {
     type CollectionSummary,
     type CollectionSummaryType,
 } from "../../services/collection-summary";
-import {
-    createFileCollectionIDs,
-    getLatestVersionFiles,
-    groupFilesByCollectionID,
-    sortFiles,
-    uniqueFilesByID,
-    type TrashedEnteFile,
-} from "../../services/files";
 import type { PeopleState, Person } from "../../services/ml/people";
 import type { SearchSuggestion } from "../../services/search/types";
 import type { FamilyData } from "../../services/user-details";
@@ -1250,6 +1249,19 @@ const deriveFavoriteFileIDs = (
     }
     return favoriteFileIDs;
 };
+
+/**
+ * Construct a map from file IDs to the list of collections (IDs) to which the
+ * file belongs.
+ */
+const createFileCollectionIDs = (files: EnteFile[]) =>
+    files.reduce((result, file) => {
+        const id = file.id;
+        let fs = result.get(id);
+        if (!fs) result.set(id, (fs = []));
+        fs.push(file.collectionID);
+        return result;
+    }, new Map<number, number[]>());
 
 /**
  * Compute normal (non-hidden) collection summaries from their dependencies.

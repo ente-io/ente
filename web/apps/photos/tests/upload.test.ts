@@ -7,6 +7,7 @@ import {
     matchJSONMetadata,
     metadataJSONMapKeyForJSON,
 } from "ente-gallery/services/upload/metadata-json";
+import { groupFilesByCollectionID } from "ente-gallery/utils/files";
 import {
     fileCreationTime,
     fileFileName,
@@ -14,7 +15,6 @@ import {
 } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
 import { getLocalCollections } from "ente-new/photos/services/collections";
-import { groupFilesByCollectionID } from "ente-new/photos/services/files";
 import { savedNormalFiles } from "ente-new/photos/services/photos-fdb";
 import { getUserDetailsV2 } from "ente-new/photos/services/user-details";
 

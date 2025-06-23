@@ -75,7 +75,6 @@ import {
 } from "ente-new/photos/services/collection-summary";
 import exportService from "ente-new/photos/services/export";
 import { updateFilesVisibility } from "ente-new/photos/services/file";
-import { getLocalTrashedFiles } from "ente-new/photos/services/files";
 import {
     savedCollections,
     savedHiddenFiles,
@@ -92,6 +91,7 @@ import {
     preCollectionAndFilesSync,
     syncCollectionAndFiles,
 } from "ente-new/photos/services/sync";
+import { getLocalTrashedFiles } from "ente-new/photos/services/trash";
 import {
     initUserDetailsOrTriggerSync,
     redirectToCustomerPortal,

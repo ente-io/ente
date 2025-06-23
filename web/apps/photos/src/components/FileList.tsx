@@ -26,7 +26,7 @@ import {
 } from "ente-new/photos/components/PlaceholderThumbnails";
 import { TileBottomTextOverlay } from "ente-new/photos/components/Tiles";
 import { PseudoCollectionID } from "ente-new/photos/services/collection-summary";
-import { enteFileDeletionDate } from "ente-new/photos/services/files";
+import { enteFileDeletionDate } from "ente-new/photos/services/trash";
 import { t } from "i18next";
 import memoize from "memoize-one";
 import { GalleryContext } from "pages/gallery";

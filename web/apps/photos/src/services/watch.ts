@@ -14,11 +14,9 @@ import type {
 } from "ente-base/types/ipc";
 import { type UploadResult } from "ente-gallery/services/upload";
 import type { UploadAsset } from "ente-gallery/services/upload/upload-service";
+import { groupFilesByCollectionID } from "ente-gallery/utils/files";
 import type { EnteFile } from "ente-media/file";
-import {
-    getLocalFiles,
-    groupFilesByCollectionID,
-} from "ente-new/photos/services/files";
+import { getLocalFiles } from "ente-new/photos/services/files";
 import { ensureString } from "ente-utils/ensure";
 import { removeFromCollection } from "./collectionService";
 import { type UploadItemWithCollection, uploadManager } from "./upload-manager";

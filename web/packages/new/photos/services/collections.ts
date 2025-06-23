@@ -11,8 +11,6 @@ import {
     getLocalTrash,
     getTrashedFiles,
     TRASH,
-} from "ente-new/photos/services/files";
-import {
     type EncryptedTrashItem,
     type Trash,
 } from "ente-new/photos/services/trash";
