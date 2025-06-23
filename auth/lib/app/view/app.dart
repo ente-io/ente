@@ -169,6 +169,11 @@ class _AppState extends State<App>
   }
 
   @override
+  void onWindowClose() {
+    windowManager.destroy();
+  }
+
+  @override
   void onWindowResize() {
     WindowListenerService.instance.onWindowResize().ignore();
   }
