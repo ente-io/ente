@@ -96,6 +96,9 @@ class _PeoplePageState extends State<PeoplePage> {
           final filesAfter = files?.length ?? 0;
           if (filesBefore != filesAfter) setState(() {});
         }
+        if (event.type == PeopleEventType.addedClusterToPerson) {
+          if (mounted) setState(() {});
+        }
       }
     });
 
