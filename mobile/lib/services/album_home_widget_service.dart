@@ -110,6 +110,7 @@ class AlbumHomeWidgetService {
     await _setTotalAlbums(null);
     await updateAlbumsStatus(WidgetStatus.syncedEmpty);
     _hasSyncedAlbums = false;
+    await setAlbumsLastHash("");
     await _refreshWidget(message: "AlbumsHomeWidget cleared & updated");
   }
 
@@ -386,6 +387,7 @@ class AlbumHomeWidgetService {
   }
 
   Future<void> _loadAndRenderAlbums() async {
+    final selectedAlbumIds = await _getEffectiveSelectedAlbumIds();
     final albumsWithFiles = await _getAlbumsWithFiles();
 
     if (albumsWithFiles.isEmpty) {
@@ -465,7 +467,6 @@ class AlbumHomeWidgetService {
     }
 
     // Update the hash to track changes
-    final selectedAlbumIds = await _getEffectiveSelectedAlbumIds();
     final hash = _calculateHash(selectedAlbumIds);
     await setAlbumsLastHash(hash);
 

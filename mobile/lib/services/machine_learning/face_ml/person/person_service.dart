@@ -75,7 +75,11 @@ class PersonService {
     final entities = await entityService.getEntities(EntityType.cgroup);
     return entities
         .map(
-          (e) => PersonEntity(e.id, PersonData.fromJson(json.decode(e.data))),
+          (e) => PersonEntity(
+            e.id,
+            PersonData.fromJson(json.decode(e.data)),
+            DateTime.fromMicrosecondsSinceEpoch(e.updatedAt),
+          ),
         )
         .toList();
   }
@@ -85,7 +89,11 @@ class PersonService {
       if (e == null) {
         return null;
       }
-      return PersonEntity(e.id, PersonData.fromJson(json.decode(e.data)));
+      return PersonEntity(
+        e.id,
+        PersonData.fromJson(json.decode(e.data)),
+        DateTime.fromMicrosecondsSinceEpoch(e.updatedAt),
+      );
     });
   }
 
@@ -93,8 +101,11 @@ class PersonService {
     final entities = await entityService.getEntities(EntityType.cgroup);
     final Map<String, PersonEntity> map = {};
     for (var e in entities) {
-      final person =
-          PersonEntity(e.id, PersonData.fromJson(json.decode(e.data)));
+      final person = PersonEntity(
+        e.id,
+        PersonData.fromJson(json.decode(e.data)),
+        DateTime.fromMicrosecondsSinceEpoch(e.updatedAt),
+      );
       map[person.remoteID] = person;
     }
     return map;
@@ -211,7 +222,11 @@ class PersonService {
       await resetEmailToPartialPersonDataCache();
     }
     memoriesCacheService.queueUpdateCache();
-    return PersonEntity(result.id, data);
+    return PersonEntity(
+      result.id,
+      data,
+      DateTime.fromMicrosecondsSinceEpoch(result.updatedAt),
+    );
   }
 
   Future<void> removeClusterToPerson({
@@ -287,8 +302,11 @@ class PersonService {
       if (entity == null) {
         return;
       }
-      final PersonEntity justName =
-          PersonEntity(personID, PersonData(name: entity.data.name));
+      final PersonEntity justName = PersonEntity(
+        personID,
+        PersonData(name: entity.data.name),
+        entity.updatedAt,
+      );
       await entityService.addOrUpdate(
         EntityType.cgroup,
         justName.data.toJson(),
