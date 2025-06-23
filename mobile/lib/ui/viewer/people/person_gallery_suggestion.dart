@@ -255,7 +255,7 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
       final clusterID = currentSuggestion.clusterIDToMerge;
       final someFile = currentSuggestion.filesInCluster.first;
 
-      await Navigator.of(context).push(
+      final result = await Navigator.of(context).push(
         MaterialPageRoute(
           builder: (context) => SaveOrEditPerson(
             clusterID,
@@ -264,6 +264,16 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
           ),
         ),
       );
+      if (result == null || result == false) {
+        // Animate back in and reset processing state
+        unawaited(_animateIn());
+        if (mounted) {
+          setState(() {
+            isProcessing = false;
+          });
+        }
+        return;
+      }
       // Wait for animation to complete before hiding widget
       await Future.delayed(const Duration(milliseconds: 300));
       if (mounted) {
