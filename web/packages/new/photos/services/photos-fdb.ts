@@ -2,10 +2,7 @@
  * @file Photos app specific files DB. See: [Note: Files DB].
  */
 
-import {
-    LocalCollections,
-    LocalEnteFiles,
-} from "ente-gallery/services/files-db";
+import { LocalCollections } from "ente-gallery/services/files-db";
 import { type Collection } from "ente-media/collection";
 import type { EnteFile } from "ente-media/file";
 import localForage from "ente-shared/storage/localForage";
@@ -123,13 +120,19 @@ export const savedFiles = async (): Promise<EnteFile[]> => {
  *
  * Use {@link saveNormalFiles} to update the database.
  */
-export const savedNormalFiles = async (): Promise<EnteFile[]> => {
-    const files: EnteFile[] =
-        (await localForage.getItem<EnteFile[]>("files")) ?? [];
-    const fmany = Array(10000).fill(files).flat();
-    console.time("file parse");
-    const f2 = LocalEnteFiles.parse(fmany);
-    console.timeEnd("file parse");
-    console.log(f2.length);
-    return files;
-};
+export const savedNormalFiles = async (): Promise<EnteFile[]> =>
+    // [Note: Avoiding Zod parsing for large DB arrays]
+    //
+    // Zod can be used to validate that the value we read from the DB is indeed
+    // the same as the type we expect, but for potentially very large arrays,
+    // this has an overhead that is perhaps not justified when dealing with DB
+    // entries we ourselves wrote.
+    //
+    // For example (as a non-rigorous benchmark) parsing 200k files took one
+    // second. Zod is fast, just that these arrays are big and might be accessed
+    // frequently, and the schemas are, while not too complicated, non-trivial.
+    //
+    // As an optimization, we skip the runtime check here and cast. This might
+    // not be the most optimal choice in the future, so (a) use it sparingly,
+    // and (b) mark all such cases with the title of this note.
+    (await localForage.getItem<EnteFile[]>("files")) ?? [];
