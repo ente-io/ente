@@ -111,10 +111,9 @@ export const saveTrashItemCollectionKeys = (cks: TrashItemCollectionKey[]) =>
  * {@link savedNormalFiles} or {@link savedHiddenFiles} to obtain them; this
  * method is only a convenience to concatenate the two.
  */
-export const savedFiles = async (): Promise<EnteFile[]> => {
-    await Promise.resolve(1);
-    throw new Error("TODO(RE)");
-};
+export const savedFiles = async (): Promise<EnteFile[]> =>
+    Promise.all([savedNormalFiles(), savedHiddenFiles()]).then((f) => f.flat());
+
 /**
  * Return all normal (non-hidden) files present in our local database.
  *
@@ -136,3 +135,12 @@ export const savedNormalFiles = async (): Promise<EnteFile[]> =>
     // not be the most optimal choice in the future, so (a) use it sparingly,
     // and (b) mark all such cases with the title of this note.
     (await localForage.getItem<EnteFile[]>("files")) ?? [];
+
+/**
+ * Return all hidden files present in our local database.
+ *
+ * Use {@link saveNormalFiles} to update the database.
+ */
+export const savedHiddenFiles = async (): Promise<EnteFile[]> =>
+    // See: [Note: Avoiding Zod parsing for large DB arrays]
+    (await localForage.getItem<EnteFile[]>("hidden-files")) ?? [];

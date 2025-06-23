@@ -1,6 +1,5 @@
 import { blobCache } from "ente-base/blob-cache";
 import { dateFromEpochMicroseconds } from "ente-base/date";
-import { isDevBuild } from "ente-base/env";
 import log from "ente-base/log";
 import { apiURL } from "ente-base/origins";
 import type { Collection } from "ente-media/collection";
@@ -19,29 +18,27 @@ import {
     getCollectionLastSyncTime,
     setCollectionLastSyncTime,
 } from "./collections";
-import { savedNormalFiles } from "./photos-fdb";
+import { savedFiles, savedHiddenFiles, savedNormalFiles } from "./photos-fdb";
 
 const FILES_TABLE = "files";
 const HIDDEN_FILES_TABLE = "hidden-files";
 
 /**
  * Return all files that we know about locally, both "normal" and "hidden".
+ *
+ * Deprecated. Use {@link savedFiles} instead.
  */
-export const getAllLocalFiles = async () =>
-    (await getLocalFiles("normal")).concat(await getLocalFiles("hidden"));
+export const getAllLocalFiles = savedFiles;
 
 /**
  * Return all files that we know about locally. By default it returns only
  * "normal" (i.e. non-"hidden") files, but it can be passed the {@link type}
  * "hidden" to get it to instead return hidden files that we know about locally.
+ *
+ * Deprecated. Use {@link savedNormalFiles} or {@link savedHiddenFiles} instead.
  */
-export const getLocalFiles = async (type: "normal" | "hidden" = "normal") => {
-    if (type == "normal" && isDevBuild) return savedNormalFiles();
-    const tableName = type == "normal" ? FILES_TABLE : HIDDEN_FILES_TABLE;
-    const files: EnteFile[] =
-        (await localForage.getItem<EnteFile[]>(tableName)) ?? [];
-    return files;
-};
+export const getLocalFiles = async (type: "normal" | "hidden" = "normal") =>
+    type == "normal" ? savedNormalFiles() : savedHiddenFiles();
 
 /**
  * Update the files that we know about locally.
