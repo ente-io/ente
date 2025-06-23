@@ -10,11 +10,8 @@ import log from "ente-base/log";
 import { apiURL } from "ente-base/origins";
 import { ensureAuthToken } from "ente-base/token";
 import { fileLogID, type EnteFile } from "ente-media/file";
-import {
-    filePublicMagicMetadata,
-    updateRemotePublicMagicMetadata,
-} from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
+import { updateFilePublicMagicMetadata } from "ente-new/photos/services/file";
 import {
     getAllLocalFiles,
     getLocalTrashFileIDs,
@@ -338,7 +335,7 @@ export const hlsPlaylistDataForFile = async (
 ): Promise<HLSPlaylistDataForFile> => {
     ensurePrecondition(file.metadata.fileType == FileType.video);
 
-    if (filePublicMagicMetadata(file)?.sv == 1) {
+    if (file.pubMagicMetadata?.data.sv == 1) {
         return "skip";
     }
 
@@ -903,7 +900,7 @@ const backfillQueue = async (
                 // Not in trash.
                 !localTrashFileIDs.has(f.id) &&
                 // See: [Note: Marking files which do not need video processing]
-                filePublicMagicMetadata(f)?.sv != 1,
+                f.pubMagicMetadata?.data.sv != 1,
         ),
     );
 
@@ -1040,7 +1037,7 @@ const processQueueItem = async ({
     if (!res) {
         log.info(`Generate HLS for ${fileLogID(file)} | not-required`);
         // See: [Note: Marking files which do not need video processing]
-        await updateRemotePublicMagicMetadata(file, { sv: 1 });
+        await updateFilePublicMagicMetadata(file, { sv: 1 });
         return;
     }
 

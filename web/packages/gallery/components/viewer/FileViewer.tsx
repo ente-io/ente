@@ -37,11 +37,7 @@ import {
     type FileInfoProps,
 } from "ente-gallery/components/FileInfo";
 import type { Collection } from "ente-media/collection";
-import {
-    fileFileName,
-    fileVisibility,
-    ItemVisibility,
-} from "ente-media/file-metadata";
+import { fileFileName, ItemVisibility } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
 import type { EnteFile } from "ente-media/file.js";
 import { isHEICExtension, needsJPEGConversion } from "ente-media/formats";
@@ -217,6 +213,17 @@ export type FileViewerProps = ModalVisibilityProps & {
      */
     onTriggerSyncWithRemote?: () => void;
     /**
+     * Called when an action in the file viewer requires us to sync the local
+     * files and collections with remote.
+     *
+     * Unlike {@link onTriggerSyncWithRemote}, which is a trigger, this function
+     * returns a promise that will settle once the sync has completed, and thus
+     * can be used in interactive operations that indicate activity to the user.
+     *
+     * See: [Note: Full sync vs file and collection sync]
+     */
+    onFileAndCollectionSyncWithRemote?: () => Promise<void>;
+    /**
      * Called when the user performs an action which does not otherwise have any
      * immediate visual impact, to acknowledge it.
      *
@@ -290,6 +297,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     fileNormalCollectionIDs,
     collectionNameByID,
     onTriggerSyncWithRemote,
+    onFileAndCollectionSyncWithRemote,
     onVisualFeedback,
     onToggleFavorite,
     onFileVisibilityUpdate,
@@ -620,9 +628,6 @@ export const FileViewer: React.FC<FileViewerProps> = ({
 
     const handleShortcutsClose = useCallback(() => setOpenShortcuts(false), []);
 
-    // TODO: Unused translation t("convert") - can be removed post the upcoming
-    // streaming changes as they'll provides the equiv.
-
     const shouldIgnoreKeyboardEvent = useCallback(() => {
         // Don't handle keydowns if any of the modals are open.
         return (
@@ -661,7 +666,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                 file &&
                 activeAnnotatedFile.annotation.showArchive
             ) {
-                switch (fileVisibility(file)) {
+                switch (file.magicMetadata?.data.visibility) {
                     case undefined:
                     case ItemVisibility.visible:
                         isArchived = false;
@@ -769,56 +774,16 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         performKeyAction,
     ]);
 
-    // Update the active annotated file, if needed, on updates to files or
-    // favoriteFileIDs.
+    // Handle updates to files.
     //
-    // If the active annotated file is no longer being shown, move to the next
-    // slide if possible, or close the viewer otherwise.
+    // See: [Note: Updates to the files prop for FileViewer]
     useEffect(() => {
-        setActiveAnnotatedFile((af) => {
-            // Do nothing if we're not showing a file (we might not be open).
-            if (!af) return af;
-
-            if (files.length) {
-                const updatedFile = files.find(({ id }) => id == af?.file.id);
-                if (updatedFile) {
-                    // Modify the active annotated file if we found a file with
-                    // the same ID in the (possibly) updated files array.
-                    //
-                    // This is not correct in its full generality, but it works
-                    // fine in the specific cases we would need to handle (and
-                    // we want to avoid refreshing the entire UI unnecessarily
-                    // lest the user lose their zoom/pan etc):
-                    //
-                    // - In case of delete or toggling archived that caused the
-                    //   file is no longer part of the list that is shown, we'll
-                    //   not get to this code branch.
-                    //
-                    // - In case of toggling archive otherwise, just updating
-                    //   the file attribute is enough, the UI state is derived
-                    //   from it; none of the other attributes of the annotated
-                    //   file currently depend on the archive status change.
-                    af = { ...af, file: updatedFile };
-                } else {
-                    // The file we were displaying is no longer part of the list
-                    // of files that should be displayed. Refresh the slides,
-                    // adjusting the indexes as necessary.
-                    //
-                    // A special case is when we might've been the last slide,
-                    // in which case we need to go back one slide first. To
-                    // determine this, also pass the expected count of files to
-                    // our PhotoSwipe wrapper.
-                    psRef.current?.refreshCurrentSlideContentAfterRemove(
-                        files.length,
-                    );
-                }
-            } else {
-                // If there are no more files left, close the viewer.
-                handleClose();
-            }
-
-            return af;
-        });
+        if (!files.length) {
+            // If there are no more files left, close the viewer.
+            handleClose();
+        } else {
+            psRef.current?.refreshSlideOnFilesUpdateIfNeeded();
+        }
     }, [handleClose, files]);
 
     useEffect(() => {
@@ -881,10 +846,24 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         handleMore,
     ]);
 
-    const handleUpdateCaption = useCallback((updatedFile: EnteFile) => {
-        updateItemDataAlt(updatedFile);
-        psRef.current!.refreshCurrentSlideContent();
-    }, []);
+    const handleFileMetadataUpdate = useMemo(() => {
+        return onFileAndCollectionSyncWithRemote
+            ? async () => {
+                  // Wait for the file and collection sync to complete.
+                  await onFileAndCollectionSyncWithRemote();
+                  // Set the flag to trigger the full sync to later.
+                  handleNeedsRemoteSync();
+              }
+            : undefined;
+    }, [onFileAndCollectionSyncWithRemote, handleNeedsRemoteSync]);
+
+    const handleUpdateCaption = useCallback(
+        (fileID: number, newCaption: string) => {
+            updateItemDataAlt(fileID, newCaption);
+            psRef.current!.refreshCurrentSlideContent();
+        },
+        [],
+    );
 
     useEffect(updateFullscreenStatus, [updateFullscreenStatus]);
 
@@ -903,11 +882,11 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                 allowMap={haveUser}
                 showCollections={haveUser && !isInHiddenSection}
                 fileCollectionIDs={fileNormalCollectionIDs}
-                collectionNameByID={collectionNameByID}
-                onNeedsRemoteSync={handleNeedsRemoteSync}
+                onFileMetadataUpdate={handleFileMetadataUpdate}
                 onUpdateCaption={handleUpdateCaption}
                 onSelectCollection={handleSelectCollection}
                 onSelectPerson={handleSelectPerson}
+                {...{ collectionNameByID, onFileAndCollectionSyncWithRemote }}
             />
             <MoreMenu
                 open={!!moreMenuAnchorEl}

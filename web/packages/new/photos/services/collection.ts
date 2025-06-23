@@ -9,7 +9,6 @@ import {
 import { authenticatedRequestHeaders, ensureOk } from "ente-base/http";
 import { apiURL } from "ente-base/origins";
 import { ensureMasterKeyFromSession } from "ente-base/session";
-import type { UpdateMagicMetadataRequest } from "ente-gallery/services/file";
 import {
     CollectionSubType,
     decryptRemoteCollection,
@@ -32,7 +31,7 @@ import {
 } from "ente-media/magic-metadata";
 import { batch } from "ente-utils/array";
 import { z } from "zod/v4";
-import { requestBatchSize } from "./file";
+import { requestBatchSize, type UpdateMagicMetadataRequest } from "./file";
 import { ensureUserKeyPair, getPublicKey } from "./user";
 
 const uncategorizedCollectionName = "Uncategorized";

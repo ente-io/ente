@@ -38,10 +38,7 @@ import { FullScreenDropZone } from "ente-gallery/components/FullScreenDropZone";
 import { type UploadTypeSelectorIntent } from "ente-gallery/components/Upload";
 import { type Collection } from "ente-media/collection";
 import { type EnteFile } from "ente-media/file";
-import {
-    updateRemotePrivateMagicMetadata,
-    type ItemVisibility,
-} from "ente-media/file-metadata";
+import { type ItemVisibility } from "ente-media/file-metadata";
 import {
     CollectionSelector,
     type CollectionSelectorAttributes,
@@ -78,6 +75,7 @@ import {
 } from "ente-new/photos/services/collection-summary";
 import { getAllLocalCollections } from "ente-new/photos/services/collections";
 import exportService from "ente-new/photos/services/export";
+import { updateFilesVisibility } from "ente-new/photos/services/file";
 import {
     getLocalFiles,
     getLocalTrashedFiles,
@@ -520,6 +518,23 @@ const Page: React.FC = () => {
         setTimeout(hideLoadingBar, 0);
     }, [showLoadingBar, hideLoadingBar]);
 
+    /**
+     * Sync the local files and collection with remote.
+     *
+     * [Note: Full sync vs file and collection sync]
+     *
+     * This is a subset of the sync which happens in {@link syncWithRemote}, but
+     * in some cases where we know that the changes will not have transitive
+     * effects outside of the locally stored files and collections this is a
+     * better option for interactive operations because:
+     *
+     * 1. This involves a lesser number of API requests, so it reduces the time
+     *    the user has to wait for their interactive request to complete.
+     *
+     * 2. The current implementation {@link syncWithRemote} tries to run only
+     *    only one instance of it is in progress at a time, while each
+     *    invocation of {@link fileAndCollectionSyncWithRemote} is independent.
+     */
     const fileAndCollectionSyncWithRemote = useCallback(async () => {
         const didUpdateFiles = await syncCollectionAndFiles({
             onSetCollections: (
@@ -830,14 +845,26 @@ const Page: React.FC = () => {
             const fileID = file.id;
             dispatch({ type: "addPendingVisibilityUpdate", fileID });
             try {
-                const privateMagicMetadata =
-                    await updateRemotePrivateMagicMetadata(file, {
-                        visibility,
-                    });
+                await updateFilesVisibility([file], visibility);
+                // [Note: Interactive updates to file metadata]
+                //
+                // 1. Update the remote metadata.
+                //
+                // 2. Construct a fake a metadata object with the updates
+                //    reflected in it.
+                //
+                // 3. The caller (eventually) triggers a remote sync in the
+                //    background, but meanwhile uses this updated metadata.
+                //
+                // TODO(RE): Replace with file fetch?
                 dispatch({
                     type: "unsyncedPrivateMagicMetadataUpdate",
                     fileID,
-                    privateMagicMetadata,
+                    privateMagicMetadata: {
+                        ...file.magicMetadata,
+                        version: (file.magicMetadata?.version ?? 0) + 1,
+                        data: { ...file.magicMetadata?.data, visibility },
+                    },
                 });
             } finally {
                 dispatch({ type: "removePendingVisibilityUpdate", fileID });
@@ -1132,6 +1159,9 @@ const Page: React.FC = () => {
                         onMarkTempDeleted={handleMarkTempDeleted}
                         onSetOpenFileViewer={setIsFileViewerOpen}
                         onSyncWithRemote={syncWithRemote}
+                        onFileAndCollectionSyncWithRemote={
+                            fileAndCollectionSyncWithRemote
+                        }
                         onVisualFeedback={handleVisualFeedback}
                         onSelectCollection={handleSelectCollection}
                         onSelectPerson={handleSelectPerson}
