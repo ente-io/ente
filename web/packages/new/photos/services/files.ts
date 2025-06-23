@@ -5,7 +5,6 @@ import { apiURL } from "ente-base/origins";
 import type { Collection } from "ente-media/collection";
 import {
     decryptRemoteFile,
-    mergeMetadata,
     type EnteFile,
     type RemoteEnteFile,
 } from "ente-media/file";
@@ -247,14 +246,12 @@ export const enteFileDeletionDate = (file: TrashedEnteFile) =>
 
 export function getTrashedFiles(trash: Trash): TrashedEnteFile[] {
     return sortTrashFiles(
-        mergeMetadata(
-            trash.map((trashedFile) => ({
-                ...trashedFile.file,
-                updationTime: trashedFile.updatedAt,
-                deleteBy: trashedFile.deleteBy,
-                isTrashed: true,
-            })),
-        ),
+        trash.map((trashedFile) => ({
+            ...trashedFile.file,
+            updationTime: trashedFile.updatedAt,
+            deleteBy: trashedFile.deleteBy,
+            isTrashed: true,
+        })),
     );
 }
 

@@ -10,7 +10,7 @@ import log from "ente-base/log";
 import { exportMetadataDirectoryName } from "ente-gallery/export-dirs";
 import { downloadManager } from "ente-gallery/services/download";
 import type { Collection } from "ente-media/collection";
-import { mergeMetadata, type EnteFile } from "ente-media/file";
+import { type EnteFile } from "ente-media/file";
 import { fileFileName } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
 import { decodeLivePhoto } from "ente-media/live-photo";
@@ -140,7 +140,7 @@ async function migrationV0ToV1(
     }
     const collectionIDPathMap = new Map<number, string>();
     const user: User = getData("user");
-    const localFiles = mergeMetadata(await savedFiles());
+    const localFiles = await savedFiles();
     const localCollections = await getLocalCollections();
     const personalFiles = getIDBasedSortedFiles(
         localFiles.filter((file) => file.ownerID == user.id),
@@ -179,7 +179,7 @@ async function migrationV2ToV3(
         return;
     }
     const user: User = getData("user");
-    const localFiles = mergeMetadata(await savedFiles());
+    const localFiles = await savedFiles();
     const personalFiles = getIDBasedSortedFiles(
         localFiles.filter((file) => file.ownerID == user.id),
     );

@@ -460,48 +460,6 @@ export const transformDecryptedMetadataJSON = (
 };
 
 /**
- * Update the immutable fields of an (in-memory) {@link EnteFile} with any edits
- * that the user has made to their corresponding mutable metadata fields.
- *
- * This function updates a single file, see {@link mergeMetadata} for a
- * convenience function to run it on an array of files.
- */
-const mergeMetadata1 = (file: EnteFile): EnteFile => {
-    const mutableMetadata = file.pubMagicMetadata?.data;
-    if (mutableMetadata) {
-        const { editedTime, editedName, lat, long } = mutableMetadata;
-        // Not needed, fileCreationTime is used instead.
-        if (editedTime) file.metadata.creationTime = editedTime;
-        // Not needed, fileFileName is used instead.
-        if (editedName) file.metadata.title = editedName;
-        // Not needed, fileLocation is used instead.
-        if (lat && long) {
-            file.metadata.latitude = lat;
-            file.metadata.longitude = long;
-        }
-    }
-
-    // Moved to transformDecryptedMetadataJSON. Not needed.
-    if (!file.metadata.modificationTime)
-        file.metadata.modificationTime = file.metadata.creationTime;
-
-    // Moved to transformDecryptedMetadataJSON. Not needed.
-    if (!file.metadata.fileType && file.id < 100000000)
-        file.metadata.fileType = FileType.image;
-
-    return file;
-};
-
-/**
- * Update the in-memory representation of an array of {@link EnteFile} to
- * reflect user edits since the file was uploaded.
- *
- * This is a list variant of {@link mergeMetadata1}.
- */
-export const mergeMetadata = (files: EnteFile[]) =>
-    files.map((file) => mergeMetadata1(file));
-
-/**
  * A short identifier for a file in log messages.
  *
  * e.g. "file flower.png (827233681)"

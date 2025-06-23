@@ -2,6 +2,7 @@ import { assertionFailed } from "ente-base/assert";
 import { newNonSecureID } from "ente-base/id-worker";
 import log from "ente-base/log";
 import type { EnteFile } from "ente-media/file";
+import { fileCreationTime } from "ente-media/file-metadata";
 import { wait } from "ente-utils/promise";
 import {
     pullUserEntities,
@@ -16,7 +17,6 @@ import {
     type FaceIndex,
 } from "./face";
 import { dotProduct } from "./math";
-import { fileCreationTime } from "ente-media/file-metadata";
 
 /**
  * A face cluster is an set of faces, and a nanoid to uniquely identify it.

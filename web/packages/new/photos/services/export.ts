@@ -15,7 +15,7 @@ import {
 import { downloadManager } from "ente-gallery/services/download";
 import { writeStream } from "ente-gallery/utils/native-stream";
 import type { Collection } from "ente-media/collection";
-import { fileLogID, mergeMetadata, type EnteFile } from "ente-media/file";
+import { fileLogID, type EnteFile } from "ente-media/file";
 import {
     fileCreationTime,
     fileFileName,
@@ -357,7 +357,7 @@ class ExportService {
         { resync }: ExportOpts,
     ) {
         try {
-            const files = mergeMetadata(await savedFiles());
+            const files = await savedFiles();
             const collections = await savedCollections();
 
             const exportRecord = await this.getExportRecord(exportFolder);
