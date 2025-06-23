@@ -112,4 +112,32 @@ class RemoteCache {
     }
     return files;
   }
+
+  Future<Map<String, EnteFile>> ownedFilesWithSameHash(
+    List<String> hashes,
+    int ownerID,
+  ) async {
+    final collectionFileEntries = await remoteDB.ownedFilesWithSameHash(
+      hashes,
+      ownerID,
+    );
+    final _ = isLoaded ?? await _load();
+    final List<EnteFile> files = [];
+    for (final entry in collectionFileEntries) {
+      final asset = remoteAssets[entry.fileID];
+      if (asset != null) {
+        files.add(EnteFile.fromRemoteAsset(asset, entry));
+      } else {
+        // If the asset is not found, we can log or handle it as needed.
+        throw Exception(
+          'ownedFilesWithSameHash: remoteAsset not cached ${entry.fileID}',
+        );
+      }
+    }
+    final Map<String, EnteFile> fileMap = {};
+    for (final file in files) {
+      fileMap[file.rAsset!.hash!] = file;
+    }
+    return fileMap;
+  }
 }

@@ -57,6 +57,21 @@ extension CollectionFiles on RemoteDB {
         .toList(growable: false);
   }
 
+  Future<List<CollectionFile>> ownedFilesWithSameHash(
+    List<String> hashes,
+    int ownerID,
+  ) async {
+    if (hashes.isEmpty) return [];
+    final inParam = hashes.map((e) => "'$e'").join(',');
+    final rows = await sqliteDB.getAll(
+      "SELECT * FROM collection_files JOIN files ON collection_files.file_id = files.id WHERE files.hash IN ($inParam) AND files.owner_id = ?",
+      [ownerID],
+    );
+    return rows
+        .map((row) => CollectionFile.fromMap(row))
+        .toList(growable: false);
+  }
+
   Future<CollectionFile?> coverFile(
     int collectionID,
     int? fileID, {

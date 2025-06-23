@@ -843,16 +843,10 @@ class FilesDB with SqlDbBase {
   // todo:rewrite (copy related)
   Future<Map<String, EnteFile>>
       getUserOwnedFilesWithSameHashForGivenListOfFiles(
-    List<EnteFile> files,
+    List<String> hashes,
     int userID,
   ) async {
     final db = await sqliteAsyncDB;
-    final List<String> hashes = [];
-    for (final file in files) {
-      if (file.hash != null && file.hash != '') {
-        hashes.add(file.hash!);
-      }
-    }
     if (hashes.isEmpty) {
       return {};
     }

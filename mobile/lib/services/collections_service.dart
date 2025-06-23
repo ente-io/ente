@@ -1471,11 +1471,9 @@ class CollectionsService {
       // group files by collectionID
       final Map<int, List<EnteFile>> filesByCollection = {};
       for (final file in filesToCopy) {
-        if (filesByCollection.containsKey(file.collectionID!)) {
-          filesByCollection[file.collectionID!]!.add(file.copyWith());
-        } else {
-          filesByCollection[file.collectionID!] = [file.copyWith()];
-        }
+        filesByCollection
+            .putIfAbsent(file.cf!.collectionID, () => [])
+            .add(file.copyWith());
       }
       for (final entry in filesByCollection.entries) {
         final srcCollectionID = entry.key;
@@ -1523,7 +1521,7 @@ class CollectionsService {
       final List<EnteFile> newFiles = [];
       for (final file in batch) {
         final newFile = moveOrAddEntry(file, destCollection);
-        final localDiffItem = buildDiffItem(newFile);
+        final localDiffItem = buildDiffItem(newFile, destCollection);
         collectionDiffItems.add(localDiffItem);
         newFiles.add(newFile);
         params["files"].add(
@@ -1609,25 +1607,44 @@ class CollectionsService {
     required int srcCollectionID,
   }) async {
     _validateCopyInput(dstCollectionID, srcCollectionID, files);
-    final batchedFiles = files.chunks(batchSizeCopy);
-    final params = <String, dynamic>{};
-    params["dstCollectionID"] = dstCollectionID;
-    params["srcCollectionID"] = srcCollectionID;
+    final List<EnteFile> uniqueFiles = [];
+    final Set<int> uniqueFileIDs = {};
+    for (final file in files) {
+      if (!uniqueFileIDs.contains(file.remoteID)) {
+        uniqueFiles.add(file);
+        uniqueFileIDs.add(file.remoteID);
+      }
+    }
+    final batchedFiles = uniqueFiles.chunks(batchSizeCopy);
+
     for (final batch in batchedFiles) {
+      final params = <String, dynamic>{};
+      params["dstCollectionID"] = dstCollectionID;
+      params["srcCollectionID"] = srcCollectionID;
       params["files"] = [];
+      final Map<int, (Uint8List encKey, Uint8List encKeyNonce)> newFileKeys =
+          {};
+      final List<DiffFileItem> diffItems = [];
+      final List<EnteFile> copiedFiles = [];
       for (final batchFile in batch) {
+        if (newFileKeys.containsKey(batchFile.remoteID)) {
+          throw ArgumentError(
+            'File with remoteID ${batchFile.remoteID} already exists in the batch',
+          );
+        }
         final fileKey = getFileKey(batchFile);
         final encryptedKeyData =
             CryptoUtil.encryptSync(fileKey, getCollectionKey(dstCollectionID));
-        batchFile.encryptedKey =
-            CryptoUtil.bin2base64(encryptedKeyData.encryptedData!);
-        batchFile.keyDecryptionNonce =
-            CryptoUtil.bin2base64(encryptedKeyData.nonce!);
+        newFileKeys[batchFile.remoteID] = (
+          encryptedKeyData.encryptedData!,
+          encryptedKeyData.nonce!,
+        );
+
         params["files"].add(
           CollectionFileRequest(
             batchFile.uploadedFileID!,
-            batchFile.encryptedKey!,
-            batchFile.keyDecryptionNonce!,
+            CryptoUtil.bin2base64(encryptedKeyData.encryptedData!),
+            CryptoUtil.bin2base64(encryptedKeyData.nonce!),
           ).toMap(),
         );
       }
@@ -1645,11 +1662,22 @@ class CollectionsService {
         for (final file in batch) {
           final int srcRemoteID = file.remoteID;
           if (srcToCopiedFileIDs.containsKey(srcRemoteID)) {
-            file.generatedID = null;
-            file.collectionID = dstCollectionID;
-            file.uploadedFileID = srcToCopiedFileIDs[srcRemoteID];
-            file.ownerID = _config.getUserID();
+            final int newUploadID = srcToCopiedFileIDs[srcRemoteID]!;
+            final copiedFile = copyEntry(
+              file.rAsset!,
+              newFileKeys[srcRemoteID]!,
+              dstCollectionID: dstCollectionID,
+              ownerID: _config.getUserID()!,
+              newID: newUploadID,
+            );
+            final diffItem = buildDiffItem(
+              copiedFile,
+              dstCollectionID,
+            );
+            diffItems.add(diffItem);
+            copiedFiles.add(copiedFile);
             srcToCopiedFileIDs.remove(srcRemoteID);
+            newFileKeys.remove(srcRemoteID);
           } else {
             throw Exception("Failed to copy file ${file.uploadedFileID}");
           }
@@ -1659,21 +1687,36 @@ class CollectionsService {
             "Failed to map following uploadKey ${srcToCopiedFileIDs.keys}",
           );
         }
-        await _filesDB.insertMultiple(batch);
-        Bus.instance
-            .fire(CollectionUpdatedEvent(dstCollectionID, batch, "copiedTo"));
+        await remoteDB.insertFilesDiff(diffItems);
+        Bus.instance.fire(
+            CollectionUpdatedEvent(dstCollectionID, copiedFiles, "copiedTo"));
       } catch (e) {
         rethrow;
       }
     }
   }
 
+  // _splitFilesToAddAndCopy for a given list of files owned by others, it returns
+  // two lists: filesToAdd and filesToCopy.
+  // filesToAdd are the files that already exist in the user's collection with
+  // the same hash and fileType, and can be added as symlinks.
+  // filesToCopy are the files that either do not exist in the user's collection
+  // or exist with a different fileType, and need to be copied.
+  /// This is used to handle the case here the user tries to add files owned by
+  /// other users to their collection. If the file already exists in the user's
+  /// collection with the same hash and fileType, it is added as a symlink.
+  /// If the file exists with a different fileType, it is copied.
   Future<(List<EnteFile>, List<EnteFile>)> _splitFilesToAddAndCopy(
     List<EnteFile> othersFile,
   ) async {
-    final hashToUserFile =
-        await _filesDB.getUserOwnedFilesWithSameHashForGivenListOfFiles(
-      othersFile,
+    final List<String> hashes = [];
+    for (final file in othersFile) {
+      if (file.hash != null && file.hash != '') {
+        hashes.add(file.hash!);
+      }
+    }
+    final hashToUserFile = await remoteCache.ownedFilesWithSameHash(
+      hashes,
       _config.getUserID()!,
     );
     final List<EnteFile> filesToCopy = [];
@@ -1853,7 +1896,10 @@ class CollectionsService {
       final List<DiffFileItem> collectionDiffItems = [];
       for (final file in batch) {
         final newFile = moveOrAddEntry(file, toCollectionID);
-        final DiffFileItem localDiffItem = buildDiffItem(newFile);
+        final DiffFileItem localDiffItem = buildDiffItem(
+          newFile,
+          toCollectionID,
+        );
         batchMovedFiles.add(newFile);
         collectionDiffItems.add(localDiffItem);
         params["files"].add(
