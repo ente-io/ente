@@ -3,6 +3,7 @@ import log from "ente-base/log";
 import { apiURL } from "ente-base/origins";
 import { transformFilesIfNeeded } from "ente-gallery/services/files-db";
 import { type MagicMetadataCore } from "ente-gallery/services/magic-metadata";
+import { sortFiles } from "ente-gallery/utils/files";
 import type {
     Collection,
     CollectionPublicMagicMetadataData,
@@ -10,7 +11,6 @@ import type {
 import type { EnteFile, RemoteEnteFile } from "ente-media/file";
 import { decryptRemoteFile } from "ente-media/file";
 import { savedPublicCollections } from "ente-new/albums/services/public-albums-fdb";
-import { sortFiles } from "ente-new/photos/services/files";
 import { CustomError, parseSharingErrorCodes } from "ente-shared/error";
 import HTTPService from "ente-shared/network/HTTPService";
 import localForage from "ente-shared/storage/localForage";

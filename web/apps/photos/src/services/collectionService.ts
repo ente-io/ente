@@ -2,6 +2,7 @@ import type { User } from "ente-accounts/services/user";
 import { ensureLocalUser } from "ente-accounts/services/user";
 import log from "ente-base/log";
 import { apiURL } from "ente-base/origins";
+import { groupFilesByCollectionID, sortFiles } from "ente-gallery/utils/files";
 import { Collection } from "ente-media/collection";
 import { EnteFile } from "ente-media/file";
 import {
@@ -18,11 +19,7 @@ import {
     CollectionsSortBy,
 } from "ente-new/photos/services/collection-summary";
 import { getLocalCollections } from "ente-new/photos/services/collections";
-import {
-    getLocalFiles,
-    groupFilesByCollectionID,
-    sortFiles,
-} from "ente-new/photos/services/files";
+import { getLocalFiles } from "ente-new/photos/services/files";
 import HTTPService from "ente-shared/network/HTTPService";
 import { getData } from "ente-shared/storage/localStorage";
 import { getToken } from "ente-shared/storage/localStorage/helpers";

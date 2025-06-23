@@ -57,11 +57,14 @@ export const formattedTime = (date: Date) => _timeFormat.format(date);
  * @param dateOrEpochMicroseconds A JavaScript Date or a numeric epoch
  * microseconds value.
  *
+ * [Note: Remote timestamps are epoch microseconds]
+ *
+ * Remote talks in terms of epoch microseconds, while JavaScript dates are
+ * underlain by epoch milliseconds.
+ *
  * As a convenience, this function can be either be directly passed a JavaScript
  * date, or it can be given the raw epoch microseconds value and it'll convert
  * internally.
- *
- * See: [Note: Remote timestamps are epoch microseconds]
  */
 export const formattedDateTime = (dateOrEpochMicroseconds: Date | number) =>
     _formattedDateTime(toDate(dateOrEpochMicroseconds));
@@ -74,7 +77,19 @@ const toDate = (dm: Date | number) =>
 
 let _relativeTimeFormat: Intl.RelativeTimeFormat | undefined;
 
-export const formattedDateRelative = (date: Date) => {
+/**
+ * Return a locale aware relative version of the given date.
+ *
+ * Example: "in 23 days"
+ *
+ * @param dateOrEpochMicroseconds A JavaScript Date or a numeric epoch
+ * microseconds value.
+ *
+ * See: [Note: Remote timestamps are epoch microseconds]
+ */
+export const formattedDateRelative = (
+    dateOrEpochMicroseconds: Date | number,
+) => {
     const units: [Intl.RelativeTimeFormatUnit, number][] = [
         ["year", 24 * 60 * 60 * 1000 * 365],
         ["month", (24 * 60 * 60 * 1000 * 365) / 12],
@@ -83,6 +98,8 @@ export const formattedDateRelative = (date: Date) => {
         ["minute", 60 * 1000],
         ["second", 1000],
     ];
+
+    const date = toDate(dateOrEpochMicroseconds);
 
     // Math.abs accounts for both past and future scenarios.
     const elapsed = Math.abs(date.getTime() - Date.now());

@@ -9,14 +9,12 @@ import { getKV, getKVB, getKVN, setKV } from "ente-base/kv";
 import log from "ente-base/log";
 import { apiURL } from "ente-base/origins";
 import { ensureAuthToken } from "ente-base/token";
+import { uniqueFilesByID } from "ente-gallery/utils/files";
 import { fileLogID, type EnteFile } from "ente-media/file";
 import { FileType } from "ente-media/file-type";
 import { updateFilePublicMagicMetadata } from "ente-new/photos/services/file";
-import {
-    getLocalTrashFileIDs,
-    uniqueFilesByID,
-} from "ente-new/photos/services/files";
 import { savedFiles } from "ente-new/photos/services/photos-fdb";
+import { getLocalTrashFileIDs } from "ente-new/photos/services/trash";
 import { gunzip, gzip } from "ente-new/photos/utils/gzip";
 import { randomSample } from "ente-utils/array";
 import { ensurePrecondition } from "ente-utils/ensure";
