@@ -225,13 +225,16 @@ class EntityService {
     String preHash = "";
 
     for (final id in personIds) {
-      final entity = await getEntity(EntityType.person, id);
+      final entity = await getEntity(EntityType.cgroup, id);
 
       if (entity != null) {
         preHash = "$id:${entity.updatedAt}_";
       }
     }
 
+    if (preHash.isEmpty) {
+      return "";
+    }
     final hash = md5.convert(utf8.encode(preHash)).toString().substring(0, 10);
     return hash;
   }
