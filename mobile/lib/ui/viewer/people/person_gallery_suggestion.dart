@@ -490,14 +490,20 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
                     ),
                   ],
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 4),
                 GestureDetector(
                   onTap: isProcessing ? null : () => _saveAsAnotherPerson(),
-                  child: Text(
-                    S.of(context).saveAsAnotherPerson,
-                    style: textTheme.mini.copyWith(
-                      color: colorScheme.textMuted,
-                      decoration: TextDecoration.underline,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 8,
+                      horizontal: 16,
+                    ),
+                    child: Text(
+                      S.of(context).saveAsAnotherPerson,
+                      style: textTheme.mini.copyWith(
+                        color: colorScheme.textMuted,
+                        decoration: TextDecoration.underline,
+                      ),
                     ),
                   ),
                 ),
