@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/ente-io/museum/pkg/controller/access"
+	"net/url"
 	"runtime/debug"
 	"strconv"
 	"strings"
@@ -808,7 +809,16 @@ func (c *FileController) getHotDcSignedUrl(objectKey string) (string, error) {
 		Bucket: c.S3Config.GetHotBucket(),
 		Key:    &objectKey,
 	})
-	return r.Presign(PreSignedRequestValidityDuration)
+
+	presignedUrl, _ := r.Presign(PreSignedRequestValidityDuration)
+
+	cdnUrl, err := c.resolveCdnIfNeeded(presignedUrl, c.S3Config.GetHotBackblazeDC())
+
+	if err != nil {
+		return "", err
+	}
+
+	return cdnUrl, nil
 }
 
 func (c *FileController) getPreSignedURLForDC(objectKey string, dc string) (string, error) {
@@ -817,7 +827,32 @@ func (c *FileController) getPreSignedURLForDC(objectKey string, dc string) (stri
 		Bucket: c.S3Config.GetBucket(dc),
 		Key:    &objectKey,
 	})
-	return r.Presign(PreSignedRequestValidityDuration)
+
+	presignedUrl, _ := r.Presign(PreSignedRequestValidityDuration)
+
+	cdnUrl, err := c.resolveCdnIfNeeded(presignedUrl, dc)
+
+	if err != nil {
+		return "", err
+	}
+
+	return cdnUrl, nil
+}
+
+func (c *FileController) resolveCdnIfNeeded(presignedUrl string, dc string) (string, error) {
+	cdn := c.S3Config.GetCDN(dc)
+
+	if *cdn != "" {
+		parsedUrl, _ := url.Parse(presignedUrl)
+
+		parsedUrl.Host = *cdn
+
+		parsedUrl.Scheme = "https"
+
+		return parsedUrl.String(), nil
+	}
+
+	return presignedUrl, nil
 }
 
 func (c *FileController) sizeOf(objectKey string) (int64, error) {
