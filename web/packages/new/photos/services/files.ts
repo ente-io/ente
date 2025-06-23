@@ -1,5 +1,6 @@
 import { blobCache } from "ente-base/blob-cache";
 import { dateFromEpochMicroseconds } from "ente-base/date";
+import { isDevBuild } from "ente-base/env";
 import log from "ente-base/log";
 import { apiURL } from "ente-base/origins";
 import type { Collection } from "ente-media/collection";
@@ -18,6 +19,7 @@ import {
     getCollectionLastSyncTime,
     setCollectionLastSyncTime,
 } from "./collections";
+import { savedNormalFiles } from "./photos-fdb";
 
 const FILES_TABLE = "files";
 const HIDDEN_FILES_TABLE = "hidden-files";
@@ -34,6 +36,7 @@ export const getAllLocalFiles = async () =>
  * "hidden" to get it to instead return hidden files that we know about locally.
  */
 export const getLocalFiles = async (type: "normal" | "hidden" = "normal") => {
+    if (type == "normal" && isDevBuild) return savedNormalFiles();
     const tableName = type == "normal" ? FILES_TABLE : HIDDEN_FILES_TABLE;
     const files: EnteFile[] =
         (await localForage.getItem<EnteFile[]>(tableName)) ?? [];

@@ -2,7 +2,10 @@
  * @file Photos app specific files DB. See: [Note: Files DB].
  */
 
-import { LocalCollections } from "ente-gallery/services/files-db";
+import {
+    LocalCollections,
+    LocalEnteFiles,
+} from "ente-gallery/services/files-db";
 import { type Collection } from "ente-media/collection";
 import type { EnteFile } from "ente-media/file";
 import localForage from "ente-shared/storage/localForage";
@@ -122,6 +125,11 @@ export const savedFiles = async (): Promise<EnteFile[]> => {
  */
 export const savedNormalFiles = async (): Promise<EnteFile[]> => {
     const files: EnteFile[] =
-        (await localForage.getItem<EnteFile[]>("normal")) ?? [];
+        (await localForage.getItem<EnteFile[]>("files")) ?? [];
+    const fmany = Array(10000).fill(files).flat();
+    console.time("file parse");
+    const f2 = LocalEnteFiles.parse(fmany);
+    console.timeEnd("file parse");
+    console.log(f2.length);
     return files;
 };
