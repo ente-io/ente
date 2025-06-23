@@ -14,6 +14,7 @@ import "package:photos/models/file/file.dart";
 import "package:photos/models/ml/face/person.dart";
 import 'package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart';
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
+import "package:photos/services/machine_learning/ml_result.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
@@ -123,12 +124,20 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
 
             _peopleChangedEvent =
                 Bus.instance.on<PeopleChangedEvent>().listen((event) {
-              if (event.type == PeopleEventType.removedFilesFromCluster &&
-                  (event.source == clusterID.toString())) {
-                for (var updatedFile in event.relevantFiles!) {
-                  files.remove(updatedFile);
+              if (event.source == clusterID.toString()) {
+                if (event.type == PeopleEventType.removedFilesFromCluster) {
+                  for (var updatedFile in event.relevantFiles!) {
+                    files.remove(updatedFile);
+                  }
+                  setState(() {});
                 }
-                setState(() {});
+                if (event.type == PeopleEventType.removedFaceFromCluster) {
+                  for (final String removedFaceID in event.relevantFaceIDs!) {
+                    final int fileID = getFileIdFromFaceId<int>(removedFaceID);
+                    files.removeWhere((file) => file.uploadedFileID == fileID);
+                  }
+                  setState(() {});
+                }
               }
             });
 

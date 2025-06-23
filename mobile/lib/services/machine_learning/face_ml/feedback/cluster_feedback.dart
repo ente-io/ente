@@ -218,7 +218,11 @@ class ClusterFeedbackService<T> {
           .removeFacesFromPerson(person: person, faceIDs: {faceID});
 
       Bus.instance.fire(
-        PeopleChangedEvent(type: PeopleEventType.removedFaceFromCluster),
+        PeopleChangedEvent(
+          type: PeopleEventType.removedFaceFromCluster,
+          relevantFaceIDs: [faceID],
+          source: person.remoteID,
+        ),
       );
       _logger.info('removeFaceFromPerson done');
       return updatedClusterID;
@@ -299,6 +303,7 @@ class ClusterFeedbackService<T> {
       Bus.instance.fire(
         PeopleChangedEvent(
           type: PeopleEventType.removedFaceFromCluster,
+          relevantFaceIDs: [faceID],
           source: clusterID ?? "",
         ),
       );

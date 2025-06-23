@@ -15,6 +15,7 @@ import "package:photos/models/search/search_result.dart";
 import 'package:photos/models/selected_files.dart';
 import "package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart";
 import "package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart";
+import "package:photos/services/machine_learning/ml_result.dart";
 import "package:photos/services/search_service.dart";
 import "package:photos/ui/components/end_to_end_banner.dart";
 import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
@@ -83,6 +84,17 @@ class _PeoplePageState extends State<PeoplePage> {
           setState(() {
             _person = event.person!;
           });
+        }
+      }
+      if (event.source == widget.person.remoteID) {
+        if (event.type == PeopleEventType.removedFaceFromCluster) {
+          final filesBefore = files?.length ?? 0;
+          for (final String removedFaceID in event.relevantFaceIDs!) {
+            final int fileID = getFileIdFromFaceId<int>(removedFaceID);
+            files?.removeWhere((file) => file.uploadedFileID == fileID);
+          }
+          final filesAfter = files?.length ?? 0;
+          if (filesBefore != filesAfter) setState(() {});
         }
       }
     });
