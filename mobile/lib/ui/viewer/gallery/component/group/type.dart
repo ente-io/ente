@@ -10,6 +10,7 @@ enum GroupType {
   week,
   month,
   size,
+  trash,
   year,
   none,
 }
@@ -27,6 +28,8 @@ extension GroupTypeExtension on GroupType {
         return "size";
       case GroupType.year:
         return "year";
+      case GroupType.trash:
+        return "trash";
       case GroupType.none:
         return "none";
     }
@@ -40,7 +43,9 @@ extension GroupTypeExtension on GroupType {
   }
 
   bool showGroupHeader() {
-    if (this == GroupType.size || this == GroupType.none) {
+    if (this == GroupType.size ||
+        this == GroupType.none ||
+        this == GroupType.trash) {
       return false;
     }
     return true;
