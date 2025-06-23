@@ -6,10 +6,14 @@
  * Prior to us using idb for accessing IndexedDB, we used localForage (another
  * IndexedDB library) for that purpose (See `docs/storage.md` for more context).
  *
- * Our use of localForage was limited to a single IndexedDB database named
- * "ente-files" with a single (pertinent) table named "files". It stored more
- * than files though - files, collections, trash, their corresponding sync
- * times, and other bits and bobs.
+ * Our use of localForage was (and is) limited to:
+ *
+ * - A single IndexedDB database named "ente-files" containing
+ *
+ *   - A single table named "files"
+ *
+ * It stored more than files though - files, collections, trash, their
+ * corresponding sync times, and other bits and bobs related to them.
  *
  * Since we've now switched to idb as our preferred IndexedDB library, the data
  * stored in this files table could be considered legacy in a sense. But such

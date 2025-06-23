@@ -466,7 +466,7 @@ const transformDecryptedMetadataJSON = (
  * This function updates a single file, see {@link mergeMetadata} for a
  * convenience function to run it on an array of files.
  */
-export const mergeMetadata1 = (file: EnteFile): EnteFile => {
+const mergeMetadata1 = (file: EnteFile): EnteFile => {
     const mutableMetadata = file.pubMagicMetadata?.data;
     if (mutableMetadata) {
         const { editedTime, editedName, lat, long } = mutableMetadata;

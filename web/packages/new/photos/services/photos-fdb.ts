@@ -3,8 +3,9 @@
  */
 
 import { LocalCollections } from "ente-gallery/services/files-db";
-import { type Collection } from "ente-media/collection";
+import { ignore, type Collection } from "ente-media/collection";
 import type { EnteFile } from "ente-media/file";
+import type { MagicMetadata } from "ente-media/magic-metadata";
 import localForage from "ente-shared/storage/localForage";
 import { z } from "zod/v4";
 
@@ -137,6 +138,14 @@ export const savedNormalFiles = async (): Promise<EnteFile[]> =>
     (await localForage.getItem<EnteFile[]>("files")) ?? [];
 
 /**
+ * Replace the list of files stored in our local database.
+ *
+ * This is the setter corresponding to {@link savedNormalFiles}.
+ */
+export const saveNormalFiles = (files: EnteFile[]) =>
+    localForage.setItem("files", transformFilesIfNeeded(files));
+
+/**
  * Return all hidden files present in our local database.
  *
  * Use {@link saveNormalFiles} to update the database.
@@ -144,3 +153,42 @@ export const savedNormalFiles = async (): Promise<EnteFile[]> =>
 export const savedHiddenFiles = async (): Promise<EnteFile[]> =>
     // See: [Note: Avoiding Zod parsing for large DB arrays]
     (await localForage.getItem<EnteFile[]>("hidden-files")) ?? [];
+
+/**
+ * Replace the list of files stored in our local database.
+ *
+ * This is the setter corresponding to {@link savedNormalFiles}.
+ */
+export const saveHiddenFiles = (files: EnteFile[]) =>
+    localForage.setItem("hidden-files", transformFilesIfNeeded(files));
+
+/**
+ * Remove unused fields from the file objects when saving them.
+ *
+ * This is similar to the transformation we perform when reading collections
+ * from the database, to discard fields that are no longer forwarded when we
+ * parse the remote object, and thus will not be present in the local DB either
+ * when going forward. They might be present for the existing entries in DB
+ * though, which is why these functions are needed.
+ *
+ * However, since unlike collections, we don't route the files through zod when
+ * reading. So instead we do it when we next write. Effectively, the end result
+ * should be the same. In any case, doing this cleanup has no functional impact.
+ *
+ * Added June 2025, 1.7.14-beta, can be removed after a bit (tag: Migration).
+ */
+const transformFilesIfNeeded = (files: EnteFile[]) =>
+    files.map((f) => ("isDeleted" in f ? transformFile(f) : f));
+
+const transformFile = (file: EnteFile & { isDeleted?: unknown }) => {
+    const { isDeleted, magicMetadata, pubMagicMetadata, ...rest } = file;
+    ignore(isDeleted);
+    if (magicMetadata) {
+        delete (magicMetadata as MagicMetadata & { header?: unknown }).header;
+    }
+    if (pubMagicMetadata) {
+        delete (pubMagicMetadata as MagicMetadata & { header?: unknown })
+            .header;
+    }
+    return { ...rest, magicMetadata, pubMagicMetadata };
+};

@@ -18,15 +18,18 @@ import {
     getCollectionLastSyncTime,
     setCollectionLastSyncTime,
 } from "./collections";
-import { savedFiles, savedHiddenFiles, savedNormalFiles } from "./photos-fdb";
-
-const FILES_TABLE = "files";
-const HIDDEN_FILES_TABLE = "hidden-files";
+import {
+    savedFiles,
+    savedHiddenFiles,
+    savedNormalFiles,
+    saveHiddenFiles,
+    saveNormalFiles,
+} from "./photos-fdb";
 
 /**
  * Return all files that we know about locally, both "normal" and "hidden".
  *
- * Deprecated. Use {@link savedFiles} instead.
+ * Deprecated, use {@link savedFiles} instead.
  */
 export const getAllLocalFiles = savedFiles;
 
@@ -35,7 +38,7 @@ export const getAllLocalFiles = savedFiles;
  * "normal" (i.e. non-"hidden") files, but it can be passed the {@link type}
  * "hidden" to get it to instead return hidden files that we know about locally.
  *
- * Deprecated. Use {@link savedNormalFiles} or {@link savedHiddenFiles} instead.
+ * Deprecated, use {@link savedNormalFiles} or {@link savedHiddenFiles} instead.
  */
 export const getLocalFiles = async (type: "normal" | "hidden" = "normal") =>
     type == "normal" ? savedNormalFiles() : savedHiddenFiles();
@@ -44,14 +47,11 @@ export const getLocalFiles = async (type: "normal" | "hidden" = "normal") =>
  * Update the files that we know about locally.
  *
  * Sibling of {@link getLocalFiles}.
+ *
+ * Deprecate, use {@link saveNormalFiles} or {@link saveHiddenFiles} instead.
  */
-export const setLocalFiles = async (
-    type: "normal" | "hidden",
-    files: EnteFile[],
-) => {
-    const tableName = type == "normal" ? FILES_TABLE : HIDDEN_FILES_TABLE;
-    await localForage.setItem(tableName, files);
-};
+export const setLocalFiles = (type: "normal" | "hidden", files: EnteFile[]) =>
+    type == "normal" ? saveNormalFiles(files) : saveHiddenFiles(files);
 
 /**
  * Fetch all files of the given {@link type}, belonging to the given
