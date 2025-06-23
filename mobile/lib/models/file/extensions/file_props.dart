@@ -1,7 +1,6 @@
 import "package:photos/core/configuration.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/file/file_type.dart";
-import "package:photos/models/file/trash_file.dart";
 import "package:photos/services/collections_service.dart";
 
 extension FilePropsExtn on EnteFile {
@@ -42,7 +41,7 @@ extension FilePropsExtn on EnteFile {
 
   bool get canEditMetaInfo => isUploaded && isOwner;
 
-  bool get isTrash => this is TrashFile;
+  bool get isTrash => trashTime != null;
 
   // Return true if the file was uploaded via collect photos workflow
   bool get isCollect => uploaderName != null;

@@ -2,9 +2,10 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:photos/core/event_bus.dart';
-import 'package:photos/db/trash_db.dart';
+import "package:photos/db/remote/db.dart";
 import 'package:photos/events/trash_updated_event.dart';
 import "package:photos/generated/l10n.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/services/local_authentication_service.dart";
 import 'package:photos/ui/viewer/gallery/trash_page.dart';
 import 'package:photos/utils/navigation_util.dart';
@@ -71,7 +72,7 @@ class _TrashSectionButtonState extends State<TrashSectionButton> {
                   ),
                   const Padding(padding: EdgeInsets.all(6)),
                   FutureBuilder<int>(
-                    future: TrashDB.instance.count(),
+                    future: remoteDB.rowCount(RemoteTable.trash),
                     builder: (context, snapshot) {
                       if (snapshot.hasData && snapshot.data! > 0) {
                         return RichText(

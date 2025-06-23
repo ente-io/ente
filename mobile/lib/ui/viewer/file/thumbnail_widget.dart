@@ -10,7 +10,6 @@ import "package:photos/models/api/collection/user.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
-import 'package:photos/models/file/trash_file.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/favorites_service.dart';
 import 'package:photos/ui/viewer/file/file_icons_widget.dart';
@@ -226,7 +225,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
     }
 
     if (widget.file.isTrash) {
-      viewChildren.add(TrashedFileOverlayText(widget.file as TrashFile));
+      viewChildren.add(TrashedFileOverlayText(widget.file));
     } else if (GalleryContextState.of(context)?.type == GroupType.size) {
       viewChildren.add(FileSizeOverlayText(widget.file));
     }

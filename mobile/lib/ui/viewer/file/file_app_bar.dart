@@ -13,7 +13,6 @@ import "package:photos/l10n/l10n.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
-import 'package:photos/models/file/trash_file.dart';
 import "package:photos/models/metadata/common_keys.dart";
 import 'package:photos/models/selected_files.dart';
 import "package:photos/service_locator.dart";
@@ -93,7 +92,7 @@ class FileAppBarState extends State<FileAppBar> {
       _reloadActions = false;
     }
 
-    final isTrashedFile = widget.file is TrashFile;
+    final isTrashedFile = widget.file.isTrash;
     final shouldShowActions = widget.shouldShowActions && !isTrashedFile;
     return PreferredSize(
       preferredSize: const Size.fromHeight(kToolbarHeight),

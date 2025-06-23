@@ -16,10 +16,10 @@ import "package:photos/services/machine_learning/face_ml/face_recognition_servic
 import "package:photos/services/magic_cache_service.dart";
 import "package:photos/services/memories_cache_service.dart";
 import "package:photos/services/permission/service.dart";
-import "package:photos/services/remote/assets/remote_cache.dart";
+import "package:photos/services/remote/cache/remote_cache.dart";
 import "package:photos/services/smart_memories_service.dart";
 import "package:photos/services/storage_bonus_service.dart";
-import "package:photos/services/sync/trash_sync_service.dart";
+import "package:photos/services/remote/trash_service.dart";
 import "package:photos/services/update_service.dart";
 import "package:photos/utils/local_settings.dart";
 import "package:shared_preferences/shared_preferences.dart";

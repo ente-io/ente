@@ -19,7 +19,7 @@ import 'package:photos/db/files_db.dart';
 import "package:photos/db/local/table/path_config_table.dart";
 import "package:photos/db/remote/db.dart";
 import "package:photos/db/remote/table/collection_files.dart";
-import 'package:photos/db/trash_db.dart';
+import "package:photos/db/remote/table/trash.dart";
 import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/force_reload_home_gallery_event.dart';
@@ -1806,8 +1806,8 @@ class CollectionsService {
           data: params,
         );
         await _filesDB.insertMultiple(batch);
-        await TrashDB.instance
-            .delete(batch.map((e) => e.uploadedFileID!).toList());
+        await remoteDB
+            .removeTrashItems(batch.map((e) => e.uploadedFileID!).toList());
         Bus.instance.fire(
           CollectionUpdatedEvent(toCollectionID, batch, "restore"),
         );

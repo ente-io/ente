@@ -10,11 +10,11 @@ import "package:photos/core/constants.dart";
 import "package:photos/log/devlog.dart";
 import "package:photos/models/api/diff/diff.dart";
 
-class CollectionFilesService {
-  final Logger _logger = Logger("CollectionFilesService");
+class RemoteFileDiffService {
+  final Logger _logger = Logger("RemoteFileDiffService");
   final Dio _enteDio;
 
-  CollectionFilesService(this._enteDio);
+  RemoteFileDiffService(this._enteDio);
   Future<DiffResult> getCollectionItemsDiff(
     int collectionID,
     int sinceTime,
@@ -116,59 +116,15 @@ class CollectionFilesService {
         deletedFiles.add(deletedItem);
         continue;
       }
-
       final Uint8List encFileKey = CryptoUtil.base642bin(item["encryptedKey"]);
       final Uint8List encFileKeyNonce =
           CryptoUtil.base642bin(item["keyDecryptionNonce"]);
-      final fileKey =
-          CryptoUtil.decryptSync(encFileKey, collectionKey, encFileKeyNonce);
-
-      final encodedMetadata = CryptoUtil.decryptChaChaSync(
-        CryptoUtil.base642bin(item["metadata"]["encryptedData"]),
-        fileKey,
-        CryptoUtil.base642bin(item["metadata"]["decryptionHeader"]),
+      final FileItem fileItem = constructFileItem(
+        item,
+        collectionKey,
+        encFileKey,
+        encFileKeyNonce,
       );
-      final Map<String, dynamic> defaultMeta =
-          jsonDecode(utf8.decode(encodedMetadata));
-      if (!defaultMeta.containsKey('version')) {
-        defaultMeta['version'] = 0;
-      }
-      if (defaultMeta['hash'] == null &&
-          defaultMeta.containsKey('imageHash') &&
-          defaultMeta.containsKey('videoHash')) {
-        // old web version was putting live photo hash in different fields
-        defaultMeta['hash'] =
-            '${defaultMeta['imageHash']}$kLivePhotoHashSeparator${defaultMeta['videoHash']}';
-      }
-      Metadata? pubMagicMetadata;
-      Metadata? privateMagicMetadata;
-
-      if (item['magicMetadata'] != null) {
-        final utfEncodedMmd = CryptoUtil.decryptChaChaSync(
-          CryptoUtil.base642bin(item['magicMetadata']['data']),
-          fileKey,
-          CryptoUtil.base642bin(item['magicMetadata']['header']),
-        );
-        privateMagicMetadata = Metadata(
-          data: jsonDecode(utf8.decode(utfEncodedMmd)),
-          version: item['magicMetadata']['version'],
-        );
-      }
-      if (item['pubMagicMetadata'] != null) {
-        final utfEncodedMmd = CryptoUtil.decryptChaChaSync(
-          CryptoUtil.base642bin(item['pubMagicMetadata']['data']),
-          fileKey,
-          CryptoUtil.base642bin(item['pubMagicMetadata']['header']),
-        );
-        pubMagicMetadata = Metadata(
-          data: jsonDecode(utf8.decode(utfEncodedMmd)),
-          version: item['pubMagicMetadata']['version'],
-        );
-      }
-      final String fileDecryptionHeader = item["file"]["decryptionHeader"];
-      final String thumbnailDecryptionHeader =
-          item["thumbnail"]["decryptionHeader"];
-      final Info? info = Info.fromJson(item["info"]);
       final DiffFileItem file = DiffFileItem(
         collectionID: collectionID,
         updatedAt: collectionUpdationTime,
@@ -176,17 +132,7 @@ class CollectionFilesService {
         encFileKeyNonce: encFileKeyNonce,
         isDeleted: false,
         createdAt: item["createdAt"] ?? defaultCreatedAt,
-        fileItem: FileItem(
-          fileID: fileID,
-          ownerID: ownerID,
-          thumnailDecryptionHeader:
-              CryptoUtil.base642bin(thumbnailDecryptionHeader),
-          fileDecryotionHeader: CryptoUtil.base642bin(fileDecryptionHeader),
-          metadata: Metadata(data: defaultMeta, version: 0),
-          magicMetadata: privateMagicMetadata,
-          pubMagicMetadata: pubMagicMetadata,
-          info: info,
-        ),
+        fileItem: fileItem,
       );
       updatedFiles.add(file);
     }
@@ -195,6 +141,87 @@ class CollectionFilesService {
       deletedFiles,
       hasMore,
       latestUpdatedAtTime,
+    );
+  }
+
+  static FileItem constructFileItem(
+    Map<String, dynamic> item,
+    Uint8List collectionKey,
+    Uint8List encFileKey,
+    Uint8List encFileKeyNonce,
+  ) {
+    final int fileID = item["id"] as int;
+    final int ownerID = item["ownerID"];
+
+    // Decrypt file key
+    final fileKey =
+        CryptoUtil.decryptSync(encFileKey, collectionKey, encFileKeyNonce);
+
+    // Decrypt and parse metadata
+    final encodedMetadata = CryptoUtil.decryptChaChaSync(
+      CryptoUtil.base642bin(item["metadata"]["encryptedData"]),
+      fileKey,
+      CryptoUtil.base642bin(item["metadata"]["decryptionHeader"]),
+    );
+    final Map<String, dynamic> defaultMeta =
+        jsonDecode(utf8.decode(encodedMetadata));
+
+    // Apply metadata defaults and fixes
+    if (!defaultMeta.containsKey('version')) {
+      defaultMeta['version'] = 0;
+    }
+    if (defaultMeta['hash'] == null &&
+        defaultMeta.containsKey('imageHash') &&
+        defaultMeta.containsKey('videoHash')) {
+      // old web version was putting live photo hash in different fields
+      defaultMeta['hash'] =
+          '${defaultMeta['imageHash']}$kLivePhotoHashSeparator${defaultMeta['videoHash']}';
+    }
+
+    // Decrypt magic metadata if present
+    Metadata? privateMagicMetadata;
+    if (item['magicMetadata'] != null) {
+      final utfEncodedMmd = CryptoUtil.decryptChaChaSync(
+        CryptoUtil.base642bin(item['magicMetadata']['data']),
+        fileKey,
+        CryptoUtil.base642bin(item['magicMetadata']['header']),
+      );
+      privateMagicMetadata = Metadata(
+        data: jsonDecode(utf8.decode(utfEncodedMmd)),
+        version: item['magicMetadata']['version'],
+      );
+    }
+
+    // Decrypt public magic metadata if present
+    Metadata? pubMagicMetadata;
+    if (item['pubMagicMetadata'] != null) {
+      final utfEncodedMmd = CryptoUtil.decryptChaChaSync(
+        CryptoUtil.base642bin(item['pubMagicMetadata']['data']),
+        fileKey,
+        CryptoUtil.base642bin(item['pubMagicMetadata']['header']),
+      );
+      pubMagicMetadata = Metadata(
+        data: jsonDecode(utf8.decode(utfEncodedMmd)),
+        version: item['pubMagicMetadata']['version'],
+      );
+    }
+
+    // Extract decryption headers and info
+    final String fileDecryptionHeader = item["file"]["decryptionHeader"];
+    final String thumbnailDecryptionHeader =
+        item["thumbnail"]["decryptionHeader"];
+    final Info? info = Info.fromJson(item["info"]);
+
+    return FileItem(
+      fileID: fileID,
+      ownerID: ownerID,
+      thumnailDecryptionHeader:
+          CryptoUtil.base642bin(thumbnailDecryptionHeader),
+      fileDecryotionHeader: CryptoUtil.base642bin(fileDecryptionHeader),
+      metadata: Metadata(data: defaultMeta, version: 0),
+      magicMetadata: privateMagicMetadata,
+      pubMagicMetadata: pubMagicMetadata,
+      info: info,
     );
   }
 }

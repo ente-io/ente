@@ -30,8 +30,8 @@ import 'package:photos/services/ignored_files_service.dart';
 import "package:photos/services/language_service.dart";
 import 'package:photos/services/local_file_update_service.dart';
 import "package:photos/services/notification_service.dart";
-import "package:photos/services/remote/fetch/collection_files.dart";
-import "package:photos/services/remote/fetch/diff.dart";
+import "package:photos/services/remote/fetch/files_diff.dart";
+import "package:photos/services/remote/fetch/remote_diff.dart";
 import 'package:photos/services/sync/sync_service.dart';
 import "package:photos/services/video_preview_service.dart";
 import 'package:photos/utils/file_uploader.dart';
@@ -83,7 +83,7 @@ class RemoteSyncService {
     _prefs = preferences;
     newService = RemoteDiffService(
       _collectionsService,
-      CollectionFilesService(NetworkClient.instance.enteDio),
+      RemoteFileDiffService(NetworkClient.instance.enteDio),
     );
 
     Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) async {
@@ -127,7 +127,7 @@ class RemoteSyncService {
         await queueLocalAssetForUpload();
       }
       await _pullDiff();
-      // await trashSyncService.syncTrash();
+      await trashSyncService.syncTrash();
       if (!hasSyncedBefore) {
         await _prefs.setBool(_isFirstRemoteSyncDone, true);
         await queueLocalAssetForUpload();

@@ -5,16 +5,16 @@ import "package:photos/events/diff_sync_complete_event.dart";
 import "package:photos/events/sync_status_update_event.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
-import "package:photos/services/remote/fetch/collection_files.dart";
+import "package:photos/services/remote/fetch/files_diff.dart";
 
 class RemoteDiffService {
   final Logger _logger = Logger('RemoteDiffService');
   final CollectionsService _collectionsService;
-  final CollectionFilesService collectionFiles;
+  final RemoteFileDiffService filesDiffService;
 
   RemoteDiffService(
     this._collectionsService,
-    this.collectionFiles,
+    this.filesDiffService,
   );
 
   bool _isExistingSyncSilent = false;
@@ -64,7 +64,7 @@ class RemoteDiffService {
     int currentSinceTime = sinceTime;
     bool hasMore = true;
     while (hasMore) {
-      final diff = await collectionFiles.getCollectionItemsDiff(
+      final diff = await filesDiffService.getCollectionItemsDiff(
         collectionID,
         currentSinceTime,
         collectionKey,

@@ -40,9 +40,9 @@ class RemoteCache {
 
   Future<void> _load() async {
     if (isLoaded == null) {
-      final assets = await remoteDB.getAllFiles();
-      for (final asset in assets) {
-        remoteAssets[asset.id] = asset;
+      final rAssets = await remoteDB.getRemoteAssets();
+      for (final item in rAssets) {
+        remoteAssets[item.id] = item;
       }
       isLoaded = true;
     }

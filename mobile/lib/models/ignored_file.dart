@@ -1,4 +1,4 @@
-import 'package:photos/models/file/trash_file.dart';
+import "package:photos/models/api/diff/diff.dart";
 
 const kIgnoreReasonTrash = "trash";
 
@@ -10,21 +10,21 @@ class IgnoredFile {
 
   IgnoredFile(this.localID, this.title, this.deviceFolder, this.reason);
 
-  static fromTrashItem(TrashFile? trashFile) {
-    if (trashFile == null) return null;
-    if (trashFile.localID == null ||
-        trashFile.localID!.isEmpty ||
-        trashFile.title == null ||
-        trashFile.title!.isEmpty ||
-        trashFile.deviceFolder == null ||
-        trashFile.deviceFolder!.isEmpty) {
+  static fromTrashItem(DiffFileItem? item) {
+    if (item == null) return null;
+    final fileItem = item.fileItem;
+    if (fileItem.localID == null ||
+        fileItem.localID!.isEmpty ||
+        fileItem.title.isEmpty ||
+        fileItem.deviceFolder == null ||
+        fileItem.deviceFolder!.isEmpty) {
       return null;
     }
 
     return IgnoredFile(
-      trashFile.localID,
-      trashFile.title,
-      trashFile.deviceFolder,
+      fileItem.localID,
+      fileItem.title,
+      fileItem.deviceFolder,
       kIgnoreReasonTrash,
     );
   }

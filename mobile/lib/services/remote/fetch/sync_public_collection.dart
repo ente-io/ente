@@ -6,7 +6,7 @@ import 'package:photos/models/file/file.dart';
 import "package:photos/models/file/remote/asset.dart";
 import "package:photos/models/file/remote/collection_file.dart";
 import "package:photos/services/collections_service.dart";
-import "package:photos/services/remote/fetch/collection_files.dart";
+import "package:photos/services/remote/fetch/files_diff.dart";
 import "package:photos/utils/dialog_util.dart";
 
 Future<List<EnteFile>> getPublicFiles(
@@ -16,7 +16,7 @@ Future<List<EnteFile>> getPublicFiles(
 ) async {
   try {
     final collectionFilService =
-        CollectionFilesService(NetworkClient.instance.enteDio);
+        RemoteFileDiffService(NetworkClient.instance.enteDio);
     bool hasMore = false;
     final sharedFiles = <EnteFile>[];
     final headers =

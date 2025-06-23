@@ -6,6 +6,7 @@ import 'package:logging/logging.dart';
 import 'package:path/path.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/constants.dart';
+import "package:photos/models/api/diff/trash_time.dart";
 import 'package:photos/models/file/file_type.dart';
 import "package:photos/models/file/remote/asset.dart";
 import "package:photos/models/file/remote/collection_file.dart";
@@ -22,6 +23,7 @@ class EnteFile {
   AssetEntity? lAsset;
   RemoteAsset? rAsset;
   CollectionFile? cf;
+  TrashTime? trashTime;
   int? generatedID;
   int? uploadedFileID;
   int? ownerID;

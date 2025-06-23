@@ -34,7 +34,13 @@ final String filesUpdateColumns = filesColumns
     .join(', ');
 
 const trashedFilesColumns =
-    'id, owner_id, file_header, thumb_header, metadata, priv_metadata, pub_metadata, info, trash_data';
+    'id, owner_id, collection_id, enc_key,enc_key_nonce, file_header, thumb_header, metadata, priv_metadata, pub_metadata, info, created_at, updated_at, delete_by';
+
+final String trashedFilesUpdateColumns = trashedFilesColumns
+    .split(', ')
+    .where((column) => (column != 'id'))
+    .map((column) => '$column = excluded.$column') // Use excluded virtual table
+    .join(', ');
 
 const uploadLocalMappingColumns =
     'file_id, local_id, local_clould_id, local_mapping_src';
@@ -92,6 +98,24 @@ class RemoteDBMigration {
       priv_metadata TEXT,
       pub_metadata TEXT,
       info TEXT
+    )
+    ''',
+    '''
+    CREATE TABLE trash (
+      id INTEGER PRIMARY KEY,
+      owner_id INTEGER NOT NULL,
+      collection_id INTEGER NOT NULL,
+      enc_key BLOB NOT NULL,
+      enc_key_nonce BLOB NOT NULL,
+      metadata TEXT NOT NULL,
+      priv_metadata TEXT,
+      pub_metadata TEXT,
+      info TEXT,
+      file_header BLOB NOT NULL,
+      thumb_header BLOB NOT NULL,
+      created_at INTEGER NOT NULL,
+      updated_at INTEGER NOT NULL,
+      deleted_by INTEGER NOT NULL
     )
     ''',
     '''

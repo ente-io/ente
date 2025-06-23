@@ -3,12 +3,15 @@ import 'dart:ui';
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:flutter/material.dart';
 import 'package:photos/core/event_bus.dart';
-import 'package:photos/db/trash_db.dart';
+import "package:photos/db/remote/db.dart";
+import "package:photos/db/remote/table/trash.dart";
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/force_reload_trash_page_event.dart';
 import "package:photos/generated/l10n.dart";
+import "package:photos/models/file_load_result.dart";
 import 'package:photos/models/gallery_type.dart';
 import 'package:photos/models/selected_files.dart';
+import "package:photos/service_locator.dart";
 import 'package:photos/ui/common/bottom_shadow.dart';
 import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
@@ -34,13 +37,9 @@ class TrashPage extends StatelessWidget {
     final bool filesAreSelected = _selectedFiles.files.isNotEmpty;
 
     final gallery = Gallery(
-      asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) {
-        return TrashDB.instance.getTrashedFiles(
-          creationStartTime,
-          creationEndTime,
-          limit: limit,
-          asc: asc,
-        );
+      asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) async {
+        final result = await remoteDB.getTrashFiles();
+        return FileLoadResult(result, false);
       },
       reloadEvent: Bus.instance.on<FilesUpdatedEvent>().where(
             (event) =>
@@ -104,7 +103,7 @@ class TrashPage extends StatelessWidget {
 
   Widget _headerWidget() {
     return FutureBuilder<int>(
-      future: TrashDB.instance.count(),
+      future: remoteDB.rowCount(RemoteTable.trash),
       builder: (context, snapshot) {
         if (snapshot.hasData && snapshot.data! > 0) {
           return Padding(

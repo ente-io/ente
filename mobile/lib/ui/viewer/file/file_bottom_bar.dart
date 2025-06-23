@@ -10,7 +10,6 @@ import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
-import 'package:photos/models/file/trash_file.dart';
 import 'package:photos/models/selected_files.dart';
 
 import "package:photos/ui/actions/file/file_actions.dart";
@@ -105,11 +104,11 @@ class FileBottomBarState extends State<FileBottomBar> {
         ),
       ),
     );
-    if (widget.file is TrashFile) {
+    if (widget.file.isTrash) {
       _addTrashOptions(children);
     }
 
-    if (!widget.showOnlyInfoButton && widget.file is! TrashFile) {
+    if (!widget.showOnlyInfoButton && !widget.file.isTrash) {
       if (widget.file.fileType == FileType.image ||
           widget.file.fileType == FileType.livePhoto ||
           (widget.file.fileType == FileType.video)) {
@@ -259,9 +258,7 @@ class FileBottomBarState extends State<FileBottomBar> {
               color: Colors.white,
             ),
             onPressed: () async {
-              final trashedFile = <TrashFile>[];
-              trashedFile.add(widget.file as TrashFile);
-              if (await deleteFromTrash(context, trashedFile) == true) {
+              if (await deleteFromTrash(context, [widget.file]) == true) {
                 Navigator.pop(context);
               }
             },

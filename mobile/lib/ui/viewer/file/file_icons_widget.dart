@@ -6,7 +6,6 @@ import 'package:photos/ente_theme_data.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/api/collection/user.dart";
 import "package:photos/models/file/file.dart";
-import 'package:photos/models/file/trash_file.dart';
 import 'package:photos/theme/colors.dart';
 import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/sharing/user_avator_widget.dart';
@@ -218,12 +217,12 @@ class OwnerAvatarOverlayIcon extends StatelessWidget {
 }
 
 class TrashedFileOverlayText extends StatelessWidget {
-  final TrashFile file;
+  final EnteFile file;
   const TrashedFileOverlayText(this.file, {super.key});
   @override
   Widget build(BuildContext context) {
     final int daysLeft =
-        ((file.deleteBy - DateTime.now().microsecondsSinceEpoch) /
+        ((file.trashTime!.deleteBy - DateTime.now().microsecondsSinceEpoch) /
                 Duration.microsecondsPerDay)
             .ceil();
     final text = S.of(context).trashDaysLeft(daysLeft);

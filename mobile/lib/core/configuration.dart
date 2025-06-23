@@ -15,7 +15,7 @@ import 'package:photos/db/collections_db.dart';
 import 'package:photos/db/files_db.dart';
 import "package:photos/db/memories_db.dart";
 import "package:photos/db/ml/db.dart";
-import 'package:photos/db/trash_db.dart';
+import "package:photos/db/remote/table/trash.dart";
 import 'package:photos/db/upload_locks_db.dart';
 import "package:photos/events/endpoint_updated_event.dart";
 import 'package:photos/events/signed_in_event.dart';
@@ -23,6 +23,7 @@ import 'package:photos/events/user_logged_out_event.dart';
 import 'package:photos/models/api/user/key_attributes.dart';
 import 'package:photos/models/api/user/key_gen_result.dart';
 import 'package:photos/models/api/user/private_key_attributes.dart';
+import "package:photos/service_locator.dart";
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/favorites_service.dart';
 import "package:photos/services/home_widget_service.dart";
@@ -195,7 +196,7 @@ class Configuration {
 
     await UploadLocksDB.instance.clearTable();
     await IgnoredFilesService.instance.reset();
-    await TrashDB.instance.clearTable();
+    await remoteDB.clearTrash();
     unawaited(HomeWidgetService.instance.clearWidget(autoLogout));
     if (!autoLogout) {
       // Following services won't be initialized if it's the case of autoLogout

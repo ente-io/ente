@@ -14,10 +14,10 @@ import "package:photos/models/file/remote/asset.dart";
 import "package:sqlite_async/sqlite_async.dart";
 
 // ignore: constant_identifier_names
-enum RemoteTable { collections, collection_files, files, entities }
+enum RemoteTable { collections, collection_files, files, entities, trash }
 
 class RemoteDB with SqlDbBase {
-  static const _databaseName = "remotex2.db";
+  static const _databaseName = "remotex4.db";
   static const _batchInsertMaxCount = 1000;
   late final SqliteDatabase _sqliteDB;
 
@@ -55,7 +55,7 @@ class RemoteDB with SqlDbBase {
     return result;
   }
 
-  Future<List<RemoteAsset>> getAllFiles() async {
+  Future<List<RemoteAsset>> getRemoteAssets() async {
     final result = <RemoteAsset>[];
     final cursor = await _sqliteDB.getAll("SELECT * FROM files");
     for (final row in cursor) {
