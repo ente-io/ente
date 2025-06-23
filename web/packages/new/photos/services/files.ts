@@ -19,19 +19,11 @@ import {
     setCollectionLastSyncTime,
 } from "./collections";
 import {
-    savedFiles,
     savedHiddenFiles,
     savedNormalFiles,
     saveHiddenFiles,
     saveNormalFiles,
 } from "./photos-fdb";
-
-/**
- * Return all files that we know about locally, both "normal" and "hidden".
- *
- * Deprecated, use {@link savedFiles} instead.
- */
-export const getAllLocalFiles = savedFiles;
 
 /**
  * Return all files that we know about locally. By default it returns only

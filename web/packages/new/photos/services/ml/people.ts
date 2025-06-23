@@ -2,7 +2,7 @@ import { assertionFailed } from "ente-base/assert";
 import log from "ente-base/log";
 import type { EnteFile } from "ente-media/file";
 import { randomSample } from "ente-utils/array";
-import { getLocalFiles } from "../files";
+import { savedNormalFiles } from "../photos-fdb";
 import {
     savedCGroups,
     updateOrCreateUserEntities,
@@ -212,7 +212,7 @@ export interface PeopleState {
  * construct an in-memory list of {@link Person}s on which the UI will operate.
  */
 export const reconstructPeopleState = async (): Promise<PeopleState> => {
-    const files = await getLocalFiles("normal");
+    const files = await savedNormalFiles();
     const fileByID = new Map(files.map((f) => [f.id, f]));
 
     // "Person face"s are faces annotated with their corresponding local files.
@@ -519,7 +519,7 @@ export const _suggestionsAndChoicesForPerson = async (
     // Annotate the clusters with the information that the UI needs to show its
     // preview faces.
 
-    const files = await getLocalFiles("normal");
+    const files = await savedNormalFiles();
     const fileByID = new Map(files.map((f) => [f.id, f]));
 
     const toPreviewable = (cluster: FaceCluster) => {

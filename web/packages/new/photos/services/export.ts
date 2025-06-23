@@ -23,8 +23,6 @@ import {
     collectionUserFacingName,
     createCollectionNameByID,
 } from "ente-new/photos/services/collection";
-import { getAllLocalCollections } from "ente-new/photos/services/collections";
-import { getAllLocalFiles } from "ente-new/photos/services/files";
 import {
     safeDirectoryName,
     safeFileName,
@@ -34,6 +32,7 @@ import { getData, setData } from "ente-shared/storage/localStorage";
 import { PromiseQueue } from "ente-utils/promise";
 import i18n from "i18next";
 import { migrateExport, type ExportRecord } from "./export-migration";
+import { savedCollections, savedFiles } from "./photos-fdb";
 
 /** Name of the JSON file in which we keep the state of the export. */
 const exportRecordFileName = "export_status.json";
@@ -248,11 +247,7 @@ class ExportService {
      * happen.
      */
     pendingFiles = async (exportRecord?: ExportRecord): Promise<EnteFile[]> => {
-        return getUnExportedFiles(
-            await getAllLocalFiles(),
-            exportRecord,
-            undefined,
-        );
+        return getUnExportedFiles(await savedFiles(), exportRecord, undefined);
     };
 
     async preExport(exportFolder: string) {
@@ -358,8 +353,8 @@ class ExportService {
         { resync }: ExportOpts,
     ) {
         try {
-            const files = mergeMetadata(await getAllLocalFiles());
-            const collections = await getAllLocalCollections();
+            const files = mergeMetadata(await savedFiles());
+            const collections = await savedCollections();
 
             const exportRecord = await this.getExportRecord(exportFolder);
             const collectionIDExportNameMap =

@@ -13,10 +13,10 @@ import { fileLogID, type EnteFile } from "ente-media/file";
 import { FileType } from "ente-media/file-type";
 import { updateFilePublicMagicMetadata } from "ente-new/photos/services/file";
 import {
-    getAllLocalFiles,
     getLocalTrashFileIDs,
     uniqueFilesByID,
 } from "ente-new/photos/services/files";
+import { savedFiles } from "ente-new/photos/services/photos-fdb";
 import { gunzip, gzip } from "ente-new/photos/utils/gzip";
 import { randomSample } from "ente-utils/array";
 import { ensurePrecondition } from "ente-utils/ensure";
@@ -879,7 +879,7 @@ const processQueue = async () => {
 const backfillQueue = async (
     userID: number,
 ): Promise<VideoProcessingQueueItem[]> => {
-    const allCollectionFiles = await getAllLocalFiles();
+    const allCollectionFiles = await savedFiles();
     const localTrashFileIDs = await getLocalTrashFileIDs();
     const videoFiles = uniqueFilesByID(
         allCollectionFiles.filter(

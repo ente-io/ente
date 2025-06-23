@@ -73,13 +73,14 @@ import {
     areOnlySystemCollections,
     PseudoCollectionID,
 } from "ente-new/photos/services/collection-summary";
-import { getAllLocalCollections } from "ente-new/photos/services/collections";
 import exportService from "ente-new/photos/services/export";
 import { updateFilesVisibility } from "ente-new/photos/services/file";
+import { getLocalTrashedFiles } from "ente-new/photos/services/files";
 import {
-    getLocalFiles,
-    getLocalTrashedFiles,
-} from "ente-new/photos/services/files";
+    savedCollections,
+    savedHiddenFiles,
+    savedNormalFiles,
+} from "ente-new/photos/services/photos-fdb";
 import {
     filterSearchableFiles,
     setSearchCollectionsAndFiles,
@@ -328,9 +329,9 @@ const Page: React.FC = () => {
                 type: "mount",
                 user,
                 familyData,
-                collections: await getAllLocalCollections(),
-                normalFiles: await getLocalFiles("normal"),
-                hiddenFiles: await getLocalFiles("hidden"),
+                collections: await savedCollections(),
+                normalFiles: await savedNormalFiles(),
+                hiddenFiles: await savedHiddenFiles(),
                 trashedFiles: await getLocalTrashedFiles(),
             });
             await syncWithRemote({ force: true });
