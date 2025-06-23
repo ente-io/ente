@@ -7,7 +7,7 @@ import {
     matchJSONMetadata,
     metadataJSONMapKeyForJSON,
 } from "ente-gallery/services/upload/metadata-json";
-import { fileFileName } from "ente-media/file-metadata";
+import { fileCreationTime, fileFileName } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
 import { getLocalCollections } from "ente-new/photos/services/collections";
 import { groupFilesByCollectionID } from "ente-new/photos/services/files";
@@ -303,11 +303,11 @@ async function exifDataParsingCheck(expectedState) {
         }
         if (
             exifValues["creation_time"] &&
-            exifValues["creation_time"] !== matchingFile.metadata.creationTime
+            exifValues["creation_time"] !== fileCreationTime(matchingFile)
         ) {
             throw Error(`exifDataParsingCheck failed ❌ ,
                             for ${fileName}
-                            expected: ${exifValues["creation_time"]} got: ${matchingFile.metadata.creationTime}`);
+                            expected: ${exifValues["creation_time"]} got: ${fileCreationTime(matchingFile)}`);
         }
         if (
             exifValues["location"] &&
@@ -369,11 +369,11 @@ async function googleMetadataReadingCheck(expectedState) {
         }
         if (
             metadata["creation_time"] &&
-            metadata["creation_time"] !== matchingFile.metadata.creationTime
+            metadata["creation_time"] !== fileCreationTime(matchingFile)
         ) {
             throw Error(`googleMetadataJSON reading check failed ❌ ,
                 for ${fileName}
-                expected: ${metadata["creation_time"]} got: ${matchingFile.metadata.creationTime}`);
+                expected: ${metadata["creation_time"]} got: ${fileCreationTime(matchingFile)}`);
         }
         if (
             metadata["location"] &&

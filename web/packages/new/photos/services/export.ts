@@ -16,7 +16,11 @@ import { downloadManager } from "ente-gallery/services/download";
 import { writeStream } from "ente-gallery/utils/native-stream";
 import type { Collection } from "ente-media/collection";
 import { fileLogID, mergeMetadata, type EnteFile } from "ente-media/file";
-import { fileFileName, fileLocation } from "ente-media/file-metadata";
+import {
+    fileCreationTime,
+    fileFileName,
+    fileLocation,
+} from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
 import { decodeLivePhoto } from "ente-media/live-photo";
 import {
@@ -1447,13 +1451,8 @@ const getGoogleLikeMetadataFile = (
     dateTimeFormatter: Intl.DateTimeFormat,
 ) => {
     const metadata = file.metadata;
-    const publicMagicMetadata = file.pubMagicMetadata?.data;
-    const creationTime = Math.floor(
-        (publicMagicMetadata?.editedTime ?? metadata.creationTime) / 1e6,
-    );
-    const modificationTime = Math.floor(
-        (metadata.modificationTime ?? metadata.creationTime) / 1e6,
-    );
+    const creationTime = Math.floor(fileCreationTime(file) / 1e6);
+    const modificationTime = Math.floor(metadata.modificationTime / 1e6);
     const result: Record<string, unknown> = {
         title: fileExportName,
         creationTime: {

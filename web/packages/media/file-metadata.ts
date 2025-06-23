@@ -460,6 +460,17 @@ export const fileFileName = (file: EnteFile) =>
     file.pubMagicMetadata?.data.editedName ?? file.metadata.title;
 
 /**
+ * Return the file's creation timestamp (epoch microseconds).
+ *
+ * This function handles files with edited dates.
+ *
+ * While sometimes the epoch timestamp is the correct value to use, it is also
+ * possible that {@link fileCreationPhotoDate} might be more appropriate.
+ */
+export const fileCreationTime = (file: EnteFile) =>
+    file.pubMagicMetadata?.data.editedTime ?? file.metadata.creationTime;
+
+/**
  * Return the file's creation date as a Date in the hypothetical "timezone of
  * the photo".
  *

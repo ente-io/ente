@@ -16,6 +16,7 @@ import {
     type FaceIndex,
 } from "./face";
 import { dotProduct } from "./math";
+import { fileCreationTime } from "ente-media/file-metadata";
 
 /**
  * A face cluster is an set of faces, and a nanoid to uniquely identify it.
@@ -229,7 +230,7 @@ const sortFacesNewestOnesFirst = (
             assertionFailed(`Did not find a local file for faceID ${faceID}`);
             return 0;
         }
-        return file.metadata.creationTime;
+        return fileCreationTime(file);
     };
 
     return faces.sort((a, b) => sortTimeForFace(b) - sortTimeForFace(a));

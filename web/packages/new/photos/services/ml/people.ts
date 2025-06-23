@@ -1,6 +1,7 @@
 import { assertionFailed } from "ente-base/assert";
 import log from "ente-base/log";
 import type { EnteFile } from "ente-media/file";
+import { fileCreationTime } from "ente-media/file-metadata";
 import { randomSample } from "ente-utils/array";
 import { savedNormalFiles } from "../photos-fdb";
 import {
@@ -245,8 +246,8 @@ export const reconstructPeopleState = async (): Promise<PeopleState> => {
             .map((faceID) => personFaceByID.get(faceID))
             .filter((pf) => !!pf)
             .sort((a, b) => {
-                const at = a.file.metadata.creationTime;
-                const bt = b.file.metadata.creationTime;
+                const at = fileCreationTime(a.file);
+                const bt = fileCreationTime(b.file);
                 return bt == at ? b.score - a.score : bt - at;
             });
 

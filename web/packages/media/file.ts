@@ -470,8 +470,9 @@ const mergeMetadata1 = (file: EnteFile): EnteFile => {
     const mutableMetadata = file.pubMagicMetadata?.data;
     if (mutableMetadata) {
         const { editedTime, editedName, lat, long } = mutableMetadata;
+        // Not needed, fileCreationTime is used instead.
         if (editedTime) file.metadata.creationTime = editedTime;
-        // Not needed, use fileFileName.
+        // Not needed, fileFileName is used instead.
         if (editedName) file.metadata.title = editedName;
         // Use (lat, long) only if both are present and nonzero.
         if (lat && long) {
@@ -480,11 +481,11 @@ const mergeMetadata1 = (file: EnteFile): EnteFile => {
         }
     }
 
-    // Moved to transformDecryptedMetadataJSON.
+    // Moved to transformDecryptedMetadataJSON. Not needed.
     if (!file.metadata.modificationTime)
         file.metadata.modificationTime = file.metadata.creationTime;
 
-    // Moved to transformDecryptedMetadataJSON.
+    // Moved to transformDecryptedMetadataJSON. Not needed.
     if (!file.metadata.fileType && file.id < 100000000)
         file.metadata.fileType = FileType.image;
 

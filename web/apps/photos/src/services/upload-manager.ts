@@ -34,7 +34,10 @@ import {
     type EnteFile,
     type RemoteEnteFile,
 } from "ente-media/file";
-import type { ParsedMetadata } from "ente-media/file-metadata";
+import {
+    fileCreationTime,
+    type ParsedMetadata,
+} from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
 import { potentialFileTypeFromExtension } from "ente-media/live-photo";
 import { getLocalFiles } from "ente-new/photos/services/files";
@@ -413,7 +416,7 @@ class UploadManager {
         collection: Collection,
         sourceEnteFile: EnteFile,
     ) {
-        const timestamp = sourceEnteFile.metadata.creationTime;
+        const timestamp = fileCreationTime(sourceEnteFile);
         const dateTime = sourceEnteFile.pubMagicMetadata?.data.dateTime;
         const offset = sourceEnteFile.pubMagicMetadata?.data.offsetTime;
 

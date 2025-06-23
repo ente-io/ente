@@ -9,7 +9,7 @@ import {
     type EnteFile,
     type RemoteEnteFile,
 } from "ente-media/file";
-import { metadataHash } from "ente-media/file-metadata";
+import { fileCreationTime, metadataHash } from "ente-media/file-metadata";
 import { type Trash } from "ente-new/photos/services/trash";
 import HTTPService from "ente-shared/network/HTTPService";
 import localForage from "ente-shared/storage/localForage";
@@ -170,13 +170,12 @@ export const sortFiles = (files: EnteFile[], sortAsc = false) => {
     // modification.
     const factor = sortAsc ? -1 : 1;
     return files.sort((a, b) => {
-        if (a.metadata.creationTime === b.metadata.creationTime) {
-            return (
-                factor *
-                (b.metadata.modificationTime - a.metadata.modificationTime)
-            );
-        }
-        return factor * (b.metadata.creationTime - a.metadata.creationTime);
+        const at = fileCreationTime(a);
+        const bt = fileCreationTime(b);
+        return at == bt
+            ? factor *
+                  (b.metadata.modificationTime - a.metadata.modificationTime)
+            : factor * (bt - at);
     });
 };
 
@@ -269,12 +268,11 @@ export const getLocalTrashFileIDs = () =>
 const sortTrashFiles = (files: TrashedEnteFile[]) => {
     return files.sort((a, b) => {
         if (a.deleteBy === b.deleteBy) {
-            if (a.metadata.creationTime === b.metadata.creationTime) {
-                return (
-                    b.metadata.modificationTime - a.metadata.modificationTime
-                );
-            }
-            return b.metadata.creationTime - a.metadata.creationTime;
+            const at = fileCreationTime(a);
+            const bt = fileCreationTime(b);
+            return at == bt
+                ? b.metadata.modificationTime - a.metadata.modificationTime
+                : bt - at;
         }
         return (a.deleteBy ?? 0) - (b.deleteBy ?? 0);
     });
