@@ -77,14 +77,14 @@ class _PeoplePageState extends State<PeoplePage> {
     _person = widget.person;
     ClusterFeedbackService.resetLastViewedClusterID();
     _peopleChangedEvent = Bus.instance.on<PeopleChangedEvent>().listen((event) {
-      setState(() {
-        if (event.type == PeopleEventType.saveOrEditPerson) {
-          if (event.person != null &&
-              event.person!.remoteID == _person.remoteID) {
+      if (event.type == PeopleEventType.saveOrEditPerson) {
+        if (event.person != null &&
+            event.person!.remoteID == _person.remoteID) {
+          setState(() {
             _person = event.person!;
-          }
+          });
         }
-      });
+      }
     });
 
     filesFuture = loadPersonFiles();
