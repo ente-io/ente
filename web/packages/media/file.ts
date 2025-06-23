@@ -192,7 +192,7 @@ export interface FileObjectAttributes {
     decryptionHeader: string;
 }
 
-const RemoteFileObjectAttributes = z.looseObject({
+export const RemoteFileObjectAttributes = z.looseObject({
     /**
      * The decryption header (base64 string) used when encrypting the object.
      *
@@ -216,7 +216,7 @@ export interface FileInfo {
     thumbSize: number;
 }
 
-const RemoteFileInfo = z.looseObject({
+export const RemoteFileInfo = z.looseObject({
     fileSize: z.number(),
     thumbSize: z.number(),
 });

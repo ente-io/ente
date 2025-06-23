@@ -45,7 +45,9 @@ import {
     RemoteCollectionUser,
     RemotePublicURL,
 } from "ente-media/collection";
+import { RemoteFileInfo, RemoteFileObjectAttributes } from "ente-media/file";
 import {
+    FileMetadata,
     FilePrivateMagicMetadataData,
     FilePublicMagicMetadataData,
 } from "ente-media/file-metadata";
@@ -133,6 +135,11 @@ export const LocalEnteFile = z.looseObject({
     collectionID: z.number(),
     ownerID: z.number(),
     key: z.string(),
+    file: RemoteFileObjectAttributes,
+    thumbnail: RemoteFileObjectAttributes,
+    info: RemoteFileInfo.nullish().transform(nullToUndefined),
+    updationTime: z.number(),
+    metadata: FileMetadata,
     magicMetadata: createMagicMetadataSchema(FilePrivateMagicMetadataData),
     pubMagicMetadata: createMagicMetadataSchema(FilePublicMagicMetadataData),
 });
