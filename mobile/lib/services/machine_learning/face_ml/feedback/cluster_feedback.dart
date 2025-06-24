@@ -390,15 +390,13 @@ class ClusterFeedbackService<T> {
         }
       }
       final getFilesTime = DateTime.now();
-
-      final sortingStartTime = DateTime.now();
       try {
         await _sortSuggestionsOnDistanceToPerson(person, finalSuggestions);
       } catch (e, s) {
         _logger.severe("Error in sorting suggestions", e, s);
       }
       _logger.finest(
-        'getFastSuggestionForPerson post-processing suggestions took ${DateTime.now().difference(startTime).inMilliseconds} ms, of which sorting took ${DateTime.now().difference(sortingStartTime).inMilliseconds} ms and getting files took ${getFilesTime.difference(startTime).inMilliseconds} ms',
+        'getFastSuggestionForPerson post-processing suggestions took ${DateTime.now().difference(startTime).inMilliseconds} ms, of which sorting took ${DateTime.now().difference(getFilesTime).inMilliseconds} ms and getting files took ${getFilesTime.difference(startTime).inMilliseconds} ms',
       );
 
       return finalSuggestions;
