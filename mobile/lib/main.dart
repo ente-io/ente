@@ -161,7 +161,7 @@ Future<void> _runMinimally(String taskId, TimeLogger tlog) async {
   // Upload & Sync Related
   await FileUploader.instance.init(prefs, true);
   LocalFileUpdateService.instance.init(prefs);
-  await LocalSyncService.instance.init(prefs);
+  await LocalImportService.instance.init(prefs);
   RemoteSyncService.instance.init(prefs);
   await SyncService.instance.init(prefs);
 

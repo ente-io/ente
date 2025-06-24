@@ -14,7 +14,6 @@ import 'package:photos/core/constants.dart';
 import 'package:photos/core/errors.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/core/network/network.dart';
-import 'package:photos/db/collections_db.dart';
 import 'package:photos/db/files_db.dart';
 import "package:photos/db/local/table/path_config_table.dart";
 import "package:photos/db/remote/db.dart";
@@ -57,7 +56,6 @@ class CollectionsService {
 
   final _logger = Logger("CollectionsService");
 
-  late CollectionsDB _db;
   late FilesDB _filesDB;
   late Configuration _config;
   late SharedPreferences _prefs;
@@ -80,7 +78,6 @@ class CollectionsService {
   final _cachedPublicAlbumKey = <int, String>{};
 
   CollectionsService._privateConstructor() {
-    _db = CollectionsDB.instance;
     _filesDB = FilesDB.instance;
     _config = Configuration.instance;
   }
@@ -94,24 +91,10 @@ class CollectionsService {
     // todo: neeraj move it to local sync service
     await localDB.init();
 
-    final collections = await _db.getAllCollections();
-    final List<Collection> collectionsToInsert = [];
-    for (final collection in collections) {
-      // using deprecated method because the path is stored in encrypted
-      // format in the DB
-      // ignore: deprecated_member_use_from_same_package
-      final r = _cacheCollectionAttributes(collection);
-      collectionsToInsert.add(r);
+    final newColections = await remoteDB.getAllCollections();
+    for (final collection in newColections) {
+      _cacheLocalPathAndCollection(collection);
     }
-    await remoteDB.insertCollections(collectionsToInsert);
-    await _db.clearTable();
-    if (collectionsToInsert.isEmpty) {
-      final newColections = await remoteDB.getAllCollections();
-      for (final collection in newColections) {
-        _cacheLocalPathAndCollection(collection);
-      }
-    }
-
     Bus.instance.on<CollectionUpdatedEvent>().listen((event) {
       _collectionIDToNewestFileTime = null;
       if (event.collectionID != null) {
@@ -2021,19 +2004,6 @@ class CollectionsService {
 
   bool hasSyncedCollections() {
     return _prefs.containsKey(_collectionsSyncTimeKey);
-  }
-
-  @Deprecated("Use _cacheLocalPathAndCollection instead")
-  Collection _cacheCollectionAttributes(CollectionV2 collection) {
-    final String decryptedName = _getDecryptedCollectionName(collection);
-    collection.setName(decryptedName);
-    if (collection.canLinkToDevicePath(_config.getUserID()!)) {
-      collection.decryptedPath = _decryptCollectionPath(collection);
-      _localPathToCollectionID[collection.decryptedPath!] = collection.id;
-    }
-    final Collection c = Collection.fromOldCollection(collection);
-    _collectionIDToCollections[collection.id] = c;
-    return c;
   }
 
   String _decryptCollectionPath(CollectionV2 collection) {

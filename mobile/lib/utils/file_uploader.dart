@@ -1183,7 +1183,6 @@ class FileUploader {
       file.keyDecryptionNonce = keyDecryptionNonce;
       file.fileDecryptionHeader = fileDecryptionHeader;
       file.thumbnailDecryptionHeader = thumbnailDecryptionHeader;
-      file.metadataDecryptionHeader = metadataDecryptionHeader;
       return file;
     } on DioException catch (e) {
       final int statusCode = e.response?.statusCode ?? -1;
@@ -1256,7 +1255,6 @@ class FileUploader {
       file.updationTime = data["updationTime"];
       file.fileDecryptionHeader = fileDecryptionHeader;
       file.thumbnailDecryptionHeader = thumbnailDecryptionHeader;
-      file.metadataDecryptionHeader = metadataDecryptionHeader;
       return file;
     } on DioException catch (e) {
       final int statusCode = e.response?.statusCode ?? -1;

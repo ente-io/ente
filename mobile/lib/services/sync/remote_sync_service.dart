@@ -51,7 +51,7 @@ class RemoteSyncService {
   Completer<void>? _existingSync;
   bool _isExistingSyncSilent = false;
 
-  late RemoteDiffService newService;
+  late RemoteDiffService remoteDiff;
 
   static const kHasSyncedArchiveKey = "has_synced_archive";
   /* This setting is used to maintain a list of local IDs for videos that the user has manually
@@ -77,7 +77,7 @@ class RemoteSyncService {
 
   void init(SharedPreferences preferences) {
     _prefs = preferences;
-    newService = RemoteDiffService(
+    remoteDiff = RemoteDiffService(
       _collectionsService,
       RemoteFileDiffService(NetworkClient.instance.enteDio),
     );
@@ -218,7 +218,7 @@ class RemoteSyncService {
   }
 
   Future<void> _pullDiff() async {
-    await newService.syncFromRemote();
+    await remoteDiff.syncFromRemote();
     return;
     _logger.info("Pulling remote diff");
     final isFirstSync = !_collectionsService.hasSyncedCollections();

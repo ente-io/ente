@@ -1223,7 +1223,7 @@ class FilesDB with SqlDbBase {
       file.keyDecryptionNonce,
       file.fileDecryptionHeader,
       file.thumbnailDecryptionHeader,
-      file.metadataDecryptionHeader,
+      'na',
       creationTime,
       file.updationTime,
       file.fileSubType ?? -1,
@@ -1289,7 +1289,6 @@ class FilesDB with SqlDbBase {
     file.keyDecryptionNonce = row[columnKeyDecryptionNonce];
     file.fileDecryptionHeader = row[columnFileDecryptionHeader];
     file.thumbnailDecryptionHeader = row[columnThumbnailDecryptionHeader];
-    file.metadataDecryptionHeader = row[columnMetadataDecryptionHeader];
     file.fileSubType = row[columnFileSubType] ?? -1;
     file.duration = row[columnDuration] ?? 0;
     file.exif = row[columnExif];
