@@ -35,6 +35,7 @@ const maxKernelRadius = maxKernelSize ~/ 2;
 // Face thumbnail compression constants
 const int _maxFaceThumbnailSizeBytes = 1 * 1024 * 1024; // 1MB
 const int _faceThumbnailCompressionQuality = 85;
+const int _faceThumbnailMinDimension = 720;
 
 class DecodedImage {
   final Image image;
@@ -558,6 +559,8 @@ Future<Uint8List> _compressFaceThumbnailIfNeeded(Uint8List pngBytes) async {
       pngBytes,
       quality: _faceThumbnailCompressionQuality,
       format: CompressFormat.jpeg,
+      minWidth: _faceThumbnailMinDimension,
+      minHeight: _faceThumbnailMinDimension,
     );
 
     _logger.info(
