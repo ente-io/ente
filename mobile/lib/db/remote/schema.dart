@@ -115,7 +115,7 @@ class RemoteDBMigration {
       thumb_header BLOB NOT NULL,
       created_at INTEGER NOT NULL,
       updated_at INTEGER NOT NULL,
-      deleted_by INTEGER NOT NULL
+      delete_by INTEGER NOT NULL
     )
     ''',
     '''

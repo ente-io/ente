@@ -66,23 +66,6 @@ extension CollectionsServiceMapper on CollectionsService {
     return EnteFile.fromRemoteAsset(newRAsset, newCF);
   }
 
-  EnteFile copyEntryFromFile(EnteFile file, int dstCollectionID) {
-    if (file.rAsset == null || file.cf == null) {
-      throw ArgumentError(
-        "File must have remoteAsset and fileEntry to be copied.",
-      );
-    }
-    final fileKey = getFileKey(file);
-    final encResult =
-        CryptoUtil.encryptSync(fileKey, getCollectionKey(dstCollectionID));
-    return copyEntry(
-      file.rAsset!,
-      (encResult.encryptedData!, encResult.nonce!),
-      file.cf!.collectionID,
-      dstCollectionID,
-    );
-  }
-
   DiffFileItem buildDiffItem(EnteFile file, int dstCollectionID) {
     if (file.rAsset == null || file.cf == null) {
       throw ArgumentError("must have remoteAsset and fileEntry");

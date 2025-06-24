@@ -148,7 +148,7 @@ class LocalDBMigration {
        created_at INTEGER NOT NULL,
        duration_in_sec INTEGER DEFAULT 0,
        owner_id INTEGER NOT NULL,
-       PRIMARY KEY (dest_collection_id, id),
+       PRIMARY KEY (dest_collection_id, id)
     );
   ''',
     '''
