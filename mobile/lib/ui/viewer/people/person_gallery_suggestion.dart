@@ -87,7 +87,7 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
   Future<void> _loadInitialSuggestion() async {
     try {
       final suggestions = await ClusterFeedbackService.instance
-          .getFastSuggestionForPerson(widget.person);
+          .getSuggestionForPerson(widget.person);
 
       if (suggestions.isNotEmpty && mounted) {
         allSuggestions = suggestions;
