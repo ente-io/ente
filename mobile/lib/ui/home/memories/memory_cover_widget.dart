@@ -6,6 +6,7 @@ import "package:photos/theme/effects.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/home/memories/all_memories_page.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
+import "package:photos/utils/file_util.dart";
 import "package:photos/utils/navigation_util.dart";
 
 class MemoryCoverWidget extends StatefulWidget {
@@ -39,6 +40,12 @@ class MemoryCoverWidget extends StatefulWidget {
 
 class _MemoryCoverWidgetState extends State<MemoryCoverWidget> {
   @override
+  void initState() {
+    super.initState();
+    _preloadFirstUnseenMemory();
+  }
+
+  @override
   Widget build(BuildContext context) {
     //memories will be empty if all memories are deleted and setState is called
     //after FullScreenMemory screen is popped
@@ -62,10 +69,10 @@ class _MemoryCoverWidgetState extends State<MemoryCoverWidget> {
             horizontal: MemoryCoverWidget.horizontalPadding,
           ),
           child: GestureDetector(
-            onTap: () async { 
+            onTap: () async {
               await routeToPage(
                 context,
-                AllMemoriesPage( 
+                AllMemoriesPage(
                   initialPageIndex: widget.currentMemoryIndex,
                   allMemories: widget.allMemories,
                   allTitles: widget.allTitle,
@@ -210,6 +217,16 @@ class _MemoryCoverWidgetState extends State<MemoryCoverWidget> {
         ),
       ),
     );
+  }
+
+  void _preloadFirstUnseenMemory() {
+    Future.delayed(const Duration(seconds: 5), () {
+      if (widget.memories.isEmpty) return;
+
+      final index = _getNextMemoryIndex();
+      preloadThumbnail(widget.memories[index].file);
+      preloadFile(widget.memories[index].file);
+    });
   }
 
   // Returns either the first unseen memory or the memory that succeeds the
