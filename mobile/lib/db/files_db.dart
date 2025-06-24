@@ -691,18 +691,6 @@ class FilesDB with SqlDbBase {
     return FileLoadResult(filteredFiles, files.length == limit);
   }
 
-  Future<List<EnteFile>> getAllFilesCollection(int collectionID) async {
-    final db = await instance.sqliteAsyncDB;
-    const String whereClause = '$columnCollectionID = ?';
-    final List<Object> whereArgs = [collectionID];
-    final results = await db.getAll(
-      'SELECT * FROM $filesTable WHERE $whereClause',
-      whereArgs,
-    );
-    final files = convertToFiles(results);
-    return files;
-  }
-
   Future<List<EnteFile>> getAllFilesFromCollections(
     Iterable<int> collectionID,
   ) async {
@@ -754,21 +742,21 @@ class FilesDB with SqlDbBase {
   }
 
   // todo:rewrite (upload related)
-  Future<List<int>> getUploadedFileIDsToBeUpdated(int ownerID) async {
-    final db = await instance.sqliteAsyncDB;
-    final rows = await db.getAll(
-      'SELECT DISTINCT $columnUploadedFileID FROM $filesTable WHERE '
-      '($columnLocalID IS NOT NULL AND $columnOwnerID = ? AND '
-      '($columnUploadedFileID IS NOT NULL AND $columnUploadedFileID IS NOT -1) '
-      'AND $columnUpdationTime IS NULL) ORDER BY $columnCreationTime DESC ',
-      [ownerID],
-    );
-    final uploadedFileIDs = <int>[];
-    for (final row in rows) {
-      uploadedFileIDs.add(row[columnUploadedFileID] as int);
-    }
-    return uploadedFileIDs;
-  }
+  // Future<List<int>> getUploadedFileIDsToBeUpdated(int ownerID) async {
+  //   final db = await instance.sqliteAsyncDB;
+  //   final rows = await db.getAll(
+  //     'SELECT DISTINCT $columnUploadedFileID FROM $filesTable WHERE '
+  //     '($columnLocalID IS NOT NULL AND $columnOwnerID = ? AND '
+  //     '($columnUploadedFileID IS NOT NULL AND $columnUploadedFileID IS NOT -1) '
+  //     'AND $columnUpdationTime IS NULL) ORDER BY $columnCreationTime DESC ',
+  //     [ownerID],
+  //   );
+  //   final uploadedFileIDs = <int>[];
+  //   for (final row in rows) {
+  //     uploadedFileIDs.add(row[columnUploadedFileID] as int);
+  //   }
+  //   return uploadedFileIDs;
+  // }
 
   // todo:rewrite (upload related)
   Future<List<EnteFile>> getFilesInAllCollection(
@@ -840,46 +828,28 @@ class FilesDB with SqlDbBase {
     );
   }
 
-  // todo:rewrite (copy related)
-  Future<Map<String, EnteFile>>
-      getUserOwnedFilesWithSameHashForGivenListOfFiles(
-    List<String> hashes,
-    int userID,
-  ) async {
-    final db = await sqliteAsyncDB;
-    if (hashes.isEmpty) {
-      return {};
-    }
-    final inParam = hashes.map((e) => "'$e'").join(',');
-    final rows = await db.getAll('''
-      SELECT * FROM $filesTable WHERE $columnHash IN ($inParam) AND $columnOwnerID = $userID;
-      ''');
-    final matchedFiles = convertToFiles(rows);
-    return Map.fromIterable(matchedFiles, key: (e) => e.hash);
-  }
-
 // todo:rewrite (upload related)
-  Future<List<EnteFile>> getUploadedFilesWithHashes(
-    FileHashData hashData,
-    FileType fileType,
-    int ownerID,
-  ) async {
-    String inParam = "'${hashData.fileHash}'";
-    if (fileType == FileType.livePhoto && hashData.zipHash != null) {
-      inParam += ",'${hashData.zipHash}'";
-    }
-    final db = await instance.sqliteAsyncDB;
-    final rows = await db.getAll(
-      'SELECT * FROM $filesTable WHERE ($columnUploadedFileID != NULL OR '
-      '$columnUploadedFileID != -1) AND $columnOwnerID = ? AND '
-      '$columnFileType = ? AND $columnHash IN ($inParam)',
-      [
-        ownerID,
-        getInt(fileType),
-      ],
-    );
-    return convertToFiles(rows);
-  }
+  // Future<List<EnteFile>> getUploadedFilesWithHashes(
+  //   FileHashData hashData,
+  //   FileType fileType,
+  //   int ownerID,
+  // ) async {
+  //   String inParam = "'${hashData.fileHash}'";
+  //   if (fileType == FileType.livePhoto && hashData.zipHash != null) {
+  //     inParam += ",'${hashData.zipHash}'";
+  //   }
+  //   final db = await instance.sqliteAsyncDB;
+  //   final rows = await db.getAll(
+  //     'SELECT * FROM $filesTable WHERE ($columnUploadedFileID != NULL OR '
+  //     '$columnUploadedFileID != -1) AND $columnOwnerID = ? AND '
+  //     '$columnFileType = ? AND $columnHash IN ($inParam)',
+  //     [
+  //       ownerID,
+  //       getInt(fileType),
+  //     ],
+  //   );
+  //   return convertToFiles(rows);
+  // }
 
   Future<void> update(EnteFile file) async {
     final db = await instance.sqliteAsyncDB;
@@ -895,30 +865,6 @@ class FilesDB with SqlDbBase {
   }
 
   // todo:rewrite (upload related)
-  Future<void> updateUploadedFileAcrossCollections(EnteFile file) async {
-    final db = await instance.sqliteAsyncDB;
-    final parameterSet = _getParameterSetForFile(file, omitCollectionId: true)
-      ..add(file.uploadedFileID);
-    final updateAssignments = _generateUpdateAssignmentsWithPlaceholders(
-      fileGenId: file.generatedID,
-      omitCollectionId: true,
-    );
-    await db.execute(
-      'UPDATE $filesTable '
-      'SET $updateAssignments WHERE $columnUploadedFileID = ?',
-      parameterSet,
-    );
-  }
-
-  // todo:rewrite (upload related)
-  Future<void> updateLocalIDForUploaded(int uploadedID, String localID) async {
-    final db = await instance.sqliteAsyncDB;
-    await db.execute(
-      'UPDATE $filesTable SET $columnLocalID = ? WHERE $columnUploadedFileID = ?'
-      ' AND $columnLocalID IS NULL',
-      [localID, uploadedID],
-    );
-  }
 
   // todo:rewrite (upload related)
   Future<void> deleteByGeneratedID(int genID) async {
@@ -927,20 +873,6 @@ class FilesDB with SqlDbBase {
     await db.execute(
       'DELETE FROM $filesTable WHERE $columnGeneratedID = ?',
       [genID],
-    );
-  }
-
-  // todo: neeraj (rw, upload flow)
-  Future<void> deleteMultipleByGeneratedIDs(List<int> generatedIDs) async {
-    if (generatedIDs.isEmpty) {
-      return;
-    }
-
-    final db = await instance.sqliteAsyncDB;
-    final inParam = generatedIDs.join(',');
-
-    await db.execute(
-      'DELETE FROM $filesTable WHERE $columnGeneratedID IN ($inParam)',
     );
   }
 

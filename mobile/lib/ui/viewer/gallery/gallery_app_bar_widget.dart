@@ -722,7 +722,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
           MaterialPageRoute(
             builder: (context) => MapScreen(
               filesFutureFn: () async {
-                return FilesDB.instance.getAllFilesCollection(
+                return remoteCache.geFilesForCollection(
                   widget.collection!.id,
                 );
               },

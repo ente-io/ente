@@ -53,10 +53,10 @@ extension FilePropsExtn on EnteFile {
   bool canReUpload(int userID) =>
       localID != null &&
       localID!.isNotEmpty &&
+      cf != null &&
       isOwner &&
-      collectionID != null &&
       (CollectionsService.instance
-              .getCollectionByID(collectionID!)
+              .getCollectionByID(cf!.collectionID)
               ?.isOwner(userID) ??
           false);
 }

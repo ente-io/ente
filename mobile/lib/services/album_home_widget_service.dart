@@ -220,7 +220,7 @@ class AlbumHomeWidgetService {
       ),
     ).ignore();
     final getAllFilesCollection =
-        await FilesDB.instance.getAllFilesCollection(collection.id);
+        await remoteCache.geFilesForCollection(collection.id);
 
     // Then open the specific file
     final file = await FilesDB.instance.getFile(fileId);
@@ -369,8 +369,7 @@ class AlbumHomeWidgetService {
     for (final albumId in selectedAlbumIds) {
       final collection = CollectionsService.instance.getCollectionByID(albumId);
       if (collection != null) {
-        final files =
-            await FilesDB.instance.getAllFilesCollection(collection.id);
+        final files = await remoteCache.geFilesForCollection(collection.id);
         if (files.isNotEmpty) {
           albumsWithFiles[collection.id] = (collection.name ?? "Album", files);
         }

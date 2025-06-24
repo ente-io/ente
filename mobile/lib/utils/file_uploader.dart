@@ -761,7 +761,8 @@ class FileUploader {
           metadataDecryptionHeader,
         );
         // Update across all collections
-        await FilesDB.instance.updateUploadedFileAcrossCollections(remoteFile);
+        // todo:neeraj rewrite update during upload
+        // await FilesDB.instance.updateUploadedFileAcrossCollections(remoteFile);
       } else {
         final encryptedFileKeyData = CryptoUtil.encryptSync(
           fileAttributes.key!,
@@ -922,12 +923,14 @@ class FileUploader {
     }
     final bool isSandBoxFile = fileToUpload.isSharedMediaToAppSandbox;
 
-    final List<EnteFile> existingUploadedFiles =
-        await FilesDB.instance.getUploadedFilesWithHashes(
-      mediaUploadData.hashData!,
-      fileToUpload.fileType,
-      Configuration.instance.getUserID()!,
-    );
+    // todo:neeraj rewrite this to use the new FilesDB
+    final List<EnteFile> existingUploadedFiles = [];
+
+    // final List<EnteFile> existingUploadedFiles = await FilesDB.instance.getUploadedFilesWithHashes(
+    //   mediaUploadData.hashData!,
+    //   fileToUpload.fileType,
+    //   Configuration.instance.getUserID()!,
+    // );
     if (existingUploadedFiles.isEmpty) {
       // continueUploading this file
       return Tuple2(false, fileToUpload);
@@ -973,10 +976,11 @@ class FileUploader {
       );
       fileMissingLocal.localID = fileToUpload.localID;
       // set localID for the given uploadedID across collections
-      await FilesDB.instance.updateLocalIDForUploaded(
-        fileMissingLocal.uploadedFileID!,
-        fileToUpload.localID!,
-      );
+      // todo:rewrite (upload related)
+      // await FilesDB.instance.updateLocalIDForUploaded(
+      //   fileMissingLocal.uploadedFileID!,
+      //   fileToUpload.localID!,
+      // );
       // For files selected from device, during collaborative upload, we don't
       // insert entries in the FilesDB. So, we don't need to delete the entry
       if (fileToUpload.generatedID != null) {

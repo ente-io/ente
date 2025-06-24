@@ -14,6 +14,7 @@ import 'package:photos/models/file/file.dart';
 import 'package:photos/models/files_split.dart';
 import "package:photos/models/metadata/collection_magic.dart";
 import "package:photos/models/metadata/common_keys.dart";
+import "package:photos/service_locator.dart";
 import 'package:photos/services/account/user_service.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/hidden_service.dart';
@@ -510,7 +511,7 @@ class CollectionActions {
     BuildContext bContext,
   ) async {
     final List<EnteFile> files =
-        await FilesDB.instance.getAllFilesCollection(collection.id);
+        await remoteCache.geFilesForCollection(collection.id);
     await moveFilesFromCurrentCollection(
       bContext,
       collection,
@@ -527,7 +528,7 @@ class CollectionActions {
   ) async {
     try {
       final List<EnteFile> files =
-          await FilesDB.instance.getAllFilesCollection(collection.id);
+          await remoteCache.geFilesForCollection(collection.id);
       await moveFilesFromCurrentCollection(bContext, collection, files);
     } catch (e) {
       logger.severe("Failed to remove files from uncategorized", e);

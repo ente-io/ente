@@ -23,6 +23,23 @@ class RemoteCache {
     return files;
   }
 
+  Future<List<EnteFile>> geFilesForCollection(int collectionID) async {
+    final cf = await remoteDB.getCollectionFiles(
+      FilterQueryParam(
+        collectionID: collectionID,
+      ),
+    );
+    final _ = isLoaded ?? await _load();
+    final List<EnteFile> files = [];
+    for (final file in cf) {
+      final asset = remoteAssets[file.fileID];
+      if (asset != null) {
+        files.add(EnteFile.fromRemoteAsset(asset, file));
+      }
+    }
+    return files;
+  }
+
   Future<FileLoadResult> getCollectionFilesResult(
     FilterQueryParam? params,
   ) async {
