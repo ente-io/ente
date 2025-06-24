@@ -1,32 +1,7 @@
-// TODO: Audit this file
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-
-import log from "ente-base/log";
-import { apiURL } from "ente-base/origins";
 import { type Collection } from "ente-media/collection";
-import { decryptRemoteFile, type EnteFile } from "ente-media/file";
-import {
-    getTrashedFiles,
-    type RemoteTrashItem,
-    type TrashItem,
-} from "ente-new/photos/services/trash";
-import HTTPService from "ente-shared/network/HTTPService";
 import localForage from "ente-shared/storage/localForage";
-import { getToken } from "ente-shared/storage/localStorage/helpers";
-import {
-    getCollectionByID,
-    getCollectionChanges,
-    isHiddenCollection,
-} from "./collection";
-import {
-    savedCollections,
-    savedTrashItemCollectionKeys,
-    savedTrashItems,
-    saveTrashItemCollectionKeys,
-    saveTrashItems,
-} from "./photos-fdb";
+import { getCollectionChanges, isHiddenCollection } from "./collection";
+import { savedCollections } from "./photos-fdb";
 
 const COLLECTION_TABLE = "collections";
 const HIDDEN_COLLECTION_IDS = "hidden-collection-ids";
@@ -118,4 +93,3 @@ export const syncCollections = async () => {
 
     return collections;
 };
-
