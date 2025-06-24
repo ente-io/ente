@@ -454,7 +454,7 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
                               ),
                               const SizedBox(width: 8),
                               Text(
-                                "No",
+                                S.of(context).no,
                                 style: textTheme.bodyBold.copyWith(
                                   color: colorScheme.warning500,
                                 ),
@@ -488,7 +488,7 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
                               ),
                               const SizedBox(width: 8),
                               Text(
-                                "Yes",
+                                S.of(context).yes,
                                 style: textTheme.bodyBold.copyWith(
                                   color: textBaseDark,
                                 ),
@@ -500,13 +500,13 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
                     ),
                   ],
                 ),
-                const SizedBox(height: 4),
                 GestureDetector(
+                  behavior: HitTestBehavior.opaque,
                   onTap: isProcessing ? null : () => _saveAsAnotherPerson(),
                   child: Padding(
                     padding: const EdgeInsets.symmetric(
-                      vertical: 8,
-                      horizontal: 16,
+                      vertical: 12,
+                      horizontal: 32,
                     ),
                     child: Text(
                       S.of(context).saveAsAnotherPerson,
