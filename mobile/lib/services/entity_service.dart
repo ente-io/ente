@@ -221,20 +221,20 @@ class EntityService {
     }
   }
 
+  Future<String?> getUpdatedAtHash(
+    EntityType type,
+    List<String> ids,
+  ) async {
+    return await _db.getUpdatedAtHash(type, ids);
+  }
+
   Future<String> getHashForIds(List<String> personIds) async {
-    String preHash = "";
+    final preHash = await getUpdatedAtHash(EntityType.cgroup, personIds);
 
-    for (final id in personIds) {
-      final entity = await getEntity(EntityType.cgroup, id);
-
-      if (entity != null) {
-        preHash = "$id:${entity.updatedAt}_";
-      }
-    }
-
-    if (preHash.isEmpty) {
+    if (preHash == null) {
       return "";
     }
+
     final hash = md5.convert(utf8.encode(preHash)).toString().substring(0, 10);
     return hash;
   }
