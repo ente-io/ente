@@ -5,11 +5,13 @@ import "package:photo_manager/photo_manager.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/db/files_db.dart";
+import "package:photos/db/local/table/shared_assets.dart";
 import "package:photos/events/collection_updated_event.dart";
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection/collection.dart';
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/selected_files.dart';
+import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
 import 'package:photos/services/favorites_service.dart';
 import "package:photos/services/hidden_service.dart";
@@ -203,12 +205,12 @@ extension CollectionFileActions on CollectionActions {
       final List<EnteFile> filesPendingUpload = [];
       final int currentUserID = Configuration.instance.getUserID()!;
       if (sharedFiles != null) {
-        filesPendingUpload.addAll(
-          await convertIncomingSharedMediaToFile(
-            sharedFiles,
-            collectionID,
-          ),
+        final sharedAssets = await convertIncomingSharedMediaToFile(
+          sharedFiles,
+          collectionID,
+          Configuration.instance.getUserID()!,
         );
+        await localDB.insertSharedAssets(sharedAssets);
       } else if (picketAssets != null) {
         filesPendingUpload.addAll(
           await convertPicketAssets(

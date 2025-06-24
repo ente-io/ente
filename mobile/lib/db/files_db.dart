@@ -16,7 +16,6 @@ import 'package:photos/models/file_load_result.dart';
 import 'package:photos/models/location/location.dart';
 import "package:photos/models/metadata/common_keys.dart";
 import "package:photos/services/filter/db_filters.dart";
-import 'package:photos/utils/file_uploader_util.dart';
 import 'package:sqlite_async/sqlite_async.dart';
 
 class FilesDB with SqlDbBase {

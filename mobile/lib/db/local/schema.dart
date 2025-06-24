@@ -141,14 +141,19 @@ class LocalDBMigration {
     ''',
     '''
       CREATE TABLE shared_assets (
-       id TEXT PRIMARY KEY,
+       dest_collection_id INTEGER NOT NULL,
+       id TEXT NOT NULL,
+       name TEXT NOT NULL,
        type INTEGER NOT NULL,
        created_at INTEGER NOT NULL,
        duration_in_sec INTEGER DEFAULT 0,
-       dest_collection_id INTEGER NOT NULL,
-       owner_id INTEGER NOT NULL
+       owner_id INTEGER NOT NULL,
+       PRIMARY KEY (dest_collection_id, id),
     );
   ''',
+    '''
+        CREATE INDEX IF NOT EXISTS sa_collection_owner ON shared_assets(dest_collection_id, owner_id);
+    ''',
     '''
     CREATE TABLE device_path (
       path_id TEXT PRIMARY KEY,

@@ -17,6 +17,7 @@ import 'package:photos/core/errors.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/core/network/network.dart';
 import 'package:photos/db/files_db.dart';
+import "package:photos/db/local/table/shared_assets.dart";
 import 'package:photos/db/upload_locks_db.dart';
 import "package:photos/events/backup_updated_event.dart";
 import "package:photos/events/file_uploaded_event.dart";
@@ -394,9 +395,7 @@ class FileUploader {
         final sharedFiles = await Directory(sharedMediaDir).list().toList();
         if (sharedFiles.isNotEmpty) {
           _logger.info('Shared media directory cleanup ${sharedFiles.length}');
-          final int ownerID = Configuration.instance.getUserID()!;
-          final existingLocalFileIDs =
-              await FilesDB.instance.getExistingLocalFileIDs(ownerID);
+          final existingLocalFileIDs = await localDB.getSharedAssetsID();
           final Set<String> trackedSharedFilePaths = {};
           for (String localID in existingLocalFileIDs) {
             if (localID.contains(sharedMediaIdentifier)) {

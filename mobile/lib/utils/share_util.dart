@@ -8,12 +8,12 @@ import 'package:path/path.dart';
 import "package:photo_manager/photo_manager.dart";
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
-import "package:photos/db/files_db.dart";
 import "package:photos/db/remote/schema.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/collection/collection.dart";
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
+import "package:photos/models/local/shared_asset.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/ui/sharing/show_images_prevew.dart";
 import 'package:photos/utils/dialog_util.dart';
@@ -113,11 +113,12 @@ Future<ShareResult> shareText(
   }
 }
 
-Future<List<EnteFile>> convertIncomingSharedMediaToFile(
+Future<List<SharedAsset>> convertIncomingSharedMediaToFile(
   List<SharedMediaFile> sharedMedia,
   int collectionID,
+  int ownerID,
 ) async {
-  final List<EnteFile> localFiles = [];
+  final List<SharedAsset> sharedAssets = [];
   for (var media in sharedMedia) {
     if (!(media.type == SharedMediaType.image ||
         media.type == SharedMediaType.video)) {
@@ -129,7 +130,11 @@ Future<List<EnteFile>> convertIncomingSharedMediaToFile(
     final enteFile = EnteFile();
     final sharedLocalId = const Uuid().v4();
     // fileName: img_x.jpg
-    enteFile.title = basename(media.path);
+    final String name = basename(media.path);
+    int creationTime = 0;
+    int durationInSeconds = 0;
+    final fileType =
+        media.type == SharedMediaType.image ? FileType.image : FileType.video;
     var ioFile = File(media.path);
     try {
       ioFile = ioFile.renameSync(
@@ -156,32 +161,37 @@ Future<List<EnteFile>> convertIncomingSharedMediaToFile(
         rethrow;
       }
     }
-    enteFile.localID = sharedMediaIdentifier + sharedLocalId;
-    enteFile.collectionID = collectionID;
-    enteFile.fileType =
-        media.type == SharedMediaType.image ? FileType.image : FileType.video;
-    if (enteFile.fileType == FileType.image) {
+
+    if (fileType == FileType.image) {
       final dateResult = await tryParseExifDateTime(ioFile, null);
       if (dateResult != null && dateResult.time != null) {
-        enteFile.creationTime = dateResult.time!.microsecondsSinceEpoch;
+        creationTime = dateResult.time!.microsecondsSinceEpoch;
       }
-    } else if (enteFile.fileType == FileType.video) {
-      enteFile.duration = (media.duration ?? 0) ~/ 1000;
+    } else if (fileType == FileType.video) {
+      durationInSeconds = (media.duration ?? 0) ~/ 1000;
     }
-    if (enteFile.creationTime == null || enteFile.creationTime == 0) {
+    if (creationTime == 0) {
       final parsedDateTime =
           parseDateTimeFromFileNameV2(basenameWithoutExtension(media.path));
       if (parsedDateTime != null) {
-        enteFile.creationTime = parsedDateTime.microsecondsSinceEpoch;
+        creationTime = parsedDateTime.microsecondsSinceEpoch;
       } else {
-        enteFile.creationTime = DateTime.now().microsecondsSinceEpoch;
+        creationTime = DateTime.now().microsecondsSinceEpoch;
       }
     }
-    enteFile.modificationTime = enteFile.creationTime;
-    enteFile.metadataVersion = EnteFile.kCurrentMetadataVersion;
-    localFiles.add(enteFile);
+    sharedAssets.add(
+      SharedAsset(
+        id: sharedLocalId,
+        name: name,
+        type: fileType,
+        creationTime: creationTime,
+        durationInSeconds: durationInSeconds,
+        destCollectionID: collectionID,
+        ownerID: ownerID,
+      ),
+    );
   }
-  return localFiles;
+  return sharedAssets;
 }
 
 Future<List<EnteFile>> convertPicketAssets(
