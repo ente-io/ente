@@ -35,7 +35,8 @@ export interface TrashItem {
      */
     updatedAt: number;
     /**
-     * Timestamp (epoch microseconds) when the file will be permanently deleted.
+     * Timestamp (epoch microseconds) when the trash item (along with its
+     * associated {@link EnteFile}) will be permanently deleted.
      */
     deleteBy: number;
 }
@@ -79,21 +80,28 @@ export type RemoteTrashItem = z.infer<typeof RemoteTrashItem>;
  * locally.
  *
  * @param onUpdateTrashFiles A callback invoked when the locally persisted trash
- * items are updated. This can be used for the UI to also update its state. This
- * callback can be invoked multiple times during the pull (once for each batch
- * that gets pulled and processed).
+ * items are updated. This can be used for the UI to also update its state.
+ *
+ * This callback can be invoked multiple times during the pull (once for each
+ * batch that gets pulled and processed).
+ *
+ * Each time, it gets passed a list of all the items that are present in trash,
+ * sorted in ascending order of their time to deletion. For more details about
+ * the sorting order, see {@link sortTrashItems}.
  *
  * @param onPruneDeletedFileIDs A callback invoked when files that were
  * previously in trash have now been permanently deleted. This can be used by
  * other subsystems to prune data referring to files that now have been deleted
- * permanently. This callback can be invoked multiple times during the pull
- * (once for each batch that gets processed).
+ * permanently.
+ *
+ * This callback can be invoked multiple times during the pull (once for each
+ * batch that gets processed).
  */
-export async function pullTrash(
+export const pullTrash = async (
     collections: Collection[],
     onUpdateTrashFiles: ((files: EnteFile[]) => void) | undefined,
     onPruneDeletedFileIDs: (deletedFileIDs: Set<number>) => Promise<void>,
-): Promise<void> {
+): Promise<void> => {
     // Data structures:
     //
     // `collectionKeyByID` is a map from collection ID => collection key.
@@ -129,6 +137,7 @@ export async function pullTrash(
     while (true) {
         const { diff, hasMore } = await getTrashDiff(sinceTime);
         if (!diff.length) break;
+
         // IDs of files that we encounter in this batch that have been
         // permanently deleted.
         const deletedFileIDs = new Set<number>();
@@ -175,7 +184,7 @@ export async function pullTrash(
             .filter(([id]) => trashCollectionIDs.has(id))
             .map(([id, key]) => ({ id, key })),
     );
-}
+};
 
 /**
  * See {@link FileDiffResponse} for general semantics of diff responses.
@@ -204,6 +213,63 @@ const getTrashDiff = async (sinceTime: number) => {
     ensureOk(res);
     return TrashDiffResponse.parse(await res.json());
 };
+
+/**
+ * Return all the trash items present locally after sorting them.
+ */
+export async function getLocalTrashedFiles() {
+    return getTrashedFiles(await savedTrashItems());
+}
+
+/**
+ * A file augmented with the date when it will be permanently deleted.
+ */
+export type EnteTrashFile = EnteFile & {
+    /**
+     * Timestamp (epoch microseconds) when the trash item (and its corresponding
+     * {@link EnteFile}) will be permanently deleted.
+     */
+    deleteBy?: number;
+};
+
+const getTrashedFiles = (trashItems: TrashItem[]): EnteTrashFile[] =>
+    sortTrashItems(trashItems).map(({ file, updatedAt, deleteBy }) => ({
+        ...file,
+        updationTime: updatedAt,
+        deleteBy,
+    }));
+
+/**
+ * Sort trash items such that the items which will be permanently deleted
+ * earlier are first.
+ *
+ * This is a variant of {@link sortFiles}; it sorts {@link items} in place and
+ * also returns a reference to the same mutated arrays.
+ *
+ * Items are sorted in ascending order of their time to deletion. For items with
+ * the same time to deletion, the ordering is in descending order of the item's
+ * file's modification or creation date.
+ */
+const sortTrashItems = (trashItems: TrashItem[]) =>
+    trashItems.sort((a, b) => {
+        if (a.deleteBy == b.deleteBy) {
+            const af = a.file;
+            const bf = b.file;
+            const at = fileCreationTime(af);
+            const bt = fileCreationTime(bf);
+            return at == bt
+                ? bf.metadata.modificationTime - af.metadata.modificationTime
+                : bt - at;
+        }
+        return a.deleteBy - b.deleteBy;
+    });
+
+/**
+ * Return the IDs of all the files that are part of the trash in our local
+ * database.
+ */
+export const getLocalTrashFileIDs = () =>
+    savedTrashItems().then((items) => new Set(items.map((f) => f.file.id)));
 
 /**
  * Delete all the items in trash, permanently deleting the files corresponding
@@ -238,47 +304,3 @@ const postTrashEmpty = async (lastUpdatedAt: number) =>
             body: JSON.stringify({ lastUpdatedAt }),
         }),
     );
-
-export async function getLocalTrashedFiles() {
-    return getTrashedFiles(await savedTrashItems());
-}
-
-/**
- * A file augmented with the date when it will be permanently deleted.
- */
-export type EnteTrashFile = EnteFile & {
-    /**
-     * Timestamp (epoch microseconds) when this file, which is already in trash,
-     * will be permanently deleted.
-
-     */
-    deleteBy?: number;
-};
-
-export const getTrashedFiles = (trash: TrashItem[]): EnteTrashFile[] =>
-    sortTrashFiles(
-        trash.map(({ file, updatedAt, deleteBy }) => ({
-            ...file,
-            updationTime: updatedAt,
-            deleteBy,
-        })),
-    );
-
-const sortTrashFiles = (files: EnteTrashFile[]) =>
-    files.sort((a, b) => {
-        if (a.deleteBy === b.deleteBy) {
-            const at = fileCreationTime(a);
-            const bt = fileCreationTime(b);
-            return at == bt
-                ? b.metadata.modificationTime - a.metadata.modificationTime
-                : bt - at;
-        }
-        return (a.deleteBy ?? 0) - (b.deleteBy ?? 0);
-    });
-
-/**
- * Return the IDs of all the files that are part of the trash in our local
- * database.
- */
-export const getLocalTrashFileIDs = () =>
-    savedTrashItems().then((items) => new Set(items.map((f) => f.file.id)));
