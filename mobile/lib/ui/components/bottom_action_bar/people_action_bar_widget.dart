@@ -21,8 +21,8 @@ class _PeopleActionBarWidgetState extends State<PeopleActionBarWidget> {
 
   @override
   void initState() {
-    widget.selectedPeople?.addListener(_selectedPeopleListener);
     super.initState();
+    widget.selectedPeople?.addListener(_selectedPeopleListener);
   }
 
   @override

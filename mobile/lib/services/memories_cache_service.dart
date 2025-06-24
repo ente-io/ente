@@ -55,7 +55,7 @@ class MemoriesCacheService {
   final _memoriesGetLock = Lock();
 
   MemoriesCacheService(this._prefs) {
-    _logger.fine("MemoriesCacheService constructor");
+    _logger.info("MemoriesCacheService constructor");
 
     Future.delayed(_kCacheUpdateDelay, () {
       _checkIfTimeToUpdateCache();

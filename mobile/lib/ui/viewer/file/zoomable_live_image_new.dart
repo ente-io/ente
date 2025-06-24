@@ -211,7 +211,7 @@ class _ZoomableLiveImageNewState extends State<ZoomableLiveImageNew>
           index: index,
         );
       } else if (_enteFile.isMotionPhoto && _enteFile.canEditMetaInfo) {
-        _logger.finest('Incorrectly tagged as MP, reset tag ${_enteFile.tag}');
+        _logger.info('Incorrectly tagged as MP, reset tag ${_enteFile.tag}');
         FileMagicService.instance.updatePublicMagicMetadata(
           [_enteFile],
           {motionVideoIndexKey: 0},

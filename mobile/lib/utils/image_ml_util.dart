@@ -35,6 +35,7 @@ const maxKernelRadius = maxKernelSize ~/ 2;
 // Face thumbnail compression constants
 const int _maxFaceThumbnailSizeBytes = 1 * 1024 * 1024; // 1MB
 const int _faceThumbnailCompressionQuality = 85;
+const int _faceThumbnailMinDimension = 720;
 
 class DecodedImage {
   final Image image;
@@ -540,24 +541,22 @@ Future<Uint8List> _cropAndEncodeCanvas(
     width: width,
     height: height,
   );
-  final pngBytes = await _encodeImageToPng(croppedImage);
-  return await _compressFaceThumbnailIfNeeded(pngBytes);
+  return await _encodeImageToPng(croppedImage);
 }
 
-/// Compresses the face thumbnail if it's too large in size.
-///
-/// Returns compressed bytes if the original size exceeds [_maxFaceThumbnailSizeBytes],
-/// otherwise returns the original bytes.
-Future<Uint8List> _compressFaceThumbnailIfNeeded(Uint8List pngBytes) async {
-  if (pngBytes.length <= _maxFaceThumbnailSizeBytes) {
-    return pngBytes;
-  }
+bool shouldCompressFaceThumbnail(Uint8List pngBytes) {
+  return pngBytes.length > _maxFaceThumbnailSizeBytes;
+}
 
+Future<Uint8List> compressFaceThumbnail(Map args) async {
+  final pngBytes = args['pngBytes'] as Uint8List;
   try {
     final compressedBytes = await FlutterImageCompress.compressWithList(
       pngBytes,
       quality: _faceThumbnailCompressionQuality,
       format: CompressFormat.jpeg,
+      minWidth: _faceThumbnailMinDimension,
+      minHeight: _faceThumbnailMinDimension,
     );
 
     _logger.info(

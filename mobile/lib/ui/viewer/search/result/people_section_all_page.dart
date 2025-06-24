@@ -310,7 +310,7 @@ class FaceSearchResult extends StatelessWidget {
       clusterID: params[kClusterParamId],
       key: params.containsKey(kPersonWidgetKey)
           ? ValueKey(params[kPersonWidgetKey])
-          : null,
+          : ValueKey(params[kPersonParamID] ?? params[kClusterParamId]),
     );
   }
 }
@@ -336,6 +336,7 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
   final streamSubscriptions = <StreamSubscription>[];
   bool _showingAllFaces = false;
   bool _isLoaded = false;
+  bool _isInitialLoad = true;
 
   bool get _showMoreLessOption => !widget.namedOnly && extraFaces.isNotEmpty;
 
@@ -349,6 +350,7 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
       streamSubscriptions.add(
         stream.listen((event) async {
           setState(() {
+            _isInitialLoad = false;
             _isLoaded = false;
             sectionData = getResults();
           });
@@ -413,7 +415,9 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
     return FutureBuilder<List<GenericSearchResult>>(
       future: sectionData,
       builder: (context, snapshot) {
-        if (!_isLoaded && snapshot.connectionState == ConnectionState.waiting) {
+        if (!_isLoaded &&
+            snapshot.connectionState == ConnectionState.waiting &&
+            _isInitialLoad) {
           return const Center(child: EnteLoadingWidget());
         } else if (snapshot.hasError) {
           return const Center(child: Icon(Icons.error_outline_rounded));

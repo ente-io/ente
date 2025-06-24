@@ -13,7 +13,6 @@ import 'package:photos/models/gallery_type.dart';
 import "package:photos/models/ml/face/person.dart";
 import "package:photos/models/search/search_result.dart";
 import 'package:photos/models/selected_files.dart';
-import "package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart";
 import "package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart";
 import "package:photos/services/machine_learning/ml_result.dart";
 import "package:photos/services/search_service.dart";
@@ -28,8 +27,6 @@ import "package:photos/ui/viewer/gallery/state/selection_state.dart";
 import "package:photos/ui/viewer/people/link_email_screen.dart";
 
 import "package:photos/ui/viewer/people/people_app_bar.dart";
-import "package:photos/ui/viewer/people/people_banner.dart";
-import "package:photos/ui/viewer/people/person_cluster_suggestion.dart";
 import "package:photos/ui/viewer/people/person_gallery_suggestion.dart";
 import "package:photos/utils/navigation_util.dart";
 
@@ -56,17 +53,9 @@ class _PeoplePageState extends State<PeoplePage> {
   final Logger _logger = Logger("_PeoplePageState");
   final _selectedFiles = SelectedFiles();
   List<EnteFile>? files;
-  int? smallestClusterSize;
   Future<List<EnteFile>> filesFuture = Future.value([]);
   late PersonEntity _person;
 
-  bool get showSuggestionBanner => (!userDismissedSuggestionBanner &&
-      smallestClusterSize != null &&
-      smallestClusterSize! >= kMinimumClusterSizeSearchResult &&
-      files != null &&
-      files!.isNotEmpty);
-
-  bool userDismissedSuggestionBanner = false;
   bool userDismissedPersonGallerySuggestion = false;
 
   late final StreamSubscription<LocalPhotosUpdatedEvent> _filesUpdatedEvent;
@@ -127,10 +116,6 @@ class _PeoplePageState extends State<PeoplePage> {
       );
       return [];
     }
-    smallestClusterSize = result.values.fold<int>(result.values.first.length,
-        (previousValue, element) {
-      return element.length < previousValue ? element.length : previousValue;
-    });
     final List<EnteFile> resultFiles = [];
     for (final e in result.entries) {
       resultFiles.addAll(e.value);
@@ -178,85 +163,49 @@ class _PeoplePageState extends State<PeoplePage> {
               );
               if (snapshot.hasData) {
                 final personFiles = snapshot.data as List<EnteFile>;
-                return Column(
-                  children: [
-                    Expanded(
-                      child: SelectionState(
-                        selectedFiles: _selectedFiles,
-                        child: Stack(
-                          alignment: Alignment.bottomCenter,
-                          children: [
-                            inheritedSearchFilterData.isHierarchicalSearchable
-                                ? ValueListenableBuilder(
-                                    valueListenable: inheritedSearchFilterData
-                                        .searchFilterDataProvider!
-                                        .isSearchingNotifier,
-                                    builder: (
-                                      context,
-                                      value,
-                                      _,
-                                    ) {
-                                      return value
-                                          ? HierarchicalSearchGallery(
-                                              tagPrefix: widget.tagPrefix,
-                                              selectedFiles: _selectedFiles,
-                                            )
-                                          : _Gallery(
-                                              tagPrefix: widget.tagPrefix,
-                                              selectedFiles: _selectedFiles,
-                                              personFiles: personFiles,
-                                              loadPersonFiles: loadPersonFiles,
-                                              personEntity: _person,
-                                            );
-                                    },
-                                  )
-                                : _Gallery(
-                                    tagPrefix: widget.tagPrefix,
-                                    selectedFiles: _selectedFiles,
-                                    personFiles: personFiles,
-                                    loadPersonFiles: loadPersonFiles,
-                                    personEntity: _person,
-                                  ),
-                            FileSelectionOverlayBar(
-                              PeoplePage.overlayType,
-                              _selectedFiles,
-                              person: _person,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    showSuggestionBanner
-                        ? Dismissible(
-                            key: const Key("suggestionBanner"),
-                            direction: DismissDirection.horizontal,
-                            onDismissed: (direction) {
-                              setState(() {
-                                userDismissedSuggestionBanner = true;
-                              });
-                            },
-                            child: PeopleBanner(
-                              type: PeopleBannerType.suggestion,
-                              startIcon: Icons.face_retouching_natural,
-                              actionIcon: Icons.search_outlined,
-                              text: "Review suggestions",
-                              subText: "Improve the results",
-                              onTap: () async {
-                                unawaited(
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder: (context) =>
-                                          PersonReviewClusterSuggestion(
-                                        _person,
-                                      ),
-                                    ),
-                                  ),
-                                );
+                return SelectionState(
+                  selectedFiles: _selectedFiles,
+                  child: Stack(
+                    alignment: Alignment.bottomCenter,
+                    children: [
+                      inheritedSearchFilterData.isHierarchicalSearchable
+                          ? ValueListenableBuilder(
+                              valueListenable: inheritedSearchFilterData
+                                  .searchFilterDataProvider!
+                                  .isSearchingNotifier,
+                              builder: (
+                                context,
+                                value,
+                                _,
+                              ) {
+                                return value
+                                    ? HierarchicalSearchGallery(
+                                        tagPrefix: widget.tagPrefix,
+                                        selectedFiles: _selectedFiles,
+                                      )
+                                    : _Gallery(
+                                        tagPrefix: widget.tagPrefix,
+                                        selectedFiles: _selectedFiles,
+                                        personFiles: personFiles,
+                                        loadPersonFiles: loadPersonFiles,
+                                        personEntity: _person,
+                                      );
                               },
+                            )
+                          : _Gallery(
+                              tagPrefix: widget.tagPrefix,
+                              selectedFiles: _selectedFiles,
+                              personFiles: personFiles,
+                              loadPersonFiles: loadPersonFiles,
+                              personEntity: _person,
                             ),
-                          )
-                        : const SizedBox.shrink(),
-                  ],
+                      FileSelectionOverlayBar(
+                        PeoplePage.overlayType,
+                        _selectedFiles,
+                        person: _person,
+                      ),
+                    ],
+                  ),
                 );
               } else if (snapshot.hasError) {
                 _logger

@@ -1,4 +1,4 @@
-import 'dart:developer' as dev;
+import 'dart:developer' as dev show log;
 import "dart:math" show Random, min;
 
 import "package:computer/computer.dart";
@@ -141,7 +141,6 @@ class ClusterFeedbackService<T> {
     PersonEntity p,
   ) async {
     try {
-      _logger.info('removeFilesFromPerson called');
       // Get the relevant faces to be removed
       final faceIDs = await mlDataDB
           .getFaceIDsForPerson(p.remoteID)
@@ -191,7 +190,6 @@ class ClusterFeedbackService<T> {
           .removeFacesFromPerson(person: p, faceIDs: faceIDs.toSet());
 
       Bus.instance.fire(PeopleChangedEvent());
-      _logger.info('removeFilesFromPerson done');
       return;
     } catch (e, s) {
       _logger.severe("Error in removeFilesFromPerson", e, s);
@@ -203,7 +201,6 @@ class ClusterFeedbackService<T> {
     String faceID,
     PersonEntity person,
   ) async {
-    _logger.info('removeFaceFromPerson called');
     try {
       final updatedClusterID = newClusterID();
       final newFaceIdToClusterID = {faceID: updatedClusterID};
@@ -224,7 +221,6 @@ class ClusterFeedbackService<T> {
           source: person.remoteID,
         ),
       );
-      _logger.info('removeFaceFromPerson done');
       return updatedClusterID;
     } catch (e, s) {
       _logger.severe("Error in removeFaceFromPerson", e, s);
@@ -294,7 +290,6 @@ class ClusterFeedbackService<T> {
     required String faceID,
     String? clusterID,
   }) async {
-    _logger.info('removeFaceFromCluster called');
     try {
       final updatedClusterID = newClusterID();
       final newFaceIdToClusterID = {faceID: updatedClusterID};
@@ -307,7 +302,6 @@ class ClusterFeedbackService<T> {
           source: clusterID ?? "",
         ),
       );
-      _logger.info('removeFaceFromCluster done, with $newFaceIdToClusterID');
       return updatedClusterID;
     } catch (e, s) {
       _logger.severe("Error in removeFaceFromCluster", e, s);
@@ -328,10 +322,6 @@ class ClusterFeedbackService<T> {
   Future<List<ClusterSuggestion>> getFastSuggestionForPerson(
     PersonEntity person,
   ) async {
-    _logger.info(
-      'getFastSuggestionForPerson ${kDebugMode ? person.data.name : person.remoteID}',
-    );
-
     // Get the biggest cluster, to be used for quick suggestion calculation
     final personClusters = await mlDataDB.getPersonClusterIDs(person.remoteID);
     final allClusterIdsToCountMap = (await mlDataDB.clusterIdToFaceCount());
@@ -400,15 +390,13 @@ class ClusterFeedbackService<T> {
         }
       }
       final getFilesTime = DateTime.now();
-
-      final sortingStartTime = DateTime.now();
       try {
         await _sortSuggestionsOnDistanceToPerson(person, finalSuggestions);
       } catch (e, s) {
         _logger.severe("Error in sorting suggestions", e, s);
       }
       _logger.info(
-        'getFastSuggestionForPerson post-processing suggestions took ${DateTime.now().difference(startTime).inMilliseconds} ms, of which sorting took ${DateTime.now().difference(sortingStartTime).inMilliseconds} ms and getting files took ${getFilesTime.difference(startTime).inMilliseconds} ms',
+        'getFastSuggestionForPerson post-processing suggestions took ${DateTime.now().difference(startTime).inMilliseconds} ms, of which sorting took ${DateTime.now().difference(getFilesTime).inMilliseconds} ms and getting files took ${getFilesTime.difference(startTime).inMilliseconds} ms',
       );
 
       return finalSuggestions;
@@ -857,7 +845,6 @@ class ClusterFeedbackService<T> {
     double threshold, {
     Set<String>? extraIgnoredClusters,
   }) async {
-    _logger.fine('Getting fast suggestions');
     final allClusterIdsToCountMap = (await mlDataDB.clusterIdToFaceCount());
     final personignoredClusters =
         await mlDataDB.getPersonIgnoredClusters(person.remoteID);

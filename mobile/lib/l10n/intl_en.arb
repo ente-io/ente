@@ -1772,5 +1772,6 @@
   "thePersonGroupsWillNotBeDisplayed": "The person groups will not be displayed in the people section anymore. Photos will remain untouched.",
   "thePersonWillNotBeDisplayed": "The person will not be displayed in the people section anymore. Photos will remain untouched.",
   "areYouSureYouWantToMergeThem": "Are you sure you want to merge them?",
-  "allUnnamedGroupsWillBeMergedIntoTheSelectedPerson": "All unnamed groups will be merged into the selected person. This can still be undone from the suggestions history overview of the person."
+  "allUnnamedGroupsWillBeMergedIntoTheSelectedPerson": "All unnamed groups will be merged into the selected person. This can still be undone from the suggestions history overview of the person.",
+  "yesIgnore": "Yes, ignore"
 }

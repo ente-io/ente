@@ -12135,6 +12135,16 @@ class S {
       args: [],
     );
   }
+
+  /// `Yes, ignore`
+  String get yesIgnore {
+    return Intl.message(
+      'Yes, ignore',
+      name: 'yesIgnore',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
