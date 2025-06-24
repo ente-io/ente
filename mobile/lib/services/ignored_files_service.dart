@@ -80,11 +80,6 @@ class IgnoredFilesService {
     return null;
   }
 
-  Future<bool> shouldSkipUploadAsync(EnteFile file) async {
-    final ignoredID = await idToIgnoreReasonMap;
-    return shouldSkipUpload(ignoredID, file);
-  }
-
   // removeIgnoredMappings is used to remove the ignore mapping for the given
   // set of files so that they can be uploaded.
   Future<void> removeIgnoredMappings(List<EnteFile> files) async {

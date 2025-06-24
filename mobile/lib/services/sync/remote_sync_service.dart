@@ -65,10 +65,6 @@ class RemoteSyncService {
   static const _ignoreBackUpSettingsForIDs_ = "ignoreBackUpSettingsForIDs";
   final String _isFirstRemoteSyncDone = "isFirstRemoteSyncDone";
 
-  // 28 Sept, 2021 9:03:20 AM IST
-  static const kArchiveFeatureReleaseTime = 1632800000000000;
-  static const kHasSyncedEditTime = "has_synced_edit_time";
-
   // 29 October, 2021 3:56:40 AM IST
   static const kEditTimeFeatureReleaseTime = 1635460000000000;
 
