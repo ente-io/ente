@@ -97,6 +97,7 @@ class _FileInfoFaceWidgetState extends State<FileInfoFaceWidget> {
                         ),
                       ),
                       child: FileFaceWidget(
+                        key: ValueKey(widget.face.faceID),
                         widget.file,
                         faceCrop: widget.faceCrop,
                       ),
