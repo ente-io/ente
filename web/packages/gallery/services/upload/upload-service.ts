@@ -24,7 +24,7 @@ import {
     isFileTypeNotSupportedError,
 } from "ente-gallery/utils/detect-type";
 import { readStream } from "ente-gallery/utils/native-stream";
-import type { EnteFile, RemoteEnteFile } from "ente-media/file";
+import { decryptRemoteFile, type EnteFile } from "ente-media/file";
 import {
     fileFileName,
     metadataHash,
@@ -42,8 +42,13 @@ import {
 import { addToCollection } from "ente-new/photos/services/collection";
 import { mergeUint8Arrays } from "ente-utils/array";
 import { ensureInteger, ensureNumber } from "ente-utils/ensure";
-import type { UploadableUploadItem, UploadItem, UploadPathPrefix } from ".";
-import { type LivePhotoAssets, type UploadResult } from ".";
+import type {
+    UploadableUploadItem,
+    UploadItem,
+    UploadPathPrefix,
+    UploadResult,
+} from ".";
+import { type LivePhotoAssets } from ".";
 import { tryParseEpochMicrosecondsFromFileName } from "./date";
 import { matchJSONMetadata, type ParsedMetadataJSON } from "./metadata-json";
 import {
@@ -635,11 +640,6 @@ interface UploadContext {
     updateUploadProgress: (fileLocalID: number, percentage: number) => void;
 }
 
-interface UploadResponse {
-    uploadResult: UploadResult;
-    uploadedFile?: RemoteEnteFile | EnteFile;
-}
-
 /**
  * Upload the given {@link UploadableUploadItem}
  *
@@ -657,7 +657,7 @@ export const upload = async (
     parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>,
     worker: CryptoWorker,
     uploadContext: UploadContext,
-): Promise<UploadResponse> => {
+): Promise<UploadResult> => {
     const { abortIfCancelled } = uploadContext;
 
     log.info(`Upload ${fileName} | start`);
@@ -685,7 +685,7 @@ export const upload = async (
         } catch (e) {
             if (isFileTypeNotSupportedError(e)) {
                 log.error(`Not uploading ${fileName}`, e);
-                return { uploadResult: "unsupported" };
+                return { type: "unsupported" };
             }
             throw e;
         }
@@ -693,7 +693,7 @@ export const upload = async (
         const { fileTypeInfo, fileSize, lastModifiedMs } = assetDetails;
 
         const maxFileSize = 10 * 1024 * 1024 * 1024; /* 10 GB */
-        if (fileSize >= maxFileSize) return { uploadResult: "tooLarge" };
+        if (fileSize >= maxFileSize) return { type: "tooLarge" };
 
         abortIfCancelled();
 
@@ -717,16 +717,13 @@ export const upload = async (
                 (f) => f.collectionID == collection.id,
             );
             if (matchInSameCollection) {
-                return {
-                    uploadResult: "alreadyUploaded",
-                    uploadedFile: matchInSameCollection,
-                };
+                return { type: "alreadyUploaded", file: matchInSameCollection };
             } else {
                 // Any of the matching files can be used to add a symlink.
                 const symlink = Object.assign({}, anyMatch);
                 symlink.collectionID = collection.id;
                 await addToCollection(collection, [symlink]);
-                return { uploadResult: "addedSymlink", uploadedFile: symlink };
+                return { type: "addedSymlink", file: symlink };
             }
         }
 
@@ -778,10 +775,10 @@ export const upload = async (
         );
 
         return {
-            uploadResult: metadata.hasStaticThumbnail
+            type: metadata.hasStaticThumbnail
                 ? "uploadedWithStaticThumbnail"
                 : "uploaded",
-            uploadedFile,
+            file: await decryptRemoteFile(uploadedFile, collection.key),
         };
     } catch (e) {
         if (isUploadCancelledError(e)) {
@@ -799,11 +796,11 @@ export const upload = async (
 
             /* file specific */
             case eTagMissingErrorMessage:
-                return { uploadResult: "blocked" };
+                return { type: "blocked" };
             case fileTooLargeErrorMessage:
-                return { uploadResult: "largerThanAvailableStorage" };
+                return { type: "largerThanAvailableStorage" };
             default:
-                return { uploadResult: "failed" };
+                return { type: "failed" };
         }
     }
 };

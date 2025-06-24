@@ -3,9 +3,13 @@ import {
     isArchivedCollection,
     isPinnedCollection,
 } from "ente-gallery/services/magic-metadata";
+import {
+    groupFilesByCollectionID,
+    sortFiles,
+    uniqueFilesByID,
+} from "ente-gallery/utils/files";
 import { collectionTypes, type Collection } from "ente-media/collection";
 import type { EnteFile } from "ente-media/file";
-import { mergeMetadata } from "ente-media/file";
 import {
     isArchivedFile,
     type FilePrivateMagicMetadataData,
@@ -15,6 +19,8 @@ import {
     createCollectionNameByID,
     isHiddenCollection,
 } from "ente-new/photos/services/collection";
+import { getLatestVersionFiles } from "ente-new/photos/services/files";
+import { sortTrashItems, type TrashItem } from "ente-new/photos/services/trash";
 import { splitByPredicate } from "ente-utils/array";
 import { includes } from "ente-utils/type-guards";
 import { t } from "i18next";
@@ -29,14 +35,6 @@ import {
     type CollectionSummary,
     type CollectionSummaryType,
 } from "../../services/collection-summary";
-import {
-    createFileCollectionIDs,
-    getLatestVersionFiles,
-    groupFilesByCollectionID,
-    sortFiles,
-    uniqueFilesByID,
-    type TrashedEnteFile,
-} from "../../services/files";
 import type { PeopleState, Person } from "../../services/ml/people";
 import type { SearchSuggestion } from "../../services/search/types";
 import type { FamilyData } from "../../services/user-details";
@@ -148,11 +146,12 @@ export interface GalleryState {
      */
     lastSyncedHiddenFiles: EnteFile[];
     /**
-     * The user's files that are in trash.
+     * The items in the user's trash.
      *
-     * The list is sorted so that newer files are first.
+     * The items are sorted in ascending order of their time to deletion. For
+     * more details about the sorting order, see {@link sortTrashItems}.
      */
-    trashedFiles: EnteFile[];
+    trashItems: TrashItem[];
     /**
      * Latest snapshot of people related state, as reported by
      * {@link usePeopleStateSnapshot}.
@@ -426,7 +425,7 @@ export type GalleryAction =
           collections: Collection[];
           normalFiles: EnteFile[];
           hiddenFiles: EnteFile[];
-          trashedFiles: TrashedEnteFile[];
+          trashItems: TrashItem[];
       }
     | {
           type: "setCollections";
@@ -440,7 +439,7 @@ export type GalleryAction =
     | { type: "uploadNormalFile"; file: EnteFile }
     | { type: "setHiddenFiles"; files: EnteFile[] }
     | { type: "fetchHiddenFiles"; files: EnteFile[] }
-    | { type: "setTrashedFiles"; files: EnteFile[] }
+    | { type: "setTrashItems"; trashItems: TrashItem[] }
     | { type: "setPeopleState"; peopleState: PeopleState | undefined }
     | { type: "markTempDeleted"; files: EnteFile[] }
     | { type: "clearTempDeleted" }
@@ -475,7 +474,7 @@ const initialGalleryState: GalleryState = {
     hiddenCollections: [],
     lastSyncedNormalFiles: [],
     lastSyncedHiddenFiles: [],
-    trashedFiles: [],
+    trashItems: [],
     peopleState: undefined,
     normalFiles: [],
     hiddenFiles: [],
@@ -515,12 +514,9 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
     if (process.env.NEXT_PUBLIC_ENTE_TRACE) console.log("dispatch", action);
     switch (action.type) {
         case "mount": {
-            const lastSyncedNormalFiles = sortFiles(
-                mergeMetadata(action.normalFiles),
-            );
-            const lastSyncedHiddenFiles = sortFiles(
-                mergeMetadata(action.hiddenFiles),
-            );
+            const lastSyncedNormalFiles = sortFiles(action.normalFiles);
+            const lastSyncedHiddenFiles = sortFiles(action.hiddenFiles);
+            const trashItems = sortTrashItems(action.trashItems);
 
             // During mount there are no unsynced updates, and we can directly
             // use the provided files.
@@ -552,7 +548,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 hiddenCollections,
                 lastSyncedNormalFiles,
                 lastSyncedHiddenFiles,
-                trashedFiles: action.trashedFiles,
+                trashItems,
                 normalFiles,
                 hiddenFiles,
                 archivedCollectionIDs,
@@ -574,7 +570,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                     action.user,
                     normalCollections,
                     normalFiles,
-                    action.trashedFiles,
+                    trashItems,
                     archivedFileIDs,
                 ),
                 hiddenCollectionSummaries: deriveHiddenCollectionSummaries(
@@ -601,7 +597,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 state.user!,
                 normalCollections,
                 state.normalFiles,
-                state.trashedFiles,
+                state.trashItems,
                 archivedFileIDs,
             );
             const hiddenCollectionSummaries = deriveHiddenCollectionSummaries(
@@ -671,7 +667,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 state.user!,
                 normalCollections,
                 state.normalFiles,
-                state.trashedFiles,
+                state.trashItems,
                 archivedFileIDs,
             );
 
@@ -721,9 +717,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                     state.unsyncedPrivateMagicMetadataUpdates,
                     action.files,
                 );
-            const lastSyncedNormalFiles = sortFiles(
-                mergeMetadata(action.files),
-            );
+            const lastSyncedNormalFiles = sortFiles(action.files);
             const normalFiles = deriveFiles(
                 lastSyncedNormalFiles,
                 unsyncedPrivateMagicMetadataUpdates,
@@ -743,10 +737,8 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                     action.files,
                 );
             const lastSyncedNormalFiles = sortFiles(
-                mergeMetadata(
-                    getLatestVersionFiles(
-                        state.lastSyncedNormalFiles.concat(action.files),
-                    ),
+                getLatestVersionFiles(
+                    state.lastSyncedNormalFiles.concat(action.files),
                 ),
             );
             const normalFiles = deriveFiles(
@@ -786,9 +778,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                     state.unsyncedPrivateMagicMetadataUpdates,
                     action.files,
                 );
-            const lastSyncedHiddenFiles = sortFiles(
-                mergeMetadata(action.files),
-            );
+            const lastSyncedHiddenFiles = sortFiles(action.files);
             const hiddenFiles = deriveFiles(
                 lastSyncedHiddenFiles,
                 unsyncedPrivateMagicMetadataUpdates,
@@ -808,10 +798,8 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                     action.files,
                 );
             const lastSyncedHiddenFiles = sortFiles(
-                mergeMetadata(
-                    getLatestVersionFiles(
-                        state.lastSyncedHiddenFiles.concat(action.files),
-                    ),
+                getLatestVersionFiles(
+                    state.lastSyncedHiddenFiles.concat(action.files),
                 ),
             );
             const hiddenFiles = deriveFiles(
@@ -826,18 +814,21 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
             });
         }
 
-        case "setTrashedFiles":
+        case "setTrashItems": {
+            const trashItems = sortTrashItems(action.trashItems);
+
             return stateByUpdatingFilteredFiles({
                 ...state,
-                trashedFiles: action.files,
+                trashItems,
                 normalCollectionSummaries: deriveNormalCollectionSummaries(
                     state.user!,
                     state.normalCollections,
                     state.normalFiles,
-                    action.files,
+                    trashItems,
                     state.archivedFileIDs,
                 ),
             });
+        }
 
         case "setPeopleState": {
             const peopleState = action.peopleState;
@@ -1265,13 +1256,26 @@ const deriveFavoriteFileIDs = (
 };
 
 /**
+ * Construct a map from file IDs to the list of collections (IDs) to which the
+ * file belongs.
+ */
+const createFileCollectionIDs = (files: EnteFile[]) =>
+    files.reduce((result, file) => {
+        const id = file.id;
+        let fs = result.get(id);
+        if (!fs) result.set(id, (fs = []));
+        fs.push(file.collectionID);
+        return result;
+    }, new Map<number, number[]>());
+
+/**
  * Compute normal (non-hidden) collection summaries from their dependencies.
  */
 const deriveNormalCollectionSummaries = (
     user: User,
     normalCollections: Collection[],
     normalFiles: EnteFile[],
-    trashedFiles: EnteFile[],
+    trashItems: TrashItem[],
     archivedFileIDs: Set<number>,
 ) => {
     const normalCollectionSummaries = createCollectionSummaries(
@@ -1306,7 +1310,10 @@ const deriveNormalCollectionSummaries = (
         name: t("section_all"),
     });
     normalCollectionSummaries.set(PseudoCollectionID.trash, {
-        ...pseudoCollectionOptionsForFiles(trashedFiles),
+        ...pseudoCollectionOptionsForLatestFileAndCount(
+            trashItems[0]?.file,
+            trashItems.length,
+        ),
         id: PseudoCollectionID.trash,
         name: t("section_trash"),
         type: "trash",
@@ -1328,11 +1335,17 @@ const deriveNormalCollectionSummaries = (
     return normalCollectionSummaries;
 };
 
-const pseudoCollectionOptionsForFiles = (files: EnteFile[]) => ({
-    coverFile: files[0],
-    latestFile: files[0],
-    fileCount: files.length,
-    updationTime: files[0]?.updationTime,
+const pseudoCollectionOptionsForFiles = (files: EnteFile[]) =>
+    pseudoCollectionOptionsForLatestFileAndCount(files[0], files.length);
+
+const pseudoCollectionOptionsForLatestFileAndCount = (
+    file: EnteFile | undefined,
+    fileCount: number,
+) => ({
+    coverFile: file,
+    latestFile: file,
+    fileCount,
+    updationTime: file?.updationTime,
 });
 
 /**
@@ -1739,7 +1752,7 @@ const stateForUpdatedNormalFiles = (
         state.user!,
         state.normalCollections,
         normalFiles,
-        state.trashedFiles,
+        state.trashItems,
         state.archivedFileIDs,
     ),
     pendingSearchSuggestions: enqueuePendingSearchSuggestionsIfNeeded(
@@ -1789,7 +1802,7 @@ const stateByUpdatingFilteredFiles = (state: GalleryState) => {
     } else if (state.view?.type == "albums") {
         const filteredFiles = deriveAlbumsFilteredFiles(
             state.normalFiles,
-            state.trashedFiles,
+            state.trashItems,
             state.hiddenFileIDs,
             state.archivedCollectionIDs,
             state.archivedFileIDs,
@@ -1823,7 +1836,7 @@ const stateByUpdatingFilteredFiles = (state: GalleryState) => {
  */
 const deriveAlbumsFilteredFiles = (
     normalFiles: GalleryState["normalFiles"],
-    trashedFiles: GalleryState["trashedFiles"],
+    trashItems: GalleryState["trashItems"],
     hiddenFileIDs: GalleryState["hiddenFileIDs"],
     archivedCollectionIDs: GalleryState["archivedCollectionIDs"],
     archivedFileIDs: GalleryState["archivedFileIDs"],
@@ -1834,9 +1847,16 @@ const deriveAlbumsFilteredFiles = (
     const activeCollectionSummaryID = view.activeCollectionSummaryID;
 
     // Trash is dealt with separately.
+    //
+    // [Note: Files in trash pseudo collection have deleteBy]
+    //
+    // When showing the trash pseudo collection, each file in the files array is
+    // in fact an instance of `EnteTrashFile` - it has an additional (and
+    // optional) `deleteBy` property. The types don't reflect this.
+
     if (activeCollectionSummaryID == PseudoCollectionID.trash) {
         return uniqueFilesByID([
-            ...trashedFiles,
+            ...trashItems.map(({ file, deleteBy }) => ({ ...file, deleteBy })),
             ...normalFiles.filter((file) => tempDeletedFileIDs.has(file.id)),
         ]);
     }

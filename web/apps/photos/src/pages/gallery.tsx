@@ -73,13 +73,14 @@ import {
     areOnlySystemCollections,
     PseudoCollectionID,
 } from "ente-new/photos/services/collection-summary";
-import { getAllLocalCollections } from "ente-new/photos/services/collections";
 import exportService from "ente-new/photos/services/export";
 import { updateFilesVisibility } from "ente-new/photos/services/file";
 import {
-    getLocalFiles,
-    getLocalTrashedFiles,
-} from "ente-new/photos/services/files";
+    savedCollections,
+    savedHiddenFiles,
+    savedNormalFiles,
+    savedTrashItems,
+} from "ente-new/photos/services/photos-fdb";
 import {
     filterSearchableFiles,
     setSearchCollectionsAndFiles,
@@ -328,10 +329,10 @@ const Page: React.FC = () => {
                 type: "mount",
                 user,
                 familyData,
-                collections: await getAllLocalCollections(),
-                normalFiles: await getLocalFiles("normal"),
-                hiddenFiles: await getLocalFiles("hidden"),
-                trashedFiles: await getLocalTrashedFiles(),
+                collections: await savedCollections(),
+                normalFiles: await savedNormalFiles(),
+                hiddenFiles: await savedHiddenFiles(),
+                trashItems: await savedTrashItems(),
             });
             await syncWithRemote({ force: true });
             setIsFirstLoad(false);
@@ -556,8 +557,8 @@ const Page: React.FC = () => {
                 dispatch({ type: "setHiddenFiles", files }),
             onFetchHiddenFiles: (files) =>
                 dispatch({ type: "fetchHiddenFiles", files }),
-            onResetTrashedFiles: (files) =>
-                dispatch({ type: "setTrashedFiles", files }),
+            onSetTrashedItems: (trashItems) =>
+                dispatch({ type: "setTrashItems", trashItems }),
         });
         if (didUpdateFiles) {
             exportService.onLocalFilesUpdated();

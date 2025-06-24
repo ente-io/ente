@@ -15,14 +15,12 @@ import {
     restoreToCollection,
 } from "ente-new/photos/services/collection";
 import { PseudoCollectionID } from "ente-new/photos/services/collection-summary";
+import { getLocalCollections } from "ente-new/photos/services/collections";
+import { getLocalFiles } from "ente-new/photos/services/files";
 import {
-    getAllLocalCollections,
-    getLocalCollections,
-} from "ente-new/photos/services/collections";
-import {
-    getAllLocalFiles,
-    getLocalFiles,
-} from "ente-new/photos/services/files";
+    savedCollections,
+    savedFiles,
+} from "ente-new/photos/services/photos-fdb";
 import { safeDirectoryName } from "ente-new/photos/utils/native-fs";
 import { getData } from "ente-shared/storage/localStorage";
 import {
@@ -78,13 +76,13 @@ export async function downloadCollectionHelper(
     setFilesDownloadProgressAttributes: SetFilesDownloadProgressAttributes,
 ) {
     try {
-        const allFiles = await getAllLocalFiles();
+        const allFiles = await savedFiles();
         const collectionFiles = allFiles.filter(
-            (file) => file.collectionID === collectionID,
+            (file) => file.collectionID == collectionID,
         );
-        const allCollections = await getAllLocalCollections();
+        const allCollections = await savedCollections();
         const collection = allCollections.find(
-            (collection) => collection.id === collectionID,
+            (collection) => collection.id == collectionID,
         );
         if (!collection) {
             throw Error("collection not found");

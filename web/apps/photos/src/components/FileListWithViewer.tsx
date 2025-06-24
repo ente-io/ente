@@ -7,7 +7,7 @@ import {
 } from "ente-gallery/components/viewer/FileViewer";
 import type { Collection } from "ente-media/collection";
 import { EnteFile } from "ente-media/file";
-import { fileFileName } from "ente-media/file-metadata";
+import { fileCreationTime, fileFileName } from "ente-media/file-metadata";
 import { moveToTrash } from "ente-new/photos/services/collection";
 import { PseudoCollectionID } from "ente-new/photos/services/collection-summary";
 import { t } from "i18next";
@@ -227,8 +227,8 @@ const Container = styled("div")`
 /**
  * See: [Note: Timeline date string]
  */
-const fileTimelineDateString = (item: EnteFile) => {
-    const date = new Date(item.metadata.creationTime / 1000);
+const fileTimelineDateString = (file: EnteFile) => {
+    const date = new Date(fileCreationTime(file) / 1000);
     return isSameDay(date, new Date())
         ? t("today")
         : isSameDay(date, new Date(Date.now() - 24 * 60 * 60 * 1000))
