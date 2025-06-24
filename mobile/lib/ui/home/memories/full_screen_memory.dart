@@ -15,6 +15,7 @@ import "package:photos/theme/text_style.dart";
 import "package:photos/ui/actions/file/file_actions.dart";
 import "package:photos/ui/home/memories/memory_progress_indicator.dart";
 import "package:photos/ui/viewer/file/file_widget.dart";
+
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/ui/viewer/file_details/favorite_widget.dart";
 import "package:photos/utils/file_util.dart";
@@ -552,28 +553,17 @@ class MemoryBackDrop extends StatelessWidget {
         }
         return AnimatedContainer(
           duration: const Duration(milliseconds: 200),
-          child: Stack(
-            children: [
-              Container(
-                width: double.infinity,
-                height: double.infinity,
-                color: Colors.transparent,
-              ),
-              ThumbnailWidget(
-                currentFile,
-                shouldShowSyncStatus: false,
-                shouldShowFavoriteIcon: false,
-              ),
-              BackdropFilter(
-                filter: ImageFilter.blur(
-                  sigmaX: 100,
-                  sigmaY: 100,
-                ),
-                child: Container(
-                  color: Colors.transparent,
-                ),
-              ),
-            ],
+          child: ImageFiltered(
+            imageFilter: ImageFilter.blur(
+              sigmaX: 100,
+              sigmaY: 100,
+            ),
+            child: ThumbnailWidget(
+              currentFile,
+              shouldShowSyncStatus: false,
+              shouldShowFavoriteIcon: false,
+              shouldShowVideoOverlayIcon: false,
+            ),
           ),
         );
       },
