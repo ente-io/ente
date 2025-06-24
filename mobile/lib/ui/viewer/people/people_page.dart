@@ -13,7 +13,6 @@ import 'package:photos/models/gallery_type.dart';
 import "package:photos/models/ml/face/person.dart";
 import "package:photos/models/search/search_result.dart";
 import 'package:photos/models/selected_files.dart';
-import "package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart";
 import "package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart";
 import "package:photos/services/machine_learning/ml_result.dart";
 import "package:photos/services/search_service.dart";
@@ -54,17 +53,9 @@ class _PeoplePageState extends State<PeoplePage> {
   final Logger _logger = Logger("_PeoplePageState");
   final _selectedFiles = SelectedFiles();
   List<EnteFile>? files;
-  int? smallestClusterSize;
   Future<List<EnteFile>> filesFuture = Future.value([]);
   late PersonEntity _person;
 
-  bool get showSuggestionBanner => (!userDismissedSuggestionBanner &&
-      smallestClusterSize != null &&
-      smallestClusterSize! >= kMinimumClusterSizeSearchResult &&
-      files != null &&
-      files!.isNotEmpty);
-
-  bool userDismissedSuggestionBanner = false;
   bool userDismissedPersonGallerySuggestion = false;
 
   late final StreamSubscription<LocalPhotosUpdatedEvent> _filesUpdatedEvent;
@@ -125,10 +116,6 @@ class _PeoplePageState extends State<PeoplePage> {
       );
       return [];
     }
-    smallestClusterSize = result.values.fold<int>(result.values.first.length,
-        (previousValue, element) {
-      return element.length < previousValue ? element.length : previousValue;
-    });
     final List<EnteFile> resultFiles = [];
     for (final e in result.entries) {
       resultFiles.addAll(e.value);
