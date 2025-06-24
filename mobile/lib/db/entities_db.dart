@@ -100,7 +100,7 @@ extension EntitiesDB on FilesDB {
     return LocalEntityData.fromJson(maps.first);
   }
 
-  Future<String?> getUpdatedAtHash(
+  Future<String?> getPreHashForEntities(
     EntityType type,
     List<String> ids,
   ) async {

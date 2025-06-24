@@ -221,15 +221,15 @@ class EntityService {
     }
   }
 
-  Future<String?> getUpdatedAtHash(
+  Future<String?> getPreHashForEntities(
     EntityType type,
     List<String> ids,
   ) async {
-    return await _db.getUpdatedAtHash(type, ids);
+    return await _db.getPreHashForEntities(type, ids);
   }
 
   Future<String> getHashForIds(List<String> personIds) async {
-    final preHash = await getUpdatedAtHash(EntityType.cgroup, personIds);
+    final preHash = await getPreHashForEntities(EntityType.cgroup, personIds);
 
     if (preHash == null) {
       return "";
