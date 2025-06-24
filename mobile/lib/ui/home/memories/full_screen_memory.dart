@@ -20,7 +20,6 @@ import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/ui/viewer/file_details/favorite_widget.dart";
 import "package:photos/utils/file_util.dart";
 import "package:photos/utils/share_util.dart";
-// import "package:step_progress_indicator/step_progress_indicator.dart";
 
 //There are two states of variables that FullScreenMemory depends on:
 //1. The list of memories
@@ -364,35 +363,39 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
           ),
           SafeArea(
             top: false,
-            child: Padding(
-              padding: const EdgeInsets.only(bottom: 72),
-              child: ValueListenableBuilder(
-                valueListenable: _showTitle,
-                builder: (context, value, _) {
-                  return AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 250),
-                    switchInCurve: Curves.easeOut,
-                    switchOutCurve: Curves.easeIn,
-                    child: value
-                        ? Padding(
-                            padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
-                            child: Hero(
-                              tag: widget.title,
-                              child: Text(
-                                widget.title,
-                                style: getEnteTextTheme(context)
-                                    .largeBold
-                                    .copyWith(
-                                      color: Colors.white,
-                                    ),
+            child: Align(
+              alignment: Alignment.bottomLeft,
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 72),
+                child: ValueListenableBuilder(
+                  valueListenable: _showTitle,
+                  builder: (context, value, _) {
+                    return AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 250),
+                      switchInCurve: Curves.easeOut,
+                      switchOutCurve: Curves.easeIn,
+                      child: value
+                          ? Padding(
+                              padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
+                              child: Hero(
+                                tag: widget.title,
+                                child: Text(
+                                  widget.title,
+                                  style: getEnteTextTheme(context)
+                                      .largeBold
+                                      .copyWith(
+                                        fontSize: 40,
+                                        color: Colors.white,
+                                      ),
+                                ),
                               ),
-                            ),
-                          )
-                        : showStepProgressIndicator
-                            ? const SizedBox.shrink()
-                            : const MemoryCounter(),
-                  );
-                },
+                            )
+                          : showStepProgressIndicator
+                              ? const SizedBox.shrink()
+                              : const MemoryCounter(),
+                    );
+                  },
+                ),
               ),
             ),
           ),
@@ -519,17 +522,18 @@ class BottomGradient extends StatelessWidget {
   Widget build(BuildContext context) {
     return IgnorePointer(
       child: Container(
-        height: 124,
+        height: 172,
         width: double.infinity,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.bottomCenter,
             end: Alignment.topCenter,
             colors: [
-              Colors.black.withOpacity(0.5), //same for both themes
+              Colors.black87,
+              Colors.black54,
               Colors.transparent,
             ],
-            stops: const [0, 0.8],
+            stops: [0, 0.5, 1.0],
           ),
         ),
       ),
@@ -657,7 +661,7 @@ class _MemoriesZoomWidgetState extends State<MemoriesZoomWidget>
     return widget.isVideo
         ? widget.child
         : ClipRect(
-          child: AnimatedBuilder(
+            child: AnimatedBuilder(
               animation: _controller,
               builder: (context, child) {
                 return Transform.scale(
@@ -672,6 +676,6 @@ class _MemoriesZoomWidgetState extends State<MemoriesZoomWidget>
                 );
               },
             ),
-        );
+          );
   }
 }
