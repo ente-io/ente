@@ -15,7 +15,6 @@ class PersonEntity {
   PersonEntity copyWith({
     String? remoteID,
     PersonData? data,
-    DateTime? updatedAt,
   }) {
     return PersonEntity(
       remoteID ?? this.remoteID,
