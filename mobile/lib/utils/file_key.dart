@@ -6,21 +6,25 @@ import "package:photos/models/file/file.dart";
 import "package:photos/services/collections_service.dart";
 
 Uint8List getFileKey(EnteFile file) {
-  final encryptedKey = CryptoUtil.base642bin(file.encryptedKey!);
-  final nonce = CryptoUtil.base642bin(file.keyDecryptionNonce!);
+  final cf = file.cf!;
   final collectionKey =
-      CollectionsService.instance.getCollectionKey(file.collectionID!);
-  return CryptoUtil.decryptSync(encryptedKey, collectionKey, nonce);
+      CollectionsService.instance.getCollectionKey(cf.collectionID);
+  return CryptoUtil.decryptSync(
+    cf.encFileKey,
+    collectionKey,
+    cf.encFileKeyNonce,
+  );
 }
 
 Future<Uint8List> getFileKeyUsingBgWorker(EnteFile file) async {
+  final cf = file.cf!;
   final collectionKey =
-      CollectionsService.instance.getCollectionKey(file.collectionID!);
+      CollectionsService.instance.getCollectionKey(cf.collectionID);
   return await Computer.shared().compute(
     _decryptFileKey,
     param: <String, dynamic>{
-      "encryptedKey": file.encryptedKey,
-      "keyDecryptionNonce": file.keyDecryptionNonce,
+      "encryptedKey": cf.encFileKey,
+      "keyDecryptionNonce": cf.encFileKeyNonce,
       "collectionKey": collectionKey,
     },
   );
