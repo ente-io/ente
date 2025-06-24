@@ -1,6 +1,6 @@
 import { type Collection } from "ente-media/collection";
 import localForage from "ente-shared/storage/localForage";
-import { getCollectionChanges, isHiddenCollection } from "./collection";
+import { getCollections, isHiddenCollection } from "./collection";
 import { savedCollections } from "./photos-fdb";
 
 const COLLECTION_TABLE = "collections";
@@ -43,15 +43,10 @@ export const getLatestCollections = async (
 };
 
 export const getAllLatestCollections = async (): Promise<Collection[]> => {
-    const collections = await syncCollections();
-    return collections;
-};
-
-export const syncCollections = async () => {
     const localCollections = await savedCollections();
     let sinceTime = await getCollectionUpdationTime();
 
-    const changes = await getCollectionChanges(sinceTime);
+    const changes = await getCollections(sinceTime);
     if (!changes.length) return localCollections;
 
     const hiddenCollectionIDs = await getHiddenCollectionIDs();
