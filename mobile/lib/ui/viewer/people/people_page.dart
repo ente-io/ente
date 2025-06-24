@@ -28,8 +28,6 @@ import "package:photos/ui/viewer/gallery/state/selection_state.dart";
 import "package:photos/ui/viewer/people/link_email_screen.dart";
 
 import "package:photos/ui/viewer/people/people_app_bar.dart";
-import "package:photos/ui/viewer/people/people_banner.dart";
-import "package:photos/ui/viewer/people/person_cluster_suggestion.dart";
 import "package:photos/ui/viewer/people/person_gallery_suggestion.dart";
 import "package:photos/utils/navigation_util.dart";
 
@@ -178,85 +176,49 @@ class _PeoplePageState extends State<PeoplePage> {
               );
               if (snapshot.hasData) {
                 final personFiles = snapshot.data as List<EnteFile>;
-                return Column(
-                  children: [
-                    Expanded(
-                      child: SelectionState(
-                        selectedFiles: _selectedFiles,
-                        child: Stack(
-                          alignment: Alignment.bottomCenter,
-                          children: [
-                            inheritedSearchFilterData.isHierarchicalSearchable
-                                ? ValueListenableBuilder(
-                                    valueListenable: inheritedSearchFilterData
-                                        .searchFilterDataProvider!
-                                        .isSearchingNotifier,
-                                    builder: (
-                                      context,
-                                      value,
-                                      _,
-                                    ) {
-                                      return value
-                                          ? HierarchicalSearchGallery(
-                                              tagPrefix: widget.tagPrefix,
-                                              selectedFiles: _selectedFiles,
-                                            )
-                                          : _Gallery(
-                                              tagPrefix: widget.tagPrefix,
-                                              selectedFiles: _selectedFiles,
-                                              personFiles: personFiles,
-                                              loadPersonFiles: loadPersonFiles,
-                                              personEntity: _person,
-                                            );
-                                    },
-                                  )
-                                : _Gallery(
-                                    tagPrefix: widget.tagPrefix,
-                                    selectedFiles: _selectedFiles,
-                                    personFiles: personFiles,
-                                    loadPersonFiles: loadPersonFiles,
-                                    personEntity: _person,
-                                  ),
-                            FileSelectionOverlayBar(
-                              PeoplePage.overlayType,
-                              _selectedFiles,
-                              person: _person,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    showSuggestionBanner
-                        ? Dismissible(
-                            key: const Key("suggestionBanner"),
-                            direction: DismissDirection.horizontal,
-                            onDismissed: (direction) {
-                              setState(() {
-                                userDismissedSuggestionBanner = true;
-                              });
-                            },
-                            child: PeopleBanner(
-                              type: PeopleBannerType.suggestion,
-                              startIcon: Icons.face_retouching_natural,
-                              actionIcon: Icons.search_outlined,
-                              text: "Review suggestions",
-                              subText: "Improve the results",
-                              onTap: () async {
-                                unawaited(
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder: (context) =>
-                                          PersonReviewClusterSuggestion(
-                                        _person,
-                                      ),
-                                    ),
-                                  ),
-                                );
+                return SelectionState(
+                  selectedFiles: _selectedFiles,
+                  child: Stack(
+                    alignment: Alignment.bottomCenter,
+                    children: [
+                      inheritedSearchFilterData.isHierarchicalSearchable
+                          ? ValueListenableBuilder(
+                              valueListenable: inheritedSearchFilterData
+                                  .searchFilterDataProvider!
+                                  .isSearchingNotifier,
+                              builder: (
+                                context,
+                                value,
+                                _,
+                              ) {
+                                return value
+                                    ? HierarchicalSearchGallery(
+                                        tagPrefix: widget.tagPrefix,
+                                        selectedFiles: _selectedFiles,
+                                      )
+                                    : _Gallery(
+                                        tagPrefix: widget.tagPrefix,
+                                        selectedFiles: _selectedFiles,
+                                        personFiles: personFiles,
+                                        loadPersonFiles: loadPersonFiles,
+                                        personEntity: _person,
+                                      );
                               },
+                            )
+                          : _Gallery(
+                              tagPrefix: widget.tagPrefix,
+                              selectedFiles: _selectedFiles,
+                              personFiles: personFiles,
+                              loadPersonFiles: loadPersonFiles,
+                              personEntity: _person,
                             ),
-                          )
-                        : const SizedBox.shrink(),
-                  ],
+                      FileSelectionOverlayBar(
+                        PeoplePage.overlayType,
+                        _selectedFiles,
+                        person: _person,
+                      ),
+                    ],
+                  ),
                 );
               } else if (snapshot.hasError) {
                 _logger
