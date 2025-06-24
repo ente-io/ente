@@ -96,7 +96,7 @@ class SearchService {
     }
 
     if (_cachedFilesFuture == null) {
-      _logger.fine("Reading all files from db");
+      _logger.info("Reading all files from db");
       _cachedFilesFuture = FilesDB.instance.getAllFilesFromDB(
         ignoreCollections(),
         dedupeByUploadId: false,
@@ -122,7 +122,7 @@ class SearchService {
     }
 
     if (_cachedFilesFuture == null) {
-      _logger.fine("Reading all files from db");
+      _logger.info("Reading all files from db");
       _cachedFilesFuture = FilesDB.instance.getAllFilesFromDB(
         ignoreCollections(),
         dedupeByUploadId: false,
@@ -146,7 +146,7 @@ class SearchService {
     if (_cachedHiddenFilesFuture != null) {
       return _cachedHiddenFilesFuture!;
     }
-    _logger.fine("Reading hidden files from db");
+    _logger.info("Reading hidden files from db");
     final hiddenCollections =
         CollectionsService.instance.getHiddenCollectionIds();
     _cachedHiddenFilesFuture =
@@ -691,7 +691,7 @@ class SearchService {
       }
     }
     if (showNoLocationTag) {
-      _logger.fine("finding photos with no location");
+      _logger.info("finding photos with no location");
       // find files that have location but the file's location is not inside
       // any location tag
       final noLocationTagFiles = allFiles.where((file) {

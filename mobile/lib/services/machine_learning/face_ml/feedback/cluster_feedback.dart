@@ -395,7 +395,7 @@ class ClusterFeedbackService<T> {
       } catch (e, s) {
         _logger.severe("Error in sorting suggestions", e, s);
       }
-      _logger.finest(
+      _logger.info(
         'getFastSuggestionForPerson post-processing suggestions took ${DateTime.now().difference(startTime).inMilliseconds} ms, of which sorting took ${DateTime.now().difference(getFilesTime).inMilliseconds} ms and getting files took ${getFilesTime.difference(startTime).inMilliseconds} ms',
       );
 
@@ -867,7 +867,7 @@ class ClusterFeedbackService<T> {
       threshold,
     );
     final suggestionCalcTime = DateTime.now();
-    _logger.finest(
+    _logger.info(
       "Calculated average vectors in ${avgCalcTime.difference(startTime).inMilliseconds}ms and suggestions in ${suggestionCalcTime.difference(avgCalcTime).inMilliseconds}ms",
     );
     return foundSuggestions;
