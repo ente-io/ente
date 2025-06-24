@@ -33,6 +33,15 @@ export const getHiddenCollectionIDs = async (): Promise<number[]> =>
 export const getCollectionUpdationTime = async (): Promise<number> =>
     (await localForage.getItem<number>(COLLECTION_UPDATION_TIME)) ?? 0;
 
+/**
+ * Pull the latest collections from remote.
+ *
+ * This function uses a delta diff, pulling only changes since the timestamp
+ * saved by the last pull.
+ *
+ * @returns The latest list of collections, reflecting both the state in our
+ * local database and on remote.
+ */
 export const pullCollections = async (): Promise<Collection[]> => {
     const localCollections = await savedCollections();
     let sinceTime = await getCollectionUpdationTime();

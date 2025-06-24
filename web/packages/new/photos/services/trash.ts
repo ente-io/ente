@@ -73,8 +73,8 @@ export type RemoteTrashItem = z.infer<typeof RemoteTrashItem>;
  * Update our locally saved data about the files and collections in trash by
  * pulling changes from remote.
  *
- * This function uses a diff-based mechanism that pulls forward from the
- * (persisted) latest pulled item's updated at time.
+ * This function uses a delta diff, pulling only changes since the timestamp
+ * saved by the last pull.
  *
  * @param collections All the (non-deleted) collections that we know about
  * locally.

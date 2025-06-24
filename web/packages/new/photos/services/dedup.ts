@@ -116,7 +116,7 @@ export const deduceDuplicates = async () => {
         nonHiddenOwnedCollections,
     );
 
-    // Final all non-hidden collection files owned by the user that are in a
+    // Find all non-hidden collection files owned by the user that are in a
     // non-hidden owned collection.
     const nonHiddenCollectionFiles = await getLocalFiles("normal");
     const filteredCollectionFiles = nonHiddenCollectionFiles.filter((f) =>

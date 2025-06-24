@@ -481,7 +481,7 @@ export const Upload: React.FC<UploadProps> = ({
         setDesktopFilePaths([]);
         setDesktopZipItems([]);
 
-        // Remove hidden files (files whose names begins with a ".").
+        // Filter out files whose names begins with a ".".
         const prunedItemAndPaths = allItemAndPaths.filter(
             ([, p]) => !basename(p).startsWith("."),
         );

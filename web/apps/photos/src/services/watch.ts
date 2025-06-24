@@ -581,17 +581,10 @@ const deduceEvents = async (watches: FolderWatch[]): Promise<WatchEvent[]> => {
  */
 const pathsToUpload = (paths: string[], watch: FolderWatch) =>
     paths
-        // Filter out hidden files (files whose names begins with a dot)
-        .filter((path) => !isHiddenFile(path))
+        // Filter out files whose names begins with a dot.
+        .filter((path) => !basename(path).startsWith("."))
         // Files that are on disk but not yet synced or ignored.
         .filter((path) => !isSyncedOrIgnoredPath(path, watch));
-
-/**
- * Return true if the file at the given {@link path} is hidden.
- *
- * Hidden files are those whose names begin with a "." (dot).
- */
-const isHiddenFile = (path: string) => basename(path).startsWith(".");
 
 /**
  * Return the paths to previously synced files that are no longer on disk and so
