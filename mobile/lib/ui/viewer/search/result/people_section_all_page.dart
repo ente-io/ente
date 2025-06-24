@@ -310,7 +310,7 @@ class FaceSearchResult extends StatelessWidget {
       clusterID: params[kClusterParamId],
       key: params.containsKey(kPersonWidgetKey)
           ? ValueKey(params[kPersonWidgetKey])
-          : null,
+          : ValueKey(params[kPersonParamID] ?? params[kClusterParamId]),
     );
   }
 }
