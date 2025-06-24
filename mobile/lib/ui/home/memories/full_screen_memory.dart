@@ -15,6 +15,7 @@ import "package:photos/theme/text_style.dart";
 import "package:photos/ui/actions/file/file_actions.dart";
 import "package:photos/ui/home/memories/memory_progress_indicator.dart";
 import "package:photos/ui/viewer/file/file_widget.dart";
+
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/ui/viewer/file_details/favorite_widget.dart";
 import "package:photos/utils/file_util.dart";
@@ -326,7 +327,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
 
               return GestureDetector(
                 onTapUp: (TapUpDetails details) {
-                  final screenWidth = MediaQuery.of(context).size.width;
+                  final screenWidth = MediaQuery.sizeOf(context).width;
                   final edgeWidth = screenWidth * 0.20;
                   if (details.localPosition.dx < edgeWidth) {
                     _goToPrevious(inheritedData);
@@ -550,30 +551,22 @@ class MemoryBackDrop extends StatelessWidget {
             currentFile.fileType == FileType.livePhoto) {
           return const SizedBox.shrink();
         }
-        return AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          child: Stack(
-            children: [
-              Container(
-                width: double.infinity,
-                height: double.infinity,
-                color: Colors.transparent,
-              ),
-              ThumbnailWidget(
-                currentFile,
-                shouldShowSyncStatus: false,
-                shouldShowFavoriteIcon: false,
-              ),
-              BackdropFilter(
-                filter: ImageFilter.blur(
-                  sigmaX: 50,
-                  sigmaY: 50,
-                ),
-                child: Container(
-                  color: Colors.transparent,
-                ),
-              ),
-            ],
+        return AnimatedSwitcher(
+          duration: const Duration(milliseconds: 750),
+          switchInCurve: Curves.easeOutExpo,
+          switchOutCurve: Curves.easeInExpo,
+          child: ImageFiltered(
+            key: ValueKey(inheritedData.indexNotifier.value),
+            imageFilter: ImageFilter.blur(
+              sigmaX: 100,
+              sigmaY: 100,
+            ),
+            child: ThumbnailWidget(
+              currentFile,
+              shouldShowSyncStatus: false,
+              shouldShowFavoriteIcon: false,
+              shouldShowVideoOverlayIcon: false,
+            ),
           ),
         );
       },
