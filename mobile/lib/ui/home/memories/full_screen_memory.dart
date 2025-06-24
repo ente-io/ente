@@ -551,9 +551,12 @@ class MemoryBackDrop extends StatelessWidget {
             currentFile.fileType == FileType.livePhoto) {
           return const SizedBox.shrink();
         }
-        return AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
+        return AnimatedSwitcher(
+          duration: const Duration(milliseconds: 750),
+          switchInCurve: Curves.easeOutExpo,
+          switchOutCurve: Curves.easeInExpo,
           child: ImageFiltered(
+            key: ValueKey(inheritedData.indexNotifier.value),
             imageFilter: ImageFilter.blur(
               sigmaX: 100,
               sigmaY: 100,
