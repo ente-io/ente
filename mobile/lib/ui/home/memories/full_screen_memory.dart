@@ -326,7 +326,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
 
               return GestureDetector(
                 onTapUp: (TapUpDetails details) {
-                  final screenWidth = MediaQuery.of(context).size.width;
+                  final screenWidth = MediaQuery.sizeOf(context).width;
                   final edgeWidth = screenWidth * 0.20;
                   if (details.localPosition.dx < edgeWidth) {
                     _goToPrevious(inheritedData);
