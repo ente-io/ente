@@ -79,6 +79,7 @@ import {
     savedCollections,
     savedHiddenFiles,
     savedNormalFiles,
+    savedTrashItems,
 } from "ente-new/photos/services/photos-fdb";
 import {
     filterSearchableFiles,
@@ -91,7 +92,6 @@ import {
     preCollectionAndFilesSync,
     syncCollectionAndFiles,
 } from "ente-new/photos/services/sync";
-import { getLocalTrashedFiles } from "ente-new/photos/services/trash";
 import {
     initUserDetailsOrTriggerSync,
     redirectToCustomerPortal,
@@ -332,7 +332,7 @@ const Page: React.FC = () => {
                 collections: await savedCollections(),
                 normalFiles: await savedNormalFiles(),
                 hiddenFiles: await savedHiddenFiles(),
-                trashedFiles: await getLocalTrashedFiles(),
+                trashItems: await savedTrashItems(),
             });
             await syncWithRemote({ force: true });
             setIsFirstLoad(false);
@@ -557,8 +557,8 @@ const Page: React.FC = () => {
                 dispatch({ type: "setHiddenFiles", files }),
             onFetchHiddenFiles: (files) =>
                 dispatch({ type: "fetchHiddenFiles", files }),
-            onResetTrashedFiles: (files) =>
-                dispatch({ type: "setTrashedFiles", files }),
+            onSetTrashedItems: (trashItems) =>
+                dispatch({ type: "setTrashItems", trashItems }),
         });
         if (didUpdateFiles) {
             exportService.onLocalFilesUpdated();

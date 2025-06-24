@@ -26,7 +26,6 @@ import {
 } from "ente-new/photos/components/PlaceholderThumbnails";
 import { TileBottomTextOverlay } from "ente-new/photos/components/Tiles";
 import { PseudoCollectionID } from "ente-new/photos/services/collection-summary";
-import { type EnteTrashFile } from "ente-new/photos/services/trash";
 import { t } from "i18next";
 import memoize from "memoize-one";
 import { GalleryContext } from "pages/gallery";
@@ -92,6 +91,19 @@ export interface FileListAnnotatedFile {
      */
     timelineDateString: string;
 }
+
+/**
+ * A file augmented with the date when it will be permanently deleted.
+ *
+ * See: [Note: Files in trash pseudo collection have deleteBy]
+ */
+export type EnteTrashFile = EnteFile & {
+    /**
+     * Timestamp (epoch microseconds) when the trash item (and its corresponding
+     * {@link EnteFile}) will be permanently deleted.
+     */
+    deleteBy?: number;
+};
 
 export interface FileListProps {
     /** The height we should occupy (needed since the list is virtualized). */
@@ -1228,6 +1240,11 @@ const FileThumbnail: React.FC<FileThumbnailProps> = ({
         }
     };
 
+    // See: [Note: Files in trash pseudo collection have deleteBy]
+    const deleteBy =
+        activeCollectionID == PseudoCollectionID.trash &&
+        (file as EnteTrashFile).deleteBy;
+
     return (
         <FileThumbnail_
             key={`thumb-${file.id}}`}
@@ -1281,17 +1298,13 @@ const FileThumbnail: React.FC<FileThumbnailProps> = ({
                 <InSelectRangeOverlay />
             )}
 
-            {activeCollectionID == PseudoCollectionID.trash &&
-                // TODO(RE):
-                (file as EnteTrashFile).deleteBy && (
-                    <TileBottomTextOverlay>
-                        <Typography variant="small">
-                            {formattedDateRelative(
-                                (file as EnteTrashFile).deleteBy,
-                            )}
-                        </Typography>
-                    </TileBottomTextOverlay>
-                )}
+            {deleteBy && (
+                <TileBottomTextOverlay>
+                    <Typography variant="small">
+                        {formattedDateRelative(deleteBy)}
+                    </Typography>
+                </TileBottomTextOverlay>
+            )}
         </FileThumbnail_>
     );
 };

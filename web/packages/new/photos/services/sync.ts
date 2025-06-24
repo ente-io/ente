@@ -16,7 +16,7 @@ import {
 import { searchDataSync } from "ente-new/photos/services/search";
 import { syncSettings } from "ente-new/photos/services/settings";
 import { splitByPredicate } from "ente-utils/array";
-import { pullTrash } from "./trash";
+import { pullTrash, type TrashItem } from "./trash";
 
 /**
  * Called during a full sync, before doing the collection and file sync.
@@ -99,9 +99,10 @@ interface SyncCallectionAndFilesOpts {
      */
     onFetchHiddenFiles: (files: EnteFile[]) => void;
     /**
-     * Called when saved trashed files were replaced by the given {@link files}.
+     * Called when saved trashed items were replaced by the given
+     * {@link trashItems}.
      */
-    onResetTrashedFiles: (files: EnteFile[]) => void;
+    onSetTrashedItems: (trashItems: TrashItem[]) => void;
 }
 
 /**
@@ -144,7 +145,7 @@ export const syncCollectionAndFiles = async (
     );
     await pullTrash(
         collections,
-        opts?.onResetTrashedFiles,
+        opts?.onSetTrashedItems,
         videoPrunePermanentlyDeletedFileIDsIfNeeded,
     );
     if (didUpdateNormalFiles || didUpdateHiddenFiles) {

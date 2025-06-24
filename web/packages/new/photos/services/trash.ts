@@ -79,15 +79,12 @@ export type RemoteTrashItem = z.infer<typeof RemoteTrashItem>;
  * @param collections All the (non-deleted) collections that we know about
  * locally.
  *
- * @param onUpdateTrashFiles A callback invoked when the locally persisted trash
+ * @param onSetTrashedItems A callback invoked when the locally persisted trash
  * items are updated. This can be used for the UI to also update its state.
  *
  * This callback can be invoked multiple times during the pull (once for each
- * batch that gets pulled and processed).
- *
- * Each time, it gets passed a list of all the items that are present in trash,
- * sorted in ascending order of their time to deletion. For more details about
- * the sorting order, see {@link sortTrashItems}.
+ * batch that gets pulled and processed). Each time, it gets passed a list of
+ * all the items that are present in trash (in an arbitrary order).
  *
  * @param onPruneDeletedFileIDs A callback invoked when files that were
  * previously in trash have now been permanently deleted. This can be used by
@@ -99,7 +96,7 @@ export type RemoteTrashItem = z.infer<typeof RemoteTrashItem>;
  */
 export const pullTrash = async (
     collections: Collection[],
-    onUpdateTrashFiles: ((files: EnteFile[]) => void) | undefined,
+    onSetTrashedItems: ((trashItems: TrashItem[]) => void) | undefined,
     onPruneDeletedFileIDs: (deletedFileIDs: Set<number>) => Promise<void>,
 ): Promise<void> => {
     // Data structures:
@@ -169,7 +166,7 @@ export const pullTrash = async (
         }
 
         const trashItems = [...trashItemsByID.values()];
-        onUpdateTrashFiles?.(getTrashedFiles(trashItems));
+        onSetTrashedItems?.(trashItems);
         await saveTrashItems(trashItems);
         await saveTrashLastUpdatedAt(sinceTime);
         if (deletedFileIDs.size) await onPruneDeletedFileIDs(deletedFileIDs);
@@ -215,31 +212,6 @@ const getTrashDiff = async (sinceTime: number) => {
 };
 
 /**
- * Return all the trash items present locally after sorting them.
- */
-export async function getLocalTrashedFiles() {
-    return getTrashedFiles(await savedTrashItems());
-}
-
-/**
- * A file augmented with the date when it will be permanently deleted.
- */
-export type EnteTrashFile = EnteFile & {
-    /**
-     * Timestamp (epoch microseconds) when the trash item (and its corresponding
-     * {@link EnteFile}) will be permanently deleted.
-     */
-    deleteBy?: number;
-};
-
-const getTrashedFiles = (trashItems: TrashItem[]): EnteTrashFile[] =>
-    sortTrashItems(trashItems).map(({ file, updatedAt, deleteBy }) => ({
-        ...file,
-        updationTime: updatedAt,
-        deleteBy,
-    }));
-
-/**
  * Sort trash items such that the items which will be permanently deleted
  * earlier are first.
  *
@@ -250,7 +222,7 @@ const getTrashedFiles = (trashItems: TrashItem[]): EnteTrashFile[] =>
  * the same time to deletion, the ordering is in descending order of the item's
  * file's modification or creation date.
  */
-const sortTrashItems = (trashItems: TrashItem[]) =>
+export const sortTrashItems = (trashItems: TrashItem[]) =>
     trashItems.sort((a, b) => {
         if (a.deleteBy == b.deleteBy) {
             const af = a.file;
