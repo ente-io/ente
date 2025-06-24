@@ -47,21 +47,23 @@ class _AllMemoriesPageState extends State<AllMemoriesPage>
           return FullScreenMemoryDataUpdater(
             initialIndex: initialMemoryIndex,
             memories: widget.allMemories[index],
-            child: FullScreenMemory(
-              widget.allTitles[index],
-              initialMemoryIndex,
-              onNextMemory: index < widget.allMemories.length - 1
-                  ? () => pageController.nextPage(
-                        duration: const Duration(milliseconds: 250),
-                        curve: Curves.ease,
-                      )
-                  : null,
-              onPreviousMemory: index > 0
-                  ? () => pageController.previousPage(
-                        duration: const Duration(milliseconds: 250),
-                        curve: Curves.ease,
-                      )
-                  : null,
+            child: ClipRRect(
+              child: FullScreenMemory(
+                widget.allTitles[index],
+                initialMemoryIndex,
+                onNextMemory: index < widget.allMemories.length - 1
+                    ? () => pageController.nextPage(
+                          duration: const Duration(milliseconds: 250),
+                          curve: Curves.ease,
+                        )
+                    : null,
+                onPreviousMemory: index > 0
+                    ? () => pageController.previousPage(
+                          duration: const Duration(milliseconds: 250),
+                          curve: Curves.ease,
+                        )
+                    : null,
+              ),
             ),
           );
         },
