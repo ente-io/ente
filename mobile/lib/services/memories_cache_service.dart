@@ -24,6 +24,7 @@ import "package:photos/services/language_service.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/services/notification_service.dart";
 import "package:photos/services/search_service.dart";
+import "package:photos/ui/home/memories/all_memories_page.dart";
 import "package:photos/ui/home/memories/full_screen_memory.dart";
 import "package:photos/ui/viewer/people/people_page.dart";
 import "package:photos/utils/navigation_util.dart";
@@ -469,33 +470,40 @@ class MemoriesCacheService {
   ) async {
     final allMemories = await getMemories();
     if (allMemories.isEmpty) return;
-    int memoryIdx = 0;
-    int fileIdx = 0;
-    bool found = false;
-    memoryLoop:
-    for (final memory in _cachedMemories!) {
-      for (final mem in memory.memories) {
-        if (mem.file.generatedID == generatedFileID) {
-          found = true;
-          break memoryLoop;
-        }
-        fileIdx++;
+
+    final List<(List<Memory>, String)> collatedMemories = [];
+    final List<SmartMemory> seenMemories = [];
+    for (final memory in allMemories) {
+      if (memory.memories.every((element) => element.isSeen())) {
+        seenMemories.add(memory);
+      } else {
+        collatedMemories.add((memory.memories, memory.title));
       }
-      memoryIdx++;
-      fileIdx = 0;
     }
-    if (!found) {
+    collatedMemories.addAll(seenMemories.map((e) => (e.memories, e.title)));
+
+    int currentMemoryIndex = -1;
+    for (var i = 0; i < collatedMemories.length; i++) {
+      final files = collatedMemories[i].$1;
+      if (files.any((mem) => mem.file.generatedID == generatedFileID)) {
+        currentMemoryIndex = i;
+        break;
+      }
+    }
+
+    if (currentMemoryIndex == -1) {
       _logger.warning(
-        "Could not find memory with generatedFileID: $generatedFileID",
+        "Could not find collated memory with generatedFileID: $generatedFileID",
       );
       return;
     }
+
     await routeToPage(
       context,
-      FullScreenMemoryDataUpdater(
-        initialIndex: fileIdx,
-        memories: allMemories[memoryIdx].memories,
-        child: FullScreenMemory(allMemories[memoryIdx].title, fileIdx),
+      AllMemoriesPage(
+        initialPageIndex: currentMemoryIndex,
+        allMemories: collatedMemories.map((e) => e.$1).toList(),
+        allTitles: collatedMemories.map((e) => e.$2).toList(),
       ),
       forceCustomPageRoute: true,
     );
