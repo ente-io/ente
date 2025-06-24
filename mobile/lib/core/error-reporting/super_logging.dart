@@ -187,7 +187,7 @@ class SuperLogging {
       setupSentry().ignore();
     }
 
-    Logger.root.level = Level.ALL;
+    Logger.root.level = kDebugMode ? Level.ALL : Level.INFO;
     Logger.root.onRecord.listen(onLogRecord);
 
     if (isFDroidClient) {
