@@ -214,7 +214,7 @@ export interface CollectionChange {
  * will be at most one entry for a given collection in the result array. See:
  * [Note: Diff response will have at most one entry for an id]
  */
-export const getCollectionChanges = async (
+export const getCollections = async (
     sinceTime: number,
 ): Promise<CollectionChange[]> => {
     const res = await fetch(
