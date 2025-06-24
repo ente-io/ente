@@ -50,7 +50,7 @@ import { UploaderNameInput } from "ente-new/albums/components/UploaderNameInput"
 import { CollectionMappingChoice } from "ente-new/photos/components/CollectionMappingChoice";
 import type { CollectionSelectorAttributes } from "ente-new/photos/components/CollectionSelector";
 import { downloadAppDialogAttributes } from "ente-new/photos/components/utils/download";
-import { getLatestCollections } from "ente-new/photos/services/collections";
+import { savedNormalCollections } from "ente-new/photos/services/collection";
 import { redirectToCustomerPortal } from "ente-new/photos/services/user-details";
 import { usePhotosAppContext } from "ente-new/photos/types/context";
 import { firstNonEmpty } from "ente-utils/array";
@@ -99,6 +99,20 @@ interface UploadProps {
     setShouldDisableDropzone: (value: boolean) => void;
     showCollectionSelector?: () => void;
     /**
+     * Called when an action in the uploader requires us to first pull the
+     * latest files and collections from remote.
+     *
+     * See: [Note: Full sync vs file and collection sync]
+     *
+     * Specifically, this is used prior to creating a new album, to obtain
+     * (potential) existing albums from remote so that they can be matched by
+     * name if needed.
+     *
+     * This functionality is not needed during uploads to a public album, so
+     * this property is optional; the public albums code need not provide it.
+     */
+    onFileAndCollectionSyncWithRemote?: () => Promise<void>;
+    /**
      * Callback invoked when a file is uploaded.
      *
      * @param file The newly uploaded file.
@@ -111,7 +125,6 @@ interface UploadProps {
      * app, where the scenario requiring this will not arise.
      */
     onShowPlanSelector?: () => void;
-    setCollections?: (cs: Collection[]) => void;
     isFirstUpload?: boolean;
     uploadTypeSelectorView: boolean;
     showSessionExpiredMessage: () => void;
@@ -129,6 +142,7 @@ type UploadType = "files" | "folders" | "zips";
 export const Upload: React.FC<UploadProps> = ({
     isFirstUpload,
     dragAndDropFiles,
+    onFileAndCollectionSyncWithRemote,
     onUploadFile,
     onShowPlanSelector,
     showSessionExpiredMessage,
@@ -592,7 +606,6 @@ export const Upload: React.FC<UploadProps> = ({
     ) => {
         await preCollectionCreationAction();
         let uploadItemsWithCollection: UploadItemWithCollection[] = [];
-        const collections: Collection[] = [];
         let collectionNameToUploadItems = new Map<
             string,
             UploadItemAndPath[]
@@ -608,8 +621,10 @@ export const Upload: React.FC<UploadProps> = ({
                 collectionName,
             );
         }
+        const collections: Collection[] = [];
         try {
-            const existingCollections = await getLatestCollections();
+            await onFileAndCollectionSyncWithRemote!();
+            const existingCollections = await savedNormalCollections();
             let index = 0;
             for (const [
                 collectionName,
@@ -620,7 +635,6 @@ export const Upload: React.FC<UploadProps> = ({
                     existingCollections,
                 );
                 collections.push(collection);
-                props.setCollections([...existingCollections, ...collections]);
                 uploadItemsWithCollection = [
                     ...uploadItemsWithCollection,
                     ...uploadItems.map(([uploadItem, path]) => ({

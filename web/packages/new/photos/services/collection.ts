@@ -29,9 +29,10 @@ import {
     createMagicMetadata,
     encryptMagicMetadata,
 } from "ente-media/magic-metadata";
-import { batch } from "ente-utils/array";
+import { batch, splitByPredicate } from "ente-utils/array";
 import { z } from "zod/v4";
 import { requestBatchSize, type UpdateMagicMetadataRequest } from "./file";
+import { savedCollections } from "./photos-fdb";
 import { ensureUserKeyPair, getPublicKey } from "./user";
 
 const uncategorizedCollectionName = "Uncategorized";
@@ -233,6 +234,15 @@ export const getCollections = async (
         })),
     );
 };
+
+/**
+ * Return all normal (non-hidden) collections that are present in our local
+ * database.
+ */
+export const savedNormalCollections = (): Promise<Collection[]> =>
+    savedCollections().then(
+        (cs) => splitByPredicate(cs, isHiddenCollection)[1],
+    );
 
 /**
  * Return a map of the (user-facing) collection name, indexed by collection ID.

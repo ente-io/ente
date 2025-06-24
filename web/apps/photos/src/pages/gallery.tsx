@@ -1078,13 +1078,13 @@ const Page: React.FC = () => {
                     onCloseCollectionSelector={handleCloseCollectionSelector}
                     setLoading={setBlockingLoad}
                     setShouldDisableDropzone={setShouldDisableDropzone}
+                    onFileAndCollectionSyncWithRemote={
+                        fileAndCollectionSyncWithRemote
+                    }
                     onUploadFile={(file) =>
                         dispatch({ type: "uploadNormalFile", file })
                     }
                     onShowPlanSelector={showPlanSelector}
-                    setCollections={(collections) =>
-                        dispatch({ type: "setNormalCollections", collections })
-                    }
                     isFirstUpload={areOnlySystemCollections(
                         normalCollectionSummaries,
                     )}

@@ -321,6 +321,11 @@ class UploadManager {
      * @param itemsWithCollection The items to upload, each paired with the id
      * of the collection that they should be uploaded into.
      *
+     * @param collections The collections to which the files are being uploaded.
+     *
+     * These are not all the user's collections - these are just the collections
+     * mentioned by one or more {@link itemsWithCollection}.
+     *
      * @returns `true` if at least one file was processed
      */
     public async uploadItems(

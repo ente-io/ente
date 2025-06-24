@@ -433,7 +433,6 @@ export type GalleryAction =
           normalCollections: Collection[];
           hiddenCollections: Collection[];
       }
-    | { type: "setNormalCollections"; collections: Collection[] }
     | { type: "setNormalFiles"; files: EnteFile[] }
     | { type: "fetchNormalFiles"; files: EnteFile[] }
     | { type: "uploadNormalFile"; file: EnteFile }
@@ -642,62 +641,6 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 collectionNameByID: createCollectionNameByID(collections),
                 normalCollectionSummaries,
                 hiddenCollectionSummaries,
-                uncategorizedCollectionSummaryID:
-                    deriveUncategorizedCollectionSummaryID(normalCollections),
-                selectedCollectionSummaryID,
-                pendingSearchSuggestions:
-                    enqueuePendingSearchSuggestionsIfNeeded(
-                        state.searchSuggestion,
-                        state.pendingSearchSuggestions,
-                        state.isInSearchMode,
-                    ),
-                view,
-            });
-        }
-
-        case "setNormalCollections": {
-            const normalCollections = action.collections;
-            const archivedCollectionIDs =
-                deriveArchivedCollectionIDs(normalCollections);
-            const archivedFileIDs = deriveArchivedFileIDs(
-                archivedCollectionIDs,
-                state.normalFiles,
-            );
-            const normalCollectionSummaries = deriveNormalCollectionSummaries(
-                state.user!,
-                normalCollections,
-                state.normalFiles,
-                state.trashItems,
-                archivedFileIDs,
-            );
-
-            // Revalidate the active view if needed.
-            let view = state.view;
-            let selectedCollectionSummaryID = state.selectedCollectionSummaryID;
-            if (state.view?.type == "albums") {
-                ({ view, selectedCollectionSummaryID } =
-                    deriveAlbumsViewAndSelectedID(
-                        normalCollections,
-                        normalCollectionSummaries,
-                        selectedCollectionSummaryID,
-                    ));
-            }
-
-            return stateByUpdatingFilteredFiles({
-                ...state,
-                normalCollections,
-                archivedCollectionIDs,
-                archivedFileIDs,
-                favoriteFileIDs: deriveFavoriteFileIDs(
-                    state.user!,
-                    normalCollections,
-                    state.normalFiles,
-                    state.unsyncedFavoriteUpdates,
-                ),
-                collectionNameByID: createCollectionNameByID(
-                    normalCollections.concat(state.hiddenCollections),
-                ),
-                normalCollectionSummaries,
                 uncategorizedCollectionSummaryID:
                     deriveUncategorizedCollectionSummaryID(normalCollections),
                 selectedCollectionSummaryID,

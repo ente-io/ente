@@ -6,7 +6,7 @@ import {
 import type { Collection } from "ente-media/collection";
 import type { EnteFile } from "ente-media/file";
 import { isHiddenCollection } from "ente-new/photos/services/collection";
-import { getAllLatestCollections } from "ente-new/photos/services/collections";
+import { pullCollections } from "ente-new/photos/services/collections";
 import { syncFiles } from "ente-new/photos/services/files";
 import {
     isMLSupported,
@@ -125,7 +125,7 @@ interface SyncCallectionAndFilesOpts {
 export const syncCollectionAndFiles = async (
     opts?: SyncCallectionAndFilesOpts,
 ) => {
-    const collections = await getAllLatestCollections();
+    const collections = await pullCollections();
     const [hiddenCollections, normalCollections] = splitByPredicate(
         collections,
         isHiddenCollection,

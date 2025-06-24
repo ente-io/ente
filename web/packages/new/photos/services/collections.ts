@@ -33,16 +33,7 @@ export const getHiddenCollectionIDs = async (): Promise<number[]> =>
 export const getCollectionUpdationTime = async (): Promise<number> =>
     (await localForage.getItem<number>(COLLECTION_UPDATION_TIME)) ?? 0;
 
-export const getLatestCollections = async (
-    type: "normal" | "hidden" = "normal",
-): Promise<Collection[]> => {
-    const collections = await getAllLatestCollections();
-    return type == "normal"
-        ? collections.filter((c) => !isHiddenCollection(c))
-        : collections.filter((c) => isHiddenCollection(c));
-};
-
-export const getAllLatestCollections = async (): Promise<Collection[]> => {
+export const pullCollections = async (): Promise<Collection[]> => {
     const localCollections = await savedCollections();
     let sinceTime = await getCollectionUpdationTime();
 
