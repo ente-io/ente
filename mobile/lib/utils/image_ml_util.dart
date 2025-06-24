@@ -541,19 +541,15 @@ Future<Uint8List> _cropAndEncodeCanvas(
     width: width,
     height: height,
   );
-  final pngBytes = await _encodeImageToPng(croppedImage);
-  return await _compressFaceThumbnailIfNeeded(pngBytes);
+  return await _encodeImageToPng(croppedImage);
 }
 
-/// Compresses the face thumbnail if it's too large in size.
-///
-/// Returns compressed bytes if the original size exceeds [_maxFaceThumbnailSizeBytes],
-/// otherwise returns the original bytes.
-Future<Uint8List> _compressFaceThumbnailIfNeeded(Uint8List pngBytes) async {
-  if (pngBytes.length <= _maxFaceThumbnailSizeBytes) {
-    return pngBytes;
-  }
+bool shouldCompressFaceThumbnail(Uint8List pngBytes) {
+  return pngBytes.length > _maxFaceThumbnailSizeBytes;
+}
 
+Future<Uint8List> compressFaceThumbnail(Map args) async {
+  final pngBytes = args['pngBytes'] as Uint8List;
   try {
     final compressedBytes = await FlutterImageCompress.compressWithList(
       pngBytes,
