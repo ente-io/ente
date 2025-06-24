@@ -2173,6 +2173,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "yesDelete": MessageLookupByLibrary.simpleMessage("Yes, delete"),
         "yesDiscardChanges":
             MessageLookupByLibrary.simpleMessage("Yes, discard changes"),
+        "yesIgnore": MessageLookupByLibrary.simpleMessage("Yes, ignore"),
         "yesLogout": MessageLookupByLibrary.simpleMessage("Yes, logout"),
         "yesRemove": MessageLookupByLibrary.simpleMessage("Yes, remove"),
         "yesRenew": MessageLookupByLibrary.simpleMessage("Yes, Renew"),

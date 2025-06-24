@@ -220,7 +220,7 @@ class _PeopleSelectionActionWidgetState
       body: multiple
           ? S.of(context).thePersonGroupsWillNotBeDisplayed
           : S.of(context).thePersonWillNotBeDisplayed,
-      firstButtonLabel: "Yes, confirm",
+      firstButtonLabel: S.of(context).yesIgnore,
       firstButtonOnTap: () async {
         try {
           for (final clusterID in selectedClusterIds) {
