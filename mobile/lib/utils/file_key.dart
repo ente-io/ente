@@ -31,8 +31,8 @@ Future<Uint8List> getFileKeyUsingBgWorker(EnteFile file) async {
 }
 
 Uint8List _decryptFileKey(Map<String, dynamic> args) {
-  final encryptedKey = CryptoUtil.base642bin(args["encryptedKey"]);
-  final nonce = CryptoUtil.base642bin(args["keyDecryptionNonce"]);
+  final encryptedKey = (args["encryptedKey"]);
+  final nonce = (args["keyDecryptionNonce"]);
   return CryptoUtil.decryptSync(
     encryptedKey,
     args["collectionKey"],
