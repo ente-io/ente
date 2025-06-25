@@ -224,6 +224,22 @@ export interface GalleryState {
      * that they're a part of.
      */
     fileNormalCollectionIDs: Map<number, number[]>;
+    /**
+     * A map from Ente user IDs to their emails (except for the user in user
+     * themselves).
+     *
+     * This is used to perform a fast lookup of the email of the Ente user that
+     * shared a file or collection.
+     */
+    emailByUserID: Map<number, string>;
+    /**
+     * A list of emails that can be served as suggestions when the user is
+     * trying to share a collection with another Ente user.
+     *
+     * These are derived from the emails of the Ente users with whom the user
+     * has already shared collections, plus the emails of their family members.
+     */
+    shareSuggestionEmails: string[];
 
     /*--<  Derived UI state  >--*/
 
@@ -459,6 +475,8 @@ const initialGalleryState: GalleryState = {
     favoriteFileIDs: new Set(),
     collectionNameByID: new Map(),
     fileNormalCollectionIDs: new Map(),
+    emailByUserID: new Map(),
+    shareSuggestionEmails: [],
     normalCollectionSummaries: new Map(),
     hiddenCollectionSummaries: new Map(),
     uncategorizedCollectionSummaryID:
@@ -488,6 +506,8 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
     if (process.env.NEXT_PUBLIC_ENTE_TRACE) console.log("dispatch", action);
     switch (action.type) {
         case "mount": {
+            const { user, familyData } = action;
+
             const lastSyncedCollectionFiles = sortFiles(action.collectionFiles);
             const trashItems = sortTrashItems(action.trashItems);
 
@@ -519,8 +539,8 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
 
             return stateByUpdatingFilteredFiles({
                 ...state,
-                user: action.user,
-                familyData: action.familyData,
+                user,
+                familyData,
                 collections,
                 lastSyncedCollectionFiles,
                 trashItems,
@@ -542,6 +562,12 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 fileNormalCollectionIDs: deriveFileNormalCollectionIDs(
                     collectionFiles,
                     hiddenCollectionIDs,
+                ),
+                emailByUserID: constructUserIDToEmailMap(user, collections),
+                shareSuggestionEmails: createShareSuggestionEmails(
+                    user,
+                    familyData,
+                    collections,
                 ),
                 normalCollectionSummaries: deriveNormalCollectionSummaries(
                     action.user,
@@ -632,6 +658,15 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 fileNormalCollectionIDs: deriveFileNormalCollectionIDs(
                     state.collectionFiles,
                     hiddenCollectionIDs,
+                ),
+                emailByUserID: constructUserIDToEmailMap(
+                    state.user!,
+                    collections,
+                ),
+                shareSuggestionEmails: createShareSuggestionEmails(
+                    state.user!,
+                    state.familyData!,
+                    collections,
                 ),
                 normalCollectionSummaries,
                 hiddenCollectionSummaries,
@@ -1694,7 +1729,10 @@ const stateByUpdatingFilteredFiles = (state: GalleryState) => {
     if (state.isInSearchMode) {
         const filteredFiles = state.searchResults ?? state.filteredFiles;
         return { ...state, filteredFiles };
-    } else if (state.view?.type == "albums" || state.view?.type == "hidden-albums") {
+    } else if (
+        state.view?.type == "albums" ||
+        state.view?.type == "hidden-albums"
+    ) {
         const filteredFiles = deriveAlbumsOrHiddenAlbumsFilteredFiles(
             state.trashItems,
             state.collectionFiles,
@@ -1859,3 +1897,48 @@ const enqueuePendingSearchSuggestionsIfNeeded = (
     searchSuggestion && isInSearchMode
         ? [...pendingSearchSuggestions, searchSuggestion]
         : pendingSearchSuggestions;
+
+/**
+ * Create a map from the user IDs to their emails, with entries for all Ente
+ * users who have shared a collection with the user.
+ */
+const constructUserIDToEmailMap = (
+    user: User,
+    collections: GalleryState["collections"],
+): Map<number, string> => {
+    const userIDToEmail = new Map<number, string>();
+    for (const { owner, sharees } of collections) {
+        if (user.id != owner.id && owner.email) {
+            userIDToEmail.set(owner.id, owner.email);
+        }
+        for (const sharee of sharees) {
+            if (sharee.id != user.id && sharee.email) {
+                userIDToEmail.set(sharee.id, sharee.email);
+            }
+        }
+    }
+    return userIDToEmail;
+};
+
+/**
+ * Create a list of emails that are shown as suggestions to the user when they
+ * are trying to share albums with specific users.
+ */
+const createShareSuggestionEmails = (
+    user: User,
+    familyData: FamilyData,
+    collections: Collection[],
+): string[] => [
+    ...new Set(
+        collections
+            .map(({ owner, sharees }) =>
+                owner.email && owner.id != user.id
+                    ? [owner.email]
+                    : sharees.map(({ email }) => email),
+            )
+            .flat()
+            .filter((e) => e !== undefined)
+            .concat(familyData.members.map((member) => member.email))
+            .filter((email) => email != user.email),
+    ),
+];

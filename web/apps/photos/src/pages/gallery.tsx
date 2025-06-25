@@ -56,8 +56,6 @@ import {
     SearchResultsHeader,
 } from "ente-new/photos/components/gallery";
 import {
-    constructUserIDToEmailMap,
-    createShareeSuggestionEmails,
     findCollectionCreatingUncategorizedIfNeeded,
     validateKey,
 } from "ente-new/photos/components/gallery/helpers";
@@ -199,10 +197,6 @@ const Page: React.FC = () => {
         while one was already in progress. */
     const resyncOpts = useRef<SyncWithRemoteOpts | undefined>(undefined);
 
-    const [userIDToEmailMap, setUserIDToEmailMap] =
-        useState<Map<number, string>>(null);
-    const [emailList, setEmailList] = useState<string[]>(null);
-
     const [uploadTypeSelectorView, setUploadTypeSelectorView] = useState(false);
     const [uploadTypeSelectorIntent, setUploadTypeSelectorIntent] =
         useState<UploadTypeSelectorIntent>("upload");
@@ -265,7 +259,6 @@ const Page: React.FC = () => {
     // Local aliases.
     const {
         user,
-        familyData,
         normalCollections,
         normalFiles,
         hiddenFiles,
@@ -359,16 +352,6 @@ const Page: React.FC = () => {
             files: normalFiles,
         });
     }, [normalCollections, normalFiles]);
-
-    useEffect(() => {
-        if (!user || !normalCollections) {
-            return;
-        }
-        setUserIDToEmailMap(constructUserIDToEmailMap(user, normalCollections));
-        setEmailList(
-            createShareeSuggestionEmails(user, normalCollections, familyData),
-        );
-    }, [user, normalCollections, familyData]);
 
     useEffect(() => {
         if (typeof activeCollectionID == "undefined" || !router.isReady) {
@@ -910,9 +893,10 @@ const Page: React.FC = () => {
                     syncWithRemote({ force, silent }),
                 setBlockingLoad,
                 photoListHeader,
-                userIDToEmailMap,
                 user,
-                emailList,
+                // TODO(RE): Rename
+                userIDToEmailMap: state.emailByUserID,
+                emailList: state.shareSuggestionEmails,
                 openHiddenSection,
                 isClipSearchResult,
                 selectedFile: selected,

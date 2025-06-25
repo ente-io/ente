@@ -11,10 +11,8 @@
  */
 
 import { getUserRecoveryKey } from "ente-accounts/services/recovery-key";
-import type { User } from "ente-accounts/services/user";
 import log from "ente-base/log";
 import type { Collection } from "ente-media/collection";
-import type { FamilyData } from "ente-new/photos/services/user-details";
 import { createUncategorizedCollection } from "../../services/collection";
 import { PseudoCollectionID } from "../../services/collection-summary";
 
@@ -51,48 +49,3 @@ export const findCollectionCreatingUncategorizedIfNeeded = async (
     collectionSummaryID == PseudoCollectionID.uncategorizedPlaceholder
         ? createUncategorizedCollection()
         : collections.find(({ id }) => id == collectionSummaryID);
-
-export const constructUserIDToEmailMap = (
-    user: User,
-    collections: Collection[],
-): Map<number, string> => {
-    const userIDToEmail = new Map<number, string>();
-    collections.forEach((item) => {
-        const { owner, sharees } = item;
-        if (user.id !== owner.id && owner.email) {
-            userIDToEmail.set(owner.id, owner.email);
-        }
-        sharees.forEach((item) => {
-            if (item.id !== user.id && item.email)
-                userIDToEmail.set(item.id, item.email);
-        });
-    });
-    return userIDToEmail;
-};
-
-/**
- * Create a list of emails that are shown as suggestions to the user when they
- * are trying to share albums with specific users.
- */
-export const createShareeSuggestionEmails = (
-    user: User,
-    collections: Collection[],
-    familyData: FamilyData | undefined,
-): string[] => {
-    const emails = collections
-        .map(({ owner, sharees }) =>
-            owner.email && owner.id != user.id
-                ? [owner.email]
-                : sharees.map(({ email }) => email),
-        )
-        .flat()
-        .filter((e) => e !== undefined);
-
-    // Add family members.
-    if (familyData) {
-        const family = familyData.members.map((member) => member.email);
-        emails.push(...family);
-    }
-
-    return [...new Set(emails.filter((email) => email != user.email))];
-};
