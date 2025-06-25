@@ -6,6 +6,8 @@ import "dart:ui";
 import "package:flutter/cupertino.dart";
 import "package:flutter/material.dart";
 import "package:photos/core/configuration.dart";
+import "package:photos/core/event_bus.dart";
+import "package:photos/events/reset_zoom_of_photo_view_event.dart";
 import "package:photos/models/file/file_type.dart";
 import "package:photos/models/memories/memory.dart";
 import "package:photos/service_locator.dart";
@@ -13,6 +15,7 @@ import "package:photos/services/smart_memories_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/theme/text_style.dart";
 import "package:photos/ui/actions/file/file_actions.dart";
+import "package:photos/ui/home/memories/custom_listener.dart";
 import "package:photos/ui/home/memories/memory_progress_indicator.dart";
 import "package:photos/ui/viewer/file/file_widget.dart";
 
@@ -146,22 +149,52 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
   final ValueNotifier<Duration> durationNotifier =
       ValueNotifier(const Duration(seconds: 5));
 
+  /// Used to check if any pointer is on the screen.
+  final hasPointerOnScreenNotifier = ValueNotifier<bool>(false);
+
   @override
   void initState() {
     super.initState();
     Future.delayed(const Duration(seconds: 3), () {
       if (mounted) _showTitle.value = false;
     });
+    hasPointerOnScreenNotifier.addListener(
+      _hasPointerListener,
+    );
   }
 
   @override
   void dispose() {
     _showTitle.dispose();
     durationNotifier.dispose();
+    hasPointerOnScreenNotifier.removeListener(_hasPointerListener);
+
     super.dispose();
   }
 
-  void _toggleAnimation(bool pause) {
+  /// Used to check if user has touched the screen and then to pause animation
+  /// and once the pointer is removed from the screen, it resumes the animation
+  /// It also resets the zoom of the photo view to default for better user
+  /// experience after finger(s) is removed from the screen after zooming in by
+  /// pinching.
+  void _hasPointerListener() {
+    if (hasPointerOnScreenNotifier.value) {
+      _toggleAnimation(pause: true);
+    } else {
+      _toggleAnimation(pause: false);
+      final inheritedData = FullScreenMemoryData.of(context)!;
+      final currentFile =
+          inheritedData.memories[inheritedData.indexNotifier.value].file;
+      Bus.instance.fire(
+        ResetZoomOfPhotoView(
+          localID: currentFile.localID,
+          uploadedFileID: currentFile.uploadedFileID,
+        ),
+      );
+    }
+  }
+
+  void _toggleAnimation({required bool pause}) {
     if (pause) {
       _progressAnimationController?.stop();
       _zoomAnimationController?.stop();
@@ -325,19 +358,17 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
               final isVideo = currentMemory.file.fileType == FileType.video;
               final currentFile = currentMemory.file;
 
-              return GestureDetector(
-                onTapUp: (TapUpDetails details) {
+              return MemoriesPointerGestureListener(
+                onTap: (PointerEvent event) {
                   final screenWidth = MediaQuery.sizeOf(context).width;
-                  final edgeWidth = screenWidth * 0.20;
-                  if (details.localPosition.dx < edgeWidth) {
+                  final goToPreviousTapAreaWidth = screenWidth * 0.20;
+                  if (event.localPosition.dx < goToPreviousTapAreaWidth) {
                     _goToPrevious(inheritedData);
-                  } else if (details.localPosition.dx >
-                      screenWidth - edgeWidth) {
+                  } else {
                     _goToNext(inheritedData);
                   }
                 },
-                onLongPress: () => isVideo ? null : _toggleAnimation(true),
-                onLongPressUp: () => isVideo ? null : _toggleAnimation(false),
+                hasPointerNotifier: hasPointerOnScreenNotifier,
                 child: MemoriesZoomWidget(
                   scaleController: (controller) {
                     _zoomAnimationController = controller;
@@ -352,7 +383,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                         const BoxDecoration(color: Colors.transparent),
                     isFromMemories: true,
                     playbackCallback: (isPlaying) {
-                      _toggleAnimation(!isPlaying);
+                      _toggleAnimation(pause: !isPlaying);
                     },
                     onFinalFileLoad: ({required int memoryDuration}) {
                       onFinalFileLoad(memoryDuration);
@@ -424,9 +455,9 @@ class BottomIcons extends StatelessWidget {
               color: Colors.white, //same for both themes
             ),
             onPressed: () async {
-              fullScreenState?._toggleAnimation(true);
+              fullScreenState?._toggleAnimation(pause: true);
               await showDetailsSheet(context, currentFile);
-              fullScreenState?._toggleAnimation(false);
+              fullScreenState?._toggleAnimation(pause: false);
             },
           ),
         ];
@@ -442,7 +473,7 @@ class BottomIcons extends StatelessWidget {
                 color: Colors.white, //same for both themes
               ),
               onPressed: () async {
-                fullScreenState?._toggleAnimation(true);
+                fullScreenState?._toggleAnimation(pause: true);
                 await showSingleFileDeleteSheet(
                   context,
                   inheritedData
@@ -455,7 +486,7 @@ class BottomIcons extends StatelessWidget {
                       },
                   },
                 );
-                fullScreenState?._toggleAnimation(false);
+                fullScreenState?._toggleAnimation(pause: false);
               },
             ),
             SizedBox(
@@ -471,9 +502,9 @@ class BottomIcons extends StatelessWidget {
               color: Colors.white, //same for both themes
             ),
             onPressed: () async {
-              fullScreenState?._toggleAnimation(true);
+              fullScreenState?._toggleAnimation(pause: true);
               await share(context, [currentFile]);
-              fullScreenState?._toggleAnimation(false);
+              fullScreenState?._toggleAnimation(pause: false);
             },
           ),
         );
