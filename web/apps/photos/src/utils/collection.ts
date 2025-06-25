@@ -100,9 +100,9 @@ export async function downloadDefaultHiddenCollectionHelper(
     setFilesDownloadProgressAttributesCreator: SetFilesDownloadProgressAttributesCreator,
 ) {
     try {
-        const collections = await savedCollections();
-        const defaultHiddenCollectionsIDs =
-            findDefaultHiddenCollectionIDs(collections);
+        const defaultHiddenCollectionsIDs = findDefaultHiddenCollectionIDs(
+            await savedCollections(),
+        );
         const collectionFiles = await savedCollectionFiles();
         const defaultHiddenCollectionFiles = uniqueFilesByID(
             collectionFiles.filter((file) =>

@@ -245,8 +245,7 @@ export const savedNormalCollections = (): Promise<Collection[]> =>
     );
 
 /**
- * Return all hidden collections that are present in our local
- * database.
+ * Return all hidden collections that are present in our local database.
  */
 export const savedHiddenCollections = (): Promise<Collection[]> =>
     savedCollections().then(

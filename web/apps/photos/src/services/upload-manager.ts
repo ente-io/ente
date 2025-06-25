@@ -36,7 +36,7 @@ import {
 } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
 import { potentialFileTypeFromExtension } from "ente-media/live-photo";
-import { savedNormalCollectionFiles } from "ente-new/photos/services/file";
+import { computeNormalCollectionFilesFromSaved } from "ente-new/photos/services/file";
 import { indexNewUpload } from "ente-new/photos/services/ml";
 import { wait } from "ente-utils/promise";
 import {
@@ -449,7 +449,7 @@ class UploadManager {
             );
         } else {
             this.existingFiles = getUserOwnedFiles(
-                await savedNormalCollectionFiles(),
+                await computeNormalCollectionFilesFromSaved(),
             );
         }
         this.collections = new Map(

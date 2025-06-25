@@ -58,14 +58,15 @@ export const searchDataSync = () =>
  */
 export const updateSearchCollectionsAndFiles = (
     collections: Collection[],
-    hiddenCollectionIDs: Set<number>,
     collectionFiles: EnteFile[],
+    hiddenCollectionIDs: Set<number>,
+    hiddenFileIDs: Set<number>,
 ) => {
     const normalCollections = collections.filter(
         (c) => !hiddenCollectionIDs.has(c.id),
     );
     const normalCollectionFiles = collectionFiles.filter(
-        (f) => !hiddenCollectionIDs.has(f.collectionID),
+        (f) => !hiddenFileIDs.has(f.id),
     );
     void worker().then((w) =>
         w.setCollectionsAndFiles({

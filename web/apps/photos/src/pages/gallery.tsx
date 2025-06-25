@@ -369,10 +369,16 @@ const Page: React.FC = () => {
     useEffect(() => {
         updateSearchCollectionsAndFiles(
             state.collections,
-            state.hiddenCollectionIDs,
             state.collectionFiles,
+            state.hiddenCollectionIDs,
+            state.hiddenFileIDs,
         );
-    }, [state.collections, state.hiddenCollectionIDs, state.collectionFiles]);
+    }, [
+        state.collections,
+        state.collectionFiles,
+        state.hiddenCollectionIDs,
+        state.hiddenFileIDs,
+    ]);
 
     useEffect(() => {
         dispatch({ type: "setPeopleState", peopleState });

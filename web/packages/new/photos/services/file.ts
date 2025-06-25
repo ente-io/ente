@@ -49,17 +49,23 @@ export const performInBatches = <T, U>(
 ): Promise<U[]> => Promise.all(batch(items, requestBatchSize).map(op));
 
 /**
- * Return the list of collection files from our local database that do not
- * belong to hidden collections.
+ * Return all normal (non-hidden) files present in our local database.
+ *
+ * The long name and the "compute" in it is to signal that this is not just a DB
+ * read, and that it also does some potentially non-trivial computation.
  */
-export const savedNormalCollectionFiles = async () => {
+export const computeNormalCollectionFilesFromSaved = async () => {
     const hiddenCollections = await savedHiddenCollections();
     const hiddenCollectionIDs = new Set(hiddenCollections.map((c) => c.id));
 
     const collectionFiles = await savedCollectionFiles();
-    return collectionFiles.filter(
-        (f) => !hiddenCollectionIDs.has(f.collectionID),
+    const hiddenFileIDs = new Set(
+        collectionFiles
+            .filter((f) => hiddenCollectionIDs.has(f.collectionID))
+            .map((f) => f.id),
     );
+
+    return collectionFiles.filter((f) => !hiddenFileIDs.has(f.id));
 };
 
 /**
