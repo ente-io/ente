@@ -12,6 +12,7 @@ import "package:photos/models/file/file_type.dart";
 import "package:photos/models/memories/memory.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/smart_memories_service.dart";
+import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/theme/text_style.dart";
 import "package:photos/ui/actions/file/file_actions.dart";
@@ -276,16 +277,16 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
 
     return Padding(
       padding: EdgeInsets.fromLTRB(
-        8,
+        4,
         screenPadding.top + 8,
-        8,
+        4,
         screenPadding.bottom + 8,
       ),
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: getEnteColorScheme(context).strokeFainter,
+            color: strokeFainterDark,
             width: 1,
           ),
         ),
