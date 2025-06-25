@@ -57,6 +57,27 @@ extension CollectionFiles on RemoteDB {
         .toList(growable: false);
   }
 
+  Future<(Set<int>, Map<String, int>)> getUploadAndHash(
+    int collectionID,
+  ) async {
+    final results = await sqliteDB.getAll(
+      'SELECT id, hash FROM collection_files JOIN files ON files.id = collection_files.file_id'
+      ' WHERE collection_id = ?',
+      [
+        collectionID,
+      ],
+    );
+    final ids = <int>{};
+    final hash = <String, int>{};
+    for (final result in results) {
+      ids.add(result['id'] as int);
+      if (result['hash'] != null) {
+        hash[result['hash'] as String] = result['id'] as int;
+      }
+    }
+    return (ids, hash);
+  }
+
   Future<List<CollectionFile>> ownedFilesWithSameHash(
     List<String> hashes,
     int ownerID,

@@ -66,7 +66,7 @@ class FavoritesService {
       Set<int> uploadedIDs;
       Map<String, int> fileHashes;
       (uploadedIDs, fileHashes) =
-          await FilesDB.instance.getUploadAndHash(favCollection.id);
+          await remoteDB.getUploadAndHash(favCollection.id);
       _cachedFavUploadedIDs.addAll(uploadedIDs);
       _cachedFavFileHases.addAll(fileHashes);
     }
