@@ -67,14 +67,8 @@ interface PullFilesOpts {
     /**
      * Called when the saved collections were replaced by the given
      * {@link collections}.
-     *
-     * It is also passed the IDs of the collections from amongst
-     * {@link collections} that are hidden.
      */
-    onSetCollections: (
-        collections: Collection[],
-        hiddenCollectionIDs: Set<number>,
-    ) => void;
+    onSetCollections: (collections: Collection[]) => void;
     /**
      * Called when saved collection files were replaced by the given
      * {@link collectionFiles}.
@@ -106,12 +100,11 @@ interface PullFilesOpts {
  * state in tandem with the sync. The callbacks are optional since we might not
  * have local state to update, as is the case when this is invoked post dedup.
  *
- * @returns `true` if one or more normal or hidden files were updated during the
- * sync.
+ * @returns `true` if one or more files were updated during the pull.
  */
 export const syncCollectionAndFiles = async (opts?: PullFilesOpts) => {
-    const { collections, hiddenCollectionIDs } = await pullCollections();
-    opts?.onSetCollections(collections, hiddenCollectionIDs);
+    const collections = await pullCollections();
+    opts?.onSetCollections(collections);
     const didUpdateFiles = await pullCollectionFiles(
         collections,
         opts?.onSetCollectionFiles,

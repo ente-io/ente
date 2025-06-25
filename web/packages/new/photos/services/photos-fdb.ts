@@ -45,29 +45,6 @@ export const saveCollections = async (collections: Collection[]) => {
     await localForage.setItem("collections", collections);
 };
 
-/**
- * Return the collectionIDs of hidden collections as per our local database.
- *
- * Use {@link saveHiddenCollectionIDs} to update the database.
- */
-export const savedHiddenCollectionIDs = async (): Promise<Set<number>> =>
-    new Set(
-        z
-            .array(z.number())
-            .parse((await localForage.getItem("hidden-collection-ids")) ?? []),
-    );
-
-/**
- * Replace the list of hidden collectionIDs stored in our local database.
- *
- * This is the setter corresponding to {@link savedHiddenCollectionIDs}.
- */
-export const saveHiddenCollectionIDs = async (
-    hc: Set<number>,
-): Promise<void> => {
-    await localForage.setItem("hidden-collection-ids", [...hc]);
-};
-
 const TrashItemCollectionKey = z.object({
     /**
      * Collection ID.
@@ -173,6 +150,9 @@ export const savedCollectionFiles = async (): Promise<EnteFile[]> => {
         files = files.concat(previousHiddenFiles);
         await saveCollectionFiles(files);
         await localForage.removeItem("hidden-files");
+        // While we're cleaning up, also remove this unused field related to
+        // hidden collections also being separately stored earlier.
+        await localForage.removeItem("hidden-collection-ids");
     }
 
     return transformFilesIfNeeded(files);

@@ -78,7 +78,6 @@ import { updateFilesVisibility } from "ente-new/photos/services/file";
 import {
     savedCollectionFiles,
     savedCollections,
-    savedHiddenCollectionIDs,
     savedTrashItems,
 } from "ente-new/photos/services/photos-fdb";
 import {
@@ -330,7 +329,6 @@ const Page: React.FC = () => {
                 user,
                 familyData,
                 collections: await savedCollections(),
-                hiddenCollectionsIDs: await savedHiddenCollectionIDs(),
                 collectionFiles: await savedCollectionFiles(),
                 trashItems: await savedTrashItems(),
             });
@@ -538,12 +536,8 @@ const Page: React.FC = () => {
      */
     const fileAndCollectionSyncWithRemote = useCallback(async () => {
         const didUpdateFiles = await syncCollectionAndFiles({
-            onSetCollections: (collections, hiddenCollectionIDs) =>
-                dispatch({
-                    type: "setCollections",
-                    collections,
-                    hiddenCollectionIDs,
-                }),
+            onSetCollections: (collections) =>
+                dispatch({ type: "setCollections", collections }),
             onSetCollectionFiles: (collectionFiles) =>
                 dispatch({ type: "setCollectionFiles", collectionFiles }),
             onAugmentCollectionFiles: (collectionFiles) =>
