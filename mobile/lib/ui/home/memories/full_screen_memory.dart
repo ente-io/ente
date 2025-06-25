@@ -353,7 +353,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
       body: Stack(
         alignment: Alignment.bottomCenter,
         children: [
-          const MemoryBackDrop(),
+          const _MemoryBlur(),
           ValueListenableBuilder<int>(
             valueListenable: inheritedData.indexNotifier,
             builder: (context, index, _) {
@@ -576,8 +576,8 @@ class BottomGradient extends StatelessWidget {
   }
 }
 
-class MemoryBackDrop extends StatelessWidget {
-  const MemoryBackDrop({super.key});
+class _MemoryBlur extends StatelessWidget {
+  const _MemoryBlur();
 
   @override
   Widget build(BuildContext context) {
