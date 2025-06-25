@@ -617,7 +617,7 @@ const saveSyncLastUpdatedAt = (lastUpdatedAt: number) =>
  * Fetch IDs of files from remote that have been processed by other clients
  * since the last time we checked.
  */
-const syncProcessedFileIDs = async () =>
+const pullProcessedFileIDs = async () =>
     syncUpdatedFileDataFileIDs(
         "vid_preview",
         (await savedSyncLastUpdatedAt()) ?? 0,
@@ -657,19 +657,19 @@ export const videoPrunePermanentlyDeletedFileIDsIfNeeded = async (
 };
 
 /**
- * If video processing is enabled, trigger a sync with remote and any subsequent
- * backfill queue processing for pending videos.
+ * If video processing is enabled, trigger a pull from remote and then proceed
+ * with any subsequent backfill queue processing of pending videos.
  *
- * This function is expected to be called during a regular sync that the app
- * makes with remote (See: [Note: Remote sync]). It is a no-op if video
- * processing is not enabled or eligible on this device. Otherwise it syncs the
- * list of already processed file IDs with remote.
+ * This function is intended to be called during a full remote pull (See: [Note:
+ * Remote pull]). It is a no-op if video processing is not enabled or eligible
+ * on this device. Otherwise it pulls the list of already processed file IDs
+ * with remote.
  *
- * At this point it also triggers a backfill (if needed), but doesn't wait for
- * it to complete (which might take a time for big libraries).
+ * At this point it also triggers processing of the backfill (if needed), but
+ * doesn't wait for it to complete (which might take a time for big libraries).
  *
  * Calling it when a backfill has already been triggered by a previous sync is
- * also a no-op. However, a backfill does not start until at least one sync of
+ * also a no-op. However, a backfill does not start until at least one pull of
  * file IDs has been completed with remote, to avoid picking up work on file IDs
  * that have already been processed elsewhere.
  */
@@ -685,7 +685,7 @@ export const videoProcessingSyncIfNeeded = async () => {
 
     if (!isHLSGenerationEnabled()) return;
 
-    await syncProcessedFileIDs();
+    await pullProcessedFileIDs();
 
     tickNow(); /* if not already ticking */
 };

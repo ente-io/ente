@@ -79,16 +79,16 @@ import {
     savedTrashItems,
 } from "ente-new/photos/services/photos-fdb";
 import {
+    pullFiles,
+    pullFilesPost,
+    pullFilesPre,
+} from "ente-new/photos/services/pull";
+import {
     filterSearchableFiles,
     updateSearchCollectionsAndFiles,
 } from "ente-new/photos/services/search";
 import type { SearchOption } from "ente-new/photos/services/search/types";
 import { initSettings } from "ente-new/photos/services/settings";
-import {
-    postCollectionAndFilesSync,
-    preCollectionAndFilesSync,
-    syncCollectionAndFiles,
-} from "ente-new/photos/services/sync";
 import {
     initUserDetailsOrTriggerSync,
     redirectToCustomerPortal,
@@ -505,14 +505,13 @@ const Page: React.FC = () => {
     }, [showLoadingBar, hideLoadingBar]);
 
     /**
-     * Sync the local files and collection with remote.
+     * Pull latest collections, collection files and trash items from remote.
      *
-     * [Note: Full sync vs file and collection sync]
+     * [Note: Full remote pull vs files pull]
      *
-     * This is a subset of the sync which happens in {@link syncWithRemote}, but
-     * in some cases where we know that the changes will not have transitive
-     * effects outside of the locally stored files and collections this is a
-     * better option for interactive operations because:
+     * If we know that our operation will not have other transitive effects
+     * beyond collections, collection files and trash, this is a better option
+     * as compared to a full remote pull for interactive operations because:
      *
      * 1. This involves a lesser number of API requests, so it reduces the time
      *    the user has to wait for their interactive request to complete.
@@ -522,7 +521,7 @@ const Page: React.FC = () => {
      *    invocation of {@link fileAndCollectionSyncWithRemote} is independent.
      */
     const fileAndCollectionSyncWithRemote = useCallback(async () => {
-        const didUpdateFiles = await syncCollectionAndFiles({
+        const didUpdateFiles = await pullFiles({
             onSetCollections: (collections) =>
                 dispatch({ type: "setCollections", collections }),
             onSetCollectionFiles: (collectionFiles) =>
@@ -568,7 +567,7 @@ const Page: React.FC = () => {
             isSyncing.current = true;
             try {
                 if (!silent) showLoadingBar();
-                await preCollectionAndFilesSync();
+                await pullFilesPre();
                 await fileAndCollectionSyncWithRemote();
                 // syncWithRemote is called with the force flag set to true before
                 // doing an upload. So it is possible, say when resuming a pending
@@ -576,7 +575,7 @@ const Page: React.FC = () => {
                 //
                 // Do the non-file-related sync only for one of these parallel ones.
                 if (!isForced) {
-                    await postCollectionAndFilesSync();
+                    await pullFilesPost();
                 }
             } catch (e) {
                 log.error("syncWithRemote failed", e);
