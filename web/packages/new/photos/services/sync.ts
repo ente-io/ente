@@ -5,15 +5,11 @@ import {
 } from "ente-gallery/services/video";
 import type { Collection } from "ente-media/collection";
 import type { EnteFile } from "ente-media/file";
-import { pullCollections } from "ente-new/photos/services/collections";
-import { pullCollectionFiles } from "ente-new/photos/services/files";
-import {
-    isMLSupported,
-    mlStatusSync,
-    mlSync,
-} from "ente-new/photos/services/ml";
-import { searchDataSync } from "ente-new/photos/services/search";
-import { syncSettings } from "ente-new/photos/services/settings";
+import { pullCollections } from "./collection";
+import { pullCollectionFiles } from "./files";
+import { isMLSupported, mlStatusSync, mlSync } from "./ml";
+import { searchDataSync } from "./search";
+import { syncSettings } from "./settings";
 import { pullTrash, type TrashItem } from "./trash";
 
 /**
