@@ -84,7 +84,7 @@ class FileAppBarState extends State<FileAppBar> {
 
   @override
   Widget build(BuildContext context) {
-    _logger.fine("building app bar ${widget.file.generatedID?.toString()}");
+    _logger.info("building app bar ${widget.file.generatedID?.toString()}");
 
     //When the widget is initialized, the actions are not available.
     //Cannot call _getActions() in initState.

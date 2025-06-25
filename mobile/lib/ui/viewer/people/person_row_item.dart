@@ -33,7 +33,10 @@ class PersonGridItem extends StatelessWidget {
                     borderRadius: BorderRadius.circular(80),
                   ),
                 ),
-                child: PersonFaceWidget(personId: person.remoteID),
+                child: PersonFaceWidget(
+                  personId: person.remoteID,
+                  key: ValueKey(person.remoteID),
+                ),
               ),
             ),
             const SizedBox(height: 4),

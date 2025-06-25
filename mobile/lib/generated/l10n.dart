@@ -11975,6 +11975,176 @@ class S {
       args: [name],
     );
   }
+
+  /// `Are you sure you want to remove this face from this person?`
+  String get areYouSureRemoveThisFaceFromPerson {
+    return Intl.message(
+      'Are you sure you want to remove this face from this person?',
+      name: 'areYouSureRemoveThisFaceFromPerson',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Other detected faces`
+  String get otherDetectedFaces {
+    return Intl.message(
+      'Other detected faces',
+      name: 'otherDetectedFaces',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Are they `
+  String get areThey {
+    return Intl.message(
+      'Are they ',
+      name: 'areThey',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `?`
+  String get questionmark {
+    return Intl.message(
+      '?',
+      name: 'questionmark',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Save as another person`
+  String get saveAsAnotherPerson {
+    return Intl.message(
+      'Save as another person',
+      name: 'saveAsAnotherPerson',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Show less faces`
+  String get showLessFaces {
+    return Intl.message(
+      'Show less faces',
+      name: 'showLessFaces',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Show more faces`
+  String get showMoreFaces {
+    return Intl.message(
+      'Show more faces',
+      name: 'showMoreFaces',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Ignore`
+  String get ignore {
+    return Intl.message(
+      'Ignore',
+      name: 'ignore',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Merge`
+  String get merge {
+    return Intl.message(
+      'Merge',
+      name: 'merge',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Reset`
+  String get reset {
+    return Intl.message(
+      'Reset',
+      name: 'reset',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Are you sure you want to ignore this person?`
+  String get areYouSureYouWantToIgnoreThisPerson {
+    return Intl.message(
+      'Are you sure you want to ignore this person?',
+      name: 'areYouSureYouWantToIgnoreThisPerson',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Are you sure you want to ignore these persons?`
+  String get areYouSureYouWantToIgnoreThesePersons {
+    return Intl.message(
+      'Are you sure you want to ignore these persons?',
+      name: 'areYouSureYouWantToIgnoreThesePersons',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The person groups will not be displayed in the people section anymore. Photos will remain untouched.`
+  String get thePersonGroupsWillNotBeDisplayed {
+    return Intl.message(
+      'The person groups will not be displayed in the people section anymore. Photos will remain untouched.',
+      name: 'thePersonGroupsWillNotBeDisplayed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The person will not be displayed in the people section anymore. Photos will remain untouched.`
+  String get thePersonWillNotBeDisplayed {
+    return Intl.message(
+      'The person will not be displayed in the people section anymore. Photos will remain untouched.',
+      name: 'thePersonWillNotBeDisplayed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Are you sure you want to merge them?`
+  String get areYouSureYouWantToMergeThem {
+    return Intl.message(
+      'Are you sure you want to merge them?',
+      name: 'areYouSureYouWantToMergeThem',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `All unnamed groups will be merged into the selected person. This can still be undone from the suggestions history overview of the person.`
+  String get allUnnamedGroupsWillBeMergedIntoTheSelectedPerson {
+    return Intl.message(
+      'All unnamed groups will be merged into the selected person. This can still be undone from the suggestions history overview of the person.',
+      name: 'allUnnamedGroupsWillBeMergedIntoTheSelectedPerson',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Yes, ignore`
+  String get yesIgnore {
+    return Intl.message(
+      'Yes, ignore',
+      name: 'yesIgnore',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

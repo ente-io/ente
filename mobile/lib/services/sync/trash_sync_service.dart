@@ -32,7 +32,7 @@ class TrashSyncService {
   final Dio _enteDio;
 
   TrashSyncService(this._prefs, this._enteDio) {
-    _logger.fine("TrashSyncService constructor");
+    _logger.info("TrashSyncService constructor");
   }
 
   void init(SharedPreferences preferences) {
@@ -42,20 +42,20 @@ class TrashSyncService {
   Future<void> syncTrash() async {
     final lastSyncTime = _getSyncTime();
     bool isLocalTrashUpdated = false;
-    _logger.fine('sync trash sinceTime : $lastSyncTime');
+    _logger.info('sync trash sinceTime : $lastSyncTime');
     final diff = await getTrashFilesDiff(lastSyncTime);
     if (diff.trashedFiles.isNotEmpty) {
       isLocalTrashUpdated = true;
-      _logger.fine("inserting ${diff.trashedFiles.length} items in trash");
+      _logger.info("inserting ${diff.trashedFiles.length} items in trash");
       await _trashDB.insertMultiple(diff.trashedFiles);
     }
     if (diff.deletedUploadIDs.isNotEmpty) {
-      _logger.fine("discard ${diff.deletedUploadIDs.length} deleted items");
+      _logger.info("discard ${diff.deletedUploadIDs.length} deleted items");
       final itemsDeleted = await _trashDB.delete(diff.deletedUploadIDs);
       isLocalTrashUpdated = isLocalTrashUpdated || itemsDeleted > 0;
     }
     if (diff.restoredFiles.isNotEmpty) {
-      _logger.fine("discard ${diff.restoredFiles.length} restored items");
+      _logger.info("discard ${diff.restoredFiles.length} restored items");
       final itemsDeleted = await _trashDB
           .delete(diff.restoredFiles.map((e) => e.uploadedFileID!).toList());
       isLocalTrashUpdated = isLocalTrashUpdated || itemsDeleted > 0;
@@ -94,7 +94,7 @@ class TrashSyncService {
       }
     }
     if (ignoredFiles.isNotEmpty) {
-      _logger.fine('updating ${ignoredFiles.length} ignored files ');
+      _logger.info('updating ${ignoredFiles.length} ignored files ');
       await IgnoredFilesService.instance.cacheAndInsert(ignoredFiles);
     }
   }
