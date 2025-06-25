@@ -67,6 +67,10 @@ interface PullFilesOpts {
      * {@link trashItems}.
      */
     onSetTrashedItems: (trashItems: TrashItem[]) => void;
+    /**
+     * Called if one or more files were updated during the pull.
+     */
+    onDidUpdateCollectionFiles: () => void;
 }
 
 /**
@@ -79,11 +83,12 @@ interface PullFilesOpts {
  *
  * See also: [Note: Remote pull]
  *
+ * It is not robust to have multiple of these executing in parallel, and caller
+ * should have some mechanism to serialize invocations.
+ *
  * @param opts various callbacks that are used by gallery to update its local
  * state in tandem with the pull. The callbacks are optional since we might not
  * have local state to update, as is the case when this is invoked post dedup.
- *
- * @returns `true` if one or more files were updated during the pull.
  */
 export const pullFiles = async (opts?: PullFilesOpts) => {
     const collections = await pullCollections();
@@ -100,15 +105,15 @@ export const pullFiles = async (opts?: PullFilesOpts) => {
     );
     if (didUpdateFiles) {
         // TODO: Ok for now since its is only commented for the deduper (gallery
-        // does this on the return value), but still needs fixing instead of a
-        // hidden gotcha. Fix is simple, just uncomment, but that can be done
-        // once the exportService can be imported here in the ente-new package.
+        // does this by providing onDidUpdateCollectionFiles), but still needs
+        // fixing instead of a hidden gotcha. Fix is simple, just uncomment, but
+        // that can be done once the exportService can be imported here in the
+        // ente-new package.
         //
         // exportService.onLocalFilesUpdated();
+        opts?.onDidUpdateCollectionFiles();
         resetFileViewerDataSourceOnClose();
-        return true;
     }
-    return false;
 };
 
 /**

@@ -523,7 +523,7 @@ const Page: React.FC = () => {
      *    {@link remoteFilesPull} is independent.
      */
     const remoteFilesPull = useCallback(async () => {
-        const didUpdateFiles = await pullFiles({
+        await pullFiles({
             onSetCollections: (collections) =>
                 dispatch({ type: "setCollections", collections }),
             onSetCollectionFiles: (collectionFiles) =>
@@ -532,10 +532,9 @@ const Page: React.FC = () => {
                 dispatch({ type: "augmentCollectionFiles", collectionFiles }),
             onSetTrashedItems: (trashItems) =>
                 dispatch({ type: "setTrashItems", trashItems }),
+            onDidUpdateCollectionFiles: () =>
+                exportService.onLocalFilesUpdated(),
         });
-        if (didUpdateFiles) {
-            exportService.onLocalFilesUpdated();
-        }
     }, []);
 
     const remotePull = useCallback(
