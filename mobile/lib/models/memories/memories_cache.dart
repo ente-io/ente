@@ -138,8 +138,8 @@ class ToShowMemory {
     return ToShowMemory(
       memory.title,
       memory.memories
-          .where((m) => m.file.uploadedFileID != null)
-          .map((m) => m.file.uploadedFileID!)
+          .where((m) => m.file.isUploaded)
+          .map((m) => m.file.remoteID)
           .toList(),
       memory.type,
       memory.firstDateToShow,

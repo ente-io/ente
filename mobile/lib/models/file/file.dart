@@ -302,7 +302,7 @@ class EnteFile {
 
   // returns true if the file isn't available in the user's gallery
   bool get isRemoteFile {
-    return localID == null && uploadedFileID != null;
+    return localID == null && isUploaded;
   }
 
   bool get isUploaded {

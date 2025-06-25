@@ -101,7 +101,7 @@ class _HiddenPageState extends State<HiddenPage> {
       reloadEvent: Bus.instance.on<FilesUpdatedEvent>().where(
             (event) =>
                 event.updatedFiles.firstWhereOrNull(
-                  (element) => element.uploadedFileID != null,
+                  (element) => element.isUploaded,
                 ) !=
                 null,
           ),
@@ -114,7 +114,7 @@ class _HiddenPageState extends State<HiddenPage> {
         Bus.instance.on<FilesUpdatedEvent>().where(
               (event) =>
                   event.updatedFiles.firstWhereOrNull(
-                    (element) => element.uploadedFileID != null,
+                    (element) => element.isUploaded,
                   ) !=
                   null,
             ),

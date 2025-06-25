@@ -92,7 +92,7 @@ class FavoritesService {
     if (checkOnlyAlbum) {
       return false;
     }
-    if (file.uploadedFileID != null) {
+    if (file.isUploaded) {
       if (file.ownerID != _config.getUserID() && file.hash != null) {
         return _cachedFavFileHases.containsKey(file.hash!);
       }
@@ -126,10 +126,10 @@ class FavoritesService {
     final Map<String, int> hashes = {};
     final Set<String> localIDs = {};
     for (var file in files) {
-      if (file.uploadedFileID != null) {
-        updatedIDs.add(file.uploadedFileID!);
+      if (file.isUploaded) {
+        updatedIDs.add(file.remoteID);
         if (file.hash != null) {
-          hashes[file.hash!] = file.uploadedFileID!;
+          hashes[file.hash!] = file.remoteID;
         }
       } else if (file.localID != null || file.localID != "") {
         /* Note: Favorite un-uploaded files

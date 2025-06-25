@@ -180,13 +180,13 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
       final localFile = File(getSharedMediaFilePath(widget.file));
       if (localFile.existsSync()) {
         _setFilePathForNativePlayer(localFile.path, update);
-      } else if (widget.file.uploadedFileID != null) {
+      } else if (widget.file.isUploaded) {
         _loadNetworkVideo(update);
       }
     } else {
       await widget.file.getAsset.then((asset) async {
         if (asset == null || !(await asset.exists)) {
-          if (widget.file.uploadedFileID != null) {
+          if (widget.file.isUploaded) {
             _loadNetworkVideo(update);
           }
         } else {

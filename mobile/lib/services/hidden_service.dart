@@ -120,7 +120,7 @@ extension HiddenService on CollectionsService {
     await dialog.show();
     try {
       for (EnteFile file in filesToHide) {
-        if (file.uploadedFileID == null) {
+        if (!file.isUploaded) {
           throw AssertionError("Can only hide uploaded files");
         }
         if (file.ownerID != userID) {

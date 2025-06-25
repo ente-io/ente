@@ -55,7 +55,7 @@ Future<void> deleteFilesFromEverywhere(
         localAssetIDs.add(file.localID!);
       }
     }
-    if (file.uploadedFileID == null) {
+    if (!file.isUploaded) {
       hasLocalOnlyFiles = true;
     }
   }

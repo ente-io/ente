@@ -230,8 +230,8 @@ class MemoriesCacheService {
       );
       final minimalFileIdsToFile = <int, EnteFile>{};
       for (final file in minimalFiles) {
-        if (file.uploadedFileID != null) {
-          minimalFileIdsToFile[file.uploadedFileID!] = file;
+        if (file.isUploaded) {
+          minimalFileIdsToFile[file.remoteID] = file;
         }
       }
 

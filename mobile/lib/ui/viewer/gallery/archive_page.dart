@@ -55,7 +55,7 @@ class ArchivePage extends StatelessWidget {
       reloadEvent: Bus.instance.on<FilesUpdatedEvent>().where(
             (event) =>
                 event.updatedFiles.firstWhereOrNull(
-                  (element) => element.uploadedFileID != null,
+                  (element) => element.isUploaded,
                 ) !=
                 null,
           ),
@@ -64,7 +64,7 @@ class ArchivePage extends StatelessWidget {
         Bus.instance.on<FilesUpdatedEvent>().where(
               (event) =>
                   event.updatedFiles.firstWhereOrNull(
-                    (element) => element.uploadedFileID != null,
+                    (element) => element.isUploaded,
                   ) !=
                   null,
             ),

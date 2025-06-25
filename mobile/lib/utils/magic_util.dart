@@ -172,9 +172,8 @@ Future<bool> editTime(
   Map<EnteFile, int> filesToEditedTimes,
 ) async {
   try {
-    final files = filesToEditedTimes.keys
-        .where((file) => file.uploadedFileID != null)
-        .toList();
+    final files =
+        filesToEditedTimes.keys.where((file) => file.isUploaded).toList();
     if (files.isEmpty) {
       _logger.severe('No files to edit time for');
       return false;
@@ -182,7 +181,7 @@ Future<bool> editTime(
     final fileIdToTimeUpdate = <int, Map<String, dynamic>>{};
     for (final entry in filesToEditedTimes.entries) {
       final file = entry.key;
-      if (file.uploadedFileID == null) continue;
+      if (!file.isUploaded) continue;
       final editedTime = entry.value;
       fileIdToTimeUpdate[file.uploadedFileID!] = {editTimeKey: editedTime};
     }

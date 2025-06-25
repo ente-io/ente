@@ -1477,8 +1477,8 @@ class CollectionsService {
           await remoteDB.getUploadedFileIDs(destCollection);
       files.removeWhere(
         (element) =>
-            element.uploadedFileID != null &&
-            existingFileIDsInCollection.contains(element.uploadedFileID),
+            element.isUploaded &&
+            existingFileIDsInCollection.contains(element.remoteID),
       );
     }
     if (files.isEmpty || !containsUploadedFile) {

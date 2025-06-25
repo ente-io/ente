@@ -177,9 +177,8 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
         ),
       ),
       const FileDetailsDivider(),
-      if (widget.file.uploadedFileID != null &&
-          (fileDataService.previewIds
-              .containsKey(widget.file.uploadedFileID))) ...[
+      if (widget.file.isUploaded &&
+          (fileDataService.previewIds.containsKey(widget.file.remoteID))) ...[
         ValueListenableBuilder(
           valueListenable: _exifNotifier,
           builder: (context, _, __) => PreviewPropertiesItemWidget(
@@ -302,7 +301,7 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
       ]);
     }
 
-    if (file.uploadedFileID != null && file.updationTime != null) {
+    if (file.isUploaded && file.updationTime != null) {
       fileDetailsTiles.addAll(
         [
           BackedUpTimeItemWidget(file),

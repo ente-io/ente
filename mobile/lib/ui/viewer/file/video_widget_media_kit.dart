@@ -139,13 +139,13 @@ class _VideoWidgetMediaKitState extends State<VideoWidgetMediaKit>
       final localFile = File(getSharedMediaFilePath(widget.file));
       if (localFile.existsSync()) {
         _setVideoController(localFile.path);
-      } else if (widget.file.uploadedFileID != null) {
+      } else if (widget.file.isUploaded) {
         _loadNetworkVideo();
       }
     } else {
       widget.file.getAsset.then((asset) async {
         if (asset == null || !(await asset.exists)) {
-          if (widget.file.uploadedFileID != null) {
+          if (widget.file.isUploaded) {
             _loadNetworkVideo();
           }
         } else {
