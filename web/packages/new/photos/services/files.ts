@@ -11,10 +11,11 @@ import { metadataHash } from "ente-media/file-metadata";
 import HTTPService from "ente-shared/network/HTTPService";
 import { getToken } from "ente-shared/storage/localStorage/helpers";
 import {
-    getCollectionLastSyncTime,
-    setCollectionLastSyncTime,
-} from "./collections";
-import { saveCollectionFiles, savedCollectionFiles } from "./photos-fdb";
+    saveCollectionFiles,
+    saveCollectionLastSyncTime,
+    savedCollectionFiles,
+    savedCollectionLastSyncTime,
+} from "./photos-fdb";
 
 /**
  * Fetch all files of the given {@link type}, belonging to the given
@@ -48,7 +49,8 @@ export const pullCollectionFiles = async (
         if (!getToken()) {
             continue;
         }
-        const lastSyncTime = await getCollectionLastSyncTime(collection);
+        const lastSyncTime =
+            (await savedCollectionLastSyncTime(collection)) ?? 0;
         if (collection.updationTime === lastSyncTime) {
             continue;
         }
@@ -62,7 +64,7 @@ export const pullCollectionFiles = async (
         files = getLatestVersionFiles([...files, ...newFiles]);
         await saveCollectionFiles(files);
         didUpdateFiles = true;
-        await setCollectionLastSyncTime(collection, collection.updationTime);
+        await saveCollectionLastSyncTime(collection, collection.updationTime);
     }
     return didUpdateFiles;
 };
