@@ -127,7 +127,6 @@ Future<List<SharedAsset>> convertIncomingSharedMediaToFile(
       );
       continue;
     }
-    final enteFile = EnteFile();
     final sharedLocalId = const Uuid().v4();
     // fileName: img_x.jpg
     final String name = basename(media.path);
