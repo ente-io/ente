@@ -1,13 +1,12 @@
 import { type Collection } from "ente-media/collection";
-import localForage from "ente-shared/storage/localForage";
 import { getCollections } from "./collection";
-import { removeCollectionIDLastSyncTime, savedCollections } from "./photos-fdb";
-
-const COLLECTION_TABLE = "collections";
-const COLLECTION_UPDATION_TIME = "collection-updation-time";
-
-export const getCollectionUpdationTime = async (): Promise<number> =>
-    (await localForage.getItem<number>(COLLECTION_UPDATION_TIME)) ?? 0;
+import {
+    removeCollectionIDLastSyncTime,
+    saveCollections,
+    saveCollectionsUpdationTime,
+    savedCollections,
+    savedCollectionsUpdationTime,
+} from "./photos-fdb";
 
 /**
  * Pull the latest collections from remote.
@@ -20,7 +19,7 @@ export const getCollectionUpdationTime = async (): Promise<number> =>
  */
 export const pullCollections = async (): Promise<Collection[]> => {
     const collections = await savedCollections();
-    let sinceTime = await getCollectionUpdationTime();
+    let sinceTime = (await savedCollectionsUpdationTime()) ?? 0;
 
     const changes = await getCollections(sinceTime);
 
@@ -40,8 +39,8 @@ export const pullCollections = async (): Promise<Collection[]> => {
 
     const updatedCollections = [...collectionsByID.values()];
 
-    await localForage.setItem(COLLECTION_TABLE, updatedCollections);
-    await localForage.setItem(COLLECTION_UPDATION_TIME, sinceTime);
+    await saveCollections(updatedCollections);
+    await saveCollectionsUpdationTime(sinceTime);
 
     return updatedCollections;
 };

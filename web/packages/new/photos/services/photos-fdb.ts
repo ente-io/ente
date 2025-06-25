@@ -45,6 +45,23 @@ export const saveCollections = async (collections: Collection[]) => {
     await localForage.setItem("collections", collections);
 };
 
+/**
+ * Return the locally persisted {@link updationTime} of the latest collection we
+ * have pulled from remote.
+ *
+ * Use {@link saveCollectionsUpdationTime} to update the saved value.
+ */
+export const savedCollectionsUpdationTime = async () =>
+    LocalTimestamp.parse(await localForage.getItem("collection-updation-time"));
+
+/**
+ * Update the locally persisted timestamp that will be returned by subsequent
+ * calls to {@link savedCollectionsUpdationTime}.
+ */
+export const saveCollectionsUpdationTime = async (time: number) => {
+    await localForage.setItem("collection-updation-time", time);
+};
+
 const TrashItemCollectionKey = z.object({
     /**
      * Collection ID.
