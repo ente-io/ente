@@ -326,17 +326,15 @@ const Page: React.FC = () => {
                 collectionFiles: await savedCollectionFiles(),
                 trashItems: await savedTrashItems(),
             });
-            await syncWithRemote({ force: true });
+            await remotePull({ force: true });
             setIsFirstLoad(false);
             setJustSignedUp(false);
             syncIntervalID = setInterval(
-                () => syncWithRemote({ silent: true }),
+                () => remotePull({ silent: true }),
                 5 * 60 * 1000 /* 5 minutes */,
             );
             if (electron) {
-                electron.onMainWindowFocus(() =>
-                    syncWithRemote({ silent: true }),
-                );
+                electron.onMainWindowFocus(() => remotePull({ silent: true }));
                 if (await shouldShowWhatsNew(electron)) showWhatsNew();
             }
         })();
@@ -607,9 +605,6 @@ const Page: React.FC = () => {
         ],
     );
 
-    // TODO(RE): temp alias.
-    const syncWithRemote = remotePull;
-
     const setupSelectAllKeyBoardShortcutHandler = () => {
         const handleKeyUp = (e: KeyboardEvent) => {
             switch (e.key) {
@@ -683,7 +678,7 @@ const Page: React.FC = () => {
                     );
                 }
                 clearSelection();
-                await syncWithRemote({ silent: true });
+                await remotePull({ silent: true });
             } catch (e) {
                 onGenericError(e);
             } finally {
@@ -724,7 +719,7 @@ const Page: React.FC = () => {
                 );
             }
             clearSelection();
-            await syncWithRemote({ silent: true });
+            await remotePull({ silent: true });
         } catch (e) {
             onGenericError(e);
         } finally {
@@ -908,7 +903,7 @@ const Page: React.FC = () => {
                 ...defaultGalleryContext,
                 setActiveCollectionID: handleShowCollectionSummary,
                 syncWithRemote: (force, silent) =>
-                    syncWithRemote({ force, silent }),
+                    remotePull({ force, silent }),
                 setBlockingLoad,
                 photoListHeader,
                 user,
@@ -1055,7 +1050,7 @@ const Page: React.FC = () => {
                 <Upload
                     activeCollection={activeCollection}
                     syncWithRemote={(force, silent) =>
-                        syncWithRemote({ force, silent })
+                        remotePull({ force, silent })
                     }
                     closeUploadTypeSelector={setUploadTypeSelectorView.bind(
                         null,
@@ -1143,7 +1138,7 @@ const Page: React.FC = () => {
                         }
                         onMarkTempDeleted={handleMarkTempDeleted}
                         onSetOpenFileViewer={setIsFileViewerOpen}
-                        onSyncWithRemote={syncWithRemote}
+                        onRemotePull={remotePull}
                         onRemoteFilesPull={remoteFilesPull}
                         onVisualFeedback={handleVisualFeedback}
                         onSelectCollection={handleSelectCollection}
