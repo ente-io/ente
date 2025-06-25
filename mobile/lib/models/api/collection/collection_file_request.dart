@@ -14,12 +14,12 @@ class CollectionFileRequest {
   );
 
   static Map<String, dynamic> req(
-    int fileID, {
+    int id, {
     required Uint8List encKey,
     required Uint8List encKeyNonce,
   }) {
     return {
-      'fileID': fileID,
+      'id': id,
       'encryptedKey': CryptoUtil.bin2base64(encKey),
       'keyDecryptionNonce': CryptoUtil.bin2base64(encKeyNonce),
     };
