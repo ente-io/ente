@@ -126,6 +126,15 @@ export interface GalleryState {
      */
     hiddenCollections: Collection[];
     /**
+     * The user's files, without any unsynced modifications applied to them.
+     *
+     * The list is sorted so that newer files are first.
+     *
+     * This property is expected to be of use only internal to the reducer;
+     * external code should only needs {@link files} instead.
+     */
+    lastSyncedFiles: EnteFile[];
+    /**
      * The user's normal (non-hidden, non-trash) files, without any unsynced
      * modifications applied to them.
      *
@@ -161,10 +170,17 @@ export interface GalleryState {
     /*--<  Derived state  >--*/
 
     /**
-     * The user's normal (non-hidden, non-trash) files, with any unsynced
-     * modifications also applied to them.
+     * The user's "collection files", with any unsynced modifications also
+     * applied to them.
+     *
+     * "Collection files" means that there might be multiple entries for the
+     * same file ID, one for each collection the file belongs to. For more
+     * details, see [Note: Collection file].
      *
      * The list is sorted so that newer files are first.
+     *
+     * See {@link lastSyncedFiles} for the same list, but without unsynced
+     * modifications.
      *
      * [Note: Unsynced modifications]
      *
@@ -173,6 +189,13 @@ export interface GalleryState {
      * yet refreshed our local state to incorporate them. The refresh will
      * happen on the next "file sync", until then they remain as in-memory state
      * in the reducer.
+     */
+    files: EnteFile[];
+    /**
+     * The user's normal (non-hidden, non-trash) files, with any unsynced
+     * modifications also applied to them.
+     *
+     * The list is sorted so that newer files are first.
      */
     normalFiles: EnteFile[];
     /**
@@ -471,10 +494,12 @@ const initialGalleryState: GalleryState = {
     familyData: undefined,
     normalCollections: [],
     hiddenCollections: [],
+    lastSyncedFiles: [],
     lastSyncedNormalFiles: [],
     lastSyncedHiddenFiles: [],
     trashItems: [],
     peopleState: undefined,
+    files: [],
     normalFiles: [],
     hiddenFiles: [],
     archivedCollectionIDs: new Set(),
@@ -513,12 +538,16 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
     if (process.env.NEXT_PUBLIC_ENTE_TRACE) console.log("dispatch", action);
     switch (action.type) {
         case "mount": {
+            const lastSyncedFiles = sortFiles(
+                action.normalFiles.concat(action.hiddenFiles),
+            );
             const lastSyncedNormalFiles = sortFiles(action.normalFiles);
             const lastSyncedHiddenFiles = sortFiles(action.hiddenFiles);
             const trashItems = sortTrashItems(action.trashItems);
 
             // During mount there are no unsynced updates, and we can directly
             // use the provided files.
+            const files = lastSyncedFiles;
             const normalFiles = lastSyncedNormalFiles;
             const hiddenFiles = lastSyncedHiddenFiles;
 
@@ -545,9 +574,11 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 familyData: action.familyData,
                 normalCollections,
                 hiddenCollections,
+                lastSyncedFiles,
                 lastSyncedNormalFiles,
                 lastSyncedHiddenFiles,
                 trashItems,
+                files,
                 normalFiles,
                 hiddenFiles,
                 archivedCollectionIDs,
