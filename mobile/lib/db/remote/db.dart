@@ -102,7 +102,7 @@ class RemoteDB with SqlDbBase {
       final List<List<Object?>> fileValues = [];
       for (final item in slice) {
         collectionFileValues.add(item.collectionFileRowValues());
-        fileValues.add(item.fileItem.rowValues());
+        fileValues.add(item.fileItem.filesRowValues());
       }
       await Future.wait([
         _sqliteDB.executeBatch(

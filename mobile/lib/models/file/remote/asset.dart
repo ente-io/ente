@@ -103,7 +103,11 @@ class RemoteAsset {
   // is already converted to the new format
   String? get hash => metadata.data['hash'];
 
-  String? get caption => publicMetadata?.data['caption'];
+  String? get caption => publicMetadata?.data[captionKey];
 
   int get fileSize => info?.fileSize ?? -1;
+
+  String? get uploaderName {
+    return publicMetadata?.data[uploaderNameKey];
+  }
 }

@@ -93,6 +93,12 @@ class RemoteCache {
     }
   }
 
+  void updateItems(List<RemoteAsset> items) {
+    for (final item in items) {
+      remoteAssets[item.id] = item;
+    }
+  }
+
   Future<EnteFile?> getAlbumCover(Collection c) async {
     final cf = await remoteDB.coverFile(
       c.id,

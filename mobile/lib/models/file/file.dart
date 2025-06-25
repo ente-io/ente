@@ -20,6 +20,7 @@ import 'package:photos/utils/standalone/date_time.dart';
 
 //Todo: files with no location data have lat and long set to 0.0. This should ideally be null.
 class EnteFile {
+  static final _logger = Logger('File');
   AssetEntity? lAsset;
   RemoteAsset? rAsset;
   CollectionFile? cf;
@@ -48,7 +49,7 @@ class EnteFile {
   @Deprecated(
       'use remoteAsset.thumbHeader instead. This will be removed in future')
   String? thumbnailDecryptionHeader;
-  
+
   int? get fileSize {
     if (rAsset != null && rAsset!.fileSize != -1) {
       return rAsset!.fileSize;
@@ -78,8 +79,6 @@ class EnteFile {
   // in Version 1, live photo hash is stored as zip's hash.
   // in V2: LivePhoto hash is stored as imgHash:vidHash
   static const kCurrentMetadataVersion = 2;
-
-  static final _logger = Logger('File');
 
   EnteFile();
 
@@ -287,7 +286,7 @@ class EnteFile {
       FileUrl.getUrl(uploadedFileID!, FileUrlType.download);
 
   String? get caption {
-    return pubMagicMetadata?.caption;
+    return rAsset?.caption;
   }
 
   String get displayName {

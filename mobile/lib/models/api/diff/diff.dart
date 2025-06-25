@@ -97,7 +97,7 @@ class ApiFileItem {
     );
   }
 
-  List<Object?> rowValues() {
+  List<Object?> filesRowValues() {
     final Location? loc = location;
     return [
       fileID,

@@ -12,10 +12,13 @@ import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/force_reload_home_gallery_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/extensions/list.dart';
+import "package:photos/models/api/diff/diff.dart";
 import "package:photos/models/api/metadata.dart";
 import 'package:photos/models/file/file.dart';
+import "package:photos/models/file/remote/asset.dart";
 import "package:photos/models/metadata/common_keys.dart";
 import "package:photos/models/metadata/file_magic.dart";
+import "package:photos/service_locator.dart";
 import 'package:photos/services/sync/remote_sync_service.dart';
 import "package:photos/utils/file_key.dart";
 
@@ -34,7 +37,7 @@ class FileMagicService {
 
   Future<void> changeVisibility(List<EnteFile> files, int visibility) async {
     final Map<String, dynamic> update = {magicKeyVisibility: visibility};
-    await _updateMagicData(files, update);
+    await _updatePrivateMagicData(files, update);
     if (visibility == visibleVisibility) {
       // Force reload home gallery to pull in the now unarchived files
       Bus.instance.fire(ForceReloadHomeGalleryEvent("unarchivedFiles"));
@@ -65,34 +68,34 @@ class FileMagicService {
     params['metadataList'] = [];
     final int ownerID = Configuration.instance.getUserID()!;
     try {
+      final Map<int, RemoteAsset> updatedRAssets = {};
       for (final file in files) {
-        if (file.uploadedFileID == null) {
+        if (file.rAsset == null) {
           throw AssertionError(
             "operation is only supported on backed up files",
           );
-        } else if (file.ownerID != ownerID) {
+        }
+        final rAsset = file.rAsset!;
+        if (rAsset.ownerID != ownerID) {
           throw AssertionError("cannot modify memories not owned by you");
         }
         // read the existing magic metadata and apply new updates to existing data
         // current update is simple replace. This will be enhanced in the future,
         // as required.
         final newUpdates = metadataUpdateMap != null
-            ? metadataUpdateMap[file.uploadedFileID]
+            ? metadataUpdateMap[rAsset.id]
             : newMetadataUpdate;
         assert(
           newUpdates != null && newUpdates.isNotEmpty,
           "can not apply empty updates",
         );
+
         final Map<String, dynamic> jsonToUpdate =
-            jsonDecode(file.pubMmdEncodedJson ?? '{}');
+            rAsset.publicMetadata?.data ?? {};
+        final currentVersion = rAsset.publicMetadata?.version ?? 0;
         newUpdates!.forEach((key, value) {
           jsonToUpdate[key] = value;
         });
-
-        // update the local information so that it's reflected on UI
-        file.pubMmdEncodedJson = jsonEncode(jsonToUpdate);
-        file.pubMagicMetadata = PubMagicMetadata.fromJson(jsonToUpdate);
-
         final fileKey = getFileKey(file);
         final encryptedMMd = await CryptoUtil.encryptChaCha(
           utf8.encode(jsonEncode(jsonToUpdate)),
@@ -102,20 +105,27 @@ class FileMagicService {
           UpdateMagicMetadataRequest(
             id: file.uploadedFileID!,
             magicMetadata: MetadataRequest(
-              version: file.pubMmdVersion,
+              version: currentVersion,
               count: jsonToUpdate.length,
               data: CryptoUtil.bin2base64(encryptedMMd.encryptedData!),
               header: CryptoUtil.bin2base64(encryptedMMd.header!),
             ),
           ),
         );
-        file.pubMmdVersion = file.pubMmdVersion + 1;
+        updatedRAssets[rAsset.id] = rAsset.copyWith(
+          publicMetadata: Metadata(
+            data: jsonToUpdate,
+            version: currentVersion + 1,
+          ),
+        );
       }
-
       await _enteDio.put("/files/public-magic-metadata", data: params);
       // update the state of the selected file. Same file in other collection
       // should be eventually synced after remote sync has completed
-      await _filesDB.insertMultiple(files);
+      for (final file in files) {
+        file.rAsset = updatedRAssets[file.rAsset!.id]!;
+      }
+      remoteCache.updateItems(updatedRAssets.values.toList());
       RemoteSyncService.instance.sync(silently: true).ignore();
     } on DioException catch (e) {
       if (e.response != null && e.response!.statusCode == 409) {
@@ -128,36 +138,35 @@ class FileMagicService {
     }
   }
 
-  Future<void> _updateMagicData(
+  Future<void> _updatePrivateMagicData(
     List<EnteFile> files,
     Map<String, dynamic> newMetadataUpdate,
   ) async {
-    final params = <String, dynamic>{};
     final int ownerID = Configuration.instance.getUserID()!;
     final batchedFiles = files.chunks(batchSize);
     try {
       for (final batch in batchedFiles) {
+        final Map<int, RemoteAsset> updatedRAssets = {};
+        final params = <String, dynamic>{};
         params['metadataList'] = [];
         for (final file in batch) {
-          if (file.uploadedFileID == null) {
+          if (file.rAsset == null) {
             throw AssertionError(
               "operation is only supported on backed up files",
             );
-          } else if (file.ownerID != ownerID) {
+          }
+          final rAsset = file.rAsset!;
+          if (rAsset.ownerID != ownerID) {
             throw AssertionError("cannot modify memories not owned by you");
           }
           // read the existing magic metadata and apply new updates to existing data
           // current update is simple replace. This will be enhanced in the future,
           // as required.
           final Map<String, dynamic> jsonToUpdate =
-              jsonDecode(file.mMdEncodedJson ?? '{}');
+              rAsset.privateMetadata?.data ?? {};
           newMetadataUpdate.forEach((key, value) {
             jsonToUpdate[key] = value;
           });
-
-          // update the local information so that it's reflected on UI
-          file.mMdEncodedJson = jsonEncode(jsonToUpdate);
-          file.magicMetadata = MagicMetadata.fromJson(jsonToUpdate);
 
           final fileKey = getFileKey(file);
           final encryptedMMd = await CryptoUtil.encryptChaCha(
@@ -175,11 +184,19 @@ class FileMagicService {
               ),
             ),
           );
-          file.mMdVersion = file.mMdVersion + 1;
+          // for updating the local information so that it's reflected on UI
+          updatedRAssets[rAsset.id] = rAsset.copyWith(
+            privateMetadata: Metadata(
+              data: jsonToUpdate,
+              version: file.mMdVersion + 1,
+            ),
+          );
         }
-
         await _enteDio.put("/files/magic-metadata", data: params);
-        await _filesDB.insertMultiple(files);
+        for (final file in batch) {
+          file.rAsset = updatedRAssets[file.rAsset!.id]!;
+        }
+        remoteCache.updateItems(updatedRAssets.values.toList());
       }
 
       // update the state of the selected file. Same file in other collection

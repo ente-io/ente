@@ -23,7 +23,7 @@ final String collectionFilesUpdateColumns = collectionFilesColumns
     )
     .map((column) => '$column = excluded.$column') // Use excluded virtual table
     .join(', ');
-const filesColumns =
+const  filesColumns =
     'id, owner_id, file_header, thumb_header, creation_time, modification_time, title, size, hash, lat, lng, '
     'metadata, priv_metadata, pub_metadata, info';
 
