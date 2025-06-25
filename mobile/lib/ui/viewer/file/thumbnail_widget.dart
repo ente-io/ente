@@ -271,7 +271,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
     return _loadWithRetry().then((thumbData) async {
       if (thumbData == null) {
         if (widget.file.isUploaded) {
-          _logger.fine("Removing localID reference for " + widget.file.tag);
+          _logger.info("Removing localID reference for " + widget.file.tag);
           widget.file.localID = null;
           if (widget.file.isTrash) {
             unawaited(TrashDB.instance.update(widget.file as TrashFile));

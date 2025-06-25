@@ -79,7 +79,7 @@ class _AllSectionsExamplesProviderState
   void onDataUpdate() {
     if (!isOnSearchTab) {
       if (kDebugMode) {
-        _logger.finest('Skip reload till user clicks on search tab');
+        _logger.info('Skip reload till user clicks on search tab');
       }
       hasPendingUpdate = true;
     } else {

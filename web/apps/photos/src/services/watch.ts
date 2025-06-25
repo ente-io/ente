@@ -14,18 +14,12 @@ import type {
 } from "ente-base/types/ipc";
 import { type UploadResult } from "ente-gallery/services/upload";
 import type { UploadAsset } from "ente-gallery/services/upload/upload-service";
-import {
-    getLocalFiles,
-    groupFilesByCollectionID,
-} from "ente-new/photos/services/files";
+import { groupFilesByCollectionID } from "ente-gallery/utils/files";
+import type { EnteFile } from "ente-media/file";
+import { computeNormalCollectionFilesFromSaved } from "ente-new/photos/services/file";
 import { ensureString } from "ente-utils/ensure";
 import { removeFromCollection } from "./collectionService";
 import { type UploadItemWithCollection, uploadManager } from "./upload-manager";
-
-interface FolderWatchUploadedFile {
-    id: number;
-    collectionID: number;
-}
 
 /**
  * Watch for file system folders and automatically update the corresponding Ente
@@ -53,7 +47,7 @@ class FolderWatcher {
      * A map from file paths to the (fileID, collectionID) of the file that was
      * uploaded (or symlinked) as part of the most recent upload attempt.
      */
-    private uploadedFileForPath = new Map<string, FolderWatchUploadedFile>();
+    private uploadedFileForPath = new Map<string, EnteFile>();
     /**
      * A set of file paths that could not be uploaded in the most recent upload
      * attempt. These are the uploads that failed due to a permanent error that
@@ -326,47 +320,54 @@ class FolderWatcher {
      * {@link upload} gets uploaded.
      */
     async onFileUpload(
-        fileUploadResult: UploadResult,
         item: UploadItemWithCollection,
-        file: FolderWatchUploadedFile,
+        uploadResult: UploadResult,
     ) {
         // Re the usage of ensureString: For desktop watch, the only possibility
         // for a UploadItem is for it to be a string (the absolute path to a
         // file on disk).
-        if (
-            [
-                "addedSymlink",
-                "uploaded",
-                "uploadedWithStaticThumbnail",
-                "alreadyUploaded",
-            ].includes(fileUploadResult)
-        ) {
-            if (item.isLivePhoto) {
-                this.uploadedFileForPath.set(
-                    ensureString(item.livePhotoAssets.image),
-                    file,
-                );
-                this.uploadedFileForPath.set(
-                    ensureString(item.livePhotoAssets.video),
-                    file,
-                );
-            } else {
-                this.uploadedFileForPath.set(
-                    ensureString(item.uploadItem),
-                    file,
-                );
-            }
-        } else if (["unsupported", "tooLarge"].includes(fileUploadResult)) {
-            if (item.isLivePhoto) {
-                this.unUploadableFilePaths.add(
-                    ensureString(item.livePhotoAssets.image),
-                );
-                this.unUploadableFilePaths.add(
-                    ensureString(item.livePhotoAssets.video),
-                );
-            } else {
-                this.unUploadableFilePaths.add(ensureString(item.uploadItem));
-            }
+        switch (uploadResult.type) {
+            case "alreadyUploaded":
+            case "addedSymlink":
+            case "uploaded":
+            case "uploadedWithStaticThumbnail":
+                {
+                    // Done.
+                    if (item.isLivePhoto) {
+                        this.uploadedFileForPath.set(
+                            ensureString(item.livePhotoAssets.image),
+                            uploadResult.file,
+                        );
+                        this.uploadedFileForPath.set(
+                            ensureString(item.livePhotoAssets.video),
+                            uploadResult.file,
+                        );
+                    } else {
+                        this.uploadedFileForPath.set(
+                            ensureString(item.uploadItem),
+                            uploadResult.file,
+                        );
+                    }
+                }
+                break;
+            case "unsupported":
+            case "tooLarge":
+                {
+                    // Non-retriable error.
+                    if (item.isLivePhoto) {
+                        this.unUploadableFilePaths.add(
+                            ensureString(item.livePhotoAssets.image),
+                        );
+                        this.unUploadableFilePaths.add(
+                            ensureString(item.livePhotoAssets.video),
+                        );
+                    } else {
+                        this.unUploadableFilePaths.add(
+                            ensureString(item.uploadItem),
+                        );
+                    }
+                }
+                break;
         }
     }
 
@@ -408,7 +409,7 @@ class FolderWatcher {
         const syncedFiles: FolderWatch["syncedFiles"] = [];
         const ignoredFiles: FolderWatch["ignoredFiles"] = [];
 
-        const markSynced = (file: FolderWatchUploadedFile, path: string) => {
+        const markSynced = (file: EnteFile, path: string) => {
             syncedFiles.push({
                 path,
                 uploadedFileID: file.id,
@@ -474,7 +475,7 @@ class FolderWatcher {
         for (const file of syncedFiles)
             syncedFileForID.set(file.uploadedFileID, file);
 
-        const files = await getLocalFiles();
+        const files = await computeNormalCollectionFilesFromSaved();
         const filesToTrash = files.filter((file) => {
             const correspondingSyncedFile = syncedFileForID.get(file.id);
             if (
@@ -580,17 +581,10 @@ const deduceEvents = async (watches: FolderWatch[]): Promise<WatchEvent[]> => {
  */
 const pathsToUpload = (paths: string[], watch: FolderWatch) =>
     paths
-        // Filter out hidden files (files whose names begins with a dot)
-        .filter((path) => !isHiddenFile(path))
+        // Filter out files whose names begins with a dot.
+        .filter((path) => !basename(path).startsWith("."))
         // Files that are on disk but not yet synced or ignored.
         .filter((path) => !isSyncedOrIgnoredPath(path, watch));
-
-/**
- * Return true if the file at the given {@link path} is hidden.
- *
- * Hidden files are those whose names begin with a "." (dot).
- */
-const isHiddenFile = (path: string) => basename(path).startsWith(".");
 
 /**
  * Return the paths to previously synced files that are no longer on disk and so

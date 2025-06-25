@@ -7,7 +7,7 @@ import {
 } from "ente-gallery/components/viewer/FileViewer";
 import type { Collection } from "ente-media/collection";
 import { EnteFile } from "ente-media/file";
-import { fileFileName } from "ente-media/file-metadata";
+import { fileCreationTime, fileFileName } from "ente-media/file-metadata";
 import { moveToTrash } from "ente-new/photos/services/collection";
 import { PseudoCollectionID } from "ente-new/photos/services/collection-summary";
 import { t } from "i18next";
@@ -44,9 +44,10 @@ export type FileListWithViewerProps = {
      */
     onSetOpenFileViewer?: (open: boolean) => void;
     /**
-     * Called when an action in the file viewer requires us to sync with remote.
+     * Called when an action in the file viewer requires us to perform a full
+     * pull from remote.
      */
-    onSyncWithRemote: () => Promise<void>;
+    onRemotePull: () => Promise<void>;
 } & Pick<
     FileListProps,
     | "mode"
@@ -68,7 +69,7 @@ export type FileListWithViewerProps = {
         | "collectionNameByID"
         | "pendingFavoriteUpdates"
         | "pendingVisibilityUpdates"
-        | "onFileAndCollectionSyncWithRemote"
+        | "onRemoteFilesPull"
         | "onVisualFeedback"
         | "onToggleFavorite"
         | "onFileVisibilityUpdate"
@@ -102,8 +103,8 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
     pendingVisibilityUpdates,
     setFilesDownloadProgressAttributesCreator,
     onSetOpenFileViewer,
-    onSyncWithRemote,
-    onFileAndCollectionSyncWithRemote,
+    onRemotePull,
+    onRemoteFilesPull,
     onVisualFeedback,
     onToggleFavorite,
     onFileVisibilityUpdate,
@@ -134,9 +135,9 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
         setOpenFileViewer(false);
     }, []);
 
-    const handleTriggerSyncWithRemote = useCallback(
-        () => void onSyncWithRemote(),
-        [onSyncWithRemote],
+    const handleTriggerRemotePull = useCallback(
+        () => void onRemotePull(),
+        [onRemotePull],
     );
 
     const handleDownload = useCallback(
@@ -203,14 +204,14 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
                     collectionNameByID,
                     pendingFavoriteUpdates,
                     pendingVisibilityUpdates,
-                    onFileAndCollectionSyncWithRemote,
+                    onRemoteFilesPull,
                     onVisualFeedback,
                     onToggleFavorite,
                     onFileVisibilityUpdate,
                     onSelectCollection,
                     onSelectPerson,
                 }}
-                onTriggerSyncWithRemote={handleTriggerSyncWithRemote}
+                onTriggerRemotePull={handleTriggerRemotePull}
                 onDownload={handleDownload}
                 onDelete={handleDelete}
                 onSaveEditedImageCopy={handleSaveEditedImageCopy}
@@ -227,8 +228,8 @@ const Container = styled("div")`
 /**
  * See: [Note: Timeline date string]
  */
-const fileTimelineDateString = (item: EnteFile) => {
-    const date = new Date(item.metadata.creationTime / 1000);
+const fileTimelineDateString = (file: EnteFile) => {
+    const date = new Date(fileCreationTime(file) / 1000);
     return isSameDay(date, new Date())
         ? t("today")
         : isSameDay(date, new Date(Date.now() - 24 * 60 * 60 * 1000))

@@ -65,7 +65,7 @@ class _UpdateIconWidgetState extends State<UploadIconWidget> {
   Widget build(BuildContext context) {
     if (SyncService.instance.isSyncInProgress()) {
       if (!widget.file.isUploaded) {
-        _logger.fine("sync in progress ${widget.file.displayName}");
+        _logger.info("sync in progress ${widget.file.displayName}");
       }
       return const SizedBox.shrink();
     }

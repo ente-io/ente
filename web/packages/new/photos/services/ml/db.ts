@@ -344,7 +344,7 @@ export const getIndexableAndIndexedCounts = async () => {
  * than {@link count} items present, the files with the higher file IDs (which
  * can be taken as a approximate for their creation order) are preferred.
  */
-export const getIndexableFileIDs = async (count: number) => {
+export const readNextIndexableFileIDs = async (count: number) => {
     const db = await mlDB();
     const tx = db.transaction("file-status", "readonly");
     let cursor = await tx.store

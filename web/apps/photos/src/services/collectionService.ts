@@ -2,6 +2,7 @@ import type { User } from "ente-accounts/services/user";
 import { ensureLocalUser } from "ente-accounts/services/user";
 import log from "ente-base/log";
 import { apiURL } from "ente-base/origins";
+import { groupFilesByCollectionID, sortFiles } from "ente-gallery/utils/files";
 import { Collection } from "ente-media/collection";
 import { EnteFile } from "ente-media/file";
 import {
@@ -17,12 +18,10 @@ import {
     CollectionSummaryOrder,
     CollectionsSortBy,
 } from "ente-new/photos/services/collection-summary";
-import { getLocalCollections } from "ente-new/photos/services/collections";
 import {
-    getLocalFiles,
-    groupFilesByCollectionID,
-    sortFiles,
-} from "ente-new/photos/services/files";
+    savedCollectionFiles,
+    savedCollections,
+} from "ente-new/photos/services/photos-fdb";
 import HTTPService from "ente-shared/network/HTTPService";
 import { getData } from "ente-shared/storage/localStorage";
 import { getToken } from "ente-shared/storage/localStorage/helpers";
@@ -79,7 +78,6 @@ export const removeFromFavorites = async (
 export const removeFromCollection = async (
     collectionID: number,
     toRemoveFiles: EnteFile[],
-    allFiles?: EnteFile[],
 ) => {
     try {
         const user: User = getData("user");
@@ -97,7 +95,7 @@ export const removeFromCollection = async (
             await removeNonUserFiles(collectionID, nonUserFiles);
         }
         if (userFiles.length > 0) {
-            await removeUserFiles(collectionID, userFiles, allFiles);
+            await removeUserFiles(collectionID, userFiles);
         }
     } catch (e) {
         log.error("remove from collection failed ", e);
@@ -108,12 +106,10 @@ export const removeFromCollection = async (
 export const removeUserFiles = async (
     sourceCollectionID: number,
     toRemoveFiles: EnteFile[],
-    allFiles?: EnteFile[],
 ) => {
     try {
-        if (!allFiles) {
-            allFiles = await getLocalFiles();
-        }
+        const allFiles = await savedCollectionFiles();
+
         const toRemoveFilesIds = new Set(toRemoveFiles.map((f) => f.id));
         const toRemoveFilesCopiesInOtherCollections = allFiles.filter((f) => {
             return toRemoveFilesIds.has(f.id);
@@ -122,7 +118,7 @@ export const removeUserFiles = async (
             toRemoveFilesCopiesInOtherCollections,
         );
 
-        const collections = await getLocalCollections();
+        const collections = await savedCollections();
         const collectionsMap = new Map(collections.map((c) => [c.id, c]));
         const user: User = getData("user");
 
@@ -210,11 +206,11 @@ export const deleteCollection = async (
 ) => {
     try {
         if (keepFiles) {
-            const allFiles = await getLocalFiles();
-            const collectionFiles = allFiles.filter((file) => {
-                return file.collectionID === collectionID;
-            });
-            await removeFromCollection(collectionID, collectionFiles, allFiles);
+            const allFiles = await savedCollectionFiles();
+            const collectionFiles = allFiles.filter(
+                (file) => file.collectionID == collectionID,
+            );
+            await removeFromCollection(collectionID, collectionFiles);
         }
         const token = getToken();
 
@@ -234,7 +230,7 @@ export const deleteCollection = async (
  * Return the user's own favorites collection, if any.
  */
 export const getFavCollection = async () => {
-    const collections = await getLocalCollections();
+    const collections = await savedCollections();
     const userID = ensureLocalUser().id;
     for (const collection of collections) {
         // See: [Note: User and shared favorites]
@@ -288,7 +284,7 @@ function compareCollectionsLatestFile(
 }
 
 export async function getDefaultHiddenCollection(): Promise<Collection> {
-    const collections = await getLocalCollections("hidden");
+    const collections = await savedCollections();
     const hiddenCollection = collections.find((collection) =>
         isDefaultHiddenCollection(collection),
     );

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 
+import "package:crypto/crypto.dart";
 import "package:ente_crypto/ente_crypto.dart";
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
@@ -218,5 +219,23 @@ class EntityService {
       _logger.severe("Failed to getOrCreateKey for type $type", e, s);
       rethrow;
     }
+  }
+
+  Future<String?> getPreHashForEntities(
+    EntityType type,
+    List<String> ids,
+  ) async {
+    return await _db.getPreHashForEntities(type, ids);
+  }
+
+  Future<String> getHashForIds(List<String> personIds) async {
+    final preHash = await getPreHashForEntities(EntityType.cgroup, personIds);
+
+    if (preHash == null) {
+      return "";
+    }
+
+    final hash = md5.convert(utf8.encode(preHash)).toString().substring(0, 10);
+    return hash;
   }
 }

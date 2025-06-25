@@ -56,8 +56,6 @@ import {
     SearchResultsHeader,
 } from "ente-new/photos/components/gallery";
 import {
-    constructUserIDToEmailMap,
-    createShareeSuggestionEmails,
     findCollectionCreatingUncategorizedIfNeeded,
     validateKey,
 } from "ente-new/photos/components/gallery/helpers";
@@ -73,24 +71,24 @@ import {
     areOnlySystemCollections,
     PseudoCollectionID,
 } from "ente-new/photos/services/collection-summary";
-import { getAllLocalCollections } from "ente-new/photos/services/collections";
 import exportService from "ente-new/photos/services/export";
 import { updateFilesVisibility } from "ente-new/photos/services/file";
 import {
-    getLocalFiles,
-    getLocalTrashedFiles,
-} from "ente-new/photos/services/files";
+    savedCollectionFiles,
+    savedCollections,
+    savedTrashItems,
+} from "ente-new/photos/services/photos-fdb";
+import {
+    pullFiles,
+    pullFilesPost,
+    pullFilesPre,
+} from "ente-new/photos/services/pull";
 import {
     filterSearchableFiles,
-    setSearchCollectionsAndFiles,
+    updateSearchCollectionsAndFiles,
 } from "ente-new/photos/services/search";
 import type { SearchOption } from "ente-new/photos/services/search/types";
 import { initSettings } from "ente-new/photos/services/settings";
-import {
-    postCollectionAndFilesSync,
-    preCollectionAndFilesSync,
-    syncCollectionAndFiles,
-} from "ente-new/photos/services/sync";
 import {
     initUserDetailsOrTriggerSync,
     redirectToCustomerPortal,
@@ -106,6 +104,7 @@ import {
     setIsFirstLogin,
     setJustSignedUp,
 } from "ente-shared/storage/localStorage/helpers";
+import { PromiseQueue } from "ente-utils/promise";
 import { t } from "i18next";
 import { useRouter, type NextRouter } from "next/router";
 import { createContext, useCallback, useEffect, useRef, useState } from "react";
@@ -130,13 +129,15 @@ import {
 import { getSelectedFiles, handleFileOp, type FileOp } from "utils/file";
 
 /**
- * Options to customize the behaviour of the sync with remote that gets
- * triggered on various actions within the gallery and its descendants.
+ * Options to customize the behaviour of the remote pull that gets triggered on
+ * various actions within the gallery and its descendants.
  */
-interface SyncWithRemoteOpts {
-    /** Force a sync to happen (default: no) */
-    force?: boolean;
-    /** Perform the sync without showing a global loading bar (default: no) */
+interface RemotePullOpts {
+    /**
+     * Perform the pull without showing a global loading bar
+     *
+     * Default: `false`.
+     */
     silent?: boolean;
 }
 
@@ -193,15 +194,14 @@ const Page: React.FC = () => {
     );
     const [isFileViewerOpen, setIsFileViewerOpen] = useState(false);
 
-    /**`true` if a sync is currently in progress. */
-    const isSyncing = useRef(false);
-    /** Set to the {@link SyncWithRemoteOpts} of the last sync that was enqueued
-        while one was already in progress. */
-    const resyncOpts = useRef<SyncWithRemoteOpts | undefined>(undefined);
-
-    const [userIDToEmailMap, setUserIDToEmailMap] =
-        useState<Map<number, string>>(null);
-    const [emailList, setEmailList] = useState<string[]>(null);
+    /**
+     * A queue to serialize calls to {@link remoteFilesPull}.
+     */
+    const remoteFilesPullQueue = useRef(new PromiseQueue<void>());
+    /**
+     * A queue to serialize calls to {@link remotePull}.
+     */
+    const remotePullQueue = useRef(new PromiseQueue<void>());
 
     const [uploadTypeSelectorView, setUploadTypeSelectorView] = useState(false);
     const [uploadTypeSelectorIntent, setUploadTypeSelectorIntent] =
@@ -265,10 +265,6 @@ const Page: React.FC = () => {
     // Local aliases.
     const {
         user,
-        familyData,
-        normalCollections,
-        normalFiles,
-        hiddenFiles,
         favoriteFileIDs,
         collectionNameByID,
         fileNormalCollectionIDs,
@@ -328,22 +324,19 @@ const Page: React.FC = () => {
                 type: "mount",
                 user,
                 familyData,
-                collections: await getAllLocalCollections(),
-                normalFiles: await getLocalFiles("normal"),
-                hiddenFiles: await getLocalFiles("hidden"),
-                trashedFiles: await getLocalTrashedFiles(),
+                collections: await savedCollections(),
+                collectionFiles: await savedCollectionFiles(),
+                trashItems: await savedTrashItems(),
             });
-            await syncWithRemote({ force: true });
+            await remotePull();
             setIsFirstLoad(false);
             setJustSignedUp(false);
             syncIntervalID = setInterval(
-                () => syncWithRemote({ silent: true }),
+                () => remotePull({ silent: true }),
                 5 * 60 * 1000 /* 5 minutes */,
             );
             if (electron) {
-                electron.onMainWindowFocus(() =>
-                    syncWithRemote({ silent: true }),
-                );
+                electron.onMainWindowFocus(() => remotePull({ silent: true }));
                 if (await shouldShowWhatsNew(electron)) showWhatsNew();
             }
         })();
@@ -353,23 +346,6 @@ const Page: React.FC = () => {
             if (electron) electron.onMainWindowFocus(undefined);
         };
     }, []);
-
-    useEffect(() => {
-        setSearchCollectionsAndFiles({
-            collections: normalCollections,
-            files: normalFiles,
-        });
-    }, [normalCollections, normalFiles]);
-
-    useEffect(() => {
-        if (!user || !normalCollections) {
-            return;
-        }
-        setUserIDToEmailMap(constructUserIDToEmailMap(user, normalCollections));
-        setEmailList(
-            createShareeSuggestionEmails(user, normalCollections, familyData),
-        );
-    }, [user, normalCollections, familyData]);
 
     useEffect(() => {
         if (typeof activeCollectionID == "undefined" || !router.isReady) {
@@ -393,6 +369,20 @@ const Page: React.FC = () => {
             );
         }
     }, [router.isReady]);
+
+    useEffect(() => {
+        updateSearchCollectionsAndFiles(
+            state.collections,
+            state.collectionFiles,
+            state.hiddenCollectionIDs,
+            state.hiddenFileIDs,
+        );
+    }, [
+        state.collections,
+        state.collectionFiles,
+        state.hiddenCollectionIDs,
+        state.hiddenFileIDs,
+    ]);
 
     useEffect(() => {
         dispatch({ type: "setPeopleState", peopleState });
@@ -519,112 +509,79 @@ const Page: React.FC = () => {
     }, [showLoadingBar, hideLoadingBar]);
 
     /**
-     * Sync the local files and collection with remote.
+     * Pull latest collections, collection files and trash items from remote.
      *
-     * [Note: Full sync vs file and collection sync]
+     * Parallel calls are serialized so that there is only one invocation of the
+     * underlying {@link pullFiles} at a time.
      *
-     * This is a subset of the sync which happens in {@link syncWithRemote}, but
-     * in some cases where we know that the changes will not have transitive
-     * effects outside of the locally stored files and collections this is a
-     * better option for interactive operations because:
+     * [Note: Full remote pull vs files pull]
      *
-     * 1. This involves a lesser number of API requests, so it reduces the time
-     *    the user has to wait for their interactive request to complete.
-     *
-     * 2. The current implementation {@link syncWithRemote} tries to run only
-     *    only one instance of it is in progress at a time, while each
-     *    invocation of {@link fileAndCollectionSyncWithRemote} is independent.
+     * For interactive operations, if we know that our operation will not have
+     * other transitive effects beyond collections, collection files and trash,
+     * this is a better option as compared to a full remote pull since it
+     * involves a lesser number of API requests (and thus, time).
      */
-    const fileAndCollectionSyncWithRemote = useCallback(async () => {
-        const didUpdateFiles = await syncCollectionAndFiles({
-            onSetCollections: (
-                collections,
-                normalCollections,
-                hiddenCollections,
-            ) =>
-                dispatch({
-                    type: "setCollections",
-                    collections,
-                    normalCollections,
-                    hiddenCollections,
+    const remoteFilesPull = useCallback(
+        () =>
+            remoteFilesPullQueue.current.add(() =>
+                pullFiles({
+                    onSetCollections: (collections) =>
+                        dispatch({ type: "setCollections", collections }),
+                    onSetCollectionFiles: (collectionFiles) =>
+                        dispatch({
+                            type: "setCollectionFiles",
+                            collectionFiles,
+                        }),
+                    onAugmentCollectionFiles: (collectionFiles) =>
+                        dispatch({
+                            type: "augmentCollectionFiles",
+                            collectionFiles,
+                        }),
+                    onSetTrashedItems: (trashItems) =>
+                        dispatch({ type: "setTrashItems", trashItems }),
+                    onDidUpdateCollectionFiles: () =>
+                        exportService.onLocalFilesUpdated(),
                 }),
-            onResetNormalFiles: (files) =>
-                dispatch({ type: "setNormalFiles", files }),
-            onFetchNormalFiles: (files) =>
-                dispatch({ type: "fetchNormalFiles", files }),
-            onResetHiddenFiles: (files) =>
-                dispatch({ type: "setHiddenFiles", files }),
-            onFetchHiddenFiles: (files) =>
-                dispatch({ type: "fetchHiddenFiles", files }),
-            onResetTrashedFiles: (files) =>
-                dispatch({ type: "setTrashedFiles", files }),
-        });
-        if (didUpdateFiles) {
-            exportService.onLocalFilesUpdated();
-        }
-    }, []);
+            ),
+        [],
+    );
 
-    const syncWithRemote = useCallback(
-        async (opts?: SyncWithRemoteOpts) => {
-            const { force, silent } = opts ?? {};
+    const remotePull = useCallback(
+        async (opts?: RemotePullOpts) =>
+            remotePullQueue.current.add(async () => {
+                const { silent } = opts ?? {};
 
-            // Pre-flight checks.
-            if (!navigator.onLine) return;
-            if (await isSessionInvalid()) {
-                showSessionExpiredDialog();
-                return;
-            }
-            if (!(await masterKeyFromSession())) {
-                clearSessionStorage();
-                router.push("/credentials");
-                return;
-            }
-
-            // Start or enqueue.
-            let isForced = false;
-            if (isSyncing.current) {
-                if (force) {
-                    isForced = true;
-                } else {
-                    resyncOpts.current = { force, silent };
+                // Pre-flight checks.
+                if (!navigator.onLine) return;
+                if (await isSessionInvalid()) {
+                    showSessionExpiredDialog();
                     return;
                 }
-            }
-
-            // The sync
-            isSyncing.current = true;
-            try {
-                if (!silent) showLoadingBar();
-                await preCollectionAndFilesSync();
-                await fileAndCollectionSyncWithRemote();
-                // syncWithRemote is called with the force flag set to true before
-                // doing an upload. So it is possible, say when resuming a pending
-                // upload, that we get two syncWithRemotes happening in parallel.
-                //
-                // Do the non-file-related sync only for one of these parallel ones.
-                if (!isForced) {
-                    await postCollectionAndFilesSync();
+                if (!(await masterKeyFromSession())) {
+                    clearSessionStorage();
+                    router.push("/credentials");
+                    return;
                 }
-            } catch (e) {
-                log.error("syncWithRemote failed", e);
-            } finally {
-                dispatch({ type: "clearUnsyncedState" });
-                if (!silent) hideLoadingBar();
-            }
-            isSyncing.current = false;
 
-            const nextOpts = resyncOpts.current;
-            if (nextOpts) {
-                resyncOpts.current = undefined;
-                setTimeout(() => syncWithRemote(nextOpts), 0);
-            }
-        },
+                // The pull itself.
+                try {
+                    if (!silent) showLoadingBar();
+                    await pullFilesPre();
+                    await remoteFilesPull();
+                    await pullFilesPost();
+                } catch (e) {
+                    log.error("Remote pull failed", e);
+                } finally {
+                    dispatch({ type: "clearUnsyncedState" });
+                    if (!silent) hideLoadingBar();
+                }
+            }),
         [
             showLoadingBar,
             hideLoadingBar,
             router,
             showSessionExpiredDialog,
-            fileAndCollectionSyncWithRemote,
+            remoteFilesPull,
         ],
     );
 
@@ -701,7 +658,7 @@ const Page: React.FC = () => {
                     );
                 }
                 clearSelection();
-                await syncWithRemote({ silent: true });
+                await remotePull({ silent: true });
             } catch (e) {
                 onGenericError(e);
             } finally {
@@ -712,10 +669,15 @@ const Page: React.FC = () => {
     const fileOpHelper = (op: FileOp) => async () => {
         showLoadingBar();
         try {
-            // passing files here instead of filteredData for hide ops because we want to move all files copies to hidden collection
             const selectedFiles = getSelectedFiles(
                 selected,
-                op == "hide" ? normalFiles : filteredFiles,
+                op == "hide"
+                    ? // passing files here instead of filteredData for hide ops
+                      // because we want to move all files copies to hidden collection
+                      state.collectionFiles.filter(
+                          (f) => !state.hiddenFileIDs.has(f.id),
+                      )
+                    : filteredFiles,
             );
             const toProcessFiles =
                 op == "download"
@@ -737,7 +699,7 @@ const Page: React.FC = () => {
                 );
             }
             clearSelection();
-            await syncWithRemote({ silent: true });
+            await remotePull({ silent: true });
         } catch (e) {
             onGenericError(e);
         } finally {
@@ -920,13 +882,13 @@ const Page: React.FC = () => {
             value={{
                 ...defaultGalleryContext,
                 setActiveCollectionID: handleShowCollectionSummary,
-                syncWithRemote: (force, silent) =>
-                    syncWithRemote({ force, silent }),
+                syncWithRemote: (silent) => remotePull({ silent }),
                 setBlockingLoad,
                 photoListHeader,
-                userIDToEmailMap,
                 user,
-                emailList,
+                // TODO(RE): Rename
+                userIDToEmailMap: state.emailByUserID,
+                emailList: state.shareSuggestionEmails,
                 openHiddenSection,
                 isClipSearchResult,
                 selectedFile: selected,
@@ -957,7 +919,7 @@ const Page: React.FC = () => {
                         // show "selectable" normalCollectionSummaries. See:
                         // [Note: Picking from selectable collection summaries].
                         findCollectionCreatingUncategorizedIfNeeded(
-                            normalCollections,
+                            state.collections,
                             id,
                         )!
                     }
@@ -995,7 +957,7 @@ const Page: React.FC = () => {
                             activeCollectionID={activeCollectionID}
                             selectedCollection={getSelectedCollection(
                                 selected.collectionID,
-                                normalCollections,
+                                state.collections,
                             )}
                             isFavoriteCollection={
                                 normalCollectionSummaries.get(
@@ -1066,9 +1028,7 @@ const Page: React.FC = () => {
 
                 <Upload
                     activeCollection={activeCollection}
-                    syncWithRemote={(force, silent) =>
-                        syncWithRemote({ force, silent })
-                    }
+                    syncWithRemote={(silent) => remotePull({ silent })}
                     closeUploadTypeSelector={setUploadTypeSelectorView.bind(
                         null,
                         false,
@@ -1077,13 +1037,11 @@ const Page: React.FC = () => {
                     onCloseCollectionSelector={handleCloseCollectionSelector}
                     setLoading={setBlockingLoad}
                     setShouldDisableDropzone={setShouldDisableDropzone}
+                    onRemoteFilesPull={remoteFilesPull}
                     onUploadFile={(file) =>
-                        dispatch({ type: "uploadNormalFile", file })
+                        dispatch({ type: "uploadFile", file })
                     }
                     onShowPlanSelector={showPlanSelector}
-                    setCollections={(collections) =>
-                        dispatch({ type: "setNormalCollections", collections })
-                    }
                     isFirstUpload={areOnlySystemCollections(
                         normalCollectionSummaries,
                     )}
@@ -1108,8 +1066,7 @@ const Page: React.FC = () => {
                 <WhatsNew {...whatsNewVisibilityProps} />
                 {!isInSearchMode &&
                 !isFirstLoad &&
-                !normalFiles?.length &&
-                !hiddenFiles?.length &&
+                !state.collectionFiles.length &&
                 activeCollectionID === PseudoCollectionID.all ? (
                     <GalleryEmptyState
                         isUploadInProgress={uploadManager.isUploadInProgress()}
@@ -1128,7 +1085,7 @@ const Page: React.FC = () => {
                         files={filteredFiles}
                         enableDownload={true}
                         showAppDownloadBanner={
-                            normalFiles.length < 30 && !isInSearchMode
+                            state.collectionFiles.length < 30 && !isInSearchMode
                         }
                         selectable={true}
                         selected={selected}
@@ -1158,10 +1115,8 @@ const Page: React.FC = () => {
                         }
                         onMarkTempDeleted={handleMarkTempDeleted}
                         onSetOpenFileViewer={setIsFileViewerOpen}
-                        onSyncWithRemote={syncWithRemote}
-                        onFileAndCollectionSyncWithRemote={
-                            fileAndCollectionSyncWithRemote
-                        }
+                        onRemotePull={remotePull}
+                        onRemoteFilesPull={remoteFilesPull}
                         onVisualFeedback={handleVisualFeedback}
                         onSelectCollection={handleSelectCollection}
                         onSelectPerson={handleSelectPerson}

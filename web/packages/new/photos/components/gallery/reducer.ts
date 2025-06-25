@@ -3,9 +3,13 @@ import {
     isArchivedCollection,
     isPinnedCollection,
 } from "ente-gallery/services/magic-metadata";
+import {
+    groupFilesByCollectionID,
+    sortFiles,
+    uniqueFilesByID,
+} from "ente-gallery/utils/files";
 import { collectionTypes, type Collection } from "ente-media/collection";
 import type { EnteFile } from "ente-media/file";
-import { mergeMetadata } from "ente-media/file";
 import {
     isArchivedFile,
     type FilePrivateMagicMetadataData,
@@ -15,6 +19,8 @@ import {
     createCollectionNameByID,
     isHiddenCollection,
 } from "ente-new/photos/services/collection";
+import { getLatestVersionFiles } from "ente-new/photos/services/files";
+import { sortTrashItems, type TrashItem } from "ente-new/photos/services/trash";
 import { splitByPredicate } from "ente-utils/array";
 import { includes } from "ente-utils/type-guards";
 import { t } from "i18next";
@@ -29,14 +35,6 @@ import {
     type CollectionSummary,
     type CollectionSummaryType,
 } from "../../services/collection-summary";
-import {
-    createFileCollectionIDs,
-    getLatestVersionFiles,
-    groupFilesByCollectionID,
-    sortFiles,
-    uniqueFilesByID,
-    type TrashedEnteFile,
-} from "../../services/files";
 import type { PeopleState, Person } from "../../services/ml/people";
 import type { SearchSuggestion } from "../../services/search/types";
 import type { FamilyData } from "../../services/user-details";
@@ -120,39 +118,25 @@ export interface GalleryState {
     /*--<  Primary state: Files, collections, people  >--*/
 
     /**
-     * The user's normal (non-hidden) collections.
+     * The user's collections.
      */
-    normalCollections: Collection[];
+    collections: Collection[];
     /**
-     * The user's hidden collections.
-     */
-    hiddenCollections: Collection[];
-    /**
-     * The user's normal (non-hidden, non-trash) files, without any unsynced
-     * modifications applied to them.
+     * The user's files, without any unsynced modifications applied to them.
      *
      * The list is sorted so that newer files are first.
      *
      * This property is expected to be of use only internal to the reducer;
-     * external code likely needs {@link normalFiles} instead.
+     * external code should only needs {@link files} instead.
      */
-    lastSyncedNormalFiles: EnteFile[];
+    lastSyncedCollectionFiles: EnteFile[];
     /**
-     * The user's hidden files, without any unsynced modifications applied to
-     * them.
+     * The items in the user's trash.
      *
-     * The list is sorted so that newer files are first.
-     *
-     * This property is expected to be of use only internal to the reducer;
-     * external code likely needs {@link hiddenFiles} instead.
+     * The items are sorted in ascending order of their time to deletion. For
+     * more details about the sorting order, see {@link sortTrashItems}.
      */
-    lastSyncedHiddenFiles: EnteFile[];
-    /**
-     * The user's files that are in trash.
-     *
-     * The list is sorted so that newer files are first.
-     */
-    trashedFiles: EnteFile[];
+    trashItems: TrashItem[];
     /**
      * Latest snapshot of people related state, as reported by
      * {@link usePeopleStateSnapshot}.
@@ -162,10 +146,17 @@ export interface GalleryState {
     /*--<  Derived state  >--*/
 
     /**
-     * The user's normal (non-hidden, non-trash) files, with any unsynced
-     * modifications also applied to them.
+     * The user's "collection files", with any unsynced modifications also
+     * applied to them.
+     *
+     * "Collection files" means that there might be multiple entries for the
+     * same file ID, one for each collection the file belongs to. For more
+     * details, see [Note: Collection file].
      *
      * The list is sorted so that newer files are first.
+     *
+     * See {@link lastSyncedFiles} for the same list, but without unsynced
+     * modifications.
      *
      * [Note: Unsynced modifications]
      *
@@ -175,35 +166,49 @@ export interface GalleryState {
      * happen on the next "file sync", until then they remain as in-memory state
      * in the reducer.
      */
-    normalFiles: EnteFile[];
+    collectionFiles: EnteFile[];
     /**
-     * The user's hidden files, with any unsynced modifications also applied to
-     * them.
-     *
-     * The list is sorted so that newer files are first.
-     *
-     * See: [Note: Unsynced modifications]
+     * Collection IDs of hidden collections.
      */
-    hiddenFiles: EnteFile[];
+    hiddenCollectionIDs: Set<number>;
+    /**
+     * Collection IDs of default hidden collections.
+     *
+     * The default hidden collection contains files that have been hidden
+     * individually. Rarely, but it is a technical possibility, multiple clients
+     * might create such "default" hidden collections. So this needs to be a set
+     * of IDs, but usually will be only one. In either case, the client shows a
+     * "merged" default hidden collection to the user.
+     */
+    defaultHiddenCollectionIDs: Set<number>;
+    /**
+     * File IDs of hidden files.
+     *
+     * [Note: Hidden files]
+     *
+     * Files can be individually hidden, or hidden by virtue of being placed in
+     * a hidden album. However unlike archiving (See: [Note: Archived files]),
+     * in the case of individually hiding a file, we do not set a file level
+     * property but rather move it to the "default hidden collection".
+     *
+     * So effectively, files can be hidden only by virtue of being present in a
+     * hidden collection.
+     *
+     * If a file is present in any hidden collection, then it is considered
+     * hidden. Since this computation requires multiple steps, we precompute the
+     * list of such files and keep it this set.
+     */
+    hiddenFileIDs: Set<number>;
     /**
      * Collection IDs of archived collections.
      */
     archivedCollectionIDs: Set<number>;
     /**
-     * Collection IDs of default hidden collections.
-     */
-    defaultHiddenCollectionIDs: Set<number>;
-    /**
-     * File IDs of the files that the user has hidden.
-     *
-     * Unlike archived files which can be in a mixture of normal and archived
-     * albums, hidden files can only be in hidden albums.
-     */
-    hiddenFileIDs: Set<number>;
-    /**
      * File IDs of the files that the user has archived.
      *
      * Includes the effects of {@link unsyncedVisibilityUpdates}.
+     *
+     * [Note: Archived files]
      *
      * Files can be individually archived (which is a file level property), or
      * archived by virtue of being placed in an archived album (which is a
@@ -211,6 +216,7 @@ export interface GalleryState {
      *
      * Archived files are not supposed to be shown in the all section,
      * irrespective of which of those two way they obtain their archive status.
+     *
      * In particular, a (collection) file can be both in an archived album and
      * an normal album, so just checking for membership in archived collections
      * is not enough to filter them out from all. Instead, we need to compile a
@@ -239,6 +245,22 @@ export interface GalleryState {
      * that they're a part of.
      */
     fileNormalCollectionIDs: Map<number, number[]>;
+    /**
+     * A map from Ente user IDs to their emails (except for the user in user
+     * themselves).
+     *
+     * This is used to perform a fast lookup of the email of the Ente user that
+     * shared a file or collection.
+     */
+    emailByUserID: Map<number, string>;
+    /**
+     * A list of emails that can be served as suggestions when the user is
+     * trying to share a collection with another Ente user.
+     *
+     * These are derived from the emails of the Ente users with whom the user
+     * has already shared collections, plus the emails of their family members.
+     */
+    shareSuggestionEmails: string[];
 
     /*--<  Derived UI state  >--*/
 
@@ -422,25 +444,16 @@ export type GalleryAction =
     | {
           type: "mount";
           user: User;
-          familyData: FamilyData;
+          familyData: FamilyData | undefined;
           collections: Collection[];
-          normalFiles: EnteFile[];
-          hiddenFiles: EnteFile[];
-          trashedFiles: TrashedEnteFile[];
+          collectionFiles: EnteFile[];
+          trashItems: TrashItem[];
       }
-    | {
-          type: "setCollections";
-          collections: Collection[];
-          normalCollections: Collection[];
-          hiddenCollections: Collection[];
-      }
-    | { type: "setNormalCollections"; collections: Collection[] }
-    | { type: "setNormalFiles"; files: EnteFile[] }
-    | { type: "fetchNormalFiles"; files: EnteFile[] }
-    | { type: "uploadNormalFile"; file: EnteFile }
-    | { type: "setHiddenFiles"; files: EnteFile[] }
-    | { type: "fetchHiddenFiles"; files: EnteFile[] }
-    | { type: "setTrashedFiles"; files: EnteFile[] }
+    | { type: "setCollections"; collections: Collection[] }
+    | { type: "setCollectionFiles"; collectionFiles: EnteFile[] }
+    | { type: "augmentCollectionFiles"; collectionFiles: EnteFile[] }
+    | { type: "uploadFile"; file: EnteFile }
+    | { type: "setTrashItems"; trashItems: TrashItem[] }
     | { type: "setPeopleState"; peopleState: PeopleState | undefined }
     | { type: "markTempDeleted"; files: EnteFile[] }
     | { type: "clearTempDeleted" }
@@ -471,21 +484,21 @@ export type GalleryAction =
 const initialGalleryState: GalleryState = {
     user: undefined,
     familyData: undefined,
-    normalCollections: [],
-    hiddenCollections: [],
-    lastSyncedNormalFiles: [],
-    lastSyncedHiddenFiles: [],
-    trashedFiles: [],
+    collections: [],
+    lastSyncedCollectionFiles: [],
+    trashItems: [],
     peopleState: undefined,
-    normalFiles: [],
-    hiddenFiles: [],
-    archivedCollectionIDs: new Set(),
+    collectionFiles: [],
+    hiddenCollectionIDs: new Set(),
     defaultHiddenCollectionIDs: new Set(),
     hiddenFileIDs: new Set(),
+    archivedCollectionIDs: new Set(),
     archivedFileIDs: new Set(),
     favoriteFileIDs: new Set(),
     collectionNameByID: new Map(),
     fileNormalCollectionIDs: new Map(),
+    emailByUserID: new Map(),
+    shareSuggestionEmails: [],
     normalCollectionSummaries: new Map(),
     hiddenCollectionSummaries: new Map(),
     uncategorizedCollectionSummaryID:
@@ -515,29 +528,31 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
     if (process.env.NEXT_PUBLIC_ENTE_TRACE) console.log("dispatch", action);
     switch (action.type) {
         case "mount": {
-            const lastSyncedNormalFiles = sortFiles(
-                mergeMetadata(action.normalFiles),
-            );
-            const lastSyncedHiddenFiles = sortFiles(
-                mergeMetadata(action.hiddenFiles),
-            );
+            const { user, familyData } = action;
+
+            const lastSyncedCollectionFiles = sortFiles(action.collectionFiles);
+            const trashItems = sortTrashItems(action.trashItems);
 
             // During mount there are no unsynced updates, and we can directly
             // use the provided files.
-            const normalFiles = lastSyncedNormalFiles;
-            const hiddenFiles = lastSyncedHiddenFiles;
+            const collectionFiles = lastSyncedCollectionFiles;
 
-            const [hiddenCollections, normalCollections] = splitByPredicate(
-                action.collections,
-                isHiddenCollection,
-            );
-            const hiddenFileIDs = deriveHiddenFileIDs(hiddenFiles);
+            const collections = action.collections;
+
+            const {
+                normalCollections,
+                hiddenCollections,
+                hiddenCollectionIDs,
+                hiddenFileIDs,
+            } = deriveHiddenInfo(collections, collectionFiles);
+
             const archivedCollectionIDs =
                 deriveArchivedCollectionIDs(normalCollections);
             const archivedFileIDs = deriveArchivedFileIDs(
                 archivedCollectionIDs,
-                normalFiles,
+                collectionFiles,
             );
+
             const view = {
                 type: "albums" as const,
                 activeCollectionSummaryID: PseudoCollectionID.all,
@@ -546,41 +561,49 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
 
             return stateByUpdatingFilteredFiles({
                 ...state,
-                user: action.user,
-                familyData: action.familyData,
-                normalCollections,
-                hiddenCollections,
-                lastSyncedNormalFiles,
-                lastSyncedHiddenFiles,
-                trashedFiles: action.trashedFiles,
-                normalFiles,
-                hiddenFiles,
-                archivedCollectionIDs,
+                user,
+                familyData,
+                collections,
+                lastSyncedCollectionFiles,
+                trashItems,
+                collectionFiles,
+                hiddenCollectionIDs,
                 defaultHiddenCollectionIDs:
                     deriveDefaultHiddenCollectionIDs(hiddenCollections),
                 hiddenFileIDs,
+                archivedCollectionIDs,
                 archivedFileIDs,
                 favoriteFileIDs: deriveFavoriteFileIDs(
                     action.user,
-                    normalCollections,
-                    normalFiles,
+                    collections,
+                    collectionFiles,
                     state.unsyncedFavoriteUpdates,
                 ),
                 collectionNameByID: createCollectionNameByID(
                     action.collections,
                 ),
-                fileNormalCollectionIDs: createFileCollectionIDs(normalFiles),
+                fileNormalCollectionIDs: deriveFileNormalCollectionIDs(
+                    collectionFiles,
+                    hiddenFileIDs,
+                ),
+                emailByUserID: constructUserIDToEmailMap(user, collections),
+                shareSuggestionEmails: createShareSuggestionEmails(
+                    user,
+                    familyData,
+                    collections,
+                ),
                 normalCollectionSummaries: deriveNormalCollectionSummaries(
-                    action.user,
                     normalCollections,
-                    normalFiles,
-                    action.trashedFiles,
+                    action.user,
+                    trashItems,
+                    collectionFiles,
+                    hiddenFileIDs,
                     archivedFileIDs,
                 ),
                 hiddenCollectionSummaries: deriveHiddenCollectionSummaries(
-                    action.user,
                     hiddenCollections,
-                    hiddenFiles,
+                    action.user,
+                    collectionFiles,
                 ),
                 uncategorizedCollectionSummaryID:
                     deriveUncategorizedCollectionSummaryID(normalCollections),
@@ -589,25 +612,34 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
         }
 
         case "setCollections": {
-            const { collections, normalCollections, hiddenCollections } =
-                action;
+            const collections = action.collections;
+
+            const {
+                normalCollections,
+                hiddenCollections,
+                hiddenCollectionIDs,
+                hiddenFileIDs,
+            } = deriveHiddenInfo(collections, state.collectionFiles);
+
             const archivedCollectionIDs =
                 deriveArchivedCollectionIDs(normalCollections);
             const archivedFileIDs = deriveArchivedFileIDs(
                 archivedCollectionIDs,
-                state.normalFiles,
+                state.collectionFiles,
             );
+
             const normalCollectionSummaries = deriveNormalCollectionSummaries(
-                state.user!,
                 normalCollections,
-                state.normalFiles,
-                state.trashedFiles,
+                state.user!,
+                state.trashItems,
+                state.collectionFiles,
+                hiddenFileIDs,
                 archivedFileIDs,
             );
             const hiddenCollectionSummaries = deriveHiddenCollectionSummaries(
-                state.user!,
                 hiddenCollections,
-                state.hiddenFiles,
+                state.user!,
+                state.collectionFiles,
             );
 
             // Revalidate the active view if needed.
@@ -616,14 +648,16 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
             if (state.view?.type == "albums") {
                 ({ view, selectedCollectionSummaryID } =
                     deriveAlbumsViewAndSelectedID(
-                        normalCollections,
+                        collections,
+                        hiddenCollectionIDs,
                         normalCollectionSummaries,
                         selectedCollectionSummaryID,
                     ));
             } else if (state.view?.type == "hidden-albums") {
                 ({ view, selectedCollectionSummaryID } =
                     deriveHiddenAlbumsViewAndSelectedID(
-                        hiddenCollections,
+                        collections,
+                        hiddenCollectionIDs,
                         hiddenCollectionSummaries,
                         selectedCollectionSummaryID,
                     ));
@@ -631,19 +665,33 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
 
             return stateByUpdatingFilteredFiles({
                 ...state,
-                normalCollections,
-                hiddenCollections,
-                archivedCollectionIDs,
+                collections,
+                hiddenCollectionIDs,
                 defaultHiddenCollectionIDs:
                     deriveDefaultHiddenCollectionIDs(hiddenCollections),
+                hiddenFileIDs,
+                archivedCollectionIDs,
                 archivedFileIDs,
                 favoriteFileIDs: deriveFavoriteFileIDs(
                     state.user!,
                     normalCollections,
-                    state.normalFiles,
+                    state.collectionFiles,
                     state.unsyncedFavoriteUpdates,
                 ),
                 collectionNameByID: createCollectionNameByID(collections),
+                fileNormalCollectionIDs: deriveFileNormalCollectionIDs(
+                    state.collectionFiles,
+                    hiddenFileIDs,
+                ),
+                emailByUserID: constructUserIDToEmailMap(
+                    state.user!,
+                    collections,
+                ),
+                shareSuggestionEmails: createShareSuggestionEmails(
+                    state.user!,
+                    state.familyData,
+                    collections,
+                ),
                 normalCollectionSummaries,
                 hiddenCollectionSummaries,
                 uncategorizedCollectionSummaryID:
@@ -659,185 +707,87 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
             });
         }
 
-        case "setNormalCollections": {
-            const normalCollections = action.collections;
-            const archivedCollectionIDs =
-                deriveArchivedCollectionIDs(normalCollections);
-            const archivedFileIDs = deriveArchivedFileIDs(
-                archivedCollectionIDs,
-                state.normalFiles,
-            );
-            const normalCollectionSummaries = deriveNormalCollectionSummaries(
-                state.user!,
-                normalCollections,
-                state.normalFiles,
-                state.trashedFiles,
-                archivedFileIDs,
-            );
-
-            // Revalidate the active view if needed.
-            let view = state.view;
-            let selectedCollectionSummaryID = state.selectedCollectionSummaryID;
-            if (state.view?.type == "albums") {
-                ({ view, selectedCollectionSummaryID } =
-                    deriveAlbumsViewAndSelectedID(
-                        normalCollections,
-                        normalCollectionSummaries,
-                        selectedCollectionSummaryID,
-                    ));
-            }
-
-            return stateByUpdatingFilteredFiles({
-                ...state,
-                normalCollections,
-                archivedCollectionIDs,
-                archivedFileIDs,
-                favoriteFileIDs: deriveFavoriteFileIDs(
-                    state.user!,
-                    normalCollections,
-                    state.normalFiles,
-                    state.unsyncedFavoriteUpdates,
-                ),
-                collectionNameByID: createCollectionNameByID(
-                    normalCollections.concat(state.hiddenCollections),
-                ),
-                normalCollectionSummaries,
-                uncategorizedCollectionSummaryID:
-                    deriveUncategorizedCollectionSummaryID(normalCollections),
-                selectedCollectionSummaryID,
-                pendingSearchSuggestions:
-                    enqueuePendingSearchSuggestionsIfNeeded(
-                        state.searchSuggestion,
-                        state.pendingSearchSuggestions,
-                        state.isInSearchMode,
-                    ),
-                view,
-            });
-        }
-
-        case "setNormalFiles": {
+        case "setCollectionFiles": {
             const unsyncedPrivateMagicMetadataUpdates =
                 prunedUnsyncedPrivateMagicMetadataUpdates(
                     state.unsyncedPrivateMagicMetadataUpdates,
-                    action.files,
+                    action.collectionFiles,
                 );
-            const lastSyncedNormalFiles = sortFiles(
-                mergeMetadata(action.files),
-            );
-            const normalFiles = deriveFiles(
-                lastSyncedNormalFiles,
+            const lastSyncedCollectionFiles = sortFiles(action.collectionFiles);
+            const collectionFiles = deriveCollectionFiles(
+                lastSyncedCollectionFiles,
                 unsyncedPrivateMagicMetadataUpdates,
             );
 
             return stateByUpdatingFilteredFiles({
-                ...stateForUpdatedNormalFiles(state, normalFiles),
-                lastSyncedNormalFiles,
+                ...stateForUpdatedCollectionFiles(state, collectionFiles),
+                lastSyncedCollectionFiles,
                 unsyncedPrivateMagicMetadataUpdates,
             });
         }
 
-        case "fetchNormalFiles": {
+        case "augmentCollectionFiles": {
             const unsyncedPrivateMagicMetadataUpdates =
                 prunedUnsyncedPrivateMagicMetadataUpdates(
                     state.unsyncedPrivateMagicMetadataUpdates,
-                    action.files,
+                    action.collectionFiles,
                 );
-            const lastSyncedNormalFiles = sortFiles(
-                mergeMetadata(
-                    getLatestVersionFiles(
-                        state.lastSyncedNormalFiles.concat(action.files),
+            const lastSyncedCollectionFiles = sortFiles(
+                getLatestVersionFiles(
+                    state.lastSyncedCollectionFiles.concat(
+                        action.collectionFiles,
                     ),
                 ),
             );
-            const normalFiles = deriveFiles(
-                lastSyncedNormalFiles,
+            const collectionFiles = deriveCollectionFiles(
+                lastSyncedCollectionFiles,
                 unsyncedPrivateMagicMetadataUpdates,
             );
 
             return stateByUpdatingFilteredFiles({
-                ...stateForUpdatedNormalFiles(state, normalFiles),
-                lastSyncedNormalFiles,
+                ...stateForUpdatedCollectionFiles(state, collectionFiles),
+                lastSyncedCollectionFiles,
                 unsyncedPrivateMagicMetadataUpdates,
             });
         }
 
-        case "uploadNormalFile": {
+        case "uploadFile": {
             // TODO: Consider batching this instead of doing it per file
             // upload to speed up uploads. Perf test first though.
 
-            const lastSyncedNormalFiles = sortFiles([
-                ...state.lastSyncedNormalFiles,
+            const lastSyncedCollectionFiles = sortFiles([
+                ...state.lastSyncedCollectionFiles,
                 action.file,
             ]);
-            const normalFiles = deriveFiles(
-                lastSyncedNormalFiles,
+            const collectionFiles = deriveCollectionFiles(
+                lastSyncedCollectionFiles,
                 state.unsyncedPrivateMagicMetadataUpdates,
             );
 
             return stateByUpdatingFilteredFiles({
-                ...stateForUpdatedNormalFiles(state, normalFiles),
-                lastSyncedNormalFiles,
+                ...stateForUpdatedCollectionFiles(state, collectionFiles),
+                lastSyncedCollectionFiles,
             });
         }
 
-        case "setHiddenFiles": {
-            const unsyncedPrivateMagicMetadataUpdates =
-                prunedUnsyncedPrivateMagicMetadataUpdates(
-                    state.unsyncedPrivateMagicMetadataUpdates,
-                    action.files,
-                );
-            const lastSyncedHiddenFiles = sortFiles(
-                mergeMetadata(action.files),
-            );
-            const hiddenFiles = deriveFiles(
-                lastSyncedHiddenFiles,
-                unsyncedPrivateMagicMetadataUpdates,
-            );
+        case "setTrashItems": {
+            const trashItems = sortTrashItems(action.trashItems);
 
-            return stateByUpdatingFilteredFiles({
-                ...stateForUpdatedHiddenFiles(state, hiddenFiles),
-                lastSyncedHiddenFiles,
-                unsyncedPrivateMagicMetadataUpdates,
-            });
-        }
-
-        case "fetchHiddenFiles": {
-            const unsyncedPrivateMagicMetadataUpdates =
-                prunedUnsyncedPrivateMagicMetadataUpdates(
-                    state.unsyncedPrivateMagicMetadataUpdates,
-                    action.files,
-                );
-            const lastSyncedHiddenFiles = sortFiles(
-                mergeMetadata(
-                    getLatestVersionFiles(
-                        state.lastSyncedHiddenFiles.concat(action.files),
-                    ),
-                ),
-            );
-            const hiddenFiles = deriveFiles(
-                lastSyncedHiddenFiles,
-                unsyncedPrivateMagicMetadataUpdates,
-            );
-
-            return stateByUpdatingFilteredFiles({
-                ...stateForUpdatedHiddenFiles(state, hiddenFiles),
-                lastSyncedHiddenFiles,
-                unsyncedPrivateMagicMetadataUpdates,
-            });
-        }
-
-        case "setTrashedFiles":
             return stateByUpdatingFilteredFiles({
                 ...state,
-                trashedFiles: action.files,
+                trashItems,
                 normalCollectionSummaries: deriveNormalCollectionSummaries(
+                    state.collections.filter(
+                        (c) => !state.hiddenCollectionIDs.has(c.id),
+                    ),
                     state.user!,
-                    state.normalCollections,
-                    state.normalFiles,
-                    action.files,
+                    trashItems,
+                    state.collectionFiles,
+                    state.hiddenFileIDs,
                     state.archivedFileIDs,
                 ),
             });
+        }
 
         case "setPeopleState": {
             const peopleState = action.peopleState;
@@ -920,8 +870,8 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 ...state,
                 favoriteFileIDs: deriveFavoriteFileIDs(
                     state.user!,
-                    state.normalCollections,
-                    state.normalFiles,
+                    state.collections,
+                    state.collectionFiles,
                     unsyncedFavoriteUpdates,
                 ),
                 unsyncedFavoriteUpdates,
@@ -954,13 +904,14 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 action.fileID,
                 action.privateMagicMetadata,
             );
-            const normalFiles = deriveFiles(
-                state.lastSyncedNormalFiles,
+
+            const collectionFiles = deriveCollectionFiles(
+                state.lastSyncedCollectionFiles,
                 unsyncedPrivateMagicMetadataUpdates,
             );
 
             return stateByUpdatingFilteredFiles({
-                ...stateForUpdatedNormalFiles(state, normalFiles),
+                ...stateForUpdatedCollectionFiles(state, collectionFiles),
                 unsyncedPrivateMagicMetadataUpdates,
             });
         }
@@ -970,40 +921,31 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 new Map();
             const favoriteFileIDs = deriveFavoriteFileIDs(
                 state.user!,
-                state.normalCollections,
-                state.normalFiles,
+                state.collections,
+                state.collectionFiles,
                 unsyncedFavoriteUpdates,
             );
 
+            const collectionFiles = state.lastSyncedCollectionFiles;
             const unsyncedPrivateMagicMetadataUpdates: GalleryState["unsyncedPrivateMagicMetadataUpdates"] =
                 new Map();
-            const normalFiles = deriveFiles(
-                state.lastSyncedNormalFiles,
-                unsyncedPrivateMagicMetadataUpdates,
-            );
-            const hiddenFiles = deriveFiles(
-                state.lastSyncedHiddenFiles,
-                unsyncedPrivateMagicMetadataUpdates,
-            );
 
-            return stateByUpdatingFilteredFiles(
-                stateForUpdatedHiddenFiles(
-                    stateForUpdatedNormalFiles(
-                        {
-                            ...state,
-                            favoriteFileIDs,
-                            tempDeletedFileIDs: new Set(),
-                            tempHiddenFileIDs: new Set(),
-                            pendingFavoriteUpdates: new Set(),
-                            pendingVisibilityUpdates: new Set(),
-                            unsyncedPrivateMagicMetadataUpdates,
-                            unsyncedFavoriteUpdates: new Map(),
-                        },
-                        normalFiles,
-                    ),
-                    hiddenFiles,
+            return stateByUpdatingFilteredFiles({
+                ...stateForUpdatedCollectionFiles(
+                    {
+                        ...state,
+                        favoriteFileIDs,
+                        tempDeletedFileIDs: new Set(),
+                        tempHiddenFileIDs: new Set(),
+                        pendingFavoriteUpdates: new Set(),
+                        pendingVisibilityUpdates: new Set(),
+                        unsyncedPrivateMagicMetadataUpdates,
+                        unsyncedFavoriteUpdates: new Map(),
+                    },
+                    collectionFiles,
                 ),
-            );
+                unsyncedPrivateMagicMetadataUpdates,
+            });
         }
 
         case "showAll":
@@ -1043,7 +985,8 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
         case "showAlbums": {
             const { view, selectedCollectionSummaryID } =
                 deriveAlbumsViewAndSelectedID(
-                    state.normalCollections,
+                    state.collections,
+                    state.hiddenCollectionIDs,
                     state.normalCollectionSummaries,
                     state.selectedCollectionSummaryID,
                 );
@@ -1080,9 +1023,9 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                             : "albums",
                     activeCollectionSummaryID:
                         action.collectionSummaryID ?? PseudoCollectionID.all,
-                    activeCollection: state.normalCollections
-                        .concat(state.hiddenCollections)
-                        .find(({ id }) => id === action.collectionSummaryID),
+                    activeCollection: state.collections.find(
+                        ({ id }) => id == action.collectionSummaryID,
+                    ),
                 },
                 isInSearchMode: false,
             });
@@ -1178,16 +1121,17 @@ export const useGalleryReducer = () =>
  * Compute the effective files that we should use by overlaying the files we
  * read from disk by any temporary unsynced updates.
  */
-const deriveFiles = (
-    files: EnteFile[],
+const deriveCollectionFiles = (
+    lastSyncedCollectionFiles: GalleryState["lastSyncedCollectionFiles"],
     unsyncedPrivateMagicMetadataUpdates: GalleryState["unsyncedPrivateMagicMetadataUpdates"],
 ) => {
     // Happy fastpath.
-    if (unsyncedPrivateMagicMetadataUpdates.size == 0) return files;
+    if (unsyncedPrivateMagicMetadataUpdates.size == 0)
+        return lastSyncedCollectionFiles;
 
     // We have one or more unsynced private magic metadata updates that should
     // be applied to all the collection files with the matching file ID.
-    return files.map((file) => {
+    return lastSyncedCollectionFiles.map((file) => {
         const privateMagicMetadata = unsyncedPrivateMagicMetadataUpdates.get(
             file.id,
         );
@@ -1196,6 +1140,49 @@ const deriveFiles = (
         return { ...file, magicMetadata: privateMagicMetadata };
     });
 };
+
+/**
+ * Compute various bits of the state associated with hidden items from their
+ * dependencies.
+ */
+const deriveHiddenInfo = (
+    collections: GalleryState["collections"],
+    collectionFiles: GalleryState["collectionFiles"],
+) => {
+    const [hiddenCollections, normalCollections] = splitByPredicate(
+        collections,
+        isHiddenCollection,
+    );
+    const hiddenCollectionIDs = new Set(hiddenCollections.map((c) => c.id));
+    return {
+        normalCollections,
+        hiddenCollections,
+        hiddenCollectionIDs,
+        hiddenFileIDs: deriveHiddenFileIDs(
+            collectionFiles,
+            hiddenCollectionIDs,
+        ),
+    };
+};
+
+/**
+ * Compute the list of hidden file IDs from their dependencies.
+ */
+const deriveHiddenFileIDs = (
+    collectionFiles: GalleryState["collectionFiles"],
+    hiddenCollectionIDs: GalleryState["hiddenCollectionIDs"],
+) =>
+    new Set(
+        collectionFiles
+            .filter((f) => hiddenCollectionIDs.has(f.collectionID))
+            .map((f) => f.id),
+    );
+
+/**
+ * Compute the default hidden collection IDs from their dependencies.
+ */
+const deriveDefaultHiddenCollectionIDs = (hiddenCollections: Collection[]) =>
+    findDefaultHiddenCollectionIDs(hiddenCollections);
 
 /**
  * Compute archived collection IDs from their dependencies.
@@ -1208,26 +1195,14 @@ const deriveArchivedCollectionIDs = (collections: Collection[]) =>
     );
 
 /**
- * Compute the default hidden collection IDs from their dependencies.
- */
-const deriveDefaultHiddenCollectionIDs = (hiddenCollections: Collection[]) =>
-    findDefaultHiddenCollectionIDs(hiddenCollections);
-
-/**
- * Compute hidden file IDs from their dependencies.
- */
-const deriveHiddenFileIDs = (hiddenFiles: EnteFile[]) =>
-    new Set<number>(hiddenFiles.map((f) => f.id));
-
-/**
  * Compute archived file IDs from their dependencies.
  */
 const deriveArchivedFileIDs = (
     archivedCollectionIDs: GalleryState["archivedCollectionIDs"],
-    files: GalleryState["normalFiles"],
+    collectionFiles: GalleryState["collectionFiles"],
 ) =>
     new Set(
-        files
+        collectionFiles
             .filter(
                 (file) =>
                     isArchivedFile(file) ||
@@ -1241,8 +1216,8 @@ const deriveArchivedFileIDs = (
  */
 const deriveFavoriteFileIDs = (
     user: User,
-    collections: Collection[],
-    files: EnteFile[],
+    collections: GalleryState["collections"],
+    collectionFiles: GalleryState["collectionFiles"],
     unsyncedFavoriteUpdates: GalleryState["unsyncedFavoriteUpdates"],
 ) => {
     let favoriteFileIDs = new Set<number>();
@@ -1250,8 +1225,8 @@ const deriveFavoriteFileIDs = (
         // See: [Note: User and shared favorites]
         if (collection.type == "favorites" && collection.owner.id == user.id) {
             favoriteFileIDs = new Set(
-                files
-                    .filter((file) => file.collectionID === collection.id)
+                collectionFiles
+                    .filter((file) => file.collectionID == collection.id)
                     .map((file) => file.id),
             );
             break;
@@ -1265,19 +1240,44 @@ const deriveFavoriteFileIDs = (
 };
 
 /**
+ * Compute file to (non-hidden) collection mapping from its dependencies.
+ */
+const deriveFileNormalCollectionIDs = (
+    collectionFiles: GalleryState["collectionFiles"],
+    hiddenFileIDs: GalleryState["hiddenFileIDs"],
+) =>
+    createFileCollectionIDs(
+        collectionFiles.filter((f) => !hiddenFileIDs.has(f.id)),
+    );
+
+/**
+ * Construct a map from file IDs to the list of collections (IDs) to which the
+ * file belongs.
+ */
+const createFileCollectionIDs = (files: EnteFile[]) =>
+    files.reduce((result, file) => {
+        const id = file.id;
+        let fs = result.get(id);
+        if (!fs) result.set(id, (fs = []));
+        fs.push(file.collectionID);
+        return result;
+    }, new Map<number, number[]>());
+
+/**
  * Compute normal (non-hidden) collection summaries from their dependencies.
  */
 const deriveNormalCollectionSummaries = (
-    user: User,
     normalCollections: Collection[],
-    normalFiles: EnteFile[],
-    trashedFiles: EnteFile[],
-    archivedFileIDs: Set<number>,
+    user: User,
+    trashItems: GalleryState["trashItems"],
+    collectionFiles: GalleryState["collectionFiles"],
+    hiddenFileIDs: GalleryState["hiddenFileIDs"],
+    archivedFileIDs: GalleryState["archivedFileIDs"],
 ) => {
     const normalCollectionSummaries = createCollectionSummaries(
         user,
         normalCollections,
-        normalFiles,
+        collectionFiles,
     );
 
     const uncategorizedCollection = normalCollections.find(
@@ -1294,10 +1294,18 @@ const deriveNormalCollectionSummaries = (
         });
     }
 
-    const allSectionFiles = findAllSectionVisibleFiles(
-        normalFiles,
-        archivedFileIDs,
+    const allSectionFiles = uniqueFilesByID(
+        collectionFiles.filter(
+            (f) => !hiddenFileIDs.has(f.id) && !archivedFileIDs.has(f.id),
+        ),
     );
+
+    const archiveItemsFiles = uniqueFilesByID(
+        collectionFiles.filter(
+            (f) => !hiddenFileIDs.has(f.id) && isArchivedFile(f),
+        ),
+    );
+
     normalCollectionSummaries.set(PseudoCollectionID.all, {
         ...pseudoCollectionOptionsForFiles(allSectionFiles),
         id: PseudoCollectionID.all,
@@ -1305,19 +1313,21 @@ const deriveNormalCollectionSummaries = (
         attributes: ["all"],
         name: t("section_all"),
     });
+
     normalCollectionSummaries.set(PseudoCollectionID.trash, {
-        ...pseudoCollectionOptionsForFiles(trashedFiles),
+        ...pseudoCollectionOptionsForLatestFileAndCount(
+            trashItems[0]?.file,
+            trashItems.length,
+        ),
         id: PseudoCollectionID.trash,
         name: t("section_trash"),
         type: "trash",
         attributes: ["trash"],
         coverFile: undefined,
     });
-    const archivedFiles = uniqueFilesByID(
-        normalFiles.filter((file) => isArchivedFile(file)),
-    );
+
     normalCollectionSummaries.set(PseudoCollectionID.archiveItems, {
-        ...pseudoCollectionOptionsForFiles(archivedFiles),
+        ...pseudoCollectionOptionsForFiles(archiveItemsFiles),
         id: PseudoCollectionID.archiveItems,
         name: t("section_archive"),
         type: "archive",
@@ -1328,30 +1338,36 @@ const deriveNormalCollectionSummaries = (
     return normalCollectionSummaries;
 };
 
-const pseudoCollectionOptionsForFiles = (files: EnteFile[]) => ({
-    coverFile: files[0],
-    latestFile: files[0],
-    fileCount: files.length,
-    updationTime: files[0]?.updationTime,
+const pseudoCollectionOptionsForFiles = (files: EnteFile[]) =>
+    pseudoCollectionOptionsForLatestFileAndCount(files[0], files.length);
+
+const pseudoCollectionOptionsForLatestFileAndCount = (
+    file: EnteFile | undefined,
+    fileCount: number,
+) => ({
+    coverFile: file,
+    latestFile: file,
+    fileCount,
+    updationTime: file?.updationTime,
 });
 
 /**
  * Compute hidden collection summaries from their dependencies.
  */
 const deriveHiddenCollectionSummaries = (
-    user: User,
     hiddenCollections: Collection[],
-    hiddenFiles: EnteFile[],
+    user: User,
+    collectionFiles: GalleryState["collectionFiles"],
 ) => {
     const hiddenCollectionSummaries = createCollectionSummaries(
         user,
         hiddenCollections,
-        hiddenFiles,
+        collectionFiles,
     );
 
     const dhcIDs = findDefaultHiddenCollectionIDs(hiddenCollections);
     const defaultHiddenFiles = uniqueFilesByID(
-        hiddenFiles.filter((file) => dhcIDs.has(file.collectionID)),
+        collectionFiles.filter((file) => dhcIDs.has(file.collectionID)),
     );
     hiddenCollectionSummaries.set(PseudoCollectionID.hiddenItems, {
         ...pseudoCollectionOptionsForFiles(defaultHiddenFiles),
@@ -1377,11 +1393,11 @@ const deriveUncategorizedCollectionSummaryID = (
 const createCollectionSummaries = (
     user: User,
     collections: Collection[],
-    files: EnteFile[],
+    collectionFiles: EnteFile[],
 ) => {
     const collectionSummaries = new Map<number, CollectionSummary>();
 
-    const filesByCollection = groupFilesByCollectionID(files);
+    const filesByCollection = groupFilesByCollectionID(collectionFiles);
     const coverFiles = findCoverFiles(collections, filesByCollection);
 
     for (const collection of collections) {
@@ -1500,8 +1516,7 @@ const createCollectionSummaries = (
             coverFile: coverFiles.get(collection.id),
             fileCount: collectionFiles?.length ?? 0,
             updationTime: collection.updationTime,
-            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-            order: collection.magicMetadata?.data?.order ?? 0,
+            order: collection.magicMetadata?.data.order ?? 0,
         });
     }
 
@@ -1557,20 +1572,13 @@ const isSharedOnlyViaLink = (collection: Collection) =>
     collection.publicURLs?.length && !collection.sharees?.length;
 
 /**
- * Return all list of files that should be shown in the "All" section.
- */
-const findAllSectionVisibleFiles = (
-    files: EnteFile[],
-    archivedFileIDs: Set<number>,
-) => uniqueFilesByID(files.filter(({ id }) => !archivedFileIDs.has(id)));
-
-/**
  * Compute the {@link GalleryView} from its dependencies when we are switching
  * to (or back to) the "albums" view, or the underlying collections might've
  * changed.
  */
 const deriveAlbumsViewAndSelectedID = (
-    collections: GalleryState["normalCollections"],
+    collections: GalleryState["collections"],
+    hiddenCollectionIDs: GalleryState["hiddenCollectionIDs"],
     collectionSummaries: GalleryState["normalCollectionSummaries"],
     selectedCollectionSummaryID: GalleryState["selectedCollectionSummaryID"],
 ) => {
@@ -1578,9 +1586,11 @@ const deriveAlbumsViewAndSelectedID = (
     const activeCollectionSummaryID = selectedCollectionSummaryID
         ? collectionSummaries.get(selectedCollectionSummaryID)?.id
         : undefined;
-    const activeCollection = activeCollectionSummaryID
-        ? collections.find(({ id }) => id == activeCollectionSummaryID)
-        : undefined;
+    const activeCollection =
+        activeCollectionSummaryID &&
+        !hiddenCollectionIDs.has(activeCollectionSummaryID)
+            ? collections.find(({ id }) => id == activeCollectionSummaryID)
+            : undefined;
     return {
         selectedCollectionSummaryID: activeCollectionSummaryID,
         view: {
@@ -1597,7 +1607,8 @@ const deriveAlbumsViewAndSelectedID = (
  * albums section.
  */
 const deriveHiddenAlbumsViewAndSelectedID = (
-    hiddenCollections: GalleryState["hiddenCollections"],
+    collections: GalleryState["collections"],
+    hiddenCollectionIDs: GalleryState["hiddenCollectionIDs"],
     hiddenCollectionSummaries: GalleryState["hiddenCollectionSummaries"],
     selectedCollectionSummaryID: GalleryState["selectedCollectionSummaryID"],
 ) => {
@@ -1605,9 +1616,11 @@ const deriveHiddenAlbumsViewAndSelectedID = (
     const activeCollectionSummaryID = selectedCollectionSummaryID
         ? hiddenCollectionSummaries.get(selectedCollectionSummaryID)?.id
         : undefined;
-    const activeCollection = activeCollectionSummaryID
-        ? hiddenCollections.find(({ id }) => id == activeCollectionSummaryID)
-        : undefined;
+    const activeCollection =
+        activeCollectionSummaryID &&
+        hiddenCollectionIDs.has(activeCollectionSummaryID)
+            ? collections.find(({ id }) => id == activeCollectionSummaryID)
+            : undefined;
     return {
         selectedCollectionSummaryID: activeCollectionSummaryID,
         view: {
@@ -1710,67 +1723,65 @@ const derivePeopleView = (
 
 /**
  * Return a new state from the given {@link state} by recomputing all properties
- * that depend on normal (non-hidden) files, using the provided
- * {@link normalFiles}.
+ * that depend on collection files, using the provided {@link collectionFiles}.
  *
  * Usually, we update state by manually dependency tracking on a fine grained
  * basis, but it results in a duplicate code when the files themselves change,
- * since they effect many things. This is a convenience function for updating
- * everything that needs to change when the normal files themselves change.
- */
-const stateForUpdatedNormalFiles = (
-    state: GalleryState,
-    normalFiles: GalleryState["normalFiles"],
-): GalleryState => ({
-    ...state,
-    normalFiles,
-    archivedFileIDs: deriveArchivedFileIDs(
-        state.archivedCollectionIDs,
-        normalFiles,
-    ),
-    favoriteFileIDs: deriveFavoriteFileIDs(
-        state.user!,
-        state.normalCollections,
-        normalFiles,
-        state.unsyncedFavoriteUpdates,
-    ),
-    fileNormalCollectionIDs: createFileCollectionIDs(normalFiles),
-    normalCollectionSummaries: deriveNormalCollectionSummaries(
-        state.user!,
-        state.normalCollections,
-        normalFiles,
-        state.trashedFiles,
-        state.archivedFileIDs,
-    ),
-    pendingSearchSuggestions: enqueuePendingSearchSuggestionsIfNeeded(
-        state.searchSuggestion,
-        state.pendingSearchSuggestions,
-        state.isInSearchMode,
-    ),
-});
-
-/**
- * Return a new state from the given {@link state} by recomputing all properties
- * that depend on hidden files, using the provided {@link hiddenFiles}.
+ * since they effect many things.
  *
- * Usually, we update state by manually dependency tracking on a fine grained
- * basis, but it results in a duplicate code when the hidden files themselves
- * change, since they effect a few things. This is a convenience function for
- * updating everything that needs to change when the hidden files change.
+ * So this is a convenience function for updating everything that needs to
+ * change when the collections files themselves change.
  */
-const stateForUpdatedHiddenFiles = (
+const stateForUpdatedCollectionFiles = (
     state: GalleryState,
-    hiddenFiles: GalleryState["hiddenFiles"],
-): GalleryState => ({
-    ...state,
-    hiddenFiles,
-    hiddenFileIDs: deriveHiddenFileIDs(hiddenFiles),
-    hiddenCollectionSummaries: deriveHiddenCollectionSummaries(
-        state.user!,
-        state.hiddenCollections,
-        hiddenFiles,
-    ),
-});
+    collectionFiles: GalleryState["collectionFiles"],
+): GalleryState => {
+    const hiddenFileIDs = deriveHiddenFileIDs(
+        collectionFiles,
+        state.hiddenCollectionIDs,
+    );
+    return {
+        ...state,
+        collectionFiles,
+        hiddenFileIDs,
+        archivedFileIDs: deriveArchivedFileIDs(
+            state.archivedCollectionIDs,
+            collectionFiles,
+        ),
+        favoriteFileIDs: deriveFavoriteFileIDs(
+            state.user!,
+            state.collections,
+            collectionFiles,
+            state.unsyncedFavoriteUpdates,
+        ),
+        fileNormalCollectionIDs: deriveFileNormalCollectionIDs(
+            collectionFiles,
+            hiddenFileIDs,
+        ),
+        normalCollectionSummaries: deriveNormalCollectionSummaries(
+            state.collections.filter(
+                (c) => !state.hiddenCollectionIDs.has(c.id),
+            ),
+            state.user!,
+            state.trashItems,
+            collectionFiles,
+            hiddenFileIDs,
+            state.archivedFileIDs,
+        ),
+        hiddenCollectionSummaries: deriveHiddenCollectionSummaries(
+            state.collections.filter((c) =>
+                state.hiddenCollectionIDs.has(c.id),
+            ),
+            state.user!,
+            collectionFiles,
+        ),
+        pendingSearchSuggestions: enqueuePendingSearchSuggestionsIfNeeded(
+            state.searchSuggestion,
+            state.pendingSearchSuggestions,
+            state.isInSearchMode,
+        ),
+    };
+};
 
 /**
  * Return a new state by recomputing the {@link filteredFiles} property
@@ -1778,18 +1789,23 @@ const stateForUpdatedHiddenFiles = (
  *
  * Usually, we update state by manually dependency tracking on a fine grained
  * basis, but it is cumbersome (and mistake prone) to do that for the list of
- * filtered files which depend on a many things. So this is a convenience
- * function for recomputing filtered files whenever any bit of the underlying
- * state that could affect the list of files changes.
+ * filtered files which depend on a many things.
+ *
+ * So this is a convenience function for recomputing filtered files whenever any
+ * bit of the underlying state that could affect the list of files changes.
  */
 const stateByUpdatingFilteredFiles = (state: GalleryState) => {
     if (state.isInSearchMode) {
         const filteredFiles = state.searchResults ?? state.filteredFiles;
         return { ...state, filteredFiles };
-    } else if (state.view?.type == "albums") {
-        const filteredFiles = deriveAlbumsFilteredFiles(
-            state.normalFiles,
-            state.trashedFiles,
+    } else if (
+        state.view?.type == "albums" ||
+        state.view?.type == "hidden-albums"
+    ) {
+        const filteredFiles = deriveAlbumsOrHiddenAlbumsFilteredFiles(
+            state.trashItems,
+            state.collectionFiles,
+            state.defaultHiddenCollectionIDs,
             state.hiddenFileIDs,
             state.archivedCollectionIDs,
             state.archivedFileIDs,
@@ -1798,17 +1814,10 @@ const stateByUpdatingFilteredFiles = (state: GalleryState) => {
             state.view,
         );
         return { ...state, filteredFiles };
-    } else if (state.view?.type == "hidden-albums") {
-        const filteredFiles = deriveHiddenAlbumsFilteredFiles(
-            state.hiddenFiles,
-            state.defaultHiddenCollectionIDs,
-            state.tempDeletedFileIDs,
-            state.view,
-        );
-        return { ...state, filteredFiles };
     } else if (state.view?.type == "people") {
         const filteredFiles = derivePeopleFilteredFiles(
-            state.normalFiles,
+            state.collectionFiles,
+            state.hiddenFileIDs,
             state.view,
         );
         return { ...state, filteredFiles };
@@ -1818,12 +1827,13 @@ const stateByUpdatingFilteredFiles = (state: GalleryState) => {
 };
 
 /**
- * Compute the sorted list of files to show when we're in the "albums" view and
- * the dependencies change.
+ * Compute the sorted list of files to show when we're in the "albums" or
+ * "hidden-albums" view and the dependencies change.
  */
-const deriveAlbumsFilteredFiles = (
-    normalFiles: GalleryState["normalFiles"],
-    trashedFiles: GalleryState["trashedFiles"],
+const deriveAlbumsOrHiddenAlbumsFilteredFiles = (
+    trashItems: GalleryState["trashItems"],
+    collectionFiles: GalleryState["collectionFiles"],
+    defaultHiddenCollectionIDs: GalleryState["defaultHiddenCollectionIDs"],
     hiddenFileIDs: GalleryState["hiddenFileIDs"],
     archivedCollectionIDs: GalleryState["archivedCollectionIDs"],
     archivedFileIDs: GalleryState["archivedFileIDs"],
@@ -1834,20 +1844,36 @@ const deriveAlbumsFilteredFiles = (
     const activeCollectionSummaryID = view.activeCollectionSummaryID;
 
     // Trash is dealt with separately.
+    //
+    // [Note: Files in trash pseudo collection have deleteBy]
+    //
+    // When showing the trash pseudo collection, each file in the files array is
+    // in fact an instance of `EnteTrashFile` - it has an additional (and
+    // optional) `deleteBy` property. The types don't reflect this.
+
     if (activeCollectionSummaryID == PseudoCollectionID.trash) {
         return uniqueFilesByID([
-            ...trashedFiles,
-            ...normalFiles.filter((file) => tempDeletedFileIDs.has(file.id)),
+            ...trashItems.map(({ file, deleteBy }) => ({ ...file, deleteBy })),
+            ...collectionFiles.filter((file) =>
+                tempDeletedFileIDs.has(file.id),
+            ),
         ]);
     }
 
-    const filteredFiles = normalFiles.filter((file) => {
+    const filteredFiles = collectionFiles.filter((file) => {
         if (tempDeletedFileIDs.has(file.id)) return false;
-        if (hiddenFileIDs.has(file.id)) return false;
-        if (tempHiddenFileIDs.has(file.id)) return false;
 
-        // Archived files can only be seen in the archive section, or in their
-        // respective collection.
+        // "Hidden items" shows all individually hidden files.
+        if (
+            activeCollectionSummaryID == PseudoCollectionID.hiddenItems &&
+            defaultHiddenCollectionIDs.has(file.collectionID)
+        ) {
+            return true;
+        }
+
+        // Archived files can only be seen in the archive items, or in their
+        // respective collection. Hidden files should be excluded in from
+        // archive items (but not from their album).
         //
         // Note that a file may both be archived, AND be part of an archived
         // collection. Such files should be shown in both the archive section
@@ -1855,7 +1881,9 @@ const deriveAlbumsFilteredFiles = (
         // needs to be before the following (archived collection) case.
         if (isArchivedFile(file)) {
             return (
-                activeCollectionSummaryID == PseudoCollectionID.archiveItems ||
+                (activeCollectionSummaryID == PseudoCollectionID.archiveItems &&
+                    !hiddenFileIDs.has(file.id) &&
+                    !tempHiddenFileIDs.has(file.id)) ||
                 activeCollectionSummaryID == file.collectionID
             );
         }
@@ -1867,46 +1895,22 @@ const deriveAlbumsFilteredFiles = (
         }
 
         if (activeCollectionSummaryID === PseudoCollectionID.all) {
+            // Hidden files should not be shown in "All".
+            if (hiddenFileIDs.has(file.id)) return false;
+            if (tempHiddenFileIDs.has(file.id)) return false;
+
             // Archived files (whether individually archived, or part of some
             // archived album) should not be shown in "All".
             if (archivedFileIDs.has(file.id)) {
                 return false;
             }
+
             // Show all remaining (non-hidden, non-archived) files in "All".
             return true;
         }
 
         // Show files that belong to the active collection.
-        return activeCollectionSummaryID === file.collectionID;
-    });
-
-    return sortAndUniqueFilteredFiles(filteredFiles, view.activeCollection);
-};
-
-/**
- * Compute the sorted list of files to show when we're in the "hidden-albums"
- * view and the dependencies change.
- */
-const deriveHiddenAlbumsFilteredFiles = (
-    hiddenFiles: GalleryState["hiddenFiles"],
-    defaultHiddenCollectionIDs: GalleryState["defaultHiddenCollectionIDs"],
-    tempDeletedFileIDs: GalleryState["tempDeletedFileIDs"],
-    view: Extract<GalleryView, { type: "albums" | "hidden-albums" }>,
-) => {
-    const activeCollectionSummaryID = view.activeCollectionSummaryID;
-    const filteredFiles = hiddenFiles.filter((file) => {
-        if (tempDeletedFileIDs.has(file.id)) return false;
-
-        // "Hidden items" shows all individually hidden files.
-        if (
-            activeCollectionSummaryID == PseudoCollectionID.hiddenItems &&
-            defaultHiddenCollectionIDs.has(file.collectionID)
-        ) {
-            return true;
-        }
-
-        // Show files that belong to the active collection.
-        return activeCollectionSummaryID === file.collectionID;
+        return activeCollectionSummaryID == file.collectionID;
     });
 
     return sortAndUniqueFilteredFiles(filteredFiles, view.activeCollection);
@@ -1925,8 +1929,7 @@ const sortAndUniqueFilteredFiles = (
     activeCollection: Collection | undefined,
 ) => {
     const uniqueFiles = uniqueFilesByID(files);
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    const sortAsc = activeCollection?.pubMagicMetadata?.data?.asc ?? false;
+    const sortAsc = activeCollection?.pubMagicMetadata?.data.asc ?? false;
     return sortAsc ? sortFiles(uniqueFiles, true) : uniqueFiles;
 };
 
@@ -1935,13 +1938,15 @@ const sortAndUniqueFilteredFiles = (
  * the dependencies change.
  */
 const derivePeopleFilteredFiles = (
-    normalFiles: GalleryState["normalFiles"],
+    collectionFiles: GalleryState["collectionFiles"],
+    hiddenFileIDs: GalleryState["hiddenFileIDs"],
     view: Extract<GalleryView, { type: "people" }>,
 ) => {
     const pfSet = new Set(view.activePerson?.fileIDs ?? []);
     return uniqueFilesByID(
-        normalFiles.filter(({ id }) => {
-            if (!pfSet.has(id)) return false;
+        collectionFiles.filter((f) => {
+            if (!pfSet.has(f.id)) return false;
+            if (hiddenFileIDs.has(f.id)) return false;
             return true;
         }),
     );
@@ -1963,3 +1968,48 @@ const enqueuePendingSearchSuggestionsIfNeeded = (
     searchSuggestion && isInSearchMode
         ? [...pendingSearchSuggestions, searchSuggestion]
         : pendingSearchSuggestions;
+
+/**
+ * Create a map from the user IDs to their emails, with entries for all Ente
+ * users who have shared a collection with the user.
+ */
+const constructUserIDToEmailMap = (
+    user: User,
+    collections: GalleryState["collections"],
+): Map<number, string> => {
+    const userIDToEmail = new Map<number, string>();
+    for (const { owner, sharees } of collections) {
+        if (user.id != owner.id && owner.email) {
+            userIDToEmail.set(owner.id, owner.email);
+        }
+        for (const sharee of sharees) {
+            if (sharee.id != user.id && sharee.email) {
+                userIDToEmail.set(sharee.id, sharee.email);
+            }
+        }
+    }
+    return userIDToEmail;
+};
+
+/**
+ * Create a list of emails that are shown as suggestions to the user when they
+ * are trying to share albums with specific users.
+ */
+const createShareSuggestionEmails = (
+    user: User,
+    familyData: FamilyData | undefined,
+    collections: Collection[],
+): string[] => [
+    ...new Set(
+        collections
+            .map(({ owner, sharees }) =>
+                owner.email && owner.id != user.id
+                    ? [owner.email]
+                    : sharees.map(({ email }) => email),
+            )
+            .flat()
+            .filter((e) => e !== undefined)
+            .concat((familyData?.members ?? []).map((member) => member.email))
+            .filter((email) => email != user.email),
+    ),
+];

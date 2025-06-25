@@ -127,12 +127,16 @@ class RemoteSyncService {
         await syncDeviceCollectionFilesForUpload();
       }
 
-      fileDataService.syncFDStatus().then((_) {
-        if (!flagService.hasGrantedMLConsent) {
-          VideoPreviewService.instance
-              .queueFiles(); // Only in case ML is disabled. if ML is enabled the MLService will queue streaming when ML is done
-        }
-      }).ignore();
+      if (
+          // Only Uploading Previews in fg to prevent heating issues
+          AppLifecycleService.instance.isForeground &&
+              // if ML is enabled the MLService will queue when ML is done
+              !flagService.hasGrantedMLConsent) {
+        fileDataService.syncFDStatus().then((_) {
+          VideoPreviewService.instance.queueFiles();
+        }).ignore();
+      }
+
       final filesToBeUploaded = await _getFilesToBeUploaded();
       final hasUploadedFiles = await _uploadFiles(filesToBeUploaded);
       if (filesToBeUploaded.isNotEmpty) {
@@ -152,8 +156,7 @@ class RemoteSyncService {
         if (hasMoreFilesToBackup && !_shouldThrottleSync()) {
           // Skipping a resync to ensure that files that were ignored in this
           // session are not processed now
-          // ignore: unawaited_futures
-          sync();
+          await sync();
         } else {
           _logger.info("Fire backup completed event");
           Bus.instance.fire(SyncStatusUpdate(SyncStatus.completedBackup));
@@ -175,20 +178,19 @@ class RemoteSyncService {
     } catch (e, s) {
       _existingSync?.complete();
       _existingSync = null;
-      // rethrow whitelisted error so that UI status can be updated correctly.
-      if (e is UnauthorizedError ||
-          e is NoActiveSubscriptionError ||
-          e is WiFiUnavailableError ||
-          e is StorageLimitExceededError ||
-          e is SyncStopRequestedError ||
-          e is NoMediaLocationAccessError) {
-        _logger.warning("Error executing remote sync", e, s);
+      _logger.warning("Error executing remote sync", e, s);
+
+      if (flagService.internalUser ||
+          // rethrow whitelisted error so that UI status can be updated correctly.
+          {
+            UnauthorizedError,
+            NoActiveSubscriptionError,
+            WiFiUnavailableError,
+            StorageLimitExceededError,
+            SyncStopRequestedError,
+            NoMediaLocationAccessError,
+          }.contains(e.runtimeType)) {
         rethrow;
-      } else {
-        _logger.severe("Error executing remote sync ", e, s);
-        if (flagService.internalUser) {
-          rethrow;
-        }
       }
     } finally {
       _isExistingSyncSilent = false;
@@ -602,6 +604,22 @@ class RemoteSyncService {
       await _uploader.fetchUploadURLs(toBeUploaded);
     }
     final List<Future> futures = [];
+
+    for (final file in filesToBeUploaded) {
+      if (_shouldThrottleSync() &&
+          futures.length >= kMaximumPermissibleUploadsInThrottledMode) {
+        _logger.info("Skipping some new files as we are throttling uploads");
+        break;
+      }
+      // prefer existing collection ID for manually uploaded files.
+      // See https://github.com/ente-io/photos-app/pull/187
+      final collectionID = file.collectionID ??
+          (await _collectionsService
+                  .getOrCreateForPath(file.deviceFolder ?? 'Unknown Folder'))
+              .id;
+      _uploadFile(file, collectionID, futures);
+    }
+
     for (final uploadedFileID in updatedFileIDs) {
       if (_shouldThrottleSync() &&
           futures.length >= kMaximumPermissibleUploadsInThrottledMode) {
@@ -631,21 +649,6 @@ class RemoteSyncService {
           futures,
         );
       }
-    }
-
-    for (final file in filesToBeUploaded) {
-      if (_shouldThrottleSync() &&
-          futures.length >= kMaximumPermissibleUploadsInThrottledMode) {
-        _logger.info("Skipping some new files as we are throttling uploads");
-        break;
-      }
-      // prefer existing collection ID for manually uploaded files.
-      // See https://github.com/ente-io/photos-app/pull/187
-      final collectionID = file.collectionID ??
-          (await _collectionsService
-                  .getOrCreateForPath(file.deviceFolder ?? 'Unknown Folder'))
-              .id;
-      _uploadFile(file, collectionID, futures);
     }
 
     try {
@@ -933,25 +936,23 @@ class RemoteSyncService {
   }
 
   bool _shouldThrottleSync() {
-    return Platform.isIOS && !AppLifecycleService.instance.isForeground;
+    return !flagService.enableMobMultiPart ||
+        !localSettings.userEnabledMultiplePart;
   }
 
   // _sortByTime sort by creation time (desc).
   // This is done to upload most recent photo first.
   void _sortByTime(List<EnteFile> file) {
     file.sort((first, second) {
+      // 1. fileType: move videos to end when in bg
+      if (!AppLifecycleService.instance.isForeground &&
+          first.fileType != second.fileType) {
+        if (first.fileType == FileType.video) return 1;
+        if (second.fileType == FileType.video) return -1;
+      }
+
+      // 2. creationTime descending
       return second.creationTime!.compareTo(first.creationTime!);
-    });
-    // move updated files towards the end
-    file.sort((first, second) {
-      if (first.updationTime == second.updationTime) {
-        return 0;
-      }
-      if (first.updationTime == -1) {
-        return 1;
-      } else {
-        return -1;
-      }
     });
   }
 
@@ -991,7 +992,7 @@ class RemoteSyncService {
       final totalCount = sharedFilesIDs.length + collectedFilesIDs.length;
       if (totalCount > 0) {
         final collection = _collectionsService.getCollectionByID(collectionID);
-        _logger.finest(
+        _logger.info(
           'creating notification for ${collection?.displayName} '
           'shared: $sharedFilesIDs, collected: $collectedFilesIDs files',
         );

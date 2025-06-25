@@ -33,7 +33,7 @@ class BillingService {
 
   Future<BillingPlans>? _future;
   BillingService(this._enteDio) {
-    _logger.finest("BillingService constructor");
+    _logger.info("BillingService constructor");
     init();
   }
 

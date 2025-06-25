@@ -13,6 +13,7 @@ import 'package:photos/models/gallery_type.dart';
 import "package:photos/models/ml/face/person.dart";
 import 'package:photos/models/selected_files.dart';
 import "package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart";
+import "package:photos/services/machine_learning/ml_result.dart";
 import "package:photos/ui/notification/toast.dart";
 import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
@@ -76,12 +77,20 @@ class _ClusterPageState extends State<ClusterPage> {
       }
     });
     _peopleChangedEvent = Bus.instance.on<PeopleChangedEvent>().listen((event) {
-      if (event.type == PeopleEventType.removedFilesFromCluster &&
-          (event.source == widget.clusterID.toString())) {
-        for (var updatedFile in event.relevantFiles!) {
-          files.remove(updatedFile);
+      if (event.source == widget.clusterID.toString()) {
+        if (event.type == PeopleEventType.removedFilesFromCluster) {
+          for (var updatedFile in event.relevantFiles!) {
+            files.remove(updatedFile);
+          }
+          setState(() {});
         }
-        setState(() {});
+        if (event.type == PeopleEventType.removedFaceFromCluster) {
+          for (final String removedFaceID in event.relevantFaceIDs!) {
+            final int fileID = getFileIdFromFaceId<int>(removedFaceID);
+            files.removeWhere((file) => file.uploadedFileID == fileID);
+          }
+          setState(() {});
+        }
       }
     });
     kDebugMode

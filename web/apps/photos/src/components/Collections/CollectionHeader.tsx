@@ -48,10 +48,7 @@ import {
     type CollectionSummary,
     type CollectionSummaryType,
 } from "ente-new/photos/services/collection-summary";
-import {
-    clearLocalTrash,
-    emptyTrash,
-} from "ente-new/photos/services/collections";
+import { emptyTrash } from "ente-new/photos/services/trash";
 import { usePhotosAppContext } from "ente-new/photos/types/context";
 import { t } from "i18next";
 import { GalleryContext } from "pages/gallery";
@@ -157,7 +154,7 @@ const CollectionOptions: React.FC<CollectionHeaderProps> = ({
                 } catch (e) {
                     onGenericError(e);
                 } finally {
-                    void syncWithRemote(false, true);
+                    void syncWithRemote(true);
                     hideLoadingBar();
                 }
             };
@@ -170,7 +167,7 @@ const CollectionOptions: React.FC<CollectionHeaderProps> = ({
         async (newName: string) => {
             if (activeCollection.name !== newName) {
                 await renameCollection(activeCollection, newName);
-                void syncWithRemote(false, true);
+                void syncWithRemote(true);
             }
         },
         [activeCollection],
@@ -227,7 +224,6 @@ const CollectionOptions: React.FC<CollectionHeaderProps> = ({
 
     const doEmptyTrash = wrap(async () => {
         await emptyTrash();
-        await clearLocalTrash();
         setActiveCollectionID(PseudoCollectionID.all);
     });
 

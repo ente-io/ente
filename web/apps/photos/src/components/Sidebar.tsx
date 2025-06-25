@@ -86,7 +86,7 @@ import exportService from "ente-new/photos/services/export";
 import { isMLSupported } from "ente-new/photos/services/ml";
 import {
     isDevBuildAndUser,
-    syncSettings,
+    pullSettings,
     updateCFProxyDisabledPreference,
     updateMapEnabled,
 } from "ente-new/photos/services/settings";
@@ -771,7 +771,7 @@ const Preferences: React.FC<NestedSidebarDrawerVisibilityProps> = ({
     const isHLSGenerationEnabled = !!hlsGenStatusSnapshot?.enabled;
 
     useEffect(() => {
-        if (open) void syncSettings();
+        if (open) void pullSettings();
     }, [open]);
 
     const handleRootClose = () => {

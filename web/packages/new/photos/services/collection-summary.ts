@@ -38,8 +38,13 @@ export const PseudoCollectionID = {
     /**
      * Trash.
      *
-     * This pseudo-collection contains files that are in the user's trash -
-     * files that have been deleted, but have not yet been deleted permanently.
+     * This pseudo-collection contains items that are in the user's trash. Each
+     * items corresponds to a file that has been deleted, but has not yet been
+     * deleted permanently.
+     *
+     * As a special case, when the trash pseudo collection is being shown, then
+     * the corresponding files array will have {@link EnteTrashFile} items
+     * instead of normal {@link EnteFile} ones.
      */
     trash: -2,
     /**
