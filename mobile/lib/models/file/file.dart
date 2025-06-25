@@ -57,15 +57,6 @@ class EnteFile {
     return null;
   }
 
-  String? mMdEncodedJson;
-  int mMdVersion = 0;
-  MagicMetadata? _mmd;
-
-  MagicMetadata get magicMetadata =>
-      _mmd ?? MagicMetadata.fromEncodedJson(mMdEncodedJson ?? '{}');
-
-  set magicMetadata(val) => _mmd = val;
-
   // public magic metadata is shared if during file/album sharing
   String? pubMmdEncodedJson;
   int pubMmdVersion = 0;
@@ -150,7 +141,6 @@ class EnteFile {
 
     file.pubMagicMetadata =
         PubMagicMetadata.fromMap(rAsset.publicMetadata?.data);
-    file.magicMetadata = MagicMetadata.fromMap(rAsset.privateMetadata?.data);
     return file;
   }
 
@@ -390,7 +380,6 @@ class EnteFile {
     int? fileSize,
     String? mMdEncodedJson,
     int? mMdVersion,
-    MagicMetadata? magicMetadata,
     String? pubMmdEncodedJson,
     int? pubMmdVersion,
     PubMagicMetadata? pubMagicMetadata,
@@ -422,9 +411,6 @@ class EnteFile {
       ..fileDecryptionHeader = fileDecryptionHeader ?? this.fileDecryptionHeader
       ..thumbnailDecryptionHeader =
           thumbnailDecryptionHeader ?? this.thumbnailDecryptionHeader
-      ..mMdEncodedJson = mMdEncodedJson ?? this.mMdEncodedJson
-      ..mMdVersion = mMdVersion ?? this.mMdVersion
-      ..magicMetadata = magicMetadata ?? this.magicMetadata
       ..pubMmdEncodedJson = pubMmdEncodedJson ?? this.pubMmdEncodedJson
       ..pubMmdVersion = pubMmdVersion ?? this.pubMmdVersion
       ..pubMagicMetadata = pubMagicMetadata ?? this.pubMagicMetadata;

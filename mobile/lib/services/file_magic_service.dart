@@ -17,7 +17,6 @@ import "package:photos/models/api/metadata.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/file/remote/asset.dart";
 import "package:photos/models/metadata/common_keys.dart";
-import "package:photos/models/metadata/file_magic.dart";
 import "package:photos/service_locator.dart";
 import 'package:photos/services/sync/remote_sync_service.dart';
 import "package:photos/utils/file_key.dart";
@@ -164,6 +163,7 @@ class FileMagicService {
           // as required.
           final Map<String, dynamic> jsonToUpdate =
               rAsset.privateMetadata?.data ?? {};
+          final currentVersion = rAsset.privateMetadata?.version ?? 0;
           newMetadataUpdate.forEach((key, value) {
             jsonToUpdate[key] = value;
           });
@@ -177,7 +177,7 @@ class FileMagicService {
             UpdateMagicMetadataRequest(
               id: file.uploadedFileID!,
               magicMetadata: MetadataRequest(
-                version: file.mMdVersion,
+                version: currentVersion,
                 count: jsonToUpdate.length,
                 data: CryptoUtil.bin2base64(encryptedMMd.encryptedData!),
                 header: CryptoUtil.bin2base64(encryptedMMd.header!),
@@ -188,7 +188,7 @@ class FileMagicService {
           updatedRAssets[rAsset.id] = rAsset.copyWith(
             privateMetadata: Metadata(
               data: jsonToUpdate,
-              version: file.mMdVersion + 1,
+              version: currentVersion + 1,
             ),
           );
         }

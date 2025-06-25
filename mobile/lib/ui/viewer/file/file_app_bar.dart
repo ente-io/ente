@@ -213,8 +213,7 @@ class FileAppBarState extends State<FileAppBar> {
     }
     // options for files owned by the user
     if (isOwnedByUser && !isFileHidden && isFileUploaded) {
-      final bool isArchived =
-          widget.file.magicMetadata.visibility == archiveVisibility;
+      final bool isArchived = widget.file.rAsset!.isArchived;
       items.add(
         PopupMenuItem(
           value: 2,
@@ -429,8 +428,7 @@ class FileAppBarState extends State<FileAppBar> {
   }
 
   Future<void> _toggleFileArchiveStatus(EnteFile file) async {
-    final bool isArchived =
-        widget.file.magicMetadata.visibility == archiveVisibility;
+    final bool isArchived = widget.file.rAsset!.isArchived;
     await changeVisibility(
       context,
       [widget.file],

@@ -4,6 +4,7 @@ import "dart:typed_data";
 import "package:photos/models/api/diff/diff.dart";
 import "package:photos/models/file/file_type.dart";
 import "package:photos/models/location/location.dart";
+import "package:photos/models/metadata/common_keys.dart";
 import "package:photos/models/metadata/file_magic.dart";
 
 class RemoteAsset {
@@ -59,6 +60,10 @@ class RemoteAsset {
       : Platform.isIOS
           ? localID
           : '$localID-$deviceFolder-$title';
+
+  bool get isArchived {
+    return metadata.data[magicKeyVisibility] == archiveVisibility;
+  }
 
   String? get deviceFolder => metadata.data['deviceFolder'];
 

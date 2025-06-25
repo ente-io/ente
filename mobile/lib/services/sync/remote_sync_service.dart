@@ -568,30 +568,7 @@ class RemoteSyncService {
     }
   }
 
-  bool _shouldClearCache(EnteFile remoteFile, EnteFile existingFile) {
-    if (remoteFile.hash != null && existingFile.hash != null) {
-      return remoteFile.hash != existingFile.hash;
-    }
-    return remoteFile.updationTime != (existingFile.updationTime ?? 0);
-  }
-
-  bool _shouldReloadHomeGallery(EnteFile remoteFile, EnteFile existingFile) {
-    int remoteCreationTime = remoteFile.creationTime!;
-    if (remoteFile.pubMmdVersion > 0 &&
-        (remoteFile.pubMagicMetadata?.editedTime ?? 0) != 0) {
-      remoteCreationTime = remoteFile.pubMagicMetadata!.editedTime!;
-    }
-    if (remoteCreationTime != existingFile.creationTime) {
-      return true;
-    }
-    if (existingFile.mMdVersion > 0 &&
-        remoteFile.mMdVersion != existingFile.mMdVersion &&
-        remoteFile.magicMetadata.visibility !=
-            existingFile.magicMetadata.visibility) {
-      return false;
-    }
-    return false;
-  }
+ 
 
   bool _shouldThrottleSync() {
     return !flagService.enableMobMultiPart ||

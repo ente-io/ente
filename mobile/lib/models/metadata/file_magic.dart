@@ -1,7 +1,6 @@
 import "dart:convert";
 
 import "package:flutter/cupertino.dart";
-import 'package:photos/models/metadata/common_keys.dart';
 
 const editTimeKey = 'editedTime';
 const editNameKey = 'editedName';
@@ -17,27 +16,6 @@ const motionVideoIndexKey = "mvi";
 const noThumbKey = "noThumb";
 const dateTimeKey = 'dateTime';
 const offsetTimeKey = 'offsetTime';
-
-class MagicMetadata {
-  // 0 -> visible
-  // 1 -> archived
-  // 2 -> hidden etc?
-  int visibility;
-
-  MagicMetadata({required this.visibility});
-
-  factory MagicMetadata.fromEncodedJson(String encodedJson) =>
-      MagicMetadata.fromJson(jsonDecode(encodedJson));
-
-  factory MagicMetadata.fromJson(dynamic json) => MagicMetadata.fromMap(json);
-
-  static fromMap(Map<String, dynamic>? map) {
-    if (map == null) return null;
-    return MagicMetadata(
-      visibility: map[magicKeyVisibility] ?? visibleVisibility,
-    );
-  }
-}
 
 class PubMagicMetadata {
   int? editedTime;

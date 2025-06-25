@@ -1197,9 +1197,10 @@ class FilesDB with SqlDbBase {
       file.exif,
       file.hash,
       file.metadataVersion,
-      file.mMdEncodedJson ?? '{}',
-      file.mMdVersion,
-      file.magicMetadata.visibility,
+      // file.mMdEncodedJson ?? '{}',
+      {}, // mMdEncodedJson is not used in this context
+      0, // version
+      0, // default visibility
       file.pubMmdEncodedJson ?? '{}',
       file.pubMmdVersion,
       file.fileSize,
@@ -1262,8 +1263,8 @@ class FilesDB with SqlDbBase {
     file.metadataVersion = row[columnMetadataVersion] ?? 0;
     // file.fileSize = row[columnFileSize];
 
-    file.mMdVersion = row[columnMMdVersion] ?? 0;
-    file.mMdEncodedJson = row[columnMMdEncodedJson] ?? '{}';
+    // file.mMdVersion = row[columnMMdVersion] ?? 0;
+    // file.mMdEncodedJson = row[columnMMdEncodedJson] ?? '{}';
 
     file.pubMmdVersion = row[columnPubMMdVersion] ?? 0;
     file.pubMmdEncodedJson = row[columnPubMMdEncodedJson] ?? '{}';
