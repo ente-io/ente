@@ -2,6 +2,7 @@ import "package:collection/collection.dart";
 import "package:flutter/foundation.dart";
 import "package:photos/db/local/db.dart";
 import "package:photos/db/local/schema.dart";
+import "package:photos/models/local/asset_upload_queue.dart";
 
 extension UploadQueueTable on LocalDB {
   Future<Set<String>> getQueueAssetIDs(int ownerID) async {
@@ -10,7 +11,7 @@ extension UploadQueueTable on LocalDB {
       'SELECT id FROM asset_upload_queue WHERE   owner_id = ?',
       [ownerID],
     );
-    final assetIDs = result.map((row) => row['asset_id'] as String).toSet();
+    final assetIDs = result.map((row) => row['id'] as String).toSet();
     debugPrint(
       '$runtimeType getQueueAssetIDs complete in ${stopwatch.elapsed.inMilliseconds}ms',
     );
@@ -28,6 +29,32 @@ extension UploadQueueTable on LocalDB {
       'DELETE FROM asset_upload_queue WHERE owner_id = $ownerID AND dest_collection_id IN (${collectionIDs.join(',')}) AND path_id IS NOT NULL',
       [],
     );
+  }
+
+  Future<List<AssetUploadQueue>> getQueueEntries(
+    int ownerID, {
+    int? destCollection,
+  }) async {
+    final stopwatch = Stopwatch()..start();
+    final result = await sqliteDB.getAll(
+      'SELECT asset_upload_queue.*, type, created_at FROM * join assets on assets.id = asset_upload_queue.id WHERE owner_id = ? ${destCollection != null ? 'AND dest_collection_id = ?' : ''} ORDER BY created_at DESC',
+      destCollection != null ? [ownerID, destCollection] : [ownerID],
+    );
+    final entries = result
+        .map(
+          (row) => AssetUploadQueue(
+            id: row['id'] as String,
+            pathId: row['path_id'] as String?,
+            destCollectionId: row['dest_collection_id'] as int,
+            ownerId: row['owner_id'] as int,
+            manual: (row['manual'] as int) == 1,
+          ),
+        )
+        .toList();
+    debugPrint(
+      '$runtimeType getQueueEntries complete in ${stopwatch.elapsed.inMilliseconds}ms for ${entries.length} entries',
+    );
+    return entries;
   }
 
   Future<void> insertOrUpdateQueue(

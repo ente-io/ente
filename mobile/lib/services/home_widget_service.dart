@@ -162,7 +162,7 @@ class HomeWidgetService {
       final Map<String, dynamic> metadata = {
         "title": title,
         "subText": subText,
-        "generatedId": file.generatedID,
+        "generatedId": file.generatedID ?? 0,
         if (mainKey != null) "mainKey": mainKey,
       };
 
