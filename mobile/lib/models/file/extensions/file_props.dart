@@ -46,7 +46,7 @@ extension FilePropsExtn on EnteFile {
   // Return true if the file was uploaded via collect photos workflow
   bool get isCollect => uploaderName != null;
 
-  String? get uploaderName => pubMagicMetadata?.uploaderName;
+  String? get uploaderName => rAsset?.uploaderName;
 
   bool get skipIndex => !isUploaded || fileType == FileType.other;
 
