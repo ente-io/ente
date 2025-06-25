@@ -128,10 +128,12 @@ String parseErrorForUI(
   if (error is DioException) {
     final DioException dioError = error;
     if (dioError.type == DioExceptionType.badResponse) {
-      if (dioError.response?.data["code"] != null) {
+      if (dioError.response?.data is Map &&
+          dioError.response?.data["code"] != null) {
         errorInfo = "Reason: " + dioError.response!.data["code"];
       } else {
-        errorInfo = "Reason: " + dioError.response!.data.toString();
+        errorInfo = "Reason: Status: ${dioError.response?.statusCode ?? -1}" +
+            dioError.response!.data.toString();
       }
     } else if (dioError.type == DioExceptionType.badCertificate) {
       errorInfo = "Reason: " + dioError.error.toString();
@@ -146,7 +148,7 @@ String parseErrorForUI(
     }
   }
   if (errorInfo.isNotEmpty) {
-    return "$genericError\n\n$errorInfo";
+    return "$genericError\n\n(i) $errorInfo";
   }
   return genericError;
 }
