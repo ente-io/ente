@@ -650,7 +650,7 @@ class RemoteSyncService {
       final totalCount = sharedFilesIDs.length + collectedFilesIDs.length;
       if (totalCount > 0) {
         final collection = _collectionsService.getCollectionByID(collectionID);
-        _logger.finest(
+        _logger.info(
           'creating notification for ${collection?.displayName} '
           'shared: $sharedFilesIDs, collected: $collectedFilesIDs files',
         );

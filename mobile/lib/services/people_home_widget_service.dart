@@ -23,6 +23,7 @@ import 'package:synchronized/synchronized.dart';
 class PeopleHomeWidgetService {
   // Constants
   static const String SELECTED_PEOPLE_KEY = "selectedPeopleHW";
+  static const String PEOPLE_LAST_HASH_KEY = "peopleLastHash";
   static const String ANDROID_CLASS_NAME = "EntePeopleWidgetProvider";
   static const String IOS_CLASS_NAME = "EntePeopleWidget";
   static const String PEOPLE_STATUS_KEY = "peopleStatusKey.widget";
@@ -39,6 +40,7 @@ class PeopleHomeWidgetService {
   final Logger _logger = Logger((PeopleHomeWidgetService).toString());
   late final SharedPreferences _prefs;
   final _peopleForceRefreshLock = Lock();
+  final _lock2 = Lock();
   bool _hasSyncedPeople = false;
 
   // Initialization
@@ -67,6 +69,14 @@ class PeopleHomeWidgetService {
 
     _logger.info("People selection changed, updating widget");
     await updatePeopleChanged(true);
+  }
+
+  String? getPeopleLastHash() {
+    return _prefs.getString(PEOPLE_LAST_HASH_KEY);
+  }
+
+  Future<void> setPeopleLastHash(String hash) async {
+    await _prefs.setString(PEOPLE_LAST_HASH_KEY, hash);
   }
 
   Future<int> countHomeWidgets() async {
@@ -112,6 +122,7 @@ class PeopleHomeWidgetService {
     await _setTotalPeople(null);
     _hasSyncedPeople = false;
     await updatePeopleStatus(WidgetStatus.syncedEmpty);
+    await setPeopleLastHash("");
     await _refreshWidget(message: "PeopleHomeWidget cleared & updated");
   }
 
@@ -147,20 +158,22 @@ class PeopleHomeWidgetService {
     await HomeWidgetService.instance.initHomeWidget();
   }
 
-  Future<void> peopleChanged() async {
-    await updatePeopleChanged(true);
+  Future<void> checkPeopleChanged() async {
+    final havePeopleChanged = await _lock2.synchronized(() async {
+      final peopleIds = await _getEffectiveSelectedPeopleIds();
+      final currentHash = await _calculateHash(peopleIds);
+      final lastHash = getPeopleLastHash();
+      if (peopleIds.isEmpty || currentHash == lastHash) {
+        return false;
+      }
+      return true;
+    });
 
-    final cachedMemories = await _getPeople();
-    final currentTotal = cachedMemories.length;
-    final existingTotal = await _getTotalPeople() ?? 0;
-
-    if (existingTotal == currentTotal && existingTotal == 0) {
-      await updatePeopleChanged(false);
-      _logger.info("People empty, no update needed");
+    await updatePeopleChanged(havePeopleChanged);
+    if (!havePeopleChanged) {
+      _logger.info("No changes detected in people, skipping update");
       return;
     }
-
-    _logger.info("People changed, updating widget");
     await initHomeWidget(true);
   }
 
@@ -217,6 +230,10 @@ class PeopleHomeWidgetService {
   Future<void> _forcePeopleUpdate() async {
     await _loadAndRenderPeople();
     await updatePeopleChanged(false);
+  }
+
+  Future<String> _calculateHash(List<String> peopleIds) async {
+    return await entityService.getHashForIds(peopleIds);
   }
 
   Future<bool> _hasAnyBlockers() async {
@@ -363,6 +380,7 @@ class PeopleHomeWidgetService {
   }
 
   Future<void> _loadAndRenderPeople() async {
+    final peopleIds = await _getEffectiveSelectedPeopleIds();
     final peopleWithFiles = await _getPeople();
 
     if (peopleWithFiles.isEmpty) {
@@ -447,6 +465,9 @@ class PeopleHomeWidgetService {
     if (isWidgetPresent) {
       await updatePeopleStatus(WidgetStatus.syncedAll);
     }
+
+    final hash = await _calculateHash(peopleIds);
+    await setPeopleLastHash(hash);
 
     await _refreshWidget(
       message: "Switched to next people set, total: $renderedCount",

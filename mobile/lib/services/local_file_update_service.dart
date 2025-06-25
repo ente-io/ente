@@ -201,7 +201,7 @@ class LocalFileUpdateService {
             file.modificationTime!,
             fileType,
           );
-          _logger.fine('fileType changed for ${file.tag} to ${e.reason} for ');
+          _logger.info('fileType changed for ${file.tag} to ${e.reason} for ');
         } else {
           _logger.severe("failed to check hash: invalid file ${file.tag}", e);
         }

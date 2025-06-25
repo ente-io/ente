@@ -218,7 +218,7 @@ Future<_LivePhoto?> _downloadLivePhoto(
     if (decryptedFile == null) {
       return null;
     }
-    _logger.fine("Decoded zipped live photo from " + decryptedFile.path);
+    _logger.info("Decoded zipped live photo from " + decryptedFile.path);
     File? imageFileCache, videoFileCache;
     final List<int> bytes = await decryptedFile.readAsBytes();
     final Archive archive = ZipDecoder().decodeBytes(bytes);

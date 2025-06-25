@@ -110,6 +110,7 @@ class _FileFaceWidgetState extends State<FileFaceWidget> {
         widget.file,
         [faceToUse!],
         useFullFile: widget.useFullFile,
+        useTempCache: true,
       );
       if (cropMap != null && cropMap[faceToUse.faceID] != null) {
         return cropMap[faceToUse.faceID];

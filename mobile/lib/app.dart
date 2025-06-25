@@ -75,7 +75,7 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
       (event) async {
         _changeCallbackDebouncer.run(
           () async =>
-              unawaited(PeopleHomeWidgetService.instance.peopleChanged()),
+              unawaited(PeopleHomeWidgetService.instance.checkPeopleChanged()),
         );
       },
     );

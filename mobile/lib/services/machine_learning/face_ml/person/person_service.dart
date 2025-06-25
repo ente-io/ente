@@ -75,7 +75,10 @@ class PersonService {
     final entities = await entityService.getEntities(EntityType.cgroup);
     return entities
         .map(
-          (e) => PersonEntity(e.id, PersonData.fromJson(json.decode(e.data))),
+          (e) => PersonEntity(
+            e.id,
+            PersonData.fromJson(json.decode(e.data)),
+          ),
         )
         .toList();
   }
@@ -85,7 +88,10 @@ class PersonService {
       if (e == null) {
         return null;
       }
-      return PersonEntity(e.id, PersonData.fromJson(json.decode(e.data)));
+      return PersonEntity(
+        e.id,
+        PersonData.fromJson(json.decode(e.data)),
+      );
     });
   }
 
@@ -93,8 +99,10 @@ class PersonService {
     final entities = await entityService.getEntities(EntityType.cgroup);
     final Map<String, PersonEntity> map = {};
     for (var e in entities) {
-      final person =
-          PersonEntity(e.id, PersonData.fromJson(json.decode(e.data)));
+      final person = PersonEntity(
+        e.id,
+        PersonData.fromJson(json.decode(e.data)),
+      );
       map[person.remoteID] = person;
     }
     return map;
@@ -245,7 +253,7 @@ class PersonService {
     personData.logStats();
   }
 
-  Future<void> removeFilesFromPerson({
+  Future<void> removeFacesFromPerson({
     required PersonEntity person,
     required Set<String> faceIDs,
   }) async {
@@ -380,8 +388,15 @@ class PersonService {
       for (var e in entities) {
         final personData = PersonData.fromJson(json.decode(e.data));
         if (personData.rejectedFaceIDs.isNotEmpty) {
+          final personClustersToFaceIDs = dbPeopleClusterInfo[e.id];
+          if (personClustersToFaceIDs == null) {
+            logger.warning(
+              "Person ${e.id} ${personData.name} has rejected faces but no clusters found in local DB",
+            );
+            continue;
+          }
           final personFaceIDs =
-              dbPeopleClusterInfo[e.id]!.values.expand((e) => e).toSet();
+              personClustersToFaceIDs.values.expand((e) => e).toSet();
           final rejectedFaceIDsSet = personData.rejectedFaceIDs.toSet();
           final assignedAndRejectedFaceIDs =
               rejectedFaceIDsSet.intersection(personFaceIDs);
