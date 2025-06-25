@@ -198,15 +198,10 @@ const Page: React.FC = () => {
      * A queue to serialize calls to {@link remoteFilesPull}.
      */
     const remoteFilesPullQueue = useRef(new PromiseQueue<void>());
-    /**`
-     * true` if a remote pull is currently in progress.
-     */
-    const isPullInProgress = useRef(false);
     /**
-     * Set to the {@link RemotePullOpts} of the last pull that was enqueued
-     * while one was already in progress.
+     * A queue to serialize calls to {@link remotePull}.
      */
-    const pendingPullOpts = useRef<RemotePullOpts | undefined>(undefined);
+    const remotePullQueue = useRef(new PromiseQueue<void>());
 
     const [uploadTypeSelectorView, setUploadTypeSelectorView] = useState(false);
     const [uploadTypeSelectorIntent, setUploadTypeSelectorIntent] =
@@ -552,49 +547,35 @@ const Page: React.FC = () => {
     );
 
     const remotePull = useCallback(
-        async (opts?: RemotePullOpts) => {
-            const { silent } = opts ?? {};
+        async (opts?: RemotePullOpts) =>
+            remotePullQueue.current.add(async () => {
+                const { silent } = opts ?? {};
 
-            // Pre-flight checks.
-            if (!navigator.onLine) return;
-            if (await isSessionInvalid()) {
-                showSessionExpiredDialog();
-                return;
-            }
-            if (!(await masterKeyFromSession())) {
-                clearSessionStorage();
-                router.push("/credentials");
-                return;
-            }
+                // Pre-flight checks.
+                if (!navigator.onLine) return;
+                if (await isSessionInvalid()) {
+                    showSessionExpiredDialog();
+                    return;
+                }
+                if (!(await masterKeyFromSession())) {
+                    clearSessionStorage();
+                    router.push("/credentials");
+                    return;
+                }
 
-            // Enqueue if needed.
-            if (isPullInProgress.current) {
-                pendingPullOpts.current = { silent };
-                return;
-            }
-
-            // The pull itself.
-            isPullInProgress.current = true;
-            try {
-                if (!silent) showLoadingBar();
-                await pullFilesPre();
-                await remoteFilesPull();
-                await pullFilesPost();
-            } catch (e) {
-                log.error("Remote pull failed", e);
-            } finally {
-                dispatch({ type: "clearUnsyncedState" });
-                if (!silent) hideLoadingBar();
-            }
-            isPullInProgress.current = false;
-
-            // Enqueue another if needed.
-            const nextOpts = pendingPullOpts.current;
-            if (nextOpts) {
-                pendingPullOpts.current = undefined;
-                setTimeout(() => remotePull(nextOpts), 0);
-            }
-        },
+                // The pull itself.
+                try {
+                    if (!silent) showLoadingBar();
+                    await pullFilesPre();
+                    await remoteFilesPull();
+                    await pullFilesPost();
+                } catch (e) {
+                    log.error("Remote pull failed", e);
+                } finally {
+                    dispatch({ type: "clearUnsyncedState" });
+                    if (!silent) hideLoadingBar();
+                }
+            }),
         [
             showLoadingBar,
             hideLoadingBar,
