@@ -2,7 +2,6 @@ import "dart:async";
 import "dart:io";
 
 import "package:computer/computer.dart";
-import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
@@ -908,23 +907,6 @@ class FilesDB with SqlDbBase {
       ' = $visibility AND $columnOwnerID = $ownerID AND $columnCollectionID NOT IN (${hiddenCollections.join(', ')})',
     );
     return count.first['COUNT'] as int;
-  }
-
-  // todo:rewrite (upload related)
-  Future<void> markForReUploadIfLocationMissing(List<String> localIDs) async {
-    if (localIDs.isEmpty) {
-      return;
-    }
-    final inParam = localIDs.map((id) => "'$id'").join(',');
-    final db = await instance.sqliteAsyncDB;
-    await db.execute(
-      '''
-      UPDATE $filesTable
-      SET $columnUpdationTime = NULL
-      WHERE $columnLocalID IN ($inParam)
-      AND ($columnLatitude IS NULL OR $columnLongitude IS NULL OR $columnLongitude = 0.0 or $columnLongitude = 0.0);
-    ''',
-    );
   }
 
   Future<Map<int, EnteFile>> getFileIDToFileFromIDs(List<int> ids) async {
