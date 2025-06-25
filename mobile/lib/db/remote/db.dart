@@ -44,6 +44,17 @@ class RemoteDB with SqlDbBase {
     return result;
   }
 
+  Future<void> clearAllTables() async {
+    final stopwatch = Stopwatch()..start();
+    await _sqliteDB.executeBatch(
+      'DELETE FROM collections; DELETE FROM collection_files; DELETE FROM files; DELETE FROM entities; DELETE FROM trash; delete FROM upload_mapping;',
+      [],
+    );
+    debugPrint(
+      '$runtimeType clearAllTables complete in ${stopwatch.elapsed.inMilliseconds}ms',
+    );
+  }
+
   Future<Map<int, int>> getCollectionIDToUpdationTime() async {
     final result = <int, int>{};
     final cursor = await _sqliteDB.getAll(
@@ -82,7 +93,7 @@ class RemoteDB with SqlDbBase {
   }
 
   Future<void> insertFilesDiff(
-    List<DiffFileItem> items,
+    List<DiffItem> items,
   ) async {
     if (items.isEmpty) return;
     final stopwatch = Stopwatch()..start();
@@ -110,7 +121,7 @@ class RemoteDB with SqlDbBase {
   }
 
   Future<void> deleteFilesDiff(
-    List<DiffFileItem> items,
+    List<DiffItem> items,
   ) async {
     final int collectionID = items.first.collectionID;
     final stopwatch = Stopwatch()..start();

@@ -192,10 +192,9 @@ class Configuration {
     // await CollectionsDB.instance.clearTable();
     await MemoriesDB.instance.clearTable();
     await MLDataDB.instance.clearTable();
-
+    await remoteDB.clearAllTables();
     await UploadLocksDB.instance.clearTable();
     await IgnoredFilesService.instance.reset();
-    await remoteDB.clearTrash();
     unawaited(HomeWidgetService.instance.clearWidget(autoLogout));
     if (!autoLogout) {
       // Following services won't be initialized if it's the case of autoLogout
