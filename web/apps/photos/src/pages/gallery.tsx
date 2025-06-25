@@ -104,6 +104,7 @@ import {
     setIsFirstLogin,
     setJustSignedUp,
 } from "ente-shared/storage/localStorage/helpers";
+import { PromiseQueue } from "ente-utils/promise";
 import { t } from "i18next";
 import { useRouter, type NextRouter } from "next/router";
 import { createContext, useCallback, useEffect, useRef, useState } from "react";
@@ -191,6 +192,10 @@ const Page: React.FC = () => {
     );
     const [isFileViewerOpen, setIsFileViewerOpen] = useState(false);
 
+    /**
+     * A queue to serialize calls to {@link remoteFilesPull}.
+     */
+    const remoteFilesPullQueue = useRef(new PromiseQueue<void>());
     /**`
      * true` if a remote pull is currently in progress.
      */
@@ -509,33 +514,40 @@ const Page: React.FC = () => {
     /**
      * Pull latest collections, collection files and trash items from remote.
      *
+     * Parallel calls are serialized so that there is only one invocation of the
+     * underlying {@link pullFiles} at a time.
+     *
      * [Note: Full remote pull vs files pull]
      *
-     * If we know that our operation will not have other transitive effects
-     * beyond collections, collection files and trash, this is a better option
-     * as compared to a full remote pull for interactive operations because:
-     *
-     * 1. This involves a lesser number of API requests, so it reduces the time
-     *    the user has to wait for their interactive request to complete.
-     *
-     * 2. The current implementation {@link remotePull} tries to run only only
-     *    one instance of it is in progress at a time, while each invocation of
-     *    {@link remoteFilesPull} is independent.
+     * For interactive operations, if we know that our operation will not have
+     * other transitive effects beyond collections, collection files and trash,
+     * this is a better option as compared to a full remote pull since it
+     * involves a lesser number of API requests (and thus, time).
      */
-    const remoteFilesPull = useCallback(async () => {
-        await pullFiles({
-            onSetCollections: (collections) =>
-                dispatch({ type: "setCollections", collections }),
-            onSetCollectionFiles: (collectionFiles) =>
-                dispatch({ type: "setCollectionFiles", collectionFiles }),
-            onAugmentCollectionFiles: (collectionFiles) =>
-                dispatch({ type: "augmentCollectionFiles", collectionFiles }),
-            onSetTrashedItems: (trashItems) =>
-                dispatch({ type: "setTrashItems", trashItems }),
-            onDidUpdateCollectionFiles: () =>
-                exportService.onLocalFilesUpdated(),
-        });
-    }, []);
+    const remoteFilesPull = useCallback(
+        () =>
+            remoteFilesPullQueue.current.add(() =>
+                pullFiles({
+                    onSetCollections: (collections) =>
+                        dispatch({ type: "setCollections", collections }),
+                    onSetCollectionFiles: (collectionFiles) =>
+                        dispatch({
+                            type: "setCollectionFiles",
+                            collectionFiles,
+                        }),
+                    onAugmentCollectionFiles: (collectionFiles) =>
+                        dispatch({
+                            type: "augmentCollectionFiles",
+                            collectionFiles,
+                        }),
+                    onSetTrashedItems: (trashItems) =>
+                        dispatch({ type: "setTrashItems", trashItems }),
+                    onDidUpdateCollectionFiles: () =>
+                        exportService.onLocalFilesUpdated(),
+                }),
+            ),
+        [],
+    );
 
     const remotePull = useCallback(
         async (opts?: RemotePullOpts) => {
