@@ -25,7 +25,6 @@ import "package:photos/services/machine_learning/face_ml/person/person_service.d
 import "package:photos/services/notification_service.dart";
 import "package:photos/services/search_service.dart";
 import "package:photos/ui/home/memories/all_memories_page.dart";
-import "package:photos/ui/home/memories/full_screen_memory.dart";
 import "package:photos/ui/viewer/people/people_page.dart";
 import "package:photos/utils/navigation_util.dart";
 import "package:shared_preferences/shared_preferences.dart";
@@ -528,12 +527,25 @@ class MemoriesCacheService {
       );
       return;
     }
+
+    final List<(List<Memory>, String)> collatedMemories = [];
+    final List<SmartMemory> seenMemories = [];
+    for (final memory in allMemories) {
+      if (memory.memories.every((element) => element.isSeen())) {
+        seenMemories.add(memory);
+      } else {
+        collatedMemories.add((memory.memories, memory.title));
+      }
+    }
+    collatedMemories.addAll(seenMemories.map((e) => (e.memories, e.title)));
+
     await routeToPage(
       context,
-      FullScreenMemoryDataUpdater(
-        initialIndex: 0,
-        memories: allMemories[memoryIdx].memories,
-        child: FullScreenMemory(allMemories[memoryIdx].title, 0),
+      AllMemoriesPage(
+        initialPageIndex: memoryIdx,
+        allMemories: collatedMemories.map((e) => e.$1).toList(),
+        allTitles: collatedMemories.map((e) => e.$2).toList(),
+        startAtFirstMemory: true,
       ),
       forceCustomPageRoute: true,
     );
@@ -580,12 +592,22 @@ class MemoriesCacheService {
         forceCustomPageRoute: true,
       );
     }
+
+    final List<List<Memory>> allPersonMemories = [];
+    final List<String> allTitles = [];
+    for (final mem in personMemories) {
+      allPersonMemories.add(mem.memories);
+      allTitles.add(mem.title);
+    }
+    final int initialIndex = allPersonMemories.indexOf(personMemory!.memories);
+
     await routeToPage(
       context,
-      FullScreenMemoryDataUpdater(
-        initialIndex: 0,
-        memories: personMemory!.memories,
-        child: FullScreenMemory(personMemory.title, 0),
+      AllMemoriesPage(
+        allMemories: allPersonMemories,
+        allTitles: allTitles,
+        initialPageIndex: initialIndex,
+        startAtFirstMemory: true,
       ),
       forceCustomPageRoute: true,
     );
