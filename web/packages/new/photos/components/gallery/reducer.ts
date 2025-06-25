@@ -118,13 +118,13 @@ export interface GalleryState {
     /*--<  Primary state: Files, collections, people  >--*/
 
     /**
-     * The user's normal (non-hidden) collections.
+     * The user's collections.
      */
-    normalCollections: Collection[];
+    collections: Collection[];
     /**
-     * The user's hidden collections.
+     * The collection IDs of the user's hidden collections.
      */
-    hiddenCollections: Collection[];
+    hiddenCollectionsIDs: Set<number>;
     /**
      * The user's files, without any unsynced modifications applied to them.
      *
@@ -179,13 +179,6 @@ export interface GalleryState {
      * Collection IDs of default hidden collections.
      */
     defaultHiddenCollectionIDs: Set<number>;
-    /**
-     * File IDs of the files that the user has hidden.
-     *
-     * Unlike archived files which can be in a mixture of normal and archived
-     * albums, hidden files can only be in hidden albums.
-     */
-    hiddenFileIDs: Set<number>;
     /**
      * File IDs of the files that the user has archived.
      *
@@ -410,10 +403,15 @@ export type GalleryAction =
           user: User;
           familyData: FamilyData;
           collections: Collection[];
+          hiddenCollectionsIDs: Set<number>;
           collectionFiles: EnteFile[];
           trashItems: TrashItem[];
       }
-    | { type: "setCollections"; collections: Collection[] }
+    | {
+          type: "setCollections";
+          collections: Collection[];
+          hiddenCollectionIDs: Set<number>;
+      }
     | { type: "setCollectionFiles"; collectionFiles: EnteFile[] }
     | { type: "augmentCollectionFiles"; collectionFiles: EnteFile[] }
     | { type: "uploadFile"; file: EnteFile }
@@ -448,15 +446,14 @@ export type GalleryAction =
 const initialGalleryState: GalleryState = {
     user: undefined,
     familyData: undefined,
-    normalCollections: [],
-    hiddenCollections: [],
-    lastSyncedFiles: [],
+    collections: [],
+    hiddenCollectionsIDs: new Set(),
+    lastSyncedCollectionFiles: [],
     trashItems: [],
     peopleState: undefined,
-    files: [],
+    collectionFiles: [],
     archivedCollectionIDs: new Set(),
     defaultHiddenCollectionIDs: new Set(),
-    hiddenFileIDs: new Set(),
     archivedFileIDs: new Set(),
     favoriteFileIDs: new Set(),
     collectionNameByID: new Map(),
@@ -490,29 +487,22 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
     if (process.env.NEXT_PUBLIC_ENTE_TRACE) console.log("dispatch", action);
     switch (action.type) {
         case "mount": {
-            const lastSyncedFiles = sortFiles(
-                action.normalFiles.concat(action.hiddenFiles),
-            );
-            const lastSyncedNormalFiles = sortFiles(action.normalFiles);
-            const lastSyncedHiddenFiles = sortFiles(action.hiddenFiles);
+            const lastSyncedCollectionFiles = sortFiles(action.collectionFiles);
             const trashItems = sortTrashItems(action.trashItems);
 
             // During mount there are no unsynced updates, and we can directly
             // use the provided files.
-            const files = lastSyncedFiles;
-            const normalFiles = lastSyncedNormalFiles;
-            const hiddenFiles = lastSyncedHiddenFiles;
+            const collectionFiles = lastSyncedCollectionFiles;
 
-            const [hiddenCollections, normalCollections] = splitByPredicate(
+            const [hiddenCollections, collections] = splitByPredicate(
                 action.collections,
                 isHiddenCollection,
             );
-            const hiddenFileIDs = deriveHiddenFileIDs(hiddenFiles);
             const archivedCollectionIDs =
-                deriveArchivedCollectionIDs(normalCollections);
+                deriveArchivedCollectionIDs(collections);
             const archivedFileIDs = deriveArchivedFileIDs(
                 archivedCollectionIDs,
-                normalFiles,
+                collectionFiles,
             );
             const view = {
                 type: "albums" as const,
@@ -524,24 +514,19 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 ...state,
                 user: action.user,
                 familyData: action.familyData,
-                normalCollections,
+                collections,
                 hiddenCollections,
-                lastSyncedFiles,
-                lastSyncedNormalFiles,
-                lastSyncedHiddenFiles,
+                lastSyncedCollectionFiles,
                 trashItems,
-                files,
-                normalFiles,
-                hiddenFiles,
+                collectionFiles,
                 archivedCollectionIDs,
                 defaultHiddenCollectionIDs:
                     deriveDefaultHiddenCollectionIDs(hiddenCollections),
-                hiddenFileIDs,
                 archivedFileIDs,
                 favoriteFileIDs: deriveFavoriteFileIDs(
                     action.user,
-                    normalCollections,
-                    normalFiles,
+                    collections,
+                    collectionFiles,
                     state.unsyncedFavoriteUpdates,
                 ),
                 collectionNameByID: createCollectionNameByID(
@@ -551,14 +536,14 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 normalCollectionSummaries: deriveNormalCollectionSummaries(
                     action.user,
                     normalCollections,
-                    normalFiles,
+                    collectionFiles,
                     trashItems,
                     archivedFileIDs,
                 ),
                 hiddenCollectionSummaries: deriveHiddenCollectionSummaries(
                     action.user,
                     hiddenCollections,
-                    hiddenFiles,
+                    collectionFiles,
                 ),
                 uncategorizedCollectionSummaryID:
                     deriveUncategorizedCollectionSummaryID(normalCollections),
@@ -1150,10 +1135,10 @@ const deriveHiddenFileIDs = (hiddenFiles: EnteFile[]) =>
  */
 const deriveArchivedFileIDs = (
     archivedCollectionIDs: GalleryState["archivedCollectionIDs"],
-    files: GalleryState["normalFiles"],
+    collectionFiles: GalleryState["collectionFiles"],
 ) =>
     new Set(
-        files
+        collectionFiles
             .filter(
                 (file) =>
                     isArchivedFile(file) ||
@@ -1168,7 +1153,7 @@ const deriveArchivedFileIDs = (
 const deriveFavoriteFileIDs = (
     user: User,
     collections: Collection[],
-    files: EnteFile[],
+    collectionFiles: GalleryState["collectionFiles"],
     unsyncedFavoriteUpdates: GalleryState["unsyncedFavoriteUpdates"],
 ) => {
     let favoriteFileIDs = new Set<number>();
@@ -1176,8 +1161,8 @@ const deriveFavoriteFileIDs = (
         // See: [Note: User and shared favorites]
         if (collection.type == "favorites" && collection.owner.id == user.id) {
             favoriteFileIDs = new Set(
-                files
-                    .filter((file) => file.collectionID === collection.id)
+                collectionFiles
+                    .filter((file) => file.collectionID == collection.id)
                     .map((file) => file.id),
             );
             break;
@@ -1209,14 +1194,14 @@ const createFileCollectionIDs = (files: EnteFile[]) =>
 const deriveNormalCollectionSummaries = (
     user: User,
     normalCollections: Collection[],
-    normalFiles: EnteFile[],
+    collectionFiles: GalleryState["collectionFiles"],
     trashItems: TrashItem[],
     archivedFileIDs: Set<number>,
 ) => {
     const normalCollectionSummaries = createCollectionSummaries(
         user,
         normalCollections,
-        normalFiles,
+        collectionFiles,
     );
 
     const uncategorizedCollection = normalCollections.find(
@@ -1234,8 +1219,9 @@ const deriveNormalCollectionSummaries = (
     }
 
     const allSectionFiles = findAllSectionVisibleFiles(
-        normalFiles,
+        collectionFiles,
         archivedFileIDs,
+        hidden,
     );
     normalCollectionSummaries.set(PseudoCollectionID.all, {
         ...pseudoCollectionOptionsForFiles(allSectionFiles),
@@ -1289,17 +1275,17 @@ const pseudoCollectionOptionsForLatestFileAndCount = (
 const deriveHiddenCollectionSummaries = (
     user: User,
     hiddenCollections: Collection[],
-    hiddenFiles: EnteFile[],
+    collectionFiles: GalleryState["collectionFiles"],
 ) => {
     const hiddenCollectionSummaries = createCollectionSummaries(
         user,
         hiddenCollections,
-        hiddenFiles,
+        collectionFiles,
     );
 
     const dhcIDs = findDefaultHiddenCollectionIDs(hiddenCollections);
     const defaultHiddenFiles = uniqueFilesByID(
-        hiddenFiles.filter((file) => dhcIDs.has(file.collectionID)),
+        collectionFiles.filter((file) => dhcIDs.has(file.collectionID)),
     );
     hiddenCollectionSummaries.set(PseudoCollectionID.hiddenItems, {
         ...pseudoCollectionOptionsForFiles(defaultHiddenFiles),
@@ -1325,11 +1311,11 @@ const deriveUncategorizedCollectionSummaryID = (
 const createCollectionSummaries = (
     user: User,
     collections: Collection[],
-    files: EnteFile[],
+    collectionFiles: GalleryState["collectionFiles"],
 ) => {
     const collectionSummaries = new Map<number, CollectionSummary>();
 
-    const filesByCollection = groupFilesByCollectionID(files);
+    const filesByCollection = groupFilesByCollectionID(collectionFiles);
     const coverFiles = findCoverFiles(collections, filesByCollection);
 
     for (const collection of collections) {
@@ -1448,8 +1434,7 @@ const createCollectionSummaries = (
             coverFile: coverFiles.get(collection.id),
             fileCount: collectionFiles?.length ?? 0,
             updationTime: collection.updationTime,
-            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-            order: collection.magicMetadata?.data?.order ?? 0,
+            order: collection.magicMetadata?.data.order ?? 0,
         });
     }
 

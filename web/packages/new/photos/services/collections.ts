@@ -43,19 +43,26 @@ export const getCollectionUpdationTime = async (): Promise<number> =>
  * This function uses a delta diff, pulling only changes since the timestamp
  * saved by the last pull.
  *
- * @returns The latest list of collections, reflecting both the state in our
- * local database and on remote.
+ * @returns
+ *
+ * 1. The latest list of collections, reflecting both the state in our local
+ *    database and on remote; and
+ *
+ * 2. The IDs of the collections that are hidden.
  */
-export const pullCollections = async (): Promise<Collection[]> => {
-    const localCollections = await savedCollections();
+export const pullCollections = async (): Promise<{
+    collections: Collection[];
+    hiddenCollectionIDs: Set<number>;
+}> => {
+    const collections = await savedCollections();
+    const hiddenCollectionIDs = await savedHiddenCollectionIDs();
     let sinceTime = await getCollectionUpdationTime();
 
     const changes = await getCollections(sinceTime);
-    if (!changes.length) return localCollections;
 
-    const hiddenCollectionIDs = new Set(await savedHiddenCollectionIDs());
+    if (!changes.length) return { collections, hiddenCollectionIDs };
 
-    const collectionsByID = new Map(localCollections.map((c) => [c.id, c]));
+    const collectionsByID = new Map(collections.map((c) => [c.id, c]));
     for (const { id, updationTime, collection } of changes) {
         sinceTime = Math.max(sinceTime, updationTime);
         let removeSyncTime = false;
@@ -78,14 +85,19 @@ export const pullCollections = async (): Promise<Collection[]> => {
         }
     }
 
-    const collections = [...collectionsByID.values()];
-    const updatedHiddenCollectionIDs = collections
-        .filter((collection) => isHiddenCollection(collection))
-        .map((collection) => collection.id);
+    const updatedCollections = [...collectionsByID.values()];
+    const updatedHiddenCollectionIDs = new Set(
+        updatedCollections
+            .filter((collection) => isHiddenCollection(collection))
+            .map((collection) => collection.id),
+    );
 
-    await localForage.setItem(COLLECTION_TABLE, collections);
+    await localForage.setItem(COLLECTION_TABLE, updatedCollections);
     await localForage.setItem(COLLECTION_UPDATION_TIME, sinceTime);
     await saveHiddenCollectionIDs(updatedHiddenCollectionIDs);
 
-    return collections;
+    return {
+        collections: updatedCollections,
+        hiddenCollectionIDs: updatedHiddenCollectionIDs,
+    };
 };

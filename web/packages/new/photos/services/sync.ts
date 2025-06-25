@@ -68,20 +68,23 @@ interface PullFilesOpts {
      * Called when the saved collections were replaced by the given
      * {@link collections}.
      *
-     * The callback is also passed splits of {@link collections} into normal
-     * ({@link normalCollections}) and hidden ({@link hiddenCollections}).
+     * It is also passed the IDs of the collections from amongst
+     * {@link collections} that are hidden.
      */
-    onSetCollections: (collections: Collection[]) => void;
+    onSetCollections: (
+        collections: Collection[],
+        hiddenCollectionIDs: Set<number>,
+    ) => void;
     /**
      * Called when saved collection files were replaced by the given
-     * {@link files}.
+     * {@link collectionFiles}.
      */
-    onSetCollectionFiles: (files: EnteFile[]) => void;
+    onSetCollectionFiles: (collectionFiles: EnteFile[]) => void;
     /**
      * Called when saved collection files were augmented with the given newly
-     * fetched {@link files}.
+     * fetched {@link collectionFiles}.
      */
-    onAugmentCollectionFiles: (files: EnteFile[]) => void;
+    onAugmentCollectionFiles: (collectionFiles: EnteFile[]) => void;
     /**
      * Called when saved trashed items were replaced by the given
      * {@link trashItems}.
@@ -107,8 +110,8 @@ interface PullFilesOpts {
  * sync.
  */
 export const syncCollectionAndFiles = async (opts?: PullFilesOpts) => {
-    const collections = await pullCollections();
-    opts?.onSetCollections(collections);
+    const { collections, hiddenCollectionIDs } = await pullCollections();
+    opts?.onSetCollections(collections, hiddenCollectionIDs);
     const didUpdateFiles = await pullCollectionFiles(
         collections,
         opts?.onSetCollectionFiles,

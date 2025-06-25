@@ -726,7 +726,7 @@ export const findDefaultHiddenCollectionIDs = (collections: Collection[]) =>
     );
 
 export const isHiddenCollection = (collection: Collection) =>
-    collection.magicMetadata?.data.visibility === ItemVisibility.hidden;
+    collection.magicMetadata?.data.visibility == ItemVisibility.hidden;
 
 /**
  * Return true if this is a collection that the user doesn't own.

@@ -48,23 +48,24 @@ export const saveCollections = async (collections: Collection[]) => {
 /**
  * Return the collectionIDs of hidden collections as per our local database.
  *
- * The returned value is an array for storage simplicity, but should be
- * semantically be thought of as a set.
- *
  * Use {@link saveHiddenCollectionIDs} to update the database.
  */
-export const savedHiddenCollectionIDs = async (): Promise<number[]> =>
-    z
-        .array(z.number())
-        .parse((await localForage.getItem("hidden-collection-ids")) ?? []);
+export const savedHiddenCollectionIDs = async (): Promise<Set<number>> =>
+    new Set(
+        z
+            .array(z.number())
+            .parse((await localForage.getItem("hidden-collection-ids")) ?? []),
+    );
 
 /**
  * Replace the list of hidden collectionIDs stored in our local database.
  *
  * This is the setter corresponding to {@link savedHiddenCollectionIDs}.
  */
-export const saveHiddenCollectionIDs = async (hs: number[]): Promise<void> => {
-    await localForage.setItem("hidden-collection-ids", hs);
+export const saveHiddenCollectionIDs = async (
+    hc: Set<number>,
+): Promise<void> => {
+    await localForage.setItem("hidden-collection-ids", [...hc]);
 };
 
 const TrashItemCollectionKey = z.object({
