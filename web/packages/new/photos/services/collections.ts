@@ -1,7 +1,11 @@
 import { type Collection } from "ente-media/collection";
 import localForage from "ente-shared/storage/localForage";
 import { getCollections, isHiddenCollection } from "./collection";
-import { savedCollections } from "./photos-fdb";
+import {
+    savedCollections,
+    savedHiddenCollectionIDs,
+    saveHiddenCollectionIDs,
+} from "./photos-fdb";
 
 const COLLECTION_TABLE = "collections";
 const HIDDEN_COLLECTION_IDS = "hidden-collection-ids";
@@ -49,7 +53,7 @@ export const pullCollections = async (): Promise<Collection[]> => {
     const changes = await getCollections(sinceTime);
     if (!changes.length) return localCollections;
 
-    const hiddenCollectionIDs = await getHiddenCollectionIDs();
+    const hiddenCollectionIDs = new Set(await savedHiddenCollectionIDs());
 
     const collectionsByID = new Map(localCollections.map((c) => [c.id, c]));
     for (const { id, updationTime, collection } of changes) {
@@ -58,7 +62,7 @@ export const pullCollections = async (): Promise<Collection[]> => {
         if (collection) {
             collectionsByID.set(id, collection);
 
-            const wasHidden = hiddenCollectionIDs.includes(collection.id);
+            const wasHidden = hiddenCollectionIDs.has(collection.id);
             const isHidden = isHiddenCollection(collection);
             // If hidden state changes.
             removeSyncTime = wasHidden != isHidden;
@@ -81,10 +85,7 @@ export const pullCollections = async (): Promise<Collection[]> => {
 
     await localForage.setItem(COLLECTION_TABLE, collections);
     await localForage.setItem(COLLECTION_UPDATION_TIME, sinceTime);
-    await localForage.setItem(
-        HIDDEN_COLLECTION_IDS,
-        updatedHiddenCollectionIDs,
-    );
+    await saveHiddenCollectionIDs(updatedHiddenCollectionIDs);
 
     return collections;
 };
