@@ -154,7 +154,7 @@ const CollectionOptions: React.FC<CollectionHeaderProps> = ({
                 } catch (e) {
                     onGenericError(e);
                 } finally {
-                    void syncWithRemote(false, true);
+                    void syncWithRemote(true);
                     hideLoadingBar();
                 }
             };
@@ -167,7 +167,7 @@ const CollectionOptions: React.FC<CollectionHeaderProps> = ({
         async (newName: string) => {
             if (activeCollection.name !== newName) {
                 await renameCollection(activeCollection, newName);
-                void syncWithRemote(false, true);
+                void syncWithRemote(true);
             }
         },
         [activeCollection],

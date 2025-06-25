@@ -83,7 +83,7 @@ import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
 import { UploadProgress } from "./UploadProgress";
 
 interface UploadProps {
-    syncWithRemote: (force?: boolean, silent?: boolean) => Promise<void>;
+    syncWithRemote: (silent?: boolean) => Promise<void>;
     closeUploadTypeSelector: () => void;
     /**
      * Show the collection selector with the given {@link attributes}.
@@ -676,7 +676,7 @@ export const Upload: React.FC<UploadProps> = ({
     ) => {
         uploadManager.prepareForNewUpload(parsedMetadataJSONMap);
         setUploadProgressView(true);
-        await props.syncWithRemote(true, true);
+        await props.syncWithRemote(true);
     };
 
     function postUploadAction() {

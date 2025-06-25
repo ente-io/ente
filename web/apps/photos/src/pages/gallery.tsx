@@ -104,6 +104,7 @@ import {
     setIsFirstLogin,
     setJustSignedUp,
 } from "ente-shared/storage/localStorage/helpers";
+import { PromiseQueue } from "ente-utils/promise";
 import { t } from "i18next";
 import { useRouter, type NextRouter } from "next/router";
 import { createContext, useCallback, useEffect, useRef, useState } from "react";
@@ -132,9 +133,11 @@ import { getSelectedFiles, handleFileOp, type FileOp } from "utils/file";
  * various actions within the gallery and its descendants.
  */
 interface RemotePullOpts {
-    /** Force a pull to happen (default: no) */
-    force?: boolean;
-    /** Perform the pull without showing a global loading bar (default: no) */
+    /**
+     * Perform the pull without showing a global loading bar
+     *
+     * Default: `false`.
+     */
     silent?: boolean;
 }
 
@@ -191,15 +194,14 @@ const Page: React.FC = () => {
     );
     const [isFileViewerOpen, setIsFileViewerOpen] = useState(false);
 
-    /**`
-     * true` if a remote pull is currently in progress.
-     */
-    const isPullInProgress = useRef(false);
     /**
-     * Set to the {@link RemotePullOpts} of the last pull that was enqueued
-     * while one was already in progress.
+     * A queue to serialize calls to {@link remoteFilesPull}.
      */
-    const pendingPullOpts = useRef<RemotePullOpts | undefined>(undefined);
+    const remoteFilesPullQueue = useRef(new PromiseQueue<void>());
+    /**
+     * A queue to serialize calls to {@link remotePull}.
+     */
+    const remotePullQueue = useRef(new PromiseQueue<void>());
 
     const [uploadTypeSelectorView, setUploadTypeSelectorView] = useState(false);
     const [uploadTypeSelectorIntent, setUploadTypeSelectorIntent] =
@@ -326,7 +328,7 @@ const Page: React.FC = () => {
                 collectionFiles: await savedCollectionFiles(),
                 trashItems: await savedTrashItems(),
             });
-            await remotePull({ force: true });
+            await remotePull();
             setIsFirstLoad(false);
             setJustSignedUp(false);
             syncIntervalID = setInterval(
@@ -509,93 +511,71 @@ const Page: React.FC = () => {
     /**
      * Pull latest collections, collection files and trash items from remote.
      *
+     * Parallel calls are serialized so that there is only one invocation of the
+     * underlying {@link pullFiles} at a time.
+     *
      * [Note: Full remote pull vs files pull]
      *
-     * If we know that our operation will not have other transitive effects
-     * beyond collections, collection files and trash, this is a better option
-     * as compared to a full remote pull for interactive operations because:
-     *
-     * 1. This involves a lesser number of API requests, so it reduces the time
-     *    the user has to wait for their interactive request to complete.
-     *
-     * 2. The current implementation {@link remotePull} tries to run only only
-     *    one instance of it is in progress at a time, while each invocation of
-     *    {@link remoteFilesPull} is independent.
+     * For interactive operations, if we know that our operation will not have
+     * other transitive effects beyond collections, collection files and trash,
+     * this is a better option as compared to a full remote pull since it
+     * involves a lesser number of API requests (and thus, time).
      */
-    const remoteFilesPull = useCallback(async () => {
-        const didUpdateFiles = await pullFiles({
-            onSetCollections: (collections) =>
-                dispatch({ type: "setCollections", collections }),
-            onSetCollectionFiles: (collectionFiles) =>
-                dispatch({ type: "setCollectionFiles", collectionFiles }),
-            onAugmentCollectionFiles: (collectionFiles) =>
-                dispatch({ type: "augmentCollectionFiles", collectionFiles }),
-            onSetTrashedItems: (trashItems) =>
-                dispatch({ type: "setTrashItems", trashItems }),
-        });
-        if (didUpdateFiles) {
-            exportService.onLocalFilesUpdated();
-        }
-    }, []);
+    const remoteFilesPull = useCallback(
+        () =>
+            remoteFilesPullQueue.current.add(() =>
+                pullFiles({
+                    onSetCollections: (collections) =>
+                        dispatch({ type: "setCollections", collections }),
+                    onSetCollectionFiles: (collectionFiles) =>
+                        dispatch({
+                            type: "setCollectionFiles",
+                            collectionFiles,
+                        }),
+                    onAugmentCollectionFiles: (collectionFiles) =>
+                        dispatch({
+                            type: "augmentCollectionFiles",
+                            collectionFiles,
+                        }),
+                    onSetTrashedItems: (trashItems) =>
+                        dispatch({ type: "setTrashItems", trashItems }),
+                    onDidUpdateCollectionFiles: () =>
+                        exportService.onLocalFilesUpdated(),
+                }),
+            ),
+        [],
+    );
 
     const remotePull = useCallback(
-        async (opts?: RemotePullOpts) => {
-            const { force, silent } = opts ?? {};
+        async (opts?: RemotePullOpts) =>
+            remotePullQueue.current.add(async () => {
+                const { silent } = opts ?? {};
 
-            // Pre-flight checks.
-            if (!navigator.onLine) return;
-            if (await isSessionInvalid()) {
-                showSessionExpiredDialog();
-                return;
-            }
-            if (!(await masterKeyFromSession())) {
-                clearSessionStorage();
-                router.push("/credentials");
-                return;
-            }
-
-            // Start or enqueue.
-            let isForced = false;
-            if (isPullInProgress.current) {
-                if (force) {
-                    isForced = true;
-                } else {
-                    pendingPullOpts.current = { force, silent };
+                // Pre-flight checks.
+                if (!navigator.onLine) return;
+                if (await isSessionInvalid()) {
+                    showSessionExpiredDialog();
                     return;
                 }
-            }
-
-            // The pull itself.
-            isPullInProgress.current = true;
-            try {
-                if (!silent) showLoadingBar();
-                await pullFilesPre();
-                await remoteFilesPull();
-                // remotePull is called with the force flag set to true before
-                // doing an upload. So it is possible, say when resuming a
-                // pending upload, that we get two remote pulls happening in
-                // parallel.
-                //
-                // Do the non-file-related post operations only for one of these
-                // parallel ones.
-                if (!isForced) {
-                    await pullFilesPost();
+                if (!(await masterKeyFromSession())) {
+                    clearSessionStorage();
+                    router.push("/credentials");
+                    return;
                 }
-            } catch (e) {
-                log.error("Remote pull failed", e);
-            } finally {
-                dispatch({ type: "clearUnsyncedState" });
-                if (!silent) hideLoadingBar();
-            }
-            isPullInProgress.current = false;
 
-            // Enqueue another if needed.
-            const nextOpts = pendingPullOpts.current;
-            if (nextOpts) {
-                pendingPullOpts.current = undefined;
-                setTimeout(() => remotePull(nextOpts), 0);
-            }
-        },
+                // The pull itself.
+                try {
+                    if (!silent) showLoadingBar();
+                    await pullFilesPre();
+                    await remoteFilesPull();
+                    await pullFilesPost();
+                } catch (e) {
+                    log.error("Remote pull failed", e);
+                } finally {
+                    dispatch({ type: "clearUnsyncedState" });
+                    if (!silent) hideLoadingBar();
+                }
+            }),
         [
             showLoadingBar,
             hideLoadingBar,
@@ -902,8 +882,7 @@ const Page: React.FC = () => {
             value={{
                 ...defaultGalleryContext,
                 setActiveCollectionID: handleShowCollectionSummary,
-                syncWithRemote: (force, silent) =>
-                    remotePull({ force, silent }),
+                syncWithRemote: (silent) => remotePull({ silent }),
                 setBlockingLoad,
                 photoListHeader,
                 user,
@@ -1049,9 +1028,7 @@ const Page: React.FC = () => {
 
                 <Upload
                     activeCollection={activeCollection}
-                    syncWithRemote={(force, silent) =>
-                        remotePull({ force, silent })
-                    }
+                    syncWithRemote={(silent) => remotePull({ silent })}
                     closeUploadTypeSelector={setUploadTypeSelectorView.bind(
                         null,
                         false,
