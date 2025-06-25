@@ -1,6 +1,7 @@
 import "dart:async";
 import "dart:io" show File;
 
+import "package:flutter/cupertino.dart";
 import "package:flutter/foundation.dart" show kDebugMode;
 import "package:flutter/material.dart" show BuildContext;
 import "package:logging/logging.dart";
@@ -24,6 +25,7 @@ import "package:photos/services/language_service.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/services/notification_service.dart";
 import "package:photos/services/search_service.dart";
+import "package:photos/theme/colors.dart";
 import "package:photos/ui/home/memories/full_screen_memory.dart";
 import "package:photos/ui/viewer/people/people_page.dart";
 import "package:photos/utils/cache_util.dart";
@@ -485,7 +487,12 @@ class MemoriesCacheService {
       FullScreenMemoryDataUpdater(
         initialIndex: fileIdx,
         memories: allMemories[memoryIdx].memories,
-        child: FullScreenMemory(allMemories[memoryIdx].title, fileIdx),
+        child: Container(
+          color: backgroundBaseDark,
+          width: double.infinity,
+          height: double.infinity,
+          child: FullScreenMemory(allMemories[memoryIdx].title, fileIdx),
+        ),
       ),
       forceCustomPageRoute: true,
     );
@@ -515,7 +522,12 @@ class MemoriesCacheService {
       FullScreenMemoryDataUpdater(
         initialIndex: 0,
         memories: allMemories[memoryIdx].memories,
-        child: FullScreenMemory(allMemories[memoryIdx].title, 0),
+        child: Container(
+          color: backgroundBaseDark,
+          width: double.infinity,
+          height: double.infinity,
+          child: FullScreenMemory(allMemories[memoryIdx].title, 0),
+        ),
       ),
       forceCustomPageRoute: true,
     );
@@ -579,7 +591,12 @@ class MemoriesCacheService {
       FullScreenMemoryDataUpdater(
         initialIndex: 0,
         memories: personMemory!.memories,
-        child: FullScreenMemory(personMemory.title, 0),
+        child: Container(
+          color: backgroundBaseDark,
+          width: double.infinity,
+          height: double.infinity,
+          child: FullScreenMemory(personMemory.title, 0),
+        ),
       ),
       forceCustomPageRoute: true,
     );
