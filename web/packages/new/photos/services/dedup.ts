@@ -10,7 +10,7 @@ import {
     savedNormalCollections,
 } from "./collection";
 import { savedCollectionFiles } from "./photos-fdb";
-import { syncCollectionAndFiles } from "./sync";
+import { pullFiles } from "./pull";
 
 /**
  * A group of duplicates as shown in the UI.
@@ -290,7 +290,7 @@ export const removeSelectedDuplicateGroups = async (
     }
 
     // Sync our local state.
-    await syncCollectionAndFiles();
+    await pullFiles();
     tickProgress();
 
     return new Set(selectedDuplicateGroups.map((g) => g.id));

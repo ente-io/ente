@@ -519,7 +519,7 @@ export default function PublicCollectionGallery() {
                     setFilesDownloadProgressAttributesCreator={
                         setFilesDownloadProgressAttributesCreator
                     }
-                    onSyncWithRemote={syncWithRemote}
+                    onRemotePull={syncWithRemote}
                     onVisualFeedback={handleVisualFeedback}
                 />
                 {blockingLoad && <TranslucentLoadingOverlay />}

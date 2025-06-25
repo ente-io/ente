@@ -102,7 +102,7 @@ interface UploadProps {
      * Called when an action in the uploader requires us to first pull the
      * latest files and collections from remote.
      *
-     * See: [Note: Full sync vs file and collection sync]
+     * See: [Note: Full remote pull vs files pull]
      *
      * Specifically, this is used prior to creating a new album, to obtain
      * (potential) existing albums from remote so that they can be matched by
@@ -111,7 +111,7 @@ interface UploadProps {
      * This functionality is not needed during uploads to a public album, so
      * this property is optional; the public albums code need not provide it.
      */
-    onFileAndCollectionSyncWithRemote?: () => Promise<void>;
+    onRemoteFilesPull?: () => Promise<void>;
     /**
      * Callback invoked when a file is uploaded.
      *
@@ -142,7 +142,7 @@ type UploadType = "files" | "folders" | "zips";
 export const Upload: React.FC<UploadProps> = ({
     isFirstUpload,
     dragAndDropFiles,
-    onFileAndCollectionSyncWithRemote,
+    onRemoteFilesPull,
     onUploadFile,
     onShowPlanSelector,
     showSessionExpiredMessage,
@@ -623,7 +623,7 @@ export const Upload: React.FC<UploadProps> = ({
         }
         const collections: Collection[] = [];
         try {
-            await onFileAndCollectionSyncWithRemote!();
+            await onRemoteFilesPull!();
             const existingCollections = await savedNormalCollections();
             let index = 0;
             for (const [

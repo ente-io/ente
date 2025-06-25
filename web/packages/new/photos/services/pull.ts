@@ -5,62 +5,45 @@ import {
 } from "ente-gallery/services/video";
 import type { Collection } from "ente-media/collection";
 import type { EnteFile } from "ente-media/file";
-import { pullCollections } from "ente-new/photos/services/collections";
-import { pullCollectionFiles } from "ente-new/photos/services/files";
-import {
-    isMLSupported,
-    mlStatusSync,
-    mlSync,
-} from "ente-new/photos/services/ml";
-import { searchDataSync } from "ente-new/photos/services/search";
-import { syncSettings } from "ente-new/photos/services/settings";
+import { pullCollections } from "./collection";
+import { pullCollectionFiles } from "./files";
+import { isMLSupported, mlSync, pullMLStatus } from "./ml";
+import { searchDataSync } from "./search";
+import { pullSettings } from "./settings";
 import { pullTrash, type TrashItem } from "./trash";
 
 /**
- * Called during a full sync, before doing the collection and file sync.
+ * Called during a full remote pull, before doing the files pull.
  *
- * [Note: Remote sync]
+ * [Note: Remote pull]
  *
- * There are two types of remote syncs we perform:
+ * There are two types of remote pulls we perform:
  *
- * - A "collection and file" sync: Syncing our local state of collections and
- *   files with remote.
+ * - A "files" pull: Updating our local state with the latest collections,
+ *   collection files, and trash from remote.
  *
- * - A "full" sync, which includes the collection and file sync, and more.
+ * - A "full" pull, which includes the files pull, and more.
  *
- * The full sync is performed by the gallery page, in the following sequence:
+ * The full pull is performed by the gallery page, in the following sequence:
  *
- * 1. {@link preCollectionAndFilesSync}
- * 2. {@link syncCollectionAndFiles}
- * 3. {@link postCollectionAndFilesSync}.
+ * 1. {@link pullFilesPre}
+ * 2. {@link pullFiles}
+ * 3. {@link pullFilesPost}.
  *
- * In some other cases, where we know that only specific collection and/or file
- * state needs to be synced, step 2 ({@link syncCollectionAndFiles}) is
- * performed independently. The only example of such a cases currently is:
- *
- * - After deduping files.
- *
- * The full sync is performed in the following cases:
+ * The full pull is performed in the following cases:
  *
  * - On the gallery page load (for both web and desktop).
  * - Every 5 minutes thereafter (while the user is on the gallery page).
  * - Each time the desktop app gains focus.
  * - When the file viewer is closed after performing some operation.
- */
-export const preCollectionAndFilesSync = async () => {
-    await Promise.all([syncSettings(), isMLSupported && mlStatusSync()]);
-};
-
-/**
- * Called during a full sync, after doing the collection and file sync.
  *
- * See: [Note: Remote sync]
+ * In some other cases, where we know that only specific collection or file
+ * state needs to be pulled, step 2 ({@link pullFiles}) is performed
+ * independently. For example, after deduping files, or updating the metadata of
+ * a file. See also: [Note: Full remote pull vs files pull]
  */
-export const postCollectionAndFilesSync = async () => {
-    await Promise.all([searchDataSync(), videoProcessingSyncIfNeeded()]);
-    // ML sync might take a very long time for initial indexing, so don't wait
-    // for it to finish.
-    void mlSync();
+export const pullFilesPre = async () => {
+    await Promise.all([pullSettings(), isMLSupported && pullMLStatus()]);
 };
 
 interface PullFilesOpts {
@@ -87,22 +70,22 @@ interface PullFilesOpts {
 }
 
 /**
- * Sync our local file and collection state with remote.
+ * Pull the latest collections, collections files and trash items from remote.
  *
- * This is a subset of a full sync, independently exposed for use at times when
- * we only want to sync collections and files (e.g. we just made some API
- * request that modified collections or files, and so now want to sync our local
- * changes to match remote).
+ * This is a subset of a full remote pull, independently exposed for use at
+ * times when we only want to pull the file related information (e.g. we just
+ * made some API request that modified collections or files, and so now want to
+ * sync our local changes to match remote).
  *
- * See: [Note: Remote sync]
+ * See also: [Note: Remote pull]
  *
  * @param opts various callbacks that are used by gallery to update its local
- * state in tandem with the sync. The callbacks are optional since we might not
+ * state in tandem with the pull. The callbacks are optional since we might not
  * have local state to update, as is the case when this is invoked post dedup.
  *
  * @returns `true` if one or more files were updated during the pull.
  */
-export const syncCollectionAndFiles = async (opts?: PullFilesOpts) => {
+export const pullFiles = async (opts?: PullFilesOpts) => {
     const collections = await pullCollections();
     opts?.onSetCollections(collections);
     const didUpdateFiles = await pullCollectionFiles(
@@ -126,4 +109,16 @@ export const syncCollectionAndFiles = async (opts?: PullFilesOpts) => {
         return true;
     }
     return false;
+};
+
+/**
+ * Called during a full remote pull, after doing the files pull.
+ *
+ * See: [Note: Remote pull]
+ */
+export const pullFilesPost = async () => {
+    await Promise.all([searchDataSync(), videoProcessingSyncIfNeeded()]);
+    // ML sync might take a very long time for initial indexing, so don't wait
+    // for it to finish.
+    void mlSync();
 };

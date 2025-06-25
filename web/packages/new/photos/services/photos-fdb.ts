@@ -45,6 +45,23 @@ export const saveCollections = async (collections: Collection[]) => {
     await localForage.setItem("collections", collections);
 };
 
+/**
+ * Return the locally persisted {@link updationTime} of the latest collection we
+ * have pulled from remote.
+ *
+ * Use {@link saveCollectionsUpdationTime} to update the saved value.
+ */
+export const savedCollectionsUpdationTime = async () =>
+    LocalTimestamp.parse(await localForage.getItem("collection-updation-time"));
+
+/**
+ * Update the locally persisted timestamp that will be returned by subsequent
+ * calls to {@link savedCollectionsUpdationTime}.
+ */
+export const saveCollectionsUpdationTime = async (time: number) => {
+    await localForage.setItem("collection-updation-time", time);
+};
+
 const TrashItemCollectionKey = z.object({
     /**
      * Collection ID.
@@ -120,7 +137,7 @@ export const saveTrashItemCollectionKeys = async (
  * for the same file, one for each collection that the file belongs to. For more
  * details, See: [Note: Collection File].
  *
- * Use {@link saveFiles} to update the database.
+ * Use {@link saveCollectionFiles} to update the database.
  */
 export const savedCollectionFiles = async (): Promise<EnteFile[]> => {
     // [Note: Avoiding Zod parsing for large DB arrays]
@@ -165,6 +182,36 @@ export const savedCollectionFiles = async (): Promise<EnteFile[]> => {
  */
 export const saveCollectionFiles = async (files: EnteFile[]) => {
     await localForage.setItem("files", transformFilesIfNeeded(files));
+};
+
+/**
+ * Return the locally persisted {@link updationTime} of the latest file from the
+ * given {@link collection} that we have pulled from remote.
+ *
+ * Use {@link saveCollectionLastSyncTime} to update the value saved in the
+ * database, and {@link removeCollectionIDLastSyncTime} to remove the saved
+ * value from the database.
+ */
+export const savedCollectionLastSyncTime = async (collection: Collection) =>
+    LocalTimestamp.parse(await localForage.getItem(`${collection.id}-time`));
+
+/**
+ * Update the locally persisted timestamp that will be returned by subsequent
+ * calls to {@link savedCollectionLastSyncTime}.
+ */
+export const saveCollectionLastSyncTime = async (
+    collection: Collection,
+    time: number,
+) => {
+    await localForage.setItem(`${collection.id}-time`, time);
+};
+
+/**
+ * Remove the locally persisted timestamp, if any, previously saved for a
+ * collection with the given ID using {@link saveCollectionLastSyncTime}.
+ */
+export const removeCollectionIDLastSyncTime = async (collectionID: number) => {
+    await localForage.removeItem(`${collectionID}-time`);
 };
 
 /**
