@@ -1,3 +1,4 @@
+import "dart:async";
 import "package:logging/logging.dart";
 import "package:photos/db/remote/schema.dart";
 import "package:photos/db/remote/table/collection_files.dart";
@@ -11,11 +12,12 @@ import "package:photos/service_locator.dart";
 class RemoteCache {
   final Logger logger = Logger("RemoteCache");
   Map<int, RemoteAsset> remoteAssets = {};
-  bool? isLoaded;
+  bool _isLoaded = false;
+  Completer<void>? _loadCompleter;
 
   Future<List<EnteFile>> getCollectionFiles(FilterQueryParam? params) async {
+    if (!_isLoaded) await _ensureLoaded();
     final cf = await remoteDB.getCollectionFiles(params);
-    final _ = isLoaded ?? await _load();
     final List<EnteFile> files = [];
     for (final file in cf) {
       final asset = remoteAssets[file.fileID];
@@ -27,12 +29,12 @@ class RemoteCache {
   }
 
   Future<List<EnteFile>> geFilesForCollection(int collectionID) async {
+    if (!_isLoaded) await _ensureLoaded();
     final cf = await remoteDB.getCollectionFiles(
       FilterQueryParam(
         collectionID: collectionID,
       ),
     );
-    final _ = isLoaded ?? await _load();
     final List<EnteFile> files = [];
     for (final file in cf) {
       final asset = remoteAssets[file.fileID];
@@ -46,8 +48,8 @@ class RemoteCache {
   Future<FileLoadResult> getCollectionFilesResult(
     FilterQueryParam? params,
   ) async {
+    if (!_isLoaded) await _ensureLoaded();
     final cf = await remoteDB.getCollectionFiles(params);
-    final _ = isLoaded ?? await _load();
     final List<EnteFile> files = [];
     for (final file in cf) {
       final asset = remoteAssets[file.fileID];
@@ -58,16 +60,27 @@ class RemoteCache {
     return FileLoadResult(files, params?.limit == files.length);
   }
 
-  Future<void> _load() async {
-    if (isLoaded != null && isLoaded!) {
-      return; // Already loaded
+  Future<void> _ensureLoaded() async {
+    if (_isLoaded) return;
+
+    if (_loadCompleter != null) {
+      return _loadCompleter!.future;
     }
-    logger.info("Loading remote assets into cache");
-    final rAssets = await remoteDB.getRemoteAssets();
-    for (final item in rAssets) {
-      remoteAssets[item.id] = item;
+    _loadCompleter = Completer<void>();
+
+    try {
+      logger.info("Loading remote assets into cache");
+      final rAssets = await remoteDB.getRemoteAssets();
+      for (final item in rAssets) {
+        remoteAssets[item.id] = item;
+      }
+      _isLoaded = true;
+      _loadCompleter!.complete();
+    } catch (error) {
+      _loadCompleter!.completeError(error);
+      _loadCompleter = null;
+      rethrow;
     }
-    isLoaded = true;
   }
 
   Future<void> insertDiffItems(
@@ -89,7 +102,7 @@ class RemoteCache {
     if (cf == null) {
       return null;
     }
-    final _ = isLoaded ?? await _load();
+    if (!_isLoaded) await _ensureLoaded();
     final asset = remoteAssets[cf.fileID];
     if (asset == null) {
       return null;
@@ -103,7 +116,7 @@ class RemoteCache {
       return null;
     }
 
-    final _ = isLoaded ?? await _load();
+    if (!_isLoaded) await _ensureLoaded();
     final rAsset = remoteAssets[cf.fileID];
     if (rAsset == null) {
       return null;
@@ -116,7 +129,7 @@ class RemoteCache {
     if (cf == null) {
       return null;
     }
-    final _ = isLoaded ?? await _load();
+    if (!_isLoaded) await _ensureLoaded();
     final asset = remoteAssets[cf.fileID];
     if (asset == null) {
       return null;
@@ -134,7 +147,7 @@ class RemoteCache {
       ignoredCollectionIDs,
       order: order,
     );
-    final _ = isLoaded ?? await _load();
+    if (!_isLoaded) await _ensureLoaded();
     final List<EnteFile> files = [];
     for (final entry in collectionFileEntries) {
       final asset = remoteAssets[entry.fileID];
@@ -153,14 +166,13 @@ class RemoteCache {
       hashes,
       ownerID,
     );
-    final _ = isLoaded ?? await _load();
+    if (!_isLoaded) await _ensureLoaded();
     final List<EnteFile> files = [];
     for (final entry in collectionFileEntries) {
       final asset = remoteAssets[entry.fileID];
       if (asset != null) {
         files.add(EnteFile.fromRemoteAsset(asset, entry));
       } else {
-        // If the asset is not found, we can log or handle it as needed.
         throw Exception(
           'ownedFilesWithSameHash: remoteAsset not cached ${entry.fileID}',
         );
