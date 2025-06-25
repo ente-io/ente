@@ -423,17 +423,6 @@ class FilesDB with SqlDbBase {
     await db.execute('DELETE FROM entities');
   }
 
-  Future<void> deleteDB() async {
-    if (kDebugMode) {
-      debugPrint("Deleting files db");
-      final Directory documentsDirectory =
-          await getApplicationDocumentsDirectory();
-      final String path = join(documentsDirectory.path, _databaseName);
-      File(path).deleteSync(recursive: true);
-      _sqliteAsyncDBFuture = null;
-    }
-  }
-
   Future<void> insertMultiple(
     List<EnteFile> files, {
     SqliteAsyncConflictAlgorithm conflictAlgorithm =
