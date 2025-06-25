@@ -14,8 +14,10 @@ import {
     fileLocation,
 } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
-import { getLocalCollections } from "ente-new/photos/services/collections";
-import { savedCollectionFiles } from "ente-new/photos/services/photos-fdb";
+import {
+    savedCollectionFiles,
+    savedCollections,
+} from "ente-new/photos/services/photos-fdb";
 import { getUserDetailsV2 } from "ente-new/photos/services/user-details";
 
 const DATE_TIME_PARSING_TEST_FILE_NAMES = [
@@ -179,7 +181,7 @@ async function totalFileCountCheck(expectedState) {
 }
 
 async function totalCollectionCountCheck(expectedState) {
-    const collections = await getLocalCollections();
+    const collections = await savedCollections();
     if (expectedState.collection_count === collections.length) {
         console.log("collection count check passed ✅");
     } else {
@@ -192,7 +194,7 @@ async function totalCollectionCountCheck(expectedState) {
 
 async function collectionWiseFileCount(expectedState) {
     const files = await savedCollectionFiles();
-    const collections = await getLocalCollections();
+    const collections = await savedCollections();
     const collectionToFilesMap = groupFilesByCollectionID(files);
     const collectionIDToNameMap = new Map(
         collections.map((collection) => [collection.id, collection.name]),

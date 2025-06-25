@@ -12,6 +12,8 @@ import {
     type RemoteMagicMetadata,
 } from "ente-media/magic-metadata";
 import { batch } from "ente-utils/array";
+import { savedHiddenCollections } from "./collection";
+import { savedCollectionFiles } from "./photos-fdb";
 
 /**
  * An reasonable but otherwise arbitrary number of items (e.g. files) to include
@@ -45,6 +47,20 @@ export const performInBatches = <T, U>(
     items: T[],
     op: (batchItems: T[]) => Promise<U>,
 ): Promise<U[]> => Promise.all(batch(items, requestBatchSize).map(op));
+
+/**
+ * Return the list of collection files from our local database that do not
+ * belong to hidden collections.
+ */
+export const savedNormalCollectionFiles = async () => {
+    const hiddenCollections = await savedHiddenCollections();
+    const hiddenCollectionIDs = new Set(hiddenCollections.map((c) => c.id));
+
+    const collectionFiles = await savedCollectionFiles();
+    return collectionFiles.filter(
+        (f) => !hiddenCollectionIDs.has(f.collectionID),
+    );
+};
 
 /**
  * Change the visibility (normal, archived, hidden) of a list of files on

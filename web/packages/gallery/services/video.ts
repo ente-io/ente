@@ -14,7 +14,7 @@ import { fileLogID, type EnteFile } from "ente-media/file";
 import { FileType } from "ente-media/file-type";
 import { updateFilePublicMagicMetadata } from "ente-new/photos/services/file";
 import { savedCollectionFiles } from "ente-new/photos/services/photos-fdb";
-import { getLocalTrashFileIDs } from "ente-new/photos/services/trash";
+import { savedTrashItemFileIDs } from "ente-new/photos/services/trash";
 import { gunzip, gzip } from "ente-new/photos/utils/gzip";
 import { randomSample } from "ente-utils/array";
 import { ensurePrecondition } from "ente-utils/ensure";
@@ -878,7 +878,7 @@ const backfillQueue = async (
     userID: number,
 ): Promise<VideoProcessingQueueItem[]> => {
     const allCollectionFiles = await savedCollectionFiles();
-    const localTrashFileIDs = await getLocalTrashFileIDs();
+    const localTrashFileIDs = await savedTrashItemFileIDs();
     const videoFiles = uniqueFilesByID(
         allCollectionFiles.filter(
             (f) =>

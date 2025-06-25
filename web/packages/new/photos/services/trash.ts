@@ -240,7 +240,7 @@ export const sortTrashItems = (trashItems: TrashItem[]) =>
  * Return the IDs of all the files that are part of the trash in our local
  * database.
  */
-export const getLocalTrashFileIDs = () =>
+export const savedTrashItemFileIDs = () =>
     savedTrashItems().then((items) => new Set(items.map((f) => f.file.id)));
 
 /**

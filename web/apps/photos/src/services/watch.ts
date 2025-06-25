@@ -16,7 +16,7 @@ import { type UploadResult } from "ente-gallery/services/upload";
 import type { UploadAsset } from "ente-gallery/services/upload/upload-service";
 import { groupFilesByCollectionID } from "ente-gallery/utils/files";
 import type { EnteFile } from "ente-media/file";
-import { getLocalFiles } from "ente-new/photos/services/files";
+import { savedNormalCollectionFiles } from "ente-new/photos/services/file";
 import { ensureString } from "ente-utils/ensure";
 import { removeFromCollection } from "./collectionService";
 import { type UploadItemWithCollection, uploadManager } from "./upload-manager";
@@ -475,7 +475,7 @@ class FolderWatcher {
         for (const file of syncedFiles)
             syncedFileForID.set(file.uploadedFileID, file);
 
-        const files = await getLocalFiles();
+        const files = await savedNormalCollectionFiles();
         const filesToTrash = files.filter((file) => {
             const correspondingSyncedFile = syncedFileForID.get(file.id);
             if (

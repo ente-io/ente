@@ -18,7 +18,6 @@ import {
     CollectionSummaryOrder,
     CollectionsSortBy,
 } from "ente-new/photos/services/collection-summary";
-import { getLocalCollections } from "ente-new/photos/services/collections";
 import {
     savedCollectionFiles,
     savedCollections,
@@ -231,7 +230,7 @@ export const deleteCollection = async (
  * Return the user's own favorites collection, if any.
  */
 export const getFavCollection = async () => {
-    const collections = await getLocalCollections();
+    const collections = await savedCollections();
     const userID = ensureLocalUser().id;
     for (const collection of collections) {
         // See: [Note: User and shared favorites]
@@ -285,7 +284,7 @@ function compareCollectionsLatestFile(
 }
 
 export async function getDefaultHiddenCollection(): Promise<Collection> {
-    const collections = await getLocalCollections("hidden");
+    const collections = await savedCollections();
     const hiddenCollection = collections.find((collection) =>
         isDefaultHiddenCollection(collection),
     );
