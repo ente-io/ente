@@ -68,7 +68,7 @@ class RemoteAsset {
   String? get deviceFolder => metadata.data['deviceFolder'];
 
   Location? get location {
-    if (publicMetadata != null && publicMetadata!.data[latKey] != null) {
+    if (publicMetadata?.data[latKey] != null) {
       return Location(
         latitude: publicMetadata!.data[latKey],
         longitude: publicMetadata!.data[longKey],

@@ -32,19 +32,19 @@ Future<File?> downloadAndDecryptPublicFile(
   EnteFile file, {
   ProgressCallback? progressCallback,
 }) async {
-  final String logPrefix = 'Public File-${file.uploadedFileID}:';
+  final String logPrefix = 'Public File-${file.remoteID}:';
   _logger
       .info('$logPrefix starting download ${formatBytes(file.fileSize ?? 0)}');
 
   final String tempDir = Configuration.instance.getTempDirectory();
-  final String encryptedFilePath = "$tempDir${file.uploadedFileID}.encrypted";
-  final String decryptedFilePath = "$tempDir${file.uploadedFileID}.decrypted";
+  final String encryptedFilePath = "$tempDir${file.remoteID}.encrypted";
+  final String decryptedFilePath = "$tempDir${file.remoteID}.decrypted";
 
   try {
     final headers =
         CollectionsService.instance.publicCollectionHeaders(file.collectionID!);
     final response = (await NetworkClient.instance.getDio().download(
-      FileUrl.getUrl(file.uploadedFileID!, FileUrlType.publicDownload),
+      FileUrl.getUrl(file.remoteID!, FileUrlType.publicDownload),
       encryptedFilePath,
       options: Options(
         headers: headers,
@@ -102,11 +102,11 @@ Future<File?> downloadAndDecrypt(
     );
   }
 
-  final String logPrefix = 'File-${file.uploadedFileID}:';
+  final String logPrefix = 'File-${file.remoteID}:';
   _logger
       .info('$logPrefix starting download ${formatBytes(file.fileSize ?? 0)}');
   final String tempDir = Configuration.instance.getTempDirectory();
-  String encryptedFilePath = "$tempDir${file.uploadedFileID}.encrypted";
+  String encryptedFilePath = "$tempDir${file.remoteID}.encrypted";
   File encryptedFile = File(encryptedFilePath);
 
   final startTime = DateTime.now().millisecondsSinceEpoch;
@@ -114,7 +114,7 @@ Future<File?> downloadAndDecrypt(
   try {
     if (downloadManager.enableResumableDownload(file.fileSize)) {
       final DownloadResult result = await downloadManager.download(
-        file.uploadedFileID!,
+        file.remoteID,
         file.displayName,
         file.fileSize!,
       );
@@ -159,7 +159,7 @@ Future<File?> downloadAndDecrypt(
       '$logPrefix download completed: ${formatBytes(sizeInBytes)}, avg speed: ${speedInKBps.toStringAsFixed(2)} KB/s',
     );
 
-    final String decryptedFilePath = "$tempDir${file.uploadedFileID}.decrypted";
+    final String decryptedFilePath = "$tempDir${file.remoteID}.decrypted";
     // As decryption can take time, emit fake progress for large files during
     // decryption
     final FakePeriodicProgress? fakeProgress = file.fileType == FileType.video
@@ -180,8 +180,7 @@ Future<File?> downloadAndDecrypt(
         getFileKey(file),
       );
       fakeProgress?.stop();
-      _logger.info(
-          '$logPrefix decryption completed (genID ${file.uploadedFileID})');
+      _logger.info('$logPrefix decryption completed (genID ${file.remoteID})');
     } catch (e, s) {
       fakeProgress?.stop();
       _logger.severe("Critical: $logPrefix failed to decrypt", e, s);
