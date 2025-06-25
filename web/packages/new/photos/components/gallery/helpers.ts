@@ -56,24 +56,18 @@ export const constructUserIDToEmailMap = (
     user: User,
     collections: Collection[],
 ): Map<number, string> => {
-    const userIDToEmailMap = new Map<number, string>();
+    const userIDToEmail = new Map<number, string>();
     collections.forEach((item) => {
         const { owner, sharees } = item;
         if (user.id !== owner.id && owner.email) {
-            userIDToEmailMap.set(owner.id, owner.email);
+            userIDToEmail.set(owner.id, owner.email);
         }
-        // Not sure about its nullability currently, revisit after auditing the
-        // type for Collection.
-        //
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-        if (sharees) {
-            sharees.forEach((item) => {
-                if (item.id !== user.id && item.email)
-                    userIDToEmailMap.set(item.id, item.email);
-            });
-        }
+        sharees.forEach((item) => {
+            if (item.id !== user.id && item.email)
+                userIDToEmail.set(item.id, item.email);
+        });
     });
-    return userIDToEmailMap;
+    return userIDToEmail;
 };
 
 /**
@@ -86,17 +80,11 @@ export const createShareeSuggestionEmails = (
     familyData: FamilyData | undefined,
 ): string[] => {
     const emails = collections
-        .map(({ owner, sharees }) => {
-            if (owner.email && owner.id != user.id) {
-                return [owner.email];
-            } else {
-                // Not sure about its nullability currently, revisit after auditing the
-                // type for Collection.
-                //
-                // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-                return (sharees ?? []).map(({ email }) => email);
-            }
-        })
+        .map(({ owner, sharees }) =>
+            owner.email && owner.id != user.id
+                ? [owner.email]
+                : sharees.map(({ email }) => email),
+        )
         .flat()
         .filter((e) => e !== undefined);
 
