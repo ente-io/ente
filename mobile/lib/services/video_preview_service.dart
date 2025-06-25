@@ -856,6 +856,10 @@ class VideoPreviewService {
   }
 
   void queueFiles({Duration duration = const Duration(seconds: 5)}) {
+    if (!isVideoStreamingEnabled) {
+      _logger.fine("Video streaming is disabled, not queuing files");
+      return;
+    }
     Future.delayed(duration, () {
       if (!_hasQueuedFile && computeController.requestCompute(stream: true)) {
         _putFilesForPreviewCreation(true).catchError((_) {
