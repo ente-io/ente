@@ -6,12 +6,14 @@ class AllMemoriesPage extends StatefulWidget {
   final int initialPageIndex;
   final List<List<Memory>> allMemories;
   final List<String> allTitles;
+  final bool startAtFirstMemory;
 
   const AllMemoriesPage({
     super.key,
     required this.allMemories,
     required this.allTitles,
     required this.initialPageIndex,
+    this.startAtFirstMemory = false,
   });
 
   @override
@@ -43,7 +45,8 @@ class _AllMemoriesPageState extends State<AllMemoriesPage>
         hitTestBehavior: HitTestBehavior.translucent,
         itemCount: widget.allMemories.length,
         itemBuilder: (context, index) {
-          final initialMemoryIndex = _getNextMemoryIndex(index);
+          final initialMemoryIndex =
+              widget.startAtFirstMemory ? 0 : _getNextMemoryIndex(index);
           return FullScreenMemoryDataUpdater(
             initialIndex: initialMemoryIndex,
             memories: widget.allMemories[index],
