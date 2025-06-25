@@ -76,9 +76,8 @@ import {
 import exportService from "ente-new/photos/services/export";
 import { updateFilesVisibility } from "ente-new/photos/services/file";
 import {
+    savedCollectionFiles,
     savedCollections,
-    savedHiddenFiles,
-    savedNormalFiles,
     savedTrashItems,
 } from "ente-new/photos/services/photos-fdb";
 import {
@@ -330,8 +329,7 @@ const Page: React.FC = () => {
                 user,
                 familyData,
                 collections: await savedCollections(),
-                normalFiles: await savedNormalFiles(),
-                hiddenFiles: await savedHiddenFiles(),
+                collectionFiles: await savedCollectionFiles(),
                 trashItems: await savedTrashItems(),
             });
             await syncWithRemote({ force: true });
@@ -538,25 +536,12 @@ const Page: React.FC = () => {
      */
     const fileAndCollectionSyncWithRemote = useCallback(async () => {
         const didUpdateFiles = await syncCollectionAndFiles({
-            onSetCollections: (
-                collections,
-                normalCollections,
-                hiddenCollections,
-            ) =>
-                dispatch({
-                    type: "setCollections",
-                    collections,
-                    normalCollections,
-                    hiddenCollections,
-                }),
-            onResetNormalFiles: (files) =>
-                dispatch({ type: "setNormalFiles", files }),
-            onFetchNormalFiles: (files) =>
-                dispatch({ type: "fetchNormalFiles", files }),
-            onResetHiddenFiles: (files) =>
-                dispatch({ type: "setHiddenFiles", files }),
-            onFetchHiddenFiles: (files) =>
-                dispatch({ type: "fetchHiddenFiles", files }),
+            onSetCollections: (collections) =>
+                dispatch({ type: "setCollections", collections }),
+            onSetCollectionFiles: (collectionFiles) =>
+                dispatch({ type: "setCollectionFiles", collectionFiles }),
+            onAugmentCollectionFiles: (collectionFiles) =>
+                dispatch({ type: "augmentCollectionFiles", collectionFiles }),
             onSetTrashedItems: (trashItems) =>
                 dispatch({ type: "setTrashItems", trashItems }),
         });
@@ -1082,7 +1067,7 @@ const Page: React.FC = () => {
                         fileAndCollectionSyncWithRemote
                     }
                     onUploadFile={(file) =>
-                        dispatch({ type: "uploadNormalFile", file })
+                        dispatch({ type: "uploadFile", file })
                     }
                     onShowPlanSelector={showPlanSelector}
                     isFirstUpload={areOnlySystemCollections(

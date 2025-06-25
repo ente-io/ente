@@ -133,27 +133,7 @@ export interface GalleryState {
      * This property is expected to be of use only internal to the reducer;
      * external code should only needs {@link files} instead.
      */
-    lastSyncedFiles: EnteFile[];
-    /**
-     * The user's normal (non-hidden, non-trash) files, without any unsynced
-     * modifications applied to them.
-     *
-     * The list is sorted so that newer files are first.
-     *
-     * This property is expected to be of use only internal to the reducer;
-     * external code likely needs {@link normalFiles} instead.
-     */
-    lastSyncedNormalFiles: EnteFile[];
-    /**
-     * The user's hidden files, without any unsynced modifications applied to
-     * them.
-     *
-     * The list is sorted so that newer files are first.
-     *
-     * This property is expected to be of use only internal to the reducer;
-     * external code likely needs {@link hiddenFiles} instead.
-     */
-    lastSyncedHiddenFiles: EnteFile[];
+    lastSyncedCollectionFiles: EnteFile[];
     /**
      * The items in the user's trash.
      *
@@ -190,23 +170,7 @@ export interface GalleryState {
      * happen on the next "file sync", until then they remain as in-memory state
      * in the reducer.
      */
-    files: EnteFile[];
-    /**
-     * The user's normal (non-hidden, non-trash) files, with any unsynced
-     * modifications also applied to them.
-     *
-     * The list is sorted so that newer files are first.
-     */
-    normalFiles: EnteFile[];
-    /**
-     * The user's hidden files, with any unsynced modifications also applied to
-     * them.
-     *
-     * The list is sorted so that newer files are first.
-     *
-     * See: [Note: Unsynced modifications]
-     */
-    hiddenFiles: EnteFile[];
+    collectionFiles: EnteFile[];
     /**
      * Collection IDs of archived collections.
      */
@@ -446,21 +410,13 @@ export type GalleryAction =
           user: User;
           familyData: FamilyData;
           collections: Collection[];
-          normalFiles: EnteFile[];
-          hiddenFiles: EnteFile[];
+          collectionFiles: EnteFile[];
           trashItems: TrashItem[];
       }
-    | {
-          type: "setCollections";
-          collections: Collection[];
-          normalCollections: Collection[];
-          hiddenCollections: Collection[];
-      }
-    | { type: "setNormalFiles"; files: EnteFile[] }
-    | { type: "fetchNormalFiles"; files: EnteFile[] }
-    | { type: "uploadNormalFile"; file: EnteFile }
-    | { type: "setHiddenFiles"; files: EnteFile[] }
-    | { type: "fetchHiddenFiles"; files: EnteFile[] }
+    | { type: "setCollections"; collections: Collection[] }
+    | { type: "setCollectionFiles"; collectionFiles: EnteFile[] }
+    | { type: "augmentCollectionFiles"; collectionFiles: EnteFile[] }
+    | { type: "uploadFile"; file: EnteFile }
     | { type: "setTrashItems"; trashItems: TrashItem[] }
     | { type: "setPeopleState"; peopleState: PeopleState | undefined }
     | { type: "markTempDeleted"; files: EnteFile[] }
@@ -495,13 +451,9 @@ const initialGalleryState: GalleryState = {
     normalCollections: [],
     hiddenCollections: [],
     lastSyncedFiles: [],
-    lastSyncedNormalFiles: [],
-    lastSyncedHiddenFiles: [],
     trashItems: [],
     peopleState: undefined,
     files: [],
-    normalFiles: [],
-    hiddenFiles: [],
     archivedCollectionIDs: new Set(),
     defaultHiddenCollectionIDs: new Set(),
     hiddenFileIDs: new Set(),
@@ -615,6 +567,15 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
         }
 
         case "setCollections": {
+            const [hiddenCollections, normalCollections] = splitByPredicate(
+                collections,
+                isHiddenCollection,
+            );
+            opts?.onSetCollections(
+                collections,
+                normalCollections,
+                hiddenCollections,
+            );
             const { collections, normalCollections, hiddenCollections } =
                 action;
             const archivedCollectionIDs =
