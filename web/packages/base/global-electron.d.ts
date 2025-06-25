@@ -14,9 +14,5 @@ declare global {
      * {@link Electron}) that allow us to communicate with the Node.js layer of
      * our desktop app.
      */
-    // This needs to be a var for it to be recognized as a property of
-    // globalThis, so we unfortunately need to hush eslint for the next line.
-    //
-    // eslint-disable-next-line no-var
-    var electron: Electron | undefined;
+    declare var electron: Electron | undefined;
 }

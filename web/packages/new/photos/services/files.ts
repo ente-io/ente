@@ -3,54 +3,43 @@ import log from "ente-base/log";
 import { apiURL } from "ente-base/origins";
 import type { Collection } from "ente-media/collection";
 import {
-    decryptFile,
-    mergeMetadata,
-    type EncryptedEnteFile,
+    decryptRemoteFile,
     type EnteFile,
-    type Trash,
+    type RemoteEnteFile,
 } from "ente-media/file";
 import { metadataHash } from "ente-media/file-metadata";
 import HTTPService from "ente-shared/network/HTTPService";
-import localForage from "ente-shared/storage/localForage";
 import { getToken } from "ente-shared/storage/localStorage/helpers";
 import {
     getCollectionLastSyncTime,
     setCollectionLastSyncTime,
 } from "./collections";
-
-const FILES_TABLE = "files";
-const HIDDEN_FILES_TABLE = "hidden-files";
-
-/**
- * Return all files that we know about locally, both "normal" and "hidden".
- */
-export const getAllLocalFiles = async () =>
-    (await getLocalFiles("normal")).concat(await getLocalFiles("hidden"));
+import {
+    savedHiddenFiles,
+    savedNormalFiles,
+    saveHiddenFiles,
+    saveNormalFiles,
+} from "./photos-fdb";
 
 /**
  * Return all files that we know about locally. By default it returns only
  * "normal" (i.e. non-"hidden") files, but it can be passed the {@link type}
  * "hidden" to get it to instead return hidden files that we know about locally.
+ *
+ * Deprecated, use {@link savedNormalFiles} or {@link savedHiddenFiles} instead.
  */
-export const getLocalFiles = async (type: "normal" | "hidden" = "normal") => {
-    const tableName = type == "normal" ? FILES_TABLE : HIDDEN_FILES_TABLE;
-    const files: EnteFile[] =
-        (await localForage.getItem<EnteFile[]>(tableName)) ?? [];
-    return files;
-};
+export const getLocalFiles = async (type: "normal" | "hidden" = "normal") =>
+    type == "normal" ? savedNormalFiles() : savedHiddenFiles();
 
 /**
  * Update the files that we know about locally.
  *
  * Sibling of {@link getLocalFiles}.
+ *
+ * Deprecate, use {@link saveNormalFiles} or {@link saveHiddenFiles} instead.
  */
-export const setLocalFiles = async (
-    type: "normal" | "hidden",
-    files: EnteFile[],
-) => {
-    const tableName = type == "normal" ? FILES_TABLE : HIDDEN_FILES_TABLE;
-    await localForage.setItem(tableName, files);
-};
+export const setLocalFiles = (type: "normal" | "hidden", files: EnteFile[]) =>
+    type == "normal" ? saveNormalFiles(files) : saveHiddenFiles(files);
 
 /**
  * Fetch all files of the given {@link type}, belonging to the given
@@ -122,9 +111,9 @@ export const getFiles = async (
 
             const newDecryptedFilesBatch = await Promise.all(
                 // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-                resp.data.diff.map(async (file: EncryptedEnteFile) => {
+                resp.data.diff.map(async (file: RemoteEnteFile) => {
                     if (!file.isDeleted) {
-                        return await decryptFile(file, collection.key);
+                        return await decryptRemoteFile(file, collection.key);
                     } else {
                         return file;
                     }
@@ -160,110 +149,6 @@ const removeDeletedCollectionFiles = (
 };
 
 /**
- * Sort the given list of {@link EnteFile}s in place.
- *
- * Like the JavaScript Array#sort, this method modifies the {@link files}
- * argument. It sorts {@link files} in place, and then returns a reference to
- * the same mutated array.
- *
- * By default, files are sorted so that the newest one is first. The optional
- * {@link sortAsc} flag can be set to `true` to sort them so that the oldest one
- * is first.
- */
-export const sortFiles = (files: EnteFile[], sortAsc = false) => {
-    // Sort based on the time of creation time of the file.
-    //
-    // For files with same creation time, sort based on the time of last
-    // modification.
-    const factor = sortAsc ? -1 : 1;
-    return files.sort((a, b) => {
-        if (a.metadata.creationTime === b.metadata.creationTime) {
-            return (
-                factor *
-                (b.metadata.modificationTime - a.metadata.modificationTime)
-            );
-        }
-        return factor * (b.metadata.creationTime - a.metadata.creationTime);
-    });
-};
-
-/**
- * [Note: Collection File]
- *
- * File IDs themselves are unique across all the files for the user (in fact,
- * they're unique across all the files in an Ente instance). However, we still
- * can have multiple entries for the same file ID in our local database because
- * the unit of account is not actually a file, but a "Collection File": a
- * collection and file pair.
- *
- * For example, if the same file is symlinked into two collections, then we will
- * have two "Collection File" entries for it, both with the same file ID, but
- * with different collection IDs.
- *
- * This function returns files such that only one of these entries is returned.
- * The entry that is returned is arbitrary in general, this function just picks
- * the first one for each unique file ID.
- *
- * If this function is invoked on a list on which {@link sortFiles} has already
- * been called, which by default sorts such that the newest file is first, then
- * this function's behaviour would be to return the newest file from among
- * multiple files with the same ID but different collections.
- */
-export const uniqueFilesByID = (files: EnteFile[]) => {
-    const seen = new Set<number>();
-    return files.filter(({ id }) => {
-        if (seen.has(id)) return false;
-        seen.add(id);
-        return true;
-    });
-};
-
-export const TRASH = "file-trash";
-
-export async function getLocalTrash() {
-    const trash = (await localForage.getItem<Trash>(TRASH)) ?? [];
-    return trash;
-}
-
-export async function getLocalTrashedFiles() {
-    return getTrashedFiles(await getLocalTrash());
-}
-
-export function getTrashedFiles(trash: Trash): EnteFile[] {
-    return sortTrashFiles(
-        mergeMetadata(
-            trash.map((trashedFile) => ({
-                ...trashedFile.file,
-                updationTime: trashedFile.updatedAt,
-                deleteBy: trashedFile.deleteBy,
-                isTrashed: true,
-            })),
-        ),
-    );
-}
-
-/**
- * Return the IDs of all the files that are part of the trash as per our local
- * database.
- */
-export const getLocalTrashFileIDs = () =>
-    getLocalTrash().then((trash) => new Set(trash.map((f) => f.file.id)));
-
-const sortTrashFiles = (files: EnteFile[]) => {
-    return files.sort((a, b) => {
-        if (a.deleteBy === b.deleteBy) {
-            if (a.metadata.creationTime === b.metadata.creationTime) {
-                return (
-                    b.metadata.modificationTime - a.metadata.modificationTime
-                );
-            }
-            return b.metadata.creationTime - a.metadata.creationTime;
-        }
-        return (a.deleteBy ?? 0) - (b.deleteBy ?? 0);
-    });
-};
-
-/**
  * Clear cached thumbnails for existing files if the thumbnail data has changed.
  *
  * This function in expected to be called when we are processing a collection
@@ -283,7 +168,7 @@ const sortTrashFiles = (files: EnteFile[]) => {
  *
  * @param newFiles The {@link EnteFile}s which we got in the diff response.
  */
-export const clearCachedThumbnailsIfChanged = async (
+const clearCachedThumbnailsIfChanged = async (
     existingFiles: EnteFile[],
     newFiles: EnteFile[],
 ) => {
@@ -316,33 +201,6 @@ export const clearCachedThumbnailsIfChanged = async (
     }
 };
 
-/**
- * Segment the given {@link files} into lists indexed by their collection ID.
- *
- * Order is preserved.
- */
-export const groupFilesByCollectionID = (files: EnteFile[]) =>
-    files.reduce((result, file) => {
-        const id = file.collectionID;
-        let cfs = result.get(id);
-        if (!cfs) result.set(id, (cfs = []));
-        cfs.push(file);
-        return result;
-    }, new Map<number, EnteFile[]>());
-
-/**
- * Construct a map from file IDs to the list of collections (IDs) to which the
- * file belongs.
- */
-export const createFileCollectionIDs = (files: EnteFile[]) =>
-    files.reduce((result, file) => {
-        const id = file.id;
-        let fs = result.get(id);
-        if (!fs) result.set(id, (fs = []));
-        fs.push(file.collectionID);
-        return result;
-    }, new Map<number, number[]>());
-
 export function getLatestVersionFiles(files: EnteFile[]) {
     const latestVersionFiles = new Map<string, EnteFile>();
     files.forEach((file) => {
@@ -353,6 +211,8 @@ export function getLatestVersionFiles(files: EnteFile[]) {
         }
     });
     return Array.from(latestVersionFiles.values()).filter(
-        (file) => !file.isDeleted,
+        // TODO(RE):
+        // (file) => !file.isDeleted,
+        (file) => !("isDeleted" in file && file.isDeleted),
     );
 }

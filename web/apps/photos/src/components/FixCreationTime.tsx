@@ -18,13 +18,13 @@ import { downloadManager } from "ente-gallery/services/download";
 import { extractExifDates } from "ente-gallery/services/exif";
 import { fileLogID, type EnteFile } from "ente-media/file";
 import {
-    decryptPublicMagicMetadata,
     fileCreationPhotoDate,
-    updateRemotePublicMagicMetadata,
+    fileFileName,
     type ParsedMetadataDate,
 } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
 import { FileDateTimePicker } from "ente-new/photos/components/FileDateTimePicker";
+import { updateFilePublicMagicMetadata } from "ente-new/photos/services/file";
 import { useFormik } from "formik";
 import { t } from "i18next";
 import { GalleryContext } from "pages/gallery";
@@ -89,7 +89,7 @@ export const FixCreationTime: React.FC<FixCreationTimeProps> = ({
                     pt: "6px",
                     display: "flex",
                     flexDirection: "column",
-                    ...(step == "running" ? { alignItems: "center" } : {}),
+                    ...(step == "running" && { alignItems: "center" }),
                 }}
             >
                 {message && <Typography>{message}</Typography>}
@@ -278,7 +278,7 @@ const updateFiles = async (
     let hadErrors = false;
     for (const [i, file] of files.entries()) {
         try {
-            await updateEnteFileDate(file, fixOption, customDate);
+            await updateFileDate(file, fixOption, customDate);
         } catch (e) {
             log.error(`Failed to update date of ${fileLogID(file)}`, e);
             hadErrors = true;
@@ -290,7 +290,7 @@ const updateFiles = async (
 };
 
 /**
- * Update the date associated with a given {@link enteFile}.
+ * Update the date associated with a given {@link EnteFile}.
  *
  * This is generally treated as the creation date of the underlying asset
  * (photo, video, live photo) that this file stores.
@@ -304,11 +304,11 @@ const updateFiles = async (
  * If an Exif-involving {@link fixOption} is passed for an non-image file, then
  * that file is just skipped over. Similarly, if an Exif-involving
  * {@link fixOption} is provided, but the given underlying image for the given
- * {@link enteFile} does not have a corresponding Exif (or related) value, then
- * that file is skipped.
+ * {@link file} does not have a corresponding Exif (or related) value, then that
+ * file is skipped.
  */
-const updateEnteFileDate = async (
-    enteFile: EnteFile,
+const updateFileDate = async (
+    file: EnteFile,
     fixOption: FixOption,
     customDate: ParsedMetadataDate | undefined,
 ) => {
@@ -322,11 +322,10 @@ const updateEnteFileDate = async (
             offset: undefined,
             timestamp: customDate!.timestamp,
         };
-    } else if (enteFile.metadata.fileType == FileType.image) {
-        const blob = await downloadManager.fileBlob(enteFile);
-        const file = new File([blob], enteFile.metadata.title);
+    } else if (file.metadata.fileType == FileType.image) {
+        const blob = await downloadManager.fileBlob(file);
         const { DateTimeOriginal, DateTimeDigitized, MetadataDate, DateTime } =
-            await extractExifDates(file);
+            await extractExifDates(new File([blob], fileFileName(file)));
 
         switch (fixOption) {
             case "date-time-original":
@@ -343,13 +342,10 @@ const updateEnteFileDate = async (
 
     if (!newDate) return;
 
-    const existingDate = fileCreationPhotoDate(
-        enteFile,
-        await decryptPublicMagicMetadata(enteFile),
-    );
+    const existingDate = fileCreationPhotoDate(file);
     if (newDate.timestamp == existingDate.getTime()) return;
 
-    await updateRemotePublicMagicMetadata(enteFile, {
+    await updateFilePublicMagicMetadata(file, {
         dateTime: newDate.dateTime,
         offsetTime: newDate.offset,
         editedTime: newDate.timestamp,

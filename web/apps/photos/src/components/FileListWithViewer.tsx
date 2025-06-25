@@ -7,10 +7,9 @@ import {
 } from "ente-gallery/components/viewer/FileViewer";
 import type { Collection } from "ente-media/collection";
 import { EnteFile } from "ente-media/file";
-import {
-    moveToTrash,
-    TRASH_SECTION,
-} from "ente-new/photos/services/collection";
+import { fileCreationTime, fileFileName } from "ente-media/file-metadata";
+import { moveToTrash } from "ente-new/photos/services/collection";
+import { PseudoCollectionID } from "ente-new/photos/services/collection-summary";
 import { t } from "i18next";
 import { useCallback, useMemo, useState } from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
@@ -69,6 +68,7 @@ export type FileListWithViewerProps = {
         | "collectionNameByID"
         | "pendingFavoriteUpdates"
         | "pendingVisibilityUpdates"
+        | "onFileAndCollectionSyncWithRemote"
         | "onVisualFeedback"
         | "onToggleFavorite"
         | "onFileVisibilityUpdate"
@@ -103,6 +103,7 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
     setFilesDownloadProgressAttributesCreator,
     onSetOpenFileViewer,
     onSyncWithRemote,
+    onFileAndCollectionSyncWithRemote,
     onVisualFeedback,
     onToggleFavorite,
     onFileVisibilityUpdate,
@@ -141,7 +142,7 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
     const handleDownload = useCallback(
         (file: EnteFile) => {
             const setSingleFileDownloadProgress =
-                setFilesDownloadProgressAttributesCreator!(file.metadata.title);
+                setFilesDownloadProgressAttributesCreator!(fileFileName(file));
             void downloadSingleFile(file, setSingleFileDownloadProgress);
         },
         [setFilesDownloadProgressAttributesCreator],
@@ -189,7 +190,9 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
                 onClose={handleCloseFileViewer}
                 initialIndex={currentIndex}
                 disableDownload={!enableDownload}
-                isInTrashSection={activeCollectionID === TRASH_SECTION}
+                isInTrashSection={
+                    activeCollectionID == PseudoCollectionID.trash
+                }
                 {...{
                     user,
                     files,
@@ -200,6 +203,7 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
                     collectionNameByID,
                     pendingFavoriteUpdates,
                     pendingVisibilityUpdates,
+                    onFileAndCollectionSyncWithRemote,
                     onVisualFeedback,
                     onToggleFavorite,
                     onFileVisibilityUpdate,
@@ -223,8 +227,8 @@ const Container = styled("div")`
 /**
  * See: [Note: Timeline date string]
  */
-const fileTimelineDateString = (item: EnteFile) => {
-    const date = new Date(item.metadata.creationTime / 1000);
+const fileTimelineDateString = (file: EnteFile) => {
+    const date = new Date(fileCreationTime(file) / 1000);
     return isSameDay(date, new Date())
         ? t("today")
         : isSameDay(date, new Date(Date.now() - 24 * 60 * 60 * 1000))

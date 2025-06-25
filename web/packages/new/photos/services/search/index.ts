@@ -1,9 +1,9 @@
 import log from "ente-base/log";
 import { ensureMasterKeyFromSession } from "ente-base/session";
 import { ComlinkWorker } from "ente-base/worker/comlink-worker";
+import { uniqueFilesByID } from "ente-gallery/utils/files";
 import { FileType } from "ente-media/file-type";
 import i18n, { t } from "i18next";
-import { uniqueFilesByID } from "../files";
 import { clipMatches, isMLEnabled, isMLSupported } from "../ml";
 import type { NamedPerson } from "../ml/people";
 import type {

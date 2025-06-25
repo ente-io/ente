@@ -13,12 +13,10 @@ import type {
     FolderWatchSyncedFile,
 } from "ente-base/types/ipc";
 import { type UploadResult } from "ente-gallery/services/upload";
-import type { Collection } from "ente-media/collection";
-import { EncryptedEnteFile } from "ente-media/file";
-import {
-    getLocalFiles,
-    groupFilesByCollectionID,
-} from "ente-new/photos/services/files";
+import type { UploadAsset } from "ente-gallery/services/upload/upload-service";
+import { groupFilesByCollectionID } from "ente-gallery/utils/files";
+import type { EnteFile } from "ente-media/file";
+import { getLocalFiles } from "ente-new/photos/services/files";
 import { ensureString } from "ente-utils/ensure";
 import { removeFromCollection } from "./collectionService";
 import { type UploadItemWithCollection, uploadManager } from "./upload-manager";
@@ -46,10 +44,10 @@ class FolderWatcher {
     /** `true` if we are temporarily paused to let a user upload go through. */
     private isPaused = false;
     /**
-     * A map from file paths to an Ente file for files that were uploaded (or
-     * symlinked) as part of the most recent upload attempt.
+     * A map from file paths to the (fileID, collectionID) of the file that was
+     * uploaded (or symlinked) as part of the most recent upload attempt.
      */
-    private uploadedFileForPath = new Map<string, EncryptedEnteFile>();
+    private uploadedFileForPath = new Map<string, EnteFile>();
     /**
      * A set of file paths that could not be uploaded in the most recent upload
      * attempt. These are the uploads that failed due to a permanent error that
@@ -322,47 +320,54 @@ class FolderWatcher {
      * {@link upload} gets uploaded.
      */
     async onFileUpload(
-        fileUploadResult: UploadResult,
         item: UploadItemWithCollection,
-        file: EncryptedEnteFile,
+        uploadResult: UploadResult,
     ) {
         // Re the usage of ensureString: For desktop watch, the only possibility
         // for a UploadItem is for it to be a string (the absolute path to a
         // file on disk).
-        if (
-            [
-                "addedSymlink",
-                "uploaded",
-                "uploadedWithStaticThumbnail",
-                "alreadyUploaded",
-            ].includes(fileUploadResult)
-        ) {
-            if (item.isLivePhoto) {
-                this.uploadedFileForPath.set(
-                    ensureString(item.livePhotoAssets.image),
-                    file,
-                );
-                this.uploadedFileForPath.set(
-                    ensureString(item.livePhotoAssets.video),
-                    file,
-                );
-            } else {
-                this.uploadedFileForPath.set(
-                    ensureString(item.uploadItem),
-                    file,
-                );
-            }
-        } else if (["unsupported", "tooLarge"].includes(fileUploadResult)) {
-            if (item.isLivePhoto) {
-                this.unUploadableFilePaths.add(
-                    ensureString(item.livePhotoAssets.image),
-                );
-                this.unUploadableFilePaths.add(
-                    ensureString(item.livePhotoAssets.video),
-                );
-            } else {
-                this.unUploadableFilePaths.add(ensureString(item.uploadItem));
-            }
+        switch (uploadResult.type) {
+            case "alreadyUploaded":
+            case "addedSymlink":
+            case "uploaded":
+            case "uploadedWithStaticThumbnail":
+                {
+                    // Done.
+                    if (item.isLivePhoto) {
+                        this.uploadedFileForPath.set(
+                            ensureString(item.livePhotoAssets.image),
+                            uploadResult.file,
+                        );
+                        this.uploadedFileForPath.set(
+                            ensureString(item.livePhotoAssets.video),
+                            uploadResult.file,
+                        );
+                    } else {
+                        this.uploadedFileForPath.set(
+                            ensureString(item.uploadItem),
+                            uploadResult.file,
+                        );
+                    }
+                }
+                break;
+            case "unsupported":
+            case "tooLarge":
+                {
+                    // Non-retriable error.
+                    if (item.isLivePhoto) {
+                        this.unUploadableFilePaths.add(
+                            ensureString(item.livePhotoAssets.image),
+                        );
+                        this.unUploadableFilePaths.add(
+                            ensureString(item.livePhotoAssets.video),
+                        );
+                    } else {
+                        this.unUploadableFilePaths.add(
+                            ensureString(item.uploadItem),
+                        );
+                    }
+                }
+                break;
         }
     }
 
@@ -370,21 +375,17 @@ class FolderWatcher {
      * Callback invoked by the uploader whenever all the files we requested to
      * {@link upload} get uploaded.
      */
-    async allFileUploadsDone(
-        uploadItemsWithCollection: UploadItemWithCollection[],
-        collections: Collection[],
-    ) {
+    async allFileUploadsDone(uploadedItems: UploadAsset[]) {
         const electron = ensureElectron();
         const watch = this.activeWatch;
 
         log.debug(() => [
             "watch/allFileUploadsDone",
-            JSON.stringify({ uploadItemsWithCollection, collections, watch }),
+            JSON.stringify({ uploadedItems, watch }),
         ]);
 
-        const { syncedFiles, ignoredFiles } = this.deduceSyncedAndIgnored(
-            uploadItemsWithCollection,
-        );
+        const { syncedFiles, ignoredFiles } =
+            this.deduceSyncedAndIgnored(uploadedItems);
 
         if (syncedFiles.length > 0)
             await electron.watch.updateSyncedFiles(
@@ -404,13 +405,11 @@ class FolderWatcher {
         this.debouncedRunNextEvent();
     }
 
-    private deduceSyncedAndIgnored(
-        uploadItemsWithCollection: UploadItemWithCollection[],
-    ) {
+    private deduceSyncedAndIgnored(uploadedItems: UploadAsset[]) {
         const syncedFiles: FolderWatch["syncedFiles"] = [];
         const ignoredFiles: FolderWatch["ignoredFiles"] = [];
 
-        const markSynced = (file: EncryptedEnteFile, path: string) => {
+        const markSynced = (file: EnteFile, path: string) => {
             syncedFiles.push({
                 path,
                 uploadedFileID: file.id,
@@ -425,7 +424,7 @@ class FolderWatcher {
             this.unUploadableFilePaths.delete(path);
         };
 
-        for (const item of uploadItemsWithCollection) {
+        for (const item of uploadedItems) {
             // Re the usage of ensureString: For desktop watch, the only
             // possibility for a UploadItem is for it to be a string (the
             // absolute path to a file on disk).

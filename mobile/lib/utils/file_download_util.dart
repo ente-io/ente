@@ -29,8 +29,7 @@ import "package:photos/utils/standalone/fake_progress.dart";
 final _logger = Logger("file_download_util");
 
 Future<File?> downloadAndDecryptPublicFile(
-  EnteFile file,
-  String authToken, {
+  EnteFile file, {
   ProgressCallback? progressCallback,
 }) async {
   final String logPrefix = 'Public File-${file.uploadedFileID}:';
@@ -42,13 +41,8 @@ Future<File?> downloadAndDecryptPublicFile(
   final String decryptedFilePath = "$tempDir${file.uploadedFileID}.decrypted";
 
   try {
-    final authJWTToken = await CollectionsService.instance
-        .getSharedPublicAlbumTokenJWT(file.collectionID!);
-
-    final headers = {
-      "X-Auth-Access-Token": authToken,
-      if (authJWTToken != null) "X-Auth-Access-Token-JWT": authJWTToken,
-    };
+    final headers =
+        CollectionsService.instance.publicCollectionHeaders(file.collectionID!);
     final response = (await NetworkClient.instance.getDio().download(
       FileUrl.getUrl(file.uploadedFileID!, FileUrlType.publicDownload),
       encryptedFilePath,
@@ -102,12 +96,8 @@ Future<File?> downloadAndDecrypt(
   ProgressCallback? progressCallback,
 }) async {
   if (CollectionsService.instance.isSharedPublicLink(file.collectionID!)) {
-    final authToken = await CollectionsService.instance
-        .getSharedPublicAlbumToken(file.collectionID!);
-
     return await downloadAndDecryptPublicFile(
       file,
-      authToken!,
       progressCallback: progressCallback,
     );
   }
@@ -147,7 +137,7 @@ Future<File?> downloadAndDecrypt(
         ),
         onReceiveProgress: (a, b) {
           if (kDebugMode && a >= 0 && b >= 0) {
-            // _logger.fine(
+            // _logger.info(
             //   "$logPrefix download progress: ${formatBytes(a)} / ${formatBytes(b)}",
             // );
           }

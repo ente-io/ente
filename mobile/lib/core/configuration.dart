@@ -75,6 +75,7 @@ class Configuration {
   late FlutterSecureStorage _secureStorage;
   late String _tempDocumentsDirPath;
   late String _thumbnailCacheDirectory;
+  late String _personFaceThumbnailCacheDirectory;
 
   late String _sharedDocumentsMediaDirectory;
   String? _volatilePassword;
@@ -95,6 +96,9 @@ class Configuration {
       final tempDirectoryPath = (await getTemporaryDirectory()).path;
       _thumbnailCacheDirectory = tempDirectoryPath + "/thumbnail-cache";
       Directory(_thumbnailCacheDirectory).createSync(recursive: true);
+      _personFaceThumbnailCacheDirectory =
+          _documentsDirectory + "/person-face-thumbnail-cache";
+      Directory(_personFaceThumbnailCacheDirectory).createSync(recursive: true);
       _sharedDocumentsMediaDirectory =
           _documentsDirectory + "/ente-shared-media";
       Directory(_sharedDocumentsMediaDirectory).createSync(recursive: true);
@@ -547,6 +551,10 @@ class Configuration {
 
   String getThumbnailCacheDirectory() {
     return _thumbnailCacheDirectory;
+  }
+
+  String getPersonFaceThumbnailCacheDirectory() {
+    return _personFaceThumbnailCacheDirectory;
   }
 
   String getSharedMediaDirectory() {

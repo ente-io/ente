@@ -7,12 +7,15 @@ import {
     matchJSONMetadata,
     metadataJSONMapKeyForJSON,
 } from "ente-gallery/services/upload/metadata-json";
+import { groupFilesByCollectionID } from "ente-gallery/utils/files";
+import {
+    fileCreationTime,
+    fileFileName,
+    fileLocation,
+} from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
 import { getLocalCollections } from "ente-new/photos/services/collections";
-import {
-    getLocalFiles,
-    groupFilesByCollectionID,
-} from "ente-new/photos/services/files";
+import { savedNormalFiles } from "ente-new/photos/services/photos-fdb";
 import { getUserDetailsV2 } from "ente-new/photos/services/user-details";
 
 const DATE_TIME_PARSING_TEST_FILE_NAMES = [
@@ -188,7 +191,7 @@ async function totalCollectionCountCheck(expectedState) {
 }
 
 async function collectionWiseFileCount(expectedState) {
-    const files = await getLocalFiles();
+    const files = await savedNormalFiles();
     const collections = await getLocalCollections();
     const collectionToFilesMap = groupFilesByCollectionID(files);
     const collectionIDToNameMap = new Map(
@@ -217,7 +220,7 @@ async function collectionWiseFileCount(expectedState) {
 }
 
 async function thumbnailGenerationFailedFilesCheck(expectedState) {
-    const files = await getLocalFiles();
+    const files = await savedNormalFiles();
     const filesWithStaticThumbnail = files.filter(
         (file) => file.metadata.hasStaticThumbnail,
     );
@@ -233,9 +236,8 @@ async function thumbnailGenerationFailedFilesCheck(expectedState) {
             }
         },
     );
-    const fileNamesWithStaticThumbnail = uniqueFilesWithStaticThumbnail.map(
-        (file) => file.metadata.title,
-    );
+    const fileNamesWithStaticThumbnail =
+        uniqueFilesWithStaticThumbnail.map(fileFileName);
 
     if (
         expectedState.thumbnail_generation_failure.count <
@@ -260,9 +262,9 @@ async function thumbnailGenerationFailedFilesCheck(expectedState) {
 }
 
 async function livePhotoClubbingCheck(expectedState) {
-    const files = await getLocalFiles();
+    const files = await savedNormalFiles();
     const livePhotos = files.filter(
-        (file) => file.metadata.fileType === FileType.livePhoto,
+        (file) => file.metadata.fileType == FileType.livePhoto,
     );
 
     const fileIDSet = new Set();
@@ -275,9 +277,7 @@ async function livePhotoClubbingCheck(expectedState) {
         }
     });
 
-    const livePhotoFileNames = uniqueLivePhotos.map(
-        (file) => file.metadata.title,
-    );
+    const livePhotoFileNames = uniqueLivePhotos.map(fileFileName);
 
     if (expectedState.live_photo.count !== livePhotoFileNames.length) {
         throw Error(
@@ -297,50 +297,44 @@ async function livePhotoClubbingCheck(expectedState) {
 }
 
 async function exifDataParsingCheck(expectedState) {
-    const files = await getLocalFiles();
+    const files = await savedNormalFiles();
     Object.entries(expectedState.exif).map(([fileName, exifValues]) => {
         const matchingFile = files.find(
-            (file) => file.metadata.title === fileName,
+            (file) => fileFileName(file) == fileName,
         );
         if (!matchingFile) {
             throw Error(`exifDataParsingCheck failed , ${fileName} missing`);
         }
         if (
             exifValues["creation_time"] &&
-            exifValues["creation_time"] !== matchingFile.metadata.creationTime
+            exifValues["creation_time"] !== fileCreationTime(matchingFile)
         ) {
             throw Error(`exifDataParsingCheck failed ❌ ,
                             for ${fileName}
-                            expected: ${exifValues["creation_time"]} got: ${matchingFile.metadata.creationTime}`);
+                            expected: ${exifValues["creation_time"]} got: ${fileCreationTime(matchingFile)}`);
         }
+        if (!exifValues["location"]) return;
+        const location = fileLocation(matchingFile);
         if (
-            exifValues["location"] &&
-            (Math.abs(
-                exifValues["location"].latitude -
-                    matchingFile.metadata.latitude,
-            ) > 1 ||
-                Math.abs(
-                    exifValues["location"].longitude -
-                        matchingFile.metadata.longitude,
-                ) > 1)
+            !location ||
+            Math.abs(exifValues["location"].latitude - location.latitude) > 1 ||
+            Math.abs(exifValues["location"].longitude - location.longitude) > 1
         ) {
             throw Error(`exifDataParsingCheck failed ❌  ,
                             for ${fileName}
                             expected: ${JSON.stringify(exifValues["location"])}
-                            got: [${matchingFile.metadata.latitude},${
-                                matchingFile.metadata.longitude
-                            }]`);
+                            got: ${location}`);
         }
     });
     console.log("exif data parsing check passed ✅");
 }
 
 async function fileDimensionExtractionCheck(expectedState) {
-    const files = await getLocalFiles();
+    const files = await savedNormalFiles();
     Object.entries(expectedState.file_dimensions).map(
         ([fileName, dimensions]) => {
             const matchingFile = files.find(
-                (file) => file.metadata.title === fileName,
+                (file) => fileFileName(file) == fileName,
             );
             if (!matchingFile) {
                 throw Error(
@@ -363,40 +357,35 @@ async function fileDimensionExtractionCheck(expectedState) {
 }
 
 async function googleMetadataReadingCheck(expectedState) {
-    const files = await getLocalFiles();
+    const files = await savedNormalFiles();
     Object.entries(expectedState.google_import).map(([fileName, metadata]) => {
         const matchingFile = files.find(
-            (file) => file.metadata.title === fileName,
+            (file) => fileFileName(file) == fileName,
         );
         if (!matchingFile) {
             throw Error(`exifDataParsingCheck failed , ${fileName} missing`);
         }
         if (
             metadata["creation_time"] &&
-            metadata["creation_time"] !== matchingFile.metadata.creationTime
+            metadata["creation_time"] !== fileCreationTime(matchingFile)
         ) {
             throw Error(`googleMetadataJSON reading check failed ❌ ,
                 for ${fileName}
-                expected: ${metadata["creation_time"]} got: ${matchingFile.metadata.creationTime}`);
+                expected: ${metadata["creation_time"]} got: ${fileCreationTime(matchingFile)}`);
         }
+        if (!metadata["location"]) return;
+        const location = fileLocation(matchingFile);
         if (
-            metadata["location"] &&
-            (Math.abs(
-                metadata["location"].latitude - matchingFile.metadata.latitude,
-            ) > 1 ||
-                Math.abs(
-                    metadata["location"].longitude -
-                        matchingFile.metadata.longitude,
-                ) > 1)
+            !location ||
+            Math.abs(metadata["location"].latitude - location.latitude) > 1 ||
+            Math.abs(metadata["location"].longitude - location.longitude) > 1
         ) {
             throw Error(`googleMetadataJSON reading check failed ❌  ,
                                 for ${fileName}
                                 expected: ${JSON.stringify(
                                     metadata["location"],
                                 )}
-                                got: [${matchingFile.metadata.latitude},${
-                                    matchingFile.metadata.longitude
-                                }]`);
+                                got: ${location}`);
         }
     });
     console.log("googleMetadataJSON reading check passed ✅");

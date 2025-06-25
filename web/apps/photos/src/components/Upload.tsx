@@ -39,6 +39,11 @@ import {
     type UploadPhase,
 } from "ente-gallery/services/upload";
 import type { ParsedMetadataJSON } from "ente-gallery/services/upload/metadata-json";
+import {
+    sessionExpiredErrorMessage,
+    storageLimitExceededErrorMessage,
+    subscriptionExpiredErrorMessage,
+} from "ente-gallery/services/upload/upload-service";
 import type { Collection } from "ente-media/collection";
 import type { EnteFile } from "ente-media/file";
 import { UploaderNameInput } from "ente-new/albums/components/UploaderNameInput";
@@ -48,7 +53,6 @@ import { downloadAppDialogAttributes } from "ente-new/photos/components/utils/do
 import { getLatestCollections } from "ente-new/photos/services/collections";
 import { redirectToCustomerPortal } from "ente-new/photos/services/user-details";
 import { usePhotosAppContext } from "ente-new/photos/types/context";
-import { CustomError } from "ente-shared/error";
 import { firstNonEmpty } from "ente-utils/array";
 import { t } from "i18next";
 import { GalleryContext } from "pages/gallery";
@@ -695,10 +699,7 @@ export const Upload: React.FC<UploadProps> = ({
             if (!wereFilesProcessed) closeUploadProgress();
             if (isDesktop) {
                 if (watcher.isUploadRunning()) {
-                    await watcher.allFileUploadsDone(
-                        uploadItemsWithCollection,
-                        collections,
-                    );
+                    await watcher.allFileUploadsDone(uploadItemsWithCollection);
                 } else if (watcher.isSyncPaused()) {
                     // Resume folder watch after the user upload that
                     // interrupted it is done.
@@ -707,8 +708,8 @@ export const Upload: React.FC<UploadProps> = ({
             }
         } catch (e) {
             log.error("Failed to upload files", e);
-            showUserFacingError(e.message);
             closeUploadProgress();
+            notifyUser(e);
         } finally {
             postUploadAction();
         }
@@ -724,19 +725,19 @@ export const Upload: React.FC<UploadProps> = ({
             await uploadManager.uploadItems(items, collections, uploaderName);
         } catch (e) {
             log.error("Retrying failed uploads failed", e);
-            showUserFacingError(e.message);
             closeUploadProgress();
+            notifyUser(e);
         } finally {
             postUploadAction();
         }
     };
 
-    function showUserFacingError(err: string) {
-        switch (err) {
-            case CustomError.SESSION_EXPIRED:
+    const notifyUser = (e: unknown) => {
+        switch (e instanceof Error && e.message) {
+            case sessionExpiredErrorMessage:
                 showSessionExpiredMessage();
                 break;
-            case CustomError.SUBSCRIPTION_EXPIRED:
+            case subscriptionExpiredErrorMessage:
                 showNotification({
                     color: "critical",
                     captionFirst: true,
@@ -745,7 +746,7 @@ export const Upload: React.FC<UploadProps> = ({
                     onClick: redirectToCustomerPortal,
                 });
                 break;
-            case CustomError.STORAGE_QUOTA_EXCEEDED:
+            case storageLimitExceededErrorMessage:
                 showNotification({
                     color: "critical",
                     captionFirst: true,
@@ -761,7 +762,7 @@ export const Upload: React.FC<UploadProps> = ({
                     title: t("generic_error_retry"),
                 });
         }
-    }
+    };
 
     const uploadToSingleNewCollection = (collectionName: string) => {
         uploadFilesToNewCollections("root", collectionName);
@@ -799,7 +800,9 @@ export const Upload: React.FC<UploadProps> = ({
             uploaderName,
         );
 
-        await uploadFilesToExistingCollection(
+        // Do not keep the uploader name input dialog open while the upload is
+        // progressing (the upload progress indicator will take out now).
+        void uploadFilesToExistingCollection(
             props.uploadCollection,
             uploaderName,
         );

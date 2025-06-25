@@ -38,10 +38,7 @@ import { FullScreenDropZone } from "ente-gallery/components/FullScreenDropZone";
 import { type UploadTypeSelectorIntent } from "ente-gallery/components/Upload";
 import { type Collection } from "ente-media/collection";
 import { type EnteFile } from "ente-media/file";
-import {
-    updateRemotePrivateMagicMetadata,
-    type ItemVisibility,
-} from "ente-media/file-metadata";
+import { type ItemVisibility } from "ente-media/file-metadata";
 import {
     CollectionSelector,
     type CollectionSelectorAttributes,
@@ -61,6 +58,7 @@ import {
 import {
     constructUserIDToEmailMap,
     createShareeSuggestionEmails,
+    findCollectionCreatingUncategorizedIfNeeded,
     validateKey,
 } from "ente-new/photos/components/gallery/helpers";
 import {
@@ -70,17 +68,19 @@ import {
 import { useIsOffline } from "ente-new/photos/components/utils/use-is-offline";
 import { usePeopleStateSnapshot } from "ente-new/photos/components/utils/use-snapshot";
 import { shouldShowWhatsNew } from "ente-new/photos/services/changelog";
+import { createAlbum } from "ente-new/photos/services/collection";
 import {
-    ALL_SECTION,
-    DUMMY_UNCATEGORIZED_COLLECTION,
-} from "ente-new/photos/services/collection";
-import { areOnlySystemCollections } from "ente-new/photos/services/collection/ui";
-import { getAllLocalCollections } from "ente-new/photos/services/collections";
+    areOnlySystemCollections,
+    PseudoCollectionID,
+} from "ente-new/photos/services/collection-summary";
 import exportService from "ente-new/photos/services/export";
+import { updateFilesVisibility } from "ente-new/photos/services/file";
 import {
-    getLocalFiles,
-    getLocalTrashedFiles,
-} from "ente-new/photos/services/files";
+    savedCollections,
+    savedHiddenFiles,
+    savedNormalFiles,
+    savedTrashItems,
+} from "ente-new/photos/services/photos-fdb";
 import {
     filterSearchableFiles,
     setSearchCollectionsAndFiles,
@@ -114,8 +114,6 @@ import { FileWithPath } from "react-dropzone";
 import { Trans } from "react-i18next";
 import {
     addToFavorites,
-    createAlbum,
-    createUnCategorizedCollection,
     removeFromFavorites,
 } from "services/collectionService";
 import { uploadManager } from "services/upload-manager";
@@ -187,7 +185,7 @@ const Page: React.FC = () => {
         ownCount: 0,
         count: 0,
         collectionID: 0,
-        context: { mode: "albums", collectionID: ALL_SECTION },
+        context: { mode: "albums", collectionID: PseudoCollectionID.all },
     });
     const [blockingLoad, setBlockingLoad] = useState(false);
     const [shouldDisableDropzone, setShouldDisableDropzone] = useState(false);
@@ -331,10 +329,10 @@ const Page: React.FC = () => {
                 type: "mount",
                 user,
                 familyData,
-                collections: await getAllLocalCollections(),
-                normalFiles: await getLocalFiles("normal"),
-                hiddenFiles: await getLocalFiles("hidden"),
-                trashedFiles: await getLocalTrashedFiles(),
+                collections: await savedCollections(),
+                normalFiles: await savedNormalFiles(),
+                hiddenFiles: await savedHiddenFiles(),
+                trashItems: await savedTrashItems(),
             });
             await syncWithRemote({ force: true });
             setIsFirstLoad(false);
@@ -379,7 +377,7 @@ const Page: React.FC = () => {
             return;
         }
         let collectionURL = "";
-        if (activeCollectionID !== ALL_SECTION) {
+        if (activeCollectionID !== PseudoCollectionID.all) {
             // TODO: Is this URL param even used?
             collectionURL = `?collection=${activeCollectionID}`;
         }
@@ -521,6 +519,23 @@ const Page: React.FC = () => {
         setTimeout(hideLoadingBar, 0);
     }, [showLoadingBar, hideLoadingBar]);
 
+    /**
+     * Sync the local files and collection with remote.
+     *
+     * [Note: Full sync vs file and collection sync]
+     *
+     * This is a subset of the sync which happens in {@link syncWithRemote}, but
+     * in some cases where we know that the changes will not have transitive
+     * effects outside of the locally stored files and collections this is a
+     * better option for interactive operations because:
+     *
+     * 1. This involves a lesser number of API requests, so it reduces the time
+     *    the user has to wait for their interactive request to complete.
+     *
+     * 2. The current implementation {@link syncWithRemote} tries to run only
+     *    only one instance of it is in progress at a time, while each
+     *    invocation of {@link fileAndCollectionSyncWithRemote} is independent.
+     */
     const fileAndCollectionSyncWithRemote = useCallback(async () => {
         const didUpdateFiles = await syncCollectionAndFiles({
             onSetCollections: (
@@ -542,8 +557,8 @@ const Page: React.FC = () => {
                 dispatch({ type: "setHiddenFiles", files }),
             onFetchHiddenFiles: (files) =>
                 dispatch({ type: "fetchHiddenFiles", files }),
-            onResetTrashedFiles: (files) =>
-                dispatch({ type: "setTrashedFiles", files }),
+            onSetTrashedItems: (trashItems) =>
+                dispatch({ type: "setTrashItems", trashItems }),
         });
         if (didUpdateFiles) {
             exportService.onLocalFilesUpdated();
@@ -785,7 +800,7 @@ const Page: React.FC = () => {
         setUploadTypeSelectorIntent(intent ?? "upload");
     };
 
-    const handleSetActiveCollectionID = (
+    const handleShowCollectionSummary = (
         collectionSummaryID: number | undefined,
     ) => dispatch({ type: "showCollectionSummary", collectionSummaryID });
 
@@ -831,14 +846,26 @@ const Page: React.FC = () => {
             const fileID = file.id;
             dispatch({ type: "addPendingVisibilityUpdate", fileID });
             try {
-                const privateMagicMetadata =
-                    await updateRemotePrivateMagicMetadata(file, {
-                        visibility,
-                    });
+                await updateFilesVisibility([file], visibility);
+                // [Note: Interactive updates to file metadata]
+                //
+                // 1. Update the remote metadata.
+                //
+                // 2. Construct a fake a metadata object with the updates
+                //    reflected in it.
+                //
+                // 3. The caller (eventually) triggers a remote sync in the
+                //    background, but meanwhile uses this updated metadata.
+                //
+                // TODO(RE): Replace with file fetch?
                 dispatch({
                     type: "unsyncedPrivateMagicMetadataUpdate",
                     fileID,
-                    privateMagicMetadata,
+                    privateMagicMetadata: {
+                        ...file.magicMetadata,
+                        version: (file.magicMetadata?.version ?? 0) + 1,
+                        data: { ...file.magicMetadata?.data, visibility },
+                    },
                 });
             } finally {
                 dispatch({ type: "removePendingVisibilityUpdate", fileID });
@@ -893,7 +920,7 @@ const Page: React.FC = () => {
         <GalleryContext.Provider
             value={{
                 ...defaultGalleryContext,
-                setActiveCollectionID: handleSetActiveCollectionID,
+                setActiveCollectionID: handleShowCollectionSummary,
                 syncWithRemote: (force, silent) =>
                     syncWithRemote({ force, silent }),
                 setBlockingLoad,
@@ -926,11 +953,14 @@ const Page: React.FC = () => {
                     onClose={handleCloseCollectionSelector}
                     attributes={collectionSelectorAttributes}
                     collectionSummaries={normalCollectionSummaries}
-                    collectionForCollectionID={(id) =>
+                    collectionForCollectionSummaryID={(id) =>
+                        // Null assert since the collection selector should only
+                        // show "selectable" normalCollectionSummaries. See:
+                        // [Note: Picking from selectable collection summaries].
                         findCollectionCreatingUncategorizedIfNeeded(
                             normalCollections,
                             id,
-                        )
+                        )!
                     }
                 />
                 <FilesDownloadProgress
@@ -1031,7 +1061,7 @@ const Page: React.FC = () => {
                             : undefined) ?? []
                     }
                     onChangeMode={handleChangeBarMode}
-                    setActiveCollectionID={handleSetActiveCollectionID}
+                    setActiveCollectionID={handleShowCollectionSummary}
                     onSelectPerson={handleSelectPerson}
                 />
 
@@ -1068,7 +1098,11 @@ const Page: React.FC = () => {
                 <Sidebar
                     {...sidebarVisibilityProps}
                     collectionSummaries={normalCollectionSummaries}
+                    uncategorizedCollectionSummaryID={
+                        state.uncategorizedCollectionSummaryID
+                    }
                     onShowPlanSelector={showPlanSelector}
+                    onShowCollectionSummary={handleShowCollectionSummary}
                     onShowExport={showExport}
                     onAuthenticateUser={authenticateUser}
                 />
@@ -1077,7 +1111,7 @@ const Page: React.FC = () => {
                 !isFirstLoad &&
                 !normalFiles?.length &&
                 !hiddenFiles?.length &&
-                activeCollectionID === ALL_SECTION ? (
+                activeCollectionID === PseudoCollectionID.all ? (
                     <GalleryEmptyState
                         isUploadInProgress={uploadManager.isUploadInProgress()}
                         onUpload={openUploader}
@@ -1126,6 +1160,9 @@ const Page: React.FC = () => {
                         onMarkTempDeleted={handleMarkTempDeleted}
                         onSetOpenFileViewer={setIsFileViewerOpen}
                         onSyncWithRemote={syncWithRemote}
+                        onFileAndCollectionSyncWithRemote={
+                            fileAndCollectionSyncWithRemote
+                        }
                         onVisualFeedback={handleVisualFeedback}
                         onSelectCollection={handleSelectCollection}
                         onSelectPerson={handleSelectPerson}
@@ -1331,19 +1368,3 @@ export async function handleSubscriptionCompletionRedirectIfNeeded(
         }
     }
 }
-
-/**
- * Return the {@link Collection} (from amongst {@link collections}) with the
- * given {@link collectionID}. As a special case, if collection ID is the
- * placeholder ID of the uncategorized collection, create it and then return it.
- */
-const findCollectionCreatingUncategorizedIfNeeded = async (
-    collections: Collection[],
-    collectionID: number,
-) => {
-    if (collectionID == DUMMY_UNCATEGORIZED_COLLECTION) {
-        return await createUnCategorizedCollection();
-    } else {
-        return collections.find((c) => c.id === collectionID);
-    }
-};

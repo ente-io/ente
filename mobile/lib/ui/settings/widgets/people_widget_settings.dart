@@ -72,7 +72,7 @@ class _PeopleWidgetSettingsState extends State<PeopleWidgetSettings> {
                             );
                             Navigator.pop(context);
                             await PeopleHomeWidgetService.instance
-                                .peopleChanged();
+                                .checkPeopleChanged();
                           },
                   );
                 },

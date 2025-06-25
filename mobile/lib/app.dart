@@ -2,7 +2,6 @@ import "dart:async";
 import 'dart:io';
 
 import 'package:adaptive_theme/adaptive_theme.dart';
-import 'package:background_fetch/background_fetch.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
@@ -24,18 +23,15 @@ import "package:photos/services/people_home_widget_service.dart";
 import 'package:photos/services/sync/sync_service.dart';
 import 'package:photos/ui/tabs/home_widget.dart';
 import "package:photos/ui/viewer/actions/file_viewer.dart";
+import "package:photos/utils/bg_task_utils.dart";
 import "package:photos/utils/intent_util.dart";
 import "package:photos/utils/standalone/debouncer.dart";
 
 class EnteApp extends StatefulWidget {
-  final Future<void> Function(String) runBackgroundTask;
-  final Future<void> Function(String) killBackgroundTask;
   final AdaptiveThemeMode? savedThemeMode;
   final Locale? locale;
 
   const EnteApp(
-    this.runBackgroundTask,
-    this.killBackgroundTask,
     this.locale,
     this.savedThemeMode, {
     super.key,
@@ -51,9 +47,9 @@ class EnteApp extends StatefulWidget {
 }
 
 class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
-  final _logger = Logger("EnteAppState");
   late Locale? locale;
   late StreamSubscription<MemoriesChangedEvent> _memoriesChangedSubscription;
+  final _logger = Logger("EnteAppState");
   late StreamSubscription<PeopleChangedEvent> _peopleChangedSubscription;
   late Debouncer _changeCallbackDebouncer;
 
@@ -79,7 +75,7 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
       (event) async {
         _changeCallbackDebouncer.run(
           () async =>
-              unawaited(PeopleHomeWidgetService.instance.peopleChanged()),
+              unawaited(PeopleHomeWidgetService.instance.checkPeopleChanged()),
         );
       },
     );
@@ -112,7 +108,7 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
         : MediaExtentionAction(action: IntentAction.main);
     AppLifecycleService.instance.setMediaExtensionAction(mediaExtentionAction);
     if (mediaExtentionAction.action == IntentAction.main) {
-      _configureBackgroundFetch();
+      await BgTaskUtils.configureWorkmanager();
     }
   }
 
@@ -196,30 +192,5 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
     } else {
       AppLifecycleService.instance.onAppInBackground(stateChangeReason);
     }
-  }
-
-  void _configureBackgroundFetch() {
-    BackgroundFetch.configure(
-        BackgroundFetchConfig(
-          minimumFetchInterval: 15,
-          forceAlarmManager: false,
-          stopOnTerminate: false,
-          startOnBoot: true,
-          enableHeadless: true,
-          requiresBatteryNotLow: true,
-          requiresCharging: false,
-          requiresStorageNotLow: false,
-          requiresDeviceIdle: false,
-          requiredNetworkType: NetworkType.ANY,
-        ), (String taskId) async {
-      await widget.runBackgroundTask(taskId);
-    }, (taskId) {
-      _logger.info("BG task timeout taskID: $taskId");
-      widget.killBackgroundTask(taskId);
-    }).then((int status) {
-      _logger.info('[BackgroundFetch] configure success: $status');
-    }).catchError((e) {
-      _logger.info('[BackgroundFetch] configure ERROR: $e');
-    });
   }
 }

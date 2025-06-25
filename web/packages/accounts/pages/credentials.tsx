@@ -21,19 +21,19 @@ import {
     unstashRedirect,
 } from "ente-accounts/services/redirect";
 import { checkSessionValidity } from "ente-accounts/services/session";
+import type { SRPAttributes } from "ente-accounts/services/srp";
 import {
-    configureSRP,
-    deriveSRPPassword,
     generateSRPSetupAttributes,
-    loginViaSRP,
+    getSRPAttributes,
+    setupSRP,
+    verifySRP,
 } from "ente-accounts/services/srp";
-import type { SRPAttributes } from "ente-accounts/services/srp-remote";
-import { getSRPAttributes } from "ente-accounts/services/srp-remote";
-import type { KeyAttributes, User } from "ente-accounts/services/user";
 import {
-    decryptAndStoreToken,
-    generateAndSaveIntermediateKeyAttributes,
-} from "ente-accounts/utils/helpers";
+    generateAndSaveInteractiveKeyAttributes,
+    type KeyAttributes,
+    type User,
+} from "ente-accounts/services/user";
+import { decryptAndStoreToken } from "ente-accounts/utils/helpers";
 import { LinkButton } from "ente-base/components/LinkButton";
 import { LoadingIndicator } from "ente-base/components/loaders";
 import { useBaseContext } from "ente-base/context";
@@ -169,7 +169,7 @@ const Page: React.FC = () => {
         async (kek: string) => {
             try {
                 // Currently the page will get reloaded if any of the attributes
-                // have changed, so we don't need to worry about the kek having
+                // have changed, so we don't need to worry about the KEK having
                 // been generated using stale credentials. This await on the
                 // promise is here to only ensure we're done with the check
                 // before we let the user in.
@@ -185,7 +185,7 @@ const Page: React.FC = () => {
                     accountsUrl,
                 } =
                     await userVerificationResultAfterResolvingSecondFactorChoice(
-                        await loginViaSRP(srpAttributes!, kek),
+                        await verifySRP(srpAttributes!, kek),
                     );
                 setIsFirstLogin(true);
 
@@ -240,16 +240,16 @@ const Page: React.FC = () => {
         };
 
     const handleVerifyMasterPassword: VerifyMasterPasswordFormProps["onVerify"] =
-        (key, kek, keyAttributes, passphrase) => {
+        (key, kek, keyAttributes, password) => {
             void (async () => {
-                if (isFirstLogin()) {
-                    await generateAndSaveIntermediateKeyAttributes(
-                        passphrase,
-                        keyAttributes,
-                        key,
-                    );
-                }
-                await postVerification(key, kek, keyAttributes);
+                const updatedKeyAttributes = isFirstLogin()
+                    ? await generateAndSaveInteractiveKeyAttributes(
+                          password,
+                          keyAttributes,
+                          key,
+                      )
+                    : keyAttributes;
+                await postVerification(key, kek, updatedKeyAttributes);
             })();
         };
 
@@ -261,7 +261,8 @@ const Page: React.FC = () => {
         await saveMasterKeyInSessionAndSafeStore(masterKey);
         await decryptAndStoreToken(keyAttributes, masterKey);
         try {
-            let srpAttributes: SRPAttributes | null = getData("srpAttributes");
+            let srpAttributes: SRPAttributes | null | undefined =
+                getData("srpAttributes");
             if (!srpAttributes && user) {
                 srpAttributes = await getSRPAttributes(user.email);
                 if (srpAttributes) {
@@ -270,10 +271,7 @@ const Page: React.FC = () => {
             }
             log.debug(() => `userSRPSetupPending ${!srpAttributes}`);
             if (!srpAttributes) {
-                const loginSubKey = await deriveSRPPassword(kek);
-                const srpSetupAttributes =
-                    await generateSRPSetupAttributes(loginSubKey);
-                await configureSRP(srpSetupAttributes);
+                await setupSRP(await generateSRPSetupAttributes(kek));
             }
         } catch (e) {
             log.error("migrate to srp failed", e);

@@ -8,8 +8,9 @@ import type { ElectronMLWorker } from "ente-base/types/ipc";
 import { isNetworkDownloadError } from "ente-gallery/services/download";
 import type { ProcessableUploadItem } from "ente-gallery/services/upload";
 import { fileLogID, type EnteFile } from "ente-media/file";
+import { getLocalTrashFileIDs } from "ente-new/photos/services/trash";
 import { wait } from "ente-utils/promise";
-import { getAllLocalFiles, getLocalTrashFileIDs } from "../files";
+import { savedFiles } from "../photos-fdb";
 import {
     createImageBitmapAndData,
     fetchRenderableBlob,
@@ -323,7 +324,7 @@ export class MLWorker {
     async clusterFaces(masterKey: string) {
         const { clusters, modifiedClusterIDs } = await _clusterFaces(
             await savedFaceIndexes(),
-            await getAllLocalFiles(),
+            await savedFiles(),
             (progress) => this.updateClusteringProgress(progress),
         );
         await reconcileClusters(clusters, modifiedClusterIDs, masterKey);
@@ -435,7 +436,7 @@ const indexNextBatch = async (
 const syncWithLocalFilesAndGetFilesToIndex = async (
     count: number,
 ): Promise<Map<number, EnteFile>> => {
-    const localFiles = await getAllLocalFiles();
+    const localFiles = await savedFiles();
     const localFileByID = new Map(localFiles.map((f) => [f.id, f]));
 
     await updateAssumingLocalFiles(

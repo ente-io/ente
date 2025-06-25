@@ -10,8 +10,8 @@ import { isDevBuild } from "ente-base/env";
 import { formattedDateRelative } from "ente-base/i18n-date";
 import log from "ente-base/log";
 import { downloadManager } from "ente-gallery/services/download";
-import { EnteFile, enteFileDeletionDate } from "ente-media/file";
-import { fileDurationString } from "ente-media/file-metadata";
+import { EnteFile } from "ente-media/file";
+import { fileCreationTime, fileDurationString } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
 import {
     GAP_BTW_TILES,
@@ -25,7 +25,7 @@ import {
     StaticThumbnail,
 } from "ente-new/photos/components/PlaceholderThumbnails";
 import { TileBottomTextOverlay } from "ente-new/photos/components/Tiles";
-import { TRASH_SECTION } from "ente-new/photos/services/collection";
+import { PseudoCollectionID } from "ente-new/photos/services/collection-summary";
 import { t } from "i18next";
 import memoize from "memoize-one";
 import { GalleryContext } from "pages/gallery";
@@ -91,6 +91,19 @@ export interface FileListAnnotatedFile {
      */
     timelineDateString: string;
 }
+
+/**
+ * A file augmented with the date when it will be permanently deleted.
+ *
+ * See: [Note: Files in trash pseudo collection have deleteBy]
+ */
+export type EnteTrashFile = EnteFile & {
+    /**
+     * Timestamp (epoch microseconds) when the trash item (and its corresponding
+     * {@link EnteFile}) will be permanently deleted.
+     */
+    deleteBy?: number;
+};
 
 export interface FileListProps {
     /** The height we should occupy (needed since the list is virtualized). */
@@ -354,21 +367,19 @@ export const FileList: React.FC<FileListProps> = ({
 
     const groupByTime = (timeStampList: TimeStampListItem[]) => {
         let listItemIndex = 0;
-        let currentDate;
+        let lastCreationTime: number | undefined;
         annotatedFiles.forEach((item, index) => {
+            const creationTime = fileCreationTime(item.file) / 1000;
             if (
-                !currentDate ||
-                !isSameDay(
-                    new Date(item.file.metadata.creationTime / 1000),
-                    new Date(currentDate),
-                )
+                !lastCreationTime ||
+                !isSameDay(new Date(creationTime), new Date(lastCreationTime))
             ) {
-                currentDate = item.file.metadata.creationTime / 1000;
+                lastCreationTime = creationTime;
 
                 timeStampList.push({
                     tag: "date",
                     date: item.timelineDateString,
-                    id: currentDate.toString(),
+                    id: lastCreationTime.toString(),
                 });
                 timeStampList.push({
                     tag: "file",
@@ -811,7 +822,7 @@ export const FileList: React.FC<FileListProps> = ({
                       (selected.context.mode == "people"
                           ? selected.context.personID == activePersonID
                           : selected.context.collectionID ==
-                            activeCollectionID)) && selected[file.id]
+                            activeCollectionID)) && !!selected[file.id]
             }
             selectOnClick={selected.count > 0}
             onHover={onHoverOver(index)}
@@ -1229,13 +1240,18 @@ const FileThumbnail: React.FC<FileThumbnailProps> = ({
         }
     };
 
+    // See: [Note: Files in trash pseudo collection have deleteBy]
+    const deleteBy =
+        activeCollectionID == PseudoCollectionID.trash &&
+        (file as EnteTrashFile).deleteBy;
+
     return (
         <FileThumbnail_
             key={`thumb-${file.id}}`}
             onClick={handleClick}
             onMouseEnter={handleHover}
             disabled={!imageURL}
-            {...(selectable ? longPressHandlers : {})}
+            {...(selectable && longPressHandlers)}
         >
             {selectable && (
                 <Check
@@ -1282,10 +1298,10 @@ const FileThumbnail: React.FC<FileThumbnailProps> = ({
                 <InSelectRangeOverlay />
             )}
 
-            {activeCollectionID === TRASH_SECTION && file.isTrashed && (
+            {deleteBy && (
                 <TileBottomTextOverlay>
                     <Typography variant="small">
-                        {formattedDateRelative(enteFileDeletionDate(file))}
+                        {formattedDateRelative(deleteBy)}
                     </Typography>
                 </TileBottomTextOverlay>
             )}

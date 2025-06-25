@@ -16,12 +16,12 @@ import {
     stashedRedirect,
     unstashRedirect,
 } from "ente-accounts/services/redirect";
-import { configureSRP } from "ente-accounts/services/srp";
-import type {
-    SRPAttributes,
-    SRPSetupAttributes,
-} from "ente-accounts/services/srp-remote";
-import { getSRPAttributes } from "ente-accounts/services/srp-remote";
+import {
+    getSRPAttributes,
+    setupSRP,
+    unstashAndUseSRPSetupAttributes,
+    type SRPAttributes,
+} from "ente-accounts/services/srp";
 import type { KeyAttributes, User } from "ente-accounts/services/user";
 import {
     putUserKeyAttributes,
@@ -35,6 +35,7 @@ import {
     type SingleInputFormProps,
 } from "ente-base/components/SingleInputForm";
 import { useBaseContext } from "ente-base/context";
+import { isDevBuild } from "ente-base/env";
 import { isHTTPErrorWithStatus } from "ente-base/http";
 import log from "ente-base/log";
 import { clearSessionStorage } from "ente-base/session";
@@ -84,6 +85,7 @@ const Page: React.FC = () => {
         setFieldError,
     ) => {
         try {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             const referralSource = getLocalReferralSource()?.trim();
             const cleanedReferral = referralSource
                 ? `web:${referralSource}`
@@ -145,11 +147,12 @@ const Page: React.FC = () => {
                     if (originalKeyAttributes) {
                         await putUserKeyAttributes(originalKeyAttributes);
                     }
-                    if (getData("srpSetupAttributes")) {
-                        const srpSetupAttributes: SRPSetupAttributes =
-                            getData("srpSetupAttributes");
-                        await configureSRP(srpSetupAttributes);
-                    }
+                    await unstashAndUseSRPSetupAttributes(setupSRP);
+                }
+                // TODO(RE): Temporary safety valve before removing the
+                // unnecessary clear (tag: Migration)
+                if (isDevBuild && (await localForage.length()) > 0) {
+                    throw new Error("Local forage is not empty");
                 }
                 await localForage.clear();
                 setIsFirstLogin(true);

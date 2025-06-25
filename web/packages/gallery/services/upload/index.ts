@@ -4,6 +4,7 @@ import { customAPIOrigin } from "ente-base/origins";
 import type { ZipItem } from "ente-base/types/ipc";
 import { exportMetadataDirectoryName } from "ente-gallery/export-dirs";
 import type { Collection } from "ente-media/collection";
+import type { EnteFile } from "ente-media/file";
 import { nullToUndefined } from "ente-utils/transform";
 import { z } from "zod/v4";
 
@@ -278,8 +279,8 @@ export type UploadableUploadItem = ClusteredUploadItem & {
 };
 
 /**
- * Result of {@link markUploadedAndObtainPostProcessableItem}; see the
- * documentation of that function for the meaning and cases of this type.
+ * Result of {@link markUploadedAndObtainProcessableItem}; see the documentation
+ * of that function for the meaning and cases of this type.
  */
 export type ProcessableUploadItem = File | TimestampedFileSystemUploadItem;
 
@@ -432,15 +433,15 @@ export type UploadPhase =
     | "done";
 
 export type UploadResult =
-    | "failed"
-    | "alreadyUploaded"
-    | "unsupported"
-    | "blocked"
-    | "tooLarge"
-    | "largerThanAvailableStorage"
-    | "uploaded"
-    | "uploadedWithStaticThumbnail"
-    | "addedSymlink";
+    | { type: "unsupported" }
+    | { type: "tooLarge" }
+    | { type: "largerThanAvailableStorage" }
+    | { type: "blocked" }
+    | { type: "failed" }
+    | { type: "alreadyUploaded"; file: EnteFile }
+    | { type: "addedSymlink"; file: EnteFile }
+    | { type: "uploadedWithStaticThumbnail"; file: EnteFile }
+    | { type: "uploaded"; file: EnteFile };
 
 /**
  * Return true to disable the upload of files via Cloudflare Workers.

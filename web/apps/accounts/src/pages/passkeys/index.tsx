@@ -193,7 +193,7 @@ export const AddPasskeyForm: React.FC<AddPasskeyFormProps> = ({
                 margin="normal"
                 disabled={formik.isSubmitting}
                 error={!!formik.errors.value}
-                // See: Note: [Use space as default TextField helperText]
+                // See: [Note: Use space as default TextField helperText]
                 helperText={formik.errors.value ?? " "}
                 label={t("enter_passkey_name")}
             />
