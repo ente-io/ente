@@ -524,10 +524,10 @@ export default function PublicCollectionGallery() {
                 />
                 {blockingLoad && <TranslucentLoadingOverlay />}
                 <Upload
-                    syncWithRemote={syncWithRemote}
                     uploadCollection={publicCollection}
                     setLoading={setBlockingLoad}
                     setShouldDisableDropzone={setShouldDisableDropzone}
+                    onRemotePull={syncWithRemote}
                     onUploadFile={(file) =>
                         setPublicFiles(sortFiles([...publicFiles, file]))
                     }
