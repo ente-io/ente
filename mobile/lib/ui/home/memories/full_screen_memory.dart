@@ -360,8 +360,8 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                     colors: [
-                      Colors.black54,
-                      Colors.black45,
+                      Color.fromARGB(97, 0, 0, 0),
+                      Color.fromARGB(42, 0, 0, 0),
                       Colors.transparent,
                     ],
                     stops: [0, 0.6, 1],
@@ -426,6 +426,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                     );
                   },
                 ),
+                const BottomGradient(),
                 Column(
                   mainAxisAlignment: MainAxisAlignment.end,
                   mainAxisSize: MainAxisSize.min,
@@ -462,7 +463,6 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                     const BottomIcons(),
                   ],
                 ),
-                const BottomGradient(),
               ],
             ),
           ),
@@ -584,15 +584,15 @@ class BottomGradient extends StatelessWidget {
   Widget build(BuildContext context) {
     return IgnorePointer(
       child: Container(
-        height: 96,
+        height: 120,
         width: double.infinity,
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.bottomCenter,
             end: Alignment.topCenter,
             colors: [
-              Colors.black87,
-              Colors.black54,
+              Color.fromARGB(97, 0, 0, 0),
+              Color.fromARGB(42, 0, 0, 0),
               Colors.transparent,
             ],
             stops: [0, 0.5, 1.0],
