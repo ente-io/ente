@@ -13,6 +13,7 @@ import 'package:photos/db/files_db.dart';
 import "package:photos/events/file_caption_updated_event.dart";
 import "package:photos/events/files_updated_event.dart";
 import 'package:photos/events/local_photos_updated_event.dart';
+import "package:photos/events/reset_zoom_of_photo_view_event.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/states/detail_page_state.dart";
@@ -64,6 +65,7 @@ class _ZoomableImageState extends State<ZoomableImage> {
   final _scaleStateController = PhotoViewScaleStateController();
   late final StreamSubscription<FileCaptionUpdatedEvent>
       _captionUpdatedSubscription;
+  late final StreamSubscription<ResetZoomOfPhotoView> _resetZoomSubscription;
 
   // This is to prevent the app from crashing when loading 200MP images
   // https://github.com/flutter/flutter/issues/110331
@@ -92,6 +94,16 @@ class _ZoomableImageState extends State<ZoomableImage> {
         }
       }
     });
+
+    _resetZoomSubscription =
+        Bus.instance.on<ResetZoomOfPhotoView>().listen((event) {
+      if (event.isSamePhoto(
+        uploadedFileID: widget.photo.uploadedFileID,
+        localID: widget.photo.localID,
+      )) {
+        _scaleStateController.scaleState = PhotoViewScaleState.initial;
+      }
+    });
   }
 
   @override
@@ -99,6 +111,7 @@ class _ZoomableImageState extends State<ZoomableImage> {
     _photoViewController.dispose();
     _scaleStateController.dispose();
     _captionUpdatedSubscription.cancel();
+    _resetZoomSubscription.cancel();
     super.dispose();
   }
 

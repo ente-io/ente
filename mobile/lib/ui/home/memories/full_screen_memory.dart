@@ -6,13 +6,17 @@ import "dart:ui";
 import "package:flutter/cupertino.dart";
 import "package:flutter/material.dart";
 import "package:photos/core/configuration.dart";
+import "package:photos/core/event_bus.dart";
+import "package:photos/events/reset_zoom_of_photo_view_event.dart";
 import "package:photos/models/file/file_type.dart";
 import "package:photos/models/memories/memory.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/smart_memories_service.dart";
+import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/theme/text_style.dart";
 import "package:photos/ui/actions/file/file_actions.dart";
+import "package:photos/ui/home/memories/custom_listener.dart";
 import "package:photos/ui/home/memories/memory_progress_indicator.dart";
 import "package:photos/ui/viewer/file/file_widget.dart";
 
@@ -37,6 +41,8 @@ import "package:photos/utils/share_util.dart";
 //ValueNotifier inside the InheritedWidget and the widgets that need to change
 //are wrapped in a ValueListenableBuilder.
 
+//TODO: Use better naming convention. "Memory" should be a whole memory and
+//parts of the memory should be called "items".
 class FullScreenMemoryDataUpdater extends StatefulWidget {
   final List<Memory> memories;
   final int initialIndex;
@@ -145,28 +151,61 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
   final ValueNotifier<Duration> durationNotifier =
       ValueNotifier(const Duration(seconds: 5));
 
+  /// Used to check if any pointer is on the screen.
+  final hasPointerOnScreenNotifier = ValueNotifier<bool>(false);
+  bool hasFinalFileLoaded = false;
+
   @override
   void initState() {
     super.initState();
     Future.delayed(const Duration(seconds: 3), () {
       if (mounted) _showTitle.value = false;
     });
+    hasPointerOnScreenNotifier.addListener(
+      _hasPointerListener,
+    );
   }
 
   @override
   void dispose() {
     _showTitle.dispose();
     durationNotifier.dispose();
+    hasPointerOnScreenNotifier.removeListener(_hasPointerListener);
+
     super.dispose();
   }
 
-  void _toggleAnimation(bool pause) {
+  /// Used to check if user has touched the screen and then to pause animation
+  /// and once the pointer is removed from the screen, it resumes the animation
+  /// It also resets the zoom of the photo view to default for better user
+  /// experience after finger(s) is removed from the screen after zooming in by
+  /// pinching.
+  void _hasPointerListener() {
+    if (hasPointerOnScreenNotifier.value) {
+      _toggleAnimation(pause: true);
+    } else {
+      _toggleAnimation(pause: false);
+      final inheritedData = FullScreenMemoryData.of(context)!;
+      final currentFile =
+          inheritedData.memories[inheritedData.indexNotifier.value].file;
+      Bus.instance.fire(
+        ResetZoomOfPhotoView(
+          localID: currentFile.localID,
+          uploadedFileID: currentFile.uploadedFileID,
+        ),
+      );
+    }
+  }
+
+  void _toggleAnimation({required bool pause}) {
     if (pause) {
       _progressAnimationController?.stop();
       _zoomAnimationController?.stop();
     } else {
-      _progressAnimationController?.forward();
-      _zoomAnimationController?.forward();
+      if (hasFinalFileLoaded) {
+        _progressAnimationController?.forward();
+        _zoomAnimationController?.forward();
+      }
     }
   }
 
@@ -180,6 +219,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
   }
 
   void onFinalFileLoad(int duration) {
+    hasFinalFileLoaded = true;
     if (_progressAnimationController?.isAnimating == true) {
       _progressAnimationController!.stop();
     }
@@ -196,6 +236,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
   }
 
   void _goToNext(FullScreenMemoryData inheritedData) {
+    hasFinalFileLoaded = false;
     final currentIndex = inheritedData.indexNotifier.value;
     if (currentIndex < inheritedData.memories.length - 1) {
       inheritedData.indexNotifier.value += 1;
@@ -206,6 +247,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
   }
 
   void _goToPrevious(FullScreenMemoryData inheritedData) {
+    hasFinalFileLoaded = false;
     final currentIndex = inheritedData.indexNotifier.value;
     if (currentIndex > 0) {
       inheritedData.indexNotifier.value -= 1;
@@ -228,180 +270,203 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
 
   @override
   Widget build(BuildContext context) {
+    final screenPadding = MediaQuery.paddingOf(context);
     final inheritedData = FullScreenMemoryData.of(context)!;
     final showStepProgressIndicator = inheritedData.memories.length < 60;
 
-    return Scaffold(
-      backgroundColor: Colors.black,
-      extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        toolbarHeight: 84,
-        automaticallyImplyLeading: false,
-        title: ValueListenableBuilder(
-          valueListenable: inheritedData.indexNotifier,
-          child: InkWell(
-            onTap: () => Navigator.pop(context),
-            child: const Padding(
-              padding: EdgeInsets.fromLTRB(4, 8, 8, 8),
-              child: Icon(Icons.close, color: Colors.white),
-            ),
-          ),
-          builder: (context, value, child) {
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                showStepProgressIndicator
-                    ? ValueListenableBuilder<Duration>(
-                        valueListenable: durationNotifier,
-                        builder: (context, duration, _) {
-                          return MemoryProgressIndicator(
-                            totalSteps: inheritedData.memories.length,
-                            currentIndex: value,
-                            selectedColor: Colors.white,
-                            unselectedColor: Colors.white.withOpacity(0.4),
-                            duration: duration,
-                            animationController: (controller) {
-                              _progressAnimationController = controller;
-                            },
-                            onComplete: () {
-                              _goToNext(inheritedData);
-                            },
-                          );
-                        },
-                      )
-                    : const SizedBox.shrink(),
-                const SizedBox(height: 10),
-                Row(
-                  children: [
-                    child!,
-                    Text(
-                      SmartMemoriesService.getDateFormatted(
-                        creationTime:
-                            inheritedData.memories[value].file.creationTime!,
-                        context: context,
-                      ),
-                      style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                            fontSize: 14,
-                            color: Colors.white,
-                          ),
-                    ),
-                  ],
-                ),
-              ],
-            );
-          },
-        ),
-        flexibleSpace: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Colors.black54,
-                Colors.black45,
-                Colors.transparent,
-              ],
-              stops: [0, 0.6, 1],
-            ),
-          ),
-        ),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
+    return Padding(
+      padding: EdgeInsets.fromLTRB(
+        4,
+        screenPadding.top + 8,
+        4,
+        screenPadding.bottom + 8,
       ),
-      body: Stack(
-        alignment: Alignment.bottomCenter,
-        children: [
-          const MemoryBackDrop(),
-          ValueListenableBuilder<int>(
-            valueListenable: inheritedData.indexNotifier,
-            builder: (context, index, _) {
-              if (index < inheritedData.memories.length - 1) {
-                final nextFile = inheritedData.memories[index + 1].file;
-                preloadThumbnail(nextFile);
-                preloadFile(nextFile);
-              }
-              final currentMemory = inheritedData.memories[index];
-              final isVideo = currentMemory.file.fileType == FileType.video;
-              final currentFile = currentMemory.file;
-
-              return GestureDetector(
-                onTapUp: (TapUpDetails details) {
-                  final screenWidth = MediaQuery.sizeOf(context).width;
-                  final edgeWidth = screenWidth * 0.20;
-                  if (details.localPosition.dx < edgeWidth) {
-                    _goToPrevious(inheritedData);
-                  } else if (details.localPosition.dx >
-                      screenWidth - edgeWidth) {
-                    _goToNext(inheritedData);
-                  }
-                },
-                onLongPress: () => isVideo ? null : _toggleAnimation(true),
-                onLongPressUp: () => isVideo ? null : _toggleAnimation(false),
-                child: MemoriesZoomWidget(
-                  scaleController: (controller) {
-                    _zoomAnimationController = controller;
-                  },
-                  zoomIn: index % 2 == 0,
-                  isVideo: isVideo,
-                  child: FileWidget(
-                    currentFile,
-                    autoPlay: false,
-                    tagPrefix: "memories",
-                    backgroundDecoration:
-                        const BoxDecoration(color: Colors.transparent),
-                    isFromMemories: true,
-                    playbackCallback: (isPlaying) {
-                      _toggleAnimation(!isPlaying);
-                    },
-                    onFinalFileLoad: ({required int memoryDuration}) {
-                      onFinalFileLoad(memoryDuration);
-                    },
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: strokeFainterDark,
+            width: 1,
+          ),
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(16),
+          child: Scaffold(
+            backgroundColor: Colors.black,
+            extendBodyBehindAppBar: true,
+            appBar: AppBar(
+              automaticallyImplyLeading: false,
+              title: ValueListenableBuilder(
+                valueListenable: inheritedData.indexNotifier,
+                child: InkWell(
+                  onTap: () => Navigator.pop(context),
+                  child: const Padding(
+                    padding: EdgeInsets.fromLTRB(4, 8, 8, 8),
+                    child: Icon(Icons.close, color: Colors.white),
                   ),
                 ),
-              );
-            },
-          ),
-          SafeArea(
-            top: false,
-            child: Align(
-              alignment: Alignment.bottomLeft,
-              child: Padding(
-                padding: const EdgeInsets.only(bottom: 72),
-                child: ValueListenableBuilder(
-                  valueListenable: _showTitle,
-                  builder: (context, value, _) {
-                    return AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 250),
-                      switchInCurve: Curves.easeOut,
-                      switchOutCurve: Curves.easeIn,
-                      child: value
-                          ? Padding(
-                              padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
-                              child: Hero(
-                                tag: widget.title,
-                                child: Text(
-                                  widget.title,
-                                  style: getEnteTextTheme(context)
-                                      .largeBold
-                                      .copyWith(
-                                        fontSize: 40,
-                                        color: Colors.white,
-                                      ),
-                                ),
-                              ),
+                builder: (context, value, child) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      showStepProgressIndicator
+                          ? ValueListenableBuilder<Duration>(
+                              valueListenable: durationNotifier,
+                              builder: (context, duration, _) {
+                                return MemoryProgressIndicator(
+                                  totalSteps: inheritedData.memories.length,
+                                  currentIndex: value,
+                                  selectedColor: Colors.white,
+                                  unselectedColor:
+                                      Colors.white.withOpacity(0.4),
+                                  duration: duration,
+                                  animationController: (controller) {
+                                    _progressAnimationController = controller;
+                                  },
+                                  onComplete: () {
+                                    _goToNext(inheritedData);
+                                  },
+                                );
+                              },
                             )
-                          : showStepProgressIndicator
-                              ? const SizedBox.shrink()
-                              : const MemoryCounter(),
+                          : const SizedBox.shrink(),
+                      const SizedBox(height: 10),
+                      Row(
+                        children: [
+                          child!,
+                          Text(
+                            SmartMemoriesService.getDateFormatted(
+                              creationTime: inheritedData
+                                  .memories[value].file.creationTime!,
+                              context: context,
+                            ),
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleMedium!
+                                .copyWith(
+                                  fontSize: 14,
+                                  color: Colors.white,
+                                ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  );
+                },
+              ),
+              flexibleSpace: Container(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.black54,
+                      Colors.black45,
+                      Colors.transparent,
+                    ],
+                    stops: [0, 0.6, 1],
+                  ),
+                ),
+              ),
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+            ),
+            body: Stack(
+              alignment: Alignment.bottomCenter,
+              children: [
+                const _MemoryBlur(),
+                ValueListenableBuilder<int>(
+                  valueListenable: inheritedData.indexNotifier,
+                  builder: (context, index, _) {
+                    if (index < inheritedData.memories.length - 1) {
+                      final nextFile = inheritedData.memories[index + 1].file;
+                      preloadThumbnail(nextFile);
+                      preloadFile(nextFile);
+                    }
+                    final currentMemory = inheritedData.memories[index];
+                    final isVideo =
+                        currentMemory.file.fileType == FileType.video;
+                    final currentFile = currentMemory.file;
+
+                    return MemoriesPointerGestureListener(
+                      onTap: (PointerEvent event) {
+                        final screenWidth = MediaQuery.sizeOf(context).width;
+                        final goToPreviousTapAreaWidth = screenWidth * 0.20;
+                        if (event.localPosition.dx < goToPreviousTapAreaWidth) {
+                          _goToPrevious(inheritedData);
+                        } else {
+                          _goToNext(inheritedData);
+                        }
+                      },
+                      hasPointerNotifier: hasPointerOnScreenNotifier,
+                      child: MemoriesZoomWidget(
+                        key: ValueKey(
+                          currentFile.uploadedFileID ?? currentFile.localID,
+                        ),
+                        scaleController: (controller) {
+                          _zoomAnimationController = controller;
+                        },
+                        zoomIn: index % 2 == 0,
+                        isVideo: isVideo,
+                        child: FileWidget(
+                          currentFile,
+                          autoPlay: false,
+                          tagPrefix: "memories",
+                          backgroundDecoration:
+                              const BoxDecoration(color: Colors.transparent),
+                          isFromMemories: true,
+                          playbackCallback: (isPlaying) {
+                            _toggleAnimation(pause: !isPlaying);
+                          },
+                          onFinalFileLoad: ({required int memoryDuration}) {
+                            onFinalFileLoad(memoryDuration);
+                          },
+                        ),
+                      ),
                     );
                   },
                 ),
-              ),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    ValueListenableBuilder(
+                      valueListenable: _showTitle,
+                      builder: (context, value, _) {
+                        return AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 250),
+                          switchInCurve: Curves.easeOut,
+                          switchOutCurve: Curves.easeIn,
+                          child: value
+                              ? Padding(
+                                  padding:
+                                      const EdgeInsets.fromLTRB(16, 4, 16, 12),
+                                  child: Hero(
+                                    tag: widget.title,
+                                    child: Text(
+                                      widget.title,
+                                      style: getEnteTextTheme(context)
+                                          .largeBold
+                                          .copyWith(
+                                            color: Colors.white,
+                                          ),
+                                    ),
+                                  ),
+                                )
+                              : showStepProgressIndicator
+                                  ? const SizedBox.shrink()
+                                  : const MemoryCounter(),
+                        );
+                      },
+                    ),
+                    const BottomIcons(),
+                  ],
+                ),
+                const BottomGradient(),
+              ],
             ),
           ),
-          const BottomGradient(),
-          const BottomIcons(),
-        ],
+        ),
       ),
     );
   }
@@ -427,9 +492,9 @@ class BottomIcons extends StatelessWidget {
               color: Colors.white, //same for both themes
             ),
             onPressed: () async {
-              fullScreenState?._toggleAnimation(true);
+              fullScreenState?._toggleAnimation(pause: true);
               await showDetailsSheet(context, currentFile);
-              fullScreenState?._toggleAnimation(false);
+              fullScreenState?._toggleAnimation(pause: false);
             },
           ),
         ];
@@ -445,7 +510,7 @@ class BottomIcons extends StatelessWidget {
                 color: Colors.white, //same for both themes
               ),
               onPressed: () async {
-                fullScreenState?._toggleAnimation(true);
+                fullScreenState?._toggleAnimation(pause: true);
                 await showSingleFileDeleteSheet(
                   context,
                   inheritedData
@@ -458,7 +523,7 @@ class BottomIcons extends StatelessWidget {
                       },
                   },
                 );
-                fullScreenState?._toggleAnimation(false);
+                fullScreenState?._toggleAnimation(pause: false);
               },
             ),
             SizedBox(
@@ -474,22 +539,19 @@ class BottomIcons extends StatelessWidget {
               color: Colors.white, //same for both themes
             ),
             onPressed: () async {
-              fullScreenState?._toggleAnimation(true);
+              fullScreenState?._toggleAnimation(pause: true);
               await share(context, [currentFile]);
-              fullScreenState?._toggleAnimation(false);
+              fullScreenState?._toggleAnimation(pause: false);
             },
           ),
         );
 
-        return SafeArea(
-          top: false,
-          child: Container(
-            alignment: Alignment.bottomCenter,
-            padding: const EdgeInsets.fromLTRB(12, 0, 12, 20),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: rowChildren,
-            ),
+        return Container(
+          alignment: Alignment.bottomCenter,
+          padding: const EdgeInsets.fromLTRB(12, 0, 12, 16),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: rowChildren,
           ),
         );
       },
@@ -522,7 +584,7 @@ class BottomGradient extends StatelessWidget {
   Widget build(BuildContext context) {
     return IgnorePointer(
       child: Container(
-        height: 172,
+        height: 96,
         width: double.infinity,
         decoration: const BoxDecoration(
           gradient: LinearGradient(
@@ -541,8 +603,8 @@ class BottomGradient extends StatelessWidget {
   }
 }
 
-class MemoryBackDrop extends StatelessWidget {
-  const MemoryBackDrop({super.key});
+class _MemoryBlur extends StatelessWidget {
+  const _MemoryBlur();
 
   @override
   Widget build(BuildContext context) {

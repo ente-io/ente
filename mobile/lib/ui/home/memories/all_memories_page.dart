@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import "package:photos/models/memories/memory.dart";
+import "package:photos/theme/colors.dart";
 import "package:photos/ui/home/memories/full_screen_memory.dart";
 
 class AllMemoriesPage extends StatefulWidget {
@@ -50,27 +51,26 @@ class _AllMemoriesPageState extends State<AllMemoriesPage>
           return FullScreenMemoryDataUpdater(
             initialIndex: initialMemoryIndex,
             memories: widget.allMemories[index],
-            child: ClipRRect(
-              child: FullScreenMemory(
-                widget.allTitles[index],
-                initialMemoryIndex,
-                onNextMemory: index < widget.allMemories.length - 1
-                    ? () => pageController.nextPage(
-                          duration: const Duration(milliseconds: 250),
-                          curve: Curves.ease,
-                        )
-                    : null,
-                onPreviousMemory: index > 0
-                    ? () => pageController.previousPage(
-                          duration: const Duration(milliseconds: 250),
-                          curve: Curves.ease,
-                        )
-                    : null,
-              ),
+            child: FullScreenMemory(
+              widget.allTitles[index],
+              initialMemoryIndex,
+              onNextMemory: index < widget.allMemories.length - 1
+                  ? () => pageController.nextPage(
+                        duration: const Duration(milliseconds: 250),
+                        curve: Curves.ease,
+                      )
+                  : null,
+              onPreviousMemory: index > 0
+                  ? () => pageController.previousPage(
+                        duration: const Duration(milliseconds: 250),
+                        curve: Curves.ease,
+                      )
+                  : null,
             ),
           );
         },
       ),
+      backgroundColor: backgroundBaseDark,
     );
   }
 
