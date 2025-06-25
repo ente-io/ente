@@ -213,16 +213,16 @@ export type FileViewerProps = ModalVisibilityProps & {
      */
     onTriggerSyncWithRemote?: () => void;
     /**
-     * Called when an action in the file viewer requires us to sync the local
+     * Called when an action in the file viewer requires us to pull the local
      * files and collections with remote.
      *
      * Unlike {@link onTriggerSyncWithRemote}, which is a trigger, this function
-     * returns a promise that will settle once the sync has completed, and thus
+     * returns a promise that will settle once the pull has completed, and thus
      * can be used in interactive operations that indicate activity to the user.
      *
-     * See: [Note: Full sync vs file and collection sync]
+     * See also: [Note: Full remote pull vs files pull]
      */
-    onFileAndCollectionSyncWithRemote?: () => Promise<void>;
+    onRemoteFilesPull?: () => Promise<void>;
     /**
      * Called when the user performs an action which does not otherwise have any
      * immediate visual impact, to acknowledge it.
@@ -297,7 +297,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     fileNormalCollectionIDs,
     collectionNameByID,
     onTriggerSyncWithRemote,
-    onFileAndCollectionSyncWithRemote,
+    onRemoteFilesPull,
     onVisualFeedback,
     onToggleFavorite,
     onFileVisibilityUpdate,
@@ -847,15 +847,15 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     ]);
 
     const handleFileMetadataUpdate = useMemo(() => {
-        return onFileAndCollectionSyncWithRemote
+        return onRemoteFilesPull
             ? async () => {
-                  // Wait for the file and collection sync to complete.
-                  await onFileAndCollectionSyncWithRemote();
-                  // Set the flag to trigger the full sync to later.
+                  // Wait for the files pull to complete.
+                  await onRemoteFilesPull();
+                  // Set the flag to trigger the full pull later.
                   handleNeedsRemoteSync();
               }
             : undefined;
-    }, [onFileAndCollectionSyncWithRemote, handleNeedsRemoteSync]);
+    }, [onRemoteFilesPull, handleNeedsRemoteSync]);
 
     const handleUpdateCaption = useCallback(
         (fileID: number, newCaption: string) => {
@@ -886,7 +886,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                 onUpdateCaption={handleUpdateCaption}
                 onSelectCollection={handleSelectCollection}
                 onSelectPerson={handleSelectPerson}
-                {...{ collectionNameByID, onFileAndCollectionSyncWithRemote }}
+                {...{ collectionNameByID }}
             />
             <MoreMenu
                 open={!!moreMenuAnchorEl}

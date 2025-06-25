@@ -68,7 +68,7 @@ export type FileListWithViewerProps = {
         | "collectionNameByID"
         | "pendingFavoriteUpdates"
         | "pendingVisibilityUpdates"
-        | "onFileAndCollectionSyncWithRemote"
+        | "onRemoteFilesPull"
         | "onVisualFeedback"
         | "onToggleFavorite"
         | "onFileVisibilityUpdate"
@@ -103,7 +103,7 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
     setFilesDownloadProgressAttributesCreator,
     onSetOpenFileViewer,
     onSyncWithRemote,
-    onFileAndCollectionSyncWithRemote,
+    onRemoteFilesPull,
     onVisualFeedback,
     onToggleFavorite,
     onFileVisibilityUpdate,
@@ -203,7 +203,7 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
                     collectionNameByID,
                     pendingFavoriteUpdates,
                     pendingVisibilityUpdates,
-                    onFileAndCollectionSyncWithRemote,
+                    onRemoteFilesPull,
                     onVisualFeedback,
                     onToggleFavorite,
                     onFileVisibilityUpdate,

@@ -128,13 +128,13 @@ import {
 import { getSelectedFiles, handleFileOp, type FileOp } from "utils/file";
 
 /**
- * Options to customize the behaviour of the sync with remote that gets
- * triggered on various actions within the gallery and its descendants.
+ * Options to customize the behaviour of the remote pull that gets triggered on
+ * various actions within the gallery and its descendants.
  */
-interface SyncWithRemoteOpts {
-    /** Force a sync to happen (default: no) */
+interface RemotePullOpts {
+    /** Force a pull to happen (default: no) */
     force?: boolean;
-    /** Perform the sync without showing a global loading bar (default: no) */
+    /** Perform the pull without showing a global loading bar (default: no) */
     silent?: boolean;
 }
 
@@ -191,11 +191,15 @@ const Page: React.FC = () => {
     );
     const [isFileViewerOpen, setIsFileViewerOpen] = useState(false);
 
-    /**`true` if a sync is currently in progress. */
-    const isSyncing = useRef(false);
-    /** Set to the {@link SyncWithRemoteOpts} of the last sync that was enqueued
-        while one was already in progress. */
-    const resyncOpts = useRef<SyncWithRemoteOpts | undefined>(undefined);
+    /**`
+     * true` if a remote pull is currently in progress.
+     */
+    const isPullInProgress = useRef(false);
+    /**
+     * Set to the {@link RemotePullOpts} of the last pull that was enqueued
+     * while one was already in progress.
+     */
+    const pendingPullOpts = useRef<RemotePullOpts | undefined>(undefined);
 
     const [uploadTypeSelectorView, setUploadTypeSelectorView] = useState(false);
     const [uploadTypeSelectorIntent, setUploadTypeSelectorIntent] =
@@ -516,11 +520,11 @@ const Page: React.FC = () => {
      * 1. This involves a lesser number of API requests, so it reduces the time
      *    the user has to wait for their interactive request to complete.
      *
-     * 2. The current implementation {@link syncWithRemote} tries to run only
-     *    only one instance of it is in progress at a time, while each
-     *    invocation of {@link fileAndCollectionSyncWithRemote} is independent.
+     * 2. The current implementation {@link remotePull} tries to run only only
+     *    one instance of it is in progress at a time, while each invocation of
+     *    {@link remoteFilesPull} is independent.
      */
-    const fileAndCollectionSyncWithRemote = useCallback(async () => {
+    const remoteFilesPull = useCallback(async () => {
         const didUpdateFiles = await pullFiles({
             onSetCollections: (collections) =>
                 dispatch({ type: "setCollections", collections }),
@@ -536,8 +540,8 @@ const Page: React.FC = () => {
         }
     }, []);
 
-    const syncWithRemote = useCallback(
-        async (opts?: SyncWithRemoteOpts) => {
+    const remotePull = useCallback(
+        async (opts?: RemotePullOpts) => {
             const { force, silent } = opts ?? {};
 
             // Pre-flight checks.
@@ -554,41 +558,44 @@ const Page: React.FC = () => {
 
             // Start or enqueue.
             let isForced = false;
-            if (isSyncing.current) {
+            if (isPullInProgress.current) {
                 if (force) {
                     isForced = true;
                 } else {
-                    resyncOpts.current = { force, silent };
+                    pendingPullOpts.current = { force, silent };
                     return;
                 }
             }
 
-            // The sync
-            isSyncing.current = true;
+            // The pull itself.
+            isPullInProgress.current = true;
             try {
                 if (!silent) showLoadingBar();
                 await pullFilesPre();
-                await fileAndCollectionSyncWithRemote();
-                // syncWithRemote is called with the force flag set to true before
-                // doing an upload. So it is possible, say when resuming a pending
-                // upload, that we get two syncWithRemotes happening in parallel.
+                await remoteFilesPull();
+                // remotePull is called with the force flag set to true before
+                // doing an upload. So it is possible, say when resuming a
+                // pending upload, that we get two remote pulls happening in
+                // parallel.
                 //
-                // Do the non-file-related sync only for one of these parallel ones.
+                // Do the non-file-related post operations only for one of these
+                // parallel ones.
                 if (!isForced) {
                     await pullFilesPost();
                 }
             } catch (e) {
-                log.error("syncWithRemote failed", e);
+                log.error("Remote pull failed", e);
             } finally {
                 dispatch({ type: "clearUnsyncedState" });
                 if (!silent) hideLoadingBar();
             }
-            isSyncing.current = false;
+            isPullInProgress.current = false;
 
-            const nextOpts = resyncOpts.current;
+            // Enqueue another if needed.
+            const nextOpts = pendingPullOpts.current;
             if (nextOpts) {
-                resyncOpts.current = undefined;
-                setTimeout(() => syncWithRemote(nextOpts), 0);
+                pendingPullOpts.current = undefined;
+                setTimeout(() => remotePull(nextOpts), 0);
             }
         },
         [
@@ -596,9 +603,12 @@ const Page: React.FC = () => {
             hideLoadingBar,
             router,
             showSessionExpiredDialog,
-            fileAndCollectionSyncWithRemote,
+            remoteFilesPull,
         ],
     );
+
+    // TODO(RE): temp alias.
+    const syncWithRemote = remotePull;
 
     const setupSelectAllKeyBoardShortcutHandler = () => {
         const handleKeyUp = (e: KeyboardEvent) => {
@@ -1055,9 +1065,7 @@ const Page: React.FC = () => {
                     onCloseCollectionSelector={handleCloseCollectionSelector}
                     setLoading={setBlockingLoad}
                     setShouldDisableDropzone={setShouldDisableDropzone}
-                    onFileAndCollectionSyncWithRemote={
-                        fileAndCollectionSyncWithRemote
-                    }
+                    onRemoteFilesPull={remoteFilesPull}
                     onUploadFile={(file) =>
                         dispatch({ type: "uploadFile", file })
                     }
@@ -1136,9 +1144,7 @@ const Page: React.FC = () => {
                         onMarkTempDeleted={handleMarkTempDeleted}
                         onSetOpenFileViewer={setIsFileViewerOpen}
                         onSyncWithRemote={syncWithRemote}
-                        onFileAndCollectionSyncWithRemote={
-                            fileAndCollectionSyncWithRemote
-                        }
+                        onRemoteFilesPull={remoteFilesPull}
                         onVisualFeedback={handleVisualFeedback}
                         onSelectCollection={handleSelectCollection}
                         onSelectPerson={handleSelectPerson}
