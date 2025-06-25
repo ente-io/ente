@@ -1,6 +1,5 @@
 import "dart:typed_data";
 
-import "package:computer/computer.dart";
 import "package:ente_crypto/ente_crypto.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/services/collections_service.dart";
@@ -16,26 +15,13 @@ Uint8List getFileKey(EnteFile file) {
   );
 }
 
-Future<Uint8List> getFileKeyUsingBgWorker(EnteFile file) async {
+Future<Uint8List> getFileKeyAsync(EnteFile file) async {
   final cf = file.cf!;
   final collectionKey =
       CollectionsService.instance.getCollectionKey(cf.collectionID);
-  return await Computer.shared().compute(
-    _decryptFileKey,
-    param: <String, dynamic>{
-      "encryptedKey": cf.encFileKey,
-      "keyDecryptionNonce": cf.encFileKeyNonce,
-      "collectionKey": collectionKey,
-    },
-  );
-}
-
-Uint8List _decryptFileKey(Map<String, dynamic> args) {
-  final encryptedKey = (args["encryptedKey"]);
-  final nonce = (args["keyDecryptionNonce"]);
-  return CryptoUtil.decryptSync(
-    encryptedKey,
-    args["collectionKey"],
-    nonce,
+  return CryptoUtil.decrypt(
+    cf.encFileKey,
+    collectionKey,
+    cf.encFileKeyNonce,
   );
 }
