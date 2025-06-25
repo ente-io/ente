@@ -41,6 +41,8 @@ import "package:photos/utils/share_util.dart";
 //ValueNotifier inside the InheritedWidget and the widgets that need to change
 //are wrapped in a ValueListenableBuilder.
 
+//TODO: Use better naming convention. "Memory" should be a whole memory and
+//parts of the memory should be called "items".
 class FullScreenMemoryDataUpdater extends StatefulWidget {
   final List<Memory> memories;
   final int initialIndex;
@@ -151,6 +153,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
 
   /// Used to check if any pointer is on the screen.
   final hasPointerOnScreenNotifier = ValueNotifier<bool>(false);
+  bool hasFinalFileLoaded = false;
 
   @override
   void initState() {
@@ -199,8 +202,10 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
       _progressAnimationController?.stop();
       _zoomAnimationController?.stop();
     } else {
-      _progressAnimationController?.forward();
-      _zoomAnimationController?.forward();
+      if (hasFinalFileLoaded) {
+        _progressAnimationController?.forward();
+        _zoomAnimationController?.forward();
+      }
     }
   }
 
@@ -214,6 +219,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
   }
 
   void onFinalFileLoad(int duration) {
+    hasFinalFileLoaded = true;
     if (_progressAnimationController?.isAnimating == true) {
       _progressAnimationController!.stop();
     }
@@ -230,6 +236,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
   }
 
   void _goToNext(FullScreenMemoryData inheritedData) {
+    hasFinalFileLoaded = false;
     final currentIndex = inheritedData.indexNotifier.value;
     if (currentIndex < inheritedData.memories.length - 1) {
       inheritedData.indexNotifier.value += 1;
@@ -240,6 +247,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
   }
 
   void _goToPrevious(FullScreenMemoryData inheritedData) {
+    hasFinalFileLoaded = false;
     final currentIndex = inheritedData.indexNotifier.value;
     if (currentIndex > 0) {
       inheritedData.indexNotifier.value -= 1;
