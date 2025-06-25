@@ -685,10 +685,15 @@ const Page: React.FC = () => {
     const fileOpHelper = (op: FileOp) => async () => {
         showLoadingBar();
         try {
-            // passing files here instead of filteredData for hide ops because we want to move all files copies to hidden collection
             const selectedFiles = getSelectedFiles(
                 selected,
-                op == "hide" ? state.collectionFiles : filteredFiles,
+                op == "hide"
+                    ? // passing files here instead of filteredData for hide ops
+                      // because we want to move all files copies to hidden collection
+                      state.collectionFiles.filter(
+                          (f) => !state.hiddenFileIDs.has(f.id),
+                      )
+                    : filteredFiles,
             );
             const toProcessFiles =
                 op == "download"
