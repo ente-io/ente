@@ -194,36 +194,6 @@ class EnteFile {
     return AssetEntity.fromId(localID!);
   }
 
-  void applyMetadata(Map<String, dynamic> metadata) {
-    localID = metadata["localID"];
-    title = metadata["title"];
-    deviceFolder = metadata["deviceFolder"];
-    creationTime = metadata["creationTime"] ?? 0;
-    modificationTime = metadata["modificationTime"] ?? creationTime;
-    final latitude = double.tryParse(metadata["latitude"].toString());
-    final longitude = double.tryParse(metadata["longitude"].toString());
-    if (latitude == null || longitude == null) {
-      location = null;
-    } else {
-      location = Location(latitude: latitude, longitude: longitude);
-    }
-    fileType = getFileType(metadata["fileType"] ?? -1);
-    fileSubType = metadata["subType"] ?? -1;
-    duration = metadata["duration"] ?? 0;
-    exif = metadata["exif"];
-    hash = metadata["hash"];
-    // handle past live photos upload from web client
-    if (hash == null &&
-        fileType == FileType.livePhoto &&
-        metadata.containsKey('imageHash') &&
-        metadata.containsKey('videoHash')) {
-      // convert to imgHash:vidHash
-      hash =
-          '${metadata['imageHash']}$kLivePhotoHashSeparator${metadata['videoHash']}';
-    }
-    metadataVersion = metadata["version"] ?? 0;
-  }
-
   Future<Map<String, dynamic>> getMetadataForUpload(
     MediaUploadData mediaUploadData,
     ParsedExifDateTime? exifTime,
