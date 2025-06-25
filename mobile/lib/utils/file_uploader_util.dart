@@ -336,20 +336,19 @@ Future<MetadataRequest> getPubMetadataRequest(
   Uint8List fileKey,
 ) async {
   final Map<String, dynamic> jsonToUpdate =
-      jsonDecode(file.pubMmdEncodedJson ?? '{}');
+      file.rAsset?.publicMetadata?.data ?? <String, dynamic>{};
+
   newData.forEach((key, value) {
     jsonToUpdate[key] = value;
   });
+  final int currentVersion = (file.rAsset?.publicMetadata?.version ?? 0);
 
-  // update the local information so that it's reflected on UI
-  file.pubMmdEncodedJson = jsonEncode(jsonToUpdate);
-  file.pubMagicMetadata = PubMagicMetadata.fromJson(jsonToUpdate);
   final encryptedMMd = await CryptoUtil.encryptChaCha(
     utf8.encode(jsonEncode(jsonToUpdate)),
     fileKey,
   );
   return MetadataRequest(
-    version: file.pubMmdVersion == 0 ? 1 : file.pubMmdVersion,
+    version: currentVersion == 0 ? 1 : currentVersion,
     count: jsonToUpdate.length,
     data: CryptoUtil.bin2base64(encryptedMMd.encryptedData!),
     header: CryptoUtil.bin2base64(encryptedMMd.header!),
