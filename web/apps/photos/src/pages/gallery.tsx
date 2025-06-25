@@ -80,7 +80,7 @@ import {
 } from "ente-new/photos/services/photos-fdb";
 import {
     filterSearchableFiles,
-    setSearchCollectionsAndFiles,
+    updateSearchCollectionsAndFiles,
 } from "ente-new/photos/services/search";
 import type { SearchOption } from "ente-new/photos/services/search/types";
 import { initSettings } from "ente-new/photos/services/settings";
@@ -259,9 +259,6 @@ const Page: React.FC = () => {
     // Local aliases.
     const {
         user,
-        normalCollections,
-        normalFiles,
-        hiddenFiles,
         favoriteFileIDs,
         collectionNameByID,
         fileNormalCollectionIDs,
@@ -347,13 +344,6 @@ const Page: React.FC = () => {
     }, []);
 
     useEffect(() => {
-        setSearchCollectionsAndFiles({
-            collections: normalCollections,
-            files: normalFiles,
-        });
-    }, [normalCollections, normalFiles]);
-
-    useEffect(() => {
         if (typeof activeCollectionID == "undefined" || !router.isReady) {
             return;
         }
@@ -375,6 +365,14 @@ const Page: React.FC = () => {
             );
         }
     }, [router.isReady]);
+
+    useEffect(() => {
+        updateSearchCollectionsAndFiles(
+            state.collections,
+            state.hiddenCollectionIDs,
+            state.collectionFiles,
+        );
+    }, [state.collections, state.hiddenCollectionIDs, state.collectionFiles]);
 
     useEffect(() => {
         dispatch({ type: "setPeopleState", peopleState });
@@ -684,7 +682,7 @@ const Page: React.FC = () => {
             // passing files here instead of filteredData for hide ops because we want to move all files copies to hidden collection
             const selectedFiles = getSelectedFiles(
                 selected,
-                op == "hide" ? normalFiles : filteredFiles,
+                op == "hide" ? state.collectionFiles : filteredFiles,
             );
             const toProcessFiles =
                 op == "download"
@@ -927,7 +925,7 @@ const Page: React.FC = () => {
                         // show "selectable" normalCollectionSummaries. See:
                         // [Note: Picking from selectable collection summaries].
                         findCollectionCreatingUncategorizedIfNeeded(
-                            normalCollections,
+                            state.collections,
                             id,
                         )!
                     }
@@ -965,7 +963,7 @@ const Page: React.FC = () => {
                             activeCollectionID={activeCollectionID}
                             selectedCollection={getSelectedCollection(
                                 selected.collectionID,
-                                normalCollections,
+                                state.collections,
                             )}
                             isFavoriteCollection={
                                 normalCollectionSummaries.get(
@@ -1078,8 +1076,7 @@ const Page: React.FC = () => {
                 <WhatsNew {...whatsNewVisibilityProps} />
                 {!isInSearchMode &&
                 !isFirstLoad &&
-                !normalFiles?.length &&
-                !hiddenFiles?.length &&
+                !state.collectionFiles.length &&
                 activeCollectionID === PseudoCollectionID.all ? (
                     <GalleryEmptyState
                         isUploadInProgress={uploadManager.isUploadInProgress()}
@@ -1098,7 +1095,7 @@ const Page: React.FC = () => {
                         files={filteredFiles}
                         enableDownload={true}
                         showAppDownloadBanner={
-                            normalFiles.length < 30 && !isInSearchMode
+                            state.collectionFiles.length < 30 && !isInSearchMode
                         }
                         selectable={true}
                         selected={selected}

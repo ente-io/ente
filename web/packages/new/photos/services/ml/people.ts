@@ -3,7 +3,8 @@ import log from "ente-base/log";
 import type { EnteFile } from "ente-media/file";
 import { fileCreationTime } from "ente-media/file-metadata";
 import { randomSample } from "ente-utils/array";
-import { savedNormalFiles } from "../photos-fdb";
+import { savedHiddenCollections } from "../collection";
+import { savedCollectionFiles } from "../photos-fdb";
 import {
     savedCGroups,
     updateOrCreateUserEntities,
@@ -213,8 +214,7 @@ export interface PeopleState {
  * construct an in-memory list of {@link Person}s on which the UI will operate.
  */
 export const reconstructPeopleState = async (): Promise<PeopleState> => {
-    const files = await savedNormalFiles();
-    const fileByID = new Map(files.map((f) => [f.id, f]));
+    const fileByID = await savedNormalFileByFileID();
 
     // "Person face"s are faces annotated with their corresponding local files.
     //
@@ -380,6 +380,22 @@ export const reconstructPeopleState = async (): Promise<PeopleState> => {
 };
 
 /**
+ * Read the saved data directly from files DB, and construct a map from fileID
+ * to file for all normal (non-hidden) files.
+ */
+const savedNormalFileByFileID = async () => {
+    const hiddenCollections = await savedHiddenCollections();
+    const hiddenCollectionIDs = new Set(hiddenCollections.map((c) => c.id));
+
+    const collectionFiles = await savedCollectionFiles();
+    const normalCollectionFiles = collectionFiles.filter(
+        (f) => !hiddenCollectionIDs.has(f.collectionID),
+    );
+
+    return new Map(normalCollectionFiles.map((f) => [f.id, f]));
+};
+
+/**
  * Older versions of the mobile app set the avatarFileID as the avatarFaceID.
  * Use the format of the string to detect such cases, and as a workaround,
  * ignore the avatarID in such cases.
@@ -520,8 +536,7 @@ export const _suggestionsAndChoicesForPerson = async (
     // Annotate the clusters with the information that the UI needs to show its
     // preview faces.
 
-    const files = await savedNormalFiles();
-    const fileByID = new Map(files.map((f) => [f.id, f]));
+    const fileByID = await savedNormalFileByFileID();
 
     const toPreviewable = (cluster: FaceCluster) => {
         const previewFaces: PreviewableFace[] = [];

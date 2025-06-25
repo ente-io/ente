@@ -245,6 +245,15 @@ export const savedNormalCollections = (): Promise<Collection[]> =>
     );
 
 /**
+ * Return all hidden collections that are present in our local
+ * database.
+ */
+export const savedHiddenCollections = (): Promise<Collection[]> =>
+    savedCollections().then(
+        (cs) => splitByPredicate(cs, isHiddenCollection)[0],
+    );
+
+/**
  * Return a map of the (user-facing) collection name, indexed by collection ID.
  */
 export const createCollectionNameByID = (collections: Collection[]) =>

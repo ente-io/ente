@@ -7,9 +7,10 @@ import {
     addToCollection,
     createCollectionNameByID,
     moveToTrash,
+    savedNormalCollections,
 } from "./collection";
 import { getLocalCollections } from "./collections";
-import { getLocalFiles } from "./files";
+import { savedCollectionFiles } from "./photos-fdb";
 import { syncCollectionAndFiles } from "./sync";
 
 /**
@@ -105,21 +106,18 @@ export const deduceDuplicates = async () => {
 
     // Find all non-hidden collections owned by the user, and also use that to
     // keep a map of their names (we'll attach this info to the result later).
-    const nonHiddenCollections = await getLocalCollections("normal");
-    const nonHiddenOwnedCollections = nonHiddenCollections.filter(
+    const normalCollections = await savedNormalCollections();
+    const normalOwnedCollections = normalCollections.filter(
         ({ owner }) => owner.id == userID,
     );
     const allowedCollectionIDs = new Set(
-        nonHiddenOwnedCollections.map(({ id }) => id),
+        normalOwnedCollections.map(({ id }) => id),
     );
-    const collectionNameByID = createCollectionNameByID(
-        nonHiddenOwnedCollections,
-    );
+    const collectionNameByID = createCollectionNameByID(normalOwnedCollections);
 
-    // Find all non-hidden collection files owned by the user that are in a
-    // non-hidden owned collection.
-    const nonHiddenCollectionFiles = await getLocalFiles("normal");
-    const filteredCollectionFiles = nonHiddenCollectionFiles.filter((f) =>
+    // Find all eligible collection files.
+    const collectionFiles = await savedCollectionFiles();
+    const filteredCollectionFiles = collectionFiles.filter((f) =>
         allowedCollectionIDs.has(f.collectionID),
     );
 
