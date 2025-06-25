@@ -10,7 +10,7 @@ import {
     savedNormalCollections,
 } from "./collection";
 import { savedCollectionFiles } from "./photos-fdb";
-import { syncCollectionAndFiles } from "./sync";
+import { syncCollectionAndFiles } from "./pull";
 
 /**
  * A group of duplicates as shown in the UI.
