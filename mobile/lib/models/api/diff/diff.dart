@@ -14,8 +14,8 @@ class Info {
   static Info? fromJson(Map<String, dynamic>? json) {
     if (json == null) return null;
     return Info(
-      fileSize: json['fileSize'] ?? 0,
-      thumbSize: json['thumbSize'] ?? 0,
+      fileSize: json['fileSize'] ?? -1,
+      thumbSize: json['thumbSize'] ?? -1,
     );
   }
 

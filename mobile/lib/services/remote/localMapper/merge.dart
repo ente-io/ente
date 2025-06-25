@@ -17,7 +17,6 @@ Future<List<EnteFile>> merge({
   final int localLength = localFiles.length;
   final int remoteLength = remoteFiles.length;
 
-  // Since there are no duplicates, we can merge without checking
   while (i < localLength && j < remoteLength) {
     if (localFiles[i].creationTime! >= remoteFiles[j].creationTime!) {
       mergedFiles.add(localFiles[i++]);

@@ -1260,7 +1260,7 @@ class FilesDB with SqlDbBase {
     file.exif = row[columnExif];
     file.hash = row[columnHash];
     file.metadataVersion = row[columnMetadataVersion] ?? 0;
-    file.fileSize = row[columnFileSize];
+    // file.fileSize = row[columnFileSize];
 
     file.mMdVersion = row[columnMMdVersion] ?? 0;
     file.mMdEncodedJson = row[columnMMdEncodedJson] ?? '{}';

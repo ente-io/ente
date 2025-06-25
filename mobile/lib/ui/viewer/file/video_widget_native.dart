@@ -87,6 +87,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
   late final StreamSubscription<FileCaptionUpdatedEvent>
       _captionUpdatedSubscription;
   int position = 0;
+  int? videoSize;
 
   @override
   void initState() {
@@ -95,6 +96,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
     );
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    videoSize = widget.file.fileSize;
 
     if (widget.selectedPreview) {
       loadPreview();
@@ -544,7 +546,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
         if (!mounted) {
           return;
         }
-        _progressNotifier.value = count / (widget.file.fileSize ?? total);
+        _progressNotifier.value = count / (videoSize ?? total);
         if (_progressNotifier.value == 1) {
           if (mounted) {
             showShortToast(context, S.of(context).decryptingVideo);
@@ -566,12 +568,11 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
 
   void _setFileSizeIfNull() {
     if (widget.file.fileSize == null && widget.file.canEditMetaInfo) {
-      FilesService.instance
-          .getFileSize(widget.file.uploadedFileID!)
-          .then((value) {
-        widget.file.fileSize = value;
+      FilesService.instance.getFileSize(widget.file.remoteID).then((value) {
         if (mounted) {
-          setState(() {});
+          setState(() {
+            videoSize = value;
+          });
         }
       });
     }

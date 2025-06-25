@@ -67,6 +67,7 @@ class _VideoWidgetMediaKitState extends State<VideoWidgetMediaKit>
   StreamSubscription<DownloadTask>? _downloadTaskSubscription;
   late final StreamSubscription<FileCaptionUpdatedEvent>
       _captionUpdatedSubscription;
+  int? videoSize;
 
   @override
   void initState() {
@@ -76,6 +77,7 @@ class _VideoWidgetMediaKitState extends State<VideoWidgetMediaKit>
     super.initState();
     WidgetsBinding.instance.addObserver(this);
 
+    videoSize = widget.file.fileSize;
     if (widget.selectedPreview) {
       loadPreview();
     } else {
@@ -267,7 +269,7 @@ class _VideoWidgetMediaKitState extends State<VideoWidgetMediaKit>
         if (!mounted) {
           return;
         }
-        _progressNotifier.value = count / (widget.file.fileSize ?? total);
+        _progressNotifier.value = count / (videoSize ?? total);
         if (_progressNotifier.value == 1) {
           if (mounted) {
             showShortToast(context, S.of(context).decryptingVideo);
@@ -292,9 +294,10 @@ class _VideoWidgetMediaKitState extends State<VideoWidgetMediaKit>
       FilesService.instance
           .getFileSize(widget.file.uploadedFileID!)
           .then((value) {
-        widget.file.fileSize = value;
         if (mounted) {
-          setState(() {});
+          setState(() {
+            videoSize = value;
+          });
         }
       });
     }

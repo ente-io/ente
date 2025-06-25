@@ -27,6 +27,28 @@ class RemoteAsset {
     required this.info,
   });
 
+  RemoteAsset copyWith({
+    int? id,
+    int? ownerID,
+    Uint8List? thumbHeader,
+    Uint8List? fileHeader,
+    Metadata? metadata,
+    Metadata? privateMetadata,
+    Metadata? publicMetadata,
+    Info? info,
+  }) {
+    return RemoteAsset(
+      id: id ?? this.id,
+      ownerID: ownerID ?? this.ownerID,
+      thumbHeader: thumbHeader ?? this.thumbHeader,
+      fileHeader: fileHeader ?? this.fileHeader,
+      metadata: metadata ?? this.metadata,
+      privateMetadata: privateMetadata ?? this.privateMetadata,
+      publicMetadata: publicMetadata ?? this.publicMetadata,
+      info: info ?? this.info,
+    );
+  }
+
   String get title =>
       publicMetadata?.data['editedName'] ?? metadata.data['title'] ?? "";
 

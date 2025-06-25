@@ -48,7 +48,13 @@ class EnteFile {
   @Deprecated(
       'use remoteAsset.thumbHeader instead. This will be removed in future')
   String? thumbnailDecryptionHeader;
-  int? fileSize;
+  
+  int? get fileSize {
+    if (rAsset != null && rAsset!.fileSize != -1) {
+      return rAsset!.fileSize;
+    }
+    return null;
+  }
 
   String? mMdEncodedJson;
   int mMdVersion = 0;
@@ -139,7 +145,6 @@ class EnteFile {
     file.fileSubType = rAsset.subType;
     file.metadataVersion = kCurrentMetadataVersion;
     file.duration = rAsset.durationInSec;
-    file.fileSize = rAsset.fileSize;
     file.collectionID = collection.collectionID;
     file.encryptedKey = CryptoUtil.bin2base64(collection.encFileKey);
     file.keyDecryptionNonce = CryptoUtil.bin2base64(collection.encFileKeyNonce);
@@ -418,7 +423,6 @@ class EnteFile {
       ..fileDecryptionHeader = fileDecryptionHeader ?? this.fileDecryptionHeader
       ..thumbnailDecryptionHeader =
           thumbnailDecryptionHeader ?? this.thumbnailDecryptionHeader
-      ..fileSize = fileSize ?? this.fileSize
       ..mMdEncodedJson = mMdEncodedJson ?? this.mMdEncodedJson
       ..mMdVersion = mMdVersion ?? this.mMdVersion
       ..magicMetadata = magicMetadata ?? this.magicMetadata

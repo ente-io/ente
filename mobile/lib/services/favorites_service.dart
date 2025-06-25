@@ -83,10 +83,10 @@ class FavoritesService {
   }
 
   bool isFavoriteCache(EnteFile file, {bool checkOnlyAlbum = false}) {
-    if (file.collectionID != null &&
+    if (file.cf != null &&
         _cachedFavoritesCollectionID != null &&
-        file.collectionID == _cachedFavoritesCollectionID) {
-      devLog("File ${file.uploadedFileID} is part of favorite collection");
+        file.cf!.collectionID == _cachedFavoritesCollectionID) {
+      devLog("File ${file.remoteID} is part of favorite collection");
       return true;
     }
     if (checkOnlyAlbum) {

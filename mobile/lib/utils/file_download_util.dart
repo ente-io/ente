@@ -74,7 +74,7 @@ Future<File?> downloadAndDecryptPublicFile(
       await CryptoUtil.decryptFile(
         encryptedFilePath,
         decryptedFilePath,
-        CryptoUtil.base642bin(file.fileDecryptionHeader!),
+        file.rAsset!.fileHeader,
         getFileKey(file),
       );
       fakeProgress?.stop();
