@@ -14,8 +14,10 @@ import {
     fileLocation,
 } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
-import { getLocalCollections } from "ente-new/photos/services/collections";
-import { savedNormalFiles } from "ente-new/photos/services/photos-fdb";
+import {
+    savedCollectionFiles,
+    savedCollections,
+} from "ente-new/photos/services/photos-fdb";
 import { getUserDetailsV2 } from "ente-new/photos/services/user-details";
 
 const DATE_TIME_PARSING_TEST_FILE_NAMES = [
@@ -179,7 +181,7 @@ async function totalFileCountCheck(expectedState) {
 }
 
 async function totalCollectionCountCheck(expectedState) {
-    const collections = await getLocalCollections();
+    const collections = await savedCollections();
     if (expectedState.collection_count === collections.length) {
         console.log("collection count check passed ✅");
     } else {
@@ -191,8 +193,8 @@ async function totalCollectionCountCheck(expectedState) {
 }
 
 async function collectionWiseFileCount(expectedState) {
-    const files = await savedNormalFiles();
-    const collections = await getLocalCollections();
+    const files = await savedCollectionFiles();
+    const collections = await savedCollections();
     const collectionToFilesMap = groupFilesByCollectionID(files);
     const collectionIDToNameMap = new Map(
         collections.map((collection) => [collection.id, collection.name]),
@@ -220,7 +222,7 @@ async function collectionWiseFileCount(expectedState) {
 }
 
 async function thumbnailGenerationFailedFilesCheck(expectedState) {
-    const files = await savedNormalFiles();
+    const files = await savedCollectionFiles();
     const filesWithStaticThumbnail = files.filter(
         (file) => file.metadata.hasStaticThumbnail,
     );
@@ -262,7 +264,7 @@ async function thumbnailGenerationFailedFilesCheck(expectedState) {
 }
 
 async function livePhotoClubbingCheck(expectedState) {
-    const files = await savedNormalFiles();
+    const files = await savedCollectionFiles();
     const livePhotos = files.filter(
         (file) => file.metadata.fileType == FileType.livePhoto,
     );
@@ -297,7 +299,7 @@ async function livePhotoClubbingCheck(expectedState) {
 }
 
 async function exifDataParsingCheck(expectedState) {
-    const files = await savedNormalFiles();
+    const files = await savedCollectionFiles();
     Object.entries(expectedState.exif).map(([fileName, exifValues]) => {
         const matchingFile = files.find(
             (file) => fileFileName(file) == fileName,
@@ -330,7 +332,7 @@ async function exifDataParsingCheck(expectedState) {
 }
 
 async function fileDimensionExtractionCheck(expectedState) {
-    const files = await savedNormalFiles();
+    const files = await savedCollectionFiles();
     Object.entries(expectedState.file_dimensions).map(
         ([fileName, dimensions]) => {
             const matchingFile = files.find(
@@ -357,7 +359,7 @@ async function fileDimensionExtractionCheck(expectedState) {
 }
 
 async function googleMetadataReadingCheck(expectedState) {
-    const files = await savedNormalFiles();
+    const files = await savedCollectionFiles();
     Object.entries(expectedState.google_import).map(([fileName, metadata]) => {
         const matchingFile = files.find(
             (file) => fileFileName(file) == fileName,

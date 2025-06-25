@@ -14,32 +14,7 @@ import {
     getCollectionLastSyncTime,
     setCollectionLastSyncTime,
 } from "./collections";
-import {
-    savedHiddenFiles,
-    savedNormalFiles,
-    saveHiddenFiles,
-    saveNormalFiles,
-} from "./photos-fdb";
-
-/**
- * Return all files that we know about locally. By default it returns only
- * "normal" (i.e. non-"hidden") files, but it can be passed the {@link type}
- * "hidden" to get it to instead return hidden files that we know about locally.
- *
- * Deprecated, use {@link savedNormalFiles} or {@link savedHiddenFiles} instead.
- */
-export const getLocalFiles = async (type: "normal" | "hidden" = "normal") =>
-    type == "normal" ? savedNormalFiles() : savedHiddenFiles();
-
-/**
- * Update the files that we know about locally.
- *
- * Sibling of {@link getLocalFiles}.
- *
- * Deprecate, use {@link saveNormalFiles} or {@link saveHiddenFiles} instead.
- */
-export const setLocalFiles = (type: "normal" | "hidden", files: EnteFile[]) =>
-    type == "normal" ? saveNormalFiles(files) : saveHiddenFiles(files);
+import { saveCollectionFiles, savedCollectionFiles } from "./photos-fdb";
 
 /**
  * Fetch all files of the given {@link type}, belonging to the given
@@ -56,18 +31,17 @@ export const setLocalFiles = (type: "normal" | "hidden", files: EnteFile[]) =>
  *
  * @returns true if one or more files were updated locally, false otherwise.
  */
-export const syncFiles = async (
-    type: "normal" | "hidden",
+export const pullCollectionFiles = async (
     collections: Collection[],
-    onResetFiles: ((files: EnteFile[]) => void) | undefined,
-    onFetchFiles: ((files: EnteFile[]) => void) | undefined,
+    onSetCollectionFiles: ((files: EnteFile[]) => void) | undefined,
+    onAugmentCollectionFiles: ((files: EnteFile[]) => void) | undefined,
 ) => {
-    const localFiles = await getLocalFiles(type);
+    const localFiles = await savedCollectionFiles();
     let files = removeDeletedCollectionFiles(collections, localFiles);
     let didUpdateFiles = false;
     if (files.length !== localFiles.length) {
-        await setLocalFiles(type, files);
-        onResetFiles?.(files);
+        await saveCollectionFiles(files);
+        onSetCollectionFiles?.(files);
         didUpdateFiles = true;
     }
     for (const collection of collections) {
@@ -79,10 +53,14 @@ export const syncFiles = async (
             continue;
         }
 
-        const newFiles = await getFiles(collection, lastSyncTime, onFetchFiles);
+        const newFiles = await getFiles(
+            collection,
+            lastSyncTime,
+            onAugmentCollectionFiles,
+        );
         await clearCachedThumbnailsIfChanged(localFiles, newFiles);
         files = getLatestVersionFiles([...files, ...newFiles]);
-        await setLocalFiles(type, files);
+        await saveCollectionFiles(files);
         didUpdateFiles = true;
         await setCollectionLastSyncTime(collection, collection.updationTime);
     }

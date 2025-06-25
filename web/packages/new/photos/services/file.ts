@@ -12,6 +12,8 @@ import {
     type RemoteMagicMetadata,
 } from "ente-media/magic-metadata";
 import { batch } from "ente-utils/array";
+import { savedHiddenCollections } from "./collection";
+import { savedCollectionFiles } from "./photos-fdb";
 
 /**
  * An reasonable but otherwise arbitrary number of items (e.g. files) to include
@@ -45,6 +47,26 @@ export const performInBatches = <T, U>(
     items: T[],
     op: (batchItems: T[]) => Promise<U>,
 ): Promise<U[]> => Promise.all(batch(items, requestBatchSize).map(op));
+
+/**
+ * Return all normal (non-hidden) files present in our local database.
+ *
+ * The long name and the "compute" in it is to signal that this is not just a DB
+ * read, and that it also does some potentially non-trivial computation.
+ */
+export const computeNormalCollectionFilesFromSaved = async () => {
+    const hiddenCollections = await savedHiddenCollections();
+    const hiddenCollectionIDs = new Set(hiddenCollections.map((c) => c.id));
+
+    const collectionFiles = await savedCollectionFiles();
+    const hiddenFileIDs = new Set(
+        collectionFiles
+            .filter((f) => hiddenCollectionIDs.has(f.collectionID))
+            .map((f) => f.id),
+    );
+
+    return collectionFiles.filter((f) => !hiddenFileIDs.has(f.id));
+};
 
 /**
  * Change the visibility (normal, archived, hidden) of a list of files on

@@ -14,7 +14,6 @@ import { type EnteFile } from "ente-media/file";
 import { fileFileName } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
 import { decodeLivePhoto } from "ente-media/live-photo";
-import { getLocalCollections } from "ente-new/photos/services/collections";
 import {
     safeDirectoryName,
     safeFileName,
@@ -32,7 +31,7 @@ import exportService, {
     type ExportStage,
     type FileExportNames,
 } from "./export";
-import { savedFiles } from "./photos-fdb";
+import { savedCollectionFiles, savedCollections } from "./photos-fdb";
 
 type ExportedCollectionPaths = Record<number, string>;
 
@@ -140,8 +139,8 @@ async function migrationV0ToV1(
     }
     const collectionIDPathMap = new Map<number, string>();
     const user: User = getData("user");
-    const localFiles = await savedFiles();
-    const localCollections = await getLocalCollections();
+    const localFiles = await savedCollectionFiles();
+    const localCollections = await savedCollections();
     const personalFiles = getIDBasedSortedFiles(
         localFiles.filter((file) => file.ownerID == user.id),
     );
@@ -179,7 +178,7 @@ async function migrationV2ToV3(
         return;
     }
     const user: User = getData("user");
-    const localFiles = await savedFiles();
+    const localFiles = await savedCollectionFiles();
     const personalFiles = getIDBasedSortedFiles(
         localFiles.filter((file) => file.ownerID == user.id),
     );

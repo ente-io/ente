@@ -2,6 +2,7 @@ import type { User } from "ente-accounts/services/user";
 import { ensureElectron } from "ente-base/electron";
 import { joinPath } from "ente-base/file-name";
 import log from "ente-base/log";
+import { uniqueFilesByID } from "ente-gallery/utils/files";
 import { type Collection, CollectionSubType } from "ente-media/collection";
 import { EnteFile } from "ente-media/file";
 import {
@@ -15,11 +16,9 @@ import {
     restoreToCollection,
 } from "ente-new/photos/services/collection";
 import { PseudoCollectionID } from "ente-new/photos/services/collection-summary";
-import { getLocalCollections } from "ente-new/photos/services/collections";
-import { getLocalFiles } from "ente-new/photos/services/files";
 import {
+    savedCollectionFiles,
     savedCollections,
-    savedFiles,
 } from "ente-new/photos/services/photos-fdb";
 import { safeDirectoryName } from "ente-new/photos/utils/native-fs";
 import { getData } from "ente-shared/storage/localStorage";
@@ -76,7 +75,7 @@ export async function downloadCollectionHelper(
     setFilesDownloadProgressAttributes: SetFilesDownloadProgressAttributes,
 ) {
     try {
-        const allFiles = await savedFiles();
+        const allFiles = await savedCollectionFiles();
         const collectionFiles = allFiles.filter(
             (file) => file.collectionID == collectionID,
         );
@@ -101,12 +100,14 @@ export async function downloadDefaultHiddenCollectionHelper(
     setFilesDownloadProgressAttributesCreator: SetFilesDownloadProgressAttributesCreator,
 ) {
     try {
-        const hiddenCollections = await getLocalCollections("hidden");
-        const defaultHiddenCollectionsIds =
-            findDefaultHiddenCollectionIDs(hiddenCollections);
-        const hiddenFiles = await getLocalFiles("hidden");
-        const defaultHiddenCollectionFiles = hiddenFiles.filter((file) =>
-            defaultHiddenCollectionsIds.has(file.collectionID),
+        const defaultHiddenCollectionsIDs = findDefaultHiddenCollectionIDs(
+            await savedCollections(),
+        );
+        const collectionFiles = await savedCollectionFiles();
+        const defaultHiddenCollectionFiles = uniqueFilesByID(
+            collectionFiles.filter((file) =>
+                defaultHiddenCollectionsIDs.has(file.collectionID),
+            ),
         );
         const setFilesDownloadProgressAttributes =
             setFilesDownloadProgressAttributesCreator(

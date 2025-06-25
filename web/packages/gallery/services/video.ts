@@ -13,8 +13,8 @@ import { uniqueFilesByID } from "ente-gallery/utils/files";
 import { fileLogID, type EnteFile } from "ente-media/file";
 import { FileType } from "ente-media/file-type";
 import { updateFilePublicMagicMetadata } from "ente-new/photos/services/file";
-import { savedFiles } from "ente-new/photos/services/photos-fdb";
-import { getLocalTrashFileIDs } from "ente-new/photos/services/trash";
+import { savedCollectionFiles } from "ente-new/photos/services/photos-fdb";
+import { savedTrashItemFileIDs } from "ente-new/photos/services/trash";
 import { gunzip, gzip } from "ente-new/photos/utils/gzip";
 import { randomSample } from "ente-utils/array";
 import { ensurePrecondition } from "ente-utils/ensure";
@@ -877,8 +877,8 @@ const processQueue = async () => {
 const backfillQueue = async (
     userID: number,
 ): Promise<VideoProcessingQueueItem[]> => {
-    const allCollectionFiles = await savedFiles();
-    const localTrashFileIDs = await getLocalTrashFileIDs();
+    const allCollectionFiles = await savedCollectionFiles();
+    const localTrashFileIDs = await savedTrashItemFileIDs();
     const videoFiles = uniqueFilesByID(
         allCollectionFiles.filter(
             (f) =>

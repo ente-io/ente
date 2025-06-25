@@ -16,7 +16,7 @@ import { type UploadResult } from "ente-gallery/services/upload";
 import type { UploadAsset } from "ente-gallery/services/upload/upload-service";
 import { groupFilesByCollectionID } from "ente-gallery/utils/files";
 import type { EnteFile } from "ente-media/file";
-import { getLocalFiles } from "ente-new/photos/services/files";
+import { computeNormalCollectionFilesFromSaved } from "ente-new/photos/services/file";
 import { ensureString } from "ente-utils/ensure";
 import { removeFromCollection } from "./collectionService";
 import { type UploadItemWithCollection, uploadManager } from "./upload-manager";
@@ -475,7 +475,7 @@ class FolderWatcher {
         for (const file of syncedFiles)
             syncedFileForID.set(file.uploadedFileID, file);
 
-        const files = await getLocalFiles();
+        const files = await computeNormalCollectionFilesFromSaved();
         const filesToTrash = files.filter((file) => {
             const correspondingSyncedFile = syncedFileForID.get(file.id);
             if (
@@ -581,17 +581,10 @@ const deduceEvents = async (watches: FolderWatch[]): Promise<WatchEvent[]> => {
  */
 const pathsToUpload = (paths: string[], watch: FolderWatch) =>
     paths
-        // Filter out hidden files (files whose names begins with a dot)
-        .filter((path) => !isHiddenFile(path))
+        // Filter out files whose names begins with a dot.
+        .filter((path) => !basename(path).startsWith("."))
         // Files that are on disk but not yet synced or ignored.
         .filter((path) => !isSyncedOrIgnoredPath(path, watch));
-
-/**
- * Return true if the file at the given {@link path} is hidden.
- *
- * Hidden files are those whose names begin with a "." (dot).
- */
-const isHiddenFile = (path: string) => basename(path).startsWith(".");
 
 /**
  * Return the paths to previously synced files that are no longer on disk and so

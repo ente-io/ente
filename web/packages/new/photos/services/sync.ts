@@ -5,9 +5,8 @@ import {
 } from "ente-gallery/services/video";
 import type { Collection } from "ente-media/collection";
 import type { EnteFile } from "ente-media/file";
-import { isHiddenCollection } from "ente-new/photos/services/collection";
-import { getAllLatestCollections } from "ente-new/photos/services/collections";
-import { syncFiles } from "ente-new/photos/services/files";
+import { pullCollections } from "ente-new/photos/services/collections";
+import { pullCollectionFiles } from "ente-new/photos/services/files";
 import {
     isMLSupported,
     mlStatusSync,
@@ -15,7 +14,6 @@ import {
 } from "ente-new/photos/services/ml";
 import { searchDataSync } from "ente-new/photos/services/search";
 import { syncSettings } from "ente-new/photos/services/settings";
-import { splitByPredicate } from "ente-utils/array";
 import { pullTrash, type TrashItem } from "./trash";
 
 /**
@@ -65,39 +63,22 @@ export const postCollectionAndFilesSync = async () => {
     void mlSync();
 };
 
-interface SyncCallectionAndFilesOpts {
+interface PullFilesOpts {
     /**
-     * Called when saved collections, both normal and hidden, are (potentially)
-     * updated.
-     *
-     * The callback is passed all the collections (as {@link collections}), and
-     * also their splits into normal ({@link normalCollections}) and hidden
-     * ({@link hiddenCollections}).
+     * Called when the saved collections were replaced by the given
+     * {@link collections}.
      */
-    onSetCollections: (
-        collections: Collection[],
-        normalCollections: Collection[],
-        hiddenCollections: Collection[],
-    ) => void;
+    onSetCollections: (collections: Collection[]) => void;
     /**
-     * Called when saved normal (non-hidden, non-trash) files were replaced by
-     * the given {@link files}.
+     * Called when saved collection files were replaced by the given
+     * {@link collectionFiles}.
      */
-    onResetNormalFiles: (files: EnteFile[]) => void;
+    onSetCollectionFiles: (collectionFiles: EnteFile[]) => void;
     /**
-     * Called when saved normal files were augmented with the given newly
-     * fetched {@link files}.
+     * Called when saved collection files were augmented with the given newly
+     * fetched {@link collectionFiles}.
      */
-    onFetchNormalFiles: (files: EnteFile[]) => void;
-    /**
-     * Called when saved hidden files were replaced by the given {@link files}.
-     */
-    onResetHiddenFiles: (files: EnteFile[]) => void;
-    /**
-     * Called when saved hidden files were augmented with the given newly
-     * fetched {@link files}.
-     */
-    onFetchHiddenFiles: (files: EnteFile[]) => void;
+    onAugmentCollectionFiles: (collectionFiles: EnteFile[]) => void;
     /**
      * Called when saved trashed items were replaced by the given
      * {@link trashItems}.
@@ -119,36 +100,22 @@ interface SyncCallectionAndFilesOpts {
  * state in tandem with the sync. The callbacks are optional since we might not
  * have local state to update, as is the case when this is invoked post dedup.
  *
- * @returns `true` if one or more normal or hidden files were updated during the
- * sync.
+ * @returns `true` if one or more files were updated during the pull.
  */
-export const syncCollectionAndFiles = async (
-    opts?: SyncCallectionAndFilesOpts,
-) => {
-    const collections = await getAllLatestCollections();
-    const [hiddenCollections, normalCollections] = splitByPredicate(
+export const syncCollectionAndFiles = async (opts?: PullFilesOpts) => {
+    const collections = await pullCollections();
+    opts?.onSetCollections(collections);
+    const didUpdateFiles = await pullCollectionFiles(
         collections,
-        isHiddenCollection,
-    );
-    opts?.onSetCollections(collections, normalCollections, hiddenCollections);
-    const didUpdateNormalFiles = await syncFiles(
-        "normal",
-        normalCollections,
-        opts?.onResetNormalFiles,
-        opts?.onFetchNormalFiles,
-    );
-    const didUpdateHiddenFiles = await syncFiles(
-        "hidden",
-        hiddenCollections,
-        opts?.onResetHiddenFiles,
-        opts?.onFetchHiddenFiles,
+        opts?.onSetCollectionFiles,
+        opts?.onAugmentCollectionFiles,
     );
     await pullTrash(
         collections,
         opts?.onSetTrashedItems,
         videoPrunePermanentlyDeletedFileIDsIfNeeded,
     );
-    if (didUpdateNormalFiles || didUpdateHiddenFiles) {
+    if (didUpdateFiles) {
         // TODO: Ok for now since its is only commented for the deduper (gallery
         // does this on the return value), but still needs fixing instead of a
         // hidden gotcha. Fix is simple, just uncomment, but that can be done

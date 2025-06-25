@@ -116,20 +116,13 @@ export const saveTrashItemCollectionKeys = async (
 /**
  * Return all files present in our local database.
  *
- * This includes both normal (non-hidden) and hidden files. If you're interested
- * only in one type (normal or hidden), then it is more efficient to use
- * {@link savedNormalFiles} or {@link savedHiddenFiles} to obtain them; this
- * method is only a convenience to concatenate the two.
- */
-export const savedFiles = async (): Promise<EnteFile[]> =>
-    Promise.all([savedNormalFiles(), savedHiddenFiles()]).then((f) => f.flat());
-
-/**
- * Return all normal (non-hidden) files present in our local database.
+ * These are "collection files", meaning that there might be multiple entries
+ * for the same file, one for each collection that the file belongs to. For more
+ * details, See: [Note: Collection File].
  *
- * Use {@link saveNormalFiles} to update the database.
+ * Use {@link saveFiles} to update the database.
  */
-export const savedNormalFiles = async (): Promise<EnteFile[]> =>
+export const savedCollectionFiles = async (): Promise<EnteFile[]> => {
     // [Note: Avoiding Zod parsing for large DB arrays]
     //
     // Zod can be used to validate that the value we read from the DB is indeed
@@ -144,37 +137,34 @@ export const savedNormalFiles = async (): Promise<EnteFile[]> =>
     // As an optimization, we skip the runtime check here and cast. This might
     // not be the most optimal choice in the future, so (a) use it sparingly,
     // and (b) mark all such cases with the title of this note.
-    transformFilesIfNeeded(
-        (await localForage.getItem<EnteFile[]>("files")) ?? [],
-    );
+    let files = (await localForage.getItem<EnteFile[]>("files")) ?? [];
 
-/**
- * Replace the list of files stored in our local database.
- *
- * This is the setter corresponding to {@link savedNormalFiles}.
- */
-export const saveNormalFiles = async (files: EnteFile[]) => {
-    await localForage.setItem("files", transformFilesIfNeeded(files));
+    // Previously hidden files were stored separately. If that key is present,
+    // also read those files, and migrate them (save the concatenation to disk
+    // and delete the corresponding DB key).
+    //
+    // This migration was added Jun 2025, v1.7.14-beta (tag: Migration).
+    const previousHiddenFiles =
+        await localForage.getItem<EnteFile[]>("hidden-files");
+    if (previousHiddenFiles) {
+        files = files.concat(previousHiddenFiles);
+        await saveCollectionFiles(files);
+        await localForage.removeItem("hidden-files");
+        // While we're cleaning up, also remove this unused field related to
+        // hidden collections also being separately stored earlier.
+        await localForage.removeItem("hidden-collection-ids");
+    }
+
+    return transformFilesIfNeeded(files);
 };
 
 /**
- * Return all hidden files present in our local database.
+ * Replace the list of collection files stored in our local database.
  *
- * Use {@link saveNormalFiles} to update the database.
+ * This is the setter corresponding to {@link savedCollectionFiles}.
  */
-export const savedHiddenFiles = async (): Promise<EnteFile[]> =>
-    // See: [Note: Avoiding Zod parsing for large DB arrays]
-    transformFilesIfNeeded(
-        (await localForage.getItem<EnteFile[]>("hidden-files")) ?? [],
-    );
-
-/**
- * Replace the list of files stored in our local database.
- *
- * This is the setter corresponding to {@link savedNormalFiles}.
- */
-export const saveHiddenFiles = async (files: EnteFile[]) => {
-    await localForage.setItem("hidden-files", transformFilesIfNeeded(files));
+export const saveCollectionFiles = async (files: EnteFile[]) => {
+    await localForage.setItem("files", transformFilesIfNeeded(files));
 };
 
 /**

@@ -56,8 +56,6 @@ import {
     SearchResultsHeader,
 } from "ente-new/photos/components/gallery";
 import {
-    constructUserIDToEmailMap,
-    createShareeSuggestionEmails,
     findCollectionCreatingUncategorizedIfNeeded,
     validateKey,
 } from "ente-new/photos/components/gallery/helpers";
@@ -76,14 +74,13 @@ import {
 import exportService from "ente-new/photos/services/export";
 import { updateFilesVisibility } from "ente-new/photos/services/file";
 import {
+    savedCollectionFiles,
     savedCollections,
-    savedHiddenFiles,
-    savedNormalFiles,
     savedTrashItems,
 } from "ente-new/photos/services/photos-fdb";
 import {
     filterSearchableFiles,
-    setSearchCollectionsAndFiles,
+    updateSearchCollectionsAndFiles,
 } from "ente-new/photos/services/search";
 import type { SearchOption } from "ente-new/photos/services/search/types";
 import { initSettings } from "ente-new/photos/services/settings";
@@ -200,10 +197,6 @@ const Page: React.FC = () => {
         while one was already in progress. */
     const resyncOpts = useRef<SyncWithRemoteOpts | undefined>(undefined);
 
-    const [userIDToEmailMap, setUserIDToEmailMap] =
-        useState<Map<number, string>>(null);
-    const [emailList, setEmailList] = useState<string[]>(null);
-
     const [uploadTypeSelectorView, setUploadTypeSelectorView] = useState(false);
     const [uploadTypeSelectorIntent, setUploadTypeSelectorIntent] =
         useState<UploadTypeSelectorIntent>("upload");
@@ -266,10 +259,6 @@ const Page: React.FC = () => {
     // Local aliases.
     const {
         user,
-        familyData,
-        normalCollections,
-        normalFiles,
-        hiddenFiles,
         favoriteFileIDs,
         collectionNameByID,
         fileNormalCollectionIDs,
@@ -330,8 +319,7 @@ const Page: React.FC = () => {
                 user,
                 familyData,
                 collections: await savedCollections(),
-                normalFiles: await savedNormalFiles(),
-                hiddenFiles: await savedHiddenFiles(),
+                collectionFiles: await savedCollectionFiles(),
                 trashItems: await savedTrashItems(),
             });
             await syncWithRemote({ force: true });
@@ -356,23 +344,6 @@ const Page: React.FC = () => {
     }, []);
 
     useEffect(() => {
-        setSearchCollectionsAndFiles({
-            collections: normalCollections,
-            files: normalFiles,
-        });
-    }, [normalCollections, normalFiles]);
-
-    useEffect(() => {
-        if (!user || !normalCollections) {
-            return;
-        }
-        setUserIDToEmailMap(constructUserIDToEmailMap(user, normalCollections));
-        setEmailList(
-            createShareeSuggestionEmails(user, normalCollections, familyData),
-        );
-    }, [user, normalCollections, familyData]);
-
-    useEffect(() => {
         if (typeof activeCollectionID == "undefined" || !router.isReady) {
             return;
         }
@@ -394,6 +365,20 @@ const Page: React.FC = () => {
             );
         }
     }, [router.isReady]);
+
+    useEffect(() => {
+        updateSearchCollectionsAndFiles(
+            state.collections,
+            state.collectionFiles,
+            state.hiddenCollectionIDs,
+            state.hiddenFileIDs,
+        );
+    }, [
+        state.collections,
+        state.collectionFiles,
+        state.hiddenCollectionIDs,
+        state.hiddenFileIDs,
+    ]);
 
     useEffect(() => {
         dispatch({ type: "setPeopleState", peopleState });
@@ -538,25 +523,12 @@ const Page: React.FC = () => {
      */
     const fileAndCollectionSyncWithRemote = useCallback(async () => {
         const didUpdateFiles = await syncCollectionAndFiles({
-            onSetCollections: (
-                collections,
-                normalCollections,
-                hiddenCollections,
-            ) =>
-                dispatch({
-                    type: "setCollections",
-                    collections,
-                    normalCollections,
-                    hiddenCollections,
-                }),
-            onResetNormalFiles: (files) =>
-                dispatch({ type: "setNormalFiles", files }),
-            onFetchNormalFiles: (files) =>
-                dispatch({ type: "fetchNormalFiles", files }),
-            onResetHiddenFiles: (files) =>
-                dispatch({ type: "setHiddenFiles", files }),
-            onFetchHiddenFiles: (files) =>
-                dispatch({ type: "fetchHiddenFiles", files }),
+            onSetCollections: (collections) =>
+                dispatch({ type: "setCollections", collections }),
+            onSetCollectionFiles: (collectionFiles) =>
+                dispatch({ type: "setCollectionFiles", collectionFiles }),
+            onAugmentCollectionFiles: (collectionFiles) =>
+                dispatch({ type: "augmentCollectionFiles", collectionFiles }),
             onSetTrashedItems: (trashItems) =>
                 dispatch({ type: "setTrashItems", trashItems }),
         });
@@ -713,10 +685,15 @@ const Page: React.FC = () => {
     const fileOpHelper = (op: FileOp) => async () => {
         showLoadingBar();
         try {
-            // passing files here instead of filteredData for hide ops because we want to move all files copies to hidden collection
             const selectedFiles = getSelectedFiles(
                 selected,
-                op == "hide" ? normalFiles : filteredFiles,
+                op == "hide"
+                    ? // passing files here instead of filteredData for hide ops
+                      // because we want to move all files copies to hidden collection
+                      state.collectionFiles.filter(
+                          (f) => !state.hiddenFileIDs.has(f.id),
+                      )
+                    : filteredFiles,
             );
             const toProcessFiles =
                 op == "download"
@@ -925,9 +902,10 @@ const Page: React.FC = () => {
                     syncWithRemote({ force, silent }),
                 setBlockingLoad,
                 photoListHeader,
-                userIDToEmailMap,
                 user,
-                emailList,
+                // TODO(RE): Rename
+                userIDToEmailMap: state.emailByUserID,
+                emailList: state.shareSuggestionEmails,
                 openHiddenSection,
                 isClipSearchResult,
                 selectedFile: selected,
@@ -958,7 +936,7 @@ const Page: React.FC = () => {
                         // show "selectable" normalCollectionSummaries. See:
                         // [Note: Picking from selectable collection summaries].
                         findCollectionCreatingUncategorizedIfNeeded(
-                            normalCollections,
+                            state.collections,
                             id,
                         )!
                     }
@@ -996,7 +974,7 @@ const Page: React.FC = () => {
                             activeCollectionID={activeCollectionID}
                             selectedCollection={getSelectedCollection(
                                 selected.collectionID,
-                                normalCollections,
+                                state.collections,
                             )}
                             isFavoriteCollection={
                                 normalCollectionSummaries.get(
@@ -1078,13 +1056,13 @@ const Page: React.FC = () => {
                     onCloseCollectionSelector={handleCloseCollectionSelector}
                     setLoading={setBlockingLoad}
                     setShouldDisableDropzone={setShouldDisableDropzone}
+                    onFileAndCollectionSyncWithRemote={
+                        fileAndCollectionSyncWithRemote
+                    }
                     onUploadFile={(file) =>
-                        dispatch({ type: "uploadNormalFile", file })
+                        dispatch({ type: "uploadFile", file })
                     }
                     onShowPlanSelector={showPlanSelector}
-                    setCollections={(collections) =>
-                        dispatch({ type: "setNormalCollections", collections })
-                    }
                     isFirstUpload={areOnlySystemCollections(
                         normalCollectionSummaries,
                     )}
@@ -1109,8 +1087,7 @@ const Page: React.FC = () => {
                 <WhatsNew {...whatsNewVisibilityProps} />
                 {!isInSearchMode &&
                 !isFirstLoad &&
-                !normalFiles?.length &&
-                !hiddenFiles?.length &&
+                !state.collectionFiles.length &&
                 activeCollectionID === PseudoCollectionID.all ? (
                     <GalleryEmptyState
                         isUploadInProgress={uploadManager.isUploadInProgress()}
@@ -1129,7 +1106,7 @@ const Page: React.FC = () => {
                         files={filteredFiles}
                         enableDownload={true}
                         showAppDownloadBanner={
-                            normalFiles.length < 30 && !isInSearchMode
+                            state.collectionFiles.length < 30 && !isInSearchMode
                         }
                         selectable={true}
                         selected={selected}
