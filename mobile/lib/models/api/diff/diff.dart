@@ -3,6 +3,7 @@ import "dart:io";
 import "dart:typed_data";
 
 import "package:photos/models/api/diff/trash_time.dart";
+import "package:photos/models/file/remote/asset.dart";
 import "package:photos/models/location/location.dart";
 import "package:photos/models/metadata/file_magic.dart";
 
@@ -68,7 +69,7 @@ class Metadata {
   }
 }
 
-class FileItem {
+class ApiFileItem {
   final int fileID;
   final int ownerID;
   final Uint8List? thumnailDecryptionHeader;
@@ -78,7 +79,7 @@ class FileItem {
   final Metadata? pubMagicMetadata;
   final Info? info;
 
-  FileItem({
+  ApiFileItem({
     required this.fileID,
     required this.ownerID,
     this.thumnailDecryptionHeader,
@@ -89,8 +90,8 @@ class FileItem {
     this.info,
   });
 
-  factory FileItem.deleted(int fileID, int ownerID) {
-    return FileItem(
+  factory ApiFileItem.deleted(int fileID, int ownerID) {
+    return ApiFileItem(
       fileID: fileID,
       ownerID: ownerID,
     );
@@ -115,6 +116,19 @@ class FileItem {
       pubMagicMetadata?.toEncodedJson(),
       info?.toEncodedJson(),
     ];
+  }
+
+  RemoteAsset toRemoteAsset() {
+    return RemoteAsset(
+      id: fileID,
+      ownerID: ownerID,
+      thumbHeader: thumnailDecryptionHeader!,
+      fileHeader: fileDecryotionHeader!,
+      metadata: metadata!,
+      privateMetadata: magicMetadata,
+      publicMetadata: pubMagicMetadata,
+      info: info,
+    );
   }
 
   String get title =>
@@ -167,17 +181,17 @@ class FileItem {
   int get fileSize => info?.fileSize ?? -1;
 }
 
-class DiffFileItem {
+class DiffItem {
   final int collectionID;
   final bool isDeleted;
   final Uint8List? encFileKey;
   final Uint8List? encFileKeyNonce;
   final int updatedAt;
   final int? createdAt;
-  final FileItem fileItem;
+  final ApiFileItem fileItem;
   final TrashTime? trashTime;
 
-  DiffFileItem({
+  DiffItem({
     required this.collectionID,
     required this.isDeleted,
     required this.updatedAt,

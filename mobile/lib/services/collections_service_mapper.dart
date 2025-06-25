@@ -66,7 +66,7 @@ extension CollectionsServiceMapper on CollectionsService {
     return EnteFile.fromRemoteAsset(newRAsset, newCF);
   }
 
-  DiffFileItem buildDiffItem(EnteFile file, int dstCollectionID) {
+  DiffItem buildDiffItem(EnteFile file, int dstCollectionID) {
     if (file.rAsset == null || file.cf == null) {
       throw ArgumentError("must have remoteAsset and fileEntry");
     }
@@ -84,14 +84,14 @@ extension CollectionsServiceMapper on CollectionsService {
       throw ArgumentError("File ID in remote asset does not match file entry.");
     }
 
-    return DiffFileItem(
+    return DiffItem(
       collectionID: cf.collectionID,
       isDeleted: false,
       updatedAt: cf.updatedAt,
       createdAt: cf.createdAt,
       encFileKey: cf.encFileKey,
       encFileKeyNonce: cf.encFileKeyNonce,
-      fileItem: FileItem(
+      fileItem: ApiFileItem(
         fileID: remoteAsset.id,
         ownerID: remoteAsset.ownerID,
         thumnailDecryptionHeader: remoteAsset.thumbHeader,

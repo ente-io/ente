@@ -10,7 +10,7 @@ class IgnoredFile {
 
   IgnoredFile(this.localID, this.title, this.deviceFolder, this.reason);
 
-  static fromTrashItem(DiffFileItem? item) {
+  static fromTrashItem(DiffItem? item) {
     if (item == null) return null;
     final fileItem = item.fileItem;
     if (fileItem.localID == null ||

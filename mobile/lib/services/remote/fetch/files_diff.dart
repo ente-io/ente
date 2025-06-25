@@ -94,8 +94,8 @@ class RemoteFileDiffService {
     final List diff = args['diff'] as List;
     final hasMore = args['hasMore'] as bool;
     int latestUpdatedAtTime = 0;
-    final deletedFiles = <DiffFileItem>[];
-    final updatedFiles = <DiffFileItem>[];
+    final deletedFiles = <DiffItem>[];
+    final updatedFiles = <DiffItem>[];
     final int defaultCreatedAt = DateTime.now().millisecondsSinceEpoch;
 
     for (final item in diff) {
@@ -106,12 +106,12 @@ class RemoteFileDiffService {
       final bool isCollectionItemDeleted = item["isDeleted"];
       latestUpdatedAtTime = max(latestUpdatedAtTime, collectionUpdationTime);
       if (isCollectionItemDeleted) {
-        final deletedItem = DiffFileItem(
+        final deletedItem = DiffItem(
           collectionID: collectionID,
           updatedAt: collectionUpdationTime,
           isDeleted: true,
           createdAt: item["createdAt"] ?? defaultCreatedAt,
-          fileItem: FileItem.deleted(fileID, ownerID),
+          fileItem: ApiFileItem.deleted(fileID, ownerID),
         );
         deletedFiles.add(deletedItem);
         continue;
@@ -119,13 +119,13 @@ class RemoteFileDiffService {
       final Uint8List encFileKey = CryptoUtil.base642bin(item["encryptedKey"]);
       final Uint8List encFileKeyNonce =
           CryptoUtil.base642bin(item["keyDecryptionNonce"]);
-      final FileItem fileItem = constructFileItem(
+      final ApiFileItem fileItem = constructFileItem(
         item,
         collectionKey,
         encFileKey,
         encFileKeyNonce,
       );
-      final DiffFileItem file = DiffFileItem(
+      final DiffItem file = DiffItem(
         collectionID: collectionID,
         updatedAt: collectionUpdationTime,
         encFileKey: encFileKey,
@@ -144,7 +144,7 @@ class RemoteFileDiffService {
     );
   }
 
-  static FileItem constructFileItem(
+  static ApiFileItem constructFileItem(
     Map<String, dynamic> item,
     Uint8List collectionKey,
     Uint8List encFileKey,
@@ -212,7 +212,7 @@ class RemoteFileDiffService {
         item["thumbnail"]["decryptionHeader"];
     final Info? info = Info.fromJson(item["info"]);
 
-    return FileItem(
+    return ApiFileItem(
       fileID: fileID,
       ownerID: ownerID,
       thumnailDecryptionHeader:
@@ -227,8 +227,8 @@ class RemoteFileDiffService {
 }
 
 class DiffResult {
-  final List<DiffFileItem> updatedItems;
-  final List<DiffFileItem> deletedItems;
+  final List<DiffItem> updatedItems;
+  final List<DiffItem> deletedItems;
   final bool hasMore;
   final int maxUpdatedAtTime;
   DiffResult(

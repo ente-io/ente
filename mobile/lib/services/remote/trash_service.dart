@@ -65,7 +65,7 @@ class TrashSyncService {
 
   Future<void> _updateIgnoredFiles(TrashDiff diff) async {
     final ignoredFiles = <IgnoredFile>[];
-    for (DiffFileItem t in diff.trashedFiles) {
+    for (DiffItem t in diff.trashedFiles) {
       final file = IgnoredFile.fromTrashItem(t);
       if (file != null) {
         ignoredFiles.add(file);
@@ -140,7 +140,7 @@ class TrashSyncService {
         },
       );
       int latestUpdatedAtTime = 0;
-      final trashedFiles = <DiffFileItem>[];
+      final trashedFiles = <DiffItem>[];
       final deletedUploadIDs = <int>[];
       final restoredFiles = <int>[];
 
@@ -177,7 +177,7 @@ class TrashSyncService {
           CryptoUtil.base642bin(item["encryptedKey"]),
           CryptoUtil.base642bin(item["keyDecryptionNonce"]),
         );
-        final diffItem = DiffFileItem(
+        final diffItem = DiffItem(
           collectionID: collectionID,
           updatedAt: cfUpdatedAt,
           encFileKey: encFileKey,
@@ -256,7 +256,7 @@ class TrashSyncService {
 }
 
 class TrashDiff {
-  final List<DiffFileItem> trashedFiles;
+  final List<DiffItem> trashedFiles;
   final List<int> restoredIDs;
   final List<int> deletedIDs;
   final bool hasMore;

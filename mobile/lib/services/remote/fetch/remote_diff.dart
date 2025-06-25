@@ -1,6 +1,7 @@
 import "package:flutter/foundation.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
+import "package:photos/events/collection_updated_event.dart";
 import "package:photos/events/diff_sync_complete_event.dart";
 import "package:photos/events/sync_status_update_event.dart";
 import "package:photos/service_locator.dart";
@@ -63,17 +64,21 @@ class RemoteDiffService {
         _collectionsService.getCollectionKey(collectionID);
     int currentSinceTime = sinceTime;
     bool hasMore = true;
+    bool hasItems = false;
     while (hasMore) {
       final diff = await filesDiffService.getCollectionItemsDiff(
         collectionID,
         currentSinceTime,
         collectionKey,
       );
+      hasItems = hasItems ||
+          diff.deletedItems.isNotEmpty ||
+          diff.updatedItems.isNotEmpty;
       if (diff.deletedItems.isNotEmpty) {
         await remoteDB.deleteFilesDiff(diff.deletedItems);
       }
       if (diff.updatedItems.isNotEmpty) {
-        await remoteDB.insertFilesDiff(diff.updatedItems);
+        await remoteCache.insertDiffItems(diff.updatedItems);
       }
       // todo:(rewrite) neeraj add logic to refresh home gallery when time or visibility changes
       if (diff.maxUpdatedAtTime > currentSinceTime) {
@@ -86,5 +91,15 @@ class RemoteDiffService {
       _logger.fine("[Collection-$collectionID] synced $diff");
       hasMore = diff.hasMore;
     }
+    if (!hasItems) {
+      return;
+    }
+    Bus.instance.fire(
+      CollectionUpdatedEvent(
+        collectionID,
+        [],
+        "diff",
+      ),
+    );
   }
 }

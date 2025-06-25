@@ -1,5 +1,7 @@
+import "package:logging/logging.dart";
 import "package:photos/db/remote/schema.dart";
 import "package:photos/db/remote/table/collection_files.dart";
+import "package:photos/models/api/diff/diff.dart";
 import "package:photos/models/collection/collection.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/file/remote/asset.dart";
@@ -7,6 +9,7 @@ import "package:photos/models/file_load_result.dart";
 import "package:photos/service_locator.dart";
 
 class RemoteCache {
+  final Logger logger = Logger("RemoteCache");
   Map<int, RemoteAsset> remoteAssets = {};
   bool? isLoaded;
 
@@ -56,12 +59,24 @@ class RemoteCache {
   }
 
   Future<void> _load() async {
-    if (isLoaded == null) {
-      final rAssets = await remoteDB.getRemoteAssets();
-      for (final item in rAssets) {
-        remoteAssets[item.id] = item;
-      }
-      isLoaded = true;
+    if (isLoaded != null && isLoaded!) {
+      return; // Already loaded
+    }
+    logger.info("Loading remote assets into cache");
+    final rAssets = await remoteDB.getRemoteAssets();
+    for (final item in rAssets) {
+      remoteAssets[item.id] = item;
+    }
+    isLoaded = true;
+  }
+
+  Future<void> insertDiffItems(
+    List<DiffItem> items,
+  ) async {
+    if (items.isEmpty) return;
+    await remoteDB.insertDiffItems(items);
+    for (final item in items) {
+      remoteAssets[item.fileItem.fileID] = item.fileItem.toRemoteAsset();
     }
   }
 

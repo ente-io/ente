@@ -7,7 +7,7 @@ import "package:photos/models/api/diff/diff.dart";
 import "package:photos/models/file/file.dart";
 
 extension TrashTable on RemoteDB {
-  Future<void> insertTrashDiffItems(List<DiffFileItem> items) async {
+  Future<void> insertTrashDiffItems(List<DiffItem> items) async {
     if (items.isEmpty) return;
     final stopwatch = Stopwatch()..start();
     await Future.forEach(items.slices(1000), (slice) async {

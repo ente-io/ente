@@ -92,7 +92,7 @@ class RemoteDB with SqlDbBase {
     );
   }
 
-  Future<void> insertFilesDiff(
+  Future<void> insertDiffItems(
     List<DiffItem> items,
   ) async {
     if (items.isEmpty) return;

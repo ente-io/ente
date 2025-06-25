@@ -1497,7 +1497,7 @@ class CollectionsService {
     }
     final batchedFiles = files.chunks(batchSize);
     for (final batch in batchedFiles) {
-      final List<DiffFileItem> collectionDiffItems = [];
+      final List<DiffItem> diffItems = [];
       final params = <String, dynamic>{};
       params["collectionID"] = destCollection;
       params["files"] = [];
@@ -1505,7 +1505,7 @@ class CollectionsService {
       for (final file in batch) {
         final newFile = moveOrAddEntry(file, destCollection);
         final localDiffItem = buildDiffItem(newFile, destCollection);
-        collectionDiffItems.add(localDiffItem);
+        diffItems.add(localDiffItem);
         newFiles.add(newFile);
         params["files"].add(
           CollectionFileRequest.req(
@@ -1520,7 +1520,7 @@ class CollectionsService {
           "/collections/add-files",
           data: params,
         );
-        await remoteDB.insertFilesDiff(collectionDiffItems);
+        await remoteCache.insertDiffItems(diffItems);
         Bus.instance
             .fire(CollectionUpdatedEvent(destCollection, newFiles, "addTo"));
       } catch (e) {
@@ -1607,7 +1607,7 @@ class CollectionsService {
       params["files"] = [];
       final Map<int, (Uint8List encKey, Uint8List encKeyNonce)> newFileKeys =
           {};
-      final List<DiffFileItem> diffItems = [];
+      final List<DiffItem> diffItems = [];
       final List<EnteFile> copiedFiles = [];
       for (final batchFile in batch) {
         if (newFileKeys.containsKey(batchFile.remoteID)) {
@@ -1670,7 +1670,7 @@ class CollectionsService {
             "Failed to map following uploadKey ${srcToCopiedFileIDs.keys}",
           );
         }
-        await remoteDB.insertFilesDiff(diffItems);
+        await remoteCache.insertDiffItems(diffItems);
         Bus.instance.fire(
             CollectionUpdatedEvent(dstCollectionID, copiedFiles, "copiedTo"));
       } catch (e) {
@@ -1876,10 +1876,10 @@ class CollectionsService {
       params["fromCollectionID"] = fromCollectionID;
       params["files"] = [];
       final List<EnteFile> batchMovedFiles = [];
-      final List<DiffFileItem> collectionDiffItems = [];
+      final List<DiffItem> collectionDiffItems = [];
       for (final file in batch) {
         final newFile = moveOrAddEntry(file, toCollectionID);
-        final DiffFileItem localDiffItem = buildDiffItem(
+        final DiffItem localDiffItem = buildDiffItem(
           newFile,
           toCollectionID,
         );
@@ -1897,7 +1897,7 @@ class CollectionsService {
         "/collections/move-files",
         data: params,
       );
-      await remoteDB.insertFilesDiff(collectionDiffItems);
+      await remoteCache.insertDiffItems(collectionDiffItems);
       await remoteDB.deleteCFEnteries(
         fromCollectionID,
         files.map((e) => e.uploadedFileID!).toList(),
