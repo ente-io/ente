@@ -68,7 +68,7 @@ class CollectionsService {
   Collection? cachedDefaultHiddenCollection;
   Future<Map<int, int>>? _collectionIDToNewestFileTime;
   Collection? cachedUncategorizedCollection;
-  final Map<String, EnteFile> _coverCache = <String, EnteFile>{};
+  final Map<String, EnteFile?> _coverCache = <String, EnteFile?>{};
   final Map<int, int> _countCache = <int, int>{};
 
   //Used for links-in-app
@@ -289,17 +289,14 @@ class CollectionsService {
     final int localSyncTime = getCollectionSyncTime(c.id);
     final String coverKey = '${c.id}_${localSyncTime}_${c.updationTime}';
     if (_coverCache.containsKey(coverKey)) {
-      return Future.value(_coverCache[coverKey]!);
+      return Future.value(_coverCache[coverKey]);
     }
     if (kDebugMode) {
       debugPrint("getCover for collection ${c.id} ${c.displayName}");
     }
     final coverFile = await remoteCache.getAlbumCover(c);
-    if (coverFile != null) {
-      _coverCache[coverKey] = coverFile;
-      return Future.value(coverFile);
-    }
-    return null;
+    _coverCache[coverKey] = coverFile;
+    return Future.value(coverFile);
   }
 
   EnteFile? getCoverCache(Collection c) {
