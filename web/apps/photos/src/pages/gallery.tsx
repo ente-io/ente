@@ -133,9 +133,11 @@ import { getSelectedFiles, handleFileOp, type FileOp } from "utils/file";
  * various actions within the gallery and its descendants.
  */
 interface RemotePullOpts {
-    /** Force a pull to happen (default: no) */
-    force?: boolean;
-    /** Perform the pull without showing a global loading bar (default: no) */
+    /**
+     * Perform the pull without showing a global loading bar
+     *
+     * Default: `false`.
+     */
     silent?: boolean;
 }
 
@@ -331,7 +333,7 @@ const Page: React.FC = () => {
                 collectionFiles: await savedCollectionFiles(),
                 trashItems: await savedTrashItems(),
             });
-            await remotePull({ force: true });
+            await remotePull();
             setIsFirstLoad(false);
             setJustSignedUp(false);
             syncIntervalID = setInterval(
@@ -551,7 +553,7 @@ const Page: React.FC = () => {
 
     const remotePull = useCallback(
         async (opts?: RemotePullOpts) => {
-            const { force, silent } = opts ?? {};
+            const { silent } = opts ?? {};
 
             // Pre-flight checks.
             if (!navigator.onLine) return;
@@ -565,15 +567,10 @@ const Page: React.FC = () => {
                 return;
             }
 
-            // Start or enqueue.
-            let isForced = false;
+            // Enqueue if needed.
             if (isPullInProgress.current) {
-                if (force) {
-                    isForced = true;
-                } else {
-                    pendingPullOpts.current = { force, silent };
-                    return;
-                }
+                pendingPullOpts.current = { silent };
+                return;
             }
 
             // The pull itself.
@@ -582,16 +579,7 @@ const Page: React.FC = () => {
                 if (!silent) showLoadingBar();
                 await pullFilesPre();
                 await remoteFilesPull();
-                // remotePull is called with the force flag set to true before
-                // doing an upload. So it is possible, say when resuming a
-                // pending upload, that we get two remote pulls happening in
-                // parallel.
-                //
-                // Do the non-file-related post operations only for one of these
-                // parallel ones.
-                if (!isForced) {
-                    await pullFilesPost();
-                }
+                await pullFilesPost();
             } catch (e) {
                 log.error("Remote pull failed", e);
             } finally {
@@ -913,8 +901,7 @@ const Page: React.FC = () => {
             value={{
                 ...defaultGalleryContext,
                 setActiveCollectionID: handleShowCollectionSummary,
-                syncWithRemote: (force, silent) =>
-                    remotePull({ force, silent }),
+                syncWithRemote: (silent) => remotePull({ silent }),
                 setBlockingLoad,
                 photoListHeader,
                 user,
@@ -1060,9 +1047,7 @@ const Page: React.FC = () => {
 
                 <Upload
                     activeCollection={activeCollection}
-                    syncWithRemote={(force, silent) =>
-                        remotePull({ force, silent })
-                    }
+                    syncWithRemote={(silent) => remotePull({ silent })}
                     closeUploadTypeSelector={setUploadTypeSelectorView.bind(
                         null,
                         false,

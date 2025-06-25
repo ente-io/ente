@@ -112,7 +112,7 @@ export const CollectionShare: React.FC<CollectionShareProps> = ({
                 } catch (e) {
                     onGenericError(e);
                 } finally {
-                    void syncWithRemote(false, true);
+                    void syncWithRemote(true);
                     hideLoadingBar();
                 }
             };
@@ -477,7 +477,7 @@ const AddParticipant: React.FC<AddParticipantProps> = ({
         }
 
         if (emails.length) {
-            await syncWithRemote(false, true);
+            await syncWithRemote(true);
         }
 
         onClose();
@@ -842,7 +842,7 @@ const ManageParticipant: React.FC<ManageParticipantProps> = ({
         try {
             await shareCollection(collection, selectedEmail, newRole);
             selectedParticipant.role = newRole;
-            await galleryContext.syncWithRemote(false, true);
+            await galleryContext.syncWithRemote(true);
         } catch (e) {
             log.error(handleSharingErrors(e), e);
         }
@@ -1058,7 +1058,7 @@ const EnablePublicShareOptions: React.FC<EnablePublicShareOptionsProps> = ({
                 setPending("");
                 setPublicURL(publicURL);
                 onLinkCreated();
-                void syncWithRemote(false, true);
+                void syncWithRemote(true);
             })
             .catch((e: unknown) => {
                 log.error("Could not create public link", e);
@@ -1223,7 +1223,7 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
         try {
             galleryContext.setBlockingLoad(true);
             setPublicURL(await updatePublicURL(collection.id, updates));
-            galleryContext.syncWithRemote(false, true);
+            galleryContext.syncWithRemote(true);
         } catch (e) {
             log.error("Could not update public link", e);
             setSharableLinkError(t("generic_error"));
@@ -1236,7 +1236,7 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
             galleryContext.setBlockingLoad(true);
             await deleteShareURL(collection.id);
             setPublicURL(undefined);
-            galleryContext.syncWithRemote(false, true);
+            galleryContext.syncWithRemote(true);
             onClose();
         } catch (e) {
             log.error("Failed to remove public link", e);
