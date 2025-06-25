@@ -440,17 +440,24 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                           switchOutCurve: Curves.easeIn,
                           child: value
                               ? Padding(
-                                  padding:
-                                      const EdgeInsets.fromLTRB(16, 4, 16, 12),
+                                  padding: const EdgeInsets.fromLTRB(
+                                    32,
+                                    4,
+                                    32,
+                                    12,
+                                  ),
                                   child: Hero(
                                     tag: widget.title,
                                     child: Text(
                                       widget.title,
                                       style: getEnteTextTheme(context)
-                                          .largeBold
+                                          .large
                                           .copyWith(
                                             color: Colors.white,
+                                            fontSize: 40,
+                                            fontWeight: FontWeight.w600,
                                           ),
+                                      textAlign: TextAlign.left,
                                     ),
                                   ),
                                 )
