@@ -63,12 +63,12 @@ class FolderWatcher {
      */
     private upload: (collectionName: string, filePaths: string[]) => void;
     /**
-     * A function to call when we want to sync with the backend. It will
-     * initiate the sync but will not await its completion.
+     * A function to call when we want to trigger a full remote pull. It will
+     * initiate the pull but will not await its completion.
      *
      * This is passed as a param to {@link init}.
      */
-    private requestSyncWithRemote: () => void;
+    private onTriggerRemotePull: () => void;
 
     /** A helper function that debounces invocations of {@link runNextEvent}. */
     private debouncedRunNextEvent: () => void;
@@ -83,14 +83,14 @@ class FolderWatcher {
      * This is only called when we're running in the context of our desktop app.
      *
      * The caller provides us with the hooks we can use to actually upload the
-     * files, and to sync with remote (say after deletion).
+     * files, and to pull the latest changes from remote (say after deletion).
      */
     init(
         upload: (collectionName: string, filePaths: string[]) => void,
-        requestSyncWithRemote: () => void,
+        onTriggerRemotePull: () => void,
     ) {
         this.upload = upload;
-        this.requestSyncWithRemote = requestSyncWithRemote;
+        this.onTriggerRemotePull = onTriggerRemotePull;
         this.registerListeners();
         this.syncWithDisk();
     }
@@ -492,7 +492,7 @@ class FolderWatcher {
             await removeFromCollection(id, files);
         }
 
-        this.requestSyncWithRemote();
+        this.onTriggerRemotePull();
     }
 }
 

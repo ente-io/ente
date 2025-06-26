@@ -21,16 +21,18 @@ import { getData, removeData } from "ente-shared/storage/localStorage";
 import { includes } from "ente-utils/type-guards";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { sortCollectionSummaries } from "services/collectionService";
-import { SetFilesDownloadProgressAttributesCreator } from "types/gallery";
 import {
     FilesDownloadProgressAttributes,
     isFilesDownloadCancelled,
     isFilesDownloadCompleted,
 } from "../FilesDownloadProgress";
 import { AlbumCastDialog } from "./AlbumCastDialog";
-import { CollectionHeader } from "./CollectionHeader";
+import {
+    CollectionHeader,
+    type CollectionHeaderProps,
+} from "./CollectionHeader";
 
-type CollectionsProps = Omit<
+type GalleryBarAndListHeaderProps = Omit<
     GalleryBarImplProps,
     | "collectionSummaries"
     | "hiddenCollectionSummaries"
@@ -49,8 +51,10 @@ type CollectionsProps = Omit<
     hiddenCollectionSummaries: CollectionSummaries;
     setPhotoListHeader: (value: TimeStampListItem) => void;
     filesDownloadProgressAttributesList: FilesDownloadProgressAttributes[];
-    setFilesDownloadProgressAttributesCreator: SetFilesDownloadProgressAttributesCreator;
-};
+} & Pick<
+        CollectionHeaderProps,
+        "setFilesDownloadProgressAttributesCreator" | "onRemotePull"
+    >;
 
 /**
  * The gallery bar, the header for the list items, and state for any associated
@@ -70,7 +74,9 @@ type CollectionsProps = Omit<
  * TODO: Once the gallery code is better responsibilitied out, consider moving
  * this code back inline into the gallery.
  */
-export const GalleryBarAndListHeader: React.FC<CollectionsProps> = ({
+export const GalleryBarAndListHeader: React.FC<
+    GalleryBarAndListHeaderProps
+> = ({
     shouldHide,
     mode,
     onChangeMode,
@@ -81,6 +87,7 @@ export const GalleryBarAndListHeader: React.FC<CollectionsProps> = ({
     hiddenCollectionSummaries,
     people,
     activePerson,
+    onRemotePull,
     onSelectPerson,
     setPhotoListHeader,
     filesDownloadProgressAttributesList,
@@ -144,6 +151,7 @@ export const GalleryBarAndListHeader: React.FC<CollectionsProps> = ({
                             setActiveCollectionID,
                             setFilesDownloadProgressAttributesCreator,
                             isActiveCollectionDownloadInProgress,
+                            onRemotePull,
                         }}
                         collectionSummary={toShowCollectionSummaries.get(
                             activeCollectionID,
@@ -216,6 +224,7 @@ export const GalleryBarAndListHeader: React.FC<CollectionsProps> = ({
                     activeCollectionID,
                 )}
                 collection={activeCollection}
+                {...{ onRemotePull }}
             />
             <AlbumCastDialog
                 {...collectionCastVisibilityProps}

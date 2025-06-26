@@ -54,6 +54,7 @@ import {
     GalleryEmptyState,
     PeopleEmptyState,
     SearchResultsHeader,
+    type RemotePullOpts,
 } from "ente-new/photos/components/gallery";
 import {
     findCollectionCreatingUncategorizedIfNeeded,
@@ -128,22 +129,8 @@ import {
 } from "utils/collection";
 import { getSelectedFiles, handleFileOp, type FileOp } from "utils/file";
 
-/**
- * Options to customize the behaviour of the remote pull that gets triggered on
- * various actions within the gallery and its descendants.
- */
-interface RemotePullOpts {
-    /**
-     * Perform the pull without showing a global loading bar
-     *
-     * Default: `false`.
-     */
-    silent?: boolean;
-}
-
 const defaultGalleryContext: GalleryContextType = {
     setActiveCollectionID: () => null,
-    syncWithRemote: () => null,
     setBlockingLoad: () => null,
     photoListHeader: null,
     user: null,
@@ -511,8 +498,13 @@ const Page: React.FC = () => {
     /**
      * Pull latest collections, collection files and trash items from remote.
      *
-     * Parallel calls are serialized so that there is only one invocation of the
-     * underlying {@link pullFiles} at a time.
+     * This wraps the vanilla {@link pullFiles} with two adornments:
+     *
+     * 1. Any local database updates due to the pull are also reflected in state
+     *    updates to the Gallery's reducer.
+     *
+     * 2. Parallel calls are serialized so that there is only one invocation of
+     *    the underlying {@link pullFiles} at a time.
      *
      * [Note: Full remote pull vs files pull]
      *
@@ -546,6 +538,20 @@ const Page: React.FC = () => {
         [],
     );
 
+    /**
+     * Perform a serialized full remote pull, also updating our component state
+     * to match the updates to the local database.
+     *
+     * See {@link remoteFilesPull} for the general concept. This is a similar
+     * wrapper over the full remote pull sequence which also adds pre-flight
+     * checks (e.g. to ensure that the user's session has not expired).
+     *
+     * This method will usually not throw; exceptions during the pull itself are
+     * caught. This is so that this promise can be unguardedly awaited without
+     * failing the main operations it forms the tail end of: the remote changes
+     * would've already been successfully applied, and possibly transient pull
+     * failures should get resolved on the next retry.
+     */
     const remotePull = useCallback(
         async (opts?: RemotePullOpts) =>
             remotePullQueue.current.add(async () => {
@@ -882,7 +888,6 @@ const Page: React.FC = () => {
             value={{
                 ...defaultGalleryContext,
                 setActiveCollectionID: handleShowCollectionSummary,
-                syncWithRemote: (silent) => remotePull({ silent }),
                 setBlockingLoad,
                 photoListHeader,
                 user,
@@ -931,6 +936,7 @@ const Page: React.FC = () => {
                 <FixCreationTime
                     {...fixCreationTimeVisibilityProps}
                     files={fixCreationTimeFiles}
+                    onRemotePull={remotePull}
                 />
                 <NavbarBase
                     sx={[
@@ -1023,12 +1029,12 @@ const Page: React.FC = () => {
                     }
                     onChangeMode={handleChangeBarMode}
                     setActiveCollectionID={handleShowCollectionSummary}
+                    onRemotePull={remotePull}
                     onSelectPerson={handleSelectPerson}
                 />
 
                 <Upload
                     activeCollection={activeCollection}
-                    syncWithRemote={(silent) => remotePull({ silent })}
                     closeUploadTypeSelector={setUploadTypeSelectorView.bind(
                         null,
                         false,
@@ -1037,6 +1043,7 @@ const Page: React.FC = () => {
                     onCloseCollectionSelector={handleCloseCollectionSelector}
                     setLoading={setBlockingLoad}
                     setShouldDisableDropzone={setShouldDisableDropzone}
+                    onRemotePull={remotePull}
                     onRemoteFilesPull={remoteFilesPull}
                     onUploadFile={(file) =>
                         dispatch({ type: "uploadFile", file })
