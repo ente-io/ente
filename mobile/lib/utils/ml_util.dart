@@ -105,7 +105,7 @@ Future<List<FileMLInstruction>> getFilesForMlIndexing() async {
     if (enteFile.skipIndex) {
       continue;
     }
-    final int id = enteFile.uploadedFileID!;
+    final int id = enteFile.remoteID;
     if (queuedFiledIDs.contains(id)) {
       continue;
     }

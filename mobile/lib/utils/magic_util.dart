@@ -175,7 +175,7 @@ Future<bool> editTime(
     final files =
         filesToEditedTimes.keys.where((file) => file.isUploaded).toList();
     if (files.isEmpty) {
-      _logger.severe('No files to edit time for');
+      _logger.warning('No files to edit time for');
       return false;
     }
     final fileIdToTimeUpdate = <int, Map<String, dynamic>>{};
@@ -183,7 +183,7 @@ Future<bool> editTime(
       final file = entry.key;
       if (!file.isUploaded) continue;
       final editedTime = entry.value;
-      fileIdToTimeUpdate[file.uploadedFileID!] = {editTimeKey: editedTime};
+      fileIdToTimeUpdate[file.remoteID] = {editTimeKey: editedTime};
     }
 
     final dialog = createProgressDialog(context, S.of(context).pleaseWait);

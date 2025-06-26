@@ -740,22 +740,6 @@ class FilesDB with SqlDbBase {
   }
 
   // todo:rewrite (upload related)
-  Future<Set<String>> getExistingLocalFileIDs(int ownerID) async {
-    final db = await instance.sqliteAsyncDB;
-    final rows = await db.getAll(
-      'SELECT DISTINCT $columnLocalID FROM $filesTable '
-      'WHERE $columnLocalID IS NOT NULL AND ($columnOwnerID IS NULL OR '
-      '$columnOwnerID = ?)',
-      [ownerID],
-    );
-    final result = <String>{};
-    for (final row in rows) {
-      result.add(row[columnLocalID] as String);
-    }
-    return result;
-  }
-
-  // todo:rewrite (upload related)
   Future<void> markFilesForReUpload(
     int ownerID,
     String localID,
@@ -1167,8 +1151,10 @@ class FilesDB with SqlDbBase {
       longitude,
       getInt(file.fileType),
       file.modificationTime,
-      file.encryptedKey,
-      file.keyDecryptionNonce,
+      // file.encryptedKey,
+      'no_encrypted_key', // encryptedKey is not used in this context
+      // file.keyDecryptionNonce,
+      'no_key_decryption_nonce', // keyDecryptionNonce is not used in this context
       file.fileDecryptionHeader,
       file.thumbnailDecryptionHeader,
       'na',
@@ -1234,8 +1220,8 @@ class FilesDB with SqlDbBase {
     file.modificationTime = row[columnModificationTime];
     file.updationTime = row[columnUpdationTime] ?? -1;
     file.addedTime = row[columnAddedTime];
-    file.encryptedKey = row[columnEncryptedKey];
-    file.keyDecryptionNonce = row[columnKeyDecryptionNonce];
+    // file.encryptedKey = row[columnEncryptedKey];
+    // file.keyDecryptionNonce = row[columnKeyDecryptionNonce];
     file.fileDecryptionHeader = row[columnFileDecryptionHeader];
     file.thumbnailDecryptionHeader = row[columnThumbnailDecryptionHeader];
     file.fileSubType = row[columnFileSubType] ?? -1;

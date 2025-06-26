@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import "package:ente_crypto/ente_crypto.dart";
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart';
@@ -43,11 +42,10 @@ class EnteFile {
   String? exif;
   String? hash;
   int? metadataVersion;
-  String? encryptedKey;
-  String? keyDecryptionNonce;
   String? fileDecryptionHeader;
   @Deprecated(
-      'use remoteAsset.thumbHeader instead. This will be removed in future')
+    'use remoteAsset.thumbHeader instead. This will be removed in future',
+  )
   String? thumbnailDecryptionHeader;
 
   int? get fileSize {
@@ -136,9 +134,6 @@ class EnteFile {
     file.metadataVersion = kCurrentMetadataVersion;
     file.duration = rAsset.durationInSec;
     file.collectionID = collection.collectionID;
-    file.encryptedKey = CryptoUtil.bin2base64(collection.encFileKey);
-    file.keyDecryptionNonce = CryptoUtil.bin2base64(collection.encFileKeyNonce);
-
     file.pubMagicMetadata =
         PubMagicMetadata.fromMap(rAsset.publicMetadata?.data);
     return file;
@@ -373,8 +368,6 @@ class EnteFile {
     String? exif,
     String? hash,
     int? metadataVersion,
-    String? encryptedKey,
-    String? keyDecryptionNonce,
     String? fileDecryptionHeader,
     String? thumbnailDecryptionHeader,
     int? fileSize,
@@ -406,8 +399,6 @@ class EnteFile {
       ..exif = exif ?? this.exif
       ..hash = hash ?? this.hash
       ..metadataVersion = metadataVersion ?? this.metadataVersion
-      ..encryptedKey = encryptedKey ?? this.encryptedKey
-      ..keyDecryptionNonce = keyDecryptionNonce ?? this.keyDecryptionNonce
       ..fileDecryptionHeader = fileDecryptionHeader ?? this.fileDecryptionHeader
       ..thumbnailDecryptionHeader =
           thumbnailDecryptionHeader ?? this.thumbnailDecryptionHeader

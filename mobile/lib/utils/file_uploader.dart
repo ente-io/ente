@@ -30,6 +30,7 @@ import "package:photos/models/backup/backup_item.dart";
 import "package:photos/models/backup/backup_item_status.dart";
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
+import "package:photos/models/file/remote/collection_file.dart";
 import "package:photos/models/metadata/file_magic.dart";
 import "package:photos/models/user_details.dart";
 import 'package:photos/module/upload/model/upload_url.dart';
@@ -1175,12 +1176,20 @@ class FileUploader {
     try {
       final response = await _enteDio.post("/files", data: request);
       final data = response.data;
-      file.uploadedFileID = data["id"];
+      final int remoteID = data["id"];
+      final int updatedAt = data["updationTime"];
+      file.uploadedFileID = remoteID;
       file.collectionID = collectionID;
       file.updationTime = data["updationTime"];
       file.ownerID = data["ownerID"];
-      file.encryptedKey = encryptedKey;
-      file.keyDecryptionNonce = keyDecryptionNonce;
+      file.cf = CollectionFile(
+        collectionID: collectionID,
+        fileID: remoteID,
+        encFileKey: CryptoUtil.base642bin(encryptedKey),
+        encFileKeyNonce: CryptoUtil.base642bin(keyDecryptionNonce),
+        updatedAt: updatedAt,
+        createdAt: updatedAt,
+      );
       file.fileDecryptionHeader = fileDecryptionHeader;
       file.thumbnailDecryptionHeader = thumbnailDecryptionHeader;
       return file;

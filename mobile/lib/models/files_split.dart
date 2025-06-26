@@ -21,7 +21,7 @@ class FilesSplit {
         ownedByOtherUsers = [],
         pendingUploads = [];
     for (var f in files) {
-      if (f.ownerID == null || f.uploadedFileID == null) {
+      if (f.ownerID == null || !f.isUploaded) {
         pendingUploads.add(f);
       } else if (f.ownerID == currentUserID) {
         ownedByCurrentUser.add(f);

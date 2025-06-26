@@ -1622,7 +1622,7 @@ class CollectionsService {
 
         params["files"].add(
           CollectionFileRequest(
-            batchFile.uploadedFileID!,
+            batchFile.remoteID,
             CryptoUtil.bin2base64(encryptedKeyData.encryptedData!),
             CryptoUtil.bin2base64(encryptedKeyData.nonce!),
           ).toMap(),
@@ -1659,7 +1659,7 @@ class CollectionsService {
             srcToCopiedFileIDs.remove(srcRemoteID);
             newFileKeys.remove(srcRemoteID);
           } else {
-            throw Exception("Failed to copy file ${file.uploadedFileID}");
+            throw Exception("Failed to copy file $srcRemoteID");
           }
         }
         if (srcToCopiedFileIDs.isNotEmpty) {

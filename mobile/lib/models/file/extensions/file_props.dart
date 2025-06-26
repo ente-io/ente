@@ -1,4 +1,5 @@
 import "package:photos/core/configuration.dart";
+import 'package:photos/models/file/extensions/r_asset_props.dart';
 import "package:photos/models/file/file.dart";
 import "package:photos/models/file/file_type.dart";
 import "package:photos/services/collections_service.dart";
@@ -6,7 +7,7 @@ import "package:photos/services/collections_service.dart";
 extension FilePropsExtn on EnteFile {
   bool get isLivePhoto => fileType == FileType.livePhoto;
 
-  bool get isMotionPhoto => (pubMagicMetadata?.mvi ?? 0) > 0;
+  bool get isMotionPhoto => rAsset?.isMotionPhoto ?? false;
 
   bool get isLiveOrMotionPhoto => isLivePhoto || isMotionPhoto;
 
@@ -51,8 +52,7 @@ extension FilePropsExtn on EnteFile {
   bool get skipIndex => !isUploaded || fileType == FileType.other;
 
   bool canReUpload(int userID) =>
-      localID != null &&
-      localID!.isNotEmpty &&
+      lAsset != null &&
       cf != null &&
       isOwner &&
       (CollectionsService.instance
