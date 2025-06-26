@@ -934,6 +934,17 @@ export const createUncategorizedCollection = () =>
     createCollection(uncategorizedCollectionName, "uncategorized");
 
 /**
+ * Return the default hidden collection for the user if one is found in the
+ * local database. Otherwise create a new one and return that.
+ *
+ * Reads local state but does not modify it. The effects are on remote.
+ */
+const getOrCreateDefaultHiddenCollection = async () =>
+    (await savedCollections()).find((collection) =>
+        isDefaultHiddenCollection(collection),
+    ) ?? createDefaultHiddenCollection();
+
+/**
  * Create a new collection with hidden visibility on remote, marking it as the
  * default hidden collection, and return its local representation.
  *
@@ -941,7 +952,7 @@ export const createUncategorizedCollection = () =>
  *
  * See also: [Note: Multiple "default" hidden collections].
  */
-export const createDefaultHiddenCollection = () =>
+const createDefaultHiddenCollection = () =>
     createCollection(defaultHiddenCollectionName, "album", {
         subType: CollectionSubType.defaultHidden,
         visibility: ItemVisibility.hidden,
@@ -973,6 +984,17 @@ export const findDefaultHiddenCollectionIDs = (collections: Collection[]) =>
 
 export const isHiddenCollection = (collection: Collection) =>
     collection.magicMetadata?.data.visibility == ItemVisibility.hidden;
+
+/**
+ * Hide the provided {@link files} by moving them to the default hidden
+ * collection.
+ *
+ * If the default hidden collection does not already exist, it is created.
+ *
+ * Reads local state but does not modify it. The effects are on remote.
+ */
+export const hideFiles = async (files: EnteFile[]) =>
+    moveToCollection(await getOrCreateDefaultHiddenCollection(), files);
 
 /**
  * Return true if this is a collection that the user doesn't own.

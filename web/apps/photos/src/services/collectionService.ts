@@ -3,14 +3,11 @@ import { ensureLocalUser } from "ente-accounts/services/user";
 import log from "ente-base/log";
 import { apiURL } from "ente-base/origins";
 import { groupFilesByCollectionID, sortFiles } from "ente-gallery/utils/file";
-import { Collection } from "ente-media/collection";
 import { EnteFile } from "ente-media/file";
 import {
     addToCollection,
-    createDefaultHiddenCollection,
     createFavoritesCollection,
     createUncategorizedCollection,
-    isDefaultHiddenCollection,
     moveFromCollection,
 } from "ente-new/photos/services/collection";
 import type { CollectionSummary } from "ente-new/photos/services/collection-summary";
@@ -280,33 +277,5 @@ function compareCollectionsLatestFile(
         } else {
             return -1;
         }
-    }
-}
-
-export async function getDefaultHiddenCollection(): Promise<Collection> {
-    const collections = await savedCollections();
-    const hiddenCollection = collections.find((collection) =>
-        isDefaultHiddenCollection(collection),
-    );
-
-    return hiddenCollection;
-}
-
-export async function moveToHiddenCollection(files: EnteFile[]) {
-    try {
-        let hiddenCollection = await getDefaultHiddenCollection();
-        if (!hiddenCollection) {
-            hiddenCollection = await createDefaultHiddenCollection();
-        }
-        const groupedFiles = groupFilesByCollectionID(files);
-        for (const [collectionID, files] of groupedFiles.entries()) {
-            if (collectionID === hiddenCollection.id) {
-                continue;
-            }
-            await moveFromCollection(collectionID, hiddenCollection, files);
-        }
-    } catch (e) {
-        log.error("move to hidden collection failed ", e);
-        throw e;
     }
 }

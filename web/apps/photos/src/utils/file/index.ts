@@ -16,6 +16,7 @@ import { FileType } from "ente-media/file-type";
 import { decodeLivePhoto } from "ente-media/live-photo";
 import {
     deleteFromTrash,
+    hideFiles,
     moveToTrash,
 } from "ente-new/photos/services/collection";
 import { updateFilesVisibility } from "ente-new/photos/services/file";
@@ -23,10 +24,7 @@ import { safeFileName } from "ente-new/photos/utils/native-fs";
 import { getData } from "ente-shared/storage/localStorage";
 import { wait } from "ente-utils/promise";
 import { t } from "i18next";
-import {
-    addMultipleToFavorites,
-    moveToHiddenCollection,
-} from "services/collectionService";
+import { addMultipleToFavorites } from "services/collectionService";
 import {
     SelectedState,
     SetFilesDownloadProgressAttributes,
@@ -371,7 +369,7 @@ export const handleFileOp = async (
         case "hide":
             try {
                 markTempHidden(files);
-                await moveToHiddenCollection(files);
+                await hideFiles(files);
             } catch (e) {
                 clearTempHidden();
                 throw e;
