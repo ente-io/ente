@@ -1018,6 +1018,12 @@ const Page: React.FC = () => {
                 />
 
                 <Upload
+                    {...{
+                        user,
+                        dragAndDropFiles,
+                        uploadTypeSelectorIntent,
+                        uploadTypeSelectorView,
+                    }}
                     activeCollection={activeCollection}
                     closeUploadTypeSelector={setUploadTypeSelectorView.bind(
                         null,
@@ -1037,11 +1043,6 @@ const Page: React.FC = () => {
                         normalCollectionSummaries,
                     )}
                     showSessionExpiredMessage={showSessionExpiredDialog}
-                    {...{
-                        dragAndDropFiles,
-                        uploadTypeSelectorIntent,
-                        uploadTypeSelectorView,
-                    }}
                 />
                 <Sidebar
                     {...sidebarVisibilityProps}
