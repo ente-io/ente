@@ -489,7 +489,7 @@ class ClusterFeedbackService<T> {
       Bus.instance.fire(
         PeopleChangedEvent(
           type: PeopleEventType.addedClusterToPerson,
-          source: person.remoteID,
+          source: clusterID,
         ),
       );
     }

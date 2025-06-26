@@ -2,6 +2,7 @@ import "dart:async";
 
 import 'package:flutter/material.dart';
 import "package:photos/events/event.dart";
+import "package:photos/events/people_changed_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/ml/face/person.dart";
@@ -351,11 +352,24 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
     for (Stream<Event> stream in streamsToListenTo) {
       streamSubscriptions.add(
         stream.listen((event) async {
-          setState(() {
-            _isInitialLoad = false;
-            _isLoaded = false;
-            sectionData = getResults();
-          });
+          if (event is PeopleChangedEvent &&
+              event.type == PeopleEventType.addedClusterToPerson) {
+            normalFaces.removeWhere(
+              (person) =>
+                  (person.params[kClusterParamId] as String?) == event.source,
+            );
+            extraFaces.removeWhere(
+              (person) =>
+                  (person.params[kClusterParamId] as String?) == event.source,
+            );
+            setState(() {});
+          } else {
+            setState(() {
+              _isInitialLoad = false;
+              _isLoaded = false;
+              sectionData = getResults();
+            });
+          }
         }),
       );
     }
