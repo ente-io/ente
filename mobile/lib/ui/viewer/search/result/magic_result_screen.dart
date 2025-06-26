@@ -55,6 +55,7 @@ class _MagicResultScreenState extends State<MagicResultScreen> {
   late final Logger _logger = Logger("_MagicResultScreenState");
   late final Map<int, int> fileIDToRelevantPos;
   bool _enableGrouping = false;
+  late final SearchFilterDataProvider _searchFilterDataProvider;
 
   @override
   void initState() {
@@ -103,6 +104,10 @@ class _MagicResultScreenState extends State<MagicResultScreen> {
         });
       }
     });
+
+    _searchFilterDataProvider = SearchFilterDataProvider(
+      initialGalleryFilter: widget.magicFilter,
+    );
   }
 
   Map<int, int> getFileIDToRelevantPos() {
@@ -164,9 +169,7 @@ class _MagicResultScreenState extends State<MagicResultScreen> {
     );
     return GalleryFilesState(
       child: InheritedSearchFilterDataWrapper(
-        searchFilterDataProvider: SearchFilterDataProvider(
-          initialGalleryFilter: widget.magicFilter,
-        ),
+        searchFilterDataProvider: _searchFilterDataProvider,
         child: Scaffold(
           appBar: PreferredSize(
             preferredSize: const Size.fromHeight(90.0),

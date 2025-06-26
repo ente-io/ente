@@ -60,6 +60,7 @@ class _PeoplePageState extends State<PeoplePage> {
 
   late final StreamSubscription<LocalPhotosUpdatedEvent> _filesUpdatedEvent;
   late final StreamSubscription<PeopleChangedEvent> _peopleChangedEvent;
+  late SearchFilterDataProvider? _searchFilterDataProvider;
 
   @override
   void initState() {
@@ -104,6 +105,12 @@ class _PeoplePageState extends State<PeoplePage> {
         setState(() {});
       }
     });
+    _searchFilterDataProvider = widget.searchResult != null
+        ? SearchFilterDataProvider(
+            initialGalleryFilter:
+                widget.searchResult!.getHierarchicalSearchFilter(),
+          )
+        : null;
   }
 
   Future<List<EnteFile>> loadPersonFiles() async {
@@ -137,12 +144,7 @@ class _PeoplePageState extends State<PeoplePage> {
     _logger.info("Building for ${_person.data.name}");
     return GalleryFilesState(
       child: InheritedSearchFilterDataWrapper(
-        searchFilterDataProvider: widget.searchResult != null
-            ? SearchFilterDataProvider(
-                initialGalleryFilter:
-                    widget.searchResult!.getHierarchicalSearchFilter(),
-              )
-            : null,
+        searchFilterDataProvider: _searchFilterDataProvider,
         child: Scaffold(
           appBar: PreferredSize(
             preferredSize:

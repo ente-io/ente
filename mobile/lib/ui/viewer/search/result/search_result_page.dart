@@ -41,6 +41,7 @@ class _SearchResultPageState extends State<SearchResultPage> {
   final _selectedFiles = SelectedFiles();
   late final List<EnteFile> files;
   late final StreamSubscription<LocalPhotosUpdatedEvent> _filesUpdatedEvent;
+  late final SearchFilterDataProvider _searchFilterDataProvider;
 
   @override
   void initState() {
@@ -58,6 +59,9 @@ class _SearchResultPageState extends State<SearchResultPage> {
         setState(() {});
       }
     });
+    _searchFilterDataProvider = SearchFilterDataProvider(
+      initialGalleryFilter: widget.searchResult.getHierarchicalSearchFilter(),
+    );
   }
 
   @override
@@ -100,10 +104,7 @@ class _SearchResultPageState extends State<SearchResultPage> {
 
     return GalleryFilesState(
       child: InheritedSearchFilterDataWrapper(
-        searchFilterDataProvider: SearchFilterDataProvider(
-          initialGalleryFilter:
-              widget.searchResult.getHierarchicalSearchFilter(),
-        ),
+        searchFilterDataProvider: _searchFilterDataProvider,
         child: Scaffold(
           appBar: PreferredSize(
             preferredSize: const Size.fromHeight(90.0),
