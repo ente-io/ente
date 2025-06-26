@@ -54,11 +54,7 @@ class ClusterFeedbackService<T> {
     lastViewedClusterID = '';
   }
 
-  /// Returns a list of cluster suggestions for a person. Each suggestion is a tuple of the following elements:
-  /// 1. clusterID: the ID of the cluster
-  /// 2. distance: the distance between the person's cluster and the suggestion
-  /// 3. bool: whether the suggestion was found using the mean (true) or the median (false)
-  /// 4. List<EnteFile>: the files in the cluster
+  /// Returns a list of cluster suggestions for a person.
   Future<List<ClusterSuggestion>> getSuggestionForPerson(
     PersonEntity person, {
     bool extremeFilesFirst = true,
