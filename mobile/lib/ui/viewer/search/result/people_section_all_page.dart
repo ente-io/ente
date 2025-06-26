@@ -21,6 +21,7 @@ import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/ui/viewer/people/add_person_action_sheet.dart";
 import "package:photos/ui/viewer/people/people_page.dart";
 import "package:photos/ui/viewer/people/person_face_widget.dart";
+import "package:photos/ui/viewer/people/person_gallery_suggestion.dart";
 import "package:photos/ui/viewer/search/result/search_result_page.dart";
 import "package:photos/ui/viewer/search_tab/people_section.dart";
 import "package:photos/utils/navigation_util.dart";
@@ -337,6 +338,7 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
   bool _showingAllFaces = false;
   bool _isLoaded = false;
   bool _isInitialLoad = true;
+  bool userDismissedPersonGallerySuggestion = false;
 
   bool get _showMoreLessOption => !widget.namedOnly && extraFaces.isNotEmpty;
 
@@ -434,6 +436,20 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
 
           return CustomScrollView(
             slivers: [
+              (!userDismissedPersonGallerySuggestion && !widget.namedOnly)
+                  ? SliverToBoxAdapter(
+                      child: Dismissible(
+                        key: const Key("personGallerySuggestionAll"),
+                        direction: DismissDirection.horizontal,
+                        onDismissed: (direction) {
+                          setState(() {
+                            userDismissedPersonGallerySuggestion = true;
+                          });
+                        },
+                        child: const PersonGallerySuggestion(person: null),
+                      ),
+                    )
+                  : const SliverToBoxAdapter(child: SizedBox.shrink()),
               SliverPadding(
                 padding: const EdgeInsets.fromLTRB(
                   horizontalEdgePadding,
