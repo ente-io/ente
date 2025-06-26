@@ -34,9 +34,9 @@ import {
     createMagicMetadata,
     encryptMagicMetadata,
 } from "ente-media/magic-metadata";
-import { batch, splitByPredicate } from "ente-utils/array";
+import { splitByPredicate } from "ente-utils/array";
 import { z } from "zod/v4";
-import { requestBatchSize, type UpdateMagicMetadataRequest } from "./file";
+import { batched, type UpdateMagicMetadataRequest } from "./file";
 import {
     removeCollectionIDLastSyncTime,
     saveCollectionFiles,
@@ -531,8 +531,8 @@ export interface MoveToCollectionRequest {
 export const addToCollection = async (
     collection: Collection,
     files: EnteFile[],
-) => {
-    for (const batchFiles of batch(files, requestBatchSize)) {
+) =>
+    batched(files, async (batchFiles) => {
         const encryptedFileKeys = await encryptWithCollectionKey(
             collection,
             batchFiles,
@@ -547,8 +547,7 @@ export const addToCollection = async (
                 }),
             }),
         );
-    }
-};
+    });
 
 /**
  * Make a remote request to restore the given {@link files} to the given
@@ -559,8 +558,8 @@ export const addToCollection = async (
 export const restoreToCollection = async (
     collection: Collection,
     files: EnteFile[],
-) => {
-    for (const batchFiles of batch(files, requestBatchSize)) {
+) =>
+    batched(files, async (batchFiles) => {
         const encryptedFileKeys = await encryptWithCollectionKey(
             collection,
             batchFiles,
@@ -575,8 +574,7 @@ export const restoreToCollection = async (
                 }),
             }),
         );
-    }
-};
+    });
 
 /**
  * Make a remote request to move the given {@link files} from a collection (as
@@ -589,8 +587,8 @@ export const moveToCollection = async (
     fromCollectionID: number,
     toCollection: Collection,
     files: EnteFile[],
-) => {
-    for (const batchFiles of batch(files, requestBatchSize)) {
+) =>
+    batched(files, async (batchFiles) => {
         const encryptedFileKeys = await encryptWithCollectionKey(
             toCollection,
             batchFiles,
@@ -606,8 +604,7 @@ export const moveToCollection = async (
                 }),
             }),
         );
-    }
-};
+    });
 
 /**
  * Return an array of {@link CollectionFileItem}s, one for each file in
@@ -638,8 +635,8 @@ const encryptWithCollectionKey = async (
  *
  * Remote only, does not modify local state.
  */
-export const moveToTrash = async (files: EnteFile[]) => {
-    for (const batchFiles of batch(files, requestBatchSize)) {
+export const moveToTrash = async (files: EnteFile[]) =>
+    batched(files, async (batchFiles) =>
         ensureOk(
             await fetch(await apiURL("/files/trash"), {
                 method: "POST",
@@ -651,26 +648,24 @@ export const moveToTrash = async (files: EnteFile[]) => {
                     })),
                 }),
             }),
-        );
-    }
-};
+        ),
+    );
 
 /**
  * Make a remote request to delete the given {@link fileIDs} from trash.
  *
  * Remote only, does not modify local state.
  */
-export const deleteFromTrash = async (fileIDs: number[]) => {
-    for (const batchIDs of batch(fileIDs, requestBatchSize)) {
+export const deleteFromTrash = async (fileIDs: number[]) =>
+    batched(fileIDs, async (batchIDs) =>
         ensureOk(
             await fetch(await apiURL("/trash/delete"), {
                 method: "POST",
                 headers: await authenticatedRequestHeaders(),
                 body: JSON.stringify({ fileIDs: batchIDs }),
             }),
-        );
-    }
-};
+        ),
+    );
 
 /**
  * Rename a collection on remote.
