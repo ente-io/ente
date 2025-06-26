@@ -135,7 +135,6 @@ const defaultGalleryContext: GalleryContextType = {
     user: null,
     userIDToEmailMap: null,
     emailList: null,
-    openHiddenSection: () => null,
     selectedFile: null,
 };
 
@@ -769,14 +768,10 @@ const Page: React.FC = () => {
             ? dispatch({ type: "showPeople" })
             : dispatch({ type: "showAlbums" });
 
-    const openHiddenSection: GalleryContextType["openHiddenSection"] = (
-        callback,
-    ) => {
-        authenticateUser().then(() => {
-            dispatch({ type: "showHidden" });
-            callback?.();
-        });
-    };
+    const handleShowHiddenSection = useCallback(
+        () => authenticateUser().then(() => dispatch({ type: "showHidden" })),
+        [],
+    );
 
     const handleToggleFavorite = useCallback(
         async (file: EnteFile) => {
@@ -886,7 +881,6 @@ const Page: React.FC = () => {
                 // TODO(RE): Rename
                 userIDToEmailMap: state.emailByUserID,
                 emailList: state.shareSuggestionEmails,
-                openHiddenSection,
                 selectedFile: selected,
             }}
         >
@@ -922,6 +916,7 @@ const Page: React.FC = () => {
                 <FilesDownloadProgress
                     attributesList={filesDownloadProgressAttributesList}
                     setAttributesList={setFilesDownloadProgressAttributesList}
+                    onShowHiddenSection={handleShowHiddenSection}
                 />
                 <FixCreationTime
                     {...fixCreationTimeVisibilityProps}
@@ -1058,6 +1053,7 @@ const Page: React.FC = () => {
                     }
                     onShowPlanSelector={showPlanSelector}
                     onShowCollectionSummary={handleShowCollectionSummary}
+                    onShowHiddenSection={handleShowHiddenSection}
                     onShowExport={showExport}
                     onAuthenticateUser={authenticateUser}
                 />

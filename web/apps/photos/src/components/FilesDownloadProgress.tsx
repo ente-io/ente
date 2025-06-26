@@ -19,6 +19,17 @@ export interface FilesDownloadProgressAttributes {
 interface FilesDownloadProgressProps {
     attributesList: FilesDownloadProgressAttributes[];
     setAttributesList: (value: FilesDownloadProgressAttributes[]) => void;
+    /**
+     * Called when the hidden section should be shown.
+     *
+     * This triggers the display of the dialog to authenticate the user, and the
+     * returned promise when (and only if) the user successfully reauthenticates.
+     *
+     * Since the hidden section is only relevant in the context of the photos
+     * app where there is a logged in user, this callback can be omitted in the
+     * context of the public albums app.
+     */
+    onShowHiddenSection?: () => Promise<void>;
 }
 
 export const isFilesDownloadStarted = (
@@ -55,6 +66,7 @@ export const isFilesDownloadCancelled = (
 export const FilesDownloadProgress: React.FC<FilesDownloadProgressProps> = ({
     attributesList,
     setAttributesList,
+    onShowHiddenSection,
 }) => {
     const { showMiniDialog } = useBaseContext();
     const galleryContext = useContext(GalleryContext);
@@ -100,7 +112,7 @@ export const FilesDownloadProgress: React.FC<FilesDownloadProgressProps> = ({
             electron.openDirectory(attributes.downloadDirPath);
         } else {
             if (attributes.isHidden) {
-                galleryContext.openHiddenSection(() => {
+                void onShowHiddenSection().then(() => {
                     galleryContext.setActiveCollectionID(
                         attributes.collectionID,
                     );
