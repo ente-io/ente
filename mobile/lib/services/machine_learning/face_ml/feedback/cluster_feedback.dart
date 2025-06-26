@@ -404,6 +404,11 @@ class ClusterFeedbackService<T> {
           );
         }
       }
+      try {
+        await _sortSuggestionsOnDistanceToPerson(null, finalSuggestions);
+      } catch (e, s) {
+        _logger.severe("Error in sorting suggestions", e, s);
+      }
       return finalSuggestions;
     } catch (e, s) {
       _logger.severe("Error in getAllLargePersonSuggestions", e, s);
@@ -1056,7 +1061,7 @@ class ClusterFeedbackService<T> {
   }
 
   Future<void> _sortSuggestionsOnDistanceToPerson(
-    PersonEntity person,
+    PersonEntity? person,
     List<ClusterSuggestion> suggestions, {
     bool onlySortBigSuggestions = true,
   }) async {
@@ -1076,44 +1081,14 @@ class ClusterFeedbackService<T> {
       }
     }
     final startTime = DateTime.now();
-
-    // Get the cluster averages for the person's clusters and the suggestions' clusters
-    final personClusters = await mlDataDB.getPersonClusterIDs(person.remoteID);
-    final Map<String, (Uint8List, int)> personClusterToSummary =
-        await mlDataDB.getClusterToClusterSummary(personClusters);
-    final clusterSummaryCallTime = DateTime.now();
-
-    // remove personClusters that don't have any summary
-    for (final clusterID in personClusters.toSet()) {
-      if (!personClusterToSummary.containsKey(clusterID)) {
-        _logger.warning('missing summary for $clusterID');
-        personClusters.remove(clusterID);
-      }
-    }
-    if (personClusters.isEmpty) {
-      _logger.warning('No person clusters with summary found');
-      return;
-    }
-
-    // Calculate the avg embedding of the person
     final w = (kDebugMode ? EnteWatch('sortSuggestions') : null)?..start();
-    int personEmbeddingsCount = 0;
-    for (final clusterID in personClusters) {
-      personEmbeddingsCount += personClusterToSummary[clusterID]!.$2;
-    }
 
-    Vector personAvg = Vector.filled(192, 0);
-    for (final personClusterID in personClusters) {
-      final personClusterBlob = personClusterToSummary[personClusterID]!.$1;
-      final personClusterAvg = Vector.fromList(
-        EVector.fromBuffer(personClusterBlob).values,
-        dtype: DType.float32,
-      );
-      final clusterWeight =
-          personClusterToSummary[personClusterID]!.$2 / personEmbeddingsCount;
-      personAvg += personClusterAvg * clusterWeight;
+    final Map<String, Vector> personAverages = {};
+    if (person != null) {
+      final avg = await _getPersonAvg(person.remoteID);
+      w?.log('getPersonAvg');
+      if (avg != null) personAverages[person.remoteID] = avg;
     }
-    w?.log('calculated person avg');
 
     // Sort the suggestions based on the distance to the person
     for (final suggestion in suggestions) {
@@ -1122,6 +1097,17 @@ class ClusterFeedbackService<T> {
           continue;
         }
       }
+      // get person average
+      Vector? personAvg = personAverages[suggestion.person.remoteID];
+      if (personAvg == null) {
+        personAvg = await _getPersonAvg(suggestion.person.remoteID);
+        if (personAvg != null) {
+          personAverages[suggestion.person.remoteID] = personAvg;
+        } else {
+          continue;
+        }
+      }
+
       final clusterID = suggestion.clusterIDToMerge;
       final faceIDs = suggestion.faceIDsInCluster;
       final faceIdToEmbeddingMap = await mlDataDB.getFaceEmbeddingMapForFaces(
@@ -1159,9 +1145,51 @@ class ClusterFeedbackService<T> {
     }
 
     final endTime = DateTime.now();
-    _logger.info(
-      "Sorting suggestions based on distance to person took ${endTime.difference(startTime).inMilliseconds} ms for ${suggestions.length} suggestions, of which ${clusterSummaryCallTime.difference(startTime).inMilliseconds} ms was spent on the cluster summary call",
+    _logger.fine(
+      "Sorting suggestions based on distance to person took ${endTime.difference(startTime).inMilliseconds} ms for ${suggestions.length} suggestions",
     );
+  }
+
+  Future<Vector?> _getPersonAvg(String personID) async {
+    final w = (kDebugMode ? EnteWatch('_getPersonAvg') : null)?..start();
+    // Get the cluster averages for the person's clusters and the suggestions' clusters
+    final personClusters = await mlDataDB.getPersonClusterIDs(personID);
+    w?.log('got person clusters');
+    final Map<String, (Uint8List, int)> personClusterToSummary =
+        await mlDataDB.getClusterToClusterSummary(personClusters);
+    w?.log('got cluster summaries');
+
+    // remove personClusters that don't have any summary
+    for (final clusterID in personClusters.toSet()) {
+      if (!personClusterToSummary.containsKey(clusterID)) {
+        _logger.warning('missing summary for $clusterID');
+        personClusters.remove(clusterID);
+      }
+    }
+    if (personClusters.isEmpty) {
+      _logger.warning('No person clusters with summary found');
+      return null;
+    }
+
+    // Calculate the avg embedding of the person
+    int personEmbeddingsCount = 0;
+    for (final clusterID in personClusters) {
+      personEmbeddingsCount += personClusterToSummary[clusterID]!.$2;
+    }
+
+    Vector personAvg = Vector.filled(192, 0);
+    for (final personClusterID in personClusters) {
+      final personClusterBlob = personClusterToSummary[personClusterID]!.$1;
+      final personClusterAvg = Vector.fromList(
+        EVector.fromBuffer(personClusterBlob).values,
+        dtype: DType.float32,
+      );
+      final clusterWeight =
+          personClusterToSummary[personClusterID]!.$2 / personEmbeddingsCount;
+      personAvg += personClusterAvg * clusterWeight;
+    }
+    w?.log('calculated person avg');
+    return personAvg;
   }
 
   Future<void> debugLogClusterBlurValues(
