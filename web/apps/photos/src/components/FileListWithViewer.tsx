@@ -190,7 +190,7 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
                             activeCollectionID,
                             activePersonID,
                             favoriteFileIDs,
-                            emailByUserID
+                            emailByUserID,
                         }}
                         onItemClick={handleThumbnailClick}
                     />
