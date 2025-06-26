@@ -27,6 +27,7 @@ import {
 } from "ente-media/collection";
 import {
     decryptRemoteFile,
+    FileDiffResponse,
     type EnteFile,
     type RemoteEnteFile,
 } from "ente-media/file";
@@ -368,6 +369,31 @@ export const pullCollectionFiles = async (
         await saveCollectionLastSyncTime(collection, collection.updationTime);
     }
     return didUpdateFiles;
+};
+
+/**
+ * Fetch all files in the given {@link collection} have been created or updated
+ * since {@link sinceTime}.
+ *
+ * Remote only, does not modify local state.
+ *
+ * @param collection The collection whose updates we want to fetch.
+ *
+ * @param sinceTime The timestamp of most recently update for the collection
+ * that we have already pulled. This serves both as a pagination mechanish, and
+ * a way to fetch a delta diff the next time the client needs to pull changes
+ * from remote.
+ */
+const getCollectionDiff = async (collection: Collection, sinceTime: number) => {
+    const res = await fetch(
+        await apiURL("/collections/v2/diff", {
+            collectionID: collection.id.toString(),
+            sinceTime: sinceTime.toString(),
+        }),
+        { headers: await authenticatedRequestHeaders() },
+    );
+    ensureOk(res);
+    return FileDiffResponse.parse(await res.json());
 };
 
 export const getFiles = async (
