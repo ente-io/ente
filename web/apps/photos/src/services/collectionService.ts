@@ -11,7 +11,7 @@ import {
     createFavoritesCollection,
     createUncategorizedCollection,
     isDefaultHiddenCollection,
-    moveToCollection,
+    moveFromCollection,
 } from "ente-new/photos/services/collection";
 import type { CollectionSummary } from "ente-new/photos/services/collection-summary";
 import {
@@ -139,7 +139,7 @@ export const removeUserFiles = async (
             if (toMoveFiles.length === 0) {
                 continue;
             }
-            await moveToCollection(
+            await moveFromCollection(
                 sourceCollectionID,
                 targetCollection,
                 toMoveFiles,
@@ -157,7 +157,7 @@ export const removeUserFiles = async (
             collections.find((c) => c.type == "uncategorized") ??
             (await createUncategorizedCollection());
 
-        await moveToCollection(
+        await moveFromCollection(
             sourceCollectionID,
             uncategorizedCollection,
             leftFiles,
@@ -303,28 +303,10 @@ export async function moveToHiddenCollection(files: EnteFile[]) {
             if (collectionID === hiddenCollection.id) {
                 continue;
             }
-            await moveToCollection(collectionID, hiddenCollection, files);
+            await moveFromCollection(collectionID, hiddenCollection, files);
         }
     } catch (e) {
         log.error("move to hidden collection failed ", e);
-        throw e;
-    }
-}
-
-export async function unhideToCollection(
-    collection: Collection,
-    files: EnteFile[],
-) {
-    try {
-        const groupedFiles = groupFilesByCollectionID(files);
-        for (const [collectionID, files] of groupedFiles.entries()) {
-            if (collectionID === collection.id) {
-                continue;
-            }
-            await moveToCollection(collectionID, collection, files);
-        }
-    } catch (e) {
-        log.error("unhide to collection failed ", e);
         throw e;
     }
 }

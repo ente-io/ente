@@ -10,6 +10,7 @@ import {
 import { authenticatedRequestHeaders, ensureOk } from "ente-base/http";
 import { apiURL } from "ente-base/origins";
 import { ensureMasterKeyFromSession } from "ente-base/session";
+import { groupFilesByCollectionID } from "ente-gallery/utils/file";
 import {
     CollectionSubType,
     decryptRemoteCollection,
@@ -577,13 +578,34 @@ export const restoreToCollection = async (
     });
 
 /**
+ * Make a remote request to move the given {@link files} (which may be in
+ * different collections) to the given {@link collection}.
+ *
+ * This is a higher level primitive than {@link moveFromCollection} that first
+ * segregates the files into per-collection sets, and then performs
+ * {@link moveFromCollection} for each such set.
+ *
+ * Remote only, does not modify local state.
+ */
+export const moveToCollection = async (
+    collection: Collection,
+    files: EnteFile[],
+) =>
+    Promise.all(
+        groupFilesByCollectionID(files)
+            .entries()
+            .filter(([cid]) => cid != collection.id)
+            .map(([cid, cf]) => moveFromCollection(cid, collection, cf)),
+    );
+
+/**
  * Make a remote request to move the given {@link files} from a collection (as
  * identified by its {@link fromCollectionID}) to the given
  * {@link toCollection}.
  *
  * Remote only, does not modify local state.
  */
-export const moveToCollection = async (
+export const moveFromCollection = async (
     fromCollectionID: number,
     toCollection: Collection,
     files: EnteFile[],

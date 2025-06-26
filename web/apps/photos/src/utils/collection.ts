@@ -12,6 +12,7 @@ import {
     findDefaultHiddenCollectionIDs,
     isHiddenCollection,
     isIncomingShare,
+    moveFromCollection,
     moveToCollection,
     restoreToCollection,
 } from "ente-new/photos/services/collection";
@@ -22,10 +23,7 @@ import {
 } from "ente-new/photos/services/photos-fdb";
 import { safeDirectoryName } from "ente-new/photos/utils/native-fs";
 import { getData } from "ente-shared/storage/localStorage";
-import {
-    removeFromCollection,
-    unhideToCollection,
-} from "services/collectionService";
+import { removeFromCollection } from "services/collectionService";
 import {
     SetFilesDownloadProgressAttributes,
     type SetFilesDownloadProgressAttributesCreator,
@@ -45,7 +43,7 @@ export async function handleCollectionOp(
             await addToCollection(collection, selectedFiles);
             break;
         case "move":
-            await moveToCollection(
+            await moveFromCollection(
                 selectedCollectionID,
                 collection,
                 selectedFiles,
@@ -58,7 +56,7 @@ export async function handleCollectionOp(
             await restoreToCollection(collection, selectedFiles);
             break;
         case "unhide":
-            await unhideToCollection(collection, selectedFiles);
+            await moveToCollection(collection, selectedFiles);
             break;
     }
 }
