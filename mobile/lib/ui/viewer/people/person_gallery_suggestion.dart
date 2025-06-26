@@ -18,7 +18,7 @@ import "package:photos/utils/face/face_thumbnail_cache.dart";
 final _logger = Logger("PersonGallerySuggestion");
 
 class PersonGallerySuggestion extends StatefulWidget {
-  final PersonEntity person;
+  final PersonEntity? person;
 
   const PersonGallerySuggestion({
     required this.person,
@@ -41,6 +41,10 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
   bool hasCurrentSuggestion = false;
   Map<int, Map<int, Uint8List?>> precomputedFaceCrops = {};
 
+  PersonEntity? person;
+  bool get peoplePage => widget.person != null;
+  PersonEntity get relevantPerson => widget.person ?? person!;
+
   late AnimationController _slideController;
   late AnimationController _fadeController;
   late Animation<Offset> _slideAnimation;
@@ -49,6 +53,7 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
   @override
   void initState() {
     super.initState();
+    person = widget.person;
     _initializeAnimations();
     _loadInitialSuggestion();
   }
@@ -86,8 +91,15 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
 
   Future<void> _loadInitialSuggestion() async {
     try {
-      final suggestions = await ClusterFeedbackService.instance
-          .getSuggestionForPerson(widget.person);
+      late final List<ClusterSuggestion> suggestions;
+      if (peoplePage) {
+        suggestions = await ClusterFeedbackService.instance
+            .getSuggestionForPerson(relevantPerson);
+      } else {
+        suggestions = await ClusterFeedbackService.instance
+            .getAllLargePersonSuggestions();
+        person = suggestions.first.person;
+      }
 
       if (suggestions.isNotEmpty && mounted) {
         allSuggestions = suggestions;
@@ -188,7 +200,7 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
       MaterialPageRoute(
         builder: (context) => ClusterPage(
           sortedFiles,
-          personID: widget.person,
+          personID: relevantPerson,
           clusterID: currentSuggestion.clusterIDToMerge,
           showNamingBanner: false,
         ),
@@ -212,14 +224,14 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
       if (accepted) {
         unawaited(
           ClusterFeedbackService.instance.addClusterToExistingPerson(
-            person: widget.person,
+            person: relevantPerson,
             clusterID: currentSuggestion.clusterIDToMerge,
           ),
         );
       } else {
         unawaited(
           MLDataDB.instance.captureNotPersonFeedback(
-            personID: widget.person.remoteID,
+            personID: relevantPerson.remoteID,
             clusterID: currentSuggestion.clusterIDToMerge,
           ),
         );
@@ -252,6 +264,7 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
     unawaited(_animateOut());
     try {
       final currentSuggestion = allSuggestions[currentSuggestionIndex];
+      person = currentSuggestion.person;
       final clusterID = currentSuggestion.clusterIDToMerge;
       final someFile = currentSuggestion.filesInCluster.first;
 
@@ -301,6 +314,7 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
 
     // Check if we have more suggestions
     if (currentSuggestionIndex < allSuggestions.length) {
+      person = allSuggestions[currentSuggestionIndex].person;
       try {
         // Get face crops for next suggestion (from precomputed or generate new)
         Map<int, Uint8List?> nextCrops;
@@ -409,7 +423,7 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
                     children: [
                       TextSpan(text: S.of(context).areThey),
                       TextSpan(
-                        text: widget.person.data.name,
+                        text: relevantPerson.data.name,
                         style: textTheme.bodyBold,
                       ),
                       TextSpan(text: S.of(context).questionmark),
