@@ -8,7 +8,6 @@ import {
     generateKey,
 } from "ente-base/crypto";
 import { authenticatedRequestHeaders, ensureOk } from "ente-base/http";
-import log from "ente-base/log";
 import { apiURL } from "ente-base/origins";
 import { ensureMasterKeyFromSession } from "ente-base/session";
 import {
@@ -29,15 +28,12 @@ import {
     decryptRemoteFile,
     FileDiffResponse,
     type EnteFile,
-    type RemoteEnteFile,
 } from "ente-media/file";
 import { ItemVisibility, metadataHash } from "ente-media/file-metadata";
 import {
     createMagicMetadata,
     encryptMagicMetadata,
 } from "ente-media/magic-metadata";
-import HTTPService from "ente-shared/network/HTTPService";
-import { getToken } from "ente-shared/storage/localStorage/helpers";
 import { batch, splitByPredicate } from "ente-utils/array";
 import { z } from "zod/v4";
 import { requestBatchSize, type UpdateMagicMetadataRequest } from "./file";
@@ -290,35 +286,12 @@ const getCollections = async (
     );
 };
 
-export function getLatestVersionFiles(files: EnteFile[]) {
-    const latestVersionFiles = new Map<string, EnteFile>();
-    files.forEach((file) => {
-        const uid = `${file.collectionID}-${file.id}`;
-        const existingFile = latestVersionFiles.get(uid);
-        if (!existingFile || existingFile.updationTime < file.updationTime) {
-            latestVersionFiles.set(uid, file);
-        }
-    });
-    return Array.from(latestVersionFiles.values()).filter(
-        // TODO(RE):
-        // (file) => !file.isDeleted,
-        (file) => !("isDeleted" in file && file.isDeleted),
-    );
-}
 /**
  * Fetch all files from remote and update our local database.
  *
- * If this is the initial read, or if the count of files we have differs from
- * the state of the local database (these two are expected to be the same case),
- * then the {@link onSetCollectionFiles} callback is first invoked to give the
- * caller a chance to bring its state up to speed.
- *
- * Then it calls {@link onAugmentCollectionFiles} as each batch of updates are
- * fetched (in addition to updating the local database).
- *
- * The callbacks are optional because we might be called in a context where we
- * just want to update the local database, and there is no other in-memory state
- * we need to keep in sync.
+ * Each time it updates the local database, the {@link onSetCollectionFiles}
+ * callback is also invoked to give the caller a chance to bring its own
+ * in-memory state up to speed.
  *
  * @param collections The user's collections. These are assumed to be the latest
  * collections on remote (that is, the pull for collections should happen prior
@@ -327,46 +300,93 @@ export function getLatestVersionFiles(files: EnteFile[]) {
  * @param onSetCollectionFiles An optional callback invoked when the locally
  * saved collection files were replaced by the provided {@link collectionFiles}.
  *
- * @param onAugmentCollectionFiles An optional callback when locally saved
- * collection files were augmented with the provided newly fetched
- * {@link collectionFiles}.
+ * The callback is optional because we might be called in a context where we
+ * just want to update the local database, and there is no other in-memory state
+ * we need to keep in sync.
+ *
+ * The callback can be invoked multiple times for each pull (once for each batch
+ * of changes received, for each collection that was updated).
  *
  * @returns true if one or more files were updated locally, false otherwise.
  */
 export const pullCollectionFiles = async (
     collections: Collection[],
     onSetCollectionFiles: ((files: EnteFile[]) => void) | undefined,
-    onAugmentCollectionFiles: ((files: EnteFile[]) => void) | undefined,
 ) => {
-    const localFiles = await savedCollectionFiles();
-
-    // Prune collections files corresponding to which we no longer have a
-    // collection.
-    const collectionIDs = new Set(collections.map((c) => c.id));
-    let files = localFiles.filter((f) => collectionIDs.has(f.collectionID));
     let didUpdateFiles = false;
-    if (files.length != localFiles.length) {
+
+    const savedFiles = await savedCollectionFiles();
+
+    // Prune collections files for which we no longer have a collection.
+    const collectionIDs = new Set(collections.map((c) => c.id));
+    let files = savedFiles.filter((f) => collectionIDs.has(f.collectionID));
+
+    // Update both the saved and in-memory files to reflect the pruning.
+    if (files.length != savedFiles.length) {
         await saveCollectionFiles(files);
         onSetCollectionFiles?.(files);
         didUpdateFiles = true;
     }
 
     for (const collection of collections) {
-        const sinceTime = (await savedCollectionLastSyncTime(collection)) ?? 0;
-        if (collection.updationTime == sinceTime) {
+        let sinceTime = (await savedCollectionLastSyncTime(collection)) ?? 0;
+        if (sinceTime == collection.updationTime) {
+            // The updationTime of a collection is guaranteed to be >= the
+            // updationTime of any file in the collection.
             continue;
         }
 
-        const newFiles = await getFiles(
-            collection,
-            sinceTime,
-            onAugmentCollectionFiles,
+        const [thisCollectionFiles, otherFiles] = splitByPredicate(
+            files,
+            (f) => f.collectionID == collection.id,
         );
-        await clearCachedThumbnailsIfChanged(localFiles, newFiles);
-        files = getLatestVersionFiles([...files, ...newFiles]);
-        await saveCollectionFiles(files);
+
+        const thisCollectionFilesByID = new Map(
+            thisCollectionFiles.map((f) => [f.id, f]),
+        );
+
+        while (true) {
+            const { diff, hasMore } = await getCollectionDiff(
+                collection.id,
+                sinceTime,
+            );
+            if (!diff.length) break;
+
+            for (const change of diff) {
+                sinceTime = Math.max(sinceTime, change.updationTime);
+                if (change.isDeleted) {
+                    thisCollectionFilesByID.delete(change.id);
+                } else {
+                    const file = await decryptRemoteFile(
+                        change,
+                        collection.key,
+                    );
+                    await clearCachedThumbnailIfContentChanged(
+                        thisCollectionFilesByID.get(change.id),
+                        file,
+                    );
+                    thisCollectionFilesByID.set(change.id, file);
+                }
+            }
+
+            files = otherFiles.concat([...thisCollectionFilesByID.values()]);
+
+            await saveCollectionFiles(files);
+            await saveCollectionLastSyncTime(collection, sinceTime);
+            onSetCollectionFiles?.(files);
+            didUpdateFiles = true;
+
+            if (!hasMore) break;
+        }
+
+        // There might be a difference between the latest updation time of a
+        // file in the collection, and the latest time of the collection itself,
+        // if something about the collection itself changed, not the files in it
+        // (e.g. if the collection was renamed).
+        //
+        // In such cases, advance the sync time to match the collection's update
+        // time so we don't do an unnecessary collection diff the next time.
         await saveCollectionLastSyncTime(collection, collection.updationTime);
-        didUpdateFiles = true;
     }
 
     return didUpdateFiles;
@@ -385,11 +405,7 @@ export const pullCollectionFiles = async (
  * a way to fetch a delta diff the next time the client needs to pull changes
  * from remote.
  */
-// TODO(RE): Use me
-export const getCollectionDiff = async (
-    collectionID: number,
-    sinceTime: number,
-) => {
+const getCollectionDiff = async (collectionID: number, sinceTime: number) => {
     const res = await fetch(
         await apiURL("/collections/v2/diff", { collectionID, sinceTime }),
         { headers: await authenticatedRequestHeaders() },
@@ -398,60 +414,13 @@ export const getCollectionDiff = async (
     return FileDiffResponse.parse(await res.json());
 };
 
-export const getFiles = async (
-    collection: Collection,
-    sinceTime: number,
-    onFetchFiles: ((fs: EnteFile[]) => void) | undefined,
-): Promise<EnteFile[]> => {
-    try {
-        let decryptedFiles: EnteFile[] = [];
-        let time = sinceTime;
-        let resp;
-        do {
-            const token = getToken();
-            if (!token) {
-                break;
-            }
-            resp = await HTTPService.get(
-                await apiURL("/collections/v2/diff"),
-                { collectionID: collection.id, sinceTime: time },
-                { "X-Auth-Token": token },
-            );
-
-            const newDecryptedFilesBatch = await Promise.all(
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-                resp.data.diff.map(async (file: RemoteEnteFile) => {
-                    if (!file.isDeleted) {
-                        return await decryptRemoteFile(file, collection.key);
-                    } else {
-                        return file;
-                    }
-                }) as Promise<EnteFile>[],
-            );
-            decryptedFiles = [...decryptedFiles, ...newDecryptedFilesBatch];
-
-            onFetchFiles?.(decryptedFiles);
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-            if (resp.data.diff.length) {
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-                time = resp.data.diff.slice(-1)[0].updationTime;
-            }
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        } while (resp.data.hasMore);
-        return decryptedFiles;
-    } catch (e) {
-        log.error("Get files failed", e);
-        throw e;
-    }
-};
-
 /**
- * Clear cached thumbnails for existing files if the thumbnail data has changed.
+ * Clear cached thumbnail of an existing file if the thumbnail data has changed.
  *
  * This function in expected to be called when we are processing a collection
  * diff, updating our local state to reflect files that were updated on remote.
- * We use this as an opportune moment to invalidate any cached thumbnails which
- * have changed.
+ * This is an opportune moment to invalidate any cached thumbnails for files
+ * whose thumbnail content has changed.
  *
  * An example of when such invalidation is necessary:
  *
@@ -460,41 +429,30 @@ export const getFiles = async (
  * 3. When the Ente mobile client next comes into foreground, it'll update the
  *    remote thumbnail for the existing file to reflect the changes.
  *
- * @param existingFiles The {@link EnteFile}s we had in our local database
- * before processing the diff response.
+ * @param existingFile The {@link EnteFile} we had in our local database before
+ * processing the diff response. Pass `undefined` to indicate that there was no
+ * existing file corresponding to {@link updatedFile}; in such a case this
+ * function is a no-op.
  *
- * @param newFiles The {@link EnteFile}s which we got in the diff response.
+ * @param updatedFile The update {@link EntneFile} (with the same file ID as the
+ * {@link existingFile}) which we got in the diff response.
  */
-const clearCachedThumbnailsIfChanged = async (
-    existingFiles: EnteFile[],
-    newFiles: EnteFile[],
+const clearCachedThumbnailIfContentChanged = async (
+    existingFile: EnteFile | undefined,
+    updatedFile: EnteFile,
 ) => {
-    if (newFiles.length == 0) {
-        // Fastpath to no-op if nothing changes.
-        return;
-    }
+    if (!existingFile) return;
 
-    // TODO: This should be constructed once, at the caller (currently the
-    // caller doesn't need this, but we'll only know for sure after we
-    // consolidate all processing that happens during a diff parse).
-    const existingFileByID = new Map(existingFiles.map((f) => [f.id, f]));
-
-    for (const newFile of newFiles) {
-        const existingFile = existingFileByID.get(newFile.id);
-        const m1 = existingFile?.metadata;
-        const m2 = newFile.metadata;
-        // TODO: Add an extra truthy check the EnteFile type is null safe
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-        if (!m1 || !m2) continue;
-        // Both files exist, have metadata, but their hashes differ, which
-        // indicates that the change was in the file's contents, not the
-        // metadata itself, and thus we should refresh the thumbnail.
-        if (metadataHash(m1) != metadataHash(m2)) {
-            // This is an infrequent occurrence, so we lazily get the cache.
-            const thumbnailCache = await blobCache("thumbs");
-            const key = newFile.id.toString();
-            await thumbnailCache.delete(key);
-        }
+    // The hashes of the files differ, which indicates that the change was in
+    // the file's contents, not the metadata itself, and thus we should refresh
+    // the thumbnail.
+    if (
+        metadataHash(existingFile.metadata) !=
+        metadataHash(updatedFile.metadata)
+    ) {
+        // This is an infrequent occurrence, so we lazily get the cache.
+        const thumbnailCache = await blobCache("thumbs");
+        await thumbnailCache.delete(updatedFile.id.toString());
     }
 };
 
