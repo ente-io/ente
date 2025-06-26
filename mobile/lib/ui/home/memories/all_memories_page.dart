@@ -5,14 +5,18 @@ import "package:photos/ui/home/memories/full_screen_memory.dart";
 
 class AllMemoriesPage extends StatefulWidget {
   final int initialPageIndex;
+  final int inititalFileIndex;
   final List<List<Memory>> allMemories;
   final List<String> allTitles;
+  final bool isFromWidgetOrNotifications;
 
   const AllMemoriesPage({
     super.key,
     required this.allMemories,
     required this.allTitles,
     required this.initialPageIndex,
+    this.inititalFileIndex = 0,
+    this.isFromWidgetOrNotifications = false,
   });
 
   @override
@@ -22,6 +26,7 @@ class AllMemoriesPage extends StatefulWidget {
 class _AllMemoriesPageState extends State<AllMemoriesPage>
     with SingleTickerProviderStateMixin {
   late PageController pageController;
+  bool isFirstLoad = true;
 
   @override
   void initState() {
@@ -44,7 +49,11 @@ class _AllMemoriesPageState extends State<AllMemoriesPage>
         hitTestBehavior: HitTestBehavior.translucent,
         itemCount: widget.allMemories.length,
         itemBuilder: (context, index) {
-          final initialMemoryIndex = _getNextMemoryIndex(index);
+          final initialMemoryIndex =
+              widget.isFromWidgetOrNotifications && isFirstLoad
+                  ? widget.inititalFileIndex
+                  : _getNextMemoryIndex(index);
+          isFirstLoad = false;
           return FullScreenMemoryDataUpdater(
             initialIndex: initialMemoryIndex,
             memories: widget.allMemories[index],

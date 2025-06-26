@@ -24,6 +24,7 @@ import "package:photos/services/language_service.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/services/notification_service.dart";
 import "package:photos/services/search_service.dart";
+import "package:photos/ui/home/memories/all_memories_page.dart";
 import "package:photos/ui/home/memories/full_screen_memory.dart";
 import "package:photos/ui/viewer/people/people_page.dart";
 import "package:photos/utils/navigation_util.dart";
@@ -492,10 +493,12 @@ class MemoriesCacheService {
     }
     await routeToPage(
       context,
-      FullScreenMemoryDataUpdater(
-        initialIndex: fileIdx,
-        memories: allMemories[memoryIdx].memories,
-        child: FullScreenMemory(allMemories[memoryIdx].title, fileIdx),
+      AllMemoriesPage(
+        allMemories: _cachedMemories!.map((e) => e.memories).toList(),
+        allTitles: _cachedMemories!.map((e) => e.title).toList(),
+        initialPageIndex: memoryIdx,
+        inititalFileIndex: fileIdx,
+        isFromWidgetOrNotifications: true,
       ),
       forceCustomPageRoute: true,
     );
