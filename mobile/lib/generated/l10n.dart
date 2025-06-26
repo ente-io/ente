@@ -12145,6 +12145,36 @@ class S {
       args: [],
     );
   }
+
+  /// `Same`
+  String get same {
+    return Intl.message(
+      'Same',
+      name: 'same',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Different`
+  String get different {
+    return Intl.message(
+      'Different',
+      name: 'different',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Same person?`
+  String get sameperson {
+    return Intl.message(
+      'Same person?',
+      name: 'sameperson',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

@@ -433,7 +433,7 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
                         ),
                       )
                     : Text(
-                        "Same person?",
+                        S.of(context).sameperson,
                         style: textTheme.body,
                         textAlign: TextAlign.center,
                       ),
@@ -475,7 +475,9 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
                               ),
                               const SizedBox(width: 8),
                               Text(
-                                personPage ? S.of(context).no : "Different",
+                                personPage
+                                    ? S.of(context).no
+                                    : S.of(context).different,
                                 style: (personPage
                                         ? textTheme.bodyBold
                                         : textTheme.body)
@@ -512,7 +514,9 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
                               ),
                               const SizedBox(width: 8),
                               Text(
-                                personPage ? S.of(context).yes : "Same",
+                                personPage
+                                    ? S.of(context).yes
+                                    : S.of(context).same,
                                 style: (personPage
                                         ? textTheme.bodyBold
                                         : textTheme.body)
