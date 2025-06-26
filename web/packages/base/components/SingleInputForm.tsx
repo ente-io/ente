@@ -143,7 +143,7 @@ export const SingleInputForm: React.FC<SingleInputFormProps> = ({
         </LoadingButton>
     );
 
-    // Note: [Use space as default TextField helperText]
+    // [Note: Use space as default TextField helperText]
     //
     // For MUI text fields that use a conditional helperText, e.g. in case of
     // errors, use an space as the default helperText in the other cases to

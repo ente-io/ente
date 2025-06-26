@@ -110,9 +110,11 @@ class _IconButtonWidgetState extends State<IconButtonWidget> {
 
   _onTapUp(details) {
     Future.delayed(const Duration(milliseconds: 100), () {
-      setState(() {
-        iconStateColor = null;
-      });
+      if (mounted) {
+        setState(() {
+          iconStateColor = null;
+        });
+      }
     });
   }
 

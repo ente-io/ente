@@ -98,7 +98,7 @@ class IgnoredFilesService {
   }
 
   Future<Map<String, String>> _loadIDsToReasonMap() async {
-    _logger.fine('loading existing IDs');
+    _logger.info('loading existing IDs');
     final dbResult = await _db.getAll();
     final Map<String, String> result = <String, String>{};
     for (IgnoredFile iFile in dbResult) {

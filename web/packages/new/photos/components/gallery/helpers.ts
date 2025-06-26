@@ -11,10 +11,10 @@
  */
 
 import { getUserRecoveryKey } from "ente-accounts/services/recovery-key";
-import type { User } from "ente-accounts/services/user";
 import log from "ente-base/log";
 import type { Collection } from "ente-media/collection";
-import type { FamilyData } from "ente-new/photos/services/user-details";
+import { createUncategorizedCollection } from "../../services/collection";
+import { PseudoCollectionID } from "../../services/collection-summary";
 
 /**
  * Ensure that the keys in local storage are not malformed by verifying that the
@@ -36,59 +36,16 @@ export const validateKey = async () => {
     }
 };
 
-export const constructUserIDToEmailMap = (
-    user: User,
-    collections: Collection[],
-): Map<number, string> => {
-    const userIDToEmailMap = new Map<number, string>();
-    collections.forEach((item) => {
-        const { owner, sharees } = item;
-        if (user.id !== owner.id && owner.email) {
-            userIDToEmailMap.set(owner.id, owner.email);
-        }
-        // Not sure about its nullability currently, revisit after auditing the
-        // type for Collection.
-        //
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-        if (sharees) {
-            sharees.forEach((item) => {
-                if (item.id !== user.id && item.email)
-                    userIDToEmailMap.set(item.id, item.email);
-            });
-        }
-    });
-    return userIDToEmailMap;
-};
-
 /**
- * Create a list of emails that are shown as suggestions to the user when they
- * are trying to share albums with specific users.
+ * Return the {@link Collection} (from amongst {@link collections}) with the
+ * given {@link collectionSummaryID}. As a special case, if the given
+ * {@link collectionSummaryID} is the ID of the placeholder uncategorized
+ * collection, create a new uncategorized collection and then return it.
  */
-export const createShareeSuggestionEmails = (
-    user: User,
+export const findCollectionCreatingUncategorizedIfNeeded = async (
     collections: Collection[],
-    familyData: FamilyData | undefined,
-): string[] => {
-    const emails = collections
-        .map(({ owner, sharees }) => {
-            if (owner.email && owner.id != user.id) {
-                return [owner.email];
-            } else {
-                // Not sure about its nullability currently, revisit after auditing the
-                // type for Collection.
-                //
-                // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-                return (sharees ?? []).map(({ email }) => email);
-            }
-        })
-        .flat()
-        .filter((e) => e !== undefined);
-
-    // Add family members.
-    if (familyData) {
-        const family = familyData.members.map((member) => member.email);
-        emails.push(...family);
-    }
-
-    return [...new Set(emails.filter((email) => email != user.email))];
-};
+    collectionSummaryID: number,
+): Promise<Collection | undefined> =>
+    collectionSummaryID == PseudoCollectionID.uncategorizedPlaceholder
+        ? createUncategorizedCollection()
+        : collections.find(({ id }) => id == collectionSummaryID);

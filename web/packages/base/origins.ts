@@ -21,17 +21,21 @@ export const apiOrigin = async () =>
  *
  * @param queryParams An optional object containing query params. This is
  * appended to the generated URL after funneling it through
- * {@link URLSearchParams}.
+ * {@link URLSearchParams}. The values can be `strings` or `numbers` (both of
+ * which are converted to `string`s by using `toString`).
  *
  * @returns path prefixed by {@link apiOrigin}.
  */
 export const apiURL = async (
     path: string,
-    queryParams?: Record<string, string>,
+    queryParams?: Record<string, string | number>,
 ) => {
     let url = (await apiOrigin()) + path;
     if (queryParams) {
-        const params = new URLSearchParams(queryParams);
+        const stringQP = Object.fromEntries(
+            Object.entries(queryParams).map(([k, v]) => [k, v.toString()]),
+        );
+        const params = new URLSearchParams(stringQP);
         url = `${url}?${params.toString()}`;
     }
     return url;

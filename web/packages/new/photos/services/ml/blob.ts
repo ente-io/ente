@@ -9,6 +9,7 @@ import {
 } from "ente-gallery/services/upload";
 import { readStream } from "ente-gallery/utils/native-stream";
 import type { EnteFile } from "ente-media/file";
+import { fileFileName } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
 import { decodeLivePhoto } from "ente-media/live-photo";
 
@@ -92,8 +93,7 @@ const fetchRenderableUploadItemBlob = async (
     puItem: ProcessableUploadItem,
     electron: ElectronMLWorker,
 ) => {
-    const fileType = file.metadata.fileType;
-    if (fileType == FileType.video) {
+    if (file.metadata.fileType == FileType.video) {
         const thumbnailData = await downloadManager.thumbnailData(file);
         return new Blob([thumbnailData!]);
     } else {
@@ -109,7 +109,7 @@ const fetchRenderableUploadItemBlob = async (
             return undefined;
         }
         const blob = await readNonVideoUploadItem(uploadItem, electron);
-        return renderableImageBlob(blob, file.metadata.title);
+        return renderableImageBlob(blob, fileFileName(file));
     }
 };
 
@@ -170,12 +170,12 @@ export const fetchRenderableEnteFileBlob = async (
 
     if (fileType == FileType.livePhoto) {
         const { imageFileName, imageData } = await decodeLivePhoto(
-            file.metadata.title,
+            fileFileName(file),
             originalFileBlob,
         );
         return renderableImageBlob(new Blob([imageData]), imageFileName);
     } else if (fileType == FileType.image) {
-        return await renderableImageBlob(originalFileBlob, file.metadata.title);
+        return await renderableImageBlob(originalFileBlob, fileFileName(file));
     } else {
         // A layer above us should've already filtered these out.
         throw new Error(`Cannot index unsupported file type ${fileType}`);

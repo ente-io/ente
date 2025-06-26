@@ -1,12 +1,14 @@
 import { Input, Stack, TextField, Typography } from "@mui/material";
 import { AccountsPageFooter } from "ente-accounts/components/layouts/centered-paper";
-import { getSRPAttributes } from "ente-accounts/services/srp";
-import { sendOTT } from "ente-accounts/services/user";
+import {
+    getSRPAttributes,
+    saveSRPAttributes,
+} from "ente-accounts/services/srp";
+import { savePartialLocalUser, sendOTT } from "ente-accounts/services/user";
 import { LinkButton } from "ente-base/components/LinkButton";
 import { LoadingButton } from "ente-base/components/mui/LoadingButton";
 import { isMuseumHTTPError } from "ente-base/http";
 import log from "ente-base/log";
-import { setData, setLSUser } from "ente-shared/storage/localStorage";
 import { useFormik } from "formik";
 import { t } from "i18next";
 import { useRouter } from "next/router";
@@ -35,7 +37,6 @@ export const LoginContents: React.FC<LoginContentsProps> = ({
     const loginUser = useCallback(
         async (email: string, setFieldError: (message: string) => void) => {
             const srpAttributes = await getSRPAttributes(email);
-            log.debug(() => ["srpAttributes", JSON.stringify(srpAttributes)]);
             if (!srpAttributes || srpAttributes.isEmailMFAEnabled) {
                 try {
                     await sendOTT(email, "login");
@@ -48,11 +49,11 @@ export const LoginContents: React.FC<LoginContentsProps> = ({
                     }
                     throw e;
                 }
-                await setLSUser({ email });
+                savePartialLocalUser({ email });
                 void router.push("/verify");
             } else {
-                await setLSUser({ email });
-                setData("srpAttributes", srpAttributes);
+                savePartialLocalUser({ email });
+                saveSRPAttributes(srpAttributes);
                 void router.push("/credentials");
             }
         },
@@ -102,7 +103,7 @@ export const LoginContents: React.FC<LoginContentsProps> = ({
                     margin="normal"
                     disabled={formik.isSubmitting}
                     error={!!formik.errors.email}
-                    // See: Note: [Use space as default TextField helperText]
+                    // See: [Note: Use space as default TextField helperText]
                     helperText={formik.errors.email ?? " "}
                 />
                 <Input sx={{ display: "none" }} type="password" value="" />

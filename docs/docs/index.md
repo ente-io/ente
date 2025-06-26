@@ -66,6 +66,8 @@ and stay updated:
 - Socials:
     - Twitter: [enteio](https://twitter.com/enteio)
     - Mastodon: [@ente@fosstodon.org](https://fosstodon.org/@ente)
+    - Bluesky: [ente.io](https://bsky.app/profile/ente.io)
+    - Instagram: [ente.app](https://www.instagram.com/ente.app)
 - Website:
     - [Blog](https://ente.io/blog)
     - [RSS](https://ente.io/blog/rss.xml)

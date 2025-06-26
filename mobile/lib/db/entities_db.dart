@@ -99,4 +99,19 @@ extension EntitiesDB on FilesDB {
     }
     return LocalEntityData.fromJson(maps.first);
   }
+
+  Future<String?> getPreHashForEntities(
+    EntityType type,
+    List<String> ids,
+  ) async {
+    final db = await sqliteAsyncDB;
+    final maps = await db.get(
+      'SELECT GROUP_CONCAT(id || \':\' || updatedAt, \',\') FROM entities WHERE type = ? AND id IN (${List.filled(ids.length, '?').join(',')})',
+      [type.name, ...ids],
+    );
+    if (maps.isEmpty) {
+      return null;
+    }
+    return maps.values.first as String?;
+  }
 }

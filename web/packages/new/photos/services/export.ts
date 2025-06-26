@@ -15,16 +15,18 @@ import {
 import { downloadManager } from "ente-gallery/services/download";
 import { writeStream } from "ente-gallery/utils/native-stream";
 import type { Collection } from "ente-media/collection";
-import { mergeMetadata, type EnteFile } from "ente-media/file";
-import { fileLocation, type Metadata } from "ente-media/file-metadata";
+import { fileLogID, type EnteFile } from "ente-media/file";
+import {
+    fileCreationTime,
+    fileFileName,
+    fileLocation,
+} from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
 import { decodeLivePhoto } from "ente-media/live-photo";
 import {
+    collectionUserFacingName,
     createCollectionNameByID,
-    getCollectionUserFacingName,
 } from "ente-new/photos/services/collection";
-import { getAllLocalCollections } from "ente-new/photos/services/collections";
-import { getAllLocalFiles } from "ente-new/photos/services/files";
 import {
     safeDirectoryName,
     safeFileName,
@@ -34,6 +36,7 @@ import { getData, setData } from "ente-shared/storage/localStorage";
 import { PromiseQueue } from "ente-utils/promise";
 import i18n from "i18next";
 import { migrateExport, type ExportRecord } from "./export-migration";
+import { savedCollectionFiles, savedCollections } from "./photos-fdb";
 
 /** Name of the JSON file in which we keep the state of the export. */
 const exportRecordFileName = "export_status.json";
@@ -249,7 +252,7 @@ class ExportService {
      */
     pendingFiles = async (exportRecord?: ExportRecord): Promise<EnteFile[]> => {
         return getUnExportedFiles(
-            await getAllLocalFiles(),
+            await savedCollectionFiles(),
             exportRecord,
             undefined,
         );
@@ -358,8 +361,8 @@ class ExportService {
         { resync }: ExportOpts,
     ) {
         try {
-            const files = mergeMetadata(await getAllLocalFiles());
-            const collections = await getAllLocalCollections();
+            const files = await savedCollectionFiles();
+            const collections = await savedCollections();
 
             const exportRecord = await this.getExportRecord(exportFolder);
             const collectionIDExportNameMap =
@@ -504,7 +507,7 @@ class ExportService {
                     );
                     const newCollectionExportName = await safeDirectoryName(
                         exportFolder,
-                        getCollectionUserFacingName(collection),
+                        collectionUserFacingName(collection),
                         fs.exists,
                     );
                     log.info(
@@ -680,9 +683,7 @@ class ExportService {
         try {
             for (const file of files) {
                 log.info(
-                    `exporting file ${file.metadata.title} with id ${
-                        file.id
-                    } from collection ${collectionIDNameMap.get(
+                    `exporting ${fileLogID(file)} from collection ${collectionIDNameMap.get(
                         file.collectionID,
                     )}`,
                 );
@@ -726,15 +727,13 @@ class ExportService {
                     );
                     incrementSuccess();
                     log.info(
-                        `exporting file ${file.metadata.title} with id ${
-                            file.id
-                        } from collection ${collectionIDNameMap.get(
+                        `exporting ${fileLogID(file)} from collection ${collectionIDNameMap.get(
                             file.collectionID,
                         )} successful`,
                     );
                 } catch (e) {
                     incrementFailed();
-                    log.error("export failed for a file", e);
+                    log.error(`export failed for a ${fileLogID(file)}`, e);
                     if (
                         // @ts-ignore
                         e.message ===
@@ -1017,7 +1016,7 @@ class ExportService {
             const originalFileStream = await downloadManager.fileStream(file, {
                 background: true,
             });
-            if (file.metadata.fileType === FileType.livePhoto) {
+            if (file.metadata.fileType == FileType.livePhoto) {
                 await this.exportLivePhoto(
                     exportDir,
                     fileUID,
@@ -1029,7 +1028,7 @@ class ExportService {
             } else {
                 const fileExportName = await safeFileName(
                     collectionExportPath,
-                    file.metadata.title,
+                    fileFileName(file),
                     electron.fs.exists,
                 );
                 await this.saveMetadataFile(
@@ -1064,7 +1063,7 @@ class ExportService {
     ) {
         const fs = ensureElectron().fs;
         const fileBlob = await new Response(fileStream).blob();
-        const livePhoto = await decodeLivePhoto(file.metadata.title, fileBlob);
+        const livePhoto = await decodeLivePhoto(fileFileName(file), fileBlob);
         const imageExportName = await safeFileName(
             collectionExportPath,
             livePhoto.imageFileName,
@@ -1271,8 +1270,7 @@ const getRenamedExportedCollections = (
                 collection.id,
             );
 
-            const collectionExportName =
-                getCollectionUserFacingName(collection);
+            const collectionExportName = collectionUserFacingName(collection);
 
             if (currentExportName === collectionExportName) {
                 return false;
@@ -1456,14 +1454,9 @@ const getGoogleLikeMetadataFile = (
     file: EnteFile,
     dateTimeFormatter: Intl.DateTimeFormat,
 ) => {
-    const metadata: Metadata = file.metadata;
-    const publicMagicMetadata = file.pubMagicMetadata?.data;
-    const creationTime = Math.floor(
-        (publicMagicMetadata?.editedTime ?? metadata.creationTime) / 1e6,
-    );
-    const modificationTime = Math.floor(
-        (metadata.modificationTime ?? metadata.creationTime) / 1e6,
-    );
+    const metadata = file.metadata;
+    const creationTime = Math.floor(fileCreationTime(file) / 1e6);
+    const modificationTime = Math.floor(metadata.modificationTime / 1e6);
     const result: Record<string, unknown> = {
         title: fileExportName,
         creationTime: {

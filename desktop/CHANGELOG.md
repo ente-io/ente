@@ -2,6 +2,7 @@
 
 ## v1.7.14 (Unreleased)
 
+- Increase file size limit to 10 GB.
 - .
 
 ## v1.7.13

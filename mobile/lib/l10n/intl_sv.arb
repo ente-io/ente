@@ -364,7 +364,7 @@
   "selectAll": "Markera allt",
   "skip": "Hoppa över",
   "updatingFolderSelection": "Uppdaterar mappval...",
-  "itemCount": "{count, plural, one{{count} objekt} other{{count} objekt}}",
+  "itemCount": "{count, plural, other{{count} objekt}}",
   "deleteItemCount": "{count, plural, =1 {Radera {count} objekt} other {Radera {count} objekt}}",
   "duplicateItemsGroup": "{count} filer, {formattedSize} vardera",
   "@duplicateItemsGroup": {
@@ -382,7 +382,7 @@
     }
   },
   "showMemories": "Visa minnen",
-  "yearsAgo": "{count, plural, one{{count} år sedan} other{{count} år sedan}}",
+  "yearsAgo": "{count, plural, other{{count} år sedan}}",
   "backupSettings": "Säkerhetskopieringsinställningar",
   "backupStatus": "Säkerhetskopieringsstatus",
   "about": "Om",
@@ -496,7 +496,7 @@
   "viewAll": "Visa alla",
   "inviteYourFriendsToEnte": "Bjud in dina vänner till Ente",
   "fileTypes": "Filtyper",
-  "searchResultCount": "{count, plural, one{{count} resultat hittades} other{{count} resultat hittades}}",
+  "searchResultCount": "{count, plural, other{{count} resultat hittades}}",
   "@searchResultCount": {
     "description": "Text to tell user how many results were found for their search query",
     "placeholders": {
@@ -531,5 +531,13 @@
   "sort": "Sortera",
   "newPerson": "Ny person",
   "addName": "Lägg till namn",
-  "add": "Lägg till"
+  "add": "Lägg till",
+  "wishThemAHappyBirthday": "Wish ${name} a happy birthday! 🎉",
+  "showMoreFaces": "Show more faces",
+  "showLessFaces": "Show less faces",
+  "otherDetectedFaces": "Other detected faces",
+  "areYouSureRemoveThisFaceFromPerson": "Are you sure you want to remove this face from this person?",
+  "areThey": "Are they ",
+  "questionmark": "?",
+  "saveAsAnotherPerson": "Save as another person"
 }

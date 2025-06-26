@@ -787,7 +787,7 @@ export const deriveKey = async (
 
 /**
  * A variant of {@link deriveKey} with (dynamic) parameters for deriving
- * sensitive keys (like the user's master key kek (key encryption key).
+ * sensitive keys (like the user's master key KEK (key encryption key).
  *
  * This function defers to {@link deriveKey} after choosing the most secure ops
  * and mem limits that the current device can handle. For details about these

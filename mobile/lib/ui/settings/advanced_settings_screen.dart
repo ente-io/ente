@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import "package:photos/core/error-reporting/super_logging.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/service_locator.dart";
-import "package:photos/services/preview_video_store.dart";
+import "package:photos/services/video_preview_service.dart";
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/buttons/icon_button_widget.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
@@ -139,13 +139,13 @@ class AdvancedSettingsScreen extends StatelessWidget {
                         singleBorderRadius: 8,
                         alignCaptionedTextToLeft: true,
                         trailingWidget: ToggleSwitchWidget(
-                          value: () => PreviewVideoStore
+                          value: () => VideoPreviewService
                               .instance.isVideoStreamingEnabled,
                           onChanged: () async {
-                            final isEnabled = PreviewVideoStore
+                            final isEnabled = VideoPreviewService
                                 .instance.isVideoStreamingEnabled;
 
-                            await PreviewVideoStore.instance
+                            await VideoPreviewService.instance
                                 .setIsVideoStreamingEnabled(!isEnabled);
                           },
                         ),

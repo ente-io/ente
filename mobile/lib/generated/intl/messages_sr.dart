@@ -20,12 +20,23 @@ typedef String MessageIfAbsent(String messageStr, List<dynamic> args);
 class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'sr';
 
+  static String m115(name) => "Wish \$${name} a happy birthday! 🎉";
+
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
-        "birthdays": MessageLookupByLibrary.simpleMessage("Birthdays"),
-        "happyBirthday":
-            MessageLookupByLibrary.simpleMessage("Happy birthday! 🥳"),
-        "receiveRemindersOnBirthdays": MessageLookupByLibrary.simpleMessage(
-            "Receive reminders when it\'s someone\'s birthday. Tapping on the notification will take you to photos of the birthday person.")
+        "areThey": MessageLookupByLibrary.simpleMessage("Are they "),
+        "areYouSureRemoveThisFaceFromPerson":
+            MessageLookupByLibrary.simpleMessage(
+                "Are you sure you want to remove this face from this person?"),
+        "otherDetectedFaces":
+            MessageLookupByLibrary.simpleMessage("Other detected faces"),
+        "questionmark": MessageLookupByLibrary.simpleMessage("?"),
+        "saveAsAnotherPerson":
+            MessageLookupByLibrary.simpleMessage("Save as another person"),
+        "showLessFaces":
+            MessageLookupByLibrary.simpleMessage("Show less faces"),
+        "showMoreFaces":
+            MessageLookupByLibrary.simpleMessage("Show more faces"),
+        "wishThemAHappyBirthday": m115
       };
 }

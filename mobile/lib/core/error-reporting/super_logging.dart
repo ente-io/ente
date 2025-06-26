@@ -47,6 +47,14 @@ extension SuperLogRecord on LogRecord {
     var msg = "$header $message";
 
     if (error != null) {
+      if (error is DioException) {
+        final String? id = (error as DioException)
+            .requestOptions
+            .headers['x-request-id'] as String?;
+        if (id != null) {
+          msg += "\n⤷ id: $id";
+        }
+      }
       msg += "\n⤷ type: ${error.runtimeType}\n⤷ error: $error";
     }
     if (stackTrace != null) {
@@ -179,7 +187,7 @@ class SuperLogging {
       setupSentry().ignore();
     }
 
-    Logger.root.level = Level.ALL;
+    Logger.root.level = kDebugMode ? Level.ALL : Level.INFO;
     Logger.root.onRecord.listen(onLogRecord);
 
     if (isFDroidClient) {

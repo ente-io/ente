@@ -461,7 +461,7 @@
     }
   },
   "showMemories": "思い出を表示",
-  "yearsAgo": "{count, plural, one{{count} 年前} other{{count} 年前}}",
+  "yearsAgo": "{count, plural, other{{count} 年前}}",
   "backupSettings": "バックアップ設定",
   "backupStatus": "バックアップの状態",
   "backupStatusDescription": "バックアップされたアイテムがここに表示されます",
@@ -527,7 +527,7 @@
   },
   "remindToEmptyEnteTrash": "「ゴミ箱」も空にするとアカウントのストレージが解放されます",
   "sparkleSuccess": "成功✨",
-  "duplicateFileCountWithStorageSaved": "お掃除しました {count, plural, one{{count} 個の重複ファイル} other{{count} 個の重複ファイル}}, ({storageSaved}が開放されます！)",
+  "duplicateFileCountWithStorageSaved": "お掃除しました {count, plural, other{{count} 個の重複ファイル}}, ({storageSaved}が開放されます！)",
   "@duplicateFileCountWithStorageSaved": {
     "description": "The text to display when the user has successfully cleaned up duplicate files",
     "type": "text",
@@ -1178,7 +1178,7 @@
   "searchHint4": "場所",
   "searchHint5": "近日公開: フェイスとマジック検索 ✨",
   "addYourPhotosNow": "写真を今すぐ追加する",
-  "searchResultCount": "{count, plural, one{{count} 個の結果} other{{count} 個の結果}}",
+  "searchResultCount": "{count, plural, other{{count} 個の結果}}",
   "@searchResultCount": {
     "description": "Text to tell user how many results were found for their search query",
     "placeholders": {
@@ -1666,5 +1666,6 @@
   "moon": "月明かりの中",
   "onTheRoad": "再び道で",
   "food": "料理を楽しむ",
-  "pets": "毛むくじゃらな仲間たち"
+  "pets": "毛むくじゃらな仲間たち",
+  "wishThemAHappyBirthday": "Wish ${name} a happy birthday! 🎉"
 }

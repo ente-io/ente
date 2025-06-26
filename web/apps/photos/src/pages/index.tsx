@@ -57,7 +57,7 @@ const Page: React.FC = () => {
             search: currentURL.search,
             hash: hash,
         });
-        await initLocalForage();
+        await ensureIndexedDBAccess();
     };
 
     const handleNormalRedirect = async () => {
@@ -68,15 +68,14 @@ const Page: React.FC = () => {
         } else if (user?.email) {
             await router.push("/verify");
         }
-        await initLocalForage();
-        setLoading(false);
+        await ensureIndexedDBAccess();
     };
 
-    const initLocalForage = async () => {
+    const ensureIndexedDBAccess = useCallback(async () => {
         try {
             await localForage.ready();
         } catch (e) {
-            log.error("Local storage is not accessible", e);
+            log.error("IndexDB is not accessible", e);
             showMiniDialog({
                 title: t("error"),
                 message: t("local_storage_not_accessible"),
@@ -86,13 +85,7 @@ const Page: React.FC = () => {
         } finally {
             setLoading(false);
         }
-    };
-
-    const signUp = () => setShowLogin(false);
-    const login = () => setShowLogin(true);
-
-    const redirectToSignupPage = () => router.push("/signup");
-    const redirectToLoginPage = () => router.push("/login");
+    }, [showMiniDialog]);
 
     return (
         <TappableContainer onMaybeChangeHost={refreshHost}>
@@ -109,11 +102,13 @@ const Page: React.FC = () => {
                     <MobileBox>
                         <FocusVisibleButton
                             color="accent"
-                            onClick={redirectToSignupPage}
+                            onClick={() => router.push("/signup")}
                         >
                             {t("new_to_ente")}
                         </FocusVisibleButton>
-                        <FocusVisibleButton onClick={redirectToLoginPage}>
+                        <FocusVisibleButton
+                            onClick={() => router.push("/login")}
+                        >
                             {t("existing_user")}
                         </FocusVisibleButton>
                         <MobileBoxFooter {...{ host }} />
@@ -130,11 +125,13 @@ const Page: React.FC = () => {
                         <Stack sx={{ width: "320px", py: 4, gap: 4 }}>
                             {showLogin ? (
                                 <LoginContents
-                                    {...{ onSignUp: signUp, host }}
+                                    {...{ host }}
+                                    onSignUp={() => setShowLogin(false)}
                                 />
                             ) : (
                                 <SignUpContents
-                                    {...{ router, onLogin: login, host }}
+                                    {...{ router, host }}
+                                    onLogin={() => setShowLogin(true)}
                                 />
                             )}
                         </Stack>

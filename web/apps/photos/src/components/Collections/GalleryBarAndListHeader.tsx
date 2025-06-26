@@ -1,5 +1,8 @@
 import { AllAlbums } from "components/Collections/AllAlbums";
-import { CollectionShare } from "components/Collections/CollectionShare";
+import {
+    CollectionShare,
+    type CollectionShareProps,
+} from "components/Collections/CollectionShare";
 import { TimeStampListItem } from "components/FileList";
 import { useModalVisibility } from "ente-base/components/utils/modal";
 import type { Collection } from "ente-media/collection";
@@ -8,29 +11,31 @@ import {
     type GalleryBarImplProps,
 } from "ente-new/photos/components/gallery/BarImpl";
 import { PeopleHeader } from "ente-new/photos/components/gallery/PeopleHeader";
-import { ALL_SECTION } from "ente-new/photos/services/collection";
 import {
     areOnlySystemCollections,
     collectionsSortBy,
     isSystemCollection,
+    PseudoCollectionID,
     shouldShowOnCollectionBar,
     type CollectionsSortBy,
     type CollectionSummaries,
-} from "ente-new/photos/services/collection/ui";
+} from "ente-new/photos/services/collection-summary";
 import { getData, removeData } from "ente-shared/storage/localStorage";
 import { includes } from "ente-utils/type-guards";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { sortCollectionSummaries } from "services/collectionService";
-import { SetFilesDownloadProgressAttributesCreator } from "types/gallery";
 import {
     FilesDownloadProgressAttributes,
     isFilesDownloadCancelled,
     isFilesDownloadCompleted,
 } from "../FilesDownloadProgress";
 import { AlbumCastDialog } from "./AlbumCastDialog";
-import { CollectionHeader } from "./CollectionHeader";
+import {
+    CollectionHeader,
+    type CollectionHeaderProps,
+} from "./CollectionHeader";
 
-type CollectionsProps = Omit<
+type GalleryBarAndListHeaderProps = Omit<
     GalleryBarImplProps,
     | "collectionSummaries"
     | "hiddenCollectionSummaries"
@@ -49,8 +54,14 @@ type CollectionsProps = Omit<
     hiddenCollectionSummaries: CollectionSummaries;
     setPhotoListHeader: (value: TimeStampListItem) => void;
     filesDownloadProgressAttributesList: FilesDownloadProgressAttributes[];
-    setFilesDownloadProgressAttributesCreator: SetFilesDownloadProgressAttributesCreator;
-};
+} & Pick<
+        CollectionHeaderProps,
+        "setFilesDownloadProgressAttributesCreator" | "onRemotePull"
+    > &
+    Pick<
+        CollectionShareProps,
+        "user" | "shareSuggestionEmails" | "setBlockingLoad"
+    >;
 
 /**
  * The gallery bar, the header for the list items, and state for any associated
@@ -70,17 +81,23 @@ type CollectionsProps = Omit<
  * TODO: Once the gallery code is better responsibilitied out, consider moving
  * this code back inline into the gallery.
  */
-export const GalleryBarAndListHeader: React.FC<CollectionsProps> = ({
+export const GalleryBarAndListHeader: React.FC<
+    GalleryBarAndListHeaderProps
+> = ({
     shouldHide,
     mode,
     onChangeMode,
+    user,
     collectionSummaries,
     activeCollection,
     activeCollectionID,
     setActiveCollectionID,
+    setBlockingLoad,
     hiddenCollectionSummaries,
     people,
     activePerson,
+    shareSuggestionEmails,
+    onRemotePull,
     onSelectPerson,
     setPhotoListHeader,
     filesDownloadProgressAttributesList,
@@ -108,7 +125,7 @@ export const GalleryBarAndListHeader: React.FC<CollectionsProps> = ({
         () =>
             shouldHide ||
             (areOnlySystemCollections(toShowCollectionSummaries) &&
-                activeCollectionID === ALL_SECTION),
+                activeCollectionID === PseudoCollectionID.all),
         [shouldHide, toShowCollectionSummaries, activeCollectionID],
     );
 
@@ -144,6 +161,7 @@ export const GalleryBarAndListHeader: React.FC<CollectionsProps> = ({
                             setActiveCollectionID,
                             setFilesDownloadProgressAttributesCreator,
                             isActiveCollectionDownloadInProgress,
+                            onRemotePull,
                         }}
                         collectionSummary={toShowCollectionSummaries.get(
                             activeCollectionID,
@@ -216,6 +234,12 @@ export const GalleryBarAndListHeader: React.FC<CollectionsProps> = ({
                     activeCollectionID,
                 )}
                 collection={activeCollection}
+                {...{
+                    user,
+                    shareSuggestionEmails,
+                    setBlockingLoad,
+                    onRemotePull,
+                }}
             />
             <AlbumCastDialog
                 {...collectionCastVisibilityProps}

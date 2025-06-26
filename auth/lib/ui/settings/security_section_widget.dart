@@ -166,7 +166,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
               return;
             }
           }
-          if (await Configuration.instance.shouldShowLockScreen()) {
+          if (await LockScreenSettings.instance.shouldShowLockScreen()) {
             final bool result = await requestAuthentication(
               context,
               context.l10n.authToChangeLockscreenSetting,

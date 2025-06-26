@@ -50,6 +50,8 @@ class _AppStorageViewerState extends State<AppStorageViewer> {
         "${appTemporaryDirectory.path}/image_manager_disk_cache/";
 
     final String tempDownload = Configuration.instance.getTempDirectory();
+    final String personFaceThumbnails =
+        Configuration.instance.getPersonFaceThumbnailCacheDirectory();
     final String cacheDirectory =
         Configuration.instance.getThumbnailCacheDirectory();
     final imageCachePath =
@@ -94,6 +96,11 @@ class _AppStorageViewerState extends State<AppStorageViewer> {
         PathStorageItem.name(appDocumentsDirectory.path, "Documents"),
         PathStorageItem.name(appSupportDirectory.path, "Support"),
         PathStorageItem.name(appTemporaryDirectory.path, "App Temp"),
+        PathStorageItem.name(
+          personFaceThumbnails,
+          "Person Face Thumbnails",
+          allowCacheClear: true,
+        ),
       ]);
       if (!Platform.isAndroid) {
         paths.add(PathStorageItem.name(iosTempDirectoryPath, "/tmp"));
