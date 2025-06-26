@@ -16,6 +16,7 @@ import { Dialog, Stack, styled, Typography } from "@mui/material";
 import NumberAvatar from "@mui/material/Avatar";
 import TextField from "@mui/material/TextField";
 import Avatar from "components/pages/gallery/Avatar";
+import { ensureLocalUser } from "ente-accounts/services/user";
 import { LoadingButton } from "ente-base/components/mui/LoadingButton";
 import {
     SidebarDrawer,
@@ -180,25 +181,22 @@ const SharingDetails: React.FC<SharingDetailsProps> = ({
     collection,
     type,
 }) => {
-    const galleryContext = useContext(GalleryContext);
+    const user = ensureLocalUser();
 
-    const ownerEmail =
-        galleryContext.user.id === collection.owner?.id
-            ? galleryContext.user?.email
-            : collection.owner?.email;
+    const isOwner = user.id == collection.owner?.id;
+
+    const ownerEmail = isOwner ? user?.email : collection.owner?.email;
 
     const collaborators = collection.sharees
-        ?.filter((sharee) => sharee.role == "COLLABORATOR")
+        .filter((sharee) => sharee.role == "COLLABORATOR")
         .map((sharee) => sharee.email);
 
-    const viewers =
-        collection.sharees
-            ?.filter((sharee) => sharee.role == "VIEWER")
-            .map((sharee) => sharee.email) || [];
+    const viewers = collection.sharees
+        .filter((sharee) => sharee.role == "VIEWER")
+        .map((sharee) => sharee.email);
 
-    const isOwner = galleryContext.user?.id === collection.owner?.id;
-
-    const isMe = (email: string) => email === galleryContext.user?.email;
+    const userOrEmail = (email: string) =>
+        email == user.email ? t("you") : email;
 
     return (
         <>
@@ -214,20 +212,20 @@ const SharingDetails: React.FC<SharingDetailsProps> = ({
                 </RowButtonGroup>
             </Stack>
             {type == "incomingShareCollaborator" &&
-                collaborators?.length > 0 && (
+                collaborators.length > 0 && (
                     <Stack>
                         <RowButtonGroupTitle icon={<ModeEditIcon />}>
                             {t("collaborators")}
                         </RowButtonGroupTitle>
                         <RowButtonGroup>
-                            {collaborators.map((item, index) => (
+                            {collaborators.map((email, index) => (
                                 <>
                                     <RowLabel
-                                        key={item}
-                                        startIcon={<Avatar email={item} />}
-                                        label={isMe(item) ? t("you") : item}
+                                        key={email}
+                                        startIcon={<Avatar email={email} />}
+                                        label={userOrEmail(email)}
                                     />
-                                    {index !== collaborators.length - 1 && (
+                                    {index != collaborators.length - 1 && (
                                         <RowButtonDivider />
                                     )}
                                 </>
@@ -235,19 +233,19 @@ const SharingDetails: React.FC<SharingDetailsProps> = ({
                         </RowButtonGroup>
                     </Stack>
                 )}
-            {viewers?.length > 0 && (
+            {viewers.length > 0 && (
                 <Stack>
                     <RowButtonGroupTitle icon={<Photo />}>
                         {t("viewers")}
                     </RowButtonGroupTitle>
                     <RowButtonGroup>
-                        {viewers.map((item, index) => (
-                            <React.Fragment key={item}>
+                        {viewers.map((email, index) => (
+                            <React.Fragment key={email}>
                                 <RowLabel
-                                    label={isMe(item) ? t("you") : item}
-                                    startIcon={<Avatar email={item} />}
+                                    startIcon={<Avatar email={email} />}
+                                    label={userOrEmail(email)}
                                 />
-                                {index !== viewers.length - 1 && (
+                                {index != viewers.length - 1 && (
                                     <RowButtonDivider />
                                 )}
                             </React.Fragment>
@@ -289,37 +287,35 @@ const EmailShare: React.FC<EmailShareProps> = ({
     wrap,
     onRemotePull,
 }) => {
-    const [addParticipantView, setAddParticipantView] = useState(false);
-    const [manageEmailShareView, setManageEmailShareView] = useState(false);
+    const { show: showAddParticipant, props: addParticipantVisibilityProps } =
+        useModalVisibility();
+    const { show: showManageEmail, props: manageEmailVisibilityProps } =
+        useModalVisibility();
+
     const [participantRole, setParticipantRole] = useState<
         CollectionNewParticipantRole | undefined
     >(undefined);
 
-    const closeAddParticipant = () => setAddParticipantView(false);
-
-    const closeManageEmailShare = () => setManageEmailShareView(false);
-    const openManageEmailShare = () => setManageEmailShareView(true);
-
-    const openAddViewer = () => {
+    const showAddViewer = useCallback(() => {
         setParticipantRole("VIEWER");
-        setAddParticipantView(true);
+        showAddParticipant();
+    }, [showAddParticipant]);
+
+    const showAddCollaborator = () => {
+        setParticipantRole("COLLABORATOR");
+        showAddParticipant();
     };
 
-    const openAddCollaborator = () => {
-        setParticipantRole("COLLABORATOR");
-        setAddParticipantView(true);
-    };
+    const participantCount = collection.sharees.length;
 
     return (
         <>
             <Stack>
                 <RowButtonGroupTitle icon={<WorkspacesIcon />}>
-                    {t("shared_with_people_count", {
-                        count: collection.sharees?.length ?? 0,
-                    })}
+                    {t("shared_with_people_count", { count: participantCount })}
                 </RowButtonGroupTitle>
                 <RowButtonGroup>
-                    {collection.sharees.length > 0 ? (
+                    {participantCount > 0 ? (
                         <>
                             <RowButton
                                 fontWeight="regular"
@@ -332,35 +328,33 @@ const EmailShare: React.FC<EmailShareProps> = ({
                                         : null
                                 }
                                 endIcon={<ChevronRightIcon />}
-                                onClick={openManageEmailShare}
+                                onClick={showManageEmail}
                             />
                             <RowButtonDivider />
                         </>
                     ) : null}
                     <RowButton
                         startIcon={<AddIcon />}
-                        onClick={openAddViewer}
+                        onClick={showAddViewer}
                         label={t("add_viewers")}
                     />
                     <RowButtonDivider />
                     <RowButton
                         startIcon={<AddIcon />}
-                        onClick={openAddCollaborator}
+                        onClick={showAddCollaborator}
                         label={t("add_collaborators")}
                     />
                 </RowButtonGroup>
             </Stack>
             <AddParticipant
-                open={addParticipantView}
-                onClose={closeAddParticipant}
+                {...addParticipantVisibilityProps}
                 {...{ onRootClose, collection, onRemotePull }}
                 role={participantRole}
             />
             <ManageEmailShare
-                open={manageEmailShareView}
-                onClose={closeManageEmailShare}
+                {...manageEmailVisibilityProps}
                 {...{ onRootClose, wrap, collection, onRemotePull }}
-                peopleCount={collection.sharees.length}
+                participantCount={participantCount}
             />
         </>
     );
@@ -415,9 +409,8 @@ const AvatarGroup = ({ sharees }: { sharees: Collection["sharees"] }) => {
 
 type AddParticipantProps = ModalVisibilityProps & {
     onRootClose: () => void;
-    collection: Collection;
     role: CollectionNewParticipantRole;
-} & Pick<CollectionShareProps, "onRemotePull">;
+} & Pick<CollectionShareProps, "collection" | "onRemotePull">;
 
 const AddParticipant: React.FC<AddParticipantProps> = ({
     open,
@@ -646,7 +639,7 @@ const AddParticipantForm: React.FC<AddParticipantFormProps> = ({
 
 type ManageEmailShareProps = ModalVisibilityProps & {
     onRootClose: () => void;
-    peopleCount: number;
+    participantCount: number;
     wrap: (f: () => Promise<void>) => () => void;
 } & Pick<CollectionShareProps, "collection" | "onRemotePull">;
 
@@ -655,7 +648,7 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
     onClose,
     onRootClose,
     collection,
-    peopleCount,
+    participantCount,
     wrap,
     onRemotePull,
 }) => {
@@ -717,7 +710,7 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
                 {...{ open, onClose }}
                 onRootClose={handleRootClose}
                 title={collection.name}
-                caption={t("participants_count", { count: peopleCount })}
+                caption={t("participants_count", { count: participantCount })}
             >
                 <Stack sx={{ gap: 3, py: "20px", px: "12px" }}>
                     <Stack>
