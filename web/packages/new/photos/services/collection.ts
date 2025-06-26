@@ -916,7 +916,7 @@ const putCollectionsShareeMagicMetadata = async (
  * because remote will enforce the constraint and fail the request when we
  * attempt to create a second collection of type "favorites".
  */
-export const createFavoritesCollection = () =>
+const createFavoritesCollection = () =>
     createCollection(favoritesCollectionName, "favorites");
 
 /**
@@ -934,15 +934,56 @@ export const createUncategorizedCollection = () =>
     createCollection(uncategorizedCollectionName, "uncategorized");
 
 /**
+ * Return the user's own favorites collection if one is found in the local
+ * database. Otherwise create a new one and return that.
+ *
+ * Reads local state but does not modify it. The effects are on remote.
+ */
+const savedOrCreateUserFavoritesCollection = async () =>
+    (await savedUserFavoritesCollection()) ?? createFavoritesCollection();
+
+/**
+ * Return the user's own favorites collection, if any, present in the local
+ * database.
+ */
+export const savedUserFavoritesCollection = async () => {
+    const userID = ensureLocalUser().id;
+    const collections = await savedCollections();
+    return collections.find(
+        (collection) =>
+            // See: [Note: User and shared favorites]
+            collection.type == "favorites" && collection.owner.id == userID,
+    );
+};
+
+/**
+ * Mark the provided {@link files} as the user's favorites by adding them to the
+ * user's favorites collection.
+ *
+ * If the user doesn't yet have a favorites collection, it is created.
+ *
+ * Reads local state but does not modify it. The effects are on remote.
+ */
+export const addToFavorites = async (files: EnteFile[]) =>
+    addToCollection(await savedOrCreateUserFavoritesCollection(), files);
+
+/**
  * Return the default hidden collection for the user if one is found in the
  * local database. Otherwise create a new one and return that.
  *
  * Reads local state but does not modify it. The effects are on remote.
  */
-const getOrCreateDefaultHiddenCollection = async () =>
+const savedOrCreateDefaultHiddenCollection = async () =>
+    (await savedDefaultHiddenCollection()) ?? createDefaultHiddenCollection();
+
+/**
+ * Return the user's default hidden collection, if any, present in the
+ * local database.
+ */
+const savedDefaultHiddenCollection = async () =>
     (await savedCollections()).find((collection) =>
         isDefaultHiddenCollection(collection),
-    ) ?? createDefaultHiddenCollection();
+    );
 
 /**
  * Create a new collection with hidden visibility on remote, marking it as the
@@ -994,7 +1035,7 @@ export const isHiddenCollection = (collection: Collection) =>
  * Reads local state but does not modify it. The effects are on remote.
  */
 export const hideFiles = async (files: EnteFile[]) =>
-    moveToCollection(await getOrCreateDefaultHiddenCollection(), files);
+    moveToCollection(await savedOrCreateDefaultHiddenCollection(), files);
 
 /**
  * Return true if this is a collection that the user doesn't own.

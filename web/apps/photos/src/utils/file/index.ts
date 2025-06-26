@@ -15,6 +15,7 @@ import {
 import { FileType } from "ente-media/file-type";
 import { decodeLivePhoto } from "ente-media/live-photo";
 import {
+    addToFavorites,
     deleteFromTrash,
     hideFiles,
     moveToTrash,
@@ -24,7 +25,6 @@ import { safeFileName } from "ente-new/photos/utils/native-fs";
 import { getData } from "ente-shared/storage/localStorage";
 import { wait } from "ente-utils/promise";
 import { t } from "i18next";
-import { addMultipleToFavorites } from "services/collectionService";
 import {
     SelectedState,
     SetFilesDownloadProgressAttributes,
@@ -358,7 +358,7 @@ export const handleFileOp = async (
             fixCreationTime(files);
             break;
         case "favorite":
-            await addMultipleToFavorites(files);
+            await addToFavorites(files);
             break;
         case "archive":
             await updateFilesVisibility(files, ItemVisibility.archived);

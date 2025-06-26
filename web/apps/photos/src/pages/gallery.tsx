@@ -112,8 +112,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { FileWithPath } from "react-dropzone";
 import { Trans } from "react-i18next";
 import {
-    addToFavorites,
-    removeFromFavorites,
+    addToFavorites1,
+    removeFromFavorites1,
 } from "services/collectionService";
 import { uploadManager } from "services/upload-manager";
 import {
@@ -763,9 +763,8 @@ const Page: React.FC = () => {
 
             dispatch({ type: "addPendingFavoriteUpdate", fileID });
             try {
-                await (isFavorite ? removeFromFavorites : addToFavorites)(
+                await (isFavorite ? removeFromFavorites1 : addToFavorites1)(
                     file,
-                    true,
                 );
                 dispatch({
                     type: "unsyncedFavoriteUpdate",

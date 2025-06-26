@@ -1,14 +1,13 @@
 import type { User } from "ente-accounts/services/user";
-import { ensureLocalUser } from "ente-accounts/services/user";
 import log from "ente-base/log";
 import { apiURL } from "ente-base/origins";
 import { groupFilesByCollectionID, sortFiles } from "ente-gallery/utils/file";
 import { EnteFile } from "ente-media/file";
 import {
-    addToCollection,
-    createFavoritesCollection,
+    addToFavorites,
     createUncategorizedCollection,
     moveFromCollection,
+    savedUserFavoritesCollection,
 } from "ente-new/photos/services/collection";
 import type { CollectionSummary } from "ente-new/photos/services/collection-summary";
 import {
@@ -27,49 +26,16 @@ import { isValidMoveTarget } from "utils/collection";
 
 const REQUEST_BATCH_SIZE = 1000;
 
-export const addToFavorites = async (
-    file: EnteFile,
-    disableOldWorkaround?: boolean,
-) => {
-    await addMultipleToFavorites([file], disableOldWorkaround);
+export const addToFavorites1 = async (file: EnteFile) => {
+    await addToFavorites([file]);
 };
 
-export const addMultipleToFavorites = async (
-    files: EnteFile[],
-    disableOldWorkaround?: boolean,
-) => {
-    try {
-        let favCollection = await getFavCollection();
-        if (!favCollection) {
-            favCollection = await createFavoritesCollection();
-        }
-        await addToCollection(favCollection, files);
-    } catch (e) {
-        log.error("failed to add to favorite", e);
-        // Old code swallowed the error here. This isn't good, but to
-        // avoid changing existing behaviour only new code will set the
-        // disableOldWorkaround flag to instead rethrow it.
-        //
-        // TODO: Migrate old code, remove this flag, always throw.
-        if (disableOldWorkaround) throw e;
+export const removeFromFavorites1 = async (file: EnteFile) => {
+    const favCollection = await savedUserFavoritesCollection();
+    if (!favCollection) {
+        throw Error("favorite collection missing");
     }
-};
-
-export const removeFromFavorites = async (
-    file: EnteFile,
-    disableOldWorkaround?: boolean,
-) => {
-    try {
-        const favCollection = await getFavCollection();
-        if (!favCollection) {
-            throw Error("favorite collection missing");
-        }
-        await removeFromCollection(favCollection.id, [file]);
-    } catch (e) {
-        log.error("remove from favorite failed", e);
-        // TODO: See disableOldWorkaround in addMultipleToFavorites.
-        if (disableOldWorkaround) throw e;
-    }
+    await removeFromCollection(favCollection.id, [file]);
 };
 
 export const removeFromCollection = async (
@@ -220,20 +186,6 @@ export const deleteCollection = async (
     } catch (e) {
         log.error("delete collection failed ", e);
         throw e;
-    }
-};
-
-/**
- * Return the user's own favorites collection, if any.
- */
-export const getFavCollection = async () => {
-    const collections = await savedCollections();
-    const userID = ensureLocalUser().id;
-    for (const collection of collections) {
-        // See: [Note: User and shared favorites]
-        if (collection.type == "favorites" && collection.owner.id == userID) {
-            return collection;
-        }
     }
 };
 
