@@ -80,9 +80,9 @@ import {
     savedTrashItems,
 } from "ente-new/photos/services/photos-fdb";
 import {
+    postPullFiles,
+    prePullFiles,
     pullFiles,
-    pullFilesPost,
-    pullFilesPre,
 } from "ente-new/photos/services/pull";
 import {
     filterSearchableFiles,
@@ -501,11 +501,6 @@ const Page: React.FC = () => {
                             type: "setCollectionFiles",
                             collectionFiles,
                         }),
-                    onAugmentCollectionFiles: (collectionFiles) =>
-                        dispatch({
-                            type: "augmentCollectionFiles",
-                            collectionFiles,
-                        }),
                     onSetTrashedItems: (trashItems) =>
                         dispatch({ type: "setTrashItems", trashItems }),
                     onDidUpdateCollectionFiles: () =>
@@ -549,9 +544,9 @@ const Page: React.FC = () => {
                 // The pull itself.
                 try {
                     if (!silent) showLoadingBar();
-                    await pullFilesPre();
+                    await prePullFiles();
                     await remoteFilesPull();
-                    await pullFilesPost();
+                    await postPullFiles();
                 } catch (e) {
                     log.error("Remote pull failed", e);
                 } finally {

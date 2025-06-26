@@ -8,7 +8,6 @@ import {
     generateKey,
 } from "ente-base/crypto";
 import { authenticatedRequestHeaders, ensureOk } from "ente-base/http";
-import log from "ente-base/log";
 import { apiURL } from "ente-base/origins";
 import { ensureMasterKeyFromSession } from "ente-base/session";
 import {
@@ -29,15 +28,12 @@ import {
     decryptRemoteFile,
     FileDiffResponse,
     type EnteFile,
-    type RemoteEnteFile,
 } from "ente-media/file";
 import { ItemVisibility, metadataHash } from "ente-media/file-metadata";
 import {
     createMagicMetadata,
     encryptMagicMetadata,
 } from "ente-media/magic-metadata";
-import HTTPService from "ente-shared/network/HTTPService";
-import { getToken } from "ente-shared/storage/localStorage/helpers";
 import { batch, splitByPredicate } from "ente-utils/array";
 import { z } from "zod/v4";
 import { requestBatchSize, type UpdateMagicMetadataRequest } from "./file";
@@ -290,35 +286,12 @@ const getCollections = async (
     );
 };
 
-export function getLatestVersionFiles(files: EnteFile[]) {
-    const latestVersionFiles = new Map<string, EnteFile>();
-    files.forEach((file) => {
-        const uid = `${file.collectionID}-${file.id}`;
-        const existingFile = latestVersionFiles.get(uid);
-        if (!existingFile || existingFile.updationTime < file.updationTime) {
-            latestVersionFiles.set(uid, file);
-        }
-    });
-    return Array.from(latestVersionFiles.values()).filter(
-        // TODO(RE):
-        // (file) => !file.isDeleted,
-        (file) => !("isDeleted" in file && file.isDeleted),
-    );
-}
 /**
  * Fetch all files from remote and update our local database.
  *
- * If this is the initial read, or if the count of files we have differs from
- * the state of the local database (these two are expected to be the same case),
- * then the {@link onSetCollectionFiles} callback is first invoked to give the
- * caller a chance to bring its state up to speed.
- *
- * Then it calls {@link onAugmentCollectionFiles} as each batch of updates are
- * fetched (in addition to updating the local database).
- *
- * The callbacks are optional because we might be called in a context where we
- * just want to update the local database, and there is no other in-memory state
- * we need to keep in sync.
+ * Each time it updates the local database, the {@link onSetCollectionFiles}
+ * callback is also invoked to give the caller a chance to bring its own
+ * in-memory state up to speed.
  *
  * @param collections The user's collections. These are assumed to be the latest
  * collections on remote (that is, the pull for collections should happen prior
@@ -327,16 +300,18 @@ export function getLatestVersionFiles(files: EnteFile[]) {
  * @param onSetCollectionFiles An optional callback invoked when the locally
  * saved collection files were replaced by the provided {@link collectionFiles}.
  *
- * @param onAugmentCollectionFiles An optional callback when locally saved
- * collection files were augmented with the provided newly fetched
- * {@link collectionFiles}.
+ * The callback is optional because we might be called in a context where we
+ * just want to update the local database, and there is no other in-memory state
+ * we need to keep in sync.
+ *
+ * The callback can be invoked multiple times for each pull (once for each batch
+ * of changes received, for each collection that was updated).
  *
  * @returns true if one or more files were updated locally, false otherwise.
  */
 export const pullCollectionFiles = async (
     collections: Collection[],
     onSetCollectionFiles: ((files: EnteFile[]) => void) | undefined,
-    onAugmentCollectionFiles: ((files: EnteFile[]) => void) | undefined,
 ) => {
     let didUpdateFiles = false;
 
@@ -398,7 +373,7 @@ export const pullCollectionFiles = async (
 
             await saveCollectionFiles(files);
             await saveCollectionLastSyncTime(collection, sinceTime);
-            onAugmentCollectionFiles?.(files);
+            onSetCollectionFiles?.(files);
             didUpdateFiles = true;
 
             if (!hasMore) break;
@@ -437,53 +412,6 @@ const getCollectionDiff = async (collectionID: number, sinceTime: number) => {
     );
     ensureOk(res);
     return FileDiffResponse.parse(await res.json());
-};
-
-export const getFiles = async (
-    collection: Collection,
-    sinceTime: number,
-    onFetchFiles: ((fs: EnteFile[]) => void) | undefined,
-): Promise<EnteFile[]> => {
-    try {
-        let decryptedFiles: EnteFile[] = [];
-        let time = sinceTime;
-        let resp;
-        do {
-            const token = getToken();
-            if (!token) {
-                break;
-            }
-            resp = await HTTPService.get(
-                await apiURL("/collections/v2/diff"),
-                { collectionID: collection.id, sinceTime: time },
-                { "X-Auth-Token": token },
-            );
-
-            const newDecryptedFilesBatch = await Promise.all(
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-                resp.data.diff.map(async (file: RemoteEnteFile) => {
-                    if (!file.isDeleted) {
-                        return await decryptRemoteFile(file, collection.key);
-                    } else {
-                        return file;
-                    }
-                }) as Promise<EnteFile>[],
-            );
-            decryptedFiles = [...decryptedFiles, ...newDecryptedFilesBatch];
-
-            onFetchFiles?.(decryptedFiles);
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-            if (resp.data.diff.length) {
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-                time = resp.data.diff.slice(-1)[0].updationTime;
-            }
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        } while (resp.data.hasMore);
-        return decryptedFiles;
-    } catch (e) {
-        log.error("Get files failed", e);
-        throw e;
-    }
 };
 
 /**
