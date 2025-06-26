@@ -1,5 +1,8 @@
 import { AllAlbums } from "components/Collections/AllAlbums";
-import { CollectionShare } from "components/Collections/CollectionShare";
+import {
+    CollectionShare,
+    type CollectionShareProps,
+} from "components/Collections/CollectionShare";
 import { TimeStampListItem } from "components/FileList";
 import { useModalVisibility } from "ente-base/components/utils/modal";
 import type { Collection } from "ente-media/collection";
@@ -54,6 +57,10 @@ type GalleryBarAndListHeaderProps = Omit<
 } & Pick<
         CollectionHeaderProps,
         "setFilesDownloadProgressAttributesCreator" | "onRemotePull"
+    > &
+    Pick<
+        CollectionShareProps,
+        "user" | "shareSuggestionEmails" | "setBlockingLoad"
     >;
 
 /**
@@ -80,13 +87,16 @@ export const GalleryBarAndListHeader: React.FC<
     shouldHide,
     mode,
     onChangeMode,
+    user,
     collectionSummaries,
     activeCollection,
     activeCollectionID,
     setActiveCollectionID,
+    setBlockingLoad,
     hiddenCollectionSummaries,
     people,
     activePerson,
+    shareSuggestionEmails,
     onRemotePull,
     onSelectPerson,
     setPhotoListHeader,
@@ -224,7 +234,12 @@ export const GalleryBarAndListHeader: React.FC<
                     activeCollectionID,
                 )}
                 collection={activeCollection}
-                {...{ onRemotePull }}
+                {...{
+                    user,
+                    shareSuggestionEmails,
+                    setBlockingLoad,
+                    onRemotePull,
+                }}
             />
             <AlbumCastDialog
                 {...collectionCastVisibilityProps}

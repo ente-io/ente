@@ -13,6 +13,7 @@ import {
     Typography,
     type DialogProps,
 } from "@mui/material";
+import type { LocalUser } from "ente-accounts/services/user";
 import { isDesktop } from "ente-base/app";
 import { SpacedRow } from "ente-base/components/containers";
 import { DialogCloseIconButton } from "ente-base/components/mui/DialogCloseIconButton";
@@ -56,7 +57,6 @@ import { redirectToCustomerPortal } from "ente-new/photos/services/user-details"
 import { usePhotosAppContext } from "ente-new/photos/types/context";
 import { firstNonEmpty } from "ente-utils/array";
 import { t } from "i18next";
-import { GalleryContext } from "pages/gallery";
 import React, {
     useCallback,
     useContext,
@@ -84,6 +84,14 @@ import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
 import { UploadProgress } from "./UploadProgress";
 
 interface UploadProps {
+    /**
+     * The currently logged in user, if any.
+     *
+     * This is only expected to be present when we're running it the context of
+     * the photos app, where there is a logged in user. When used by the public
+     * albums app, this prop can be omitted.
+     */
+    user?: LocalUser;
     closeUploadTypeSelector: () => void;
     /**
      * Show the collection selector with the given {@link attributes}.
@@ -147,6 +155,7 @@ type UploadType = "files" | "folders" | "zips";
  * Top level component that houses the infrastructure for handling uploads.
  */
 export const Upload: React.FC<UploadProps> = ({
+    user,
     isFirstUpload,
     dragAndDropFiles,
     onRemotePull,
@@ -158,7 +167,6 @@ export const Upload: React.FC<UploadProps> = ({
 }) => {
     const { showMiniDialog, onGenericError } = useBaseContext();
     const { showNotification, watchFolderView } = usePhotosAppContext();
-    const galleryContext = useContext(GalleryContext);
     const publicCollectionGalleryContext = useContext(
         PublicCollectionGalleryContext,
     );
@@ -545,7 +553,7 @@ export const Upload: React.FC<UploadProps> = ({
                 isDragAndDrop.current = false;
                 if (
                     props.activeCollection &&
-                    props.activeCollection.owner.id === galleryContext.user?.id
+                    props.activeCollection.owner.id == user?.id
                 ) {
                     uploadFilesToExistingCollection(props.activeCollection);
                     return;

@@ -16,7 +16,7 @@ import { Dialog, Stack, styled, Typography } from "@mui/material";
 import NumberAvatar from "@mui/material/Avatar";
 import TextField from "@mui/material/TextField";
 import Avatar from "components/pages/gallery/Avatar";
-import { ensureLocalUser } from "ente-accounts/services/user";
+import { type LocalUser } from "ente-accounts/services/user";
 import { LoadingButton } from "ente-base/components/mui/LoadingButton";
 import {
     SidebarDrawer,
@@ -75,10 +75,8 @@ import { CustomError, parseSharingErrorCodes } from "ente-shared/error";
 import { wait } from "ente-utils/promise";
 import { useFormik } from "formik";
 import { t } from "i18next";
-import { GalleryContext } from "pages/gallery";
 import React, {
     useCallback,
-    useContext,
     useEffect,
     useMemo,
     useRef,
@@ -87,9 +85,19 @@ import React, {
 import { Trans } from "react-i18next";
 import { z } from "zod/v4";
 
-type CollectionShareProps = ModalVisibilityProps & {
+export type CollectionShareProps = ModalVisibilityProps & {
+    /**
+     * The currently logged in user.
+     */
+    user: LocalUser;
     collection: Collection;
     collectionSummary: CollectionSummary;
+    /**
+     * A list of emails that can be served up as suggestions when the user is
+     * trying to share an album with another Ente user.
+     */
+    shareSuggestionEmails: string[];
+    setBlockingLoad: (value: boolean) => void;
     /**
      * Called when an operation in the share menu requires a full remote pull.
      */
@@ -99,8 +107,11 @@ type CollectionShareProps = ModalVisibilityProps & {
 export const CollectionShare: React.FC<CollectionShareProps> = ({
     open,
     onClose,
+    user,
     collection,
     collectionSummary,
+    shareSuggestionEmails,
+    setBlockingLoad,
     onRemotePull,
 }) => {
     const { onGenericError } = useBaseContext();
@@ -153,16 +164,26 @@ export const CollectionShare: React.FC<CollectionShareProps> = ({
                 <Stack sx={{ py: "20px", px: "8px", gap: "24px" }}>
                     {type == "incomingShareCollaborator" ||
                     type == "incomingShareViewer" ? (
-                        <SharingDetails {...{ collection, type }} />
+                        <SharingDetails {...{ user, collection, type }} />
                     ) : (
                         <>
                             <EmailShare
                                 onRootClose={onClose}
-                                {...{ wrap, collection, onRemotePull }}
+                                {...{
+                                    user,
+                                    collection,
+                                    shareSuggestionEmails,
+                                    wrap,
+                                    onRemotePull,
+                                }}
                             />
                             <PublicShare
                                 onRootClose={onClose}
-                                {...{ collection, onRemotePull }}
+                                {...{
+                                    collection,
+                                    setBlockingLoad,
+                                    onRemotePull,
+                                }}
                             />
                         </>
                     )}
@@ -172,17 +193,16 @@ export const CollectionShare: React.FC<CollectionShareProps> = ({
     );
 };
 
-interface SharingDetailsProps {
-    collection: Collection;
-    type: CollectionSummaryType;
-}
+type SharingDetailsProps = { type: CollectionSummaryType } & Pick<
+    CollectionShareProps,
+    "user" | "collection"
+>;
 
 const SharingDetails: React.FC<SharingDetailsProps> = ({
+    user,
     collection,
     type,
 }) => {
-    const user = ensureLocalUser();
-
     const isOwner = user.id == collection.owner?.id;
 
     const ownerEmail = isOwner ? user?.email : collection.owner?.email;
@@ -219,16 +239,15 @@ const SharingDetails: React.FC<SharingDetailsProps> = ({
                         </RowButtonGroupTitle>
                         <RowButtonGroup>
                             {collaborators.map((email, index) => (
-                                <>
+                                <React.Fragment key={email}>
                                     <RowLabel
-                                        key={email}
                                         startIcon={<Avatar email={email} />}
                                         label={userOrEmail(email)}
                                     />
                                     {index != collaborators.length - 1 && (
                                         <RowButtonDivider />
                                     )}
-                                </>
+                                </React.Fragment>
                             ))}
                         </RowButtonGroup>
                     </Stack>
@@ -279,11 +298,16 @@ const handleSharingErrors = (error) => {
 type EmailShareProps = {
     onRootClose: () => void;
     wrap: (f: () => Promise<void>) => () => void;
-} & Pick<CollectionShareProps, "collection" | "onRemotePull">;
+} & Pick<
+    CollectionShareProps,
+    "user" | "collection" | "shareSuggestionEmails" | "onRemotePull"
+>;
 
 const EmailShare: React.FC<EmailShareProps> = ({
     onRootClose,
+    user,
     collection,
+    shareSuggestionEmails,
     wrap,
     onRemotePull,
 }) => {
@@ -348,13 +372,26 @@ const EmailShare: React.FC<EmailShareProps> = ({
             </Stack>
             <AddParticipant
                 {...addParticipantVisibilityProps}
-                {...{ onRootClose, collection, onRemotePull }}
+                {...{
+                    onRootClose,
+                    user,
+                    collection,
+                    shareSuggestionEmails,
+                    onRemotePull,
+                }}
                 role={participantRole}
             />
             <ManageEmailShare
                 {...manageEmailVisibilityProps}
-                {...{ onRootClose, wrap, collection, onRemotePull }}
-                participantCount={participantCount}
+                {...{
+                    onRootClose,
+                    user,
+                    collection,
+                    shareSuggestionEmails,
+                    participantCount,
+                    wrap,
+                    onRemotePull,
+                }}
             />
         </>
     );
@@ -410,27 +447,28 @@ const AvatarGroup = ({ sharees }: { sharees: Collection["sharees"] }) => {
 type AddParticipantProps = ModalVisibilityProps & {
     onRootClose: () => void;
     role: CollectionNewParticipantRole;
-} & Pick<CollectionShareProps, "collection" | "onRemotePull">;
+} & Pick<
+        CollectionShareProps,
+        "user" | "collection" | "shareSuggestionEmails" | "onRemotePull"
+    >;
 
 const AddParticipant: React.FC<AddParticipantProps> = ({
     open,
     onClose,
     onRootClose,
+    user,
     collection,
+    shareSuggestionEmails,
     role,
     onRemotePull,
 }) => {
-    const { user, emailList } = useContext(GalleryContext);
-
-    const eligibleEmails = useMemo(
-        () =>
-            emailList.filter(
-                (email) =>
-                    email != user.email &&
-                    !collection?.sharees?.find((value) => value.email == email),
-            ),
-        [emailList, collection.sharees],
-    );
+    const eligibleEmails = useMemo(() => {
+        return shareSuggestionEmails.filter(
+            (email) =>
+                email != user.email &&
+                !collection?.sharees?.find((value) => value.email == email),
+        );
+    }, [shareSuggestionEmails, collection.sharees]);
 
     const handleRootClose = () => {
         onClose();
@@ -641,19 +679,22 @@ type ManageEmailShareProps = ModalVisibilityProps & {
     onRootClose: () => void;
     participantCount: number;
     wrap: (f: () => Promise<void>) => () => void;
-} & Pick<CollectionShareProps, "collection" | "onRemotePull">;
+} & Pick<
+        CollectionShareProps,
+        "user" | "collection" | "shareSuggestionEmails" | "onRemotePull"
+    >;
 
 const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
     open,
     onClose,
     onRootClose,
+    user,
     collection,
+    shareSuggestionEmails,
     participantCount,
     wrap,
     onRemotePull,
 }) => {
-    const galleryContext = useContext(GalleryContext);
-
     const { show: showAddParticipant, props: addParticipantVisibilityProps } =
         useModalVisibility();
     const {
@@ -681,11 +722,9 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
     };
 
     const ownerEmail =
-        galleryContext.user.id === collection.owner?.id
-            ? galleryContext.user.email
-            : collection.owner?.email;
+        user.id == collection.owner?.id ? user.email : collection.owner?.email;
 
-    const isOwner = galleryContext.user.id === collection.owner?.id;
+    const isOwner = user.id == collection.owner?.id;
 
     const collaborators = collection.sharees
         ?.filter((sharee) => sharee.role == "COLLABORATOR")
@@ -789,7 +828,13 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
             </TitledNestedSidebarDrawer>
             <AddParticipant
                 {...addParticipantVisibilityProps}
-                {...{ collection, onRootClose, onRemotePull }}
+                {...{
+                    user,
+                    collection,
+                    shareSuggestionEmails,
+                    onRootClose,
+                    onRemotePull,
+                }}
                 role={participantType.current}
             />
             <ManageParticipant
@@ -977,12 +1022,13 @@ const ManageParticipant: React.FC<ManageParticipantProps> = ({
 
 type PublicShareProps = { onRootClose: () => void } & Pick<
     CollectionShareProps,
-    "collection" | "onRemotePull"
+    "collection" | "setBlockingLoad" | "onRemotePull"
 >;
 
 const PublicShare: React.FC<PublicShareProps> = ({
     collection,
     onRootClose,
+    setBlockingLoad,
     onRemotePull,
 }) => {
     const [publicShareUrl, setPublicShareUrl] = useState<string>(null);
@@ -1022,6 +1068,7 @@ const PublicShare: React.FC<PublicShareProps> = ({
                         publicURL,
                         setPublicURL,
                         publicShareUrl,
+                        setBlockingLoad,
                         onRemotePull,
                     }}
                 />
@@ -1125,7 +1172,10 @@ type ManagePublicShareProps = {
     publicURL: PublicURL;
     setPublicURL: (publicURL: PublicURL | undefined) => void;
     publicShareUrl: string;
-} & Pick<CollectionShareProps, "collection" | "onRemotePull">;
+} & Pick<
+    CollectionShareProps,
+    "collection" | "setBlockingLoad" | "onRemotePull"
+>;
 
 const ManagePublicShare: React.FC<ManagePublicShareProps> = ({
     onRootClose,
@@ -1133,6 +1183,7 @@ const ManagePublicShare: React.FC<ManagePublicShareProps> = ({
     publicURL,
     setPublicURL,
     publicShareUrl,
+    setBlockingLoad,
     onRemotePull,
 }) => {
     const {
@@ -1188,6 +1239,7 @@ const ManagePublicShare: React.FC<ManagePublicShareProps> = ({
                     publicURL,
                     publicShareUrl,
                     setPublicURL,
+                    setBlockingLoad,
                     onRemotePull,
                 }}
             />
@@ -1204,7 +1256,10 @@ type ManagePublicShareOptionsProps = ModalVisibilityProps & {
     publicURL: PublicURL;
     setPublicURL: (publicURL: PublicURL | undefined) => void;
     publicShareUrl: string;
-} & Pick<CollectionShareProps, "collection" | "onRemotePull">;
+} & Pick<
+        CollectionShareProps,
+        "collection" | "setBlockingLoad" | "onRemotePull"
+    >;
 
 const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
     open,
@@ -1214,10 +1269,9 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
     publicURL,
     setPublicURL,
     publicShareUrl,
+    setBlockingLoad,
     onRemotePull,
 }) => {
-    const galleryContext = useContext(GalleryContext);
-
     const [sharableLinkError, setSharableLinkError] = useState(null);
 
     const [copied, handleCopyLink] = useClipboardCopy(publicShareUrl);
@@ -1231,19 +1285,19 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
         updates: UpdatePublicURLAttributes,
     ) => {
         try {
-            galleryContext.setBlockingLoad(true);
+            setBlockingLoad(true);
             setPublicURL(await updatePublicURL(collection.id, updates));
             void onRemotePull({ silent: true });
         } catch (e) {
             log.error("Could not update public link", e);
             setSharableLinkError(t("generic_error"));
         } finally {
-            galleryContext.setBlockingLoad(false);
+            setBlockingLoad(false);
         }
     };
     const handleRemovePublicLink = async () => {
         try {
-            galleryContext.setBlockingLoad(true);
+            setBlockingLoad(true);
             await deleteShareURL(collection.id);
             setPublicURL(undefined);
             void onRemotePull({ silent: true });
@@ -1252,7 +1306,7 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
             log.error("Failed to remove public link", e);
             setSharableLinkError(t("generic_error"));
         } finally {
-            galleryContext.setBlockingLoad(false);
+            setBlockingLoad(false);
         }
     };
 
