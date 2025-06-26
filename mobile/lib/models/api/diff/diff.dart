@@ -73,9 +73,9 @@ class ApiFileItem {
   final int fileID;
   final int ownerID;
   final Uint8List? thumnailDecryptionHeader;
-  final Uint8List? fileDecryotionHeader;
+  final Uint8List? fileDecryptionHeader;
   final Metadata? metadata;
-  final Metadata? magicMetadata;
+  final Metadata? privMagicMetadata;
   final Metadata? pubMagicMetadata;
   final Info? info;
 
@@ -83,9 +83,9 @@ class ApiFileItem {
     required this.fileID,
     required this.ownerID,
     this.thumnailDecryptionHeader,
-    this.fileDecryotionHeader,
+    this.fileDecryptionHeader,
     this.metadata,
-    this.magicMetadata,
+    this.privMagicMetadata,
     this.pubMagicMetadata,
     this.info,
   });
@@ -102,7 +102,7 @@ class ApiFileItem {
     return [
       fileID,
       ownerID,
-      fileDecryotionHeader,
+      fileDecryptionHeader,
       thumnailDecryptionHeader,
       creationTime,
       modificationTime,
@@ -112,7 +112,7 @@ class ApiFileItem {
       loc?.latitude,
       loc?.longitude,
       metadata?.toEncodedJson(),
-      magicMetadata?.toEncodedJson(),
+      privMagicMetadata?.toEncodedJson(),
       pubMagicMetadata?.toEncodedJson(),
       info?.toEncodedJson(),
     ];
@@ -123,9 +123,9 @@ class ApiFileItem {
       id: fileID,
       ownerID: ownerID,
       thumbHeader: thumnailDecryptionHeader!,
-      fileHeader: fileDecryotionHeader!,
+      fileHeader: fileDecryptionHeader!,
       metadata: metadata!,
-      privateMetadata: magicMetadata,
+      privateMetadata: privMagicMetadata,
       publicMetadata: pubMagicMetadata,
       info: info,
     );
@@ -221,10 +221,10 @@ class DiffItem {
       collectionID,
       encFileKey,
       encFileKeyNonce,
-      fileItem.fileDecryotionHeader,
+      fileItem.fileDecryptionHeader,
       fileItem.thumnailDecryptionHeader,
       fileItem.metadata?.toEncodedJson(),
-      fileItem.magicMetadata?.toEncodedJson(),
+      fileItem.privMagicMetadata?.toEncodedJson(),
       fileItem.pubMagicMetadata?.toEncodedJson(),
       fileItem.info?.toEncodedJson(),
       trashTime!.createdAt,

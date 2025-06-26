@@ -43,11 +43,11 @@ Future<List<EnteFile>> getPublicFiles(
         final rAsset = RemoteAsset(
           id: item.fileItem.fileID,
           ownerID: item.fileItem.ownerID,
-          fileHeader: item.fileItem.fileDecryotionHeader!,
+          fileHeader: item.fileItem.fileDecryptionHeader!,
           thumbHeader: item.fileItem.thumnailDecryptionHeader!,
           metadata: item.fileItem.metadata!,
           publicMetadata: item.fileItem.pubMagicMetadata,
-          privateMetadata: item.fileItem.magicMetadata,
+          privateMetadata: item.fileItem.privMagicMetadata,
           info: item.fileItem.info,
         );
         sharedFiles.add(EnteFile.fromRemoteAsset(rAsset, cf));

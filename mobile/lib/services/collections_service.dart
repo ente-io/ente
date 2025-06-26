@@ -1748,13 +1748,9 @@ class CollectionsService {
     required EnteFile localFileToUpload,
     required EnteFile existingUploadedFile,
   }) async {
-    final params = <String, dynamic>{};
-    params["collectionID"] = destCollectionID;
-    params["files"] = [];
-    final int uploadedFileID = existingUploadedFile.uploadedFileID!;
-
+    final int remoteID = existingUploadedFile.remoteID;
     // encrypt the fileKey with destination collection's key
-    final fileKey = getFileKey(existingUploadedFile);
+    final fileKey = await getFileKeyAsync(existingUploadedFile);
     final encryptedKeyData =
         CryptoUtil.encryptSync(fileKey, getCollectionKey(destCollectionID));
 
@@ -1762,10 +1758,12 @@ class CollectionsService {
         CryptoUtil.bin2base64(encryptedKeyData.encryptedData!);
     localFileToUpload.keyDecryptionNonce =
         CryptoUtil.bin2base64(encryptedKeyData.nonce!);
-
+    final params = <String, dynamic>{};
+    params["collectionID"] = destCollectionID;
+    params["files"] = [];
     params["files"].add(
       CollectionFileRequest(
-        uploadedFileID,
+        remoteID,
         localFileToUpload.encryptedKey!,
         localFileToUpload.keyDecryptionNonce!,
       ).toMap(),
@@ -1777,7 +1775,7 @@ class CollectionsService {
         data: params,
       );
       localFileToUpload.collectionID = destCollectionID;
-      localFileToUpload.uploadedFileID = uploadedFileID;
+      localFileToUpload.uploadedFileID = remoteID;
       await _filesDB.insertMultiple([localFileToUpload]);
       return localFileToUpload;
     } catch (e) {
@@ -1830,7 +1828,6 @@ class CollectionsService {
         Bus.instance.fire(
           CollectionUpdatedEvent(toCollectionID, batch, "restore"),
         );
-        Bus.instance.fire(FilesUpdatedEvent(batch, source: "restore"));
         // Remove imported local files which are imported but not uploaded.
         // This handles the case where local file was trashed -> imported again
         // but not uploaded automatically as it was trashed.

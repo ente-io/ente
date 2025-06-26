@@ -217,9 +217,9 @@ class RemoteFileDiffService {
       ownerID: ownerID,
       thumnailDecryptionHeader:
           CryptoUtil.base642bin(thumbnailDecryptionHeader),
-      fileDecryotionHeader: CryptoUtil.base642bin(fileDecryptionHeader),
+      fileDecryptionHeader: CryptoUtil.base642bin(fileDecryptionHeader),
       metadata: Metadata(data: defaultMeta, version: 0),
-      magicMetadata: privateMagicMetadata,
+      privMagicMetadata: privateMagicMetadata,
       pubMagicMetadata: pubMagicMetadata,
       info: info,
     );
