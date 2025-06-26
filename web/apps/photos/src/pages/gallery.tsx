@@ -135,7 +135,6 @@ const defaultGalleryContext: GalleryContextType = {
     user: null,
     userIDToEmailMap: null,
     emailList: null,
-    selectedFile: null,
 };
 
 export const GalleryContext = createContext<GalleryContextType>(
@@ -881,7 +880,6 @@ const Page: React.FC = () => {
                 // TODO(RE): Rename
                 userIDToEmailMap: state.emailByUserID,
                 emailList: state.shareSuggestionEmails,
-                selectedFile: selected,
             }}
         >
             <FullScreenDropZone

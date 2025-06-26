@@ -44,5 +44,4 @@ export interface GalleryContextType {
     user: User;
     userIDToEmailMap: Map<number, string>;
     emailList: string[];
-    selectedFile: SelectedState;
 }

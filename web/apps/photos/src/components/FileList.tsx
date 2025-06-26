@@ -677,10 +677,10 @@ export const FileList: React.FC<FileListProps> = ({
 
     useEffect(() => {
         // Nothing to do here if nothing is selected.
-        if (!galleryContext.selectedFile) return;
+        if (!selected) return;
 
         const notSelectedFiles = (annotatedFiles ?? []).filter(
-            (item) => !galleryContext.selectedFile[item.file.id],
+            (item) => !selected[item.file.id],
         );
 
         const unselectedDates = new Set(
@@ -706,7 +706,7 @@ export const FileList: React.FC<FileListProps> = ({
             localSelectedDates.forEach((date) => checked.add(date));
             return checked;
         });
-    }, [galleryContext.selectedFile]);
+    }, [selected]);
 
     const handleSelectMulti = handleSelectCreatorMulti(
         setSelected,
@@ -847,9 +847,7 @@ export const FileList: React.FC<FileListProps> = ({
         listItem: TimeStampListItem,
         isScrolling: boolean,
     ) => {
-        // Enhancement: This logic doesn't work on the shared album screen, the
-        // galleryContext.selectedFile is always null there.
-        const haveSelection = (galleryContext.selectedFile?.count ?? 0) > 0;
+        const haveSelection = (selected.count ?? 0) > 0;
         switch (listItem.tag) {
             case "date":
                 return listItem.dates ? (
