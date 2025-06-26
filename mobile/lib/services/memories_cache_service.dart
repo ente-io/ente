@@ -525,10 +525,12 @@ class MemoriesCacheService {
     }
     await routeToPage(
       context,
-      FullScreenMemoryDataUpdater(
-        initialIndex: 0,
-        memories: allMemories[memoryIdx].memories,
-        child: FullScreenMemory(allMemories[memoryIdx].title, 0),
+      AllMemoriesPage(
+        allMemories: allMemories.map((e) => e.memories).toList(),
+        allTitles: allMemories.map((e) => e.title).toList(),
+        initialPageIndex: memoryIdx,
+        inititalFileIndex: 0,
+        isFromWidgetOrNotifications: true,
       ),
       forceCustomPageRoute: true,
     );
