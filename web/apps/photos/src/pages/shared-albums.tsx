@@ -362,7 +362,7 @@ export default function PublicCollectionGallery() {
                 setPublicCollection(null);
                 setPublicFiles(null);
             } else {
-                log.error("failed to sync public album with remote", e);
+                log.error("Public album remote pull failed", e);
             }
         } finally {
             hideLoadingBar();
