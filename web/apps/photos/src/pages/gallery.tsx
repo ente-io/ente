@@ -137,7 +137,6 @@ const defaultGalleryContext: GalleryContextType = {
     userIDToEmailMap: null,
     emailList: null,
     openHiddenSection: () => null,
-    isClipSearchResult: null,
     selectedFile: null,
     setSelectedFiles: () => null,
 };
@@ -201,9 +200,6 @@ const Page: React.FC = () => {
     >([]);
 
     const peopleState = usePeopleStateSnapshot();
-
-    const [isClipSearchResult, setIsClipSearchResult] =
-        useState<boolean>(false);
 
     // The (non-sticky) header shown at the top of the gallery items.
     const [photoListHeader, setPhotoListHeader] =
@@ -758,7 +754,6 @@ const Page: React.FC = () => {
         } else {
             dispatch({ type: "exitSearch" });
         }
-        setIsClipSearchResult(type == "clip");
     };
 
     const openUploader = (intent?: UploadTypeSelectorIntent) => {
@@ -895,7 +890,6 @@ const Page: React.FC = () => {
                 userIDToEmailMap: state.emailByUserID,
                 emailList: state.shareSuggestionEmails,
                 openHiddenSection,
-                isClipSearchResult,
                 selectedFile: selected,
                 setSelectedFiles: setSelected,
             }}
@@ -1093,6 +1087,9 @@ const Page: React.FC = () => {
                         enableDownload={true}
                         showAppDownloadBanner={
                             state.collectionFiles.length < 30 && !isInSearchMode
+                        }
+                        isMagicSearchResult={
+                            state.searchSuggestion?.type == "clip"
                         }
                         selectable={true}
                         selected={selected}
