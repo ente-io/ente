@@ -87,9 +87,10 @@ import React, {
 import { Trans } from "react-i18next";
 import { z } from "zod/v4";
 
-type CollectionShareProps = ModalVisibilityProps & {
+export type CollectionShareProps = ModalVisibilityProps & {
     collection: Collection;
     collectionSummary: CollectionSummary;
+    setBlockingLoad: (value: boolean) => void;
     /**
      * Called when an operation in the share menu requires a full remote pull.
      */
@@ -101,6 +102,7 @@ export const CollectionShare: React.FC<CollectionShareProps> = ({
     onClose,
     collection,
     collectionSummary,
+    setBlockingLoad,
     onRemotePull,
 }) => {
     const { onGenericError } = useBaseContext();
@@ -162,7 +164,11 @@ export const CollectionShare: React.FC<CollectionShareProps> = ({
                             />
                             <PublicShare
                                 onRootClose={onClose}
-                                {...{ collection, onRemotePull }}
+                                {...{
+                                    collection,
+                                    setBlockingLoad,
+                                    onRemotePull,
+                                }}
                             />
                         </>
                     )}
@@ -977,12 +983,13 @@ const ManageParticipant: React.FC<ManageParticipantProps> = ({
 
 type PublicShareProps = { onRootClose: () => void } & Pick<
     CollectionShareProps,
-    "collection" | "onRemotePull"
+    "collection" | "setBlockingLoad" | "onRemotePull"
 >;
 
 const PublicShare: React.FC<PublicShareProps> = ({
     collection,
     onRootClose,
+    setBlockingLoad,
     onRemotePull,
 }) => {
     const [publicShareUrl, setPublicShareUrl] = useState<string>(null);
@@ -1022,6 +1029,7 @@ const PublicShare: React.FC<PublicShareProps> = ({
                         publicURL,
                         setPublicURL,
                         publicShareUrl,
+                        setBlockingLoad,
                         onRemotePull,
                     }}
                 />
@@ -1125,7 +1133,10 @@ type ManagePublicShareProps = {
     publicURL: PublicURL;
     setPublicURL: (publicURL: PublicURL | undefined) => void;
     publicShareUrl: string;
-} & Pick<CollectionShareProps, "collection" | "onRemotePull">;
+} & Pick<
+    CollectionShareProps,
+    "collection" | "setBlockingLoad" | "onRemotePull"
+>;
 
 const ManagePublicShare: React.FC<ManagePublicShareProps> = ({
     onRootClose,
@@ -1133,6 +1144,7 @@ const ManagePublicShare: React.FC<ManagePublicShareProps> = ({
     publicURL,
     setPublicURL,
     publicShareUrl,
+    setBlockingLoad,
     onRemotePull,
 }) => {
     const {
@@ -1188,6 +1200,7 @@ const ManagePublicShare: React.FC<ManagePublicShareProps> = ({
                     publicURL,
                     publicShareUrl,
                     setPublicURL,
+                    setBlockingLoad,
                     onRemotePull,
                 }}
             />
@@ -1204,7 +1217,10 @@ type ManagePublicShareOptionsProps = ModalVisibilityProps & {
     publicURL: PublicURL;
     setPublicURL: (publicURL: PublicURL | undefined) => void;
     publicShareUrl: string;
-} & Pick<CollectionShareProps, "collection" | "onRemotePull">;
+} & Pick<
+        CollectionShareProps,
+        "collection" | "setBlockingLoad" | "onRemotePull"
+    >;
 
 const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
     open,
@@ -1214,10 +1230,9 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
     publicURL,
     setPublicURL,
     publicShareUrl,
+    setBlockingLoad,
     onRemotePull,
 }) => {
-    const galleryContext = useContext(GalleryContext);
-
     const [sharableLinkError, setSharableLinkError] = useState(null);
 
     const [copied, handleCopyLink] = useClipboardCopy(publicShareUrl);
@@ -1231,19 +1246,19 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
         updates: UpdatePublicURLAttributes,
     ) => {
         try {
-            galleryContext.setBlockingLoad(true);
+            setBlockingLoad(true);
             setPublicURL(await updatePublicURL(collection.id, updates));
             void onRemotePull({ silent: true });
         } catch (e) {
             log.error("Could not update public link", e);
             setSharableLinkError(t("generic_error"));
         } finally {
-            galleryContext.setBlockingLoad(false);
+            setBlockingLoad(false);
         }
     };
     const handleRemovePublicLink = async () => {
         try {
-            galleryContext.setBlockingLoad(true);
+            setBlockingLoad(true);
             await deleteShareURL(collection.id);
             setPublicURL(undefined);
             void onRemotePull({ silent: true });
@@ -1252,7 +1267,7 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
             log.error("Failed to remove public link", e);
             setSharableLinkError(t("generic_error"));
         } finally {
-            galleryContext.setBlockingLoad(false);
+            setBlockingLoad(false);
         }
     };
 

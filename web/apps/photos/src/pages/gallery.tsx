@@ -131,7 +131,6 @@ import { getSelectedFiles, handleFileOp, type FileOp } from "utils/file";
 
 const defaultGalleryContext: GalleryContextType = {
     setActiveCollectionID: () => null,
-    setBlockingLoad: () => null,
     photoListHeader: null,
     user: null,
     userIDToEmailMap: null,
@@ -882,7 +881,6 @@ const Page: React.FC = () => {
             value={{
                 ...defaultGalleryContext,
                 setActiveCollectionID: handleShowCollectionSummary,
-                setBlockingLoad,
                 photoListHeader,
                 user,
                 // TODO(RE): Rename
@@ -1020,6 +1018,7 @@ const Page: React.FC = () => {
                             : undefined) ?? []
                     }
                     onChangeMode={handleChangeBarMode}
+                    setBlockingLoad={setBlockingLoad}
                     setActiveCollectionID={handleShowCollectionSummary}
                     onRemotePull={remotePull}
                     onSelectPerson={handleSelectPerson}
