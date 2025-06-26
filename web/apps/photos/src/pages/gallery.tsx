@@ -878,7 +878,6 @@ const Page: React.FC = () => {
             value={{
                 ...defaultGalleryContext,
                 setActiveCollectionID: handleShowCollectionSummary,
-                photoListHeader,
                 user,
                 // TODO(RE): Rename
                 userIDToEmailMap: state.emailByUserID,
@@ -1079,6 +1078,7 @@ const Page: React.FC = () => {
                     <FileListWithViewer
                         mode={barMode}
                         modePlus={isInSearchMode ? "search" : barMode}
+                        header={photoListHeader}
                         user={user}
                         files={filteredFiles}
                         enableDownload={true}

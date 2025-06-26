@@ -7,7 +7,6 @@ import type { LocalUser } from "ente-accounts/services/user";
 import { assertionFailed } from "ente-base/assert";
 import { Overlay } from "ente-base/components/containers";
 import { isSameDay } from "ente-base/date";
-import { isDevBuild } from "ente-base/env";
 import { formattedDateRelative } from "ente-base/i18n-date";
 import log from "ente-base/log";
 import { downloadManager } from "ente-gallery/services/download";
@@ -29,7 +28,6 @@ import { TileBottomTextOverlay } from "ente-new/photos/components/Tiles";
 import { PseudoCollectionID } from "ente-new/photos/services/collection-summary";
 import { t } from "i18next";
 import memoize from "memoize-one";
-import { GalleryContext } from "pages/gallery";
 import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { Trans } from "react-i18next";
 import {
@@ -185,6 +183,7 @@ export const FileList: React.FC<FileListProps> = ({
     width,
     mode,
     modePlus,
+    header,
     user,
     annotatedFiles,
     showAppDownloadBanner,
@@ -196,11 +195,9 @@ export const FileList: React.FC<FileListProps> = ({
     activePersonID,
     favoriteFileIDs,
     emailByUserID,
-    header,
     footer,
     onItemClick,
 }) => {
-    const galleryContext = useContext(GalleryContext);
     const publicCollectionGalleryContext = useContext(
         PublicCollectionGalleryContext,
     );
@@ -247,10 +244,6 @@ export const FileList: React.FC<FileListProps> = ({
 
             if (header) {
                 timeStampList.push(asFullSpanListItem(header));
-            } else if (galleryContext.photoListHeader) {
-                timeStampList.push(
-                    getPhotoListHeader(galleryContext.photoListHeader),
-                );
             } else if (publicCollectionGalleryContext.photoListHeader) {
                 timeStampList.push(
                     getPhotoListHeader(
@@ -298,90 +291,9 @@ export const FileList: React.FC<FileListProps> = ({
         width,
         height,
         annotatedFiles,
-        galleryContext.photoListHeader,
+        header,
         publicCollectionGalleryContext.photoListHeader,
         isMagicSearchResult,
-    ]);
-
-    useEffect(() => {
-        setTimeStampList((timeStampList) => {
-            timeStampList = timeStampList ?? [];
-            const hasHeader = timeStampList[0]?.tag == "header";
-            if (hasHeader) {
-                return timeStampList;
-            }
-            // TODO(RE): Remove after audit.
-            if (isDevBuild) throw new Error("Unexpected header change");
-            if (header) {
-                return [asFullSpanListItem(header), ...timeStampList];
-            } else if (galleryContext.photoListHeader) {
-                return [
-                    getPhotoListHeader(galleryContext.photoListHeader),
-                    ...timeStampList,
-                ];
-            } else if (publicCollectionGalleryContext.photoListHeader) {
-                return [
-                    getPhotoListHeader(
-                        publicCollectionGalleryContext.photoListHeader,
-                    ),
-                    ...timeStampList,
-                ];
-            } else {
-                return timeStampList;
-            }
-        });
-    }, [
-        galleryContext.photoListHeader,
-        publicCollectionGalleryContext.photoListHeader,
-    ]);
-
-    useEffect(() => {
-        setTimeStampList((timeStampList) => {
-            timeStampList = timeStampList ?? [];
-            const hasFooter =
-                timeStampList.length > 0 &&
-                timeStampList[timeStampList.length - 1]?.tag ==
-                    "publicAlbumsFooter";
-
-            if (hasFooter) {
-                return timeStampList;
-            }
-            // TODO(RE): Remove after audit.
-            if (
-                isDevBuild &&
-                (footer ||
-                    publicCollectionGalleryContext.credentials ||
-                    showAppDownloadBanner)
-            ) {
-                console.log({ timeStampList, footer, showAppDownloadBanner });
-                throw new Error("Unexpected footer change");
-            }
-            if (footer) {
-                return [
-                    ...timeStampList,
-                    asFullSpanListItem(footer),
-                    getAlbumsFooter(),
-                ];
-            } else if (publicCollectionGalleryContext.credentials) {
-                if (publicCollectionGalleryContext.photoListFooter) {
-                    return [
-                        ...timeStampList,
-                        getPhotoListFooter(
-                            publicCollectionGalleryContext.photoListFooter,
-                        ),
-                        getAlbumsFooter(),
-                    ];
-                }
-            } else if (showAppDownloadBanner) {
-                return [...timeStampList, getAppDownloadFooter()];
-            } else {
-                return timeStampList;
-            }
-        });
-    }, [
-        publicCollectionGalleryContext.credentials,
-        showAppDownloadBanner,
-        publicCollectionGalleryContext.photoListFooter,
     ]);
 
     useEffect(() => {

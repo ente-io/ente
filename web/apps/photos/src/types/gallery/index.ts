@@ -1,4 +1,3 @@
-import { TimeStampListItem } from "components/FileList";
 import { FilesDownloadProgressAttributes } from "components/FilesDownloadProgress";
 import type { User } from "ente-accounts/services/user";
 import { type SelectionContext } from "ente-new/photos/components/gallery";
@@ -40,7 +39,6 @@ export interface MergedSourceURL {
 
 export interface GalleryContextType {
     setActiveCollectionID: (collectionID: number) => void;
-    photoListHeader: TimeStampListItem;
     user: User;
     userIDToEmailMap: Map<number, string>;
 }
