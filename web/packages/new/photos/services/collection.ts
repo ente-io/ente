@@ -338,35 +338,76 @@ export const pullCollectionFiles = async (
     onSetCollectionFiles: ((files: EnteFile[]) => void) | undefined,
     onAugmentCollectionFiles: ((files: EnteFile[]) => void) | undefined,
 ) => {
-    const localFiles = await savedCollectionFiles();
-
-    // Prune collections files corresponding to which we no longer have a
-    // collection.
-    const collectionIDs = new Set(collections.map((c) => c.id));
-    let files = localFiles.filter((f) => collectionIDs.has(f.collectionID));
     let didUpdateFiles = false;
-    if (files.length != localFiles.length) {
+
+    const savedFiles = await savedCollectionFiles();
+
+    // Prune collections files for which we no longer have a collection.
+    const collectionIDs = new Set(collections.map((c) => c.id));
+    let files = savedFiles.filter((f) => collectionIDs.has(f.collectionID));
+
+    if (files.length != savedFiles.length) {
         await saveCollectionFiles(files);
         onSetCollectionFiles?.(files);
         didUpdateFiles = true;
     }
 
     for (const collection of collections) {
-        const sinceTime = (await savedCollectionLastSyncTime(collection)) ?? 0;
-        if (collection.updationTime == sinceTime) {
+        let sinceTime = (await savedCollectionLastSyncTime(collection)) ?? 0;
+        if (sinceTime == collection.updationTime) {
+            // The updationTime of a collection is guaranteed to be >= the
+            // updationTime of any update file in the collection.
             continue;
         }
 
-        const newFiles = await getFiles(
-            collection,
-            sinceTime,
-            onAugmentCollectionFiles,
+        const [thisCollectionFiles, otherFiles] = splitByPredicate(
+            files,
+            (f) => f.collectionID == collection.id,
         );
-        await clearCachedThumbnailsIfChanged(localFiles, newFiles);
-        files = getLatestVersionFiles([...files, ...newFiles]);
-        await saveCollectionFiles(files);
-        await saveCollectionLastSyncTime(collection, collection.updationTime);
-        didUpdateFiles = true;
+
+        const thisCollectionFilesByID = new Map(
+            thisCollectionFiles.map((f) => [f.id, f]),
+        );
+
+        while (true) {
+            const { diff, hasMore } = await getCollectionDiff(
+                collection.id,
+                sinceTime,
+            );
+            if (!diff.length) break;
+
+            for (const change of diff) {
+                sinceTime = Math.max(sinceTime, change.updationTime);
+                if (change.isDeleted) {
+                    thisCollectionFilesByID.delete(change.id);
+                } else {
+                    const existingFile = thisCollectionFilesByID.get(change.id);
+                    const file = await decryptRemoteFile(
+                        change,
+                        collection.key,
+                    );
+                    thisCollectionFilesByID.set(change.id, file);
+                    if (existingFile) {
+                        await clearCachedThumbnailIfContentChanged(
+                            existingFile,
+                            file,
+                        );
+                    }
+                }
+            }
+
+            files = otherFiles.concat([...thisCollectionFilesByID.values()]);
+
+            onAugmentCollectionFiles?.(files);
+            await saveCollectionFiles(files);
+            await saveCollectionLastSyncTime(
+                collection,
+                collection.updationTime,
+            );
+            didUpdateFiles = true;
+
+            if (!hasMore) break;
+        }
     }
 
     return didUpdateFiles;
@@ -446,12 +487,12 @@ export const getFiles = async (
 };
 
 /**
- * Clear cached thumbnails for existing files if the thumbnail data has changed.
+ * Clear cached thumbnail of an existing file if the thumbnail data has changed.
  *
  * This function in expected to be called when we are processing a collection
  * diff, updating our local state to reflect files that were updated on remote.
- * We use this as an opportune moment to invalidate any cached thumbnails which
- * have changed.
+ * This is an opportune moment to invalidate any cached thumbnails for files
+ * whose thumbnail content has changed.
  *
  * An example of when such invalidation is necessary:
  *
@@ -460,41 +501,26 @@ export const getFiles = async (
  * 3. When the Ente mobile client next comes into foreground, it'll update the
  *    remote thumbnail for the existing file to reflect the changes.
  *
- * @param existingFiles The {@link EnteFile}s we had in our local database
- * before processing the diff response.
+ * @param existingFile The {@link EnteFile} we had in our local database before
+ * processing the diff response.
  *
- * @param newFiles The {@link EnteFile}s which we got in the diff response.
+ * @param updatedFile The update {@link EntneFile} (with the same file ID as the
+ * {@link existingFile}) which we got in the diff response.
  */
-const clearCachedThumbnailsIfChanged = async (
-    existingFiles: EnteFile[],
-    newFiles: EnteFile[],
+const clearCachedThumbnailIfContentChanged = async (
+    existingFile: EnteFile,
+    updatedFile: EnteFile,
 ) => {
-    if (newFiles.length == 0) {
-        // Fastpath to no-op if nothing changes.
-        return;
-    }
-
-    // TODO: This should be constructed once, at the caller (currently the
-    // caller doesn't need this, but we'll only know for sure after we
-    // consolidate all processing that happens during a diff parse).
-    const existingFileByID = new Map(existingFiles.map((f) => [f.id, f]));
-
-    for (const newFile of newFiles) {
-        const existingFile = existingFileByID.get(newFile.id);
-        const m1 = existingFile?.metadata;
-        const m2 = newFile.metadata;
-        // TODO: Add an extra truthy check the EnteFile type is null safe
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-        if (!m1 || !m2) continue;
-        // Both files exist, have metadata, but their hashes differ, which
-        // indicates that the change was in the file's contents, not the
-        // metadata itself, and thus we should refresh the thumbnail.
-        if (metadataHash(m1) != metadataHash(m2)) {
-            // This is an infrequent occurrence, so we lazily get the cache.
-            const thumbnailCache = await blobCache("thumbs");
-            const key = newFile.id.toString();
-            await thumbnailCache.delete(key);
-        }
+    // The hashes of the files differ, which indicates that the change was in
+    // the file's contents, not the metadata itself, and thus we should refresh
+    // the thumbnail.
+    if (
+        metadataHash(existingFile.metadata) !=
+        metadataHash(updatedFile.metadata)
+    ) {
+        // This is an infrequent occurrence, so we lazily get the cache.
+        const thumbnailCache = await blobCache("thumbs");
+        await thumbnailCache.delete(updatedFile.id.toString());
     }
 };
 
