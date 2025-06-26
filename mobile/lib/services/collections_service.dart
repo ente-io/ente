@@ -1778,37 +1778,28 @@ class CollectionsService {
   }
 
   Future<void> restore(int toCollectionID, List<EnteFile> files) async {
-    final params = <String, dynamic>{};
-    params["collectionID"] = toCollectionID;
-    final toCollectionKey = getCollectionKey(toCollectionID);
-    final int ownerID = Configuration.instance.getUserID()!;
-    final Set<String> existingLocalIDS =
-        await _filesDB.getExistingLocalFileIDs(ownerID);
+    // todo:neeraj check flow to restoring files from trash
+    // when they were uploaded from same device
+    // final Set<String> existingLocalIDS =
+    //     await _filesDB.getExistingLocalFileIDs(ownerID);
     final batchedFiles = files.chunks(batchSize);
     for (final batch in batchedFiles) {
+      final params = <String, dynamic>{};
+      params["collectionID"] = toCollectionID;
       params["files"] = [];
+      final List<EnteFile> batchFiles = [];
+      final List<DiffItem> diffItems = [];
       for (final file in batch) {
-        final fileKey = getFileKey(file);
-        file.generatedID =
-            null; // So that a new entry is created in the FilesDB
-        file.collectionID = toCollectionID;
-        // During restore, if trash file local ID is not present in currently
-        // imported files, treat the file as deleted from device
-        if (file.localID != null && !existingLocalIDS.contains(file.localID)) {
-          file.localID = null;
-        }
-        final encryptedKeyData =
-            CryptoUtil.encryptSync(fileKey, toCollectionKey);
-        file.encryptedKey =
-            CryptoUtil.bin2base64(encryptedKeyData.encryptedData!);
-        file.keyDecryptionNonce =
-            CryptoUtil.bin2base64(encryptedKeyData.nonce!);
+        final newFile = moveOrAddEntry(file, toCollectionID);
+        final localDiffItem = buildDiffItem(newFile, toCollectionID);
+        batchFiles.add(newFile);
+        diffItems.add(localDiffItem);
         params["files"].add(
-          CollectionFileRequest(
-            file.uploadedFileID!,
-            file.encryptedKey!,
-            file.keyDecryptionNonce!,
-          ).toMap(),
+          CollectionFileRequest.req(
+            localDiffItem.fileID,
+            encKey: localDiffItem.encFileKey!,
+            encKeyNonce: localDiffItem.encFileKeyNonce!,
+          ),
         );
       }
       try {
@@ -1816,25 +1807,12 @@ class CollectionsService {
           "/collections/restore-files",
           data: params,
         );
-        await _filesDB.insertMultiple(batch);
-        await remoteDB
-            .removeTrashItems(batch.map((e) => e.uploadedFileID!).toList());
+        await remoteCache.insertDiffItems(diffItems);
+        await remoteDB.removeTrashItems(batch.map((e) => e.remoteID).toList());
         Bus.instance.fire(
-          CollectionUpdatedEvent(toCollectionID, batch, "restore"),
+          CollectionUpdatedEvent(toCollectionID, batchFiles, "restore"),
         );
-        // Remove imported local files which are imported but not uploaded.
-        // This handles the case where local file was trashed -> imported again
-        // but not uploaded automatically as it was trashed.
 
-        final localIDs = batch
-            .where((e) => e.localID != null)
-            .map((e) => e.localID!)
-            .toSet()
-            .toList();
-        if (localIDs.isNotEmpty) {
-          // todo:(rewrite) remove enteries from upload_mapping table
-          // if we decide to use it for book keeping
-        }
         // Force reload home gallery to pull in the restored files
         Bus.instance.fire(ForceReloadHomeGalleryEvent("restoredFromTrash"));
       } catch (e, s) {
