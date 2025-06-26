@@ -239,16 +239,15 @@ const SharingDetails: React.FC<SharingDetailsProps> = ({
                         </RowButtonGroupTitle>
                         <RowButtonGroup>
                             {collaborators.map((email, index) => (
-                                <>
+                                <React.Fragment key={email}>
                                     <RowLabel
-                                        key={email}
                                         startIcon={<Avatar email={email} />}
                                         label={userOrEmail(email)}
                                     />
                                     {index != collaborators.length - 1 && (
                                         <RowButtonDivider />
                                     )}
-                                </>
+                                </React.Fragment>
                             ))}
                         </RowButtonGroup>
                     </Stack>
