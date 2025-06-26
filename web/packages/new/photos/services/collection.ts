@@ -346,6 +346,7 @@ export const pullCollectionFiles = async (
     const collectionIDs = new Set(collections.map((c) => c.id));
     let files = savedFiles.filter((f) => collectionIDs.has(f.collectionID));
 
+    // Update both the saved and in-memory files to reflect the pruning.
     if (files.length != savedFiles.length) {
         await saveCollectionFiles(files);
         onSetCollectionFiles?.(files);
@@ -356,7 +357,7 @@ export const pullCollectionFiles = async (
         let sinceTime = (await savedCollectionLastSyncTime(collection)) ?? 0;
         if (sinceTime == collection.updationTime) {
             // The updationTime of a collection is guaranteed to be >= the
-            // updationTime of any update file in the collection.
+            // updationTime of any file in the collection.
             continue;
         }
 
@@ -381,33 +382,36 @@ export const pullCollectionFiles = async (
                 if (change.isDeleted) {
                     thisCollectionFilesByID.delete(change.id);
                 } else {
-                    const existingFile = thisCollectionFilesByID.get(change.id);
                     const file = await decryptRemoteFile(
                         change,
                         collection.key,
                     );
+                    await clearCachedThumbnailIfContentChanged(
+                        thisCollectionFilesByID.get(change.id),
+                        file,
+                    );
                     thisCollectionFilesByID.set(change.id, file);
-                    if (existingFile) {
-                        await clearCachedThumbnailIfContentChanged(
-                            existingFile,
-                            file,
-                        );
-                    }
                 }
             }
 
             files = otherFiles.concat([...thisCollectionFilesByID.values()]);
 
-            onAugmentCollectionFiles?.(files);
             await saveCollectionFiles(files);
-            await saveCollectionLastSyncTime(
-                collection,
-                collection.updationTime,
-            );
+            await saveCollectionLastSyncTime(collection, sinceTime);
+            onAugmentCollectionFiles?.(files);
             didUpdateFiles = true;
 
             if (!hasMore) break;
         }
+
+        // There might be a difference between the latest updation time of a
+        // file in the collection, and the latest time of the collection itself,
+        // if something about the collection itself changed, not the files in it
+        // (e.g. if the collection was renamed).
+        //
+        // In such cases, advance the sync time to match the collection's update
+        // time so we don't do an unnecessary collection diff the next time.
+        await saveCollectionLastSyncTime(collection, collection.updationTime);
     }
 
     return didUpdateFiles;
@@ -426,11 +430,7 @@ export const pullCollectionFiles = async (
  * a way to fetch a delta diff the next time the client needs to pull changes
  * from remote.
  */
-// TODO(RE): Use me
-export const getCollectionDiff = async (
-    collectionID: number,
-    sinceTime: number,
-) => {
+const getCollectionDiff = async (collectionID: number, sinceTime: number) => {
     const res = await fetch(
         await apiURL("/collections/v2/diff", { collectionID, sinceTime }),
         { headers: await authenticatedRequestHeaders() },
@@ -502,15 +502,19 @@ export const getFiles = async (
  *    remote thumbnail for the existing file to reflect the changes.
  *
  * @param existingFile The {@link EnteFile} we had in our local database before
- * processing the diff response.
+ * processing the diff response. Pass `undefined` to indicate that there was no
+ * existing file corresponding to {@link updatedFile}; in such a case this
+ * function is a no-op.
  *
  * @param updatedFile The update {@link EntneFile} (with the same file ID as the
  * {@link existingFile}) which we got in the diff response.
  */
 const clearCachedThumbnailIfContentChanged = async (
-    existingFile: EnteFile,
+    existingFile: EnteFile | undefined,
     updatedFile: EnteFile,
 ) => {
+    if (!existingFile) return;
+
     // The hashes of the files differ, which indicates that the change was in
     // the file's contents, not the metadata itself, and thus we should refresh
     // the thumbnail.
