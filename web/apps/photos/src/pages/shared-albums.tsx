@@ -238,7 +238,7 @@ export default function PublicCollectionGallery() {
                 downloadManager.setPublicAlbumsCredentials(credentials.current);
                 // Update the CF proxy flag, but we don't need to block on it.
                 void updateShouldDisableCFUploadProxy();
-                await syncWithRemote();
+                await publicAlbumsRemotePull();
             } finally {
                 if (!redirectingToWebsite) {
                     setLoading(false);
@@ -284,7 +284,11 @@ export default function PublicCollectionGallery() {
         );
     }, [onAddPhotos]);
 
-    const syncWithRemote = useCallback(async () => {
+    /**
+     * Pull the latest data related to the public album from remote, updating
+     * both our local database and component state.
+     */
+    const publicAlbumsRemotePull = useCallback(async () => {
         const collectionUID = getPublicCollectionUID(
             credentials.current.accessToken,
         );
@@ -397,7 +401,7 @@ export default function PublicCollectionGallery() {
             throw e;
         }
 
-        await syncWithRemote();
+        await publicAlbumsRemotePull();
     };
 
     const clearSelection = () => {
@@ -519,7 +523,7 @@ export default function PublicCollectionGallery() {
                     setFilesDownloadProgressAttributesCreator={
                         setFilesDownloadProgressAttributesCreator
                     }
-                    onRemotePull={syncWithRemote}
+                    onRemotePull={publicAlbumsRemotePull}
                     onVisualFeedback={handleVisualFeedback}
                 />
                 {blockingLoad && <TranslucentLoadingOverlay />}
@@ -527,7 +531,7 @@ export default function PublicCollectionGallery() {
                     uploadCollection={publicCollection}
                     setLoading={setBlockingLoad}
                     setShouldDisableDropzone={setShouldDisableDropzone}
-                    onRemotePull={syncWithRemote}
+                    onRemotePull={publicAlbumsRemotePull}
                     onUploadFile={(file) =>
                         setPublicFiles(sortFiles([...publicFiles, file]))
                     }

@@ -938,6 +938,7 @@ const Page: React.FC = () => {
                 <FixCreationTime
                     {...fixCreationTimeVisibilityProps}
                     files={fixCreationTimeFiles}
+                    onRemotePull={remotePull}
                 />
                 <NavbarBase
                     sx={[
@@ -1030,6 +1031,7 @@ const Page: React.FC = () => {
                     }
                     onChangeMode={handleChangeBarMode}
                     setActiveCollectionID={handleShowCollectionSummary}
+                    onRemotePull={remotePull}
                     onSelectPerson={handleSelectPerson}
                 />
 

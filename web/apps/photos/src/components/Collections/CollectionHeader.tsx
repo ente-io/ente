@@ -31,6 +31,7 @@ import {
 } from "ente-gallery/services/magic-metadata";
 import { CollectionOrder, type Collection } from "ente-media/collection";
 import { ItemVisibility } from "ente-media/file-metadata";
+import type { RemotePullOpts } from "ente-new/photos/components/gallery";
 import {
     GalleryItemsHeaderAdapter,
     GalleryItemsSummary,
@@ -51,8 +52,7 @@ import {
 import { emptyTrash } from "ente-new/photos/services/trash";
 import { usePhotosAppContext } from "ente-new/photos/types/context";
 import { t } from "i18next";
-import { GalleryContext } from "pages/gallery";
-import React, { useCallback, useContext, useRef } from "react";
+import React, { useCallback, useRef } from "react";
 import { Trans } from "react-i18next";
 import * as CollectionAPI from "services/collectionService";
 import { SetFilesDownloadProgressAttributesCreator } from "types/gallery";
@@ -61,11 +61,16 @@ import {
     downloadDefaultHiddenCollectionHelper,
 } from "utils/collection";
 
-interface CollectionHeaderProps {
+export interface CollectionHeaderProps {
     collectionSummary: CollectionSummary;
     activeCollection: Collection;
     setActiveCollectionID: (collectionID: number) => void;
     isActiveCollectionDownloadInProgress: () => boolean;
+    /**
+     * Called when an operation (e.g. renaming a collection) completes and wants
+     * to perform a full remote pull.
+     */
+    onRemotePull: (opts?: RemotePullOpts) => Promise<void>;
     onCollectionShare: () => void;
     onCollectionCast: () => void;
     setFilesDownloadProgressAttributesCreator: SetFilesDownloadProgressAttributesCreator;
@@ -110,7 +115,9 @@ export const CollectionHeader: React.FC<CollectionHeaderProps> = (props) => {
                     fileCount={fileCount}
                     endIcon={<EndIcon type={type} />}
                 />
-                {shouldShowOptions(type) && <CollectionOptions {...props} />}
+                {shouldShowOptions(type) && (
+                    <CollectionHeaderOptions {...props} />
+                )}
             </SpacedRow>
         </GalleryItemsHeaderAdapter>
     );
@@ -119,10 +126,11 @@ export const CollectionHeader: React.FC<CollectionHeaderProps> = (props) => {
 const shouldShowOptions = (type: CollectionSummaryType) =>
     type != "all" && type != "archive";
 
-const CollectionOptions: React.FC<CollectionHeaderProps> = ({
+const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
     activeCollection,
     collectionSummary,
     setActiveCollectionID,
+    onRemotePull,
     onCollectionShare,
     onCollectionCast,
     setFilesDownloadProgressAttributesCreator,
@@ -130,7 +138,6 @@ const CollectionOptions: React.FC<CollectionHeaderProps> = ({
 }) => {
     const { showMiniDialog, onGenericError } = useBaseContext();
     const { showLoadingBar, hideLoadingBar } = usePhotosAppContext();
-    const { syncWithRemote } = useContext(GalleryContext);
     const overflowMenuIconRef = useRef<SVGSVGElement>(null);
 
     const { show: showSortOrderMenu, props: sortOrderMenuVisibilityProps } =
@@ -154,23 +161,23 @@ const CollectionOptions: React.FC<CollectionHeaderProps> = ({
                 } catch (e) {
                     onGenericError(e);
                 } finally {
-                    void syncWithRemote(true);
+                    void onRemotePull({ silent: true });
                     hideLoadingBar();
                 }
             };
             return (): void => void wrapped();
         },
-        [showLoadingBar, hideLoadingBar, onGenericError, syncWithRemote],
+        [showLoadingBar, hideLoadingBar, onGenericError, onRemotePull],
     );
 
     const handleRenameCollection = useCallback(
         async (newName: string) => {
             if (activeCollection.name !== newName) {
                 await renameCollection(activeCollection, newName);
-                void syncWithRemote(true);
+                void onRemotePull({ silent: true });
             }
         },
-        [activeCollection],
+        [activeCollection, onRemotePull],
     );
 
     const confirmDeleteCollection = () => {
