@@ -53,7 +53,7 @@ export const isFilesDownloadCompleted = (
     );
 };
 
-export const isFilesDownloadCompletedWithErrors = (
+const isFilesDownloadCompletedWithErrors = (
     attributes: FilesDownloadProgressAttributes,
 ) => {
     return (
@@ -129,42 +129,45 @@ export const FilesDownloadProgress: React.FC<FilesDownloadProgressProps> = ({
             }
         };
 
-    return (
-        <>
-            {attributesList.map((attributes, index) => (
-                <Notification
-                    key={attributes.id}
-                    horizontal="left"
-                    sx={{ "&&": { bottom: `${index * 80 + 20}px` } }}
-                    open={isFilesDownloadStarted(attributes)}
-                    onClose={handleClose(attributes)}
-                    keepOpenOnClick
-                    attributes={{
-                        color: isFilesDownloadCompletedWithErrors(attributes)
-                            ? "critical"
-                            : "secondary",
-                        title: isFilesDownloadCompletedWithErrors(attributes)
-                            ? t("download_failed")
-                            : isFilesDownloadCompleted(attributes)
-                              ? t("download_complete")
-                              : t("downloading_album", {
-                                    name: attributes.folderName,
-                                }),
-                        caption: isFilesDownloadCompleted(attributes)
-                            ? attributes.folderName
-                            : t("download_progress", {
-                                  count: attributes.success + attributes.failed,
-                                  total: attributes.total,
-                              }),
-                        onClick: onShowCollection
-                            ? createHandleOnClick(
-                                  attributes.id,
-                                  onShowCollection,
-                              )
-                            : undefined,
-                    }}
-                />
-            ))}
-        </>
-    );
+    const notifications: React.ReactNode[] = [];
+    let visibleIndex = 0;
+    for (const attributes of attributesList) {
+        // Skip attempted downloads of empty albums, which had no effect.
+        if (!isFilesDownloadStarted(attributes)) continue;
+
+        const index = visibleIndex++;
+        notifications.push(
+            <Notification
+                key={attributes.id}
+                horizontal="left"
+                sx={{ "&&": { bottom: `${index * 80 + 20}px` } }}
+                open={isFilesDownloadStarted(attributes)}
+                onClose={handleClose(attributes)}
+                keepOpenOnClick
+                attributes={{
+                    color: isFilesDownloadCompletedWithErrors(attributes)
+                        ? "critical"
+                        : "secondary",
+                    title: isFilesDownloadCompletedWithErrors(attributes)
+                        ? t("download_failed")
+                        : isFilesDownloadCompleted(attributes)
+                          ? t("download_complete")
+                          : t("downloading_album", {
+                                name: attributes.folderName,
+                            }),
+                    caption: isFilesDownloadCompleted(attributes)
+                        ? attributes.folderName
+                        : t("download_progress", {
+                              count: attributes.success + attributes.failed,
+                              total: attributes.total,
+                          }),
+                    onClick: onShowCollection
+                        ? createHandleOnClick(attributes.id, onShowCollection)
+                        : undefined,
+                }}
+            />,
+        );
+    }
+
+    return notifications;
 };
