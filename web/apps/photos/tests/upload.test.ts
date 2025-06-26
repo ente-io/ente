@@ -18,7 +18,7 @@ import {
     savedCollectionFiles,
     savedCollections,
 } from "ente-new/photos/services/photos-fdb";
-import { getUserDetailsV2 } from "ente-new/photos/services/user-details";
+import { userDetailsSnapshot } from "ente-new/photos/services/user-details";
 
 const DATE_TIME_PARSING_TEST_FILE_NAMES = [
     {
@@ -170,7 +170,7 @@ export async function testUpload() {
 }
 
 async function totalFileCountCheck(expectedState) {
-    const userDetails = await getUserDetailsV2();
+    const userDetails = userDetailsSnapshot();
     if (expectedState.total_file_count === userDetails.fileCount) {
         console.log("file count check passed ✅");
     } else {

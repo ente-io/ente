@@ -91,7 +91,7 @@ import {
 import type { SearchOption } from "ente-new/photos/services/search/types";
 import { initSettings } from "ente-new/photos/services/settings";
 import {
-    initUserDetailsOrTriggerSync,
+    initUserDetailsOrTriggerPull,
     redirectToCustomerPortal,
     userDetailsSnapshot,
     verifyStripeSubscription,
@@ -137,7 +137,6 @@ const defaultGalleryContext: GalleryContextType = {
     userIDToEmailMap: null,
     emailList: null,
     openHiddenSection: () => null,
-    isClipSearchResult: null,
     selectedFile: null,
     setSelectedFiles: () => null,
 };
@@ -201,9 +200,6 @@ const Page: React.FC = () => {
     >([]);
 
     const peopleState = usePeopleStateSnapshot();
-
-    const [isClipSearchResult, setIsClipSearchResult] =
-        useState<boolean>(false);
 
     // The (non-sticky) header shown at the top of the gallery items.
     const [photoListHeader, setPhotoListHeader] =
@@ -296,7 +292,7 @@ const Page: React.FC = () => {
                 return;
             }
             initSettings();
-            await initUserDetailsOrTriggerSync();
+            await initUserDetailsOrTriggerPull();
             setupSelectAllKeyBoardShortcutHandler();
             dispatch({ type: "showAll" });
             setIsFirstLoad(isFirstLogin());
@@ -758,7 +754,6 @@ const Page: React.FC = () => {
         } else {
             dispatch({ type: "exitSearch" });
         }
-        setIsClipSearchResult(type == "clip");
     };
 
     const openUploader = (intent?: UploadTypeSelectorIntent) => {
@@ -821,7 +816,7 @@ const Page: React.FC = () => {
                 // 2. Construct a fake a metadata object with the updates
                 //    reflected in it.
                 //
-                // 3. The caller (eventually) triggers a remote sync in the
+                // 3. The caller (eventually) triggers a remote pull in the
                 //    background, but meanwhile uses this updated metadata.
                 //
                 // TODO(RE): Replace with file fetch?
@@ -895,7 +890,6 @@ const Page: React.FC = () => {
                 userIDToEmailMap: state.emailByUserID,
                 emailList: state.shareSuggestionEmails,
                 openHiddenSection,
-                isClipSearchResult,
                 selectedFile: selected,
                 setSelectedFiles: setSelected,
             }}
@@ -1093,6 +1087,9 @@ const Page: React.FC = () => {
                         enableDownload={true}
                         showAppDownloadBanner={
                             state.collectionFiles.length < 30 && !isInSearchMode
+                        }
+                        isMagicSearchResult={
+                            state.searchSuggestion?.type == "clip"
                         }
                         selectable={true}
                         selected={selected}

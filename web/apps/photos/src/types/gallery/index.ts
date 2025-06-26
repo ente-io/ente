@@ -46,7 +46,6 @@ export interface GalleryContextType {
     userIDToEmailMap: Map<number, string>;
     emailList: string[];
     openHiddenSection: (callback?: () => void) => void;
-    isClipSearchResult: boolean;
     setSelectedFiles: (value) => void;
     selectedFile: SelectedState;
 }

@@ -123,6 +123,10 @@ export interface FileListProps {
      */
     modePlus?: GalleryBarMode | "search";
     showAppDownloadBanner?: boolean;
+    /**
+     * If `true`, then the current listing is showing magic search results.
+     */
+    isMagicSearchResult?: boolean;
     selectable?: boolean;
     setSelected: (
         selected: SelectedState | ((selected: SelectedState) => SelectedState),
@@ -167,6 +171,7 @@ export const FileList: React.FC<FileListProps> = ({
     modePlus,
     annotatedFiles,
     showAppDownloadBanner,
+    isMagicSearchResult,
     selectable,
     selected,
     setSelected,
@@ -235,7 +240,7 @@ export const FileList: React.FC<FileListProps> = ({
                     ),
                 );
             }
-            if (galleryContext.isClipSearchResult) {
+            if (isMagicSearchResult) {
                 noGrouping(timeStampList);
             } else {
                 groupByTime(timeStampList);
@@ -277,7 +282,7 @@ export const FileList: React.FC<FileListProps> = ({
         annotatedFiles,
         galleryContext.photoListHeader,
         publicCollectionGalleryContext.photoListHeader,
-        galleryContext.isClipSearchResult,
+        isMagicSearchResult,
     ]);
 
     useEffect(() => {

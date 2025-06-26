@@ -102,8 +102,8 @@ import {
     isSubscriptionPastDue,
     isSubscriptionStripe,
     leaveFamily,
+    pullUserDetails,
     redirectToCustomerPortal,
-    syncUserDetails,
     userDetailsAddOnBonuses,
     type UserDetails,
 } from "ente-new/photos/services/user-details";
@@ -230,7 +230,7 @@ const UserDetailsSection: React.FC<UserDetailsSectionProps> = ({
     } = useModalVisibility();
 
     useEffect(() => {
-        if (sidebarOpen) void syncUserDetails();
+        if (sidebarOpen) void pullUserDetails();
     }, [sidebarOpen]);
 
     const isNonAdminFamilyMember = useMemo(

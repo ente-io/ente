@@ -79,7 +79,7 @@ interface PullFilesOpts {
  * This is a subset of a full remote pull, independently exposed for use at
  * times when we only want to pull the file related information (e.g. we just
  * made some API request that modified collections or files, and so now want to
- * sync our local changes to match remote).
+ * update our local changes to match remote).
  *
  * See also: [Note: Remote pull]
  *

@@ -163,7 +163,7 @@ export interface GalleryState {
      * Unsynced modifications are those whose effects have already been made on
      * remote (so thus they have been "saved", so to say), but we still haven't
      * yet refreshed our local state to incorporate them. The refresh will
-     * happen on the next "file sync", until then they remain as in-memory state
+     * happen on the next files pull, until then they remain as in-memory state
      * in the reducer.
      */
     collectionFiles: EnteFile[];
@@ -318,9 +318,9 @@ export interface GalleryState {
      * the user's favorites, false otherwise) which should be used for that file
      * instead of what we get from our local DB.
      *
-     * The next time a sync with remote completes, we clear this map since
-     * thereafter just deriving {@link favoriteFileIDs} from our local files
-     * would reflect the correct state on remote too.
+     * The next time a remote pull completes, we clear this map since thereafter
+     * just deriving {@link favoriteFileIDs} from our local files would reflect
+     * the correct state on remote too.
      */
     unsyncedFavoriteUpdates: Map<number, boolean>;
     /**
@@ -338,9 +338,9 @@ export interface GalleryState {
      * Each entry from a file ID to the magic metadata that should be used for
      * that file instead of what we get from our local DB.
      *
-     * The next time a sync with remote completes, we clear this map since
-     * thereafter the synced files themselves will reflect the latest private
-     * magic metadata.
+     * The next time a remote pull completes, we clear this map since thereafter
+     * the synced files themselves will reflect the latest private magic
+     * metadata.
      */
     unsyncedPrivateMagicMetadataUpdates: Map<
         number,

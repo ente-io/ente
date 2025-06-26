@@ -56,7 +56,7 @@ class MLState {
      *
      * - On app start, this is read from local storage during {@link initML}.
      *
-     * - It gets updated when we sync with remote (so if the user
+     * - It gets updated when we pull from remote (so if the user
      *   enables/disables ML on a different device, this local value will also
      *   become true/false).
      *
