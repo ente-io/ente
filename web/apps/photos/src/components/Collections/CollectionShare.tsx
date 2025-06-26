@@ -53,6 +53,7 @@ import type {
     PublicURL,
 } from "ente-media/collection";
 import { type CollectionUser } from "ente-media/collection";
+import type { RemotePullOpts } from "ente-new/photos/components/gallery";
 import { PublicLinkCreated } from "ente-new/photos/components/share/PublicLinkCreated";
 import { avatarTextColor } from "ente-new/photos/services/avatar";
 import {
@@ -64,7 +65,10 @@ import {
     type CreatePublicURLAttributes,
     type UpdatePublicURLAttributes,
 } from "ente-new/photos/services/collection";
-import type { CollectionSummary } from "ente-new/photos/services/collection-summary";
+import type {
+    CollectionSummary,
+    CollectionSummaryType,
+} from "ente-new/photos/services/collection-summary";
 import { usePhotosAppContext } from "ente-new/photos/types/context";
 import { CustomError, parseSharingErrorCodes } from "ente-shared/error";
 import { wait } from "ente-utils/promise";
@@ -85,6 +89,10 @@ import { z } from "zod/v4";
 type CollectionShareProps = ModalVisibilityProps & {
     collection: Collection;
     collectionSummary: CollectionSummary;
+    /**
+     * Called when an operation in the share menu requires a full remote pull.
+     */
+    onRemotePull: (opts?: RemotePullOpts) => Promise<void>;
 };
 
 export const CollectionShare: React.FC<CollectionShareProps> = ({
@@ -92,10 +100,10 @@ export const CollectionShare: React.FC<CollectionShareProps> = ({
     onClose,
     collection,
     collectionSummary,
+    onRemotePull,
 }) => {
     const { onGenericError } = useBaseContext();
     const { showLoadingBar, hideLoadingBar } = usePhotosAppContext();
-    const { syncWithRemote } = useContext(GalleryContext);
 
     // TODO: Duplicated from CollectionHeader.tsx
     /**
@@ -112,13 +120,13 @@ export const CollectionShare: React.FC<CollectionShareProps> = ({
                 } catch (e) {
                     onGenericError(e);
                 } finally {
-                    void syncWithRemote(true);
+                    void onRemotePull({ silent: true });
                     hideLoadingBar();
                 }
             };
             return (): void => void wrapped();
         },
-        [showLoadingBar, hideLoadingBar, onGenericError, syncWithRemote],
+        [showLoadingBar, hideLoadingBar, onGenericError, onRemotePull],
     );
 
     if (!collection || !collectionSummary) {
@@ -149,11 +157,11 @@ export const CollectionShare: React.FC<CollectionShareProps> = ({
                         <>
                             <EmailShare
                                 onRootClose={onClose}
-                                {...{ wrap, collection }}
+                                {...{ wrap, collection, onRemotePull }}
                             />
                             <PublicShare
                                 onRootClose={onClose}
-                                {...{ collection }}
+                                {...{ collection, onRemotePull }}
                             />
                         </>
                     )}
@@ -163,7 +171,15 @@ export const CollectionShare: React.FC<CollectionShareProps> = ({
     );
 };
 
-function SharingDetails({ collection, type }) {
+interface SharingDetailsProps {
+    collection: Collection;
+    type: CollectionSummaryType;
+}
+
+const SharingDetails: React.FC<SharingDetailsProps> = ({
+    collection,
+    type,
+}) => {
     const galleryContext = useContext(GalleryContext);
 
     const ownerEmail =
@@ -241,7 +257,7 @@ function SharingDetails({ collection, type }) {
             )}
         </>
     );
-}
+};
 
 const handleSharingErrors = (error) => {
     const parsedError = parseSharingErrorCodes(error);
@@ -262,16 +278,16 @@ const handleSharingErrors = (error) => {
     return errorMessage;
 };
 
-interface EmailShareProps {
+type EmailShareProps = {
     onRootClose: () => void;
     wrap: (f: () => Promise<void>) => () => void;
-    collection: Collection;
-}
+} & Pick<CollectionShareProps, "collection" | "onRemotePull">;
 
 const EmailShare: React.FC<EmailShareProps> = ({
     onRootClose,
-    wrap,
     collection,
+    wrap,
+    onRemotePull,
 }) => {
     const [addParticipantView, setAddParticipantView] = useState(false);
     const [manageEmailShareView, setManageEmailShareView] = useState(false);
@@ -337,15 +353,13 @@ const EmailShare: React.FC<EmailShareProps> = ({
             <AddParticipant
                 open={addParticipantView}
                 onClose={closeAddParticipant}
-                onRootClose={onRootClose}
-                collection={collection}
+                {...{ onRootClose, collection, onRemotePull }}
                 role={participantRole}
             />
             <ManageEmailShare
                 open={manageEmailShareView}
                 onClose={closeManageEmailShare}
-                onRootClose={onRootClose}
-                {...{ onRootClose, wrap, collection }}
+                {...{ onRootClose, wrap, collection, onRemotePull }}
                 peopleCount={collection.sharees.length}
             />
         </>
@@ -399,22 +413,21 @@ const AvatarGroup = ({ sharees }: { sharees: Collection["sharees"] }) => {
     );
 };
 
-interface AddParticipantProps {
-    collection: Collection;
-    open: boolean;
-    onClose: () => void;
+type AddParticipantProps = ModalVisibilityProps & {
     onRootClose: () => void;
+    collection: Collection;
     role: CollectionNewParticipantRole;
-}
+} & Pick<CollectionShareProps, "onRemotePull">;
 
 const AddParticipant: React.FC<AddParticipantProps> = ({
     open,
-    collection,
     onClose,
     onRootClose,
+    collection,
     role,
+    onRemotePull,
 }) => {
-    const { user, syncWithRemote, emailList } = useContext(GalleryContext);
+    const { user, emailList } = useContext(GalleryContext);
 
     const eligibleEmails = useMemo(
         () =>
@@ -477,7 +490,7 @@ const AddParticipant: React.FC<AddParticipantProps> = ({
         }
 
         if (emails.length) {
-            await syncWithRemote(true);
+            await onRemotePull({ silent: true });
         }
 
         onClose();
@@ -631,22 +644,20 @@ const AddParticipantForm: React.FC<AddParticipantFormProps> = ({
     );
 };
 
-interface ManageEmailShareProps {
-    open: boolean;
-    onClose: () => void;
+type ManageEmailShareProps = ModalVisibilityProps & {
     onRootClose: () => void;
-    wrap: (f: () => Promise<void>) => () => void;
-    collection: Collection;
     peopleCount: number;
-}
+    wrap: (f: () => Promise<void>) => () => void;
+} & Pick<CollectionShareProps, "collection" | "onRemotePull">;
 
 const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
     open,
     onClose,
     onRootClose,
-    wrap,
     collection,
     peopleCount,
+    wrap,
+    onRemotePull,
 }) => {
     const galleryContext = useContext(GalleryContext);
 
@@ -785,38 +796,34 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
             </TitledNestedSidebarDrawer>
             <AddParticipant
                 {...addParticipantVisibilityProps}
-                onRootClose={onRootClose}
-                collection={collection}
+                {...{ collection, onRootClose, onRemotePull }}
                 role={participantType.current}
             />
             <ManageParticipant
                 {...manageParticipantVisibilityProps}
-                {...{ onRootClose, wrap, collection }}
+                {...{ onRootClose, wrap, collection, onRemotePull }}
                 selectedParticipant={selectedParticipant.current}
             />
         </>
     );
 };
 
-interface ManageParticipantProps {
-    open: boolean;
-    onClose: () => void;
+type ManageParticipantProps = ModalVisibilityProps & {
     onRootClose: () => void;
     wrap: (f: () => Promise<void>) => () => void;
-    collection: Collection;
     selectedParticipant: CollectionUser;
-}
+} & Pick<CollectionShareProps, "collection" | "onRemotePull">;
 
 const ManageParticipant: React.FC<ManageParticipantProps> = ({
     open,
     onClose,
     onRootClose,
-    wrap,
     collection,
     selectedParticipant,
+    wrap,
+    onRemotePull,
 }) => {
     const { showMiniDialog } = useBaseContext();
-    const galleryContext = useContext(GalleryContext);
 
     const handleRootClose = () => {
         onClose();
@@ -842,7 +849,7 @@ const ManageParticipant: React.FC<ManageParticipantProps> = ({
         try {
             await shareCollection(collection, selectedEmail, newRole);
             selectedParticipant.role = newRole;
-            await galleryContext.syncWithRemote(true);
+            await onRemotePull({ silent: true });
         } catch (e) {
             log.error(handleSharingErrors(e), e);
         }
@@ -975,14 +982,15 @@ const ManageParticipant: React.FC<ManageParticipantProps> = ({
     );
 };
 
-interface PublicShareProps {
-    collection: Collection;
-    onRootClose: () => void;
-}
+type PublicShareProps = { onRootClose: () => void } & Pick<
+    CollectionShareProps,
+    "collection" | "onRemotePull"
+>;
 
 const PublicShare: React.FC<PublicShareProps> = ({
     collection,
     onRootClose,
+    onRemotePull,
 }) => {
     const [publicShareUrl, setPublicShareUrl] = useState<string>(null);
     const [publicURL, setPublicURL] = useState<PublicURL | undefined>(
@@ -1015,13 +1023,18 @@ const PublicShare: React.FC<PublicShareProps> = ({
         <>
             {publicURL ? (
                 <ManagePublicShare
-                    {...{ onRootClose, collection, publicURL, setPublicURL }}
-                    publicShareUrl={publicShareUrl}
+                    {...{
+                        onRootClose,
+                        collection,
+                        publicURL,
+                        setPublicURL,
+                        publicShareUrl,
+                        onRemotePull,
+                    }}
                 />
             ) : (
                 <EnablePublicShareOptions
-                    {...{ setPublicURL }}
-                    collection={collection}
+                    {...{ collection, onRemotePull, setPublicURL }}
                     onLinkCreated={showPublicLinkCreated}
                 />
             )}
@@ -1033,19 +1046,17 @@ const PublicShare: React.FC<PublicShareProps> = ({
     );
 };
 
-interface EnablePublicShareOptionsProps {
-    collection: Collection;
+type EnablePublicShareOptionsProps = {
     setPublicURL: (value: PublicURL) => void;
     onLinkCreated: () => void;
-}
+} & Pick<CollectionShareProps, "collection" | "onRemotePull">;
 
 const EnablePublicShareOptions: React.FC<EnablePublicShareOptionsProps> = ({
     collection,
+    onRemotePull,
     setPublicURL,
     onLinkCreated,
 }) => {
-    const { syncWithRemote } = useContext(GalleryContext);
-
     const [pending, setPending] = useState("");
     const [errorMessage, setErrorMessage] = useState("");
 
@@ -1058,7 +1069,7 @@ const EnablePublicShareOptions: React.FC<EnablePublicShareOptionsProps> = ({
                 setPending("");
                 setPublicURL(publicURL);
                 onLinkCreated();
-                void syncWithRemote(true);
+                void onRemotePull({ silent: true });
             })
             .catch((e: unknown) => {
                 log.error("Could not create public link", e);
@@ -1115,13 +1126,13 @@ const EnablePublicShareOptions: React.FC<EnablePublicShareOptionsProps> = ({
     );
 };
 
-interface ManagePublicShareProps {
+type ManagePublicShareProps = {
     onRootClose: () => void;
     collection: Collection;
     publicURL: PublicURL;
     setPublicURL: (publicURL: PublicURL | undefined) => void;
     publicShareUrl: string;
-}
+} & Pick<CollectionShareProps, "collection" | "onRemotePull">;
 
 const ManagePublicShare: React.FC<ManagePublicShareProps> = ({
     onRootClose,
@@ -1129,6 +1140,7 @@ const ManagePublicShare: React.FC<ManagePublicShareProps> = ({
     publicURL,
     setPublicURL,
     publicShareUrl,
+    onRemotePull,
 }) => {
     const {
         show: showManagePublicShare,
@@ -1177,9 +1189,14 @@ const ManagePublicShare: React.FC<ManagePublicShareProps> = ({
             </Stack>
             <ManagePublicShareOptions
                 {...managePublicShareVisibilityProps}
-                onRootClose={onRootClose}
-                {...{ onRootClose, collection, publicURL, setPublicURL }}
-                publicShareUrl={publicShareUrl}
+                {...{
+                    onRootClose,
+                    collection,
+                    publicURL,
+                    publicShareUrl,
+                    setPublicURL,
+                    onRemotePull,
+                }}
             />
         </>
     );
@@ -1191,11 +1208,10 @@ const isLinkExpired = (validTill: number) => {
 
 type ManagePublicShareOptionsProps = ModalVisibilityProps & {
     onRootClose: () => void;
-    collection: Collection;
     publicURL: PublicURL;
     setPublicURL: (publicURL: PublicURL | undefined) => void;
     publicShareUrl: string;
-};
+} & Pick<CollectionShareProps, "collection" | "onRemotePull">;
 
 const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
     open,
@@ -1205,6 +1221,7 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
     publicURL,
     setPublicURL,
     publicShareUrl,
+    onRemotePull,
 }) => {
     const galleryContext = useContext(GalleryContext);
 
@@ -1223,7 +1240,7 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
         try {
             galleryContext.setBlockingLoad(true);
             setPublicURL(await updatePublicURL(collection.id, updates));
-            galleryContext.syncWithRemote(true);
+            void onRemotePull({ silent: true });
         } catch (e) {
             log.error("Could not update public link", e);
             setSharableLinkError(t("generic_error"));

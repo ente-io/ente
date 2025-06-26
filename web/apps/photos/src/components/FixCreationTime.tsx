@@ -35,7 +35,8 @@ type FixCreationTimeProps = ModalVisibilityProps & {
      */
     files: EnteFile[];
     /**
-     * Perform a full remote pull.
+     * Called after the creation times have been updated, to perform a full
+     * remote pull.
      */
     onRemotePull: () => Promise<void>;
 };

@@ -224,6 +224,7 @@ export const GalleryBarAndListHeader: React.FC<
                     activeCollectionID,
                 )}
                 collection={activeCollection}
+                {...{ onRemotePull }}
             />
             <AlbumCastDialog
                 {...collectionCastVisibilityProps}
