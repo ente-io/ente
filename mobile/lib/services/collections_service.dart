@@ -1748,36 +1748,30 @@ class CollectionsService {
     required EnteFile localFileToUpload,
     required EnteFile existingUploadedFile,
   }) async {
-    final int remoteID = existingUploadedFile.remoteID;
-    // encrypt the fileKey with destination collection's key
-    final fileKey = await getFileKeyAsync(existingUploadedFile);
-    final encryptedKeyData =
-        CryptoUtil.encryptSync(fileKey, getCollectionKey(destCollectionID));
-
-    localFileToUpload.encryptedKey =
-        CryptoUtil.bin2base64(encryptedKeyData.encryptedData!);
-    localFileToUpload.keyDecryptionNonce =
-        CryptoUtil.bin2base64(encryptedKeyData.nonce!);
+    if (localFileToUpload.rAsset != null || localFileToUpload.cf != null) {
+      throw ArgumentError(
+        'localFileToUpload should not have rAsset or cf set',
+      );
+    }
+    final newFile = moveOrAddEntry(existingUploadedFile, destCollectionID);
+    final localDiffItem = buildDiffItem(newFile, destCollectionID);
     final params = <String, dynamic>{};
     params["collectionID"] = destCollectionID;
     params["files"] = [];
     params["files"].add(
-      CollectionFileRequest(
-        remoteID,
-        localFileToUpload.encryptedKey!,
-        localFileToUpload.keyDecryptionNonce!,
-      ).toMap(),
+      CollectionFileRequest.req(
+        localDiffItem.fileID,
+        encKey: localDiffItem.encFileKey!,
+        encKeyNonce: localDiffItem.encFileKeyNonce!,
+      ),
     );
-
     try {
       await _enteDio.post(
         "/collections/add-files",
         data: params,
       );
-      localFileToUpload.collectionID = destCollectionID;
-      localFileToUpload.uploadedFileID = remoteID;
-      await _filesDB.insertMultiple([localFileToUpload]);
-      return localFileToUpload;
+      await remoteDB.insertDiffItems([localDiffItem]);
+      return newFile;
     } catch (e) {
       rethrow;
     }
