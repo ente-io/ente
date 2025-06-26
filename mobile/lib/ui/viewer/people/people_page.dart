@@ -85,7 +85,8 @@ class _PeoplePageState extends State<PeoplePage> {
             files?.removeWhere((file) => file.uploadedFileID == fileID);
           }
           final filesAfter = files?.length ?? 0;
-          // Is this setState also indented to update gallery?
+          // Is this setState also indented to update gallery? If yes need to
+          // test if it actually works.
           if (filesBefore != filesAfter) setState(() {});
         }
       }
