@@ -5,8 +5,7 @@ import {
 } from "ente-gallery/services/video";
 import type { Collection } from "ente-media/collection";
 import type { EnteFile } from "ente-media/file";
-import { pullCollections } from "./collection";
-import { pullCollectionFiles } from "./files";
+import { pullCollectionFiles, pullCollections } from "./collection";
 import { isMLSupported, mlSync, pullMLStatus } from "./ml";
 import { searchDataSync } from "./search";
 import { pullSettings } from "./settings";

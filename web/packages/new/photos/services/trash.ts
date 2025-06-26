@@ -203,10 +203,9 @@ const TrashDiffResponse = z.object({
  * pull changes from remote.
  */
 const getTrashDiff = async (sinceTime: number) => {
-    const res = await fetch(
-        await apiURL("/trash/v2/diff", { sinceTime: sinceTime.toString() }),
-        { headers: await authenticatedRequestHeaders() },
-    );
+    const res = await fetch(await apiURL("/trash/v2/diff", { sinceTime }), {
+        headers: await authenticatedRequestHeaders(),
+    });
     ensureOk(res);
     return TrashDiffResponse.parse(await res.json());
 };

@@ -27,9 +27,7 @@ export const ensureUserKeyPair = async (): Promise<KeyPair> => {
  * @returns the base64 encoded public key of the user with {@link email}.
  */
 export const getPublicKey = async (email: string) => {
-    const params = new URLSearchParams({ email });
-    const url = await apiURL("/users/public-key");
-    const res = await fetch(`${url}?${params.toString()}`, {
+    const res = await fetch(await apiURL("/users/public-key", { email }), {
         headers: await authenticatedRequestHeaders(),
     });
     ensureOk(res);

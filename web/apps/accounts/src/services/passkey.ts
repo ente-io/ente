@@ -77,9 +77,8 @@ export const renamePasskey = async (
     id: string,
     name: string,
 ) => {
-    const params = new URLSearchParams({ friendlyName: name });
-    const url = await apiURL(`/passkeys/${id}`);
-    const res = await fetch(`${url}?${params.toString()}`, {
+    const url = await apiURL(`/passkeys/${id}`, { friendlyName: name });
+    const res = await fetch(url, {
         method: "PATCH",
         headers: accountsAuthenticatedRequestHeaders(token),
     });
@@ -284,9 +283,11 @@ const finishPasskeyRegistration = async ({
     );
     const transports = attestationResponse.getTransports();
 
-    const params = new URLSearchParams({ friendlyName, sessionID });
-    const url = await apiURL("/passkeys/registration/finish");
-    const res = await fetch(`${url}?${params.toString()}`, {
+    const url = await apiURL("/passkeys/registration/finish", {
+        friendlyName,
+        sessionID,
+    });
+    const res = await fetch(url, {
         method: "POST",
         headers: accountsAuthenticatedRequestHeaders(token),
         body: JSON.stringify({

@@ -17,9 +17,9 @@ import {
 import type { MagicMetadata } from "ente-media/magic-metadata";
 import {
     createCollectionNameByID,
+    getLatestVersionFiles,
     isHiddenCollection,
 } from "ente-new/photos/services/collection";
-import { getLatestVersionFiles } from "ente-new/photos/services/files";
 import { sortTrashItems, type TrashItem } from "ente-new/photos/services/trash";
 import { splitByPredicate } from "ente-utils/array";
 import { includes } from "ente-utils/type-guards";
