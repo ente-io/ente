@@ -183,12 +183,12 @@ export const logoutUserDetails = () => {
  *
  * This assumes that the user is already logged in.
  */
-export const initUserDetailsOrTriggerSync = async () => {
+export const initUserDetailsOrTriggerPull = async () => {
     const saved = await getKV("userDetails");
     if (saved) {
         setUserDetailsSnapshot(UserDetails.parse(saved));
     } else {
-        void syncUserDetails();
+        void pullUserDetails();
     }
 };
 
@@ -231,8 +231,8 @@ const setUserDetailsSnapshot = (snapshot: UserDetails) => {
  * Fetch the user's details from remote and save them in local storage for
  * subsequent lookup, and also update our in-memory snapshots.
  */
-export const syncUserDetails = async () => {
-    const userDetails = await getUserDetailsV2();
+export const pullUserDetails = async () => {
+    const userDetails = await getUserDetails();
     await setKV("userDetails", userDetails);
     setUserDetailsSnapshot(userDetails);
 
@@ -248,7 +248,7 @@ export const syncUserDetails = async () => {
 /**
  * Fetch the user details for the currently logged in user from remote.
  */
-export const getUserDetailsV2 = async () => {
+const getUserDetails = async () => {
     const res = await fetch(await apiURL("/users/details/v2"), {
         headers: await authenticatedRequestHeaders(),
     });
@@ -326,7 +326,7 @@ export const verifyStripeSubscription = async (
             }),
         }),
     );
-    await syncUserDetails();
+    await pullUserDetails();
     return userDetailsSnapshot()!.subscription;
 };
 
@@ -342,7 +342,7 @@ export const activateStripeSubscription = async () => {
             headers: await authenticatedRequestHeaders(),
         }),
     );
-    return syncUserDetails();
+    return pullUserDetails();
 };
 
 /**
@@ -356,7 +356,7 @@ export const cancelStripeSubscription = async () => {
             headers: await authenticatedRequestHeaders(),
         }),
     );
-    return syncUserDetails();
+    return pullUserDetails();
 };
 
 const paymentsAppOrigin = "https://payments.ente.io";
@@ -539,7 +539,8 @@ const getFamiliesTokenAndURL = async () => {
 
 /**
  * Update remote to indicate that the user wants to leave the family plan that
- * they are part of, then our local sync user details with remote.
+ * they are part of, then update our local user details by pulling the latest
+ * ones from remote.
  */
 export const leaveFamily = async () => {
     ensureOk(
@@ -548,7 +549,7 @@ export const leaveFamily = async () => {
             headers: await authenticatedRequestHeaders(),
         }),
     );
-    return syncUserDetails();
+    return pullUserDetails();
 };
 
 /**

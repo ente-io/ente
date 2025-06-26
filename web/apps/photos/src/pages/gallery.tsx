@@ -91,7 +91,7 @@ import {
 import type { SearchOption } from "ente-new/photos/services/search/types";
 import { initSettings } from "ente-new/photos/services/settings";
 import {
-    initUserDetailsOrTriggerSync,
+    initUserDetailsOrTriggerPull,
     redirectToCustomerPortal,
     userDetailsSnapshot,
     verifyStripeSubscription,
@@ -296,7 +296,7 @@ const Page: React.FC = () => {
                 return;
             }
             initSettings();
-            await initUserDetailsOrTriggerSync();
+            await initUserDetailsOrTriggerPull();
             setupSelectAllKeyBoardShortcutHandler();
             dispatch({ type: "showAll" });
             setIsFirstLoad(isFirstLogin());
