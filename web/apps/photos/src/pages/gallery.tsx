@@ -138,7 +138,6 @@ const defaultGalleryContext: GalleryContextType = {
     emailList: null,
     openHiddenSection: () => null,
     selectedFile: null,
-    setSelectedFiles: () => null,
 };
 
 export const GalleryContext = createContext<GalleryContextType>(
@@ -891,7 +890,6 @@ const Page: React.FC = () => {
                 emailList: state.shareSuggestionEmails,
                 openHiddenSection,
                 selectedFile: selected,
-                setSelectedFiles: setSelected,
             }}
         >
             <FullScreenDropZone

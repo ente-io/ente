@@ -709,7 +709,7 @@ export const FileList: React.FC<FileListProps> = ({
     }, [galleryContext.selectedFile]);
 
     const handleSelectMulti = handleSelectCreatorMulti(
-        galleryContext.setSelectedFiles,
+        setSelected,
         mode,
         galleryContext?.user?.id,
         activeCollectionID,
