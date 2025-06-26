@@ -58,7 +58,10 @@ type GalleryBarAndListHeaderProps = Omit<
         CollectionHeaderProps,
         "setFilesDownloadProgressAttributesCreator" | "onRemotePull"
     > &
-    Pick<CollectionShareProps, "setBlockingLoad">;
+    Pick<
+        CollectionShareProps,
+        "user" | "shareSuggestionEmails" | "setBlockingLoad"
+    >;
 
 /**
  * The gallery bar, the header for the list items, and state for any associated
@@ -84,6 +87,7 @@ export const GalleryBarAndListHeader: React.FC<
     shouldHide,
     mode,
     onChangeMode,
+    user,
     collectionSummaries,
     activeCollection,
     activeCollectionID,
@@ -92,6 +96,7 @@ export const GalleryBarAndListHeader: React.FC<
     hiddenCollectionSummaries,
     people,
     activePerson,
+    shareSuggestionEmails,
     onRemotePull,
     onSelectPerson,
     setPhotoListHeader,
@@ -229,7 +234,12 @@ export const GalleryBarAndListHeader: React.FC<
                     activeCollectionID,
                 )}
                 collection={activeCollection}
-                {...{ setBlockingLoad, onRemotePull }}
+                {...{
+                    user,
+                    shareSuggestionEmails,
+                    setBlockingLoad,
+                    onRemotePull,
+                }}
             />
             <AlbumCastDialog
                 {...collectionCastVisibilityProps}

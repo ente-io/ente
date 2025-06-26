@@ -134,7 +134,6 @@ const defaultGalleryContext: GalleryContextType = {
     photoListHeader: null,
     user: null,
     userIDToEmailMap: null,
-    emailList: null,
 };
 
 export const GalleryContext = createContext<GalleryContextType>(
@@ -879,7 +878,6 @@ const Page: React.FC = () => {
                 user,
                 // TODO(RE): Rename
                 userIDToEmailMap: state.emailByUserID,
-                emailList: state.shareSuggestionEmails,
             }}
         >
             <FullScreenDropZone
@@ -994,6 +992,7 @@ const Page: React.FC = () => {
 
                 <GalleryBarAndListHeader
                     {...{
+                        user,
                         activeCollection,
                         activeCollectionID,
                         activePerson,
@@ -1005,6 +1004,7 @@ const Page: React.FC = () => {
                     shouldHide={isInSearchMode}
                     collectionSummaries={normalCollectionSummaries}
                     hiddenCollectionSummaries={state.hiddenCollectionSummaries}
+                    shareSuggestionEmails={state.shareSuggestionEmails}
                     people={
                         (state.view.type == "people"
                             ? state.view.visiblePeople

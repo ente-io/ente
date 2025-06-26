@@ -43,5 +43,4 @@ export interface GalleryContextType {
     photoListHeader: TimeStampListItem;
     user: User;
     userIDToEmailMap: Map<number, string>;
-    emailList: string[];
 }
