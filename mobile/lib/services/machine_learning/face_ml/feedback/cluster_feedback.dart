@@ -466,7 +466,6 @@ class ClusterFeedbackService<T> {
   Future<void> addClusterToExistingPerson({
     required PersonEntity person,
     required String clusterID,
-    bool fireEvent = true,
   }) async {
     if (person.data.rejectedFaceIDs.isNotEmpty) {
       final clusterFaceIDs = await mlDataDB.getFaceIDsForCluster(clusterID);
@@ -485,14 +484,12 @@ class ClusterFeedbackService<T> {
       personID: person.remoteID,
       clusterID: clusterID,
     );
-    if (fireEvent) {
-      Bus.instance.fire(
-        PeopleChangedEvent(
-          type: PeopleEventType.addedClusterToPerson,
-          source: clusterID,
-        ),
-      );
-    }
+    Bus.instance.fire(
+      PeopleChangedEvent(
+        type: PeopleEventType.addedClusterToPerson,
+        source: clusterID,
+      ),
+    );
   }
 
   Future<void> ignoreCluster(String clusterID) async {
