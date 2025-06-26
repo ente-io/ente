@@ -3,6 +3,7 @@ import FavoriteRoundedIcon from "@mui/icons-material/FavoriteRounded";
 import PlayCircleOutlineOutlinedIcon from "@mui/icons-material/PlayCircleOutlineOutlined";
 import { Box, Checkbox, Link, Typography, styled } from "@mui/material";
 import Avatar from "components/pages/gallery/Avatar";
+import type { LocalUser } from "ente-accounts/services/user";
 import { assertionFailed } from "ente-base/assert";
 import { Overlay } from "ente-base/components/containers";
 import { isSameDay } from "ente-base/date";
@@ -122,6 +123,14 @@ export interface FileListProps {
      * another mode in which the gallery operates.
      */
     modePlus?: GalleryBarMode | "search";
+    /**
+     * The logged in user, if any.
+     *
+     * This is only expected to be present when the listing is shown within the
+     * photos app, where we have a logged in user. The public albums app can
+     * omit this prop.
+     */
+    user?: LocalUser;
     showAppDownloadBanner?: boolean;
     /**
      * If `true`, then the current listing is showing magic search results.
@@ -142,6 +151,13 @@ export interface FileListProps {
      * Not set in the context of the shared albums app.
      */
     favoriteFileIDs?: Set<number>;
+    /**
+     * A map from known Ente user IDs to their emails.
+     *
+     * This is only expected in the context of the photos app, and will be
+     * omitted when running in the public albums app.
+     */
+    emailByUserID?: Map<number, string>;
     /**
      * An optional {@link TimeStampListItem} shown before all the items in the
      * list. It is not sticky, and scrolls along with the content of the list.
@@ -169,6 +185,7 @@ export const FileList: React.FC<FileListProps> = ({
     width,
     mode,
     modePlus,
+    user,
     annotatedFiles,
     showAppDownloadBanner,
     isMagicSearchResult,
@@ -178,6 +195,7 @@ export const FileList: React.FC<FileListProps> = ({
     activeCollectionID,
     activePersonID,
     favoriteFileIDs,
+    emailByUserID,
     header,
     footer,
     onItemClick,
@@ -711,7 +729,7 @@ export const FileList: React.FC<FileListProps> = ({
     const handleSelectMulti = handleSelectCreatorMulti(
         setSelected,
         mode,
-        galleryContext?.user?.id,
+        user?.id,
         activeCollectionID,
         activePersonID,
     );
@@ -740,18 +758,12 @@ export const FileList: React.FC<FileListProps> = ({
             handleSelectCreator(
                 setSelected,
                 mode,
-                galleryContext.user?.id,
+                user?.id,
                 activeCollectionID,
                 activePersonID,
                 setRangeStart,
             ),
-        [
-            setSelected,
-            mode,
-            galleryContext.user?.id,
-            activeCollectionID,
-            activePersonID,
-        ],
+        [setSelected, mode, user?.id, activeCollectionID, activePersonID],
     );
 
     const onHoverOver = (index: number) => () => {
@@ -816,6 +828,7 @@ export const FileList: React.FC<FileListProps> = ({
     ) => (
         <FileThumbnail
             key={`tile-${file.id}-selected-${selected[file.id] ?? false}`}
+            {...{ user, emailByUserID }}
             file={file}
             onClick={() => onItemClick(index)}
             selectable={selectable}
@@ -1146,7 +1159,7 @@ const PhotoListRow = React.memo(
     areEqual,
 );
 
-interface FileThumbnailProps {
+type FileThumbnailProps = {
     file: EnteFile;
     onClick: () => void;
     selectable: boolean;
@@ -1160,10 +1173,11 @@ interface FileThumbnailProps {
     activeCollectionID: number;
     showPlaceholder: boolean;
     isFav: boolean;
-}
+} & Pick<FileListProps, "user" | "emailByUserID">;
 
 const FileThumbnail: React.FC<FileThumbnailProps> = ({
     file,
+    user,
     onClick,
     selectable,
     selected,
@@ -1174,11 +1188,10 @@ const FileThumbnail: React.FC<FileThumbnailProps> = ({
     isRangeSelectActive,
     isInsSelectRange,
     isFav,
+    emailByUserID,
     activeCollectionID,
     showPlaceholder,
 }) => {
-    const galleryContext = useContext(GalleryContext);
-
     const [imageURL, setImageURL] = useState<string | undefined>(undefined);
     const [isLongPressing, setIsLongPressing] = useState(false);
 
@@ -1282,9 +1295,9 @@ const FileThumbnail: React.FC<FileThumbnailProps> = ({
                 )
             )}
             {selected && <SelectedOverlay />}
-            {shouldShowAvatar(file, galleryContext.user) && (
+            {shouldShowAvatar(file, user) && (
                 <AvatarOverlay>
-                    <Avatar file={file} />
+                    <Avatar {...{ user, file, emailByUserID }} />
                 </AvatarOverlay>
             )}
             {isFav && (

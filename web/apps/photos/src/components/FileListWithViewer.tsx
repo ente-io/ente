@@ -60,6 +60,7 @@ export type FileListWithViewerProps = {
     | "activeCollectionID"
     | "activePersonID"
     | "favoriteFileIDs"
+    | "emailByUserID"
 > &
     Pick<
         FileViewerProps,
@@ -97,6 +98,7 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
     activeCollectionID,
     activePersonID,
     favoriteFileIDs,
+    emailByUserID,
     isInIncomingSharedCollection,
     isInHiddenSection,
     fileNormalCollectionIDs,
@@ -176,6 +178,7 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
                         {...{
                             mode,
                             modePlus,
+                            user,
                             showAppDownloadBanner,
                             isMagicSearchResult,
                             selectable,
@@ -184,6 +187,7 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
                             activeCollectionID,
                             activePersonID,
                             favoriteFileIDs,
+                            emailByUserID
                         }}
                         onItemClick={handleThumbnailClick}
                     />

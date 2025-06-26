@@ -246,8 +246,9 @@ export interface GalleryState {
      */
     fileNormalCollectionIDs: Map<number, number[]>;
     /**
-     * A map from Ente user IDs to their emails (except for the user in user
-     * themselves).
+     * A map from known Ente user IDs to their emails
+     *
+     * This will not have an entry for the user themselves.
      *
      * This is used to perform a fast lookup of the email of the Ente user that
      * shared a file or collection.

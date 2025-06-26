@@ -1,4 +1,4 @@
-import type { User } from "ente-accounts/services/user";
+import type { LocalUser, User } from "ente-accounts/services/user";
 import { joinPath } from "ente-base/file-name";
 import log from "ente-base/log";
 import { type Electron } from "ente-base/types/ipc";
@@ -312,7 +312,10 @@ export const getUserOwnedFiles = (files: EnteFile[]) => {
     return files.filter((file) => file.ownerID === user.id);
 };
 
-export const shouldShowAvatar = (file: EnteFile, user: User) => {
+export const shouldShowAvatar = (
+    file: EnteFile,
+    user: LocalUser | undefined,
+) => {
     if (!file || !user) {
         return false;
     }

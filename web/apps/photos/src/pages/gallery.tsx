@@ -1107,6 +1107,7 @@ const Page: React.FC = () => {
                             pendingFavoriteUpdates,
                             pendingVisibilityUpdates,
                         }}
+                        emailByUserID={state.emailByUserID}
                         setFilesDownloadProgressAttributesCreator={
                             setFilesDownloadProgressAttributesCreator
                         }
