@@ -40,7 +40,6 @@ export interface MergedSourceURL {
 
 export interface GalleryContextType {
     setActiveCollectionID: (collectionID: number) => void;
-    syncWithRemote: (silent?: boolean) => Promise<void>;
     setBlockingLoad: (value: boolean) => void;
     photoListHeader: TimeStampListItem;
     user: User;

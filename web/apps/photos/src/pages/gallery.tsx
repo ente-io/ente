@@ -131,7 +131,6 @@ import { getSelectedFiles, handleFileOp, type FileOp } from "utils/file";
 
 const defaultGalleryContext: GalleryContextType = {
     setActiveCollectionID: () => null,
-    syncWithRemote: () => null,
     setBlockingLoad: () => null,
     photoListHeader: null,
     user: null,
@@ -889,7 +888,6 @@ const Page: React.FC = () => {
             value={{
                 ...defaultGalleryContext,
                 setActiveCollectionID: handleShowCollectionSummary,
-                syncWithRemote: (silent) => remotePull({ silent }),
                 setBlockingLoad,
                 photoListHeader,
                 user,

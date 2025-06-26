@@ -1246,7 +1246,7 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
             galleryContext.setBlockingLoad(true);
             await deleteShareURL(collection.id);
             setPublicURL(undefined);
-            galleryContext.syncWithRemote(true);
+            void onRemotePull({ silent: true });
             onClose();
         } catch (e) {
             log.error("Failed to remove public link", e);
