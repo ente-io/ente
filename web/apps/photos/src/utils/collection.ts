@@ -2,7 +2,7 @@ import type { User } from "ente-accounts/services/user";
 import { ensureElectron } from "ente-base/electron";
 import { joinPath } from "ente-base/file-name";
 import log from "ente-base/log";
-import { uniqueFilesByID } from "ente-gallery/utils/files";
+import { uniqueFilesByID } from "ente-gallery/utils/file";
 import { type Collection, CollectionSubType } from "ente-media/collection";
 import { EnteFile } from "ente-media/file";
 import {

@@ -47,7 +47,7 @@ import { FullScreenDropZone } from "ente-gallery/components/FullScreenDropZone";
 import { downloadManager } from "ente-gallery/services/download";
 import { extractCollectionKeyFromShareURL } from "ente-gallery/services/share";
 import { updateShouldDisableCFUploadProxy } from "ente-gallery/services/upload";
-import { sortFiles } from "ente-gallery/utils/files";
+import { sortFiles } from "ente-gallery/utils/file";
 import type { Collection } from "ente-media/collection";
 import { type EnteFile } from "ente-media/file";
 import { verifyPublicAlbumPassword } from "ente-new/albums/services/publicCollection";

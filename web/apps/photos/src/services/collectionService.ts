@@ -2,7 +2,7 @@ import type { User } from "ente-accounts/services/user";
 import { ensureLocalUser } from "ente-accounts/services/user";
 import log from "ente-base/log";
 import { apiURL } from "ente-base/origins";
-import { groupFilesByCollectionID, sortFiles } from "ente-gallery/utils/files";
+import { groupFilesByCollectionID, sortFiles } from "ente-gallery/utils/file";
 import { Collection } from "ente-media/collection";
 import { EnteFile } from "ente-media/file";
 import {
