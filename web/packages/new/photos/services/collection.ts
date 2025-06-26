@@ -10,6 +10,7 @@ import {
 import { authenticatedRequestHeaders, ensureOk } from "ente-base/http";
 import { apiURL } from "ente-base/origins";
 import { ensureMasterKeyFromSession } from "ente-base/session";
+import { groupFilesByCollectionID } from "ente-gallery/utils/file";
 import {
     CollectionSubType,
     decryptRemoteCollection,
@@ -34,9 +35,9 @@ import {
     createMagicMetadata,
     encryptMagicMetadata,
 } from "ente-media/magic-metadata";
-import { batch, splitByPredicate } from "ente-utils/array";
+import { splitByPredicate } from "ente-utils/array";
 import { z } from "zod/v4";
-import { requestBatchSize, type UpdateMagicMetadataRequest } from "./file";
+import { batched, type UpdateMagicMetadataRequest } from "./file";
 import {
     removeCollectionIDLastSyncTime,
     saveCollectionFiles,
@@ -531,8 +532,8 @@ export interface MoveToCollectionRequest {
 export const addToCollection = async (
     collection: Collection,
     files: EnteFile[],
-) => {
-    for (const batchFiles of batch(files, requestBatchSize)) {
+) =>
+    batched(files, async (batchFiles) => {
         const encryptedFileKeys = await encryptWithCollectionKey(
             collection,
             batchFiles,
@@ -547,8 +548,7 @@ export const addToCollection = async (
                 }),
             }),
         );
-    }
-};
+    });
 
 /**
  * Make a remote request to restore the given {@link files} to the given
@@ -559,8 +559,8 @@ export const addToCollection = async (
 export const restoreToCollection = async (
     collection: Collection,
     files: EnteFile[],
-) => {
-    for (const batchFiles of batch(files, requestBatchSize)) {
+) =>
+    batched(files, async (batchFiles) => {
         const encryptedFileKeys = await encryptWithCollectionKey(
             collection,
             batchFiles,
@@ -575,8 +575,28 @@ export const restoreToCollection = async (
                 }),
             }),
         );
-    }
-};
+    });
+
+/**
+ * Make a remote request to move the given {@link files} (which may be in
+ * different collections) to the given {@link collection}.
+ *
+ * This is a higher level primitive than {@link moveFromCollection} that first
+ * segregates the files into per-collection sets, and then performs
+ * {@link moveFromCollection} for each such set.
+ *
+ * Remote only, does not modify local state.
+ */
+export const moveToCollection = async (
+    collection: Collection,
+    files: EnteFile[],
+) =>
+    Promise.all(
+        groupFilesByCollectionID(files)
+            .entries()
+            .filter(([cid]) => cid != collection.id)
+            .map(([cid, cf]) => moveFromCollection(cid, collection, cf)),
+    );
 
 /**
  * Make a remote request to move the given {@link files} from a collection (as
@@ -585,12 +605,12 @@ export const restoreToCollection = async (
  *
  * Remote only, does not modify local state.
  */
-export const moveToCollection = async (
+export const moveFromCollection = async (
     fromCollectionID: number,
     toCollection: Collection,
     files: EnteFile[],
-) => {
-    for (const batchFiles of batch(files, requestBatchSize)) {
+) =>
+    batched(files, async (batchFiles) => {
         const encryptedFileKeys = await encryptWithCollectionKey(
             toCollection,
             batchFiles,
@@ -606,8 +626,7 @@ export const moveToCollection = async (
                 }),
             }),
         );
-    }
-};
+    });
 
 /**
  * Return an array of {@link CollectionFileItem}s, one for each file in
@@ -638,8 +657,8 @@ const encryptWithCollectionKey = async (
  *
  * Remote only, does not modify local state.
  */
-export const moveToTrash = async (files: EnteFile[]) => {
-    for (const batchFiles of batch(files, requestBatchSize)) {
+export const moveToTrash = async (files: EnteFile[]) =>
+    batched(files, async (batchFiles) =>
         ensureOk(
             await fetch(await apiURL("/files/trash"), {
                 method: "POST",
@@ -651,26 +670,24 @@ export const moveToTrash = async (files: EnteFile[]) => {
                     })),
                 }),
             }),
-        );
-    }
-};
+        ),
+    );
 
 /**
  * Make a remote request to delete the given {@link fileIDs} from trash.
  *
  * Remote only, does not modify local state.
  */
-export const deleteFromTrash = async (fileIDs: number[]) => {
-    for (const batchIDs of batch(fileIDs, requestBatchSize)) {
+export const deleteFromTrash = async (fileIDs: number[]) =>
+    batched(fileIDs, async (batchIDs) =>
         ensureOk(
             await fetch(await apiURL("/trash/delete"), {
                 method: "POST",
                 headers: await authenticatedRequestHeaders(),
                 body: JSON.stringify({ fileIDs: batchIDs }),
             }),
-        );
-    }
-};
+        ),
+    );
 
 /**
  * Rename a collection on remote.
@@ -899,7 +916,7 @@ const putCollectionsShareeMagicMetadata = async (
  * because remote will enforce the constraint and fail the request when we
  * attempt to create a second collection of type "favorites".
  */
-export const createFavoritesCollection = () =>
+const createFavoritesCollection = () =>
     createCollection(favoritesCollectionName, "favorites");
 
 /**
@@ -917,6 +934,58 @@ export const createUncategorizedCollection = () =>
     createCollection(uncategorizedCollectionName, "uncategorized");
 
 /**
+ * Return the user's own favorites collection if one is found in the local
+ * database. Otherwise create a new one and return that.
+ *
+ * Reads local state but does not modify it. The effects are on remote.
+ */
+const savedOrCreateUserFavoritesCollection = async () =>
+    (await savedUserFavoritesCollection()) ?? createFavoritesCollection();
+
+/**
+ * Return the user's own favorites collection, if any, present in the local
+ * database.
+ */
+export const savedUserFavoritesCollection = async () => {
+    const userID = ensureLocalUser().id;
+    const collections = await savedCollections();
+    return collections.find(
+        (collection) =>
+            // See: [Note: User and shared favorites]
+            collection.type == "favorites" && collection.owner.id == userID,
+    );
+};
+
+/**
+ * Mark the provided {@link files} as the user's favorites by adding them to the
+ * user's favorites collection.
+ *
+ * If the user doesn't yet have a favorites collection, it is created.
+ *
+ * Reads local state but does not modify it. The effects are on remote.
+ */
+export const addToFavorites = async (files: EnteFile[]) =>
+    addToCollection(await savedOrCreateUserFavoritesCollection(), files);
+
+/**
+ * Return the default hidden collection for the user if one is found in the
+ * local database. Otherwise create a new one and return that.
+ *
+ * Reads local state but does not modify it. The effects are on remote.
+ */
+const savedOrCreateDefaultHiddenCollection = async () =>
+    (await savedDefaultHiddenCollection()) ?? createDefaultHiddenCollection();
+
+/**
+ * Return the user's default hidden collection, if any, present in the
+ * local database.
+ */
+const savedDefaultHiddenCollection = async () =>
+    (await savedCollections()).find((collection) =>
+        isDefaultHiddenCollection(collection),
+    );
+
+/**
  * Create a new collection with hidden visibility on remote, marking it as the
  * default hidden collection, and return its local representation.
  *
@@ -924,7 +993,7 @@ export const createUncategorizedCollection = () =>
  *
  * See also: [Note: Multiple "default" hidden collections].
  */
-export const createDefaultHiddenCollection = () =>
+const createDefaultHiddenCollection = () =>
     createCollection(defaultHiddenCollectionName, "album", {
         subType: CollectionSubType.defaultHidden,
         visibility: ItemVisibility.hidden,
@@ -956,6 +1025,17 @@ export const findDefaultHiddenCollectionIDs = (collections: Collection[]) =>
 
 export const isHiddenCollection = (collection: Collection) =>
     collection.magicMetadata?.data.visibility == ItemVisibility.hidden;
+
+/**
+ * Hide the provided {@link files} by moving them to the default hidden
+ * collection.
+ *
+ * If the default hidden collection does not already exist, it is created.
+ *
+ * Reads local state but does not modify it. The effects are on remote.
+ */
+export const hideFiles = async (files: EnteFile[]) =>
+    moveToCollection(await savedOrCreateDefaultHiddenCollection(), files);
 
 /**
  * Return true if this is a collection that the user doesn't own.

@@ -24,7 +24,7 @@ import { savedCollectionFiles } from "./photos-fdb";
  * selected files) are expected to be batched to keep each request of a
  * reasonable size. By default, we break the request into batches of 1000.
  */
-export const requestBatchSize = 1000;
+const requestBatchSize = 1000;
 
 /**
  * Perform an operation on batches, concurrently.
@@ -43,7 +43,7 @@ export const requestBatchSize = 1000;
  * @returns An array of results, one from each batch operation. For details,
  * including behaviour on errors, see `Promise.all`.
  */
-export const performInBatches = <T, U>(
+export const batched = <T, U>(
     items: T[],
     op: (batchItems: T[]) => Promise<U>,
 ): Promise<U[]> => Promise.all(batch(items, requestBatchSize).map(op));
@@ -86,10 +86,7 @@ export const computeNormalCollectionFilesFromSaved = async () => {
 export const updateFilesVisibility = async (
     files: EnteFile[],
     visibility: ItemVisibility,
-) =>
-    performInBatches(files, (b) =>
-        updateFilesPrivateMagicMetadata(b, { visibility }),
-    );
+) => batched(files, (b) => updateFilesPrivateMagicMetadata(b, { visibility }));
 
 /**
  * Update the private magic metadata of a list of files on remote.

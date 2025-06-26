@@ -323,7 +323,6 @@ export type RemoteEnteFile = z.infer<typeof RemoteEnteFile>;
  *
  * - "/collections/v2/diff"
  * - "/cast/diff"
- *
  */
 export const FileDiffResponse = z.object({
     /**

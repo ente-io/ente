@@ -7,7 +7,7 @@ import {
     groupFilesByCollectionID,
     sortFiles,
     uniqueFilesByID,
-} from "ente-gallery/utils/files";
+} from "ente-gallery/utils/file";
 import { collectionTypes, type Collection } from "ente-media/collection";
 import type { EnteFile } from "ente-media/file";
 import {

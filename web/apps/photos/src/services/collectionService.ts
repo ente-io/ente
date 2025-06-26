@@ -1,17 +1,13 @@
 import type { User } from "ente-accounts/services/user";
-import { ensureLocalUser } from "ente-accounts/services/user";
 import log from "ente-base/log";
 import { apiURL } from "ente-base/origins";
-import { groupFilesByCollectionID, sortFiles } from "ente-gallery/utils/files";
-import { Collection } from "ente-media/collection";
+import { groupFilesByCollectionID, sortFiles } from "ente-gallery/utils/file";
 import { EnteFile } from "ente-media/file";
 import {
-    addToCollection,
-    createDefaultHiddenCollection,
-    createFavoritesCollection,
+    addToFavorites,
     createUncategorizedCollection,
-    isDefaultHiddenCollection,
-    moveToCollection,
+    moveFromCollection,
+    savedUserFavoritesCollection,
 } from "ente-new/photos/services/collection";
 import type { CollectionSummary } from "ente-new/photos/services/collection-summary";
 import {
@@ -30,49 +26,16 @@ import { isValidMoveTarget } from "utils/collection";
 
 const REQUEST_BATCH_SIZE = 1000;
 
-export const addToFavorites = async (
-    file: EnteFile,
-    disableOldWorkaround?: boolean,
-) => {
-    await addMultipleToFavorites([file], disableOldWorkaround);
+export const addToFavorites1 = async (file: EnteFile) => {
+    await addToFavorites([file]);
 };
 
-export const addMultipleToFavorites = async (
-    files: EnteFile[],
-    disableOldWorkaround?: boolean,
-) => {
-    try {
-        let favCollection = await getFavCollection();
-        if (!favCollection) {
-            favCollection = await createFavoritesCollection();
-        }
-        await addToCollection(favCollection, files);
-    } catch (e) {
-        log.error("failed to add to favorite", e);
-        // Old code swallowed the error here. This isn't good, but to
-        // avoid changing existing behaviour only new code will set the
-        // disableOldWorkaround flag to instead rethrow it.
-        //
-        // TODO: Migrate old code, remove this flag, always throw.
-        if (disableOldWorkaround) throw e;
+export const removeFromFavorites1 = async (file: EnteFile) => {
+    const favCollection = await savedUserFavoritesCollection();
+    if (!favCollection) {
+        throw Error("favorite collection missing");
     }
-};
-
-export const removeFromFavorites = async (
-    file: EnteFile,
-    disableOldWorkaround?: boolean,
-) => {
-    try {
-        const favCollection = await getFavCollection();
-        if (!favCollection) {
-            throw Error("favorite collection missing");
-        }
-        await removeFromCollection(favCollection.id, [file]);
-    } catch (e) {
-        log.error("remove from favorite failed", e);
-        // TODO: See disableOldWorkaround in addMultipleToFavorites.
-        if (disableOldWorkaround) throw e;
-    }
+    await removeFromCollection(favCollection.id, [file]);
 };
 
 export const removeFromCollection = async (
@@ -139,7 +102,7 @@ export const removeUserFiles = async (
             if (toMoveFiles.length === 0) {
                 continue;
             }
-            await moveToCollection(
+            await moveFromCollection(
                 sourceCollectionID,
                 targetCollection,
                 toMoveFiles,
@@ -157,7 +120,7 @@ export const removeUserFiles = async (
             collections.find((c) => c.type == "uncategorized") ??
             (await createUncategorizedCollection());
 
-        await moveToCollection(
+        await moveFromCollection(
             sourceCollectionID,
             uncategorizedCollection,
             leftFiles,
@@ -226,20 +189,6 @@ export const deleteCollection = async (
     }
 };
 
-/**
- * Return the user's own favorites collection, if any.
- */
-export const getFavCollection = async () => {
-    const collections = await savedCollections();
-    const userID = ensureLocalUser().id;
-    for (const collection of collections) {
-        // See: [Note: User and shared favorites]
-        if (collection.type == "favorites" && collection.owner.id == userID) {
-            return collection;
-        }
-    }
-};
-
 export const sortCollectionSummaries = (
     collectionSummaries: CollectionSummary[],
     by: CollectionsSortBy,
@@ -280,51 +229,5 @@ function compareCollectionsLatestFile(
         } else {
             return -1;
         }
-    }
-}
-
-export async function getDefaultHiddenCollection(): Promise<Collection> {
-    const collections = await savedCollections();
-    const hiddenCollection = collections.find((collection) =>
-        isDefaultHiddenCollection(collection),
-    );
-
-    return hiddenCollection;
-}
-
-export async function moveToHiddenCollection(files: EnteFile[]) {
-    try {
-        let hiddenCollection = await getDefaultHiddenCollection();
-        if (!hiddenCollection) {
-            hiddenCollection = await createDefaultHiddenCollection();
-        }
-        const groupedFiles = groupFilesByCollectionID(files);
-        for (const [collectionID, files] of groupedFiles.entries()) {
-            if (collectionID === hiddenCollection.id) {
-                continue;
-            }
-            await moveToCollection(collectionID, hiddenCollection, files);
-        }
-    } catch (e) {
-        log.error("move to hidden collection failed ", e);
-        throw e;
-    }
-}
-
-export async function unhideToCollection(
-    collection: Collection,
-    files: EnteFile[],
-) {
-    try {
-        const groupedFiles = groupFilesByCollectionID(files);
-        for (const [collectionID, files] of groupedFiles.entries()) {
-            if (collectionID === collection.id) {
-                continue;
-            }
-            await moveToCollection(collectionID, collection, files);
-        }
-    } catch (e) {
-        log.error("unhide to collection failed ", e);
-        throw e;
     }
 }

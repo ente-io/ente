@@ -2,7 +2,7 @@ import type { User } from "ente-accounts/services/user";
 import { ensureElectron } from "ente-base/electron";
 import { joinPath } from "ente-base/file-name";
 import log from "ente-base/log";
-import { uniqueFilesByID } from "ente-gallery/utils/files";
+import { uniqueFilesByID } from "ente-gallery/utils/file";
 import { type Collection, CollectionSubType } from "ente-media/collection";
 import { EnteFile } from "ente-media/file";
 import {
@@ -12,6 +12,7 @@ import {
     findDefaultHiddenCollectionIDs,
     isHiddenCollection,
     isIncomingShare,
+    moveFromCollection,
     moveToCollection,
     restoreToCollection,
 } from "ente-new/photos/services/collection";
@@ -22,10 +23,7 @@ import {
 } from "ente-new/photos/services/photos-fdb";
 import { safeDirectoryName } from "ente-new/photos/utils/native-fs";
 import { getData } from "ente-shared/storage/localStorage";
-import {
-    removeFromCollection,
-    unhideToCollection,
-} from "services/collectionService";
+import { removeFromCollection } from "services/collectionService";
 import {
     SetFilesDownloadProgressAttributes,
     type SetFilesDownloadProgressAttributesCreator,
@@ -45,7 +43,7 @@ export async function handleCollectionOp(
             await addToCollection(collection, selectedFiles);
             break;
         case "move":
-            await moveToCollection(
+            await moveFromCollection(
                 selectedCollectionID,
                 collection,
                 selectedFiles,
@@ -58,7 +56,7 @@ export async function handleCollectionOp(
             await restoreToCollection(collection, selectedFiles);
             break;
         case "unhide":
-            await unhideToCollection(collection, selectedFiles);
+            await moveToCollection(collection, selectedFiles);
             break;
     }
 }

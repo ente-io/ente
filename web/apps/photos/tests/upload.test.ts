@@ -7,7 +7,7 @@ import {
     matchJSONMetadata,
     metadataJSONMapKeyForJSON,
 } from "ente-gallery/services/upload/metadata-json";
-import { groupFilesByCollectionID } from "ente-gallery/utils/files";
+import { groupFilesByCollectionID } from "ente-gallery/utils/file";
 import {
     fileCreationTime,
     fileFileName,
