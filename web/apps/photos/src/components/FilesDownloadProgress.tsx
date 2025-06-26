@@ -1,8 +1,6 @@
 import { useBaseContext } from "ente-base/context";
 import { Notification } from "ente-new/photos/components/Notification";
 import { t } from "i18next";
-import { GalleryContext } from "pages/gallery";
-import { useContext } from "react";
 
 export interface FilesDownloadProgressAttributes {
     id: number;
@@ -30,6 +28,14 @@ interface FilesDownloadProgressProps {
      * context of the public albums app.
      */
     onShowHiddenSection?: () => Promise<void>;
+    /**
+     * Called when the collection with the given {@link collectionID} should be
+     * shown.
+     *
+     * This is only relevant in the context of the photos app, and can be
+     * omitted by the public albums app.
+     */
+    onShowCollection?: (collectionID: number) => void;
 }
 
 export const isFilesDownloadStarted = (
@@ -67,9 +73,9 @@ export const FilesDownloadProgress: React.FC<FilesDownloadProgressProps> = ({
     attributesList,
     setAttributesList,
     onShowHiddenSection,
+    onShowCollection,
 }) => {
     const { showMiniDialog } = useBaseContext();
-    const galleryContext = useContext(GalleryContext);
 
     if (!attributesList) {
         return <></>;
@@ -105,23 +111,23 @@ export const FilesDownloadProgress: React.FC<FilesDownloadProgressProps> = ({
         }
     };
 
-    const handleOnClick = (id: number) => () => {
-        const attributes = attributesList.find((attr) => attr.id === id);
-        const electron = globalThis.electron;
-        if (electron) {
-            electron.openDirectory(attributes.downloadDirPath);
-        } else {
-            if (attributes.isHidden) {
-                void onShowHiddenSection().then(() => {
-                    galleryContext.setActiveCollectionID(
-                        attributes.collectionID,
-                    );
-                });
-            } else {
-                galleryContext.setActiveCollectionID(attributes.collectionID);
+    const createHandleOnClick =
+        (id: number, onShowCollection: (collectionID: number) => void) =>
+        () => {
+            const attributes = attributesList.find((attr) => attr.id === id);
+            const electron = globalThis.electron;
+            if (electron) {
+                electron.openDirectory(attributes.downloadDirPath);
+            } else if (onShowCollection) {
+                if (attributes.isHidden) {
+                    void onShowHiddenSection().then(() => {
+                        onShowCollection(attributes.collectionID);
+                    });
+                } else {
+                    onShowCollection(attributes.collectionID);
+                }
             }
-        }
-    };
+        };
 
     return (
         <>
@@ -150,7 +156,12 @@ export const FilesDownloadProgress: React.FC<FilesDownloadProgressProps> = ({
                                   count: attributes.success + attributes.failed,
                                   total: attributes.total,
                               }),
-                        onClick: handleOnClick(attributes.id),
+                        onClick: onShowCollection
+                            ? createHandleOnClick(
+                                  attributes.id,
+                                  onShowCollection,
+                              )
+                            : undefined,
                     }}
                 />
             ))}

@@ -761,6 +761,10 @@ const Page: React.FC = () => {
         collectionSummaryID: number | undefined,
     ) => dispatch({ type: "showCollectionSummary", collectionSummaryID });
 
+    // The same function can also be used to show collections since the
+    // namespace for the collection IDs and collection summary IDs are disjoint.
+    const handleShowCollection = handleShowCollectionSummary;
+
     const handleChangeBarMode = (mode: GalleryBarMode) =>
         mode == "people"
             ? dispatch({ type: "showPeople" })
@@ -913,6 +917,7 @@ const Page: React.FC = () => {
                     attributesList={filesDownloadProgressAttributesList}
                     setAttributesList={setFilesDownloadProgressAttributesList}
                     onShowHiddenSection={handleShowHiddenSection}
+                    onShowCollection={handleShowCollection}
                 />
                 <FixCreationTime
                     {...fixCreationTimeVisibilityProps}
