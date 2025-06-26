@@ -160,10 +160,9 @@ export const getRemoteCastCollectionFiles = async (
     const filesByID = new Map<number, RemoteEnteFile>();
     let sinceTime = 0;
     while (true) {
-        const res = await fetch(
-            await apiURL("/cast/diff", { sinceTime: sinceTime.toString() }),
-            { headers: { "X-Cast-Access-Token": castToken } },
-        );
+        const res = await fetch(await apiURL("/cast/diff", { sinceTime }), {
+            headers: { "X-Cast-Access-Token": castToken },
+        });
         ensureOk(res);
         const { diff, hasMore } = FileDiffResponse.parse(await res.json());
         if (!diff.length) break;
