@@ -18,17 +18,30 @@ import {
 } from "./photos-fdb";
 
 /**
- * Fetch all files of the given {@link type}, belonging to the given
- * {@link collections}, from remote and update our local database.
+ * Fetch all files from remote and update our local database.
  *
  * If this is the initial read, or if the count of files we have differs from
  * the state of the local database (these two are expected to be the same case),
- * then the {@link onResetFiles} callback is invoked to give the caller a chance
- * to bring its state up to speed.
+ * then the {@link onSetCollectionFiles} callback is first invoked to give the
+ * caller a chance to bring its state up to speed.
  *
- * In addition to updating the local database, it also calls the provided
- * {@link onFetchFiles} callback with the latest decrypted files after each
- * batch the new and/or updated files are received from remote.
+ * Then it calls {@link onAugmentCollectionFiles} as each batch of updates are
+ * fetched (in addition to updating the local database).
+ *
+ * The callbacks are optional because we might be called in a context where we
+ * just want to update the local database, and there is no other in-memory state
+ * we need to keep in sync.
+ *
+ * @param collections The user's collections. These are assumed to be the latest
+ * collections on remote (that is, the pull for collections should happen prior
+ * to calling this function).
+ *
+ * @param onSetCollectionFiles An optional callback invoked when the locally
+ * saved collection files were replaced by the provided {@link collectionFiles}.
+ *
+ * @param onAugmentCollectionFiles An optional callback when locally saved
+ * collection files were augmented with the provided newly fetched
+ * {@link collectionFiles}.
  *
  * @returns true if one or more files were updated locally, false otherwise.
  */
