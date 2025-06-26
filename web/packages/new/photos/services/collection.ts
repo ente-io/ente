@@ -339,34 +339,36 @@ export const pullCollectionFiles = async (
     onAugmentCollectionFiles: ((files: EnteFile[]) => void) | undefined,
 ) => {
     const localFiles = await savedCollectionFiles();
-    let files = removeDeletedCollectionFiles(collections, localFiles);
+
+    // Prune collections files corresponding to which we no longer have a
+    // collection.
+    const collectionIDs = new Set(collections.map((c) => c.id));
+    let files = localFiles.filter((f) => collectionIDs.has(f.collectionID));
     let didUpdateFiles = false;
-    if (files.length !== localFiles.length) {
+    if (files.length != localFiles.length) {
         await saveCollectionFiles(files);
         onSetCollectionFiles?.(files);
         didUpdateFiles = true;
     }
+
     for (const collection of collections) {
-        if (!getToken()) {
-            continue;
-        }
-        const lastSyncTime =
-            (await savedCollectionLastSyncTime(collection)) ?? 0;
-        if (collection.updationTime === lastSyncTime) {
+        const sinceTime = (await savedCollectionLastSyncTime(collection)) ?? 0;
+        if (collection.updationTime == sinceTime) {
             continue;
         }
 
         const newFiles = await getFiles(
             collection,
-            lastSyncTime,
+            sinceTime,
             onAugmentCollectionFiles,
         );
         await clearCachedThumbnailsIfChanged(localFiles, newFiles);
         files = getLatestVersionFiles([...files, ...newFiles]);
         await saveCollectionFiles(files);
-        didUpdateFiles = true;
         await saveCollectionLastSyncTime(collection, collection.updationTime);
+        didUpdateFiles = true;
     }
+
     return didUpdateFiles;
 };
 
@@ -383,7 +385,11 @@ export const pullCollectionFiles = async (
  * a way to fetch a delta diff the next time the client needs to pull changes
  * from remote.
  */
-const getCollectionDiff = async (collectionID: number, sinceTime: number) => {
+// TODO(RE): Use me
+export const getCollectionDiff = async (
+    collectionID: number,
+    sinceTime: number,
+) => {
     const res = await fetch(
         await apiURL("/collections/v2/diff", { collectionID, sinceTime }),
         { headers: await authenticatedRequestHeaders() },
@@ -437,18 +443,6 @@ export const getFiles = async (
         log.error("Get files failed", e);
         throw e;
     }
-};
-
-const removeDeletedCollectionFiles = (
-    collections: Collection[],
-    files: EnteFile[],
-) => {
-    const syncedCollectionIds = new Set<number>();
-    for (const collection of collections) {
-        syncedCollectionIds.add(collection.id);
-    }
-    files = files.filter((file) => syncedCollectionIds.has(file.collectionID));
-    return files;
 };
 
 /**
