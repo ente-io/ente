@@ -19,7 +19,7 @@ import {
     createCollectionNameByID,
     isHiddenCollection,
 } from "ente-new/photos/services/collection";
-import { getLatestVersionFiles } from "ente-new/photos/services/files";
+import { getLatestVersionFiles } from "ente-new/photos/services/collection";
 import { sortTrashItems, type TrashItem } from "ente-new/photos/services/trash";
 import { splitByPredicate } from "ente-utils/array";
 import { includes } from "ente-utils/type-guards";
