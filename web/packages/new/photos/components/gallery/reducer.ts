@@ -69,6 +69,10 @@ export type GalleryView =
            * or {@link hiddenCollections}.
            */
           activeCollection: Collection | undefined;
+          /**
+           * The currently active collection summary.
+           */
+          activeCollectionSummary: CollectionSummary;
       }
     | {
           /**
@@ -554,10 +558,28 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 collectionFiles,
             );
 
+            const normalCollectionSummaries = deriveNormalCollectionSummaries(
+                normalCollections,
+                action.user,
+                trashItems,
+                collectionFiles,
+                hiddenFileIDs,
+                archivedFileIDs,
+            );
+
+            const hiddenCollectionSummaries = deriveHiddenCollectionSummaries(
+                hiddenCollections,
+                action.user,
+                collectionFiles,
+            );
+
             const view = {
                 type: "albums" as const,
                 activeCollectionSummaryID: PseudoCollectionID.all,
                 activeCollection: undefined,
+                activeCollectionSummary: normalCollectionSummaries.get(
+                    PseudoCollectionID.all,
+                )!,
             };
 
             return stateByUpdatingFilteredFiles({
@@ -593,19 +615,8 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                     familyData,
                     collections,
                 ),
-                normalCollectionSummaries: deriveNormalCollectionSummaries(
-                    normalCollections,
-                    action.user,
-                    trashItems,
-                    collectionFiles,
-                    hiddenFileIDs,
-                    archivedFileIDs,
-                ),
-                hiddenCollectionSummaries: deriveHiddenCollectionSummaries(
-                    hiddenCollections,
-                    action.user,
-                    collectionFiles,
-                ),
+                normalCollectionSummaries,
+                hiddenCollectionSummaries,
                 uncategorizedCollectionSummaryID:
                     deriveUncategorizedCollectionSummaryID(normalCollections),
                 view,
@@ -637,6 +648,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 hiddenFileIDs,
                 archivedFileIDs,
             );
+
             const hiddenCollectionSummaries = deriveHiddenCollectionSummaries(
                 hiddenCollections,
                 state.user!,
@@ -929,6 +941,10 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                     type: "albums",
                     activeCollectionSummaryID: PseudoCollectionID.all,
                     activeCollection: undefined,
+                    activeCollectionSummary:
+                        state.normalCollectionSummaries.get(
+                            PseudoCollectionID.all,
+                        )!,
                 },
                 isInSearchMode: false,
             });
@@ -946,6 +962,10 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                     type: "hidden-albums",
                     activeCollectionSummaryID: PseudoCollectionID.hiddenItems,
                     activeCollection: undefined,
+                    activeCollectionSummary:
+                        state.hiddenCollectionSummaries.get(
+                            PseudoCollectionID.hiddenItems,
+                        )!,
                 },
                 isInSearchMode: false,
             });
@@ -972,31 +992,53 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
             });
         }
 
-        case "showCollectionSummary":
+        case "showCollectionSummary": {
+            const selectedCollectionSummaryID = action.collectionSummaryID;
+            const activeCollection = state.collections.find(
+                ({ id }) => id == selectedCollectionSummaryID,
+            );
+
+            let view: GalleryState["view"];
+            if (
+                selectedCollectionSummaryID !== undefined &&
+                state.hiddenCollectionSummaries.has(selectedCollectionSummaryID)
+            ) {
+                const activeCollectionSummaryID = selectedCollectionSummaryID;
+                view = {
+                    type: "hidden-albums",
+                    activeCollectionSummaryID,
+                    activeCollection,
+                    activeCollectionSummary:
+                        state.hiddenCollectionSummaries.get(
+                            activeCollectionSummaryID,
+                        )!,
+                };
+            } else {
+                const activeCollectionSummaryID =
+                    selectedCollectionSummaryID ?? PseudoCollectionID.all;
+                view = {
+                    type: "albums",
+                    activeCollectionSummaryID,
+                    activeCollection,
+                    activeCollectionSummary:
+                        state.normalCollectionSummaries.get(
+                            activeCollectionSummaryID,
+                        )!,
+                };
+            }
+
             return stateByUpdatingFilteredFiles({
                 ...state,
-                selectedCollectionSummaryID: action.collectionSummaryID,
+                selectedCollectionSummaryID,
                 extraVisiblePerson: undefined,
                 searchResults: undefined,
                 searchSuggestion: undefined,
                 isRecomputingSearchResults: false,
                 pendingSearchSuggestions: [],
-                view: {
-                    type:
-                        action.collectionSummaryID !== undefined &&
-                        state.hiddenCollectionSummaries.has(
-                            action.collectionSummaryID,
-                        )
-                            ? "hidden-albums"
-                            : "albums",
-                    activeCollectionSummaryID:
-                        action.collectionSummaryID ?? PseudoCollectionID.all,
-                    activeCollection: state.collections.find(
-                        ({ id }) => id == action.collectionSummaryID,
-                    ),
-                },
+                view,
                 isInSearchMode: false,
             });
+        }
 
         case "showPeople": {
             const { view, extraVisiblePerson } = derivePeopleView(
@@ -1556,11 +1598,17 @@ const deriveAlbumsViewAndSelectedID = (
     selectedCollectionSummaryID: GalleryState["selectedCollectionSummaryID"],
 ) => {
     // Make sure that the last selected ID is still valid by searching for it.
-    const activeCollectionSummaryID = selectedCollectionSummaryID
-        ? collectionSummaries.get(selectedCollectionSummaryID)?.id
+    const selectedCollectionSummary = selectedCollectionSummaryID
+        ? collectionSummaries.get(selectedCollectionSummaryID)
         : undefined;
+
+    const activeCollectionSummaryID =
+        selectedCollectionSummary?.id ?? PseudoCollectionID.all;
+    const activeCollectionSummary = collectionSummaries.get(
+        activeCollectionSummaryID,
+    )!;
     const activeCollection =
-        activeCollectionSummaryID &&
+        selectedCollectionSummary &&
         !hiddenCollectionIDs.has(activeCollectionSummaryID)
             ? collections.find(({ id }) => id == activeCollectionSummaryID)
             : undefined;
@@ -1568,9 +1616,9 @@ const deriveAlbumsViewAndSelectedID = (
         selectedCollectionSummaryID: activeCollectionSummaryID,
         view: {
             type: "albums" as const,
-            activeCollectionSummaryID:
-                activeCollectionSummaryID ?? PseudoCollectionID.all,
+            activeCollectionSummaryID,
             activeCollection,
+            activeCollectionSummary,
         },
     };
 };
@@ -1586,11 +1634,17 @@ const deriveHiddenAlbumsViewAndSelectedID = (
     selectedCollectionSummaryID: GalleryState["selectedCollectionSummaryID"],
 ) => {
     // Make sure that the last selected ID is still valid by searching for it.
-    const activeCollectionSummaryID = selectedCollectionSummaryID
-        ? hiddenCollectionSummaries.get(selectedCollectionSummaryID)?.id
+    const selectedCollectionSummary = selectedCollectionSummaryID
+        ? hiddenCollectionSummaries.get(selectedCollectionSummaryID)
         : undefined;
+
+    const activeCollectionSummaryID =
+        selectedCollectionSummary?.id ?? PseudoCollectionID.hiddenItems;
+    const activeCollectionSummary = hiddenCollectionSummaries.get(
+        activeCollectionSummaryID,
+    )!;
     const activeCollection =
-        activeCollectionSummaryID &&
+        selectedCollectionSummary &&
         hiddenCollectionIDs.has(activeCollectionSummaryID)
             ? collections.find(({ id }) => id == activeCollectionSummaryID)
             : undefined;
@@ -1598,9 +1652,9 @@ const deriveHiddenAlbumsViewAndSelectedID = (
         selectedCollectionSummaryID: activeCollectionSummaryID,
         view: {
             type: "hidden-albums" as const,
-            activeCollectionSummaryID:
-                activeCollectionSummaryID ?? PseudoCollectionID.hiddenItems,
+            activeCollectionSummaryID,
             activeCollection,
+            activeCollectionSummary,
         },
     };
 };
