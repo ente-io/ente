@@ -49,7 +49,6 @@ import 'package:photos/utils/file_uploader_util.dart';
 import "package:photos/utils/file_util.dart";
 import "package:photos/utils/network_util.dart";
 import 'package:photos/utils/standalone/data.dart';
-import "package:sentry_flutter/sentry_flutter.dart";
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tuple/tuple.dart';
 import "package:uuid/uuid.dart";
@@ -633,7 +632,7 @@ class FileUploader {
       await _checkIfWithinStorageLimit(mediaUploadData.sourceFile!);
       final encryptedFile = File(encryptedFilePath);
 
-      final EncryptionResult fileAttributes = multiPartFileEncResult ??
+      final EncryptionResult fileEncryptResult = multiPartFileEncResult ??
           await CryptoUtil.encryptFile(
             mediaUploadData.sourceFile!.path,
             encryptedFilePath,
@@ -649,17 +648,15 @@ class FileUploader {
       }
       encFileSize = await encryptedFile.length();
 
-      final EncryptionResult encryptedThumbnailData =
-          await CryptoUtil.encryptChaCha(
+      final EncryptionResult thumbEncResult = await CryptoUtil.encryptChaCha(
         thumbnailData!,
-        fileAttributes.key!,
+        fileEncryptResult.key!,
       );
       if (File(encryptedThumbnailPath).existsSync()) {
         await File(encryptedThumbnailPath).delete();
       }
       final encryptedThumbnailFile = File(encryptedThumbnailPath);
-      await encryptedThumbnailFile
-          .writeAsBytes(encryptedThumbnailData.encryptedData!);
+      await encryptedThumbnailFile.writeAsBytes(thumbEncResult.encryptedData!);
       encThumbSize = await encryptedThumbnailFile.length();
 
       // Calculate the number of parts for the file.
@@ -701,8 +698,8 @@ class FileUploader {
             fileUploadURLs,
             encFileName,
             encFileSize,
-            fileAttributes.key!,
-            fileAttributes.header!,
+            fileEncryptResult.key!,
+            fileEncryptResult.header!,
           );
           fileObjectKey = await _multiPartUploader.putMultipartFile(
             fileUploadURLs,
@@ -728,14 +725,15 @@ class FileUploader {
       final metadata =
           await file.getMetadataForUpload(mediaUploadData, exifTime);
 
+      final fileDecryptionHeader =
+          CryptoUtil.bin2base64(fileEncryptResult.header!);
+      final thumbnailDecryptionHeader =
+          CryptoUtil.bin2base64(thumbEncResult.header!);
+
       final encryptedMetadataResult = await CryptoUtil.encryptChaCha(
         utf8.encode(jsonEncode(metadata)),
-        fileAttributes.key!,
+        fileEncryptResult.key!,
       );
-      final fileDecryptionHeader =
-          CryptoUtil.bin2base64(fileAttributes.header!);
-      final thumbnailDecryptionHeader =
-          CryptoUtil.bin2base64(encryptedThumbnailData.header!);
       final encryptedMetadata = CryptoUtil.bin2base64(
         encryptedMetadataResult.encryptedData!,
       );
@@ -755,14 +753,14 @@ class FileUploader {
       if (isUpdatedFile) {
         final response = await _updateFile(
           file,
-          fileObjectKey,
-          fileDecryptionHeader,
-          encFileSize,
-          thumbnailObjectKey,
-          thumbnailDecryptionHeader,
-          encThumbSize,
-          encryptedMetadata,
-          metadataDecryptionHeader,
+          fileObjectKey: fileObjectKey,
+          fileDecryptionHeader: fileDecryptionHeader,
+          fileSize: encFileSize,
+          thumbnailObjectKey: thumbnailObjectKey,
+          thumbnailDecryptionHeader: thumbnailDecryptionHeader,
+          thumbnailSize: encThumbSize,
+          encryptedMetadata: encryptedMetadata,
+          metadataDecryptionHeader: metadataDecryptionHeader,
         );
         if (response.id != file.remoteID) {
           throw Exception(
@@ -771,8 +769,8 @@ class FileUploader {
         }
         remoteFile = file;
         remoteFile.rAsset = file.rAsset!.copyWith(
-          thumbHeader: CryptoUtil.base642bin(thumbnailDecryptionHeader),
-          fileHeader: CryptoUtil.base642bin(fileDecryptionHeader),
+          thumbHeader: thumbEncResult.header!,
+          fileHeader: fileEncryptResult.header!,
           metadata: Metadata(data: metadata, version: metadata['version'] ?? 0),
         );
         // Update across all collections
@@ -780,13 +778,9 @@ class FileUploader {
         // await FilesDB.instance.updateUploadedFileAcrossCollections(remoteFile);
       } else {
         final encryptedFileKeyData = CryptoUtil.encryptSync(
-          fileAttributes.key!,
+          fileEncryptResult.key!,
           CollectionsService.instance.getCollectionKey(collectionID),
         );
-        final encryptedKey =
-            CryptoUtil.bin2base64(encryptedFileKeyData.encryptedData!);
-        final keyDecryptionNonce =
-            CryptoUtil.bin2base64(encryptedFileKeyData.nonce!);
         final Map<String, dynamic> pubMetadata =
             _buildPublicMagicData(mediaUploadData, exifTime, file.rAsset);
         MetadataRequest? pubMetadataRequest;
@@ -794,23 +788,24 @@ class FileUploader {
           pubMetadataRequest = await getPubMetadataRequest(
             file,
             pubMetadata,
-            fileAttributes.key!,
+            fileEncryptResult.key!,
           );
         }
-        remoteFile = await _uploadFile(
+        remoteFile = await _createFile(
           file,
           collectionID,
-          encryptedKey,
-          keyDecryptionNonce,
-          fileAttributes,
-          fileObjectKey,
-          fileDecryptionHeader,
-          encFileSize,
-          thumbnailObjectKey,
-          thumbnailDecryptionHeader,
-          encThumbSize,
-          encryptedMetadata,
-          metadataDecryptionHeader,
+          encryptedKey:
+              CryptoUtil.bin2base64(encryptedFileKeyData.encryptedData!),
+          keyDecryptionNonce:
+              CryptoUtil.bin2base64(encryptedFileKeyData.nonce!),
+          fileObjectKey: fileObjectKey,
+          fileDecryptionHeader: fileDecryptionHeader,
+          fileSize: encFileSize,
+          thumbnailObjectKey: thumbnailObjectKey,
+          thumbnailDecryptionHeader: thumbnailDecryptionHeader,
+          thumbnailSize: encThumbSize,
+          encryptedMetadata: encryptedMetadata,
+          metadataDecryptionHeader: metadataDecryptionHeader,
           pubMetadata: pubMetadataRequest,
           metadata: metadata,
           pubMagicMetadata: pubMetadata,
@@ -1157,22 +1152,21 @@ class FileUploader {
     }
   }
 
-  Future<EnteFile> _uploadFile(
+  Future<EnteFile> _createFile(
     EnteFile file,
-    int collectionID,
-    String encryptedKey,
-    String keyDecryptionNonce,
-    EncryptionResult fileAttributes,
-    String fileObjectKey,
-    String fileDecryptionHeader,
-    int fileSize,
-    String thumbnailObjectKey,
-    String thumbnailDecryptionHeader,
-    int thumbnailSize,
-    String encryptedMetadata,
-    String metadataDecryptionHeader, {
-    MetadataRequest? pubMetadata,
+    int collectionID, {
+    required String encryptedKey,
+    required String keyDecryptionNonce,
+    required String fileObjectKey,
+    required String fileDecryptionHeader,
+    required int fileSize,
+    required String thumbnailObjectKey,
+    required String thumbnailDecryptionHeader,
+    required int thumbnailSize,
+    required String encryptedMetadata,
+    required String metadataDecryptionHeader,
     required Map<String, dynamic> metadata,
+    MetadataRequest? pubMetadata,
     Map<String, dynamic>? pubMagicMetadata,
     int attempt = 1,
   }) async {
@@ -1236,24 +1230,23 @@ class FileUploader {
         _logger
             .info("Upload file (${file.tag}) failed, will retry in 3 seconds");
         await Future.delayed(const Duration(seconds: 3));
-        return _uploadFile(
+        return _createFile(
           file,
           collectionID,
-          encryptedKey,
-          keyDecryptionNonce,
-          fileAttributes,
-          fileObjectKey,
-          fileDecryptionHeader,
-          fileSize,
-          thumbnailObjectKey,
-          thumbnailDecryptionHeader,
-          thumbnailSize,
-          encryptedMetadata,
-          metadataDecryptionHeader,
-          attempt: attempt + 1,
+          encryptedKey: encryptedKey,
+          keyDecryptionNonce: keyDecryptionNonce,
+          fileObjectKey: fileObjectKey,
+          fileDecryptionHeader: fileDecryptionHeader,
+          fileSize: fileSize,
+          thumbnailObjectKey: thumbnailObjectKey,
+          thumbnailDecryptionHeader: thumbnailDecryptionHeader,
+          thumbnailSize: thumbnailSize,
+          encryptedMetadata: encryptedMetadata,
+          metadataDecryptionHeader: metadataDecryptionHeader,
           pubMetadata: pubMetadata,
           metadata: metadata,
           pubMagicMetadata: pubMagicMetadata,
+          attempt: attempt + 1,
         );
       } else {
         _logger.severe("Failed to upload file ${file.tag}", e);
@@ -1263,15 +1256,15 @@ class FileUploader {
   }
 
   Future<FileUpdateResponse> _updateFile(
-    EnteFile file,
-    String fileObjectKey,
-    String fileDecryptionHeader,
-    int fileSize,
-    String thumbnailObjectKey,
-    String thumbnailDecryptionHeader,
-    int thumbnailSize,
-    String encryptedMetadata,
-    String metadataDecryptionHeader, {
+    EnteFile file, {
+    required String fileObjectKey,
+    required String fileDecryptionHeader,
+    required int fileSize,
+    required String thumbnailObjectKey,
+    required int thumbnailSize,
+    required String encryptedMetadata,
+    required String metadataDecryptionHeader,
+    required String thumbnailDecryptionHeader,
     int attempt = 1,
   }) async {
     final request = {
@@ -1308,14 +1301,14 @@ class FileUploader {
         await Future.delayed(const Duration(seconds: 3));
         return _updateFile(
           file,
-          fileObjectKey,
-          fileDecryptionHeader,
-          fileSize,
-          thumbnailObjectKey,
-          thumbnailDecryptionHeader,
-          thumbnailSize,
-          encryptedMetadata,
-          metadataDecryptionHeader,
+          fileObjectKey: fileObjectKey,
+          fileDecryptionHeader: fileDecryptionHeader,
+          fileSize: fileSize,
+          thumbnailObjectKey: thumbnailObjectKey,
+          thumbnailSize: thumbnailSize,
+          thumbnailDecryptionHeader: thumbnailDecryptionHeader,
+          encryptedMetadata: encryptedMetadata,
+          metadataDecryptionHeader: metadataDecryptionHeader,
           attempt: attempt + 1,
         );
       } else {
