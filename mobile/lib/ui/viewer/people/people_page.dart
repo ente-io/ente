@@ -268,9 +268,7 @@ class _GalleryState extends State<_Gallery> {
       },
       reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
       forceReloadEvents: [
-        Bus.instance.on<PeopleChangedEvent>().where(
-              (event) => event.type == PeopleEventType.addedClusterToPerson,
-            ),
+        Bus.instance.on<PeopleChangedEvent>(),
       ],
       removalEventTypes: const {
         EventType.deletedFromRemote,
