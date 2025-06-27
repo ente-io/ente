@@ -969,6 +969,7 @@ const Page: React.FC = () => {
                 shouldHide={isInSearchMode}
                 collectionSummaries={normalCollectionSummaries}
                 hiddenCollectionSummaries={state.hiddenCollectionSummaries}
+                emailByUserID={state.emailByUserID}
                 shareSuggestionEmails={state.shareSuggestionEmails}
                 people={
                     (state.view.type == "people"
