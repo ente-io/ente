@@ -690,6 +690,36 @@ export const deleteFromTrash = async (fileIDs: number[]) =>
     );
 
 /**
+ * Remove the provided files (none of which are owned by the user) from the
+ * provided collection on remote.
+ *
+ * Only files which do not belong to the collection owner can be removed from
+ * the collection. If the collection owner wants to remove files owned by them,
+ * then their client should first move those files first to other collections
+ * owned by the collection owner.
+ *
+ * Remote only, does not modify local state.
+ *
+ * @param collectionID The ID of collection from which to remove the files.
+ *
+ * @param files A list of files which do not belong to the user, and which we
+ * the user wants to remove from the given collection.
+ */
+export const removeNonUserFilesFromCollection = async (
+    collectionID: number,
+    fileIDs: number[],
+) =>
+    batched(fileIDs, async (batchFileIDs) =>
+        ensureOk(
+            await fetch(await apiURL("/collections/v3/remove-files"), {
+                method: "POST",
+                headers: await authenticatedRequestHeaders(),
+                body: JSON.stringify({ collectionID, fileIDs: batchFileIDs }),
+            }),
+        ),
+    );
+
+/**
  * Rename a collection on remote.
  *
  * Remote only, does not modify local state.

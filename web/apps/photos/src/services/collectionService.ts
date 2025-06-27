@@ -7,6 +7,7 @@ import {
     addToFavorites,
     createUncategorizedCollection,
     moveFromCollection,
+    removeNonUserFilesFromCollection,
     savedUserFavoritesCollection,
 } from "ente-new/photos/services/collection";
 import type { CollectionSummary } from "ente-new/photos/services/collection-summary";
@@ -21,10 +22,7 @@ import {
 import HTTPService from "ente-shared/network/HTTPService";
 import { getData } from "ente-shared/storage/localStorage";
 import { getToken } from "ente-shared/storage/localStorage/helpers";
-import { batch } from "ente-utils/array";
 import { isValidMoveTarget } from "utils/collection";
-
-const REQUEST_BATCH_SIZE = 1000;
 
 export const addToFavorites1 = async (file: EnteFile) => {
     await addToFavorites([file]);
@@ -55,7 +53,10 @@ export const removeFromCollection = async (
         }
 
         if (nonUserFiles.length > 0) {
-            await removeNonUserFiles(collectionID, nonUserFiles);
+            await removeNonUserFilesFromCollection(
+                collectionID,
+                nonUserFiles.map((f) => f.id),
+            );
         }
         if (userFiles.length > 0) {
             await removeUserFiles(collectionID, userFiles);
@@ -66,7 +67,7 @@ export const removeFromCollection = async (
     }
 };
 
-export const removeUserFiles = async (
+const removeUserFiles = async (
     sourceCollectionID: number,
     toRemoveFiles: EnteFile[],
 ) => {
@@ -127,38 +128,6 @@ export const removeUserFiles = async (
         );
     } catch (e) {
         log.error("remove user files failed ", e);
-        throw e;
-    }
-};
-
-export interface RemoveFromCollectionRequest {
-    collectionID: number;
-    fileIDs: number[];
-}
-
-export const removeNonUserFiles = async (
-    collectionID: number,
-    nonUserFiles: EnteFile[],
-) => {
-    try {
-        const fileIDs = nonUserFiles.map((f) => f.id);
-        const token = getToken();
-        const batchedFileIDs = batch(fileIDs, REQUEST_BATCH_SIZE);
-        for (const batch of batchedFileIDs) {
-            const request: RemoveFromCollectionRequest = {
-                collectionID,
-                fileIDs: batch,
-            };
-
-            await HTTPService.post(
-                await apiURL("/collections/v3/remove-files"),
-                request,
-                null,
-                { "X-Auth-Token": token },
-            );
-        }
-    } catch (e) {
-        log.error("remove non user files failed ", e);
         throw e;
     }
 };
