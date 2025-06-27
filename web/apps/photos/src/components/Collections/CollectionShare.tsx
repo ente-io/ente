@@ -165,7 +165,12 @@ export const CollectionShare: React.FC<CollectionShareProps> = ({
                 <Stack sx={{ py: "20px", px: "8px", gap: "24px" }}>
                     {isSharedIncoming ? (
                         <SharingDetails
-                            {...{ user, collection, collectionSummary }}
+                            {...{
+                                user,
+                                collection,
+                                collectionSummary,
+                                emailByUserID,
+                            }}
                         />
                     ) : (
                         <>
@@ -198,13 +203,14 @@ export const CollectionShare: React.FC<CollectionShareProps> = ({
 
 type SharingDetailsProps = Pick<
     CollectionShareProps,
-    "user" | "collection" | "collectionSummary"
+    "user" | "collection" | "emailByUserID" | "collectionSummary"
 >;
 
 const SharingDetails: React.FC<SharingDetailsProps> = ({
     user,
     collection,
     collectionSummary,
+    emailByUserID,
 }) => {
     const isOwner = user.id == collection.owner?.id;
 
@@ -229,7 +235,12 @@ const SharingDetails: React.FC<SharingDetailsProps> = ({
                 </RowButtonGroupTitle>
                 <RowButtonGroup>
                     <RowLabel
-                        startIcon={<Avatar email={ownerEmail} />}
+                        startIcon={
+                            <Avatar
+                                email={ownerEmail}
+                                {...{ user, emailByUserID }}
+                            />
+                        }
                         label={isOwner ? t("you") : ownerEmail}
                     />
                 </RowButtonGroup>
@@ -244,7 +255,12 @@ const SharingDetails: React.FC<SharingDetailsProps> = ({
                             {collaborators.map((email, index) => (
                                 <React.Fragment key={email}>
                                     <RowLabel
-                                        startIcon={<Avatar email={email} />}
+                                        startIcon={
+                                            <Avatar
+                                                email={email}
+                                                {...{ user, emailByUserID }}
+                                            />
+                                        }
                                         label={userOrEmail(email)}
                                     />
                                     {index != collaborators.length - 1 && (
@@ -264,7 +280,12 @@ const SharingDetails: React.FC<SharingDetailsProps> = ({
                         {viewers.map((email, index) => (
                             <React.Fragment key={email}>
                                 <RowLabel
-                                    startIcon={<Avatar email={email} />}
+                                    startIcon={
+                                        <Avatar
+                                            email={email}
+                                            {...{ user, emailByUserID }}
+                                        />
+                                    }
                                     label={userOrEmail(email)}
                                 />
                                 {index != viewers.length - 1 && (
@@ -387,6 +408,7 @@ const EmailShare: React.FC<EmailShareProps> = ({
                     onRootClose,
                     user,
                     collection,
+                    emailByUserID,
                     shareSuggestionEmails,
                     onRemotePull,
                 }}
@@ -398,6 +420,7 @@ const EmailShare: React.FC<EmailShareProps> = ({
                     onRootClose,
                     user,
                     collection,
+                    emailByUserID,
                     shareSuggestionEmails,
                     participantCount,
                     wrap,
@@ -471,7 +494,11 @@ type AddParticipantProps = ModalVisibilityProps & {
     role: CollectionNewParticipantRole;
 } & Pick<
         CollectionShareProps,
-        "user" | "collection" | "shareSuggestionEmails" | "onRemotePull"
+        | "user"
+        | "collection"
+        | "emailByUserID"
+        | "shareSuggestionEmails"
+        | "onRemotePull"
     >;
 
 const AddParticipant: React.FC<AddParticipantProps> = ({
@@ -480,6 +507,7 @@ const AddParticipant: React.FC<AddParticipantProps> = ({
     onRootClose,
     user,
     collection,
+    emailByUserID,
     shareSuggestionEmails,
     role,
     onRemotePull,
@@ -558,6 +586,7 @@ const AddParticipant: React.FC<AddParticipantProps> = ({
             caption={collection.name}
         >
             <AddParticipantForm
+                {...{ user, emailByUserID }}
                 existingEmails={eligibleEmails}
                 submitButtonTitle={title}
                 onSubmit={collectionShare}
@@ -566,7 +595,7 @@ const AddParticipant: React.FC<AddParticipantProps> = ({
     );
 };
 
-interface AddParticipantFormProps {
+type AddParticipantFormProps = {
     /**
      * Title for the submit button.
      */
@@ -588,9 +617,11 @@ interface AddParticipantFormProps {
         emailOrEmails: string | string[],
         setEmailFieldError: (message: string) => void,
     ) => Promise<void>;
-}
+} & Pick<CollectionShareProps, "user" | "emailByUserID">;
 
 const AddParticipantForm: React.FC<AddParticipantFormProps> = ({
+    user,
+    emailByUserID,
     existingEmails,
     submitButtonTitle,
     onSubmit,
@@ -666,7 +697,12 @@ const AddParticipantForm: React.FC<AddParticipantFormProps> = ({
                                             );
                                         }}
                                         label={email}
-                                        startIcon={<Avatar email={email} />}
+                                        startIcon={
+                                            <Avatar
+                                                email={email}
+                                                {...{ user, emailByUserID }}
+                                            />
+                                        }
                                         endIcon={
                                             formik.values.selectedEmails.includes(
                                                 email,
@@ -703,7 +739,11 @@ type ManageEmailShareProps = ModalVisibilityProps & {
     wrap: (f: () => Promise<void>) => () => void;
 } & Pick<
         CollectionShareProps,
-        "user" | "collection" | "shareSuggestionEmails" | "onRemotePull"
+        | "user"
+        | "collection"
+        | "emailByUserID"
+        | "shareSuggestionEmails"
+        | "onRemotePull"
     >;
 
 const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
@@ -712,6 +752,7 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
     onRootClose,
     user,
     collection,
+    emailByUserID,
     shareSuggestionEmails,
     participantCount,
     wrap,
@@ -780,7 +821,12 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
                         </RowButtonGroupTitle>
                         <RowButtonGroup>
                             <RowLabel
-                                startIcon={<Avatar email={ownerEmail} />}
+                                startIcon={
+                                    <Avatar
+                                        email={ownerEmail}
+                                        {...{ user, emailByUserID }}
+                                    />
+                                }
                                 label={isOwner ? t("you") : ownerEmail}
                             />
                         </RowButtonGroup>
@@ -798,7 +844,12 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
                                             openManageParticipant(item)
                                         }
                                         label={item}
-                                        startIcon={<Avatar email={item} />}
+                                        startIcon={
+                                            <Avatar
+                                                email={item}
+                                                {...{ user, emailByUserID }}
+                                            />
+                                        }
                                         endIcon={<ChevronRightIcon />}
                                     />
                                     <RowButtonDivider />
@@ -829,7 +880,12 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
                                             openManageParticipant(item)
                                         }
                                         label={item}
-                                        startIcon={<Avatar email={item} />}
+                                        startIcon={
+                                            <Avatar
+                                                email={item}
+                                                {...{ user, emailByUserID }}
+                                            />
+                                        }
                                         endIcon={<ChevronRightIcon />}
                                     />
                                     <RowButtonDivider />
@@ -853,6 +909,7 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
                 {...{
                     user,
                     collection,
+                    emailByUserID,
                     shareSuggestionEmails,
                     onRootClose,
                     onRemotePull,
