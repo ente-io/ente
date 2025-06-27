@@ -701,10 +701,28 @@ export const deleteFromTrash = async (fileIDs: number[]) =>
  *
  * See: [Note: Deleting a collection].
  */
-export const removeFromCollection = (
+export const removeFromCollection2 = async (
     collectionID: number,
     files: EnteFile[],
-) => {};
+) => {
+    const userID = ensureLocalUser().id;
+    const [userFiles, nonUserFiles] = splitByPredicate(
+        files,
+        (f) => f.ownerID == userID,
+    );
+    if (userFiles.length) {
+        await moveUserFilesToUncategorizedIfSoleCollection(
+            collectionID,
+            userFiles,
+        );
+    }
+    if (nonUserFiles.length) {
+        await removeNonUserFilesFromCollection(
+            collectionID,
+            nonUserFiles.map((f) => f.id),
+        );
+    }
+};
 
 /**
  * Move the given user owned files whose only user owned instance is in the

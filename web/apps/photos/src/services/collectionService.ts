@@ -1,4 +1,5 @@
 import type { User } from "ente-accounts/services/user";
+import { isDevBuild } from "ente-base/env";
 import log from "ente-base/log";
 import { apiURL } from "ente-base/origins";
 import { groupFilesByCollectionID, sortFiles } from "ente-gallery/utils/file";
@@ -7,6 +8,7 @@ import {
     addToFavorites,
     createUncategorizedCollection,
     moveFromCollection,
+    removeFromCollection2,
     removeNonUserFilesFromCollection,
     savedUserFavoritesCollection,
 } from "ente-new/photos/services/collection";
@@ -40,6 +42,10 @@ export const removeFromCollection = async (
     collectionID: number,
     toRemoveFiles: EnteFile[],
 ) => {
+    // TODO(RE):
+    if (isDevBuild && process.env.ENTE_WIP_MOVE)
+        return removeFromCollection2(collectionID, toRemoveFiles);
+
     try {
         const user: User = getData("user");
         const nonUserFiles = [];
