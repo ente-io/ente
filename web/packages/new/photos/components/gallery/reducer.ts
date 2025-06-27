@@ -33,6 +33,7 @@ import {
     CollectionSummarySortPriority,
     PseudoCollectionID,
     type CollectionSummary,
+    type CollectionSummaryAttribute,
     type CollectionSummaryType,
 } from "../../services/collection-summary";
 import type { PeopleState, Person } from "../../services/ml/people";
@@ -1414,8 +1415,6 @@ const createCollectionSummaries = (
             type = "outgoingShare";
         } else if (isSharedOnlyViaLink(collection)) {
             type = "sharedOnlyViaLink";
-        } else if (isArchivedCollection(collection)) {
-            type = "archived";
         } else if (isDefaultHiddenCollection(collection)) {
             type = "defaultHidden";
         } else if (
@@ -1429,7 +1428,7 @@ const createCollectionSummaries = (
 
         // This block of code duplicates the above. Such duplication is needed
         // until type is completely replaced by attributes.
-        const attributes = new Set<CollectionSummaryType>();
+        const attributes = new Set<CollectionSummaryAttribute>();
         if (collection.owner.id != user.id) {
             attributes.add(
                 collection.sharees.find((s) => s.id == user.id)?.role ==

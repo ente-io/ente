@@ -83,14 +83,13 @@ export const CollectionHeader: React.FC<CollectionHeaderProps> = (props) => {
         return <></>;
     }
 
-    const { name, type, fileCount } = collectionSummary;
+    const { name, type, attributes, fileCount } = collectionSummary;
 
     const EndIcon = ({ type }: { type: CollectionSummaryType }) => {
+        if (attributes.has("archived")) return <ArchiveOutlinedIcon />;
         switch (type) {
             case "favorites":
                 return <FavoriteRoundedIcon />;
-            case "archived":
-                return <ArchiveOutlinedIcon />;
             case "incomingShareViewer":
             case "incomingShareCollaborator":
                 return <PeopleIcon />;
@@ -500,6 +499,7 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
     return (
         <Box sx={{ display: "inline-flex", gap: "16px" }}>
             <QuickOptions
+                collectionSummary={collectionSummary}
                 collectionSummaryType={collectionSummaryType}
                 isDownloadInProgress={isActiveCollectionDownloadInProgress}
                 onEmptyTrashClick={confirmEmptyTrash}
@@ -538,7 +538,8 @@ interface OptionProps {
 }
 
 interface QuickOptionsProps {
-    collectionSummaryType: CollectionSummaryType;
+    collectionSummary: CollectionSummary;
+    collectionSummaryType: CollectionSummary["type"];
     isDownloadInProgress: () => boolean;
     onEmptyTrashClick: () => void;
     onDownloadClick: () => void;
@@ -549,6 +550,7 @@ const QuickOptions: React.FC<QuickOptionsProps> = ({
     onEmptyTrashClick,
     onDownloadClick,
     onShareClick,
+    collectionSummary,
     collectionSummaryType: type,
     isDownloadInProgress,
 }) => (
@@ -556,7 +558,7 @@ const QuickOptions: React.FC<QuickOptionsProps> = ({
         {showEmptyTrashQuickOption(type) && (
             <EmptyTrashQuickOption onClick={onEmptyTrashClick} />
         )}
-        {showDownloadQuickOption(type) &&
+        {showDownloadQuickOption(collectionSummary) &&
             (isDownloadInProgress() ? (
                 <ActivityIndicator size="20px" sx={{ m: "12px" }} />
             ) : (
@@ -565,7 +567,7 @@ const QuickOptions: React.FC<QuickOptionsProps> = ({
                     collectionSummaryType={type}
                 />
             ))}
-        {showShareQuickOption(type) && (
+        {showShareQuickOption(collectionSummary) && (
             <ShareQuickOption
                 onClick={onShareClick}
                 collectionSummaryType={type}
@@ -585,7 +587,7 @@ const EmptyTrashQuickOption: React.FC<OptionProps> = ({ onClick }) => (
     </Tooltip>
 );
 
-const showDownloadQuickOption = (type: CollectionSummaryType) =>
+const showDownloadQuickOption = ({ type, attributes }: CollectionSummary) =>
     type == "album" ||
     type == "folder" ||
     type == "favorites" ||
@@ -595,7 +597,7 @@ const showDownloadQuickOption = (type: CollectionSummaryType) =>
     type == "incomingShareCollaborator" ||
     type == "outgoingShare" ||
     type == "sharedOnlyViaLink" ||
-    type == "archived" ||
+    attributes.has("archived") ||
     type == "pinned";
 
 type DownloadQuickOptionProps = OptionProps & {
@@ -623,13 +625,13 @@ const DownloadQuickOption: React.FC<DownloadQuickOptionProps> = ({
     </Tooltip>
 );
 
-const showShareQuickOption = (type: CollectionSummaryType) =>
+const showShareQuickOption = ({ type, attributes }: CollectionSummary) =>
     type == "album" ||
     type == "folder" ||
     type == "favorites" ||
     type == "outgoingShare" ||
     type == "sharedOnlyViaLink" ||
-    type == "archived" ||
+    attributes.has("archived") ||
     type == "incomingShareViewer" ||
     type == "incomingShareCollaborator" ||
     type == "pinned";

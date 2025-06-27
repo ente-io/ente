@@ -23,7 +23,7 @@ import {
 import { FocusVisibleUnstyledButton } from "ente-new/photos/components/UnstyledButton";
 import type {
     CollectionSummary,
-    CollectionSummaryType,
+    CollectionSummaryAttribute,
     CollectionsSortBy,
 } from "ente-new/photos/services/collection-summary";
 import type { Person } from "ente-new/photos/services/ml/people";
@@ -528,7 +528,7 @@ const CardText: React.FC<React.PropsWithChildren> = ({ children }) => (
 );
 
 interface CollectionBarCardIconProps {
-    attributes: Set<CollectionSummaryType>;
+    attributes: Set<CollectionSummaryAttribute>;
 }
 
 const CollectionBarCardIcon: React.FC<CollectionBarCardIconProps> = ({

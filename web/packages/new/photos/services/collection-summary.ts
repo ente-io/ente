@@ -12,6 +12,19 @@ export type CollectionSummaryType =
     | "incomingShareViewer"
     | "incomingShareCollaborator"
     | "sharedOnlyViaLink"
+    | "pinned";
+
+export type CollectionSummaryAttribute =
+    | CollectionType
+    | "all"
+    | "archive"
+    | "trash"
+    | "hiddenItems"
+    | "defaultHidden"
+    | "outgoingShare"
+    | "incomingShareViewer"
+    | "incomingShareCollaborator"
+    | "sharedOnlyViaLink"
     | "archived"
     | "pinned";
 
@@ -117,7 +130,7 @@ export interface CollectionSummary {
      * ad-hoc "UI" attributes which make it easier and more efficient for the UI
      * elements to render the collection summary in the UI.
      */
-    attributes: Set<CollectionSummaryType>;
+    attributes: Set<CollectionSummaryAttribute>;
     /**
      * The name of the collection or pseudo-collection surfaced in the UI.
      */
