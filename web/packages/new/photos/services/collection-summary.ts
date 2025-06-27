@@ -11,8 +11,7 @@ export type CollectionSummaryType =
     | "outgoingShare"
     | "incomingShareViewer"
     | "incomingShareCollaborator"
-    | "sharedOnlyViaLink"
-    | "pinned";
+    | "sharedOnlyViaLink";
 
 export type CollectionSummaryAttribute =
     | CollectionType

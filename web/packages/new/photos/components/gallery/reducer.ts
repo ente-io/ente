@@ -1417,11 +1417,6 @@ const createCollectionSummaries = (
             type = "sharedOnlyViaLink";
         } else if (isDefaultHiddenCollection(collection)) {
             type = "defaultHidden";
-        } else if (
-            collection.magicMetadata?.data.order == CollectionOrder.pinned
-        ) {
-            type = "pinned";
-            sortPriority = CollectionSummarySortPriority.pinned;
         } else {
             type = collectionType;
         }
@@ -1451,6 +1446,7 @@ const createCollectionSummaries = (
         }
         if (collection.magicMetadata?.data.order == CollectionOrder.pinned) {
             attributes.add("pinned");
+            sortPriority = CollectionSummarySortPriority.pinned;
         }
         switch (collectionType) {
             case "favorites":

@@ -587,7 +587,7 @@ const EmptyTrashQuickOption: React.FC<OptionProps> = ({ onClick }) => (
     </Tooltip>
 );
 
-const showDownloadQuickOption = ({ type, attributes }: CollectionSummary) =>
+const showDownloadQuickOption = ({ type }: CollectionSummary) =>
     type == "album" ||
     type == "folder" ||
     type == "favorites" ||
@@ -596,9 +596,7 @@ const showDownloadQuickOption = ({ type, attributes }: CollectionSummary) =>
     type == "incomingShareViewer" ||
     type == "incomingShareCollaborator" ||
     type == "outgoingShare" ||
-    type == "sharedOnlyViaLink" ||
-    attributes.has("archived") ||
-    type == "pinned";
+    type == "sharedOnlyViaLink"
 
 type DownloadQuickOptionProps = OptionProps & {
     collectionSummaryType: CollectionSummaryType;
@@ -625,16 +623,14 @@ const DownloadQuickOption: React.FC<DownloadQuickOptionProps> = ({
     </Tooltip>
 );
 
-const showShareQuickOption = ({ type, attributes }: CollectionSummary) =>
+const showShareQuickOption = ({ type }: CollectionSummary) =>
     type == "album" ||
     type == "folder" ||
     type == "favorites" ||
     type == "outgoingShare" ||
     type == "sharedOnlyViaLink" ||
-    attributes.has("archived") ||
     type == "incomingShareViewer" ||
-    type == "incomingShareCollaborator" ||
-    type == "pinned";
+    type == "incomingShareCollaborator"
 
 interface ShareQuickOptionProps {
     onClick: () => void;
