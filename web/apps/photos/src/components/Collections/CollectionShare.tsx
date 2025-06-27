@@ -93,6 +93,10 @@ export type CollectionShareProps = ModalVisibilityProps & {
     collection: Collection;
     collectionSummary: CollectionSummary;
     /**
+     * A map from known Ente user IDs to their emails
+     */
+    emailByUserID: Map<number, string>;
+    /**
      * A list of emails that can be served up as suggestions when the user is
      * trying to share an album with another Ente user.
      */
@@ -110,6 +114,7 @@ export const CollectionShare: React.FC<CollectionShareProps> = ({
     user,
     collection,
     collectionSummary,
+    emailByUserID,
     shareSuggestionEmails,
     setBlockingLoad,
     onRemotePull,
@@ -172,6 +177,7 @@ export const CollectionShare: React.FC<CollectionShareProps> = ({
                                 {...{
                                     user,
                                     collection,
+                                    emailByUserID,
                                     shareSuggestionEmails,
                                     wrap,
                                     onRemotePull,
@@ -300,13 +306,18 @@ type EmailShareProps = {
     wrap: (f: () => Promise<void>) => () => void;
 } & Pick<
     CollectionShareProps,
-    "user" | "collection" | "shareSuggestionEmails" | "onRemotePull"
+    | "user"
+    | "collection"
+    | "emailByUserID"
+    | "shareSuggestionEmails"
+    | "onRemotePull"
 >;
 
 const EmailShare: React.FC<EmailShareProps> = ({
     onRootClose,
     user,
     collection,
+    emailByUserID,
     shareSuggestionEmails,
     wrap,
     onRemotePull,
@@ -344,7 +355,10 @@ const EmailShare: React.FC<EmailShareProps> = ({
                             <RowButton
                                 fontWeight="regular"
                                 startIcon={
-                                    <AvatarGroup sharees={collection.sharees} />
+                                    <AvatarGroup
+                                        {...{ user, emailByUserID }}
+                                        sharees={collection.sharees}
+                                    />
                                 }
                                 label={
                                     collection.sharees.length === 1
@@ -420,7 +434,17 @@ const AvatarCounter = styled(NumberAvatar)({
 
 const SHAREE_AVATAR_LIMIT = 6;
 
-const AvatarGroup = ({ sharees }: { sharees: Collection["sharees"] }) => {
+interface AvatarGroupProps {
+    user?: LocalUser;
+    emailByUserID?: Map<number, string>;
+    sharees: Collection["sharees"];
+}
+
+const AvatarGroup: React.FC<AvatarGroupProps> = ({
+    sharees,
+    user,
+    emailByUserID,
+}) => {
     const hasShareesOverLimit = sharees?.length > SHAREE_AVATAR_LIMIT;
     const countOfShareesOverLimit = sharees?.length - SHAREE_AVATAR_LIMIT;
 
@@ -429,6 +453,7 @@ const AvatarGroup = ({ sharees }: { sharees: Collection["sharees"] }) => {
             {sharees?.slice(0, 6).map((sharee) => (
                 <AvatarContainer key={sharee.email}>
                     <Avatar
+                        {...{ user, emailByUserID }}
                         key={sharee.email}
                         email={sharee.email}
                         opacity={100}

@@ -60,7 +60,7 @@ type GalleryBarAndListHeaderProps = Omit<
     > &
     Pick<
         CollectionShareProps,
-        "user" | "shareSuggestionEmails" | "setBlockingLoad"
+        "user" | "emailByUserID" | "shareSuggestionEmails" | "setBlockingLoad"
     >;
 
 /**
@@ -96,6 +96,7 @@ export const GalleryBarAndListHeader: React.FC<
     hiddenCollectionSummaries,
     people,
     activePerson,
+    emailByUserID,
     shareSuggestionEmails,
     onRemotePull,
     onSelectPerson,
@@ -236,6 +237,7 @@ export const GalleryBarAndListHeader: React.FC<
                 collection={activeCollection}
                 {...{
                     user,
+                    emailByUserID,
                     shareSuggestionEmails,
                     setBlockingLoad,
                     onRemotePull,
