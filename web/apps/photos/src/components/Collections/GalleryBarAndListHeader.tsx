@@ -48,10 +48,9 @@ type GalleryBarAndListHeaderProps = Omit<
      * When `true`, the bar is be hidden altogether.
      */
     shouldHide: boolean;
-    collectionSummaries: CollectionSummaries;
+    barCollectionSummaries: CollectionSummaries;
     activeCollection: Collection;
     setActiveCollectionID: (collectionID: number) => void;
-    hiddenCollectionSummaries: CollectionSummaries;
     setPhotoListHeader: (value: TimeStampListItem) => void;
     filesDownloadProgressAttributesList: FilesDownloadProgressAttributes[];
 } & Pick<
@@ -88,12 +87,11 @@ export const GalleryBarAndListHeader: React.FC<
     mode,
     onChangeMode,
     user,
-    collectionSummaries,
+    barCollectionSummaries: toShowCollectionSummaries,
     activeCollection,
     activeCollectionID,
     setActiveCollectionID,
     setBlockingLoad,
-    hiddenCollectionSummaries,
     people,
     activePerson,
     emailByUserID,
@@ -114,13 +112,6 @@ export const GalleryBarAndListHeader: React.FC<
     const [collectionsSortBy, setCollectionsSortBy] =
         useCollectionsSortByLocalState("updation-time-desc");
 
-    const toShowCollectionSummaries = useMemo(
-        () =>
-            mode == "hidden-albums"
-                ? hiddenCollectionSummaries
-                : collectionSummaries,
-        [mode, hiddenCollectionSummaries, collectionSummaries],
-    );
 
     const shouldBeHidden = useMemo(
         () =>

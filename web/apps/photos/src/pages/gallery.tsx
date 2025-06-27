@@ -108,7 +108,7 @@ import {
 import { PromiseQueue } from "ente-utils/promise";
 import { t } from "i18next";
 import { useRouter, type NextRouter } from "next/router";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FileWithPath } from "react-dropzone";
 import { Trans } from "react-i18next";
 import {
@@ -252,6 +252,19 @@ const Page: React.FC = () => {
     const activePerson =
         state.view?.type == "people" ? state.view.activePerson : undefined;
     const activePersonID = activePerson?.id;
+
+    // TODO: Move into reducer
+    const barCollectionSummaries = useMemo(
+        () =>
+            barMode == "hidden-albums"
+                ? state.hiddenCollectionSummaries
+                : state.normalCollectionSummaries,
+        [
+            barMode,
+            state.hiddenCollectionSummaries,
+            state.normalCollectionSummaries,
+        ],
+    );
 
     if (process.env.NEXT_PUBLIC_ENTE_TRACE) console.log("render", state);
 
@@ -967,8 +980,7 @@ const Page: React.FC = () => {
                 }}
                 mode={barMode}
                 shouldHide={isInSearchMode}
-                collectionSummaries={normalCollectionSummaries}
-                hiddenCollectionSummaries={state.hiddenCollectionSummaries}
+                barCollectionSummaries={barCollectionSummaries}
                 emailByUserID={state.emailByUserID}
                 shareSuggestionEmails={state.shareSuggestionEmails}
                 people={
