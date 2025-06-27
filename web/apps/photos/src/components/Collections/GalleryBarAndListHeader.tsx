@@ -38,7 +38,6 @@ import {
 type GalleryBarAndListHeaderProps = Omit<
     GalleryBarImplProps,
     | "collectionSummaries"
-    | "hiddenCollectionSummaries"
     | "onSelectCollectionID"
     | "collectionsSortBy"
     | "onChangeCollectionsSortBy"
@@ -111,7 +110,6 @@ export const GalleryBarAndListHeader: React.FC<
 
     const [collectionsSortBy, setCollectionsSortBy] =
         useCollectionsSortByLocalState("updation-time-desc");
-
 
     const shouldBeHidden = useMemo(
         () =>

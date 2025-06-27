@@ -249,6 +249,10 @@ const Page: React.FC = () => {
             : state.view?.activeCollectionSummaryID;
     const activeCollection =
         state.view?.type == "people" ? undefined : state.view?.activeCollection;
+    const activeCollectionSummary =
+        state.view?.type == "people"
+            ? undefined
+            : state.view?.activeCollectionSummary;
     const activePerson =
         state.view?.type == "people" ? state.view.activePerson : undefined;
     const activePersonID = activePerson?.id;
@@ -931,18 +935,16 @@ const Page: React.FC = () => {
                             state.collections,
                         )}
                         isFavoriteCollection={
-                            normalCollectionSummaries.get(activeCollectionID)
-                                ?.type == "favorites"
+                            activeCollectionSummary?.type == "favorites"
                         }
                         isUncategorizedCollection={
-                            normalCollectionSummaries.get(activeCollectionID)
-                                ?.type == "uncategorized"
+                            activeCollectionSummary?.type == "uncategorized"
                         }
                         isIncomingSharedCollection={
-                            normalCollectionSummaries.get(activeCollectionID)
-                                ?.type == "incomingShareCollaborator" ||
-                            normalCollectionSummaries.get(activeCollectionID)
-                                ?.type == "incomingShareViewer"
+                            activeCollectionSummary?.type ==
+                                "incomingShareCollaborator" ||
+                            activeCollectionSummary?.type ==
+                                "incomingShareViewer"
                         }
                         isInSearchMode={isInSearchMode}
                         isInHiddenSection={barMode == "hidden-albums"}
@@ -1022,7 +1024,7 @@ const Page: React.FC = () => {
             />
             <Sidebar
                 {...sidebarVisibilityProps}
-                collectionSummaries={normalCollectionSummaries}
+                normalCollectionSummaries={normalCollectionSummaries}
                 uncategorizedCollectionSummaryID={
                     state.uncategorizedCollectionSummaryID
                 }
