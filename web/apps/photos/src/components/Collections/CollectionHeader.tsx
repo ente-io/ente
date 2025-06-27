@@ -358,8 +358,7 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
             ];
             break;
 
-        case "incomingShareViewer":
-        case "incomingShareCollaborator":
+        case "sharedIncoming":
             menuOptions = [
                 collectionSummary.attributes.has("archived") ? (
                     <OverflowMenuOption
@@ -635,11 +634,9 @@ const ShareQuickOption: React.FC<ShareQuickOptionProps> = ({
 }) => (
     <Tooltip
         title={
-            collectionSummaryType == "incomingShareViewer" ||
-            collectionSummaryType == "incomingShareCollaborator"
+            collectionSummary.attributes.has("sharedIncoming")
                 ? t("sharing_details")
-                : collectionSummary.attributes.has("outgoingShare") ||
-                    collectionSummary.attributes.has("sharedOnlyViaLink")
+                : collectionSummary.attributes.has("shared")
                   ? t("modify_sharing")
                   : collectionSummaryType == "favorites"
                     ? t("share_favorites")

@@ -1424,11 +1424,7 @@ const createCollectionSummaries = (
         let sortPriority: CollectionSummarySortPriority =
             CollectionSummarySortPriority.other;
         if (collection.owner.id != user.id) {
-            type =
-                collection.sharees.find((s) => s.id == user.id)?.role ==
-                "COLLABORATOR"
-                    ? "incomingShareCollaborator"
-                    : "incomingShareViewer";
+            type = "sharedIncoming";
         } else if (collectionType == "uncategorized") {
             type = "uncategorized";
             sortPriority = CollectionSummarySortPriority.system;
@@ -1437,9 +1433,9 @@ const createCollectionSummaries = (
             //
             // "favorites" can be both the user's own favorites, or favorites of
             // other users shared with them. However, all of the latter will get
-            // typed as "incomingShareViewer" or "incomingShareCollaborator" in
-            // the first case above. So if a collection summary has type
-            // "favorites", it is guaranteed to be the user's own favorites.
+            // typed as "sharedIncoming" in the first case above. So if a
+            // collection summary has type "favorites", it is guaranteed to be
+            // the user's own favorites.
             //
             // However, notice that the type of the _collection_ itself is not
             // changed, so whenever we're checking the type of the collection
@@ -1453,10 +1449,6 @@ const createCollectionSummaries = (
             // of the `attributes` computed below.
             type = collectionType;
             sortPriority = CollectionSummarySortPriority.favorites;
-        } else if (isOutgoingShare(collection, user)) {
-            type = "outgoingShare";
-        } else if (isSharedOnlyViaLink(collection)) {
-            type = "sharedOnlyViaLink";
         } else if (isDefaultHiddenCollection(collection)) {
             type = "defaultHidden";
         } else {
@@ -1472,15 +1464,15 @@ const createCollectionSummaries = (
             attributes.add(
                 collection.sharees.find((s) => s.id == user.id)?.role ==
                     "COLLABORATOR"
-                    ? "incomingShareCollaborator"
-                    : "incomingShareViewer",
+                    ? "sharedIncomingCollaborator"
+                    : "sharedIncomingViewer",
             );
         }
-        if (isOutgoingShare(collection, user)) {
+        if (collection.owner.id == user.id && collection.sharees.length) {
             attributes.add("shared");
-            attributes.add("outgoingShare");
+            attributes.add("sharedOutgoing");
         }
-        if (isSharedOnlyViaLink(collection)) {
+        if (collection.publicURLs.length && !collection.sharees.length) {
             attributes.add("shared");
             attributes.add("sharedOnlyViaLink");
         }
@@ -1578,14 +1570,6 @@ const findCoverFiles = (
     }
     return coverFiles;
 };
-
-const isOutgoingShare = (collection: Collection, user: User) =>
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    collection.owner.id === user.id && collection.sharees?.length > 0;
-
-const isSharedOnlyViaLink = (collection: Collection) =>
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    collection.publicURLs?.length && !collection.sharees?.length;
 
 /**
  * Compute the {@link GalleryView} from its dependencies when we are switching

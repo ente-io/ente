@@ -94,7 +94,7 @@ const SelectedFileOptions = ({
     const isUncategorizedCollection =
         activeCollectionSummary?.type == "uncategorized";
 
-    const isIncomingSharedCollection =
+    const isSharedIncomingCollection =
         activeCollectionSummary?.attributes.has("sharedIncoming");
 
     const addToCollection = () =>
@@ -286,7 +286,7 @@ const SelectedFileOptions = ({
                         </IconButton>
                     </Tooltip>
                 </>
-            ) : isIncomingSharedCollection ? (
+            ) : isSharedIncomingCollection ? (
                 <Tooltip title={t("download")}>
                     <IconButton onClick={handleFileOp("download")}>
                         <DownloadIcon />

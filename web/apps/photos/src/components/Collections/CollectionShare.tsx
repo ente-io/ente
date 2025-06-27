@@ -66,10 +66,7 @@ import {
     type CreatePublicURLAttributes,
     type UpdatePublicURLAttributes,
 } from "ente-new/photos/services/collection";
-import type {
-    CollectionSummary,
-    CollectionSummaryType,
-} from "ente-new/photos/services/collection-summary";
+import type { CollectionSummary } from "ente-new/photos/services/collection-summary";
 import { usePhotosAppContext } from "ente-new/photos/types/context";
 import { CustomError, parseSharingErrorCodes } from "ente-shared/error";
 import { wait } from "ente-utils/promise";
@@ -150,7 +147,7 @@ export const CollectionShare: React.FC<CollectionShareProps> = ({
         return <></>;
     }
 
-    const { type } = collectionSummary;
+    const isSharedIncoming = collectionSummary.type == "sharedIncoming";
 
     return (
         <SidebarDrawer anchor="right" {...{ open, onClose }}>
@@ -159,17 +156,17 @@ export const CollectionShare: React.FC<CollectionShareProps> = ({
                     onClose={onClose}
                     onRootClose={onClose}
                     title={
-                        type == "incomingShareCollaborator" ||
-                        type == "incomingShareViewer"
+                        isSharedIncoming
                             ? t("sharing_details")
                             : t("share_album")
                     }
                     caption={collection.name}
                 />
                 <Stack sx={{ py: "20px", px: "8px", gap: "24px" }}>
-                    {type == "incomingShareCollaborator" ||
-                    type == "incomingShareViewer" ? (
-                        <SharingDetails {...{ user, collection, type }} />
+                    {isSharedIncoming ? (
+                        <SharingDetails
+                            {...{ user, collection, collectionSummary }}
+                        />
                     ) : (
                         <>
                             <EmailShare
@@ -199,15 +196,15 @@ export const CollectionShare: React.FC<CollectionShareProps> = ({
     );
 };
 
-type SharingDetailsProps = { type: CollectionSummaryType } & Pick<
+type SharingDetailsProps = Pick<
     CollectionShareProps,
-    "user" | "collection"
+    "user" | "collection" | "collectionSummary"
 >;
 
 const SharingDetails: React.FC<SharingDetailsProps> = ({
     user,
     collection,
-    type,
+    collectionSummary,
 }) => {
     const isOwner = user.id == collection.owner?.id;
 
@@ -237,7 +234,7 @@ const SharingDetails: React.FC<SharingDetailsProps> = ({
                     />
                 </RowButtonGroup>
             </Stack>
-            {type == "incomingShareCollaborator" &&
+            {collectionSummary.attributes.has("sharedIncomingCollaborator") &&
                 collaborators.length > 0 && (
                     <Stack>
                         <RowButtonGroupTitle icon={<ModeEditIcon />}>

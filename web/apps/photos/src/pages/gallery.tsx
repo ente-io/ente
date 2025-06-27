@@ -1054,12 +1054,9 @@ const Page: React.FC = () => {
                     setSelected={setSelected}
                     activeCollectionID={activeCollectionID}
                     activePersonID={activePerson?.id}
-                    isInIncomingSharedCollection={
-                        normalCollectionSummaries.get(activeCollectionID)
-                            ?.type == "incomingShareCollaborator" ||
-                        normalCollectionSummaries.get(activeCollectionID)
-                            ?.type == "incomingShareViewer"
-                    }
+                    isInIncomingSharedCollection={activeCollectionSummary?.attributes.has(
+                        "sharedIncoming",
+                    )}
                     isInHiddenSection={barMode == "hidden-albums"}
                     {...{
                         favoriteFileIDs,

@@ -8,10 +8,7 @@ export type CollectionSummaryType =
     | "trash"
     | "hiddenItems"
     | "defaultHidden"
-    | "outgoingShare"
-    | "incomingShareViewer"
-    | "incomingShareCollaborator"
-    | "sharedOnlyViaLink";
+    | "sharedIncoming";
 
 export type CollectionSummaryAttribute =
     | CollectionType
@@ -21,10 +18,10 @@ export type CollectionSummaryAttribute =
     | "hiddenItems"
     | "defaultHidden"
     | "shared"
-    | "outgoingShare"
+    | "sharedOutgoing"
     | "sharedIncoming"
-    | "incomingShareViewer"
-    | "incomingShareCollaborator"
+    | "sharedIncomingViewer"
+    | "sharedIncomingCollaborator"
     | "sharedOnlyViaLink"
     | "archived"
     | "pinned";
@@ -224,14 +221,9 @@ const systemCSTypes = new Set<CollectionSummaryType>([
     "defaultHidden",
 ]);
 
-const addToDisabledCSTypes = new Set<CollectionSummaryType>([
-    ...systemCSTypes,
-    "incomingShareViewer",
-]);
-
 const moveToDisabledCSTypes = new Set<CollectionSummaryType>([
-    ...addToDisabledCSTypes,
-    "incomingShareCollaborator",
+    ...systemCSTypes,
+    "sharedIncoming",
 ]);
 
 const hideFromCollectionBarCSTypes = new Set<CollectionSummaryType>([
@@ -251,8 +243,10 @@ export const areOnlySystemCollections = (
         isSystemCollection(type),
     );
 
-export const canAddToCollection = (type: CollectionSummaryType) =>
-    !addToDisabledCSTypes.has(type);
+export const canAddToCollection = (
+    type: CollectionSummaryType,
+    attributes: Set<CollectionSummaryAttribute>,
+) => !systemCSTypes.has(type) && !attributes.has("sharedIncomingViewer");
 
 export const canMoveToCollection = (type: CollectionSummaryType) =>
     !moveToDisabledCSTypes.has(type);

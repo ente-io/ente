@@ -122,11 +122,11 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
         }
 
         const collections = [...collectionSummaries.values()]
-            .filter(({ id, type }) => {
+            .filter(({ id, attributes: csAttributes, type }) => {
                 if (id === attributes.relatedCollectionID) {
                     return false;
                 } else if (attributes.action == "add") {
-                    return canAddToCollection(type);
+                    return canAddToCollection(type, csAttributes);
                 } else if (attributes.action == "upload") {
                     return canMoveToCollection(type) || type == "uncategorized";
                 } else if (attributes.action == "restore") {
