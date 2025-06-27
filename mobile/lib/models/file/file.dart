@@ -222,11 +222,7 @@ class EnteFile {
         }
       }
     }
-    hash = mediaUploadData.hashData?.fileHash;
-    return metadata;
-  }
 
-  Map<String, dynamic> get metadata {
     final metadata = <String, dynamic>{};
     metadata["localID"] = isSharedMediaToAppSandbox ? null : localID;
     metadata["title"] = title;
@@ -246,8 +242,9 @@ class EnteFile {
     if (duration != null) {
       metadata["duration"] = duration;
     }
-    if (hash != null) {
-      metadata["hash"] = hash;
+    final String? hashValue = mediaUploadData.hashData?.fileHash;
+    if (hashValue != null) {
+      metadata["hash"] = hashValue;
     }
     if (metadataVersion != null) {
       metadata["version"] = metadataVersion;
