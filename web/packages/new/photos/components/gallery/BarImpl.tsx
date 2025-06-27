@@ -528,7 +528,7 @@ const CardText: React.FC<React.PropsWithChildren> = ({ children }) => (
 );
 
 interface CollectionBarCardIconProps {
-    attributes: CollectionSummaryType[];
+    attributes: Set<CollectionSummaryType>;
 }
 
 const CollectionBarCardIcon: React.FC<CollectionBarCardIconProps> = ({
@@ -538,18 +538,16 @@ const CollectionBarCardIcon: React.FC<CollectionBarCardIconProps> = ({
     // will be true simultaneously even in the rarest of cases (a pinned and
     // shared album that is also archived), and there is enough space for 3.
     <CollectionBarCardIcon_>
-        {attributes.includes("favorites") && <FavoriteRoundedIcon />}
-        {attributes.includes("pinned") && (
+        {attributes.has("favorites") && <FavoriteRoundedIcon />}
+        {attributes.has("pinned") && (
             // Need && to override the 20px set in the container.
             <PushPinIcon sx={{ "&&": { fontSize: "18px" } }} />
         )}
-        {(attributes.includes("outgoingShare") ||
-            attributes.includes("incomingShareViewer") ||
-            attributes.includes("incomingShareCollaborator")) && <PeopleIcon />}
-        {attributes.includes("sharedOnlyViaLink") && <LinkIcon />}
-        {attributes.includes("archived") && (
-            <ArchiveIcon sx={{ opacity: 0.48 }} />
-        )}
+        {(attributes.has("outgoingShare") ||
+            attributes.has("incomingShareViewer") ||
+            attributes.has("incomingShareCollaborator")) && <PeopleIcon />}
+        {attributes.has("sharedOnlyViaLink") && <LinkIcon />}
+        {attributes.has("archived") && <ArchiveIcon sx={{ opacity: 0.48 }} />}
     </CollectionBarCardIcon_>
 );
 

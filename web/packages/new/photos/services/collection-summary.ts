@@ -117,7 +117,7 @@ export interface CollectionSummary {
      * ad-hoc "UI" attributes which make it easier and more efficient for the UI
      * elements to render the collection summary in the UI.
      */
-    attributes: CollectionSummaryType[];
+    attributes: Set<CollectionSummaryType>;
     /**
      * The name of the collection or pseudo-collection surfaced in the UI.
      */
@@ -146,6 +146,7 @@ export interface CollectionSummary {
      * file that it contains.
      */
     updationTime: number | undefined;
+    sortPriority: CollectionSummarySortPriority;
     order?: number;
 }
 
@@ -173,28 +174,32 @@ export const collectionsSortBy = [
 export type CollectionsSortBy = (typeof collectionsSortBy)[number];
 
 /**
- * An ordering of collection "categories".
+ * An orderable set collection "priorities".
  *
- * Within each category, the collections are sorted by the applicable
- * {@link CollectionsSortBy}.
+ * Collection summaries that need to appear prior to other collection summaries
+ * get assigned a "priority", which is an otherwise arbitrary integer that only
+ * serves as a sort priority (higher being prior).
+ *
+ * All collections in a higher category appear together, and before collections
+ * in lower categories. Within each priority, the collections are sorted by the
+ * applicable {@link CollectionsSortBy}.
  */
-export const CollectionSummaryOrder = new Map<CollectionSummaryType, number>([
-    ["all", 0],
-    ["hiddenItems", 0],
-    ["uncategorized", 1],
-    ["favorites", 2],
-    ["pinned", 3],
-    ["album", 4],
-    ["folder", 4],
-    ["incomingShareViewer", 4],
-    ["incomingShareCollaborator", 4],
-    ["outgoingShare", 4],
-    ["sharedOnlyViaLink", 4],
-    ["archived", 4],
-    ["archive", 5],
-    ["trash", 6],
-    ["defaultHidden", 7],
-]);
+export const CollectionSummarySortPriority = {
+    /**
+     * Currently: "All", "Uncategorized", "Hidden items".
+     */
+    system: 9,
+    favorites: 8,
+    pinned: 7,
+    other: 0,
+} as const;
+
+/**
+ * The TypeScript type that restricts the possible values to be one from amongst
+ * the {@link CollectionSummarySortCategory} constants.
+ */
+export type CollectionSummarySortPriority =
+    (typeof CollectionSummarySortPriority)[keyof typeof CollectionSummarySortPriority];
 
 const systemCSTypes = new Set<CollectionSummaryType>([
     "all",

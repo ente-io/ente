@@ -1,14 +1,15 @@
 import type { User } from "ente-accounts/services/user";
-import {
-    isArchivedCollection,
-    isPinnedCollection,
-} from "ente-gallery/services/magic-metadata";
+import { isArchivedCollection } from "ente-gallery/services/magic-metadata";
 import {
     groupFilesByCollectionID,
     sortFiles,
     uniqueFilesByID,
 } from "ente-gallery/utils/file";
-import { collectionTypes, type Collection } from "ente-media/collection";
+import {
+    CollectionOrder,
+    collectionTypes,
+    type Collection,
+} from "ente-media/collection";
 import type { EnteFile } from "ente-media/file";
 import {
     isArchivedFile,
@@ -27,9 +28,9 @@ import React, { useReducer } from "react";
 import {
     findDefaultHiddenCollectionIDs,
     isDefaultHiddenCollection,
-    isIncomingShare,
 } from "../../services/collection";
 import {
+    CollectionSummarySortPriority,
     PseudoCollectionID,
     type CollectionSummary,
     type CollectionSummaryType,
@@ -1255,8 +1256,9 @@ const deriveNormalCollectionSummaries = (
             ...pseudoCollectionOptionsForFiles([]),
             id,
             type: "uncategorized",
-            attributes: ["uncategorized"],
+            attributes: new Set(["uncategorized"]),
             name: t("section_uncategorized"),
+            sortPriority: CollectionSummarySortPriority.system,
         });
     }
 
@@ -1276,8 +1278,9 @@ const deriveNormalCollectionSummaries = (
         ...pseudoCollectionOptionsForFiles(allSectionFiles),
         id: PseudoCollectionID.all,
         type: "all",
-        attributes: ["all"],
+        attributes: new Set(["all"]),
         name: t("section_all"),
+        sortPriority: CollectionSummarySortPriority.system,
     });
 
     normalCollectionSummaries.set(PseudoCollectionID.trash, {
@@ -1288,8 +1291,9 @@ const deriveNormalCollectionSummaries = (
         id: PseudoCollectionID.trash,
         name: t("section_trash"),
         type: "trash",
-        attributes: ["trash"],
+        attributes: new Set(["trash"]),
         coverFile: undefined,
+        sortPriority: CollectionSummarySortPriority.other,
     });
 
     normalCollectionSummaries.set(PseudoCollectionID.archiveItems, {
@@ -1297,8 +1301,9 @@ const deriveNormalCollectionSummaries = (
         id: PseudoCollectionID.archiveItems,
         name: t("section_archive"),
         type: "archive",
-        attributes: ["archive"],
+        attributes: new Set(["archive"]),
         coverFile: undefined,
+        sortPriority: CollectionSummarySortPriority.other,
     });
 
     return normalCollectionSummaries;
@@ -1340,7 +1345,8 @@ const deriveHiddenCollectionSummaries = (
         id: PseudoCollectionID.hiddenItems,
         name: t("hidden_items"),
         type: "hiddenItems",
-        attributes: ["hiddenItems"],
+        attributes: new Set(["hiddenItems"]),
+        sortPriority: CollectionSummarySortPriority.system,
     });
 
     return hiddenCollectionSummaries;
@@ -1372,12 +1378,17 @@ const createCollectionSummaries = (
             : "album";
 
         let type: CollectionSummaryType;
-        if (isIncomingShare(collection, user)) {
-            if (isIncomingCollabShare(collection, user)) {
-                type = "incomingShareCollaborator";
-            } else {
-                type = "incomingShareViewer";
-            }
+        let sortPriority: CollectionSummarySortPriority =
+            CollectionSummarySortPriority.other;
+        if (collection.owner.id != user.id) {
+            type =
+                collection.sharees.find((s) => s.id == user.id)?.role ==
+                "COLLABORATOR"
+                    ? "incomingShareCollaborator"
+                    : "incomingShareViewer";
+        } else if (collectionType == "uncategorized") {
+            type = "uncategorized";
+            sortPriority = CollectionSummarySortPriority.system;
         } else if (collectionType == "favorites") {
             // [Note: User and shared favorites]
             //
@@ -1398,6 +1409,7 @@ const createCollectionSummaries = (
             // user's "favorites", everything else is secondary and can be part
             // of the `attributes` computed below.
             type = collectionType;
+            sortPriority = CollectionSummarySortPriority.favorites;
         } else if (isOutgoingShare(collection, user)) {
             type = "outgoingShare";
         } else if (isSharedOnlyViaLink(collection)) {
@@ -1406,36 +1418,40 @@ const createCollectionSummaries = (
             type = "archived";
         } else if (isDefaultHiddenCollection(collection)) {
             type = "defaultHidden";
-        } else if (isPinnedCollection(collection)) {
+        } else if (
+            collection.magicMetadata?.data.order == CollectionOrder.pinned
+        ) {
             type = "pinned";
+            sortPriority = CollectionSummarySortPriority.pinned;
         } else {
             type = collectionType;
         }
 
         // This block of code duplicates the above. Such duplication is needed
         // until type is completely replaced by attributes.
-        const attributes: CollectionSummaryType[] = [];
-        if (isIncomingShare(collection, user)) {
-            if (isIncomingCollabShare(collection, user)) {
-                attributes.push("incomingShareCollaborator");
-            } else {
-                attributes.push("incomingShareViewer");
-            }
+        const attributes = new Set<CollectionSummaryType>();
+        if (collection.owner.id != user.id) {
+            attributes.add(
+                collection.sharees.find((s) => s.id == user.id)?.role ==
+                    "COLLABORATOR"
+                    ? "incomingShareCollaborator"
+                    : "incomingShareViewer",
+            );
         }
         if (isOutgoingShare(collection, user)) {
-            attributes.push("outgoingShare");
+            attributes.add("outgoingShare");
         }
         if (isSharedOnlyViaLink(collection)) {
-            attributes.push("sharedOnlyViaLink");
+            attributes.add("sharedOnlyViaLink");
         }
         if (isArchivedCollection(collection)) {
-            attributes.push("archived");
+            attributes.add("archived");
         }
         if (isDefaultHiddenCollection(collection)) {
-            attributes.push("defaultHidden");
+            attributes.add("defaultHidden");
         }
-        if (isPinnedCollection(collection)) {
-            attributes.push("pinned");
+        if (collection.magicMetadata?.data.order == CollectionOrder.pinned) {
+            attributes.add("pinned");
         }
         switch (collectionType) {
             case "favorites":
@@ -1443,10 +1459,10 @@ const createCollectionSummaries = (
                 // the user's own favorites (giving it a special icon etc), so
                 // only apply the favorites attribute if it is the user's own.
                 if (collection.owner.id == user.id)
-                    attributes.push(collectionType);
+                    attributes.add(collectionType);
                 break;
             default:
-                attributes.push(collectionType);
+                attributes.add(collectionType);
                 break;
         }
 
@@ -1482,7 +1498,7 @@ const createCollectionSummaries = (
             coverFile: coverFiles.get(collection.id),
             fileCount: collectionFiles?.length ?? 0,
             updationTime: collection.updationTime,
-            order: collection.magicMetadata?.data.order ?? 0,
+            sortPriority,
         });
     }
 
@@ -1520,13 +1536,6 @@ const findCoverFiles = (
         }
     }
     return coverFiles;
-};
-
-const isIncomingCollabShare = (collection: Collection, user: User) => {
-    // TODO: Need to audit the types
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    const sharee = collection.sharees?.find((sharee) => sharee.id === user.id);
-    return sharee?.role == "COLLABORATOR";
 };
 
 const isOutgoingShare = (collection: Collection, user: User) =>
