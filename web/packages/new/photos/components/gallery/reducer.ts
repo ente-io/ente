@@ -1468,6 +1468,7 @@ const createCollectionSummaries = (
         const attributes = new Set<CollectionSummaryAttribute>();
         if (collection.owner.id != user.id) {
             attributes.add("shared");
+            attributes.add("sharedIncoming");
             attributes.add(
                 collection.sharees.find((s) => s.id == user.id)?.role ==
                     "COLLABORATOR"

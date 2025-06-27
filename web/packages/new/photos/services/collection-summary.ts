@@ -22,6 +22,7 @@ export type CollectionSummaryAttribute =
     | "defaultHidden"
     | "shared"
     | "outgoingShare"
+    | "sharedIncoming"
     | "incomingShareViewer"
     | "incomingShareCollaborator"
     | "sharedOnlyViaLink"

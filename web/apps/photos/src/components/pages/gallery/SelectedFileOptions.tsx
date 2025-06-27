@@ -17,7 +17,10 @@ import { useBaseContext } from "ente-base/context";
 import type { Collection } from "ente-media/collection";
 import type { CollectionSelectorAttributes } from "ente-new/photos/components/CollectionSelector";
 import type { GalleryBarMode } from "ente-new/photos/components/gallery/reducer";
-import { PseudoCollectionID } from "ente-new/photos/services/collection-summary";
+import {
+    PseudoCollectionID,
+    type CollectionSummary,
+} from "ente-new/photos/services/collection-summary";
 import { t } from "i18next";
 import { type CollectionOp } from "utils/collection";
 import { type FileOp } from "utils/file";
@@ -40,8 +43,6 @@ interface Props {
     clearSelection: () => void;
     barMode?: GalleryBarMode;
     activeCollectionID: number;
-    isFavoriteCollection: boolean;
-    isUncategorizedCollection: boolean;
     /**
      * TODO: Need to implement delete-equivalent from shared albums.
      *
@@ -63,7 +64,7 @@ interface Props {
      * Also note that that user cannot delete files that are not owned by the
      * user, even if they are in an album owned by the user.
      */
-    isIncomingSharedCollection: boolean;
+    activeCollectionSummary: CollectionSummary | undefined;
     isInSearchMode: boolean;
     selectedCollection: Collection;
     isInHiddenSection: boolean;
@@ -80,15 +81,21 @@ const SelectedFileOptions = ({
     clearSelection,
     barMode,
     activeCollectionID,
-    isFavoriteCollection,
-    isUncategorizedCollection,
-    isIncomingSharedCollection,
+    activeCollectionSummary,
     isInSearchMode,
     isInHiddenSection,
 }: Props) => {
     const { showMiniDialog } = useBaseContext();
 
     const peopleMode = barMode == "people";
+
+    const isFavoriteCollection = activeCollectionSummary?.type == "favorites";
+
+    const isUncategorizedCollection =
+        activeCollectionSummary?.type == "uncategorized";
+
+    const isIncomingSharedCollection =
+        activeCollectionSummary?.attributes.has("sharedIncoming");
 
     const addToCollection = () =>
         onOpenCollectionSelector({

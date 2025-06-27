@@ -934,18 +934,7 @@ const Page: React.FC = () => {
                             selected.collectionID,
                             state.collections,
                         )}
-                        isFavoriteCollection={
-                            activeCollectionSummary?.type == "favorites"
-                        }
-                        isUncategorizedCollection={
-                            activeCollectionSummary?.type == "uncategorized"
-                        }
-                        isIncomingSharedCollection={
-                            activeCollectionSummary?.type ==
-                                "incomingShareCollaborator" ||
-                            activeCollectionSummary?.type ==
-                                "incomingShareViewer"
-                        }
+                        activeCollectionSummary={activeCollectionSummary}
                         isInSearchMode={isInSearchMode}
                         isInHiddenSection={barMode == "hidden-albums"}
                     />
