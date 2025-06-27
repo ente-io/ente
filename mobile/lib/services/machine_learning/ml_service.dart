@@ -58,9 +58,6 @@ class MLService {
   /// Only call this function once at app startup, after that you can directly call [runAllML]
   Future<void> init() async {
     if (_isInitialized) return;
-    if (!flagService.hasGrantedMLConsent) {
-      return;
-    }
     _logger.info("init called");
 
     // Check if the device has enough RAM to run local indexing
