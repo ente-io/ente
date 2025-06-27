@@ -1254,7 +1254,7 @@ const deriveNormalCollectionSummaries = (
             ...pseudoCollectionOptionsForFiles([]),
             id,
             type: "uncategorized",
-            attributes: ["uncategorized"],
+            attributes: new Set(["uncategorized"]),
             name: t("section_uncategorized"),
         });
     }
@@ -1275,7 +1275,7 @@ const deriveNormalCollectionSummaries = (
         ...pseudoCollectionOptionsForFiles(allSectionFiles),
         id: PseudoCollectionID.all,
         type: "all",
-        attributes: ["all"],
+        attributes: new Set(["all"]),
         name: t("section_all"),
     });
 
@@ -1287,7 +1287,7 @@ const deriveNormalCollectionSummaries = (
         id: PseudoCollectionID.trash,
         name: t("section_trash"),
         type: "trash",
-        attributes: ["trash"],
+        attributes: new Set(["trash"]),
         coverFile: undefined,
     });
 
@@ -1296,7 +1296,7 @@ const deriveNormalCollectionSummaries = (
         id: PseudoCollectionID.archiveItems,
         name: t("section_archive"),
         type: "archive",
-        attributes: ["archive"],
+        attributes: new Set(["archive"]),
         coverFile: undefined,
     });
 
@@ -1339,7 +1339,7 @@ const deriveHiddenCollectionSummaries = (
         id: PseudoCollectionID.hiddenItems,
         name: t("hidden_items"),
         type: "hiddenItems",
-        attributes: ["hiddenItems"],
+        attributes: new Set(["hiddenItems"]),
     });
 
     return hiddenCollectionSummaries;
@@ -1413,9 +1413,9 @@ const createCollectionSummaries = (
 
         // This block of code duplicates the above. Such duplication is needed
         // until type is completely replaced by attributes.
-        const attributes: CollectionSummaryType[] = [];
+        const attributes = new Set<CollectionSummaryType>();
         if (collection.owner.id != user.id) {
-            attributes.push(
+            attributes.add(
                 collection.sharees.find((s) => s.id == user.id)?.role ==
                     "COLLABORATOR"
                     ? "incomingShareCollaborator"
@@ -1423,19 +1423,19 @@ const createCollectionSummaries = (
             );
         }
         if (isOutgoingShare(collection, user)) {
-            attributes.push("outgoingShare");
+            attributes.add("outgoingShare");
         }
         if (isSharedOnlyViaLink(collection)) {
-            attributes.push("sharedOnlyViaLink");
+            attributes.add("sharedOnlyViaLink");
         }
         if (isArchivedCollection(collection)) {
-            attributes.push("archived");
+            attributes.add("archived");
         }
         if (isDefaultHiddenCollection(collection)) {
-            attributes.push("defaultHidden");
+            attributes.add("defaultHidden");
         }
         if (isPinnedCollection(collection)) {
-            attributes.push("pinned");
+            attributes.add("pinned");
         }
         switch (collectionType) {
             case "favorites":
@@ -1443,10 +1443,10 @@ const createCollectionSummaries = (
                 // the user's own favorites (giving it a special icon etc), so
                 // only apply the favorites attribute if it is the user's own.
                 if (collection.owner.id == user.id)
-                    attributes.push(collectionType);
+                    attributes.add(collectionType);
                 break;
             default:
-                attributes.push(collectionType);
+                attributes.add(collectionType);
                 break;
         }
 

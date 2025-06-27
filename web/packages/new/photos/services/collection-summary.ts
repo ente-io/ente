@@ -117,7 +117,7 @@ export interface CollectionSummary {
      * ad-hoc "UI" attributes which make it easier and more efficient for the UI
      * elements to render the collection summary in the UI.
      */
-    attributes: CollectionSummaryType[];
+    attributes: Set<CollectionSummaryType>;
     /**
      * The name of the collection or pseudo-collection surfaced in the UI.
      */
