@@ -512,17 +512,6 @@ interface CollectionFileItem {
     keyDecryptionNonce: string;
 }
 
-export interface AddToCollectionRequest {
-    collectionID: number;
-    files: CollectionFileItem[];
-}
-
-export interface MoveToCollectionRequest {
-    fromCollectionID: number;
-    toCollectionID: number;
-    files: CollectionFileItem[];
-}
-
 /**
  * Make a remote request to add the given {@link files} to the given
  * {@link collection}.
@@ -690,6 +679,84 @@ export const deleteFromTrash = async (fileIDs: number[]) =>
     );
 
 /**
+ * Remove the given files from the specified collection.
+ *
+ * Reads local state but does not modify it. The effects are on remote.
+ *
+ * [Note: Removing files from a collection]
+ *
+ * The "remove from collection" primitive operates differently depending on
+ * whether or not the user owns the files that they're trying to remove.
+ *
+ * 1. If the user does not own the file, then it should be removed from the
+ *    collection using POST "/collections/v3/remove-files".
+ *
+ * 2. If the user owns the file, and if this is the only collection that this
+ *    file belongs to, then the file should be moved to the user's
+ *    "Uncategorized" collection.
+ *
+ * The "remove from collection" primitive is provided to the user both as a UI
+ * action (on selecting files in a collection), and also internally used when
+ * deleting a collection if the user chose the option to keep files.
+ *
+ * See: [Note: Deleting a collection].
+ */
+export const removeFromCollection = (
+    collectionID: number,
+    files: EnteFile[],
+) => {};
+
+/**
+ * Move the given user owned files whose only user owned instance is in the
+ * given collection to the user's "Uncategorized" collection.
+ *
+ * Reads local state but does not modify it. The effects are on remote.
+ *
+ * This is used as a subroutine of [Note: Removing files from a collection].
+ */
+export const moveUserFilesToUncategorizedIfSoleCollection = async (
+    collectionID: number,
+    files: EnteFile[],
+) => {
+    const userID = ensureLocalUser().id;
+    const collections = await savedCollections();
+    const collectionFiles = await savedCollectionFiles();
+    const userCollections = collections.filter((c) => c.owner.id == userID);
+    const userCollectionIDs = new Set(userCollections.map((c) => c.id));
+
+    // TODO(RE): More conditions?
+    // !isHiddenCollection(targetCollection) &&
+    // !isQuickLinkCollection(targetCollection) &&
+    // !isIncomingShare(targetCollection, user)
+
+    const ownCollectionCountByFileID = new Map<number, number>();
+    for (const file of collectionFiles) {
+        if (userCollectionIDs.has(file.collectionID)) {
+            ownCollectionCountByFileID.set(
+                file.id,
+                (ownCollectionCountByFileID.get(file.id) ?? 0) + 1,
+            );
+        }
+    }
+    const filesToUncat = files.filter(
+        (f) =>
+            f.collectionID == collectionID &&
+            ownCollectionCountByFileID.get(f.id) == 1,
+    );
+    if (filesToUncat.length) {
+        const uncategorizedCollection =
+            userCollections.find((c) => c.type == "uncategorized") ??
+            (await createUncategorizedCollection());
+
+        await moveFromCollection(
+            collectionID,
+            uncategorizedCollection,
+            filesToUncat,
+        );
+    }
+};
+
+/**
  * Remove the provided files (none of which are owned by the user) from the
  * provided collection on remote.
  *
@@ -699,6 +766,8 @@ export const deleteFromTrash = async (fileIDs: number[]) =>
  * owned by the collection owner.
  *
  * Remote only, does not modify local state.
+ *
+ * See also: [Note: Removing files from a collection].
  *
  * @param collectionID The ID of collection from which to remove the files.
  *
