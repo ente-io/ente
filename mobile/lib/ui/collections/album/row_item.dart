@@ -74,7 +74,7 @@ class AlbumRowItemWidget extends StatelessWidget {
                     cornerSmoothing: _cornerSmoothing,
                   ),
                   child: Container(
-                  color: getEnteColorScheme(context).strokeMuted,
+                    color: getEnteColorScheme(context).strokeMuted,
                     width: sideOfThumbnail + borderWidth * 2,
                     height: sideOfThumbnail + borderWidth * 2,
                   ),

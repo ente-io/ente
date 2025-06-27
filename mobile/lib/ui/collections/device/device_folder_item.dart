@@ -1,6 +1,8 @@
+import "package:figma_squircle/figma_squircle.dart";
 import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/device_collection.dart';
+import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/viewer/file/file_icons_widget.dart';
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
 import 'package:photos/ui/viewer/gallery/device_folder_page.dart';
@@ -9,10 +11,16 @@ import 'package:photos/utils/navigation_util.dart';
 class DeviceFolderItem extends StatelessWidget {
   final DeviceCollection deviceCollection;
   final double sideOfThumbnail;
+  final double borderWidth;
+
+  static const _cornerRadius = 12.0;
+  static const _cornerSmoothing = 1.0;
+
   const DeviceFolderItem(
     this.deviceCollection, {
     ///120 is default for the 'on device' scrollview in albums section
     this.sideOfThumbnail = 120,
+    this.borderWidth = 1.0,
     super.key,
   });
 
@@ -23,31 +31,57 @@ class DeviceFolderItem extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: SizedBox(
-              height: sideOfThumbnail,
-              width: sideOfThumbnail,
-              child: Hero(
-                tag: "device_folder:" +
-                    deviceCollection.name +
-                    deviceCollection.thumbnail!.tag,
-                transitionOnUserGestures: true,
-                child: Stack(
-                  children: [
-                    ThumbnailWidget(
-                      deviceCollection.thumbnail!,
-                      shouldShowSyncStatus: false,
-                      key: Key(
-                        "device_folder:" +
-                            deviceCollection.name +
-                            deviceCollection.thumbnail!.tag,
+          SizedBox(
+            height: sideOfThumbnail + borderWidth * 2,
+            width: sideOfThumbnail + borderWidth * 2,
+            child: Stack(
+              clipBehavior: Clip.none,
+              alignment: Alignment.center,
+              children: [
+                ClipSmoothRect(
+                  radius: SmoothBorderRadius(
+                    cornerRadius: _cornerRadius + borderWidth,
+                    cornerSmoothing: _cornerSmoothing,
+                  ),
+                  child: Container(
+                    color: getEnteColorScheme(context).strokeMuted,
+                    width: sideOfThumbnail + borderWidth * 2,
+                    height: sideOfThumbnail + borderWidth * 2,
+                  ),
+                ),
+                ClipSmoothRect(
+                  radius: SmoothBorderRadius(
+                    cornerRadius: _cornerRadius,
+                    cornerSmoothing: _cornerSmoothing,
+                  ),
+                  child: SizedBox(
+                    height: sideOfThumbnail,
+                    width: sideOfThumbnail,
+                    child: Hero(
+                      tag: "device_folder:" +
+                          deviceCollection.name +
+                          deviceCollection.thumbnail!.tag,
+                      transitionOnUserGestures: true,
+                      child: Stack(
+                        children: [
+                          ThumbnailWidget(
+                            deviceCollection.thumbnail!,
+                            shouldShowSyncStatus: false,
+                            key: Key(
+                              "device_folder:" +
+                                  deviceCollection.name +
+                                  deviceCollection.thumbnail!.tag,
+                            ),
+                          ),
+                          isBackedUp
+                              ? const SizedBox.shrink()
+                              : const UnSyncedIcon(),
+                        ],
                       ),
                     ),
-                    isBackedUp ? const SizedBox.shrink() : const UnSyncedIcon(),
-                  ],
+                  ),
                 ),
-              ),
+              ],
             ),
           ),
           const SizedBox(height: 6),
@@ -66,7 +100,8 @@ class DeviceFolderItem extends StatelessWidget {
             child: Text(
               deviceCollection.count.toString(),
               textAlign: TextAlign.left,
-              style: Theme.of(context).colorScheme.enteTheme.textTheme.miniMuted,
+              style:
+                  Theme.of(context).colorScheme.enteTheme.textTheme.miniMuted,
               overflow: TextOverflow.ellipsis,
             ),
           ),

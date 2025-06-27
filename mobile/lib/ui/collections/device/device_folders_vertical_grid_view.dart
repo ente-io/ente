@@ -68,6 +68,7 @@ class _DeviceFolderVerticalGridViewBodyState
   static const maxThumbnailWidth = 224.0;
   static const horizontalPadding = 16.0;
   static const crossAxisSpacing = 8.0;
+  static const borderWidth = 1.0;
 
   @override
   void initState() {
@@ -106,9 +107,11 @@ class _DeviceFolderVerticalGridViewBodyState
 
           final double totalCrossAxisSpacing =
               (albumsCountInCrossAxis - 1) * crossAxisSpacing;
-          final double sideOfThumbnail =
-              (screenWidth - totalCrossAxisSpacing - horizontalPadding) /
-                  albumsCountInCrossAxis;
+          final double sideOfThumbnail = (screenWidth -
+                  totalCrossAxisSpacing -
+                  horizontalPadding -
+                  borderWidth * 2) /
+              albumsCountInCrossAxis;
 
           return snapshot.data!.isEmpty
               ? const SliverFillRemaining(child: EmptyState())
