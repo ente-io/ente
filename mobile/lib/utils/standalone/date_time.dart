@@ -166,7 +166,7 @@ bool isValidGregorianDate({
 
 final RegExp exp = RegExp('[\\.A-Za-z]*');
 
-DateTime? parseDateTimeFromFileNameV2(
+DateTime? parseDateTimeFromName(
   String fileName, {
   /* to avoid parsing incorrect date time from the filename, the max and min
     year limits the chances of parsing incorrect date times

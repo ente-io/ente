@@ -21,7 +21,7 @@ void main() {
       "signal-2022-12-17-15-16-04-718-2.jpg",
     ];
     for (String val in validParsing) {
-      final parsedValue = parseDateTimeFromFileNameV2(val);
+      final parsedValue = parseDateTimeFromName(val);
       expect(
         parsedValue != null,
         true,
@@ -40,7 +40,7 @@ void main() {
       "Snapchat-900000000.mp4",
     ];
     for (String val in badParsing) {
-      final parsedValue = parseDateTimeFromFileNameV2(val);
+      final parsedValue = parseDateTimeFromName(val);
       expect(
         parsedValue == null,
         true,

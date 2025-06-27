@@ -151,7 +151,7 @@ class EnteFile {
         creationTime = DateTime.now().toUtc().microsecondsSinceEpoch;
       }
       try {
-        final parsedDateTime = parseDateTimeFromFileNameV2(
+        final parsedDateTime = parseDateTimeFromName(
           basenameWithoutExtension(asset.title ?? ""),
         );
         if (parsedDateTime != null) {
@@ -205,7 +205,7 @@ class EnteFile {
     // Try to get the timestamp from fileName. In case of iOS, file names are
     // generic IMG_XXXX, so only parse it on Android devices
     if (!hasExifTime && Platform.isAndroid && title != null) {
-      final timeFromFileName = parseDateTimeFromFileNameV2(title!);
+      final timeFromFileName = parseDateTimeFromName(title!);
       if (timeFromFileName != null) {
         // only use timeFromFileName if the existing creationTime and
         // timeFromFilename belongs to different date.
