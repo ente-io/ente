@@ -69,7 +69,7 @@ import { usePeopleStateSnapshot } from "ente-new/photos/components/utils/use-sna
 import { shouldShowWhatsNew } from "ente-new/photos/services/changelog";
 import { createAlbum } from "ente-new/photos/services/collection";
 import {
-    areOnlySystemCollections,
+    haveOnlySystemCollections,
     PseudoCollectionID,
 } from "ente-new/photos/services/collection-summary";
 import exportService from "ente-new/photos/services/export";
@@ -1006,7 +1006,7 @@ const Page: React.FC = () => {
                 onRemoteFilesPull={remoteFilesPull}
                 onUploadFile={(file) => dispatch({ type: "uploadFile", file })}
                 onShowPlanSelector={showPlanSelector}
-                isFirstUpload={areOnlySystemCollections(
+                isFirstUpload={haveOnlySystemCollections(
                     normalCollectionSummaries,
                 )}
                 showSessionExpiredMessage={showSessionExpiredDialog}

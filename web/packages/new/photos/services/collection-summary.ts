@@ -18,6 +18,8 @@ export type CollectionSummaryAttribute =
     | "sharedIncomingViewer"
     | "sharedIncomingCollaborator"
     | "sharedOnlyViaLink"
+    | "system"
+    | "hideFromCollectionBar"
     | "archived"
     | "pinned";
 
@@ -207,44 +209,15 @@ export const CollectionSummarySortPriority = {
 export type CollectionSummarySortPriority =
     (typeof CollectionSummarySortPriority)[keyof typeof CollectionSummarySortPriority];
 
-const systemCSTypes = new Set<CollectionSummaryType>([
-    "all",
-    "archiveItems",
-    "trash",
-    "uncategorized",
-    "hiddenItems",
-    "defaultHidden",
-]);
-
-const moveToDisabledCSTypes = new Set<CollectionSummaryType>([
-    ...systemCSTypes,
-    "sharedIncoming",
-]);
-
-const hideFromCollectionBarCSTypes = new Set<CollectionSummaryType>([
-    "trash",
-    "archiveItems",
-    "uncategorized",
-    "defaultHidden",
-]);
-
-export const isSystemCollection = (type: CollectionSummaryType) =>
-    systemCSTypes.has(type);
-
-export const areOnlySystemCollections = (
+export const haveOnlySystemCollections = (
     collectionSummaries: CollectionSummaries,
 ) =>
-    [...collectionSummaries.values()].every(({ type }) =>
-        isSystemCollection(type),
+    [...collectionSummaries.values()].every((cs) =>
+        cs.attributes.has("system"),
     );
 
-export const canAddToCollection = (
-    type: CollectionSummaryType,
-    attributes: Set<CollectionSummaryAttribute>,
-) => !systemCSTypes.has(type) && !attributes.has("sharedIncomingViewer");
+export const canAddToCollection = ({ attributes }: CollectionSummary) =>
+    !attributes.has("system") && !attributes.has("sharedIncomingViewer");
 
-export const canMoveToCollection = (type: CollectionSummaryType) =>
-    !moveToDisabledCSTypes.has(type);
-
-export const shouldShowOnCollectionBar = (type: CollectionSummaryType) =>
-    !hideFromCollectionBarCSTypes.has(type);
+export const canMoveToCollection = ({ attributes }: CollectionSummary) =>
+    !attributes.has("system") && !attributes.has("sharedIncoming");

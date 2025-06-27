@@ -624,12 +624,12 @@ const ShareQuickOption: React.FC<ShareQuickOptionProps> = ({
 }) => (
     <Tooltip
         title={
-            attributes.has("sharedIncoming")
-                ? t("sharing_details")
-                : attributes.has("shared")
-                  ? t("modify_sharing")
-                  : attributes.has("userFavorites")
-                    ? t("share_favorites")
+            attributes.has("userFavorites")
+                ? t("share_favorites")
+                : attributes.has("sharedIncoming")
+                  ? t("sharing_details")
+                  : attributes.has("shared")
+                    ? t("modify_sharing")
                     : t("share_album")
         }
     >

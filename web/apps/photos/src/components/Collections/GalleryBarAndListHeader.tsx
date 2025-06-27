@@ -12,11 +12,9 @@ import {
 } from "ente-new/photos/components/gallery/BarImpl";
 import { PeopleHeader } from "ente-new/photos/components/gallery/PeopleHeader";
 import {
-    areOnlySystemCollections,
     collectionsSortBy,
-    isSystemCollection,
+    haveOnlySystemCollections,
     PseudoCollectionID,
-    shouldShowOnCollectionBar,
     type CollectionsSortBy,
     type CollectionSummaries,
 } from "ente-new/photos/services/collection-summary";
@@ -114,7 +112,7 @@ export const GalleryBarAndListHeader: React.FC<
     const shouldBeHidden = useMemo(
         () =>
             shouldHide ||
-            (areOnlySystemCollections(toShowCollectionSummaries) &&
+            (haveOnlySystemCollections(toShowCollectionSummaries) &&
                 activeCollectionID === PseudoCollectionID.all),
         [shouldHide, toShowCollectionSummaries, activeCollectionID],
     );
@@ -203,15 +201,15 @@ export const GalleryBarAndListHeader: React.FC<
                 onSelectCollectionID={setActiveCollectionID}
                 onChangeCollectionsSortBy={setCollectionsSortBy}
                 onShowAllAlbums={showAllAlbums}
-                collectionSummaries={sortedCollectionSummaries.filter((x) =>
-                    shouldShowOnCollectionBar(x.type),
+                collectionSummaries={sortedCollectionSummaries.filter(
+                    (cs) => !cs.attributes.has("hideFromCollectionBar"),
                 )}
             />
 
             <AllAlbums
                 {...allAlbumsVisibilityProps}
                 collectionSummaries={sortedCollectionSummaries.filter(
-                    (x) => !isSystemCollection(x.type),
+                    (cs) => !cs.attributes.has("system"),
                 )}
                 onSelectCollectionID={setActiveCollectionID}
                 onChangeCollectionsSortBy={setCollectionsSortBy}

@@ -1299,7 +1299,11 @@ const deriveNormalCollectionSummaries = (
             ...pseudoCollectionOptionsForFiles([]),
             id,
             type: "uncategorized",
-            attributes: new Set(["uncategorized"]),
+            attributes: new Set([
+                "uncategorized",
+                "system",
+                "hideFromCollectionBar",
+            ]),
             name: t("section_uncategorized"),
             sortPriority: CollectionSummarySortPriority.system,
         });
@@ -1321,7 +1325,7 @@ const deriveNormalCollectionSummaries = (
         ...pseudoCollectionOptionsForFiles(allSectionFiles),
         id: PseudoCollectionID.all,
         type: "all",
-        attributes: new Set(["all"]),
+        attributes: new Set(["all", "system"]),
         name: t("section_all"),
         sortPriority: CollectionSummarySortPriority.system,
     });
@@ -1334,7 +1338,7 @@ const deriveNormalCollectionSummaries = (
         id: PseudoCollectionID.trash,
         name: t("section_trash"),
         type: "trash",
-        attributes: new Set(["trash"]),
+        attributes: new Set(["trash", "system", "hideFromCollectionBar"]),
         coverFile: undefined,
         sortPriority: CollectionSummarySortPriority.other,
     });
@@ -1344,7 +1348,11 @@ const deriveNormalCollectionSummaries = (
         id: PseudoCollectionID.archiveItems,
         name: t("section_archive"),
         type: "archiveItems",
-        attributes: new Set(),
+        attributes: new Set([
+            "archiveItems",
+            "system",
+            "hideFromCollectionBar",
+        ]),
         coverFile: undefined,
         sortPriority: CollectionSummarySortPriority.other,
     });
@@ -1388,7 +1396,7 @@ const deriveHiddenCollectionSummaries = (
         id: PseudoCollectionID.hiddenItems,
         name: t("hidden_items"),
         type: "hiddenItems",
-        attributes: new Set(["hiddenItems"]),
+        attributes: new Set(["hiddenItems", "system"]),
         sortPriority: CollectionSummarySortPriority.system,
     });
 
@@ -1420,15 +1428,30 @@ const createCollectionSummaries = (
             ? collection.type
             : "album";
 
+        const attributes = new Set<CollectionSummaryAttribute>();
+
         let type: CollectionSummaryType;
+        let name = collection.name;
         let sortPriority: CollectionSummarySortPriority =
             CollectionSummarySortPriority.other;
+
         if (collection.owner.id != user.id) {
             // This case needs to be the first; the rest assume that they're
             // dealing with collections owned by the user.
             type = "sharedIncoming";
+            attributes.add("shared");
+            attributes.add("sharedIncoming");
+            attributes.add(
+                collection.sharees.find((s) => s.id == user.id)?.role ==
+                    "COLLABORATOR"
+                    ? "sharedIncomingCollaborator"
+                    : "sharedIncomingViewer",
+            );
         } else if (collectionType == "uncategorized") {
             type = "uncategorized";
+            name = t("section_uncategorized");
+            attributes.add("system");
+            attributes.add("hideFromCollectionBar");
             sortPriority = CollectionSummarySortPriority.system;
         } else if (collectionType == "favorites") {
             // [Note: User and shared favorites]
@@ -1453,26 +1476,19 @@ const createCollectionSummaries = (
             // user's "favorites", everything else is secondary and can be part
             // of the `attributes` computed below.
             type = "userFavorites";
+            name = t("favorites");
             sortPriority = CollectionSummarySortPriority.favorites;
         } else if (isDefaultHiddenCollection(collection)) {
             type = "defaultHidden";
+            attributes.add("system");
+            attributes.add("hideFromCollectionBar");
         } else {
             type = collectionType;
         }
 
-        // This block of code duplicates the above. Such duplication is needed
-        // until type is completely replaced by attributes.
-        const attributes = new Set<CollectionSummaryAttribute>();
-        if (collection.owner.id != user.id) {
-            attributes.add("shared");
-            attributes.add("sharedIncoming");
-            attributes.add(
-                collection.sharees.find((s) => s.id == user.id)?.role ==
-                    "COLLABORATOR"
-                    ? "sharedIncomingCollaborator"
-                    : "sharedIncomingViewer",
-            );
-        }
+        attributes.add(type);
+        attributes.add(collectionType);
+
         if (collection.owner.id == user.id && collection.sharees.length) {
             attributes.add("shared");
             attributes.add("sharedOutgoing");
@@ -1484,21 +1500,12 @@ const createCollectionSummaries = (
         if (isArchivedCollection(collection)) {
             attributes.add("archived");
         }
-        if (isDefaultHiddenCollection(collection)) {
-            attributes.add("defaultHidden");
-        }
         if (collection.magicMetadata?.data.order == CollectionOrder.pinned) {
             attributes.add("pinned");
             sortPriority = CollectionSummarySortPriority.pinned;
         }
-        attributes.add(collectionType);
 
-        let name: string;
-        if (type == "uncategorized") {
-            name = t("section_uncategorized");
-        } else if (type == "userFavorites") {
-            name = t("favorites");
-        } else if (collectionType == "favorites") {
+        if (type == "sharedIncoming" && collectionType == "favorites") {
             // See: [Note: User and shared favorites] above.
             //
             // Use the first letter of the email of the user who shared this
@@ -1511,8 +1518,6 @@ const createCollectionSummaries = (
             } else {
                 name = t("shared_favorites");
             }
-        } else {
-            name = collection.name;
         }
 
         const collectionFiles = filesByCollection.get(collection.id);
