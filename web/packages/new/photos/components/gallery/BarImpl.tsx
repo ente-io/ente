@@ -23,7 +23,7 @@ import {
 import { FocusVisibleUnstyledButton } from "ente-new/photos/components/UnstyledButton";
 import type {
     CollectionSummary,
-    CollectionSummaryType,
+    CollectionSummaryAttribute,
     CollectionsSortBy,
 } from "ente-new/photos/services/collection-summary";
 import type { Person } from "ente-new/photos/services/ml/people";
@@ -528,7 +528,7 @@ const CardText: React.FC<React.PropsWithChildren> = ({ children }) => (
 );
 
 interface CollectionBarCardIconProps {
-    attributes: Set<CollectionSummaryType>;
+    attributes: Set<CollectionSummaryAttribute>;
 }
 
 const CollectionBarCardIcon: React.FC<CollectionBarCardIconProps> = ({
@@ -538,15 +538,17 @@ const CollectionBarCardIcon: React.FC<CollectionBarCardIconProps> = ({
     // will be true simultaneously even in the rarest of cases (a pinned and
     // shared album that is also archived), and there is enough space for 3.
     <CollectionBarCardIcon_>
-        {attributes.has("favorites") && <FavoriteRoundedIcon />}
+        {attributes.has("userFavorites") && <FavoriteRoundedIcon />}
         {attributes.has("pinned") && (
             // Need && to override the 20px set in the container.
             <PushPinIcon sx={{ "&&": { fontSize: "18px" } }} />
         )}
-        {(attributes.has("outgoingShare") ||
-            attributes.has("incomingShareViewer") ||
-            attributes.has("incomingShareCollaborator")) && <PeopleIcon />}
-        {attributes.has("sharedOnlyViaLink") && <LinkIcon />}
+        {attributes.has("shared") &&
+            (attributes.has("sharedOnlyViaLink") ? (
+                <LinkIcon />
+            ) : (
+                <PeopleIcon />
+            ))}
         {attributes.has("archived") && <ArchiveIcon sx={{ opacity: 0.48 }} />}
     </CollectionBarCardIcon_>
 );

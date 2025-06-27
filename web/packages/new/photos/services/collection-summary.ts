@@ -4,14 +4,22 @@ import type { EnteFile } from "ente-media/file";
 export type CollectionSummaryType =
     | CollectionType
     | "all"
-    | "archive"
-    | "trash"
     | "hiddenItems"
     | "defaultHidden"
-    | "outgoingShare"
-    | "incomingShareViewer"
-    | "incomingShareCollaborator"
+    | "archiveItems"
+    | "trash"
+    | "userFavorites"
+    | "sharedIncoming";
+
+export type CollectionSummaryAttribute =
+    | CollectionSummaryType
+    | "shared"
+    | "sharedOutgoing"
+    | "sharedIncomingViewer"
+    | "sharedIncomingCollaborator"
     | "sharedOnlyViaLink"
+    | "system"
+    | "hideFromCollectionBar"
     | "archived"
     | "pinned";
 
@@ -117,7 +125,7 @@ export interface CollectionSummary {
      * ad-hoc "UI" attributes which make it easier and more efficient for the UI
      * elements to render the collection summary in the UI.
      */
-    attributes: Set<CollectionSummaryType>;
+    attributes: Set<CollectionSummaryAttribute>;
     /**
      * The name of the collection or pseudo-collection surfaced in the UI.
      */
@@ -201,47 +209,15 @@ export const CollectionSummarySortPriority = {
 export type CollectionSummarySortPriority =
     (typeof CollectionSummarySortPriority)[keyof typeof CollectionSummarySortPriority];
 
-const systemCSTypes = new Set<CollectionSummaryType>([
-    "all",
-    "archive",
-    "trash",
-    "uncategorized",
-    "hiddenItems",
-    "defaultHidden",
-]);
-
-const addToDisabledCSTypes = new Set<CollectionSummaryType>([
-    ...systemCSTypes,
-    "incomingShareViewer",
-]);
-
-const moveToDisabledCSTypes = new Set<CollectionSummaryType>([
-    ...addToDisabledCSTypes,
-    "incomingShareCollaborator",
-]);
-
-const hideFromCollectionBarCSTypes = new Set<CollectionSummaryType>([
-    "trash",
-    "archive",
-    "uncategorized",
-    "defaultHidden",
-]);
-
-export const isSystemCollection = (type: CollectionSummaryType) =>
-    systemCSTypes.has(type);
-
-export const areOnlySystemCollections = (
+export const haveOnlySystemCollections = (
     collectionSummaries: CollectionSummaries,
 ) =>
-    [...collectionSummaries.values()].every(({ type }) =>
-        isSystemCollection(type),
+    [...collectionSummaries.values()].every((cs) =>
+        cs.attributes.has("system"),
     );
 
-export const canAddToCollection = (type: CollectionSummaryType) =>
-    !addToDisabledCSTypes.has(type);
+export const canAddToCollection = ({ attributes }: CollectionSummary) =>
+    !attributes.has("system") && !attributes.has("sharedIncomingViewer");
 
-export const canMoveToCollection = (type: CollectionSummaryType) =>
-    !moveToDisabledCSTypes.has(type);
-
-export const shouldShowOnCollectionBar = (type: CollectionSummaryType) =>
-    !hideFromCollectionBarCSTypes.has(type);
+export const canMoveToCollection = ({ attributes }: CollectionSummary) =>
+    !attributes.has("system") && !attributes.has("sharedIncoming");

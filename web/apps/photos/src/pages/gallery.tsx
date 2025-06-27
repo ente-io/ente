@@ -69,7 +69,7 @@ import { usePeopleStateSnapshot } from "ente-new/photos/components/utils/use-sna
 import { shouldShowWhatsNew } from "ente-new/photos/services/changelog";
 import { createAlbum } from "ente-new/photos/services/collection";
 import {
-    areOnlySystemCollections,
+    haveOnlySystemCollections,
     PseudoCollectionID,
 } from "ente-new/photos/services/collection-summary";
 import exportService from "ente-new/photos/services/export";
@@ -108,7 +108,7 @@ import {
 import { PromiseQueue } from "ente-utils/promise";
 import { t } from "i18next";
 import { useRouter, type NextRouter } from "next/router";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FileWithPath } from "react-dropzone";
 import { Trans } from "react-i18next";
 import {
@@ -249,9 +249,26 @@ const Page: React.FC = () => {
             : state.view?.activeCollectionSummaryID;
     const activeCollection =
         state.view?.type == "people" ? undefined : state.view?.activeCollection;
+    const activeCollectionSummary =
+        state.view?.type == "people"
+            ? undefined
+            : state.view?.activeCollectionSummary;
     const activePerson =
         state.view?.type == "people" ? state.view.activePerson : undefined;
     const activePersonID = activePerson?.id;
+
+    // TODO: Move into reducer
+    const barCollectionSummaries = useMemo(
+        () =>
+            barMode == "hidden-albums"
+                ? state.hiddenCollectionSummaries
+                : state.normalCollectionSummaries,
+        [
+            barMode,
+            state.hiddenCollectionSummaries,
+            state.normalCollectionSummaries,
+        ],
+    );
 
     if (process.env.NEXT_PUBLIC_ENTE_TRACE) console.log("render", state);
 
@@ -917,20 +934,7 @@ const Page: React.FC = () => {
                             selected.collectionID,
                             state.collections,
                         )}
-                        isFavoriteCollection={
-                            normalCollectionSummaries.get(activeCollectionID)
-                                ?.type == "favorites"
-                        }
-                        isUncategorizedCollection={
-                            normalCollectionSummaries.get(activeCollectionID)
-                                ?.type == "uncategorized"
-                        }
-                        isIncomingSharedCollection={
-                            normalCollectionSummaries.get(activeCollectionID)
-                                ?.type == "incomingShareCollaborator" ||
-                            normalCollectionSummaries.get(activeCollectionID)
-                                ?.type == "incomingShareViewer"
-                        }
+                        activeCollectionSummary={activeCollectionSummary}
                         isInSearchMode={isInSearchMode}
                         isInHiddenSection={barMode == "hidden-albums"}
                     />
@@ -967,8 +971,7 @@ const Page: React.FC = () => {
                 }}
                 mode={barMode}
                 shouldHide={isInSearchMode}
-                collectionSummaries={normalCollectionSummaries}
-                hiddenCollectionSummaries={state.hiddenCollectionSummaries}
+                barCollectionSummaries={barCollectionSummaries}
                 emailByUserID={state.emailByUserID}
                 shareSuggestionEmails={state.shareSuggestionEmails}
                 people={
@@ -1003,14 +1006,14 @@ const Page: React.FC = () => {
                 onRemoteFilesPull={remoteFilesPull}
                 onUploadFile={(file) => dispatch({ type: "uploadFile", file })}
                 onShowPlanSelector={showPlanSelector}
-                isFirstUpload={areOnlySystemCollections(
+                isFirstUpload={haveOnlySystemCollections(
                     normalCollectionSummaries,
                 )}
                 showSessionExpiredMessage={showSessionExpiredDialog}
             />
             <Sidebar
                 {...sidebarVisibilityProps}
-                collectionSummaries={normalCollectionSummaries}
+                normalCollectionSummaries={normalCollectionSummaries}
                 uncategorizedCollectionSummaryID={
                     state.uncategorizedCollectionSummaryID
                 }
@@ -1051,12 +1054,9 @@ const Page: React.FC = () => {
                     setSelected={setSelected}
                     activeCollectionID={activeCollectionID}
                     activePersonID={activePerson?.id}
-                    isInIncomingSharedCollection={
-                        normalCollectionSummaries.get(activeCollectionID)
-                            ?.type == "incomingShareCollaborator" ||
-                        normalCollectionSummaries.get(activeCollectionID)
-                            ?.type == "incomingShareViewer"
-                    }
+                    isInIncomingSharedCollection={activeCollectionSummary?.attributes.has(
+                        "sharedIncoming",
+                    )}
                     isInHiddenSection={barMode == "hidden-albums"}
                     {...{
                         favoriteFileIDs,
