@@ -138,11 +138,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
         widget.file.uploadedFileID!,
       )
           .listen((event) {
-        if (mounted) {
-          setState(() {
-            _progressNotifier.value = event.progress;
-          });
-        }
+        _progressNotifier.value = event.progress;
       });
     }
 
