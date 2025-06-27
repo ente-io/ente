@@ -620,8 +620,7 @@ class _MemoryBlur extends StatelessWidget {
       valueListenable: inheritedData.indexNotifier,
       builder: (context, value, _) {
         final currentFile = inheritedData.memories[value].file;
-        if (currentFile.fileType == FileType.video ||
-            currentFile.fileType == FileType.livePhoto) {
+        if (currentFile.fileType == FileType.video) {
           return const SizedBox.shrink();
         }
         return AnimatedSwitcher(
