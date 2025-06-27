@@ -60,6 +60,10 @@ class FlagService {
 
   String get castUrl => flags.castUrl;
 
+  bool hasSyncedAccountFlags() {
+    return _prefs.containsKey("remote_flags");
+  }
+
   Future<void> setMapEnabled(bool isEnabled) async {
     await _updateKeyValue("mapEnabled", isEnabled.toString());
     _updateFlags(flags.copyWith(mapEnabled: isEnabled));
