@@ -19,7 +19,6 @@ import "package:photos/ui/actions/file/file_actions.dart";
 import "package:photos/ui/home/memories/custom_listener.dart";
 import "package:photos/ui/home/memories/memory_progress_indicator.dart";
 import "package:photos/ui/viewer/file/file_widget.dart";
-
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/ui/viewer/file_details/favorite_widget.dart";
 import "package:photos/utils/file_util.dart";
@@ -295,10 +294,12 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
             backgroundColor: Colors.black,
             extendBodyBehindAppBar: true,
             appBar: AppBar(
+              toolbarHeight: 64,
+              primary: false,
               automaticallyImplyLeading: false,
               title: ValueListenableBuilder(
                 valueListenable: inheritedData.indexNotifier,
-                child: InkWell(
+                child: GestureDetector(
                   onTap: () => Navigator.pop(context),
                   child: const Padding(
                     padding: EdgeInsets.fromLTRB(4, 8, 8, 8),
@@ -309,6 +310,9 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      const SizedBox(
+                        height: 32,
+                      ),
                       showStepProgressIndicator
                           ? ValueListenableBuilder<Duration>(
                               valueListenable: durationNotifier,
@@ -330,7 +334,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                               },
                             )
                           : const SizedBox.shrink(),
-                      const SizedBox(height: 10),
+                      const SizedBox(height: 6),
                       Row(
                         children: [
                           child!,
@@ -360,11 +364,12 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                     colors: [
-                      Color.fromARGB(97, 0, 0, 0),
-                      Color.fromARGB(42, 0, 0, 0),
+                      Color.fromARGB(75, 0, 0, 0),
+                      Color.fromARGB(37, 0, 0, 0),
+                      Colors.transparent,
                       Colors.transparent,
                     ],
-                    stops: [0, 0.6, 1],
+                    stops: [0, 0.45, 0.8, 1],
                   ),
                 ),
               ),
@@ -598,11 +603,12 @@ class BottomGradient extends StatelessWidget {
             begin: Alignment.bottomCenter,
             end: Alignment.topCenter,
             colors: [
-              Color.fromARGB(97, 0, 0, 0),
-              Color.fromARGB(42, 0, 0, 0),
+              Color.fromARGB(75, 0, 0, 0),
+              Color.fromARGB(37, 0, 0, 0),
+              Colors.transparent,
               Colors.transparent,
             ],
-            stops: [0, 0.5, 1.0],
+            stops: [0, 0.45, 0.8, 1],
           ),
         ),
       ),
