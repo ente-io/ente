@@ -1344,7 +1344,7 @@ const deriveNormalCollectionSummaries = (
         id: PseudoCollectionID.archiveItems,
         name: t("section_archive"),
         type: "archiveItems",
-        attributes: new Set(["archiveItems"]),
+        attributes: new Set(),
         coverFile: undefined,
         sortPriority: CollectionSummarySortPriority.other,
     });
@@ -1424,6 +1424,8 @@ const createCollectionSummaries = (
         let sortPriority: CollectionSummarySortPriority =
             CollectionSummarySortPriority.other;
         if (collection.owner.id != user.id) {
+            // This case needs to be the first; the rest assume that they're
+            // dealing with collections owned by the user.
             type = "sharedIncoming";
         } else if (collectionType == "uncategorized") {
             type = "uncategorized";
@@ -1433,9 +1435,12 @@ const createCollectionSummaries = (
             //
             // "favorites" can be both the user's own favorites, or favorites of
             // other users shared with them. However, all of the latter will get
-            // typed as "sharedIncoming" in the first case above. So if a
-            // collection summary has type "favorites", it is guaranteed to be
-            // the user's own favorites.
+            // typed as "sharedIncoming" in the first case above.
+            //
+            // So if we get here and the collection summary has type
+            // "favorites", it is guaranteed to be the user's own favorites. We
+            // mark these with the type "userFavorites", which gives it special
+            // treatment like custom icon etc.
             //
             // However, notice that the type of the _collection_ itself is not
             // changed, so whenever we're checking the type of the collection
@@ -1447,7 +1452,7 @@ const createCollectionSummaries = (
             // classification of this collection summary is that it is the
             // user's "favorites", everything else is secondary and can be part
             // of the `attributes` computed below.
-            type = collectionType;
+            type = "userFavorites";
             sortPriority = CollectionSummarySortPriority.favorites;
         } else if (isDefaultHiddenCollection(collection)) {
             type = "defaultHidden";
@@ -1486,23 +1491,12 @@ const createCollectionSummaries = (
             attributes.add("pinned");
             sortPriority = CollectionSummarySortPriority.pinned;
         }
-        switch (collectionType) {
-            case "favorites":
-                // We don't want to treat other folks' favorites specially like
-                // the user's own favorites (giving it a special icon etc), so
-                // only apply the favorites attribute if it is the user's own.
-                if (collection.owner.id == user.id)
-                    attributes.add(collectionType);
-                break;
-            default:
-                attributes.add(collectionType);
-                break;
-        }
+        attributes.add(collectionType);
 
         let name: string;
         if (type == "uncategorized") {
             name = t("section_uncategorized");
-        } else if (type == "favorites") {
+        } else if (type == "userFavorites") {
             name = t("favorites");
         } else if (collectionType == "favorites") {
             // See: [Note: User and shared favorites] above.

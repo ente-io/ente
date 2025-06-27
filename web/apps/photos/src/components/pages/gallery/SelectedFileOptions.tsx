@@ -89,13 +89,14 @@ const SelectedFileOptions = ({
 
     const peopleMode = barMode == "people";
 
-    const isFavoriteCollection = activeCollectionSummary?.type == "favorites";
+    const isFavoriteCollection =
+        !!activeCollectionSummary?.attributes.has("userFavorites");
 
     const isUncategorizedCollection =
         activeCollectionSummary?.type == "uncategorized";
 
     const isSharedIncomingCollection =
-        activeCollectionSummary?.attributes.has("sharedIncoming");
+        !!activeCollectionSummary?.attributes.has("sharedIncoming");
 
     const addToCollection = () =>
         onOpenCollectionSelector({

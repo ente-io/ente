@@ -8,18 +8,13 @@ export type CollectionSummaryType =
     | "defaultHidden"
     | "archiveItems"
     | "trash"
+    | "userFavorites"
     | "sharedIncoming";
 
 export type CollectionSummaryAttribute =
-    | CollectionType
-    | "all"
-    | "hiddenItems"
-    | "defaultHidden"
-    | "archiveItems"
-    | "trash"
+    | CollectionSummaryType
     | "shared"
     | "sharedOutgoing"
-    | "sharedIncoming"
     | "sharedIncomingViewer"
     | "sharedIncomingCollaborator"
     | "sharedOnlyViaLink"

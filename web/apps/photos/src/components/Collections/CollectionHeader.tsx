@@ -89,12 +89,8 @@ export const CollectionHeader: React.FC<CollectionHeaderProps> = (props) => {
         if (attributes.has("archived")) return <ArchiveOutlinedIcon />;
         if (attributes.has("sharedOnlyViaLink")) return <LinkIcon />;
         if (attributes.has("shared")) return <PeopleIcon />;
-        switch (type) {
-            case "favorites":
-                return <FavoriteRoundedIcon />;
-            default:
-                return <></>;
-        }
+        if (attributes.has("userFavorites")) return <FavoriteRoundedIcon />;
+        return <></>;
     };
 
     return (
@@ -313,7 +309,7 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
             ];
             break;
 
-        case "favorites":
+        case "userFavorites":
             menuOptions = [
                 <DownloadOption
                     key="download"
@@ -494,7 +490,6 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
         <Box sx={{ display: "inline-flex", gap: "16px" }}>
             <QuickOptions
                 collectionSummary={collectionSummary}
-                collectionSummaryType={collectionSummaryType}
                 isDownloadInProgress={isActiveCollectionDownloadInProgress}
                 onEmptyTrashClick={confirmEmptyTrash}
                 onDownloadClick={downloadCollection}
@@ -533,7 +528,6 @@ interface OptionProps {
 
 interface QuickOptionsProps {
     collectionSummary: CollectionSummary;
-    collectionSummaryType: CollectionSummary["type"];
     isDownloadInProgress: () => boolean;
     onEmptyTrashClick: () => void;
     onDownloadClick: () => void;
@@ -545,11 +539,10 @@ const QuickOptions: React.FC<QuickOptionsProps> = ({
     onDownloadClick,
     onShareClick,
     collectionSummary,
-    collectionSummaryType: type,
     isDownloadInProgress,
 }) => (
     <Stack direction="row" sx={{ alignItems: "center", gap: "16px" }}>
-        {showEmptyTrashQuickOption(type) && (
+        {showEmptyTrashQuickOption(collectionSummary) && (
             <EmptyTrashQuickOption onClick={onEmptyTrashClick} />
         )}
         {showDownloadQuickOption(collectionSummary) &&
@@ -557,21 +550,20 @@ const QuickOptions: React.FC<QuickOptionsProps> = ({
                 <ActivityIndicator size="20px" sx={{ m: "12px" }} />
             ) : (
                 <DownloadQuickOption
+                    collectionSummary={collectionSummary}
                     onClick={onDownloadClick}
-                    collectionSummaryType={type}
                 />
             ))}
         {showShareQuickOption(collectionSummary) && (
             <ShareQuickOption
-                onClick={onShareClick}
                 collectionSummary={collectionSummary}
-                collectionSummaryType={type}
+                onClick={onShareClick}
             />
         )}
     </Stack>
 );
 
-const showEmptyTrashQuickOption = (type: CollectionSummaryType) =>
+const showEmptyTrashQuickOption = ({ type }: CollectionSummary) =>
     type == "trash";
 
 const EmptyTrashQuickOption: React.FC<OptionProps> = ({ onClick }) => (
@@ -585,26 +577,26 @@ const EmptyTrashQuickOption: React.FC<OptionProps> = ({ onClick }) => (
 const showDownloadQuickOption = ({ type, attributes }: CollectionSummary) =>
     type == "album" ||
     type == "folder" ||
-    type == "favorites" ||
     type == "uncategorized" ||
     type == "hiddenItems" ||
+    attributes.has("favorites") ||
     attributes.has("shared");
 
 type DownloadQuickOptionProps = OptionProps & {
-    collectionSummaryType: CollectionSummaryType;
+    collectionSummary: CollectionSummary;
 };
 
 const DownloadQuickOption: React.FC<DownloadQuickOptionProps> = ({
+    collectionSummary: { type },
     onClick,
-    collectionSummaryType,
 }) => (
     <Tooltip
         title={
-            collectionSummaryType == "favorites"
+            type == "userFavorites"
                 ? t("download_favorites")
-                : collectionSummaryType == "uncategorized"
+                : type == "uncategorized"
                   ? t("download_uncategorized")
-                  : collectionSummaryType == "hiddenItems"
+                  : type == "hiddenItems"
                     ? t("download_hidden_items")
                     : t("download_album")
         }
@@ -618,27 +610,25 @@ const DownloadQuickOption: React.FC<DownloadQuickOptionProps> = ({
 const showShareQuickOption = ({ type, attributes }: CollectionSummary) =>
     type == "album" ||
     type == "folder" ||
-    type == "favorites" ||
+    attributes.has("favorites") ||
     attributes.has("shared");
 
 interface ShareQuickOptionProps {
-    onClick: () => void;
     collectionSummary: CollectionSummary;
-    collectionSummaryType: CollectionSummaryType;
+    onClick: () => void;
 }
 
 const ShareQuickOption: React.FC<ShareQuickOptionProps> = ({
+    collectionSummary: { attributes },
     onClick,
-    collectionSummary,
-    collectionSummaryType,
 }) => (
     <Tooltip
         title={
-            collectionSummary.attributes.has("sharedIncoming")
+            attributes.has("sharedIncoming")
                 ? t("sharing_details")
-                : collectionSummary.attributes.has("shared")
+                : attributes.has("shared")
                   ? t("modify_sharing")
-                  : collectionSummaryType == "favorites"
+                  : attributes.has("userFavorites")
                     ? t("share_favorites")
                     : t("share_album")
         }

@@ -538,7 +538,7 @@ const CollectionBarCardIcon: React.FC<CollectionBarCardIconProps> = ({
     // will be true simultaneously even in the rarest of cases (a pinned and
     // shared album that is also archived), and there is enough space for 3.
     <CollectionBarCardIcon_>
-        {attributes.has("favorites") && <FavoriteRoundedIcon />}
+        {attributes.has("userFavorites") && <FavoriteRoundedIcon />}
         {attributes.has("pinned") && (
             // Need && to override the 20px set in the container.
             <PushPinIcon sx={{ "&&": { fontSize: "18px" } }} />
