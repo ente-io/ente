@@ -4,19 +4,19 @@ import type { EnteFile } from "ente-media/file";
 export type CollectionSummaryType =
     | CollectionType
     | "all"
-    | "archive"
-    | "trash"
     | "hiddenItems"
     | "defaultHidden"
+    | "archiveItems"
+    | "trash"
     | "sharedIncoming";
 
 export type CollectionSummaryAttribute =
     | CollectionType
     | "all"
-    | "archive"
-    | "trash"
     | "hiddenItems"
     | "defaultHidden"
+    | "archiveItems"
+    | "trash"
     | "shared"
     | "sharedOutgoing"
     | "sharedIncoming"
@@ -214,7 +214,7 @@ export type CollectionSummarySortPriority =
 
 const systemCSTypes = new Set<CollectionSummaryType>([
     "all",
-    "archive",
+    "archiveItems",
     "trash",
     "uncategorized",
     "hiddenItems",
@@ -228,7 +228,7 @@ const moveToDisabledCSTypes = new Set<CollectionSummaryType>([
 
 const hideFromCollectionBarCSTypes = new Set<CollectionSummaryType>([
     "trash",
-    "archive",
+    "archiveItems",
     "uncategorized",
     "defaultHidden",
 ]);

@@ -114,7 +114,7 @@ export const CollectionHeader: React.FC<CollectionHeaderProps> = (props) => {
 };
 
 const shouldShowOptions = (type: CollectionSummaryType) =>
-    type != "all" && type != "archive";
+    type != "all" && type != "archiveItems";
 
 const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
     activeCollection,

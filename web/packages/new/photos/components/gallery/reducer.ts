@@ -1343,8 +1343,8 @@ const deriveNormalCollectionSummaries = (
         ...pseudoCollectionOptionsForFiles(archiveItemsFiles),
         id: PseudoCollectionID.archiveItems,
         name: t("section_archive"),
-        type: "archive",
-        attributes: new Set(["archive"]),
+        type: "archiveItems",
+        attributes: new Set(["archiveItems"]),
         coverFile: undefined,
         sortPriority: CollectionSummarySortPriority.other,
     });
