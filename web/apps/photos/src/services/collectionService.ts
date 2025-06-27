@@ -1,15 +1,10 @@
-import type { User } from "ente-accounts/services/user";
-import { isDevBuild } from "ente-base/env";
 import log from "ente-base/log";
 import { apiURL } from "ente-base/origins";
-import { groupFilesByCollectionID, sortFiles } from "ente-gallery/utils/file";
+import { sortFiles } from "ente-gallery/utils/file";
 import { EnteFile } from "ente-media/file";
 import {
     addToFavorites,
-    createUncategorizedCollection,
-    moveFromCollection,
-    removeFromCollection2,
-    removeNonUserFilesFromCollection,
+    removeFromCollection,
     savedUserFavoritesCollection,
 } from "ente-new/photos/services/collection";
 import type { CollectionSummary } from "ente-new/photos/services/collection-summary";
@@ -17,14 +12,9 @@ import {
     CollectionSummaryOrder,
     CollectionsSortBy,
 } from "ente-new/photos/services/collection-summary";
-import {
-    savedCollectionFiles,
-    savedCollections,
-} from "ente-new/photos/services/photos-fdb";
+import { savedCollectionFiles } from "ente-new/photos/services/photos-fdb";
 import HTTPService from "ente-shared/network/HTTPService";
-import { getData } from "ente-shared/storage/localStorage";
 import { getToken } from "ente-shared/storage/localStorage/helpers";
-import { isValidMoveTarget } from "utils/collection";
 
 export const addToFavorites1 = async (file: EnteFile) => {
     await addToFavorites([file]);
@@ -36,106 +26,6 @@ export const removeFromFavorites1 = async (file: EnteFile) => {
         throw Error("favorite collection missing");
     }
     await removeFromCollection(favCollection.id, [file]);
-};
-
-export const removeFromCollection = async (
-    collectionID: number,
-    toRemoveFiles: EnteFile[],
-) => {
-    // TODO(RE):
-    if (isDevBuild && process.env.NEXT_PUBLIC_ENTE_WIP_MOVE)
-        return removeFromCollection2(collectionID, toRemoveFiles);
-
-    try {
-        const user: User = getData("user");
-        const nonUserFiles = [];
-        const userFiles = [];
-        for (const file of toRemoveFiles) {
-            if (file.ownerID === user.id) {
-                userFiles.push(file);
-            } else {
-                nonUserFiles.push(file);
-            }
-        }
-
-        if (nonUserFiles.length > 0) {
-            await removeNonUserFilesFromCollection(
-                collectionID,
-                nonUserFiles.map((f) => f.id),
-            );
-        }
-        if (userFiles.length > 0) {
-            await removeUserFiles(collectionID, userFiles);
-        }
-    } catch (e) {
-        log.error("remove from collection failed ", e);
-        throw e;
-    }
-};
-
-const removeUserFiles = async (
-    sourceCollectionID: number,
-    toRemoveFiles: EnteFile[],
-) => {
-    try {
-        const allFiles = await savedCollectionFiles();
-
-        const toRemoveFilesIds = new Set(toRemoveFiles.map((f) => f.id));
-        const toRemoveFilesCopiesInOtherCollections = allFiles.filter((f) => {
-            return toRemoveFilesIds.has(f.id);
-        });
-        const groupedFiles = groupFilesByCollectionID(
-            toRemoveFilesCopiesInOtherCollections,
-        );
-
-        const collections = await savedCollections();
-        const collectionsMap = new Map(collections.map((c) => [c.id, c]));
-        const user: User = getData("user");
-
-        for (const [targetCollectionID, files] of groupedFiles.entries()) {
-            const targetCollection = collectionsMap.get(targetCollectionID);
-            if (
-                !isValidMoveTarget(sourceCollectionID, targetCollection, user)
-            ) {
-                continue;
-            }
-            const toMoveFiles = files.filter((f) => {
-                if (toRemoveFilesIds.has(f.id)) {
-                    toRemoveFilesIds.delete(f.id);
-                    return true;
-                }
-                return false;
-            });
-            if (toMoveFiles.length === 0) {
-                continue;
-            }
-            await moveFromCollection(
-                sourceCollectionID,
-                targetCollection,
-                toMoveFiles,
-            );
-        }
-        const leftFiles = toRemoveFiles.filter((f) =>
-            toRemoveFilesIds.has(f.id),
-        );
-
-        if (leftFiles.length === 0) {
-            return;
-        }
-
-        const uncategorizedCollection =
-            collections.find((c) => c.type == "uncategorized") ??
-            (await createUncategorizedCollection());
-
-        await moveFromCollection(
-            sourceCollectionID,
-            uncategorizedCollection,
-            leftFiles,
-        );
-    } catch (e) {
-        log.error("remove user files failed ", e);
-        throw e;
-    }
 };
 
 export const deleteCollection = async (

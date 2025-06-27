@@ -27,7 +27,6 @@ import React, { useReducer } from "react";
 import {
     findDefaultHiddenCollectionIDs,
     isDefaultHiddenCollection,
-    isIncomingShare,
 } from "../../services/collection";
 import {
     PseudoCollectionID,
@@ -1372,7 +1371,7 @@ const createCollectionSummaries = (
             : "album";
 
         let type: CollectionSummaryType;
-        if (isIncomingShare(collection, user)) {
+        if (collection.owner.id != user.id) {
             if (isIncomingCollabShare(collection, user)) {
                 type = "incomingShareCollaborator";
             } else {
@@ -1415,7 +1414,7 @@ const createCollectionSummaries = (
         // This block of code duplicates the above. Such duplication is needed
         // until type is completely replaced by attributes.
         const attributes: CollectionSummaryType[] = [];
-        if (isIncomingShare(collection, user)) {
+        if (collection.owner.id != user.id) {
             if (isIncomingCollabShare(collection, user)) {
                 attributes.push("incomingShareCollaborator");
             } else {

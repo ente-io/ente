@@ -1,4 +1,4 @@
-import { ensureLocalUser, type User } from "ente-accounts/services/user";
+import { ensureLocalUser } from "ente-accounts/services/user";
 import { blobCache } from "ente-base/blob-cache";
 import {
     boxSeal,
@@ -679,30 +679,49 @@ export const deleteFromTrash = async (fileIDs: number[]) =>
     );
 
 /**
- * Remove the given files from the specified collection.
+ * Remove the given files from the specified collection owned by the user.
  *
  * Reads local state but does not modify it. The effects are on remote.
  *
  * [Note: Removing files from a collection]
  *
- * The "remove from collection" primitive operates differently depending on
- * whether or not the user owns the files that they're trying to remove.
+ * There are three scenarios
  *
- * 1. If the user owns the file, then move it from this collection to a
- *    different user owned collection in which it already exists (such a move
- *    acts as a remove). If it doesn't exist in any other user owned collection,
- *    then move it to the user's "Uncategorized" collection.
+ *                             own file      shared file
+ *     own collection             M               R
+ *     others collection          R         not supported
  *
- * 1. If the user does not own the file, then it should be removed from the
- *    collection using POST "/collections/v3/remove-files".
+ *     M (move)   when both collection and file belongs to user
+ *     R (remove) when only one of them belongs to the user
+ *
+ * The move operation is not supported across ownership boundaries. The remove
+ * operation is only supported across ownership boundaries, but the user should
+ * have owner ship of either the file or collection (not both).
+ *
+ * In more detail, the above three scenarios can be described this way.
+ *
+ * 1. Move: If the user owns both the collection and the file they're trying to
+ *    remove from the collection, then instead of a remove the client needs to
+ *    move it to a different user owned collection in which it already exists
+ *    (such a move acts as a remove). If it doesn't exist in any other user
+ *    owned collection, then move it to the user's "Uncategorized" collection.
+ *    The intent is that a "remove from collection" should not remove the last
+ *    copy of a file (thus deleting it).
+ *
+ * 2. Remove: If the user does not own the file being removed, or owns the file
+ *    being removed but does not own the collection from which it is being
+ *    removed, they can remove it from the collection using the POST
+ *    "/collections/v3/remove-files".
+ *
+ * 3. Not supported: Currently the possibility of removing a file the user does
+ *    not own from a collection that the user does not own, even if they are a
+ *    collaborator, is not supported.
  *
  * The "remove from collection" primitive is provided to the user both as a UI
- * action (on selecting files in a collection), and also internally used when
- * deleting a collection if the user chose the option to keep files.
- *
- * See: [Note: Deleting a collection].
+ * action (on selecting files in a collection), and as an implicit action if the
+ * user chooses the option to "keep files" when deleting a collection.
  */
-export const removeFromCollection2 = async (
+export const removeFromCollection = async (
     collectionID: number,
     files: EnteFile[],
 ) => {
@@ -712,24 +731,24 @@ export const removeFromCollection2 = async (
         (f) => f.ownerID == userID,
     );
     if (userFiles.length) {
-        await removeUserFilesFromCollection(collectionID, userFiles);
+        await removeUserFilesFromUserCollection(collectionID, userFiles);
     }
     if (nonUserFiles.length) {
-        await removeNonUserFilesFromCollection(collectionID, nonUserFiles);
+        await postRemoveFilesFromCollection(collectionID, nonUserFiles);
     }
 };
 
 /**
- * Remove the given user owned files from the given collection, ensuring that at
- * least one user owned instance is retained for them (either in a user owned
- * collection in which they already existed, or in the user's "Uncategorized"
- * collection as a fallback).
+ * Remove the given user owned files from the given collection also owned by the
+ * user, ensuring that at least one user owned instance is retained for them
+ * (either in a different user owned collection in which they already existed,
+ * or in the user's "Uncategorized" collection as a fallback).
  *
  * Reads local state but does not modify it. The effects are on remote.
  *
  * This is used as a subroutine of [Note: Removing files from a collection].
  */
-export const removeUserFilesFromCollection = async (
+export const removeUserFilesFromUserCollection = async (
     collectionID: number,
     filesToRemove: EnteFile[],
 ) => {
@@ -756,10 +775,6 @@ export const removeUserFilesFromCollection = async (
         if (targetCollection.owner.id != userID) continue;
         // We'll move to uncategorized after the loop (if they still remain).
         if (targetCollection.type == "uncategorized") continue;
-
-        // TODO(RE): More conditions?
-        // !isHiddenCollection(targetCollection) &&
-        // !isQuickLinkCollection(targetCollection) &&
 
         const filesInCollectionToRemove =
             filesInCollection.filter(pendingRemove);
@@ -794,13 +809,20 @@ export const removeUserFilesFromCollection = async (
 };
 
 /**
- * Remove the provided files (none of which are owned by the user) from the
- * provided collection on remote.
+ * Remove the provided files from the provided collection on remote.
  *
  * Only files which do not belong to the collection owner can be removed from
- * the collection. If the collection owner wants to remove files owned by them,
- * then their client should first move those files first to other collections
- * owned by the collection owner.
+ * the collection using this endpoint. That is,
+ *
+ * - Either the user owns the collection and the all files being removed are
+ *   owned by somebody else, or
+ *
+ * - The user owns all the files being removed, but the collection belongs to
+ *   somebody else.
+ *
+ * If the collection owner wants to remove files owned by them, then their
+ * client should first move those files first to other collections owned by the
+ * collection owner.
  *
  * Remote only, does not modify local state.
  *
@@ -811,7 +833,7 @@ export const removeUserFilesFromCollection = async (
  * @param files A list of files which do not belong to the user, and which we
  * the user wants to remove from the given collection.
  */
-export const removeNonUserFilesFromCollection = async (
+export const postRemoveFilesFromCollection = async (
     collectionID: number,
     files: EnteFile[],
 ) =>
@@ -1175,12 +1197,6 @@ export const isHiddenCollection = (collection: Collection) =>
  */
 export const hideFiles = async (files: EnteFile[]) =>
     moveToCollection(await savedOrCreateDefaultHiddenCollection(), files);
-
-/**
- * Return true if this is a collection that the user doesn't own.
- */
-export const isIncomingShare = (collection: Collection, user: User) =>
-    collection.owner.id !== user.id;
 
 /**
  * Share the provided collection with another Ente user.
