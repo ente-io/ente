@@ -342,8 +342,8 @@ String getExtension(String nameOrPath) {
 Future<Uint8List> compressThumbnail(Uint8List thumbnail) {
   return FlutterImageCompress.compressWithList(
     thumbnail,
-    minHeight: compressedThumbnailResolution,
-    minWidth: compressedThumbnailResolution,
+    minHeight: compressThumb1080,
+    minWidth: compressThumb1080,
     quality: 25,
   );
 }

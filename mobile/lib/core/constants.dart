@@ -1,10 +1,12 @@
 import "package:flutter/foundation.dart";
 
-const int thumbnailSmallSize = 256;
 const int thumbnailQuality = 50;
-const int thumbnailLargeSize = 512;
-const int compressedThumbnailResolution = 1080;
-const int thumbnailDataLimit = 100 * 1024;
+// thumbnailSmallSize Thumbnail sizes in pixels 256px
+const int thumbnailSmall256 = 256;
+// thumbnailMediumSize Thumbnail sizes in pixels 512px
+const int thumbnailLarge512 = 512; // 512px
+const int compressThumb1080 = 1080;
+const int thumbnailDataMaxSize = 100 * 1024;
 const String sentryDSN =
     "https://2235e5c99219488ea93da34b9ac1cb68@sentry.ente.io/4";
 const String sentryDebugDSN =

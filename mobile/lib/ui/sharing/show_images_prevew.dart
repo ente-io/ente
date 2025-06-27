@@ -319,7 +319,7 @@ class _BackDrop extends StatelessWidget {
             backDropImage,
             shouldShowSyncStatus: false,
             shouldShowFavoriteIcon: false,
-            thumbnailSize: thumbnailLargeSize,
+            thumbnailSize: thumbnailLarge512,
           ),
           BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
@@ -388,7 +388,7 @@ class _CustomImage extends StatelessWidget {
                     file,
                     shouldShowSyncStatus: false,
                     shouldShowFavoriteIcon: false,
-                    thumbnailSize: thumbnailLargeSize,
+                    thumbnailSize: thumbnailLarge512,
                   ),
                 ),
               ),

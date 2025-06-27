@@ -52,8 +52,8 @@ class GalleryFileWidget extends StatelessWidget {
       shouldShowLivePhotoOverlay: true,
       key: Key(heroTag),
       thumbnailSize: photoGridSize < photoGridSizeDefault
-          ? thumbnailLargeSize
-          : thumbnailSmallSize,
+          ? thumbnailLarge512
+          : thumbnailSmall256,
       shouldShowOwnerAvatar: !isFileSelected,
       shouldShowVideoDuration: true,
     );

@@ -17,12 +17,14 @@ import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/errors.dart';
+import "package:photos/image/thumnail/upload_thumb.dart";
 import "package:photos/models/api/metadata.dart";
 import "package:photos/models/ffmpeg/ffprobe_props.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
 import "package:photos/models/location/location.dart";
+import "package:photos/services/local/asset_entity.service.dart";
 import "package:photos/services/local/local_import.dart";
 import "package:photos/utils/exif_util.dart";
 import 'package:photos/utils/file_util.dart';
@@ -30,7 +32,6 @@ import "package:uuid/uuid.dart";
 import 'package:video_thumbnail/video_thumbnail.dart';
 
 final _logger = Logger("FileUtil");
-const kMaximumThumbnailCompressionAttempts = 2;
 
 class MediaUploadData {
   final File? sourceFile;
@@ -95,39 +96,12 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(
   Map<String, IfdTag>? exifData;
 
   // The timeouts are to safeguard against https://github.com/CaiJingLong/flutter_photo_manager/issues/467
-  final asset = await file.getAsset
-      .timeout(const Duration(seconds: 3))
-      .catchError((e) async {
-    if (e is TimeoutException) {
-      _logger.info("Asset fetch timed out for " + file.toString());
-      return await file.getAsset;
-    } else {
-      throw e;
-    }
-  });
-  if (asset == null) {
-    throw InvalidFileError("", InvalidReason.assetDeleted);
-  }
+  final asset = await AssetEntityService.fromIDWithRetry(file.lAsset!.id);
   _assertFileType(asset, file);
   if (Platform.isIOS) {
-    trackOriginFetchForUploadOrML.put(file.localID!, true);
+    trackOriginFetchForUploadOrML.put(file.lAsset!.id, true);
   }
-  sourceFile = await asset.originFile
-      .timeout(const Duration(seconds: 15))
-      .catchError((e) async {
-    if (e is TimeoutException) {
-      _logger.info("Origin file fetch timed out for " + file.tag);
-      return await asset.originFile;
-    } else {
-      throw e;
-    }
-  });
-  if (sourceFile == null || !sourceFile.existsSync()) {
-    throw InvalidFileError(
-      "id: ${file.localID}",
-      InvalidReason.sourceFileMissing,
-    );
-  }
+  sourceFile = await AssetEntityService.sourceFromAsset(asset);
   if (parseExif) {
     exifData = await tryExifFromFile(sourceFile);
   }
@@ -143,10 +117,10 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(
       _logger.severe(errMsg);
       throw InvalidFileError(errMsg, InvalidReason.livePhotoVideoMissing);
     }
-    final String livePhotoVideoHash =
+    final String videoHash =
         CryptoUtil.bin2base64(await CryptoUtil.getHash(videoUrl));
     // imgHash:vidHash
-    fileHash = '$fileHash$kLivePhotoHashSeparator$livePhotoVideoHash';
+    fileHash = '$fileHash$kLivePhotoHashSeparator$videoHash';
     final tempPath = Configuration.instance.getTempDirectory();
     // .elp -> ente live photo
     final uniqueId = const Uuid().v4().toString();
@@ -166,7 +140,7 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(
     zipHash = CryptoUtil.bin2base64(await CryptoUtil.getHash(sourceFile));
   }
 
-  thumbnailData = await _getThumbnailForUpload(asset, file);
+  thumbnailData = await getThumbnailForUpload(asset);
   isDeleted = !(await asset.exists);
   int? h, w;
   if (asset.width != 0 && asset.height != 0) {
@@ -202,24 +176,25 @@ Future<int?> motionVideoIndex(Map<String, dynamic> args) async {
   return (await MotionPhotos(path).getMotionVideoIndex())?.start;
 }
 
-Future<void> _computeZip(Map<String, dynamic> args) async {
-  final String zipPath = args['zipPath'];
-  final String imagePath = args['imagePath'];
-  final String videoPath = args['videoPath'];
-  final encoder = ZipFileEncoder();
-  encoder.create(zipPath);
-  await encoder.addFile(File(imagePath), "image" + extension(imagePath));
-  await encoder.addFile(File(videoPath), "video" + extension(videoPath));
-  await encoder.close();
-}
-
 Future<void> zip({
   required String zipPath,
   required String imagePath,
   required String videoPath,
 }) {
   return Computer.shared().compute(
-    _computeZip,
+    (Map<String, dynamic> args) async {
+      final encoder = ZipFileEncoder();
+      encoder.create(args['zipPath']);
+      await encoder.addFile(
+        File(args['imagePath']),
+        "image${extension(args['imagePath'])}",
+      );
+      await encoder.addFile(
+        File(args['videoPath']),
+        "video${extension(args['videoPath'])}",
+      );
+      await encoder.close();
+    },
     param: {
       'zipPath': zipPath,
       'imagePath': imagePath,
@@ -227,47 +202,6 @@ Future<void> zip({
     },
     taskName: 'zip',
   );
-}
-
-Future<Uint8List?> _getThumbnailForUpload(
-  AssetEntity asset,
-  EnteFile file,
-) async {
-  try {
-    Uint8List? thumbnailData = await asset.thumbnailDataWithSize(
-      const ThumbnailSize(thumbnailLargeSize, thumbnailLargeSize),
-      quality: thumbnailQuality,
-    );
-    if (thumbnailData == null) {
-      // allow videos to be uploaded without thumbnails
-      if (asset.type == AssetType.video) {
-        return null;
-      }
-      throw InvalidFileError(
-        "no thumbnail : ${file.fileType} ${file.tag}",
-        InvalidReason.thumbnailMissing,
-      );
-    }
-    int compressionAttempts = 0;
-    while (thumbnailData!.length > thumbnailDataLimit &&
-        compressionAttempts < kMaximumThumbnailCompressionAttempts) {
-      _logger.info("Thumbnail size " + thumbnailData.length.toString());
-      thumbnailData = await compressThumbnail(thumbnailData);
-      _logger
-          .info("Compressed thumbnail size " + thumbnailData.length.toString());
-      compressionAttempts++;
-    }
-    return thumbnailData;
-  } catch (e) {
-    final String errMessage =
-        "thumbErr for ${file.fileType}, ${extension(file.displayName)} ${file.tag}";
-    _logger.warning(errMessage, e);
-    // allow videos to be uploaded without thumbnails
-    if (asset.type == AssetType.video) {
-      return null;
-    }
-    throw InvalidFileError(errMessage, InvalidReason.thumbnailMissing);
-  }
 }
 
 // check if the assetType is still the same. This can happen for livePhotos
@@ -443,7 +377,7 @@ Future<Uint8List?> getThumbnailFromInAppCacheFile(EnteFile file) async {
         video: localFile.path,
         imageFormat: ImageFormat.JPEG,
         thumbnailPath: (await getTemporaryDirectory()).path,
-        maxWidth: thumbnailLargeSize,
+        maxWidth: thumbnailLarge512,
         quality: 80,
       );
       localFile = File(thumbnailFilePath!);
@@ -454,7 +388,7 @@ Future<Uint8List?> getThumbnailFromInAppCacheFile(EnteFile file) async {
   }
   var thumbnailData = await localFile.readAsBytes();
   int compressionAttempts = 0;
-  while (thumbnailData.length > thumbnailDataLimit &&
+  while (thumbnailData.length > thumbnailDataMaxSize &&
       compressionAttempts < kMaximumThumbnailCompressionAttempts) {
     _logger.info("Thumbnail size " + thumbnailData.length.toString());
     thumbnailData = await compressThumbnail(thumbnailData);

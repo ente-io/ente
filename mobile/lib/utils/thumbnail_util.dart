@@ -39,7 +39,7 @@ Future<Uint8List?> getThumbnail(EnteFile file) async {
   } else {
     return getThumbnailFromLocal(
       file,
-      size: thumbnailLargeSize,
+      size: thumbnailLarge512,
     );
   }
 }
@@ -69,7 +69,7 @@ Future<Uint8List> getThumbnailFromServer(EnteFile file) async {
   final cachedThumbnail = cachedThumbnailPath(file);
   if (await cachedThumbnail.exists()) {
     final data = await cachedThumbnail.readAsBytes();
-    enteImageCache.putThumb(file, data, thumbnailLargeSize);
+    enteImageCache.putThumb(file, data, thumbnailLarge512);
     return data;
   }
   // Check if there's already in flight request for fetching thumbnail from the
@@ -95,7 +95,7 @@ Future<Uint8List> getThumbnailFromServer(EnteFile file) async {
 
 Future<Uint8List?> getThumbnailFromLocal(
   EnteFile file, {
-  int size = thumbnailSmallSize,
+  int size = thumbnailSmall256,
   int quality = thumbnailQuality,
 }) async {
   final lruCachedThumbnail = enteImageCache.getThumb(file, size);
@@ -116,7 +116,8 @@ Future<Uint8List?> getThumbnailFromLocal(
         return null;
       }
       return asset
-          .thumbnailDataWithSize(ThumbnailSize(size, size), quality: quality, format: ThumbnailFormat.jpeg)
+          .thumbnailDataWithSize(ThumbnailSize(size, size),
+              quality: quality, format: ThumbnailFormat.jpeg)
           .then((data) {
         enteImageCache.putThumb(file, data, size);
         return data;
@@ -207,10 +208,10 @@ Future<void> _downloadAndDecryptThumbnail(FileDownloadItem item) async {
     return;
   }
   final thumbnailSize = data.length;
-  if (thumbnailSize > thumbnailDataLimit) {
+  if (thumbnailSize > thumbnailDataMaxSize) {
     data = await compressThumbnail(data);
   }
-  enteImageCache.putThumb(item.file, data, thumbnailLargeSize);
+  enteImageCache.putThumb(item.file, data, thumbnailLarge512);
   final cachedThumbnail = cachedThumbnailPath(item.file);
   if (await cachedThumbnail.exists()) {
     await cachedThumbnail.delete();

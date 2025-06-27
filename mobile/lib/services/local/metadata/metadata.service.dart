@@ -6,12 +6,12 @@ import "package:ente_crypto/ente_crypto.dart";
 import "package:exif_reader/exif_reader.dart";
 import "package:logging/logging.dart";
 import "package:motion_photos/motion_photos.dart";
-import "package:photos/core/errors.dart";
 import "package:photos/extensions/stop_watch.dart";
 import "package:photos/models/ffmpeg/ffprobe_props.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/local/local_metadata.dart";
 import "package:photos/models/location/location.dart";
+import "package:photos/services/local/asset_entity.service.dart";
 import "package:photos/utils/exif_util.dart";
 import "package:wechat_assets_picker/wechat_assets_picker.dart";
 
@@ -21,8 +21,8 @@ class LocalMetadataService {
   static Future<DroidMetadata?> getMetadata(String id) async {
     try {
       final TimeLogger t = TimeLogger(context: "getDroidMetadata");
-      final AssetEntity asset = await fromIDWithRetry(id);
-      final sourceFile = await sourceFromAsset(asset);
+      final AssetEntity asset = await AssetEntityService.fromIDWithRetry(id);
+      final sourceFile = await AssetEntityService.sourceFromAsset(asset);
       final latLng = await asset.latlngAsync();
       Location location =
           Location(latitude: latLng.latitude, longitude: latLng.longitude);
@@ -88,42 +88,5 @@ class LocalMetadataService {
       MotionPhotos(sourceFile).getMotionVideoIndex,
       taskName: "motionVideoIndex",
     );
-  }
-
-  static Future<AssetEntity> fromIDWithRetry(String localID) async {
-    final asset = await AssetEntity.fromId(localID)
-        .timeout(const Duration(seconds: 3))
-        .catchError((e) async {
-      if (e is TimeoutException) {
-        _logger.info("Asset fetch timed out for id $localID ");
-        return await AssetEntity.fromId(localID);
-      } else {
-        throw e;
-      }
-    });
-    if (asset == null) {
-      throw InvalidFileError("", InvalidReason.assetDeleted);
-    }
-    return asset;
-  }
-
-  static Future<File> sourceFromAsset(AssetEntity asset) async {
-    final sourceFile = await asset.originFile
-        .timeout(const Duration(seconds: 15))
-        .catchError((e) async {
-      if (e is TimeoutException) {
-        _logger.info("Origin file fetch timed out for ${asset.id}");
-        return await asset.originFile;
-      } else {
-        throw e;
-      }
-    });
-    if (sourceFile == null || !sourceFile.existsSync()) {
-      throw InvalidFileError(
-        "id: ${asset.id}",
-        InvalidReason.sourceFileMissing,
-      );
-    }
-    return sourceFile;
   }
 }

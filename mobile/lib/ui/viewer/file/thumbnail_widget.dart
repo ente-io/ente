@@ -53,7 +53,7 @@ class ThumbnailWidget extends StatefulWidget {
     this.shouldShowOwnerAvatar = false,
     this.diskLoadDeferDuration,
     this.serverLoadDeferDuration,
-    this.thumbnailSize = thumbnailSmallSize,
+    this.thumbnailSize = thumbnailSmall256,
     this.shouldShowFavoriteIcon = true,
     this.shouldShowVideoDuration = false,
     this.shouldShowVideoOverlayIcon = true,
@@ -250,7 +250,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
         !_isLoadingRemoteThumbnail) {
       _isLoadingRemoteThumbnail = true;
       final cachedThumbnail =
-          enteImageCache.getThumb(widget.file, thumbnailLargeSize);
+          enteImageCache.getThumb(widget.file, thumbnailLarge512);
       if (cachedThumbnail != null) {
         _imageProvider = Image.memory(cachedThumbnail).image;
         _hasLoadedThumbnail = true;
