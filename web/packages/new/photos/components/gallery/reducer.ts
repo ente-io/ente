@@ -1372,11 +1372,11 @@ const createCollectionSummaries = (
 
         let type: CollectionSummaryType;
         if (collection.owner.id != user.id) {
-            if (isIncomingCollabShare(collection, user)) {
-                type = "incomingShareCollaborator";
-            } else {
-                type = "incomingShareViewer";
-            }
+            type =
+                collection.sharees.find((s) => s.id == user.id)?.role ==
+                "COLLABORATOR"
+                    ? "incomingShareCollaborator"
+                    : "incomingShareViewer";
         } else if (collectionType == "favorites") {
             // [Note: User and shared favorites]
             //
@@ -1415,11 +1415,12 @@ const createCollectionSummaries = (
         // until type is completely replaced by attributes.
         const attributes: CollectionSummaryType[] = [];
         if (collection.owner.id != user.id) {
-            if (isIncomingCollabShare(collection, user)) {
-                attributes.push("incomingShareCollaborator");
-            } else {
-                attributes.push("incomingShareViewer");
-            }
+            attributes.push(
+                collection.sharees.find((s) => s.id == user.id)?.role ==
+                    "COLLABORATOR"
+                    ? "incomingShareCollaborator"
+                    : "incomingShareViewer",
+            );
         }
         if (isOutgoingShare(collection, user)) {
             attributes.push("outgoingShare");
@@ -1519,13 +1520,6 @@ const findCoverFiles = (
         }
     }
     return coverFiles;
-};
-
-const isIncomingCollabShare = (collection: Collection, user: User) => {
-    // TODO: Need to audit the types
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    const sharee = collection.sharees?.find((sharee) => sharee.id === user.id);
-    return sharee?.role == "COLLABORATOR";
 };
 
 const isOutgoingShare = (collection: Collection, user: User) =>
