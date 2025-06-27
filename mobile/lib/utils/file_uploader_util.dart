@@ -102,46 +102,14 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(
     trackOriginFetchForUploadOrML.put(file.lAsset!.id, true);
   }
   sourceFile = await AssetEntityService.sourceFromAsset(asset);
+  thumbnailData = await getThumbnailForUpload(asset);
   if (parseExif) {
     exifData = await tryExifFromFile(sourceFile);
   }
   // h4ck to fetch location data if missing (thank you Android Q+) lazily only during uploads
+  // call this method before creating zip for live photo as sourceFile image will be
+  // deleted after zipping
   await _decorateEnteFileData(file, asset, sourceFile, exifData);
-  fileHash = CryptoUtil.bin2base64(await CryptoUtil.getHash(sourceFile));
-
-  if (file.fileType == FileType.livePhoto && Platform.isIOS) {
-    final File? videoUrl = await Motionphoto.getLivePhotoFile(file.localID!);
-    if (videoUrl == null || !videoUrl.existsSync()) {
-      final String errMsg =
-          "missing livePhoto url for  ${file.toString()} with subType ${file.fileSubType}";
-      _logger.severe(errMsg);
-      throw InvalidFileError(errMsg, InvalidReason.livePhotoVideoMissing);
-    }
-    final String videoHash =
-        CryptoUtil.bin2base64(await CryptoUtil.getHash(videoUrl));
-    // imgHash:vidHash
-    fileHash = '$fileHash$kLivePhotoHashSeparator$videoHash';
-    final tempPath = Configuration.instance.getTempDirectory();
-    // .elp -> ente live photo
-    final uniqueId = const Uuid().v4().toString();
-    final livePhotoPath = tempPath + uniqueId + "_${file.generatedID}.elp";
-    _logger.info("Creating zip for live photo from " + basename(livePhotoPath));
-    await zip(
-      zipPath: livePhotoPath,
-      imagePath: sourceFile.path,
-      videoPath: videoUrl.path,
-    );
-    // delete the temporary video and image copy (only in IOS)
-    if (Platform.isIOS) {
-      await sourceFile.delete();
-    }
-    // new sourceFile which needs to be uploaded
-    sourceFile = File(livePhotoPath);
-    zipHash = CryptoUtil.bin2base64(await CryptoUtil.getHash(sourceFile));
-  }
-
-  thumbnailData = await getThumbnailForUpload(asset);
-  isDeleted = !(await asset.exists);
   int? h, w;
   if (asset.width != 0 && asset.height != 0) {
     h = asset.height;
@@ -159,6 +127,40 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(
       _logger.severe('error while detecthing motion photo start index', e);
     }
   }
+  fileHash = CryptoUtil.bin2base64(await CryptoUtil.getHash(sourceFile));
+  if (file.fileType == FileType.livePhoto && Platform.isIOS) {
+    final File? videoUrl = await Motionphoto.getLivePhotoFile(file.localID!);
+    if (videoUrl == null || !videoUrl.existsSync()) {
+      final String errMsg =
+          "missing livePhoto url for  ${file.toString()} with subType ${file.fileSubType}";
+      _logger.severe(errMsg);
+      throw InvalidFileError(errMsg, InvalidReason.livePhotoVideoMissing);
+    }
+    final String videoHash =
+        CryptoUtil.bin2base64(await CryptoUtil.getHash(videoUrl));
+    // imgHash:vidHash
+    fileHash = '$fileHash$kLivePhotoHashSeparator$videoHash';
+    final tempPath = Configuration.instance.getTempDirectory();
+    // .elp -> ente live photo
+    final uniqueId = const Uuid().v4().toString();
+    final zippedPath = tempPath + uniqueId + "_${file.generatedID}.elp";
+    _logger.info("Creating zip for live photo from " + basename(zippedPath));
+    await zip(
+      zipPath: zippedPath,
+      imagePath: sourceFile.path,
+      videoPath: videoUrl.path,
+    );
+    // delete the temporary video and image copy (only in IOS)
+    if (Platform.isIOS) {
+      await sourceFile.delete();
+    }
+    // new sourceFile which needs to be uploaded
+    sourceFile = File(zippedPath);
+    zipHash = CryptoUtil.bin2base64(await CryptoUtil.getHash(sourceFile));
+  }
+
+  isDeleted = !(await asset.exists);
+
   return MediaUploadData(
     sourceFile,
     thumbnailData,

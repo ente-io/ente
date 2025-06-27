@@ -116,8 +116,11 @@ Future<Uint8List?> getThumbnailFromLocal(
         return null;
       }
       return asset
-          .thumbnailDataWithSize(ThumbnailSize(size, size),
-              quality: quality, format: ThumbnailFormat.jpeg)
+          .thumbnailDataWithSize(
+        ThumbnailSize(size, size),
+        quality: quality,
+        format: ThumbnailFormat.jpeg,
+      )
           .then((data) {
         enteImageCache.putThumb(file, data, size);
         return data;
