@@ -40,8 +40,6 @@ class MLService {
 
   late String client;
 
-  bool get isInitialized => _isInitialized;
-
   bool get showClusteringIsHappening => _clusteringIsHappening;
 
   bool debugIndexingDisabled = false;
