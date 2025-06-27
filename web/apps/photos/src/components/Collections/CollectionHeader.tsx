@@ -25,7 +25,6 @@ import {
 import { SingleInputDialog } from "ente-base/components/SingleInputDialog";
 import { useModalVisibility } from "ente-base/components/utils/modal";
 import { useBaseContext } from "ente-base/context";
-import { isArchivedCollection } from "ente-gallery/services/magic-metadata";
 import { CollectionOrder, type Collection } from "ente-media/collection";
 import { ItemVisibility } from "ente-media/file-metadata";
 import type { RemotePullOpts } from "ente-new/photos/components/gallery";
@@ -368,7 +367,7 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
         case "incomingShareViewer":
         case "incomingShareCollaborator":
             menuOptions = [
-                isArchivedCollection(activeCollection) ? (
+                collectionSummary.attributes.has("archived") ? (
                     <OverflowMenuOption
                         key="unarchive"
                         onClick={unarchiveAlbum}
@@ -437,7 +436,7 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
                 ),
                 ...(!isHiddenCollection(activeCollection)
                     ? [
-                          isArchivedCollection(activeCollection) ? (
+                          collectionSummary.attributes.has("archived") ? (
                               <OverflowMenuOption
                                   key="unarchive"
                                   onClick={unarchiveAlbum}

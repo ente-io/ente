@@ -696,7 +696,7 @@ export const deleteFromTrash = async (fileIDs: number[]) =>
  *
  * The move operation is not supported across ownership boundaries. The remove
  * operation is only supported across ownership boundaries, but the user should
- * have owner ship of either the file or collection (not both).
+ * have ownership of either the file or collection (not both).
  *
  * In more detail, the above three scenarios can be described this way.
  *
@@ -1184,8 +1184,24 @@ export const findDefaultHiddenCollectionIDs = (collections: Collection[]) =>
             .map((collection) => collection.id),
     );
 
+/**
+ * Return `true` if the given collection is hidden.
+ *
+ * Hidden collections are those that have their visibility set to hidden in the
+ * collection's owner's private magic metadata.
+ */
 export const isHiddenCollection = (collection: Collection) =>
     collection.magicMetadata?.data.visibility == ItemVisibility.hidden;
+
+/**
+ * Return `true` if the given collection is archived.
+ *
+ * Archived collections are those that have their visibility set to hidden in the
+ * collection's private magic metadata or per-sharee private metadata.
+ */
+export const isArchivedCollection = (collection: Collection) =>
+    collection.magicMetadata?.data.visibility == ItemVisibility.archived ||
+    collection.sharedMagicMetadata?.data.visibility == ItemVisibility.archived;
 
 /**
  * Hide the provided {@link files} by moving them to the default hidden

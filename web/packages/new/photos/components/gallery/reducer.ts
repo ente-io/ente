@@ -1,5 +1,4 @@
 import type { User } from "ente-accounts/services/user";
-import { isArchivedCollection } from "ente-gallery/services/magic-metadata";
 import {
     groupFilesByCollectionID,
     sortFiles,
@@ -18,6 +17,7 @@ import {
 import type { MagicMetadata } from "ente-media/magic-metadata";
 import {
     createCollectionNameByID,
+    isArchivedCollection,
     isHiddenCollection,
 } from "ente-new/photos/services/collection";
 import { sortTrashItems, type TrashItem } from "ente-new/photos/services/trash";
