@@ -688,12 +688,13 @@ export const deleteFromTrash = async (fileIDs: number[]) =>
  * The "remove from collection" primitive operates differently depending on
  * whether or not the user owns the files that they're trying to remove.
  *
+ * 1. If the user owns the file, then move it from this collection to a
+ *    different user owned collection in which it already exists (such a move
+ *    acts as a remove). If it doesn't exist in any other user owned collection,
+ *    then move it to the user's "Uncategorized" collection.
+ *
  * 1. If the user does not own the file, then it should be removed from the
  *    collection using POST "/collections/v3/remove-files".
- *
- * 2. If the user owns the file, and if this is the only collection that this
- *    file belongs to, then the file should be moved to the user's
- *    "Uncategorized" collection.
  *
  * The "remove from collection" primitive is provided to the user both as a UI
  * action (on selecting files in a collection), and also internally used when
@@ -711,65 +712,83 @@ export const removeFromCollection2 = async (
         (f) => f.ownerID == userID,
     );
     if (userFiles.length) {
-        await moveUserFilesToUncategorizedIfSoleCollection(
-            collectionID,
-            userFiles,
-        );
+        await removeUserFilesFromCollection(collectionID, userFiles);
     }
     if (nonUserFiles.length) {
-        await removeNonUserFilesFromCollection(
-            collectionID,
-            nonUserFiles.map((f) => f.id),
-        );
+        await removeNonUserFilesFromCollection(collectionID, nonUserFiles);
     }
 };
 
 /**
- * Move the given user owned files whose only user owned instance is in the
- * given collection to the user's "Uncategorized" collection.
+ * Remove the given user owned files from the given collection, ensuring that at
+ * least one user owned instance is retained for them (either in a user owned
+ * collection in which they already existed, or in the user's "Uncategorized"
+ * collection as a fallback).
  *
  * Reads local state but does not modify it. The effects are on remote.
  *
  * This is used as a subroutine of [Note: Removing files from a collection].
  */
-export const moveUserFilesToUncategorizedIfSoleCollection = async (
+export const removeUserFilesFromCollection = async (
     collectionID: number,
-    files: EnteFile[],
+    filesToRemove: EnteFile[],
 ) => {
     const userID = ensureLocalUser().id;
     const collections = await savedCollections();
     const collectionFiles = await savedCollectionFiles();
-    const userCollections = collections.filter((c) => c.owner.id == userID);
-    const userCollectionIDs = new Set(userCollections.map((c) => c.id));
 
-    // TODO(RE): More conditions?
-    // !isHiddenCollection(targetCollection) &&
-    // !isQuickLinkCollection(targetCollection) &&
-    // !isIncomingShare(targetCollection, user)
+    const collectionsByID = new Map(collections.map((c) => [c.id, c]));
 
-    const ownCollectionCountByFileID = new Map<number, number>();
-    for (const file of collectionFiles) {
-        if (userCollectionIDs.has(file.collectionID)) {
-            ownCollectionCountByFileID.set(
-                file.id,
-                (ownCollectionCountByFileID.get(file.id) ?? 0) + 1,
-            );
-        }
+    // This set keeps a running track of file IDs that still need to be removed.
+    // It is seeded with the original set of files we were asked to remove.
+    const filesToRemoveIDs = new Set(filesToRemove.map((f) => f.id));
+    // A predicate that checks if the given file is still pending removal.
+    const pendingRemove = (f: EnteFile) => filesToRemoveIDs.has(f.id);
+
+    const collectionFilesToRemove = collectionFiles.filter(pendingRemove);
+    const groups = groupFilesByCollectionID(collectionFilesToRemove);
+    for (const [targetCollectionID, filesInCollection] of groups.entries()) {
+        // Ignore the source collection itself.
+        if (targetCollectionID == collectionID) continue;
+
+        const targetCollection = collectionsByID.get(targetCollectionID)!;
+        // We want a copy to exist in at least one other user owned collection.
+        if (targetCollection.owner.id != userID) continue;
+        // We'll move to uncategorized after the loop (if they still remain).
+        if (targetCollection.type == "uncategorized") continue;
+
+        // TODO(RE): More conditions?
+        // !isHiddenCollection(targetCollection) &&
+        // !isQuickLinkCollection(targetCollection) &&
+
+        const filesInCollectionToRemove =
+            filesInCollection.filter(pendingRemove);
+        if (!filesInCollectionToRemove.length) continue;
+
+        // The file already exists in the target collection, but this acts as
+        // "remove" from the source.
+        await moveFromCollection(
+            collectionID,
+            targetCollection,
+            filesInCollectionToRemove,
+        );
+
+        // Mark the files we just moved as been taken care of.
+        filesInCollectionToRemove.forEach((f) => filesToRemoveIDs.delete(f.id));
     }
-    const filesToUncat = files.filter(
-        (f) =>
-            f.collectionID == collectionID &&
-            ownCollectionCountByFileID.get(f.id) == 1,
-    );
-    if (filesToUncat.length) {
+
+    // Any files that were not moved so far, move them to uncategorized,
+    // creating uncategorized if needed.
+    const remainingFiles = filesToRemove.filter(pendingRemove);
+    if (remainingFiles.length) {
         const uncategorizedCollection =
-            userCollections.find((c) => c.type == "uncategorized") ??
+            collections.find((c) => c.type == "uncategorized") ??
             (await createUncategorizedCollection());
 
         await moveFromCollection(
             collectionID,
             uncategorizedCollection,
-            filesToUncat,
+            remainingFiles,
         );
     }
 };
@@ -794,14 +813,17 @@ export const moveUserFilesToUncategorizedIfSoleCollection = async (
  */
 export const removeNonUserFilesFromCollection = async (
     collectionID: number,
-    fileIDs: number[],
+    files: EnteFile[],
 ) =>
-    batched(fileIDs, async (batchFileIDs) =>
+    batched(files, async (batchFiles) =>
         ensureOk(
             await fetch(await apiURL("/collections/v3/remove-files"), {
                 method: "POST",
                 headers: await authenticatedRequestHeaders(),
-                body: JSON.stringify({ collectionID, fileIDs: batchFileIDs }),
+                body: JSON.stringify({
+                    collectionID,
+                    fileIDs: batchFiles.map((f) => f.id),
+                }),
             }),
         ),
     );

@@ -43,7 +43,7 @@ export const removeFromCollection = async (
     toRemoveFiles: EnteFile[],
 ) => {
     // TODO(RE):
-    if (isDevBuild && process.env.ENTE_WIP_MOVE)
+    if (isDevBuild && process.env.NEXT_PUBLIC_ENTE_WIP_MOVE)
         return removeFromCollection2(collectionID, toRemoveFiles);
 
     try {
