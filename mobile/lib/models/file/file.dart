@@ -42,18 +42,6 @@ class EnteFile {
   String? exif;
   String? hash;
   int? metadataVersion;
-  String? fileDecryptionHeader;
-  @Deprecated(
-    'use remoteAsset.thumbHeader instead. This will be removed in future',
-  )
-  String? thumbnailDecryptionHeader;
-
-  int? get fileSize {
-    if (rAsset != null && rAsset!.fileSize != -1) {
-      return rAsset!.fileSize;
-    }
-    return null;
-  }
 
   // public magic metadata is shared if during file/album sharing
   String? pubMmdEncodedJson;
@@ -274,6 +262,13 @@ class EnteFile {
     return rAsset?.caption;
   }
 
+  int? get fileSize {
+    if (rAsset != null && rAsset!.fileSize != -1) {
+      return rAsset!.fileSize;
+    }
+    return null;
+  }
+
   String get displayName {
     if (pubMagicMetadata != null && pubMagicMetadata!.editedName != null) {
       return pubMagicMetadata!.editedName!;
@@ -368,11 +363,7 @@ class EnteFile {
     String? exif,
     String? hash,
     int? metadataVersion,
-    String? fileDecryptionHeader,
-    String? thumbnailDecryptionHeader,
     int? fileSize,
-    String? mMdEncodedJson,
-    int? mMdVersion,
     String? pubMmdEncodedJson,
     int? pubMmdVersion,
     PubMagicMetadata? pubMagicMetadata,
@@ -399,9 +390,6 @@ class EnteFile {
       ..exif = exif ?? this.exif
       ..hash = hash ?? this.hash
       ..metadataVersion = metadataVersion ?? this.metadataVersion
-      ..fileDecryptionHeader = fileDecryptionHeader ?? this.fileDecryptionHeader
-      ..thumbnailDecryptionHeader =
-          thumbnailDecryptionHeader ?? this.thumbnailDecryptionHeader
       ..pubMmdEncodedJson = pubMmdEncodedJson ?? this.pubMmdEncodedJson
       ..pubMmdVersion = pubMmdVersion ?? this.pubMmdVersion
       ..pubMagicMetadata = pubMagicMetadata ?? this.pubMagicMetadata;

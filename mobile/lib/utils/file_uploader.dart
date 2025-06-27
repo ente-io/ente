@@ -25,14 +25,17 @@ import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/subscription_purchased_event.dart';
 import 'package:photos/main.dart';
+import "package:photos/models/api/diff/diff.dart";
 import "package:photos/models/api/metadata.dart";
 import "package:photos/models/backup/backup_item.dart";
 import "package:photos/models/backup/backup_item_status.dart";
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
+import "package:photos/models/file/remote/asset.dart";
 import "package:photos/models/file/remote/collection_file.dart";
 import "package:photos/models/metadata/file_magic.dart";
 import "package:photos/models/user_details.dart";
+import "package:photos/module/upload/model/update_response.dart";
 import 'package:photos/module/upload/model/upload_url.dart';
 import "package:photos/module/upload/service/multipart.dart";
 import "package:photos/service_locator.dart";
@@ -46,6 +49,7 @@ import 'package:photos/utils/file_uploader_util.dart';
 import "package:photos/utils/file_util.dart";
 import "package:photos/utils/network_util.dart";
 import 'package:photos/utils/standalone/data.dart';
+import "package:sentry_flutter/sentry_flutter.dart";
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tuple/tuple.dart';
 import "package:uuid/uuid.dart";
@@ -749,7 +753,7 @@ class FileUploader {
 
       EnteFile remoteFile;
       if (isUpdatedFile) {
-        remoteFile = await _updateFile(
+        final response = await _updateFile(
           file,
           fileObjectKey,
           fileDecryptionHeader,
@@ -759,6 +763,17 @@ class FileUploader {
           encThumbSize,
           encryptedMetadata,
           metadataDecryptionHeader,
+        );
+        if (response.id != file.remoteID) {
+          throw Exception(
+            "File update response ID does not match the file's remoteID",
+          );
+        }
+        remoteFile = file;
+        remoteFile.rAsset = file.rAsset!.copyWith(
+          thumbHeader: CryptoUtil.base642bin(thumbnailDecryptionHeader),
+          fileHeader: CryptoUtil.base642bin(fileDecryptionHeader),
+          metadata: Metadata(data: metadata, version: metadata['version'] ?? 0),
         );
         // Update across all collections
         // todo:neeraj rewrite update during upload
@@ -773,7 +788,7 @@ class FileUploader {
         final keyDecryptionNonce =
             CryptoUtil.bin2base64(encryptedFileKeyData.nonce!);
         final Map<String, dynamic> pubMetadata =
-            _buildPublicMagicData(mediaUploadData, exifTime);
+            _buildPublicMagicData(mediaUploadData, exifTime, file.rAsset);
         MetadataRequest? pubMetadataRequest;
         if (pubMetadata.isNotEmpty) {
           pubMetadataRequest = await getPubMetadataRequest(
@@ -797,6 +812,8 @@ class FileUploader {
           encryptedMetadata,
           metadataDecryptionHeader,
           pubMetadata: pubMetadataRequest,
+          metadata: metadata,
+          pubMagicMetadata: pubMetadata,
         );
         if (mediaUploadData.isDeleted) {
           _logger.info("File found to be deleted");
@@ -856,6 +873,7 @@ class FileUploader {
   Map<String, dynamic> _buildPublicMagicData(
     MediaUploadData mediaUploadData,
     ParsedExifDateTime? exifTime,
+    RemoteAsset? rAsset,
   ) {
     final Map<String, dynamic> pubMetadata = {};
     if ((mediaUploadData.height ?? 0) != 0 &&
@@ -878,7 +896,12 @@ class FileUploader {
         pubMetadata[offsetTimeKey] = exifTime.offsetTime;
       }
     }
-    return pubMetadata;
+    final Map<String, dynamic> jsonToUpdate =
+        rAsset?.publicMetadata?.data ?? <String, dynamic>{};
+    pubMetadata.forEach((key, value) {
+      jsonToUpdate[key] = value;
+    });
+    return jsonToUpdate;
   }
 
   bool isPutOrUpdateFileError(Object e) {
@@ -1149,6 +1172,8 @@ class FileUploader {
     String encryptedMetadata,
     String metadataDecryptionHeader, {
     MetadataRequest? pubMetadata,
+    required Map<String, dynamic> metadata,
+    Map<String, dynamic>? pubMagicMetadata,
     int attempt = 1,
   }) async {
     final request = {
@@ -1177,11 +1202,8 @@ class FileUploader {
       final response = await _enteDio.post("/files", data: request);
       final data = response.data;
       final int remoteID = data["id"];
+      final int ownerID = data["ownerID"];
       final int updatedAt = data["updationTime"];
-      file.uploadedFileID = remoteID;
-      file.collectionID = collectionID;
-      file.updationTime = data["updationTime"];
-      file.ownerID = data["ownerID"];
       file.cf = CollectionFile(
         collectionID: collectionID,
         fileID: remoteID,
@@ -1190,8 +1212,18 @@ class FileUploader {
         updatedAt: updatedAt,
         createdAt: updatedAt,
       );
-      file.fileDecryptionHeader = fileDecryptionHeader;
-      file.thumbnailDecryptionHeader = thumbnailDecryptionHeader;
+      file.rAsset = RemoteAsset(
+        id: remoteID,
+        ownerID: ownerID,
+        fileHeader: CryptoUtil.base642bin(fileDecryptionHeader),
+        thumbHeader: CryptoUtil.base642bin(thumbnailDecryptionHeader),
+        info: Info(fileSize: fileSize, thumbSize: thumbnailSize),
+        metadata: Metadata(data: metadata, version: metadata['version']!),
+        publicMetadata: pubMetadata != null
+            ? Metadata(data: pubMagicMetadata!, version: pubMetadata.version!)
+            : null,
+        privateMetadata: null,
+      );
       return file;
     } on DioException catch (e) {
       final int statusCode = e.response?.statusCode ?? -1;
@@ -1220,6 +1252,8 @@ class FileUploader {
           metadataDecryptionHeader,
           attempt: attempt + 1,
           pubMetadata: pubMetadata,
+          metadata: metadata,
+          pubMagicMetadata: pubMagicMetadata,
         );
       } else {
         _logger.severe("Failed to upload file ${file.tag}", e);
@@ -1228,7 +1262,7 @@ class FileUploader {
     }
   }
 
-  Future<EnteFile> _updateFile(
+  Future<FileUpdateResponse> _updateFile(
     EnteFile file,
     String fileObjectKey,
     String fileDecryptionHeader,
@@ -1241,7 +1275,7 @@ class FileUploader {
     int attempt = 1,
   }) async {
     final request = {
-      "id": file.uploadedFileID,
+      "id": file.remoteID,
       "file": {
         "objectKey": fileObjectKey,
         "decryptionHeader": fileDecryptionHeader,
@@ -1260,11 +1294,10 @@ class FileUploader {
     try {
       final response = await _enteDio.put("/files/update", data: request);
       final data = response.data;
-      file.uploadedFileID = data["id"];
-      file.updationTime = data["updationTime"];
-      file.fileDecryptionHeader = fileDecryptionHeader;
-      file.thumbnailDecryptionHeader = thumbnailDecryptionHeader;
-      return file;
+      return FileUpdateResponse(
+        id: data["id"],
+        updationTime: data["updationTime"],
+      );
     } on DioException catch (e) {
       final int statusCode = e.response?.statusCode ?? -1;
       if (statusCode == 426) {

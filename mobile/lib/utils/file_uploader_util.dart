@@ -331,17 +331,10 @@ Future<void> _decorateEnteFileData(
 
 Future<MetadataRequest> getPubMetadataRequest(
   EnteFile file,
-  Map<String, dynamic> newData,
+  Map<String, dynamic> jsonToUpdate,
   Uint8List fileKey,
 ) async {
-  final Map<String, dynamic> jsonToUpdate =
-      file.rAsset?.publicMetadata?.data ?? <String, dynamic>{};
-
-  newData.forEach((key, value) {
-    jsonToUpdate[key] = value;
-  });
   final int currentVersion = (file.rAsset?.publicMetadata?.version ?? 0);
-
   final encryptedMMd = await CryptoUtil.encryptChaCha(
     utf8.encode(jsonEncode(jsonToUpdate)),
     fileKey,

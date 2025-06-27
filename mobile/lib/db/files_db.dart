@@ -1155,8 +1155,10 @@ class FilesDB with SqlDbBase {
       'no_encrypted_key', // encryptedKey is not used in this context
       // file.keyDecryptionNonce,
       'no_key_decryption_nonce', // keyDecryptionNonce is not used in this context
-      file.fileDecryptionHeader,
-      file.thumbnailDecryptionHeader,
+      // file.fileDecryptionHeader,
+      'no_file_decryption_header', // fileDecryptionHeader is not used in this context
+      // file.thumbnailDecryptionHeader,
+      'no_thumbnail_decryption_header', // thumbnailDecryptionHeader is not used in this context
       'na',
       creationTime,
       file.updationTime,
@@ -1222,8 +1224,8 @@ class FilesDB with SqlDbBase {
     file.addedTime = row[columnAddedTime];
     // file.encryptedKey = row[columnEncryptedKey];
     // file.keyDecryptionNonce = row[columnKeyDecryptionNonce];
-    file.fileDecryptionHeader = row[columnFileDecryptionHeader];
-    file.thumbnailDecryptionHeader = row[columnThumbnailDecryptionHeader];
+    // file.fileDecryptionHeader = row[columnFileDecryptionHeader];
+    // file.thumbnailDecryptionHeader = row[columnThumbnailDecryptionHeader];
     file.fileSubType = row[columnFileSubType] ?? -1;
     file.duration = row[columnDuration] ?? 0;
     file.exif = row[columnExif];
