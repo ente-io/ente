@@ -1425,6 +1425,7 @@ const createCollectionSummaries = (
         // until type is completely replaced by attributes.
         const attributes = new Set<CollectionSummaryAttribute>();
         if (collection.owner.id != user.id) {
+            attributes.add("shared");
             attributes.add(
                 collection.sharees.find((s) => s.id == user.id)?.role ==
                     "COLLABORATOR"
@@ -1433,9 +1434,11 @@ const createCollectionSummaries = (
             );
         }
         if (isOutgoingShare(collection, user)) {
+            attributes.add("shared");
             attributes.add("outgoingShare");
         }
         if (isSharedOnlyViaLink(collection)) {
+            attributes.add("shared");
             attributes.add("sharedOnlyViaLink");
         }
         if (isArchivedCollection(collection)) {

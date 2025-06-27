@@ -543,10 +543,12 @@ const CollectionBarCardIcon: React.FC<CollectionBarCardIconProps> = ({
             // Need && to override the 20px set in the container.
             <PushPinIcon sx={{ "&&": { fontSize: "18px" } }} />
         )}
-        {(attributes.has("outgoingShare") ||
-            attributes.has("incomingShareViewer") ||
-            attributes.has("incomingShareCollaborator")) && <PeopleIcon />}
-        {attributes.has("sharedOnlyViaLink") && <LinkIcon />}
+        {attributes.has("shared") &&
+            (attributes.has("sharedOnlyViaLink") ? (
+                <LinkIcon />
+            ) : (
+                <PeopleIcon />
+            ))}
         {attributes.has("archived") && <ArchiveIcon sx={{ opacity: 0.48 }} />}
     </CollectionBarCardIcon_>
 );

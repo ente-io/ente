@@ -20,6 +20,7 @@ export type CollectionSummaryAttribute =
     | "trash"
     | "hiddenItems"
     | "defaultHidden"
+    | "shared"
     | "outgoingShare"
     | "incomingShareViewer"
     | "incomingShareCollaborator"
