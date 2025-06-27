@@ -30,6 +30,7 @@ import {
     isDefaultHiddenCollection,
 } from "../../services/collection";
 import {
+    CollectionSummarySortPriority,
     PseudoCollectionID,
     type CollectionSummary,
     type CollectionSummaryType,
@@ -1257,6 +1258,7 @@ const deriveNormalCollectionSummaries = (
             type: "uncategorized",
             attributes: new Set(["uncategorized"]),
             name: t("section_uncategorized"),
+            sortPriority: CollectionSummarySortPriority.system,
         });
     }
 
@@ -1278,6 +1280,7 @@ const deriveNormalCollectionSummaries = (
         type: "all",
         attributes: new Set(["all"]),
         name: t("section_all"),
+        sortPriority: CollectionSummarySortPriority.system,
     });
 
     normalCollectionSummaries.set(PseudoCollectionID.trash, {
@@ -1290,6 +1293,7 @@ const deriveNormalCollectionSummaries = (
         type: "trash",
         attributes: new Set(["trash"]),
         coverFile: undefined,
+        sortPriority: CollectionSummarySortPriority.other,
     });
 
     normalCollectionSummaries.set(PseudoCollectionID.archiveItems, {
@@ -1299,6 +1303,7 @@ const deriveNormalCollectionSummaries = (
         type: "archive",
         attributes: new Set(["archive"]),
         coverFile: undefined,
+        sortPriority: CollectionSummarySortPriority.other,
     });
 
     return normalCollectionSummaries;
@@ -1341,6 +1346,7 @@ const deriveHiddenCollectionSummaries = (
         name: t("hidden_items"),
         type: "hiddenItems",
         attributes: new Set(["hiddenItems"]),
+        sortPriority: CollectionSummarySortPriority.system,
     });
 
     return hiddenCollectionSummaries;
@@ -1372,12 +1378,17 @@ const createCollectionSummaries = (
             : "album";
 
         let type: CollectionSummaryType;
+        let sortPriority: CollectionSummarySortPriority =
+            CollectionSummarySortPriority.other;
         if (collection.owner.id != user.id) {
             type =
                 collection.sharees.find((s) => s.id == user.id)?.role ==
                 "COLLABORATOR"
                     ? "incomingShareCollaborator"
                     : "incomingShareViewer";
+        } else if (collectionType == "uncategorized") {
+            type = "uncategorized";
+            sortPriority = CollectionSummarySortPriority.system;
         } else if (collectionType == "favorites") {
             // [Note: User and shared favorites]
             //
@@ -1398,6 +1409,7 @@ const createCollectionSummaries = (
             // user's "favorites", everything else is secondary and can be part
             // of the `attributes` computed below.
             type = collectionType;
+            sortPriority = CollectionSummarySortPriority.favorites;
         } else if (isOutgoingShare(collection, user)) {
             type = "outgoingShare";
         } else if (isSharedOnlyViaLink(collection)) {
@@ -1410,6 +1422,7 @@ const createCollectionSummaries = (
             collection.magicMetadata?.data.order == CollectionOrder.pinned
         ) {
             type = "pinned";
+            sortPriority = CollectionSummarySortPriority.pinned;
         } else {
             type = collectionType;
         }
@@ -1485,7 +1498,7 @@ const createCollectionSummaries = (
             coverFile: coverFiles.get(collection.id),
             fileCount: collectionFiles?.length ?? 0,
             updationTime: collection.updationTime,
-            order: collection.magicMetadata?.data.order ?? 0,
+            sortPriority,
         });
     }
 

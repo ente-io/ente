@@ -19,7 +19,6 @@ import {
 import {
     canAddToCollection,
     canMoveToCollection,
-    CollectionSummaryOrder,
     type CollectionSummaries,
     type CollectionSummary,
 } from "ente-new/photos/services/collection-summary";
@@ -136,15 +135,8 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
                     return canMoveToCollection(type);
                 }
             })
-            .sort((a, b) => {
-                return a.name.localeCompare(b.name);
-            })
-            .sort((a, b) => {
-                return (
-                    CollectionSummaryOrder.get(a.type)! -
-                    CollectionSummaryOrder.get(b.type)!
-                );
-            });
+            .sort((a, b) => a.name.localeCompare(b.name))
+            .sort((a, b) => b.sortPriority - a.sortPriority);
 
         if (collections.length === 0) {
             onClose();

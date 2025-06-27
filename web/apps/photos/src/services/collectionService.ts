@@ -8,10 +8,7 @@ import {
     savedUserFavoritesCollection,
 } from "ente-new/photos/services/collection";
 import type { CollectionSummary } from "ente-new/photos/services/collection-summary";
-import {
-    CollectionSummaryOrder,
-    CollectionsSortBy,
-} from "ente-new/photos/services/collection-summary";
+import { CollectionsSortBy } from "ente-new/photos/services/collection-summary";
 import { savedCollectionFiles } from "ente-new/photos/services/photos-fdb";
 import HTTPService from "ente-shared/network/HTTPService";
 import { getToken } from "ente-shared/storage/localStorage/helpers";
@@ -72,12 +69,7 @@ export const sortCollectionSummaries = (
                     return (b.updationTime ?? 0) - (a.updationTime ?? 0);
             }
         })
-        .sort((a, b) => (b.order ?? 0) - (a.order ?? 0))
-        .sort(
-            (a, b) =>
-                CollectionSummaryOrder.get(a.type) -
-                CollectionSummaryOrder.get(b.type),
-        );
+        .sort((a, b) => b.sortPriority - a.sortPriority);
 
 function compareCollectionsLatestFile(
     first: EnteFile | undefined,
