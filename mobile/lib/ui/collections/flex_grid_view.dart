@@ -29,6 +29,7 @@ class CollectionsFlexiGridViewWidget extends StatefulWidget {
   static const maxThumbnailWidth = 224.0;
   static const crossAxisSpacing = 8.0;
   static const horizontalPadding = 16.0;
+  static const borderWidth = 1.0;
   final List<Collection>? collections;
   // At max how many albums to display
   final int displayLimitCount;
@@ -137,7 +138,8 @@ class _CollectionsFlexiGridViewWidgetState
 
     final double sideOfThumbnail = (screenWidth -
             totalCrossAxisSpacing -
-            CollectionsFlexiGridViewWidget.horizontalPadding) /
+            CollectionsFlexiGridViewWidget.horizontalPadding -
+            CollectionsFlexiGridViewWidget.borderWidth * 2) /
         albumsCountInCrossAxis;
 
     final int totalCollections = widget.collections!.length;
