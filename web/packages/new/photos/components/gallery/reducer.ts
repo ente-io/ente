@@ -1,14 +1,15 @@
 import type { User } from "ente-accounts/services/user";
-import {
-    isArchivedCollection,
-    isPinnedCollection,
-} from "ente-gallery/services/magic-metadata";
+import { isArchivedCollection } from "ente-gallery/services/magic-metadata";
 import {
     groupFilesByCollectionID,
     sortFiles,
     uniqueFilesByID,
 } from "ente-gallery/utils/file";
-import { collectionTypes, type Collection } from "ente-media/collection";
+import {
+    CollectionOrder,
+    collectionTypes,
+    type Collection,
+} from "ente-media/collection";
 import type { EnteFile } from "ente-media/file";
 import {
     isArchivedFile,
@@ -1405,7 +1406,9 @@ const createCollectionSummaries = (
             type = "archived";
         } else if (isDefaultHiddenCollection(collection)) {
             type = "defaultHidden";
-        } else if (isPinnedCollection(collection)) {
+        } else if (
+            collection.magicMetadata?.data.order == CollectionOrder.pinned
+        ) {
             type = "pinned";
         } else {
             type = collectionType;
@@ -1434,7 +1437,7 @@ const createCollectionSummaries = (
         if (isDefaultHiddenCollection(collection)) {
             attributes.add("defaultHidden");
         }
-        if (isPinnedCollection(collection)) {
+        if (collection.magicMetadata?.data.order == CollectionOrder.pinned) {
             attributes.add("pinned");
         }
         switch (collectionType) {

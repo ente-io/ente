@@ -25,10 +25,7 @@ import {
 import { SingleInputDialog } from "ente-base/components/SingleInputDialog";
 import { useModalVisibility } from "ente-base/components/utils/modal";
 import { useBaseContext } from "ente-base/context";
-import {
-    isArchivedCollection,
-    isPinnedCollection,
-} from "ente-gallery/services/magic-metadata";
+import { isArchivedCollection } from "ente-gallery/services/magic-metadata";
 import { CollectionOrder, type Collection } from "ente-media/collection";
 import { ItemVisibility } from "ente-media/file-metadata";
 import type { RemotePullOpts } from "ente-new/photos/components/gallery";
@@ -421,7 +418,7 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
                 >
                     {t("sort_by")}
                 </OverflowMenuOption>,
-                isPinnedCollection(activeCollection) ? (
+                collectionSummary.attributes.has("pinned") ? (
                     <OverflowMenuOption
                         key="unpin"
                         onClick={unpinAlbum}
