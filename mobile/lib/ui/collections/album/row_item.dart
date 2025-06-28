@@ -25,7 +25,7 @@ class AlbumRowItemWidget extends StatelessWidget {
   final void Function(Collection)? onTapCallback;
   final void Function(Collection)? onLongPressCallback;
   final SelectedAlbums? selectedAlbums;
-  final double borderWidth;
+  static const _borderWidth = 1.0;
   static const _cornerRadius = 12.0;
   static const _cornerSmoothing = 1.0;
 
@@ -39,7 +39,6 @@ class AlbumRowItemWidget extends StatelessWidget {
     this.onTapCallback,
     this.onLongPressCallback,
     this.selectedAlbums,
-    this.borderWidth = 1.0,
   });
 
   @override
@@ -62,21 +61,21 @@ class AlbumRowItemWidget extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           SizedBox(
-            height: sideOfThumbnail + borderWidth * 2,
-            width: sideOfThumbnail + borderWidth * 2,
+            height: sideOfThumbnail,
+            width: sideOfThumbnail,
             child: Stack(
               clipBehavior: Clip.none,
               alignment: Alignment.center,
               children: [
                 ClipSmoothRect(
                   radius: SmoothBorderRadius(
-                    cornerRadius: _cornerRadius + borderWidth,
+                    cornerRadius: _cornerRadius + _borderWidth,
                     cornerSmoothing: _cornerSmoothing,
                   ),
                   child: Container(
                     color: getEnteColorScheme(context).strokeMuted,
-                    width: sideOfThumbnail + borderWidth * 2,
-                    height: sideOfThumbnail + borderWidth * 2,
+                    width: sideOfThumbnail,
+                    height: sideOfThumbnail,
                   ),
                 ),
                 ClipSmoothRect(
@@ -85,8 +84,8 @@ class AlbumRowItemWidget extends StatelessWidget {
                     cornerSmoothing: _cornerSmoothing,
                   ),
                   child: SizedBox(
-                    height: sideOfThumbnail,
-                    width: sideOfThumbnail,
+                    height: sideOfThumbnail - _borderWidth * 2,
+                    width: sideOfThumbnail - _borderWidth * 2,
                     child: Stack(
                       children: [
                         FutureBuilder<EnteFile?>(

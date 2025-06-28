@@ -11,16 +11,15 @@ import 'package:photos/utils/navigation_util.dart';
 class DeviceFolderItem extends StatelessWidget {
   final DeviceCollection deviceCollection;
   final double sideOfThumbnail;
-  final double borderWidth;
 
   static const _cornerRadius = 12.0;
   static const _cornerSmoothing = 1.0;
+  static const _borderWidth = 1.0;
 
   const DeviceFolderItem(
     this.deviceCollection, {
     ///120 is default for the 'on device' scrollview in albums section
     this.sideOfThumbnail = 120,
-    this.borderWidth = 1.0,
     super.key,
   });
 
@@ -32,21 +31,21 @@ class DeviceFolderItem extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           SizedBox(
-            height: sideOfThumbnail + borderWidth * 2,
-            width: sideOfThumbnail + borderWidth * 2,
+            height: sideOfThumbnail,
+            width: sideOfThumbnail,
             child: Stack(
               clipBehavior: Clip.none,
               alignment: Alignment.center,
               children: [
                 ClipSmoothRect(
                   radius: SmoothBorderRadius(
-                    cornerRadius: _cornerRadius + borderWidth,
+                    cornerRadius: _cornerRadius + _borderWidth,
                     cornerSmoothing: _cornerSmoothing,
                   ),
                   child: Container(
                     color: getEnteColorScheme(context).strokeMuted,
-                    width: sideOfThumbnail + borderWidth * 2,
-                    height: sideOfThumbnail + borderWidth * 2,
+                    width: sideOfThumbnail,
+                    height: sideOfThumbnail,
                   ),
                 ),
                 ClipSmoothRect(
@@ -55,8 +54,8 @@ class DeviceFolderItem extends StatelessWidget {
                     cornerSmoothing: _cornerSmoothing,
                   ),
                   child: SizedBox(
-                    height: sideOfThumbnail,
-                    width: sideOfThumbnail,
+                    height: sideOfThumbnail - _borderWidth * 2,
+                    width: sideOfThumbnail - _borderWidth * 2,
                     child: Hero(
                       tag: "device_folder:" +
                           deviceCollection.name +
