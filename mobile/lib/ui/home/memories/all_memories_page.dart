@@ -42,8 +42,11 @@ class _AllMemoriesPageState extends State<AllMemoriesPage>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: PageView.builder(
+    return Container(
+      width: double.infinity,
+      height: double.infinity,
+      color: backgroundBaseDark,
+      child: PageView.builder(
         controller: pageController,
         physics: const BouncingScrollPhysics(),
         hitTestBehavior: HitTestBehavior.translucent,
@@ -76,7 +79,6 @@ class _AllMemoriesPageState extends State<AllMemoriesPage>
           );
         },
       ),
-      backgroundColor: backgroundBaseDark,
     );
   }
 
