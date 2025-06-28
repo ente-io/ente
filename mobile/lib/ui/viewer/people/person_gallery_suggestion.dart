@@ -440,6 +440,7 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
                 const SizedBox(height: 16),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: _buildFaceThumbnails(),
                 ),
                 const SizedBox(height: 24),
@@ -559,6 +560,7 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
     final files =
         currentSuggestion.filesInCluster.take(personPage ? 4 : 3).toList();
     final thumbnails = <Widget>[];
+    final textTheme = getEnteTextTheme(context);
 
     final start = personPage ? 0 : -1;
     for (int i = start; i < files.length; i++) {
@@ -574,40 +576,58 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
       }
 
       thumbnails.add(
-        Container(
-          width: 72,
-          height: 72,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(32),
-            border: Border.all(
-              color: getEnteColorScheme(context).strokeFainter,
-              width: 1,
-            ),
-          ),
-          child: ClipRRect(
-            child: ClipPath(
-              clipper: ShapeBorderClipper(
-                shape: ContinuousRectangleBorder(
-                  borderRadius: BorderRadius.circular(52),
+        Column(
+          children: [
+            Container(
+              width: 72,
+              height: 72,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(32),
+                border: Border.all(
+                  color: getEnteColorScheme(context).strokeFainter,
+                  width: 1,
                 ),
               ),
-              child: (i == -1)
-                  ? PersonFaceWidget(
-                      personId: suggestPerson.remoteID,
-                      key: ValueKey('person_${suggestPerson.remoteID}'),
-                    )
-                  : FileFaceWidget(
-                      key: ValueKey(
-                        'face_${currentSuggestionIndex}_${file!.uploadedFileID}',
-                      ),
-                      file,
-                      faceCrop: faceCrop,
-                      clusterID: currentSuggestion.clusterIDToMerge,
-                      useFullFile: true,
-                      thumbnailFallback: true,
+              child: ClipRRect(
+                child: ClipPath(
+                  clipper: ShapeBorderClipper(
+                    shape: ContinuousRectangleBorder(
+                      borderRadius: BorderRadius.circular(52),
                     ),
+                  ),
+                  child: (i == -1)
+                      ? PersonFaceWidget(
+                          personId: suggestPerson.remoteID,
+                          key: ValueKey('person_${suggestPerson.remoteID}'),
+                        )
+                      : FileFaceWidget(
+                          key: ValueKey(
+                            'face_${currentSuggestionIndex}_${file!.uploadedFileID}',
+                          ),
+                          file,
+                          faceCrop: faceCrop,
+                          clusterID: currentSuggestion.clusterIDToMerge,
+                          useFullFile: true,
+                          thumbnailFallback: true,
+                        ),
+                ),
+              ),
             ),
-          ),
+            if (i == -1) const SizedBox(height: 8),
+            if (i == -1)
+              SizedBox(
+                width: 72,
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 4),
+                  child: Text(
+                    relevantPerson.data.name.trim(),
+                    style: textTheme.bodyMuted,
+                    overflow: TextOverflow.visible,
+                    maxLines: 1,
+                  ),
+                ),
+              ),
+          ],
         ),
       );
     }
