@@ -28,6 +28,7 @@ import "package:photos/services/local/asset_entity.service.dart";
 import "package:photos/services/local/local_import.dart";
 import "package:photos/utils/exif_util.dart";
 import 'package:photos/utils/file_util.dart';
+import "package:photos/utils/standalone/decode_image.dart";
 import "package:uuid/uuid.dart";
 import 'package:video_thumbnail/video_thumbnail.dart';
 
@@ -287,12 +288,8 @@ Future<MediaUploadData> _getMediaUploadDataFromAppCache(
   EnteFile file,
   bool parseExif,
 ) async {
-  File sourceFile;
-  Uint8List? thumbnailData;
-  Map<String, IfdTag>? exifData;
-  const bool isDeleted = false;
   final localPath = getSharedMediaFilePath(file);
-  sourceFile = File(localPath);
+  final sourceFile = File(localPath);
   if (!sourceFile.existsSync()) {
     _logger.warning("File doesn't exist in app sandbox");
     throw InvalidFileError(
@@ -301,12 +298,13 @@ Future<MediaUploadData> _getMediaUploadDataFromAppCache(
     );
   }
   try {
-    thumbnailData = await getThumbnailFromInAppCacheFile(file);
+    Map<String, IfdTag>? exifData;
+    final Uint8List? thumbnailData = await getThumbnailFromInAppCacheFile(file);
     final fileHash =
         CryptoUtil.bin2base64(await CryptoUtil.getHash(sourceFile));
-    Map<String, int>? dimensions;
+    ui.Image? decodedImage;
     if (file.fileType == FileType.image) {
-      dimensions = await getImageHeightAndWith(imagePath: localPath);
+      decodedImage = await decodeImageInIsolate(localPath);
       exifData = await tryExifFromFile(sourceFile);
     } else if (thumbnailData != null) {
       // the thumbnail null check is to ensure that we are able to generate thum
@@ -317,15 +315,17 @@ Future<MediaUploadData> _getMediaUploadDataFromAppCache(
         thumbnailPath: (await getTemporaryDirectory()).path,
         quality: 10,
       );
-      dimensions = await getImageHeightAndWith(imagePath: thumbnailFilePath);
+      if (thumbnailFilePath != null) {
+        decodedImage = await decodeImageInIsolate(thumbnailFilePath);
+      }
     }
     return MediaUploadData(
       sourceFile,
       thumbnailData,
-      isDeleted,
+      false,
       FileHashData(fileHash),
-      height: dimensions?['height'],
-      width: dimensions?['width'],
+      height: decodedImage?.height,
+      width: decodedImage?.width,
       exifData: exifData,
     );
   } catch (e, s) {
@@ -334,37 +334,6 @@ Future<MediaUploadData> _getMediaUploadDataFromAppCache(
       "thumbnail failed for appCache fileType: ${file.fileType.toString()}",
       InvalidReason.thumbnailMissing,
     );
-  }
-}
-
-Future<Map<String, int>?> getImageHeightAndWith({
-  String? imagePath,
-  Uint8List? imageBytes,
-}) async {
-  if (imagePath == null && imageBytes == null) {
-    throw ArgumentError("imagePath and imageBytes cannot be null");
-  }
-  try {
-    late Uint8List bytes;
-    if (imagePath != null) {
-      final File imageFile = File(imagePath);
-      bytes = await imageFile.readAsBytes();
-    } else {
-      bytes = imageBytes!;
-    }
-    final ui.Codec codec = await ui.instantiateImageCodec(bytes);
-    final ui.FrameInfo frameInfo = await codec.getNextFrame();
-    if (frameInfo.image.width == 0 || frameInfo.image.height == 0) {
-      return null;
-    } else {
-      return {
-        "width": frameInfo.image.width,
-        "height": frameInfo.image.height,
-      };
-    }
-  } catch (e) {
-    _logger.severe("Failed to get image size", e);
-    return null;
   }
 }
 
