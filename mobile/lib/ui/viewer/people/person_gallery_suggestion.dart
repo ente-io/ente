@@ -475,9 +475,7 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
                               ),
                               const SizedBox(width: 8),
                               Text(
-                                personPage
-                                    ? S.of(context).no
-                                    : S.of(context).different,
+                                S.of(context).no,
                                 style: (personPage
                                         ? textTheme.bodyBold
                                         : textTheme.body)
@@ -514,9 +512,7 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
                               ),
                               const SizedBox(width: 8),
                               Text(
-                                personPage
-                                    ? S.of(context).yes
-                                    : S.of(context).same,
+                                S.of(context).yes,
                                 style: (personPage
                                         ? textTheme.bodyBold
                                         : textTheme.body)
