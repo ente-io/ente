@@ -264,15 +264,8 @@ class _PeopleSelectionActionWidgetState
             await ClusterFeedbackService.instance.addClusterToExistingPerson(
               clusterID: clusterID,
               person: person,
-              fireEvent: false,
             );
           }
-          Bus.instance.fire(
-            PeopleChangedEvent(
-              type: PeopleEventType.addedClusterToPerson,
-              source: person.remoteID,
-            ),
-          );
           widget.selectedPeople.clearAll();
         } catch (e, s) {
           _logger.severe('Merging clusters failed', e, s);

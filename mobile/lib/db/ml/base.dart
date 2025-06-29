@@ -40,6 +40,7 @@ abstract class IMLDataDB<T> {
   Future<Map<String, Iterable<String>>> getAllClusterIdToFaceIDs();
   Future<Iterable<String>> getFaceIDsForCluster(String clusterID);
   Future<Map<String, Map<String, Set<String>>>> getPersonToClusterIdToFaceIds();
+  Future<Map<String, Set<String>>> getPersonToClusterIDs();
   Future<Map<String, Set<String>>> getClusterIdToFaceIdsForPerson(
     String personID,
   );
