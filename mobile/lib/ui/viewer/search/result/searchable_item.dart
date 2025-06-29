@@ -64,7 +64,7 @@ class SearchableItemWidget extends StatelessWidget {
         decoration: BoxDecoration(
           border: Border.all(color: colorScheme.strokeFainter),
           borderRadius: const BorderRadius.all(
-            Radius.circular(4),
+            Radius.circular(6),
           ),
         ),
         child: Row(

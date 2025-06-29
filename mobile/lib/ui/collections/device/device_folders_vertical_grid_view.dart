@@ -62,13 +62,12 @@ class _DeviceFolderVerticalGridViewBodyState
     executionInterval: const Duration(seconds: 4),
   );
   /*
-  Aspect ratio 1:1 Max width 224 Fixed gap 8
-  Width changes dynamically with screen width such that we can fit 2 in one row.
-  Keep the width integral (center the albums to distribute excess pixels)
-   */
-  static const maxThumbnailWidth = 170.0;
-  static const fixedGapBetweenAlbum = 2.0;
-  static const minGapForHorizontalPadding = 8.0;
+  Aspect ratio 1:1
+  Width changes dynamically with screen width
+  */
+  static const maxThumbnailWidth = 224.0;
+  static const horizontalPadding = 16.0;
+  static const crossAxisSpacing = 8.0;
 
   @override
   void initState() {
@@ -101,30 +100,28 @@ class _DeviceFolderVerticalGridViewBodyState
           FilesDB.instance.getDeviceCollections(includeCoverThumbnail: true),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
-          final double screenWidth = MediaQuery.of(context).size.width;
-          final int albumsCountInOneRow =
+          final double screenWidth = MediaQuery.sizeOf(context).width;
+          final int albumsCountInCrossAxis =
               max(screenWidth ~/ maxThumbnailWidth, 3);
-          final double gapBetweenAlbums =
-              (albumsCountInOneRow - 1) * fixedGapBetweenAlbum;
-          final double gapOnSizeOfAlbums = minGapForHorizontalPadding +
-              (screenWidth -
-                      gapBetweenAlbums -
-                      (2 * minGapForHorizontalPadding)) %
-                  albumsCountInOneRow;
 
+          final double totalCrossAxisSpacing =
+              (albumsCountInCrossAxis - 1) * crossAxisSpacing;
           final double sideOfThumbnail =
-              (screenWidth - gapOnSizeOfAlbums - gapBetweenAlbums) /
-                  albumsCountInOneRow;
+              (screenWidth - totalCrossAxisSpacing - horizontalPadding) /
+                  albumsCountInCrossAxis;
 
           return snapshot.data!.isEmpty
               ? const SliverFillRemaining(child: EmptyState())
               : SliverPadding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  padding: const EdgeInsets.only(
+                    left: horizontalPadding / 2,
+                    right: horizontalPadding / 2,
+                  ),
                   sliver: SliverGrid(
                     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: albumsCountInOneRow,
-                      mainAxisSpacing: 4,
-                      crossAxisSpacing: gapBetweenAlbums,
+                      crossAxisCount: albumsCountInCrossAxis,
+                      mainAxisSpacing: 8,
+                      crossAxisSpacing: crossAxisSpacing,
                       childAspectRatio:
                           sideOfThumbnail / (sideOfThumbnail + 46),
                     ),
