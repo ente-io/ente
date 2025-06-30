@@ -47,7 +47,7 @@ import { FullScreenDropZone } from "ente-gallery/components/FullScreenDropZone";
 import { downloadManager } from "ente-gallery/services/download";
 import { extractCollectionKeyFromShareURL } from "ente-gallery/services/share";
 import { updateShouldDisableCFUploadProxy } from "ente-gallery/services/upload";
-import { sortFiles } from "ente-gallery/utils/files";
+import { sortFiles } from "ente-gallery/utils/file";
 import type { Collection } from "ente-media/collection";
 import { type EnteFile } from "ente-media/file";
 import { verifyPublicAlbumPassword } from "ente-new/albums/services/publicCollection";
@@ -238,7 +238,7 @@ export default function PublicCollectionGallery() {
                 downloadManager.setPublicAlbumsCredentials(credentials.current);
                 // Update the CF proxy flag, but we don't need to block on it.
                 void updateShouldDisableCFUploadProxy();
-                await syncWithRemote();
+                await publicAlbumsRemotePull();
             } finally {
                 if (!redirectingToWebsite) {
                     setLoading(false);
@@ -284,7 +284,11 @@ export default function PublicCollectionGallery() {
         );
     }, [onAddPhotos]);
 
-    const syncWithRemote = useCallback(async () => {
+    /**
+     * Pull the latest data related to the public album from remote, updating
+     * both our local database and component state.
+     */
+    const publicAlbumsRemotePull = useCallback(async () => {
         const collectionUID = getPublicCollectionUID(
             credentials.current.accessToken,
         );
@@ -358,7 +362,7 @@ export default function PublicCollectionGallery() {
                 setPublicCollection(null);
                 setPublicFiles(null);
             } else {
-                log.error("failed to sync public album with remote", e);
+                log.error("Public album remote pull failed", e);
             }
         } finally {
             hideLoadingBar();
@@ -397,7 +401,7 @@ export default function PublicCollectionGallery() {
             throw e;
         }
 
-        await syncWithRemote();
+        await publicAlbumsRemotePull();
     };
 
     const clearSelection = () => {
@@ -519,15 +523,15 @@ export default function PublicCollectionGallery() {
                     setFilesDownloadProgressAttributesCreator={
                         setFilesDownloadProgressAttributesCreator
                     }
-                    onSyncWithRemote={syncWithRemote}
+                    onRemotePull={publicAlbumsRemotePull}
                     onVisualFeedback={handleVisualFeedback}
                 />
                 {blockingLoad && <TranslucentLoadingOverlay />}
                 <Upload
-                    syncWithRemote={syncWithRemote}
                     uploadCollection={publicCollection}
                     setLoading={setBlockingLoad}
                     setShouldDisableDropzone={setShouldDisableDropzone}
+                    onRemotePull={publicAlbumsRemotePull}
                     onUploadFile={(file) =>
                         setPublicFiles(sortFiles([...publicFiles, file]))
                     }

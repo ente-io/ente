@@ -2,6 +2,7 @@ import type { User } from "ente-accounts/services/user";
 import { ensureElectron } from "ente-base/electron";
 import { joinPath } from "ente-base/file-name";
 import log from "ente-base/log";
+import { uniqueFilesByID } from "ente-gallery/utils/file";
 import { type Collection, CollectionSubType } from "ente-media/collection";
 import { EnteFile } from "ente-media/file";
 import {
@@ -10,23 +11,18 @@ import {
     defaultHiddenCollectionUserFacingName,
     findDefaultHiddenCollectionIDs,
     isHiddenCollection,
-    isIncomingShare,
+    moveFromCollection,
     moveToCollection,
+    removeFromCollection,
     restoreToCollection,
 } from "ente-new/photos/services/collection";
 import { PseudoCollectionID } from "ente-new/photos/services/collection-summary";
-import { getLocalCollections } from "ente-new/photos/services/collections";
-import { getLocalFiles } from "ente-new/photos/services/files";
 import {
+    savedCollectionFiles,
     savedCollections,
-    savedFiles,
 } from "ente-new/photos/services/photos-fdb";
 import { safeDirectoryName } from "ente-new/photos/utils/native-fs";
 import { getData } from "ente-shared/storage/localStorage";
-import {
-    removeFromCollection,
-    unhideToCollection,
-} from "services/collectionService";
 import {
     SetFilesDownloadProgressAttributes,
     type SetFilesDownloadProgressAttributesCreator,
@@ -46,7 +42,7 @@ export async function handleCollectionOp(
             await addToCollection(collection, selectedFiles);
             break;
         case "move":
-            await moveToCollection(
+            await moveFromCollection(
                 selectedCollectionID,
                 collection,
                 selectedFiles,
@@ -59,7 +55,7 @@ export async function handleCollectionOp(
             await restoreToCollection(collection, selectedFiles);
             break;
         case "unhide":
-            await unhideToCollection(collection, selectedFiles);
+            await moveToCollection(collection, selectedFiles);
             break;
     }
 }
@@ -76,7 +72,7 @@ export async function downloadCollectionHelper(
     setFilesDownloadProgressAttributes: SetFilesDownloadProgressAttributes,
 ) {
     try {
-        const allFiles = await savedFiles();
+        const allFiles = await savedCollectionFiles();
         const collectionFiles = allFiles.filter(
             (file) => file.collectionID == collectionID,
         );
@@ -101,12 +97,14 @@ export async function downloadDefaultHiddenCollectionHelper(
     setFilesDownloadProgressAttributesCreator: SetFilesDownloadProgressAttributesCreator,
 ) {
     try {
-        const hiddenCollections = await getLocalCollections("hidden");
-        const defaultHiddenCollectionsIds =
-            findDefaultHiddenCollectionIDs(hiddenCollections);
-        const hiddenFiles = await getLocalFiles("hidden");
-        const defaultHiddenCollectionFiles = hiddenFiles.filter((file) =>
-            defaultHiddenCollectionsIds.has(file.collectionID),
+        const defaultHiddenCollectionsIDs = findDefaultHiddenCollectionIDs(
+            await savedCollections(),
+        );
+        const collectionFiles = await savedCollectionFiles();
+        const defaultHiddenCollectionFiles = uniqueFilesByID(
+            collectionFiles.filter((file) =>
+                defaultHiddenCollectionsIDs.has(file.collectionID),
+            ),
         );
         const setFilesDownloadProgressAttributes =
             setFilesDownloadProgressAttributesCreator(
@@ -186,19 +184,6 @@ export function isIncomingViewerShare(collection: Collection, user: User) {
     return sharee?.role == "VIEWER";
 }
 
-export function isValidMoveTarget(
-    sourceCollectionID: number,
-    targetCollection: Collection,
-    user: User,
-) {
-    return (
-        sourceCollectionID !== targetCollection.id &&
-        !isHiddenCollection(targetCollection) &&
-        !isQuickLinkCollection(targetCollection) &&
-        !isIncomingShare(targetCollection, user)
-    );
-}
-
 export function isValidReplacementAlbum(
     collection: Collection,
     user: User,
@@ -211,7 +196,7 @@ export function isValidReplacementAlbum(
             collection.type == "uncategorized") &&
         !isHiddenCollection(collection) &&
         !isQuickLinkCollection(collection) &&
-        !isIncomingShare(collection, user)
+        collection.owner.id == user.id
     );
 }
 

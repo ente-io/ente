@@ -50,7 +50,6 @@ import { downloadManager } from "ente-gallery/services/download";
 import type { Collection } from "ente-media/collection";
 import type { EnteFile } from "ente-media/file";
 import { fileFileName } from "ente-media/file-metadata";
-import { getLocalCollections } from "ente-new/photos/services/collections";
 import { t } from "i18next";
 import React, {
     forwardRef,
@@ -61,6 +60,7 @@ import React, {
     type Ref,
     type RefObject,
 } from "react";
+import { savedCollections } from "../services/photos-fdb";
 
 export type ImageEditorOverlayProps = ModalVisibilityProps & {
     /**
@@ -478,7 +478,7 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = ({
     const saveCopyToEnte = async () => {
         if (!canvasRef.current) return;
         try {
-            const collections = await getLocalCollections();
+            const collections = await savedCollections();
             const collection = collections.find(
                 (c) => c.id == file.collectionID,
             );

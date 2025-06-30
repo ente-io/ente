@@ -73,8 +73,8 @@ export type RemoteTrashItem = z.infer<typeof RemoteTrashItem>;
  * Update our locally saved data about the files and collections in trash by
  * pulling changes from remote.
  *
- * This function uses a diff-based mechanism that pulls forward from the
- * (persisted) latest pulled item's updated at time.
+ * This function uses a delta diff, pulling only changes since the timestamp
+ * saved by the last pull.
  *
  * @param collections All the (non-deleted) collections that we know about
  * locally.
@@ -174,7 +174,7 @@ export const pullTrash = async (
     }
 
     const trashCollectionIDs = new Set(
-        trashItemsByID.values().map((item) => item.file.collectionID),
+        [...trashItemsByID.values()].map((item) => item.file.collectionID),
     );
     await saveTrashItemCollectionKeys(
         [...collectionKeyByID.entries()]
@@ -203,10 +203,9 @@ const TrashDiffResponse = z.object({
  * pull changes from remote.
  */
 const getTrashDiff = async (sinceTime: number) => {
-    const res = await fetch(
-        await apiURL("/trash/v2/diff", { sinceTime: sinceTime.toString() }),
-        { headers: await authenticatedRequestHeaders() },
-    );
+    const res = await fetch(await apiURL("/trash/v2/diff", { sinceTime }), {
+        headers: await authenticatedRequestHeaders(),
+    });
     ensureOk(res);
     return TrashDiffResponse.parse(await res.json());
 };
@@ -240,7 +239,7 @@ export const sortTrashItems = (trashItems: TrashItem[]) =>
  * Return the IDs of all the files that are part of the trash in our local
  * database.
  */
-export const getLocalTrashFileIDs = () =>
+export const savedTrashItemFileIDs = () =>
     savedTrashItems().then((items) => new Set(items.map((f) => f.file.id)));
 
 /**

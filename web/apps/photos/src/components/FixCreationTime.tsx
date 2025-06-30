@@ -27,14 +27,18 @@ import { FileDateTimePicker } from "ente-new/photos/components/FileDateTimePicke
 import { updateFilePublicMagicMetadata } from "ente-new/photos/services/file";
 import { useFormik } from "formik";
 import { t } from "i18next";
-import { GalleryContext } from "pages/gallery";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 type FixCreationTimeProps = ModalVisibilityProps & {
     /**
-     * The {@link EnteFile}s whose creation time the user wishes to modify.
+     * The {@link EnteFile}s whose creation time should be modified.
      */
     files: EnteFile[];
+    /**
+     * Called after the creation times have been updated, to perform a full
+     * remote pull.
+     */
+    onRemotePull: () => Promise<void>;
 };
 
 /**
@@ -44,11 +48,10 @@ export const FixCreationTime: React.FC<FixCreationTimeProps> = ({
     open,
     onClose,
     files,
+    onRemotePull,
 }) => {
     const [step, setStep] = useState<Step | undefined>();
     const [progress, setProgress] = useState({ completed: 0, total: 0 });
-
-    const galleryContext = useContext(GalleryContext);
 
     useEffect(() => {
         // Reset the step whenever the dialog is reopened.
@@ -64,7 +67,7 @@ export const FixCreationTime: React.FC<FixCreationTimeProps> = ({
             setProgress,
         );
         setStep(completedWithErrors ? "completed-with-errors" : "completed");
-        await galleryContext.syncWithRemote();
+        await onRemotePull();
     };
 
     const title =

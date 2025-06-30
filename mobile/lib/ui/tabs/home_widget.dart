@@ -159,6 +159,8 @@ class _HomeWidgetState extends State<HomeWidget> {
     _accountConfiguredEvent =
         Bus.instance.on<AccountConfiguredEvent>().listen((event) {
       setState(() {});
+      // fetch user flags on login
+      flagService.flags;
     });
     _triggerLogoutEvent =
         Bus.instance.on<TriggerLogoutEvent>().listen((event) async {

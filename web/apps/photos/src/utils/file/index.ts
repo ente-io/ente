@@ -1,4 +1,4 @@
-import type { User } from "ente-accounts/services/user";
+import type { LocalUser, User } from "ente-accounts/services/user";
 import { joinPath } from "ente-base/file-name";
 import log from "ente-base/log";
 import { type Electron } from "ente-base/types/ipc";
@@ -15,7 +15,9 @@ import {
 import { FileType } from "ente-media/file-type";
 import { decodeLivePhoto } from "ente-media/live-photo";
 import {
+    addToFavorites,
     deleteFromTrash,
+    hideFiles,
     moveToTrash,
 } from "ente-new/photos/services/collection";
 import { updateFilesVisibility } from "ente-new/photos/services/file";
@@ -23,10 +25,6 @@ import { safeFileName } from "ente-new/photos/utils/native-fs";
 import { getData } from "ente-shared/storage/localStorage";
 import { wait } from "ente-utils/promise";
 import { t } from "i18next";
-import {
-    addMultipleToFavorites,
-    moveToHiddenCollection,
-} from "services/collectionService";
 import {
     SelectedState,
     SetFilesDownloadProgressAttributes,
@@ -312,7 +310,10 @@ export const getUserOwnedFiles = (files: EnteFile[]) => {
     return files.filter((file) => file.ownerID === user.id);
 };
 
-export const shouldShowAvatar = (file: EnteFile, user: User) => {
+export const shouldShowAvatar = (
+    file: EnteFile,
+    user: LocalUser | undefined,
+) => {
     if (!file || !user) {
         return false;
     }
@@ -357,7 +358,7 @@ export const handleFileOp = async (
             fixCreationTime(files);
             break;
         case "favorite":
-            await addMultipleToFavorites(files);
+            await addToFavorites(files);
             break;
         case "archive":
             await updateFilesVisibility(files, ItemVisibility.archived);
@@ -368,7 +369,7 @@ export const handleFileOp = async (
         case "hide":
             try {
                 markTempHidden(files);
-                await moveToHiddenCollection(files);
+                await hideFiles(files);
             } catch (e) {
                 clearTempHidden();
                 throw e;

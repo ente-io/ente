@@ -36,9 +36,10 @@
  *
  * Note that even though both of them refer to the same conceptual "files DB",
  * the actual storage is distinct since both the apps run on separate domains
- * and so have their separate IndexedDB storage.
+ * and so have their separate IndexedDB storage and thus separate files tables.
  *
- * Still, the key names are (generally) distinct to reduce chances of confusion.
+ * Still, the key names are distinct to reduce chances of confusion: the public
+ * albums app stores data in keys prefixed with "public-".
  */
 
 import {

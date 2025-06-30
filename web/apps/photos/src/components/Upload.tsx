@@ -13,6 +13,7 @@ import {
     Typography,
     type DialogProps,
 } from "@mui/material";
+import type { LocalUser } from "ente-accounts/services/user";
 import { isDesktop } from "ente-base/app";
 import { SpacedRow } from "ente-base/components/containers";
 import { DialogCloseIconButton } from "ente-base/components/mui/DialogCloseIconButton";
@@ -49,13 +50,13 @@ import type { EnteFile } from "ente-media/file";
 import { UploaderNameInput } from "ente-new/albums/components/UploaderNameInput";
 import { CollectionMappingChoice } from "ente-new/photos/components/CollectionMappingChoice";
 import type { CollectionSelectorAttributes } from "ente-new/photos/components/CollectionSelector";
+import type { RemotePullOpts } from "ente-new/photos/components/gallery";
 import { downloadAppDialogAttributes } from "ente-new/photos/components/utils/download";
-import { getLatestCollections } from "ente-new/photos/services/collections";
+import { savedNormalCollections } from "ente-new/photos/services/collection";
 import { redirectToCustomerPortal } from "ente-new/photos/services/user-details";
 import { usePhotosAppContext } from "ente-new/photos/types/context";
 import { firstNonEmpty } from "ente-utils/array";
 import { t } from "i18next";
-import { GalleryContext } from "pages/gallery";
 import React, {
     useCallback,
     useContext,
@@ -83,7 +84,14 @@ import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
 import { UploadProgress } from "./UploadProgress";
 
 interface UploadProps {
-    syncWithRemote: (force?: boolean, silent?: boolean) => Promise<void>;
+    /**
+     * The currently logged in user, if any.
+     *
+     * This is only expected to be present when we're running it the context of
+     * the photos app, where there is a logged in user. When used by the public
+     * albums app, this prop can be omitted.
+     */
+    user?: LocalUser;
     closeUploadTypeSelector: () => void;
     /**
      * Show the collection selector with the given {@link attributes}.
@@ -99,6 +107,27 @@ interface UploadProps {
     setShouldDisableDropzone: (value: boolean) => void;
     showCollectionSelector?: () => void;
     /**
+     * Called when the uploader (or the file watcher) wants to perform a full
+     * remote pull.
+     *
+     * See also {@link onRemoteFilesPull}.
+     */
+    onRemotePull: (opts?: RemotePullOpts) => Promise<void>;
+    /**
+     * Called when an action in the uploader requires us to first pull the
+     * latest files and collections from remote.
+     *
+     * See: [Note: Full remote pull vs files pull]
+     *
+     * Specifically, this is used prior to creating a new album, to obtain
+     * (potential) existing albums from remote so that they can be matched by
+     * name if needed.
+     *
+     * This functionality is not needed during uploads to a public album, so
+     * this property is optional; the public albums code need not provide it.
+     */
+    onRemoteFilesPull?: () => Promise<void>;
+    /**
      * Callback invoked when a file is uploaded.
      *
      * @param file The newly uploaded file.
@@ -111,7 +140,6 @@ interface UploadProps {
      * app, where the scenario requiring this will not arise.
      */
     onShowPlanSelector?: () => void;
-    setCollections?: (cs: Collection[]) => void;
     isFirstUpload?: boolean;
     uploadTypeSelectorView: boolean;
     showSessionExpiredMessage: () => void;
@@ -127,8 +155,11 @@ type UploadType = "files" | "folders" | "zips";
  * Top level component that houses the infrastructure for handling uploads.
  */
 export const Upload: React.FC<UploadProps> = ({
+    user,
     isFirstUpload,
     dragAndDropFiles,
+    onRemotePull,
+    onRemoteFilesPull,
     onUploadFile,
     onShowPlanSelector,
     showSessionExpiredMessage,
@@ -136,7 +167,6 @@ export const Upload: React.FC<UploadProps> = ({
 }) => {
     const { showMiniDialog, onGenericError } = useBaseContext();
     const { showNotification, watchFolderView } = usePhotosAppContext();
-    const galleryContext = useContext(GalleryContext);
     const publicCollectionGalleryContext = useContext(
         PublicCollectionGalleryContext,
     );
@@ -348,16 +378,7 @@ export const Upload: React.FC<UploadProps> = ({
                 setDesktopFilePaths(filePaths);
             };
 
-            const requestSyncWithRemote = () => {
-                props.syncWithRemote().catch((e: unknown) => {
-                    log.error(
-                        "Ignoring error when syncing trash changes with remote",
-                        e,
-                    );
-                });
-            };
-
-            watcher.init(upload, requestSyncWithRemote);
+            watcher.init(upload, () => void onRemotePull());
 
             electron.pendingUploads().then((pending) => {
                 if (!pending) return;
@@ -467,7 +488,7 @@ export const Upload: React.FC<UploadProps> = ({
         setDesktopFilePaths([]);
         setDesktopZipItems([]);
 
-        // Remove hidden files (files whose names begins with a ".").
+        // Filter out files whose names begins with a ".".
         const prunedItemAndPaths = allItemAndPaths.filter(
             ([, p]) => !basename(p).startsWith("."),
         );
@@ -532,7 +553,7 @@ export const Upload: React.FC<UploadProps> = ({
                 isDragAndDrop.current = false;
                 if (
                     props.activeCollection &&
-                    props.activeCollection.owner.id === galleryContext.user?.id
+                    props.activeCollection.owner.id == user?.id
                 ) {
                     uploadFilesToExistingCollection(props.activeCollection);
                     return;
@@ -592,7 +613,6 @@ export const Upload: React.FC<UploadProps> = ({
     ) => {
         await preCollectionCreationAction();
         let uploadItemsWithCollection: UploadItemWithCollection[] = [];
-        const collections: Collection[] = [];
         let collectionNameToUploadItems = new Map<
             string,
             UploadItemAndPath[]
@@ -608,8 +628,10 @@ export const Upload: React.FC<UploadProps> = ({
                 collectionName,
             );
         }
+        const collections: Collection[] = [];
         try {
-            const existingCollections = await getLatestCollections();
+            await onRemoteFilesPull!();
+            const existingCollections = await savedNormalCollections();
             let index = 0;
             for (const [
                 collectionName,
@@ -620,7 +642,6 @@ export const Upload: React.FC<UploadProps> = ({
                     existingCollections,
                 );
                 collections.push(collection);
-                props.setCollections([...existingCollections, ...collections]);
                 uploadItemsWithCollection = [
                     ...uploadItemsWithCollection,
                     ...uploadItems.map(([uploadItem, path]) => ({
@@ -662,13 +683,13 @@ export const Upload: React.FC<UploadProps> = ({
     ) => {
         uploadManager.prepareForNewUpload(parsedMetadataJSONMap);
         setUploadProgressView(true);
-        await props.syncWithRemote(true, true);
+        await onRemotePull({ silent: true });
     };
 
     function postUploadAction() {
         props.setShouldDisableDropzone(false);
         uploadRunning.current = false;
-        props.syncWithRemote();
+        void onRemotePull();
     }
 
     const uploadFiles = async (

@@ -14,11 +14,11 @@ import type {
 } from "ente-base/types/ipc";
 import { type UploadResult } from "ente-gallery/services/upload";
 import type { UploadAsset } from "ente-gallery/services/upload/upload-service";
-import { groupFilesByCollectionID } from "ente-gallery/utils/files";
+import { groupFilesByCollectionID } from "ente-gallery/utils/file";
 import type { EnteFile } from "ente-media/file";
-import { getLocalFiles } from "ente-new/photos/services/files";
+import { removeFromCollection } from "ente-new/photos/services/collection";
+import { computeNormalCollectionFilesFromSaved } from "ente-new/photos/services/file";
 import { ensureString } from "ente-utils/ensure";
-import { removeFromCollection } from "./collectionService";
 import { type UploadItemWithCollection, uploadManager } from "./upload-manager";
 
 /**
@@ -63,12 +63,12 @@ class FolderWatcher {
      */
     private upload: (collectionName: string, filePaths: string[]) => void;
     /**
-     * A function to call when we want to sync with the backend. It will
-     * initiate the sync but will not await its completion.
+     * A function to call when we want to trigger a full remote pull. It will
+     * initiate the pull but will not await its completion.
      *
      * This is passed as a param to {@link init}.
      */
-    private requestSyncWithRemote: () => void;
+    private onTriggerRemotePull: () => void;
 
     /** A helper function that debounces invocations of {@link runNextEvent}. */
     private debouncedRunNextEvent: () => void;
@@ -83,14 +83,14 @@ class FolderWatcher {
      * This is only called when we're running in the context of our desktop app.
      *
      * The caller provides us with the hooks we can use to actually upload the
-     * files, and to sync with remote (say after deletion).
+     * files, and to pull the latest changes from remote (say after deletion).
      */
     init(
         upload: (collectionName: string, filePaths: string[]) => void,
-        requestSyncWithRemote: () => void,
+        onTriggerRemotePull: () => void,
     ) {
         this.upload = upload;
-        this.requestSyncWithRemote = requestSyncWithRemote;
+        this.onTriggerRemotePull = onTriggerRemotePull;
         this.registerListeners();
         this.syncWithDisk();
     }
@@ -475,7 +475,7 @@ class FolderWatcher {
         for (const file of syncedFiles)
             syncedFileForID.set(file.uploadedFileID, file);
 
-        const files = await getLocalFiles();
+        const files = await computeNormalCollectionFilesFromSaved();
         const filesToTrash = files.filter((file) => {
             const correspondingSyncedFile = syncedFileForID.get(file.id);
             if (
@@ -492,7 +492,7 @@ class FolderWatcher {
             await removeFromCollection(id, files);
         }
 
-        this.requestSyncWithRemote();
+        this.onTriggerRemotePull();
     }
 }
 
@@ -581,17 +581,10 @@ const deduceEvents = async (watches: FolderWatch[]): Promise<WatchEvent[]> => {
  */
 const pathsToUpload = (paths: string[], watch: FolderWatch) =>
     paths
-        // Filter out hidden files (files whose names begins with a dot)
-        .filter((path) => !isHiddenFile(path))
+        // Filter out files whose names begins with a dot.
+        .filter((path) => !basename(path).startsWith("."))
         // Files that are on disk but not yet synced or ignored.
         .filter((path) => !isSyncedOrIgnoredPath(path, watch));
-
-/**
- * Return true if the file at the given {@link path} is hidden.
- *
- * Hidden files are those whose names begin with a "." (dot).
- */
-const isHiddenFile = (path: string) => basename(path).startsWith(".");
 
 /**
  * Return the paths to previously synced files that are no longer on disk and so

@@ -130,7 +130,7 @@ export const checkSessionValidity = async (): Promise<SessionValidity> => {
  * longer valid. If needed, also update the key attributes at remote.
  *
  * This is a subset of {@link checkSessionValidity} that has been tailored for
- * use during each remote sync, to detect if the user has been logged out
+ * use during each remote pull, to detect if the user has been logged out
  * elsewhere.
  *
  * @returns `true` if either we don't have an auth token, or if remote tells us

@@ -2,8 +2,7 @@ import { sharedCryptoWorker } from "ente-base/crypto";
 import log from "ente-base/log";
 import { apiURL } from "ente-base/origins";
 import { transformFilesIfNeeded } from "ente-gallery/services/files-db";
-import { type MagicMetadataCore } from "ente-gallery/services/magic-metadata";
-import { sortFiles } from "ente-gallery/utils/files";
+import { sortFiles } from "ente-gallery/utils/file";
 import type {
     Collection,
     CollectionPublicMagicMetadataData,
@@ -307,6 +306,13 @@ const getPublicFiles = async (
         throw e;
     }
 };
+
+export interface MagicMetadataCore<T> {
+    version: number;
+    count: number;
+    header: string;
+    data: T;
+}
 
 export const getPublicCollection = async (
     token: string,

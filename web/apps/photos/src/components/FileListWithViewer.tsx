@@ -44,20 +44,24 @@ export type FileListWithViewerProps = {
      */
     onSetOpenFileViewer?: (open: boolean) => void;
     /**
-     * Called when an action in the file viewer requires us to sync with remote.
+     * Called when an action in the file viewer requires us to perform a full
+     * pull from remote.
      */
-    onSyncWithRemote: () => Promise<void>;
+    onRemotePull: () => Promise<void>;
 } & Pick<
     FileListProps,
     | "mode"
     | "modePlus"
+    | "header"
     | "showAppDownloadBanner"
+    | "isMagicSearchResult"
     | "selectable"
     | "selected"
     | "setSelected"
     | "activeCollectionID"
     | "activePersonID"
     | "favoriteFileIDs"
+    | "emailByUserID"
 > &
     Pick<
         FileViewerProps,
@@ -68,7 +72,7 @@ export type FileListWithViewerProps = {
         | "collectionNameByID"
         | "pendingFavoriteUpdates"
         | "pendingVisibilityUpdates"
-        | "onFileAndCollectionSyncWithRemote"
+        | "onRemoteFilesPull"
         | "onVisualFeedback"
         | "onToggleFavorite"
         | "onFileVisibilityUpdate"
@@ -84,16 +88,19 @@ export type FileListWithViewerProps = {
 export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
     mode,
     modePlus,
+    header,
     user,
     files,
     enableDownload,
     showAppDownloadBanner,
+    isMagicSearchResult,
     selectable,
     selected,
     setSelected,
     activeCollectionID,
     activePersonID,
     favoriteFileIDs,
+    emailByUserID,
     isInIncomingSharedCollection,
     isInHiddenSection,
     fileNormalCollectionIDs,
@@ -102,8 +109,8 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
     pendingVisibilityUpdates,
     setFilesDownloadProgressAttributesCreator,
     onSetOpenFileViewer,
-    onSyncWithRemote,
-    onFileAndCollectionSyncWithRemote,
+    onRemotePull,
+    onRemoteFilesPull,
     onVisualFeedback,
     onToggleFavorite,
     onFileVisibilityUpdate,
@@ -134,9 +141,9 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
         setOpenFileViewer(false);
     }, []);
 
-    const handleTriggerSyncWithRemote = useCallback(
-        () => void onSyncWithRemote(),
-        [onSyncWithRemote],
+    const handleTriggerRemotePull = useCallback(
+        () => void onRemotePull(),
+        [onRemotePull],
     );
 
     const handleDownload = useCallback(
@@ -173,13 +180,17 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
                         {...{
                             mode,
                             modePlus,
+                            header,
+                            user,
                             showAppDownloadBanner,
+                            isMagicSearchResult,
                             selectable,
                             selected,
                             setSelected,
                             activeCollectionID,
                             activePersonID,
                             favoriteFileIDs,
+                            emailByUserID,
                         }}
                         onItemClick={handleThumbnailClick}
                     />
@@ -203,14 +214,14 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
                     collectionNameByID,
                     pendingFavoriteUpdates,
                     pendingVisibilityUpdates,
-                    onFileAndCollectionSyncWithRemote,
+                    onRemoteFilesPull,
                     onVisualFeedback,
                     onToggleFavorite,
                     onFileVisibilityUpdate,
                     onSelectCollection,
                     onSelectPerson,
                 }}
-                onTriggerSyncWithRemote={handleTriggerSyncWithRemote}
+                onTriggerRemotePull={handleTriggerRemotePull}
                 onDownload={handleDownload}
                 onDelete={handleDelete}
                 onSaveEditedImageCopy={handleSaveEditedImageCopy}

@@ -36,7 +36,7 @@ import {
 } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
 import { potentialFileTypeFromExtension } from "ente-media/live-photo";
-import { getLocalFiles } from "ente-new/photos/services/files";
+import { computeNormalCollectionFilesFromSaved } from "ente-new/photos/services/file";
 import { indexNewUpload } from "ente-new/photos/services/ml";
 import { wait } from "ente-utils/promise";
 import {
@@ -321,6 +321,11 @@ class UploadManager {
      * @param itemsWithCollection The items to upload, each paired with the id
      * of the collection that they should be uploaded into.
      *
+     * @param collections The collections to which the files are being uploaded.
+     *
+     * These are not all the user's collections - these are just the collections
+     * mentioned by one or more {@link itemsWithCollection}.
+     *
      * @returns `true` if at least one file was processed
      */
     public async uploadItems(
@@ -443,7 +448,9 @@ class UploadManager {
                 ),
             );
         } else {
-            this.existingFiles = getUserOwnedFiles(await getLocalFiles());
+            this.existingFiles = getUserOwnedFiles(
+                await computeNormalCollectionFilesFromSaved(),
+            );
         }
         this.collections = new Map(
             collections.map((collection) => [collection.id, collection]),
