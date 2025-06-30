@@ -495,9 +495,9 @@ export default function PublicCollectionGallery() {
                 >
                     {selected.count > 0 ? (
                         <SelectedFileOptions
-                            downloadFilesHelper={downloadFilesHelper}
-                            clearSelection={clearSelection}
                             count={selected.count}
+                            clearSelection={clearSelection}
+                            downloadFilesHelper={downloadFilesHelper}
                         />
                     ) : (
                         <SpacedRow sx={{ flex: 1 }}>
@@ -531,14 +531,14 @@ export default function PublicCollectionGallery() {
                     uploadCollection={publicCollection}
                     setLoading={setBlockingLoad}
                     setShouldDisableDropzone={setShouldDisableDropzone}
+                    uploadTypeSelectorIntent="collect"
+                    uploadTypeSelectorView={uploadTypeSelectorView}
                     onRemotePull={publicAlbumsRemotePull}
                     onUploadFile={(file) =>
                         setPublicFiles(sortFiles([...publicFiles, file]))
                     }
-                    uploadTypeSelectorView={uploadTypeSelectorView}
                     closeUploadTypeSelector={closeUploadTypeSelectorView}
-                    showSessionExpiredMessage={showPublicLinkExpiredMessage}
-                    uploadTypeSelectorIntent="collect"
+                    onShowSessionExpiredDialog={showPublicLinkExpiredMessage}
                     {...{ dragAndDropFiles }}
                 />
                 <FilesDownloadProgress
@@ -616,9 +616,9 @@ interface SelectedFileOptionsProps {
 }
 
 const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
-    downloadFilesHelper,
     count,
     clearSelection,
+    downloadFilesHelper,
 }) => (
     <Stack
         direction="row"

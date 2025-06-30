@@ -5,6 +5,7 @@ import log from "ente-base/log";
 import { uniqueFilesByID } from "ente-gallery/utils/file";
 import { type Collection, CollectionSubType } from "ente-media/collection";
 import { EnteFile } from "ente-media/file";
+import { type CollectionOp } from "ente-new/photos/components/SelectedFileOptions";
 import {
     addToCollection,
     createAlbum,
@@ -28,8 +29,6 @@ import {
     type SetFilesDownloadProgressAttributesCreator,
 } from "types/gallery";
 import { downloadFilesWithProgress } from "utils/file";
-
-export type CollectionOp = "add" | "move" | "remove" | "restore" | "unhide";
 
 export async function handleCollectionOp(
     op: CollectionOp,
@@ -58,13 +57,6 @@ export async function handleCollectionOp(
             await moveToCollection(collection, selectedFiles);
             break;
     }
-}
-
-export function getSelectedCollection(
-    collectionID: number,
-    collections: Collection[],
-) {
-    return collections.find((collection) => collection.id === collectionID);
 }
 
 export async function downloadCollectionHelper(

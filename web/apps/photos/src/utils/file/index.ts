@@ -14,6 +14,7 @@ import {
 } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
 import { decodeLivePhoto } from "ente-media/live-photo";
+import { type FileOp } from "ente-new/photos/components/SelectedFileOptions";
 import {
     addToFavorites,
     deleteFromTrash,
@@ -30,16 +31,6 @@ import {
     SetFilesDownloadProgressAttributes,
     SetFilesDownloadProgressAttributesCreator,
 } from "types/gallery";
-
-export type FileOp =
-    | "download"
-    | "fixTime"
-    | "favorite"
-    | "archive"
-    | "unarchive"
-    | "hide"
-    | "trash"
-    | "deletePermanently";
 
 function getSelectedFileIds(selectedFiles: SelectedState) {
     const filesIDs: number[] = [];

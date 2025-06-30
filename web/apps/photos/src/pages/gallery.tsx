@@ -13,7 +13,6 @@ import {
 import { FixCreationTime } from "components/FixCreationTime";
 import { Sidebar } from "components/Sidebar";
 import { Upload } from "components/Upload";
-import SelectedFileOptions from "components/pages/gallery/SelectedFileOptions";
 import { sessionExpiredDialogAttributes } from "ente-accounts/components/utils/dialog";
 import { stashRedirect } from "ente-accounts/services/redirect";
 import { isSessionInvalid } from "ente-accounts/services/session";
@@ -49,6 +48,11 @@ import {
     SearchBar,
     type SearchBarProps,
 } from "ente-new/photos/components/SearchBar";
+import {
+    SelectedFileOptions,
+    type CollectionOp,
+    type FileOp,
+} from "ente-new/photos/components/SelectedFileOptions";
 import { WhatsNew } from "ente-new/photos/components/WhatsNew";
 import {
     GalleryEmptyState,
@@ -121,12 +125,8 @@ import {
     SetFilesDownloadProgressAttributes,
     SetFilesDownloadProgressAttributesCreator,
 } from "types/gallery";
-import {
-    getSelectedCollection,
-    handleCollectionOp,
-    type CollectionOp,
-} from "utils/collection";
-import { getSelectedFiles, handleFileOp, type FileOp } from "utils/file";
+import { handleCollectionOp } from "utils/collection";
+import { getSelectedFiles, handleFileOp } from "utils/file";
 
 /**
  * The default view for logged in users.
@@ -921,22 +921,21 @@ const Page: React.FC = () => {
             >
                 {showSelectionBar ? (
                     <SelectedFileOptions
+                        barMode={barMode}
+                        isInSearchMode={isInSearchMode}
+                        collection={
+                            isInSearchMode ? undefined : activeCollection
+                        }
+                        collectionSummary={
+                            isInSearchMode ? undefined : activeCollectionSummary
+                        }
+                        selectedFileCount={selected.count}
+                        selectedOwnFileCount={selected.ownCount}
+                        onClearSelection={clearSelection}
+                        onShowCreateCollectionModal={handleCreateAlbumForOp}
+                        onOpenCollectionSelector={handleOpenCollectionSelector}
                         handleCollectionOp={collectionOpsHelper}
                         handleFileOp={fileOpHelper}
-                        showCreateCollectionModal={handleCreateAlbumForOp}
-                        onOpenCollectionSelector={handleOpenCollectionSelector}
-                        count={selected.count}
-                        ownCount={selected.ownCount}
-                        clearSelection={clearSelection}
-                        barMode={barMode}
-                        activeCollectionID={activeCollectionID}
-                        selectedCollection={getSelectedCollection(
-                            selected.collectionID,
-                            state.collections,
-                        )}
-                        activeCollectionSummary={activeCollectionSummary}
-                        isInSearchMode={isInSearchMode}
-                        isInHiddenSection={barMode == "hidden-albums"}
                     />
                 ) : barMode == "hidden-albums" ? (
                     <HiddenSectionNavbarContents
@@ -993,23 +992,23 @@ const Page: React.FC = () => {
                     uploadTypeSelectorIntent,
                     uploadTypeSelectorView,
                 }}
+                isFirstUpload={haveOnlySystemCollections(
+                    normalCollectionSummaries,
+                )}
                 activeCollection={activeCollection}
                 closeUploadTypeSelector={setUploadTypeSelectorView.bind(
                     null,
                     false,
                 )}
-                onOpenCollectionSelector={handleOpenCollectionSelector}
-                onCloseCollectionSelector={handleCloseCollectionSelector}
                 setLoading={setBlockingLoad}
                 setShouldDisableDropzone={setShouldDisableDropzone}
                 onRemotePull={remotePull}
                 onRemoteFilesPull={remoteFilesPull}
+                onOpenCollectionSelector={handleOpenCollectionSelector}
+                onCloseCollectionSelector={handleCloseCollectionSelector}
                 onUploadFile={(file) => dispatch({ type: "uploadFile", file })}
                 onShowPlanSelector={showPlanSelector}
-                isFirstUpload={haveOnlySystemCollections(
-                    normalCollectionSummaries,
-                )}
-                showSessionExpiredMessage={showSessionExpiredDialog}
+                onShowSessionExpiredDialog={showSessionExpiredDialog}
             />
             <Sidebar
                 {...sidebarVisibilityProps}
