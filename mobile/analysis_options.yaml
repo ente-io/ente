@@ -39,7 +39,7 @@ analyzer:
   errors:
     avoid_empty_else: error
     exhaustive_cases: error
-    curly_braces_in_flow_control_structures: ignore
+    curly_braces_in_flow_control_structures: error
     directives_ordering: error
     require_trailing_commas: error
     always_use_package_imports: warning
