@@ -357,11 +357,23 @@ class ClusterFeedbackService<T> {
         allOtherPersonClustersToIgnore,
         minClusterSize: kMinimumClusterSizeSearchResult,
       );
+
+      final Map<String, Set<String>> personClusterToIgnoredClusters = {};
+      final personToRejectedSuggestions =
+          await mlDataDB.getPersonToRejectedSuggestions();
+      for (final personID in personToRejectedSuggestions.keys) {
+        final personCluster = personIdToBiggestCluster[personID];
+        if (personCluster == null) continue;
+        final ignoredClusters = personToRejectedSuggestions[personID] ?? {};
+        personClusterToIgnoredClusters[personCluster] = ignoredClusters;
+      }
+
       final List<(String, double, String)> foundSuggestions =
           await calcSuggestionsMeanInComputer(
         clusterAvg,
         allPersonClusters,
         allOtherPersonClustersToIgnore,
+        personClusterToIgnoredClusters: personClusterToIgnoredClusters,
         0.55,
       );
 
@@ -1014,8 +1026,9 @@ class ClusterFeedbackService<T> {
     Map<String, Vector> clusterAvg,
     Set<String> personClusters,
     Set<String> ignoredClusters,
-    double maxClusterDistance,
-  ) async {
+    double maxClusterDistance, {
+    Map<String, Set<String>>? personClusterToIgnoredClusters,
+  }) async {
     return await _computer.compute(
       _calcSuggestionsMean,
       param: {
@@ -1023,6 +1036,7 @@ class ClusterFeedbackService<T> {
         'personClusters': personClusters,
         'ignoredClusters': ignoredClusters,
         'maxClusterDistance': maxClusterDistance,
+        'personClusterToIgnoredClusters': personClusterToIgnoredClusters,
       },
     );
   }
@@ -1341,6 +1355,9 @@ List<(String, double, String)> _calcSuggestionsMean(Map<String, dynamic> args) {
   final Set<String> personClusters = args['personClusters'];
   final Set<String> ignoredClusters = args['ignoredClusters'];
   final double maxClusterDistance = args['maxClusterDistance'];
+  final Map<String, Set<String>>? personClusterToIgnoredClusters =
+      args['personClusterToIgnoredClusters'];
+  final bool extraIgnoreCheck = personClusterToIgnoredClusters != null;
 
   final Map<String, List<(String, double)>> suggestions = {};
   const suggestionMax = 2000;
@@ -1364,6 +1381,12 @@ List<(String, double, String)> _calcSuggestionsMean(Map<String, dynamic> args) {
     for (final personCluster in personClusters) {
       if (clusterAvg[personCluster] == null) {
         dev.log('[WARNING] no avg for personcluster $personCluster');
+        continue;
+      }
+      if (extraIgnoreCheck &&
+          personClusterToIgnoredClusters[personCluster] != null &&
+          personClusterToIgnoredClusters[personCluster]!
+              .contains(otherClusterID)) {
         continue;
       }
       final Vector avg = clusterAvg[personCluster]!;

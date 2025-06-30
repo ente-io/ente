@@ -213,6 +213,21 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
   }
 
   @override
+  Future<Map<String, Set<String>>> getPersonToRejectedSuggestions() async {
+    final db = await instance.asyncDB;
+    final List<Map<String, dynamic>> rejectMaps = await db.getAll(
+      'SELECT $personIdColumn, $clusterIDColumn FROM $notPersonFeedback',
+    );
+    final Map<String, Set<String>> result = {};
+    for (final map in rejectMaps) {
+      final personID = map[personIdColumn] as String;
+      final clusterID = map[clusterIDColumn] as String;
+      result.putIfAbsent(personID, () => {}).add(clusterID);
+    }
+    return result;
+  }
+
+  @override
   Future<Set<String>> getPersonClusterIDs(String personID) async {
     final db = await instance.asyncDB;
     final List<Map<String, dynamic>> maps = await db.getAll(
