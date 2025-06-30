@@ -61,160 +61,162 @@ class _MemoryCoverWidgetState extends State<MemoryCoverWidget> {
     final brightness =
         SchedulerBinding.instance.platformDispatcher.platformBrightness;
 
-    return AnimatedBuilder(
-      animation: widget.controller,
-      builder: (context, child) {
-        return Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: MemoryCoverWidget.horizontalPadding,
-          ),
-          child: GestureDetector(
-            onTap: () async {
-              await routeToPage(
-                context,
-                forceCustomPageRoute: true,
-                AllMemoriesPage(
-                  initialPageIndex: widget.currentMemoryIndex,
-                  allMemories: widget.allMemories,
-                  allTitles: widget.allTitle,
-                ),
-              );
-              setState(() {});
-            }, //Adding this row is a workaround for making height of memory cover
-            //render as [MemoryCoverWidgetNew.height] * scale. Without this, height of rendered memory
-            //cover will be [MemoryCoverWidgetNew.height].
-            child: Row(
-              children: [
-                Container(
-                  height: widget.maxHeight,
-                  width: widget.maxWidth,
-                  decoration: BoxDecoration(
-                    boxShadow: brightness == Brightness.dark
-                        ? [
-                            const BoxShadow(
-                              color: strokeFainterDark,
-                              spreadRadius: MemoryCoverWidget.outerStrokeWidth,
-                              blurRadius: 0,
-                            ),
-                          ]
-                        : [...shadowFloatFaintestLight],
-                    borderRadius: BorderRadius.circular(5),
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(5),
-                    child: isSeen
-                        ? ColorFiltered(
-                            colorFilter: const ColorFilter.mode(
-                              Color(0xFFBFBFBF),
-                              BlendMode.hue,
-                            ),
-                            child: Stack(
-                              fit: StackFit.expand,
-                              alignment: Alignment.bottomCenter,
-                              children: [
-                                child!,
-                                Container(
-                                  decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                      colors: [
-                                        Colors.black.withOpacity(0.5),
-                                        Colors.transparent,
-                                      ],
-                                      stops: const [0, 1],
-                                      begin: Alignment.bottomCenter,
-                                      end: Alignment.topCenter,
-                                    ),
-                                  ),
-                                ),
-                                Positioned(
-                                  bottom: 8,
-                                  child: SizedBox(
-                                    width: widget.maxWidth,
-                                    child: Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 8.0,
-                                      ),
-                                      child: Hero(
-                                        tag: title,
-                                        child: Center(
-                                          child: Text(
-                                            title,
-                                            style: getEnteTextTheme(context)
-                                                .miniBold
-                                                .copyWith(
-                                                  color: isSeen
-                                                      ? textFaintDark
-                                                      : Colors.white,
-                                                ),
-                                            textAlign: TextAlign.left,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          )
-                        : Stack(
-                            fit: StackFit.expand,
-                            alignment: Alignment.bottomCenter,
-                            children: [
-                              child!,
-                              Container(
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    colors: [
-                                      Colors.black.withOpacity(0.5),
-                                      Colors.transparent,
-                                    ],
-                                    stops: const [0, 1],
-                                    begin: Alignment.bottomCenter,
-                                    end: Alignment.topCenter,
-                                  ),
-                                ),
-                              ),
-                              Positioned(
-                                bottom: 8,
-                                child: SizedBox(
-                                  width: widget.maxWidth,
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 8.0,
-                                    ),
-                                    child: Hero(
-                                      tag: title,
-                                      child: Center(
-                                        child: Text(
-                                          title,
-                                          style: getEnteTextTheme(context)
-                                              .miniBold
-                                              .copyWith(
-                                                color: Colors.white,
-                                              ),
-                                          textAlign: TextAlign.left,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                  ),
-                ),
-              ],
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: MemoryCoverWidget.horizontalPadding,
+      ),
+      child: GestureDetector(
+        onTap: () async {
+          await routeToPage(
+            context,
+            forceCustomPageRoute: true,
+            AllMemoriesPage(
+              initialPageIndex: widget.currentMemoryIndex,
+              allMemories: widget.allMemories,
+              allTitles: widget.allTitle,
             ),
-          ),
-        );
-      },
-      child: Hero(
-        tag: "memories" + memory.file.tag,
-        child: ThumbnailWidget(
-          memory.file,
-          shouldShowArchiveStatus: false,
-          shouldShowSyncStatus: false,
-          key: Key("memories" + memory.file.tag),
+          );
+          setState(() {});
+        }, //Adding this row is a workaround for making height of memory cover
+        //render as [MemoryCoverWidgetNew.height] * scale. Without this, height of rendered memory
+        //cover will be [MemoryCoverWidgetNew.height].
+        child: Row(
+          children: [
+            Container(
+              height: widget.maxHeight,
+              width: widget.maxWidth,
+              decoration: BoxDecoration(
+                boxShadow: brightness == Brightness.dark
+                    ? [
+                        const BoxShadow(
+                          color: strokeFainterDark,
+                          spreadRadius: MemoryCoverWidget.outerStrokeWidth,
+                          blurRadius: 0,
+                        ),
+                      ]
+                    : [...shadowFloatFaintestLight],
+                borderRadius: BorderRadius.circular(5),
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(5),
+                child: isSeen
+                    ? ColorFiltered(
+                        colorFilter: const ColorFilter.mode(
+                          Color(0xFFBFBFBF),
+                          BlendMode.hue,
+                        ),
+                        child: Stack(
+                          fit: StackFit.expand,
+                          alignment: Alignment.bottomCenter,
+                          children: [
+                            Hero(
+                              tag: "memories" + memory.file.tag,
+                              child: ThumbnailWidget(
+                                memory.file,
+                                shouldShowArchiveStatus: false,
+                                shouldShowSyncStatus: false,
+                                key: Key("memories" + memory.file.tag),
+                              ),
+                            ),
+                            Container(
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [
+                                    Colors.black.withOpacity(0.5),
+                                    Colors.transparent,
+                                  ],
+                                  stops: const [0, 1],
+                                  begin: Alignment.bottomCenter,
+                                  end: Alignment.topCenter,
+                                ),
+                              ),
+                            ),
+                            Positioned(
+                              bottom: 8,
+                              child: SizedBox(
+                                width: widget.maxWidth,
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8.0,
+                                  ),
+                                  child: Hero(
+                                    tag: title,
+                                    child: Center(
+                                      child: Text(
+                                        title,
+                                        style: getEnteTextTheme(context)
+                                            .miniBold
+                                            .copyWith(
+                                              color: isSeen
+                                                  ? textFaintDark
+                                                  : Colors.white,
+                                            ),
+                                        textAlign: TextAlign.left,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    : Stack(
+                        fit: StackFit.expand,
+                        alignment: Alignment.bottomCenter,
+                        children: [
+                          Hero(
+                            tag: "memories" + memory.file.tag,
+                            child: ThumbnailWidget(
+                              memory.file,
+                              shouldShowArchiveStatus: false,
+                              shouldShowSyncStatus: false,
+                              key: Key("memories" + memory.file.tag),
+                            ),
+                          ),
+                          Container(
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  Colors.black.withOpacity(0.5),
+                                  Colors.transparent,
+                                ],
+                                stops: const [0, 1],
+                                begin: Alignment.bottomCenter,
+                                end: Alignment.topCenter,
+                              ),
+                            ),
+                          ),
+                          Positioned(
+                            bottom: 8,
+                            child: SizedBox(
+                              width: widget.maxWidth,
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8.0,
+                                ),
+                                child: Hero(
+                                  tag: title,
+                                  child: Center(
+                                    child: Text(
+                                      title,
+                                      style: getEnteTextTheme(context)
+                                          .miniBold
+                                          .copyWith(
+                                            color: Colors.white,
+                                          ),
+                                      textAlign: TextAlign.left,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+              ),
+            ),
+          ],
         ),
       ),
     );
