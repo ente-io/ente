@@ -1,5 +1,6 @@
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined";
+import InfoIcon from "@mui/icons-material/Info";
 import MenuIcon from "@mui/icons-material/Menu";
 import { IconButton, Stack, Typography } from "@mui/material";
 import { AuthenticateUser } from "components/AuthenticateUser";
@@ -27,6 +28,7 @@ import { errorDialogAttributes } from "ente-base/components/utils/dialog";
 import { useIsSmallWidth } from "ente-base/components/utils/hooks";
 import { useModalVisibility } from "ente-base/components/utils/modal";
 import { useBaseContext } from "ente-base/context";
+import { pt } from "ente-base/i18n";
 import log from "ente-base/log";
 import {
     clearSessionStorage,
@@ -639,24 +641,38 @@ const Page: React.FC = () => {
     const handleRemoveFilesFromCollection = (collection: Collection) => {
         void (async () => {
             showLoadingBar();
+            let notifyOtherFiles = false;
             try {
                 setOpenCollectionSelector(false);
                 const selectedFiles = getSelectedFiles(selected, filteredFiles);
-                await removeFromCollection(collection, selectedFiles);
+                try {
+                    await removeFromCollection(collection, selectedFiles);
+                } catch (e) {
+                    if (
+                        e instanceof Error &&
+                        e.message == removeOtherOtherNotSupportErrorMessage
+                    ) {
+                        notifyOtherFiles = true;
+                    } else {
+                        throw e;
+                    }
+                }
                 clearSelection();
                 await remotePull({ silent: true });
             } catch (e) {
-                if (
-                    e instanceof Error &&
-                    e.message == removeOtherOtherNotSupportErrorMessage
-                ) {
-                    // TODO(RE):
-                    onGenericError(e);
-                } else {
-                    onGenericError(e);
-                }
+                onGenericError(e);
             } finally {
                 hideLoadingBar();
+            }
+
+            if (notifyOtherFiles) {
+                showMiniDialog({
+                    title: "Note",
+                    icon: <InfoIcon />,
+                    message: pt(
+                        "Files which are not owned by you were not removed",
+                    ),
+                });
             }
         })();
     };
