@@ -232,7 +232,7 @@ interface ManageMLProps {
 const ManageML: React.FC<ManageMLProps> = ({ mlStatus, onDisableML }) => {
     const { showMiniDialog } = useBaseContext();
 
-    const { phase, nSyncedFiles, nTotalFiles } = mlStatus;
+    const { phase, phaseFailed, nSyncedFiles, nTotalFiles } = mlStatus;
 
     let status: string;
     switch (phase) {
@@ -249,7 +249,7 @@ const ManageML: React.FC<ManageMLProps> = ({ mlStatus, onDisableML }) => {
             status = t("people");
             break;
         default:
-            status = t("indexing_status_done");
+            status = phaseFailed ? t("error") : t("indexing_status_done");
             break;
     }
 

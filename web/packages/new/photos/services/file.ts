@@ -40,8 +40,11 @@ const requestBatchSize = 1000;
  *
  * @param op The operation to perform on each batch.
  *
- * @returns An array of results, one from each batch operation. For details,
- * including behaviour on errors, see `Promise.all`.
+ * @returns A promise for an array of results, one from each batch operation. If
+ * any operations fails, then the promise rejects with the first failure reason.
+ *
+ * For more details see the documentation for the `Promise.all` primitive which
+ * this function uses.
  */
 export const batched = <T, U>(
     items: T[],

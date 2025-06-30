@@ -53,6 +53,7 @@ Future<bool> requestAuthentication(
           signInTitle: l10n.androidSignInTitle,
         ),
         IOSAuthMessages(
+          localizedFallbackTitle: l10n.enterPassword,
           goToSettingsButton: l10n.goToSettings,
           goToSettingsDescription: l10n.goToSettings,
           lockOut: l10n.iOSLockOut,
