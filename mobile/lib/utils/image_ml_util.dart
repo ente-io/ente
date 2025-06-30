@@ -564,7 +564,7 @@ Future<List<Uint8List>> compressFaceThumbnails(Map args) async {
       e,
       s,
     );
-    return listPngBytes;
+    rethrow;
   }
 }
 
