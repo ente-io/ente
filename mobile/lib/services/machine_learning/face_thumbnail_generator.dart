@@ -48,15 +48,11 @@ class FaceThumbnailGenerator extends SuperIsolate {
     ).then((value) => value.cast<Uint8List>());
     final compressedFaces = <Future<Uint8List>>[];
     for (final face in faces) {
-      if (!shouldCompressFaceThumbnail(face)) {
-        compressedFaces.add(Future.value(face));
-      } else {
-        final compressedFace = _computer.compute<Map, Uint8List>(
-          compressFaceThumbnail,
-          param: {'pngBytes': face},
-        );
-        compressedFaces.add(compressedFace);
-      }
+      final compressedFace = _computer.compute<Map, Uint8List>(
+        compressFaceThumbnail,
+        param: {'pngBytes': face},
+      );
+      compressedFaces.add(compressedFace);
     }
     return await Future.wait(compressedFaces);
   }
