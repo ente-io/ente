@@ -141,8 +141,7 @@ class EnteFile {
     final asset = await getAsset;
     // asset can be null for files shared to app
     if (asset != null) {
-      fileSubType = asset.subtype;
-      if (fileType == FileType.video) {
+      if (asset.type == AssetType.video) {
         duration = asset.duration;
       }
     }
