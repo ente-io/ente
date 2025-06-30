@@ -160,14 +160,6 @@ async function createCollectionDownloadFolder(
     return collectionDownloadPath;
 }
 
-export const getUserOwnedCollections = (collections: Collection[]) => {
-    const user: User = getData("user");
-    if (!user?.id) {
-        throw Error("user missing");
-    }
-    return collections.filter((collection) => collection.owner.id === user.id);
-};
-
 const isQuickLinkCollection = (collection: Collection) =>
     collection.magicMetadata?.data.subType == CollectionSubType.quicklink;
 

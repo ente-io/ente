@@ -32,28 +32,18 @@ import {
     SetFilesDownloadProgressAttributesCreator,
 } from "types/gallery";
 
-function getSelectedFileIds(selectedFiles: SelectedState) {
-    const filesIDs: number[] = [];
-    for (const [key, val] of Object.entries(selectedFiles)) {
-        if (typeof val == "boolean" && val) {
-            filesIDs.push(Number(key));
-        }
-    }
-    return new Set(filesIDs);
-}
 export function getSelectedFiles(
     selected: SelectedState,
     files: EnteFile[],
 ): EnteFile[] {
-    const selectedFilesIDs = getSelectedFileIds(selected);
-    return files.filter((file) => selectedFilesIDs.has(file.id));
-}
-
-export function isSharedFile(user: User, file: EnteFile) {
-    if (!user?.id || !file?.ownerID) {
-        return false;
+    const selectedFilesIDs = new Set<number>();
+    for (const [key, val] of Object.entries(selected)) {
+        if (typeof val == "boolean" && val) {
+            selectedFilesIDs.add(Number(key));
+        }
     }
-    return file.ownerID !== user.id;
+
+    return files.filter((file) => selectedFilesIDs.has(file.id));
 }
 
 export async function getFileFromURL(fileURL: string, name: string) {
