@@ -290,6 +290,11 @@ class _GalleryState extends State<_Gallery> {
                   },
                   child: PersonGallerySuggestion(
                     person: widget.personEntity,
+                    onClose: () {
+                      setState(() {
+                        userDismissedPersonGallerySuggestion = true;
+                      });
+                    },
                   ),
                 )
               : const SizedBox.shrink(),

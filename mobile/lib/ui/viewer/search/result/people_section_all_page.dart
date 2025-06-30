@@ -460,7 +460,14 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
                             userDismissedPersonGallerySuggestion = true;
                           });
                         },
-                        child: const PersonGallerySuggestion(person: null),
+                        child: PersonGallerySuggestion(
+                          person: null,
+                          onClose: () {
+                            setState(() {
+                              userDismissedPersonGallerySuggestion = true;
+                            });
+                          },
+                        ),
                       ),
                     )
                   : const SliverToBoxAdapter(child: SizedBox.shrink()),

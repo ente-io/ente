@@ -20,9 +20,11 @@ final _logger = Logger("PersonGallerySuggestion");
 
 class PersonGallerySuggestion extends StatefulWidget {
   final PersonEntity? person;
+  final VoidCallback? onClose;
 
   const PersonGallerySuggestion({
     required this.person,
+    this.onClose,
     super.key,
   });
 
@@ -403,152 +405,175 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
           key: ValueKey('suggestion_$currentSuggestionIndex'),
           onTap: _navigateToCluster,
           behavior: HitTestBehavior.opaque,
-          child: Container(
-            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            decoration: BoxDecoration(
-              color: colorScheme.fillFaint,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: colorScheme.strokeFainter,
-                width: 1,
-              ),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                personPage
-                    ? RichText(
-                        textAlign: TextAlign.center,
-                        text: TextSpan(
-                          style: textTheme.body,
-                          children: [
-                            TextSpan(text: S.of(context).areThey),
-                            TextSpan(
-                              text: relevantPerson.data.name,
-                              style: textTheme.bodyBold,
-                            ),
-                            TextSpan(text: S.of(context).questionmark),
-                          ],
-                        ),
-                      )
-                    : Text(
-                        S.of(context).sameperson,
-                        style: textTheme.body,
-                        textAlign: TextAlign.center,
-                      ),
-                const SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: _buildFaceThumbnails(),
+          child: Stack(
+            children: [
+              Container(
+                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                decoration: BoxDecoration(
+                  color: colorScheme.fillFaint,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: colorScheme.strokeFainter,
+                    width: 1,
+                  ),
                 ),
-                const SizedBox(height: 24),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: isProcessing
-                            ? null
-                            : () => _handleUserChoice(false),
-                        child: Container(
-                          margin: const EdgeInsets.only(left: 16, right: 6),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 12,
+                    personPage
+                        ? RichText(
+                            textAlign: TextAlign.center,
+                            text: TextSpan(
+                              style: textTheme.body,
+                              children: [
+                                TextSpan(text: S.of(context).areThey),
+                                TextSpan(
+                                  text: relevantPerson.data.name,
+                                  style: textTheme.bodyBold,
+                                ),
+                                TextSpan(text: S.of(context).questionmark),
+                              ],
+                            ),
+                          )
+                        : Text(
+                            S.of(context).sameperson,
+                            style: textTheme.body,
+                            textAlign: TextAlign.center,
                           ),
-                          decoration: BoxDecoration(
-                            color: Colors.transparent,
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(
-                              color: colorScheme.warning700,
-                              width: 1,
+                    const SizedBox(height: 16),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: _buildFaceThumbnails(),
+                    ),
+                    const SizedBox(height: 24),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: isProcessing
+                                ? null
+                                : () => _handleUserChoice(false),
+                            child: Container(
+                              margin: const EdgeInsets.only(left: 16, right: 6),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 12,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.transparent,
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color: colorScheme.warning700,
+                                  width: 1,
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.close,
+                                    color: colorScheme.warning500,
+                                    size: 20,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    S.of(context).no,
+                                    style: (personPage
+                                            ? textTheme.bodyBold
+                                            : textTheme.body)
+                                        .copyWith(
+                                      color: colorScheme.warning500,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.close,
-                                color: colorScheme.warning500,
-                                size: 20,
+                        ),
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: isProcessing
+                                ? null
+                                : () => _handleUserChoice(true),
+                            child: Container(
+                              margin: const EdgeInsets.only(left: 6, right: 16),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 12,
                               ),
-                              const SizedBox(width: 8),
-                              Text(
-                                S.of(context).no,
-                                style: (personPage
-                                        ? textTheme.bodyBold
-                                        : textTheme.body)
-                                    .copyWith(
-                                  color: colorScheme.warning500,
-                                ),
+                              decoration: BoxDecoration(
+                                color: colorScheme.primary500,
+                                borderRadius: BorderRadius.circular(8),
                               ),
-                            ],
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const Icon(
+                                    Icons.check,
+                                    color: textBaseDark,
+                                    size: 20,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    S.of(context).yes,
+                                    style: (personPage
+                                            ? textTheme.bodyBold
+                                            : textTheme.body)
+                                        .copyWith(
+                                      color: textBaseDark,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
                         ),
-                      ),
+                      ],
                     ),
-                    Expanded(
-                      child: GestureDetector(
+                    if (personPage) const SizedBox(height: 12),
+                    if (personPage)
+                      GestureDetector(
+                        behavior: HitTestBehavior.opaque,
                         onTap:
-                            isProcessing ? null : () => _handleUserChoice(true),
-                        child: Container(
-                          margin: const EdgeInsets.only(left: 6, right: 16),
+                            isProcessing ? null : () => _saveAsAnotherPerson(),
+                        child: Padding(
                           padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
                             vertical: 12,
+                            horizontal: 32,
                           ),
-                          decoration: BoxDecoration(
-                            color: colorScheme.primary500,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Icon(
-                                Icons.check,
-                                color: textBaseDark,
-                                size: 20,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                S.of(context).yes,
-                                style: (personPage
-                                        ? textTheme.bodyBold
-                                        : textTheme.body)
-                                    .copyWith(
-                                  color: textBaseDark,
-                                ),
-                              ),
-                            ],
+                          child: Text(
+                            S.of(context).saveAsAnotherPerson,
+                            style: textTheme.mini.copyWith(
+                              color: colorScheme.textMuted,
+                              decoration: TextDecoration.underline,
+                            ),
                           ),
                         ),
                       ),
-                    ),
                   ],
                 ),
-                if (personPage) const SizedBox(height: 12),
-                if (personPage)
-                  GestureDetector(
+              ),
+              if (widget.onClose != null)
+                Positioned(
+                  top: 4,
+                  right: 12,
+                  child: GestureDetector(
                     behavior: HitTestBehavior.opaque,
-                    onTap: isProcessing ? null : () => _saveAsAnotherPerson(),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 12,
-                        horizontal: 32,
-                      ),
-                      child: Text(
-                        S.of(context).saveAsAnotherPerson,
-                        style: textTheme.mini.copyWith(
-                          color: colorScheme.textMuted,
-                          decoration: TextDecoration.underline,
-                        ),
+                    onTap: widget.onClose,
+                    child: Container(
+                      padding: const EdgeInsets.all(16),
+                      child: Icon(
+                        Icons.close,
+                        size: 16,
+                        color: colorScheme.textBase,
                       ),
                     ),
                   ),
-              ],
-            ),
+                ),
+            ],
           ),
         ),
       ),
