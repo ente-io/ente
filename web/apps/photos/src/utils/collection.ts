@@ -5,6 +5,7 @@ import log from "ente-base/log";
 import { uniqueFilesByID } from "ente-gallery/utils/file";
 import { type Collection, CollectionSubType } from "ente-media/collection";
 import { EnteFile } from "ente-media/file";
+import { type CollectionOp } from "ente-new/photos/components/SelectedFileOptions";
 import {
     addToCollection,
     createAlbum,
@@ -28,7 +29,6 @@ import {
     type SetFilesDownloadProgressAttributesCreator,
 } from "types/gallery";
 import { downloadFilesWithProgress } from "utils/file";
-import { type CollectionOp } from "ente-new/photos/components/SelectedFileOptions";
 
 export async function handleCollectionOp(
     op: CollectionOp,
