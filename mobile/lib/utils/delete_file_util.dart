@@ -41,7 +41,7 @@ Future<void> deleteFilesFromEverywhere(
 ) async {
   _logger.info("Trying to deleteFilesFromEverywhere " + files.toString());
   final List<String> localAssetIDs = [];
-  final List<String> localSharedMediaIDs = [];
+  final List<String> sharedAssetIDs = [];
   final List<String> alreadyDeletedIDs = []; // to ignore already deleted files
   bool hasLocalOnlyFiles = false;
   for (final file in files) {
@@ -50,7 +50,7 @@ Future<void> deleteFilesFromEverywhere(
         _logger.warning("Already deleted " + file.toString());
         alreadyDeletedIDs.add(file.localID!);
       } else if (file.isSharedMediaToAppSandbox) {
-        localSharedMediaIDs.add(file.localID!);
+        sharedAssetIDs.add(file.localID!);
       } else {
         localAssetIDs.add(file.localID!);
       }
@@ -72,7 +72,7 @@ Future<void> deleteFilesFromEverywhere(
   } catch (e, s) {
     _logger.severe("Could not delete file", e, s);
   }
-  deletedIDs.addAll(await _tryDeleteSharedMediaFiles(localSharedMediaIDs));
+  deletedIDs.addAll(await _tryDeleteSharedMediaFiles(sharedAssetIDs));
   final updatedCollectionIDs = <int>{};
   final List<TrashRequest> uploadedFilesToBeTrashed = [];
   final List<EnteFile> deletedFiles = [];
