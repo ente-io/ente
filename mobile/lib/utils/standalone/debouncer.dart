@@ -16,7 +16,11 @@ class Debouncer {
   Timer? _debounceTimer;
   final bool leading;
 
-  Debouncer(this._duration, {this.executionInterval, this.leading = false});
+  Debouncer(
+    this._duration, {
+    this.executionInterval,
+    this.leading = false,
+  });
 
   final Stopwatch _stopwatch = Stopwatch();
 

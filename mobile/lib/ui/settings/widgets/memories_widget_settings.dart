@@ -11,6 +11,7 @@ import "package:photos/ui/components/menu_item_widget/menu_item_widget.dart";
 import 'package:photos/ui/components/title_bar_title_widget.dart';
 import 'package:photos/ui/components/title_bar_widget.dart';
 import "package:photos/ui/components/toggle_switch_widget.dart";
+import "package:photos/utils/standalone/debouncer.dart";
 
 class MemoriesWidgetSettings extends StatefulWidget {
   const MemoriesWidgetSettings({super.key});
@@ -28,6 +29,8 @@ class _MemoriesWidgetSettingsState extends State<MemoriesWidgetSettings> {
 
   late final bool isMLEnabled;
 
+  late Debouncer _changeMemoriesSettings;
+
   @override
   void initState() {
     super.initState();
@@ -44,6 +47,7 @@ class _MemoriesWidgetSettingsState extends State<MemoriesWidgetSettings> {
   }
 
   Future<void> initVariables() async {
+    _changeMemoriesSettings = Debouncer(const Duration(milliseconds: 2500));
     isMLEnabled = flagService.hasGrantedMLConsent;
     isYearlyMemoriesEnabled =
         MemoryHomeWidgetService.instance.hasLastYearMemoriesSelected();
@@ -78,6 +82,7 @@ class _MemoriesWidgetSettingsState extends State<MemoriesWidgetSettings> {
   }
 
   Future<void> updateVariables() async {
+    _changeMemoriesSettings.run(MemoryHomeWidgetService.instance.memoryChanged);
     await MemoryHomeWidgetService.instance
         .setLastYearMemoriesSelected(isYearlyMemoriesEnabled!);
     await MemoryHomeWidgetService.instance
