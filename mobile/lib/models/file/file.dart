@@ -13,8 +13,8 @@ import 'package:photos/models/location/location.dart';
 import "package:photos/models/metadata/file_magic.dart";
 import "package:photos/module/download/file_url.dart";
 import "package:photos/module/upload/model/upload_data.dart";
+import "package:photos/services/local/asset_entity.service.dart";
 import 'package:photos/utils/exif_util.dart';
-import 'package:photos/utils/upload_metadata.dart';
 import "package:photos/utils/panorama_util.dart";
 import 'package:photos/utils/standalone/date_time.dart';
 
@@ -60,18 +60,18 @@ class EnteFile {
 
   EnteFile();
 
-  static Future<EnteFile> fromAsset(String pathName, AssetEntity asset) async {
+  static Future<EnteFile> fromAsset(String pathName, AssetEntity lAsset) async {
     final EnteFile file = EnteFile();
-    file.lAsset = asset;
-    file.localID = asset.id;
-    file.title = asset.title;
+    file.lAsset = lAsset;
+    file.localID = lAsset.id;
+    file.title = lAsset.title;
     file.deviceFolder = pathName;
     file.location =
-        Location(latitude: asset.latitude, longitude: asset.longitude);
-    file.fileType = enteTypeFromAsset(asset);
-    file.creationTime = parseFileCreationTime(asset);
-    file.modificationTime = asset.modifiedDateTime.microsecondsSinceEpoch;
-    file.fileSubType = asset.subtype;
+        Location(latitude: lAsset.latitude, longitude: lAsset.longitude);
+    file.fileType = enteTypeFromAsset(lAsset);
+    file.creationTime = AssetEntityService.parseFileCreationTime(lAsset);
+    file.modificationTime = lAsset.modifiedDateTime.microsecondsSinceEpoch;
+    file.fileSubType = lAsset.subtype;
     file.metadataVersion = kCurrentMetadataVersion;
     return file;
   }
@@ -126,43 +126,6 @@ class EnteFile {
     file.pubMagicMetadata =
         PubMagicMetadata.fromMap(rAsset.publicMetadata?.data);
     return file;
-  }
-
-  static int parseFileCreationTime(AssetEntity asset) {
-    int creationTime = asset.createDateTime.microsecondsSinceEpoch;
-    final int modificationTime = asset.modifiedDateTime.microsecondsSinceEpoch;
-    if (creationTime >= jan011981Time) {
-      // assuming that fileSystem is returning correct creationTime.
-      // During upload, this might get overridden with exif Creation time
-      // When the assetModifiedTime is less than creationTime, than just use
-      // that as creationTime. This is to handle cases where file might be
-      // copied to the fileSystem from somewhere else See #https://superuser.com/a/1091147
-      if (modificationTime >= jan011981Time &&
-          modificationTime < creationTime) {
-        _logger.info(
-          'LocalID: ${asset.id} modification time is less than creation time. Using modification time as creation time',
-        );
-        creationTime = modificationTime;
-      }
-      return creationTime;
-    } else {
-      if (modificationTime >= jan011981Time) {
-        creationTime = modificationTime;
-      } else {
-        creationTime = DateTime.now().toUtc().microsecondsSinceEpoch;
-      }
-      try {
-        final parsedDateTime = parseDateTimeFromName(
-          basenameWithoutExtension(asset.title ?? ""),
-        );
-        if (parsedDateTime != null) {
-          creationTime = parsedDateTime.microsecondsSinceEpoch;
-        }
-      } catch (e) {
-        // ignore
-      }
-    }
-    return creationTime;
   }
 
   Future<AssetEntity?> get getAsset {

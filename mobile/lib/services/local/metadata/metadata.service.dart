@@ -72,7 +72,7 @@ class LocalMetadataService {
     AssetEntity asset,
     Map<String, IfdTag>? exifData,
   ) {
-    int createdAt = EnteFile.parseFileCreationTime(asset);
+    int createdAt = AssetEntityService.parseFileCreationTime(asset);
     final int modifiedAt = asset.modifiedDateTime.microsecondsSinceEpoch;
     final ParsedExifDateTime? parsedExifDateTime =
         exifData == null ? null : parseExifTime(exifData);
