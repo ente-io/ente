@@ -617,8 +617,7 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
             if (i == -1)
               SizedBox(
                 width: 72,
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 4),
+                child: Center(
                   child: Text(
                     relevantPerson.data.name.trim(),
                     style: textTheme.bodyMuted,
