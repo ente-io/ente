@@ -46,11 +46,11 @@ class _MemoriesWidgetSettingsState extends State<MemoriesWidgetSettings> {
   Future<void> initVariables() async {
     isMLEnabled = flagService.hasGrantedMLConsent;
     isYearlyMemoriesEnabled =
-        await MemoryHomeWidgetService.instance.hasLastYearMemoriesSelected();
+        MemoryHomeWidgetService.instance.hasLastYearMemoriesSelected();
     isSmartMemoriesEnabled =
-        await MemoryHomeWidgetService.instance.getMLMemoriesSelected();
+        MemoryHomeWidgetService.instance.getMLMemoriesSelected();
     isOnThisDayMemoriesEnabled =
-        await MemoryHomeWidgetService.instance.getOnThisDayMemoriesSelected();
+        MemoryHomeWidgetService.instance.getOnThisDayMemoriesSelected();
 
     if (isYearlyMemoriesEnabled == null ||
         isSmartMemoriesEnabled == null ||
