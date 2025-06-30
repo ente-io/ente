@@ -741,6 +741,7 @@ class _MemoriesZoomWidgetState extends State<MemoriesZoomWidget>
         : ClipRect(
             child: AnimatedBuilder(
               animation: _controller,
+              child: widget.child,
               builder: (context, child) {
                 return Transform.scale(
                   scale: _scaleAnimation.value,
@@ -749,7 +750,7 @@ class _MemoriesZoomWidgetState extends State<MemoriesZoomWidget>
                       _panAnimation.value.dx * 100,
                       _panAnimation.value.dy * 100,
                     ),
-                    child: widget.child,
+                    child: child,
                   ),
                 );
               },
