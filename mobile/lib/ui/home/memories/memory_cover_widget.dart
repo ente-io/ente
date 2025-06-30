@@ -224,11 +224,13 @@ class _MemoryCoverWidgetState extends State<MemoryCoverWidget> {
 
   void _preloadFirstUnseenMemory() {
     Future.delayed(const Duration(seconds: 5), () {
-      if (widget.memories.isEmpty) return;
+      if (mounted) {
+        if (widget.memories.isEmpty) return;
 
-      final index = _getNextMemoryIndex();
-      preloadThumbnail(widget.memories[index].file);
-      preloadFile(widget.memories[index].file);
+        final index = _getNextMemoryIndex();
+        preloadThumbnail(widget.memories[index].file);
+        preloadFile(widget.memories[index].file);
+      }
     });
   }
 
