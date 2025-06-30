@@ -280,11 +280,11 @@ class PeopleHomeWidgetService {
     return peopleIds ?? [];
   }
 
-  Future<Map<String, (String, Iterable<EnteFile>)>> _getPeople() async {
-    final peopleIds = await _getEffectiveSelectedPeopleIds();
+  Future<Map<String, (String, Iterable<EnteFile>)>> _getPeople(
+    List<String> personIds,
+  ) async {
     final Map<String, (String, Iterable<EnteFile>)> peopleFiles = {};
-
-    final persons = await PersonService.instance.getCertainPersons(peopleIds);
+    final persons = await PersonService.instance.getCertainPersons(personIds);
     for (final person in persons) {
       final clusterFiles = await SearchService.instance
           .getClusterFilesForPersonID(person.remoteID);
@@ -323,7 +323,7 @@ class PeopleHomeWidgetService {
   Future<void> _updatePeopleWidgetCache() async {
     final peopleIds = await _getEffectiveSelectedPeopleIds();
     // TODO: Add logic to directly get random people files from database
-    final peopleWithFiles = await _getPeople();
+    final peopleWithFiles = await _getPeople(peopleIds);
 
     if (peopleWithFiles.isEmpty) {
       _logger.warning("No files found for any people, clearing widget");
