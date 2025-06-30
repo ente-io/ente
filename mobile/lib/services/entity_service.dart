@@ -117,6 +117,10 @@ class EntityService {
     }
   }
 
+  int lastSyncTime(EntityType type) {
+    return _prefs.getInt(_getEntityLastSyncTimePrefix(type)) ?? 0;
+  }
+
   Future<int> _remoteToLocalSync(
     EntityType type, {
     int prevFetchCount = 0,

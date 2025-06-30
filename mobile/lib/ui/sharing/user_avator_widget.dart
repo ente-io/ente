@@ -39,6 +39,7 @@ class UserAvatarWidget extends StatefulWidget {
 class _UserAvatarWidgetState extends State<UserAvatarWidget> {
   Future<String?>? _personID;
   bool _canUsePersonFaceWidget = false;
+  int lastSyncTimeForKey = 0;
   final _logger = Logger("_UserAvatarWidgetState");
   late final StreamSubscription<PeopleChangedEvent> _peopleChangedSubscription;
   final _debouncer = Debouncer(
@@ -69,19 +70,17 @@ class _UserAvatarWidgetState extends State<UserAvatarWidget> {
 
   Future<void> _reload() async {
     _debouncer.run(() async {
+      if (!mounted) return;
       setState(() {
-        if (PersonService
-                .instance.emailToPartialPersonDataMapCache[widget.user.email] !=
-            null) {
-          _personID = PersonService.instance.getPersons().then((people) async {
-            final person = people.firstWhereOrNull(
-              (person) => person.data.email == widget.user.email,
-            );
-            _canUsePersonFaceWidget = person != null;
-            return person?.remoteID;
-          });
+        final data = PersonService
+            .instance.emailToPartialPersonDataMapCache[widget.user.email];
+        if (data != null && data.containsKey(PersonService.kPersonIDKey)) {
+          _canUsePersonFaceWidget = true;
+          _personID = Future.value(data[PersonService.kPersonIDKey]);
+          lastSyncTimeForKey = PersonService.instance.lastRemoteSyncTime();
         } else {
-          _personID = null;
+          _canUsePersonFaceWidget = false;
+          _personID = Future.value(null);
         }
       });
     });
@@ -90,7 +89,6 @@ class _UserAvatarWidgetState extends State<UserAvatarWidget> {
   @override
   Widget build(BuildContext context) {
     final double size = getAvatarSize(widget.type);
-
     return _personID != null
         ? Container(
             padding: const EdgeInsets.all(0.5),
@@ -115,6 +113,7 @@ class _UserAvatarWidgetState extends State<UserAvatarWidget> {
                     return ClipOval(
                       child: _canUsePersonFaceWidget
                           ? PersonFaceWidget(
+                              key: ValueKey('$personID-$lastSyncTimeForKey'),
                               personId: personID,
                               onErrorCallback: () {
                                 if (mounted) {
