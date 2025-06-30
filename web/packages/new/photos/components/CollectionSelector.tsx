@@ -125,7 +125,7 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
 
         const collections = [...collectionSummaries.values()]
             .filter((cs) => {
-                if (cs.id === attributes.sourceCollectionID) {
+                if (cs.id === attributes.sourceCollectionSummaryID) {
                     return false;
                 } else if (attributes.action == "add") {
                     return canAddToCollection(cs);

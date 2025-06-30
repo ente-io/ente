@@ -923,18 +923,19 @@ const Page: React.FC = () => {
                     <SelectedFileOptions
                         barMode={barMode}
                         isInSearchMode={isInSearchMode}
-                        activeCollectionID={activeCollectionID}
-                        selectedCollection={state.collections.find(
-                            (c) => c.id == selected.collectionID,
-                        )}
-                        activeCollectionSummary={activeCollectionSummary}
-                        count={selected.count}
-                        ownCount={selected.ownCount}
-                        showCreateCollectionModal={handleCreateAlbumForOp}
+                        collection={
+                            isInSearchMode ? undefined : activeCollection
+                        }
+                        collectionSummary={
+                            isInSearchMode ? undefined : activeCollectionSummary
+                        }
+                        selectedFileCount={selected.count}
+                        selectedOwnFileCount={selected.ownCount}
+                        onClearSelection={clearSelection}
+                        onShowCreateCollectionModal={handleCreateAlbumForOp}
                         onOpenCollectionSelector={handleOpenCollectionSelector}
                         handleCollectionOp={collectionOpsHelper}
                         handleFileOp={fileOpHelper}
-                        clearSelection={clearSelection}
                     />
                 ) : barMode == "hidden-albums" ? (
                     <HiddenSectionNavbarContents

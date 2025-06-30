@@ -39,9 +39,18 @@ export type FileOp =
 interface SelectedFileOptionsProps {
     barMode?: GalleryBarMode;
     isInSearchMode: boolean;
-    activeCollectionID: number;
     selectedCollection?: Collection;
     /**
+     * If {@link collectionSummary} is set and is not a pseudo-collection, then
+     * this will be set to the corresponding {@link Collection}.
+     */
+    collection: Collection | undefined;
+    /**
+     * The collection summary in whose context the selection happened.
+     *
+     * This will not be set if we are in the people section, or if we are
+     * showing search results.
+     *
      * TODO: Need to implement delete-equivalent from shared albums.
      *
      * Notes:
@@ -62,10 +71,27 @@ interface SelectedFileOptionsProps {
      * Also note that that user cannot delete files that are not owned by the
      * user, even if they are in an album owned by the user.
      */
-    activeCollectionSummary: CollectionSummary | undefined;
-    count: number;
-    ownCount: number;
-    showCreateCollectionModal: (op: CollectionOp) => () => void;
+    collectionSummary: CollectionSummary | undefined;
+    /**
+     * The total number of files selected by the user.
+     */
+    selectedFileCount: number;
+    /**
+     * The subset of {@link selectedFileCount} that are also owned by the user.
+     */
+    selectedOwnFileCount: number;
+    /**
+     * Called when the user clears the selection by pressing the cancel button
+     * on the selection bar.
+     */
+    onClearSelection: () => void;
+    /**
+     * Called when an operation requires prompting the user to create a new
+     * collection (e.g. adding to a new album).
+     *
+     * The callback is also passed the operation that caused it to be shown.
+     */
+    onShowCreateCollectionModal: (op: CollectionOp) => () => void;
     /**
      * Callback to open a dialog where the user can choose a collection.
      *
@@ -79,7 +105,6 @@ interface SelectedFileOptionsProps {
     handleCollectionOp: (op: CollectionOp) => (...args: any[]) => void;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     handleFileOp: (op: FileOp) => (...args: any[]) => void;
-    clearSelection: () => void;
 }
 
 /**
@@ -89,33 +114,26 @@ interface SelectedFileOptionsProps {
 export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
     barMode,
     isInSearchMode,
-    activeCollectionID,
-    selectedCollection,
-    activeCollectionSummary,
-    count,
-    ownCount,
-    showCreateCollectionModal,
+    collection,
+    collectionSummary,
+    selectedFileCount,
+    selectedOwnFileCount,
+    onClearSelection,
+    onShowCreateCollectionModal,
     onOpenCollectionSelector,
     handleCollectionOp,
     handleFileOp,
-    clearSelection,
 }) => {
     const { showMiniDialog } = useBaseContext();
 
-    const isFavoriteCollection =
-        !!activeCollectionSummary?.attributes.has("userFavorites");
-
-    const isUncategorizedCollection =
-        activeCollectionSummary?.type == "uncategorized";
-
-    const isSharedIncomingCollection =
-        !!activeCollectionSummary?.attributes.has("sharedIncoming");
+    const isUserFavorites =
+        !!collectionSummary?.attributes.has("userFavorites");
 
     const handleUnhide = () => {
         onOpenCollectionSelector({
             action: "unhide",
             onSelectCollection: handleCollectionOp("unhide"),
-            onCreateCollection: showCreateCollectionModal("unhide"),
+            onCreateCollection: onShowCreateCollectionModal("unhide"),
         });
     };
 
@@ -134,7 +152,7 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
         onOpenCollectionSelector({
             action: "restore",
             onSelectCollection: handleCollectionOp("restore"),
-            onCreateCollection: showCreateCollectionModal("restore"),
+            onCreateCollection: onShowCreateCollectionModal("restore"),
         });
 
     const handleDeletePermanently = () =>
@@ -151,14 +169,14 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
     const handleAddToCollection = () =>
         onOpenCollectionSelector({
             action: "add",
-            sourceCollectionSummaryID: activeCollectionSummary?.id,
+            sourceCollectionSummaryID: collectionSummary?.id,
             onSelectCollection: handleCollectionOp("add"),
-            onCreateCollection: showCreateCollectionModal("add"),
+            onCreateCollection: onShowCreateCollectionModal("add"),
         });
 
     const handleRemoveFromOwnCollection = () => {
         showMiniDialog(
-            ownCount == count
+            selectedFileCount == selectedOwnFileCount
                 ? {
                       title: t("remove_from_album"),
                       message: t("confirm_remove_message"),
@@ -166,7 +184,7 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
                           text: t("yes_remove"),
                           color: "primary",
                           action: () =>
-                              handleCollectionOp("remove")(selectedCollection),
+                              handleCollectionOp("remove")(collection),
                       },
                   }
                 : {
@@ -176,7 +194,7 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
                           text: t("yes_remove"),
                           color: "critical",
                           action: () =>
-                              handleCollectionOp("remove")(selectedCollection),
+                              handleCollectionOp("remove")(collection),
                       },
                   },
         );
@@ -185,23 +203,23 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
     const handleMoveToCollection = () => {
         onOpenCollectionSelector({
             action: "move",
-            sourceCollectionSummaryID: activeCollectionSummary?.id,
+            sourceCollectionSummaryID: collectionSummary?.id,
             onSelectCollection: handleCollectionOp("move"),
-            onCreateCollection: showCreateCollectionModal("move"),
+            onCreateCollection: onShowCreateCollectionModal("move"),
         });
     };
 
     return (
         <SpacedRow sx={{ flex: 1, gap: 1, flexWrap: "wrap" }}>
-            <IconButton onClick={clearSelection}>
+            <IconButton onClick={onClearSelection}>
                 <CloseIcon />
             </IconButton>
             <Typography sx={{ mr: "auto" }}>
-                {ownCount === count
-                    ? t("selected_count", { selected: count })
+                {selectedFileCount == selectedOwnFileCount
+                    ? t("selected_count", { selected: selectedFileCount })
                     : t("selected_and_yours_count", {
-                          selected: count,
-                          yours: ownCount,
+                          selected: selectedFileCount,
+                          yours: selectedOwnFileCount,
                       })}
             </Typography>
 
@@ -222,48 +240,46 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
                     <HideButton onClick={handleFileOp("hide")} />
                     <DeleteButton onClick={handleDelete} />
                 </>
-            ) : activeCollectionID == PseudoCollectionID.trash ? (
+            ) : collectionSummary?.id == PseudoCollectionID.trash ? (
                 <>
                     <RestoreButton onClick={handleRestore} />
                     <DeletePermanentlyButton
                         onClick={handleDeletePermanently}
                     />
                 </>
-            ) : isUncategorizedCollection ? (
+            ) : collectionSummary?.attributes.has("uncategorized") ? (
                 <>
                     <DownloadButton onClick={handleFileOp("download")} />
                     <MoveToCollectionButton onClick={handleMoveToCollection} />
                     <DeleteButton onClick={handleDelete} />
                 </>
-            ) : isSharedIncomingCollection ? (
+            ) : collectionSummary?.attributes.has("sharedIncoming") ? (
                 <DownloadButton onClick={handleFileOp("download")} />
             ) : barMode == "hidden-albums" ? (
                 <>
-                    <UnhideButton onClick={handleUnhide} />
                     <DownloadButton onClick={handleFileOp("download")} />
+                    <UnhideButton onClick={handleUnhide} />
                     <DeleteButton onClick={handleDelete} />
                 </>
             ) : (
                 <>
-                    <FixTimeButton onClick={handleFileOp("fixTime")} />
-                    {!isFavoriteCollection &&
-                        activeCollectionID !=
+                    {!isUserFavorites &&
+                        collectionSummary?.id !=
                             PseudoCollectionID.archiveItems && (
                             <FavoriteButton
                                 onClick={handleFileOp("favorite")}
                             />
                         )}
+                    <FixTimeButton onClick={handleFileOp("fixTime")} />
                     <DownloadButton onClick={handleFileOp("download")} />
                     <AddToCollectionButton onClick={handleAddToCollection} />
-                    {activeCollectionID == PseudoCollectionID.archiveItems && (
-                        <UnarchiveButton onClick={handleFileOp("unarchive")} />
-                    )}
-                    {activeCollectionID === PseudoCollectionID.all && (
+                    {collectionSummary?.id === PseudoCollectionID.all ? (
                         <ArchiveButton onClick={handleFileOp("archive")} />
-                    )}
-                    {activeCollectionID !== PseudoCollectionID.all &&
-                        activeCollectionID != PseudoCollectionID.archiveItems &&
-                        !isFavoriteCollection && (
+                    ) : collectionSummary?.id ==
+                      PseudoCollectionID.archiveItems ? (
+                        <UnarchiveButton onClick={handleFileOp("unarchive")} />
+                    ) : (
+                        !isUserFavorites && (
                             <>
                                 <MoveToCollectionButton
                                     onClick={handleMoveToCollection}
@@ -272,7 +288,8 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
                                     onClick={handleRemoveFromOwnCollection}
                                 />
                             </>
-                        )}
+                        )
+                    )}
                     <HideButton onClick={handleFileOp("hide")} />
                     <DeleteButton onClick={handleDelete} />
                 </>
