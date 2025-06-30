@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
-import 'package:photos/db/files_db.dart';
 import "package:photos/db/remote/schema.dart";
 import "package:photos/events/collection_meta_event.dart";
 import 'package:photos/events/collection_updated_event.dart';
@@ -14,7 +13,6 @@ import "package:photos/models/search/hierarchical/album_filter.dart";
 import "package:photos/models/search/hierarchical/hierarchical_search_filter.dart";
 import 'package:photos/models/selected_files.dart';
 import "package:photos/service_locator.dart";
-import "package:photos/services/filter/filter.dart";
 import 'package:photos/services/ignored_files_service.dart';
 import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
 import "package:photos/ui/viewer/gallery/collect_photos_bottom_buttons.dart";

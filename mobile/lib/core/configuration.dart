@@ -14,7 +14,6 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
 import "package:photos/db/memories_db.dart";
 import "package:photos/db/ml/db.dart";
-import "package:photos/db/remote/table/trash.dart";
 import 'package:photos/db/upload_locks_db.dart';
 import "package:photos/events/endpoint_updated_event.dart";
 import 'package:photos/events/signed_in_event.dart';
