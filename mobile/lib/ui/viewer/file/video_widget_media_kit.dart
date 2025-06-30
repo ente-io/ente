@@ -17,6 +17,7 @@ import "package:photos/models/file/file.dart";
 import "package:photos/module/download/task.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/files_service.dart";
+import "package:photos/services/local/shared_assert.service.dart";
 import "package:photos/services/wake_lock_service.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
@@ -136,7 +137,7 @@ class _VideoWidgetMediaKitState extends State<VideoWidgetMediaKit>
       _loadNetworkVideo();
       _setFileSizeIfNull();
     } else if (widget.file.isSharedMediaToAppSandbox) {
-      final localFile = File(getSharedMediaFilePath(widget.file));
+      final localFile = File(SharedAssetService.getPath(widget.file.localID!));
       if (localFile.existsSync()) {
         _setVideoController(localFile.path);
       } else if (widget.file.isUploaded) {

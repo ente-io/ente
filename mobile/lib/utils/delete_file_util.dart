@@ -22,6 +22,7 @@ import 'package:photos/models/selected_files.dart';
 import "package:photos/service_locator.dart";
 import "package:photos/services/files_service.dart";
 import "package:photos/services/local/local_import.dart";
+import "package:photos/services/local/shared_assert.service.dart";
 import 'package:photos/services/sync/remote_sync_service.dart';
 import 'package:photos/services/sync/sync_service.dart';
 import 'package:photos/ui/common/linear_progress_dialog.dart';
@@ -31,7 +32,6 @@ import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/ui/notification/toast.dart';
 import "package:photos/utils/device_info.dart";
 import 'package:photos/utils/dialog_util.dart';
-import 'package:photos/utils/file_util.dart';
 
 final _logger = Logger("DeleteFileUtil");
 
@@ -72,7 +72,7 @@ Future<void> deleteFilesFromEverywhere(
   } catch (e, s) {
     _logger.severe("Could not delete file", e, s);
   }
-  deletedIDs.addAll(await _tryDeleteSharedMediaFiles(sharedAssetIDs));
+  deletedIDs.addAll(await SharedAssetService.tryDelete(sharedAssetIDs));
   final updatedCollectionIDs = <int>{};
   final List<TrashRequest> uploadedFilesToBeTrashed = [];
   final List<EnteFile> deletedFiles = [];
@@ -228,7 +228,7 @@ Future<void> deleteFilesOnDeviceOnly(
   } catch (e, s) {
     _logger.severe("Could not delete file", e, s);
   }
-  deletedIDs.addAll(await _tryDeleteSharedMediaFiles(localSharedMediaIDs));
+  deletedIDs.addAll(await SharedAssetService.tryDelete(localSharedMediaIDs));
   final List<EnteFile> deletedFiles = [];
   for (final file in files) {
     // Remove only those files that have been removed from disk
@@ -343,7 +343,7 @@ Future<bool> deleteLocalFiles(
         localAssetIDs.add(id);
       }
     }
-    delLocalIDs.addAll(await _tryDeleteSharedMediaFiles(localSharedMediaIDs));
+    delLocalIDs.addAll(await SharedAssetService.tryDelete(localSharedMediaIDs));
 
     final bool shouldDeleteInBatches =
         await isAndroidSDKVersionLowerThan(android11SDKINT);
@@ -419,7 +419,7 @@ Future<bool> deleteLocalFilesAfterRemovingAlreadyDeletedIDs(
       }
     }
     deletedIDs.addAll(alreadyDeletedIDs);
-    deletedIDs.addAll(await _tryDeleteSharedMediaFiles(localSharedMediaIDs));
+    deletedIDs.addAll(await SharedAssetService.tryDelete(localSharedMediaIDs));
 
     await dialog.hide();
 
@@ -504,7 +504,7 @@ Future<bool> retryFreeUpSpaceAfterRemovingAssetsNonExistingInDisk(
         localAssetIDs.add(localID);
       }
     }
-    deletedIDs.addAll(await _tryDeleteSharedMediaFiles(localSharedMediaIDs));
+    deletedIDs.addAll(await SharedAssetService.tryDelete(localSharedMediaIDs));
 
     await dialog.hide();
 
@@ -621,10 +621,10 @@ Future<List<String>> deleteLocalFilesInBatches(
   return delLocalIDs;
 }
 
-Future<bool> _localFileExist(EnteFile file) {
+Future<bool> _localFileExist(EnteFile file) async {
   if (file.isSharedMediaToAppSandbox) {
-    final localFile = File(getSharedMediaFilePath(file));
-    return localFile.exists();
+    final localFile = await SharedAssetService.getFile(file.localID!);
+    return localFile != null;
   } else {
     return file.getAsset.then((asset) {
       if (asset == null) {
@@ -632,29 +632,6 @@ Future<bool> _localFileExist(EnteFile file) {
       }
       return asset.exists;
     });
-  }
-}
-
-Future<List<String>> _tryDeleteSharedMediaFiles(List<String> localIDs) {
-  final List<String> actuallyDeletedIDs = [];
-  try {
-    return Future.forEach<String>(localIDs, (id) async {
-      final String localPath = getSharedAssetPath(id);
-      try {
-        // verify the file exists as the OS may have already deleted it from cache
-        if (File(localPath).existsSync()) {
-          await File(localPath).delete();
-        }
-        actuallyDeletedIDs.add(id);
-      } catch (e, s) {
-        _logger.severe("Could not delete file ", e, s);
-      }
-    }).then((ignore) {
-      return actuallyDeletedIDs;
-    });
-  } catch (e, s) {
-    _logger.severe("Unexpected error while deleting share media files", e, s);
-    return Future.value(actuallyDeletedIDs);
   }
 }
 

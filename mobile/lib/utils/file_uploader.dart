@@ -395,7 +395,7 @@ class FileUploader {
       }
 
       if (Platform.isAndroid) {
-        await SharedAssertService.cleanUpUntrackedItems();
+        await SharedAssetService.cleanUpUntrackedItems();
       }
     } catch (e, s) {
       _logger.severe("Failed to remove stale files", e, s);

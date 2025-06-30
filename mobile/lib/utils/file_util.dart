@@ -17,6 +17,7 @@ import "package:photos/image/in_memory_image_cache.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
+import "package:photos/services/local/shared_assert.service.dart";
 import 'package:photos/utils/file_download_util.dart';
 import 'package:photos/utils/thumbnail_util.dart';
 
@@ -64,20 +65,13 @@ Future<File?> getFile(
   }
 }
 
-Future<bool> doesLocalFileExist(EnteFile file) async {
-  return await _getLocalDiskFile(file) != null;
-}
-
 Future<File?> _getLocalDiskFile(
   EnteFile file, {
   bool liveVideo = false,
   bool isOrigin = false,
 }) {
   if (file.isSharedMediaToAppSandbox) {
-    final localFile = File(getSharedMediaFilePath(file));
-    return localFile.exists().then((exist) {
-      return exist ? localFile : null;
-    });
+    return SharedAssetService.getFile(file.localID!);
   } else if (file.fileType == FileType.livePhoto && liveVideo) {
     return Motionphoto.getLivePhotoFile(file.localID!);
   } else {
@@ -88,16 +82,6 @@ Future<File?> _getLocalDiskFile(
       return isOrigin ? asset.originFile : asset.file;
     });
   }
-}
-
-String getSharedMediaFilePath(EnteFile file) {
-  return getSharedAssetPath(file.localID!);
-}
-
-String getSharedAssetPath(String localID) {
-  return Configuration.instance.getSharedMediaDirectory() +
-      "/" +
-      localID.replaceAll(sharedMediaIdentifier, '');
 }
 
 void preloadThumbnail(EnteFile file) {

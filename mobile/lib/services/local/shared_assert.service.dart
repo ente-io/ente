@@ -11,13 +11,28 @@ import "package:photos/service_locator.dart";
 import "package:photos/utils/file_util.dart";
 import "package:video_thumbnail/video_thumbnail.dart";
 
-class SharedAssertService {
-  static final _logger = Logger("SharedAssertService");
+class SharedAssetService {
+  static final _logger = Logger("SharedAssetService");
+
+  static Future<File?> getFile(String sharedAssetID) async {
+    final localFile = File(getPath(sharedAssetID));
+    if (localFile.existsSync()) {
+      return localFile;
+    }
+    return null;
+  }
+
+  static String getPath(String localID) {
+    return Configuration.instance.getSharedMediaDirectory() +
+        "/" +
+        localID.replaceAll(sharedMediaIdentifier, '');
+  }
+
   static Future<Uint8List?> getThumbnail(
     String sharedAssetID,
     bool isVideo,
   ) async {
-    var localFile = File(getSharedAssetPath(sharedAssetID));
+    var localFile = File(getPath(sharedAssetID));
     if (!localFile.existsSync()) {
       return null;
     }
@@ -49,6 +64,29 @@ class SharedAssertService {
     return thumbnailData;
   }
 
+  static Future<List<String>> tryDelete(List<String> localIDs) {
+    final List<String> actuallyDeletedIDs = [];
+    try {
+      return Future.forEach<String>(localIDs, (id) async {
+        final String localPath = getPath(id);
+        try {
+          // verify the file exists as the OS may have already deleted it from cache
+          if (File(localPath).existsSync()) {
+            await File(localPath).delete();
+          }
+          actuallyDeletedIDs.add(id);
+        } catch (e, s) {
+          _logger.severe("Could not delete file ", e, s);
+        }
+      }).then((ignore) {
+        return actuallyDeletedIDs;
+      });
+    } catch (e, s) {
+      _logger.severe("Unexpected error while deleting share media files", e, s);
+      return Future.value(actuallyDeletedIDs);
+    }
+  }
+
   static Future<void> cleanUpUntrackedItems() async {
     final sharedMediaDir =
         Configuration.instance.getSharedMediaDirectory() + "/";
@@ -59,7 +97,7 @@ class SharedAssertService {
       final Set<String> trackedSharedFilePaths = {};
       for (String localID in existingLocalFileIDs) {
         if (localID.contains(sharedMediaIdentifier)) {
-          trackedSharedFilePaths.add(getSharedAssetPath(localID));
+          trackedSharedFilePaths.add(getPath(localID));
         }
       }
       for (final file in sharedFiles) {
