@@ -12,11 +12,12 @@ import 'package:photos/core/constants.dart';
 import 'package:photos/core/errors.dart';
 import 'package:photos/core/network/network.dart';
 import "package:photos/image/in_memory_image_cache.dart";
+import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/module/download/file_url.dart";
 import "package:photos/services/collections_service.dart";
+import "package:photos/services/local/shared_assert.service.dart";
 import "package:photos/utils/file_key.dart";
-import 'package:photos/utils/file_uploader_util.dart';
 import 'package:photos/utils/file_util.dart';
 
 final _logger = Logger("ThumbnailUtil");
@@ -104,7 +105,10 @@ Future<Uint8List?> getThumbnailFromLocal(
   }
   if (file.isSharedMediaToAppSandbox) {
     //todo:neeraj support specifying size/quality
-    return getThumbnailFromInAppCacheFile(file).then((data) {
+    return SharedAssertService.getThumbnailFromInAppCacheFile(
+      file.localID!,
+      file.isVideo,
+    ).then((data) {
       if (data != null) {
         enteImageCache.putThumb(file, data, size);
       }

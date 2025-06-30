@@ -26,6 +26,7 @@ import 'package:photos/models/file/file_type.dart';
 import "package:photos/models/location/location.dart";
 import "package:photos/services/local/asset_entity.service.dart";
 import "package:photos/services/local/local_import.dart";
+import "package:photos/services/local/shared_assert.service.dart";
 import "package:photos/utils/exif_util.dart";
 import 'package:photos/utils/file_util.dart';
 import "package:photos/utils/standalone/decode_image.dart";
@@ -299,7 +300,11 @@ Future<MediaUploadData> _getMediaUploadDataFromAppCache(
   }
   try {
     Map<String, IfdTag>? exifData;
-    final Uint8List? thumbnailData = await getThumbnailFromInAppCacheFile(file);
+    final Uint8List? thumbnailData =
+        await SharedAssertService.getThumbnailFromInAppCacheFile(
+      file.localID!,
+      file.isVideo,
+    );
     final fileHash =
         CryptoUtil.bin2base64(await CryptoUtil.getHash(sourceFile));
     ui.Image? decodedImage;
@@ -309,14 +314,14 @@ Future<MediaUploadData> _getMediaUploadDataFromAppCache(
     } else if (thumbnailData != null) {
       // the thumbnail null check is to ensure that we are able to generate thum
       // for video, we need to use the thumbnail data with any max width/height
-      final thumbnailFilePath = await VideoThumbnail.thumbnailFile(
+      final thumbforVidDimention = await VideoThumbnail.thumbnailFile(
         video: localPath,
         imageFormat: ImageFormat.JPEG,
         thumbnailPath: (await getTemporaryDirectory()).path,
         quality: 10,
       );
-      if (thumbnailFilePath != null) {
-        decodedImage = await decodeImageInIsolate(thumbnailFilePath);
+      if (thumbforVidDimention != null) {
+        decodedImage = await decodeImageInIsolate(thumbforVidDimention);
       }
     }
     return MediaUploadData(
@@ -335,37 +340,4 @@ Future<MediaUploadData> _getMediaUploadDataFromAppCache(
       InvalidReason.thumbnailMissing,
     );
   }
-}
-
-Future<Uint8List?> getThumbnailFromInAppCacheFile(EnteFile file) async {
-  var localFile = File(getSharedMediaFilePath(file));
-  if (!localFile.existsSync()) {
-    return null;
-  }
-  if (file.fileType == FileType.video) {
-    try {
-      final thumbnailFilePath = await VideoThumbnail.thumbnailFile(
-        video: localFile.path,
-        imageFormat: ImageFormat.JPEG,
-        thumbnailPath: (await getTemporaryDirectory()).path,
-        maxWidth: thumbnailLarge512,
-        quality: 80,
-      );
-      localFile = File(thumbnailFilePath!);
-    } catch (e) {
-      _logger.warning('Failed to generate video thumbnail', e);
-      return null;
-    }
-  }
-  var thumbnailData = await localFile.readAsBytes();
-  int compressionAttempts = 0;
-  while (thumbnailData.length > thumbnailDataMaxSize &&
-      compressionAttempts < kMaximumThumbnailCompressionAttempts) {
-    _logger.info("Thumbnail size " + thumbnailData.length.toString());
-    thumbnailData = await compressThumbnail(thumbnailData);
-    _logger
-        .info("Compressed thumbnail size " + thumbnailData.length.toString());
-    compressionAttempts++;
-  }
-  return thumbnailData;
 }

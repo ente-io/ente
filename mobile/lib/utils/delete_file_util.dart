@@ -647,8 +647,6 @@ Future<List<String>> _tryDeleteSharedMediaFiles(List<String> localIDs) {
         }
         actuallyDeletedIDs.add(id);
       } catch (e, s) {
-        _logger.warning("Could not delete file " + id, e, s);
-        // server log shouldn't contain localId
         _logger.severe("Could not delete file ", e, s);
       }
     }).then((ignore) {

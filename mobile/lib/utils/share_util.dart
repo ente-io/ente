@@ -7,7 +7,6 @@ import 'package:logging/logging.dart';
 import 'package:path/path.dart';
 import "package:photo_manager/photo_manager.dart";
 import 'package:photos/core/configuration.dart';
-import 'package:photos/core/constants.dart';
 import "package:photos/db/remote/schema.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/collection/collection.dart";
