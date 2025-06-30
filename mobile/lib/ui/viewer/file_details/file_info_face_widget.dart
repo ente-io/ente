@@ -33,6 +33,7 @@ class FileInfoFaceWidget extends StatefulWidget {
   final Uint8List faceCrop;
   final PersonEntity? person;
   final String? clusterID;
+  final double? width;
   final bool highlight;
   final bool isEditMode;
   final Future<void> Function() reloadAllFaces;
@@ -45,6 +46,7 @@ class FileInfoFaceWidget extends StatefulWidget {
     this.clusterID,
     this.highlight = false,
     this.isEditMode = false,
+    this.width,
     required this.reloadAllFaces,
     super.key,
   });
@@ -56,6 +58,7 @@ class FileInfoFaceWidget extends StatefulWidget {
 class _FileInfoFaceWidgetState extends State<FileInfoFaceWidget> {
   bool get hasPerson => widget.person != null;
   bool get isEditMode => widget.isEditMode;
+  double get thumbnailWidth => widget.width ?? 68;
 
   @override
   Widget build(BuildContext context) {
@@ -71,8 +74,8 @@ class _FileInfoFaceWidgetState extends State<FileInfoFaceWidget> {
                       : _onPlusIconTap
                   : _routeToPersonOrClusterPage,
               child: Container(
-                height: 68,
-                width: 68,
+                height: thumbnailWidth,
+                width: thumbnailWidth,
                 decoration: ShapeDecoration(
                   shape: RoundedRectangleBorder(
                     borderRadius: const BorderRadius.all(
@@ -88,8 +91,8 @@ class _FileInfoFaceWidgetState extends State<FileInfoFaceWidget> {
                 ),
                 child: ClipRRect(
                   child: SizedBox(
-                    width: 68,
-                    height: 68,
+                    width: thumbnailWidth,
+                    height: thumbnailWidth,
                     child: ClipPath(
                       clipper: ShapeBorderClipper(
                         shape: ContinuousRectangleBorder(
@@ -120,7 +123,7 @@ class _FileInfoFaceWidgetState extends State<FileInfoFaceWidget> {
     if (widget.person != null) {
       faceInfo.add(
         SizedBox(
-          width: 68,
+          width: thumbnailWidth,
           child: Center(
             child: Text(
               widget.person!.data.isIgnored
