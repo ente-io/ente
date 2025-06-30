@@ -12,7 +12,6 @@ import "package:photos/utils/navigation_util.dart";
 class MemoryCoverWidget extends StatefulWidget {
   final List<Memory> memories;
   final List<List<Memory>> allMemories;
-  final ScrollController controller;
   final double maxHeight;
   final double maxWidth;
   static const outerStrokeWidth = 1.0;
@@ -25,7 +24,6 @@ class MemoryCoverWidget extends StatefulWidget {
   const MemoryCoverWidget({
     required this.memories,
     required this.allMemories,
-    required this.controller,
     required this.maxHeight,
     required this.maxWidth,
     required this.title,
