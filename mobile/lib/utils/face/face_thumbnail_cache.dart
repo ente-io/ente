@@ -20,10 +20,10 @@ import "package:photos/utils/thumbnail_util.dart";
 final _logger = Logger("FaceCropUtils");
 
 const int _retryLimit = 3;
-final LRUMap<String, Uint8List?> _faceCropCache = LRUMap(1000);
-final LRUMap<String, Uint8List?> _faceCropThumbnailCache = LRUMap(1000);
+final LRUMap<String, Uint8List?> _faceCropCache = LRUMap(200);
+final LRUMap<String, Uint8List?> _faceCropThumbnailCache = LRUMap(200);
 
-final LRUMap<String, String> _personOrClusterIdToCachedFaceID = LRUMap(1000);
+final LRUMap<String, String> _personOrClusterIdToCachedFaceID = LRUMap(200);
 
 TaskQueue _queueFullFileFaceGenerations = TaskQueue<String>(
   maxConcurrentTasks: 5,
