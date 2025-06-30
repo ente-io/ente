@@ -678,10 +678,22 @@ export const deleteFromTrash = async (fileIDs: number[]) =>
         ),
     );
 
+export const removeOtherOtherNotSupportErrorMessage =
+    "Cannot remove other user's files in other user's collections";
+
 /**
  * Remove the given files from the specified collection owned by the user.
  *
  * Reads local state but does not modify it. The effects are on remote.
+ *
+ * @param collection A collection (either owned by the user, or shared with the
+ * user).
+ *
+ * @param files The files to remove from the collection. The files owned by the
+ * user will be removed. If the collection is not owned by the user and some of
+ * the given files are also not owned by the user, then this function will throw
+ * an error with the message {@link removeOtherOtherNotSupportErrorMessage}
+ * (after having removed what can be removed).
  *
  * [Note: Removing files from a collection]
  *
@@ -728,8 +740,8 @@ export const deleteFromTrash = async (fileIDs: number[]) =>
  * 2. [Public] {@link removeFromOwnCollection} - Handles both cases for own
  *    collections by delegating to either "Move" or "Remove"
  * 3. [Private] {@link removeFromOthersCollection} - Handles both cases for
- *    other's collections by delegating to "Remove" or throwing an error for the
- *    unsupported case.
+ *    other's collections by delegating to "Remove", then if needed, also
+ *    throwing an error for the unsupported case.
  * 4. [Private] {@link removeOwnFilesFromOwnCollection} implements the "Move".
  * 5. [Private] {@link removeNonCollectionOwnerFiles} implements the "Remove".
  */
@@ -771,9 +783,7 @@ const removeFromOthersCollection = async (
         await removeNonCollectionOwnerFiles(collectionID, nonUserFiles);
     }
     if (nonUserFiles.length) {
-        throw new Error(
-            "Cannot remove other user's files in other user's collections",
-        );
+        throw new Error(removeOtherOtherNotSupportErrorMessage);
     }
 };
 
