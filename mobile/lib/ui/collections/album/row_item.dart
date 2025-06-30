@@ -73,7 +73,7 @@ class AlbumRowItemWidget extends StatelessWidget {
                     cornerSmoothing: _cornerSmoothing,
                   ),
                   child: Container(
-                    color: getEnteColorScheme(context).strokeMuted,
+                    color: getEnteColorScheme(context).strokeFaint,
                     width: sideOfThumbnail,
                     height: sideOfThumbnail,
                   ),
@@ -130,8 +130,12 @@ class AlbumRowItemWidget extends StatelessWidget {
                                     : thumbnailWidget,
                               );
                             } else {
-                              return const NoThumbnailWidget(
-                                borderRadius: 12,
+                              return Container(
+                                color: getEnteColorScheme(context).backdropBase,
+                                child: const NoThumbnailWidget(
+                                  borderRadius: 12,
+                                  addBorder: false,
+                                ),
                               );
                             }
                           },
