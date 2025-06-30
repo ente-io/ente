@@ -86,7 +86,7 @@ class PeopleHomeWidgetService {
     );
   }
 
-  Future<void> initHomeWidget(bool? forceFetchNewPeople) async {
+  Future<void> initPeopleHomeWidget(bool? forceFetchNewPeople) async {
     if (await _hasAnyBlockers()) {
       await clearWidget();
       return;
@@ -155,7 +155,7 @@ class PeopleHomeWidgetService {
       return;
     }
 
-    await HomeWidgetService.instance.initHomeWidget();
+    await initPeopleHomeWidget(needsForceFetch);
   }
 
   Future<void> checkPeopleChanged() async {
@@ -174,7 +174,7 @@ class PeopleHomeWidgetService {
       _logger.info("No changes detected in people, skipping update");
       return;
     }
-    await initHomeWidget(true);
+    await initPeopleHomeWidget(true);
   }
 
   Future<void> onLaunchFromWidget(

@@ -49,7 +49,7 @@ class AlbumHomeWidgetService {
   }
 
   // Public methods
-  Future<void> initHomeWidget(bool? forceFetchNewAlbums) async {
+  Future<void> initAlbumHomeWidget(bool? forceFetchNewAlbums) async {
     if (await _hasAnyBlockers()) {
       await clearWidget();
       return;
@@ -147,7 +147,7 @@ class AlbumHomeWidgetService {
       return;
     }
 
-    await initHomeWidget(shouldForceFetch);
+    await initAlbumHomeWidget(shouldForceFetch);
   }
 
   Future<void> albumsChanged() async {
@@ -162,7 +162,7 @@ class AlbumHomeWidgetService {
 
     _logger.info("Albums changed, updating widget");
     await updateAlbumsChanged(true);
-    await initHomeWidget(true);
+    await initAlbumHomeWidget(true);
   }
 
   List<Collection> getAlbumsByIds(List<int> albumIds) {
