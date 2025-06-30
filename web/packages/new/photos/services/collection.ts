@@ -737,12 +737,16 @@ export const removeOtherOtherNotSupportErrorMessage =
  *
  * 1. [Public] {@link removeFromCollection} - Handles both own and others
  *    collections by delegating to the one of the following functions.
+ *
  * 2. [Public] {@link removeFromOwnCollection} - Handles both cases for own
  *    collections by delegating to either "Move" or "Remove"
+ *
  * 3. [Private] {@link removeFromOthersCollection} - Handles both cases for
  *    other's collections by delegating to "Remove", then if needed, also
  *    throwing an error for the unsupported case.
+ *
  * 4. [Private] {@link removeOwnFilesFromOwnCollection} implements the "Move".
+ *
  * 5. [Private] {@link removeNonCollectionOwnerFiles} implements the "Remove".
  */
 export const removeFromCollection = async (
@@ -780,7 +784,7 @@ const removeFromOthersCollection = async (
         (f) => f.ownerID == userID,
     );
     if (userFiles.length) {
-        await removeNonCollectionOwnerFiles(collectionID, nonUserFiles);
+        await removeNonCollectionOwnerFiles(collectionID, userFiles);
     }
     if (nonUserFiles.length) {
         throw new Error(removeOtherOtherNotSupportErrorMessage);

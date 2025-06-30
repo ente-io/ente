@@ -667,11 +667,10 @@ const Page: React.FC = () => {
 
             if (notifyOtherFiles) {
                 showMiniDialog({
-                    title: "Note",
+                    title: pt("Note"),
                     icon: <InfoIcon />,
-                    message: pt(
-                        "Files which are not owned by you were not removed",
-                    ),
+                    message: pt("Files added by other users were not removed"),
+                    cancel: t("ok"),
                 });
             }
         })();
