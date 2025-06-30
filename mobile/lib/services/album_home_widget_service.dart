@@ -1,3 +1,4 @@
+import "dart:async";
 import 'dart:convert';
 import "dart:math";
 
@@ -50,8 +51,9 @@ class AlbumHomeWidgetService {
     return selectedAlbums?.map((id) => int.tryParse(id) ?? 0).toList();
   }
 
-  Future<void> setSelectedAlbums(List<String> selectedAlbums) async {
+  Future<void> updateSelectedAlbums(List<String> selectedAlbums) async {
     await _prefs.setStringList(SELECTED_ALBUMS_KEY, selectedAlbums);
+    unawaited(_refreshOnSelection());
   }
 
   String? getAlbumsLastHash() {
@@ -74,7 +76,7 @@ class AlbumHomeWidgetService {
       if (forceFetchNewAlbums) {
         _logger.info("Initializing albums widget: updating albums cache");
         await _updateAlbumsWidgetCache();
-        await updateAlbumsChanged(false);
+        await setSelectionChange(false);
       } else {
         _logger.info("Initializing albums widget: syncing existing albums");
         await _refreshAlbumsWidget();
@@ -84,7 +86,6 @@ class AlbumHomeWidgetService {
 
   Future<void> clearWidget() async {
     if (getAlbumsStatus() == WidgetStatus.syncedEmpty) {
-      _logger.info("Widget already empty, nothing to clear");
       return;
     }
 
@@ -93,11 +94,11 @@ class AlbumHomeWidgetService {
     await _refreshWidget(message: "AlbumsHomeWidget cleared & updated");
   }
 
-  bool? getAlbumsChanged() {
+  bool? hasSelectionChanged() {
     return _prefs.getBool(ALBUMS_CHANGED_KEY);
   }
 
-  Future<void> updateAlbumsChanged(bool value) async {
+  Future<void> setSelectionChange(bool value) async {
     _logger.info("Updating albums changed flag to $value");
     await _prefs.setBool(ALBUMS_CHANGED_KEY, value);
   }
@@ -132,18 +133,16 @@ class AlbumHomeWidgetService {
     }
   }
 
-  Future<void> albumsChanged() async {
+  Future<void> _refreshOnSelection() async {
     final lastHash = getAlbumsLastHash();
     final selectedAlbumIds = await _getEffectiveSelectedAlbumIds();
     final currentHash = _calculateHash(selectedAlbumIds);
-
     if (lastHash != null && currentHash == lastHash) {
       _logger.info("No changes detected in albums");
       return;
     }
 
-    _logger.info("Albums changed, updating widget");
-    await updateAlbumsChanged(true);
+    await setSelectionChange(true);
     await initAlbumHomeWidget();
   }
 
@@ -152,7 +151,9 @@ class AlbumHomeWidgetService {
 
     for (final albumId in albumIds) {
       final collection = CollectionsService.instance.getCollectionByID(albumId);
-      if (collection != null) {
+      if (collection != null &&
+          !collection.isDeleted &&
+          collection.isHidden()) {
         albums.add(collection);
       }
     }
@@ -232,7 +233,7 @@ class AlbumHomeWidgetService {
     final hasCompletedFirstImport =
         LocalSyncService.instance.hasCompletedFirstImport();
     if (!hasCompletedFirstImport) {
-      _logger.warning("First import not completed");
+      _logger.info("First import not completed");
       return true;
     }
 
@@ -241,7 +242,7 @@ class AlbumHomeWidgetService {
     final albums = getAlbumsByIds(selectedAlbumIds);
 
     if (albums.isEmpty) {
-      _logger.warning("Selected albums not found");
+      _logger.info("Selected albums not found");
       return true;
     }
 
@@ -256,7 +257,7 @@ class AlbumHomeWidgetService {
 
   Future<bool> _shouldUpdateWidgetCache() async {
     // Check if albums changed flag is set
-    if (getAlbumsChanged() == true) {
+    if (hasSelectionChanged() == true) {
       return true;
     }
 
@@ -273,7 +274,6 @@ class AlbumHomeWidgetService {
 
     if (currentHash == lastHash) {
       final saveStatus = getAlbumsStatus();
-
       switch (saveStatus) {
         case WidgetStatus.syncedPartially:
           return await countHomeWidgets() > 0;

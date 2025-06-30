@@ -128,7 +128,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     super.initState();
 
     if (LocalSyncService.instance.hasCompletedFirstImport()) {
-      syncWidget();
+       syncWidget();
     }
     _tabChangedEventSubscription =
         Bus.instance.on<TabChangedEvent>().listen((event) {

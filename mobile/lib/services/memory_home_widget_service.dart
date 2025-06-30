@@ -163,14 +163,12 @@ class MemoryHomeWidgetService {
     final hasCompletedFirstImport =
         LocalSyncService.instance.hasCompletedFirstImport();
     if (!hasCompletedFirstImport) {
-      _logger.warning("First import not completed");
       return true;
     }
 
     // Check if memories are enabled
     final areMemoriesShown = memoriesCacheService.showAnyMemories;
     if (!areMemoriesShown) {
-      _logger.warning("Memories not enabled");
       return true;
     }
 
@@ -262,13 +260,14 @@ class MemoryHomeWidgetService {
     _logger.info("Home Widget updated: ${message ?? "standard update"}");
   }
 
-  Future<void> _updateMemoriesWidgetCache() async {
+  // _updateMemoriesWidgetCache will return false if no memories were cached
+  Future<bool> _updateMemoriesWidgetCache() async {
     // TODO: Can update the method to fetch directly max limit random memories
     final memoriesWithFiles = await _getMemoriesWithFiles();
     if (memoriesWithFiles.isEmpty) {
       _logger.warning("No memories found, clearing widget");
       await clearWidget();
-      return;
+      return false;
     }
 
     final bool isWidgetPresent = await countHomeWidgets() > 0;
@@ -311,7 +310,7 @@ class MemoryHomeWidgetService {
         // Check for blockers again before continuing
         if (await _hasAnyBlockers()) {
           await clearWidget();
-          return;
+          return true;
         }
 
         // Show update toast after first item is rendered
@@ -335,7 +334,7 @@ class MemoryHomeWidgetService {
     }
 
     if (renderedCount == 0) {
-      return;
+      return true;
     }
 
     if (isWidgetPresent) {
@@ -345,5 +344,6 @@ class MemoryHomeWidgetService {
     await _refreshWidget(
       message: "Switched to next memory set, total: $renderedCount",
     );
+    return true;
   }
 }
