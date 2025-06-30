@@ -33,7 +33,7 @@ const maxKernelSize = gaussianKernelSize;
 const maxKernelRadius = maxKernelSize ~/ 2;
 
 // Face thumbnail compression constants
-const int _faceThumbnailCompressionQuality = 85;
+const int _faceThumbnailCompressionQuality = 90;
 const int _faceThumbnailMinDimension = 512;
 
 class DecodedImage {
