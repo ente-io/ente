@@ -314,13 +314,13 @@ export const resetFailedFileStatuses = async () => {
 };
 
 /**
- * Return the count of files that can be, and that have been, indexed.
+ * Return the count of files that can be indexed, have been indexed, and which
+ * have been marked as having failed when attempting to index them.
  *
- * These counts are mutually exclusive. Thus the total number of files that are
- * fall within the purview of the indexer will be indexable + indexed (if we are
- * ignoring the "failed" ones).
+ * The total number of files that are within the purview of the indexer is
+ * indexable + indexed + failed.
  */
-export const getIndexableAndIndexedCounts = async () => {
+export const savedIndexCounts = async () => {
     const db = await mlDB();
     const tx = db.transaction("file-status", "readonly");
     const indexableCount = await tx.store
@@ -329,7 +329,10 @@ export const getIndexableAndIndexedCounts = async () => {
     const indexedCount = await tx.store
         .index("status")
         .count(IDBKeyRange.only("indexed"));
-    return { indexableCount, indexedCount };
+    const failedCount = await tx.store
+        .index("status")
+        .count(IDBKeyRange.only("failed"));
+    return { indexableCount, indexedCount, failedCount };
 };
 
 /**
