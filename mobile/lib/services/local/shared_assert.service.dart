@@ -3,18 +3,21 @@ import "dart:typed_data";
 
 import "package:logging/logging.dart";
 import "package:path_provider/path_provider.dart";
+import "package:photos/core/configuration.dart";
 import "package:photos/core/constants.dart";
+import "package:photos/db/local/table/shared_assets.dart";
 import "package:photos/image/thumnail/upload_thumb.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/utils/file_util.dart";
 import "package:video_thumbnail/video_thumbnail.dart";
 
 class SharedAssertService {
   static final _logger = Logger("SharedAssertService");
-  static Future<Uint8List?> getThumbnailFromInAppCacheFile(
+  static Future<Uint8List?> getThumbnail(
     String sharedAssetID,
     bool isVideo,
   ) async {
-    var localFile = File(getSharedMediaPathFromLocalID(sharedAssetID));
+    var localFile = File(getSharedAssetPath(sharedAssetID));
     if (!localFile.existsSync()) {
       return null;
     }
@@ -44,5 +47,27 @@ class SharedAssertService {
       compressionAttempts++;
     }
     return thumbnailData;
+  }
+
+  static Future<void> cleanUpUntrackedItems() async {
+    final sharedMediaDir =
+        Configuration.instance.getSharedMediaDirectory() + "/";
+    final sharedFiles = await Directory(sharedMediaDir).list().toList();
+    if (sharedFiles.isNotEmpty) {
+      _logger.info('Shared media directory cleanup ${sharedFiles.length}');
+      final existingLocalFileIDs = await localDB.getSharedAssetsID();
+      final Set<String> trackedSharedFilePaths = {};
+      for (String localID in existingLocalFileIDs) {
+        if (localID.contains(sharedMediaIdentifier)) {
+          trackedSharedFilePaths.add(getSharedAssetPath(localID));
+        }
+      }
+      for (final file in sharedFiles) {
+        if (!trackedSharedFilePaths.contains(file.path)) {
+          _logger.info('Deleting stale shared media file ${file.path}');
+          await file.delete();
+        }
+      }
+    }
   }
 }

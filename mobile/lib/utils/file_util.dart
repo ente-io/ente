@@ -91,10 +91,10 @@ Future<File?> _getLocalDiskFile(
 }
 
 String getSharedMediaFilePath(EnteFile file) {
-  return getSharedMediaPathFromLocalID(file.localID!);
+  return getSharedAssetPath(file.localID!);
 }
 
-String getSharedMediaPathFromLocalID(String localID) {
+String getSharedAssetPath(String localID) {
   return Configuration.instance.getSharedMediaDirectory() +
       "/" +
       localID.replaceAll(sharedMediaIdentifier, '');

@@ -289,7 +289,7 @@ Future<MediaUploadData> _getMediaUploadDataFromAppCache(
   EnteFile file,
   bool parseExif,
 ) async {
-  final localPath = getSharedMediaFilePath(file);
+  final localPath = getSharedAssetPath(file.localID!);
   final sourceFile = File(localPath);
   if (!sourceFile.existsSync()) {
     _logger.warning("File doesn't exist in app sandbox");
@@ -300,8 +300,7 @@ Future<MediaUploadData> _getMediaUploadDataFromAppCache(
   }
   try {
     Map<String, IfdTag>? exifData;
-    final Uint8List? thumbnailData =
-        await SharedAssertService.getThumbnailFromInAppCacheFile(
+    final Uint8List? thumbnailData = await SharedAssertService.getThumbnail(
       file.localID!,
       file.isVideo,
     );

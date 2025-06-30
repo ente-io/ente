@@ -42,6 +42,7 @@ import "package:photos/service_locator.dart";
 import "package:photos/services/account/user_service.dart";
 import 'package:photos/services/collections_service.dart';
 import "package:photos/services/ignored_files_service.dart";
+import "package:photos/services/local/shared_assert.service.dart";
 import 'package:photos/services/sync/sync_service.dart';
 import "package:photos/utils/exif_util.dart";
 import "package:photos/utils/file_key.dart";
@@ -394,26 +395,7 @@ class FileUploader {
       }
 
       if (Platform.isAndroid) {
-        final sharedMediaDir =
-            Configuration.instance.getSharedMediaDirectory() + "/";
-        final sharedFiles = await Directory(sharedMediaDir).list().toList();
-        if (sharedFiles.isNotEmpty) {
-          _logger.info('Shared media directory cleanup ${sharedFiles.length}');
-          final existingLocalFileIDs = await localDB.getSharedAssetsID();
-          final Set<String> trackedSharedFilePaths = {};
-          for (String localID in existingLocalFileIDs) {
-            if (localID.contains(sharedMediaIdentifier)) {
-              trackedSharedFilePaths
-                  .add(getSharedMediaPathFromLocalID(localID));
-            }
-          }
-          for (final file in sharedFiles) {
-            if (!trackedSharedFilePaths.contains(file.path)) {
-              _logger.info('Deleting stale shared media file ${file.path}');
-              await file.delete();
-            }
-          }
-        }
+        await SharedAssertService.cleanUpUntrackedItems();
       }
     } catch (e, s) {
       _logger.severe("Failed to remove stale files", e, s);

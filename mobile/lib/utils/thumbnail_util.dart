@@ -105,7 +105,7 @@ Future<Uint8List?> getThumbnailFromLocal(
   }
   if (file.isSharedMediaToAppSandbox) {
     //todo:neeraj support specifying size/quality
-    return SharedAssertService.getThumbnailFromInAppCacheFile(
+    return SharedAssertService.getThumbnail(
       file.localID!,
       file.isVideo,
     ).then((data) {

@@ -639,7 +639,7 @@ Future<List<String>> _tryDeleteSharedMediaFiles(List<String> localIDs) {
   final List<String> actuallyDeletedIDs = [];
   try {
     return Future.forEach<String>(localIDs, (id) async {
-      final String localPath = getSharedMediaPathFromLocalID(id);
+      final String localPath = getSharedAssetPath(id);
       try {
         // verify the file exists as the OS may have already deleted it from cache
         if (File(localPath).existsSync()) {
