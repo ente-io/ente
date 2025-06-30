@@ -28,7 +28,6 @@ class AlbumHomeWidgetService {
   static const String IOS_CLASS_NAME = "EnteAlbumWidget";
   static const String ALBUMS_CHANGED_KEY = "albumsChanged.widget";
   static const String ALBUMS_STATUS_KEY = "albumsStatusKey.widget";
-  static const String TOTAL_ALBUMS_KEY = "totalAlbums";
   static const int MAX_ALBUMS_LIMIT = 50;
 
   // Singleton pattern
@@ -185,8 +184,6 @@ class AlbumHomeWidgetService {
     int collectionId,
     BuildContext context,
   ) async {
-    await _refreshAlbumsWidget();
-
     final collection =
         CollectionsService.instance.getCollectionByID(collectionId);
     if (collection == null) {
@@ -214,7 +211,7 @@ class AlbumHomeWidgetService {
       return;
     }
 
-    await routeToPage(
+    routeToPage(
       context,
       DetailPage(
         DetailPageConfiguration(
@@ -224,7 +221,8 @@ class AlbumHomeWidgetService {
         ),
       ),
       forceCustomPageRoute: true,
-    );
+    ).ignore();
+    await _refreshAlbumsWidget();
   }
 
   // Private methods

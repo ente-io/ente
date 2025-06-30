@@ -71,8 +71,6 @@ class _PeopleWidgetSettingsState extends State<PeopleWidgetSettings> {
                               _selectedPeople.personIds.toList(),
                             );
                             Navigator.pop(context);
-                            await PeopleHomeWidgetService.instance
-                                .checkPeopleChanged();
                           },
                   );
                 },

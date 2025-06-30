@@ -21,7 +21,6 @@ class MemoryHomeWidgetService {
   static const String IOS_CLASS_NAME = "EnteMemoryWidget";
   static const String MEMORY_STATUS_KEY = "memoryStatusKey.widget";
   static const String MEMORY_CHANGED_KEY = "memoryChanged.widget";
-  static const String TOTAL_MEMORIES_KEY = "totalMemories";
   static const int MAX_MEMORIES_LIMIT = 50;
 
   // Singleton pattern
@@ -149,11 +148,13 @@ class MemoryHomeWidgetService {
   }
 
   Future<void> onLaunchFromWidget(int generatedId, BuildContext context) async {
+    memoriesCacheService
+        .goToMemoryFromGeneratedFileID(
+          context,
+          generatedId,
+        )
+        .ignore();
     await _refreshMemoriesWidget();
-    await memoriesCacheService.goToMemoryFromGeneratedFileID(
-      context,
-      generatedId,
-    );
   }
 
   // Private methods
