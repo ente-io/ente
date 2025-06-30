@@ -632,7 +632,7 @@ const Page: React.FC = () => {
             return updater;
         }, []);
 
-    const createCollectionOpHandler =
+    const createOnSelectForCollectionOp =
         (op: CollectionOp) => async (selectedCollection: Collection) => {
             showLoadingBar();
             try {
@@ -701,7 +701,7 @@ const Page: React.FC = () => {
         }
     };
 
-    const handleCreateAlbumForOp = useCallback(
+    const createOnCreateForCollectionOp = useCallback(
         (op: CollectionOp) => {
             setPostCreateAlbumOp(op);
             return showAlbumNameInput;
@@ -715,11 +715,13 @@ const Page: React.FC = () => {
             setPostCreateAlbumOp((postCreateAlbumOp) => {
                 // The function returned by createHandleCollectionOp does its
                 // own progress and error reporting, defer to that.
-                void createCollectionOpHandler(postCreateAlbumOp!)(collection);
+                void createOnSelectForCollectionOp(postCreateAlbumOp!)(
+                    collection,
+                );
                 return undefined;
             });
         },
-        [createCollectionOpHandler],
+        [createOnSelectForCollectionOp],
     );
 
     const handleSelectSearchOption = (
@@ -931,9 +933,11 @@ const Page: React.FC = () => {
                         selectedFileCount={selected.count}
                         selectedOwnFileCount={selected.ownCount}
                         onClearSelection={clearSelection}
-                        onShowCreateCollectionModal={handleCreateAlbumForOp}
                         onOpenCollectionSelector={handleOpenCollectionSelector}
-                        onCreateCollectionOpHandler={createCollectionOpHandler}
+                        {...{
+                            createOnCreateForCollectionOp,
+                            createOnSelectForCollectionOp,
+                        }}
                         handleFileOp={fileOpHelper}
                     />
                 ) : barMode == "hidden-albums" ? (
