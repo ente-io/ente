@@ -528,6 +528,7 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
                     ),
                   ],
                 ),
+                if (personPage) const SizedBox(height: 12),
                 if (personPage)
                   GestureDetector(
                     behavior: HitTestBehavior.opaque,
