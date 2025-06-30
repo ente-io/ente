@@ -5,17 +5,11 @@ import log from "ente-base/log";
 import { uniqueFilesByID } from "ente-gallery/utils/file";
 import { type Collection, CollectionSubType } from "ente-media/collection";
 import { EnteFile } from "ente-media/file";
-import { type CollectionOp } from "ente-new/photos/components/SelectedFileOptions";
 import {
-    addToCollection,
     createAlbum,
     defaultHiddenCollectionUserFacingName,
     findDefaultHiddenCollectionIDs,
     isHiddenCollection,
-    moveFromCollection,
-    moveToCollection,
-    removeFromCollection,
-    restoreToCollection,
 } from "ente-new/photos/services/collection";
 import { PseudoCollectionID } from "ente-new/photos/services/collection-summary";
 import {
@@ -29,35 +23,6 @@ import {
     type SetFilesDownloadProgressAttributesCreator,
 } from "types/gallery";
 import { downloadFilesWithProgress } from "utils/file";
-
-export async function handleCollectionOp(
-    op: CollectionOp,
-    collection: Collection,
-    selectedFiles: EnteFile[],
-    selectedCollectionID: number,
-) {
-    switch (op) {
-        case "add":
-            await addToCollection(collection, selectedFiles);
-            break;
-        case "move":
-            await moveFromCollection(
-                selectedCollectionID,
-                collection,
-                selectedFiles,
-            );
-            break;
-        case "remove":
-            await removeFromCollection(collection.id, selectedFiles);
-            break;
-        case "restore":
-            await restoreToCollection(collection, selectedFiles);
-            break;
-        case "unhide":
-            await moveToCollection(collection, selectedFiles);
-            break;
-    }
-}
 
 export async function downloadCollectionHelper(
     collectionID: number,
@@ -159,14 +124,6 @@ async function createCollectionDownloadFolder(
     await fs.mkdirIfNeeded(collectionDownloadPath);
     return collectionDownloadPath;
 }
-
-export const getUserOwnedCollections = (collections: Collection[]) => {
-    const user: User = getData("user");
-    if (!user?.id) {
-        throw Error("user missing");
-    }
-    return collections.filter((collection) => collection.owner.id === user.id);
-};
 
 const isQuickLinkCollection = (collection: Collection) =>
     collection.magicMetadata?.data.subType == CollectionSubType.quicklink;

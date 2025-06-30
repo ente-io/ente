@@ -48,15 +48,15 @@ export interface CollectionSelectorAttributes {
      */
     sourceCollectionSummaryID?: number;
     /**
-     * Callback invoked when the user selects one the existing collections
-     * listed in the dialog.
-     */
-    onSelectCollection: (collection: Collection) => void;
-    /**
      * Callback invoked when the user selects the option to create a new
      * collection.
      */
     onCreateCollection: () => void;
+    /**
+     * Callback invoked when the user selects one the existing collections
+     * listed in the dialog.
+     */
+    onSelectCollection: (collection: Collection) => void;
     /**
      * Callback invoked when the user cancels the collection selection dialog.
      */

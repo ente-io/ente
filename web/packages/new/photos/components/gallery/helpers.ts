@@ -12,7 +12,15 @@
 
 import { getUserRecoveryKey } from "ente-accounts/services/recovery-key";
 import log from "ente-base/log";
-import type { Collection } from "ente-media/collection";
+import { type Collection } from "ente-media/collection";
+import { type EnteFile } from "ente-media/file";
+import { type CollectionOp } from "ente-new/photos/components/SelectedFileOptions";
+import {
+    addToCollection,
+    moveFromCollection,
+    moveToCollection,
+    restoreToCollection,
+} from "ente-new/photos/services/collection";
 import { createUncategorizedCollection } from "../../services/collection";
 import { PseudoCollectionID } from "../../services/collection-summary";
 
@@ -49,3 +57,46 @@ export const findCollectionCreatingUncategorizedIfNeeded = async (
     collectionSummaryID == PseudoCollectionID.uncategorizedPlaceholder
         ? createUncategorizedCollection()
         : collections.find(({ id }) => id == collectionSummaryID);
+
+/**
+ * Perform a "collection operation" on the selected file(s).
+ *
+ * @param op The {@link CollectionOp} to perform, e.g. "add", "restore".
+ *
+ * @param selectedCollection The existing or new collection selected by the
+ * user. This serves as the target of the operation.
+ *
+ * @param selectedFiles The files selected by the user, on which the operation
+ * should be performed.
+ *
+ * @param sourceCollectionID In the case of a "move", the operation is always
+ * expected to happen in the context of an existing collection, which serves as
+ * the source collection for the move. In such a case, the caller should provide
+ * this argument, using the collection ID of the collection in which the
+ * selection occurred.
+ */
+export const performCollectionOp = async (
+    op: CollectionOp,
+    selectedCollection: Collection,
+    selectedFiles: EnteFile[],
+    sourceCollectionID: number | undefined,
+): Promise<void> => {
+    switch (op) {
+        case "add":
+            await addToCollection(selectedCollection, selectedFiles);
+            break;
+        case "move":
+            await moveFromCollection(
+                sourceCollectionID!,
+                selectedCollection,
+                selectedFiles,
+            );
+            break;
+        case "restore":
+            await restoreToCollection(selectedCollection, selectedFiles);
+            break;
+        case "unhide":
+            await moveToCollection(selectedCollection, selectedFiles);
+            break;
+    }
+};

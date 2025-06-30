@@ -24,7 +24,7 @@ import {
 } from "ente-new/photos/services/collection-summary";
 import { t } from "i18next";
 
-export type CollectionOp = "add" | "move" | "remove" | "restore" | "unhide";
+export type CollectionOp = "add" | "move" | "restore" | "unhide";
 
 export type FileOp =
     | "download"
@@ -86,12 +86,10 @@ interface SelectedFileOptionsProps {
      */
     onClearSelection: () => void;
     /**
-     * Called when an operation requires prompting the user to create a new
-     * collection (e.g. adding to a new album).
-     *
-     * The callback is also passed the operation that caused it to be shown.
+     * Called when the user wants to remove the selected files from the given
+     * {@link collection}.
      */
-    onShowCreateCollectionModal: (op: CollectionOp) => () => void;
+    onRemoveFilesFromCollection: (collection: Collection) => void;
     /**
      * Callback to open a dialog where the user can choose a collection.
      *
@@ -101,8 +99,43 @@ interface SelectedFileOptionsProps {
     onOpenCollectionSelector: (
         attributes: CollectionSelectorAttributes,
     ) => void;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    handleCollectionOp: (op: CollectionOp) => (...args: any[]) => void;
+    /**
+     * A function called to obtain a new album creation handler for the provided
+     * {@link op}.
+     *
+     * This function will be passed the operation to be be performed. It will
+     * return a new function G can be used as the {@link onCreateCollection}
+     * attribute for {@link onOpenCollectionSelector}.
+     *
+     * Once the user enters the name and a new album with that name gets
+     * created, the newly created collection will be passed to G.
+     *
+     * @param op The operation that should be performed using the newly created
+     * collection.
+     *
+     * @returns A function that can be called with to create a new collection
+     * and then perform {@link op} on successful creation of the new collection.
+     */
+    createOnCreateForCollectionOp: (op: CollectionOp) => () => void;
+    /**
+     * A function called to obtain an existing album selection handler for the
+     * provided {@link op}.
+     *
+     * This function will be passed the operation to be be performed. It will
+     * return a new function G can be used as the {@link onSelectCollection}
+     * attribute for {@link onOpenCollectionSelector}.
+     *
+     * Once the user selects a collection, then the selected collection will be
+     * passed to G.
+     *
+     * @param op The operation that should be performed using the selected
+     * collection.
+     *
+     * @returns A function that can be called with a selected collection.
+     */
+    createOnSelectForCollectionOp: (
+        op: CollectionOp,
+    ) => (selectedCollection: Collection) => void;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     handleFileOp: (op: FileOp) => (...args: any[]) => void;
 }
@@ -119,23 +152,16 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
     selectedFileCount,
     selectedOwnFileCount,
     onClearSelection,
-    onShowCreateCollectionModal,
+    onRemoveFilesFromCollection,
     onOpenCollectionSelector,
-    handleCollectionOp,
+    createOnCreateForCollectionOp,
+    createOnSelectForCollectionOp,
     handleFileOp,
 }) => {
     const { showMiniDialog } = useBaseContext();
 
     const isUserFavorites =
         !!collectionSummary?.attributes.has("userFavorites");
-
-    const handleUnhide = () => {
-        onOpenCollectionSelector({
-            action: "unhide",
-            onSelectCollection: handleCollectionOp("unhide"),
-            onCreateCollection: onShowCreateCollectionModal("unhide"),
-        });
-    };
 
     const handleDelete = () =>
         showMiniDialog({
@@ -151,8 +177,8 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
     const handleRestore = () =>
         onOpenCollectionSelector({
             action: "restore",
-            onSelectCollection: handleCollectionOp("restore"),
-            onCreateCollection: onShowCreateCollectionModal("restore"),
+            onCreateCollection: createOnCreateForCollectionOp("restore"),
+            onSelectCollection: createOnSelectForCollectionOp("restore"),
         });
 
     const handleDeletePermanently = () =>
@@ -170,42 +196,45 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
         onOpenCollectionSelector({
             action: "add",
             sourceCollectionSummaryID: collectionSummary?.id,
-            onSelectCollection: handleCollectionOp("add"),
-            onCreateCollection: onShowCreateCollectionModal("add"),
+            onCreateCollection: createOnCreateForCollectionOp("add"),
+            onSelectCollection: createOnSelectForCollectionOp("add"),
         });
 
-    const handleRemoveFromOwnCollection = () => {
-        showMiniDialog(
-            selectedFileCount == selectedOwnFileCount
-                ? {
-                      title: t("remove_from_album"),
-                      message: t("confirm_remove_message"),
-                      continue: {
-                          text: t("yes_remove"),
-                          color: "primary",
-                          action: () =>
-                              handleCollectionOp("remove")(collection),
-                      },
-                  }
-                : {
-                      title: t("remove_from_album"),
-                      message: t("confirm_remove_incl_others_message"),
-                      continue: {
-                          text: t("yes_remove"),
-                          color: "critical",
-                          action: () =>
-                              handleCollectionOp("remove")(collection),
-                      },
-                  },
-        );
+    const handleRemoveFromCollection = () => {
+        const remove = () => onRemoveFilesFromCollection(collection!);
+
+        if (collectionSummary?.attributes.has("sharedIncoming")) {
+            remove();
+        } else {
+            const onlyUserFiles = selectedFileCount == selectedOwnFileCount;
+            showMiniDialog({
+                title: t("remove_from_album"),
+                message: onlyUserFiles
+                    ? t("confirm_remove_message")
+                    : t("confirm_remove_incl_others_message"),
+                continue: {
+                    text: t("yes_remove"),
+                    color: onlyUserFiles ? "primary" : "critical",
+                    action: remove,
+                },
+            });
+        }
     };
 
     const handleMoveToCollection = () => {
         onOpenCollectionSelector({
             action: "move",
             sourceCollectionSummaryID: collectionSummary?.id,
-            onSelectCollection: handleCollectionOp("move"),
-            onCreateCollection: onShowCreateCollectionModal("move"),
+            onCreateCollection: createOnCreateForCollectionOp("move"),
+            onSelectCollection: createOnSelectForCollectionOp("move"),
+        });
+    };
+
+    const handleUnhide = () => {
+        onOpenCollectionSelector({
+            action: "unhide",
+            onCreateCollection: createOnCreateForCollectionOp("unhide"),
+            onSelectCollection: createOnSelectForCollectionOp("unhide"),
         });
     };
 
@@ -254,7 +283,12 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
                     <DeleteButton onClick={handleDelete} />
                 </>
             ) : collectionSummary?.attributes.has("sharedIncoming") ? (
-                <DownloadButton onClick={handleFileOp("download")} />
+                <>
+                    <DownloadButton onClick={handleFileOp("download")} />
+                    <RemoveFromCollectionButton
+                        onClick={handleRemoveFromCollection}
+                    />
+                </>
             ) : barMode == "hidden-albums" ? (
                 <>
                     <DownloadButton onClick={handleFileOp("download")} />
@@ -285,7 +319,7 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
                                     onClick={handleMoveToCollection}
                                 />
                                 <RemoveFromCollectionButton
-                                    onClick={handleRemoveFromOwnCollection}
+                                    onClick={handleRemoveFromCollection}
                                 />
                             </>
                         )

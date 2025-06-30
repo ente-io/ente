@@ -1,5 +1,6 @@
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined";
+import InfoIcon from "@mui/icons-material/Info";
 import MenuIcon from "@mui/icons-material/Menu";
 import { IconButton, Stack, Typography } from "@mui/material";
 import { AuthenticateUser } from "components/AuthenticateUser";
@@ -27,6 +28,7 @@ import { errorDialogAttributes } from "ente-base/components/utils/dialog";
 import { useIsSmallWidth } from "ente-base/components/utils/hooks";
 import { useModalVisibility } from "ente-base/components/utils/modal";
 import { useBaseContext } from "ente-base/context";
+import { pt } from "ente-base/i18n";
 import log from "ente-base/log";
 import {
     clearSessionStorage,
@@ -62,6 +64,7 @@ import {
 } from "ente-new/photos/components/gallery";
 import {
     findCollectionCreatingUncategorizedIfNeeded,
+    performCollectionOp,
     validateKey,
 } from "ente-new/photos/components/gallery/helpers";
 import {
@@ -71,7 +74,11 @@ import {
 import { useIsOffline } from "ente-new/photos/components/utils/use-is-offline";
 import { usePeopleStateSnapshot } from "ente-new/photos/components/utils/use-snapshot";
 import { shouldShowWhatsNew } from "ente-new/photos/services/changelog";
-import { createAlbum } from "ente-new/photos/services/collection";
+import {
+    createAlbum,
+    removeFromCollection,
+    removeOtherOtherNotSupportErrorMessage,
+} from "ente-new/photos/services/collection";
 import {
     haveOnlySystemCollections,
     PseudoCollectionID,
@@ -125,7 +132,6 @@ import {
     SetFilesDownloadProgressAttributes,
     SetFilesDownloadProgressAttributesCreator,
 } from "types/gallery";
-import { handleCollectionOp } from "utils/collection";
 import { getSelectedFiles, handleFileOp } from "utils/file";
 
 /**
@@ -632,25 +638,24 @@ const Page: React.FC = () => {
             return updater;
         }, []);
 
-    const collectionOpsHelper =
-        (op: CollectionOp) => async (collection: Collection) => {
+    const handleRemoveFilesFromCollection = (collection: Collection) => {
+        void (async () => {
             showLoadingBar();
+            let notifyOtherFiles = false;
             try {
                 setOpenCollectionSelector(false);
                 const selectedFiles = getSelectedFiles(selected, filteredFiles);
-                const toProcessFiles =
-                    op == "remove"
-                        ? selectedFiles
-                        : selectedFiles.filter(
-                              (file) => file.ownerID === user.id,
-                          );
-                if (toProcessFiles.length > 0) {
-                    await handleCollectionOp(
-                        op,
-                        collection,
-                        toProcessFiles,
-                        selected.collectionID,
-                    );
+                try {
+                    await removeFromCollection(collection, selectedFiles);
+                } catch (e) {
+                    if (
+                        e instanceof Error &&
+                        e.message == removeOtherOtherNotSupportErrorMessage
+                    ) {
+                        notifyOtherFiles = true;
+                    } else {
+                        throw e;
+                    }
                 }
                 clearSelection();
                 await remotePull({ silent: true });
@@ -659,7 +664,70 @@ const Page: React.FC = () => {
             } finally {
                 hideLoadingBar();
             }
+
+            if (notifyOtherFiles) {
+                showMiniDialog({
+                    title: pt("Note"),
+                    icon: <InfoIcon />,
+                    message: pt("Files added by other users were not removed"),
+                    cancel: t("ok"),
+                });
+            }
+        })();
+    };
+
+    const createOnSelectForCollectionOp =
+        (op: CollectionOp) => (selectedCollection: Collection) => {
+            void (async () => {
+                showLoadingBar();
+                try {
+                    setOpenCollectionSelector(false);
+                    const selectedFiles = getSelectedFiles(
+                        selected,
+                        filteredFiles,
+                    );
+                    const processableFiles = selectedFiles.filter(
+                        (f) => f.ownerID == user.id,
+                    );
+                    const sourceCollectionID = selected.collectionID;
+                    if (processableFiles.length > 0) {
+                        await performCollectionOp(
+                            op,
+                            selectedCollection,
+                            processableFiles,
+                            sourceCollectionID,
+                        );
+                    }
+                    clearSelection();
+                    await remotePull({ silent: true });
+                } catch (e) {
+                    onGenericError(e);
+                } finally {
+                    hideLoadingBar();
+                }
+            })();
         };
+
+    const createOnCreateForCollectionOp = useCallback(
+        (op: CollectionOp) => {
+            setPostCreateAlbumOp(op);
+            return showAlbumNameInput;
+        },
+        [showAlbumNameInput],
+    );
+
+    const handleAlbumNameSubmit = useCallback(
+        async (name: string) => {
+            const collection = await createAlbum(name);
+            setPostCreateAlbumOp((postCreateAlbumOp) => {
+                // The function returned by createHandleCollectionOp does its
+                // own progress and error reporting, defer to that.
+                createOnSelectForCollectionOp(postCreateAlbumOp!)(collection);
+                return undefined;
+            });
+        },
+        [createOnSelectForCollectionOp],
+    );
 
     const fileOpHelper = (op: FileOp) => async () => {
         showLoadingBar();
@@ -701,27 +769,6 @@ const Page: React.FC = () => {
             hideLoadingBar();
         }
     };
-
-    const handleCreateAlbumForOp = useCallback(
-        (op: CollectionOp) => {
-            setPostCreateAlbumOp(op);
-            return showAlbumNameInput;
-        },
-        [showAlbumNameInput],
-    );
-
-    const handleAlbumNameSubmit = useCallback(
-        async (name: string) => {
-            const collection = await createAlbum(name);
-            setPostCreateAlbumOp((postCreateAlbumOp) => {
-                // collectionOpsHelper does its own progress and error
-                // reporting, defer to that.
-                void collectionOpsHelper(postCreateAlbumOp!)(collection);
-                return undefined;
-            });
-        },
-        [collectionOpsHelper],
-    );
 
     const handleSelectSearchOption = (
         searchOption: SearchOption | undefined,
@@ -932,9 +979,14 @@ const Page: React.FC = () => {
                         selectedFileCount={selected.count}
                         selectedOwnFileCount={selected.ownCount}
                         onClearSelection={clearSelection}
-                        onShowCreateCollectionModal={handleCreateAlbumForOp}
+                        onRemoveFilesFromCollection={
+                            handleRemoveFilesFromCollection
+                        }
                         onOpenCollectionSelector={handleOpenCollectionSelector}
-                        handleCollectionOp={collectionOpsHelper}
+                        {...{
+                            createOnCreateForCollectionOp,
+                            createOnSelectForCollectionOp,
+                        }}
                         handleFileOp={fileOpHelper}
                     />
                 ) : barMode == "hidden-albums" ? (
