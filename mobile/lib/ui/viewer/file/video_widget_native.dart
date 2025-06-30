@@ -93,7 +93,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
   @override
   void initState() {
     _logger.info(
-      'initState for ${widget.file.generatedID} with tag ${widget.file.tag} and name ${widget.file.displayName}',
+      'initState for tag ${widget.file.tag} and name ${widget.file.displayName}',
     );
     super.initState();
     WidgetsBinding.instance.addObserver(this);

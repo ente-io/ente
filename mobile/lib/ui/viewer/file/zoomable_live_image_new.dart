@@ -55,7 +55,7 @@ class _ZoomableLiveImageNewState extends State<ZoomableLiveImageNew>
 
     _enteFile = widget.enteFile;
     _logger.info(
-      'initState for ${_enteFile.generatedID} with tag ${_enteFile.tag} and name ${_enteFile.displayName}',
+      'initState for tag ${_enteFile.tag} and name ${_enteFile.displayName}',
     );
     _guestViewEventSubscription =
         Bus.instance.on<GuestViewEvent>().listen((event) {

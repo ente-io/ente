@@ -44,7 +44,7 @@ class FileBottomBarState extends State<FileBottomBar> {
   final GlobalKey shareButtonKey = GlobalKey();
   bool isGuestView = false;
   late final StreamSubscription<GuestViewEvent> _guestViewEventSubscription;
-  int? lastFileGenID;
+  String? lastFileGenID;
 
   @override
   void initState() {
@@ -66,8 +66,8 @@ class FileBottomBarState extends State<FileBottomBar> {
   @override
   Widget build(BuildContext context) {
     if (widget.file.canBePanorama()) {
-      lastFileGenID = widget.file.generatedID;
-      if (lastFileGenID != widget.file.generatedID) {
+      lastFileGenID = widget.file.tag;
+      if (lastFileGenID != widget.file.tag) {
         guardedCheckPanorama(widget.file).ignore();
       }
     }
@@ -82,8 +82,7 @@ class FileBottomBarState extends State<FileBottomBar> {
   }
 
   Widget _getBottomBar() {
-    Logger("FileBottomBar")
-        .fine("building bottom bar ${widget.file.generatedID}");
+    Logger("FileBottomBar").fine("building bottom bar ${widget.file.tag}");
     final List<Widget> children = [];
     final bool isOwnedByUser =
         widget.file.ownerID == null || widget.file.ownerID == widget.userID;
