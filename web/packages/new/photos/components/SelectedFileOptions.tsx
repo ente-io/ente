@@ -201,29 +201,24 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
         });
 
     const handleRemoveFromCollection = () => {
-        const action = () => onRemoveFilesFromCollection(collection!);
+        const remove = () => onRemoveFilesFromCollection(collection!);
 
-        showMiniDialog(
-            selectedFileCount == selectedOwnFileCount
-                ? {
-                      title: t("remove_from_album"),
-                      message: t("confirm_remove_message"),
-                      continue: {
-                          text: t("yes_remove"),
-                          color: "primary",
-                          action,
-                      },
-                  }
-                : {
-                      title: t("remove_from_album"),
-                      message: t("confirm_remove_incl_others_message"),
-                      continue: {
-                          text: t("yes_remove"),
-                          color: "critical",
-                          action,
-                      },
-                  },
-        );
+        if (collectionSummary?.attributes.has("sharedIncoming")) {
+            remove();
+        } else {
+            const onlyUserFiles = selectedFileCount == selectedOwnFileCount;
+            showMiniDialog({
+                title: t("remove_from_album"),
+                message: onlyUserFiles
+                    ? t("confirm_remove_message")
+                    : t("confirm_remove_incl_others_message"),
+                continue: {
+                    text: t("yes_remove"),
+                    color: onlyUserFiles ? "primary" : "critical",
+                    action: remove,
+                },
+            });
+        }
     };
 
     const handleMoveToCollection = () => {
