@@ -647,7 +647,7 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
                   child: Text(
                     relevantPerson.data.name.trim(),
                     style: textTheme.bodyMuted,
-                    overflow: TextOverflow.visible,
+                    overflow: TextOverflow.ellipsis,
                     maxLines: 1,
                   ),
                 ),
