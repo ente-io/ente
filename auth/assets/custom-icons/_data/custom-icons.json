@@ -574,7 +574,7 @@
       "title": "IBKR",
       "slug": "ibkr",
       "altNames": [
-        "Interactive Brokers", 
+        "Interactive Brokers",
         "IB"
       ]
     },
@@ -698,6 +698,10 @@
       "altNames": [
         "飞书"
       ]
+    },
+    {
+      "title": "LaunchDarkly",
+      "hex": "858585"
     },
     {
       "title": "Letterboxd"
