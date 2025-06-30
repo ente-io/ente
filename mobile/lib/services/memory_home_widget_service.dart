@@ -65,8 +65,7 @@ class MemoryHomeWidgetService {
 
   // Public methods
   Future<void> initMemoryHomeWidget() async {
-    await HomeWidgetService.instance.widgetComputationLock
-        .synchronized(() async {
+    await HomeWidgetService.instance.computeLock.synchronized(() async {
       if (await _hasAnyBlockers()) {
         await clearWidget();
         return;
@@ -314,7 +313,7 @@ class MemoryHomeWidgetService {
           return;
         }
 
-        // Show update toast after first item is rendered\
+        // Show update toast after first item is rendered
         if (renderedCount == 1) {
           await _refreshWidget(
             message: "First memory fetched, updating widget",

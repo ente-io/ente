@@ -53,7 +53,7 @@ class HomeWidgetService {
   HomeWidgetService._privateConstructor();
 
   final Logger _logger = Logger((HomeWidgetService).toString());
-  final widgetComputationLock = Lock();
+  final computeLock = Lock();
 
   void init(SharedPreferences prefs) {
     setAppGroupID(iOSGroupIDMemory);
@@ -72,8 +72,8 @@ class HomeWidgetService {
 
   Future<void> initHomeWidget() async {
     await MemoryHomeWidgetService.instance.initMemoryHomeWidget();
-    await PeopleHomeWidgetService.instance.initPeopleHomeWidget(null);
-    await AlbumHomeWidgetService.instance.initAlbumHomeWidget(null);
+    await PeopleHomeWidgetService.instance.initPeopleHomeWidget();
+    await AlbumHomeWidgetService.instance.initAlbumHomeWidget();
   }
 
   Future<bool?> updateWidget({

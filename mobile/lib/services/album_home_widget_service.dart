@@ -19,7 +19,6 @@ import "package:photos/ui/viewer/file/detail_page.dart";
 import 'package:photos/ui/viewer/gallery/collection_page.dart';
 import 'package:photos/utils/navigation_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:synchronized/synchronized.dart';
 
 class AlbumHomeWidgetService {
   // Constants
@@ -40,8 +39,6 @@ class AlbumHomeWidgetService {
   // Properties
   final Logger _logger = Logger((AlbumHomeWidgetService).toString());
   late final SharedPreferences _prefs;
-  final _albumsForceRefreshLock = Lock();
-  bool _hasSyncedAlbums = false;
 
   // Initialization
   void init(SharedPreferences prefs) {
@@ -49,29 +46,20 @@ class AlbumHomeWidgetService {
   }
 
   // Public methods
-  Future<void> initAlbumHomeWidget(bool? forceFetchNewAlbums) async {
-    if (await _hasAnyBlockers()) {
-      await clearWidget();
-      return;
-    }
-
-    await _albumsForceRefreshLock.synchronized(() async {
+  Future<void> initAlbumHomeWidget() async {
+    await HomeWidgetService.instance.computeLock.synchronized(() async {
       if (await _hasAnyBlockers()) {
         await clearWidget();
         return;
       }
 
-      final isWidgetEmpty = await _isWidgetEmpty();
-      forceFetchNewAlbums ??= await _shouldForceFetchAlbums(isWidgetEmpty);
+      final bool forceFetchNewAlbums = await _shouldUpdateWidgetCache();
 
-      _logger.warning(
-        "Initializing albums widget: forceFetch: $forceFetchNewAlbums, isEmpty: $isWidgetEmpty",
-      );
-
-      if (forceFetchNewAlbums!) {
-        await _forceAlbumsUpdate();
-      } else if (!isWidgetEmpty) {
-        await _syncExistingAlbums();
+      if (forceFetchNewAlbums) {
+        await _loadAndRenderAlbums();
+        await updateAlbumsChanged(false);
+      } else {
+        await _refreshAlbumsWidget();
       }
     });
   }
@@ -101,21 +89,19 @@ class AlbumHomeWidgetService {
   }
 
   Future<void> clearWidget() async {
-    if (await _isWidgetEmpty()) {
+    if (getAlbumsStatus() == WidgetStatus.syncedEmpty) {
       _logger.info("Widget already empty, nothing to clear");
       return;
     }
 
     _logger.info("Clearing AlbumsHomeWidget");
-    await _setTotalAlbums(null);
     await updateAlbumsStatus(WidgetStatus.syncedEmpty);
-    _hasSyncedAlbums = false;
     await setAlbumsLastHash("");
     await _refreshWidget(message: "AlbumsHomeWidget cleared & updated");
   }
 
-  bool getAlbumsChanged() {
-    return _prefs.getBool(ALBUMS_CHANGED_KEY) ?? false;
+  bool? getAlbumsChanged() {
+    return _prefs.getBool(ALBUMS_CHANGED_KEY);
   }
 
   Future<void> updateAlbumsChanged(bool value) async {
@@ -139,15 +125,14 @@ class AlbumHomeWidgetService {
       await Future.delayed(const Duration(seconds: 5));
     }
 
-    final isWidgetEmpty = await _isWidgetEmpty();
-    final shouldForceFetch = await _shouldForceFetchAlbums(isWidgetEmpty);
+    final shouldForceFetch = await _shouldUpdateWidgetCache();
 
-    if (_hasSyncedAlbums && !shouldForceFetch) {
+    if (!shouldForceFetch) {
       _logger.info("Albums already synced, no action needed");
       return;
     }
 
-    await initAlbumHomeWidget(shouldForceFetch);
+    await initAlbumHomeWidget();
   }
 
   Future<void> albumsChanged() async {
@@ -162,7 +147,7 @@ class AlbumHomeWidgetService {
 
     _logger.info("Albums changed, updating widget");
     await updateAlbumsChanged(true);
-    await initAlbumHomeWidget(true);
+    await initAlbumHomeWidget();
   }
 
   List<Collection> getAlbumsByIds(List<int> albumIds) {
@@ -200,8 +185,7 @@ class AlbumHomeWidgetService {
     int collectionId,
     BuildContext context,
   ) async {
-    _hasSyncedAlbums = true;
-    await _syncExistingAlbums();
+    await _refreshAlbumsWidget();
 
     final collection =
         CollectionsService.instance.getCollectionByID(collectionId);
@@ -265,30 +249,15 @@ class AlbumHomeWidgetService {
     return false;
   }
 
-  Future<void> _forceAlbumsUpdate() async {
-    await _loadAndRenderAlbums();
-    await updateAlbumsChanged(false);
-  }
-
-  Future<void> _syncExistingAlbums() async {
-    final homeWidgetCount = await countHomeWidgets();
-    if (homeWidgetCount == 0) {
-      _logger.warning("No active home widgets found");
-      return;
-    }
-
+  Future<void> _refreshAlbumsWidget() async {
+    // only refresh if widget was synced without issues
+    if (getAlbumsStatus() == WidgetStatus.syncedAll) return;
     await _refreshWidget(message: "Refreshing from existing album set");
   }
 
-  Future<bool> _isWidgetEmpty() async {
-    final totalAlbums = await _getTotalAlbums();
-    return totalAlbums == 0 || totalAlbums == null;
-  }
-
-  Future<bool> _shouldForceFetchAlbums(bool isWidgetEmpty) async {
+  Future<bool> _shouldUpdateWidgetCache() async {
     // Check if albums changed flag is set
-    final albumsChanged = _prefs.getBool(ALBUMS_CHANGED_KEY);
-    if (albumsChanged == true) {
+    if (getAlbumsChanged() == true) {
       return true;
     }
 
@@ -332,14 +301,6 @@ class AlbumHomeWidgetService {
     }
 
     return selectedAlbumIds ?? [];
-  }
-
-  Future<int?> _getTotalAlbums() async {
-    return HomeWidgetService.instance.getData<int>(TOTAL_ALBUMS_KEY);
-  }
-
-  Future<void> _setTotalAlbums(int? total) async {
-    await HomeWidgetService.instance.setData(TOTAL_ALBUMS_KEY, total);
   }
 
   Future<void> _refreshWidget({String? message}) async {
@@ -396,9 +357,6 @@ class AlbumHomeWidgetService {
       return;
     }
 
-    final currentTotal = await _getTotalAlbums();
-    _logger.info("Current total albums in widget: $currentTotal");
-
     final bool isWidgetPresent = await countHomeWidgets() > 0;
 
     final limit = isWidgetPresent ? MAX_ALBUMS_LIMIT : 5;
@@ -443,8 +401,6 @@ class AlbumHomeWidgetService {
           await clearWidget();
           return;
         }
-
-        await _setTotalAlbums(renderedCount);
 
         // Show update toast after first item is rendered
         if (renderedCount == 1) {
