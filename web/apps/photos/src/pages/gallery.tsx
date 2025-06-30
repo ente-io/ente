@@ -62,6 +62,7 @@ import {
 } from "ente-new/photos/components/gallery";
 import {
     findCollectionCreatingUncategorizedIfNeeded,
+    performCollectionOp,
     validateKey,
 } from "ente-new/photos/components/gallery/helpers";
 import {
@@ -125,7 +126,6 @@ import {
     SetFilesDownloadProgressAttributes,
     SetFilesDownloadProgressAttributesCreator,
 } from "types/gallery";
-import { handleCollectionOp } from "utils/collection";
 import { getSelectedFiles, handleFileOp } from "utils/file";
 
 /**
@@ -632,24 +632,23 @@ const Page: React.FC = () => {
             return updater;
         }, []);
 
-    const collectionOpsHelper =
-        (op: CollectionOp) => async (collection: Collection) => {
+    const createCollectionOpHandler =
+        (op: CollectionOp) => async (selectedCollection: Collection) => {
             showLoadingBar();
             try {
                 setOpenCollectionSelector(false);
                 const selectedFiles = getSelectedFiles(selected, filteredFiles);
-                const toProcessFiles =
+                const processableFiles =
                     op == "remove"
                         ? selectedFiles
-                        : selectedFiles.filter(
-                              (file) => file.ownerID === user.id,
-                          );
-                if (toProcessFiles.length > 0) {
-                    await handleCollectionOp(
+                        : selectedFiles.filter((f) => f.ownerID == user.id);
+                const sourceCollectionID = selected.collectionID;
+                if (processableFiles.length > 0) {
+                    await performCollectionOp(
                         op,
-                        collection,
-                        toProcessFiles,
-                        selected.collectionID,
+                        selectedCollection,
+                        processableFiles,
+                        sourceCollectionID,
                     );
                 }
                 clearSelection();
@@ -714,13 +713,13 @@ const Page: React.FC = () => {
         async (name: string) => {
             const collection = await createAlbum(name);
             setPostCreateAlbumOp((postCreateAlbumOp) => {
-                // collectionOpsHelper does its own progress and error
-                // reporting, defer to that.
-                void collectionOpsHelper(postCreateAlbumOp!)(collection);
+                // The function returned by createHandleCollectionOp does its
+                // own progress and error reporting, defer to that.
+                void createCollectionOpHandler(postCreateAlbumOp!)(collection);
                 return undefined;
             });
         },
-        [collectionOpsHelper],
+        [createCollectionOpHandler],
     );
 
     const handleSelectSearchOption = (
@@ -934,7 +933,7 @@ const Page: React.FC = () => {
                         onClearSelection={clearSelection}
                         onShowCreateCollectionModal={handleCreateAlbumForOp}
                         onOpenCollectionSelector={handleOpenCollectionSelector}
-                        handleCollectionOp={collectionOpsHelper}
+                        onCreateCollectionOpHandler={createCollectionOpHandler}
                         handleFileOp={fileOpHelper}
                     />
                 ) : barMode == "hidden-albums" ? (

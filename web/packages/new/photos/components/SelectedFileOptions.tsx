@@ -101,8 +101,24 @@ interface SelectedFileOptionsProps {
     onOpenCollectionSelector: (
         attributes: CollectionSelectorAttributes,
     ) => void;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    handleCollectionOp: (op: CollectionOp) => (...args: any[]) => void;
+    /**
+     * A function called to obtain a handler for the provided {@link op}.
+     *
+     * This function will be passed the operation to be be performed. It will
+     * return a new function G can be used as the {@link onSelectCollection}
+     * attribute for {@link onOpenCollectionSelector}.
+     *
+     * Once the user selects a collection (or creates a new one), then that
+     * selected collection will be passed to G.
+     *
+     * @param op The operation that should be performed using the selected
+     * collection.
+     *
+     * @returns A function that can be called with a selected collection.
+     */
+    onCreateCollectionOpHandler: (
+        op: CollectionOp,
+    ) => (selectedCollection: Collection) => void;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     handleFileOp: (op: FileOp) => (...args: any[]) => void;
 }
@@ -121,7 +137,7 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
     onClearSelection,
     onShowCreateCollectionModal,
     onOpenCollectionSelector,
-    handleCollectionOp,
+    onCreateCollectionOpHandler,
     handleFileOp,
 }) => {
     const { showMiniDialog } = useBaseContext();
@@ -132,7 +148,7 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
     const handleUnhide = () => {
         onOpenCollectionSelector({
             action: "unhide",
-            onSelectCollection: handleCollectionOp("unhide"),
+            onSelectCollection: onCreateCollectionOpHandler("unhide"),
             onCreateCollection: onShowCreateCollectionModal("unhide"),
         });
     };
@@ -151,7 +167,7 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
     const handleRestore = () =>
         onOpenCollectionSelector({
             action: "restore",
-            onSelectCollection: handleCollectionOp("restore"),
+            onSelectCollection: onCreateCollectionOpHandler("restore"),
             onCreateCollection: onShowCreateCollectionModal("restore"),
         });
 
@@ -170,7 +186,7 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
         onOpenCollectionSelector({
             action: "add",
             sourceCollectionSummaryID: collectionSummary?.id,
-            onSelectCollection: handleCollectionOp("add"),
+            onSelectCollection: onCreateCollectionOpHandler("add"),
             onCreateCollection: onShowCreateCollectionModal("add"),
         });
 
@@ -184,7 +200,9 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
                           text: t("yes_remove"),
                           color: "primary",
                           action: () =>
-                              handleCollectionOp("remove")(collection),
+                              onCreateCollectionOpHandler("remove")(
+                                  collection!,
+                              ),
                       },
                   }
                 : {
@@ -194,7 +212,9 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
                           text: t("yes_remove"),
                           color: "critical",
                           action: () =>
-                              handleCollectionOp("remove")(collection),
+                              onCreateCollectionOpHandler("remove")(
+                                  collection!,
+                              ),
                       },
                   },
         );
@@ -204,7 +224,7 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
         onOpenCollectionSelector({
             action: "move",
             sourceCollectionSummaryID: collectionSummary?.id,
-            onSelectCollection: handleCollectionOp("move"),
+            onSelectCollection: onCreateCollectionOpHandler("move"),
             onCreateCollection: onShowCreateCollectionModal("move"),
         });
     };
