@@ -13,6 +13,7 @@ import VisibilityOffOutlinedIcon from "@mui/icons-material/VisibilityOffOutlined
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import { IconButton, Tooltip, Typography } from "@mui/material";
 import { SpacedRow } from "ente-base/components/containers";
+import type { ButtonishProps } from "ente-base/components/mui";
 import { useBaseContext } from "ente-base/context";
 import type { Collection } from "ente-media/collection";
 import type { CollectionSelectorAttributes } from "ente-new/photos/components/CollectionSelector";
@@ -117,7 +118,7 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
                     : activeCollectionID,
         });
 
-    const trashHandler = () =>
+    const handleDelete = () =>
         showMiniDialog({
             title: t("trash_files_title"),
             message: t("trash_files_message"),
@@ -172,7 +173,7 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
         );
     };
 
-    const moveToCollection = () => {
+    const handleMoveToCollection = () => {
         onOpenCollectionSelector({
             action: "move",
             onSelectCollection: handleCollectionOp("move"),
@@ -208,64 +209,20 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
 
             {isInSearchMode ? (
                 <>
-                    <Tooltip title={t("fix_creation_time")}>
-                        <IconButton onClick={handleFileOp("fixTime")}>
-                            <ClockIcon />
-                        </IconButton>
-                    </Tooltip>
-                    <Tooltip title={t("download")}>
-                        <IconButton onClick={handleFileOp("download")}>
-                            <DownloadIcon />
-                        </IconButton>
-                    </Tooltip>
-                    <Tooltip title={t("add")}>
-                        <IconButton onClick={addToCollection}>
-                            <AddIcon />
-                        </IconButton>
-                    </Tooltip>
-                    <Tooltip title={t("archive")}>
-                        <IconButton onClick={handleFileOp("archive")}>
-                            <ArchiveIcon />
-                        </IconButton>
-                    </Tooltip>
-                    <Tooltip title={t("hide")}>
-                        <IconButton onClick={handleFileOp("hide")}>
-                            <VisibilityOffOutlinedIcon />
-                        </IconButton>
-                    </Tooltip>
-                    <Tooltip title={t("delete")}>
-                        <IconButton onClick={trashHandler}>
-                            <DeleteIcon />
-                        </IconButton>
-                    </Tooltip>
+                    <FixTimeButton onClick={handleFileOp("fixTime")} />
+                    <DownloadButton onClick={handleFileOp("download")} />
+                    <AddToCollectionButton onClick={addToCollection} />
+                    <ArchiveButton onClick={handleFileOp("archive")} />
+                    <HideButton onClick={handleFileOp("hide")} />
+                    <DeleteButton onClick={handleDelete} />
                 </>
             ) : barMode == "people" ? (
                 <>
-                    <Tooltip title={t("download")}>
-                        <IconButton onClick={handleFileOp("download")}>
-                            <DownloadIcon />
-                        </IconButton>
-                    </Tooltip>
-                    <Tooltip title={t("add")}>
-                        <IconButton onClick={addToCollection}>
-                            <AddIcon />
-                        </IconButton>
-                    </Tooltip>
-                    <Tooltip title={t("archive")}>
-                        <IconButton onClick={handleFileOp("archive")}>
-                            <ArchiveIcon />
-                        </IconButton>
-                    </Tooltip>
-                    <Tooltip title={t("hide")}>
-                        <IconButton onClick={handleFileOp("hide")}>
-                            <VisibilityOffOutlinedIcon />
-                        </IconButton>
-                    </Tooltip>
-                    <Tooltip title={t("delete")}>
-                        <IconButton onClick={trashHandler}>
-                            <DeleteIcon />
-                        </IconButton>
-                    </Tooltip>
+                    <DownloadButton onClick={handleFileOp("download")} />
+                    <AddToCollectionButton onClick={addToCollection} />
+                    <ArchiveButton onClick={handleFileOp("archive")} />
+                    <HideButton onClick={handleFileOp("hide")} />
+                    <DeleteButton onClick={handleDelete} />
                 </>
             ) : activeCollectionID == PseudoCollectionID.trash ? (
                 <>
@@ -282,28 +239,12 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
                 </>
             ) : isUncategorizedCollection ? (
                 <>
-                    <Tooltip title={t("download")}>
-                        <IconButton onClick={handleFileOp("download")}>
-                            <DownloadIcon />
-                        </IconButton>
-                    </Tooltip>
-                    <Tooltip title={t("move")}>
-                        <IconButton onClick={moveToCollection}>
-                            <MoveIcon />
-                        </IconButton>
-                    </Tooltip>
-                    <Tooltip title={t("delete")}>
-                        <IconButton onClick={trashHandler}>
-                            <DeleteIcon />
-                        </IconButton>
-                    </Tooltip>
+                    <DownloadButton onClick={handleFileOp("download")} />
+                    <MoveToCollectionButton onClick={handleMoveToCollection} />
+                    <DeleteButton onClick={handleDelete} />
                 </>
             ) : isSharedIncomingCollection ? (
-                <Tooltip title={t("download")}>
-                    <IconButton onClick={handleFileOp("download")}>
-                        <DownloadIcon />
-                    </IconButton>
-                </Tooltip>
+                <DownloadButton onClick={handleFileOp("download")} />
             ) : barMode == "hidden-albums" ? (
                 <>
                     <Tooltip title={t("unhide")}>
@@ -311,25 +252,12 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
                             <VisibilityOutlinedIcon />
                         </IconButton>
                     </Tooltip>
-                    <Tooltip title={t("download")}>
-                        <IconButton onClick={handleFileOp("download")}>
-                            <DownloadIcon />
-                        </IconButton>
-                    </Tooltip>
-
-                    <Tooltip title={t("delete")}>
-                        <IconButton onClick={trashHandler}>
-                            <DeleteIcon />
-                        </IconButton>
-                    </Tooltip>
+                    <DownloadButton onClick={handleFileOp("download")} />
+                    <DeleteButton onClick={handleDelete} />
                 </>
             ) : (
                 <>
-                    <Tooltip title={t("fix_creation_time")}>
-                        <IconButton onClick={handleFileOp("fixTime")}>
-                            <ClockIcon />
-                        </IconButton>
-                    </Tooltip>
+                    <FixTimeButton onClick={handleFileOp("fixTime")} />
                     {!isFavoriteCollection &&
                         activeCollectionID !=
                             PseudoCollectionID.archiveItems && (
@@ -339,16 +267,8 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
                                 </IconButton>
                             </Tooltip>
                         )}
-                    <Tooltip title={t("download")}>
-                        <IconButton onClick={handleFileOp("download")}>
-                            <DownloadIcon />
-                        </IconButton>
-                    </Tooltip>
-                    <Tooltip title={t("add")}>
-                        <IconButton onClick={addToCollection}>
-                            <AddIcon />
-                        </IconButton>
-                    </Tooltip>
+                    <DownloadButton onClick={handleFileOp("download")} />
+                    <AddToCollectionButton onClick={addToCollection} />
                     {activeCollectionID == PseudoCollectionID.archiveItems && (
                         <Tooltip title={t("unarchive")}>
                             <IconButton onClick={handleFileOp("unarchive")}>
@@ -357,21 +277,15 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
                         </Tooltip>
                     )}
                     {activeCollectionID === PseudoCollectionID.all && (
-                        <Tooltip title={t("archive")}>
-                            <IconButton onClick={handleFileOp("archive")}>
-                                <ArchiveIcon />
-                            </IconButton>
-                        </Tooltip>
+                        <ArchiveButton onClick={handleFileOp("archive")} />
                     )}
                     {activeCollectionID !== PseudoCollectionID.all &&
                         activeCollectionID != PseudoCollectionID.archiveItems &&
                         !isFavoriteCollection && (
                             <>
-                                <Tooltip title={t("move")}>
-                                    <IconButton onClick={moveToCollection}>
-                                        <MoveIcon />
-                                    </IconButton>
-                                </Tooltip>
+                                <MoveToCollectionButton
+                                    onClick={handleMoveToCollection}
+                                />
 
                                 <Tooltip title={t("remove")}>
                                     <IconButton
@@ -382,18 +296,66 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
                                 </Tooltip>
                             </>
                         )}
-                    <Tooltip title={t("hide")}>
-                        <IconButton onClick={handleFileOp("hide")}>
-                            <VisibilityOffOutlinedIcon />
-                        </IconButton>
-                    </Tooltip>
-                    <Tooltip title={t("delete")}>
-                        <IconButton onClick={trashHandler}>
-                            <DeleteIcon />
-                        </IconButton>
-                    </Tooltip>
+                    <HideButton onClick={handleFileOp("hide")} />
+                    <DeleteButton onClick={handleDelete} />
                 </>
             )}
         </SpacedRow>
     );
 };
+
+const DownloadButton: React.FC<ButtonishProps> = ({ onClick }) => (
+    <Tooltip title={t("download")}>
+        <IconButton {...{ onClick }}>
+            <DownloadIcon />
+        </IconButton>
+    </Tooltip>
+);
+
+const ArchiveButton: React.FC<ButtonishProps> = ({ onClick }) => (
+    <Tooltip title={t("archive")}>
+        <IconButton {...{ onClick }}>
+            <ArchiveIcon />
+        </IconButton>
+    </Tooltip>
+);
+
+const HideButton: React.FC<ButtonishProps> = ({ onClick }) => (
+    <Tooltip title={t("hide")}>
+        <IconButton {...{ onClick }}>
+            <VisibilityOffOutlinedIcon />
+        </IconButton>
+    </Tooltip>
+);
+
+const DeleteButton: React.FC<ButtonishProps> = ({ onClick }) => (
+    <Tooltip title={t("delete")}>
+        <IconButton {...{ onClick }}>
+            <DeleteIcon />
+        </IconButton>
+    </Tooltip>
+);
+
+const FixTimeButton: React.FC<ButtonishProps> = ({ onClick }) => (
+    <Tooltip title={t("fix_creation_time")}>
+        <IconButton {...{ onClick }}>
+            <ClockIcon />
+        </IconButton>
+    </Tooltip>
+);
+
+const AddToCollectionButton: React.FC<ButtonishProps> = ({ onClick }) => (
+    <Tooltip title={t("add")}>
+        <IconButton {...{ onClick }}>
+            <AddIcon />
+        </IconButton>
+    </Tooltip>
+);
+
+const MoveToCollectionButton: React.FC<ButtonishProps> = ({ onClick }) => (
+    <Tooltip title={t("move")}>
+        <IconButton {...{ onClick }}>
+            <MoveIcon />
+        </IconButton>
+    </Tooltip>
+);
