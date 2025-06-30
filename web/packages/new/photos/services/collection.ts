@@ -720,8 +720,28 @@ export const deleteFromTrash = async (fileIDs: number[]) =>
  * The "remove from collection" primitive is provided to the user both as a UI
  * action (on selecting files in a collection), and as an implicit action if the
  * user chooses the option to "keep files" when deleting a collection.
+ *
+ * This entire shebang is implemented by the following set of functions:
+ *
+ * 1. [Public] {@link removeFromCollection} - Handles both own and others
+ *    collections by delegating to the one of the following functions.
+ * 2. [Public] {@link removeFromOwnCollection} - Handles both cases for own
+ *    collections by delegating to either "Move" or "Remove"
+ * 3. [Private] {@link removeFromOthersCollection} - Handles both cases for
+ *    other's collections by delegating to "Remove" or throwing an error for the
+ *    unsupported case.
+ * 4. [Private] {@link removeOwnFilesFromOwnCollection} implements the "Move".
+ * 5. [Private] {@link removeNonCollectionOwnerFiles} implements the "Remove".
  */
 export const removeFromCollection = async (
+    collection: Collection,
+    files: EnteFile[],
+) =>
+    collection.owner.id == ensureLocalUser().id
+        ? removeFromOwnCollection(collection.id, files)
+        : removeFromOthersCollection(collection.id, files);
+
+export const removeFromOwnCollection = async (
     collectionID: number,
     files: EnteFile[],
 ) => {
@@ -731,10 +751,29 @@ export const removeFromCollection = async (
         (f) => f.ownerID == userID,
     );
     if (userFiles.length) {
-        await removeUserFilesFromUserCollection(collectionID, userFiles);
+        await removeOwnFilesFromOwnCollection(collectionID, userFiles);
     }
     if (nonUserFiles.length) {
-        await postRemoveFilesFromCollection(collectionID, nonUserFiles);
+        await removeNonCollectionOwnerFiles(collectionID, nonUserFiles);
+    }
+};
+
+const removeFromOthersCollection = async (
+    collectionID: number,
+    files: EnteFile[],
+) => {
+    const userID = ensureLocalUser().id;
+    const [userFiles, nonUserFiles] = splitByPredicate(
+        files,
+        (f) => f.ownerID == userID,
+    );
+    if (userFiles.length) {
+        await removeNonCollectionOwnerFiles(collectionID, nonUserFiles);
+    }
+    if (nonUserFiles.length) {
+        throw new Error(
+            "Cannot remove other user's files in other user's collections",
+        );
     }
 };
 
@@ -748,7 +787,7 @@ export const removeFromCollection = async (
  *
  * This is used as a subroutine of [Note: Removing files from a collection].
  */
-export const removeUserFilesFromUserCollection = async (
+const removeOwnFilesFromOwnCollection = async (
     collectionID: number,
     filesToRemove: EnteFile[],
 ) => {
@@ -833,7 +872,7 @@ export const removeUserFilesFromUserCollection = async (
  * @param files A list of files which do not belong to the user, and which we
  * the user wants to remove from the given collection.
  */
-export const postRemoveFilesFromCollection = async (
+const removeNonCollectionOwnerFiles = async (
     collectionID: number,
     files: EnteFile[],
 ) =>

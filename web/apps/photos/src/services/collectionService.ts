@@ -4,7 +4,7 @@ import { sortFiles } from "ente-gallery/utils/file";
 import { EnteFile } from "ente-media/file";
 import {
     addToFavorites,
-    removeFromCollection,
+    removeFromOwnCollection,
     savedUserFavoritesCollection,
 } from "ente-new/photos/services/collection";
 import type { CollectionSummary } from "ente-new/photos/services/collection-summary";
@@ -22,7 +22,7 @@ export const removeFromFavorites1 = async (file: EnteFile) => {
     if (!favCollection) {
         throw Error("favorite collection missing");
     }
-    await removeFromCollection(favCollection.id, [file]);
+    await removeFromOwnCollection(favCollection.id, [file]);
 };
 
 export const deleteCollection = async (
@@ -35,7 +35,7 @@ export const deleteCollection = async (
             const collectionFiles = allFiles.filter(
                 (file) => file.collectionID == collectionID,
             );
-            await removeFromCollection(collectionID, collectionFiles);
+            await removeFromOwnCollection(collectionID, collectionFiles);
         }
         const token = getToken();
 

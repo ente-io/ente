@@ -12,7 +12,6 @@ import UnArchiveIcon from "@mui/icons-material/Unarchive";
 import VisibilityOffOutlinedIcon from "@mui/icons-material/VisibilityOffOutlined";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import { IconButton, Tooltip, Typography } from "@mui/material";
-import { assertionFailed } from "ente-base/assert";
 import { SpacedRow } from "ente-base/components/containers";
 import type { ButtonishProps } from "ente-base/components/mui";
 import { useBaseContext } from "ente-base/context";
@@ -195,16 +194,11 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
             onSelectCollection: createOnSelectForCollectionOp("add"),
         });
 
-    const handleRemoveFromOwnCollection = () => {
-        if (!collection) {
-            assertionFailed();
-            return;
-        }
-
-        // Reuse the scaffolding provided by the collection selection mechanism,
-        // even though we already know the selected collection.
-        const remove = () =>
-            createOnSelectForCollectionOp("remove")(collection);
+    const handleRemoveFromCollection = () => {
+        const action = () =>
+            // Reuse the scaffolding provided by the collection selection mechanism,
+            // even though we already know the selected collection.
+            createOnSelectForCollectionOp("remove")(collection!);
 
         showMiniDialog(
             selectedFileCount == selectedOwnFileCount
@@ -214,7 +208,7 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
                       continue: {
                           text: t("yes_remove"),
                           color: "primary",
-                          action: remove,
+                          action,
                       },
                   }
                 : {
@@ -223,7 +217,7 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
                       continue: {
                           text: t("yes_remove"),
                           color: "critical",
-                          action: remove,
+                          action,
                       },
                   },
         );
@@ -291,7 +285,12 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
                     <DeleteButton onClick={handleDelete} />
                 </>
             ) : collectionSummary?.attributes.has("sharedIncoming") ? (
-                <DownloadButton onClick={handleFileOp("download")} />
+                <>
+                    <DownloadButton onClick={handleFileOp("download")} />
+                    <RemoveFromCollectionButton
+                        onClick={handleRemoveFromCollection}
+                    />
+                </>
             ) : barMode == "hidden-albums" ? (
                 <>
                     <DownloadButton onClick={handleFileOp("download")} />
@@ -322,7 +321,7 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
                                     onClick={handleMoveToCollection}
                                 />
                                 <RemoveFromCollectionButton
-                                    onClick={handleRemoveFromOwnCollection}
+                                    onClick={handleRemoveFromCollection}
                                 />
                             </>
                         )

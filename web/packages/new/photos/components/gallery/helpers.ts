@@ -94,7 +94,7 @@ export const performCollectionOp = async (
             );
             break;
         case "remove":
-            await removeFromCollection(selectedCollection.id, selectedFiles);
+            await removeFromCollection(selectedCollection, selectedFiles);
             break;
         case "restore":
             await restoreToCollection(selectedCollection, selectedFiles);
