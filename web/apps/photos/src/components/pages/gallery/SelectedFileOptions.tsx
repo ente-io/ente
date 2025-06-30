@@ -136,31 +136,30 @@ const SelectedFileOptions = ({
             onCreateCollection: showCreateCollectionModal("restore"),
         });
 
-    const removeFromCollectionHandler = () => {
-        if (ownCount === count) {
-            showMiniDialog({
-                title: t("remove_from_album"),
-                message: t("confirm_remove_message"),
-                continue: {
-                    text: t("yes_remove"),
-                    color: "primary",
-
-                    action: () =>
-                        handleCollectionOp("remove")(selectedCollection),
-                },
-            });
-        } else {
-            showMiniDialog({
-                title: t("remove_from_album"),
-                message: t("confirm_remove_incl_others_message"),
-                continue: {
-                    text: t("yes_remove"),
-                    color: "critical",
-                    action: () =>
-                        handleCollectionOp("remove")(selectedCollection),
-                },
-            });
-        }
+    const handleRemoveFromOwnCollection = () => {
+        showMiniDialog(
+            ownCount == count
+                ? {
+                      title: t("remove_from_album"),
+                      message: t("confirm_remove_message"),
+                      continue: {
+                          text: t("yes_remove"),
+                          color: "primary",
+                          action: () =>
+                              handleCollectionOp("remove")(selectedCollection),
+                      },
+                  }
+                : {
+                      title: t("remove_from_album"),
+                      message: t("confirm_remove_incl_others_message"),
+                      continue: {
+                          text: t("yes_remove"),
+                          color: "critical",
+                          action: () =>
+                              handleCollectionOp("remove")(selectedCollection),
+                      },
+                  },
+        );
     };
 
     const moveToCollection = () => {
@@ -364,7 +363,7 @@ const SelectedFileOptions = ({
 
                                 <Tooltip title={t("remove")}>
                                     <IconButton
-                                        onClick={removeFromCollectionHandler}
+                                        onClick={handleRemoveFromOwnCollection}
                                     >
                                         <RemoveIcon />
                                     </IconButton>
