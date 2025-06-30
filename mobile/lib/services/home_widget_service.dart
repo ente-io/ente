@@ -20,8 +20,9 @@ import "package:synchronized/synchronized.dart";
 enum WidgetStatus {
   // notSynced means the widget is not initialized or has no data
   notSynced,
-  // partially synced means some widgets were updated, but not all
+  // partially synced means some images were synced but not all
   // this can happen if some widgets were not installed but we did a sync regardless
+  // or if the sync fails midway
   syncedPartially,
   // we purposefully set widget to empty, widget had data
   syncedEmpty,

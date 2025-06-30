@@ -122,7 +122,6 @@ class AlbumHomeWidgetService {
 
   Future<void> checkPendingAlbumsSync() async {
     if (await _hasAnyBlockers()) {
-      _logger.warning("Widget update blocked by existing conditions");
       await clearWidget();
       return;
     }
@@ -232,7 +231,6 @@ class AlbumHomeWidgetService {
     final hasCompletedFirstImport =
         LocalSyncService.instance.hasCompletedFirstImport();
     if (!hasCompletedFirstImport) {
-      _logger.warning("First import not completed");
       return true;
     }
 
@@ -241,7 +239,6 @@ class AlbumHomeWidgetService {
     final albums = getAlbumsByIds(selectedAlbumIds);
 
     if (albums.isEmpty) {
-      _logger.warning("Selected albums not found");
       return true;
     }
 
@@ -263,7 +260,6 @@ class AlbumHomeWidgetService {
     // Check if we have any albums selected
     final selectedAlbumIds = await _getEffectiveSelectedAlbumIds();
     if (selectedAlbumIds.isEmpty) {
-      _logger.warning("No albums selected");
       return false;
     }
 
@@ -339,10 +335,6 @@ class AlbumHomeWidgetService {
       }
     }
 
-    if (albumsWithFiles.isEmpty) {
-      _logger.warning("No albums with files found");
-    }
-
     return albumsWithFiles;
   }
 
@@ -351,7 +343,6 @@ class AlbumHomeWidgetService {
     final albumsWithFiles = await _getAlbumsWithFiles();
 
     if (albumsWithFiles.isEmpty) {
-      _logger.warning("No files found for any albums, clearing widget");
       await clearWidget();
       return;
     }

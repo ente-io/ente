@@ -73,11 +73,9 @@ class MemoryHomeWidgetService {
       final bool forceFetchNewMemories = await _shouldUpdateWidgetCache();
 
       if (forceFetchNewMemories) {
-        _logger.info("Initializing memory widget: updating memories cache");
         await _updateMemoriesWidgetCache();
         await updateMemoryChanged(false);
       } else {
-        _logger.info("Initializing memory widget: syncing existing memories");
         await _refreshMemoriesWidget();
       }
     });
@@ -115,7 +113,6 @@ class MemoryHomeWidgetService {
 
   Future<void> checkPendingMemorySync() async {
     if (await _hasAnyBlockers()) {
-      _logger.warning("Widget update blocked by existing conditions");
       await clearWidget();
       return;
     }
@@ -163,14 +160,12 @@ class MemoryHomeWidgetService {
     final hasCompletedFirstImport =
         LocalSyncService.instance.hasCompletedFirstImport();
     if (!hasCompletedFirstImport) {
-      _logger.warning("First import not completed");
       return true;
     }
 
     // Check if memories are enabled
     final areMemoriesShown = memoriesCacheService.showAnyMemories;
     if (!areMemoriesShown) {
-      _logger.warning("Memories not enabled");
       return true;
     }
 
@@ -266,7 +261,6 @@ class MemoryHomeWidgetService {
     // TODO: Can update the method to fetch directly max limit random memories
     final memoriesWithFiles = await _getMemoriesWithFiles();
     if (memoriesWithFiles.isEmpty) {
-      _logger.warning("No memories found, clearing widget");
       await clearWidget();
       return;
     }

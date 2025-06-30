@@ -118,7 +118,6 @@ class PeopleHomeWidgetService {
 
   Future<void> checkPendingPeopleSync() async {
     if (await _hasAnyBlockers()) {
-      _logger.warning("Widget update blocked by existing conditions");
       await clearWidget();
       return;
     }
@@ -208,25 +207,28 @@ class PeopleHomeWidgetService {
   }
 
   Future<bool> _hasAnyBlockers() async {
+    if (await countHomeWidgets() == 0) {
+      return true;
+    }
+
     // Check if first import is completed
     final hasCompletedFirstImport =
         LocalSyncService.instance.hasCompletedFirstImport();
     if (!hasCompletedFirstImport) {
-      _logger.warning("First import not completed");
       return true;
     }
 
     // Check ML consent
     if (!flagService.hasGrantedMLConsent) {
-      _logger.warning("ML consent not granted");
       return true;
     }
 
-    // Check if selected people exist
+    // Check if selected people or hash exist
     final peopleIds = await _getEffectiveSelectedPeopleIds();
     final hash = await _calculateHash(peopleIds);
-    if (peopleIds.isEmpty || hash.isEmpty) {
-      _logger.warning("No selected people found or hash is empty");
+
+    final noSelectionOrHashEmpty = peopleIds.isEmpty || hash.isEmpty;
+    if (noSelectionOrHashEmpty) {
       return true;
     }
 
@@ -329,9 +331,8 @@ class PeopleHomeWidgetService {
       return;
     }
 
-    final bool isWidgetPresent = await countHomeWidgets() > 0;
-    final limit = isWidgetPresent ? MAX_PEOPLE_LIMIT : 5;
-    final maxAttempts = limit * 10;
+    const limit = MAX_PEOPLE_LIMIT;
+    const maxAttempts = limit * 10;
 
     int renderedCount = 0;
     int attemptsCount = 0;
@@ -396,9 +397,7 @@ class PeopleHomeWidgetService {
       return;
     }
 
-    if (isWidgetPresent) {
-      await updatePeopleStatus(WidgetStatus.syncedAll);
-    }
+    await updatePeopleStatus(WidgetStatus.syncedAll);
 
     final hash = await _calculateHash(peopleIds);
     await setPeopleLastHash(hash);
