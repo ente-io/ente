@@ -59,13 +59,6 @@ export async function handleCollectionOp(
     }
 }
 
-export function getSelectedCollection(
-    collectionID: number,
-    collections: Collection[],
-) {
-    return collections.find((collection) => collection.id === collectionID);
-}
-
 export async function downloadCollectionHelper(
     collectionID: number,
     setFilesDownloadProgressAttributes: SetFilesDownloadProgressAttributes,

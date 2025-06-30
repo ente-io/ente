@@ -125,7 +125,7 @@ import {
     SetFilesDownloadProgressAttributes,
     SetFilesDownloadProgressAttributesCreator,
 } from "types/gallery";
-import { getSelectedCollection, handleCollectionOp } from "utils/collection";
+import { handleCollectionOp } from "utils/collection";
 import { getSelectedFiles, handleFileOp } from "utils/file";
 
 /**
@@ -924,9 +924,8 @@ const Page: React.FC = () => {
                         barMode={barMode}
                         isInSearchMode={isInSearchMode}
                         activeCollectionID={activeCollectionID}
-                        selectedCollection={getSelectedCollection(
-                            selected.collectionID,
-                            state.collections,
+                        selectedCollection={state.collections.find(
+                            (c) => c.id == selected.collectionID,
                         )}
                         activeCollectionSummary={activeCollectionSummary}
                         count={selected.count}

@@ -82,6 +82,10 @@ interface SelectedFileOptionsProps {
     clearSelection: () => void;
 }
 
+/**
+ * The selection bar shown at the top of the viewport when the user has selected
+ * one or more files in the photos app gallery.
+ */
 export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
     barMode,
     isInSearchMode,
@@ -106,6 +110,14 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
 
     const isSharedIncomingCollection =
         !!activeCollectionSummary?.attributes.has("sharedIncoming");
+
+    const handleUnhide = () => {
+        onOpenCollectionSelector({
+            action: "unhide",
+            onSelectCollection: handleCollectionOp("unhide"),
+            onCreateCollection: showCreateCollectionModal("unhide"),
+        });
+    };
 
     const handleDelete = () =>
         showMiniDialog({
@@ -139,12 +151,9 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
     const handleAddToCollection = () =>
         onOpenCollectionSelector({
             action: "add",
+            sourceCollectionSummaryID: activeCollectionSummary?.id,
             onSelectCollection: handleCollectionOp("add"),
             onCreateCollection: showCreateCollectionModal("add"),
-            relatedCollectionID:
-                isInSearchMode || barMode == "people"
-                    ? undefined
-                    : activeCollectionID,
         });
 
     const handleRemoveFromOwnCollection = () => {
@@ -176,20 +185,9 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
     const handleMoveToCollection = () => {
         onOpenCollectionSelector({
             action: "move",
+            sourceCollectionSummaryID: activeCollectionSummary?.id,
             onSelectCollection: handleCollectionOp("move"),
             onCreateCollection: showCreateCollectionModal("move"),
-            relatedCollectionID:
-                isInSearchMode || barMode == "people"
-                    ? undefined
-                    : activeCollectionID,
-        });
-    };
-
-    const unhideToCollection = () => {
-        onOpenCollectionSelector({
-            action: "unhide",
-            onSelectCollection: handleCollectionOp("unhide"),
-            onCreateCollection: showCreateCollectionModal("unhide"),
         });
     };
 
@@ -241,7 +239,7 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
                 <DownloadButton onClick={handleFileOp("download")} />
             ) : barMode == "hidden-albums" ? (
                 <>
-                    <UnhideButton onClick={unhideToCollection} />
+                    <UnhideButton onClick={handleUnhide} />
                     <DownloadButton onClick={handleFileOp("download")} />
                     <DeleteButton onClick={handleDelete} />
                 </>
