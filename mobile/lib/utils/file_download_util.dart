@@ -20,7 +20,7 @@ import "package:photos/module/download/task.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/services/ignored_files_service.dart";
-import "package:photos/services/local/local_import.dart";
+import "package:photos/services/local/import/local_import.dart";
 import "package:photos/utils/file_key.dart";
 import "package:photos/utils/file_util.dart";
 import "package:photos/utils/standalone/data.dart";

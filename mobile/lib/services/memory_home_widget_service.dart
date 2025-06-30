@@ -7,7 +7,7 @@ import 'package:photos/models/file/file.dart';
 import 'package:photos/models/memories/smart_memory.dart';
 import 'package:photos/service_locator.dart';
 import 'package:photos/services/home_widget_service.dart';
-import "package:photos/services/local/local_import.dart";
+import "package:photos/services/local/import/local_import.dart";
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:synchronized/synchronized.dart';
 

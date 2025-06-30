@@ -13,7 +13,7 @@ import 'package:photos/generated/l10n.dart';
 import "package:photos/models/file/file.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/local/local_assets_cache.dart";
-import "package:photos/services/local/local_import.dart";
+import "package:photos/services/local/import/local_import.dart";
 import 'package:photos/services/sync/remote_sync_service.dart';
 import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/common/loading_widget.dart';

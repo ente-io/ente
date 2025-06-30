@@ -11,7 +11,7 @@ import "package:photos/models/search/search_constants.dart";
 import "package:photos/models/search/search_types.dart";
 import 'package:photos/service_locator.dart';
 import 'package:photos/services/home_widget_service.dart';
-import "package:photos/services/local/local_import.dart";
+import "package:photos/services/local/import/local_import.dart";
 import 'package:photos/services/machine_learning/face_ml/person/person_service.dart';
 import 'package:photos/services/search_service.dart';
 import "package:photos/ui/viewer/file/detail_page.dart";

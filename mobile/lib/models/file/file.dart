@@ -12,8 +12,9 @@ import "package:photos/models/file/remote/collection_file.dart";
 import 'package:photos/models/location/location.dart';
 import "package:photos/models/metadata/file_magic.dart";
 import "package:photos/module/download/file_url.dart";
+import "package:photos/module/upload/model/upload_data.dart";
 import 'package:photos/utils/exif_util.dart';
-import 'package:photos/utils/file_uploader_util.dart';
+import 'package:photos/utils/upload_metadata.dart';
 import "package:photos/utils/panorama_util.dart";
 import 'package:photos/utils/standalone/date_time.dart';
 

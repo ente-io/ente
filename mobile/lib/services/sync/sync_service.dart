@@ -15,7 +15,7 @@ import 'package:photos/events/trigger_logout_event.dart';
 import "package:photos/extensions/stop_watch.dart";
 import 'package:photos/models/file/file_type.dart';
 import "package:photos/services/language_service.dart";
-import "package:photos/services/local/local_import.dart";
+import "package:photos/services/local/import/local_import.dart";
 import 'package:photos/services/notification_service.dart';
 import 'package:photos/services/sync/remote_sync_service.dart';
 import 'package:photos/utils/file_uploader.dart';

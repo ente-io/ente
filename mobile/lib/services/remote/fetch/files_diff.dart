@@ -175,7 +175,7 @@ class RemoteFileDiffService {
         defaultMeta.containsKey('videoHash')) {
       // old web version was putting live photo hash in different fields
       defaultMeta['hash'] =
-          '${defaultMeta['imageHash']}$kLivePhotoHashSeparator${defaultMeta['videoHash']}';
+          '${defaultMeta['imageHash']}$kHashSeprator${defaultMeta['videoHash']}';
     }
 
     // Decrypt magic metadata if present

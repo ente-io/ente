@@ -4,17 +4,13 @@ import "dart:io";
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
-import "package:archive/archive_io.dart";
 import "package:computer/computer.dart";
 import 'package:ente_crypto/ente_crypto.dart';
 import "package:exif_reader/exif_reader.dart";
 import 'package:logging/logging.dart';
 import "package:motion_photos/motion_photos.dart";
-import 'package:motionphoto/motionphoto.dart';
-import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:photo_manager/photo_manager.dart';
-import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/errors.dart';
 import "package:photos/image/thumnail/upload_thumb.dart";
@@ -24,55 +20,16 @@ import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
 import "package:photos/models/location/location.dart";
+import "package:photos/module/upload/model/upload_data.dart";
 import "package:photos/services/local/asset_entity.service.dart";
-import "package:photos/services/local/local_import.dart";
+import "package:photos/services/local/import/local_import.dart";
+import "package:photos/services/local/livephoto.dart";
 import "package:photos/services/local/shared_assert.service.dart";
 import "package:photos/utils/exif_util.dart";
 import "package:photos/utils/standalone/decode_image.dart";
-import "package:uuid/uuid.dart";
 import 'package:video_thumbnail/video_thumbnail.dart';
 
 final _logger = Logger("FileUtil");
-
-class MediaUploadData {
-  final File? sourceFile;
-  final Uint8List? thumbnail;
-  final bool isDeleted;
-  final FileHashData? hashData;
-  final int? height;
-  final int? width;
-
-  // For android motion photos, the startIndex is the index of the first frame
-  // For iOS, this value will be always null.
-  final int? motionPhotoStartIndex;
-
-  final Map<String, IfdTag>? exifData;
-
-  bool? isPanorama;
-
-  MediaUploadData(
-    this.sourceFile,
-    this.thumbnail,
-    this.isDeleted,
-    this.hashData, {
-    this.height,
-    this.width,
-    this.motionPhotoStartIndex,
-    this.isPanorama,
-    this.exifData,
-  });
-}
-
-class FileHashData {
-  // For livePhotos, the fileHash value will be imageHash:videoHash
-  final String? fileHash;
-
-  // zipHash is used to take care of existing live photo uploads from older
-  // mobile clients
-  String? zipHash;
-
-  FileHashData(this.fileHash, {this.zipHash});
-}
 
 Future<MediaUploadData> getUploadDataFromEnteFile(
   EnteFile file, {
@@ -109,11 +66,8 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(
   // call this method before creating zip for live photo as sourceFile image will be
   // deleted after zipping
   await _decorateEnteFileData(file, asset, sourceFile, exifData);
-  int? h, w;
-  if (asset.width != 0 && asset.height != 0) {
-    h = asset.height;
-    w = asset.width;
-  }
+  final int? h = asset.height != 0 ? asset.height : null;
+  final int? w = asset.width != 0 ? asset.width : null;
   int? motionPhotoStartingIndex;
   if (Platform.isAndroid && asset.type == AssetType.image) {
     try {
@@ -128,33 +82,19 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(
   }
   fileHash = CryptoUtil.bin2base64(await CryptoUtil.getHash(sourceFile));
   if (file.fileType == FileType.livePhoto && Platform.isIOS) {
-    final File? videoUrl = await Motionphoto.getLivePhotoFile(file.localID!);
-    if (videoUrl == null || !videoUrl.existsSync()) {
-      final String errMsg =
-          "missing livePhoto url for  ${file.toString()} with subType ${file.fileSubType}";
-      _logger.severe(errMsg);
-      throw InvalidFileError(errMsg, InvalidReason.livePhotoVideoMissing);
-    }
-    final String videoHash =
-        CryptoUtil.bin2base64(await CryptoUtil.getHash(videoUrl));
-    // imgHash:vidHash
-    fileHash = '$fileHash$kLivePhotoHashSeparator$videoHash';
-    final tempPath = Configuration.instance.getTempDirectory();
-    // .elp -> ente live photo
-    final uniqueId = const Uuid().v4().toString();
-    final zippedPath = tempPath + uniqueId + "_${file.generatedID}.elp";
-    _logger.info("Creating zip for live photo from " + basename(zippedPath));
-    await zip(
-      zipPath: zippedPath,
+    final (videoUrl, videoHash) =
+        await LivePhotoService.liveVideoAndHash(file.lAsset!.id);
+    final zippedPath = await LivePhotoService.zip(
+      id: file.lAsset!.id,
       imagePath: sourceFile.path,
       videoPath: videoUrl.path,
     );
-    // delete the temporary video and image copy (only in IOS)
-    if (Platform.isIOS) {
-      await sourceFile.delete();
-    }
+    await sourceFile.delete();
+    await videoUrl.delete();
     // new sourceFile which needs to be uploaded
     sourceFile = File(zippedPath);
+    // imgHash:vidHash
+    fileHash = '$fileHash$kHashSeprator$videoHash';
     zipHash = CryptoUtil.bin2base64(await CryptoUtil.getHash(sourceFile));
   }
 
@@ -175,34 +115,6 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(
 Future<int?> motionVideoIndex(Map<String, dynamic> args) async {
   final String path = args['path'];
   return (await MotionPhotos(path).getMotionVideoIndex())?.start;
-}
-
-Future<void> zip({
-  required String zipPath,
-  required String imagePath,
-  required String videoPath,
-}) {
-  return Computer.shared().compute(
-    (Map<String, dynamic> args) async {
-      final encoder = ZipFileEncoder();
-      encoder.create(args['zipPath']);
-      await encoder.addFile(
-        File(args['imagePath']),
-        "image${extension(args['imagePath'])}",
-      );
-      await encoder.addFile(
-        File(args['videoPath']),
-        "video${extension(args['videoPath'])}",
-      );
-      await encoder.close();
-    },
-    param: {
-      'zipPath': zipPath,
-      'imagePath': imagePath,
-      'videoPath': videoPath,
-    },
-    taskName: 'zip',
-  );
 }
 
 Future<void> _decorateEnteFileData(

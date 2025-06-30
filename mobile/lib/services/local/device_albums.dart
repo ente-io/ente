@@ -1,7 +1,7 @@
 import "package:photos/models/device_collection.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/service_locator.dart";
-import "package:photos/services/local/local_import.dart";
+import "package:photos/services/local/import/local_import.dart";
 
 extension DeviceAlbums on LocalImportService {
   Future<List<DeviceCollection>> getDeviceCollections() async {

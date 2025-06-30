@@ -60,15 +60,13 @@ Future<Map<String, IfdTag>?> tryExifFromFile(File originFile) async {
 
 Future<Map<String, dynamic>> getXmp(File file) async {
   return Computer.shared().compute(
-    _getXMPComputer,
+    (Map<String, dynamic> args) {
+      final File originalFile = args["file"] as File;
+      return XMPExtractor().extract(originalFile.readAsBytesSync());
+    },
     param: {"file": file},
     taskName: "getXMPAsync",
   );
-}
-
-Map<String, dynamic> _getXMPComputer(Map<String, dynamic> args) {
-  final File originalFile = args["file"] as File;
-  return XMPExtractor().extract(originalFile.readAsBytesSync());
 }
 
 Future<FFProbeProps?> getVideoPropsAsync(File originalFile) async {

@@ -9,8 +9,8 @@ import 'package:photos/db/file_updation_db.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
-import 'package:photos/utils/file_uploader_util.dart';
-import 'package:photos/utils/file_util.dart';
+import "package:photos/module/upload/model/upload_data.dart";
+import 'package:photos/utils/upload_metadata.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // LocalFileUpdateService tracks all the potential local file IDs which have
