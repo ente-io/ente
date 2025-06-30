@@ -98,7 +98,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
   @override
   void didUpdateWidget(ThumbnailWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.file.generatedID != oldWidget.file.generatedID) {
+    if (widget.file.tag != oldWidget.file.tag) {
       _reset();
     }
   }

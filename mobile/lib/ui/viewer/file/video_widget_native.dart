@@ -127,7 +127,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
 
     _captionUpdatedSubscription =
         Bus.instance.on<FileCaptionUpdatedEvent>().listen((event) {
-      if (event.fileGeneratedID == widget.file.generatedID) {
+      if (event.fileTag == widget.file.tag) {
         if (mounted) {
           setState(() {});
         }
@@ -262,7 +262,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
     return Hero(
       tag: widget.tagPrefix! + widget.file.tag,
       child: VisibilityDetector(
-        key: Key(widget.file.generatedID.toString()),
+        key: Key(widget.file.tag.toString()),
         onVisibilityChanged: (info) {
           if (info.visibleFraction == 1) {
             setState(() {
@@ -427,7 +427,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
   ) async {
     try {
       _logger.info(
-        "Initializing native video player controller for file gen id: ${widget.file.generatedID}",
+        "Initializing native video player controller for file tag: ${widget.file.tag}",
       );
       _controller = controller;
 
@@ -438,7 +438,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
       await setVideoSource();
     } catch (e) {
       _logger.severe(
-        "Error initializing native video player controller for file gen id: ${widget.file.generatedID}",
+        "Error initializing native video player controller for file tag: ${widget.file.tag}",
         e,
       );
     }
@@ -519,7 +519,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
   void _onError(String errorMessage) {
     //This doesn't work all the time
     _logger.severe(
-      "Error in native video player controller for file gen id: ${widget.file.generatedID}",
+      "Error in native video player controller for file tag: ${widget.file.tag}",
     );
     _logger.severe(errorMessage);
     Bus.instance.fire(UseMediaKitForVideo());

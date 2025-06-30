@@ -84,7 +84,7 @@ class _ZoomableImageState extends State<ZoomableImage> {
 
     _captionUpdatedSubscription =
         Bus.instance.on<FileCaptionUpdatedEvent>().listen((event) {
-      if (event.fileGeneratedID == _photo.generatedID) {
+      if (event.fileTag == _photo.tag) {
         if (mounted) {
           setState(() {});
         }

@@ -73,7 +73,7 @@ class _VideoWidgetMediaKitState extends State<VideoWidgetMediaKit>
   @override
   void initState() {
     _logger.info(
-      'initState for ${widget.file.generatedID} with tag ${widget.file.tag} and name ${widget.file.displayName}',
+      'initState for tag ${widget.file.tag} and name ${widget.file.displayName}',
     );
     super.initState();
     WidgetsBinding.instance.addObserver(this);
@@ -118,7 +118,7 @@ class _VideoWidgetMediaKitState extends State<VideoWidgetMediaKit>
 
     _captionUpdatedSubscription =
         Bus.instance.on<FileCaptionUpdatedEvent>().listen((event) {
-      if (event.fileGeneratedID == widget.file.generatedID) {
+      if (event.fileTag == widget.file.tag) {
         if (mounted) {
           setState(() {});
         }

@@ -71,13 +71,9 @@ class MemoriesCacheService {
       return event.type == EventType.deletedFromEverywhere;
     }).listen((event) {
       if (_cachedMemories == null) return;
-      final generatedIDs = event.updatedFiles
-          .where((element) => element.generatedID != null)
-          .map((e) => e.generatedID!)
-          .toSet();
+      final tags = event.updatedFiles.map((e) => e.tag).toSet();
       for (final memory in _cachedMemories!) {
-        memory.memories
-            .removeWhere((m) => generatedIDs.contains(m.file.generatedID));
+        memory.memories.removeWhere((m) => tags.contains(m.file.tag));
       }
     });
   }

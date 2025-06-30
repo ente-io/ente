@@ -28,8 +28,7 @@ class FileWidget extends StatelessWidget {
     // Specify key to ensure that the widget is rebuilt when the file changes
     // Before changing this, ensure that file deletes are handled properly
 
-    final String fileKey =
-        "file_genID_${file.generatedID}___file_id_${file.uploadedFileID}";
+    final String fileKey = "file_tag_${file.tag}";
     if (file.fileType == FileType.livePhoto ||
         file.fileType == FileType.image) {
       return ZoomableLiveImageNew(

@@ -194,7 +194,7 @@ class _FileCaptionWidgetState extends State<FileCaptionWidget> {
   bool _onEditFileFinish(bool isSuccess) {
     if (isSuccess) {
       widget.file.pubMagicMetadata?.caption = editedCaption;
-      Bus.instance.fire(FileCaptionUpdatedEvent(widget.file.generatedID!));
+      Bus.instance.fire(FileCaptionUpdatedEvent(widget.file.tag));
       return true;
     } else {
       showShortToast(context, S.of(context).somethingWentWrong);

@@ -1,7 +1,7 @@
 import "package:photos/events/event.dart";
 
 class FileCaptionUpdatedEvent extends Event {
-  final int fileGeneratedID;
+  final String fileTag;
 
-  FileCaptionUpdatedEvent(this.fileGeneratedID);
+  FileCaptionUpdatedEvent(this.fileTag);
 }

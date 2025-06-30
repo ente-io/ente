@@ -59,7 +59,7 @@ class FileAppBarState extends State<FileAppBar> {
   @override
   void didUpdateWidget(FileAppBar oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.file.generatedID != widget.file.generatedID) {
+    if (oldWidget.file.tag != widget.file.tag) {
       _getActions();
     }
   }
