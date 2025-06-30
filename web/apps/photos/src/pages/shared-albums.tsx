@@ -495,9 +495,9 @@ export default function PublicCollectionGallery() {
                 >
                     {selected.count > 0 ? (
                         <SelectedFileOptions
-                            downloadFilesHelper={downloadFilesHelper}
-                            clearSelection={clearSelection}
                             count={selected.count}
+                            clearSelection={clearSelection}
+                            downloadFilesHelper={downloadFilesHelper}
                         />
                     ) : (
                         <SpacedRow sx={{ flex: 1 }}>
@@ -616,9 +616,9 @@ interface SelectedFileOptionsProps {
 }
 
 const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
-    downloadFilesHelper,
     count,
     clearSelection,
+    downloadFilesHelper,
 }) => (
     <Stack
         direction="row"

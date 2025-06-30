@@ -35,24 +35,11 @@ export type FileOp =
     | "trash"
     | "deletePermanently";
 
-interface Props {
-    handleCollectionOp: (op: CollectionOp) => (...args: any[]) => void;
-    handleFileOp: (op: FileOp) => (...args: any[]) => void;
-    showCreateCollectionModal: (op: CollectionOp) => () => void;
-    /**
-     * Callback to open a dialog where the user can choose a collection.
-     *
-     * The reason for opening the dialog and other properties are passed as the
-     * {@link attributes} argument.
-     */
-    onOpenCollectionSelector: (
-        attributes: CollectionSelectorAttributes,
-    ) => void;
-    count: number;
-    ownCount: number;
-    clearSelection: () => void;
+interface SelectedFileOptionsProps {
     barMode?: GalleryBarMode;
+    isInSearchMode: boolean;
     activeCollectionID: number;
+    selectedCollection?: Collection;
     /**
      * TODO: Need to implement delete-equivalent from shared albums.
      *
@@ -75,12 +62,26 @@ interface Props {
      * user, even if they are in an album owned by the user.
      */
     activeCollectionSummary: CollectionSummary | undefined;
-    isInSearchMode: boolean;
-    selectedCollection: Collection;
-    isInHiddenSection: boolean;
+    count: number;
+    ownCount: number;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    handleCollectionOp: (op: CollectionOp) => (...args: any[]) => void;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    handleFileOp: (op: FileOp) => (...args: any[]) => void;
+    showCreateCollectionModal: (op: CollectionOp) => () => void;
+    /**
+     * Callback to open a dialog where the user can choose a collection.
+     *
+     * The reason for opening the dialog and other properties are passed as the
+     * {@link attributes} argument.
+     */
+    onOpenCollectionSelector: (
+        attributes: CollectionSelectorAttributes,
+    ) => void;
+    clearSelection: () => void;
 }
 
-const SelectedFileOptions = ({
+export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
     showCreateCollectionModal,
     onOpenCollectionSelector,
     handleCollectionOp,
@@ -93,11 +94,8 @@ const SelectedFileOptions = ({
     activeCollectionID,
     activeCollectionSummary,
     isInSearchMode,
-    isInHiddenSection,
-}: Props) => {
+}) => {
     const { showMiniDialog } = useBaseContext();
-
-    const peopleMode = barMode == "people";
 
     const isFavoriteCollection =
         !!activeCollectionSummary?.attributes.has("userFavorites");
@@ -114,7 +112,9 @@ const SelectedFileOptions = ({
             onSelectCollection: handleCollectionOp("add"),
             onCreateCollection: showCreateCollectionModal("add"),
             relatedCollectionID:
-                isInSearchMode || peopleMode ? undefined : activeCollectionID,
+                isInSearchMode || barMode == "people"
+                    ? undefined
+                    : activeCollectionID,
         });
 
     const trashHandler = () =>
@@ -178,7 +178,9 @@ const SelectedFileOptions = ({
             onSelectCollection: handleCollectionOp("move"),
             onCreateCollection: showCreateCollectionModal("move"),
             relatedCollectionID:
-                isInSearchMode || peopleMode ? undefined : activeCollectionID,
+                isInSearchMode || barMode == "people"
+                    ? undefined
+                    : activeCollectionID,
         });
     };
 
@@ -237,7 +239,7 @@ const SelectedFileOptions = ({
                         </IconButton>
                     </Tooltip>
                 </>
-            ) : peopleMode ? (
+            ) : barMode == "people" ? (
                 <>
                     <Tooltip title={t("download")}>
                         <IconButton onClick={handleFileOp("download")}>
@@ -302,7 +304,7 @@ const SelectedFileOptions = ({
                         <DownloadIcon />
                     </IconButton>
                 </Tooltip>
-            ) : isInHiddenSection ? (
+            ) : barMode == "hidden-albums" ? (
                 <>
                     <Tooltip title={t("unhide")}>
                         <IconButton onClick={unhideToCollection}>
@@ -395,5 +397,3 @@ const SelectedFileOptions = ({
         </SpacedRow>
     );
 };
-
-export default SelectedFileOptions;

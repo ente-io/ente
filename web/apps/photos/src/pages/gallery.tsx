@@ -48,7 +48,8 @@ import {
     SearchBar,
     type SearchBarProps,
 } from "ente-new/photos/components/SearchBar";
-import SelectedFileOptions, {
+import {
+    SelectedFileOptions,
     type CollectionOp,
     type FileOp,
 } from "ente-new/photos/components/SelectedFileOptions";
@@ -920,22 +921,21 @@ const Page: React.FC = () => {
             >
                 {showSelectionBar ? (
                     <SelectedFileOptions
-                        handleCollectionOp={collectionOpsHelper}
-                        handleFileOp={fileOpHelper}
-                        showCreateCollectionModal={handleCreateAlbumForOp}
-                        onOpenCollectionSelector={handleOpenCollectionSelector}
-                        count={selected.count}
-                        ownCount={selected.ownCount}
-                        clearSelection={clearSelection}
                         barMode={barMode}
+                        isInSearchMode={isInSearchMode}
                         activeCollectionID={activeCollectionID}
                         selectedCollection={getSelectedCollection(
                             selected.collectionID,
                             state.collections,
                         )}
                         activeCollectionSummary={activeCollectionSummary}
-                        isInSearchMode={isInSearchMode}
-                        isInHiddenSection={barMode == "hidden-albums"}
+                        count={selected.count}
+                        ownCount={selected.ownCount}
+                        handleCollectionOp={collectionOpsHelper}
+                        handleFileOp={fileOpHelper}
+                        showCreateCollectionModal={handleCreateAlbumForOp}
+                        onOpenCollectionSelector={handleOpenCollectionSelector}
+                        clearSelection={clearSelection}
                     />
                 ) : barMode == "hidden-albums" ? (
                     <HiddenSectionNavbarContents
