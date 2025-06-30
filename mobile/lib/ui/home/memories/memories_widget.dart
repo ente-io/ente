@@ -23,8 +23,8 @@ class _MemoriesWidgetState extends State<MemoriesWidget> {
   late StreamSubscription<MemoriesSettingChanged> _memoriesSettingSubscription;
   late StreamSubscription<MemoriesChangedEvent> _memoriesChangedSubscription;
   late StreamSubscription<MemorySeenEvent> _memorySeenSubscription;
-  late double _maxHeight;
-  late double _maxWidth;
+  late double _memoryheight;
+  late double _memoryWidth;
 
   @override
   void initState() {
@@ -55,8 +55,8 @@ class _MemoriesWidgetState extends State<MemoriesWidget> {
     final screenWidth = MediaQuery.sizeOf(context).width;
     //factor will be 2 for most phones in portrait mode
     final factor = (screenWidth / 220).ceil();
-    _maxWidth = screenWidth / (factor * 2);
-    _maxHeight = _maxWidth / MemoryCoverWidget.aspectRatio;
+    _memoryWidth = screenWidth / (factor * 2);
+    _memoryheight = _memoryWidth / MemoryCoverWidget.aspectRatio;
   }
 
   @override
@@ -81,7 +81,7 @@ class _MemoriesWidgetState extends State<MemoriesWidget> {
       builder: (context, snapshot) {
         if (snapshot.hasError || !snapshot.hasData) {
           return SizedBox(
-            height: _maxHeight + 12 + 10,
+            height: _memoryheight + 12 + 10,
             child: const EnteLoadingWidget(),
           );
         } else {
@@ -118,7 +118,7 @@ class _MemoriesWidgetState extends State<MemoriesWidget> {
     collatedMemories.addAll(seenMemories.map((e) => (e.memories, e.title)));
 
     return SizedBox(
-      height: _maxHeight + MemoryCoverWidget.outerStrokeWidth * 2,
+      height: _memoryheight + MemoryCoverWidget.outerStrokeWidth * 2,
       child: ListView.builder(
         physics: const AlwaysScrollableScrollPhysics(
           parent: BouncingScrollPhysics(),
@@ -129,8 +129,8 @@ class _MemoriesWidgetState extends State<MemoriesWidget> {
           return MemoryCoverWidget(
             memories: collatedMemories[itemIndex].$1,
             allMemories: collatedMemories.map((e) => e.$1).toList(),
-            maxHeight: _maxHeight,
-            maxWidth: _maxWidth,
+            maxHeight: _memoryheight,
+            maxWidth: _memoryWidth,
             title: collatedMemories[itemIndex].$2,
             allTitle: collatedMemories.map((e) => e.$2).toList(),
             currentMemoryIndex: itemIndex,
