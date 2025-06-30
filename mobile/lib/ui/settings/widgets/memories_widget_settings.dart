@@ -161,7 +161,7 @@ class _MemoriesWidgetSettingsState extends State<MemoriesWidgetSettings> {
                                 isYearlyMemoriesEnabled =
                                     !isYearlyMemoriesEnabled!;
                               });
-                              await updateVariables();
+                              updateVariables().ignore();
                             },
                           ),
                           singleBorderRadius: 8,
@@ -184,7 +184,7 @@ class _MemoriesWidgetSettingsState extends State<MemoriesWidgetSettings> {
                                 isOnThisDayMemoriesEnabled =
                                     !isOnThisDayMemoriesEnabled!;
                               });
-                              await updateVariables();
+                              updateVariables().ignore();
                             },
                           ),
                           singleBorderRadius: 8,
@@ -208,7 +208,8 @@ class _MemoriesWidgetSettingsState extends State<MemoriesWidgetSettings> {
                                   isSmartMemoriesEnabled =
                                       !isSmartMemoriesEnabled!;
                                 });
-                                await updateVariables();
+
+                                updateVariables().ignore();
                               },
                             ),
                             singleBorderRadius: 8,
