@@ -24,7 +24,7 @@ import {
 } from "ente-new/photos/services/collection-summary";
 import { t } from "i18next";
 
-export type CollectionOp = "add" | "move" | "remove" | "restore" | "unhide";
+export type CollectionOp = "add" | "move" | "restore" | "unhide";
 
 export type FileOp =
     | "download"
@@ -85,6 +85,11 @@ interface SelectedFileOptionsProps {
      * on the selection bar.
      */
     onClearSelection: () => void;
+    /**
+     * Called when the user wants to remove the selected files from the given
+     * {@link collection}.
+     */
+    onRemoveFilesFromCollection: (collection: Collection) => void;
     /**
      * Callback to open a dialog where the user can choose a collection.
      *
@@ -147,6 +152,7 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
     selectedFileCount,
     selectedOwnFileCount,
     onClearSelection,
+    onRemoveFilesFromCollection,
     onOpenCollectionSelector,
     createOnCreateForCollectionOp,
     createOnSelectForCollectionOp,
@@ -195,10 +201,7 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
         });
 
     const handleRemoveFromCollection = () => {
-        const action = () =>
-            // Reuse the scaffolding provided by the collection selection mechanism,
-            // even though we already know the selected collection.
-            createOnSelectForCollectionOp("remove")(collection!);
+        const action = () => onRemoveFilesFromCollection(collection!);
 
         showMiniDialog(
             selectedFileCount == selectedOwnFileCount

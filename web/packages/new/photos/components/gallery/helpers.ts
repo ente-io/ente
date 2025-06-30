@@ -19,7 +19,6 @@ import {
     addToCollection,
     moveFromCollection,
     moveToCollection,
-    removeFromCollection,
     restoreToCollection,
 } from "ente-new/photos/services/collection";
 import { createUncategorizedCollection } from "../../services/collection";
@@ -92,9 +91,6 @@ export const performCollectionOp = async (
                 selectedCollection,
                 selectedFiles,
             );
-            break;
-        case "remove":
-            await removeFromCollection(selectedCollection, selectedFiles);
             break;
         case "restore":
             await restoreToCollection(selectedCollection, selectedFiles);
