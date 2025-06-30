@@ -4,6 +4,7 @@ import "dart:io";
 import "package:logging/logging.dart";
 import "package:photo_manager/photo_manager.dart";
 import "package:photos/core/errors.dart";
+import "package:photos/models/file/file_type.dart";
 
 class AssetEntityService {
   static final Logger _logger = Logger("AssetEntityService");
@@ -43,5 +44,31 @@ class AssetEntityService {
       );
     }
     return sourceFile;
+  }
+
+// check if the assetType is still the same. This can happen for livePhotos
+// if the user turns off the video using native photos app
+  static void assetType(AssetEntity asset, FileType type) {
+    final assetType = enteTypeFromAsset(asset);
+    if (assetType == type) {
+      return;
+    }
+    if (Platform.isIOS || Platform.isMacOS) {
+      if (assetType == FileType.image && type == FileType.livePhoto) {
+        throw InvalidFileError(
+          'id ${asset.id}',
+          InvalidReason.livePhotoToImageTypeChanged,
+        );
+      } else if (assetType == FileType.livePhoto && type == FileType.image) {
+        throw InvalidFileError(
+          'id ${asset.id}',
+          InvalidReason.imageToLivePhotoTypeChanged,
+        );
+      }
+    }
+    throw InvalidFileError(
+      'fileType mismatch for id ${asset.id} assetType $assetType fileType ${type.name}',
+      InvalidReason.unknown,
+    );
   }
 }

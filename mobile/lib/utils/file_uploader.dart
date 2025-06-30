@@ -706,6 +706,9 @@ class FileUploader {
       );
       final metadata =
           await file.getMetadataForUpload(mediaUploadData, exifTime);
+      final Map<String, dynamic> pubMetadata =
+          _buildPublicMagicData(mediaUploadData, exifTime, file.rAsset);
+      MetadataRequest? pubMetadataRequest;
 
       final fileDecryptionHeader =
           CryptoUtil.bin2base64(fileEncryptResult.header!);
@@ -721,6 +724,14 @@ class FileUploader {
       );
       final metadataDecryptionHeader =
           CryptoUtil.bin2base64(encryptedMetadataResult.header!);
+
+      if (pubMetadata.isNotEmpty) {
+        pubMetadataRequest = await getPubMetadataRequest(
+          file,
+          pubMetadata,
+          fileEncryptResult.key!,
+        );
+      }
       if (SyncService.instance.shouldStopSync()) {
         throw SyncStopRequestedError();
       }
@@ -763,16 +774,7 @@ class FileUploader {
           fileEncryptResult.key!,
           CollectionsService.instance.getCollectionKey(collectionID),
         );
-        final Map<String, dynamic> pubMetadata =
-            _buildPublicMagicData(mediaUploadData, exifTime, file.rAsset);
-        MetadataRequest? pubMetadataRequest;
-        if (pubMetadata.isNotEmpty) {
-          pubMetadataRequest = await getPubMetadataRequest(
-            file,
-            pubMetadata,
-            fileEncryptResult.key!,
-          );
-        }
+
         remoteFile = await _createFile(
           file,
           collectionID,

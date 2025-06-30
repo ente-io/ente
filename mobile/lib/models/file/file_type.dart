@@ -35,7 +35,7 @@ FileType getFileType(int fileType) {
   }
 }
 
-FileType fileTypeFromAsset(AssetEntity asset) {
+FileType enteTypeFromAsset(AssetEntity asset) {
   FileType type = FileType.image;
   switch (asset.type) {
     case AssetType.image:

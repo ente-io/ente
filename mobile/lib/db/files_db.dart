@@ -960,25 +960,6 @@ class FilesDB with SqlDbBase {
     return result;
   }
 
-  Future<List<String>> getLocalFilesBackedUpWithoutLocation(int userId) async {
-    final db = await instance.sqliteAsyncDB;
-    final rows = await db.getAll(
-      '''
-      SELECT DISTINCT $columnLocalID FROM $filesTable
-      WHERE $columnOwnerID = ? AND $columnLocalID IS NOT NULL AND
-      ($columnUploadedFileID IS NOT NULL AND $columnUploadedFileID IS NOT -1)
-      AND ($columnLatitude IS NULL OR $columnLongitude IS NULL OR
-      $columnLatitude = 0.0 or $columnLongitude = 0.0)
-      ''',
-      [userId],
-    );
-    final result = <String>[];
-    for (final row in rows) {
-      result.add(row[columnLocalID] as String);
-    }
-    return result;
-  }
-
   Future<List<EnteFile>> getAllFilesAfterDate({
     required FileType fileType,
     required DateTime beginDate,

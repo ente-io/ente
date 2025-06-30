@@ -28,7 +28,6 @@ import "package:photos/services/local/asset_entity.service.dart";
 import "package:photos/services/local/local_import.dart";
 import "package:photos/services/local/shared_assert.service.dart";
 import "package:photos/utils/exif_util.dart";
-import 'package:photos/utils/file_util.dart';
 import "package:photos/utils/standalone/decode_image.dart";
 import "package:uuid/uuid.dart";
 import 'package:video_thumbnail/video_thumbnail.dart';
@@ -80,7 +79,7 @@ Future<MediaUploadData> getUploadDataFromEnteFile(
   bool parseExif = false,
 }) async {
   if (file.isSharedMediaToAppSandbox) {
-    return await _getMediaUploadDataFromAppCache(file, parseExif);
+    return await _getSharedMediaUploadData(file);
   } else {
     return await _getMediaUploadDataFromAssetFile(file, parseExif);
   }
@@ -96,10 +95,8 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(
   String? zipHash;
   String fileHash;
   Map<String, IfdTag>? exifData;
-
-  // The timeouts are to safeguard against https://github.com/CaiJingLong/flutter_photo_manager/issues/467
   final asset = await AssetEntityService.fromIDWithRetry(file.lAsset!.id);
-  _assertFileType(asset, file);
+  AssetEntityService.assetType(asset, file.fileType);
   if (Platform.isIOS) {
     trackOriginFetchForUploadOrML.put(file.lAsset!.id, true);
   }
@@ -208,33 +205,6 @@ Future<void> zip({
   );
 }
 
-// check if the assetType is still the same. This can happen for livePhotos
-// if the user turns off the video using native photos app
-void _assertFileType(AssetEntity asset, EnteFile file) {
-  final assetType = fileTypeFromAsset(asset);
-  if (assetType == file.fileType) {
-    return;
-  }
-  if (Platform.isIOS || Platform.isMacOS) {
-    if (assetType == FileType.image && file.fileType == FileType.livePhoto) {
-      throw InvalidFileError(
-        'id ${asset.id}',
-        InvalidReason.livePhotoToImageTypeChanged,
-      );
-    } else if (assetType == FileType.livePhoto &&
-        file.fileType == FileType.image) {
-      throw InvalidFileError(
-        'id ${asset.id}',
-        InvalidReason.imageToLivePhotoTypeChanged,
-      );
-    }
-  }
-  throw InvalidFileError(
-    'fileType mismatch for id ${asset.id} assetType $assetType fileType ${file.fileType}',
-    InvalidReason.unknown,
-  );
-}
-
 Future<void> _decorateEnteFileData(
   EnteFile file,
   AssetEntity asset,
@@ -285,10 +255,7 @@ Future<MetadataRequest> getPubMetadataRequest(
   );
 }
 
-Future<MediaUploadData> _getMediaUploadDataFromAppCache(
-  EnteFile file,
-  bool parseExif,
-) async {
+Future<MediaUploadData> _getSharedMediaUploadData(EnteFile file) async {
   final localPath = SharedAssetService.getPath(file.localID!);
   final sourceFile = File(localPath);
   if (!sourceFile.existsSync()) {

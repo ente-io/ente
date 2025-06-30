@@ -67,7 +67,7 @@ class EnteFile {
     file.deviceFolder = pathName;
     file.location =
         Location(latitude: asset.latitude, longitude: asset.longitude);
-    file.fileType = fileTypeFromAsset(asset);
+    file.fileType = enteTypeFromAsset(asset);
     file.creationTime = parseFileCreationTime(asset);
     file.modificationTime = asset.modifiedDateTime.microsecondsSinceEpoch;
     file.fileSubType = asset.subtype;
@@ -83,7 +83,7 @@ class EnteFile {
     file.deviceFolder = asset.relativePath;
     file.location =
         Location(latitude: asset.latitude, longitude: asset.longitude);
-    file.fileType = fileTypeFromAsset(asset);
+    file.fileType = enteTypeFromAsset(asset);
     file.creationTime = asset.createDateTime.microsecondsSinceEpoch;
     file.modificationTime = asset.modifiedDateTime.microsecondsSinceEpoch;
     file.fileSubType = asset.subtype;
@@ -224,7 +224,16 @@ class EnteFile {
     }
 
     final metadata = <String, dynamic>{};
-    metadata["localID"] = isSharedMediaToAppSandbox ? null : localID;
+    metadata["localID"] = asset?.id;
+    final String? hashValue = mediaUploadData.hashData?.fileHash;
+    if (hashValue != null) {
+      metadata["hash"] = hashValue;
+    }
+    if (asset != null) {
+      metadata["subType"] = asset.subtype;
+    }
+    metadata["version"] = kCurrentMetadataVersion;
+
     metadata["title"] = title;
     metadata["deviceFolder"] = deviceFolder;
     metadata["creationTime"] = creationTime;
@@ -236,19 +245,11 @@ class EnteFile {
       metadata["latitude"] = location!.latitude;
       metadata["longitude"] = location!.longitude;
     }
-    if (fileSubType != null) {
-      metadata["subType"] = fileSubType;
-    }
+
     if (duration != null) {
       metadata["duration"] = duration;
     }
-    final String? hashValue = mediaUploadData.hashData?.fileHash;
-    if (hashValue != null) {
-      metadata["hash"] = hashValue;
-    }
-    if (metadataVersion != null) {
-      metadata["version"] = metadataVersion;
-    }
+
     return metadata;
   }
 
