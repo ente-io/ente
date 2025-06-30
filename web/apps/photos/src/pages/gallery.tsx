@@ -931,10 +931,10 @@ const Page: React.FC = () => {
                         activeCollectionSummary={activeCollectionSummary}
                         count={selected.count}
                         ownCount={selected.ownCount}
-                        handleCollectionOp={collectionOpsHelper}
-                        handleFileOp={fileOpHelper}
                         showCreateCollectionModal={handleCreateAlbumForOp}
                         onOpenCollectionSelector={handleOpenCollectionSelector}
+                        handleCollectionOp={collectionOpsHelper}
+                        handleFileOp={fileOpHelper}
                         clearSelection={clearSelection}
                     />
                 ) : barMode == "hidden-albums" ? (
@@ -992,23 +992,23 @@ const Page: React.FC = () => {
                     uploadTypeSelectorIntent,
                     uploadTypeSelectorView,
                 }}
+                isFirstUpload={haveOnlySystemCollections(
+                    normalCollectionSummaries,
+                )}
                 activeCollection={activeCollection}
                 closeUploadTypeSelector={setUploadTypeSelectorView.bind(
                     null,
                     false,
                 )}
-                onOpenCollectionSelector={handleOpenCollectionSelector}
-                onCloseCollectionSelector={handleCloseCollectionSelector}
                 setLoading={setBlockingLoad}
                 setShouldDisableDropzone={setShouldDisableDropzone}
                 onRemotePull={remotePull}
                 onRemoteFilesPull={remoteFilesPull}
+                onOpenCollectionSelector={handleOpenCollectionSelector}
+                onCloseCollectionSelector={handleCloseCollectionSelector}
                 onUploadFile={(file) => dispatch({ type: "uploadFile", file })}
                 onShowPlanSelector={showPlanSelector}
-                isFirstUpload={haveOnlySystemCollections(
-                    normalCollectionSummaries,
-                )}
-                showSessionExpiredMessage={showSessionExpiredDialog}
+                onShowSessionExpiredDialog={showSessionExpiredDialog}
             />
             <Sidebar
                 {...sidebarVisibilityProps}

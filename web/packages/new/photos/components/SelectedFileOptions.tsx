@@ -65,10 +65,6 @@ interface SelectedFileOptionsProps {
     activeCollectionSummary: CollectionSummary | undefined;
     count: number;
     ownCount: number;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    handleCollectionOp: (op: CollectionOp) => (...args: any[]) => void;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    handleFileOp: (op: FileOp) => (...args: any[]) => void;
     showCreateCollectionModal: (op: CollectionOp) => () => void;
     /**
      * Callback to open a dialog where the user can choose a collection.
@@ -79,22 +75,26 @@ interface SelectedFileOptionsProps {
     onOpenCollectionSelector: (
         attributes: CollectionSelectorAttributes,
     ) => void;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    handleCollectionOp: (op: CollectionOp) => (...args: any[]) => void;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    handleFileOp: (op: FileOp) => (...args: any[]) => void;
     clearSelection: () => void;
 }
 
 export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
+    barMode,
+    isInSearchMode,
+    activeCollectionID,
+    selectedCollection,
+    activeCollectionSummary,
+    count,
+    ownCount,
     showCreateCollectionModal,
     onOpenCollectionSelector,
     handleCollectionOp,
     handleFileOp,
-    selectedCollection,
-    count,
-    ownCount,
     clearSelection,
-    barMode,
-    activeCollectionID,
-    activeCollectionSummary,
-    isInSearchMode,
 }) => {
     const { showMiniDialog } = useBaseContext();
 
@@ -107,17 +107,6 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
     const isSharedIncomingCollection =
         !!activeCollectionSummary?.attributes.has("sharedIncoming");
 
-    const addToCollection = () =>
-        onOpenCollectionSelector({
-            action: "add",
-            onSelectCollection: handleCollectionOp("add"),
-            onCreateCollection: showCreateCollectionModal("add"),
-            relatedCollectionID:
-                isInSearchMode || barMode == "people"
-                    ? undefined
-                    : activeCollectionID,
-        });
-
     const handleDelete = () =>
         showMiniDialog({
             title: t("trash_files_title"),
@@ -129,7 +118,14 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
             },
         });
 
-    const permanentlyDeleteHandler = () =>
+    const handleRestore = () =>
+        onOpenCollectionSelector({
+            action: "restore",
+            onSelectCollection: handleCollectionOp("restore"),
+            onCreateCollection: showCreateCollectionModal("restore"),
+        });
+
+    const handleDeletePermanently = () =>
         showMiniDialog({
             title: t("delete_files_title"),
             message: t("delete_files_message"),
@@ -140,11 +136,15 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
             },
         });
 
-    const restoreHandler = () =>
+    const handleAddToCollection = () =>
         onOpenCollectionSelector({
-            action: "restore",
-            onSelectCollection: handleCollectionOp("restore"),
-            onCreateCollection: showCreateCollectionModal("restore"),
+            action: "add",
+            onSelectCollection: handleCollectionOp("add"),
+            onCreateCollection: showCreateCollectionModal("add"),
+            relatedCollectionID:
+                isInSearchMode || barMode == "people"
+                    ? undefined
+                    : activeCollectionID,
         });
 
     const handleRemoveFromOwnCollection = () => {
@@ -211,7 +211,7 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
                 <>
                     <FixTimeButton onClick={handleFileOp("fixTime")} />
                     <DownloadButton onClick={handleFileOp("download")} />
-                    <AddToCollectionButton onClick={addToCollection} />
+                    <AddToCollectionButton onClick={handleAddToCollection} />
                     <ArchiveButton onClick={handleFileOp("archive")} />
                     <HideButton onClick={handleFileOp("hide")} />
                     <DeleteButton onClick={handleDelete} />
@@ -219,23 +219,17 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
             ) : barMode == "people" ? (
                 <>
                     <DownloadButton onClick={handleFileOp("download")} />
-                    <AddToCollectionButton onClick={addToCollection} />
+                    <AddToCollectionButton onClick={handleAddToCollection} />
                     <ArchiveButton onClick={handleFileOp("archive")} />
                     <HideButton onClick={handleFileOp("hide")} />
                     <DeleteButton onClick={handleDelete} />
                 </>
             ) : activeCollectionID == PseudoCollectionID.trash ? (
                 <>
-                    <Tooltip title={t("restore")}>
-                        <IconButton onClick={restoreHandler}>
-                            <RestoreIcon />
-                        </IconButton>
-                    </Tooltip>
-                    <Tooltip title={t("delete_permanently")}>
-                        <IconButton onClick={permanentlyDeleteHandler}>
-                            <DeleteIcon />
-                        </IconButton>
-                    </Tooltip>
+                    <RestoreButton onClick={handleRestore} />
+                    <DeletePermanentlyButton
+                        onClick={handleDeletePermanently}
+                    />
                 </>
             ) : isUncategorizedCollection ? (
                 <>
@@ -247,11 +241,7 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
                 <DownloadButton onClick={handleFileOp("download")} />
             ) : barMode == "hidden-albums" ? (
                 <>
-                    <Tooltip title={t("unhide")}>
-                        <IconButton onClick={unhideToCollection}>
-                            <VisibilityOutlinedIcon />
-                        </IconButton>
-                    </Tooltip>
+                    <UnhideButton onClick={unhideToCollection} />
                     <DownloadButton onClick={handleFileOp("download")} />
                     <DeleteButton onClick={handleDelete} />
                 </>
@@ -261,20 +251,14 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
                     {!isFavoriteCollection &&
                         activeCollectionID !=
                             PseudoCollectionID.archiveItems && (
-                            <Tooltip title={t("favorite")}>
-                                <IconButton onClick={handleFileOp("favorite")}>
-                                    <FavoriteBorderIcon />
-                                </IconButton>
-                            </Tooltip>
+                            <FavoriteButton
+                                onClick={handleFileOp("favorite")}
+                            />
                         )}
                     <DownloadButton onClick={handleFileOp("download")} />
-                    <AddToCollectionButton onClick={addToCollection} />
+                    <AddToCollectionButton onClick={handleAddToCollection} />
                     {activeCollectionID == PseudoCollectionID.archiveItems && (
-                        <Tooltip title={t("unarchive")}>
-                            <IconButton onClick={handleFileOp("unarchive")}>
-                                <UnArchiveIcon />
-                            </IconButton>
-                        </Tooltip>
+                        <UnarchiveButton onClick={handleFileOp("unarchive")} />
                     )}
                     {activeCollectionID === PseudoCollectionID.all && (
                         <ArchiveButton onClick={handleFileOp("archive")} />
@@ -286,14 +270,9 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
                                 <MoveToCollectionButton
                                     onClick={handleMoveToCollection}
                                 />
-
-                                <Tooltip title={t("remove")}>
-                                    <IconButton
-                                        onClick={handleRemoveFromOwnCollection}
-                                    >
-                                        <RemoveIcon />
-                                    </IconButton>
-                                </Tooltip>
+                                <RemoveFromCollectionButton
+                                    onClick={handleRemoveFromOwnCollection}
+                                />
                             </>
                         )}
                     <HideButton onClick={handleFileOp("hide")} />
@@ -312,10 +291,26 @@ const DownloadButton: React.FC<ButtonishProps> = ({ onClick }) => (
     </Tooltip>
 );
 
+const FavoriteButton: React.FC<ButtonishProps> = ({ onClick }) => (
+    <Tooltip title={t("favorite")}>
+        <IconButton {...{ onClick }}>
+            <FavoriteBorderIcon />
+        </IconButton>
+    </Tooltip>
+);
+
 const ArchiveButton: React.FC<ButtonishProps> = ({ onClick }) => (
     <Tooltip title={t("archive")}>
         <IconButton {...{ onClick }}>
             <ArchiveIcon />
+        </IconButton>
+    </Tooltip>
+);
+
+const UnarchiveButton: React.FC<ButtonishProps> = ({ onClick }) => (
+    <Tooltip title={t("unarchive")}>
+        <IconButton {...{ onClick }}>
+            <UnArchiveIcon />
         </IconButton>
     </Tooltip>
 );
@@ -328,8 +323,32 @@ const HideButton: React.FC<ButtonishProps> = ({ onClick }) => (
     </Tooltip>
 );
 
+const UnhideButton: React.FC<ButtonishProps> = ({ onClick }) => (
+    <Tooltip title={t("unhide")}>
+        <IconButton {...{ onClick }}>
+            <VisibilityOutlinedIcon />
+        </IconButton>
+    </Tooltip>
+);
+
 const DeleteButton: React.FC<ButtonishProps> = ({ onClick }) => (
     <Tooltip title={t("delete")}>
+        <IconButton {...{ onClick }}>
+            <DeleteIcon />
+        </IconButton>
+    </Tooltip>
+);
+
+const RestoreButton: React.FC<ButtonishProps> = ({ onClick }) => (
+    <Tooltip title={t("restore")}>
+        <IconButton {...{ onClick }}>
+            <RestoreIcon />
+        </IconButton>
+    </Tooltip>
+);
+
+const DeletePermanentlyButton: React.FC<ButtonishProps> = ({ onClick }) => (
+    <Tooltip title={t("delete_permanently")}>
         <IconButton {...{ onClick }}>
             <DeleteIcon />
         </IconButton>
@@ -356,6 +375,14 @@ const MoveToCollectionButton: React.FC<ButtonishProps> = ({ onClick }) => (
     <Tooltip title={t("move")}>
         <IconButton {...{ onClick }}>
             <MoveIcon />
+        </IconButton>
+    </Tooltip>
+);
+
+const RemoveFromCollectionButton: React.FC<ButtonishProps> = ({ onClick }) => (
+    <Tooltip title={t("remove")}>
+        <IconButton {...{ onClick }}>
+            <RemoveIcon />
         </IconButton>
     </Tooltip>
 );
