@@ -443,7 +443,7 @@
   "selectAll": "Chọn tất cả",
   "skip": "Bỏ qua",
   "updatingFolderSelection": "Đang cập nhật lựa chọn thư mục...",
-  "itemCount": "{count, plural, other{{count} mục}}",
+  "itemCount": "{count, plural, one{{count} mục} other{{count} mục}}",
   "deleteItemCount": "{count, plural, =1 {Xóa {count} mục} other {Xóa {count} mục}}",
   "duplicateItemsGroup": "{count} tệp, {formattedSize} mỗi tệp",
   "@duplicateItemsGroup": {
@@ -461,7 +461,7 @@
     }
   },
   "showMemories": "Hiển thị kỷ niệm",
-  "yearsAgo": "{count, plural, other{{count} năm trước}}",
+  "yearsAgo": "{count, plural, one{{count} năm trước} other{{count} năm trước}}",
   "backupSettings": "Cài đặt sao lưu",
   "backupStatus": "Trạng thái sao lưu",
   "backupStatusDescription": "Các mục đã được sao lưu sẽ hiển thị ở đây",
@@ -526,7 +526,7 @@
   },
   "remindToEmptyEnteTrash": "Cũng hãy xóa \"Thùng rác\" của bạn để chiếm không gian đã giải phóng",
   "sparkleSuccess": "✨ Thành công",
-  "duplicateFileCountWithStorageSaved": "Bạn đã dọn dẹp {count, plural, other{{count} tệp trùng lặp}}, tiết kiệm ({storageSaved}!)",
+  "duplicateFileCountWithStorageSaved": "Bạn đã dọn dẹp {count, plural, one{{count} tệp trùng lặp} other{{count} tệp trùng lặp}}, tiết kiệm ({storageSaved}!)",
   "@duplicateFileCountWithStorageSaved": {
     "description": "The text to display when the user has successfully cleaned up duplicate files",
     "type": "text",
@@ -1181,7 +1181,7 @@
   "searchHint4": "Vị trí",
   "searchHint5": "Sắp có: Nhận diện khuôn mặt & tìm kiếm ma thuật ✨",
   "addYourPhotosNow": "Thêm ảnh của bạn ngay bây giờ",
-  "searchResultCount": "{count, plural, other{{count} kết quả được tìm thấy}}",
+  "searchResultCount": "{count, plural, one{{count} kết quả được tìm thấy} other{{count} kết quả được tìm thấy}}",
   "@searchResultCount": {
     "description": "Text to tell user how many results were found for their search query",
     "placeholders": {
@@ -1536,6 +1536,5 @@
   "joinAlbum": "Tham gia album",
   "joinAlbumSubtext": "để xem và thêm ảnh của bạn",
   "joinAlbumSubtextViewer": "thêm vào album được chia sẻ",
-  "join": "Tham gia",
-  "wishThemAHappyBirthday": "Wish ${name} a happy birthday! 🎉"
+  "join": "Tham gia"
 }

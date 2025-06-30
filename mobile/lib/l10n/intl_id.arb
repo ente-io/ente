@@ -1111,6 +1111,5 @@
   "rotate": "Putar",
   "left": "Kiri",
   "right": "Kanan",
-  "whatsNew": "Hal yang baru",
-  "wishThemAHappyBirthday": "Wish ${name} a happy birthday! 🎉"
+  "whatsNew": "Hal yang baru"
 }

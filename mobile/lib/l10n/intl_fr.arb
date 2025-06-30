@@ -899,7 +899,7 @@
   "authToViewYourMemories": "Authentifiez-vous pour voir vos souvenirs",
   "unlock": "Déverrouiller",
   "freeUpSpace": "Libérer de l'espace",
-  "freeUpSpaceSaving": "{count, plural, =1 {Il peut être supprimé de l'appareil pour libérer {formattedSize}} other {Ils peuvent être supprimés de l'appareil pour libérer {formattedSize}}}",
+  "freeUpSpaceSaving": "{count, plural, one {}=1 {Il peut être supprimé de l'appareil pour libérer {formattedSize}} other {Ils peuvent être supprimés de l'appareil pour libérer {formattedSize}}}",
   "filesBackedUpInAlbum": "{count, plural, one {1 fichier dans cet album a été sauvegardé en toute sécurité} other {{formattedNumber} fichiers dans cet album ont été sauvegardés en toute sécurité}}",
   "@filesBackedUpInAlbum": {
     "description": "Text to tell user how many files have been backed up in the album",
@@ -933,7 +933,7 @@
   "@freeUpSpaceSaving": {
     "description": "Text to tell user how much space they can free up by deleting items from the device"
   },
-  "freeUpAccessPostDelete": "Vous pouvez toujours {count, plural, =1 {l'} other {les}} accéder sur Ente tant que vous avez un abonnement actif",
+  "freeUpAccessPostDelete": "Vous pouvez toujours {count, plural, one {}=1 {l'} other {les}} accéder sur Ente tant que vous avez un abonnement actif",
   "@freeUpAccessPostDelete": {
     "placeholders": {
       "count": {
@@ -1269,8 +1269,8 @@
     "description": "Subtitle to indicate that the user can find people quickly by name"
   },
   "findPeopleByName": "Trouver des personnes rapidement par leur nom",
-  "addViewers": "{count, plural, =0 {Ajouter un spectateur} =1 {Ajouter une spectateur} other {Ajouter des spectateurs}}",
-  "addCollaborators": "{count, plural, =0 {Ajouter un collaborateur} =1 {Ajouter un collaborateur} other {Ajouter des collaborateurs}}",
+  "addViewers": "{count, plural, one {}=0 {Ajouter un spectateur} =1 {Ajouter une spectateur} other {Ajouter des spectateurs}}",
+  "addCollaborators": "{count, plural, one {}=0 {Ajouter un collaborateur} =1 {Ajouter un collaborateur} other {Ajouter des collaborateurs}}",
   "longPressAnEmailToVerifyEndToEndEncryption": "Appuyez longuement sur un email pour vérifier le chiffrement de bout en bout.",
   "developerSettingsWarning": "Êtes-vous sûr de vouloir modifier les paramètres du développeur ?",
   "developerSettings": "Paramètres du développeur",
@@ -1404,7 +1404,7 @@
   "enableMachineLearningBanner": "Activer l'apprentissage automatique pour la reconnaissance des visages et la recherche magique",
   "searchDiscoverEmptySection": "Les images seront affichées ici une fois le traitement terminé",
   "searchPersonsEmptySection": "Les personnes seront affichées ici une fois le traitement terminé",
-  "viewersSuccessfullyAdded": "{count, plural, =0 {0 spectateur ajouté} =1 {Un spectateur ajouté} other {{count} spectateurs ajoutés}}",
+  "viewersSuccessfullyAdded": "{count, plural, one {}=0 {0 spectateur ajouté} =1 {Un spectateur ajouté} other {{count} spectateurs ajoutés}}",
   "@viewersSuccessfullyAdded": {
     "placeholders": {
       "count": {
@@ -1755,7 +1755,23 @@
   "birthdayNotifications": "Notifications d’anniversaire",
   "receiveRemindersOnBirthdays": "Recevoir des rappels quand c'est l'anniversaire de quelqu'un. Appuyer sur la notification vous amènera à des photos de son anniversaire.",
   "happyBirthday": "Joyeux anniversaire ! 🥳",
-  "happyBirthdayToPerson": "Joyeux anniversaire {name}! 🎉",
   "birthdays": "Anniversaires",
-  "wishThemAHappyBirthday": "Wish ${name} a happy birthday! 🎉"
+  "wishThemAHappyBirthday": "Souhaitez à {name} un joyeux anniversaire ! 🎉",
+  "areYouSureRemoveThisFaceFromPerson": "Êtes-vous sûr de vouloir retirer ce visage de cette personne ?",
+  "otherDetectedFaces": "Autres visages détectés",
+  "areThey": "Vraiment",
+  "questionmark": "?",
+  "saveAsAnotherPerson": "Enregistrer comme une autre personne",
+  "showLessFaces": "Afficher moins de visages",
+  "showMoreFaces": "Afficher plus de visages",
+  "ignore": "Ignorer",
+  "merge": "Fusionner",
+  "reset": "Réinitialiser",
+  "areYouSureYouWantToIgnoreThisPerson": "Êtes-vous sûr de vouloir ignorer cette personne ?",
+  "areYouSureYouWantToIgnoreThesePersons": "Êtes-vous sûr de vouloir ignorer ces personnes ?",
+  "thePersonGroupsWillNotBeDisplayed": "Les groupes de personnes ne seront plus affichés dans la section personnes. Les photos resteront intactes.",
+  "thePersonWillNotBeDisplayed": "Les groupes de personnes ne seront plus affichés dans la section personnes. Les photos resteront intactes.",
+  "areYouSureYouWantToMergeThem": "Êtes-vous sûr de vouloir les fusionner?",
+  "allUnnamedGroupsWillBeMergedIntoTheSelectedPerson": "Tous les groupes sans nom seront fusionnés dans la personne sélectionnée. Cela peut toujours être annulé à partir de l'historique des suggestions de la personne.",
+  "yesIgnore": "Oui, ignorer"
 }
