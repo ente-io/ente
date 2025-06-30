@@ -41,6 +41,13 @@ class EntityService {
     return "entity_last_sync_time_" + type.typeToString();
   }
 
+  Future<List<LocalEntityData>> getCertainEntities(
+    EntityType type,
+    List<String> ids,
+  ) async {
+    return await _db.getCertainEntities(type, ids);
+  }
+
   Future<List<LocalEntityData>> getEntities(EntityType type) async {
     return await _db.getEntities(type);
   }

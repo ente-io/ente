@@ -71,6 +71,19 @@ class PersonService {
     });
   }
 
+  Future<List<PersonEntity>> getCertainPersons(List<String> ids) async {
+    final entities =
+        await entityService.getCertainEntities(EntityType.cgroup, ids);
+    return entities
+        .map(
+          (e) => PersonEntity(
+            e.id,
+            PersonData.fromJson(json.decode(e.data)),
+          ),
+        )
+        .toList();
+  }
+
   Future<List<PersonEntity>> getPersons() async {
     final entities = await entityService.getEntities(EntityType.cgroup);
     return entities

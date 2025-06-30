@@ -15,11 +15,18 @@ import 'package:photos/services/people_home_widget_service.dart';
 import 'package:photos/services/smart_memories_service.dart';
 import 'package:photos/utils/thumbnail_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import "package:synchronized/synchronized.dart";
 
 enum WidgetStatus {
+  // notSynced means the widget is not initialized or has no data
   notSynced,
+  // partially synced means some images were synced but not all
+  // this can happen if some widgets were not installed but we did a sync regardless
+  // or if the sync fails midway
   syncedPartially,
+  // we purposefully set widget to empty, widget had data
   syncedEmpty,
+  // all widgets were synced successfully
   syncedAll,
 }
 
@@ -47,6 +54,7 @@ class HomeWidgetService {
   HomeWidgetService._privateConstructor();
 
   final Logger _logger = Logger((HomeWidgetService).toString());
+  final computeLock = Lock();
 
   void init(SharedPreferences prefs) {
     setAppGroupID(iOSGroupIDMemory);
@@ -64,9 +72,9 @@ class HomeWidgetService {
   }
 
   Future<void> initHomeWidget() async {
-    await MemoryHomeWidgetService.instance.initMemoryHomeWidget(null);
-    await PeopleHomeWidgetService.instance.initHomeWidget(null);
-    await AlbumHomeWidgetService.instance.initHomeWidget(null);
+    await MemoryHomeWidgetService.instance.initMemoryHomeWidget();
+    await PeopleHomeWidgetService.instance.initPeopleHomeWidget();
+    await AlbumHomeWidgetService.instance.initAlbumHomeWidget();
   }
 
   Future<bool?> updateWidget({

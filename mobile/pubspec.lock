@@ -1745,10 +1745,10 @@ packages:
     dependency: "direct main"
     description:
       name: native_video_player
-      sha256: "571d2ddb9ce297a653ca69ced40e30135c6a59c5a9be9a38e3b370dd6e4bdb0e"
+      sha256: "83c6672848c7d563734d2415e189713285020174eebd967cbbf22c6941c5833c"
       url: "https://pub.dev"
     source: hosted
-    version: "3.0.0-dev.4"
+    version: "4.0.0"
   nested:
     dependency: transitive
     description:

@@ -107,10 +107,11 @@ class _GallerySettingsScreenState extends State<GallerySettingsScreen> {
                             await memoriesCacheService.setShowAnyMemories(
                               !memoriesCacheService.showAnyMemories,
                             );
-                            unawaited(
-                              MemoryHomeWidgetService.instance
-                                  .initMemoryHomeWidget(true),
-                            );
+                            if (!memoriesCacheService.showAnyMemories) {
+                              unawaited(
+                                MemoryHomeWidgetService.instance.clearWidget(),
+                              );
+                            }
                             setState(() {});
                           },
                         ),
