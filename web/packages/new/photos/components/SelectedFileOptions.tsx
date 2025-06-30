@@ -22,8 +22,18 @@ import {
     type CollectionSummary,
 } from "ente-new/photos/services/collection-summary";
 import { t } from "i18next";
-import { type CollectionOp } from "utils/collection";
-import { type FileOp } from "utils/file";
+
+export type CollectionOp = "add" | "move" | "remove" | "restore" | "unhide";
+
+export type FileOp =
+    | "download"
+    | "fixTime"
+    | "favorite"
+    | "archive"
+    | "unarchive"
+    | "hide"
+    | "trash"
+    | "deletePermanently";
 
 interface Props {
     handleCollectionOp: (op: CollectionOp) => (...args: any[]) => void;

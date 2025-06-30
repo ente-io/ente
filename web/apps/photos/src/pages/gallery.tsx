@@ -13,7 +13,6 @@ import {
 import { FixCreationTime } from "components/FixCreationTime";
 import { Sidebar } from "components/Sidebar";
 import { Upload } from "components/Upload";
-import SelectedFileOptions from "components/pages/gallery/SelectedFileOptions";
 import { sessionExpiredDialogAttributes } from "ente-accounts/components/utils/dialog";
 import { stashRedirect } from "ente-accounts/services/redirect";
 import { isSessionInvalid } from "ente-accounts/services/session";
@@ -49,6 +48,10 @@ import {
     SearchBar,
     type SearchBarProps,
 } from "ente-new/photos/components/SearchBar";
+import SelectedFileOptions, {
+    type CollectionOp,
+    type FileOp,
+} from "ente-new/photos/components/SelectedFileOptions";
 import { WhatsNew } from "ente-new/photos/components/WhatsNew";
 import {
     GalleryEmptyState,
@@ -121,12 +124,8 @@ import {
     SetFilesDownloadProgressAttributes,
     SetFilesDownloadProgressAttributesCreator,
 } from "types/gallery";
-import {
-    getSelectedCollection,
-    handleCollectionOp,
-    type CollectionOp,
-} from "utils/collection";
-import { getSelectedFiles, handleFileOp, type FileOp } from "utils/file";
+import { getSelectedCollection, handleCollectionOp } from "utils/collection";
+import { getSelectedFiles, handleFileOp } from "utils/file";
 
 /**
  * The default view for logged in users.

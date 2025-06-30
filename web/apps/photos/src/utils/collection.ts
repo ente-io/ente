@@ -28,8 +28,7 @@ import {
     type SetFilesDownloadProgressAttributesCreator,
 } from "types/gallery";
 import { downloadFilesWithProgress } from "utils/file";
-
-export type CollectionOp = "add" | "move" | "remove" | "restore" | "unhide";
+import { type CollectionOp } from "ente-new/photos/components/SelectedFileOptions";
 
 export async function handleCollectionOp(
     op: CollectionOp,
