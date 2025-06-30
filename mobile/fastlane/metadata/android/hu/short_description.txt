@@ -1,1 +1,1 @@
-ente is an end-to-end encrypted photo storage app
+Az ente egy végponttól végpontig titkosított fotótároló alkalmazás

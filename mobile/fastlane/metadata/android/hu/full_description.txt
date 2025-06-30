@@ -1,6 +1,6 @@
-ente is a simple app to backup and share your photos and videos.
+Az ente egy egyszerű alkalmazás a fényképek és videók biztonsági mentéséhez és megosztásához.
 
-If you've been looking for a privacy-friendly alternative to Google Photos, you've come to the right place. With ente, they are stored end-to-end encrypted (e2ee). This means that only you can view them.
+Ha a Google Fotók adatvédelmet biztosító alternatíváját keresed, jó helyen jársz. Az enter használatával végponttól végpontig titkosítva (e2ee) tárolódnak. This means that only you can view them.
 
 We have open-source apps across Android, iOS, web and desktop, and your photos will seamlessly sync between all of them in an end-to-end encrypted (e2ee) manner.
 
