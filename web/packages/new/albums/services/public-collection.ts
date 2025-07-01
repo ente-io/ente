@@ -4,7 +4,11 @@ import {
     ensureOk,
 } from "ente-base/http";
 import { apiURL } from "ente-base/origins";
-import { RemoteCollection, type PublicURL } from "ente-media/collection";
+import {
+    RemoteCollection,
+    type Collection,
+    type PublicURL,
+} from "ente-media/collection";
 import { z } from "zod/v4";
 
 /**
@@ -68,3 +72,45 @@ export const PublicCollectionInfo = z.object({
      */
     referralCode: z.string(),
 });
+
+/**
+ * Fetch a public collection from remote using its access key, decrypt it using
+ * the provided key, save the collection in our local database for subsequent
+ * use, and return it.
+ *
+ * This function modifies local state.
+ *
+ * @param accessToken A public collection access key obtained from the "t="
+ * query parameter of the public URL.
+ *
+ * The access key serves to both identify the public collection, and also
+ * authenticate the request. See: [Note: Public album access token].
+ *
+ * @param collectionKey The base64 encoded key that can be used to decrypt the
+ * collection obtained from remote.
+ *
+ * The collection key is obtained from the fragment portion of the public URL
+ * (the fragment is a client side only portion that can be used to have local
+ * secrets that are not sent by the browser to the server).
+ */
+export const fetchAndSavePublicCollection = (
+    accessToken: string,
+    collectionKey: string,
+): Promise<Collection> => {
+    throw new Error("TODO");
+};
+
+/**
+ * Fetch information from remote about a public collection using its access key.
+ *
+ * Remote only, does not modify local state.
+ *
+ * @param accessToken A public collection access key.
+ */
+const getPublicCollectionInfo = (accessToken: string) => {
+    const res = await fetch(await apiURL("/public-collection/info"), {
+        headers: authenticatedPublicAlbumsRequestHeaders({ accessToken }),
+    });
+    ensureOk(res);
+    return PublicCollectionInfo.parse(await res.json());
+};
