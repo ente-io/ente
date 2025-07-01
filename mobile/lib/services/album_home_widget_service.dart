@@ -254,7 +254,7 @@ class AlbumHomeWidgetService {
 
   Future<void> _refreshAlbumsWidget() async {
     // only refresh if widget was synced without issues
-    if (getAlbumsStatus() == WidgetStatus.syncedAll) return;
+    if (await countHomeWidgets() == 0) return;
     await _refreshWidget(message: "Refreshing from existing album set");
   }
 
