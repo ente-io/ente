@@ -6,7 +6,6 @@ import 'package:logging/logging.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import "package:photos/db/common/base.dart";
-import "package:photos/db/common/conflict_algo.dart";
 import "package:photos/extensions/stop_watch.dart";
 import 'package:photos/models/backup_status.dart';
 import 'package:photos/models/file/file.dart';
@@ -842,28 +841,25 @@ class FilesDB with SqlDbBase {
     return result;
   }
 
-  Future<List<EnteFile>> getFilesFromIDs(
+  Future<List<EnteFile>> getUniqueFiles(
     List<int> ids, {
-    bool asc = false,
     bool dedupeByUploadId = false,
     Set<int> collectionsToIgnore = const {},
   }) async {
-    final order = (asc ? 'ASC' : 'DESC');
     if (ids.isEmpty) {
       return [];
     }
-
     final inParam = ids.map((id) => "'$id'").join(',');
     final db = await instance.sqliteAsyncDB;
     final results = await db.getAll(
-      'SELECT * FROM $filesTable WHERE $columnUploadedFileID IN ($inParam) ORDER BY $columnCreationTime $order',
+      'SELECT * FROM $filesTable WHERE $columnUploadedFileID IN ($inParam) ORDER BY $columnCreationTime DESC',
     );
     final files = convertToFiles(results);
     final result = await applyDBFilters(
       files,
       DBFilterOptions(
         ignoredCollectionIDs: collectionsToIgnore,
-        dedupeUploadID: dedupeByUploadId,
+        dedupeUploadID: true,
       ),
     );
 

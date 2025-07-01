@@ -222,7 +222,7 @@ class MemoriesCacheService {
           minimalFileIDs.addAll(memory.fileUploadedIDs);
         }
       }
-      final minimalFiles = await FilesDB.instance.getFilesFromIDs(
+      final minimalFiles = await FilesDB.instance.getUniqueFiles(
         minimalFileIDs.toList(),
         collectionsToIgnore:
             CollectionsService.instance.getHiddenCollectionIds(),
