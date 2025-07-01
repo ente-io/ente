@@ -666,7 +666,6 @@ const Page: React.FC = () => {
         (op: CollectionOp) => (selectedCollection: Collection) => {
             void (async () => {
                 showLoadingBar();
-                let notifyOthersFiles = false;
                 try {
                     setOpenCollectionSelector(false);
                     const selectedFiles = getSelectedFiles(
@@ -686,18 +685,15 @@ const Page: React.FC = () => {
                         );
                     }
                     // See: [Note: Add and move of non-user files]
-                    notifyOthersFiles =
-                        userFiles.length != selectedFiles.length;
+                    if (userFiles.length != selectedFiles.length) {
+                        showMiniDialog(notifyOthersFilesDialogAttributes());
+                    }
                     clearSelection();
                     await remotePull({ silent: true });
                 } catch (e) {
                     onGenericError(e);
                 } finally {
                     hideLoadingBar();
-                }
-
-                if (notifyOthersFiles) {
-                    showMiniDialog(notifyOthersFilesDialogAttributes());
                 }
             })();
         };
@@ -726,7 +722,6 @@ const Page: React.FC = () => {
     const createFileOpHandler = (op: FileOp) => () => {
         void (async () => {
             showLoadingBar();
-            let notifyOthersFiles = false;
             try {
                 const selectedFiles = getSelectedFiles(
                     selected,
@@ -763,17 +758,15 @@ const Page: React.FC = () => {
                 // on the user's own files.
                 //
                 // See: [Note: Add and move of non-user files].
-                notifyOthersFiles =
-                    toProcessFiles.length != selectedFiles.length;
+                if (toProcessFiles.length != selectedFiles.length) {
+                    showMiniDialog(notifyOthersFilesDialogAttributes());
+                }
                 clearSelection();
                 await remotePull({ silent: true });
             } catch (e) {
                 onGenericError(e);
             } finally {
                 hideLoadingBar();
-            }
-            if (notifyOthersFiles) {
-                showMiniDialog(notifyOthersFilesDialogAttributes());
             }
         })();
     };
