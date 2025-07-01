@@ -124,6 +124,7 @@ class MemoryHomeWidgetService {
       return;
     }
 
+    _logger.info("Checking pending memory sync");
     if (await _shouldUpdateWidgetCache()) {
       await initMemoryHomeWidget();
     }

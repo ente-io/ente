@@ -6,9 +6,6 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/models/file/file.dart';
-import "package:photos/models/search/generic_search_result.dart";
-import "package:photos/models/search/search_constants.dart";
-import "package:photos/models/search/search_types.dart";
 import 'package:photos/service_locator.dart';
 import 'package:photos/services/home_widget_service.dart';
 import 'package:photos/services/machine_learning/face_ml/person/person_service.dart';
@@ -126,6 +123,7 @@ class PeopleHomeWidgetService {
       return;
     }
 
+    _logger.info("Checking pending people sync");
     if (await _shouldUpdateWidgetCache()) {
       await initPeopleHomeWidget();
     }
@@ -133,7 +131,7 @@ class PeopleHomeWidgetService {
 
   Future<void> checkPeopleChanged() async {
     final havePeopleChanged = await peopleChangedLock.synchronized(() async {
-      final peopleIds = await _getEffectiveSelectedPeopleIds();
+      final peopleIds = getSelectedPeople() ?? [];
       final currentHash = await _calculateHash(peopleIds);
       final lastHash = getPeopleLastHash();
 
@@ -228,7 +226,7 @@ class PeopleHomeWidgetService {
     }
 
     // Check if selected people or hash exist
-    final peopleIds = await _getEffectiveSelectedPeopleIds();
+    final peopleIds = getSelectedPeople() ?? [];
     final hash = await _calculateHash(peopleIds);
 
     final noSelectionOrHashEmpty = peopleIds.isEmpty || hash.isEmpty;
@@ -259,30 +257,6 @@ class PeopleHomeWidgetService {
     return peopleStatus == WidgetStatus.notSynced ||
         peopleStatus == WidgetStatus.syncedPartially &&
             await countHomeWidgets() > 0;
-  }
-
-  Future<List<String>> _getEffectiveSelectedPeopleIds() async {
-    var peopleIds = getSelectedPeople();
-
-    // Select first two named people by default
-    if (peopleIds == null || peopleIds.isEmpty) {
-      final searchFilter = await SectionType.face.getData(null).then(
-            (value) => (value as List<GenericSearchResult>).where(
-              (element) => (element.params[kPersonParamID] as String?) != null,
-            ),
-          );
-
-      if (searchFilter.isNotEmpty) {
-        peopleIds = searchFilter
-            .take(2)
-            .map((e) => e.params[kPersonParamID] as String)
-            .toList();
-      } else {
-        _logger.warning("No selected people found");
-      }
-    }
-
-    return peopleIds ?? [];
   }
 
   Future<Map<String, (String, Iterable<EnteFile>)>> _getPeople(
@@ -330,7 +304,7 @@ class PeopleHomeWidgetService {
   }
 
   Future<void> _updatePeopleWidgetCache() async {
-    final peopleIds = await _getEffectiveSelectedPeopleIds();
+    final peopleIds = getSelectedPeople() ?? [];
     final peopleWithFiles = await _getPeople(peopleIds);
 
     if (peopleWithFiles.isEmpty) {

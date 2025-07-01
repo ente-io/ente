@@ -131,6 +131,7 @@ class AlbumHomeWidgetService {
       return;
     }
 
+    _logger.info("Checking pending albums sync");
     if (await _shouldUpdateWidgetCache()) {
       await initAlbumHomeWidget();
     }
