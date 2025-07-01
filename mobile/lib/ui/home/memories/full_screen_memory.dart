@@ -268,211 +268,208 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
 
   @override
   Widget build(BuildContext context) {
-    final screenPadding = MediaQuery.paddingOf(context);
     final inheritedData = FullScreenMemoryData.of(context)!;
     final showStepProgressIndicator = inheritedData.memories.length < 60;
 
     return Padding(
-      padding: EdgeInsets.fromLTRB(
-        4,
-        screenPadding.top + 8,
-        4,
-        screenPadding.bottom + 8,
+      padding: const EdgeInsets.symmetric(
+        horizontal: 4.0,
       ),
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: strokeFainterDark,
-            width: 1,
-          ),
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(16),
-          child: Scaffold(
-            backgroundColor: Colors.black,
-            extendBodyBehindAppBar: true,
-            appBar: AppBar(
-              toolbarHeight: 64,
-              primary: false,
-              automaticallyImplyLeading: false,
-              title: ValueListenableBuilder(
-                valueListenable: inheritedData.indexNotifier,
-                child: GestureDetector(
-                  onTap: () => Navigator.pop(context),
-                  child: const Padding(
-                    padding: EdgeInsets.fromLTRB(4, 8, 8, 8),
-                    child: Icon(Icons.close, color: Colors.white),
-                  ),
-                ),
-                builder: (context, value, child) {
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const SizedBox(
-                        height: 32,
-                      ),
-                      showStepProgressIndicator
-                          ? ValueListenableBuilder<Duration>(
-                              valueListenable: durationNotifier,
-                              builder: (context, duration, _) {
-                                return MemoryProgressIndicator(
-                                  totalSteps: inheritedData.memories.length,
-                                  currentIndex: value,
-                                  selectedColor: Colors.white,
-                                  unselectedColor:
-                                      Colors.white.withOpacity(0.4),
-                                  duration: duration,
-                                  animationController: (controller) {
-                                    _progressAnimationController = controller;
-                                  },
-                                  onComplete: () {
-                                    _goToNext(inheritedData);
-                                  },
-                                );
-                              },
-                            )
-                          : const SizedBox.shrink(),
-                      const SizedBox(height: 6),
-                      Row(
-                        children: [
-                          child!,
-                          Text(
-                            SmartMemoriesService.getDateFormatted(
-                              creationTime: inheritedData
-                                  .memories[value].file.creationTime!,
-                              context: context,
-                            ),
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleMedium!
-                                .copyWith(
-                                  fontSize: 14,
-                                  color: Colors.white,
-                                ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  );
-                },
-              ),
-              flexibleSpace: Container(
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Color.fromARGB(75, 0, 0, 0),
-                      Color.fromARGB(37, 0, 0, 0),
-                      Colors.transparent,
-                      Colors.transparent,
-                    ],
-                    stops: [0, 0.45, 0.8, 1],
-                  ),
-                ),
-              ),
-              backgroundColor: Colors.transparent,
-              elevation: 0,
+      child: SafeArea(
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: strokeFainterDark,
+              width: 1,
             ),
-            body: Stack(
-              alignment: Alignment.bottomCenter,
-              children: [
-                const _MemoryBlur(),
-                ValueListenableBuilder<int>(
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: Scaffold(
+              backgroundColor: Colors.black,
+              extendBodyBehindAppBar: true,
+              appBar: AppBar(
+                toolbarHeight: 64,
+                primary: false,
+                automaticallyImplyLeading: false,
+                title: ValueListenableBuilder(
                   valueListenable: inheritedData.indexNotifier,
-                  builder: (context, index, _) {
-                    if (index < inheritedData.memories.length - 1) {
-                      final nextFile = inheritedData.memories[index + 1].file;
-                      preloadThumbnail(nextFile);
-                      preloadFile(nextFile);
-                    }
-                    final currentMemory = inheritedData.memories[index];
-                    final isVideo =
-                        currentMemory.file.fileType == FileType.video;
-                    final currentFile = currentMemory.file;
-
-                    return MemoriesPointerGestureListener(
-                      onTap: (PointerEvent event) {
-                        final screenWidth = MediaQuery.sizeOf(context).width;
-                        final goToPreviousTapAreaWidth = screenWidth * 0.20;
-                        if (event.localPosition.dx < goToPreviousTapAreaWidth) {
-                          _goToPrevious(inheritedData);
-                        } else {
-                          _goToNext(inheritedData);
-                        }
-                      },
-                      hasPointerNotifier: hasPointerOnScreenNotifier,
-                      child: MemoriesZoomWidget(
-                        key: ValueKey(
-                          currentFile.uploadedFileID ?? currentFile.localID,
+                  child: GestureDetector(
+                    onTap: () => Navigator.pop(context),
+                    child: const Padding(
+                      padding: EdgeInsets.fromLTRB(4, 8, 8, 8),
+                      child: Icon(Icons.close, color: Colors.white),
+                    ),
+                  ),
+                  builder: (context, value, child) {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 32),
+                        showStepProgressIndicator
+                            ? ValueListenableBuilder<Duration>(
+                                valueListenable: durationNotifier,
+                                builder: (context, duration, _) {
+                                  return MemoryProgressIndicator(
+                                    totalSteps: inheritedData.memories.length,
+                                    currentIndex: value,
+                                    selectedColor: Colors.white,
+                                    unselectedColor:
+                                        Colors.white.withOpacity(0.4),
+                                    duration: duration,
+                                    animationController: (controller) {
+                                      _progressAnimationController = controller;
+                                    },
+                                    onComplete: () {
+                                      _goToNext(inheritedData);
+                                    },
+                                  );
+                                },
+                              )
+                            : const SizedBox.shrink(),
+                        const SizedBox(height: 6),
+                        Row(
+                          children: [
+                            child!,
+                            Text(
+                              SmartMemoriesService.getDateFormatted(
+                                creationTime: inheritedData
+                                    .memories[value].file.creationTime!,
+                                context: context,
+                              ),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleMedium!
+                                  .copyWith(
+                                    fontSize: 14,
+                                    color: Colors.white,
+                                  ),
+                            ),
+                          ],
                         ),
-                        scaleController: (controller) {
-                          _zoomAnimationController = controller;
-                        },
-                        zoomIn: index % 2 == 0,
-                        isVideo: isVideo,
-                        child: FileWidget(
-                          currentFile,
-                          autoPlay: false,
-                          tagPrefix: "memories",
-                          backgroundDecoration:
-                              const BoxDecoration(color: Colors.transparent),
-                          isFromMemories: true,
-                          playbackCallback: (isPlaying) {
-                            _toggleAnimation(pause: !isPlaying);
-                          },
-                          onFinalFileLoad: ({required int memoryDuration}) {
-                            onFinalFileLoad(memoryDuration);
-                          },
-                        ),
-                      ),
+                      ],
                     );
                   },
                 ),
-                BottomGradient(showTitle: _showTitle),
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    ValueListenableBuilder(
-                      valueListenable: _showTitle,
-                      builder: (context, value, _) {
-                        return AnimatedSwitcher(
-                          duration: const Duration(milliseconds: 250),
-                          switchInCurve: Curves.easeOut,
-                          switchOutCurve: Curves.easeIn,
-                          child: value
-                              ? Padding(
-                                  padding: const EdgeInsets.fromLTRB(
-                                    32,
-                                    4,
-                                    32,
-                                    12,
-                                  ),
-                                  child: Hero(
-                                    tag: widget.title,
-                                    child: Text(
-                                      widget.title,
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 30,
-                                        fontFamily: "Montserrat",
-                                      ),
-                                      textAlign: TextAlign.left,
-                                    ),
-                                  ),
-                                )
-                              : showStepProgressIndicator
-                                  ? const SizedBox.shrink()
-                                  : const MemoryCounter(),
-                        );
-                      },
+                flexibleSpace: Container(
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Color.fromARGB(75, 0, 0, 0),
+                        Color.fromARGB(37, 0, 0, 0),
+                        Colors.transparent,
+                        Colors.transparent,
+                      ],
+                      stops: [0, 0.45, 0.8, 1],
                     ),
-                    const BottomIcons(),
-                  ],
+                  ),
                 ),
-              ],
+                backgroundColor: Colors.transparent,
+                elevation: 0,
+              ),
+              body: Stack(
+                alignment: Alignment.bottomCenter,
+                children: [
+                  const _MemoryBlur(),
+                  ValueListenableBuilder<int>(
+                    valueListenable: inheritedData.indexNotifier,
+                    builder: (context, index, _) {
+                      if (index < inheritedData.memories.length - 1) {
+                        final nextFile = inheritedData.memories[index + 1].file;
+                        preloadThumbnail(nextFile);
+                        preloadFile(nextFile);
+                      }
+                      final currentMemory = inheritedData.memories[index];
+                      final isVideo =
+                          currentMemory.file.fileType == FileType.video;
+                      final currentFile = currentMemory.file;
+
+                      return MemoriesPointerGestureListener(
+                        onTap: (PointerEvent event) {
+                          final screenWidth = MediaQuery.sizeOf(context).width;
+                          final goToPreviousTapAreaWidth = screenWidth * 0.20;
+                          if (event.localPosition.dx <
+                              goToPreviousTapAreaWidth) {
+                            _goToPrevious(inheritedData);
+                          } else {
+                            _goToNext(inheritedData);
+                          }
+                        },
+                        hasPointerNotifier: hasPointerOnScreenNotifier,
+                        child: MemoriesZoomWidget(
+                          key: ValueKey(
+                            currentFile.uploadedFileID ?? currentFile.localID,
+                          ),
+                          scaleController: (controller) {
+                            _zoomAnimationController = controller;
+                          },
+                          zoomIn: index % 2 == 0,
+                          isVideo: isVideo,
+                          child: FileWidget(
+                            currentFile,
+                            autoPlay: false,
+                            tagPrefix: "memories",
+                            backgroundDecoration:
+                                const BoxDecoration(color: Colors.transparent),
+                            isFromMemories: true,
+                            playbackCallback: (isPlaying) {
+                              _toggleAnimation(pause: !isPlaying);
+                            },
+                            onFinalFileLoad: ({required int memoryDuration}) {
+                              onFinalFileLoad(memoryDuration);
+                            },
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                  BottomGradient(showTitle: _showTitle),
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      ValueListenableBuilder(
+                        valueListenable: _showTitle,
+                        builder: (context, value, _) {
+                          return AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 250),
+                            switchInCurve: Curves.easeOut,
+                            switchOutCurve: Curves.easeIn,
+                            child: value
+                                ? Padding(
+                                    padding: const EdgeInsets.fromLTRB(
+                                      32,
+                                      4,
+                                      32,
+                                      12,
+                                    ),
+                                    child: Hero(
+                                      tag: widget.title,
+                                      child: Text(
+                                        widget.title,
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 30,
+                                          fontFamily: "Montserrat",
+                                        ),
+                                        textAlign: TextAlign.left,
+                                      ),
+                                    ),
+                                  )
+                                : showStepProgressIndicator
+                                    ? const SizedBox.shrink()
+                                    : const MemoryCounter(),
+                          );
+                        },
+                      ),
+                      const BottomIcons(),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ),
