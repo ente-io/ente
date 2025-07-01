@@ -136,8 +136,7 @@ class _VideoWidgetMediaKitNewState extends State<VideoWidgetMediaKitNew>
           // ignore: unawaited_futures
           asset.getMediaUrl().then((url) {
             _setVideoController(
-              url ??
-                  'https://user-images.githubusercontent.com/28951144/229373695-22f88f13-d18f-4288-9bf1-c3e078d83722.mp4',
+              url ?? "",
             );
           });
         }

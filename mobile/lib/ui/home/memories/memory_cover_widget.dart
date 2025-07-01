@@ -1,5 +1,4 @@
 import "package:flutter/material.dart";
-import "package:flutter/scheduler.dart";
 import "package:photos/models/memories/memory.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/effects.dart";
@@ -57,8 +56,7 @@ class _MemoryCoverWidgetState extends State<MemoryCoverWidget> {
 
     final memory = widget.memories[index];
     final isSeen = memory.isSeen();
-    final brightness =
-        SchedulerBinding.instance.platformDispatcher.platformBrightness;
+    final brightness = Theme.of(context).brightness;
 
     return Padding(
       padding: const EdgeInsets.symmetric(
