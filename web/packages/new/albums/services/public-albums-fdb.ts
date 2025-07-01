@@ -5,6 +5,7 @@
 import {
     LocalCollections,
     LocalEnteFiles,
+    LocalTimestamp,
     transformFilesIfNeeded,
 } from "ente-gallery/services/files-db";
 import { type Collection } from "ente-media/collection";
@@ -91,7 +92,8 @@ type ES = LocalSavedPublicCollectionFilesEntry[];
  *
  * Use {@link savePublicCollectionFiles} to update the database.
  *
- * @param accessToken The access token of the public album whose files we want.
+ * @param accessToken The access token that identifies the public album under
+ * consideration.
  */
 export const savedPublicCollectionFiles = async (
     accessToken: string,
@@ -108,8 +110,8 @@ export const savedPublicCollectionFiles = async (
  *
  * This is the setter corresponding to {@link savedPublicCollectionFiles}.
  *
- * @param accessToken The access token of the public album whose files we want
- * to replace.
+ * @param accessToken The access token that identifies the public album under
+ * consideration.
  *
  * @param files The files to save.
  */
@@ -123,6 +125,44 @@ export const savePublicCollectionFiles = async (
         { collectionUID: accessToken, files },
         ...(entries ?? []).filter((e) => e.collectionUID != accessToken),
     ]);
+};
+
+/**
+ * Return the locally persisted "last sync time" for a public collection that we
+ * have pulled from remote. This can be used to perform a paginated delta pull
+ * from the saved time onwards.
+ *
+ * Use {@link savePublic CollectionLastSyncTime} to update the value saved in
+ * the database, and {@link removePublicCollectionLastSyncTime} to remove the
+ * saved value from the database.
+ *
+ * @param accessToken The access token that identifies the public album under
+ * consideration.
+ */
+export const savedPublicCollectionLastSyncTime = async (accessToken: string) =>
+    LocalTimestamp.parse(
+        await localForage.getItem(`public-${accessToken}-time`),
+    );
+
+/**
+ * Update the locally persisted timestamp that will be returned by subsequent
+ * calls to {@link savedPublicCollectionLastSyncTime}.
+ */
+export const savePublicCollectionLastSyncTime = async (
+    accessToken: string,
+    time: number,
+) => {
+    await localForage.setItem(`public-${accessToken}-time`, time);
+};
+
+/**
+ * Remove the locally persisted timestamp, if any, previously saved for a
+ * collection using {@link savedPublicCollectionLastSyncTime}.
+ */
+export const removePublicCollectionLastSyncTime = async (
+    accessToken: string,
+) => {
+    await localForage.removeItem(`public-${accessToken}-time`);
 };
 
 const LocalUploaderName = z.string().nullish().transform(nullToUndefined);
@@ -143,8 +183,8 @@ const LocalUploaderName = z.string().nullish().transform(nullToUndefined);
  * public collection, in the local database so that it can prefill it the next
  * time there is an upload from the same client.
  *
- * @param accessToken The access token of the public album whose persisted
- * uploader name we we want.
+ * @param accessToken The access token that identifies the public album under
+ * consideration.
  */
 export const savedPublicCollectionUploaderName = async (accessToken: string) =>
     LocalUploaderName.parse(
