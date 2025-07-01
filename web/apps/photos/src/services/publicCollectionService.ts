@@ -9,6 +9,7 @@ import type {
 import type { EnteFile, RemoteEnteFile } from "ente-media/file";
 import { decryptRemoteFile } from "ente-media/file";
 import {
+    removePublicCollectionFiles,
     removePublicCollectionLastSyncTime,
     savedPublicCollectionFiles,
     savedPublicCollectionLastSyncTime,
@@ -21,7 +22,6 @@ import { CustomError, parseSharingErrorCodes } from "ente-shared/error";
 import HTTPService from "ente-shared/network/HTTPService";
 import localForage from "ente-shared/storage/localForage";
 
-const PUBLIC_COLLECTION_FILES_TABLE = "public-collection-files";
 const PUBLIC_COLLECTIONS_TABLE = "public-collections";
 
 // Fix this once we can trust the types.
@@ -305,16 +305,5 @@ export const removePublicCollectionWithFiles = async (
 export const removePublicFiles = async (collectionUID: string) => {
     await localForage.removeItem(getPublicCollectionPasswordKey(collectionUID));
     await removePublicCollectionLastSyncTime(collectionUID);
-
-    const publicCollectionFiles =
-        (await localForage.getItem<LocalSavedPublicCollectionFiles[]>(
-            PUBLIC_COLLECTION_FILES_TABLE,
-        )) ?? [];
-    await localForage.setItem(
-        PUBLIC_COLLECTION_FILES_TABLE,
-        publicCollectionFiles.filter(
-            (collectionFiles) =>
-                collectionFiles.collectionUID !== collectionUID,
-        ),
-    );
+    await removePublicCollectionFiles(collectionUID);
 };

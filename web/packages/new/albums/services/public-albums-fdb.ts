@@ -84,13 +84,11 @@ type LocalSavedPublicCollectionFilesEntry = z.infer<
     typeof LocalSavedPublicCollectionFilesEntry
 >;
 
-// A purely synactic and local alias to avoid the code from looking scary.
-type ES = LocalSavedPublicCollectionFilesEntry[];
-
 /**
  * Return all files for a public collection present in our local database.
  *
- * Use {@link savePublicCollectionFiles} to update the database.
+ * Use {@link savePublicCollectionFiles} to update the list of files in the
+ * database, and {@link removePublicCollectionFiles} to remove them.
  *
  * @param accessToken The access token that identifies the public album under
  * consideration.
@@ -98,11 +96,23 @@ type ES = LocalSavedPublicCollectionFilesEntry[];
 export const savedPublicCollectionFiles = async (
     accessToken: string,
 ): Promise<EnteFile[]> => {
+    const entry = (await pcfEntries()).find(
+        (e) => e.collectionUID == accessToken,
+    );
+    return transformFilesIfNeeded(entry ? entry.files : []);
+};
+
+/**
+ * A convenience routine to read the DB entries for "public-collection-files".
+ */
+const pcfEntries = async () => {
+    // A local alias to avoid the code from looking scary.
+    type ES = LocalSavedPublicCollectionFilesEntry[];
+
     // See: [Note: Avoiding Zod parsing for large DB arrays] for why we use an
     // (implied) cast here instead of parsing using the Zod schema.
     const entries = await localForage.getItem<ES>("public-collection-files");
-    const entry = (entries ?? []).find((e) => e.collectionUID == accessToken);
-    return transformFilesIfNeeded(entry ? entry.files : []);
+    return entries ?? [];
 };
 
 /**
@@ -119,11 +129,21 @@ export const savePublicCollectionFiles = async (
     accessToken: string,
     files: EnteFile[],
 ): Promise<void> => {
-    // See: [Note: Avoiding Zod parsing for large DB arrays].
-    const entries = await localForage.getItem<ES>("public-collection-files");
     await localForage.setItem("public-collection-files", [
         { collectionUID: accessToken, files },
-        ...(entries ?? []).filter((e) => e.collectionUID != accessToken),
+        ...(await pcfEntries()).filter((e) => e.collectionUID != accessToken),
+    ]);
+};
+
+/**
+ * Remove the list of files, in any, in our local database for the given
+ * collection (identified by its {@link accessToken}).
+ */
+export const removePublicCollectionFiles = async (
+    accessToken: string,
+): Promise<void> => {
+    await localForage.setItem("public-collection-files", [
+        ...(await pcfEntries()).filter((e) => e.collectionUID != accessToken),
     ]);
 };
 
