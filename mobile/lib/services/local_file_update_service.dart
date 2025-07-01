@@ -164,7 +164,7 @@ class LocalFileUpdateService {
           _logger.info(
             "Marking for file update as hash did not match ${file.tag}",
           );
-          await clearCache(file);
+          // await clearCache(file);
           await FilesDB.instance.markFilesForReUpload(
             userID,
             file.localID!,

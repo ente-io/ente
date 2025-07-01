@@ -13,7 +13,6 @@ import {
 import { FixCreationTime } from "components/FixCreationTime";
 import { Sidebar } from "components/Sidebar";
 import { Upload } from "components/Upload";
-import SelectedFileOptions from "components/pages/gallery/SelectedFileOptions";
 import { sessionExpiredDialogAttributes } from "ente-accounts/components/utils/dialog";
 import { stashRedirect } from "ente-accounts/services/redirect";
 import { isSessionInvalid } from "ente-accounts/services/session";
@@ -49,6 +48,11 @@ import {
     SearchBar,
     type SearchBarProps,
 } from "ente-new/photos/components/SearchBar";
+import {
+    SelectedFileOptions,
+    type CollectionOp,
+    type FileOp,
+} from "ente-new/photos/components/SelectedFileOptions";
 import { WhatsNew } from "ente-new/photos/components/WhatsNew";
 import {
     GalleryEmptyState,
@@ -58,16 +62,23 @@ import {
 } from "ente-new/photos/components/gallery";
 import {
     findCollectionCreatingUncategorizedIfNeeded,
+    performCollectionOp,
     validateKey,
 } from "ente-new/photos/components/gallery/helpers";
 import {
     useGalleryReducer,
     type GalleryBarMode,
 } from "ente-new/photos/components/gallery/reducer";
+import { notifyOthersFilesDialogAttributes } from "ente-new/photos/components/utils/dialog-attributes";
 import { useIsOffline } from "ente-new/photos/components/utils/use-is-offline";
 import { usePeopleStateSnapshot } from "ente-new/photos/components/utils/use-snapshot";
 import { shouldShowWhatsNew } from "ente-new/photos/services/changelog";
-import { createAlbum } from "ente-new/photos/services/collection";
+import {
+    addToFavoritesCollection,
+    createAlbum,
+    removeFromCollection,
+    removeFromFavoritesCollection,
+} from "ente-new/photos/services/collection";
 import {
     haveOnlySystemCollections,
     PseudoCollectionID,
@@ -111,22 +122,13 @@ import { useRouter, type NextRouter } from "next/router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FileWithPath } from "react-dropzone";
 import { Trans } from "react-i18next";
-import {
-    addToFavorites1,
-    removeFromFavorites1,
-} from "services/collectionService";
 import { uploadManager } from "services/upload-manager";
 import {
     SelectedState,
     SetFilesDownloadProgressAttributes,
     SetFilesDownloadProgressAttributesCreator,
 } from "types/gallery";
-import {
-    getSelectedCollection,
-    handleCollectionOp,
-    type CollectionOp,
-} from "utils/collection";
-import { getSelectedFiles, handleFileOp, type FileOp } from "utils/file";
+import { getSelectedFiles, performFileOp } from "utils/file";
 
 /**
  * The default view for logged in users.
@@ -632,26 +634,18 @@ const Page: React.FC = () => {
             return updater;
         }, []);
 
-    const collectionOpsHelper =
-        (op: CollectionOp) => async (collection: Collection) => {
+    const handleRemoveFilesFromCollection = (collection: Collection) => {
+        void (async () => {
             showLoadingBar();
+            let notifyOthersFiles = false;
             try {
                 setOpenCollectionSelector(false);
                 const selectedFiles = getSelectedFiles(selected, filteredFiles);
-                const toProcessFiles =
-                    op == "remove"
-                        ? selectedFiles
-                        : selectedFiles.filter(
-                              (file) => file.ownerID === user.id,
-                          );
-                if (toProcessFiles.length > 0) {
-                    await handleCollectionOp(
-                        op,
-                        collection,
-                        toProcessFiles,
-                        selected.collectionID,
-                    );
-                }
+                const processedCount = await removeFromCollection(
+                    collection,
+                    selectedFiles,
+                );
+                notifyOthersFiles = processedCount != selectedFiles.length;
                 clearSelection();
                 await remotePull({ silent: true });
             } catch (e) {
@@ -659,50 +653,50 @@ const Page: React.FC = () => {
             } finally {
                 hideLoadingBar();
             }
-        };
 
-    const fileOpHelper = (op: FileOp) => async () => {
-        showLoadingBar();
-        try {
-            const selectedFiles = getSelectedFiles(
-                selected,
-                op == "hide"
-                    ? // passing files here instead of filteredData for hide ops
-                      // because we want to move all files copies to hidden collection
-                      state.collectionFiles.filter(
-                          (f) => !state.hiddenFileIDs.has(f.id),
-                      )
-                    : filteredFiles,
-            );
-            const toProcessFiles =
-                op == "download"
-                    ? selectedFiles
-                    : selectedFiles.filter((file) => file.ownerID === user.id);
-            if (toProcessFiles.length > 0) {
-                await handleFileOp(
-                    op,
-                    toProcessFiles,
-                    handleMarkTempDeleted,
-                    () => dispatch({ type: "clearTempDeleted" }),
-                    (files) => dispatch({ type: "markTempHidden", files }),
-                    () => dispatch({ type: "clearTempHidden" }),
-                    (files) => {
-                        setFixCreationTimeFiles(files);
-                        showFixCreationTime();
-                    },
-                    setFilesDownloadProgressAttributesCreator,
-                );
+            if (notifyOthersFiles) {
+                showMiniDialog(notifyOthersFilesDialogAttributes());
             }
-            clearSelection();
-            await remotePull({ silent: true });
-        } catch (e) {
-            onGenericError(e);
-        } finally {
-            hideLoadingBar();
-        }
+        })();
     };
 
-    const handleCreateAlbumForOp = useCallback(
+    const createOnSelectForCollectionOp =
+        (op: CollectionOp) => (selectedCollection: Collection) => {
+            void (async () => {
+                showLoadingBar();
+                try {
+                    setOpenCollectionSelector(false);
+                    const selectedFiles = getSelectedFiles(
+                        selected,
+                        filteredFiles,
+                    );
+                    const userFiles = selectedFiles.filter(
+                        (f) => f.ownerID == user.id,
+                    );
+                    const sourceCollectionID = selected.collectionID;
+                    if (userFiles.length > 0) {
+                        await performCollectionOp(
+                            op,
+                            selectedCollection,
+                            userFiles,
+                            sourceCollectionID,
+                        );
+                    }
+                    // See: [Note: Add and move of non-user files]
+                    if (userFiles.length != selectedFiles.length) {
+                        showMiniDialog(notifyOthersFilesDialogAttributes());
+                    }
+                    clearSelection();
+                    await remotePull({ silent: true });
+                } catch (e) {
+                    onGenericError(e);
+                } finally {
+                    hideLoadingBar();
+                }
+            })();
+        };
+
+    const createOnCreateForCollectionOp = useCallback(
         (op: CollectionOp) => {
             setPostCreateAlbumOp(op);
             return showAlbumNameInput;
@@ -714,14 +708,66 @@ const Page: React.FC = () => {
         async (name: string) => {
             const collection = await createAlbum(name);
             setPostCreateAlbumOp((postCreateAlbumOp) => {
-                // collectionOpsHelper does its own progress and error
-                // reporting, defer to that.
-                void collectionOpsHelper(postCreateAlbumOp!)(collection);
+                // The function returned by createHandleCollectionOp does its
+                // own progress and error reporting, defer to that.
+                createOnSelectForCollectionOp(postCreateAlbumOp!)(collection);
                 return undefined;
             });
         },
-        [collectionOpsHelper],
+        [createOnSelectForCollectionOp],
     );
+
+    const createFileOpHandler = (op: FileOp) => () => {
+        void (async () => {
+            showLoadingBar();
+            try {
+                const selectedFiles = getSelectedFiles(
+                    selected,
+                    op == "hide"
+                        ? // passing files here instead of filteredData for hide since
+                          // we want to move all files copies to hidden collection
+                          state.collectionFiles.filter(
+                              (f) => !state.hiddenFileIDs.has(f.id),
+                          )
+                        : filteredFiles,
+                );
+                const toProcessFiles =
+                    op == "download"
+                        ? selectedFiles
+                        : selectedFiles.filter(
+                              (file) => file.ownerID == user.id,
+                          );
+                if (toProcessFiles.length > 0) {
+                    await performFileOp(
+                        op,
+                        toProcessFiles,
+                        handleMarkTempDeleted,
+                        () => dispatch({ type: "clearTempDeleted" }),
+                        (files) => dispatch({ type: "markTempHidden", files }),
+                        () => dispatch({ type: "clearTempHidden" }),
+                        (files) => {
+                            setFixCreationTimeFiles(files);
+                            showFixCreationTime();
+                        },
+                        setFilesDownloadProgressAttributesCreator,
+                    );
+                }
+                // Apart from download, the other operations currently only work
+                // on the user's own files.
+                //
+                // See: [Note: Add and move of non-user files].
+                if (toProcessFiles.length != selectedFiles.length) {
+                    showMiniDialog(notifyOthersFilesDialogAttributes());
+                }
+                clearSelection();
+                await remotePull({ silent: true });
+            } catch (e) {
+                onGenericError(e);
+            } finally {
+                hideLoadingBar();
+            }
+        })();
+    };
 
     const handleSelectSearchOption = (
         searchOption: SearchOption | undefined,
@@ -757,7 +803,27 @@ const Page: React.FC = () => {
 
     const handleShowCollectionSummary = (
         collectionSummaryID: number | undefined,
-    ) => dispatch({ type: "showCollectionSummary", collectionSummaryID });
+    ) => {
+        // Trigger a pull of the latest data from remote when opening the trash.
+        //
+        // This is needed for a specific scenario:
+        //
+        // 1. User deletes a collection, selecting the option to delete files.
+        // 2. Museum acks, and then client does a trash pull.
+        //
+        // This trash pull will not contain the files that belonged to the
+        // collection that got deleted because the collection deletion is a
+        // asynchronous operation.
+        //
+        // So the user might not see the entry for the just deleted file if they
+        // were to go to the trash meanwhile (until the next pull happens). To
+        // avoid this, we trigger a trash pull whenever it is opened.
+        if (collectionSummaryID == PseudoCollectionID.trash) {
+            void remoteFilesPull();
+        }
+
+        dispatch({ type: "showCollectionSummary", collectionSummaryID });
+    };
 
     // The same function can also be used to show collections since the
     // namespace for the collection IDs and collection summary IDs are disjoint.
@@ -773,16 +839,17 @@ const Page: React.FC = () => {
         [],
     );
 
-    const handleToggleFavorite = useCallback(
+    const handleFileViewerToggleFavorite = useCallback(
         async (file: EnteFile) => {
             const fileID = file.id;
             const isFavorite = favoriteFileIDs.has(fileID);
 
             dispatch({ type: "addPendingFavoriteUpdate", fileID });
             try {
-                await (isFavorite ? removeFromFavorites1 : addToFavorites1)(
-                    file,
-                );
+                const action = isFavorite
+                    ? removeFromFavoritesCollection
+                    : addToFavoritesCollection;
+                await action([file]);
                 dispatch({
                     type: "unsyncedFavoriteUpdate",
                     fileID,
@@ -792,7 +859,7 @@ const Page: React.FC = () => {
                 dispatch({ type: "removePendingFavoriteUpdate", fileID });
             }
         },
-        [favoriteFileIDs],
+        [user, favoriteFileIDs],
     );
 
     const handleFileViewerFileVisibilityUpdate = useCallback(
@@ -921,22 +988,26 @@ const Page: React.FC = () => {
             >
                 {showSelectionBar ? (
                     <SelectedFileOptions
-                        handleCollectionOp={collectionOpsHelper}
-                        handleFileOp={fileOpHelper}
-                        showCreateCollectionModal={handleCreateAlbumForOp}
-                        onOpenCollectionSelector={handleOpenCollectionSelector}
-                        count={selected.count}
-                        ownCount={selected.ownCount}
-                        clearSelection={clearSelection}
                         barMode={barMode}
-                        activeCollectionID={activeCollectionID}
-                        selectedCollection={getSelectedCollection(
-                            selected.collectionID,
-                            state.collections,
-                        )}
-                        activeCollectionSummary={activeCollectionSummary}
                         isInSearchMode={isInSearchMode}
-                        isInHiddenSection={barMode == "hidden-albums"}
+                        collection={
+                            isInSearchMode ? undefined : activeCollection
+                        }
+                        collectionSummary={
+                            isInSearchMode ? undefined : activeCollectionSummary
+                        }
+                        selectedFileCount={selected.count}
+                        selectedOwnFileCount={selected.ownCount}
+                        onClearSelection={clearSelection}
+                        onRemoveFilesFromCollection={
+                            handleRemoveFilesFromCollection
+                        }
+                        onOpenCollectionSelector={handleOpenCollectionSelector}
+                        {...{
+                            createOnCreateForCollectionOp,
+                            createOnSelectForCollectionOp,
+                            createFileOpHandler,
+                        }}
                     />
                 ) : barMode == "hidden-albums" ? (
                     <HiddenSectionNavbarContents
@@ -993,23 +1064,23 @@ const Page: React.FC = () => {
                     uploadTypeSelectorIntent,
                     uploadTypeSelectorView,
                 }}
+                isFirstUpload={haveOnlySystemCollections(
+                    normalCollectionSummaries,
+                )}
                 activeCollection={activeCollection}
                 closeUploadTypeSelector={setUploadTypeSelectorView.bind(
                     null,
                     false,
                 )}
-                onOpenCollectionSelector={handleOpenCollectionSelector}
-                onCloseCollectionSelector={handleCloseCollectionSelector}
                 setLoading={setBlockingLoad}
                 setShouldDisableDropzone={setShouldDisableDropzone}
                 onRemotePull={remotePull}
                 onRemoteFilesPull={remoteFilesPull}
+                onOpenCollectionSelector={handleOpenCollectionSelector}
+                onCloseCollectionSelector={handleCloseCollectionSelector}
                 onUploadFile={(file) => dispatch({ type: "uploadFile", file })}
                 onShowPlanSelector={showPlanSelector}
-                isFirstUpload={haveOnlySystemCollections(
-                    normalCollectionSummaries,
-                )}
-                showSessionExpiredMessage={showSessionExpiredDialog}
+                onShowSessionExpiredDialog={showSessionExpiredDialog}
             />
             <Sidebar
                 {...sidebarVisibilityProps}
@@ -1069,7 +1140,7 @@ const Page: React.FC = () => {
                     setFilesDownloadProgressAttributesCreator={
                         setFilesDownloadProgressAttributesCreator
                     }
-                    onToggleFavorite={handleToggleFavorite}
+                    onToggleFavorite={handleFileViewerToggleFavorite}
                     onFileVisibilityUpdate={
                         handleFileViewerFileVisibilityUpdate
                     }

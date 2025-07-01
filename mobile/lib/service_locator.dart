@@ -17,6 +17,7 @@ import "package:photos/services/magic_cache_service.dart";
 import "package:photos/services/memories_cache_service.dart";
 import "package:photos/services/permission/service.dart";
 import "package:photos/services/remote/cache/remote_cache.dart";
+import "package:photos/services/remote/trash_service.dart";
 import "package:photos/services/smart_memories_service.dart";
 import "package:photos/services/storage_bonus_service.dart";
 import "package:photos/services/update_service.dart";

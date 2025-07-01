@@ -162,6 +162,7 @@
     "ok": "OK",
     "success": "Sucesso",
     "error": "Erro",
+    "note": "",
     "offline_message": "Você está sem internet, as memórias em cache estão sendo exibidas",
     "install": "Instalar",
     "install_mobile_app": "Instale nosso aplicativo para <a>Android</a> ou <b>iOS</b> para copiar todas suas fotos com segurança",
@@ -683,5 +684,6 @@
     "share_favorites": "Compartilhar favoritos",
     "person_favorites": "Favoritos de {{name}}",
     "shared_favorites": "Favoritos compartilhados",
-    "added_by_name": "Adicionado por {{name}}"
+    "added_by_name": "Adicionado por {{name}}",
+    "unowned_files_not_processed": ""
 }

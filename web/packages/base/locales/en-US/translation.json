@@ -162,6 +162,7 @@
     "ok": "OK",
     "success": "Success",
     "error": "Error",
+    "note": "Note",
     "offline_message": "You are offline, cached memories are being shown",
     "install": "Install",
     "install_mobile_app": "Install our <a>Android</a> or <b>iOS</b> app to automatically backup all your photos",
@@ -683,5 +684,6 @@
     "share_favorites": "Share favorites",
     "person_favorites": "{{name}}'s favorites",
     "shared_favorites": "Shared favorites",
-    "added_by_name": "Added by {{name}}"
+    "added_by_name": "Added by {{name}}",
+    "unowned_files_not_processed": "Files added by other users were not processed"
 }

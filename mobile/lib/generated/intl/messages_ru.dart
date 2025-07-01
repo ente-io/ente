@@ -526,6 +526,29 @@ class MessageLookup extends MessageLookupByLibrary {
         "blackFridaySale": MessageLookupByLibrary.simpleMessage(
             "Распродажа в \"Черную пятницу\""),
         "blog": MessageLookupByLibrary.simpleMessage("Блог"),
+        "cLDesc1": MessageLookupByLibrary.simpleMessage(
+            "Вслед за бета-версией потокового видео и работой над возобновляемыми загрузками и скачиваниями, мы увеличили лимит загрузки файлов до 10ГБ. Это теперь доступно как в настольных, так и в мобильных приложениях."),
+        "cLDesc2": MessageLookupByLibrary.simpleMessage(
+            "Фоновые загрузки теперь также поддерживаются на iOS, в дополнение к устройствам Android. Больше не нужно открывать приложение для резервного копирования ваших последних фото и видео."),
+        "cLDesc3": MessageLookupByLibrary.simpleMessage(
+            "Мы внесли значительные улучшения в наш опыт воспоминаний, включая автовоспроизведение, пролистывание к следующему воспоминанию и многое другое."),
+        "cLDesc4": MessageLookupByLibrary.simpleMessage(
+            "Наряду с множеством внутренних улучшений, теперь гораздо проще увидеть все обнаруженные лица, предоставить обратную связь о похожих лицах и добавить/удалить лица с одной фотографии."),
+        "cLDesc5": MessageLookupByLibrary.simpleMessage(
+            "Теперь вы будете получать опциональные уведомления обо всех днях рождения, которые вы сохранили в Ente, вместе с коллекцией их лучших фотографий."),
+        "cLDesc6": MessageLookupByLibrary.simpleMessage(
+            "Больше не нужно ждать завершения загрузок/скачиваний перед закрытием приложения. Все загрузки и скачивания теперь могут быть приостановлены на полпути и возобновлены с того места, где вы остановились."),
+        "cLTitle1": MessageLookupByLibrary.simpleMessage(
+            "Загрузка больших видеофайлов"),
+        "cLTitle2": MessageLookupByLibrary.simpleMessage("Фоновая загрузка"),
+        "cLTitle3": MessageLookupByLibrary.simpleMessage(
+            "Автовоспроизведение воспоминаний"),
+        "cLTitle4": MessageLookupByLibrary.simpleMessage(
+            "Улучшенное распознавание лиц"),
+        "cLTitle5":
+            MessageLookupByLibrary.simpleMessage("Уведомления о днях рождения"),
+        "cLTitle6": MessageLookupByLibrary.simpleMessage(
+            "Возобновляемые загрузки и скачивания"),
         "cachedData":
             MessageLookupByLibrary.simpleMessage("Кэшированные данные"),
         "calculating": MessageLookupByLibrary.simpleMessage("Подсчёт..."),

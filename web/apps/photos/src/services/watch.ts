@@ -16,7 +16,7 @@ import { type UploadResult } from "ente-gallery/services/upload";
 import type { UploadAsset } from "ente-gallery/services/upload/upload-service";
 import { groupFilesByCollectionID } from "ente-gallery/utils/file";
 import type { EnteFile } from "ente-media/file";
-import { removeFromCollection } from "ente-new/photos/services/collection";
+import { removeFromOwnCollection } from "ente-new/photos/services/collection";
 import { computeNormalCollectionFilesFromSaved } from "ente-new/photos/services/file";
 import { ensureString } from "ente-utils/ensure";
 import { type UploadItemWithCollection, uploadManager } from "./upload-manager";
@@ -489,7 +489,7 @@ class FolderWatcher {
 
         const filesByCollectionID = groupFilesByCollectionID(filesToTrash);
         for (const [id, files] of filesByCollectionID.entries()) {
-            await removeFromCollection(id, files);
+            await removeFromOwnCollection(id, files);
         }
 
         this.onTriggerRemotePull();

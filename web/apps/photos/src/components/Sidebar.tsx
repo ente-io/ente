@@ -71,7 +71,7 @@ import { TwoFactorSettings } from "ente-new/photos/components/sidebar/TwoFactorS
 import {
     confirmDisableMapsDialogAttributes,
     confirmEnableMapsDialogAttributes,
-} from "ente-new/photos/components/utils/dialog";
+} from "ente-new/photos/components/utils/dialog-attributes";
 import { downloadAppDialogAttributes } from "ente-new/photos/components/utils/download";
 import {
     useHLSGenerationStatusSnapshot,

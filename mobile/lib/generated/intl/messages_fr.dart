@@ -579,6 +579,30 @@ class MessageLookup extends MessageLookupByLibrary {
         "blackFridaySale":
             MessageLookupByLibrary.simpleMessage("Offre Black Friday"),
         "blog": MessageLookupByLibrary.simpleMessage("Blog"),
+        "cLDesc1": MessageLookupByLibrary.simpleMessage(
+            "Suite à la version bêta du streaming vidéo et au travail sur les téléchargements reprenables, nous avons maintenant augmenté la limite de téléchargement de fichiers à 10 Go. Ceci est maintenant disponible dans les applications desktop et mobiles."),
+        "cLDesc2": MessageLookupByLibrary.simpleMessage(
+            "Les téléchargements en arrière-plan sont maintenant pris en charge sur iOS également, en plus des appareils Android. Pas besoin d\'ouvrir l\'application pour sauvegarder vos dernières photos et vidéos."),
+        "cLDesc3": MessageLookupByLibrary.simpleMessage(
+            "Nous avons apporté des améliorations significatives à notre expérience de souvenirs, y compris la lecture automatique, le balayage vers le souvenir suivant et bien plus encore."),
+        "cLDesc4": MessageLookupByLibrary.simpleMessage(
+            "Avec un tas d\'améliorations internes, il est maintenant beaucoup plus facile de voir tous les visages détectés, de donner des commentaires sur les visages similaires et d\'ajouter/supprimer des visages d\'une seule photo."),
+        "cLDesc5": MessageLookupByLibrary.simpleMessage(
+            "Vous recevrez maintenant une notification optionnelle pour tous les anniversaires que vous avez sauvegardés sur Ente, ainsi qu\'une collection de leurs meilleures photos."),
+        "cLDesc6": MessageLookupByLibrary.simpleMessage(
+            "Plus besoin d\'attendre que les téléchargements se terminent avant de pouvoir fermer l\'application. Tous les téléchargements ont maintenant la capacité d\'être mis en pause à mi-chemin et de reprendre là où vous vous êtes arrêté."),
+        "cLTitle1": MessageLookupByLibrary.simpleMessage(
+            "Téléchargement de fichiers vidéo volumineux"),
+        "cLTitle2": MessageLookupByLibrary.simpleMessage(
+            "Téléchargement en arrière-plan"),
+        "cLTitle3": MessageLookupByLibrary.simpleMessage(
+            "Lecture automatique des souvenirs"),
+        "cLTitle4": MessageLookupByLibrary.simpleMessage(
+            "Reconnaissance faciale améliorée"),
+        "cLTitle5": MessageLookupByLibrary.simpleMessage(
+            "Notifications d\'anniversaire"),
+        "cLTitle6":
+            MessageLookupByLibrary.simpleMessage("Téléchargements reprenables"),
         "cachedData":
             MessageLookupByLibrary.simpleMessage("Données mises en cache"),
         "calculating":

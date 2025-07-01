@@ -28,7 +28,6 @@ class PeopleHomeWidgetService {
   static const String IOS_CLASS_NAME = "EntePeopleWidget";
   static const String PEOPLE_STATUS_KEY = "peopleStatusKey.widget";
   static const String PEOPLE_CHANGED_KEY = "peopleChanged.widget";
-  static const String TOTAL_PEOPLE_KEY = "totalPeople";
   static const int MAX_PEOPLE_LIMIT = 50;
 
   // Singleton pattern
@@ -39,9 +38,7 @@ class PeopleHomeWidgetService {
   // Properties
   final Logger _logger = Logger((PeopleHomeWidgetService).toString());
   late final SharedPreferences _prefs;
-  final _peopleForceRefreshLock = Lock();
-  final _lock2 = Lock();
-  bool _hasSyncedPeople = false;
+  final peopleChangedLock = Lock();
 
   // Initialization
   void init(SharedPreferences prefs) {
@@ -54,21 +51,10 @@ class PeopleHomeWidgetService {
   }
 
   Future<void> setSelectedPeople(List<String> selectedPeople) async {
-    final previousSelection = getSelectedPeople();
     await _prefs.setStringList(SELECTED_PEOPLE_KEY, selectedPeople);
 
-    if (previousSelection != null) {
-      final oldSet = previousSelection.toSet();
-      final newSet = selectedPeople.toSet();
-
-      if (oldSet.containsAll(newSet) && newSet.containsAll(oldSet)) {
-        _logger.info("People selection unchanged, no update needed");
-        return;
-      }
-    }
-
     _logger.info("People selection changed, updating widget");
-    await updatePeopleChanged(true);
+    await checkPeopleChanged();
   }
 
   String? getPeopleLastHash() {
@@ -79,51 +65,44 @@ class PeopleHomeWidgetService {
     await _prefs.setString(PEOPLE_LAST_HASH_KEY, hash);
   }
 
-  Future<int> countHomeWidgets() async {
-    return await HomeWidgetService.instance.countHomeWidgets(
-      ANDROID_CLASS_NAME,
-      IOS_CLASS_NAME,
-    );
-  }
-
-  Future<void> initHomeWidget(bool? forceFetchNewPeople) async {
-    if (await _hasAnyBlockers()) {
-      await clearWidget();
-      return;
-    }
-
-    await _peopleForceRefreshLock.synchronized(() async {
+  Future<void> initPeopleHomeWidget() async {
+    await HomeWidgetService.instance.computeLock.synchronized(() async {
       if (await _hasAnyBlockers()) {
+        await clearWidget();
         return;
       }
 
-      final isPeopleEmpty = await _isWidgetEmpty();
-      forceFetchNewPeople ??= await _shouldForceFetchPeople(isPeopleEmpty);
+      final bool forceFetchNewPeople = await _shouldUpdateWidgetCache();
 
-      _logger.warning(
-        "Initializing people widget: forceFetch: $forceFetchNewPeople, isPeopleEmpty: $isPeopleEmpty",
-      );
-
-      if (forceFetchNewPeople!) {
-        await _forcePeopleUpdate();
-      } else if (!isPeopleEmpty) {
-        await _syncExistingPeople();
+      if (forceFetchNewPeople) {
+        _logger.info("Initializing people widget: updating people cache");
+        await _updatePeopleWidgetCache();
+        await updatePeopleChanged(false);
+      } else {
+        _logger.info("Initializing people widget: syncing existing people");
+        await _refreshPeopleWidget();
       }
     });
   }
 
   Future<void> clearWidget() async {
-    if (await _isWidgetEmpty()) {
+    if (getPeopleStatus() == WidgetStatus.syncedEmpty) {
       _logger.info("Widget already empty, nothing to clear");
       return;
     }
 
-    _logger.info("Clearing PeopleHomeWidget");
-    await _setTotalPeople(null);
-    _hasSyncedPeople = false;
-    await updatePeopleStatus(WidgetStatus.syncedEmpty);
     await setPeopleLastHash("");
+    await updatePeopleStatus(WidgetStatus.syncedEmpty);
     await _refreshWidget(message: "PeopleHomeWidget cleared & updated");
+  }
+
+  bool getPeopleChanged() {
+    return _prefs.getBool(PEOPLE_CHANGED_KEY) ?? false;
+  }
+
+  Future<void> updatePeopleChanged(bool value) async {
+    _logger.info("Updating people changed flag to $value");
+    await _prefs.setBool(PEOPLE_CHANGED_KEY, value);
   }
 
   WidgetStatus getPeopleStatus() {
@@ -137,35 +116,27 @@ class PeopleHomeWidgetService {
     await _prefs.setInt(PEOPLE_STATUS_KEY, value.index);
   }
 
-  Future<void> updatePeopleChanged(bool value) async {
-    _logger.info("Updating people changed flag to $value");
-    await _prefs.setBool(PEOPLE_CHANGED_KEY, value);
-  }
-
-  Future<void> checkPendingPeopleSync({bool addDelay = true}) async {
-    if (addDelay) {
-      await Future.delayed(const Duration(seconds: 5));
-    }
-
-    final isPeopleEmpty = await _isWidgetEmpty();
-    final needsForceFetch = await _shouldForceFetchPeople(isPeopleEmpty);
-
-    if (_hasSyncedPeople && !needsForceFetch) {
-      _logger.info("People already synced, no action needed");
+  Future<void> checkPendingPeopleSync() async {
+    if (await _hasAnyBlockers()) {
+      await clearWidget();
       return;
     }
 
-    await HomeWidgetService.instance.initHomeWidget();
+    if (await _shouldUpdateWidgetCache()) {
+      await initPeopleHomeWidget();
+    }
   }
 
   Future<void> checkPeopleChanged() async {
-    final havePeopleChanged = await _lock2.synchronized(() async {
+    final havePeopleChanged = await peopleChangedLock.synchronized(() async {
       final peopleIds = await _getEffectiveSelectedPeopleIds();
       final currentHash = await _calculateHash(peopleIds);
       final lastHash = getPeopleLastHash();
-      if (peopleIds.isEmpty || currentHash == lastHash) {
+
+      if (lastHash != null && currentHash == lastHash) {
         return false;
       }
+
       return true;
     });
 
@@ -174,7 +145,14 @@ class PeopleHomeWidgetService {
       _logger.info("No changes detected in people, skipping update");
       return;
     }
-    await initHomeWidget(true);
+    await initPeopleHomeWidget();
+  }
+
+  Future<int> countHomeWidgets() async {
+    return await HomeWidgetService.instance.countHomeWidgets(
+      ANDROID_CLASS_NAME,
+      IOS_CLASS_NAME,
+    );
   }
 
   Future<void> onLaunchFromWidget(
@@ -182,9 +160,6 @@ class PeopleHomeWidgetService {
     String personId,
     BuildContext context,
   ) async {
-    _hasSyncedPeople = true;
-    await _syncExistingPeople();
-
     final file = await FilesDB.instance.getFile(fileId);
     if (file == null) {
       _logger.warning("Cannot launch widget: file with ID $fileId not found");
@@ -213,7 +188,7 @@ class PeopleHomeWidgetService {
     );
     final files = clusterFiles.entries.expand((e) => e.value).toList();
 
-    await routeToPage(
+    routeToPage(
       context,
       DetailPage(
         DetailPageConfiguration(
@@ -223,13 +198,8 @@ class PeopleHomeWidgetService {
         ),
       ),
       forceCustomPageRoute: true,
-    );
-  }
-
-  // Private methods
-  Future<void> _forcePeopleUpdate() async {
-    await _loadAndRenderPeople();
-    await updatePeopleChanged(false);
+    ).ignore();
+    await _refreshPeopleWidget();
   }
 
   Future<String> _calculateHash(List<String> peopleIds) async {
@@ -237,76 +207,60 @@ class PeopleHomeWidgetService {
   }
 
   Future<bool> _hasAnyBlockers() async {
+    if (await countHomeWidgets() == 0) {
+      return true;
+    }
+
     // Check if first import is completed
     final hasCompletedFirstImport =
         LocalImportService.instance.hasCompletedFirstImport();
     if (!hasCompletedFirstImport) {
-      _logger.warning("First import not completed");
       return true;
     }
 
     // Check ML consent
     if (!flagService.hasGrantedMLConsent) {
-      _logger.warning("ML consent not granted");
       return true;
     }
 
-    // Check if selected people exist
+    // Check if selected people or hash exist
     final peopleIds = await _getEffectiveSelectedPeopleIds();
-    try {
-      for (final id in peopleIds) {
-        final person = await PersonService.instance.getPerson(id);
-        if (person == null) {
-          _logger.warning("Person not found for id: $id");
-          return true;
-        }
-      }
-    } catch (e) {
-      _logger.warning("Error looking up people: $e");
+    final hash = await _calculateHash(peopleIds);
+
+    final noSelectionOrHashEmpty = peopleIds.isEmpty || hash.isEmpty;
+    if (noSelectionOrHashEmpty) {
       return true;
     }
 
     return false;
   }
 
-  Future<void> _syncExistingPeople() async {
-    final homeWidgetCount = await countHomeWidgets();
-    if (homeWidgetCount == 0) {
-      _logger.warning("No active home widgets found");
-      return;
-    }
-
+  Future<void> _refreshPeopleWidget() async {
+    // only refresh if widget was synced without issues
+    if (getPeopleStatus() == WidgetStatus.syncedAll) return;
     await _refreshWidget(message: "Refreshing from existing people set");
   }
 
-  Future<bool> _isWidgetEmpty() async {
-    final totalPeople = await _getTotalPeople();
-    return totalPeople == 0 || totalPeople == null;
-  }
-
-  Future<bool> _shouldForceFetchPeople(bool isPeopleEmpty) async {
-    final peopleChanged = _prefs.getBool(PEOPLE_CHANGED_KEY);
-    if (peopleChanged ?? true) {
+  Future<bool> _shouldUpdateWidgetCache() async {
+    // Update widget cache when people were changed
+    if (getPeopleChanged() == true) {
       return true;
     }
 
+    // update widget cache if
+    // - people not synced
+    // - people synced partially but now home widget is present
     final peopleStatus = getPeopleStatus();
-    switch (peopleStatus) {
-      case WidgetStatus.notSynced:
-        return true;
-      case WidgetStatus.syncedPartially:
-        return await countHomeWidgets() > 0;
-      case WidgetStatus.syncedEmpty:
-      case WidgetStatus.syncedAll:
-        return false;
-    }
+    return peopleStatus == WidgetStatus.notSynced ||
+        peopleStatus == WidgetStatus.syncedPartially &&
+            await countHomeWidgets() > 0;
   }
 
   Future<List<String>> _getEffectiveSelectedPeopleIds() async {
     var peopleIds = getSelectedPeople();
 
+    // Select first two named people by default
     if (peopleIds == null || peopleIds.isEmpty) {
-      // Search Filter with face and pick top two faces
       final searchFilter = await SectionType.face.getData(null).then(
             (value) => (value as List<GenericSearchResult>).where(
               (element) => (element.params[kPersonParamID] as String?) != null,
@@ -326,25 +280,20 @@ class PeopleHomeWidgetService {
     return peopleIds ?? [];
   }
 
-  Future<Map<String, (String, Iterable<EnteFile>)>> _getPeople() async {
-    final peopleIds = await _getEffectiveSelectedPeopleIds();
+  Future<Map<String, (String, Iterable<EnteFile>)>> _getPeople(
+    List<String> personIds,
+  ) async {
     final Map<String, (String, Iterable<EnteFile>)> peopleFiles = {};
-
-    for (final id in peopleIds) {
-      final person = await PersonService.instance.getPerson(id);
-      if (person == null) {
-        _logger.warning("Person not found for id: $id");
-        continue;
-      }
-
-      final clusterFiles =
-          await SearchService.instance.getClusterFilesForPersonID(id);
+    final persons = await PersonService.instance.getCertainPersons(personIds);
+    for (final person in persons) {
+      final clusterFiles = await SearchService.instance
+          .getClusterFilesForPersonID(person.remoteID);
       final files = clusterFiles.entries.expand((e) => e.value).toList();
       if (files.isEmpty) {
         _logger.warning("No files found for person: ${person.data.name}");
         continue;
       }
-      peopleFiles[id] = (person.data.name, files);
+      peopleFiles[person.remoteID] = (person.data.name, files);
     }
 
     return peopleFiles;
@@ -371,17 +320,10 @@ class PeopleHomeWidgetService {
     _logger.info("Home Widget updated: ${message ?? "standard update"}");
   }
 
-  Future<int?> _getTotalPeople() async {
-    return HomeWidgetService.instance.getData<int>(TOTAL_PEOPLE_KEY);
-  }
-
-  Future<void> _setTotalPeople(int? total) async {
-    await HomeWidgetService.instance.setData(TOTAL_PEOPLE_KEY, total);
-  }
-
-  Future<void> _loadAndRenderPeople() async {
+  Future<void> _updatePeopleWidgetCache() async {
     final peopleIds = await _getEffectiveSelectedPeopleIds();
-    final peopleWithFiles = await _getPeople();
+    // TODO: Add logic to directly get random people files from database
+    final peopleWithFiles = await _getPeople(peopleIds);
 
     if (peopleWithFiles.isEmpty) {
       _logger.warning("No files found for any people, clearing widget");
@@ -389,13 +331,8 @@ class PeopleHomeWidgetService {
       return;
     }
 
-    final currentTotal = await _getTotalPeople();
-    _logger.info("Current total people in widget: $currentTotal");
-
-    final bool isWidgetPresent = await countHomeWidgets() > 0;
-
-    final limit = isWidgetPresent ? MAX_PEOPLE_LIMIT : 5;
-    final maxAttempts = limit * 10;
+    const limit = MAX_PEOPLE_LIMIT;
+    const maxAttempts = limit * 10;
 
     int renderedCount = 0;
     int attemptsCount = 0;
@@ -436,8 +373,6 @@ class PeopleHomeWidgetService {
           return;
         }
 
-        await _setTotalPeople(renderedCount);
-
         // Show update toast after first item is rendered
         if (renderedCount == 1) {
           await _refreshWidget(
@@ -462,9 +397,7 @@ class PeopleHomeWidgetService {
       return;
     }
 
-    if (isWidgetPresent) {
-      await updatePeopleStatus(WidgetStatus.syncedAll);
-    }
+    await updatePeopleStatus(WidgetStatus.syncedAll);
 
     final hash = await _calculateHash(peopleIds);
     await setPeopleLastHash(hash);

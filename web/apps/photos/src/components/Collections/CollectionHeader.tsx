@@ -33,6 +33,7 @@ import {
     GalleryItemsSummary,
 } from "ente-new/photos/components/gallery/ListHeader";
 import {
+    deleteCollection,
     isHiddenCollection,
     leaveSharedCollection,
     renameCollection,
@@ -50,7 +51,6 @@ import { usePhotosAppContext } from "ente-new/photos/types/context";
 import { t } from "i18next";
 import React, { useCallback, useRef } from "react";
 import { Trans } from "react-i18next";
-import * as CollectionAPI from "services/collectionService";
 import { SetFilesDownloadProgressAttributesCreator } from "types/gallery";
 import {
     downloadCollectionHelper,
@@ -183,24 +183,25 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
                 />
             ),
             continue: {
+                text: t("keep_photos"),
+                color: "primary",
+                action: deleteCollectionButKeepFiles,
+            },
+            secondary: {
                 text: t("delete_photos"),
                 color: "critical",
                 action: deleteCollectionAlongWithFiles,
-            },
-            secondary: {
-                text: t("keep_photos"),
-                action: deleteCollectionButKeepFiles,
             },
         });
     };
 
     const deleteCollectionAlongWithFiles = wrap(async () => {
-        await CollectionAPI.deleteCollection(activeCollection.id, false);
+        await deleteCollection(activeCollection.id);
         setActiveCollectionID(PseudoCollectionID.all);
     });
 
     const deleteCollectionButKeepFiles = wrap(async () => {
-        await CollectionAPI.deleteCollection(activeCollection.id, true);
+        await deleteCollection(activeCollection.id, { keepFiles: true });
         setActiveCollectionID(PseudoCollectionID.all);
     });
 

@@ -571,6 +571,29 @@ class MessageLookup extends MessageLookupByLibrary {
         "blackFridaySale":
             MessageLookupByLibrary.simpleMessage("Black-Friday-Aktion"),
         "blog": MessageLookupByLibrary.simpleMessage("Blog"),
+        "cLDesc1": MessageLookupByLibrary.simpleMessage(
+            "Nach der Video-Streaming-Beta und der Arbeit an fortsetzbaren Uploads und Downloads haben wir das Datei-Upload-Limit auf 10 GB erhöht. Dies ist jetzt sowohl in Desktop- als auch in mobilen Apps verfügbar."),
+        "cLDesc2": MessageLookupByLibrary.simpleMessage(
+            "Hintergrund-Uploads werden jetzt auch auf iOS unterstützt, zusätzlich zu Android-Geräten. Du musst die App nicht öffnen, um deine neuesten Fotos und Videos zu sichern."),
+        "cLDesc3": MessageLookupByLibrary.simpleMessage(
+            "Wir haben erhebliche Verbesserungen an unserer Erinnerungserfahrung vorgenommen, einschließlich Autoplay, Wischen zur nächsten Erinnerung und vieles mehr."),
+        "cLDesc4": MessageLookupByLibrary.simpleMessage(
+            "Zusammen mit vielen internen Verbesserungen ist es jetzt viel einfacher, alle erkannten Gesichter zu sehen, Feedback zu ähnlichen Gesichtern zu geben und Gesichter zu einem einzelnen Foto hinzuzufügen/zu entfernen."),
+        "cLDesc5": MessageLookupByLibrary.simpleMessage(
+            "Du erhältst jetzt eine optionale Benachrichtigung für alle Geburtstage, die du auf Ente gespeichert hast, zusammen mit einer Sammlung ihrer besten Fotos."),
+        "cLDesc6": MessageLookupByLibrary.simpleMessage(
+            "Kein Warten mehr darauf, dass Uploads/Downloads abgeschlossen werden, bevor du die App schließen kannst. Alle Uploads und Downloads können jetzt mitten im Vorgang pausiert und von dort fortgesetzt werden, wo du aufgehört hast."),
+        "cLTitle1":
+            MessageLookupByLibrary.simpleMessage("Upload großer Videodateien"),
+        "cLTitle2": MessageLookupByLibrary.simpleMessage("Hintergrund-Upload"),
+        "cLTitle3":
+            MessageLookupByLibrary.simpleMessage("Autoplay-Erinnerungen"),
+        "cLTitle4": MessageLookupByLibrary.simpleMessage(
+            "Verbesserte Gesichtserkennung"),
+        "cLTitle5": MessageLookupByLibrary.simpleMessage(
+            "Geburtstags-Benachrichtigungen"),
+        "cLTitle6": MessageLookupByLibrary.simpleMessage(
+            "Fortsetzbare Uploads und Downloads"),
         "cachedData": MessageLookupByLibrary.simpleMessage("Daten im Cache"),
         "calculating":
             MessageLookupByLibrary.simpleMessage("Wird berechnet..."),

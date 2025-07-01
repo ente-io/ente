@@ -683,6 +683,20 @@ export const deleteFromTrash = async (fileIDs: number[]) =>
  *
  * Reads local state but does not modify it. The effects are on remote.
  *
+ * @param collection A collection (either owned by the user, or shared with the
+ * user).
+ *
+ * @param files The files to remove from the collection. The files owned by the
+ * user will be removed. If the collection is not owned by the user, then any
+ * files that are not owned by the user will not be processed. In such cases,
+ * this function will return a count less than the count of the provided files
+ * (after having removed what can be removed).
+ *
+ * @returns The count of files that were processed. This can be less than the
+ * count of the provided {@link files} if some files were not processed because
+ * because they belong to other users (and {@link collection} also does not
+ * belong to the current user).
+ *
  * [Note: Removing files from a collection]
  *
  * There are three scenarios
@@ -720,8 +734,32 @@ export const deleteFromTrash = async (fileIDs: number[]) =>
  * The "remove from collection" primitive is provided to the user both as a UI
  * action (on selecting files in a collection), and as an implicit action if the
  * user chooses the option to "keep files" when deleting a collection.
+ *
+ * This entire shebang is implemented by the following set of functions:
+ *
+ * 1. [Public] {@link removeFromCollection} - Handles both own and others
+ *    collections by delegating to the one of the following functions.
+ *
+ * 2. [Public] {@link removeFromOwnCollection} - Handles both cases for own
+ *    collections by delegating to either "Move" or "Remove"
+ *
+ * 3. [Private] {@link removeFromOthersCollection} - Handles both cases for
+ *    other's collections by delegating to "Remove", then if needed, also
+ *    throwing an error for the unsupported case.
+ *
+ * 4. [Private] {@link removeOwnFilesFromOwnCollection} implements the "Move".
+ *
+ * 5. [Private] {@link removeNonCollectionOwnerFiles} implements the "Remove".
  */
 export const removeFromCollection = async (
+    collection: Collection,
+    files: EnteFile[],
+): Promise<number> =>
+    collection.owner.id == ensureLocalUser().id
+        ? removeFromOwnCollection(collection.id, files)
+        : removeFromOthersCollection(collection.id, files);
+
+export const removeFromOwnCollection = async (
     collectionID: number,
     files: EnteFile[],
 ) => {
@@ -731,11 +769,24 @@ export const removeFromCollection = async (
         (f) => f.ownerID == userID,
     );
     if (userFiles.length) {
-        await removeUserFilesFromUserCollection(collectionID, userFiles);
+        await removeOwnFilesFromOwnCollection(collectionID, userFiles);
     }
     if (nonUserFiles.length) {
-        await postRemoveFilesFromCollection(collectionID, nonUserFiles);
+        await removeNonCollectionOwnerFiles(collectionID, nonUserFiles);
     }
+    return files.length;
+};
+
+const removeFromOthersCollection = async (
+    collectionID: number,
+    files: EnteFile[],
+) => {
+    const userID = ensureLocalUser().id;
+    const [userFiles] = splitByPredicate(files, (f) => f.ownerID == userID);
+    if (userFiles.length) {
+        await removeNonCollectionOwnerFiles(collectionID, userFiles);
+    }
+    return userFiles.length;
 };
 
 /**
@@ -748,7 +799,7 @@ export const removeFromCollection = async (
  *
  * This is used as a subroutine of [Note: Removing files from a collection].
  */
-export const removeUserFilesFromUserCollection = async (
+const removeOwnFilesFromOwnCollection = async (
     collectionID: number,
     filesToRemove: EnteFile[],
 ) => {
@@ -833,7 +884,7 @@ export const removeUserFilesFromUserCollection = async (
  * @param files A list of files which do not belong to the user, and which we
  * the user wants to remove from the given collection.
  */
-export const postRemoveFilesFromCollection = async (
+const removeNonCollectionOwnerFiles = async (
     collectionID: number,
     files: EnteFile[],
 ) =>
@@ -849,6 +900,45 @@ export const postRemoveFilesFromCollection = async (
             }),
         ),
     );
+
+/**
+ * Delete a collection on remote.
+ *
+ * Reads local state but does not modify it. The effects are on remote.
+ *
+ * @param collectionID The ID of the collection to delete.
+ *
+ * @param opts Deletion options. In particular, if {@link keepFiles} is true,
+ *  then the any of the user's files that only exist in this collection are
+ *  first moved to another one of the user's collection (or Uncategorized if no
+ *  such collection exists) before deleting the collection.
+ *
+ * See: [Note: Removing files from a collection]
+ */
+export const deleteCollection = async (
+    collectionID: number,
+    opts?: { keepFiles?: boolean },
+) => {
+    const keepFiles = opts?.keepFiles ?? false;
+
+    if (keepFiles) {
+        const collectionFiles = await savedCollectionFiles();
+        await removeFromOwnCollection(
+            collectionID,
+            collectionFiles.filter((f) => f.collectionID == collectionID),
+        );
+    }
+
+    ensureOk(
+        await fetch(
+            await apiURL(`/collections/v3/${collectionID}`, {
+                collectionID,
+                keepFiles,
+            }),
+            { method: "DELETE", headers: await authenticatedRequestHeaders() },
+        ),
+    );
+};
 
 /**
  * Rename a collection on remote.
@@ -1125,8 +1215,13 @@ export const savedUserFavoritesCollection = async () => {
  *
  * Reads local state but does not modify it. The effects are on remote.
  */
-export const addToFavorites = async (files: EnteFile[]) =>
+export const addToFavoritesCollection = async (files: EnteFile[]) =>
     addToCollection(await savedOrCreateUserFavoritesCollection(), files);
+
+export const removeFromFavoritesCollection = async (files: EnteFile[]) =>
+    // Non-null assertion because if we get here and a favorites collection does
+    // not already exist, then something is wrong.
+    removeFromOwnCollection((await savedUserFavoritesCollection())!.id, files);
 
 /**
  * Return the default hidden collection for the user if one is found in the
