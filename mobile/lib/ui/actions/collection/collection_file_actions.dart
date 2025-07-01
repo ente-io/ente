@@ -6,6 +6,7 @@ import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/db/local/table/shared_assets.dart";
+import "package:photos/db/local/table/upload_queue_table.dart";
 import "package:photos/events/collection_updated_event.dart";
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection/collection.dart';
@@ -103,67 +104,32 @@ extension CollectionFileActions on CollectionActions {
     final int currentUserID = Configuration.instance.getUserID()!;
     for (final collection in collections) {
       try {
-        final List<EnteFile> files = [];
+        final List<EnteFile> uploadedFiles = [];
+        final Set<String> pendingUploads = {};
         final List<EnteFile> filesPendingUpload = [];
         for (final file in selectedFiles!) {
-          EnteFile? currentFile;
-          if (file.uploadedFileID != null) {
-            currentFile = file.copyWith();
-          } else if (file.generatedID != null) {
-            // when file is not uploaded, refresh the state from the db to
-            // ensure we have latest upload status for given file before
-            // queueing it up as pending upload
-            currentFile = await (FilesDB.instance.getFile(file.generatedID!));
-          } else if (file.generatedID == null) {
-            logger.severe("generated id should not be null");
-          }
-          if (currentFile == null) {
-            logger.severe("Failed to find fileBy genID");
-            continue;
-          }
-
-          if (currentFile.uploadedFileID == null) {
-            currentFile.collectionID = collection.id;
-            filesPendingUpload.add(currentFile);
+          if (file.rAsset != null) {
+            uploadedFiles.add(file.copyWith());
           } else {
-            files.add(currentFile);
+            pendingUploads.add(file.lAsset!.id);
+            filesPendingUpload.add(file.copyWith());
           }
         }
-        if (filesPendingUpload.isNotEmpty) {
-          // Newly created collection might not be cached
-          final Collection? c =
-              CollectionsService.instance.getCollectionByID(collection.id);
-          if (c != null && c.owner.id != currentUserID) {
-            final Collection uncat =
-                await CollectionsService.instance.getUncategorizedCollection();
-            for (EnteFile unuploadedFile in filesPendingUpload) {
-              final uploadedFile = await FileUploader.instance.forceUpload(
-                unuploadedFile,
-                uncat.id,
-              );
-              files.add(uploadedFile);
-            }
-          } else {
-            for (final file in filesPendingUpload) {
-              file.collectionID = collection.id;
-            }
-            // filesPendingUpload might be getting ignored during auto-upload
-            // because the user deleted these files from ente in the past.
-            await IgnoredFilesService.instance
-                .removeIgnoredMappings(filesPendingUpload);
-            await FilesDB.instance.insertMultiple(filesPendingUpload);
-            Bus.instance.fire(
-              CollectionUpdatedEvent(
-                collection.id,
-                filesPendingUpload,
-                "pendingFilesAdd",
-              ),
-            );
-          }
+        if (pendingUploads.isNotEmpty) {
+          await IgnoredFilesService.instance
+              .removeIgnoredMappings(filesPendingUpload);
+          await localDB.insertOrUpdateQueue( pendingUploads, collection.id, currentUserID, manual: true)
+          Bus.instance.fire(
+            CollectionUpdatedEvent(
+              collection.id,
+              filesPendingUpload,
+              "queuedForUpload",
+            ),
+          );
         }
-        if (files.isNotEmpty) {
+        if (uploadedFiles.isNotEmpty) {
           await CollectionsService.instance
-              .addOrCopyToCollection(collection.id, files);
+              .addOrCopyToCollection(collection.id, uploadedFiles);
         }
       } catch (e, s) {
         logger.severe("Failed to add to album", e, s);
@@ -192,7 +158,7 @@ extension CollectionFileActions on CollectionActions {
     List<SharedMediaFile>? sharedFiles,
     List<AssetEntity>? picketAssets,
   }) async {
-    ProgressDialog? dialog = showProgressDialog
+    final ProgressDialog? dialog = showProgressDialog
         ? createProgressDialog(
             context,
             S.of(context).uploadingFilesToAlbum,
@@ -220,69 +186,31 @@ extension CollectionFileActions on CollectionActions {
         );
       } else {
         for (final file in selectedFiles!) {
-          EnteFile? currentFile;
-          if (file.uploadedFileID != null) {
-            currentFile = file.copyWith();
-          } else if (file.generatedID != null) {
-            // when file is not uploaded, refresh the state from the db to
-            // ensure we have latest upload status for given file before
-            // queueing it up as pending upload
-            currentFile = await (FilesDB.instance.getFile(file.generatedID!));
-          } else if (file.generatedID == null) {
-            logger.severe("generated id should not be null");
-          }
-          if (currentFile == null) {
-            logger.severe("Failed to find fileBy genID");
-            continue;
-          }
-          if (currentFile.uploadedFileID == null) {
-            currentFile.collectionID = collectionID;
-            filesPendingUpload.add(currentFile);
+          if (file.rAsset != null) {
+            uploadedFiles.add(file.copyWith());
+          } else if (file.lAsset != null) {
+            filesPendingUpload.add(file.copyWith());
           } else {
-            uploadedFiles.add(currentFile);
+            throw Exception("File does not have rAsset or lAsset: $file");
           }
         }
       }
       if (filesPendingUpload.isNotEmpty) {
-        // Newly created collection might not be cached
-        final Collection? c =
-            CollectionsService.instance.getCollectionByID(collectionID);
-        if (c != null && c.owner.id != currentUserID) {
-          if (!showProgressDialog) {
-            dialog = createProgressDialog(
-              context,
-              S.of(context).uploadingFilesToAlbum,
-              isDismissible: true,
-            );
-            await dialog.show();
-          }
-          final Collection uncat =
-              await CollectionsService.instance.getUncategorizedCollection();
-          for (EnteFile unuploadedFile in filesPendingUpload) {
-            final uploadedFile = await FileUploader.instance.forceUpload(
-              unuploadedFile,
-              uncat.id,
-            );
-            uploadedFiles.add(uploadedFile);
-          }
-        } else {
+          final Set<String> pendingUploadAssetIDs = {};
           for (final file in filesPendingUpload) {
-            file.collectionID = collectionID;
+            pendingUploadAssetIDs.add(file.lAsset!.id);
           }
-          // filesPendingUpload might be getting ignored during auto-upload
-          // because the user deleted these files from ente in the past.
           await IgnoredFilesService.instance
               .removeIgnoredMappings(filesPendingUpload);
-          await FilesDB.instance.insertMultiple(filesPendingUpload);
+          await localDB.insertOrUpdateQueue(pendingUploadAssetIDs, collectionID, currentUserID, manual: true);
           Bus.instance.fire(
             CollectionUpdatedEvent(
               collectionID,
               filesPendingUpload,
-              "pendingFilesAdd",
+              "queuedForUpload",
             ),
           );
         }
-      }
       if (uploadedFiles.isNotEmpty) {
         await CollectionsService.instance
             .addOrCopyToCollection(collectionID, uploadedFiles);

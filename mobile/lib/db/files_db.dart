@@ -422,74 +422,6 @@ class FilesDB with SqlDbBase {
     await db.execute('DELETE FROM entities');
   }
 
-  Future<void> insertMultiple(
-    List<EnteFile> files, {
-    SqliteAsyncConflictAlgorithm conflictAlgorithm =
-        SqliteAsyncConflictAlgorithm.replace,
-  }) async {
-    if (files.isEmpty) return;
-
-    final startTime = DateTime.now();
-    final db = await sqliteAsyncDB;
-
-    final withIdParams = <List<Object?>>[];
-    const withIdColumnNames = _columnNames;
-    final withoutIdParams = <List<Object?>>[];
-    final withoutIdColumns =
-        _columnNames.where((column) => column != columnGeneratedID).toList();
-
-    // Sort files into appropriate parameter sets
-    for (final file in files) {
-      if (file.generatedID == null) {
-        withoutIdParams.add(_getParameterSetForFile(file));
-
-        if (withoutIdParams.length == 400) {
-          await _insertBatch(
-            conflictAlgorithm,
-            withoutIdColumns,
-            db,
-            withoutIdParams,
-          );
-          withoutIdParams.clear();
-        }
-      } else {
-        withIdParams.add(_getParameterSetForFile(file));
-        if (withIdParams.length == 400) {
-          await _insertBatch(
-            conflictAlgorithm,
-            withIdColumnNames,
-            db,
-            withIdParams,
-          );
-          withIdParams.clear();
-        }
-      }
-    }
-
-    // Insert any remaining files
-    if (withIdParams.isNotEmpty) {
-      await _insertBatch(
-        conflictAlgorithm,
-        withIdColumnNames,
-        db,
-        withIdParams,
-      );
-    }
-
-    if (withoutIdParams.isNotEmpty) {
-      await _insertBatch(
-        conflictAlgorithm,
-        withoutIdColumns,
-        db,
-        withoutIdParams,
-      );
-    }
-    final duration = DateTime.now().difference(startTime);
-    _logger.info(
-      "Batch insert of ${files.length} took ${duration.inMilliseconds}ms.",
-    );
-  }
-
   Future<void> insert(EnteFile file) async {
     _logger.info("Inserting $file");
     final db = await instance.sqliteAsyncDB;
@@ -1163,22 +1095,6 @@ class FilesDB with SqlDbBase {
     }
 
     return values;
-  }
-
-  Future<void> _insertBatch(
-    SqliteAsyncConflictAlgorithm conflictAlgorithm,
-    Iterable<String> columnNames,
-    SqliteDatabase db,
-    List<List<Object?>> parameterSets,
-  ) async {
-    final valuesPlaceholders = List.filled(columnNames.length, "?").join(",");
-    final columnNamesJoined = columnNames.join(",");
-    await db.executeBatch(
-      '''
-          INSERT OR ${conflictAlgorithm.name.toUpperCase()} INTO $filesTable($columnNamesJoined) VALUES($valuesPlaceholders)
-                                  ''',
-      parameterSets,
-    );
   }
 
   EnteFile _getFileFromRow(Map<String, dynamic> row) {
