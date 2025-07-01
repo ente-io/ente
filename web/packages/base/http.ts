@@ -35,9 +35,24 @@ export const publicRequestHeaders = () => ({
  */
 export interface PublicAlbumsCredentials {
     /**
-     * An access token that does the same job as the "X-Auth-Token" for usual
-     * authenticated API requests, except it will be passed as the
-     * ""X-Auth-Access-Token" header.
+     * [Note: Public album access token]
+     *
+     * The public album access is a token that serves a similar purpose as the
+     * "X-Auth-Token" for usual authenticated API requests that happen for a
+     * logged in user, except:
+     *
+     * - It will be passed as the "X-Auth-Access-Token" header, and
+     * - It also tells remote about the public album under consideration.
+     *
+     * This access token is variously referred to as the album token, or the
+     * auth token, when the context is clear. The client obtains this from the
+     * "t" query parameter of a public album URL, and then uses it both to:
+     *
+     * 1. Identify and authenticate itself with remote (this header).
+     *
+     * 2. Scope local storage per public album by using this access token as a
+     *    part of the local storage key. In this context it is sometimes also
+     *    referred to as a "collectionUID" by old code.
      */
     accessToken: string;
     /**
