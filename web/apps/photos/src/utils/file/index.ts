@@ -16,7 +16,7 @@ import { FileType } from "ente-media/file-type";
 import { decodeLivePhoto } from "ente-media/live-photo";
 import { type FileOp } from "ente-new/photos/components/SelectedFileOptions";
 import {
-    addToFavorites,
+    addToFavoritesCollection,
     deleteFromTrash,
     hideFiles,
     moveToTrash,
@@ -313,7 +313,7 @@ export const shouldShowAvatar = (
     }
 };
 
-export const handleFileOp = async (
+export const performFileOp = async (
     op: FileOp,
     files: EnteFile[],
     markTempDeleted: (files: EnteFile[]) => void,
@@ -339,7 +339,7 @@ export const handleFileOp = async (
             fixCreationTime(files);
             break;
         case "favorite":
-            await addToFavorites(files);
+            await addToFavoritesCollection(files);
             break;
         case "archive":
             await updateFilesVisibility(files, ItemVisibility.archived);

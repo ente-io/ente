@@ -24,8 +24,9 @@ import {
 } from "ente-new/photos/services/collection-summary";
 import { t } from "i18next";
 
-export type CollectionOp = "add" | "move" | "restore" | "unhide";
-
+/**
+ * Operations on selected files.
+ */
 export type FileOp =
     | "download"
     | "fixTime"
@@ -35,6 +36,11 @@ export type FileOp =
     | "hide"
     | "trash"
     | "deletePermanently";
+
+/**
+ * Operations on selected files that also have an associated collection.
+ */
+export type CollectionOp = "add" | "move" | "restore" | "unhide";
 
 interface SelectedFileOptionsProps {
     barMode?: GalleryBarMode;
@@ -90,8 +96,8 @@ interface SelectedFileOptionsProps {
      * Once the user enters the name and a new album with that name gets
      * created, the newly created collection will be passed to G.
      *
-     * @param op The operation that should be performed using the newly created
-     * collection.
+     * @param op The operation that should be performed on the selected files
+     * using the newly created collection.
      *
      * @returns A function that can be called with to create a new collection
      * and then perform {@link op} on successful creation of the new collection.
@@ -108,16 +114,25 @@ interface SelectedFileOptionsProps {
      * Once the user selects a collection, then the selected collection will be
      * passed to G.
      *
-     * @param op The operation that should be performed using the selected
-     * collection.
+     * @param op The operation that should be performed on the selected files,
+     * using the selected collection.
      *
      * @returns A function that can be called with a selected collection.
      */
     createOnSelectForCollectionOp: (
         op: CollectionOp,
     ) => (selectedCollection: Collection) => void;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    handleFileOp: (op: FileOp) => (...args: any[]) => void;
+    /**
+     * A function called to obtain a handler for the provided {@link op}.
+     *
+     * This function will be passed the file operation to be performed. It will
+     * return a new function G that can be used as a {@link onClick} handler for
+     * the button. Calling G will trigger the operation on the selected files.
+     *
+     * @param op The operation that should be performed on the selected files.
+     * @returns
+     */
+    createFileOpHandler: (op: FileOp) => () => void;
 }
 
 /**
@@ -136,12 +151,22 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
     onOpenCollectionSelector,
     createOnCreateForCollectionOp,
     createOnSelectForCollectionOp,
-    handleFileOp,
+    createFileOpHandler,
 }) => {
     const { showMiniDialog } = useBaseContext();
 
     const isUserFavorites =
         !!collectionSummary?.attributes.has("userFavorites");
+
+    const handleFavorite = createFileOpHandler("favorite");
+
+    const handleFixTime = createFileOpHandler("fixTime");
+
+    const handleDownload = createFileOpHandler("download");
+
+    const handleArchive = createFileOpHandler("archive");
+
+    const handleUnarchive = createFileOpHandler("unarchive");
 
     const handleDelete = () =>
         showMiniDialog({
@@ -150,7 +175,7 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
             continue: {
                 text: t("move_to_trash"),
                 color: "critical",
-                action: handleFileOp("trash"),
+                action: createFileOpHandler("trash"),
             },
         });
 
@@ -168,7 +193,7 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
             continue: {
                 text: t("delete"),
                 color: "critical",
-                action: handleFileOp("deletePermanently"),
+                action: createFileOpHandler("deletePermanently"),
             },
         });
 
@@ -210,6 +235,8 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
         });
     };
 
+    const handleHide = createFileOpHandler("hide");
+
     const handleUnhide = () => {
         onOpenCollectionSelector({
             action: "unhide",
@@ -234,19 +261,21 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
 
             {isInSearchMode ? (
                 <>
-                    <FixTimeButton onClick={handleFileOp("fixTime")} />
-                    <DownloadButton onClick={handleFileOp("download")} />
+                    <FavoriteButton onClick={handleFavorite} />
+                    <FixTimeButton onClick={handleFixTime} />
+                    <DownloadButton onClick={handleDownload} />
                     <AddToCollectionButton onClick={handleAddToCollection} />
-                    <ArchiveButton onClick={handleFileOp("archive")} />
-                    <HideButton onClick={handleFileOp("hide")} />
+                    <ArchiveButton onClick={handleArchive} />
+                    <HideButton onClick={handleHide} />
                     <DeleteButton onClick={handleDelete} />
                 </>
             ) : barMode == "people" ? (
                 <>
-                    <DownloadButton onClick={handleFileOp("download")} />
+                    <FavoriteButton onClick={handleFavorite} />
+                    <DownloadButton onClick={handleDownload} />
                     <AddToCollectionButton onClick={handleAddToCollection} />
-                    <ArchiveButton onClick={handleFileOp("archive")} />
-                    <HideButton onClick={handleFileOp("hide")} />
+                    <ArchiveButton onClick={handleArchive} />
+                    <HideButton onClick={handleHide} />
                     <DeleteButton onClick={handleDelete} />
                 </>
             ) : collectionSummary?.id == PseudoCollectionID.trash ? (
@@ -258,20 +287,20 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
                 </>
             ) : collectionSummary?.attributes.has("uncategorized") ? (
                 <>
-                    <DownloadButton onClick={handleFileOp("download")} />
+                    <DownloadButton onClick={handleDownload} />
                     <MoveToCollectionButton onClick={handleMoveToCollection} />
                     <DeleteButton onClick={handleDelete} />
                 </>
             ) : collectionSummary?.attributes.has("sharedIncoming") ? (
                 <>
-                    <DownloadButton onClick={handleFileOp("download")} />
+                    <DownloadButton onClick={handleDownload} />
                     <RemoveFromCollectionButton
                         onClick={handleRemoveFromCollection}
                     />
                 </>
             ) : barMode == "hidden-albums" ? (
                 <>
-                    <DownloadButton onClick={handleFileOp("download")} />
+                    <DownloadButton onClick={handleDownload} />
                     <UnhideButton onClick={handleUnhide} />
                     <DeleteButton onClick={handleDelete} />
                 </>
@@ -280,18 +309,16 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
                     {!isUserFavorites &&
                         collectionSummary?.id !=
                             PseudoCollectionID.archiveItems && (
-                            <FavoriteButton
-                                onClick={handleFileOp("favorite")}
-                            />
+                            <FavoriteButton onClick={handleFavorite} />
                         )}
-                    <FixTimeButton onClick={handleFileOp("fixTime")} />
-                    <DownloadButton onClick={handleFileOp("download")} />
+                    <FixTimeButton onClick={handleFixTime} />
+                    <DownloadButton onClick={handleDownload} />
                     <AddToCollectionButton onClick={handleAddToCollection} />
                     {collectionSummary?.id === PseudoCollectionID.all ? (
-                        <ArchiveButton onClick={handleFileOp("archive")} />
+                        <ArchiveButton onClick={handleArchive} />
                     ) : collectionSummary?.id ==
                       PseudoCollectionID.archiveItems ? (
-                        <UnarchiveButton onClick={handleFileOp("unarchive")} />
+                        <UnarchiveButton onClick={handleUnarchive} />
                     ) : (
                         !isUserFavorites && (
                             <>
@@ -304,7 +331,7 @@ export const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
                             </>
                         )
                     )}
-                    <HideButton onClick={handleFileOp("hide")} />
+                    <HideButton onClick={handleHide} />
                     <DeleteButton onClick={handleDelete} />
                 </>
             )}

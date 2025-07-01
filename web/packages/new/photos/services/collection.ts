@@ -1176,7 +1176,7 @@ export const savedUserFavoritesCollection = async () => {
  *
  * Reads local state but does not modify it. The effects are on remote.
  */
-export const addToFavorites = async (files: EnteFile[]) =>
+export const addToFavoritesCollection = async (files: EnteFile[]) =>
     addToCollection(await savedOrCreateUserFavoritesCollection(), files);
 
 /**

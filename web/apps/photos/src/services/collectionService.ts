@@ -3,7 +3,7 @@ import { apiURL } from "ente-base/origins";
 import { sortFiles } from "ente-gallery/utils/file";
 import { EnteFile } from "ente-media/file";
 import {
-    addToFavorites,
+    addToFavoritesCollection,
     removeFromOwnCollection,
     savedUserFavoritesCollection,
 } from "ente-new/photos/services/collection";
@@ -14,7 +14,7 @@ import HTTPService from "ente-shared/network/HTTPService";
 import { getToken } from "ente-shared/storage/localStorage/helpers";
 
 export const addToFavorites1 = async (file: EnteFile) => {
-    await addToFavorites([file]);
+    await addToFavoritesCollection([file]);
 };
 
 export const removeFromFavorites1 = async (file: EnteFile) => {

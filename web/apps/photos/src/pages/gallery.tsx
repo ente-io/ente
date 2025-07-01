@@ -130,7 +130,7 @@ import {
     SetFilesDownloadProgressAttributes,
     SetFilesDownloadProgressAttributesCreator,
 } from "types/gallery";
-import { getSelectedFiles, handleFileOp } from "utils/file";
+import { getSelectedFiles, performFileOp } from "utils/file";
 
 /**
  * The default view for logged in users.
@@ -723,45 +723,59 @@ const Page: React.FC = () => {
         [createOnSelectForCollectionOp],
     );
 
-    const fileOpHelper = (op: FileOp) => async () => {
-        showLoadingBar();
-        try {
-            const selectedFiles = getSelectedFiles(
-                selected,
-                op == "hide"
-                    ? // passing files here instead of filteredData for hide ops
-                      // because we want to move all files copies to hidden collection
-                      state.collectionFiles.filter(
-                          (f) => !state.hiddenFileIDs.has(f.id),
-                      )
-                    : filteredFiles,
-            );
-            const toProcessFiles =
-                op == "download"
-                    ? selectedFiles
-                    : selectedFiles.filter((file) => file.ownerID === user.id);
-            if (toProcessFiles.length > 0) {
-                await handleFileOp(
-                    op,
-                    toProcessFiles,
-                    handleMarkTempDeleted,
-                    () => dispatch({ type: "clearTempDeleted" }),
-                    (files) => dispatch({ type: "markTempHidden", files }),
-                    () => dispatch({ type: "clearTempHidden" }),
-                    (files) => {
-                        setFixCreationTimeFiles(files);
-                        showFixCreationTime();
-                    },
-                    setFilesDownloadProgressAttributesCreator,
+    const createFileOpHandler = (op: FileOp) => () => {
+        void (async () => {
+            showLoadingBar();
+            let notifyOthersFiles = false;
+            try {
+                const selectedFiles = getSelectedFiles(
+                    selected,
+                    op == "hide"
+                        ? // passing files here instead of filteredData for hide since
+                          // we want to move all files copies to hidden collection
+                          state.collectionFiles.filter(
+                              (f) => !state.hiddenFileIDs.has(f.id),
+                          )
+                        : filteredFiles,
                 );
+                const toProcessFiles =
+                    op == "download"
+                        ? selectedFiles
+                        : selectedFiles.filter(
+                              (file) => file.ownerID == user.id,
+                          );
+                if (toProcessFiles.length > 0) {
+                    await performFileOp(
+                        op,
+                        toProcessFiles,
+                        handleMarkTempDeleted,
+                        () => dispatch({ type: "clearTempDeleted" }),
+                        (files) => dispatch({ type: "markTempHidden", files }),
+                        () => dispatch({ type: "clearTempHidden" }),
+                        (files) => {
+                            setFixCreationTimeFiles(files);
+                            showFixCreationTime();
+                        },
+                        setFilesDownloadProgressAttributesCreator,
+                    );
+                }
+                // Apart from download, the other operations currently only work
+                // on the user's own files.
+                //
+                // See: [Note: Add and move of non-user files].
+                notifyOthersFiles =
+                    toProcessFiles.length != selectedFiles.length;
+                clearSelection();
+                await remotePull({ silent: true });
+            } catch (e) {
+                onGenericError(e);
+            } finally {
+                hideLoadingBar();
             }
-            clearSelection();
-            await remotePull({ silent: true });
-        } catch (e) {
-            onGenericError(e);
-        } finally {
-            hideLoadingBar();
-        }
+            if (notifyOthersFiles) {
+                showMiniDialog(notifyOthersFilesDialogAttributes());
+            }
+        })();
     };
 
     const handleSelectSearchOption = (
@@ -980,8 +994,8 @@ const Page: React.FC = () => {
                         {...{
                             createOnCreateForCollectionOp,
                             createOnSelectForCollectionOp,
+                            createFileOpHandler,
                         }}
-                        handleFileOp={fileOpHelper}
                     />
                 ) : barMode == "hidden-albums" ? (
                     <HiddenSectionNavbarContents
