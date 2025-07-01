@@ -128,9 +128,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     super.initState();
 
     if (LocalSyncService.instance.hasCompletedFirstImport()) {
-      MemoryHomeWidgetService.instance.checkPendingMemorySync();
-      PeopleHomeWidgetService.instance.checkPendingPeopleSync();
-      AlbumHomeWidgetService.instance.checkPendingAlbumsSync();
+      syncWidget();
     }
     _tabChangedEventSubscription =
         Bus.instance.on<TabChangedEvent>().listen((event) {
@@ -161,6 +159,8 @@ class _HomeWidgetState extends State<HomeWidget> {
     _accountConfiguredEvent =
         Bus.instance.on<AccountConfiguredEvent>().listen((event) {
       setState(() {});
+      // fetch user flags on login
+      flagService.flags;
     });
     _triggerLogoutEvent =
         Bus.instance.on<TriggerLogoutEvent>().listen((event) async {
@@ -194,9 +194,7 @@ class _HomeWidgetState extends State<HomeWidget> {
           () {
             if (mounted) {
               setState(() {});
-              MemoryHomeWidgetService.instance.checkPendingMemorySync();
-              AlbumHomeWidgetService.instance.checkPendingAlbumsSync();
-              PeopleHomeWidgetService.instance.checkPendingPeopleSync();
+              syncWidget();
             }
           },
         );
@@ -275,6 +273,15 @@ class _HomeWidgetState extends State<HomeWidget> {
         }
       });
     }
+  }
+
+  Future<void> syncWidget() async {
+    await Future.delayed(const Duration(milliseconds: 5000));
+
+    _logger.info("Syncing home widget");
+    await MemoryHomeWidgetService.instance.checkPendingMemorySync();
+    await PeopleHomeWidgetService.instance.checkPendingPeopleSync();
+    await AlbumHomeWidgetService.instance.checkPendingAlbumsSync();
   }
 
   final Map<Uri, (bool, int)> _linkedPublicAlbums = {};
@@ -696,7 +703,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     }
     if (!permissionService.hasGrantedPermissions()) {
       entityService.syncEntities().then((_) {
-        PersonService.instance.resetEmailToPartialPersonDataCache();
+        PersonService.instance.refreshPersonCache();
       });
       return const GrantPermissionsWidget();
     }

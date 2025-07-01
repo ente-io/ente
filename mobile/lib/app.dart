@@ -2,7 +2,6 @@ import "dart:async";
 import 'dart:io';
 
 import 'package:adaptive_theme/adaptive_theme.dart';
-// import "package:backgrounds_fetch/background_fetch.dart";
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
@@ -76,7 +75,7 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
       (event) async {
         _changeCallbackDebouncer.run(
           () async =>
-              unawaited(PeopleHomeWidgetService.instance.peopleChanged()),
+              unawaited(PeopleHomeWidgetService.instance.checkPeopleChanged()),
         );
       },
     );

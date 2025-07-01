@@ -162,6 +162,7 @@
     "ok": "OK",
     "success": "Completado",
     "error": "Error",
+    "note": "",
     "offline_message": "Estás desconectado, se están mostrando recuerdos en caché",
     "install": "Instalar",
     "install_mobile_app": "Instala nuestra aplicación <a>Android</a> o <b>iOS</b> para hacer una copia de seguridad automática de todas usted fotos",
@@ -683,5 +684,6 @@
     "share_favorites": "",
     "person_favorites": "",
     "shared_favorites": "",
-    "added_by_name": ""
+    "added_by_name": "",
+    "unowned_files_not_processed": ""
 }

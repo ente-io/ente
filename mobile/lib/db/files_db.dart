@@ -1436,22 +1436,6 @@ class FilesDB with SqlDbBase {
     return convertToFiles(rows).first;
   }
 
-  Future<void> markForReUploadIfLocationMissing(List<String> localIDs) async {
-    if (localIDs.isEmpty) {
-      return;
-    }
-    final inParam = localIDs.map((id) => "'$id'").join(',');
-    final db = await instance.sqliteAsyncDB;
-    await db.execute(
-      '''
-      UPDATE $filesTable
-      SET $columnUpdationTime = NULL
-      WHERE $columnLocalID IN ($inParam)
-      AND ($columnLatitude IS NULL OR $columnLongitude IS NULL OR $columnLongitude = 0.0 or $columnLongitude = 0.0);
-    ''',
-    );
-  }
-
   Future<bool> doesFileExistInCollection(
     int uploadedFileID,
     int collectionID,
@@ -1586,25 +1570,6 @@ class FilesDB with SqlDbBase {
     return files;
   }
 
-  // For givenUserID, get List of unique LocalIDs for files which are
-  // uploaded by the given user and location is missing
-  Future<List<String>> getLocalIDsForFilesWithoutLocation(int ownerID) async {
-    final db = await instance.sqliteAsyncDB;
-    final rows = await db.getAll(
-      '''
-      SELECT DISTINCT $columnLocalID FROM $filesTable
-      WHERE $columnOwnerID = ? AND $columnLocalID IS NOT NULL AND 
-      ($columnLatitude IS NULL OR $columnLongitude IS NULL OR $columnLatitude = 0.0 or $columnLongitude = 0.0)
-    ''',
-      [ownerID],
-    );
-    final result = <String>[];
-    for (final row in rows) {
-      result.add(row[columnLocalID].toString());
-    }
-    return result;
-  }
-
   // For a given userID, return unique uploadedFileId for the given userID
   Future<List<int>> getUploadIDsWithMissingSize(int userId) async {
     final db = await instance.sqliteAsyncDB;
@@ -1618,25 +1583,6 @@ class FilesDB with SqlDbBase {
     final result = <int>[];
     for (final row in rows) {
       result.add(row[columnUploadedFileID] as int);
-    }
-    return result;
-  }
-
-  Future<List<String>> getLocalFilesBackedUpWithoutLocation(int userId) async {
-    final db = await instance.sqliteAsyncDB;
-    final rows = await db.getAll(
-      '''
-      SELECT DISTINCT $columnLocalID FROM $filesTable
-      WHERE $columnOwnerID = ? AND $columnLocalID IS NOT NULL AND
-      ($columnUploadedFileID IS NOT NULL AND $columnUploadedFileID IS NOT -1)
-      AND ($columnLatitude IS NULL OR $columnLongitude IS NULL OR
-      $columnLatitude = 0.0 or $columnLongitude = 0.0)
-      ''',
-      [userId],
-    );
-    final result = <String>[];
-    for (final row in rows) {
-      result.add(row[columnLocalID] as String);
     }
     return result;
   }

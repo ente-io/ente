@@ -12,6 +12,8 @@ import {
     type RemoteMagicMetadata,
 } from "ente-media/magic-metadata";
 import { batch } from "ente-utils/array";
+import { savedHiddenCollections } from "./collection";
+import { savedCollectionFiles } from "./photos-fdb";
 
 /**
  * An reasonable but otherwise arbitrary number of items (e.g. files) to include
@@ -22,7 +24,7 @@ import { batch } from "ente-utils/array";
  * selected files) are expected to be batched to keep each request of a
  * reasonable size. By default, we break the request into batches of 1000.
  */
-export const requestBatchSize = 1000;
+const requestBatchSize = 1000;
 
 /**
  * Perform an operation on batches, concurrently.
@@ -38,13 +40,36 @@ export const requestBatchSize = 1000;
  *
  * @param op The operation to perform on each batch.
  *
- * @returns An array of results, one from each batch operation. For details,
- * including behaviour on errors, see `Promise.all`.
+ * @returns A promise for an array of results, one from each batch operation. If
+ * any operations fails, then the promise rejects with the first failure reason.
+ *
+ * For more details see the documentation for the `Promise.all` primitive which
+ * this function uses.
  */
-export const performInBatches = <T, U>(
+export const batched = <T, U>(
     items: T[],
     op: (batchItems: T[]) => Promise<U>,
 ): Promise<U[]> => Promise.all(batch(items, requestBatchSize).map(op));
+
+/**
+ * Return all normal (non-hidden) files present in our local database.
+ *
+ * The long name and the "compute" in it is to signal that this is not just a DB
+ * read, and that it also does some potentially non-trivial computation.
+ */
+export const computeNormalCollectionFilesFromSaved = async () => {
+    const hiddenCollections = await savedHiddenCollections();
+    const hiddenCollectionIDs = new Set(hiddenCollections.map((c) => c.id));
+
+    const collectionFiles = await savedCollectionFiles();
+    const hiddenFileIDs = new Set(
+        collectionFiles
+            .filter((f) => hiddenCollectionIDs.has(f.collectionID))
+            .map((f) => f.id),
+    );
+
+    return collectionFiles.filter((f) => !hiddenFileIDs.has(f.id));
+};
 
 /**
  * Change the visibility (normal, archived, hidden) of a list of files on
@@ -64,10 +89,7 @@ export const performInBatches = <T, U>(
 export const updateFilesVisibility = async (
     files: EnteFile[],
     visibility: ItemVisibility,
-) =>
-    performInBatches(files, (b) =>
-        updateFilesPrivateMagicMetadata(b, { visibility }),
-    );
+) => batched(files, (b) => updateFilesPrivateMagicMetadata(b, { visibility }));
 
 /**
  * Update the private magic metadata of a list of files on remote.

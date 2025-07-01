@@ -12,16 +12,19 @@ import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/viewer/people/cluster_page.dart";
 import "package:photos/ui/viewer/people/file_face_widget.dart";
+import "package:photos/ui/viewer/people/person_face_widget.dart";
 import "package:photos/ui/viewer/people/save_or_edit_person.dart";
 import "package:photos/utils/face/face_thumbnail_cache.dart";
 
 final _logger = Logger("PersonGallerySuggestion");
 
 class PersonGallerySuggestion extends StatefulWidget {
-  final PersonEntity person;
+  final PersonEntity? person;
+  final VoidCallback? onClose;
 
   const PersonGallerySuggestion({
     required this.person,
+    this.onClose,
     super.key,
   });
 
@@ -41,6 +44,10 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
   bool hasCurrentSuggestion = false;
   Map<int, Map<int, Uint8List?>> precomputedFaceCrops = {};
 
+  PersonEntity? person;
+  bool get personPage => widget.person != null;
+  PersonEntity get relevantPerson => widget.person ?? person!;
+
   late AnimationController _slideController;
   late AnimationController _fadeController;
   late Animation<Offset> _slideAnimation;
@@ -49,6 +56,7 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
   @override
   void initState() {
     super.initState();
+    person = widget.person;
     _initializeAnimations();
     _loadInitialSuggestion();
   }
@@ -86,23 +94,32 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
 
   Future<void> _loadInitialSuggestion() async {
     try {
-      final suggestions = await ClusterFeedbackService.instance
-          .getSuggestionForPerson(widget.person);
+      late final List<ClusterSuggestion> suggestions;
+      if (personPage) {
+        suggestions = await ClusterFeedbackService.instance
+            .getSuggestionForPerson(relevantPerson);
+      } else {
+        suggestions = await ClusterFeedbackService.instance
+            .getAllLargePersonSuggestions();
+        person = suggestions.first.person;
+      }
 
       if (suggestions.isNotEmpty && mounted) {
         allSuggestions = suggestions;
         currentSuggestionIndex = 0;
 
         final crops = await _generateFaceThumbnails(
-          allSuggestions[0].filesInCluster.take(4).toList(),
+          allSuggestions[0].filesInCluster.take(personPage ? 4 : 3).toList(),
           allSuggestions[0].clusterIDToMerge,
         );
 
-        setState(() {
-          faceCrops = crops;
-          isLoading = false;
-          hasCurrentSuggestion = true;
-        });
+        if (mounted) {
+          setState(() {
+            faceCrops = crops;
+            isLoading = false;
+            hasCurrentSuggestion = true;
+          });
+        }
 
         unawaited(_fadeController.forward());
         unawaited(_slideController.forward());
@@ -138,7 +155,7 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
 
         final suggestion = allSuggestions[i];
         final crops = await _generateFaceThumbnails(
-          suggestion.filesInCluster.take(4).toList(),
+          suggestion.filesInCluster.take(personPage ? 4 : 3).toList(),
           suggestion.clusterIDToMerge,
         );
 
@@ -175,7 +192,9 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
 
   void _navigateToCluster() {
     if (allSuggestions.isEmpty ||
-        currentSuggestionIndex >= allSuggestions.length) return;
+        currentSuggestionIndex >= allSuggestions.length) {
+      return;
+    }
 
     final currentSuggestion = allSuggestions[currentSuggestionIndex];
     final List<EnteFile> sortedFiles = List<EnteFile>.from(
@@ -188,7 +207,7 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
       MaterialPageRoute(
         builder: (context) => ClusterPage(
           sortedFiles,
-          personID: widget.person,
+          personID: relevantPerson,
           clusterID: currentSuggestion.clusterIDToMerge,
           showNamingBanner: false,
         ),
@@ -199,7 +218,9 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
   Future<void> _handleUserChoice(bool accepted) async {
     if (isProcessing ||
         allSuggestions.isEmpty ||
-        currentSuggestionIndex >= allSuggestions.length) return;
+        currentSuggestionIndex >= allSuggestions.length) {
+      return;
+    }
 
     setState(() {
       isProcessing = true;
@@ -212,14 +233,14 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
       if (accepted) {
         unawaited(
           ClusterFeedbackService.instance.addClusterToExistingPerson(
-            person: widget.person,
+            person: relevantPerson,
             clusterID: currentSuggestion.clusterIDToMerge,
           ),
         );
       } else {
         unawaited(
           MLDataDB.instance.captureNotPersonFeedback(
-            personID: widget.person.remoteID,
+            personID: relevantPerson.remoteID,
             clusterID: currentSuggestion.clusterIDToMerge,
           ),
         );
@@ -245,13 +266,16 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
   Future<void> _saveAsAnotherPerson() async {
     if (isProcessing ||
         allSuggestions.isEmpty ||
-        currentSuggestionIndex >= allSuggestions.length) return;
+        currentSuggestionIndex >= allSuggestions.length) {
+      return;
+    }
     setState(() {
       isProcessing = true;
     });
     unawaited(_animateOut());
     try {
       final currentSuggestion = allSuggestions[currentSuggestionIndex];
+      person = currentSuggestion.person;
       final clusterID = currentSuggestion.clusterIDToMerge;
       final someFile = currentSuggestion.filesInCluster.first;
 
@@ -301,6 +325,7 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
 
     // Check if we have more suggestions
     if (currentSuggestionIndex < allSuggestions.length) {
+      person = allSuggestions[currentSuggestionIndex].person;
       try {
         // Get face crops for next suggestion (from precomputed or generate new)
         Map<int, Uint8List?> nextCrops;
@@ -309,7 +334,7 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
         } else {
           final nextSuggestion = allSuggestions[currentSuggestionIndex];
           nextCrops = await _generateFaceThumbnails(
-            nextSuggestion.filesInCluster.take(4).toList(),
+            nextSuggestion.filesInCluster.take(personPage ? 4 : 3).toList(),
             nextSuggestion.clusterIDToMerge,
           );
         }
@@ -388,137 +413,175 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
           key: ValueKey('suggestion_$currentSuggestionIndex'),
           onTap: _navigateToCluster,
           behavior: HitTestBehavior.opaque,
-          child: Container(
-            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: colorScheme.fillFaint,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: colorScheme.strokeFainter,
-                width: 1,
-              ),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                RichText(
-                  textAlign: TextAlign.center,
-                  text: TextSpan(
-                    style: textTheme.body,
-                    children: [
-                      TextSpan(text: S.of(context).areThey),
-                      TextSpan(
-                        text: widget.person.data.name,
-                        style: textTheme.bodyBold,
-                      ),
-                      TextSpan(text: S.of(context).questionmark),
-                    ],
+          child: Stack(
+            children: [
+              Container(
+                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                decoration: BoxDecoration(
+                  color: colorScheme.fillFaint,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: colorScheme.strokeFainter,
+                    width: 1,
                   ),
                 ),
-                const SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: _buildFaceThumbnails(),
-                ),
-                const SizedBox(height: 24),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: isProcessing
-                            ? null
-                            : () => _handleUserChoice(false),
-                        child: Container(
-                          margin: const EdgeInsets.only(right: 6),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 12,
+                    personPage
+                        ? RichText(
+                            textAlign: TextAlign.center,
+                            text: TextSpan(
+                              style: textTheme.body,
+                              children: [
+                                TextSpan(text: S.of(context).areThey),
+                                TextSpan(
+                                  text: relevantPerson.data.name,
+                                  style: textTheme.bodyBold,
+                                ),
+                                TextSpan(text: S.of(context).questionmark),
+                              ],
+                            ),
+                          )
+                        : Text(
+                            S.of(context).sameperson,
+                            style: textTheme.body,
+                            textAlign: TextAlign.center,
                           ),
-                          decoration: BoxDecoration(
-                            color: Colors.transparent,
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(
-                              color: colorScheme.warning700,
-                              width: 1,
+                    const SizedBox(height: 16),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: _buildFaceThumbnails(),
+                    ),
+                    const SizedBox(height: 24),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: isProcessing
+                                ? null
+                                : () => _handleUserChoice(false),
+                            child: Container(
+                              margin: const EdgeInsets.only(left: 16, right: 6),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 12,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.transparent,
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color: colorScheme.warning700,
+                                  width: 1,
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.close,
+                                    color: colorScheme.warning500,
+                                    size: 20,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    S.of(context).no,
+                                    style: (personPage
+                                            ? textTheme.bodyBold
+                                            : textTheme.body)
+                                        .copyWith(
+                                      color: colorScheme.warning500,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.close,
-                                color: colorScheme.warning500,
-                                size: 20,
+                        ),
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: isProcessing
+                                ? null
+                                : () => _handleUserChoice(true),
+                            child: Container(
+                              margin: const EdgeInsets.only(left: 6, right: 16),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 12,
                               ),
-                              const SizedBox(width: 8),
-                              Text(
-                                S.of(context).no,
-                                style: textTheme.bodyBold.copyWith(
-                                  color: colorScheme.warning500,
-                                ),
+                              decoration: BoxDecoration(
+                                color: colorScheme.primary500,
+                                borderRadius: BorderRadius.circular(8),
                               ),
-                            ],
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const Icon(
+                                    Icons.check,
+                                    color: textBaseDark,
+                                    size: 20,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    S.of(context).yes,
+                                    style: (personPage
+                                            ? textTheme.bodyBold
+                                            : textTheme.body)
+                                        .copyWith(
+                                      color: textBaseDark,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
                         ),
-                      ),
+                      ],
                     ),
-                    Expanded(
-                      child: GestureDetector(
+                    if (personPage) const SizedBox(height: 12),
+                    if (personPage)
+                      GestureDetector(
+                        behavior: HitTestBehavior.opaque,
                         onTap:
-                            isProcessing ? null : () => _handleUserChoice(true),
-                        child: Container(
-                          margin: const EdgeInsets.only(left: 6),
+                            isProcessing ? null : () => _saveAsAnotherPerson(),
+                        child: Padding(
                           padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
                             vertical: 12,
+                            horizontal: 32,
                           ),
-                          decoration: BoxDecoration(
-                            color: colorScheme.primary500,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Icon(
-                                Icons.check,
-                                color: textBaseDark,
-                                size: 20,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                S.of(context).yes,
-                                style: textTheme.bodyBold.copyWith(
-                                  color: textBaseDark,
-                                ),
-                              ),
-                            ],
+                          child: Text(
+                            S.of(context).saveAsAnotherPerson,
+                            style: textTheme.mini.copyWith(
+                              color: colorScheme.textMuted,
+                              decoration: TextDecoration.underline,
+                            ),
                           ),
                         ),
                       ),
-                    ),
                   ],
                 ),
-                GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onTap: isProcessing ? null : () => _saveAsAnotherPerson(),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 12,
-                      horizontal: 32,
-                    ),
-                    child: Text(
-                      S.of(context).saveAsAnotherPerson,
-                      style: textTheme.mini.copyWith(
-                        color: colorScheme.textMuted,
-                        decoration: TextDecoration.underline,
+              ),
+              if (widget.onClose != null)
+                Positioned(
+                  top: 4,
+                  right: 12,
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: widget.onClose,
+                    child: Container(
+                      padding: const EdgeInsets.all(16),
+                      child: Icon(
+                        Icons.close,
+                        size: 16,
+                        color: colorScheme.textBase,
                       ),
                     ),
                   ),
                 ),
-              ],
-            ),
+            ],
           ),
         ),
       ),
@@ -527,47 +590,77 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
 
   List<Widget> _buildFaceThumbnails() {
     final currentSuggestion = allSuggestions[currentSuggestionIndex];
-    final files = currentSuggestion.filesInCluster.take(4).toList();
+    final suggestPerson = currentSuggestion.person;
+    final files =
+        currentSuggestion.filesInCluster.take(personPage ? 4 : 3).toList();
     final thumbnails = <Widget>[];
+    final textTheme = getEnteTextTheme(context);
 
-    for (int i = 0; i < files.length; i++) {
-      final file = files[i];
-      final faceCrop = faceCrops[file.uploadedFileID!];
+    final start = personPage ? 0 : -1;
+    for (int i = start; i < files.length; i++) {
+      EnteFile? file;
+      Uint8List? faceCrop;
+      if (i != -1) {
+        file = files[i];
+        faceCrop = faceCrops[file.uploadedFileID!];
+      }
 
-      if (i > 0) {
+      if (i > start) {
         thumbnails.add(const SizedBox(width: 8));
       }
 
       thumbnails.add(
-        Container(
-          width: 72,
-          height: 72,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(32),
-            border: Border.all(
-              color: getEnteColorScheme(context).strokeFainter,
-              width: 1,
-            ),
-          ),
-          child: ClipRRect(
-            child: ClipPath(
-              clipper: ShapeBorderClipper(
-                shape: ContinuousRectangleBorder(
-                  borderRadius: BorderRadius.circular(52),
+        Column(
+          children: [
+            Container(
+              width: 72,
+              height: 72,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(32),
+                border: Border.all(
+                  color: getEnteColorScheme(context).strokeFainter,
+                  width: 1,
                 ),
               ),
-              child: FileFaceWidget(
-                key: ValueKey(
-                  'face_${currentSuggestionIndex}_${file.uploadedFileID}',
+              child: ClipRRect(
+                child: ClipPath(
+                  clipper: ShapeBorderClipper(
+                    shape: ContinuousRectangleBorder(
+                      borderRadius: BorderRadius.circular(52),
+                    ),
+                  ),
+                  child: (i == -1)
+                      ? PersonFaceWidget(
+                          personId: suggestPerson.remoteID,
+                          key: ValueKey('person_${suggestPerson.remoteID}'),
+                        )
+                      : FileFaceWidget(
+                          key: ValueKey(
+                            'face_${currentSuggestionIndex}_${file!.uploadedFileID}',
+                          ),
+                          file,
+                          faceCrop: faceCrop,
+                          clusterID: currentSuggestion.clusterIDToMerge,
+                          useFullFile: true,
+                          thumbnailFallback: true,
+                        ),
                 ),
-                file,
-                faceCrop: faceCrop,
-                clusterID: currentSuggestion.clusterIDToMerge,
-                useFullFile: true,
-                thumbnailFallback: true,
               ),
             ),
-          ),
+            if (i == -1) const SizedBox(height: 8),
+            if (i == -1)
+              SizedBox(
+                width: 72,
+                child: Center(
+                  child: Text(
+                    relevantPerson.data.name.trim(),
+                    style: textTheme.bodyMuted,
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                  ),
+                ),
+              ),
+          ],
         ),
       );
     }

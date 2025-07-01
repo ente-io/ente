@@ -4,14 +4,22 @@ import type { EnteFile } from "ente-media/file";
 export type CollectionSummaryType =
     | CollectionType
     | "all"
-    | "archive"
-    | "trash"
     | "hiddenItems"
     | "defaultHidden"
-    | "outgoingShare"
-    | "incomingShareViewer"
-    | "incomingShareCollaborator"
+    | "archiveItems"
+    | "trash"
+    | "userFavorites"
+    | "sharedIncoming";
+
+export type CollectionSummaryAttribute =
+    | CollectionSummaryType
+    | "shared"
+    | "sharedOutgoing"
+    | "sharedIncomingViewer"
+    | "sharedIncomingCollaborator"
     | "sharedOnlyViaLink"
+    | "system"
+    | "hideFromCollectionBar"
     | "archived"
     | "pinned";
 
@@ -38,8 +46,13 @@ export const PseudoCollectionID = {
     /**
      * Trash.
      *
-     * This pseudo-collection contains files that are in the user's trash -
-     * files that have been deleted, but have not yet been deleted permanently.
+     * This pseudo-collection contains items that are in the user's trash. Each
+     * items corresponds to a file that has been deleted, but has not yet been
+     * deleted permanently.
+     *
+     * As a special case, when the trash pseudo collection is being shown, then
+     * the corresponding files array will have {@link EnteTrashFile} items
+     * instead of normal {@link EnteFile} ones.
      */
     trash: -2,
     /**
@@ -112,7 +125,7 @@ export interface CollectionSummary {
      * ad-hoc "UI" attributes which make it easier and more efficient for the UI
      * elements to render the collection summary in the UI.
      */
-    attributes: CollectionSummaryType[];
+    attributes: Set<CollectionSummaryAttribute>;
     /**
      * The name of the collection or pseudo-collection surfaced in the UI.
      */
@@ -141,6 +154,7 @@ export interface CollectionSummary {
      * file that it contains.
      */
     updationTime: number | undefined;
+    sortPriority: CollectionSummarySortPriority;
     order?: number;
 }
 
@@ -168,70 +182,42 @@ export const collectionsSortBy = [
 export type CollectionsSortBy = (typeof collectionsSortBy)[number];
 
 /**
- * An ordering of collection "categories".
+ * An orderable set collection "priorities".
  *
- * Within each category, the collections are sorted by the applicable
- * {@link CollectionsSortBy}.
+ * Collection summaries that need to appear prior to other collection summaries
+ * get assigned a "priority", which is an otherwise arbitrary integer that only
+ * serves as a sort priority (higher being prior).
+ *
+ * All collections in a higher category appear together, and before collections
+ * in lower categories. Within each priority, the collections are sorted by the
+ * applicable {@link CollectionsSortBy}.
  */
-export const CollectionSummaryOrder = new Map<CollectionSummaryType, number>([
-    ["all", 0],
-    ["hiddenItems", 0],
-    ["uncategorized", 1],
-    ["favorites", 2],
-    ["pinned", 3],
-    ["album", 4],
-    ["folder", 4],
-    ["incomingShareViewer", 4],
-    ["incomingShareCollaborator", 4],
-    ["outgoingShare", 4],
-    ["sharedOnlyViaLink", 4],
-    ["archived", 4],
-    ["archive", 5],
-    ["trash", 6],
-    ["defaultHidden", 7],
-]);
+export const CollectionSummarySortPriority = {
+    /**
+     * Currently: "All", "Uncategorized", "Hidden items".
+     */
+    system: 9,
+    favorites: 8,
+    pinned: 7,
+    other: 0,
+} as const;
 
-const systemCSTypes = new Set<CollectionSummaryType>([
-    "all",
-    "archive",
-    "trash",
-    "uncategorized",
-    "hiddenItems",
-    "defaultHidden",
-]);
+/**
+ * The TypeScript type that restricts the possible values to be one from amongst
+ * the {@link CollectionSummarySortCategory} constants.
+ */
+export type CollectionSummarySortPriority =
+    (typeof CollectionSummarySortPriority)[keyof typeof CollectionSummarySortPriority];
 
-const addToDisabledCSTypes = new Set<CollectionSummaryType>([
-    ...systemCSTypes,
-    "incomingShareViewer",
-]);
-
-const moveToDisabledCSTypes = new Set<CollectionSummaryType>([
-    ...addToDisabledCSTypes,
-    "incomingShareCollaborator",
-]);
-
-const hideFromCollectionBarCSTypes = new Set<CollectionSummaryType>([
-    "trash",
-    "archive",
-    "uncategorized",
-    "defaultHidden",
-]);
-
-export const isSystemCollection = (type: CollectionSummaryType) =>
-    systemCSTypes.has(type);
-
-export const areOnlySystemCollections = (
+export const haveOnlySystemCollections = (
     collectionSummaries: CollectionSummaries,
 ) =>
-    [...collectionSummaries.values()].every(({ type }) =>
-        isSystemCollection(type),
+    [...collectionSummaries.values()].every((cs) =>
+        cs.attributes.has("system"),
     );
 
-export const canAddToCollection = (type: CollectionSummaryType) =>
-    !addToDisabledCSTypes.has(type);
+export const canAddToCollection = ({ attributes }: CollectionSummary) =>
+    !attributes.has("system") && !attributes.has("sharedIncomingViewer");
 
-export const canMoveToCollection = (type: CollectionSummaryType) =>
-    !moveToDisabledCSTypes.has(type);
-
-export const shouldShowOnCollectionBar = (type: CollectionSummaryType) =>
-    !hideFromCollectionBarCSTypes.has(type);
+export const canMoveToCollection = ({ attributes }: CollectionSummary) =>
+    !attributes.has("system") && !attributes.has("sharedIncoming");

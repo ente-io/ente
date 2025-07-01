@@ -1,15 +1,15 @@
 import { sharedCryptoWorker } from "ente-base/crypto";
 import log from "ente-base/log";
 import { apiURL } from "ente-base/origins";
-import { type MagicMetadataCore } from "ente-gallery/services/magic-metadata";
+import { transformFilesIfNeeded } from "ente-gallery/services/files-db";
+import { sortFiles } from "ente-gallery/utils/file";
 import type {
     Collection,
     CollectionPublicMagicMetadataData,
 } from "ente-media/collection";
 import type { EnteFile, RemoteEnteFile } from "ente-media/file";
-import { decryptRemoteFile, mergeMetadata } from "ente-media/file";
+import { decryptRemoteFile } from "ente-media/file";
 import { savedPublicCollections } from "ente-new/albums/services/public-albums-fdb";
-import { sortFiles } from "ente-new/photos/services/files";
 import { CustomError, parseSharingErrorCodes } from "ente-shared/error";
 import HTTPService from "ente-shared/network/HTTPService";
 import localForage from "ente-shared/storage/localForage";
@@ -64,7 +64,7 @@ export const getLocalPublicFiles = async (collectionUID: string) => {
             collectionUID: null,
             files: [] as EnteFile[],
         } as LocalSavedPublicCollectionFiles);
-    return localSavedPublicCollectionFiles.files;
+    return transformFilesIfNeeded(localSavedPublicCollectionFiles.files);
 };
 export const savePublicCollectionFiles = async (
     collectionUID: string,
@@ -228,7 +228,7 @@ export const syncPublicFiles = async (
                 collectionUID,
                 collection.updationTime,
             );
-            setPublicFiles([...sortFiles(mergeMetadata(files), sortAsc)]);
+            setPublicFiles([...sortFiles(files, sortAsc)]);
         } catch (e) {
             const parsedError = parseSharingErrorCodes(e);
             log.error("failed to sync shared collection files", e);
@@ -236,7 +236,7 @@ export const syncPublicFiles = async (
                 throw e;
             }
         }
-        return [...sortFiles(mergeMetadata(files), sortAsc)];
+        return [...sortFiles(files, sortAsc)];
     } catch (e) {
         log.error("failed to get local  or sync shared collection files", e);
         throw e;
@@ -291,12 +291,10 @@ const getPublicFiles = async (
             }
             setPublicFiles(
                 sortFiles(
-                    mergeMetadata(
-                        [...(files || []), ...decryptedFiles].filter(
-                            // TODO(RE):
-                            // (item) => !item.isDeleted,
-                            (file) => !("isDeleted" in file && file.isDeleted),
-                        ),
+                    [...(files || []), ...decryptedFiles].filter(
+                        // TODO(RE):
+                        // (item) => !item.isDeleted,
+                        (file) => !("isDeleted" in file && file.isDeleted),
                     ),
                     sortAsc,
                 ),
@@ -308,6 +306,13 @@ const getPublicFiles = async (
         throw e;
     }
 };
+
+export interface MagicMetadataCore<T> {
+    version: number;
+    count: number;
+    header: string;
+    data: T;
+}
 
 export const getPublicCollection = async (
     token: string,

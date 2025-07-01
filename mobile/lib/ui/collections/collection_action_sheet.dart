@@ -397,10 +397,10 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
           unpinned.add(collection);
         }
       }
-      return recentlyCreated +
-          pinned +
-          unpinned +
-          (uncategorized != null ? [uncategorized] : []);
+
+      return uncategorized != null
+          ? [uncategorized] + recentlyCreated + pinned + unpinned
+          : recentlyCreated + pinned + unpinned;
     }
   }
 

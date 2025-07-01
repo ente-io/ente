@@ -571,6 +571,14 @@
       ]
     },
     {
+      "title": "IBKR",
+      "slug": "ibkr",
+      "altNames": [
+        "Interactive Brokers",
+        "IB"
+      ]
+    },
+    {
       "title": "IceDrive",
       "slug": "ice_drive"
     },
@@ -690,6 +698,10 @@
       "altNames": [
         "飞书"
       ]
+    },
+    {
+      "title": "LaunchDarkly",
+      "hex": "858585"
     },
     {
       "title": "Letterboxd"
@@ -1465,6 +1477,9 @@
     {
       "title": "Cronometer",
       "slug": "cronometer"
+    },
+    {
+      "title": "Zitadel"
     }
   ]
 }

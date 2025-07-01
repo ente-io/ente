@@ -575,6 +575,28 @@ class MessageLookup extends MessageLookupByLibrary {
         "blackFridaySale":
             MessageLookupByLibrary.simpleMessage("Black Friday Sale"),
         "blog": MessageLookupByLibrary.simpleMessage("Blog"),
+        "cLDesc1": MessageLookupByLibrary.simpleMessage(
+            "On the back of video streaming beta, and work on resumable uploads and downloads, we have now increased the file upload limit to 10GB. This is now available in both desktop and mobile apps."),
+        "cLDesc2": MessageLookupByLibrary.simpleMessage(
+            "Background uploads are now supported on iOS as well, in addition to Android devices. No need to open the app to backup your latest photos and videos."),
+        "cLDesc3": MessageLookupByLibrary.simpleMessage(
+            "We have made significant improvements to our memories experience, including autoplay, swipe to next memory and a lot more."),
+        "cLDesc4": MessageLookupByLibrary.simpleMessage(
+            "Along with a bunch of under the hood improvements, now its much easier to see all detected faces, provide feedback on similar faces, and add/remove faces from a single photo."),
+        "cLDesc5": MessageLookupByLibrary.simpleMessage(
+            "You will now receive an opt-out notification for all the birthdays your have saved on Ente, along with a collection of their best photos."),
+        "cLDesc6": MessageLookupByLibrary.simpleMessage(
+            "No more waiting for uploads/downloads to complete before you can close the app. All uploads and downloads now have the ability to be paused midway, and resume from where you left off."),
+        "cLTitle1":
+            MessageLookupByLibrary.simpleMessage("Uploading Large Video Files"),
+        "cLTitle2": MessageLookupByLibrary.simpleMessage("Background Upload"),
+        "cLTitle3": MessageLookupByLibrary.simpleMessage("Autoplay Memories"),
+        "cLTitle4":
+            MessageLookupByLibrary.simpleMessage("Improved Face Recognition"),
+        "cLTitle5":
+            MessageLookupByLibrary.simpleMessage("Birthday Notifications"),
+        "cLTitle6": MessageLookupByLibrary.simpleMessage(
+            "Resumable Uploads and Downloads"),
         "cachedData": MessageLookupByLibrary.simpleMessage("Cached data"),
         "calculating": MessageLookupByLibrary.simpleMessage("Calculating..."),
         "canNotOpenBody": MessageLookupByLibrary.simpleMessage(
@@ -825,6 +847,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "deviceNotFound":
             MessageLookupByLibrary.simpleMessage("Device not found"),
         "didYouKnow": MessageLookupByLibrary.simpleMessage("Did you know?"),
+        "different": MessageLookupByLibrary.simpleMessage("Different"),
         "disableAutoLock":
             MessageLookupByLibrary.simpleMessage("Disable auto lock"),
         "disableDownloadWarningBody": MessageLookupByLibrary.simpleMessage(
@@ -1697,6 +1720,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "rotateLeft": MessageLookupByLibrary.simpleMessage("Rotate left"),
         "rotateRight": MessageLookupByLibrary.simpleMessage("Rotate right"),
         "safelyStored": MessageLookupByLibrary.simpleMessage("Safely stored"),
+        "same": MessageLookupByLibrary.simpleMessage("Same"),
+        "sameperson": MessageLookupByLibrary.simpleMessage("Same person?"),
         "save": MessageLookupByLibrary.simpleMessage("Save"),
         "saveAsAnotherPerson":
             MessageLookupByLibrary.simpleMessage("Save as another person"),

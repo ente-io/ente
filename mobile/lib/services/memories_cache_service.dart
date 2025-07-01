@@ -26,6 +26,7 @@ import "package:photos/services/machine_learning/face_ml/person/person_service.d
 import "package:photos/services/notification_service.dart";
 import "package:photos/services/search_service.dart";
 import "package:photos/theme/colors.dart";
+import "package:photos/ui/home/memories/all_memories_page.dart";
 import "package:photos/ui/home/memories/full_screen_memory.dart";
 import "package:photos/ui/viewer/people/people_page.dart";
 import "package:photos/utils/cache_util.dart";
@@ -147,7 +148,7 @@ class MemoriesCacheService {
     unawaited(_prefs.setBool(_shouldUpdateCacheKey, true));
   }
 
-  Future<List<SmartMemory>> getMemories() async {
+  Future<List<SmartMemory>> getMemories({bool onlyUseCache = false}) async {
     _logger.info("getMemories called");
     if (!showAnyMemories) {
       _logger.info('Showing memories is disabled in settings, showing none');
@@ -157,6 +158,9 @@ class MemoriesCacheService {
       if (_cachedMemories != null && _cachedMemories!.isNotEmpty) {
         _logger.info("Found memories in memory cache");
         return _cachedMemories!;
+      } else if (onlyUseCache) {
+        _logger.info("Only using cache, no memories found");
+        return [];
       }
       try {
         if (!enableSmartMemories) {
@@ -436,7 +440,7 @@ class MemoriesCacheService {
       );
       return [];
     }
-    final allMemories = await getMemories();
+    final allMemories = await getMemories(onlyUseCache: true);
     if (onThisDay && pastYears && smart) {
       return allMemories;
     }
@@ -484,15 +488,12 @@ class MemoriesCacheService {
     }
     await routeToPage(
       context,
-      FullScreenMemoryDataUpdater(
-        initialIndex: fileIdx,
-        memories: allMemories[memoryIdx].memories,
-        child: Container(
-          color: backgroundBaseDark,
-          width: double.infinity,
-          height: double.infinity,
-          child: FullScreenMemory(allMemories[memoryIdx].title, fileIdx),
-        ),
+      AllMemoriesPage(
+        allMemories: _cachedMemories!.map((e) => e.memories).toList(),
+        allTitles: _cachedMemories!.map((e) => e.title).toList(),
+        initialPageIndex: memoryIdx,
+        inititalFileIndex: fileIdx,
+        isFromWidgetOrNotifications: true,
       ),
       forceCustomPageRoute: true,
     );
@@ -519,15 +520,12 @@ class MemoriesCacheService {
     }
     await routeToPage(
       context,
-      FullScreenMemoryDataUpdater(
-        initialIndex: 0,
-        memories: allMemories[memoryIdx].memories,
-        child: Container(
-          color: backgroundBaseDark,
-          width: double.infinity,
-          height: double.infinity,
-          child: FullScreenMemory(allMemories[memoryIdx].title, 0),
-        ),
+      AllMemoriesPage(
+        allMemories: allMemories.map((e) => e.memories).toList(),
+        allTitles: allMemories.map((e) => e.title).toList(),
+        initialPageIndex: memoryIdx,
+        inititalFileIndex: 0,
+        isFromWidgetOrNotifications: true,
       ),
       forceCustomPageRoute: true,
     );

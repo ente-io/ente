@@ -1773,5 +1773,20 @@
   "thePersonWillNotBeDisplayed": "The person will not be displayed in the people section anymore. Photos will remain untouched.",
   "areYouSureYouWantToMergeThem": "Are you sure you want to merge them?",
   "allUnnamedGroupsWillBeMergedIntoTheSelectedPerson": "All unnamed groups will be merged into the selected person. This can still be undone from the suggestions history overview of the person.",
-  "yesIgnore": "Yes, ignore"
+  "yesIgnore": "Yes, ignore",
+  "same": "Same",
+  "different": "Different",
+  "sameperson": "Same person?",
+  "cLTitle1": "Uploading Large Video Files",
+  "cLDesc1": "On the back of video streaming beta, and work on resumable uploads and downloads, we have now increased the file upload limit to 10GB. This is now available in both desktop and mobile apps.",
+  "cLTitle2": "Background Upload",
+  "cLDesc2": "Background uploads are now supported on iOS as well, in addition to Android devices. No need to open the app to backup your latest photos and videos.",
+  "cLTitle3": "Autoplay Memories",
+  "cLDesc3": "We have made significant improvements to our memories experience, including autoplay, swipe to next memory and a lot more.",
+  "cLTitle4": "Improved Face Recognition",
+  "cLDesc4": "Along with a bunch of under the hood improvements, now its much easier to see all detected faces, provide feedback on similar faces, and add/remove faces from a single photo.",
+  "cLTitle5": "Birthday Notifications",
+  "cLDesc5": "You will now receive an opt-out notification for all the birthdays your have saved on Ente, along with a collection of their best photos.",
+  "cLTitle6": "Resumable Uploads and Downloads",
+  "cLDesc6": "No more waiting for uploads/downloads to complete before you can close the app. All uploads and downloads now have the ability to be paused midway, and resume from where you left off."
 }

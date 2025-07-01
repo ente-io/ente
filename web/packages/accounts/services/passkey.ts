@@ -213,11 +213,10 @@ export const passkeySessionExpiredErrorMessage = "Passkey session has expired";
 export const checkPasskeyVerificationStatus = async (
     sessionID: string,
 ): Promise<TwoFactorAuthorizationResponse | undefined> => {
-    const url = await apiURL("/users/two-factor/passkeys/get-token");
-    const params = new URLSearchParams({ sessionID });
-    const res = await fetch(`${url}?${params.toString()}`, {
-        headers: publicRequestHeaders(),
-    });
+    const res = await fetch(
+        await apiURL("/users/two-factor/passkeys/get-token", { sessionID }),
+        { headers: publicRequestHeaders() },
+    );
     if (!res.ok) {
         if (res.status == 404 || res.status == 410)
             throw new Error(passkeySessionExpiredErrorMessage);

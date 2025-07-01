@@ -460,6 +460,17 @@ export const fileFileName = (file: EnteFile) =>
     file.pubMagicMetadata?.data.editedName ?? file.metadata.title;
 
 /**
+ * Return the file's creation timestamp (epoch microseconds).
+ *
+ * This function handles files with edited dates.
+ *
+ * While sometimes the epoch timestamp is the correct value to use, it is also
+ * possible that {@link fileCreationPhotoDate} might be more appropriate.
+ */
+export const fileCreationTime = (file: EnteFile) =>
+    file.pubMagicMetadata?.data.editedTime ?? file.metadata.creationTime;
+
+/**
  * Return the file's creation date as a Date in the hypothetical "timezone of
  * the photo".
  *
@@ -475,17 +486,16 @@ export const fileCreationPhotoDate = (file: EnteFile) =>
 
 /**
  * Return the GPS coordinates (if any) present in the given {@link EnteFile}.
+ *
+ * This function handles files with edited locations.
  */
 export const fileLocation = (file: EnteFile): Location | undefined => {
-    // TODO: EnteFile types. Need to verify that metadata itself, and
-    // metadata.lat/lng can not be null (I think they likely can, if so need to
-    // update the types). Need to suppress the linter meanwhile.
+    const { lat, long } = file.pubMagicMetadata?.data ?? {};
+    // Use (lat, long) only if both are present and nonzero.
+    const edited = lat && long;
 
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    if (!file.metadata) return undefined;
-
-    const latitude = nullToUndefined(file.metadata.latitude);
-    const longitude = nullToUndefined(file.metadata.longitude);
+    const latitude = nullToUndefined(edited ? lat : file.metadata.latitude);
+    const longitude = nullToUndefined(edited ? long : file.metadata.longitude);
 
     if (latitude === undefined || longitude === undefined) return undefined;
     if (Number.isNaN(latitude) || Number.isNaN(longitude)) return undefined;

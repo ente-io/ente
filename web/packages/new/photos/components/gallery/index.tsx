@@ -25,6 +25,18 @@ import { useWrapAsyncOperation } from "../utils/use-wrap-async";
 import { GalleryItemsHeaderAdapter, GalleryItemsSummary } from "./ListHeader";
 
 /**
+ * Options to customize the behaviour of the remote pull that gets triggered on
+ * various actions within the gallery and its descendants.
+ */
+export interface RemotePullOpts {
+    /**
+     * Perform the pull without showing a global loading bar
+     *
+     * Default: `false`.
+     */
+    silent?: boolean;
+}
+/**
  * The context in which a selection was made.
  *
  * This allows us to reset the selection if user moves to a different context

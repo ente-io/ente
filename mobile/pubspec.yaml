@@ -12,7 +12,7 @@ description: ente photos application
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 
-version: 1.1.36+1068
+version: 1.1.39+1071
 publish_to: none
 
 environment:
@@ -144,7 +144,7 @@ dependencies:
       ref: 3b862fe
   nanoid: ^1.0.0
   native_dio_adapter: ^1.4.0
-  native_video_player: ^3.0.0-dev.4
+  native_video_player: ^4.0.0
   onnx_dart:
     path: plugins/onnx_dart
   onnxruntime:

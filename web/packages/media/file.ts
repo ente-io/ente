@@ -192,7 +192,7 @@ export interface FileObjectAttributes {
     decryptionHeader: string;
 }
 
-const RemoteFileObjectAttributes = z.looseObject({
+export const RemoteFileObjectAttributes = z.looseObject({
     /**
      * The decryption header (base64 string) used when encrypting the object.
      *
@@ -216,7 +216,7 @@ export interface FileInfo {
     thumbSize: number;
 }
 
-const RemoteFileInfo = z.looseObject({
+export const RemoteFileInfo = z.looseObject({
     fileSize: z.number(),
     thumbSize: z.number(),
 });
@@ -321,8 +321,8 @@ export type RemoteEnteFile = z.infer<typeof RemoteEnteFile>;
  * Zod schema for a response for various "/diff" APIs that return changes since
  * a provided timestamp.
  *
+ * - "/collections/v2/diff"
  * - "/cast/diff"
- *
  */
 export const FileDiffResponse = z.object({
     /**
@@ -420,7 +420,7 @@ export const decryptRemoteFile = async (
  *
  * @returns A JSON object with any transformations applied, if needed.
  */
-const transformDecryptedMetadataJSON = (
+export const transformDecryptedMetadataJSON = (
     fileID: number,
     metadataJSON: unknown,
 ) => {
@@ -458,47 +458,6 @@ const transformDecryptedMetadataJSON = (
 
     return metadataJSON;
 };
-
-/**
- * Update the immutable fields of an (in-memory) {@link EnteFile} with any edits
- * that the user has made to their corresponding mutable metadata fields.
- *
- * This function updates a single file, see {@link mergeMetadata} for a
- * convenience function to run it on an array of files.
- */
-export const mergeMetadata1 = (file: EnteFile): EnteFile => {
-    const mutableMetadata = file.pubMagicMetadata?.data;
-    if (mutableMetadata) {
-        const { editedTime, editedName, lat, long } = mutableMetadata;
-        if (editedTime) file.metadata.creationTime = editedTime;
-        // Not needed, use fileFileName.
-        if (editedName) file.metadata.title = editedName;
-        // Use (lat, long) only if both are present and nonzero.
-        if (lat && long) {
-            file.metadata.latitude = lat;
-            file.metadata.longitude = long;
-        }
-    }
-
-    // Moved to transformDecryptedMetadataJSON.
-    if (!file.metadata.modificationTime)
-        file.metadata.modificationTime = file.metadata.creationTime;
-
-    // Moved to transformDecryptedMetadataJSON.
-    if (!file.metadata.fileType && file.id < 100000000)
-        file.metadata.fileType = FileType.image;
-
-    return file;
-};
-
-/**
- * Update the in-memory representation of an array of {@link EnteFile} to
- * reflect user edits since the file was uploaded.
- *
- * This is a list variant of {@link mergeMetadata1}.
- */
-export const mergeMetadata = (files: EnteFile[]) =>
-    files.map((file) => mergeMetadata1(file));
 
 /**
  * A short identifier for a file in log messages.

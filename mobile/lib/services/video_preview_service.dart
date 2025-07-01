@@ -110,8 +110,7 @@ class VideoPreviewService {
     EnteFile enteFile, [
     bool forceUpload = false,
   ]) async {
-    if (!isVideoStreamingEnabled ||
-        !computeController.requestCompute(stream: true)) {
+    if (!_allowStream()) {
       _logger.info(
         "Pause preview due to disabledSteaming($isVideoStreamingEnabled) or computeController permission)",
       );
@@ -855,9 +854,14 @@ class VideoPreviewService {
     chunkAndUploadVideo(null, file).ignore();
   }
 
+  bool _allowStream() {
+    return isVideoStreamingEnabled &&
+        computeController.requestCompute(stream: true);
+  }
+
   void queueFiles({Duration duration = const Duration(seconds: 5)}) {
     Future.delayed(duration, () {
-      if (!_hasQueuedFile && computeController.requestCompute(stream: true)) {
+      if (!_hasQueuedFile && _allowStream()) {
         _putFilesForPreviewCreation(true).catchError((_) {
           _hasQueuedFile = false;
         });

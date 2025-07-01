@@ -47,6 +47,7 @@ class VideoWidgetMediaKit extends StatefulWidget {
     this.preview,
     this.onFinalFileLoad,
     required this.selectedPreview,
+    this.onFinalFileLoad,
     super.key,
   });
 
@@ -322,6 +323,13 @@ class _VideoWidgetMediaKitState extends State<VideoWidgetMediaKit>
           memoryDuration: duration,
         );
       });
+      int duration = controller!.player.state.duration.inSeconds;
+      if (duration == 0) {
+        duration = 10;
+      }
+      widget.onFinalFileLoad?.call(
+        memoryDuration: duration,
+      );
     }
   }
 }

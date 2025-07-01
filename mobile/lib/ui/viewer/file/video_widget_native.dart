@@ -81,7 +81,9 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
   bool _isCompletelyVisible = false;
   final _showControls = ValueNotifier(true);
   final _isSeeking = ValueNotifier(false);
-  final _debouncer = Debouncer(const Duration(milliseconds: 2000));
+  final _debouncer = Debouncer(
+    const Duration(milliseconds: 2000),
+  );
   final _elTooltipController = ElTooltipController();
   StreamSubscription<PlaybackEvent>? _subscription;
   StreamSubscription<StreamSwitchedEvent>? _streamSwitchedSubscription;
@@ -138,11 +140,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
         widget.file.uploadedFileID!,
       )
           .listen((event) {
-        if (mounted) {
-          setState(() {
-            _progressNotifier.value = event.progress;
-          });
-        }
+        _progressNotifier.value = event.progress;
       });
     }
 
@@ -376,64 +374,73 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
                                           )
                                         : const SizedBox();
                                   },
-                                  valueListenable: _isPlaybackReady,
+                                  valueListenable: _isPlaybackReady, 
                                 ),
                               ),
                             ),
-                      Positioned(
-                        bottom: verticalMargin,
-                        right: 0,
-                        left: 0,
-                        child: SafeArea(
-                          top: false,
-                          left: false,
-                          right: false,
-                          child: Padding(
-                            padding: EdgeInsets.only(
-                              bottom: widget.isFromMemories ? 32 : 0,
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                _VideoDescriptionAndSwitchToMediaKitButton(
-                                  file: widget.file,
-                                  showControls: _showControls,
-                                  elTooltipController: _elTooltipController,
-                                  controller: _controller,
-                                  selectedPreview: widget.selectedPreview,
-                                ),
-                                ValueListenableBuilder(
-                                  valueListenable: _showControls,
-                                  builder: (context, value, _) {
-                                    return VideoStreamChangeWidget(
-                                      showControls: value,
-                                      file: widget.file,
-                                      isPreviewPlayer: widget.selectedPreview,
-                                      onStreamChange: widget.onStreamChange,
-                                    );
-                                  },
-                                ),
-                                ValueListenableBuilder(
-                                  valueListenable: _isPlaybackReady,
-                                  builder:
-                                      (BuildContext context, bool value, _) {
-                                    return value && !widget.isFromMemories
-                                        ? _SeekBarAndDuration(
-                                            controller: _controller,
-                                            duration: duration,
-                                            showControls: _showControls,
-                                            isSeeking: _isSeeking,
-                                            position: position,
+                      widget.isFromMemories
+                          ? const SizedBox.shrink()
+                          : Positioned(
+                              bottom: verticalMargin,
+                              right: 0,
+                              left: 0,
+                              child: SafeArea(
+                                top: false,
+                                left: false,
+                                right: false,
+                                child: Padding(
+                                  padding: EdgeInsets.only(
+                                    bottom: widget.isFromMemories ? 32 : 0,
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: [
+                                      _VideoDescriptionAndSwitchToMediaKitButton(
+                                        file: widget.file,
+                                        showControls: _showControls,
+                                        elTooltipController:
+                                            _elTooltipController,
+                                        controller: _controller,
+                                        selectedPreview: widget.selectedPreview,
+                                      ),
+                                      ValueListenableBuilder(
+                                        valueListenable: _showControls,
+                                        builder: (context, value, _) {
+                                          return VideoStreamChangeWidget(
+                                            showControls: value,
                                             file: widget.file,
-                                          )
-                                        : const SizedBox();
-                                  },
+                                            isPreviewPlayer:
+                                                widget.selectedPreview,
+                                            onStreamChange:
+                                                widget.onStreamChange,
+                                          );
+                                        },
+                                      ),
+                                      ValueListenableBuilder(
+                                        valueListenable: _isPlaybackReady,
+                                        builder: (
+                                          BuildContext context,
+                                          bool value,
+                                          _,
+                                        ) {
+                                          return value
+                                              ? _SeekBarAndDuration(
+                                                  controller: _controller,
+                                                  duration: duration,
+                                                  showControls: _showControls,
+                                                  isSeeking: _isSeeking,
+                                                  position: position,
+                                                  file: widget.file,
+                                                )
+                                              : const SizedBox();
+                                        },
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                              ],
+                              ),
                             ),
-                          ),
-                        ),
-                      ),
                     ],
                   ),
           ),

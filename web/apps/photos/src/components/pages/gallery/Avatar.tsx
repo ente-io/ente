@@ -1,4 +1,5 @@
 import { styled } from "@mui/material";
+import type { LocalUser } from "ente-accounts/services/user";
 import log from "ente-base/log";
 import { EnteFile } from "ente-media/file";
 import {
@@ -6,13 +7,14 @@ import {
     avatarBackgroundColorPublicCollectedFile,
     avatarTextColor,
 } from "ente-new/photos/services/avatar";
-import { GalleryContext } from "pages/gallery";
-import React, { useContext, useLayoutEffect, useState } from "react";
+import React, { useLayoutEffect, useState } from "react";
 
 interface AvatarProps {
+    user?: LocalUser;
     file?: EnteFile;
     email?: string;
     opacity?: number;
+    emailByUserID?: Map<number, string>;
 }
 
 const AvatarBase = styled("div")<{
@@ -33,9 +35,13 @@ const AvatarBase = styled("div")<{
     font-size: ${({ size }) => `${Math.floor(size / 2)}px`};
 `;
 
-const Avatar: React.FC<AvatarProps> = ({ file, email, opacity }) => {
-    const { userIDToEmailMap, user } = useContext(GalleryContext);
-
+const Avatar: React.FC<AvatarProps> = ({
+    user,
+    file,
+    email,
+    opacity,
+    emailByUserID,
+}) => {
     const [colorCode, setColorCode] = useState("");
     const [userLetter, setUserLetter] = useState("");
 
@@ -46,7 +52,7 @@ const Avatar: React.FC<AvatarProps> = ({ file, email, opacity }) => {
             }
             if (file.ownerID !== user.id) {
                 // getting email from in-memory id-email map
-                const email = userIDToEmailMap.get(file.ownerID);
+                const email = emailByUserID.get(file.ownerID);
                 if (!email) {
                     log.error("email not found in userIDToEmailMap");
                     return;
@@ -74,14 +80,15 @@ const Avatar: React.FC<AvatarProps> = ({ file, email, opacity }) => {
             if (!email) {
                 return;
             }
-            if (user.email === email) {
+
+            if (user?.email === email) {
                 setUserLetter(email[0].toUpperCase());
                 setColorCode(avatarBackgroundColorPublicCollectedFile);
                 return;
             }
 
-            const id = Array.from(userIDToEmailMap.keys()).find(
-                (key) => userIDToEmailMap.get(key) === email,
+            const id = Array.from(emailByUserID?.keys() ?? []).find(
+                (key) => emailByUserID?.get(key) === email,
             );
             if (!id) {
                 log.error(`ID not found for email: ${email}`);
@@ -92,7 +99,7 @@ const Avatar: React.FC<AvatarProps> = ({ file, email, opacity }) => {
         } catch (e) {
             log.error("AvatarIcon.tsx - useLayoutEffect email failed", e);
         }
-    }, [email]);
+    }, [user, email, emailByUserID]);
 
     if (!colorCode || !userLetter) {
         return <></>;

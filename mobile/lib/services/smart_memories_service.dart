@@ -632,7 +632,7 @@ class SmartMemoriesService {
     // Loop through the people and check if we should surface anything based on relevancy (bday, last met)
     for (final personID in orderedImportantPersonsID) {
       final personMemories = personToMemories[personID];
-      if (personID == meID || personMemories == null) continue;
+      if (personMemories == null) continue;
       final person = personIdToPerson[personID]!;
 
       // Check if we should surface memory based on last met
@@ -646,8 +646,6 @@ class SmartMemoriesService {
         if (daysSinceLastMet < 7 && daysSinceLastMet >= 0) {
           memoryResults.add(lastMetMemory);
         }
-        // Don't surface birthday when person hasn't been seen in a while (could be passed away)
-        continue;
       }
 
       // Check if we should surface memory based on birthday
@@ -705,7 +703,6 @@ class SmartMemoriesService {
               ),
             );
           }
-          continue;
         }
       }
     }

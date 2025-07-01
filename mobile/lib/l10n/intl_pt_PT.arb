@@ -1757,5 +1757,17 @@
   "happyBirthday": "Felicidades! 🥳",
   "happyBirthdayToPerson": "Felicidades para {name}! 🎉",
   "birthdays": "Aniversários",
-  "wishThemAHappyBirthday": "Wish ${name} a happy birthday! 🎉"
+  "wishThemAHappyBirthday": "Wish ${name} a happy birthday! 🎉",
+  "cLTitle1": "Envio de ficheiros de vídeo grandes",
+  "cLDesc1": "Na sequência da versão beta de transmissão de vídeo e do trabalho em envios e transferências retomáveis, agora aumentámos o limite de envio de ficheiros para 10GB. Isto está agora disponível tanto nas aplicações de computador como móveis.",
+  "cLTitle2": "Envio em segundo plano",
+  "cLDesc2": "Os envios em segundo plano agora também são suportados no iOS, além dos dispositivos Android. Não é necessário abrir a aplicação para fazer uma cópia de segurança das suas fotografias e vídeos mais recentes.",
+  "cLTitle3": "Reprodução automática de memórias",
+  "cLDesc3": "Fizemos melhorias significativas na nossa experiência de memórias, incluindo reprodução automática, deslizar para a próxima memória e muito mais.",
+  "cLTitle4": "Reconhecimento facial melhorado",
+  "cLDesc4": "Juntamente com várias melhorias internas, agora é muito mais fácil ver todas as faces detectadas, fornecer comentários sobre faces similares e adicionar/remover faces de uma única fotografia.",
+  "cLTitle5": "Notificações de aniversário",
+  "cLDesc5": "Agora receberá uma notificação opcional para todos os aniversários que guardou no Ente, juntamente com uma colecção das suas melhores fotografias.",
+  "cLTitle6": "Envios e transferências retomáveis",
+  "cLDesc6": "Já não é necessário esperar que os envios/transferências sejam concluídos antes de poder fechar a aplicação. Todos os envios e transferências têm agora a capacidade de serem pausados a meio e retomados de onde parou."
 }

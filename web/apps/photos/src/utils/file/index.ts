@@ -1,4 +1,4 @@
-import type { User } from "ente-accounts/services/user";
+import type { LocalUser, User } from "ente-accounts/services/user";
 import { joinPath } from "ente-base/file-name";
 import log from "ente-base/log";
 import { type Electron } from "ente-base/types/ipc";
@@ -14,8 +14,11 @@ import {
 } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
 import { decodeLivePhoto } from "ente-media/live-photo";
+import { type FileOp } from "ente-new/photos/components/SelectedFileOptions";
 import {
+    addToFavoritesCollection,
     deleteFromTrash,
+    hideFiles,
     moveToTrash,
 } from "ente-new/photos/services/collection";
 import { updateFilesVisibility } from "ente-new/photos/services/file";
@@ -24,47 +27,23 @@ import { getData } from "ente-shared/storage/localStorage";
 import { wait } from "ente-utils/promise";
 import { t } from "i18next";
 import {
-    addMultipleToFavorites,
-    moveToHiddenCollection,
-} from "services/collectionService";
-import {
     SelectedState,
     SetFilesDownloadProgressAttributes,
     SetFilesDownloadProgressAttributesCreator,
 } from "types/gallery";
 
-export type FileOp =
-    | "download"
-    | "fixTime"
-    | "favorite"
-    | "archive"
-    | "unarchive"
-    | "hide"
-    | "trash"
-    | "deletePermanently";
-
-function getSelectedFileIds(selectedFiles: SelectedState) {
-    const filesIDs: number[] = [];
-    for (const [key, val] of Object.entries(selectedFiles)) {
-        if (typeof val == "boolean" && val) {
-            filesIDs.push(Number(key));
-        }
-    }
-    return new Set(filesIDs);
-}
 export function getSelectedFiles(
     selected: SelectedState,
     files: EnteFile[],
 ): EnteFile[] {
-    const selectedFilesIDs = getSelectedFileIds(selected);
-    return files.filter((file) => selectedFilesIDs.has(file.id));
-}
-
-export function isSharedFile(user: User, file: EnteFile) {
-    if (!user?.id || !file?.ownerID) {
-        return false;
+    const selectedFilesIDs = new Set<number>();
+    for (const [key, val] of Object.entries(selected)) {
+        if (typeof val == "boolean" && val) {
+            selectedFilesIDs.add(Number(key));
+        }
     }
-    return file.ownerID !== user.id;
+
+    return files.filter((file) => selectedFilesIDs.has(file.id));
 }
 
 export async function getFileFromURL(fileURL: string, name: string) {
@@ -312,7 +291,10 @@ export const getUserOwnedFiles = (files: EnteFile[]) => {
     return files.filter((file) => file.ownerID === user.id);
 };
 
-export const shouldShowAvatar = (file: EnteFile, user: User) => {
+export const shouldShowAvatar = (
+    file: EnteFile,
+    user: LocalUser | undefined,
+) => {
     if (!file || !user) {
         return false;
     }
@@ -331,7 +313,7 @@ export const shouldShowAvatar = (file: EnteFile, user: User) => {
     }
 };
 
-export const handleFileOp = async (
+export const performFileOp = async (
     op: FileOp,
     files: EnteFile[],
     markTempDeleted: (files: EnteFile[]) => void,
@@ -357,7 +339,7 @@ export const handleFileOp = async (
             fixCreationTime(files);
             break;
         case "favorite":
-            await addMultipleToFavorites(files);
+            await addToFavoritesCollection(files);
             break;
         case "archive":
             await updateFilesVisibility(files, ItemVisibility.archived);
@@ -368,7 +350,7 @@ export const handleFileOp = async (
         case "hide":
             try {
                 markTempHidden(files);
-                await moveToHiddenCollection(files);
+                await hideFiles(files);
             } catch (e) {
                 clearTempHidden();
                 throw e;

@@ -163,7 +163,7 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget> {
           }
         }
         if (fileForFaceCrop == null) {
-          _logger.severe(
+          _logger.warning(
             "No suitable file found for face crop for person: ${widget.personId} or cluster: ${widget.clusterID}",
           );
           return null;
