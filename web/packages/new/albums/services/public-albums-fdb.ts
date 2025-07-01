@@ -86,18 +86,8 @@ export const savePublicCollectionFiles = async (
 ): Promise<void> => {
     // See: [Note: Avoiding Zod parsing for large DB arrays].
     const entries = await localForage.getItem<ES>("public-collection-files");
-    const updatedEntries = (entries ?? []).filter(
-        (e) => e.collectionUID != accessToken,
-    );
-    updatedEntries.push({
-        collectionUID: accessToken,
-        // The cast is needed here, from what I can understand, because nested
-        // objects in EnteFile don't have an index signature so they don't allow
-        // for arbitrary property access, while LocalEnteFiles expects that.
-        //
-        // But I'm not sure. This upstream question seems related:
-        // https://github.com/microsoft/TypeScript/issues/59199
-        files: files as z.infer<typeof LocalEnteFiles>,
-    });
-    await localForage.setItem("public-collection-files", updatedEntries);
+    await localForage.setItem("public-collection-files", [
+        { collectionUID: accessToken, files },
+        ...(entries ?? []).filter((e) => e.collectionUID != accessToken),
+    ]);
 };
