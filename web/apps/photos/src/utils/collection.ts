@@ -1,15 +1,11 @@
-import type { User } from "ente-accounts/services/user";
 import { ensureElectron } from "ente-base/electron";
 import { joinPath } from "ente-base/file-name";
 import log from "ente-base/log";
 import { uniqueFilesByID } from "ente-gallery/utils/file";
-import { type Collection, CollectionSubType } from "ente-media/collection";
 import { EnteFile } from "ente-media/file";
 import {
-    createAlbum,
     defaultHiddenCollectionUserFacingName,
     findDefaultHiddenCollectionIDs,
-    isHiddenCollection,
 } from "ente-new/photos/services/collection";
 import { PseudoCollectionID } from "ente-new/photos/services/collection-summary";
 import {
@@ -17,7 +13,6 @@ import {
     savedCollections,
 } from "ente-new/photos/services/photos-fdb";
 import { safeDirectoryName } from "ente-new/photos/utils/native-fs";
-import { getData } from "ente-shared/storage/localStorage";
 import {
     SetFilesDownloadProgressAttributes,
     type SetFilesDownloadProgressAttributesCreator,
@@ -124,48 +119,3 @@ async function createCollectionDownloadFolder(
     await fs.mkdirIfNeeded(collectionDownloadPath);
     return collectionDownloadPath;
 }
-
-const isQuickLinkCollection = (collection: Collection) =>
-    collection.magicMetadata?.data.subType == CollectionSubType.quicklink;
-
-export function isIncomingViewerShare(collection: Collection, user: User) {
-    const sharee = collection.sharees?.find((sharee) => sharee.id === user.id);
-    return sharee?.role == "VIEWER";
-}
-
-export function isValidReplacementAlbum(
-    collection: Collection,
-    user: User,
-    wantedCollectionName: string,
-) {
-    return (
-        collection.name === wantedCollectionName &&
-        (collection.type == "album" ||
-            collection.type == "folder" ||
-            collection.type == "uncategorized") &&
-        !isHiddenCollection(collection) &&
-        !isQuickLinkCollection(collection) &&
-        collection.owner.id == user.id
-    );
-}
-
-export const getOrCreateAlbum = async (
-    albumName: string,
-    existingCollections: Collection[],
-) => {
-    const user: User = getData("user");
-    if (!user?.id) {
-        throw Error("user missing");
-    }
-    for (const collection of existingCollections) {
-        if (isValidReplacementAlbum(collection, user, albumName)) {
-            log.info(
-                `Found existing album ${albumName} with id ${collection.id}`,
-            );
-            return collection;
-        }
-    }
-    const album = await createAlbum(albumName);
-    log.info(`Created new album ${albumName} with id ${album.id}`);
-    return album;
-};

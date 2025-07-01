@@ -13,6 +13,7 @@ abstract class IMLDataDB<T> {
   Future<int> getFaceIndexedFileCount({int minimumMlVersion});
   Future<Map<String, int>> clusterIdToFaceCount();
   Future<Set<String>> getPersonIgnoredClusters(String personID);
+  Future<Map<String, Set<String>>> getPersonToRejectedSuggestions();
   Future<Set<String>> getPersonClusterIDs(String personID);
   Future<Set<String>> getPersonsClusterIDs(List<String> personID);
   Future<void> clearTable();
@@ -40,6 +41,7 @@ abstract class IMLDataDB<T> {
   Future<Map<String, Iterable<String>>> getAllClusterIdToFaceIDs();
   Future<Iterable<String>> getFaceIDsForCluster(String clusterID);
   Future<Map<String, Map<String, Set<String>>>> getPersonToClusterIdToFaceIds();
+  Future<Map<String, Set<String>>> getPersonToClusterIDs();
   Future<Map<String, Set<String>>> getClusterIdToFaceIdsForPerson(
     String personID,
   );

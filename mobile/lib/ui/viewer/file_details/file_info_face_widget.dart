@@ -33,6 +33,7 @@ class FileInfoFaceWidget extends StatefulWidget {
   final Uint8List faceCrop;
   final PersonEntity? person;
   final String? clusterID;
+  final double? width;
   final bool highlight;
   final bool isEditMode;
   final Future<void> Function() reloadAllFaces;
@@ -45,6 +46,7 @@ class FileInfoFaceWidget extends StatefulWidget {
     this.clusterID,
     this.highlight = false,
     this.isEditMode = false,
+    this.width,
     required this.reloadAllFaces,
     super.key,
   });
@@ -56,6 +58,7 @@ class FileInfoFaceWidget extends StatefulWidget {
 class _FileInfoFaceWidgetState extends State<FileInfoFaceWidget> {
   bool get hasPerson => widget.person != null;
   bool get isEditMode => widget.isEditMode;
+  double get thumbnailWidth => widget.width ?? 68;
 
   @override
   Widget build(BuildContext context) {
@@ -71,8 +74,8 @@ class _FileInfoFaceWidgetState extends State<FileInfoFaceWidget> {
                       : _onPlusIconTap
                   : _routeToPersonOrClusterPage,
               child: Container(
-                height: 60,
-                width: 60,
+                height: thumbnailWidth,
+                width: thumbnailWidth,
                 decoration: ShapeDecoration(
                   shape: RoundedRectangleBorder(
                     borderRadius: const BorderRadius.all(
@@ -88,8 +91,8 @@ class _FileInfoFaceWidgetState extends State<FileInfoFaceWidget> {
                 ),
                 child: ClipRRect(
                   child: SizedBox(
-                    width: 60,
-                    height: 60,
+                    width: thumbnailWidth,
+                    height: thumbnailWidth,
                     child: ClipPath(
                       clipper: ShapeBorderClipper(
                         shape: ContinuousRectangleBorder(
@@ -119,41 +122,46 @@ class _FileInfoFaceWidgetState extends State<FileInfoFaceWidget> {
     final List<Widget> faceInfo = [];
     if (widget.person != null) {
       faceInfo.add(
-        Text(
-          widget.person!.data.isIgnored
-              ? '(' + S.of(context).ignored + ')'
-              : widget.person!.data.name.trim(),
-          style: Theme.of(context).textTheme.bodySmall,
-          overflow: TextOverflow.ellipsis,
-          maxLines: 1,
+        SizedBox(
+          width: thumbnailWidth,
+          child: Center(
+            child: Text(
+              widget.person!.data.isIgnored
+                  ? '(' + S.of(context).ignored + ')'
+                  : widget.person!.data.name.trim(),
+              style: Theme.of(context).textTheme.bodySmall,
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
+            ),
+          ),
         ),
       );
     }
     if (kDebugMode) {
       faceInfo.add(
         Text(
-          'S: ${widget.face.score.toStringAsFixed(3)}(I)',
+          'S:${widget.face.score.toStringAsFixed(2)}(I)',
           style: Theme.of(context).textTheme.bodySmall,
           maxLines: 1,
         ),
       );
       faceInfo.add(
         Text(
-          'B: ${widget.face.blur.toStringAsFixed(0)}(I)',
+          'B:${widget.face.blur.toStringAsFixed(0)}(I)',
           style: Theme.of(context).textTheme.bodySmall,
           maxLines: 1,
         ),
       );
       faceInfo.add(
         Text(
-          'D: ${widget.face.detection.getFaceDirection().toDirectionString().substring(0, 3)}(I)',
+          'D:${widget.face.detection.getFaceDirection().toDirectionString().substring(0, 3)}(I)',
           style: Theme.of(context).textTheme.bodySmall,
           maxLines: 1,
         ),
       );
       faceInfo.add(
         Text(
-          'Si: ${widget.face.detection.faceIsSideways().toString()}(I)',
+          'Si:${widget.face.detection.faceIsSideways().toString()}(I)',
           style: Theme.of(context).textTheme.bodySmall,
           maxLines: 1,
         ),

@@ -29,6 +29,7 @@ class AlbumHomeWidgetService {
   static const String IOS_CLASS_NAME = "EnteAlbumWidget";
   static const String ALBUMS_CHANGED_KEY = "albumsChanged.widget";
   static const String ALBUMS_STATUS_KEY = "albumsStatusKey.widget";
+  static const String TOTAL_ALBUMS_KEY = "totalAlbums";
   static const int MAX_ALBUMS_LIMIT = 50;
 
   // Singleton pattern
@@ -71,15 +72,17 @@ class AlbumHomeWidgetService {
         return;
       }
 
+      _logger.info("Initializing albums widget");
+
       final bool forceFetchNewAlbums = await _shouldUpdateWidgetCache();
 
       if (forceFetchNewAlbums) {
-        _logger.info("Initializing albums widget: updating albums cache");
         await _updateAlbumsWidgetCache();
         await setSelectionChange(false);
+        _logger.info("Force fetch new albums complete");
       } else {
-        _logger.info("Initializing albums widget: syncing existing albums");
         await _refreshAlbumsWidget();
+        _logger.info("Refresh albums widget complete");
       }
     });
   }
@@ -90,6 +93,7 @@ class AlbumHomeWidgetService {
     }
 
     await setAlbumsLastHash("");
+    await _setTotalAlbums(null);
     await updateAlbumsStatus(WidgetStatus.syncedEmpty);
     await _refreshWidget(message: "AlbumsHomeWidget cleared & updated");
   }
@@ -127,6 +131,7 @@ class AlbumHomeWidgetService {
       return;
     }
 
+    _logger.info("Checking pending albums sync");
     if (await _shouldUpdateWidgetCache()) {
       await initAlbumHomeWidget();
     }
@@ -240,6 +245,7 @@ class AlbumHomeWidgetService {
     final albums = getAlbumsByIds(selectedAlbumIds);
 
     if (albums.isEmpty) {
+      _logger.info("Selected albums are empty or do not exist");
       return true;
     }
 
@@ -338,6 +344,10 @@ class AlbumHomeWidgetService {
     return albumsWithFiles;
   }
 
+  Future<void> _setTotalAlbums(int? total) async {
+    await HomeWidgetService.instance.setData(TOTAL_ALBUMS_KEY, total);
+  }
+
   Future<void> _updateAlbumsWidgetCache() async {
     final selectedAlbumIds = await _getEffectiveSelectedAlbumIds();
     final albumsWithFiles = await _getAlbumsWithFiles();
@@ -391,6 +401,8 @@ class AlbumHomeWidgetService {
           await clearWidget();
           return;
         }
+
+        await _setTotalAlbums(renderedCount);
 
         // Show update toast after first item is rendered
         if (renderedCount == 1) {

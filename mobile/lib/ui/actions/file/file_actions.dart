@@ -2,6 +2,8 @@ import "dart:async";
 
 import "package:flutter/cupertino.dart";
 import "package:modal_bottom_sheet/modal_bottom_sheet.dart";
+import "package:photos/core/event_bus.dart";
+import "package:photos/events/details_sheet_event.dart";
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
@@ -138,7 +140,14 @@ Future<void> showSingleFileDeleteSheet(
 Future<void> showDetailsSheet(BuildContext context, EnteFile file) async {
   guardedCheckPanorama(file).ignore();
   final colorScheme = getEnteColorScheme(context);
-  return showBarModalBottomSheet(
+  Bus.instance.fire(
+    DetailsSheetEvent(
+      localID: file.localID,
+      uploadedFileID: file.uploadedFileID,
+      opened: true,
+    ),
+  );
+  await showBarModalBottomSheet(
     topControl: const SizedBox.shrink(),
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(
@@ -155,5 +164,12 @@ Future<void> showDetailsSheet(BuildContext context, EnteFile file) async {
         child: FileDetailsWidget(file),
       );
     },
+  );
+  Bus.instance.fire(
+    DetailsSheetEvent(
+      localID: file.localID,
+      uploadedFileID: file.uploadedFileID,
+      opened: false,
+    ),
   );
 }

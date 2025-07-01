@@ -1,7 +1,6 @@
 import { sharedCryptoWorker } from "ente-base/crypto";
 import log from "ente-base/log";
 import { apiURL } from "ente-base/origins";
-import { transformFilesIfNeeded } from "ente-gallery/services/files-db";
 import { sortFiles } from "ente-gallery/utils/file";
 import type {
     Collection,
@@ -9,14 +8,18 @@ import type {
 } from "ente-media/collection";
 import type { EnteFile, RemoteEnteFile } from "ente-media/file";
 import { decryptRemoteFile } from "ente-media/file";
-import { savedPublicCollections } from "ente-new/albums/services/public-albums-fdb";
+import {
+    savedPublicCollectionFiles,
+    savedPublicCollections,
+    saveLastPublicCollectionReferralCode,
+    savePublicCollectionFiles,
+} from "ente-new/albums/services/public-albums-fdb";
 import { CustomError, parseSharingErrorCodes } from "ente-shared/error";
 import HTTPService from "ente-shared/network/HTTPService";
 import localForage from "ente-shared/storage/localForage";
 
 const PUBLIC_COLLECTION_FILES_TABLE = "public-collection-files";
 const PUBLIC_COLLECTIONS_TABLE = "public-collections";
-const PUBLIC_REFERRAL_CODE = "public-referral-code";
 
 // Fix this once we can trust the types.
 // eslint-disable-next-line @typescript-eslint/no-unnecessary-template-expression
@@ -28,60 +31,10 @@ const getPublicCollectionLastSyncTimeKey = (collectionUID: string) =>
 const getPublicCollectionPasswordKey = (collectionUID: string) =>
     `public-${collectionUID}-passkey`;
 
-const getPublicCollectionUploaderNameKey = (collectionUID: string) =>
-    `public-${collectionUID}-uploaderName`;
-
-export const getPublicCollectionUploaderName = async (collectionUID: string) =>
-    await localForage.getItem<string>(
-        getPublicCollectionUploaderNameKey(collectionUID),
-    );
-
-export const savePublicCollectionUploaderName = async (
-    collectionUID: string,
-    uploaderName: string,
-) =>
-    await localForage.setItem(
-        getPublicCollectionUploaderNameKey(collectionUID),
-        uploaderName,
-    );
-
 export interface LocalSavedPublicCollectionFiles {
     collectionUID: string;
     files: EnteFile[];
 }
-
-export const getLocalPublicFiles = async (collectionUID: string) => {
-    const localSavedPublicCollectionFiles =
-        (
-            (await localForage.getItem<LocalSavedPublicCollectionFiles[]>(
-                PUBLIC_COLLECTION_FILES_TABLE,
-            )) || []
-        ).find(
-            (localSavedPublicCollectionFiles) =>
-                localSavedPublicCollectionFiles.collectionUID === collectionUID,
-        ) ||
-        ({
-            collectionUID: null,
-            files: [] as EnteFile[],
-        } as LocalSavedPublicCollectionFiles);
-    return transformFilesIfNeeded(localSavedPublicCollectionFiles.files);
-};
-export const savePublicCollectionFiles = async (
-    collectionUID: string,
-    files: EnteFile[],
-) => {
-    const publicCollectionFiles =
-        (await localForage.getItem<LocalSavedPublicCollectionFiles[]>(
-            PUBLIC_COLLECTION_FILES_TABLE,
-        )) || [];
-    await localForage.setItem(
-        PUBLIC_COLLECTION_FILES_TABLE,
-        dedupeCollectionFiles([
-            { collectionUID, files },
-            ...publicCollectionFiles,
-        ]),
-    );
-};
 
 export const getLocalPublicCollectionPassword = async (
     collectionUID: string,
@@ -121,36 +74,11 @@ export const savePublicCollection = async (collection: Collection) => {
     );
 };
 
-export const getReferralCode = async () => {
-    return await localForage.getItem<string>(PUBLIC_REFERRAL_CODE);
-};
-
-export const saveReferralCode = async (code: string) => {
-    if (!code) {
-        localForage.removeItem(PUBLIC_REFERRAL_CODE);
-    }
-    await localForage.setItem(PUBLIC_REFERRAL_CODE, code);
-};
-
 const dedupeCollections = (collections: Collection[]) => {
     const keySet = new Set([]);
     return collections.filter((collection) => {
         if (!keySet.has(collection.key)) {
             keySet.add(collection.key);
-            return true;
-        } else {
-            return false;
-        }
-    });
-};
-
-const dedupeCollectionFiles = (
-    collectionFiles: LocalSavedPublicCollectionFiles[],
-) => {
-    const keySet = new Set([]);
-    return collectionFiles.filter(({ collectionUID }) => {
-        if (!keySet.has(collectionUID)) {
-            keySet.add(collectionUID);
             return true;
         } else {
             return false;
@@ -182,7 +110,7 @@ export const syncPublicFiles = async (
         let files: EnteFile[] = [];
         const sortAsc = collection?.pubMagicMetadata?.data.asc ?? false;
         const collectionUID = getPublicCollectionUID(token);
-        const localFiles = await getLocalPublicFiles(collectionUID);
+        const localFiles = await savedPublicCollectionFiles(collectionUID);
 
         files = [...files, ...localFiles];
         try {
@@ -366,7 +294,7 @@ export const getPublicCollection = async (
             pubMagicMetadata: collectionPublicMagicMetadata,
         };
         await savePublicCollection(collection);
-        await saveReferralCode(referralCode);
+        await saveLastPublicCollectionReferralCode(referralCode);
         return [collection, referralCode];
     } catch (e) {
         log.error("failed to get public collection", e);

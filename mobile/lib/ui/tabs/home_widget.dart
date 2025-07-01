@@ -276,7 +276,7 @@ class _HomeWidgetState extends State<HomeWidget> {
   }
 
   Future<void> syncWidget() async {
-    await Future.delayed(const Duration(milliseconds: 5000));
+    await Future.delayed(const Duration(seconds: 5));
 
     _logger.info("Syncing home widget");
     await AlbumHomeWidgetService.instance.checkPendingAlbumsSync();

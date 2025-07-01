@@ -14,7 +14,6 @@ import "package:photos/models/ml/face/person.dart";
 import "package:photos/models/search/search_result.dart";
 import 'package:photos/models/selected_files.dart';
 import "package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart";
-import "package:photos/services/machine_learning/ml_result.dart";
 import "package:photos/services/search_service.dart";
 import "package:photos/ui/components/end_to_end_banner.dart";
 import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
@@ -60,6 +59,7 @@ class _PeoplePageState extends State<PeoplePage> {
 
   late final StreamSubscription<LocalPhotosUpdatedEvent> _filesUpdatedEvent;
   late final StreamSubscription<PeopleChangedEvent> _peopleChangedEvent;
+  late SearchFilterDataProvider? _searchFilterDataProvider;
 
   @override
   void initState() {
@@ -73,20 +73,6 @@ class _PeoplePageState extends State<PeoplePage> {
           setState(() {
             _person = event.person!;
           });
-        }
-      }
-      if (event.source == widget.person.remoteID) {
-        if (event.type == PeopleEventType.removedFaceFromCluster) {
-          final filesBefore = files?.length ?? 0;
-          for (final String removedFaceID in event.relevantFaceIDs!) {
-            final int fileID = getFileIdFromFaceId<int>(removedFaceID);
-            files?.removeWhere((file) => file.uploadedFileID == fileID);
-          }
-          final filesAfter = files?.length ?? 0;
-          if (filesBefore != filesAfter) setState(() {});
-        }
-        if (event.type == PeopleEventType.addedClusterToPerson) {
-          if (mounted) setState(() {});
         }
       }
     });
@@ -105,6 +91,12 @@ class _PeoplePageState extends State<PeoplePage> {
         setState(() {});
       }
     });
+    _searchFilterDataProvider = widget.searchResult != null
+        ? SearchFilterDataProvider(
+            initialGalleryFilter:
+                widget.searchResult!.getHierarchicalSearchFilter(),
+          )
+        : null;
   }
 
   Future<List<EnteFile>> loadPersonFiles() async {
@@ -138,12 +130,7 @@ class _PeoplePageState extends State<PeoplePage> {
     _logger.info("Building for ${_person.data.name}");
     return GalleryFilesState(
       child: InheritedSearchFilterDataWrapper(
-        searchFilterDataProvider: widget.searchResult != null
-            ? SearchFilterDataProvider(
-                initialGalleryFilter:
-                    widget.searchResult!.getHierarchicalSearchFilter(),
-              )
-            : null,
+        searchFilterDataProvider: _searchFilterDataProvider,
         child: Scaffold(
           appBar: PreferredSize(
             preferredSize:
@@ -265,11 +252,7 @@ class _GalleryState extends State<_Gallery> {
         );
       },
       reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
-      forceReloadEvents: [
-        Bus.instance.on<PeopleChangedEvent>().where(
-              (event) => event.type != PeopleEventType.addedClusterToPerson,
-            ),
-      ],
+      forceReloadEvents: [Bus.instance.on<PeopleChangedEvent>()],
       removalEventTypes: const {
         EventType.deletedFromRemote,
         EventType.deletedFromEverywhere,
@@ -309,6 +292,11 @@ class _GalleryState extends State<_Gallery> {
                   },
                   child: PersonGallerySuggestion(
                     person: widget.personEntity,
+                    onClose: () {
+                      setState(() {
+                        userDismissedPersonGallerySuggestion = true;
+                      });
+                    },
                   ),
                 )
               : const SizedBox.shrink(),

@@ -186,7 +186,7 @@ class _CollectionsFlexiGridViewWidgetState
         ),
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: albumsCountInCrossAxis,
-          mainAxisSpacing: 2,
+          mainAxisSpacing: 8,
           crossAxisSpacing: CollectionsFlexiGridViewWidget.crossAxisSpacing,
           childAspectRatio: sideOfThumbnail / (sideOfThumbnail + 46),
         ),

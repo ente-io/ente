@@ -5,6 +5,8 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import "package:photos/core/configuration.dart";
+import "package:photos/core/event_bus.dart";
+import "package:photos/events/create_new_album_event.dart";
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection/collection.dart';
 import 'package:photos/models/selected_files.dart';
@@ -32,6 +34,12 @@ enum CollectionActionType {
   shareCollection,
   addToHiddenAlbum,
   moveToHiddenCollection,
+}
+
+extension CollectionActionTypeExtension on CollectionActionType {
+  bool get isHiddenAction =>
+      this == CollectionActionType.moveToHiddenCollection ||
+      this == CollectionActionType.addToHiddenAlbum;
 }
 
 String _actionName(
@@ -119,16 +127,29 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
   static const int okButtonSize = 80;
   String _searchQuery = "";
   final _selectedCollections = <Collection>[];
+  final _recentlyCreatedCollections = <Collection>[];
+  late StreamSubscription<CreateNewAlbumEvent> _createNewAlbumSubscription;
 
   @override
   void initState() {
     super.initState();
-    _showOnlyHiddenCollections =
-        widget.actionType == CollectionActionType.moveToHiddenCollection ||
-            widget.actionType == CollectionActionType.addToHiddenAlbum;
+    _showOnlyHiddenCollections = widget.actionType.isHiddenAction;
     _enableSelection = (widget.actionType == CollectionActionType.addFiles ||
             widget.actionType == CollectionActionType.addToHiddenAlbum) &&
         (widget.sharedFiles == null || widget.sharedFiles!.isEmpty);
+    _createNewAlbumSubscription =
+        Bus.instance.on<CreateNewAlbumEvent>().listen((event) {
+      setState(() {
+        _recentlyCreatedCollections.insert(0, event.collection);
+        _selectedCollections.add(event.collection);
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _createNewAlbumSubscription.cancel();
+    super.dispose();
   }
 
   @override
@@ -319,15 +340,25 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
 
   Future<List<Collection>> _getCollections() async {
     if (_showOnlyHiddenCollections) {
+      final List<Collection> recentlyCreated = [];
+      final List<Collection> hidden = [];
+
       final hiddenCollections = CollectionsService.instance
           .getHiddenCollections(includeDefaultHidden: false);
-      hiddenCollections.sort((first, second) {
+      for (final collection in hiddenCollections) {
+        if (_recentlyCreatedCollections.contains(collection)) {
+          recentlyCreated.add(collection);
+        } else {
+          hidden.add(collection);
+        }
+      }
+      hidden.sort((first, second) {
         return compareAsciiLowerCaseNatural(
           first.displayName,
           second.displayName,
         );
       });
-      return hiddenCollections;
+      return recentlyCreated + hidden;
     } else {
       final List<Collection> collections =
           CollectionsService.instance.getCollectionsForUI(
@@ -344,6 +375,7 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
       });
       final List<Collection> pinned = [];
       final List<Collection> unpinned = [];
+      final List<Collection> recentlyCreated = [];
       // show uncategorized collection only for restore files action
       Collection? uncategorized;
       for (final collection in collections) {
@@ -355,13 +387,20 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
           }
           continue;
         }
+        if (_recentlyCreatedCollections.contains(collection)) {
+          recentlyCreated.add(collection);
+          continue;
+        }
         if (collection.isPinned) {
           pinned.add(collection);
         } else {
           unpinned.add(collection);
         }
       }
-      return (uncategorized != null ? [uncategorized] + pinned + unpinned : []);
+
+      return uncategorized != null
+          ? [uncategorized] + recentlyCreated + pinned + unpinned
+          : recentlyCreated + pinned + unpinned;
     }
   }
 

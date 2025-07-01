@@ -75,6 +75,8 @@ PODS:
     - Flutter
   - flutter_timezone (0.0.1):
     - Flutter
+  - flutter_timezone (0.0.1):
+    - Flutter
   - fluttertoast (0.0.2):
     - Flutter
   - GoogleDataTransport (10.1.0):
@@ -260,6 +262,7 @@ DEPENDENCIES:
   - flutter_secure_storage (from `.symlinks/plugins/flutter_secure_storage/ios`)
   - flutter_sodium (from `.symlinks/plugins/flutter_sodium/ios`)
   - flutter_timezone (from `.symlinks/plugins/flutter_timezone/ios`)
+  - flutter_timezone (from `.symlinks/plugins/flutter_timezone/ios`)
   - fluttertoast (from `.symlinks/plugins/fluttertoast/ios`)
   - home_widget (from `.symlinks/plugins/home_widget/ios`)
   - image_editor_common (from `.symlinks/plugins/image_editor_common/ios`)
@@ -300,7 +303,7 @@ DEPENDENCIES:
   - workmanager (from `.symlinks/plugins/workmanager/ios`)
 
 SPEC REPOS:
-  https://github.com/ente-io/ffmpeg-kit-custom-repo-ios:
+  https://github.com/ente-io/ffmpeg-kit-custom-repo-ios.git:
     - ffmpeg_kit_custom
   trunk:
     - Firebase
@@ -359,6 +362,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/flutter_secure_storage/ios"
   flutter_sodium:
     :path: ".symlinks/plugins/flutter_sodium/ios"
+  flutter_timezone:
+    :path: ".symlinks/plugins/flutter_timezone/ios"
   flutter_timezone:
     :path: ".symlinks/plugins/flutter_timezone/ios"
   fluttertoast:
@@ -445,10 +450,21 @@ SPEC CHECKSUMS:
   cupertino_http: 94ac07f5ff090b8effa6c5e2c47871d48ab7c86c
   dart_ui_isolate: 46f6714abe6891313267153ef6f9748d8ecfcab1
   device_info_plus: 335f3ce08d2e174b9fdc3db3db0f4e3b1f66bd89
+  app_links: 76b66b60cc809390ca1ad69bfd66b998d2387ac7
+  background_fetch: 94b36ee293e82972852dba8ede1fbcd3bd3d9d57
+  battery_info: 83f3aae7be2fccefab1d2bf06b8aa96f11c8bcdd
+  connectivity_plus: cb623214f4e1f6ef8fe7403d580fdad517d2f7dd
+  cupertino_http: 94ac07f5ff090b8effa6c5e2c47871d48ab7c86c
+  dart_ui_isolate: 46f6714abe6891313267153ef6f9748d8ecfcab1
+  device_info_plus: 335f3ce08d2e174b9fdc3db3db0f4e3b1f66bd89
   ffmpeg_kit_custom: 682b4f2f1ff1f8abae5a92f6c3540f2441d5be99
   ffmpeg_kit_flutter: 915b345acc97d4142e8a9a8549d177ff10f043f5
   file_saver: 6cdbcddd690cb02b0c1a0c225b37cd805c2bf8b6
+  ffmpeg_kit_flutter: 915b345acc97d4142e8a9a8549d177ff10f043f5
+  file_saver: 6cdbcddd690cb02b0c1a0c225b37cd805c2bf8b6
   Firebase: d80354ed7f6df5f9aca55e9eb47cc4b634735eaf
+  firebase_core: 6cbed78b4f298ed103a9fd034e6dbc846320480f
+  firebase_messaging: 5e0adf2eb18b0ee59aa0c109314c091a0497ecac
   firebase_core: 6cbed78b4f298ed103a9fd034e6dbc846320480f
   firebase_messaging: 5e0adf2eb18b0ee59aa0c109314c091a0497ecac
   FirebaseCore: 99fe0c4b44a39f37d99e6404e02009d2db5d718d
@@ -459,11 +475,11 @@ SPEC CHECKSUMS:
   flutter_email_sender: aa1e9772696691d02cd91fea829856c11efb8e58
   flutter_image_compress_common: 1697a328fd72bfb335507c6bca1a65fa5ad87df1
   flutter_inappwebview_ios: b89ba3482b96fb25e00c967aae065701b66e9b99
-  flutter_local_notifications: a5a732f069baa862e728d839dd2ebb904737effb
+  flutter_local_notifications: ad39620c743ea4c15127860f4b5641649a988100
   flutter_native_splash: 6cad9122ea0fad137d23137dd14b937f3e90b145
   flutter_secure_storage: 2c2ff13db9e0a5647389bff88b0ecac56e3f3418
   flutter_sodium: 7e4621538491834eba53bd524547854bcbbd6987
-  flutter_timezone: 7c838e17ffd4645d261e87037e5bebf6d38fe544
+  flutter_timezone: ac3da59ac941ff1c98a2e1f0293420e020120282
   fluttertoast: 2c67e14dce98bbdb200df9e1acf610d7a6264ea1
   GoogleDataTransport: aae35b7ea0c09004c3797d53c8c41f66f219d6a7
   GoogleUtilities: 00c88b9a86066ef77f0da2fab05f65d7768ed8e1
@@ -472,9 +488,22 @@ SPEC CHECKSUMS:
   in_app_purchase_storekit: d1a48cb0f8b29dbf5f85f782f5dd79b21b90a5e6
   integration_test: 4a889634ef21a45d28d50d622cf412dc6d9f586e
   launcher_icon_switcher: 84c218d233505aa7d8655d8fa61a3ba802c022da
+  home_widget: f169fc41fd807b4d46ab6615dc44d62adbf9f64f
+  image_editor_common: 3de87e7c4804f4ae24c8f8a998362b98c105cac1
+  in_app_purchase_storekit: d1a48cb0f8b29dbf5f85f782f5dd79b21b90a5e6
+  integration_test: 4a889634ef21a45d28d50d622cf412dc6d9f586e
+  launcher_icon_switcher: 84c218d233505aa7d8655d8fa61a3ba802c022da
   libwebp: 02b23773aedb6ff1fd38cec7a77b81414c6842a8
+  local_auth_darwin: 553ce4f9b16d3fdfeafce9cf042e7c9f77c1c391
   local_auth_ios: f7a1841beef3151d140a967c2e46f30637cdf451
   Mantle: c5aa8794a29a022dfbbfc9799af95f477a69b62d
+  maps_launcher: edf829809ba9e894d70e569bab11c16352dedb45
+  media_extension: 671e2567880d96c95c65c9a82ccceed8f2e309fd
+  media_kit_libs_ios_video: 5a18affdb97d1f5d466dc79988b13eff6c5e2854
+  media_kit_video: 1746e198cb697d1ffb734b1d05ec429d1fcd1474
+  motion_sensors: 741e702c17467b9569a92165dda8d4d88c6167f1
+  motionphoto: 23e2aeb5c6380112f69468d71f970fa7438e5ed1
+  move_to_background: 7e3467dd2a1d1013e98c9c1cb93fd53cd7ef9d84
   maps_launcher: edf829809ba9e894d70e569bab11c16352dedb45
   media_extension: 671e2567880d96c95c65c9a82ccceed8f2e309fd
   media_kit_libs_ios_video: 5a18affdb97d1f5d466dc79988b13eff6c5e2854
@@ -486,10 +515,19 @@ SPEC CHECKSUMS:
   native_video_player: 6809dec117e8997161dbfb42a6f90d6df71a504d
   objective_c: 89e720c30d716b036faf9c9684022048eee1eee2
   onnxruntime: f9b296392c96c42882be020a59dbeac6310d81b2
+  native_video_player: e363dd14f6a498ad8a8f7e6486a0db046ad19f13
+  objective_c: 89e720c30d716b036faf9c9684022048eee1eee2
+  onnxruntime: f9b296392c96c42882be020a59dbeac6310d81b2
   onnxruntime-c: a909204639a1f035f575127ac406f781ac797c9c
   onnxruntime-objc: b6fab0f1787aa6f7190c2013f03037df4718bd8b
   open_mail_app: 7314a609e88eed22d53671279e189af7a0ab0f11
+  open_mail_app: 7314a609e88eed22d53671279e189af7a0ab0f11
   OrderedSet: e539b66b644ff081c73a262d24ad552a69be3a94
+  package_info_plus: af8e2ca6888548050f16fa2f1938db7b5a5df499
+  path_provider_foundation: 080d55be775b7414fd5a5ef3ac137b97b097e564
+  permission_handler_apple: 4ed2196e43d0651e8ff7ca3483a069d469701f2d
+  photo_manager: d2fbcc0f2d82458700ee6256a15018210a81d413
+  privacy_screen: 3159a541f5d3a31bea916cfd4e58f9dc722b3fd4
   package_info_plus: af8e2ca6888548050f16fa2f1938db7b5a5df499
   path_provider_foundation: 080d55be775b7414fd5a5ef3ac137b97b097e564
   permission_handler_apple: 4ed2196e43d0651e8ff7ca3483a069d469701f2d
@@ -507,7 +545,6 @@ SPEC CHECKSUMS:
   sqlite3: 3c950dc86011117c307eb0b28c4a7bb449dce9f1
   sqlite3_flutter_libs: 3c323550ef3b928bc0aa9513c841e45a7d242832
   system_info_plus: 555ce7047fbbf29154726db942ae785c29211740
-  thermal: d4c48be750d1ddbab36b0e2dcb2471531bc8df41
   ua_client_hints: 92fe0d139619b73ec9fcb46cc7e079a26178f586
   url_launcher_ios: 694010445543906933d732453a59da0a173ae33d
   video_player_avfoundation: 2cef49524dd1f16c5300b9cd6efd9611ce03639b
