@@ -666,30 +666,38 @@ const Page: React.FC = () => {
         (op: CollectionOp) => (selectedCollection: Collection) => {
             void (async () => {
                 showLoadingBar();
+                let notifyOthersFiles = false;
                 try {
                     setOpenCollectionSelector(false);
                     const selectedFiles = getSelectedFiles(
                         selected,
                         filteredFiles,
                     );
-                    const processableFiles = selectedFiles.filter(
+                    const userFiles = selectedFiles.filter(
                         (f) => f.ownerID == user.id,
                     );
                     const sourceCollectionID = selected.collectionID;
-                    if (processableFiles.length > 0) {
+                    if (userFiles.length > 0) {
                         await performCollectionOp(
                             op,
                             selectedCollection,
-                            processableFiles,
+                            userFiles,
                             sourceCollectionID,
                         );
                     }
+                    // See: [Note: Add and move of non-user files]
+                    notifyOthersFiles =
+                        userFiles.length != selectedFiles.length;
                     clearSelection();
                     await remotePull({ silent: true });
                 } catch (e) {
                     onGenericError(e);
                 } finally {
                     hideLoadingBar();
+                }
+
+                if (notifyOthersFiles) {
+                    showMiniDialog(notifyOthersFilesDialogAttributes());
                 }
             })();
         };

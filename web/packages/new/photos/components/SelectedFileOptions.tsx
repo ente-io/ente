@@ -50,26 +50,6 @@ interface SelectedFileOptionsProps {
      *
      * This will not be set if we are in the people section, or if we are
      * showing search results.
-     *
-     * TODO: Need to implement delete-equivalent from shared albums.
-     *
-     * Notes:
-     *
-     * - Delete action should not be enabled  3 selected (0 Yours). There should
-     *   be separate remove action.
-     *
-     * - On remove, if the file and collection both belong to current user, we
-     *   just use move api to existing or uncat collection.
-     *
-     * - Otherwise, we call /collections/v3/remove-files (when collection and
-     *   file belong to different users).
-     *
-     * - Album owner can remove files of all other users from their collection.
-     *   Particiapant (viewer/collaborator) can only remove files that belong to
-     *   them.
-     *
-     * Also note that that user cannot delete files that are not owned by the
-     * user, even if they are in an album owned by the user.
      */
     collectionSummary: CollectionSummary | undefined;
     /**
