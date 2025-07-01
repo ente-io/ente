@@ -902,6 +902,45 @@ const removeNonCollectionOwnerFiles = async (
     );
 
 /**
+ * Delete a collection on remote.
+ *
+ * Reads local state but does not modify it. The effects are on remote.
+ *
+ * @param collectionID The ID of the collection to delete.
+ *
+ * @param opts Deletion options. In particular, if {@link keepFiles} is true,
+ *  then the any of the user's files that only exist in this collection are
+ *  first moved to another one of the user's collection (or Uncategorized if no
+ *  such collection exists) before deleting the collection.
+ *
+ * See: [Note: Removing files from a collection]
+ */
+export const deleteCollection = async (
+    collectionID: number,
+    opts?: { keepFiles?: boolean },
+) => {
+    const keepFiles = opts?.keepFiles ?? false;
+
+    if (keepFiles) {
+        const collectionFiles = await savedCollectionFiles();
+        await removeFromOwnCollection(
+            collectionID,
+            collectionFiles.filter((f) => f.collectionID == collectionID),
+        );
+    }
+
+    ensureOk(
+        await fetch(
+            await apiURL(`/collections/v3/${collectionID}`, {
+                collectionID,
+                keepFiles,
+            }),
+            { method: "DELETE", headers: await authenticatedRequestHeaders() },
+        ),
+    );
+};
+
+/**
  * Rename a collection on remote.
  *
  * Remote only, does not modify local state.
@@ -1178,6 +1217,11 @@ export const savedUserFavoritesCollection = async () => {
  */
 export const addToFavoritesCollection = async (files: EnteFile[]) =>
     addToCollection(await savedOrCreateUserFavoritesCollection(), files);
+
+export const removeFromFavoritesCollection = async (files: EnteFile[]) =>
+    // Non-null assertion because if we get here and a favorites collection does
+    // not already exist, then something is wrong.
+    removeFromOwnCollection((await savedUserFavoritesCollection())!.id, files);
 
 /**
  * Return the default hidden collection for the user if one is found in the

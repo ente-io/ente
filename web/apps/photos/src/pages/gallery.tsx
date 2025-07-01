@@ -74,8 +74,10 @@ import { useIsOffline } from "ente-new/photos/components/utils/use-is-offline";
 import { usePeopleStateSnapshot } from "ente-new/photos/components/utils/use-snapshot";
 import { shouldShowWhatsNew } from "ente-new/photos/services/changelog";
 import {
+    addToFavoritesCollection,
     createAlbum,
     removeFromCollection,
+    removeFromFavoritesCollection,
 } from "ente-new/photos/services/collection";
 import {
     haveOnlySystemCollections,
@@ -120,10 +122,6 @@ import { useRouter, type NextRouter } from "next/router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FileWithPath } from "react-dropzone";
 import { Trans } from "react-i18next";
-import {
-    addToFavorites1,
-    removeFromFavorites1,
-} from "services/collectionService";
 import { uploadManager } from "services/upload-manager";
 import {
     SelectedState,
@@ -828,9 +826,10 @@ const Page: React.FC = () => {
 
             dispatch({ type: "addPendingFavoriteUpdate", fileID });
             try {
-                await (isFavorite ? removeFromFavorites1 : addToFavorites1)(
-                    file,
-                );
+                const action = isFavorite
+                    ? removeFromFavoritesCollection
+                    : addToFavoritesCollection;
+                await action([file]);
                 dispatch({
                     type: "unsyncedFavoriteUpdate",
                     fileID,
