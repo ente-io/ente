@@ -47,7 +47,7 @@ export const savePublicCollections = (collections: Collection[]) =>
  * @param key The collection key that can be used to identify the public album
  * we want from amongst all the locally saved public albums.
  */
-export const savedPublicCollection = async (
+export const savedPublicCollectionByKey = async (
     collectionKey: string,
 ): Promise<Collection | undefined> =>
     savedPublicCollections().then((cs) =>
@@ -69,12 +69,16 @@ export const savePublicCollection = async (collection: Collection) => {
 };
 
 /**
- * Remove a public collection from our local database.
+ * Remove a public collection, identified using its collection key, from our
+ * local database.
+ *
+ * @param key The collection key that can be used to identify the public album
+ * we want to remove.
  */
-export const removePublicCollection = async (collection: Collection) => {
+export const removePublicCollectionByKey = async (collectionKey: string) => {
     const collections = await savedPublicCollections();
     await savePublicCollections([
-        ...collections.filter((c) => c.id != collection.id),
+        ...collections.filter((c) => c.key != collectionKey),
     ]);
 };
 

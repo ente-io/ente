@@ -9,20 +9,19 @@ import type {
 import type { EnteFile, RemoteEnteFile } from "ente-media/file";
 import { decryptRemoteFile } from "ente-media/file";
 import {
+    removePublicCollectionByKey,
     removePublicCollectionFiles,
     removePublicCollectionLastSyncTime,
     savedPublicCollectionFiles,
     savedPublicCollectionLastSyncTime,
-    savedPublicCollections,
     saveLastPublicCollectionReferralCode,
+    savePublicCollection,
     savePublicCollectionFiles,
     savePublicCollectionLastSyncTime,
 } from "ente-new/albums/services/public-albums-fdb";
 import { CustomError, parseSharingErrorCodes } from "ente-shared/error";
 import HTTPService from "ente-shared/network/HTTPService";
 import localForage from "ente-shared/storage/localForage";
-
-const PUBLIC_COLLECTIONS_TABLE = "public-collections";
 
 // Fix this once we can trust the types.
 // eslint-disable-next-line @typescript-eslint/no-unnecessary-template-expression
@@ -54,36 +53,6 @@ export const savePublicCollectionPassword = async (
         getPublicCollectionPasswordKey(collectionUID),
         passToken,
     );
-};
-
-export const getLocalPublicCollection = async (collectionKey: string) => {
-    const localCollections = await savedPublicCollections();
-    const publicCollection =
-        localCollections.find(
-            (localSavedPublicCollection) =>
-                localSavedPublicCollection.key === collectionKey,
-        ) || null;
-    return publicCollection;
-};
-
-export const savePublicCollection = async (collection: Collection) => {
-    const publicCollections = await savedPublicCollections();
-    await localForage.setItem(
-        PUBLIC_COLLECTIONS_TABLE,
-        dedupeCollections([collection, ...publicCollections]),
-    );
-};
-
-const dedupeCollections = (collections: Collection[]) => {
-    const keySet = new Set([]);
-    return collections.filter((collection) => {
-        if (!keySet.has(collection.key)) {
-            keySet.add(collection.key);
-            return true;
-        } else {
-            return false;
-        }
-    });
 };
 
 export const syncPublicFiles = async (
@@ -292,13 +261,7 @@ export const removePublicCollectionWithFiles = async (
     collectionUID: string,
     collectionKey: string,
 ) => {
-    const publicCollections = await savedPublicCollections();
-    await localForage.setItem(
-        PUBLIC_COLLECTIONS_TABLE,
-        publicCollections.filter(
-            (collection) => collection.key !== collectionKey,
-        ),
-    );
+    await removePublicCollectionByKey(collectionKey);
     await removePublicFiles(collectionUID);
 };
 

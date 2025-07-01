@@ -52,6 +52,7 @@ import type { Collection } from "ente-media/collection";
 import { type EnteFile } from "ente-media/file";
 import {
     savedLastPublicCollectionReferralCode,
+    savedPublicCollectionByKey,
     savedPublicCollectionFiles,
 } from "ente-new/albums/services/public-albums-fdb";
 import { verifyPublicAlbumPassword } from "ente-new/albums/services/public-collection";
@@ -68,7 +69,6 @@ import { useRouter } from "next/router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { type FileWithPath } from "react-dropzone";
 import {
-    getLocalPublicCollection,
     getLocalPublicCollectionPassword,
     getPublicCollection,
     getPublicCollectionUID,
@@ -216,7 +216,7 @@ export default function PublicCollectionGallery() {
                 }
                 collectionKey.current = ck;
                 url.current = window.location.href;
-                const localCollection = await getLocalPublicCollection(
+                const localCollection = await savedPublicCollectionByKey(
                     collectionKey.current,
                 );
                 const accessToken = t;
