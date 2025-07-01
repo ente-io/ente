@@ -435,7 +435,7 @@ class FilesDB with SqlDbBase {
     );
   }
 
-  // blocked upload queue
+  // blocked upload queue (shared assets rendering)
   Future<int> insertAndGetId(EnteFile file) async {
     _logger.info("Inserting $file");
     final db = await instance.sqliteAsyncDB;

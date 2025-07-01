@@ -118,7 +118,12 @@ extension CollectionFileActions on CollectionActions {
         if (pendingUploads.isNotEmpty) {
           await IgnoredFilesService.instance
               .removeIgnoredMappings(filesPendingUpload);
-          await localDB.insertOrUpdateQueue( pendingUploads, collection.id, currentUserID, manual: true)
+          await localDB.insertOrUpdateQueue(
+            pendingUploads,
+            collection.id,
+            currentUserID,
+            manual: true,
+          );
           Bus.instance.fire(
             CollectionUpdatedEvent(
               collection.id,
@@ -196,21 +201,23 @@ extension CollectionFileActions on CollectionActions {
         }
       }
       if (filesPendingUpload.isNotEmpty) {
-          final Set<String> pendingUploadAssetIDs = {};
-          for (final file in filesPendingUpload) {
-            pendingUploadAssetIDs.add(file.lAsset!.id);
-          }
-          await IgnoredFilesService.instance
-              .removeIgnoredMappings(filesPendingUpload);
-          await localDB.insertOrUpdateQueue(pendingUploadAssetIDs, collectionID, currentUserID, manual: true);
-          Bus.instance.fire(
-            CollectionUpdatedEvent(
-              collectionID,
-              filesPendingUpload,
-              "queuedForUpload",
-            ),
-          );
+        final Set<String> pendingUploadAssetIDs = {};
+        for (final file in filesPendingUpload) {
+          pendingUploadAssetIDs.add(file.lAsset!.id);
         }
+        await IgnoredFilesService.instance
+            .removeIgnoredMappings(filesPendingUpload);
+        await localDB.insertOrUpdateQueue(
+            pendingUploadAssetIDs, collectionID, currentUserID,
+            manual: true);
+        Bus.instance.fire(
+          CollectionUpdatedEvent(
+            collectionID,
+            filesPendingUpload,
+            "queuedForUpload",
+          ),
+        );
+      }
       if (uploadedFiles.isNotEmpty) {
         await CollectionsService.instance
             .addOrCopyToCollection(collectionID, uploadedFiles);
