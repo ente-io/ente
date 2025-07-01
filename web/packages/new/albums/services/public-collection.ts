@@ -2,6 +2,7 @@ import { deriveKey } from "ente-base/crypto";
 import {
     authenticatedPublicAlbumsRequestHeaders,
     ensureOk,
+    type PublicAlbumsCredentials,
 } from "ente-base/http";
 import { apiURL } from "ente-base/origins";
 import {
@@ -10,6 +11,7 @@ import {
     type Collection,
     type PublicURL,
 } from "ente-media/collection";
+import type { EnteFile } from "ente-media/file";
 import { z } from "zod/v4";
 import {
     saveLastPublicCollectionReferralCode,
@@ -128,4 +130,35 @@ const getPublicCollectionInfo = async (accessToken: string) => {
     });
     ensureOk(res);
     return PublicCollectionInfo.parse(await res.json());
+};
+
+/**
+ * Pull any changes to the files belonging to the given collection, updating our
+ * local database and also calling the provided callback.
+ *
+ * This function modifies local state.
+ *
+ * The pull uses a persisted timestamp for the most recent change we've already
+ * fetched, and will be only fetch the delta of changes since the last pull. The
+ * files are fetched in a paginated manner, so the provided callback can get
+ * called multiple times during the pull (one for each page).
+ *
+ * @param credentials A public collection access key and an optional password
+ * unlocked access token JWT. The credentials serve to both identify the
+ * collection, and authenticate the request.
+ *
+ * @param collection The public collection corresponding to the credentials.
+ *
+ * @param onSetFiles A callback that is invoked each time a new batch of updates
+ * to the collection's files is fetched and processed. THe callback is called
+ * the consolidated list of files after applying the updates received so far.
+ *
+ * This callback can get called multiple times during the pull.
+ */
+export const pullPublicCollectionFiles = (
+    credentials: PublicAlbumsCredentials,
+    collection: Collection,
+    onSetFiles: (files: EnteFile[]) => void,
+) => {
+    throw new Error("X");
 };

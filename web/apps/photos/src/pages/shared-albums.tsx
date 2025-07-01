@@ -163,7 +163,7 @@ export default function PublicCollectionGallery() {
         }, []);
 
     const onAddPhotos = useMemo(() => {
-        return publicCollection?.publicURLs?.[0]?.enableCollect
+        return publicCollection?.publicURLs[0]?.enableCollect
             ? () => setUploadTypeSelectorView(true)
             : undefined;
     }, [publicCollection]);
