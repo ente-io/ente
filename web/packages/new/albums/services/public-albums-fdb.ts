@@ -10,6 +10,7 @@ import {
 import { type Collection } from "ente-media/collection";
 import type { EnteFile } from "ente-media/file";
 import localForage from "ente-shared/storage/localForage";
+import { nullToUndefined } from "ente-utils/transform";
 import { z } from "zod/v4";
 
 /**
@@ -35,6 +36,34 @@ export const savedPublicCollections = async (): Promise<Collection[]> =>
  */
 export const savePublicCollections = (collections: Collection[]) =>
     localForage.setItem("public-collections", collections);
+
+const LocalReferralCode = z.string().nullish().transform(nullToUndefined);
+
+/**
+ * Return the last saved referral code present in our local database.
+ *
+ * See: [Note: Public albums referral code]. A few more details specific to the
+ * persistence of the referral code:
+ *
+ * 1. The public albums app persists only the referral code for the latest
+ *    public album that was fetched.
+ *
+ * 2. This saved value can be read by {@link savedLastPublicAlbumReferralCode}.
+ *
+ * 3. It gets updated as part of {@link publicAlbumsRemotePull}, which writes
+ *    out a new value using {@link saveLastPublicAlbumReferralCode}.
+ */
+export const savedLastPublicAlbumReferralCode = async () =>
+    LocalReferralCode.parse(await localForage.getItem("public-referral-code"));
+
+/**
+ * Update the referral code present in our local database.
+ *
+ * This is the setter corresponding to {@link savedLastPublicAlbumReferralCode}.
+ */
+export const saveLastPublicAlbumReferralCode = async (referralCode: string) => {
+    await localForage.setItem("public-referral-code", referralCode);
+};
 
 const LocalSavedPublicCollectionFilesEntry = z.object({
     /**
