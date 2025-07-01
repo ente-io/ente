@@ -76,7 +76,6 @@ import { shouldShowWhatsNew } from "ente-new/photos/services/changelog";
 import {
     createAlbum,
     removeFromCollection,
-    removeOtherOtherNotSupportErrorMessage,
 } from "ente-new/photos/services/collection";
 import {
     haveOnlySystemCollections,
@@ -640,22 +639,15 @@ const Page: React.FC = () => {
     const handleRemoveFilesFromCollection = (collection: Collection) => {
         void (async () => {
             showLoadingBar();
-            let notifyOtherFiles = false;
+            let notifyOthersFiles = false;
             try {
                 setOpenCollectionSelector(false);
                 const selectedFiles = getSelectedFiles(selected, filteredFiles);
-                try {
-                    await removeFromCollection(collection, selectedFiles);
-                } catch (e) {
-                    if (
-                        e instanceof Error &&
-                        e.message == removeOtherOtherNotSupportErrorMessage
-                    ) {
-                        notifyOtherFiles = true;
-                    } else {
-                        throw e;
-                    }
-                }
+                const processedCount = await removeFromCollection(
+                    collection,
+                    selectedFiles,
+                );
+                notifyOthersFiles = processedCount != selectedFiles.length;
                 clearSelection();
                 await remotePull({ silent: true });
             } catch (e) {
@@ -664,7 +656,7 @@ const Page: React.FC = () => {
                 hideLoadingBar();
             }
 
-            if (notifyOtherFiles) {
+            if (notifyOthersFiles) {
                 showMiniDialog(notifyOthersFilesDialogAttributes());
             }
         })();

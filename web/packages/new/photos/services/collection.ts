@@ -678,9 +678,6 @@ export const deleteFromTrash = async (fileIDs: number[]) =>
         ),
     );
 
-export const removeOtherOtherNotSupportErrorMessage =
-    "Cannot remove other user's files in other user's collections";
-
 /**
  * Remove the given files from the specified collection owned by the user.
  *
@@ -690,10 +687,15 @@ export const removeOtherOtherNotSupportErrorMessage =
  * user).
  *
  * @param files The files to remove from the collection. The files owned by the
- * user will be removed. If the collection is not owned by the user and some of
- * the given files are also not owned by the user, then this function will throw
- * an error with the message {@link removeOtherOtherNotSupportErrorMessage}
+ * user will be removed. If the collection is not owned by the user, then any
+ * files that are not owned by the user will not be processed. In such cases,
+ * this function will return a count less than the count of the provided files
  * (after having removed what can be removed).
+ *
+ * @returns The count of files that were processed. This can be less than the
+ * count of the provided {@link files} if some files were not processed because
+ * because they belong to other users (and {@link collection} also does not
+ * belong to the current user).
  *
  * [Note: Removing files from a collection]
  *
@@ -752,7 +754,7 @@ export const removeOtherOtherNotSupportErrorMessage =
 export const removeFromCollection = async (
     collection: Collection,
     files: EnteFile[],
-) =>
+): Promise<number> =>
     collection.owner.id == ensureLocalUser().id
         ? removeFromOwnCollection(collection.id, files)
         : removeFromOthersCollection(collection.id, files);
@@ -772,6 +774,7 @@ export const removeFromOwnCollection = async (
     if (nonUserFiles.length) {
         await removeNonCollectionOwnerFiles(collectionID, nonUserFiles);
     }
+    return files.length;
 };
 
 const removeFromOthersCollection = async (
@@ -779,16 +782,11 @@ const removeFromOthersCollection = async (
     files: EnteFile[],
 ) => {
     const userID = ensureLocalUser().id;
-    const [userFiles, nonUserFiles] = splitByPredicate(
-        files,
-        (f) => f.ownerID == userID,
-    );
+    const [userFiles] = splitByPredicate(files, (f) => f.ownerID == userID);
     if (userFiles.length) {
         await removeNonCollectionOwnerFiles(collectionID, userFiles);
     }
-    if (nonUserFiles.length) {
-        throw new Error(removeOtherOtherNotSupportErrorMessage);
-    }
+    return userFiles.length;
 };
 
 /**
