@@ -66,14 +66,14 @@ class _AllMemoriesPageState extends State<AllMemoriesPage>
               initialMemoryIndex,
               onNextMemory: index < widget.allMemories.length - 1
                   ? () => pageController.nextPage(
-                        duration: const Duration(milliseconds: 250),
-                        curve: Curves.ease,
+                        duration: const Duration(milliseconds: 675),
+                        curve: Curves.easeOutQuart,
                       )
                   : null,
               onPreviousMemory: index > 0
                   ? () => pageController.previousPage(
-                        duration: const Duration(milliseconds: 250),
-                        curve: Curves.ease,
+                        duration: const Duration(milliseconds: 675),
+                        curve: Curves.easeOutQuart,
                       )
                   : null,
             ),
