@@ -1,6 +1,5 @@
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined";
-import InfoIcon from "@mui/icons-material/Info";
 import MenuIcon from "@mui/icons-material/Menu";
 import { IconButton, Stack, Typography } from "@mui/material";
 import { AuthenticateUser } from "components/AuthenticateUser";
@@ -28,7 +27,6 @@ import { errorDialogAttributes } from "ente-base/components/utils/dialog";
 import { useIsSmallWidth } from "ente-base/components/utils/hooks";
 import { useModalVisibility } from "ente-base/components/utils/modal";
 import { useBaseContext } from "ente-base/context";
-import { pt } from "ente-base/i18n";
 import log from "ente-base/log";
 import {
     clearSessionStorage,
@@ -71,6 +69,7 @@ import {
     useGalleryReducer,
     type GalleryBarMode,
 } from "ente-new/photos/components/gallery/reducer";
+import { notifyOthersFilesDialogAttributes } from "ente-new/photos/components/utils/dialog-attributes";
 import { useIsOffline } from "ente-new/photos/components/utils/use-is-offline";
 import { usePeopleStateSnapshot } from "ente-new/photos/components/utils/use-snapshot";
 import { shouldShowWhatsNew } from "ente-new/photos/services/changelog";
@@ -666,12 +665,7 @@ const Page: React.FC = () => {
             }
 
             if (notifyOtherFiles) {
-                showMiniDialog({
-                    title: pt("Note"),
-                    icon: <InfoIcon />,
-                    message: pt("Files added by other users were not removed"),
-                    cancel: t("ok"),
-                });
+                showMiniDialog(notifyOthersFilesDialogAttributes());
             }
         })();
     };
