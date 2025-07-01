@@ -66,37 +66,50 @@ export const findCollectionCreatingUncategorizedIfNeeded = async (
  * @param selectedCollection The existing or new collection selected by the
  * user. This serves as the target of the operation.
  *
- * @param selectedFiles The files selected by the user, on which the operation
- * should be performed.
+ * @param selectedUserFiles The files selected by the user, on which the
+ * operation should be performed. Currently these need to all belong to the
+ * user.
  *
  * @param sourceCollectionID In the case of a "move", the operation is always
  * expected to happen in the context of an existing collection, which serves as
  * the source collection for the move. In such a case, the caller should provide
  * this argument, using the collection ID of the collection in which the
  * selection occurred.
+ *
+ * [Note: Add and move of non-user files]
+ *
+ * Currently, all {@link selectedUserFiles} need to belong to the user. This is
+ * because adds and move cannot be performed on remote across ownership
+ * boundaries directly.
+ *
+ * Enhancement: The mobile client has support for adding and moving such files.
+ * It does so by creating a copy, but using hash checks to avoid a copy if not
+ * needed. Implement these. This is a bit non-trivial since the mobile client
+ * then also adds various heuristics to omit the display of the "doubled" files
+ * in the all section etc.
  */
 export const performCollectionOp = async (
     op: CollectionOp,
     selectedCollection: Collection,
-    selectedFiles: EnteFile[],
+    selectedUserFiles: EnteFile[],
     sourceCollectionID: number | undefined,
 ): Promise<void> => {
     switch (op) {
         case "add":
-            await addToCollection(selectedCollection, selectedFiles);
+            await addToCollection(selectedCollection, selectedUserFiles);
             break;
         case "move":
             await moveFromCollection(
                 sourceCollectionID!,
                 selectedCollection,
-                selectedFiles,
+                selectedUserFiles,
             );
             break;
         case "restore":
-            await restoreToCollection(selectedCollection, selectedFiles);
+            await restoreToCollection(selectedCollection, selectedUserFiles);
             break;
         case "unhide":
-            await moveToCollection(selectedCollection, selectedFiles);
+            await moveToCollection(selectedCollection, selectedUserFiles);
             break;
     }
 };

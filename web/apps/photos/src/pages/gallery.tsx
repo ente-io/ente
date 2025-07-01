@@ -1,6 +1,5 @@
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined";
-import InfoIcon from "@mui/icons-material/Info";
 import MenuIcon from "@mui/icons-material/Menu";
 import { IconButton, Stack, Typography } from "@mui/material";
 import { AuthenticateUser } from "components/AuthenticateUser";
@@ -28,7 +27,6 @@ import { errorDialogAttributes } from "ente-base/components/utils/dialog";
 import { useIsSmallWidth } from "ente-base/components/utils/hooks";
 import { useModalVisibility } from "ente-base/components/utils/modal";
 import { useBaseContext } from "ente-base/context";
-import { pt } from "ente-base/i18n";
 import log from "ente-base/log";
 import {
     clearSessionStorage,
@@ -71,13 +69,13 @@ import {
     useGalleryReducer,
     type GalleryBarMode,
 } from "ente-new/photos/components/gallery/reducer";
+import { notifyOthersFilesDialogAttributes } from "ente-new/photos/components/utils/dialog-attributes";
 import { useIsOffline } from "ente-new/photos/components/utils/use-is-offline";
 import { usePeopleStateSnapshot } from "ente-new/photos/components/utils/use-snapshot";
 import { shouldShowWhatsNew } from "ente-new/photos/services/changelog";
 import {
     createAlbum,
     removeFromCollection,
-    removeOtherOtherNotSupportErrorMessage,
 } from "ente-new/photos/services/collection";
 import {
     haveOnlySystemCollections,
@@ -132,7 +130,7 @@ import {
     SetFilesDownloadProgressAttributes,
     SetFilesDownloadProgressAttributesCreator,
 } from "types/gallery";
-import { getSelectedFiles, handleFileOp } from "utils/file";
+import { getSelectedFiles, performFileOp } from "utils/file";
 
 /**
  * The default view for logged in users.
@@ -641,22 +639,15 @@ const Page: React.FC = () => {
     const handleRemoveFilesFromCollection = (collection: Collection) => {
         void (async () => {
             showLoadingBar();
-            let notifyOtherFiles = false;
+            let notifyOthersFiles = false;
             try {
                 setOpenCollectionSelector(false);
                 const selectedFiles = getSelectedFiles(selected, filteredFiles);
-                try {
-                    await removeFromCollection(collection, selectedFiles);
-                } catch (e) {
-                    if (
-                        e instanceof Error &&
-                        e.message == removeOtherOtherNotSupportErrorMessage
-                    ) {
-                        notifyOtherFiles = true;
-                    } else {
-                        throw e;
-                    }
-                }
+                const processedCount = await removeFromCollection(
+                    collection,
+                    selectedFiles,
+                );
+                notifyOthersFiles = processedCount != selectedFiles.length;
                 clearSelection();
                 await remotePull({ silent: true });
             } catch (e) {
@@ -665,13 +656,8 @@ const Page: React.FC = () => {
                 hideLoadingBar();
             }
 
-            if (notifyOtherFiles) {
-                showMiniDialog({
-                    title: pt("Note"),
-                    icon: <InfoIcon />,
-                    message: pt("Files added by other users were not removed"),
-                    cancel: t("ok"),
-                });
+            if (notifyOthersFiles) {
+                showMiniDialog(notifyOthersFilesDialogAttributes());
             }
         })();
     };
@@ -686,17 +672,21 @@ const Page: React.FC = () => {
                         selected,
                         filteredFiles,
                     );
-                    const processableFiles = selectedFiles.filter(
+                    const userFiles = selectedFiles.filter(
                         (f) => f.ownerID == user.id,
                     );
                     const sourceCollectionID = selected.collectionID;
-                    if (processableFiles.length > 0) {
+                    if (userFiles.length > 0) {
                         await performCollectionOp(
                             op,
                             selectedCollection,
-                            processableFiles,
+                            userFiles,
                             sourceCollectionID,
                         );
+                    }
+                    // See: [Note: Add and move of non-user files]
+                    if (userFiles.length != selectedFiles.length) {
+                        showMiniDialog(notifyOthersFilesDialogAttributes());
                     }
                     clearSelection();
                     await remotePull({ silent: true });
@@ -729,45 +719,56 @@ const Page: React.FC = () => {
         [createOnSelectForCollectionOp],
     );
 
-    const fileOpHelper = (op: FileOp) => async () => {
-        showLoadingBar();
-        try {
-            const selectedFiles = getSelectedFiles(
-                selected,
-                op == "hide"
-                    ? // passing files here instead of filteredData for hide ops
-                      // because we want to move all files copies to hidden collection
-                      state.collectionFiles.filter(
-                          (f) => !state.hiddenFileIDs.has(f.id),
-                      )
-                    : filteredFiles,
-            );
-            const toProcessFiles =
-                op == "download"
-                    ? selectedFiles
-                    : selectedFiles.filter((file) => file.ownerID === user.id);
-            if (toProcessFiles.length > 0) {
-                await handleFileOp(
-                    op,
-                    toProcessFiles,
-                    handleMarkTempDeleted,
-                    () => dispatch({ type: "clearTempDeleted" }),
-                    (files) => dispatch({ type: "markTempHidden", files }),
-                    () => dispatch({ type: "clearTempHidden" }),
-                    (files) => {
-                        setFixCreationTimeFiles(files);
-                        showFixCreationTime();
-                    },
-                    setFilesDownloadProgressAttributesCreator,
+    const createFileOpHandler = (op: FileOp) => () => {
+        void (async () => {
+            showLoadingBar();
+            try {
+                const selectedFiles = getSelectedFiles(
+                    selected,
+                    op == "hide"
+                        ? // passing files here instead of filteredData for hide since
+                          // we want to move all files copies to hidden collection
+                          state.collectionFiles.filter(
+                              (f) => !state.hiddenFileIDs.has(f.id),
+                          )
+                        : filteredFiles,
                 );
+                const toProcessFiles =
+                    op == "download"
+                        ? selectedFiles
+                        : selectedFiles.filter(
+                              (file) => file.ownerID == user.id,
+                          );
+                if (toProcessFiles.length > 0) {
+                    await performFileOp(
+                        op,
+                        toProcessFiles,
+                        handleMarkTempDeleted,
+                        () => dispatch({ type: "clearTempDeleted" }),
+                        (files) => dispatch({ type: "markTempHidden", files }),
+                        () => dispatch({ type: "clearTempHidden" }),
+                        (files) => {
+                            setFixCreationTimeFiles(files);
+                            showFixCreationTime();
+                        },
+                        setFilesDownloadProgressAttributesCreator,
+                    );
+                }
+                // Apart from download, the other operations currently only work
+                // on the user's own files.
+                //
+                // See: [Note: Add and move of non-user files].
+                if (toProcessFiles.length != selectedFiles.length) {
+                    showMiniDialog(notifyOthersFilesDialogAttributes());
+                }
+                clearSelection();
+                await remotePull({ silent: true });
+            } catch (e) {
+                onGenericError(e);
+            } finally {
+                hideLoadingBar();
             }
-            clearSelection();
-            await remotePull({ silent: true });
-        } catch (e) {
-            onGenericError(e);
-        } finally {
-            hideLoadingBar();
-        }
+        })();
     };
 
     const handleSelectSearchOption = (
@@ -820,7 +821,7 @@ const Page: React.FC = () => {
         [],
     );
 
-    const handleToggleFavorite = useCallback(
+    const handleFileViewerToggleFavorite = useCallback(
         async (file: EnteFile) => {
             const fileID = file.id;
             const isFavorite = favoriteFileIDs.has(fileID);
@@ -839,7 +840,7 @@ const Page: React.FC = () => {
                 dispatch({ type: "removePendingFavoriteUpdate", fileID });
             }
         },
-        [favoriteFileIDs],
+        [user, favoriteFileIDs],
     );
 
     const handleFileViewerFileVisibilityUpdate = useCallback(
@@ -986,8 +987,8 @@ const Page: React.FC = () => {
                         {...{
                             createOnCreateForCollectionOp,
                             createOnSelectForCollectionOp,
+                            createFileOpHandler,
                         }}
-                        handleFileOp={fileOpHelper}
                     />
                 ) : barMode == "hidden-albums" ? (
                     <HiddenSectionNavbarContents
@@ -1120,7 +1121,7 @@ const Page: React.FC = () => {
                     setFilesDownloadProgressAttributesCreator={
                         setFilesDownloadProgressAttributesCreator
                     }
-                    onToggleFavorite={handleToggleFavorite}
+                    onToggleFavorite={handleFileViewerToggleFavorite}
                     onFileVisibilityUpdate={
                         handleFileViewerFileVisibilityUpdate
                     }
