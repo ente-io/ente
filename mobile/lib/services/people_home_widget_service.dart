@@ -28,6 +28,7 @@ class PeopleHomeWidgetService {
   static const String IOS_CLASS_NAME = "EntePeopleWidget";
   static const String PEOPLE_STATUS_KEY = "peopleStatusKey.widget";
   static const String PEOPLE_CHANGED_KEY = "peopleChanged.widget";
+  static const String TOTAL_PEOPLE_KEY = "totalPeople";
   static const int MAX_PEOPLE_LIMIT = 50;
 
   // Singleton pattern
@@ -72,15 +73,17 @@ class PeopleHomeWidgetService {
         return;
       }
 
+      _logger.info("Initializing people widget");
+
       final bool forceFetchNewPeople = await _shouldUpdateWidgetCache();
 
       if (forceFetchNewPeople) {
-        _logger.info("Initializing people widget: updating people cache");
         await _updatePeopleWidgetCache();
         await updatePeopleChanged(false);
+        _logger.info("Force fetch new people complete");
       } else {
-        _logger.info("Initializing people widget: syncing existing people");
         await _refreshPeopleWidget();
+        _logger.info("Refresh people widget complete");
       }
     });
   }
@@ -92,6 +95,7 @@ class PeopleHomeWidgetService {
     }
 
     await setPeopleLastHash("");
+    await _setTotalPeople(null);
     await updatePeopleStatus(WidgetStatus.syncedEmpty);
     await _refreshWidget(message: "PeopleHomeWidget cleared & updated");
   }
@@ -229,6 +233,7 @@ class PeopleHomeWidgetService {
 
     final noSelectionOrHashEmpty = peopleIds.isEmpty || hash.isEmpty;
     if (noSelectionOrHashEmpty) {
+      _logger.info("No selected people or hash empty, cannot update widget");
       return true;
     }
 
@@ -320,9 +325,12 @@ class PeopleHomeWidgetService {
     _logger.info("Home Widget updated: ${message ?? "standard update"}");
   }
 
+  Future<void> _setTotalPeople(int? total) async {
+    await HomeWidgetService.instance.setData(TOTAL_PEOPLE_KEY, total);
+  }
+
   Future<void> _updatePeopleWidgetCache() async {
     final peopleIds = await _getEffectiveSelectedPeopleIds();
-    // TODO: Add logic to directly get random people files from database
     final peopleWithFiles = await _getPeople(peopleIds);
 
     if (peopleWithFiles.isEmpty) {
@@ -372,6 +380,8 @@ class PeopleHomeWidgetService {
         if (await _hasAnyBlockers()) {
           return;
         }
+
+        await _setTotalPeople(renderedCount);
 
         // Show update toast after first item is rendered
         if (renderedCount == 1) {
