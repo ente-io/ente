@@ -9,6 +9,7 @@ import "package:photos/events/people_changed_event.dart";
 import "package:photos/extensions/stop_watch.dart";
 import "package:photos/models/api/entity/type.dart";
 import "package:photos/models/file/file.dart";
+import "package:photos/models/local_entity_data.dart";
 import 'package:photos/models/ml/face/face.dart';
 import "package:photos/models/ml/face/person.dart";
 import "package:photos/service_locator.dart";
@@ -156,8 +157,7 @@ class PersonService {
               ),
             )
             .toList();
-        entityService
-            .addOrUpdate(EntityType.cgroup, personData.toJson(), id: personID)
+        _addOrUpdateEntity(EntityType.cgroup, personData.toJson(), id: personID)
             .ignore();
         personData.logStats();
       }
@@ -226,7 +226,7 @@ class PersonService {
       birthDate: birthdate,
       email: email,
     );
-    final result = await entityService.addOrUpdate(
+    final result = await _addOrUpdateEntity(
       EntityType.cgroup,
       data.toJson(),
     );
@@ -260,7 +260,7 @@ class PersonService {
     }
     personData.rejectedFaceIDs.addAll(clusterInfo.faces);
     personData.assigned.removeWhere((element) => element.id == clusterID);
-    await entityService.addOrUpdate(
+    await _addOrUpdateEntity(
       EntityType.cgroup,
       personData.toJson(),
       id: personID,
@@ -300,7 +300,7 @@ class PersonService {
     // Add removed faces to rejected faces
     personData.rejectedFaceIDs.addAll(faceIDs);
 
-    await entityService.addOrUpdate(
+    await _addOrUpdateEntity(
       EntityType.cgroup,
       personData.toJson(),
       id: person.remoteID,
@@ -316,7 +316,7 @@ class PersonService {
       }
       final PersonEntity justName =
           PersonEntity(personID, PersonData(name: entity.data.name));
-      await entityService.addOrUpdate(
+      await _addOrUpdateEntity(
         EntityType.cgroup,
         justName.data.toJson(),
         id: personID,
@@ -508,7 +508,7 @@ class PersonService {
 
   Future<void> updatePerson(PersonEntity updatePerson) async {
     try {
-      await entityService.addOrUpdate(
+      await _addOrUpdateEntity(
         EntityType.cgroup,
         updatePerson.data.toJson(),
         id: updatePerson.remoteID,
@@ -518,5 +518,15 @@ class PersonService {
       logger.severe("Failed to update person", e, s);
       rethrow;
     }
+  }
+
+  /// Wrapper method for entityService.addOrUpdate that handles cache refresh
+  Future<LocalEntityData> _addOrUpdateEntity(
+    EntityType type,
+    Map<String, dynamic> jsonMap, {
+    String? id,
+  }) async {
+    final result = await entityService.addOrUpdate(type, jsonMap, id: id);
+    return result;
   }
 }
