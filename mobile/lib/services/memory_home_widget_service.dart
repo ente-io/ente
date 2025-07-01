@@ -21,6 +21,7 @@ class MemoryHomeWidgetService {
   static const String IOS_CLASS_NAME = "EnteMemoryWidget";
   static const String MEMORY_STATUS_KEY = "memoryStatusKey.widget";
   static const String MEMORY_CHANGED_KEY = "memoryChanged.widget";
+  static const String TOTAL_MEMORIES_KEY = "totalMemories";
   static const int MAX_MEMORIES_LIMIT = 50;
 
   // Singleton pattern
@@ -70,13 +71,18 @@ class MemoryHomeWidgetService {
         return;
       }
 
+      _logger.info("Initializing memories widget");
+
       final bool forceFetchNewMemories = await _shouldUpdateWidgetCache();
 
       if (forceFetchNewMemories) {
-        await _updateMemoriesWidgetCache();
-        await updateMemoryChanged(false);
+        if (await _updateMemoriesWidgetCache()) {
+          await updateMemoryChanged(false);
+          _logger.info("Force fetch new memories complete");
+        }
       } else {
         await _refreshMemoriesWidget();
+        _logger.info("Refresh memories widget complete");
       }
     });
   }
@@ -87,6 +93,7 @@ class MemoryHomeWidgetService {
       return;
     }
 
+    await _setTotalMemories(null);
     await updateMemoriesStatus(WidgetStatus.syncedEmpty);
     await _refreshWidget(message: "MemoryHomeWidget cleared & updated");
   }
@@ -117,6 +124,7 @@ class MemoryHomeWidgetService {
       return;
     }
 
+    _logger.info("Checking pending memory sync");
     if (await _shouldUpdateWidgetCache()) {
       await initMemoryHomeWidget();
     }
@@ -257,6 +265,10 @@ class MemoryHomeWidgetService {
     _logger.info("Home Widget updated: ${message ?? "standard update"}");
   }
 
+  Future<void> _setTotalMemories(int? total) async {
+    await HomeWidgetService.instance.setData(TOTAL_MEMORIES_KEY, total);
+  }
+
   // _updateMemoriesWidgetCache will return false if no memories were cached
   Future<bool> _updateMemoriesWidgetCache() async {
     // TODO: Can update the method to fetch directly max limit random memories
@@ -309,6 +321,8 @@ class MemoryHomeWidgetService {
           return true;
         }
 
+        await _setTotalMemories(renderedCount);
+
         // Show update toast after first item is rendered
         if (renderedCount == 1) {
           await _refreshWidget(
@@ -330,7 +344,7 @@ class MemoryHomeWidgetService {
     }
 
     if (renderedCount == 0) {
-      return true;
+      return false;
     }
 
     if (isWidgetPresent) {
