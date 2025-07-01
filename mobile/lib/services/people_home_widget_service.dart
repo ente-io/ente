@@ -256,7 +256,7 @@ class PeopleHomeWidgetService {
 
   Future<void> _refreshPeopleWidget() async {
     // only refresh if widget was synced without issues
-    if (getPeopleStatus() == WidgetStatus.syncedAll) return;
+    if (await countHomeWidgets() == 0) return;
     await _refreshWidget(message: "Refreshing from existing people set");
   }
 
