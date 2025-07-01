@@ -103,9 +103,9 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
 
       const String sql = '''
         INSERT INTO $facesTable (
-          $fileIDColumn, $faceIDColumn, $faceDetectionColumn, $embeddingColumn, $faceScore, $faceBlur, $isSideways, $imageHeight, $imageWidth, $mlVersionColumn 
+          $fileIDColumn, $faceIDColumn, $faceDetectionColumn, $embeddingColumn, $faceScore, $faceBlur, $isSideways, $imageHeight, $imageWidth, $mlVersionColumn
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ON CONFLICT($fileIDColumn, $faceIDColumn) DO UPDATE SET $faceIDColumn = excluded.$faceIDColumn, $faceDetectionColumn = excluded.$faceDetectionColumn, $embeddingColumn = excluded.$embeddingColumn, $faceScore = excluded.$faceScore, $faceBlur = excluded.$faceBlur, $isSideways = excluded.$isSideways, $imageHeight = excluded.$imageHeight, $imageWidth = excluded.$imageWidth, $mlVersionColumn = excluded.$mlVersionColumn 
+        ON CONFLICT($fileIDColumn, $faceIDColumn) DO UPDATE SET $faceIDColumn = excluded.$faceIDColumn, $faceDetectionColumn = excluded.$faceDetectionColumn, $embeddingColumn = excluded.$embeddingColumn, $faceScore = excluded.$faceScore, $faceBlur = excluded.$faceBlur, $isSideways = excluded.$isSideways, $imageHeight = excluded.$imageHeight, $imageWidth = excluded.$imageWidth, $mlVersionColumn = excluded.$mlVersionColumn
       ''';
       final parameterSets = batch.map((face) {
         final map = mapRemoteToFaceDB(face);
@@ -158,7 +158,7 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
     final db = await instance.asyncDB;
     final String query = '''
         SELECT $fileIDColumn, $mlVersionColumn
-        FROM $facesTable 
+        FROM $facesTable
         WHERE $mlVersionColumn >= $minimumMlVersion
       ''';
     final List<Map<String, dynamic>> maps = await db.getAll(query);
@@ -210,6 +210,21 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
     final Set<String> rejectClusterIDs =
         rejectMaps.map((e) => e[clusterIDColumn] as String).toSet();
     return ignoredClusterIDs.union(rejectClusterIDs);
+  }
+
+  @override
+  Future<Map<String, Set<String>>> getPersonToRejectedSuggestions() async {
+    final db = await instance.asyncDB;
+    final List<Map<String, dynamic>> rejectMaps = await db.getAll(
+      'SELECT $personIdColumn, $clusterIDColumn FROM $notPersonFeedback',
+    );
+    final Map<String, Set<String>> result = {};
+    for (final map in rejectMaps) {
+      final personID = map[personIdColumn] as String;
+      final clusterID = map[clusterIDColumn] as String;
+      result.putIfAbsent(personID, () => {}).add(clusterID);
+    }
+    return result;
   }
 
   @override
@@ -267,9 +282,9 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
     final Map<String, List<Uint8List>> result = {};
 
     final selectQuery = '''
-  SELECT fc.$clusterIDColumn, fe.$embeddingColumn 
-  FROM $faceClustersTable fc 
-  INNER JOIN $facesTable fe ON fc.$faceIDColumn = fe.$faceIDColumn 
+  SELECT fc.$clusterIDColumn, fe.$embeddingColumn
+  FROM $faceClustersTable fc
+  INNER JOIN $facesTable fe ON fc.$faceIDColumn = fe.$faceIDColumn
   WHERE fc.$clusterIDColumn IN (${List.filled(clusterIDs.length, '?').join(',')})
   ${limit != null ? 'LIMIT ?' : ''}
 ''';
@@ -323,10 +338,10 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
 
       final List<Map<String, dynamic>> faceMaps = await db.getAll(
         '''
-        SELECT * FROM $facesTable 
+        SELECT * FROM $facesTable
         WHERE $faceIDColumn IN (
-        SELECT $faceIDColumn 
-        FROM $faceClustersTable 
+        SELECT $faceIDColumn
+        FROM $faceClustersTable
         WHERE $clusterIDColumn IN (${List.filled(clusterIDs.length, '?').join(',')})
         )
         AND $fileIDColumn IN (${List.filled(fileId.length, '?').join(',')})
@@ -420,8 +435,8 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
 
     final List<Map<String, dynamic>> maps = await db.getAll(
       '''
-  SELECT $clusterIDColumn, $faceIDColumn 
-  FROM $faceClustersTable 
+  SELECT $clusterIDColumn, $faceIDColumn
+  FROM $faceClustersTable
   WHERE $clusterIDColumn IN (${List.filled(clusterIDs.length, '?').join(',')})
   ''',
       [...clusterIDs],
@@ -512,6 +527,21 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
     return result;
   }
 
+  @override
+  Future<Map<String, Set<String>>> getPersonToClusterIDs() async {
+    final db = await instance.asyncDB;
+    final List<Map<String, dynamic>> maps = await db.getAll(
+      'SELECT $personIdColumn, $clusterIDColumn FROM $clusterPersonTable',
+    );
+    final Map<String, Set<String>> result = {};
+    for (final map in maps) {
+      final personID = map[personIdColumn] as String;
+      final clusterID = map[clusterIDColumn] as String;
+      result.putIfAbsent(personID, () => {}).add(clusterID);
+    }
+    return result;
+  }
+
   Future<Map<String, String>> getFaceIdToPersonIdForFaces(
     Iterable<String> faceIDs,
   ) async {
@@ -581,9 +611,9 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
   Future<Iterable<double>> getBlurValuesForCluster(String clusterID) async {
     final db = await instance.asyncDB;
     const String query = '''
-        SELECT $facesTable.$faceBlur 
-        FROM $facesTable 
-        JOIN $faceClustersTable ON $facesTable.$faceIDColumn = $faceClustersTable.$faceIDColumn 
+        SELECT $facesTable.$faceBlur
+        FROM $facesTable
+        JOIN $faceClustersTable ON $facesTable.$faceIDColumn = $faceClustersTable.$faceIDColumn
         WHERE $faceClustersTable.$clusterIDColumn = ?
       ''';
     // const String query2 = '''
@@ -757,11 +787,11 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
     while (true) {
       // Query a batch of rows
       final String query = '''
-        SELECT $faceIDColumn, $embeddingColumn 
-        FROM $facesTable 
-        WHERE $faceIDColumn IN (${faceIDs.map((id) => "'$id'").join(",")}) 
-        ORDER BY $faceIDColumn DESC 
-        LIMIT $batchSize OFFSET $offset         
+        SELECT $faceIDColumn, $embeddingColumn
+        FROM $facesTable
+        WHERE $faceIDColumn IN (${faceIDs.map((id) => "'$id'").join(",")})
+        ORDER BY $faceIDColumn DESC
+        LIMIT $batchSize OFFSET $offset
       ''';
       final List<Map<String, dynamic>> maps = await db.getAll(query);
       // Break the loop if no more rows
@@ -985,8 +1015,8 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
     return db.then((db) async {
       final List<Map<String, dynamic>> maps = await db.getAll(
         '''
-  SELECT $clusterIDColumn, $faceIDColumn 
-  FROM $faceClustersTable 
+  SELECT $clusterIDColumn, $faceIDColumn
+  FROM $faceClustersTable
   WHERE $clusterIDColumn IN (${List.filled(clusterIDs.length, '?').join(',')})
   ''',
         [...clusterIDs],
@@ -1009,7 +1039,7 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
     final db = await instance.asyncDB;
 
     const String sql = '''
-      INSERT INTO $clusterSummaryTable ($clusterIDColumn, $avgColumn, $countColumn) VALUES (?, ?, ?) ON CONFLICT($clusterIDColumn) DO UPDATE SET $avgColumn = excluded.$avgColumn, $countColumn = excluded.$countColumn 
+      INSERT INTO $clusterSummaryTable ($clusterIDColumn, $avgColumn, $countColumn) VALUES (?, ?, ?) ON CONFLICT($clusterIDColumn) DO UPDATE SET $avgColumn = excluded.$avgColumn, $countColumn = excluded.$countColumn
     ''';
     final List<List<Object?>> parameterSets = [];
     int batchCounter = 0;
@@ -1158,7 +1188,7 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
     final result = await db.getAll(
       '''
         SELECT DISTINCT $facesTable.$fileIDColumn
-        FROM $faceClustersTable 
+        FROM $faceClustersTable
         JOIN $facesTable ON $faceClustersTable.$faceIDColumn = $facesTable.$faceIDColumn
         WHERE $faceClustersTable.$clusterIDColumn = ?
     ''',
@@ -1189,8 +1219,8 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
     final notInParam = exceptClusters?.map((e) => "'$e'").join(',') ?? '';
     final db = await instance.asyncDB;
     final result = await db.getAll('''
-        SELECT DISTINCT $facesTable.$fileIDColumn 
-        FROM $facesTable 
+        SELECT DISTINCT $facesTable.$fileIDColumn
+        FROM $facesTable
         JOIN $faceClustersTable on $faceClustersTable.$faceIDColumn = $facesTable.$faceIDColumn
         WHERE $faceClustersTable.$clusterIDColumn NOT IN ($notInParam);
     ''');

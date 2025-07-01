@@ -137,6 +137,8 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
   }
 
   Widget _buildFaceGrid(List<_FaceInfo> faceInfoList) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final thumbnailWidth = screenWidth * 0.16;
     return Padding(
       padding: const EdgeInsets.only(right: 12.0),
       child: Wrap(
@@ -150,6 +152,7 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
                 faceCrop: faceInfo.faceCrop,
                 person: faceInfo.person,
                 clusterID: faceInfo.clusterID,
+                width: thumbnailWidth,
                 isEditMode: _isEditMode,
                 reloadAllFaces: () => loadFaces(isRefresh: true),
               ),

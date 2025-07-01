@@ -33,9 +33,8 @@ const maxKernelSize = gaussianKernelSize;
 const maxKernelRadius = maxKernelSize ~/ 2;
 
 // Face thumbnail compression constants
-const int _maxFaceThumbnailSizeBytes = 1 * 1024 * 1024; // 1MB
-const int _faceThumbnailCompressionQuality = 85;
-const int _faceThumbnailMinDimension = 720;
+const int _faceThumbnailCompressionQuality = 90;
+const int _faceThumbnailMinDimension = 512;
 
 class DecodedImage {
   final Image image;
@@ -544,34 +543,28 @@ Future<Uint8List> _cropAndEncodeCanvas(
   return await _encodeImageToPng(croppedImage);
 }
 
-bool shouldCompressFaceThumbnail(Uint8List pngBytes) {
-  return pngBytes.length > _maxFaceThumbnailSizeBytes;
-}
-
-Future<Uint8List> compressFaceThumbnail(Map args) async {
-  final pngBytes = args['pngBytes'] as Uint8List;
+Future<List<Uint8List>> compressFaceThumbnails(Map args) async {
+  final listPngBytes = args['listPngBytes'] as List<Uint8List>;
+  final List<Future<Uint8List>> compressedBytesList = [];
   try {
-    final compressedBytes = await FlutterImageCompress.compressWithList(
-      pngBytes,
-      quality: _faceThumbnailCompressionQuality,
-      format: CompressFormat.jpeg,
-      minWidth: _faceThumbnailMinDimension,
-      minHeight: _faceThumbnailMinDimension,
-    );
-
-    _logger.info(
-      'Face thumbnail compressed from ${pngBytes.length} bytes to ${compressedBytes.length} bytes '
-      '(${((1 - compressedBytes.length / pngBytes.length) * 100).toStringAsFixed(1)}% reduction)',
-    );
-
-    return compressedBytes;
+    for (final pngBytes in listPngBytes) {
+      final compressedBytes = FlutterImageCompress.compressWithList(
+        pngBytes,
+        quality: _faceThumbnailCompressionQuality,
+        format: CompressFormat.jpeg,
+        minWidth: _faceThumbnailMinDimension,
+        minHeight: _faceThumbnailMinDimension,
+      );
+      compressedBytesList.add(compressedBytes);
+    }
+    return await Future.wait(compressedBytesList);
   } catch (e, s) {
     _logger.warning(
-      'Failed to compress face thumbnail, using original. Size: ${pngBytes.length} bytes',
+      'Failed to compress face thumbnail, using original. Size: ${listPngBytes.map((e) => e.length).toList()} bytes',
       e,
       s,
     );
-    return pngBytes;
+    rethrow;
   }
 }
 
