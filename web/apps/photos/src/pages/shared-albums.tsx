@@ -91,6 +91,9 @@ import { downloadSelectedFiles, getSelectedFiles } from "utils/file";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
 
 export default function PublicCollectionGallery() {
+    const { showMiniDialog } = useBaseContext();
+    const { showLoadingBar, hideLoadingBar } = usePhotosAppContext();
+
     const credentials = useRef<PublicAlbumsCredentials | undefined>(undefined);
     const collectionKey = useRef<string>(null);
     const url = useRef<string>(null);
@@ -98,12 +101,10 @@ export default function PublicCollectionGallery() {
     const [publicFiles, setPublicFiles] = useState<EnteFile[]>(null);
     const [publicCollection, setPublicCollection] = useState<Collection>(null);
     const [errorMessage, setErrorMessage] = useState<string>(null);
-    const { showMiniDialog } = useBaseContext();
-    const { showLoadingBar, hideLoadingBar } = usePhotosAppContext();
     const [loading, setLoading] = useState(true);
+    const [isPasswordProtected, setIsPasswordProtected] = useState(false);
+
     const router = useRouter();
-    const [isPasswordProtected, setIsPasswordProtected] =
-        useState<boolean>(false);
 
     const [photoListHeader, setPhotoListHeader] =
         useState<TimeStampListItem>(null);
@@ -219,24 +220,22 @@ export default function PublicCollectionGallery() {
                 }
                 collectionKey.current = ck;
                 url.current = window.location.href;
-                const localCollection = await savedPublicCollectionByKey(
+                const collection = await savedPublicCollectionByKey(
                     collectionKey.current,
                 );
                 const accessToken = t;
                 let accessTokenJWT: string | undefined;
-                if (localCollection) {
+                if (collection) {
                     referralCode.current =
                         await savedLastPublicCollectionReferralCode();
-                    const sortAsc: boolean =
-                        localCollection?.pubMagicMetadata?.data.asc ?? false;
-                    setPublicCollection(localCollection);
-                    const isPasswordProtected =
-                        localCollection?.publicURLs?.[0]?.passwordEnabled;
-                    setIsPasswordProtected(isPasswordProtected);
-                    const localFiles =
-                        await savedPublicCollectionFiles(accessToken);
-                    const localPublicFiles = sortFiles(localFiles, sortAsc);
-                    setPublicFiles(localPublicFiles);
+                    setPublicCollection(collection);
+                    const sortAsc =
+                        collection.pubMagicMetadata?.data.asc ?? false;
+                    setIsPasswordProtected(
+                        !!collection.publicURLs[0]?.passwordEnabled,
+                    );
+                    const files = await savedPublicCollectionFiles(accessToken);
+                    setPublicFiles(sortFiles(files, sortAsc));
                     accessTokenJWT =
                         await savedPublicCollectionAccessTokenJWT(accessToken);
                 }

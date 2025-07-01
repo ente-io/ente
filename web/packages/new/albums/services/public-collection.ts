@@ -5,6 +5,7 @@ import {
     type PublicAlbumsCredentials,
 } from "ente-base/http";
 import { apiURL } from "ente-base/origins";
+import { sortFiles } from "ente-gallery/utils/file";
 import {
     decryptRemoteCollection,
     RemoteCollection,
@@ -157,11 +158,17 @@ const getPublicCollectionInfo = async (accessToken: string) => {
  *
  * @param collection The public collection corresponding to the credentials.
  *
+ * This function assumes that collection has already been pulled from remote and
+ * is at its latest, remote, value. This assumption is used to skip fetching
+ * files if the collection has not changed on remote (any updates to the files
+ * will also increase the updation time of the collection that contains them).
+ *
  * @param onSetFiles A callback that is invoked each time a new batch of updates
  * to the collection's files is fetched and processed. THe callback is called
  * the consolidated list of files after applying the updates received so far.
  *
- * This callback can get called multiple times during the pull.
+ * This callback can get called multiple times during the pull. The callback can
+ * also never get called if no changes were pulled.
  */
 export const pullPublicCollectionFiles = async (
     credentials: PublicAlbumsCredentials,
@@ -169,11 +176,13 @@ export const pullPublicCollectionFiles = async (
     onSetFiles: (files: EnteFile[]) => void,
 ) => {
     const { accessToken } = credentials;
+    const sortAsc = collection.pubMagicMetadata?.data.asc ?? false;
+
+    let sinceTime = (await savedPublicCollectionLastSyncTime(accessToken)) ?? 0;
+    if (sinceTime == collection.updationTime) return;
 
     const files = await savedPublicCollectionFiles(accessToken);
     const filesByID = new Map(files.map((f) => [f.id, f]));
-
-    let sinceTime = (await savedPublicCollectionLastSyncTime(accessToken)) ?? 0;
 
     while (true) {
         const { diff, hasMore } = await getPublicCollectionDiff(
@@ -193,7 +202,7 @@ export const pullPublicCollectionFiles = async (
             }
         }
 
-        const files = [...filesByID.values()];
+        const files = sortFiles([...filesByID.values()], sortAsc);
         await savePublicCollectionFiles(accessToken, files);
         await savePublicCollectionLastSyncTime(accessToken, sinceTime);
         onSetFiles(files);
