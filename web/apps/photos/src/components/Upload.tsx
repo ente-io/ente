@@ -194,6 +194,7 @@ export const Upload: React.FC<UploadProps> = ({
     const [percentComplete, setPercentComplete] = useState(0);
     const [hasLivePhotos, setHasLivePhotos] = useState(false);
     const [prefilledNewAlbumName, setPrefilledNewAlbumName] = useState("");
+    const [uploaderName, setUploaderName] = useState("");
 
     const [openCollectionMappingChoice, setOpenCollectionMappingChoice] =
         useState(false);
@@ -280,7 +281,6 @@ export const Upload: React.FC<UploadProps> = ({
 
     const currentUploadPromise = useRef<Promise<void> | undefined>(undefined);
     const uploadRunning = useRef(false);
-    const uploaderNameRef = useRef("");
     const isDragAndDrop = useRef(false);
 
     /**
@@ -522,10 +522,11 @@ export const Upload: React.FC<UploadProps> = ({
 
         (async () => {
             if (publicCollectionGalleryContext.credentials) {
-                const uploaderName = await savedPublicCollectionUploaderName(
-                    publicCollectionGalleryContext.credentials.accessToken,
+                setUploaderName(
+                    await savedPublicCollectionUploaderName(
+                        publicCollectionGalleryContext.credentials.accessToken,
+                    ),
                 );
-                uploaderNameRef.current = uploaderName ?? "";
                 showUploaderNameInput();
                 return;
             }
@@ -888,7 +889,7 @@ export const Upload: React.FC<UploadProps> = ({
             <UploaderNameInput
                 open={uploaderNameInputVisibilityProps.open}
                 onClose={handleUploaderNameInputClose}
-                uploaderName={uploaderNameRef.current}
+                uploaderName={uploaderName}
                 uploadFileCount={uploadItemsAndPaths.current?.length ?? 0}
                 onSubmit={handlePublicUpload}
             />
