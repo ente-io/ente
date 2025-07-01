@@ -113,13 +113,17 @@ class _VideoWidgetState extends State<VideoWidget> {
                     onLongPress: () {
                       if (widget.isFromMemories) {
                         widget.playbackCallback?.call(false);
-                        widget.controller.player.stop();
+                        if (widget.controller.player.state.playing) {
+                          widget.controller.player.pause();
+                        }
                       }
                     },
                     onLongPressUp: () {
                       if (widget.isFromMemories) {
                         widget.playbackCallback?.call(true);
-                        widget.controller.player.play();
+                        if (!widget.controller.player.state.playing) {
+                          widget.controller.player.play();
+                        }
                       }
                     },
                     child: Container(
