@@ -1,6 +1,7 @@
 import "dart:convert";
 import "dart:developer";
 
+import "package:computer/computer.dart";
 import "package:flutter/foundation.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
@@ -30,6 +31,9 @@ class PersonService {
   static const kPersonIDKey = "person_id";
   static const kNameKey = "name";
 
+  Future<List<PersonEntity>>? _cachedPersonsFuture;
+  int _lastPersonCacheRefresh = 0;
+
   static PersonService get instance {
     if (_instance == null) {
       throw Exception("PersonService not initialized");
@@ -55,21 +59,14 @@ class PersonService {
 
   void clearCache() {
     _emailToPartialPersonDataMapCache.clear();
+    _cachedPersonsFuture = null;
+    _lastPersonCacheRefresh = 0;
   }
 
   Future<void> refreshPersonCache() async {
-    _emailToPartialPersonDataMapCache.clear();
-    await getPersons().then((value) {
-      for (var person in value) {
-        if (person.data.email != null && person.data.email!.isNotEmpty) {
-          _instance!._emailToPartialPersonDataMapCache[person.data.email!] = {
-            kPersonIDKey: person.remoteID,
-            kNameKey: person.data.name,
-          };
-        }
-      }
-      logger.info("Email to partial person data cache reset");
-    });
+    _lastPersonCacheRefresh = 0;
+    // wait to ensure cache is refreshed
+    final _ = await getPersons();
   }
 
   Future<List<PersonEntity>> getCertainPersons(List<String> ids) async {
@@ -90,9 +87,40 @@ class PersonService {
   }
 
   Future<List<PersonEntity>> getPersons() async {
-    // perf todo: move this json decode in computer, and use cached future
-    // to read values from DB and also poulate the emailPartialPersonDataMapCache
+    if (_lastPersonCacheRefresh != lastRemoteSyncTime()) {
+      _lastPersonCacheRefresh = lastRemoteSyncTime();
+      _cachedPersonsFuture = null; // Invalidate cache
+    }
+    _cachedPersonsFuture ??= _fetchAndCachePersons();
+    return _cachedPersonsFuture!;
+  }
+
+  Future<List<PersonEntity>> _fetchAndCachePersons() async {
+    logger.finest("reading all persons from local db");
     final entities = await entityService.getEntities(EntityType.cgroup);
+    // Only use compute for large datasets to avoid overhead
+    final persons = await Computer.shared().compute(
+      _decodePersonEntities,
+      param: {"entity": entities},
+    );
+    // Populate email cache if needed
+    _emailToPartialPersonDataMapCache.clear();
+    for (var person in persons) {
+      if (person.data.email != null && person.data.email!.isNotEmpty) {
+        _emailToPartialPersonDataMapCache[person.data.email!] = {
+          kPersonIDKey: person.remoteID,
+          kNameKey: person.data.name,
+        };
+      }
+    }
+
+    return persons;
+  }
+
+  static List<PersonEntity> _decodePersonEntities(
+    Map<String, dynamic> param,
+  ) {
+    final entities = param["entity"] as List<LocalEntityData>;
     return entities
         .map(
           (e) => PersonEntity(
