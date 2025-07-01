@@ -48,6 +48,10 @@ import {
 import { CollectionSubType, type Collection } from "ente-media/collection";
 import type { EnteFile } from "ente-media/file";
 import { UploaderNameInput } from "ente-new/albums/components/UploaderNameInput";
+import {
+    savedPublicCollectionUploaderName,
+    savePublicCollectionUploaderName,
+} from "ente-new/albums/services/public-albums-fdb";
 import { CollectionMappingChoice } from "ente-new/photos/components/CollectionMappingChoice";
 import type { CollectionSelectorAttributes } from "ente-new/photos/components/CollectionSelector";
 import type { RemotePullOpts } from "ente-new/photos/components/gallery";
@@ -68,11 +72,6 @@ import React, {
     useRef,
     useState,
 } from "react";
-import {
-    getPublicCollectionUID,
-    getPublicCollectionUploaderName,
-    savePublicCollectionUploaderName,
-} from "services/publicCollectionService";
 import type {
     InProgressUpload,
     SegregatedFinishedUploads,
@@ -523,10 +522,8 @@ export const Upload: React.FC<UploadProps> = ({
 
         (async () => {
             if (publicCollectionGalleryContext.credentials) {
-                const uploaderName = await getPublicCollectionUploaderName(
-                    getPublicCollectionUID(
-                        publicCollectionGalleryContext.credentials.accessToken,
-                    ),
+                const uploaderName = await savedPublicCollectionUploaderName(
+                    publicCollectionGalleryContext.credentials.accessToken,
                 );
                 uploaderNameRef.current = uploaderName ?? "";
                 showUploaderNameInput();
@@ -825,9 +822,7 @@ export const Upload: React.FC<UploadProps> = ({
 
     const handlePublicUpload = async (uploaderName: string) => {
         savePublicCollectionUploaderName(
-            getPublicCollectionUID(
-                publicCollectionGalleryContext.credentials.accessToken,
-            ),
+            publicCollectionGalleryContext.credentials.accessToken,
             uploaderName,
         );
 

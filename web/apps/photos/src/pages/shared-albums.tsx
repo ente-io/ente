@@ -51,7 +51,7 @@ import { sortFiles } from "ente-gallery/utils/file";
 import type { Collection } from "ente-media/collection";
 import { type EnteFile } from "ente-media/file";
 import {
-    savedLastPublicAlbumReferralCode,
+    savedLastPublicCollectionReferralCode,
     savedPublicCollectionFiles,
 } from "ente-new/albums/services/public-albums-fdb";
 import { verifyPublicAlbumPassword } from "ente-new/albums/services/public-collection";
@@ -223,7 +223,7 @@ export default function PublicCollectionGallery() {
                 let accessTokenJWT: string | undefined;
                 if (localCollection) {
                     referralCode.current =
-                        await savedLastPublicAlbumReferralCode();
+                        await savedLastPublicCollectionReferralCode();
                     const sortAsc: boolean =
                         localCollection?.pubMagicMetadata?.data.asc ?? false;
                     setPublicCollection(localCollection);

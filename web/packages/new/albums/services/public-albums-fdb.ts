@@ -48,20 +48,24 @@ const LocalReferralCode = z.string().nullish().transform(nullToUndefined);
  * 1. The public albums app persists only the referral code for the latest
  *    public album that was fetched.
  *
- * 2. This saved value can be read by {@link savedLastPublicAlbumReferralCode}.
+ * 2. This saved value can be read by
+ *    {@link savedLastPublicCollectionReferralCode}.
  *
  * 3. It gets updated as part of {@link publicAlbumsRemotePull}, which writes
- *    out a new value using {@link saveLastPublicAlbumReferralCode}.
+ *    out a new value using {@link saveLastPublicCollectionReferralCode}.
  */
-export const savedLastPublicAlbumReferralCode = async () =>
+export const savedLastPublicCollectionReferralCode = async () =>
     LocalReferralCode.parse(await localForage.getItem("public-referral-code"));
 
 /**
  * Update the referral code present in our local database.
  *
- * This is the setter corresponding to {@link savedLastPublicAlbumReferralCode}.
+ * This is the setter corresponding to
+ * {@link savedLastPublicCollectionReferralCode}.
  */
-export const saveLastPublicAlbumReferralCode = async (referralCode: string) => {
+export const saveLastPublicCollectionReferralCode = async (
+    referralCode: string,
+) => {
     await localForage.setItem("public-referral-code", referralCode);
 };
 
@@ -119,4 +123,47 @@ export const savePublicCollectionFiles = async (
         { collectionUID: accessToken, files },
         ...(entries ?? []).filter((e) => e.collectionUID != accessToken),
     ]);
+};
+
+const LocalUploaderName = z.string().nullish().transform(nullToUndefined);
+
+/**
+ * Return the previously saved uploader name, if any, present in our local
+ * database corresponding to a public collection.
+ *
+ * Use {@link savePublicCollectionUploaderName} to update the persisted value.
+ *
+ * [Note: Public albums uploader name]
+ *
+ * Whenever there is an upload to a public album, we ask the person doing the
+ * upload for their name. This uploader name is attached as part of the public
+ * magic metadata of the file so that other people know who uploaded the file.
+ *
+ * The public albums app also saves this value, keyed by an identifier for the
+ * public collection, in the local database so that it can prefill it the next
+ * time there is an upload from the same client.
+ *
+ * @param accessToken The access token of the public album whose persisted
+ * uploader name we we want.
+ */
+export const savedPublicCollectionUploaderName = async (accessToken: string) =>
+    LocalUploaderName.parse(
+        await localForage.getItem(`public-${accessToken}-uploaderName`),
+    );
+
+/**
+ * Update the uploader name present in our local database corresponding to a
+ * public collection.
+ *
+ * This is the setter corresponding to
+ * {@link savedPublicCollectionUploaderName}.
+ */
+export const savePublicCollectionUploaderName = async (
+    accessToken: string,
+    uploaderName: string,
+) => {
+    await localForage.setItem(
+        `public-${accessToken}-uploaderName`,
+        uploaderName,
+    );
 };

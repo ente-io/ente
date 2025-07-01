@@ -11,7 +11,7 @@ import { decryptRemoteFile } from "ente-media/file";
 import {
     savedPublicCollectionFiles,
     savedPublicCollections,
-    saveLastPublicAlbumReferralCode,
+    saveLastPublicCollectionReferralCode,
     savePublicCollectionFiles,
 } from "ente-new/albums/services/public-albums-fdb";
 import { CustomError, parseSharingErrorCodes } from "ente-shared/error";
@@ -30,23 +30,6 @@ const getPublicCollectionLastSyncTimeKey = (collectionUID: string) =>
 
 const getPublicCollectionPasswordKey = (collectionUID: string) =>
     `public-${collectionUID}-passkey`;
-
-const getPublicCollectionUploaderNameKey = (collectionUID: string) =>
-    `public-${collectionUID}-uploaderName`;
-
-export const getPublicCollectionUploaderName = async (collectionUID: string) =>
-    await localForage.getItem<string>(
-        getPublicCollectionUploaderNameKey(collectionUID),
-    );
-
-export const savePublicCollectionUploaderName = async (
-    collectionUID: string,
-    uploaderName: string,
-) =>
-    await localForage.setItem(
-        getPublicCollectionUploaderNameKey(collectionUID),
-        uploaderName,
-    );
 
 export interface LocalSavedPublicCollectionFiles {
     collectionUID: string;
@@ -311,7 +294,7 @@ export const getPublicCollection = async (
             pubMagicMetadata: collectionPublicMagicMetadata,
         };
         await savePublicCollection(collection);
-        await saveLastPublicAlbumReferralCode(referralCode);
+        await saveLastPublicCollectionReferralCode(referralCode);
         return [collection, referralCode];
     } catch (e) {
         log.error("failed to get public collection", e);
