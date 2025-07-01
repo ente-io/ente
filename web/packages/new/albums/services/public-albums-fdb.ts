@@ -50,6 +50,9 @@ type LocalSavedPublicCollectionFilesEntry = z.infer<
     typeof LocalSavedPublicCollectionFilesEntry
 >;
 
+// A purely synactic and local alias to avoid the code from looking scary.
+type ES = LocalSavedPublicCollectionFilesEntry[];
+
 /**
  * Return all files for a public collection present in our local database.
  *
@@ -60,10 +63,41 @@ type LocalSavedPublicCollectionFilesEntry = z.infer<
 export const savedPublicCollectionFiles = async (
     accessToken: string,
 ): Promise<EnteFile[]> => {
-    type ES = LocalSavedPublicCollectionFilesEntry[];
     // See: [Note: Avoiding Zod parsing for large DB arrays] for why we use an
     // (implied) cast here instead of parsing using the Zod schema.
     const entries = await localForage.getItem<ES>("public-collection-files");
     const entry = (entries ?? []).find((e) => e.collectionUID == accessToken);
     return transformFilesIfNeeded(entry ? entry.files : []);
+};
+
+/**
+ * Replace the list of files for a public collection in our local database.
+ *
+ * This is the setter corresponding to {@link savedPublicCollectionFiles}.
+ *
+ * @param accessToken The access token of the public album whose files we want
+ * to replace.
+ *
+ * @param files The files to save.
+ */
+export const savePublicCollectionFiles = async (
+    accessToken: string,
+    files: EnteFile[],
+): Promise<void> => {
+    // See: [Note: Avoiding Zod parsing for large DB arrays].
+    const entries = await localForage.getItem<ES>("public-collection-files");
+    const updatedEntries = (entries ?? []).filter(
+        (e) => e.collectionUID != accessToken,
+    );
+    updatedEntries.push({
+        collectionUID: accessToken,
+        // The cast is needed here, from what I can understand, because nested
+        // objects in EnteFile don't have an index signature so they don't allow
+        // for arbitrary property access, while LocalEnteFiles expects that.
+        //
+        // But I'm not sure. This upstream question seems related:
+        // https://github.com/microsoft/TypeScript/issues/59199
+        files: files as z.infer<typeof LocalEnteFiles>,
+    });
+    await localForage.setItem("public-collection-files", updatedEntries);
 };
