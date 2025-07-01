@@ -58,7 +58,10 @@ import {
     savedPublicCollectionFiles,
     savePublicCollectionAccessTokenJWT,
 } from "ente-new/albums/services/public-albums-fdb";
-import { verifyPublicAlbumPassword } from "ente-new/albums/services/public-collection";
+import {
+    fetchAndSavePublicCollection,
+    verifyPublicAlbumPassword,
+} from "ente-new/albums/services/public-collection";
 import {
     GalleryItemsHeaderAdapter,
     GalleryItemsSummary,
@@ -72,7 +75,6 @@ import { useRouter } from "next/router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { type FileWithPath } from "react-dropzone";
 import {
-    getPublicCollection,
     getPublicCollectionUID,
     removePublicCollectionWithFiles,
     removePublicFiles,
@@ -299,10 +301,11 @@ export default function PublicCollectionGallery() {
         try {
             showLoadingBar();
             setLoading(true);
-            const [collection, userReferralCode] = await getPublicCollection(
-                credentials.current.accessToken,
-                collectionKey.current,
-            );
+            const { collection, referralCode: userReferralCode } =
+                await fetchAndSavePublicCollection(
+                    credentials.current.accessToken,
+                    collectionKey.current,
+                );
             referralCode.current = userReferralCode;
 
             setPublicCollection(collection);

@@ -1,11 +1,7 @@
-import { sharedCryptoWorker } from "ente-base/crypto";
 import log from "ente-base/log";
 import { apiURL } from "ente-base/origins";
 import { sortFiles } from "ente-gallery/utils/file";
-import type {
-    Collection,
-    CollectionPublicMagicMetadataData,
-} from "ente-media/collection";
+import type { Collection } from "ente-media/collection";
 import type { EnteFile, RemoteEnteFile } from "ente-media/file";
 import { decryptRemoteFile } from "ente-media/file";
 import {
@@ -15,8 +11,6 @@ import {
     removePublicCollectionLastSyncTime,
     savedPublicCollectionFiles,
     savedPublicCollectionLastSyncTime,
-    saveLastPublicCollectionReferralCode,
-    savePublicCollection,
     savePublicCollectionFiles,
     savePublicCollectionLastSyncTime,
 } from "ente-new/albums/services/public-albums-fdb";
@@ -163,73 +157,6 @@ const getPublicFiles = async (
         return decryptedFiles;
     } catch (e) {
         log.error("Get public  files failed", e);
-        throw e;
-    }
-};
-
-export interface MagicMetadataCore<T> {
-    version: number;
-    count: number;
-    header: string;
-    data: T;
-}
-
-export const getPublicCollection = async (
-    token: string,
-    collectionKey: string,
-): Promise<[Collection, string]> => {
-    try {
-        if (!token) {
-            return;
-        }
-        const resp = await HTTPService.get(
-            await apiURL("/public-collection/info"),
-            null,
-            { "X-Auth-Access-Token": token },
-        );
-        const fetchedCollection = resp.data.collection;
-        const referralCode = resp.data.referralCode ?? "";
-
-        const cryptoWorker = await sharedCryptoWorker();
-
-        const collectionName = (fetchedCollection.name =
-            fetchedCollection.name ||
-            new TextDecoder().decode(
-                await cryptoWorker.decryptBoxBytes(
-                    {
-                        encryptedData: fetchedCollection.encryptedName,
-                        nonce: fetchedCollection.nameDecryptionNonce,
-                    },
-                    collectionKey,
-                ),
-            ));
-
-        let collectionPublicMagicMetadata: MagicMetadataCore<CollectionPublicMagicMetadataData>;
-        if (fetchedCollection.pubMagicMetadata?.data) {
-            collectionPublicMagicMetadata = {
-                ...fetchedCollection.pubMagicMetadata,
-                data: await cryptoWorker.decryptMetadataJSON(
-                    {
-                        encryptedData: fetchedCollection.pubMagicMetadata.data,
-                        decryptionHeader:
-                            fetchedCollection.pubMagicMetadata.header,
-                    },
-                    collectionKey,
-                ),
-            };
-        }
-
-        const collection = {
-            ...fetchedCollection,
-            name: collectionName,
-            key: collectionKey,
-            pubMagicMetadata: collectionPublicMagicMetadata,
-        };
-        await savePublicCollection(collection);
-        await saveLastPublicCollectionReferralCode(referralCode);
-        return [collection, referralCode];
-    } catch (e) {
-        log.error("failed to get public collection", e);
         throw e;
     }
 };

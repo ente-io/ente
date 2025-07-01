@@ -63,21 +63,6 @@ export const verifyPublicAlbumPassword = async (
     return z.object({ jwtToken: z.string() }).parse(await res.json()).jwtToken;
 };
 
-// TODO(RE): Use me
-export const PublicCollectionInfo = z.object({
-    collection: RemoteCollection,
-    /**
-     * A referral code of the owner of the public album.
-     *
-     * [Note: Public albums referral code]
-     *
-     * The information of a public collection contains the referral code of the
-     * person who shared the album. This allows both the viewer and the sharer
-     * to gain storage bonus.
-     */
-    referralCode: z.string(),
-});
-
 /**
  * Fetch a public collection from remote using its access key, decrypt it using
  * the provided key, save the collection in our local database for subsequent
@@ -101,18 +86,34 @@ export const PublicCollectionInfo = z.object({
 export const fetchAndSavePublicCollection = async (
     accessToken: string,
     collectionKey: string,
-): Promise<Collection> => {
-    const collectionInfo = await getPublicCollectionInfo(accessToken);
+): Promise<{ collection: Collection; referralCode: string }> => {
+    const { collection: remoteCollection, referralCode } =
+        await getPublicCollectionInfo(accessToken);
+
     const collection = await decryptRemoteCollection(
-        collectionInfo.collection,
+        remoteCollection,
         collectionKey,
     );
 
     await savePublicCollection(collection);
-    await saveLastPublicCollectionReferralCode(collectionInfo.referralCode);
+    await saveLastPublicCollectionReferralCode(referralCode);
 
-    return collection;
+    return { collection, referralCode };
 };
+
+const PublicCollectionInfo = z.object({
+    collection: RemoteCollection,
+    /**
+     * A referral code of the owner of the public album.
+     *
+     * [Note: Public albums referral code]
+     *
+     * The information of a public collection contains the referral code of the
+     * person who shared the album. This allows both the viewer and the sharer
+     * to gain storage bonus.
+     */
+    referralCode: z.string(),
+});
 
 /**
  * Fetch information from remote about a public collection using its access key.
