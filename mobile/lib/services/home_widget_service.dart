@@ -62,9 +62,9 @@ class HomeWidgetService {
   }
 
   void _initializeWidgetServices(SharedPreferences prefs) {
-    MemoryHomeWidgetService.instance.init(prefs);
-    PeopleHomeWidgetService.instance.init(prefs);
     AlbumHomeWidgetService.instance.init(prefs);
+    PeopleHomeWidgetService.instance.init(prefs);
+    MemoryHomeWidgetService.instance.init(prefs);
   }
 
   void setAppGroupID(String id) {
@@ -72,9 +72,9 @@ class HomeWidgetService {
   }
 
   Future<void> initHomeWidget() async {
-    await MemoryHomeWidgetService.instance.initMemoryHomeWidget();
-    await PeopleHomeWidgetService.instance.initPeopleHomeWidget();
     await AlbumHomeWidgetService.instance.initAlbumHomeWidget();
+    await PeopleHomeWidgetService.instance.initPeopleHomeWidget();
+    await MemoryHomeWidgetService.instance.initMemoryHomeWidget();
   }
 
   Future<bool?> updateWidget({
@@ -222,9 +222,9 @@ class HomeWidgetService {
     }
 
     await Future.wait([
-      MemoryHomeWidgetService.instance.clearWidget(),
-      PeopleHomeWidgetService.instance.clearWidget(),
       AlbumHomeWidgetService.instance.clearWidget(),
+      PeopleHomeWidgetService.instance.clearWidget(),
+      MemoryHomeWidgetService.instance.clearWidget(),
     ]);
 
     try {
