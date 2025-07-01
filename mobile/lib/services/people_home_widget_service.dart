@@ -131,7 +131,7 @@ class PeopleHomeWidgetService {
 
   Future<void> checkPeopleChanged() async {
     final havePeopleChanged = await peopleChangedLock.synchronized(() async {
-      final peopleIds = getSelectedPeople() ?? [];
+      final peopleIds = await _getEffectiveSelections();
       final currentHash = await _calculateHash(peopleIds);
       final lastHash = getPeopleLastHash();
 
@@ -204,6 +204,22 @@ class PeopleHomeWidgetService {
     await _refreshPeopleWidget();
   }
 
+  Future<List<String>> _getEffectiveSelections() async {
+    var selection = getSelectedPeople();
+
+    if ((selection?.isEmpty ?? true) &&
+        getPeopleStatus() == WidgetStatus.syncedAll) {
+      selection = await SearchService.instance.getTopTwoFaces();
+      if (selection.isEmpty) {
+        await clearWidget();
+        return [];
+      }
+      await setSelectedPeople(selection);
+    }
+
+    return selection ?? [];
+  }
+
   Future<String> _calculateHash(List<String> peopleIds) async {
     return await entityService.getHashForIds(peopleIds);
   }
@@ -226,7 +242,7 @@ class PeopleHomeWidgetService {
     }
 
     // Check if selected people or hash exist
-    final peopleIds = getSelectedPeople() ?? [];
+    final peopleIds = await _getEffectiveSelections();
     final hash = await _calculateHash(peopleIds);
 
     final noSelectionOrHashEmpty = peopleIds.isEmpty || hash.isEmpty;
@@ -304,7 +320,7 @@ class PeopleHomeWidgetService {
   }
 
   Future<void> _updatePeopleWidgetCache() async {
-    final peopleIds = getSelectedPeople() ?? [];
+    final peopleIds = await _getEffectiveSelections();
     final peopleWithFiles = await _getPeople(peopleIds);
 
     if (peopleWithFiles.isEmpty) {
