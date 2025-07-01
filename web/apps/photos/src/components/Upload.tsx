@@ -45,14 +45,18 @@ import {
     storageLimitExceededErrorMessage,
     subscriptionExpiredErrorMessage,
 } from "ente-gallery/services/upload/upload-service";
-import type { Collection } from "ente-media/collection";
+import { CollectionSubType, type Collection } from "ente-media/collection";
 import type { EnteFile } from "ente-media/file";
 import { UploaderNameInput } from "ente-new/albums/components/UploaderNameInput";
 import { CollectionMappingChoice } from "ente-new/photos/components/CollectionMappingChoice";
 import type { CollectionSelectorAttributes } from "ente-new/photos/components/CollectionSelector";
 import type { RemotePullOpts } from "ente-new/photos/components/gallery";
 import { downloadAppDialogAttributes } from "ente-new/photos/components/utils/download";
-import { savedNormalCollections } from "ente-new/photos/services/collection";
+import {
+    createAlbum,
+    isHiddenCollection,
+    savedNormalCollections,
+} from "ente-new/photos/services/collection";
 import { redirectToCustomerPortal } from "ente-new/photos/services/user-details";
 import { usePhotosAppContext } from "ente-new/photos/types/context";
 import { firstNonEmpty } from "ente-utils/array";
@@ -79,7 +83,6 @@ import type {
 import { uploadManager } from "services/upload-manager";
 import watcher from "services/watch";
 import { SetLoading } from "types/gallery";
-import { getOrCreateAlbum } from "utils/collection";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
 import { UploadProgress } from "./UploadProgress";
 
@@ -643,8 +646,9 @@ export const Upload: React.FC<UploadProps> = ({
                 collectionName,
                 uploadItems,
             ] of collectionNameToUploadItems) {
-                const collection = await getOrCreateAlbum(
+                const collection = await matchExistingOrCreateAlbum(
                     collectionName,
+                    user!,
                     existingCollections,
                 );
                 collections.push(collection);
@@ -1021,6 +1025,39 @@ const deriveImportSuggestion = (
         rootFolderName: commonPathPrefix || null,
         hasNestedFolders: firstFileFolder !== lastFileFolder,
     };
+};
+
+const matchExistingOrCreateAlbum = async (
+    albumName: string,
+    user: LocalUser,
+    existingCollections: Collection[],
+) => {
+    for (const collection of existingCollections) {
+        if (
+            // Name matches
+            collection.name == albumName &&
+            // Valid types
+            (collection.type == "album" ||
+                collection.type == "folder" ||
+                collection.type == "uncategorized") &&
+            // Not hidden
+            !isHiddenCollection(collection) &&
+            // Not a quicklink
+            collection.magicMetadata?.data.subType !=
+                CollectionSubType.quicklink &&
+            // Owned by user
+            collection.owner.id == user.id
+        ) {
+            log.info(
+                `Found existing album ${albumName} with id ${collection.id}`,
+            );
+            return collection;
+        }
+    }
+
+    const collection = await createAlbum(albumName);
+    log.info(`Created new album ${albumName} with id ${collection.id}`);
+    return collection;
 };
 
 const setPendingUploads = async (
