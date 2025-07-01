@@ -9,96 +9,28 @@ import type {
 import type { EnteFile, RemoteEnteFile } from "ente-media/file";
 import { decryptRemoteFile } from "ente-media/file";
 import {
+    removePublicCollectionAccessTokenJWT,
+    removePublicCollectionByKey,
+    removePublicCollectionFiles,
+    removePublicCollectionLastSyncTime,
     savedPublicCollectionFiles,
-    savedPublicCollections,
+    savedPublicCollectionLastSyncTime,
     saveLastPublicCollectionReferralCode,
+    savePublicCollection,
     savePublicCollectionFiles,
+    savePublicCollectionLastSyncTime,
 } from "ente-new/albums/services/public-albums-fdb";
 import { CustomError, parseSharingErrorCodes } from "ente-shared/error";
 import HTTPService from "ente-shared/network/HTTPService";
-import localForage from "ente-shared/storage/localForage";
-
-const PUBLIC_COLLECTION_FILES_TABLE = "public-collection-files";
-const PUBLIC_COLLECTIONS_TABLE = "public-collections";
 
 // Fix this once we can trust the types.
 // eslint-disable-next-line @typescript-eslint/no-unnecessary-template-expression
 export const getPublicCollectionUID = (token: string) => `${token}`;
 
-const getPublicCollectionLastSyncTimeKey = (collectionUID: string) =>
-    `public-${collectionUID}-time`;
-
-const getPublicCollectionPasswordKey = (collectionUID: string) =>
-    `public-${collectionUID}-passkey`;
-
 export interface LocalSavedPublicCollectionFiles {
     collectionUID: string;
     files: EnteFile[];
 }
-
-export const getLocalPublicCollectionPassword = async (
-    collectionUID: string,
-): Promise<string> => {
-    return (
-        (await localForage.getItem<string>(
-            getPublicCollectionPasswordKey(collectionUID),
-        )) || ""
-    );
-};
-
-export const savePublicCollectionPassword = async (
-    collectionUID: string,
-    passToken: string,
-): Promise<string> => {
-    return await localForage.setItem<string>(
-        getPublicCollectionPasswordKey(collectionUID),
-        passToken,
-    );
-};
-
-export const getLocalPublicCollection = async (collectionKey: string) => {
-    const localCollections = await savedPublicCollections();
-    const publicCollection =
-        localCollections.find(
-            (localSavedPublicCollection) =>
-                localSavedPublicCollection.key === collectionKey,
-        ) || null;
-    return publicCollection;
-};
-
-export const savePublicCollection = async (collection: Collection) => {
-    const publicCollections = await savedPublicCollections();
-    await localForage.setItem(
-        PUBLIC_COLLECTIONS_TABLE,
-        dedupeCollections([collection, ...publicCollections]),
-    );
-};
-
-const dedupeCollections = (collections: Collection[]) => {
-    const keySet = new Set([]);
-    return collections.filter((collection) => {
-        if (!keySet.has(collection.key)) {
-            keySet.add(collection.key);
-            return true;
-        } else {
-            return false;
-        }
-    });
-};
-
-const getPublicCollectionLastSyncTime = async (collectionUID: string) =>
-    (await localForage.getItem<number>(
-        getPublicCollectionLastSyncTimeKey(collectionUID),
-    )) ?? 0;
-
-const savePublicCollectionLastSyncTime = async (
-    collectionUID: string,
-    time: number,
-) =>
-    await localForage.setItem(
-        getPublicCollectionLastSyncTimeKey(collectionUID),
-        time,
-    );
 
 export const syncPublicFiles = async (
     token: string,
@@ -118,7 +50,7 @@ export const syncPublicFiles = async (
                 return sortFiles(files, sortAsc);
             }
             const lastSyncTime =
-                await getPublicCollectionLastSyncTime(collectionUID);
+                (await savedPublicCollectionLastSyncTime(collectionUID)) ?? 0;
             if (collection.updationTime === lastSyncTime) {
                 return sortFiles(files, sortAsc);
             }
@@ -306,31 +238,12 @@ export const removePublicCollectionWithFiles = async (
     collectionUID: string,
     collectionKey: string,
 ) => {
-    const publicCollections = await savedPublicCollections();
-    await localForage.setItem(
-        PUBLIC_COLLECTIONS_TABLE,
-        publicCollections.filter(
-            (collection) => collection.key !== collectionKey,
-        ),
-    );
+    await removePublicCollectionByKey(collectionKey);
     await removePublicFiles(collectionUID);
 };
 
 export const removePublicFiles = async (collectionUID: string) => {
-    await localForage.removeItem(getPublicCollectionPasswordKey(collectionUID));
-    await localForage.removeItem(
-        getPublicCollectionLastSyncTimeKey(collectionUID),
-    );
-
-    const publicCollectionFiles =
-        (await localForage.getItem<LocalSavedPublicCollectionFiles[]>(
-            PUBLIC_COLLECTION_FILES_TABLE,
-        )) ?? [];
-    await localForage.setItem(
-        PUBLIC_COLLECTION_FILES_TABLE,
-        publicCollectionFiles.filter(
-            (collectionFiles) =>
-                collectionFiles.collectionUID !== collectionUID,
-        ),
-    );
+    await removePublicCollectionAccessTokenJWT(collectionUID);
+    await removePublicCollectionLastSyncTime(collectionUID);
+    await removePublicCollectionFiles(collectionUID);
 };

@@ -68,7 +68,6 @@ import {
 } from "ente-new/photos/services/collection";
 import type { CollectionSummary } from "ente-new/photos/services/collection-summary";
 import { usePhotosAppContext } from "ente-new/photos/types/context";
-import { CustomError, parseSharingErrorCodes } from "ente-shared/error";
 import { wait } from "ente-utils/promise";
 import { useFormik } from "formik";
 import { t } from "i18next";
@@ -298,25 +297,6 @@ const SharingDetails: React.FC<SharingDetailsProps> = ({
             )}
         </>
     );
-};
-
-const handleSharingErrors = (error) => {
-    const parsedError = parseSharingErrorCodes(error);
-    let errorMessage = "";
-    switch (parsedError.message) {
-        case CustomError.BAD_REQUEST:
-            errorMessage = t("sharing_album_not_allowed");
-            break;
-        case CustomError.SUBSCRIPTION_NEEDED:
-            errorMessage = t("sharing_disabled_for_free_accounts");
-            break;
-        case CustomError.NOT_FOUND:
-            errorMessage = t("sharing_user_does_not_exist");
-            break;
-        default:
-            errorMessage = `${t("generic_error_retry")} ${parsedError.message}`;
-    }
-    return errorMessage;
 };
 
 type EmailShareProps = {
@@ -956,51 +936,55 @@ const ManageParticipant: React.FC<ManageParticipantProps> = ({
         onClose();
     };
 
-    const handleRoleChange = (role: string) => () => {
-        if (role !== selectedParticipant.role) {
-            changeRolePermission(selectedParticipant.email, role);
-        }
-    };
+    const confirmChangeRolePermission = useCallback(
+        (
+            selectedEmail: string,
+            newRole: CollectionNewParticipantRole,
+            action: () => Promise<void>,
+        ) => {
+            let message: React.ReactNode;
+            let buttonText: string;
 
-    const updateCollectionRole = async (selectedEmail, newRole) => {
-        try {
-            await shareCollection(collection, selectedEmail, newRole);
-            selectedParticipant.role = newRole;
-            await onRemotePull({ silent: true });
-        } catch (e) {
-            log.error(handleSharingErrors(e), e);
-        }
-    };
+            if (newRole == "VIEWER") {
+                message = (
+                    <Trans
+                        i18nKey="change_permission_to_viewer"
+                        values={{ selectedEmail }}
+                    />
+                );
 
-    const changeRolePermission = (selectedEmail, newRole) => {
-        let contentText;
-        let buttonText;
+                buttonText = t("confirm_convert_to_viewer");
+            } else if (newRole == "COLLABORATOR") {
+                message = t("change_permission_to_collaborator", {
+                    selectedEmail,
+                });
+                buttonText = t("confirm_convert_to_collaborator");
+            }
 
-        if (newRole == "VIEWER") {
-            contentText = (
-                <Trans
-                    i18nKey="change_permission_to_viewer"
-                    values={{ selectedEmail }}
-                />
-            );
-
-            buttonText = t("confirm_convert_to_viewer");
-        } else if (newRole == "COLLABORATOR") {
-            contentText = t("change_permission_to_collaborator", {
-                selectedEmail,
+            showMiniDialog({
+                title: t("change_permission_title"),
+                message: message,
+                continue: { text: buttonText, color: "critical", action },
             });
-            buttonText = t("confirm_convert_to_collaborator");
-        }
+        },
+        [showMiniDialog],
+    );
 
-        showMiniDialog({
-            title: t("change_permission_title"),
-            message: contentText,
-            continue: {
-                text: buttonText,
-                color: "critical",
-                action: () => updateCollectionRole(selectedEmail, newRole),
-            },
-        });
+    const updateCollectionRole = async (
+        selectedEmail: string,
+        newRole: CollectionNewParticipantRole,
+    ) => {
+        await shareCollection(collection, selectedEmail, newRole);
+        selectedParticipant.role = newRole;
+        await onRemotePull({ silent: true });
+    };
+
+    const createOnRoleChange = (role: CollectionNewParticipantRole) => () => {
+        if (role == selectedParticipant.role) return;
+        const { email } = selectedParticipant;
+        confirmChangeRolePermission(email, role, () =>
+            updateCollectionRole(email, role),
+        );
     };
 
     const removeParticipant = () => {
@@ -1044,7 +1028,7 @@ const ManageParticipant: React.FC<ManageParticipantProps> = ({
                     <RowButtonGroup>
                         <RowButton
                             fontWeight="regular"
-                            onClick={handleRoleChange("COLLABORATOR")}
+                            onClick={createOnRoleChange("COLLABORATOR")}
                             label={"Collaborator"}
                             startIcon={<ModeEditIcon />}
                             endIcon={
@@ -1057,7 +1041,7 @@ const ManageParticipant: React.FC<ManageParticipantProps> = ({
 
                         <RowButton
                             fontWeight="regular"
-                            onClick={handleRoleChange("VIEWER")}
+                            onClick={createOnRoleChange("VIEWER")}
                             label={"Viewer"}
                             startIcon={<PhotoIcon />}
                             endIcon={

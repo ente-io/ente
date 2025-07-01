@@ -5,6 +5,7 @@
 import {
     LocalCollections,
     LocalEnteFiles,
+    LocalTimestamp,
     transformFilesIfNeeded,
 } from "ente-gallery/services/files-db";
 import { type Collection } from "ente-media/collection";
@@ -18,7 +19,7 @@ import { z } from "zod/v4";
  *
  * Use {@link savePublicCollections} to update the database.
  */
-export const savedPublicCollections = async (): Promise<Collection[]> =>
+const savedPublicCollections = async (): Promise<Collection[]> =>
     // TODO:
     //
     // See: [Note: strict mode migration]
@@ -34,10 +35,57 @@ export const savedPublicCollections = async (): Promise<Collection[]> =>
  *
  * This is the setter corresponding to {@link savedPublicCollections}.
  */
-export const savePublicCollections = (collections: Collection[]) =>
+const savePublicCollections = (collections: Collection[]) =>
     localForage.setItem("public-collections", collections);
 
-const LocalReferralCode = z.string().nullish().transform(nullToUndefined);
+/**
+ * Return the saved public collection with the given {@link key} if present in
+ * our local database.
+ *
+ * Use {@link savePublicCollection} to save collections in our local database.
+ *
+ * @param key The collection key that can be used to identify the public album
+ * we want from amongst all the locally saved public albums.
+ */
+export const savedPublicCollectionByKey = async (
+    collectionKey: string,
+): Promise<Collection | undefined> =>
+    savedPublicCollections().then((cs) =>
+        cs.find((c) => c.key == collectionKey),
+    );
+
+/**
+ * Save a public collection to our local database.
+ *
+ * The collection can later be retrieved using {@link savedPublicCollection}.
+ * The collection can be removed using {@link removePublicCollection}.
+ */
+export const savePublicCollection = async (collection: Collection) => {
+    const collections = await savedPublicCollections();
+    await savePublicCollections([
+        collection,
+        ...collections.filter((c) => c.id != collection.id),
+    ]);
+};
+
+/**
+ * Remove a public collection, identified using its collection key, from our
+ * local database.
+ *
+ * @param key The collection key that can be used to identify the public album
+ * we want to remove.
+ */
+export const removePublicCollectionByKey = async (collectionKey: string) => {
+    const collections = await savedPublicCollections();
+    await savePublicCollections([
+        ...collections.filter((c) => c.key != collectionKey),
+    ]);
+};
+
+/**
+ * Zod schema for a nullish string, with `null` transformed to `undefined`.
+ */
+const LocalString = z.string().nullish().transform(nullToUndefined);
 
 /**
  * Return the last saved referral code present in our local database.
@@ -55,7 +103,7 @@ const LocalReferralCode = z.string().nullish().transform(nullToUndefined);
  *    out a new value using {@link saveLastPublicCollectionReferralCode}.
  */
 export const savedLastPublicCollectionReferralCode = async () =>
-    LocalReferralCode.parse(await localForage.getItem("public-referral-code"));
+    LocalString.parse(await localForage.getItem("public-referral-code"));
 
 /**
  * Update the referral code present in our local database.
@@ -83,24 +131,35 @@ type LocalSavedPublicCollectionFilesEntry = z.infer<
     typeof LocalSavedPublicCollectionFilesEntry
 >;
 
-// A purely synactic and local alias to avoid the code from looking scary.
-type ES = LocalSavedPublicCollectionFilesEntry[];
-
 /**
  * Return all files for a public collection present in our local database.
  *
- * Use {@link savePublicCollectionFiles} to update the database.
+ * Use {@link savePublicCollectionFiles} to update the list of files in the
+ * database, and {@link removePublicCollectionFiles} to remove them.
  *
- * @param accessToken The access token of the public album whose files we want.
+ * @param accessToken The access token that identifies the public album whose
+ * files we want.
  */
 export const savedPublicCollectionFiles = async (
     accessToken: string,
 ): Promise<EnteFile[]> => {
+    const entry = (await pcfEntries()).find(
+        (e) => e.collectionUID == accessToken,
+    );
+    return transformFilesIfNeeded(entry ? entry.files : []);
+};
+
+/**
+ * A convenience routine to read the DB entries for "public-collection-files".
+ */
+const pcfEntries = async () => {
+    // A local alias to avoid the code from looking scary.
+    type ES = LocalSavedPublicCollectionFilesEntry[];
+
     // See: [Note: Avoiding Zod parsing for large DB arrays] for why we use an
     // (implied) cast here instead of parsing using the Zod schema.
     const entries = await localForage.getItem<ES>("public-collection-files");
-    const entry = (entries ?? []).find((e) => e.collectionUID == accessToken);
-    return transformFilesIfNeeded(entry ? entry.files : []);
+    return entries ?? [];
 };
 
 /**
@@ -108,8 +167,8 @@ export const savedPublicCollectionFiles = async (
  *
  * This is the setter corresponding to {@link savedPublicCollectionFiles}.
  *
- * @param accessToken The access token of the public album whose files we want
- * to replace.
+ * @param accessToken The access token that identifies the public album whose
+ * files we want to update.
  *
  * @param files The files to save.
  */
@@ -117,15 +176,99 @@ export const savePublicCollectionFiles = async (
     accessToken: string,
     files: EnteFile[],
 ): Promise<void> => {
-    // See: [Note: Avoiding Zod parsing for large DB arrays].
-    const entries = await localForage.getItem<ES>("public-collection-files");
     await localForage.setItem("public-collection-files", [
         { collectionUID: accessToken, files },
-        ...(entries ?? []).filter((e) => e.collectionUID != accessToken),
+        ...(await pcfEntries()).filter((e) => e.collectionUID != accessToken),
     ]);
 };
 
-const LocalUploaderName = z.string().nullish().transform(nullToUndefined);
+/**
+ * Remove the list of files, in any, in our local database for the given
+ * collection (identified by its {@link accessToken}).
+ */
+export const removePublicCollectionFiles = async (
+    accessToken: string,
+): Promise<void> => {
+    await localForage.setItem("public-collection-files", [
+        ...(await pcfEntries()).filter((e) => e.collectionUID != accessToken),
+    ]);
+};
+
+/**
+ * Return the locally persisted "last sync time" for a public collection that we
+ * have pulled from remote. This can be used to perform a paginated delta pull
+ * from the saved time onwards.
+ *
+ * Use {@link savePublic CollectionLastSyncTime} to update the value saved in
+ * the database, and {@link removePublicCollectionLastSyncTime} to remove the
+ * saved value from the database.
+ *
+ * @param accessToken The access token that identifies the public album whose
+ * last sync time we want.
+ */
+export const savedPublicCollectionLastSyncTime = async (accessToken: string) =>
+    LocalTimestamp.parse(
+        await localForage.getItem(`public-${accessToken}-time`),
+    );
+
+/**
+ * Update the locally persisted timestamp that will be returned by subsequent
+ * calls to {@link savedPublicCollectionLastSyncTime}.
+ */
+export const savePublicCollectionLastSyncTime = async (
+    accessToken: string,
+    time: number,
+) => {
+    await localForage.setItem(`public-${accessToken}-time`, time);
+};
+
+/**
+ * Remove the locally persisted timestamp, if any, previously saved for a
+ * collection using {@link savedPublicCollectionLastSyncTime}.
+ */
+export const removePublicCollectionLastSyncTime = async (
+    accessToken: string,
+) => {
+    await localForage.removeItem(`public-${accessToken}-time`);
+};
+
+/**
+ * Return the access token JWT, if any, present in our local database for the
+ * given public collection (as identified by its {@link accessToken}).
+ *
+ * Use {@link savePublicCollectionAccessTokenJWT} to save the value, and
+ * {@link removePublicCollectionAccessTokenJWT} to remove it.
+ */
+export const savedPublicCollectionAccessTokenJWT = async (
+    accessToken: string,
+) =>
+    LocalString.parse(
+        await localForage.getItem(`public-${accessToken}-passkey`),
+    );
+
+/**
+ * Update the access token JWT in our local database for the given public
+ * collection (as identified by its {@link accessToken}).
+ *
+ * This is the setter corresponding to
+ * {@link savedPublicCollectionAccessTokenJWT}.
+ */
+export const savePublicCollectionAccessTokenJWT = async (
+    accessToken: string,
+    passwordJWT: string,
+) => {
+    await localForage.setItem(`public-${accessToken}-passkey`, passwordJWT);
+};
+
+/**
+ * Remove the access token JWT in our local database for the given public
+ * collection (as identified by its {@link accessToken}).
+ */
+export const removePublicCollectionAccessTokenJWT = async (
+    accessToken: string,
+) => {
+    await localForage.removeItem(`public-${accessToken}-passkey`);
+};
 
 /**
  * Return the previously saved uploader name, if any, present in our local
@@ -143,11 +286,11 @@ const LocalUploaderName = z.string().nullish().transform(nullToUndefined);
  * public collection, in the local database so that it can prefill it the next
  * time there is an upload from the same client.
  *
- * @param accessToken The access token of the public album whose persisted
- * uploader name we we want.
+ * @param accessToken The access token that identifies the public album whose
+ * saved uploader name we want.
  */
 export const savedPublicCollectionUploaderName = async (accessToken: string) =>
-    LocalUploaderName.parse(
+    LocalString.parse(
         await localForage.getItem(`public-${accessToken}-uploaderName`),
     );
 
