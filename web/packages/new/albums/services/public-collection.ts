@@ -11,11 +11,19 @@ import {
     type Collection,
     type PublicURL,
 } from "ente-media/collection";
-import type { EnteFile } from "ente-media/file";
+import {
+    decryptRemoteFile,
+    FileDiffResponse,
+    type EnteFile,
+} from "ente-media/file";
 import { z } from "zod/v4";
 import {
+    savedPublicCollectionFiles,
+    savedPublicCollectionLastSyncTime,
     saveLastPublicCollectionReferralCode,
     savePublicCollection,
+    savePublicCollectionFiles,
+    savePublicCollectionLastSyncTime,
 } from "./public-albums-fdb";
 
 /**
@@ -155,10 +163,62 @@ const getPublicCollectionInfo = async (accessToken: string) => {
  *
  * This callback can get called multiple times during the pull.
  */
-export const pullPublicCollectionFiles = (
+export const pullPublicCollectionFiles = async (
     credentials: PublicAlbumsCredentials,
     collection: Collection,
     onSetFiles: (files: EnteFile[]) => void,
 ) => {
-    throw new Error("X");
+    const { accessToken } = credentials;
+
+    const files = await savedPublicCollectionFiles(accessToken);
+    const filesByID = new Map(files.map((f) => [f.id, f]));
+
+    let sinceTime = (await savedPublicCollectionLastSyncTime(accessToken)) ?? 0;
+
+    while (true) {
+        const { diff, hasMore } = await getPublicCollectionDiff(
+            credentials,
+            sinceTime,
+        );
+        if (!diff.length) break;
+        for (const change of diff) {
+            sinceTime = Math.max(sinceTime, change.updationTime);
+            if (change.isDeleted) {
+                filesByID.delete(change.id);
+            } else {
+                filesByID.set(
+                    change.id,
+                    await decryptRemoteFile(change, collection.key),
+                );
+            }
+        }
+
+        const files = [...filesByID.values()];
+        await savePublicCollectionFiles(accessToken, files);
+        await savePublicCollectionLastSyncTime(accessToken, sinceTime);
+        onSetFiles(files);
+
+        if (!hasMore) break;
+    }
+};
+
+/**
+ * Fetch the public collection diff to obtain updates to the collection
+ * (identified by its {@link credentials}) since {@link sinceTime}.
+ *
+ * Remote only, does not modify local state.
+ *
+ * @param credentials
+ * @param number
+ */
+const getPublicCollectionDiff = async (
+    credentials: PublicAlbumsCredentials,
+    sinceTime: number,
+) => {
+    const res = await fetch(
+        await apiURL("/public-collection/diff", { sinceTime }),
+        { headers: authenticatedPublicAlbumsRequestHeaders(credentials) },
+    );
+    ensureOk(res);
+    return FileDiffResponse.parse(await res.json());
 };
