@@ -803,7 +803,27 @@ const Page: React.FC = () => {
 
     const handleShowCollectionSummary = (
         collectionSummaryID: number | undefined,
-    ) => dispatch({ type: "showCollectionSummary", collectionSummaryID });
+    ) => {
+        // Trigger a pull of the latest data from remote when opening the trash.
+        //
+        // This is needed for a specific scenario:
+        //
+        // 1. User deletes a collection, selecting the option to delete files.
+        // 2. Museum acks, and then client does a trash pull.
+        //
+        // This trash pull will not contain the files that belonged to the
+        // collection that got deleted because the collection deletion is a
+        // asynchronous operation.
+        //
+        // So the user might not see the entry for the just deleted file if they
+        // were to go to the trash meanwhile (until the next pull happens). To
+        // avoid this, we trigger a trash pull whenever it is opened.
+        if (collectionSummaryID == PseudoCollectionID.trash) {
+            void remoteFilesPull();
+        }
+
+        dispatch({ type: "showCollectionSummary", collectionSummaryID });
+    };
 
     // The same function can also be used to show collections since the
     // namespace for the collection IDs and collection summary IDs are disjoint.
