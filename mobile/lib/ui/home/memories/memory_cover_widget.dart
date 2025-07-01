@@ -9,6 +9,7 @@ import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/utils/file_util.dart";
 import "package:photos/utils/navigation_util.dart";
 
+// TODO: Use a single instance variable for `allMemories` and `allTitles`
 class MemoryCoverWidget extends StatefulWidget {
   final List<Memory> memories;
   final List<List<Memory>> allMemories;

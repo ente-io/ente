@@ -3,6 +3,7 @@ import "package:photos/models/memories/memory.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/ui/home/memories/full_screen_memory.dart";
 
+// TODO: Use a single instance variable for `allMemories` and `allTitles`
 class AllMemoriesPage extends StatefulWidget {
   final int initialPageIndex;
   final int inititalFileIndex;
