@@ -1,7 +1,6 @@
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { Link } from "@mui/material";
 import type { MiniDialogAttributes } from "ente-base/components/MiniDialog";
-import { pt } from "ente-base/i18n";
 import { t } from "i18next";
 import { Trans } from "react-i18next";
 
@@ -39,10 +38,8 @@ export const confirmDisableMapsDialogAttributes = (
  * the files were not processed because they belonged to other users.
  */
 export const notifyOthersFilesDialogAttributes = () => ({
-    // TODO(RE):
-    title: pt("Note"),
+    title: t("note"),
     icon: <InfoOutlinedIcon />,
-    // TODO(RE):
-    message: pt("Files added by other users were not processed"),
+    message: t("unowned_files_not_processed"),
     cancel: t("ok"),
 });
