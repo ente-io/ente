@@ -13,8 +13,8 @@ import "package:photos/utils/navigation_util.dart";
 class MemoryCoverWidget extends StatefulWidget {
   final List<Memory> memories;
   final List<List<Memory>> allMemories;
-  final double maxHeight;
-  final double maxWidth;
+  final double height;
+  final double width;
   static const outerStrokeWidth = 1.0;
   static const aspectRatio = 0.68;
   static const horizontalPadding = 2.5;
@@ -25,8 +25,8 @@ class MemoryCoverWidget extends StatefulWidget {
   const MemoryCoverWidget({
     required this.memories,
     required this.allMemories,
-    required this.maxHeight,
-    required this.maxWidth,
+    required this.height,
+    required this.width,
     required this.title,
     required this.allTitle,
     required this.currentMemoryIndex,
@@ -76,146 +76,140 @@ class _MemoryCoverWidgetState extends State<MemoryCoverWidget> {
             ),
           );
           setState(() {});
-        }, //Adding this row is a workaround for making height of memory cover
-        //render as [MemoryCoverWidgetNew.height] * scale. Without this, height of rendered memory
-        //cover will be [MemoryCoverWidgetNew.height].
-        child: Row(
-          children: [
-            Container(
-              height: widget.maxHeight,
-              width: widget.maxWidth,
-              decoration: BoxDecoration(
-                boxShadow: brightness == Brightness.dark
-                    ? [
-                        const BoxShadow(
-                          color: strokeFainterDark,
-                          spreadRadius: MemoryCoverWidget.outerStrokeWidth,
-                          blurRadius: 0,
+        },
+        child: Container(
+          height: widget.height,
+          width: widget.width,
+          decoration: BoxDecoration(
+            boxShadow: brightness == Brightness.dark
+                ? [
+                    const BoxShadow(
+                      color: strokeFainterDark,
+                      spreadRadius: MemoryCoverWidget.outerStrokeWidth,
+                      blurRadius: 0,
+                    ),
+                  ]
+                : [...shadowFloatFaintestLight],
+            borderRadius: BorderRadius.circular(5),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(5),
+            child: isSeen
+                ? ColorFiltered(
+                    colorFilter: const ColorFilter.mode(
+                      Color(0xFFBFBFBF),
+                      BlendMode.hue,
+                    ),
+                    child: Stack(
+                      fit: StackFit.expand,
+                      alignment: Alignment.bottomCenter,
+                      children: [
+                        Hero(
+                          tag: "memories" + memory.file.tag,
+                          child: ThumbnailWidget(
+                            memory.file,
+                            shouldShowArchiveStatus: false,
+                            shouldShowSyncStatus: false,
+                            key: Key("memories" + memory.file.tag),
+                          ),
                         ),
-                      ]
-                    : [...shadowFloatFaintestLight],
-                borderRadius: BorderRadius.circular(5),
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(5),
-                child: isSeen
-                    ? ColorFiltered(
-                        colorFilter: const ColorFilter.mode(
-                          Color(0xFFBFBFBF),
-                          BlendMode.hue,
-                        ),
-                        child: Stack(
-                          fit: StackFit.expand,
-                          alignment: Alignment.bottomCenter,
-                          children: [
-                            Hero(
-                              tag: "memories" + memory.file.tag,
-                              child: ThumbnailWidget(
-                                memory.file,
-                                shouldShowArchiveStatus: false,
-                                shouldShowSyncStatus: false,
-                                key: Key("memories" + memory.file.tag),
-                              ),
-                            ),
-                            Container(
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: [
-                                    Colors.black.withOpacity(0.5),
-                                    Colors.transparent,
-                                  ],
-                                  stops: const [0, 1],
-                                  begin: Alignment.bottomCenter,
-                                  end: Alignment.topCenter,
-                                ),
-                              ),
-                            ),
-                            Positioned(
-                              bottom: 8,
-                              child: SizedBox(
-                                width: widget.maxWidth,
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 8.0,
-                                  ),
-                                  child: Hero(
-                                    tag: title,
-                                    child: Center(
-                                      child: Text(
-                                        title,
-                                        style: getEnteTextTheme(context)
-                                            .miniBold
-                                            .copyWith(
-                                              color: isSeen
-                                                  ? textFaintDark
-                                                  : Colors.white,
-                                            ),
-                                        textAlign: TextAlign.left,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      )
-                    : Stack(
-                        fit: StackFit.expand,
-                        alignment: Alignment.bottomCenter,
-                        children: [
-                          Hero(
-                            tag: "memories" + memory.file.tag,
-                            child: ThumbnailWidget(
-                              memory.file,
-                              shouldShowArchiveStatus: false,
-                              shouldShowSyncStatus: false,
-                              key: Key("memories" + memory.file.tag),
+                        Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                Colors.black.withOpacity(0.5),
+                                Colors.transparent,
+                              ],
+                              stops: const [0, 1],
+                              begin: Alignment.bottomCenter,
+                              end: Alignment.topCenter,
                             ),
                           ),
-                          Container(
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: [
-                                  Colors.black.withOpacity(0.5),
-                                  Colors.transparent,
-                                ],
-                                stops: const [0, 1],
-                                begin: Alignment.bottomCenter,
-                                end: Alignment.topCenter,
+                        ),
+                        Positioned(
+                          bottom: 8,
+                          child: SizedBox(
+                            width: widget.width,
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8.0,
                               ),
-                            ),
-                          ),
-                          Positioned(
-                            bottom: 8,
-                            child: SizedBox(
-                              width: widget.maxWidth,
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8.0,
-                                ),
-                                child: Hero(
-                                  tag: title,
-                                  child: Center(
-                                    child: Text(
-                                      title,
-                                      style: getEnteTextTheme(context)
-                                          .miniBold
-                                          .copyWith(
-                                            color: Colors.white,
-                                          ),
-                                      textAlign: TextAlign.left,
-                                    ),
+                              child: Hero(
+                                tag: title,
+                                child: Center(
+                                  child: Text(
+                                    title,
+                                    style: getEnteTextTheme(context)
+                                        .miniBold
+                                        .copyWith(
+                                          color: isSeen
+                                              ? textFaintDark
+                                              : Colors.white,
+                                        ),
+                                    textAlign: TextAlign.left,
                                   ),
                                 ),
                               ),
                             ),
                           ),
-                        ],
+                        ),
+                      ],
+                    ),
+                  )
+                : Stack(
+                    fit: StackFit.expand,
+                    alignment: Alignment.bottomCenter,
+                    children: [
+                      Hero(
+                        tag: "memories" + memory.file.tag,
+                        child: ThumbnailWidget(
+                          memory.file,
+                          shouldShowArchiveStatus: false,
+                          shouldShowSyncStatus: false,
+                          key: Key("memories" + memory.file.tag),
+                        ),
                       ),
-              ),
-            ),
-          ],
+                      Container(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              Colors.black.withOpacity(0.5),
+                              Colors.transparent,
+                            ],
+                            stops: const [0, 1],
+                            begin: Alignment.bottomCenter,
+                            end: Alignment.topCenter,
+                          ),
+                        ),
+                      ),
+                      Positioned(
+                        bottom: 8,
+                        child: SizedBox(
+                          width: widget.width,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8.0,
+                            ),
+                            child: Hero(
+                              tag: title,
+                              child: Center(
+                                child: Text(
+                                  title,
+                                  style: getEnteTextTheme(context)
+                                      .miniBold
+                                      .copyWith(
+                                        color: Colors.white,
+                                      ),
+                                  textAlign: TextAlign.left,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+          ),
         ),
       ),
     );
