@@ -1,6 +1,7 @@
 import "dart:convert";
 import "dart:developer";
 
+import "package:computer/computer.dart";
 import "package:flutter/foundation.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
@@ -9,6 +10,7 @@ import "package:photos/events/people_changed_event.dart";
 import "package:photos/extensions/stop_watch.dart";
 import "package:photos/models/api/entity/type.dart";
 import "package:photos/models/file/file.dart";
+import "package:photos/models/local_entity_data.dart";
 import 'package:photos/models/ml/face/face.dart';
 import "package:photos/models/ml/face/person.dart";
 import "package:photos/service_locator.dart";
@@ -29,6 +31,9 @@ class PersonService {
   static const kPersonIDKey = "person_id";
   static const kNameKey = "name";
 
+  Future<List<PersonEntity>>? _cachedPersonsFuture;
+  int _lastCacheRefreshTime = 0;
+
   static PersonService get instance {
     if (_instance == null) {
       throw Exception("PersonService not initialized");
@@ -46,7 +51,7 @@ class PersonService {
     SharedPreferences prefs,
   ) async {
     _instance = PersonService(entityService, faceMLDataDB, prefs);
-    await _instance!.resetEmailToPartialPersonDataCache();
+    await _instance!.refreshPersonCache();
   }
 
   Map<String, Map<String, String>> get emailToPartialPersonDataMapCache =>
@@ -54,21 +59,14 @@ class PersonService {
 
   void clearCache() {
     _emailToPartialPersonDataMapCache.clear();
+    _cachedPersonsFuture = null;
+    _lastCacheRefreshTime = 0;
   }
 
-  Future<void> resetEmailToPartialPersonDataCache() async {
-    _emailToPartialPersonDataMapCache.clear();
-    await getPersons().then((value) {
-      for (var person in value) {
-        if (person.data.email != null && person.data.email!.isNotEmpty) {
-          _instance!._emailToPartialPersonDataMapCache[person.data.email!] = {
-            kPersonIDKey: person.remoteID,
-            kNameKey: person.data.name,
-          };
-        }
-      }
-      logger.info("Email to partial person data cache reset");
-    });
+  Future<void> refreshPersonCache() async {
+    _lastCacheRefreshTime = 0;
+    // wait to ensure cache is refreshed
+    final _ = await getPersons();
   }
 
   Future<List<PersonEntity>> getCertainPersons(List<String> ids) async {
@@ -89,9 +87,39 @@ class PersonService {
   }
 
   Future<List<PersonEntity>> getPersons() async {
-    // perf todo: move this json decode in computer, and use cached future
-    // to read values from DB and also poulate the emailPartialPersonDataMapCache
+    if (_lastCacheRefreshTime != lastRemoteSyncTime()) {
+      _lastCacheRefreshTime = lastRemoteSyncTime();
+      _cachedPersonsFuture = null; // Invalidate cache
+    }
+    _cachedPersonsFuture ??= _fetchAndCachePersons();
+    return _cachedPersonsFuture!;
+  }
+
+  Future<List<PersonEntity>> _fetchAndCachePersons() async {
+    logger.finest("reading all persons from local db");
     final entities = await entityService.getEntities(EntityType.cgroup);
+    final persons = await Computer.shared().compute(
+      _decodePersonEntities,
+      param: {"entity": entities},
+      taskName: "decode_person_entities",
+    );
+    _emailToPartialPersonDataMapCache.clear();
+    for (PersonEntity person in persons) {
+      if (person.data.email != null && person.data.email!.isNotEmpty) {
+        _emailToPartialPersonDataMapCache[person.data.email!] = {
+          kPersonIDKey: person.remoteID,
+          kNameKey: person.data.name,
+        };
+      }
+    }
+
+    return persons;
+  }
+
+  static List<PersonEntity> _decodePersonEntities(
+    Map<String, dynamic> param,
+  ) {
+    final entities = param["entity"] as List<LocalEntityData>;
     return entities
         .map(
           (e) => PersonEntity(
@@ -115,13 +143,9 @@ class PersonService {
   }
 
   Future<Map<String, PersonEntity>> getPersonsMap() async {
-    final entities = await entityService.getEntities(EntityType.cgroup);
+    final persons = await getPersons();
     final Map<String, PersonEntity> map = {};
-    for (var e in entities) {
-      final person = PersonEntity(
-        e.id,
-        PersonData.fromJson(json.decode(e.data)),
-      );
+    for (var person in persons) {
       map[person.remoteID] = person;
     }
     return map;
@@ -156,8 +180,7 @@ class PersonService {
               ),
             )
             .toList();
-        entityService
-            .addOrUpdate(EntityType.cgroup, personData.toJson(), id: personID)
+        _addOrUpdateEntity(EntityType.cgroup, personData.toJson(), id: personID)
             .ignore();
         personData.logStats();
       }
@@ -226,7 +249,7 @@ class PersonService {
       birthDate: birthdate,
       email: email,
     );
-    final result = await entityService.addOrUpdate(
+    final result = await _addOrUpdateEntity(
       EntityType.cgroup,
       data.toJson(),
     );
@@ -235,7 +258,7 @@ class PersonService {
       clusterID: clusterID,
     );
     if (data.email != null) {
-      await resetEmailToPartialPersonDataCache();
+      await refreshPersonCache();
     }
     memoriesCacheService.queueUpdateCache();
     return PersonEntity(result.id, data);
@@ -260,7 +283,7 @@ class PersonService {
     }
     personData.rejectedFaceIDs.addAll(clusterInfo.faces);
     personData.assigned.removeWhere((element) => element.id == clusterID);
-    await entityService.addOrUpdate(
+    await _addOrUpdateEntity(
       EntityType.cgroup,
       personData.toJson(),
       id: personID,
@@ -300,7 +323,7 @@ class PersonService {
     // Add removed faces to rejected faces
     personData.rejectedFaceIDs.addAll(faceIDs);
 
-    await entityService.addOrUpdate(
+    await _addOrUpdateEntity(
       EntityType.cgroup,
       personData.toJson(),
       id: person.remoteID,
@@ -316,7 +339,7 @@ class PersonService {
       }
       final PersonEntity justName =
           PersonEntity(personID, PersonData(name: entity.data.name));
-      await entityService.addOrUpdate(
+      await _addOrUpdateEntity(
         EntityType.cgroup,
         justName.data.toJson(),
         id: personID,
@@ -325,7 +348,7 @@ class PersonService {
       justName.data.logStats();
 
       if (entity.data.email != null) {
-        await resetEmailToPartialPersonDataCache();
+        await refreshPersonCache();
       }
     } else {
       await entityService.deleteEntry(personID);
@@ -333,7 +356,7 @@ class PersonService {
 
       if (entity != null) {
         if (entity.data.email != null) {
-          await resetEmailToPartialPersonDataCache();
+          await refreshPersonCache();
         }
       }
     }
@@ -502,13 +525,13 @@ class PersonService {
       ),
     );
     await updatePerson(updatedPerson);
-    await resetEmailToPartialPersonDataCache();
+    await refreshPersonCache();
     return updatedPerson;
   }
 
   Future<void> updatePerson(PersonEntity updatePerson) async {
     try {
-      await entityService.addOrUpdate(
+      await _addOrUpdateEntity(
         EntityType.cgroup,
         updatePerson.data.toJson(),
         id: updatePerson.remoteID,
@@ -518,5 +541,16 @@ class PersonService {
       logger.severe("Failed to update person", e, s);
       rethrow;
     }
+  }
+
+  /// Wrapper method for entityService.addOrUpdate that handles cache refresh
+  Future<LocalEntityData> _addOrUpdateEntity(
+    EntityType type,
+    Map<String, dynamic> jsonMap, {
+    String? id,
+  }) async {
+    final result = await entityService.addOrUpdate(type, jsonMap, id: id);
+    _lastCacheRefreshTime = 0; // Invalidate cache
+    return result;
   }
 }
