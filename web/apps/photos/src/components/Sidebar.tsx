@@ -71,7 +71,7 @@ import { TwoFactorSettings } from "ente-new/photos/components/sidebar/TwoFactorS
 import {
     confirmDisableMapsDialogAttributes,
     confirmEnableMapsDialogAttributes,
-} from "ente-new/photos/components/utils/dialog";
+} from "ente-new/photos/components/utils/dialog-attributes";
 import { downloadAppDialogAttributes } from "ente-new/photos/components/utils/download";
 import {
     useHLSGenerationStatusSnapshot,
@@ -111,11 +111,9 @@ import { usePhotosAppContext } from "ente-new/photos/types/context";
 import { initiateEmail, openURL } from "ente-new/photos/utils/web";
 import { t } from "i18next";
 import { useRouter } from "next/router";
-import { GalleryContext } from "pages/gallery";
 import React, {
     MouseEventHandler,
     useCallback,
-    useContext,
     useEffect,
     useMemo,
     useState,
@@ -126,12 +124,12 @@ import { SubscriptionCard } from "./SubscriptionCard";
 
 type SidebarProps = ModalVisibilityProps & {
     /**
-     * The latest set of collections, sections and pseudo-collections.
+     * Information about non-hidden collections and pseudo-collections.
      *
      * These are used to obtain data about the archive, hidden and trash
      * "section" entries shown within the shortcut section of the sidebar.
      */
-    collectionSummaries: CollectionSummaries;
+    normalCollectionSummaries: CollectionSummaries;
     /**
      * The ID of the collection summary that should be shown when the user
      * activates the "Uncategorized" section shortcut.
@@ -147,6 +145,14 @@ type SidebarProps = ModalVisibilityProps & {
      */
     onShowCollectionSummary: (collectionSummaryID: number) => void;
     /**
+     * Called when the hidden section should be shown.
+     *
+     * This triggers the display of the dialog to authenticate the user, exactly
+     * as if {@link onAuthenticateUser} were called. Then, on successful
+     * authentication, the gallery will switch to the hidden section.
+     */
+    onShowHiddenSection: () => Promise<void>;
+    /**
      * Called when the export dialog should be shown.
      */
     onShowExport: () => void;
@@ -155,6 +161,9 @@ type SidebarProps = ModalVisibilityProps & {
      *
      * This will be invoked before sensitive actions, and the action will only
      * proceed if the promise returned by this function is fulfilled.
+     *
+     * On errors or if the user cancels the reauthentication, the promise will
+     * not settle.
      */
     onAuthenticateUser: () => Promise<void>;
 };
@@ -162,10 +171,11 @@ type SidebarProps = ModalVisibilityProps & {
 export const Sidebar: React.FC<SidebarProps> = ({
     open,
     onClose,
-    collectionSummaries,
+    normalCollectionSummaries,
     uncategorizedCollectionSummaryID,
     onShowPlanSelector,
     onShowCollectionSummary,
+    onShowHiddenSection,
     onShowExport,
     onAuthenticateUser,
 }) => (
@@ -176,9 +186,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <ShortcutSection
                 onCloseSidebar={onClose}
                 {...{
-                    collectionSummaries,
+                    normalCollectionSummaries,
                     uncategorizedCollectionSummaryID,
                     onShowCollectionSummary,
+                    onShowHiddenSection,
                 }}
             />
             <UtilitySection
@@ -447,19 +458,19 @@ const ManageMemberSubscription: React.FC<ManageMemberSubscriptionProps> = ({
 type ShortcutSectionProps = SectionProps &
     Pick<
         SidebarProps,
-        | "collectionSummaries"
+        | "normalCollectionSummaries"
         | "uncategorizedCollectionSummaryID"
         | "onShowCollectionSummary"
+        | "onShowHiddenSection"
     >;
 
 const ShortcutSection: React.FC<ShortcutSectionProps> = ({
     onCloseSidebar,
-    collectionSummaries,
+    normalCollectionSummaries,
     uncategorizedCollectionSummaryID,
     onShowCollectionSummary,
+    onShowHiddenSection,
 }) => {
-    const galleryContext = useContext(GalleryContext);
-
     const openUncategorizedSection = () => {
         onShowCollectionSummary(uncategorizedCollectionSummaryID);
         onCloseSidebar();
@@ -475,14 +486,11 @@ const ShortcutSection: React.FC<ShortcutSectionProps> = ({
         onCloseSidebar();
     };
 
-    const openHiddenSection = () => {
-        galleryContext.openHiddenSection(() => {
-            onCloseSidebar();
-        });
-    };
+    const openHiddenSection = () =>
+        void onShowHiddenSection().then(onCloseSidebar);
 
-    const summaryCaption = (collectionSummaryID: number) =>
-        collectionSummaries.get(collectionSummaryID)?.fileCount.toString();
+    const summaryCaption = (summaryID: number) =>
+        normalCollectionSummaries.get(summaryID)?.fileCount.toString();
 
     return (
         <>

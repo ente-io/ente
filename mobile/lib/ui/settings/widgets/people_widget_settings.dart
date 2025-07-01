@@ -1,3 +1,5 @@
+import "dart:async";
+
 import 'package:flutter/material.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
@@ -66,13 +68,13 @@ class _PeopleWidgetSettingsState extends State<PeopleWidgetSettings> {
                     onTap: _selectedPeople.personIds.isEmpty
                         ? null
                         : () async {
-                            await PeopleHomeWidgetService.instance
-                                .setSelectedPeople(
-                              _selectedPeople.personIds.toList(),
+                            unawaited(
+                              PeopleHomeWidgetService.instance
+                                  .setSelectedPeople(
+                                _selectedPeople.personIds.toList(),
+                              ),
                             );
                             Navigator.pop(context);
-                            await PeopleHomeWidgetService.instance
-                                .checkPeopleChanged();
                           },
                   );
                 },

@@ -41,6 +41,13 @@ class EntityService {
     return "entity_last_sync_time_" + type.typeToString();
   }
 
+  Future<List<LocalEntityData>> getCertainEntities(
+    EntityType type,
+    List<String> ids,
+  ) async {
+    return await _db.getCertainEntities(type, ids);
+  }
+
   Future<List<LocalEntityData>> getEntities(EntityType type) async {
     return await _db.getEntities(type);
   }
@@ -108,6 +115,10 @@ class EntityService {
       _logger.severe("Failed to sync entities", e);
       return -1;
     }
+  }
+
+  int lastSyncTime(EntityType type) {
+    return _prefs.getInt(_getEntityLastSyncTimePrefix(type)) ?? 0;
   }
 
   Future<int> _remoteToLocalSync(

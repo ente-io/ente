@@ -321,8 +321,8 @@ export type RemoteEnteFile = z.infer<typeof RemoteEnteFile>;
  * Zod schema for a response for various "/diff" APIs that return changes since
  * a provided timestamp.
  *
+ * - "/collections/v2/diff"
  * - "/cast/diff"
- *
  */
 export const FileDiffResponse = z.object({
     /**

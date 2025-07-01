@@ -184,7 +184,7 @@ const downloadModel = async (saveLocation: string, name: string) => {
 /**
  * Create an ONNX {@link InferenceSession} with some defaults.
  */
-const createInferenceSession = async (modelPath: string) =>
+const createInferenceSession = (modelPath: string) =>
     ort.InferenceSession.create(modelPath, {
         // Restrict the number of threads to 1.
         intraOpNumThreads: 1,

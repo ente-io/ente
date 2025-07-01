@@ -47,7 +47,7 @@ import { FullScreenDropZone } from "ente-gallery/components/FullScreenDropZone";
 import { downloadManager } from "ente-gallery/services/download";
 import { extractCollectionKeyFromShareURL } from "ente-gallery/services/share";
 import { updateShouldDisableCFUploadProxy } from "ente-gallery/services/upload";
-import { sortFiles } from "ente-gallery/utils/files";
+import { sortFiles } from "ente-gallery/utils/file";
 import type { Collection } from "ente-media/collection";
 import { type EnteFile } from "ente-media/file";
 import { verifyPublicAlbumPassword } from "ente-new/albums/services/publicCollection";
@@ -495,9 +495,9 @@ export default function PublicCollectionGallery() {
                 >
                     {selected.count > 0 ? (
                         <SelectedFileOptions
-                            downloadFilesHelper={downloadFilesHelper}
-                            clearSelection={clearSelection}
                             count={selected.count}
+                            clearSelection={clearSelection}
+                            downloadFilesHelper={downloadFilesHelper}
                         />
                     ) : (
                         <SpacedRow sx={{ flex: 1 }}>
@@ -531,14 +531,14 @@ export default function PublicCollectionGallery() {
                     uploadCollection={publicCollection}
                     setLoading={setBlockingLoad}
                     setShouldDisableDropzone={setShouldDisableDropzone}
+                    uploadTypeSelectorIntent="collect"
+                    uploadTypeSelectorView={uploadTypeSelectorView}
                     onRemotePull={publicAlbumsRemotePull}
                     onUploadFile={(file) =>
                         setPublicFiles(sortFiles([...publicFiles, file]))
                     }
-                    uploadTypeSelectorView={uploadTypeSelectorView}
                     closeUploadTypeSelector={closeUploadTypeSelectorView}
-                    showSessionExpiredMessage={showPublicLinkExpiredMessage}
-                    uploadTypeSelectorIntent="collect"
+                    onShowSessionExpiredDialog={showPublicLinkExpiredMessage}
                     {...{ dragAndDropFiles }}
                 />
                 <FilesDownloadProgress
@@ -616,9 +616,9 @@ interface SelectedFileOptionsProps {
 }
 
 const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
-    downloadFilesHelper,
     count,
     clearSelection,
+    downloadFilesHelper,
 }) => (
     <Stack
         direction="row"

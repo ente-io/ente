@@ -5,8 +5,7 @@ import {
 } from "ente-gallery/services/video";
 import type { Collection } from "ente-media/collection";
 import type { EnteFile } from "ente-media/file";
-import { pullCollections } from "./collection";
-import { pullCollectionFiles } from "./files";
+import { pullCollectionFiles, pullCollections } from "./collection";
 import { isMLSupported, mlSync, pullMLStatus } from "./ml";
 import { searchDataSync } from "./search";
 import { pullSettings } from "./settings";
@@ -26,9 +25,9 @@ import { pullTrash, type TrashItem } from "./trash";
  *
  * The full pull is performed by the gallery page, in the following sequence:
  *
- * 1. {@link pullFilesPre}
+ * 1. {@link prePullFiles}
  * 2. {@link pullFiles}
- * 3. {@link pullFilesPost}.
+ * 3. {@link postPullFiles}.
  *
  * The full pull is performed in the following cases:
  *
@@ -42,7 +41,7 @@ import { pullTrash, type TrashItem } from "./trash";
  * independently. For example, after deduping files, or updating the metadata of
  * a file. See also: [Note: Full remote pull vs files pull]
  */
-export const pullFilesPre = async () => {
+export const prePullFiles = async () => {
     await Promise.all([pullSettings(), isMLSupported && pullMLStatus()]);
 };
 
@@ -50,25 +49,31 @@ interface PullFilesOpts {
     /**
      * Called when the saved collections were replaced by the given
      * {@link collections}.
+     *
+     * Can be called multiple times during a pull, as each batch of changes is
+     * received and processed.
      */
     onSetCollections: (collections: Collection[]) => void;
     /**
      * Called when saved collection files were replaced by the given
      * {@link collectionFiles}.
+     *
+     * Can be called multiple times during a pull, as each batch of changes is
+     * received and processed.
      */
     onSetCollectionFiles: (collectionFiles: EnteFile[]) => void;
     /**
-     * Called when saved collection files were augmented with the given newly
-     * fetched {@link collectionFiles}.
-     */
-    onAugmentCollectionFiles: (collectionFiles: EnteFile[]) => void;
-    /**
      * Called when saved trashed items were replaced by the given
      * {@link trashItems}.
+     *
+     * Can be called multiple times during a pull, as each batch of changes is
+     * received and processed.
      */
     onSetTrashedItems: (trashItems: TrashItem[]) => void;
     /**
      * Called if one or more files were updated during the pull.
+     *
+     * Will be called at most once per pull.
      */
     onDidUpdateCollectionFiles: () => void;
 }
@@ -96,7 +101,6 @@ export const pullFiles = async (opts?: PullFilesOpts) => {
     const didUpdateFiles = await pullCollectionFiles(
         collections,
         opts?.onSetCollectionFiles,
-        opts?.onAugmentCollectionFiles,
     );
     await pullTrash(
         collections,
@@ -121,7 +125,7 @@ export const pullFiles = async (opts?: PullFilesOpts) => {
  *
  * See: [Note: Remote pull]
  */
-export const pullFilesPost = async () => {
+export const postPullFiles = async () => {
     await Promise.all([searchDataSync(), videoProcessingSyncIfNeeded()]);
     // ML sync might take a very long time for initial indexing, so don't wait
     // for it to finish.

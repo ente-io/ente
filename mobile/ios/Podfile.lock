@@ -151,7 +151,7 @@ PODS:
     - nanopb/encode (= 3.30910.0)
   - nanopb/decode (3.30910.0)
   - nanopb/encode (3.30910.0)
-  - native_video_player (1.0.0):
+  - native_video_player (4.0.0):
     - Flutter
   - objective_c (0.0.1):
     - Flutter
@@ -463,7 +463,7 @@ SPEC CHECKSUMS:
   flutter_native_splash: 6cad9122ea0fad137d23137dd14b937f3e90b145
   flutter_secure_storage: 2c2ff13db9e0a5647389bff88b0ecac56e3f3418
   flutter_sodium: 7e4621538491834eba53bd524547854bcbbd6987
-  flutter_timezone: 7c838e17ffd4645d261e87037e5bebf6d38fe544
+  flutter_timezone: ac3da59ac941ff1c98a2e1f0293420e020120282
   fluttertoast: 2c67e14dce98bbdb200df9e1acf610d7a6264ea1
   GoogleDataTransport: aae35b7ea0c09004c3797d53c8c41f66f219d6a7
   GoogleUtilities: 00c88b9a86066ef77f0da2fab05f65d7768ed8e1
@@ -483,7 +483,7 @@ SPEC CHECKSUMS:
   motionphoto: 23e2aeb5c6380112f69468d71f970fa7438e5ed1
   move_to_background: 7e3467dd2a1d1013e98c9c1cb93fd53cd7ef9d84
   nanopb: fad817b59e0457d11a5dfbde799381cd727c1275
-  native_video_player: e363dd14f6a498ad8a8f7e6486a0db046ad19f13
+  native_video_player: 6809dec117e8997161dbfb42a6f90d6df71a504d
   objective_c: 89e720c30d716b036faf9c9684022048eee1eee2
   onnxruntime: f9b296392c96c42882be020a59dbeac6310d81b2
   onnxruntime-c: a909204639a1f035f575127ac406f781ac797c9c

@@ -131,7 +131,7 @@ services:
           sh -c '
           #!/bin/sh
 
-          while ! mc config host add h0 http://minio:3200 $minio_user $minio_pass 2>/dev/null
+          while ! mc alias set h0 http://minio:3200 $minio_user $minio_pass 2>/dev/null
           do
             echo "Waiting for minio..."
             sleep 0.5

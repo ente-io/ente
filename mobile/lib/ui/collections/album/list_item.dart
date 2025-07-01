@@ -36,9 +36,7 @@ class AlbumListItemWidget extends StatelessWidget {
       child: Row(
         children: [
           ClipRRect(
-            borderRadius: const BorderRadius.horizontal(
-              left: Radius.circular(4),
-            ),
+            borderRadius: BorderRadius.circular(4),
             child: SizedBox(
               height: sideOfThumbnail,
               width: sideOfThumbnail,
@@ -53,7 +51,9 @@ class AlbumListItemWidget extends StatelessWidget {
                       shouldShowOwnerAvatar: false,
                     );
                   } else {
-                    return const NoThumbnailWidget(addBorder: false);
+                    return const NoThumbnailWidget(
+                      addBorder: false,
+                    );
                   }
                 },
               ),
@@ -63,13 +63,15 @@ class AlbumListItemWidget extends StatelessWidget {
           Flexible(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
                   collection.displayName,
                   overflow: TextOverflow.ellipsis,
                 ),
                 FutureBuilder<int>(
-                  future: CollectionsService.instance.getFileCount(collection),
+                  future:
+                      CollectionsService.instance.getFileCount(collection),
                   builder: (context, snapshot) {
                     if (snapshot.hasData) {
                       return Text(
@@ -123,7 +125,7 @@ class AlbumListItemWidget extends StatelessWidget {
                     ? colorScheme.strokeMuted
                     : colorScheme.strokeFainter,
               ),
-              borderRadius: const BorderRadius.all(Radius.circular(4)),
+              borderRadius: const BorderRadius.all(Radius.circular(6)),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,

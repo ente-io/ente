@@ -571,6 +571,30 @@ class MessageLookup extends MessageLookupByLibrary {
         "blackFridaySale":
             MessageLookupByLibrary.simpleMessage("Promoção Black Friday"),
         "blog": MessageLookupByLibrary.simpleMessage("Blog"),
+        "cLDesc1": MessageLookupByLibrary.simpleMessage(
+            "Com a versão beta de streaming de vídeo e o trabalho em uploads e downloads resumíveis, agora aumentamos o limite de upload de arquivos para 10GB. Isso já está disponível nos aplicativos desktop e móvel."),
+        "cLDesc2": MessageLookupByLibrary.simpleMessage(
+            "Os uploads em segundo plano agora também são suportados no iOS, além dos dispositivos Android. Não é necessário abrir o aplicativo para fazer backup de suas fotos e vídeos mais recentes."),
+        "cLDesc3": MessageLookupByLibrary.simpleMessage(
+            "Fizemos melhorias significativas em nossa experiência de memórias, incluindo reprodução automática, deslizar para a próxima memória e muito mais."),
+        "cLDesc4": MessageLookupByLibrary.simpleMessage(
+            "Junto com várias melhorias internas, agora é muito mais fácil ver todos os rostos detectados, fornecer feedback sobre rostos similares e adicionar/remover rostos de uma única foto."),
+        "cLDesc5": MessageLookupByLibrary.simpleMessage(
+            "Agora você receberá uma notificação opcional para todos os aniversários que salvou no Ente, junto com uma coleção de suas melhores fotos."),
+        "cLDesc6": MessageLookupByLibrary.simpleMessage(
+            "Não é mais necessário esperar que uploads/downloads sejam concluídos antes de fechar o aplicativo. Todos os uploads e downloads agora podem ser pausados no meio do caminho e retomados de onde você parou."),
+        "cLTitle1": MessageLookupByLibrary.simpleMessage(
+            "Upload de arquivos de vídeo grandes"),
+        "cLTitle2":
+            MessageLookupByLibrary.simpleMessage("Upload em segundo plano"),
+        "cLTitle3": MessageLookupByLibrary.simpleMessage(
+            "Reprodução automática de memórias"),
+        "cLTitle4": MessageLookupByLibrary.simpleMessage(
+            "Reconhecimento facial aprimorado"),
+        "cLTitle5":
+            MessageLookupByLibrary.simpleMessage("Notificações de aniversário"),
+        "cLTitle6": MessageLookupByLibrary.simpleMessage(
+            "Uploads e downloads resumíveis"),
         "cachedData":
             MessageLookupByLibrary.simpleMessage("Dados armazenados em cache"),
         "calculating": MessageLookupByLibrary.simpleMessage("Calculando..."),

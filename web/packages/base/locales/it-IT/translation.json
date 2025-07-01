@@ -162,6 +162,7 @@
     "ok": "OK",
     "success": "Operazione riuscita",
     "error": "Errore",
+    "note": "",
     "offline_message": "Sei offline, i ricordi memorizzati nella cache vengono mostrati",
     "install": "Installa",
     "install_mobile_app": "Installa la nostra app <a>Android</a> o <b>iOS</b> per eseguire il backup automatico di tutte le tue foto",
@@ -683,5 +684,6 @@
     "share_favorites": "",
     "person_favorites": "",
     "shared_favorites": "",
-    "added_by_name": ""
+    "added_by_name": "",
+    "unowned_files_not_processed": ""
 }

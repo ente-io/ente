@@ -144,7 +144,7 @@ dependencies:
       ref: 3b862fe
   nanoid: ^1.0.0
   native_dio_adapter: ^1.4.0
-  native_video_player: ^3.0.0-dev.4
+  native_video_player: ^4.0.0
   onnx_dart:
     path: plugins/onnx_dart
   onnxruntime:

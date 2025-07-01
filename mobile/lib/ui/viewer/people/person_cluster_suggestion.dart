@@ -336,7 +336,9 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
   Future<void> _saveAsAnotherPerson() async {
     if (!canGiveFeedback ||
         allSuggestions.isEmpty ||
-        currentSuggestionIndex >= allSuggestions.length) return;
+        currentSuggestionIndex >= allSuggestions.length) {
+      return;
+    }
 
     try {
       final currentSuggestion = allSuggestions[currentSuggestionIndex];

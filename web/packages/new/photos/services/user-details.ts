@@ -406,11 +406,10 @@ const getPaymentToken = async () => {
  */
 export const redirectToCustomerPortal = async () => {
     const redirectURL = paymentCompletionRedirectURL();
-    const url = await apiURL("/billing/stripe/customer-portal");
-    const params = new URLSearchParams({ redirectURL });
-    const res = await fetch(`${url}?${params.toString()}`, {
-        headers: await authenticatedRequestHeaders(),
-    });
+    const res = await fetch(
+        await apiURL("/billing/stripe/customer-portal", { redirectURL }),
+        { headers: await authenticatedRequestHeaders() },
+    );
     ensureOk(res);
     const portal = z.object({ url: z.string() }).parse(await res.json());
     window.location.href = portal.url;
