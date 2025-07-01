@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import "package:flutter/rendering.dart";
 import "package:flutter/services.dart";
 import "package:flutter_displaymode/flutter_displaymode.dart";
+import "package:intl/date_symbol_data_local.dart";
 import 'package:logging/logging.dart';
 import "package:media_kit/media_kit.dart";
 import "package:package_info_plus/package_info_plus.dart";
@@ -116,6 +117,11 @@ Future<void> _homeWidgetSync([bool isBackground = false]) async {
     return;
   }
 
+  if (isBackground) {
+    final locale = await getLocale();
+    await initializeDateFormatting(locale?.languageCode ?? "en");
+  }
+
   try {
     await HomeWidgetService.instance.initHomeWidget();
   } catch (e, s) {
@@ -163,6 +169,7 @@ Future<void> _runMinimally(String taskId, TimeLogger tlog) async {
   LocalFileUpdateService.instance.init(prefs);
   await LocalSyncService.instance.init(prefs);
   RemoteSyncService.instance.init(prefs);
+  await FavoritesService.instance.initFav();
   await SyncService.instance.init(prefs);
 
   // Misc Services

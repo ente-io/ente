@@ -157,7 +157,7 @@ class AlbumHomeWidgetService {
       final collection = CollectionsService.instance.getCollectionByID(albumId);
       if (collection != null &&
           !collection.isDeleted &&
-          collection.isHidden()) {
+          !collection.isHidden()) {
         albums.add(collection);
       }
     }

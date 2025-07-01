@@ -222,6 +222,7 @@ class MemoryHomeWidgetService {
       onThisDay: onThisDayValue,
       pastYears: lastYearValue,
       smart: smartMemoryValue,
+      hasAnyWidgets: await countHomeWidgets() > 0,
     );
 
     return memories;
