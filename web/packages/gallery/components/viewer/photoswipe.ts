@@ -1046,6 +1046,7 @@ export class FileViewerPhotoSwipe {
         const handleToggleFavoriteIfEnabled = () => {
             if (
                 haveUser &&
+                currentAnnotatedFile().annotation.showFavorite &&
                 !delegate.isFavoritePending(currentAnnotatedFile())
             ) {
                 handleToggleFavorite();

@@ -821,7 +821,7 @@ const Page: React.FC = () => {
         [],
     );
 
-    const handleToggleFavorite = useCallback(
+    const handleFileViewerToggleFavorite = useCallback(
         async (file: EnteFile) => {
             const fileID = file.id;
             const isFavorite = favoriteFileIDs.has(fileID);
@@ -840,7 +840,7 @@ const Page: React.FC = () => {
                 dispatch({ type: "removePendingFavoriteUpdate", fileID });
             }
         },
-        [favoriteFileIDs],
+        [user, favoriteFileIDs],
     );
 
     const handleFileViewerFileVisibilityUpdate = useCallback(
@@ -1121,7 +1121,7 @@ const Page: React.FC = () => {
                     setFilesDownloadProgressAttributesCreator={
                         setFilesDownloadProgressAttributesCreator
                     }
-                    onToggleFavorite={handleToggleFavorite}
+                    onToggleFavorite={handleFileViewerToggleFavorite}
                     onFileVisibilityUpdate={
                         handleFileViewerFileVisibilityUpdate
                     }
