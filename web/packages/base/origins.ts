@@ -21,14 +21,16 @@ export const apiOrigin = async () =>
  *
  * @param queryParams An optional object containing query params. This is
  * appended to the generated URL after funneling it through
- * {@link URLSearchParams}. The values can be `strings` or `numbers` (both of
- * which are converted to `string`s by using `toString`).
+ * {@link URLSearchParams}. Each value can be a `string` or `number` or
+ * `boolean` - all of which are converted to `string`s by using `toString`
+ *
+ * > The boolean stringification yields "true" or "false".
  *
  * @returns path prefixed by {@link apiOrigin}.
  */
 export const apiURL = async (
     path: string,
-    queryParams?: Record<string, string | number>,
+    queryParams?: Record<string, string | number | boolean>,
 ) => {
     let url = (await apiOrigin()) + path;
     if (queryParams) {

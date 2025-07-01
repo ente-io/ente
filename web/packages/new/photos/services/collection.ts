@@ -930,11 +930,13 @@ export const deleteCollection = async (
     }
 
     ensureOk(
-        await fetch(await apiURL(`/collections/v3/${collectionID}`), {
-            method: "DELETE",
-            headers: await authenticatedRequestHeaders(),
-            body: JSON.stringify({ collectionID, keepFiles }),
-        }),
+        await fetch(
+            await apiURL(`/collections/v3/${collectionID}`, {
+                collectionID,
+                keepFiles,
+            }),
+            { method: "DELETE", headers: await authenticatedRequestHeaders() },
+        ),
     );
 };
 
