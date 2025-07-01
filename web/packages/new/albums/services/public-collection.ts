@@ -5,11 +5,16 @@ import {
 } from "ente-base/http";
 import { apiURL } from "ente-base/origins";
 import {
+    decryptRemoteCollection,
     RemoteCollection,
     type Collection,
     type PublicURL,
 } from "ente-media/collection";
 import { z } from "zod/v4";
+import {
+    saveLastPublicCollectionReferralCode,
+    savePublicCollection,
+} from "./public-albums-fdb";
 
 /**
  * Verify with remote that the password entered by the user is the same as the
@@ -93,11 +98,20 @@ export const PublicCollectionInfo = z.object({
  * (the fragment is a client side only portion that can be used to have local
  * secrets that are not sent by the browser to the server).
  */
-export const fetchAndSavePublicCollection = (
+export const fetchAndSavePublicCollection = async (
     accessToken: string,
     collectionKey: string,
 ): Promise<Collection> => {
-    throw new Error("TODO");
+    const collectionInfo = await getPublicCollectionInfo(accessToken);
+    const collection = await decryptRemoteCollection(
+        collectionInfo.collection,
+        collectionKey,
+    );
+
+    await savePublicCollection(collection);
+    await saveLastPublicCollectionReferralCode(collectionInfo.referralCode);
+
+    return collection;
 };
 
 /**
@@ -107,7 +121,7 @@ export const fetchAndSavePublicCollection = (
  *
  * @param accessToken A public collection access key.
  */
-const getPublicCollectionInfo = (accessToken: string) => {
+const getPublicCollectionInfo = async (accessToken: string) => {
     const res = await fetch(await apiURL("/public-collection/info"), {
         headers: authenticatedPublicAlbumsRequestHeaders({ accessToken }),
     });
