@@ -19,7 +19,7 @@ import { z } from "zod/v4";
  *
  * Use {@link savePublicCollections} to update the database.
  */
-export const savedPublicCollections = async (): Promise<Collection[]> =>
+const savedPublicCollections = async (): Promise<Collection[]> =>
     // TODO:
     //
     // See: [Note: strict mode migration]
@@ -35,7 +35,7 @@ export const savedPublicCollections = async (): Promise<Collection[]> =>
  *
  * This is the setter corresponding to {@link savedPublicCollections}.
  */
-export const savePublicCollections = (collections: Collection[]) =>
+const savePublicCollections = (collections: Collection[]) =>
     localForage.setItem("public-collections", collections);
 
 /**
@@ -233,24 +233,27 @@ export const removePublicCollectionLastSyncTime = async (
 };
 
 /**
- * Return the password JWT, if any, present in our local database for the given
- * public collection (as identified by its {@link accessToken}).
+ * Return the access token JWT, if any, present in our local database for the
+ * given public collection (as identified by its {@link accessToken}).
  *
- * Use {@link savedPublicCollectionPasswordJWT} to save the value, and
- * {@link removePublicCollectionPasswordJWT} to remove it.
+ * Use {@link savePublicCollectionAccessTokenJWT} to save the value, and
+ * {@link removePublicCollectionAccessTokenJWT} to remove it.
  */
-export const savedPublicCollectionPasswordJWT = async (accessToken: string) =>
+export const savedPublicCollectionAccessTokenJWT = async (
+    accessToken: string,
+) =>
     LocalString.parse(
         await localForage.getItem(`public-${accessToken}-passkey`),
     );
 
 /**
- * Update the password JWT in our local database for the given public
+ * Update the access token JWT in our local database for the given public
  * collection (as identified by its {@link accessToken}).
  *
- * This is the setter corresponding to {@link savedPublicCollectionPasswordJWT}.
+ * This is the setter corresponding to
+ * {@link savedPublicCollectionAccessTokenJWT}.
  */
-export const savePublicCollectionPasswordJWT = async (
+export const savePublicCollectionAccessTokenJWT = async (
     accessToken: string,
     passwordJWT: string,
 ) => {
@@ -258,12 +261,10 @@ export const savePublicCollectionPasswordJWT = async (
 };
 
 /**
- * Remove the password JWT in our local database for the given public
+ * Remove the access token JWT in our local database for the given public
  * collection (as identified by its {@link accessToken}).
- *
- * This is the setter corresponding to {@link savedPublicCollectionPasswordJWT}.
  */
-export const removePublicCollectionPasswordJWT = async (
+export const removePublicCollectionAccessTokenJWT = async (
     accessToken: string,
 ) => {
     await localForage.removeItem(`public-${accessToken}-passkey`);

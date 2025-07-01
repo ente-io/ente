@@ -9,6 +9,7 @@ import type {
 import type { EnteFile, RemoteEnteFile } from "ente-media/file";
 import { decryptRemoteFile } from "ente-media/file";
 import {
+    removePublicCollectionAccessTokenJWT,
     removePublicCollectionByKey,
     removePublicCollectionFiles,
     removePublicCollectionLastSyncTime,
@@ -21,39 +22,15 @@ import {
 } from "ente-new/albums/services/public-albums-fdb";
 import { CustomError, parseSharingErrorCodes } from "ente-shared/error";
 import HTTPService from "ente-shared/network/HTTPService";
-import localForage from "ente-shared/storage/localForage";
 
 // Fix this once we can trust the types.
 // eslint-disable-next-line @typescript-eslint/no-unnecessary-template-expression
 export const getPublicCollectionUID = (token: string) => `${token}`;
 
-const getPublicCollectionPasswordKey = (collectionUID: string) =>
-    `public-${collectionUID}-passkey`;
-
 export interface LocalSavedPublicCollectionFiles {
     collectionUID: string;
     files: EnteFile[];
 }
-
-export const getLocalPublicCollectionPassword = async (
-    collectionUID: string,
-): Promise<string> => {
-    return (
-        (await localForage.getItem<string>(
-            getPublicCollectionPasswordKey(collectionUID),
-        )) || ""
-    );
-};
-
-export const savePublicCollectionPassword = async (
-    collectionUID: string,
-    passToken: string,
-): Promise<string> => {
-    return await localForage.setItem<string>(
-        getPublicCollectionPasswordKey(collectionUID),
-        passToken,
-    );
-};
 
 export const syncPublicFiles = async (
     token: string,
@@ -266,7 +243,7 @@ export const removePublicCollectionWithFiles = async (
 };
 
 export const removePublicFiles = async (collectionUID: string) => {
-    await localForage.removeItem(getPublicCollectionPasswordKey(collectionUID));
+    await removePublicCollectionAccessTokenJWT(collectionUID);
     await removePublicCollectionLastSyncTime(collectionUID);
     await removePublicCollectionFiles(collectionUID);
 };
