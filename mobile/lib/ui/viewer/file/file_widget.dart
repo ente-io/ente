@@ -12,6 +12,8 @@ class FileWidget extends StatelessWidget {
   final Function(bool)? playbackCallback;
   final BoxDecoration? backgroundDecoration;
   final bool? autoPlay;
+  final bool? isFromMemories;
+  final Function({required int memoryDuration})? onFinalFileLoad;
 
   const FileWidget(
     this.file, {
@@ -20,6 +22,8 @@ class FileWidget extends StatelessWidget {
     this.playbackCallback,
     required this.tagPrefix,
     this.backgroundDecoration,
+    this.isFromMemories = false,
+    this.onFinalFileLoad,
     super.key,
   });
 
@@ -37,7 +41,9 @@ class FileWidget extends StatelessWidget {
         shouldDisableScroll: shouldDisableScroll,
         tagPrefix: tagPrefix,
         backgroundDecoration: backgroundDecoration,
+        isFromMemories: isFromMemories ?? false,
         key: key ?? ValueKey(fileKey),
+        onFinalFileLoad: onFinalFileLoad,
       );
     } else if (file.fileType == FileType.video) {
       // use old video widget on iOS simulator as the new one crashes while
@@ -54,6 +60,8 @@ class FileWidget extends StatelessWidget {
         file,
         tagPrefix: tagPrefix,
         playbackCallback: playbackCallback,
+        onFinalFileLoad: onFinalFileLoad,
+        isFromMemories: isFromMemories ?? false,
         key: key ?? ValueKey(fileKey),
       );
     } else {

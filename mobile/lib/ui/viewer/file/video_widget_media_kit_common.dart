@@ -99,56 +99,79 @@ class _VideoWidgetState extends State<VideoWidget> {
                 children: [
                   GestureDetector(
                     behavior: HitTestBehavior.opaque,
-                    onTap: () {
-                      showControlsNotifier.value = !showControlsNotifier.value;
-                      if (widget.playbackCallback != null) {
-                        widget.playbackCallback!(
-                          !showControlsNotifier.value,
-                        );
+                    onTap: widget.isFromMemories
+                        ? null
+                        : () {
+                            showControlsNotifier.value =
+                                !showControlsNotifier.value;
+                            if (widget.playbackCallback != null) {
+                              widget.playbackCallback!(
+                                !showControlsNotifier.value,
+                              );
+                            }
+                          },
+                    onLongPress: () {
+                      if (widget.isFromMemories) {
+                        widget.playbackCallback?.call(false);
+                        if (widget.controller.player.state.playing) {
+                          widget.controller.player.pause();
+                        }
+                      }
+                    },
+                    onLongPressUp: () {
+                      if (widget.isFromMemories) {
+                        widget.playbackCallback?.call(true);
+                        if (!widget.controller.player.state.playing) {
+                          widget.controller.player.play();
+                        }
                       }
                     },
                     child: Container(
                       constraints: const BoxConstraints.expand(),
                     ),
                   ),
-                  IgnorePointer(
-                    ignoring: !value,
-                    child: PlayPauseButtonMediaKit(widget.controller),
-                  ),
-                  Positioned(
-                    bottom: verticalMargin,
-                    right: 0,
-                    left: 0,
-                    child: IgnorePointer(
-                      ignoring: !value,
-                      child: SafeArea(
-                        top: false,
-                        left: false,
-                        right: false,
-                        child: Padding(
-                          padding: EdgeInsets.only(
-                            bottom: widget.isFromMemories ? 32 : 0,
-                          ),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              VideoStreamChangeWidget(
-                                showControls: value,
-                                file: widget.file,
-                                isPreviewPlayer: widget.isPreviewPlayer,
-                                onStreamChange: widget.onStreamChange,
+                  widget.isFromMemories
+                      ? const SizedBox.shrink()
+                      : IgnorePointer(
+                          ignoring: !value,
+                          child: PlayPauseButtonMediaKit(widget.controller),
+                        ),
+                  widget.isFromMemories
+                      ? const SizedBox.shrink()
+                      : Positioned(
+                          bottom: verticalMargin,
+                          right: 0,
+                          left: 0,
+                          child: IgnorePointer(
+                            ignoring: !value,
+                            child: SafeArea(
+                              top: false,
+                              left: false,
+                              right: false,
+                              child: Padding(
+                                padding: EdgeInsets.only(
+                                  bottom: widget.isFromMemories ? 32 : 0,
+                                ),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    VideoStreamChangeWidget(
+                                      showControls: value,
+                                      file: widget.file,
+                                      isPreviewPlayer: widget.isPreviewPlayer,
+                                      onStreamChange: widget.onStreamChange,
+                                    ),
+                                    SeekBarAndDuration(
+                                      controller: widget.controller,
+                                      isSeekingNotifier: _isSeekingNotifier,
+                                      file: widget.file,
+                                    ),
+                                  ],
+                                ),
                               ),
-                              SeekBarAndDuration(
-                                controller: widget.controller,
-                                isSeekingNotifier: _isSeekingNotifier,
-                                file: widget.file,
-                              ),
-                            ],
+                            ),
                           ),
                         ),
-                      ),
-                    ),
-                  ),
                 ],
               ),
             );
