@@ -82,7 +82,10 @@ export const removePublicCollectionByKey = async (collectionKey: string) => {
     ]);
 };
 
-const LocalReferralCode = z.string().nullish().transform(nullToUndefined);
+/**
+ * Zod schema for a nullish string, with `null` transformed to `undefined`.
+ */
+const LocalString = z.string().nullish().transform(nullToUndefined);
 
 /**
  * Return the last saved referral code present in our local database.
@@ -100,7 +103,7 @@ const LocalReferralCode = z.string().nullish().transform(nullToUndefined);
  *    out a new value using {@link saveLastPublicCollectionReferralCode}.
  */
 export const savedLastPublicCollectionReferralCode = async () =>
-    LocalReferralCode.parse(await localForage.getItem("public-referral-code"));
+    LocalString.parse(await localForage.getItem("public-referral-code"));
 
 /**
  * Update the referral code present in our local database.
@@ -229,7 +232,42 @@ export const removePublicCollectionLastSyncTime = async (
     await localForage.removeItem(`public-${accessToken}-time`);
 };
 
-const LocalUploaderName = z.string().nullish().transform(nullToUndefined);
+/**
+ * Return the password JWT, if any, present in our local database for the given
+ * public collection (as identified by its {@link accessToken}).
+ *
+ * Use {@link savedPublicCollectionPasswordJWT} to save the value, and
+ * {@link removePublicCollectionPasswordJWT} to remove it.
+ */
+export const savedPublicCollectionPasswordJWT = async (accessToken: string) =>
+    LocalString.parse(
+        await localForage.getItem(`public-${accessToken}-passkey`),
+    );
+
+/**
+ * Update the password JWT in our local database for the given public
+ * collection (as identified by its {@link accessToken}).
+ *
+ * This is the setter corresponding to {@link savedPublicCollectionPasswordJWT}.
+ */
+export const savePublicCollectionPasswordJWT = async (
+    accessToken: string,
+    passwordJWT: string,
+) => {
+    await localForage.setItem(`public-${accessToken}-passkey`, passwordJWT);
+};
+
+/**
+ * Remove the password JWT in our local database for the given public
+ * collection (as identified by its {@link accessToken}).
+ *
+ * This is the setter corresponding to {@link savedPublicCollectionPasswordJWT}.
+ */
+export const removePublicCollectionPasswordJWT = async (
+    accessToken: string,
+) => {
+    await localForage.removeItem(`public-${accessToken}-passkey`);
+};
 
 /**
  * Return the previously saved uploader name, if any, present in our local
@@ -251,7 +289,7 @@ const LocalUploaderName = z.string().nullish().transform(nullToUndefined);
  * saved uploader name we want.
  */
 export const savedPublicCollectionUploaderName = async (accessToken: string) =>
-    LocalUploaderName.parse(
+    LocalString.parse(
         await localForage.getItem(`public-${accessToken}-uploaderName`),
     );
 
