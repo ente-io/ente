@@ -1,17 +1,17 @@
 import "package:photos/events/event.dart";
 
-class ToggleMemoryAnimationEvent extends Event {
+class DetailsSheetEvent extends Event {
   final int? uploadedFileID;
   final String? localID;
-  final bool pause;
+  final bool opened;
 
-  ToggleMemoryAnimationEvent({
+  DetailsSheetEvent({
     required this.localID,
     required this.uploadedFileID,
-    required this.pause,
+    required this.opened,
   });
 
-  bool isSamePhoto({required int? uploadedFileID, required String? localID}) {
+  bool isSameFile({required int? uploadedFileID, required String? localID}) {
     if (this.uploadedFileID == uploadedFileID && this.localID == localID) {
       return true;
     }

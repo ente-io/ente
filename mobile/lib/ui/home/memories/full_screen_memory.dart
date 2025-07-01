@@ -7,8 +7,8 @@ import "package:flutter/cupertino.dart";
 import "package:flutter/material.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
+import "package:photos/events/details_sheet_event.dart";
 import "package:photos/events/reset_zoom_of_photo_view_event.dart";
-import "package:photos/events/toggle_memory_animation_event.dart";
 import "package:photos/models/file/file_type.dart";
 import "package:photos/models/memories/memory.dart";
 import "package:photos/service_locator.dart";
@@ -154,8 +154,8 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
   final hasPointerOnScreenNotifier = ValueNotifier<bool>(false);
   bool hasFinalFileLoaded = false;
 
-  late final StreamSubscription<ToggleMemoryAnimationEvent>
-      _toggleAnimationSubscription;
+  late final StreamSubscription<DetailsSheetEvent>
+      _detailSheetEventSubscription;
 
   @override
   void initState() {
@@ -167,18 +167,18 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
       _hasPointerListener,
     );
 
-    _toggleAnimationSubscription =
-        Bus.instance.on<ToggleMemoryAnimationEvent>().listen((event) {
+    _detailSheetEventSubscription =
+        Bus.instance.on<DetailsSheetEvent>().listen((event) {
       final inheritedData = FullScreenMemoryData.of(context);
       if (inheritedData == null) return;
       final index = inheritedData.indexNotifier.value;
       final currentFile = inheritedData.memories[index].file;
 
-      if (event.isSamePhoto(
+      if (event.isSameFile(
         uploadedFileID: currentFile.uploadedFileID,
         localID: currentFile.localID,
       )) {
-        _toggleAnimation(pause: event.pause);
+        _toggleAnimation(pause: event.opened);
       }
     });
   }
@@ -188,7 +188,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
     _showTitle.dispose();
     durationNotifier.dispose();
     hasPointerOnScreenNotifier.removeListener(_hasPointerListener);
-    _toggleAnimationSubscription.cancel();
+    _detailSheetEventSubscription.cancel();
     super.dispose();
   }
 
