@@ -86,9 +86,8 @@ class _AllMemoriesPageState extends State<AllMemoriesPage>
   int _getNextMemoryIndex(int currentIndex) {
     int lastSeenIndex = 0;
     int lastSeenTimestamp = 0;
-    for (var index = 0;
-        index < widget.allMemories[currentIndex].length;
-        index++) {
+    final allMemoriesLength = widget.allMemories[currentIndex].length;
+    for (var index = 0; index < allMemoriesLength; index++) {
       final memory = widget.allMemories[currentIndex][index];
       if (!memory.isSeen()) {
         return index;
