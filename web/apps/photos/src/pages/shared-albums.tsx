@@ -51,7 +51,7 @@ import { sortFiles } from "ente-gallery/utils/file";
 import type { Collection } from "ente-media/collection";
 import { type EnteFile } from "ente-media/file";
 import { savedPublicCollectionFiles } from "ente-new/albums/services/public-albums-fdb";
-import { verifyPublicAlbumPassword } from "ente-new/albums/services/publicCollection";
+import { verifyPublicAlbumPassword } from "ente-new/albums/services/public-collection";
 import {
     GalleryItemsHeaderAdapter,
     GalleryItemsSummary,
