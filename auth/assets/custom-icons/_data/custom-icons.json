@@ -27,6 +27,9 @@
       "hex": "c41230"
     },
     {
+      "title": "AliasVault"
+    },
+    {
       "title": "aliyun",
       "altNames": [
         "阿里云"
@@ -738,6 +741,10 @@
         "luma",
         "lu.ma"
       ]
+    },
+    {
+      "title": "Mailbox.org",
+      "slug": "mailbox_org"
     },
     {
       "title": "Marketplace.tf",
