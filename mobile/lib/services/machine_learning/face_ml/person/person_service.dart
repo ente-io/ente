@@ -32,7 +32,7 @@ class PersonService {
   static const kNameKey = "name";
 
   Future<List<PersonEntity>>? _cachedPersonsFuture;
-  int _lastPersonCacheRefresh = 0;
+  int _lastCacheRefreshTime = 0;
 
   static PersonService get instance {
     if (_instance == null) {
@@ -60,11 +60,11 @@ class PersonService {
   void clearCache() {
     _emailToPartialPersonDataMapCache.clear();
     _cachedPersonsFuture = null;
-    _lastPersonCacheRefresh = 0;
+    _lastCacheRefreshTime = 0;
   }
 
   Future<void> refreshPersonCache() async {
-    _lastPersonCacheRefresh = 0;
+    _lastCacheRefreshTime = 0;
     // wait to ensure cache is refreshed
     final _ = await getPersons();
   }
@@ -87,8 +87,8 @@ class PersonService {
   }
 
   Future<List<PersonEntity>> getPersons() async {
-    if (_lastPersonCacheRefresh != lastRemoteSyncTime()) {
-      _lastPersonCacheRefresh = lastRemoteSyncTime();
+    if (_lastCacheRefreshTime != lastRemoteSyncTime()) {
+      _lastCacheRefreshTime = lastRemoteSyncTime();
       _cachedPersonsFuture = null; // Invalidate cache
     }
     _cachedPersonsFuture ??= _fetchAndCachePersons();
@@ -551,6 +551,7 @@ class PersonService {
     String? id,
   }) async {
     final result = await entityService.addOrUpdate(type, jsonMap, id: id);
+    _lastCacheRefreshTime = 0; // Invalidate cache
     return result;
   }
 }
