@@ -183,13 +183,14 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
                 />
             ),
             continue: {
+                text: t("keep_photos"),
+                color: "primary",
+                action: deleteCollectionButKeepFiles,
+            },
+            secondary: {
                 text: t("delete_photos"),
                 color: "critical",
                 action: deleteCollectionAlongWithFiles,
-            },
-            secondary: {
-                text: t("keep_photos"),
-                action: deleteCollectionButKeepFiles,
             },
         });
     };

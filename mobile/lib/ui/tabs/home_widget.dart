@@ -128,7 +128,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     super.initState();
 
     if (LocalSyncService.instance.hasCompletedFirstImport()) {
-       syncWidget();
+      syncWidget();
     }
     _tabChangedEventSubscription =
         Bus.instance.on<TabChangedEvent>().listen((event) {
@@ -703,7 +703,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     }
     if (!permissionService.hasGrantedPermissions()) {
       entityService.syncEntities().then((_) {
-        PersonService.instance.resetEmailToPartialPersonDataCache();
+        PersonService.instance.refreshPersonCache();
       });
       return const GrantPermissionsWidget();
     }
