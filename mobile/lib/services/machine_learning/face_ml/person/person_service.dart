@@ -98,14 +98,13 @@ class PersonService {
   Future<List<PersonEntity>> _fetchAndCachePersons() async {
     logger.finest("reading all persons from local db");
     final entities = await entityService.getEntities(EntityType.cgroup);
-    // Only use compute for large datasets to avoid overhead
     final persons = await Computer.shared().compute(
       _decodePersonEntities,
       param: {"entity": entities},
+      taskName: "decode_person_entities",
     );
-    // Populate email cache if needed
     _emailToPartialPersonDataMapCache.clear();
-    for (var person in persons) {
+    for (PersonEntity person in persons) {
       if (person.data.email != null && person.data.email!.isNotEmpty) {
         _emailToPartialPersonDataMapCache[person.data.email!] = {
           kPersonIDKey: person.remoteID,
