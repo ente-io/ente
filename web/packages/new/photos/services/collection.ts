@@ -1,4 +1,4 @@
-import { ensureLocalUser, type User } from "ente-accounts/services/user";
+import { ensureLocalUser } from "ente-accounts/services/user";
 import { blobCache } from "ente-base/blob-cache";
 import {
     boxSeal,
@@ -512,17 +512,6 @@ interface CollectionFileItem {
     keyDecryptionNonce: string;
 }
 
-export interface AddToCollectionRequest {
-    collectionID: number;
-    files: CollectionFileItem[];
-}
-
-export interface MoveToCollectionRequest {
-    fromCollectionID: number;
-    toCollectionID: number;
-    files: CollectionFileItem[];
-}
-
 /**
  * Make a remote request to add the given {@link files} to the given
  * {@link collection}.
@@ -688,6 +677,268 @@ export const deleteFromTrash = async (fileIDs: number[]) =>
             }),
         ),
     );
+
+/**
+ * Remove the given files from the specified collection owned by the user.
+ *
+ * Reads local state but does not modify it. The effects are on remote.
+ *
+ * @param collection A collection (either owned by the user, or shared with the
+ * user).
+ *
+ * @param files The files to remove from the collection. The files owned by the
+ * user will be removed. If the collection is not owned by the user, then any
+ * files that are not owned by the user will not be processed. In such cases,
+ * this function will return a count less than the count of the provided files
+ * (after having removed what can be removed).
+ *
+ * @returns The count of files that were processed. This can be less than the
+ * count of the provided {@link files} if some files were not processed because
+ * because they belong to other users (and {@link collection} also does not
+ * belong to the current user).
+ *
+ * [Note: Removing files from a collection]
+ *
+ * There are three scenarios
+ *
+ *                             own file      shared file
+ *     own collection             M               R
+ *     others collection          R         not supported
+ *
+ *     M (move)   when both collection and file belongs to user
+ *     R (remove) when only one of them belongs to the user
+ *
+ * The move operation is not supported across ownership boundaries. The remove
+ * operation is only supported across ownership boundaries, but the user should
+ * have ownership of either the file or collection (not both).
+ *
+ * In more detail, the above three scenarios can be described this way.
+ *
+ * 1. Move: If the user owns both the collection and the file they're trying to
+ *    remove from the collection, then instead of a remove the client needs to
+ *    move it to a different user owned collection in which it already exists
+ *    (such a move acts as a remove). If it doesn't exist in any other user
+ *    owned collection, then move it to the user's "Uncategorized" collection.
+ *    The intent is that a "remove from collection" should not remove the last
+ *    copy of a file (thus deleting it).
+ *
+ * 2. Remove: If the user does not own the file being removed, or owns the file
+ *    being removed but does not own the collection from which it is being
+ *    removed, they can remove it from the collection using the POST
+ *    "/collections/v3/remove-files".
+ *
+ * 3. Not supported: Currently the possibility of removing a file the user does
+ *    not own from a collection that the user does not own, even if they are a
+ *    collaborator, is not supported.
+ *
+ * The "remove from collection" primitive is provided to the user both as a UI
+ * action (on selecting files in a collection), and as an implicit action if the
+ * user chooses the option to "keep files" when deleting a collection.
+ *
+ * This entire shebang is implemented by the following set of functions:
+ *
+ * 1. [Public] {@link removeFromCollection} - Handles both own and others
+ *    collections by delegating to the one of the following functions.
+ *
+ * 2. [Public] {@link removeFromOwnCollection} - Handles both cases for own
+ *    collections by delegating to either "Move" or "Remove"
+ *
+ * 3. [Private] {@link removeFromOthersCollection} - Handles both cases for
+ *    other's collections by delegating to "Remove", then if needed, also
+ *    throwing an error for the unsupported case.
+ *
+ * 4. [Private] {@link removeOwnFilesFromOwnCollection} implements the "Move".
+ *
+ * 5. [Private] {@link removeNonCollectionOwnerFiles} implements the "Remove".
+ */
+export const removeFromCollection = async (
+    collection: Collection,
+    files: EnteFile[],
+): Promise<number> =>
+    collection.owner.id == ensureLocalUser().id
+        ? removeFromOwnCollection(collection.id, files)
+        : removeFromOthersCollection(collection.id, files);
+
+export const removeFromOwnCollection = async (
+    collectionID: number,
+    files: EnteFile[],
+) => {
+    const userID = ensureLocalUser().id;
+    const [userFiles, nonUserFiles] = splitByPredicate(
+        files,
+        (f) => f.ownerID == userID,
+    );
+    if (userFiles.length) {
+        await removeOwnFilesFromOwnCollection(collectionID, userFiles);
+    }
+    if (nonUserFiles.length) {
+        await removeNonCollectionOwnerFiles(collectionID, nonUserFiles);
+    }
+    return files.length;
+};
+
+const removeFromOthersCollection = async (
+    collectionID: number,
+    files: EnteFile[],
+) => {
+    const userID = ensureLocalUser().id;
+    const [userFiles] = splitByPredicate(files, (f) => f.ownerID == userID);
+    if (userFiles.length) {
+        await removeNonCollectionOwnerFiles(collectionID, userFiles);
+    }
+    return userFiles.length;
+};
+
+/**
+ * Remove the given user owned files from the given collection also owned by the
+ * user, ensuring that at least one user owned instance is retained for them
+ * (either in a different user owned collection in which they already existed,
+ * or in the user's "Uncategorized" collection as a fallback).
+ *
+ * Reads local state but does not modify it. The effects are on remote.
+ *
+ * This is used as a subroutine of [Note: Removing files from a collection].
+ */
+const removeOwnFilesFromOwnCollection = async (
+    collectionID: number,
+    filesToRemove: EnteFile[],
+) => {
+    const userID = ensureLocalUser().id;
+    const collections = await savedCollections();
+    const collectionFiles = await savedCollectionFiles();
+
+    const collectionsByID = new Map(collections.map((c) => [c.id, c]));
+
+    // This set keeps a running track of file IDs that still need to be removed.
+    // It is seeded with the original set of files we were asked to remove.
+    const filesToRemoveIDs = new Set(filesToRemove.map((f) => f.id));
+    // A predicate that checks if the given file is still pending removal.
+    const pendingRemove = (f: EnteFile) => filesToRemoveIDs.has(f.id);
+
+    const collectionFilesToRemove = collectionFiles.filter(pendingRemove);
+    const groups = groupFilesByCollectionID(collectionFilesToRemove);
+    for (const [targetCollectionID, filesInCollection] of groups.entries()) {
+        // Ignore the source collection itself.
+        if (targetCollectionID == collectionID) continue;
+
+        const targetCollection = collectionsByID.get(targetCollectionID)!;
+        // We want a copy to exist in at least one other user owned collection.
+        if (targetCollection.owner.id != userID) continue;
+        // We'll move to uncategorized after the loop (if they still remain).
+        if (targetCollection.type == "uncategorized") continue;
+
+        const filesInCollectionToRemove =
+            filesInCollection.filter(pendingRemove);
+        if (!filesInCollectionToRemove.length) continue;
+
+        // The file already exists in the target collection, but this acts as
+        // "remove" from the source.
+        await moveFromCollection(
+            collectionID,
+            targetCollection,
+            filesInCollectionToRemove,
+        );
+
+        // Mark the files we just moved as been taken care of.
+        filesInCollectionToRemove.forEach((f) => filesToRemoveIDs.delete(f.id));
+    }
+
+    // Any files that were not moved so far, move them to uncategorized,
+    // creating uncategorized if needed.
+    const remainingFiles = filesToRemove.filter(pendingRemove);
+    if (remainingFiles.length) {
+        const uncategorizedCollection =
+            collections.find((c) => c.type == "uncategorized") ??
+            (await createUncategorizedCollection());
+
+        await moveFromCollection(
+            collectionID,
+            uncategorizedCollection,
+            remainingFiles,
+        );
+    }
+};
+
+/**
+ * Remove the provided files from the provided collection on remote.
+ *
+ * Only files which do not belong to the collection owner can be removed from
+ * the collection using this endpoint. That is,
+ *
+ * - Either the user owns the collection and the all files being removed are
+ *   owned by somebody else, or
+ *
+ * - The user owns all the files being removed, but the collection belongs to
+ *   somebody else.
+ *
+ * If the collection owner wants to remove files owned by them, then their
+ * client should first move those files first to other collections owned by the
+ * collection owner.
+ *
+ * Remote only, does not modify local state.
+ *
+ * See also: [Note: Removing files from a collection].
+ *
+ * @param collectionID The ID of collection from which to remove the files.
+ *
+ * @param files A list of files which do not belong to the user, and which we
+ * the user wants to remove from the given collection.
+ */
+const removeNonCollectionOwnerFiles = async (
+    collectionID: number,
+    files: EnteFile[],
+) =>
+    batched(files, async (batchFiles) =>
+        ensureOk(
+            await fetch(await apiURL("/collections/v3/remove-files"), {
+                method: "POST",
+                headers: await authenticatedRequestHeaders(),
+                body: JSON.stringify({
+                    collectionID,
+                    fileIDs: batchFiles.map((f) => f.id),
+                }),
+            }),
+        ),
+    );
+
+/**
+ * Delete a collection on remote.
+ *
+ * Reads local state but does not modify it. The effects are on remote.
+ *
+ * @param collectionID The ID of the collection to delete.
+ *
+ * @param opts Deletion options. In particular, if {@link keepFiles} is true,
+ *  then the any of the user's files that only exist in this collection are
+ *  first moved to another one of the user's collection (or Uncategorized if no
+ *  such collection exists) before deleting the collection.
+ *
+ * See: [Note: Removing files from a collection]
+ */
+export const deleteCollection = async (
+    collectionID: number,
+    opts?: { keepFiles?: boolean },
+) => {
+    const keepFiles = opts?.keepFiles ?? false;
+
+    if (keepFiles) {
+        const collectionFiles = await savedCollectionFiles();
+        await removeFromOwnCollection(
+            collectionID,
+            collectionFiles.filter((f) => f.collectionID == collectionID),
+        );
+    }
+
+    ensureOk(
+        await fetch(
+            await apiURL(`/collections/v3/${collectionID}`, {
+                collectionID,
+                keepFiles,
+            }),
+            { method: "DELETE", headers: await authenticatedRequestHeaders() },
+        ),
+    );
+};
 
 /**
  * Rename a collection on remote.
@@ -964,8 +1215,13 @@ export const savedUserFavoritesCollection = async () => {
  *
  * Reads local state but does not modify it. The effects are on remote.
  */
-export const addToFavorites = async (files: EnteFile[]) =>
+export const addToFavoritesCollection = async (files: EnteFile[]) =>
     addToCollection(await savedOrCreateUserFavoritesCollection(), files);
+
+export const removeFromFavoritesCollection = async (files: EnteFile[]) =>
+    // Non-null assertion because if we get here and a favorites collection does
+    // not already exist, then something is wrong.
+    removeFromOwnCollection((await savedUserFavoritesCollection())!.id, files);
 
 /**
  * Return the default hidden collection for the user if one is found in the
@@ -1023,8 +1279,24 @@ export const findDefaultHiddenCollectionIDs = (collections: Collection[]) =>
             .map((collection) => collection.id),
     );
 
+/**
+ * Return `true` if the given collection is hidden.
+ *
+ * Hidden collections are those that have their visibility set to hidden in the
+ * collection's owner's private magic metadata.
+ */
 export const isHiddenCollection = (collection: Collection) =>
     collection.magicMetadata?.data.visibility == ItemVisibility.hidden;
+
+/**
+ * Return `true` if the given collection is archived.
+ *
+ * Archived collections are those that have their visibility set to hidden in the
+ * collection's private magic metadata or per-sharee private metadata.
+ */
+export const isArchivedCollection = (collection: Collection) =>
+    collection.magicMetadata?.data.visibility == ItemVisibility.archived ||
+    collection.sharedMagicMetadata?.data.visibility == ItemVisibility.archived;
 
 /**
  * Hide the provided {@link files} by moving them to the default hidden
@@ -1036,12 +1308,6 @@ export const isHiddenCollection = (collection: Collection) =>
  */
 export const hideFiles = async (files: EnteFile[]) =>
     moveToCollection(await savedOrCreateDefaultHiddenCollection(), files);
-
-/**
- * Return true if this is a collection that the user doesn't own.
- */
-export const isIncomingShare = (collection: Collection, user: User) =>
-    collection.owner.id !== user.id;
 
 /**
  * Share the provided collection with another Ente user.

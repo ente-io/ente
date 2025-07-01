@@ -92,17 +92,13 @@ interface UploadProps {
      * albums app, this prop can be omitted.
      */
     user?: LocalUser;
+    isFirstUpload?: boolean;
+    uploadTypeSelectorView: boolean;
+    dragAndDropFiles: File[];
+    uploadCollection?: Collection;
+    uploadTypeSelectorIntent: UploadTypeSelectorIntent;
+    activeCollection?: Collection;
     closeUploadTypeSelector: () => void;
-    /**
-     * Show the collection selector with the given {@link attributes}.
-     */
-    onOpenCollectionSelector?: (
-        attributes: CollectionSelectorAttributes,
-    ) => void;
-    /**
-     * Close the collection selector if it is open.
-     */
-    onCloseCollectionSelector?: () => void;
     setLoading: SetLoading;
     setShouldDisableDropzone: (value: boolean) => void;
     showCollectionSelector?: () => void;
@@ -128,6 +124,16 @@ interface UploadProps {
      */
     onRemoteFilesPull?: () => Promise<void>;
     /**
+     * Show the collection selector with the given {@link attributes}.
+     */
+    onOpenCollectionSelector?: (
+        attributes: CollectionSelectorAttributes,
+    ) => void;
+    /**
+     * Close the collection selector if it is open.
+     */
+    onCloseCollectionSelector?: () => void;
+    /**
      * Callback invoked when a file is uploaded.
      *
      * @param file The newly uploaded file.
@@ -140,13 +146,11 @@ interface UploadProps {
      * app, where the scenario requiring this will not arise.
      */
     onShowPlanSelector?: () => void;
-    isFirstUpload?: boolean;
-    uploadTypeSelectorView: boolean;
-    showSessionExpiredMessage: () => void;
-    dragAndDropFiles: File[];
-    uploadCollection?: Collection;
-    uploadTypeSelectorIntent: UploadTypeSelectorIntent;
-    activeCollection?: Collection;
+    /**
+     * Called when the upload failed because the user's session has expired, and
+     * the Upload component wants to prompt the user to log in again.
+     */
+    onShowSessionExpiredDialog: () => void;
 }
 
 type UploadType = "files" | "folders" | "zips";
@@ -160,9 +164,11 @@ export const Upload: React.FC<UploadProps> = ({
     dragAndDropFiles,
     onRemotePull,
     onRemoteFilesPull,
+    onOpenCollectionSelector,
+    onCloseCollectionSelector,
     onUploadFile,
     onShowPlanSelector,
-    showSessionExpiredMessage,
+    onShowSessionExpiredDialog,
     ...props
 }) => {
     const { showMiniDialog, onGenericError } = useBaseContext();
@@ -570,7 +576,7 @@ export const Upload: React.FC<UploadProps> = ({
                 };
             }
 
-            props.onOpenCollectionSelector({
+            onOpenCollectionSelector({
                 action: "upload",
                 onSelectCollection: uploadFilesToExistingCollection,
                 onCreateCollection: showNextModal,
@@ -580,7 +586,7 @@ export const Upload: React.FC<UploadProps> = ({
     }, [webFiles, desktopFiles, desktopFilePaths, desktopZipItems]);
 
     const preCollectionCreationAction = async () => {
-        props.onCloseCollectionSelector?.();
+        onCloseCollectionSelector?.();
         props.setShouldDisableDropzone(uploadManager.isUploadInProgress());
         setUploadPhase("preparing");
         setUploadProgressView(true);
@@ -756,7 +762,7 @@ export const Upload: React.FC<UploadProps> = ({
     const notifyUser = (e: unknown) => {
         switch (e instanceof Error && e.message) {
             case sessionExpiredErrorMessage:
-                showSessionExpiredMessage();
+                onShowSessionExpiredDialog();
                 break;
             case subscriptionExpiredErrorMessage:
                 showNotification({

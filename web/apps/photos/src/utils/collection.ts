@@ -6,15 +6,10 @@ import { uniqueFilesByID } from "ente-gallery/utils/file";
 import { type Collection, CollectionSubType } from "ente-media/collection";
 import { EnteFile } from "ente-media/file";
 import {
-    addToCollection,
     createAlbum,
     defaultHiddenCollectionUserFacingName,
     findDefaultHiddenCollectionIDs,
     isHiddenCollection,
-    isIncomingShare,
-    moveFromCollection,
-    moveToCollection,
-    restoreToCollection,
 } from "ente-new/photos/services/collection";
 import { PseudoCollectionID } from "ente-new/photos/services/collection-summary";
 import {
@@ -23,50 +18,11 @@ import {
 } from "ente-new/photos/services/photos-fdb";
 import { safeDirectoryName } from "ente-new/photos/utils/native-fs";
 import { getData } from "ente-shared/storage/localStorage";
-import { removeFromCollection } from "services/collectionService";
 import {
     SetFilesDownloadProgressAttributes,
     type SetFilesDownloadProgressAttributesCreator,
 } from "types/gallery";
 import { downloadFilesWithProgress } from "utils/file";
-
-export type CollectionOp = "add" | "move" | "remove" | "restore" | "unhide";
-
-export async function handleCollectionOp(
-    op: CollectionOp,
-    collection: Collection,
-    selectedFiles: EnteFile[],
-    selectedCollectionID: number,
-) {
-    switch (op) {
-        case "add":
-            await addToCollection(collection, selectedFiles);
-            break;
-        case "move":
-            await moveFromCollection(
-                selectedCollectionID,
-                collection,
-                selectedFiles,
-            );
-            break;
-        case "remove":
-            await removeFromCollection(collection.id, selectedFiles);
-            break;
-        case "restore":
-            await restoreToCollection(collection, selectedFiles);
-            break;
-        case "unhide":
-            await moveToCollection(collection, selectedFiles);
-            break;
-    }
-}
-
-export function getSelectedCollection(
-    collectionID: number,
-    collections: Collection[],
-) {
-    return collections.find((collection) => collection.id === collectionID);
-}
 
 export async function downloadCollectionHelper(
     collectionID: number,
@@ -169,33 +125,12 @@ async function createCollectionDownloadFolder(
     return collectionDownloadPath;
 }
 
-export const getUserOwnedCollections = (collections: Collection[]) => {
-    const user: User = getData("user");
-    if (!user?.id) {
-        throw Error("user missing");
-    }
-    return collections.filter((collection) => collection.owner.id === user.id);
-};
-
 const isQuickLinkCollection = (collection: Collection) =>
     collection.magicMetadata?.data.subType == CollectionSubType.quicklink;
 
 export function isIncomingViewerShare(collection: Collection, user: User) {
     const sharee = collection.sharees?.find((sharee) => sharee.id === user.id);
     return sharee?.role == "VIEWER";
-}
-
-export function isValidMoveTarget(
-    sourceCollectionID: number,
-    targetCollection: Collection,
-    user: User,
-) {
-    return (
-        sourceCollectionID !== targetCollection.id &&
-        !isHiddenCollection(targetCollection) &&
-        !isQuickLinkCollection(targetCollection) &&
-        !isIncomingShare(targetCollection, user)
-    );
 }
 
 export function isValidReplacementAlbum(
@@ -210,7 +145,7 @@ export function isValidReplacementAlbum(
             collection.type == "uncategorized") &&
         !isHiddenCollection(collection) &&
         !isQuickLinkCollection(collection) &&
-        !isIncomingShare(collection, user)
+        collection.owner.id == user.id
     );
 }
 

@@ -174,7 +174,7 @@ export const pullTrash = async (
     }
 
     const trashCollectionIDs = new Set(
-        trashItemsByID.values().map((item) => item.file.collectionID),
+        [...trashItemsByID.values()].map((item) => item.file.collectionID),
     );
     await saveTrashItemCollectionKeys(
         [...collectionKeyByID.entries()]

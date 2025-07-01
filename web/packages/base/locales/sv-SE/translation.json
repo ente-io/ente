@@ -162,6 +162,7 @@
     "ok": "OK",
     "success": "Lyckades",
     "error": "Fel",
+    "note": "",
     "offline_message": "",
     "install": "Installera",
     "install_mobile_app": "Installera vår <a>Android</a> eller <b>iOS</b>-app för att automatiskt säkerhetskopiera alla dina foton",
@@ -683,5 +684,6 @@
     "share_favorites": "",
     "person_favorites": "",
     "shared_favorites": "",
-    "added_by_name": ""
+    "added_by_name": "",
+    "unowned_files_not_processed": ""
 }

@@ -19,7 +19,6 @@ import {
 import {
     canAddToCollection,
     canMoveToCollection,
-    CollectionSummaryOrder,
     type CollectionSummaries,
     type CollectionSummary,
 } from "ente-new/photos/services/collection-summary";
@@ -41,25 +40,27 @@ export interface CollectionSelectorAttributes {
      */
     action: CollectionSelectorAction;
     /**
-     * Callback invoked when the user selects one the existing collections
-     * listed in the dialog.
+     * Some actions, like "add" and "move", happen in the context of an existing
+     * collection summary.
+     *
+     * In such cases, the ID of the collection summary can be set as the
+     * {@link sourceCollectionID} to omit showing it in the list again.
      */
-    onSelectCollection: (collection: Collection) => void;
+    sourceCollectionSummaryID?: number;
     /**
      * Callback invoked when the user selects the option to create a new
      * collection.
      */
     onCreateCollection: () => void;
     /**
+     * Callback invoked when the user selects one the existing collections
+     * listed in the dialog.
+     */
+    onSelectCollection: (collection: Collection) => void;
+    /**
      * Callback invoked when the user cancels the collection selection dialog.
      */
     onCancel?: () => void;
-    /**
-     * Some actions, like "add" and "move", happen in the context of an existing
-     * collection. In such cases, the ID of this collection can be set as the
-     * {@link relatedCollectionID} to omit showing it in the list again.
-     */
-    relatedCollectionID?: number | undefined;
 }
 
 type CollectionSelectorProps = ModalVisibilityProps & {
@@ -123,28 +124,25 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
         }
 
         const collections = [...collectionSummaries.values()]
-            .filter(({ id, type }) => {
-                if (id === attributes.relatedCollectionID) {
+            .filter((cs) => {
+                if (cs.id === attributes.sourceCollectionSummaryID) {
                     return false;
                 } else if (attributes.action == "add") {
-                    return canAddToCollection(type);
+                    return canAddToCollection(cs);
                 } else if (attributes.action == "upload") {
-                    return canMoveToCollection(type) || type == "uncategorized";
+                    return (
+                        canMoveToCollection(cs) || cs.type == "uncategorized"
+                    );
                 } else if (attributes.action == "restore") {
-                    return canMoveToCollection(type) || type == "uncategorized";
+                    return (
+                        canMoveToCollection(cs) || cs.type == "uncategorized"
+                    );
                 } else {
-                    return canMoveToCollection(type);
+                    return canMoveToCollection(cs);
                 }
             })
-            .sort((a, b) => {
-                return a.name.localeCompare(b.name);
-            })
-            .sort((a, b) => {
-                return (
-                    CollectionSummaryOrder.get(a.type)! -
-                    CollectionSummaryOrder.get(b.type)!
-                );
-            });
+            .sort((a, b) => a.name.localeCompare(b.name))
+            .sort((a, b) => b.sortPriority - a.sortPriority);
 
         if (collections.length === 0) {
             onClose();

@@ -77,6 +77,20 @@ extension EntitiesDB on FilesDB {
     );
   }
 
+  Future<List<LocalEntityData>> getCertainEntities(
+    EntityType type,
+    List<String> ids,
+  ) async {
+    final db = await sqliteAsyncDB;
+    final List<Map<String, dynamic>> maps = await db.getAll(
+      'SELECT * FROM entities WHERE type = ? AND id IN (${List.filled(ids.length, '?').join(',')})',
+      [type.name, ...ids],
+    );
+    return List.generate(maps.length, (i) {
+      return LocalEntityData.fromJson(maps[i]);
+    });
+  }
+
   Future<List<LocalEntityData>> getEntities(EntityType type) async {
     final db = await sqliteAsyncDB;
     final List<Map<String, dynamic>> maps = await db.getAll(

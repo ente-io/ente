@@ -58,7 +58,7 @@ class PersonService {
 
   Future<void> resetEmailToPartialPersonDataCache() async {
     _emailToPartialPersonDataMapCache.clear();
-    await _instance!.getPersons().then((value) {
+    await getPersons().then((value) {
       for (var person in value) {
         if (person.data.email != null && person.data.email!.isNotEmpty) {
           _instance!._emailToPartialPersonDataMapCache[person.data.email!] = {
@@ -71,7 +71,26 @@ class PersonService {
     });
   }
 
+  Future<List<PersonEntity>> getCertainPersons(List<String> ids) async {
+    final entities =
+        await entityService.getCertainEntities(EntityType.cgroup, ids);
+    return entities
+        .map(
+          (e) => PersonEntity(
+            e.id,
+            PersonData.fromJson(json.decode(e.data)),
+          ),
+        )
+        .toList();
+  }
+
+  int lastRemoteSyncTime() {
+    return entityService.lastSyncTime(EntityType.cgroup);
+  }
+
   Future<List<PersonEntity>> getPersons() async {
+    // perf todo: move this json decode in computer, and use cached future
+    // to read values from DB and also poulate the emailPartialPersonDataMapCache
     final entities = await entityService.getEntities(EntityType.cgroup);
     return entities
         .map(

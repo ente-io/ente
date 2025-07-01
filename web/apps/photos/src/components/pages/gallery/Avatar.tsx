@@ -80,14 +80,15 @@ const Avatar: React.FC<AvatarProps> = ({
             if (!email) {
                 return;
             }
-            if (user.email === email) {
+
+            if (user?.email === email) {
                 setUserLetter(email[0].toUpperCase());
                 setColorCode(avatarBackgroundColorPublicCollectedFile);
                 return;
             }
 
-            const id = Array.from(emailByUserID.keys()).find(
-                (key) => emailByUserID.get(key) === email,
+            const id = Array.from(emailByUserID?.keys() ?? []).find(
+                (key) => emailByUserID?.get(key) === email,
             );
             if (!id) {
                 log.error(`ID not found for email: ${email}`);
@@ -98,7 +99,7 @@ const Avatar: React.FC<AvatarProps> = ({
         } catch (e) {
             log.error("AvatarIcon.tsx - useLayoutEffect email failed", e);
         }
-    }, [email]);
+    }, [user, email, emailByUserID]);
 
     if (!colorCode || !userLetter) {
         return <></>;

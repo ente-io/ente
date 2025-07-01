@@ -71,7 +71,7 @@ import { TwoFactorSettings } from "ente-new/photos/components/sidebar/TwoFactorS
 import {
     confirmDisableMapsDialogAttributes,
     confirmEnableMapsDialogAttributes,
-} from "ente-new/photos/components/utils/dialog";
+} from "ente-new/photos/components/utils/dialog-attributes";
 import { downloadAppDialogAttributes } from "ente-new/photos/components/utils/download";
 import {
     useHLSGenerationStatusSnapshot,
@@ -124,12 +124,12 @@ import { SubscriptionCard } from "./SubscriptionCard";
 
 type SidebarProps = ModalVisibilityProps & {
     /**
-     * The latest set of collections, sections and pseudo-collections.
+     * Information about non-hidden collections and pseudo-collections.
      *
      * These are used to obtain data about the archive, hidden and trash
      * "section" entries shown within the shortcut section of the sidebar.
      */
-    collectionSummaries: CollectionSummaries;
+    normalCollectionSummaries: CollectionSummaries;
     /**
      * The ID of the collection summary that should be shown when the user
      * activates the "Uncategorized" section shortcut.
@@ -171,7 +171,7 @@ type SidebarProps = ModalVisibilityProps & {
 export const Sidebar: React.FC<SidebarProps> = ({
     open,
     onClose,
-    collectionSummaries,
+    normalCollectionSummaries,
     uncategorizedCollectionSummaryID,
     onShowPlanSelector,
     onShowCollectionSummary,
@@ -186,7 +186,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <ShortcutSection
                 onCloseSidebar={onClose}
                 {...{
-                    collectionSummaries,
+                    normalCollectionSummaries,
                     uncategorizedCollectionSummaryID,
                     onShowCollectionSummary,
                     onShowHiddenSection,
@@ -458,7 +458,7 @@ const ManageMemberSubscription: React.FC<ManageMemberSubscriptionProps> = ({
 type ShortcutSectionProps = SectionProps &
     Pick<
         SidebarProps,
-        | "collectionSummaries"
+        | "normalCollectionSummaries"
         | "uncategorizedCollectionSummaryID"
         | "onShowCollectionSummary"
         | "onShowHiddenSection"
@@ -466,7 +466,7 @@ type ShortcutSectionProps = SectionProps &
 
 const ShortcutSection: React.FC<ShortcutSectionProps> = ({
     onCloseSidebar,
-    collectionSummaries,
+    normalCollectionSummaries,
     uncategorizedCollectionSummaryID,
     onShowCollectionSummary,
     onShowHiddenSection,
@@ -489,8 +489,8 @@ const ShortcutSection: React.FC<ShortcutSectionProps> = ({
     const openHiddenSection = () =>
         void onShowHiddenSection().then(onCloseSidebar);
 
-    const summaryCaption = (collectionSummaryID: number) =>
-        collectionSummaries.get(collectionSummaryID)?.fileCount.toString();
+    const summaryCaption = (summaryID: number) =>
+        normalCollectionSummaries.get(summaryID)?.fileCount.toString();
 
     return (
         <>

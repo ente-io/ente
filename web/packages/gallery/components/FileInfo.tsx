@@ -70,7 +70,7 @@ import { FilePeopleList } from "ente-new/photos/components/PeopleList";
 import {
     confirmDisableMapsDialogAttributes,
     confirmEnableMapsDialogAttributes,
-} from "ente-new/photos/components/utils/dialog";
+} from "ente-new/photos/components/utils/dialog-attributes";
 import { useSettingsSnapshot } from "ente-new/photos/components/utils/use-snapshot";
 import {
     updateFileCaption,
