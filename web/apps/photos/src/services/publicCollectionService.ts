@@ -9,10 +9,13 @@ import type {
 import type { EnteFile, RemoteEnteFile } from "ente-media/file";
 import { decryptRemoteFile } from "ente-media/file";
 import {
+    removePublicCollectionLastSyncTime,
     savedPublicCollectionFiles,
+    savedPublicCollectionLastSyncTime,
     savedPublicCollections,
     saveLastPublicCollectionReferralCode,
     savePublicCollectionFiles,
+    savePublicCollectionLastSyncTime,
 } from "ente-new/albums/services/public-albums-fdb";
 import { CustomError, parseSharingErrorCodes } from "ente-shared/error";
 import HTTPService from "ente-shared/network/HTTPService";
@@ -24,9 +27,6 @@ const PUBLIC_COLLECTIONS_TABLE = "public-collections";
 // Fix this once we can trust the types.
 // eslint-disable-next-line @typescript-eslint/no-unnecessary-template-expression
 export const getPublicCollectionUID = (token: string) => `${token}`;
-
-const getPublicCollectionLastSyncTimeKey = (collectionUID: string) =>
-    `public-${collectionUID}-time`;
 
 const getPublicCollectionPasswordKey = (collectionUID: string) =>
     `public-${collectionUID}-passkey`;
@@ -86,20 +86,6 @@ const dedupeCollections = (collections: Collection[]) => {
     });
 };
 
-const getPublicCollectionLastSyncTime = async (collectionUID: string) =>
-    (await localForage.getItem<number>(
-        getPublicCollectionLastSyncTimeKey(collectionUID),
-    )) ?? 0;
-
-const savePublicCollectionLastSyncTime = async (
-    collectionUID: string,
-    time: number,
-) =>
-    await localForage.setItem(
-        getPublicCollectionLastSyncTimeKey(collectionUID),
-        time,
-    );
-
 export const syncPublicFiles = async (
     token: string,
     passwordToken: string,
@@ -118,7 +104,7 @@ export const syncPublicFiles = async (
                 return sortFiles(files, sortAsc);
             }
             const lastSyncTime =
-                await getPublicCollectionLastSyncTime(collectionUID);
+                (await savedPublicCollectionLastSyncTime(collectionUID)) ?? 0;
             if (collection.updationTime === lastSyncTime) {
                 return sortFiles(files, sortAsc);
             }
@@ -318,9 +304,7 @@ export const removePublicCollectionWithFiles = async (
 
 export const removePublicFiles = async (collectionUID: string) => {
     await localForage.removeItem(getPublicCollectionPasswordKey(collectionUID));
-    await localForage.removeItem(
-        getPublicCollectionLastSyncTimeKey(collectionUID),
-    );
+    await removePublicCollectionLastSyncTime(collectionUID);
 
     const publicCollectionFiles =
         (await localForage.getItem<LocalSavedPublicCollectionFiles[]>(
