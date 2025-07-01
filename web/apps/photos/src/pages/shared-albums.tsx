@@ -50,7 +50,10 @@ import { updateShouldDisableCFUploadProxy } from "ente-gallery/services/upload";
 import { sortFiles } from "ente-gallery/utils/file";
 import type { Collection } from "ente-media/collection";
 import { type EnteFile } from "ente-media/file";
-import { savedPublicCollectionFiles } from "ente-new/albums/services/public-albums-fdb";
+import {
+    savedLastPublicAlbumReferralCode,
+    savedPublicCollectionFiles,
+} from "ente-new/albums/services/public-albums-fdb";
 import { verifyPublicAlbumPassword } from "ente-new/albums/services/public-collection";
 import {
     GalleryItemsHeaderAdapter,
@@ -69,7 +72,6 @@ import {
     getLocalPublicCollectionPassword,
     getPublicCollection,
     getPublicCollectionUID,
-    getReferralCode,
     removePublicCollectionWithFiles,
     removePublicFiles,
     savePublicCollectionPassword,
@@ -220,7 +222,8 @@ export default function PublicCollectionGallery() {
                 const accessToken = t;
                 let accessTokenJWT: string | undefined;
                 if (localCollection) {
-                    referralCode.current = await getReferralCode();
+                    referralCode.current =
+                        await savedLastPublicAlbumReferralCode();
                     const sortAsc: boolean =
                         localCollection?.pubMagicMetadata?.data.asc ?? false;
                     setPublicCollection(localCollection);

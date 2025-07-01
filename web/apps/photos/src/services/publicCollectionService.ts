@@ -11,6 +11,7 @@ import { decryptRemoteFile } from "ente-media/file";
 import {
     savedPublicCollectionFiles,
     savedPublicCollections,
+    saveLastPublicAlbumReferralCode,
     savePublicCollectionFiles,
 } from "ente-new/albums/services/public-albums-fdb";
 import { CustomError, parseSharingErrorCodes } from "ente-shared/error";
@@ -19,7 +20,6 @@ import localForage from "ente-shared/storage/localForage";
 
 const PUBLIC_COLLECTION_FILES_TABLE = "public-collection-files";
 const PUBLIC_COLLECTIONS_TABLE = "public-collections";
-const PUBLIC_REFERRAL_CODE = "public-referral-code";
 
 // Fix this once we can trust the types.
 // eslint-disable-next-line @typescript-eslint/no-unnecessary-template-expression
@@ -89,17 +89,6 @@ export const savePublicCollection = async (collection: Collection) => {
         PUBLIC_COLLECTIONS_TABLE,
         dedupeCollections([collection, ...publicCollections]),
     );
-};
-
-export const getReferralCode = async () => {
-    return await localForage.getItem<string>(PUBLIC_REFERRAL_CODE);
-};
-
-export const saveReferralCode = async (code: string) => {
-    if (!code) {
-        localForage.removeItem(PUBLIC_REFERRAL_CODE);
-    }
-    await localForage.setItem(PUBLIC_REFERRAL_CODE, code);
 };
 
 const dedupeCollections = (collections: Collection[]) => {
@@ -322,7 +311,7 @@ export const getPublicCollection = async (
             pubMagicMetadata: collectionPublicMagicMetadata,
         };
         await savePublicCollection(collection);
-        await saveReferralCode(referralCode);
+        await saveLastPublicAlbumReferralCode(referralCode);
         return [collection, referralCode];
     } catch (e) {
         log.error("failed to get public collection", e);
