@@ -211,15 +211,15 @@ const getTrashDiff = async (sinceTime: number) => {
 };
 
 /**
- * Sort trash items such that the items which will be permanently deleted
- * earlier are first.
+ * Sort trash items such that the items which were recently deleted are first.
  *
  * This is a variant of {@link sortFiles}; it sorts {@link items} in place and
  * also returns a reference to the same mutated arrays.
  *
- * Items are sorted in ascending order of their time to deletion. For items with
- * the same time to deletion, the ordering is in descending order of the item's
- * file's modification or creation date.
+ * Items are sorted in descending order of their time to deletion (that is, the
+ * items which were the most recently deleted will be at the top). For items
+ * with the same time to deletion, the ordering is in descending order of the
+ * item's file's modification or creation date.
  */
 export const sortTrashItems = (trashItems: TrashItem[]) =>
     trashItems.sort((a, b) => {
@@ -232,7 +232,7 @@ export const sortTrashItems = (trashItems: TrashItem[]) =>
                 ? bf.metadata.modificationTime - af.metadata.modificationTime
                 : bt - at;
         }
-        return a.deleteBy - b.deleteBy;
+        return b.deleteBy - a.deleteBy;
     });
 
 /**
