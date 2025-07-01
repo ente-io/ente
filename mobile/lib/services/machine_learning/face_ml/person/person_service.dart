@@ -47,7 +47,7 @@ class PersonService {
     SharedPreferences prefs,
   ) async {
     _instance = PersonService(entityService, faceMLDataDB, prefs);
-    await _instance!.resetEmailToPartialPersonDataCache();
+    await _instance!.refreshPersonCache();
   }
 
   Map<String, Map<String, String>> get emailToPartialPersonDataMapCache =>
@@ -57,7 +57,7 @@ class PersonService {
     _emailToPartialPersonDataMapCache.clear();
   }
 
-  Future<void> resetEmailToPartialPersonDataCache() async {
+  Future<void> refreshPersonCache() async {
     _emailToPartialPersonDataMapCache.clear();
     await getPersons().then((value) {
       for (var person in value) {
@@ -116,13 +116,9 @@ class PersonService {
   }
 
   Future<Map<String, PersonEntity>> getPersonsMap() async {
-    final entities = await entityService.getEntities(EntityType.cgroup);
+    final persons = await getPersons();
     final Map<String, PersonEntity> map = {};
-    for (var e in entities) {
-      final person = PersonEntity(
-        e.id,
-        PersonData.fromJson(json.decode(e.data)),
-      );
+    for (var person in persons) {
       map[person.remoteID] = person;
     }
     return map;
@@ -235,7 +231,7 @@ class PersonService {
       clusterID: clusterID,
     );
     if (data.email != null) {
-      await resetEmailToPartialPersonDataCache();
+      await refreshPersonCache();
     }
     memoriesCacheService.queueUpdateCache();
     return PersonEntity(result.id, data);
@@ -325,7 +321,7 @@ class PersonService {
       justName.data.logStats();
 
       if (entity.data.email != null) {
-        await resetEmailToPartialPersonDataCache();
+        await refreshPersonCache();
       }
     } else {
       await entityService.deleteEntry(personID);
@@ -333,7 +329,7 @@ class PersonService {
 
       if (entity != null) {
         if (entity.data.email != null) {
-          await resetEmailToPartialPersonDataCache();
+          await refreshPersonCache();
         }
       }
     }
@@ -502,7 +498,7 @@ class PersonService {
       ),
     );
     await updatePerson(updatedPerson);
-    await resetEmailToPartialPersonDataCache();
+    await refreshPersonCache();
     return updatedPerson;
   }
 
