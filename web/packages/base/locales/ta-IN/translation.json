@@ -162,6 +162,7 @@
     "ok": "",
     "success": "",
     "error": "",
+    "note": "",
     "offline_message": "",
     "install": "",
     "install_mobile_app": "",
@@ -683,5 +684,6 @@
     "share_favorites": "",
     "person_favorites": "",
     "shared_favorites": "",
-    "added_by_name": ""
+    "added_by_name": "",
+    "unowned_files_not_processed": ""
 }

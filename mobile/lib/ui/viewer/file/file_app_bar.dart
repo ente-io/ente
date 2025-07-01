@@ -20,7 +20,7 @@ import "package:photos/service_locator.dart";
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/hidden_service.dart';
 import "package:photos/services/local_authentication_service.dart";
-import "package:photos/services/preview_video_store.dart";
+import "package:photos/services/video_preview_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/collections/collection_action_sheet.dart';
 import 'package:photos/ui/notification/toast.dart';
@@ -84,7 +84,7 @@ class FileAppBarState extends State<FileAppBar> {
 
   @override
   Widget build(BuildContext context) {
-    _logger.fine("building app bar ${widget.file.generatedID?.toString()}");
+    _logger.info("building app bar ${widget.file.generatedID?.toString()}");
 
     //When the widget is initialized, the actions are not available.
     //Cannot call _getActions() in initState.
@@ -379,7 +379,7 @@ class FileAppBarState extends State<FileAppBar> {
               await _onTapGuestView();
             } else if (value == 99) {
               try {
-                await PreviewVideoStore.instance.chunkAndUploadVideo(
+                await VideoPreviewService.instance.chunkAndUploadVideo(
                   context,
                   widget.file,
                 );

@@ -8,6 +8,7 @@ import 'package:onnxruntime/onnxruntime.dart';
 import "package:photos/models/ml/face/dimension.dart";
 import 'package:photos/services/machine_learning/face_ml/face_detection/detection.dart';
 import "package:photos/services/machine_learning/face_ml/face_detection/face_detection_postprocessing.dart";
+import "package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart";
 import "package:photos/services/machine_learning/ml_model.dart";
 import "package:photos/utils/image_ml_util.dart";
 
@@ -31,7 +32,7 @@ class FaceDetectionService extends MlModel {
   static const int kInputWidth = 640;
   static const int kInputHeight = 640;
   static const double kIouThreshold = 0.4;
-  static const double kMinScoreSigmoidThreshold = 0.7;
+  static const double kMinScoreSigmoidThreshold = kMinFaceDetectionScore;
   static const int kNumKeypoints = 5;
 
   // Singleton pattern
@@ -82,7 +83,11 @@ class FaceDetectionService extends MlModel {
         'Face detection is finished, in ${inferenceTime.difference(startTime).inMilliseconds} ms (preprocessing: $preprocessingMs ms, inference: $inferenceMs ms)',
       );
     } catch (e, s) {
-      _logger.severe('Error while running inference (PlatformPlugin: ${MlModel.usePlatformPlugin})', e, s);
+      _logger.severe(
+        'Error while running inference (PlatformPlugin: ${MlModel.usePlatformPlugin})',
+        e,
+        s,
+      );
       throw YOLOFaceInterpreterRunException();
     }
     try {

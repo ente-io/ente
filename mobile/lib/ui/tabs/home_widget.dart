@@ -67,6 +67,7 @@ import "package:photos/ui/settings_page.dart";
 import "package:photos/ui/tabs/shared_collections_tab.dart";
 import "package:photos/ui/tabs/user_collections_tab.dart";
 import "package:photos/ui/viewer/actions/file_viewer.dart";
+import "package:photos/ui/viewer/file/detail_page.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/ui/viewer/gallery/shared_public_collection_page.dart";
 import "package:photos/ui/viewer/search/search_widget.dart";
@@ -127,9 +128,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     super.initState();
 
     if (LocalSyncService.instance.hasCompletedFirstImport()) {
-      MemoryHomeWidgetService.instance.checkPendingMemorySync();
-      PeopleHomeWidgetService.instance.checkPendingPeopleSync();
-      AlbumHomeWidgetService.instance.checkPendingAlbumsSync();
+       syncWidget();
     }
     _tabChangedEventSubscription =
         Bus.instance.on<TabChangedEvent>().listen((event) {
@@ -160,6 +159,8 @@ class _HomeWidgetState extends State<HomeWidget> {
     _accountConfiguredEvent =
         Bus.instance.on<AccountConfiguredEvent>().listen((event) {
       setState(() {});
+      // fetch user flags on login
+      flagService.flags;
     });
     _triggerLogoutEvent =
         Bus.instance.on<TriggerLogoutEvent>().listen((event) async {
@@ -193,9 +194,7 @@ class _HomeWidgetState extends State<HomeWidget> {
           () {
             if (mounted) {
               setState(() {});
-              MemoryHomeWidgetService.instance.checkPendingMemorySync();
-              AlbumHomeWidgetService.instance.checkPendingAlbumsSync();
-              PeopleHomeWidgetService.instance.checkPendingPeopleSync();
+              syncWidget();
             }
           },
         );
@@ -276,8 +275,33 @@ class _HomeWidgetState extends State<HomeWidget> {
     }
   }
 
-  Future<void> _handlePublicAlbumLink(Uri uri) async {
+  Future<void> syncWidget() async {
+    await Future.delayed(const Duration(milliseconds: 5000));
+
+    _logger.info("Syncing home widget");
+    await MemoryHomeWidgetService.instance.checkPendingMemorySync();
+    await PeopleHomeWidgetService.instance.checkPendingPeopleSync();
+    await AlbumHomeWidgetService.instance.checkPendingAlbumsSync();
+  }
+
+  final Map<Uri, (bool, int)> _linkedPublicAlbums = {};
+  Future<void> _handlePublicAlbumLink(Uri uri, String via) async {
     try {
+      _logger.info("Handling public album link: via $via");
+      final int currentTime = DateTime.now().millisecondsSinceEpoch;
+      final bool isInitialStream = via.toLowerCase().contains('initial');
+      if (_linkedPublicAlbums.containsKey(uri)) {
+        final (lastInitialLink, lastTime) = _linkedPublicAlbums[uri]!;
+        // for initial stream, wait for 30 seconds to ignore duplicate links event
+        if (currentTime - lastTime < (lastInitialLink ? 30000 : 2000)) {
+          _logger.info(
+            "ignore was it has handled $lastInitialLink at epoch $lastTime",
+          );
+          return;
+        }
+      }
+      _linkedPublicAlbums[uri] = (isInitialStream, currentTime);
+
       final Collection collection = await CollectionsService.instance
           .getCollectionFromPublicLink(context, uri);
       final existingCollection =
@@ -372,7 +396,7 @@ class _HomeWidgetState extends State<HomeWidget> {
         );
         await dialog.hide();
 
-        await routeToPage(
+        routeToPage(
           context,
           SharedPublicCollectionPage(
             files: sharedFiles,
@@ -381,7 +405,19 @@ class _HomeWidgetState extends State<HomeWidget> {
               null,
             ),
           ),
-        );
+        ).ignore();
+        if (sharedFiles.length == 1) {
+          await routeToPage(
+            context,
+            DetailPage(
+              DetailPageConfiguration(
+                sharedFiles,
+                0,
+                "sharedPublicCollection",
+              ),
+            ),
+          );
+        }
       }
     } catch (e, s) {
       _logger.severe("Failed to handle public album link", e, s);
@@ -453,7 +489,7 @@ class _HomeWidgetState extends State<HomeWidget> {
         }
         if (value[0].path.contains("albums.ente.io")) {
           final uri = Uri.parse(value[0].path);
-          _handlePublicAlbumLink(uri);
+          _handlePublicAlbumLink(uri, "sharedIntent.getMediaStream");
           return;
         }
 
@@ -520,7 +556,7 @@ class _HomeWidgetState extends State<HomeWidget> {
       if (mounted) {
         if (value.isNotEmpty && value[0].path.contains("albums.ente.io")) {
           final uri = Uri.parse(value[0].path);
-          _handlePublicAlbumLink(uri);
+          _handlePublicAlbumLink(uri, "sharedIntent.getInitialMedia");
           return;
         }
 
@@ -553,7 +589,7 @@ class _HomeWidgetState extends State<HomeWidget> {
       final initialUri = await appLinks.getInitialLink();
       if (initialUri != null) {
         if (initialUri.toString().contains("albums.ente.io")) {
-          await _handlePublicAlbumLink(initialUri);
+          await _handlePublicAlbumLink(initialUri, "appLinks.getInitialLink");
         } else {
           _logger.info(
             "uri doesn't contain 'albums.ente.io' in initial public album deep link",
@@ -572,7 +608,7 @@ class _HomeWidgetState extends State<HomeWidget> {
       (Uri? uri) {
         if (uri != null) {
           if (uri.toString().contains("albums.ente.io")) {
-            _handlePublicAlbumLink(uri);
+            _handlePublicAlbumLink(uri, "appLinks.uriLinkStream");
           } else {
             _logger.info(
               "uri doesn't contain 'albums.ente.io' in public album link subscription",
@@ -798,7 +834,7 @@ class _HomeWidgetState extends State<HomeWidget> {
       // Parse the link and warn the user, if it is not correct,
       // but keep in mind it could be `null`.
       if (initialLink != null) {
-        _logger.info("Initial link received: " + initialLink.toString());
+        _logger.info("Initial link received: host ${initialLink.host}");
         _getCredentials(context, initialLink);
         return true;
       } else {
@@ -813,7 +849,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     // Attach a listener to the stream
     appLinks.uriLinkStream.listen(
       (link) {
-        _logger.info("Link received: " + link.toString());
+        _logger.info("Link received: host ${link.host}");
         _getCredentials(context, link);
       },
       onError: (err) {
@@ -868,13 +904,16 @@ class _HomeWidgetState extends State<HomeWidget> {
     if (payload != null) {
       debugPrint('notification payload: $payload');
       if (payload.toLowerCase().contains("onthisday")) {
+        _logger.info("On this day notification received");
         // ignore: unawaited_futures
         memoriesCacheService.goToOnThisDayMemory(context);
       } else if (payload.toLowerCase().contains("birthday")) {
+        _logger.info("Birthday notification received");
         final personID = payload.substring("birthday_".length);
         // ignore: unawaited_futures
         memoriesCacheService.goToPersonMemory(context, personID);
       } else {
+        _logger.info("Album notification received");
         final collectionID = Uri.parse(payload).queryParameters["collectionID"];
         if (collectionID != null) {
           final collection = CollectionsService.instance

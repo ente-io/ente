@@ -7,7 +7,6 @@ import "package:photos/core/configuration.dart";
 
 import "package:photos/module/download/file_url.dart";
 import "package:photos/module/download/task.dart";
-import "package:photos/service_locator.dart";
 
 class DownloadManager {
   final _logger = Logger('DownloadManager');
@@ -35,7 +34,7 @@ class DownloadManager {
   bool enableResumableDownload(int? size) {
     if (size == null) return false;
     //todo: Use FileUrlType.direct instead of FileUrlType.directDownload
-    return size > downloadChunkSize && flagService.internalUser;
+    return size > downloadChunkSize;
   }
 
   /// Start download and return a Future that completes when download finishes

@@ -1724,5 +1724,6 @@
   "onTheRoad": "De nuevo en la carretera",
   "food": "Delicia culinaria",
   "pets": "Compañeros peludos",
-  "curatedMemories": "Memorias revisadas"
+  "curatedMemories": "Memorias revisadas",
+  "wishThemAHappyBirthday": "Wish ${name} a happy birthday! 🎉"
 }

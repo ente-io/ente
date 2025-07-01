@@ -32,10 +32,17 @@ After the installation is complete, a `Caddyfile` is created on the path
 `/etc/caddy/`. This file is used to configure reverse proxies among other
 things.
 
-```yaml
+```groovy
 # Caddyfile - myente.xyz is just an example.
-api.myente.xyz { reverse_proxy http://localhost:8080 } ente.myente.xyz {
-reverse_proxy http://localhost:3000 }
+
+api.myente.xyz {
+    reverse_proxy http://localhost:8080
+}
+
+ente.myente.xyz {
+    reverse_proxy http://localhost:3000
+}
+
 #...and so on for other endpoints
 ```
 

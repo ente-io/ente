@@ -10,5 +10,6 @@
   "deleteAccount": "Fiók törlése",
   "askDeleteReason": "Miért törli a fiókját?",
   "deleteAccountFeedbackPrompt": "Sajnáljuk, hogy távozik. Kérjük, ossza meg velünk visszajelzéseit, hogy segítsen nekünk a fejlődésben.",
-  "feedback": "Visszajelzés"
+  "feedback": "Visszajelzés",
+  "wishThemAHappyBirthday": "Wish ${name} a happy birthday! 🎉"
 }

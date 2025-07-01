@@ -53,7 +53,6 @@ class FileUploader {
   static const kMaximumConcurrentVideoUploads = 2;
   static const kMaximumThumbnailCompressionAttempts = 2;
   static const kMaximumUploadAttempts = 4;
-  static const kMaxFileSize5Gib = 5368709120;
   static const kMaxFileSize10Gib = 10737418240;
   static const kBlockedUploadsPollFrequency = Duration(seconds: 2);
   static const kFileUploadTimeout = Duration(minutes: 50);
@@ -660,7 +659,7 @@ class FileUploader {
       encThumbSize = await encryptedThumbnailFile.length();
 
       // Calculate the number of parts for the file.
-      final count = await _multiPartUploader.calculatePartCount(encFileSize);
+      final count = _multiPartUploader.calculatePartCount(encFileSize);
 
       late String fileObjectKey;
       late String thumbnailObjectKey;
@@ -677,7 +676,7 @@ class FileUploader {
             await _putFile(fileUploadURL, encryptedFile, encFileSize);
       } else {
         isMultipartUpload = true;
-        _logger.finest(
+        _logger.info(
           "Init multipartUpload $multipartEntryExists, isUpdate $isUpdatedFile",
         );
         if (multipartEntryExists) {
@@ -942,7 +941,7 @@ class FileUploader {
           (e.localID == fileToUpload.localID || isSandBoxFile),
     );
     if (sameLocalSameCollection != null) {
-      _logger.fine(
+      _logger.info(
         "sameLocalSameCollection: toUpload  ${fileToUpload.tag} "
         "existing: ${sameLocalSameCollection.tag} $isSandBoxFile",
       );
@@ -968,7 +967,7 @@ class FileUploader {
     if (fileMissingLocal != null) {
       // update the local id of the existing file and delete the fileToUpload
       // entry
-      _logger.fine(
+      _logger.info(
         "fileMissingLocal: \n toUpload  ${fileToUpload.tag} "
         "\n existing: ${fileMissingLocal.tag}",
       );
@@ -1001,7 +1000,7 @@ class FileUploader {
           (e.localID == fileToUpload.localID || isSandBoxFile),
     );
     if (fileExistsButDifferentCollection != null) {
-      _logger.fine(
+      _logger.info(
         "fileExistsButDifferentCollection: toUpload  ${fileToUpload.tag} "
         "existing: ${fileExistsButDifferentCollection.tag} $isSandBoxFile",
       );
@@ -1019,7 +1018,7 @@ class FileUploader {
         )
         .map((e) => e.localID!)
         .toSet();
-    _logger.fine(
+    _logger.info(
       "Found hashMatch but probably with diff localIDs "
       "$matchLocalIDs",
     );
@@ -1050,7 +1049,7 @@ class FileUploader {
     }
     if (File(encryptedFilePath).existsSync()) {
       if (isMultiPartUpload && !uploadCompleted) {
-        _logger.fine(
+        _logger.info(
           "skip delete for multipart encrypted file $encryptedFilePath",
         );
       } else {
@@ -1087,12 +1086,10 @@ class FileUploader {
             'freeStorage $freeStorage');
         throw StorageLimitExceededError();
       }
-      final int maxSize =
-          flagService.internalUser ? kMaxFileSize10Gib : kMaxFileSize5Gib;
-      if (fileSize > maxSize) {
-        _logger.warning('File size exceeds $maxSize fileSize $fileSize');
+      if (fileSize > kMaxFileSize10Gib) {
+        _logger.warning('File size exceeds 10GiB fileSize $fileSize');
         throw InvalidFileError(
-          'file size above $maxSize',
+          'file size above 10GiB',
           InvalidReason.tooLargeFile,
         );
       }

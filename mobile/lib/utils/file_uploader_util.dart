@@ -152,7 +152,7 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(
     // .elp -> ente live photo
     final uniqueId = const Uuid().v4().toString();
     final livePhotoPath = tempPath + uniqueId + "_${file.generatedID}.elp";
-    _logger.fine("Creating zip for live photo from " + basename(livePhotoPath));
+    _logger.info("Creating zip for live photo from " + basename(livePhotoPath));
     await zip(
       zipPath: livePhotoPath,
       imagePath: sourceFile.path,

@@ -269,7 +269,7 @@ class _DetailPageState extends State<DetailPage> {
           shouldDisableScroll: (value) {
             if (_shouldDisableScroll != value) {
               setState(() {
-                _logger.fine('setState $_shouldDisableScroll to $value');
+                _logger.info('setState $_shouldDisableScroll to $value');
                 _shouldDisableScroll = value;
               });
             }

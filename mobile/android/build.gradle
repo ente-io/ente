@@ -10,9 +10,6 @@ allprojects {
         mavenCentral()
         // mavenLocal() // for FDroid
         maven {
-            url "${project(':background_fetch').projectDir}/libs"
-        }
-        maven {
             url "${project(':ffmpeg_kit_flutter').projectDir}/libs"
         }
     }

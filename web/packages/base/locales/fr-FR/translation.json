@@ -162,6 +162,7 @@
     "ok": "Ok",
     "success": "Parfait",
     "error": "Erreur",
+    "note": "",
     "offline_message": "Vous êtes hors ligne, les souvenirs en cache sont affichés",
     "install": "Installer",
     "install_mobile_app": "Installez notre application <a>Android</a> or <b>iOS</b> pour sauvegarder automatiquement toutes vos photos",
@@ -646,7 +647,7 @@
     "rename_passkey": "Renommer le code d'accès",
     "add_passkey": "Ajouter un code d'accès",
     "enter_passkey_name": "Entrez le nom du code d'accès",
-    "passkeys_description": "Les codes d'ccès sont un deuxième facteur moderne et sécurisé pour votre compte Ente. Ils utilisent l'authentification biométrique de l'appareil pour des raisons de commodité et de sécurité.",
+    "passkeys_description": "Les codes d'accès sont un deuxième facteur moderne et sécurisé pour votre compte Ente. Ils utilisent l'authentification biométrique de l'appareil pour des raisons de commodité et de sécurité.",
     "created_at": "Créé le",
     "passkey_add_failed": "Impossible d'ajouter une clé d'accès",
     "passkey_login_failed": "Échec de la connexion via code d'accès",
@@ -683,5 +684,6 @@
     "share_favorites": "Partager les favoris",
     "person_favorites": "Favoris de {{name}}",
     "shared_favorites": "Favoris partagés",
-    "added_by_name": "Ajouté par {{name}}"
+    "added_by_name": "Ajouté par {{name}}",
+    "unowned_files_not_processed": ""
 }

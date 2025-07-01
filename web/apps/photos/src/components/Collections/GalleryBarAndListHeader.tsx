@@ -1,5 +1,8 @@
 import { AllAlbums } from "components/Collections/AllAlbums";
-import { CollectionShare } from "components/Collections/CollectionShare";
+import {
+    CollectionShare,
+    type CollectionShareProps,
+} from "components/Collections/CollectionShare";
 import { TimeStampListItem } from "components/FileList";
 import { useModalVisibility } from "ente-base/components/utils/modal";
 import type { Collection } from "ente-media/collection";
@@ -8,32 +11,31 @@ import {
     type GalleryBarImplProps,
 } from "ente-new/photos/components/gallery/BarImpl";
 import { PeopleHeader } from "ente-new/photos/components/gallery/PeopleHeader";
-import { ALL_SECTION } from "ente-new/photos/services/collection";
 import {
-    areOnlySystemCollections,
     collectionsSortBy,
-    isSystemCollection,
-    shouldShowOnCollectionBar,
+    haveOnlySystemCollections,
+    PseudoCollectionID,
     type CollectionsSortBy,
     type CollectionSummaries,
-} from "ente-new/photos/services/collection/ui";
+} from "ente-new/photos/services/collection-summary";
 import { getData, removeData } from "ente-shared/storage/localStorage";
 import { includes } from "ente-utils/type-guards";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { sortCollectionSummaries } from "services/collectionService";
-import { SetFilesDownloadProgressAttributesCreator } from "types/gallery";
 import {
     FilesDownloadProgressAttributes,
     isFilesDownloadCancelled,
     isFilesDownloadCompleted,
 } from "../FilesDownloadProgress";
 import { AlbumCastDialog } from "./AlbumCastDialog";
-import { CollectionHeader } from "./CollectionHeader";
+import {
+    CollectionHeader,
+    type CollectionHeaderProps,
+} from "./CollectionHeader";
 
-type CollectionsProps = Omit<
+type GalleryBarAndListHeaderProps = Omit<
     GalleryBarImplProps,
     | "collectionSummaries"
-    | "hiddenCollectionSummaries"
     | "onSelectCollectionID"
     | "collectionsSortBy"
     | "onChangeCollectionsSortBy"
@@ -43,14 +45,19 @@ type CollectionsProps = Omit<
      * When `true`, the bar is be hidden altogether.
      */
     shouldHide: boolean;
-    collectionSummaries: CollectionSummaries;
+    barCollectionSummaries: CollectionSummaries;
     activeCollection: Collection;
     setActiveCollectionID: (collectionID: number) => void;
-    hiddenCollectionSummaries: CollectionSummaries;
     setPhotoListHeader: (value: TimeStampListItem) => void;
     filesDownloadProgressAttributesList: FilesDownloadProgressAttributes[];
-    setFilesDownloadProgressAttributesCreator: SetFilesDownloadProgressAttributesCreator;
-};
+} & Pick<
+        CollectionHeaderProps,
+        "setFilesDownloadProgressAttributesCreator" | "onRemotePull"
+    > &
+    Pick<
+        CollectionShareProps,
+        "user" | "emailByUserID" | "shareSuggestionEmails" | "setBlockingLoad"
+    >;
 
 /**
  * The gallery bar, the header for the list items, and state for any associated
@@ -70,17 +77,23 @@ type CollectionsProps = Omit<
  * TODO: Once the gallery code is better responsibilitied out, consider moving
  * this code back inline into the gallery.
  */
-export const GalleryBarAndListHeader: React.FC<CollectionsProps> = ({
+export const GalleryBarAndListHeader: React.FC<
+    GalleryBarAndListHeaderProps
+> = ({
     shouldHide,
     mode,
     onChangeMode,
-    collectionSummaries,
+    user,
+    barCollectionSummaries: toShowCollectionSummaries,
     activeCollection,
     activeCollectionID,
     setActiveCollectionID,
-    hiddenCollectionSummaries,
+    setBlockingLoad,
     people,
     activePerson,
+    emailByUserID,
+    shareSuggestionEmails,
+    onRemotePull,
     onSelectPerson,
     setPhotoListHeader,
     filesDownloadProgressAttributesList,
@@ -96,19 +109,11 @@ export const GalleryBarAndListHeader: React.FC<CollectionsProps> = ({
     const [collectionsSortBy, setCollectionsSortBy] =
         useCollectionsSortByLocalState("updation-time-desc");
 
-    const toShowCollectionSummaries = useMemo(
-        () =>
-            mode == "hidden-albums"
-                ? hiddenCollectionSummaries
-                : collectionSummaries,
-        [mode, hiddenCollectionSummaries, collectionSummaries],
-    );
-
     const shouldBeHidden = useMemo(
         () =>
             shouldHide ||
-            (areOnlySystemCollections(toShowCollectionSummaries) &&
-                activeCollectionID === ALL_SECTION),
+            (haveOnlySystemCollections(toShowCollectionSummaries) &&
+                activeCollectionID === PseudoCollectionID.all),
         [shouldHide, toShowCollectionSummaries, activeCollectionID],
     );
 
@@ -144,6 +149,7 @@ export const GalleryBarAndListHeader: React.FC<CollectionsProps> = ({
                             setActiveCollectionID,
                             setFilesDownloadProgressAttributesCreator,
                             isActiveCollectionDownloadInProgress,
+                            onRemotePull,
                         }}
                         collectionSummary={toShowCollectionSummaries.get(
                             activeCollectionID,
@@ -195,15 +201,15 @@ export const GalleryBarAndListHeader: React.FC<CollectionsProps> = ({
                 onSelectCollectionID={setActiveCollectionID}
                 onChangeCollectionsSortBy={setCollectionsSortBy}
                 onShowAllAlbums={showAllAlbums}
-                collectionSummaries={sortedCollectionSummaries.filter((x) =>
-                    shouldShowOnCollectionBar(x.type),
+                collectionSummaries={sortedCollectionSummaries.filter(
+                    (cs) => !cs.attributes.has("hideFromCollectionBar"),
                 )}
             />
 
             <AllAlbums
                 {...allAlbumsVisibilityProps}
                 collectionSummaries={sortedCollectionSummaries.filter(
-                    (x) => !isSystemCollection(x.type),
+                    (cs) => !cs.attributes.has("system"),
                 )}
                 onSelectCollectionID={setActiveCollectionID}
                 onChangeCollectionsSortBy={setCollectionsSortBy}
@@ -216,6 +222,13 @@ export const GalleryBarAndListHeader: React.FC<CollectionsProps> = ({
                     activeCollectionID,
                 )}
                 collection={activeCollection}
+                {...{
+                    user,
+                    emailByUserID,
+                    shareSuggestionEmails,
+                    setBlockingLoad,
+                    onRemotePull,
+                }}
             />
             <AlbumCastDialog
                 {...collectionCastVisibilityProps}

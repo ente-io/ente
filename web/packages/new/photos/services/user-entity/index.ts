@@ -79,7 +79,7 @@ const RemoteFaceCluster = z.looseObject({
  *
  * See also: {@link CGroupUserEntityData}.
  *
- * See: [Note: Use passthrough for metadata Zod schemas].
+ * See: [Note: Use looseObject for metadata Zod schemas].
  */
 const RemoteCGroupData = z.looseObject({
     name: z.string().nullish().transform(nullToUndefined),

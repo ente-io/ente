@@ -24,18 +24,10 @@ class DiffFetcher {
     bool sortAsc,
   ) async {
     try {
-      final authToken = await CollectionsService.instance
-          .getSharedPublicAlbumToken(collectionID);
-      final authJWTToken = await CollectionsService.instance
-          .getSharedPublicAlbumTokenJWT(collectionID);
       bool hasMore = false;
       final sharedFiles = <EnteFile>[];
-
-      final headers = {
-        "X-Auth-Access-Token": authToken,
-        if (authJWTToken != null) "X-Auth-Access-Token-JWT": authJWTToken,
-      };
-
+      final headers =
+          CollectionsService.instance.publicCollectionHeaders(collectionID);
       int sinceTime = 0;
 
       do {

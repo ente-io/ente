@@ -81,7 +81,8 @@ const saveCredentialsAndNavigateTo = async (
     // - The plaintext "token" will be passed during fresh signups, where we
     //   don't yet have keys to encrypt it, the account itself is being created
     //   as we go through this flow.
-    //   TODO(MR): Conceptually this cannot happen. During a _real_ fresh signup
+    //
+    //   TODO: Conceptually this cannot happen. During a _real_ fresh signup
     //   we'll never enter the passkey verification flow. Remove this code after
     //   making sure that it doesn't get triggered in cases where an existing
     //   user goes through the new user flow.

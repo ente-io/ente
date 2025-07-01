@@ -8,7 +8,7 @@ import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/db/ml/db.dart";
-import "package:photos/events/machine_learning_control_event.dart";
+import "package:photos/events/compute_control_event.dart";
 import "package:photos/events/people_changed_event.dart";
 import "package:photos/models/ml/face/face.dart";
 import "package:photos/models/ml/ml_versions.dart";
@@ -20,7 +20,7 @@ import "package:photos/services/machine_learning/face_ml/person/person_service.d
 import "package:photos/services/machine_learning/ml_indexing_isolate.dart";
 import 'package:photos/services/machine_learning/ml_result.dart';
 import "package:photos/services/machine_learning/semantic_search/semantic_search_service.dart";
-import "package:photos/services/preview_video_store.dart";
+import "package:photos/services/video_preview_service.dart";
 import "package:photos/utils/ml_util.dart";
 import "package:photos/utils/network_util.dart";
 import "package:photos/utils/ram_check_util.dart";
@@ -40,8 +40,6 @@ class MLService {
 
   late String client;
 
-  bool get isInitialized => _isInitialized;
-
   bool get showClusteringIsHappening => _clusteringIsHappening;
 
   bool debugIndexingDisabled = false;
@@ -60,9 +58,6 @@ class MLService {
   /// Only call this function once at app startup, after that you can directly call [runAllML]
   Future<void> init() async {
     if (_isInitialized) return;
-    if (!flagService.hasGrantedMLConsent) {
-      return;
-    }
     _logger.info("init called");
 
     // Check if the device has enough RAM to run local indexing
@@ -73,8 +68,8 @@ class MLService {
     client = "${packageInfo.packageName}/${packageInfo.version}";
     _logger.info("client: $client");
 
-    // Listen on MachineLearningController
-    Bus.instance.on<MachineLearningControlEvent>().listen((event) {
+    // Listen on ComputeController
+    Bus.instance.on<ComputeControlEvent>().listen((event) {
       if (!flagService.hasGrantedMLConsent) {
         return;
       }
@@ -165,7 +160,7 @@ class MLService {
     } finally {
       _isRunningML = false;
       computeController.releaseCompute(ml: true);
-      PreviewVideoStore.instance.queueFiles();
+      VideoPreviewService.instance.queueFiles();
     }
   }
 

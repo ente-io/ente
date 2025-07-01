@@ -1685,5 +1685,6 @@
   "birhtdayNotifications": "Birhtday notifications",
   "receiveRemindersOnBirthdays": "Receive reminders when it's someone's birthday. Tapping on the notification will take you to photos of the birthday person.",
   "happyBirthday": "Happy birthday! 🥳",
-  "birthdays": "Birthdays"
+  "birthdays": "Birthdays",
+  "wishThemAHappyBirthday": "Wish ${name} a happy birthday! 🎉"
 }

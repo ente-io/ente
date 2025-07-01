@@ -25,49 +25,48 @@ import {
 import { SingleInputDialog } from "ente-base/components/SingleInputDialog";
 import { useModalVisibility } from "ente-base/components/utils/modal";
 import { useBaseContext } from "ente-base/context";
-import {
-    isArchivedCollection,
-    isPinnedCollection,
-} from "ente-gallery/services/magic-metadata";
-import type { Collection } from "ente-media/collection";
+import { CollectionOrder, type Collection } from "ente-media/collection";
 import { ItemVisibility } from "ente-media/file-metadata";
+import type { RemotePullOpts } from "ente-new/photos/components/gallery";
 import {
     GalleryItemsHeaderAdapter,
     GalleryItemsSummary,
 } from "ente-new/photos/components/gallery/ListHeader";
 import {
-    ALL_SECTION,
-    HIDDEN_ITEMS_SECTION,
+    deleteCollection,
     isHiddenCollection,
+    leaveSharedCollection,
+    renameCollection,
+    updateCollectionOrder,
+    updateCollectionSortOrder,
+    updateCollectionVisibility,
 } from "ente-new/photos/services/collection";
-import type {
-    CollectionSummary,
-    CollectionSummaryType,
-} from "ente-new/photos/services/collection/ui";
 import {
-    clearLocalTrash,
-    emptyTrash,
-} from "ente-new/photos/services/collections";
+    PseudoCollectionID,
+    type CollectionSummary,
+    type CollectionSummaryType,
+} from "ente-new/photos/services/collection-summary";
+import { emptyTrash } from "ente-new/photos/services/trash";
 import { usePhotosAppContext } from "ente-new/photos/types/context";
 import { t } from "i18next";
-import { GalleryContext } from "pages/gallery";
-import React, { useCallback, useContext, useRef } from "react";
+import React, { useCallback, useRef } from "react";
 import { Trans } from "react-i18next";
-import * as CollectionAPI from "services/collectionService";
 import { SetFilesDownloadProgressAttributesCreator } from "types/gallery";
 import {
-    changeCollectionOrder,
-    changeCollectionSortOrder,
-    changeCollectionVisibility,
     downloadCollectionHelper,
     downloadDefaultHiddenCollectionHelper,
 } from "utils/collection";
 
-interface CollectionHeaderProps {
+export interface CollectionHeaderProps {
     collectionSummary: CollectionSummary;
     activeCollection: Collection;
     setActiveCollectionID: (collectionID: number) => void;
     isActiveCollectionDownloadInProgress: () => boolean;
+    /**
+     * Called when an operation (e.g. renaming a collection) completes and wants
+     * to perform a full remote pull.
+     */
+    onRemotePull: (opts?: RemotePullOpts) => Promise<void>;
     onCollectionShare: () => void;
     onCollectionCast: () => void;
     setFilesDownloadProgressAttributesCreator: SetFilesDownloadProgressAttributesCreator;
@@ -84,24 +83,14 @@ export const CollectionHeader: React.FC<CollectionHeaderProps> = (props) => {
         return <></>;
     }
 
-    const { name, type, fileCount } = collectionSummary;
+    const { name, type, attributes, fileCount } = collectionSummary;
 
-    const EndIcon = ({ type }: { type: CollectionSummaryType }) => {
-        switch (type) {
-            case "favorites":
-                return <FavoriteRoundedIcon />;
-            case "archived":
-                return <ArchiveOutlinedIcon />;
-            case "incomingShareViewer":
-            case "incomingShareCollaborator":
-                return <PeopleIcon />;
-            case "outgoingShare":
-                return <PeopleIcon />;
-            case "sharedOnlyViaLink":
-                return <LinkIcon />;
-            default:
-                return <></>;
-        }
+    const EndIcon = () => {
+        if (attributes.has("archived")) return <ArchiveOutlinedIcon />;
+        if (attributes.has("sharedOnlyViaLink")) return <LinkIcon />;
+        if (attributes.has("shared")) return <PeopleIcon />;
+        if (attributes.has("userFavorites")) return <FavoriteRoundedIcon />;
+        return <></>;
     };
 
     return (
@@ -110,21 +99,24 @@ export const CollectionHeader: React.FC<CollectionHeaderProps> = (props) => {
                 <GalleryItemsSummary
                     name={name}
                     fileCount={fileCount}
-                    endIcon={<EndIcon type={type} />}
+                    endIcon={<EndIcon />}
                 />
-                {shouldShowOptions(type) && <CollectionOptions {...props} />}
+                {shouldShowOptions(type) && (
+                    <CollectionHeaderOptions {...props} />
+                )}
             </SpacedRow>
         </GalleryItemsHeaderAdapter>
     );
 };
 
 const shouldShowOptions = (type: CollectionSummaryType) =>
-    type != "all" && type != "archive";
+    type != "all" && type != "archiveItems";
 
-const CollectionOptions: React.FC<CollectionHeaderProps> = ({
+const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
     activeCollection,
     collectionSummary,
     setActiveCollectionID,
+    onRemotePull,
     onCollectionShare,
     onCollectionCast,
     setFilesDownloadProgressAttributesCreator,
@@ -132,8 +124,7 @@ const CollectionOptions: React.FC<CollectionHeaderProps> = ({
 }) => {
     const { showMiniDialog, onGenericError } = useBaseContext();
     const { showLoadingBar, hideLoadingBar } = usePhotosAppContext();
-    const { syncWithRemote } = useContext(GalleryContext);
-    const overFlowMenuIconRef = useRef<SVGSVGElement>(null);
+    const overflowMenuIconRef = useRef<SVGSVGElement>(null);
 
     const { show: showSortOrderMenu, props: sortOrderMenuVisibilityProps } =
         useModalVisibility();
@@ -156,23 +147,23 @@ const CollectionOptions: React.FC<CollectionHeaderProps> = ({
                 } catch (e) {
                     onGenericError(e);
                 } finally {
-                    void syncWithRemote(false, true);
+                    void onRemotePull({ silent: true });
                     hideLoadingBar();
                 }
             };
             return (): void => void wrapped();
         },
-        [showLoadingBar, hideLoadingBar, onGenericError, syncWithRemote],
+        [showLoadingBar, hideLoadingBar, onGenericError, onRemotePull],
     );
 
-    const renameCollection = useCallback(
+    const handleRenameCollection = useCallback(
         async (newName: string) => {
             if (activeCollection.name !== newName) {
-                await CollectionAPI.renameCollection(activeCollection, newName);
-                void syncWithRemote(false, true);
+                await renameCollection(activeCollection, newName);
+                void onRemotePull({ silent: true });
             }
         },
-        [activeCollection],
+        [activeCollection, onRemotePull],
     );
 
     const confirmDeleteCollection = () => {
@@ -204,13 +195,13 @@ const CollectionOptions: React.FC<CollectionHeaderProps> = ({
     };
 
     const deleteCollectionAlongWithFiles = wrap(async () => {
-        await CollectionAPI.deleteCollection(activeCollection.id, false);
-        setActiveCollectionID(ALL_SECTION);
+        await deleteCollection(activeCollection.id);
+        setActiveCollectionID(PseudoCollectionID.all);
     });
 
     const deleteCollectionButKeepFiles = wrap(async () => {
-        await CollectionAPI.deleteCollection(activeCollection.id, true);
-        setActiveCollectionID(ALL_SECTION);
+        await deleteCollection(activeCollection.id, { keepFiles: true });
+        setActiveCollectionID(PseudoCollectionID.all);
     });
 
     const confirmEmptyTrash = () =>
@@ -226,8 +217,7 @@ const CollectionOptions: React.FC<CollectionHeaderProps> = ({
 
     const doEmptyTrash = wrap(async () => {
         await emptyTrash();
-        await clearLocalTrash();
-        setActiveCollectionID(ALL_SECTION);
+        setActiveCollectionID(PseudoCollectionID.all);
     });
 
     const _downloadCollection = () => {
@@ -253,14 +243,14 @@ const CollectionOptions: React.FC<CollectionHeaderProps> = ({
         void _downloadCollection().catch(onGenericError);
 
     const archiveAlbum = wrap(() =>
-        changeCollectionVisibility(activeCollection, ItemVisibility.archived),
+        updateCollectionVisibility(activeCollection, ItemVisibility.archived),
     );
 
     const unarchiveAlbum = wrap(() =>
-        changeCollectionVisibility(activeCollection, ItemVisibility.visible),
+        updateCollectionVisibility(activeCollection, ItemVisibility.visible),
     );
 
-    const confirmLeaveSharedAlbum = () => {
+    const confirmLeaveSharedAlbum = () =>
         showMiniDialog({
             title: t("leave_shared_album_title"),
             message: t("leave_shared_album_message"),
@@ -270,39 +260,42 @@ const CollectionOptions: React.FC<CollectionHeaderProps> = ({
                 action: leaveSharedAlbum,
             },
         });
-    };
 
     const leaveSharedAlbum = wrap(async () => {
-        await CollectionAPI.leaveSharedAlbum(activeCollection.id);
-        setActiveCollectionID(ALL_SECTION);
+        await leaveSharedCollection(activeCollection.id);
+        setActiveCollectionID(PseudoCollectionID.all);
     });
 
-    const pinAlbum = wrap(() => changeCollectionOrder(activeCollection, 1));
+    const pinAlbum = wrap(() =>
+        updateCollectionOrder(activeCollection, CollectionOrder.pinned),
+    );
 
-    const unpinAlbum = wrap(() => changeCollectionOrder(activeCollection, 0));
+    const unpinAlbum = wrap(() =>
+        updateCollectionOrder(activeCollection, CollectionOrder.default),
+    );
 
     const hideAlbum = wrap(async () => {
-        await changeCollectionVisibility(
+        await updateCollectionVisibility(
             activeCollection,
             ItemVisibility.hidden,
         );
-        setActiveCollectionID(ALL_SECTION);
+        setActiveCollectionID(PseudoCollectionID.all);
     });
 
     const unhideAlbum = wrap(async () => {
-        await changeCollectionVisibility(
+        await updateCollectionVisibility(
             activeCollection,
             ItemVisibility.visible,
         );
-        setActiveCollectionID(HIDDEN_ITEMS_SECTION);
+        setActiveCollectionID(PseudoCollectionID.hiddenItems);
     });
 
     const changeSortOrderAsc = wrap(() =>
-        changeCollectionSortOrder(activeCollection, true),
+        updateCollectionSortOrder(activeCollection, true),
     );
 
     const changeSortOrderDesc = wrap(() =>
-        changeCollectionSortOrder(activeCollection, false),
+        updateCollectionSortOrder(activeCollection, false),
     );
 
     let menuOptions: React.ReactNode[] = [];
@@ -316,7 +309,7 @@ const CollectionOptions: React.FC<CollectionHeaderProps> = ({
             ];
             break;
 
-        case "favorites":
+        case "userFavorites":
             menuOptions = [
                 <DownloadOption
                     key="download"
@@ -361,10 +354,9 @@ const CollectionOptions: React.FC<CollectionHeaderProps> = ({
             ];
             break;
 
-        case "incomingShareViewer":
-        case "incomingShareCollaborator":
+        case "sharedIncoming":
             menuOptions = [
-                isArchivedCollection(activeCollection) ? (
+                collectionSummary.attributes.has("archived") ? (
                     <OverflowMenuOption
                         key="unarchive"
                         onClick={unarchiveAlbum}
@@ -414,7 +406,7 @@ const CollectionOptions: React.FC<CollectionHeaderProps> = ({
                 >
                     {t("sort_by")}
                 </OverflowMenuOption>,
-                isPinnedCollection(activeCollection) ? (
+                collectionSummary.attributes.has("pinned") ? (
                     <OverflowMenuOption
                         key="unpin"
                         onClick={unpinAlbum}
@@ -433,7 +425,7 @@ const CollectionOptions: React.FC<CollectionHeaderProps> = ({
                 ),
                 ...(!isHiddenCollection(activeCollection)
                     ? [
-                          isArchivedCollection(activeCollection) ? (
+                          collectionSummary.attributes.has("archived") ? (
                               <OverflowMenuOption
                                   key="unarchive"
                                   onClick={unarchiveAlbum}
@@ -497,7 +489,7 @@ const CollectionOptions: React.FC<CollectionHeaderProps> = ({
     return (
         <Box sx={{ display: "inline-flex", gap: "16px" }}>
             <QuickOptions
-                collectionSummaryType={collectionSummaryType}
+                collectionSummary={collectionSummary}
                 isDownloadInProgress={isActiveCollectionDownloadInProgress}
                 onEmptyTrashClick={confirmEmptyTrash}
                 onDownloadClick={downloadCollection}
@@ -506,13 +498,13 @@ const CollectionOptions: React.FC<CollectionHeaderProps> = ({
 
             <OverflowMenu
                 ariaID="collection-options"
-                triggerButtonIcon={<MoreHorizIcon ref={overFlowMenuIconRef} />}
+                triggerButtonIcon={<MoreHorizIcon ref={overflowMenuIconRef} />}
             >
                 {...menuOptions}
             </OverflowMenu>
             <CollectionSortOrderMenu
                 {...sortOrderMenuVisibilityProps}
-                overFlowMenuIconRef={overFlowMenuIconRef}
+                overflowMenuIconRef={overflowMenuIconRef}
                 onAscClick={changeSortOrderAsc}
                 onDescClick={changeSortOrderDesc}
             />
@@ -523,7 +515,7 @@ const CollectionOptions: React.FC<CollectionHeaderProps> = ({
                 initialValue={activeCollection?.name}
                 submitButtonColor="primary"
                 submitButtonTitle={t("rename")}
-                onSubmit={renameCollection}
+                onSubmit={handleRenameCollection}
             />
         </Box>
     );
@@ -535,7 +527,7 @@ interface OptionProps {
 }
 
 interface QuickOptionsProps {
-    collectionSummaryType: CollectionSummaryType;
+    collectionSummary: CollectionSummary;
     isDownloadInProgress: () => boolean;
     onEmptyTrashClick: () => void;
     onDownloadClick: () => void;
@@ -546,32 +538,32 @@ const QuickOptions: React.FC<QuickOptionsProps> = ({
     onEmptyTrashClick,
     onDownloadClick,
     onShareClick,
-    collectionSummaryType: type,
+    collectionSummary,
     isDownloadInProgress,
 }) => (
     <Stack direction="row" sx={{ alignItems: "center", gap: "16px" }}>
-        {showEmptyTrashQuickOption(type) && (
+        {showEmptyTrashQuickOption(collectionSummary) && (
             <EmptyTrashQuickOption onClick={onEmptyTrashClick} />
         )}
-        {showDownloadQuickOption(type) &&
+        {showDownloadQuickOption(collectionSummary) &&
             (isDownloadInProgress() ? (
                 <ActivityIndicator size="20px" sx={{ m: "12px" }} />
             ) : (
                 <DownloadQuickOption
+                    collectionSummary={collectionSummary}
                     onClick={onDownloadClick}
-                    collectionSummaryType={type}
                 />
             ))}
-        {showShareQuickOption(type) && (
+        {showShareQuickOption(collectionSummary) && (
             <ShareQuickOption
+                collectionSummary={collectionSummary}
                 onClick={onShareClick}
-                collectionSummaryType={type}
             />
         )}
     </Stack>
 );
 
-const showEmptyTrashQuickOption = (type: CollectionSummaryType) =>
+const showEmptyTrashQuickOption = ({ type }: CollectionSummary) =>
     type == "trash";
 
 const EmptyTrashQuickOption: React.FC<OptionProps> = ({ onClick }) => (
@@ -582,34 +574,29 @@ const EmptyTrashQuickOption: React.FC<OptionProps> = ({ onClick }) => (
     </Tooltip>
 );
 
-const showDownloadQuickOption = (type: CollectionSummaryType) =>
+const showDownloadQuickOption = ({ type, attributes }: CollectionSummary) =>
     type == "album" ||
     type == "folder" ||
-    type == "favorites" ||
     type == "uncategorized" ||
     type == "hiddenItems" ||
-    type == "incomingShareViewer" ||
-    type == "incomingShareCollaborator" ||
-    type == "outgoingShare" ||
-    type == "sharedOnlyViaLink" ||
-    type == "archived" ||
-    type == "pinned";
+    attributes.has("favorites") ||
+    attributes.has("shared");
 
 type DownloadQuickOptionProps = OptionProps & {
-    collectionSummaryType: CollectionSummaryType;
+    collectionSummary: CollectionSummary;
 };
 
 const DownloadQuickOption: React.FC<DownloadQuickOptionProps> = ({
+    collectionSummary: { type },
     onClick,
-    collectionSummaryType,
 }) => (
     <Tooltip
         title={
-            collectionSummaryType == "favorites"
+            type == "userFavorites"
                 ? t("download_favorites")
-                : collectionSummaryType == "uncategorized"
+                : type == "uncategorized"
                   ? t("download_uncategorized")
-                  : collectionSummaryType == "hiddenItems"
+                  : type == "hiddenItems"
                     ? t("download_hidden_items")
                     : t("download_album")
         }
@@ -620,36 +607,29 @@ const DownloadQuickOption: React.FC<DownloadQuickOptionProps> = ({
     </Tooltip>
 );
 
-const showShareQuickOption = (type: CollectionSummaryType) =>
+const showShareQuickOption = ({ type, attributes }: CollectionSummary) =>
     type == "album" ||
     type == "folder" ||
-    type == "favorites" ||
-    type == "outgoingShare" ||
-    type == "sharedOnlyViaLink" ||
-    type == "archived" ||
-    type == "incomingShareViewer" ||
-    type == "incomingShareCollaborator" ||
-    type == "pinned";
+    attributes.has("favorites") ||
+    attributes.has("shared");
 
 interface ShareQuickOptionProps {
+    collectionSummary: CollectionSummary;
     onClick: () => void;
-    collectionSummaryType: CollectionSummaryType;
 }
 
 const ShareQuickOption: React.FC<ShareQuickOptionProps> = ({
+    collectionSummary: { attributes },
     onClick,
-    collectionSummaryType,
 }) => (
     <Tooltip
         title={
-            collectionSummaryType == "incomingShareViewer" ||
-            collectionSummaryType == "incomingShareCollaborator"
-                ? t("sharing_details")
-                : collectionSummaryType == "outgoingShare" ||
-                    collectionSummaryType == "sharedOnlyViaLink"
-                  ? t("modify_sharing")
-                  : collectionSummaryType == "favorites"
-                    ? t("share_favorites")
+            attributes.has("userFavorites")
+                ? t("share_favorites")
+                : attributes.has("sharedIncoming")
+                  ? t("sharing_details")
+                  : attributes.has("shared")
+                    ? t("modify_sharing")
                     : t("share_album")
         }
     >
@@ -693,7 +673,7 @@ const DownloadOption: React.FC<
 interface CollectionSortOrderMenuProps {
     open: boolean;
     onClose: () => void;
-    overFlowMenuIconRef: React.RefObject<SVGSVGElement>;
+    overflowMenuIconRef: React.RefObject<SVGSVGElement>;
     onAscClick: () => void;
     onDescClick: () => void;
 }
@@ -701,24 +681,24 @@ interface CollectionSortOrderMenuProps {
 const CollectionSortOrderMenu: React.FC<CollectionSortOrderMenuProps> = ({
     open,
     onClose,
-    overFlowMenuIconRef,
+    overflowMenuIconRef,
     onAscClick,
     onDescClick,
 }) => {
     const handleAscClick = () => {
-        onClose();
         onAscClick();
+        onClose();
     };
 
     const handleDescClick = () => {
-        onClose();
         onDescClick();
+        onClose();
     };
 
     return (
         <Menu
             id="collection-files-sort"
-            anchorEl={overFlowMenuIconRef.current}
+            anchorEl={overflowMenuIconRef.current}
             open={open}
             onClose={onClose}
             slotProps={{

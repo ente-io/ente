@@ -40,6 +40,13 @@
       "slug": "ankama"
     },
     {
+      "title": "Ankara University",
+      "slug": "ankara_university",
+      "altNames": [
+        "Ankara Üniversitesi"
+      ]
+    },
+    {
       "title": "Anycoin Direct",
       "slug": "anycoindirect"
     },
@@ -564,6 +571,14 @@
       ]
     },
     {
+      "title": "IBKR",
+      "slug": "ibkr",
+      "altNames": [
+        "Interactive Brokers",
+        "IB"
+      ]
+    },
+    {
       "title": "IceDrive",
       "slug": "ice_drive"
     },
@@ -685,6 +700,10 @@
       ]
     },
     {
+      "title": "LaunchDarkly",
+      "hex": "858585"
+    },
+    {
       "title": "Letterboxd"
     },
     {
@@ -747,6 +766,9 @@
         "thebrainbin",
         "gehirneimer"
       ]
+    },
+    {
+      "title": "Memed"
     },
     {
       "title": "Mercado Libre",
@@ -1123,6 +1145,16 @@
       "slug": "seafile"
     },
     {
+      "title": "SEI",
+      "altNames": [
+        "sei",
+        "sei!",
+        "SEI!",
+        "Sistema Eletrônico de Informações",
+        "SEI/SEDE"
+      ]
+    },
+    {
       "title": "Sendgrid"
     },
     {
@@ -1445,6 +1477,9 @@
     {
       "title": "Cronometer",
       "slug": "cronometer"
+    },
+    {
+      "title": "Zitadel"
     }
   ]
 }

@@ -58,7 +58,7 @@ class PersonService {
 
   Future<void> resetEmailToPartialPersonDataCache() async {
     _emailToPartialPersonDataMapCache.clear();
-    await _instance!.getPersons().then((value) {
+    await getPersons().then((value) {
       for (var person in value) {
         if (person.data.email != null && person.data.email!.isNotEmpty) {
           _instance!._emailToPartialPersonDataMapCache[person.data.email!] = {
@@ -71,11 +71,33 @@ class PersonService {
     });
   }
 
+  Future<List<PersonEntity>> getCertainPersons(List<String> ids) async {
+    final entities =
+        await entityService.getCertainEntities(EntityType.cgroup, ids);
+    return entities
+        .map(
+          (e) => PersonEntity(
+            e.id,
+            PersonData.fromJson(json.decode(e.data)),
+          ),
+        )
+        .toList();
+  }
+
+  int lastRemoteSyncTime() {
+    return entityService.lastSyncTime(EntityType.cgroup);
+  }
+
   Future<List<PersonEntity>> getPersons() async {
+    // perf todo: move this json decode in computer, and use cached future
+    // to read values from DB and also poulate the emailPartialPersonDataMapCache
     final entities = await entityService.getEntities(EntityType.cgroup);
     return entities
         .map(
-          (e) => PersonEntity(e.id, PersonData.fromJson(json.decode(e.data))),
+          (e) => PersonEntity(
+            e.id,
+            PersonData.fromJson(json.decode(e.data)),
+          ),
         )
         .toList();
   }
@@ -85,7 +107,10 @@ class PersonService {
       if (e == null) {
         return null;
       }
-      return PersonEntity(e.id, PersonData.fromJson(json.decode(e.data)));
+      return PersonEntity(
+        e.id,
+        PersonData.fromJson(json.decode(e.data)),
+      );
     });
   }
 
@@ -93,8 +118,10 @@ class PersonService {
     final entities = await entityService.getEntities(EntityType.cgroup);
     final Map<String, PersonEntity> map = {};
     for (var e in entities) {
-      final person =
-          PersonEntity(e.id, PersonData.fromJson(json.decode(e.data)));
+      final person = PersonEntity(
+        e.id,
+        PersonData.fromJson(json.decode(e.data)),
+      );
       map[person.remoteID] = person;
     }
     return map;
@@ -245,7 +272,7 @@ class PersonService {
     personData.logStats();
   }
 
-  Future<void> removeFilesFromPerson({
+  Future<void> removeFacesFromPerson({
     required PersonEntity person,
     required Set<String> faceIDs,
   }) async {
@@ -380,8 +407,15 @@ class PersonService {
       for (var e in entities) {
         final personData = PersonData.fromJson(json.decode(e.data));
         if (personData.rejectedFaceIDs.isNotEmpty) {
+          final personClustersToFaceIDs = dbPeopleClusterInfo[e.id];
+          if (personClustersToFaceIDs == null) {
+            logger.warning(
+              "Person ${e.id} ${personData.name} has rejected faces but no clusters found in local DB",
+            );
+            continue;
+          }
           final personFaceIDs =
-              dbPeopleClusterInfo[e.id]!.values.expand((e) => e).toSet();
+              personClustersToFaceIDs.values.expand((e) => e).toSet();
           final rejectedFaceIDsSet = personData.rejectedFaceIDs.toSet();
           final assignedAndRejectedFaceIDs =
               rejectedFaceIDsSet.intersection(personFaceIDs);

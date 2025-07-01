@@ -10,11 +10,10 @@ import log from "ente-base/log";
 import { exportMetadataDirectoryName } from "ente-gallery/export-dirs";
 import { downloadManager } from "ente-gallery/services/download";
 import type { Collection } from "ente-media/collection";
-import { mergeMetadata, type EnteFile } from "ente-media/file";
+import { type EnteFile } from "ente-media/file";
+import { fileFileName } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
 import { decodeLivePhoto } from "ente-media/live-photo";
-import { getLocalCollections } from "ente-new/photos/services/collections";
-import { getAllLocalFiles } from "ente-new/photos/services/files";
 import {
     safeDirectoryName,
     safeFileName,
@@ -32,6 +31,7 @@ import exportService, {
     type ExportStage,
     type FileExportNames,
 } from "./export";
+import { savedCollectionFiles, savedCollections } from "./photos-fdb";
 
 type ExportedCollectionPaths = Record<number, string>;
 
@@ -139,8 +139,8 @@ async function migrationV0ToV1(
     }
     const collectionIDPathMap = new Map<number, string>();
     const user: User = getData("user");
-    const localFiles = mergeMetadata(await getAllLocalFiles());
-    const localCollections = await getLocalCollections();
+    const localFiles = await savedCollectionFiles();
+    const localCollections = await savedCollections();
     const personalFiles = getIDBasedSortedFiles(
         localFiles.filter((file) => file.ownerID == user.id),
     );
@@ -178,7 +178,7 @@ async function migrationV2ToV3(
         return;
     }
     const user: User = getData("user");
-    const localFiles = mergeMetadata(await getAllLocalFiles());
+    const localFiles = await savedCollectionFiles();
     const personalFiles = getIDBasedSortedFiles(
         localFiles.filter((file) => file.ownerID == user.id),
     );
@@ -267,7 +267,7 @@ async function migrateFiles(
             exportMetadataDirectoryName,
         );
 
-        const oldFileName = `${file.id}_${oldSanitizeName(file.metadata.title)}`;
+        const oldFileName = `${file.id}_${oldSanitizeName(fileFileName(file))}`;
         // @ts-ignore
         const oldFilePath = joinPath(collectionPath, oldFileName);
         const oldFileMetadataPath = joinPath(
@@ -278,7 +278,7 @@ async function migrateFiles(
         const newFileName = await safeFileName(
             // @ts-ignore
             collectionPath,
-            file.metadata.title,
+            fileFileName(file),
             fs.exists,
         );
         // @ts-ignore
@@ -367,14 +367,15 @@ async function getFileExportNamesFromExportedFiles(
             () =>
                 `collection path for ${file.collectionID} is ${collectionPath}`,
         );
+        const fileName = fileFileName(file);
         let fileExportName: string;
         /*
             For Live Photos we need to download the file to get the image and video name
         */
-        if (file.metadata.fileType === FileType.livePhoto) {
+        if (file.metadata.fileType == FileType.livePhoto) {
             const fileBlob = await downloadManager.fileBlob(file);
             const { imageFileName, videoFileName } = await decodeLivePhoto(
-                file.metadata.title,
+                fileName,
                 fileBlob,
             );
             const imageExportName = getUniqueFileExportNameForMigration(
@@ -397,13 +398,12 @@ async function getFileExportNamesFromExportedFiles(
             fileExportName = getUniqueFileExportNameForMigration(
                 // @ts-ignore
                 collectionPath,
-                file.metadata.title,
+                fileName,
                 usedFilePaths,
             );
         }
         log.debug(
-            () =>
-                `file export name for ${file.metadata.title} is ${fileExportName}`,
+            () => `file export name for ${fileName} is ${fileExportName}`,
         );
         exportedFileNames = {
             // @ts-ignore

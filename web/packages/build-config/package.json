@@ -4,8 +4,8 @@
     "private": true,
     "type": "module",
     "devDependencies": {
-        "@eslint/js": "^9.28.0",
-        "eslint": "^9.28.0",
+        "@eslint/js": "^9.29.0",
+        "eslint": "^9.29.0",
         "eslint-plugin-react": "^7.37.5",
         "eslint-plugin-react-hooks": "^5.2.0",
         "eslint-plugin-react-refresh": "^0.4.20",
@@ -13,6 +13,6 @@
         "prettier-plugin-organize-imports": "^4.1.0",
         "prettier-plugin-packagejson": "^2.5.15",
         "typescript": "^5.8.3",
-        "typescript-eslint": "^8.33.1"
+        "typescript-eslint": "^8.34.1"
     }
 }

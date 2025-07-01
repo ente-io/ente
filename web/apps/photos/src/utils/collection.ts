@@ -2,99 +2,40 @@ import type { User } from "ente-accounts/services/user";
 import { ensureElectron } from "ente-base/electron";
 import { joinPath } from "ente-base/file-name";
 import log from "ente-base/log";
-import { updateMagicMetadata } from "ente-gallery/services/magic-metadata";
-import {
-    type Collection,
-    CollectionMagicMetadataProps,
-    CollectionPublicMagicMetadataProps,
-    CollectionSubType,
-} from "ente-media/collection";
+import { uniqueFilesByID } from "ente-gallery/utils/file";
+import { type Collection, CollectionSubType } from "ente-media/collection";
 import { EnteFile } from "ente-media/file";
-import { ItemVisibility } from "ente-media/file-metadata";
-import {
-    DEFAULT_HIDDEN_COLLECTION_USER_FACING_NAME,
-    HIDDEN_ITEMS_SECTION,
-    addToCollection,
-    findDefaultHiddenCollectionIDs,
-    isHiddenCollection,
-    isIncomingShare,
-    moveToCollection,
-    restoreToCollection,
-} from "ente-new/photos/services/collection";
-import {
-    getAllLocalCollections,
-    getLocalCollections,
-} from "ente-new/photos/services/collections";
-import {
-    getAllLocalFiles,
-    getLocalFiles,
-} from "ente-new/photos/services/files";
-import { safeDirectoryName } from "ente-new/photos/utils/native-fs";
-import { getData } from "ente-shared/storage/localStorage";
 import {
     createAlbum,
-    removeFromCollection,
-    unhideToCollection,
-    updateCollectionMagicMetadata,
-    updatePublicCollectionMagicMetadata,
-    updateSharedCollectionMagicMetadata,
-} from "services/collectionService";
+    defaultHiddenCollectionUserFacingName,
+    findDefaultHiddenCollectionIDs,
+    isHiddenCollection,
+} from "ente-new/photos/services/collection";
+import { PseudoCollectionID } from "ente-new/photos/services/collection-summary";
+import {
+    savedCollectionFiles,
+    savedCollections,
+} from "ente-new/photos/services/photos-fdb";
+import { safeDirectoryName } from "ente-new/photos/utils/native-fs";
+import { getData } from "ente-shared/storage/localStorage";
 import {
     SetFilesDownloadProgressAttributes,
     type SetFilesDownloadProgressAttributesCreator,
 } from "types/gallery";
 import { downloadFilesWithProgress } from "utils/file";
 
-export type CollectionOp = "add" | "move" | "remove" | "restore" | "unhide";
-
-export async function handleCollectionOp(
-    op: CollectionOp,
-    collection: Collection,
-    selectedFiles: EnteFile[],
-    selectedCollectionID: number,
-) {
-    switch (op) {
-        case "add":
-            await addToCollection(collection, selectedFiles);
-            break;
-        case "move":
-            await moveToCollection(
-                selectedCollectionID,
-                collection,
-                selectedFiles,
-            );
-            break;
-        case "remove":
-            await removeFromCollection(collection.id, selectedFiles);
-            break;
-        case "restore":
-            await restoreToCollection(collection, selectedFiles);
-            break;
-        case "unhide":
-            await unhideToCollection(collection, selectedFiles);
-            break;
-    }
-}
-
-export function getSelectedCollection(
-    collectionID: number,
-    collections: Collection[],
-) {
-    return collections.find((collection) => collection.id === collectionID);
-}
-
 export async function downloadCollectionHelper(
     collectionID: number,
     setFilesDownloadProgressAttributes: SetFilesDownloadProgressAttributes,
 ) {
     try {
-        const allFiles = await getAllLocalFiles();
+        const allFiles = await savedCollectionFiles();
         const collectionFiles = allFiles.filter(
-            (file) => file.collectionID === collectionID,
+            (file) => file.collectionID == collectionID,
         );
-        const allCollections = await getAllLocalCollections();
+        const allCollections = await savedCollections();
         const collection = allCollections.find(
-            (collection) => collection.id === collectionID,
+            (collection) => collection.id == collectionID,
         );
         if (!collection) {
             throw Error("collection not found");
@@ -113,22 +54,24 @@ export async function downloadDefaultHiddenCollectionHelper(
     setFilesDownloadProgressAttributesCreator: SetFilesDownloadProgressAttributesCreator,
 ) {
     try {
-        const hiddenCollections = await getLocalCollections("hidden");
-        const defaultHiddenCollectionsIds =
-            findDefaultHiddenCollectionIDs(hiddenCollections);
-        const hiddenFiles = await getLocalFiles("hidden");
-        const defaultHiddenCollectionFiles = hiddenFiles.filter((file) =>
-            defaultHiddenCollectionsIds.has(file.collectionID),
+        const defaultHiddenCollectionsIDs = findDefaultHiddenCollectionIDs(
+            await savedCollections(),
+        );
+        const collectionFiles = await savedCollectionFiles();
+        const defaultHiddenCollectionFiles = uniqueFilesByID(
+            collectionFiles.filter((file) =>
+                defaultHiddenCollectionsIDs.has(file.collectionID),
+            ),
         );
         const setFilesDownloadProgressAttributes =
             setFilesDownloadProgressAttributesCreator(
-                DEFAULT_HIDDEN_COLLECTION_USER_FACING_NAME,
-                HIDDEN_ITEMS_SECTION,
+                defaultHiddenCollectionUserFacingName,
+                PseudoCollectionID.hiddenItems,
                 true,
             );
 
         await downloadCollectionFiles(
-            DEFAULT_HIDDEN_COLLECTION_USER_FACING_NAME,
+            defaultHiddenCollectionUserFacingName,
             defaultHiddenCollectionFiles,
             setFilesDownloadProgressAttributes,
         );
@@ -182,136 +125,12 @@ async function createCollectionDownloadFolder(
     return collectionDownloadPath;
 }
 
-export const changeCollectionVisibility = async (
-    collection: Collection,
-    visibility: ItemVisibility,
-) => {
-    try {
-        const updatedMagicMetadataProps: CollectionMagicMetadataProps = {
-            visibility,
-        };
-
-        const user: User = getData("user");
-        if (collection.owner.id === user.id) {
-            const updatedMagicMetadata = await updateMagicMetadata(
-                updatedMagicMetadataProps,
-                collection.magicMetadata,
-                collection.key,
-            );
-
-            await updateCollectionMagicMetadata(
-                collection,
-                updatedMagicMetadata,
-            );
-        } else {
-            const updatedMagicMetadata = await updateMagicMetadata(
-                updatedMagicMetadataProps,
-                collection.sharedMagicMetadata,
-                collection.key,
-            );
-            await updateSharedCollectionMagicMetadata(
-                collection,
-                updatedMagicMetadata,
-            );
-        }
-    } catch (e) {
-        log.error("change collection visibility failed", e);
-        throw e;
-    }
-};
-
-export const changeCollectionSortOrder = async (
-    collection: Collection,
-    asc: boolean,
-) => {
-    try {
-        const updatedPublicMagicMetadataProps: CollectionPublicMagicMetadataProps =
-            { asc };
-
-        const updatedPubMagicMetadata = await updateMagicMetadata(
-            updatedPublicMagicMetadataProps,
-            collection.pubMagicMetadata,
-            collection.key,
-        );
-
-        await updatePublicCollectionMagicMetadata(
-            collection,
-            updatedPubMagicMetadata,
-        );
-    } catch (e) {
-        log.error("change collection sort order failed", e);
-    }
-};
-
-export const changeCollectionOrder = async (
-    collection: Collection,
-    order: number,
-) => {
-    try {
-        const updatedMagicMetadataProps: CollectionMagicMetadataProps = {
-            order,
-        };
-
-        const updatedMagicMetadata = await updateMagicMetadata(
-            updatedMagicMetadataProps,
-            collection.magicMetadata,
-            collection.key,
-        );
-
-        await updateCollectionMagicMetadata(collection, updatedMagicMetadata);
-    } catch (e) {
-        log.error("change collection order failed", e);
-    }
-};
-
-export const changeCollectionSubType = async (
-    collection: Collection,
-    subType: CollectionSubType,
-) => {
-    try {
-        const updatedMagicMetadataProps: CollectionMagicMetadataProps = {
-            subType: subType,
-        };
-
-        const updatedMagicMetadata = await updateMagicMetadata(
-            updatedMagicMetadataProps,
-            collection.magicMetadata,
-            collection.key,
-        );
-        await updateCollectionMagicMetadata(collection, updatedMagicMetadata);
-    } catch (e) {
-        log.error("change collection subType failed", e);
-        throw e;
-    }
-};
-
-export const getUserOwnedCollections = (collections: Collection[]) => {
-    const user: User = getData("user");
-    if (!user?.id) {
-        throw Error("user missing");
-    }
-    return collections.filter((collection) => collection.owner.id === user.id);
-};
-
-export const isQuickLinkCollection = (collection: Collection) =>
+const isQuickLinkCollection = (collection: Collection) =>
     collection.magicMetadata?.data.subType == CollectionSubType.quicklink;
 
 export function isIncomingViewerShare(collection: Collection, user: User) {
     const sharee = collection.sharees?.find((sharee) => sharee.id === user.id);
     return sharee?.role == "VIEWER";
-}
-
-export function isValidMoveTarget(
-    sourceCollectionID: number,
-    targetCollection: Collection,
-    user: User,
-) {
-    return (
-        sourceCollectionID !== targetCollection.id &&
-        !isHiddenCollection(targetCollection) &&
-        !isQuickLinkCollection(targetCollection) &&
-        !isIncomingShare(targetCollection, user)
-    );
 }
 
 export function isValidReplacementAlbum(
@@ -326,7 +145,7 @@ export function isValidReplacementAlbum(
             collection.type == "uncategorized") &&
         !isHiddenCollection(collection) &&
         !isQuickLinkCollection(collection) &&
-        !isIncomingShare(collection, user)
+        collection.owner.id == user.id
     );
 }
 

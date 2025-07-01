@@ -55,19 +55,12 @@ import log from "ente-base/log";
 import type { Location } from "ente-base/types";
 import { CopyButton } from "ente-gallery/components/FileInfoComponents";
 import { tagNumericValue, type RawExifTags } from "ente-gallery/services/exif";
-import {
-    changeCaption,
-    changeFileName,
-    updateExistingFilePubMetadata,
-} from "ente-gallery/services/file";
 import { formattedByteSize } from "ente-gallery/utils/units";
 import { type EnteFile } from "ente-media/file";
 import {
-    fileCaption,
     fileCreationPhotoDate,
+    fileFileName,
     fileLocation,
-    filePublicMagicMetadata,
-    updateRemotePublicMagicMetadata,
     type ParsedMetadata,
     type ParsedMetadataDate,
 } from "ente-media/file-metadata";
@@ -77,8 +70,13 @@ import { FilePeopleList } from "ente-new/photos/components/PeopleList";
 import {
     confirmDisableMapsDialogAttributes,
     confirmEnableMapsDialogAttributes,
-} from "ente-new/photos/components/utils/dialog";
+} from "ente-new/photos/components/utils/dialog-attributes";
 import { useSettingsSnapshot } from "ente-new/photos/components/utils/use-snapshot";
+import {
+    updateFileCaption,
+    updateFileFileName,
+    updateFilePublicMagicMetadata,
+} from "ente-new/photos/services/file";
 import {
     getAnnotatedFacesForFile,
     isMLEnabled,
@@ -151,26 +149,28 @@ export type FileInfoProps = ModalVisibilityProps & {
      */
     collectionNameByID?: Map<number, string>;
     /**
-     * Called when the action on the file info drawer has changed some the
-     * metadata for some file, and we need to sync with remote to get our
-     * locally persisted file objects up to date.
+     * Called when the action on the file info drawer has changed some metadata
+     * for a file.
      *
-     * The sync is not performed immediately by the file info drawer to give
-     * faster feedback to the user, and to allow changes to multiple files to be
-     * batched together into a single sync when the file viewer is closed.
+     * It should return a promise that settles when the changes have been
+     * reflected locally. Until the promise settles the UI element that
+     * triggered the change will show an activity indicator to the user.
      */
-    onNeedsRemoteSync: () => void;
+    onFileMetadataUpdate?: () => Promise<void>;
     /**
      * Called when an action on the file info drawer change the caption of the
      * given {@link EnteFile}.
      *
      * This hook allows the file viewer to update the caption it is displaying
-     * for the given file.
+     * for the given file. It is called in addition to, and after the settlement
+     * of, {@link onFileMetadataUpdate} since the caption update requires a
+     * special case refresh of the PhotoSwipe dialog.
      *
-     * @param updatedFile The updated file object, containing the updated
-     * caption.
+     * @param fileID The ID of the file whose caption was updated.
+     *
+     * @param newCaption The updated value of the file's caption.
      */
-    onUpdateCaption: (updatedFile: EnteFile) => void;
+    onUpdateCaption: (fileID: number, newCaption: string) => void;
     /**
      * Called when the user selects a collection from among the collections that
      * the file belongs to.
@@ -192,7 +192,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
     showCollections,
     fileCollectionIDs,
     collectionNameByID,
-    onNeedsRemoteSync,
+    onFileMetadataUpdate,
     onUpdateCaption,
     onSelectCollection,
     onSelectPerson,
@@ -258,7 +258,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
         onSelectPerson?.(personID);
     };
 
-    const uploaderName = filePublicMagicMetadata(file)?.uploaderName;
+    const uploaderName = file.pubMagicMetadata?.data.uploaderName;
 
     return (
         <FileInfoSidebar {...{ open, onClose }}>
@@ -272,13 +272,19 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                     {...{
                         file,
                         allowEdits,
-                        onNeedsRemoteSync,
+                        onFileMetadataUpdate,
                         onUpdateCaption,
+                        onClose,
                     }}
                 />
-                <CreationTime {...{ file, allowEdits, onNeedsRemoteSync }} />
+                <CreationTime {...{ file, allowEdits, onFileMetadataUpdate }} />
                 <FileName
-                    {...{ file, annotatedExif, allowEdits, onNeedsRemoteSync }}
+                    {...{
+                        file,
+                        annotatedExif,
+                        allowEdits,
+                        onFileMetadataUpdate,
+                    }}
                 />
 
                 {annotatedExif?.takenOnDevice && (
@@ -386,7 +392,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                 {...rawExifVisibilityProps}
                 onInfoClose={onClose}
                 tags={exif?.tags}
-                fileName={file.metadata.title}
+                fileName={fileFileName(file)}
             />
         </FileInfoSidebar>
     );
@@ -517,9 +523,7 @@ const InfoItem: React.FC<React.PropsWithChildren<InfoItemProps>> = ({
                 <Typography sx={{ wordBreak: "break-all" }}>{title}</Typography>
                 <Typography
                     variant="small"
-                    {...(typeof caption == "string"
-                        ? {}
-                        : { component: "div" })}
+                    {...(typeof caption != "string" && { component: "div" })}
                     sx={{ color: "text.muted" }}
                 >
                     {caption}
@@ -560,18 +564,23 @@ const EditButton: React.FC<EditButtonProps> = ({ onClick, loading }) => (
 
 type CaptionProps = Pick<
     FileInfoProps,
-    "file" | "allowEdits" | "onNeedsRemoteSync" | "onUpdateCaption"
+    | "file"
+    | "allowEdits"
+    | "onFileMetadataUpdate"
+    | "onUpdateCaption"
+    | "onClose"
 >;
 
 const Caption: React.FC<CaptionProps> = ({
     file,
     allowEdits,
-    onNeedsRemoteSync,
+    onFileMetadataUpdate,
     onUpdateCaption,
+    onClose,
 }) => {
     const [isSaving, setIsSaving] = useState(false);
 
-    const caption = fileCaption(file) ?? "";
+    const caption = file.pubMagicMetadata?.data.caption ?? "";
 
     const formik = useFormik<{ caption: string }>({
         initialValues: { caption },
@@ -583,15 +592,16 @@ const Caption: React.FC<CaptionProps> = ({
             if (newCaption == caption) return;
             setIsSaving(true);
             try {
-                const updatedFile = await changeCaption(file, newCaption);
-                updateExistingFilePubMetadata(file, updatedFile);
-                onUpdateCaption(file);
+                await updateFileCaption(file, newCaption);
+                await onFileMetadataUpdate?.();
+                onUpdateCaption(file.id, newCaption);
+                setIsSaving(false);
+                onClose();
             } catch (e) {
                 log.error("Failed to update caption", e);
+                setIsSaving(false);
                 setFieldError("caption", t("generic_error"));
             }
-            onNeedsRemoteSync();
-            setIsSaving(false);
         },
     });
 
@@ -650,23 +660,20 @@ const CaptionForm = styled("form")(({ theme }) => ({
 
 type CreationTimeProps = Pick<
     FileInfoProps,
-    "allowEdits" | "onNeedsRemoteSync"
+    "allowEdits" | "onFileMetadataUpdate"
 > & { file: EnteFile };
 
 const CreationTime: React.FC<CreationTimeProps> = ({
     file,
     allowEdits,
-    onNeedsRemoteSync,
+    onFileMetadataUpdate,
 }) => {
     const { onGenericError } = useBaseContext();
 
     const [isEditing, setIsEditing] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
 
-    const originalDate = fileCreationPhotoDate(
-        file,
-        filePublicMagicMetadata(file),
-    );
+    const originalDate = fileCreationPhotoDate(file);
 
     const saveEdits = async (pickedTime: ParsedMetadataDate) => {
         setIsEditing(false);
@@ -690,14 +697,11 @@ const CreationTime: React.FC<CreationTimeProps> = ({
             // we can provide functionality for the user to edit the associated
             // offset, but right now it is not even surfaced, so don't also
             // potentially overwrite it.
-            await updateRemotePublicMagicMetadata(file, {
-                dateTime,
-                editedTime,
-            });
+            await updateFilePublicMagicMetadata(file, { dateTime, editedTime });
+            await onFileMetadataUpdate?.();
         } catch (e) {
             onGenericError(e);
         }
-        onNeedsRemoteSync();
         setIsSaving(false);
     };
 
@@ -727,30 +731,29 @@ const CreationTime: React.FC<CreationTimeProps> = ({
     );
 };
 
-type FileNameProps = Pick<FileInfoProps, "allowEdits" | "onNeedsRemoteSync"> & {
-    file: EnteFile;
-    annotatedExif: AnnotatedExif | undefined;
-};
+type FileNameProps = Pick<
+    FileInfoProps,
+    "allowEdits" | "onFileMetadataUpdate"
+> & { file: EnteFile; annotatedExif: AnnotatedExif | undefined };
 
 const FileName: React.FC<FileNameProps> = ({
     file,
     annotatedExif,
     allowEdits,
-    onNeedsRemoteSync,
+    onFileMetadataUpdate,
 }) => {
     const { show: showRename, props: renameVisibilityProps } =
         useModalVisibility();
 
-    const fileName = file.metadata.title;
+    const fileName = fileFileName(file);
 
     const handleRename = async (newFileName: string) => {
-        const updatedFile = await changeFileName(file, newFileName);
-        updateExistingFilePubMetadata(file, updatedFile);
-        onNeedsRemoteSync();
+        await updateFileFileName(file, newFileName);
+        await onFileMetadataUpdate?.();
     };
 
     const icon =
-        file.metadata.fileType === FileType.video ? (
+        file.metadata.fileType == FileType.video ? (
             <VideocamOutlinedIcon />
         ) : (
             <PhotoOutlinedIcon />

@@ -5,7 +5,7 @@
     "dependencies": {
         "@emotion/react": "^11.14.0",
         "@emotion/styled": "^11.14.0",
-        "@fontsource-variable/inter": "^5.2.5",
+        "@fontsource-variable/inter": "^5.2.6",
         "@mui/icons-material": "^7.1.1",
         "@mui/material": "^7.1.1",
         "comlink": "^4.4.2",
@@ -17,17 +17,16 @@
         "idb": "^8.0.3",
         "libsodium-wrappers-sumo": "^0.7.15",
         "nanoid": "^5.1.5",
-        "next": "^15.3.3",
+        "next": "^15.3.4",
         "react": "^19.1.0",
         "react-dom": "^19.1.0",
-        "react-i18next": "^15.5.2",
-        "yup": "^1.6.1",
-        "zod": "^3.25.51"
+        "react-i18next": "^15.5.3",
+        "zod": "^3.25.67"
     },
     "devDependencies": {
         "@types/libsodium-wrappers-sumo": "^0.7.8",
-        "@types/react": "^19.1.6",
-        "@types/react-dom": "^19.1.5",
+        "@types/react": "^19.1.8",
+        "@types/react-dom": "^19.1.6",
         "ente-build-config": "*"
     }
 }

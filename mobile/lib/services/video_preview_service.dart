@@ -29,6 +29,7 @@ import "package:photos/models/preview/playlist_data.dart";
 import "package:photos/models/preview/preview_item.dart";
 import "package:photos/models/preview/preview_item_status.dart";
 import "package:photos/service_locator.dart";
+import "package:photos/services/collections_service.dart";
 import "package:photos/services/filedata/model/file_data.dart";
 import "package:photos/ui/notification/toast.dart";
 import "package:photos/utils/exif_util.dart";
@@ -40,26 +41,28 @@ import "package:shared_preferences/shared_preferences.dart";
 
 const _maxRetryCount = 3;
 
-class PreviewVideoStore {
+class VideoPreviewService {
+  final _logger = Logger("VideoPreviewService");
   final LinkedHashMap<int, PreviewItem> _items = LinkedHashMap();
   LinkedHashMap<int, EnteFile> fileQueue = LinkedHashMap();
-  final int _minPreviewSizeForCache = 50 * 1024 * 1024; // 50 MB
+  final int _maxPreviewSizeLimitForCache = 50 * 1024 * 1024; // 50 MB
   Set<int>? _failureFiles;
 
   bool _hasQueuedFile = false;
 
-  PreviewVideoStore._privateConstructor();
+  VideoPreviewService._privateConstructor();
 
-  static final PreviewVideoStore instance =
-      PreviewVideoStore._privateConstructor();
+  static final VideoPreviewService instance =
+      VideoPreviewService._privateConstructor();
 
-  final _logger = Logger("PreviewVideoStore");
   final cacheManager = DefaultCacheManager();
   final videoCacheManager = VideoCacheManager.instance;
 
   int uploadingFileId = -1;
 
-  final _dio = NetworkClient.instance.enteDio;
+  final _enteDio = NetworkClient.instance.enteDio;
+  final _nonEnteDio = NetworkClient.instance.getDio();
+  final CollectionsService collectionsService = CollectionsService.instance;
 
   void init(SharedPreferences prefs) {
     _prefs = prefs;
@@ -67,26 +70,18 @@ class PreviewVideoStore {
 
   late final SharedPreferences _prefs;
   static const String _videoStreamingEnabled = "videoStreamingEnabled";
-  static const String _videoStreamingCutoff = "videoStreamingCutoff";
 
   bool get isVideoStreamingEnabled {
     return _prefs.getBool(_videoStreamingEnabled) ?? false;
   }
 
   Future<void> setIsVideoStreamingEnabled(bool value) async {
-    final oneMonthBack = DateTime.now().subtract(const Duration(days: 30));
     _prefs.setBool(_videoStreamingEnabled, value).ignore();
-    _prefs
-        .setInt(
-          _videoStreamingCutoff,
-          oneMonthBack.millisecondsSinceEpoch,
-        )
-        .ignore();
     Bus.instance.fire(VideoStreamingChanged());
 
     if (isVideoStreamingEnabled) {
       await fileDataService.syncFDStatus();
-      _putFilesForPreviewCreation().ignore();
+      queueFiles(duration: Duration.zero);
     } else {
       clearQueue();
     }
@@ -96,12 +91,6 @@ class PreviewVideoStore {
     fileQueue.clear();
     _items.clear();
     _hasQueuedFile = false;
-  }
-
-  DateTime? get videoStreamingCutoff {
-    final milliseconds = _prefs.getInt(_videoStreamingCutoff);
-    if (milliseconds == null) return null;
-    return DateTime.fromMillisecondsSinceEpoch(milliseconds);
   }
 
   Future<bool> isSharedFileStreamble(EnteFile file) async {
@@ -121,8 +110,7 @@ class PreviewVideoStore {
     EnteFile enteFile, [
     bool forceUpload = false,
   ]) async {
-    if (!isVideoStreamingEnabled ||
-        !computeController.requestCompute(stream: true)) {
+    if (!_allowStream()) {
       _logger.info(
         "Pause preview due to disabledSteaming($isVideoStreamingEnabled) or computeController permission)",
       );
@@ -204,14 +192,16 @@ class PreviewVideoStore {
           .firstWhereOrNull((e) => e["type"] == "video");
 
       final codec = videoData["codec_name"]?.toString().toLowerCase();
-      final codecIsH264 = codec?.contains("h264") ?? false;
+      final isH264 = codec?.contains("h264") ?? false;
 
       final bitrate = props?.duration?.inSeconds != null
           ? (fileSize * 8) / props!.duration!.inSeconds
           : null;
 
-      final colorSpace = videoData["color_space"]?.toString().toLowerCase();
-      final isColorGood = colorSpace == "bt709";
+      final colorTransfer =
+          videoData["color_transfer"]?.toString().toLowerCase();
+      final isHDR = colorTransfer != null &&
+          (colorTransfer == "smpte2084" || colorTransfer == "arib-std-b67");
 
       // create temp file & directory for preview generation
       final String tempDir = Configuration.instance.getTempDirectory();
@@ -234,53 +224,60 @@ class PreviewVideoStore {
 
       FFmpegSession? session;
 
-      // case 1, if it's already a good stream
-      if (bitrate != null && bitrate <= 4000 * 1000 && codecIsH264) {
-        session = await FFmpegKit.execute(
-          '-i "${file.path}" '
-          '-c:v copy -c:a copy '
-          '-f hls -hls_time 2 -hls_flags single_file '
-          '-hls_list_size 0 -hls_key_info_file ${keyinfo.path} '
-          '$prefix/output.m3u8',
-        );
-      } // case 2, if it's bitrate is good, but codec is not
-      else if (bitrate != null &&
-          codec != null &&
-          bitrate <= 2000 * 1000 &&
-          !codecIsH264) {
-        session = await FFmpegKit.execute(
-          '-i "${file.path}" '
-          '-vf "format=yuv420p10le,zscale=transfer=linear,tonemap=tonemap=hable:desat=0:peak=10,zscale=transfer=bt709:matrix=bt709:primaries=bt709,format=yuv420p" '
-          '-color_primaries bt709 -color_trc bt709 -colorspace bt709 '
-          '-c:v libx264 -crf 23 -preset medium '
-          '-c:a aac -b:a 128k '
-          '-f hls -hls_time 2 -hls_flags single_file '
-          '-hls_list_size 0 -hls_key_info_file ${keyinfo.path} '
-          '$prefix/output.m3u8',
-        );
-      } // case 3, if it's color space is good
-      else if (colorSpace != null && isColorGood) {
-        session = await FFmpegKit.execute(
-          '-i "${file.path}" '
-          '-vf "scale=-2:720,fps=30" '
-          '-c:v libx264 -b:v 2000k -crf 23 -preset medium '
-          '-c:a aac -b:a 128k -f hls -hls_time 2 -hls_flags single_file '
-          '-hls_list_size 0 -hls_key_info_file ${keyinfo.path} '
-          '$prefix/output.m3u8',
-        );
-      } // case 4, make it compatible
-      else {
-        session = await FFmpegKit.execute(
-          '-i "${file.path}" '
-          '-vf "scale=-2:720,fps=30,format=yuv420p10le,zscale=transfer=linear,tonemap=tonemap=hable:desat=0:peak=10,zscale=transfer=bt709:matrix=bt709:primaries=bt709,format=yuv420p" '
-          '-color_primaries bt709 -color_trc bt709 -colorspace bt709 '
-          '-x264-params "colorprim=bt709:transfer=bt709:colormatrix=bt709" '
-          '-c:v libx264 -b:v 2000k -crf 23 -preset medium '
-          '-c:a aac -b:a 128k -f hls -hls_time 2 -hls_flags single_file '
-          '-hls_list_size 0 -hls_key_info_file ${keyinfo.path} '
-          '$prefix/output.m3u8',
-        );
+      final reencodeVideo =
+          !(isH264 && bitrate != null && bitrate <= 4000 * 1000);
+      final rescaleVideo = !(bitrate != null && bitrate <= 2000 * 1000);
+      final needsTonemap = isHDR;
+      final applyFPS = (double.tryParse(props?.fps ?? "") ?? 100) > 30;
+
+      String filters = "";
+
+      if (reencodeVideo) {
+        final videoFilters = <String>[];
+
+        if (rescaleVideo || needsTonemap) {
+          // scale video to 720p or keep original height if less than 720p
+          videoFilters.add("scale=-2:'min(720,ih)'");
+
+          // reduce fps to 30 if it is more than 30
+          if (applyFPS) videoFilters.add("fps=30");
+        }
+
+        if (needsTonemap) {
+          // apply tonemapping for HDR videos
+          videoFilters.addAll([
+            'zscale=transfer=linear',
+            'tonemap=tonemap=hable:desat=0',
+            'zscale=primaries=709:transfer=709:matrix=709',
+          ]);
+        }
+
+        videoFilters.add("format=yuv420p");
+
+        filters = '-vf "${videoFilters.join(",")}" ';
       }
+
+      final command =
+          // scaling, fps, tonemapping
+          '$filters'
+          // video encoding
+          '${reencodeVideo ? '-c:v libx264 -crf 23 -preset medium ' : '-c:v copy '}'
+          // audio encoding
+          '-c:a aac -b:a 128k '
+          // hls options
+          '-f hls -hls_flags single_file '
+          '-hls_list_size 0 -hls_key_info_file ${keyinfo.path} ';
+
+      _logger.info(command);
+
+      session = await FFmpegKit.execute(
+        // input file path
+        '-i "${file.path}" ' +
+            // main params for streaming
+            command +
+            // output file path
+            '$prefix/output.m3u8',
+      );
 
       final returnCode = await session.getReturnCode();
 
@@ -463,7 +460,7 @@ class PreviewVideoStore {
         },
         encryptionKey,
       );
-      final _ = await _dio.put(
+      final _ = await _enteDio.put(
         "/files/video-data",
         data: {
           "fileID": file.uploadedFileID!,
@@ -482,7 +479,7 @@ class PreviewVideoStore {
   Future<(String, int)> _uploadPreviewVideo(EnteFile file, File preview) async {
     _logger.info("Pushing preview for $file");
     try {
-      final response = await _dio.get(
+      final response = await _enteDio.get(
         "/files/data/preview-upload-url",
         queryParameters: {
           "fileID": file.uploadedFileID!,
@@ -492,7 +489,7 @@ class PreviewVideoStore {
       final uploadURL = response.data["url"];
       final String objectID = response.data["objectID"];
       final objectSize = preview.lengthSync();
-      final _ = await _dio.put(
+      final _ = await _enteDio.put(
         uploadURL,
         data: preview.openRead(),
         options: Options(
@@ -557,21 +554,7 @@ class PreviewVideoStore {
           size = details["size"];
         }
       } else {
-        final response = await _dio.get(
-          "/files/data/fetch/",
-          queryParameters: {
-            "fileID": file.uploadedFileID,
-            "type": "vid_preview",
-          },
-        );
-        final encryptedData = response.data["data"]["encryptedData"];
-        final header = response.data["data"]["decryptionHeader"];
-        final encryptionKey = getFileKey(file);
-        final playlistData = await decryptAndUnzipJson(
-          encryptionKey,
-          encryptedData: encryptedData,
-          header: header,
-        );
+        final Map<String, dynamic> playlistData = await _getPlaylistData(file);
         finalPlaylist = playlistData["playlist"];
         width = playlistData["width"];
         height = playlistData["height"];
@@ -602,7 +585,7 @@ class PreviewVideoStore {
           ?.file;
       if (videoFile == null) {
         previewURLResult = previewURLResult ?? await _getPreviewUrl(file);
-        if (size != null && size < _minPreviewSizeForCache) {
+        if (size != null && size < _maxPreviewSizeLimitForCache) {
           unawaited(
             videoCacheManager.downloadFile(
               previewURLResult.$1,
@@ -646,6 +629,40 @@ class PreviewVideoStore {
     }
   }
 
+  Future<Map<String, dynamic>> _getPlaylistData(EnteFile file) async {
+    late Response<dynamic> response;
+    if (collectionsService.isSharedPublicLink(file.collectionID!)) {
+      response = await _nonEnteDio.get(
+        "${Configuration.instance.getHttpEndpoint()}/public-collection/files/data/fetch/",
+        queryParameters: {
+          "fileID": file.uploadedFileID,
+          "type": "vid_preview",
+        },
+        options: Options(
+          headers:
+              collectionsService.publicCollectionHeaders(file.collectionID!),
+        ),
+      );
+    } else {
+      response = await _enteDio.get(
+        "/files/data/fetch/",
+        queryParameters: {
+          "fileID": file.uploadedFileID,
+          "type": "vid_preview",
+        },
+      );
+    }
+    final encryptedData = response.data["data"]["encryptedData"];
+    final header = response.data["data"]["decryptionHeader"];
+    final encryptionKey = getFileKey(file);
+    final playlistData = await decryptAndUnzipJson(
+      encryptionKey,
+      encryptedData: encryptedData,
+      header: header,
+    );
+    return playlistData;
+  }
+
   int? parseDurationFromHLS(String playlist) {
     final lines = playlist.split("\n");
     double totalDuration = 0.0;
@@ -667,16 +684,32 @@ class PreviewVideoStore {
 
   Future<(String, String)> _getPreviewUrl(EnteFile file) async {
     try {
-      final response = await _dio.get(
-        "/files/data/preview",
-        queryParameters: {
-          "fileID": file.uploadedFileID,
-          "type":
-              file.fileType == FileType.video ? "vid_preview" : "img_preview",
-        },
-      );
-
-      final url = (response.data["url"] as String);
+      late String url;
+      if (collectionsService.isSharedPublicLink(file.collectionID!)) {
+        final response = await _nonEnteDio.get(
+          "${Configuration.instance.getHttpEndpoint()}/public-collection/files/data/preview",
+          queryParameters: {
+            "fileID": file.uploadedFileID,
+            "type":
+                file.fileType == FileType.video ? "vid_preview" : "img_preview",
+          },
+          options: Options(
+            headers:
+                collectionsService.publicCollectionHeaders(file.collectionID!),
+          ),
+        );
+        url = (response.data["url"] as String);
+      } else {
+        final response = await _enteDio.get(
+          "/files/data/preview",
+          queryParameters: {
+            "fileID": file.uploadedFileID,
+            "type":
+                file.fileType == FileType.video ? "vid_preview" : "img_preview",
+          },
+        );
+        url = (response.data["url"] as String);
+      }
       final uri = Uri.parse(url);
       final segments = uri.pathSegments;
       if (segments.isEmpty) throw Exception("Invalid URL");
@@ -743,8 +776,6 @@ class PreviewVideoStore {
   Future<void> _putFilesForPreviewCreation([bool updateInit = false]) async {
     if (!isVideoStreamingEnabled || !await canUseHighBandwidth()) return;
 
-    final cutoff = videoStreamingCutoff;
-    if (cutoff == null) return;
     if (updateInit) _hasQueuedFile = true;
 
     Map<int, String> failureFiles = {};
@@ -762,7 +793,9 @@ class PreviewVideoStore {
 
     final files = await FilesDB.instance.getAllFilesAfterDate(
       fileType: FileType.video,
-      beginDate: cutoff,
+      beginDate: DateTime.now().subtract(
+        const Duration(days: 30),
+      ),
       userID: Configuration.instance.getUserID()!,
     );
 
@@ -821,9 +854,14 @@ class PreviewVideoStore {
     chunkAndUploadVideo(null, file).ignore();
   }
 
-  void queueFiles() {
-    Future.delayed(const Duration(seconds: 5), () {
-      if (!_hasQueuedFile && computeController.requestCompute(stream: true)) {
+  bool _allowStream() {
+    return isVideoStreamingEnabled &&
+        computeController.requestCompute(stream: true);
+  }
+
+  void queueFiles({Duration duration = const Duration(seconds: 5)}) {
+    Future.delayed(duration, () {
+      if (!_hasQueuedFile && _allowStream()) {
         _putFilesForPreviewCreation(true).catchError((_) {
           _hasQueuedFile = false;
         });

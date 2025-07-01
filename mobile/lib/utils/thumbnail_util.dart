@@ -163,16 +163,8 @@ Future<void> _downloadAndDecryptThumbnail(FileDownloadItem item) async {
   Uint8List encryptedThumbnail;
   try {
     if (CollectionsService.instance.isSharedPublicLink(file.collectionID!)) {
-      final authToken = await CollectionsService.instance
-          .getSharedPublicAlbumToken(file.collectionID!);
-      final authJWTToken = await CollectionsService.instance
-          .getSharedPublicAlbumTokenJWT(file.collectionID!);
-
-      final headers = {
-        "X-Auth-Access-Token": authToken,
-        if (authJWTToken != null) "X-Auth-Access-Token-JWT": authJWTToken,
-      };
-
+      final headers = CollectionsService.instance
+          .publicCollectionHeaders(file.collectionID!);
       encryptedThumbnail = (await NetworkClient.instance.getDio().get(
                 FileUrl.getUrl(
                   file.uploadedFileID!,
@@ -250,9 +242,15 @@ File cachedThumbnailPath(EnteFile file) {
   );
 }
 
-File cachedFaceCropPath(String faceID) {
-  final thumbnailCacheDirectory =
-      Configuration.instance.getThumbnailCacheDirectory();
+File cachedFaceCropPath(String faceID, bool useTempCache) {
+  late final String thumbnailCacheDirectory;
+  if (useTempCache) {
+    thumbnailCacheDirectory =
+        Configuration.instance.getThumbnailCacheDirectory();
+  } else {
+    thumbnailCacheDirectory =
+        Configuration.instance.getPersonFaceThumbnailCacheDirectory();
+  }
   return File(
     thumbnailCacheDirectory + "/" + faceID,
   );

@@ -29,6 +29,7 @@ import "package:photos/theme/colors.dart";
 import "package:photos/ui/home/memories/all_memories_page.dart";
 import "package:photos/ui/home/memories/full_screen_memory.dart";
 import "package:photos/ui/viewer/people/people_page.dart";
+import "package:photos/utils/cache_util.dart";
 import "package:photos/utils/navigation_util.dart";
 import "package:shared_preferences/shared_preferences.dart";
 import "package:synchronized/synchronized.dart";
@@ -43,7 +44,7 @@ class MemoriesCacheService {
   static const _kCacheUpdateDelay = Duration(seconds: 5);
 
   final SharedPreferences _prefs;
-  late final Logger _logger = Logger("MemoriesCacheService");
+  static final Logger _logger = Logger("MemoriesCacheService");
 
   final _memoriesDB = MemoriesDB.instance;
 
@@ -57,7 +58,7 @@ class MemoriesCacheService {
   final _memoriesGetLock = Lock();
 
   MemoriesCacheService(this._prefs) {
-    _logger.fine("MemoriesCacheService constructor");
+    _logger.info("MemoriesCacheService constructor");
 
     Future.delayed(_kCacheUpdateDelay, () {
       _checkIfTimeToUpdateCache();
@@ -147,7 +148,7 @@ class MemoriesCacheService {
     unawaited(_prefs.setBool(_shouldUpdateCacheKey, true));
   }
 
-  Future<List<SmartMemory>> getMemories() async {
+  Future<List<SmartMemory>> getMemories({bool onlyUseCache = false}) async {
     _logger.info("getMemories called");
     if (!showAnyMemories) {
       _logger.info('Showing memories is disabled in settings, showing none');
@@ -157,6 +158,9 @@ class MemoriesCacheService {
       if (_cachedMemories != null && _cachedMemories!.isNotEmpty) {
         _logger.info("Found memories in memory cache");
         return _cachedMemories!;
+      } else if (onlyUseCache) {
+        _logger.info("Only using cache, no memories found");
+        return [];
       }
       try {
         if (!enableSmartMemories) {
@@ -198,35 +202,26 @@ class MemoriesCacheService {
     if (cache == null) {
       return null;
     }
-    final result = await _fromCacheToMemories(cache);
+    final result = await fromCacheToMemories(cache);
     return result;
   }
 
   Future<MemoriesCache?> _readCacheFromDisk() async {
     _logger.info("Reading memories cache result from disk");
-    final file = File(await _getCachePath());
-    if (!file.existsSync()) {
-      _logger.info("No memories cache found");
-      return null;
-    }
-    try {
-      final bytes = await file.readAsBytes();
-      final jsonString = String.fromCharCodes(bytes);
-      final cache = MemoriesCache.decodeFromJsonString(jsonString);
-      _logger.info("Reading memories cache result from disk done");
-      return cache;
-    } catch (e, s) {
-      _logger.severe("Error reading or decoding cache file", e, s);
-      await file.delete();
-      return null;
-    }
+    final cache = decodeJsonFile<MemoriesCache>(
+      await _getCachePath(),
+      MemoriesCache.decodeFromJsonString,
+    );
+    return cache;
   }
 
-  Future<List<SmartMemory>> _fromCacheToMemories(MemoriesCache cache) async {
+  static Future<List<SmartMemory>> fromCacheToMemories(
+    MemoriesCache cache,
+  ) async {
     try {
       _logger.info('Processing disk cache memories to smart memories');
       final List<SmartMemory> memories = [];
-      final seenTimes = await _memoriesDB.getSeenTimes();
+      final seenTimes = await MemoriesDB.instance.getSeenTimes();
       final minimalFileIDs = <int>{};
       for (final ToShowMemory memory in cache.toShowMemories) {
         if (memory.shouldShowNow()) {
@@ -328,10 +323,6 @@ class MemoriesCacheService {
         }
         newCache.baseLocations.addAll(nowResult.baseLocations);
         w?.log("added memories to cache");
-        final file = File(await _getCachePath());
-        if (!file.existsSync()) {
-          file.createSync(recursive: true);
-        }
         _cachedMemories = nowResult.memories
             .where((memory) => memory.shouldShowNow())
             .toList();
@@ -339,8 +330,10 @@ class MemoriesCacheService {
           [...nowResult.memories, ...nextResult.memories],
         );
         locationService.baseLocations = nowResult.baseLocations;
-        await file.writeAsBytes(
-          MemoriesCache.encodeToJsonString(newCache).codeUnits,
+        await writeToJsonFile<MemoriesCache>(
+          await _getCachePath(),
+          newCache,
+          MemoriesCache.encodeToJsonString,
         );
         w?.log("cacheWritten");
         await _cacheUpdated();
@@ -447,7 +440,7 @@ class MemoriesCacheService {
       );
       return [];
     }
-    final allMemories = await getMemories();
+    final allMemories = await getMemories(onlyUseCache: true);
     if (onThisDay && pastYears && smart) {
       return allMemories;
     }
@@ -544,19 +537,30 @@ class MemoriesCacheService {
     if (allMemories.isEmpty) return;
     final personMemories = <PeopleMemory>[];
     for (final memory in allMemories) {
+      if (memory is PeopleMemory) {
+        _logger.info("Found person memory");
+        _logger.info("Person memory ID: ${memory.id}");
+        _logger.info("Person memory personID: ${memory.personID}");
+        _logger.info("Person memory isBirthday: ${memory.isBirthday}");
+      }
       if (memory is PeopleMemory &&
           (memory.isBirthday ?? false) &&
           memory.personID == personID) {
         personMemories.add(memory);
       }
     }
+    if (personMemories.isEmpty) {
+      _logger.severe("No person memories found");
+    }
     PeopleMemory? personMemory;
     for (final memory in personMemories) {
       if (memory.peopleMemoryType == PeopleMemoryType.youAndThem) {
+        _logger.info("Found youAndThem person memory");
         personMemory = memory;
         break; // breaking to prefer youAndThem over spotlight
       }
       if (memory.peopleMemoryType == PeopleMemoryType.spotlight) {
+        _logger.info("Found spotlight person memory");
         personMemory = memory;
       }
     }
@@ -579,6 +583,7 @@ class MemoriesCacheService {
         forceCustomPageRoute: true,
       );
     }
+    _logger.info("Routing to the birthday memory");
     await routeToPage(
       context,
       FullScreenMemoryDataUpdater(
@@ -735,7 +740,7 @@ class MemoriesCacheService {
       final s = await LanguageService.s;
       await NotificationService.instance.scheduleNotification(
         memory.personName != null
-            ? s.happyBirthdayToPerson(memory.personName!)
+            ? s.wishThemAHappyBirthday(memory.personName!)
             : s.happyBirthday,
         id: memory.id.hashCode,
         channelID: "birthday",

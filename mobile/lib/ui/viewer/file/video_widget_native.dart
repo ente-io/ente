@@ -81,7 +81,9 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
   bool _isCompletelyVisible = false;
   final _showControls = ValueNotifier(true);
   final _isSeeking = ValueNotifier(false);
-  final _debouncer = Debouncer(const Duration(milliseconds: 2000));
+  final _debouncer = Debouncer(
+    const Duration(milliseconds: 2000),
+  );
   final _elTooltipController = ElTooltipController();
   StreamSubscription<PlaybackEvent>? _subscription;
   StreamSubscription<StreamSwitchedEvent>? _streamSwitchedSubscription;
@@ -666,15 +668,14 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
                             strokeWidth: 2,
                             strokeCap: StrokeCap.round,
                           ),
-                          if (flagService.internalUser)
-                            Center(
-                              child: Text(
-                                "${(progress * 100).toStringAsFixed(0)}%",
-                                style: getEnteTextTheme(context).tiny.copyWith(
-                                      color: textBaseDark,
-                                    ),
-                              ),
+                          Center(
+                            child: Text(
+                              "${(progress * 100).toStringAsFixed(0)}%",
+                              style: getEnteTextTheme(context).tiny.copyWith(
+                                    color: textBaseDark,
+                                  ),
                             ),
+                          ),
                         ],
                       );
               },
