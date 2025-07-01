@@ -113,11 +113,13 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
           allSuggestions[0].clusterIDToMerge,
         );
 
-        setState(() {
-          faceCrops = crops;
-          isLoading = false;
-          hasCurrentSuggestion = true;
-        });
+        if (mounted) {
+          setState(() {
+            faceCrops = crops;
+            isLoading = false;
+            hasCurrentSuggestion = true;
+          });
+        }
 
         unawaited(_fadeController.forward());
         unawaited(_slideController.forward());
