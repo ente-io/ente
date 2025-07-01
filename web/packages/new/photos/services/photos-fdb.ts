@@ -188,8 +188,12 @@ export const saveCollectionFiles = async (files: EnteFile[]) => {
 };
 
 /**
- * Return the locally persisted {@link updationTime} of the latest file from the
- * given {@link collection} that we have pulled from remote.
+ * Return the locally persisted "last sync time" for a collection that we have
+ * pulled from remote. This can be used to perform a paginated delta pull from
+ * the saved time onwards.
+ *
+ * > Specifically, this is the {@link updationTime} of the latest file from the
+ * > {@link collection}, or the the collection itself if it is fully synced.
  *
  * Use {@link saveCollectionLastSyncTime} to update the value saved in the
  * database, and {@link removeCollectionIDLastSyncTime} to remove the saved

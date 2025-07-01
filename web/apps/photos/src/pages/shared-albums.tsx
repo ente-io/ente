@@ -51,8 +51,12 @@ import { sortFiles } from "ente-gallery/utils/file";
 import type { Collection } from "ente-media/collection";
 import { type EnteFile } from "ente-media/file";
 import {
+    removePublicCollectionAccessTokenJWT,
     savedLastPublicCollectionReferralCode,
+    savedPublicCollectionAccessTokenJWT,
+    savedPublicCollectionByKey,
     savedPublicCollectionFiles,
+    savePublicCollectionAccessTokenJWT,
 } from "ente-new/albums/services/public-albums-fdb";
 import { verifyPublicAlbumPassword } from "ente-new/albums/services/public-collection";
 import {
@@ -68,13 +72,10 @@ import { useRouter } from "next/router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { type FileWithPath } from "react-dropzone";
 import {
-    getLocalPublicCollection,
-    getLocalPublicCollectionPassword,
     getPublicCollection,
     getPublicCollectionUID,
     removePublicCollectionWithFiles,
     removePublicFiles,
-    savePublicCollectionPassword,
     syncPublicFiles,
 } from "services/publicCollectionService";
 import { uploadManager } from "services/upload-manager";
@@ -216,7 +217,7 @@ export default function PublicCollectionGallery() {
                 }
                 collectionKey.current = ck;
                 url.current = window.location.href;
-                const localCollection = await getLocalPublicCollection(
+                const localCollection = await savedPublicCollectionByKey(
                     collectionKey.current,
                 );
                 const accessToken = t;
@@ -230,13 +231,12 @@ export default function PublicCollectionGallery() {
                     const isPasswordProtected =
                         localCollection?.publicURLs?.[0]?.passwordEnabled;
                     setIsPasswordProtected(isPasswordProtected);
-                    const collectionUID = getPublicCollectionUID(accessToken);
                     const localFiles =
                         await savedPublicCollectionFiles(accessToken);
                     const localPublicFiles = sortFiles(localFiles, sortAsc);
                     setPublicFiles(localPublicFiles);
                     accessTokenJWT =
-                        await getLocalPublicCollectionPassword(collectionUID);
+                        await savedPublicCollectionAccessTokenJWT(accessToken);
                 }
                 credentials.current = { accessToken, accessTokenJWT };
                 downloadManager.setPublicAlbumsCredentials(credentials.current);
@@ -316,7 +316,7 @@ export default function PublicCollectionGallery() {
             if (!isPasswordProtected && credentials.current.accessTokenJWT) {
                 credentials.current.accessTokenJWT = undefined;
                 downloadManager.setPublicAlbumsCredentials(credentials.current);
-                savePublicCollectionPassword(collectionUID, null);
+                removePublicCollectionAccessTokenJWT(collectionUID);
             }
 
             if (
@@ -395,7 +395,10 @@ export default function PublicCollectionGallery() {
             const collectionUID = getPublicCollectionUID(
                 credentials.current.accessToken,
             );
-            await savePublicCollectionPassword(collectionUID, accessTokenJWT);
+            await savePublicCollectionAccessTokenJWT(
+                collectionUID,
+                accessTokenJWT,
+            );
         } catch (e) {
             log.error("Failed to verifyLinkPassword", e);
             if (isHTTP401Error(e)) {
