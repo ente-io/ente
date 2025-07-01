@@ -154,6 +154,9 @@ export const savedCollectionFiles = async (): Promise<EnteFile[]> => {
     // As an optimization, we skip the runtime check here and cast. This might
     // not be the most optimal choice in the future, so (a) use it sparingly,
     // and (b) mark all such cases with the title of this note.
+    //
+    // Note that the cast is happening inside the local forage code since we're
+    // passing a type parameter.
     let files = (await localForage.getItem<EnteFile[]>("files")) ?? [];
 
     // Previously hidden files were stored separately. If that key is present,
