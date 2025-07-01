@@ -50,6 +50,7 @@ import { updateShouldDisableCFUploadProxy } from "ente-gallery/services/upload";
 import { sortFiles } from "ente-gallery/utils/file";
 import type { Collection } from "ente-media/collection";
 import { type EnteFile } from "ente-media/file";
+import { savedPublicCollectionFiles } from "ente-new/albums/services/public-albums-fdb";
 import { verifyPublicAlbumPassword } from "ente-new/albums/services/publicCollection";
 import {
     GalleryItemsHeaderAdapter,
@@ -66,7 +67,6 @@ import { type FileWithPath } from "react-dropzone";
 import {
     getLocalPublicCollection,
     getLocalPublicCollectionPassword,
-    getLocalPublicFiles,
     getPublicCollection,
     getPublicCollectionUID,
     getReferralCode,
@@ -228,7 +228,8 @@ export default function PublicCollectionGallery() {
                         localCollection?.publicURLs?.[0]?.passwordEnabled;
                     setIsPasswordProtected(isPasswordProtected);
                     const collectionUID = getPublicCollectionUID(accessToken);
-                    const localFiles = await getLocalPublicFiles(collectionUID);
+                    const localFiles =
+                        await savedPublicCollectionFiles(accessToken);
                     const localPublicFiles = sortFiles(localFiles, sortAsc);
                     setPublicFiles(localPublicFiles);
                     accessTokenJWT =

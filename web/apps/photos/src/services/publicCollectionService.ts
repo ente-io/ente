@@ -1,7 +1,6 @@
 import { sharedCryptoWorker } from "ente-base/crypto";
 import log from "ente-base/log";
 import { apiURL } from "ente-base/origins";
-import { transformFilesIfNeeded } from "ente-gallery/services/files-db";
 import { sortFiles } from "ente-gallery/utils/file";
 import type {
     Collection,
@@ -9,7 +8,11 @@ import type {
 } from "ente-media/collection";
 import type { EnteFile, RemoteEnteFile } from "ente-media/file";
 import { decryptRemoteFile } from "ente-media/file";
-import { savedPublicCollections } from "ente-new/albums/services/public-albums-fdb";
+import {
+    savedPublicCollectionFiles,
+    savedPublicCollections,
+    savePublicCollectionFiles,
+} from "ente-new/albums/services/public-albums-fdb";
 import { CustomError, parseSharingErrorCodes } from "ente-shared/error";
 import HTTPService from "ente-shared/network/HTTPService";
 import localForage from "ente-shared/storage/localForage";
@@ -49,39 +52,6 @@ export interface LocalSavedPublicCollectionFiles {
     collectionUID: string;
     files: EnteFile[];
 }
-
-export const getLocalPublicFiles = async (collectionUID: string) => {
-    const localSavedPublicCollectionFiles =
-        (
-            (await localForage.getItem<LocalSavedPublicCollectionFiles[]>(
-                PUBLIC_COLLECTION_FILES_TABLE,
-            )) || []
-        ).find(
-            (localSavedPublicCollectionFiles) =>
-                localSavedPublicCollectionFiles.collectionUID === collectionUID,
-        ) ||
-        ({
-            collectionUID: null,
-            files: [] as EnteFile[],
-        } as LocalSavedPublicCollectionFiles);
-    return transformFilesIfNeeded(localSavedPublicCollectionFiles.files);
-};
-export const savePublicCollectionFiles = async (
-    collectionUID: string,
-    files: EnteFile[],
-) => {
-    const publicCollectionFiles =
-        (await localForage.getItem<LocalSavedPublicCollectionFiles[]>(
-            PUBLIC_COLLECTION_FILES_TABLE,
-        )) || [];
-    await localForage.setItem(
-        PUBLIC_COLLECTION_FILES_TABLE,
-        dedupeCollectionFiles([
-            { collectionUID, files },
-            ...publicCollectionFiles,
-        ]),
-    );
-};
 
 export const getLocalPublicCollectionPassword = async (
     collectionUID: string,
@@ -144,20 +114,6 @@ const dedupeCollections = (collections: Collection[]) => {
     });
 };
 
-const dedupeCollectionFiles = (
-    collectionFiles: LocalSavedPublicCollectionFiles[],
-) => {
-    const keySet = new Set([]);
-    return collectionFiles.filter(({ collectionUID }) => {
-        if (!keySet.has(collectionUID)) {
-            keySet.add(collectionUID);
-            return true;
-        } else {
-            return false;
-        }
-    });
-};
-
 const getPublicCollectionLastSyncTime = async (collectionUID: string) =>
     (await localForage.getItem<number>(
         getPublicCollectionLastSyncTimeKey(collectionUID),
@@ -182,7 +138,7 @@ export const syncPublicFiles = async (
         let files: EnteFile[] = [];
         const sortAsc = collection?.pubMagicMetadata?.data.asc ?? false;
         const collectionUID = getPublicCollectionUID(token);
-        const localFiles = await getLocalPublicFiles(collectionUID);
+        const localFiles = await savedPublicCollectionFiles(collectionUID);
 
         files = [...files, ...localFiles];
         try {
