@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import "package:flutter/rendering.dart";
 import "package:flutter/services.dart";
 import "package:flutter_displaymode/flutter_displaymode.dart";
+import "package:intl/date_symbol_data_local.dart";
 import 'package:logging/logging.dart';
 import "package:media_kit/media_kit.dart";
 import "package:package_info_plus/package_info_plus.dart";
@@ -114,6 +115,11 @@ Future<void> _homeWidgetSync([bool isBackground = false]) async {
   if (isBackground && Platform.isIOS) {
     _logger.info("Home widget sync skipped in background on iOS");
     return;
+  }
+
+  if (isBackground) {
+    final locale = await getLocale();
+    await initializeDateFormatting(locale?.languageCode ?? "en");
   }
 
   try {
