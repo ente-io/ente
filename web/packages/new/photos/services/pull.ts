@@ -79,7 +79,8 @@ interface PullFilesOpts {
 }
 
 /**
- * Pull the latest collections, collections files and trash items from remote.
+ * Pull the latest collections, collections files and trash items from remote,
+ * updating our local database and also calling the provided callbacks.
  *
  * This is a subset of a full remote pull, independently exposed for use at
  * times when we only want to pull the file related information (e.g. we just

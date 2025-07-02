@@ -41,7 +41,11 @@ import {
     useIsTouchscreen,
 } from "ente-base/components/utils/hooks";
 import { useBaseContext } from "ente-base/context";
-import { isHTTP401Error, PublicAlbumsCredentials } from "ente-base/http";
+import {
+    isHTTP401Error,
+    isHTTPErrorWithStatus,
+    PublicAlbumsCredentials,
+} from "ente-base/http";
 import log from "ente-base/log";
 import { FullScreenDropZone } from "ente-gallery/components/FullScreenDropZone";
 import { downloadManager } from "ente-gallery/services/download";
@@ -52,13 +56,19 @@ import type { Collection } from "ente-media/collection";
 import { type EnteFile } from "ente-media/file";
 import {
     removePublicCollectionAccessTokenJWT,
+    removePublicCollectionByKey,
     savedLastPublicCollectionReferralCode,
     savedPublicCollectionAccessTokenJWT,
     savedPublicCollectionByKey,
     savedPublicCollectionFiles,
     savePublicCollectionAccessTokenJWT,
 } from "ente-new/albums/services/public-albums-fdb";
-import { verifyPublicAlbumPassword } from "ente-new/albums/services/public-collection";
+import {
+    pullCollection,
+    pullPublicCollectionFiles,
+    removePublicCollectionFileData,
+    verifyPublicAlbumPassword,
+} from "ente-new/albums/services/public-collection";
 import {
     GalleryItemsHeaderAdapter,
     GalleryItemsSummary,
@@ -66,18 +76,10 @@ import {
 import { isHiddenCollection } from "ente-new/photos/services/collection";
 import { PseudoCollectionID } from "ente-new/photos/services/collection-summary";
 import { usePhotosAppContext } from "ente-new/photos/types/context";
-import { CustomError, parseSharingErrorCodes } from "ente-shared/error";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { type FileWithPath } from "react-dropzone";
-import {
-    getPublicCollection,
-    getPublicCollectionUID,
-    removePublicCollectionWithFiles,
-    removePublicFiles,
-    syncPublicFiles,
-} from "services/publicCollectionService";
 import { uploadManager } from "services/upload-manager";
 import {
     SelectedState,
@@ -89,19 +91,24 @@ import { downloadSelectedFiles, getSelectedFiles } from "utils/file";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
 
 export default function PublicCollectionGallery() {
+    const { showMiniDialog, onGenericError } = useBaseContext();
+    const { showLoadingBar, hideLoadingBar } = usePhotosAppContext();
+
     const credentials = useRef<PublicAlbumsCredentials | undefined>(undefined);
     const collectionKey = useRef<string>(null);
     const url = useRef<string>(null);
     const referralCode = useRef<string>("");
-    const [publicFiles, setPublicFiles] = useState<EnteFile[]>(null);
-    const [publicCollection, setPublicCollection] = useState<Collection>(null);
+    const [publicCollection, setPublicCollection] = useState<
+        Collection | undefined
+    >(undefined);
+    const [publicFiles, setPublicFiles] = useState<EnteFile[] | undefined>(
+        undefined,
+    );
     const [errorMessage, setErrorMessage] = useState<string>(null);
-    const { showMiniDialog } = useBaseContext();
-    const { showLoadingBar, hideLoadingBar } = usePhotosAppContext();
     const [loading, setLoading] = useState(true);
+    const [isPasswordProtected, setIsPasswordProtected] = useState(false);
+
     const router = useRouter();
-    const [isPasswordProtected, setIsPasswordProtected] =
-        useState<boolean>(false);
 
     const [photoListHeader, setPhotoListHeader] =
         useState<TimeStampListItem>(null);
@@ -161,7 +168,7 @@ export default function PublicCollectionGallery() {
         }, []);
 
     const onAddPhotos = useMemo(() => {
-        return publicCollection?.publicURLs?.[0]?.enableCollect
+        return publicCollection?.publicURLs[0]?.enableCollect
             ? () => setUploadTypeSelectorView(true)
             : undefined;
     }, [publicCollection]);
@@ -201,6 +208,10 @@ export default function PublicCollectionGallery() {
                 { shallow: true },
             );
         }
+        /**
+         * Determine credentials, read the locally cached state, then start
+         * pulling the latest from remote.
+         */
         const main = async () => {
             let redirectingToWebsite = false;
             try {
@@ -217,24 +228,24 @@ export default function PublicCollectionGallery() {
                 }
                 collectionKey.current = ck;
                 url.current = window.location.href;
-                const localCollection = await savedPublicCollectionByKey(
+                const collection = await savedPublicCollectionByKey(
                     collectionKey.current,
                 );
                 const accessToken = t;
                 let accessTokenJWT: string | undefined;
-                if (localCollection) {
+                if (collection) {
                     referralCode.current =
                         await savedLastPublicCollectionReferralCode();
-                    const sortAsc: boolean =
-                        localCollection?.pubMagicMetadata?.data.asc ?? false;
-                    setPublicCollection(localCollection);
-                    const isPasswordProtected =
-                        localCollection?.publicURLs?.[0]?.passwordEnabled;
-                    setIsPasswordProtected(isPasswordProtected);
-                    const localFiles =
-                        await savedPublicCollectionFiles(accessToken);
-                    const localPublicFiles = sortFiles(localFiles, sortAsc);
-                    setPublicFiles(localPublicFiles);
+                    setPublicCollection(collection);
+                    setIsPasswordProtected(
+                        !!collection.publicURLs[0]?.passwordEnabled,
+                    );
+                    setPublicFiles(
+                        sortFilesForCollection(
+                            await savedPublicCollectionFiles(accessToken),
+                            collection,
+                        ),
+                    );
                     accessTokenJWT =
                         await savedPublicCollectionAccessTokenJWT(accessToken);
                 }
@@ -293,80 +304,91 @@ export default function PublicCollectionGallery() {
      * both our local database and component state.
      */
     const publicAlbumsRemotePull = useCallback(async () => {
-        const collectionUID = getPublicCollectionUID(
-            credentials.current.accessToken,
-        );
+        const accessToken = credentials.current.accessToken;
+        showLoadingBar();
+        setLoading(true);
         try {
-            showLoadingBar();
-            setLoading(true);
-            const [collection, userReferralCode] = await getPublicCollection(
-                credentials.current.accessToken,
-                collectionKey.current,
-            );
+            const { collection, referralCode: userReferralCode } =
+                await pullCollection(accessToken, collectionKey.current);
             referralCode.current = userReferralCode;
 
             setPublicCollection(collection);
             const isPasswordProtected =
-                collection?.publicURLs?.[0]?.passwordEnabled;
+                !!collection.publicURLs[0]?.passwordEnabled;
             setIsPasswordProtected(isPasswordProtected);
             setErrorMessage(null);
 
-            // Remove the locally saved outdated password token if the sharer
-            // has disabled password protection on the link.
+            // Remove the locally cached accessTokenJWT if the sharer has
+            // disabled password protection on the link.
             if (!isPasswordProtected && credentials.current.accessTokenJWT) {
                 credentials.current.accessTokenJWT = undefined;
                 downloadManager.setPublicAlbumsCredentials(credentials.current);
-                removePublicCollectionAccessTokenJWT(collectionUID);
+                removePublicCollectionAccessTokenJWT(accessToken);
             }
 
-            if (
-                !isPasswordProtected ||
-                (isPasswordProtected && credentials.current.accessTokenJWT)
-            ) {
+            if (isPasswordProtected && !credentials.current.accessTokenJWT) {
+                await removePublicCollectionFileData(accessToken);
+            } else {
                 try {
-                    await syncPublicFiles(
-                        credentials.current.accessToken,
-                        credentials.current.accessTokenJWT,
+                    await pullPublicCollectionFiles(
+                        credentials.current,
                         collection,
-                        setPublicFiles,
+                        (files) =>
+                            setPublicFiles(
+                                sortFilesForCollection(files, collection),
+                            ),
                     );
                 } catch (e) {
-                    const parsedError = parseSharingErrorCodes(e);
-                    if (parsedError.message === CustomError.TOKEN_EXPIRED) {
-                        // passwordToken has expired, sharer has changed the password,
-                        // so,clearing local cache token value to prompt user to re-enter password
+                    // If we reached the try block and attempted to pull files,
+                    // it means the accessToken itself is very likely valid
+                    // (since the `pullCollection` succeeded just a moment ago).
+                    //
+                    // So a 401 Unauthorized now indicates that the
+                    // accessTokenJWT is no longer valid since the sharer has
+                    // changed the password.
+                    //
+                    // Clear the locally cached accessTokenJWT and ask the user
+                    // to reenter the password.
+                    if (isHTTP401Error(e)) {
                         credentials.current.accessTokenJWT = undefined;
                         downloadManager.setPublicAlbumsCredentials(
                             credentials.current,
                         );
+                    } else {
+                        throw e;
                     }
                 }
             }
-
-            if (isPasswordProtected && !credentials.current.accessTokenJWT) {
-                await removePublicFiles(collectionUID);
-            }
         } catch (e) {
-            const parsedError = parseSharingErrorCodes(e);
+            // The 410 Gone or 429 Rate limited can arise from either the
+            // collection pull or the files pull since they're part of the
+            // remote's access token check sequence.
+            //
+            // In practice, it almost always will be a consequence of the
+            // collection pull since it happens first.
+            //
+            // The 401 Unauthorized can only arise from the collection pull
+            // since we already handle that separately for the files pull.
             if (
-                parsedError.message === CustomError.TOKEN_EXPIRED ||
-                parsedError.message === CustomError.TOO_MANY_REQUESTS
+                isHTTPErrorWithStatus(e, 401) ||
+                isHTTPErrorWithStatus(e, 410) ||
+                isHTTPErrorWithStatus(e, 429)
             ) {
                 setErrorMessage(
-                    parsedError.message === CustomError.TOO_MANY_REQUESTS
+                    isHTTPErrorWithStatus(e, 429)
                         ? t("link_request_limit_exceeded")
                         : t("link_expired_message"),
                 );
-                // share has been disabled
-                // local cache should be cleared
-                removePublicCollectionWithFiles(
-                    collectionUID,
-                    collectionKey.current,
-                );
-                setPublicCollection(null);
-                setPublicFiles(null);
+                // Sharing has been disabled. Clear out local cache.
+                await removePublicCollectionFileData(accessToken);
+                await removePublicCollectionByKey(collectionKey.current);
+                setPublicCollection(undefined);
+                setPublicFiles(undefined);
             } else {
                 log.error("Public album remote pull failed", e);
+                // Don't use the `setErrorMessage`, show a dialog instead,
+                // because this might be a transient network error.
+                onGenericError(e);
             }
         } finally {
             hideLoadingBar();
@@ -385,18 +407,16 @@ export default function PublicCollectionGallery() {
         setFieldError,
     ) => {
         try {
+            const accessToken = credentials.current.accessToken;
             const accessTokenJWT = await verifyPublicAlbumPassword(
                 publicCollection.publicURLs[0]!,
                 password,
-                credentials.current.accessToken,
+                accessToken,
             );
             credentials.current.accessTokenJWT = accessTokenJWT;
             downloadManager.setPublicAlbumsCredentials(credentials.current);
-            const collectionUID = getPublicCollectionUID(
-                credentials.current.accessToken,
-            );
             await savePublicCollectionAccessTokenJWT(
-                collectionUID,
+                accessToken,
                 accessTokenJWT,
             );
         } catch (e) {
@@ -422,6 +442,11 @@ export default function PublicCollectionGallery() {
             context: undefined,
         });
     };
+
+    const handleUploadFile = (file: EnteFile) =>
+        setPublicFiles(
+            sortFilesForCollection([...publicFiles, file], publicCollection),
+        );
 
     const downloadFilesHelper = async () => {
         try {
@@ -541,9 +566,7 @@ export default function PublicCollectionGallery() {
                     uploadTypeSelectorIntent="collect"
                     uploadTypeSelectorView={uploadTypeSelectorView}
                     onRemotePull={publicAlbumsRemotePull}
-                    onUploadFile={(file) =>
-                        setPublicFiles(sortFiles([...publicFiles, file]))
-                    }
+                    onUploadFile={handleUploadFile}
                     closeUploadTypeSelector={closeUploadTypeSelectorView}
                     onShowSessionExpiredDialog={showPublicLinkExpiredMessage}
                     {...{ dragAndDropFiles }}
@@ -556,6 +579,13 @@ export default function PublicCollectionGallery() {
         </PublicCollectionGalleryContext.Provider>
     );
 }
+
+/**
+ * Sort the given {@link files} using {@link sortFiles}, using the ascending
+ * ordering preference if specified in the given {@link collection}'s metadata.
+ */
+const sortFilesForCollection = (files: EnteFile[], collection?: Collection) =>
+    sortFiles(files, collection?.pubMagicMetadata?.data.asc ?? false);
 
 const EnteLogoLink = styled("a")(({ theme }) => ({
     // Remove the excess space at the top.

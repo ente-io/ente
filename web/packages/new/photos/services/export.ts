@@ -31,12 +31,18 @@ import {
     safeDirectoryName,
     safeFileName,
 } from "ente-new/photos/utils/native-fs";
-import { CustomError } from "ente-shared/error";
 import { getData, setData } from "ente-shared/storage/localStorage";
 import { PromiseQueue } from "ente-utils/promise";
 import i18n from "i18next";
 import { migrateExport, type ExportRecord } from "./export-migration";
 import { savedCollectionFiles, savedCollections } from "./photos-fdb";
+
+// TODO: Audit the uses of these constants
+export const CustomError = {
+    UPDATE_EXPORTED_RECORD_FAILED: "update file exported record failed",
+    EXPORT_STOPPED: "export stopped",
+    EXPORT_FOLDER_DOES_NOT_EXIST: "export folder does not exist",
+};
 
 /** Name of the JSON file in which we keep the state of the export. */
 const exportRecordFileName = "export_status.json";
