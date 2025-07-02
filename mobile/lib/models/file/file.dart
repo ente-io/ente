@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:photo_manager/photo_manager.dart';
@@ -11,11 +9,7 @@ import "package:photos/models/file/remote/collection_file.dart";
 import 'package:photos/models/location/location.dart';
 import "package:photos/models/metadata/file_magic.dart";
 import "package:photos/module/download/file_url.dart";
-import "package:photos/module/upload/model/upload_data.dart";
 import "package:photos/services/local/asset_entity.service.dart";
-import 'package:photos/utils/exif_util.dart';
-import "package:photos/utils/panorama_util.dart";
-import 'package:photos/utils/standalone/date_time.dart';
 
 //Todo: files with no location data have lat and long set to 0.0. This should ideally be null.
 class EnteFile {
