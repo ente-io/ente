@@ -4,7 +4,7 @@ import {
     ensureOk,
 } from "ente-base/http";
 import { apiURL } from "ente-base/origins";
-import type { PublicURL } from "ente-media/collection";
+import { RemoteCollection, type PublicURL } from "ente-media/collection";
 import { z } from "zod/v4";
 
 /**
@@ -53,3 +53,18 @@ export const verifyPublicAlbumPassword = async (
     ensureOk(res);
     return z.object({ jwtToken: z.string() }).parse(await res.json()).jwtToken;
 };
+
+// TODO(RE): Use me
+export const PublicCollectionInfo = z.object({
+    collection: RemoteCollection,
+    /**
+     * A referral code of the owner of the public album.
+     *
+     * [Note: Public albums referral code]
+     *
+     * The information of a public collection contains the referral code of the
+     * person who shared the album. This allows both the viewer and the sharer
+     * to gain storage bonus.
+     */
+    referralCode: z.string(),
+});

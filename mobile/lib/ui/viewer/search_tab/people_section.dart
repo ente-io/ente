@@ -3,6 +3,7 @@ import "dart:async";
 import "package:flutter/material.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/events/event.dart";
+import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/ml/face/person.dart";
 import "package:photos/models/search/generic_search_result.dart";
@@ -346,7 +347,7 @@ class PersonSearchExample extends StatelessWidget {
                       child: Padding(
                         padding: const EdgeInsets.only(top: 6, bottom: 0),
                         child: Text(
-                          "Add name",
+                          S.of(context).addName,
                           maxLines: 1,
                           textAlign: TextAlign.center,
                           overflow: TextOverflow.ellipsis,
@@ -356,12 +357,15 @@ class PersonSearchExample extends StatelessWidget {
                     )
                   : Padding(
                       padding: const EdgeInsets.only(top: 6, bottom: 0),
-                      child: Text(
-                        searchResult.name(),
-                        maxLines: 1,
-                        textAlign: TextAlign.center,
-                        overflow: TextOverflow.ellipsis,
-                        style: getEnteTextTheme(context).small,
+                      child: SizedBox(
+                        width: size,
+                        child: Text(
+                          searchResult.name(),
+                          maxLines: 1,
+                          textAlign: TextAlign.center,
+                          overflow: TextOverflow.ellipsis,
+                          style: getEnteTextTheme(context).small,
+                        ),
                       ),
                     ),
             ],

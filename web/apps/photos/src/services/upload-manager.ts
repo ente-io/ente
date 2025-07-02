@@ -36,13 +36,10 @@ import {
 } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
 import { potentialFileTypeFromExtension } from "ente-media/live-photo";
+import { savedPublicCollectionFiles } from "ente-new/albums/services/public-albums-fdb";
 import { computeNormalCollectionFilesFromSaved } from "ente-new/photos/services/file";
 import { indexNewUpload } from "ente-new/photos/services/ml";
 import { wait } from "ente-utils/promise";
-import {
-    getLocalPublicFiles,
-    getPublicCollectionUID,
-} from "services/publicCollectionService";
 import watcher from "services/watch";
 import { getUserOwnedFiles } from "utils/file";
 
@@ -442,10 +439,8 @@ class UploadManager {
 
     private async updateExistingFilesAndCollections(collections: Collection[]) {
         if (this.publicAlbumsCredentials) {
-            this.existingFiles = await getLocalPublicFiles(
-                getPublicCollectionUID(
-                    this.publicAlbumsCredentials.accessToken,
-                ),
+            this.existingFiles = await savedPublicCollectionFiles(
+                this.publicAlbumsCredentials.accessToken,
             );
         } else {
             this.existingFiles = getUserOwnedFiles(

@@ -847,6 +847,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "deviceNotFound":
             MessageLookupByLibrary.simpleMessage("Device not found"),
         "didYouKnow": MessageLookupByLibrary.simpleMessage("Did you know?"),
+        "different": MessageLookupByLibrary.simpleMessage("Different"),
         "disableAutoLock":
             MessageLookupByLibrary.simpleMessage("Disable auto lock"),
         "disableDownloadWarningBody": MessageLookupByLibrary.simpleMessage(
@@ -1719,6 +1720,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "rotateLeft": MessageLookupByLibrary.simpleMessage("Rotate left"),
         "rotateRight": MessageLookupByLibrary.simpleMessage("Rotate right"),
         "safelyStored": MessageLookupByLibrary.simpleMessage("Safely stored"),
+        "same": MessageLookupByLibrary.simpleMessage("Same"),
+        "sameperson": MessageLookupByLibrary.simpleMessage("Same person?"),
         "save": MessageLookupByLibrary.simpleMessage("Save"),
         "saveAsAnotherPerson":
             MessageLookupByLibrary.simpleMessage("Save as another person"),

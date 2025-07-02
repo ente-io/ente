@@ -75,6 +75,8 @@ PODS:
     - Flutter
   - flutter_timezone (0.0.1):
     - Flutter
+  - flutter_timezone (0.0.1):
+    - Flutter
   - fluttertoast (0.0.2):
     - Flutter
   - GoogleDataTransport (10.1.0):
@@ -263,6 +265,7 @@ DEPENDENCIES:
   - flutter_secure_storage (from `.symlinks/plugins/flutter_secure_storage/ios`)
   - flutter_sodium (from `.symlinks/plugins/flutter_sodium/ios`)
   - flutter_timezone (from `.symlinks/plugins/flutter_timezone/ios`)
+  - flutter_timezone (from `.symlinks/plugins/flutter_timezone/ios`)
   - fluttertoast (from `.symlinks/plugins/fluttertoast/ios`)
   - home_widget (from `.symlinks/plugins/home_widget/ios`)
   - image_editor_common (from `.symlinks/plugins/image_editor_common/ios`)
@@ -363,6 +366,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/flutter_secure_storage/ios"
   flutter_sodium:
     :path: ".symlinks/plugins/flutter_sodium/ios"
+  flutter_timezone:
+    :path: ".symlinks/plugins/flutter_timezone/ios"
   flutter_timezone:
     :path: ".symlinks/plugins/flutter_timezone/ios"
   fluttertoast:
