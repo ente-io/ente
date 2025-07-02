@@ -123,7 +123,7 @@ Future<void> _homeWidgetSync([bool isBackground = false]) async {
   }
 
   try {
-    await HomeWidgetService.instance.initHomeWidget();
+    await HomeWidgetService.instance.initHomeWidget(isBackground);
   } catch (e, s) {
     _logger.severe("Error in syncing home widget", e, s);
   }

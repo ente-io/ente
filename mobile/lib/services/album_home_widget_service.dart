@@ -12,7 +12,6 @@ import 'package:photos/models/collection/collection.dart';
 import 'package:photos/models/collection/collection_items.dart';
 import 'package:photos/models/file/file.dart';
 import 'package:photos/service_locator.dart';
-import "package:photos/services/app_lifecycle_service.dart";
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/favorites_service.dart';
 import 'package:photos/services/home_widget_service.dart';
@@ -66,9 +65,9 @@ class AlbumHomeWidgetService {
     await _prefs.setString(ALBUMS_LAST_HASH_KEY, hash);
   }
 
-  Future<void> initAlbumHomeWidget() async {
+  Future<void> initAlbumHomeWidget(bool isBg) async {
     await HomeWidgetService.instance.computeLock.synchronized(() async {
-      if (await _hasAnyBlockers()) {
+      if (await _hasAnyBlockers(isBg)) {
         await clearWidget();
         return;
       }
@@ -134,13 +133,13 @@ class AlbumHomeWidgetService {
 
     _logger.info("Checking pending albums sync");
     if (await _shouldUpdateWidgetCache()) {
-      await initAlbumHomeWidget();
+      await initAlbumHomeWidget(false);
     }
   }
 
   Future<void> _refreshOnSelection() async {
     final lastHash = getAlbumsLastHash();
-    final selectedAlbumIds = await _getEffectiveSelectedAlbumIds();
+    final selectedAlbumIds = await _getEffectiveSelectedAlbumIds(false);
     final currentHash = _calculateHash(selectedAlbumIds);
     if (lastHash != null && currentHash == lastHash) {
       _logger.info("No changes detected in albums");
@@ -148,7 +147,7 @@ class AlbumHomeWidgetService {
     }
 
     await setSelectionChange(true);
-    await initAlbumHomeWidget();
+    await initAlbumHomeWidget(false);
   }
 
   List<Collection> getAlbumsByIds(List<int> albumIds) {
@@ -233,7 +232,7 @@ class AlbumHomeWidgetService {
     return hash;
   }
 
-  Future<bool> _hasAnyBlockers() async {
+  Future<bool> _hasAnyBlockers([bool isBg = false]) async {
     // Check if first import is completed
     final hasCompletedFirstImport =
         LocalSyncService.instance.hasCompletedFirstImport();
@@ -242,7 +241,7 @@ class AlbumHomeWidgetService {
     }
 
     // Check if selected albums exist
-    final selectedAlbumIds = await _getEffectiveSelectedAlbumIds();
+    final selectedAlbumIds = await _getEffectiveSelectedAlbumIds(isBg);
     final albums = getAlbumsByIds(selectedAlbumIds);
 
     if (albums.isEmpty) {
@@ -290,12 +289,12 @@ class AlbumHomeWidgetService {
     return true;
   }
 
-  Future<List<int>> _getEffectiveSelectedAlbumIds() async {
+  Future<List<int>> _getEffectiveSelectedAlbumIds([bool isBg = false]) async {
     final selectedAlbumIds = getSelectedAlbumIds();
 
     // If no albums selected, use favorites as default
     if (selectedAlbumIds == null || selectedAlbumIds.isEmpty) {
-      if (!AppLifecycleService.instance.isForeground) {
+      if (isBg) {
         await FavoritesService.instance.initFav();
       }
       final favoriteId =

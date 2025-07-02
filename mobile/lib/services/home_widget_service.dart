@@ -71,8 +71,8 @@ class HomeWidgetService {
     hw.HomeWidget.setAppGroupId(id).ignore();
   }
 
-  Future<void> initHomeWidget() async {
-    await AlbumHomeWidgetService.instance.initAlbumHomeWidget();
+  Future<void> initHomeWidget([bool isBg = false]) async {
+    await AlbumHomeWidgetService.instance.initAlbumHomeWidget(isBg);
     await PeopleHomeWidgetService.instance.initPeopleHomeWidget();
     await MemoryHomeWidgetService.instance.initMemoryHomeWidget();
   }
