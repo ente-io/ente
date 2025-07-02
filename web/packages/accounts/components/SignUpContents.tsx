@@ -14,8 +14,8 @@ import {
     Typography,
 } from "@mui/material";
 import {
+    saveJustSignedUp,
     setData,
-    setJustSignedUp,
     setLocalReferralSource,
 } from "ente-accounts/services/accounts-db";
 import {
@@ -154,7 +154,7 @@ export const SignUpContents: React.FC<SignUpContentsProps> = ({
                 );
                 await saveMasterKeyInSessionAndSafeStore(masterKey);
 
-                setJustSignedUp(true);
+                saveJustSignedUp();
                 void router.push("/verify");
             } catch (e) {
                 log.error("Signup failed", e);

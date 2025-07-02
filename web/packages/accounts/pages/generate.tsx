@@ -7,8 +7,8 @@ import {
 import { RecoveryKey } from "ente-accounts/components/RecoveryKey";
 import {
     getData,
-    justSignedUp,
-    setJustSignedUp,
+    savedJustSignedUp,
+    saveJustSignedUp,
 } from "ente-accounts/services/accounts-db";
 import { appHomeRoute } from "ente-accounts/services/redirect";
 import {
@@ -54,7 +54,7 @@ const Page: React.FC = () => {
         if (!user?.token) {
             void router.push("/");
         } else if (haveCredentialsInSession()) {
-            if (justSignedUp()) {
+            if (savedJustSignedUp()) {
                 setOpenRecoveryKey(true);
                 setLoading(false);
             } else {
@@ -82,7 +82,7 @@ const Page: React.FC = () => {
                 masterKey,
             );
             await saveMasterKeyInSessionAndSafeStore(masterKey);
-            setJustSignedUp(true);
+            saveJustSignedUp();
             setOpenRecoveryKey(true);
         } catch (e) {
             log.error("failed to generate password", e);

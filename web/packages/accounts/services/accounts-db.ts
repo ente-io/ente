@@ -1,7 +1,8 @@
 import { getKVS, removeKV, setKV } from "ente-base/kv";
 import log from "ente-base/log";
+import { nullToUndefined } from "ente-utils/transform";
+import { z } from "zod/v4";
 import { RemoteKeyAttributes, type KeyAttributes } from "./user";
-
 export type LocalStorageKey =
     | "user"
     // See also savedKeyAttributes.
@@ -14,12 +15,6 @@ export type LocalStorageKey =
     // "srpSetupAttributes"
     | "srpAttributes"
     | "referralSource";
-
-export const setData = (key: LocalStorageKey, value: object) =>
-    localStorage.setItem(key, JSON.stringify(value));
-
-export const removeData = (key: LocalStorageKey) =>
-    localStorage.removeItem(key);
 
 /**
  * [Note: Accounts DB]
@@ -54,6 +49,9 @@ export const getData = (key: LocalStorageKey) => {
         log.error(`Failed to Parse JSON for key ${key}`, e);
     }
 };
+
+export const setData = (key: LocalStorageKey, value: object) =>
+    localStorage.setItem(key, JSON.stringify(value));
 
 // TODO: Migrate this to `local-user.ts`, with (a) more precise optionality
 // indication of the constituent fields, (b) moving any fields that need to be
@@ -153,17 +151,88 @@ export const getToken = (): string => {
     return token;
 };
 
-export const isFirstLogin = () => getData("isFirstLogin")?.status ?? false;
+const LocalIsFirstLogin = z.object({
+    status: z.boolean().nullish().transform(nullToUndefined),
+});
 
-export function setIsFirstLogin(status: boolean) {
-    setData("isFirstLogin", { status });
-}
+/**
+ * Return `true` if it is the user's first login on this client.
+ *
+ * The {@link savedIsFirstLogin} flag is saved in local storage (using
+ * {@link saveIsFirstLogin}) if we determine during the login flow that it a
+ * fresh login on this client. If so, we
+ *
+ * - Generate interactive key attributes for them, and
+ *
+ * - Display them a special indicator post login to notify them that the first
+ *   load might take extra time. At this point, we also clear the flag (the read
+ *   and clear is done by the same {@link getAndClearIsFirstLogin} function).
+ */
+export const savedIsFirstLogin = () => {
+    const jsonString = localStorage.getItem("isFirstLogin");
+    if (!jsonString) return false;
+    return LocalIsFirstLogin.parse(JSON.parse(jsonString)).status ?? false;
+};
 
-export const justSignedUp = () => getData("justSignedUp")?.status ?? false;
+/**
+ * Save a flag in local storage to indicate that this is the user's first login
+ * on this client.
+ *
+ * This is the setter corresponding to {@link savedIsFirstLogin}.
+ */
+export const saveIsFirstLogin = () => {
+    localStorage.setItem("isFirstLogin", JSON.stringify({ status: true }));
+};
 
-export function setJustSignedUp(status: boolean) {
-    setData("justSignedUp", { status });
-}
+/**
+ * Get the saved value of the local storage flag that indicates that this is the
+ * user' first login on this client. Also remove the flag after reading.
+ *
+ * The flag can be set by using {@link saveIsFirstLogin}, and can be read
+ * without clearing it by using {@link savedIsFirstLogin}.
+ */
+export const getAndClearIsFirstLogin = () => {
+    const result = savedIsFirstLogin();
+    localStorage.removeItem("isFirstLogin");
+    return result;
+};
+
+const LocalJustSignedUp = z.object({
+    status: z.boolean().nullish().transform(nullToUndefined),
+});
+
+/**
+ * Return `true` if the user created a new account on this client during the
+ * current (in-progress) or just completed login / signup sequence.
+ */
+export const savedJustSignedUp = () => {
+    const jsonString = localStorage.getItem("justSignedUp");
+    if (!jsonString) return false;
+    return LocalJustSignedUp.parse(JSON.parse(jsonString)).status ?? false;
+};
+
+/**
+ * Save a flag in local storage to indicate that the user signed up for a
+ * new Ente account during the current login / signup sequence.
+ *
+ * This is the setter corresponding to {@link savedJustSignedUp}.
+ */
+export const saveJustSignedUp = () => {
+    localStorage.setItem("justSignedUp", JSON.stringify({ status: true }));
+};
+
+/**
+ * Get the saved value of the local storage flag that indicates that the user just
+ * signed up. Also remove the flag from local storage after reading.
+ *
+ * The flag can be set by using {@link saveJustSignedUp}, and can be read
+ * without clearing it by using {@link savedJustSignedUp}.
+ */
+export const getAndClearJustSignedUp = () => {
+    const result = savedJustSignedUp();
+    localStorage.removeItem("justSignedUp");
+    return result;
+};
 
 export function getLocalReferralSource() {
     return getData("referralSource")?.source;
