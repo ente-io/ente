@@ -31,7 +31,6 @@ import {
     safeDirectoryName,
     safeFileName,
 } from "ente-new/photos/utils/native-fs";
-import { setData } from "ente-shared/storage/localStorage";
 import { PromiseQueue } from "ente-utils/promise";
 import { nullToUndefined } from "ente-utils/transform";
 import i18n from "i18next";
@@ -103,7 +102,8 @@ const ExportSettings = z.object({
  */
 export const savedExportSettings = () => {
     const jsonString = localStorage.getItem("export");
-    return jsonString ? ExportSettings.parse(jsonString) : undefined;
+    const json = jsonString ? JSON.parse(jsonString) : undefined;
+    return json ? ExportSettings.parse(json) : undefined;
 };
 
 /**
@@ -211,7 +211,7 @@ class ExportService {
             const exportSettings = this.getExportSettings();
             const newSettings = { ...exportSettings, ...newData };
             this.exportSettings = newSettings;
-            setData("export", newSettings);
+            saveExportSettings(newSettings);
         } catch (e) {
             log.error("updateExportSettings failed", e);
             throw e;
