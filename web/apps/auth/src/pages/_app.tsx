@@ -3,7 +3,7 @@ import { CssBaseline } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
 import { accountLogout } from "ente-accounts/services/logout";
 import type { User } from "ente-accounts/services/user";
-import { clientPackageName, staticAppTitle } from "ente-base/app";
+import { staticAppTitle } from "ente-base/app";
 import { CustomHead } from "ente-base/components/Head";
 import {
     LoadingIndicator,
@@ -19,7 +19,6 @@ import {
 import { authTheme } from "ente-base/components/utils/theme";
 import { BaseContext, deriveBaseContext } from "ente-base/context";
 import { logStartupBanner } from "ente-base/log-web";
-import HTTPService from "ente-shared/network/HTTPService";
 import { getData } from "ente-shared/storage/localStorage";
 import { t } from "i18next";
 import type { AppProps } from "next/app";
@@ -35,7 +34,6 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     useEffect(() => {
         const user = getData("user") as User | undefined | null;
         logStartupBanner(user?.id);
-        HTTPService.setHeaders({ "X-Client-Package": clientPackageName });
     }, []);
 
     const logout = useCallback(() => {

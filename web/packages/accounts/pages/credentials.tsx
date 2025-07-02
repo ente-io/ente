@@ -6,7 +6,10 @@ import {
 } from "ente-accounts/components/LoginComponents";
 import { SecondFactorChoice } from "ente-accounts/components/SecondFactorChoice";
 import { sessionExpiredDialogAttributes } from "ente-accounts/components/utils/dialog";
-import { useSecondFactorChoiceIfNeeded } from "ente-accounts/components/utils/second-factor-choice";
+import {
+    twoFactorEnabledErrorMessage,
+    useSecondFactorChoiceIfNeeded,
+} from "ente-accounts/components/utils/second-factor-choice";
 import {
     VerifyMasterPasswordForm,
     type VerifyMasterPasswordFormProps,
@@ -47,7 +50,6 @@ import {
     unstashKeyEncryptionKeyFromSession,
     updateSessionFromElectronSafeStorageIfNeeded,
 } from "ente-base/session";
-import { CustomError } from "ente-shared/error";
 import { getData, setData, setLSUser } from "ente-shared/storage/localStorage";
 import {
     getToken,
@@ -205,7 +207,7 @@ const Page: React.FC = () => {
                     );
                     setPasskeyVerificationData({ passkeySessionID, url });
                     openPasskeyVerificationURL({ passkeySessionID, url });
-                    throw Error(CustomError.TWO_FACTOR_ENABLED);
+                    throw new Error(twoFactorEnabledErrorMessage);
                 } else if (twoFactorSessionID) {
                     await stashKeyEncryptionKeyInSessionStore(kek);
                     const user = getData("user");
@@ -215,7 +217,7 @@ const Page: React.FC = () => {
                         isTwoFactorEnabled: true,
                     });
                     void router.push("/two-factor/verify");
-                    throw Error(CustomError.TWO_FACTOR_ENABLED);
+                    throw new Error(twoFactorEnabledErrorMessage);
                 } else {
                     const user = getData("user");
                     await setLSUser({
@@ -231,7 +233,7 @@ const Page: React.FC = () => {
             } catch (e) {
                 if (
                     e instanceof Error &&
-                    e.message != CustomError.TWO_FACTOR_ENABLED
+                    e.message != twoFactorEnabledErrorMessage
                 ) {
                     log.error("getKeyAttributes failed", e);
                 }

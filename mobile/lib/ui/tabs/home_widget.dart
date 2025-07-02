@@ -279,9 +279,9 @@ class _HomeWidgetState extends State<HomeWidget> {
     await Future.delayed(const Duration(seconds: 5));
 
     _logger.info("Syncing home widget");
-    await MemoryHomeWidgetService.instance.checkPendingMemorySync();
-    await PeopleHomeWidgetService.instance.checkPendingPeopleSync();
     await AlbumHomeWidgetService.instance.checkPendingAlbumsSync();
+    await PeopleHomeWidgetService.instance.checkPendingPeopleSync();
+    await MemoryHomeWidgetService.instance.checkPendingMemorySync();
   }
 
   final Map<Uri, (bool, int)> _linkedPublicAlbums = {};

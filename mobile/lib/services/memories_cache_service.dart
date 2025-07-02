@@ -433,6 +433,7 @@ class MemoriesCacheService {
     required bool onThisDay,
     required bool pastYears,
     required bool smart,
+    required bool hasAnyWidgets,
   }) async {
     if (!onThisDay && !pastYears && !smart) {
       _logger.info(
@@ -440,7 +441,7 @@ class MemoriesCacheService {
       );
       return [];
     }
-    final allMemories = await getMemories(onlyUseCache: true);
+    final allMemories = await getMemories(onlyUseCache: !hasAnyWidgets);
     if (onThisDay && pastYears && smart) {
       return allMemories;
     }

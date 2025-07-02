@@ -8,10 +8,10 @@ import { LoadingButton } from "ente-base/components/mui/LoadingButton";
 import { ShowHidePasswordInputAdornment } from "ente-base/components/mui/PasswordInputAdornment";
 import { sharedCryptoWorker } from "ente-base/crypto";
 import log from "ente-base/log";
-import { CustomError } from "ente-shared/error";
 import { useFormik } from "formik";
 import { t } from "i18next";
 import { useCallback, useState } from "react";
+import { twoFactorEnabledErrorMessage } from "./utils/second-factor-choice";
 
 export interface VerifyMasterPasswordFormProps {
     /**
@@ -30,9 +30,9 @@ export interface VerifyMasterPasswordFormProps {
      * used for reauthenticating the user after they've already logged in, then
      * this function will not be provided.
      *
-     * This function can throw an `CustomError.TWO_FACTOR_ENABLED` to signal to
-     * the form that some other form of second factor is enabled and the user
-     * has been redirected to a two factor verification page.
+     * @throws A Error with message {@link twoFactorEnabledErrorMessage} to
+     * signal to the form that some other form of second factor is enabled and
+     * the user has been redirected to a two factor verification page.
      *
      * @throws A Error with message
      * {@link srpVerificationUnauthorizedErrorMessage} to signal that either
@@ -154,7 +154,7 @@ export const VerifyMasterPasswordForm: React.FC<
             } catch (e) {
                 if (e instanceof Error) {
                     switch (e.message) {
-                        case CustomError.TWO_FACTOR_ENABLED:
+                        case twoFactorEnabledErrorMessage:
                             // Two factor enabled, user has been redirected to
                             // the two-factor verification page.
                             return;
