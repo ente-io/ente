@@ -62,7 +62,8 @@ class _ContactResultPageState extends State<ContactResultPage> {
     super.initState();
     files = widget.searchResult.resultFiles();
     collections = (widget.searchResult as GenericSearchResult)
-        .params[kContactCollections];
+            .params[kContactCollections] ??
+        <Collection>[];
     _searchResultName = widget.searchResult.name();
     _filesUpdatedEvent =
         Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
