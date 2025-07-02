@@ -16,7 +16,7 @@ import {
 import {
     saveJustSignedUp,
     setData,
-    setLocalReferralSource,
+    stashReferralSource,
 } from "ente-accounts/services/accounts-db";
 import {
     generateSRPSetupAttributes,
@@ -107,7 +107,8 @@ export const SignUpContents: React.FC<SignUpContentsProps> = ({
             }
 
             try {
-                setLocalReferralSource(referral);
+                const cleanedReferral = referral.trim();
+                if (cleanedReferral) stashReferralSource(cleanedReferral);
 
                 try {
                     await sendOTT(email, "signup");

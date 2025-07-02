@@ -9,10 +9,10 @@ import { SecondFactorChoice } from "ente-accounts/components/SecondFactorChoice"
 import { useSecondFactorChoiceIfNeeded } from "ente-accounts/components/utils/second-factor-choice";
 import {
     getData,
-    getLocalReferralSource,
     saveIsFirstLogin,
     setData,
     setLSUser,
+    unstashReferralSource,
 } from "ente-accounts/services/accounts-db";
 import {
     openPasskeyVerificationURL,
@@ -83,8 +83,7 @@ const Page: React.FC = () => {
         setFieldError,
     ) => {
         try {
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-            const referralSource = getLocalReferralSource()?.trim();
+            const referralSource = unstashReferralSource();
             const cleanedReferral = referralSource
                 ? `web:${referralSource}`
                 : undefined;

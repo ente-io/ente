@@ -3,18 +3,16 @@ import log from "ente-base/log";
 import { nullToUndefined } from "ente-utils/transform";
 import { z } from "zod/v4";
 import { RemoteKeyAttributes, type KeyAttributes } from "./user";
+
 export type LocalStorageKey =
     | "user"
     // See also savedKeyAttributes.
     | "keyAttributes"
     | "originalKeyAttributes"
-    | "isFirstLogin"
-    | "justSignedUp"
     | "showBackButton"
     // Moved to ente-accounts
     // "srpSetupAttributes"
-    | "srpAttributes"
-    | "referralSource";
+    | "srpAttributes";
 
 /**
  * [Note: Accounts DB]
@@ -252,10 +250,45 @@ export const getAndClearJustSignedUp = () => {
     return result;
 };
 
-export function getLocalReferralSource() {
-    return getData("referralSource")?.source;
-}
+/**
+ * Zod schema for the format in which the {@link stashReferralSource} used to
+ * saved the referral source in local storage.
+ *
+ * Starting 1.7.15-beta (July 2025), we started saving the string directly, but
+ * when reading we fallback to the old format if needed. This fallback can be
+ * removed, and soonish, since these is a transient value that isn't expected to
+ * remain in the user's local storage for long anyway. (tag: Migration).
+ */
+const LocalLegacyReferralSource = z.object({ source: z.string() });
 
-export function setLocalReferralSource(source: string) {
-    setData("referralSource", { source });
-}
+/**
+ * Save the referral source entered by the user on the signup screen in local
+ * storage.
+ *
+ * The saved value can be retrieved post email verification using
+ * {@link unstashReferralSource}.
+ */
+export const stashReferralSource = (referralSource: string) => {
+    localStorage.setItem("referralSource", referralSource);
+};
+
+/**
+ * Retrieve the previously saved referral source (using
+ * {@link stashReferralSource}), returning the saved value and also clearing it
+ * from local storage.
+ */
+export const unstashReferralSource = () => {
+    const jsonString = localStorage.getItem("referralSource");
+    if (!jsonString) return undefined;
+    localStorage.removeItem("referralSource");
+    try {
+        // Try the old format first. The trim is also a legacy expectation and
+        // can be removed when we remove this fallfront.
+        return LocalLegacyReferralSource.parse(
+            JSON.parse(jsonString),
+        ).source.trim();
+    } catch {
+        // Otherwise try the new format.
+        return jsonString;
+    }
+};
