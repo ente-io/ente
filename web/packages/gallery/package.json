@@ -8,7 +8,7 @@
         "ente-base": "*",
         "ente-utils": "*",
         "exifreader": "^4.31.1",
-        "hls-video-element": "^1.5.4",
+        "hls-video-element": "^1.5.5",
         "leaflet": "^1.9.4",
         "leaflet-defaulticon-compatibility": "^0.1.2",
         "localforage": "^1.10.0",
@@ -19,7 +19,7 @@
         "react-dropzone": "14.2.10"
     },
     "devDependencies": {
-        "@types/leaflet": "^1.9.18",
+        "@types/leaflet": "^1.9.19",
         "@types/react": "^19.1.8",
         "@types/react-dom": "^19.1.6",
         "ente-build-config": "*"

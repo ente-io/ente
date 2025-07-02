@@ -54,9 +54,11 @@ The root `package.json` also has a convenience dev dependency:
 > For example, ideally we'd just have specified the react dependencies in
 > _ente-base_, but that leads to missing peer dependency warnings in our other
 > packages, so we need to need to repeat them. For now, we manually ensure that
-> all of them use the same version. Additionally, we pin the versions of the
-> react types using the resolutions field in the top level `package.json`, to
-> avoid type errors because of multiple versions of react types being in scope.
+> all of them use the same version.
+>
+> Additionally, we pin the versions of the react types using the resolutions
+> field in the top level `package.json`, to avoid type errors because of
+> multiple versions of react types being in scope.
 
 ## Cryptography
 
@@ -242,7 +244,6 @@ via [@fontsource-variable/inter](https://fontsource.org/fonts/inter/install).
   which we've built our file viewer.
 
 - For streaming video (HLS), we use three libraries:
-
     1. [media-chrome](https://github.com/muxinc/media-chrome) provides custom
        video controls which we use when playing HLS playlists (we use custom
        controls to provide a standardized UX across browsers, but really the
@@ -294,6 +295,11 @@ via [@fontsource-variable/inter](https://fontsource.org/fonts/inter/install).
 - `react-dropzone` is pinned to the 14.2.10, the last version in the 14.2
   series, since if we use 14.3 onwards (I tested till 14.3.5) then we are unable
   to get back a path from the file by using the `webUtils.getPathForFile`
-  function provided by Electron.
+  function provided by Electron. See:
+  https://github.com/react-dropzone/react-dropzone/issues/1411
+
+- `@stripe/stripe-js` is pinned to the latest 1.x (it works as it is currently,
+  migrating to newer major versions requires headspace since it _might_ also
+  require museum changes).
 
 - `file-type` is pinned to 16.5.4 since subsequent versions are ESM only.
