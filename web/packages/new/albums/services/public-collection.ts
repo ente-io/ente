@@ -18,6 +18,9 @@ import {
 } from "ente-media/file";
 import { z } from "zod/v4";
 import {
+    removePublicCollectionAccessTokenJWT,
+    removePublicCollectionFiles,
+    removePublicCollectionLastSyncTime,
     savedPublicCollectionFiles,
     savedPublicCollectionLastSyncTime,
     saveLastPublicCollectionReferralCode,
@@ -232,4 +235,18 @@ const getPublicCollectionDiff = async (
     );
     ensureOk(res);
     return FileDiffResponse.parse(await res.json());
+};
+
+/**
+ * Remove the files, sync time and accessTokenJWT associated with the given
+ * collection (identified by its {@link accessToken}).
+ *
+ * This function modifies local state.
+ */
+export const removePublicCollectionFileData = async (accessToken: string) => {
+    await Promise.all([
+        removePublicCollectionAccessTokenJWT(accessToken),
+        removePublicCollectionLastSyncTime(accessToken),
+        removePublicCollectionFiles(accessToken),
+    ]);
 };
