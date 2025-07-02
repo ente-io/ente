@@ -169,7 +169,6 @@ Future<void> _runMinimally(String taskId, TimeLogger tlog) async {
   LocalFileUpdateService.instance.init(prefs);
   await LocalSyncService.instance.init(prefs);
   RemoteSyncService.instance.init(prefs);
-  await FavoritesService.instance.initFav();
   await SyncService.instance.init(prefs);
 
   // Misc Services

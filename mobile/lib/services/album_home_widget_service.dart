@@ -12,6 +12,7 @@ import 'package:photos/models/collection/collection.dart';
 import 'package:photos/models/collection/collection_items.dart';
 import 'package:photos/models/file/file.dart';
 import 'package:photos/service_locator.dart';
+import "package:photos/services/app_lifecycle_service.dart";
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/favorites_service.dart';
 import 'package:photos/services/home_widget_service.dart';
@@ -294,9 +295,13 @@ class AlbumHomeWidgetService {
 
     // If no albums selected, use favorites as default
     if (selectedAlbumIds == null || selectedAlbumIds.isEmpty) {
+      if (!AppLifecycleService.instance.isForeground) {
+        await FavoritesService.instance.initFav();
+      }
       final favoriteId =
           await FavoritesService.instance.getFavoriteCollectionID();
       if (favoriteId != null) {
+        await updateSelectedAlbums([favoriteId.toString()]);
         return [favoriteId];
       }
     }
