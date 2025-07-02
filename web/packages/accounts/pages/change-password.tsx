@@ -63,25 +63,21 @@ interface PageContentsProps {
 const PageContents: React.FC<PageContentsProps> = ({ user, isReset }) => {
     const router = useRouter();
 
-    const redirectToAppHome = useCallback(() => {
-        void router.push(appHomeRoute);
-    }, [router]);
-
-    const handleSubmit: NewPasswordFormProps["onSubmit"] = async (
-        password,
-        setPasswordsFieldError,
-    ) =>
-        changePassword(password)
-            .then(redirectToAppHome)
-            .catch((e: unknown) => {
-                log.error("Could not change password", e);
-                setPasswordsFieldError(
-                    e instanceof Error &&
-                        e.message == deriveKeyInsufficientMemoryErrorMessage
-                        ? t("password_generation_failed")
-                        : t("generic_error"),
-                );
-            });
+    const handleSubmit: NewPasswordFormProps["onSubmit"] = useCallback(
+        async (password, setPasswordsFieldError) =>
+            changePassword(password)
+                .then(() => void router.push(appHomeRoute))
+                .catch((e: unknown) => {
+                    log.error("Could not change password", e);
+                    setPasswordsFieldError(
+                        e instanceof Error &&
+                            e.message == deriveKeyInsufficientMemoryErrorMessage
+                            ? t("password_generation_failed")
+                            : t("generic_error"),
+                    );
+                }),
+        [router],
+    );
 
     return (
         <AccountsPageContents>
