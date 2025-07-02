@@ -93,7 +93,7 @@ export const verifyPublicAlbumPassword = async (
  * (the fragment is a client side only portion that can be used to have local
  * secrets that are not sent by the browser to the server).
  */
-export const fetchAndSavePublicCollection = async (
+export const pullCollection = async (
     accessToken: string,
     collectionKey: string,
 ): Promise<{ collection: Collection; referralCode: string }> => {
@@ -221,9 +221,6 @@ export const pullPublicCollectionFiles = async (
  * (identified by its {@link credentials}) since {@link sinceTime}.
  *
  * Remote only, does not modify local state.
- *
- * @param credentials
- * @param number
  */
 const getPublicCollectionDiff = async (
     credentials: PublicAlbumsCredentials,

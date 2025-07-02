@@ -59,7 +59,8 @@ import {
     savePublicCollectionAccessTokenJWT,
 } from "ente-new/albums/services/public-albums-fdb";
 import {
-    fetchAndSavePublicCollection,
+    pullCollection,
+    pullPublicCollectionFiles,
     verifyPublicAlbumPassword,
 } from "ente-new/albums/services/public-collection";
 import {
@@ -78,7 +79,6 @@ import {
     getPublicCollectionUID,
     removePublicCollectionWithFiles,
     removePublicFiles,
-    syncPublicFiles,
 } from "services/publicCollectionService";
 import { uploadManager } from "services/upload-manager";
 import {
@@ -307,7 +307,7 @@ export default function PublicCollectionGallery() {
             showLoadingBar();
             setLoading(true);
             const { collection, referralCode: userReferralCode } =
-                await fetchAndSavePublicCollection(
+                await pullCollection(
                     credentials.current.accessToken,
                     collectionKey.current,
                 );
@@ -327,14 +327,12 @@ export default function PublicCollectionGallery() {
                 removePublicCollectionAccessTokenJWT(collectionUID);
             }
 
-            if (
-                !isPasswordProtected ||
-                (isPasswordProtected && credentials.current.accessTokenJWT)
-            ) {
+            if (isPasswordProtected && !credentials.current.accessTokenJWT) {
+                await removePublicFiles(collectionUID);
+            } else {
                 try {
-                    await syncPublicFiles(
-                        credentials.current.accessToken,
-                        credentials.current.accessTokenJWT,
+                    await pullPublicCollectionFiles(
+                        credentials.current,
                         collection,
                         (files) =>
                             setPublicFiles(
@@ -342,20 +340,25 @@ export default function PublicCollectionGallery() {
                             ),
                     );
                 } catch (e) {
-                    const parsedError = parseSharingErrorCodes(e);
-                    if (parsedError.message === CustomError.TOKEN_EXPIRED) {
-                        // passwordToken has expired, sharer has changed the password,
-                        // so,clearing local cache token value to prompt user to re-enter password
+                    // If we reached the try block and attempted to pull files,
+                    // it means the accessToken itself is very likely valid
+                    // (since the `pullCollection` succeeded just a moment ago).
+                    //
+                    // So a 401 Unauthorized now indicates that the
+                    // accessTokenJWT is no longer valid since the sharer has
+                    // changed the password.
+                    //
+                    // Clear the locally cached accessTokenJWT and ask the user
+                    // to reenter the password.
+                    if (isHTTP401Error(e)) {
                         credentials.current.accessTokenJWT = undefined;
                         downloadManager.setPublicAlbumsCredentials(
                             credentials.current,
                         );
+                    } else {
+                        throw e;
                     }
                 }
-            }
-
-            if (isPasswordProtected && !credentials.current.accessTokenJWT) {
-                await removePublicFiles(collectionUID);
             }
         } catch (e) {
             const parsedError = parseSharingErrorCodes(e);
