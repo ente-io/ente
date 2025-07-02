@@ -1,9 +1,6 @@
 // ignore: implementation_imports
 
 import "package:exif_reader/exif_reader.dart";
-import "package:image/image.dart";
-// ignore: implementation_imports
-import "package:motion_photos/src/xmp_extractor.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/file/file_type.dart";
@@ -27,8 +24,8 @@ Future<bool> checkIfPanorama(EnteFile enteFile) async {
     return true;
   }
   try {
-    final result = XMPExtractor().extract(sourceFile.readAsBytesSync());
-    if (checkPanoramaFromXMP(result)) {
+    final xmpData = await getXmp(sourceFile);
+    if (checkPanoramaFromXMP(xmpData)) {
       return true;
     }
   } catch (_) {}

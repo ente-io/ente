@@ -115,4 +115,6 @@ class RemoteAsset {
   String? get uploaderName {
     return publicMetadata?.data[uploaderNameKey];
   }
+
+  int? get mediaType => null;
 }
