@@ -1,4 +1,7 @@
-import { getData } from "ente-accounts/services/accounts-db";
+import {
+    getData,
+    savedOriginalKeyAttributes,
+} from "ente-accounts/services/accounts-db";
 import type { KeyAttributes } from "ente-accounts/services/user";
 import { authenticatedRequestHeaders, HTTPError } from "ente-base/http";
 import log from "ente-base/log";
@@ -159,7 +162,7 @@ export const isSessionInvalid = async (): Promise<boolean> => {
 
         const { hasSetKeys } = SessionValidityResponse.parse(await res.json());
         if (!hasSetKeys) {
-            const originalKeyAttributes = getData("originalKeyAttributes");
+            const originalKeyAttributes = savedOriginalKeyAttributes();
             if (originalKeyAttributes)
                 await putUserKeyAttributes(originalKeyAttributes);
         }

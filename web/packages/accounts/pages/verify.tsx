@@ -9,8 +9,10 @@ import { SecondFactorChoice } from "ente-accounts/components/SecondFactorChoice"
 import { useSecondFactorChoiceIfNeeded } from "ente-accounts/components/utils/second-factor-choice";
 import {
     getData,
+    savedOriginalKeyAttributes,
     saveIsFirstLogin,
-    setData,
+    saveKeyAttributes,
+    saveOriginalKeyAttributes,
     setLSUser,
     unstashReferralSource,
 } from "ente-accounts/services/accounts-db";
@@ -130,12 +132,10 @@ const Page: React.FC = () => {
                     isTwoFactorEnabled: false,
                 });
                 if (keyAttributes) {
-                    setData("keyAttributes", keyAttributes);
-                    setData("originalKeyAttributes", keyAttributes);
+                    saveKeyAttributes(keyAttributes);
+                    saveOriginalKeyAttributes(keyAttributes);
                 } else {
-                    const originalKeyAttributes = getData(
-                        "originalKeyAttributes",
-                    );
+                    const originalKeyAttributes = savedOriginalKeyAttributes();
                     if (originalKeyAttributes) {
                         await putUserKeyAttributes(originalKeyAttributes);
                     }

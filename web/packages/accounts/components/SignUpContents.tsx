@@ -15,7 +15,7 @@ import {
 } from "@mui/material";
 import {
     saveJustSignedUp,
-    setData,
+    saveOriginalKeyAttributes,
     stashReferralSource,
 } from "ente-accounts/services/accounts-db";
 import {
@@ -146,7 +146,7 @@ export const SignUpContents: React.FC<SignUpContentsProps> = ({
                 }
 
                 const { masterKey, kek, keyAttributes } = gkResult;
-                setData("originalKeyAttributes", keyAttributes);
+                saveOriginalKeyAttributes(keyAttributes);
                 stashSRPSetupAttributes(await generateSRPSetupAttributes(kek));
                 await generateAndSaveInteractiveKeyAttributes(
                     password,

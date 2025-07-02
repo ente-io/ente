@@ -128,6 +128,8 @@ export const isLocalStorageAndIndexedDBMismatch = async () => {
  * The key attributes are stored in the browser's localStorage. Thus, this
  * function only works from the main thread, not from web workers (local storage
  * is not accessible to web workers).
+ *
+ * See also: [Note: Original vs interactive key attributes]
  */
 export const savedKeyAttributes = (): KeyAttributes | undefined => {
     const jsonString = localStorage.getItem("keyAttributes");
@@ -142,6 +144,41 @@ export const savedKeyAttributes = (): KeyAttributes | undefined => {
  */
 export const saveKeyAttributes = (keyAttributes: KeyAttributes) =>
     localStorage.setItem("keyAttributes", JSON.stringify(keyAttributes));
+
+/**
+ * Return the user's original {@link KeyAttributes} if they are present in local
+ * storage.
+ *
+ * [Note: Original vs interactive key attributes]
+ *
+ * This function is similar to {@link savedKeyAttributes} except it returns the
+ * user's "original" key attributes. These are the key attributes that were
+ * either freshly generated (if the user signed up on this client) or were
+ * fetched from remote (otherwise).
+ *
+ * In contrast, the regular key attributes get overwritten by the local only
+ * interactive key attributes for the user's convenience. See the documentation
+ * of {@link generateAndSaveInteractiveKeyAttributes} for more details.
+ */
+export const savedOriginalKeyAttributes = (): KeyAttributes | undefined => {
+    const jsonString = localStorage.getItem("originalKeyAttributes");
+    if (!jsonString) return undefined;
+    return RemoteKeyAttributes.parse(JSON.parse(jsonString));
+};
+
+/**
+ * Save the user's {@link KeyAttributes} in local storage.
+ *
+ * Once saved, these values are not replaced (in contrast with the regular key
+ * attributes which can get overwritten with interactive ones).
+ *
+ * Use {@link savedOriginalKeyAttributes} to retrieve them.
+ */
+export const saveOriginalKeyAttributes = (keyAttributes: KeyAttributes) =>
+    localStorage.setItem(
+        "originalKeyAttributes",
+        JSON.stringify(keyAttributes),
+    );
 
 export const getToken = (): string => {
     const token = getData("user")?.token;
