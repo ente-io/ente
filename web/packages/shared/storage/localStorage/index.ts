@@ -10,11 +10,6 @@ export type LocalStorageKey =
     | "justSignedUp"
     | "showBackButton"
     | "export"
-    // LOGS = "logs",
-    // Migrated to (and only used by) useCollectionsSortByLocalState.
-    | "collectionSortBy"
-    // Moved to the new wrapper ente-base/local-storage
-    // LOCALE = 'locale',
     // Moved to ente-accounts
     // "srpSetupAttributes"
     | "srpAttributes"

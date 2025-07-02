@@ -18,7 +18,6 @@ import {
     type CollectionsSortBy,
     type CollectionSummaries,
 } from "ente-new/photos/services/collection-summary";
-import { getData, removeData } from "ente-shared/storage/localStorage";
 import { includes } from "ente-utils/type-guards";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { sortCollectionSummaries } from "services/collectionService";
@@ -249,35 +248,7 @@ const useCollectionsSortByLocalState = (initialValue: CollectionsSortBy) => {
 
     useEffect(() => {
         const value = localStorage.getItem(key);
-        if (value) {
-            if (includes(collectionsSortBy, value)) setValue(value);
-        } else {
-            // Older versions of this code used to store the value in a
-            // different place and format. Migrate if needed.
-            //
-            // This migration added Sep 2024, can be removed after a bit (esp
-            // since it effectively runs on each app start). (tag: Migration).
-            const oldData = getData("collectionSortBy");
-            if (oldData) {
-                let newValue: CollectionsSortBy | undefined;
-                switch (oldData.value) {
-                    case 0:
-                        newValue = "name";
-                        break;
-                    case 1:
-                        newValue = "creation-time-asc";
-                        break;
-                    case 2:
-                        newValue = "updation-time-desc";
-                        break;
-                }
-                if (newValue) {
-                    localStorage.setItem(key, newValue);
-                    setValue(newValue);
-                }
-                removeData("collectionSortBy");
-            }
-        }
+        if (value && includes(collectionsSortBy, value)) setValue(value);
     }, []);
 
     const setter = (value: CollectionsSortBy) => {
