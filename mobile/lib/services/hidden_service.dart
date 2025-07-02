@@ -138,7 +138,7 @@ extension HiddenService on CollectionsService {
       for (MapEntry<int, List<EnteFile>> entry
           in collectionToFilesMap.entries) {
         if (entry.key == defaultHiddenCollection.id) {
-          _logger.finest('file already part of hidden collection');
+          _logger.info('file already part of hidden collection');
           continue;
         }
         final Collection? c = getCollectionByID(entry.key);

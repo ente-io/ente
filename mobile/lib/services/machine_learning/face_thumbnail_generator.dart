@@ -1,11 +1,14 @@
 import 'dart:async';
 import 'dart:typed_data' show Uint8List;
 
+import "package:computer/computer.dart";
 import "package:logging/logging.dart";
 import "package:photos/models/ml/face/box.dart";
 import "package:photos/services/isolate_functions.dart";
 import "package:photos/services/isolate_service.dart";
 import "package:photos/utils/image_ml_util.dart";
+
+final Computer _computer = Computer.shared();
 
 class FaceThumbnailGenerator extends SuperIsolate {
   @override
@@ -36,12 +39,18 @@ class FaceThumbnailGenerator extends SuperIsolate {
   ) async {
     final List<Map<String, dynamic>> faceBoxesJson =
         faceBoxes.map((box) => box.toJson()).toList();
-    return await runInIsolate(
+    final List<Uint8List> faces = await runInIsolate(
       IsolateOperation.generateFaceThumbnails,
       {
         'imagePath': imagePath,
         'faceBoxesList': faceBoxesJson,
       },
     ).then((value) => value.cast<Uint8List>());
+    final compressedFaces =
+        await compressFaceThumbnails({'listPngBytes': faces});
+    _logger.fine(
+      "Compressed face thumbnails from sizes ${faces.map((e) => e.length / 1024).toList()} to ${compressedFaces.map((e) => e.length / 1024).toList()} kilobytes",
+    );
+    return compressedFaces;
   }
 }

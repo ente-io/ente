@@ -1,4 +1,4 @@
-import "package:exif/exif.dart";
+import "package:exif_reader/exif_reader.dart";
 import "package:flutter/material.dart";
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/file/file.dart';

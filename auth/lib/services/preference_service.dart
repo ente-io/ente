@@ -18,6 +18,7 @@ class PreferenceService {
   late final SharedPreferences _prefs;
 
   static const kHasShownCoachMarkKey = "has_shown_coach_mark_v2";
+  static const kLocalTimeOffsetKey = "local_time_offset";
   static const kShouldShowLargeIconsKey = "should_show_large_icons";
   static const kShouldHideCodesKey = "should_hide_codes";
   static const kShouldAutoFocusOnSearchBar = "should_auto_focus_on_search_bar";
@@ -113,5 +114,25 @@ class PreferenceService {
       _prefs.setInt(kAppInstallTime, installedTimeinMillis).ignore();
       return installedTimeinMillis;
     }
+  }
+
+  // localEpochOffsetInMilliSecond returns the local epoch offset in milliseconds.
+  // This is used to adjust the time for TOTP calculations when device local time is not in sync with actual time.
+  int timeOffsetInMilliSeconds() {
+    return _prefs.getInt(kLocalTimeOffsetKey) ?? 0;
+  }
+
+  void computeAndStoreTimeOffset(
+    int? epochTimeInMicroseconds,
+  ) {
+    if (epochTimeInMicroseconds == null) {
+      _prefs.remove(kLocalTimeOffsetKey);
+      return;
+    }
+    int serverEpochTimeInMilliSecond = epochTimeInMicroseconds ~/ 1000;
+    int localEpochTimeInMilliSecond = DateTime.now().millisecondsSinceEpoch;
+    int localEpochOffset =
+        serverEpochTimeInMilliSecond - localEpochTimeInMilliSecond;
+    _prefs.setInt(kLocalTimeOffsetKey, localEpochOffset);
   }
 }

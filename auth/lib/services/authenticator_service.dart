@@ -13,6 +13,7 @@ import 'package:ente_auth/models/authenticator/auth_entity.dart';
 import 'package:ente_auth/models/authenticator/auth_key.dart';
 import 'package:ente_auth/models/authenticator/entity_result.dart';
 import 'package:ente_auth/models/authenticator/local_auth_entity.dart';
+import 'package:ente_auth/services/preference_service.dart';
 import 'package:ente_auth/store/authenticator_db.dart';
 import 'package:ente_auth/store/offline_authenticator_db.dart';
 import 'package:ente_crypto_dart/ente_crypto_dart.dart';
@@ -194,8 +195,13 @@ class AuthenticatorService {
     final int lastSyncTime = _prefs.getInt(_lastEntitySyncTime) ?? 0;
     _logger.info("Current sync is $lastSyncTime");
     const int fetchLimit = 500;
-    final List<AuthEntity> result =
+    late final List<AuthEntity> result;
+    late final int? epochTimeInMicroseconds;
+    (result, epochTimeInMicroseconds) =
         await _gateway.getDiff(lastSyncTime, limit: fetchLimit);
+    PreferenceService.instance
+        .computeAndStoreTimeOffset(epochTimeInMicroseconds);
+
     _logger.info("${result.length} entries fetched from remote");
     if (result.isEmpty) {
       return;

@@ -7,11 +7,11 @@
         "bs58": "^6.0.0",
         "ente-base": "*",
         "ente-utils": "*",
-        "exifreader": "^4.30.1",
-        "hls-video-element": "^1.5.1",
+        "exifreader": "^4.31.1",
+        "hls-video-element": "^1.5.4",
         "leaflet": "^1.9.4",
         "leaflet-defaulticon-compatibility": "^0.1.2",
-        "media-chrome": "^4.10.0",
+        "media-chrome": "^4.11.1",
         "photoswipe": "^5.4.4",
         "react": "^19.1.0",
         "react-dom": "^19.1.0",
@@ -19,8 +19,8 @@
     },
     "devDependencies": {
         "@types/leaflet": "^1.9.18",
-        "@types/react": "^19.1.5",
-        "@types/react-dom": "^19.1.5",
+        "@types/react": "^19.1.8",
+        "@types/react-dom": "^19.1.6",
         "ente-build-config": "*"
     }
 }

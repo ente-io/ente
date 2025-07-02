@@ -66,7 +66,6 @@ class _AppliedFiltersForAppbarState extends State<AppliedFiltersForAppbar> {
                   ? FaceFilterChip(
                       personId: filter.personId,
                       clusterId: filter.clusterId,
-                      faceThumbnailFile: filter.faceFile,
                       apply: () {
                         _searchFilterDataProvider.applyFilters([filter]);
                       },

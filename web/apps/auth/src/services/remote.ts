@@ -1,4 +1,4 @@
-import { decryptBoxB64, decryptMetadataJSON_New } from "ente-base/crypto";
+import { decryptBox, decryptMetadataJSON } from "ente-base/crypto";
 import {
     authenticatedRequestHeaders,
     ensureOk,
@@ -7,21 +7,43 @@ import {
 import log from "ente-base/log";
 import { apiURL } from "ente-base/origins";
 import { ensureString } from "ente-utils/ensure";
+import { nullToUndefined } from "ente-utils/transform";
 import { codeFromURIString, type Code } from "services/code";
-import { z } from "zod";
+import { z } from "zod/v4";
 
-export const getAuthCodes = async (masterKey: Uint8Array): Promise<Code[]> => {
+export interface AuthCodesAndTimeOffset {
+    codes: Code[];
+    /**
+     * An optional and approximate correction (milliseconds) which should be
+     * applied to the current client's time when deriving TOTPs.
+     */
+    timeOffset?: number;
+}
+
+/**
+ * Fetch the user's auth codes from remote and decrypt them using the user's
+ * master key.
+ *
+ * @param masterKey The user's base64 encoded master key.
+ */
+export const getAuthCodesAndTimeOffset = async (
+    masterKey: string,
+): Promise<AuthCodesAndTimeOffset> => {
     const authenticatorEntityKey = await getAuthenticatorEntityKey();
     if (!authenticatorEntityKey) {
         // The user might not have stored any codes yet from the mobile app.
-        return [];
+        return { codes: [] };
     }
 
     const authenticatorKey = await decryptAuthenticatorKey(
         authenticatorEntityKey,
         masterKey,
     );
-    return (await authenticatorEntityDiff(authenticatorKey))
+
+    const { entities, timeOffset } =
+        await authenticatorEntityDiff(authenticatorKey);
+
+    const codes = entities
         .map((entity) => {
             try {
                 return codeFromURIString(entity.id, ensureString(entity.data));
@@ -53,6 +75,8 @@ export const getAuthCodes = async (masterKey: Uint8Array): Promise<Code[]> => {
             }
             return 0;
         });
+
+    return { codes, timeOffset };
 };
 
 /**
@@ -93,50 +117,94 @@ const RemoteAuthenticatorEntityChange = z.object({
     updatedAt: z.number(),
 });
 
+const AuthenticatorEntityDiffResponse = z.object({
+    /**
+     * Changes to entities.
+     */
+    diff: z.array(RemoteAuthenticatorEntityChange),
+    /**
+     * An optional epoch microseconds indicating the remote time when it
+     * generated the response.
+     */
+    timestamp: z.number().nullish().transform(nullToUndefined),
+});
+
+export interface AuthenticatorEntityDiffResult {
+    /**
+     * The decrypted {@link AuthenticatorEntity} values.
+     */
+    entities: AuthenticatorEntity[];
+    /**
+     * An optional and approximate offset (in milliseconds) by which the time on
+     * the current client is out of sync.
+     *
+     * This offset is computed by calculated by comparing the timestamp when the
+     * remote generated the response to the time we received it. As such
+     * (because of network delays etc) this will not be an accurate offset,
+     * neither is it meant to be - it is only meant to help users whose devices
+     * have wildly off times to still see the correct codes.
+     *
+     * Note that, for various reasons, remote might not send us a timestamp when
+     * fetching the diff, so this is a best effort correction, and is not
+     * guaranteed to be present.
+     */
+    timeOffset: number | undefined;
+}
+
 /**
- * Fetch all the authenticator entities for the user.
+ * Fetch all the authenticator entities for the user, and an estimated time
+ * drift for the current client.
  *
  * @param authenticatorKey The (base64 encoded) key that should be used for
  * decrypting the authenticator entities received from remote.
  */
 export const authenticatorEntityDiff = async (
     authenticatorKey: string,
-): Promise<AuthenticatorEntity[]> => {
+): Promise<AuthenticatorEntityDiffResult> => {
     const decrypt = (encryptedData: string, decryptionHeader: string) =>
-        decryptMetadataJSON_New(
+        decryptMetadataJSON(
             { encryptedData, decryptionHeader },
             authenticatorKey,
         );
 
     // Fetch all the entities, paginating the requests.
-    const entities = new Map<
+    const encryptedEntities = new Map<
         string,
         { id: string; encryptedData: string; header: string }
     >();
     let sinceTime = 0;
     const batchSize = 2500;
 
+    let timeOffset: number | undefined = undefined;
+
     while (true) {
-        const params = new URLSearchParams({
-            sinceTime: `${sinceTime}`,
-            limit: `${batchSize}`,
-        });
-        const url = await apiURL("/authenticator/entity/diff");
-        const res = await fetch(`${url}?${params.toString()}`, {
-            headers: await authenticatedRequestHeaders(),
-        });
+        const res = await fetch(
+            await apiURL("/authenticator/entity/diff", {
+                sinceTime,
+                limit: batchSize,
+            }),
+            { headers: await authenticatedRequestHeaders() },
+        );
         ensureOk(res);
-        const diff = z
-            .object({ diff: z.array(RemoteAuthenticatorEntityChange) })
-            .parse(await res.json()).diff;
+
+        const { diff, timestamp } = AuthenticatorEntityDiffResponse.parse(
+            await res.json(),
+        );
+
+        if (timestamp) {
+            // - timestamp is in epoch microseconds.
+            // - Date.now and timeOffset are in epoch milliseconds.
+            timeOffset = Date.now() - Math.floor(timestamp / 1e3);
+        }
+
         if (diff.length == 0) break;
 
         for (const change of diff) {
             sinceTime = Math.max(sinceTime, change.updatedAt);
             if (change.isDeleted) {
-                entities.delete(change.id);
+                encryptedEntities.delete(change.id);
             } else {
-                entities.set(change.id, {
+                encryptedEntities.set(change.id, {
                     id: change.id,
                     encryptedData: change.encryptedData!,
                     header: change.header!,
@@ -145,17 +213,21 @@ export const authenticatorEntityDiff = async (
         }
     }
 
-    return Promise.all(
-        [...entities.values()].map(async ({ id, encryptedData, header }) => ({
-            id,
-            data: await decrypt(encryptedData, header),
-        })),
+    const entities = await Promise.all(
+        [...encryptedEntities.values()].map(
+            async ({ id, encryptedData, header }) => ({
+                id,
+                data: await decrypt(encryptedData, header),
+            }),
+        ),
     );
+
+    return { entities, timeOffset };
 };
 
 export const AuthenticatorEntityKey = z.object({
     /**
-     * The authenticator entity key (base 64 string), encrypted with the user's
+     * The authenticator entity key (base64 string), encrypted with the user's
      * master key.
      */
     encryptedKey: z.string(),
@@ -196,9 +268,9 @@ export const getAuthenticatorEntityKey = async (): Promise<
  */
 const decryptAuthenticatorKey = async (
     remote: AuthenticatorEntityKey,
-    masterKey: Uint8Array,
+    masterKey: string,
 ) =>
-    decryptBoxB64(
+    decryptBox(
         {
             encryptedData: remote.encryptedKey,
             // Remote calls it the header, but it really is the nonce.

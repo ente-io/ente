@@ -51,26 +51,18 @@ Uint8List cryptoKdfDeriveFromKey(
   );
 }
 
-// Returns the hash for a given file, chunking it in batches of hashChunkSize
+// Returns the hash for a given file
 Future<Uint8List> cryptoGenericHash(Map<String, dynamic> args) async {
-  final sourceFile = File(args["sourceFilePath"]);
-  final sourceFileLength = await sourceFile.length();
-  final inputFile = sourceFile.openSync(mode: FileMode.read);
+  final file = File(args["sourceFilePath"]);
   final state =
       Sodium.cryptoGenerichashInit(null, Sodium.cryptoGenerichashBytesMax);
-  var bytesRead = 0;
-  bool isDone = false;
-  while (!isDone) {
-    var chunkSize = hashChunkSize;
-    if (bytesRead + chunkSize >= sourceFileLength) {
-      chunkSize = sourceFileLength - bytesRead;
-      isDone = true;
+  await for (final chunk in file.openRead()) {
+    if (chunk is Uint8List) {
+      Sodium.cryptoGenerichashUpdate(state, chunk);
+    } else {
+      Sodium.cryptoGenerichashUpdate(state, Uint8List.fromList(chunk));
     }
-    final buffer = await inputFile.read(chunkSize);
-    bytesRead += chunkSize;
-    Sodium.cryptoGenerichashUpdate(state, buffer);
   }
-  await inputFile.close();
   return Sodium.cryptoGenerichashFinal(state, Sodium.cryptoGenerichashBytesMax);
 }
 

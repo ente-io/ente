@@ -90,15 +90,15 @@ export interface Electron {
      *
      * If the key is not found, return `undefined`.
      *
-     * See also: {@link saveMasterKeyB64}.
+     * See also: {@link saveMasterKeyInSafeStorage}.
      */
-    masterKeyB64: () => Promise<string | undefined>;
+    masterKeyFromSafeStorage: () => Promise<string | undefined>;
 
     /**
-     * Save the given {@link masterKeyB64} (encoded as a base64 string) to the
+     * Save the given {@link masterKey} (encoded as a base64 string) to the
      * persistent safe storage accessible to the desktop app.
      */
-    saveMasterKeyB64: (masterKeyB64: string) => Promise<void>;
+    saveMasterKeyInSafeStorage: (masterKey: string) => Promise<void>;
 
     /**
      * Set or clear the callback {@link cb} to invoke whenever the app comes

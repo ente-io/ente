@@ -1,24 +1,30 @@
 import "dart:async";
 import "dart:io";
 
-import "package:flutter/cupertino.dart";
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import "package:media_kit/media_kit.dart";
 import "package:media_kit_video/media_kit_video.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/core/event_bus.dart";
+import "package:photos/events/file_caption_updated_event.dart";
 import "package:photos/events/guest_view_event.dart";
 import "package:photos/events/pause_video_event.dart";
+import "package:photos/events/stream_switched_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import "package:photos/models/file/file.dart";
+import "package:photos/module/download/task.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/services/files_service.dart";
+import "package:photos/services/wake_lock_service.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/actions/file/file_actions.dart";
+import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/notification/toast.dart";
-import "package:photos/ui/viewer/file/thumbnail_widget.dart";
+import "package:photos/ui/viewer/file/video_widget_media_kit_common.dart"
+    as common;
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/file_util.dart";
 
@@ -26,10 +32,21 @@ class VideoWidgetMediaKit extends StatefulWidget {
   final EnteFile file;
   final String? tagPrefix;
   final Function(bool)? playbackCallback;
+  final bool isFromMemories;
+  final void Function() onStreamChange;
+  final File? preview;
+  final bool selectedPreview;
+  final Function({required int memoryDuration})? onFinalFileLoad;
+
   const VideoWidgetMediaKit(
     this.file, {
     this.tagPrefix,
     this.playbackCallback,
+    this.isFromMemories = false,
+    required this.onStreamChange,
+    this.preview,
+    required this.selectedPreview,
+    this.onFinalFileLoad,
     super.key,
   });
 
@@ -39,16 +56,19 @@ class VideoWidgetMediaKit extends StatefulWidget {
 
 class _VideoWidgetMediaKitState extends State<VideoWidgetMediaKit>
     with WidgetsBindingObserver {
-  final Logger _logger = Logger("VideoWidgetMediaKit");
-  static const verticalMargin = 72.0;
+  final Logger _logger = Logger("VideoWidgetMediaKitNew");
   late final player = Player();
   VideoController? controller;
   final _progressNotifier = ValueNotifier<double?>(null);
-  late StreamSubscription<bool> playingStreamSubscription;
   bool _isAppInFG = true;
   late StreamSubscription<PauseVideoEvent> pauseVideoSubscription;
   bool isGuestView = false;
   late final StreamSubscription<GuestViewEvent> _guestViewEventSubscription;
+  bool _isGuestView = false;
+  StreamSubscription<StreamSwitchedEvent>? _streamSwitchedSubscription;
+  StreamSubscription<DownloadTask>? _downloadTaskSubscription;
+  late final StreamSubscription<FileCaptionUpdatedEvent>
+      _captionUpdatedSubscription;
 
   @override
   void initState() {
@@ -57,6 +77,61 @@ class _VideoWidgetMediaKitState extends State<VideoWidgetMediaKit>
     );
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+
+    if (widget.selectedPreview) {
+      loadPreview();
+    } else {
+      loadOriginal();
+    }
+
+    pauseVideoSubscription = Bus.instance.on<PauseVideoEvent>().listen((event) {
+      player.pause();
+    });
+    _guestViewEventSubscription =
+        Bus.instance.on<GuestViewEvent>().listen((event) {
+      setState(() {
+        _isGuestView = event.isGuestView;
+      });
+    });
+    if (widget.file.isUploaded) {
+      _downloadTaskSubscription = downloadManager
+          .watchDownload(widget.file.uploadedFileID!)
+          .listen((event) {
+        if (mounted) {
+          setState(() {
+            _progressNotifier.value = event.progress;
+          });
+        }
+      });
+    }
+
+    _streamSwitchedSubscription =
+        Bus.instance.on<StreamSwitchedEvent>().listen((event) {
+      if (event.type != PlayerType.mediaKit || !mounted) return;
+      if (event.selectedPreview) {
+        loadPreview();
+      } else {
+        loadOriginal();
+      }
+    });
+
+    _captionUpdatedSubscription =
+        Bus.instance.on<FileCaptionUpdatedEvent>().listen((event) {
+      if (event.fileGeneratedID == widget.file.generatedID) {
+        if (mounted) {
+          setState(() {});
+        }
+      }
+    });
+    EnteWakeLockService.instance
+        .updateWakeLock(enable: true, wakeLockFor: WakeLockFor.videoPlayback);
+  }
+
+  void loadPreview() {
+    _setVideoController(widget.preview!.path);
+  }
+
+  void loadOriginal() {
     if (widget.file.isRemoteFile) {
       _loadNetworkVideo();
       _setFileSizeIfNull();
@@ -84,21 +159,6 @@ class _VideoWidgetMediaKitState extends State<VideoWidgetMediaKit>
         }
       });
     }
-    playingStreamSubscription = player.stream.playing.listen((event) {
-      if (widget.playbackCallback != null && mounted) {
-        widget.playbackCallback!(event);
-      }
-    });
-
-    pauseVideoSubscription = Bus.instance.on<PauseVideoEvent>().listen((event) {
-      player.pause();
-    });
-    _guestViewEventSubscription =
-        Bus.instance.on<GuestViewEvent>().listen((event) {
-      setState(() {
-        isGuestView = event.isGuestView;
-      });
-    });
   }
 
   @override
@@ -112,71 +172,92 @@ class _VideoWidgetMediaKitState extends State<VideoWidgetMediaKit>
 
   @override
   void dispose() {
+    _streamSwitchedSubscription?.cancel();
     _guestViewEventSubscription.cancel();
     pauseVideoSubscription.cancel();
     removeCallBack(widget.file);
     _progressNotifier.dispose();
     WidgetsBinding.instance.removeObserver(this);
-    playingStreamSubscription.cancel();
+    if (_downloadTaskSubscription != null) {
+      _downloadTaskSubscription!.cancel();
+      downloadManager.pause(widget.file.uploadedFileID!).ignore();
+    }
     player.dispose();
+    _captionUpdatedSubscription.cancel();
+    if (EnteWakeLockService.instance.shouldKeepAppAwakeAcrossSessions) {
+      EnteWakeLockService.instance.updateWakeLock(
+        enable: true,
+        wakeLockFor: WakeLockFor.handlingMediaKitEdgeCase,
+      );
+    } else {
+      EnteWakeLockService.instance.updateWakeLock(
+        enable: false,
+        wakeLockFor: WakeLockFor.videoPlayback,
+      );
+    }
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Hero(
-      tag: widget.tagPrefix! + widget.file.tag,
-      child: MaterialVideoControlsTheme(
-        normal: MaterialVideoControlsThemeData(
-          backdropColor: null,
-          automaticallyImplySkipNextButton: false,
-          automaticallyImplySkipPreviousButton: false,
-          seekOnDoubleTap: false,
-          displaySeekBar: true,
-          seekBarMargin: const EdgeInsets.only(bottom: verticalMargin),
-          bottomButtonBarMargin: const EdgeInsets.only(bottom: 112),
-          controlsHoverDuration: const Duration(seconds: 3),
-          seekBarHeight: 2,
-          seekBarThumbSize: 16,
-          seekBarBufferColor: Colors.transparent,
-          seekBarThumbColor: backgroundElevatedLight,
-          seekBarColor: fillMutedDark,
-          seekBarPositionColor: backgroundElevatedLight,
-          seekBarContainerHeight: 56,
-          seekBarAlignment: Alignment.center,
-
-          ///topButtonBarMargin is needed for keeping the buffering loading
-          ///indicator to be center aligned
-          topButtonBarMargin: const EdgeInsets.only(top: verticalMargin),
-          bottomButtonBar: [
-            const Spacer(),
-            PausePlayAndDuration(controller?.player),
-            const Spacer(),
-          ],
-          primaryButtonBar: [],
-        ),
-        fullscreen: const MaterialVideoControlsThemeData(),
-        child: GestureDetector(
-          onVerticalDragUpdate: isGuestView
-              ? null
-              : (d) => {
-                    if (d.delta.dy > dragSensitivity)
-                      {
-                        Navigator.of(context).pop(),
-                      }
-                    else if (d.delta.dy < (dragSensitivity * -1))
-                      {
-                        showDetailsSheet(context, widget.file),
-                      },
+    return GestureDetector(
+      onVerticalDragUpdate: _isGuestView
+          ? null
+          : (d) => {
+                if (d.delta.dy > dragSensitivity)
+                  {
+                    Navigator.of(context).pop(),
+                  }
+                else if (d.delta.dy < (dragSensitivity * -1))
+                  {
+                    showDetailsSheet(context, widget.file),
                   },
-          child: Center(
-            child: controller != null
-                ? Video(
-                    controller: controller!,
-                  )
-                : _getLoadingWidget(),
-          ),
-        ),
+              },
+      child: Center(
+        child: controller != null
+            ? common.VideoWidget(
+                widget.file,
+                controller!,
+                widget.playbackCallback,
+                isFromMemories: widget.isFromMemories,
+                onStreamChange: widget.onStreamChange,
+                isPreviewPlayer: widget.selectedPreview,
+              )
+            : Center(
+                child: ValueListenableBuilder(
+                  valueListenable: _progressNotifier,
+                  builder: (BuildContext context, double? progress, _) {
+                    return progress == null || progress == 1
+                        ? const EnteLoadingWidget(
+                            size: 32,
+                            color: fillBaseDark,
+                            padding: 0,
+                          )
+                        : Stack(
+                            children: [
+                              CircularProgressIndicator(
+                                backgroundColor: Colors.transparent,
+                                value: progress,
+                                valueColor: const AlwaysStoppedAnimation<Color>(
+                                  Color.fromRGBO(45, 194, 98, 1.0),
+                                ),
+                                strokeWidth: 2,
+                                strokeCap: StrokeCap.round,
+                              ),
+                              Center(
+                                child: Text(
+                                  "${(progress * 100).toStringAsFixed(0)}%",
+                                  style:
+                                      getEnteTextTheme(context).tiny.copyWith(
+                                            color: textBaseDark,
+                                          ),
+                                ),
+                              ),
+                            ],
+                          );
+                  },
+                ),
+              ),
       ),
     );
   }
@@ -221,148 +302,26 @@ class _VideoWidgetMediaKitState extends State<VideoWidgetMediaKit>
     }
   }
 
-  Widget _getLoadingWidget() {
-    return Stack(
-      children: [
-        _getThumbnail(),
-        Container(
-          color: Colors.black12,
-          constraints: const BoxConstraints.expand(),
-        ),
-        Center(
-          child: SizedBox.fromSize(
-            size: const Size.square(20),
-            child: ValueListenableBuilder(
-              valueListenable: _progressNotifier,
-              builder: (BuildContext context, double? progress, _) {
-                return progress == null || progress == 1
-                    ? const CupertinoActivityIndicator(
-                        color: Colors.white,
-                      )
-                    : CircularProgressIndicator(
-                        backgroundColor: Colors.black,
-                        value: progress,
-                        valueColor: const AlwaysStoppedAnimation<Color>(
-                          Color.fromRGBO(45, 194, 98, 1.0),
-                        ),
-                      );
-              },
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _getThumbnail() {
-    return Container(
-      color: Colors.black,
-      constraints: const BoxConstraints.expand(),
-      child: ThumbnailWidget(
-        widget.file,
-        fit: BoxFit.contain,
-      ),
-    );
-  }
-
   void _setVideoController(String url) {
     if (mounted) {
       setState(() {
-        player.setPlaylistMode(PlaylistMode.single);
-        controller = VideoController(player);
+        if (controller == null) {
+          player.setPlaylistMode(
+            localSettings.shouldLoopVideo()
+                ? PlaylistMode.single
+                : PlaylistMode.none,
+          );
+          controller = VideoController(player);
+        }
         player.open(Media(url), play: _isAppInFG);
       });
+      int duration = controller!.player.state.duration.inSeconds;
+      if (duration == 0) {
+        duration = 10;
+      }
+      widget.onFinalFileLoad?.call(
+        memoryDuration: duration,
+      );
     }
-  }
-}
-
-class PausePlayAndDuration extends StatefulWidget {
-  final Player? player;
-  const PausePlayAndDuration(this.player, {super.key});
-
-  @override
-  State<PausePlayAndDuration> createState() => _PausePlayAndDurationState();
-}
-
-class _PausePlayAndDurationState extends State<PausePlayAndDuration> {
-  Color backgroundColor = fillStrongLight;
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTapDown: (details) {
-        setState(() {
-          backgroundColor = fillMutedDark;
-        });
-      },
-      onTapUp: (details) {
-        Future.delayed(const Duration(milliseconds: 175), () {
-          if (mounted) {
-            setState(() {
-              backgroundColor = fillStrongLight;
-            });
-          }
-        });
-      },
-      onTapCancel: () {
-        Future.delayed(const Duration(milliseconds: 175), () {
-          if (mounted) {
-            setState(() {
-              backgroundColor = fillStrongLight;
-            });
-          }
-        });
-      },
-      onTap: () => widget.player!.playOrPause(),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
-        curve: Curves.easeInBack,
-        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-        decoration: BoxDecoration(
-          color: backgroundColor,
-          border: Border.all(
-            color: strokeFaintDark,
-            width: 1,
-          ),
-          borderRadius: BorderRadius.circular(24),
-        ),
-        child: AnimatedSize(
-          duration: const Duration(seconds: 2),
-          curve: Curves.easeInOutExpo,
-          child: Row(
-            children: [
-              StreamBuilder(
-                builder: (context, snapshot) {
-                  final bool isPlaying = snapshot.data ?? false;
-                  return AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 350),
-                    switchInCurve: Curves.easeInOutCirc,
-                    switchOutCurve: Curves.easeInOutCirc,
-                    child: Icon(
-                      key: ValueKey(
-                        isPlaying ? "pause_button" : "play_button",
-                      ),
-                      isPlaying
-                          ? Icons.pause_rounded
-                          : Icons.play_arrow_rounded,
-                      color: backdropBaseLight,
-                      size: 24,
-                    ),
-                  );
-                },
-                initialData: widget.player?.state.playing,
-                stream: widget.player?.stream.playing,
-              ),
-              const SizedBox(width: 8),
-              MaterialPositionIndicator(
-                style: getEnteTextTheme(context).tiny.copyWith(
-                      color: textBaseDark,
-                    ),
-              ),
-              const SizedBox(width: 10),
-            ],
-          ),
-        ),
-      ),
-    );
   }
 }

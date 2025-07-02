@@ -1,6 +1,6 @@
 import { unstashRedirect } from "ente-accounts/services/redirect";
 import { LoadingIndicator } from "ente-base/components/loaders";
-import { fromB64URLSafeNoPaddingString } from "ente-base/crypto/libsodium";
+import { fromB64URLSafeNoPadding } from "ente-base/crypto";
 import log from "ente-base/log";
 import { getData, setData, setLSUser } from "ente-shared/storage/localStorage";
 import { nullToUndefined } from "ente-utils/transform";
@@ -72,7 +72,7 @@ const saveCredentialsAndNavigateTo = async (
     // Decode response string (inverse of the steps we perform in
     // `passkeyAuthenticationSuccessRedirectURL`).
     const decodedResponse = JSON.parse(
-        await fromB64URLSafeNoPaddingString(response),
+        new TextDecoder().decode(await fromB64URLSafeNoPadding(response)),
     );
 
     // Only one of `encryptedToken` or `token` will be present depending on the
@@ -81,7 +81,8 @@ const saveCredentialsAndNavigateTo = async (
     // - The plaintext "token" will be passed during fresh signups, where we
     //   don't yet have keys to encrypt it, the account itself is being created
     //   as we go through this flow.
-    //   TODO(MR): Conceptually this cannot happen. During a _real_ fresh signup
+    //
+    //   TODO: Conceptually this cannot happen. During a _real_ fresh signup
     //   we'll never enter the passkey verification flow. Remove this code after
     //   making sure that it doesn't get triggered in cases where an existing
     //   user goes through the new user flow.

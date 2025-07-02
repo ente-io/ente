@@ -70,36 +70,36 @@ class SmartMemoriesService {
   }) async {
     try {
       final TimeLogger t = TimeLogger(context: "calcMemories");
-      _logger.finest(
+      _logger.info(
         'calcMemories called with time: $now at ${DateTime.now()} $t',
       );
 
       final (allFiles, allFileIdsToFile) = await _getFilesAndMapForMemories();
-      _logger.finest("All files length: ${allFiles.length} $t");
+      _logger.info("All files length: ${allFiles.length} $t");
 
       final collectionIDsToExclude = await getCollectionIDsToExclude();
-      _logger.finest(
+      _logger.info(
         'collectionIDsToExclude length: ${collectionIDsToExclude.length} $t',
       );
 
       final seenTimes = await _memoriesDB.getSeenTimes();
-      _logger.finest('seenTimes has ${seenTimes.length} entries $t');
+      _logger.info('seenTimes has ${seenTimes.length} entries $t');
 
       final persons = await PersonService.instance.getPersons();
-      _logger.finest('gotten all ${persons.length} persons $t');
+      _logger.info('gotten all ${persons.length} persons $t');
 
       final currentUserEmail = Configuration.instance.getEmail();
-      _logger.finest('currentUserEmail: $currentUserEmail $t');
+      _logger.info('currentUserEmail: $currentUserEmail $t');
 
       final cities = await locationService.getCities();
-      _logger.finest('cities has ${cities.length} entries $t');
+      _logger.info('cities has ${cities.length} entries $t');
 
       final Map<int, List<FaceWithoutEmbedding>> fileIdToFaces =
           await MLDataDB.instance.getFileIDsToFacesWithoutEmbedding();
-      _logger.finest('fileIdToFaces has ${fileIdToFaces.length} entries $t');
+      _logger.info('fileIdToFaces has ${fileIdToFaces.length} entries $t');
 
       final allImageEmbeddings = await MLDataDB.instance.getAllClipVectors();
-      _logger.finest(
+      _logger.info(
         'allImageEmbeddings has ${allImageEmbeddings.length} entries $t',
       );
 
@@ -120,15 +120,15 @@ class SmartMemoriesService {
           await MLComputer.instance.runClipText(clipQuery(clipMemoryType)),
         );
       }
-      _logger.finest('clipPositiveTextVector and clipPeopleActivityVectors $t');
+      _logger.info('clipPositiveTextVector and clipPeopleActivityVectors $t');
 
       final local = await getLocale();
       final languageCode = local?.languageCode ?? "en";
       final s = await LanguageService.s;
 
-      _logger.finest('get locale and S $t');
+      _logger.info('get locale and S $t');
 
-      _logger.finest('all data fetched $t at ${DateTime.now()}, to computer');
+      _logger.info('all data fetched $t at ${DateTime.now()}, to computer');
       final memoriesResult = await Computer.shared().compute(
         _allMemoriesCalculations,
         param: <String, dynamic>{
@@ -149,14 +149,14 @@ class SmartMemoriesService {
           "clipMemoryTypeVectors": clipMemoryTypeVectors,
         },
       ) as MemoriesResult;
-      _logger.finest(
+      _logger.info(
         '${memoriesResult.memories.length} memories computed in computer $t',
       );
 
       for (final memory in memoriesResult.memories) {
         memory.title = memory.createTitle(s, languageCode);
       }
-      _logger.finest('titles created for all memories $t');
+      _logger.info('titles created for all memories $t');
       return memoriesResult;
     } catch (e, s) {
       _logger.severe("Error calculating smart memories", e, s);
@@ -272,6 +272,7 @@ class SmartMemoriesService {
       // Trip memories
       final (tripMemories, bases) = await _getTripsResults(
         allFiles,
+        allFileIdsToFile,
         now,
         oldCache.tripsShownLogs,
         surfaceAll: debugSurfaceAll,
@@ -358,7 +359,7 @@ class SmartMemoriesService {
     final languageCode = local?.languageCode ?? "en";
     final s = await LanguageService.s;
 
-    _logger.finest('get locale and S');
+    _logger.info('get locale and S');
     for (final memory in memories) {
       memory.title = memory.createTitle(s, languageCode);
     }
@@ -631,7 +632,7 @@ class SmartMemoriesService {
     // Loop through the people and check if we should surface anything based on relevancy (bday, last met)
     for (final personID in orderedImportantPersonsID) {
       final personMemories = personToMemories[personID];
-      if (personID == meID || personMemories == null) continue;
+      if (personMemories == null) continue;
       final person = personIdToPerson[personID]!;
 
       // Check if we should surface memory based on last met
@@ -645,8 +646,6 @@ class SmartMemoriesService {
         if (daysSinceLastMet < 7 && daysSinceLastMet >= 0) {
           memoryResults.add(lastMetMemory);
         }
-        // Don't surface birthday when person hasn't been seen in a while (could be passed away)
-        continue;
       }
 
       // Check if we should surface memory based on birthday
@@ -686,15 +685,24 @@ class SmartMemoriesService {
           if (youAndThemMem != null) {
             memoryResults.add(
               youAndThemMem.copyWith(
+                isBirthday: false,
+                newAge: newAge,
                 firstDateToShow: thisBirthday
                     .subtract(const Duration(days: 5))
                     .microsecondsSinceEpoch,
+                lastDateToShow: thisBirthday.microsecondsSinceEpoch,
+              ),
+            );
+            memoryResults.add(
+              youAndThemMem.copyWith(
+                isBirthday: true,
+                newAge: newAge,
+                firstDateToShow: thisBirthday.microsecondsSinceEpoch,
                 lastDateToShow:
                     thisBirthday.add(kDayItself).microsecondsSinceEpoch,
               ),
             );
           }
-          continue;
         }
       }
     }
@@ -728,7 +736,7 @@ class SmartMemoriesService {
               'Something is going wrong, ${potentialMemory.peopleMemoryType} has multiple memories for same person',
             );
           } else {
-            final randIdx = Random().nextInt(potentialMemory.memories.length);
+            final randIdx = Random().nextInt(memoriesForCategory.length);
             potentialMemory = memoriesForCategory[randIdx];
           }
         }
@@ -841,6 +849,7 @@ class SmartMemoriesService {
 
   static Future<(List<TripMemory>, List<BaseLocation>)> _getTripsResults(
     Iterable<EnteFile> allFiles,
+    Map<int, EnteFile> allFileIdsToFile,
     DateTime currentTime,
     List<TripsShownLog> shownTrips, {
     bool surfaceAll = false,
@@ -946,7 +955,13 @@ class SmartMemoriesService {
           const Duration(days: 90),
         ),
       );
-      baseLocations.add(BaseLocation(files, location, isCurrent));
+      baseLocations.add(
+        BaseLocation(
+          files.map((file) => file.uploadedFileID!).toList(),
+          location,
+          isCurrent,
+        ),
+      );
     }
 
     // Identify trip locations
@@ -1098,8 +1113,11 @@ class SmartMemoriesService {
       for (final baseLocation in baseLocations) {
         String name =
             "Base (${baseLocation.isCurrentBase ? 'current' : 'old'})";
+        final files = baseLocation.fileIDs
+            .map((fileID) => allFileIdsToFile[fileID]!)
+            .toList();
         final String? locationName = _tryFindLocationName(
-          Memory.fromFiles(baseLocation.files, seenTimes),
+          Memory.fromFiles(files, seenTimes),
           cities,
           base: true,
         );
@@ -1109,7 +1127,7 @@ class SmartMemoriesService {
         }
         memoryResults.add(
           TripMemory(
-            Memory.fromFiles(baseLocation.files, seenTimes),
+            Memory.fromFiles(files, seenTimes),
             nowInMicroseconds,
             windowEnd,
             baseLocation.location,
@@ -1678,14 +1696,7 @@ class SmartMemoriesService {
       if (memories == null) continue;
       if (memories.length < 5) continue;
       final years = daysToYears[day]!;
-      if (years.toSet().length < 3) continue;
-      final yearCounts = <int, int>{};
-      for (final year in years) {
-        yearCounts[year] = (yearCounts[year] ?? 0) + 1;
-      }
-      final bool hasThreeInAtLeastThreeYears =
-          yearCounts.values.where((count) => count >= 3).length >= 3;
-      if (!hasThreeInAtLeastThreeYears) continue;
+      if (years.toSet().length < 2) continue;
 
       final filteredMemories = <Memory>[];
       if (memories.length > 20) {

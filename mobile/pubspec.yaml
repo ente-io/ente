@@ -12,7 +12,7 @@ description: ente photos application
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 
-version: 1.1.0+1053
+version: 1.1.53+1083
 publish_to: none
 
 environment:
@@ -24,7 +24,7 @@ dependencies:
   animated_list_plus: ^0.5.2
   app_links: ^6.4.0
   archive: ^3.6.1
-  background_fetch: ^1.3.7
+  async: ^2.11.0
   battery_info: # replace with battery_plus
     git:
       url: https://github.com/ente-io/battery_info
@@ -61,7 +61,10 @@ dependencies:
     path: plugins/ente_feature_flag
   equatable: ^2.0.5
   event_bus: ^2.0.0
-  exif: ^3.0.0
+  exif_reader:
+    git:
+      url: https://github.com/mgenware/exif_reader.git
+      ref: 476f701c084861a8e9de5f4f4e5e067fc85fda96
   expandable: ^5.0.1
   expansion_tile_card: ^3.0.0
   extended_image: ^8.1.1
@@ -139,7 +142,7 @@ dependencies:
       ref: 3b862fe
   nanoid: ^1.0.0
   native_dio_adapter: ^1.4.0
-  native_video_player: ^3.0.0-dev.4
+  native_video_player: ^4.0.0
   onnx_dart:
     path: plugins/onnx_dart
   onnxruntime:
@@ -188,6 +191,7 @@ dependencies:
   syncfusion_flutter_sliders: ^25.2.5
   synchronized: ^3.3.0+3
   system_info_plus: ^0.0.6
+  thermal: ^1.1.11
   timezone: ^0.10.0
   tuple: ^2.0.0
   ua_client_hints: ^1.4.0
@@ -202,10 +206,11 @@ dependencies:
       ref: android_video_roation_fix
       path: packages/video_player/video_player/
   video_thumbnail:
-  visibility_detector: ^0.3.3
+  visibility_detector: ^0.4.0+2
   wakelock_plus: ^1.1.1
-  wechat_assets_picker: ^8.6.3
+  wechat_assets_picker: ^9.5.1
   widgets_to_image: ^0.0.2
+  workmanager: ^0.6.0
   xml: ^6.3.0
 
 dependency_overrides:

@@ -5,6 +5,7 @@ import "package:flutter/cupertino.dart";
 import "package:flutter/material.dart";
 import "package:intl/intl.dart";
 import 'package:logging/logging.dart';
+import "package:path_provider/path_provider.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/core/constants.dart";
 import 'package:photos/core/event_bus.dart';
@@ -24,6 +25,7 @@ import 'package:photos/models/file/file_type.dart';
 import "package:photos/models/local_entity_data.dart";
 import "package:photos/models/location/location.dart";
 import "package:photos/models/location_tag/location_tag.dart";
+import "package:photos/models/memories/memories_cache.dart";
 import "package:photos/models/memories/memory.dart";
 import "package:photos/models/memories/smart_memory.dart";
 import "package:photos/models/ml/face/person.dart";
@@ -47,12 +49,14 @@ import "package:photos/services/location_service.dart";
 import "package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import 'package:photos/services/machine_learning/semantic_search/semantic_search_service.dart';
+import "package:photos/services/memories_cache_service.dart";
 import "package:photos/states/location_screen_state.dart";
 import "package:photos/ui/viewer/location/add_location_sheet.dart";
 import "package:photos/ui/viewer/location/location_screen.dart";
 import "package:photos/ui/viewer/people/cluster_page.dart";
 import "package:photos/ui/viewer/people/people_page.dart";
 import "package:photos/ui/viewer/search/result/magic_result_screen.dart";
+import "package:photos/utils/cache_util.dart";
 import "package:photos/utils/file_util.dart";
 import "package:photos/utils/navigation_util.dart";
 import 'package:photos/utils/standalone/date_time.dart';
@@ -92,7 +96,7 @@ class SearchService {
     }
 
     if (_cachedFilesFuture == null) {
-      _logger.fine("Reading all files from db");
+      _logger.info("Reading all files from db");
       _cachedFilesFuture = FilesDB.instance.getAllFilesFromDB(
         ignoreCollections(),
         dedupeByUploadId: false,
@@ -118,7 +122,7 @@ class SearchService {
     }
 
     if (_cachedFilesFuture == null) {
-      _logger.fine("Reading all files from db");
+      _logger.info("Reading all files from db");
       _cachedFilesFuture = FilesDB.instance.getAllFilesFromDB(
         ignoreCollections(),
         dedupeByUploadId: false,
@@ -142,7 +146,7 @@ class SearchService {
     if (_cachedHiddenFilesFuture != null) {
       return _cachedHiddenFilesFuture!;
     }
-    _logger.fine("Reading hidden files from db");
+    _logger.info("Reading hidden files from db");
     final hiddenCollections =
         CollectionsService.instance.getHiddenCollectionIds();
     _cachedHiddenFilesFuture =
@@ -659,6 +663,19 @@ class SearchService {
     return searchResults;
   }
 
+  Future<List<String>> getTopTwoFaces() async {
+    final searchFilter = await SectionType.face.getData(null).then(
+          (value) => (value as List<GenericSearchResult>).where(
+            (element) => (element.params[kPersonParamID] as String?) != null,
+          ),
+        );
+
+    return searchFilter
+        .take(2)
+        .map((e) => e.params[kPersonParamID] as String)
+        .toList();
+  }
+
   Future<List<GenericSearchResult>> getLocationResults(String query) async {
     final locationTagEntities = (await locationService.getLocationTags());
     final Map<LocalEntity<LocationTag>, List<EnteFile>> result = {};
@@ -687,7 +704,7 @@ class SearchService {
       }
     }
     if (showNoLocationTag) {
-      _logger.fine("finding photos with no location");
+      _logger.info("finding photos with no location");
       // find files that have location but the file's location is not inside
       // any location tag
       final noLocationTagFiles = allFiles.where((file) {
@@ -925,10 +942,10 @@ class SearchService {
         );
 
       for (final clusterId in sortedClusterIds) {
+        if (limit != null && facesResult.length >= limit) {
+          break;
+        }
         final files = clusterIdToFiles[clusterId]!;
-        // final String clusterName = "ID:$clusterId,  ${files.length}";
-        // final String clusterName = "${files.length}";
-        // const String clusterName = "";
         final String clusterName = clusterId;
 
         if (clusterIDToPersonID[clusterId] != null) {
@@ -987,15 +1004,8 @@ class SearchService {
         );
       }
       if (facesResult.isEmpty) {
-        int newMinimum = minClusterSize;
-        for (final int minimum in kLowerMinimumClusterSizes) {
-          if (minimum < minClusterSize) {
-            newMinimum = minimum;
-            break;
-          }
-        }
-        if (newMinimum < minClusterSize) {
-          return getAllFace(limit, minClusterSize: newMinimum);
+        if (kMinimumClusterSizeAllFaces < minClusterSize) {
+          return getAllFace(limit, minClusterSize: kMinimumClusterSizeAllFaces);
         } else {
           return [];
         }
@@ -1275,7 +1285,33 @@ class SearchService {
       final memoriesResult = await smartMemoriesService
           .calcSmartMemories(calcTime, cache, debugSurfaceAll: true);
       locationService.baseLocations = memoriesResult.baseLocations;
-      memories = memoriesResult.memories;
+      for (final nowMemory in memoriesResult.memories) {
+        cache.toShowMemories
+            .add(ToShowMemory.fromSmartMemory(nowMemory, calcTime));
+      }
+      cache.baseLocations.addAll(memoriesResult.baseLocations);
+      // memories = memoriesResult.memories;
+      final tempCachePath = (await getTemporaryDirectory()).path +
+          "/cache/test/memories_cache_test";
+      await writeToJsonFile(
+        tempCachePath,
+        cache,
+        MemoriesCache.encodeToJsonString,
+      );
+      _logger.info(
+        "Smart memories cache written to $tempCachePath",
+      );
+      final decodedCache = await decodeJsonFile(
+        tempCachePath,
+        MemoriesCache.decodeFromJsonString,
+      );
+      _logger.info(
+        "Smart memories cache decoded from $tempCachePath",
+      );
+      memories = await MemoriesCacheService.fromCacheToMemories(decodedCache!);
+      _logger.info(
+        "Smart memories cache converted to memories",
+      );
     }
     final searchResults = <GenericSearchResult>[];
     for (final memory in memories) {

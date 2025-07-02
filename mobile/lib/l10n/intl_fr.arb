@@ -1,6 +1,7 @@
 {
   "@@locale ": "en",
   "enterYourEmailAddress": "Entrez votre adresse e-mail",
+  "enterYourNewEmailAddress": "Entrez votre nouvelle adresse e-mail",
   "accountWelcomeBack": "Bon retour parmi nous !",
   "emailAlreadyRegistered": "Email déjà enregistré.",
   "emailNotRegistered": "E-mail non enregistré.",
@@ -721,6 +722,7 @@
     "type": "text"
   },
   "backupFailed": "Échec de la sauvegarde",
+  "sorryBackupFailedDesc": "Désolé, nous n'avons pas pu sauvegarder ce fichier maintenant, nous allons réessayer plus tard.",
   "couldNotBackUpTryLater": "Nous n'avons pas pu sauvegarder vos données.\nNous allons réessayer plus tard.",
   "enteCanEncryptAndPreserveFilesOnlyIfYouGrant": "Ente peut chiffrer et conserver des fichiers que si vous leur accordez l'accès",
   "pleaseGrantPermissions": "Veuillez accorder la permission",
@@ -792,6 +794,14 @@
   "share": "Partager",
   "unhideToAlbum": "Afficher dans l'album",
   "restoreToAlbum": "Restaurer vers l'album",
+  "moveItem": "{count, plural,=1 {Déplacer un élément} other {Déplacer des éléments}}",
+  "@moveItem": {
+    "description": "Page title while moving one or more items to an album"
+  },
+  "addItem": "{count, plural, =1 {Ajouter un élément} other {Ajouter des éléments}}",
+  "@addItem": {
+    "description": "Page title while adding one or more items to album"
+  },
   "createOrSelectAlbum": "Créez ou sélectionnez un album",
   "selectAlbum": "Sélectionner album",
   "searchByAlbumNameHint": "Nom de l'album",
@@ -889,6 +899,7 @@
   "authToViewYourMemories": "Authentifiez-vous pour voir vos souvenirs",
   "unlock": "Déverrouiller",
   "freeUpSpace": "Libérer de l'espace",
+  "freeUpSpaceSaving": "{count, plural, =1 {Il peut être supprimé de l'appareil pour libérer {formattedSize}} other {Ils peuvent être supprimés de l'appareil pour libérer {formattedSize}}}",
   "filesBackedUpInAlbum": "{count, plural, one {1 fichier dans cet album a été sauvegardé en toute sécurité} other {{formattedNumber} fichiers dans cet album ont été sauvegardés en toute sécurité}}",
   "@filesBackedUpInAlbum": {
     "description": "Text to tell user how many files have been backed up in the album",
@@ -916,6 +927,18 @@
         "content": "{formattedNumber}",
         "example": "1,000",
         "type": "String"
+      }
+    }
+  },
+  "@freeUpSpaceSaving": {
+    "description": "Text to tell user how much space they can free up by deleting items from the device"
+  },
+  "freeUpAccessPostDelete": "Vous pouvez toujours {count, plural, =1 {l'} other {les}} accéder sur Ente tant que vous avez un abonnement actif",
+  "@freeUpAccessPostDelete": {
+    "placeholders": {
+      "count": {
+        "example": "1",
+        "type": "int"
       }
     }
   },
@@ -1008,6 +1031,7 @@
   "didYouKnow": "Le savais-tu ?",
   "loadingMessage": "Chargement de vos photos...",
   "loadMessage1": "Vous pouvez partager votre abonnement avec votre famille",
+  "loadMessage2": "Nous avons préservé plus de 200 millions de souvenirs jusqu'à présent",
   "loadMessage3": "Nous conservons 3 copies de vos données, l'une dans un abri anti-atomique",
   "loadMessage4": "Toutes nos applications sont open source",
   "loadMessage5": "Notre code source et notre cryptographie ont été audités en externe",
@@ -1245,6 +1269,8 @@
     "description": "Subtitle to indicate that the user can find people quickly by name"
   },
   "findPeopleByName": "Trouver des personnes rapidement par leur nom",
+  "addViewers": "{count, plural, =0 {Ajouter un spectateur} =1 {Ajouter une spectateur} other {Ajouter des spectateurs}}",
+  "addCollaborators": "{count, plural, =0 {Ajouter un collaborateur} =1 {Ajouter un collaborateur} other {Ajouter des collaborateurs}}",
   "longPressAnEmailToVerifyEndToEndEncryption": "Appuyez longuement sur un email pour vérifier le chiffrement de bout en bout.",
   "developerSettingsWarning": "Êtes-vous sûr de vouloir modifier les paramètres du développeur ?",
   "developerSettings": "Paramètres du développeur",
@@ -1256,6 +1282,7 @@
   "createCollaborativeLink": "Créer un lien collaboratif",
   "search": "Rechercher",
   "enterPersonName": "Entrez le nom d'une personne",
+  "editEmailAlreadyLinked": "Cet e-mail est déjà lié à {name}.",
   "viewPersonToUnlink": "Voir {name} pour délier",
   "enterName": "Saisir un nom",
   "savePerson": "Enregistrer la personne",
@@ -1377,6 +1404,16 @@
   "enableMachineLearningBanner": "Activer l'apprentissage automatique pour la reconnaissance des visages et la recherche magique",
   "searchDiscoverEmptySection": "Les images seront affichées ici une fois le traitement terminé",
   "searchPersonsEmptySection": "Les personnes seront affichées ici une fois le traitement terminé",
+  "viewersSuccessfullyAdded": "{count, plural, =0 {0 spectateur ajouté} =1 {Un spectateur ajouté} other {{count} spectateurs ajoutés}}",
+  "@viewersSuccessfullyAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    },
+    "description": "Number of viewers that were successfully added to an album."
+  },
   "collaboratorsSuccessfullyAdded": "{count, plural, =0 {0 collaborateur ajouté} =1 {1 collaborateur ajouté} other {{count} collaborateurs ajoutés}}",
   "@collaboratorsSuccessfullyAdded": {
     "placeholders": {
@@ -1452,6 +1489,15 @@
   },
   "currentlyRunning": "en cours d'exécution",
   "ignored": "ignoré",
+  "photosCount": "{count, plural, =0 {0 photo} =1 {1 photo} other {{count} photos}}",
+  "@photosCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
   "file": "Fichier",
   "searchSectionsLengthMismatch": "Incompatibilité de longueur des sections : {snapshotLength} != {searchLength}",
   "@searchSectionsLengthMismatch": {
@@ -1617,6 +1663,7 @@
   "@linkPersonCaption": {
     "description": "Caption for the 'Link person' title. It should be a continuation of the 'Link person' title. Just like how 'Link person' + 'for better sharing experience' forms a proper sentence in English, the combination of these two strings should also be a proper sentence in other languages."
   },
+  "videoStreaming": "Vidéos diffusables",
   "processingVideos": "Traitement des vidéos",
   "streamDetails": "Détails du stream",
   "processing": "Traitement en cours",
@@ -1683,21 +1730,44 @@
   "onTheRoad": "De nouveau sur la route",
   "food": "Plaisir culinaire",
   "pets": "Compagnons à quatre pattes",
-  "cLIcon": "Nouvel icône",
-  "cLIconDesc": "Finalement, création d'un nouvel icône d'application qui, selon nous, représente au mieux notre travail. Nous avons également ajouté un changeur d'icône pour que vous puissiez continuer à utiliser l'ancien.",
-  "cLMemories": "Souvenirs",
-  "cLMemoriesDesc": "Redécouvrez vos précieux souvenirs - focus sur vos connaissances préférées, vos voyages et vos vacances, vos meilleurs clics et bien plus encore. Activez l'apprentissage automatique, taguez-vous et nommez vos amis pour une meilleure expérience.",
-  "cLWidgets": "Widgets",
-  "cLWidgetsDesc": "Les widgets (ou gadgets) de l'écran d'accueil, qui sont intégrés à des souvenirs, sont maintenant disponibles. Ils montreront vos moments spéciaux sans nécessité d'ouvrir l'application.",
-  "cLFamilyPlan": "Limites pour le forfait Famille",
-  "cLFamilyPlanDesc": "Vous pouvez maintenant fixer des limites sur la quantité de stockage que les membres de votre famille peuvent utiliser.",
-  "cLBulkEdit": "Dates de modification multiples",
-  "cLBulkEditDesc": "Vous pouvez maintenant sélectionner plusieurs photos et modifier la date/heure pour toutes celles-ci, en une seule action rapide. Les dates de décalage sont également prises en charge.",
   "curatedMemories": "Souvenirs conservés",
-  "onThisDay": "On this day",
-  "lookBackOnYourMemories": "Look back on your memories 🌄",
-  "newPhotosEmoji": " new 📸",
-  "sorryWeHadToPauseYourBackups": "Sorry, we had to pause your backups",
-  "clickToInstallOurBestVersionYet": "Click to install our best version yet",
-  "onThisDayNotificationExplanation": "Receive reminders about memories from this day in previous years."
+  "widgets": "Gadgets",
+  "memories": "Souvenirs",
+  "peopleWidgetDesc": "Sélectionnez les personnes que vous souhaitez voir sur votre écran d'accueil.",
+  "albumsWidgetDesc": "Sélectionnez les personnes que vous souhaitez voir sur votre écran d'accueil.",
+  "memoriesWidgetDesc": "Sélectionnez le type de souvenirs que vous souhaitez voir sur votre écran d'accueil.",
+  "smartMemories": "Souvenirs intelligents",
+  "pastYearsMemories": "Souvenirs de ces dernières années",
+  "deleteMultipleAlbumDialog": "Supprimer également les photos (et les vidéos) présentes dans ces {count} albums de <bold>tous les</bold> autres albums dont ils font partie ?",
+  "addParticipants": "Ajouter des participants",
+  "selectedAlbums": "{count} sélectionné(s)",
+  "actionNotSupportedOnFavouritesAlbum": "Action non prise en charge sur l'album des Favoris",
+  "onThisDayMemories": "Souvenirs du jour",
+  "onThisDay": "Ce jour-ci",
+  "lookBackOnYourMemories": "Regarde tes souvenirs passés 🌄",
+  "newPhotosEmoji": " nouveau 📸",
+  "sorryWeHadToPauseYourBackups": "Désolé, nous avons dû mettre en pause vos sauvegardes",
+  "clickToInstallOurBestVersionYet": "Cliquez pour installer notre meilleure version",
+  "onThisDayNotificationExplanation": "Recevoir des rappels sur les souvenirs de cette journée des années précédentes.",
+  "addMemoriesWidgetPrompt": "Ajoutez un gadget des souvenirs à votre écran d'accueil et revenez ici pour le personnaliser.",
+  "addAlbumWidgetPrompt": "Ajoutez un gadget d'album à votre écran d'accueil et revenez ici pour le personnaliser.",
+  "addPeopleWidgetPrompt": "Ajoutez un gadget des personnes à votre écran d'accueil et revenez ici pour le personnaliser.",
+  "birthdayNotifications": "Notifications d’anniversaire",
+  "receiveRemindersOnBirthdays": "Recevoir des rappels quand c'est l'anniversaire de quelqu'un. Appuyer sur la notification vous amènera à des photos de son anniversaire.",
+  "happyBirthday": "Joyeux anniversaire ! 🥳",
+  "happyBirthdayToPerson": "Joyeux anniversaire {name}! 🎉",
+  "birthdays": "Anniversaires",
+  "wishThemAHappyBirthday": "Wish ${name} a happy birthday! 🎉",
+  "cLTitle1": "Téléchargement de fichiers vidéo volumineux",
+  "cLDesc1": "Suite à la version bêta du streaming vidéo et au travail sur les téléchargements reprenables, nous avons maintenant augmenté la limite de téléchargement de fichiers à 10 Go. Ceci est maintenant disponible dans les applications desktop et mobiles.",
+  "cLTitle2": "Téléchargement en arrière-plan",
+  "cLDesc2": "Les téléchargements en arrière-plan sont maintenant pris en charge sur iOS également, en plus des appareils Android. Pas besoin d'ouvrir l'application pour sauvegarder vos dernières photos et vidéos.",
+  "cLTitle3": "Lecture automatique des souvenirs",
+  "cLDesc3": "Nous avons apporté des améliorations significatives à notre expérience de souvenirs, y compris la lecture automatique, le balayage vers le souvenir suivant et bien plus encore.",
+  "cLTitle4": "Reconnaissance faciale améliorée",
+  "cLDesc4": "Avec un tas d'améliorations internes, il est maintenant beaucoup plus facile de voir tous les visages détectés, de donner des commentaires sur les visages similaires et d'ajouter/supprimer des visages d'une seule photo.",
+  "cLTitle5": "Notifications d'anniversaire",
+  "cLDesc5": "Vous recevrez maintenant une notification optionnelle pour tous les anniversaires que vous avez sauvegardés sur Ente, ainsi qu'une collection de leurs meilleures photos.",
+  "cLTitle6": "Téléchargements reprenables",
+  "cLDesc6": "Plus besoin d'attendre que les téléchargements se terminent avant de pouvoir fermer l'application. Tous les téléchargements ont maintenant la capacité d'être mis en pause à mi-chemin et de reprendre là où vous vous êtes arrêté."
 }

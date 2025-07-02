@@ -1,21 +1,21 @@
 import "dart:convert";
 import "dart:developer";
 
+import "package:computer/computer.dart";
 import "package:flutter/foundation.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
-import "package:photos/db/files_db.dart";
 import "package:photos/db/ml/db.dart";
 import "package:photos/events/people_changed_event.dart";
 import "package:photos/extensions/stop_watch.dart";
 import "package:photos/models/api/entity/type.dart";
 import "package:photos/models/file/file.dart";
+import "package:photos/models/local_entity_data.dart";
 import 'package:photos/models/ml/face/face.dart';
 import "package:photos/models/ml/face/person.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/entity_service.dart";
-import "package:photos/services/machine_learning/ml_result.dart";
-import "package:photos/services/search_service.dart";
+import "package:photos/utils/face/face_thumbnail_cache.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
 class PersonService {
@@ -30,6 +30,9 @@ class PersonService {
   static PersonService? _instance;
   static const kPersonIDKey = "person_id";
   static const kNameKey = "name";
+
+  Future<List<PersonEntity>>? _cachedPersonsFuture;
+  int _lastCacheRefreshTime = 0;
 
   static PersonService get instance {
     if (_instance == null) {
@@ -48,7 +51,7 @@ class PersonService {
     SharedPreferences prefs,
   ) async {
     _instance = PersonService(entityService, faceMLDataDB, prefs);
-    await _instance!.resetEmailToPartialPersonDataCache();
+    await _instance!.refreshPersonCache();
   }
 
   Map<String, Map<String, String>> get emailToPartialPersonDataMapCache =>
@@ -56,28 +59,73 @@ class PersonService {
 
   void clearCache() {
     _emailToPartialPersonDataMapCache.clear();
+    _cachedPersonsFuture = null;
+    _lastCacheRefreshTime = 0;
   }
 
-  Future<void> resetEmailToPartialPersonDataCache() async {
-    _emailToPartialPersonDataMapCache.clear();
-    await _instance!.getPersons().then((value) {
-      for (var person in value) {
-        if (person.data.email != null && person.data.email!.isNotEmpty) {
-          _instance!._emailToPartialPersonDataMapCache[person.data.email!] = {
-            kPersonIDKey: person.remoteID,
-            kNameKey: person.data.name,
-          };
-        }
-      }
-      logger.info("Email to partial person data cache reset");
-    });
+  Future<void> refreshPersonCache() async {
+    _lastCacheRefreshTime = 0;
+    // wait to ensure cache is refreshed
+    final _ = await getPersons();
+  }
+
+  Future<List<PersonEntity>> getCertainPersons(List<String> ids) async {
+    final entities =
+        await entityService.getCertainEntities(EntityType.cgroup, ids);
+    return entities
+        .map(
+          (e) => PersonEntity(
+            e.id,
+            PersonData.fromJson(json.decode(e.data)),
+          ),
+        )
+        .toList();
+  }
+
+  int lastRemoteSyncTime() {
+    return entityService.lastSyncTime(EntityType.cgroup);
   }
 
   Future<List<PersonEntity>> getPersons() async {
+    if (_lastCacheRefreshTime != lastRemoteSyncTime()) {
+      _lastCacheRefreshTime = lastRemoteSyncTime();
+      _cachedPersonsFuture = null; // Invalidate cache
+    }
+    _cachedPersonsFuture ??= _fetchAndCachePersons();
+    return _cachedPersonsFuture!;
+  }
+
+  Future<List<PersonEntity>> _fetchAndCachePersons() async {
+    logger.finest("reading all persons from local db");
     final entities = await entityService.getEntities(EntityType.cgroup);
+    final persons = await Computer.shared().compute(
+      _decodePersonEntities,
+      param: {"entity": entities},
+      taskName: "decode_person_entities",
+    );
+    _emailToPartialPersonDataMapCache.clear();
+    for (PersonEntity person in persons) {
+      if (person.data.email != null && person.data.email!.isNotEmpty) {
+        _emailToPartialPersonDataMapCache[person.data.email!] = {
+          kPersonIDKey: person.remoteID,
+          kNameKey: person.data.name,
+        };
+      }
+    }
+
+    return persons;
+  }
+
+  static List<PersonEntity> _decodePersonEntities(
+    Map<String, dynamic> param,
+  ) {
+    final entities = param["entity"] as List<LocalEntityData>;
     return entities
         .map(
-          (e) => PersonEntity(e.id, PersonData.fromJson(json.decode(e.data))),
+          (e) => PersonEntity(
+            e.id,
+            PersonData.fromJson(json.decode(e.data)),
+          ),
         )
         .toList();
   }
@@ -87,16 +135,17 @@ class PersonService {
       if (e == null) {
         return null;
       }
-      return PersonEntity(e.id, PersonData.fromJson(json.decode(e.data)));
+      return PersonEntity(
+        e.id,
+        PersonData.fromJson(json.decode(e.data)),
+      );
     });
   }
 
   Future<Map<String, PersonEntity>> getPersonsMap() async {
-    final entities = await entityService.getEntities(EntityType.cgroup);
+    final persons = await getPersons();
     final Map<String, PersonEntity> map = {};
-    for (var e in entities) {
-      final person =
-          PersonEntity(e.id, PersonData.fromJson(json.decode(e.data)));
+    for (var person in persons) {
       map[person.remoteID] = person;
     }
     return map;
@@ -131,8 +180,7 @@ class PersonService {
               ),
             )
             .toList();
-        entityService
-            .addOrUpdate(EntityType.cgroup, personData.toJson(), id: personID)
+        _addOrUpdateEntity(EntityType.cgroup, personData.toJson(), id: personID)
             .ignore();
         personData.logStats();
       }
@@ -201,7 +249,7 @@ class PersonService {
       birthDate: birthdate,
       email: email,
     );
-    final result = await entityService.addOrUpdate(
+    final result = await _addOrUpdateEntity(
       EntityType.cgroup,
       data.toJson(),
     );
@@ -210,7 +258,7 @@ class PersonService {
       clusterID: clusterID,
     );
     if (data.email != null) {
-      await resetEmailToPartialPersonDataCache();
+      await refreshPersonCache();
     }
     memoriesCacheService.queueUpdateCache();
     return PersonEntity(result.id, data);
@@ -235,7 +283,7 @@ class PersonService {
     }
     personData.rejectedFaceIDs.addAll(clusterInfo.faces);
     personData.assigned.removeWhere((element) => element.id == clusterID);
-    await entityService.addOrUpdate(
+    await _addOrUpdateEntity(
       EntityType.cgroup,
       personData.toJson(),
       id: personID,
@@ -247,7 +295,7 @@ class PersonService {
     personData.logStats();
   }
 
-  Future<void> removeFilesFromPerson({
+  Future<void> removeFacesFromPerson({
     required PersonEntity person,
     required Set<String> faceIDs,
   }) async {
@@ -275,7 +323,7 @@ class PersonService {
     // Add removed faces to rejected faces
     personData.rejectedFaceIDs.addAll(faceIDs);
 
-    await entityService.addOrUpdate(
+    await _addOrUpdateEntity(
       EntityType.cgroup,
       personData.toJson(),
       id: person.remoteID,
@@ -291,7 +339,7 @@ class PersonService {
       }
       final PersonEntity justName =
           PersonEntity(personID, PersonData(name: entity.data.name));
-      await entityService.addOrUpdate(
+      await _addOrUpdateEntity(
         EntityType.cgroup,
         justName.data.toJson(),
         id: personID,
@@ -300,7 +348,7 @@ class PersonService {
       justName.data.logStats();
 
       if (entity.data.email != null) {
-        await resetEmailToPartialPersonDataCache();
+        await refreshPersonCache();
       }
     } else {
       await entityService.deleteEntry(personID);
@@ -308,7 +356,7 @@ class PersonService {
 
       if (entity != null) {
         if (entity.data.email != null) {
-          await resetEmailToPartialPersonDataCache();
+          await refreshPersonCache();
         }
       }
     }
@@ -382,8 +430,15 @@ class PersonService {
       for (var e in entities) {
         final personData = PersonData.fromJson(json.decode(e.data));
         if (personData.rejectedFaceIDs.isNotEmpty) {
+          final personClustersToFaceIDs = dbPeopleClusterInfo[e.id];
+          if (personClustersToFaceIDs == null) {
+            logger.warning(
+              "Person ${e.id} ${personData.name} has rejected faces but no clusters found in local DB",
+            );
+            continue;
+          }
           final personFaceIDs =
-              dbPeopleClusterInfo[e.id]!.values.expand((e) => e).toSet();
+              personClustersToFaceIDs.values.expand((e) => e).toSet();
           final rejectedFaceIDsSet = personData.rejectedFaceIDs.toSet();
           final assignedAndRejectedFaceIDs =
               rejectedFaceIDsSet.intersection(personFaceIDs);
@@ -445,6 +500,7 @@ class PersonService {
       data: person.data.copyWith(avatarFaceId: face.faceID),
     );
     await updatePerson(updatedPerson);
+    await putFaceIdCachedForPersonOrCluster(p.remoteID, face.faceID);
     return updatedPerson;
   }
 
@@ -469,13 +525,13 @@ class PersonService {
       ),
     );
     await updatePerson(updatedPerson);
-    await resetEmailToPartialPersonDataCache();
+    await refreshPersonCache();
     return updatedPerson;
   }
 
   Future<void> updatePerson(PersonEntity updatePerson) async {
     try {
-      await entityService.addOrUpdate(
+      await _addOrUpdateEntity(
         EntityType.cgroup,
         updatePerson.data.toJson(),
         id: updatePerson.remoteID,
@@ -487,48 +543,14 @@ class PersonService {
     }
   }
 
-  Future<EnteFile?> getThumbnailFileOfPerson(
-    PersonEntity person,
-  ) async {
-    try {
-      if (person.data.hasAvatar()) {
-        final avatarFileID = tryGetFileIdFromFaceId(person.data.avatarFaceID!);
-        if (avatarFileID != null) {
-          final file = (await FilesDB.instance
-              .getFileIDToFileFromIDs([avatarFileID]))[avatarFileID];
-          if (file != null) {
-            return file;
-          } else {
-            logger.severe("Avatar File not found for face ${person.data}");
-          }
-        }
-      }
-
-      final clustersToFiles =
-          await SearchService.instance.getClusterFilesForPersonID(
-        person.remoteID,
-      );
-
-      EnteFile? resultFile;
-      // iterate over all clusters and get the first file
-      for (final clusterFiles in clustersToFiles.values) {
-        for (final file in clusterFiles) {
-          resultFile ??= file;
-          if (resultFile.creationTime! < file.creationTime!) {
-            resultFile = file;
-          }
-        }
-      }
-      if (resultFile == null) {
-        logger.warning(
-          "Person ${kDebugMode ? person.data.name : person.remoteID} has no files",
-        );
-        return null;
-      }
-      return resultFile;
-    } catch (e, s) {
-      logger.severe("Error in getThumbnailFileOfPerson", e, s);
-      return null;
-    }
+  /// Wrapper method for entityService.addOrUpdate that handles cache refresh
+  Future<LocalEntityData> _addOrUpdateEntity(
+    EntityType type,
+    Map<String, dynamic> jsonMap, {
+    String? id,
+  }) async {
+    final result = await entityService.addOrUpdate(type, jsonMap, id: id);
+    _lastCacheRefreshTime = 0; // Invalidate cache
+    return result;
   }
 }

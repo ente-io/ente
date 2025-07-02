@@ -3,13 +3,12 @@ import { clientPackageName } from "ente-base/app";
 import {
     fromB64URLSafeNoPadding,
     toB64URLSafeNoPadding,
-    toB64URLSafeNoPaddingString,
-} from "ente-base/crypto/libsodium";
+} from "ente-base/crypto";
 import { isDevBuild } from "ente-base/env";
 import { ensureOk, HTTPError, publicRequestHeaders } from "ente-base/http";
 import { apiURL } from "ente-base/origins";
 import { nullToUndefined } from "ente-utils/transform";
-import { z } from "zod";
+import { z } from "zod/v4";
 
 /** Return true if the user's browser supports WebAuthn (Passkeys). */
 export const isWebAuthnSupported = () => !!navigator.credentials;
@@ -78,9 +77,8 @@ export const renamePasskey = async (
     id: string,
     name: string,
 ) => {
-    const params = new URLSearchParams({ friendlyName: name });
-    const url = await apiURL(`/passkeys/${id}`);
-    const res = await fetch(`${url}?${params.toString()}`, {
+    const url = await apiURL(`/passkeys/${id}`, { friendlyName: name });
+    const res = await fetch(url, {
         method: "PATCH",
         headers: accountsAuthenticatedRequestHeaders(token),
     });
@@ -285,9 +283,11 @@ const finishPasskeyRegistration = async ({
     );
     const transports = attestationResponse.getTransports();
 
-    const params = new URLSearchParams({ friendlyName, sessionID });
-    const url = await apiURL("/passkeys/registration/finish");
-    const res = await fetch(`${url}?${params.toString()}`, {
+    const url = await apiURL("/passkeys/registration/finish", {
+        friendlyName,
+        sessionID,
+    });
+    const res = await fetch(url, {
         method: "POST",
         headers: accountsAuthenticatedRequestHeaders(token),
         body: JSON.stringify({
@@ -619,8 +619,10 @@ export const passkeyAuthenticationSuccessRedirectURL = async (
     passkeySessionID: string,
     twoFactorAuthorizationResponse: TwoFactorAuthorizationResponse,
 ) => {
-    const encodedResponse = await toB64URLSafeNoPaddingString(
-        JSON.stringify(twoFactorAuthorizationResponse),
+    const encodedResponse = await toB64URLSafeNoPadding(
+        new TextEncoder().encode(
+            JSON.stringify(twoFactorAuthorizationResponse),
+        ),
     );
     redirectURL.searchParams.set("passkeySessionID", passkeySessionID);
     redirectURL.searchParams.set("response", encodedResponse);

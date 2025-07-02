@@ -5,6 +5,7 @@ import "package:flutter/services.dart";
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import "package:photos/core/event_bus.dart";
+import "package:photos/events/create_new_album_event.dart";
 import "package:photos/events/tab_changed_event.dart";
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection/collection.dart';
@@ -183,31 +184,35 @@ class _AlbumVerticalListWidgetState extends State<AlbumVerticalListWidget> {
       }
 
       if (collection != null) {
-        if (await _runCollectionAction(
-          context,
-          collection,
-          showProgressDialog: false,
-        )) {
-          if (widget.actionType == CollectionActionType.restoreFiles) {
-            showShortToast(
-              context,
-              'Restored files to album ' + albumName,
-            );
-          } else {
-            showShortToast(
-              context,
-              "Album '" + albumName + "' created.",
-            );
-          }
-
-          Navigator.pop(context);
-          Navigator.pop(context);
-
-          await _navigateToCollection(
+        if (widget.enableSelection) {
+          Bus.instance.fire(CreateNewAlbumEvent(collection));
+        } else {
+          if (await _runCollectionAction(
             context,
             collection,
-            hasVerifiedLock: hasVerifiedLock,
-          );
+            showProgressDialog: false,
+          )) {
+            if (widget.actionType == CollectionActionType.restoreFiles) {
+              showShortToast(
+                context,
+                'Restored files to album ' + albumName,
+              );
+            } else {
+              showShortToast(
+                context,
+                "Album '" + albumName + "' created.",
+              );
+            }
+
+            Navigator.pop(context);
+            Navigator.pop(context);
+
+            await _navigateToCollection(
+              context,
+              collection,
+              hasVerifiedLock: hasVerifiedLock,
+            );
+          }
         }
       }
     }
@@ -290,8 +295,6 @@ class _AlbumVerticalListWidgetState extends State<AlbumVerticalListWidget> {
         return _restoreFilesToCollection(context, collection.id);
       case CollectionActionType.shareCollection:
         return _showShareCollectionPage(context, collection);
-      case CollectionActionType.collectPhotos:
-        return _createCollaborativeLink(context, collection);
       case CollectionActionType.moveToHiddenCollection:
         return _moveFilesToCollection(context, collection.id);
       case CollectionActionType.addToHiddenAlbum:
@@ -311,76 +314,6 @@ class _AlbumVerticalListWidgetState extends State<AlbumVerticalListWidget> {
         hasVerifiedLock: hasVerifiedLock,
       ),
     );
-  }
-
-  Future<bool> _createCollaborativeLink(
-    BuildContext context,
-    Collection collection,
-  ) async {
-    final CollectionActions collectionActions =
-        CollectionActions(CollectionsService.instance);
-
-    if (collection.hasLink) {
-      if (collection.publicURLs.first.enableCollect) {
-        if (Configuration.instance.getUserID() == collection.owner.id) {
-          unawaited(
-            routeToPage(
-              context,
-              ShareCollectionPage(collection),
-            ),
-          );
-        }
-        showShortToast(
-          context,
-          S.of(context).thisAlbumAlreadyHDACollaborativeLink,
-        );
-        return Future.value(false);
-      } else {
-        try {
-          unawaited(
-            routeToPage(
-              context,
-              ShareCollectionPage(collection),
-            ),
-          );
-          // ignore: unawaited_futures
-          CollectionsService.instance
-              .updateShareUrl(collection, {'enableCollect': true}).then(
-            (value) => showShortToast(
-              context,
-              S.of(context).collaborativeLinkCreatedFor(collection.displayName),
-            ),
-          );
-          return true;
-        } catch (e) {
-          await showGenericErrorDialog(context: context, error: e);
-          return false;
-        }
-      }
-    }
-    final bool result = await collectionActions.enableUrl(
-      context,
-      collection,
-      enableCollect: true,
-    );
-    if (result) {
-      showShortToast(
-        context,
-        S.of(context).collaborativeLinkCreatedFor(collection.displayName),
-      );
-      if (Configuration.instance.getUserID() == collection.owner.id) {
-        unawaited(
-          routeToPage(
-            context,
-            ShareCollectionPage(collection),
-          ),
-        );
-      } else {
-        await showGenericErrorDialog(context: context, error: result);
-        _logger.severe("Cannot share collections owned by others");
-      }
-    }
-    return result;
   }
 
   Future<bool> _showShareCollectionPage(

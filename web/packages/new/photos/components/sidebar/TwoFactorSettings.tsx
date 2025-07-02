@@ -8,8 +8,7 @@ import {
 } from "ente-base/components/RowButton";
 import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
 import {
-    NestedSidebarDrawer,
-    SidebarDrawerTitlebar,
+    TitledNestedSidebarDrawer,
     type NestedSidebarDrawerVisibilityProps,
 } from "ente-base/components/mui/SidebarDrawer";
 import { useBaseContext } from "ente-base/context";
@@ -52,24 +51,17 @@ export const TwoFactorSettings: React.FC<
     };
 
     return (
-        <NestedSidebarDrawer
+        <TitledNestedSidebarDrawer
             {...{ open, onClose }}
             onRootClose={handleRootClose}
+            title={t("two_factor_authentication")}
         >
-            <Stack sx={{ gap: "4px", py: "12px" }}>
-                <SidebarDrawerTitlebar
-                    onClose={onClose}
-                    onRootClose={handleRootClose}
-                    title={t("two_factor_authentication")}
-                />
-
-                {isTwoFactorEnabled ? (
-                    <ManageDrawerContents onRootClose={handleRootClose} />
-                ) : (
-                    <SetupDrawerContents onRootClose={handleRootClose} />
-                )}
-            </Stack>
-        </NestedSidebarDrawer>
+            {isTwoFactorEnabled ? (
+                <ManageDrawerContents onRootClose={handleRootClose} />
+            ) : (
+                <SetupDrawerContents onRootClose={handleRootClose} />
+            )}
+        </TitledNestedSidebarDrawer>
     );
 };
 

@@ -443,7 +443,7 @@
   "selectAll": "Chọn tất cả",
   "skip": "Bỏ qua",
   "updatingFolderSelection": "Đang cập nhật lựa chọn thư mục...",
-  "itemCount": "{count, plural, one{{count} mục} other{{count} mục}}",
+  "itemCount": "{count, plural, other{{count} mục}}",
   "deleteItemCount": "{count, plural, =1 {Xóa {count} mục} other {Xóa {count} mục}}",
   "duplicateItemsGroup": "{count} tệp, {formattedSize} mỗi tệp",
   "@duplicateItemsGroup": {
@@ -461,7 +461,7 @@
     }
   },
   "showMemories": "Hiển thị kỷ niệm",
-  "yearsAgo": "{count, plural, one{{count} năm trước} other{{count} năm trước}}",
+  "yearsAgo": "{count, plural, other{{count} năm trước}}",
   "backupSettings": "Cài đặt sao lưu",
   "backupStatus": "Trạng thái sao lưu",
   "backupStatusDescription": "Các mục đã được sao lưu sẽ hiển thị ở đây",
@@ -526,7 +526,7 @@
   },
   "remindToEmptyEnteTrash": "Cũng hãy xóa \"Thùng rác\" của bạn để chiếm không gian đã giải phóng",
   "sparkleSuccess": "✨ Thành công",
-  "duplicateFileCountWithStorageSaved": "Bạn đã dọn dẹp {count, plural, one{{count} tệp trùng lặp} other{{count} tệp trùng lặp}}, tiết kiệm ({storageSaved}!)",
+  "duplicateFileCountWithStorageSaved": "Bạn đã dọn dẹp {count, plural, other{{count} tệp trùng lặp}}, tiết kiệm ({storageSaved}!)",
   "@duplicateFileCountWithStorageSaved": {
     "description": "The text to display when the user has successfully cleaned up duplicate files",
     "type": "text",
@@ -873,6 +873,7 @@
   "authToViewYourMemories": "Vui lòng xác thực để xem kỷ niệm của bạn",
   "unlock": "Mở khóa",
   "freeUpSpace": "Giải phóng không gian",
+  "freeUpSpaceSaving": "{count, plural, =1 {Nó có thể được xóa khỏi thiết bị để giải phóng {formattedSize}} other {Chúng có thể được xóa khỏi thiết bị để giải phóng {formattedSize}}}",
   "filesBackedUpInAlbum": "{count, plural, one {1 tệp} other {{formattedNumber} tệp}} trong album này đã được sao lưu an toàn",
   "@filesBackedUpInAlbum": {
     "description": "Text to tell user how many files have been backed up in the album",
@@ -902,6 +903,9 @@
         "type": "String"
       }
     }
+  },
+  "@freeUpSpaceSaving": {
+    "description": "Text to tell user how much space they can free up by deleting items from the device"
   },
   "freeUpAmount": "Giải phóng {sizeInMBorGB}",
   "thisEmailIsAlreadyInUse": "Email này đã được sử dụng",
@@ -1177,7 +1181,7 @@
   "searchHint4": "Vị trí",
   "searchHint5": "Sắp có: Nhận diện khuôn mặt & tìm kiếm ma thuật ✨",
   "addYourPhotosNow": "Thêm ảnh của bạn ngay bây giờ",
-  "searchResultCount": "{count, plural, one{{count} kết quả được tìm thấy} other{{count} kết quả được tìm thấy}}",
+  "searchResultCount": "{count, plural, other{{count} kết quả được tìm thấy}}",
   "@searchResultCount": {
     "description": "Text to tell user how many results were found for their search query",
     "placeholders": {
@@ -1533,10 +1537,5 @@
   "joinAlbumSubtext": "để xem và thêm ảnh của bạn",
   "joinAlbumSubtextViewer": "thêm vào album được chia sẻ",
   "join": "Tham gia",
-  "onThisDay": "On this day",
-  "lookBackOnYourMemories": "Look back on your memories 🌄",
-  "newPhotosEmoji": " new 📸",
-  "sorryWeHadToPauseYourBackups": "Sorry, we had to pause your backups",
-  "clickToInstallOurBestVersionYet": "Click to install our best version yet",
-  "onThisDayNotificationExplanation": "Receive reminders about memories from this day in previous years."
+  "wishThemAHappyBirthday": "Wish ${name} a happy birthday! 🎉"
 }

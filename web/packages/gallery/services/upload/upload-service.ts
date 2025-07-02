@@ -1,13 +1,14 @@
 // TODO: Audit this file
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 
-import { streamEncryptionChunkSize } from "ente-base/crypto/libsodium";
 import type { BytesOrB64 } from "ente-base/crypto/types";
+import { streamEncryptionChunkSize } from "ente-base/crypto/types";
 import { type CryptoWorker } from "ente-base/crypto/worker";
 import { ensureElectron } from "ente-base/electron";
 import { basename, nameAndExtension } from "ente-base/file-name";
 import {
     ensureOk,
+    HTTPError,
     retryAsyncOperation,
     type HTTPRequestRetrier,
     type PublicAlbumsCredentials,
@@ -19,41 +20,35 @@ import {
     extractVideoMetadata,
 } from "ente-gallery/services/ffmpeg";
 import {
-    getNonEmptyMagicMetadataProps,
-    updateMagicMetadata,
-} from "ente-gallery/services/magic-metadata";
-import {
     detectFileTypeInfoFromChunk,
     isFileTypeNotSupportedError,
 } from "ente-gallery/utils/detect-type";
 import { readStream } from "ente-gallery/utils/native-stream";
-import type {
-    EncryptedEnteFile,
-    EncryptedMagicMetadata,
-    EnteFile,
-    FilePublicMagicMetadata,
-    FilePublicMagicMetadataProps,
-    MetadataFileAttributes,
-    S3FileAttributes,
-} from "ente-media/file";
+import { decryptRemoteFile, type EnteFile } from "ente-media/file";
 import {
+    fileFileName,
     metadataHash,
-    type Metadata,
+    type FileMetadata,
+    type FilePublicMagicMetadataData,
     type ParsedMetadata,
-    type PublicMagicMetadata,
 } from "ente-media/file-metadata";
 import { FileType, type FileTypeInfo } from "ente-media/file-type";
 import { encodeLivePhoto } from "ente-media/live-photo";
-import { addToCollection } from "ente-new/photos/services/collection";
 import {
-    CustomError,
-    CustomErrorMessage,
-    handleUploadError,
-} from "ente-shared/error";
+    createMagicMetadata,
+    encryptMagicMetadata,
+    type RemoteMagicMetadata,
+} from "ente-media/magic-metadata";
+import { addToCollection } from "ente-new/photos/services/collection";
 import { mergeUint8Arrays } from "ente-utils/array";
 import { ensureInteger, ensureNumber } from "ente-utils/ensure";
-import type { UploadableUploadItem, UploadItem, UploadPathPrefix } from ".";
-import { type LivePhotoAssets, type UploadResult } from ".";
+import type {
+    UploadableUploadItem,
+    UploadItem,
+    UploadPathPrefix,
+    UploadResult,
+} from ".";
+import { type LivePhotoAssets } from ".";
 import { tryParseEpochMicrosecondsFromFileName } from "./date";
 import { matchJSONMetadata, type ParsedMetadataJSON } from "./metadata-json";
 import {
@@ -63,23 +58,21 @@ import {
     fetchPublicAlbumsMultipartUploadURLs,
     fetchPublicAlbumsUploadURLs,
     fetchUploadURLs,
-    PhotosUploadHTTPClient,
-    PublicAlbumsUploadHTTPClient,
+    postEnteFile,
+    postPublicAlbumsEnteFile,
     putFile,
     putFilePart,
     putFilePartViaWorker,
     putFileViaWorker,
     type MultipartCompletedPart,
     type ObjectUploadURL,
+    type PostEnteFileRequest,
 } from "./remote";
 import {
     fallbackThumbnail,
     generateThumbnailNative,
     generateThumbnailWeb,
 } from "./thumbnail";
-
-const photosHTTPClient = new PhotosUploadHTTPClient();
-const publicAlbumsHTTPClient = new PublicAlbumsUploadHTTPClient();
 
 /**
  * A readable stream for a file, and its associated size and last modified time.
@@ -148,7 +141,7 @@ class UploadService {
 
     async setFileCount(fileCount: number) {
         this.pendingUploadCount = fileCount;
-        await this.preFetchUploadURLs();
+        await this.refillUploadURLs(); /* prefetch */
     }
 
     reducePendingUploadCount() {
@@ -156,33 +149,12 @@ class UploadService {
     }
 
     async getUploadURL() {
-        if (this.uploadURLs.length === 0 && this.pendingUploadCount) {
+        if (this.uploadURLs.length == 0 && this.pendingUploadCount) {
             await this.refillUploadURLs();
-            this.ensureUniqueUploadURLs();
         }
         const url = this.uploadURLs.pop();
         if (!url) throw new Error("Failed to obtain upload URL");
         return url;
-    }
-
-    private async preFetchUploadURLs() {
-        try {
-            await this.refillUploadURLs();
-            // checking for any subscription related errors
-        } catch (e) {
-            log.error("prefetch uploadURL failed", e);
-            handleUploadError(e);
-        }
-        this.ensureUniqueUploadURLs();
-    }
-
-    async uploadFile(uploadFile: UploadFile) {
-        return this.publicAlbumsCredentials
-            ? publicAlbumsHTTPClient.uploadFile(
-                  uploadFile,
-                  this.publicAlbumsCredentials,
-              )
-            : photosHTTPClient.uploadFile(uploadFile);
     }
 
     private async refillUploadURLs() {
@@ -194,9 +166,9 @@ class UploadService {
         } finally {
             this.activeUploadURLRefill = undefined;
         }
-    }
 
-    private ensureUniqueUploadURLs() {
+        // Ensure that the upload URLs we have are unique.
+        //
         // Sanity check added when this was a new implementation. Have kept it
         // around, but it can be removed too.
         if (
@@ -215,7 +187,11 @@ class UploadService {
                 this.publicAlbumsCredentials,
             );
         } else {
-            urls = await fetchUploadURLs(this.pendingUploadCount);
+            try {
+                urls = await fetchUploadURLs(this.pendingUploadCount);
+            } catch (e) {
+                throw translateURLFetchErrorIfNeeded(e);
+            }
         }
         urls.forEach((u) => this.uploadURLs.push(u));
     }
@@ -226,7 +202,9 @@ class UploadService {
                   uploadPartCount,
                   this.publicAlbumsCredentials,
               )
-            : fetchMultipartUploadURLs(uploadPartCount);
+            : fetchMultipartUploadURLs(uploadPartCount).catch((e: unknown) => {
+                  throw translateURLFetchErrorIfNeeded(e);
+              });
     }
 }
 
@@ -302,9 +280,9 @@ interface ThumbnailedFile {
 }
 
 interface FileWithMetadata extends Omit<ThumbnailedFile, "hasStaticThumbnail"> {
-    metadata: Metadata;
     localID: number;
-    pubMagicMetadata: FilePublicMagicMetadata;
+    metadata: FileMetadata;
+    publicMagicMetadata: FilePublicMagicMetadataData;
 }
 
 interface EncryptedFileStream {
@@ -325,32 +303,31 @@ interface EncryptedFileStream {
 }
 
 interface EncryptedFilePieces {
+    /**
+     * The encrypted contents of the file (as bytes or a stream of bytes), and
+     * the decryption header that was used during encryption (base64 string).
+     */
     file: {
         encryptedData: Uint8Array | EncryptedFileStream;
         decryptionHeader: string;
     };
+    /**
+     * The encrypted contents of the file's thumbnail (as bytes), and the
+     * decryption header that was used during encryption (base64 string).
+     */
     thumbnail: { encryptedData: Uint8Array; decryptionHeader: string };
-    metadata: { encryptedDataB64: string; decryptionHeaderB64: string };
-    pubMagicMetadata: EncryptedMagicMetadata;
+    /**
+     * The encrypted contents of the file's metadata (as a base64 string), and
+     * the decryption header that was used during encryption (base64 string).
+     */
+    metadata: { encryptedData: string; decryptionHeader: string };
+    pubMagicMetadata: RemoteMagicMetadata | undefined;
     localID: number;
-}
-
-export interface BackupedFile {
-    file: S3FileAttributes;
-    thumbnail: S3FileAttributes;
-    metadata: MetadataFileAttributes;
-    pubMagicMetadata: EncryptedMagicMetadata;
-}
-
-export interface UploadFile extends BackupedFile {
-    collectionID: number;
-    encryptedKey: string;
-    keyDecryptionNonce: string;
 }
 
 export interface PotentialLivePhotoAsset {
     fileName: string;
-    fileType: FileType;
+    fileType: number /* FileType */;
     collectionID: number;
     uploadItem: UploadItem;
     pathPrefix: UploadPathPrefix | undefined;
@@ -526,7 +503,7 @@ const uploadItemSize = async (uploadItem: UploadItem): Promise<number> => {
  */
 const uploadItemCreationDate = async (
     uploadItem: UploadItem,
-    fileType: FileType,
+    fileType: number /* FileType */,
     parsedMetadataJSON: ParsedMetadataJSON | undefined,
 ) => {
     if (parsedMetadataJSON?.creationTime)
@@ -547,6 +524,81 @@ const uploadItemCreationDate = async (
 };
 
 /**
+ * The message of the {@link Error} that is thrown when the user cancels an
+ * upload.
+ *
+ * As a convenience, the {@link isUploadCancelledError} matcher can be used to
+ * match such errors.
+ *
+ * [Note: Upload cancellation]
+ *
+ * 1. User cancels the upload by pressing the cancel button on the upload
+ *    progress indicator in the UI.
+ *
+ * 2. This sets the {@link shouldUploadBeCancelled} flag on
+ *    {@link UploadManager}.
+ *
+ * 3. Periodically the code that is performing the upload calls the
+ *    {@link abortIfCancelled} flag. This function is a no-op normally, but if
+ *    the {@link shouldUploadBeCancelled} is set then it throws an {@link Error}
+ *    with the message set to {@link uploadCancelledErrorMessage}.
+ *
+ * 4. The intermediate per-file try catch handlers do not intercept this error,
+ *    and it bubbles all the way to the top of the call stack, ending the upload.
+ */
+export const uploadCancelledErrorMessage = "Upload cancelled";
+
+/**
+ * A convenience function to check if the provided value is an {@link Error}
+ * with message {@link uploadCancelledErrorMessage}.
+ */
+export const isUploadCancelledError = (e: unknown) =>
+    e instanceof Error && e.message == uploadCancelledErrorMessage;
+
+/**
+ * The message of the {@link Error} that is thrown when the upload fails because
+ * the user's current session has expired (e.g. maybe they logged this client
+ * out from another session), and that they need to login again.
+ */
+export const sessionExpiredErrorMessage = "Session expired";
+
+/**
+ * The message of the {@link Error} that is thrown when the upload fails because
+ * the user's subscription has expired.
+ */
+export const subscriptionExpiredErrorMessage = "Subscription expired";
+
+/**
+ * The message of the {@link Error} that is thrown when the upload fails because
+ * the user's storage space has been exhausted.
+ */
+export const storageLimitExceededErrorMessage = "Storage limit exceeded";
+
+/**
+ * The message of the {@link Error} that is thrown when the PUT request for the
+ * upload of a part of file (as part of an overall multipart upload) fails
+ * because the response did not have the etag error.
+ *
+ * This usually happens because some browser extension is blocking access to the
+ * ETag header (even when it is present in the remote S3 response). In self
+ * hosted scenarios, this can also happen if the remote S3 bucket does not have
+ * the appropriate CORS rules to allow access to the etag header.
+ */
+const eTagMissingErrorMessage = "ETag header not present in response";
+
+/**
+ * The message of the {@link Error} that is thrown when the size of the file
+ * being uploaded exceeds the maximum allowed file size.
+ *
+ * The client already checks for the size of the file being uploaded, and aborts
+ * the request if the client side limit is exceeded. An error with this message
+ * is thrown if we remote side validation fails.
+ *
+ * The UI outcome is the same in both cases.
+ */
+const fileTooLargeErrorMessage = "File too large";
+
+/**
  * Some state and callbacks used during upload that are not tied to a specific
  * file being uploaded.
  */
@@ -558,11 +610,21 @@ interface UploadContext {
      */
     isCFUploadProxyDisabled: boolean;
     /**
+     * If present, then the upload is happening in the context of the public
+     * albums app and these are the credentials that should be used for
+     * performing API requests (instead of trying to obtain and use the
+     * credentials for the logged in user, as happens when we're running in the
+     * context of the photos app).
+     */
+    publicAlbumsCredentials: PublicAlbumsCredentials | undefined;
+    /**
      * A function that the upload sequence should use to periodically check in
      * and see if the upload has been cancelled by the user.
      *
      * If the upload has been cancelled, it will throw an exception with the
-     * message set to {@link CustomError.UPLOAD_CANCELLED}.
+     * message set to {@link uploadCancelledErrorMessage}.
+     *
+     * See: [Note: Upload cancellation]
      */
     abortIfCancelled: () => void;
     /**
@@ -576,11 +638,6 @@ interface UploadContext {
      * 0 and 100 (inclusive).
      */
     updateUploadProgress: (fileLocalID: number, percentage: number) => void;
-}
-
-interface UploadResponse {
-    uploadResult: UploadResult;
-    uploadedFile?: EncryptedEnteFile | EnteFile;
 }
 
 /**
@@ -600,7 +657,7 @@ export const upload = async (
     parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>,
     worker: CryptoWorker,
     uploadContext: UploadContext,
-): Promise<UploadResponse> => {
+): Promise<UploadResult> => {
     const { abortIfCancelled } = uploadContext;
 
     log.info(`Upload ${fileName} | start`);
@@ -628,21 +685,21 @@ export const upload = async (
         } catch (e) {
             if (isFileTypeNotSupportedError(e)) {
                 log.error(`Not uploading ${fileName}`, e);
-                return { uploadResult: "unsupported" };
+                return { type: "unsupported" };
             }
             throw e;
         }
 
         const { fileTypeInfo, fileSize, lastModifiedMs } = assetDetails;
 
-        const maxFileSize = 4 * 1024 * 1024 * 1024; /* 4 GB */
-        if (fileSize >= maxFileSize) return { uploadResult: "tooLarge" };
+        const maxFileSize = 10 * 1024 * 1024 * 1024; /* 10 GB */
+        if (fileSize >= maxFileSize) return { type: "tooLarge" };
 
         abortIfCancelled();
 
         const { metadata, publicMagicMetadata } = await extractAssetMetadata(
             uploadAsset,
-            fileTypeInfo,
+            fileTypeInfo.fileType,
             lastModifiedMs,
             collection.id,
             parsedMetadataJSONMap,
@@ -650,7 +707,7 @@ export const upload = async (
         );
 
         const matches = existingFiles.filter((file) =>
-            areFilesSame(file.metadata, metadata),
+            areFilesSame(file, metadata),
         );
 
         const anyMatch = matches.length > 0 ? matches[0] : undefined;
@@ -660,16 +717,13 @@ export const upload = async (
                 (f) => f.collectionID == collection.id,
             );
             if (matchInSameCollection) {
-                return {
-                    uploadResult: "alreadyUploaded",
-                    uploadedFile: matchInSameCollection,
-                };
+                return { type: "alreadyUploaded", file: matchInSameCollection };
             } else {
                 // Any of the matching files can be used to add a symlink.
                 const symlink = Object.assign({}, anyMatch);
                 symlink.collectionID = collection.id;
                 await addToCollection(collection, [symlink]);
-                return { uploadResult: "addedSymlink", uploadedFile: symlink };
+                return { type: "addedSymlink", file: symlink };
             }
         }
 
@@ -680,11 +734,6 @@ export const upload = async (
 
         if (hasStaticThumbnail) metadata.hasStaticThumbnail = true;
 
-        const pubMagicMetadata = await constructPublicMagicMetadata({
-            ...publicMagicMetadata,
-            uploaderName,
-        });
-
         abortIfCancelled();
 
         const fileWithMetadata: FileWithMetadata = {
@@ -692,7 +741,10 @@ export const upload = async (
             fileStreamOrData,
             thumbnail,
             metadata,
-            pubMagicMetadata,
+            publicMagicMetadata: {
+                ...publicMagicMetadata,
+                ...(uploaderName && { uploaderName }),
+            },
         };
 
         const { encryptedFilePieces, encryptedFileKey } = await encryptFile(
@@ -710,36 +762,71 @@ export const upload = async (
 
         abortIfCancelled();
 
-        const uploadedFile = await uploadService.uploadFile({
+        const newFileRequest = {
             collectionID: collection.id,
             encryptedKey: encryptedFileKey.encryptedData,
             keyDecryptionNonce: encryptedFileKey.nonce,
             ...backupedFile,
-        });
+        };
+
+        const uploadedFile = await createRemoteFile(
+            newFileRequest,
+            uploadContext,
+        );
 
         return {
-            uploadResult: metadata.hasStaticThumbnail
+            type: metadata.hasStaticThumbnail
                 ? "uploadedWithStaticThumbnail"
                 : "uploaded",
-            uploadedFile,
+            file: await decryptRemoteFile(uploadedFile, collection.key),
         };
     } catch (e) {
-        if (e instanceof Error && e.message == CustomError.UPLOAD_CANCELLED) {
-            log.info(`Upload for ${fileName} cancelled`);
-        } else {
-            log.error(`Upload failed for ${fileName}`, e);
+        if (isUploadCancelledError(e)) {
+            /* stop the upload */
+            throw e;
         }
 
-        const error = handleUploadError(e);
-        switch (error.message) {
-            case CustomErrorMessage.eTagMissing:
-                return { uploadResult: "blocked" };
-            case CustomError.FILE_TOO_LARGE:
-                return { uploadResult: "largerThanAvailableStorage" };
+        log.error(`Upload failed for ${fileName}`, e);
+        switch (e instanceof Error && e.message) {
+            /* stop the upload */
+            case sessionExpiredErrorMessage:
+            case subscriptionExpiredErrorMessage:
+            case storageLimitExceededErrorMessage:
+                throw e;
+
+            /* file specific */
+            case eTagMissingErrorMessage:
+                return { type: "blocked" };
+            case fileTooLargeErrorMessage:
+                return { type: "largerThanAvailableStorage" };
             default:
-                return { uploadResult: "failed" };
+                return { type: "failed" };
         }
     }
+};
+
+/**
+ * Convert specific HTTP errors during an API call to remote endpoints for
+ * fetching new upload URLs into error with known messages (if applicable).
+ *
+ * Can be used with the following functions:
+ *
+ * - {@link fetchUploadURLs}
+ * - {@link fetchMultipartUploadURLs}
+ *
+ */
+const translateURLFetchErrorIfNeeded = (e: unknown) => {
+    if (e instanceof HTTPError) {
+        switch (e.res.status) {
+            case 401:
+                return new Error(sessionExpiredErrorMessage);
+            case 402:
+                return new Error(subscriptionExpiredErrorMessage);
+            case 426:
+                return new Error(storageLimitExceededErrorMessage);
+        }
+    }
+    return e;
 };
 
 /**
@@ -903,9 +990,9 @@ const readLivePhotoDetails = async ({ image, video }: LivePhotoAssets) => {
     return {
         fileTypeInfo: {
             fileType: FileType.livePhoto,
-            extension: `${img.fileTypeInfo.extension}+${vid.fileTypeInfo.extension}`,
-            imageType: img.fileTypeInfo.extension,
-            videoType: vid.fileTypeInfo.extension,
+            // Use the extension of the image component as the extension of the
+            // live photo.
+            extension: img.fileTypeInfo.extension,
         },
         fileSize: img.fileSize + vid.fileSize,
         lastModifiedMs: img.lastModifiedMs,
@@ -949,8 +1036,8 @@ const readEntireStream = async (stream: ReadableStream) =>
     new Uint8Array(await new Response(stream).arrayBuffer());
 
 interface ExtractAssetMetadataResult {
-    metadata: Metadata;
-    publicMagicMetadata: FilePublicMagicMetadataProps;
+    metadata: FileMetadata;
+    publicMagicMetadata: FilePublicMagicMetadataData;
 }
 
 /**
@@ -965,7 +1052,7 @@ const extractAssetMetadata = async (
         pathPrefix,
         externalParsedMetadata,
     }: UploadAsset,
-    fileTypeInfo: FileTypeInfo,
+    fileType: FileType,
     lastModifiedMs: number,
     collectionID: number,
     parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>,
@@ -976,7 +1063,6 @@ const extractAssetMetadata = async (
               // @ts-ignore
               livePhotoAssets,
               pathPrefix,
-              fileTypeInfo,
               lastModifiedMs,
               collectionID,
               parsedMetadataJSONMap,
@@ -987,7 +1073,7 @@ const extractAssetMetadata = async (
               uploadItem,
               pathPrefix,
               externalParsedMetadata,
-              fileTypeInfo,
+              fileType,
               lastModifiedMs,
               collectionID,
               parsedMetadataJSONMap,
@@ -997,23 +1083,17 @@ const extractAssetMetadata = async (
 const extractLivePhotoMetadata = async (
     livePhotoAssets: LivePhotoAssets,
     pathPrefix: UploadPathPrefix | undefined,
-    fileTypeInfo: FileTypeInfo,
     lastModifiedMs: number,
     collectionID: number,
     parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>,
     worker: CryptoWorker,
 ) => {
-    const imageFileTypeInfo: FileTypeInfo = {
-        fileType: FileType.image,
-        // @ts-ignore
-        extension: fileTypeInfo.imageType,
-    };
     const { metadata: imageMetadata, publicMagicMetadata } =
         await extractImageOrVideoMetadata(
             livePhotoAssets.image,
             pathPrefix,
             undefined,
-            imageFileTypeInfo,
+            FileType.image,
             lastModifiedMs,
             collectionID,
             parsedMetadataJSONMap,
@@ -1040,14 +1120,13 @@ const extractImageOrVideoMetadata = async (
     uploadItem: UploadItem,
     pathPrefix: UploadPathPrefix | undefined,
     externalParsedMetadata: ExternalParsedMetadata | undefined,
-    fileTypeInfo: FileTypeInfo,
+    fileType: FileType,
     lastModifiedMs: number,
     collectionID: number,
     parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>,
     worker: CryptoWorker,
 ) => {
     const fileName = uploadItemFileName(uploadItem);
-    const { fileType } = fileTypeInfo;
 
     let parsedMetadata: (ParsedMetadata & ExternalParsedMetadata) | undefined;
     if (fileType == FileType.image) {
@@ -1082,7 +1161,7 @@ const extractImageOrVideoMetadata = async (
         parsedMetadataJSONMap,
     );
 
-    const publicMagicMetadata: PublicMagicMetadata = {};
+    const publicMagicMetadata: FilePublicMagicMetadataData = {};
 
     const modificationTime =
         parsedMetadataJSON?.modificationTime ?? lastModifiedMs * 1000;
@@ -1117,7 +1196,7 @@ const extractImageOrVideoMetadata = async (
     // the metadata (it should've been an integer). The most probable theory is
     // that somehow it made its way in through malformed Exif.
 
-    const metadata: Metadata = {
+    const metadata: FileMetadata = {
         fileType,
         title: fileName,
         creationTime: ensureInteger(creationTime),
@@ -1228,17 +1307,24 @@ const computeHash = async (uploadItem: UploadItem, worker: CryptoWorker) => {
 };
 
 /**
- * Return true if the two files, as represented by their metadata, are same.
+ * Return true if the given file is the same as provided metadata.
  *
  * Note that the metadata includes the hash of the file's contents (when
  * available), so this also in effect compares the contents of the files, not
  * just the "meta" information about them.
  */
-const areFilesSame = (f: Metadata, g: Metadata) => {
-    if (f.fileType !== g.fileType || f.title !== g.title) return false;
+const areFilesSame = (fFile: EnteFile, gm: FileMetadata) => {
+    const fm = fFile.metadata;
 
-    const fh = metadataHash(f);
-    const gh = metadataHash(g);
+    // File name is different.
+    if (fileFileName(fFile) != gm.title) return false;
+
+    // File type is different.
+    if (fm.fileType != gm.fileType) return false;
+
+    // Name and type is same, compare hash.
+    const fh = metadataHash(fm);
+    const gh = metadataHash(gm);
     return fh && gh && fh == gh;
 };
 
@@ -1260,11 +1346,11 @@ const readLivePhoto = async (
         fileStreamOrData: imageFileStreamOrData,
         thumbnail,
         hasStaticThumbnail,
-    } = await withThumbnail(
+    } = await augmentWithThumbnail(
         livePhotoAssets.image,
-        // TODO: Update underlying type
-        // @ts-ignore
-        { extension: fileTypeInfo.imageType, fileType: FileType.image },
+        // For live photos, the extension field in the file type info is the
+        // extension of the image component of the live photo.
+        { fileType: FileType.image, extension: fileTypeInfo.extension },
         await readUploadItem(livePhotoAssets.image),
     );
     const videoFileStreamOrData = await readUploadItem(livePhotoAssets.video);
@@ -1299,7 +1385,7 @@ const readImageOrVideo = async (
     fileTypeInfo: FileTypeInfo,
 ) => {
     const fileStream = await readUploadItem(uploadItem);
-    return withThumbnail(uploadItem, fileTypeInfo, fileStream);
+    return augmentWithThumbnail(uploadItem, fileTypeInfo, fileStream);
 };
 
 /**
@@ -1314,7 +1400,7 @@ const readImageOrVideo = async (
  * Note: The `fileStream` in the returned {@link ThumbnailedFile} may be
  * different from the one passed to the function.
  */
-const withThumbnail = async (
+const augmentWithThumbnail = async (
     uploadItem: UploadItem,
     fileTypeInfo: FileTypeInfo,
     fileStream: FileStream,
@@ -1393,76 +1479,61 @@ const withThumbnail = async (
     };
 };
 
-const constructPublicMagicMetadata = async (
-    publicMagicMetadataProps: FilePublicMagicMetadataProps,
-): Promise<FilePublicMagicMetadata> => {
-    const nonEmptyPublicMagicMetadataProps = getNonEmptyMagicMetadataProps(
-        publicMagicMetadataProps,
-    );
-
-    if (Object.values(nonEmptyPublicMagicMetadataProps).length === 0) {
-        // @ts-ignore
-        return null;
-    }
-    return await updateMagicMetadata(publicMagicMetadataProps);
-};
-
 const encryptFile = async (
     file: FileWithMetadata,
-    encryptionKey: string,
+    collectionKey: string,
     worker: CryptoWorker,
 ) => {
     const fileKey = await worker.generateBlobOrStreamKey();
 
-    const { fileStreamOrData, thumbnail, metadata, pubMagicMetadata, localID } =
-        file;
+    const {
+        fileStreamOrData,
+        thumbnail,
+        metadata,
+        publicMagicMetadata,
+        localID,
+    } = file;
 
     const encryptedFiledata =
         fileStreamOrData instanceof Uint8Array
             ? await worker.encryptStreamBytes(fileStreamOrData, fileKey)
             : await encryptFileStream(fileStreamOrData, fileKey, worker);
 
-    const encryptedThumbnail = await worker.encryptThumbnail(
-        thumbnail,
+    const {
+        encryptedData: encryptedThumbnailData,
+        decryptionHeader: thumbnailDecryptionHeaderBytes,
+    } = await worker.encryptBlobBytes(thumbnail, fileKey);
+
+    const encryptedThumbnail = {
+        encryptedData: encryptedThumbnailData,
+        decryptionHeader: await worker.toB64(thumbnailDecryptionHeaderBytes),
+    };
+
+    const encryptedMetadata = await worker.encryptMetadataJSON(
+        metadata,
         fileKey,
     );
 
-    const encryptedMetadata = await worker.encryptMetadataJSON({
-        jsonValue: metadata,
-        keyB64: fileKey,
-    });
-
-    let encryptedPubMagicMetadata: EncryptedMagicMetadata;
-    // Keep defensive check until the underlying type is audited.
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    if (pubMagicMetadata) {
-        const encryptedPubMagicMetadataData = await worker.encryptMetadataJSON({
-            jsonValue: pubMagicMetadata.data,
-            keyB64: fileKey,
-        });
-        encryptedPubMagicMetadata = {
-            version: pubMagicMetadata.version,
-            count: pubMagicMetadata.count,
-            data: encryptedPubMagicMetadataData.encryptedDataB64,
-            header: encryptedPubMagicMetadataData.decryptionHeaderB64,
-        };
+    let encryptedPubMagicMetadata: RemoteMagicMetadata | undefined;
+    const pubMagicMetadata = createMagicMetadata(publicMagicMetadata);
+    if (pubMagicMetadata.count) {
+        encryptedPubMagicMetadata = await encryptMagicMetadata(
+            pubMagicMetadata,
+            fileKey,
+        );
     }
 
-    const encryptedKey = await worker.encryptToB64(fileKey, encryptionKey);
+    const encryptedFileKey = await worker.encryptBox(fileKey, collectionKey);
 
     return {
         encryptedFilePieces: {
             file: encryptedFiledata,
             thumbnail: encryptedThumbnail,
             metadata: encryptedMetadata,
-            // @ts-ignore
             pubMagicMetadata: encryptedPubMagicMetadata,
             localID: localID,
         },
-        encryptedFileKey: {
-            encryptedData: encryptedKey.encryptedData,
-            nonce: encryptedKey.nonce,
-        },
+        encryptedFileKey,
     };
 };
 
@@ -1500,7 +1571,12 @@ const encryptFileStream = async (
 const uploadToBucket = async (
     encryptedFilePieces: EncryptedFilePieces,
     uploadContext: UploadContext,
-): Promise<BackupedFile> => {
+): Promise<
+    Pick<
+        PostEnteFileRequest,
+        "file" | "thumbnail" | "metadata" | "pubMagicMetadata"
+    >
+> => {
     const { isCFUploadProxyDisabled, abortIfCancelled, updateUploadProgress } =
         uploadContext;
 
@@ -1578,11 +1654,8 @@ const uploadToBucket = async (
             objectKey: thumbnailUploadURL.objectKey,
             size: thumbnail.encryptedData.length,
         },
-        metadata: {
-            encryptedData: metadata.encryptedDataB64,
-            decryptionHeader: metadata.decryptionHeaderB64,
-        },
-        pubMagicMetadata: pubMagicMetadata,
+        metadata,
+        pubMagicMetadata,
     };
 };
 
@@ -1592,8 +1665,8 @@ const uploadToBucket = async (
  * used by the upload subsystem.
  *
  * @param abortIfCancelled A function that aborts the operation by throwing a
- * error with the message set to {@link CustomError.UPLOAD_CANCELLED} if the
- * user has cancelled the upload.
+ * error with the message set to {@link uploadCancelledErrorMessage} if the user
+ * has cancelled the upload.
  *
  * @return A function of type {@link HTTPRequestRetrier} that can be used to
  * retry requests. This function will retry requests (obtained afresh each time
@@ -1604,7 +1677,7 @@ const uploadToBucket = async (
  */
 const createAbortableRetryEnsuringHTTPOk =
     (abortIfCancelled: () => void): HTTPRequestRetrier =>
-    (request: () => Promise<Response>) =>
+    (request, opts) =>
         retryAsyncOperation(
             async () => {
                 abortIfCancelled();
@@ -1613,12 +1686,9 @@ const createAbortableRetryEnsuringHTTPOk =
                 return r;
             },
             {
+                ...opts,
                 abortIfNeeded(e) {
-                    if (
-                        e instanceof Error &&
-                        e.message == CustomError.UPLOAD_CANCELLED
-                    )
-                        throw e;
+                    if (isUploadCancelledError(e)) throw e;
                 },
             },
         );
@@ -1664,7 +1734,7 @@ const uploadStreamUsingMultipart = async (
                   requestRetrier,
               )
             : await putFilePart(partUploadURL, partData, requestRetrier);
-        if (!eTag) throw new Error(CustomErrorMessage.eTagMissing);
+        if (!eTag) throw new Error(eTagMissingErrorMessage);
 
         updateUploadProgress(fileLocalID, percentPerPart * partNumber);
         completedParts.push({ partNumber, eTag });
@@ -1706,3 +1776,72 @@ const nextMultipartUploadPart = async (
     }
     return mergeUint8Arrays(chunks);
 };
+
+/**
+ * Finalize an upload by creating an {@link EnteFile} on remote.
+ */
+const createRemoteFile = async (
+    newFileRequest: PostEnteFileRequest,
+    uploadContext: UploadContext,
+) => {
+    const { publicAlbumsCredentials } = uploadContext;
+
+    return publicAlbumsCredentials
+        ? retriedPostPublicAlbumsEnteFile(
+              newFileRequest,
+              publicAlbumsCredentials,
+              uploadContext,
+          )
+        : retriedPostEnteFile(newFileRequest, uploadContext);
+};
+
+const retriedPostPublicAlbumsEnteFile = async (
+    newFileRequest: PostEnteFileRequest,
+    credentials: PublicAlbumsCredentials,
+    { abortIfCancelled }: UploadContext,
+) =>
+    retryAsyncOperation(
+        () => {
+            abortIfCancelled();
+            return postPublicAlbumsEnteFile(newFileRequest, credentials);
+        },
+        {
+            abortIfNeeded: (e) => {
+                if (isUploadCancelledError(e)) throw e;
+                if (e instanceof HTTPError) {
+                    switch (e.res.status) {
+                        case 413:
+                            throw new Error(fileTooLargeErrorMessage);
+                    }
+                }
+            },
+        },
+    );
+
+const retriedPostEnteFile = async (
+    newFileRequest: PostEnteFileRequest,
+    { abortIfCancelled }: UploadContext,
+) =>
+    retryAsyncOperation(
+        () => {
+            abortIfCancelled();
+            return postEnteFile(newFileRequest);
+        },
+        {
+            abortIfNeeded: (e) => {
+                if (isUploadCancelledError(e)) throw e;
+                if (e instanceof HTTPError) {
+                    switch (e.res.status) {
+                        case 401:
+                            throw new Error(sessionExpiredErrorMessage);
+                        case 402:
+                            throw new Error(subscriptionExpiredErrorMessage);
+                        case 413:
+                            throw new Error(fileTooLargeErrorMessage);
+                        case 426:
+                            throw new Error(storageLimitExceededErrorMessage);
+                    }
+                }
+            },
+        },
+    );

@@ -40,6 +40,13 @@
       "slug": "ankama"
     },
     {
+      "title": "Ankara University",
+      "slug": "ankara_university",
+      "altNames": [
+        "Ankara Üniversitesi"
+      ]
+    },
+    {
       "title": "Anycoin Direct",
       "slug": "anycoindirect"
     },
@@ -200,7 +207,9 @@
     {
       "title": "bonify",
       "slug": "bonify",
-      "altNames": ["bonify.de"]
+      "altNames": [
+        "bonify.de"
+      ]
     },
     {
       "title": "Booking",
@@ -303,6 +312,15 @@
     },
     {
       "title": "CSAM"
+    },
+    {
+      "title": "CSSBuy",
+      "slug": "cssbuy",
+      "altNames": [
+        "CSS Buy",
+        "CSS-Buy",
+        "cssbuy.com"
+      ]
     },
     {
       "title": "CSFloat"
@@ -465,11 +483,24 @@
       "slug": "freetaxusa"
     },
     {
+      "title": "FZJ",
+      "slug": "fzj",
+      "hex": "023d6b",
+      "altNames": [
+        "Forschungszentrum Jülich",
+        "FZJ IdP",
+        "iffLogin"
+      ]
+    },
+    {
       "title": "G2A"
     },
     {
       "title": "Gate.io",
       "slug": "gateio.svg"
+    },
+    {
+      "title": "GERID"
     },
     {
       "title": "GitHub"
@@ -537,6 +568,14 @@
       "title": "HuggingFace",
       "altNames": [
         "Hugging Face"
+      ]
+    },
+    {
+      "title": "IBKR",
+      "slug": "ibkr",
+      "altNames": [
+        "Interactive Brokers",
+        "IB"
       ]
     },
     {
@@ -661,6 +700,10 @@
       ]
     },
     {
+      "title": "LaunchDarkly",
+      "hex": "858585"
+    },
+    {
       "title": "Letterboxd"
     },
     {
@@ -725,8 +768,11 @@
       ]
     },
     {
-      "title": "Mercado Livre",
-      "slug": "mercado_livre",
+      "title": "Memed"
+    },
+    {
+      "title": "Mercado Libre",
+      "slug": "mercado_libre",
       "altNames": [
         "Mercado Libre",
         "MercadoLibre",
@@ -1007,6 +1053,14 @@
       ]
     },
     {
+      "title": "R10.net",
+      "slug": "r10",
+      "altNames": [
+        "R10",
+        "r10.net"
+      ]
+    },
+    {
       "title": "Raindrop.io",
       "slug": "raindrop_io",
       "altNames": [
@@ -1089,6 +1143,16 @@
     {
       "title": "Seafile",
       "slug": "seafile"
+    },
+    {
+      "title": "SEI",
+      "altNames": [
+        "sei",
+        "sei!",
+        "SEI!",
+        "Sistema Eletrônico de Informações",
+        "SEI/SEDE"
+      ]
     },
     {
       "title": "Sendgrid"
@@ -1293,6 +1357,14 @@
       "slug": "us_mobile"
     },
     {
+      "title": "uollet",
+      "slug": "uollet",
+      "altNames": [
+        "UOLLET",
+        "uollet.com.br"
+      ]
+    },
+    {
       "title": "Vikunja"
     },
     {
@@ -1377,6 +1449,37 @@
     },
     {
       "title": "CoinSpot"
+    },
+    {
+      "title": "Aternos",
+      "slug": "aternos"
+    },
+    {
+      "title": "Toshl Finance",
+      "slug": "toshl_finance",
+      "altNames": [
+        "Toshl"
+      ]
+    },
+    {
+      "title": "Tebex",
+      "slug": "tebex",
+      "altNames": [
+        "tebex",
+        "tebex.io",
+        "buycraft"
+      ]
+    },
+    {
+      "title": "xAI",
+      "slug": "xai"
+    },
+    {
+      "title": "Cronometer",
+      "slug": "cronometer"
+    },
+    {
+      "title": "Zitadel"
     }
   ]
 }

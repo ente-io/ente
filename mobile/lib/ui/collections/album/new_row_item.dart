@@ -23,6 +23,7 @@ class NewAlbumRowItemWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
     return GestureDetector(
       onTap: () async {
         final result = await showTextInputDialog(
@@ -35,13 +36,18 @@ class NewAlbumRowItemWidget extends StatelessWidget {
           textCapitalization: TextCapitalization.words,
           popnavAfterSubmission: true,
           onSubmit: (String text) async {
-            if (text.trim() == "") {
+            text = text.trim();
+            if (text == "") {
               return;
             }
 
             try {
               final Collection c =
                   await CollectionsService.instance.createAlbum(text);
+
+              // Close the dialog now so that it does not flash when leaving the album again.
+              Navigator.of(context).pop();
+
               // ignore: unawaited_futures
               await routeToPage(
                 context,
@@ -62,25 +68,31 @@ class NewAlbumRowItemWidget extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(
-            height: height,
-            width: width,
-            child: DottedBorder(
-              borderType: BorderType.RRect,
-              strokeWidth: 1.5,
-              dashPattern: const [3.75, 3.75],
-              radius: const Radius.circular(2.35),
-              padding: EdgeInsets.zero,
-              color: getEnteColorScheme(context).strokeMuted,
-              child: Center(
-                child: Icon(
-                  Icons.add,
-                  color: getEnteColorScheme(context).strokeMuted,
+          ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: Container(
+              height: height,
+              width: width,
+              color: Theme.of(context).brightness == Brightness.light
+                  ? colorScheme.backdropBase
+                  : colorScheme.backdropFaint,
+              child: DottedBorder(
+                borderType: BorderType.RRect,
+                strokeWidth: 1.75,
+                dashPattern: const [3.75, 3.75],
+                radius: const Radius.circular(12),
+                padding: EdgeInsets.zero,
+                color: colorScheme.strokeFaint,
+                child: Center(
+                  child: Icon(
+                    Icons.add,
+                    color: colorScheme.strokeFaint,
+                  ),
                 ),
               ),
             ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 6),
           Text(
             S.of(context).addNew,
             style: getEnteTextTheme(context).smallFaint,

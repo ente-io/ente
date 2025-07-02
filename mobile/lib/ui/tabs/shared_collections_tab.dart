@@ -60,6 +60,10 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
     const Duration(milliseconds: 500),
   );
 
+  static const maxThumbnailWidth = 224.0;
+  static const crossAxisSpacing = 8.0;
+  static const horizontalPadding = 16.0;
+
   @override
   void initState() {
     super.initState();
@@ -135,9 +139,14 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
   }
 
   Widget _getSharedCollectionsGallery(SharedCollections collections) {
-    const maxThumbnailWidth = 160.0;
     const maxQuickLinks = 4;
     final numberOfQuickLinks = collections.quickLinks.length;
+    final double screenWidth = MediaQuery.sizeOf(context).width;
+    final int albumsCountInRow = max(screenWidth ~/ maxThumbnailWidth, 3);
+    final totalHorizontalPadding = (albumsCountInRow - 1) * crossAxisSpacing;
+    final sideOfThumbnail =
+        (screenWidth - totalHorizontalPadding - horizontalPadding) /
+            albumsCountInRow;
     const quickLinkTitleHeroTag = "quick_link_title";
     final SectionTitle sharedWithYou =
         SectionTitle(title: S.of(context).sharedWithYou);
@@ -150,195 +159,188 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
         margin: const EdgeInsets.only(bottom: 50),
         child: Column(
           children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  SectionOptions(
-                    onTap: collections.incoming.isNotEmpty
-                        ? () {
-                            unawaited(
-                              routeToPage(
-                                context,
-                                CollectionListPage(
-                                  collections.incoming,
-                                  sectionType:
-                                      UISectionType.incomingCollections,
-                                  tag: "incoming",
-                                  appTitle: sharedWithYou,
-                                ),
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SectionOptions(
+                  onTap: collections.incoming.isNotEmpty
+                      ? () {
+                          unawaited(
+                            routeToPage(
+                              context,
+                              CollectionListPage(
+                                collections.incoming,
+                                sectionType:
+                                    UISectionType.incomingCollections,
+                                tag: "incoming",
+                                appTitle: sharedWithYou,
+                              ),
+                            ),
+                          );
+                        }
+                      : null,
+                  Hero(tag: "incoming", child: sharedWithYou),
+                  trailingWidget: collections.incoming.isNotEmpty
+                      ? IconButtonWidget(
+                          icon: Icons.chevron_right,
+                          iconButtonType: IconButtonType.secondary,
+                          iconColor: colorTheme.blurStrokePressed,
+                        )
+                      : null,
+                ),
+                const SizedBox(height: 2),
+                collections.incoming.isNotEmpty
+                    ? SizedBox(
+                        height: sideOfThumbnail + 46,
+                        child: ListView.builder(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: horizontalPadding / 2,
+                          ),
+                          scrollDirection: Axis.horizontal,
+                          itemBuilder: (context, index) {
+                            return Padding(
+                              padding: const EdgeInsets.only(
+                                right: horizontalPadding / 2,
+                              ),
+                              child: AlbumRowItemWidget(
+                                collections.incoming[index],
+                                sideOfThumbnail,
+                                tag: "incoming",
+                                showFileCount: true,
                               ),
                             );
-                          }
-                        : null,
-                    Hero(tag: "incoming", child: sharedWithYou),
-                    trailingWidget: collections.incoming.isNotEmpty
-                        ? IconButtonWidget(
-                            icon: Icons.chevron_right,
-                            iconButtonType: IconButtonType.secondary,
-                            iconColor: colorTheme.blurStrokePressed,
-                          )
-                        : null,
-                  ),
-                  const SizedBox(height: 2),
-                  collections.incoming.isNotEmpty
-                      ? SizedBox(
-                          height: maxThumbnailWidth + 24,
-                          child: ListView.builder(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                            ),
-                            scrollDirection: Axis.horizontal,
-                            itemBuilder: (context, index) {
-                              return Padding(
-                                padding: const EdgeInsets.only(right: 8.0),
-                                child: AlbumRowItemWidget(
-                                  collections.incoming[index],
-                                  maxThumbnailWidth,
-                                  tag: "incoming",
-                                  showFileCount: false,
-                                ),
-                              );
-                            },
-                            itemCount: collections.incoming.length,
-                          ),
-                        )
-                      : const IncomingAlbumEmptyState(),
-                ],
-              ),
+                          },
+                          itemCount: collections.incoming.length,
+                        ),
+                      )
+                    : const IncomingAlbumEmptyState(),
+              ],
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  SectionOptions(
-                    onTap: collections.outgoing.isNotEmpty
-                        ? () {
-                            unawaited(
-                              routeToPage(
-                                context,
-                                CollectionListPage(
-                                  collections.outgoing,
-                                  sectionType:
-                                      UISectionType.outgoingCollections,
-                                  tag: "outgoing",
-                                  appTitle: sharedByYou,
-                                ),
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SectionOptions(
+                  onTap: collections.outgoing.isNotEmpty
+                      ? () {
+                          unawaited(
+                            routeToPage(
+                              context,
+                              CollectionListPage(
+                                collections.outgoing,
+                                sectionType:
+                                    UISectionType.outgoingCollections,
+                                tag: "outgoing",
+                                appTitle: sharedByYou,
+                              ),
+                            ),
+                          );
+                        }
+                      : null,
+                  Hero(tag: "outgoing", child: sharedByYou),
+                  trailingWidget: collections.outgoing.isNotEmpty
+                      ? IconButtonWidget(
+                          icon: Icons.chevron_right,
+                          iconButtonType: IconButtonType.secondary,
+                          iconColor: colorTheme.blurStrokePressed,
+                        )
+                      : null,
+                ),
+                const SizedBox(height: 2),
+                collections.outgoing.isNotEmpty
+                    ? SizedBox(
+                        height: sideOfThumbnail + 46,
+                        child: ListView.builder(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                          ),
+                          scrollDirection: Axis.horizontal,
+                          itemBuilder: (context, index) {
+                            return Padding(
+                              padding: const EdgeInsets.only(
+                                right: horizontalPadding / 2,
+                              ),
+                              child: AlbumRowItemWidget(
+                                collections.outgoing[index],
+                                sideOfThumbnail,
+                                tag: "outgoing",
+                                showFileCount: true,
                               ),
                             );
-                          }
-                        : null,
-                    Hero(tag: "outgoing", child: sharedByYou),
-                    trailingWidget: collections.outgoing.isNotEmpty
-                        ? IconButtonWidget(
-                            icon: Icons.chevron_right,
-                            iconButtonType: IconButtonType.secondary,
-                            iconColor: colorTheme.blurStrokePressed,
-                          )
-                        : null,
-                  ),
-                  const SizedBox(height: 2),
-                  collections.outgoing.isNotEmpty
-                      ? SizedBox(
-                          height: maxThumbnailWidth + 24,
-                          child: ListView.builder(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                            ),
-                            scrollDirection: Axis.horizontal,
-                            itemBuilder: (context, index) {
-                              return Padding(
-                                padding: const EdgeInsets.only(right: 8.0),
-                                child: AlbumRowItemWidget(
-                                  collections.outgoing[index],
-                                  maxThumbnailWidth,
-                                  tag: "outgoing",
-                                  showFileCount: false,
-                                ),
-                              );
-                            },
-                            itemCount: collections.outgoing.length,
-                          ),
-                        )
-                      : const OutgoingAlbumEmptyState(),
-                ],
-              ),
+                          },
+                          itemCount: collections.outgoing.length,
+                        ),
+                      )
+                    : const OutgoingAlbumEmptyState(),
+              ],
             ),
             numberOfQuickLinks > 0
-                ? Padding(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 8.0,
-                    ),
-                    child: Column(
-                      children: [
-                        SectionOptions(
-                          onTap: numberOfQuickLinks > maxQuickLinks
-                              ? () {
-                                  unawaited(
-                                    routeToPage(
-                                      context,
-                                      AllQuickLinksPage(
-                                        titleHeroTag: quickLinkTitleHeroTag,
-                                        quickLinks: collections.quickLinks,
-                                      ),
-                                    ),
-                                  );
-                                }
-                              : null,
-                          Hero(
-                            tag: quickLinkTitleHeroTag,
-                            child: SectionTitle(
-                              title: S.of(context).quickLinks,
-                            ),
-                          ),
-                          trailingWidget: numberOfQuickLinks > maxQuickLinks
-                              ? IconButtonWidget(
-                                  icon: Icons.chevron_right,
-                                  iconButtonType: IconButtonType.secondary,
-                                  iconColor: colorTheme.blurStrokePressed,
-                                )
-                              : null,
-                        ),
-                        const SizedBox(height: 2),
-                        ListView.separated(
-                          shrinkWrap: true,
-                          padding: const EdgeInsets.only(
-                            bottom: 12,
-                            left: 12,
-                            right: 12,
-                          ),
-                          physics: const NeverScrollableScrollPhysics(),
-                          itemBuilder: (context, index) {
-                            return GestureDetector(
-                              onTap: () async {
-                                final thumbnail = await CollectionsService
-                                    .instance
-                                    .getCover(collections.quickLinks[index]);
-                                final page = CollectionPage(
-                                  CollectionWithThumbnail(
-                                    collections.quickLinks[index],
-                                    thumbnail,
+                ? Column(
+                  children: [
+                    SectionOptions(
+                      onTap: numberOfQuickLinks > maxQuickLinks
+                          ? () {
+                              unawaited(
+                                routeToPage(
+                                  context,
+                                  AllQuickLinksPage(
+                                    titleHeroTag: quickLinkTitleHeroTag,
+                                    quickLinks: collections.quickLinks,
                                   ),
-                                  tagPrefix: heroTagPrefix,
-                                );
-                                // ignore: unawaited_futures
-                                routeToPage(context, page);
-                              },
-                              child: QuickLinkAlbumItem(
-                                c: collections.quickLinks[index],
-                              ),
-                            );
-                          },
-                          separatorBuilder: (context, index) {
-                            return const SizedBox(height: 4);
-                          },
-                          itemCount: min(numberOfQuickLinks, maxQuickLinks),
+                                ),
+                              );
+                            }
+                          : null,
+                      Hero(
+                        tag: quickLinkTitleHeroTag,
+                        child: SectionTitle(
+                          title: S.of(context).quickLinks,
                         ),
-                      ],
+                      ),
+                      trailingWidget: numberOfQuickLinks > maxQuickLinks
+                          ? IconButtonWidget(
+                              icon: Icons.chevron_right,
+                              iconButtonType: IconButtonType.secondary,
+                              iconColor: colorTheme.blurStrokePressed,
+                            )
+                          : null,
                     ),
-                  )
+                    const SizedBox(height: 2),
+                    ListView.separated(
+                      shrinkWrap: true,
+                      padding: const EdgeInsets.only(
+                        bottom: 12,
+                        left: 12,
+                        right: 12,
+                      ),
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemBuilder: (context, index) {
+                        return GestureDetector(
+                          onTap: () async {
+                            final thumbnail = await CollectionsService
+                                .instance
+                                .getCover(collections.quickLinks[index]);
+                            final page = CollectionPage(
+                              CollectionWithThumbnail(
+                                collections.quickLinks[index],
+                                thumbnail,
+                              ),
+                              tagPrefix: heroTagPrefix,
+                            );
+                            // ignore: unawaited_futures
+                            routeToPage(context, page);
+                          },
+                          child: QuickLinkAlbumItem(
+                            c: collections.quickLinks[index],
+                          ),
+                        );
+                      },
+                      separatorBuilder: (context, index) {
+                        return const SizedBox(height: 4);
+                      },
+                      itemCount: min(numberOfQuickLinks, maxQuickLinks),
+                    ),
+                  ],
+                )
                 : const SizedBox.shrink(),
             const SizedBox(height: 2),
             ValueListenableBuilder(
@@ -368,7 +370,6 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
                     : const EnteLoadingWidget();
               },
             ),
-            const SizedBox(height: 4),
             const CollectPhotosCardWidget(),
             const SizedBox(height: 32),
           ],

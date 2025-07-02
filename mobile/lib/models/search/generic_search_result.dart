@@ -46,6 +46,10 @@ class GenericSearchResult extends SearchResult {
     return _files;
   }
 
+  int fileCount() {
+    return _files.length;
+  }
+
   @override
   HierarchicalSearchFilter getHierarchicalSearchFilter() {
     return hierarchicalSearchFilter;

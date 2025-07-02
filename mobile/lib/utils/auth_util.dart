@@ -46,6 +46,7 @@ Future<bool> requestAuthentication(
           signInTitle: S.of(context).androidSignInTitle,
         ),
         IOSAuthMessages(
+          localizedFallbackTitle: S.of(context).enterPassword,
           goToSettingsButton: S.of(context).goToSettings,
           goToSettingsDescription: S.of(context).goToSettings,
           lockOut: S.of(context).iOSLockOut,

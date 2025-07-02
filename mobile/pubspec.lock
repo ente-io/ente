@@ -119,21 +119,13 @@ packages:
     source: hosted
     version: "1.5.8"
   async:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: async
       sha256: "947bfcf187f74dbc5e146c9eb9c0f10c9f8b30743e341481c1e2ed3ecc18c20c"
       url: "https://pub.dev"
     source: hosted
     version: "2.11.0"
-  background_fetch:
-    dependency: "direct main"
-    description:
-      name: background_fetch
-      sha256: e9f26ae54d88310b7ac2a68f2f9fcee0081a4d5f11100f233a70702021e7ac4f
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.3.7"
   battery_info:
     dependency: "direct main"
     description:
@@ -159,6 +151,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.1"
+  brotli:
+    dependency: transitive
+    description:
+      name: brotli
+      sha256: "7f891558ed779aab2bed874f0a36b8123f9ff3f19cf6efbee89e18ed294945ae"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.6.0"
   build:
     dependency: transitive
     description:
@@ -566,14 +566,15 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.1"
-  exif:
+  exif_reader:
     dependency: "direct main"
     description:
-      name: exif
-      sha256: a7980fdb3b7ffcd0b035e5b8a5e1eef7cadfe90ea6a4e85ebb62f87b96c7a172
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.3.0"
+      path: "."
+      ref: "476f701c084861a8e9de5f4f4e5e067fc85fda96"
+      resolved-ref: "476f701c084861a8e9de5f4f4e5e067fc85fda96"
+      url: "https://github.com/mgenware/exif_reader.git"
+    source: git
+    version: "3.16.1"
   expandable:
     dependency: "direct main"
     description:
@@ -1371,6 +1372,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.5"
+  iso_base_media:
+    dependency: transitive
+    description:
+      name: iso_base_media
+      sha256: "0f5594feef1fba98179a2df95d1afbdda952de0c7a2e35e6815093f7c00aaf06"
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.5.2"
   jni:
     dependency: transitive
     description:
@@ -1752,10 +1761,10 @@ packages:
     dependency: "direct main"
     description:
       name: native_video_player
-      sha256: "64ac4086c50f13306c7ebca70372b2c2c67c063caae25f0c486dbec16d666e9a"
+      sha256: "83c6672848c7d563734d2415e189713285020174eebd967cbbf22c6941c5833c"
       url: "https://pub.dev"
     source: hosted
-    version: "3.0.0"
+    version: "4.0.0"
   nested:
     dependency: transitive
     description:
@@ -2091,10 +2100,10 @@ packages:
     dependency: "direct overridden"
     description:
       name: protobuf
-      sha256: fbb0c37d435641d0b84813c1dad41e6fa61ddc880a320bce16b3063ecec35aa6
+      sha256: "68645b24e0716782e58948f8467fd42a880f255096a821f9e7d0ec625b00c84d"
       url: "https://pub.dev"
     source: hosted
-    version: "4.0.0"
+    version: "3.1.0"
   provider:
     dependency: transitive
     description:
@@ -2127,6 +2136,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.2.2"
+  random_access_source:
+    dependency: transitive
+    description:
+      name: random_access_source
+      sha256: dc86934da2cc4777334f43916234410f232032738c519c0c3452147c5d4fec89
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.1.0"
   receive_sharing_intent:
     dependency: "direct main"
     description:
@@ -2549,6 +2566,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.6.4"
+  thermal:
+    dependency: "direct main"
+    description:
+      name: thermal
+      sha256: c6275ebc609e75f1bbbfc354d56d6c559a0c6045a06a8e8c3939c03306a07e18
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.11"
   timezone:
     dependency: "direct main"
     description:
@@ -2796,10 +2821,10 @@ packages:
     dependency: "direct main"
     description:
       name: visibility_detector
-      sha256: "15c54a459ec2c17b4705450483f3d5a2858e733aee893dcee9d75fd04814940d"
+      sha256: dd5cc11e13494f432d15939c3aa8ae76844c42b723398643ce9addb88a5ed420
       url: "https://pub.dev"
     source: hosted
-    version: "0.3.3"
+    version: "0.4.0+2"
   vm_service:
     dependency: transitive
     description:
@@ -2884,10 +2909,18 @@ packages:
     dependency: "direct main"
     description:
       name: wechat_assets_picker
-      sha256: "9934724a45fdb2b12e332d8190c58713e6675c37c630d53608e0f50167215c9f"
+      sha256: cafe3d32564ed3cacf9822f251941f7b44fe9885c17c8de4fca7e939a459e1ef
       url: "https://pub.dev"
     source: hosted
-    version: "8.9.0-dev.1"
+    version: "9.5.1"
+  wechat_picker_library:
+    dependency: transitive
+    description:
+      name: wechat_picker_library
+      sha256: a42e09cb85b15fc9410f6a69671371cc60aa99c4a1f7967f6593a7f665f6f47a
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.5"
   widgets_to_image:
     dependency: "direct main"
     description:
@@ -2920,6 +2953,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.0"
+  workmanager:
+    dependency: "direct main"
+    description:
+      name: workmanager
+      sha256: f3c3ce6d79cce53eee4a29dd2e8328c25db5ba5d9062fcc5e8f3c71e0af9b7e4
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.6.0"
   xdg_directories:
     dependency: transitive
     description:

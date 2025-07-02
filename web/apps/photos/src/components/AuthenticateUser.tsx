@@ -1,4 +1,6 @@
+import { VerifyMasterPasswordForm } from "ente-accounts/components/VerifyMasterPasswordForm";
 import { checkSessionValidity } from "ente-accounts/services/session";
+import type { KeyAttributes, User } from "ente-accounts/services/user";
 import {
     TitledMiniDialog,
     type MiniDialogAttributes,
@@ -6,11 +8,7 @@ import {
 import type { ModalVisibilityProps } from "ente-base/components/utils/modal";
 import { useBaseContext } from "ente-base/context";
 import log from "ente-base/log";
-import VerifyMasterPasswordForm, {
-    type VerifyMasterPasswordFormProps,
-} from "ente-shared/components/VerifyMasterPasswordForm";
 import { getData } from "ente-shared/storage/localStorage";
-import type { KeyAttributes, User } from "ente-shared/user/types";
 import { t } from "i18next";
 import { useCallback, useEffect, useState } from "react";
 
@@ -90,12 +88,6 @@ export const AuthenticateUser: React.FC<AuthenticateUserProps> = ({
         if (open) void validateSession();
     }, [open]);
 
-    const useMasterPassword: VerifyMasterPasswordFormProps["callback"] =
-        async () => {
-            onClose();
-            onAuthenticate();
-        };
-
     return (
         <TitledMiniDialog
             open={open}
@@ -104,11 +96,13 @@ export const AuthenticateUser: React.FC<AuthenticateUserProps> = ({
             title={t("password")}
         >
             <VerifyMasterPasswordForm
-                buttonText={t("authenticate")}
-                callback={useMasterPassword}
                 user={user}
                 keyAttributes={keyAttributes}
-                submitButtonProps={{ sx: { mb: 0 } }}
+                submitButtonTitle={t("authenticate")}
+                onVerify={() => {
+                    onClose();
+                    onAuthenticate();
+                }}
             />
         </TitledMiniDialog>
     );

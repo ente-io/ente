@@ -16,10 +16,10 @@ If you used our quickstart script, your `my-ente` directory will include a
 PostgreSQL and MinIO.
 
 > [!TIP]
-> 
+>
 > Always do `docker compose down` inside your `my-ente` directory. If you've
-> made changes to `museum.yaml`, restart the containers with `docker compose up
-> -d ` to see your changes in action.
+> made changes to `museum.yaml`, restart the containers with
+> `docker compose up -d ` to see your changes in action.
 
 ## S3 buckets
 
@@ -33,19 +33,20 @@ Check out [Configuring S3](/self-hosting/guides/configuring-s3.md) to understand
 more about configuring S3 buckets.
 
 MinIO uses the port `3200` for API Endpoints and their web app runs over
-`:3201`. You can login to MinIO Web Console by opening `localhost:3201` in your browser.
+`:3201`. You can login to MinIO Web Console by opening `localhost:3201` in your
+browser.
 
-If you face any issues related to uploads then checkout [Troubleshooting bucket
-CORS](/self-hosting/troubleshooting/bucket-cors) and [Frequently encountered S3
-errors](/self-hosting/guides/configuring-s3#frequently-encountered-errors).
+If you face any issues related to uploads then checkout
+[Troubleshooting bucket CORS](/self-hosting/troubleshooting/bucket-cors) and
+[Frequently encountered S3 errors](/self-hosting/guides/configuring-s3#frequently-encountered-errors).
 
 ## Web apps
 
 The web apps for Ente Photos is divided into multiple sub-apps like albums,
-cast, auth, etc. These endpoints are configurable in the museum.yaml under the
+cast, auth, etc. These endpoints are configurable in `museum.yaml` under the
 `apps.*` section.
 
-For example, 
+For example,
 
 ```yaml
 apps:
@@ -55,17 +56,16 @@ apps:
     family: https://family.myente.xyz
 ```
 
->[!IMPORTANT]
->By default, all the values redirect to our publicly hosted production services. 
->For example, if `public-albums` is not configured your shared album will 
->use the `albums.ente.io` URL.
+> [!IMPORTANT] By default, all the values redirect to our publicly hosted
+> production services. For example, if `public-albums` is not configured your
+> shared album will use the `albums.ente.io` URL.
 
 After you are done with filling the values, restart museum and the app will
 start utilizing those endpoints instead of Ente's production instances.
 
 Once you have configured all the necessary endpoints, `cd` into `my-ente` and
 stop all the Docker containers with `docker compose down` and restart them with
-`docker compose up -d`. 
+`docker compose up -d`.
 
 Similarly, you can use the default
 [`local.yaml`](https://github.com/ente-io/ente/tree/main/server/configurations/local.yaml)

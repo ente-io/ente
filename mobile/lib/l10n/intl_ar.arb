@@ -1,6 +1,7 @@
 {
   "@@locale ": "en",
   "enterYourEmailAddress": "أدخل عنوان بريدك الإلكتروني",
+  "enterYourNewEmailAddress": "أدخل عنوان بريدك الإلكتروني الجديد",
   "accountWelcomeBack": "أهلاً بعودتك!",
   "emailAlreadyRegistered": "البريد الإلكتروني مُسجل من قبل.",
   "emailNotRegistered": "البريد الإلكتروني غير مسجل.",
@@ -35,7 +36,7 @@
   "activeSessions": "الجلسات النشطة",
   "oops": "عفوًا",
   "somethingWentWrongPleaseTryAgain": "حدث خطأ ما، يرجى المحاولة مرة أخرى",
-  "thisWillLogYouOutOfThisDevice": "سيؤدي هذا إلى تسجيل خروجك من هذا الجهاز.",
+  "thisWillLogYouOutOfThisDevice": "سيؤدي هذا إلى تسجيل خروجك من هذا الجهاز!",
   "thisWillLogYouOutOfTheFollowingDevice": "سيؤدي هذا إلى تسجيل خروجك من الجهاز التالي:",
   "terminateSession": "إنهاء الجَلسةِ؟",
   "terminate": "إنهاء",
@@ -45,7 +46,7 @@
   "decrypting": "جارٍ فك التشفير...",
   "incorrectRecoveryKeyTitle": "مفتاح الاسترداد غير صحيح",
   "incorrectRecoveryKeyBody": "مفتاح الاسترداد الذي أدخلته غير صحيح",
-  "forgotPassword": "نسيت كلمة المرور؟",
+  "forgotPassword": "نسيت كلمة المرور",
   "enterYourRecoveryKey": "أدخل مفتاح الاسترداد",
   "noRecoveryKey": "لا تملك مفتاح استرداد؟",
   "sorry": "عفوًا",
@@ -120,7 +121,7 @@
   "recoveryKeyCopiedToClipboard": "تم نسخ مفتاح الاسترداد إلى الحافظة",
   "recoverAccount": "استعادة الحساب",
   "recover": "استعادة",
-  "dropSupportEmail": "يرجى إرسال بريد إلكتروني إلى {supportEmail} من عنوان بريدك الإلكتروني المسجل.",
+  "dropSupportEmail": "يرجى إرسال بريد إلكتروني إلى {supportEmail} من عنوان بريدك الإلكتروني المسجل",
   "@dropSupportEmail": {
     "placeholders": {
       "supportEmail": {
@@ -140,12 +141,12 @@
   "enterThe6digitCodeFromnyourAuthenticatorApp": "أدخل الرمز المكون من 6 أرقام من\n تطبيق المصادقة الخاص بك",
   "confirm": "تأكيد",
   "setupComplete": "اكتمل الإعداد",
-  "saveYourRecoveryKeyIfYouHaventAlready": "احفظ مفتاح الاسترداد إذا لم تكن قد فعلت ذلك بالفعل.",
-  "thisCanBeUsedToRecoverYourAccountIfYou": "يمكن استخدام هذا المفتاح لاستعادة حسابك إذا فقدت جهاز المصادقة الثنائية.",
+  "saveYourRecoveryKeyIfYouHaventAlready": "احفظ مفتاح الاسترداد إذا لم تكن قد فعلت ذلك",
+  "thisCanBeUsedToRecoverYourAccountIfYou": "يمكن استخدام هذا المفتاح لاستعادة حسابك إذا فقدت العامل الثاني للمصادقة",
   "twofactorAuthenticationPageTitle": "المصادقة الثنائية",
   "lostDevice": "جهاز مفقود؟",
   "verifyingRecoveryKey": "جارٍ التحقق من مفتاح الاسترداد...",
-  "recoveryKeyVerified": "تم التحقق من مفتاح الاسترداد.",
+  "recoveryKeyVerified": "تم التحقق من مفتاح الاسترداد",
   "recoveryKeySuccessBody": "مفتاح الاسترداد الخاص بك صالح. شكرًا على التحقق.\n\nيرجى تذكر الاحتفاظ بنسخة احتياطية آمنة من مفتاح الاسترداد.",
   "invalidRecoveryKey": "مفتاح الاسترداد الذي أدخلته غير صالح. يرجى التأكد من أنه يحتوي على 24 كلمة، والتحقق من كتابة كل كلمة بشكل صحيح.\n\nإذا كنت تستخدم مفتاح استرداد قديمًا، تأكد من أنه مكون من 64 حرفًا، وتحقق من صحة كل حرف.",
   "invalidKey": "المفتاح غير صالح",
@@ -190,7 +191,7 @@
   "canNotOpenTitle": "لا يمكن فتح هذا الألبوم",
   "canNotOpenBody": "عذرًا، لا يمكن فتح هذا الألبوم في التطبيق.",
   "disableDownloadWarningTitle": "يرجى الملاحظة",
-  "disableDownloadWarningBody": "لا يزال بإمكان المشاهدين التقاط لقطات شاشة أو حفظ نسخة من صورك باستخدام أدوات خارجية.",
+  "disableDownloadWarningBody": "لا يزال بإمكان المشاهدين التقاط لقطات شاشة أو حفظ نسخة من صورك باستخدام أدوات خارجية",
   "allowDownloads": "السماح بالتنزيلات",
   "linkDeviceLimit": "حد الأجهزة",
   "noDeviceLimit": "لا شيء",
@@ -220,7 +221,7 @@
   "after1Month": "بعد شهر",
   "after1Year": "بعد سنة",
   "manageParticipants": "إدارة المشاركين",
-  "albumParticipantsCount": "{count, plural, =0 {لا يوجد مشاركون} =1 {مشارك واحد} two {مشاركان} few {{count} مشاركين} many {{count} مشاركًا} other {{count} مشارك}}",
+  "albumParticipantsCount": "{count, plural, =0 {لا يوجد مُشاركون}=1 {مُشارك واحد} other {{count} مُشاركين}}",
   "@albumParticipantsCount": {
     "placeholders": {
       "count": {
@@ -230,7 +231,7 @@
     },
     "description": "Number of participants in an album, including the album owner."
   },
-  "collabLinkSectionDescription": "أنشئ رابطًا يسمح للأشخاص بإضافة الصور ومشاهدتها في ألبومك المشترك دون الحاجة إلى تطبيق Ente أو حساب. خيار مثالي لجمع صور الفعاليات بسهولة.",
+  "collabLinkSectionDescription": "أنشئ رابطًا يسمح للأشخاص بإضافة الصور ومشاهدتها في ألبومك المشترك دون الحاجة إلى تطبيق أو حساب Ente. خيار مثالي لجمع صور الفعاليات بسهولة.",
   "collectPhotos": "جمع الصور",
   "collaborativeLink": "رابط تعاوني",
   "shareWithNonenteUsers": "المشاركة مع غير مستخدمي Ente",
@@ -241,7 +242,7 @@
   "publicLinkEnabled": "تمكين الرابط العام",
   "shareALink": "مشاركة رابط",
   "sharedAlbumSectionDescription": "أنشئ ألبومات مشتركة وتعاونية مع مستخدمي Ente الآخرين، بما في ذلك المستخدمين ذوي الاشتراكات المجانية.",
-  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, =0 {مشاركة مع أشخاص محددين} =1 {تمت المشاركة مع شخص واحد} two {تمت المشاركة مع شخصين} few {تمت المشاركة مع {numberOfPeople} أشخاص} many {تمت المشاركة مع {numberOfPeople} شخصًا} other {تمت المشاركة مع {numberOfPeople} شخصًا}}",
+  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, =0 {مشاركة مع أشخاص مُحددين}=1 {مُشارَك مع شخص واحد} other {مُشارَك مع {numberOfPeople} أشخاص}}",
   "@shareWithPeopleSectionTitle": {
     "placeholders": {
       "numberOfPeople": {
@@ -266,13 +267,13 @@
   "verifyEmailID": "التحقق من {email}",
   "emailNoEnteAccount": "{email} لا يملك حسابًا على Ente.\n\nأرسل له دعوة لمشاركة الصور.",
   "shareMyVerificationID": "إليك معرّف التحقق الخاص بي لـ ente.io: {verificationID}",
-  "shareTextConfirmOthersVerificationID": "مرحبًا، هل يمكنك تأكيد أن هذا هو معرّف التحقق الخاص بك على ente.io: {verificationID}؟",
+  "shareTextConfirmOthersVerificationID": "مرحبًا، هل يمكنك تأكيد أن هذا هو معرّف التحقق الخاص بك على ente.io: {verificationID}",
   "somethingWentWrong": "حدث خطأ ما",
   "sendInvite": "إرسال دعوة",
   "shareTextRecommendUsingEnte": "قم بتنزيل تطبيق Ente حتى نتمكن من مشاركة الصور ومقاطع الفيديو بالجودة الأصلية بسهولة.\n\nhttps://ente.io",
   "done": "تم",
   "applyCodeTitle": "تطبيق الرمز",
-  "enterCodeDescription": "أدخل الرمز المقدم من صديقك للمطالبة بمساحة تخزين مجانية لكما.",
+  "enterCodeDescription": "أدخل الرمز المقدم من صديقك للمطالبة بمساحة تخزين مجانية لكما",
   "apply": "تطبيق",
   "failedToApplyCode": "فشل تطبيق الرمز",
   "enterReferralCode": "أدخل رمز الإحالة",
@@ -354,8 +355,8 @@
   "importing": "جارٍ الاستيراد...",
   "failedToLoadAlbums": "فشل تحميل الألبومات",
   "hidden": "المخفية",
-  "authToViewYourHiddenFiles": "يرجى المصادقة للوصول إلى ملفاتك المخفية.",
-  "authToViewTrashedFiles": "يرجى المصادقة لعرض ملفاتك المحذوفة.",
+  "authToViewYourHiddenFiles": "يرجى المصادقة للوصول إلى ملفاتك المخفية",
+  "authToViewTrashedFiles": "يرجى المصادقة لعرض ملفاتك المحذوفة",
   "trash": "سلة المهملات",
   "uncategorized": "غير مصنف",
   "videoSmallCase": "فيديو",
@@ -364,14 +365,14 @@
   "singleFileInBothLocalAndRemote": "{fileType} موجود في Ente وعلى جهازك.",
   "singleFileInRemoteOnly": "سيتم حذف {fileType} من Ente.",
   "singleFileDeleteFromDevice": "سيتم حذف {fileType} من جهازك.",
-  "deleteFromEnte": "الحذف من Ente",
+  "deleteFromEnte": "حذف من Ente",
   "yesDelete": "نعم، حذف",
   "movedToTrash": "تم النقل إلى سلة المهملات",
   "deleteFromDevice": "الحذف من الجهاز",
   "deleteFromBoth": "الحذف من كليهما",
   "newAlbum": "ألبوم جديد",
   "albums": "الألبومات",
-  "memoryCount": "{count, plural, =0 {لا توجد ذكريات} one {ذكرى واحدة} two {ذكريتان} few {{formattedCount} ذكريات} many {{formattedCount} ذكرى} other {{formattedCount} ذكرى}}",
+  "memoryCount": "{count, plural, =0 {لا توجد ذكريات} one {ذكرى واحدة} two {ذكريتان} other {{formattedCount} ذكرى}}",
   "@memoryCount": {
     "description": "The text to display the number of memories",
     "type": "text",
@@ -459,7 +460,7 @@
   "skip": "تخط",
   "updatingFolderSelection": "جارٍ تحديث تحديد المجلد...",
   "itemCount": "{count, plural, one {{count} عُنْصُر} other {{count} عَنَاصِر}}",
-  "deleteItemCount": "{count, plural, =1 {حذف عنصر واحد} two {حذف عنصرين} few {حذف {count} عناصر} many {حذف {count} عنصرًا} other {حذف {count} عنصرًا}}",
+  "deleteItemCount": "{count, plural, =1 {حذف عنصر واحد} two {حذف عنصرين} other {حذف {count} عنصرًا}}",
   "duplicateItemsGroup": "{count} ملفات، {formattedSize} لكل منها",
   "@duplicateItemsGroup": {
     "description": "Display the number of duplicate files and their size",
@@ -476,7 +477,7 @@
     }
   },
   "showMemories": "عرض الذكريات",
-  "yearsAgo": "{count, plural, one {قبل سنة} two {قبل سنتين} few {قبل {count} سنوات} many {قبل {count} سنة} other {قبل {count} سنة}}",
+  "yearsAgo": "{count, plural, one {قبل سنة} two {قبل سنتين} other {قبل {count} سنة}}",
   "backupSettings": "إعدادات النسخ الاحتياطي",
   "backupStatus": "حالة النسخ الاحتياطي",
   "backupStatusDescription": "ستظهر العناصر التي تم نسخها احتياطيًا هنا",
@@ -494,14 +495,14 @@
   "youAreOnTheLatestVersion": "أنت تستخدم أحدث إصدار.",
   "account": "الحساب",
   "manageSubscription": "إدارة الاشتراك",
-  "authToChangeYourEmail": "يرجى المصادقة لتغيير بريدك الإلكتروني.",
+  "authToChangeYourEmail": "يرجى المصادقة لتغيير بريدك الإلكتروني",
   "changePassword": "تغيير كلمة المرور",
-  "authToChangeYourPassword": "يرجى المصادقة لتغيير كلمة المرور الخاصة بك.",
+  "authToChangeYourPassword": "يرجى المصادقة لتغيير كلمة المرور الخاصة بك",
   "emailVerificationToggle": "تأكيد عنوان البريد الإلكتروني",
-  "authToChangeEmailVerificationSetting": "يرجى المصادقة لتغيير إعداد التحقق من البريد الإلكتروني.",
+  "authToChangeEmailVerificationSetting": "يرجى المصادقة لتغيير إعداد التحقق من البريد الإلكتروني",
   "exportYourData": "تصدير بياناتك",
   "logout": "تسجيل الخروج",
-  "authToInitiateAccountDeletion": "يرجى المصادقة لبدء عملية حذف الحساب.",
+  "authToInitiateAccountDeletion": "يرجى المصادقة لبدء عملية حذف الحساب",
   "areYouSureYouWantToLogout": "هل أنت متأكد من رغبتك في تسجيل الخروج؟",
   "yesLogout": "نعم، تسجيل الخروج",
   "aNewVersionOfEnteIsAvailable": "يتوفر إصدار جديد من Ente.",
@@ -511,24 +512,24 @@
   "updateAvailable": "يتوفر تحديث",
   "ignoreUpdate": "تجاهل",
   "downloading": "جارٍ التنزيل...",
-  "cannotDeleteSharedFiles": "لا يمكن حذف الملفات المشتركة.",
-  "theDownloadCouldNotBeCompleted": "تعذر إكمال التنزيل.",
+  "cannotDeleteSharedFiles": "لا يمكن حذف الملفات المشتركة",
+  "theDownloadCouldNotBeCompleted": "تعذر إكمال التنزيل",
   "retry": "إعادة المحاولة",
   "backedUpFolders": "المجلدات المنسوخة احتياطيًا",
   "backup": "النسخ الاحتياطي",
   "freeUpDeviceSpace": "تحرير مساحة على الجهاز",
   "freeUpDeviceSpaceDesc": "وفر مساحة على جهازك عن طريق مسح الملفات التي تم نسخها احتياطيًا.",
   "allClear": "✨ كل شيء واضح",
-  "noDeviceThatCanBeDeleted": "لا توجد ملفات على هذا الجهاز يمكن حذفها.",
+  "noDeviceThatCanBeDeleted": "لا توجد ملفات على هذا الجهاز يمكن حذفها",
   "removeDuplicates": "إزالة النسخ المكررة",
   "removeDuplicatesDesc": "مراجعة وإزالة الملفات المتطابقة تمامًا.",
   "viewLargeFiles": "الملفات الكبيرة",
   "viewLargeFilesDesc": "عرض الملفات التي تستهلك أكبر قدر من مساحة التخزين.",
   "noDuplicates": "✨ لا توجد ملفات مكررة",
-  "youveNoDuplicateFilesThatCanBeCleared": "لا توجد لديك أي ملفات مكررة يمكن مسحها.",
+  "youveNoDuplicateFilesThatCanBeCleared": "لا توجد لديك أي ملفات مكررة يمكن مسحها",
   "success": "تم بنجاح",
   "rateUs": "تقييم التطبيق",
-  "remindToEmptyDeviceTrash": "تذكر أيضًا إفراغ \"المحذوفة مؤخرًا\" من \"الإعدادات\" -> \"التخزين\" لاستعادة المساحة المحررة.",
+  "remindToEmptyDeviceTrash": "تذكر أيضًا إفراغ \"المحذوفة مؤخرًا\" من \"الإعدادات\" -> \"التخزين\" لاستعادة المساحة المحررة",
   "youHaveSuccessfullyFreedUp": "لقد حررت {storageSaved} بنجاح!",
   "@youHaveSuccessfullyFreedUp": {
     "description": "The text to display when the user has successfully freed up storage",
@@ -542,7 +543,7 @@
   },
   "remindToEmptyEnteTrash": "تذكر أيضًا إفراغ \"سلة المهملات\" لاستعادة المساحة المحررة.",
   "sparkleSuccess": "✨ نجاح",
-  "duplicateFileCountWithStorageSaved": "لقد قمت بتنظيف {count, plural, one {ملف مكرر واحد} two {ملفين مكررين} few {{count} ملفات مكررة} many {{count} ملفًا مكررًا} other {{count} ملفًا مكررًا}}، مما وفر {storageSaved}!",
+  "duplicateFileCountWithStorageSaved": "لقد قمت بتنظيف {count, plural, one {ملف مكرر واحد} two {ملفين مكررين} other {{count} ملفًا مكررًا}}، مما وفر {storageSaved}!",
   "@duplicateFileCountWithStorageSaved": {
     "description": "The text to display when the user has successfully cleaned up duplicate files",
     "type": "text",
@@ -598,7 +599,7 @@
   "selectYourPlan": "اختر خطتك",
   "enteSubscriptionPitch": "يحفظ Ente ذكرياتك، بحيث تظل دائمًا متاحة لك حتى لو فقدت جهازك.",
   "enteSubscriptionShareWithFamily": "يمكنك أيضًا إضافة أفراد عائلتك إلى خطتك.",
-  "currentUsageIs": "استخدامك الحالي هو",
+  "currentUsageIs": "استخدامك الحالي هو ",
   "@currentUsageIs": {
     "description": "This text is followed by storage usage",
     "examples": {
@@ -682,7 +683,7 @@
   "areYouSureYouWantToExit": "هل أنت متأكد من رغبتك في الخروج؟",
   "thankYou": "شكرًا لك",
   "failedToVerifyPaymentStatus": "فشل التحقق من حالة الدفع.",
-  "pleaseWaitForSometimeBeforeRetrying": "يرجى الانتظار لبعض الوقت قبل إعادة المحاولة.",
+  "pleaseWaitForSometimeBeforeRetrying": "يرجى الانتظار لبعض الوقت قبل إعادة المحاولة",
   "paymentFailedMessage": "للأسف، فشلت عملية الدفع الخاصة بك. يرجى الاتصال بالدعم وسوف نساعدك!",
   "youAreOnAFamilyPlan": "أنت مشترك في خطة عائلية!",
   "contactFamilyAdmin": "يرجى الاتصال بـ <green>{familyAdminEmail}</green> لإدارة اشتراكك.",
@@ -691,9 +692,9 @@
   "leave": "مغادرة",
   "rateTheApp": "تقييم التطبيق",
   "startBackup": "بدء النسخ الاحتياطي",
-  "noPhotosAreBeingBackedUpRightNow": "لا يتم نسخ أي صور احتياطيًا في الوقت الحالي.",
+  "noPhotosAreBeingBackedUpRightNow": "لا يتم نسخ أي صور احتياطيًا في الوقت الحالي",
   "preserveMore": "حفظ المزيد",
-  "grantFullAccessPrompt": "يرجى السماح بالوصول إلى جميع الصور في تطبيق الإعدادات.",
+  "grantFullAccessPrompt": "الرجاء السماح بالوصول إلى جميع الصور في تطبيق الإعدادات",
   "allowPermTitle": "السماح بالوصول إلى الصور",
   "allowPermBody": "يرجى السماح بالوصول إلى صورك من الإعدادات حتى يتمكن Ente من عرض نسختك الاحتياطية ومكتبتك.",
   "openSettings": "فتح الإعدادات",
@@ -710,10 +711,10 @@
   "androidIosWebDesktop": "أندرويد، iOS، الويب، سطح المكتب",
   "mobileWebDesktop": "الهاتف المحمول، الويب، سطح المكتب",
   "newToEnte": "جديد في Ente",
-  "pleaseLoginAgain": "يرجى تسجيل الدخول مرة أخرى.",
+  "pleaseLoginAgain": "يرجى تسجيل الدخول مرة أخرى",
   "autoLogoutMessage": "بسبب خلل تقني، تم تسجيل خروجك. نعتذر عن الإزعاج.",
-  "yourSubscriptionHasExpired": "انتهت صلاحية اشتراكك.",
-  "storageLimitExceeded": "تم تجاوز حد التخزين.",
+  "yourSubscriptionHasExpired": "انتهت صلاحية اشتراكك",
+  "storageLimitExceeded": "تم تجاوز حد التخزين",
   "upgrade": "ترقية",
   "raiseTicket": "فتح تذكرة دعم",
   "@raiseTicket": {
@@ -723,8 +724,8 @@
   "backupFailed": "فشل النسخ الاحتياطي",
   "sorryBackupFailedDesc": "عذرًا، لم نتمكن من عمل نسخة احتياطية لهذا الملف الآن، سنعيد المحاولة لاحقًا.",
   "couldNotBackUpTryLater": "لم نتمكن من نسخ بياناتك احتياطيًا.\nسنحاول مرة أخرى لاحقًا.",
-  "enteCanEncryptAndPreserveFilesOnlyIfYouGrant": "يمكن لـ Ente تشفير وحفظ الملفات فقط إذا منحت الإذن بالوصول إليها.",
-  "pleaseGrantPermissions": "يرجى منح الأذونات.",
+  "enteCanEncryptAndPreserveFilesOnlyIfYouGrant": "يمكن لـ Ente تشفير وحفظ الملفات فقط إذا منحت الإذن بالوصول إليها",
+  "pleaseGrantPermissions": "يرجى منح الأذونات",
   "grantPermission": "منح الإذن",
   "privateSharing": "مشاركة خاصة",
   "shareOnlyWithThePeopleYouWant": "شارك فقط مع الأشخاص الذين تريدهم.",
@@ -793,11 +794,11 @@
   "share": "مشاركة",
   "unhideToAlbum": "إظهار في الألبوم",
   "restoreToAlbum": "استعادة إلى الألبوم",
-  "moveItem": "{count, plural, =1 {نقل عنصر} two {نقل عنصرين} few {نقل {count} عناصر} many {نقل {count} عنصرًا} other {نقل {count} عنصرًا}}",
+  "moveItem": "{count, plural, =1 {نقل عنصر} two {نقل عنصرين} other {نقل {count} عنصرًا}}",
   "@moveItem": {
     "description": "Page title while moving one or more items to an album"
   },
-  "addItem": "{count, plural, =1 {إضافة عنصر} two {إضافة عنصرين} few {إضافة {count} عناصر} many {إضافة {count} عنصرًا} other {إضافة {count} عنصرًا}}",
+  "addItem": "{count, plural, =1 {إضافة عنصر} two {إضافة عنصرين} other {إضافة {count} عنصرًا}}",
   "@addItem": {
     "description": "Page title while adding one or more items to album"
   },
@@ -825,7 +826,7 @@
   "referFriendsAnd2xYourPlan": "أحِل الأصدقاء وضاعف خطتك مرتين",
   "shareAlbumHint": "افتح ألبومًا وانقر على زر المشاركة في الزاوية اليمنى العليا للمشاركة.",
   "itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion": "تعرض العناصر عدد الأيام المتبقية قبل الحذف الدائم.",
-  "trashDaysLeft": "{count, plural, =0 {قريبًا} =1 {يوم واحد} two {يومان} few {{count} أيام} many {{count} يومًا} other {{count} يومًا}}",
+  "trashDaysLeft": "{count, plural, =0 {قريبًا} =1 {يوم واحد} two {يومان} other {{count} يومًا}}",
   "@trashDaysLeft": {
     "description": "Text to indicate number of days remaining before permanent deletion",
     "placeholders": {
@@ -898,8 +899,8 @@
   "authToViewYourMemories": "يرجى المصادقة لعرض ذكرياتك.",
   "unlock": "فتح",
   "freeUpSpace": "تحرير المساحة",
-  "freeUpSpaceSaving": "{count, plural, =1 {يمكن حذفه من الجهاز لتحرير {formattedSize}} two {يمكن حذفهما من الجهاز لتحرير {formattedSize}} few {يمكن حذفها من الجهاز لتحرير {formattedSize}} many {يمكن حذفها من الجهاز لتحرير {formattedSize}} other {يمكن حذفها من الجهاز لتحرير {formattedSize}}}",
-  "filesBackedUpInAlbum": "{count, plural, one {ملف واحد} two {ملفان} few {{formattedNumber} ملفات} many {{formattedNumber} ملفًا} other {{formattedNumber} ملفًا}} في هذا الألبوم تم نسخه احتياطيًا بأمان",
+  "freeUpSpaceSaving": "{count, plural, =1 {يمكن حذفه من الجهاز لتحرير {formattedSize}} two {يمكن حذفهما من الجهاز لتحرير {formattedSize}} other {يمكن حذفها من الجهاز لتحرير {formattedSize}}}",
+  "filesBackedUpInAlbum": "{count, plural, one {ملف واحد} two {ملفان} other {{formattedNumber} ملفًا}} في هذا الألبوم تم نسخه احتياطيًا بأمان",
   "@filesBackedUpInAlbum": {
     "description": "Text to tell user how many files have been backed up in the album",
     "placeholders": {
@@ -914,7 +915,7 @@
       }
     }
   },
-  "filesBackedUpFromDevice": "{count, plural, one {ملف واحد} two {ملفان} few {{formattedNumber} ملفات} many {{formattedNumber} ملفًا} other {{formattedNumber} ملفًا}} على هذا الجهاز تم نسخه احتياطيًا بأمان",
+  "filesBackedUpFromDevice": "{count, plural, one {ملف واحد} two {ملفان} other {{formattedNumber} ملفًا}} على هذا الجهاز تم نسخه احتياطيًا بأمان",
   "@filesBackedUpFromDevice": {
     "description": "Text to tell user how many files have been backed up from this device",
     "placeholders": {
@@ -1030,7 +1031,7 @@
   "didYouKnow": "هل تعلم؟",
   "loadingMessage": "جارٍ تحميل صورك...",
   "loadMessage1": "يمكنك مشاركة اشتراكك مع عائلتك.",
-  "loadMessage2": "لقد حفظنا أكثر من 200 مليون ذكرى حتى الآن.",
+  "loadMessage2": "لقد حفظنا أكثر من 200 مليون ذكرى حتى الآن",
   "loadMessage3": "نحتفظ بـ 3 نسخ من بياناتك، إحداها في ملجأ للطوارئ تحت الأرض.",
   "loadMessage4": "جميع تطبيقاتنا مفتوحة المصدر.",
   "loadMessage5": "تم تدقيق شفرتنا المصدرية والتشفير الخاص بنا خارجيًا.",
@@ -1216,7 +1217,7 @@
   "searchHint4": "الموقع",
   "searchHint5": "قريبًا: الوجوه والبحث السحري ✨",
   "addYourPhotosNow": "أضف صورك الآن",
-  "searchResultCount": "{count, plural, one{{count} النتائج التي تم العثور عليها} other{{count} النتائج التي تم العثور عليها}}",
+  "searchResultCount": "{count, plural, other{{count} النتائج التي تم العثور عليها}}",
   "@searchResultCount": {
     "description": "Text to tell user how many results were found for their search query",
     "placeholders": {
@@ -1268,8 +1269,8 @@
     "description": "Subtitle to indicate that the user can find people quickly by name"
   },
   "findPeopleByName": "البحث عن الأشخاص بسرعة بالاسم",
-  "addViewers": "{count, plural, =0 {إضافة مشاهد} =1 {إضافة مشاهد} two {إضافة مشاهدين} few {إضافة {count} مشاهدين} many {إضافة {count} مشاهدًا} other {إضافة {count} مشاهدًا}}",
-  "addCollaborators": "{count, plural, =0 {إضافة متعاون} =1 {إضافة متعاون} two {إضافة متعاونين} few {إضافة {count} متعاونين} many {إضافة {count} متعاونًا} other {إضافة {count} متعاونًا}}",
+  "addViewers": "{count, plural, =0 {إضافة مشاهد} =1 {إضافة مشاهد} two {إضافة مشاهدين} other {إضافة {count} مشاهدًا}}",
+  "addCollaborators": "{count, plural, =0 {إضافة متعاون} =1 {إضافة متعاون} two {إضافة متعاونين} other {إضافة {count} متعاونًا}}",
   "longPressAnEmailToVerifyEndToEndEncryption": "اضغط مطولاً على بريد إلكتروني للتحقق من التشفير من طرف إلى طرف.",
   "developerSettingsWarning": "هل أنت متأكد من رغبتك في تعديل إعدادات المطور؟",
   "developerSettings": "إعدادات المطور",
@@ -1403,7 +1404,7 @@
   "enableMachineLearningBanner": "قم بتمكين تعلم الآلة للبحث السحري والتعرف على الوجوه.",
   "searchDiscoverEmptySection": "سيتم عرض الصور هنا بمجرد اكتمال المعالجة والمزامنة.",
   "searchPersonsEmptySection": "سيتم عرض الأشخاص هنا بمجرد اكتمال المعالجة والمزامنة.",
-  "viewersSuccessfullyAdded": "{count, plural, =0 {تمت إضافة 0 مشاهدين} =1 {تمت إضافة مشاهد واحد} two {تمت إضافة مشاهدين} few {تمت إضافة {count} مشاهدين} many {تمت إضافة {count} مشاهدًا} other {تمت إضافة {count} مشاهدًا}}",
+  "viewersSuccessfullyAdded": "{count, plural, =0 {تمت إضافة 0 مشاهدين} =1 {تمت إضافة مشاهد واحد} two {تمت إضافة مشاهدين} other {تمت إضافة {count} مشاهدًا}}",
   "@viewersSuccessfullyAdded": {
     "placeholders": {
       "count": {
@@ -1413,7 +1414,7 @@
     },
     "description": "Number of viewers that were successfully added to an album."
   },
-  "collaboratorsSuccessfullyAdded": "{count, plural, =0 {تمت إضافة 0 متعاونين} =1 {تمت إضافة متعاون واحد} two {تمت إضافة متعاونين} few {تمت إضافة {count} متعاونين} many {تمت إضافة {count} متعاونًا} other {تمت إضافة {count} متعاونًا}}",
+  "collaboratorsSuccessfullyAdded": "{count, plural, =0 {تمت إضافة 0 متعاونين} =1 {تمت إضافة متعاون واحد} two {تمت إضافة متعاونين} other {تمت إضافة {count} متعاونًا}}",
   "@collaboratorsSuccessfullyAdded": {
     "placeholders": {
       "count": {
@@ -1488,7 +1489,7 @@
   },
   "currentlyRunning": "قيد التشغيل حاليًا",
   "ignored": "تم التجاهل",
-  "photosCount": "{count, plural, =0 {لا توجد صور} =1 {صورة واحدة} two {صورتان} few {{count} صور} many {{count} صورة} other {{count} صورة}}",
+  "photosCount": "{count, plural, =0 {لا توجد صور} =1 {صورة واحدة} two {صورتان} other {{count} صورة}}",
   "@photosCount": {
     "placeholders": {
       "count": {
@@ -1686,7 +1687,7 @@
   "moveSelectedPhotosToOneDate": "نقل الصور المحددة إلى تاريخ واحد",
   "shiftDatesAndTime": "تغيير التواريخ والوقت",
   "photosKeepRelativeTimeDifference": "تحتفظ الصور بالفرق الزمني النسبي",
-  "photocountPhotos": "{count, plural, =0 {لا توجد صور} =1 {صورة واحدة} two {صورتان} few {{count} صور} many {{count} صورة} other {{count} صورة}}",
+  "photocountPhotos": "{count, plural, =0 {لا توجد صور} =1 {صورة واحدة} two {صورتان} other {{count} صورة}}",
   "@photocountPhotos": {
     "placeholders": {
       "count": {
@@ -1700,7 +1701,7 @@
   "selectedItemsWillBeRemovedFromThisPerson": "سيتم إزالة العناصر المحددة من هذا الشخص، ولكن لن يتم حذفها من مكتبتك.",
   "throughTheYears": "{dateFormat} عبر السنين",
   "thisWeekThroughTheYears": "هذا الأسبوع عبر السنين",
-  "thisWeekXYearsAgo": "{count, plural, =1 {هذا الأسبوع، قبل سنة} two {هذا الأسبوع، قبل سنتين} few {هذا الأسبوع، قبل {count} سنوات} many {هذا الأسبوع، قبل {count} سنة} other {هذا الأسبوع، قبل {count} سنة}}",
+  "thisWeekXYearsAgo": "{count, plural, =1 {هذا الأسبوع، قبل سنة} two {هذا الأسبوع، قبل سنتين} other {هذا الأسبوع، قبل {count} سنة}}",
   "youAndThem": "أنت و {name}",
   "admiringThem": "الإعجاب بـ {name}",
   "embracingThem": "معانقة {name}",
@@ -1729,21 +1730,16 @@
   "onTheRoad": "على الطريق مرة أخرى",
   "food": "متعة الطهي",
   "pets": "رفاق فروي",
-  "cLIcon": "أيقونة جديدة",
-  "cLIconDesc": "أخيرًا، أيقونة تطبيق جديدة، نعتقد أنها تمثل عملنا على أفضل وجه. أضفنا أيضًا مبدل أيقونات حتى تتمكن من الاستمرار في استخدام الأيقونة القديمة.",
-  "cLMemories": "الذكريات",
-  "cLMemoriesDesc": "أعد اكتشاف لحظاتك الخاصة - تسليط الضوء على الأشخاص المفضلين لديك، رحلاتك وعطلاتك، أفضل لقطاتك، وأكثر من ذلك بكثير. قم بتشغيل تعلم الآلة، ضع علامة على نفسك وقم بتسمية أصدقائك للحصول على أفضل تجربة.",
-  "cLWidgets": "الأدوات المصغرة (Widgets)",
-  "cLWidgetsDesc": "الأدوات المصغرة للشاشة الرئيسية المدمجة مع الذكريات متاحة الآن. ستعرض لحظاتك الخاصة دون فتح التطبيق.",
-  "cLFamilyPlan": "حدود الخطة العائلية",
-  "cLFamilyPlanDesc": "يمكنك الآن تعيين حدود لمقدار التخزين الذي يمكن لأفراد عائلتك استخدامه.",
-  "cLBulkEdit": "تعديل التواريخ بشكل جماعي",
-  "cLBulkEditDesc": "يمكنك الآن تحديد صور متعددة، وتعديل التاريخ/الوقت لجميعها بإجراء سريع واحد. تغيير التواريخ مدعوم أيضًا.",
   "curatedMemories": "ذكريات منسقة",
-  "onThisDay": "On this day",
-  "lookBackOnYourMemories": "Look back on your memories 🌄",
-  "newPhotosEmoji": " new 📸",
-  "sorryWeHadToPauseYourBackups": "Sorry, we had to pause your backups",
-  "clickToInstallOurBestVersionYet": "Click to install our best version yet",
-  "onThisDayNotificationExplanation": "Receive reminders about memories from this day in previous years."
+  "memories": "ذكريات",
+  "deleteMultipleAlbumDialog": "هل تريد أيضًا حذف الصور (والمقاطع) الموجودة في هذه الألبومات {count} من <bold>كافة</bold> الألبومات الأخرى التي تشترك فيها؟",
+  "addParticipants": "إضافة مشاركين",
+  "selectedAlbums": "{count} تم تحديد",
+  "actionNotSupportedOnFavouritesAlbum": "الإجراء غير مدعوم في ألبوم المفضلة",
+  "onThisDay": "في هذا اليوم",
+  "newPhotosEmoji": " جديد 📸",
+  "happyBirthday": "عيد ميلاد سعيد! 🥳",
+  "happyBirthdayToPerson": "عيد ميلاد سعيد إلى {name}! 🎉",
+  "birthdays": "أعياد الميلاد",
+  "wishThemAHappyBirthday": "Wish ${name} a happy birthday! 🎉"
 }

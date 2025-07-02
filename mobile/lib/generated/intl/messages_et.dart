@@ -20,6 +20,8 @@ typedef String MessageIfAbsent(String messageStr, List<dynamic> args);
 class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'et';
 
+  static String m115(name) => "Wish \$${name} a happy birthday! 🎉";
+
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
         "about": MessageLookupByLibrary.simpleMessage("Info"),
@@ -49,8 +51,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "checkStatus":
             MessageLookupByLibrary.simpleMessage("Kontrolli staatust"),
         "checking": MessageLookupByLibrary.simpleMessage("Kontrollimine..."),
-        "clickToInstallOurBestVersionYet": MessageLookupByLibrary.simpleMessage(
-            "Click to install our best version yet"),
         "collaborator": MessageLookupByLibrary.simpleMessage("Kaastööline"),
         "collectPhotos": MessageLookupByLibrary.simpleMessage("Kogu fotod"),
         "color": MessageLookupByLibrary.simpleMessage("Värv"),
@@ -151,8 +151,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "lockButtonLabel": MessageLookupByLibrary.simpleMessage("Lukusta"),
         "logInLabel": MessageLookupByLibrary.simpleMessage("Logi sisse"),
         "logout": MessageLookupByLibrary.simpleMessage("Logi välja"),
-        "lookBackOnYourMemories": MessageLookupByLibrary.simpleMessage(
-            "Look back on your memories 🌄"),
         "manage": MessageLookupByLibrary.simpleMessage("Halda"),
         "manageLink": MessageLookupByLibrary.simpleMessage("Halda linki"),
         "manageParticipants": MessageLookupByLibrary.simpleMessage("Halda"),
@@ -166,14 +164,10 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Liigutatud prügikasti"),
         "name": MessageLookupByLibrary.simpleMessage("Nimi"),
         "never": MessageLookupByLibrary.simpleMessage("Mitte kunagi"),
-        "newPhotosEmoji": MessageLookupByLibrary.simpleMessage(" new 📸"),
         "newest": MessageLookupByLibrary.simpleMessage("Uusimad"),
         "no": MessageLookupByLibrary.simpleMessage("Ei"),
         "noDeviceLimit": MessageLookupByLibrary.simpleMessage("Puudub"),
         "ok": MessageLookupByLibrary.simpleMessage("OK"),
-        "onThisDay": MessageLookupByLibrary.simpleMessage("On this day"),
-        "onThisDayNotificationExplanation": MessageLookupByLibrary.simpleMessage(
-            "Receive reminders about memories from this day in previous years."),
         "oops": MessageLookupByLibrary.simpleMessage("Oih"),
         "oopsSomethingWentWrong":
             MessageLookupByLibrary.simpleMessage("Oih, midagi läks valesti"),
@@ -229,8 +223,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage(
                 "Midagi läks valesti, palun proovi uuesti"),
         "sorry": MessageLookupByLibrary.simpleMessage("Vabandust"),
-        "sorryWeHadToPauseYourBackups": MessageLookupByLibrary.simpleMessage(
-            "Sorry, we had to pause your backups"),
         "sortAlbumsBy": MessageLookupByLibrary.simpleMessage("Sorteeri"),
         "sortNewestFirst":
             MessageLookupByLibrary.simpleMessage("Uuemad eespool"),
@@ -268,6 +260,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "weakStrength": MessageLookupByLibrary.simpleMessage("Nõrk"),
         "welcomeBack":
             MessageLookupByLibrary.simpleMessage("Tere tulemast tagasi!"),
+        "wishThemAHappyBirthday": m115,
         "yes": MessageLookupByLibrary.simpleMessage("Jah"),
         "yesConvertToViewer":
             MessageLookupByLibrary.simpleMessage("Jah, muuda vaatajaks"),

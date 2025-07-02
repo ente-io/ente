@@ -13,10 +13,5 @@
   "confirmAccountDeletion": "계정 삭제 확인",
   "deleteAccountPermanentlyButton": "계정을 영구적으로 삭제",
   "yourAccountHasBeenDeleted": "계정이 삭제되었습니다.",
-  "onThisDay": "On this day",
-  "lookBackOnYourMemories": "Look back on your memories 🌄",
-  "newPhotosEmoji": " new 📸",
-  "sorryWeHadToPauseYourBackups": "Sorry, we had to pause your backups",
-  "clickToInstallOurBestVersionYet": "Click to install our best version yet",
-  "onThisDayNotificationExplanation": "Receive reminders about memories from this day in previous years."
+  "wishThemAHappyBirthday": "Wish ${name} a happy birthday! 🎉"
 }

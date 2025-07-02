@@ -3,7 +3,7 @@
     "version": "0.0.0",
     "private": true,
     "dependencies": {
-        "chrono-node": "^2.8.0",
+        "chrono-node": "^2.8.3",
         "debounce": "^2.2.0",
         "ente-accounts": "*",
         "ente-base": "*",
@@ -25,9 +25,9 @@
         "similarity-transformation": "^0.0.1"
     },
     "devDependencies": {
-        "@types/node": "^22.15.21",
-        "@types/react": "^19.1.5",
-        "@types/react-dom": "^19.1.5",
+        "@types/node": "^22.15.32",
+        "@types/react": "^19.1.8",
+        "@types/react-dom": "^19.1.6",
         "@types/react-window": "^1.8.8",
         "ente-build-config": "*"
     }

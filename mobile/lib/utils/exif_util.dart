@@ -3,7 +3,7 @@ import "dart:developer";
 import "dart:io";
 
 import "package:computer/computer.dart";
-import 'package:exif/exif.dart';
+import 'package:exif_reader/exif_reader.dart';
 import "package:ffmpeg_kit_flutter/ffprobe_kit.dart";
 import "package:ffmpeg_kit_flutter/media_information.dart";
 import "package:ffmpeg_kit_flutter/media_information_session.dart";

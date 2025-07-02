@@ -1,6 +1,5 @@
 import "dart:async";
 
-import "package:collection/collection.dart";
 import 'package:flutter/material.dart';
 import "package:logging/logging.dart";
 import "package:photos/core/configuration.dart";
@@ -8,11 +7,10 @@ import "package:photos/core/event_bus.dart";
 import "package:photos/events/people_changed_event.dart";
 import "package:photos/extensions/user_extension.dart";
 import "package:photos/models/api/collection/user.dart";
-import "package:photos/models/file/file.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/theme/colors.dart";
 import 'package:photos/theme/ente_theme.dart';
-import "package:photos/ui/viewer/search/result/person_face_widget.dart";
+import "package:photos/ui/viewer/people/person_face_widget.dart";
 import "package:photos/utils/standalone/debouncer.dart";
 import 'package:tuple/tuple.dart';
 
@@ -39,7 +37,8 @@ class UserAvatarWidget extends StatefulWidget {
 
 class _UserAvatarWidgetState extends State<UserAvatarWidget> {
   Future<String?>? _personID;
-  EnteFile? _faceThumbnail;
+  bool _canUsePersonFaceWidget = false;
+  int lastSyncTimeForKey = 0;
   final _logger = Logger("_UserAvatarWidgetState");
   late final StreamSubscription<PeopleChangedEvent> _peopleChangedSubscription;
   final _debouncer = Debouncer(
@@ -70,22 +69,17 @@ class _UserAvatarWidgetState extends State<UserAvatarWidget> {
 
   Future<void> _reload() async {
     _debouncer.run(() async {
+      if (!mounted) return;
       setState(() {
-        if (PersonService
-                .instance.emailToPartialPersonDataMapCache[widget.user.email] !=
-            null) {
-          _personID = PersonService.instance.getPersons().then((people) async {
-            final person = people.firstWhereOrNull(
-              (person) => person.data.email == widget.user.email,
-            );
-            if (person != null) {
-              _faceThumbnail =
-                  await PersonService.instance.getThumbnailFileOfPerson(person);
-            }
-            return person?.remoteID;
-          });
+        final data = PersonService
+            .instance.emailToPartialPersonDataMapCache[widget.user.email];
+        if (data != null && data.containsKey(PersonService.kPersonIDKey)) {
+          _canUsePersonFaceWidget = true;
+          _personID = Future.value(data[PersonService.kPersonIDKey]);
+          lastSyncTimeForKey = PersonService.instance.lastRemoteSyncTime();
         } else {
-          _personID = null;
+          _canUsePersonFaceWidget = false;
+          _personID = Future.value(null);
         }
       });
     });
@@ -94,7 +88,6 @@ class _UserAvatarWidgetState extends State<UserAvatarWidget> {
   @override
   Widget build(BuildContext context) {
     final double size = getAvatarSize(widget.type);
-
     return _personID != null
         ? Container(
             padding: const EdgeInsets.all(0.5),
@@ -117,24 +110,24 @@ class _UserAvatarWidgetState extends State<UserAvatarWidget> {
                   if (snapshot.hasData) {
                     final personID = snapshot.data as String;
                     return ClipOval(
-                      child: _faceThumbnail == null
-                          ? _FirstLetterCircularAvatar(
-                              user: widget.user,
-                              currentUserID: widget.currentUserID,
-                              thumbnailView: widget.thumbnailView,
-                              type: widget.type,
-                            )
-                          : PersonFaceWidget(
-                              _faceThumbnail!,
+                      child: _canUsePersonFaceWidget
+                          ? PersonFaceWidget(
+                              key: ValueKey('$personID-$lastSyncTimeForKey'),
                               personId: personID,
                               onErrorCallback: () {
                                 if (mounted) {
                                   setState(() {
                                     _personID = null;
-                                    _faceThumbnail = null;
+                                    _canUsePersonFaceWidget = false;
                                   });
                                 }
                               },
+                            )
+                          : _FirstLetterCircularAvatar(
+                              user: widget.user,
+                              currentUserID: widget.currentUserID,
+                              thumbnailView: widget.thumbnailView,
+                              type: widget.type,
                             ),
                     );
                   } else if (snapshot.hasError) {

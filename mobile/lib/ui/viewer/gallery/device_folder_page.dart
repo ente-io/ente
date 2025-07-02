@@ -129,7 +129,7 @@ class _BackupHeaderWidgetState extends State<BackupHeaderWidget> {
                 trailingWidget: ToggleSwitchWidget(
                   value: () => shouldBackup.value,
                   onChanged: () async {
-                    _logger.fine(
+                    _logger.info(
                       "Toggling device folder sync status to "
                       "${!shouldBackup.value}",
                     );

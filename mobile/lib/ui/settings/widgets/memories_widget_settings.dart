@@ -11,6 +11,7 @@ import "package:photos/ui/components/menu_item_widget/menu_item_widget.dart";
 import 'package:photos/ui/components/title_bar_title_widget.dart';
 import 'package:photos/ui/components/title_bar_widget.dart';
 import "package:photos/ui/components/toggle_switch_widget.dart";
+import "package:photos/utils/standalone/debouncer.dart";
 
 class MemoriesWidgetSettings extends StatefulWidget {
   const MemoriesWidgetSettings({super.key});
@@ -28,6 +29,8 @@ class _MemoriesWidgetSettingsState extends State<MemoriesWidgetSettings> {
 
   late final bool isMLEnabled;
 
+  late Debouncer _changeMemoriesSettings;
+
   @override
   void initState() {
     super.initState();
@@ -44,13 +47,14 @@ class _MemoriesWidgetSettingsState extends State<MemoriesWidgetSettings> {
   }
 
   Future<void> initVariables() async {
+    _changeMemoriesSettings = Debouncer(const Duration(milliseconds: 2500));
     isMLEnabled = flagService.hasGrantedMLConsent;
     isYearlyMemoriesEnabled =
-        await MemoryHomeWidgetService.instance.getSelectedLastYearMemories();
+        MemoryHomeWidgetService.instance.hasLastYearMemoriesSelected();
     isSmartMemoriesEnabled =
-        await MemoryHomeWidgetService.instance.getSelectedMLMemories();
+        MemoryHomeWidgetService.instance.getMLMemoriesSelected();
     isOnThisDayMemoriesEnabled =
-        await MemoryHomeWidgetService.instance.getSelectedOnThisDayMemories();
+        MemoryHomeWidgetService.instance.getOnThisDayMemoriesSelected();
 
     if (isYearlyMemoriesEnabled == null ||
         isSmartMemoriesEnabled == null ||
@@ -78,12 +82,13 @@ class _MemoriesWidgetSettingsState extends State<MemoriesWidgetSettings> {
   }
 
   Future<void> updateVariables() async {
+    _changeMemoriesSettings.run(MemoryHomeWidgetService.instance.memoryChanged);
     await MemoryHomeWidgetService.instance
-        .setSelectedLastYearMemories(isYearlyMemoriesEnabled!);
+        .setLastYearMemoriesSelected(isYearlyMemoriesEnabled!);
     await MemoryHomeWidgetService.instance
         .setSelectedMLMemories(isSmartMemoriesEnabled!);
     await MemoryHomeWidgetService.instance
-        .setSelectedOnThisDayMemories(isOnThisDayMemoriesEnabled!);
+        .setOnThisDayMemoriesSelected(isOnThisDayMemoriesEnabled!);
     await MemoryHomeWidgetService.instance.memoryChanged();
   }
 
@@ -99,7 +104,7 @@ class _MemoriesWidgetSettingsState extends State<MemoriesWidgetSettings> {
             flexibleSpaceTitle: TitleBarTitleWidget(
               title: S.of(context).memories,
             ),
-            expandedHeight: 120,
+            expandedHeight: MediaQuery.textScalerOf(context).scale(120),
             flexibleSpaceCaption: hasInstalledAny
                 ? S.of(context).memoriesWidgetDesc
                 : context.l10n.addMemoriesWidgetPrompt,
@@ -161,7 +166,7 @@ class _MemoriesWidgetSettingsState extends State<MemoriesWidgetSettings> {
                                 isYearlyMemoriesEnabled =
                                     !isYearlyMemoriesEnabled!;
                               });
-                              await updateVariables();
+                              updateVariables().ignore();
                             },
                           ),
                           singleBorderRadius: 8,
@@ -184,7 +189,7 @@ class _MemoriesWidgetSettingsState extends State<MemoriesWidgetSettings> {
                                 isOnThisDayMemoriesEnabled =
                                     !isOnThisDayMemoriesEnabled!;
                               });
-                              await updateVariables();
+                              updateVariables().ignore();
                             },
                           ),
                           singleBorderRadius: 8,
@@ -208,7 +213,8 @@ class _MemoriesWidgetSettingsState extends State<MemoriesWidgetSettings> {
                                   isSmartMemoriesEnabled =
                                       !isSmartMemoriesEnabled!;
                                 });
-                                await updateVariables();
+
+                                updateVariables().ignore();
                               },
                             ),
                             singleBorderRadius: 8,

@@ -3,10 +3,10 @@ import "dart:async";
 import "package:flutter/material.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/events/event.dart";
+import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/ml/face/person.dart";
 import "package:photos/models/search/generic_search_result.dart";
-import "package:photos/models/search/hierarchical/face_filter.dart";
 import "package:photos/models/search/recent_searches.dart";
 import "package:photos/models/search/search_constants.dart";
 import "package:photos/models/search/search_result.dart";
@@ -18,8 +18,8 @@ import "package:photos/ui/viewer/file/no_thumbnail_widget.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/ui/viewer/people/add_person_action_sheet.dart";
 import "package:photos/ui/viewer/people/people_page.dart";
+import 'package:photos/ui/viewer/people/person_face_widget.dart';
 import "package:photos/ui/viewer/search/result/people_section_all_page.dart";
-import 'package:photos/ui/viewer/search/result/person_face_widget.dart';
 import "package:photos/ui/viewer/search/result/search_result_page.dart";
 import "package:photos/ui/viewer/search/search_section_cta.dart";
 import "package:photos/utils/navigation_util.dart";
@@ -52,12 +52,10 @@ class _PeopleSectionState extends State<PeopleSection> {
     for (Stream<Event> stream in streamsToListenTo) {
       streamSubscriptions.add(
         stream.listen((event) async {
-          _examples = await widget.sectionType
-              .getData(
-                context,
-                limit: kSearchSectionLimit,
-              )
-              .then((value) => List.from(value));
+          _examples = await widget.sectionType.getData(
+            context,
+            limit: kSearchSectionLimit,
+          ) as List<GenericSearchResult>;
           setState(() {});
         }),
       );
@@ -203,9 +201,8 @@ class PersonSearchExample extends StatelessWidget {
   });
 
   void toggleSelection() {
-    selectedPeople?.toggleSelection(
-      (searchResult.hierarchicalSearchFilter as FaceFilter).personId!,
-    );
+    selectedPeople
+        ?.toggleSelection(searchResult.params[kPersonParamID]! as String);
   }
 
   @override
@@ -218,9 +215,9 @@ class PersonSearchExample extends StatelessWidget {
     return ListenableBuilder(
       listenable: selectedPeople ?? ValueNotifier(false),
       builder: (context, _) {
-        final filter = (searchResult.hierarchicalSearchFilter as FaceFilter);
-        final id = filter.personId ?? filter.clusterId ?? "";
-        final bool isSelected = selectedPeople?.isPersonSelected(id) ?? false;
+        final id = searchResult.params[kPersonParamID] as String?;
+        final bool isSelected =
+            id != null ? selectedPeople?.isPersonSelected(id) ?? false : false;
 
         return GestureDetector(
           onTap: selectedPeople != null
@@ -350,7 +347,7 @@ class PersonSearchExample extends StatelessWidget {
                       child: Padding(
                         padding: const EdgeInsets.only(top: 6, bottom: 0),
                         child: Text(
-                          "Add name",
+                          S.of(context).addName,
                           maxLines: 1,
                           textAlign: TextAlign.center,
                           overflow: TextOverflow.ellipsis,
@@ -360,12 +357,15 @@ class PersonSearchExample extends StatelessWidget {
                     )
                   : Padding(
                       padding: const EdgeInsets.only(top: 6, bottom: 0),
-                      child: Text(
-                        searchResult.name(),
-                        maxLines: 1,
-                        textAlign: TextAlign.center,
-                        overflow: TextOverflow.ellipsis,
-                        style: getEnteTextTheme(context).small,
+                      child: SizedBox(
+                        width: size,
+                        child: Text(
+                          searchResult.name(),
+                          maxLines: 1,
+                          textAlign: TextAlign.center,
+                          overflow: TextOverflow.ellipsis,
+                          style: getEnteTextTheme(context).small,
+                        ),
                       ),
                     ),
             ],
@@ -385,12 +385,11 @@ class FaceSearchResult extends StatelessWidget {
   Widget build(BuildContext context) {
     final params = (searchResult as GenericSearchResult).params;
     return PersonFaceWidget(
-      searchResult.previewThumbnail()!,
       personId: params[kPersonParamID],
       clusterID: params[kClusterParamId],
       key: params.containsKey(kPersonWidgetKey)
           ? ValueKey(params[kPersonWidgetKey])
-          : null,
+          : ValueKey(params[kPersonParamID] ?? params[kClusterParamId]),
     );
   }
 }

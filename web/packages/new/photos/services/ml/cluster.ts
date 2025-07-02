@@ -2,6 +2,7 @@ import { assertionFailed } from "ente-base/assert";
 import { newNonSecureID } from "ente-base/id-worker";
 import log from "ente-base/log";
 import type { EnteFile } from "ente-media/file";
+import { fileCreationTime } from "ente-media/file-metadata";
 import { wait } from "ente-utils/promise";
 import {
     pullUserEntities,
@@ -229,7 +230,7 @@ const sortFacesNewestOnesFirst = (
             assertionFailed(`Did not find a local file for faceID ${faceID}`);
             return 0;
         }
-        return file.metadata.creationTime;
+        return fileCreationTime(file);
     };
 
     return faces.sort((a, b) => sortTimeForFace(b) - sortTimeForFace(a));
@@ -360,13 +361,13 @@ const clusterBatchLinear = async (
  * Use the output of the clustering phase to (a) update any remote cgroups that
  * have changed, and (b) update our locally persisted clusters.
  *
- * @param masterKey The user's master key, required for updating the cgroups on
- * remote if needed.
+ * @param masterKey The user's master key (as a base64 string), required for
+ * updating the cgroups on remote if needed.
  */
 export const reconcileClusters = async (
     clusters: FaceCluster[],
     modifiedClusterIDs: Set<string>,
-    masterKey: Uint8Array,
+    masterKey: string,
 ) => {
     // Index clusters by their ID for fast lookup.
     const clusterByID = new Map(clusters.map((c) => [c.id, c]));

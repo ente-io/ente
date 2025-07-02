@@ -37,8 +37,8 @@ import { formattedNumber } from "ente-base/i18n";
 import { formattedDateTime } from "ente-base/i18n-date";
 import log from "ente-base/log";
 import { type EnteFile } from "ente-media/file";
+import { fileFileName } from "ente-media/file-metadata";
 import { ItemCard, PreviewItemTile } from "ente-new/photos/components/Tiles";
-import { CustomError } from "ente-shared/error";
 import { t } from "i18next";
 import React, { memo, useCallback, useEffect, useState } from "react";
 import { Trans } from "react-i18next";
@@ -49,6 +49,7 @@ import {
     type ListItemKeySelector,
 } from "react-window";
 import exportService, {
+    CustomError,
     ExportStage,
     selectAndPrepareExportDirectory,
     type ExportOpts,
@@ -601,7 +602,7 @@ const ExportPendingListItem: React.FC<
     const { pendingFiles, collectionNameByID } = data;
     const file = pendingFiles[index]!;
 
-    const fileName = file.metadata.title;
+    const fileName = fileFileName(file);
     const collectionName = collectionNameByID.get(file.collectionID);
 
     return (

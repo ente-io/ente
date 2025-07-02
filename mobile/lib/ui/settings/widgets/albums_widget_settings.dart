@@ -101,10 +101,8 @@ class _AlbumsWidgetSettingsState extends State<AlbumsWidgetSettings> {
                                 .map((e) => e.id.toString())
                                 .toList();
                             await AlbumHomeWidgetService.instance
-                                .setSelectedAlbums(albums);
+                                .updateSelectedAlbums(albums);
                             Navigator.pop(context);
-                            await AlbumHomeWidgetService.instance
-                                .albumsChanged();
                           }
                         : null,
                     isDisabled: _selectedAlbums.albums.isEmpty,
@@ -124,7 +122,7 @@ class _AlbumsWidgetSettingsState extends State<AlbumsWidgetSettings> {
               flexibleSpaceTitle: TitleBarTitleWidget(
                 title: S.of(context).albums,
               ),
-              expandedHeight: 120,
+              expandedHeight: MediaQuery.textScalerOf(context).scale(120),
               flexibleSpaceCaption: hasInstalledAny
                   ? S.of(context).albumsWidgetDesc
                   : context.l10n.addAlbumWidgetPrompt,

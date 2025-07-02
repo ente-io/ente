@@ -2,7 +2,6 @@ import "dart:convert";
 
 import "package:photos/models/base/id.dart";
 import "package:photos/models/base_location.dart";
-import "package:photos/models/file/file.dart";
 import "package:photos/models/location/location.dart";
 import "package:photos/models/memories/clip_memory.dart";
 import "package:photos/models/memories/people_memory.dart";
@@ -39,7 +38,6 @@ class MemoriesCache {
 
   factory MemoriesCache.fromJson(
     Map<String, dynamic> json,
-    Map<int, EnteFile> filesMap,
   ) {
     return MemoriesCache(
       toShowMemories: ToShowMemory.decodeJsonToList(json['toShowMemories']),
@@ -47,10 +45,7 @@ class MemoriesCache {
       clipShownLogs: ClipShownLog.decodeJsonToList(json['clipShownLogs']),
       tripsShownLogs: TripsShownLog.decodeJsonToList(json['tripsShownLogs']),
       baseLocations: json['baseLocations'] != null
-          ? BaseLocation.decodeJsonToList(
-              json['baseLocations'],
-              filesMap,
-            )
+          ? BaseLocation.decodeJsonToList(json['baseLocations'])
           : [],
     );
   }
@@ -71,9 +66,8 @@ class MemoriesCache {
 
   static MemoriesCache decodeFromJsonString(
     String jsonString,
-    Map<int, EnteFile> filesMap,
   ) {
-    return MemoriesCache.fromJson(jsonDecode(jsonString), filesMap);
+    return MemoriesCache.fromJson(jsonDecode(jsonString));
   }
 }
 

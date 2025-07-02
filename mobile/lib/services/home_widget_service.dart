@@ -15,11 +15,18 @@ import 'package:photos/services/people_home_widget_service.dart';
 import 'package:photos/services/smart_memories_service.dart';
 import 'package:photos/utils/thumbnail_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import "package:synchronized/synchronized.dart";
 
 enum WidgetStatus {
+  // notSynced means the widget is not initialized or has no data
   notSynced,
+  // partially synced means some images were synced but not all
+  // this can happen if some widgets were not installed but we did a sync regardless
+  // or if the sync fails midway
   syncedPartially,
+  // we purposefully set widget to empty, widget had data
   syncedEmpty,
+  // all widgets were synced successfully
   syncedAll,
 }
 
@@ -47,6 +54,7 @@ class HomeWidgetService {
   HomeWidgetService._privateConstructor();
 
   final Logger _logger = Logger((HomeWidgetService).toString());
+  final computeLock = Lock();
 
   void init(SharedPreferences prefs) {
     setAppGroupID(iOSGroupIDMemory);
@@ -54,19 +62,19 @@ class HomeWidgetService {
   }
 
   void _initializeWidgetServices(SharedPreferences prefs) {
-    MemoryHomeWidgetService.instance.init(prefs);
-    PeopleHomeWidgetService.instance.init(prefs);
     AlbumHomeWidgetService.instance.init(prefs);
+    PeopleHomeWidgetService.instance.init(prefs);
+    MemoryHomeWidgetService.instance.init(prefs);
   }
 
   void setAppGroupID(String id) {
     hw.HomeWidget.setAppGroupId(id).ignore();
   }
 
-  Future<void> initHomeWidget() async {
-    await MemoryHomeWidgetService.instance.initMemoryHomeWidget(null);
-    await PeopleHomeWidgetService.instance.initHomeWidget(null);
-    await AlbumHomeWidgetService.instance.initHomeWidget(null);
+  Future<void> initHomeWidget([bool isBg = false]) async {
+    await AlbumHomeWidgetService.instance.initAlbumHomeWidget(isBg);
+    await PeopleHomeWidgetService.instance.initPeopleHomeWidget();
+    await MemoryHomeWidgetService.instance.initMemoryHomeWidget();
   }
 
   Future<bool?> updateWidget({
@@ -214,10 +222,21 @@ class HomeWidgetService {
     }
 
     await Future.wait([
-      MemoryHomeWidgetService.instance.clearWidget(),
-      PeopleHomeWidgetService.instance.clearWidget(),
       AlbumHomeWidgetService.instance.clearWidget(),
+      PeopleHomeWidgetService.instance.clearWidget(),
+      MemoryHomeWidgetService.instance.clearWidget(),
     ]);
+
+    try {
+      final String widgetParent = await _getWidgetStorageDirectory();
+      final String widgetPath = '$widgetParent/$WIDGET_DIRECTORY';
+      final dir = Directory(widgetPath);
+
+      await dir.delete(recursive: true);
+      _logger.info("Widget directory cleared successfully");
+    } catch (e) {
+      _logger.severe("Failed to clear widget directory", e);
+    }
   }
 
   /// Handle app launch from a widget

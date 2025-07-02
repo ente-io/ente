@@ -10,7 +10,12 @@
             "type": "dart",
             "flutterMode": "debug",
             "program": "mobile/lib/main.dart",
-            "args": ["--flavor", "independent"]
+            "args": [
+            "--flavor",
+            "independent",
+            "--dart-define",
+            "cronetHttpNoPlay=true"
+           ]
         },
         {
             "name": "Photos Android Local",
@@ -24,7 +29,9 @@
                 "--dart-define",
                 "endpoint=http://localhost:8080",
                 "--dart-define",
-                "web-family=http://localhost:3003"
+                "web-family=http://localhost:3003",
+                "--dart-define",
+                "cronetHttpNoPlay=true"
             ]
         },
         {

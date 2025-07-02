@@ -1,7 +1,10 @@
 {
   "@@locale ": "en",
   "enterYourEmailAddress": "Masukkan alamat email kamu",
+  "enterYourNewEmailAddress": "Masukkan alamat email baru anda",
   "accountWelcomeBack": "Selamat datang kembali!",
+  "emailAlreadyRegistered": "Email sudah terdaftar.",
+  "emailNotRegistered": "Email belum terdaftar.",
   "email": "Email",
   "cancel": "Batal",
   "verify": "Verifikasi",
@@ -328,6 +331,7 @@
   "removingFromFavorites": "Menghapus dari favorit...",
   "sorryCouldNotAddToFavorites": "Maaf, tidak dapat menambahkan ke favorit!",
   "sorryCouldNotRemoveFromFavorites": "Maaf, tidak dapat menghapus dari favorit!",
+  "subscribeToEnableSharing": "Anda memerlukan langganan berbayar yang aktif untuk bisa berbagi.",
   "subscribe": "Berlangganan",
   "canOnlyRemoveFilesOwnedByYou": "Hanya dapat menghapus berkas yang dimiliki oleh mu",
   "deleteSharedAlbum": "Hapus album bersama?",
@@ -397,6 +401,8 @@
     "description": "The text to display in the advanced settings section"
   },
   "photoGridSize": "Ukuran kotak foto",
+  "manageDeviceStorage": "Mengelola cache perangkat",
+  "manageDeviceStorageDesc": "Tinjau dan hapus penyimpanan cache lokal.",
   "machineLearning": "Pemelajaran mesin",
   "mlConsent": "Aktifkan pemelajaran mesin",
   "mlConsentTitle": "Aktifkan pemelajaran mesin?",
@@ -404,8 +410,13 @@
   "mlConsentPrivacy": "Klik di sini untuk detail lebih lanjut tentang fitur ini pada kebijakan privasi kami",
   "mlConsentConfirmation": "Saya memahami, dan bersedia mengaktifkan pemelajaran mesin",
   "magicSearch": "Penelusuran ajaib",
+  "discover": "Temukan",
+  "@discover": {
+    "description": "The text to display for the discover section under which we show receipts, screenshots, sunsets, greenery, etc."
+  },
   "discover_identity": "Identitas",
   "discover_screenshots": "Tangkapan layar",
+  "discover_receipts": "Tanda Terima",
   "discover_notes": "Catatan",
   "discover_memes": "Meme",
   "discover_babies": "Bayi",
@@ -413,6 +424,7 @@
   "discover_selfies": "Swafoto",
   "discover_wallpapers": "Gambar latar",
   "discover_food": "Makanan",
+  "discover_celebrations": "Perayaan",
   "discover_sunset": "Senja",
   "discover_hills": "Bukit",
   "mlIndexingDescription": "Perlu diperhatikan bahwa pemelajaran mesin dapat meningkatkan penggunaan data dan baterai perangkat hingga seluruh item selesai terindeks. Gunakan aplikasi desktop untuk pengindeksan lebih cepat, seluruh hasil akan tersinkronkan secara otomatis.",
@@ -647,6 +659,8 @@
   "startBackup": "Mulai pencadangan",
   "noPhotosAreBeingBackedUpRightNow": "Tidak ada foto yang sedang dicadangkan sekarang",
   "grantFullAccessPrompt": "Harap berikan akses ke semua foto di app Pengaturan",
+  "allowPermTitle": "Izinkan akses ke foto",
+  "allowPermBody": "Ijinkan akses ke foto Anda dari Pengaturan agar Ente dapat menampilkan dan mencadangkan pustaka Anda.",
   "openSettings": "Buka Pengaturan",
   "selectMorePhotos": "Pilih lebih banyak foto",
   "existingUser": "Masuk",
@@ -672,6 +686,7 @@
     "type": "text"
   },
   "backupFailed": "Pencadangan gagal",
+  "sorryBackupFailedDesc": "Maaf, kami tidak dapat mencadangkan berkas ini sekarang, kami akan mencobanya kembali nanti.",
   "couldNotBackUpTryLater": "Kami tidak dapat mencadangkan data kamu.\nKami akan coba lagi nanti.",
   "enteCanEncryptAndPreserveFilesOnlyIfYouGrant": "Ente hanya dapat mengenkripsi dan menyimpan file jika kamu berikan izin",
   "pleaseGrantPermissions": "Harap berikan izin",
@@ -1097,10 +1112,5 @@
   "left": "Kiri",
   "right": "Kanan",
   "whatsNew": "Hal yang baru",
-  "onThisDay": "On this day",
-  "lookBackOnYourMemories": "Look back on your memories 🌄",
-  "newPhotosEmoji": " new 📸",
-  "sorryWeHadToPauseYourBackups": "Sorry, we had to pause your backups",
-  "clickToInstallOurBestVersionYet": "Click to install our best version yet",
-  "onThisDayNotificationExplanation": "Receive reminders about memories from this day in previous years."
+  "wishThemAHappyBirthday": "Wish ${name} a happy birthday! 🎉"
 }

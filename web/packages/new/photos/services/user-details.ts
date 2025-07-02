@@ -1,6 +1,8 @@
+import { ensureLocalUser } from "ente-accounts/services/user";
 import { isDesktop } from "ente-base/app";
 import { authenticatedRequestHeaders, ensureOk } from "ente-base/http";
 import { getKV, setKV } from "ente-base/kv";
+import log from "ente-base/log";
 import { apiURL } from "ente-base/origins";
 import { getData, setLSUser } from "ente-shared/storage/localStorage";
 import {
@@ -8,7 +10,7 @@ import {
     nullishToZero,
     nullToUndefined,
 } from "ente-utils/transform";
-import { z } from "zod";
+import { z } from "zod/v4";
 
 /**
  * Validity of the plan.
@@ -181,12 +183,12 @@ export const logoutUserDetails = () => {
  *
  * This assumes that the user is already logged in.
  */
-export const initUserDetailsOrTriggerSync = async () => {
+export const initUserDetailsOrTriggerPull = async () => {
     const saved = await getKV("userDetails");
     if (saved) {
         setUserDetailsSnapshot(UserDetails.parse(saved));
     } else {
-        void syncUserDetails();
+        void pullUserDetails();
     }
 };
 
@@ -229,39 +231,24 @@ const setUserDetailsSnapshot = (snapshot: UserDetails) => {
  * Fetch the user's details from remote and save them in local storage for
  * subsequent lookup, and also update our in-memory snapshots.
  */
-export const syncUserDetails = async () => {
-    const userDetails = await getUserDetailsV2();
+export const pullUserDetails = async () => {
+    const userDetails = await getUserDetails();
     await setKV("userDetails", userDetails);
     setUserDetailsSnapshot(userDetails);
 
-    // TODO: The existing code used to also set the email for the local storage
-    // user whenever it updated the user details. I don't see why this would be
-    // needed though.
-    //
-    // Retaining the existing behaviour for now, except we throw. The intent is
-    // to remove this entire copy-over after a bit.
-    //
-    // Added Nov 2024, and can be removed after a while (tag: Migration).
-
-    const oldLSUser = getData("user") as unknown;
-    const hasMatchingEmail =
-        oldLSUser &&
-        typeof oldLSUser == "object" &&
-        "email" in oldLSUser &&
-        typeof oldLSUser.email == "string" &&
-        oldLSUser.email == userDetails.email;
-
-    if (!hasMatchingEmail) {
+    // Update the email for the local storage user if needed (the user might've
+    // changed their email on a different client).
+    if (ensureLocalUser().email != userDetails.email) {
+        log.info("Updating user email to match fetched user details");
         // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
         await setLSUser({ ...getData("user"), email: userDetails.email });
-        throw new Error("Email in local storage did not match user details");
     }
 };
 
 /**
  * Fetch the user details for the currently logged in user from remote.
  */
-export const getUserDetailsV2 = async () => {
+const getUserDetails = async () => {
     const res = await fetch(await apiURL("/users/details/v2"), {
         headers: await authenticatedRequestHeaders(),
     });
@@ -339,7 +326,7 @@ export const verifyStripeSubscription = async (
             }),
         }),
     );
-    await syncUserDetails();
+    await pullUserDetails();
     return userDetailsSnapshot()!.subscription;
 };
 
@@ -355,7 +342,7 @@ export const activateStripeSubscription = async () => {
             headers: await authenticatedRequestHeaders(),
         }),
     );
-    return syncUserDetails();
+    return pullUserDetails();
 };
 
 /**
@@ -369,7 +356,7 @@ export const cancelStripeSubscription = async () => {
             headers: await authenticatedRequestHeaders(),
         }),
     );
-    return syncUserDetails();
+    return pullUserDetails();
 };
 
 const paymentsAppOrigin = "https://payments.ente.io";
@@ -419,11 +406,10 @@ const getPaymentToken = async () => {
  */
 export const redirectToCustomerPortal = async () => {
     const redirectURL = paymentCompletionRedirectURL();
-    const url = await apiURL("/billing/stripe/customer-portal");
-    const params = new URLSearchParams({ redirectURL });
-    const res = await fetch(`${url}?${params.toString()}`, {
-        headers: await authenticatedRequestHeaders(),
-    });
+    const res = await fetch(
+        await apiURL("/billing/stripe/customer-portal", { redirectURL }),
+        { headers: await authenticatedRequestHeaders() },
+    );
     ensureOk(res);
     const portal = z.object({ url: z.string() }).parse(await res.json());
     window.location.href = portal.url;
@@ -552,7 +538,8 @@ const getFamiliesTokenAndURL = async () => {
 
 /**
  * Update remote to indicate that the user wants to leave the family plan that
- * they are part of, then our local sync user details with remote.
+ * they are part of, then update our local user details by pulling the latest
+ * ones from remote.
  */
 export const leaveFamily = async () => {
     ensureOk(
@@ -561,7 +548,7 @@ export const leaveFamily = async () => {
             headers: await authenticatedRequestHeaders(),
         }),
     );
-    return syncUserDetails();
+    return pullUserDetails();
 };
 
 /**

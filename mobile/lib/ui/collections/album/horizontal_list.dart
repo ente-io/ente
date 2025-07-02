@@ -1,4 +1,5 @@
 import "dart:async";
+import "dart:math";
 
 import "package:flutter/cupertino.dart";
 import "package:logging/logging.dart";
@@ -29,6 +30,10 @@ class _AlbumHorizontalListState extends State<AlbumHorizontalList> {
       _collectionUpdatesSubscription;
   late Logger _logger;
 
+  static const maxThumbnailWidth = 224.0;
+  static const crossAxisSpacing = 8.0;
+  static const horizontalPadding = 16.0;
+
   @override
   void initState() {
     super.initState();
@@ -47,6 +52,12 @@ class _AlbumHorizontalListState extends State<AlbumHorizontalList> {
 
   @override
   Widget build(BuildContext context) {
+    final double screenWidth = MediaQuery.sizeOf(context).width;
+    final int albumsCountInRow = max(screenWidth ~/ maxThumbnailWidth, 3);
+    final totalHorizontalPadding = (albumsCountInRow - 1) * crossAxisSpacing;
+    final sideOfThumbnail =
+        (screenWidth - totalHorizontalPadding - horizontalPadding) /
+            albumsCountInRow;
     debugPrint('$runtimeType widget build');
     return FutureBuilder<List<Collection>>(
       future: widget.collectionsFuture(),
@@ -75,20 +86,25 @@ class _AlbumHorizontalListState extends State<AlbumHorizontalList> {
                 Align(
                   alignment: Alignment.centerLeft,
                   child: SizedBox(
-                    height: 147, //139 + 8 (calculated from figma design)
-                    child: ListView.separated(
-                      separatorBuilder: (context, index) =>
-                          const SizedBox(width: 4),
+                    height: sideOfThumbnail + 46,
+                    child: ListView.builder(
                       scrollDirection: Axis.horizontal,
                       itemCount: collections.length,
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: horizontalPadding / 2,
+                      ),
                       itemBuilder: (context, index) {
                         final item = collections[index];
-                        return AlbumRowItemWidget(
-                          item,
-                          120,
-                          showFileCount: false,
-                          hasVerifiedLock: widget.hasVerifiedLock,
+                        return Padding(
+                          padding: const EdgeInsets.only(
+                            right: horizontalPadding / 2,
+                          ),
+                          child: AlbumRowItemWidget(
+                            item,
+                            sideOfThumbnail,
+                            showFileCount: true,
+                            hasVerifiedLock: widget.hasVerifiedLock,
+                          ),
                         );
                       },
                     ),

@@ -3,7 +3,7 @@ import "package:photos/generated/l10n.dart";
 import "package:photos/models/ffmpeg/ffprobe_props.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/file/file_type.dart";
-import "package:photos/services/preview_video_store.dart";
+import "package:photos/services/video_preview_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/info_item_widget.dart";
 import "package:photos/utils/standalone/data.dart";
@@ -44,7 +44,7 @@ class _PreviewPropertiesItemWidgetState
     final textStyle = getEnteTextTheme(context).miniMuted;
     final subSectionWidgets = <Widget>[];
 
-    final data = await PreviewVideoStore.instance
+    final data = await VideoPreviewService.instance
         .getPlaylist(widget.file)
         .onError((error, stackTrace) {
       if (!mounted) return;

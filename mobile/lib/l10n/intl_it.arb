@@ -1,6 +1,7 @@
 {
   "@@locale ": "en",
   "enterYourEmailAddress": "Inserisci il tuo indirizzo email",
+  "enterYourNewEmailAddress": "Inserisci il tuo nuovo indirizzo email",
   "accountWelcomeBack": "Bentornato!",
   "emailAlreadyRegistered": "Email già registrata.",
   "emailNotRegistered": "Email non registrata.",
@@ -371,6 +372,21 @@
   "deleteFromBoth": "Elimina da entrambi",
   "newAlbum": "Nuovo album",
   "albums": "Album",
+  "memoryCount": "{count, plural, =0{nessun ricordo} one{{formattedCount} ricordo} other{{formattedCount} ricordi}}",
+  "@memoryCount": {
+    "description": "The text to display the number of memories",
+    "type": "text",
+    "placeholders": {
+      "count": {
+        "example": "1",
+        "type": "int"
+      },
+      "formattedCount": {
+        "type": "String",
+        "example": "11.513, 11,511"
+      }
+    }
+  },
   "selectedPhotos": "{count} selezionati",
   "@selectedPhotos": {
     "description": "Display the number of selected photos",
@@ -510,6 +526,7 @@
   "viewLargeFiles": "File di grandi dimensioni",
   "viewLargeFilesDesc": "Visualizza i file che stanno occupando la maggior parte dello spazio di archiviazione.",
   "noDuplicates": "✨ Nessun doppione",
+  "youveNoDuplicateFilesThatCanBeCleared": "Non ci sono file duplicati che possono essere eliminati",
   "success": "Operazione riuscita",
   "rateUs": "Lascia una recensione",
   "remindToEmptyDeviceTrash": "Vuota anche \"Cancellati di recente\" da \"Impostazioni\" -> \"Storage\" per avere più spazio libero",
@@ -705,6 +722,7 @@
     "type": "text"
   },
   "backupFailed": "Backup fallito",
+  "sorryBackupFailedDesc": "Purtroppo non è stato possibile eseguire il backup del file in questo momento, riproveremo più tardi.",
   "couldNotBackUpTryLater": "Impossibile eseguire il backup dei tuoi dati.\nRiproveremo più tardi.",
   "enteCanEncryptAndPreserveFilesOnlyIfYouGrant": "Ente può criptare e conservare i file solo se gliene concedi l'accesso",
   "pleaseGrantPermissions": "Concedi i permessi",
@@ -776,6 +794,14 @@
   "share": "Condividi",
   "unhideToAlbum": "Non nascondere l'album",
   "restoreToAlbum": "Ripristina l'album",
+  "moveItem": "{count, plural, =1 {Sposta elemento} other {Sposta elementi}}",
+  "@moveItem": {
+    "description": "Page title while moving one or more items to an album"
+  },
+  "addItem": "{count, plural, =1 {Aggiungi elemento} other {Aggiungi elementi}}",
+  "@addItem": {
+    "description": "Page title while adding one or more items to album"
+  },
   "createOrSelectAlbum": "Crea o seleziona album",
   "selectAlbum": "Seleziona album",
   "searchByAlbumNameHint": "Nome album",
@@ -873,6 +899,7 @@
   "authToViewYourMemories": "Autenticati per visualizzare le tue foto",
   "unlock": "Sblocca",
   "freeUpSpace": "Libera spazio",
+  "freeUpSpaceSaving": "{count, plural, =1 {Può essere cancellato per liberare {formattedSize}} other {Possono essere cancellati per liberare {formattedSize}}}",
   "filesBackedUpInAlbum": "{count, plural, one {1 file} other {{formattedNumber} file}} di quest'album sono stati salvati in modo sicuro",
   "@filesBackedUpInAlbum": {
     "description": "Text to tell user how many files have been backed up in the album",
@@ -902,6 +929,9 @@
         "type": "String"
       }
     }
+  },
+  "@freeUpSpaceSaving": {
+    "description": "Text to tell user how much space they can free up by deleting items from the device"
   },
   "freeUpAmount": "Libera {sizeInMBorGB}",
   "thisEmailIsAlreadyInUse": "Questo indirizzo email è già registrato",
@@ -1230,6 +1260,8 @@
     "description": "Subtitle to indicate that the user can find people quickly by name"
   },
   "findPeopleByName": "Trova rapidamente le persone per nome",
+  "addViewers": "{count, plural, =0 {Aggiungi visualizzatore} =1 {Add viewer} other {Aggiungi visualizzatori}}",
+  "addCollaborators": "{count, plural, =0 {Aggiungi collaboratore} =1 {Aggiungi collaboratore} other {Aggiungi collaboratori}}",
   "longPressAnEmailToVerifyEndToEndEncryption": "Premi a lungo un'email per verificare la crittografia end to end.",
   "developerSettingsWarning": "Sei sicuro di voler modificare le Impostazioni sviluppatore?",
   "developerSettings": "Impostazioni sviluppatore",
@@ -1241,9 +1273,12 @@
   "createCollaborativeLink": "Crea link collaborativo",
   "search": "Cerca",
   "enterPersonName": "Inserisci il nome della persona",
+  "editEmailAlreadyLinked": "Questa email è già collegata a {name}.",
+  "viewPersonToUnlink": "Visualizza {name} per scollegare",
   "enterName": "Aggiungi nome",
   "savePerson": "Salva persona",
   "editPerson": "Modifica persona",
+  "mergedPhotos": "Fotografie unite",
   "orMergeWithExistingPerson": "O unisci con esistente",
   "enterDateOfBirth": "Compleanno (Opzionale)",
   "birthday": "Compleanno",
@@ -1350,6 +1385,7 @@
   "extraPhotosFound": "Trovate foto aggiuntive",
   "configuration": "Configurazione",
   "localIndexing": "Indicizzazione locale",
+  "processed": "Processato",
   "resetPerson": "Rimuovi",
   "areYouSureYouWantToResetThisPerson": "Sei sicuro di voler resettare questa persona?",
   "allPersonGroupingWillReset": "Tutti i raggruppamenti per questa persona saranno resettati e perderai tutti i suggerimenti fatti per questa persona",
@@ -1359,6 +1395,16 @@
   "enableMachineLearningBanner": "Abilita l'apprendimento automatico per la ricerca magica e il riconoscimento facciale",
   "searchDiscoverEmptySection": "Le immagini saranno mostrate qui una volta che l'elaborazione e la sincronizzazione saranno completate",
   "searchPersonsEmptySection": "Le persone saranno mostrate qui una volta che l'elaborazione e la sincronizzazione saranno completate",
+  "viewersSuccessfullyAdded": "{count, plural, =0 {Added 0 visualizzatori} =1 {Added 1 visualizzatore} other {Added {count} visualizzatori}}",
+  "@viewersSuccessfullyAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    },
+    "description": "Number of viewers that were successfully added to an album."
+  },
   "collaboratorsSuccessfullyAdded": "{count, plural, =0 {Aggiunti 0 collaboratori} =1 {Aggiunto 1 collaboratore} other {Aggiunti {count} collaboratori}}",
   "@collaboratorsSuccessfullyAdded": {
     "placeholders": {
@@ -1384,6 +1430,15 @@
   "@uploadIsIgnoredDueToIgnorereason": {
     "placeholders": {
       "ignoreReason": {
+        "type": "String",
+        "example": "no network"
+      }
+    }
+  },
+  "typeOfGallerGallerytypeIsNotSupportedForRename": "Il tipo di galleria {galleryType} non è supportato per la rinomina",
+  "@typeOfGallerGallerytypeIsNotSupportedForRename": {
+    "placeholders": {
+      "galleryType": {
         "type": "String",
         "example": "no network"
       }
@@ -1425,16 +1480,46 @@
   },
   "currentlyRunning": "attualmente in esecuzione",
   "ignored": "ignorato",
+  "photosCount": "{count, plural, =0 {0 foto} =1 {1 foto} other {{count} foto}}",
+  "@photosCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
   "file": "File",
+  "searchSectionsLengthMismatch": "Lunghezza sezioni non corrisponde: {snapshotLength} != {searchLength}",
+  "@searchSectionsLengthMismatch": {
+    "description": "Appears in search tab page",
+    "placeholders": {
+      "snapshotLength": {
+        "type": "int",
+        "example": "1"
+      },
+      "searchLength": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "selectMailApp": "Seleziona app email",
+  "selectAllShort": "Tutte",
+  "@selectAllShort": {
+    "description": "Text that appears in bottom right when you start to select multiple photos. When clicked, it selects all photos."
+  },
   "selectCoverPhoto": "Seleziona foto di copertina",
   "newLocation": "Nuova posizione",
   "faceNotClusteredYet": "Faccia non ancora raggruppata, per favore torna più tardi",
+  "theLinkYouAreTryingToAccessHasExpired": "Il link a cui stai cercando di accedere è scaduto.",
   "openFile": "Apri file",
   "backupFile": "File di backup",
   "openAlbumInBrowser": "Apri album nel browser",
   "openAlbumInBrowserTitle": "Utilizza l'app web per aggiungere foto a questo album",
   "allow": "Consenti",
   "allowAppToOpenSharedAlbumLinks": "Consenti all'app di aprire link all'album condiviso",
+  "seePublicAlbumLinksInApp": "Vedi link album pubblici nell'app",
   "emergencyContacts": "Contatti di emergenza",
   "acceptTrustInvite": "Accetta l'invito",
   "declineTrustInvite": "Rifiuta l'invito",
@@ -1498,6 +1583,14 @@
   "useDifferentPlayerInfo": "Hai problemi a riprodurre questo video? Premi a lungo qui per provare un altro lettore.",
   "hideSharedItemsFromHomeGallery": "Nascondi gli elementi condivisi dalla galleria principale",
   "gallery": "Galleria",
+  "joinAlbum": "Unisciti all'album",
+  "joinAlbumSubtext": "per visualizzare e aggiungere le tue foto",
+  "joinAlbumSubtextViewer": "per aggiungerla agli album condivisi",
+  "join": "Unisciti",
+  "linkEmail": "Link Email",
+  "link": "Link",
+  "noEnteAccountExclamation": "Nessun account Ente!",
+  "orPickFromYourContacts": "o scegli tra i tuoi contatti",
   "emailDoesNotHaveEnteAccount": "{email} non ha un account Ente.",
   "@emailDoesNotHaveEnteAccount": {
     "description": "Shown when email doesn't have an Ente account",
@@ -1531,6 +1624,19 @@
       }
     }
   },
+  "linkPersonToEmailConfirmation": "Questo collegherà {personName} a {email}",
+  "@linkPersonToEmailConfirmation": {
+    "description": "Confirmation message when linking a person to an email",
+    "placeholders": {
+      "personName": {
+        "type": "String"
+      },
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "selectYourFace": "Seleziona il tuo volto",
   "reassigningLoading": "Riassegnando...",
   "reassignedToName": "Riassegnato a {name}",
   "@reassignedToName": {
@@ -1540,6 +1646,7 @@
       }
     }
   },
+  "saveChangesBeforeLeavingQuestion": "Salvare le modifiche prima di uscire?",
   "dontSave": "Non salvare",
   "thisIsMeExclamation": "Questo sono io!",
   "linkPerson": "Collega persona",
@@ -1547,12 +1654,111 @@
   "@linkPersonCaption": {
     "description": "Caption for the 'Link person' title. It should be a continuation of the 'Link person' title. Just like how 'Link person' + 'for better sharing experience' forms a proper sentence in English, the combination of these two strings should also be a proper sentence in other languages."
   },
+  "videoStreaming": "Video in streaming",
   "processingVideos": "Elaborando video",
-  "onThisDay": "On this day",
+  "streamDetails": "Dettagli dello streaming",
+  "processing": "In elaborazione",
+  "queued": "In coda",
+  "ineligible": "Non idoneo",
+  "failed": "Non riuscito",
+  "playStream": "Riproduci lo streaming",
+  "playOriginal": "Riproduci originale",
   "joinAlbumConfirmationDialogBody": "Unirsi a un album renderà visibile la tua email ai suoi partecipanti.",
-  "lookBackOnYourMemories": "Look back on your memories 🌄",
-  "newPhotosEmoji": " new 📸",
-  "sorryWeHadToPauseYourBackups": "Sorry, we had to pause your backups",
-  "clickToInstallOurBestVersionYet": "Click to install our best version yet",
-  "onThisDayNotificationExplanation": "Receive reminders about memories from this day in previous years."
+  "pleaseWaitThisWillTakeAWhile": "Attendere, potrebbe volerci un po' di tempo.",
+  "editTime": "Modifica orario",
+  "selectTime": "Imposta ora",
+  "selectDate": "Imposta data",
+  "previous": "Precedente",
+  "selectOneDateAndTimeForAll": "Seleziona una data e un'ora per tutti",
+  "selectStartOfRange": "Seleziona inizio dell'intervallo",
+  "thisWillMakeTheDateAndTimeOfAllSelected": "In questo modo la data e l'ora di tutte le foto selezionate saranno uguali.",
+  "allWillShiftRangeBasedOnFirst": "Questo è il primo nel gruppo. Altre foto selezionate si sposteranno automaticamente in base a questa nuova data",
+  "newRange": "Nuovo intervallo",
+  "selectOneDateAndTime": "Seleziona data e orario",
+  "moveSelectedPhotosToOneDate": "Sposta foto selezionate in una data specifica",
+  "shiftDatesAndTime": "Sposta date e orari",
+  "photosKeepRelativeTimeDifference": "Le foto mantengono una differenza di tempo relativa",
+  "photocountPhotos": "{count, plural, =0 {Nessuna foto} =1 {1 foto} other {{count} foto}}",
+  "@photocountPhotos": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "appIcon": "Icona dell'app",
+  "notThisPerson": "Non è questa persona?",
+  "selectedItemsWillBeRemovedFromThisPerson": "Gli elementi selezionati verranno rimossi da questa persona, ma non eliminati dalla tua libreria.",
+  "throughTheYears": "{dateFormat} negli anni",
+  "thisWeekThroughTheYears": "Questa settimana negli anni",
+  "thisWeekXYearsAgo": "{count, plural, =1 {Questa settimana, {count} anno fa} other {Questa settimana, {count} anni fa}}",
+  "youAndThem": "Tu e {name}",
+  "admiringThem": "Ammirando {name}",
+  "embracingThem": "Abbracciando {name}",
+  "partyWithThem": "Festa con {name}",
+  "hikingWithThem": "Escursioni con {name}",
+  "feastingWithThem": "Festeggiando con {name}",
+  "selfiesWithThem": "Selfie con {name}",
+  "posingWithThem": "In posa con {name}",
+  "backgroundWithThem": "Bellissimi panorami con {name}",
+  "sportsWithThem": "Sport con {name}",
+  "roadtripWithThem": "Viaggio con {name}",
+  "spotlightOnYourself": "Tu in primo piano",
+  "spotlightOnThem": "Riflettori su {name}",
+  "personIsAge": "{name} ha {age}!",
+  "personTurningAge": "{name} sta per compiere {age} anni",
+  "lastTimeWithThem": "Ultima volta con {name}",
+  "tripToLocation": "Viaggio a {location}",
+  "tripInYear": "Viaggio nel {year}",
+  "lastYearsTrip": "Viaggio dello scorso anno",
+  "sunrise": "All'orizzonte",
+  "mountains": "Oltre le colline",
+  "greenery": "In mezzo al verde",
+  "beach": "Sabbia e mare",
+  "city": "In città",
+  "moon": "Al chiaro di luna",
+  "onTheRoad": "Un altro viaggio su strada",
+  "food": "Delizia culinaria",
+  "pets": "Compagni pelosetti",
+  "curatedMemories": "Ricordi importanti",
+  "widgets": "Widget",
+  "memories": "Ricordi",
+  "peopleWidgetDesc": "Seleziona le persone che desideri vedere nella schermata principale.",
+  "albumsWidgetDesc": "Seleziona gli album che desideri vedere nella schermata principale.",
+  "memoriesWidgetDesc": "Seleziona il tipo di ricordi che desideri vedere nella schermata principale.",
+  "smartMemories": "Ricordi intelligenti",
+  "pastYearsMemories": "Ricordi degli ultimi anni",
+  "deleteMultipleAlbumDialog": "Eliminare anche le foto (e i video) presenti su {count} album da <bold>tutti</bold> gli altri album di cui fanno parte?",
+  "addParticipants": "Aggiungi Partecipanti",
+  "selectedAlbums": "{count} selezionati",
+  "actionNotSupportedOnFavouritesAlbum": "Questa azione non è supportata nei Preferiti",
+  "onThisDayMemories": "Ricordi di questo giorno",
+  "onThisDay": "In questo giorno",
+  "lookBackOnYourMemories": "Rivivi i tuoi ricordi 🌄",
+  "newPhotosEmoji": " nuova 📸",
+  "sorryWeHadToPauseYourBackups": "Spiacenti, abbiamo dovuto mettere in pausa i backup",
+  "clickToInstallOurBestVersionYet": "Clicca per installare l'ultima versione dell'app",
+  "onThisDayNotificationExplanation": "Ricevi promemoria sui ricordi da questo giorno negli anni precedenti.",
+  "addMemoriesWidgetPrompt": "Aggiungi un widget dei ricordi nella schermata iniziale e torna qui per personalizzarlo.",
+  "addAlbumWidgetPrompt": "Aggiungi un widget per gli album nella schermata iniziale e torna qui per personalizzarlo.",
+  "addPeopleWidgetPrompt": "Aggiungi un widget delle persone nella schermata iniziale e torna qui per personalizzarlo.",
+  "birthdayNotifications": "Notifiche dei compleanni",
+  "receiveRemindersOnBirthdays": "Ricevi promemoria quando è il compleanno di qualcuno. Toccare la notifica ti porterà alle foto della persona che compie gli anni.",
+  "happyBirthday": "Buon compleanno! 🥳",
+  "happyBirthdayToPerson": "Buon compleanno a {name}! 🎉",
+  "birthdays": "Compleanni",
+  "wishThemAHappyBirthday": "Wish ${name} a happy birthday! 🎉",
+  "cLTitle1": "Caricamento di file video di grandi dimensioni",
+  "cLDesc1": "Dopo la versione beta dello streaming video e il lavoro sui caricamenti e download ripresi, abbiamo ora aumentato il limite di caricamento file a 10GB. Questo è ora disponibile sia nelle app desktop che mobili.",
+  "cLTitle2": "Caricamento in background",
+  "cLDesc2": "I caricamenti in background sono ora supportati anche su iOS, oltre ai dispositivi Android. Non è necessario aprire l'app per eseguire il backup delle tue foto e video più recenti.",
+  "cLTitle3": "Riproduzione automatica dei ricordi",
+  "cLDesc3": "Abbiamo apportato miglioramenti significativi alla nostra esperienza dei ricordi, inclusa la riproduzione automatica, scorrimento al ricordo successivo e molto altro.",
+  "cLTitle4": "Riconoscimento facciale migliorato",
+  "cLDesc4": "Insieme a un sacco di miglioramenti interni, ora è molto più facile vedere tutti i volti rilevati, fornire feedback sui volti simili e aggiungere/rimuovere volti da una singola foto.",
+  "cLTitle5": "Notifiche di compleanno",
+  "cLDesc5": "Ora riceverai una notifica opzionale per tutti i compleanni che hai salvato su Ente, insieme a una raccolta delle loro migliori foto.",
+  "cLTitle6": "Caricamenti e download ripresi",
+  "cLDesc6": "Non più attese per il completamento di caricamenti/download prima di poter chiudere l'app. Tutti i caricamenti e download ora hanno la capacità di essere messi in pausa a metà e ripresi da dove hai lasciato."
 }

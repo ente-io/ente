@@ -1,5 +1,8 @@
+import "dart:io";
+
 import 'package:flutter/material.dart';
 import "package:photos/generated/l10n.dart";
+import "package:photos/l10n/l10n.dart";
 import "package:photos/service_locator.dart";
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/buttons/button_widget.dart';
@@ -33,11 +36,10 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
             ),
             Container(
               alignment: Alignment.centerLeft,
-              child: const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16.0),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 child: TitleBarTitleWidget(
-                  // title: S.of(context).whatsNew,
-                  title: "v1.1.0",
+                  title: S.of(context).whatsNew,
                 ),
               ),
             ),
@@ -101,28 +103,29 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
     final List<ChangeLogEntry> items = [];
     items.addAll([
       ChangeLogEntry(
-        "On This Day",
-        "You can now see a new memory called \"On This Day\" showing photos of a date across multiple years. Moreover, you will receive an opt-out notification every morning to check out this new memory.",
+        context.l10n.cLTitle4,
+        context.l10n.cLDesc4,
       ),
       ChangeLogEntry(
-        "New Widgets",
-        "We have added new widgets for albums and people. You can customise which albums or people you want to see in these widgets as well.",
+        context.l10n.cLTitle3,
+        context.l10n.cLDesc3,
       ),
       ChangeLogEntry(
-        "Shareable Favorites",
-        "You can now share your favorites to your contacts just like any other album.",
+        context.l10n.cLTitle5,
+        context.l10n.cLDesc5,
+      ),
+      if (!Platform.isAndroid)
+        ChangeLogEntry(
+          context.l10n.cLTitle2,
+          context.l10n.cLDesc2,
+        ),
+      ChangeLogEntry(
+        context.l10n.cLTitle6,
+        context.l10n.cLDesc6,
       ),
       ChangeLogEntry(
-        "Albums Improvements",
-        "We have redesigned the albums screen so you can select multiple albums and take actions like share, hide, archive, delete on all selected albums quickly.",
-      ),
-      ChangeLogEntry(
-        "Add to Multiple Albums",
-        "You can now select multiple albums when you want to add a photo to an album.",
-      ),
-      ChangeLogEntry(
-        "Albums in Contact Page",
-        "We have updated the contacts page to show you all the albums shared with you by the contact, so you can browse someone's shared library easily.",
+        context.l10n.cLTitle1,
+        context.l10n.cLDesc1,
       ),
     ]);
 

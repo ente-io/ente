@@ -11,7 +11,6 @@ import "package:photos/services/machine_learning/face_ml/person/person_service.d
 import "package:photos/services/machine_learning/ml_indexing_isolate.dart";
 import 'package:photos/services/machine_learning/ml_service.dart';
 import "package:photos/services/machine_learning/semantic_search/semantic_search_service.dart";
-import "package:photos/services/memory_home_widget_service.dart";
 import "package:photos/services/notification_service.dart";
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
@@ -118,7 +117,6 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
             try {
               await NotificationService.instance.scheduleNotification(
                 "test",
-                "test",
                 id: 10,
                 dateTime: DateTime.now().add(
                   const Duration(seconds: 10),
@@ -143,7 +141,6 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
             try {
               await NotificationService.instance.scheduleNotification(
                 "test",
-                "test",
                 id: 11,
                 dateTime: DateTime.now().add(
                   const Duration(hours: 1),
@@ -167,7 +164,6 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
           onTap: () async {
             try {
               await NotificationService.instance.scheduleNotification(
-                "test",
                 "test",
                 id: 12,
                 dateTime: DateTime.now().add(
@@ -433,28 +429,6 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
               await showGenericErrorDialog(context: context, error: e);
             }
           },
-        ),
-        sectionOptionSpacing,
-        MenuItemWidget(
-          captionedTextWidget: const CaptionedTextWidget(
-            title: "Force memory widget data refresh",
-          ),
-          pressedColor: getEnteColorScheme(context).fillFaint,
-          trailingIcon: Icons.chevron_right_outlined,
-          trailingIconIsMuted: true,
-          onTap: () async =>
-              await MemoryHomeWidgetService.instance.initMemoryHomeWidget(true),
-        ),
-        sectionOptionSpacing,
-        MenuItemWidget(
-          captionedTextWidget: const CaptionedTextWidget(
-            title: "Change memory widget picture",
-          ),
-          pressedColor: getEnteColorScheme(context).fillFaint,
-          trailingIcon: Icons.chevron_right_outlined,
-          trailingIconIsMuted: true,
-          onTap: () async => await MemoryHomeWidgetService.instance
-              .initMemoryHomeWidget(false),
         ),
         sectionOptionSpacing,
         MenuItemWidget(

@@ -19,10 +19,9 @@ import {
 import {
     canAddToCollection,
     canMoveToCollection,
-    CollectionSummaryOrder,
     type CollectionSummaries,
     type CollectionSummary,
-} from "ente-new/photos/services/collection/ui";
+} from "ente-new/photos/services/collection-summary";
 import { t } from "i18next";
 import React, { useEffect, useState } from "react";
 
@@ -41,25 +40,27 @@ export interface CollectionSelectorAttributes {
      */
     action: CollectionSelectorAction;
     /**
-     * Callback invoked when the user selects one the existing collections
-     * listed in the dialog.
+     * Some actions, like "add" and "move", happen in the context of an existing
+     * collection summary.
+     *
+     * In such cases, the ID of the collection summary can be set as the
+     * {@link sourceCollectionID} to omit showing it in the list again.
      */
-    onSelectCollection: (collection: Collection) => void;
+    sourceCollectionSummaryID?: number;
     /**
      * Callback invoked when the user selects the option to create a new
      * collection.
      */
     onCreateCollection: () => void;
     /**
+     * Callback invoked when the user selects one the existing collections
+     * listed in the dialog.
+     */
+    onSelectCollection: (collection: Collection) => void;
+    /**
      * Callback invoked when the user cancels the collection selection dialog.
      */
     onCancel?: () => void;
-    /**
-     * Some actions, like "add" and "move", happen in the context of an existing
-     * collection. In such cases, the ID of this collection can be set as the
-     * {@link relatedCollectionID} to omit showing it in the list again.
-     */
-    relatedCollectionID?: number | undefined;
 }
 
 type CollectionSelectorProps = ModalVisibilityProps & {
@@ -70,16 +71,33 @@ type CollectionSelectorProps = ModalVisibilityProps & {
     attributes: CollectionSelectorAttributes | undefined;
     /**
      * The collections to list.
+     *
+     * The picker does not list all of the collection summaries, it filters
+     * these provided list down to values which make sense for the
+     * {@link attribute}'s {@link action}.
+     *
+     * See: [Note: Picking from selectable collection summaries].
      */
     collectionSummaries: CollectionSummaries;
     /**
-     * A function to map from a collection ID to a {@link Collection}.
+     * A function to map from a collection summary ID to a {@link Collection}.
      *
      * This is invoked when the user makes a selection, to convert the ID of the
-     * selected collection into a collection object that can be passed to the
-     * {@link callback} attribute of {@link CollectionSelectorAttributes}.
+     * selected collection summary into a collection object that can be passed
+     * as the {@link callback} property of {@link CollectionSelectorAttributes}.
+     *
+     * [Note: Picking from selectable collection summaries]
+     *
+     * In general, not all pseudo collections can be converted into a
+     * collection. For example, there is no underlying collection corresponding
+     * to the "All" pseudo collection. However, the implementation of
+     * {@link CollectionSelector} is such that it filters the provided
+     * {@link collectionSummaries} to only show those which, when selected, can
+     * be mapped to an (existing or on-demand created) collection.
      */
-    collectionForCollectionID: (collectionID: number) => Promise<Collection>;
+    collectionForCollectionSummaryID: (
+        collectionID: number,
+    ) => Promise<Collection>;
 };
 
 /**
@@ -91,7 +109,7 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
     onClose,
     attributes,
     collectionSummaries,
-    collectionForCollectionID,
+    collectionForCollectionSummaryID,
 }) => {
     // Make the dialog fullscreen if the screen is <= the dialog's max width.
     const isFullScreen = useMediaQuery("(max-width: 490px)");
@@ -106,28 +124,25 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
         }
 
         const collections = [...collectionSummaries.values()]
-            .filter(({ id, type }) => {
-                if (id === attributes.relatedCollectionID) {
+            .filter((cs) => {
+                if (cs.id === attributes.sourceCollectionSummaryID) {
                     return false;
                 } else if (attributes.action == "add") {
-                    return canAddToCollection(type);
+                    return canAddToCollection(cs);
                 } else if (attributes.action == "upload") {
-                    return canMoveToCollection(type) || type == "uncategorized";
+                    return (
+                        canMoveToCollection(cs) || cs.type == "uncategorized"
+                    );
                 } else if (attributes.action == "restore") {
-                    return canMoveToCollection(type) || type == "uncategorized";
+                    return (
+                        canMoveToCollection(cs) || cs.type == "uncategorized"
+                    );
                 } else {
-                    return canMoveToCollection(type);
+                    return canMoveToCollection(cs);
                 }
             })
-            .sort((a, b) => {
-                return a.name.localeCompare(b.name);
-            })
-            .sort((a, b) => {
-                return (
-                    CollectionSummaryOrder.get(a.type)! -
-                    CollectionSummaryOrder.get(b.type)!
-                );
-            });
+            .sort((a, b) => a.name.localeCompare(b.name))
+            .sort((a, b) => b.sortPriority - a.sortPriority);
 
         if (collections.length === 0) {
             onClose();
@@ -148,8 +163,8 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
     const { action, onSelectCollection, onCancel, onCreateCollection } =
         attributes;
 
-    const handleCollectionClick = async (collectionID: number) => {
-        onSelectCollection(await collectionForCollectionID(collectionID));
+    const handleCollectionSummaryClick = async (id: number) => {
+        onSelectCollection(await collectionForCollectionSummaryID(id));
         onClose();
     };
 
@@ -176,10 +191,10 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
                     {t("create_albums")}
                 </LargeTileCreateNewButton>
                 {filteredCollections.map((collectionSummary) => (
-                    <CollectionButton
+                    <CollectionSummaryButton
                         key={collectionSummary.id}
                         collectionSummary={collectionSummary}
-                        onCollectionClick={handleCollectionClick}
+                        onClick={handleCollectionSummaryClick}
                     />
                 ))}
             </DialogContent_>
@@ -208,19 +223,19 @@ const titleForAction = (action: CollectionSelectorAction) => {
     }
 };
 
-interface CollectionButtonProps {
+interface CollectionSummaryButtonProps {
     collectionSummary: CollectionSummary;
-    onCollectionClick: (collectionID: number) => void;
+    onClick: (collectionSummaryID: number) => void;
 }
 
-const CollectionButton: React.FC<CollectionButtonProps> = ({
+const CollectionSummaryButton: React.FC<CollectionSummaryButtonProps> = ({
     collectionSummary,
-    onCollectionClick,
+    onClick,
 }) => (
     <ItemCard
         TileComponent={LargeTileButton}
         coverFile={collectionSummary.coverFile}
-        onClick={() => onCollectionClick(collectionSummary.id)}
+        onClick={() => onClick(collectionSummary.id)}
     >
         <LargeTileTextOverlay>
             <Typography>{collectionSummary.name}</Typography>

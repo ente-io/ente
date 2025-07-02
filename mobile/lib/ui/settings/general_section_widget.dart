@@ -46,7 +46,6 @@ class GeneralSectionWidget extends StatelessWidget {
             routeToPage(
               context,
               const ReferralScreen(),
-              forceCustomPageRoute: true,
             );
           },
         ),

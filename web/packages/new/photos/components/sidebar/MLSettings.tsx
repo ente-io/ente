@@ -13,8 +13,7 @@ import { RowButtonGroup, RowSwitch } from "ente-base/components/RowButton";
 import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
 import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
 import {
-    NestedSidebarDrawer,
-    SidebarDrawerTitlebar,
+    TitledNestedSidebarDrawer,
     type NestedSidebarDrawerVisibilityProps,
 } from "ente-base/components/mui/SidebarDrawer";
 import { useBaseContext } from "ente-base/context";
@@ -66,19 +65,13 @@ export const MLSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
 
     return (
         <>
-            <NestedSidebarDrawer
+            <TitledNestedSidebarDrawer
                 {...{ open, onClose }}
                 onRootClose={handleRootClose}
+                title={t("ml_search")}
             >
-                <Stack sx={{ gap: "4px", py: "12px" }}>
-                    <SidebarDrawerTitlebar
-                        onClose={onClose}
-                        onRootClose={handleRootClose}
-                        title={t("ml_search")}
-                    />
-                    {component}
-                </Stack>
-            </NestedSidebarDrawer>
+                {component}
+            </TitledNestedSidebarDrawer>
 
             <FaceConsentDrawer
                 open={openFaceConsent}
@@ -115,7 +108,7 @@ export const EnableML: React.FC<EnableMLProps> = ({
         openURL("https://help.ente.io/photos/features/machine-learning");
 
     return (
-        <Stack sx={{ gap: "32px", py: "20px", px: "16px" }}>
+        <Stack sx={{ gap: "32px", py: "20px", px: 2 }}>
             <Typography sx={{ color: "text.muted" }}>
                 {t("ml_search_description")}
             </Typography>
@@ -151,19 +144,13 @@ const FaceConsentDrawer: React.FC<FaceConsentDrawerProps> = ({
     };
 
     return (
-        <NestedSidebarDrawer
+        <TitledNestedSidebarDrawer
             {...{ open, onClose }}
             onRootClose={handleRootClose}
+            title={t("ml_consent_title")}
         >
-            <Stack sx={{ gap: "4px", py: "12px" }}>
-                <SidebarDrawerTitlebar
-                    onClose={onClose}
-                    onRootClose={handleRootClose}
-                    title={t("ml_consent_title")}
-                />
-                <FaceConsent onConsent={onConsent} onCancel={onClose} />
-            </Stack>
-        </NestedSidebarDrawer>
+            <FaceConsent onConsent={onConsent} onCancel={onClose} />
+        </TitledNestedSidebarDrawer>
     );
 };
 
@@ -245,7 +232,7 @@ interface ManageMLProps {
 const ManageML: React.FC<ManageMLProps> = ({ mlStatus, onDisableML }) => {
     const { showMiniDialog } = useBaseContext();
 
-    const { phase, nSyncedFiles, nTotalFiles } = mlStatus;
+    const { phase, phaseFailed, nSyncedFiles, nTotalFiles } = mlStatus;
 
     let status: string;
     switch (phase) {
@@ -262,7 +249,7 @@ const ManageML: React.FC<ManageMLProps> = ({ mlStatus, onDisableML }) => {
             status = t("people");
             break;
         default:
-            status = t("indexing_status_done");
+            status = phaseFailed ? t("error") : t("indexing_status_done");
             break;
     }
 

@@ -50,8 +50,8 @@ import { convertToJPEG, generateImageThumbnail } from "./services/image";
 import { logout } from "./services/logout";
 import {
     lastShownChangelogVersion,
-    masterKeyB64,
-    saveMasterKeyB64,
+    masterKeyFromSafeStorage,
+    saveMasterKeyInSafeStorage,
     setLastShownChangelogVersion,
 } from "./services/store";
 import {
@@ -108,10 +108,12 @@ export const attachIPCHandlers = () => {
 
     ipcMain.handle("selectDirectory", () => selectDirectory());
 
-    ipcMain.handle("masterKeyB64", () => masterKeyB64());
+    ipcMain.handle("masterKeyFromSafeStorage", () =>
+        masterKeyFromSafeStorage(),
+    );
 
-    ipcMain.handle("saveMasterKeyB64", (_, masterKeyB64: string) =>
-        saveMasterKeyB64(masterKeyB64),
+    ipcMain.handle("saveMasterKeyInSafeStorage", (_, masterKey: string) =>
+        saveMasterKeyInSafeStorage(masterKey),
     );
 
     ipcMain.handle("lastShownChangelogVersion", () =>

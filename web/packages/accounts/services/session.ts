@@ -1,14 +1,17 @@
+import type { KeyAttributes } from "ente-accounts/services/user";
 import { authenticatedRequestHeaders, HTTPError } from "ente-base/http";
-import { ensureLocalUser, getAuthToken } from "ente-base/local-user";
 import log from "ente-base/log";
 import { apiURL } from "ente-base/origins";
+import { getAuthToken } from "ente-base/token";
 import { getData } from "ente-shared/storage/localStorage";
-import type { KeyAttributes } from "ente-shared/user/types";
 import { nullToUndefined } from "ente-utils/transform";
-import { z } from "zod";
-import type { SRPAttributes } from "./srp-remote";
-import { getSRPAttributes } from "./srp-remote";
-import { putUserKeyAttributes, RemoteKeyAttributes } from "./user";
+import { z } from "zod/v4";
+import { getSRPAttributes, type SRPAttributes } from "./srp";
+import {
+    ensureLocalUser,
+    putUserKeyAttributes,
+    RemoteKeyAttributes,
+} from "./user";
 
 type SessionValidity =
     | { status: "invalid" }
@@ -127,7 +130,7 @@ export const checkSessionValidity = async (): Promise<SessionValidity> => {
  * longer valid. If needed, also update the key attributes at remote.
  *
  * This is a subset of {@link checkSessionValidity} that has been tailored for
- * use during each remote sync, to detect if the user has been logged out
+ * use during each remote pull, to detect if the user has been logged out
  * elsewhere.
  *
  * @returns `true` if either we don't have an auth token, or if remote tells us

@@ -437,13 +437,12 @@
   "newRange": "Nový rozsah",
   "youAndThem": "Vy a {name}",
   "selfiesWithThem": "Selfie s {name}",
-  "cLIcon": "Nová ikona",
-  "cLMemories": "Vzpomínky",
-  "cLWidgets": "Widgety",
-  "onThisDay": "On this day",
-  "lookBackOnYourMemories": "Look back on your memories 🌄",
-  "newPhotosEmoji": " new 📸",
-  "sorryWeHadToPauseYourBackups": "Sorry, we had to pause your backups",
-  "clickToInstallOurBestVersionYet": "Click to install our best version yet",
-  "onThisDayNotificationExplanation": "Receive reminders about memories from this day in previous years."
+  "wishThemAHappyBirthday": "Wish ${name} a happy birthday! 🎉",
+  "showMoreFaces": "Show more faces",
+  "showLessFaces": "Show less faces",
+  "otherDetectedFaces": "Other detected faces",
+  "areYouSureRemoveThisFaceFromPerson": "Are you sure you want to remove this face from this person?",
+  "areThey": "Are they ",
+  "questionmark": "?",
+  "saveAsAnotherPerson": "Save as another person"
 }

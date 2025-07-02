@@ -1,7 +1,5 @@
-import { TimeStampListItem } from "components/FileList";
 import { FilesDownloadProgressAttributes } from "components/FilesDownloadProgress";
 import { type SelectionContext } from "ente-new/photos/components/gallery";
-import type { User } from "ente-shared/user/types";
 
 export interface SelectedState {
     [k: number]: boolean;
@@ -36,18 +34,4 @@ export type SetFilesDownloadProgressAttributesCreator = (
 export interface MergedSourceURL {
     original: string;
     converted: string;
-}
-
-export interface GalleryContextType {
-    setActiveCollectionID: (collectionID: number) => void;
-    syncWithRemote: (force?: boolean, silent?: boolean) => Promise<void>;
-    setBlockingLoad: (value: boolean) => void;
-    photoListHeader: TimeStampListItem;
-    user: User;
-    userIDToEmailMap: Map<number, string>;
-    emailList: string[];
-    openHiddenSection: (callback?: () => void) => void;
-    isClipSearchResult: boolean;
-    setSelectedFiles: (value) => void;
-    selectedFile: SelectedState;
 }

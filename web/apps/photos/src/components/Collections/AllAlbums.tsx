@@ -18,9 +18,10 @@ import {
     LargeTileButton,
     LargeTileTextOverlay,
 } from "ente-new/photos/components/Tiles";
-import type { CollectionSummary } from "ente-new/photos/services/collection/ui";
-import { CollectionsSortBy } from "ente-new/photos/services/collection/ui";
-import { FlexWrapper } from "ente-shared/components/Container";
+import {
+    CollectionsSortBy,
+    type CollectionSummary,
+} from "ente-new/photos/services/collection-summary";
 import { t } from "i18next";
 import memoize from "memoize-one";
 import React, { useEffect, useRef, useState } from "react";
@@ -168,7 +169,7 @@ const AlbumsRow = React.memo(
         const collectionRow = collectionRowList[index];
         return (
             <div style={style}>
-                <FlexWrapper gap={"4px"} padding={"16px"}>
+                <Stack direction="row" sx={{ p: 2, gap: 0.5 }}>
                     {collectionRow.map((item: any) => (
                         <AlbumCard
                             isScrolling={isScrolling}
@@ -177,7 +178,7 @@ const AlbumsRow = React.memo(
                             key={item.id}
                         />
                     ))}
-                </FlexWrapper>
+                </Stack>
             </div>
         );
     },

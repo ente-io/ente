@@ -1,16 +1,17 @@
 import log from "ente-base/log";
-import { masterKeyFromSession } from "ente-base/session";
+import { ensureMasterKeyFromSession } from "ente-base/session";
 import { ComlinkWorker } from "ente-base/worker/comlink-worker";
+import { uniqueFilesByID } from "ente-gallery/utils/file";
+import type { Collection } from "ente-media/collection";
+import type { EnteFile } from "ente-media/file";
 import { FileType } from "ente-media/file-type";
 import i18n, { t } from "i18next";
-import { uniqueFilesByID } from "../files";
 import { clipMatches, isMLEnabled, isMLSupported } from "../ml";
 import type { NamedPerson } from "../ml/people";
 import type {
     LabelledFileType,
     LabelledSearchDateComponents,
     LocalizedSearchData,
-    SearchCollectionsAndFiles,
     SearchSuggestion,
 } from "./types";
 import type { SearchWorker } from "./worker";
@@ -50,22 +51,31 @@ export const logoutSearch = () => {
  * Fetch any data that would be needed if the user were to search.
  */
 export const searchDataSync = () =>
-    worker().then((w) => masterKeyFromSession().then((k) => w.sync(k)));
+    worker().then((w) => ensureMasterKeyFromSession().then((k) => w.sync(k)));
 
 /**
- * Set the collections and files over which we should search.
+ * Update the collections and files over which we should search.
  */
-export const setSearchCollectionsAndFiles = ({
-    collections,
-    files,
-}: Omit<SearchCollectionsAndFiles, "collectionFiles">) =>
+export const updateSearchCollectionsAndFiles = (
+    collections: Collection[],
+    collectionFiles: EnteFile[],
+    hiddenCollectionIDs: Set<number>,
+    hiddenFileIDs: Set<number>,
+) => {
+    const normalCollections = collections.filter(
+        (c) => !hiddenCollectionIDs.has(c.id),
+    );
+    const normalCollectionFiles = collectionFiles.filter(
+        (f) => !hiddenFileIDs.has(f.id),
+    );
     void worker().then((w) =>
         w.setCollectionsAndFiles({
-            collections: collections,
-            files: uniqueFilesByID(files),
-            collectionFiles: files,
+            collections: normalCollections,
+            files: uniqueFilesByID(normalCollectionFiles),
+            collectionFiles: normalCollectionFiles,
         }),
     );
+};
 
 /**
  * Set the (named) people that we should search across.

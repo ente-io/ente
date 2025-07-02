@@ -173,8 +173,11 @@ class AddPhotosPhotoWidget extends StatelessWidget {
       final List<AssetEntity>? result = await AssetPicker.pickAssets(
         context,
         pickerConfig: AssetPickerConfig(
+          keepScrollOffset: true,
           maxAssets: maxPickAssetLimit,
           textDelegate: assetPickerTextDelegate,
+          gridCount: 6,
+          pageSize: 120,
         ),
       );
       if (result != null && result.isNotEmpty) {

@@ -115,7 +115,7 @@ export const useFileInput = ({
             ...directoryOpts,
             ref: inputRef,
             onChange: handleChange,
-            ...(accept ? { accept } : {}),
+            ...(accept && { accept }),
         }),
         [directoryOpts, accept, handleChange],
     );

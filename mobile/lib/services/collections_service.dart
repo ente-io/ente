@@ -1180,7 +1180,7 @@ class CollectionsService {
     String passwordHash,
     int collectionID,
   ) async {
-    final authToken = await getSharedPublicAlbumToken(collectionID);
+    final authToken = getSharedPublicAlbumToken(collectionID);
     try {
       final response = await _enteDio.post(
         "/public-collection/verify-password",
@@ -1212,9 +1212,7 @@ class CollectionsService {
     BuildContext context,
     int collectionID,
   ) async {
-    final authToken = await getSharedPublicAlbumToken(collectionID);
-    final jwtToken = await getSharedPublicAlbumTokenJWT(collectionID);
-    final key = await getSharedPublicAlbumKey(collectionID);
+    final key = getSharedPublicAlbumKey(collectionID);
     if (key.isEmpty) {
       throw Exception("Collection key not found");
     }
@@ -1231,36 +1229,32 @@ class CollectionsService {
         "encryptedKey": CryptoUtil.bin2base64(encryptedKey),
       },
       options: Options(
-        headers: {
-          "X-Auth-Access-Token": authToken,
-          "X-Auth-Access-Token-JWT": jwtToken,
-        },
+        headers: publicCollectionHeaders(collectionID),
       ),
     );
   }
 
-  Future<String> getSharedPublicAlbumKey(int collectionID) async {
+  String getSharedPublicAlbumKey(int collectionID) {
     if (_cachedPublicAlbumKey.containsKey(collectionID)) {
       return _cachedPublicAlbumKey[collectionID]!;
     }
     return "";
   }
 
-  Future<String?> getSharedPublicAlbumToken(int collectionID) async {
-    if (_cachedPublicAlbumToken.containsKey(collectionID)) {
-      return _cachedPublicAlbumToken[collectionID];
-    }
-    return null;
+  String? getSharedPublicAlbumToken(int collectionID) {
+    return _cachedPublicAlbumToken[collectionID];
   }
 
-  Future<String?> getSharedPublicAlbumTokenJWT(int collectionID) async {
-    if (_cachedPublicAlbumJWT.containsKey(collectionID)) {
-      return _cachedPublicAlbumJWT[collectionID];
-    }
-    return null;
+  Map<String, String> publicCollectionHeaders(int collectionID) {
+    final String? albumToken = _cachedPublicAlbumToken[collectionID];
+    final String? albumJwtToken = _cachedPublicAlbumJWT[collectionID];
+    return {
+      if (albumToken != null) "X-Auth-Access-Token": albumToken,
+      if (albumJwtToken != null) "X-Auth-Access-Token-JWT": albumJwtToken,
+    };
   }
 
-  /// Is a public link opened in the app
+  /// Is a public link opened in the app via deeplink
   bool isSharedPublicLink(int collectionID) {
     return _cachedPublicCollectionID.contains(collectionID);
   }
@@ -1357,7 +1351,7 @@ class CollectionsService {
 
   Future<Collection> fetchCollectionByID(int collectionID) async {
     try {
-      _logger.fine('fetching collectionByID $collectionID');
+      _logger.info('fetching collectionByID $collectionID');
       final response = await _enteDio.get(
         "/collections/$collectionID",
       );

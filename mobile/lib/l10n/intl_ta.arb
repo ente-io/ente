@@ -20,10 +20,5 @@
   "yourAccountHasBeenDeleted": "உங்கள் கணக்கு நீக்கப்பட்டது",
   "selectReason": "காரணத்தைத் தேர்ந்தெடுக்கவும்",
   "deleteReason1": "எனக்கு தேவையான ஒரு முக்கிய அம்சம் இதில் இல்லை",
-  "onThisDay": "On this day",
-  "lookBackOnYourMemories": "Look back on your memories 🌄",
-  "newPhotosEmoji": " new 📸",
-  "sorryWeHadToPauseYourBackups": "Sorry, we had to pause your backups",
-  "clickToInstallOurBestVersionYet": "Click to install our best version yet",
-  "onThisDayNotificationExplanation": "Receive reminders about memories from this day in previous years."
+  "wishThemAHappyBirthday": "Wish ${name} a happy birthday! 🎉"
 }

@@ -1,4 +1,3 @@
-import "dart:io" show File;
 import 'dart:typed_data' show Uint8List;
 
 import "package:ml_linalg/linalg.dart";
@@ -98,12 +97,11 @@ Future<dynamic> isolateFunction(
     /// MLComputer
     case IsolateOperation.generateFaceThumbnails:
       final imagePath = args['imagePath'] as String;
-      final Uint8List imageData = await File(imagePath).readAsBytes();
       final faceBoxesJson = args['faceBoxesList'] as List<Map<String, dynamic>>;
       final List<FaceBox> faceBoxes =
           faceBoxesJson.map((json) => FaceBox.fromJson(json)).toList();
       final List<Uint8List> results = await generateFaceThumbnailsUsingCanvas(
-        imageData,
+        imagePath,
         faceBoxes,
       );
       return List.from(results);

@@ -28,6 +28,8 @@ class LocalSettings {
   static const kCuratedMemoriesEnabled = "ls.curated_memories_enabled";
   static const kOnThisDayNotificationsEnabled =
       "ls.on_this_day_notifications_enabled";
+  static const kBirthdayNotificationsEnabled =
+      "ls.birthday_notifications_enabled";
   static const kRateUsPromptThreshold = 2;
   static const shouldLoopVideoKey = "video.should_loop";
   static const onGuestViewKey = "on_guest_view";
@@ -129,20 +131,16 @@ class LocalSettings {
     return value;
   }
 
-  bool get userEnabledMultiplePart =>
-      _prefs.getBool(kEnableMultiplePart) ?? false;
+  bool get birthdayNotificationsEnabled =>
+      _prefs.getBool(kBirthdayNotificationsEnabled) ?? true;
 
-  Future<void> autoEnableMultiplePart(int rolloutPercentage) async {
-    if (_prefs.containsKey(kEnableMultiplePart)) {
-      return;
-    }
-    rolloutPercentage = rolloutPercentage.clamp(0, 100);
-    final randomValue = DateTime.now().millisecondsSinceEpoch % 100;
-    await _prefs.setBool(
-      kEnableMultiplePart,
-      randomValue < rolloutPercentage,
-    );
+  Future<bool> setBirthdayNotificationsEnabled(bool value) async {
+    await _prefs.setBool(kBirthdayNotificationsEnabled, value);
+    return value;
   }
+
+  bool get userEnabledMultiplePart =>
+      _prefs.getBool(kEnableMultiplePart) ?? true;
 
   Future<bool> setUserEnabledMultiplePart(bool value) async {
     await _prefs.setBool(kEnableMultiplePart, value);

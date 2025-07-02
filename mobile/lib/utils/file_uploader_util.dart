@@ -7,7 +7,7 @@ import 'dart:ui' as ui;
 import "package:archive/archive_io.dart";
 import "package:computer/computer.dart";
 import 'package:ente_crypto/ente_crypto.dart';
-import "package:exif/exif.dart";
+import "package:exif_reader/exif_reader.dart";
 import 'package:logging/logging.dart';
 import "package:motion_photos/motion_photos.dart";
 import 'package:motionphoto/motionphoto.dart';
@@ -24,6 +24,7 @@ import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
 import "package:photos/models/location/location.dart";
 import "package:photos/models/metadata/file_magic.dart";
+import "package:photos/services/sync/local_sync_service.dart";
 import "package:photos/utils/exif_util.dart";
 import 'package:photos/utils/file_util.dart';
 import "package:uuid/uuid.dart";
@@ -109,6 +110,9 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(
     throw InvalidFileError("", InvalidReason.assetDeleted);
   }
   _assertFileType(asset, file);
+  if (Platform.isIOS) {
+    trackOriginFetchForUploadOrML.put(file.localID!, true);
+  }
   sourceFile = await asset.originFile
       .timeout(const Duration(seconds: 15))
       .catchError((e) async {
@@ -148,7 +152,7 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(
     // .elp -> ente live photo
     final uniqueId = const Uuid().v4().toString();
     final livePhotoPath = tempPath + uniqueId + "_${file.generatedID}.elp";
-    _logger.fine("Creating zip for live photo from " + basename(livePhotoPath));
+    _logger.info("Creating zip for live photo from " + basename(livePhotoPath));
     await zip(
       zipPath: livePhotoPath,
       imagePath: sourceFile.path,

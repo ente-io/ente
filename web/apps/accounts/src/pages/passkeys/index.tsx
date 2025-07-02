@@ -3,9 +3,20 @@ import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import KeyIcon from "@mui/icons-material/Key";
-import { Box, Paper, Stack, Typography, styled } from "@mui/material";
+import {
+    Box,
+    Paper,
+    Stack,
+    TextField,
+    Typography,
+    styled,
+} from "@mui/material";
 import { EnteLogo } from "ente-base/components/EnteLogo";
-import { SidebarDrawer } from "ente-base/components/mui/SidebarDrawer";
+import { LoadingButton } from "ente-base/components/mui/LoadingButton";
+import {
+    SidebarDrawer,
+    SidebarDrawerTitlebar,
+} from "ente-base/components/mui/SidebarDrawer";
 import { NavbarBase } from "ente-base/components/Navbar";
 import {
     RowButton,
@@ -13,13 +24,12 @@ import {
     RowButtonGroup,
 } from "ente-base/components/RowButton";
 import { SingleInputDialog } from "ente-base/components/SingleInputDialog";
-import { Titlebar } from "ente-base/components/Titlebar";
 import { errorDialogAttributes } from "ente-base/components/utils/dialog";
 import { useModalVisibility } from "ente-base/components/utils/modal";
 import { useBaseContext } from "ente-base/context";
 import { formattedDateTime } from "ente-base/i18n-date";
 import log from "ente-base/log";
-import SingleInputForm from "ente-shared/components/SingleInputForm";
+import { useFormik } from "formik";
 import { t } from "i18next";
 import React, { useCallback, useEffect, useState } from "react";
 import {
@@ -91,30 +101,6 @@ const Page: React.FC = () => {
         void refreshPasskeys();
     };
 
-    const handleSubmit = async (
-        inputValue: string,
-        setFieldError: (errorMessage: string) => void,
-        resetForm: () => void,
-    ) => {
-        try {
-            await registerPasskey(token!, inputValue);
-        } catch (e) {
-            log.error("Failed to register a new passkey", e);
-            // If the user cancels the operation, then an error with name
-            // "NotAllowedError" is thrown.
-            //
-            // Ignore these, but in other cases add an error indicator to the
-            // add passkey text field. The browser is expected to already have
-            // shown an error dialog to the user.
-            if (!(e instanceof Error && e.name == "NotAllowedError")) {
-                setFieldError(t("passkey_add_failed"));
-            }
-            return;
-        }
-        await refreshPasskeys();
-        resetForm();
-    };
-
     return (
         <Stack sx={{ minHeight: "100svh" }}>
             <NavbarBase>
@@ -124,14 +110,10 @@ const Page: React.FC = () => {
                 sx={{ alignSelf: "center", m: 3, maxWidth: "375px", gap: 3 }}
             >
                 <Typography>{t("passkeys_description")}</Typography>
-                <Paper sx={{ p: "1rem" }}>
-                    <SingleInputForm
-                        fieldType="text"
-                        placeholder={t("enter_passkey_name")}
-                        buttonText={t("add_passkey")}
-                        initialValue={""}
-                        callback={handleSubmit}
-                        submitButtonProps={{ sx: { marginBottom: 1 } }}
+                <Paper sx={{ p: 2, pb: "29px" }}>
+                    <AddPasskeyForm
+                        token={token!}
+                        onRefreshPasskeys={refreshPasskeys}
                     />
                 </Paper>
                 <PasskeysList
@@ -152,6 +134,80 @@ const Page: React.FC = () => {
 };
 
 export default Page;
+
+interface AddPasskeyFormProps {
+    /**
+     * The token to use for the API request for adding the passkey.
+     */
+    token: string;
+    /**
+     * Called to refresh the list of passkeys shown on the page after the passkey was successfully added.
+     */
+    onRefreshPasskeys: () => Promise<void>;
+}
+
+export const AddPasskeyForm: React.FC<AddPasskeyFormProps> = ({
+    token,
+    onRefreshPasskeys,
+}) => {
+    const formik = useFormik({
+        initialValues: { value: "" },
+        onSubmit: async (values, { setFieldError, resetForm }) => {
+            const value = values.value;
+            const setValueFieldError = (message: string) =>
+                setFieldError("value", message);
+
+            if (!value) {
+                setValueFieldError(t("required"));
+                return;
+            }
+
+            try {
+                await registerPasskey(token, value);
+            } catch (e) {
+                log.error("Failed to register a new passkey", e);
+                // If the user cancels the operation, then an error with name
+                // "NotAllowedError" is thrown.
+                //
+                // Ignore these, but in other cases add an error indicator to the
+                // add passkey text field. The browser is expected to already have
+                // shown an error dialog to the user.
+                if (!(e instanceof Error && e.name == "NotAllowedError")) {
+                    setValueFieldError(t("passkey_add_failed"));
+                }
+                return;
+            }
+            await onRefreshPasskeys();
+            resetForm();
+        },
+    });
+
+    return (
+        <form onSubmit={formik.handleSubmit}>
+            <TextField
+                name="value"
+                value={formik.values.value}
+                onChange={formik.handleChange}
+                type="text"
+                fullWidth
+                margin="normal"
+                disabled={formik.isSubmitting}
+                error={!!formik.errors.value}
+                // See: [Note: Use space as default TextField helperText]
+                helperText={formik.errors.value ?? " "}
+                label={t("enter_passkey_name")}
+            />
+            <LoadingButton
+                fullWidth
+                color="accent"
+                type="submit"
+                loading={formik.isSubmitting}
+            >
+                {t("add_passkey")}
+            </LoadingButton>
+        </form>
+    );
+};
 
 interface PasskeysListProps {
     /** The list of {@link Passkey}s to show. */
@@ -287,7 +343,7 @@ const ManagePasskeyDrawer: React.FC<ManagePasskeyDrawerProps> = ({
             <SidebarDrawer anchor="right" {...{ open, onClose }}>
                 {token && passkey && (
                     <Stack sx={{ gap: "4px", py: "12px" }}>
-                        <Titlebar
+                        <SidebarDrawerTitlebar
                             onClose={onClose}
                             title={t("manage_passkey")}
                             onRootClose={onClose}
@@ -295,7 +351,7 @@ const ManagePasskeyDrawer: React.FC<ManagePasskeyDrawerProps> = ({
                         <CreatedAtEntry>
                             {formattedDateTime(passkey.createdAt)}
                         </CreatedAtEntry>
-                        <RowButtonGroup>
+                        <RowButtonGroup sx={{ m: 1 }}>
                             <RowButton
                                 startIcon={<EditIcon />}
                                 label={t("rename_passkey")}
@@ -318,7 +374,6 @@ const ManagePasskeyDrawer: React.FC<ManagePasskeyDrawerProps> = ({
                     title={t("rename_passkey")}
                     label={t("name")}
                     placeholder={t("enter_passkey_name")}
-                    autoFocus
                     initialValue={passkey.friendlyName}
                     submitButtonTitle={t("rename")}
                     onSubmit={handleRenamePasskeySubmit}

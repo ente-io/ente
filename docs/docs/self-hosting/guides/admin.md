@@ -14,7 +14,7 @@ explicit whitelist of admins.
 
 > [!NOTE]
 >
-> The first user is only treated as the admin if the list of admins in the 
+> The first user is only treated as the admin if the list of admins in the
 > configuration is empty.
 >
 > Also, if at some point you delete the first user, then you will need to define
@@ -54,11 +54,10 @@ command to find the user id of any account.
 
 # Administering your custom server
 
-> [!NOTE]
-> For the first user (admin) to perform administrative actions using the CLI, their
-> userID must be whitelisted in the `museum.yaml` configuration file under
-> `internal.admins`. While the first user is automatically granted admin privileges
-> on the server, this additional step is required for CLI operations.
+> [!NOTE] For the first user (admin) to perform administrative actions using the
+> CLI, their userID must be whitelisted in the `museum.yaml` configuration file
+> under `internal.admins`. While the first user is automatically granted admin
+> privileges on the server, this additional step is required for CLI operations.
 
 You can use
 [Ente's CLI](https://github.com/ente-io/ente/releases?q=tag%3Acli-v0) to

@@ -7,10 +7,12 @@ import 'package:flutter/material.dart';
 class CodeTimerProgress extends StatefulWidget {
   final int period;
   final bool isCompactMode;
+  final int timeOffsetInMilliseconds;
   const CodeTimerProgress({
     super.key,
     required this.period,
     this.isCompactMode = false,
+    this.timeOffsetInMilliseconds = 0,
   });
 
   @override
@@ -20,7 +22,7 @@ class CodeTimerProgress extends StatefulWidget {
 class _CodeTimerProgressState extends State<CodeTimerProgress> {
   late final Timer _timer;
   late final ValueNotifier<double> _progress;
-  late final int _periodInMicros;
+  late final int _periodInMilii;
 
   // Reduce update frequency
   final int _updateIntervalMs =
@@ -29,29 +31,30 @@ class _CodeTimerProgressState extends State<CodeTimerProgress> {
   @override
   void initState() {
     super.initState();
-    _periodInMicros = widget.period * 1000000;
+    _periodInMilii = widget.period * 1000;
     _progress = ValueNotifier<double>(0.0);
-    _updateTimeRemaining(DateTime.now().microsecondsSinceEpoch);
+    _updateTimeRemaining(DateTime.now().millisecondsSinceEpoch);
 
     _timer = Timer.periodic(Duration(milliseconds: _updateIntervalMs), (timer) {
-      final now = DateTime.now().microsecondsSinceEpoch;
+      final now = DateTime.now().millisecondsSinceEpoch;
       _updateTimeRemaining(now);
     });
   }
 
-  void _updateTimeRemaining(int currentMicros) {
+  void _updateTimeRemaining(int currentMilliSeconds) {
     // More efficient time calculation using modulo
-    final elapsed = (currentMicros) % _periodInMicros;
-    final timeRemaining = _periodInMicros - elapsed;
-    _progress.value = timeRemaining / _periodInMicros;
+    final elapsed = (currentMilliSeconds + widget.timeOffsetInMilliseconds) %
+        _periodInMilii;
+    final timeRemaining = _periodInMilii - elapsed;
+    _progress.value = timeRemaining / _periodInMilii;
   }
 
   @override
   void didUpdateWidget(covariant CodeTimerProgress oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.period != widget.period) {
-      _periodInMicros = widget.period * 1000000;
-      _updateTimeRemaining(DateTime.now().microsecondsSinceEpoch);
+      _periodInMilii = widget.period * 1000;
+      _updateTimeRemaining(DateTime.now().millisecondsSinceEpoch);
     }
   }
 

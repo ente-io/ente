@@ -10,6 +10,7 @@ import {
 import { EnteSwitch } from "ente-base/components/EnteSwitch";
 import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
 import React from "react";
+import { ActivityIndicator } from "./mui/ActivityIndicator";
 
 interface RowButtonGroupTitleProps {
     /**
@@ -410,4 +411,12 @@ export const RowLabel: React.FC<RowLabelProps> = ({ startIcon, label }) => (
             </Box>
         </Stack>
     </Stack>
+);
+
+/**
+ * A variant of {@link ActivityIndicator} with defaults suitable to be used as the
+ * {@link EndIcon} of a {@link RowButton}.
+ */
+export const RowButtonEndActivityIndicator: React.FC = () => (
+    <ActivityIndicator size="20px" sx={{ color: "stroke.muted" }} />
 );

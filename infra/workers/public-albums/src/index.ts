@@ -70,8 +70,15 @@ const handleGET = async (request: Request) => {
     if (accessToken) params.set("accessToken", accessToken);
     if (accessTokenJWT) params.set("accessTokenJWT", accessTokenJWT);
 
+    const headers = {
+        "X-Client-Package": request.headers.get("X-Client-Package") ?? "",
+        "X-Client-Version": request.headers.get("X-Client-Version") ?? "",
+        "User-Agent": request.headers.get("User-Agent") ?? "",
+    };
+
     let response = await fetch(
         `https://api.ente.io/public-collection/files${pathname}${fileID}?${params.toString()}`,
+        { headers },
     );
 
     if (!response.ok) console.log("Upstream error", response.status);

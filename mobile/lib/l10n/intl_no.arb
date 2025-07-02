@@ -476,7 +476,7 @@
     }
   },
   "showMemories": "Vis minner",
-  "yearsAgo": "{count, plural, one{{count} år siden} other{{count} år siden}}",
+  "yearsAgo": "{count, plural, other{{count} år siden}}",
   "backupSettings": "Sikkerhetskopier innstillinger",
   "backupStatus": "Status for sikkerhetskopi",
   "backupStatusDescription": "Elementer som har blitt sikkerhetskopiert vil vises her",
@@ -1699,11 +1699,5 @@
   "cLFamilyPlan": "Begrensninger for familieabonnement",
   "cLFamilyPlanDesc": "Du kan nå sette grenser for hvor mye lagringsplass familiemedlemmer kan bruke.",
   "cLBulkEdit": "Masseendring av datoer",
-  "cLBulkEditDesc": "Du kan nå velge flere bilder, og redigere dato/klokkeslett for alle med en rask handling. Forskyving av datoer støttes også.",
-  "onThisDay": "On this day",
-  "lookBackOnYourMemories": "Look back on your memories 🌄",
-  "newPhotosEmoji": " new 📸",
-  "sorryWeHadToPauseYourBackups": "Sorry, we had to pause your backups",
-  "clickToInstallOurBestVersionYet": "Click to install our best version yet",
-  "onThisDayNotificationExplanation": "Receive reminders about memories from this day in previous years."
+  "cLBulkEditDesc": "Du kan nå velge flere bilder, og redigere dato/klokkeslett for alle med en rask handling. Forskyving av datoer støttes også."
 }

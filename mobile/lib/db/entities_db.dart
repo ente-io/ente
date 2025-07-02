@@ -77,6 +77,20 @@ extension EntitiesDB on FilesDB {
     );
   }
 
+  Future<List<LocalEntityData>> getCertainEntities(
+    EntityType type,
+    List<String> ids,
+  ) async {
+    final db = await sqliteAsyncDB;
+    final List<Map<String, dynamic>> maps = await db.getAll(
+      'SELECT * FROM entities WHERE type = ? AND id IN (${List.filled(ids.length, '?').join(',')})',
+      [type.name, ...ids],
+    );
+    return List.generate(maps.length, (i) {
+      return LocalEntityData.fromJson(maps[i]);
+    });
+  }
+
   Future<List<LocalEntityData>> getEntities(EntityType type) async {
     final db = await sqliteAsyncDB;
     final List<Map<String, dynamic>> maps = await db.getAll(
@@ -98,5 +112,20 @@ extension EntitiesDB on FilesDB {
       return null;
     }
     return LocalEntityData.fromJson(maps.first);
+  }
+
+  Future<String?> getPreHashForEntities(
+    EntityType type,
+    List<String> ids,
+  ) async {
+    final db = await sqliteAsyncDB;
+    final maps = await db.get(
+      'SELECT GROUP_CONCAT(id || \':\' || updatedAt, \',\') FROM entities WHERE type = ? AND id IN (${List.filled(ids.length, '?').join(',')})',
+      [type.name, ...ids],
+    );
+    if (maps.isEmpty) {
+      return null;
+    }
+    return maps.values.first as String?;
   }
 }

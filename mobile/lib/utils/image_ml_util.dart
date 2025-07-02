@@ -32,12 +32,29 @@ final List<List<double>> gaussianKernel =
 const maxKernelSize = gaussianKernelSize;
 const maxKernelRadius = maxKernelSize ~/ 2;
 
-Future<(Image, Uint8List)> decodeImageFromPath(String imagePath) async {
+// Face thumbnail compression constants
+const int _faceThumbnailCompressionQuality = 90;
+const int _faceThumbnailMinDimension = 512;
+
+class DecodedImage {
+  final Image image;
+  final Uint8List? rawRgbaBytes;
+
+  const DecodedImage(this.image, [this.rawRgbaBytes]);
+}
+
+Future<DecodedImage> decodeImageFromPath(
+  String imagePath, {
+  required bool includeRgbaBytes,
+}) async {
   try {
     final imageData = await File(imagePath).readAsBytes();
     final image = await decodeImageFromData(imageData);
+    if (!includeRgbaBytes) {
+      return DecodedImage(image);
+    }
     final rawRgbaBytes = await _getRawRgbaBytes(image);
-    return (image, rawRgbaBytes);
+    return DecodedImage(image, rawRgbaBytes);
   } catch (e, s) {
     final format = imagePath.split('.').last;
     _logger.info(
@@ -50,9 +67,12 @@ Future<(Image, Uint8List)> decodeImageFromPath(String imagePath) async {
         format: CompressFormat.jpeg,
       );
       final image = await decodeImageFromData(convertedData!);
-      final rawRgbaBytes = await _getRawRgbaBytes(image);
       _logger.info('Conversion successful, jpeg decoded');
-      return (image, rawRgbaBytes);
+      if (!includeRgbaBytes) {
+        return DecodedImage(image);
+      }
+      final rawRgbaBytes = await _getRawRgbaBytes(image);
+      return DecodedImage(image, rawRgbaBytes);
     } catch (e) {
       _logger.severe(
         'Error decoding image of format $format on ${Platform.isAndroid ? "Android" : "iOS"}',
@@ -122,12 +142,16 @@ Future<Uint8List> _getByteDataFromImage(
 ///
 /// Returns a [Uint8List] image, in png format.
 Future<List<Uint8List>> generateFaceThumbnailsUsingCanvas(
-  Uint8List imageData,
+  String imagePath,
   List<FaceBox> faceBoxes,
 ) async {
   int i = 0; // Index of the faceBox, initialized here for logging purposes
   try {
-    final Image img = await decodeImageFromData(imageData);
+    final decodedImage = await decodeImageFromPath(
+      imagePath,
+      includeRgbaBytes: false,
+    );
+    final Image img = decodedImage.image;
     final futureFaceThumbnails = <Future<Uint8List>>[];
     for (final faceBox in faceBoxes) {
       // Note that the faceBox values are relative to the image size, so we need to convert them to absolute values first
@@ -517,6 +541,31 @@ Future<Uint8List> _cropAndEncodeCanvas(
     height: height,
   );
   return await _encodeImageToPng(croppedImage);
+}
+
+Future<List<Uint8List>> compressFaceThumbnails(Map args) async {
+  final listPngBytes = args['listPngBytes'] as List<Uint8List>;
+  final List<Future<Uint8List>> compressedBytesList = [];
+  try {
+    for (final pngBytes in listPngBytes) {
+      final compressedBytes = FlutterImageCompress.compressWithList(
+        pngBytes,
+        quality: _faceThumbnailCompressionQuality,
+        format: CompressFormat.jpeg,
+        minWidth: _faceThumbnailMinDimension,
+        minHeight: _faceThumbnailMinDimension,
+      );
+      compressedBytesList.add(compressedBytes);
+    }
+    return await Future.wait(compressedBytesList);
+  } catch (e, s) {
+    _logger.warning(
+      'Failed to compress face thumbnail, using original. Size: ${listPngBytes.map((e) => e.length).toList()} bytes',
+      e,
+      s,
+    );
+    rethrow;
+  }
 }
 
 RGB _getPixelBilinear(

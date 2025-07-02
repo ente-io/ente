@@ -1,5 +1,5 @@
 ---
-title: Docker errors
+title: Docker Errors
 description: Fixing docker related errors when trying to self host Ente
 ---
 
@@ -34,30 +34,30 @@ perform the same configuration by removing the "post_start" hook, and adding a
 new service definition:
 
 ```yaml
-  minio-provision:
+minio-provision:
     image: minio/mc
     depends_on:
-      - minio
+        - minio
     volumes:
-      - minio-data:/data
+        - minio-data:/data
     networks:
-      - internal
+        - internal
     entrypoint: |
-      sh -c '
-      #!/bin/sh
+        sh -c '
+        #!/bin/sh
 
-      while ! mc config host add h0 http://minio:3200 changeme changeme1234
-      do
-        echo "waiting for minio..."
-        sleep 0.5
-      done
+        while ! mc alias set h0 http://minio:3200 your_minio_user your_minio_pass
+        do
+          echo "waiting for minio..."
+          sleep 0.5
+        done
 
-      cd /data
+        cd /data
 
-      mc mb -p b2-eu-cen
-      mc mb -p wasabi-eu-central-2-v3
-      mc mb -p scw-eu-fr-v3
-      '
+        mc mb -p b2-eu-cen
+        mc mb -p wasabi-eu-central-2-v3
+        mc mb -p scw-eu-fr-v3
+        '
 ```
 
 ## start_interval
@@ -114,7 +114,7 @@ volumes.
 
 If you're sure of what you're doing, the volumes can be deleted by
 
-```
+```sh
 docker volume ls
 ```
 
@@ -124,7 +124,54 @@ to list them, and then delete the ones that begin with `my-ente` using
 that'll delete all volumes (Ente or otherwise) on your machine that are not
 currently in use by a running docker container.
 
+An alternative way is to delete the volumes along with removal of cluster's
+containers using `docker compose` inside `my-ente` directory.
+
+```sh
+docker compose down --volumes
+```
+
 If you're unsure about removing volumes, another alternative is to rename your
 `my-ente` folder. Docker uses the folder name to determine the volume name
 prefix, so giving it a different name will cause Docker to create a volume
 afresh for it.
+
+## MinIO provisioning error
+
+If you have used our quickstart script for self-hosting Ente (new users will be unaffected) and are using the default MinIO container for object storage, you may run into issues while starting the cluster after pulling latest images with provisioning MinIO and creating buckets.
+
+You may encounter similar logs while trying to start the cluster:
+
+```
+my-ente-minio-1 ->  | Waiting for minio...
+my-ente-minio-1 ->  | Waiting for minio...
+my-ente-minio-1 ->  | Waiting for minio...
+```
+
+MinIO has deprecated the `mc config` command in favor of `mc alias set` resulting in failure in execution of the command for creating bucket using `post_start` hook.
+
+This can be resolved by changing `mc config host h0 add http://minio:3200 $minio_user $minio_pass` to `mc alias set h0 http://minio:3200  $minio_user $minio_pass`
+
+Thus the updated `post_start` will look as follows for `minio` service:
+
+``` yaml
+    minio: 
+        ...
+        post_start:
+        - command: |
+            sh -c '
+            #!/bin/sh
+
+            while ! mc alias set h0 http://minio:3200 your_minio_user your_minio_pass 2>/dev/null
+            do
+                echo "Waiting for minio..."
+                sleep 0.5
+            done
+
+            cd /data
+
+            mc mb -p b2-eu-cen
+            mc mb -p wasabi-eu-central-2-v3
+            mc mb -p scw-eu-fr-v3
+            '
+```

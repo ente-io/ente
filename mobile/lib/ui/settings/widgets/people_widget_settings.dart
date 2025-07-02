@@ -1,3 +1,5 @@
+import "dart:async";
+
 import 'package:flutter/material.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
@@ -66,13 +68,13 @@ class _PeopleWidgetSettingsState extends State<PeopleWidgetSettings> {
                     onTap: _selectedPeople.personIds.isEmpty
                         ? null
                         : () async {
-                            await PeopleHomeWidgetService.instance
-                                .setSelectedPeople(
-                              _selectedPeople.personIds.toList(),
+                            unawaited(
+                              PeopleHomeWidgetService.instance
+                                  .setSelectedPeople(
+                                _selectedPeople.personIds.toList(),
+                              ),
                             );
                             Navigator.pop(context);
-                            await PeopleHomeWidgetService.instance
-                                .peopleChanged();
                           },
                   );
                 },
@@ -86,7 +88,7 @@ class _PeopleWidgetSettingsState extends State<PeopleWidgetSettings> {
             flexibleSpaceTitle: TitleBarTitleWidget(
               title: S.of(context).people,
             ),
-            expandedHeight: 120,
+            expandedHeight: MediaQuery.textScalerOf(context).scale(120),
             flexibleSpaceCaption: hasInstalledAny
                 ? S.of(context).peopleWidgetDesc
                 : context.l10n.addPeopleWidgetPrompt,
@@ -122,7 +124,7 @@ class _PeopleWidgetSettingsState extends State<PeopleWidgetSettings> {
               ),
             )
           else
-            SliverToBoxAdapter(
+            SliverFillRemaining(
               child: PeopleSectionAllWidget(
                 selectedPeople: _selectedPeople,
                 namedOnly: true,

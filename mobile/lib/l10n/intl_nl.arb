@@ -1,6 +1,7 @@
 {
   "@@locale ": "en",
   "enterYourEmailAddress": "Voer je e-mailadres in",
+  "enterYourNewEmailAddress": "Voer uw nieuwe e-mailadres in",
   "accountWelcomeBack": "Welkom terug!",
   "emailAlreadyRegistered": "E-mail is al geregistreerd.",
   "emailNotRegistered": "E-mail niet geregistreerd.",
@@ -371,6 +372,21 @@
   "deleteFromBoth": "Verwijder van beide",
   "newAlbum": "Nieuw album",
   "albums": "Albums",
+  "memoryCount": "{count, plural, =0{geen herinneringen} one{{formattedCount} herinnering} other{{formattedCount} herinneringen}}",
+  "@memoryCount": {
+    "description": "The text to display the number of memories",
+    "type": "text",
+    "placeholders": {
+      "count": {
+        "example": "1",
+        "type": "int"
+      },
+      "formattedCount": {
+        "type": "String",
+        "example": "11.513, 11,511"
+      }
+    }
+  },
   "selectedPhotos": "{count} geselecteerd",
   "@selectedPhotos": {
     "description": "Display the number of selected photos",
@@ -461,7 +477,7 @@
     }
   },
   "showMemories": "Toon herinneringen",
-  "yearsAgo": "{count, plural, one{{count} jaar geleden} other{{count} jaar geleden}}",
+  "yearsAgo": "{count, plural, other{{count} jaar geleden}}",
   "backupSettings": "Back-up instellingen",
   "backupStatus": "Back-up status",
   "backupStatusDescription": "Items die zijn geback-upt, worden hier getoond",
@@ -706,6 +722,7 @@
     "type": "text"
   },
   "backupFailed": "Back-up mislukt",
+  "sorryBackupFailedDesc": "Sorry, we kunnen dit bestand nu niet back-uppen, we zullen het later opnieuw proberen.",
   "couldNotBackUpTryLater": "We konden uw gegevens niet back-uppen.\nWe zullen het later opnieuw proberen.",
   "enteCanEncryptAndPreserveFilesOnlyIfYouGrant": "Ente kan bestanden alleen versleutelen en bewaren als u toegang tot ze geeft",
   "pleaseGrantPermissions": "Geef alstublieft toestemming",
@@ -777,6 +794,14 @@
   "share": "Delen",
   "unhideToAlbum": "Zichtbaar maken in album",
   "restoreToAlbum": "Terugzetten naar album",
+  "moveItem": "{count, plural, =1 {Bestand verplaatsen} other {Bestanden verplaatsen}}",
+  "@moveItem": {
+    "description": "Page title while moving one or more items to an album"
+  },
+  "addItem": "{count, plural, =1 {Bestand toevoegen} other {Bestanden toevoegen}}",
+  "@addItem": {
+    "description": "Page title while adding one or more items to album"
+  },
   "createOrSelectAlbum": "Maak of selecteer album",
   "selectAlbum": "Album selecteren",
   "searchByAlbumNameHint": "Albumnaam",
@@ -874,6 +899,7 @@
   "authToViewYourMemories": "Graag verifiëren om uw herinneringen te bekijken",
   "unlock": "Ontgrendelen",
   "freeUpSpace": "Ruimte vrijmaken",
+  "freeUpSpaceSaving": "{count, plural, =1 {Het kan verwijderd worden van het apparaat om {formattedSize} vrij te maken} other {Ze kunnen verwijderd worden van het apparaat om {formattedSize} vrij te maken}}",
   "filesBackedUpInAlbum": "{count, plural, one {1 bestand} other {{formattedNumber} bestanden}} in dit album is veilig geback-upt",
   "@filesBackedUpInAlbum": {
     "description": "Text to tell user how many files have been backed up in the album",
@@ -901,6 +927,18 @@
         "content": "{formattedNumber}",
         "example": "1,000",
         "type": "String"
+      }
+    }
+  },
+  "@freeUpSpaceSaving": {
+    "description": "Text to tell user how much space they can free up by deleting items from the device"
+  },
+  "freeUpAccessPostDelete": "Je hebt nog steeds toegang tot {count, plural, =1 {het} other {ze}} op Ente zolang je een actief abonnement hebt",
+  "@freeUpAccessPostDelete": {
+    "placeholders": {
+      "count": {
+        "example": "1",
+        "type": "int"
       }
     }
   },
@@ -993,6 +1031,7 @@
   "didYouKnow": "Wist u dat?",
   "loadingMessage": "Uw foto's laden...",
   "loadMessage1": "U kunt uw abonnement met uw familie delen",
+  "loadMessage2": "We hebben tot nu toe meer dan 200 miljoen herinneringen bewaard",
   "loadMessage3": "We bewaren 3 kopieën van uw bestanden, één in een ondergrondse kernbunker",
   "loadMessage4": "Al onze apps zijn open source",
   "loadMessage5": "Onze broncode en cryptografie zijn extern gecontroleerd en geverifieerd",
@@ -1230,6 +1269,8 @@
     "description": "Subtitle to indicate that the user can find people quickly by name"
   },
   "findPeopleByName": "Mensen snel op naam zoeken",
+  "addViewers": "{count, plural, =0 {Kijker toevoegen} =1 {Kijker toevoegen} other {Kijkers toevoegen}}",
+  "addCollaborators": "{count, plural, =0 {Samenwerker toevoegen} =1 {Samenwerker toevoegen} other {Samenwerkers toevoegen}}",
   "longPressAnEmailToVerifyEndToEndEncryption": "Druk lang op een e-mail om de versleuteling te verifiëren.",
   "developerSettingsWarning": "Weet je zeker dat je de ontwikkelaarsinstellingen wilt wijzigen?",
   "developerSettings": "Ontwikkelaarsinstellingen",
@@ -1241,6 +1282,8 @@
   "createCollaborativeLink": "Maak een gezamenlijke link",
   "search": "Zoeken",
   "enterPersonName": "Naam van persoon invoeren",
+  "editEmailAlreadyLinked": "Dit e-mailadres is al aan {name} gekoppeld.",
+  "viewPersonToUnlink": "Bekijk {name} om te ontkoppelen",
   "enterName": "Naam invoeren",
   "savePerson": "Persoon opslaan",
   "editPerson": "Persoon bewerken",
@@ -1361,6 +1404,16 @@
   "enableMachineLearningBanner": "Schakel machine learning in voor magische zoekopdrachten en gezichtsherkenning",
   "searchDiscoverEmptySection": "Afbeeldingen worden hier getoond zodra verwerking en synchroniseren voltooid is",
   "searchPersonsEmptySection": "Personen worden hier getoond zodra verwerking en synchroniseren voltooid is",
+  "viewersSuccessfullyAdded": "{count, plural, =0 {0 kijkers toegevoegd} =1 {1 kijker toegevoegd} other {{count} kijkers toegevoegd}}",
+  "@viewersSuccessfullyAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    },
+    "description": "Number of viewers that were successfully added to an album."
+  },
   "collaboratorsSuccessfullyAdded": "{count, plural, =0 {0 samenwerkers toegevoegd} =1 {1 samenwerker toegevoegd} other {{count} samenwerkers toegevoegd}}",
   "@collaboratorsSuccessfullyAdded": {
     "placeholders": {
@@ -1436,6 +1489,15 @@
   },
   "currentlyRunning": "momenteel bezig",
   "ignored": "genegeerd",
+  "photosCount": "{count, plural, =0 {0 foto's} =1 {1 foto} other {{count} foto's}}",
+  "@photosCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
   "file": "Bestand",
   "searchSectionsLengthMismatch": "Lengte van secties komt niet overeen: {snapshotLength} != {searchLength}",
   "@searchSectionsLengthMismatch": {
@@ -1601,6 +1663,7 @@
   "@linkPersonCaption": {
     "description": "Caption for the 'Link person' title. It should be a continuation of the 'Link person' title. Just like how 'Link person' + 'for better sharing experience' forms a proper sentence in English, the combination of these two strings should also be a proper sentence in other languages."
   },
+  "videoStreaming": "Video's met stream",
   "processingVideos": "Video's verwerken",
   "streamDetails": "Stream details",
   "processing": "Verwerken",
@@ -1667,20 +1730,27 @@
   "onTheRoad": "Onderweg",
   "food": "Culinaire vreugde",
   "pets": "Harige kameraden",
-  "cLIcon": "Nieuw icoon",
-  "cLIconDesc": "Tot slot, een nieuwe app icoon waarvan we denken dat het ons werk het beste weergeeft. We hebben ook een icon-switcher toegevoegd zodat je het oude icoon kunt blijven gebruiken.",
-  "cLMemories": "Herinneringen",
-  "cLMemoriesDesc": "Ontdek nog eens je speciale momenten - spotlicht op je favoriete mensen, op je reizen en vakanties, op de beste plaatjes, en nog veel meer. Zet Machine Learning aan, tag jezelf en benoem je vrienden voor de beste ervaring.",
-  "cLWidgets": "Widgets",
-  "cLWidgetsDesc": "Widgets die zijn geïntegreerd met herinneringen zijn nu beschikbaar. Ze tonen je speciale momenten zonder de app te openen.",
-  "cLFamilyPlan": "Familieplan limieten",
-  "cLFamilyPlanDesc": "Je kunt nu limieten instellen voor hoeveel opslag je familieleden kunnen gebruiken.",
-  "cLBulkEdit": "Bulk datums wijzigen",
-  "cLBulkEditDesc": "Je kunt nu meerdere foto's selecteren en de datum/tijd van ze allemaal bewerken met één snelle actie. Verschuiven van datums wordt ook ondersteund.",
-  "onThisDay": "On this day",
-  "lookBackOnYourMemories": "Look back on your memories 🌄",
-  "newPhotosEmoji": " new 📸",
-  "sorryWeHadToPauseYourBackups": "Sorry, we had to pause your backups",
-  "clickToInstallOurBestVersionYet": "Click to install our best version yet",
-  "onThisDayNotificationExplanation": "Receive reminders about memories from this day in previous years."
+  "curatedMemories": "Samengestelde herinneringen",
+  "widgets": "Widgets",
+  "memories": "Herinneringen",
+  "peopleWidgetDesc": "Selecteer de mensen die je wilt zien op je beginscherm.",
+  "albumsWidgetDesc": "Selecteer de albums die je wilt zien op je beginscherm.",
+  "memoriesWidgetDesc": "Selecteer het soort herinneringen dat je wilt zien op je beginscherm.",
+  "smartMemories": "Slimme herinneringen",
+  "pastYearsMemories": "Afgelopen jaren",
+  "deleteMultipleAlbumDialog": "Verwijder de foto's (en video's) van deze {count} albums ook uit <bold>alle</bold> andere albums waar deze deel van uitmaken?",
+  "addParticipants": "Voeg deelnemers toe",
+  "selectedAlbums": "{count} geselecteerd",
+  "actionNotSupportedOnFavouritesAlbum": "Actie niet ondersteund op Favorieten album",
+  "onThisDayMemories": "Op deze dag herinneringen",
+  "onThisDay": "Op deze dag",
+  "lookBackOnYourMemories": "Kijk terug op je herinneringen 🌄",
+  "newPhotosEmoji": " nieuwe 📸",
+  "sorryWeHadToPauseYourBackups": "Sorry, we moesten je back-ups pauzeren",
+  "clickToInstallOurBestVersionYet": "Klik om onze beste versie tot nu toe te installeren",
+  "onThisDayNotificationExplanation": "Ontvang meldingen over herinneringen op deze dag door de jaren heen.",
+  "addMemoriesWidgetPrompt": "Voeg een widget toe aan je beginscherm en kom hier terug om aan te passen.",
+  "addAlbumWidgetPrompt": "Voeg een widget toe aan je beginscherm en kom hier terug om aan te passen.",
+  "addPeopleWidgetPrompt": "Voeg een widget toe aan je beginscherm en kom hier terug om aan te passen.",
+  "wishThemAHappyBirthday": "Wish ${name} a happy birthday! 🎉"
 }

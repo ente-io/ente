@@ -4,6 +4,7 @@ import {
 } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs, { Dayjs } from "dayjs";
+import { useIsSmallWidth } from "ente-base/components/utils/hooks";
 import type { ParsedMetadataDate } from "ente-media/file-metadata";
 import React, { useState } from "react";
 
@@ -50,6 +51,8 @@ export const FileDateTimePicker: React.FC<FileDateTimePickerProps> = ({
     const [open, setOpen] = useState(true);
     const [value, setValue] = useState<Dayjs | null>(dayjs(initialValue));
 
+    const isSmallWidth = useIsSmallWidth();
+
     const handleAccept = (d: Dayjs | null) => {
         if (!dayjs.isDayjs(d))
             throw new Error(`Unexpected non-dayjs result ${typeof d}`);
@@ -72,11 +75,8 @@ export const FileDateTimePicker: React.FC<FileDateTimePickerProps> = ({
                 disableFuture={true}
                 /* The dialog grows too big on the default portrait mode with
                    our theme customizations. So we instead use the landscape
-                   layout. This works great on desktop since we have sufficient
-                   width. MUI omits the sidebar on mobile devices (using the
-                   pointer:fine media query), so it remains functional on mobile
-                   devices too. */
-                orientation="landscape"
+                   layout if the screen is large enough. */
+                orientation={isSmallWidth ? "portrait" : "landscape"}
                 onAccept={handleAccept}
                 slots={{ field: EmptyField }}
                 slotProps={{

@@ -20,7 +20,7 @@ import "package:photos/ui/viewer/gallery/state/search_filter_data_provider.dart"
 import "package:photos/ui/viewer/people/add_person_action_sheet.dart";
 import "package:photos/ui/viewer/people/people_banner.dart";
 import "package:photos/ui/viewer/people/people_page.dart";
-import "package:photos/ui/viewer/search/result/person_face_widget.dart";
+import "package:photos/ui/viewer/people/person_face_widget.dart";
 import "package:photos/utils/hierarchical_search_util.dart";
 import "package:photos/utils/navigation_util.dart";
 
@@ -171,11 +171,8 @@ class _HierarchicalSearchGalleryState extends State<HierarchicalSearchGallery> {
                       ? PeopleBanner(
                           type: PeopleBannerType.addName,
                           faceWidget: PersonFaceWidget(
-                            _firstUnnamedAppliedFaceFilter!.faceFile,
                             clusterID:
                                 _firstUnnamedAppliedFaceFilter!.clusterId,
-                            thumbnailFallback: false,
-                            cannotTrustFile: true,
                           ),
                           actionIcon: Icons.add_outlined,
                           text: S.of(context).savePerson,

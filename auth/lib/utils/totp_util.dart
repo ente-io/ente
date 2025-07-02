@@ -1,7 +1,13 @@
 import 'package:ente_auth/models/code.dart';
+import 'package:ente_auth/services/preference_service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:otp/otp.dart' as otp;
 import 'package:steam_totp/steam_totp.dart';
+
+int millisecondsSinceEpoch() {
+  return DateTime.now().millisecondsSinceEpoch +
+      PreferenceService.instance.timeOffsetInMilliSeconds();
+}
 
 String getOTP(Code code) {
   if (code.type == Type.steam || code.issuer.toLowerCase() == 'steam') {
@@ -12,7 +18,7 @@ String getOTP(Code code) {
   }
   return otp.OTP.generateTOTPCodeString(
     getSanitizedSecret(code.secret),
-    DateTime.now().millisecondsSinceEpoch,
+    millisecondsSinceEpoch(),
     length: code.digits,
     interval: code.period,
     algorithm: _getAlgorithm(code),
@@ -34,7 +40,7 @@ String _getSteamCode(Code code, [bool isNext = false]) {
   final SteamTOTP steamtotp = SteamTOTP(secret: code.secret);
 
   return steamtotp.generate(
-    DateTime.now().millisecondsSinceEpoch ~/ 1000 + (isNext ? code.period : 0),
+    millisecondsSinceEpoch() ~/ 1000 + (isNext ? code.period : 0),
   );
 }
 
@@ -44,7 +50,7 @@ String getNextTotp(Code code) {
   }
   return otp.OTP.generateTOTPCodeString(
     getSanitizedSecret(code.secret),
-    DateTime.now().millisecondsSinceEpoch + code.period * 1000,
+    millisecondsSinceEpoch() + code.period * 1000,
     length: code.digits,
     interval: code.period,
     algorithm: _getAlgorithm(code),
@@ -56,9 +62,7 @@ String getNextTotp(Code code) {
 // It returns the start time and a list of future codes.
 (int, List<String>) generateFutureTotpCodes(Code code, int count) {
   final int startTime =
-      ((DateTime.now().millisecondsSinceEpoch ~/ 1000) ~/ code.period) *
-          code.period *
-          1000;
+      ((millisecondsSinceEpoch() ~/ 1000) ~/ code.period) * code.period * 1000;
   final String secret = getSanitizedSecret(code.secret);
   final List<String> codes = [];
   if (code.type == Type.steam || code.issuer.toLowerCase() == 'steam') {

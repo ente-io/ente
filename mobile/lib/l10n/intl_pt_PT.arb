@@ -1,7 +1,10 @@
 {
   "@@locale ": "en",
-  "enterYourEmailAddress": "Insira o seu endereço de email",
+  "enterYourEmailAddress": "Introduza o seu e-mail",
+  "enterYourNewEmailAddress": "Introduza o seu novo e-mail",
   "accountWelcomeBack": "Bem-vindo de volta!",
+  "emailAlreadyRegistered": "E-mail já em utilização.",
+  "emailNotRegistered": "E-mail não em utilização.",
   "email": "Email",
   "cancel": "Cancelar",
   "verify": "Verificar",
@@ -185,6 +188,8 @@
   },
   "allowAddPhotosDescription": "Permitir que pessoas com o link também adicionem fotos ao álbum compartilhado.",
   "passwordLock": "Bloqueio da palavra-passe",
+  "canNotOpenTitle": "Não pôde abrir este álbum",
+  "canNotOpenBody": "Perdão, portanto o álbum não pode ser aberto na aplicação.",
   "disableDownloadWarningTitle": "Por favor, observe",
   "disableDownloadWarningBody": "Visualizadores ainda podem fazer capturas de tela ou salvar uma cópia das suas fotos usando ferramentas externas",
   "allowDownloads": "Permitir downloads",
@@ -351,6 +356,7 @@
   "failedToLoadAlbums": "Falha ao carregar álbuns",
   "hidden": "Oculto",
   "authToViewYourHiddenFiles": "Por favor, autentique para ver seus arquivos ocultos",
+  "authToViewTrashedFiles": "Autentica-se para visualizar os ficheiros na lata de lixo",
   "trash": "Lixo",
   "uncategorized": "Sem categoria",
   "videoSmallCase": "vídeo",
@@ -366,6 +372,21 @@
   "deleteFromBoth": "Apagar de ambos",
   "newAlbum": "Novo álbum",
   "albums": "Álbuns",
+  "memoryCount": "{count, plural, =0{não há memórias} one{{formattedCount} memória} other{{formattedCount} memórias}}",
+  "@memoryCount": {
+    "description": "The text to display the number of memories",
+    "type": "text",
+    "placeholders": {
+      "count": {
+        "example": "1",
+        "type": "int"
+      },
+      "formattedCount": {
+        "type": "String",
+        "example": "11.513, 11,511"
+      }
+    }
+  },
   "selectedPhotos": "{count} selecionado(s)",
   "@selectedPhotos": {
     "description": "Display the number of selected photos",
@@ -397,6 +418,7 @@
     "description": "The text to display in the advanced settings section"
   },
   "photoGridSize": "Tamanho da grelha de fotos",
+  "manageDeviceStorage": "Gerir cache do aparelho",
   "manageDeviceStorageDesc": "Reveja e limpe o armazenamento de cache local.",
   "machineLearning": "Aprendizagem automática",
   "mlConsent": "Ativar aprendizagem automática",
@@ -504,6 +526,7 @@
   "viewLargeFiles": "Ficheiros grandes",
   "viewLargeFilesDesc": "Ver os ficheiros que estão a consumir a maior quantidade de armazenamento.",
   "noDuplicates": "✨ Sem duplicados",
+  "youveNoDuplicateFilesThatCanBeCleared": "Não tem nenhum ficheiro duplicado que possa ser eliminado",
   "success": "Sucesso",
   "rateUs": "Avalie-nos",
   "remindToEmptyDeviceTrash": "Esvazie também a opção “Eliminados recentemente” em “Definições” -> “Armazenamento” para reclamar o espaço libertado",
@@ -672,6 +695,8 @@
   "noPhotosAreBeingBackedUpRightNow": "No momento não há backup de fotos sendo feito",
   "preserveMore": "Preservar mais",
   "grantFullAccessPrompt": "Por favor, permita o acesso a todas as fotos nas definições do aplicativo",
+  "allowPermTitle": "Garanta acesso às fotos",
+  "allowPermBody": "Por favor, permita o acesso às suas fotos para que Ente possa mostrá-las e fazer backup na Fototeca.",
   "openSettings": "Abrir Definições",
   "selectMorePhotos": "Selecionar mais fotos",
   "existingUser": "Utilizador existente",
@@ -697,6 +722,7 @@
     "type": "text"
   },
   "backupFailed": "Backup falhou",
+  "sorryBackupFailedDesc": "Perdão, mas não podemos fazer backup deste ficheiro agora, tentaremos mais tarde.",
   "couldNotBackUpTryLater": "Não foi possível fazer o backup de seus dados.\nTentaremos novamente mais tarde.",
   "enteCanEncryptAndPreserveFilesOnlyIfYouGrant": "Ente pode criptografar e preservar arquivos apenas se você conceder acesso a eles",
   "pleaseGrantPermissions": "Por favor, conceda as permissões",
@@ -768,6 +794,14 @@
   "share": "Partilhar",
   "unhideToAlbum": "Mostrar para o álbum",
   "restoreToAlbum": "Restaurar para álbum",
+  "moveItem": "{count, plural, =1 {Mover item} other {Mover itens}}",
+  "@moveItem": {
+    "description": "Page title while moving one or more items to an album"
+  },
+  "addItem": "{count, plural,=1 {Adicionar item} other {Adicionar itens}}",
+  "@addItem": {
+    "description": "Page title while adding one or more items to album"
+  },
   "createOrSelectAlbum": "Criar ou selecionar álbum",
   "selectAlbum": "Selecionar álbum",
   "searchByAlbumNameHint": "Nome do álbum",
@@ -865,6 +899,7 @@
   "authToViewYourMemories": "Por favor, autentique-se para ver suas memórias",
   "unlock": "Desbloquear",
   "freeUpSpace": "Libertar espaço",
+  "freeUpSpaceSaving": "{count, plural, =1 {Pode eliminá-lo do aparelho para esvaziar {formattedSize}} other {Pode eliminá-los do aparelho para esvaziar {formattedSize}}}",
   "filesBackedUpInAlbum": "{count, plural, one {1 arquivo} other {{formattedNumber} arquivos}} neste álbum teve um backup seguro",
   "@filesBackedUpInAlbum": {
     "description": "Text to tell user how many files have been backed up in the album",
@@ -892,6 +927,18 @@
         "content": "{formattedNumber}",
         "example": "1,000",
         "type": "String"
+      }
+    }
+  },
+  "@freeUpSpaceSaving": {
+    "description": "Text to tell user how much space they can free up by deleting items from the device"
+  },
+  "freeUpAccessPostDelete": "Ainda pode acessá{count, plural, =1 {-lo} other {-los}} no Ente contanto que tenha uma subscrição ativa",
+  "@freeUpAccessPostDelete": {
+    "placeholders": {
+      "count": {
+        "example": "1",
+        "type": "int"
       }
     }
   },
@@ -984,6 +1031,7 @@
   "didYouKnow": "Você sabia?",
   "loadingMessage": "Carregar as suas fotos...",
   "loadMessage1": "Pode partilhar a sua subscrição com a sua família",
+  "loadMessage2": "Já contivemos 200 milhões de memórias até o momento",
   "loadMessage3": "Mantemos 3 cópias dos seus dados, uma em um abrigo subterrâneo",
   "loadMessage4": "Todos os nossos aplicativos são de código aberto",
   "loadMessage5": "Nosso código-fonte e criptografia foram auditadas externamente",
@@ -1221,6 +1269,8 @@
     "description": "Subtitle to indicate that the user can find people quickly by name"
   },
   "findPeopleByName": "Encontrar pessoas rapidamente pelo nome",
+  "addViewers": "{count, plural, =0 {Adicionar visualizador} =1 {Adicionar visualizador} other {Adicionar vizualizadores}}",
+  "addCollaborators": "{count, plural, =0 {Adicionar colaborador} =1 {Adicionar colaborador} other {Adicionar colaboradores}}",
   "longPressAnEmailToVerifyEndToEndEncryption": "Pressione e segure um e-mail para verificar a criptografia de ponta a ponta.",
   "developerSettingsWarning": "Tem a certeza de que pretende modificar as definições de programador?",
   "developerSettings": "Definições do programador",
@@ -1232,6 +1282,8 @@
   "createCollaborativeLink": "Criar link colaborativo",
   "search": "Pesquisar",
   "enterPersonName": "Inserir nome da pessoa",
+  "editEmailAlreadyLinked": "Este e-mail já está ligado a {name}.",
+  "viewPersonToUnlink": "Ver {name} para desligar",
   "enterName": "Inserir nome",
   "savePerson": "Guardar pessoa",
   "editPerson": "Editar pessoa",
@@ -1342,6 +1394,7 @@
   "extraPhotosFound": "Fotos adicionais encontradas",
   "configuration": "Configuração",
   "localIndexing": "Indexação local",
+  "processed": "Processado",
   "resetPerson": "Remover",
   "areYouSureYouWantToResetThisPerson": "Tens a certeza de que queres repor esta pessoa?",
   "allPersonGroupingWillReset": "Todos os agrupamentos para esta pessoa serão reiniciados e perderá todas as sugestões feitas para esta pessoa",
@@ -1349,6 +1402,18 @@
   "onlyThem": "Apenas eles",
   "checkingModels": "A verificar modelos...",
   "enableMachineLearningBanner": "Habilitar aprendizagem automática para pesquisa mágica e reconhecimento de rosto",
+  "searchDiscoverEmptySection": "As imagens aparecerão aqui caso o processamento e sincronização for concluído",
+  "searchPersonsEmptySection": "As pessoas aparecerão aqui caso o processamento e sincronização for concluído",
+  "viewersSuccessfullyAdded": "{count, plural, =0 {Adicionado 0 vizualizadores} =1 {Adicionado 1 visualizador} other {Adicionado {count} visualizadores}}",
+  "@viewersSuccessfullyAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    },
+    "description": "Number of viewers that were successfully added to an album."
+  },
   "collaboratorsSuccessfullyAdded": "{count, plural, =0 {Adicionado 0 colaboradores} =1 {Adicionado 1 colaborador} other {Adicionado {count} colaboradores}}",
   "@collaboratorsSuccessfullyAdded": {
     "placeholders": {
@@ -1388,10 +1453,321 @@
       }
     }
   },
-  "onThisDay": "On this day",
-  "lookBackOnYourMemories": "Look back on your memories 🌄",
-  "newPhotosEmoji": " new 📸",
-  "sorryWeHadToPauseYourBackups": "Sorry, we had to pause your backups",
-  "clickToInstallOurBestVersionYet": "Click to install our best version yet",
-  "onThisDayNotificationExplanation": "Receive reminders about memories from this day in previous years."
+  "tapToUploadIsIgnoredDue": "Clique para enviar, o envio foi ignorado devido a {ignoreReason}",
+  "@tapToUploadIsIgnoredDue": {
+    "description": "Shown in upload icon widet, inside a tooltip.",
+    "placeholders": {
+      "ignoreReason": {
+        "type": "String",
+        "example": "no network"
+      }
+    }
+  },
+  "tapToUpload": "Clique para enviar",
+  "@tapToUpload": {
+    "description": "Shown in upload icon widet, inside a tooltip."
+  },
+  "info": "Info",
+  "addFiles": "Adicionar Ficheiros",
+  "castAlbum": "Transfere Álbum",
+  "imageNotAnalyzed": "Imagem sem análise",
+  "noFacesFound": "Nenhum rosto foi detetado",
+  "fileNotUploadedYet": "Ficheiro não enviado ainda",
+  "noSuggestionsForPerson": "Sem sugestões para {personName}",
+  "@noSuggestionsForPerson": {
+    "placeholders": {
+      "personName": {
+        "type": "String",
+        "example": "Alice"
+      }
+    }
+  },
+  "month": "mês",
+  "yearShort": "ano",
+  "@yearShort": {
+    "description": "Appears in pricing page (/yr)"
+  },
+  "currentlyRunning": "em execução",
+  "ignored": "ignorado",
+  "photosCount": "{count, plural, =0 {0 fotos} =1 {1 foto} other {{count} fotos}}",
+  "@photosCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "file": "Ficheiro",
+  "searchSectionsLengthMismatch": "Desigualdade de Largura entre Seções: {snapshotLength} != {searchLength}",
+  "@searchSectionsLengthMismatch": {
+    "description": "Appears in search tab page",
+    "placeholders": {
+      "snapshotLength": {
+        "type": "int",
+        "example": "1"
+      },
+      "searchLength": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "selectMailApp": "Selecione Aplicação de Correios",
+  "selectAllShort": "Tudo",
+  "@selectAllShort": {
+    "description": "Text that appears in bottom right when you start to select multiple photos. When clicked, it selects all photos."
+  },
+  "selectCoverPhoto": "Selecione Foto para Capa",
+  "newLocation": "Novo Lugar",
+  "faceNotClusteredYet": "Rosto não aglomerado ainda, retome mais tarde",
+  "theLinkYouAreTryingToAccessHasExpired": "A ligação que está a tentar acessar já expirou.",
+  "openFile": "Abrir o Ficheiro",
+  "backupFile": "Backup de Ficheiro",
+  "openAlbumInBrowser": "Abrir o Álbum em Navegador",
+  "openAlbumInBrowserTitle": "Utilize a Aplicação de Web Sítio para adicionar fotos ao álbum",
+  "allow": "Permitir",
+  "allowAppToOpenSharedAlbumLinks": "Permitir Aplicação Abrir Ligações Partilhadas",
+  "seePublicAlbumLinksInApp": "Ver Ligações Públicas na Aplicação",
+  "emergencyContacts": "Contactos de Emergência",
+  "acceptTrustInvite": "Aceite o Convite",
+  "declineTrustInvite": "Dispense o Convite",
+  "removeYourselfAsTrustedContact": "Retirar convosco dos contactos de confiança",
+  "legacy": "Revivência",
+  "legacyPageDesc": "A Revivência permite que contactos de confiança acessem a sua conta na sua inatividade.",
+  "legacyPageDesc2": "Contactos de confiança podem restaurar a sua conta, e se não lhes impedir em 30 dias, redefine a sua palavra-passe e acesse a sua conta.",
+  "legacyAccounts": "Contas revividas",
+  "trustedContacts": "Contactos de Confiança",
+  "addTrustedContact": "Adicionar Contacto de Confiança",
+  "removeInvite": "Retirar convite",
+  "recoveryWarning": "Um contacto de confiança está a tentar acessar a sua conta",
+  "rejectRecovery": "Recusar recuperação",
+  "recoveryInitiated": "Recuperação iniciada",
+  "recoveryInitiatedDesc": "Pode acessar a conta após {days} dias. Uma notificação será enviada para {email}.",
+  "@recoveryInitiatedDesc": {
+    "placeholders": {
+      "days": {
+        "type": "int",
+        "example": "30"
+      },
+      "email": {
+        "type": "String",
+        "example": "me@example.com"
+      }
+    }
+  },
+  "cancelAccountRecovery": "Cancelar recuperação",
+  "recoveryAccount": "Recuperar Conta",
+  "cancelAccountRecoveryBody": "Quer mesmo cancelar a recuperação?",
+  "startAccountRecoveryTitle": "Começar Recuperação",
+  "whyAddTrustContact": "O contacto de confiança pode ajudar na recuperação dos seus dados.",
+  "recoveryReady": "Agora pode recuperar a conta de {email} definindo uma nova palavra-passe.",
+  "@recoveryReady": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "me@example.com"
+      }
+    }
+  },
+  "recoveryWarningBody": "{email} está a tentar recuperar a sua conta.",
+  "trustedInviteBody": "Foste convidado para ser um contacto revivido de {email}.",
+  "warning": "Alerta",
+  "proceed": "Continuar",
+  "confirmAddingTrustedContact": "Está prestes a adicionar {email} como contacto de confiança. Eles poderão recuperar a sua conta caso esteja inativo por {numOfDays} dias.",
+  "@confirmAddingTrustedContact": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "me@example.com"
+      },
+      "numOfDays": {
+        "type": "int",
+        "example": "30"
+      }
+    }
+  },
+  "legacyInvite": "{email} convidou-lhe a ser um contacto de confiança",
+  "authToManageLegacy": "Autentica-se para gerir os seus contactos de confiança",
+  "useDifferentPlayerInfo": "A ter problemas reproduzindo este vídeo? Prima aqui para tentar outro reprodutor.",
+  "hideSharedItemsFromHomeGallery": "Esconder Itens Partilhados da Galeria Inicial",
+  "gallery": "Galeria",
+  "joinAlbum": "Aderir ao Álbum",
+  "joinAlbumSubtext": "para ver e adicionar as suas fotos",
+  "joinAlbumSubtextViewer": "para adicionar isto aos álbuns partilhados",
+  "join": "Aderir",
+  "linkEmail": "Ligar e-mail",
+  "link": "Ligar",
+  "noEnteAccountExclamation": "Nenhuma conta do Ente!",
+  "orPickFromYourContacts": "ou selecione dos seus contactos",
+  "emailDoesNotHaveEnteAccount": "{email} não há uma conta no Ente.",
+  "@emailDoesNotHaveEnteAccount": {
+    "description": "Shown when email doesn't have an Ente account",
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "accountOwnerPersonAppbarTitle": "{title} (Eu)",
+  "@accountOwnerPersonAppbarTitle": {
+    "description": "Title of appbar for account owner person",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "reassignMe": "Retribua \"Mim\"",
+  "me": "Eu",
+  "linkEmailToContactBannerCaption": "para partilha ágil",
+  "@linkEmailToContactBannerCaption": {
+    "description": "Caption for the 'Link email' title. It should be a continuation of the 'Link email' title. Just like how 'Link email' + 'for faster sharing' forms a proper sentence in English, the combination of these two strings should also be a proper sentence in other languages."
+  },
+  "selectPersonToLink": "Selecione uma pessoa para ligar-se",
+  "linkPersonToEmail": "Ligar pessoa a {email}",
+  "@linkPersonToEmail": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "linkPersonToEmailConfirmation": "Isto ligará {personName} a {email}",
+  "@linkPersonToEmailConfirmation": {
+    "description": "Confirmation message when linking a person to an email",
+    "placeholders": {
+      "personName": {
+        "type": "String"
+      },
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "selectYourFace": "Selecionar o seu rosto",
+  "reassigningLoading": "A retribuir...",
+  "reassignedToName": "Retribuiu tu a {name}",
+  "@reassignedToName": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "saveChangesBeforeLeavingQuestion": "Guardar as alterações antes de sair?",
+  "dontSave": "Não guarde",
+  "thisIsMeExclamation": "Este sou eu!",
+  "linkPerson": "Ligar pessoa",
+  "linkPersonCaption": "para melhor experiência de partilha",
+  "@linkPersonCaption": {
+    "description": "Caption for the 'Link person' title. It should be a continuation of the 'Link person' title. Just like how 'Link person' + 'for better sharing experience' forms a proper sentence in English, the combination of these two strings should also be a proper sentence in other languages."
+  },
+  "videoStreaming": "Vídeos transmissíveis",
+  "processingVideos": "A processar vídeos",
+  "streamDetails": "Detalhes do em direto",
+  "processing": "A processar",
+  "queued": "Em fila",
+  "ineligible": "Inelegível",
+  "failed": "Falha",
+  "playStream": "Ver em direto",
+  "playOriginal": "Ver original",
+  "joinAlbumConfirmationDialogBody": "Aderir a um álbum fará o seu e-mail visível aos participantes.",
+  "pleaseWaitThisWillTakeAWhile": "Espera um pouco, isto deve levar um tempo.",
+  "editTime": "Editar tempo",
+  "selectTime": "Selecionar tempo",
+  "selectDate": "Selecionar data",
+  "previous": "Anterior",
+  "selectOneDateAndTimeForAll": "Selecionar uma data e hora a todos",
+  "selectStartOfRange": "Selecionar início de intervalo",
+  "thisWillMakeTheDateAndTimeOfAllSelected": "Isto fará a data e hora de todas as fotos o mesmo.",
+  "allWillShiftRangeBasedOnFirst": "Este é o primeiro neste grupo. Outras fotos selecionadas serão automaticamente alteradas para a nova data",
+  "newRange": "Novo intervalo",
+  "selectOneDateAndTime": "Selecione uma Data e Hora",
+  "moveSelectedPhotosToOneDate": "Alterar datas de Fotos ao Selecionado",
+  "shiftDatesAndTime": "Mude as Datas e Horas",
+  "photosKeepRelativeTimeDifference": "As Fotos continuam com uma diferença de horário relativo",
+  "photocountPhotos": "{count, plural, =0 {Sem fotos} =1 {1 foto} other {{count} fotos}}",
+  "@photocountPhotos": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "appIcon": "Ícone da Aplicação",
+  "notThisPerson": "Não é esta pessoa?",
+  "selectedItemsWillBeRemovedFromThisPerson": "Os itens em seleção serão removidos desta pessoa, mas não da sua biblioteca.",
+  "throughTheYears": "{dateFormat} com o avanço dos anos",
+  "thisWeekThroughTheYears": "Esta semana com o avanço dos anos",
+  "thisWeekXYearsAgo": "{count, plural, =1 {Esta semana, {count} ano atrás} other {Esta semana, {count} anos atrás}}",
+  "youAndThem": "Tu e {name}",
+  "admiringThem": "A admirar {name}",
+  "embracingThem": "A abraçar {name}",
+  "partyWithThem": "Tendo uma festa com {name}",
+  "hikingWithThem": "Passeando com {name}",
+  "feastingWithThem": "A comer com {name}",
+  "selfiesWithThem": "A captar selfies com {name}",
+  "posingWithThem": "A posicionar com {name}",
+  "backgroundWithThem": "Vistas deslumbrantes com {name}",
+  "sportsWithThem": "A praticar esportes com {name}",
+  "roadtripWithThem": "A viajar na rua com {name}",
+  "spotlightOnYourself": "A dar destaque em vos",
+  "spotlightOnThem": "A dar destaque em {name}",
+  "personIsAge": "{name} tem {age} anos!",
+  "personTurningAge": "{name} fará {age} anos em breve",
+  "lastTimeWithThem": "Últimos momentos com {name}",
+  "tripToLocation": "Viagem para {location}",
+  "tripInYear": "Viajem em {year}",
+  "lastYearsTrip": "Viagem do ano passado",
+  "sunrise": "No horizonte",
+  "mountains": "Sobre as colinas",
+  "greenery": "A vida esverdeada",
+  "beach": "A areia e o mar",
+  "city": "Na cidade",
+  "moon": "Na luz da lua",
+  "onTheRoad": "Na rua de novo",
+  "food": "Culinária saborosa",
+  "pets": "Acompanhantes peludos",
+  "curatedMemories": "Memórias curadas",
+  "widgets": "Widgets",
+  "memories": "Memórias",
+  "peopleWidgetDesc": "Seleciona as pessoas que adoraria ver no seu ecrã inicial.",
+  "albumsWidgetDesc": "Seleciona os álbuns que adoraria ver no seu ecrã inicial.",
+  "memoriesWidgetDesc": "Seleciona os tipos de memórias que adoraria ver no seu ecrã inicial.",
+  "smartMemories": "Memórias inteligentes",
+  "pastYearsMemories": "Memórias de anos passados",
+  "deleteMultipleAlbumDialog": "Também eliminar fotos (e vídeos) presentes em {count} álbuns e de <bold>todos</bold> os outros álbuns que fazem parte?",
+  "addParticipants": "Adicionar participante",
+  "selectedAlbums": "{count} selecionado(s)",
+  "actionNotSupportedOnFavouritesAlbum": "Ação não suportada no álbum de Preferidos",
+  "onThisDayMemories": "Memórias deste dia",
+  "onThisDay": "Neste dia",
+  "lookBackOnYourMemories": "Revê as suas memórias 🌄",
+  "newPhotosEmoji": " novo 📸",
+  "sorryWeHadToPauseYourBackups": "Perdão, precisamos parar seus backups",
+  "clickToInstallOurBestVersionYet": "Clica para transferir a melhor versão",
+  "onThisDayNotificationExplanation": "Obtém lembretes de memórias deste dia em anos passados.",
+  "addMemoriesWidgetPrompt": "Adiciona um widget de memórias no seu ecrã inicial e volte aqui para personalizar.",
+  "addAlbumWidgetPrompt": "Adiciona um widget de álbum no seu ecrã inicial e volte aqui para personalizar.",
+  "addPeopleWidgetPrompt": "Adiciona um widget de pessoas no seu ecrã inicial e volte aqui para personalizar.",
+  "birthdayNotifications": "Notificações de felicidades",
+  "receiveRemindersOnBirthdays": "Obtém lembretes de quando é aniversário de alguém. Apertar na notificação o levará às fotos do aniversariante.",
+  "happyBirthday": "Felicidades! 🥳",
+  "happyBirthdayToPerson": "Felicidades para {name}! 🎉",
+  "birthdays": "Aniversários",
+  "wishThemAHappyBirthday": "Wish ${name} a happy birthday! 🎉",
+  "cLTitle1": "Envio de ficheiros de vídeo grandes",
+  "cLDesc1": "Na sequência da versão beta de transmissão de vídeo e do trabalho em envios e transferências retomáveis, agora aumentámos o limite de envio de ficheiros para 10GB. Isto está agora disponível tanto nas aplicações de computador como móveis.",
+  "cLTitle2": "Envio em segundo plano",
+  "cLDesc2": "Os envios em segundo plano agora também são suportados no iOS, além dos dispositivos Android. Não é necessário abrir a aplicação para fazer uma cópia de segurança das suas fotografias e vídeos mais recentes.",
+  "cLTitle3": "Reprodução automática de memórias",
+  "cLDesc3": "Fizemos melhorias significativas na nossa experiência de memórias, incluindo reprodução automática, deslizar para a próxima memória e muito mais.",
+  "cLTitle4": "Reconhecimento facial melhorado",
+  "cLDesc4": "Juntamente com várias melhorias internas, agora é muito mais fácil ver todas as faces detectadas, fornecer comentários sobre faces similares e adicionar/remover faces de uma única fotografia.",
+  "cLTitle5": "Notificações de aniversário",
+  "cLDesc5": "Agora receberá uma notificação opcional para todos os aniversários que guardou no Ente, juntamente com uma colecção das suas melhores fotografias.",
+  "cLTitle6": "Envios e transferências retomáveis",
+  "cLDesc6": "Já não é necessário esperar que os envios/transferências sejam concluídos antes de poder fechar a aplicação. Todos os envios e transferências têm agora a capacidade de serem pausados a meio e retomados de onde parou."
 }

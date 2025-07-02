@@ -88,6 +88,8 @@
   "useRecoveryKey": "Gunakan kunci pemulihan",
   "incorrectPasswordTitle": "Kata sandi salah",
   "welcomeBack": "Selamat datang kembali!",
+  "emailAlreadyRegistered": "Email sudah terdaftar.",
+  "emailNotRegistered": "Email belum terdaftar.",
   "madeWithLoveAtPrefix": "dibuat dengan ❤️ di ",
   "supportDevs": "Berlangganan <bold-green>ente</bold-green> untuk mendukung kami",
   "supportDiscount": "Gunakan kode kupon \"AUTH\" untuk mendapatkan potongan 10% untuk tahun pertama",
@@ -171,6 +173,7 @@
   "invalidQRCode": "Kode QR tidak valid",
   "noRecoveryKeyTitle": "Tidak punya kunci pemulihan?",
   "enterEmailHint": "Masukkan alamat email Anda",
+  "enterNewEmailHint": "Masukkan alamat email baru anda",
   "invalidEmailTitle": "Alamat email tidak valid",
   "invalidEmailMessage": "Harap masukkan alamat email yang valid.",
   "deleteAccount": "Hapus akun",
@@ -501,5 +504,12 @@
   "deselectAll": "Batalkan semua pilihan",
   "selectAll": "Pilih semua",
   "deleteDuplicates": "Hapus duplikat",
-  "plainHTML": "HTML Sederhana"
+  "plainHTML": "HTML Sederhana",
+  "tellUsWhatYouThink": "Berikan pendapatmu",
+  "dropReviewAndroid": "Berikan ulasan di Play Store",
+  "advanced": "Lanjutan",
+  "algorithm": "Algoritma",
+  "type": "Tipe",
+  "period": "Periode",
+  "digits": "Digit"
 }

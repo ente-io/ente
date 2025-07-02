@@ -73,7 +73,10 @@ class AuthenticatorGateway {
     );
   }
 
-  Future<List<AuthEntity>> getDiff(int sinceTime, {int limit = 500}) async {
+  Future<(List<AuthEntity>, int?)> getDiff(
+    int sinceTime, {
+    int limit = 500,
+  }) async {
     try {
       final response = await _enteDio.get(
         "/authenticator/entity/diff",
@@ -84,11 +87,12 @@ class AuthenticatorGateway {
       );
       final List<AuthEntity> authEntities = <AuthEntity>[];
       final diff = response.data["diff"] as List;
+      final int? unixTimeInMicroSeconds = response.data["timestamp"] as int?;
       for (var entry in diff) {
         final AuthEntity entity = AuthEntity.fromMap(entry);
         authEntities.add(entity);
       }
-      return authEntities;
+      return (authEntities, unixTimeInMicroSeconds);
     } catch (e) {
       if (e is DioException && e.response?.statusCode == 401) {
         throw UnauthorizedError();

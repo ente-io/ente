@@ -3,9 +3,9 @@
     "version": "0.0.0",
     "private": true,
     "dependencies": {
-        "@mui/material": "^6.4.11",
-        "@mui/system": "^6.4.11",
-        "@mui/x-date-pickers": "^7.29.3",
+        "@mui/material": "^7.1.1",
+        "@mui/system": "^7.1.1",
+        "@mui/x-date-pickers": "^8.5.2",
         "dayjs": "^1.11.13",
         "ente-base": "*",
         "ente-gallery": "*",
@@ -15,8 +15,8 @@
         "react-dom": "^19.1.0"
     },
     "devDependencies": {
-        "@types/react": "^19.1.5",
-        "@types/react-dom": "^19.1.5",
+        "@types/react": "^19.1.8",
+        "@types/react-dom": "^19.1.6",
         "ente-build-config": "*"
     }
 }

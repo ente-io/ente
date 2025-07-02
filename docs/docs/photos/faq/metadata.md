@@ -62,6 +62,7 @@ the upload time as the photo's creation time.
 ## Modifications
 
 Ente supports modifications to the following metadata:
+
 - File name
 - Date & time
 - Location

@@ -1,6 +1,7 @@
 import "dart:async";
 
 import 'package:flutter/material.dart';
+import "package:flutter_svg/flutter_svg.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/album_sort_order_change_event.dart";
 import "package:photos/events/collection_updated_event.dart";
@@ -142,7 +143,7 @@ class _CollectionListPageState extends State<CollectionListPage> {
 
   Widget _sortMenu(List<Collection> collections) {
     final colorTheme = getEnteColorScheme(context);
-
+    final isLightMode = Theme.of(context).brightness == Brightness.light;
     Widget sortOptionText(AlbumSortKey key) {
       String text = key.toString();
       switch (key) {
@@ -180,12 +181,7 @@ class _CollectionListPageState extends State<CollectionListPage> {
       ),
       child: Row(
         children: [
-          IconButtonWidget(
-            icon: albumViewType == AlbumViewType.grid
-                ? Icons.view_list_outlined
-                : Icons.grid_view_outlined,
-            iconButtonType: IconButtonType.secondary,
-            iconColor: colorTheme.blurStrokePressed,
+          GestureDetector(
             onTap: () async {
               setState(() {
                 albumViewType = albumViewType == AlbumViewType.grid
@@ -194,6 +190,24 @@ class _CollectionListPageState extends State<CollectionListPage> {
               });
               await localSettings.setAlbumViewType(albumViewType!);
             },
+            child: Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: SizedBox(
+                height: 24,
+                width: 24,
+                child: albumViewType == AlbumViewType.grid
+                    ? SvgPicture.asset(
+                        isLightMode
+                            ? "assets/icons/list_view_icon_light.svg"
+                            : "assets/icons/list_view_icon_dark.svg",
+                      )
+                    : Icon(
+                        Icons.grid_view,
+                        color: colorTheme.textMuted,
+                        size: 22,
+                      ),
+              ),
+            ),
           ),
           GestureDetector(
             onTapDown: (TapDownDetails details) async {
@@ -226,9 +240,9 @@ class _CollectionListPageState extends State<CollectionListPage> {
               }
             },
             child: IconButtonWidget(
-              icon: Icons.sort_outlined,
+              icon: Icons.sort_rounded,
               iconButtonType: IconButtonType.secondary,
-              iconColor: colorTheme.blurStrokePressed,
+              iconColor: colorTheme.textMuted,
             ),
           ),
         ],

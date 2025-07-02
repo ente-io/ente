@@ -1,9 +1,9 @@
 import { desktopAppVersion, isDesktop } from "ente-base/app";
 import { wait } from "ente-utils/promise";
-import { z } from "zod";
+import { z } from "zod/v4";
 import { clientPackageName } from "./app";
-import { ensureAuthToken } from "./local-user";
 import log from "./log";
+import { ensureAuthToken } from "./token";
 
 /**
  * Return headers that should be passed alongwith (almost) all authenticated
@@ -15,7 +15,7 @@ import log from "./log";
 export const authenticatedRequestHeaders = async () => ({
     "X-Auth-Token": await ensureAuthToken(),
     "X-Client-Package": clientPackageName,
-    ...(isDesktop ? { "X-Client-Version": desktopAppVersion } : {}),
+    ...(isDesktop && { "X-Client-Version": desktopAppVersion }),
 });
 
 /**
@@ -27,7 +27,7 @@ export const authenticatedRequestHeaders = async () => ({
  */
 export const publicRequestHeaders = () => ({
     "X-Client-Package": clientPackageName,
-    ...(isDesktop ? { "X-Client-Version": desktopAppVersion } : {}),
+    ...(isDesktop && { "X-Client-Version": desktopAppVersion }),
 });
 
 /**
@@ -35,9 +35,24 @@ export const publicRequestHeaders = () => ({
  */
 export interface PublicAlbumsCredentials {
     /**
-     * An access token that does the same job as the "X-Auth-Token" for usual
-     * authenticated API requests, except it will be passed as the
-     * ""X-Auth-Access-Token" header.
+     * [Note: Public album access token]
+     *
+     * The public album access is a token that serves a similar purpose as the
+     * "X-Auth-Token" for usual authenticated API requests that happen for a
+     * logged in user, except:
+     *
+     * - It will be passed as the "X-Auth-Access-Token" header, and
+     * - It also tells remote about the public album under consideration.
+     *
+     * This access token is variously referred to as the album token, or the
+     * auth token, when the context is clear. The client obtains this from the
+     * "t" query parameter of a public album URL, and then uses it both to:
+     *
+     * 1. Identify and authenticate itself with remote (this header).
+     *
+     * 2. Scope local storage per public album by using this access token as a
+     *    part of the local storage key. In this context it is sometimes also
+     *    referred to as a "collectionUID" by old code.
      */
     accessToken: string;
     /**
@@ -87,7 +102,7 @@ export class HTTPError extends Error {
         super(`HTTP ${res.status} ${res.statusText} (${url.pathname})`);
 
         const requestID = res.headers.get("x-request-id");
-        const details = { url: url.href, ...(requestID ? { requestID } : {}) };
+        const details = { url: url.href, ...(requestID && { requestID }) };
 
         // Cargo culted from
         // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error#custom_error_types
@@ -141,6 +156,8 @@ export const isHTTP401Error = (e: unknown) =>
  * Return `true` if this is an error because of a HTTP failure response returned
  * by museum with the given "code" and HTTP status.
  *
+ * > The function is async because it needs to parse the payload.
+ *
  * For some known set of errors, museum returns a payload of the form
  *
  *     {"code":"USER_NOT_REGISTERED","message":"User is not registered"}
@@ -193,6 +210,16 @@ interface RetryAsyncOperationOpts {
  * Retry a async operation on failure up to 4 times (1 original + 3 retries)
  * with exponential backoff.
  *
+ * [Note: Retries of network requests should be idempotent]
+ *
+ * When dealing with network requests, avoid using this function directly, use
+ * one of its wrappers like {@link retryEnsuringHTTPOk} instead. Those wrappers
+ * ultimately use this function only, and there is nothing wrong with this
+ * function generally, however since this function allows retrying arbitrary
+ * promises, it is easy accidentally try and attempt retries of non-idemponent
+ * requests, while the more restricted API of {@link retryEnsuringHTTPOk} and
+ * other {@link HTTPRequestRetrier}s makes such misuse less likely.
+ *
  * @param op A function that performs the operation, returning the promise for
  * its completion.
  *
@@ -211,7 +238,7 @@ export const retryAsyncOperation = async <T>(
     const { retryProfile, abortIfNeeded } = opts ?? {};
     const waitTimeBeforeNextTry =
         retryProfile == "background"
-            ? [5000, 25000, 120000]
+            ? [10000, 30000, 120000]
             : [2000, 5000, 10000];
 
     while (true) {
@@ -235,10 +262,15 @@ export const retryAsyncOperation = async <T>(
  * See {@link retryEnsuringHTTPOk} for the canonical example. This typedef is to
  * allow us to talk about and pass functions that behave similar to
  * {@link retryEnsuringHTTPOk}, but perhaps with other additional checks.
+ *
+ * See also: [Note: Retries of network requests should be idempotent]
  */
 export type HTTPRequestRetrier = (
     request: () => Promise<Response>,
+    opts?: HTTPRequestRetrierOpts,
 ) => Promise<Response>;
+
+type HTTPRequestRetrierOpts = Pick<RetryAsyncOperationOpts, "retryProfile">;
 
 /**
  * A helper function to adapt {@link retryAsyncOperation} for HTTP fetches.
@@ -248,12 +280,13 @@ export type HTTPRequestRetrier = (
  */
 export const retryEnsuringHTTPOk: HTTPRequestRetrier = (
     request: () => Promise<Response>,
+    opts?: HTTPRequestRetrierOpts,
 ) =>
     retryAsyncOperation(async () => {
         const r = await request();
         ensureOk(r);
         return r;
-    });
+    }, opts);
 
 /**
  * A helper function to adapt {@link retryAsyncOperation} for HTTP fetches, but
@@ -264,6 +297,7 @@ export const retryEnsuringHTTPOk: HTTPRequestRetrier = (
  */
 export const retryEnsuringHTTPOkOr4xx: HTTPRequestRetrier = (
     request: () => Promise<Response>,
+    opts?: HTTPRequestRetrierOpts,
 ) =>
     retryAsyncOperation(
         async () => {
@@ -272,6 +306,7 @@ export const retryEnsuringHTTPOkOr4xx: HTTPRequestRetrier = (
             return r;
         },
         {
+            ...opts,
             abortIfNeeded(e) {
                 if (isHTTP4xxError(e)) throw e;
             },
