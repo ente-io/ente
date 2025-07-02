@@ -15,6 +15,9 @@
  * It stored more than files though - files, collections, trash, their
  * corresponding sync times, and other bits and bobs related to them.
  *
+ * > Note: File contents themselves are not stored in IndexedDB, only
+ * > {@link EnteFile}s.
+ *
  * Since we've now switched to idb as our preferred IndexedDB library, the data
  * stored in this files table could be considered legacy in a sense. But such
  * would be an incorrect characterization - this code has no issues, and it
@@ -73,9 +76,6 @@ import { z } from "zod/v4";
  * This is used as a pre-flight check, to notify the user if they're using a
  * browser or extension that is preventing the app from using IndexedDB (which
  * is necessary for local storage of collections and files metadata).
- *
- * > File contents themselves are not stored in IndexedDB, only
- * > {@link EnteFile}s.
  */
 export const canAccessIndexedDB = async () => {
     try {
@@ -86,6 +86,13 @@ export const canAccessIndexedDB = async () => {
         return false;
     }
 };
+
+/**
+ * Clear any data stored in files DB.
+ *
+ * This is meant to be called during the logout sequence.
+ */
+export const clearFilesDB = () => localForage.clear();
 
 /**
  * Return a Zod schema suitable for being used with the various magic metadata
