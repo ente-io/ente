@@ -83,10 +83,10 @@ export const AuthenticateUser: React.FC<AuthenticateUserProps> = ({
     }, []);
 
     useEffect(() => {
-        // Do a non-blocking validation of the session, but show the dialog to
-        // the user.
+        // Do a non-blocking validation of the session whenever we show the
+        // dialog to the user.
         if (open) void validateSession();
-    }, [open]);
+    }, [open, validateSession]);
 
     return (
         <TitledMiniDialog
