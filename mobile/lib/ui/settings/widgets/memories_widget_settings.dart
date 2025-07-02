@@ -104,7 +104,7 @@ class _MemoriesWidgetSettingsState extends State<MemoriesWidgetSettings> {
             flexibleSpaceTitle: TitleBarTitleWidget(
               title: S.of(context).memories,
             ),
-            expandedHeight: 120,
+            expandedHeight: MediaQuery.textScalerOf(context).scale(120),
             flexibleSpaceCaption: hasInstalledAny
                 ? S.of(context).memoriesWidgetDesc
                 : context.l10n.addMemoriesWidgetPrompt,

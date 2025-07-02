@@ -638,6 +638,19 @@ class SearchService {
     return searchResults;
   }
 
+  Future<List<String>> getTopTwoFaces() async {
+    final searchFilter = await SectionType.face.getData(null).then(
+          (value) => (value as List<GenericSearchResult>).where(
+            (element) => (element.params[kPersonParamID] as String?) != null,
+          ),
+        );
+
+    return searchFilter
+        .take(2)
+        .map((e) => e.params[kPersonParamID] as String)
+        .toList();
+  }
+
   Future<List<GenericSearchResult>> getLocationResults(String query) async {
     final locationTagEntities = (await locationService.getLocationTags());
     final Map<LocalEntity<LocationTag>, List<EnteFile>> result = {};

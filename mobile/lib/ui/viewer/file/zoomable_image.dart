@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:math';
 import 'dart:typed_data' show Uint8List;
 
 import 'package:flutter/material.dart';
@@ -69,7 +70,7 @@ class _ZoomableImageState extends State<ZoomableImage> {
 
   // This is to prevent the app from crashing when loading 200MP images
   // https://github.com/flutter/flutter/issues/110331
-  bool get isTooLargeImage => _photo.width * _photo.height > 160000000;
+  bool get isTooLargeImage => _photo.width * _photo.height > 100000000; //100MP
 
   @override
   void initState() {
@@ -386,23 +387,18 @@ class _ZoomableImageState extends State<ZoomableImage> {
     ImageProvider imageProvider;
     if (isTooLargeImage) {
       _logger.info(
-        "Handling very large image (${_photo.width}x${_photo.height}) to prevent crash",
+        "Handling very large image (${_photo.width}x${_photo.height}) by decreasing resolution to 50MP to prevent crash",
       );
       final aspectRatio = _photo.width / _photo.height;
-      int targetWidth, targetHeight;
-      if (aspectRatio > 1) {
-        targetWidth = 4096;
-        targetHeight = (targetWidth / aspectRatio).round();
-      } else {
-        targetHeight = 4096;
-        targetWidth = (targetHeight * aspectRatio).round();
-      }
+      const maxPixels = 50000000;
+      final targetHeight = sqrt(maxPixels / aspectRatio);
+      final targetWidth = aspectRatio * targetHeight;
 
       imageProvider = Image.file(
         file,
         gaplessPlayback: true,
-        cacheWidth: targetWidth,
-        cacheHeight: targetHeight,
+        cacheWidth: targetWidth.round(),
+        cacheHeight: targetHeight.round(),
       ).image;
     } else {
       imageProvider = Image.file(
@@ -483,23 +479,17 @@ class _ZoomableImageState extends State<ZoomableImage> {
     Uint8List? compressedFile;
     if (isTooLargeImage) {
       _logger.info(
-        "Compressing very large image (${_photo.width}x${_photo.height}) more aggressively",
+        "Compressing very large image (${_photo.width}x${_photo.height}) more aggressively down to 50MP",
       );
       final aspectRatio = _photo.width / _photo.height;
-      int targetWidth, targetHeight;
-
-      if (aspectRatio > 1) {
-        targetWidth = 4096;
-        targetHeight = (targetWidth / aspectRatio).round();
-      } else {
-        targetHeight = 4096;
-        targetWidth = (targetHeight * aspectRatio).round();
-      }
+      const maxPixels = 50000000;
+      final targetHeight = sqrt(maxPixels / aspectRatio);
+      final targetWidth = aspectRatio * targetHeight;
 
       compressedFile = await FlutterImageCompress.compressWithFile(
         file.path,
-        minWidth: targetWidth,
-        minHeight: targetHeight,
+        minWidth: targetWidth.round(),
+        minHeight: targetHeight.round(),
         quality: 85,
       );
     } else {

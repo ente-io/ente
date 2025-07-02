@@ -39,7 +39,6 @@ import log from "ente-base/log";
 import { type EnteFile } from "ente-media/file";
 import { fileFileName } from "ente-media/file-metadata";
 import { ItemCard, PreviewItemTile } from "ente-new/photos/components/Tiles";
-import { CustomError } from "ente-shared/error";
 import { t } from "i18next";
 import React, { memo, useCallback, useEffect, useState } from "react";
 import { Trans } from "react-i18next";
@@ -50,6 +49,7 @@ import {
     type ListItemKeySelector,
 } from "react-window";
 import exportService, {
+    CustomError,
     ExportStage,
     selectAndPrepareExportDirectory,
     type ExportOpts,
