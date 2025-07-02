@@ -11,6 +11,7 @@
         "hls-video-element": "^1.5.4",
         "leaflet": "^1.9.4",
         "leaflet-defaulticon-compatibility": "^0.1.2",
+        "localforage": "^1.10.0",
         "media-chrome": "^4.11.1",
         "photoswipe": "^5.4.4",
         "react": "^19.1.0",

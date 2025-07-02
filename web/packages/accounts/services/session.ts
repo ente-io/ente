@@ -1,9 +1,9 @@
+import { getData } from "ente-accounts/services/accounts-db";
 import type { KeyAttributes } from "ente-accounts/services/user";
 import { authenticatedRequestHeaders, HTTPError } from "ente-base/http";
 import log from "ente-base/log";
 import { apiURL } from "ente-base/origins";
 import { getAuthToken } from "ente-base/token";
-import { getData } from "ente-shared/storage/localStorage";
 import { nullToUndefined } from "ente-utils/transform";
 import { z } from "zod/v4";
 import { getSRPAttributes, type SRPAttributes } from "./srp";

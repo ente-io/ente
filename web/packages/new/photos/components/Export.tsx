@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-/* eslint-disable @typescript-eslint/no-unnecessary-condition */
 import FolderIcon from "@mui/icons-material/Folder";
 import {
     Box,
@@ -54,7 +53,6 @@ import exportService, {
     selectAndPrepareExportDirectory,
     type ExportOpts,
     type ExportProgress,
-    type ExportSettings,
 } from "../services/export";
 
 type ExportProps = ModalVisibilityProps & {
@@ -118,10 +116,12 @@ export const Export: React.FC<ExportProps> = ({
             setLastExportTime,
             setPendingFiles,
         });
-        const exportSettings: ExportSettings =
-            exportService.getExportSettings();
-        setExportFolder(exportSettings?.folder ?? null);
+        const exportSettings = exportService.getExportSettings();
+        setExportFolder(exportSettings?.folder ?? "");
         setContinuousExport(exportSettings?.continuousExport ?? false);
+        // TODO: The type of syncExportRecord is wrong. It can work with an
+        // undefined value, but the type prohibits that.
+        // @ts-ignore
         void syncExportRecord(exportSettings?.folder);
     }, [syncExportRecord]);
 

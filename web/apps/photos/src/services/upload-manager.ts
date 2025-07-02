@@ -259,7 +259,7 @@ class UploadManager {
     private collections: Map<number, Collection>;
     private uploadInProgress: boolean;
     private publicAlbumsCredentials: PublicAlbumsCredentials | undefined;
-    private uploaderName: string;
+    private uploaderName: string | undefined;
     /**
      * When `true`, then the next call to {@link abortIfCancelled} will throw.
      *
@@ -295,7 +295,7 @@ class UploadManager {
         this.itemsToBeUploaded = [];
         this.failedItems = [];
         this.parsedMetadataJSONMap = parsedMetadataJSONMap ?? new Map();
-        this.uploaderName = null;
+        this.uploaderName = undefined;
         this.shouldUploadBeCancelled = false;
 
         this.uiService.reset();

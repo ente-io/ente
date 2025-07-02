@@ -1,10 +1,14 @@
 import { Verify2FACodeForm } from "ente-accounts/components/Verify2FACodeForm";
+import {
+    getData,
+    setData,
+    setLSUser,
+} from "ente-accounts/services/accounts-db";
 import type { User } from "ente-accounts/services/user";
 import { verifyTwoFactor } from "ente-accounts/services/user";
 import { LinkButton } from "ente-base/components/LinkButton";
 import { useBaseContext } from "ente-base/context";
 import { isHTTPErrorWithStatus } from "ente-base/http";
-import { getData, setData, setLSUser } from "ente-shared/storage/localStorage";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";

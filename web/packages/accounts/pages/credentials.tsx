@@ -15,6 +15,14 @@ import {
     type VerifyMasterPasswordFormProps,
 } from "ente-accounts/components/VerifyMasterPasswordForm";
 import {
+    getData,
+    getToken,
+    isFirstLogin,
+    setData,
+    setIsFirstLogin,
+    setLSUser,
+} from "ente-accounts/services/accounts-db";
+import {
     openPasskeyVerificationURL,
     passkeyVerificationRedirectURL,
 } from "ente-accounts/services/passkey";
@@ -50,12 +58,6 @@ import {
     unstashKeyEncryptionKeyFromSession,
     updateSessionFromElectronSafeStorageIfNeeded,
 } from "ente-base/session";
-import { getData, setData, setLSUser } from "ente-shared/storage/localStorage";
-import {
-    getToken,
-    isFirstLogin,
-    setIsFirstLogin,
-} from "ente-shared/storage/localStorage/helpers";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useState } from "react";

@@ -4,6 +4,7 @@ import {
     AccountsPageFooter,
     AccountsPageTitle,
 } from "ente-accounts/components/layouts/centered-paper";
+import { getData } from "ente-accounts/services/accounts-db";
 import {
     recoverTwoFactor,
     recoverTwoFactorFinish,
@@ -20,7 +21,6 @@ import {
 import { useBaseContext } from "ente-base/context";
 import { isHTTP4xxError, isHTTPErrorWithStatus } from "ente-base/http";
 import log from "ente-base/log";
-import { getData } from "ente-shared/storage/localStorage";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useMemo, useState } from "react";

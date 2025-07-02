@@ -1,20 +1,19 @@
 import { Box, Stack, Typography, styled } from "@mui/material";
 import { LoginContents } from "ente-accounts/components/LoginContents";
 import { SignUpContents } from "ente-accounts/components/SignUpContents";
+import { getData } from "ente-accounts/services/accounts-db";
 import { CenteredFill, CenteredRow } from "ente-base/components/containers";
 import { EnteLogo } from "ente-base/components/EnteLogo";
 import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
 import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
 import { useBaseContext } from "ente-base/context";
-import log from "ente-base/log";
 import { albumsAppOrigin, customAPIHost } from "ente-base/origins";
 import {
     haveAuthenticatedSession,
     updateSessionFromElectronSafeStorageIfNeeded,
 } from "ente-base/session";
+import { canAccessIndexedDB } from "ente-gallery/services/files-db";
 import { DevSettings } from "ente-new/photos/components/DevSettings";
-import localForage from "ente-shared/storage/localForage";
-import { getData } from "ente-shared/storage/localStorage";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import React, { useCallback, useEffect, useRef, useState } from "react";
@@ -72,19 +71,15 @@ const Page: React.FC = () => {
     };
 
     const ensureIndexedDBAccess = useCallback(async () => {
-        try {
-            await localForage.ready();
-        } catch (e) {
-            log.error("IndexDB is not accessible", e);
+        if (!(await canAccessIndexedDB())) {
             showMiniDialog({
                 title: t("error"),
                 message: t("local_storage_not_accessible"),
                 nonClosable: true,
                 cancel: false,
             });
-        } finally {
-            setLoading(false);
         }
+        setLoading(false);
     }, [showMiniDialog]);
 
     return (

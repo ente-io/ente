@@ -4,6 +4,7 @@ import {
     AccountsPageFooter,
     AccountsPageTitle,
 } from "ente-accounts/components/layouts/centered-paper";
+import { getData, setData } from "ente-accounts/services/accounts-db";
 import { appHomeRoute, stashRedirect } from "ente-accounts/services/redirect";
 import {
     changePassword,
@@ -14,7 +15,6 @@ import { LinkButton } from "ente-base/components/LinkButton";
 import { LoadingIndicator } from "ente-base/components/loaders";
 import { deriveKeyInsufficientMemoryErrorMessage } from "ente-base/crypto/types";
 import log from "ente-base/log";
-import { getData, setData } from "ente-shared/storage/localStorage";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import React, { useCallback, useEffect, useState } from "react";

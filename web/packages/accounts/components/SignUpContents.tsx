@@ -14,6 +14,11 @@ import {
     Typography,
 } from "@mui/material";
 import {
+    setData,
+    setJustSignedUp,
+    setLocalReferralSource,
+} from "ente-accounts/services/accounts-db";
+import {
     generateSRPSetupAttributes,
     stashSRPSetupAttributes,
 } from "ente-accounts/services/srp";
@@ -32,11 +37,6 @@ import { deriveKeyInsufficientMemoryErrorMessage } from "ente-base/crypto/types"
 import { isMuseumHTTPError } from "ente-base/http";
 import log from "ente-base/log";
 import { saveMasterKeyInSessionAndSafeStore } from "ente-base/session";
-import { setData } from "ente-shared/storage/localStorage";
-import {
-    setJustSignedUp,
-    setLocalReferralSource,
-} from "ente-shared/storage/localStorage/helpers";
 import { useFormik } from "formik";
 import { t } from "i18next";
 import type { NextRouter } from "next/router";

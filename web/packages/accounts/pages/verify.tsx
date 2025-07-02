@@ -8,6 +8,13 @@ import { VerifyingPasskey } from "ente-accounts/components/LoginComponents";
 import { SecondFactorChoice } from "ente-accounts/components/SecondFactorChoice";
 import { useSecondFactorChoiceIfNeeded } from "ente-accounts/components/utils/second-factor-choice";
 import {
+    getData,
+    getLocalReferralSource,
+    setData,
+    setIsFirstLogin,
+    setLSUser,
+} from "ente-accounts/services/accounts-db";
+import {
     openPasskeyVerificationURL,
     passkeyVerificationRedirectURL,
 } from "ente-accounts/services/passkey";
@@ -34,16 +41,9 @@ import {
     type SingleInputFormProps,
 } from "ente-base/components/SingleInputForm";
 import { useBaseContext } from "ente-base/context";
-import { isDevBuild } from "ente-base/env";
 import { isHTTPErrorWithStatus } from "ente-base/http";
 import log from "ente-base/log";
 import { clearSessionStorage } from "ente-base/session";
-import localForage from "ente-shared/storage/localForage";
-import { getData, setData, setLSUser } from "ente-shared/storage/localStorage";
-import {
-    getLocalReferralSource,
-    setIsFirstLogin,
-} from "ente-shared/storage/localStorage/helpers";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
@@ -147,12 +147,6 @@ const Page: React.FC = () => {
                     }
                     await unstashAndUseSRPSetupAttributes(setupSRP);
                 }
-                // TODO(RE): Temporary safety valve before removing the
-                // unnecessary clear (tag: Migration)
-                if (isDevBuild && (await localForage.length()) > 0) {
-                    throw new Error("Local forage is not empty");
-                }
-                await localForage.clear();
                 setIsFirstLogin(true);
                 const redirectURL = unstashRedirect();
                 if (keyAttributes?.encryptedKey) {

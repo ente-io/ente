@@ -1,8 +1,12 @@
+import {
+    getData,
+    setData,
+    setLSUser,
+} from "ente-accounts/services/accounts-db";
 import { unstashRedirect } from "ente-accounts/services/redirect";
 import { LoadingIndicator } from "ente-base/components/loaders";
 import { fromB64URLSafeNoPadding } from "ente-base/crypto";
 import log from "ente-base/log";
-import { getData, setData, setLSUser } from "ente-shared/storage/localStorage";
 import { nullToUndefined } from "ente-utils/transform";
 import { useRouter } from "next/router";
 import React, { useEffect } from "react";

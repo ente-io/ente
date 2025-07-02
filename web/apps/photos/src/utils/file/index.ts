@@ -1,3 +1,4 @@
+import { getData } from "ente-accounts/services/accounts-db";
 import type { LocalUser, User } from "ente-accounts/services/user";
 import { joinPath } from "ente-base/file-name";
 import log from "ente-base/log";
@@ -23,7 +24,6 @@ import {
 } from "ente-new/photos/services/collection";
 import { updateFilesVisibility } from "ente-new/photos/services/file";
 import { safeFileName } from "ente-new/photos/utils/native-fs";
-import { getData } from "ente-shared/storage/localStorage";
 import { wait } from "ente-utils/promise";
 import { t } from "i18next";
 import {

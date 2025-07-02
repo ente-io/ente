@@ -9,7 +9,6 @@
         "dayjs": "^1.11.13",
         "ente-base": "*",
         "ente-gallery": "*",
-        "ente-shared": "*",
         "ente-utils": "*",
         "react": "^19.1.0",
         "react-dom": "^19.1.0"
