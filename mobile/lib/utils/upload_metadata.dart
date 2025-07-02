@@ -134,8 +134,8 @@ Future<void> _decorateEnteFileData(
   }
   if (!file.hasLocation && file.isVideo && Platform.isAndroid) {
     final FFProbeProps? props = await getVideoPropsAsync(sourceFile);
-    if (props != null && props.location != null) {
-      file.location = props.location;
+    if (props?.location != null) {
+      file.location = props!.location;
     }
   }
   if (Platform.isAndroid && exifData != null) {
@@ -175,13 +175,13 @@ Future<Map<String, dynamic>> getMetadata(
     hasExifTime = true;
     creationTime = exifTime.time!.microsecondsSinceEpoch;
   }
-  mediaUploadData.isPanorama = checkPanoramaFromEXIF(mediaUploadData.exifData);
+  mediaUploadData.isPanorama = isPanoFromExif(mediaUploadData.exifData);
   if (mediaUploadData.isPanorama != true &&
       fileType == FileType.image &&
       mediaUploadData.sourceFile != null) {
     try {
       final xmpData = await getXmp(mediaUploadData.sourceFile!);
-      mediaUploadData.isPanorama = checkPanoramaFromXMP(xmpData);
+      mediaUploadData.isPanorama = isPanoFromXmp(xmpData);
     } catch (_) {}
     mediaUploadData.isPanorama ??= false;
   }
@@ -198,7 +198,7 @@ Future<Map<String, dynamic>> getMetadata(
       // contain the time.
       final bool useFileTimeStamp = creationTime == null ||
           !areFromSameDay(
-            creationTime!,
+            creationTime,
             timeFromFileName.microsecondsSinceEpoch,
           );
       if (useFileTimeStamp) {

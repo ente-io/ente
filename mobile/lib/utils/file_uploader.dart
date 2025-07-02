@@ -858,8 +858,8 @@ class FileUploader {
         (mediaUploadData.width ?? 0) != 0) {
       pubMetadata[heightKey] = mediaUploadData.height;
       pubMetadata[widthKey] = mediaUploadData.width;
-      pubMetadata[mediaTypeKey] = mediaUploadData.isPanorama == true ? 1 : 0;
     }
+    pubMetadata[mediaTypeKey] = mediaUploadData.isPanorama == true ? 1 : 0;
     if (mediaUploadData.motionPhotoStartIndex != null) {
       pubMetadata[motionVideoIndexKey] = mediaUploadData.motionPhotoStartIndex;
     }
