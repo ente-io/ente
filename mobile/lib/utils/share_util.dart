@@ -274,15 +274,9 @@ Future<void> shareAlbumLinkWithPlaceholder(
     await shareText(url);
     return;
   } else {
-    final placeholderBytes = await _createAlbumPlaceholder(
-      filesInCollection,
-      screenshotController,
-      context,
-    );
     await dialog.hide();
 
-    await shareImageAndUrl(
-      placeholderBytes,
+    await shareText(
       url,
       context: context,
       key: key,
