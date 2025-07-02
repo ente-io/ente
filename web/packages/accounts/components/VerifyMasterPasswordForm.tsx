@@ -6,7 +6,7 @@ import {
 import type { KeyAttributes, User } from "ente-accounts/services/user";
 import { LoadingButton } from "ente-base/components/mui/LoadingButton";
 import { ShowHidePasswordInputAdornment } from "ente-base/components/mui/PasswordInputAdornment";
-import { sharedCryptoWorker } from "ente-base/crypto";
+import { decryptBox, deriveKey } from "ente-base/crypto";
 import log from "ente-base/log";
 import { useFormik } from "formik";
 import { t } from "i18next";
@@ -118,11 +118,10 @@ export const VerifyMasterPasswordForm: React.FC<
         password: string,
         setFieldError: (message: string) => void,
     ) => {
-        const cryptoWorker = await sharedCryptoWorker();
         let kek: string;
         if (srpAttributes) {
             try {
-                kek = await cryptoWorker.deriveKey(
+                kek = await deriveKey(
                     password,
                     srpAttributes.kekSalt,
                     srpAttributes.opsLimit,
@@ -135,7 +134,7 @@ export const VerifyMasterPasswordForm: React.FC<
             }
         } else if (keyAttributes) {
             try {
-                kek = await cryptoWorker.deriveKey(
+                kek = await deriveKey(
                     password,
                     keyAttributes.kekSalt,
                     keyAttributes.opsLimit,
@@ -175,7 +174,7 @@ export const VerifyMasterPasswordForm: React.FC<
 
         let key: string;
         try {
-            key = await cryptoWorker.decryptBox(
+            key = await decryptBox(
                 {
                     encryptedData: keyAttributes.encryptedKey,
                     nonce: keyAttributes.keyDecryptionNonce,
