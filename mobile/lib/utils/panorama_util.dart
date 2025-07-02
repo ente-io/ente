@@ -1,4 +1,8 @@
 // ignore: implementation_imports
+
+import "package:exif_reader/exif_reader.dart";
+import "package:image/image.dart";
+// ignore: implementation_imports
 import "package:motion_photos/src/xmp_extractor.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import "package:photos/models/file/file.dart";
@@ -13,21 +17,22 @@ Future<bool> checkIfPanorama(EnteFile enteFile) async {
   if (enteFile.fileType != FileType.image) {
     return false;
   }
-  final file = await getFile(enteFile);
-  if (file == null) {
+  final sourceFile = await getFile(enteFile);
+  if (sourceFile == null) {
     return false;
   }
+  final exifData = await readExifAsync(sourceFile);
+  final bool? isPanorama = checkPanoramaFromEXIF(exifData);
+  if (isPanorama != null && isPanorama) {
+    return true;
+  }
   try {
-    final result = XMPExtractor().extract(file.readAsBytesSync());
+    final result = XMPExtractor().extract(sourceFile.readAsBytesSync());
     if (checkPanoramaFromXMP(result)) {
       return true;
     }
   } catch (_) {}
-
-  final result = await readExifAsync(file);
-
-  final element = result["EXIF CustomRendered"];
-  return element?.printable == "6";
+  return false;
 }
 
 bool checkPanoramaFromXMP(Map<String, dynamic> xmpData) {
@@ -36,6 +41,18 @@ bool checkPanoramaFromXMP(Map<String, dynamic> xmpData) {
     return true;
   }
   return false;
+}
+
+bool? checkPanoramaFromEXIF(Map<String, IfdTag>? exifData) {
+  if (exifData == null) {
+    return null;
+  }
+  if (exifData.containsKey('GPano:UsePanoramaViewer')) {
+    return true;
+  }
+  final element = exifData["EXIF CustomRendered"];
+  if (element?.printable == null) return null;
+  return element?.printable == "6";
 }
 
 // guardedCheckPanorama() method is used to check if the file is a panorama image.

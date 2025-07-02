@@ -145,10 +145,6 @@ Future<void> _decorateEnteFileData(
       file.location = exifLocation;
     }
   }
-  if (file.title == null || file.title!.isEmpty) {
-    _logger.warning("Title was missing ${file.tag}");
-    file.title = await asset.titleAsync;
-  }
 }
 
 Future<Map<String, dynamic>> getMetadata(
@@ -160,7 +156,7 @@ Future<Map<String, dynamic>> getMetadata(
   int? duration;
   int? creationTime = file.creationTime;
   final FileType fileType = file.fileType;
-  final String? title = file.title;
+  String? title = file.title;
   final String? deviceFolder = file.deviceFolder;
   final int? modificationTime = file.modificationTime;
   final Location? location = file.location;
@@ -169,16 +165,17 @@ Future<Map<String, dynamic>> getMetadata(
     if (asset.type == AssetType.video) {
       duration = asset.duration;
     }
+    if (title == null || title.isEmpty) {
+      _logger.warning("Title was missing ${file.tag}");
+      title = await asset.titleAsync;
+    }
   }
   bool hasExifTime = false;
   if (exifTime != null && exifTime.time != null) {
     hasExifTime = true;
     creationTime = exifTime.time!.microsecondsSinceEpoch;
   }
-  if (mediaUploadData.exifData != null) {
-    mediaUploadData.isPanorama =
-        checkPanoramaFromEXIF(null, mediaUploadData.exifData);
-  }
+  mediaUploadData.isPanorama = checkPanoramaFromEXIF(mediaUploadData.exifData);
   if (mediaUploadData.isPanorama != true &&
       fileType == FileType.image &&
       mediaUploadData.sourceFile != null) {

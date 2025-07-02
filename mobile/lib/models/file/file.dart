@@ -35,7 +35,7 @@ class EnteFile {
   int? modificationTime;
   int? updationTime;
   int? addedTime;
-  Location? location;
+  late Location? location;
   late FileType fileType;
   int? fileSubType;
   int? duration;
@@ -134,8 +134,6 @@ class EnteFile {
     return AssetEntity.fromId(localID!);
   }
 
-  
-
   String get downloadUrl =>
       FileUrl.getUrl(uploadedFileID!, FileUrlType.download);
 
@@ -151,8 +149,8 @@ class EnteFile {
   }
 
   String get displayName {
-    if (pubMagicMetadata != null && pubMagicMetadata!.editedName != null) {
-      return pubMagicMetadata!.editedName!;
+    if (rAsset != null) {
+      return rAsset!.title;
     }
     if (title == null && kDebugMode) _logger.severe('File title is null');
     return title ?? '';
