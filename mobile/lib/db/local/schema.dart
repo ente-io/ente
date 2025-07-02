@@ -1,6 +1,7 @@
 import "dart:io";
 
 import "package:flutter/foundation.dart";
+import "package:photos/core/constants.dart";
 import "package:sqlite_async/sqlite_async.dart";
 
 const assetColumns =
@@ -97,13 +98,15 @@ class LocalAssertsParam {
       ? ""
       : "(created_at BETWEEN ${createAtRange!.$1} AND ${createAtRange!.$2})";
 
-  String whereClause() {
+  String whereClause({bool addWhere = false}) {
     final where = <String>[];
     if (createAtRangeStr.isNotEmpty) {
       where.add(createAtRangeStr);
     }
 
-    return (where.isEmpty ? "" : where.join(" AND ")) +
+    return (where.isEmpty
+            ? ""
+            : '${addWhere ? "Where" : ""} ${where.join(" AND ")}') +
         " " +
         orderBy +
         " " +
@@ -202,6 +205,9 @@ class LocalDBMigration {
       ON asset_upload_queue(owner_id) 
       WHERE owner_id IS NOT NULL;
   ''',
+    '''
+        CREATE INDEX IF NOT EXISTS assets_created_at_desc ON assets(created_at DESC);
+    ''',
   ];
 
   static Future<void> migrate(

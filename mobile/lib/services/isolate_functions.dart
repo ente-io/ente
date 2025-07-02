@@ -125,7 +125,7 @@ Future<dynamic> isolateFunction(
     /// MLComputer
     case IsolateOperation.runClipText:
       final textEmbedding = await ClipTextEncoder.predict(args);
-      return List<double>.from(textEmbedding, growable: false);
+      return textEmbedding;
 
     /// MLComputer
     case IsolateOperation.computeBulkSimilarities:

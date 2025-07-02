@@ -83,10 +83,28 @@ class LocalDB with SqlDbBase {
   }
 
   Future<List<EnteFile>> getAssets({LocalAssertsParam? params}) async {
-    final result = await _sqliteDB.execute(
-      "SELECT * FROM assets ${params != null ? 'WHERE  ${params.whereClause()}' : ""}",
+    final stopwatch = Stopwatch()..start();
+    final result = await _sqliteDB.getAll(
+      "SELECT * FROM assets ${params != null ? params.whereClause(addWhere: true) : ""}",
     );
-    return result.map((row) => LocalDBMappers.assetRowToEnteFile(row)).toList();
+    debugPrint(
+      "getAssets complete in ${stopwatch.elapsed.inMilliseconds}ms, params: ${params?.whereClause()}",
+    );
+    // if time is greater than 1000ms, print explain analyze out
+    if (kDebugMode && stopwatch.elapsed.inMilliseconds > 1000) {
+      final explain = await _sqliteDB.execute(
+        "EXPLAIN QUERY PLAN SELECT * FROM assets ${params != null ? params.whereClause(addWhere: true) : ""}",
+      );
+      debugPrint("getAssets: Explain Query Plan: $explain");
+    }
+    stopwatch.reset();
+    stopwatch.start();
+    final r =
+        result.map((row) => LocalDBMappers.assetRowToEnteFile(row)).toList();
+    debugPrint(
+      "getAssets mapping completed in ${stopwatch.elapsed.inMilliseconds}ms",
+    );
+    return r;
   }
 
   Future<List<EnteFile>> getPathAssets(
@@ -96,7 +114,7 @@ class LocalDB with SqlDbBase {
     final String query =
         "SELECT * FROM assets WHERE id IN (SELECT asset_id FROM device_path_assets WHERE path_id = ?) ${params != null ? 'AND ${params.whereClause()}' : "order by created_at desc"}";
     debugPrint(query);
-    final result = await _sqliteDB.execute(
+    final result = await _sqliteDB.getAll(
       query,
       [pathID],
     );
@@ -121,7 +139,7 @@ class LocalDB with SqlDbBase {
   }
 
   Future<List<AssetPathEntity>> getAssetPaths() async {
-    final result = await _sqliteDB.execute(
+    final result = await _sqliteDB.getAll(
       "SELECT * FROM device_path",
     );
     return result.map((row) => LocalDBMappers.assetPath(row)).toList();
@@ -168,7 +186,7 @@ class LocalDB with SqlDbBase {
   }
 
   Future<Set<String>> getAssetsIDs({bool pendingScan = false}) async {
-    final result = await _sqliteDB.execute(
+    final result = await _sqliteDB.getAll(
       "SELECT id FROM assets ${pendingScan ? 'WHERE scan_state != $finalState ORDER BY created_at DESC' : ''}",
     );
     final ids = <String>{};
@@ -179,7 +197,7 @@ class LocalDB with SqlDbBase {
   }
 
   Future<Map<String, int>> getIDToCreationTime() async {
-    final result = await _sqliteDB.execute(
+    final result = await _sqliteDB.getAll(
       "SELECT id, created_at FROM assets",
     );
     final idToCreationTime = <String, int>{};
@@ -191,7 +209,7 @@ class LocalDB with SqlDbBase {
 
   Future<Map<String, Set<String>>> pathToAssetIDs() async {
     final result = await _sqliteDB
-        .execute("SELECT path_id, asset_id FROM device_path_assets");
+        .getAll("SELECT path_id, asset_id FROM device_path_assets");
     final pathToAssetIDs = <String, Set<String>>{};
     for (var row in result) {
       final pathID = row["path_id"] as String;

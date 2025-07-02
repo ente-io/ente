@@ -37,7 +37,7 @@ extension TrashTable on RemoteDB {
   }
 
   Future<List<EnteFile>> getTrashFiles() async {
-    final result = await sqliteDB.execute(
+    final result = await sqliteDB.getAll(
       'SELECT * FROM trash',
     );
     return result.map((e) => trashRowToEnteFile(e)).toList();

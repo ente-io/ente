@@ -69,7 +69,7 @@ class SmartMemoriesService {
     bool debugSurfaceAll = false,
   }) async {
     try {
-      final TimeLogger t = TimeLogger(context: "calcMemories");
+      final TimeLogger t = TimeLogger(context: "smartMem:");
       _logger.info(
         'calcMemories called with time: $now at ${DateTime.now()} $t',
       );
@@ -89,7 +89,6 @@ class SmartMemoriesService {
       _logger.info('gotten all ${persons.length} persons $t');
 
       final currentUserEmail = Configuration.instance.getEmail();
-      _logger.info('currentUserEmail: $currentUserEmail $t');
 
       final cities = await locationService.getCities();
       _logger.info('cities has ${cities.length} entries $t');
@@ -197,6 +196,9 @@ class SmartMemoriesService {
   static Future<MemoriesResult> _allMemoriesCalculations(
     Map<String, dynamic> args,
   ) async {
+    final s = Logger.root.onRecord.listen((record) {
+      print('${record.level.name}: ${record.message}');
+    });
     try {
       final TimeLogger t = TimeLogger(context: "_allMemoriesCalculations");
       // Arguments: direct data
@@ -326,6 +328,8 @@ class SmartMemoriesService {
     } catch (e, s) {
       dev.log("Error in _allMemoriesCalculations \n Error:$e \n Stacktrace:$s");
       return MemoriesResult(<SmartMemory>[], <BaseLocation>[]);
+    } finally {
+      s.cancel().ignore();
     }
   }
 
