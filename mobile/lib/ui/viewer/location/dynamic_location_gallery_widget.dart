@@ -37,18 +37,8 @@ class _DynamicLocationGalleryWidgetState
 
   @override
   void initState() {
-    final collectionsToHide =
-        CollectionsService.instance.archivedOrHiddenCollectionIds();
-    fileLoadResult =
-        FilesDB.instance.fetchAllUploadedAndSharedFilesWithLocation(
-      galleryLoadStartTime,
-      galleryLoadEndTime,
-      limit: null,
-      asc: false,
-      filterOptions: DBFilterOptions(
-        ignoredCollectionIDs: collectionsToHide,
-        hideIgnoredForUpload: true,
-      ),
+    fileLoadResult = remoteCache.getFilesWithLocation(
+      CollectionsService.instance.archivedOrHiddenCollectionIds(),
     );
 
     super.initState();

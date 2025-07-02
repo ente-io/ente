@@ -13,6 +13,7 @@ import "package:photos/models/gallery_type.dart";
 import "package:photos/models/search/hierarchical/hierarchical_search_filter.dart";
 import "package:photos/models/search/hierarchical/location_filter.dart";
 import "package:photos/models/selected_files.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/services/filter/db_filters.dart";
 import "package:photos/services/location_service.dart";
@@ -107,18 +108,8 @@ class _LocationGalleryWidgetState extends State<LocationGalleryWidget> {
 
     final collectionsToHide =
         CollectionsService.instance.getHiddenCollectionIds();
-    fileLoadResult = FilesDB.instance
-        .fetchAllUploadedAndSharedFilesWithLocation(
-      galleryLoadStartTime,
-      galleryLoadEndTime,
-      limit: null,
-      asc: false,
-      filterOptions: DBFilterOptions(
-        ignoredCollectionIDs: collectionsToHide,
-        hideIgnoredForUpload: true,
-      ),
-    )
-        .then((value) {
+    fileLoadResult =
+        remoteCache.getFilesWithLocation(collectionsToHide).then((value) {
       allFilesWithLocation = value.files;
       _filesUpdateEvent =
           Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {

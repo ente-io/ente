@@ -10,6 +10,7 @@ import "package:photos/generated/l10n.dart";
 import "package:photos/models/file_load_result.dart";
 import "package:photos/models/location/location.dart";
 import "package:photos/models/selected_files.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/services/filter/db_filters.dart";
 import "package:photos/theme/colors.dart";
@@ -96,19 +97,9 @@ class PickCenterPointWidget extends StatelessWidget {
                                 final collectionsToHide = CollectionsService
                                     .instance
                                     .archivedOrHiddenCollectionIds();
-                                FileLoadResult result;
-                                result = await FilesDB.instance
-                                    .fetchAllUploadedAndSharedFilesWithLocation(
-                                  galleryLoadStartTime,
-                                  galleryLoadEndTime,
-                                  limit: null,
-                                  asc: false,
-                                  filterOptions: DBFilterOptions(
-                                    ignoredCollectionIDs: collectionsToHide,
-                                    hideIgnoredForUpload: true,
-                                  ),
-                                );
-                                return result;
+
+                                return remoteCache
+                                    .getFilesWithLocation(collectionsToHide);
                               },
                               reloadEvent:
                                   Bus.instance.on<LocalPhotosUpdatedEvent>(),

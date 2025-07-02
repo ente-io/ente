@@ -24,7 +24,7 @@ class AlbumsWidgetSettings extends StatefulWidget {
 class _AlbumsWidgetSettingsState extends State<AlbumsWidgetSettings> {
   final _selectedAlbums = SelectedAlbums();
   bool hasInstalledAny = false;
-  final _scrollController = ScrollController();
+  final _scrollController = ScrollController(debugLabel: 'AlbumWidgetScroll');
 
   @override
   void initState() {

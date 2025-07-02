@@ -1250,4 +1250,16 @@ class OfflineMLDataDB with SqlDbBase implements IMLDataDB<String> {
       embedding.version,
     ];
   }
+  
+  @override
+  Future<Map<String, Set<String>>> getPersonToClusterIDs() {
+    // TODO: implement getPersonToClusterIDs
+    throw UnimplementedError();
+  }
+  
+  @override
+  Future<Map<String, Set<String>>> getPersonToRejectedSuggestions() {
+    // TODO: implement getPersonToRejectedSuggestions
+    throw UnimplementedError();
+  }
 }

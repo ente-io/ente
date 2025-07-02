@@ -8,6 +8,8 @@ import "package:photos/models/file/file.dart";
 import "package:photos/models/file/remote/asset.dart";
 import "package:photos/models/file_load_result.dart";
 import "package:photos/service_locator.dart";
+import "package:photos/services/filter/db_filters.dart";
+import "package:photos/services/remote/localMapper/merge.dart";
 
 class RemoteCache {
   final Logger logger = Logger("RemoteCache");
@@ -162,6 +164,28 @@ class RemoteCache {
       }
     }
     return files;
+  }
+
+  Future<FileLoadResult> getFilesWithLocation(
+    Set<int> ignoredCollectionIDs,
+  ) async {
+    final collectionFileEntries = await remoteDB.filesWithLocation();
+    if (!_isLoaded) await _ensureLoaded();
+    final List<EnteFile> files = [];
+    for (final entry in collectionFileEntries) {
+      final asset = remoteAssets[entry.fileID];
+      if (asset != null) {
+        files.add(EnteFile.fromRemoteAsset(asset, entry));
+      }
+    }
+    final filterFiles = await merge(
+      localFiles: [],
+      remoteFiles: files,
+      filterOptions: DBFilterOptions(
+        ignoredCollectionIDs: ignoredCollectionIDs,
+      ),
+    );
+    return FileLoadResult(filterFiles, true);
   }
 
   Future<Map<String, EnteFile>> ownedFilesWithSameHash(

@@ -160,6 +160,16 @@ extension CollectionFiles on RemoteDB {
     return result;
   }
 
+  Future<List<CollectionFile>> filesWithLocation() {
+    return sqliteDB
+        .getAll(
+          "SELECT * FROM collection_files JOIN files ON collection_files.file_id = files.id WHERE files.lat IS NOT NULL and files.lng IS NOT NULL order by files.creation_time desc",
+        )
+        .then(
+          (rows) => rows.map((row) => CollectionFile.fromMap(row)).toList(),
+        );
+  }
+
   Future<void> deleteFiles(List<int> fileIDs) async {
     if (fileIDs.isEmpty) return;
     final stopwatch = Stopwatch()..start();

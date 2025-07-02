@@ -934,42 +934,6 @@ class FilesDB with SqlDbBase {
     return deduplicatedFiles;
   }
 
-  Future<FileLoadResult> fetchAllUploadedAndSharedFilesWithLocation(
-    int startTime,
-    int endTime, {
-    int? limit,
-    bool? asc,
-    required DBFilterOptions? filterOptions,
-  }) async {
-    final db = await instance.sqliteAsyncDB;
-    final order = (asc ?? false ? 'ASC' : 'DESC');
-    String query = '''
-      SELECT * FROM $filesTable 
-      WHERE $columnLatitude IS NOT NULL AND $columnLongitude IS NOT NULL AND
-      ($columnLatitude IS NOT 0 OR $columnLongitude IS NOT 0) AND 
-      $columnCreationTime >= ? AND $columnCreationTime <= ? AND
-      ($columnLocalID IS NOT NULL OR ($columnCollectionID IS NOT NULL AND 
-      $columnCollectionID IS NOT -1)) 
-      ORDER BY $columnCreationTime $order, $columnModificationTime $order
-      ''';
-
-    final args = [startTime, endTime];
-
-    if (limit != null) {
-      query += ' LIMIT ?';
-      args.add(limit);
-    }
-
-    final results = await db.getAll(
-      query,
-      args,
-    );
-    final files = convertToFiles(results);
-    final List<EnteFile> filteredFiles =
-        await applyDBFilters(files, filterOptions);
-    return FileLoadResult(filteredFiles, files.length == limit);
-  }
-
   ///Returns "columnName1 = ?, columnName2 = ?, ..."
   String _generateUpdateAssignmentsWithPlaceholders({
     required int? fileGenId,

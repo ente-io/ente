@@ -10,7 +10,6 @@ import 'package:photos/core/configuration.dart';
 import "package:photos/core/constants.dart";
 import 'package:photos/core/event_bus.dart';
 import "package:photos/core/network/network.dart";
-import "package:photos/db/files_db.dart";
 import "package:photos/events/magic_sort_change_event.dart";
 import 'package:photos/events/subscription_purchased_event.dart';
 import "package:photos/gateways/cast_gw.dart";

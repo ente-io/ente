@@ -490,7 +490,9 @@ class _FileSelectionActionsWidgetState
     }
 
     if (items.isNotEmpty) {
-      final scrollController = ScrollController();
+      final scrollController = ScrollController(
+        debugLabel: "FileSectionScroll",
+      );
       // h4ck: https://github.com/flutter/flutter/issues/57920#issuecomment-893970066
       return MediaQuery(
         data: MediaQuery.of(context).removePadding(removeBottom: true),

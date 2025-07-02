@@ -79,6 +79,7 @@ class _HomeGalleryWidgetV2State extends State<HomeGalleryWidgetV2> {
       key: ValueKey(_shouldHideSharedItems),
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) async {
         Logger("_HomeGalleryWidgetV2State").info("Loading home gallery files");
+        
         final localFiles = await localDB.getAssets(
           params: LocalAssertsParam(
             limit: limit,

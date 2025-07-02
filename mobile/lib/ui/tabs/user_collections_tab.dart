@@ -52,7 +52,7 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
   late StreamSubscription<AlbumSortOrderChangeEvent> _albumSortOrderChangeEvent;
 
   String _loadReason = "init";
-  final _scrollController = ScrollController();
+  final _scrollController = ScrollController(debugLabel: 'UserCollectionsScroll');
   final _debouncer = Debouncer(
     const Duration(seconds: 2),
     executionInterval: const Duration(seconds: 5),
