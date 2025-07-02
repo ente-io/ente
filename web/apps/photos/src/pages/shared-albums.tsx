@@ -41,7 +41,11 @@ import {
     useIsTouchscreen,
 } from "ente-base/components/utils/hooks";
 import { useBaseContext } from "ente-base/context";
-import { isHTTP401Error, PublicAlbumsCredentials } from "ente-base/http";
+import {
+    isHTTP401Error,
+    isHTTPErrorWithStatus,
+    PublicAlbumsCredentials,
+} from "ente-base/http";
 import log from "ente-base/log";
 import { FullScreenDropZone } from "ente-gallery/components/FullScreenDropZone";
 import { downloadManager } from "ente-gallery/services/download";
@@ -72,7 +76,6 @@ import {
 import { isHiddenCollection } from "ente-new/photos/services/collection";
 import { PseudoCollectionID } from "ente-new/photos/services/collection-summary";
 import { usePhotosAppContext } from "ente-new/photos/types/context";
-import { CustomError, parseSharingErrorCodes } from "ente-shared/error";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -88,7 +91,7 @@ import { downloadSelectedFiles, getSelectedFiles } from "utils/file";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
 
 export default function PublicCollectionGallery() {
-    const { showMiniDialog } = useBaseContext();
+    const { showMiniDialog, onGenericError } = useBaseContext();
     const { showLoadingBar, hideLoadingBar } = usePhotosAppContext();
 
     const credentials = useRef<PublicAlbumsCredentials | undefined>(undefined);
@@ -302,9 +305,9 @@ export default function PublicCollectionGallery() {
      */
     const publicAlbumsRemotePull = useCallback(async () => {
         const accessToken = credentials.current.accessToken;
+        showLoadingBar();
+        setLoading(true);
         try {
-            showLoadingBar();
-            setLoading(true);
             const { collection, referralCode: userReferralCode } =
                 await pullCollection(accessToken, collectionKey.current);
             referralCode.current = userReferralCode;
@@ -357,13 +360,22 @@ export default function PublicCollectionGallery() {
                 }
             }
         } catch (e) {
-            const parsedError = parseSharingErrorCodes(e);
+            // The 410 Gone or 429 Rate limited can arise from either the
+            // collection pull or the files pull since they're part of the
+            // remote's access token check sequence.
+            //
+            // In practice, it almost always will be a consequence of the
+            // collection pull since it happens first.
+            //
+            // The 401 Unauthorized can only arise from the collection pull
+            // since we already handle that separately for the files pull.
             if (
-                parsedError.message === CustomError.TOKEN_EXPIRED ||
-                parsedError.message === CustomError.TOO_MANY_REQUESTS
+                isHTTPErrorWithStatus(e, 401) ||
+                isHTTPErrorWithStatus(e, 410) ||
+                isHTTPErrorWithStatus(e, 429)
             ) {
                 setErrorMessage(
-                    parsedError.message === CustomError.TOO_MANY_REQUESTS
+                    isHTTPErrorWithStatus(e, 429)
                         ? t("link_request_limit_exceeded")
                         : t("link_expired_message"),
                 );
@@ -374,6 +386,9 @@ export default function PublicCollectionGallery() {
                 setPublicFiles(undefined);
             } else {
                 log.error("Public album remote pull failed", e);
+                // Don't use the `setErrorMessage`, show a dialog instead,
+                // because this might be a transient network error.
+                onGenericError(e);
             }
         } finally {
             hideLoadingBar();
