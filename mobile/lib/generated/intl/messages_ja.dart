@@ -948,8 +948,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "incorrectRecoveryKeyTitle":
             MessageLookupByLibrary.simpleMessage("リカバリーキーの誤り"),
         "indexedItems": MessageLookupByLibrary.simpleMessage("処理済みの項目"),
-        "indexingIsPaused": MessageLookupByLibrary.simpleMessage(
-            "インデックス作成は一時停止されています。デバイスの準備ができたら自動的に再開します。"),
         "ineligible": MessageLookupByLibrary.simpleMessage("対象外"),
         "info": MessageLookupByLibrary.simpleMessage("情報"),
         "insecureDevice": MessageLookupByLibrary.simpleMessage("安全でないデバイス"),

@@ -1004,8 +1004,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Cheie de recuperare incorectă"),
         "indexedItems":
             MessageLookupByLibrary.simpleMessage("Elemente indexate"),
-        "indexingIsPaused": MessageLookupByLibrary.simpleMessage(
-            "Indexarea este în pauză. Va relua automat când dispozitivul este pregătit."),
         "info": MessageLookupByLibrary.simpleMessage("Informații"),
         "insecureDevice":
             MessageLookupByLibrary.simpleMessage("Dispozitiv nesigur"),

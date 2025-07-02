@@ -9376,16 +9376,6 @@ class S {
     );
   }
 
-  /// `Indexing is paused. It will automatically resume when device is ready.`
-  String get indexingIsPaused {
-    return Intl.message(
-      'Indexing is paused. It will automatically resume when device is ready.',
-      name: 'indexingIsPaused',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Trim`
   String get trim {
     return Intl.message(
@@ -12291,6 +12281,16 @@ class S {
     return Intl.message(
       'No more waiting for uploads/downloads to complete before you can close the app. All uploads and downloads now have the ability to be paused midway, and resume from where you left off.',
       name: 'cLDesc6',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Indexing is paused. It will automatically resume when the device is ready. The device is considered ready when its battery level, battery health, and thermal status are within a healthy range.`
+  String get indexingPausedStatusDescription {
+    return Intl.message(
+      'Indexing is paused. It will automatically resume when the device is ready. The device is considered ready when its battery level, battery health, and thermal status are within a healthy range.',
+      name: 'indexingPausedStatusDescription',
       desc: '',
       args: [],
     );
