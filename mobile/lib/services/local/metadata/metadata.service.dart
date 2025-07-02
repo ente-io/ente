@@ -8,7 +8,6 @@ import "package:logging/logging.dart";
 import "package:motion_photos/motion_photos.dart";
 import "package:photos/extensions/stop_watch.dart";
 import "package:photos/models/ffmpeg/ffprobe_props.dart";
-import "package:photos/models/file/file.dart";
 import "package:photos/models/local/local_metadata.dart";
 import "package:photos/models/location/location.dart";
 import "package:photos/services/local/asset_entity.service.dart";
@@ -28,7 +27,7 @@ class LocalMetadataService {
       final latLng = await asset.latlngAsync();
       Location location =
           Location(latitude: latLng.latitude, longitude: latLng.longitude);
-      final int size = await sourceFile.length();
+      final int size =  sourceFile.lengthSync();
       final Map<String, IfdTag>? exifData = await tryExifFromFile(sourceFile);
       final int? mviIndex = asset.type != AssetType.image
           ? null

@@ -26,6 +26,8 @@ import "package:photos/services/local/import/local_import.dart";
 import "package:photos/services/local/livephoto.dart";
 import "package:photos/services/local/shared_assert.service.dart";
 import "package:photos/utils/exif_util.dart";
+import "package:photos/utils/panorama_util.dart";
+import "package:photos/utils/standalone/date_time.dart";
 import "package:photos/utils/standalone/decode_image.dart";
 import 'package:video_thumbnail/video_thumbnail.dart';
 
@@ -80,6 +82,7 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(
       _logger.severe('error while detecthing motion photo start index', e);
     }
   }
+
   fileHash = CryptoUtil.bin2base64(await CryptoUtil.getHash(sourceFile));
   if (file.fileType == FileType.livePhoto && Platform.isIOS) {
     final (videoUrl, videoHash) =
@@ -124,8 +127,7 @@ Future<void> _decorateEnteFileData(
   Map<String, IfdTag>? exifData,
 ) async {
   // h4ck to fetch location data if missing (thank you Android Q+) lazily only during uploads
-  if (file.location == null ||
-      (file.location!.latitude == 0 && file.location!.longitude == 0)) {
+  if (!file.hasLocation) {
     final latLong = await asset.latlngAsync();
     file.location =
         Location(latitude: latLong.latitude, longitude: latLong.longitude);
@@ -147,6 +149,95 @@ Future<void> _decorateEnteFileData(
     _logger.warning("Title was missing ${file.tag}");
     file.title = await asset.titleAsync;
   }
+}
+
+Future<Map<String, dynamic>> getMetadata(
+  MediaUploadData mediaUploadData,
+  ParsedExifDateTime? exifTime,
+  EnteFile file,
+) async {
+  final AssetEntity? asset = await file.getAsset;
+  int? duration;
+  int? creationTime = file.creationTime;
+  final FileType fileType = file.fileType;
+  final String? title = file.title;
+  final String? deviceFolder = file.deviceFolder;
+  final int? modificationTime = file.modificationTime;
+  final Location? location = file.location;
+  // asset can be null for files shared to app
+  if (asset != null) {
+    if (asset.type == AssetType.video) {
+      duration = asset.duration;
+    }
+  }
+  bool hasExifTime = false;
+  if (exifTime != null && exifTime.time != null) {
+    hasExifTime = true;
+    creationTime = exifTime.time!.microsecondsSinceEpoch;
+  }
+  if (mediaUploadData.exifData != null) {
+    mediaUploadData.isPanorama =
+        checkPanoramaFromEXIF(null, mediaUploadData.exifData);
+  }
+  if (mediaUploadData.isPanorama != true &&
+      fileType == FileType.image &&
+      mediaUploadData.sourceFile != null) {
+    try {
+      final xmpData = await getXmp(mediaUploadData.sourceFile!);
+      mediaUploadData.isPanorama = checkPanoramaFromXMP(xmpData);
+    } catch (_) {}
+    mediaUploadData.isPanorama ??= false;
+  }
+
+  // Try to get the timestamp from fileName. In case of iOS, file names are
+  // generic IMG_XXXX, so only parse it on Android devices
+  if (!hasExifTime && Platform.isAndroid && title != null) {
+    final timeFromFileName = parseDateTimeFromName(title);
+    if (timeFromFileName != null) {
+      // only use timeFromFileName if the existing creationTime and
+      // timeFromFilename belongs to different date.
+      // This is done because many times the fileTimeStamp will only give us
+      // the date, not time value but the photo_manager's creation time will
+      // contain the time.
+      final bool useFileTimeStamp = creationTime == null ||
+          !areFromSameDay(
+            creationTime!,
+            timeFromFileName.microsecondsSinceEpoch,
+          );
+      if (useFileTimeStamp) {
+        creationTime = timeFromFileName.microsecondsSinceEpoch;
+      }
+    }
+  }
+
+  final metadata = <String, dynamic>{};
+  metadata["localID"] = asset?.id;
+  final String? hashValue = mediaUploadData.hashData?.fileHash;
+  if (hashValue != null) {
+    metadata["hash"] = hashValue;
+  }
+  if (asset != null) {
+    metadata["subType"] = asset.subtype;
+  }
+  metadata["version"] = EnteFile.kCurrentMetadataVersion;
+  metadata["title"] = title;
+  metadata["deviceFolder"] = deviceFolder;
+  metadata["creationTime"] = creationTime;
+  metadata["modificationTime"] = modificationTime;
+  metadata["fileType"] = fileType.index;
+  if (location != null &&
+      location.latitude != null &&
+      location.longitude != null &&
+      (location.latitude != 0 && location.longitude != 0)) {
+    metadata["latitude"] = location.latitude;
+    metadata["longitude"] = location.longitude;
+  }
+
+  if (duration != null) {
+    metadata["duration"] = duration;
+  }
+
+  return metadata;
 }
 
 Future<MetadataRequest> getPubMetadataRequest(

@@ -705,16 +705,11 @@ class FileUploader {
         null,
         mediaUploadData.exifData,
       );
-      final metadata =
-          await file.getMetadataForUpload(mediaUploadData, exifTime);
+      final Map<String, dynamic> metadata =
+          await getMetadata(mediaUploadData, exifTime, file);
       final Map<String, dynamic> pubMetadata =
           _buildPublicMagicData(mediaUploadData, exifTime, file.rAsset);
       MetadataRequest? pubMetadataRequest;
-
-      final fileDecryptionHeader =
-          CryptoUtil.bin2base64(fileEncryptResult.header!);
-      final thumbnailDecryptionHeader =
-          CryptoUtil.bin2base64(thumbEncResult.header!);
 
       final encryptedMetadataResult = await CryptoUtil.encryptChaCha(
         utf8.encode(jsonEncode(metadata)),
@@ -733,6 +728,10 @@ class FileUploader {
           fileEncryptResult.key!,
         );
       }
+      final fileDecryptionHeader =
+          CryptoUtil.bin2base64(fileEncryptResult.header!);
+      final thumbnailDecryptionHeader =
+          CryptoUtil.bin2base64(thumbEncResult.header!);
       if (SyncService.instance.shouldStopSync()) {
         throw SyncStopRequestedError();
       }
