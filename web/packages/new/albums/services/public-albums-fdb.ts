@@ -5,12 +5,12 @@
 import {
     LocalCollections,
     LocalEnteFiles,
+    localForage,
     LocalTimestamp,
     transformFilesIfNeeded,
 } from "ente-gallery/services/files-db";
 import { type Collection } from "ente-media/collection";
 import type { EnteFile } from "ente-media/file";
-import localForage from "ente-shared/storage/localForage";
 import { nullToUndefined } from "ente-utils/transform";
 import { z } from "zod/v4";
 

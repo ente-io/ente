@@ -45,6 +45,7 @@
  * albums app stores data in keys prefixed with "public-".
  */
 
+import { haveWindow } from "ente-base/env";
 import log from "ente-base/log";
 import {
     CollectionPrivateMagicMetadataData,
@@ -66,9 +67,25 @@ import {
     FilePublicMagicMetadataData,
 } from "ente-media/file-metadata";
 import type { MagicMetadata } from "ente-media/magic-metadata";
-import localForage from "ente-shared/storage/localForage";
 import { nullishToEmpty, nullToUndefined } from "ente-utils/transform";
+import localForage from "localforage";
 import { z } from "zod/v4";
+
+if (haveWindow()) {
+    localForage.config({
+        name: "ente-files",
+        version: 1.0,
+        storeName: "files",
+    });
+}
+
+/**
+ * Reexport localForage for use by (and only by):
+ * - photos-fdb.ts
+ * - public-albums-fdb.ts
+ * - migration.ts
+ */
+export { localForage };
 
 /**
  * Return `true` if we can access IndexedDB.
