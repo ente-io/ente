@@ -51,6 +51,9 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { Trans } from "react-i18next";
 
+/**
+ * A page that allows the user to verify their email.
+ */
 const Page: React.FC = () => {
     const { logout, showMiniDialog } = useBaseContext();
 

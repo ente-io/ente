@@ -6,9 +6,7 @@ import { RemoteKeyAttributes, type KeyAttributes } from "./user";
 
 export type LocalStorageKey =
     | "user"
-    // See also savedKeyAttributes.
     | "keyAttributes"
-    | "originalKeyAttributes"
     // Moved to ente-accounts
     // "srpSetupAttributes"
     | "srpAttributes";
@@ -28,6 +26,7 @@ export type LocalStorageKey =
  *
  * - "user"
  * - "keyAttributes"
+ * - "originalKeyAttributes"
  * - "srpAttributes"
  */
 export const getData = (key: LocalStorageKey) => {

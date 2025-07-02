@@ -62,6 +62,9 @@ import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useState } from "react";
 
+/**
+ * A page that allows the user to authenticate using their password.
+ */
 const Page: React.FC = () => {
     const { logout, showMiniDialog } = useBaseContext();
 
