@@ -10,6 +10,7 @@ import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/force_reload_home_gallery_event.dart';
 import "package:photos/events/hide_shared_items_from_home_gallery_event.dart";
 import 'package:photos/events/local_photos_updated_event.dart';
+import "package:photos/extensions/stop_watch.dart";
 import "package:photos/models/file/file.dart";
 import 'package:photos/models/file_load_result.dart';
 import 'package:photos/models/gallery_type.dart';
@@ -42,6 +43,7 @@ class _HomeGalleryWidgetV2State extends State<HomeGalleryWidgetV2> {
   late final StreamSubscription<HideSharedItemsFromHomeGalleryEvent>
       _hideSharedFilesFromHomeSubscription;
   bool _shouldHideSharedItems = localSettings.hideSharedItemsFromHomeGallery;
+  final Logger _logger = Logger("HomeGalleryWidgetV2State");
 
   /// This deboucner is to delay the UI update of the shared items toggle
   /// since it's expensive (a new differnt key is used for the gallery
@@ -78,15 +80,17 @@ class _HomeGalleryWidgetV2State extends State<HomeGalleryWidgetV2> {
     final gallery = Gallery(
       key: ValueKey(_shouldHideSharedItems),
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) async {
-        Logger("_HomeGalleryWidgetV2State").info("Loading home gallery files");
-        
+        _logger.info("Loading home gallery files v1");
+        final TimeLogger tl = TimeLogger();
+
         final localFiles = await localDB.getAssets(
           params: LocalAssertsParam(
-            limit: limit,
+            limit: null,
             isAsc: asc ?? false,
             createAtRange: (creationStartTime, creationEndTime),
           ),
         );
+        _logger.info("Loaded local files: ${localFiles.length} files $tl");
 
         final enteFiles = await remoteCache.getCollectionFiles(
           FilterQueryParam(
@@ -95,17 +99,16 @@ class _HomeGalleryWidgetV2State extends State<HomeGalleryWidgetV2> {
             createAtRange: (creationStartTime, creationEndTime),
           ),
         );
+        _logger.info("Loaded remote files: ${enteFiles.length} files $tl");
 
         final List<EnteFile> allFiles = await merge(
           localFiles: localFiles,
           remoteFiles: enteFiles,
           filterOptions: homeGalleryFilters,
         );
+        _logger.info(
+            "Merged files: ${allFiles.length} (local: ${localFiles.length}, remote: ${enteFiles.length}) files $tl, total ${tl.elapsed}");
         // merge
-
-        Logger("_HomeGalleryWidgetV2State").info(
-          "Load home gallery files ${enteFiles.length} files",
-        );
         return FileLoadResult(
           allFiles,
           limit != null &&
