@@ -9,7 +9,6 @@ export type LocalStorageKey =
     | "isFirstLogin"
     | "justSignedUp"
     | "showBackButton"
-    | "export"
     // Moved to ente-accounts
     // "srpSetupAttributes"
     | "srpAttributes"
@@ -21,6 +20,23 @@ export const setData = (key: LocalStorageKey, value: object) =>
 export const removeData = (key: LocalStorageKey) =>
     localStorage.removeItem(key);
 
+/**
+ * [Note: Accounts DB]
+ *
+ * The accounts package stores various state both during the login / signup
+ * flow, and post login to identify the logged in user.
+ *
+ * This state is stored in local storage.
+ *
+ * Most of this state is meant to be transitory - various bits and bobs that we
+ * accumulate and want to persist as the user goes through the login or signup
+ * flow. One the user is successfully logged in and the first pull has
+ * completed, then only a few of these are expected to remain:
+ *
+ * - "user"
+ * - "keyAttributes"
+ * - "srpAttributes"
+ */
 export const getData = (key: LocalStorageKey) => {
     try {
         if (
@@ -109,3 +125,28 @@ export const isLocalStorageAndIndexedDBMismatch = async () => {
         !(await getKVS("token"))
     );
 };
+
+export const getToken = (): string => {
+    const token = getData("user")?.token;
+    return token;
+};
+
+export const isFirstLogin = () => getData("isFirstLogin")?.status ?? false;
+
+export function setIsFirstLogin(status: boolean) {
+    setData("isFirstLogin", { status });
+}
+
+export const justSignedUp = () => getData("justSignedUp")?.status ?? false;
+
+export function setJustSignedUp(status: boolean) {
+    setData("justSignedUp", { status });
+}
+
+export function getLocalReferralSource() {
+    return getData("referralSource")?.source;
+}
+
+export function setLocalReferralSource(source: string) {
+    setData("referralSource", { source });
+}

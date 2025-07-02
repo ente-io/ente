@@ -1,5 +1,6 @@
 import LockIcon from "@mui/icons-material/Lock";
 import { Stack, Typography } from "@mui/material";
+import { getData, setLSUser } from "ente-accounts/services/accounts-db";
 import {
     RowButton,
     RowButtonGroup,
@@ -13,7 +14,6 @@ import {
 } from "ente-base/components/mui/SidebarDrawer";
 import { useBaseContext } from "ente-base/context";
 import { disable2FA, get2FAStatus } from "ente-new/photos/services/user";
-import { getData, setLSUser } from "ente-shared/storage/localStorage";
 import { t } from "i18next";
 import router, { useRouter } from "next/router";
 import { useEffect, useState } from "react";

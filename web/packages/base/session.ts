@@ -1,4 +1,4 @@
-import { getToken } from "ente-shared/storage/localStorage/helpers";
+import { getToken } from "ente-accounts/services/accounts-db";
 import { z } from "zod/v4";
 import { decryptBox, encryptBox, generateKey } from "./crypto";
 import { isDevBuild } from "./env";

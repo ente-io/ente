@@ -5,6 +5,11 @@ import {
     AccountsPageTitle,
 } from "ente-accounts/components/layouts/centered-paper";
 import { RecoveryKey } from "ente-accounts/components/RecoveryKey";
+import {
+    getData,
+    justSignedUp,
+    setJustSignedUp,
+} from "ente-accounts/services/accounts-db";
 import { appHomeRoute } from "ente-accounts/services/redirect";
 import {
     generateSRPSetupAttributes,
@@ -25,11 +30,6 @@ import {
     haveCredentialsInSession,
     saveMasterKeyInSessionAndSafeStore,
 } from "ente-base/session";
-import { getData } from "ente-shared/storage/localStorage";
-import {
-    justSignedUp,
-    setJustSignedUp,
-} from "ente-shared/storage/localStorage/helpers";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";

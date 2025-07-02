@@ -1,3 +1,4 @@
+import { getData, setLSUser } from "ente-accounts/services/accounts-db";
 import {
     generateSRPSetupAttributes,
     getSRPAttributes,
@@ -25,7 +26,6 @@ import {
     saveMasterKeyInSessionAndSafeStore,
 } from "ente-base/session";
 import { getAuthToken } from "ente-base/token";
-import { getData, setLSUser } from "ente-shared/storage/localStorage";
 import { ensure } from "ente-utils/ensure";
 import { nullToUndefined } from "ente-utils/transform";
 import { z } from "zod/v4";

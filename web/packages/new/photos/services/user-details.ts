@@ -1,10 +1,10 @@
+import { getData, setLSUser } from "ente-accounts/services/accounts-db";
 import { ensureLocalUser } from "ente-accounts/services/user";
 import { isDesktop } from "ente-base/app";
 import { authenticatedRequestHeaders, ensureOk } from "ente-base/http";
 import { getKV, setKV } from "ente-base/kv";
 import log from "ente-base/log";
 import { apiURL } from "ente-base/origins";
-import { getData, setLSUser } from "ente-shared/storage/localStorage";
 import {
     nullishToEmpty,
     nullishToZero,

@@ -1,6 +1,7 @@
 import "@fontsource-variable/inter";
 import { CssBaseline } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
+import { getData } from "ente-accounts/services/accounts-db";
 import { accountLogout } from "ente-accounts/services/logout";
 import type { User } from "ente-accounts/services/user";
 import { staticAppTitle } from "ente-base/app";
@@ -19,7 +20,6 @@ import {
 import { authTheme } from "ente-base/components/utils/theme";
 import { BaseContext, deriveBaseContext } from "ente-base/context";
 import { logStartupBanner } from "ente-base/log-web";
-import { getData } from "ente-shared/storage/localStorage";
 import { t } from "i18next";
 import type { AppProps } from "next/app";
 import React, { useCallback, useEffect, useMemo } from "react";

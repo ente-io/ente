@@ -1,3 +1,8 @@
+import {
+    getData,
+    setData,
+    setLSUser,
+} from "ente-accounts/services/accounts-db";
 import { TwoFactorAuthorizationResponse } from "ente-accounts/services/user";
 import { clientPackageName, isDesktop } from "ente-base/app";
 import { encryptBox, generateKey } from "ente-base/crypto";
@@ -8,7 +13,6 @@ import {
     publicRequestHeaders,
 } from "ente-base/http";
 import { apiURL } from "ente-base/origins";
-import { getData, setData, setLSUser } from "ente-shared/storage/localStorage";
 import { z } from "zod/v4";
 import { getUserRecoveryKey } from "./recovery-key";
 import { unstashRedirect } from "./redirect";
