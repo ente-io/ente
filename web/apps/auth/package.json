@@ -5,7 +5,6 @@
     "dependencies": {
         "ente-accounts": "*",
         "ente-base": "*",
-        "ente-shared": "*",
         "jssha": "~3.3.1",
         "otpauth": "9.2.4"
     },
