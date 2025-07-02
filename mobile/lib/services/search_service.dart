@@ -1387,11 +1387,18 @@ class SearchService {
   Future<List<GenericSearchResult>> getContactSearchResults(
     String query,
   ) async {
+    final int ownerID = Configuration.instance.getUserID()!;
     final lowerCaseQuery = query.toLowerCase();
     final searchResults = <GenericSearchResult>[];
     final allFiles = await getAllFilesForSearch();
     final peopleToSharedFiles = <User, List<EnteFile>>{};
+    final peopleToSharedAlbums = <String, List<Collection>>{};
     final existingEmails = <String>{};
+    final List<Collection> collections = _collectionService.getCollectionsForUI(
+      includedShared: true,
+      includeCollab: true,
+    );
+
     for (EnteFile file in allFiles) {
       if (file.isOwner) continue;
 
@@ -1422,7 +1429,22 @@ class SearchService {
       }
     }
 
+    for (Collection collection in collections) {
+      if (collection.isHidden() || collection.isOwner(ownerID)) {
+        continue;
+      }
+
+      if (peopleToSharedAlbums.containsKey(collection.owner.email)) {
+        peopleToSharedAlbums[collection.owner.email]!.add(collection);
+      } else {
+        peopleToSharedAlbums[collection.owner.email] = [collection];
+      }
+    }
+
     peopleToSharedFiles.forEach((key, value) {
+      final user = key;
+      final collections = peopleToSharedAlbums[user.email] ?? [];
+
       searchResults.add(
         GenericSearchResult(
           ResultType.shared,
@@ -1438,6 +1460,7 @@ class SearchService {
           params: {
             kPersonParamID: key.linkedPersonID,
             kContactEmail: key.email,
+            kContactCollections: collections,
           },
         ),
       );
