@@ -34,7 +34,6 @@ import {
 import { getData, setData } from "ente-shared/storage/localStorage";
 import { PromiseQueue } from "ente-utils/promise";
 import i18n from "i18next";
-import { migrateExport, type ExportRecord } from "./export-migration";
 import { savedCollectionFiles, savedCollections } from "./photos-fdb";
 
 // TODO: Audit the uses of these constants
@@ -77,17 +76,30 @@ export interface ExportSettings {
     continuousExport: boolean;
 }
 
-export type CollectionExportNames = Record<number, string>;
+type CollectionExportNames = Record<number, string>;
 
-export type FileExportNames = Record<string, string>;
+type FileExportNames = Record<string, string>;
+
+export interface ExportRecord {
+    /**
+     * The version of the export record.
+     *
+     * Current version: 5
+     */
+    version: number;
+    stage: ExportStage;
+    lastAttemptTimestamp: number;
+    collectionExportNames: CollectionExportNames;
+    fileExportNames: FileExportNames;
+}
 
 export const NULL_EXPORT_RECORD: ExportRecord = {
-    version: 3,
+    version: 5,
+    stage: ExportStage.init,
     // @ts-ignore
     lastAttemptTimestamp: null,
-    stage: ExportStage.init,
-    fileExportNames: {},
     collectionExportNames: {},
+    fileExportNames: {},
 };
 
 export interface ExportOpts {
@@ -163,21 +175,6 @@ class ExportService {
             setData("export", newSettings);
         } catch (e) {
             log.error("updateExportSettings failed", e);
-            throw e;
-        }
-    }
-
-    async runMigration(
-        exportDir: string,
-        exportRecord: ExportRecord,
-        updateProgress: (progress: ExportProgress) => void,
-    ) {
-        try {
-            log.info("running migration");
-            await migrateExport(exportDir, exportRecord, updateProgress);
-            log.info("migration completed");
-        } catch (e) {
-            log.error("migration failed", e);
             throw e;
         }
     }
@@ -268,11 +265,7 @@ class ExportService {
         await this.verifyExportFolderExists(exportFolder);
         const exportRecord = await this.getExportRecord(exportFolder);
         await this.updateExportStage(ExportStage.migration);
-        await this.runMigration(
-            exportFolder,
-            exportRecord,
-            this.updateExportProgress.bind(this),
-        );
+        await migrateExportRecordIfNeeded(exportFolder, exportRecord);
         await this.updateExportStage(ExportStage.starting);
     }
 
@@ -1234,10 +1227,39 @@ export const selectAndPrepareExportDirectory = async (): Promise<
     return exportDir;
 };
 
-export const getExportRecordFileUID = (file: EnteFile) =>
+const migrateExportRecordIfNeeded = async (
+    exportFolder: string,
+    exportRecord: Partial<ExportRecord>,
+) => {
+    const version = exportRecord.version;
+    // The last migration from versions prior to version 5 of the export record
+    // was added in Sep 2023 (commit 1fe4d0443b29e77a91981d5800d2c4231118cb83)
+    // and released as part of app version 1.6.41:
+    // https://github.com/ente-io/photos-desktop/releases/tag/v1.6.41.
+    //
+    // There is no traffic from older versions anymore. Still, as an extra
+    // precaution, do not proceed if the migration prior to 5 hasn't run by now.
+    if (version === 0 || version === 1 || version === 2) {
+        throw new Error(`Unsupported export record version ${version}`);
+    }
+    if (version === 3 || version === 4) {
+        // The version number in the empty export record was 3 when it should've
+        // been 5. Special case for these by ensuring the record is empty.
+        if (Object.entries(exportRecord.collectionExportNames ?? {}).length) {
+            throw new Error(`Unsupported export record version ${version}`);
+        } else {
+            await exportService.updateExportRecord(exportFolder, {
+                ...exportRecord,
+                version: 5,
+            });
+        }
+    }
+};
+
+const getExportRecordFileUID = (file: EnteFile) =>
     `${file.id}_${file.collectionID}_${file.updationTime}`;
 
-export const getCollectionIDFromFileUID = (fileUID: string) =>
+const getCollectionIDFromFileUID = (fileUID: string) =>
     Number(fileUID.split("_")[1]);
 
 const convertCollectionIDExportNameObjectToMap = (
@@ -1481,7 +1503,7 @@ const getGoogleLikeMetadataFile = (
     return JSON.stringify(result, null, 2);
 };
 
-export const getMetadataFolderExportPath = (collectionExportPath: string) =>
+const getMetadataFolderExportPath = (collectionExportPath: string) =>
     joinPath(collectionExportPath, exportMetadataDirectoryName);
 
 // if filepath is /home/user/Ente/Export/Collection1/1.jpg
@@ -1495,7 +1517,7 @@ const getFileMetadataExportPath = (
         joinPath(exportMetadataDirectoryName, `${fileExportName}.json`),
     );
 
-export const getLivePhotoExportName = (
+const getLivePhotoExportName = (
     imageExportName: string,
     videoExportName: string,
 ) => JSON.stringify({ image: imageExportName, video: videoExportName });
