@@ -21,9 +21,6 @@
         "lint-fix": "yarn prettier --write --log-level warn . && yarn eslint && yarn tsc",
         "prepare": "node scripts/vips.js"
     },
-    "resolutions": {
-        "jackspeak": "2.1.1"
-    },
     "dependencies": {
         "any-shell-escape": "^0.1.1",
         "auto-launch": "^5.0.6",
