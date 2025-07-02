@@ -151,7 +151,17 @@ export const getToken = (): string => {
     return token;
 };
 
-const LocalIsFirstLogin = z.object({
+/**
+ * Zod schema for the legacy format in which the {@link savedIsFirstLogin} and
+ * {@link savedJustSignedUp} flags were saved in local storage.
+ *
+ * Starting 1.7.15-beta (July 2025), we started saving the booleans directly,
+ * but when reading we fallback to the old format if needed. This fallback can
+ * be removed, and soonish, since these are transient flags that are saved
+ * during the login / signup sequence and wouldn't be expected to remain in the
+ * user's local storage for long anyway. (tag: Migration).
+ */
+const LocalLegacyBooleanFlag = z.object({
     status: z.boolean().nullish().transform(nullToUndefined),
 });
 
@@ -171,7 +181,13 @@ const LocalIsFirstLogin = z.object({
 export const savedIsFirstLogin = () => {
     const jsonString = localStorage.getItem("isFirstLogin");
     if (!jsonString) return false;
-    return LocalIsFirstLogin.parse(JSON.parse(jsonString)).status ?? false;
+    try {
+        return z.boolean().parse(JSON.parse(jsonString)) ?? false;
+    } catch {
+        return (
+            LocalLegacyBooleanFlag.parse(JSON.parse(jsonString)).status ?? false
+        );
+    }
 };
 
 /**
@@ -197,10 +213,6 @@ export const getAndClearIsFirstLogin = () => {
     return result;
 };
 
-const LocalJustSignedUp = z.object({
-    status: z.boolean().nullish().transform(nullToUndefined),
-});
-
 /**
  * Return `true` if the user created a new account on this client during the
  * current (in-progress) or just completed login / signup sequence.
@@ -208,7 +220,13 @@ const LocalJustSignedUp = z.object({
 export const savedJustSignedUp = () => {
     const jsonString = localStorage.getItem("justSignedUp");
     if (!jsonString) return false;
-    return LocalJustSignedUp.parse(JSON.parse(jsonString)).status ?? false;
+    try {
+        return z.boolean().parse(JSON.parse(jsonString)) ?? false;
+    } catch {
+        return (
+            LocalLegacyBooleanFlag.parse(JSON.parse(jsonString)).status ?? false
+        );
+    }
 };
 
 /**
