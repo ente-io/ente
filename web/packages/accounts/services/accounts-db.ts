@@ -9,7 +9,6 @@ export type LocalStorageKey =
     // See also savedKeyAttributes.
     | "keyAttributes"
     | "originalKeyAttributes"
-    | "showBackButton"
     // Moved to ente-accounts
     // "srpSetupAttributes"
     | "srpAttributes";
@@ -206,6 +205,12 @@ export const saveIsFirstLogin = () => {
  * without clearing it by using {@link savedIsFirstLogin}.
  */
 export const getAndClearIsFirstLogin = () => {
+    // Completely unrelated, but since this code runs on each /gallery load, use
+    // this as a chance to remove the unused "showBackButton" property saved in
+    // local storage. This code was added 1.7.15-beta (July 2025) and can be
+    // removed after a while, soonish (tag: Migration).
+    localStorage.removeItem("showBackButton");
+
     const result = savedIsFirstLogin();
     localStorage.removeItem("isFirstLogin");
     return result;

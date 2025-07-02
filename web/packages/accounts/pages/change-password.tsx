@@ -4,7 +4,6 @@ import {
     AccountsPageFooter,
     AccountsPageTitle,
 } from "ente-accounts/components/layouts/centered-paper";
-import { getData, setData } from "ente-accounts/services/accounts-db";
 import { appHomeRoute, stashRedirect } from "ente-accounts/services/redirect";
 import {
     changePassword,
@@ -31,6 +30,9 @@ const Page: React.FC = () => {
 
     const router = useRouter();
 
+    // We're invoked with the "?op=reset" query parameter in the recovery flow.
+    const isReset = router.query.op == "reset";
+
     useEffect(() => {
         const user = localUser();
         if (user) {
@@ -41,20 +43,27 @@ const Page: React.FC = () => {
         }
     }, [router]);
 
-    return user ? <PageContents {...{ user }} /> : <LoadingIndicator />;
+    return user ? (
+        <PageContents {...{ user, isReset }} />
+    ) : (
+        <LoadingIndicator />
+    );
 };
 
 export default Page;
 
 interface PageContentsProps {
     user: LocalUser;
+    /**
+     * True if the password is being reset during the account recovery flow.
+     */
+    isReset: boolean;
 }
 
-const PageContents: React.FC<PageContentsProps> = ({ user }) => {
+const PageContents: React.FC<PageContentsProps> = ({ user, isReset }) => {
     const router = useRouter();
 
     const redirectToAppHome = useCallback(() => {
-        setData("showBackButton", { value: true });
         void router.push(appHomeRoute);
     }, [router]);
 
@@ -82,7 +91,7 @@ const PageContents: React.FC<PageContentsProps> = ({ user }) => {
                 submitButtonTitle={t("change_password")}
                 onSubmit={handleSubmit}
             />
-            {(getData("showBackButton")?.value ?? true) && (
+            {!isReset && (
                 <>
                     <Divider sx={{ mt: 1 }} />
                     <AccountsPageFooter>
