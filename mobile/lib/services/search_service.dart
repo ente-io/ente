@@ -1417,9 +1417,7 @@ class SearchService {
     }
 
     for (Collection collection in collections) {
-      if (collection.isHidden() ||
-          collection.isArchived() ||
-          collection.isOwner(ownerID)) {
+      if (collection.isHidden() || collection.isOwner(ownerID)) {
         continue;
       }
 
