@@ -1,5 +1,4 @@
 import { Box, Typography } from "@mui/material";
-import { HttpStatusCode } from "axios";
 import {
     AccountsPageContents,
     AccountsPageFooter,
@@ -39,7 +38,6 @@ import { isDevBuild } from "ente-base/env";
 import { isHTTPErrorWithStatus } from "ente-base/http";
 import log from "ente-base/log";
 import { clearSessionStorage } from "ente-base/session";
-import { ApiError } from "ente-shared/error";
 import localForage from "ente-shared/storage/localForage";
 import { getData, setData, setLSUser } from "ente-shared/storage/localStorage";
 import {
@@ -169,14 +167,6 @@ const Page: React.FC = () => {
                 setFieldError(t("invalid_code_error"));
             } else if (isHTTPErrorWithStatus(e, 410)) {
                 setFieldError(t("expired_code_error"));
-            } else if (e instanceof ApiError) {
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
-                if (e?.httpStatusCode === HttpStatusCode.Unauthorized) {
-                    setFieldError(t("invalid_code_error"));
-                    // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
-                } else if (e?.httpStatusCode === HttpStatusCode.Gone) {
-                    setFieldError(t("expired_code_error"));
-                }
             } else {
                 log.error("OTT verification failed", e);
                 throw e;
