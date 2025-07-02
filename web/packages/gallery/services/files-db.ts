@@ -42,6 +42,7 @@
  * albums app stores data in keys prefixed with "public-".
  */
 
+import log from "ente-base/log";
 import {
     CollectionPrivateMagicMetadataData,
     CollectionPublicMagicMetadataData,
@@ -62,8 +63,29 @@ import {
     FilePublicMagicMetadataData,
 } from "ente-media/file-metadata";
 import type { MagicMetadata } from "ente-media/magic-metadata";
+import localForage from "ente-shared/storage/localForage";
 import { nullishToEmpty, nullToUndefined } from "ente-utils/transform";
 import { z } from "zod/v4";
+
+/**
+ * Return `true` if we can access IndexedDB.
+ *
+ * This is used as a pre-flight check, to notify the user if they're using a
+ * browser or extension that is preventing the app from using IndexedDB (which
+ * is necessary for local storage of collections and files metadata).
+ *
+ * > File contents themselves are not stored in IndexedDB, only
+ * > {@link EnteFile}s.
+ */
+export const canAccessIndexedDB = async () => {
+    try {
+        await localForage.ready();
+        return true;
+    } catch (e) {
+        log.error("IndexDB is not accessible", e);
+        return false;
+    }
+};
 
 /**
  * Return a Zod schema suitable for being used with the various magic metadata
