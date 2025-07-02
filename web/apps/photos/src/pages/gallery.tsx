@@ -33,6 +33,7 @@ import {
     haveCredentialsInSession,
     masterKeyFromSession,
 } from "ente-base/session";
+import { getAuthToken } from "ente-base/token";
 import { FullScreenDropZone } from "ente-gallery/components/FullScreenDropZone";
 import { type UploadTypeSelectorIntent } from "ente-gallery/components/Upload";
 import { type Collection } from "ente-media/collection";
@@ -110,7 +111,6 @@ import {
 import { usePhotosAppContext } from "ente-new/photos/types/context";
 import { getData } from "ente-shared/storage/localStorage";
 import {
-    getToken,
     isFirstLogin,
     justSignedUp,
     setIsFirstLogin,
@@ -277,23 +277,30 @@ const Page: React.FC = () => {
     const router = useRouter();
 
     useEffect(() => {
-        const token = getToken();
-        if (!haveCredentialsInSession() || !token) {
-            stashRedirect("/gallery");
-            router.push("/");
-            return;
-        }
-        preloadImage("/images/subscription-card-background");
-
         const electron = globalThis.electron;
         let syncIntervalID: ReturnType<typeof setInterval> | undefined;
 
         void (async () => {
+            if (!haveCredentialsInSession() || !(await getAuthToken())) {
+                // If we don't have master key or auth token, reauthenticate.
+                stashRedirect("/gallery");
+                router.push("/");
+                return;
+            }
+
             if (!(await validateKey())) {
+                // If we have credentials but they can't be decrypted, reset.
+                //
+                // This code is never expected to run, it is only kept as a
+                // safety valve.
                 logout();
                 return;
             }
+
+            // We are logged in and everything looks fine. Proceed with page
+            // load initialization.
             initSettings();
+            preloadImage("/images/subscription-card-background");
             await initUserDetailsOrTriggerPull();
             setupSelectAllKeyBoardShortcutHandler();
             dispatch({ type: "showAll" });
