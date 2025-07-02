@@ -14,9 +14,9 @@ import {
     Typography,
 } from "@mui/material";
 import {
+    saveJustSignedUp,
     setData,
-    setJustSignedUp,
-    setLocalReferralSource,
+    stashReferralSource,
 } from "ente-accounts/services/accounts-db";
 import {
     generateSRPSetupAttributes,
@@ -107,7 +107,8 @@ export const SignUpContents: React.FC<SignUpContentsProps> = ({
             }
 
             try {
-                setLocalReferralSource(referral);
+                const cleanedReferral = referral.trim();
+                if (cleanedReferral) stashReferralSource(cleanedReferral);
 
                 try {
                     await sendOTT(email, "signup");
@@ -154,7 +155,7 @@ export const SignUpContents: React.FC<SignUpContentsProps> = ({
                 );
                 await saveMasterKeyInSessionAndSafeStore(masterKey);
 
-                setJustSignedUp(true);
+                saveJustSignedUp();
                 void router.push("/verify");
             } catch (e) {
                 log.error("Signup failed", e);

@@ -17,9 +17,9 @@ import {
 import {
     getData,
     getToken,
-    isFirstLogin,
+    savedIsFirstLogin,
+    saveIsFirstLogin,
     setData,
-    setIsFirstLogin,
     setLSUser,
 } from "ente-accounts/services/accounts-db";
 import {
@@ -98,7 +98,7 @@ const Page: React.FC = () => {
                     setData("srpAttributes", session.updatedSRPAttributes);
                     // Set a flag that causes new interactive key attributes to
                     // be generated.
-                    setIsFirstLogin(true);
+                    saveIsFirstLogin();
                     // This should be a rare occurrence, instead of building the
                     // scaffolding to update all the in-memory state, just
                     // reload everything.
@@ -191,7 +191,7 @@ const Page: React.FC = () => {
                     await userVerificationResultAfterResolvingSecondFactorChoice(
                         await verifySRP(srpAttributes!, kek),
                     );
-                setIsFirstLogin(true);
+                saveIsFirstLogin();
 
                 if (passkeySessionID) {
                     await stashKeyEncryptionKeyInSessionStore(kek);
@@ -246,7 +246,7 @@ const Page: React.FC = () => {
     const handleVerifyMasterPassword: VerifyMasterPasswordFormProps["onVerify"] =
         (key, kek, keyAttributes, password) => {
             void (async () => {
-                const updatedKeyAttributes = isFirstLogin()
+                const updatedKeyAttributes = savedIsFirstLogin()
                     ? await generateAndSaveInteractiveKeyAttributes(
                           password,
                           keyAttributes,

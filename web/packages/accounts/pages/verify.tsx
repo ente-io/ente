@@ -9,10 +9,10 @@ import { SecondFactorChoice } from "ente-accounts/components/SecondFactorChoice"
 import { useSecondFactorChoiceIfNeeded } from "ente-accounts/components/utils/second-factor-choice";
 import {
     getData,
-    getLocalReferralSource,
+    saveIsFirstLogin,
     setData,
-    setIsFirstLogin,
     setLSUser,
+    unstashReferralSource,
 } from "ente-accounts/services/accounts-db";
 import {
     openPasskeyVerificationURL,
@@ -83,8 +83,7 @@ const Page: React.FC = () => {
         setFieldError,
     ) => {
         try {
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-            const referralSource = getLocalReferralSource()?.trim();
+            const referralSource = unstashReferralSource();
             const cleanedReferral = referralSource
                 ? `web:${referralSource}`
                 : undefined;
@@ -107,12 +106,7 @@ const Page: React.FC = () => {
                     isTwoFactorEnabled: true,
                     isTwoFactorPasskeysEnabled: true,
                 });
-                // TODO: This is not the first login though if they already have
-                // 2FA. Does this flag mean first login on this device?
-                //
-                // Update: This flag causes the interactive encryption key to be
-                // generated, so it has a functional impact we need.
-                setIsFirstLogin(true);
+                saveIsFirstLogin();
                 const url = passkeyVerificationRedirectURL(
                     accountsUrl!,
                     passkeySessionID,
@@ -125,7 +119,7 @@ const Page: React.FC = () => {
                     twoFactorSessionID,
                     isTwoFactorEnabled: true,
                 });
-                setIsFirstLogin(true);
+                saveIsFirstLogin();
                 void router.push("/two-factor/verify");
             } else {
                 await setLSUser({
@@ -147,7 +141,7 @@ const Page: React.FC = () => {
                     }
                     await unstashAndUseSRPSetupAttributes(setupSRP);
                 }
-                setIsFirstLogin(true);
+                saveIsFirstLogin();
                 const redirectURL = unstashRedirect();
                 if (keyAttributes?.encryptedKey) {
                     clearSessionStorage();
@@ -196,7 +190,7 @@ const Page: React.FC = () => {
         return (
             <VerifyingPasskey
                 email={email}
-                passkeySessionID={passkeyVerificationData?.passkeySessionID}
+                passkeySessionID={passkeyVerificationData.passkeySessionID}
                 onRetry={() =>
                     openPasskeyVerificationURL(passkeyVerificationData)
                 }

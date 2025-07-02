@@ -15,11 +15,9 @@ import { Sidebar } from "components/Sidebar";
 import { Upload } from "components/Upload";
 import { sessionExpiredDialogAttributes } from "ente-accounts/components/utils/dialog";
 import {
+    getAndClearIsFirstLogin,
+    getAndClearJustSignedUp,
     getData,
-    isFirstLogin,
-    justSignedUp,
-    setIsFirstLogin,
-    setJustSignedUp,
 } from "ente-accounts/services/accounts-db";
 import { stashRedirect } from "ente-accounts/services/redirect";
 import { isSessionInvalid } from "ente-accounts/services/session";
@@ -299,16 +297,27 @@ const Page: React.FC = () => {
 
             // We are logged in and everything looks fine. Proceed with page
             // load initialization.
-            initSettings();
+
+            // One time inits.
             preloadImage("/images/subscription-card-background");
+            initSettings();
             await initUserDetailsOrTriggerPull();
             setupSelectAllKeyBoardShortcutHandler();
+
+            // Show the initial state while the rest of the sequence proceeds.
             dispatch({ type: "showAll" });
-            setIsFirstLoad(isFirstLogin());
-            if (justSignedUp()) {
+
+            // If this is the user's first login on this client, then show them
+            // a message informing the that the initial load might take time.
+            setIsFirstLoad(getAndClearIsFirstLogin());
+
+            // If the user created a new account on this client, show them the
+            // plan options.
+            if (getAndClearJustSignedUp()) {
                 showPlanSelector();
             }
-            setIsFirstLogin(false);
+
+            // Initialize the reducer.
             const user = getData("user");
             // TODO: Pass entire snapshot to reducer?
             const familyData = userDetailsSnapshot()?.familyData;
@@ -320,13 +329,19 @@ const Page: React.FC = () => {
                 collectionFiles: await savedCollectionFiles(),
                 trashItems: await savedTrashItems(),
             });
+
+            // Fetch data from remote.
             await remotePull();
+
+            // Clear the first load message if needed.
             setIsFirstLoad(false);
-            setJustSignedUp(false);
+
+            // Start the interval that does a periodic pull.
             syncIntervalID = setInterval(
                 () => remotePull({ silent: true }),
                 5 * 60 * 1000 /* 5 minutes */,
             );
+
             if (electron) {
                 electron.onMainWindowFocus(() => remotePull({ silent: true }));
                 if (await shouldShowWhatsNew(electron)) showWhatsNew();

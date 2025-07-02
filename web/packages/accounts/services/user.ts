@@ -1,4 +1,9 @@
-import { getData, setLSUser } from "ente-accounts/services/accounts-db";
+import {
+    getData,
+    savedKeyAttributes,
+    saveKeyAttributes,
+    setLSUser,
+} from "ente-accounts/services/accounts-db";
 import {
     generateSRPSetupAttributes,
     getSRPAttributes,
@@ -351,32 +356,11 @@ export const RemoteKeyAttributes = z.object({
 });
 
 /**
- * Return the user's {@link KeyAttributes} if they are present in local storage.
- *
- * The key attributes are stored in the browser's localStorage. Thus, this
- * function only works from the main thread, not from web workers (local storage
- * is not accessible to web workers).
- */
-export const savedKeyAttributes = (): KeyAttributes | undefined => {
-    const jsonString = localStorage.getItem("keyAttributes");
-    if (!jsonString) return undefined;
-    return RemoteKeyAttributes.parse(JSON.parse(jsonString));
-};
-
-/**
  * A variant of {@link savedKeyAttributes} that throws if keyAttributes are not
  * present in local storage.
  */
 export const ensureSavedKeyAttributes = (): KeyAttributes =>
     ensureExpectedLoggedInValue(savedKeyAttributes());
-
-/**
- * Save the user's {@link KeyAttributes} in local storage.
- *
- * Use {@link savedKeyAttributes} to retrieve them.
- */
-export const saveKeyAttributes = (keyAttributes: KeyAttributes) =>
-    localStorage.setItem("keyAttributes", JSON.stringify(keyAttributes));
 
 export interface GenerateKeysAndAttributesResult {
     masterKey: string;
