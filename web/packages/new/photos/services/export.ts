@@ -31,9 +31,11 @@ import {
     safeDirectoryName,
     safeFileName,
 } from "ente-new/photos/utils/native-fs";
-import { getData, setData } from "ente-shared/storage/localStorage";
+import { setData } from "ente-shared/storage/localStorage";
 import { PromiseQueue } from "ente-utils/promise";
+import { nullToUndefined } from "ente-utils/transform";
 import i18n from "i18next";
+import { z } from "zod/v4";
 import { savedCollectionFiles, savedCollections } from "./photos-fdb";
 
 // TODO: Audit the uses of these constants
@@ -71,10 +73,48 @@ export interface ExportProgress {
     total: number;
 }
 
+/**
+ * The export related settings that are persisted to local storage.
+ */
 export interface ExportSettings {
-    folder: string;
-    continuousExport: boolean;
+    /**
+     * The parent folder where the "Ente Photos" folder containing the export
+     * will be placed.
+     */
+    folder?: string;
+    /**
+     * If `true`, the app will automatically export new or pending files.
+     */
+    continuousExport?: boolean;
 }
+
+/**
+ * Zod schema for the {@link ExportSettings} TypeScript type.
+ */
+const ExportSettings = z.object({
+    folder: z.string().nullish().transform(nullToUndefined),
+    continuousExport: z.boolean().nullish().transform(nullToUndefined),
+});
+
+/**
+ * Return the previously saved export settings, if any, present in local storage.
+ *
+ * Use {@link saveExportSettings} to update the settings in local storage.
+ */
+export const savedExportSettings = () => {
+    const jsonString = localStorage.getItem("export");
+    return jsonString ? ExportSettings.parse(jsonString) : undefined;
+};
+
+/**
+ * Update the export settings saved in local storage.
+ *
+ * This is the setter corresponding to {@link savedExportSettings}.
+ * @param exportSettings
+ */
+export const saveExportSettings = (exportSettings: ExportSettings) => {
+    localStorage.setItem("export", JSON.stringify(exportSettings));
+};
 
 type CollectionExportNames = Record<number, string>;
 
@@ -130,8 +170,7 @@ interface CancellationStatus {
 }
 
 class ExportService {
-    // @ts-ignore
-    private exportSettings: ExportSettings;
+    private exportSettings: ExportSettings | undefined;
     // @ts-ignore
     private exportInProgress: RequestCanceller = null;
     private resync = true;
@@ -153,12 +192,12 @@ class ExportService {
     // @ts-ignore
     private cachedMetadataDateTimeFormatter: Intl.DateTimeFormat;
 
-    getExportSettings(): ExportSettings {
+    getExportSettings(): ExportSettings | undefined {
         try {
             if (this.exportSettings) {
                 return this.exportSettings;
             }
-            const exportSettings = getData("export");
+            const exportSettings = savedExportSettings();
             this.exportSettings = exportSettings;
             return exportSettings;
         } catch (e) {
@@ -190,13 +229,17 @@ class ExportService {
     }
 
     private async updateExportStage(stage: ExportStage) {
-        const exportFolder = this.getExportSettings()?.folder;
+        // TODO: Retain the existing behaviour of this code but needs rework.
+        // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
+        const exportFolder = this.getExportSettings()?.folder!;
         await this.updateExportRecord(exportFolder, { stage });
         this.uiUpdater.setExportStage(stage);
     }
 
     private async updateLastExportTime(exportTime: number) {
-        const exportFolder = this.getExportSettings()?.folder;
+        // TODO: Retain the existing behaviour of this code but needs rework.
+        // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
+        const exportFolder = this.getExportSettings()?.folder!;
         await this.updateExportRecord(exportFolder, {
             lastAttemptTimestamp: exportTime,
         });
@@ -271,7 +314,9 @@ class ExportService {
 
     async postExport() {
         try {
-            const exportFolder = this.getExportSettings()?.folder;
+            // TODO: Retain the existing behaviour of this code but needs rework.
+            // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
+            const exportFolder = this.getExportSettings()?.folder!;
             if (!(await this.exportFolderExists(exportFolder))) {
                 this.uiUpdater.setExportStage(ExportStage.init);
                 return;
@@ -319,7 +364,9 @@ class ExportService {
             };
             this.exportInProgress = canceller;
             try {
-                const exportFolder = this.getExportSettings()?.folder;
+                // TODO: Retain the existing behaviour of this code but needs rework.
+                // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
+                const exportFolder = this.getExportSettings()?.folder!;
                 await this.preExport(exportFolder);
                 log.info("export started");
                 await this.runExport(exportFolder, isCanceled, exportOpts);
@@ -1156,7 +1203,7 @@ class ExportService {
         return this.exportInProgress;
     };
 
-    exportFolderExists = async (exportFolder: string) => {
+    exportFolderExists = async (exportFolder: string | undefined) => {
         return exportFolder && (await ensureElectron().fs.exists(exportFolder));
     };
 
@@ -1198,9 +1245,10 @@ export const resumeExportsIfNeeded = async () => {
         return;
     }
     const exportRecord = await exportService.getExportRecord(
-        exportSettings.folder,
+        // TODO: Retain existing behaviour of code. Needs rework.
+        exportSettings!.folder!,
     );
-    if (exportSettings.continuousExport) {
+    if (exportSettings!.continuousExport) {
         exportService.enableContinuousExport();
     }
     if (isExportInProgress(exportRecord.stage)) {
