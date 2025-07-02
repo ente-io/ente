@@ -98,8 +98,12 @@ export default function PublicCollectionGallery() {
     const collectionKey = useRef<string>(null);
     const url = useRef<string>(null);
     const referralCode = useRef<string>("");
-    const [publicFiles, setPublicFiles] = useState<EnteFile[]>(null);
-    const [publicCollection, setPublicCollection] = useState<Collection>(null);
+    const [publicCollection, setPublicCollection] = useState<
+        Collection | undefined
+    >(undefined);
+    const [publicFiles, setPublicFiles] = useState<EnteFile[] | undefined>(
+        undefined,
+    );
     const [errorMessage, setErrorMessage] = useState<string>(null);
     const [loading, setLoading] = useState(true);
     const [isPasswordProtected, setIsPasswordProtected] = useState(false);
@@ -229,13 +233,15 @@ export default function PublicCollectionGallery() {
                     referralCode.current =
                         await savedLastPublicCollectionReferralCode();
                     setPublicCollection(collection);
-                    const sortAsc =
-                        collection.pubMagicMetadata?.data.asc ?? false;
                     setIsPasswordProtected(
                         !!collection.publicURLs[0]?.passwordEnabled,
                     );
-                    const files = await savedPublicCollectionFiles(accessToken);
-                    setPublicFiles(sortFiles(files, sortAsc));
+                    setPublicFiles(
+                        sortFilesForCollection(
+                            await savedPublicCollectionFiles(accessToken),
+                            collection,
+                        ),
+                    );
                     accessTokenJWT =
                         await savedPublicCollectionAccessTokenJWT(accessToken);
                 }
@@ -330,7 +336,10 @@ export default function PublicCollectionGallery() {
                         credentials.current.accessToken,
                         credentials.current.accessTokenJWT,
                         collection,
-                        setPublicFiles,
+                        (files) =>
+                            setPublicFiles(
+                                sortFilesForCollection(files, collection),
+                            ),
                     );
                 } catch (e) {
                     const parsedError = parseSharingErrorCodes(e);
@@ -365,8 +374,8 @@ export default function PublicCollectionGallery() {
                     collectionUID,
                     collectionKey.current,
                 );
-                setPublicCollection(null);
-                setPublicFiles(null);
+                setPublicCollection(undefined);
+                setPublicFiles(undefined);
             } else {
                 log.error("Public album remote pull failed", e);
             }
@@ -424,6 +433,11 @@ export default function PublicCollectionGallery() {
             context: undefined,
         });
     };
+
+    const handleUploadFile = (file: EnteFile) =>
+        setPublicFiles(
+            sortFilesForCollection([...publicFiles, file], publicCollection),
+        );
 
     const downloadFilesHelper = async () => {
         try {
@@ -543,9 +557,7 @@ export default function PublicCollectionGallery() {
                     uploadTypeSelectorIntent="collect"
                     uploadTypeSelectorView={uploadTypeSelectorView}
                     onRemotePull={publicAlbumsRemotePull}
-                    onUploadFile={(file) =>
-                        setPublicFiles(sortFiles([...publicFiles, file]))
-                    }
+                    onUploadFile={handleUploadFile}
                     closeUploadTypeSelector={closeUploadTypeSelectorView}
                     onShowSessionExpiredDialog={showPublicLinkExpiredMessage}
                     {...{ dragAndDropFiles }}
@@ -558,6 +570,13 @@ export default function PublicCollectionGallery() {
         </PublicCollectionGalleryContext.Provider>
     );
 }
+
+/**
+ * Sort the given {@link files} using {@link sortFiles}, using the ascending
+ * ordering preference if specified in the given {@link collection}'s metadata.
+ */
+const sortFilesForCollection = (files: EnteFile[], collection?: Collection) =>
+    sortFiles(files, collection?.pubMagicMetadata?.data.asc ?? false);
 
 const EnteLogoLink = styled("a")(({ theme }) => ({
     // Remove the excess space at the top.
