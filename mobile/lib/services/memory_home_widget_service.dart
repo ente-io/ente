@@ -182,7 +182,7 @@ class MemoryHomeWidgetService {
 
   Future<void> _refreshMemoriesWidget() async {
     // only refresh if widget was synced without issues
-    if (getMemoriesStatus() == WidgetStatus.syncedAll) return;
+    if (await countHomeWidgets() == 0) return;
     await _refreshWidget(message: "Refreshing from existing memory set");
   }
 
@@ -222,6 +222,7 @@ class MemoryHomeWidgetService {
       onThisDay: onThisDayValue,
       pastYears: lastYearValue,
       smart: smartMemoryValue,
+      hasAnyWidgets: await countHomeWidgets() > 0,
     );
 
     return memories;

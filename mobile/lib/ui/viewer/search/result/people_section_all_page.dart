@@ -399,14 +399,6 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
       results.removeWhere(
         (element) => element.params[kPersonParamID] == null,
       );
-      if (widget.selectedPeople?.personIds.isEmpty ?? false) {
-        widget.selectedPeople!.select(
-          results
-              .take(2)
-              .map((e) => e.params[kPersonParamID] as String)
-              .toSet(),
-        );
-      }
     }
     _isLoaded = true;
     return results;
