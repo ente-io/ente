@@ -196,7 +196,7 @@ const Page: React.FC = () => {
         return (
             <VerifyingPasskey
                 email={email}
-                passkeySessionID={passkeyVerificationData?.passkeySessionID}
+                passkeySessionID={passkeyVerificationData.passkeySessionID}
                 onRetry={() =>
                     openPasskeyVerificationURL(passkeyVerificationData)
                 }

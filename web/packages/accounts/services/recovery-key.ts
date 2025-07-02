@@ -8,7 +8,8 @@ import {
     toHex,
 } from "ente-base/crypto";
 import { ensureMasterKeyFromSession } from "ente-base/session";
-import { putUserRecoveryKeyAttributes, saveKeyAttributes } from "./user";
+import { saveKeyAttributes } from "./accounts-db";
+import { putUserRecoveryKeyAttributes } from "./user";
 
 // Mobile client library only supports English.
 bip39.setDefaultWordlist("english");

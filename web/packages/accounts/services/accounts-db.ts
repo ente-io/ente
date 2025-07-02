@@ -1,5 +1,6 @@
 import { getKVS, removeKV, setKV } from "ente-base/kv";
 import log from "ente-base/log";
+import { RemoteKeyAttributes, type KeyAttributes } from "./user";
 
 export type LocalStorageKey =
     | "user"
@@ -125,6 +126,27 @@ export const isLocalStorageAndIndexedDBMismatch = async () => {
         !(await getKVS("token"))
     );
 };
+
+/**
+ * Return the user's {@link KeyAttributes} if they are present in local storage.
+ *
+ * The key attributes are stored in the browser's localStorage. Thus, this
+ * function only works from the main thread, not from web workers (local storage
+ * is not accessible to web workers).
+ */
+export const savedKeyAttributes = (): KeyAttributes | undefined => {
+    const jsonString = localStorage.getItem("keyAttributes");
+    if (!jsonString) return undefined;
+    return RemoteKeyAttributes.parse(JSON.parse(jsonString));
+};
+
+/**
+ * Save the user's {@link KeyAttributes} in local storage.
+ *
+ * Use {@link savedKeyAttributes} to retrieve them.
+ */
+export const saveKeyAttributes = (keyAttributes: KeyAttributes) =>
+    localStorage.setItem("keyAttributes", JSON.stringify(keyAttributes));
 
 export const getToken = (): string => {
     const token = getData("user")?.token;
