@@ -1,7 +1,5 @@
-import { getToken } from "ente-accounts/services/accounts-db";
 import { z } from "zod/v4";
 import { decryptBox, encryptBox, generateKey } from "./crypto";
-import { isDevBuild } from "./env";
 import log from "./log";
 import { getAuthToken } from "./token";
 
@@ -157,22 +155,11 @@ export const updateSessionFromElectronSafeStorageIfNeeded = async () => {
 };
 
 /**
- * Return true if we both have the user's master key in session storage, and
- * their auth token in KV DB.
+ * Return true if we both have a usable user's master key in session storage,
+ * and their auth token in KV DB.
  */
-export const haveAuthenticatedSession = async () => {
-    if (!(await masterKeyFromSession())) return false;
-    const lsToken = getToken();
-    const kvToken = await getAuthToken();
-    // TODO: To avoid changing old behaviour, this currently relies on the token
-    // from local storage. Both should be the same though, so it throws an error
-    // on dev build (tag: Migration).
-    if (isDevBuild) {
-        if (lsToken != kvToken)
-            throw new Error("Local storage and indexed DB mismatch");
-    }
-    return !!lsToken;
-};
+export const haveAuthenticatedSession = async () =>
+    (await masterKeyFromSession()) && !!(await getAuthToken());
 
 /**
  * Save the user's encypted key encryption key ("key") in session store

@@ -17,10 +17,12 @@ The data in local storage is tied to the Document's origin (scheme + host).
 
 Some things that get stored here are:
 
-- Details about the logged in user, in particular their user id and a auth token
-  we can use to make API calls on their behalf.
+- Details about the logged in user (See: [Note: Accounts DB]).
 
-- Various user preferences
+- Some user preferences (export settings, collection sort order).
+
+> Local storage is not accessible to web workers, so if any non main-thread
+> context needs access to the data, it should be stored in IndexedDB.
 
 ## IndexedDB
 
@@ -42,6 +44,13 @@ For more details, see:
 - https://web.dev/articles/indexeddb
 - https://github.com/jakearchibald/idb
 - https://github.com/localForage/localForage
+
+Some things that get stored here are:
+
+- The collection and file data (See: [Files DB]). Note that the file contents
+  themselves are not stored, only the "EnteFile" object that describes a file.
+
+- Various key value pairs (See: [Note: KV DB]).
 
 ## OPFS
 
