@@ -19,8 +19,7 @@ class LivePhotoService {
       _logger.severe(errMsg);
       throw InvalidFileError(errMsg, InvalidReason.livePhotoVideoMissing);
     }
-    final videoHash =
-        CryptoUtil.bin2base64(await CryptoUtil.getHash(liveVideo));
+    final videoHash = await CryptoUtil.getHash(liveVideo);
     return (liveVideo, videoHash);
   }
 

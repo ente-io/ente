@@ -83,7 +83,7 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(
     }
   }
 
-  fileHash = CryptoUtil.bin2base64(await CryptoUtil.getHash(sourceFile));
+  fileHash = await CryptoUtil.getHash(sourceFile);
   if (file.fileType == FileType.livePhoto && Platform.isIOS) {
     final (videoUrl, videoHash) =
         await LivePhotoService.liveVideoAndHash(file.lAsset!.id);
@@ -98,7 +98,7 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(
     sourceFile = File(zippedPath);
     // imgHash:vidHash
     fileHash = '$fileHash$kHashSeprator$videoHash';
-    zipHash = CryptoUtil.bin2base64(await CryptoUtil.getHash(sourceFile));
+    zipHash = await CryptoUtil.getHash(sourceFile);
   }
 
   isDeleted = !(await asset.exists);
@@ -271,8 +271,7 @@ Future<MediaUploadData> _getSharedMediaUploadData(EnteFile file) async {
       file.localID!,
       file.isVideo,
     );
-    final fileHash =
-        CryptoUtil.bin2base64(await CryptoUtil.getHash(sourceFile));
+    final fileHash = await CryptoUtil.getHash(sourceFile);
     ui.Image? decodedImage;
     if (file.fileType == FileType.image) {
       decodedImage = await decodeImageInIsolate(localPath);

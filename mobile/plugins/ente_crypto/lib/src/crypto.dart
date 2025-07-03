@@ -52,7 +52,7 @@ Uint8List cryptoKdfDeriveFromKey(
 }
 
 // Returns the hash for a given file
-Future<Uint8List> cryptoGenericHash(Map<String, dynamic> args) async {
+Future<String> cryptoGenericHash(Map<String, dynamic> args) async {
   final file = File(args["sourceFilePath"]);
   final state =
       Sodium.cryptoGenerichashInit(null, Sodium.cryptoGenerichashBytesMax);
@@ -63,7 +63,8 @@ Future<Uint8List> cryptoGenericHash(Map<String, dynamic> args) async {
       Sodium.cryptoGenerichashUpdate(state, Uint8List.fromList(chunk));
     }
   }
-  return Sodium.cryptoGenerichashFinal(state, Sodium.cryptoGenerichashBytesMax);
+  final hash =  Sodium.cryptoGenerichashFinal(state, Sodium.cryptoGenerichashBytesMax);
+  return Sodium.bin2base64(hash, variant: Sodium.base64VariantOriginal);
 }
 
 EncryptionResult chachaEncryptData(Map<String, dynamic> args) {
@@ -503,7 +504,7 @@ class CryptoUtil {
   }
 
   // Computes and returns the hash of the source file
-  static Future<Uint8List> getHash(File source) {
+  static Future<String> getHash(File source) {
     return _computer.compute(
       cryptoGenericHash,
       param: {

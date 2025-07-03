@@ -22,12 +22,11 @@ class LocalMetadataService {
       final TimeLogger t = TimeLogger(context: "getDroidMetadata");
       final AssetEntity asset = await AssetEntityService.fromIDWithRetry(id);
       final sourceFile = await AssetEntityService.sourceFromAsset(asset);
-      final String hash =
-          CryptoUtil.bin2base64(await CryptoUtil.getHash(sourceFile));
+      final String hash = await CryptoUtil.getHash(sourceFile);
       final latLng = await asset.latlngAsync();
       Location location =
           Location(latitude: latLng.latitude, longitude: latLng.longitude);
-      final int size =  sourceFile.lengthSync();
+      final int size = sourceFile.lengthSync();
       final Map<String, IfdTag>? exifData = await tryExifFromFile(sourceFile);
       final int? mviIndex = asset.type != AssetType.image
           ? null
