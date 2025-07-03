@@ -8,6 +8,8 @@ import React, { useCallback, useEffect, useState } from "react";
 
 /**
  * A page that allows the user to signup for a new Ente account.
+ *
+ * See: [Note: Login pages]
  */
 const Page: React.FC = () => {
     const [loading, setLoading] = useState(true);

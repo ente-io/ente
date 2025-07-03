@@ -51,6 +51,8 @@ import { Trans } from "react-i18next";
 
 /**
  * A page that allows the user to verify their email.
+ *
+ * See: [Note: Login pages]
  */
 const Page: React.FC = () => {
     const { logout, showMiniDialog } = useBaseContext();
@@ -228,13 +230,13 @@ const Page: React.FC = () => {
             />
 
             <AccountsPageFooter>
-                {resend === 0 && (
+                {resend == 0 && (
                     <LinkButton onClick={resendEmail}>
                         {t("resend_code")}
                     </LinkButton>
                 )}
-                {resend === 1 && <span>{t("status_sending")}</span>}
-                {resend === 2 && <span>{t("status_sent")}</span>}
+                {resend == 1 && <span>{t("status_sending")}</span>}
+                {resend == 2 && <span>{t("status_sent")}</span>}
                 <LinkButton onClick={logout}>{t("change_email")}</LinkButton>
             </AccountsPageFooter>
 

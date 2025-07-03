@@ -21,6 +21,8 @@ import { savedLocalUser } from "../services/accounts-db";
 
 /**
  * A page that allows a user to reset or change their password.
+ *
+ * See: [Note: Login pages]
  */
 const Page: React.FC = () => {
     const [user, setUser] = useState<LocalUser | undefined>(undefined);

@@ -19,6 +19,7 @@ import {
     getToken,
     savedIsFirstLogin,
     savedKeyAttributes,
+    savedPartialLocalUser,
     savedSRPAttributes,
     saveIsFirstLogin,
     saveKeyAttributes,
@@ -79,15 +80,16 @@ import { useCallback, useEffect, useState } from "react";
 const Page: React.FC = () => {
     const { logout, showMiniDialog } = useBaseContext();
 
-    const [srpAttributes, setSrpAttributes] = useState<SRPAttributes>();
+    const [user, setUser] = useState<PartialLocalUser | undefined>(undefined);
     const [keyAttributes, setKeyAttributes] = useState<KeyAttributes>();
-    const [user, setUser] = useState<PartialLocalUser>();
+    const [srpAttributes, setSrpAttributes] = useState<SRPAttributes>();
     const [passkeyVerificationData, setPasskeyVerificationData] = useState<
         { passkeySessionID: string; url: string } | undefined
     >();
     const [sessionValidityCheck, setSessionValidityCheck] = useState<
         Promise<void> | undefined
     >();
+
     const {
         secondFactorChoiceProps,
         userVerificationResultAfterResolvingSecondFactorChoice,
@@ -127,11 +129,12 @@ const Page: React.FC = () => {
 
     useEffect(() => {
         const main = async () => {
-            const user: PartialLocalUser = getData("user");
+            const user = savedPartialLocalUser();
             if (!user?.email) {
                 void router.push("/");
                 return;
             }
+
             setUser(user);
             await updateSessionFromElectronSafeStorageIfNeeded();
             if (await haveAuthenticatedSession()) {
