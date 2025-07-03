@@ -38,50 +38,23 @@ class GallerySections {
     init();
   }
 
-  final List<String> _groupIDs = [];
-  final Map<String, List<EnteFile>> _groupIDToFilesMap = {};
-  final Map<String, GroupHeaderData> _groupIdToheaderDataMap = {};
+  final List<String> _groupIds = [];
+  final Map<String, List<EnteFile>> _groupIdToFilesMap = {};
+  final Map<String, GroupHeaderData> _groupIdToHeaderDataMap = {};
   late final int crossAxisCount;
   final currentUserID = Configuration.instance.getUserID();
+  static const double spacing = 2.0;
 
-  List<String> get groupIDs => _groupIDs;
-  Map<String, List<EnteFile>> get groupIDToFilesMap => _groupIDToFilesMap;
+  List<String> get groupIDs => _groupIds;
+  Map<String, List<EnteFile>> get groupIDToFilesMap => _groupIdToFilesMap;
   Map<String, GroupHeaderData> get groupIdToheaderDataMap =>
-      _groupIdToheaderDataMap;
+      _groupIdToHeaderDataMap;
 
   final _uuid = const Uuid();
 
   void init() {
-    List<EnteFile> dailyFiles = [];
-    for (int index = 0; index < allFiles.length; index++) {
-      if (index > 0 &&
-          !groupType.areFromSameGroup(allFiles[index - 1], allFiles[index])) {
-        _createNewGroup(dailyFiles);
-        dailyFiles = [];
-      }
-      dailyFiles.add(allFiles[index]);
-    }
-    if (dailyFiles.isNotEmpty) {
-      _createNewGroup(dailyFiles);
-    }
-
+    _buildGroups();
     crossAxisCount = localSettings.getPhotoGridSize();
-  }
-
-  void _createNewGroup(
-    List<EnteFile> dailyFiles,
-  ) {
-    final uuid = _uuid.v1();
-    _groupIDs.add(uuid);
-    _groupIDToFilesMap[uuid] = dailyFiles;
-    _groupIdToheaderDataMap[uuid] = GroupHeaderData(
-      title: groupType.getTitle(
-        context,
-        dailyFiles.first,
-        lastFile: dailyFiles.last,
-      ),
-      groupType: groupType,
-    );
   }
 
   List<FixedExtentSectionLayout> getSectionLayouts() {
@@ -90,9 +63,11 @@ class GallerySections {
     final tileHeight = widthAvailable / crossAxisCount;
     final sectionLayouts = <FixedExtentSectionLayout>[];
 
+    final groupIDs = _groupIdToFilesMap.keys;
+
     // TODO: spacing
-    for (final key in _groupIDToFilesMap.keys) {
-      final filesInGroup = _groupIDToFilesMap[key]!;
+    for (final groupID in groupIDs) {
+      final filesInGroup = _groupIdToFilesMap[groupID]!;
       final numberOfGridRows = (filesInGroup.length / crossAxisCount).ceil();
       final firstIndex = currentIndex == 0 ? currentIndex : currentIndex + 1;
       final lastIndex = firstIndex + numberOfGridRows;
@@ -109,11 +84,11 @@ class GallerySections {
           maxOffset: maxOffset,
           headerExtent: headerExtent,
           tileHeight: tileHeight,
-          spacing: 0,
+          spacing: spacing,
           builder: (context, index) {
             if (index == firstIndex) {
               return GroupHeaderWidget(
-                title: _groupIdToheaderDataMap[key]!.title,
+                title: _groupIdToHeaderDataMap[groupID]!.title,
                 gridSize: crossAxisCount,
               );
             } else {
@@ -138,8 +113,7 @@ class GallerySections {
               return FixedExtentGridRow(
                 width: tileHeight,
                 height: tileHeight,
-                //TODO: spacing
-                spacing: 0,
+                spacing: spacing,
                 textDirection: TextDirection.ltr,
                 children: gridRowChildren,
               );
@@ -148,10 +122,48 @@ class GallerySections {
         ),
       );
       currentIndex = lastIndex;
+
+      // Adding this crashes the app??????
+
+      // if (groupID != groupIDs.last) {
+      //   // lastIndex - (firstIndex + 1) - 1
+      //   currentOffset = maxOffset + (lastIndex - firstIndex) * spacing;
+      // }
       currentOffset = maxOffset;
     }
 
     return sectionLayouts;
+  }
+
+  void _buildGroups() {
+    List<EnteFile> dailyFiles = [];
+    for (int index = 0; index < allFiles.length; index++) {
+      if (index > 0 &&
+          !groupType.areFromSameGroup(allFiles[index - 1], allFiles[index])) {
+        _createNewGroup(dailyFiles);
+        dailyFiles = [];
+      }
+      dailyFiles.add(allFiles[index]);
+    }
+    if (dailyFiles.isNotEmpty) {
+      _createNewGroup(dailyFiles);
+    }
+  }
+
+  void _createNewGroup(
+    List<EnteFile> dailyFiles,
+  ) {
+    final uuid = _uuid.v1();
+    _groupIds.add(uuid);
+    _groupIdToFilesMap[uuid] = dailyFiles;
+    _groupIdToHeaderDataMap[uuid] = GroupHeaderData(
+      title: groupType.getTitle(
+        context,
+        dailyFiles.first,
+        lastFile: dailyFiles.last,
+      ),
+      groupType: groupType,
+    );
   }
 }
 
