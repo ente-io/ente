@@ -243,8 +243,18 @@ export const checkPasskeyVerificationStatus = async (
 export const saveCredentialsAndNavigateTo = async (
     response: TwoFactorAuthorizationResponse,
 ) => {
-    // The implementation is similar to the `saveQueryCredentialsAndNavigateTo`
-    // function on the "/passkeys/finish" page.
+    // [Note: Ending the passkey flow]
+    //
+    // The implementation of this function is similar to that of the
+    // `saveQueryCredentialsAndNavigateTo` on the "/passkeys/finish" page.
+    //
+    // This one, `saveCredentialsAndNavigateTo`, is used when the user presses
+    // the check verification status button on the page that triggered the
+    // passkey flow (when they're using the desktop app).
+    //
+    // The other one, `saveQueryCredentialsAndNavigateTo`, is used when the user
+    // goes through the passkey flow in the browser itself (when they are using
+    // the web app).
 
     const { id, encryptedToken, keyAttributes } = response;
 

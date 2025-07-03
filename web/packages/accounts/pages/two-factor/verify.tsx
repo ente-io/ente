@@ -49,6 +49,8 @@ const Page: React.FC = () => {
             await setLSUser({
                 ...getData("user"),
                 id,
+                // TODO: [Note: empty token?]
+                //
                 // The original code was parsing an token which is never going
                 // to be present in the response, so effectively was always
                 // setting token to undefined. So this works, but is it needed?
