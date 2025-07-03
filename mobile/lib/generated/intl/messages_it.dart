@@ -1158,8 +1158,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Chiave di recupero errata"),
         "indexedItems":
             MessageLookupByLibrary.simpleMessage("Elementi indicizzati"),
-        "indexingIsPaused": MessageLookupByLibrary.simpleMessage(
-            "L\'indicizzazione è in pausa. Riprenderà automaticamente quando il dispositivo è pronto."),
         "ineligible": MessageLookupByLibrary.simpleMessage("Non idoneo"),
         "info": MessageLookupByLibrary.simpleMessage("Info"),
         "insecureDevice":

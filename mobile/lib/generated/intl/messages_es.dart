@@ -1144,8 +1144,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Clave de recuperación incorrecta"),
         "indexedItems":
             MessageLookupByLibrary.simpleMessage("Elementos indexados"),
-        "indexingIsPaused": MessageLookupByLibrary.simpleMessage(
-            "La indexación está pausada. Se reanudará automáticamente cuando el dispositivo esté listo."),
         "ineligible": MessageLookupByLibrary.simpleMessage("Inelegible"),
         "info": MessageLookupByLibrary.simpleMessage("Info"),
         "insecureDevice":

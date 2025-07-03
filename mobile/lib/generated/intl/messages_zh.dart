@@ -915,8 +915,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "incorrectRecoveryKeyTitle":
             MessageLookupByLibrary.simpleMessage("恢复密钥不正确"),
         "indexedItems": MessageLookupByLibrary.simpleMessage("已索引项目"),
-        "indexingIsPaused":
-            MessageLookupByLibrary.simpleMessage("索引已暂停。当设备准备就绪时，它将自动恢复。"),
         "ineligible": MessageLookupByLibrary.simpleMessage("不合格"),
         "info": MessageLookupByLibrary.simpleMessage("详情"),
         "insecureDevice": MessageLookupByLibrary.simpleMessage("设备不安全"),

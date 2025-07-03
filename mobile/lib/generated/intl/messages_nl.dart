@@ -1141,8 +1141,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Onjuiste herstelsleutel"),
         "indexedItems":
             MessageLookupByLibrary.simpleMessage("Geïndexeerde bestanden"),
-        "indexingIsPaused": MessageLookupByLibrary.simpleMessage(
-            "Indexeren is gepauzeerd. Het zal automatisch hervatten wanneer het apparaat klaar is."),
         "ineligible": MessageLookupByLibrary.simpleMessage("Ongerechtigd"),
         "info": MessageLookupByLibrary.simpleMessage("Info"),
         "insecureDevice":

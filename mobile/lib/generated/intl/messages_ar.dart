@@ -1096,8 +1096,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("مفتاح الاسترداد غير صحيح"),
         "indexedItems":
             MessageLookupByLibrary.simpleMessage("العناصر المفهرسة"),
-        "indexingIsPaused": MessageLookupByLibrary.simpleMessage(
-            "الفهرسة متوقفة مؤقتًا. سيتم استئنافها تلقائيًا عندما يكون الجهاز جاهزًا."),
         "ineligible": MessageLookupByLibrary.simpleMessage("غير مؤهل"),
         "info": MessageLookupByLibrary.simpleMessage("معلومات"),
         "insecureDevice": MessageLookupByLibrary.simpleMessage("جهاز غير آمن"),

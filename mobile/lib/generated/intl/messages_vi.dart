@@ -985,8 +985,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Khóa khôi phục không chính xác"),
         "indexedItems":
             MessageLookupByLibrary.simpleMessage("Các mục đã lập chỉ mục"),
-        "indexingIsPaused": MessageLookupByLibrary.simpleMessage(
-            "Chỉ mục đang tạm dừng. Nó sẽ tự động tiếp tục khi thiết bị sẵn sàng."),
         "info": MessageLookupByLibrary.simpleMessage("Thông tin"),
         "insecureDevice":
             MessageLookupByLibrary.simpleMessage("Thiết bị không an toàn"),

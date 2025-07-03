@@ -1148,8 +1148,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "incorrectRecoveryKeyTitle":
             MessageLookupByLibrary.simpleMessage("Incorrect recovery key"),
         "indexedItems": MessageLookupByLibrary.simpleMessage("Indexed items"),
-        "indexingIsPaused": MessageLookupByLibrary.simpleMessage(
-            "Indexing is paused. It will automatically resume when device is ready."),
+        "indexingPausedStatusDescription": MessageLookupByLibrary.simpleMessage(
+            "Indexing is paused. It will automatically resume when the device is ready. The device is considered ready when its battery level, battery health, and thermal status are within a healthy range."),
         "ineligible": MessageLookupByLibrary.simpleMessage("Ineligible"),
         "info": MessageLookupByLibrary.simpleMessage("Info"),
         "insecureDevice":

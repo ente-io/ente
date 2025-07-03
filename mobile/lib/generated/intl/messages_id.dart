@@ -768,8 +768,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "incorrectRecoveryKeyTitle":
             MessageLookupByLibrary.simpleMessage("Kunci pemulihan salah"),
         "indexedItems": MessageLookupByLibrary.simpleMessage("Item terindeks"),
-        "indexingIsPaused": MessageLookupByLibrary.simpleMessage(
-            "Proses indeks dijeda, dan akan otomatis dilanjutkan saat perangkat siap."),
         "insecureDevice":
             MessageLookupByLibrary.simpleMessage("Perangkat tidak aman"),
         "installManually":

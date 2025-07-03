@@ -1171,8 +1171,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Falscher Wiederherstellungs-Schlüssel"),
         "indexedItems":
             MessageLookupByLibrary.simpleMessage("Indizierte Elemente"),
-        "indexingIsPaused": MessageLookupByLibrary.simpleMessage(
-            "Die Indizierung ist unterbrochen. Sie wird automatisch fortgesetzt, wenn das Gerät bereit ist."),
         "ineligible": MessageLookupByLibrary.simpleMessage("Unzulässig"),
         "info": MessageLookupByLibrary.simpleMessage("Info"),
         "insecureDevice":

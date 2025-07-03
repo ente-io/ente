@@ -1000,8 +1000,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Nieprawidłowy klucz odzyskiwania"),
         "indexedItems":
             MessageLookupByLibrary.simpleMessage("Zindeksowane elementy"),
-        "indexingIsPaused": MessageLookupByLibrary.simpleMessage(
-            "Wstrzymano indeksowanie. Zostanie ono automatycznie wznowione, gdy urządzenie będzie gotowe."),
         "info": MessageLookupByLibrary.simpleMessage("Informacje"),
         "insecureDevice":
             MessageLookupByLibrary.simpleMessage("Niezabezpieczone urządzenie"),

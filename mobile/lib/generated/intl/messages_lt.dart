@@ -1141,8 +1141,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Neteisingas atkūrimo raktas"),
         "indexedItems":
             MessageLookupByLibrary.simpleMessage("Indeksuoti elementai"),
-        "indexingIsPaused": MessageLookupByLibrary.simpleMessage(
-            "Indeksavimas pristabdytas. Jis bus automatiškai tęsiamas, kai įrenginys yra paruoštas."),
         "ineligible": MessageLookupByLibrary.simpleMessage("Netinkami"),
         "info": MessageLookupByLibrary.simpleMessage("Informacija"),
         "insecureDevice":
