@@ -76,8 +76,8 @@ class GalleryGroups {
           (numberOfGridRows * tileHeight) +
           (numberOfGridRows - 1) * spacing +
           headerExtent;
+      final bodyFirstIndex = firstIndex + 1;
 
-      int currentFileInGroupIndex = 0;
       groupLayouts.add(
         FixedExtentSectionLayout(
           firstIndex: firstIndex,
@@ -87,19 +87,25 @@ class GalleryGroups {
           headerExtent: headerExtent,
           tileHeight: tileHeight,
           spacing: spacing,
-          builder: (context, index) {
-            if (index == firstIndex) {
+          builder: (context, rowIndex) {
+            if (rowIndex == firstIndex) {
               return GroupHeaderWidget(
                 title: _groupIdToHeaderDataMap[groupID]!.title,
                 gridSize: crossAxisCount,
               );
             } else {
               final gridRowChildren = <Widget>[];
-              for (int _ in Iterable<int>.generate(crossAxisCount)) {
-                if (currentFileInGroupIndex < filesInGroup.length) {
+              final firstIndexOfRowWrtFilesInGroup =
+                  (rowIndex - bodyFirstIndex) * crossAxisCount;
+
+              if (rowIndex == lastIndex) {
+                final lastFile = filesInGroup.last;
+                bool endOfListReached = false;
+                int i = 0;
+                while (!endOfListReached) {
                   gridRowChildren.add(
                     GalleryFileWidget(
-                      file: filesInGroup[currentFileInGroupIndex],
+                      file: filesInGroup[firstIndexOfRowWrtFilesInGroup + i],
                       selectedFiles: selectedFiles,
                       limitSelectionToOne: limitSelectionToOne,
                       tag: tagPrefix,
@@ -107,11 +113,27 @@ class GalleryGroups {
                       currentUserID: currentUserID,
                     ),
                   );
-                  currentFileInGroupIndex++;
-                } else {
-                  break;
+
+                  endOfListReached =
+                      filesInGroup[firstIndexOfRowWrtFilesInGroup + i] ==
+                          lastFile;
+                  i++;
+                }
+              } else {
+                for (int i = 0; i < crossAxisCount; i++) {
+                  gridRowChildren.add(
+                    GalleryFileWidget(
+                      file: filesInGroup[firstIndexOfRowWrtFilesInGroup + i],
+                      selectedFiles: selectedFiles,
+                      limitSelectionToOne: limitSelectionToOne,
+                      tag: tagPrefix,
+                      photoGridSize: crossAxisCount,
+                      currentUserID: currentUserID,
+                    ),
+                  );
                 }
               }
+
               return FixedExtentGridRow(
                 width: tileHeight,
                 height: tileHeight,
