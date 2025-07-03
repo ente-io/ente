@@ -14,7 +14,7 @@ import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.da
 import "package:photos/utils/file_util.dart";
 import "package:photos/utils/navigation_util.dart";
 
-class GalleryFileWidget extends StatelessWidget {
+class GalleryFileWidget extends StatefulWidget {
   final EnteFile file;
   final SelectedFiles? selectedFiles;
   final bool limitSelectionToOne;
@@ -32,38 +32,59 @@ class GalleryFileWidget extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    final isFileSelected = selectedFiles?.isFileSelected(file) ?? false;
+  State<GalleryFileWidget> createState() => _GalleryFileWidgetState();
+}
 
+class _GalleryFileWidgetState extends State<GalleryFileWidget> {
+  late bool _isFileSelected;
+
+  @override
+  void initState() {
+    super.initState();
+    _isFileSelected =
+        widget.selectedFiles?.isFileSelected(widget.file) ?? false;
+    widget.selectedFiles?.addListener(_selectedFilesListener);
+  }
+
+  @override
+  void dispose() {
+    widget.selectedFiles?.removeListener(_selectedFilesListener);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     Color selectionColor = Colors.white;
-    if (isFileSelected && file.isUploaded && file.ownerID != currentUserID) {
+    if (_isFileSelected &&
+        widget.file.isUploaded &&
+        widget.file.ownerID != widget.currentUserID) {
       final avatarColors = getEnteColorScheme(context).avatarColors;
       selectionColor =
-          avatarColors[(file.ownerID!).remainder(avatarColors.length)];
+          avatarColors[(widget.file.ownerID!).remainder(avatarColors.length)];
     }
-    final String heroTag = tag + file.tag;
+    final String heroTag = widget.tag + widget.file.tag;
     final Widget thumbnailWidget = ThumbnailWidget(
-      file,
+      widget.file,
       diskLoadDeferDuration: galleryThumbnailDiskLoadDeferDuration,
       serverLoadDeferDuration: galleryThumbnailServerLoadDeferDuration,
       shouldShowLivePhotoOverlay: true,
       key: Key(heroTag),
-      thumbnailSize: photoGridSize < photoGridSizeDefault
+      thumbnailSize: widget.photoGridSize < photoGridSizeDefault
           ? thumbnailLargeSize
           : thumbnailSmallSize,
-      shouldShowOwnerAvatar: !isFileSelected,
+      shouldShowOwnerAvatar: !_isFileSelected,
       shouldShowVideoDuration: true,
     );
     return GestureDetector(
       onTap: () {
-        limitSelectionToOne
-            ? _onTapWithSelectionLimit(file)
-            : _onTapNoSelectionLimit(context, file);
+        widget.limitSelectionToOne
+            ? _onTapWithSelectionLimit(widget.file)
+            : _onTapNoSelectionLimit(context, widget.file);
       },
       onLongPress: () {
-        limitSelectionToOne
-            ? _onLongPressWithSelectionLimit(context, file)
-            : _onLongPressNoSelectionLimit(context, file);
+        widget.limitSelectionToOne
+            ? _onLongPressWithSelectionLimit(context, widget.file)
+            : _onLongPressNoSelectionLimit(context, widget.file);
       },
       child: Stack(
         clipBehavior: Clip.none,
@@ -81,7 +102,7 @@ class GalleryFileWidget extends StatelessWidget {
               ) =>
                   thumbnailWidget,
               transitionOnUserGestures: true,
-              child: isFileSelected
+              child: _isFileSelected
                   ? ColorFiltered(
                       colorFilter: ColorFilter.mode(
                         Colors.black.withOpacity(
@@ -94,7 +115,7 @@ class GalleryFileWidget extends StatelessWidget {
                   : thumbnailWidget,
             ),
           ),
-          isFileSelected
+          _isFileSelected
               ? Positioned(
                   right: 4,
                   top: 4,
@@ -110,20 +131,35 @@ class GalleryFileWidget extends StatelessWidget {
     );
   }
 
+  void _selectedFilesListener() {
+    late bool latestSelectionState;
+    if (widget.selectedFiles?.files.contains(widget.file) ?? false) {
+      latestSelectionState = true;
+    } else {
+      latestSelectionState = false;
+    }
+    if (latestSelectionState != _isFileSelected && mounted) {
+      setState(() {
+        _isFileSelected = latestSelectionState;
+      });
+    }
+  }
+
   void _toggleFileSelection(EnteFile file) {
-    selectedFiles!.toggleSelection(file);
+    widget.selectedFiles!.toggleSelection(file);
   }
 
   void _onTapWithSelectionLimit(EnteFile file) {
-    if (selectedFiles!.files.isNotEmpty && selectedFiles!.files.first != file) {
-      selectedFiles!.clearAll();
+    if (widget.selectedFiles!.files.isNotEmpty &&
+        widget.selectedFiles!.files.first != file) {
+      widget.selectedFiles!.clearAll();
     }
     _toggleFileSelection(file);
   }
 
   void _onTapNoSelectionLimit(BuildContext context, EnteFile file) async {
     final bool shouldToggleSelection =
-        (selectedFiles?.files.isNotEmpty ?? false) ||
+        (widget.selectedFiles?.files.isNotEmpty ?? false) ||
             GalleryContextState.of(context)!.inSelectionMode;
     if (shouldToggleSelection) {
       _toggleFileSelection(file);
@@ -139,7 +175,7 @@ class GalleryFileWidget extends StatelessWidget {
   }
 
   void _onLongPressNoSelectionLimit(BuildContext context, EnteFile file) {
-    if (selectedFiles!.files.isNotEmpty) {
+    if (widget.selectedFiles!.files.isNotEmpty) {
       _routeToDetailPage(file, context);
     } else {
       HapticFeedback.lightImpact();
@@ -166,7 +202,7 @@ class GalleryFileWidget extends StatelessWidget {
       DetailPageConfiguration(
         galleryFiles,
         galleryFiles.indexOf(file),
-        tag,
+        widget.tag,
       ),
     );
     routeToPage(context, page, forceCustomPageRoute: true);
