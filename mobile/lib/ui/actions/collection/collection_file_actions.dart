@@ -4,7 +4,6 @@ import 'package:flutter/cupertino.dart';
 import "package:photo_manager/photo_manager.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
-import "package:photos/db/files_db.dart";
 import "package:photos/db/local/table/shared_assets.dart";
 import "package:photos/db/local/table/upload_queue_table.dart";
 import "package:photos/events/collection_updated_event.dart";
@@ -15,7 +14,6 @@ import 'package:photos/models/selected_files.dart';
 import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
 import 'package:photos/services/favorites_service.dart';
-import "package:photos/services/hidden_service.dart";
 import "package:photos/services/ignored_files_service.dart";
 import "package:photos/services/sync/remote_sync_service.dart";
 import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
@@ -25,7 +23,6 @@ import 'package:photos/ui/components/buttons/button_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/ui/notification/toast.dart';
 import 'package:photos/utils/dialog_util.dart';
-import "package:photos/utils/file_uploader.dart";
 import "package:photos/utils/share_util.dart";
 import "package:receive_sharing_intent/receive_sharing_intent.dart";
 
@@ -208,8 +205,11 @@ extension CollectionFileActions on CollectionActions {
         await IgnoredFilesService.instance
             .removeIgnoredMappings(filesPendingUpload);
         await localDB.insertOrUpdateQueue(
-            pendingUploadAssetIDs, collectionID, currentUserID,
-            manual: true);
+          pendingUploadAssetIDs,
+          collectionID,
+          currentUserID,
+          manual: true,
+        );
         Bus.instance.fire(
           CollectionUpdatedEvent(
             collectionID,

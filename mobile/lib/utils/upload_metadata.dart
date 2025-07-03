@@ -48,7 +48,6 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(
   EnteFile file,
   bool parseExif,
 ) async {
-  File? sourceFile;
   Uint8List? thumbnailData;
   bool isDeleted;
   String? zipHash;
@@ -59,7 +58,7 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(
   if (Platform.isIOS) {
     trackOriginFetchForUploadOrML.put(file.lAsset!.id, true);
   }
-  sourceFile = await AssetEntityService.sourceFromAsset(asset);
+  File sourceFile = await AssetEntityService.sourceFromAsset(asset);
   thumbnailData = await getThumbnailForUpload(asset);
   if (parseExif) {
     exifData = await tryExifFromFile(sourceFile);
@@ -176,11 +175,9 @@ Future<Map<String, dynamic>> getMetadata(
     creationTime = exifTime.time!.microsecondsSinceEpoch;
   }
   mediaUploadData.isPanorama = isPanoFromExif(mediaUploadData.exifData);
-  if (mediaUploadData.isPanorama != true &&
-      fileType == FileType.image &&
-      mediaUploadData.sourceFile != null) {
+  if (mediaUploadData.isPanorama != true && fileType == FileType.image) {
     try {
-      final xmpData = await getXmp(mediaUploadData.sourceFile!);
+      final xmpData = await getXmp(mediaUploadData.sourceFile);
       mediaUploadData.isPanorama = isPanoFromXmp(xmpData);
     } catch (_) {}
     mediaUploadData.isPanorama ??= false;
@@ -209,7 +206,7 @@ Future<Map<String, dynamic>> getMetadata(
 
   final metadata = <String, dynamic>{};
   metadata["localID"] = asset?.id;
-  final String? hashValue = mediaUploadData.hashData?.fileHash;
+  final String? hashValue = mediaUploadData.hashData.fileHash;
   if (hashValue != null) {
     metadata["hash"] = hashValue;
   }

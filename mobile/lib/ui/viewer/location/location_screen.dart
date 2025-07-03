@@ -2,9 +2,7 @@ import "dart:async";
 import 'dart:developer' as dev;
 
 import "package:flutter/material.dart";
-import "package:photos/core/constants.dart";
 import "package:photos/core/event_bus.dart";
-import "package:photos/db/files_db.dart";
 import "package:photos/events/files_updated_event.dart";
 import "package:photos/events/local_photos_updated_event.dart";
 import 'package:photos/models/file/file.dart';
@@ -15,7 +13,6 @@ import "package:photos/models/search/hierarchical/location_filter.dart";
 import "package:photos/models/selected_files.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
-import "package:photos/services/filter/db_filters.dart";
 import "package:photos/services/location_service.dart";
 import "package:photos/states/location_screen_state.dart";
 import "package:photos/theme/ente_theme.dart";

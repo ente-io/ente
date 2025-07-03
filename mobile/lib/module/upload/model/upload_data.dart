@@ -4,10 +4,10 @@ import "dart:typed_data";
 import "package:exif_reader/exif_reader.dart";
 
 class MediaUploadData {
-  final File? sourceFile;
+  final File sourceFile;
   final Uint8List? thumbnail;
   final bool isDeleted;
-  final FileHashData? hashData;
+  final FileHashData hashData;
   final int? height;
   final int? width;
 
@@ -34,7 +34,7 @@ class MediaUploadData {
 
 class FileHashData {
   // For livePhotos, the fileHash value will be imageHash:videoHash
-  final String? fileHash;
+  final String fileHash;
 
   // zipHash is used to take care of existing live photo uploads from older
   // mobile clients

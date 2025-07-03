@@ -107,7 +107,8 @@ class _HomeGalleryWidgetV2State extends State<HomeGalleryWidgetV2> {
           filterOptions: homeGalleryFilters,
         );
         _logger.info(
-            "Merged files: ${allFiles.length} (local: ${localFiles.length}, remote: ${enteFiles.length}) files $tl, total ${tl.elapsed}");
+          "Merged files: ${allFiles.length} (local: ${localFiles.length}, remote: ${enteFiles.length}) files $tl, total ${tl.elapsed}",
+        );
         // merge
         return FileLoadResult(
           allFiles,
