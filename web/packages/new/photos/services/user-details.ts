@@ -1,4 +1,4 @@
-import { getData, setLSUser } from "ente-accounts/services/accounts-db";
+import { updateSavedLocalUser } from "ente-accounts/services/accounts-db";
 import { ensureLocalUser } from "ente-accounts/services/user";
 import { isDesktop } from "ente-base/app";
 import { authenticatedRequestHeaders, ensureOk } from "ente-base/http";
@@ -241,10 +241,10 @@ export const pullUserDetails = async () => {
 
     // Update the email for the local storage user if needed (the user might've
     // changed their email on a different client).
-    if (ensureLocalUser().email != userDetails.email) {
+    const { email } = userDetails;
+    if (ensureLocalUser().email != email) {
         log.info("Updating user email to match fetched user details");
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-        await setLSUser({ ...getData("user"), email: userDetails.email });
+        updateSavedLocalUser({ email });
     }
 
     // The gallery listens for updates to userDetails, so a special case, do a

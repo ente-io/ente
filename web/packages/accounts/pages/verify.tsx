@@ -8,7 +8,6 @@ import { VerifyingPasskey } from "ente-accounts/components/LoginComponents";
 import { SecondFactorChoice } from "ente-accounts/components/SecondFactorChoice";
 import { useSecondFactorChoiceIfNeeded } from "ente-accounts/components/utils/second-factor-choice";
 import {
-    getData,
     savedKeyAttributes,
     savedOriginalKeyAttributes,
     savedPartialLocalUser,
@@ -19,6 +18,7 @@ import {
     setLSUser,
     unstashAfterUseSRPSetupAttributes,
     unstashReferralSource,
+    updateSavedLocalUser,
 } from "ente-accounts/services/accounts-db";
 import {
     openPasskeyVerificationURL,
@@ -101,12 +101,7 @@ const Page: React.FC = () => {
                 await verifyEmail(email, ott, cleanedReferral),
             );
             if (passkeySessionID) {
-                const user = getData("user");
-                await setLSUser({
-                    ...user,
-                    passkeySessionID,
-                    isTwoFactorEnabled: true,
-                });
+                updateSavedLocalUser({ passkeySessionID });
                 saveIsFirstLogin();
                 const url = passkeyVerificationRedirectURL(
                     accountsUrl!,
@@ -115,10 +110,9 @@ const Page: React.FC = () => {
                 setPasskeyVerificationData({ passkeySessionID, url });
                 openPasskeyVerificationURL({ passkeySessionID, url });
             } else if (twoFactorSessionID) {
-                await setLSUser({
-                    email,
-                    twoFactorSessionID,
+                updateSavedLocalUser({
                     isTwoFactorEnabled: true,
+                    twoFactorSessionID,
                 });
                 saveIsFirstLogin();
                 void router.push("/two-factor/verify");
@@ -128,7 +122,9 @@ const Page: React.FC = () => {
                     token,
                     encryptedToken,
                     id,
-                    isTwoFactorEnabled: false,
+                    isTwoFactorEnabled: undefined,
+                    twoFactorSessionID: undefined,
+                    passkeySessionID: undefined,
                 });
                 if (keyAttributes) {
                     saveKeyAttributes(keyAttributes);

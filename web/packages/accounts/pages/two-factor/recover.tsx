@@ -4,7 +4,7 @@ import {
     AccountsPageFooter,
     AccountsPageTitle,
 } from "ente-accounts/components/layouts/centered-paper";
-import { getData } from "ente-accounts/services/accounts-db";
+import { savedPartialLocalUser } from "ente-accounts/services/accounts-db";
 import {
     recoverTwoFactor,
     recoverTwoFactorFinish,
@@ -64,14 +64,14 @@ const Page: React.FC<RecoverPageProps> = ({ twoFactorType }) => {
     );
 
     useEffect(() => {
-        const user = getData("user");
-        const sessionID = user.passkeySessionID || user.twoFactorSessionID;
+        const user = savedPartialLocalUser();
+        const sessionID =
+            twoFactorType == "passkey"
+                ? user?.passkeySessionID
+                : user?.twoFactorSessionID;
         if (!user?.email || !sessionID) {
             void router.push("/");
-        } else if (
-            !user.isTwoFactorEnabled &&
-            (user.encryptedToken || user.token)
-        ) {
+        } else if (user.encryptedToken || user.token) {
             void router.push("/generate");
         } else {
             setSessionID(sessionID);

@@ -25,6 +25,7 @@ import {
     saveKeyAttributes,
     saveSRPAttributes,
     setLSUser,
+    updateSavedLocalUser,
 } from "ente-accounts/services/accounts-db";
 import {
     openPasskeyVerificationURL,
@@ -212,12 +213,7 @@ const Page: React.FC = () => {
 
                 if (passkeySessionID) {
                     await stashKeyEncryptionKeyInSessionStore(kek);
-                    const user = getData("user");
-                    await setLSUser({
-                        ...user,
-                        passkeySessionID,
-                        isTwoFactorEnabled: true,
-                    });
+                    updateSavedLocalUser({ passkeySessionID });
                     stashRedirect("/");
                     const url = passkeyVerificationRedirectURL(
                         accountsUrl!,
@@ -228,11 +224,9 @@ const Page: React.FC = () => {
                     throw new Error(twoFactorEnabledErrorMessage);
                 } else if (twoFactorSessionID) {
                     await stashKeyEncryptionKeyInSessionStore(kek);
-                    const user = getData("user");
-                    await setLSUser({
-                        ...user,
-                        twoFactorSessionID,
+                    updateSavedLocalUser({
                         isTwoFactorEnabled: true,
+                        twoFactorSessionID,
                     });
                     void router.push("/two-factor/verify");
                     throw new Error(twoFactorEnabledErrorMessage);
@@ -243,7 +237,9 @@ const Page: React.FC = () => {
                         token,
                         encryptedToken,
                         id,
-                        isTwoFactorEnabled: false,
+                        isTwoFactorEnabled: undefined,
+                        twoFactorSessionID: undefined,
+                        passkeySessionID: undefined,
                     });
                     if (keyAttributes) saveKeyAttributes(keyAttributes);
                     return keyAttributes;

@@ -5,6 +5,7 @@ import {
     saveKeyAttributes,
     saveSRPAttributes,
     setLSUser,
+    updateSavedLocalUser,
     type PartialLocalUser,
 } from "ente-accounts/services/accounts-db";
 import {
@@ -70,6 +71,10 @@ export interface LocalUser {
      * in IndexedDB and thus can also be used in web workers.
      */
     token: string;
+    /**
+     * `true` if the TOTP based second factor is enabled for the user.
+     */
+    isTwoFactorEnabled?: boolean;
 }
 
 /**
@@ -664,7 +669,7 @@ export const generateAndSaveInteractiveKeyAttributes = async (
  */
 export const changeEmail = async (email: string, ott: string) => {
     await postChangeEmail(email, ott);
-    await setLSUser({ ...getData("user"), email });
+    updateSavedLocalUser({ email });
 };
 
 /**
@@ -784,7 +789,7 @@ export const setupTwoFactorFinish = async (
         encryptedTwoFactorSecret: box.encryptedData,
         twoFactorSecretDecryptionNonce: box.nonce,
     });
-    await setLSUser({ ...getData("user"), isTwoFactorEnabled: true });
+    updateSavedLocalUser({ isTwoFactorEnabled: true });
 };
 
 interface EnableTwoFactorRequest {
@@ -956,7 +961,7 @@ export const recoverTwoFactorFinish = async (
     await setLSUser({
         ...getData("user"),
         id,
-        isTwoFactorEnabled: false,
+        isTwoFactorEnabled: undefined,
         encryptedToken,
         token: undefined,
     });

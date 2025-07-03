@@ -49,6 +49,8 @@ import React, { useCallback, useEffect, useState } from "react";
  *
  *   - Redirects to the passkey app once email verification is complete if the
  *     user has setup an additional passkey that also needs to be verified.
+ *     Before redirecting, it sets the `inflightPasskeySessionID` in session
+ *     storage.
  *
  * - "/credentials" - A page that allows the user to enter their password to
  *   authenticate (initial login) or reauthenticate (new web app tab)
@@ -79,10 +81,40 @@ import React, { useCallback, useEffect, useState } from "react";
  *
  *   - Redirects to "/change-password" once the recovery key is verified.
  *
- *  - "/change-password" - A page that allows the user to reset their password.
+ * - "/change-password" - A page that allows the user to reset their password.
  *
  *   - Redirects to "/" if there is no `email` present in the saved partial
  *     user, and after successfully changing the password.
+ *
+ * - "/two-factor/verify" - A page that allows the user to verify their TOTP
+ *   based second factor.
+ *
+ *   - Redirects to "/" if there is no `email` or `twoFactorSessionID` in the
+ *     saved partial local user.
+ *
+ *   - Redirects to "/credentials" if there `isTwoFactorEnabled` is not `true`
+ *     and either of `encryptedToken` or `token` is present in the saved partial
+ *     local user.
+ *
+ * - "/passkeys/finish" - A page that the accounts app hands off control back to
+ *   us (the calling app) to continue the rest of the authentication.
+ *
+ *   - Redirects to "/" if there is no matching `inflightPasskeySessionID` in
+ *     session storage.
+ *
+ *   - Redirects to "/credentials" otherwise.
+ *
+ * - "/two-factor/recover" and "/passkeys/recover" - Pages that allow the user
+ *   to reset or bypass their second factor if they possess their recovery key.
+ *   Both pages work similarly, except the second factor they act on.
+ *
+ *   - Redirects to "/" if there is no `email` in the saved partial local user,
+ *     or either of `twoFactorSessionID` and `twoFactorSessionID` is set.
+ *
+ *   - Redirects to "/generate" if there is an `encryptedToken` or `token` in
+ *     the saved partial local user (TODO: Why?).
+ *
+ *   - Redirects to "/credentials" after recovery.
  *
  */
 const Page: React.FC = () => {

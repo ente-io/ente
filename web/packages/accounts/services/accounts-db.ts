@@ -58,6 +58,9 @@ import {
  *   also get filled in. Once they verify their TOTP based second factor, their
  *   {@link id} and {@link encryptedToken} will also get filled in.
  *
+ * - If they have a passkey set as a second factor set, then after verifying
+ *   their password the {@link passkeySessionID} will be set.
+ *
  * - As the login or signup sequence completes, a {@link token} obtained from
  *   the {@link encryptedToken} will be written out, and the
  *   {@link encryptedToken} cleared since it is not needed anymore.
@@ -105,6 +108,7 @@ const LocalUser = z.object({
     id: z.number(),
     email: z.string(),
     token: z.string(),
+    isTwoFactorEnabled: z.boolean().nullish().transform(nullToUndefined),
 });
 
 /**
@@ -127,12 +131,32 @@ export const savedPartialLocalUser = (): PartialLocalUser | undefined => {
  *
  * See: [Note: Partial local user].
  *
+ * This method replaces the existing data. Use {@link updatePartialLocalUser} to
+ * update selected fields while keeping the other fields as it is.
+ *
  * TODO: WARNING: This does not update the KV token. The idea is to gradually
  * move over uses of setLSUser to this while explicitly setting the KV token
  * where needed.
  */
-export const savePartialLocalUser = (partialLocalUser: Partial<LocalUser>) =>
+export const savePartialLocalUser = (partialLocalUser: PartialLocalUser) =>
     localStorage.setItem("user", JSON.stringify(partialLocalUser));
+
+/**
+ * Partially update the saved user data.
+ *
+ * This is a delta variant of {@link savePartialLocalUser}, which replaces the
+ * entire saved object, while this function spreads the provided {@link updates}
+ * onto the currently saved value.
+ *
+ * @param updates A subset of {@link PartialLocalUser} fields that we'd like to
+ * update. The other fields, if any, remain unchanged.
+ *
+ * TODO: WARNING: This does not update the KV token. The idea is to gradually
+ * move over uses of setLSUser to this while explicitly setting the KV token
+ * where needed.
+ */
+export const updateSavedLocalUser = (updates: Partial<PartialLocalUser>) =>
+    savePartialLocalUser({ ...savedPartialLocalUser(), ...updates });
 
 /**
  * Return data about the logged-in user, if someone is indeed logged in.
@@ -143,7 +167,8 @@ export const savePartialLocalUser = (partialLocalUser: Partial<LocalUser>) =>
  * not accessible to web workers.
  *
  * There is no setter corresponding to this function since this is only a view
- * on data saved using {@link savePartialLocalUser}.
+ * on data saved using {@link savePartialLocalUser} or
+ * {@link updateSavedLocalUser}.
  *
  * See: [Note: Partial local user] for more about the whole shebang.
  */
