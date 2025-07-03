@@ -217,7 +217,6 @@ const Page: React.FC = () => {
                         ...user,
                         passkeySessionID,
                         isTwoFactorEnabled: true,
-                        isTwoFactorPasskeysEnabled: true,
                     });
                     stashRedirect("/");
                     const url = passkeyVerificationRedirectURL(

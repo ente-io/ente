@@ -106,7 +106,6 @@ const Page: React.FC = () => {
                     ...user,
                     passkeySessionID,
                     isTwoFactorEnabled: true,
-                    isTwoFactorPasskeysEnabled: true,
                 });
                 saveIsFirstLogin();
                 const url = passkeyVerificationRedirectURL(

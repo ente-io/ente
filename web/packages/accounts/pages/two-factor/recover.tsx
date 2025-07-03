@@ -69,7 +69,7 @@ const Page: React.FC<RecoverPageProps> = ({ twoFactorType }) => {
         if (!user?.email || !sessionID) {
             void router.push("/");
         } else if (
-            !(user.isTwoFactorEnabled || user.isTwoFactorEnabledPasskey) &&
+            !user.isTwoFactorEnabled &&
             (user.encryptedToken || user.token)
         ) {
             void router.push("/generate");
