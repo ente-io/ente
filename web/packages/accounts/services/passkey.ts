@@ -256,6 +256,8 @@ export const saveCredentialsAndNavigateTo = async (
     // goes through the passkey flow in the browser itself (when they are using
     // the web app).
 
+    sessionStorage.removeItem("inflightPasskeySessionID");
+
     const { id, encryptedToken, keyAttributes } = response;
 
     await setLSUser({ ...getData("user"), encryptedToken, id });
