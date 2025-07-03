@@ -45,7 +45,7 @@ import {
 import {
     generateAndSaveInteractiveKeyAttributes,
     type KeyAttributes,
-    type User,
+    type PartialLocalUser,
 } from "ente-accounts/services/user";
 import { decryptAndStoreToken } from "ente-accounts/utils/helpers";
 import { LinkButton } from "ente-base/components/LinkButton";
@@ -81,7 +81,7 @@ const Page: React.FC = () => {
 
     const [srpAttributes, setSrpAttributes] = useState<SRPAttributes>();
     const [keyAttributes, setKeyAttributes] = useState<KeyAttributes>();
-    const [user, setUser] = useState<User>();
+    const [user, setUser] = useState<PartialLocalUser>();
     const [passkeyVerificationData, setPasskeyVerificationData] = useState<
         { passkeySessionID: string; url: string } | undefined
     >();
@@ -127,7 +127,7 @@ const Page: React.FC = () => {
 
     useEffect(() => {
         const main = async () => {
-            const user: User = getData("user");
+            const user: PartialLocalUser = getData("user");
             if (!user?.email) {
                 void router.push("/");
                 return;
@@ -280,7 +280,7 @@ const Page: React.FC = () => {
         await decryptAndStoreToken(keyAttributes, masterKey);
         try {
             let srpAttributes = savedSRPAttributes();
-            if (!srpAttributes && user) {
+            if (!srpAttributes && user?.email) {
                 srpAttributes = await getSRPAttributes(user.email);
                 if (srpAttributes) {
                     saveSRPAttributes(srpAttributes);

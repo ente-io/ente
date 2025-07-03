@@ -28,7 +28,7 @@ import {
     unstashRedirect,
 } from "ente-accounts/services/redirect";
 import { getSRPAttributes, setupSRP } from "ente-accounts/services/srp";
-import type { User } from "ente-accounts/services/user";
+import type { PartialLocalUser } from "ente-accounts/services/user";
 import {
     putUserKeyAttributes,
     sendOTT,
@@ -69,7 +69,7 @@ const Page: React.FC = () => {
 
     useEffect(() => {
         const main = async () => {
-            const user: User = getData("user");
+            const user: PartialLocalUser = getData("user");
 
             const redirect = await redirectionIfNeeded(user);
             if (redirect) {
@@ -253,7 +253,7 @@ export default Page;
  *
  * @returns The slug to redirect to, if needed.
  */
-const redirectionIfNeeded = async (user: User | undefined) => {
+const redirectionIfNeeded = async (user: PartialLocalUser | undefined) => {
     const email = user?.email;
     if (!email) {
         return "/";

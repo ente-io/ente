@@ -16,6 +16,7 @@ import {
 import {
     saveJustSignedUp,
     saveOriginalKeyAttributes,
+    savePartialLocalUser,
     stashReferralSource,
     stashSRPSetupAttributes,
 } from "ente-accounts/services/accounts-db";
@@ -23,7 +24,6 @@ import { generateSRPSetupAttributes } from "ente-accounts/services/srp";
 import {
     generateAndSaveInteractiveKeyAttributes,
     generateKeysAndAttributes,
-    savePartialLocalUser,
     sendOTT,
     type GenerateKeysAndAttributesResult,
 } from "ente-accounts/services/user";

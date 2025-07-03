@@ -9,7 +9,10 @@ import {
 } from "ente-accounts/services/accounts-db";
 import { recoveryKeyFromMnemonic } from "ente-accounts/services/recovery-key";
 import { appHomeRoute, stashRedirect } from "ente-accounts/services/redirect";
-import type { KeyAttributes, User } from "ente-accounts/services/user";
+import type {
+    KeyAttributes,
+    PartialLocalUser,
+} from "ente-accounts/services/user";
 import { sendOTT } from "ente-accounts/services/user";
 import { decryptAndStoreToken } from "ente-accounts/utils/helpers";
 import { LinkButton } from "ente-base/components/LinkButton";
@@ -38,7 +41,7 @@ const Page: React.FC = () => {
     const router = useRouter();
 
     useEffect(() => {
-        const user: User = getData("user");
+        const user: PartialLocalUser = getData("user");
         if (!user?.email) {
             void router.push("/");
             return;

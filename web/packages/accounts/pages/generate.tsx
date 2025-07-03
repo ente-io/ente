@@ -16,7 +16,7 @@ import {
     generateSRPSetupAttributes,
     setupSRP,
 } from "ente-accounts/services/srp";
-import type { User } from "ente-accounts/services/user";
+import type { PartialLocalUser } from "ente-accounts/services/user";
 import {
     generateAndSaveInteractiveKeyAttributes,
     generateKeysAndAttributes,
@@ -42,14 +42,14 @@ import {
 const Page: React.FC = () => {
     const { logout, showMiniDialog } = useBaseContext();
 
-    const [user, setUser] = useState<User>();
+    const [user, setUser] = useState<PartialLocalUser>();
     const [openRecoveryKey, setOpenRecoveryKey] = useState(false);
     const [loading, setLoading] = useState(true);
 
     const router = useRouter();
 
     useEffect(() => {
-        const user: User = getData("user");
+        const user: PartialLocalUser = getData("user");
         setUser(user);
         if (!user?.token) {
             void router.push("/");
@@ -109,7 +109,7 @@ const Page: React.FC = () => {
                 <AccountsPageContents>
                     <AccountsPageTitle>{t("set_password")}</AccountsPageTitle>
                     <NewPasswordForm
-                        userEmail={user.email}
+                        userEmail={user.email! /* TODO(RE):*/}
                         submitButtonTitle={t("set_password")}
                         onSubmit={handleSubmit}
                     />

@@ -5,11 +5,7 @@ import {
     AccountsPageTitle,
 } from "ente-accounts/components/layouts/centered-paper";
 import { appHomeRoute, stashRedirect } from "ente-accounts/services/redirect";
-import {
-    changePassword,
-    localUser,
-    type LocalUser,
-} from "ente-accounts/services/user";
+import { changePassword, type LocalUser } from "ente-accounts/services/user";
 import { LinkButton } from "ente-base/components/LinkButton";
 import { LoadingIndicator } from "ente-base/components/loaders";
 import { deriveKeyInsufficientMemoryErrorMessage } from "ente-base/crypto/types";
@@ -21,12 +17,13 @@ import {
     NewPasswordForm,
     type NewPasswordFormProps,
 } from "../components/NewPasswordForm";
+import { savedLocalUser } from "../services/accounts-db";
 
 /**
  * A page that allows a user to reset or change their password.
  */
 const Page: React.FC = () => {
-    const [user, setUser] = useState<LocalUser>();
+    const [user, setUser] = useState<LocalUser | undefined>(undefined);
 
     const router = useRouter();
 
@@ -34,7 +31,7 @@ const Page: React.FC = () => {
     const isReset = router.query.op == "reset";
 
     useEffect(() => {
-        const user = localUser();
+        const user = savedLocalUser();
         if (user) {
             setUser(user);
         } else {
