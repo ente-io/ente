@@ -38,7 +38,7 @@ import {
 } from "../../services/collection-summary";
 import type { PeopleState, Person } from "../../services/ml/people";
 import type { SearchSuggestion } from "../../services/search/types";
-import type { FamilyData } from "../../services/user-details";
+import type { FamilyData, UserDetails } from "../../services/user-details";
 
 /**
  * Specifies what the bar at the top of the gallery is displaying currently.
@@ -455,6 +455,7 @@ export type GalleryAction =
           collectionFiles: EnteFile[];
           trashItems: TrashItem[];
       }
+    | { type: "setUserDetails"; userDetails: UserDetails }
     | { type: "setCollections"; collections: Collection[] }
     | { type: "setCollectionFiles"; collectionFiles: EnteFile[] }
     | { type: "uploadFile"; file: EnteFile }
@@ -621,6 +622,32 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                     deriveUncategorizedCollectionSummaryID(normalCollections),
                 view,
             });
+        }
+
+        case "setUserDetails": {
+            // While user details have more state that can change, the only
+            // changes that affect the reducer's state (so far) are if the
+            // user's own email changes, or the list of their family members
+            // changes.
+            //
+            // Both of these affect only the list of share suggestion emails.
+
+            let user = state.user!;
+            const { email, familyData } = action.userDetails;
+            if (email != user.email) {
+                user = { ...user, email };
+            }
+
+            return {
+                ...state,
+                user,
+                familyData,
+                shareSuggestionEmails: createShareSuggestionEmails(
+                    user,
+                    familyData,
+                    state.collections,
+                ),
+            };
         }
 
         case "setCollections": {

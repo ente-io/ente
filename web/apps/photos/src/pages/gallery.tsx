@@ -77,7 +77,10 @@ import {
 } from "ente-new/photos/components/gallery/reducer";
 import { notifyOthersFilesDialogAttributes } from "ente-new/photos/components/utils/dialog-attributes";
 import { useIsOffline } from "ente-new/photos/components/utils/use-is-offline";
-import { usePeopleStateSnapshot } from "ente-new/photos/components/utils/use-snapshot";
+import {
+    usePeopleStateSnapshot,
+    useUserDetailsSnapshot,
+} from "ente-new/photos/components/utils/use-snapshot";
 import { shouldShowWhatsNew } from "ente-new/photos/services/changelog";
 import {
     addToFavoritesCollection,
@@ -110,7 +113,6 @@ import { initSettings } from "ente-new/photos/services/settings";
 import {
     redirectToCustomerPortal,
     savedUserDetailsOrTriggerPull,
-    userDetailsSnapshot,
     verifyStripeSubscription,
 } from "ente-new/photos/services/user-details";
 import { usePhotosAppContext } from "ente-new/photos/types/context";
@@ -182,6 +184,7 @@ const Page: React.FC = () => {
         EnteFile[]
     >([]);
 
+    const userDetails = useUserDetailsSnapshot();
     const peopleState = usePeopleStateSnapshot();
 
     // The (non-sticky) header shown at the top of the gallery items.
@@ -351,6 +354,13 @@ const Page: React.FC = () => {
             if (electron) electron.onMainWindowFocus(undefined);
         };
     }, []);
+
+    useEffect(() => {
+        // Only act on updates after the initial mount has completed.
+        if (state.user && userDetails) {
+            dispatch({ type: "setUserDetails", userDetails });
+        }
+    }, [state.user, userDetails]);
 
     useEffect(() => {
         if (typeof activeCollectionID == "undefined" || !router.isReady) {
