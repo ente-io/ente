@@ -95,7 +95,7 @@ class _AppStorageViewerState extends State<AppStorageViewer> {
       paths.addAll([
         PathStorageItem.name(appDocumentsDirectory.path, "Documents"),
         PathStorageItem.name(appSupportDirectory.path, "Support"),
-        PathStorageItem.name(appTemporaryDirectory.path, "App temp"),
+        PathStorageItem.name(appTemporaryDirectory.path, "Temp"),
         PathStorageItem.name(
           personFaceThumbnails,
           "Face thumbnails",
