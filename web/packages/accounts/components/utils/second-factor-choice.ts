@@ -9,15 +9,6 @@ import { useCallback, useMemo, useRef } from "react";
 import type { SecondFactorType } from "../SecondFactorChoice";
 
 /**
- * The message of the {@link Error} that is thrown when the user has enabled a
- * second factor so further authentication is needed during the login sequence.
- *
- * TODO: This is not really an error but rather is a code flow flag; consider
- * not using exceptions for flow control.
- */
-export const twoFactorEnabledErrorMessage = "two factor enabled";
-
-/**
  * A convenience hook for keeping track of the state and logic that is needed
  * after password verification to determine which second factor (if any) we
  * should be asking the user for.

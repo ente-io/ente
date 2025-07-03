@@ -19,7 +19,7 @@
 
 import { getKVS, removeKV, setKV } from "ente-base/kv";
 import log from "ente-base/log";
-import { getAuthToken } from "ente-base/token";
+import { savedAuthToken } from "ente-base/token";
 import { nullToUndefined } from "ente-utils/transform";
 import { z } from "zod/v4";
 import {
@@ -264,7 +264,7 @@ export const migrateKVToken = async (user: unknown) => {
  * token in local storage, then it should also be present in IndexedDB.
  */
 export const isLocalStorageAndIndexedDBMismatch = async () =>
-    savedPartialLocalUser()?.token && !(await getAuthToken());
+    savedPartialLocalUser()?.token && !(await savedAuthToken());
 
 /**
  * Return the user's {@link KeyAttributes} if they are present in local storage.
@@ -379,11 +379,6 @@ export const unstashAfterUseSRPSetupAttributes = async (
     const srpSetupAttributes = SRPSetupAttributes.parse(JSON.parse(jsonString));
     await cb(srpSetupAttributes);
     localStorage.removeItem("srpSetupAttributes");
-};
-
-export const getToken = (): string => {
-    const token = getData("user")?.token;
-    return token;
 };
 
 /**

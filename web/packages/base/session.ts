@@ -1,7 +1,7 @@
 import { z } from "zod/v4";
 import { decryptBox, encryptBox, generateKey } from "./crypto";
 import log from "./log";
-import { getAuthToken } from "./token";
+import { savedAuthToken } from "./token";
 
 /**
  * Remove all data stored in session storage (data tied to the browser tab).
@@ -159,7 +159,7 @@ export const updateSessionFromElectronSafeStorageIfNeeded = async () => {
  * and their auth token in KV DB.
  */
 export const haveAuthenticatedSession = async () =>
-    (await masterKeyFromSession()) && !!(await getAuthToken());
+    (await masterKeyFromSession()) && !!(await savedAuthToken());
 
 /**
  * Save the user's encypted key encryption key ("key") in session store

@@ -58,6 +58,18 @@ import React, { useCallback, useEffect, useState } from "react";
  *   - Redirects to "/" if there is no `email` present in the saved partial
  *     local user.
  *
+ *   - Redirects to "/two-factor/verify" if saved key attributes are not present
+ *     once password is verified and the user has setup an additional TOTP
+ *     second factor that also needs to be verified.
+ *
+ *   - Redirects to the passkey app once password is verified if saved key
+ *     attributes are not present if the user has setup an additional passkey
+ *     that also needs to be verified. Before redirecting, it sets the
+ *     `inflightPasskeySessionID` in session storage.
+ *
+ *   - Redirects to the `appHomeRoute` otherwise (e.g. /gallery). The flow is
+ *     complete.
+ *
  * - "/generate" - A page that allows the user to generate key attributes if
  *   needed, and shows them their recovery key.
  *
@@ -112,7 +124,7 @@ import React, { useCallback, useEffect, useState } from "react";
  *     or either of `twoFactorSessionID` and `twoFactorSessionID` is set.
  *
  *   - Redirects to "/generate" if there is an `encryptedToken` or `token` in
- *     the saved partial local user (TODO: Why?).
+ *     the saved partial local user.
  *
  *   - Redirects to "/credentials" after recovery.
  *

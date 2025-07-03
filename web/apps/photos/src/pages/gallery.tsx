@@ -38,7 +38,7 @@ import {
     haveCredentialsInSession,
     masterKeyFromSession,
 } from "ente-base/session";
-import { getAuthToken } from "ente-base/token";
+import { savedAuthToken } from "ente-base/token";
 import { FullScreenDropZone } from "ente-gallery/components/FullScreenDropZone";
 import { type UploadTypeSelectorIntent } from "ente-gallery/components/Upload";
 import { type Collection } from "ente-media/collection";
@@ -282,7 +282,7 @@ const Page: React.FC = () => {
         let syncIntervalID: ReturnType<typeof setInterval> | undefined;
 
         void (async () => {
-            if (!haveCredentialsInSession() || !(await getAuthToken())) {
+            if (!haveCredentialsInSession() || !(await savedAuthToken())) {
                 // If we don't have master key or auth token, reauthenticate.
                 stashRedirect("/gallery");
                 router.push("/");

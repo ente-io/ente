@@ -33,7 +33,7 @@ import {
     ensureMasterKeyFromSession,
     saveMasterKeyInSessionAndSafeStore,
 } from "ente-base/session";
-import { getAuthToken } from "ente-base/token";
+import { savedAuthToken } from "ente-base/token";
 import { ensure } from "ente-utils/ensure";
 import { nullToUndefined } from "ente-utils/transform";
 import { z } from "zod/v4";
@@ -67,7 +67,7 @@ export interface LocalUser {
      * the value of the X-Auth-Token header in the HTTP request.
      *
      * Usually you shouldn't be needing to access this property; instead use
-     * {@link getAuthToken()} which is kept in sync with this value, and lives
+     * {@link savedAuthToken()} which is kept in sync with this value, and lives
      * in IndexedDB and thus can also be used in web workers.
      */
     token: string;
@@ -582,9 +582,9 @@ export const verifyEmail = async (
  * Log the user out on remote, if possible and needed.
  */
 export const remoteLogoutIfNeeded = async () => {
-    if (!(await getAuthToken())) {
-        // If the logout is attempted during the signup flow itself, then we
-        // won't have an auth token.
+    if (!(await savedAuthToken())) {
+        // If the logout is attempted during the login / signup flow itself,
+        // then we won't have an auth token. Handle that gracefully.
         return;
     }
 
