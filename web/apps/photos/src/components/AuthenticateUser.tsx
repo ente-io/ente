@@ -32,9 +32,30 @@ type AuthenticateUserProps = ModalVisibilityProps & {
 export const AuthenticateUser: React.FC<AuthenticateUserProps> = ({
     open,
     onClose,
+    ...rest
+}) => (
+    <TitledMiniDialog
+        open={open}
+        onClose={onClose}
+        sx={{ position: "absolute" }}
+        title={t("password")}
+    >
+        <AuthenticateUserDialogContents {...{ open, onClose }} {...rest} />
+    </TitledMiniDialog>
+);
+
+/**
+ * The contents of the {@link AuthenticateUser} dialog.
+ *
+ * See: [Note: MUI dialog state] for why this is a separate component.
+ */
+const AuthenticateUserDialogContents: React.FC<AuthenticateUserProps> = ({
+    open,
+    onClose,
     onAuthenticate,
 }) => {
     const { logout, showMiniDialog } = useBaseContext();
+
     const [user, setUser] = useState<LocalUser | undefined>();
     const [keyAttributes, setKeyAttributes] = useState<
         KeyAttributes | undefined
@@ -76,22 +97,15 @@ export const AuthenticateUser: React.FC<AuthenticateUserProps> = ({
     if (!user && !keyAttributes) return <></>;
 
     return (
-        <TitledMiniDialog
-            open={open}
-            onClose={onClose}
-            sx={{ position: "absolute" }}
-            title={t("password")}
-        >
-            <VerifyMasterPasswordForm
-                userEmail={user.email}
-                keyAttributes={keyAttributes}
-                submitButtonTitle={t("authenticate")}
-                onVerify={() => {
-                    onClose();
-                    onAuthenticate();
-                }}
-            />
-        </TitledMiniDialog>
+        <VerifyMasterPasswordForm
+            userEmail={user.email}
+            keyAttributes={keyAttributes}
+            submitButtonTitle={t("authenticate")}
+            onVerify={() => {
+                onClose();
+                onAuthenticate();
+            }}
+        />
     );
 };
 
