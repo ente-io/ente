@@ -424,7 +424,7 @@ class GalleryState extends State<Gallery> {
               builder: (context, snapshot) {
                 if (snapshot.hasData) {
                   return SectionedListSliver(
-                    sectionLayouts: GallerySections(
+                    sectionLayouts: GalleryGroups(
                       allFiles: _allGalleryFiles,
                       groupType: widget.groupType,
                       widthAvailable: MediaQuery.sizeOf(context).width,
@@ -432,7 +432,7 @@ class GalleryState extends State<Gallery> {
                       selectedFiles: widget.selectedFiles,
                       tagPrefix: widget.tagPrefix,
                       headerExtent: snapshot.data!,
-                    ).getSectionLayouts(),
+                    ).getGroupLayouts(),
                   );
                 } else {
                   return const SliverFillRemaining();

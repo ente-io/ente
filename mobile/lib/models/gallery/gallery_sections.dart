@@ -12,7 +12,7 @@ import "package:photos/ui/viewer/gallery/component/group/group_header_widget.dar
 import "package:photos/ui/viewer/gallery/component/group/type.dart";
 import "package:uuid/uuid.dart";
 
-class GallerySections {
+class GalleryGroups {
   final List<EnteFile> allFiles;
   final GroupType groupType;
   final SelectedFiles? selectedFiles;
@@ -24,7 +24,7 @@ class GallerySections {
   final double widthAvailable;
   final double headerExtent;
   final BuildContext context;
-  GallerySections({
+  GalleryGroups({
     required this.allFiles,
     required this.groupType,
     required this.widthAvailable,
@@ -57,11 +57,11 @@ class GallerySections {
     crossAxisCount = localSettings.getPhotoGridSize();
   }
 
-  List<FixedExtentSectionLayout> getSectionLayouts() {
+  List<FixedExtentSectionLayout> getGroupLayouts() {
     int currentIndex = 0;
     double currentOffset = 0.0;
     final tileHeight = widthAvailable / crossAxisCount;
-    final sectionLayouts = <FixedExtentSectionLayout>[];
+    final groupLayouts = <FixedExtentSectionLayout>[];
 
     final groupIDs = _groupIdToFilesMap.keys;
 
@@ -76,7 +76,7 @@ class GallerySections {
           minOffset + (numberOfGridRows * tileHeight) + headerExtent;
 
       int currentGroupIndex = 0;
-      sectionLayouts.add(
+      groupLayouts.add(
         FixedExtentSectionLayout(
           firstIndex: firstIndex,
           lastIndex: lastIndex,
@@ -132,7 +132,7 @@ class GallerySections {
       currentOffset = maxOffset;
     }
 
-    return sectionLayouts;
+    return groupLayouts;
   }
 
   void _buildGroups() {
