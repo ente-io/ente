@@ -1,7 +1,11 @@
 import { VerifyMasterPasswordForm } from "ente-accounts/components/VerifyMasterPasswordForm";
-import { getData } from "ente-accounts/services/accounts-db";
 import { checkSessionValidity } from "ente-accounts/services/session";
-import type { KeyAttributes, User } from "ente-accounts/services/user";
+import {
+    ensureLocalUser,
+    ensureSavedKeyAttributes,
+    type KeyAttributes,
+    type LocalUser,
+} from "ente-accounts/services/user";
 import {
     TitledMiniDialog,
     type MiniDialogAttributes,
@@ -30,9 +34,11 @@ export const AuthenticateUser: React.FC<AuthenticateUserProps> = ({
     onClose,
     onAuthenticate,
 }) => {
-    const { logout, showMiniDialog, onGenericError } = useBaseContext();
-    const [user, setUser] = useState<User>();
-    const [keyAttributes, setKeyAttributes] = useState<KeyAttributes>();
+    const { logout, showMiniDialog } = useBaseContext();
+    const [user, setUser] = useState<LocalUser | undefined>();
+    const [keyAttributes, setKeyAttributes] = useState<
+        KeyAttributes | undefined
+    >(undefined);
 
     // This is a altered version of the check we do on the password verification
     // screen, except here it don't try to overwrite local state and instead
@@ -56,30 +62,8 @@ export const AuthenticateUser: React.FC<AuthenticateUserProps> = ({
     }, [logout, showMiniDialog]);
 
     useEffect(() => {
-        const main = async () => {
-            try {
-                const user = getData("user");
-                if (!user) {
-                    throw Error("User not found");
-                }
-                setUser(user);
-                const keyAttributes = getData("keyAttributes");
-                if (
-                    (!user?.token && !user?.encryptedToken) ||
-                    (keyAttributes && !keyAttributes.memLimit)
-                ) {
-                    throw Error("User not logged in");
-                } else if (!keyAttributes) {
-                    throw Error("Key attributes not found");
-                } else {
-                    setKeyAttributes(keyAttributes);
-                }
-            } catch (e) {
-                onClose();
-                onGenericError(e);
-            }
-        };
-        main();
+        setUser(ensureLocalUser());
+        setKeyAttributes(ensureSavedKeyAttributes());
     }, []);
 
     useEffect(() => {
@@ -87,6 +71,9 @@ export const AuthenticateUser: React.FC<AuthenticateUserProps> = ({
         // dialog to the user.
         if (open) void validateSession();
     }, [open, validateSession]);
+
+    // They'll be read from disk shortly.
+    if (!user && !keyAttributes) return <></>;
 
     return (
         <TitledMiniDialog
@@ -96,7 +83,7 @@ export const AuthenticateUser: React.FC<AuthenticateUserProps> = ({
             title={t("password")}
         >
             <VerifyMasterPasswordForm
-                user={user}
+                userEmail={user.email}
                 keyAttributes={keyAttributes}
                 submitButtonTitle={t("authenticate")}
                 onVerify={() => {

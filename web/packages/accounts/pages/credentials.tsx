@@ -64,6 +64,14 @@ import { useCallback, useEffect, useState } from "react";
 
 /**
  * A page that allows the user to authenticate using their password.
+ *
+ * It is shown in two cases:
+ *
+ * - Initial authentication, when the user is logging in on to a new client.
+ *
+ * - Subsequent reauthentication, when the user opens the web app in a new tab.
+ *   Such a tab won't have the user's master key in session storage, so we ask
+ *   the user to reauthenticate using their password.
  */
 const Page: React.FC = () => {
     const { logout, showMiniDialog } = useBaseContext();
@@ -286,6 +294,12 @@ const Page: React.FC = () => {
         void router.push(unstashRedirect() ?? appHomeRoute);
     };
 
+    const userEmail = user?.email;
+
+    if (!userEmail) {
+        return <LoadingIndicator />;
+    }
+
     if (!keyAttributes && !srpAttributes) {
         return <LoadingIndicator />;
     }
@@ -320,12 +334,14 @@ const Page: React.FC = () => {
     // possibility using types.
     return (
         <AccountsPageContents>
-            <PasswordHeader caption={user?.email} />
+            <PasswordHeader caption={userEmail} />
             <VerifyMasterPasswordForm
-                user={user}
-                keyAttributes={keyAttributes}
-                getKeyAttributes={getKeyAttributes}
-                srpAttributes={srpAttributes}
+                {...{
+                    userEmail,
+                    keyAttributes,
+                    getKeyAttributes,
+                    srpAttributes,
+                }}
                 submitButtonTitle={t("sign_in")}
                 onVerify={handleVerifyMasterPassword}
             />
