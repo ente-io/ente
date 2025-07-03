@@ -8,6 +8,8 @@ class SharedAsset {
   final int durationInSeconds;
   final int destCollectionID;
   final int ownerID;
+  final int? latitude;
+  final int? longitude;
 
   SharedAsset({
     required this.id,
@@ -17,6 +19,8 @@ class SharedAsset {
     required this.durationInSeconds,
     required this.destCollectionID,
     required this.ownerID,
+    this.latitude,
+    this.longitude,
   });
 
   List<Object?> get rowProps => [
@@ -27,6 +31,8 @@ class SharedAsset {
         durationInSeconds,
         destCollectionID,
         ownerID,
+        latitude,
+        longitude,
       ];
 
   factory SharedAsset.fromRow(Map<String, dynamic> map) {
@@ -38,6 +44,8 @@ class SharedAsset {
       durationInSeconds: map['duration_in_seconds'] as int,
       destCollectionID: map['dest_collection_id'] as int,
       ownerID: map['owner_id'] as int,
+      latitude: map['latitude'] as int?,
+      longitude: map['longitude'] as int?,
     );
   }
 }
