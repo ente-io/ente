@@ -17,10 +17,10 @@ import { sessionExpiredDialogAttributes } from "ente-accounts/components/utils/d
 import {
     getAndClearIsFirstLogin,
     getAndClearJustSignedUp,
-    getData,
 } from "ente-accounts/services/accounts-db";
 import { stashRedirect } from "ente-accounts/services/redirect";
 import { isSessionInvalid } from "ente-accounts/services/session";
+import { ensureLocalUser } from "ente-accounts/services/user";
 import type { MiniDialogAttributes } from "ente-base/components/MiniDialog";
 import { NavbarBase } from "ente-base/components/Navbar";
 import { SingleInputDialog } from "ente-base/components/SingleInputDialog";
@@ -318,13 +318,10 @@ const Page: React.FC = () => {
             }
 
             // Initialize the reducer.
-            const user = getData("user");
-            // TODO: Pass entire snapshot to reducer?
-            const familyData = userDetailsSnapshot()?.familyData;
             dispatch({
                 type: "mount",
-                user,
-                familyData,
+                user: ensureLocalUser(),
+                familyData: userDetailsSnapshot()?.familyData,
                 collections: await savedCollections(),
                 collectionFiles: await savedCollectionFiles(),
                 trashItems: await savedTrashItems(),
