@@ -60,12 +60,12 @@ class GalleryGroups {
   List<FixedExtentSectionLayout> getGroupLayouts() {
     int currentIndex = 0;
     double currentOffset = 0.0;
-    final tileHeight = widthAvailable / crossAxisCount;
+    final tileHeight =
+        (widthAvailable - (crossAxisCount - 1) * spacing) / crossAxisCount;
     final groupLayouts = <FixedExtentSectionLayout>[];
 
     final groupIDs = _groupIdToFilesMap.keys;
 
-    // TODO: spacing
     for (final groupID in groupIDs) {
       final filesInGroup = _groupIdToFilesMap[groupID]!;
       final numberOfGridRows = (filesInGroup.length / crossAxisCount).ceil();
