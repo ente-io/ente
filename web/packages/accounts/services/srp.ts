@@ -190,7 +190,7 @@ export interface SRPAttributes {
  * it to local storage, so the same schema describes both the remote type and
  * the local storage type.
  */
-const RemoteSRPAttributes = z.object({
+export const RemoteSRPAttributes = z.object({
     srpUserID: z.string(),
     srpSalt: z.string(),
     memLimit: z.number(),
@@ -220,26 +220,6 @@ export const getSRPAttributes = async (
     return z.object({ attributes: RemoteSRPAttributes }).parse(await res.json())
         .attributes;
 };
-
-/**
- * Return the user's {@link SRPAttributes} if they are present in local storage.
- *
- * Like key attributes, SRP attributes are also stored in the browser's local
- * storage so will not be accessible to web workers.
- */
-export const savedSRPAttributes = (): SRPAttributes | undefined => {
-    const jsonString = localStorage.getItem("srpAttributes");
-    if (!jsonString) return undefined;
-    return RemoteSRPAttributes.parse(JSON.parse(jsonString));
-};
-
-/**
- * Save the user's {@link SRPAttributes} in local storage.
- *
- * Use {@link savedSRPAttributes} to retrieve them.
- */
-export const saveSRPAttributes = (srpAttributes: SRPAttributes) =>
-    localStorage.setItem("srpAttributes", JSON.stringify(srpAttributes));
 
 /**
  * A local-only structure holding information required for SRP setup.

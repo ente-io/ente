@@ -28,8 +28,8 @@ const Page: React.FC = () => {
         const response = searchParams.get("response");
         if (!passkeySessionID || !response) return;
 
-        void saveCredentialsAndNavigateTo(passkeySessionID, response).then(
-            (slug: string) => router.push(slug),
+        void saveQueryCredentialsAndNavigateTo(passkeySessionID, response).then(
+            (slug) => router.push(slug),
         );
     }, [router]);
 
@@ -51,10 +51,13 @@ export default Page;
  *
  * @returns the slug that we should navigate to now.
  */
-const saveCredentialsAndNavigateTo = async (
+const saveQueryCredentialsAndNavigateTo = async (
     passkeySessionID: string,
     response: string,
 ) => {
+    // This function's implementation is on the same lines as that of the
+    // `saveCredentialsAndNavigateTo` function in passkey utilities.
+
     const inflightPasskeySessionID = nullToUndefined(
         sessionStorage.getItem("inflightPasskeySessionID"),
     );

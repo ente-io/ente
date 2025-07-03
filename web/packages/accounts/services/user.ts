@@ -2,12 +2,12 @@ import {
     getData,
     savedKeyAttributes,
     saveKeyAttributes,
+    saveSRPAttributes,
     setLSUser,
 } from "ente-accounts/services/accounts-db";
 import {
     generateSRPSetupAttributes,
     getSRPAttributes,
-    saveSRPAttributes,
     updateSRPAndKeyAttributes,
     type UpdatedKeyAttr,
 } from "ente-accounts/services/srp";

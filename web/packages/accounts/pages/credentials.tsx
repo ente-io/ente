@@ -19,6 +19,8 @@ import {
     getToken,
     savedIsFirstLogin,
     saveIsFirstLogin,
+    saveKeyAttributes,
+    saveSRPAttributes,
     setData,
     setLSUser,
 } from "ente-accounts/services/accounts-db";
@@ -105,8 +107,8 @@ const Page: React.FC = () => {
                 case "valid":
                     break;
                 case "validButPasswordChanged":
-                    setData("keyAttributes", session.updatedKeyAttributes);
-                    setData("srpAttributes", session.updatedSRPAttributes);
+                    saveKeyAttributes(session.updatedKeyAttributes);
+                    saveSRPAttributes(session.updatedSRPAttributes);
                     // Set a flag that causes new interactive key attributes to
                     // be generated.
                     saveIsFirstLogin();

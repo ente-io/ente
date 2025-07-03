@@ -1,6 +1,6 @@
 import {
     getData,
-    setData,
+    saveKeyAttributes,
     setLSUser,
 } from "ente-accounts/services/accounts-db";
 import { TwoFactorAuthorizationResponse } from "ente-accounts/services/user";
@@ -243,12 +243,13 @@ export const checkPasskeyVerificationStatus = async (
 export const saveCredentialsAndNavigateTo = async (
     response: TwoFactorAuthorizationResponse,
 ) => {
-    // This method somewhat duplicates `saveCredentialsAndNavigateTo` in the
-    // /passkeys/finish page.
+    // The implementation is similar to the `saveQueryCredentialsAndNavigateTo`
+    // function on the "/passkeys/finish" page.
+
     const { id, encryptedToken, keyAttributes } = response;
 
     await setLSUser({ ...getData("user"), encryptedToken, id });
-    setData("keyAttributes", keyAttributes);
+    saveKeyAttributes(keyAttributes);
 
     return unstashRedirect() ?? "/credentials";
 };

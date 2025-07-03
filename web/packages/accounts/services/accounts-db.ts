@@ -3,6 +3,7 @@ import log from "ente-base/log";
 import { nullToUndefined } from "ente-utils/transform";
 import { z } from "zod/v4";
 import { RemoteKeyAttributes, type KeyAttributes } from "./user";
+import { RemoteSRPAttributes, type SRPAttributes } from "./srp";
 
 export type LocalStorageKey =
     | "user"
@@ -178,6 +179,27 @@ export const saveOriginalKeyAttributes = (keyAttributes: KeyAttributes) =>
         "originalKeyAttributes",
         JSON.stringify(keyAttributes),
     );
+
+/**
+ * Return the user's {@link SRPAttributes} if they are present in local storage.
+ *
+ * Like key attributes, SRP attributes are also stored in the browser's local
+ * storage so will not be accessible to web workers.
+ */
+export const savedSRPAttributes = (): SRPAttributes | undefined => {
+    const jsonString = localStorage.getItem("srpAttributes");
+    if (!jsonString) return undefined;
+    return RemoteSRPAttributes.parse(JSON.parse(jsonString));
+};
+
+/**
+ * Save the user's {@link SRPAttributes} in local storage.
+ *
+ * Use {@link savedSRPAttributes} to retrieve them.
+ */
+export const saveSRPAttributes = (srpAttributes: SRPAttributes) =>
+    localStorage.setItem("srpAttributes", JSON.stringify(srpAttributes));
+
 
 export const getToken = (): string => {
     const token = getData("user")?.token;
