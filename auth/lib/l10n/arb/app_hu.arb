@@ -18,7 +18,7 @@
   "incorrectDetails": "Helytelen adatok",
   "pleaseVerifyDetails": "Kérjük, ellenőrizd az adataid, majd próbáld meg újra",
   "codeIssuerHint": "Kibocsátó",
-  "codeSecretKeyHint": "Titkos (Secret) kulcs",
+  "codeSecretKeyHint": "Titkos kulcs",
   "secret": "Titkos kód",
   "all": "Minden",
   "notes": "Megjegyzések",
@@ -223,7 +223,7 @@
   "saveOrSendDescription": "El szeretné menteni ezt a tárhelyére (alapértelmezés szerint a Letöltések mappába), vagy elküldi más alkalmazásoknak?",
   "saveOnlyDescription": "El szeretné menteni ezt a tárhelyére (alapértelmezés szerint a Letöltések mappába)?",
   "back": "Vissza",
-  "createAccount": "Jelszó erőssége:",
+  "createAccount": "Felhasználó létrehozás",
   "passwordStrength": "Jelszó erőssége: {passwordStrengthValue}",
   "@passwordStrength": {
     "description": "Text to indicate the password strength",
@@ -381,7 +381,7 @@
   "deleteCodeAuthMessage": "Hitelesítés a kód törléséhez",
   "showQRAuthMessage": "Hitelesítés a QR kód megjelenítéséhez",
   "confirmAccountDeleteTitle": "Fiók törlésének megerősítése",
-  "confirmAccountDeleteMessage": "",
+  "confirmAccountDeleteMessage": "Ez a fiók össze van kapcsolva más Ente-alkalmazásokkal, ha használ ilyet.\n\nA feltöltött adataid törlését ütemezzük az összes Ente alkalmazásban, és a fiókod véglegesen törlésre kerül.",
   "androidBiometricHint": "Személyazonosság ellenőrzése",
   "@androidBiometricHint": {
     "description": "Hint message advising the user how to authenticate with biometrics. It is used on Android side. Maximum 60 characters."
@@ -515,5 +515,9 @@
   "loginWithAuthAccount": "Jelentkezzen be Auth fiókjával",
   "freeStorageOffer": "10% kedvezmény on <bold-green>ente<bold-green> photos",
   "freeStorageOfferDescription": "Használja az \"AUTH\" kódot, hogy 10% kedvezményt kapjon az első évben",
-  "type": "Típus"
+  "advanced": "Haladó",
+  "algorithm": "Algoritmus",
+  "type": "Típus",
+  "period": "Időszak",
+  "digits": "Számjegyek"
 }
