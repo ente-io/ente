@@ -11,6 +11,7 @@ import {
     getData,
     savedKeyAttributes,
     savedOriginalKeyAttributes,
+    savedPartialLocalUser,
     savedSRPAttributes,
     saveIsFirstLogin,
     saveKeyAttributes,
@@ -28,7 +29,6 @@ import {
     unstashRedirect,
 } from "ente-accounts/services/redirect";
 import { getSRPAttributes, setupSRP } from "ente-accounts/services/srp";
-import type { PartialLocalUser } from "ente-accounts/services/user";
 import {
     putUserKeyAttributes,
     sendOTT,
@@ -60,6 +60,7 @@ const Page: React.FC = () => {
     const [passkeyVerificationData, setPasskeyVerificationData] = useState<
         { passkeySessionID: string; url: string } | undefined
     >();
+
     const {
         secondFactorChoiceProps,
         userVerificationResultAfterResolvingSecondFactorChoice,
@@ -68,17 +69,13 @@ const Page: React.FC = () => {
     const router = useRouter();
 
     useEffect(() => {
-        const main = async () => {
-            const user: PartialLocalUser = getData("user");
-
-            const redirect = await redirectionIfNeeded(user);
-            if (redirect) {
-                void router.push(redirect);
+        void redirectionIfNeededOrEmail().then((redirectOrEmail) => {
+            if (typeof redirectOrEmail == "string") {
+                void router.push(redirectOrEmail);
             } else {
-                setEmail(user.email);
+                setEmail(redirectOrEmail.email);
             }
-        };
-        void main();
+        });
     }, [router]);
 
     const onSubmit: SingleInputFormProps["onSubmit"] = async (
@@ -251,9 +248,12 @@ export default Page;
 /**
  * A function called during page load to see if a redirection is required
  *
- * @returns The slug to redirect to, if needed.
+ * @returns The slug to redirect to, if needed. Otherwise an object containing
+ * the saved partial user's email.
  */
-const redirectionIfNeeded = async (user: PartialLocalUser | undefined) => {
+const redirectionIfNeededOrEmail = async () => {
+    const user = savedPartialLocalUser();
+
     const email = user?.email;
     if (!email) {
         return "/";
@@ -266,7 +266,7 @@ const redirectionIfNeeded = async (user: PartialLocalUser | undefined) => {
     }
 
     // If we're coming here during the recover flow, do not redirect.
-    if (stashedRedirect() == "/recover") return undefined;
+    if (stashedRedirect() == "/recover") return { email };
 
     // The user might have email verification disabled, but after previously
     // entering their email on the login screen, they might've closed the tab
@@ -290,5 +290,5 @@ const redirectionIfNeeded = async (user: PartialLocalUser | undefined) => {
         }
     }
 
-    return undefined;
+    return { email };
 };
