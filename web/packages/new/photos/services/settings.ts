@@ -22,12 +22,12 @@ import { fetchFeatureFlags, updateRemoteFlag } from "./remote-store";
  * 1. On app start, the initial are read from local storage in
  *    {@link initSettings}.
  *
- * 2. During the remote sync, remote flags are fetched and saved in local
+ * 2. During the remote pull, remote flags are fetched and saved in local
  *    storage, and the in-memory state updated to reflect the latest values
- *    ({@link syncSettings}).
+ *    ({@link pullSettings}).
  *
  * 3. Updating a value also cause an unconditional fetch and update
- *    ({@link syncSettings}).
+ *    ({@link pullSettings}).
  *
  * 4. The individual getter functions for the flags (e.g.
  *    {@link isInternalUser}) return the in-memory values, and so are suitable
@@ -120,7 +120,7 @@ export const logoutSettings = () => {
  * Fetch remote flags from remote and save them in local storage for subsequent
  * lookup. Then use the results to update our in memory state if needed.
  */
-export const syncSettings = async () => {
+export const pullSettings = async () => {
     const jsonString = await fetchFeatureFlags().then((res) => res.text());
     // Do a parse as a sanity check before saving the string contents.
     FeatureFlags.parse(JSON.parse(jsonString));
@@ -205,7 +205,7 @@ const isDevUserViaEmail = () => {
  */
 export const updateMapEnabled = async (isEnabled: boolean) => {
     await updateRemoteFlag("mapEnabled", isEnabled);
-    return syncSettings();
+    return pullSettings();
 };
 
 const cfProxyDisabledKey = "cfProxyDisabled";

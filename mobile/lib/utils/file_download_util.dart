@@ -137,7 +137,7 @@ Future<File?> downloadAndDecrypt(
         ),
         onReceiveProgress: (a, b) {
           if (kDebugMode && a >= 0 && b >= 0) {
-            // _logger.fine(
+            // _logger.info(
             //   "$logPrefix download progress: ${formatBytes(a)} / ${formatBytes(b)}",
             // );
           }

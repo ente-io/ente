@@ -115,7 +115,7 @@ class CollectionActions {
     try {
       // create album with emptyName, use collectionCreationTime on UI to
       // show name
-      logger.finest("creating album for sharing files");
+      logger.info("creating album for sharing files");
       final EnteFile fileWithMinCreationTime = files.reduce(
         (a, b) => (a.creationTime ?? 0) < (b.creationTime ?? 0) ? a : b,
       );
@@ -136,9 +136,9 @@ class CollectionActions {
         req,
       );
       newCollection = collection;
-      logger.finest("adding files to share to new album");
+      logger.info("adding files to share to new album");
       await collectionsService.addOrCopyToCollection(collection.id, files);
-      logger.finest("creating public link for the newly created album");
+      logger.info("creating public link for the newly created album");
       try {
         await CollectionsService.instance.createShareUrl(collection);
       } catch (e) {

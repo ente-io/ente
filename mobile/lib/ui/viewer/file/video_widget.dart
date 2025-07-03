@@ -23,10 +23,15 @@ class VideoWidget extends StatefulWidget {
   final EnteFile file;
   final String? tagPrefix;
   final Function(bool)? playbackCallback;
+  final Function({required int memoryDuration})? onFinalFileLoad;
+  final bool isFromMemories;
+
   const VideoWidget(
     this.file, {
     this.tagPrefix,
     this.playbackCallback,
+    this.onFinalFileLoad,
+    this.isFromMemories = false,
     super.key,
   });
 
@@ -149,6 +154,7 @@ class _VideoWidgetState extends State<VideoWidget> {
         playbackCallback: widget.playbackCallback,
         playlistData: playlistData,
         selectedPreview: playPreview,
+        isFromMemories: widget.isFromMemories,
         onStreamChange: () {
           setState(() {
             selectPreviewForPlay = !selectPreviewForPlay;
@@ -162,6 +168,7 @@ class _VideoWidgetState extends State<VideoWidget> {
             );
           });
         },
+        onFinalFileLoad: widget.onFinalFileLoad,
       );
     }
     return VideoWidgetMediaKit(
@@ -171,6 +178,7 @@ class _VideoWidgetState extends State<VideoWidget> {
       playbackCallback: widget.playbackCallback,
       preview: playlistData?.preview,
       selectedPreview: playPreview,
+      isFromMemories: widget.isFromMemories,
       onStreamChange: () {
         setState(() {
           selectPreviewForPlay = !selectPreviewForPlay;
@@ -184,6 +192,7 @@ class _VideoWidgetState extends State<VideoWidget> {
           );
         });
       },
+      onFinalFileLoad: widget.onFinalFileLoad,
     );
   }
 }

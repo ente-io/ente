@@ -93,8 +93,7 @@ const fetchRenderableUploadItemBlob = async (
     puItem: ProcessableUploadItem,
     electron: ElectronMLWorker,
 ) => {
-    const fileType = file.metadata.fileType;
-    if (fileType == FileType.video) {
+    if (file.metadata.fileType == FileType.video) {
         const thumbnailData = await downloadManager.thumbnailData(file);
         return new Blob([thumbnailData!]);
     } else {

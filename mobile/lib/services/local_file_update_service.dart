@@ -3,12 +3,10 @@ import 'dart:core';
 import 'dart:io';
 
 import 'package:logging/logging.dart';
-import "package:photo_manager/photo_manager.dart";
 import "package:photos/core/configuration.dart";
 import 'package:photos/core/errors.dart';
 import 'package:photos/db/file_updation_db.dart';
 import 'package:photos/db/files_db.dart';
-import "package:photos/extensions/list.dart";
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
 import 'package:photos/utils/file_uploader_util.dart';
@@ -21,10 +19,6 @@ class LocalFileUpdateService {
   late FileUpdationDB _fileUpdationDB;
   late SharedPreferences _prefs;
   late Logger _logger;
-  final String _androidMissingGPSImportDone =
-      'fm_android_missing_gps_import_done';
-  final String _androidMissingGPSCheckDone =
-      'fm_android_missing_gps_check_done';
 
   final List<String> _oldMigrationKeys = [
     'fm_badCreationTime',
@@ -37,6 +31,7 @@ class LocalFileUpdateService {
     'fm_import_ios_live_photo_size',
     'fm_ios_live_photo_check',
     'fm_import_ios_live_photo_check',
+    'fm_android_missing_gps_check_done',
   ];
 
   Completer<void>? _existingMigration;
@@ -62,9 +57,6 @@ class LocalFileUpdateService {
     try {
       await _markFilesWhichAreActuallyUpdated();
       _cleanUpOlderMigration().ignore();
-      if (Platform.isAndroid) {
-        await _androidMissingGPSCheck();
-      }
     } catch (e, s) {
       _logger.severe('failed to perform migration', e, s);
     } finally {
@@ -90,6 +82,7 @@ class LocalFileUpdateService {
         'badLocationCord',
         'livePhotoSize',
         'livePhotoCheck',
+        'androidMissingGPS',
       ]);
       for (var element in _oldMigrationKeys) {
         await _prefs.remove(element);
@@ -202,7 +195,7 @@ class LocalFileUpdateService {
             file.modificationTime!,
             fileType,
           );
-          _logger.fine('fileType changed for ${file.tag} to ${e.reason} for ');
+          _logger.info('fileType changed for ${file.tag} to ${e.reason} for ');
         } else {
           _logger.severe("failed to check hash: invalid file ${file.tag}", e);
         }
@@ -216,131 +209,6 @@ class LocalFileUpdateService {
       FileUpdationDB.modificationTimeUpdated,
     );
   }
-
-  //#region Android Missing GPS specific methods ###
-
-  Future<void> _androidMissingGPSCheck() async {
-    if (_prefs.containsKey(_androidMissingGPSCheckDone)) {
-      return;
-    }
-    await _importAndroidBadGPSCandidate();
-    // singleRunLimit indicates number of files to check during single
-    // invocation of this method. The limit act as a crude way to limit the
-    // resource consumed by the method
-    const int singleRunLimit = 500;
-    final localIDsToProcess =
-        await _fileUpdationDB.getLocalIDsForPotentialReUpload(
-      singleRunLimit,
-      FileUpdationDB.androidMissingGPS,
-    );
-    if (localIDsToProcess.isNotEmpty) {
-      final chunksOf50 = localIDsToProcess.chunks(50);
-      for (final chunk in chunksOf50) {
-        final sTime = DateTime.now().microsecondsSinceEpoch;
-        final List<Future> futures = [];
-        final chunkOf10 = chunk.chunks(10);
-        for (final smallChunk in chunkOf10) {
-          futures.add(_checkForMissingGPS(smallChunk));
-        }
-        await Future.wait(futures);
-        final eTime = DateTime.now().microsecondsSinceEpoch;
-        final d = Duration(microseconds: eTime - sTime);
-        _logger.info(
-          'Performed missing GPS Location check for ${chunk.length} files '
-          'completed in ${d.inSeconds.toString()} secs',
-        );
-      }
-    } else {
-      _logger.info('Completed android missing GPS check');
-      await _prefs.setBool(_androidMissingGPSCheckDone, true);
-    }
-  }
-
-  Future<void> _checkForMissingGPS(List<String> localIDs) async {
-    try {
-      final List<EnteFile> localFiles =
-          await FilesDB.instance.getLocalFiles(localIDs);
-      final ownerID = Configuration.instance.getUserID()!;
-      final Set<String> localIDsWithFile = {};
-      final Set<String> reuploadCandidate = {};
-      final Set<String> processedIDs = {};
-      for (EnteFile file in localFiles) {
-        if (file.localID == null) continue;
-        // ignore files that are not uploaded or have different owner
-        if (!file.isUploaded || file.ownerID! != ownerID) {
-          processedIDs.add(file.localID!);
-        }
-        if (file.hasLocation) {
-          processedIDs.add(file.localID!);
-        }
-      }
-      for (EnteFile enteFile in localFiles) {
-        try {
-          if (enteFile.localID == null ||
-              processedIDs.contains(enteFile.localID!)) {
-            continue;
-          }
-
-          final localID = enteFile.localID!;
-          localIDsWithFile.add(localID);
-          final AssetEntity? entity = await AssetEntity.fromId(localID);
-          if (entity == null) {
-            processedIDs.add(localID);
-          } else {
-            final latLng = await entity.latlngAsync();
-            if ((latLng.longitude ?? 0) == 0 || (latLng.latitude ?? 0) == 0) {
-              processedIDs.add(localID);
-            } else {
-              reuploadCandidate.add(localID);
-              processedIDs.add(localID);
-            }
-          }
-        } catch (e, s) {
-          processedIDs.add(enteFile.localID!);
-          _logger.severe('lat/long check file ${enteFile.toString()}', e, s);
-        }
-      }
-      for (String id in localIDs) {
-        // if the file with given localID doesn't exist, consider it as done.
-        if (!localIDsWithFile.contains(id)) {
-          processedIDs.add(id);
-        }
-      }
-      await FileUpdationDB.instance.insertMultiple(
-        reuploadCandidate.toList(),
-        FileUpdationDB.modificationTimeUpdated,
-      );
-      await FileUpdationDB.instance.deleteByLocalIDs(
-        processedIDs.toList(),
-        FileUpdationDB.androidMissingGPS,
-      );
-    } catch (e, s) {
-      _logger.severe('error while checking missing GPS', e, s);
-    }
-  }
-
-  Future<void> _importAndroidBadGPSCandidate() async {
-    if (_prefs.containsKey(_androidMissingGPSImportDone)) {
-      return;
-    }
-    final sTime = DateTime.now().microsecondsSinceEpoch;
-    _logger.info('importing files without missing GPS');
-    final int ownerID = Configuration.instance.getUserID()!;
-    final fileLocalIDs =
-        await FilesDB.instance.getLocalFilesBackedUpWithoutLocation(ownerID);
-    await _fileUpdationDB.insertMultiple(
-      fileLocalIDs,
-      FileUpdationDB.androidMissingGPS,
-    );
-    final eTime = DateTime.now().microsecondsSinceEpoch;
-    final d = Duration(microseconds: eTime - sTime);
-    _logger.info(
-      'importing completed, total files count ${fileLocalIDs.length} and took ${d.inSeconds.toString()} seconds',
-    );
-    await _prefs.setBool(_androidMissingGPSImportDone, true);
-  }
-
-  //#endregion Android Missing GPS specific methods ###
 
   Future<MediaUploadData> getUploadData(EnteFile file) async {
     final mediaUploadData = await getUploadDataFromEnteFile(file);

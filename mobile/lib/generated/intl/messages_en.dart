@@ -415,6 +415,9 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("All memories preserved"),
         "allPersonGroupingWillReset": MessageLookupByLibrary.simpleMessage(
             "All groupings for this person will be reset, and you will lose all suggestions made for this person"),
+        "allUnnamedGroupsWillBeMergedIntoTheSelectedPerson":
+            MessageLookupByLibrary.simpleMessage(
+                "All unnamed groups will be merged into the selected person. This can still be undone from the suggestions history overview of the person."),
         "allWillShiftRangeBasedOnFirst": MessageLookupByLibrary.simpleMessage(
             "This is the first in the group. Other selected photos will automatically shift based on this new date"),
         "allow": MessageLookupByLibrary.simpleMessage("Allow"),
@@ -464,6 +467,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "archive": MessageLookupByLibrary.simpleMessage("Archive"),
         "archiveAlbum": MessageLookupByLibrary.simpleMessage("Archive album"),
         "archiving": MessageLookupByLibrary.simpleMessage("Archiving..."),
+        "areThey": MessageLookupByLibrary.simpleMessage("Are they "),
+        "areYouSureRemoveThisFaceFromPerson":
+            MessageLookupByLibrary.simpleMessage(
+                "Are you sure you want to remove this face from this person?"),
         "areYouSureThatYouWantToLeaveTheFamily":
             MessageLookupByLibrary.simpleMessage(
                 "Are you sure that you want to leave the family plan?"),
@@ -474,8 +481,16 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Are you sure you want to change your plan?"),
         "areYouSureYouWantToExit": MessageLookupByLibrary.simpleMessage(
             "Are you sure you want to exit?"),
+        "areYouSureYouWantToIgnoreThesePersons":
+            MessageLookupByLibrary.simpleMessage(
+                "Are you sure you want to ignore these persons?"),
+        "areYouSureYouWantToIgnoreThisPerson":
+            MessageLookupByLibrary.simpleMessage(
+                "Are you sure you want to ignore this person?"),
         "areYouSureYouWantToLogout": MessageLookupByLibrary.simpleMessage(
             "Are you sure you want to logout?"),
+        "areYouSureYouWantToMergeThem": MessageLookupByLibrary.simpleMessage(
+            "Are you sure you want to merge them?"),
         "areYouSureYouWantToRenew": MessageLookupByLibrary.simpleMessage(
             "Are you sure you want to renew?"),
         "areYouSureYouWantToResetThisPerson":
@@ -560,6 +575,28 @@ class MessageLookup extends MessageLookupByLibrary {
         "blackFridaySale":
             MessageLookupByLibrary.simpleMessage("Black Friday Sale"),
         "blog": MessageLookupByLibrary.simpleMessage("Blog"),
+        "cLDesc1": MessageLookupByLibrary.simpleMessage(
+            "On the back of video streaming beta, and work on resumable uploads and downloads, we have now increased the file upload limit to 10GB. This is now available in both desktop and mobile apps."),
+        "cLDesc2": MessageLookupByLibrary.simpleMessage(
+            "Background uploads are now supported on iOS as well, in addition to Android devices. No need to open the app to backup your latest photos and videos."),
+        "cLDesc3": MessageLookupByLibrary.simpleMessage(
+            "We have made significant improvements to our memories experience, including autoplay, swipe to next memory and a lot more."),
+        "cLDesc4": MessageLookupByLibrary.simpleMessage(
+            "Along with a bunch of under the hood improvements, now its much easier to see all detected faces, provide feedback on similar faces, and add/remove faces from a single photo."),
+        "cLDesc5": MessageLookupByLibrary.simpleMessage(
+            "You will now receive an opt-out notification for all the birthdays your have saved on Ente, along with a collection of their best photos."),
+        "cLDesc6": MessageLookupByLibrary.simpleMessage(
+            "No more waiting for uploads/downloads to complete before you can close the app. All uploads and downloads now have the ability to be paused midway, and resume from where you left off."),
+        "cLTitle1":
+            MessageLookupByLibrary.simpleMessage("Uploading Large Video Files"),
+        "cLTitle2": MessageLookupByLibrary.simpleMessage("Background Upload"),
+        "cLTitle3": MessageLookupByLibrary.simpleMessage("Autoplay Memories"),
+        "cLTitle4":
+            MessageLookupByLibrary.simpleMessage("Improved Face Recognition"),
+        "cLTitle5":
+            MessageLookupByLibrary.simpleMessage("Birthday Notifications"),
+        "cLTitle6": MessageLookupByLibrary.simpleMessage(
+            "Resumable Uploads and Downloads"),
         "cachedData": MessageLookupByLibrary.simpleMessage("Cached data"),
         "calculating": MessageLookupByLibrary.simpleMessage("Calculating..."),
         "canNotOpenBody": MessageLookupByLibrary.simpleMessage(
@@ -810,6 +847,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "deviceNotFound":
             MessageLookupByLibrary.simpleMessage("Device not found"),
         "didYouKnow": MessageLookupByLibrary.simpleMessage("Did you know?"),
+        "different": MessageLookupByLibrary.simpleMessage("Different"),
         "disableAutoLock":
             MessageLookupByLibrary.simpleMessage("Disable auto lock"),
         "disableDownloadWarningBody": MessageLookupByLibrary.simpleMessage(
@@ -1091,6 +1129,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "iOSLockOut": MessageLookupByLibrary.simpleMessage(
             "Biometric authentication is disabled. Please lock and unlock your screen to enable it."),
         "iOSOkButton": MessageLookupByLibrary.simpleMessage("OK"),
+        "ignore": MessageLookupByLibrary.simpleMessage("Ignore"),
         "ignoreUpdate": MessageLookupByLibrary.simpleMessage("Ignore"),
         "ignored": MessageLookupByLibrary.simpleMessage("ignored"),
         "ignoredFolderUploadReason": MessageLookupByLibrary.simpleMessage(
@@ -1285,6 +1324,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Select the kind of memories you wish to see on your homescreen."),
         "memoryCount": m50,
         "merchandise": MessageLookupByLibrary.simpleMessage("Merchandise"),
+        "merge": MessageLookupByLibrary.simpleMessage("Merge"),
         "mergeWithExisting":
             MessageLookupByLibrary.simpleMessage("Merge with existing"),
         "mergedPhotos": MessageLookupByLibrary.simpleMessage("Merged photos"),
@@ -1417,6 +1457,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Or pick an existing one"),
         "orPickFromYourContacts":
             MessageLookupByLibrary.simpleMessage("or pick from your contacts"),
+        "otherDetectedFaces":
+            MessageLookupByLibrary.simpleMessage("Other detected faces"),
         "pair": MessageLookupByLibrary.simpleMessage("Pair"),
         "pairWithPin": MessageLookupByLibrary.simpleMessage("Pair with PIN"),
         "pairingComplete":
@@ -1542,6 +1584,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Public link created"),
         "publicLinkEnabled":
             MessageLookupByLibrary.simpleMessage("Public link enabled"),
+        "questionmark": MessageLookupByLibrary.simpleMessage("?"),
         "queued": MessageLookupByLibrary.simpleMessage("Queued"),
         "quickLinks": MessageLookupByLibrary.simpleMessage("Quick links"),
         "radius": MessageLookupByLibrary.simpleMessage("Radius"),
@@ -1650,6 +1693,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "reportABug": MessageLookupByLibrary.simpleMessage("Report a bug"),
         "reportBug": MessageLookupByLibrary.simpleMessage("Report bug"),
         "resendEmail": MessageLookupByLibrary.simpleMessage("Resend email"),
+        "reset": MessageLookupByLibrary.simpleMessage("Reset"),
         "resetIgnoredFiles":
             MessageLookupByLibrary.simpleMessage("Reset ignored files"),
         "resetPasswordTitle":
@@ -1676,7 +1720,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "rotateLeft": MessageLookupByLibrary.simpleMessage("Rotate left"),
         "rotateRight": MessageLookupByLibrary.simpleMessage("Rotate right"),
         "safelyStored": MessageLookupByLibrary.simpleMessage("Safely stored"),
+        "same": MessageLookupByLibrary.simpleMessage("Same"),
+        "sameperson": MessageLookupByLibrary.simpleMessage("Same person?"),
         "save": MessageLookupByLibrary.simpleMessage("Save"),
+        "saveAsAnotherPerson":
+            MessageLookupByLibrary.simpleMessage("Save as another person"),
         "saveChangesBeforeLeavingQuestion":
             MessageLookupByLibrary.simpleMessage(
                 "Save changes before leaving?"),
@@ -1834,7 +1882,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "sharing": MessageLookupByLibrary.simpleMessage("Sharing..."),
         "shiftDatesAndTime":
             MessageLookupByLibrary.simpleMessage("Shift dates and time"),
+        "showLessFaces":
+            MessageLookupByLibrary.simpleMessage("Show less faces"),
         "showMemories": MessageLookupByLibrary.simpleMessage("Show memories"),
+        "showMoreFaces":
+            MessageLookupByLibrary.simpleMessage("Show more faces"),
         "showPerson": MessageLookupByLibrary.simpleMessage("Show person"),
         "signOutFromOtherDevices":
             MessageLookupByLibrary.simpleMessage("Sign out from other devices"),
@@ -1952,6 +2004,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "theLinkYouAreTryingToAccessHasExpired":
             MessageLookupByLibrary.simpleMessage(
                 "The link you are trying to access has expired."),
+        "thePersonGroupsWillNotBeDisplayed": MessageLookupByLibrary.simpleMessage(
+            "The person groups will not be displayed in the people section anymore. Photos will remain untouched."),
+        "thePersonWillNotBeDisplayed": MessageLookupByLibrary.simpleMessage(
+            "The person will not be displayed in the people section anymore. Photos will remain untouched."),
         "theRecoveryKeyYouEnteredIsIncorrect":
             MessageLookupByLibrary.simpleMessage(
                 "The recovery key you entered is incorrect"),
@@ -2142,6 +2198,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "yesDelete": MessageLookupByLibrary.simpleMessage("Yes, delete"),
         "yesDiscardChanges":
             MessageLookupByLibrary.simpleMessage("Yes, discard changes"),
+        "yesIgnore": MessageLookupByLibrary.simpleMessage("Yes, ignore"),
         "yesLogout": MessageLookupByLibrary.simpleMessage("Yes, logout"),
         "yesRemove": MessageLookupByLibrary.simpleMessage("Yes, remove"),
         "yesRenew": MessageLookupByLibrary.simpleMessage("Yes, Renew"),

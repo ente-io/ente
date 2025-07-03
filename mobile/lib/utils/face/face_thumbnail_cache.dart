@@ -20,10 +20,10 @@ import "package:photos/utils/thumbnail_util.dart";
 final _logger = Logger("FaceCropUtils");
 
 const int _retryLimit = 3;
-final LRUMap<String, Uint8List?> _faceCropCache = LRUMap(1000);
-final LRUMap<String, Uint8List?> _faceCropThumbnailCache = LRUMap(1000);
+final LRUMap<String, Uint8List?> _faceCropCache = LRUMap(100);
+final LRUMap<String, Uint8List?> _faceCropThumbnailCache = LRUMap(100);
 
-final LRUMap<String, String> _personOrClusterIdToCachedFaceID = LRUMap(1000);
+final LRUMap<String, String> _personOrClusterIdToCachedFaceID = LRUMap(2000);
 
 TaskQueue _queueFullFileFaceGenerations = TaskQueue<String>(
   maxConcurrentTasks: 5,
@@ -106,6 +106,7 @@ Future<Map<String, Uint8List>?> getCachedFaceCrops(
   int fetchAttempt = 1,
   bool useFullFile = true,
   String? personOrClusterID,
+  required bool useTempCache,
 }) async {
   try {
     final faceIdToCrop = <String, Uint8List>{};
@@ -116,11 +117,32 @@ Future<Map<String, Uint8List>?> getCachedFaceCrops(
       if (cachedFace != null) {
         faceIdToCrop[face.faceID] = cachedFace;
       } else {
-        final faceCropCacheFile = cachedFaceCropPath(face.faceID);
+        final faceCropCacheFile = cachedFaceCropPath(face.faceID, useTempCache);
         if ((await faceCropCacheFile.exists())) {
-          final data = await faceCropCacheFile.readAsBytes();
-          await _putCachedCropForFaceID(face.faceID, data, personOrClusterID);
-          faceIdToCrop[face.faceID] = data;
+          try {
+            final data = await faceCropCacheFile.readAsBytes();
+            if (data.isNotEmpty) {
+              await _putCachedCropForFaceID(
+                face.faceID,
+                data,
+                personOrClusterID,
+              );
+              faceIdToCrop[face.faceID] = data;
+            } else {
+              _logger.warning(
+                "Cached face crop for faceID ${face.faceID} is empty, deleting file ${faceCropCacheFile.path}",
+              );
+              await faceCropCacheFile.delete();
+              facesWithoutCrops[face.faceID] = face.detection.box;
+            }
+          } catch (e, s) {
+            _logger.severe(
+              "Error reading cached face crop for faceID ${face.faceID} from file ${faceCropCacheFile.path}",
+              e,
+              s,
+            );
+            facesWithoutCrops[face.faceID] = face.detection.box;
+          }
         } else {
           facesWithoutCrops[face.faceID] = face.detection.box;
         }
@@ -164,8 +186,17 @@ Future<Map<String, Uint8List>?> getCachedFaceCrops(
             computedCrop,
             personOrClusterID,
           );
-          final faceCropCacheFile = cachedFaceCropPath(entry.key);
-          faceCropCacheFile.writeAsBytes(computedCrop).ignore();
+          final faceCropCacheFile = cachedFaceCropPath(entry.key, useTempCache);
+          try {
+            // ignore: unawaited_futures
+            faceCropCacheFile.writeAsBytes(computedCrop);
+          } catch (e, s) {
+            _logger.severe(
+              "Error writing cached face crop for faceID ${entry.key} to file ${faceCropCacheFile.path}",
+              e,
+              s,
+            );
+          }
         } else {
           _faceCropThumbnailCache.put(entry.key, computedCrop);
         }
@@ -191,6 +222,7 @@ Future<Map<String, Uint8List>?> getCachedFaceCrops(
           faces,
           fetchAttempt: fetchAttempt + 1,
           useFullFile: useFullFile,
+          useTempCache: useTempCache,
         );
       }
       _logger.severe(
@@ -238,6 +270,7 @@ Future<Uint8List?> precomputeClusterFaceCrop(
       fileForFaceCrop,
       [face],
       useFullFile: useFullFile,
+      useTempCache: true,
     );
     w?.logAndReset('getCachedFaceCrops');
     return cropMap?[face.faceID];

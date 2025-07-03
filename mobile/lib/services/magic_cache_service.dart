@@ -183,7 +183,7 @@ class MagicCacheService {
   bool _isUpdateInProgress = false;
 
   MagicCacheService(this._prefs) {
-    _logger.fine("MagicCacheService constructor");
+    _logger.info("MagicCacheService constructor");
     Bus.instance.on<FileUploadedEvent>().listen((event) {
       queueUpdate("File uploaded");
     });

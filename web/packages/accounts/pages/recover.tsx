@@ -3,6 +3,7 @@ import {
     AccountsPageFooter,
     AccountsPageTitle,
 } from "ente-accounts/components/layouts/centered-paper";
+import { getData } from "ente-accounts/services/accounts-db";
 import { recoveryKeyFromMnemonic } from "ente-accounts/services/recovery-key";
 import { appHomeRoute, stashRedirect } from "ente-accounts/services/redirect";
 import type { KeyAttributes, User } from "ente-accounts/services/user";
@@ -20,7 +21,6 @@ import {
     haveCredentialsInSession,
     saveMasterKeyInSessionAndSafeStore,
 } from "ente-base/session";
-import { getData, setData } from "ente-shared/storage/localStorage";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
@@ -72,8 +72,7 @@ const Page: React.FC = () => {
             await saveMasterKeyInSessionAndSafeStore(masterKey);
             await decryptAndStoreToken(keyAttr, masterKey);
 
-            setData("showBackButton", { value: false });
-            void router.push("/change-password");
+            void router.push("/change-password?op=reset");
         } catch (e) {
             log.error("password recovery failed", e);
             setFieldError(t("incorrect_recovery_key"));

@@ -162,6 +162,7 @@
     "ok": "Tamam",
     "success": "Başarılı",
     "error": "Hata",
+    "note": "",
     "offline_message": "Çevrimdışısın, önbelleğe alınmış anılar gösteriliyor",
     "install": "Kur",
     "install_mobile_app": "Tüm fotoğraflarını otomatik olarak yedeklemek için <a>Android</a> veya <b>iOS</b> uygulamamızı yükle",
@@ -626,7 +627,7 @@
     "faster_upload_description": "Yüklemeleri yakındaki sunucular üzerinden yönlendir",
     "open_ente_on_startup": "Başlangıçta Ente’yi aç",
     "cast_album_to_tv": "Albümü TV'de oynat",
-    "cast_to_tv": "",
+    "cast_to_tv": "TV de oynat",
     "enter_cast_pin_code": "Bu cihazı eşleştirmek için TV ekranında gördüğünüz kodu girin.",
     "code": "Kod",
     "pair_device_to_tv": "Cihazları eşleştir",
@@ -683,5 +684,6 @@
     "share_favorites": "Favorileri paylaş",
     "person_favorites": "{{name}}'in favorileri",
     "shared_favorites": "Paylaşılan favoriler",
-    "added_by_name": "{{name}} tarafından eklendi"
+    "added_by_name": "{{name}} tarafından eklendi",
+    "unowned_files_not_processed": ""
 }

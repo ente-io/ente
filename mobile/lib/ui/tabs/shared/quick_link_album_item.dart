@@ -35,7 +35,7 @@ class QuickLinkAlbumItem extends StatelessWidget {
               isSelected ? colorScheme.strokeMuted : colorScheme.strokeFainter,
         ),
         borderRadius: const BorderRadius.all(
-          Radius.circular(2),
+          Radius.circular(6),
         ),
       ),
       child: Row(
@@ -57,9 +57,7 @@ class QuickLinkAlbumItem extends StatelessWidget {
                         return Hero(
                           tag: heroTag,
                           child: ClipRRect(
-                            borderRadius: const BorderRadius.horizontal(
-                              left: Radius.circular(2),
-                            ),
+                            borderRadius: BorderRadius.circular(4),
                             child: ThumbnailWidget(
                               snapshot.data!,
                               key: ValueKey(heroTag),

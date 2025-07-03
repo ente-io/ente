@@ -242,9 +242,15 @@ File cachedThumbnailPath(EnteFile file) {
   );
 }
 
-File cachedFaceCropPath(String faceID) {
-  final thumbnailCacheDirectory =
-      Configuration.instance.getThumbnailCacheDirectory();
+File cachedFaceCropPath(String faceID, bool useTempCache) {
+  late final String thumbnailCacheDirectory;
+  if (useTempCache) {
+    thumbnailCacheDirectory =
+        Configuration.instance.getThumbnailCacheDirectory();
+  } else {
+    thumbnailCacheDirectory =
+        Configuration.instance.getPersonFaceThumbnailCacheDirectory();
+  }
   return File(
     thumbnailCacheDirectory + "/" + faceID,
   );

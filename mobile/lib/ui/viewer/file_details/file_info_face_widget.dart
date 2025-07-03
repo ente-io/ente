@@ -3,6 +3,7 @@ import "dart:typed_data";
 
 import "package:flutter/foundation.dart" show kDebugMode;
 import "package:flutter/material.dart";
+import "package:logging/logging.dart";
 import "package:photos/db/ml/db.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/base/id.dart";
@@ -11,13 +12,20 @@ import "package:photos/models/ml/face/face.dart";
 import "package:photos/models/ml/face/person.dart";
 import "package:photos/services/machine_learning/face_ml/face_detection/detection.dart";
 import "package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart";
+import "package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart";
 import "package:photos/services/machine_learning/ml_service.dart";
 import "package:photos/services/search_service.dart";
 import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/components/buttons/button_widget.dart";
+import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/notification/toast.dart";
 import "package:photos/ui/viewer/people/cluster_page.dart";
 import "package:photos/ui/viewer/people/file_face_widget.dart";
 import "package:photos/ui/viewer/people/people_page.dart";
+import "package:photos/ui/viewer/people/save_or_edit_person.dart";
+import "package:photos/utils/dialog_util.dart";
+
+final _logger = Logger("FileInfoFaceWidget");
 
 class FileInfoFaceWidget extends StatefulWidget {
   final EnteFile file;
@@ -25,7 +33,10 @@ class FileInfoFaceWidget extends StatefulWidget {
   final Uint8List faceCrop;
   final PersonEntity? person;
   final String? clusterID;
+  final double? width;
   final bool highlight;
+  final bool isEditMode;
+  final Future<void> Function() reloadAllFaces;
 
   const FileInfoFaceWidget(
     this.file,
@@ -34,6 +45,9 @@ class FileInfoFaceWidget extends StatefulWidget {
     this.person,
     this.clusterID,
     this.highlight = false,
+    this.isEditMode = false,
+    this.width,
+    required this.reloadAllFaces,
     super.key,
   });
 
@@ -42,17 +56,26 @@ class FileInfoFaceWidget extends StatefulWidget {
 }
 
 class _FileInfoFaceWidgetState extends State<FileInfoFaceWidget> {
+  bool get hasPerson => widget.person != null;
+  bool get isEditMode => widget.isEditMode;
+  double get thumbnailWidth => widget.width ?? 68;
+
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: _routeToPersonOrClusterPage,
-      child: Column(
-        children: [
-          Stack(
-            children: [
-              Container(
-                height: 60,
-                width: 60,
+    return Column(
+      children: [
+        Stack(
+          clipBehavior: Clip.none,
+          children: [
+            GestureDetector(
+              onTap: isEditMode
+                  ? hasPerson
+                      ? _onMinusIconTap
+                      : _onPlusIconTap
+                  : _routeToPersonOrClusterPage,
+              child: Container(
+                height: thumbnailWidth,
+                width: thumbnailWidth,
                 decoration: ShapeDecoration(
                   shape: RoundedRectangleBorder(
                     borderRadius: const BorderRadius.all(
@@ -67,24 +90,31 @@ class _FileInfoFaceWidgetState extends State<FileInfoFaceWidget> {
                   ),
                 ),
                 child: ClipRRect(
-                  borderRadius:
-                      const BorderRadius.all(Radius.elliptical(16, 12)),
                   child: SizedBox(
-                    width: 60,
-                    height: 60,
-                    child: FileFaceWidget(
-                      widget.file,
-                      faceCrop: widget.faceCrop,
+                    width: thumbnailWidth,
+                    height: thumbnailWidth,
+                    child: ClipPath(
+                      clipper: ShapeBorderClipper(
+                        shape: ContinuousRectangleBorder(
+                          borderRadius: BorderRadius.circular(52),
+                        ),
+                      ),
+                      child: FileFaceWidget(
+                        key: ValueKey(widget.face.faceID),
+                        widget.file,
+                        faceCrop: widget.faceCrop,
+                      ),
                     ),
                   ),
                 ),
               ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          ..._buildFaceInfo(),
-        ],
-      ),
+            ),
+            if (isEditMode) _buildEditIcon(context),
+          ],
+        ),
+        const SizedBox(height: 8),
+        ..._buildFaceInfo(),
+      ],
     );
   }
 
@@ -92,54 +122,50 @@ class _FileInfoFaceWidgetState extends State<FileInfoFaceWidget> {
     final List<Widget> faceInfo = [];
     if (widget.person != null) {
       faceInfo.add(
-        Text(
-          widget.person!.data.isIgnored
-              ? '(' + S.of(context).ignored + ')'
-              : widget.person!.data.name.trim(),
-          style: Theme.of(context).textTheme.bodySmall,
-          overflow: TextOverflow.ellipsis,
-          maxLines: 1,
+        SizedBox(
+          width: thumbnailWidth,
+          child: Center(
+            child: Text(
+              widget.person!.data.isIgnored
+                  ? '(' + S.of(context).ignored + ')'
+                  : widget.person!.data.name.trim(),
+              style: Theme.of(context).textTheme.bodySmall,
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
+            ),
+          ),
         ),
       );
     }
     if (kDebugMode) {
       faceInfo.add(
         Text(
-          'S: ${widget.face.score.toStringAsFixed(3)} (I)',
+          'S:${widget.face.score.toStringAsFixed(2)}(I)',
           style: Theme.of(context).textTheme.bodySmall,
           maxLines: 1,
         ),
       );
       faceInfo.add(
         Text(
-          'B: ${widget.face.blur.toStringAsFixed(0)} (I)',
+          'B:${widget.face.blur.toStringAsFixed(0)}(I)',
           style: Theme.of(context).textTheme.bodySmall,
           maxLines: 1,
         ),
       );
       faceInfo.add(
         Text(
-          'D: ${widget.face.detection.getFaceDirection().toDirectionString()} (I)',
+          'D:${widget.face.detection.getFaceDirection().toDirectionString().substring(0, 3)}(I)',
           style: Theme.of(context).textTheme.bodySmall,
           maxLines: 1,
         ),
       );
       faceInfo.add(
         Text(
-          'Sideways: ${widget.face.detection.faceIsSideways().toString()} (I)',
+          'Si:${widget.face.detection.faceIsSideways().toString()}(I)',
           style: Theme.of(context).textTheme.bodySmall,
           maxLines: 1,
         ),
       );
-      if (widget.face.score < kMinimumFaceShowScore) {
-        faceInfo.add(
-          Text(
-            'Not visible to user (I)',
-            style: Theme.of(context).textTheme.bodySmall,
-            maxLines: 1,
-          ),
-        );
-      }
     }
     return faceInfo;
   }
@@ -203,5 +229,81 @@ class _FileInfoFaceWidgetState extends State<FileInfoFaceWidget> {
     );
     unawaited(MLService.instance.clusterAllImages(force: true));
     return;
+  }
+
+  Future<void> _onPlusIconTap() async {
+    try {
+      final newClusterIDValue =
+          await ClusterFeedbackService.instance.removeFaceFromCluster(
+        faceID: widget.face.faceID,
+        clusterID: widget.clusterID,
+      );
+      await Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => SaveOrEditPerson(
+            newClusterIDValue,
+            file: widget.file,
+            isEditing: false,
+          ),
+        ),
+      );
+      await widget.reloadAllFaces();
+    } catch (e, s) {
+      _logger.severe('Error handling plus icon tap', e, s);
+    }
+  }
+
+  Future<void> _onMinusIconTap() async {
+    if (widget.person == null) return;
+    final result = await showChoiceActionSheet(
+      context,
+      title: S.of(context).removePersonLabel,
+      body: S.of(context).areYouSureRemoveThisFaceFromPerson,
+      firstButtonLabel: S.of(context).remove,
+      firstButtonType: ButtonType.critical,
+      secondButtonLabel: S.of(context).cancel,
+      isCritical: true,
+    );
+    if (result?.action == ButtonAction.first) {
+      try {
+        await ClusterFeedbackService.instance.removeFaceFromPerson(
+          widget.face.faceID,
+          widget.person!,
+        );
+        await widget.reloadAllFaces();
+      } catch (e, s) {
+        _logger.severe('Error removing face from person', e, s);
+      }
+    }
+  }
+
+  Widget _buildEditIcon(BuildContext context) {
+    return Positioned(
+      right: -5,
+      top: -5,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () => hasPerson ? _onMinusIconTap() : _onPlusIconTap(),
+        child: Container(
+          width: 20,
+          height: 20,
+          decoration: BoxDecoration(
+            color: hasPerson
+                ? getEnteColorScheme(context).warning500
+                : getEnteColorScheme(context).primary500,
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: getEnteColorScheme(context).backgroundBase,
+              width: 2,
+            ),
+          ),
+          child: Icon(
+            hasPerson ? Icons.remove : Icons.add,
+            size: 12,
+            color: getEnteColorScheme(context).backgroundBase,
+          ),
+        ),
+      ),
+    );
   }
 }

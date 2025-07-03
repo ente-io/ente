@@ -236,6 +236,7 @@ class MultiPartUploader {
         options: Options(
           headers: {
             Headers.contentLengthHeader: fileSize,
+            Headers.contentTypeHeader: "application/octet-stream",
           },
         ),
       );

@@ -162,6 +162,7 @@
     "ok": "Oké",
     "success": "Succes",
     "error": "Foutmelding",
+    "note": "",
     "offline_message": "Je bent offline, lokaal opgeslagen herinneringen worden getoond",
     "install": "Installeren",
     "install_mobile_app": "Installeer onze <a>Android</a> of <b>iOS</b> app om automatisch een back-up te maken van al uw foto's",
@@ -683,5 +684,6 @@
     "share_favorites": "Favorieten delen",
     "person_favorites": "Favorieten van {{name}}",
     "shared_favorites": "Gedeelde favorieten",
-    "added_by_name": "Toegevoegd door {{name}}"
+    "added_by_name": "Toegevoegd door {{name}}",
+    "unowned_files_not_processed": ""
 }

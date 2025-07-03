@@ -354,10 +354,10 @@ media-settings-menu {
 /* Hide the caption when hovering over the video controls (and when the settings
    menu is open) since they occupy similar real estate as the caption. */
 body:has(
-        media-time-range[mediapreviewtime],
-        media-controller:not([mediapaused]),
-        media-settings-menu:not([hidden])
-    ) {
+    media-time-range[mediapreviewtime],
+    media-controller:not([mediapaused]),
+    media-settings-menu:not([hidden])
+) {
     & .pswp-ente .pswp__caption {
         display: none;
     }

@@ -6,11 +6,22 @@ import {
 } from "ente-accounts/components/LoginComponents";
 import { SecondFactorChoice } from "ente-accounts/components/SecondFactorChoice";
 import { sessionExpiredDialogAttributes } from "ente-accounts/components/utils/dialog";
-import { useSecondFactorChoiceIfNeeded } from "ente-accounts/components/utils/second-factor-choice";
+import {
+    twoFactorEnabledErrorMessage,
+    useSecondFactorChoiceIfNeeded,
+} from "ente-accounts/components/utils/second-factor-choice";
 import {
     VerifyMasterPasswordForm,
     type VerifyMasterPasswordFormProps,
 } from "ente-accounts/components/VerifyMasterPasswordForm";
+import {
+    getData,
+    getToken,
+    savedIsFirstLogin,
+    saveIsFirstLogin,
+    setData,
+    setLSUser,
+} from "ente-accounts/services/accounts-db";
 import {
     openPasskeyVerificationURL,
     passkeyVerificationRedirectURL,
@@ -47,13 +58,6 @@ import {
     unstashKeyEncryptionKeyFromSession,
     updateSessionFromElectronSafeStorageIfNeeded,
 } from "ente-base/session";
-import { CustomError } from "ente-shared/error";
-import { getData, setData, setLSUser } from "ente-shared/storage/localStorage";
-import {
-    getToken,
-    isFirstLogin,
-    setIsFirstLogin,
-} from "ente-shared/storage/localStorage/helpers";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useState } from "react";
@@ -94,7 +98,7 @@ const Page: React.FC = () => {
                     setData("srpAttributes", session.updatedSRPAttributes);
                     // Set a flag that causes new interactive key attributes to
                     // be generated.
-                    setIsFirstLogin(true);
+                    saveIsFirstLogin();
                     // This should be a rare occurrence, instead of building the
                     // scaffolding to update all the in-memory state, just
                     // reload everything.
@@ -187,7 +191,7 @@ const Page: React.FC = () => {
                     await userVerificationResultAfterResolvingSecondFactorChoice(
                         await verifySRP(srpAttributes!, kek),
                     );
-                setIsFirstLogin(true);
+                saveIsFirstLogin();
 
                 if (passkeySessionID) {
                     await stashKeyEncryptionKeyInSessionStore(kek);
@@ -205,7 +209,7 @@ const Page: React.FC = () => {
                     );
                     setPasskeyVerificationData({ passkeySessionID, url });
                     openPasskeyVerificationURL({ passkeySessionID, url });
-                    throw Error(CustomError.TWO_FACTOR_ENABLED);
+                    throw new Error(twoFactorEnabledErrorMessage);
                 } else if (twoFactorSessionID) {
                     await stashKeyEncryptionKeyInSessionStore(kek);
                     const user = getData("user");
@@ -215,7 +219,7 @@ const Page: React.FC = () => {
                         isTwoFactorEnabled: true,
                     });
                     void router.push("/two-factor/verify");
-                    throw Error(CustomError.TWO_FACTOR_ENABLED);
+                    throw new Error(twoFactorEnabledErrorMessage);
                 } else {
                     const user = getData("user");
                     await setLSUser({
@@ -231,7 +235,7 @@ const Page: React.FC = () => {
             } catch (e) {
                 if (
                     e instanceof Error &&
-                    e.message != CustomError.TWO_FACTOR_ENABLED
+                    e.message != twoFactorEnabledErrorMessage
                 ) {
                     log.error("getKeyAttributes failed", e);
                 }
@@ -242,7 +246,7 @@ const Page: React.FC = () => {
     const handleVerifyMasterPassword: VerifyMasterPasswordFormProps["onVerify"] =
         (key, kek, keyAttributes, password) => {
             void (async () => {
-                const updatedKeyAttributes = isFirstLogin()
+                const updatedKeyAttributes = savedIsFirstLogin()
                     ? await generateAndSaveInteractiveKeyAttributes(
                           password,
                           keyAttributes,

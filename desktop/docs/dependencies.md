@@ -144,13 +144,10 @@ watcher for the watch folders functionality.
 
 ## Pinned
 
-- Electron builder is pinned to 26.0.16 because of
-  https://github.com/electron-userland/electron-builder/issues/9161#issuecomment-2977829326
+- `electron-builder` is pinned to 26.0.14 because of
+  https://github.com/electron-userland/electron-builder/issues/9161
 
-- Electron builder is pinned to 26.0.15 because of a new error when building
-  (same happens for other files like ONNX runtime libraries too):
+    To reproduce this locally, add `x64ArchFiles: "ffmpeg"` to
+    `electron-builder.yml`, then run `node_modules/.bin/electron-builder --mac`.
 
-    > Detected file
-    > "Contents/Resources/app.asar.unpacked/node_modules/ffmpeg-static/ffmpeg"
-    > that's the same in both x64 and arm64 builds and not covered by the
-    > x64ArchFiles rule: "undefined"
+- `electron-store` is pinned to 8.2.0 because subsequent versions are ESM only.

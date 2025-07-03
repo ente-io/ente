@@ -55,13 +55,15 @@ class _ContactResultPageState extends State<ContactResultPage> {
   late final List<Collection> collections;
   late final StreamSubscription<LocalPhotosUpdatedEvent> _filesUpdatedEvent;
   late String _searchResultName;
+  late final SearchFilterDataProvider _searchFilterDataProvider;
 
   @override
   void initState() {
     super.initState();
     files = widget.searchResult.resultFiles();
     collections = (widget.searchResult as GenericSearchResult)
-        .params[kContactCollections];
+            .params[kContactCollections] ??
+        <Collection>[];
     _searchResultName = widget.searchResult.name();
     _filesUpdatedEvent =
         Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
@@ -75,6 +77,10 @@ class _ContactResultPageState extends State<ContactResultPage> {
         setState(() {});
       }
     });
+
+    _searchFilterDataProvider = SearchFilterDataProvider(
+      initialGalleryFilter: widget.searchResult.getHierarchicalSearchFilter(),
+    );
   }
 
   @override
@@ -145,10 +151,7 @@ class _ContactResultPageState extends State<ContactResultPage> {
 
     return GalleryFilesState(
       child: InheritedSearchFilterDataWrapper(
-        searchFilterDataProvider: SearchFilterDataProvider(
-          initialGalleryFilter:
-              widget.searchResult.getHierarchicalSearchFilter(),
-        ),
+        searchFilterDataProvider: _searchFilterDataProvider,
         child: Scaffold(
           appBar: PreferredSize(
             preferredSize: const Size.fromHeight(90.0),

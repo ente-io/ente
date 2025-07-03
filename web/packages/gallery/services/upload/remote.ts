@@ -1,24 +1,14 @@
-// TODO: Audit this file
-/* eslint-disable @typescript-eslint/ban-ts-comment */
-/* eslint-disable @typescript-eslint/no-unsafe-return */
 import {
     authenticatedPublicAlbumsRequestHeaders,
     authenticatedRequestHeaders,
     ensureOk,
     publicRequestHeaders,
-    retryAsyncOperation,
     type HTTPRequestRetrier,
     type PublicAlbumsCredentials,
 } from "ente-base/http";
-import log from "ente-base/log";
 import { apiURL, uploaderOrigin } from "ente-base/origins";
-import {
-    type EncryptedMagicMetadata,
-    type EnteFile,
-    type RemoteFileMetadata,
-} from "ente-media/file";
-import { handleUploadError } from "ente-shared/error";
-import HTTPService from "ente-shared/network/HTTPService";
+import { RemoteEnteFile, type RemoteFileMetadata } from "ente-media/file";
+import type { RemoteMagicMetadata } from "ente-media/magic-metadata";
 import { nullToUndefined } from "ente-utils/transform";
 import { z } from "zod/v4";
 
@@ -54,10 +44,8 @@ const ObjectUploadURLResponse = z.object({ urls: ObjectUploadURL.array() });
  * will refer to the uploaded object after it has been uploaded.
  */
 export const fetchUploadURLs = async (countHint: number) => {
-    const count = Math.min(50, countHint * 2).toString();
-    const params = new URLSearchParams({ count });
-    const url = await apiURL("/files/upload-urls");
-    const res = await fetch(`${url}?${params.toString()}`, {
+    const count = Math.min(50, countHint * 2);
+    const res = await fetch(await apiURL("/files/upload-urls", { count }), {
         headers: await authenticatedRequestHeaders(),
     });
     ensureOk(res);
@@ -71,12 +59,11 @@ export const fetchPublicAlbumsUploadURLs = async (
     countHint: number,
     credentials: PublicAlbumsCredentials,
 ) => {
-    const count = Math.min(50, countHint * 2).toString();
-    const params = new URLSearchParams({ count });
-    const url = await apiURL("/public-collection/upload-urls");
-    const res = await fetch(`${url}?${params.toString()}`, {
-        headers: authenticatedPublicAlbumsRequestHeaders(credentials),
-    });
+    const count = Math.min(50, countHint * 2);
+    const res = await fetch(
+        await apiURL("/public-collection/upload-urls", { count }),
+        { headers: authenticatedPublicAlbumsRequestHeaders(credentials) },
+    );
     ensureOk(res);
     return ObjectUploadURLResponse.parse(await res.json()).urls;
 };
@@ -124,11 +111,11 @@ const MultipartUploadURLsResponse = z.object({ urls: MultipartUploadURLs });
  * for uploading each part, a completion URL, and the final object key.
  */
 export const fetchMultipartUploadURLs = async (uploadPartCount: number) => {
-    const params = new URLSearchParams({ count: uploadPartCount.toString() });
-    const url = await apiURL("/files/multipart-upload-urls");
-    const res = await fetch(`${url}?${params.toString()}`, {
-        headers: await authenticatedRequestHeaders(),
-    });
+    const count = uploadPartCount;
+    const res = await fetch(
+        await apiURL("/files/multipart-upload-urls", { count }),
+        { headers: await authenticatedRequestHeaders() },
+    );
     ensureOk(res);
     return MultipartUploadURLsResponse.parse(await res.json()).urls;
 };
@@ -140,11 +127,11 @@ export const fetchPublicAlbumsMultipartUploadURLs = async (
     uploadPartCount: number,
     credentials: PublicAlbumsCredentials,
 ) => {
-    const params = new URLSearchParams({ count: uploadPartCount.toString() });
-    const url = await apiURL("/public-collection/multipart-upload-urls");
-    const res = await fetch(`${url}?${params.toString()}`, {
-        headers: authenticatedPublicAlbumsRequestHeaders(credentials),
-    });
+    const count = uploadPartCount;
+    const res = await fetch(
+        await apiURL("/public-collection/multipart-upload-urls", { count }),
+        { headers: authenticatedPublicAlbumsRequestHeaders(credentials) },
+    );
     ensureOk(res);
     return MultipartUploadURLsResponse.parse(await res.json()).urls;
 };
@@ -421,7 +408,7 @@ export interface PostEnteFileRequest {
     file: UploadedFileObjectAttributes;
     thumbnail: UploadedFileObjectAttributes;
     metadata: RemoteFileMetadata;
-    pubMagicMetadata: EncryptedMagicMetadata;
+    pubMagicMetadata?: RemoteMagicMetadata;
 }
 
 /**
@@ -482,59 +469,33 @@ export interface UploadedFileObjectAttributes {
  *
  * Remote only, does not modify local state.
  *
- * Since this function is the last step after a potentially long upload to S3
- * remote of the file contents themselves, it has internal retries of the HTTP
- * request to avoid having transient issues spoil the party.
- *
  * @returns the newly created {@link EnteFile}.
  */
 export const postEnteFile = async (
-    uploadFile: PostEnteFileRequest,
-): Promise<EnteFile> => {
-    try {
-        const url = await apiURL("/files");
-        const headers = await authenticatedRequestHeaders();
-        const response = await retryAsyncOperation(
-            () =>
-                HTTPService.post(
-                    url,
-                    uploadFile,
-                    // @ts-ignore
-                    null,
-                    headers,
-                ),
-            { abortIfNeeded: handleUploadError },
-        );
-        return response.data;
-    } catch (e) {
-        log.error("upload Files Failed", e);
-        throw e;
-    }
+    postFileRequest: PostEnteFileRequest,
+): Promise<RemoteEnteFile> => {
+    const res = await fetch(await apiURL("/files"), {
+        method: "POST",
+        headers: await authenticatedRequestHeaders(),
+        body: JSON.stringify(postFileRequest),
+    });
+    ensureOk(res);
+    return RemoteEnteFile.parse(await res.json());
 };
 
 /**
  * Sibling of {@link postEnteFile} for public albums.
  */
 export const postPublicAlbumsEnteFile = async (
-    uploadFile: PostEnteFileRequest,
+    postFileRequest: PostEnteFileRequest,
+
     credentials: PublicAlbumsCredentials,
-): Promise<EnteFile> => {
-    try {
-        const url = await apiURL("/public-collection/file");
-        const response = await retryAsyncOperation(
-            () =>
-                HTTPService.post(
-                    url,
-                    uploadFile,
-                    // @ts-ignore
-                    null,
-                    authenticatedPublicAlbumsRequestHeaders(credentials),
-                ),
-            { abortIfNeeded: handleUploadError },
-        );
-        return response.data;
-    } catch (e) {
-        log.error("upload public File Failed", e);
-        throw e;
-    }
+): Promise<RemoteEnteFile> => {
+    const res = await fetch(await apiURL("/public-collection/file"), {
+        method: "POST",
+        headers: authenticatedPublicAlbumsRequestHeaders(credentials),
+        body: JSON.stringify(postFileRequest),
+    });
+    ensureOk(res);
+    return RemoteEnteFile.parse(await res.json());
 };

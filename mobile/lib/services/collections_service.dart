@@ -1351,7 +1351,7 @@ class CollectionsService {
 
   Future<Collection> fetchCollectionByID(int collectionID) async {
     try {
-      _logger.fine('fetching collectionByID $collectionID');
+      _logger.info('fetching collectionByID $collectionID');
       final response = await _enteDio.get(
         "/collections/$collectionID",
       );

@@ -14,6 +14,11 @@ import {
     Typography,
 } from "@mui/material";
 import {
+    saveJustSignedUp,
+    setData,
+    stashReferralSource,
+} from "ente-accounts/services/accounts-db";
+import {
     generateSRPSetupAttributes,
     stashSRPSetupAttributes,
 } from "ente-accounts/services/srp";
@@ -32,11 +37,6 @@ import { deriveKeyInsufficientMemoryErrorMessage } from "ente-base/crypto/types"
 import { isMuseumHTTPError } from "ente-base/http";
 import log from "ente-base/log";
 import { saveMasterKeyInSessionAndSafeStore } from "ente-base/session";
-import { setData } from "ente-shared/storage/localStorage";
-import {
-    setJustSignedUp,
-    setLocalReferralSource,
-} from "ente-shared/storage/localStorage/helpers";
 import { useFormik } from "formik";
 import { t } from "i18next";
 import type { NextRouter } from "next/router";
@@ -107,7 +107,8 @@ export const SignUpContents: React.FC<SignUpContentsProps> = ({
             }
 
             try {
-                setLocalReferralSource(referral);
+                const cleanedReferral = referral.trim();
+                if (cleanedReferral) stashReferralSource(cleanedReferral);
 
                 try {
                     await sendOTT(email, "signup");
@@ -154,7 +155,7 @@ export const SignUpContents: React.FC<SignUpContentsProps> = ({
                 );
                 await saveMasterKeyInSessionAndSafeStore(masterKey);
 
-                setJustSignedUp(true);
+                saveJustSignedUp();
                 void router.push("/verify");
             } catch (e) {
                 log.error("Signup failed", e);

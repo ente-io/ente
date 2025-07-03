@@ -96,7 +96,7 @@ class SearchService {
     }
 
     if (_cachedFilesFuture == null) {
-      _logger.fine("Reading all files from db");
+      _logger.info("Reading all files from db");
       _cachedFilesFuture = FilesDB.instance.getAllFilesFromDB(
         ignoreCollections(),
         dedupeByUploadId: false,
@@ -122,7 +122,7 @@ class SearchService {
     }
 
     if (_cachedFilesFuture == null) {
-      _logger.fine("Reading all files from db");
+      _logger.info("Reading all files from db");
       _cachedFilesFuture = FilesDB.instance.getAllFilesFromDB(
         ignoreCollections(),
         dedupeByUploadId: false,
@@ -146,7 +146,7 @@ class SearchService {
     if (_cachedHiddenFilesFuture != null) {
       return _cachedHiddenFilesFuture!;
     }
-    _logger.fine("Reading hidden files from db");
+    _logger.info("Reading hidden files from db");
     final hiddenCollections =
         CollectionsService.instance.getHiddenCollectionIds();
     _cachedHiddenFilesFuture =
@@ -663,6 +663,19 @@ class SearchService {
     return searchResults;
   }
 
+  Future<List<String>> getTopTwoFaces() async {
+    final searchFilter = await SectionType.face.getData(null).then(
+          (value) => (value as List<GenericSearchResult>).where(
+            (element) => (element.params[kPersonParamID] as String?) != null,
+          ),
+        );
+
+    return searchFilter
+        .take(2)
+        .map((e) => e.params[kPersonParamID] as String)
+        .toList();
+  }
+
   Future<List<GenericSearchResult>> getLocationResults(String query) async {
     final locationTagEntities = (await locationService.getLocationTags());
     final Map<LocalEntity<LocationTag>, List<EnteFile>> result = {};
@@ -691,7 +704,7 @@ class SearchService {
       }
     }
     if (showNoLocationTag) {
-      _logger.fine("finding photos with no location");
+      _logger.info("finding photos with no location");
       // find files that have location but the file's location is not inside
       // any location tag
       final noLocationTagFiles = allFiles.where((file) {
@@ -929,10 +942,10 @@ class SearchService {
         );
 
       for (final clusterId in sortedClusterIds) {
+        if (limit != null && facesResult.length >= limit) {
+          break;
+        }
         final files = clusterIdToFiles[clusterId]!;
-        // final String clusterName = "ID:$clusterId,  ${files.length}";
-        // final String clusterName = "${files.length}";
-        // const String clusterName = "";
         final String clusterName = clusterId;
 
         if (clusterIDToPersonID[clusterId] != null) {
@@ -991,15 +1004,8 @@ class SearchService {
         );
       }
       if (facesResult.isEmpty) {
-        int newMinimum = minClusterSize;
-        for (final int minimum in kLowerMinimumClusterSizes) {
-          if (minimum < minClusterSize) {
-            newMinimum = minimum;
-            break;
-          }
-        }
-        if (newMinimum < minClusterSize) {
-          return getAllFace(limit, minClusterSize: newMinimum);
+        if (kMinimumClusterSizeAllFaces < minClusterSize) {
+          return getAllFace(limit, minClusterSize: kMinimumClusterSizeAllFaces);
         } else {
           return [];
         }
@@ -1381,11 +1387,18 @@ class SearchService {
   Future<List<GenericSearchResult>> getContactSearchResults(
     String query,
   ) async {
+    final int ownerID = Configuration.instance.getUserID()!;
     final lowerCaseQuery = query.toLowerCase();
     final searchResults = <GenericSearchResult>[];
     final allFiles = await getAllFilesForSearch();
     final peopleToSharedFiles = <User, List<EnteFile>>{};
+    final peopleToSharedAlbums = <String, List<Collection>>{};
     final existingEmails = <String>{};
+    final List<Collection> collections = _collectionService.getCollectionsForUI(
+      includedShared: true,
+      includeCollab: true,
+    );
+
     for (EnteFile file in allFiles) {
       if (file.isOwner) continue;
 
@@ -1416,7 +1429,22 @@ class SearchService {
       }
     }
 
+    for (Collection collection in collections) {
+      if (collection.isHidden() || collection.isOwner(ownerID)) {
+        continue;
+      }
+
+      if (peopleToSharedAlbums.containsKey(collection.owner.email)) {
+        peopleToSharedAlbums[collection.owner.email]!.add(collection);
+      } else {
+        peopleToSharedAlbums[collection.owner.email] = [collection];
+      }
+    }
+
     peopleToSharedFiles.forEach((key, value) {
+      final user = key;
+      final collections = peopleToSharedAlbums[user.email] ?? [];
+
       searchResults.add(
         GenericSearchResult(
           ResultType.shared,
@@ -1432,6 +1460,7 @@ class SearchService {
           params: {
             kPersonParamID: key.linkedPersonID,
             kContactEmail: key.email,
+            kContactCollections: collections,
           },
         ),
       );

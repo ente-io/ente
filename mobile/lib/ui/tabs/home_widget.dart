@@ -128,9 +128,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     super.initState();
 
     if (LocalSyncService.instance.hasCompletedFirstImport()) {
-      MemoryHomeWidgetService.instance.checkPendingMemorySync();
-      PeopleHomeWidgetService.instance.checkPendingPeopleSync();
-      AlbumHomeWidgetService.instance.checkPendingAlbumsSync();
+      syncWidget();
     }
     _tabChangedEventSubscription =
         Bus.instance.on<TabChangedEvent>().listen((event) {
@@ -161,6 +159,8 @@ class _HomeWidgetState extends State<HomeWidget> {
     _accountConfiguredEvent =
         Bus.instance.on<AccountConfiguredEvent>().listen((event) {
       setState(() {});
+      // fetch user flags on login
+      flagService.flags;
     });
     _triggerLogoutEvent =
         Bus.instance.on<TriggerLogoutEvent>().listen((event) async {
@@ -194,9 +194,7 @@ class _HomeWidgetState extends State<HomeWidget> {
           () {
             if (mounted) {
               setState(() {});
-              MemoryHomeWidgetService.instance.checkPendingMemorySync();
-              AlbumHomeWidgetService.instance.checkPendingAlbumsSync();
-              PeopleHomeWidgetService.instance.checkPendingPeopleSync();
+              syncWidget();
             }
           },
         );
@@ -277,11 +275,33 @@ class _HomeWidgetState extends State<HomeWidget> {
     }
   }
 
+  Future<void> syncWidget() async {
+    await Future.delayed(const Duration(seconds: 5));
+
+    _logger.info("Syncing home widget");
+    await AlbumHomeWidgetService.instance.checkPendingAlbumsSync();
+    await PeopleHomeWidgetService.instance.checkPendingPeopleSync();
+    await MemoryHomeWidgetService.instance.checkPendingMemorySync();
+  }
+
+  final Map<Uri, (bool, int)> _linkedPublicAlbums = {};
   Future<void> _handlePublicAlbumLink(Uri uri, String via) async {
     try {
-      _logger.info(
-        "Handling public album link: via $via",
-      );
+      _logger.info("Handling public album link: via $via");
+      final int currentTime = DateTime.now().millisecondsSinceEpoch;
+      final bool isInitialStream = via.toLowerCase().contains('initial');
+      if (_linkedPublicAlbums.containsKey(uri)) {
+        final (lastInitialLink, lastTime) = _linkedPublicAlbums[uri]!;
+        // for initial stream, wait for 30 seconds to ignore duplicate links event
+        if (currentTime - lastTime < (lastInitialLink ? 30000 : 2000)) {
+          _logger.info(
+            "ignore was it has handled $lastInitialLink at epoch $lastTime",
+          );
+          return;
+        }
+      }
+      _linkedPublicAlbums[uri] = (isInitialStream, currentTime);
+
       final Collection collection = await CollectionsService.instance
           .getCollectionFromPublicLink(context, uri);
       final existingCollection =
@@ -683,7 +703,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     }
     if (!permissionService.hasGrantedPermissions()) {
       entityService.syncEntities().then((_) {
-        PersonService.instance.resetEmailToPartialPersonDataCache();
+        PersonService.instance.refreshPersonCache();
       });
       return const GrantPermissionsWidget();
     }
@@ -814,7 +834,7 @@ class _HomeWidgetState extends State<HomeWidget> {
       // Parse the link and warn the user, if it is not correct,
       // but keep in mind it could be `null`.
       if (initialLink != null) {
-        _logger.info("Initial link received: " + initialLink.toString());
+        _logger.info("Initial link received: host ${initialLink.host}");
         _getCredentials(context, initialLink);
         return true;
       } else {
@@ -829,7 +849,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     // Attach a listener to the stream
     appLinks.uriLinkStream.listen(
       (link) {
-        _logger.info("Link received: " + link.toString());
+        _logger.info("Link received: host ${link.host}");
         _getCredentials(context, link);
       },
       onError: (err) {

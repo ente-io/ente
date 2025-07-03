@@ -337,7 +337,7 @@ class _LockScreenState extends State<LockScreen>
               context.l10n.authToViewYourMemories,
               isOpeningApp: true,
             );
-      _logger.finest("LockScreen Result $result");
+      _logger.info("LockScreen Result $result");
       _isShowingLockScreen = false;
       if (result) {
         lastAuthenticatingTime = DateTime.now().millisecondsSinceEpoch;

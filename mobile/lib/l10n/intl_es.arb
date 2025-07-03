@@ -1725,5 +1725,17 @@
   "food": "Delicia culinaria",
   "pets": "Compañeros peludos",
   "curatedMemories": "Memorias revisadas",
-  "wishThemAHappyBirthday": "Wish ${name} a happy birthday! 🎉"
+  "wishThemAHappyBirthday": "Wish ${name} a happy birthday! 🎉",
+  "cLTitle1": "Subida de archivos de video grandes",
+  "cLDesc1": "Tras el lanzamiento de la versión beta de transmisión de video y el trabajo en subidas y descargas reanudables, ahora hemos aumentado el límite de subida de archivos a 10GB. Esto ya está disponible tanto en aplicaciones de escritorio como móviles.",
+  "cLTitle2": "Subida en segundo plano",
+  "cLDesc2": "Las subidas en segundo plano ahora también son compatibles con iOS, además de dispositivos Android. No necesitas abrir la aplicación para hacer una copia de seguridad de tus fotos y videos más recientes.",
+  "cLTitle3": "Reproducción automática de recuerdos",
+  "cLDesc3": "Hemos hecho mejoras significativas en nuestra experiencia de recuerdos, incluyendo reproducción automática, deslizar al siguiente recuerdo y mucho más.",
+  "cLTitle4": "Reconocimiento facial mejorado",
+  "cLDesc4": "Junto con un montón de mejoras internas, ahora es mucho más fácil ver todas las caras detectadas, proporcionar comentarios sobre caras similares y agregar/eliminar caras de una sola foto.",
+  "cLTitle5": "Notificaciones de cumpleaños",
+  "cLDesc5": "Ahora recibirás una notificación opcional para todos los cumpleaños que hayas guardado en Ente, junto con una colección de sus mejores fotos.",
+  "cLTitle6": "Subidas y descargas reanudables",
+  "cLDesc6": "No más esperas para que se completen las subidas/descargas antes de poder cerrar la aplicación. Todas las subidas y descargas ahora tienen la capacidad de pausarse a mitad de camino y reanudarse desde donde lo dejaste."
 }

@@ -106,7 +106,7 @@ class MLIndexingIsolate extends SuperIsolate {
 
   Future<void> ensureDownloadedModels([bool forceRefresh = false]) async {
     if (_downloadModelLock.locked) {
-      _logger.finest("Download models already in progress");
+      _logger.info("Download models already in progress");
       return;
     }
     return _downloadModelLock.synchronized(() async {

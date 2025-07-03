@@ -182,7 +182,7 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
   Future<void> _handlePaymentResponse(Uri uri) async {
     final queryParams = uri.queryParameters;
     final paymentStatus = uri.queryParameters['status'] ?? '';
-    _logger.fine('handle payment response with status $paymentStatus');
+    _logger.info('handle payment response with status $paymentStatus');
     if (paymentStatus == 'success') {
       await _handlePaymentSuccess(queryParams);
     } else if (paymentStatus == 'fail') {

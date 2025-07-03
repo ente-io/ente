@@ -23,6 +23,20 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m115(name) => "Wish \$${name} a happy birthday! 🎉";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
-  static Map<String, Function> _notInlinedMessages(_) =>
-      <String, Function>{"wishThemAHappyBirthday": m115};
+  static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
+        "areThey": MessageLookupByLibrary.simpleMessage("Are they "),
+        "areYouSureRemoveThisFaceFromPerson":
+            MessageLookupByLibrary.simpleMessage(
+                "Are you sure you want to remove this face from this person?"),
+        "otherDetectedFaces":
+            MessageLookupByLibrary.simpleMessage("Other detected faces"),
+        "questionmark": MessageLookupByLibrary.simpleMessage("?"),
+        "saveAsAnotherPerson":
+            MessageLookupByLibrary.simpleMessage("Save as another person"),
+        "showLessFaces":
+            MessageLookupByLibrary.simpleMessage("Show less faces"),
+        "showMoreFaces":
+            MessageLookupByLibrary.simpleMessage("Show more faces"),
+        "wishThemAHappyBirthday": m115
+      };
 }

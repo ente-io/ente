@@ -1,3 +1,8 @@
+import {
+    getData,
+    setData,
+    setLSUser,
+} from "ente-accounts/services/accounts-db";
 import { TwoFactorAuthorizationResponse } from "ente-accounts/services/user";
 import { clientPackageName, isDesktop } from "ente-base/app";
 import { encryptBox, generateKey } from "ente-base/crypto";
@@ -8,7 +13,6 @@ import {
     publicRequestHeaders,
 } from "ente-base/http";
 import { apiURL } from "ente-base/origins";
-import { getData, setData, setLSUser } from "ente-shared/storage/localStorage";
 import { z } from "zod/v4";
 import { getUserRecoveryKey } from "./recovery-key";
 import { unstashRedirect } from "./redirect";
@@ -213,11 +217,10 @@ export const passkeySessionExpiredErrorMessage = "Passkey session has expired";
 export const checkPasskeyVerificationStatus = async (
     sessionID: string,
 ): Promise<TwoFactorAuthorizationResponse | undefined> => {
-    const url = await apiURL("/users/two-factor/passkeys/get-token");
-    const params = new URLSearchParams({ sessionID });
-    const res = await fetch(`${url}?${params.toString()}`, {
-        headers: publicRequestHeaders(),
-    });
+    const res = await fetch(
+        await apiURL("/users/two-factor/passkeys/get-token", { sessionID }),
+        { headers: publicRequestHeaders() },
+    );
     if (!res.ok) {
         if (res.status == 404 || res.status == 410)
             throw new Error(passkeySessionExpiredErrorMessage);

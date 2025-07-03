@@ -162,6 +162,7 @@
     "ok": "Gerai",
     "success": "Pavyko",
     "error": "Klaida",
+    "note": "",
     "offline_message": "Esate neprisijungę. Rodomi prisiminimai iš podėlio.",
     "install": "Diegti",
     "install_mobile_app": "Įdiekite mūsų <a>„Android“</a> arba <b>„iOS“</b> programą, kad automatiškai sukurtumėte atsargines visų nuotraukų kopijas",
@@ -531,9 +532,9 @@
     "ml_consent_description": "<p>Jei įjungsite mašininį mokymąsi, „Ente“ išsitrauks tokią informaciją kaip veido geometrija iš failų, įskaitant tuos, kuriais su jumis bendrinama.</p><p>Tai bus daroma jūsų įrenginyje, o visa sugeneruota biometrinė informacija bus visapusiškai užšifruota.</p><p><a>Spustelėkite čia dėl išsamesnės informacijos apie šią funkciją mūsų privatumo politikoje</a></p>.",
     "ml_consent_confirmation": "Suprantu ir noriu įjungti mašininį mokymąsi",
     "labs": "Laboratorijos",
-    "password_strength_weak": "Slaptažodžio stiprumas: silpna",
-    "password_strength_moderate": "Slaptažodžio stiprumas: vidutinė",
-    "password_strength_strong": "Slaptažodžio stiprumas: stipri",
+    "password_strength_weak": "Slaptažodžio stiprumas: silpnas",
+    "password_strength_moderate": "Slaptažodžio stiprumas: vidutinis",
+    "password_strength_strong": "Slaptažodžio stiprumas: stiprus",
     "preferences": "Nuostatos",
     "language": "Kalba",
     "advanced": "Išplėstiniai",
@@ -683,5 +684,6 @@
     "share_favorites": "Bendrinti mėgstamus",
     "person_favorites": "{{name}} mėgstami",
     "shared_favorites": "Bendrinami mėgstami",
-    "added_by_name": "Įtraukė {{name}}"
+    "added_by_name": "Įtraukė {{name}}",
+    "unowned_files_not_processed": ""
 }

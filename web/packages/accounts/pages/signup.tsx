@@ -1,8 +1,8 @@
 import { AccountsPageContents } from "ente-accounts/components/layouts/centered-paper";
 import { SignUpContents } from "ente-accounts/components/SignUpContents";
+import { getData } from "ente-accounts/services/accounts-db";
 import { LoadingIndicator } from "ente-base/components/loaders";
 import { customAPIHost } from "ente-base/origins";
-import { getData } from "ente-shared//storage/localStorage";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 

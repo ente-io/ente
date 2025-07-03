@@ -408,8 +408,8 @@ class DownloadManager {
         const res = await wrapErrors(() => this._downloadFile(file, opts));
 
         if (
-            file.metadata.fileType === FileType.image ||
-            file.metadata.fileType === FileType.livePhoto
+            file.metadata.fileType == FileType.image ||
+            file.metadata.fileType == FileType.livePhoto
         ) {
             const encryptedData = new Uint8Array(
                 await wrapErrors(() => res.arrayBuffer()),

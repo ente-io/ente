@@ -7,7 +7,7 @@ import {
     decryptRemoteFile,
     FileDiffResponse,
     RemoteEnteFile,
-    type EnteFile2,
+    type EnteFile,
 } from "ente-media/file";
 import { fileFileName } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
@@ -150,32 +150,34 @@ export const imageURLGenerator = async function* (castData: CastData) {
  *
  * @param castToken A token used both for authentication, and also identifying
  * the collection corresponding to the cast session.
+ *
+ * @returns All the files in the collection in an arbitrary order. Since we are
+ * anyways going to be shuffling these files, the order has no bearing.
  */
 export const getRemoteCastCollectionFiles = async (
     castToken: string,
 ): Promise<RemoteEnteFile[]> => {
-    const files: RemoteEnteFile[] = [];
+    const filesByID = new Map<number, RemoteEnteFile>();
     let sinceTime = 0;
     while (true) {
-        const res = await fetch(
-            await apiURL("/cast/diff", { sinceTime: sinceTime.toString() }),
-            { headers: { "X-Cast-Access-Token": castToken } },
-        );
+        const res = await fetch(await apiURL("/cast/diff", { sinceTime }), {
+            headers: { "X-Cast-Access-Token": castToken },
+        });
         ensureOk(res);
         const { diff, hasMore } = FileDiffResponse.parse(await res.json());
         if (!diff.length) break;
         for (const change of diff) {
             sinceTime = Math.max(sinceTime, change.updationTime);
             if (!change.isDeleted) {
-                files.push(change);
+                filesByID.set(change.id, change);
             }
         }
         if (!hasMore) break;
     }
-    return files;
+    return [...filesByID.values()];
 };
 
-const isFileEligible = (file: EnteFile2) => {
+const isFileEligible = (file: EnteFile) => {
     if (!isImageOrLivePhoto(file)) return false;
 
     if ((file.info?.fileSize ?? 0) > 100 * 1024 * 1024) return false;
@@ -193,10 +195,9 @@ const isFileEligible = (file: EnteFile2) => {
     return true;
 };
 
-const isImageOrLivePhoto = (file: EnteFile2) => {
-    const fileType = file.metadata.fileType;
-    return fileType == FileType.image || fileType == FileType.livePhoto;
-};
+const isImageOrLivePhoto = (file: EnteFile) =>
+    file.metadata.fileType == FileType.image ||
+    file.metadata.fileType == FileType.livePhoto;
 
 /**
  * Create and return a new data URL that can be used to show the given
@@ -205,12 +206,12 @@ const isImageOrLivePhoto = (file: EnteFile2) => {
  * Once we're done showing the file, the URL should be revoked using
  * {@link URL.revokeObjectURL} to free up browser resources.
  */
-const createRenderableURL = async (castToken: string, file: EnteFile2) => {
+const createRenderableURL = async (castToken: string, file: EnteFile) => {
     const imageBlob = await renderableImageBlob(castToken, file);
     return URL.createObjectURL(imageBlob);
 };
 
-const renderableImageBlob = async (castToken: string, file: EnteFile2) => {
+const renderableImageBlob = async (castToken: string, file: EnteFile) => {
     const shouldUseThumbnail = isChromecast();
 
     let blob = await downloadFile(castToken, file, shouldUseThumbnail);
@@ -240,7 +241,7 @@ const renderableImageBlob = async (castToken: string, file: EnteFile2) => {
 
 const downloadFile = async (
     castToken: string,
-    file: EnteFile2,
+    file: EnteFile,
     shouldUseThumbnail: boolean,
 ) => {
     if (!isImageOrLivePhoto(file))

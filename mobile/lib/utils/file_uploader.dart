@@ -676,7 +676,7 @@ class FileUploader {
             await _putFile(fileUploadURL, encryptedFile, encFileSize);
       } else {
         isMultipartUpload = true;
-        _logger.finest(
+        _logger.info(
           "Init multipartUpload $multipartEntryExists, isUpdate $isUpdatedFile",
         );
         if (multipartEntryExists) {
@@ -941,7 +941,7 @@ class FileUploader {
           (e.localID == fileToUpload.localID || isSandBoxFile),
     );
     if (sameLocalSameCollection != null) {
-      _logger.fine(
+      _logger.info(
         "sameLocalSameCollection: toUpload  ${fileToUpload.tag} "
         "existing: ${sameLocalSameCollection.tag} $isSandBoxFile",
       );
@@ -967,7 +967,7 @@ class FileUploader {
     if (fileMissingLocal != null) {
       // update the local id of the existing file and delete the fileToUpload
       // entry
-      _logger.fine(
+      _logger.info(
         "fileMissingLocal: \n toUpload  ${fileToUpload.tag} "
         "\n existing: ${fileMissingLocal.tag}",
       );
@@ -1000,7 +1000,7 @@ class FileUploader {
           (e.localID == fileToUpload.localID || isSandBoxFile),
     );
     if (fileExistsButDifferentCollection != null) {
-      _logger.fine(
+      _logger.info(
         "fileExistsButDifferentCollection: toUpload  ${fileToUpload.tag} "
         "existing: ${fileExistsButDifferentCollection.tag} $isSandBoxFile",
       );
@@ -1018,7 +1018,7 @@ class FileUploader {
         )
         .map((e) => e.localID!)
         .toSet();
-    _logger.fine(
+    _logger.info(
       "Found hashMatch but probably with diff localIDs "
       "$matchLocalIDs",
     );
@@ -1049,7 +1049,7 @@ class FileUploader {
     }
     if (File(encryptedFilePath).existsSync()) {
       if (isMultiPartUpload && !uploadCompleted) {
-        _logger.fine(
+        _logger.info(
           "skip delete for multipart encrypted file $encryptedFilePath",
         );
       } else {

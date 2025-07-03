@@ -571,6 +571,14 @@
       ]
     },
     {
+      "title": "IBKR",
+      "slug": "ibkr",
+      "altNames": [
+        "Interactive Brokers",
+        "IB"
+      ]
+    },
+    {
       "title": "IceDrive",
       "slug": "ice_drive"
     },
@@ -690,6 +698,10 @@
       "altNames": [
         "飞书"
       ]
+    },
+    {
+      "title": "LaunchDarkly",
+      "hex": "858585"
     },
     {
       "title": "Letterboxd"
@@ -1366,6 +1378,13 @@
       "slug": "wargamingnet"
     },
     {
+      "title": "Warner Bros.",
+      "slug": "warner_bros",
+      "altNames": [
+          "Warner Brothers"
+      ]
+    },
+    {
       "title": "Wealthfront"
     },
     {
@@ -1465,6 +1484,9 @@
     {
       "title": "Cronometer",
       "slug": "cronometer"
+    },
+    {
+      "title": "Zitadel"
     }
   ]
 }

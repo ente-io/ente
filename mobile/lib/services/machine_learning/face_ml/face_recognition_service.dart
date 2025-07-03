@@ -18,7 +18,7 @@ class FaceRecognitionService {
   static final _logger = Logger("FaceRecognitionService");
 
   FaceRecognitionService() {
-    _logger.finest("FaceRecognitionService constructor");
+    _logger.info("FaceRecognitionService constructor");
     init();
   }
 

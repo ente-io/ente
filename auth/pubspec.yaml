@@ -1,7 +1,7 @@
 
 name: ente_auth
 description: ente two-factor authenticator
-version: 4.4.0+440
+version: 4.4.1+441
 publish_to: none
 
 environment:
@@ -45,7 +45,13 @@ dependencies:
   flutter_context_menu: ^0.2.0
   flutter_displaymode: ^0.6.0
   flutter_email_sender: ^6.0.2
-  flutter_inappwebview: ^6.1.5
+  # revert to pub.dev when merged
+  # https://github.com/pichillilorenzo/flutter_inappwebview/pull/2548
+  flutter_inappwebview:
+    git:
+      url: https://github.com/pichillilorenzo/flutter_inappwebview.git
+      path: flutter_inappwebview
+      ref: 3e6c4c4a25340cd363af9d38891d88498b90be26
   flutter_launcher_icons: ^0.14.1
   flutter_local_authentication:
     git:

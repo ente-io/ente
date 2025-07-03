@@ -32,6 +32,10 @@ final List<List<double>> gaussianKernel =
 const maxKernelSize = gaussianKernelSize;
 const maxKernelRadius = maxKernelSize ~/ 2;
 
+// Face thumbnail compression constants
+const int _faceThumbnailCompressionQuality = 90;
+const int _faceThumbnailMinDimension = 512;
+
 class DecodedImage {
   final Image image;
   final Uint8List? rawRgbaBytes;
@@ -537,6 +541,31 @@ Future<Uint8List> _cropAndEncodeCanvas(
     height: height,
   );
   return await _encodeImageToPng(croppedImage);
+}
+
+Future<List<Uint8List>> compressFaceThumbnails(Map args) async {
+  final listPngBytes = args['listPngBytes'] as List<Uint8List>;
+  final List<Future<Uint8List>> compressedBytesList = [];
+  try {
+    for (final pngBytes in listPngBytes) {
+      final compressedBytes = FlutterImageCompress.compressWithList(
+        pngBytes,
+        quality: _faceThumbnailCompressionQuality,
+        format: CompressFormat.jpeg,
+        minWidth: _faceThumbnailMinDimension,
+        minHeight: _faceThumbnailMinDimension,
+      );
+      compressedBytesList.add(compressedBytes);
+    }
+    return await Future.wait(compressedBytesList);
+  } catch (e, s) {
+    _logger.warning(
+      'Failed to compress face thumbnail, using original. Size: ${listPngBytes.map((e) => e.length).toList()} bytes',
+      e,
+      s,
+    );
+    rethrow;
+  }
 }
 
 RGB _getPixelBilinear(

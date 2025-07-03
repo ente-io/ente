@@ -9,17 +9,12 @@ import { getKV, getKVB, getKVN, setKV } from "ente-base/kv";
 import log from "ente-base/log";
 import { apiURL } from "ente-base/origins";
 import { ensureAuthToken } from "ente-base/token";
+import { uniqueFilesByID } from "ente-gallery/utils/file";
 import { fileLogID, type EnteFile } from "ente-media/file";
-import {
-    filePublicMagicMetadata,
-    updateRemotePublicMagicMetadata,
-} from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
-import {
-    getAllLocalFiles,
-    getLocalTrashFileIDs,
-    uniqueFilesByID,
-} from "ente-new/photos/services/files";
+import { updateFilePublicMagicMetadata } from "ente-new/photos/services/file";
+import { savedCollectionFiles } from "ente-new/photos/services/photos-fdb";
+import { savedTrashItemFileIDs } from "ente-new/photos/services/trash";
 import { gunzip, gzip } from "ente-new/photos/utils/gzip";
 import { randomSample } from "ente-utils/array";
 import { ensurePrecondition } from "ente-utils/ensure";
@@ -338,7 +333,7 @@ export const hlsPlaylistDataForFile = async (
 ): Promise<HLSPlaylistDataForFile> => {
     ensurePrecondition(file.metadata.fileType == FileType.video);
 
-    if (filePublicMagicMetadata(file)?.sv == 1) {
+    if (file.pubMagicMetadata?.data.sv == 1) {
         return "skip";
     }
 
@@ -519,16 +514,7 @@ const blobToDataURL = (blob: Blob) =>
  * an array.
  */
 const savedProcessedVideoFileIDs = () =>
-    // [Note: Avoiding Zod parsing overhead for DB arrays]
-    //
-    // Validating that the value we read from the DB is indeed the same as the
-    // type we expect can be done using Zod, but for potentially very large
-    // arrays, this has an overhead that is perhaps not justified when dealing
-    // with DB entries we ourselves wrote.
-    //
-    // As an optimization, we skip the runtime check here and cast. This might
-    // not be the most optimal choice in the future, so (a) use it sparingly,
-    // and (b) mark all such cases with the title of this note.
+    // See: [Note: Avoiding Zod parsing for large DB arrays]
     getKV("videoPreviewProcessedFileIDs").then((v) => new Set(v as number[]));
 
 /**
@@ -538,7 +524,7 @@ const savedProcessedVideoFileIDs = () =>
  * @see also {@link savedProcessedVideoFileIDs}.
  */
 const savedFailedVideoFileIDs = () =>
-    // See: [Note: Avoiding Zod parsing overhead for DB arrays]
+    // See: [Note: Avoiding Zod parsing for large DB arrays]
     getKV("videoPreviewFailedFileIDs").then((v) => new Set(v as number[]));
 
 /**
@@ -631,7 +617,7 @@ const saveSyncLastUpdatedAt = (lastUpdatedAt: number) =>
  * Fetch IDs of files from remote that have been processed by other clients
  * since the last time we checked.
  */
-const syncProcessedFileIDs = async () =>
+const pullProcessedFileIDs = async () =>
     syncUpdatedFileDataFileIDs(
         "vid_preview",
         (await savedSyncLastUpdatedAt()) ?? 0,
@@ -671,19 +657,19 @@ export const videoPrunePermanentlyDeletedFileIDsIfNeeded = async (
 };
 
 /**
- * If video processing is enabled, trigger a sync with remote and any subsequent
- * backfill queue processing for pending videos.
+ * If video processing is enabled, trigger a pull from remote and then proceed
+ * with any subsequent backfill queue processing of pending videos.
  *
- * This function is expected to be called during a regular sync that the app
- * makes with remote (See: [Note: Remote sync]). It is a no-op if video
- * processing is not enabled or eligible on this device. Otherwise it syncs the
- * list of already processed file IDs with remote.
+ * This function is intended to be called during a full remote pull (See: [Note:
+ * Remote pull]). It is a no-op if video processing is not enabled or eligible
+ * on this device. Otherwise it pulls the list of already processed file IDs
+ * with remote.
  *
- * At this point it also triggers a backfill (if needed), but doesn't wait for
- * it to complete (which might take a time for big libraries).
+ * At this point it also triggers processing of the backfill (if needed), but
+ * doesn't wait for it to complete (which might take a time for big libraries).
  *
  * Calling it when a backfill has already been triggered by a previous sync is
- * also a no-op. However, a backfill does not start until at least one sync of
+ * also a no-op. However, a backfill does not start until at least one pull of
  * file IDs has been completed with remote, to avoid picking up work on file IDs
  * that have already been processed elsewhere.
  */
@@ -699,7 +685,7 @@ export const videoProcessingSyncIfNeeded = async () => {
 
     if (!isHLSGenerationEnabled()) return;
 
-    await syncProcessedFileIDs();
+    await pullProcessedFileIDs();
 
     tickNow(); /* if not already ticking */
 };
@@ -733,7 +719,7 @@ export const processVideoNewUpload = (
 ) => {
     if (!isHLSGenerationSupported) return;
     if (!isHLSGenerationEnabled()) return;
-    if (file.metadata.fileType !== FileType.video) return;
+    if (file.metadata.fileType != FileType.video) return;
     if (processableUploadItem instanceof File) {
         // While the types don't guarantee it, we really shouldn't be getting
         // here. The only time a processableUploadItem can be File when we're
@@ -891,8 +877,8 @@ const processQueue = async () => {
 const backfillQueue = async (
     userID: number,
 ): Promise<VideoProcessingQueueItem[]> => {
-    const allCollectionFiles = await getAllLocalFiles();
-    const localTrashFileIDs = await getLocalTrashFileIDs();
+    const allCollectionFiles = await savedCollectionFiles();
+    const localTrashFileIDs = await savedTrashItemFileIDs();
     const videoFiles = uniqueFilesByID(
         allCollectionFiles.filter(
             (f) =>
@@ -903,7 +889,7 @@ const backfillQueue = async (
                 // Not in trash.
                 !localTrashFileIDs.has(f.id) &&
                 // See: [Note: Marking files which do not need video processing]
-                filePublicMagicMetadata(f)?.sv != 1,
+                f.pubMagicMetadata?.data.sv != 1,
         ),
     );
 
@@ -1040,7 +1026,7 @@ const processQueueItem = async ({
     if (!res) {
         log.info(`Generate HLS for ${fileLogID(file)} | not-required`);
         // See: [Note: Marking files which do not need video processing]
-        await updateRemotePublicMagicMetadata(file, { sv: 1 });
+        await updateFilePublicMagicMetadata(file, { sv: 1 });
         return;
     }
 

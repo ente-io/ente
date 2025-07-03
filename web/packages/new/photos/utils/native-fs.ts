@@ -19,8 +19,7 @@ import sanitize from "sanitize-filename";
  * directory separators and invalid characters in the input string {@link s}
  * with "_".
  */
-export const sanitizeFilename = (s: string) =>
-    sanitize(s, { replacement: "_" });
+const sanitizeFilename = (s: string) => sanitize(s, { replacement: "_" });
 
 /**
  * Return a new sanitized and unique directory name based on {@link name} that

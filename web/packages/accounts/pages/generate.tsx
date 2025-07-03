@@ -5,6 +5,11 @@ import {
     AccountsPageTitle,
 } from "ente-accounts/components/layouts/centered-paper";
 import { RecoveryKey } from "ente-accounts/components/RecoveryKey";
+import {
+    getData,
+    savedJustSignedUp,
+    saveJustSignedUp,
+} from "ente-accounts/services/accounts-db";
 import { appHomeRoute } from "ente-accounts/services/redirect";
 import {
     generateSRPSetupAttributes,
@@ -25,11 +30,6 @@ import {
     haveCredentialsInSession,
     saveMasterKeyInSessionAndSafeStore,
 } from "ente-base/session";
-import { getData } from "ente-shared/storage/localStorage";
-import {
-    justSignedUp,
-    setJustSignedUp,
-} from "ente-shared/storage/localStorage/helpers";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
@@ -54,7 +54,7 @@ const Page: React.FC = () => {
         if (!user?.token) {
             void router.push("/");
         } else if (haveCredentialsInSession()) {
-            if (justSignedUp()) {
+            if (savedJustSignedUp()) {
                 setOpenRecoveryKey(true);
                 setLoading(false);
             } else {
@@ -82,7 +82,7 @@ const Page: React.FC = () => {
                 masterKey,
             );
             await saveMasterKeyInSessionAndSafeStore(masterKey);
-            setJustSignedUp(true);
+            saveJustSignedUp();
             setOpenRecoveryKey(true);
         } catch (e) {
             log.error("failed to generate password", e);

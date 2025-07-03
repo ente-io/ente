@@ -153,6 +153,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "appVersion": m9,
         "apply": MessageLookupByLibrary.simpleMessage("Verkställ"),
         "applyCodeTitle": MessageLookupByLibrary.simpleMessage("Använd kod"),
+        "areThey": MessageLookupByLibrary.simpleMessage("Are they "),
+        "areYouSureRemoveThisFaceFromPerson":
+            MessageLookupByLibrary.simpleMessage(
+                "Are you sure you want to remove this face from this person?"),
         "areYouSureYouWantToLogout": MessageLookupByLibrary.simpleMessage(
             "Är du säker på att du vill logga ut?"),
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
@@ -449,6 +453,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Oj, något gick fel"),
         "orPickAnExistingOne":
             MessageLookupByLibrary.simpleMessage("Eller välj en befintlig"),
+        "otherDetectedFaces":
+            MessageLookupByLibrary.simpleMessage("Other detected faces"),
         "passkey": MessageLookupByLibrary.simpleMessage("Nyckel"),
         "password": MessageLookupByLibrary.simpleMessage("Lösenord"),
         "passwordChangedSuccessfully":
@@ -471,6 +477,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Integritetspolicy"),
         "publicLinkEnabled":
             MessageLookupByLibrary.simpleMessage("Offentlig länk aktiverad"),
+        "questionmark": MessageLookupByLibrary.simpleMessage("?"),
         "rateUsOnStore": m68,
         "recover": MessageLookupByLibrary.simpleMessage("Återställ"),
         "recoverAccount":
@@ -529,6 +536,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Återställ till standard"),
         "retry": MessageLookupByLibrary.simpleMessage("Försök igen"),
         "save": MessageLookupByLibrary.simpleMessage("Spara"),
+        "saveAsAnotherPerson":
+            MessageLookupByLibrary.simpleMessage("Save as another person"),
         "saveCopy": MessageLookupByLibrary.simpleMessage("Spara kopia"),
         "saveKey": MessageLookupByLibrary.simpleMessage("Spara nyckel"),
         "saveYourRecoveryKeyIfYouHaventAlready":
@@ -580,7 +589,11 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Dela ditt första album"),
         "sharedAlbumSectionDescription": MessageLookupByLibrary.simpleMessage(
             "Skapa delade och samarbetande album med andra Ente användare, inklusive användare med gratisnivån."),
+        "showLessFaces":
+            MessageLookupByLibrary.simpleMessage("Show less faces"),
         "showMemories": MessageLookupByLibrary.simpleMessage("Visa minnen"),
+        "showMoreFaces":
+            MessageLookupByLibrary.simpleMessage("Show more faces"),
         "showPerson": MessageLookupByLibrary.simpleMessage("Visa person"),
         "signUpTerms": MessageLookupByLibrary.simpleMessage(
             "Jag samtycker till <u-terms>användarvillkoren</u-terms> och <u-policy>integritetspolicyn</u-policy>"),

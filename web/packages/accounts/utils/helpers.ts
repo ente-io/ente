@@ -1,8 +1,8 @@
 // TODO: Audit this file, this can be better. e.g. do we need the Object.assign?
 
+import { getData, setLSUser } from "ente-accounts/services/accounts-db";
 import { type KeyAttributes } from "ente-accounts/services/user";
 import { boxSealOpenBytes, decryptBox, toB64URLSafe } from "ente-base/crypto";
-import { getData, setLSUser } from "ente-shared/storage/localStorage";
 
 export async function decryptAndStoreToken(
     keyAttributes: KeyAttributes,

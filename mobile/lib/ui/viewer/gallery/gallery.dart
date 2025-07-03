@@ -127,7 +127,7 @@ class GalleryState extends State<Gallery> {
     _logTag =
         "Gallery_${widget.tagPrefix}${kDebugMode ? "_" + widget.albumName! : ""}_x";
     _logger = Logger(_logTag);
-    _logger.finest("init Gallery");
+    _logger.info("init Gallery");
     _debouncer = Debouncer(
       widget.reloadDebounceTime,
       executionInterval: widget.reloadDebounceExecutionInterval,
@@ -154,11 +154,11 @@ class GalleryState extends State<Gallery> {
         _debouncer.run(() async {
           // In soft refresh, setState is called for entire gallery only when
           // number of child change
-          _logger.finest("Soft refresh all files on ${event.reason} ");
+          _logger.info("Soft refresh all files on ${event.reason} ");
           final result = await _loadFiles();
           final bool hasTriggeredSetState = _onFilesLoaded(result.files);
           if (hasTriggeredSetState && kDebugMode) {
-            _logger.finest(
+            _logger.info(
               "Reloaded gallery on soft refresh all files on ${event.reason}",
             );
           }
@@ -184,7 +184,7 @@ class GalleryState extends State<Gallery> {
         _forceReloadEventSubscriptions.add(
           event.listen((event) async {
             _debouncer.run(() async {
-              _logger.finest("Force refresh all files on ${event.reason}");
+              _logger.info("Force refresh all files on ${event.reason}");
               _sortOrderAsc =
                   widget.sortAsyncFn != null ? widget.sortAsyncFn!() : false;
               final result = await _loadFiles();
@@ -383,7 +383,7 @@ class GalleryState extends State<Gallery> {
 
   @override
   Widget build(BuildContext context) {
-    _logger.finest("Building Gallery  ${widget.tagPrefix}");
+    _logger.info("Building Gallery  ${widget.tagPrefix}");
     GalleryFilesState.of(context).setGalleryFiles = _allGalleryFiles;
     if (!_hasLoadedFiles) {
       return widget.loadingWidget;

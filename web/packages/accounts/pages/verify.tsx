@@ -1,5 +1,4 @@
 import { Box, Typography } from "@mui/material";
-import { HttpStatusCode } from "axios";
 import {
     AccountsPageContents,
     AccountsPageFooter,
@@ -8,6 +7,13 @@ import {
 import { VerifyingPasskey } from "ente-accounts/components/LoginComponents";
 import { SecondFactorChoice } from "ente-accounts/components/SecondFactorChoice";
 import { useSecondFactorChoiceIfNeeded } from "ente-accounts/components/utils/second-factor-choice";
+import {
+    getData,
+    saveIsFirstLogin,
+    setData,
+    setLSUser,
+    unstashReferralSource,
+} from "ente-accounts/services/accounts-db";
 import {
     openPasskeyVerificationURL,
     passkeyVerificationRedirectURL,
@@ -35,17 +41,9 @@ import {
     type SingleInputFormProps,
 } from "ente-base/components/SingleInputForm";
 import { useBaseContext } from "ente-base/context";
-import { isDevBuild } from "ente-base/env";
 import { isHTTPErrorWithStatus } from "ente-base/http";
 import log from "ente-base/log";
 import { clearSessionStorage } from "ente-base/session";
-import { ApiError } from "ente-shared/error";
-import localForage from "ente-shared/storage/localForage";
-import { getData, setData, setLSUser } from "ente-shared/storage/localStorage";
-import {
-    getLocalReferralSource,
-    setIsFirstLogin,
-} from "ente-shared/storage/localStorage/helpers";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
@@ -85,8 +83,7 @@ const Page: React.FC = () => {
         setFieldError,
     ) => {
         try {
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-            const referralSource = getLocalReferralSource()?.trim();
+            const referralSource = unstashReferralSource();
             const cleanedReferral = referralSource
                 ? `web:${referralSource}`
                 : undefined;
@@ -109,12 +106,7 @@ const Page: React.FC = () => {
                     isTwoFactorEnabled: true,
                     isTwoFactorPasskeysEnabled: true,
                 });
-                // TODO: This is not the first login though if they already have
-                // 2FA. Does this flag mean first login on this device?
-                //
-                // Update: This flag causes the interactive encryption key to be
-                // generated, so it has a functional impact we need.
-                setIsFirstLogin(true);
+                saveIsFirstLogin();
                 const url = passkeyVerificationRedirectURL(
                     accountsUrl!,
                     passkeySessionID,
@@ -127,7 +119,7 @@ const Page: React.FC = () => {
                     twoFactorSessionID,
                     isTwoFactorEnabled: true,
                 });
-                setIsFirstLogin(true);
+                saveIsFirstLogin();
                 void router.push("/two-factor/verify");
             } else {
                 await setLSUser({
@@ -149,13 +141,7 @@ const Page: React.FC = () => {
                     }
                     await unstashAndUseSRPSetupAttributes(setupSRP);
                 }
-                // TODO(RE): Temporary safety valve before removing the
-                // unnecessary clear (tag: Migration)
-                if (isDevBuild && (await localForage.length()) > 0) {
-                    throw new Error("Local forage is not empty");
-                }
-                await localForage.clear();
-                setIsFirstLogin(true);
+                saveIsFirstLogin();
                 const redirectURL = unstashRedirect();
                 if (keyAttributes?.encryptedKey) {
                     clearSessionStorage();
@@ -169,14 +155,6 @@ const Page: React.FC = () => {
                 setFieldError(t("invalid_code_error"));
             } else if (isHTTPErrorWithStatus(e, 410)) {
                 setFieldError(t("expired_code_error"));
-            } else if (e instanceof ApiError) {
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
-                if (e?.httpStatusCode === HttpStatusCode.Unauthorized) {
-                    setFieldError(t("invalid_code_error"));
-                    // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
-                } else if (e?.httpStatusCode === HttpStatusCode.Gone) {
-                    setFieldError(t("expired_code_error"));
-                }
             } else {
                 log.error("OTT verification failed", e);
                 throw e;
@@ -212,7 +190,7 @@ const Page: React.FC = () => {
         return (
             <VerifyingPasskey
                 email={email}
-                passkeySessionID={passkeyVerificationData?.passkeySessionID}
+                passkeySessionID={passkeyVerificationData.passkeySessionID}
                 onRetry={() =>
                     openPasskeyVerificationURL(passkeyVerificationData)
                 }

@@ -11975,6 +11975,326 @@ class S {
       args: [name],
     );
   }
+
+  /// `Are you sure you want to remove this face from this person?`
+  String get areYouSureRemoveThisFaceFromPerson {
+    return Intl.message(
+      'Are you sure you want to remove this face from this person?',
+      name: 'areYouSureRemoveThisFaceFromPerson',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Other detected faces`
+  String get otherDetectedFaces {
+    return Intl.message(
+      'Other detected faces',
+      name: 'otherDetectedFaces',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Are they `
+  String get areThey {
+    return Intl.message(
+      'Are they ',
+      name: 'areThey',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `?`
+  String get questionmark {
+    return Intl.message(
+      '?',
+      name: 'questionmark',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Save as another person`
+  String get saveAsAnotherPerson {
+    return Intl.message(
+      'Save as another person',
+      name: 'saveAsAnotherPerson',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Show less faces`
+  String get showLessFaces {
+    return Intl.message(
+      'Show less faces',
+      name: 'showLessFaces',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Show more faces`
+  String get showMoreFaces {
+    return Intl.message(
+      'Show more faces',
+      name: 'showMoreFaces',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Ignore`
+  String get ignore {
+    return Intl.message(
+      'Ignore',
+      name: 'ignore',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Merge`
+  String get merge {
+    return Intl.message(
+      'Merge',
+      name: 'merge',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Reset`
+  String get reset {
+    return Intl.message(
+      'Reset',
+      name: 'reset',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Are you sure you want to ignore this person?`
+  String get areYouSureYouWantToIgnoreThisPerson {
+    return Intl.message(
+      'Are you sure you want to ignore this person?',
+      name: 'areYouSureYouWantToIgnoreThisPerson',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Are you sure you want to ignore these persons?`
+  String get areYouSureYouWantToIgnoreThesePersons {
+    return Intl.message(
+      'Are you sure you want to ignore these persons?',
+      name: 'areYouSureYouWantToIgnoreThesePersons',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The person groups will not be displayed in the people section anymore. Photos will remain untouched.`
+  String get thePersonGroupsWillNotBeDisplayed {
+    return Intl.message(
+      'The person groups will not be displayed in the people section anymore. Photos will remain untouched.',
+      name: 'thePersonGroupsWillNotBeDisplayed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The person will not be displayed in the people section anymore. Photos will remain untouched.`
+  String get thePersonWillNotBeDisplayed {
+    return Intl.message(
+      'The person will not be displayed in the people section anymore. Photos will remain untouched.',
+      name: 'thePersonWillNotBeDisplayed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Are you sure you want to merge them?`
+  String get areYouSureYouWantToMergeThem {
+    return Intl.message(
+      'Are you sure you want to merge them?',
+      name: 'areYouSureYouWantToMergeThem',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `All unnamed groups will be merged into the selected person. This can still be undone from the suggestions history overview of the person.`
+  String get allUnnamedGroupsWillBeMergedIntoTheSelectedPerson {
+    return Intl.message(
+      'All unnamed groups will be merged into the selected person. This can still be undone from the suggestions history overview of the person.',
+      name: 'allUnnamedGroupsWillBeMergedIntoTheSelectedPerson',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Yes, ignore`
+  String get yesIgnore {
+    return Intl.message(
+      'Yes, ignore',
+      name: 'yesIgnore',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Same`
+  String get same {
+    return Intl.message(
+      'Same',
+      name: 'same',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Different`
+  String get different {
+    return Intl.message(
+      'Different',
+      name: 'different',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Same person?`
+  String get sameperson {
+    return Intl.message(
+      'Same person?',
+      name: 'sameperson',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Uploading Large Video Files`
+  String get cLTitle1 {
+    return Intl.message(
+      'Uploading Large Video Files',
+      name: 'cLTitle1',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `On the back of video streaming beta, and work on resumable uploads and downloads, we have now increased the file upload limit to 10GB. This is now available in both desktop and mobile apps.`
+  String get cLDesc1 {
+    return Intl.message(
+      'On the back of video streaming beta, and work on resumable uploads and downloads, we have now increased the file upload limit to 10GB. This is now available in both desktop and mobile apps.',
+      name: 'cLDesc1',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Background Upload`
+  String get cLTitle2 {
+    return Intl.message(
+      'Background Upload',
+      name: 'cLTitle2',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Background uploads are now supported on iOS as well, in addition to Android devices. No need to open the app to backup your latest photos and videos.`
+  String get cLDesc2 {
+    return Intl.message(
+      'Background uploads are now supported on iOS as well, in addition to Android devices. No need to open the app to backup your latest photos and videos.',
+      name: 'cLDesc2',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Autoplay Memories`
+  String get cLTitle3 {
+    return Intl.message(
+      'Autoplay Memories',
+      name: 'cLTitle3',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `We have made significant improvements to our memories experience, including autoplay, swipe to next memory and a lot more.`
+  String get cLDesc3 {
+    return Intl.message(
+      'We have made significant improvements to our memories experience, including autoplay, swipe to next memory and a lot more.',
+      name: 'cLDesc3',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Improved Face Recognition`
+  String get cLTitle4 {
+    return Intl.message(
+      'Improved Face Recognition',
+      name: 'cLTitle4',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Along with a bunch of under the hood improvements, now its much easier to see all detected faces, provide feedback on similar faces, and add/remove faces from a single photo.`
+  String get cLDesc4 {
+    return Intl.message(
+      'Along with a bunch of under the hood improvements, now its much easier to see all detected faces, provide feedback on similar faces, and add/remove faces from a single photo.',
+      name: 'cLDesc4',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Birthday Notifications`
+  String get cLTitle5 {
+    return Intl.message(
+      'Birthday Notifications',
+      name: 'cLTitle5',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `You will now receive an opt-out notification for all the birthdays your have saved on Ente, along with a collection of their best photos.`
+  String get cLDesc5 {
+    return Intl.message(
+      'You will now receive an opt-out notification for all the birthdays your have saved on Ente, along with a collection of their best photos.',
+      name: 'cLDesc5',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Resumable Uploads and Downloads`
+  String get cLTitle6 {
+    return Intl.message(
+      'Resumable Uploads and Downloads',
+      name: 'cLTitle6',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No more waiting for uploads/downloads to complete before you can close the app. All uploads and downloads now have the ability to be paused midway, and resume from where you left off.`
+  String get cLDesc6 {
+    return Intl.message(
+      'No more waiting for uploads/downloads to complete before you can close the app. All uploads and downloads now have the ability to be paused midway, and resume from where you left off.',
+      name: 'cLDesc6',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
