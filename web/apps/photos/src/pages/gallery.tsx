@@ -108,8 +108,8 @@ import {
 import type { SearchOption } from "ente-new/photos/services/search/types";
 import { initSettings } from "ente-new/photos/services/settings";
 import {
-    initUserDetailsOrTriggerPull,
     redirectToCustomerPortal,
+    savedUserDetailsOrTriggerPull,
     userDetailsSnapshot,
     verifyStripeSubscription,
 } from "ente-new/photos/services/user-details";
@@ -301,7 +301,6 @@ const Page: React.FC = () => {
             // One time inits.
             preloadImage("/images/subscription-card-background");
             initSettings();
-            await initUserDetailsOrTriggerPull();
             setupSelectAllKeyBoardShortcutHandler();
 
             // Show the initial state while the rest of the sequence proceeds.
@@ -318,10 +317,12 @@ const Page: React.FC = () => {
             }
 
             // Initialize the reducer.
+            const user = ensureLocalUser();
+            const userDetails = await savedUserDetailsOrTriggerPull();
             dispatch({
                 type: "mount",
-                user: ensureLocalUser(),
-                familyData: userDetailsSnapshot()?.familyData,
+                user,
+                familyData: userDetails?.familyData,
                 collections: await savedCollections(),
                 collectionFiles: await savedCollectionFiles(),
                 trashItems: await savedTrashItems(),
