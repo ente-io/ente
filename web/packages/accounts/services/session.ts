@@ -1,4 +1,7 @@
-import { getData } from "ente-accounts/services/accounts-db";
+import {
+    savedOriginalKeyAttributes,
+    savedSRPAttributes,
+} from "ente-accounts/services/accounts-db";
 import type { KeyAttributes } from "ente-accounts/services/user";
 import { authenticatedRequestHeaders, HTTPError } from "ente-base/http";
 import log from "ente-base/log";
@@ -24,6 +27,9 @@ type SessionValidity =
 
 const SessionValidityResponse = z.object({
     hasSetKeys: z.boolean(),
+    /**
+     * Will not be present if {@link hasSetKeys} is `false`.
+     */
     keyAttributes: RemoteKeyAttributes.nullish().transform(nullToUndefined),
 });
 
@@ -82,15 +88,16 @@ export const checkSessionValidity = async (): Promise<SessionValidity> => {
         else throw new HTTPError(res);
     }
 
-    // See if the response contains keyAttributes (they might not for older
-    // deployments).
+    // See if the response contains keyAttributes (it will not if `hasSetKeys`
+    // in the response is `false`).
     const { keyAttributes } = SessionValidityResponse.parse(await res.json());
     if (keyAttributes) {
         const remoteKeyAttributes = keyAttributes;
 
         // We should have these values locally if we reach here.
         const email = ensureLocalUser().email;
-        const localSRPAttributes = getData("srpAttributes")!;
+        // TODO(RE): This is not being set until initial reauthentication.
+        const localSRPAttributes = savedSRPAttributes()!;
 
         // Fetch the remote SRP attributes.
         //
@@ -121,7 +128,7 @@ export const checkSessionValidity = async (): Promise<SessionValidity> => {
         }
     }
 
-    // The token is still valid (to the best of our ascertainable knowledge).
+    // The token is still valid.
     return { status: "valid" };
 };
 
@@ -159,7 +166,7 @@ export const isSessionInvalid = async (): Promise<boolean> => {
 
         const { hasSetKeys } = SessionValidityResponse.parse(await res.json());
         if (!hasSetKeys) {
-            const originalKeyAttributes = getData("originalKeyAttributes");
+            const originalKeyAttributes = savedOriginalKeyAttributes();
             if (originalKeyAttributes)
                 await putUserKeyAttributes(originalKeyAttributes);
         }

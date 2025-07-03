@@ -1,7 +1,7 @@
 import { Verify2FACodeForm } from "ente-accounts/components/Verify2FACodeForm";
 import {
     getData,
-    setData,
+    saveKeyAttributes,
     setLSUser,
 } from "ente-accounts/services/accounts-db";
 import type { User } from "ente-accounts/services/user";
@@ -49,13 +49,15 @@ const Page: React.FC = () => {
             await setLSUser({
                 ...getData("user"),
                 id,
+                // TODO: [Note: empty token?]
+                //
                 // The original code was parsing an token which is never going
                 // to be present in the response, so effectively was always
                 // setting token to undefined. So this works, but is it needed?
                 token: undefined,
                 encryptedToken,
             });
-            setData("keyAttributes", keyAttributes);
+            saveKeyAttributes(keyAttributes);
             await router.push(unstashRedirect() ?? "/credentials");
         } catch (e) {
             if (isHTTPErrorWithStatus(e, 404)) {

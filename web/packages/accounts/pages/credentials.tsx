@@ -18,8 +18,11 @@ import {
     getData,
     getToken,
     savedIsFirstLogin,
+    savedKeyAttributes,
+    savedSRPAttributes,
     saveIsFirstLogin,
-    setData,
+    saveKeyAttributes,
+    saveSRPAttributes,
     setLSUser,
 } from "ente-accounts/services/accounts-db";
 import {
@@ -62,6 +65,17 @@ import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useState } from "react";
 
+/**
+ * A page that allows the user to authenticate using their password.
+ *
+ * It is shown in two cases:
+ *
+ * - Initial authentication, when the user is logging in on to a new client.
+ *
+ * - Subsequent reauthentication, when the user opens the web app in a new tab.
+ *   Such a tab won't have the user's master key in session storage, so we ask
+ *   the user to reauthenticate using their password.
+ */
 const Page: React.FC = () => {
     const { logout, showMiniDialog } = useBaseContext();
 
@@ -94,8 +108,8 @@ const Page: React.FC = () => {
                 case "valid":
                     break;
                 case "validButPasswordChanged":
-                    setData("keyAttributes", session.updatedKeyAttributes);
-                    setData("srpAttributes", session.updatedSRPAttributes);
+                    saveKeyAttributes(session.updatedKeyAttributes);
+                    saveSRPAttributes(session.updatedSRPAttributes);
                     // Set a flag that causes new interactive key attributes to
                     // be generated.
                     saveIsFirstLogin();
@@ -125,8 +139,8 @@ const Page: React.FC = () => {
                 return;
             }
             const kek = await unstashKeyEncryptionKeyFromSession();
-            const keyAttributes: KeyAttributes = getData("keyAttributes");
-            const srpAttributes: SRPAttributes = getData("srpAttributes");
+            const keyAttributes = savedKeyAttributes();
+            const srpAttributes = savedSRPAttributes();
 
             if (getToken()) {
                 setSessionValidityCheck(validateSession());
@@ -140,7 +154,7 @@ const Page: React.FC = () => {
                     },
                     kek,
                 );
-                void postVerification(masterKey, kek, keyAttributes);
+                await postVerification(masterKey, kek, keyAttributes);
                 return;
             }
 
@@ -229,7 +243,7 @@ const Page: React.FC = () => {
                         id,
                         isTwoFactorEnabled: false,
                     });
-                    if (keyAttributes) setData("keyAttributes", keyAttributes);
+                    if (keyAttributes) saveKeyAttributes(keyAttributes);
                     return keyAttributes;
                 }
             } catch (e) {
@@ -265,14 +279,14 @@ const Page: React.FC = () => {
         await saveMasterKeyInSessionAndSafeStore(masterKey);
         await decryptAndStoreToken(keyAttributes, masterKey);
         try {
-            let srpAttributes: SRPAttributes | null | undefined =
-                getData("srpAttributes");
+            let srpAttributes = savedSRPAttributes();
             if (!srpAttributes && user) {
                 srpAttributes = await getSRPAttributes(user.email);
                 if (srpAttributes) {
-                    setData("srpAttributes", srpAttributes);
+                    saveSRPAttributes(srpAttributes);
                 }
             }
+            // TODO: todo?
             log.debug(() => `userSRPSetupPending ${!srpAttributes}`);
             if (!srpAttributes) {
                 await setupSRP(await generateSRPSetupAttributes(kek));
@@ -282,6 +296,12 @@ const Page: React.FC = () => {
         }
         void router.push(unstashRedirect() ?? appHomeRoute);
     };
+
+    const userEmail = user?.email;
+
+    if (!userEmail) {
+        return <LoadingIndicator />;
+    }
 
     if (!keyAttributes && !srpAttributes) {
         return <LoadingIndicator />;
@@ -317,12 +337,14 @@ const Page: React.FC = () => {
     // possibility using types.
     return (
         <AccountsPageContents>
-            <PasswordHeader caption={user?.email} />
+            <PasswordHeader caption={userEmail} />
             <VerifyMasterPasswordForm
-                user={user}
-                keyAttributes={keyAttributes}
-                getKeyAttributes={getKeyAttributes}
-                srpAttributes={srpAttributes}
+                {...{
+                    userEmail,
+                    keyAttributes,
+                    getKeyAttributes,
+                    srpAttributes,
+                }}
                 submitButtonTitle={t("sign_in")}
                 onVerify={handleVerifyMasterPassword}
             />

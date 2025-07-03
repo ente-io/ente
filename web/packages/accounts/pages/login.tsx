@@ -6,6 +6,9 @@ import { customAPIHost } from "ente-base/origins";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 
+/**
+ * A page that allows the user to login into their existing Ente account.
+ */
 const Page: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [host, setHost] = useState<string | undefined>();

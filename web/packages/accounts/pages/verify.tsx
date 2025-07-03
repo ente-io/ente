@@ -9,9 +9,14 @@ import { SecondFactorChoice } from "ente-accounts/components/SecondFactorChoice"
 import { useSecondFactorChoiceIfNeeded } from "ente-accounts/components/utils/second-factor-choice";
 import {
     getData,
+    savedKeyAttributes,
+    savedOriginalKeyAttributes,
+    savedSRPAttributes,
     saveIsFirstLogin,
-    setData,
+    saveKeyAttributes,
+    saveOriginalKeyAttributes,
     setLSUser,
+    unstashAfterUseSRPSetupAttributes,
     unstashReferralSource,
 } from "ente-accounts/services/accounts-db";
 import {
@@ -22,13 +27,8 @@ import {
     stashedRedirect,
     unstashRedirect,
 } from "ente-accounts/services/redirect";
-import {
-    getSRPAttributes,
-    setupSRP,
-    unstashAndUseSRPSetupAttributes,
-    type SRPAttributes,
-} from "ente-accounts/services/srp";
-import type { KeyAttributes, User } from "ente-accounts/services/user";
+import { getSRPAttributes, setupSRP } from "ente-accounts/services/srp";
+import type { User } from "ente-accounts/services/user";
 import {
     putUserKeyAttributes,
     sendOTT,
@@ -49,6 +49,9 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { Trans } from "react-i18next";
 
+/**
+ * A page that allows the user to verify their email.
+ */
 const Page: React.FC = () => {
     const { logout, showMiniDialog } = useBaseContext();
 
@@ -130,16 +133,14 @@ const Page: React.FC = () => {
                     isTwoFactorEnabled: false,
                 });
                 if (keyAttributes) {
-                    setData("keyAttributes", keyAttributes);
-                    setData("originalKeyAttributes", keyAttributes);
+                    saveKeyAttributes(keyAttributes);
+                    saveOriginalKeyAttributes(keyAttributes);
                 } else {
-                    const originalKeyAttributes = getData(
-                        "originalKeyAttributes",
-                    );
+                    const originalKeyAttributes = savedOriginalKeyAttributes();
                     if (originalKeyAttributes) {
                         await putUserKeyAttributes(originalKeyAttributes);
                     }
-                    await unstashAndUseSRPSetupAttributes(setupSRP);
+                    await unstashAfterUseSRPSetupAttributes(setupSRP);
                 }
                 saveIsFirstLogin();
                 const redirectURL = unstashRedirect();
@@ -258,7 +259,7 @@ const redirectionIfNeeded = async (user: User | undefined) => {
         return "/";
     }
 
-    const keyAttributes: KeyAttributes = getData("keyAttributes");
+    const keyAttributes = savedKeyAttributes();
 
     if (keyAttributes?.encryptedKey && (user.token || user.encryptedToken)) {
         return "/credentials";
@@ -278,7 +279,7 @@ const redirectionIfNeeded = async (user: User | undefined) => {
     // saved them). If they are present and indicate that email verification is
     // not required, redirect to the password verification page.
 
-    const srpAttributes: SRPAttributes = getData("srpAttributes");
+    const srpAttributes = savedSRPAttributes();
     if (srpAttributes && !srpAttributes.isEmailMFAEnabled) {
         // Fetch the latest SRP attributes instead of relying on the potentially
         // stale stored values. This is an infrequent scenario path, so extra

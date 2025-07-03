@@ -19,6 +19,10 @@ import { useCallback, useState } from "react";
 import { Trans } from "react-i18next";
 import { z } from "zod/v4";
 
+/**
+ * A page that allows a user to change the email address associated with their
+ * Ente account.
+ */
 const Page: React.FC = () => {
     useRedirectIfNeedsCredentials("/change-email");
 

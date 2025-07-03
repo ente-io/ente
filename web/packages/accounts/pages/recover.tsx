@@ -3,7 +3,10 @@ import {
     AccountsPageFooter,
     AccountsPageTitle,
 } from "ente-accounts/components/layouts/centered-paper";
-import { getData } from "ente-accounts/services/accounts-db";
+import {
+    getData,
+    savedKeyAttributes,
+} from "ente-accounts/services/accounts-db";
 import { recoveryKeyFromMnemonic } from "ente-accounts/services/recovery-key";
 import { appHomeRoute, stashRedirect } from "ente-accounts/services/redirect";
 import type { KeyAttributes, User } from "ente-accounts/services/user";
@@ -30,13 +33,12 @@ const Page: React.FC = () => {
 
     const [keyAttributes, setKeyAttributes] = useState<
         KeyAttributes | undefined
-    >();
+    >(undefined);
 
     const router = useRouter();
 
     useEffect(() => {
         const user: User = getData("user");
-        const keyAttributes: KeyAttributes = getData("keyAttributes");
         if (!user?.email) {
             void router.push("/");
             return;
@@ -47,6 +49,8 @@ const Page: React.FC = () => {
             void router.push("/verify");
             return;
         }
+
+        const keyAttributes = savedKeyAttributes();
         if (!keyAttributes) {
             void router.push("/generate");
         } else if (haveCredentialsInSession()) {

@@ -8,6 +8,7 @@ import { RecoveryKey } from "ente-accounts/components/RecoveryKey";
 import {
     getData,
     savedJustSignedUp,
+    savedOriginalKeyAttributes,
     saveJustSignedUp,
 } from "ente-accounts/services/accounts-db";
 import { appHomeRoute } from "ente-accounts/services/redirect";
@@ -15,7 +16,7 @@ import {
     generateSRPSetupAttributes,
     setupSRP,
 } from "ente-accounts/services/srp";
-import type { KeyAttributes, User } from "ente-accounts/services/user";
+import type { User } from "ente-accounts/services/user";
 import {
     generateAndSaveInteractiveKeyAttributes,
     generateKeysAndAttributes,
@@ -48,7 +49,6 @@ const Page: React.FC = () => {
     const router = useRouter();
 
     useEffect(() => {
-        const keyAttributes: KeyAttributes = getData("originalKeyAttributes");
         const user: User = getData("user");
         setUser(user);
         if (!user?.token) {
@@ -60,7 +60,7 @@ const Page: React.FC = () => {
             } else {
                 void router.push(appHomeRoute);
             }
-        } else if (keyAttributes?.encryptedKey) {
+        } else if (savedOriginalKeyAttributes()?.encryptedKey) {
             void router.push("/credentials");
         } else {
             setLoading(false);
