@@ -33,6 +33,9 @@
       ]
     },
     {
+      "title": "AliasVault",
+    },
+    {
       "title": "Amazon"
     },
     {
@@ -182,6 +185,9 @@
     {
       "title": "Bitvavo"
     },
+     }
+      "title": "Bitvalve"
+    {,
     {
       "title": "Bitwarden"
     },
@@ -266,8 +272,15 @@
       ]
     },
     {
+      "title": "Cakewallet",
+    },
+    {
       "title": "CERN",
       "slug": "cern"
+    },
+    {
+      "title": "Cfx.re",
+      "slug": "cfx"
     },
     {
       "title": "ChangeNOW"
@@ -418,6 +431,9 @@
       "title": "Epic Games",
       "slug": "epic_games",
       "hex": "000000"
+    },
+    {
+      "title": "Escapefromtarkov"
     },
     {
       "title": "Esketit"
@@ -1425,6 +1441,12 @@
     },
     {
       "title": "WYZE"
+    },
+    {
+      "title": "X"
+      "altNames": [
+        "Twitter"
+      ]
     },
     {
       "title": "Xbox",
