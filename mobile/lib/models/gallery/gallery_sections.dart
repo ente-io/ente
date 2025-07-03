@@ -72,10 +72,12 @@ class GalleryGroups {
       final firstIndex = currentIndex == 0 ? currentIndex : currentIndex + 1;
       final lastIndex = firstIndex + numberOfGridRows;
       final minOffset = currentOffset;
-      final maxOffset =
-          minOffset + (numberOfGridRows * tileHeight) + headerExtent;
+      final maxOffset = minOffset +
+          (numberOfGridRows * tileHeight) +
+          (numberOfGridRows - 1) * spacing +
+          headerExtent;
 
-      int currentGroupIndex = 0;
+      int currentFileInGroupIndex = 0;
       groupLayouts.add(
         FixedExtentSectionLayout(
           firstIndex: firstIndex,
@@ -94,10 +96,10 @@ class GalleryGroups {
             } else {
               final gridRowChildren = <Widget>[];
               for (int _ in Iterable<int>.generate(crossAxisCount)) {
-                if (currentGroupIndex < filesInGroup.length) {
+                if (currentFileInGroupIndex < filesInGroup.length) {
                   gridRowChildren.add(
                     GalleryFileWidget(
-                      file: filesInGroup[currentGroupIndex],
+                      file: filesInGroup[currentFileInGroupIndex],
                       selectedFiles: selectedFiles,
                       limitSelectionToOne: limitSelectionToOne,
                       tag: tagPrefix,
@@ -105,7 +107,7 @@ class GalleryGroups {
                       currentUserID: currentUserID,
                     ),
                   );
-                  currentGroupIndex++;
+                  currentFileInGroupIndex++;
                 } else {
                   break;
                 }
@@ -122,13 +124,6 @@ class GalleryGroups {
         ),
       );
       currentIndex = lastIndex;
-
-      // Adding this crashes the app??????
-
-      // if (groupID != groupIDs.last) {
-      //   // lastIndex - (firstIndex + 1) - 1
-      //   currentOffset = maxOffset + (lastIndex - firstIndex) * spacing;
-      // }
       currentOffset = maxOffset;
     }
 
