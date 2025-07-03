@@ -82,7 +82,7 @@ const Page: React.FC = () => {
 
     const [user, setUser] = useState<PartialLocalUser | undefined>(undefined);
     const [keyAttributes, setKeyAttributes] = useState<KeyAttributes>();
-    const [srpAttributes, setSrpAttributes] = useState<SRPAttributes>();
+    const [srpAttributes, setSRPAttributes] = useState<SRPAttributes>();
     const [passkeyVerificationData, setPasskeyVerificationData] = useState<
         { passkeySessionID: string; url: string } | undefined
     >();
@@ -175,7 +175,7 @@ const Page: React.FC = () => {
             }
 
             if (srpAttributes) {
-                setSrpAttributes(srpAttributes);
+                setSRPAttributes(srpAttributes);
             } else {
                 void router.push("/");
             }
