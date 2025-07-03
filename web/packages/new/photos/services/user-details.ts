@@ -238,7 +238,6 @@ const setUserDetailsSnapshot = (snapshot: UserDetails) => {
 export const pullUserDetails = async () => {
     const userDetails = await getUserDetails();
     await setKV("userDetails", userDetails);
-    setUserDetailsSnapshot(userDetails);
 
     // Update the email for the local storage user if needed (the user might've
     // changed their email on a different client).
@@ -246,6 +245,32 @@ export const pullUserDetails = async () => {
         log.info("Updating user email to match fetched user details");
         // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
         await setLSUser({ ...getData("user"), email: userDetails.email });
+    }
+
+    // The gallery listens for updates to userDetails, so a special case, do a
+    // deep equality check so as to not rerender it on redundant updates.
+    //
+    // [Note: Deep equal check]
+    //
+    // React uses `Object.is` to detect changes, which changes for arrays,
+    // objects and combinations thereof even if the underlying data is the same.
+    //
+    // In many cases, the code can be restructured to avoid this being a
+    // problem, or the rerender might be infrequent enough that it is not a
+    // problem.
+    //
+    // However, when used with useSyncExternalStore, there is an easy way to
+    // prevent this, by doing a preflight deep equality comparison.
+    //
+    // There are arguably faster libraries out there that'll do the deep
+    // equality check for us, but since it is an infrequent pattern in our code
+    // base currently, we just use the JSON serialization.
+    //
+    // Mark all cases that do this using this note's title so we can audit them
+    // if we move to a deep equality comparison library in the future.
+
+    if (JSON.stringify(userDetails) != JSON.stringify(userDetailsSnapshot())) {
+        setUserDetailsSnapshot(userDetails);
     }
 };
 
