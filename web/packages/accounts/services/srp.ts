@@ -245,7 +245,7 @@ export const getSRPAttributes = async (
  * temporarily stash them in local storage using an object that conforms to the
  * following {@link SRPSetupAttributes} schema.
  */
-const SRPSetupAttributes = z.object({
+export const SRPSetupAttributes = z.object({
     srpUserID: z.string(),
     srpSalt: z.string(),
     srpVerifier: z.string(),
@@ -300,40 +300,6 @@ const deriveSRPLoginSubKey = async (kek: string) => {
 const b64ToBuffer = (base64: string) => Buffer.from(base64, "base64");
 
 const bufferToB64 = (buffer: Buffer) => buffer.toString("base64");
-
-/**
- * Save {@link SRPSetupAttributes} in local storage for later use via
- * {@link unstashAndUseSRPSetupAttributes}.
- *
- * See: [Note: SRP setup attributes]
- */
-export const stashSRPSetupAttributes = (
-    srpSetupAttributes: SRPSetupAttributes,
-) =>
-    localStorage.setItem(
-        "srpSetupAttributes",
-        JSON.stringify(srpSetupAttributes),
-    );
-
-/**
- * Retrieve the {@link SRPSetupAttributes}, if any, that were stashed by a
- * previous call to {@link stashSRPSetupAttributes}.
- *
- * - If they are found, then invoke the provided callback ({@link cb}) with the
- *   value. If the promise returned by the callback fulfills, then remove the
- *   stashed value from local storage.
- *
- * - If they are not found, then the callback is not invoked.
- */
-export const unstashAndUseSRPSetupAttributes = async (
-    cb: (srpSetupAttributes: SRPSetupAttributes) => Promise<void>,
-) => {
-    const jsonString = localStorage.getItem("srpSetupAttributes");
-    if (!jsonString) return;
-    const srpSetupAttributes = SRPSetupAttributes.parse(JSON.parse(jsonString));
-    await cb(srpSetupAttributes);
-    localStorage.removeItem("srpSetupAttributes");
-};
 
 /**
  * Use the provided {@link SRPSetupAttributes} to, well, setup SRP.

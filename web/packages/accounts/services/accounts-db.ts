@@ -2,15 +2,14 @@ import { getKVS, removeKV, setKV } from "ente-base/kv";
 import log from "ente-base/log";
 import { nullToUndefined } from "ente-utils/transform";
 import { z } from "zod/v4";
+import {
+    RemoteSRPAttributes,
+    SRPSetupAttributes,
+    type SRPAttributes,
+} from "./srp";
 import { RemoteKeyAttributes, type KeyAttributes } from "./user";
-import { RemoteSRPAttributes, type SRPAttributes } from "./srp";
 
-export type LocalStorageKey =
-    | "user"
-    | "keyAttributes"
-    // Moved to ente-accounts
-    // "srpSetupAttributes"
-    | "srpAttributes";
+export type LocalStorageKey = "user";
 
 /**
  * [Note: Accounts DB]
@@ -200,6 +199,39 @@ export const savedSRPAttributes = (): SRPAttributes | undefined => {
 export const saveSRPAttributes = (srpAttributes: SRPAttributes) =>
     localStorage.setItem("srpAttributes", JSON.stringify(srpAttributes));
 
+/**
+ * Save {@link SRPSetupAttributes} in local storage for later use via
+ * {@link unstashAfterUseSRPSetupAttributes}.
+ *
+ * See: [Note: SRP setup attributes]
+ */
+export const stashSRPSetupAttributes = (
+    srpSetupAttributes: SRPSetupAttributes,
+) =>
+    localStorage.setItem(
+        "srpSetupAttributes",
+        JSON.stringify(srpSetupAttributes),
+    );
+
+/**
+ * Retrieve the {@link SRPSetupAttributes}, if any, that were stashed by a
+ * previous call to {@link stashSRPSetupAttributes}.
+ *
+ * - If they are found, then invoke the provided callback ({@link cb}) with the
+ *   value. If the promise returned by the callback fulfills, then remove the
+ *   stashed value from local storage.
+ *
+ * - If they are not found, then the callback is not invoked.
+ */
+export const unstashAfterUseSRPSetupAttributes = async (
+    cb: (srpSetupAttributes: SRPSetupAttributes) => Promise<void>,
+) => {
+    const jsonString = localStorage.getItem("srpSetupAttributes");
+    if (!jsonString) return;
+    const srpSetupAttributes = SRPSetupAttributes.parse(JSON.parse(jsonString));
+    await cb(srpSetupAttributes);
+    localStorage.removeItem("srpSetupAttributes");
+};
 
 export const getToken = (): string => {
     const token = getData("user")?.token;

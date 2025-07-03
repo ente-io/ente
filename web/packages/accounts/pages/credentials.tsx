@@ -18,10 +18,11 @@ import {
     getData,
     getToken,
     savedIsFirstLogin,
+    savedKeyAttributes,
+    savedSRPAttributes,
     saveIsFirstLogin,
     saveKeyAttributes,
     saveSRPAttributes,
-    setData,
     setLSUser,
 } from "ente-accounts/services/accounts-db";
 import {
@@ -138,8 +139,8 @@ const Page: React.FC = () => {
                 return;
             }
             const kek = await unstashKeyEncryptionKeyFromSession();
-            const keyAttributes: KeyAttributes = getData("keyAttributes");
-            const srpAttributes: SRPAttributes = getData("srpAttributes");
+            const keyAttributes = savedKeyAttributes();
+            const srpAttributes = savedSRPAttributes();
 
             if (getToken()) {
                 setSessionValidityCheck(validateSession());
@@ -153,7 +154,7 @@ const Page: React.FC = () => {
                     },
                     kek,
                 );
-                void postVerification(masterKey, kek, keyAttributes);
+                await postVerification(masterKey, kek, keyAttributes);
                 return;
             }
 
@@ -242,7 +243,7 @@ const Page: React.FC = () => {
                         id,
                         isTwoFactorEnabled: false,
                     });
-                    if (keyAttributes) setData("keyAttributes", keyAttributes);
+                    if (keyAttributes) saveKeyAttributes(keyAttributes);
                     return keyAttributes;
                 }
             } catch (e) {
@@ -278,14 +279,14 @@ const Page: React.FC = () => {
         await saveMasterKeyInSessionAndSafeStore(masterKey);
         await decryptAndStoreToken(keyAttributes, masterKey);
         try {
-            let srpAttributes: SRPAttributes | null | undefined =
-                getData("srpAttributes");
+            let srpAttributes = savedSRPAttributes();
             if (!srpAttributes && user) {
                 srpAttributes = await getSRPAttributes(user.email);
                 if (srpAttributes) {
-                    setData("srpAttributes", srpAttributes);
+                    saveSRPAttributes(srpAttributes);
                 }
             }
+            // TODO: todo?
             log.debug(() => `userSRPSetupPending ${!srpAttributes}`);
             if (!srpAttributes) {
                 await setupSRP(await generateSRPSetupAttributes(kek));

@@ -1,7 +1,7 @@
 import { Verify2FACodeForm } from "ente-accounts/components/Verify2FACodeForm";
 import {
     getData,
-    setData,
+    saveKeyAttributes,
     setLSUser,
 } from "ente-accounts/services/accounts-db";
 import type { User } from "ente-accounts/services/user";
@@ -57,7 +57,7 @@ const Page: React.FC = () => {
                 token: undefined,
                 encryptedToken,
             });
-            setData("keyAttributes", keyAttributes);
+            saveKeyAttributes(keyAttributes);
             await router.push(unstashRedirect() ?? "/credentials");
         } catch (e) {
             if (isHTTPErrorWithStatus(e, 404)) {
