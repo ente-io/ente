@@ -83,6 +83,7 @@ export interface PartialLocalUser {
     encryptedToken?: string;
     isTwoFactorEnabled?: boolean;
     twoFactorSessionID?: string;
+    passkeySessionID?: string;
 }
 
 const PartialLocalUser = z.object({
@@ -92,6 +93,7 @@ const PartialLocalUser = z.object({
     encryptedToken: z.string().nullish().transform(nullToUndefined),
     isTwoFactorEnabled: z.boolean().nullish().transform(nullToUndefined),
     twoFactorSessionID: z.string().nullish().transform(nullToUndefined),
+    passkeySessionID: z.string().nullish().transform(nullToUndefined),
 });
 
 /**
