@@ -4,12 +4,12 @@ import {
     AccountsPageTitle,
 } from "ente-accounts/components/layouts/centered-paper";
 import {
-    getData,
     savedKeyAttributes,
+    savedPartialLocalUser,
 } from "ente-accounts/services/accounts-db";
 import { recoveryKeyFromMnemonic } from "ente-accounts/services/recovery-key";
 import { appHomeRoute, stashRedirect } from "ente-accounts/services/redirect";
-import type { KeyAttributes, User } from "ente-accounts/services/user";
+import type { KeyAttributes } from "ente-accounts/services/user";
 import { sendOTT } from "ente-accounts/services/user";
 import { decryptAndStoreToken } from "ente-accounts/utils/helpers";
 import { LinkButton } from "ente-base/components/LinkButton";
@@ -28,6 +28,12 @@ import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 
+/**
+ * A page that allows the user to enter their recovery key to recover their
+ * master key if they've forgotten their password.
+ *
+ * See: [Note: Login pages]
+ */
 const Page: React.FC = () => {
     const { showMiniDialog } = useBaseContext();
 
@@ -38,7 +44,7 @@ const Page: React.FC = () => {
     const router = useRouter();
 
     useEffect(() => {
-        const user: User = getData("user");
+        const user = savedPartialLocalUser();
         if (!user?.email) {
             void router.push("/");
             return;

@@ -11,6 +11,7 @@ import {
     getData,
     savedKeyAttributes,
     savedOriginalKeyAttributes,
+    savedPartialLocalUser,
     savedSRPAttributes,
     saveIsFirstLogin,
     saveKeyAttributes,
@@ -28,7 +29,6 @@ import {
     unstashRedirect,
 } from "ente-accounts/services/redirect";
 import { getSRPAttributes, setupSRP } from "ente-accounts/services/srp";
-import type { User } from "ente-accounts/services/user";
 import {
     putUserKeyAttributes,
     sendOTT,
@@ -51,6 +51,8 @@ import { Trans } from "react-i18next";
 
 /**
  * A page that allows the user to verify their email.
+ *
+ * See: [Note: Login pages]
  */
 const Page: React.FC = () => {
     const { logout, showMiniDialog } = useBaseContext();
@@ -60,6 +62,7 @@ const Page: React.FC = () => {
     const [passkeyVerificationData, setPasskeyVerificationData] = useState<
         { passkeySessionID: string; url: string } | undefined
     >();
+
     const {
         secondFactorChoiceProps,
         userVerificationResultAfterResolvingSecondFactorChoice,
@@ -68,17 +71,13 @@ const Page: React.FC = () => {
     const router = useRouter();
 
     useEffect(() => {
-        const main = async () => {
-            const user: User = getData("user");
-
-            const redirect = await redirectionIfNeeded(user);
-            if (redirect) {
-                void router.push(redirect);
+        void redirectionIfNeededOrEmail().then((redirectOrEmail) => {
+            if (typeof redirectOrEmail == "string") {
+                void router.push(redirectOrEmail);
             } else {
-                setEmail(user.email);
+                setEmail(redirectOrEmail.email);
             }
-        };
-        void main();
+        });
     }, [router]);
 
     const onSubmit: SingleInputFormProps["onSubmit"] = async (
@@ -231,13 +230,13 @@ const Page: React.FC = () => {
             />
 
             <AccountsPageFooter>
-                {resend === 0 && (
+                {resend == 0 && (
                     <LinkButton onClick={resendEmail}>
                         {t("resend_code")}
                     </LinkButton>
                 )}
-                {resend === 1 && <span>{t("status_sending")}</span>}
-                {resend === 2 && <span>{t("status_sent")}</span>}
+                {resend == 1 && <span>{t("status_sending")}</span>}
+                {resend == 2 && <span>{t("status_sent")}</span>}
                 <LinkButton onClick={logout}>{t("change_email")}</LinkButton>
             </AccountsPageFooter>
 
@@ -251,9 +250,12 @@ export default Page;
 /**
  * A function called during page load to see if a redirection is required
  *
- * @returns The slug to redirect to, if needed.
+ * @returns The slug to redirect to, if needed. Otherwise an object containing
+ * the saved partial user's email.
  */
-const redirectionIfNeeded = async (user: User | undefined) => {
+const redirectionIfNeededOrEmail = async () => {
+    const user = savedPartialLocalUser();
+
     const email = user?.email;
     if (!email) {
         return "/";
@@ -266,7 +268,7 @@ const redirectionIfNeeded = async (user: User | undefined) => {
     }
 
     // If we're coming here during the recover flow, do not redirect.
-    if (stashedRedirect() == "/recover") return undefined;
+    if (stashedRedirect() == "/recover") return { email };
 
     // The user might have email verification disabled, but after previously
     // entering their email on the login screen, they might've closed the tab
@@ -290,5 +292,5 @@ const redirectionIfNeeded = async (user: User | undefined) => {
         }
     }
 
-    return undefined;
+    return { email };
 };

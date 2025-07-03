@@ -64,6 +64,7 @@ const saveQueryCredentialsAndNavigateTo = async (
     const inflightPasskeySessionID = nullToUndefined(
         sessionStorage.getItem("inflightPasskeySessionID"),
     );
+
     if (
         !inflightPasskeySessionID ||
         passkeySessionID != inflightPasskeySessionID

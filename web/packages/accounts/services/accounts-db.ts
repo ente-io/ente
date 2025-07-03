@@ -1,18 +1,5 @@
-import { getKVS, removeKV, setKV } from "ente-base/kv";
-import log from "ente-base/log";
-import { nullToUndefined } from "ente-utils/transform";
-import { z } from "zod/v4";
-import {
-    RemoteSRPAttributes,
-    SRPSetupAttributes,
-    type SRPAttributes,
-} from "./srp";
-import { RemoteKeyAttributes, type KeyAttributes } from "./user";
-
-export type LocalStorageKey = "user";
-
 /**
- * [Note: Accounts DB]
+ * @file [Note: Accounts DB]
  *
  * The accounts package stores various state both during the login / signup
  * flow, and post login to identify the logged in user.
@@ -29,6 +16,145 @@ export type LocalStorageKey = "user";
  * - "originalKeyAttributes"
  * - "srpAttributes"
  */
+
+import { getKVS, removeKV, setKV } from "ente-base/kv";
+import log from "ente-base/log";
+import { getAuthToken } from "ente-base/token";
+import { nullToUndefined } from "ente-utils/transform";
+import { z } from "zod/v4";
+import {
+    RemoteSRPAttributes,
+    SRPSetupAttributes,
+    type SRPAttributes,
+} from "./srp";
+import {
+    RemoteKeyAttributes,
+    type KeyAttributes,
+    type LocalUser,
+} from "./user";
+
+/**
+ * The local storage data about the user before login or signup is complete.
+ *
+ * [Note: Partial local user]
+ *
+ * During login or signup, the user object exists in various partial states in
+ * local storage.
+ *
+ * - Initially, there is no user object in local storage.
+ *
+ * - When the user enters their email, the email property of the stored object
+ *   is set, but nothing else.
+ *
+ * - After they verify their password, we have two cases: if second factor
+ *   verification is not set, and when it is set.
+ *
+ * - If second factor verification is not set, then after verifying their
+ *   password their {@link id} and {@link encryptedToken} will get filled in,
+ *   and {@link isTwoFactorEnabled} will be set to false.
+ *
+ * - If they have second factor verification set, then after verifying their
+ *   password {@link isTwoFactorEnabled} and {@link twoFactorSessionID} will
+ *   also get filled in. Once they verify their TOTP based second factor, their
+ *   {@link id} and {@link encryptedToken} will also get filled in.
+ *
+ * - As the login or signup sequence completes, a {@link token} obtained from
+ *   the {@link encryptedToken} will be written out, and the
+ *   {@link encryptedToken} cleared since it is not needed anymore.
+ *
+ * So while the underlying storage is the same, we offer two APIs for code to
+ * obtain the user:
+ *
+ * - Before login is complete, or when it is unknown if login is complete or
+ *   not, then {@link savedPartialLocalUser} can be used to obtain a
+ *   {@link PartialLocalUser} with all of its properties set to be optional (and
+ *   some additional properties not available in the regular user object).
+ *
+ * - When we know that the login has completed, we can use either
+ *   {@link savedLocalUser} (which returns `undefined` if our assumption is
+ *   false) or {@link ensureSavedLocalUser} (which throws if our assumption is
+ *   false) to obtain an object with all the properties expected to be present
+ *   for a locally persisted user set to be required.
+ */
+export interface PartialLocalUser {
+    id?: number;
+    email?: string;
+    token?: string;
+    encryptedToken?: string;
+    isTwoFactorEnabled?: boolean;
+    twoFactorSessionID?: string;
+}
+
+const PartialLocalUser = z.object({
+    id: z.number().nullish().transform(nullToUndefined),
+    email: z.string().nullish().transform(nullToUndefined),
+    token: z.string().nullish().transform(nullToUndefined),
+    encryptedToken: z.string().nullish().transform(nullToUndefined),
+    isTwoFactorEnabled: z.boolean().nullish().transform(nullToUndefined),
+    twoFactorSessionID: z.string().nullish().transform(nullToUndefined),
+});
+
+/**
+ * Zod schema for the {@link LocalUser} TypeScript type.
+ *
+ * The type itself is in `user.ts`.
+ */
+const LocalUser = z.object({
+    id: z.number(),
+    email: z.string(),
+    token: z.string(),
+});
+
+/**
+ * Return the local storage value of the user's data.
+ *
+ * This function is meant to be called during the login or signup sequence.
+ * After the user is logged in, use {@link savedLocalUser} or
+ * {@link ensureLocalUser} instead.
+ *
+ * Use {@link savePartialLocalUser} to updated the saved value.
+ */
+export const savedPartialLocalUser = (): PartialLocalUser | undefined => {
+    const jsonString = localStorage.getItem("user");
+    if (!jsonString) return undefined;
+    return PartialLocalUser.parse(JSON.parse(jsonString));
+};
+
+/**
+ * Save the users data as we accrue it during the signup or login flow.
+ *
+ * See: [Note: Partial local user].
+ *
+ * TODO: WARNING: This does not update the KV token. The idea is to gradually
+ * move over uses of setLSUser to this while explicitly setting the KV token
+ * where needed.
+ */
+export const savePartialLocalUser = (partialLocalUser: Partial<LocalUser>) =>
+    localStorage.setItem("user", JSON.stringify(partialLocalUser));
+
+/**
+ * Return data about the logged-in user, if someone is indeed logged in.
+ * Otherwise return `undefined`.
+ *
+ * The user's data is stored in the browser's localStorage. Thus, this function
+ * only works from the main thread, not from web workers since local storage is
+ * not accessible to web workers.
+ *
+ * There is no setter corresponding to this function since this is only a view
+ * on data saved using {@link savePartialLocalUser}.
+ *
+ * See: [Note: Partial local user] for more about the whole shebang.
+ */
+export const savedLocalUser = (): LocalUser | undefined => {
+    const jsonString = localStorage.getItem("user");
+    if (!jsonString) return undefined;
+    // We might have some data, but not all of it. So do a non-throwing parse.
+    const { success, data } = LocalUser.safeParse(JSON.parse(jsonString));
+    return success ? data : undefined;
+};
+
+export type LocalStorageKey = "user";
+
 export const getData = (key: LocalStorageKey) => {
     try {
         if (
@@ -110,16 +236,8 @@ export const migrateKVToken = async (user: unknown) => {
  * This acts a sanity check on IndexedDB by ensuring that if the user has a
  * token in local storage, then it should also be present in IndexedDB.
  */
-export const isLocalStorageAndIndexedDBMismatch = async () => {
-    const oldLSUser = getData("user");
-    return (
-        oldLSUser &&
-        typeof oldLSUser == "object" &&
-        "token" in oldLSUser &&
-        typeof oldLSUser.token == "string" &&
-        !(await getKVS("token"))
-    );
-};
+export const isLocalStorageAndIndexedDBMismatch = async () =>
+    savedPartialLocalUser()?.token && !(await getAuthToken());
 
 /**
  * Return the user's {@link KeyAttributes} if they are present in local storage.
@@ -154,6 +272,9 @@ export const saveKeyAttributes = (keyAttributes: KeyAttributes) =>
  * user's "original" key attributes. These are the key attributes that were
  * either freshly generated (if the user signed up on this client) or were
  * fetched from remote (otherwise).
+ *
+ * > NOTE: Currently the code does not guarantee that savedOriginalKeyAttributes
+ * > will always be set when savedKeyAttributes is set.
  *
  * In contrast, the regular key attributes get overwritten by the local only
  * interactive key attributes for the user's convenience. See the documentation

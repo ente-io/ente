@@ -1,5 +1,5 @@
 import { getData } from "ente-accounts/services/accounts-db";
-import type { LocalUser, User } from "ente-accounts/services/user";
+import type { LocalUser, PartialLocalUser } from "ente-accounts/services/user";
 import { joinPath } from "ente-base/file-name";
 import log from "ente-base/log";
 import { type Electron } from "ente-base/types/ipc";
@@ -284,7 +284,7 @@ export const getArchivedFiles = (files: EnteFile[]) => {
 };
 
 export const getUserOwnedFiles = (files: EnteFile[]) => {
-    const user: User = getData("user");
+    const user: PartialLocalUser = getData("user");
     if (!user?.id) {
         throw Error("user missing");
     }

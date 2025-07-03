@@ -6,9 +6,9 @@ import {
 } from "ente-accounts/components/layouts/centered-paper";
 import { RecoveryKey } from "ente-accounts/components/RecoveryKey";
 import {
-    getData,
     savedJustSignedUp,
     savedOriginalKeyAttributes,
+    savedPartialLocalUser,
     saveJustSignedUp,
 } from "ente-accounts/services/accounts-db";
 import { appHomeRoute } from "ente-accounts/services/redirect";
@@ -16,7 +16,7 @@ import {
     generateSRPSetupAttributes,
     setupSRP,
 } from "ente-accounts/services/srp";
-import type { User } from "ente-accounts/services/user";
+import type { PartialLocalUser } from "ente-accounts/services/user";
 import {
     generateAndSaveInteractiveKeyAttributes,
     generateKeysAndAttributes,
@@ -39,31 +39,35 @@ import {
     type NewPasswordFormProps,
 } from "../components/NewPasswordForm";
 
+/**
+ * A page that allows the user to generate key attributes if needed, and shows
+ * them their recovery key.
+ *
+ * See: [Note: Login pages]
+ */
 const Page: React.FC = () => {
     const { logout, showMiniDialog } = useBaseContext();
 
-    const [user, setUser] = useState<User>();
+    const [user, setUser] = useState<PartialLocalUser | undefined>(undefined);
     const [openRecoveryKey, setOpenRecoveryKey] = useState(false);
-    const [loading, setLoading] = useState(true);
 
     const router = useRouter();
 
     useEffect(() => {
-        const user: User = getData("user");
-        setUser(user);
+        const user = savedPartialLocalUser();
         if (!user?.token) {
             void router.push("/");
         } else if (haveCredentialsInSession()) {
             if (savedJustSignedUp()) {
                 setOpenRecoveryKey(true);
-                setLoading(false);
+                setUser(user);
             } else {
                 void router.push(appHomeRoute);
             }
         } else if (savedOriginalKeyAttributes()?.encryptedKey) {
             void router.push("/credentials");
         } else {
-            setLoading(false);
+            setUser(user);
         }
     }, [router]);
 
@@ -97,7 +101,7 @@ const Page: React.FC = () => {
 
     return (
         <>
-            {loading || !user ? (
+            {!user ? (
                 <LoadingIndicator />
             ) : openRecoveryKey ? (
                 <RecoveryKey
@@ -109,7 +113,7 @@ const Page: React.FC = () => {
                 <AccountsPageContents>
                     <AccountsPageTitle>{t("set_password")}</AccountsPageTitle>
                     <NewPasswordForm
-                        userEmail={user.email}
+                        userEmail={user.email!}
                         submitButtonTitle={t("set_password")}
                         onSubmit={handleSubmit}
                     />

@@ -6,8 +6,8 @@ import { useNotification } from "components/utils/hooks-app";
 import {
     getData,
     isLocalStorageAndIndexedDBMismatch,
+    savedLocalUser,
 } from "ente-accounts/services/accounts-db";
-import type { User } from "ente-accounts/services/user";
 import { isDesktop, staticAppTitle } from "ente-base/app";
 import { CenteredRow } from "ente-base/components/containers";
 import { CustomHead } from "ente-base/components/Head";
@@ -68,8 +68,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     const logout = useCallback(() => void photosLogout(), []);
 
     useEffect(() => {
-        const user = getData("user") as User | undefined | null;
-        logStartupBanner(user?.id);
+        logStartupBanner(savedLocalUser()?.id);
         void isLocalStorageAndIndexedDBMismatch().then((mismatch) => {
             if (mismatch) {
                 log.error("Logging out (IndexedDB and local storage mismatch)");

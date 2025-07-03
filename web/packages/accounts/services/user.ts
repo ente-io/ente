@@ -1,9 +1,11 @@
 import {
     getData,
     savedKeyAttributes,
+    savedLocalUser,
     saveKeyAttributes,
     saveSRPAttributes,
     setLSUser,
+    type PartialLocalUser,
 } from "ente-accounts/services/accounts-db";
 import {
     generateSRPSetupAttributes,
@@ -36,121 +38,51 @@ import { nullToUndefined } from "ente-utils/transform";
 import { z } from "zod/v4";
 import { getUserRecoveryKey, recoveryKeyFromMnemonic } from "./recovery-key";
 
-export interface User {
-    id: number;
-    email: string;
-    token: string;
-    encryptedToken: string;
-    isTwoFactorEnabled: boolean;
-    twoFactorSessionID: string;
-}
+// TODO(RE): Temporary re-export
+export type { PartialLocalUser };
 
 /**
- * The local storage data about the user after they've logged in.
+ * The locally persisted data we have about the user after they've logged in.
+ *
+ * This type arguably belongs to accounts-db (since that's what persists it and
+ * its shadow alias, {@link PartialLocalUser}), but since most code that will
+ * need this will need this after login has completed, and will be using the
+ * {@link ensureLocalUser} method below, we keep this in the same file to reduce
+ * the need to import the type from a separate file.
  */
-const LocalUser = z.object({
+export interface LocalUser {
     /**
      * The user's ID.
      */
-    id: z.number(),
+    id: number;
     /**
-     * The user's email.
+     * The email associated with the user's Ente account.
      */
-    email: z.string(),
+    email: string;
     /**
      * The user's (plaintext) auth token.
      *
      * It is used for making API calls on their behalf, by passing this token as
      * the value of the X-Auth-Token header in the HTTP request.
      *
-     * Deprecated, use `getAuthToken()` instead (which fetches it from IDB).
+     * Usually you shouldn't be needing to access this property; instead use
+     * {@link getAuthToken()} which is kept in sync with this value, and lives
+     * in IndexedDB and thus can also be used in web workers.
      */
-    token: z.string(),
-});
+    token: string;
+}
 
 /**
- * The local storage data about the user after they've logged in.
- */
-export type LocalUser = z.infer<typeof LocalUser>;
-
-/**
- * The local storage data about the user before login or signup is complete.
+ * Return the currently logged in {@link LocalUser}, throwing it the user is not
+ * logged in.
  *
- * [Note: Partial local user]
- *
- * During login or signup, the user object exists in various partial states in
- * local storage.
- *
- * - Initially, there is no user object in local storage.
- *
- * - When the user enters their email, the email property of the stored object
- *   is set, but nothing else.
- *
- * - After they verify their password, we have two cases: if second factor
- *   verification is not set, and when it is set.
- *
- * - If second factor verification is not set, then after verifying their
- *   password their {@link id} and {@link encryptedToken} will get filled in,
- *   and {@link isTwoFactorEnabled} will be set to false.
- *
- * - If they have second factor verification set, then after verifying their
- *   password {@link isTwoFactorEnabled} and {@link twoFactorSessionID} will
- *   also get filled in. Once they verify their TOTP based second factor, their
- *   {@link id} and {@link encryptedToken} will also get filled in.
- *
- * So while the underlying storage is the same, we offer two APIs for code to
- * obtain the user:
- *
- * - Before login is complete, or when it is unknown if login is complete or
- *   not, then {@link partialLocalUser} can be used to obtain a
- *   {@link LocalUser} with all of its properties set to be optional.
- *
- * - When we know that the login has completed, we can use either
- *   {@link localUser} (which returns `undefined` if our presumption is false)
- *   or {@link ensureLocalUser} (which throws if our presumption is false) to
- *   obtain an object with all the properties expected to be present for a
- *   locally persisted user set to be required.
- */
-export const partialLocalUser = (): Partial<LocalUser> | undefined => {
-    // TODO: duplicate of getData("user")
-    const s = localStorage.getItem("user");
-    if (!s) return undefined;
-    return LocalUser.partial().parse(JSON.parse(s));
-};
-
-/**
- * Save the users data as we accrue it during the signup or login flow.
- *
- * See: [Note: Partial local user].
- *
- * TODO: WARNING: This does not update the KV token. The idea is to gradually
- * move over uses of setLSUser to this while explicitly setting the KV token
- * where needed.
- */
-export const savePartialLocalUser = (partialLocalUser: Partial<LocalUser>) =>
-    localStorage.setItem("user", JSON.stringify(partialLocalUser));
-
-/**
- * Return the logged-in user, if someone is indeed logged in. Otherwise return
- * `undefined`.
- *
- * The user's data is stored in the browser's localStorage. Thus, this function
- * only works from the main thread, not from web workers (local storage is not
- * accessible to web workers).
- */
-export const localUser = (): LocalUser | undefined => {
-    // TODO: duplicate of getData("user")
-    const s = localStorage.getItem("user");
-    if (!s) return undefined;
-    const { success, data } = LocalUser.safeParse(JSON.parse(s));
-    return success ? data : undefined;
-};
-
-/**
- * A wrapper over {@link localUser} with that throws if no one is logged in.
+ * This is a wrapper over the {@link savedLocalUser} function that throws if no
+ * one is logged in. A more appropriate name for this function, keeping in line
+ * with the conventions the other methods follow, would've been
+ * {@link ensureSavedLocalUser}. The shorter name is for readability.
  */
 export const ensureLocalUser = (): LocalUser =>
-    ensureExpectedLoggedInValue(localUser());
+    ensureExpectedLoggedInValue(savedLocalUser());
 
 /**
  * A function throws an error if a value that is expected to be truthy when the

@@ -1,9 +1,8 @@
 import "@fontsource-variable/inter";
 import { CssBaseline } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
-import { getData } from "ente-accounts/services/accounts-db";
+import { savedLocalUser } from "ente-accounts/services/accounts-db";
 import { accountLogout } from "ente-accounts/services/logout";
-import type { User } from "ente-accounts/services/user";
 import { staticAppTitle } from "ente-base/app";
 import { CustomHead } from "ente-base/components/Head";
 import {
@@ -32,8 +31,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     const { showMiniDialog, miniDialogProps } = useAttributedMiniDialog();
 
     useEffect(() => {
-        const user = getData("user") as User | undefined | null;
-        logStartupBanner(user?.id);
+        logStartupBanner(savedLocalUser()?.id);
     }, []);
 
     const logout = useCallback(() => {

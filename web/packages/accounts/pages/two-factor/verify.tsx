@@ -4,7 +4,7 @@ import {
     saveKeyAttributes,
     setLSUser,
 } from "ente-accounts/services/accounts-db";
-import type { User } from "ente-accounts/services/user";
+import type { PartialLocalUser } from "ente-accounts/services/user";
 import { verifyTwoFactor } from "ente-accounts/services/user";
 import { LinkButton } from "ente-base/components/LinkButton";
 import { useBaseContext } from "ente-base/context";
@@ -27,7 +27,7 @@ const Page: React.FC = () => {
     const router = useRouter();
 
     useEffect(() => {
-        const user: User = getData("user");
+        const user: PartialLocalUser = getData("user");
         if (!user?.email || !user.twoFactorSessionID) {
             void router.push("/");
         } else if (
