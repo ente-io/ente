@@ -235,44 +235,46 @@ Future<Map<String, dynamic>> getMetadata(
 }
 
 Map<String, dynamic> buildPublicMagicData(
-    MediaUploadData mediaUploadData,
-    ParsedExifDateTime? exifTime,
-    RemoteAsset? rAsset,
-  ) {
-    final Map<String, dynamic> pubMetadata = {};
-    if ((mediaUploadData.height ?? 0) != 0 &&
-        (mediaUploadData.width ?? 0) != 0) {
-      pubMetadata[heightKey] = mediaUploadData.height;
-      pubMetadata[widthKey] = mediaUploadData.width;
-    }
-    pubMetadata[mediaTypeKey] = mediaUploadData.isPanorama == true ? 1 : 0;
-    if (mediaUploadData.motionPhotoStartIndex != null) {
-      pubMetadata[motionVideoIndexKey] = mediaUploadData.motionPhotoStartIndex;
-    }
-    if (mediaUploadData.thumbnail == null) {
-      pubMetadata[noThumbKey] = true;
-    }
-    if (exifTime != null) {
-      if (exifTime.dateTime != null) {
-        pubMetadata[dateTimeKey] = exifTime.dateTime;
-      }
-      if (exifTime.offsetTime != null) {
-        pubMetadata[offsetTimeKey] = exifTime.offsetTime;
-      }
-    }
-    final Map<String, dynamic> jsonToUpdate =
-        rAsset?.publicMetadata?.data ?? <String, dynamic>{};
-    pubMetadata.forEach((key, value) {
-      jsonToUpdate[key] = value;
-    });
-    return jsonToUpdate;
+  MediaUploadData mediaUploadData,
+  ParsedExifDateTime? exifTime,
+  RemoteAsset? rAsset,
+) {
+  final Map<String, dynamic> pubMetadata = {};
+  if ((mediaUploadData.height ?? 0) != 0 && (mediaUploadData.width ?? 0) != 0) {
+    pubMetadata[heightKey] = mediaUploadData.height;
+    pubMetadata[widthKey] = mediaUploadData.width;
   }
+  pubMetadata[mediaTypeKey] = mediaUploadData.isPanorama == true ? 1 : 0;
+  if (mediaUploadData.motionPhotoStartIndex != null) {
+    pubMetadata[motionVideoIndexKey] = mediaUploadData.motionPhotoStartIndex;
+  }
+  if (mediaUploadData.thumbnail == null) {
+    pubMetadata[noThumbKey] = true;
+  }
+  if (exifTime != null) {
+    if (exifTime.dateTime != null) {
+      pubMetadata[dateTimeKey] = exifTime.dateTime;
+    }
+    if (exifTime.offsetTime != null) {
+      pubMetadata[offsetTimeKey] = exifTime.offsetTime;
+    }
+  }
+  final Map<String, dynamic> jsonToUpdate =
+      rAsset?.publicMetadata?.data ?? <String, dynamic>{};
+  pubMetadata.forEach((key, value) {
+    jsonToUpdate[key] = value;
+  });
+  return jsonToUpdate;
+}
 
-Future<MetadataRequest> getPubMetadataRequest(
+Future<MetadataRequest?> getPubMetadataRequest(
   EnteFile file,
   Map<String, dynamic> jsonToUpdate,
   Uint8List fileKey,
 ) async {
+  if (jsonToUpdate.isEmpty) {
+    return null;
+  }
   final int currentVersion = (file.rAsset?.publicMetadata?.version ?? 0);
   final encryptedMMd = await CryptoUtil.encryptChaCha(
     utf8.encode(jsonEncode(jsonToUpdate)),

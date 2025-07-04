@@ -707,7 +707,6 @@ class FileUploader {
           await getMetadata(mediaUploadData, exifTime, file);
       final Map<String, dynamic> pubMetadata =
           buildPublicMagicData(mediaUploadData, exifTime, file.rAsset);
-      MetadataRequest? pubMetadataRequest;
 
       final encryptedMetadataResult = await CryptoUtil.encryptChaCha(
         utf8.encode(jsonEncode(metadata)),
@@ -719,13 +718,12 @@ class FileUploader {
       final metadataDecryptionHeader =
           CryptoUtil.bin2base64(encryptedMetadataResult.header!);
 
-      if (pubMetadata.isNotEmpty) {
-        pubMetadataRequest = await getPubMetadataRequest(
-          file,
-          pubMetadata,
-          fileEncryptResult.key!,
-        );
-      }
+      final MetadataRequest? pubMetadataRequest = await getPubMetadataRequest(
+        file,
+        pubMetadata,
+        fileEncryptResult.key!,
+      );
+
       final fileDecryptionHeader =
           CryptoUtil.bin2base64(fileEncryptResult.header!);
       final thumbnailDecryptionHeader =
