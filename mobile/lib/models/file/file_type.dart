@@ -6,7 +6,9 @@ enum FileType {
   image,
   video,
   livePhoto,
-  other,
+  other;
+
+  bool get isVideo => this == FileType.video;
 }
 
 int getInt(FileType fileType) {

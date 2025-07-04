@@ -62,7 +62,7 @@ class EnteFile {
     file.location =
         Location(latitude: lAsset.latitude, longitude: lAsset.longitude);
     file.fileType = enteTypeFromAsset(lAsset);
-    file.creationTime = AssetEntityService.parseFileCreationTime(lAsset);
+    file.creationTime = AssetEntityService.estimateCreationTime(lAsset);
     file.modificationTime = lAsset.modifiedDateTime.microsecondsSinceEpoch;
     file.fileSubType = lAsset.subtype;
     file.metadataVersion = kCurrentMetadataVersion;

@@ -29,7 +29,8 @@ class AssetEntityService {
     return asset;
   }
 
-  static int parseFileCreationTime(AssetEntity asset) {
+  // Use this time if exif data is not available
+  static int estimateCreationTime(AssetEntity asset) {
     int creationTime = asset.createDateTime.microsecondsSinceEpoch;
     final int modificationTime = asset.modifiedDateTime.microsecondsSinceEpoch;
     if (creationTime >= jan011981Time) {
@@ -52,16 +53,28 @@ class AssetEntityService {
       } else {
         creationTime = DateTime.now().toUtc().microsecondsSinceEpoch;
       }
-      try {
-        final parsedDateTime = parseDateTimeFromName(
-          basenameWithoutExtension(asset.title ?? ""),
-        );
-        if (parsedDateTime != null) {
-          creationTime = parsedDateTime.microsecondsSinceEpoch;
-        }
-      } catch (e) {
-        // ignore
+    }
+    if (!Platform.isAndroid) {
+      return creationTime;
+    }
+    try {
+      final parsedDateTime = parseDateTimeFromName(
+        basenameWithoutExtension(asset.title ?? ""),
+      );
+      // only use timeFromFileName if the existing creationTime and
+      // timeFromFilename belongs to different date.
+      // This is done because many times the fileTimeStamp will only give us
+      // the date, not time value but the photo_manager's creation time will
+      // contain the time.
+      if (parsedDateTime != null &&
+          !areFromSameDay(
+            creationTime,
+            parsedDateTime.microsecondsSinceEpoch,
+          )) {
+        creationTime = parsedDateTime.microsecondsSinceEpoch;
       }
+    } catch (e) {
+      // ignore
     }
     return creationTime;
   }

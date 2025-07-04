@@ -15,7 +15,6 @@ import 'package:photos/core/constants.dart';
 import 'package:photos/core/errors.dart';
 import "package:photos/image/thumnail/upload_thumb.dart";
 import "package:photos/models/api/metadata.dart";
-import "package:photos/models/ffmpeg/ffprobe_props.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
@@ -26,10 +25,10 @@ import "package:photos/module/upload/model/upload_data.dart";
 import "package:photos/services/local/asset_entity.service.dart";
 import "package:photos/services/local/import/local_import.dart";
 import "package:photos/services/local/livephoto.dart";
+import "package:photos/services/local/metadata/metadata.service.dart";
 import "package:photos/services/local/shared_assert.service.dart";
 import "package:photos/utils/exif_util.dart";
 import "package:photos/utils/panorama_util.dart";
-import "package:photos/utils/standalone/date_time.dart";
 import "package:photos/utils/standalone/decode_image.dart";
 import 'package:video_thumbnail/video_thumbnail.dart';
 
@@ -65,10 +64,6 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(
   if (parseExif) {
     exifData = await tryExifFromFile(sourceFile);
   }
-  // h4ck to fetch location data if missing (thank you Android Q+) lazily only during uploads
-  // call this method before creating zip for live photo as sourceFile image will be
-  // deleted after zipping
-  await _decorateEnteFileData(file, asset, sourceFile, exifData);
   final int? h = asset.height != 0 ? asset.height : null;
   final int? w = asset.width != 0 ? asset.width : null;
   int? motionPhotoStartingIndex;
@@ -121,46 +116,29 @@ Future<int?> motionVideoIndex(Map<String, dynamic> args) async {
   return (await MotionPhotos(path).getMotionVideoIndex())?.start;
 }
 
-Future<void> _decorateEnteFileData(
-  EnteFile file,
-  AssetEntity asset,
-  File sourceFile,
-  Map<String, IfdTag>? exifData,
-) async {
-  // h4ck to fetch location data if missing (thank you Android Q+) lazily only during uploads
-  if (!file.hasLocation) {
-    final latLong = await asset.latlngAsync();
-    file.location =
-        Location(latitude: latLong.latitude, longitude: latLong.longitude);
-  }
-  if (!file.hasLocation && file.isVideo && Platform.isAndroid) {
-    final FFProbeProps? props = await getVideoPropsAsync(sourceFile);
-    if (props?.location != null) {
-      file.location = props!.location;
-    }
-  }
-  if (Platform.isAndroid && exifData != null) {
-    //Fix for missing location data in lower android versions.
-    final Location? exifLocation = locationFromExif(exifData);
-    if (Location.isValidLocation(exifLocation)) {
-      file.location = exifLocation;
-    }
-  }
-}
-
 Future<Map<String, dynamic>> getMetadata(
   MediaUploadData mediaUploadData,
   ParsedExifDateTime? exifTime,
   EnteFile file,
 ) async {
   final AssetEntity? asset = await file.getAsset;
-  int? duration;
-  int? creationTime = file.creationTime;
   final FileType fileType = file.fileType;
-  String? title = file.title;
   final String? deviceFolder = file.deviceFolder;
-  final int? modificationTime = file.modificationTime;
-  final Location? location = file.location;
+
+  int? duration;
+  final (int creationTime, int modificationTime) =
+      LocalMetadataService.computeCreationAndModification(
+    asset,
+    mediaUploadData.exifData,
+  );
+  String? title = file.title;
+
+  final Location? location = await LocalMetadataService.detectLocation(
+    fileType.isVideo,
+    asset,
+    mediaUploadData.sourceFile,
+    mediaUploadData.exifData,
+  );
   // asset can be null for files shared to app
   if (asset != null) {
     if (asset.type == AssetType.video) {
@@ -171,11 +149,7 @@ Future<Map<String, dynamic>> getMetadata(
       title = await asset.titleAsync;
     }
   }
-  bool hasExifTime = false;
-  if (exifTime != null && exifTime.time != null) {
-    hasExifTime = true;
-    creationTime = exifTime.time!.microsecondsSinceEpoch;
-  }
+
   mediaUploadData.isPanorama = isPanoFromExif(mediaUploadData.exifData);
   if (mediaUploadData.isPanorama != true && fileType == FileType.image) {
     try {
@@ -183,27 +157,6 @@ Future<Map<String, dynamic>> getMetadata(
       mediaUploadData.isPanorama = isPanoFromXmp(xmpData);
     } catch (_) {}
     mediaUploadData.isPanorama ??= false;
-  }
-
-  // Try to get the timestamp from fileName. In case of iOS, file names are
-  // generic IMG_XXXX, so only parse it on Android devices
-  if (!hasExifTime && Platform.isAndroid && title != null) {
-    final timeFromFileName = parseDateTimeFromName(title);
-    if (timeFromFileName != null) {
-      // only use timeFromFileName if the existing creationTime and
-      // timeFromFilename belongs to different date.
-      // This is done because many times the fileTimeStamp will only give us
-      // the date, not time value but the photo_manager's creation time will
-      // contain the time.
-      final bool useFileTimeStamp = creationTime == null ||
-          !areFromSameDay(
-            creationTime,
-            timeFromFileName.microsecondsSinceEpoch,
-          );
-      if (useFileTimeStamp) {
-        creationTime = timeFromFileName.microsecondsSinceEpoch;
-      }
-    }
   }
 
   final metadata = <String, dynamic>{
@@ -233,7 +186,7 @@ Future<Map<String, dynamic>> getMetadata(
 
 Map<String, dynamic> buildPublicMagicData(
   MediaUploadData mediaUploadData,
-  ParsedExifDateTime? exifTime,
+  ParsedExifDateTime? parsedExifTime,
   RemoteAsset? rAsset,
 ) {
   final Map<String, dynamic> pubMetadata = {};
@@ -248,14 +201,13 @@ Map<String, dynamic> buildPublicMagicData(
   if (mediaUploadData.thumbnail == null) {
     pubMetadata[noThumbKey] = true;
   }
-  if (exifTime != null) {
-    if (exifTime.dateTime != null) {
-      pubMetadata[dateTimeKey] = exifTime.dateTime;
-    }
-    if (exifTime.offsetTime != null) {
-      pubMetadata[offsetTimeKey] = exifTime.offsetTime;
-    }
+  if (parsedExifTime?.dateTime != null) {
+    pubMetadata[dateTimeKey] = parsedExifTime!.dateTime;
   }
+  if (parsedExifTime?.offsetTime != null) {
+    pubMetadata[offsetTimeKey] = parsedExifTime!.offsetTime;
+  }
+
   final Map<String, dynamic> jsonToUpdate =
       rAsset?.publicMetadata?.data ?? <String, dynamic>{};
   pubMetadata.forEach((key, value) {

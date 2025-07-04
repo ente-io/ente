@@ -23,29 +23,17 @@ class LocalMetadataService {
       final AssetEntity asset = await AssetEntityService.fromIDWithRetry(id);
       final sourceFile = await AssetEntityService.sourceFromAsset(asset);
       final String hash = await CryptoUtil.getHash(sourceFile);
-      final latLng = await asset.latlngAsync();
-      Location location =
-          Location(latitude: latLng.latitude, longitude: latLng.longitude);
       final int size = sourceFile.lengthSync();
       final Map<String, IfdTag>? exifData = await tryExifFromFile(sourceFile);
+      final Location? location = await detectLocation(
+        asset.type == AssetType.video,
+        asset,
+        sourceFile,
+        exifData,
+      );
       final int? mviIndex = asset.type != AssetType.image
           ? null
           : (await motionVideoIndex(sourceFile.path))?.start;
-
-      if (!Location.isValidLocation(location) && exifData != null) {
-        final exifLocation = locationFromExif(exifData);
-        if (Location.isValidLocation(exifLocation)) {
-          location = exifLocation!;
-        }
-      }
-      if (!Location.isValidLocation(location) &&
-          asset.type == AssetType.video &&
-          Platform.isAndroid) {
-        final FFProbeProps? props = await getVideoPropsAsync(sourceFile);
-        if (props != null && props.location != null) {
-          location = props.location!;
-        }
-      }
       final (createdAt, modifiedAt) =
           computeCreationAndModification(asset, exifData);
       final result = DroidMetadata(
@@ -66,17 +54,72 @@ class LocalMetadataService {
     }
   }
 
+  static Future<Location?> detectLocation(
+    bool isVideo,
+    AssetEntity? asset,
+    File sourceFile,
+    Map<String, IfdTag>? exifData,
+  ) async {
+    final Location assetLocation = Location(
+      latitude: asset?.latitude,
+      longitude: asset?.longitude,
+    );
+    if (Location.isValidLocation(assetLocation)) {
+      return assetLocation;
+    }
+
+    if (asset != null &&
+        !Location.isValidLocation(assetLocation) &&
+        Platform.isAndroid) {
+      // h4ck to fetch location data if missing (thank you Android Q+) lazily only during uploads
+      final latLong = await asset.latlngAsync();
+      if (latLong.latitude != 0 && latLong.longitude != 0) {
+        _logger.finest('[assetID-${asset.id}] detected lat/lng via async');
+        return Location(
+          latitude: latLong.latitude,
+          longitude: latLong.longitude,
+        );
+      }
+    }
+    if (!Location.isValidLocation(assetLocation) &&
+        isVideo &&
+        Platform.isAndroid) {
+      final FFProbeProps? props = await getVideoPropsAsync(sourceFile);
+      if (Location.isValidLocation(props?.location)) {
+        _logger.finest('detected lat/long from props');
+        return props!.location!;
+      }
+    }
+    if (Platform.isAndroid && exifData != null) {
+      //Fix for missing location data in lower android versions.
+      final Location? exifLocation = locationFromExif(exifData);
+      if (Location.isValidLocation(exifLocation)) {
+        _logger.finest('deleted lag/lng from exif data');
+        return exifLocation!;
+      }
+    }
+    return null;
+  }
+
   static (int, int) computeCreationAndModification(
-    AssetEntity asset,
+    AssetEntity? asset,
     Map<String, IfdTag>? exifData,
   ) {
-    int createdAt = AssetEntityService.parseFileCreationTime(asset);
-    final int modifiedAt = asset.modifiedDateTime.microsecondsSinceEpoch;
+    late final int createdAt;
     final ParsedExifDateTime? parsedExifDateTime =
         exifData == null ? null : parseExifTime(exifData);
     if (parsedExifDateTime?.time != null) {
       createdAt = parsedExifDateTime!.time!.microsecondsSinceEpoch;
+    } else {
+      if (asset == null) {
+        _logger.warning("Asset is null, using current time for creation");
+        createdAt = DateTime.now().toUtc().microsecondsSinceEpoch;
+      } else {
+        createdAt = AssetEntityService.estimateCreationTime(asset);
+      }
     }
+    final int modifiedAt =
+        asset?.modifiedDateTime.microsecondsSinceEpoch ?? createdAt;
     return (createdAt, modifiedAt);
   }
 
