@@ -6,7 +6,7 @@ import DownloadIcon from "@mui/icons-material/Download";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import { Box, Button, IconButton, Stack, styled, Tooltip } from "@mui/material";
 import Typography from "@mui/material/Typography";
-import { FilesDownloadProgress } from "components/DownloadProgress";
+import { DownloadStatusNotifications } from "components/DownloadStatusNotifications";
 import type { TimeStampListItem } from "components/FileList";
 import { FileListWithViewer } from "components/FileListWithViewer";
 import { Upload } from "components/Upload";
@@ -51,7 +51,7 @@ import { downloadManager } from "ente-gallery/services/download";
 import {
     downloadCollectionFiles,
     downloadSelectedFiles,
-    type FilesDownloadProgressAttributes,
+    type SaveGroup,
     type SetFilesDownloadProgressAttributes,
     type SetFilesDownloadProgressAttributesCreator,
 } from "ente-gallery/services/save";
@@ -133,7 +133,7 @@ export default function PublicCollectionGallery() {
     const [
         filesDownloadProgressAttributesList,
         setFilesDownloadProgressAttributesList,
-    ] = useState<FilesDownloadProgressAttributes[]>([]);
+    ] = useState<SaveGroup[]>([]);
 
     const setFilesDownloadProgressAttributesCreator: SetFilesDownloadProgressAttributesCreator =
         useCallback((folderName, collectionID, isHidden) => {
@@ -572,8 +572,8 @@ export default function PublicCollectionGallery() {
                     onShowSessionExpiredDialog={showPublicLinkExpiredMessage}
                     {...{ dragAndDropFiles }}
                 />
-                <FilesDownloadProgress
-                    attributesList={filesDownloadProgressAttributesList}
+                <DownloadStatusNotifications
+                    saveGroups={filesDownloadProgressAttributesList}
                     setAttributesList={setFilesDownloadProgressAttributesList}
                 />
             </FullScreenDropZone>

@@ -27,32 +27,60 @@ import {
 import { wait } from "ente-utils/promise";
 
 /**
- * An object that keeps track of progress of the download of a set of files.
+ * An object that keeps track of progress of a user-initiated download of a set
+ * of files to the user's device.
  *
- * This "download" is distinct from the downloads the app does from remote. What
- * we're doing here is perhaps more accurately but too verbosely described as "a
- * user initiated download of files to the user's device", aka "saving them". In
- * contrast, the app does the "download the file from remote" internal action,
- * e.g. for showing to the user or performing some indexing etc.
+ * This "download" is distinct from the downloads the app does from remote (e.g.
+ * when the user is viewing them).
+ *
+ * What we're doing here is perhaps more accurately described "a user initiated
+ * download of files to the user's device", but that is too long, so we instead
+ * refer to this process as "saving them".
+ *
+ * Note however that the app's UI itself takes the user perspective, so the
+ * upper (UI) layers use the word "download", while this implementation layer
+ * uses the word "save", and there is an unavoidable incongruity in the middle.
  */
-export interface FilesDownloadProgressAttributes {
+export interface SaveGroup {
+    /**
+     * A unique identifier of this set of saves.
+     */
     id: number;
-    success: number;
-    failed: number;
+    /**
+     * The total number of files to save to the user's device.
+     */
     total: number;
+    /**
+     * The number of files that have already been save.
+     */
+    success: number;
+    /**
+     * The number of failures.
+     */
+    failed: number;
     folderName: string;
     collectionID: number;
     isHidden: boolean;
     downloadDirPath: string;
+    /**
+     * An {@link AbortController} that can be used to cancel the save.
+     */
     canceller: AbortController;
 }
 
+export const isSaveStarted = (group: SaveGroup) => group.total > 0;
+
+export const isSaveComplete = ({ total, success, failed }: SaveGroup) =>
+    total == success + failed;
+
+export const isSaveCompleteWithErrors = (group: SaveGroup) =>
+    group.failed > 0 && isSaveComplete(group);
+
+export const isSaveCancelled = (group: SaveGroup) =>
+    group.canceller.signal.aborted;
+
 export type SetFilesDownloadProgressAttributes = (
-    value:
-        | Partial<FilesDownloadProgressAttributes>
-        | ((
-              prev: FilesDownloadProgressAttributes,
-          ) => FilesDownloadProgressAttributes),
+    value: Partial<SaveGroup> | ((prev: SaveGroup) => SaveGroup),
 ) => void;
 
 export type SetFilesDownloadProgressAttributesCreator = (

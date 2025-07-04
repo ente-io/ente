@@ -5,7 +5,11 @@ import {
 } from "components/Collections/CollectionShare";
 import type { TimeStampListItem } from "components/FileList";
 import { useModalVisibility } from "ente-base/components/utils/modal";
-import { type FilesDownloadProgressAttributes } from "ente-gallery/services/save";
+import {
+    isFilesDownloadCancelled,
+    isSaveComplete,
+    type SaveGroup,
+} from "ente-gallery/services/save";
 import type { Collection } from "ente-media/collection";
 import {
     GalleryBarImpl,
@@ -22,10 +26,6 @@ import {
 import { includes } from "ente-utils/type-guards";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { sortCollectionSummaries } from "services/collectionService";
-import {
-    isFilesDownloadCancelled,
-    isFilesDownloadCompleted,
-} from "../DownloadProgress";
 import { AlbumCastDialog } from "./AlbumCastDialog";
 import {
     CollectionHeader,
@@ -47,7 +47,7 @@ type GalleryBarAndListHeaderProps = Omit<
     activeCollection: Collection;
     setActiveCollectionID: (collectionID: number) => void;
     setPhotoListHeader: (value: TimeStampListItem) => void;
-    filesDownloadProgressAttributesList: FilesDownloadProgressAttributes[];
+    filesDownloadProgressAttributesList: SaveGroup[];
 } & Pick<
         CollectionHeaderProps,
         "setFilesDownloadProgressAttributesCreator" | "onRemotePull"
@@ -131,7 +131,7 @@ export const GalleryBarAndListHeader: React.FC<
         return (
             attributes &&
             !isFilesDownloadCancelled(attributes) &&
-            !isFilesDownloadCompleted(attributes)
+            !isSaveComplete(attributes)
         );
     }, [activeCollectionID, filesDownloadProgressAttributesList]);
 

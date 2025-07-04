@@ -1,13 +1,23 @@
-// TODO: Audit this file
-/* eslint-disable react-refresh/only-export-components */
 import { useBaseContext } from "ente-base/context";
-import type { FilesDownloadProgressAttributes } from "ente-gallery/services/save";
+import {
+    isSaveComplete,
+    isSaveCompleteWithErrors,
+    isSaveStarted,
+    type SaveGroup,
+} from "ente-gallery/services/save";
 import { Notification } from "ente-new/photos/components/Notification";
 import { t } from "i18next";
 
-interface FilesDownloadProgressProps {
-    attributesList: FilesDownloadProgressAttributes[];
-    setAttributesList: (value: FilesDownloadProgressAttributes[]) => void;
+interface DownloadStatusNotificationsProps {
+    /**
+     * A list of user-initiated downloads for which a status should be shown.
+     *
+     * An entry is added to this list when the user initiates the download, and
+     * remains here until the user explicitly closes the corresponding
+     * {@link Notification} component that was showing the save group's status.
+     */
+    saveGroups: SaveGroup[];
+    setAttributesList: (value: SaveGroup[]) => void;
     /**
      * Called when the hidden section should be shown.
      *
@@ -29,56 +39,25 @@ interface FilesDownloadProgressProps {
     onShowCollection?: (collectionID: number) => void;
 }
 
-export const isFilesDownloadStarted = (
-    attributes: FilesDownloadProgressAttributes,
-) => {
-    return attributes && attributes.total > 0;
-};
-
-export const isFilesDownloadCompleted = (
-    attributes: FilesDownloadProgressAttributes,
-) => {
-    return (
-        attributes &&
-        attributes.success + attributes.failed === attributes.total
-    );
-};
-
-const isFilesDownloadCompletedWithErrors = (
-    attributes: FilesDownloadProgressAttributes,
-) => {
-    return (
-        attributes &&
-        attributes.failed > 0 &&
-        isFilesDownloadCompleted(attributes)
-    );
-};
-
-export const isFilesDownloadCancelled = (
-    attributes: FilesDownloadProgressAttributes,
-) => {
-    return attributes?.canceller?.signal?.aborted;
-};
-
-export const FilesDownloadProgress: React.FC<FilesDownloadProgressProps> = ({
-    attributesList,
+/**
+ * A component that shows a list of notifications, one each for an active
+ * user-initiated download.
+ */
+export const DownloadStatusNotifications: React.FC<
+    DownloadStatusNotificationsProps
+> = ({
+    saveGroups,
     setAttributesList,
     onShowHiddenSection,
     onShowCollection,
 }) => {
     const { showMiniDialog } = useBaseContext();
 
-    if (!attributesList) {
-        return <></>;
-    }
-
     const onClose = (id: number) => {
-        setAttributesList(attributesList.filter((attr) => attr.id !== id));
+        setAttributesList(saveGroups.filter((attr) => attr.id !== id));
     };
 
-    const confirmCancelDownload = (
-        attributes: FilesDownloadProgressAttributes,
-    ) => {
+    const confirmCancelDownload = (attributes: SaveGroup) => {
         showMiniDialog({
             title: t("stop_downloads_title"),
             message: t("stop_downloads_message"),
@@ -94,8 +73,8 @@ export const FilesDownloadProgress: React.FC<FilesDownloadProgressProps> = ({
         });
     };
 
-    const handleClose = (attributes: FilesDownloadProgressAttributes) => () => {
-        if (isFilesDownloadCompleted(attributes)) {
+    const handleClose = (attributes: SaveGroup) => () => {
+        if (isSaveComplete(attributes)) {
             onClose(attributes.id);
         } else {
             confirmCancelDownload(attributes);
@@ -105,7 +84,7 @@ export const FilesDownloadProgress: React.FC<FilesDownloadProgressProps> = ({
     const createHandleOnClick =
         (id: number, onShowCollection: (collectionID: number) => void) =>
         () => {
-            const attributes = attributesList.find((attr) => attr.id === id);
+            const attributes = saveGroups.find((attr) => attr.id === id);
             const electron = globalThis.electron;
             if (electron) {
                 electron.openDirectory(attributes.downloadDirPath);
@@ -120,40 +99,43 @@ export const FilesDownloadProgress: React.FC<FilesDownloadProgressProps> = ({
             }
         };
 
+    if (!saveGroups) {
+        return <></>;
+    }
+
     const notifications: React.ReactNode[] = [];
+
     let visibleIndex = 0;
-    for (const attributes of attributesList) {
+    for (const group of saveGroups) {
         // Skip attempted downloads of empty albums, which had no effect.
-        if (!isFilesDownloadStarted(attributes)) continue;
+        if (!isSaveStarted(group)) continue;
 
         const index = visibleIndex++;
         notifications.push(
             <Notification
-                key={attributes.id}
+                key={group.id}
                 horizontal="left"
                 sx={{ "&&": { bottom: `${index * 80 + 20}px` } }}
-                open={isFilesDownloadStarted(attributes)}
-                onClose={handleClose(attributes)}
+                open={isSaveStarted(group)}
+                onClose={handleClose(group)}
                 keepOpenOnClick
                 attributes={{
-                    color: isFilesDownloadCompletedWithErrors(attributes)
+                    color: isSaveCompleteWithErrors(group)
                         ? "critical"
                         : "secondary",
-                    title: isFilesDownloadCompletedWithErrors(attributes)
+                    title: isSaveCompleteWithErrors(group)
                         ? t("download_failed")
-                        : isFilesDownloadCompleted(attributes)
+                        : isSaveComplete(group)
                           ? t("download_complete")
-                          : t("downloading_album", {
-                                name: attributes.folderName,
-                            }),
-                    caption: isFilesDownloadCompleted(attributes)
-                        ? attributes.folderName
+                          : t("downloading_album", { name: group.folderName }),
+                    caption: isSaveComplete(group)
+                        ? group.folderName
                         : t("download_progress", {
-                              count: attributes.success + attributes.failed,
-                              total: attributes.total,
+                              count: group.success + group.failed,
+                              total: group.total,
                           }),
                     onClick: onShowCollection
-                        ? createHandleOnClick(attributes.id, onShowCollection)
+                        ? createHandleOnClick(group.id, onShowCollection)
                         : undefined,
                 }}
             />,

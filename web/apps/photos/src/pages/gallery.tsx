@@ -5,9 +5,9 @@ import { IconButton, Stack, Typography } from "@mui/material";
 import { AuthenticateUser } from "components/AuthenticateUser";
 import { GalleryBarAndListHeader } from "components/Collections/GalleryBarAndListHeader";
 import {
-    FilesDownloadProgress,
+    DownloadStatusNotifications,
     type FilesDownloadProgressAttributes,
-} from "components/DownloadProgress";
+} from "components/DownloadStatusNotifications";
 import { type TimeStampListItem } from "components/FileList";
 import { FileListWithViewer } from "components/FileListWithViewer";
 import { FixCreationTime } from "components/FixCreationTime";
@@ -995,8 +995,8 @@ const Page: React.FC = () => {
                     )!
                 }
             />
-            <FilesDownloadProgress
-                attributesList={filesDownloadProgressAttributesList}
+            <DownloadStatusNotifications
+                saveGroups={filesDownloadProgressAttributesList}
                 setAttributesList={setFilesDownloadProgressAttributesList}
                 onShowHiddenSection={handleShowHiddenSection}
                 onShowCollection={handleShowCollection}
