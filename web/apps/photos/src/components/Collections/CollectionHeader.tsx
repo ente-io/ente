@@ -55,7 +55,7 @@ import type { SetFilesDownloadProgressAttributesCreator } from "types/gallery";
 import {
     downloadCollectionHelper,
     downloadDefaultHiddenCollectionHelper,
-} from "utils/collection";
+} from "ente-gallery/services/save";
 
 export interface CollectionHeaderProps {
     collectionSummary: CollectionSummary;

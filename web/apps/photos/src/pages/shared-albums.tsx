@@ -8,10 +8,7 @@ import { Box, Button, IconButton, Stack, styled, Tooltip } from "@mui/material";
 import Typography from "@mui/material/Typography";
 import type { TimeStampListItem } from "components/FileList";
 import { FileListWithViewer } from "components/FileListWithViewer";
-import {
-    FilesDownloadProgress,
-    type FilesDownloadProgressAttributes,
-} from "components/FilesDownloadProgress";
+import { FilesDownloadProgress } from "components/FilesDownloadProgress";
 import { Upload } from "components/Upload";
 import {
     AccountsPageContents,
@@ -51,6 +48,13 @@ import {
 import log from "ente-base/log";
 import { FullScreenDropZone } from "ente-gallery/components/FullScreenDropZone";
 import { downloadManager } from "ente-gallery/services/download";
+import {
+    downloadCollectionFiles,
+    downloadSelectedFiles,
+    type FilesDownloadProgressAttributes,
+    type SetFilesDownloadProgressAttributes,
+    type SetFilesDownloadProgressAttributesCreator,
+} from "ente-gallery/services/save";
 import { extractCollectionKeyFromShareURL } from "ente-gallery/services/share";
 import { updateShouldDisableCFUploadProxy } from "ente-gallery/services/upload";
 import { sortFiles } from "ente-gallery/utils/file";
@@ -83,13 +87,8 @@ import { useRouter } from "next/router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { type FileWithPath } from "react-dropzone";
 import { uploadManager } from "services/upload-manager";
-import type {
-    SelectedState,
-    SetFilesDownloadProgressAttributes,
-    SetFilesDownloadProgressAttributesCreator,
-} from "types/gallery";
-import { downloadCollectionFiles } from "utils/collection";
-import { downloadSelectedFiles, getSelectedFiles } from "utils/file";
+import type { SelectedState } from "types/gallery";
+import { getSelectedFiles } from "utils/file";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
 
 export default function PublicCollectionGallery() {

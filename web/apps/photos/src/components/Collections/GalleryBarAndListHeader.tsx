@@ -5,6 +5,7 @@ import {
 } from "components/Collections/CollectionShare";
 import type { TimeStampListItem } from "components/FileList";
 import { useModalVisibility } from "ente-base/components/utils/modal";
+import { type FilesDownloadProgressAttributes } from "ente-gallery/services/save";
 import type { Collection } from "ente-media/collection";
 import {
     GalleryBarImpl,
@@ -24,14 +25,12 @@ import { sortCollectionSummaries } from "services/collectionService";
 import {
     isFilesDownloadCancelled,
     isFilesDownloadCompleted,
-    type FilesDownloadProgressAttributes,
 } from "../FilesDownloadProgress";
 import { AlbumCastDialog } from "./AlbumCastDialog";
 import {
     CollectionHeader,
     type CollectionHeaderProps,
 } from "./CollectionHeader";
-
 type GalleryBarAndListHeaderProps = Omit<
     GalleryBarImplProps,
     | "collectionSummaries"

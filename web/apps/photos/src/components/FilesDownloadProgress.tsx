@@ -1,20 +1,9 @@
 // TODO: Audit this file
 /* eslint-disable react-refresh/only-export-components */
 import { useBaseContext } from "ente-base/context";
+import type { FilesDownloadProgressAttributes } from "ente-gallery/services/save";
 import { Notification } from "ente-new/photos/components/Notification";
 import { t } from "i18next";
-
-export interface FilesDownloadProgressAttributes {
-    id: number;
-    success: number;
-    failed: number;
-    total: number;
-    folderName: string;
-    collectionID: number;
-    isHidden: boolean;
-    downloadDirPath: string;
-    canceller: AbortController;
-}
 
 interface FilesDownloadProgressProps {
     attributesList: FilesDownloadProgressAttributes[];

@@ -125,9 +125,11 @@ import { Trans } from "react-i18next";
 import { uploadManager } from "services/upload-manager";
 import type {
     SelectedState,
+} from "types/gallery";
+import type {
     SetFilesDownloadProgressAttributes,
     SetFilesDownloadProgressAttributesCreator,
-} from "types/gallery";
+} from "ente-gallery/services/save";
 import { getSelectedFiles, performFileOp } from "utils/file";
 
 /**

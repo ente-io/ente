@@ -5,6 +5,10 @@ import {
     FileViewer,
     type FileViewerProps,
 } from "ente-gallery/components/viewer/FileViewer";
+import {
+    downloadSingleFile,
+    type SetFilesDownloadProgressAttributesCreator,
+} from "ente-gallery/services/save";
 import type { Collection } from "ente-media/collection";
 import type { EnteFile } from "ente-media/file";
 import { fileCreationTime, fileFileName } from "ente-media/file-metadata";
@@ -14,8 +18,6 @@ import { t } from "i18next";
 import { useCallback, useMemo, useState } from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { uploadManager } from "services/upload-manager";
-import type { SetFilesDownloadProgressAttributesCreator } from "types/gallery";
-import { downloadSingleFile } from "utils/file";
 import {
     FileList,
     type FileListAnnotatedFile,
