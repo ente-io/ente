@@ -1024,8 +1024,8 @@ const Page: React.FC = () => {
                     activeCollectionID,
                     activePerson,
                     setPhotoListHeader,
-                    setFilesDownloadProgressAttributesCreator,
-                    filesDownloadProgressAttributesList,
+                    saveGroups,
+                    onAddSaveGroup,
                 }}
                 mode={barMode}
                 shouldHide={isInSearchMode}
@@ -1122,11 +1122,9 @@ const Page: React.FC = () => {
                         fileNormalCollectionIDs,
                         pendingFavoriteUpdates,
                         pendingVisibilityUpdates,
+                        onAddSaveGroup,
                     }}
                     emailByUserID={state.emailByUserID}
-                    setFilesDownloadProgressAttributesCreator={
-                        setFilesDownloadProgressAttributesCreator
-                    }
                     onToggleFavorite={handleFileViewerToggleFavorite}
                     onFileVisibilityUpdate={
                         handleFileViewerFileVisibilityUpdate

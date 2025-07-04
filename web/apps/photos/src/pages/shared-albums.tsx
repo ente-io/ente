@@ -47,12 +47,14 @@ import {
 } from "ente-base/http";
 import log from "ente-base/log";
 import { FullScreenDropZone } from "ente-gallery/components/FullScreenDropZone";
-import { useSaveGroups } from "ente-gallery/components/utils/save-groups";
+import {
+    useSaveGroups,
+    type AddSaveGroup,
+} from "ente-gallery/components/utils/save-groups";
 import { downloadManager } from "ente-gallery/services/download";
 import {
-    downloadCollectionFiles,
-    downloadSelectedFiles,
-    type SetFilesDownloadProgressAttributesCreator,
+    downloadAndSaveCollectionFiles,
+    downloadAndSaveFiles,
 } from "ente-gallery/services/save";
 import { extractCollectionKeyFromShareURL } from "ente-gallery/services/share";
 import { updateShouldDisableCFUploadProxy } from "ente-gallery/services/upload";
@@ -410,13 +412,10 @@ export default function PublicCollectionGallery() {
     const downloadFilesHelper = async () => {
         try {
             const selectedFiles = getSelectedFiles(selected, publicFiles);
-            const setFilesDownloadProgressAttributes =
-                setFilesDownloadProgressAttributesCreator(
-                    t("files_count", { count: selectedFiles.length }),
-                );
-            await downloadSelectedFiles(
+            await downloadAndSaveFiles(
                 selectedFiles,
-                setFilesDownloadProgressAttributes,
+                t("files_count", { count: selectedFiles.length }),
+                onAddSaveGroup,
             );
             clearSelection();
         } catch (e) {
@@ -634,30 +633,25 @@ const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
 interface ListHeaderProps {
     publicCollection: Collection;
     publicFiles: EnteFile[];
-    setFilesDownloadProgressAttributesCreator: SetFilesDownloadProgressAttributesCreator;
+    onAddSaveGroup: AddSaveGroup;
 }
 
 const ListHeader: React.FC<ListHeaderProps> = ({
     publicCollection,
     publicFiles,
-    setFilesDownloadProgressAttributesCreator,
+    onAddSaveGroup,
 }) => {
     const downloadEnabled =
         publicCollection.publicURLs?.[0]?.enableDownload ?? true;
 
-    const downloadAllFiles = async () => {
-        const setFilesDownloadProgressAttributes =
-            setFilesDownloadProgressAttributesCreator(
-                publicCollection.name,
-                publicCollection.id,
-                isHiddenCollection(publicCollection),
-            );
-        await downloadCollectionFiles(
+    const downloadAllFiles = () =>
+        downloadAndSaveCollectionFiles(
             publicCollection.name,
+            publicCollection.id,
             publicFiles,
-            setFilesDownloadProgressAttributes,
+            isHiddenCollection(publicCollection),
+            onAddSaveGroup,
         );
-    };
 
     return (
         <GalleryItemsHeaderAdapter>

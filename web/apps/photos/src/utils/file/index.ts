@@ -1,6 +1,6 @@
 import type { LocalUser } from "ente-accounts/services/user";
 import type { AddSaveGroup } from "ente-gallery/components/utils/save-groups";
-import { saveFiles } from "ente-gallery/services/save";
+import { downloadAndSaveFiles } from "ente-gallery/services/save";
 import type { EnteFile } from "ente-media/file";
 import { ItemVisibility } from "ente-media/file-metadata";
 import { type FileOp } from "ente-new/photos/components/SelectedFileOptions";
@@ -11,6 +11,7 @@ import {
     moveToTrash,
 } from "ente-new/photos/services/collection";
 import { updateFilesVisibility } from "ente-new/photos/services/file";
+import { t } from "i18next";
 import type { SelectedState } from "types/gallery";
 
 export function getSelectedFiles(
@@ -61,7 +62,11 @@ export const performFileOp = async (
 ) => {
     switch (op) {
         case "download": {
-            await saveFiles(files, onAddSaveGroup);
+            await downloadAndSaveFiles(
+                files,
+                t("files_count", { count: files.length }),
+                onAddSaveGroup,
+            );
             break;
         }
         case "fixTime":

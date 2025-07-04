@@ -1,31 +1,19 @@
-import { ensureElectron } from "ente-base/electron";
 import { joinPath } from "ente-base/file-name";
 import log from "ente-base/log";
 import { type Electron } from "ente-base/types/ipc";
 import { saveAsFileAndRevokeObjectURL } from "ente-base/utils/web";
 import { downloadManager } from "ente-gallery/services/download";
 import { detectFileTypeInfo } from "ente-gallery/utils/detect-type";
-import { uniqueFilesByID } from "ente-gallery/utils/file";
 import { writeStream } from "ente-gallery/utils/native-stream";
 import type { EnteFile } from "ente-media/file";
 import { fileFileName } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
 import { decodeLivePhoto } from "ente-media/live-photo";
 import {
-    defaultHiddenCollectionUserFacingName,
-    findDefaultHiddenCollectionIDs,
-} from "ente-new/photos/services/collection";
-import { PseudoCollectionID } from "ente-new/photos/services/collection-summary";
-import {
-    savedCollectionFiles,
-    savedCollections,
-} from "ente-new/photos/services/photos-fdb";
-import {
     safeDirectoryName,
     safeFileName,
 } from "ente-new/photos/utils/native-fs";
 import { wait } from "ente-utils/promise";
-import { t } from "i18next";
 import type { AddSaveGroup } from "../components/utils/save-groups";
 
 /**
@@ -38,16 +26,60 @@ import type { AddSaveGroup } from "../components/utils/save-groups";
  *
  * @param files The files to save.
  *
+ * @param title A title to show in the UI notification that indicates the
+ * progress of the save.
+ *
  * @param onAddSaveGroup A function that can be used to create a save group
  * associated with the save. The newly added save group will correspond to a
  * notification shown in the UI, and the progress and status of the save can be
  * communicated by updating the save group's state using the updater function
  * obtained when adding the save group.
  */
-export async function saveFiles(
+export const downloadAndSaveFiles = (
     files: EnteFile[],
+    title: string,
     onAddSaveGroup: AddSaveGroup,
-) {
+) => downloadAndSave(files, title, onAddSaveGroup);
+
+/**
+ * Save all the files of a collection to the user's device.
+ *
+ * This is a variant of {@link downloadAndSaveFiles}, except instead of taking a
+ * list of files to save, this variant is tailored for saving saves all the
+ * files that belong to a collection. Otherwise, it broadly behaves similarly;
+ * see that method's documentation for more details.
+ *
+ * When running in the context of the desktop app, instead of saving the files
+ * in the directory selected by the user, files are saved in a directory with
+ * the same name as the collection.
+ */
+export const downloadAndSaveCollectionFiles = async (
+    collectionName: string,
+    collectionID: number | undefined,
+    files: EnteFile[],
+    isHidden: boolean,
+    onAddSaveGroup: AddSaveGroup,
+) =>
+    downloadAndSave(
+        files,
+        collectionName,
+        onAddSaveGroup,
+        collectionName,
+        collectionID,
+        isHidden,
+    );
+
+/**
+ * The lower level primitive that the public API of this module delegates to.
+ */
+const downloadAndSave = async (
+    files: EnteFile[],
+    title: string,
+    onAddSaveGroup: AddSaveGroup,
+    collectionName?: string,
+    collectionID?: number,
+    isHidden?: boolean,
+) => {
     const electron = globalThis.electron;
 
     let downloadDirPath: string | undefined;
@@ -57,14 +89,24 @@ export async function saveFiles(
             // The user cancelled on the directory selection dialog.
             return;
         }
+        if (collectionName) {
+            downloadDirPath = await mkdirCollectionDownloadFolder(
+                electron,
+                downloadDirPath,
+                collectionName,
+            );
+        }
     }
 
     const canceller = new AbortController();
+    const total = files.length;
 
     const updateSaveGroup = onAddSaveGroup({
-        title: t("files_count", { count: files.length }),
+        title,
+        collectionID,
+        isHidden,
         downloadDirPath,
-        total: files.length,
+        total,
         canceller,
     });
 
@@ -82,7 +124,7 @@ export async function saveFiles(
             updateSaveGroup((g) => ({ ...g, failed: g.failed + 1 }));
         }
     }
-}
+};
 
 /**
  * Save the given {@link EnteFile} as a file in the user's download folder.
@@ -117,6 +159,32 @@ const createTypedObjectURL = async (blobPart: BlobPart, fileName: string) => {
     const blob = blobPart instanceof Blob ? blobPart : new Blob([blobPart]);
     const { mimeType } = await detectFileTypeInfo(new File([blob], fileName));
     return URL.createObjectURL(new Blob([blob], { type: mimeType }));
+};
+
+/**
+ * Create a new directory on the user's file system with the same name as the
+ * provided {@link collectionName} under the provided {@link downloadDirPath},
+ * and return the full path to the created directory.
+ *
+ * This function can be used only when running in the context of our desktop
+ * app, and so such requires an {@link Electron} instance as the witness.
+ */
+const mkdirCollectionDownloadFolder = async (
+    { fs }: Electron,
+    downloadDirPath: string,
+    collectionName: string,
+) => {
+    const collectionDownloadName = await safeDirectoryName(
+        downloadDirPath,
+        collectionName,
+        fs.exists,
+    );
+    const collectionDownloadPath = joinPath(
+        downloadDirPath,
+        collectionDownloadName,
+    );
+    await fs.mkdirIfNeeded(collectionDownloadPath);
+    return collectionDownloadPath;
 };
 
 /**
@@ -171,104 +239,3 @@ const saveFileDesktop = async (
         await writeStreamToFile(await createExportName(fileName), stream);
     }
 };
-
-export async function downloadCollectionHelper(
-    collectionID: number,
-    setFilesDownloadProgressAttributes: SetFilesDownloadProgressAttributes,
-) {
-    try {
-        const allFiles = await savedCollectionFiles();
-        const collectionFiles = allFiles.filter(
-            (file) => file.collectionID == collectionID,
-        );
-        const allCollections = await savedCollections();
-        const collection = allCollections.find(
-            (collection) => collection.id == collectionID,
-        );
-        if (!collection) {
-            throw Error("collection not found");
-        }
-        await downloadCollectionFiles(
-            collection.name,
-            collectionFiles,
-            setFilesDownloadProgressAttributes,
-        );
-    } catch (e) {
-        log.error("download collection failed ", e);
-    }
-}
-
-export async function downloadDefaultHiddenCollectionHelper(
-    setFilesDownloadProgressAttributesCreator: SetFilesDownloadProgressAttributesCreator,
-) {
-    try {
-        const defaultHiddenCollectionsIDs = findDefaultHiddenCollectionIDs(
-            await savedCollections(),
-        );
-        const collectionFiles = await savedCollectionFiles();
-        const defaultHiddenCollectionFiles = uniqueFilesByID(
-            collectionFiles.filter((file) =>
-                defaultHiddenCollectionsIDs.has(file.collectionID),
-            ),
-        );
-        const setFilesDownloadProgressAttributes =
-            setFilesDownloadProgressAttributesCreator(
-                defaultHiddenCollectionUserFacingName,
-                PseudoCollectionID.hiddenItems,
-                true,
-            );
-
-        await downloadCollectionFiles(
-            defaultHiddenCollectionUserFacingName,
-            defaultHiddenCollectionFiles,
-            setFilesDownloadProgressAttributes,
-        );
-    } catch (e) {
-        log.error("download hidden files failed ", e);
-    }
-}
-
-export async function downloadCollectionFiles(
-    collectionName: string,
-    collectionFiles: EnteFile[],
-    setFilesDownloadProgressAttributes: SetFilesDownloadProgressAttributes,
-) {
-    if (!collectionFiles.length) {
-        return;
-    }
-    let downloadDirPath: string;
-    const electron = globalThis.electron;
-    if (electron) {
-        const selectedDir = await electron.selectDirectory();
-        if (!selectedDir) {
-            return;
-        }
-        downloadDirPath = await createCollectionDownloadFolder(
-            selectedDir,
-            collectionName,
-        );
-    }
-    await downloadFilesWithProgress(
-        collectionFiles,
-        downloadDirPath,
-        setFilesDownloadProgressAttributes,
-    );
-}
-
-async function createCollectionDownloadFolder(
-    downloadDirPath: string,
-    collectionName: string,
-) {
-    const fs = ensureElectron().fs;
-    const collectionDownloadName = await safeDirectoryName(
-        downloadDirPath,
-        collectionName,
-        fs.exists,
-    );
-    const collectionDownloadPath = joinPath(
-        downloadDirPath,
-        collectionDownloadName,
-    );
-    await fs.mkdirIfNeeded(collectionDownloadPath);
-    return collectionDownloadPath;
-}

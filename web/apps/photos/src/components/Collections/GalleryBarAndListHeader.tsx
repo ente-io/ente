@@ -6,10 +6,10 @@ import {
 import type { TimeStampListItem } from "components/FileList";
 import { useModalVisibility } from "ente-base/components/utils/modal";
 import {
-    isFilesDownloadCancelled,
+    isSaveCancelled,
     isSaveComplete,
     type SaveGroup,
-} from "ente-gallery/services/save";
+} from "ente-gallery/components/utils/save-groups";
 import type { Collection } from "ente-media/collection";
 import {
     GalleryBarImpl,
@@ -47,11 +47,8 @@ type GalleryBarAndListHeaderProps = Omit<
     activeCollection: Collection;
     setActiveCollectionID: (collectionID: number) => void;
     setPhotoListHeader: (value: TimeStampListItem) => void;
-    filesDownloadProgressAttributesList: SaveGroup[];
-} & Pick<
-        CollectionHeaderProps,
-        "setFilesDownloadProgressAttributesCreator" | "onRemotePull"
-    > &
+    saveGroups: SaveGroup[];
+} & Pick<CollectionHeaderProps, "onRemotePull" | "onAddSaveGroup"> &
     Pick<
         CollectionShareProps,
         "user" | "emailByUserID" | "shareSuggestionEmails" | "setBlockingLoad"
@@ -88,14 +85,14 @@ export const GalleryBarAndListHeader: React.FC<
     setActiveCollectionID,
     setBlockingLoad,
     people,
+    saveGroups,
     activePerson,
     emailByUserID,
     shareSuggestionEmails,
     onRemotePull,
+    onAddSaveGroup,
     onSelectPerson,
     setPhotoListHeader,
-    filesDownloadProgressAttributesList,
-    setFilesDownloadProgressAttributesCreator,
 }) => {
     const { show: showAllAlbums, props: allAlbumsVisibilityProps } =
         useModalVisibility();
@@ -125,15 +122,11 @@ export const GalleryBarAndListHeader: React.FC<
     );
 
     const isActiveCollectionDownloadInProgress = useCallback(() => {
-        const attributes = filesDownloadProgressAttributesList.find(
-            (attr) => attr.collectionID === activeCollectionID,
+        const group = saveGroups.find(
+            (g) => g.collectionID == activeCollectionID,
         );
-        return (
-            attributes &&
-            !isFilesDownloadCancelled(attributes) &&
-            !isSaveComplete(attributes)
-        );
-    }, [activeCollectionID, filesDownloadProgressAttributesList]);
+        return group && !isSaveCancelled(group) && !isSaveComplete(group);
+    }, [saveGroups, activeCollectionID]);
 
     useEffect(() => {
         if (shouldHide) return;
@@ -145,9 +138,9 @@ export const GalleryBarAndListHeader: React.FC<
                         {...{
                             activeCollection,
                             setActiveCollectionID,
-                            setFilesDownloadProgressAttributesCreator,
                             isActiveCollectionDownloadInProgress,
                             onRemotePull,
+                            onAddSaveGroup,
                         }}
                         collectionSummary={toShowCollectionSummaries.get(
                             activeCollectionID,
