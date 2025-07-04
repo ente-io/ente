@@ -38,7 +38,7 @@ const Page: React.FC = () => {
             setUser(user);
         } else {
             stashRedirect("/change-password");
-            void router.push("/");
+            void router.replace("/");
         }
     }, [router]);
 

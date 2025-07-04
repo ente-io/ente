@@ -19,7 +19,7 @@ const Page: React.FC = () => {
 
     useEffect(() => {
         void customAPIHost().then(setHost);
-        if (savedPartialLocalUser()?.email) void router.push("/verify");
+        if (savedPartialLocalUser()?.email) void router.replace("/verify");
         setLoading(false);
     }, [router]);
 

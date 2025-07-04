@@ -161,13 +161,13 @@ const Page: React.FC = () => {
             const user = savedPartialLocalUser();
             const userEmail = user?.email;
             if (!userEmail) {
-                void router.push("/");
+                await router.replace("/");
                 return;
             }
 
             await updateSessionFromElectronSafeStorageIfNeeded();
             if ((await masterKeyFromSession()) && (await savedAuthToken())) {
-                void router.push(appHomeRoute);
+                await router.replace(appHomeRoute);
                 return;
             }
 
@@ -203,7 +203,7 @@ const Page: React.FC = () => {
                     // TODO(RE): Why? For now, add a dev mode circuit breaker.
                     if (isDevBuild) throw new Error("Unexpected case reached");
                     clearLocalStorage();
-                    void router.push("/");
+                    void router.replace("/");
                     return;
                 }
                 setKeyAttributes(keyAttributes);
@@ -219,7 +219,7 @@ const Page: React.FC = () => {
                 return;
             }
 
-            void router.push("/");
+            void router.replace("/");
         })();
     }, [router, validateSession, postVerification]);
 

@@ -76,7 +76,7 @@ const Page: React.FC = () => {
     useEffect(() => {
         void redirectionIfNeededOrEmail().then((redirectOrEmail) => {
             if (typeof redirectOrEmail == "string") {
-                void router.push(redirectOrEmail);
+                void router.replace(redirectOrEmail);
             } else {
                 setEmail(redirectOrEmail.email);
             }

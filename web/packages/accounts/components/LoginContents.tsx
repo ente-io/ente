@@ -18,10 +18,14 @@ import { z } from "zod/v4";
 import { AccountsPageTitleWithCaption } from "./LoginComponents";
 
 interface LoginContentsProps {
-    /** Called when the user clicks the signup option instead.  */
-    onSignUp: () => void;
-    /** Reactive value of {@link customAPIHost}. */
+    /**
+     * Reactive value of {@link customAPIHost}.
+     */
     host: string | undefined;
+    /**
+     * Called when the user clicks the signup option instead.
+     */
+    onSignUp: () => void;
 }
 
 /**

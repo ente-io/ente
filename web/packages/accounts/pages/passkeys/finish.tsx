@@ -37,7 +37,7 @@ const Page: React.FC = () => {
         if (!passkeySessionID || !response) return;
 
         void saveQueryCredentialsAndNavigateTo(passkeySessionID, response).then(
-            (slug) => router.push(slug),
+            (slug) => router.replace(slug),
         );
     }, [router]);
 

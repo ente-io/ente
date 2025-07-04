@@ -55,15 +55,15 @@ const Page: React.FC = () => {
     useEffect(() => {
         const user = savedPartialLocalUser();
         if (!user?.email || !user?.token) {
-            void router.push("/");
+            void router.replace("/");
         } else if (haveMasterKeyInSession()) {
             if (savedJustSignedUp()) {
                 setOpenRecoveryKey(true);
             } else {
-                void router.push(appHomeRoute);
+                void router.replace(appHomeRoute);
             }
         } else if (savedOriginalKeyAttributes()) {
-            void router.push("/credentials");
+            void router.replace("/credentials");
         } else {
             setUserEmail(user.email);
         }

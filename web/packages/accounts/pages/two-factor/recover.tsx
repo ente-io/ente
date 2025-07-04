@@ -71,9 +71,9 @@ const Page: React.FC<RecoverPageProps> = ({ twoFactorType }) => {
                     ? user?.passkeySessionID
                     : user?.twoFactorSessionID;
             if (!user?.email || !sessionID) {
-                await router.push("/");
+                await router.replace("/");
             } else if (user.encryptedToken || user.token) {
-                await router.push("/generate");
+                await router.replace("/generate");
             } else {
                 setSessionID(sessionID);
                 try {

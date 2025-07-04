@@ -36,12 +36,12 @@ const Page: React.FC = () => {
     useEffect(() => {
         const user = savedPartialLocalUser();
         if (!user?.email || !user.twoFactorSessionID) {
-            void router.push("/");
+            void router.replace("/");
         } else if (
             !user.isTwoFactorEnabled &&
             (user.encryptedToken || user.token)
         ) {
-            void router.push("/credentials");
+            void router.replace("/credentials");
         } else {
             setTwoFactorSessionID(user.twoFactorSessionID);
         }

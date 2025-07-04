@@ -46,22 +46,22 @@ const Page: React.FC = () => {
         void (async () => {
             const user = savedPartialLocalUser();
             if (!user?.email) {
-                await router.push("/");
+                await router.replace("/");
                 return;
             }
 
             if (!user.encryptedToken && !user.token) {
                 await sendOTT(user.email, undefined);
                 stashRedirect("/recover");
-                await router.push("/verify");
+                await router.replace("/verify");
                 return;
             }
 
             const keyAttributes = savedKeyAttributes();
             if (!keyAttributes) {
-                await router.push("/generate");
+                await router.replace("/generate");
             } else if (haveMasterKeyInSession()) {
-                await router.push(appHomeRoute);
+                await router.replace(appHomeRoute);
             } else {
                 setKeyAttributes(keyAttributes);
             }
