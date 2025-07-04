@@ -1,12 +1,10 @@
 import {
-    getData,
     replaceSavedLocalUser,
     savedKeyAttributes,
     savedLocalUser,
     savedPartialLocalUser,
     saveKeyAttributes,
     saveSRPAttributes,
-    setLSUser,
     updateSavedLocalUser,
 } from "ente-accounts/services/accounts-db";
 import {
@@ -25,18 +23,19 @@ import {
     generateKeyPair,
     toB64URLSafe,
 } from "ente-base/crypto";
-import { isDevBuild } from "ente-base/env";
 import {
     authenticatedRequestHeaders,
     ensureOk,
     publicRequestHeaders,
 } from "ente-base/http";
+import log from "ente-base/log";
 import { apiURL } from "ente-base/origins";
+import { ensureMasterKeyFromSession } from "ente-base/session";
 import {
-    ensureMasterKeyFromSession,
-    saveMasterKeyInSessionAndSafeStore,
-} from "ente-base/session";
-import { removeAuthToken, savedAuthToken } from "ente-base/token";
+    removeAuthToken,
+    saveAuthToken,
+    savedAuthToken,
+} from "ente-base/token";
 import { ensure } from "ente-utils/ensure";
 import { nullToUndefined } from "ente-utils/transform";
 import { z } from "zod/v4";
@@ -730,12 +729,6 @@ export const changePassword = async (password: string) => {
         { ...keyAttributes, ...updatedKeyAttr },
         masterKey,
     );
-
-    // TODO(RE): This shouldn't be needed, remove me. As a soft remove,
-    // disabling it for dev builds. (tag: Migration)
-    if (!isDevBuild) {
-        await saveMasterKeyInSessionAndSafeStore(masterKey);
-    }
 };
 
 /**
@@ -780,30 +773,25 @@ export const decryptAndStoreToken = async (
     keyAttributes: KeyAttributes,
     masterKey: string,
 ) => {
-    const user = getData("user");
-    const { encryptedToken } = user;
-
-    if (encryptedToken && encryptedToken.length > 0) {
-        const { encryptedSecretKey, secretKeyDecryptionNonce, publicKey } =
-            keyAttributes;
-        const privateKey = await decryptBox(
-            {
-                encryptedData: encryptedSecretKey,
-                nonce: secretKeyDecryptionNonce,
-            },
-            masterKey,
-        );
-
-        const decryptedToken = await toB64URLSafe(
-            await boxSealOpenBytes(encryptedToken, { publicKey, privateKey }),
-        );
-
-        await setLSUser({
-            ...user,
-            token: decryptedToken,
-            encryptedToken: null,
-        });
+    const { encryptedToken } = savedPartialLocalUser() ?? {};
+    if (!encryptedToken) {
+        log.info("Skipping token decryption (no encrypted token found)");
+        return;
     }
+
+    const { encryptedSecretKey, secretKeyDecryptionNonce, publicKey } =
+        keyAttributes;
+    const privateKey = await decryptBox(
+        { encryptedData: encryptedSecretKey, nonce: secretKeyDecryptionNonce },
+        masterKey,
+    );
+
+    const token = await toB64URLSafe(
+        await boxSealOpenBytes(encryptedToken, { publicKey, privateKey }),
+    );
+
+    updateSavedLocalUser({ token, encryptedToken: undefined });
+    return saveAuthToken(token);
 };
 
 const TwoFactorSecret = z.object({

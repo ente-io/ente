@@ -1,7 +1,6 @@
 import { z } from "zod/v4";
 import { decryptBox, encryptBox, generateKey } from "./crypto";
 import log from "./log";
-import { savedAuthToken } from "./token";
 
 /**
  * Remove all data stored in session storage (data tied to the browser tab).

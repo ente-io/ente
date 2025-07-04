@@ -10,8 +10,7 @@ import {
 import { recoveryKeyFromMnemonic } from "ente-accounts/services/recovery-key";
 import { appHomeRoute, stashRedirect } from "ente-accounts/services/redirect";
 import type { KeyAttributes } from "ente-accounts/services/user";
-import { sendOTT } from "ente-accounts/services/user";
-import { decryptAndStoreToken } from "ente-accounts/utils/helpers";
+import { decryptAndStoreToken, sendOTT } from "ente-accounts/services/user";
 import { LinkButton } from "ente-base/components/LinkButton";
 import {
     SingleInputForm,
