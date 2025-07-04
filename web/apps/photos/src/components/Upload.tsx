@@ -1,3 +1,5 @@
+// TODO: Audit this file
+/* eslint-disable @typescript-eslint/no-misused-promises */
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import DiscFullIcon from "@mui/icons-material/DiscFull";
 import GoogleIcon from "@mui/icons-material/Google";
@@ -81,7 +83,7 @@ import type {
 } from "services/upload-manager";
 import { uploadManager } from "services/upload-manager";
 import watcher from "services/watch";
-import { SetLoading } from "types/gallery";
+import type { SetLoading } from "types/gallery";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
 import { UploadProgress } from "./UploadProgress";
 

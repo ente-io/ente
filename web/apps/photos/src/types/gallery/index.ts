@@ -1,4 +1,4 @@
-import { FilesDownloadProgressAttributes } from "components/FilesDownloadProgress";
+import { type FilesDownloadProgressAttributes } from "components/FilesDownloadProgress";
 import { type SelectionContext } from "ente-new/photos/components/gallery";
 
 export interface SelectedState {

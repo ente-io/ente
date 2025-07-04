@@ -1,7 +1,9 @@
-/* eslint-disable @typescript-eslint/no-base-to-string */
 // TODO: Audit this file
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+/* eslint-disable @typescript-eslint/no-base-to-string */
 /* eslint-disable @typescript-eslint/restrict-template-expressions */
 /* eslint-disable @typescript-eslint/dot-notation */
+// @ts-nocheck
 import {
     parseDateFromDigitGroups,
     tryParseEpochMicrosecondsFromFileName,

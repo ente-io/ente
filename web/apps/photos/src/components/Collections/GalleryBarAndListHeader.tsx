@@ -3,7 +3,7 @@ import {
     CollectionShare,
     type CollectionShareProps,
 } from "components/Collections/CollectionShare";
-import { TimeStampListItem } from "components/FileList";
+import type { TimeStampListItem } from "components/FileList";
 import { useModalVisibility } from "ente-base/components/utils/modal";
 import type { Collection } from "ente-media/collection";
 import {
@@ -22,9 +22,9 @@ import { includes } from "ente-utils/type-guards";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { sortCollectionSummaries } from "services/collectionService";
 import {
-    FilesDownloadProgressAttributes,
     isFilesDownloadCancelled,
     isFilesDownloadCompleted,
+    type FilesDownloadProgressAttributes,
 } from "../FilesDownloadProgress";
 import { AlbumCastDialog } from "./AlbumCastDialog";
 import {

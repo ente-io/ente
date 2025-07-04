@@ -4,11 +4,11 @@ import MenuIcon from "@mui/icons-material/Menu";
 import { IconButton, Stack, Typography } from "@mui/material";
 import { AuthenticateUser } from "components/AuthenticateUser";
 import { GalleryBarAndListHeader } from "components/Collections/GalleryBarAndListHeader";
-import { TimeStampListItem } from "components/FileList";
+import { type TimeStampListItem } from "components/FileList";
 import { FileListWithViewer } from "components/FileListWithViewer";
 import {
     FilesDownloadProgress,
-    FilesDownloadProgressAttributes,
+    type FilesDownloadProgressAttributes,
 } from "components/FilesDownloadProgress";
 import { FixCreationTime } from "components/FixCreationTime";
 import { Sidebar } from "components/Sidebar";
@@ -120,10 +120,10 @@ import { PromiseQueue } from "ente-utils/promise";
 import { t } from "i18next";
 import { useRouter, type NextRouter } from "next/router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { FileWithPath } from "react-dropzone";
+import type { FileWithPath } from "react-dropzone";
 import { Trans } from "react-i18next";
 import { uploadManager } from "services/upload-manager";
-import {
+import type {
     SelectedState,
     SetFilesDownloadProgressAttributes,
     SetFilesDownloadProgressAttributesCreator,
@@ -1309,11 +1309,11 @@ const HiddenSectionNavbarContents: React.FC<
  *
  * Check if these query parameters exist, and if so, act on them appropriately.
  */
-export async function handleSubscriptionCompletionRedirectIfNeeded(
+const handleSubscriptionCompletionRedirectIfNeeded = async (
     showMiniDialog: (attributes: MiniDialogAttributes) => void,
     showLoadingBar: () => void,
     router: NextRouter,
-) {
+) => {
     const { session_id: sessionID, status, reason } = router.query;
 
     if (status == "success") {
@@ -1378,4 +1378,4 @@ export async function handleSubscriptionCompletionRedirectIfNeeded(
                 );
         }
     }
-}
+};

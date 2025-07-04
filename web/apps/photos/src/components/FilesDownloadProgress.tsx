@@ -1,3 +1,5 @@
+// TODO: Audit this file
+/* eslint-disable react-refresh/only-export-components */
 import { useBaseContext } from "ente-base/context";
 import { Notification } from "ente-new/photos/components/Notification";
 import { t } from "i18next";

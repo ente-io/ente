@@ -5,14 +5,8 @@
         "baseUrl": "./src",
 
         /* Override tsconfig-next.json (TODO: Remove all of us) */
-        "verbatimModuleSyntax": false,
         "noImplicitAny": false,
-        "noUnusedLocals": false,
-        "noUnusedParameters": false,
-        "noImplicitReturns": false,
-        "noUncheckedIndexedAccess": false,
-        "strictNullChecks": false,
-        "useUnknownInCatchVariables": false
+        "strictNullChecks": false
     },
     "include": [
         "next-env.d.ts",

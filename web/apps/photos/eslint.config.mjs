@@ -20,9 +20,7 @@ export default [
             /** TODO: Disabled as we migrate, try to prune these again */
             "@typescript-eslint/no-floating-promises": "off",
             "@typescript-eslint/no-unnecessary-type-assertion": "off",
-            "@typescript-eslint/prefer-promise-reject-errors": "off",
             "react-hooks/exhaustive-deps": "off",
-            "react-refresh/only-export-components": "off",
         },
     },
 ];

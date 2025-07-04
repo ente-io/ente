@@ -51,7 +51,7 @@ import { usePhotosAppContext } from "ente-new/photos/types/context";
 import { t } from "i18next";
 import React, { useCallback, useRef } from "react";
 import { Trans } from "react-i18next";
-import { SetFilesDownloadProgressAttributesCreator } from "types/gallery";
+import type { SetFilesDownloadProgressAttributesCreator } from "types/gallery";
 import {
     downloadCollectionHelper,
     downloadDefaultHiddenCollectionHelper,
@@ -221,15 +221,15 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
         setActiveCollectionID(PseudoCollectionID.all);
     });
 
-    const _downloadCollection = () => {
+    const _downloadCollection = async () => {
         if (isActiveCollectionDownloadInProgress()) return;
 
         if (collectionSummaryType == "hiddenItems") {
-            return downloadDefaultHiddenCollectionHelper(
+            await downloadDefaultHiddenCollectionHelper(
                 setFilesDownloadProgressAttributesCreator,
             );
         } else {
-            return downloadCollectionHelper(
+            await downloadCollectionHelper(
                 activeCollection.id,
                 setFilesDownloadProgressAttributesCreator(
                     activeCollection.name,
