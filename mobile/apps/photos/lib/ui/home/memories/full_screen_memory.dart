@@ -260,6 +260,8 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
       _onPageChange(inheritedData, currentIndex + 1);
     } else if (widget.onNextMemory != null) {
       widget.onNextMemory!();
+    } else {
+      Navigator.of(context).pop();
     }
   }
 
@@ -271,6 +273,10 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
       _onPageChange(inheritedData, currentIndex - 1);
     } else if (widget.onPreviousMemory != null) {
       widget.onPreviousMemory!();
+    } else {
+      hasFinalFileLoaded = true;
+      _onPageChange(inheritedData, currentIndex);
+      _toggleAnimation(pause: false);
     }
   }
 
