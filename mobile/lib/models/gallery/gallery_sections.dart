@@ -25,12 +25,10 @@ class GalleryGroups {
   final bool sortOrderAsc;
   final double widthAvailable;
   final double headerExtent;
-  final BuildContext context;
   GalleryGroups({
     required this.allFiles,
     required this.groupType,
     required this.widthAvailable,
-    required this.context,
     required this.selectedFiles,
     required this.tagPrefix,
     this.sortOrderAsc = true,
@@ -102,7 +100,9 @@ class GalleryGroups {
           builder: (context, rowIndex) {
             if (rowIndex == firstIndex) {
               return GroupHeaderWidget(
-                title: _groupIdToHeaderDataMap[groupID]!.title,
+                title: _groupIdToHeaderDataMap[groupID]!
+                    .groupType
+                    .getTitle(context, groupIDToFilesMap[groupID]!.first),
                 gridSize: crossAxisCount,
               );
             } else {
@@ -205,21 +205,15 @@ class GalleryGroups {
     _groupIds.add(uuid);
     _groupIdToFilesMap[uuid] = dailyFiles;
     _groupIdToHeaderDataMap[uuid] = GroupHeaderData(
-      title: groupType.getTitle(
-        context,
-        dailyFiles.first,
-      ),
       groupType: groupType,
     );
   }
 }
 
 class GroupHeaderData {
-  final String title;
   final GroupType groupType;
 
   GroupHeaderData({
-    required this.title,
     required this.groupType,
   });
 }

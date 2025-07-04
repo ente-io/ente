@@ -418,6 +418,7 @@ class GalleryState extends State<Gallery> {
       child: Scrollbar(
         interactive: true,
         child: CustomScrollView(
+          // physics: const BouncingScrollPhysics(),
           slivers: [
             FutureBuilder(
               future: headerExtent,
@@ -428,7 +429,6 @@ class GalleryState extends State<Gallery> {
                       allFiles: _allGalleryFiles,
                       groupType: widget.groupType,
                       widthAvailable: MediaQuery.sizeOf(context).width,
-                      context: context,
                       selectedFiles: widget.selectedFiles,
                       tagPrefix: widget.tagPrefix,
                       headerExtent: snapshot.data!,
