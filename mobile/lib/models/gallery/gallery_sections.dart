@@ -208,7 +208,6 @@ class GalleryGroups {
       title: groupType.getTitle(
         context,
         dailyFiles.first,
-        lastFile: dailyFiles.last,
       ),
       groupType: groupType,
     );

@@ -46,7 +46,10 @@ extension GroupTypeExtension on GroupType {
     return true;
   }
 
-  String getTitle(BuildContext context, EnteFile file, {EnteFile? lastFile}) {
+  String getTitle(
+    BuildContext context,
+    EnteFile file,
+  ) {
     if (this == GroupType.day) {
       return _getDayTitle(context, file.creationTime!);
     } else if (this == GroupType.week) {
