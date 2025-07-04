@@ -729,6 +729,7 @@ const Page: React.FC = () => {
                     await performFileOp(
                         op,
                         toProcessFiles,
+                        onAddSaveGroup,
                         handleMarkTempDeleted,
                         () => dispatch({ type: "clearTempDeleted" }),
                         (files) => dispatch({ type: "markTempHidden", files }),
@@ -737,7 +738,6 @@ const Page: React.FC = () => {
                             setFixCreationTimeFiles(files);
                             showFixCreationTime();
                         },
-                        setFilesDownloadProgressAttributesCreator,
                     );
                 }
                 // Apart from download, the other operations currently only work

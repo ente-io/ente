@@ -25,127 +25,61 @@ import {
     safeFileName,
 } from "ente-new/photos/utils/native-fs";
 import { wait } from "ente-utils/promise";
+import { t } from "i18next";
+import type { AddSaveGroup } from "../components/utils/save-groups";
 
-
-export type SetFilesDownloadProgressAttributes = (
-    value: Partial<SaveGroup> | ((prev: SaveGroup) => SaveGroup),
-) => void;
-
-export type SetFilesDownloadProgressAttributesCreator = (
-    folderName: string,
-    collectionID?: number,
-    isHidden?: boolean,
-) => SetFilesDownloadProgressAttributes;
-
-export async function downloadFilesWithProgress(
+/**
+ * Save the given {@link files} to the user's device.
+ *
+ * If we're running in the context of the web app, the files will be saved to
+ * the user's download folder. If we're running in the context of our desktop
+ * app, the user will be prompted to select a directory on their file system and
+ * the files will be saved therein.
+ *
+ * @param files The files to save.
+ *
+ * @param onAddSaveGroup A function that can be used to create a save group
+ * associated with the save. The newly added save group will correspond to a
+ * notification shown in the UI, and the progress and status of the save can be
+ * communicated by updating the save group's state using the updater function
+ * obtained when adding the save group.
+ */
+export async function saveFiles(
     files: EnteFile[],
-    downloadDirPath: string,
-    setFilesDownloadProgressAttributes: SetFilesDownloadProgressAttributes,
+    onAddSaveGroup: AddSaveGroup,
 ) {
-    if (!files.length) {
-        return;
-    }
-    const canceller = new AbortController();
-    const increaseSuccess = () => {
-        if (canceller.signal.aborted) return;
-        setFilesDownloadProgressAttributes((prev) => ({
-            ...prev,
-            success: prev.success + 1,
-        }));
-    };
-    const increaseFailed = () => {
-        if (canceller.signal.aborted) return;
-        setFilesDownloadProgressAttributes((prev) => ({
-            ...prev,
-            failed: prev.failed + 1,
-        }));
-    };
-    const isCancelled = () => canceller.signal.aborted;
+    const electron = globalThis.electron;
 
-    setFilesDownloadProgressAttributes({
+    let downloadDirPath: string | undefined;
+    if (electron) {
+        downloadDirPath = await electron.selectDirectory();
+        if (!downloadDirPath) {
+            // The user cancelled on the directory selection dialog.
+            return;
+        }
+    }
+
+    const canceller = new AbortController();
+
+    const updateSaveGroup = onAddSaveGroup({
+        title: t("files_count", { count: files.length }),
         downloadDirPath,
-        success: 0,
-        failed: 0,
         total: files.length,
         canceller,
     });
 
-    const electron = globalThis.electron;
-    if (electron) {
-        await downloadFilesDesktop(
-            electron,
-            files,
-            { increaseSuccess, increaseFailed, isCancelled },
-            downloadDirPath,
-        );
-    } else {
-        await downloadFiles(files, {
-            increaseSuccess,
-            increaseFailed,
-            isCancelled,
-        });
-    }
-}
-
-export async function downloadSelectedFiles(
-    files: EnteFile[],
-    setFilesDownloadProgressAttributes: SetFilesDownloadProgressAttributes,
-) {
-    if (!files.length) {
-        return;
-    }
-    let downloadDirPath: string;
-    const electron = globalThis.electron;
-    if (electron) {
-        downloadDirPath = await electron.selectDirectory();
-        if (!downloadDirPath) {
-            return;
-        }
-    }
-    await downloadFilesWithProgress(
-        files,
-        downloadDirPath,
-        setFilesDownloadProgressAttributes,
-    );
-}
-
-export async function downloadSingleFile(
-    file: EnteFile,
-    setFilesDownloadProgressAttributes: SetFilesDownloadProgressAttributes,
-) {
-    let downloadDirPath: string;
-    const electron = globalThis.electron;
-    if (electron) {
-        downloadDirPath = await electron.selectDirectory();
-        if (!downloadDirPath) {
-            return;
-        }
-    }
-    await downloadFilesWithProgress(
-        [file],
-        downloadDirPath,
-        setFilesDownloadProgressAttributes,
-    );
-}
-
-export async function downloadFiles(
-    files: EnteFile[],
-    progressBarUpdater: {
-        increaseSuccess: () => void;
-        increaseFailed: () => void;
-        isCancelled: () => boolean;
-    },
-) {
     for (const file of files) {
+        if (canceller.signal.aborted) break;
         try {
-            if (progressBarUpdater?.isCancelled()) {
-                return;
+            if (electron && downloadDirPath) {
+                await saveFileDesktop(electron, file, downloadDirPath);
+            } else {
+                await saveAsFile(file);
             }
-            await saveAsFile(file);
-            progressBarUpdater?.increaseSuccess();
+            updateSaveGroup((g) => ({ ...g, success: g.success + 1 }));
         } catch (e) {
-            log.error("download fail for file", e);
-            progressBarUpdater?.increaseFailed();
+            log.error("File download failed", e);
+            updateSaveGroup((g) => ({ ...g, failed: g.failed + 1 }));
         }
     }
 }
@@ -184,30 +118,6 @@ const createTypedObjectURL = async (blobPart: BlobPart, fileName: string) => {
     const { mimeType } = await detectFileTypeInfo(new File([blob], fileName));
     return URL.createObjectURL(new Blob([blob], { type: mimeType }));
 };
-
-async function downloadFilesDesktop(
-    electron: Electron,
-    files: EnteFile[],
-    progressBarUpdater: {
-        increaseSuccess: () => void;
-        increaseFailed: () => void;
-        isCancelled: () => boolean;
-    },
-    downloadPath: string,
-) {
-    for (const file of files) {
-        try {
-            if (progressBarUpdater?.isCancelled()) {
-                return;
-            }
-            await saveFileDesktop(electron, file, downloadPath);
-            progressBarUpdater?.increaseSuccess();
-        } catch (e) {
-            log.error("download fail for file", e);
-            progressBarUpdater?.increaseFailed();
-        }
-    }
-}
 
 /**
  * Save a file to the given {@link directoryPath} using native filesystem APIs.

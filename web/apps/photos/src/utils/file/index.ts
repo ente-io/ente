@@ -1,9 +1,6 @@
 import type { LocalUser } from "ente-accounts/services/user";
 import type { AddSaveGroup } from "ente-gallery/components/utils/save-groups";
-import {
-    type SetFilesDownloadProgressAttributesCreator,
-    downloadSelectedFiles,
-} from "ente-gallery/services/save";
+import { saveFiles } from "ente-gallery/services/save";
 import type { EnteFile } from "ente-media/file";
 import { ItemVisibility } from "ente-media/file-metadata";
 import { type FileOp } from "ente-new/photos/components/SelectedFileOptions";
@@ -14,7 +11,6 @@ import {
     moveToTrash,
 } from "ente-new/photos/services/collection";
 import { updateFilesVisibility } from "ente-new/photos/services/file";
-import { t } from "i18next";
 import type { SelectedState } from "types/gallery";
 
 export function getSelectedFiles(
@@ -56,23 +52,16 @@ export const shouldShowAvatar = (
 export const performFileOp = async (
     op: FileOp,
     files: EnteFile[],
+    onAddSaveGroup: AddSaveGroup,
     markTempDeleted: (files: EnteFile[]) => void,
     clearTempDeleted: () => void,
     markTempHidden: (files: EnteFile[]) => void,
     clearTempHidden: () => void,
     fixCreationTime: (files: EnteFile[]) => void,
-    onAddSaveGroup: AddSaveGroup,
 ) => {
     switch (op) {
         case "download": {
-            const setSelectedFileDownloadProgressAttributes =
-                setFilesDownloadProgressAttributesCreator(
-                    t("files_count", { count: files.length }),
-                );
-            await downloadSelectedFiles(
-                files,
-                setSelectedFileDownloadProgressAttributes,
-            );
+            await saveFiles(files, onAddSaveGroup);
             break;
         }
         case "fixTime":
