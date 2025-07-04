@@ -26,6 +26,15 @@ import {
 } from "ente-new/photos/utils/native-fs";
 import { wait } from "ente-utils/promise";
 
+/**
+ * An object that keeps track of progress of the download of a set of files.
+ *
+ * This "download" is distinct from the downloads the app does from remote. What
+ * we're doing here is perhaps more accurately but too verbosely described as "a
+ * user initiated download of files to the user's device", aka "saving them". In
+ * contrast, the app does the "download the file from remote" internal action,
+ * e.g. for showing to the user or performing some indexing etc.
+ */
 export interface FilesDownloadProgressAttributes {
     id: number;
     success: number;
@@ -215,7 +224,7 @@ async function downloadFilesDesktop(
             if (progressBarUpdater?.isCancelled()) {
                 return;
             }
-            await downloadFileDesktop(electron, file, downloadPath);
+            await saveFileDesktop(electron, file, downloadPath);
             progressBarUpdater?.increaseSuccess();
         } catch (e) {
             log.error("download fail for file", e);
@@ -224,60 +233,58 @@ async function downloadFilesDesktop(
     }
 }
 
-async function downloadFileDesktop(
+/**
+ * Save a file to the given {@link directoryPath} using native filesystem APIs.
+ *
+ * This is a sibling of {@link saveAsFile} for use when we are running in the
+ * context of our desktop app. Unlike the browser, the desktop app can use
+ * native file system APIs to efficiently write the files on disk without
+ * needing to prompt the user for each write.
+ *
+ * @param electron An {@link Electron} instance, a witness to the fact that
+ * we're running in the desktop app.
+ *
+ * @param file The {@link EnteFile} whose contents we want to save to the user's
+ * file system.
+ *
+ * @param directoryPath The file system directory in which to save the file.
+ */
+const saveFileDesktop = async (
     electron: Electron,
     file: EnteFile,
-    downloadDir: string,
-) {
+    directoryPath: string,
+) => {
     const fs = electron.fs;
+
+    const createSafeName = (fileName: string) =>
+        safeFileName(directoryPath, fileName, fs.exists);
+
+    const writeStreamToFile = (
+        fileName: string,
+        stream: ReadableStream<Uint8Array> | null,
+    ) => writeStream(electron, joinPath(directoryPath, fileName), stream);
 
     const stream = await downloadManager.fileStream(file);
     const fileName = fileFileName(file);
 
     if (file.metadata.fileType == FileType.livePhoto) {
-        const fileBlob = await new Response(stream).blob();
         const { imageFileName, imageData, videoFileName, videoData } =
-            await decodeLivePhoto(fileName, fileBlob);
-        const imageExportName = await safeFileName(
-            downloadDir,
-            imageFileName,
-            fs.exists,
-        );
-        const imageStream = new Response(imageData).body;
-        await writeStream(
-            electron,
-            joinPath(downloadDir, imageExportName),
-            imageStream,
-        );
+            await decodeLivePhoto(fileName, await new Response(stream).blob());
+        const imageExportName = await createSafeName(imageFileName);
+        await writeStreamToFile(imageExportName, new Response(imageData).body);
         try {
-            const videoExportName = await safeFileName(
-                downloadDir,
-                videoFileName,
-                fs.exists,
-            );
-            const videoStream = new Response(videoData).body;
-            await writeStream(
-                electron,
-                joinPath(downloadDir, videoExportName),
-                videoStream,
+            await writeStreamToFile(
+                await createSafeName(videoFileName),
+                new Response(videoData).body,
             );
         } catch (e) {
-            await fs.rm(joinPath(downloadDir, imageExportName));
+            await fs.rm(joinPath(directoryPath, imageExportName));
             throw e;
         }
     } else {
-        const fileExportName = await safeFileName(
-            downloadDir,
-            fileName,
-            fs.exists,
-        );
-        await writeStream(
-            electron,
-            joinPath(downloadDir, fileExportName),
-            stream,
-        );
+        await writeStreamToFile(await createSafeName(fileName), stream);
     }
-}
+};
 
 export async function downloadCollectionHelper(
     collectionID: number,
