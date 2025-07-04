@@ -206,27 +206,24 @@ Future<Map<String, dynamic>> getMetadata(
     }
   }
 
-  final metadata = <String, dynamic>{};
-  metadata["localID"] = asset?.id;
-  final String hashValue = mediaUploadData.hash.data;
-  metadata["hash"] = hashValue;
+  final metadata = <String, dynamic>{
+    "localID": asset?.id,
+    "hash": mediaUploadData.hash.data,
+    "version": EnteFile.kCurrentMetadataVersion,
+    "title": title,
+    "deviceFolder": deviceFolder,
+    "creationTime": creationTime,
+    "modificationTime": modificationTime,
+    "fileType": fileType.index,
+  };
+
   if (asset != null) {
     metadata["subType"] = asset.subtype;
   }
-  metadata["version"] = EnteFile.kCurrentMetadataVersion;
-  metadata["title"] = title;
-  metadata["deviceFolder"] = deviceFolder;
-  metadata["creationTime"] = creationTime;
-  metadata["modificationTime"] = modificationTime;
-  metadata["fileType"] = fileType.index;
-  if (location != null &&
-      location.latitude != null &&
-      location.longitude != null &&
-      (location.latitude != 0 && location.longitude != 0)) {
-    metadata["latitude"] = location.latitude;
+  if (Location.isValidLocation(location)) {
+    metadata["latitude"] = location!.latitude;
     metadata["longitude"] = location.longitude;
   }
-
   if (duration != null) {
     metadata["duration"] = duration;
   }

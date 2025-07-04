@@ -1748,17 +1748,5 @@
   "happyBirthday": "Buon compleanno! 🥳",
   "happyBirthdayToPerson": "Buon compleanno a {name}! 🎉",
   "birthdays": "Compleanni",
-  "wishThemAHappyBirthday": "Wish ${name} a happy birthday! 🎉",
-  "cLTitle1": "Caricamento di file video di grandi dimensioni",
-  "cLDesc1": "Dopo la versione beta dello streaming video e il lavoro sui caricamenti e download ripresi, abbiamo ora aumentato il limite di caricamento file a 10GB. Questo è ora disponibile sia nelle app desktop che mobili.",
-  "cLTitle2": "Caricamento in background",
-  "cLDesc2": "I caricamenti in background sono ora supportati anche su iOS, oltre ai dispositivi Android. Non è necessario aprire l'app per eseguire il backup delle tue foto e video più recenti.",
-  "cLTitle3": "Riproduzione automatica dei ricordi",
-  "cLDesc3": "Abbiamo apportato miglioramenti significativi alla nostra esperienza dei ricordi, inclusa la riproduzione automatica, scorrimento al ricordo successivo e molto altro.",
-  "cLTitle4": "Riconoscimento facciale migliorato",
-  "cLDesc4": "Insieme a un sacco di miglioramenti interni, ora è molto più facile vedere tutti i volti rilevati, fornire feedback sui volti simili e aggiungere/rimuovere volti da una singola foto.",
-  "cLTitle5": "Notifiche di compleanno",
-  "cLDesc5": "Ora riceverai una notifica opzionale per tutti i compleanni che hai salvato su Ente, insieme a una raccolta delle loro migliori foto.",
-  "cLTitle6": "Caricamenti e download ripresi",
-  "cLDesc6": "Non più attese per il completamento di caricamenti/download prima di poter chiudere l'app. Tutti i caricamenti e download ora hanno la capacità di essere messi in pausa a metà e ripresi da dove hai lasciato."
+  "wishThemAHappyBirthday": "Wish ${name} a happy birthday! 🎉"
 }

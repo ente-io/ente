@@ -40,6 +40,9 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m7(name) => "Любуясь ${name}";
 
+  static String m8(count) =>
+      "${Intl.plural(count, zero: 'Нет участников', one: '${count} участник', other: '${count} участников')}";
+
   static String m9(versionValue) => "Версия: ${versionValue}";
 
   static String m10(freeAmount, storageUnit) =>
@@ -63,6 +66,9 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m15(albumName) => "Совместная ссылка создана для ${albumName}";
 
+  static String m16(count) =>
+      "${Intl.plural(count, zero: 'Добавлено 0 соавторов', one: 'Добавлен 1 соавтор', other: 'Добавлено ${count} соавторов')}";
+
   static String m17(email, numOfDays) =>
       "Вы собираетесь добавить ${email} в качестве доверенного контакта. Доверенный контакт сможет восстановить ваш аккаунт, если вы будете отсутствовать ${numOfDays} дней.";
 
@@ -73,6 +79,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Пожалуйста, свяжитесь с нами по адресу support@ente.io для управления вашей подпиской ${provider}.";
 
   static String m20(endpoint) => "Подключено к ${endpoint}";
+
+  static String m21(count) =>
+      "${Intl.plural(count, one: 'Удалить ${count} элемент', other: 'Удалить ${count} элементов')}";
 
   static String m23(currentlyDeleting, totalCount) =>
       "Удаление ${currentlyDeleting} / ${totalCount}";
@@ -128,7 +137,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m43(name) => "Поход с ${name}";
 
   static String m44(count) =>
-      "${Intl.plural(count, one: '${count} элемент', few: '${count} элемента', other: '${count} элементов')}";
+      "${Intl.plural(count, one: '${count} элемент', other: '${count} элементов')}";
 
   static String m45(name) => "В последний раз с ${name}";
 
@@ -170,6 +179,9 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m61(count) =>
       "${Intl.plural(count, zero: 'Нет фото', one: '1 фото', other: '${count} фото')}";
+
+  static String m62(count) =>
+      "${Intl.plural(count, zero: '0 фотографий', one: '1 фотография', other: '${count} фотографий')}";
 
   static String m63(endDate) =>
       "Бесплатный пробный период действителен до ${endDate}.\nПосле этого вы можете выбрать платный тариф.";
@@ -265,7 +277,13 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m100(email) => "Это идентификатор подтверждения ${email}";
 
+  static String m101(count) =>
+      "${Intl.plural(count, one: 'Эта неделя, ${count} год назад', other: 'Эта неделя, ${count} лет назад')}";
+
   static String m102(dateFormat) => "${dateFormat} сквозь годы";
+
+  static String m103(count) =>
+      "${Intl.plural(count, zero: 'Скоро', one: '1 день', other: '${count} дней')}";
 
   static String m104(year) => "Поездка в ${year}";
 
@@ -369,6 +387,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "after1Week": MessageLookupByLibrary.simpleMessage("Через 1 неделю"),
         "after1Year": MessageLookupByLibrary.simpleMessage("Через 1 год"),
         "albumOwner": MessageLookupByLibrary.simpleMessage("Владелец"),
+        "albumParticipantsCount": m8,
         "albumTitle": MessageLookupByLibrary.simpleMessage("Название альбома"),
         "albumUpdated": MessageLookupByLibrary.simpleMessage("Альбом обновлён"),
         "albums": MessageLookupByLibrary.simpleMessage("Альбомы"),
@@ -526,29 +545,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "blackFridaySale": MessageLookupByLibrary.simpleMessage(
             "Распродажа в \"Черную пятницу\""),
         "blog": MessageLookupByLibrary.simpleMessage("Блог"),
-        "cLDesc1": MessageLookupByLibrary.simpleMessage(
-            "Вслед за бета-версией потокового видео и работой над возобновляемыми загрузками и скачиваниями, мы увеличили лимит загрузки файлов до 10ГБ. Это теперь доступно как в настольных, так и в мобильных приложениях."),
-        "cLDesc2": MessageLookupByLibrary.simpleMessage(
-            "Фоновые загрузки теперь также поддерживаются на iOS, в дополнение к устройствам Android. Больше не нужно открывать приложение для резервного копирования ваших последних фото и видео."),
-        "cLDesc3": MessageLookupByLibrary.simpleMessage(
-            "Мы внесли значительные улучшения в наш опыт воспоминаний, включая автовоспроизведение, пролистывание к следующему воспоминанию и многое другое."),
-        "cLDesc4": MessageLookupByLibrary.simpleMessage(
-            "Наряду с множеством внутренних улучшений, теперь гораздо проще увидеть все обнаруженные лица, предоставить обратную связь о похожих лицах и добавить/удалить лица с одной фотографии."),
-        "cLDesc5": MessageLookupByLibrary.simpleMessage(
-            "Теперь вы будете получать опциональные уведомления обо всех днях рождения, которые вы сохранили в Ente, вместе с коллекцией их лучших фотографий."),
-        "cLDesc6": MessageLookupByLibrary.simpleMessage(
-            "Больше не нужно ждать завершения загрузок/скачиваний перед закрытием приложения. Все загрузки и скачивания теперь могут быть приостановлены на полпути и возобновлены с того места, где вы остановились."),
-        "cLTitle1": MessageLookupByLibrary.simpleMessage(
-            "Загрузка больших видеофайлов"),
-        "cLTitle2": MessageLookupByLibrary.simpleMessage("Фоновая загрузка"),
-        "cLTitle3": MessageLookupByLibrary.simpleMessage(
-            "Автовоспроизведение воспоминаний"),
-        "cLTitle4": MessageLookupByLibrary.simpleMessage(
-            "Улучшенное распознавание лиц"),
-        "cLTitle5":
-            MessageLookupByLibrary.simpleMessage("Уведомления о днях рождения"),
-        "cLTitle6": MessageLookupByLibrary.simpleMessage(
-            "Возобновляемые загрузки и скачивания"),
         "cachedData":
             MessageLookupByLibrary.simpleMessage("Кэшированные данные"),
         "calculating": MessageLookupByLibrary.simpleMessage("Подсчёт..."),
@@ -645,6 +641,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "collaboratorsCanAddPhotosAndVideosToTheSharedAlbum":
             MessageLookupByLibrary.simpleMessage(
                 "Соавторы могут добавлять фото и видео в общий альбом."),
+        "collaboratorsSuccessfullyAdded": m16,
         "collageLayout": MessageLookupByLibrary.simpleMessage("Макет"),
         "collageSaved":
             MessageLookupByLibrary.simpleMessage("Коллаж сохранён в галерее"),
@@ -763,6 +760,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Удалить с устройства"),
         "deleteFromEnte":
             MessageLookupByLibrary.simpleMessage("Удалить из Ente"),
+        "deleteItemCount": m21,
         "deleteLocation":
             MessageLookupByLibrary.simpleMessage("Удалить местоположение"),
         "deletePhotos": MessageLookupByLibrary.simpleMessage("Удалить фото"),
@@ -1477,6 +1475,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "photosAddedByYouWillBeRemovedFromTheAlbum":
             MessageLookupByLibrary.simpleMessage(
                 "Добавленные вами фото будут удалены из альбома"),
+        "photosCount": m62,
         "photosKeepRelativeTimeDifference":
             MessageLookupByLibrary.simpleMessage(
                 "Фото сохранят относительную разницу во времени"),
@@ -2012,6 +2011,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Это ваш идентификатор подтверждения"),
         "thisWeekThroughTheYears":
             MessageLookupByLibrary.simpleMessage("Эта неделя сквозь годы"),
+        "thisWeekXYearsAgo": m101,
         "thisWillLogYouOutOfTheFollowingDevice":
             MessageLookupByLibrary.simpleMessage(
                 "Это завершит ваш сеанс на следующем устройстве:"),
@@ -2037,6 +2037,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "total": MessageLookupByLibrary.simpleMessage("всего"),
         "totalSize": MessageLookupByLibrary.simpleMessage("Общий размер"),
         "trash": MessageLookupByLibrary.simpleMessage("Корзина"),
+        "trashDaysLeft": m103,
         "trim": MessageLookupByLibrary.simpleMessage("Сократить"),
         "tripInYear": m104,
         "tripToLocation": m105,

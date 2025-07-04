@@ -1414,6 +1414,16 @@
     },
     "description": "Number of viewers that were successfully added to an album."
   },
+  "collaboratorsSuccessfullyAdded": "{count, plural, =0 {0 Mitarbeiter hinzugefügt} =1 {1 Mitarbeiter hinzugefügt} other {{count} Mitarbeiter hinzugefügt}}",
+  "@collaboratorsSuccessfullyAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    },
+    "description": "Number of collaborators that were successfully added to an album."
+  },
   "accountIsAlreadyConfigured": "Das Konto ist bereits konfiguriert.",
   "sessionIdMismatch": "Sitzungs-ID stimmt nicht überein",
   "@sessionIdMismatch": {
@@ -1479,6 +1489,15 @@
   },
   "currentlyRunning": "läuft gerade",
   "ignored": "ignoriert",
+  "photosCount": "{count, plural, =0 {0 Fotos} =1 {Ein Foto} other {{count} Fotos}}",
+  "@photosCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
   "file": "Datei",
   "searchSectionsLengthMismatch": "Abschnittslänge stimmt nicht überein: {snapshotLength} != {searchLength}",
   "@searchSectionsLengthMismatch": {
@@ -1738,17 +1757,5 @@
   "happyBirthday": "Herzlichen Glückwunsch zum Geburtstag! 🥳",
   "happyBirthdayToPerson": "Alles Gutes zum Geburtstag an {name}! 🎉",
   "birthdays": "Geburtstage",
-  "wishThemAHappyBirthday": "Wish ${name} a happy birthday! 🎉",
-  "cLTitle1": "Upload großer Videodateien",
-  "cLDesc1": "Nach der Video-Streaming-Beta und der Arbeit an fortsetzbaren Uploads und Downloads haben wir das Datei-Upload-Limit auf 10 GB erhöht. Dies ist jetzt sowohl in Desktop- als auch in mobilen Apps verfügbar.",
-  "cLTitle2": "Hintergrund-Upload",
-  "cLDesc2": "Hintergrund-Uploads werden jetzt auch auf iOS unterstützt, zusätzlich zu Android-Geräten. Du musst die App nicht öffnen, um deine neuesten Fotos und Videos zu sichern.",
-  "cLTitle3": "Autoplay-Erinnerungen",
-  "cLDesc3": "Wir haben erhebliche Verbesserungen an unserer Erinnerungserfahrung vorgenommen, einschließlich Autoplay, Wischen zur nächsten Erinnerung und vieles mehr.",
-  "cLTitle4": "Verbesserte Gesichtserkennung",
-  "cLDesc4": "Zusammen mit vielen internen Verbesserungen ist es jetzt viel einfacher, alle erkannten Gesichter zu sehen, Feedback zu ähnlichen Gesichtern zu geben und Gesichter zu einem einzelnen Foto hinzuzufügen/zu entfernen.",
-  "cLTitle5": "Geburtstags-Benachrichtigungen",
-  "cLDesc5": "Du erhältst jetzt eine optionale Benachrichtigung für alle Geburtstage, die du auf Ente gespeichert hast, zusammen mit einer Sammlung ihrer besten Fotos.",
-  "cLTitle6": "Fortsetzbare Uploads und Downloads",
-  "cLDesc6": "Kein Warten mehr darauf, dass Uploads/Downloads abgeschlossen werden, bevor du die App schließen kannst. Alle Uploads und Downloads können jetzt mitten im Vorgang pausiert und von dort fortgesetzt werden, wo du aufgehört hast."
+  "wishThemAHappyBirthday": "Wish ${name} a happy birthday! 🎉"
 }

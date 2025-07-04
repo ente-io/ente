@@ -571,30 +571,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "blackFridaySale":
             MessageLookupByLibrary.simpleMessage("Offerta del Black Friday"),
         "blog": MessageLookupByLibrary.simpleMessage("Blog"),
-        "cLDesc1": MessageLookupByLibrary.simpleMessage(
-            "Dopo la versione beta dello streaming video e il lavoro sui caricamenti e download ripresi, abbiamo ora aumentato il limite di caricamento file a 10GB. Questo è ora disponibile sia nelle app desktop che mobili."),
-        "cLDesc2": MessageLookupByLibrary.simpleMessage(
-            "I caricamenti in background sono ora supportati anche su iOS, oltre ai dispositivi Android. Non è necessario aprire l\'app per eseguire il backup delle tue foto e video più recenti."),
-        "cLDesc3": MessageLookupByLibrary.simpleMessage(
-            "Abbiamo apportato miglioramenti significativi alla nostra esperienza dei ricordi, inclusa la riproduzione automatica, scorrimento al ricordo successivo e molto altro."),
-        "cLDesc4": MessageLookupByLibrary.simpleMessage(
-            "Insieme a un sacco di miglioramenti interni, ora è molto più facile vedere tutti i volti rilevati, fornire feedback sui volti simili e aggiungere/rimuovere volti da una singola foto."),
-        "cLDesc5": MessageLookupByLibrary.simpleMessage(
-            "Ora riceverai una notifica opzionale per tutti i compleanni che hai salvato su Ente, insieme a una raccolta delle loro migliori foto."),
-        "cLDesc6": MessageLookupByLibrary.simpleMessage(
-            "Non più attese per il completamento di caricamenti/download prima di poter chiudere l\'app. Tutti i caricamenti e download ora hanno la capacità di essere messi in pausa a metà e ripresi da dove hai lasciato."),
-        "cLTitle1": MessageLookupByLibrary.simpleMessage(
-            "Caricamento di file video di grandi dimensioni"),
-        "cLTitle2":
-            MessageLookupByLibrary.simpleMessage("Caricamento in background"),
-        "cLTitle3": MessageLookupByLibrary.simpleMessage(
-            "Riproduzione automatica dei ricordi"),
-        "cLTitle4": MessageLookupByLibrary.simpleMessage(
-            "Riconoscimento facciale migliorato"),
-        "cLTitle5":
-            MessageLookupByLibrary.simpleMessage("Notifiche di compleanno"),
-        "cLTitle6": MessageLookupByLibrary.simpleMessage(
-            "Caricamenti e download ripresi"),
         "cachedData": MessageLookupByLibrary.simpleMessage("Dati nella cache"),
         "calculating": MessageLookupByLibrary.simpleMessage("Calcolando..."),
         "canNotOpenBody": MessageLookupByLibrary.simpleMessage(

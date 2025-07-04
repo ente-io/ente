@@ -1701,6 +1701,7 @@
   "selectedItemsWillBeRemovedFromThisPerson": "Les éléments sélectionnés seront retirés de cette personne, mais pas supprimés de votre bibliothèque.",
   "throughTheYears": "{dateFormat} au fil des années",
   "thisWeekThroughTheYears": "Cette semaine au fil des années",
+  "thisWeekXYearsAgo": "{count, plural, =1 {Cette semaine, {count} il y a l'année} other {Cette semaine, {count} il y a des années}}",
   "youAndThem": "Vous et {name}",
   "admiringThem": "Admirant {name}",
   "embracingThem": "Embrasse {name}",
@@ -1756,17 +1757,5 @@
   "happyBirthday": "Joyeux anniversaire ! 🥳",
   "happyBirthdayToPerson": "Joyeux anniversaire {name}! 🎉",
   "birthdays": "Anniversaires",
-  "wishThemAHappyBirthday": "Wish ${name} a happy birthday! 🎉",
-  "cLTitle1": "Téléchargement de fichiers vidéo volumineux",
-  "cLDesc1": "Suite à la version bêta du streaming vidéo et au travail sur les téléchargements reprenables, nous avons maintenant augmenté la limite de téléchargement de fichiers à 10 Go. Ceci est maintenant disponible dans les applications desktop et mobiles.",
-  "cLTitle2": "Téléchargement en arrière-plan",
-  "cLDesc2": "Les téléchargements en arrière-plan sont maintenant pris en charge sur iOS également, en plus des appareils Android. Pas besoin d'ouvrir l'application pour sauvegarder vos dernières photos et vidéos.",
-  "cLTitle3": "Lecture automatique des souvenirs",
-  "cLDesc3": "Nous avons apporté des améliorations significatives à notre expérience de souvenirs, y compris la lecture automatique, le balayage vers le souvenir suivant et bien plus encore.",
-  "cLTitle4": "Reconnaissance faciale améliorée",
-  "cLDesc4": "Avec un tas d'améliorations internes, il est maintenant beaucoup plus facile de voir tous les visages détectés, de donner des commentaires sur les visages similaires et d'ajouter/supprimer des visages d'une seule photo.",
-  "cLTitle5": "Notifications d'anniversaire",
-  "cLDesc5": "Vous recevrez maintenant une notification optionnelle pour tous les anniversaires que vous avez sauvegardés sur Ente, ainsi qu'une collection de leurs meilleures photos.",
-  "cLTitle6": "Téléchargements reprenables",
-  "cLDesc6": "Plus besoin d'attendre que les téléchargements se terminent avant de pouvoir fermer l'application. Tous les téléchargements ont maintenant la capacité d'être mis en pause à mi-chemin et de reprendre là où vous vous êtes arrêté."
+  "wishThemAHappyBirthday": "Wish ${name} a happy birthday! 🎉"
 }

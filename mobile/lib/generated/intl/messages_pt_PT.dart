@@ -244,6 +244,9 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m85(referralCode, referralStorageInGB) =>
       "Insira o código de referência: ${referralCode} \n\nAplique-o em Configurações → Geral → Indicações para obter ${referralStorageInGB} GB gratuitamente após a sua inscrição para um plano pago\n\nhttps://ente.io";
 
+  static String m86(numberOfPeople) =>
+      "${Intl.plural(numberOfPeople, zero: 'Compartilhe com pessoas específicas', one: 'Compartilhado com 1 pessoa', other: 'Compartilhado com ${numberOfPeople} pessoas')}";
+
   static String m87(emailIDs) => "Partilhado com ${emailIDs}";
 
   static String m88(fileType) =>
@@ -572,30 +575,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "blackFridaySale":
             MessageLookupByLibrary.simpleMessage("Promoção Black Friday"),
         "blog": MessageLookupByLibrary.simpleMessage("Blog"),
-        "cLDesc1": MessageLookupByLibrary.simpleMessage(
-            "Na sequência da versão beta de transmissão de vídeo e do trabalho em envios e transferências retomáveis, agora aumentámos o limite de envio de ficheiros para 10GB. Isto está agora disponível tanto nas aplicações de computador como móveis."),
-        "cLDesc2": MessageLookupByLibrary.simpleMessage(
-            "Os envios em segundo plano agora também são suportados no iOS, além dos dispositivos Android. Não é necessário abrir a aplicação para fazer uma cópia de segurança das suas fotografias e vídeos mais recentes."),
-        "cLDesc3": MessageLookupByLibrary.simpleMessage(
-            "Fizemos melhorias significativas na nossa experiência de memórias, incluindo reprodução automática, deslizar para a próxima memória e muito mais."),
-        "cLDesc4": MessageLookupByLibrary.simpleMessage(
-            "Juntamente com várias melhorias internas, agora é muito mais fácil ver todas as faces detectadas, fornecer comentários sobre faces similares e adicionar/remover faces de uma única fotografia."),
-        "cLDesc5": MessageLookupByLibrary.simpleMessage(
-            "Agora receberá uma notificação opcional para todos os aniversários que guardou no Ente, juntamente com uma colecção das suas melhores fotografias."),
-        "cLDesc6": MessageLookupByLibrary.simpleMessage(
-            "Já não é necessário esperar que os envios/transferências sejam concluídos antes de poder fechar a aplicação. Todos os envios e transferências têm agora a capacidade de serem pausados a meio e retomados de onde parou."),
-        "cLTitle1": MessageLookupByLibrary.simpleMessage(
-            "Envio de ficheiros de vídeo grandes"),
-        "cLTitle2":
-            MessageLookupByLibrary.simpleMessage("Envio em segundo plano"),
-        "cLTitle3": MessageLookupByLibrary.simpleMessage(
-            "Reprodução automática de memórias"),
-        "cLTitle4": MessageLookupByLibrary.simpleMessage(
-            "Reconhecimento facial melhorado"),
-        "cLTitle5":
-            MessageLookupByLibrary.simpleMessage("Notificações de aniversário"),
-        "cLTitle6": MessageLookupByLibrary.simpleMessage(
-            "Envios e transferências retomáveis"),
         "cachedData": MessageLookupByLibrary.simpleMessage("Dados em cache"),
         "calculating": MessageLookupByLibrary.simpleMessage("Calcular..."),
         "canNotOpenBody": MessageLookupByLibrary.simpleMessage(
@@ -1897,6 +1876,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "shareTextReferralCode": m85,
         "shareWithNonenteUsers": MessageLookupByLibrary.simpleMessage(
             "Compartilhar com usuários que não usam Ente"),
+        "shareWithPeopleSectionTitle": m86,
         "shareYourFirstAlbum": MessageLookupByLibrary.simpleMessage(
             "Partilhe o seu primeiro álbum"),
         "sharedAlbumSectionDescription": MessageLookupByLibrary.simpleMessage(
