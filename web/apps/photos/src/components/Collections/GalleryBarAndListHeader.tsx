@@ -5,6 +5,11 @@ import {
 } from "components/Collections/CollectionShare";
 import type { TimeStampListItem } from "components/FileList";
 import { useModalVisibility } from "ente-base/components/utils/modal";
+import {
+    isSaveCancelled,
+    isSaveComplete,
+    type SaveGroup,
+} from "ente-gallery/components/utils/save-groups";
 import type { Collection } from "ente-media/collection";
 import {
     GalleryBarImpl,
@@ -21,17 +26,11 @@ import {
 import { includes } from "ente-utils/type-guards";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { sortCollectionSummaries } from "services/collectionService";
-import {
-    isFilesDownloadCancelled,
-    isFilesDownloadCompleted,
-    type FilesDownloadProgressAttributes,
-} from "../FilesDownloadProgress";
 import { AlbumCastDialog } from "./AlbumCastDialog";
 import {
     CollectionHeader,
     type CollectionHeaderProps,
 } from "./CollectionHeader";
-
 type GalleryBarAndListHeaderProps = Omit<
     GalleryBarImplProps,
     | "collectionSummaries"
@@ -48,11 +47,8 @@ type GalleryBarAndListHeaderProps = Omit<
     activeCollection: Collection;
     setActiveCollectionID: (collectionID: number) => void;
     setPhotoListHeader: (value: TimeStampListItem) => void;
-    filesDownloadProgressAttributesList: FilesDownloadProgressAttributes[];
-} & Pick<
-        CollectionHeaderProps,
-        "setFilesDownloadProgressAttributesCreator" | "onRemotePull"
-    > &
+    saveGroups: SaveGroup[];
+} & Pick<CollectionHeaderProps, "onRemotePull" | "onAddSaveGroup"> &
     Pick<
         CollectionShareProps,
         "user" | "emailByUserID" | "shareSuggestionEmails" | "setBlockingLoad"
@@ -89,14 +85,14 @@ export const GalleryBarAndListHeader: React.FC<
     setActiveCollectionID,
     setBlockingLoad,
     people,
+    saveGroups,
     activePerson,
     emailByUserID,
     shareSuggestionEmails,
     onRemotePull,
+    onAddSaveGroup,
     onSelectPerson,
     setPhotoListHeader,
-    filesDownloadProgressAttributesList,
-    setFilesDownloadProgressAttributesCreator,
 }) => {
     const { show: showAllAlbums, props: allAlbumsVisibilityProps } =
         useModalVisibility();
@@ -126,15 +122,11 @@ export const GalleryBarAndListHeader: React.FC<
     );
 
     const isActiveCollectionDownloadInProgress = useCallback(() => {
-        const attributes = filesDownloadProgressAttributesList.find(
-            (attr) => attr.collectionID === activeCollectionID,
+        const group = saveGroups.find(
+            (g) => g.collectionSummaryID === activeCollectionID,
         );
-        return (
-            attributes &&
-            !isFilesDownloadCancelled(attributes) &&
-            !isFilesDownloadCompleted(attributes)
-        );
-    }, [activeCollectionID, filesDownloadProgressAttributesList]);
+        return group && !isSaveComplete(group) && !isSaveCancelled(group);
+    }, [saveGroups, activeCollectionID]);
 
     useEffect(() => {
         if (shouldHide) return;
@@ -146,9 +138,9 @@ export const GalleryBarAndListHeader: React.FC<
                         {...{
                             activeCollection,
                             setActiveCollectionID,
-                            setFilesDownloadProgressAttributesCreator,
                             isActiveCollectionDownloadInProgress,
                             onRemotePull,
+                            onAddSaveGroup,
                         }}
                         collectionSummary={toShowCollectionSummaries.get(
                             activeCollectionID,

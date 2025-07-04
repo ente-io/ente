@@ -25,6 +25,9 @@ import {
 import { SingleInputDialog } from "ente-base/components/SingleInputDialog";
 import { useModalVisibility } from "ente-base/components/utils/modal";
 import { useBaseContext } from "ente-base/context";
+import type { AddSaveGroup } from "ente-gallery/components/utils/save-groups";
+import { downloadAndSaveCollectionFiles } from "ente-gallery/services/save";
+import { uniqueFilesByID } from "ente-gallery/utils/file";
 import { CollectionOrder, type Collection } from "ente-media/collection";
 import { ItemVisibility } from "ente-media/file-metadata";
 import type { RemotePullOpts } from "ente-new/photos/components/gallery";
@@ -33,7 +36,9 @@ import {
     GalleryItemsSummary,
 } from "ente-new/photos/components/gallery/ListHeader";
 import {
+    defaultHiddenCollectionUserFacingName,
     deleteCollection,
+    findDefaultHiddenCollectionIDs,
     isHiddenCollection,
     leaveSharedCollection,
     renameCollection,
@@ -46,16 +51,15 @@ import {
     type CollectionSummary,
     type CollectionSummaryType,
 } from "ente-new/photos/services/collection-summary";
+import {
+    savedCollectionFiles,
+    savedCollections,
+} from "ente-new/photos/services/photos-fdb";
 import { emptyTrash } from "ente-new/photos/services/trash";
 import { usePhotosAppContext } from "ente-new/photos/types/context";
 import { t } from "i18next";
 import React, { useCallback, useRef } from "react";
 import { Trans } from "react-i18next";
-import type { SetFilesDownloadProgressAttributesCreator } from "types/gallery";
-import {
-    downloadCollectionHelper,
-    downloadDefaultHiddenCollectionHelper,
-} from "utils/collection";
 
 export interface CollectionHeaderProps {
     collectionSummary: CollectionSummary;
@@ -69,7 +73,11 @@ export interface CollectionHeaderProps {
     onRemotePull: (opts?: RemotePullOpts) => Promise<void>;
     onCollectionShare: () => void;
     onCollectionCast: () => void;
-    setFilesDownloadProgressAttributesCreator: SetFilesDownloadProgressAttributesCreator;
+    /**
+     * A function that can be used to create a UI notification to track the
+     * progress of user-initiated download, and to cancel it if needed.
+     */
+    onAddSaveGroup: AddSaveGroup;
 }
 
 /**
@@ -119,7 +127,7 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
     onRemotePull,
     onCollectionShare,
     onCollectionCast,
-    setFilesDownloadProgressAttributesCreator,
+    onAddSaveGroup,
     isActiveCollectionDownloadInProgress,
 }) => {
     const { showMiniDialog, onGenericError } = useBaseContext();
@@ -225,17 +233,31 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
         if (isActiveCollectionDownloadInProgress()) return;
 
         if (collectionSummaryType == "hiddenItems") {
-            await downloadDefaultHiddenCollectionHelper(
-                setFilesDownloadProgressAttributesCreator,
+            const defaultHiddenCollectionsIDs = findDefaultHiddenCollectionIDs(
+                await savedCollections(),
+            );
+            const collectionFiles = await savedCollectionFiles();
+            const defaultHiddenCollectionFiles = uniqueFilesByID(
+                collectionFiles.filter((file) =>
+                    defaultHiddenCollectionsIDs.has(file.collectionID),
+                ),
+            );
+            await downloadAndSaveCollectionFiles(
+                defaultHiddenCollectionUserFacingName,
+                PseudoCollectionID.hiddenItems,
+                defaultHiddenCollectionFiles,
+                true,
+                onAddSaveGroup,
             );
         } else {
-            await downloadCollectionHelper(
+            await downloadAndSaveCollectionFiles(
+                activeCollection.name,
                 activeCollection.id,
-                setFilesDownloadProgressAttributesCreator(
-                    activeCollection.name,
-                    activeCollection.id,
-                    isHiddenCollection(activeCollection),
+                (await savedCollectionFiles()).filter(
+                    (file) => file.collectionID == activeCollection.id,
                 ),
+                isHiddenCollection(activeCollection),
+                onAddSaveGroup,
             );
         }
     };
