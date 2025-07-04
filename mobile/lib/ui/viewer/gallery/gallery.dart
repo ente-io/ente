@@ -107,7 +107,7 @@ class Gallery extends StatefulWidget {
 class GalleryState extends State<Gallery> {
   static const int kInitialLoadLimit = 100;
   late final Debouncer _debouncer;
-  late Future<double> headerExtent;
+  late Future<double> groupHeaderExtent;
 
   late Logger _logger;
   List<List<EnteFile>> currentGroupedFiles = [];
@@ -205,7 +205,7 @@ class GalleryState extends State<Gallery> {
       }
     });
 
-    headerExtent = getIntrinsicSizeOfWidget(
+    groupHeaderExtent = getIntrinsicSizeOfWidget(
       GroupHeaderWidget(
         title: "This is a temp title",
         gridSize: localSettings.getPhotoGridSize(),
@@ -421,7 +421,7 @@ class GalleryState extends State<Gallery> {
           // physics: const BouncingScrollPhysics(),
           slivers: [
             FutureBuilder(
-              future: headerExtent,
+              future: groupHeaderExtent,
               builder: (context, snapshot) {
                 if (snapshot.hasData) {
                   return SectionedListSliver(
