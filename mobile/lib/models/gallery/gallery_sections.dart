@@ -182,18 +182,19 @@ class GalleryGroups {
     return groupLayouts;
   }
 
+// TODO: compute this in isolate
   void _buildGroups() {
-    List<EnteFile> dailyFiles = [];
+    List<EnteFile> groupFiles = [];
     for (int index = 0; index < allFiles.length; index++) {
       if (index > 0 &&
           !groupType.areFromSameGroup(allFiles[index - 1], allFiles[index])) {
-        _createNewGroup(dailyFiles);
-        dailyFiles = [];
+        _createNewGroup(groupFiles);
+        groupFiles = [];
       }
-      dailyFiles.add(allFiles[index]);
+      groupFiles.add(allFiles[index]);
     }
-    if (dailyFiles.isNotEmpty) {
-      _createNewGroup(dailyFiles);
+    if (groupFiles.isNotEmpty) {
+      _createNewGroup(groupFiles);
     }
   }
 
