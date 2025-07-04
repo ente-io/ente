@@ -61,7 +61,16 @@ export interface SaveGroup {
     folderName: string;
     collectionID: number;
     isHidden: boolean;
-    downloadDirPath: string;
+    /**
+     * The path to a directory on the user's file system that was selected by
+     * the user to save the files in when they initiated the download on the
+     * desktop app.
+     *
+     * This property is only set when running in the context of the desktop app.
+     * The web app downloads to the user's default downloads folder, and when
+     * running in the web app this property will not be set.
+     */
+    downloadDirPath?: string;
     /**
      * An {@link AbortController} that can be used to cancel the save.
      */
@@ -70,12 +79,22 @@ export interface SaveGroup {
 
 export const isSaveStarted = (group: SaveGroup) => group.total > 0;
 
+/**
+ * Return `true` if there are no files in this save group that are pending.
+ */
 export const isSaveComplete = ({ total, success, failed }: SaveGroup) =>
     total == success + failed;
 
+/**
+ * Return `true` if there are no files in this save group that are pending, but
+ * one or more files had failed to download.
+ */
 export const isSaveCompleteWithErrors = (group: SaveGroup) =>
     group.failed > 0 && isSaveComplete(group);
 
+/**
+ * Return `true` if this save was cancelled on a user request.
+ */
 export const isSaveCancelled = (group: SaveGroup) =>
     group.canceller.signal.aborted;
 

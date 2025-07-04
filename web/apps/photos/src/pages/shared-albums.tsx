@@ -135,6 +135,14 @@ export default function PublicCollectionGallery() {
         setFilesDownloadProgressAttributesList,
     ] = useState<SaveGroup[]>([]);
 
+    const handleCloseSaveGroup = useCallback(
+        ({ id }) =>
+            setFilesDownloadProgressAttributesList((groups) =>
+                groups.filter((g) => g.id != id),
+            ),
+        [],
+    );
+
     const setFilesDownloadProgressAttributesCreator: SetFilesDownloadProgressAttributesCreator =
         useCallback((folderName, collectionID, isHidden) => {
             const id = Math.random();
@@ -574,7 +582,7 @@ export default function PublicCollectionGallery() {
                 />
                 <DownloadStatusNotifications
                     saveGroups={filesDownloadProgressAttributesList}
-                    setAttributesList={setFilesDownloadProgressAttributesList}
+                    onCloseSaveGroup={handleCloseSaveGroup}
                 />
             </FullScreenDropZone>
         </PublicCollectionGalleryContext.Provider>

@@ -17,7 +17,11 @@ interface DownloadStatusNotificationsProps {
      * {@link Notification} component that was showing the save group's status.
      */
     saveGroups: SaveGroup[];
-    setAttributesList: (value: SaveGroup[]) => void;
+    /**
+     * Called when the user closes the download status associated with the given
+     * {@link saveGroup}.
+     */
+    onCloseSaveGroup: (saveGroup: SaveGroup) => void;
     /**
      * Called when the hidden section should be shown.
      *
@@ -47,17 +51,13 @@ export const DownloadStatusNotifications: React.FC<
     DownloadStatusNotificationsProps
 > = ({
     saveGroups,
-    setAttributesList,
+    onCloseSaveGroup,
     onShowHiddenSection,
     onShowCollection,
 }) => {
     const { showMiniDialog } = useBaseContext();
 
-    const onClose = (id: number) => {
-        setAttributesList(saveGroups.filter((attr) => attr.id !== id));
-    };
-
-    const confirmCancelDownload = (attributes: SaveGroup) => {
+    const confirmCancelDownload = (group: SaveGroup) =>
         showMiniDialog({
             title: t("stop_downloads_title"),
             message: t("stop_downloads_message"),
@@ -65,39 +65,37 @@ export const DownloadStatusNotifications: React.FC<
                 text: t("yes_stop_downloads"),
                 color: "critical",
                 action: () => {
-                    attributes?.canceller.abort();
-                    onClose(attributes.id);
+                    group?.canceller.abort();
+                    onCloseSaveGroup(group);
                 },
             },
             cancel: t("no"),
         });
-    };
 
-    const handleClose = (attributes: SaveGroup) => () => {
-        if (isSaveComplete(attributes)) {
-            onClose(attributes.id);
+    const createOnClose = (group: SaveGroup) => () => {
+        if (isSaveComplete(group)) {
+            onCloseSaveGroup(group);
         } else {
-            confirmCancelDownload(attributes);
+            confirmCancelDownload(group);
         }
     };
 
-    const createHandleOnClick =
-        (id: number, onShowCollection: (collectionID: number) => void) =>
-        () => {
-            const attributes = saveGroups.find((attr) => attr.id === id);
-            const electron = globalThis.electron;
-            if (electron) {
-                electron.openDirectory(attributes.downloadDirPath);
-            } else if (onShowCollection) {
-                if (attributes.isHidden) {
-                    void onShowHiddenSection().then(() => {
-                        onShowCollection(attributes.collectionID);
-                    });
-                } else {
-                    onShowCollection(attributes.collectionID);
-                }
+    const createOnClick = (group: SaveGroup) => () => {
+        const electron = globalThis.electron;
+        if (electron) {
+            electron.openDirectory(group.downloadDirPath);
+        } else if (onShowCollection) {
+            if (group.isHidden) {
+                void onShowHiddenSection().then(() => {
+                    onShowCollection(group.collectionID);
+                });
+            } else {
+                onShowCollection(group.collectionID);
             }
-        };
+        } else {
+            return undefined;
+        }
+    };
 
     if (!saveGroups) {
         return <></>;
@@ -117,7 +115,7 @@ export const DownloadStatusNotifications: React.FC<
                 horizontal="left"
                 sx={{ "&&": { bottom: `${index * 80 + 20}px` } }}
                 open={isSaveStarted(group)}
-                onClose={handleClose(group)}
+                onClose={createOnClose(group)}
                 keepOpenOnClick
                 attributes={{
                     color: isSaveCompleteWithErrors(group)
@@ -134,9 +132,7 @@ export const DownloadStatusNotifications: React.FC<
                               count: group.success + group.failed,
                               total: group.total,
                           }),
-                    onClick: onShowCollection
-                        ? createHandleOnClick(group.id, onShowCollection)
-                        : undefined,
+                    onClick: createOnClick(group),
                 }}
             />,
         );

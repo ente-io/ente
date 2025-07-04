@@ -42,6 +42,7 @@ import { savedAuthToken } from "ente-base/token";
 import { FullScreenDropZone } from "ente-gallery/components/FullScreenDropZone";
 import { type UploadTypeSelectorIntent } from "ente-gallery/components/Upload";
 import type {
+    SaveGroup,
     SetFilesDownloadProgressAttributes,
     SetFilesDownloadProgressAttributesCreator,
 } from "ente-gallery/services/save";
@@ -631,6 +632,10 @@ const Page: React.FC = () => {
         };
     };
 
+    const handleCloseSaveGroup = useCallback(({id}) => setFilesDownloadProgressAttributesList((groups) => groups.filter((g) => g.id != id)), []);
+
+
+
     const setFilesDownloadProgressAttributesCreator: SetFilesDownloadProgressAttributesCreator =
         useCallback((folderName, collectionID, isHidden) => {
             const id = Math.random();
@@ -997,7 +1002,7 @@ const Page: React.FC = () => {
             />
             <DownloadStatusNotifications
                 saveGroups={filesDownloadProgressAttributesList}
-                setAttributesList={setFilesDownloadProgressAttributesList}
+                onCloseSaveGroup={handleCloseSaveGroup}
                 onShowHiddenSection={handleShowHiddenSection}
                 onShowCollection={handleShowCollection}
             />
