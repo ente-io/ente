@@ -211,7 +211,7 @@ const AllAlbumsContent: React.FC<AllAlbumsContentProps> = ({
         if (!collectionSummaries) {
             return;
         }
-        const main = async () => {
+        const main = () => {
             if (refreshInProgress.current) {
                 shouldRefresh.current = true;
                 return;

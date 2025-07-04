@@ -1,3 +1,5 @@
+// TODO: Audit this file
+/* eslint-disable @typescript-eslint/restrict-plus-operands */
 import AlbumOutlinedIcon from "@mui/icons-material/AlbumOutlined";
 import FavoriteRoundedIcon from "@mui/icons-material/FavoriteRounded";
 import PlayCircleOutlineOutlinedIcon from "@mui/icons-material/PlayCircleOutlineOutlined";

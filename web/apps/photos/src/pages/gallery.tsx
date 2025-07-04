@@ -1337,7 +1337,7 @@ export async function handleSubscriptionCompletionRedirectIfNeeded(
             );
         }
     } else if (status == "fail") {
-        log.error(`Subscription purchase failed: ${reason}`);
+        log.error(`Subscription purchase failed`, reason);
         switch (reason) {
             case "canceled":
                 showMiniDialog({

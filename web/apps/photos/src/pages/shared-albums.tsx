@@ -1,3 +1,5 @@
+// TODO: Audit this file
+/* eslint-disable @typescript-eslint/no-unused-expressions */
 import AddPhotoAlternateOutlinedIcon from "@mui/icons-material/AddPhotoAlternateOutlined";
 import CloseIcon from "@mui/icons-material/Close";
 import DownloadIcon from "@mui/icons-material/Download";

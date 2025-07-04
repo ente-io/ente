@@ -74,6 +74,8 @@ class FolderWatcher {
     private debouncedRunNextEvent: () => void;
 
     constructor() {
+        // TODO:
+        // eslint-disable-next-line @typescript-eslint/no-misused-promises
         this.debouncedRunNextEvent = debounce(() => this.runNextEvent(), 1000);
     }
 
@@ -319,10 +321,7 @@ class FolderWatcher {
      * Callback invoked by the uploader whenever a item we requested to
      * {@link upload} gets uploaded.
      */
-    async onFileUpload(
-        item: UploadItemWithCollection,
-        uploadResult: UploadResult,
-    ) {
+    onFileUpload(item: UploadItemWithCollection, uploadResult: UploadResult) {
         // Re the usage of ensureString: For desktop watch, the only possibility
         // for a UploadItem is for it to be a string (the absolute path to a
         // file on disk).

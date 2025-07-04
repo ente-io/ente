@@ -567,6 +567,7 @@ export const Upload: React.FC<UploadProps> = ({
                 }
             }
 
+            // eslint-disable-next-line @typescript-eslint/no-empty-function
             let showNextModal = () => {};
             if (importSuggestion.hasNestedFolders) {
                 showNextModal = () => setOpenCollectionMappingChoice(true);
@@ -586,7 +587,7 @@ export const Upload: React.FC<UploadProps> = ({
         })();
     }, [webFiles, desktopFiles, desktopFilePaths, desktopZipItems]);
 
-    const preCollectionCreationAction = async () => {
+    const preCollectionCreationAction = () => {
         onCloseCollectionSelector?.();
         props.setShouldDisableDropzone(uploadManager.isUploadInProgress());
         setUploadPhase("preparing");
@@ -597,7 +598,7 @@ export const Upload: React.FC<UploadProps> = ({
         collection: Collection,
         uploaderName?: string,
     ) => {
-        await preCollectionCreationAction();
+        preCollectionCreationAction();
         const uploadItemsWithCollection = uploadItemsAndPaths.current.map(
             ([uploadItem, path], index) => ({
                 uploadItem,
@@ -618,7 +619,7 @@ export const Upload: React.FC<UploadProps> = ({
         mapping: CollectionMapping,
         collectionName?: string,
     ) => {
-        await preCollectionCreationAction();
+        preCollectionCreationAction();
         let uploadItemsWithCollection: UploadItemWithCollection[] = [];
         let collectionNameToUploadItems = new Map<
             string,
@@ -821,7 +822,7 @@ export const Upload: React.FC<UploadProps> = ({
         }
     };
 
-    const handlePublicUpload = async (uploaderName: string) => {
+    const handlePublicUpload = (uploaderName: string) => {
         savePublicCollectionUploaderName(
             publicCollectionGalleryContext.credentials.accessToken,
             uploaderName,
@@ -1210,20 +1211,22 @@ const UploadOptions: React.FC<UploadOptionsProps> = ({
                 onSelect("folders");
                 break;
             case "zips":
-                !showTakeoutOptions
-                    ? setShowTakeoutOptions(true)
-                    : onSelect("zips");
+                if (!showTakeoutOptions) {
+                    setShowTakeoutOptions(true);
+                } else {
+                    onSelect("zips");
+                }
                 break;
         }
     };
 
-    return !showTakeoutOptions ? (
+    return showTakeoutOptions ? (
+        <TakeoutOptions onSelect={handleSelect} onClose={handleTakeoutClose} />
+    ) : (
         <DefaultOptions
             {...{ intent, pendingUploadType, onClose }}
             onSelect={handleSelect}
         />
-    ) : (
-        <TakeoutOptions onSelect={handleSelect} onClose={handleTakeoutClose} />
     );
 };
 
