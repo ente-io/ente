@@ -480,11 +480,7 @@ class _FileSelectionActionsWidgetState
           labelText: S.of(context).share,
           icon: Icons.adaptive.share_outlined,
           key: shareButtonKey,
-          onTap: () => shareSelected(
-            context,
-            shareButtonKey,
-            widget.selectedFiles.files.toList(),
-          ),
+          onTap: _shareSelectedFiles,
         ),
       );
     }
@@ -522,6 +518,15 @@ class _FileSelectionActionsWidgetState
       );
     }
     return const SizedBox();
+  }
+
+  Future<void> _shareSelectedFiles() async {
+    shareSelected(
+      context,
+      shareButtonKey,
+      widget.selectedFiles.files.toList(),
+    );
+    widget.selectedFiles.clearAll();
   }
 
   Future<void> _moveFiles() async {
