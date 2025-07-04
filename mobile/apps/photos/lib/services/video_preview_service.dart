@@ -6,7 +6,6 @@ import "dart:io";
 import "package:collection/collection.dart";
 import "package:dio/dio.dart";
 import "package:encrypt/encrypt.dart" as enc;
-import "package:ffmpeg_kit_flutter/ffmpeg_kit.dart";
 import "package:ffmpeg_kit_flutter/ffmpeg_session.dart";
 import "package:ffmpeg_kit_flutter/return_code.dart";
 import "package:flutter/foundation.dart";
@@ -31,6 +30,7 @@ import "package:photos/models/preview/preview_item_status.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/services/filedata/model/file_data.dart";
+import "package:photos/services/isolated_ffmpeg_service.dart";
 import "package:photos/ui/notification/toast.dart";
 import "package:photos/utils/exif_util.dart";
 import "package:photos/utils/file_key.dart";
@@ -270,7 +270,7 @@ class VideoPreviewService {
 
       _logger.info(command);
 
-      session = await FFmpegKit.execute(
+      session = await IsolatedFfmpegService.runFfmpeg(
         // input file path
         '-i "${file.path}" ' +
             // main params for streaming
@@ -279,7 +279,7 @@ class VideoPreviewService {
             '$prefix/output.m3u8',
       );
 
-      final returnCode = await session.getReturnCode();
+      final returnCode = await session?.getReturnCode();
 
       String? objectId;
       int? objectSize;
@@ -303,7 +303,7 @@ class VideoPreviewService {
           objectSize = result.$2;
 
           // Fetch resolution of generated stream by decrypting a single frame
-          final FFmpegSession session2 = await FFmpegKit.execute(
+          final FFmpegSession session2 = await IsolatedFfmpegService.runFfmpeg(
             '-allowed_extensions ALL -i "$prefix/output.m3u8" -frames:v 1 -c copy "$prefix/frame.ts"',
           );
           final returnCode2 = await session2.getReturnCode();
@@ -339,7 +339,7 @@ class VideoPreviewService {
         _logger.warning("FFmpeg command cancelled");
         error = "FFmpeg command cancelled";
       } else {
-        final output = await session.getOutput();
+        final output = await session?.getOutput();
         _logger.shout(
           "FFmpeg command failed with return code $returnCode",
           output ?? "Error not found",
@@ -738,12 +738,12 @@ class VideoPreviewService {
     }
     final int size = enteFile.fileSize!;
     final int duration = enteFile.duration!;
-    if (size >= 500 * 1024 * 1024 || duration > 60) {
-      _logger.info(
-        "Skip Preview due to size: $size or duration: $duration",
-      );
-      return (null, true, null);
-    }
+    // if (size >= 500 * 1024 * 1024 || duration > 60) {
+    //   _logger.info(
+    //     "Skip Preview due to size: $size or duration: $duration",
+    //   );
+    //   return (null, true, null);
+    // }
     FFProbeProps? props;
     File? file;
     bool skipFile = false;
