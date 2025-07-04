@@ -4,10 +4,7 @@ import MenuIcon from "@mui/icons-material/Menu";
 import { IconButton, Stack, Typography } from "@mui/material";
 import { AuthenticateUser } from "components/AuthenticateUser";
 import { GalleryBarAndListHeader } from "components/Collections/GalleryBarAndListHeader";
-import {
-    DownloadStatusNotifications,
-    type FilesDownloadProgressAttributes,
-} from "components/DownloadStatusNotifications";
+import { DownloadStatusNotifications } from "components/DownloadStatusNotifications";
 import { type TimeStampListItem } from "components/FileList";
 import { FileListWithViewer } from "components/FileListWithViewer";
 import { FixCreationTime } from "components/FixCreationTime";
@@ -41,11 +38,7 @@ import {
 import { savedAuthToken } from "ente-base/token";
 import { FullScreenDropZone } from "ente-gallery/components/FullScreenDropZone";
 import { type UploadTypeSelectorIntent } from "ente-gallery/components/Upload";
-import type {
-    SaveGroup,
-    SetFilesDownloadProgressAttributes,
-    SetFilesDownloadProgressAttributesCreator,
-} from "ente-gallery/services/save";
+import { useSaveGroups } from "ente-gallery/components/utils/save-groups";
 import { type Collection } from "ente-media/collection";
 import { type EnteFile } from "ente-media/file";
 import { type ItemVisibility } from "ente-media/file-metadata";
@@ -192,10 +185,7 @@ const Page: React.FC = () => {
     const [photoListHeader, setPhotoListHeader] =
         useState<TimeStampListItem>(null);
 
-    const [
-        filesDownloadProgressAttributesList,
-        setFilesDownloadProgressAttributesList,
-    ] = useState<FilesDownloadProgressAttributes[]>([]);
+    const { saveGroups, onAddSaveGroup, onRemoveSaveGroup } = useSaveGroups();
     const [, setPostCreateAlbumOp] = useState<CollectionOp | undefined>(
         undefined,
     );
@@ -632,43 +622,6 @@ const Page: React.FC = () => {
         };
     };
 
-    const handleCloseSaveGroup = useCallback(({id}) => setFilesDownloadProgressAttributesList((groups) => groups.filter((g) => g.id != id)), []);
-
-
-
-    const setFilesDownloadProgressAttributesCreator: SetFilesDownloadProgressAttributesCreator =
-        useCallback((folderName, collectionID, isHidden) => {
-            const id = Math.random();
-            const updater: SetFilesDownloadProgressAttributes = (value) => {
-                setFilesDownloadProgressAttributesList((prev) => {
-                    const attributes = prev?.find((attr) => attr.id === id);
-                    const updatedAttributes =
-                        typeof value == "function"
-                            ? value(attributes)
-                            : { ...attributes, ...value };
-                    const updatedAttributesList = attributes
-                        ? prev.map((attr) =>
-                              attr.id === id ? updatedAttributes : attr,
-                          )
-                        : [...prev, updatedAttributes];
-
-                    return updatedAttributesList;
-                });
-            };
-            updater({
-                id,
-                folderName,
-                collectionID,
-                isHidden,
-                canceller: null,
-                total: 0,
-                success: 0,
-                failed: 0,
-                downloadDirPath: null,
-            });
-            return updater;
-        }, []);
-
     const handleRemoveFilesFromCollection = (collection: Collection) => {
         void (async () => {
             showLoadingBar();
@@ -1001,8 +954,7 @@ const Page: React.FC = () => {
                 }
             />
             <DownloadStatusNotifications
-                saveGroups={filesDownloadProgressAttributesList}
-                onCloseSaveGroup={handleCloseSaveGroup}
+                {...{ saveGroups, onRemoveSaveGroup }}
                 onShowHiddenSection={handleShowHiddenSection}
                 onShowCollection={handleShowCollection}
             />

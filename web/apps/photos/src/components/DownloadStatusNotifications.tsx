@@ -4,7 +4,7 @@ import {
     isSaveCompleteWithErrors,
     isSaveStarted,
     type SaveGroup,
-} from "ente-gallery/services/save";
+} from "ente-gallery/components/utils/save-groups";
 import { Notification } from "ente-new/photos/components/Notification";
 import { t } from "i18next";
 
@@ -21,7 +21,7 @@ interface DownloadStatusNotificationsProps {
      * Called when the user closes the download status associated with the given
      * {@link saveGroup}.
      */
-    onCloseSaveGroup: (saveGroup: SaveGroup) => void;
+    onRemoveSaveGroup: (saveGroup: SaveGroup) => void;
     /**
      * Called when the hidden section should be shown.
      *
@@ -51,7 +51,7 @@ export const DownloadStatusNotifications: React.FC<
     DownloadStatusNotificationsProps
 > = ({
     saveGroups,
-    onCloseSaveGroup,
+    onRemoveSaveGroup,
     onShowHiddenSection,
     onShowCollection,
 }) => {
@@ -66,7 +66,7 @@ export const DownloadStatusNotifications: React.FC<
                 color: "critical",
                 action: () => {
                     group?.canceller.abort();
-                    onCloseSaveGroup(group);
+                    onRemoveSaveGroup(group);
                 },
             },
             cancel: t("no"),
@@ -74,7 +74,7 @@ export const DownloadStatusNotifications: React.FC<
 
     const createOnClose = (group: SaveGroup) => () => {
         if (isSaveComplete(group)) {
-            onCloseSaveGroup(group);
+            onRemoveSaveGroup(group);
         } else {
             confirmCancelDownload(group);
         }
@@ -125,9 +125,9 @@ export const DownloadStatusNotifications: React.FC<
                         ? t("download_failed")
                         : isSaveComplete(group)
                           ? t("download_complete")
-                          : t("downloading_album", { name: group.folderName }),
+                          : t("downloading_album", { name: group.title }),
                     caption: isSaveComplete(group)
-                        ? group.folderName
+                        ? group.title
                         : t("download_progress", {
                               count: group.success + group.failed,
                               total: group.total,

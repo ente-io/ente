@@ -47,12 +47,11 @@ import {
 } from "ente-base/http";
 import log from "ente-base/log";
 import { FullScreenDropZone } from "ente-gallery/components/FullScreenDropZone";
+import { useSaveGroups } from "ente-gallery/components/utils/save-groups";
 import { downloadManager } from "ente-gallery/services/download";
 import {
     downloadCollectionFiles,
     downloadSelectedFiles,
-    type SaveGroup,
-    type SetFilesDownloadProgressAttributes,
     type SetFilesDownloadProgressAttributesCreator,
 } from "ente-gallery/services/save";
 import { extractCollectionKeyFromShareURL } from "ente-gallery/services/share";
@@ -129,52 +128,7 @@ export default function PublicCollectionGallery() {
         collectionID: 0,
         context: undefined,
     });
-
-    const [
-        filesDownloadProgressAttributesList,
-        setFilesDownloadProgressAttributesList,
-    ] = useState<SaveGroup[]>([]);
-
-    const handleCloseSaveGroup = useCallback(
-        ({ id }) =>
-            setFilesDownloadProgressAttributesList((groups) =>
-                groups.filter((g) => g.id != id),
-            ),
-        [],
-    );
-
-    const setFilesDownloadProgressAttributesCreator: SetFilesDownloadProgressAttributesCreator =
-        useCallback((folderName, collectionID, isHidden) => {
-            const id = Math.random();
-            const updater: SetFilesDownloadProgressAttributes = (value) => {
-                setFilesDownloadProgressAttributesList((prev) => {
-                    const attributes = prev?.find((attr) => attr.id === id);
-                    const updatedAttributes =
-                        typeof value == "function"
-                            ? value(attributes)
-                            : { ...attributes, ...value };
-                    const updatedAttributesList = attributes
-                        ? prev.map((attr) =>
-                              attr.id === id ? updatedAttributes : attr,
-                          )
-                        : [...prev, updatedAttributes];
-
-                    return updatedAttributesList;
-                });
-            };
-            updater({
-                id,
-                folderName,
-                collectionID,
-                isHidden,
-                canceller: null,
-                total: 0,
-                success: 0,
-                failed: 0,
-                downloadDirPath: null,
-            });
-            return updater;
-        }, []);
+    const { saveGroups, onAddSaveGroup, onRemoveSaveGroup } = useSaveGroups();
 
     const onAddPhotos = useMemo(() => {
         return publicCollection?.publicURLs[0]?.enableCollect
@@ -281,11 +235,7 @@ export default function PublicCollectionGallery() {
             setPhotoListHeader({
                 item: (
                     <ListHeader
-                        {...{
-                            publicCollection,
-                            publicFiles,
-                            setFilesDownloadProgressAttributesCreator,
-                        }}
+                        {...{ publicCollection, publicFiles, onAddSaveGroup }}
                     />
                 ),
                 tag: "header",
@@ -561,11 +511,9 @@ export default function PublicCollectionGallery() {
                     selected={selected}
                     setSelected={setSelected}
                     activeCollectionID={PseudoCollectionID.all}
-                    setFilesDownloadProgressAttributesCreator={
-                        setFilesDownloadProgressAttributesCreator
-                    }
                     onRemotePull={publicAlbumsRemotePull}
                     onVisualFeedback={handleVisualFeedback}
+                    onAddSaveGroup={onAddSaveGroup}
                 />
                 {blockingLoad && <TranslucentLoadingOverlay />}
                 <Upload
@@ -581,8 +529,7 @@ export default function PublicCollectionGallery() {
                     {...{ dragAndDropFiles }}
                 />
                 <DownloadStatusNotifications
-                    saveGroups={filesDownloadProgressAttributesList}
-                    onCloseSaveGroup={handleCloseSaveGroup}
+                    {...{ saveGroups, onRemoveSaveGroup }}
                 />
             </FullScreenDropZone>
         </PublicCollectionGalleryContext.Provider>

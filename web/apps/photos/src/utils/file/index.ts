@@ -1,4 +1,5 @@
 import type { LocalUser } from "ente-accounts/services/user";
+import type { AddSaveGroup } from "ente-gallery/components/utils/save-groups";
 import {
     type SetFilesDownloadProgressAttributesCreator,
     downloadSelectedFiles,
@@ -60,7 +61,7 @@ export const performFileOp = async (
     markTempHidden: (files: EnteFile[]) => void,
     clearTempHidden: () => void,
     fixCreationTime: (files: EnteFile[]) => void,
-    setFilesDownloadProgressAttributesCreator: SetFilesDownloadProgressAttributesCreator,
+    onAddSaveGroup: AddSaveGroup,
 ) => {
     switch (op) {
         case "download": {
