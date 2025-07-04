@@ -10,7 +10,10 @@ import {
 import { recoveryKeyFromMnemonic } from "ente-accounts/services/recovery-key";
 import { appHomeRoute, stashRedirect } from "ente-accounts/services/redirect";
 import type { KeyAttributes } from "ente-accounts/services/user";
-import { decryptAndStoreToken, sendOTT } from "ente-accounts/services/user";
+import {
+    decryptAndStoreTokenIfNeeded,
+    sendOTT,
+} from "ente-accounts/services/user";
 import { LinkButton } from "ente-base/components/LinkButton";
 import {
     SingleInputForm,
@@ -81,7 +84,7 @@ const Page: React.FC = () => {
                     await recoveryKeyFromMnemonic(recoveryKeyMnemonic),
                 );
                 await saveMasterKeyInSessionAndSafeStore(masterKey);
-                await decryptAndStoreToken(keyAttr, masterKey);
+                await decryptAndStoreTokenIfNeeded(keyAttr, masterKey);
 
                 void router.push("/change-password?op=reset");
             } catch (e) {

@@ -2,6 +2,7 @@ import {
     saveKeyAttributes,
     updateSavedLocalUser,
 } from "ente-accounts/services/accounts-db";
+import { clearInflightPasskeySessionID } from "ente-accounts/services/passkey";
 import { unstashRedirect } from "ente-accounts/services/redirect";
 import {
     resetSavedLocalUserTokens,
@@ -85,7 +86,7 @@ const saveQueryCredentialsAndNavigateTo = async (
         return "/";
     }
 
-    sessionStorage.removeItem("inflightPasskeySessionID");
+    clearInflightPasskeySessionID();
 
     // Decode response string (inverse of the steps we perform in
     // `passkeyAuthenticationSuccessRedirectURL`).

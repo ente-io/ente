@@ -28,7 +28,6 @@ import {
     ensureOk,
     publicRequestHeaders,
 } from "ente-base/http";
-import log from "ente-base/log";
 import { apiURL } from "ente-base/origins";
 import { ensureMasterKeyFromSession } from "ente-base/session";
 import {
@@ -39,6 +38,7 @@ import {
 import { ensure } from "ente-utils/ensure";
 import { nullToUndefined } from "ente-utils/transform";
 import { z } from "zod/v4";
+import { clearInflightPasskeySessionID } from "./passkey";
 import { getUserRecoveryKey, recoveryKeyFromMnemonic } from "./recovery-key";
 
 /**
@@ -732,19 +732,20 @@ export const changePassword = async (password: string) => {
 };
 
 /**
- * Update the {@link encryptedToken} present in the saved partial local user.
+ * Update the {@link id} and {@link encryptedToken} present in the saved partial
+ * local user.
  *
  * This function removes the {@link token}, if any, present in the saved partial
  * local user and sets the provided {@link encryptedToken}.
  *
  * It is expected that the code will subsequently redirect to "/credentials",
- * which should call {@link decryptAndStoreToken} which will decrypt the newly
- * set {@link encryptedToken} and write out the decrypted value as the
+ * which should call {@link decryptAndStoreTokenIfNeeded} which will decrypt the
+ * newly set {@link encryptedToken} and write out the decrypted value as the
  * {@link token} in the saved local user.
  *
- * @param userID The ID of the user whose token this is. This is used as a
- * sanity check to ensure that the we do not overwrite saved partial local user
- * data for a different user.
+ * @param userID The ID of the user whose token this is. This is also saved to
+ * the partial local user (after doing a sanity check that we're not replacing
+ * partial data with a different userID).
  *
  * @param encryptedToken The newly obtained base64 encoded encrypted token from
  * remote (e.g. as a result of the user verifying their email).
@@ -757,7 +758,12 @@ export const resetSavedLocalUserTokens = async (
     if (user?.id && user.id != userID) {
         throw new Error(`User ID mismatch (${user.id}, ${userID})`);
     }
-    replaceSavedLocalUser({ ...user, token: undefined, encryptedToken });
+    replaceSavedLocalUser({
+        ...user,
+        id: userID,
+        token: undefined,
+        encryptedToken,
+    });
     return removeAuthToken();
 };
 
@@ -769,15 +775,12 @@ export const resetSavedLocalUserTokens = async (
  *
  * @param masterKey The user's master key (base64 encoded).
  */
-export const decryptAndStoreToken = async (
+export const decryptAndStoreTokenIfNeeded = async (
     keyAttributes: KeyAttributes,
     masterKey: string,
 ) => {
     const { encryptedToken } = savedPartialLocalUser() ?? {};
-    if (!encryptedToken) {
-        log.info("Skipping token decryption (no encrypted token found)");
-        return;
-    }
+    if (!encryptedToken) return;
 
     const { encryptedSecretKey, secretKeyDecryptionNonce, publicKey } =
         keyAttributes;
@@ -954,7 +957,7 @@ export type TwoFactorRecoveryResponse = z.infer<
  *    sends a encrypted recovery secret (see {@link configurePasskeyRecovery}).
  *
  * 3. When the user wishes to reset or bypass their second factor, the client
- *    asks remote for these encrypted secrets (using {@link recoverTwoFactor}).
+ *    asks remote for these encrypted secrets (using {@link getRecoverTwoFactor}).
  *
  * 4. User then enters their recovery key, which the client uses to decrypt the
  *    recovery secret and provide it back to remote for verification (using
@@ -963,7 +966,7 @@ export type TwoFactorRecoveryResponse = z.infer<
  * 5. If the recovery secret matches, then remote resets (TOTP based) or bypass
  *    (passkey based) the user's second factor.
  */
-export const recoverTwoFactor = async (
+export const getRecoverTwoFactor = async (
     twoFactorType: TwoFactorType,
     sessionID: string,
 ): Promise<TwoFactorRecoveryResponse> => {
@@ -977,22 +980,23 @@ export const recoverTwoFactor = async (
 
 /**
  * Finish the second factor recovery / bypass initiated by
- * {@link recoverTwoFactor} using the provided recovery key mnemonic entered by
- * the user.
+ * {@link getRecoverTwoFactor} using the provided recovery key mnemonic entered
+ * by the user.
  *
  * See: [Note: Second factor recovery].
  *
  * This completes the recovery process both locally, and on remote.
  *
  * @param twoFactorType The second factor type (same value as what would've been
- * passed to {@link recoverTwoFactor} for obtaining {@link recoveryResponse}).
+ * passed to {@link getRecoverTwoFactor} for obtaining
+ * {@link recoveryResponse}).
  *
  * @param sessionID The second factor session ID (same value as what would've
- * been passed to {@link recoverTwoFactor} for obtaining
+ * been passed to {@link getRecoverTwoFactor} for obtaining
  * {@link recoveryResponse}).
  *
  * @param recoveryResponse The response to a previous call to
- * {@link recoverTwoFactor}.
+ * {@link getRecoverTwoFactor}.
  *
  * @param recoveryKeyMnemonic The 24-word BIP-39 recovery key mnemonic provided
  * by the user to complete recovery.
@@ -1020,6 +1024,7 @@ export const recoverTwoFactorFinish = async (
         twoFactorSessionID: undefined,
         passkeySessionID: undefined,
     });
+    if (twoFactorType == "passkey") clearInflightPasskeySessionID();
     saveKeyAttributes(keyAttributes);
 };
 

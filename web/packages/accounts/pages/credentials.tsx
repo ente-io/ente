@@ -39,7 +39,7 @@ import {
     verifySRP,
 } from "ente-accounts/services/srp";
 import {
-    decryptAndStoreToken,
+    decryptAndStoreTokenIfNeeded,
     generateAndSaveInteractiveKeyAttributes,
     type KeyAttributes,
 } from "ente-accounts/services/user";
@@ -137,7 +137,7 @@ const Page: React.FC = () => {
             keyAttributes: KeyAttributes,
         ) => {
             await saveMasterKeyInSessionAndSafeStore(masterKey);
-            await decryptAndStoreToken(keyAttributes, masterKey);
+            await decryptAndStoreTokenIfNeeded(keyAttributes, masterKey);
             try {
                 let srpAttributes = savedSRPAttributes();
                 if (!srpAttributes) {

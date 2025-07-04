@@ -6,7 +6,7 @@ import {
 } from "ente-accounts/components/layouts/centered-paper";
 import { savedPartialLocalUser } from "ente-accounts/services/accounts-db";
 import {
-    recoverTwoFactor,
+    getRecoverTwoFactor,
     recoverTwoFactorFinish,
     type TwoFactorRecoveryResponse,
     type TwoFactorType,
@@ -78,7 +78,7 @@ const Page: React.FC<RecoverPageProps> = ({ twoFactorType }) => {
                 setSessionID(sessionID);
                 try {
                     setRecoveryResponse(
-                        await recoverTwoFactor(twoFactorType, sessionID),
+                        await getRecoverTwoFactor(twoFactorType, sessionID),
                     );
                 } catch (e) {
                     log.error("Second factor recovery page setup failed", e);

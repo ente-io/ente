@@ -258,7 +258,7 @@ export const saveCredentialsAndNavigateTo = async (
     // goes through the passkey flow in the browser itself (when they are using
     // the web app).
 
-    sessionStorage.removeItem("inflightPasskeySessionID");
+    clearInflightPasskeySessionID();
 
     const { id, encryptedToken, keyAttributes } = response;
 
@@ -267,4 +267,14 @@ export const saveCredentialsAndNavigateTo = async (
     saveKeyAttributes(keyAttributes);
 
     return unstashRedirect() ?? "/credentials";
+};
+
+/**
+ * Remove the inflight passkey session ID, if any, present in session storage.
+ *
+ * This should be called whenever we get back control from the passkey app to
+ * clean up after ourselves.
+ */
+export const clearInflightPasskeySessionID = () => {
+    sessionStorage.removeItem("inflightPasskeySessionID");
 };
