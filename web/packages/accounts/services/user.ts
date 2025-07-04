@@ -9,6 +9,7 @@ import {
 } from "ente-accounts/services/accounts-db";
 import {
     generateSRPSetupAttributes,
+    getAndSaveSRPAttributes,
     getSRPAttributes,
     updateSRPAndKeyAttributes,
     type UpdatedKeyAttr,
@@ -719,6 +720,8 @@ export const changePassword = async (password: string) => {
     );
 
     // Update SRP attributes locally.
+    await getAndSaveSRPAttributes(user.email);
+
     const srpAttributes = await getSRPAttributes(user.email);
     saveSRPAttributes(ensure(srpAttributes));
 

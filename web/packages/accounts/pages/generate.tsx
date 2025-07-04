@@ -14,6 +14,7 @@ import {
 import { appHomeRoute } from "ente-accounts/services/redirect";
 import {
     generateSRPSetupAttributes,
+    getAndSaveSRPAttributes,
     setupSRP,
 } from "ente-accounts/services/srp";
 import {
@@ -76,6 +77,7 @@ const Page: React.FC = () => {
                     await generateKeysAndAttributes(password);
                 await putUserKeyAttributes(keyAttributes);
                 await setupSRP(await generateSRPSetupAttributes(kek));
+                await getAndSaveSRPAttributes(userEmail);
                 await generateAndSaveInteractiveKeyAttributes(
                     password,
                     keyAttributes,
@@ -94,7 +96,7 @@ const Page: React.FC = () => {
                 );
             }
         },
-        [],
+        [userEmail],
     );
 
     return (

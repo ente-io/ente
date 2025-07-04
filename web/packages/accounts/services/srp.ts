@@ -9,9 +9,11 @@ import {
     publicRequestHeaders,
 } from "ente-base/http";
 import { apiURL } from "ente-base/origins";
+import { ensure } from "ente-utils/ensure";
 import { SRP, SrpClient } from "fast-srp-hap";
 import { v4 as uuidv4 } from "uuid";
 import { z } from "zod/v4";
+import { saveSRPAttributes } from "./accounts-db";
 import {
     RemoteSRPVerificationResponse,
     type EmailOrSRPVerificationResponse,
@@ -439,6 +441,20 @@ const completeSRPSetup = async (
     ensureOk(res);
     return CompleteSRPSetupResponse.parse(await res.json());
 };
+
+/**
+ * Fetch the SRP attributes from remote and use them to update the SRP
+ * attributes we have saved locally.
+ *
+ * This function is intended to be called after {@link srpSetupOrReconfigure} to
+ * also update our local state to match remote.
+ *
+ * @param userEmail The email of the user whose SRP attributes we want to fetch.
+ * This should be the email address of the logged in user, or the user who is
+ * going through the login / signup sequence currently.
+ */
+export const getAndSaveSRPAttributes = async (userEmail: string) =>
+    saveSRPAttributes(ensure(await getSRPAttributes(userEmail)));
 
 /**
  * The subset of {@link KeyAttributes} that get updated when the user changes

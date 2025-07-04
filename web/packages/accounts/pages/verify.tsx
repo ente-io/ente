@@ -28,7 +28,11 @@ import {
     stashedRedirect,
     unstashRedirect,
 } from "ente-accounts/services/redirect";
-import { getSRPAttributes, setupSRP } from "ente-accounts/services/srp";
+import {
+    getAndSaveSRPAttributes,
+    getSRPAttributes,
+    setupSRP,
+} from "ente-accounts/services/srp";
 import {
     putUserKeyAttributes,
     sendOTT,
@@ -135,6 +139,7 @@ const Page: React.FC = () => {
                         await putUserKeyAttributes(originalKeyAttributes);
                     }
                     await unstashAfterUseSRPSetupAttributes(setupSRP);
+                    await getAndSaveSRPAttributes(email);
                 }
                 saveIsFirstLogin();
                 if (keyAttributes) {
