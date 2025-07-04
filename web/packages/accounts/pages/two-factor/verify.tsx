@@ -1,11 +1,13 @@
 import { Verify2FACodeForm } from "ente-accounts/components/Verify2FACodeForm";
 import {
-    getData,
     savedPartialLocalUser,
     saveKeyAttributes,
-    setLSUser,
+    updateSavedLocalUser,
 } from "ente-accounts/services/accounts-db";
-import { verifyTwoFactor } from "ente-accounts/services/user";
+import {
+    resetSavedLocalUserTokens,
+    verifyTwoFactor,
+} from "ente-accounts/services/user";
 import { LinkButton } from "ente-base/components/LinkButton";
 import { useBaseContext } from "ente-base/context";
 import { isHTTPErrorWithStatus } from "ente-base/http";
@@ -50,17 +52,8 @@ const Page: React.FC = () => {
             try {
                 const { keyAttributes, encryptedToken, id } =
                     await verifyTwoFactor(otp, twoFactorSessionID);
-                await setLSUser({
-                    ...getData("user"),
-                    id,
-                    // TODO: [Note: empty token?]
-                    //
-                    // The original code was parsing an token which is never going
-                    // to be present in the response, so effectively was always
-                    // setting token to undefined. So this works, but is it needed?
-                    token: undefined,
-                    encryptedToken,
-                });
+                await resetSavedLocalUserTokens(id, encryptedToken);
+                updateSavedLocalUser({ twoFactorSessionID: undefined });
                 saveKeyAttributes(keyAttributes);
                 await router.push(unstashRedirect() ?? "/credentials");
             } catch (e) {

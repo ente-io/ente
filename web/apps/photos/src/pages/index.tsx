@@ -9,9 +9,10 @@ import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton"
 import { useBaseContext } from "ente-base/context";
 import { albumsAppOrigin, customAPIHost } from "ente-base/origins";
 import {
-    haveAuthenticatedSession,
+    masterKeyFromSession,
     updateSessionFromElectronSafeStorageIfNeeded,
 } from "ente-base/session";
+import { savedAuthToken } from "ente-base/token";
 import { canAccessIndexedDB } from "ente-gallery/services/files-db";
 import { DevSettings } from "ente-new/photos/components/DevSettings";
 import { t } from "i18next";
@@ -55,7 +56,10 @@ const Page: React.FC = () => {
                 });
             } else {
                 await updateSessionFromElectronSafeStorageIfNeeded();
-                if (await haveAuthenticatedSession()) {
+                if (
+                    (await masterKeyFromSession()) &&
+                    (await savedAuthToken())
+                ) {
                     await router.push("/gallery");
                 } else if (savedPartialLocalUser()?.email) {
                     await router.push("/verify");

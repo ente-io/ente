@@ -1,9 +1,11 @@
 import {
-    getData,
     saveKeyAttributes,
-    setLSUser,
+    updateSavedLocalUser,
 } from "ente-accounts/services/accounts-db";
-import { TwoFactorAuthorizationResponse } from "ente-accounts/services/user";
+import {
+    resetSavedLocalUserTokens,
+    TwoFactorAuthorizationResponse,
+} from "ente-accounts/services/user";
 import { clientPackageName, isDesktop } from "ente-base/app";
 import { encryptBox, generateKey } from "ente-base/crypto";
 import {
@@ -260,7 +262,8 @@ export const saveCredentialsAndNavigateTo = async (
 
     const { id, encryptedToken, keyAttributes } = response;
 
-    await setLSUser({ ...getData("user"), encryptedToken, id });
+    await resetSavedLocalUserTokens(id, encryptedToken);
+    updateSavedLocalUser({ passkeySessionID: undefined });
     saveKeyAttributes(keyAttributes);
 
     return unstashRedirect() ?? "/credentials";

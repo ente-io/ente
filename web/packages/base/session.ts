@@ -155,13 +155,6 @@ export const updateSessionFromElectronSafeStorageIfNeeded = async () => {
 };
 
 /**
- * Return true if we both have a usable user's master key in session storage,
- * and their auth token in KV DB.
- */
-export const haveAuthenticatedSession = async () =>
-    (await masterKeyFromSession()) && !!(await savedAuthToken());
-
-/**
  * Save the user's encypted key encryption key ("key") in session store
  * temporarily, until we get back here after completing the second factor.
  *

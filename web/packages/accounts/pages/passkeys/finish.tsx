@@ -1,10 +1,12 @@
 import {
-    getData,
     saveKeyAttributes,
-    setLSUser,
+    updateSavedLocalUser,
 } from "ente-accounts/services/accounts-db";
 import { unstashRedirect } from "ente-accounts/services/redirect";
-import { TwoFactorAuthorizationResponse } from "ente-accounts/services/user";
+import {
+    resetSavedLocalUserTokens,
+    TwoFactorAuthorizationResponse,
+} from "ente-accounts/services/user";
 import { LoadingIndicator } from "ente-base/components/loaders";
 import { fromB64URLSafeNoPadding } from "ente-base/crypto";
 import log from "ente-base/log";
@@ -95,10 +97,8 @@ const saveQueryCredentialsAndNavigateTo = async (
 
     const { id, keyAttributes, encryptedToken } = decodedResponse;
 
-    // TODO: See: [Note: empty token?]
-    const token = undefined;
-
-    await setLSUser({ ...getData("user"), token, encryptedToken, id });
+    await resetSavedLocalUserTokens(id, encryptedToken);
+    updateSavedLocalUser({ passkeySessionID: undefined });
     saveKeyAttributes(keyAttributes);
 
     return unstashRedirect() ?? "/credentials";

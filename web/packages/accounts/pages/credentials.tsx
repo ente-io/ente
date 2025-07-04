@@ -39,10 +39,10 @@ import {
     verifySRP,
 } from "ente-accounts/services/srp";
 import {
+    decryptAndStoreToken,
     generateAndSaveInteractiveKeyAttributes,
     type KeyAttributes,
 } from "ente-accounts/services/user";
-import { decryptAndStoreToken } from "ente-accounts/utils/helpers";
 import { LinkButton } from "ente-base/components/LinkButton";
 import { LoadingIndicator } from "ente-base/components/loaders";
 import { useBaseContext } from "ente-base/context";
@@ -51,13 +51,13 @@ import { isDevBuild } from "ente-base/env";
 import { clearLocalStorage } from "ente-base/local-storage";
 import log from "ente-base/log";
 import {
-    haveAuthenticatedSession,
+    masterKeyFromSession,
     saveMasterKeyInSessionAndSafeStore,
     stashKeyEncryptionKeyInSessionStore,
     unstashKeyEncryptionKeyFromSession,
     updateSessionFromElectronSafeStorageIfNeeded,
 } from "ente-base/session";
-import { saveAuthToken } from "ente-base/token";
+import { saveAuthToken, savedAuthToken } from "ente-base/token";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useState } from "react";
@@ -166,7 +166,7 @@ const Page: React.FC = () => {
             }
 
             await updateSessionFromElectronSafeStorageIfNeeded();
-            if (await haveAuthenticatedSession()) {
+            if ((await masterKeyFromSession()) && (await savedAuthToken())) {
                 void router.push(appHomeRoute);
                 return;
             }
@@ -177,7 +177,8 @@ const Page: React.FC = () => {
             const kek = await unstashKeyEncryptionKeyFromSession();
             const keyAttributes = savedKeyAttributes();
 
-            // Refreshing an existing tab, or desktop app.
+            // Refreshing an existing tab, or desktop app, or only the token
+            // needs to decrypted and set.
             if (kek && keyAttributes) {
                 const masterKey = await decryptBox(
                     {

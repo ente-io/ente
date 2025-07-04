@@ -1,12 +1,13 @@
 import {
     getData,
+    replaceSavedLocalUser,
     savedKeyAttributes,
     savedLocalUser,
+    savedPartialLocalUser,
     saveKeyAttributes,
     saveSRPAttributes,
     setLSUser,
     updateSavedLocalUser,
-    type PartialLocalUser,
 } from "ente-accounts/services/accounts-db";
 import {
     generateSRPSetupAttributes,
@@ -15,12 +16,14 @@ import {
     type UpdatedKeyAttr,
 } from "ente-accounts/services/srp";
 import {
+    boxSealOpenBytes,
     decryptBox,
     deriveInteractiveKey,
     deriveSensitiveKey,
     encryptBox,
     generateKey,
     generateKeyPair,
+    toB64URLSafe,
 } from "ente-base/crypto";
 import { isDevBuild } from "ente-base/env";
 import {
@@ -33,14 +36,11 @@ import {
     ensureMasterKeyFromSession,
     saveMasterKeyInSessionAndSafeStore,
 } from "ente-base/session";
-import { savedAuthToken } from "ente-base/token";
+import { removeAuthToken, savedAuthToken } from "ente-base/token";
 import { ensure } from "ente-utils/ensure";
 import { nullToUndefined } from "ente-utils/transform";
 import { z } from "zod/v4";
 import { getUserRecoveryKey, recoveryKeyFromMnemonic } from "./recovery-key";
-
-// TODO(RE): Temporary re-export
-export type { PartialLocalUser };
 
 /**
  * The locally persisted data we have about the user after they've logged in.
@@ -738,6 +738,74 @@ export const changePassword = async (password: string) => {
     }
 };
 
+/**
+ * Update the {@link encryptedToken} present in the saved partial local user.
+ *
+ * This function removes the {@link token}, if any, present in the saved partial
+ * local user and sets the provided {@link encryptedToken}.
+ *
+ * It is expected that the code will subsequently redirect to "/credentials",
+ * which should call {@link decryptAndStoreToken} which will decrypt the newly
+ * set {@link encryptedToken} and write out the decrypted value as the
+ * {@link token} in the saved local user.
+ *
+ * @param userID The ID of the user whose token this is. This is used as a
+ * sanity check to ensure that the we do not overwrite saved partial local user
+ * data for a different user.
+ *
+ * @param encryptedToken The newly obtained base64 encoded encrypted token from
+ * remote (e.g. as a result of the user verifying their email).
+ */
+export const resetSavedLocalUserTokens = async (
+    userID: number,
+    encryptedToken: string,
+) => {
+    const user = savedPartialLocalUser();
+    if (user?.id && user.id != userID) {
+        throw new Error(`User ID mismatch (${user.id}, ${userID})`);
+    }
+    replaceSavedLocalUser({ ...user, token: undefined, encryptedToken });
+    return removeAuthToken();
+};
+
+/**
+ * Decrypt the user's {@link encryptedToken}, if present, and use it to update
+ * both the locally saved user and the KV DB.
+ *
+ * @param keyAttributes The user's key attributes.
+ *
+ * @param masterKey The user's master key (base64 encoded).
+ */
+export const decryptAndStoreToken = async (
+    keyAttributes: KeyAttributes,
+    masterKey: string,
+) => {
+    const user = getData("user");
+    const { encryptedToken } = user;
+
+    if (encryptedToken && encryptedToken.length > 0) {
+        const { encryptedSecretKey, secretKeyDecryptionNonce, publicKey } =
+            keyAttributes;
+        const privateKey = await decryptBox(
+            {
+                encryptedData: encryptedSecretKey,
+                nonce: secretKeyDecryptionNonce,
+            },
+            masterKey,
+        );
+
+        const decryptedToken = await toB64URLSafe(
+            await boxSealOpenBytes(encryptedToken, { publicKey, privateKey }),
+        );
+
+        await setLSUser({
+            ...user,
+            token: decryptedToken,
+            encryptedToken: null,
+        });
+    }
+};
+
 const TwoFactorSecret = z.object({
     /**
      * The 2FA secret code.
@@ -958,12 +1026,11 @@ export const recoverTwoFactorFinish = async (
         sessionID,
         twoFactorSecret,
     );
-    await setLSUser({
-        ...getData("user"),
-        id,
+    await resetSavedLocalUserTokens(id, encryptedToken);
+    updateSavedLocalUser({
         isTwoFactorEnabled: undefined,
-        encryptedToken,
-        token: undefined,
+        twoFactorSessionID: undefined,
+        passkeySessionID: undefined,
     });
     saveKeyAttributes(keyAttributes);
 };

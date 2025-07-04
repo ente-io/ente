@@ -1,4 +1,4 @@
-import { getKVS, setKV } from "./kv";
+import { getKVS, removeKV, setKV } from "./kv";
 
 /**
  * Return the user's auth token, or throw an error.
@@ -33,3 +33,10 @@ export const savedAuthToken = () => getKVS("token");
  * This is the setter corresponding to {@link savedAuthToken}.
  */
 export const saveAuthToken = (token: string) => setKV("token", token);
+
+/**
+ * Remove the user's auth token from KV DB.
+ *
+ * See {@link saveAuthToken}.
+ */
+export const removeAuthToken = () => removeKV("token");
