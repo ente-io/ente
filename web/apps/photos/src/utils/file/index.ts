@@ -6,7 +6,7 @@ import { saveAsFileAndRevokeObjectURL } from "ente-base/utils/web";
 import { downloadManager } from "ente-gallery/services/download";
 import { detectFileTypeInfo } from "ente-gallery/utils/detect-type";
 import { writeStream } from "ente-gallery/utils/native-stream";
-import { EnteFile } from "ente-media/file";
+import type { EnteFile } from "ente-media/file";
 import { ItemVisibility, fileFileName } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
 import { decodeLivePhoto } from "ente-media/live-photo";
@@ -21,7 +21,7 @@ import { updateFilesVisibility } from "ente-new/photos/services/file";
 import { safeFileName } from "ente-new/photos/utils/native-fs";
 import { wait } from "ente-utils/promise";
 import { t } from "i18next";
-import {
+import type {
     SelectedState,
     SetFilesDownloadProgressAttributes,
     SetFilesDownloadProgressAttributesCreator,

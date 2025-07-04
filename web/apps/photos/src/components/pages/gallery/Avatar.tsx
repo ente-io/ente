@@ -1,7 +1,7 @@
 import { styled } from "@mui/material";
 import type { LocalUser } from "ente-accounts/services/user";
 import log from "ente-base/log";
-import { EnteFile } from "ente-media/file";
+import { type EnteFile } from "ente-media/file";
 import {
     avatarBackgroundColor,
     avatarBackgroundColorPublicCollectedFile,

@@ -1673,7 +1673,7 @@ const ManageLinkPassword: React.FC<ManagePublicLinkSettingProps> = ({
     const { show: showSetPassword, props: setPasswordVisibilityProps } =
         useModalVisibility();
 
-    const handlePasswordChangeSetting = async () => {
+    const handlePasswordChangeSetting = () => {
         if (publicURL.passwordEnabled) {
             showMiniDialog({
                 title: t("disable_password"),

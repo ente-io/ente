@@ -101,8 +101,8 @@ class UIService {
     // UPLOAD LEVEL STATES
     private uploadPhase: UploadPhase = "preparing";
     private filenames = new Map<number, string>();
-    private hasLivePhoto: boolean = false;
-    private uploadProgressView: boolean = false;
+    private hasLivePhoto = false;
+    private uploadProgressView = false;
 
     // STAGE LEVEL STATES
     private perFileProgress: number;
@@ -269,7 +269,7 @@ class UploadManager {
 
     private uiService = new UIService();
 
-    public async init(
+    public init(
         progressUpdater: ProgressUpdater,
         onUploadFile: (file: EnteFile) => void,
         publicAlbumsCredentials: PublicAlbumsCredentials | undefined,
@@ -571,7 +571,7 @@ class UploadManager {
             }
 
             if (isDesktop && watcher.isUploadRunning()) {
-                await watcher.onFileUpload(uploadableItem, uploadResult);
+                watcher.onFileUpload(uploadableItem, uploadResult);
             }
 
             return type == "addedSymlink" ? "uploaded" : type;

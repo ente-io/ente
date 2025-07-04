@@ -6,7 +6,7 @@ import {
     type FileViewerProps,
 } from "ente-gallery/components/viewer/FileViewer";
 import type { Collection } from "ente-media/collection";
-import { EnteFile } from "ente-media/file";
+import type { EnteFile } from "ente-media/file";
 import { fileCreationTime, fileFileName } from "ente-media/file-metadata";
 import { moveToTrash } from "ente-new/photos/services/collection";
 import { PseudoCollectionID } from "ente-new/photos/services/collection-summary";
@@ -14,7 +14,7 @@ import { t } from "i18next";
 import { useCallback, useMemo, useState } from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { uploadManager } from "services/upload-manager";
-import { SetFilesDownloadProgressAttributesCreator } from "types/gallery";
+import type { SetFilesDownloadProgressAttributesCreator } from "types/gallery";
 import { downloadSingleFile } from "utils/file";
 import {
     FileList,

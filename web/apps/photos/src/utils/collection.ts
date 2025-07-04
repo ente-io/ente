@@ -2,7 +2,7 @@ import { ensureElectron } from "ente-base/electron";
 import { joinPath } from "ente-base/file-name";
 import log from "ente-base/log";
 import { uniqueFilesByID } from "ente-gallery/utils/file";
-import { EnteFile } from "ente-media/file";
+import type { EnteFile } from "ente-media/file";
 import {
     defaultHiddenCollectionUserFacingName,
     findDefaultHiddenCollectionIDs,
@@ -13,9 +13,9 @@ import {
     savedCollections,
 } from "ente-new/photos/services/photos-fdb";
 import { safeDirectoryName } from "ente-new/photos/utils/native-fs";
-import {
+import type {
     SetFilesDownloadProgressAttributes,
-    type SetFilesDownloadProgressAttributesCreator,
+    SetFilesDownloadProgressAttributesCreator,
 } from "types/gallery";
 import { downloadFilesWithProgress } from "utils/file";
 

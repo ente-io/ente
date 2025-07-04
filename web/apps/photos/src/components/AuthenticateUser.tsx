@@ -94,7 +94,7 @@ const AuthenticateUserDialogContents: React.FC<AuthenticateUserProps> = ({
     }, [open, validateSession]);
 
     // They'll be read from disk shortly.
-    if (!user && !keyAttributes) return <></>;
+    if (!user || !keyAttributes) return <></>;
 
     return (
         <VerifyMasterPasswordForm

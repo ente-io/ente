@@ -26,7 +26,7 @@ import { photosTheme } from "ente-base/components/utils/theme";
 import { BaseContext, deriveBaseContext } from "ente-base/context";
 import log from "ente-base/log";
 import { logStartupBanner } from "ente-base/log-web";
-import { AppUpdate } from "ente-base/types/ipc";
+import type { AppUpdate } from "ente-base/types/ipc";
 import {
     initVideoProcessing,
     isHLSGenerationSupported,
@@ -81,7 +81,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
 
     useEffect(() => {
         const electron = globalThis.electron;
-        if (!electron) return;
+        if (!electron) return undefined;
 
         // Attach various listeners for events sent to us by the Node.js layer.
         // This is for events that we should listen for always, not just when

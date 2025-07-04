@@ -1,4 +1,9 @@
+// TODO: Audit this file
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+/* eslint-disable @typescript-eslint/no-base-to-string */
+/* eslint-disable @typescript-eslint/restrict-template-expressions */
 /* eslint-disable @typescript-eslint/dot-notation */
+// @ts-nocheck
 import {
     parseDateFromDigitGroups,
     tryParseEpochMicrosecondsFromFileName,
@@ -163,13 +168,13 @@ export async function testUpload() {
         await exifDataParsingCheck(expectedState);
         await fileDimensionExtractionCheck(expectedState);
         await googleMetadataReadingCheck(expectedState);
-        await totalFileCountCheck(expectedState);
+        totalFileCountCheck(expectedState);
     } catch (e) {
         console.log(e);
     }
 }
 
-async function totalFileCountCheck(expectedState) {
+function totalFileCountCheck(expectedState) {
     const userDetails = userDetailsSnapshot();
     if (expectedState.total_file_count === userDetails.fileCount) {
         console.log("file count check passed ✅");

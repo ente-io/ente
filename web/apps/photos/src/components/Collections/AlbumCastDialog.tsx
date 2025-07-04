@@ -122,7 +122,7 @@ export const AlbumCastDialogContents: React.FC<AlbumCastDialogProps> = ({
                     log.error("Error requesting session", e);
                     return;
                 }
-                const session = instance.getCurrentSession();
+                const session = instance.getCurrentSession()!;
                 session.addMessageListener(
                     "urn:x-cast:pair-request",
                     (_, message) => {

@@ -1,3 +1,5 @@
+// TODO: Audit this file
+/* eslint-disable @typescript-eslint/restrict-plus-operands */
 import AlbumOutlinedIcon from "@mui/icons-material/AlbumOutlined";
 import FavoriteRoundedIcon from "@mui/icons-material/FavoriteRounded";
 import PlayCircleOutlineOutlinedIcon from "@mui/icons-material/PlayCircleOutlineOutlined";
@@ -10,7 +12,7 @@ import { isSameDay } from "ente-base/date";
 import { formattedDateRelative } from "ente-base/i18n-date";
 import log from "ente-base/log";
 import { downloadManager } from "ente-gallery/services/download";
-import { EnteFile } from "ente-media/file";
+import type { EnteFile } from "ente-media/file";
 import { fileCreationTime, fileDurationString } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
 import {
@@ -32,10 +34,10 @@ import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { Trans } from "react-i18next";
 import {
     VariableSizeList as List,
-    ListChildComponentProps,
+    type ListChildComponentProps,
     areEqual,
 } from "react-window";
-import { SelectedState } from "types/gallery";
+import type { SelectedState } from "types/gallery";
 import { shouldShowAvatar } from "utils/file";
 import {
     handleSelectCreator,

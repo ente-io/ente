@@ -112,11 +112,11 @@ import { initiateEmail, openURL } from "ente-new/photos/utils/web";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import React, {
-    MouseEventHandler,
     useCallback,
     useEffect,
     useMemo,
     useState,
+    type MouseEventHandler,
 } from "react";
 import { Trans } from "react-i18next";
 import { testUpload } from "../../tests/upload.test";
