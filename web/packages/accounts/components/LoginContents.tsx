@@ -1,7 +1,7 @@
 import { Input, Stack, TextField, Typography } from "@mui/material";
 import { AccountsPageFooter } from "ente-accounts/components/layouts/centered-paper";
 import {
-    savePartialLocalUser,
+    replaceSavedLocalUser,
     saveSRPAttributes,
 } from "ente-accounts/services/accounts-db";
 import { getSRPAttributes } from "ente-accounts/services/srp";
@@ -51,10 +51,10 @@ export const LoginContents: React.FC<LoginContentsProps> = ({
                     }
                     throw e;
                 }
-                savePartialLocalUser({ email });
+                replaceSavedLocalUser({ email });
                 void router.push("/verify");
             } else {
-                savePartialLocalUser({ email });
+                replaceSavedLocalUser({ email });
                 saveSRPAttributes(srpAttributes);
                 void router.push("/credentials");
             }

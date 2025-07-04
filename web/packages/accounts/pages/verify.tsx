@@ -8,6 +8,7 @@ import { VerifyingPasskey } from "ente-accounts/components/LoginComponents";
 import { SecondFactorChoice } from "ente-accounts/components/SecondFactorChoice";
 import { useSecondFactorChoiceIfNeeded } from "ente-accounts/components/utils/second-factor-choice";
 import {
+    replaceSavedLocalUser,
     savedKeyAttributes,
     savedOriginalKeyAttributes,
     savedPartialLocalUser,
@@ -15,7 +16,6 @@ import {
     saveIsFirstLogin,
     saveKeyAttributes,
     saveOriginalKeyAttributes,
-    setLSUser,
     unstashAfterUseSRPSetupAttributes,
     unstashReferralSource,
     updateSavedLocalUser,
@@ -44,6 +44,7 @@ import { useBaseContext } from "ente-base/context";
 import { isHTTPErrorWithStatus } from "ente-base/http";
 import log from "ente-base/log";
 import { clearSessionStorage } from "ente-base/session";
+import { saveAuthToken } from "ente-base/token";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useState } from "react";
@@ -103,6 +104,9 @@ const Page: React.FC = () => {
                 await verifyEmail(email, ott, cleanedReferral),
             );
 
+            // The following flow is similar to (but not the same) as what
+            // happens after `verifySRP` in the `/credentials` page.
+
             if (passkeySessionID) {
                 updateSavedLocalUser({ passkeySessionID });
                 saveIsFirstLogin();
@@ -120,15 +124,8 @@ const Page: React.FC = () => {
                 saveIsFirstLogin();
                 void router.push("/two-factor/verify");
             } else {
-                await setLSUser({
-                    email,
-                    token,
-                    encryptedToken,
-                    id,
-                    isTwoFactorEnabled: undefined,
-                    twoFactorSessionID: undefined,
-                    passkeySessionID: undefined,
-                });
+                if (token) await saveAuthToken(token);
+                replaceSavedLocalUser({ id, email, token, encryptedToken });
                 if (keyAttributes) {
                     saveKeyAttributes(keyAttributes);
                     saveOriginalKeyAttributes(keyAttributes);

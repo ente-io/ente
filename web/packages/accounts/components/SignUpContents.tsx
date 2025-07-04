@@ -14,9 +14,9 @@ import {
     Typography,
 } from "@mui/material";
 import {
+    replaceSavedLocalUser,
     saveJustSignedUp,
     saveOriginalKeyAttributes,
-    savePartialLocalUser,
     stashReferralSource,
     stashSRPSetupAttributes,
 } from "ente-accounts/services/accounts-db";
@@ -130,7 +130,7 @@ export const SignUpContents: React.FC<SignUpContentsProps> = ({
                     throw e;
                 }
 
-                savePartialLocalUser({ email });
+                replaceSavedLocalUser({ email });
 
                 let gkResult: GenerateKeysAndAttributesResult;
                 try {
