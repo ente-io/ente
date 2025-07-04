@@ -59,7 +59,7 @@ import {
 import log from "ente-base/log";
 import { savedLogs } from "ente-base/log-web";
 import { customAPIHost } from "ente-base/origins";
-import { downloadString } from "ente-base/utils/web";
+import { saveStringAsFile } from "ente-base/utils/web";
 import {
     isHLSGenerationSupported,
     toggleHLSGeneration,
@@ -71,7 +71,7 @@ import { TwoFactorSettings } from "ente-new/photos/components/sidebar/TwoFactorS
 import {
     confirmDisableMapsDialogAttributes,
     confirmEnableMapsDialogAttributes,
-} from "ente-new/photos/components/utils/dialog";
+} from "ente-new/photos/components/utils/dialog-attributes";
 import { downloadAppDialogAttributes } from "ente-new/photos/components/utils/download";
 import {
     useHLSGenerationStatusSnapshot,
@@ -79,16 +79,14 @@ import {
     useUserDetailsSnapshot,
 } from "ente-new/photos/components/utils/use-snapshot";
 import {
-    ARCHIVE_SECTION,
-    DUMMY_UNCATEGORIZED_COLLECTION,
-    TRASH_SECTION,
-} from "ente-new/photos/services/collection";
-import type { CollectionSummaries } from "ente-new/photos/services/collection/ui";
+    PseudoCollectionID,
+    type CollectionSummaries,
+} from "ente-new/photos/services/collection-summary";
 import exportService from "ente-new/photos/services/export";
 import { isMLSupported } from "ente-new/photos/services/ml";
 import {
     isDevBuildAndUser,
-    syncSettings,
+    pullSettings,
     updateCFProxyDisabledPreference,
     updateMapEnabled,
 } from "ente-new/photos/services/settings";
@@ -104,8 +102,8 @@ import {
     isSubscriptionPastDue,
     isSubscriptionStripe,
     leaveFamily,
+    pullUserDetails,
     redirectToCustomerPortal,
-    syncUserDetails,
     userDetailsAddOnBonuses,
     type UserDetails,
 } from "ente-new/photos/services/user-details";
@@ -113,32 +111,47 @@ import { usePhotosAppContext } from "ente-new/photos/types/context";
 import { initiateEmail, openURL } from "ente-new/photos/utils/web";
 import { t } from "i18next";
 import { useRouter } from "next/router";
-import { GalleryContext } from "pages/gallery";
 import React, {
-    MouseEventHandler,
     useCallback,
-    useContext,
     useEffect,
     useMemo,
     useState,
+    type MouseEventHandler,
 } from "react";
 import { Trans } from "react-i18next";
-import { getUncategorizedCollection } from "services/collectionService";
 import { testUpload } from "../../tests/upload.test";
 import { SubscriptionCard } from "./SubscriptionCard";
 
 type SidebarProps = ModalVisibilityProps & {
     /**
-     * The latest UI collections.
+     * Information about non-hidden collections and pseudo-collections.
      *
-     * These are used to obtain data about the uncategorized, hidden and other
-     * items shown in the shortcut section within the sidebar.
+     * These are used to obtain data about the archive, hidden and trash
+     * "section" entries shown within the shortcut section of the sidebar.
      */
-    collectionSummaries: CollectionSummaries;
+    normalCollectionSummaries: CollectionSummaries;
+    /**
+     * The ID of the collection summary that should be shown when the user
+     * activates the "Uncategorized" section shortcut.
+     */
+    uncategorizedCollectionSummaryID: number;
     /**
      * Called when the plan selection modal should be shown.
      */
     onShowPlanSelector: () => void;
+    /**
+     * Called when the collection summary with the given
+     * {@link collectionSummaryID} should be shown.
+     */
+    onShowCollectionSummary: (collectionSummaryID: number) => void;
+    /**
+     * Called when the hidden section should be shown.
+     *
+     * This triggers the display of the dialog to authenticate the user, exactly
+     * as if {@link onAuthenticateUser} were called. Then, on successful
+     * authentication, the gallery will switch to the hidden section.
+     */
+    onShowHiddenSection: () => Promise<void>;
     /**
      * Called when the export dialog should be shown.
      */
@@ -148,6 +161,9 @@ type SidebarProps = ModalVisibilityProps & {
      *
      * This will be invoked before sensitive actions, and the action will only
      * proceed if the promise returned by this function is fulfilled.
+     *
+     * On errors or if the user cancels the reauthentication, the promise will
+     * not settle.
      */
     onAuthenticateUser: () => Promise<void>;
 };
@@ -155,8 +171,11 @@ type SidebarProps = ModalVisibilityProps & {
 export const Sidebar: React.FC<SidebarProps> = ({
     open,
     onClose,
-    collectionSummaries,
+    normalCollectionSummaries,
+    uncategorizedCollectionSummaryID,
     onShowPlanSelector,
+    onShowCollectionSummary,
+    onShowHiddenSection,
     onShowExport,
     onAuthenticateUser,
 }) => (
@@ -166,7 +185,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <Stack sx={{ gap: 0.5, mb: 3 }}>
             <ShortcutSection
                 onCloseSidebar={onClose}
-                collectionSummaries={collectionSummaries}
+                {...{
+                    normalCollectionSummaries,
+                    uncategorizedCollectionSummaryID,
+                    onShowCollectionSummary,
+                    onShowHiddenSection,
+                }}
             />
             <UtilitySection
                 onCloseSidebar={onClose}
@@ -217,7 +241,7 @@ const UserDetailsSection: React.FC<UserDetailsSectionProps> = ({
     } = useModalVisibility();
 
     useEffect(() => {
-        if (sidebarOpen) void syncUserDetails();
+        if (sidebarOpen) void pullUserDetails();
     }, [sidebarOpen]);
 
     const isNonAdminFamilyMember = useMemo(
@@ -431,63 +455,55 @@ const ManageMemberSubscription: React.FC<ManageMemberSubscriptionProps> = ({
     );
 };
 
-type ShortcutSectionProps = SectionProps & {
-    collectionSummaries: SidebarProps["collectionSummaries"];
-};
+type ShortcutSectionProps = SectionProps &
+    Pick<
+        SidebarProps,
+        | "normalCollectionSummaries"
+        | "uncategorizedCollectionSummaryID"
+        | "onShowCollectionSummary"
+        | "onShowHiddenSection"
+    >;
 
 const ShortcutSection: React.FC<ShortcutSectionProps> = ({
     onCloseSidebar,
-    collectionSummaries,
+    normalCollectionSummaries,
+    uncategorizedCollectionSummaryID,
+    onShowCollectionSummary,
+    onShowHiddenSection,
 }) => {
-    const galleryContext = useContext(GalleryContext);
-    const [uncategorizedCollectionId, setUncategorizedCollectionID] =
-        useState<number>();
-
-    useEffect(() => {
-        void getUncategorizedCollection().then((uncat) =>
-            setUncategorizedCollectionID(
-                uncat?.id ?? DUMMY_UNCATEGORIZED_COLLECTION,
-            ),
-        );
-    }, []);
-
     const openUncategorizedSection = () => {
-        galleryContext.setActiveCollectionID(uncategorizedCollectionId);
+        onShowCollectionSummary(uncategorizedCollectionSummaryID);
         onCloseSidebar();
     };
 
     const openTrashSection = () => {
-        galleryContext.setActiveCollectionID(TRASH_SECTION);
+        onShowCollectionSummary(PseudoCollectionID.trash);
         onCloseSidebar();
     };
 
     const openArchiveSection = () => {
-        galleryContext.setActiveCollectionID(ARCHIVE_SECTION);
+        onShowCollectionSummary(PseudoCollectionID.archiveItems);
         onCloseSidebar();
     };
 
-    const openHiddenSection = () => {
-        galleryContext.openHiddenSection(() => {
-            onCloseSidebar();
-        });
-    };
+    const openHiddenSection = () =>
+        void onShowHiddenSection().then(onCloseSidebar);
+
+    const summaryCaption = (summaryID: number) =>
+        normalCollectionSummaries.get(summaryID)?.fileCount.toString();
 
     return (
         <>
             <RowButton
                 startIcon={<CategoryIcon />}
                 label={t("section_uncategorized")}
-                caption={collectionSummaries
-                    .get(uncategorizedCollectionId)
-                    ?.fileCount.toString()}
+                caption={summaryCaption(uncategorizedCollectionSummaryID)}
                 onClick={openUncategorizedSection}
             />
             <RowButton
                 startIcon={<ArchiveOutlinedIcon />}
                 label={t("section_archive")}
-                caption={collectionSummaries
-                    .get(ARCHIVE_SECTION)
-                    ?.fileCount.toString()}
+                caption={summaryCaption(PseudoCollectionID.archiveItems)}
                 onClick={openArchiveSection}
             />
             <RowButton
@@ -506,9 +522,7 @@ const ShortcutSection: React.FC<ShortcutSectionProps> = ({
             <RowButton
                 startIcon={<DeleteOutlineIcon />}
                 label={t("section_trash")}
-                caption={collectionSummaries
-                    .get(TRASH_SECTION)
-                    ?.fileCount.toString()}
+                caption={summaryCaption(PseudoCollectionID.trash)}
                 onClick={openTrashSection}
             />
         </>
@@ -765,7 +779,7 @@ const Preferences: React.FC<NestedSidebarDrawerVisibilityProps> = ({
     const isHLSGenerationEnabled = !!hlsGenStatusSnapshot?.enabled;
 
     useEffect(() => {
-        if (open) void syncSettings();
+        if (open) void pullSettings();
     }, [open]);
 
     const handleRootClose = () => {
@@ -1073,7 +1087,7 @@ const Help: React.FC<NestedSidebarDrawerVisibilityProps> = ({
         log.info("Viewing logs");
         const electron = globalThis.electron;
         if (electron) electron.openLogDirectory();
-        else downloadString(savedLogs(), `ente-web-logs-${Date.now()}.txt`);
+        else saveStringAsFile(savedLogs(), `ente-web-logs-${Date.now()}.txt`);
     };
 
     return (

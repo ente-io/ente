@@ -1,6 +1,6 @@
 import type { SelectionContext } from "ente-new/photos/components/gallery";
 import type { GalleryBarMode } from "ente-new/photos/components/gallery/reducer";
-import { SetSelectedState, type SelectedState } from "types/gallery";
+import type { SelectedState, SetSelectedState } from "types/gallery";
 
 // TODO: All this is unnecessarily complex, and needs reworking.
 export const handleSelectCreator =

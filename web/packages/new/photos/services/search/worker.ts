@@ -8,8 +8,8 @@ import type { Collection } from "ente-media/collection";
 import type { EnteFile } from "ente-media/file";
 import {
     fileCreationPhotoDate,
+    fileFileName,
     fileLocation,
-    filePublicMagicMetadata,
 } from "ente-media/file-metadata";
 import { nullToUndefined } from "ente-utils/transform";
 import { z } from "zod/v4";
@@ -178,7 +178,7 @@ const fileNameSuggestion = (
     const sn = Number(s) || undefined;
 
     const fileIDs = files
-        .filter(({ id, metadata }) => id === sn || re.test(metadata.title))
+        .filter((f) => f.id === sn || re.test(fileFileName(f)))
         .map((f) => f.id);
 
     return fileIDs.length
@@ -373,7 +373,7 @@ const isMatchingFile = (file: EnteFile, suggestion: SearchSuggestion) => {
             return suggestion.collectionID === file.collectionID;
 
         case "fileType":
-            return suggestion.fileType === file.metadata.fileType;
+            return suggestion.fileType == file.metadata.fileType;
 
         case "fileName":
             return suggestion.fileIDs.includes(file.id);
@@ -384,7 +384,7 @@ const isMatchingFile = (file: EnteFile, suggestion: SearchSuggestion) => {
         case "date":
             return isDateComponentsMatch(
                 suggestion.dateComponents,
-                fileCreationPhotoDate(file, filePublicMagicMetadata(file)),
+                fileCreationPhotoDate(file),
             );
 
         case "location": {

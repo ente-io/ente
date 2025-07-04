@@ -162,6 +162,7 @@
     "ok": "OK",
     "success": "成功",
     "error": "エラー",
+    "note": "",
     "offline_message": "オフラインです。キャッシュされた内容が表示されています",
     "install": "インストール",
     "install_mobile_app": "<a>Android</a> または <b>iOS</b> アプリをインストールして、すべての写真を自動的にバックアップします",
@@ -683,5 +684,6 @@
     "share_favorites": "",
     "person_favorites": "",
     "shared_favorites": "",
-    "added_by_name": ""
+    "added_by_name": "",
+    "unowned_files_not_processed": ""
 }

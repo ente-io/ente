@@ -1,0 +1,17 @@
+{
+  "@@locale ": "en",
+  "enterYourEmailAddress": "이메일을 입력하세요",
+  "accountWelcomeBack": "다시 오신 것을 환영합니다!",
+  "email": "이메일",
+  "cancel": "닫기",
+  "verify": "인증",
+  "invalidEmailAddress": "잘못된 이메일 주소",
+  "enterValidEmail": "올바른 이메일 주소를 입력하세요.",
+  "deleteAccount": "계정 삭제",
+  "askDeleteReason": "계정을 삭제하는 가장 큰 이유가 무엇인가요?",
+  "feedback": "피드백",
+  "confirmAccountDeletion": "계정 삭제 확인",
+  "deleteAccountPermanentlyButton": "계정을 영구적으로 삭제",
+  "yourAccountHasBeenDeleted": "계정이 삭제되었습니다.",
+  "wishThemAHappyBirthday": "Wish ${name} a happy birthday! 🎉"
+}

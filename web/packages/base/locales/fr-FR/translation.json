@@ -162,6 +162,7 @@
     "ok": "Ok",
     "success": "Parfait",
     "error": "Erreur",
+    "note": "",
     "offline_message": "Vous êtes hors ligne, les souvenirs en cache sont affichés",
     "install": "Installer",
     "install_mobile_app": "Installez notre application <a>Android</a> or <b>iOS</b> pour sauvegarder automatiquement toutes vos photos",
@@ -683,5 +684,6 @@
     "share_favorites": "Partager les favoris",
     "person_favorites": "Favoris de {{name}}",
     "shared_favorites": "Favoris partagés",
-    "added_by_name": "Ajouté par {{name}}"
+    "added_by_name": "Ajouté par {{name}}",
+    "unowned_files_not_processed": ""
 }

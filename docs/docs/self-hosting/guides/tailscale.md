@@ -31,7 +31,7 @@ Before getting start keep the following NOTE in mind.
 > net.ipv4.ping_group_range = 0 2147483647
 > ```
 >
-> than run `sudo sysctl --system`. Create
+> then run `sudo sysctl --system`. Create
 > `~/.config/systemd/user/docker.service.d/override.conf` with the following
 > content:
 >
@@ -48,7 +48,7 @@ Before getting start keep the following NOTE in mind.
 ## GETTING START WITH SETUP
 
 First of all create a directory
-`sudo mkdir -p /home/ubuntu/docker/tsdproxy/config` than `cd docker/tsdproxy`
+`sudo mkdir -p /home/ubuntu/docker/tsdproxy/config` then `cd docker/tsdproxy`
 and create compose.yaml file by running `sudo nano compose.yaml`. Populate it
 with the following:
 

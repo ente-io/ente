@@ -52,7 +52,7 @@ export const generateThumbnailWeb = async (
     blob: Blob,
     fileTypeInfo: FileTypeInfo,
 ): Promise<Uint8Array> =>
-    fileTypeInfo.fileType === FileType.image
+    fileTypeInfo.fileType == FileType.image
         ? await generateImageThumbnailWeb(blob, fileTypeInfo)
         : await generateVideoThumbnailWeb(blob);
 
@@ -194,7 +194,7 @@ export const generateThumbnailNative = async (
     fsUploadItem: FileSystemUploadItem,
     fileTypeInfo: FileTypeInfo,
 ): Promise<Uint8Array> =>
-    fileTypeInfo.fileType === FileType.image
+    fileTypeInfo.fileType == FileType.image
         ? await electron.generateImageThumbnail(
               toPathOrZipEntry(fsUploadItem),
               maxThumbnailDimension,

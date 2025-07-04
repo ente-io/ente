@@ -1,9 +1,12 @@
+import {
+    savedOriginalKeyAttributes,
+    savedSRPAttributes,
+} from "ente-accounts/services/accounts-db";
 import type { KeyAttributes } from "ente-accounts/services/user";
 import { authenticatedRequestHeaders, HTTPError } from "ente-base/http";
 import log from "ente-base/log";
 import { apiURL } from "ente-base/origins";
-import { getAuthToken } from "ente-base/token";
-import { getData } from "ente-shared/storage/localStorage";
+import { savedAuthToken } from "ente-base/token";
 import { nullToUndefined } from "ente-utils/transform";
 import { z } from "zod/v4";
 import { getSRPAttributes, type SRPAttributes } from "./srp";
@@ -24,6 +27,9 @@ type SessionValidity =
 
 const SessionValidityResponse = z.object({
     hasSetKeys: z.boolean(),
+    /**
+     * Will not be present if {@link hasSetKeys} is `false`.
+     */
     keyAttributes: RemoteKeyAttributes.nullish().transform(nullToUndefined),
 });
 
@@ -82,15 +88,15 @@ export const checkSessionValidity = async (): Promise<SessionValidity> => {
         else throw new HTTPError(res);
     }
 
-    // See if the response contains keyAttributes (they might not for older
-    // deployments).
+    // See if the response contains keyAttributes (it will not if `hasSetKeys`
+    // in the response is `false`).
     const { keyAttributes } = SessionValidityResponse.parse(await res.json());
     if (keyAttributes) {
         const remoteKeyAttributes = keyAttributes;
 
         // We should have these values locally if we reach here.
         const email = ensureLocalUser().email;
-        const localSRPAttributes = getData("srpAttributes")!;
+        const localSRPAttributes = savedSRPAttributes()!;
 
         // Fetch the remote SRP attributes.
         //
@@ -121,7 +127,7 @@ export const checkSessionValidity = async (): Promise<SessionValidity> => {
         }
     }
 
-    // The token is still valid (to the best of our ascertainable knowledge).
+    // The token is still valid.
     return { status: "valid" };
 };
 
@@ -130,7 +136,7 @@ export const checkSessionValidity = async (): Promise<SessionValidity> => {
  * longer valid. If needed, also update the key attributes at remote.
  *
  * This is a subset of {@link checkSessionValidity} that has been tailored for
- * use during each remote sync, to detect if the user has been logged out
+ * use during each remote pull, to detect if the user has been logged out
  * elsewhere.
  *
  * @returns `true` if either we don't have an auth token, or if remote tells us
@@ -143,7 +149,7 @@ export const checkSessionValidity = async (): Promise<SessionValidity> => {
  * e.g. transient network issues.
  */
 export const isSessionInvalid = async (): Promise<boolean> => {
-    const token = await getAuthToken();
+    const token = await savedAuthToken();
     if (!token) {
         return true; /* No saved token, session is invalid */
     }
@@ -159,7 +165,7 @@ export const isSessionInvalid = async (): Promise<boolean> => {
 
         const { hasSetKeys } = SessionValidityResponse.parse(await res.json());
         if (!hasSetKeys) {
-            const originalKeyAttributes = getData("originalKeyAttributes");
+            const originalKeyAttributes = savedOriginalKeyAttributes();
             if (originalKeyAttributes)
                 await putUserKeyAttributes(originalKeyAttributes);
         }

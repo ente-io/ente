@@ -1,0 +1,15 @@
+{
+  "@@locale ": "en",
+  "enterYourEmailAddress": "Adja meg az e-mail címét",
+  "accountWelcomeBack": "Köszöntjük ismét!",
+  "email": "E-mail",
+  "cancel": "Mégse",
+  "verify": "Hitelesítés",
+  "invalidEmailAddress": "Érvénytelen e-mail cím",
+  "enterValidEmail": "Kérjük, adjon meg egy érvényes e-mail címet.",
+  "deleteAccount": "Fiók törlése",
+  "askDeleteReason": "Miért törli a fiókját?",
+  "deleteAccountFeedbackPrompt": "Sajnáljuk, hogy távozik. Kérjük, ossza meg velünk visszajelzéseit, hogy segítsen nekünk a fejlődésben.",
+  "feedback": "Visszajelzés",
+  "wishThemAHappyBirthday": "Wish ${name} a happy birthday! 🎉"
+}

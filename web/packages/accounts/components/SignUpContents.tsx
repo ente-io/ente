@@ -14,13 +14,16 @@ import {
     Typography,
 } from "@mui/material";
 import {
-    generateSRPSetupAttributes,
+    replaceSavedLocalUser,
+    saveJustSignedUp,
+    saveOriginalKeyAttributes,
+    stashReferralSource,
     stashSRPSetupAttributes,
-} from "ente-accounts/services/srp";
+} from "ente-accounts/services/accounts-db";
+import { generateSRPSetupAttributes } from "ente-accounts/services/srp";
 import {
     generateAndSaveInteractiveKeyAttributes,
     generateKeysAndAttributes,
-    savePartialLocalUser,
     sendOTT,
     type GenerateKeysAndAttributesResult,
 } from "ente-accounts/services/user";
@@ -32,11 +35,6 @@ import { deriveKeyInsufficientMemoryErrorMessage } from "ente-base/crypto/types"
 import { isMuseumHTTPError } from "ente-base/http";
 import log from "ente-base/log";
 import { saveMasterKeyInSessionAndSafeStore } from "ente-base/session";
-import { setData } from "ente-shared/storage/localStorage";
-import {
-    setJustSignedUp,
-    setLocalReferralSource,
-} from "ente-shared/storage/localStorage/helpers";
 import { useFormik } from "formik";
 import { t } from "i18next";
 import type { NextRouter } from "next/router";
@@ -57,6 +55,12 @@ interface SignUpContentsProps {
     host: string | undefined;
 }
 
+/**
+ * A contents of the "signup" form.
+ *
+ * It is used both on the "/signup" page itself, and as a subcomponent of the
+ * "/" page where the user can toggle between the signup and login forms inline.
+ */
 export const SignUpContents: React.FC<SignUpContentsProps> = ({
     router,
     onLogin,
@@ -107,7 +111,8 @@ export const SignUpContents: React.FC<SignUpContentsProps> = ({
             }
 
             try {
-                setLocalReferralSource(referral);
+                const cleanedReferral = referral.trim();
+                if (cleanedReferral) stashReferralSource(cleanedReferral);
 
                 try {
                     await sendOTT(email, "signup");
@@ -125,7 +130,7 @@ export const SignUpContents: React.FC<SignUpContentsProps> = ({
                     throw e;
                 }
 
-                savePartialLocalUser({ email });
+                replaceSavedLocalUser({ email });
 
                 let gkResult: GenerateKeysAndAttributesResult;
                 try {
@@ -145,7 +150,7 @@ export const SignUpContents: React.FC<SignUpContentsProps> = ({
                 }
 
                 const { masterKey, kek, keyAttributes } = gkResult;
-                setData("originalKeyAttributes", keyAttributes);
+                saveOriginalKeyAttributes(keyAttributes);
                 stashSRPSetupAttributes(await generateSRPSetupAttributes(kek));
                 await generateAndSaveInteractiveKeyAttributes(
                     password,
@@ -154,7 +159,7 @@ export const SignUpContents: React.FC<SignUpContentsProps> = ({
                 );
                 await saveMasterKeyInSessionAndSafeStore(masterKey);
 
-                setJustSignedUp(true);
+                saveJustSignedUp();
                 void router.push("/verify");
             } catch (e) {
                 log.error("Signup failed", e);

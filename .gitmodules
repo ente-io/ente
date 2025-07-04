@@ -3,9 +3,9 @@
 	url = https://github.com/ente-io/sentry-dart.git
 	branch = sentry_flutter_ente
 [submodule "auth/flutter"]
-	path = auth/flutter
+	path = mobile/apps/auth/flutter
 	url = https://github.com/flutter/flutter.git
 	branch = stable
 [submodule "auth/assets/simple-icons"]
-	path = auth/assets/simple-icons
+	path = mobile/apps/auth/assets/simple-icons
 	url = https://github.com/simple-icons/simple-icons.git

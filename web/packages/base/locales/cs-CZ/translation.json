@@ -162,6 +162,7 @@
     "ok": "OK",
     "success": "Úspěch",
     "error": "Chyba",
+    "note": "",
     "offline_message": "Jste offline, soubory se zobrazují z mezipaměti",
     "install": "Instalovat",
     "install_mobile_app": "Nainstalujte naši aplikaci <a>Android</a> nebo <b>iOS</b> pro automatické zálohování všech vašich fotografií",
@@ -683,5 +684,6 @@
     "share_favorites": "",
     "person_favorites": "",
     "shared_favorites": "",
-    "added_by_name": ""
+    "added_by_name": "",
+    "unowned_files_not_processed": ""
 }

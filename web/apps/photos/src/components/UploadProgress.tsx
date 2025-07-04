@@ -32,20 +32,20 @@ import { t } from "i18next";
 import memoize from "memoize-one";
 import React, {
     createContext,
-    ReactElement,
     useContext,
     useEffect,
     useState,
+    type ReactElement,
 } from "react";
 import { Trans } from "react-i18next";
 import {
     areEqual,
     FixedSizeList as List,
-    ListChildComponentProps,
-    ListItemKeySelector,
+    type ListChildComponentProps,
+    type ListItemKeySelector,
 } from "react-window";
 import type {
-    FinishedUploadResult,
+    FinishedUploadType,
     InProgressUpload,
     SegregatedFinishedUploads,
     UploadCounter,
@@ -321,11 +321,11 @@ function UploadProgressDialog() {
                 <DialogContent sx={{ "&&&": { px: 0 } }}>
                     {uploadPhase == "uploading" && <InProgressSection />}
                     <ResultSection
-                        uploadResult="uploaded"
+                        resultType="uploaded"
                         sectionTitle={t("successful_uploads")}
                     />
                     <ResultSection
-                        uploadResult="uploadedWithStaticThumbnail"
+                        resultType="uploadedWithStaticThumbnail"
                         sectionTitle={t("thumbnail_generation_failed")}
                         sectionInfo={t("thumbnail_generation_failed_hint")}
                     />
@@ -335,12 +335,12 @@ function UploadProgressDialog() {
                         </NotUploadSectionHeader>
                     )}
                     <ResultSection
-                        uploadResult="blocked"
+                        resultType="blocked"
                         sectionTitle={t("blocked_uploads")}
                         sectionInfo={<Trans i18nKey={"blocked_uploads_hint"} />}
                     />
                     <ResultSection
-                        uploadResult="failed"
+                        resultType="failed"
                         sectionTitle={t("failed_uploads")}
                         sectionInfo={
                             uploadPhase == "done"
@@ -349,22 +349,22 @@ function UploadProgressDialog() {
                         }
                     />
                     <ResultSection
-                        uploadResult="alreadyUploaded"
+                        resultType="alreadyUploaded"
                         sectionTitle={t("ignored_uploads")}
                         sectionInfo={t("ignored_uploads_hint")}
                     />
                     <ResultSection
-                        uploadResult="largerThanAvailableStorage"
+                        resultType="largerThanAvailableStorage"
                         sectionTitle={t("insufficient_storage")}
                         sectionInfo={t("insufficient_storage_hint")}
                     />
                     <ResultSection
-                        uploadResult="unsupported"
+                        resultType="unsupported"
                         sectionTitle={t("unsupported_files")}
                         sectionInfo={t("unsupported_files_hint")}
                     />
                     <ResultSection
-                        uploadResult="tooLarge"
+                        resultType="tooLarge"
                         sectionTitle={t("large_files")}
                         sectionInfo={t("large_files_hint")}
                     />
@@ -482,20 +482,20 @@ const NotUploadSectionHeader = styled("div")(
 );
 
 interface ResultSectionProps {
-    uploadResult: FinishedUploadResult;
+    resultType: FinishedUploadType;
     sectionTitle: string;
     sectionInfo?: React.ReactNode;
 }
 
 const ResultSection: React.FC<ResultSectionProps> = ({
-    uploadResult,
+    resultType,
     sectionTitle,
     sectionInfo,
 }) => {
     const { finishedUploads, uploadFileNames } = useContext(
         UploadProgressContext,
     );
-    const fileList = finishedUploads.get(uploadResult);
+    const fileList = finishedUploads.get(resultType);
 
     if (!fileList?.length) {
         return <></>;

@@ -1,22 +1,13 @@
-import { decryptMetadataJSON, encryptMetadataJSON } from "ente-base/crypto";
-import { authenticatedRequestHeaders, ensureOk } from "ente-base/http";
-import { apiURL } from "ente-base/origins";
 import { type Location } from "ente-base/types";
-import {
-    fileLogID,
-    type EnteFile,
-    type FileMagicMetadata,
-    type FilePrivateMagicMetadata,
-    type FilePublicMagicMetadata,
-} from "ente-media/file";
+import { type EnteFile } from "ente-media/file";
 import { nullToUndefined } from "ente-utils/transform";
 import { z } from "zod/v4";
-import { mergeMetadata1 } from "./file";
 import { FileType } from "./file-type";
-import type { RemoteMagicMetadata } from "./magic-metadata";
 
 /**
  * Information about the file that never changes post upload.
+ *
+ * ---
  *
  * [Note: Metadatum]
  *
@@ -82,15 +73,21 @@ import type { RemoteMagicMetadata } from "./magic-metadata";
  * status) that is private to them, and can only be edited by them. For more
  * details on this type of metadata, see [Note: Share specific metadata].
  */
-export interface Metadata {
+export interface FileMetadata {
     /**
      * The "Ente" file type - image, video or live photo.
+     *
+     * Expected to be one of {@link FileType}.
+     *
+     * See: [Note: Enums in remote objects] for why we keep it as a number
+     * instead of the expected enum.
      */
-    fileType: FileType;
+    fileType: number;
     /**
      * The name of the file (including its extension).
      *
-     * See: [Note: File name for local EnteFile objects]
+     * Don't use this property directly, use {@link fileFileName} instead which
+     * takes into account subsequent edits too.
      */
     title: string;
     /**
@@ -165,16 +162,36 @@ export interface Metadata {
      * sub-second fraction.
      */
     duration?: number;
+    /**
+     * `true` if the uploading client was unable to generate a thumbnail for the
+     * file when uploading it (e.g. unsupported format), and so instead a
+     * placeholder thumbnail was used.
+     */
     hasStaticThumbnail?: boolean;
-    localID?: number;
-    version?: number;
-    deviceFolder?: string;
 }
+
+/**
+ * Zod schema for {@link FileMetadata}.
+ */
+export const FileMetadata = z.looseObject({
+    fileType: z.number(),
+    title: z.string(),
+    creationTime: z.number(),
+    modificationTime: z.number(),
+    latitude: z.number().nullish().transform(nullToUndefined),
+    longitude: z.number().nullish().transform(nullToUndefined),
+    hash: z.string().nullish().transform(nullToUndefined),
+    imageHash: z.string().nullish().transform(nullToUndefined),
+    videoHash: z.string().nullish().transform(nullToUndefined),
+    duration: z.number().nullish().transform(nullToUndefined),
+    hasStaticThumbnail: z.boolean().nullish().transform(nullToUndefined),
+});
 
 /**
  * Mutable private metadata associated with an {@link EnteFile}.
  *
- * - Unlike {@link Metadata}, this can change after the file has been uploaded.
+ * - Unlike {@link FileMetadata}, this can change after the file has been
+ *   uploaded.
  *
  * - Unlike {@link PublicMagicMetadata}, this is only available to the owner of
  *   the file.
@@ -185,7 +202,7 @@ export interface Metadata {
  * APIs refers to the (this) private metadata, even though the mutable public
  * metadata is the much more frequently used of the two. See: [Note: Metadatum].
  */
-export interface PrivateMagicMetadata {
+export interface FilePrivateMagicMetadataData {
     /**
      * The visibility of the file.
      *
@@ -193,9 +210,20 @@ export interface PrivateMagicMetadata {
      * the private magic metadata. This allows the file's owner to share a file
      * and independently edit its visibility without revealing their visibility
      * preference to the other people with whom they have shared the file.
+     *
+     * Expected to be one of {@link ItemVisibility}.
      */
-    visibility?: ItemVisibility;
+    visibility?: number;
 }
+
+/**
+ * Zod schema for {@link FilePrivateMagicMetadataData}.
+ *
+ * See: [Note: Use looseObject for metadata Zod schemas]
+ */
+export const FilePrivateMagicMetadataData = z.looseObject({
+    visibility: z.number().nullish().transform(nullToUndefined),
+});
 
 /**
  * The visibility of an Ente file or collection.
@@ -227,10 +255,11 @@ export type ItemVisibility =
 /**
  * Mutable public metadata associated with an {@link EnteFile}.
  *
- * - Unlike {@link Metadata}, this can change after the file has been uploaded.
+ * - Unlike {@link FileMetadata}, this can change after the file has been
+ *   uploaded.
  *
- * - Unlike {@link PrivateMagicMetadata}, this is available to all the people
- *   with whom the file has been shared.
+ * - Unlike {@link FilePrivateMagicMetadataData}, this is available to all the
+ *   people with whom the file has been shared.
  *
  * For more details, see [Note: Metadatum].
  *
@@ -249,10 +278,8 @@ export type ItemVisibility =
  * And never like:
  *
  *     foo: T | undefined
- *
- * Also see: [Note: Zod doesn't work with `exactOptionalPropertyTypes` yet].
  */
-export interface PublicMagicMetadata {
+export interface FilePublicMagicMetadataData {
     /**
      * A ISO 8601 date time string without a timezone, indicating the local time
      * where the photo (or video) was taken.
@@ -274,14 +301,14 @@ export interface PublicMagicMetadata {
      *
      * Epoch microseconds.
      *
-     * This field stores edits to the {@link creationTime} {@link Metadata}
+     * This field stores edits to the {@link creationTime} {@link FileMetadata}
      * field.
      */
     editedTime?: number;
     /**
-     * Modified name of the {@link EnteFile}.
+     * Modified file name of the {@link EnteFile}.
      *
-     * This field stores edits to the {@link title} {@link Metadata} field.
+     * This field stores edits to the {@link title} {@link FileMetadata} field.
      */
     editedName?: string;
     /**
@@ -304,7 +331,33 @@ export interface PublicMagicMetadata {
      * side checks.
      */
     caption?: string;
+    /**
+     * The name provided by the person who uploaded the file using an otherwise
+     * anonymous public link upload.
+     *
+     * When sharing an album using a public link, the owner of the collection
+     * can enable public uploads. When uploading files this way, the public
+     * albums app asks the person doing the upload their name, and that gets
+     * persisted here in the file's public magic metadata so that it can be
+     * shown to the Ente users who are participants in the collection.
+     *
+     * (The owner of such files will be the owner of the collection)
+     */
     uploaderName?: string;
+    /**
+     * Edited latitude of the file
+     *
+     * If the user edits the location (latitude and longitude) of a file within
+     * Ente, then the edits will be stored as the {@link lat} and {@link long}
+     * properties in the file's public magic metadata.
+     */
+    lat?: number;
+    /**
+     * Edited longitude of the file.
+     *
+     * See {@link long}.
+     */
+    long?: number;
     /**
      * An arbitrary integer set to indicate that this file should be skipped for
      * the purpose of HLS generation.
@@ -337,10 +390,6 @@ export interface PublicMagicMetadata {
 /**
  * Zod schema for the {@link PublicMagicMetadata} type.
  *
- * See: [Note: Duplicated Zod schema and TypeScript type]
- *
- * ---
- *
  * [Note: Use looseObject for metadata Zod schemas]
  *
  * It is important to (recursively) use the {@link looseObject} option when
@@ -349,63 +398,19 @@ export interface PublicMagicMetadata {
  * might be other, newer, clients out there adding fields that the current
  * client might not we aware of, and we don't want to overwrite them.
  */
-const PublicMagicMetadata = z.looseObject({
-    // [Note: Zod doesn't work with `exactOptionalPropertyTypes` yet]
-    //
-    // Using `optional` is not accurate here. The key is optional, but the
-    // value itself is not optional.
-    //
-    // Zod doesn't work with `exactOptionalPropertyTypes` yet, but it seems
-    // to be on the roadmap so we suppress these mismatches.
-    //
-    // See:
-    // https://github.com/colinhacks/zod/issues/635#issuecomment-2196579063
-    editedTime: z.number().optional(),
+export const FilePublicMagicMetadataData = z.looseObject({
+    dateTime: z.string().nullish().transform(nullToUndefined),
+    offsetTime: z.string().nullish().transform(nullToUndefined),
+    editedTime: z.number().nullish().transform(nullToUndefined),
+    editedName: z.string().nullish().transform(nullToUndefined),
+    w: z.number().nullish().transform(nullToUndefined),
+    h: z.number().nullish().transform(nullToUndefined),
+    caption: z.string().nullish().transform(nullToUndefined),
+    uploaderName: z.string().nullish().transform(nullToUndefined),
+    lat: z.number().nullish().transform(nullToUndefined),
+    long: z.number().nullish().transform(nullToUndefined),
+    sv: z.number().nullish().transform(nullToUndefined),
 });
-
-/**
- * Return the private magic metadata for an {@link EnteFile}.
- *
- * We are not expected to be in a scenario where the file gets to the UI without
- * having its private magic metadata decrypted, so this function is a sanity
- * check and should be a no-op in usually. It'll throw if it finds its
- * assumptions broken. Once the types have been refactored this entire
- * check/cast shouldn't be needed, and this should become a trivial accessor.
- */
-export const filePrivateMagicMetadata = (file: EnteFile) => {
-    // TODO: Audit the types.
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    if (!file.magicMetadata) return undefined;
-    if (typeof file.magicMetadata.data == "string") {
-        throw new Error(
-            `Private magic metadata for ${fileLogID(file)} had not been decrypted even when the file reached the UI layer`,
-        );
-    }
-    // This cast is unavoidable in the current setup. We need to refactor the
-    // types so that this cast in not needed.
-    return file.magicMetadata.data as PrivateMagicMetadata;
-};
-
-/**
- * Return the public magic metadata for an {@link EnteFile}.
- *
- * We are not expected to be in a scenario where the file gets to the UI without
- * having its public magic metadata decrypted, so this function is a sanity
- * check and should be a no-op in usually. It'll throw if it finds its
- * assumptions broken. Once the types have been refactored this entire
- * check/cast shouldn't be needed, and this should become a trivial accessor.
- */
-export const filePublicMagicMetadata = (file: EnteFile) => {
-    if (!file.pubMagicMetadata) return undefined;
-    if (typeof file.pubMagicMetadata.data == "string") {
-        throw new Error(
-            `Public magic metadata for ${fileLogID(file)} had not been decrypted even when the file reached the UI layer`,
-        );
-    }
-    // This cast is unavoidable in the current setup. We need to refactor the
-    // types so that this cast in not needed.
-    return file.pubMagicMetadata.data as PublicMagicMetadata;
-};
 
 /**
  * Return the hash of the file by reading it from its metadata.
@@ -413,9 +418,9 @@ export const filePublicMagicMetadata = (file: EnteFile) => {
  * This is a convenience function that directly reads the information from the
  * metadata in the happy path, but also has branches to handle the legacy format
  * that older clients used to upload. For more details, see the note in the
- * documentation for {@link hash} in {@link Metadata}.
+ * documentation for {@link hash} in {@link FileMetadata}.
  */
-export const metadataHash = (metadata: Metadata) => {
+export const metadataHash = (metadata: FileMetadata) => {
     const hash = metadata.hash;
     if (hash) return hash;
 
@@ -434,313 +439,63 @@ export const metadataHash = (metadata: Metadata) => {
 };
 
 /**
- * Return the public magic metadata for the given {@link file}.
- *
- * The file we persist in our local db has the metadata in the encrypted form
- * that we get it from remote. We decrypt when we read it, and also hang the
- * decrypted version to the in-memory {@link EnteFile} as a cache.
- *
- * If the file doesn't have any public magic metadata attached to it, return
- * `undefined`.
+ * Return `true` if the {@link ItemVisibility} of the given {@link file} is
+ * archived.
  */
-export const decryptPublicMagicMetadata = async (
-    file: EnteFile,
-): Promise<PublicMagicMetadata | undefined> => {
-    const envelope = file.pubMagicMetadata;
-    if (!envelope) return undefined;
+export const isArchivedFile = (file: EnteFile) =>
+    file.magicMetadata?.data.visibility == ItemVisibility.archived;
 
-    // TODO: This function can be optimized to directly return the cached value
-    // instead of reparsing it using Zod. But that requires us (a) first fix the
-    // types, and (b) guarantee that we're the only ones putting that parsed
-    // data there, so that it is in a known good state (currently we exist in
-    // parallel with other functions that do the similar things).
+/**
+ * Return the file name of the file (including both the name and the extension).
+ *
+ * This function handles files with edited names. It will first look into the
+ * public magic metadata of a file to see if the file has an edited name, and if
+ * so, return that. Otherwise it will return the original name of the file
+ * stored in its metadata.
+ *
+ * @returns The provided {@link EnteFile}'s filename, including the extension.
+ * e.g. "flower.png".
+ */
+export const fileFileName = (file: EnteFile) =>
+    file.pubMagicMetadata?.data.editedName ?? file.metadata.title;
 
-    const jsonValue =
-        typeof envelope.data == "string"
-            ? await decryptMetadataJSON(
-                  {
-                      encryptedData: envelope.data,
-                      decryptionHeader: envelope.header,
-                  },
-                  file.key,
-              )
-            : envelope.data;
-    const result = PublicMagicMetadata.parse(
-        // TODO: Can we avoid this cast?
-        withoutNullAndUndefinedValues(jsonValue as object),
-    );
-
-    // -@ts-expect-error [Note: Zod doesn't work with `exactOptionalPropertyTypes` yet]
-    // We can't use -@ts-expect-error since this code is also included in the
-    // packages which don't have strict mode enabled (and thus don't error).
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    envelope.data = result;
-
-    // -@ts-expect-error [Note: Zod doesn't work with `exactOptionalPropertyTypes` yet]
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    return result;
-};
-
-const withoutNullAndUndefinedValues = (o: object) =>
-    Object.fromEntries(
-        Object.entries(o).filter(([, v]) => v !== null && v !== undefined),
-    );
+/**
+ * Return the file's creation timestamp (epoch microseconds).
+ *
+ * This function handles files with edited dates.
+ *
+ * While sometimes the epoch timestamp is the correct value to use, it is also
+ * possible that {@link fileCreationPhotoDate} might be more appropriate.
+ */
+export const fileCreationTime = (file: EnteFile) =>
+    file.pubMagicMetadata?.data.editedTime ?? file.metadata.creationTime;
 
 /**
  * Return the file's creation date as a Date in the hypothetical "timezone of
  * the photo".
  *
- * For all the details and nuance, see {@link createPhotoDate}.
+ * This function handles files with edited dates. For all the details and
+ * nuance, see {@link createPhotoDate}.
  */
-export const fileCreationPhotoDate = (
-    file: EnteFile,
-    publicMagicMetadata: PublicMagicMetadata | undefined,
-) =>
+export const fileCreationPhotoDate = (file: EnteFile) =>
     createPhotoDate(
-        publicMagicMetadata?.dateTime ??
-            publicMagicMetadata?.editedTime ??
+        file.pubMagicMetadata?.data.dateTime ??
+            file.pubMagicMetadata?.data.editedTime ??
             file.metadata.creationTime,
     );
 
 /**
- * Update the private magic metadata associated with a file on remote.
- *
- * @param file The {@link EnteFile} whose public magic metadata we want to
- * update.
- *
- * @param metadataUpdates A subset of {@link PrivateMagicMetadata} containing
- * the fields that we want to add or update.
- *
- * @returns An updated {@link PrivateMagicMetadata} object containing the
- * (decrypted) metadata updates we just made. This is effectively what we would
- * get if we to ask the remote for the latest file for this ID, except we don't
- * do an actual sync and instead reconstruct it piecemeal.
- *
- * [Note: Interactive updates to file metadata]
- *
- * This function updates the magic metadata on remote, and returns a magic
- * metadata object with the updated (and decrypted) values, but it does not
- * update the state of the file objects in our databases.
- *
- * The caller needs to ensure that we subsequently sync with remote to fetch the
- * updates as part of the diff and update the {@link EnteFile} that is persisted
- * in our local db.
- *
- * This partial update approach is used because a full sync requires multiple
- * API calls, which can cause a slow experience for interactive operations (e.g.
- * archiving a file). So this function does not immediately perform the sync,
- * but instead expects the caller to arrange for an eventual delayed sync in the
- * background without waiting for it to complete.
- *
- * Returning a modified in-memory object is essential because in addition to the
- * updated metadata itself, the metadatum (See: [Note: Metadatum]) contain a
- * version field that is incremented for each change. So if we were not to
- * update the version, and if the user were to perform another operation on that
- * file before the asynchronous remote sync completes, the client will send a
- * stale version of the metadata, and remote will reject the update.
- *
- * The overall sequence is thus:
- *
- * 1. This function modifies the remote metadata.
- *
- * 2. It returns a metadata object with the updates reflected in it.
- *
- * 3. The caller (eventually) triggers a remote sync in the background, but
- *    meanwhile uses this updated metadata.
- */
-export const updateRemotePrivateMagicMetadata = async (
-    file: EnteFile,
-    metadataUpdates: Partial<PrivateMagicMetadata>,
-): Promise<FilePrivateMagicMetadata> => {
-    const existingMetadata = filePrivateMagicMetadata(file);
-
-    const updatedMetadata = { ...(existingMetadata ?? {}), ...metadataUpdates };
-
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    const metadataVersion = file.magicMetadata?.version ?? 1;
-
-    const updateRequest = await updateMagicMetadataRequest(
-        file,
-        updatedMetadata,
-        metadataVersion,
-    );
-
-    const updatedEnvelope = updateRequest.metadataList[0]!.magicMetadata;
-
-    await putFilesPrivateMagicMetadata(updateRequest);
-
-    // See: [Note: Interactive updates to file metadata]
-
-    // Use the updated envelope we sent as a starting point for the metadata we
-    // will use for the updated file.
-    const updatedMagicMetadata = updatedEnvelope as FileMagicMetadata;
-    // The correct version will come in the updated EnteFile we get in the
-    // response of the /diff. Temporarily bump it to reflect our latest edit.
-    updatedMagicMetadata.version = metadataVersion + 1;
-    // Set the contents (data) to the updated metadata contents we just PUT.
-    updatedMagicMetadata.data = updatedMetadata;
-
-    return updatedMagicMetadata;
-};
-
-/**
- * Update the public magic metadata associated with a file on remote.
- *
- * See: [Note: Interactive updates to file metadata]
- *
- * @param file The {@link EnteFile} whose public magic metadata we want to
- * update.
- *
- * @param metadataUpdates A subset of {@link PublicMagicMetadata} containing the
- * fields that we want to add or update.
- */
-export const updateRemotePublicMagicMetadata = async (
-    file: EnteFile,
-    metadataUpdates: Partial<PublicMagicMetadata>,
-) => {
-    const existingMetadata = await decryptPublicMagicMetadata(file);
-
-    const updatedMetadata = { ...(existingMetadata ?? {}), ...metadataUpdates };
-
-    const metadataVersion = file.pubMagicMetadata?.version ?? 1;
-
-    const updateRequest = await updateMagicMetadataRequest(
-        file,
-        updatedMetadata,
-        metadataVersion,
-    );
-
-    const updatedEnvelope = updateRequest.metadataList[0]!.magicMetadata;
-
-    await putFilesPublicMagicMetadata(updateRequest);
-
-    // Modify the in-memory object to use the updated envelope. This steps are
-    // quite ad-hoc, as is the concept of updating the object in place.
-    file.pubMagicMetadata = updatedEnvelope as FilePublicMagicMetadata;
-    // The correct version will come in the updated EnteFile we get in the
-    // response of the /diff. Temporarily bump it for the in place edits.
-    file.pubMagicMetadata.version = file.pubMagicMetadata.version + 1;
-    // Re-read the data.
-    await decryptPublicMagicMetadata(file);
-    // Re-jig the other bits of EnteFile that depend on its public magic
-    // metadata.
-    mergeMetadata1(file);
-};
-
-/**
- * The shape of the JSON body payload expected by the APIs that update the
- * public and private magic metadata fields associated with a file.
- */
-interface UpdateMagicMetadataRequest {
-    /** The list of (file id, new magic metadata) pairs to update */
-    metadataList: {
-        /** File ID */
-        id: number;
-        /** The new metadata to use */
-        magicMetadata: RemoteMagicMetadata;
-    }[];
-}
-
-/**
- * Construct an remote update request payload from the public or private magic
- * metadata JSON object for a {@link file}, using the provided
- * {@link encryptMetadataF} function to encrypt the JSON.
- */
-const updateMagicMetadataRequest = async (
-    file: EnteFile,
-    metadata: PrivateMagicMetadata | PublicMagicMetadata,
-    metadataVersion: number,
-): Promise<UpdateMagicMetadataRequest> => {
-    // Drop all null or undefined values to obtain the syncable entries.
-    // See: [Note: Optional magic metadata keys].
-    const validEntries = Object.entries(metadata).filter(
-        ([, v]) => v !== null && v !== undefined,
-    );
-
-    const { encryptedData, decryptionHeader } = await encryptMetadataJSON(
-        Object.fromEntries(validEntries),
-        file.key,
-    );
-
-    return {
-        metadataList: [
-            {
-                id: file.id,
-                magicMetadata: {
-                    version: metadataVersion,
-                    count: validEntries.length,
-                    data: encryptedData,
-                    header: decryptionHeader,
-                },
-            },
-        ],
-    };
-};
-
-/**
- * Update the (private) magic metadata for a list of files.
- *
- * See: [Note: Private magic metadata is called magic metadata on remote]
- *
- * @param request The list of file ids and the updated encrypted magic metadata
- * associated with each of them.
- */
-const putFilesPrivateMagicMetadata = async (
-    request: UpdateMagicMetadataRequest,
-) =>
-    ensureOk(
-        await fetch(await apiURL("/files/magic-metadata"), {
-            method: "PUT",
-            headers: await authenticatedRequestHeaders(),
-            body: JSON.stringify(request),
-        }),
-    );
-
-/**
- * Update the public magic metadata for a list of files.
- *
- * @param request The list of file ids and the updated encrypted magic metadata
- * associated with each of them.
- */
-const putFilesPublicMagicMetadata = async (
-    request: UpdateMagicMetadataRequest,
-) =>
-    ensureOk(
-        await fetch(await apiURL("/files/public-magic-metadata"), {
-            method: "PUT",
-            headers: await authenticatedRequestHeaders(),
-            body: JSON.stringify(request),
-        }),
-    );
-
-/**
- * Return the {@link ItemVisibility} for the given {@link file}.
- */
-export const fileVisibility = (file: EnteFile) =>
-    filePrivateMagicMetadata(file)?.visibility;
-
-/**
- * Return `true` if the {@link ItemVisibility} of the given {@link file} is
- * archived.
- */
-export const isArchivedFile = (item: EnteFile) =>
-    fileVisibility(item) === ItemVisibility.archived;
-
-/**
  * Return the GPS coordinates (if any) present in the given {@link EnteFile}.
+ *
+ * This function handles files with edited locations.
  */
 export const fileLocation = (file: EnteFile): Location | undefined => {
-    // TODO: EnteFile types. Need to verify that metadata itself, and
-    // metadata.lat/lng can not be null (I think they likely can, if so need to
-    // update the types). Need to suppress the linter meanwhile.
+    const { lat, long } = file.pubMagicMetadata?.data ?? {};
+    // Use (lat, long) only if both are present and nonzero.
+    const edited = lat && long;
 
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    if (!file.metadata) return undefined;
-
-    const latitude = nullToUndefined(file.metadata.latitude);
-    const longitude = nullToUndefined(file.metadata.longitude);
+    const latitude = nullToUndefined(edited ? lat : file.metadata.latitude);
+    const longitude = nullToUndefined(edited ? long : file.metadata.longitude);
 
     if (latitude === undefined || longitude === undefined) return undefined;
     if (Number.isNaN(latitude) || Number.isNaN(longitude)) return undefined;
@@ -785,13 +540,6 @@ export const fileDurationString = (file: EnteFile): string | undefined => {
         return `${m}:${ss}`;
     }
 };
-
-/**
- * Return the caption, aka "description", (if any) attached to the given
- * {@link EnteFile}.
- */
-export const fileCaption = (file: EnteFile): string | undefined =>
-    filePublicMagicMetadata(file)?.caption;
 
 /**
  * Metadata about a file extracted from various sources (like Exif) when
