@@ -96,7 +96,6 @@ export const checkSessionValidity = async (): Promise<SessionValidity> => {
 
         // We should have these values locally if we reach here.
         const email = ensureLocalUser().email;
-        // TODO(RE): This is not being set until initial reauthentication.
         const localSRPAttributes = savedSRPAttributes()!;
 
         // Fetch the remote SRP attributes.

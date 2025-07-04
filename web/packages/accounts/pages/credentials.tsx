@@ -34,6 +34,7 @@ import { checkSessionValidity } from "ente-accounts/services/session";
 import type { SRPAttributes } from "ente-accounts/services/srp";
 import {
     generateSRPSetupAttributes,
+    getAndSaveSRPAttributes,
     getSRPAttributes,
     setupSRP,
     verifySRP,
@@ -146,6 +147,7 @@ const Page: React.FC = () => {
                         saveSRPAttributes(srpAttributes);
                     } else {
                         await setupSRP(await generateSRPSetupAttributes(kek));
+                        await getAndSaveSRPAttributes(userEmail);
                     }
                 }
             } catch (e) {
