@@ -28,15 +28,15 @@ export interface SaveGroup {
      */
     title: string;
     /**
-     * If this save group is associated with a collection, then the ID of the
-     * collection.
+     * If this save group is associated with a {@link CollectionSummary}, then
+     * the ID of that collection summary.
      */
-    collectionID?: number;
+    collectionSummaryID?: number;
     /**
-     * `true` if the collection associated with the save group is a hidden
-     * collection.
+     * `true` if the collection summary associated with the save group is
+     * hidden.
      */
-    isHidden?: boolean;
+    isHiddenCollectionSummary?: boolean;
     /**
      * The path to a directory on the user's file system that was selected by
      * the user to save the files in when they initiated the download on the

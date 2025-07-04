@@ -85,12 +85,12 @@ export const DownloadStatusNotifications: React.FC<
         if (electron) {
             electron.openDirectory(group.downloadDirPath);
         } else if (onShowCollection) {
-            if (group.isHidden) {
+            if (group.isHiddenCollectionSummary) {
                 void onShowHiddenSection().then(() => {
-                    onShowCollection(group.collectionID);
+                    onShowCollection(group.collectionSummaryID);
                 });
             } else {
-                onShowCollection(group.collectionID);
+                onShowCollection(group.collectionSummaryID);
             }
         } else {
             return undefined;

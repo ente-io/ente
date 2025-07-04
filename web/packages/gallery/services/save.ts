@@ -54,19 +54,19 @@ export const downloadAndSaveFiles = (
  * the same name as the collection.
  */
 export const downloadAndSaveCollectionFiles = async (
-    collectionName: string,
-    collectionID: number | undefined,
+    collectionSummaryName: string,
+    collectionSummaryID: number,
     files: EnteFile[],
-    isHidden: boolean,
+    isHiddenCollectionSummary: boolean,
     onAddSaveGroup: AddSaveGroup,
 ) =>
     downloadAndSave(
         files,
-        collectionName,
+        collectionSummaryName,
         onAddSaveGroup,
-        collectionName,
-        collectionID,
-        isHidden,
+        collectionSummaryName,
+        collectionSummaryID,
+        isHiddenCollectionSummary,
     );
 
 /**
@@ -76,9 +76,9 @@ const downloadAndSave = async (
     files: EnteFile[],
     title: string,
     onAddSaveGroup: AddSaveGroup,
-    collectionName?: string,
-    collectionID?: number,
-    isHidden?: boolean,
+    collectionSummaryName?: string,
+    collectionSummaryID?: number,
+    isHiddenCollectionSummary?: boolean,
 ) => {
     const electron = globalThis.electron;
 
@@ -89,11 +89,11 @@ const downloadAndSave = async (
             // The user cancelled on the directory selection dialog.
             return;
         }
-        if (collectionName) {
+        if (collectionSummaryName) {
             downloadDirPath = await mkdirCollectionDownloadFolder(
                 electron,
                 downloadDirPath,
-                collectionName,
+                collectionSummaryName,
             );
         }
     }
@@ -103,8 +103,8 @@ const downloadAndSave = async (
 
     const updateSaveGroup = onAddSaveGroup({
         title,
-        collectionID,
-        isHidden,
+        collectionSummaryID,
+        isHiddenCollectionSummary,
         downloadDirPath,
         total,
         canceller,

@@ -123,9 +123,9 @@ export const GalleryBarAndListHeader: React.FC<
 
     const isActiveCollectionDownloadInProgress = useCallback(() => {
         const group = saveGroups.find(
-            (g) => g.collectionID == activeCollectionID,
+            (g) => g.collectionSummaryID === activeCollectionID,
         );
-        return group && !isSaveCancelled(group) && !isSaveComplete(group);
+        return group && !isSaveComplete(group) && !isSaveCancelled(group);
     }, [saveGroups, activeCollectionID]);
 
     useEffect(() => {
