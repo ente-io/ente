@@ -58,7 +58,7 @@ jobs:
                 certificate-profile-name: ${{ secrets.AZURE_CERT_PROFILE_NAME }}
                 files: |
                       ${{ github.workspace }}/mobile/apps/auth/artifacts/ente-${{ github.ref_name }}-installer.exe
-                      ${{ github.workspace }}/mobile/apps/auth/apps/auth/ente-${{ github.ref_name }}-windows/auth.exe
+                      ${{ github.workspace }}/mobile/apps/auth/ente-${{ github.ref_name }}-windows/auth.exe
                 file-digest: SHA256
                 timestamp-rfc3161: http://timestamp.acs.microsoft.com
                 timestamp-digest: SHA256  
