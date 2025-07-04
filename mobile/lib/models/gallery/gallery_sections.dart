@@ -199,11 +199,11 @@ class GalleryGroups {
   }
 
   void _createNewGroup(
-    List<EnteFile> dailyFiles,
+    List<EnteFile> groupFiles,
   ) {
     final uuid = _uuid.v1();
     _groupIds.add(uuid);
-    _groupIdToFilesMap[uuid] = dailyFiles;
+    _groupIdToFilesMap[uuid] = groupFiles;
     _groupIdToHeaderDataMap[uuid] = GroupHeaderData(
       groupType: groupType,
     );
