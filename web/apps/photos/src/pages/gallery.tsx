@@ -17,10 +17,10 @@ import { sessionExpiredDialogAttributes } from "ente-accounts/components/utils/d
 import {
     getAndClearIsFirstLogin,
     getAndClearJustSignedUp,
-    getData,
 } from "ente-accounts/services/accounts-db";
 import { stashRedirect } from "ente-accounts/services/redirect";
 import { isSessionInvalid } from "ente-accounts/services/session";
+import { ensureLocalUser } from "ente-accounts/services/user";
 import type { MiniDialogAttributes } from "ente-base/components/MiniDialog";
 import { NavbarBase } from "ente-base/components/Navbar";
 import { SingleInputDialog } from "ente-base/components/SingleInputDialog";
@@ -35,10 +35,10 @@ import { useBaseContext } from "ente-base/context";
 import log from "ente-base/log";
 import {
     clearSessionStorage,
-    haveCredentialsInSession,
+    haveMasterKeyInSession,
     masterKeyFromSession,
 } from "ente-base/session";
-import { getAuthToken } from "ente-base/token";
+import { savedAuthToken } from "ente-base/token";
 import { FullScreenDropZone } from "ente-gallery/components/FullScreenDropZone";
 import { type UploadTypeSelectorIntent } from "ente-gallery/components/Upload";
 import { type Collection } from "ente-media/collection";
@@ -77,7 +77,10 @@ import {
 } from "ente-new/photos/components/gallery/reducer";
 import { notifyOthersFilesDialogAttributes } from "ente-new/photos/components/utils/dialog-attributes";
 import { useIsOffline } from "ente-new/photos/components/utils/use-is-offline";
-import { usePeopleStateSnapshot } from "ente-new/photos/components/utils/use-snapshot";
+import {
+    usePeopleStateSnapshot,
+    useUserDetailsSnapshot,
+} from "ente-new/photos/components/utils/use-snapshot";
 import { shouldShowWhatsNew } from "ente-new/photos/services/changelog";
 import {
     addToFavoritesCollection,
@@ -108,9 +111,8 @@ import {
 import type { SearchOption } from "ente-new/photos/services/search/types";
 import { initSettings } from "ente-new/photos/services/settings";
 import {
-    initUserDetailsOrTriggerPull,
     redirectToCustomerPortal,
-    userDetailsSnapshot,
+    savedUserDetailsOrTriggerPull,
     verifyStripeSubscription,
 } from "ente-new/photos/services/user-details";
 import { usePhotosAppContext } from "ente-new/photos/types/context";
@@ -182,6 +184,7 @@ const Page: React.FC = () => {
         EnteFile[]
     >([]);
 
+    const userDetails = useUserDetailsSnapshot();
     const peopleState = usePeopleStateSnapshot();
 
     // The (non-sticky) header shown at the top of the gallery items.
@@ -279,7 +282,7 @@ const Page: React.FC = () => {
         let syncIntervalID: ReturnType<typeof setInterval> | undefined;
 
         void (async () => {
-            if (!haveCredentialsInSession() || !(await getAuthToken())) {
+            if (!haveMasterKeyInSession() || !(await savedAuthToken())) {
                 // If we don't have master key or auth token, reauthenticate.
                 stashRedirect("/gallery");
                 router.push("/");
@@ -301,7 +304,6 @@ const Page: React.FC = () => {
             // One time inits.
             preloadImage("/images/subscription-card-background");
             initSettings();
-            await initUserDetailsOrTriggerPull();
             setupSelectAllKeyBoardShortcutHandler();
 
             // Show the initial state while the rest of the sequence proceeds.
@@ -318,13 +320,12 @@ const Page: React.FC = () => {
             }
 
             // Initialize the reducer.
-            const user = getData("user");
-            // TODO: Pass entire snapshot to reducer?
-            const familyData = userDetailsSnapshot()?.familyData;
+            const user = ensureLocalUser();
+            const userDetails = await savedUserDetailsOrTriggerPull();
             dispatch({
                 type: "mount",
                 user,
-                familyData,
+                familyData: userDetails?.familyData,
                 collections: await savedCollections(),
                 collectionFiles: await savedCollectionFiles(),
                 trashItems: await savedTrashItems(),
@@ -355,6 +356,13 @@ const Page: React.FC = () => {
     }, []);
 
     useEffect(() => {
+        // Only act on updates after the initial mount has completed.
+        if (state.user && userDetails) {
+            dispatch({ type: "setUserDetails", userDetails });
+        }
+    }, [state.user, userDetails]);
+
+    useEffect(() => {
         if (typeof activeCollectionID == "undefined" || !router.isReady) {
             return;
         }
@@ -368,7 +376,7 @@ const Page: React.FC = () => {
     }, [activeCollectionID, router.isReady]);
 
     useEffect(() => {
-        if (router.isReady && haveCredentialsInSession()) {
+        if (router.isReady && haveMasterKeyInSession()) {
             handleSubscriptionCompletionRedirectIfNeeded(
                 showMiniDialog,
                 showLoadingBar,

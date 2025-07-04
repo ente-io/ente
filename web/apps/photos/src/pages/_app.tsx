@@ -4,9 +4,9 @@ import { CssBaseline, Typography } from "@mui/material";
 import { styled, ThemeProvider } from "@mui/material/styles";
 import { useNotification } from "components/utils/hooks-app";
 import {
-    getData,
     isLocalStorageAndIndexedDBMismatch,
     savedLocalUser,
+    savedPartialLocalUser,
 } from "ente-accounts/services/accounts-db";
 import { isDesktop, staticAppTitle } from "ente-base/app";
 import { CenteredRow } from "ente-base/components/containers";
@@ -127,11 +127,15 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     useEffect(() => {
         const query = new URLSearchParams(window.location.search);
         const needsFamilyRedirect = query.get("redirect") == "families";
-        if (needsFamilyRedirect && getData("user")?.token)
+        if (needsFamilyRedirect && savedPartialLocalUser()?.token)
             redirectToFamilyPortal();
 
-        router.events.on("routeChangeStart", () => {
-            if (needsFamilyRedirect && getData("user")?.token) {
+        router.events.on("routeChangeStart", (url) => {
+            if (process.env.NEXT_PUBLIC_ENTE_TRACE_RT) {
+                log.debug(() => ["route", url]);
+            }
+
+            if (needsFamilyRedirect && savedPartialLocalUser()?.token) {
                 redirectToFamilyPortal();
 
                 // https://github.com/vercel/next.js/issues/2476#issuecomment-573460710

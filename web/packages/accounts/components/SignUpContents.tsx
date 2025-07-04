@@ -14,9 +14,9 @@ import {
     Typography,
 } from "@mui/material";
 import {
+    replaceSavedLocalUser,
     saveJustSignedUp,
     saveOriginalKeyAttributes,
-    savePartialLocalUser,
     stashReferralSource,
     stashSRPSetupAttributes,
 } from "ente-accounts/services/accounts-db";
@@ -55,6 +55,12 @@ interface SignUpContentsProps {
     host: string | undefined;
 }
 
+/**
+ * A contents of the "signup" form.
+ *
+ * It is used both on the "/signup" page itself, and as a subcomponent of the
+ * "/" page where the user can toggle between the signup and login forms inline.
+ */
 export const SignUpContents: React.FC<SignUpContentsProps> = ({
     router,
     onLogin,
@@ -124,7 +130,7 @@ export const SignUpContents: React.FC<SignUpContentsProps> = ({
                     throw e;
                 }
 
-                savePartialLocalUser({ email });
+                replaceSavedLocalUser({ email });
 
                 let gkResult: GenerateKeysAndAttributesResult;
                 try {

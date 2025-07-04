@@ -6,7 +6,7 @@ import type { KeyAttributes } from "ente-accounts/services/user";
 import { authenticatedRequestHeaders, HTTPError } from "ente-base/http";
 import log from "ente-base/log";
 import { apiURL } from "ente-base/origins";
-import { getAuthToken } from "ente-base/token";
+import { savedAuthToken } from "ente-base/token";
 import { nullToUndefined } from "ente-utils/transform";
 import { z } from "zod/v4";
 import { getSRPAttributes, type SRPAttributes } from "./srp";
@@ -150,7 +150,7 @@ export const checkSessionValidity = async (): Promise<SessionValidity> => {
  * e.g. transient network issues.
  */
 export const isSessionInvalid = async (): Promise<boolean> => {
-    const token = await getAuthToken();
+    const token = await savedAuthToken();
     if (!token) {
         return true; /* No saved token, session is invalid */
     }

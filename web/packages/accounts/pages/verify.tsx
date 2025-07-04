@@ -8,7 +8,7 @@ import { VerifyingPasskey } from "ente-accounts/components/LoginComponents";
 import { SecondFactorChoice } from "ente-accounts/components/SecondFactorChoice";
 import { useSecondFactorChoiceIfNeeded } from "ente-accounts/components/utils/second-factor-choice";
 import {
-    getData,
+    replaceSavedLocalUser,
     savedKeyAttributes,
     savedOriginalKeyAttributes,
     savedPartialLocalUser,
@@ -16,9 +16,9 @@ import {
     saveIsFirstLogin,
     saveKeyAttributes,
     saveOriginalKeyAttributes,
-    setLSUser,
     unstashAfterUseSRPSetupAttributes,
     unstashReferralSource,
+    updateSavedLocalUser,
 } from "ente-accounts/services/accounts-db";
 import {
     openPasskeyVerificationURL,
@@ -44,9 +44,10 @@ import { useBaseContext } from "ente-base/context";
 import { isHTTPErrorWithStatus } from "ente-base/http";
 import log from "ente-base/log";
 import { clearSessionStorage } from "ente-base/session";
+import { saveAuthToken } from "ente-base/token";
 import { t } from "i18next";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Trans } from "react-i18next";
 
 /**
@@ -58,7 +59,9 @@ const Page: React.FC = () => {
     const { logout, showMiniDialog } = useBaseContext();
 
     const [email, setEmail] = useState("");
-    const [resend, setResend] = useState(0);
+    const [resend, setResend] = useState<"enable" | "sending" | "sent">(
+        "enable",
+    );
     const [passkeyVerificationData, setPasskeyVerificationData] = useState<
         { passkeySessionID: string; url: string } | undefined
     >();
@@ -73,7 +76,7 @@ const Page: React.FC = () => {
     useEffect(() => {
         void redirectionIfNeededOrEmail().then((redirectOrEmail) => {
             if (typeof redirectOrEmail == "string") {
-                void router.push(redirectOrEmail);
+                void router.replace(redirectOrEmail);
             } else {
                 setEmail(redirectOrEmail.email);
             }
@@ -100,14 +103,12 @@ const Page: React.FC = () => {
             } = await userVerificationResultAfterResolvingSecondFactorChoice(
                 await verifyEmail(email, ott, cleanedReferral),
             );
+
+            // The following flow is similar to (but not the same) as what
+            // happens after `verifySRP` in the `/credentials` page.
+
             if (passkeySessionID) {
-                const user = getData("user");
-                await setLSUser({
-                    ...user,
-                    passkeySessionID,
-                    isTwoFactorEnabled: true,
-                    isTwoFactorPasskeysEnabled: true,
-                });
+                updateSavedLocalUser({ passkeySessionID });
                 saveIsFirstLogin();
                 const url = passkeyVerificationRedirectURL(
                     accountsUrl!,
@@ -116,21 +117,15 @@ const Page: React.FC = () => {
                 setPasskeyVerificationData({ passkeySessionID, url });
                 openPasskeyVerificationURL({ passkeySessionID, url });
             } else if (twoFactorSessionID) {
-                await setLSUser({
-                    email,
-                    twoFactorSessionID,
+                updateSavedLocalUser({
                     isTwoFactorEnabled: true,
+                    twoFactorSessionID,
                 });
                 saveIsFirstLogin();
                 void router.push("/two-factor/verify");
             } else {
-                await setLSUser({
-                    email,
-                    token,
-                    encryptedToken,
-                    id,
-                    isTwoFactorEnabled: false,
-                });
+                if (token) await saveAuthToken(token);
+                replaceSavedLocalUser({ id, email, token, encryptedToken });
                 if (keyAttributes) {
                     saveKeyAttributes(keyAttributes);
                     saveOriginalKeyAttributes(keyAttributes);
@@ -142,12 +137,11 @@ const Page: React.FC = () => {
                     await unstashAfterUseSRPSetupAttributes(setupSRP);
                 }
                 saveIsFirstLogin();
-                const redirectURL = unstashRedirect();
-                if (keyAttributes?.encryptedKey) {
+                if (keyAttributes) {
                     clearSessionStorage();
-                    void router.push(redirectURL ?? "/credentials");
+                    void router.push(unstashRedirect() ?? "/credentials");
                 } else {
-                    void router.push(redirectURL ?? "/generate");
+                    void router.push(unstashRedirect() ?? "/generate");
                 }
             }
         } catch (e) {
@@ -162,12 +156,12 @@ const Page: React.FC = () => {
         }
     };
 
-    const resendEmail = async () => {
-        setResend(1);
+    const resendEmail = useCallback(async () => {
+        setResend("sending");
         await sendOTT(email, undefined);
-        setResend(2);
-        setTimeout(() => setResend(0), 3000);
-    };
+        setResend("sent");
+        setTimeout(() => setResend("enable"), 3000);
+    }, [email]);
 
     if (!email) {
         return <LoadingIndicator />;
@@ -230,13 +224,13 @@ const Page: React.FC = () => {
             />
 
             <AccountsPageFooter>
-                {resend == 0 && (
+                {resend == "enable" && (
                     <LinkButton onClick={resendEmail}>
                         {t("resend_code")}
                     </LinkButton>
                 )}
-                {resend == 1 && <span>{t("status_sending")}</span>}
-                {resend == 2 && <span>{t("status_sent")}</span>}
+                {resend == "sending" && <span>{t("status_sending")}</span>}
+                {resend == "sent" && <span>{t("status_sent")}</span>}
                 <LinkButton onClick={logout}>{t("change_email")}</LinkButton>
             </AccountsPageFooter>
 
@@ -261,9 +255,7 @@ const redirectionIfNeededOrEmail = async () => {
         return "/";
     }
 
-    const keyAttributes = savedKeyAttributes();
-
-    if (keyAttributes?.encryptedKey && (user.token || user.encryptedToken)) {
+    if (savedKeyAttributes() && (user.token || user.encryptedToken)) {
         return "/credentials";
     }
 

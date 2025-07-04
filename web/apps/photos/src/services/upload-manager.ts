@@ -1,3 +1,4 @@
+import { ensureLocalUser } from "ente-accounts/services/user";
 import { isDesktop } from "ente-base/app";
 import { createComlinkCryptoWorker } from "ente-base/crypto";
 import { type CryptoWorker } from "ente-base/crypto/worker";
@@ -41,7 +42,6 @@ import { computeNormalCollectionFilesFromSaved } from "ente-new/photos/services/
 import { indexNewUpload } from "ente-new/photos/services/ml";
 import { wait } from "ente-utils/promise";
 import watcher from "services/watch";
-import { getUserOwnedFiles } from "utils/file";
 
 export type FileID = number;
 
@@ -443,9 +443,9 @@ class UploadManager {
                 this.publicAlbumsCredentials.accessToken,
             );
         } else {
-            this.existingFiles = getUserOwnedFiles(
-                await computeNormalCollectionFilesFromSaved(),
-            );
+            const files = await computeNormalCollectionFilesFromSaved();
+            const userID = ensureLocalUser().id;
+            this.existingFiles = files.filter((file) => file.ownerID == userID);
         }
         this.collections = new Map(
             collections.map((collection) => [collection.id, collection]),

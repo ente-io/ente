@@ -1,10 +1,13 @@
 import {
-    getData,
     saveKeyAttributes,
-    setLSUser,
+    updateSavedLocalUser,
 } from "ente-accounts/services/accounts-db";
+import { clearInflightPasskeySessionID } from "ente-accounts/services/passkey";
 import { unstashRedirect } from "ente-accounts/services/redirect";
-import { TwoFactorAuthorizationResponse } from "ente-accounts/services/user";
+import {
+    resetSavedLocalUserTokens,
+    TwoFactorAuthorizationResponse,
+} from "ente-accounts/services/user";
 import { LoadingIndicator } from "ente-base/components/loaders";
 import { fromB64URLSafeNoPadding } from "ente-base/crypto";
 import log from "ente-base/log";
@@ -13,6 +16,11 @@ import { useRouter } from "next/router";
 import React, { useEffect } from "react";
 
 /**
+ * The page where the accounts app hands back control to us once the passkey has
+ * been verified.
+ *
+ * See: [Note: Login pages]
+ *
  * [Note: Finish passkey flow in the requesting app]
  *
  * The passkey finish step needs to happen in the context of the client which
@@ -23,14 +31,14 @@ const Page: React.FC = () => {
     const router = useRouter();
 
     useEffect(() => {
-        // Extract response from query params
+        // Extract response from query params.
         const searchParams = new URLSearchParams(window.location.search);
         const passkeySessionID = searchParams.get("passkeySessionID");
         const response = searchParams.get("response");
         if (!passkeySessionID || !response) return;
 
         void saveQueryCredentialsAndNavigateTo(passkeySessionID, response).then(
-            (slug) => router.push(slug),
+            (slug) => router.replace(slug),
         );
     }, [router]);
 
@@ -78,7 +86,7 @@ const saveQueryCredentialsAndNavigateTo = async (
         return "/";
     }
 
-    sessionStorage.removeItem("inflightPasskeySessionID");
+    clearInflightPasskeySessionID();
 
     // Decode response string (inverse of the steps we perform in
     // `passkeyAuthenticationSuccessRedirectURL`).
@@ -90,10 +98,8 @@ const saveQueryCredentialsAndNavigateTo = async (
 
     const { id, keyAttributes, encryptedToken } = decodedResponse;
 
-    // TODO: See: [Note: empty token?]
-    const token = undefined;
-
-    await setLSUser({ ...getData("user"), token, encryptedToken, id });
+    await resetSavedLocalUserTokens(id, encryptedToken);
+    updateSavedLocalUser({ passkeySessionID: undefined });
     saveKeyAttributes(keyAttributes);
 
     return unstashRedirect() ?? "/credentials";

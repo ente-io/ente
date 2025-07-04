@@ -1,5 +1,4 @@
-import { getData } from "ente-accounts/services/accounts-db";
-import type { LocalUser, PartialLocalUser } from "ente-accounts/services/user";
+import type { LocalUser } from "ente-accounts/services/user";
 import { joinPath } from "ente-base/file-name";
 import log from "ente-base/log";
 import { type Electron } from "ente-base/types/ipc";
@@ -8,11 +7,7 @@ import { downloadManager } from "ente-gallery/services/download";
 import { detectFileTypeInfo } from "ente-gallery/utils/detect-type";
 import { writeStream } from "ente-gallery/utils/native-stream";
 import { EnteFile } from "ente-media/file";
-import {
-    ItemVisibility,
-    fileFileName,
-    isArchivedFile,
-} from "ente-media/file-metadata";
+import { ItemVisibility, fileFileName } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
 import { decodeLivePhoto } from "ente-media/live-photo";
 import { type FileOp } from "ente-new/photos/components/SelectedFileOptions";
@@ -278,18 +273,6 @@ async function downloadFileDesktop(
         );
     }
 }
-
-export const getArchivedFiles = (files: EnteFile[]) => {
-    return files.filter(isArchivedFile).map((file) => file.id);
-};
-
-export const getUserOwnedFiles = (files: EnteFile[]) => {
-    const user: PartialLocalUser = getData("user");
-    if (!user?.id) {
-        throw Error("user missing");
-    }
-    return files.filter((file) => file.ownerID === user.id);
-};
 
 export const shouldShowAvatar = (
     file: EnteFile,

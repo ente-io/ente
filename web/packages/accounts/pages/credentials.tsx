@@ -6,17 +6,12 @@ import {
 } from "ente-accounts/components/LoginComponents";
 import { SecondFactorChoice } from "ente-accounts/components/SecondFactorChoice";
 import { sessionExpiredDialogAttributes } from "ente-accounts/components/utils/dialog";
-import {
-    twoFactorEnabledErrorMessage,
-    useSecondFactorChoiceIfNeeded,
-} from "ente-accounts/components/utils/second-factor-choice";
+import { useSecondFactorChoiceIfNeeded } from "ente-accounts/components/utils/second-factor-choice";
 import {
     VerifyMasterPasswordForm,
     type VerifyMasterPasswordFormProps,
 } from "ente-accounts/components/VerifyMasterPasswordForm";
 import {
-    getData,
-    getToken,
     savedIsFirstLogin,
     savedKeyAttributes,
     savedPartialLocalUser,
@@ -24,7 +19,7 @@ import {
     saveIsFirstLogin,
     saveKeyAttributes,
     saveSRPAttributes,
-    setLSUser,
+    updateSavedLocalUser,
 } from "ente-accounts/services/accounts-db";
 import {
     openPasskeyVerificationURL,
@@ -44,24 +39,25 @@ import {
     verifySRP,
 } from "ente-accounts/services/srp";
 import {
+    decryptAndStoreTokenIfNeeded,
     generateAndSaveInteractiveKeyAttributes,
     type KeyAttributes,
-    type PartialLocalUser,
 } from "ente-accounts/services/user";
-import { decryptAndStoreToken } from "ente-accounts/utils/helpers";
 import { LinkButton } from "ente-base/components/LinkButton";
 import { LoadingIndicator } from "ente-base/components/loaders";
 import { useBaseContext } from "ente-base/context";
 import { decryptBox } from "ente-base/crypto";
+import { isDevBuild } from "ente-base/env";
 import { clearLocalStorage } from "ente-base/local-storage";
 import log from "ente-base/log";
 import {
-    haveAuthenticatedSession,
+    masterKeyFromSession,
     saveMasterKeyInSessionAndSafeStore,
     stashKeyEncryptionKeyInSessionStore,
     unstashKeyEncryptionKeyFromSession,
     updateSessionFromElectronSafeStorageIfNeeded,
 } from "ente-base/session";
+import { saveAuthToken, savedAuthToken } from "ente-base/token";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useState } from "react";
@@ -76,19 +72,25 @@ import { useCallback, useEffect, useState } from "react";
  * - Subsequent reauthentication, when the user opens the web app in a new tab.
  *   Such a tab won't have the user's master key in session storage, so we ask
  *   the user to reauthenticate using their password.
+ *
+ * See: [Note: Login pages]
  */
 const Page: React.FC = () => {
     const { logout, showMiniDialog } = useBaseContext();
 
-    const [user, setUser] = useState<PartialLocalUser | undefined>(undefined);
-    const [keyAttributes, setKeyAttributes] = useState<KeyAttributes>();
-    const [srpAttributes, setSrpAttributes] = useState<SRPAttributes>();
+    const [userEmail, setUserEmail] = useState<string>("");
+    const [keyAttributes, setKeyAttributes] = useState<
+        KeyAttributes | undefined
+    >(undefined);
+    const [srpAttributes, setSRPAttributes] = useState<
+        SRPAttributes | undefined
+    >(undefined);
     const [passkeyVerificationData, setPasskeyVerificationData] = useState<
         { passkeySessionID: string; url: string } | undefined
-    >();
+    >(undefined);
     const [sessionValidityCheck, setSessionValidityCheck] = useState<
         Promise<void> | undefined
-    >();
+    >(undefined);
 
     const {
         secondFactorChoiceProps,
@@ -127,28 +129,56 @@ const Page: React.FC = () => {
         }
     }, [logout, showMiniDialog]);
 
+    const postVerification = useCallback(
+        async (
+            userEmail: string,
+            masterKey: string,
+            kek: string,
+            keyAttributes: KeyAttributes,
+        ) => {
+            await saveMasterKeyInSessionAndSafeStore(masterKey);
+            await decryptAndStoreTokenIfNeeded(keyAttributes, masterKey);
+            try {
+                let srpAttributes = savedSRPAttributes();
+                if (!srpAttributes) {
+                    srpAttributes = await getSRPAttributes(userEmail);
+                    if (srpAttributes) {
+                        saveSRPAttributes(srpAttributes);
+                    } else {
+                        await setupSRP(await generateSRPSetupAttributes(kek));
+                    }
+                }
+            } catch (e) {
+                log.error("SRP migration failed", e);
+            }
+            void router.push(unstashRedirect() ?? appHomeRoute);
+        },
+        [router],
+    );
+
     useEffect(() => {
-        const main = async () => {
+        void (async () => {
             const user = savedPartialLocalUser();
-            if (!user?.email) {
-                void router.push("/");
+            const userEmail = user?.email;
+            if (!userEmail) {
+                await router.replace("/");
                 return;
             }
 
-            setUser(user);
             await updateSessionFromElectronSafeStorageIfNeeded();
-            if (await haveAuthenticatedSession()) {
-                void router.push(appHomeRoute);
+            if ((await masterKeyFromSession()) && (await savedAuthToken())) {
+                await router.replace(appHomeRoute);
                 return;
             }
+
+            setUserEmail(userEmail);
+            if (user.token) setSessionValidityCheck(validateSession());
+
             const kek = await unstashKeyEncryptionKeyFromSession();
             const keyAttributes = savedKeyAttributes();
-            const srpAttributes = savedSRPAttributes();
 
-            if (getToken()) {
-                setSessionValidityCheck(validateSession());
-            }
-
+            // Refreshing an existing tab, or desktop app, or only the token
+            // needs to decrypted and set.
             if (kek && keyAttributes) {
                 const masterKey = await decryptBox(
                     {
@@ -157,68 +187,65 @@ const Page: React.FC = () => {
                     },
                     kek,
                 );
-                await postVerification(masterKey, kek, keyAttributes);
+                await postVerification(
+                    userEmail,
+                    masterKey,
+                    kek,
+                    keyAttributes,
+                );
                 return;
             }
 
+            // Reauthentication in a new tab on the web app. Use previously
+            // generated interactive key attributes to verify password.
             if (keyAttributes) {
-                if (
-                    (!user?.token && !user?.encryptedToken) ||
-                    (keyAttributes && !keyAttributes.memLimit)
-                ) {
+                if (!user?.token && !user?.encryptedToken) {
+                    // TODO(RE): Why? For now, add a dev mode circuit breaker.
+                    if (isDevBuild) throw new Error("Unexpected case reached");
                     clearLocalStorage();
-                    void router.push("/");
+                    void router.replace("/");
                     return;
                 }
                 setKeyAttributes(keyAttributes);
                 return;
             }
 
+            // First login on a new client. `getKeyAttributes` from below will
+            // be used during password verification to generate interactive key
+            // attributes for subsequent reauthentications.
+            const srpAttributes = savedSRPAttributes();
             if (srpAttributes) {
-                setSrpAttributes(srpAttributes);
-            } else {
-                void router.push("/");
+                setSRPAttributes(srpAttributes);
+                return;
             }
-        };
-        void main();
-        // TODO: validateSession is a dependency, but add that only after we've
-        // wrapped items from the callback (like logout) in useCallback too.
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+
+            void router.replace("/");
+        })();
+    }, [router, validateSession, postVerification]);
 
     const getKeyAttributes: VerifyMasterPasswordFormProps["getKeyAttributes"] =
-        async (kek: string) => {
-            try {
-                // Currently the page will get reloaded if any of the attributes
-                // have changed, so we don't need to worry about the KEK having
-                // been generated using stale credentials. This await on the
-                // promise is here to only ensure we're done with the check
-                // before we let the user in.
-                if (sessionValidityCheck) await sessionValidityCheck;
-
+        useCallback(
+            async (srpAttributes: SRPAttributes, kek: string) => {
                 const {
-                    keyAttributes,
-                    encryptedToken,
-                    token,
                     id,
+                    keyAttributes,
+                    token,
+                    encryptedToken,
                     twoFactorSessionID,
                     passkeySessionID,
                     accountsUrl,
                 } =
                     await userVerificationResultAfterResolvingSecondFactorChoice(
-                        await verifySRP(srpAttributes!, kek),
+                        await verifySRP(srpAttributes, kek),
                     );
+
+                // If we had to ask remote for the key attributes, it is the
+                // initial login on this client.
                 saveIsFirstLogin();
 
                 if (passkeySessionID) {
                     await stashKeyEncryptionKeyInSessionStore(kek);
-                    const user = getData("user");
-                    await setLSUser({
-                        ...user,
-                        passkeySessionID,
-                        isTwoFactorEnabled: true,
-                        isTwoFactorPasskeysEnabled: true,
-                    });
+                    updateSavedLocalUser({ passkeySessionID });
                     stashRedirect("/");
                     const url = passkeyVerificationRedirectURL(
                         accountsUrl!,
@@ -226,81 +253,64 @@ const Page: React.FC = () => {
                     );
                     setPasskeyVerificationData({ passkeySessionID, url });
                     openPasskeyVerificationURL({ passkeySessionID, url });
-                    throw new Error(twoFactorEnabledErrorMessage);
+                    return "redirecting-second-factor";
                 } else if (twoFactorSessionID) {
                     await stashKeyEncryptionKeyInSessionStore(kek);
-                    const user = getData("user");
-                    await setLSUser({
-                        ...user,
-                        twoFactorSessionID,
+                    updateSavedLocalUser({
                         isTwoFactorEnabled: true,
+                        twoFactorSessionID,
                     });
                     void router.push("/two-factor/verify");
-                    throw new Error(twoFactorEnabledErrorMessage);
+                    return "redirecting-second-factor";
                 } else {
-                    const user = getData("user");
-                    await setLSUser({
-                        ...user,
+                    // In rare cases, if the user hasn't already setup their key
+                    // attributes, we might get the plaintext token from remote.
+                    if (token) await saveAuthToken(token);
+                    updateSavedLocalUser({
+                        id,
                         token,
                         encryptedToken,
-                        id,
-                        isTwoFactorEnabled: false,
+                        isTwoFactorEnabled: undefined,
+                        twoFactorSessionID: undefined,
+                        passkeySessionID: undefined,
                     });
                     if (keyAttributes) saveKeyAttributes(keyAttributes);
                     return keyAttributes;
                 }
-            } catch (e) {
-                if (
-                    e instanceof Error &&
-                    e.message != twoFactorEnabledErrorMessage
-                ) {
-                    log.error("getKeyAttributes failed", e);
-                }
-                throw e;
-            }
-        };
+            },
+            [userVerificationResultAfterResolvingSecondFactorChoice, router],
+        );
 
     const handleVerifyMasterPassword: VerifyMasterPasswordFormProps["onVerify"] =
-        (key, kek, keyAttributes, password) => {
-            void (async () => {
-                const updatedKeyAttributes = savedIsFirstLogin()
-                    ? await generateAndSaveInteractiveKeyAttributes(
-                          password,
-                          keyAttributes,
-                          key,
-                      )
-                    : keyAttributes;
-                await postVerification(key, kek, updatedKeyAttributes);
-            })();
-        };
+        useCallback(
+            (key, kek, keyAttributes, password) => {
+                void (async () => {
+                    // Currently the page will get reloaded if any of the
+                    // attributes have changed, so we don't need to worry about
+                    // the KEK having been generated using stale credentials.
+                    //
+                    // This await on the promise is here to only ensure we're
+                    // done with the check before we let the user in.
+                    if (sessionValidityCheck) await sessionValidityCheck;
 
-    const postVerification = async (
-        masterKey: string,
-        kek: string,
-        keyAttributes: KeyAttributes,
-    ) => {
-        await saveMasterKeyInSessionAndSafeStore(masterKey);
-        await decryptAndStoreToken(keyAttributes, masterKey);
-        try {
-            let srpAttributes = savedSRPAttributes();
-            if (!srpAttributes && user?.email) {
-                srpAttributes = await getSRPAttributes(user.email);
-                if (srpAttributes) {
-                    saveSRPAttributes(srpAttributes);
-                }
-            }
-            // TODO: todo?
-            log.debug(() => `userSRPSetupPending ${!srpAttributes}`);
-            if (!srpAttributes) {
-                await setupSRP(await generateSRPSetupAttributes(kek));
-            }
-        } catch (e) {
-            log.error("migrate to srp failed", e);
-        }
-        void router.push(unstashRedirect() ?? appHomeRoute);
-    };
+                    const updatedKeyAttributes = savedIsFirstLogin()
+                        ? await generateAndSaveInteractiveKeyAttributes(
+                              password,
+                              keyAttributes,
+                              key,
+                          )
+                        : keyAttributes;
 
-    const userEmail = user?.email;
+                    await postVerification(
+                        userEmail,
+                        key,
+                        kek,
+                        updatedKeyAttributes,
+                    );
+                })();
+            },
+            [postVerification, userEmail, sessionValidityCheck],
+        );
 
     if (!userEmail) {
         return <LoadingIndicator />;
@@ -326,7 +336,7 @@ const Page: React.FC = () => {
 
         return (
             <VerifyingPasskey
-                email={user?.email}
+                email={userEmail}
                 passkeySessionID={passkeyVerificationData?.passkeySessionID}
                 onRetry={() =>
                     openPasskeyVerificationURL(passkeyVerificationData)
@@ -336,8 +346,6 @@ const Page: React.FC = () => {
         );
     }
 
-    // TODO: Handle the case when user is not present, or exclude that
-    // possibility using types.
     return (
         <AccountsPageContents>
             <PasswordHeader caption={userEmail} />

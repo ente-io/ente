@@ -17,9 +17,7 @@
  * - "srpAttributes"
  */
 
-import { getKVS, removeKV, setKV } from "ente-base/kv";
-import log from "ente-base/log";
-import { getAuthToken } from "ente-base/token";
+import { savedAuthToken } from "ente-base/token";
 import { nullToUndefined } from "ente-utils/transform";
 import { z } from "zod/v4";
 import {
@@ -58,6 +56,9 @@ import {
  *   also get filled in. Once they verify their TOTP based second factor, their
  *   {@link id} and {@link encryptedToken} will also get filled in.
  *
+ * - If they have a passkey set as a second factor set, then after verifying
+ *   their password the {@link passkeySessionID} will be set.
+ *
  * - As the login or signup sequence completes, a {@link token} obtained from
  *   the {@link encryptedToken} will be written out, and the
  *   {@link encryptedToken} cleared since it is not needed anymore.
@@ -83,6 +84,7 @@ export interface PartialLocalUser {
     encryptedToken?: string;
     isTwoFactorEnabled?: boolean;
     twoFactorSessionID?: string;
+    passkeySessionID?: string;
 }
 
 const PartialLocalUser = z.object({
@@ -92,6 +94,7 @@ const PartialLocalUser = z.object({
     encryptedToken: z.string().nullish().transform(nullToUndefined),
     isTwoFactorEnabled: z.boolean().nullish().transform(nullToUndefined),
     twoFactorSessionID: z.string().nullish().transform(nullToUndefined),
+    passkeySessionID: z.string().nullish().transform(nullToUndefined),
 });
 
 /**
@@ -103,6 +106,7 @@ const LocalUser = z.object({
     id: z.number(),
     email: z.string(),
     token: z.string(),
+    isTwoFactorEnabled: z.boolean().nullish().transform(nullToUndefined),
 });
 
 /**
@@ -112,12 +116,14 @@ const LocalUser = z.object({
  * After the user is logged in, use {@link savedLocalUser} or
  * {@link ensureLocalUser} instead.
  *
- * Use {@link savePartialLocalUser} to updated the saved value.
+ * Use {@link replaceSavedLocalUser} to updated the saved value.
  */
 export const savedPartialLocalUser = (): PartialLocalUser | undefined => {
     const jsonString = localStorage.getItem("user");
     if (!jsonString) return undefined;
-    return PartialLocalUser.parse(JSON.parse(jsonString));
+    const result = PartialLocalUser.parse(JSON.parse(jsonString));
+    void ensureTokensMatch(result);
+    return result;
 };
 
 /**
@@ -125,12 +131,24 @@ export const savedPartialLocalUser = (): PartialLocalUser | undefined => {
  *
  * See: [Note: Partial local user].
  *
- * TODO: WARNING: This does not update the KV token. The idea is to gradually
- * move over uses of setLSUser to this while explicitly setting the KV token
- * where needed.
+ * This method replaces the existing data. Use {@link updateSavedLocalUser} to
+ * update selected fields while keeping the other fields as it is.
  */
-export const savePartialLocalUser = (partialLocalUser: Partial<LocalUser>) =>
+export const replaceSavedLocalUser = (partialLocalUser: PartialLocalUser) =>
     localStorage.setItem("user", JSON.stringify(partialLocalUser));
+
+/**
+ * Partially update the saved user data.
+ *
+ * This is a delta variant of {@link replaceSavedLocalUser}, which replaces the
+ * entire saved object, while this function spreads the provided {@link updates}
+ * onto the currently saved value.
+ *
+ * @param updates A subset of {@link PartialLocalUser} fields that we'd like to
+ * update. The other fields, if present in local storage, remain unchanged.
+ */
+export const updateSavedLocalUser = (updates: Partial<PartialLocalUser>) =>
+    replaceSavedLocalUser({ ...savedPartialLocalUser(), ...updates });
 
 /**
  * Return data about the logged-in user, if someone is indeed logged in.
@@ -141,7 +159,8 @@ export const savePartialLocalUser = (partialLocalUser: Partial<LocalUser>) =>
  * not accessible to web workers.
  *
  * There is no setter corresponding to this function since this is only a view
- * on data saved using {@link savePartialLocalUser}.
+ * on data saved using {@link replaceSavedLocalUser} or
+ * {@link updateSavedLocalUser}.
  *
  * See: [Note: Partial local user] for more about the whole shebang.
  */
@@ -150,84 +169,20 @@ export const savedLocalUser = (): LocalUser | undefined => {
     if (!jsonString) return undefined;
     // We might have some data, but not all of it. So do a non-throwing parse.
     const { success, data } = LocalUser.safeParse(JSON.parse(jsonString));
+    if (success) void ensureTokensMatch(data);
     return success ? data : undefined;
 };
 
-export type LocalStorageKey = "user";
-
-export const getData = (key: LocalStorageKey) => {
-    try {
-        if (
-            typeof localStorage == "undefined" ||
-            typeof key == "undefined" ||
-            typeof localStorage.getItem(key) == "undefined" ||
-            localStorage.getItem(key) == "undefined"
-        ) {
-            return null;
-        }
-        const data = localStorage.getItem(key);
-        return data && JSON.parse(data);
-    } catch (e) {
-        log.error(`Failed to Parse JSON for key ${key}`, e);
-    }
-};
-
-export const setData = (key: LocalStorageKey, value: object) =>
-    localStorage.setItem(key, JSON.stringify(value));
-
-// TODO: Migrate this to `local-user.ts`, with (a) more precise optionality
-// indication of the constituent fields, (b) moving any fields that need to be
-// accessed from web workers to KV DB.
-//
-// Creating a new function here to act as a funnel point.
-export const setLSUser = async (user: object) => {
-    await migrateKVToken(user);
-    setData("user", user);
-};
-
 /**
- * Update the "token" KV with the token (if any) for the given {@link user}.
+ * Sanity check to ensure that KV token and local storage token are the same.
  *
- * This is an internal implementation details of {@link setLSUser} and doesn't
- * need to exposed conceptually. For now though, we need to call this externally
- * at an early point in the app startup to also copy over the token into KV DB
- * for existing users.
- *
- * This was added 1 July 2024, can be removed after a while and this code
- * inlined into `setLSUser` (tag: Migration).
+ * TODO: Added July 2025, can just be removed soon, there is already a sanity
+ * check `isLocalStorageAndIndexedDBMismatch` on app start (tag: Migration).
  */
-export const migrateKVToken = async (user: unknown) => {
-    // Throw an error if the data is in local storage but not in IndexedDB. This
-    // is a pre-cursor to inlining this code.
-    // TODO: Remove this sanity check eventually when this code is revisited.
-    const oldLSUser = getData("user");
-    const wasMissing =
-        oldLSUser &&
-        typeof oldLSUser == "object" &&
-        "token" in oldLSUser &&
-        typeof oldLSUser.token == "string" &&
-        !(await getKVS("token"));
-
-    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-    user &&
-    typeof user == "object" &&
-    "id" in user &&
-    typeof user.id == "number"
-        ? await setKV("userID", user.id)
-        : await removeKV("userID");
-
-    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-    user &&
-    typeof user == "object" &&
-    "token" in user &&
-    typeof user.token == "string"
-        ? await setKV("token", user.token)
-        : await removeKV("token");
-
-    if (wasMissing)
-        throw new Error(
-            "The user's token was present in local storage but not in IndexedDB",
-        );
+export const ensureTokensMatch = async (user: PartialLocalUser | undefined) => {
+    if (user?.token !== (await savedAuthToken())) {
+        throw new Error("Token mismatch");
+    }
 };
 
 /**
@@ -237,7 +192,7 @@ export const migrateKVToken = async (user: unknown) => {
  * token in local storage, then it should also be present in IndexedDB.
  */
 export const isLocalStorageAndIndexedDBMismatch = async () =>
-    savedPartialLocalUser()?.token && !(await getAuthToken());
+    savedPartialLocalUser()?.token && !(await savedAuthToken());
 
 /**
  * Return the user's {@link KeyAttributes} if they are present in local storage.
@@ -352,11 +307,6 @@ export const unstashAfterUseSRPSetupAttributes = async (
     const srpSetupAttributes = SRPSetupAttributes.parse(JSON.parse(jsonString));
     await cb(srpSetupAttributes);
     localStorage.removeItem("srpSetupAttributes");
-};
-
-export const getToken = (): string => {
-    const token = getData("user")?.token;
-    return token;
 };
 
 /**

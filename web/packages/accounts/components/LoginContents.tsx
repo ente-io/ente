@@ -1,7 +1,7 @@
 import { Input, Stack, TextField, Typography } from "@mui/material";
 import { AccountsPageFooter } from "ente-accounts/components/layouts/centered-paper";
 import {
-    savePartialLocalUser,
+    replaceSavedLocalUser,
     saveSRPAttributes,
 } from "ente-accounts/services/accounts-db";
 import { getSRPAttributes } from "ente-accounts/services/srp";
@@ -18,16 +18,21 @@ import { z } from "zod/v4";
 import { AccountsPageTitleWithCaption } from "./LoginComponents";
 
 interface LoginContentsProps {
-    /** Called when the user clicks the signup option instead.  */
-    onSignUp: () => void;
-    /** Reactive value of {@link customAPIHost}. */
+    /**
+     * Reactive value of {@link customAPIHost}.
+     */
     host: string | undefined;
+    /**
+     * Called when the user clicks the signup option instead.
+     */
+    onSignUp: () => void;
 }
 
 /**
- * Contents of the "login form", maintained as a separate component so that the
- * same code can be used both in the standalone /login page, and also within the
- * embedded login form shown on the photos index page.
+ * A contents of the "login" form.
+ *
+ * It is used both on the "/login" page, and as the embedded login form on the
+ * "/" page where the user can toggle between the signup and login forms inline.
  */
 export const LoginContents: React.FC<LoginContentsProps> = ({
     onSignUp,
@@ -50,10 +55,10 @@ export const LoginContents: React.FC<LoginContentsProps> = ({
                     }
                     throw e;
                 }
-                savePartialLocalUser({ email });
+                replaceSavedLocalUser({ email });
                 void router.push("/verify");
             } else {
-                savePartialLocalUser({ email });
+                replaceSavedLocalUser({ email });
                 saveSRPAttributes(srpAttributes);
                 void router.push("/credentials");
             }

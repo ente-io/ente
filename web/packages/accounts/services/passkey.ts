@@ -1,9 +1,11 @@
 import {
-    getData,
     saveKeyAttributes,
-    setLSUser,
+    updateSavedLocalUser,
 } from "ente-accounts/services/accounts-db";
-import { TwoFactorAuthorizationResponse } from "ente-accounts/services/user";
+import {
+    resetSavedLocalUserTokens,
+    TwoFactorAuthorizationResponse,
+} from "ente-accounts/services/user";
 import { clientPackageName, isDesktop } from "ente-base/app";
 import { encryptBox, generateKey } from "ente-base/crypto";
 import {
@@ -256,12 +258,23 @@ export const saveCredentialsAndNavigateTo = async (
     // goes through the passkey flow in the browser itself (when they are using
     // the web app).
 
-    sessionStorage.removeItem("inflightPasskeySessionID");
+    clearInflightPasskeySessionID();
 
     const { id, encryptedToken, keyAttributes } = response;
 
-    await setLSUser({ ...getData("user"), encryptedToken, id });
+    await resetSavedLocalUserTokens(id, encryptedToken);
+    updateSavedLocalUser({ passkeySessionID: undefined });
     saveKeyAttributes(keyAttributes);
 
     return unstashRedirect() ?? "/credentials";
+};
+
+/**
+ * Remove the inflight passkey session ID, if any, present in session storage.
+ *
+ * This should be called whenever we get back control from the passkey app to
+ * clean up after ourselves.
+ */
+export const clearInflightPasskeySessionID = () => {
+    sessionStorage.removeItem("inflightPasskeySessionID");
 };

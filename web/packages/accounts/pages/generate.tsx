@@ -16,7 +16,6 @@ import {
     generateSRPSetupAttributes,
     setupSRP,
 } from "ente-accounts/services/srp";
-import type { PartialLocalUser } from "ente-accounts/services/user";
 import {
     generateAndSaveInteractiveKeyAttributes,
     generateKeysAndAttributes,
@@ -28,12 +27,12 @@ import { useBaseContext } from "ente-base/context";
 import { deriveKeyInsufficientMemoryErrorMessage } from "ente-base/crypto/types";
 import log from "ente-base/log";
 import {
-    haveCredentialsInSession,
+    haveMasterKeyInSession,
     saveMasterKeyInSessionAndSafeStore,
 } from "ente-base/session";
 import { t } from "i18next";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
     NewPasswordForm,
     type NewPasswordFormProps,
@@ -41,79 +40,76 @@ import {
 
 /**
  * A page that allows the user to generate key attributes if needed, and shows
- * them their recovery key.
+ * them their recovery key if they just signed up.
  *
  * See: [Note: Login pages]
  */
 const Page: React.FC = () => {
     const { logout, showMiniDialog } = useBaseContext();
 
-    const [user, setUser] = useState<PartialLocalUser | undefined>(undefined);
+    const [userEmail, setUserEmail] = useState("");
     const [openRecoveryKey, setOpenRecoveryKey] = useState(false);
 
     const router = useRouter();
 
     useEffect(() => {
         const user = savedPartialLocalUser();
-        if (!user?.token) {
-            void router.push("/");
-        } else if (haveCredentialsInSession()) {
+        if (!user?.email || !user?.token) {
+            void router.replace("/");
+        } else if (haveMasterKeyInSession()) {
             if (savedJustSignedUp()) {
                 setOpenRecoveryKey(true);
-                setUser(user);
             } else {
-                void router.push(appHomeRoute);
+                void router.replace(appHomeRoute);
             }
-        } else if (savedOriginalKeyAttributes()?.encryptedKey) {
-            void router.push("/credentials");
+        } else if (savedOriginalKeyAttributes()) {
+            void router.replace("/credentials");
         } else {
-            setUser(user);
+            setUserEmail(user.email);
         }
     }, [router]);
 
-    const handleSubmit: NewPasswordFormProps["onSubmit"] = async (
-        password,
-        setPasswordsFieldError,
-    ) => {
-        try {
-            const { masterKey, kek, keyAttributes } =
-                await generateKeysAndAttributes(password);
-            await putUserKeyAttributes(keyAttributes);
-            await setupSRP(await generateSRPSetupAttributes(kek));
-            await generateAndSaveInteractiveKeyAttributes(
-                password,
-                keyAttributes,
-                masterKey,
-            );
-            await saveMasterKeyInSessionAndSafeStore(masterKey);
-            saveJustSignedUp();
-            setOpenRecoveryKey(true);
-        } catch (e) {
-            log.error("failed to generate password", e);
-            setPasswordsFieldError(
-                e instanceof Error &&
-                    e.message == deriveKeyInsufficientMemoryErrorMessage
-                    ? t("password_generation_failed")
-                    : t("generic_error"),
-            );
-        }
-    };
+    const handleSubmit: NewPasswordFormProps["onSubmit"] = useCallback(
+        async (password, setPasswordsFieldError) => {
+            try {
+                const { masterKey, kek, keyAttributes } =
+                    await generateKeysAndAttributes(password);
+                await putUserKeyAttributes(keyAttributes);
+                await setupSRP(await generateSRPSetupAttributes(kek));
+                await generateAndSaveInteractiveKeyAttributes(
+                    password,
+                    keyAttributes,
+                    masterKey,
+                );
+                await saveMasterKeyInSessionAndSafeStore(masterKey);
+                saveJustSignedUp();
+                setOpenRecoveryKey(true);
+            } catch (e) {
+                log.error("Could not generate key attributes from password", e);
+                setPasswordsFieldError(
+                    e instanceof Error &&
+                        e.message == deriveKeyInsufficientMemoryErrorMessage
+                        ? t("password_generation_failed")
+                        : t("generic_error"),
+                );
+            }
+        },
+        [],
+    );
 
     return (
         <>
-            {!user ? (
-                <LoadingIndicator />
-            ) : openRecoveryKey ? (
+            {openRecoveryKey ? (
                 <RecoveryKey
                     open={openRecoveryKey}
                     onClose={() => void router.push(appHomeRoute)}
                     showMiniDialog={showMiniDialog}
                 />
-            ) : (
+            ) : userEmail ? (
                 <AccountsPageContents>
                     <AccountsPageTitle>{t("set_password")}</AccountsPageTitle>
                     <NewPasswordForm
-                        userEmail={user.email!}
+                        userEmail={userEmail}
                         submitButtonTitle={t("set_password")}
                         onSubmit={handleSubmit}
                     />
@@ -122,6 +118,8 @@ const Page: React.FC = () => {
                         <LinkButton onClick={logout}>{t("go_back")}</LinkButton>
                     </AccountsPageFooter>
                 </AccountsPageContents>
+            ) : (
+                <LoadingIndicator />
             )}
         </>
     );
