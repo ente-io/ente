@@ -111,7 +111,7 @@ class _AppliedFiltersForAppbarState extends State<AppliedFiltersForAppbar> {
             gradient: LinearGradient(
               colors: [
                 getEnteColorScheme(context).backdropBase,
-                getEnteColorScheme(context).backdropBase.withOpacity(0),
+                getEnteColorScheme(context).backdropBase.withValues(alpha: 0),
               ],
               begin: Alignment.centerLeft,
               end: Alignment.centerRight,

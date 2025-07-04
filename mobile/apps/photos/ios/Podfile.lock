@@ -18,31 +18,31 @@ PODS:
     - Flutter
   - file_saver (0.0.1):
     - Flutter
-  - Firebase/CoreOnly (11.8.0):
-    - FirebaseCore (~> 11.8.0)
-  - Firebase/Messaging (11.8.0):
+  - Firebase/CoreOnly (11.10.0):
+    - FirebaseCore (~> 11.10.0)
+  - Firebase/Messaging (11.10.0):
     - Firebase/CoreOnly
-    - FirebaseMessaging (~> 11.8.0)
-  - firebase_core (3.12.0):
-    - Firebase/CoreOnly (= 11.8.0)
+    - FirebaseMessaging (~> 11.10.0)
+  - firebase_core (3.13.1):
+    - Firebase/CoreOnly (= 11.10.0)
     - Flutter
-  - firebase_messaging (15.2.3):
-    - Firebase/Messaging (= 11.8.0)
+  - firebase_messaging (15.2.6):
+    - Firebase/Messaging (= 11.10.0)
     - firebase_core
     - Flutter
-  - FirebaseCore (11.8.1):
-    - FirebaseCoreInternal (~> 11.8.0)
+  - FirebaseCore (11.10.0):
+    - FirebaseCoreInternal (~> 11.10.0)
     - GoogleUtilities/Environment (~> 8.0)
     - GoogleUtilities/Logger (~> 8.0)
-  - FirebaseCoreInternal (11.8.0):
+  - FirebaseCoreInternal (11.10.0):
     - "GoogleUtilities/NSData+zlib (~> 8.0)"
-  - FirebaseInstallations (11.8.0):
-    - FirebaseCore (~> 11.8.0)
+  - FirebaseInstallations (11.10.0):
+    - FirebaseCore (~> 11.10.0)
     - GoogleUtilities/Environment (~> 8.0)
     - GoogleUtilities/UserDefaults (~> 8.0)
     - PromisesObjC (~> 2.4)
-  - FirebaseMessaging (11.8.0):
-    - FirebaseCore (~> 11.8.0)
+  - FirebaseMessaging (11.10.0):
+    - FirebaseCore (~> 11.10.0)
     - FirebaseInstallations (~> 11.0)
     - GoogleDataTransport (~> 10.0)
     - GoogleUtilities/AppDelegateSwizzler (~> 8.0)
@@ -175,7 +175,7 @@ PODS:
     - FlutterMacOS
   - permission_handler_apple (9.3.0):
     - Flutter
-  - photo_manager (2.0.0):
+  - photo_manager (3.7.1):
     - Flutter
     - FlutterMacOS
   - privacy_screen (0.0.1):
@@ -216,9 +216,10 @@ PODS:
   - sqlite3_flutter_libs (0.0.1):
     - Flutter
     - FlutterMacOS
-    - sqlite3 (~> 3.49.0)
+    - sqlite3 (~> 3.49.2)
     - sqlite3/dbstatvtab
     - sqlite3/fts5
+    - sqlite3/math
     - sqlite3/perf-threadsafe
     - sqlite3/rtree
   - system_info_plus (0.0.1):
@@ -303,7 +304,7 @@ DEPENDENCIES:
   - workmanager (from `.symlinks/plugins/workmanager/ios`)
 
 SPEC REPOS:
-  https://github.com/ente-io/ffmpeg-kit-custom-repo-ios.git:
+  https://github.com/ente-io/ffmpeg-kit-custom-repo-ios:
     - ffmpeg_kit_custom
   trunk:
     - Firebase

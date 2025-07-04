@@ -204,7 +204,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
         text,
         style: Theme.of(context).textTheme.titleMedium!.copyWith(
               fontSize: 14,
-              color: Theme.of(context).iconTheme.color!.withOpacity(0.7),
+              color: Theme.of(context).iconTheme.color!.withValues(alpha: 0.7),
             ),
       );
     }
@@ -303,7 +303,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
                     color: Theme.of(context)
                         .colorScheme
                         .inverseTextColor
-                        .withOpacity(0.7),
+                        .withValues(alpha: 0.7),
                     fontSize: 12,
                   ),
                 ),
