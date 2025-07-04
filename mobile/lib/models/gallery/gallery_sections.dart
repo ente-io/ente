@@ -1,6 +1,7 @@
 import "dart:core";
 
 import "package:flutter/material.dart";
+import "package:logging/logging.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/gallery/fixed_extent_grid_row.dart";
@@ -18,6 +19,7 @@ class GalleryGroups {
   final SelectedFiles? selectedFiles;
   final bool limitSelectionToOne;
   final String tagPrefix;
+  final _logger = Logger("GalleryGroups");
 
   //TODO: Add support for sort order
   final bool sortOrderAsc;
@@ -53,11 +55,21 @@ class GalleryGroups {
   final _uuid = const Uuid();
 
   void init() {
+    final stopwatch = Stopwatch()..start();
     _buildGroups();
+    _logger.info(
+      "Built ${_groupIds.length} groups in ${stopwatch.elapsedMilliseconds} ms",
+    );
+    print(
+      "Built ${_groupIds.length} groups in ${stopwatch.elapsedMilliseconds} ms",
+    );
+    stopwatch.stop();
+
     crossAxisCount = localSettings.getPhotoGridSize();
   }
 
   List<FixedExtentSectionLayout> getGroupLayouts() {
+    final stopwatch = Stopwatch()..start();
     int currentIndex = 0;
     double currentOffset = 0.0;
     final tileHeight =
@@ -105,6 +117,11 @@ class GalleryGroups {
                 while (!endOfListReached) {
                   gridRowChildren.add(
                     GalleryFileWidget(
+                      key: ValueKey(
+                        tagPrefix +
+                            filesInGroup[firstIndexOfRowWrtFilesInGroup + i]
+                                .tag,
+                      ),
                       file: filesInGroup[firstIndexOfRowWrtFilesInGroup + i],
                       selectedFiles: selectedFiles,
                       limitSelectionToOne: limitSelectionToOne,
@@ -123,6 +140,11 @@ class GalleryGroups {
                 for (int i = 0; i < crossAxisCount; i++) {
                   gridRowChildren.add(
                     GalleryFileWidget(
+                      key: ValueKey(
+                        tagPrefix +
+                            filesInGroup[firstIndexOfRowWrtFilesInGroup + i]
+                                .tag,
+                      ),
                       file: filesInGroup[firstIndexOfRowWrtFilesInGroup + i],
                       selectedFiles: selectedFiles,
                       limitSelectionToOne: limitSelectionToOne,
@@ -148,6 +170,14 @@ class GalleryGroups {
       currentIndex = lastIndex;
       currentOffset = maxOffset;
     }
+
+    _logger.info(
+      "Built group layouts in ${stopwatch.elapsedMilliseconds} ms",
+    );
+    print(
+      "Built group layouts in ${stopwatch.elapsedMilliseconds} ms",
+    );
+    stopwatch.stop();
 
     return groupLayouts;
   }
