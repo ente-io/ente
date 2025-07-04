@@ -170,7 +170,7 @@ const AlbumsRow = React.memo(
         isScrolling,
     }: ListChildComponentProps<ItemData>) => {
         const { collectionRowList, onCollectionClick } = data;
-        const collectionRow = collectionRowList[index];
+        const collectionRow = collectionRowList[index]!;
         return (
             <div style={style}>
                 <Stack direction="row" sx={{ p: 2, gap: 0.5 }}>
@@ -191,7 +191,7 @@ const AlbumsRow = React.memo(
 
 interface AllAlbumsContentProps {
     collectionSummaries: CollectionSummary[];
-    onCollectionClick: (id?: number) => void;
+    onCollectionClick: (id: number) => void;
 }
 
 const AllAlbumsContent: React.FC<AllAlbumsContentProps> = ({
@@ -203,7 +203,9 @@ const AllAlbumsContent: React.FC<AllAlbumsContentProps> = ({
     const refreshInProgress = useRef(false);
     const shouldRefresh = useRef(false);
 
-    const [collectionRowList, setCollectionRowList] = useState([]);
+    const [collectionRowList, setCollectionRowList] = useState<
+        CollectionSummary[][]
+    >([]);
 
     const columns = isTwoColumn ? 2 : 3;
     const maxListContentHeight =
@@ -231,7 +233,7 @@ const AllAlbumsContent: React.FC<AllAlbumsContentProps> = ({
                     i < columns && index < collectionSummaries.length;
                     i++
                 ) {
-                    collectionRow.push(collectionSummaries[index++]);
+                    collectionRow.push(collectionSummaries[index++]!);
                 }
                 collectionRowList.push(collectionRow);
             }

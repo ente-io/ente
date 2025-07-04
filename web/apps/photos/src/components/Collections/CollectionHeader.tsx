@@ -124,7 +124,7 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
 }) => {
     const { showMiniDialog, onGenericError } = useBaseContext();
     const { showLoadingBar, hideLoadingBar } = usePhotosAppContext();
-    const overflowMenuIconRef = useRef<SVGSVGElement>(null);
+    const overflowMenuIconRef = useRef<SVGSVGElement | null>(null);
 
     const { show: showSortOrderMenu, props: sortOrderMenuVisibilityProps } =
         useModalVisibility();
@@ -674,7 +674,7 @@ const DownloadOption: React.FC<
 interface CollectionSortOrderMenuProps {
     open: boolean;
     onClose: () => void;
-    overflowMenuIconRef: React.RefObject<SVGSVGElement>;
+    overflowMenuIconRef: React.RefObject<SVGSVGElement | null>;
     onAscClick: () => void;
     onDescClick: () => void;
 }
@@ -699,7 +699,7 @@ const CollectionSortOrderMenu: React.FC<CollectionSortOrderMenuProps> = ({
     return (
         <Menu
             id="collection-files-sort"
-            anchorEl={overflowMenuIconRef.current}
+            anchorEl={overflowMenuIconRef?.current}
             open={open}
             onClose={onClose}
             slotProps={{
