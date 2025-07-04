@@ -178,14 +178,13 @@ export const authenticatorEntityDiff = async (
     let timeOffset: number | undefined = undefined;
 
     while (true) {
-        const params = new URLSearchParams({
-            sinceTime: `${sinceTime}`,
-            limit: `${batchSize}`,
-        });
-        const url = await apiURL("/authenticator/entity/diff");
-        const res = await fetch(`${url}?${params.toString()}`, {
-            headers: await authenticatedRequestHeaders(),
-        });
+        const res = await fetch(
+            await apiURL("/authenticator/entity/diff", {
+                sinceTime,
+                limit: batchSize,
+            }),
+            { headers: await authenticatedRequestHeaders() },
+        );
         ensureOk(res);
 
         const { diff, timestamp } = AuthenticatorEntityDiffResponse.parse(

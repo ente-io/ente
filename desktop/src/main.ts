@@ -78,14 +78,6 @@ export const allowWindowClose = (): void => {
  * We call this at the end of this file.
  */
 const main = () => {
-    // Workaround for Electron 36 not launching on some Linux distros. Remove
-    // once fixed or otherwise mitigated upstream.
-    //
-    // https://github.com/electron/electron/issues/46538#issuecomment-2808806722
-    if (process.platform == "linux") {
-        app.commandLine.appendSwitch("gtk-version", "3");
-    }
-
     const gotTheLock = app.requestSingleInstanceLock();
     if (!gotTheLock) {
         app.quit();

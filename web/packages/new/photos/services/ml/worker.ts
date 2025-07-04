@@ -8,8 +8,9 @@ import type { ElectronMLWorker } from "ente-base/types/ipc";
 import { isNetworkDownloadError } from "ente-gallery/services/download";
 import type { ProcessableUploadItem } from "ente-gallery/services/upload";
 import { fileLogID, type EnteFile } from "ente-media/file";
+import { savedTrashItemFileIDs } from "ente-new/photos/services/trash";
 import { wait } from "ente-utils/promise";
-import { getAllLocalFiles, getLocalTrashFileIDs } from "../files";
+import { savedCollectionFiles } from "../photos-fdb";
 import {
     createImageBitmapAndData,
     fetchRenderableBlob,
@@ -29,8 +30,8 @@ import {
 } from "./cluster";
 import { saveFaceCrops } from "./crop";
 import {
-    getIndexableFileIDs,
     markIndexingFailed,
+    readNextIndexableFileIDs,
     savedFaceIndexes,
     saveIndexes,
     updateAssumingLocalFiles,
@@ -323,7 +324,7 @@ export class MLWorker {
     async clusterFaces(masterKey: string) {
         const { clusters, modifiedClusterIDs } = await _clusterFaces(
             await savedFaceIndexes(),
-            await getAllLocalFiles(),
+            await savedCollectionFiles(),
             (progress) => this.updateClusteringProgress(progress),
         );
         await reconcileClusters(clusters, modifiedClusterIDs, masterKey);
@@ -435,16 +436,16 @@ const indexNextBatch = async (
 const syncWithLocalFilesAndGetFilesToIndex = async (
     count: number,
 ): Promise<Map<number, EnteFile>> => {
-    const localFiles = await getAllLocalFiles();
-    const localFileByID = new Map(localFiles.map((f) => [f.id, f]));
+    const collectionFiles = await savedCollectionFiles();
+    const fileByID = new Map(collectionFiles.map((f) => [f.id, f]));
 
     await updateAssumingLocalFiles(
-        Array.from(localFileByID.keys()),
-        await getLocalTrashFileIDs(),
+        Array.from(fileByID.keys()),
+        await savedTrashItemFileIDs(),
     );
 
-    const fileIDsToIndex = await getIndexableFileIDs(count);
-    return new Map(fileIDsToIndex.map((id) => [id, localFileByID.get(id)!]));
+    const fileIDsToIndex = await readNextIndexableFileIDs(count);
+    return new Map(fileIDsToIndex.map((id) => [id, fileByID.get(id)!]));
 };
 
 /**

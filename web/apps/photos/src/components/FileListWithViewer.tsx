@@ -6,16 +6,15 @@ import {
     type FileViewerProps,
 } from "ente-gallery/components/viewer/FileViewer";
 import type { Collection } from "ente-media/collection";
-import { EnteFile } from "ente-media/file";
-import {
-    moveToTrash,
-    TRASH_SECTION,
-} from "ente-new/photos/services/collection";
+import type { EnteFile } from "ente-media/file";
+import { fileCreationTime, fileFileName } from "ente-media/file-metadata";
+import { moveToTrash } from "ente-new/photos/services/collection";
+import { PseudoCollectionID } from "ente-new/photos/services/collection-summary";
 import { t } from "i18next";
 import { useCallback, useMemo, useState } from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { uploadManager } from "services/upload-manager";
-import { SetFilesDownloadProgressAttributesCreator } from "types/gallery";
+import type { SetFilesDownloadProgressAttributesCreator } from "types/gallery";
 import { downloadSingleFile } from "utils/file";
 import {
     FileList,
@@ -45,20 +44,24 @@ export type FileListWithViewerProps = {
      */
     onSetOpenFileViewer?: (open: boolean) => void;
     /**
-     * Called when an action in the file viewer requires us to sync with remote.
+     * Called when an action in the file viewer requires us to perform a full
+     * pull from remote.
      */
-    onSyncWithRemote: () => Promise<void>;
+    onRemotePull: () => Promise<void>;
 } & Pick<
     FileListProps,
     | "mode"
     | "modePlus"
+    | "header"
     | "showAppDownloadBanner"
+    | "isMagicSearchResult"
     | "selectable"
     | "selected"
     | "setSelected"
     | "activeCollectionID"
     | "activePersonID"
     | "favoriteFileIDs"
+    | "emailByUserID"
 > &
     Pick<
         FileViewerProps,
@@ -69,6 +72,7 @@ export type FileListWithViewerProps = {
         | "collectionNameByID"
         | "pendingFavoriteUpdates"
         | "pendingVisibilityUpdates"
+        | "onRemoteFilesPull"
         | "onVisualFeedback"
         | "onToggleFavorite"
         | "onFileVisibilityUpdate"
@@ -84,16 +88,19 @@ export type FileListWithViewerProps = {
 export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
     mode,
     modePlus,
+    header,
     user,
     files,
     enableDownload,
     showAppDownloadBanner,
+    isMagicSearchResult,
     selectable,
     selected,
     setSelected,
     activeCollectionID,
     activePersonID,
     favoriteFileIDs,
+    emailByUserID,
     isInIncomingSharedCollection,
     isInHiddenSection,
     fileNormalCollectionIDs,
@@ -102,7 +109,8 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
     pendingVisibilityUpdates,
     setFilesDownloadProgressAttributesCreator,
     onSetOpenFileViewer,
-    onSyncWithRemote,
+    onRemotePull,
+    onRemoteFilesPull,
     onVisualFeedback,
     onToggleFavorite,
     onFileVisibilityUpdate,
@@ -133,15 +141,15 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
         setOpenFileViewer(false);
     }, []);
 
-    const handleTriggerSyncWithRemote = useCallback(
-        () => void onSyncWithRemote(),
-        [onSyncWithRemote],
+    const handleTriggerRemotePull = useCallback(
+        () => void onRemotePull(),
+        [onRemotePull],
     );
 
     const handleDownload = useCallback(
         (file: EnteFile) => {
             const setSingleFileDownloadProgress =
-                setFilesDownloadProgressAttributesCreator!(file.metadata.title);
+                setFilesDownloadProgressAttributesCreator!(fileFileName(file));
             void downloadSingleFile(file, setSingleFileDownloadProgress);
         },
         [setFilesDownloadProgressAttributesCreator],
@@ -172,13 +180,17 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
                         {...{
                             mode,
                             modePlus,
+                            header,
+                            user,
                             showAppDownloadBanner,
+                            isMagicSearchResult,
                             selectable,
                             selected,
                             setSelected,
                             activeCollectionID,
                             activePersonID,
                             favoriteFileIDs,
+                            emailByUserID,
                         }}
                         onItemClick={handleThumbnailClick}
                     />
@@ -189,7 +201,9 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
                 onClose={handleCloseFileViewer}
                 initialIndex={currentIndex}
                 disableDownload={!enableDownload}
-                isInTrashSection={activeCollectionID === TRASH_SECTION}
+                isInTrashSection={
+                    activeCollectionID == PseudoCollectionID.trash
+                }
                 {...{
                     user,
                     files,
@@ -200,13 +214,14 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
                     collectionNameByID,
                     pendingFavoriteUpdates,
                     pendingVisibilityUpdates,
+                    onRemoteFilesPull,
                     onVisualFeedback,
                     onToggleFavorite,
                     onFileVisibilityUpdate,
                     onSelectCollection,
                     onSelectPerson,
                 }}
-                onTriggerSyncWithRemote={handleTriggerSyncWithRemote}
+                onTriggerRemotePull={handleTriggerRemotePull}
                 onDownload={handleDownload}
                 onDelete={handleDelete}
                 onSaveEditedImageCopy={handleSaveEditedImageCopy}
@@ -223,8 +238,8 @@ const Container = styled("div")`
 /**
  * See: [Note: Timeline date string]
  */
-const fileTimelineDateString = (item: EnteFile) => {
-    const date = new Date(item.metadata.creationTime / 1000);
+const fileTimelineDateString = (file: EnteFile) => {
+    const date = new Date(fileCreationTime(file) / 1000);
     return isSameDay(date, new Date())
         ? t("today")
         : isSameDay(date, new Date(Date.now() - 24 * 60 * 60 * 1000))

@@ -40,7 +40,7 @@ jobs:
 
         defaults:
             run:
-                working-directory: auth
+                working-directory: mobile/apps/auth
 
         steps:
             - name: Checkout code and submodules
@@ -124,7 +124,7 @@ jobs:
             - name: Create a draft GitHub release
               uses: ncipollo/release-action@v1
               with:
-                  artifacts: "auth/artifacts/*"
+                  artifacts: "mobile/apps/auth/artifacts/*"
                   draft: true
                   allowUpdates: true
                   updateOnlyUnreleased: true
@@ -136,7 +136,7 @@ jobs:
               with:
                   serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
                   packageName: io.ente.auth
-                  releaseFiles: auth/build/app/outputs/bundle/playstoreRelease/app-playstore-release.aab
+                  releaseFiles: mobile/apps/auth/build/app/outputs/bundle/playstoreRelease/app-playstore-release.aab
                   track: internal
 
     build-windows:
@@ -145,7 +145,7 @@ jobs:
 
         defaults:
             run:
-                working-directory: auth
+                working-directory: mobile/apps/auth
 
         steps:
             - name: Checkout code and submodules
@@ -185,8 +185,8 @@ jobs:
                 trusted-signing-account-name: ${{ secrets.AZURE_CODE_SIGNING_NAME }}
                 certificate-profile-name: ${{ secrets.AZURE_CERT_PROFILE_NAME }}
                 files: |
-                      ${{ github.workspace }}/auth/artifacts/ente-${{ github.ref_name }}-installer.exe
-                      ${{ github.workspace }}/auth/ente-${{ github.ref_name }}-windows/auth.exe
+                      ${{ github.workspace }}/mobile/apps/auth/artifacts/ente-${{ github.ref_name }}-installer.exe
+                      ${{ github.workspace }}/mobile/apps/auth/ente-${{ github.ref_name }}-windows/auth.exe
                 file-digest: SHA256
                 timestamp-rfc3161: http://timestamp.acs.microsoft.com
                 timestamp-digest: SHA256  
@@ -201,7 +201,7 @@ jobs:
             - name: Create a draft GitHub release
               uses: ncipollo/release-action@v1
               with:
-                  artifacts: "auth/artifacts/*"
+                  artifacts: "mobile/apps/auth/artifacts/*"
                   draft: true
                   allowUpdates: true
                   updateOnlyUnreleased: true
@@ -211,7 +211,7 @@ jobs:
 
         defaults:
             run:
-                working-directory: auth
+                working-directory: mobile/apps/auth
 
         steps:
             - name: Checkout code and submodules
@@ -298,7 +298,7 @@ jobs:
             - name: Create a draft GitHub release
               uses: ncipollo/release-action@v1
               with:
-                  artifacts: "auth/artifacts/*"
+                  artifacts: "mobile/apps/auth/artifacts/*"
                   draft: true
                   allowUpdates: true
                   updateOnlyUnreleased: true

@@ -14,13 +14,11 @@ import type {
 } from "ente-base/types/ipc";
 import { type UploadResult } from "ente-gallery/services/upload";
 import type { UploadAsset } from "ente-gallery/services/upload/upload-service";
-import { EncryptedEnteFile } from "ente-media/file";
-import {
-    getLocalFiles,
-    groupFilesByCollectionID,
-} from "ente-new/photos/services/files";
+import { groupFilesByCollectionID } from "ente-gallery/utils/file";
+import type { EnteFile } from "ente-media/file";
+import { removeFromOwnCollection } from "ente-new/photos/services/collection";
+import { computeNormalCollectionFilesFromSaved } from "ente-new/photos/services/file";
 import { ensureString } from "ente-utils/ensure";
-import { removeFromCollection } from "./collectionService";
 import { type UploadItemWithCollection, uploadManager } from "./upload-manager";
 
 /**
@@ -46,10 +44,10 @@ class FolderWatcher {
     /** `true` if we are temporarily paused to let a user upload go through. */
     private isPaused = false;
     /**
-     * A map from file paths to an Ente file for files that were uploaded (or
-     * symlinked) as part of the most recent upload attempt.
+     * A map from file paths to the (fileID, collectionID) of the file that was
+     * uploaded (or symlinked) as part of the most recent upload attempt.
      */
-    private uploadedFileForPath = new Map<string, EncryptedEnteFile>();
+    private uploadedFileForPath = new Map<string, EnteFile>();
     /**
      * A set of file paths that could not be uploaded in the most recent upload
      * attempt. These are the uploads that failed due to a permanent error that
@@ -65,17 +63,19 @@ class FolderWatcher {
      */
     private upload: (collectionName: string, filePaths: string[]) => void;
     /**
-     * A function to call when we want to sync with the backend. It will
-     * initiate the sync but will not await its completion.
+     * A function to call when we want to trigger a full remote pull. It will
+     * initiate the pull but will not await its completion.
      *
      * This is passed as a param to {@link init}.
      */
-    private requestSyncWithRemote: () => void;
+    private onTriggerRemotePull: () => void;
 
     /** A helper function that debounces invocations of {@link runNextEvent}. */
     private debouncedRunNextEvent: () => void;
 
     constructor() {
+        // TODO:
+        // eslint-disable-next-line @typescript-eslint/no-misused-promises
         this.debouncedRunNextEvent = debounce(() => this.runNextEvent(), 1000);
     }
 
@@ -85,14 +85,14 @@ class FolderWatcher {
      * This is only called when we're running in the context of our desktop app.
      *
      * The caller provides us with the hooks we can use to actually upload the
-     * files, and to sync with remote (say after deletion).
+     * files, and to pull the latest changes from remote (say after deletion).
      */
     init(
         upload: (collectionName: string, filePaths: string[]) => void,
-        requestSyncWithRemote: () => void,
+        onTriggerRemotePull: () => void,
     ) {
         this.upload = upload;
-        this.requestSyncWithRemote = requestSyncWithRemote;
+        this.onTriggerRemotePull = onTriggerRemotePull;
         this.registerListeners();
         this.syncWithDisk();
     }
@@ -321,48 +321,52 @@ class FolderWatcher {
      * Callback invoked by the uploader whenever a item we requested to
      * {@link upload} gets uploaded.
      */
-    async onFileUpload(
-        fileUploadResult: UploadResult,
-        item: UploadItemWithCollection,
-        file: EncryptedEnteFile,
-    ) {
+    onFileUpload(item: UploadItemWithCollection, uploadResult: UploadResult) {
         // Re the usage of ensureString: For desktop watch, the only possibility
         // for a UploadItem is for it to be a string (the absolute path to a
         // file on disk).
-        if (
-            [
-                "addedSymlink",
-                "uploaded",
-                "uploadedWithStaticThumbnail",
-                "alreadyUploaded",
-            ].includes(fileUploadResult)
-        ) {
-            if (item.isLivePhoto) {
-                this.uploadedFileForPath.set(
-                    ensureString(item.livePhotoAssets.image),
-                    file,
-                );
-                this.uploadedFileForPath.set(
-                    ensureString(item.livePhotoAssets.video),
-                    file,
-                );
-            } else {
-                this.uploadedFileForPath.set(
-                    ensureString(item.uploadItem),
-                    file,
-                );
-            }
-        } else if (["unsupported", "tooLarge"].includes(fileUploadResult)) {
-            if (item.isLivePhoto) {
-                this.unUploadableFilePaths.add(
-                    ensureString(item.livePhotoAssets.image),
-                );
-                this.unUploadableFilePaths.add(
-                    ensureString(item.livePhotoAssets.video),
-                );
-            } else {
-                this.unUploadableFilePaths.add(ensureString(item.uploadItem));
-            }
+        switch (uploadResult.type) {
+            case "alreadyUploaded":
+            case "addedSymlink":
+            case "uploaded":
+            case "uploadedWithStaticThumbnail":
+                {
+                    // Done.
+                    if (item.isLivePhoto) {
+                        this.uploadedFileForPath.set(
+                            ensureString(item.livePhotoAssets.image),
+                            uploadResult.file,
+                        );
+                        this.uploadedFileForPath.set(
+                            ensureString(item.livePhotoAssets.video),
+                            uploadResult.file,
+                        );
+                    } else {
+                        this.uploadedFileForPath.set(
+                            ensureString(item.uploadItem),
+                            uploadResult.file,
+                        );
+                    }
+                }
+                break;
+            case "unsupported":
+            case "tooLarge":
+                {
+                    // Non-retriable error.
+                    if (item.isLivePhoto) {
+                        this.unUploadableFilePaths.add(
+                            ensureString(item.livePhotoAssets.image),
+                        );
+                        this.unUploadableFilePaths.add(
+                            ensureString(item.livePhotoAssets.video),
+                        );
+                    } else {
+                        this.unUploadableFilePaths.add(
+                            ensureString(item.uploadItem),
+                        );
+                    }
+                }
+                break;
         }
     }
 
@@ -404,7 +408,7 @@ class FolderWatcher {
         const syncedFiles: FolderWatch["syncedFiles"] = [];
         const ignoredFiles: FolderWatch["ignoredFiles"] = [];
 
-        const markSynced = (file: EncryptedEnteFile, path: string) => {
+        const markSynced = (file: EnteFile, path: string) => {
             syncedFiles.push({
                 path,
                 uploadedFileID: file.id,
@@ -470,7 +474,7 @@ class FolderWatcher {
         for (const file of syncedFiles)
             syncedFileForID.set(file.uploadedFileID, file);
 
-        const files = await getLocalFiles();
+        const files = await computeNormalCollectionFilesFromSaved();
         const filesToTrash = files.filter((file) => {
             const correspondingSyncedFile = syncedFileForID.get(file.id);
             if (
@@ -484,10 +488,10 @@ class FolderWatcher {
 
         const filesByCollectionID = groupFilesByCollectionID(filesToTrash);
         for (const [id, files] of filesByCollectionID.entries()) {
-            await removeFromCollection(id, files);
+            await removeFromOwnCollection(id, files);
         }
 
-        this.requestSyncWithRemote();
+        this.onTriggerRemotePull();
     }
 }
 
@@ -576,17 +580,10 @@ const deduceEvents = async (watches: FolderWatch[]): Promise<WatchEvent[]> => {
  */
 const pathsToUpload = (paths: string[], watch: FolderWatch) =>
     paths
-        // Filter out hidden files (files whose names begins with a dot)
-        .filter((path) => !isHiddenFile(path))
+        // Filter out files whose names begins with a dot.
+        .filter((path) => !basename(path).startsWith("."))
         // Files that are on disk but not yet synced or ignored.
         .filter((path) => !isSyncedOrIgnoredPath(path, watch));
-
-/**
- * Return true if the file at the given {@link path} is hidden.
- *
- * Hidden files are those whose names begin with a "." (dot).
- */
-const isHiddenFile = (path: string) => basename(path).startsWith(".");
 
 /**
  * Return the paths to previously synced files that are no longer on disk and so

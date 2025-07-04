@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-/* eslint-disable @typescript-eslint/no-unnecessary-condition */
 import FolderIcon from "@mui/icons-material/Folder";
 import {
     Box,
@@ -37,8 +36,8 @@ import { formattedNumber } from "ente-base/i18n";
 import { formattedDateTime } from "ente-base/i18n-date";
 import log from "ente-base/log";
 import { type EnteFile } from "ente-media/file";
+import { fileFileName } from "ente-media/file-metadata";
 import { ItemCard, PreviewItemTile } from "ente-new/photos/components/Tiles";
-import { CustomError } from "ente-shared/error";
 import { t } from "i18next";
 import React, { memo, useCallback, useEffect, useState } from "react";
 import { Trans } from "react-i18next";
@@ -49,11 +48,11 @@ import {
     type ListItemKeySelector,
 } from "react-window";
 import exportService, {
+    CustomError,
     ExportStage,
     selectAndPrepareExportDirectory,
     type ExportOpts,
     type ExportProgress,
-    type ExportSettings,
 } from "../services/export";
 
 type ExportProps = ModalVisibilityProps & {
@@ -117,10 +116,12 @@ export const Export: React.FC<ExportProps> = ({
             setLastExportTime,
             setPendingFiles,
         });
-        const exportSettings: ExportSettings =
-            exportService.getExportSettings();
-        setExportFolder(exportSettings?.folder ?? null);
+        const exportSettings = exportService.getExportSettings();
+        setExportFolder(exportSettings?.folder ?? "");
         setContinuousExport(exportSettings?.continuousExport ?? false);
+        // TODO: The type of syncExportRecord is wrong. It can work with an
+        // undefined value, but the type prohibits that.
+        // @ts-ignore
         void syncExportRecord(exportSettings?.folder);
     }, [syncExportRecord]);
 
@@ -601,7 +602,7 @@ const ExportPendingListItem: React.FC<
     const { pendingFiles, collectionNameByID } = data;
     const file = pendingFiles[index]!;
 
-    const fileName = file.metadata.title;
+    const fileName = fileFileName(file);
     const collectionName = collectionNameByID.get(file.collectionID);
 
     return (

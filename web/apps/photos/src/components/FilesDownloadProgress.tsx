@@ -1,8 +1,8 @@
+// TODO: Audit this file
+/* eslint-disable react-refresh/only-export-components */
 import { useBaseContext } from "ente-base/context";
 import { Notification } from "ente-new/photos/components/Notification";
 import { t } from "i18next";
-import { GalleryContext } from "pages/gallery";
-import { useContext } from "react";
 
 export interface FilesDownloadProgressAttributes {
     id: number;
@@ -19,6 +19,25 @@ export interface FilesDownloadProgressAttributes {
 interface FilesDownloadProgressProps {
     attributesList: FilesDownloadProgressAttributes[];
     setAttributesList: (value: FilesDownloadProgressAttributes[]) => void;
+    /**
+     * Called when the hidden section should be shown.
+     *
+     * This triggers the display of the dialog to authenticate the user, and the
+     * returned promise when (and only if) the user successfully reauthenticates.
+     *
+     * Since the hidden section is only relevant in the context of the photos
+     * app where there is a logged in user, this callback can be omitted in the
+     * context of the public albums app.
+     */
+    onShowHiddenSection?: () => Promise<void>;
+    /**
+     * Called when the collection with the given {@link collectionID} should be
+     * shown.
+     *
+     * This is only relevant in the context of the photos app, and can be
+     * omitted by the public albums app.
+     */
+    onShowCollection?: (collectionID: number) => void;
 }
 
 export const isFilesDownloadStarted = (
@@ -36,7 +55,7 @@ export const isFilesDownloadCompleted = (
     );
 };
 
-export const isFilesDownloadCompletedWithErrors = (
+const isFilesDownloadCompletedWithErrors = (
     attributes: FilesDownloadProgressAttributes,
 ) => {
     return (
@@ -55,9 +74,10 @@ export const isFilesDownloadCancelled = (
 export const FilesDownloadProgress: React.FC<FilesDownloadProgressProps> = ({
     attributesList,
     setAttributesList,
+    onShowHiddenSection,
+    onShowCollection,
 }) => {
     const { showMiniDialog } = useBaseContext();
-    const galleryContext = useContext(GalleryContext);
 
     if (!attributesList) {
         return <></>;
@@ -93,55 +113,63 @@ export const FilesDownloadProgress: React.FC<FilesDownloadProgressProps> = ({
         }
     };
 
-    const handleOnClick = (id: number) => () => {
-        const attributes = attributesList.find((attr) => attr.id === id);
-        const electron = globalThis.electron;
-        if (electron) {
-            electron.openDirectory(attributes.downloadDirPath);
-        } else {
-            if (attributes.isHidden) {
-                galleryContext.openHiddenSection(() => {
-                    galleryContext.setActiveCollectionID(
-                        attributes.collectionID,
-                    );
-                });
-            } else {
-                galleryContext.setActiveCollectionID(attributes.collectionID);
+    const createHandleOnClick =
+        (id: number, onShowCollection: (collectionID: number) => void) =>
+        () => {
+            const attributes = attributesList.find((attr) => attr.id === id);
+            const electron = globalThis.electron;
+            if (electron) {
+                electron.openDirectory(attributes.downloadDirPath);
+            } else if (onShowCollection) {
+                if (attributes.isHidden) {
+                    void onShowHiddenSection().then(() => {
+                        onShowCollection(attributes.collectionID);
+                    });
+                } else {
+                    onShowCollection(attributes.collectionID);
+                }
             }
-        }
-    };
+        };
 
-    return (
-        <>
-            {attributesList.map((attributes, index) => (
-                <Notification
-                    key={attributes.id}
-                    horizontal="left"
-                    sx={{ "&&": { bottom: `${index * 80 + 20}px` } }}
-                    open={isFilesDownloadStarted(attributes)}
-                    onClose={handleClose(attributes)}
-                    keepOpenOnClick
-                    attributes={{
-                        color: isFilesDownloadCompletedWithErrors(attributes)
-                            ? "critical"
-                            : "secondary",
-                        title: isFilesDownloadCompletedWithErrors(attributes)
-                            ? t("download_failed")
-                            : isFilesDownloadCompleted(attributes)
-                              ? t("download_complete")
-                              : t("downloading_album", {
-                                    name: attributes.folderName,
-                                }),
-                        caption: isFilesDownloadCompleted(attributes)
-                            ? attributes.folderName
-                            : t("download_progress", {
-                                  count: attributes.success + attributes.failed,
-                                  total: attributes.total,
-                              }),
-                        onClick: handleOnClick(attributes.id),
-                    }}
-                />
-            ))}
-        </>
-    );
+    const notifications: React.ReactNode[] = [];
+    let visibleIndex = 0;
+    for (const attributes of attributesList) {
+        // Skip attempted downloads of empty albums, which had no effect.
+        if (!isFilesDownloadStarted(attributes)) continue;
+
+        const index = visibleIndex++;
+        notifications.push(
+            <Notification
+                key={attributes.id}
+                horizontal="left"
+                sx={{ "&&": { bottom: `${index * 80 + 20}px` } }}
+                open={isFilesDownloadStarted(attributes)}
+                onClose={handleClose(attributes)}
+                keepOpenOnClick
+                attributes={{
+                    color: isFilesDownloadCompletedWithErrors(attributes)
+                        ? "critical"
+                        : "secondary",
+                    title: isFilesDownloadCompletedWithErrors(attributes)
+                        ? t("download_failed")
+                        : isFilesDownloadCompleted(attributes)
+                          ? t("download_complete")
+                          : t("downloading_album", {
+                                name: attributes.folderName,
+                            }),
+                    caption: isFilesDownloadCompleted(attributes)
+                        ? attributes.folderName
+                        : t("download_progress", {
+                              count: attributes.success + attributes.failed,
+                              total: attributes.total,
+                          }),
+                    onClick: onShowCollection
+                        ? createHandleOnClick(attributes.id, onShowCollection)
+                        : undefined,
+                }}
+            />,
+        );
+    }
+
+    return notifications;
 };

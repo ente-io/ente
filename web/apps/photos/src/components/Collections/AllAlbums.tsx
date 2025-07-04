@@ -18,13 +18,19 @@ import {
     LargeTileButton,
     LargeTileTextOverlay,
 } from "ente-new/photos/components/Tiles";
-import type { CollectionSummary } from "ente-new/photos/services/collection/ui";
-import { CollectionsSortBy } from "ente-new/photos/services/collection/ui";
+import type {
+    CollectionsSortBy,
+    CollectionSummary,
+} from "ente-new/photos/services/collection-summary";
 import { t } from "i18next";
 import memoize from "memoize-one";
 import React, { useEffect, useRef, useState } from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
-import { areEqual, FixedSizeList, ListChildComponentProps } from "react-window";
+import {
+    areEqual,
+    FixedSizeList,
+    type ListChildComponentProps,
+} from "react-window";
 
 interface AllAlbums {
     open: boolean;
@@ -164,7 +170,7 @@ const AlbumsRow = React.memo(
         isScrolling,
     }: ListChildComponentProps<ItemData>) => {
         const { collectionRowList, onCollectionClick } = data;
-        const collectionRow = collectionRowList[index];
+        const collectionRow = collectionRowList[index]!;
         return (
             <div style={style}>
                 <Stack direction="row" sx={{ p: 2, gap: 0.5 }}>
@@ -185,7 +191,7 @@ const AlbumsRow = React.memo(
 
 interface AllAlbumsContentProps {
     collectionSummaries: CollectionSummary[];
-    onCollectionClick: (id?: number) => void;
+    onCollectionClick: (id: number) => void;
 }
 
 const AllAlbumsContent: React.FC<AllAlbumsContentProps> = ({
@@ -197,7 +203,9 @@ const AllAlbumsContent: React.FC<AllAlbumsContentProps> = ({
     const refreshInProgress = useRef(false);
     const shouldRefresh = useRef(false);
 
-    const [collectionRowList, setCollectionRowList] = useState([]);
+    const [collectionRowList, setCollectionRowList] = useState<
+        CollectionSummary[][]
+    >([]);
 
     const columns = isTwoColumn ? 2 : 3;
     const maxListContentHeight =
@@ -209,7 +217,7 @@ const AllAlbumsContent: React.FC<AllAlbumsContentProps> = ({
         if (!collectionSummaries) {
             return;
         }
-        const main = async () => {
+        const main = () => {
             if (refreshInProgress.current) {
                 shouldRefresh.current = true;
                 return;
@@ -225,7 +233,7 @@ const AllAlbumsContent: React.FC<AllAlbumsContentProps> = ({
                     i < columns && index < collectionSummaries.length;
                     i++
                 ) {
-                    collectionRow.push(collectionSummaries[index++]);
+                    collectionRow.push(collectionSummaries[index++]!);
                 }
                 collectionRowList.push(collectionRow);
             }

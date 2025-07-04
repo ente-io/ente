@@ -3,15 +3,13 @@
     "version": "0.0.0",
     "private": true,
     "dependencies": {
-        "chrono-node": "^2.8.2",
+        "chrono-node": "^2.8.3",
         "debounce": "^2.2.0",
         "ente-accounts": "*",
         "ente-base": "*",
         "ente-gallery": "*",
         "ente-media": "*",
         "ente-new": "*",
-        "ente-shared": "*",
-        "localforage": "^1.10.0",
         "memoize-one": "^6.0.0",
         "ml-matrix": "^6.12.1",
         "p-debounce": "^4.0.0",
@@ -25,8 +23,8 @@
         "similarity-transformation": "^0.0.1"
     },
     "devDependencies": {
-        "@types/node": "^22.15.31",
-        "@types/react": "^19.1.7",
+        "@types/node": "^22.15.32",
+        "@types/react": "^19.1.8",
         "@types/react-dom": "^19.1.6",
         "@types/react-window": "^1.8.8",
         "ente-build-config": "*"

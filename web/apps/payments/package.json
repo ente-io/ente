@@ -14,10 +14,10 @@
         "react-dom": "^19.1.0"
     },
     "devDependencies": {
-        "@types/react": "^19.1.7",
+        "@types/react": "^19.1.8",
         "@types/react-dom": "^19.1.6",
-        "@vitejs/plugin-react": "^4.5.2",
+        "@vitejs/plugin-react": "^4.6.0",
         "ente-build-config": "*",
-        "vite": "^6.3.5"
+        "vite": "^7.0.0"
     }
 }

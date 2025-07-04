@@ -35,6 +35,7 @@ type AuthorizationResponse struct {
 	ID                 int64          `json:"id"`
 	KeyAttributes      *KeyAttributes `json:"keyAttributes,omitempty"`
 	EncryptedToken     string         `json:"encryptedToken,omitempty"`
+	AccountsUrl        string         `json:"accountsUrl"`
 	Token              string         `json:"token,omitempty"`
 	TwoFactorSessionID string         `json:"twoFactorSessionID"`
 	PassKeySessionID   string         `json:"passkeySessionID"`

@@ -152,7 +152,7 @@ export const WatchFolder: React.FC<ModalVisibilityProps> = ({
 
 interface WatchList {
     watches: FolderWatch[] | undefined;
-    removeWatch: (watch: FolderWatch) => void;
+    removeWatch: (watch: FolderWatch) => Promise<void>;
 }
 
 const WatchList: React.FC<WatchList> = ({ watches, removeWatch }) =>
@@ -201,13 +201,13 @@ const Check: React.FC = () => (
 
 interface WatchEntryProps {
     watch: FolderWatch;
-    removeWatch: (watch: FolderWatch) => void;
+    removeWatch: (watch: FolderWatch) => Promise<void>;
 }
 
 const WatchEntry: React.FC<WatchEntryProps> = ({ watch, removeWatch }) => {
     const { showMiniDialog } = useBaseContext();
 
-    const confirmStopWatching = () => {
+    const confirmStopWatching = () =>
         showMiniDialog({
             title: t("stop_watching_folder_title"),
             message: t("stop_watching_folder_message"),
@@ -217,7 +217,6 @@ const WatchEntry: React.FC<WatchEntryProps> = ({ watch, removeWatch }) => {
                 action: () => removeWatch(watch),
             },
         });
-    };
 
     return (
         <SpacedRow sx={{ overflow: "hidden", flexShrink: 0 }}>
