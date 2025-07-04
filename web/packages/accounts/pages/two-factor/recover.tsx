@@ -64,20 +64,23 @@ const Page: React.FC<RecoverPageProps> = ({ twoFactorType }) => {
     );
 
     useEffect(() => {
-        const user = savedPartialLocalUser();
-        const sessionID =
-            twoFactorType == "passkey"
-                ? user?.passkeySessionID
-                : user?.twoFactorSessionID;
-        if (!user?.email || !sessionID) {
-            void router.push("/");
-        } else if (user.encryptedToken || user.token) {
-            void router.push("/generate");
-        } else {
-            setSessionID(sessionID);
-            void recoverTwoFactor(twoFactorType, sessionID)
-                .then(setRecoveryResponse)
-                .catch((e: unknown) => {
+        void (async () => {
+            const user = savedPartialLocalUser();
+            const sessionID =
+                twoFactorType == "passkey"
+                    ? user?.passkeySessionID
+                    : user?.twoFactorSessionID;
+            if (!user?.email || !sessionID) {
+                await router.push("/");
+            } else if (user.encryptedToken || user.token) {
+                await router.push("/generate");
+            } else {
+                setSessionID(sessionID);
+                try {
+                    setRecoveryResponse(
+                        await recoverTwoFactor(twoFactorType, sessionID),
+                    );
+                } catch (e) {
                     log.error("Second factor recovery page setup failed", e);
                     if (isHTTPErrorWithStatus(e, 404)) {
                         logout();
@@ -86,8 +89,9 @@ const Page: React.FC<RecoverPageProps> = ({ twoFactorType }) => {
                     } else {
                         onGenericError(e);
                     }
-                });
-        }
+                }
+            }
+        })();
     }, [
         twoFactorType,
         logout,

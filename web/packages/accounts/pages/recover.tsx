@@ -26,7 +26,7 @@ import {
 } from "ente-base/session";
 import { t } from "i18next";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 /**
  * A page that allows the user to enter their recovery key to recover their
@@ -44,58 +44,63 @@ const Page: React.FC = () => {
     const router = useRouter();
 
     useEffect(() => {
-        const user = savedPartialLocalUser();
-        if (!user?.email) {
-            void router.push("/");
-            return;
-        }
-        if (!user?.encryptedToken && !user?.token) {
-            void sendOTT(user.email, undefined);
-            stashRedirect("/recover");
-            void router.push("/verify");
-            return;
-        }
+        void (async () => {
+            const user = savedPartialLocalUser();
+            if (!user?.email) {
+                await router.push("/");
+                return;
+            }
 
-        const keyAttributes = savedKeyAttributes();
-        if (!keyAttributes) {
-            void router.push("/generate");
-        } else if (haveMasterKeyInSession()) {
-            void router.push(appHomeRoute);
-        } else {
-            setKeyAttributes(keyAttributes);
-        }
+            if (!user.encryptedToken && !user.token) {
+                await sendOTT(user.email, undefined);
+                stashRedirect("/recover");
+                await router.push("/verify");
+                return;
+            }
+
+            const keyAttributes = savedKeyAttributes();
+            if (!keyAttributes) {
+                await router.push("/generate");
+            } else if (haveMasterKeyInSession()) {
+                await router.push(appHomeRoute);
+            } else {
+                setKeyAttributes(keyAttributes);
+            }
+        })();
     }, [router]);
 
-    const handleSubmit: SingleInputFormProps["onSubmit"] = async (
-        recoveryKeyMnemonic: string,
-        setFieldError,
-    ) => {
-        try {
-            const keyAttr = keyAttributes!;
-            const masterKey = await decryptBox(
-                {
-                    encryptedData: keyAttr.masterKeyEncryptedWithRecoveryKey!,
-                    nonce: keyAttr.masterKeyDecryptionNonce!,
-                },
-                await recoveryKeyFromMnemonic(recoveryKeyMnemonic),
-            );
-            await saveMasterKeyInSessionAndSafeStore(masterKey);
-            await decryptAndStoreToken(keyAttr, masterKey);
+    const handleSubmit: SingleInputFormProps["onSubmit"] = useCallback(
+        async (recoveryKeyMnemonic: string, setFieldError) => {
+            try {
+                const keyAttr = keyAttributes!;
+                const masterKey = await decryptBox(
+                    {
+                        encryptedData:
+                            keyAttr.masterKeyEncryptedWithRecoveryKey!,
+                        nonce: keyAttr.masterKeyDecryptionNonce!,
+                    },
+                    await recoveryKeyFromMnemonic(recoveryKeyMnemonic),
+                );
+                await saveMasterKeyInSessionAndSafeStore(masterKey);
+                await decryptAndStoreToken(keyAttr, masterKey);
 
-            void router.push("/change-password?op=reset");
-        } catch (e) {
-            log.error("password recovery failed", e);
-            setFieldError(t("incorrect_recovery_key"));
-        }
-    };
+                void router.push("/change-password?op=reset");
+            } catch (e) {
+                log.error("Master key recovery failed", e);
+                setFieldError(t("incorrect_recovery_key"));
+            }
+        },
+        [router, keyAttributes],
+    );
 
-    const showNoRecoveryKeyMessage = () =>
+    const showNoRecoveryKeyMessage = useCallback(() => {
         showMiniDialog({
             title: t("sorry"),
             message: t("no_recovery_key_message"),
             continue: { color: "secondary" },
             cancel: false,
         });
+    }, [showMiniDialog]);
 
     return (
         <AccountsPageContents>

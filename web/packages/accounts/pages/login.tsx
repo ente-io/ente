@@ -110,12 +110,12 @@ import React, { useCallback, useEffect, useState } from "react";
  *   - Redirects to "/" if there is no `email` or `twoFactorSessionID` in the
  *     saved partial local user.
  *
- *   - Redirects to "/credentials" if there `isTwoFactorEnabled` is not `true`
- *     and either of `encryptedToken` or `token` is present in the saved partial
+ *   - Redirects to "/credentials" if `isTwoFactorEnabled` is not `true` and
+ *     either of `encryptedToken` or `token` is present in the saved partial
  *     local user.
  *
- * - "/passkeys/finish" - A page that the accounts app hands off control back to
- *   us (the calling app) to continue the rest of the authentication.
+ * - "/passkeys/finish" - A page where the accounts app hands off control back
+ *   to us (the calling app) once the passkey has been verified.
  *
  *   - Redirects to "/" if there is no matching `inflightPasskeySessionID` in
  *     session storage.
@@ -124,15 +124,15 @@ import React, { useCallback, useEffect, useState } from "react";
  *
  * - "/two-factor/recover" and "/passkeys/recover" - Pages that allow the user
  *   to reset or bypass their second factor if they possess their recovery key.
- *   Both pages work similarly, except the second factor they act on.
+ *   Both pages work similarly, except for the second factor they act on.
  *
- *   - Redirects to "/" if there is no `email` in the saved partial local user,
- *     or either of `twoFactorSessionID` and `twoFactorSessionID` is set.
+ *   - Redirect to "/" if there is no `email` or `twoFactorSessionID` /
+ *     `passkeySessionID` in the saved partial local user.
  *
- *   - Redirects to "/generate" if there is an `encryptedToken` or `token` in
- *     the saved partial local user.
+ *   - Redirect to "/generate" if there is an `encryptedToken` or `token` in the
+ *     saved partial local user.
  *
- *   - Redirects to "/credentials" after recovery.
+ *   - Redirect to "/credentials" after recovery.
  *
  */
 const Page: React.FC = () => {

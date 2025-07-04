@@ -13,6 +13,11 @@ import { useRouter } from "next/router";
 import React, { useEffect } from "react";
 
 /**
+ * The page where the accounts app hands back control to us once the passkey has
+ * been verified.
+ *
+ * See: [Note: Login pages]
+ *
  * [Note: Finish passkey flow in the requesting app]
  *
  * The passkey finish step needs to happen in the context of the client which
@@ -23,7 +28,7 @@ const Page: React.FC = () => {
     const router = useRouter();
 
     useEffect(() => {
-        // Extract response from query params
+        // Extract response from query params.
         const searchParams = new URLSearchParams(window.location.search);
         const passkeySessionID = searchParams.get("passkeySessionID");
         const response = searchParams.get("response");
