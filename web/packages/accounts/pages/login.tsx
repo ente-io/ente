@@ -40,17 +40,20 @@ import React, { useCallback, useEffect, useState } from "react";
  *   - Redirects to "/" if there is no `email` present in the saved partial
  *     local user.
  *
- *   - Redirects to "/credentials" if email verification is not needed, and also
- *     when email verification completes.
+ *   - Redirects to "/credentials" if both saved key attributes and a `token`
+ *     (or `encryptedToken`) in present in the saved partial local user, or if
+ *     email verification is not needed, or when email verification completes
+ *     and remote sent us key attributes (which will happen on login).
  *
- *   - Redirects to "/two-factor/verify" once email verification is complete if
- *     the user has setup an additional TOTP second factor that also needs to be
- *     verified.
+ *   - Redirects to "/generate" once email verification is complete and the user
+ *     does not have key attributes (which will happen for new signups).
  *
- *   - Redirects to the passkey app once email verification is complete if the
- *     user has setup an additional passkey that also needs to be verified.
- *     Before redirecting, it sets the `inflightPasskeySessionID` in session
- *     storage.
+ *   - Redirects to "/two-factor/verify" when email verification completes and
+ *     the user has setup a TOTP second factor that also needs to be verified.
+ *
+ *   - Redirects to the passkey app when email verification completes and the
+ *     user has setup a passkey that also needs to be verified. Before
+ *     redirecting, `inflightPasskeySessionID` in saved in session storage.
  *
  * - "/credentials" - A page that allows the user to enter their password to
  *   authenticate (initial login) or reauthenticate (new web app tab)
@@ -59,16 +62,16 @@ import React, { useCallback, useEffect, useState } from "react";
  *     local user.
  *
  *   - Redirects to "/two-factor/verify" if saved key attributes are not present
- *     once password is verified and the user has setup an additional TOTP
- *     second factor that also needs to be verified.
+ *     once password is verified and the user has setup a TOTP second factor
+ *     that also needs to be verified.
  *
  *   - Redirects to the passkey app once password is verified if saved key
- *     attributes are not present if the user has setup an additional passkey
- *     that also needs to be verified. Before redirecting, it sets the
- *     `inflightPasskeySessionID` in session storage.
+ *     attributes are not present if the user has setup a passkey that also
+ *     needs to be verified. Before redirecting, `inflightPasskeySessionID` is
+ *     saved in session storage.
  *
- *   - Redirects to the `appHomeRoute` otherwise (e.g. /gallery). The flow is
- *     complete.
+ *   - Redirects to the `appHomeRoute` otherwise (e.g. /gallery). **The flow is
+ *     complete**.
  *
  * - "/generate" - A page that allows the user to generate key attributes if
  *   needed, and shows them their recovery key.

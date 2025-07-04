@@ -25,9 +25,10 @@ interface LoginContentsProps {
 }
 
 /**
- * Contents of the "login form", maintained as a separate component so that the
- * same code can be used both in the standalone /login page, and also within the
- * embedded login form shown on the photos index page.
+ * A contents of the "login" form.
+ *
+ * It is used both on the "/login" page, and as the embedded login form on the
+ * "/" page where the user can toggle between the signup and login forms inline.
  */
 export const LoginContents: React.FC<LoginContentsProps> = ({
     onSignUp,

@@ -130,7 +130,9 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
         if (needsFamilyRedirect && savedPartialLocalUser()?.token)
             redirectToFamilyPortal();
 
-        router.events.on("routeChangeStart", () => {
+        router.events.on("routeChangeStart", (url) => {
+            if (process.env.NEXT_PUBLIC_ENTE_TRACE) console.log("route", url);
+
             if (needsFamilyRedirect && savedPartialLocalUser()?.token) {
                 redirectToFamilyPortal();
 

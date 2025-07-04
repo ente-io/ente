@@ -46,7 +46,7 @@ import log from "ente-base/log";
 import { clearSessionStorage } from "ente-base/session";
 import { t } from "i18next";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Trans } from "react-i18next";
 
 /**
@@ -58,7 +58,9 @@ const Page: React.FC = () => {
     const { logout, showMiniDialog } = useBaseContext();
 
     const [email, setEmail] = useState("");
-    const [resend, setResend] = useState(0);
+    const [resend, setResend] = useState<"enable" | "sending" | "sent">(
+        "enable",
+    );
     const [passkeyVerificationData, setPasskeyVerificationData] = useState<
         { passkeySessionID: string; url: string } | undefined
     >();
@@ -100,6 +102,7 @@ const Page: React.FC = () => {
             } = await userVerificationResultAfterResolvingSecondFactorChoice(
                 await verifyEmail(email, ott, cleanedReferral),
             );
+
             if (passkeySessionID) {
                 updateSavedLocalUser({ passkeySessionID });
                 saveIsFirstLogin();
@@ -137,12 +140,11 @@ const Page: React.FC = () => {
                     await unstashAfterUseSRPSetupAttributes(setupSRP);
                 }
                 saveIsFirstLogin();
-                const redirectURL = unstashRedirect();
-                if (keyAttributes?.encryptedKey) {
+                if (keyAttributes) {
                     clearSessionStorage();
-                    void router.push(redirectURL ?? "/credentials");
+                    void router.push(unstashRedirect() ?? "/credentials");
                 } else {
-                    void router.push(redirectURL ?? "/generate");
+                    void router.push(unstashRedirect() ?? "/generate");
                 }
             }
         } catch (e) {
@@ -157,12 +159,12 @@ const Page: React.FC = () => {
         }
     };
 
-    const resendEmail = async () => {
-        setResend(1);
+    const resendEmail = useCallback(async () => {
+        setResend("sending");
         await sendOTT(email, undefined);
-        setResend(2);
-        setTimeout(() => setResend(0), 3000);
-    };
+        setResend("sent");
+        setTimeout(() => setResend("enable"), 3000);
+    }, [email]);
 
     if (!email) {
         return <LoadingIndicator />;
@@ -225,13 +227,13 @@ const Page: React.FC = () => {
             />
 
             <AccountsPageFooter>
-                {resend == 0 && (
+                {resend == "enable" && (
                     <LinkButton onClick={resendEmail}>
                         {t("resend_code")}
                     </LinkButton>
                 )}
-                {resend == 1 && <span>{t("status_sending")}</span>}
-                {resend == 2 && <span>{t("status_sent")}</span>}
+                {resend == "sending" && <span>{t("status_sending")}</span>}
+                {resend == "sent" && <span>{t("status_sent")}</span>}
                 <LinkButton onClick={logout}>{t("change_email")}</LinkButton>
             </AccountsPageFooter>
 
@@ -256,9 +258,7 @@ const redirectionIfNeededOrEmail = async () => {
         return "/";
     }
 
-    const keyAttributes = savedKeyAttributes();
-
-    if (keyAttributes?.encryptedKey && (user.token || user.encryptedToken)) {
+    if (savedKeyAttributes() && (user.token || user.encryptedToken)) {
         return "/credentials";
     }
 

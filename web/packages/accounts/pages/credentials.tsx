@@ -223,58 +223,62 @@ const Page: React.FC = () => {
     }, [router, validateSession, postVerification]);
 
     const getKeyAttributes: VerifyMasterPasswordFormProps["getKeyAttributes"] =
-        async (kek: string) => {
-            const {
-                id,
-                keyAttributes,
-                token,
-                encryptedToken,
-                twoFactorSessionID,
-                passkeySessionID,
-                accountsUrl,
-            } = await userVerificationResultAfterResolvingSecondFactorChoice(
-                await verifySRP(srpAttributes!, kek),
-            );
-
-            // If we had to ask remote for the key attributes, it is the initial
-            // login on this client.
-            saveIsFirstLogin();
-
-            if (passkeySessionID) {
-                await stashKeyEncryptionKeyInSessionStore(kek);
-                updateSavedLocalUser({ passkeySessionID });
-                stashRedirect("/");
-                const url = passkeyVerificationRedirectURL(
-                    accountsUrl!,
-                    passkeySessionID,
-                );
-                setPasskeyVerificationData({ passkeySessionID, url });
-                openPasskeyVerificationURL({ passkeySessionID, url });
-                return "redirecting-second-factor";
-            } else if (twoFactorSessionID) {
-                await stashKeyEncryptionKeyInSessionStore(kek);
-                updateSavedLocalUser({
-                    isTwoFactorEnabled: true,
-                    twoFactorSessionID,
-                });
-                void router.push("/two-factor/verify");
-                return "redirecting-second-factor";
-            } else {
-                // In rare cases, if the user hasn't already setup their key
-                // attributes, we might get the plaintext token from remote.
-                if (token) await saveAuthToken(token);
-                updateSavedLocalUser({
+        useCallback(
+            async (srpAttributes: SRPAttributes, kek: string) => {
+                const {
                     id,
+                    keyAttributes,
                     token,
                     encryptedToken,
-                    isTwoFactorEnabled: undefined,
-                    twoFactorSessionID: undefined,
-                    passkeySessionID: undefined,
-                });
-                if (keyAttributes) saveKeyAttributes(keyAttributes);
-                return keyAttributes;
-            }
-        };
+                    twoFactorSessionID,
+                    passkeySessionID,
+                    accountsUrl,
+                } =
+                    await userVerificationResultAfterResolvingSecondFactorChoice(
+                        await verifySRP(srpAttributes, kek),
+                    );
+
+                // If we had to ask remote for the key attributes, it is the
+                // initial login on this client.
+                saveIsFirstLogin();
+
+                if (passkeySessionID) {
+                    await stashKeyEncryptionKeyInSessionStore(kek);
+                    updateSavedLocalUser({ passkeySessionID });
+                    stashRedirect("/");
+                    const url = passkeyVerificationRedirectURL(
+                        accountsUrl!,
+                        passkeySessionID,
+                    );
+                    setPasskeyVerificationData({ passkeySessionID, url });
+                    openPasskeyVerificationURL({ passkeySessionID, url });
+                    return "redirecting-second-factor";
+                } else if (twoFactorSessionID) {
+                    await stashKeyEncryptionKeyInSessionStore(kek);
+                    updateSavedLocalUser({
+                        isTwoFactorEnabled: true,
+                        twoFactorSessionID,
+                    });
+                    void router.push("/two-factor/verify");
+                    return "redirecting-second-factor";
+                } else {
+                    // In rare cases, if the user hasn't already setup their key
+                    // attributes, we might get the plaintext token from remote.
+                    if (token) await saveAuthToken(token);
+                    updateSavedLocalUser({
+                        id,
+                        token,
+                        encryptedToken,
+                        isTwoFactorEnabled: undefined,
+                        twoFactorSessionID: undefined,
+                        passkeySessionID: undefined,
+                    });
+                    if (keyAttributes) saveKeyAttributes(keyAttributes);
+                    return keyAttributes;
+                }
+            },
+            [userVerificationResultAfterResolvingSecondFactorChoice, router],
+        );
 
     const handleVerifyMasterPassword: VerifyMasterPasswordFormProps["onVerify"] =
         useCallback(
@@ -341,8 +345,6 @@ const Page: React.FC = () => {
         );
     }
 
-    // TODO: Handle the case when user is not present, or exclude that
-    // possibility using types.
     return (
         <AccountsPageContents>
             <PasswordHeader caption={userEmail} />

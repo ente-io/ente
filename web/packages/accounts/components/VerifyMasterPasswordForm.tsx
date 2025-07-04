@@ -58,6 +58,7 @@ export interface VerifyMasterPasswordFormProps {
      * exists.
      */
     getKeyAttributes?: (
+        srpAttributes: SRPAttributes,
         kek: string,
     ) => Promise<KeyAttributes | "redirecting-second-factor" | undefined>;
     /**
@@ -168,9 +169,9 @@ export const VerifyMasterPasswordForm: React.FC<
             }
         } else throw new Error("Both SRP and key attributes are missing");
 
-        if (!keyAttributes && getKeyAttributes) {
+        if (!keyAttributes && getKeyAttributes && srpAttributes) {
             try {
-                const result = await getKeyAttributes(kek);
+                const result = await getKeyAttributes(srpAttributes, kek);
                 if (result == "redirecting-second-factor") {
                     // Two factor enabled, user has been redirected to the
                     // corresponding second factor verification page.
