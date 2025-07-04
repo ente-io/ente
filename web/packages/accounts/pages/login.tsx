@@ -74,14 +74,17 @@ import React, { useCallback, useEffect, useState } from "react";
  *     complete**.
  *
  * - "/generate" - A page that allows the user to generate key attributes if
- *   needed, and shows them their recovery key.
+ *   needed, and shows them their recovery key if they just signed up.
  *
- *   - Redirects to "/" if there is no `email` present in the saved partial
- *     local user, or after viewing the recovery key, or after the user sets
- *     their password (if they did no have key attributes).
+ *   - Redirects to "/" if there is no `email` or `token` present in the saved
+ *     partial user.
  *
- *   - Redirects to "/credentials" if they already have the original key
- *     attributes.
+ *   - Redirects to `appHomeRoute` after viewing the recovery key if they have a
+ *     master key in session, or after setting the password and then viewing the
+ *     recovery key (if they did not have a master key in session store).
+ *
+ *   - Redirects to "/credentials" if if they don't have a master key in session
+ *     store but have saved original key attributes.
  *
  * - "/recover" - A page that allows the user to recover their master key using
  *   their recovery key.

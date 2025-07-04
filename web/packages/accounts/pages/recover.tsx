@@ -21,7 +21,7 @@ import { useBaseContext } from "ente-base/context";
 import { decryptBox } from "ente-base/crypto";
 import log from "ente-base/log";
 import {
-    haveCredentialsInSession,
+    haveMasterKeyInSession,
     saveMasterKeyInSessionAndSafeStore,
 } from "ente-base/session";
 import { t } from "i18next";
@@ -59,7 +59,7 @@ const Page: React.FC = () => {
         const keyAttributes = savedKeyAttributes();
         if (!keyAttributes) {
             void router.push("/generate");
-        } else if (haveCredentialsInSession()) {
+        } else if (haveMasterKeyInSession()) {
             void router.push(appHomeRoute);
         } else {
             setKeyAttributes(keyAttributes);

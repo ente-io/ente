@@ -35,7 +35,7 @@ import { useBaseContext } from "ente-base/context";
 import log from "ente-base/log";
 import {
     clearSessionStorage,
-    haveCredentialsInSession,
+    haveMasterKeyInSession,
     masterKeyFromSession,
 } from "ente-base/session";
 import { savedAuthToken } from "ente-base/token";
@@ -282,7 +282,7 @@ const Page: React.FC = () => {
         let syncIntervalID: ReturnType<typeof setInterval> | undefined;
 
         void (async () => {
-            if (!haveCredentialsInSession() || !(await savedAuthToken())) {
+            if (!haveMasterKeyInSession() || !(await savedAuthToken())) {
                 // If we don't have master key or auth token, reauthenticate.
                 stashRedirect("/gallery");
                 router.push("/");
@@ -376,7 +376,7 @@ const Page: React.FC = () => {
     }, [activeCollectionID, router.isReady]);
 
     useEffect(() => {
-        if (router.isReady && haveCredentialsInSession()) {
+        if (router.isReady && haveMasterKeyInSession()) {
             handleSubscriptionCompletionRedirectIfNeeded(
                 showMiniDialog,
                 showLoadingBar,

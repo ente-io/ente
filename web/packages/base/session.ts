@@ -51,7 +51,7 @@ export const ensureMasterKeyFromSession = async () => {
  * have credentials at hand or not, however it doesn't attempt to verify that
  * the key present in the session can actually be decrypted.
  */
-export const haveCredentialsInSession = () =>
+export const haveMasterKeyInSession = () =>
     !!sessionStorage.getItem("encryptionKey");
 
 /**
@@ -140,7 +140,7 @@ export const updateSessionFromElectronSafeStorageIfNeeded = async () => {
     const electron = globalThis.electron;
     if (!electron) return;
 
-    if (haveCredentialsInSession()) return;
+    if (haveMasterKeyInSession()) return;
 
     let masterKey: string | undefined;
     try {
