@@ -19,7 +19,9 @@ import "package:photos/models/ffmpeg/ffprobe_props.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
+import "package:photos/models/file/remote/asset.dart";
 import "package:photos/models/location/location.dart";
+import "package:photos/models/metadata/file_magic.dart";
 import "package:photos/module/upload/model/upload_data.dart";
 import "package:photos/services/local/asset_entity.service.dart";
 import "package:photos/services/local/import/local_import.dart";
@@ -106,7 +108,7 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(
     sourceFile,
     thumbnailData,
     isDeleted,
-    FileHashData(fileHash, zipHash: zipHash),
+    Hash(fileHash, zipHash: zipHash),
     height: h,
     width: w,
     motionPhotoStartIndex: motionPhotoStartingIndex,
@@ -206,10 +208,8 @@ Future<Map<String, dynamic>> getMetadata(
 
   final metadata = <String, dynamic>{};
   metadata["localID"] = asset?.id;
-  final String? hashValue = mediaUploadData.hashData.fileHash;
-  if (hashValue != null) {
-    metadata["hash"] = hashValue;
-  }
+  final String hashValue = mediaUploadData.hash.data;
+  metadata["hash"] = hashValue;
   if (asset != null) {
     metadata["subType"] = asset.subtype;
   }
@@ -233,6 +233,40 @@ Future<Map<String, dynamic>> getMetadata(
 
   return metadata;
 }
+
+Map<String, dynamic> buildPublicMagicData(
+    MediaUploadData mediaUploadData,
+    ParsedExifDateTime? exifTime,
+    RemoteAsset? rAsset,
+  ) {
+    final Map<String, dynamic> pubMetadata = {};
+    if ((mediaUploadData.height ?? 0) != 0 &&
+        (mediaUploadData.width ?? 0) != 0) {
+      pubMetadata[heightKey] = mediaUploadData.height;
+      pubMetadata[widthKey] = mediaUploadData.width;
+    }
+    pubMetadata[mediaTypeKey] = mediaUploadData.isPanorama == true ? 1 : 0;
+    if (mediaUploadData.motionPhotoStartIndex != null) {
+      pubMetadata[motionVideoIndexKey] = mediaUploadData.motionPhotoStartIndex;
+    }
+    if (mediaUploadData.thumbnail == null) {
+      pubMetadata[noThumbKey] = true;
+    }
+    if (exifTime != null) {
+      if (exifTime.dateTime != null) {
+        pubMetadata[dateTimeKey] = exifTime.dateTime;
+      }
+      if (exifTime.offsetTime != null) {
+        pubMetadata[offsetTimeKey] = exifTime.offsetTime;
+      }
+    }
+    final Map<String, dynamic> jsonToUpdate =
+        rAsset?.publicMetadata?.data ?? <String, dynamic>{};
+    pubMetadata.forEach((key, value) {
+      jsonToUpdate[key] = value;
+    });
+    return jsonToUpdate;
+  }
 
 Future<MetadataRequest> getPubMetadataRequest(
   EnteFile file,
@@ -290,7 +324,7 @@ Future<MediaUploadData> _getSharedMediaUploadData(EnteFile file) async {
       sourceFile,
       thumbnailData,
       false,
-      FileHashData(fileHash),
+      Hash(fileHash),
       height: decodedImage?.height,
       width: decodedImage?.width,
       exifData: exifData,

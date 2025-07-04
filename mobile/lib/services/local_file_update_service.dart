@@ -156,8 +156,8 @@ class LocalFileUpdateService {
       try {
         uploadData = await getUploadData(file);
         if (file.hash != null &&
-            (file.hash == uploadData.hashData.fileHash ||
-                file.hash == uploadData.hashData.zipHash)) {
+            (file.hash == uploadData.hash.data ||
+                file.hash == uploadData.hash.zipHash)) {
           _logger.info("Skip file update as hash matched ${file.tag}");
         } else {
           _logger.info(

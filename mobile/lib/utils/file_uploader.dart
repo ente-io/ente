@@ -526,7 +526,7 @@ class FileUploader {
     final String? existingMultipartEncFileName =
         await _uploadLocks.getEncryptedFileName(
       lockKey,
-      mediaUploadData.hashData.fileHash,
+      mediaUploadData.hash.data,
       collectionID,
     );
 
@@ -560,7 +560,7 @@ class FileUploader {
       EncryptionResult? multiPartFileEncResult = multipartEntryExists
           ? await _multiPartUploader.getEncryptionResult(
               lockKey,
-              mediaUploadData.hashData.fileHash,
+              mediaUploadData.hash.data,
               collectionID,
             )
           : null;
@@ -665,7 +665,7 @@ class FileUploader {
           fileObjectKey = await _multiPartUploader.putExistingMultipartFile(
             encryptedFile,
             lockKey,
-            mediaUploadData.hashData.fileHash,
+            mediaUploadData.hash.data,
             collectionID,
           );
         } else {
@@ -674,7 +674,7 @@ class FileUploader {
           final encFileName = encryptedFile.path.split('/').last;
           await _multiPartUploader.createTableEntry(
             lockKey,
-            mediaUploadData.hashData.fileHash,
+            mediaUploadData.hash.data,
             collectionID,
             fileUploadURLs,
             encFileName,
@@ -706,7 +706,7 @@ class FileUploader {
       final Map<String, dynamic> metadata =
           await getMetadata(mediaUploadData, exifTime, file);
       final Map<String, dynamic> pubMetadata =
-          _buildPublicMagicData(mediaUploadData, exifTime, file.rAsset);
+          buildPublicMagicData(mediaUploadData, exifTime, file.rAsset);
       MetadataRequest? pubMetadataRequest;
 
       final encryptedMetadataResult = await CryptoUtil.encryptChaCha(
@@ -845,40 +845,6 @@ class FileUploader {
         isMultiPartUpload: isMultipartUpload,
       );
     }
-  }
-
-  Map<String, dynamic> _buildPublicMagicData(
-    MediaUploadData mediaUploadData,
-    ParsedExifDateTime? exifTime,
-    RemoteAsset? rAsset,
-  ) {
-    final Map<String, dynamic> pubMetadata = {};
-    if ((mediaUploadData.height ?? 0) != 0 &&
-        (mediaUploadData.width ?? 0) != 0) {
-      pubMetadata[heightKey] = mediaUploadData.height;
-      pubMetadata[widthKey] = mediaUploadData.width;
-    }
-    pubMetadata[mediaTypeKey] = mediaUploadData.isPanorama == true ? 1 : 0;
-    if (mediaUploadData.motionPhotoStartIndex != null) {
-      pubMetadata[motionVideoIndexKey] = mediaUploadData.motionPhotoStartIndex;
-    }
-    if (mediaUploadData.thumbnail == null) {
-      pubMetadata[noThumbKey] = true;
-    }
-    if (exifTime != null) {
-      if (exifTime.dateTime != null) {
-        pubMetadata[dateTimeKey] = exifTime.dateTime;
-      }
-      if (exifTime.offsetTime != null) {
-        pubMetadata[offsetTimeKey] = exifTime.offsetTime;
-      }
-    }
-    final Map<String, dynamic> jsonToUpdate =
-        rAsset?.publicMetadata?.data ?? <String, dynamic>{};
-    pubMetadata.forEach((key, value) {
-      jsonToUpdate[key] = value;
-    });
-    return jsonToUpdate;
   }
 
   bool isPutOrUpdateFileError(Object e) {

@@ -7,7 +7,7 @@ class MediaUploadData {
   final File sourceFile;
   final Uint8List? thumbnail;
   final bool isDeleted;
-  final FileHashData hashData;
+  final Hash hash;
   final int? height;
   final int? width;
 
@@ -23,7 +23,7 @@ class MediaUploadData {
     this.sourceFile,
     this.thumbnail,
     this.isDeleted,
-    this.hashData, {
+    this.hash, {
     this.height,
     this.width,
     this.motionPhotoStartIndex,
@@ -32,13 +32,13 @@ class MediaUploadData {
   });
 }
 
-class FileHashData {
+class Hash {
   // For livePhotos, the fileHash value will be imageHash:videoHash
-  final String fileHash;
+  final String data;
 
   // zipHash is used to take care of existing live photo uploads from older
   // mobile clients
   String? zipHash;
 
-  FileHashData(this.fileHash, {this.zipHash});
+  Hash(this.data, {this.zipHash});
 }
