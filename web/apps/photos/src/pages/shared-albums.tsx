@@ -6,9 +6,9 @@ import DownloadIcon from "@mui/icons-material/Download";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import { Box, Button, IconButton, Stack, styled, Tooltip } from "@mui/material";
 import Typography from "@mui/material/Typography";
+import { FilesDownloadProgress } from "components/DownloadProgress";
 import type { TimeStampListItem } from "components/FileList";
 import { FileListWithViewer } from "components/FileListWithViewer";
-import { FilesDownloadProgress } from "components/FilesDownloadProgress";
 import { Upload } from "components/Upload";
 import {
     AccountsPageContents,

@@ -4,12 +4,12 @@ import MenuIcon from "@mui/icons-material/Menu";
 import { IconButton, Stack, Typography } from "@mui/material";
 import { AuthenticateUser } from "components/AuthenticateUser";
 import { GalleryBarAndListHeader } from "components/Collections/GalleryBarAndListHeader";
-import { type TimeStampListItem } from "components/FileList";
-import { FileListWithViewer } from "components/FileListWithViewer";
 import {
     FilesDownloadProgress,
     type FilesDownloadProgressAttributes,
-} from "components/FilesDownloadProgress";
+} from "components/DownloadProgress";
+import { type TimeStampListItem } from "components/FileList";
+import { FileListWithViewer } from "components/FileListWithViewer";
 import { FixCreationTime } from "components/FixCreationTime";
 import { Sidebar } from "components/Sidebar";
 import { Upload } from "components/Upload";
@@ -41,6 +41,10 @@ import {
 import { savedAuthToken } from "ente-base/token";
 import { FullScreenDropZone } from "ente-gallery/components/FullScreenDropZone";
 import { type UploadTypeSelectorIntent } from "ente-gallery/components/Upload";
+import type {
+    SetFilesDownloadProgressAttributes,
+    SetFilesDownloadProgressAttributesCreator,
+} from "ente-gallery/services/save";
 import { type Collection } from "ente-media/collection";
 import { type EnteFile } from "ente-media/file";
 import { type ItemVisibility } from "ente-media/file-metadata";
@@ -123,13 +127,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { FileWithPath } from "react-dropzone";
 import { Trans } from "react-i18next";
 import { uploadManager } from "services/upload-manager";
-import type {
-    SelectedState,
-} from "types/gallery";
-import type {
-    SetFilesDownloadProgressAttributes,
-    SetFilesDownloadProgressAttributesCreator,
-} from "ente-gallery/services/save";
+import type { SelectedState } from "types/gallery";
 import { getSelectedFiles, performFileOp } from "utils/file";
 
 /**

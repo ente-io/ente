@@ -25,7 +25,7 @@ import { sortCollectionSummaries } from "services/collectionService";
 import {
     isFilesDownloadCancelled,
     isFilesDownloadCompleted,
-} from "../FilesDownloadProgress";
+} from "../DownloadProgress";
 import { AlbumCastDialog } from "./AlbumCastDialog";
 import {
     CollectionHeader,

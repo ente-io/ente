@@ -256,13 +256,13 @@ const saveFileDesktop = async (
 ) => {
     const fs = electron.fs;
 
-    const createSafeName = (fileName: string) =>
+    const createExportName = (fileName: string) =>
         safeFileName(directoryPath, fileName, fs.exists);
 
     const writeStreamToFile = (
-        fileName: string,
+        exportName: string,
         stream: ReadableStream<Uint8Array> | null,
-    ) => writeStream(electron, joinPath(directoryPath, fileName), stream);
+    ) => writeStream(electron, joinPath(directoryPath, exportName), stream);
 
     const stream = await downloadManager.fileStream(file);
     const fileName = fileFileName(file);
@@ -270,11 +270,11 @@ const saveFileDesktop = async (
     if (file.metadata.fileType == FileType.livePhoto) {
         const { imageFileName, imageData, videoFileName, videoData } =
             await decodeLivePhoto(fileName, await new Response(stream).blob());
-        const imageExportName = await createSafeName(imageFileName);
+        const imageExportName = await createExportName(imageFileName);
         await writeStreamToFile(imageExportName, new Response(imageData).body);
         try {
             await writeStreamToFile(
-                await createSafeName(videoFileName),
+                await createExportName(videoFileName),
                 new Response(videoData).body,
             );
         } catch (e) {
@@ -282,7 +282,7 @@ const saveFileDesktop = async (
             throw e;
         }
     } else {
-        await writeStreamToFile(await createSafeName(fileName), stream);
+        await writeStreamToFile(await createExportName(fileName), stream);
     }
 };
 
