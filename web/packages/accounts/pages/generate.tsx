@@ -55,7 +55,7 @@ const Page: React.FC = () => {
 
     useEffect(() => {
         const user = savedPartialLocalUser();
-        if (!user?.email || !user?.token) {
+        if (!user?.email || !user.token) {
             void router.replace("/");
         } else if (haveMasterKeyInSession()) {
             if (savedJustSignedUp()) {

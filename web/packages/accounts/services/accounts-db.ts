@@ -340,7 +340,7 @@ export const savedIsFirstLogin = () => {
     const jsonString = localStorage.getItem("isFirstLogin");
     if (!jsonString) return false;
     try {
-        return z.boolean().parse(JSON.parse(jsonString)) ?? false;
+        return z.boolean().parse(JSON.parse(jsonString));
     } catch {
         return (
             LocalLegacyBooleanFlag.parse(JSON.parse(jsonString)).status ?? false
@@ -385,7 +385,7 @@ export const savedJustSignedUp = () => {
     const jsonString = localStorage.getItem("justSignedUp");
     if (!jsonString) return false;
     try {
-        return z.boolean().parse(JSON.parse(jsonString)) ?? false;
+        return z.boolean().parse(JSON.parse(jsonString));
     } catch {
         return (
             LocalLegacyBooleanFlag.parse(JSON.parse(jsonString)).status ?? false

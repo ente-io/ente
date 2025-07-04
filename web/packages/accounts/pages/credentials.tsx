@@ -201,7 +201,7 @@ const Page: React.FC = () => {
             // Reauthentication in a new tab on the web app. Use previously
             // generated interactive key attributes to verify password.
             if (keyAttributes) {
-                if (!user?.token && !user?.encryptedToken) {
+                if (!user.token && !user.encryptedToken) {
                     // TODO(RE): Why? For now, add a dev mode circuit breaker.
                     if (isDevBuild) throw new Error("Unexpected case reached");
                     clearLocalStorage();
@@ -339,7 +339,7 @@ const Page: React.FC = () => {
         return (
             <VerifyingPasskey
                 email={userEmail}
-                passkeySessionID={passkeyVerificationData?.passkeySessionID}
+                passkeySessionID={passkeyVerificationData.passkeySessionID}
                 onRetry={() =>
                     openPasskeyVerificationURL(passkeyVerificationData)
                 }
