@@ -1,7 +1,7 @@
 import log from "ente-base/log";
 import { ensureMasterKeyFromSession } from "ente-base/session";
 import { ComlinkWorker } from "ente-base/worker/comlink-worker";
-import { uniqueFilesByID } from "ente-gallery/utils/files";
+import { uniqueFilesByID } from "ente-gallery/utils/file";
 import type { Collection } from "ente-media/collection";
 import type { EnteFile } from "ente-media/file";
 import { FileType } from "ente-media/file-type";

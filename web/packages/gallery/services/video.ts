@@ -9,7 +9,7 @@ import { getKV, getKVB, getKVN, setKV } from "ente-base/kv";
 import log from "ente-base/log";
 import { apiURL } from "ente-base/origins";
 import { ensureAuthToken } from "ente-base/token";
-import { uniqueFilesByID } from "ente-gallery/utils/files";
+import { uniqueFilesByID } from "ente-gallery/utils/file";
 import { fileLogID, type EnteFile } from "ente-media/file";
 import { FileType } from "ente-media/file-type";
 import { updateFilePublicMagicMetadata } from "ente-new/photos/services/file";

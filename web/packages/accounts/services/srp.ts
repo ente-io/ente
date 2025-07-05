@@ -9,9 +9,11 @@ import {
     publicRequestHeaders,
 } from "ente-base/http";
 import { apiURL } from "ente-base/origins";
+import { ensure } from "ente-utils/ensure";
 import { SRP, SrpClient } from "fast-srp-hap";
 import { v4 as uuidv4 } from "uuid";
 import { z } from "zod/v4";
+import { saveSRPAttributes } from "./accounts-db";
 import {
     RemoteSRPVerificationResponse,
     type EmailOrSRPVerificationResponse,
@@ -190,7 +192,7 @@ export interface SRPAttributes {
  * it to local storage, so the same schema describes both the remote type and
  * the local storage type.
  */
-const RemoteSRPAttributes = z.object({
+export const RemoteSRPAttributes = z.object({
     srpUserID: z.string(),
     srpSalt: z.string(),
     memLimit: z.number(),
@@ -222,26 +224,6 @@ export const getSRPAttributes = async (
 };
 
 /**
- * Return the user's {@link SRPAttributes} if they are present in local storage.
- *
- * Like key attributes, SRP attributes are also stored in the browser's local
- * storage so will not be accessible to web workers.
- */
-export const savedSRPAttributes = (): SRPAttributes | undefined => {
-    const jsonString = localStorage.getItem("srpAttributes");
-    if (!jsonString) return undefined;
-    return RemoteSRPAttributes.parse(JSON.parse(jsonString));
-};
-
-/**
- * Save the user's {@link SRPAttributes} in local storage.
- *
- * Use {@link savedSRPAttributes} to retrieve them.
- */
-export const saveSRPAttributes = (srpAttributes: SRPAttributes) =>
-    localStorage.setItem("srpAttributes", JSON.stringify(srpAttributes));
-
-/**
  * A local-only structure holding information required for SRP setup.
  *
  * [Note: SRP setup attributes]
@@ -265,7 +247,7 @@ export const saveSRPAttributes = (srpAttributes: SRPAttributes) =>
  * temporarily stash them in local storage using an object that conforms to the
  * following {@link SRPSetupAttributes} schema.
  */
-const SRPSetupAttributes = z.object({
+export const SRPSetupAttributes = z.object({
     srpUserID: z.string(),
     srpSalt: z.string(),
     srpVerifier: z.string(),
@@ -320,40 +302,6 @@ const deriveSRPLoginSubKey = async (kek: string) => {
 const b64ToBuffer = (base64: string) => Buffer.from(base64, "base64");
 
 const bufferToB64 = (buffer: Buffer) => buffer.toString("base64");
-
-/**
- * Save {@link SRPSetupAttributes} in local storage for later use via
- * {@link unstashAndUseSRPSetupAttributes}.
- *
- * See: [Note: SRP setup attributes]
- */
-export const stashSRPSetupAttributes = (
-    srpSetupAttributes: SRPSetupAttributes,
-) =>
-    localStorage.setItem(
-        "srpSetupAttributes",
-        JSON.stringify(srpSetupAttributes),
-    );
-
-/**
- * Retrieve the {@link SRPSetupAttributes}, if any, that were stashed by a
- * previous call to {@link stashSRPSetupAttributes}.
- *
- * - If they are found, then invoke the provided callback ({@link cb}) with the
- *   value. If the promise returned by the callback fulfills, then remove the
- *   stashed value from local storage.
- *
- * - If they are not found, then the callback is not invoked.
- */
-export const unstashAndUseSRPSetupAttributes = async (
-    cb: (srpSetupAttributes: SRPSetupAttributes) => Promise<void>,
-) => {
-    const jsonString = localStorage.getItem("srpSetupAttributes");
-    if (!jsonString) return;
-    const srpSetupAttributes = SRPSetupAttributes.parse(JSON.parse(jsonString));
-    await cb(srpSetupAttributes);
-    localStorage.removeItem("srpSetupAttributes");
-};
 
 /**
  * Use the provided {@link SRPSetupAttributes} to, well, setup SRP.
@@ -493,6 +441,20 @@ const completeSRPSetup = async (
     ensureOk(res);
     return CompleteSRPSetupResponse.parse(await res.json());
 };
+
+/**
+ * Fetch the SRP attributes from remote and use them to update the SRP
+ * attributes we have saved locally.
+ *
+ * This function is intended to be called after {@link srpSetupOrReconfigure} to
+ * also update our local state to match remote.
+ *
+ * @param userEmail The email of the user whose SRP attributes we want to fetch.
+ * This should be the email address of the logged in user, or the user who is
+ * going through the login / signup sequence currently.
+ */
+export const getAndSaveSRPAttributes = async (userEmail: string) =>
+    saveSRPAttributes(ensure(await getSRPAttributes(userEmail)));
 
 /**
  * The subset of {@link KeyAttributes} that get updated when the user changes

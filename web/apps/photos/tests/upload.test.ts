@@ -1,4 +1,9 @@
+// TODO: Audit this file
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+/* eslint-disable @typescript-eslint/no-base-to-string */
+/* eslint-disable @typescript-eslint/restrict-template-expressions */
 /* eslint-disable @typescript-eslint/dot-notation */
+// @ts-nocheck
 import {
     parseDateFromDigitGroups,
     tryParseEpochMicrosecondsFromFileName,
@@ -7,7 +12,7 @@ import {
     matchJSONMetadata,
     metadataJSONMapKeyForJSON,
 } from "ente-gallery/services/upload/metadata-json";
-import { groupFilesByCollectionID } from "ente-gallery/utils/files";
+import { groupFilesByCollectionID } from "ente-gallery/utils/file";
 import {
     fileCreationTime,
     fileFileName,
@@ -18,7 +23,7 @@ import {
     savedCollectionFiles,
     savedCollections,
 } from "ente-new/photos/services/photos-fdb";
-import { getUserDetailsV2 } from "ente-new/photos/services/user-details";
+import { userDetailsSnapshot } from "ente-new/photos/services/user-details";
 
 const DATE_TIME_PARSING_TEST_FILE_NAMES = [
     {
@@ -163,14 +168,14 @@ export async function testUpload() {
         await exifDataParsingCheck(expectedState);
         await fileDimensionExtractionCheck(expectedState);
         await googleMetadataReadingCheck(expectedState);
-        await totalFileCountCheck(expectedState);
+        totalFileCountCheck(expectedState);
     } catch (e) {
         console.log(e);
     }
 }
 
-async function totalFileCountCheck(expectedState) {
-    const userDetails = await getUserDetailsV2();
+function totalFileCountCheck(expectedState) {
+    const userDetails = userDetailsSnapshot();
     if (expectedState.total_file_count === userDetails.fileCount) {
         console.log("file count check passed ✅");
     } else {

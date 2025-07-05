@@ -23,8 +23,8 @@ jobs:
             - name: Crowdin's action
               uses: crowdin/github-action@v2
               with:
-                  base_path: "auth/"
-                  config: "auth/crowdin.yml"
+                  base_path: "mobile/apps/auth/"
+                  config: "mobile/apps/auth/crowdin.yml"
                   upload_sources: true
                   upload_translations: false
                   download_translations: true

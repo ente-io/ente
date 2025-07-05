@@ -5,12 +5,12 @@
 import {
     LocalCollections,
     LocalEnteFile,
+    localForage,
     LocalTimestamp,
     transformFilesIfNeeded,
 } from "ente-gallery/services/files-db";
 import { type Collection } from "ente-media/collection";
 import { type EnteFile } from "ente-media/file";
-import localForage from "ente-shared/storage/localForage";
 import { z } from "zod/v4";
 import type { TrashItem } from "./trash";
 
@@ -154,6 +154,9 @@ export const savedCollectionFiles = async (): Promise<EnteFile[]> => {
     // As an optimization, we skip the runtime check here and cast. This might
     // not be the most optimal choice in the future, so (a) use it sparingly,
     // and (b) mark all such cases with the title of this note.
+    //
+    // Note that the cast is happening inside the local forage code since we're
+    // passing a type parameter.
     let files = (await localForage.getItem<EnteFile[]>("files")) ?? [];
 
     // Previously hidden files were stored separately. If that key is present,
@@ -185,8 +188,12 @@ export const saveCollectionFiles = async (files: EnteFile[]) => {
 };
 
 /**
- * Return the locally persisted {@link updationTime} of the latest file from the
- * given {@link collection} that we have pulled from remote.
+ * Return the locally persisted "last sync time" for a collection that we have
+ * pulled from remote. This can be used to perform a paginated delta pull from
+ * the saved time onwards.
+ *
+ * > Specifically, this is the {@link updationTime} of the latest file from the
+ * > {@link collection}, or the the collection itself if it is fully synced.
  *
  * Use {@link saveCollectionLastSyncTime} to update the value saved in the
  * database, and {@link removeCollectionIDLastSyncTime} to remove the saved

@@ -32,17 +32,17 @@ import { t } from "i18next";
 import memoize from "memoize-one";
 import React, {
     createContext,
-    ReactElement,
     useContext,
     useEffect,
     useState,
+    type ReactElement,
 } from "react";
 import { Trans } from "react-i18next";
 import {
     areEqual,
     FixedSizeList as List,
-    ListChildComponentProps,
-    ListItemKeySelector,
+    type ListChildComponentProps,
+    type ListItemKeySelector,
 } from "react-window";
 import type {
     FinishedUploadType,

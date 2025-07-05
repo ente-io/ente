@@ -14,11 +14,11 @@ import type {
 } from "ente-base/types/ipc";
 import { type UploadResult } from "ente-gallery/services/upload";
 import type { UploadAsset } from "ente-gallery/services/upload/upload-service";
-import { groupFilesByCollectionID } from "ente-gallery/utils/files";
+import { groupFilesByCollectionID } from "ente-gallery/utils/file";
 import type { EnteFile } from "ente-media/file";
+import { removeFromOwnCollection } from "ente-new/photos/services/collection";
 import { computeNormalCollectionFilesFromSaved } from "ente-new/photos/services/file";
 import { ensureString } from "ente-utils/ensure";
-import { removeFromCollection } from "./collectionService";
 import { type UploadItemWithCollection, uploadManager } from "./upload-manager";
 
 /**
@@ -63,17 +63,19 @@ class FolderWatcher {
      */
     private upload: (collectionName: string, filePaths: string[]) => void;
     /**
-     * A function to call when we want to sync with the backend. It will
-     * initiate the sync but will not await its completion.
+     * A function to call when we want to trigger a full remote pull. It will
+     * initiate the pull but will not await its completion.
      *
      * This is passed as a param to {@link init}.
      */
-    private requestSyncWithRemote: () => void;
+    private onTriggerRemotePull: () => void;
 
     /** A helper function that debounces invocations of {@link runNextEvent}. */
     private debouncedRunNextEvent: () => void;
 
     constructor() {
+        // TODO:
+        // eslint-disable-next-line @typescript-eslint/no-misused-promises
         this.debouncedRunNextEvent = debounce(() => this.runNextEvent(), 1000);
     }
 
@@ -83,14 +85,14 @@ class FolderWatcher {
      * This is only called when we're running in the context of our desktop app.
      *
      * The caller provides us with the hooks we can use to actually upload the
-     * files, and to sync with remote (say after deletion).
+     * files, and to pull the latest changes from remote (say after deletion).
      */
     init(
         upload: (collectionName: string, filePaths: string[]) => void,
-        requestSyncWithRemote: () => void,
+        onTriggerRemotePull: () => void,
     ) {
         this.upload = upload;
-        this.requestSyncWithRemote = requestSyncWithRemote;
+        this.onTriggerRemotePull = onTriggerRemotePull;
         this.registerListeners();
         this.syncWithDisk();
     }
@@ -319,10 +321,7 @@ class FolderWatcher {
      * Callback invoked by the uploader whenever a item we requested to
      * {@link upload} gets uploaded.
      */
-    async onFileUpload(
-        item: UploadItemWithCollection,
-        uploadResult: UploadResult,
-    ) {
+    onFileUpload(item: UploadItemWithCollection, uploadResult: UploadResult) {
         // Re the usage of ensureString: For desktop watch, the only possibility
         // for a UploadItem is for it to be a string (the absolute path to a
         // file on disk).
@@ -489,10 +488,10 @@ class FolderWatcher {
 
         const filesByCollectionID = groupFilesByCollectionID(filesToTrash);
         for (const [id, files] of filesByCollectionID.entries()) {
-            await removeFromCollection(id, files);
+            await removeFromOwnCollection(id, files);
         }
 
-        this.requestSyncWithRemote();
+        this.onTriggerRemotePull();
     }
 }
 

@@ -15,6 +15,9 @@
  * It stored more than files though - files, collections, trash, their
  * corresponding sync times, and other bits and bobs related to them.
  *
+ * > Note: File contents themselves are not stored in IndexedDB, only
+ * > {@link EnteFile}s.
+ *
  * Since we've now switched to idb as our preferred IndexedDB library, the data
  * stored in this files table could be considered legacy in a sense. But such
  * would be an incorrect characterization - this code has no issues, and it
@@ -36,11 +39,14 @@
  *
  * Note that even though both of them refer to the same conceptual "files DB",
  * the actual storage is distinct since both the apps run on separate domains
- * and so have their separate IndexedDB storage.
+ * and so have their separate IndexedDB storage and thus separate files tables.
  *
- * Still, the key names are (generally) distinct to reduce chances of confusion.
+ * Still, the key names are distinct to reduce chances of confusion: the public
+ * albums app stores data in keys prefixed with "public-".
  */
 
+import { haveWindow } from "ente-base/env";
+import log from "ente-base/log";
 import {
     CollectionPrivateMagicMetadataData,
     CollectionPublicMagicMetadataData,
@@ -62,7 +68,48 @@ import {
 } from "ente-media/file-metadata";
 import type { MagicMetadata } from "ente-media/magic-metadata";
 import { nullishToEmpty, nullToUndefined } from "ente-utils/transform";
+import localForage from "localforage";
 import { z } from "zod/v4";
+
+if (haveWindow()) {
+    localForage.config({
+        name: "ente-files",
+        version: 1.0,
+        storeName: "files",
+    });
+}
+
+/**
+ * Reexport localForage for use by (and only by):
+ * - photos-fdb.ts
+ * - public-albums-fdb.ts
+ * - migration.ts
+ */
+export { localForage };
+
+/**
+ * Return `true` if we can access IndexedDB.
+ *
+ * This is used as a pre-flight check, to notify the user if they're using a
+ * browser or extension that is preventing the app from using IndexedDB (which
+ * is necessary for local storage of collections and files metadata).
+ */
+export const canAccessIndexedDB = async () => {
+    try {
+        await localForage.ready();
+        return true;
+    } catch (e) {
+        log.error("IndexDB is not accessible", e);
+        return false;
+    }
+};
+
+/**
+ * Clear any data stored in files DB.
+ *
+ * This is meant to be called during the logout sequence.
+ */
+export const clearFilesDB = () => localForage.clear();
 
 /**
  * Return a Zod schema suitable for being used with the various magic metadata

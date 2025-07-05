@@ -1,9 +1,6 @@
-import { getToken } from "ente-shared/storage/localStorage/helpers";
 import { z } from "zod/v4";
 import { decryptBox, encryptBox, generateKey } from "./crypto";
-import { isDevBuild } from "./env";
 import log from "./log";
-import { getAuthToken } from "./token";
 
 /**
  * Remove all data stored in session storage (data tied to the browser tab).
@@ -53,7 +50,7 @@ export const ensureMasterKeyFromSession = async () => {
  * have credentials at hand or not, however it doesn't attempt to verify that
  * the key present in the session can actually be decrypted.
  */
-export const haveCredentialsInSession = () =>
+export const haveMasterKeyInSession = () =>
     !!sessionStorage.getItem("encryptionKey");
 
 /**
@@ -142,7 +139,7 @@ export const updateSessionFromElectronSafeStorageIfNeeded = async () => {
     const electron = globalThis.electron;
     if (!electron) return;
 
-    if (haveCredentialsInSession()) return;
+    if (haveMasterKeyInSession()) return;
 
     let masterKey: string | undefined;
     try {
@@ -154,24 +151,6 @@ export const updateSessionFromElectronSafeStorageIfNeeded = async () => {
     if (masterKey) {
         await saveKeyInSessionStore("encryptionKey", masterKey);
     }
-};
-
-/**
- * Return true if we both have the user's master key in session storage, and
- * their auth token in KV DB.
- */
-export const haveAuthenticatedSession = async () => {
-    if (!(await masterKeyFromSession())) return false;
-    const lsToken = getToken();
-    const kvToken = await getAuthToken();
-    // TODO: To avoid changing old behaviour, this currently relies on the token
-    // from local storage. Both should be the same though, so it throws an error
-    // on dev build (tag: Migration).
-    if (isDevBuild) {
-        if (lsToken != kvToken)
-            throw new Error("Local storage and indexed DB mismatch");
-    }
-    return !!lsToken;
 };
 
 /**

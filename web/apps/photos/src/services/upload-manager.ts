@@ -1,3 +1,4 @@
+import { ensureLocalUser } from "ente-accounts/services/user";
 import { isDesktop } from "ente-base/app";
 import { createComlinkCryptoWorker } from "ente-base/crypto";
 import { type CryptoWorker } from "ente-base/crypto/worker";
@@ -36,15 +37,11 @@ import {
 } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
 import { potentialFileTypeFromExtension } from "ente-media/live-photo";
+import { savedPublicCollectionFiles } from "ente-new/albums/services/public-albums-fdb";
 import { computeNormalCollectionFilesFromSaved } from "ente-new/photos/services/file";
 import { indexNewUpload } from "ente-new/photos/services/ml";
 import { wait } from "ente-utils/promise";
-import {
-    getLocalPublicFiles,
-    getPublicCollectionUID,
-} from "services/publicCollectionService";
 import watcher from "services/watch";
-import { getUserOwnedFiles } from "utils/file";
 
 export type FileID = number;
 
@@ -104,8 +101,8 @@ class UIService {
     // UPLOAD LEVEL STATES
     private uploadPhase: UploadPhase = "preparing";
     private filenames = new Map<number, string>();
-    private hasLivePhoto: boolean = false;
-    private uploadProgressView: boolean = false;
+    private hasLivePhoto = false;
+    private uploadProgressView = false;
 
     // STAGE LEVEL STATES
     private perFileProgress: number;
@@ -262,7 +259,7 @@ class UploadManager {
     private collections: Map<number, Collection>;
     private uploadInProgress: boolean;
     private publicAlbumsCredentials: PublicAlbumsCredentials | undefined;
-    private uploaderName: string;
+    private uploaderName: string | undefined;
     /**
      * When `true`, then the next call to {@link abortIfCancelled} will throw.
      *
@@ -272,7 +269,7 @@ class UploadManager {
 
     private uiService = new UIService();
 
-    public async init(
+    public init(
         progressUpdater: ProgressUpdater,
         onUploadFile: (file: EnteFile) => void,
         publicAlbumsCredentials: PublicAlbumsCredentials | undefined,
@@ -298,7 +295,7 @@ class UploadManager {
         this.itemsToBeUploaded = [];
         this.failedItems = [];
         this.parsedMetadataJSONMap = parsedMetadataJSONMap ?? new Map();
-        this.uploaderName = null;
+        this.uploaderName = undefined;
         this.shouldUploadBeCancelled = false;
 
         this.uiService.reset();
@@ -442,15 +439,13 @@ class UploadManager {
 
     private async updateExistingFilesAndCollections(collections: Collection[]) {
         if (this.publicAlbumsCredentials) {
-            this.existingFiles = await getLocalPublicFiles(
-                getPublicCollectionUID(
-                    this.publicAlbumsCredentials.accessToken,
-                ),
+            this.existingFiles = await savedPublicCollectionFiles(
+                this.publicAlbumsCredentials.accessToken,
             );
         } else {
-            this.existingFiles = getUserOwnedFiles(
-                await computeNormalCollectionFilesFromSaved(),
-            );
+            const files = await computeNormalCollectionFilesFromSaved();
+            const userID = ensureLocalUser().id;
+            this.existingFiles = files.filter((file) => file.ownerID == userID);
         }
         this.collections = new Map(
             collections.map((collection) => [collection.id, collection]),
@@ -576,7 +571,7 @@ class UploadManager {
             }
 
             if (isDesktop && watcher.isUploadRunning()) {
-                await watcher.onFileUpload(uploadableItem, uploadResult);
+                watcher.onFileUpload(uploadableItem, uploadResult);
             }
 
             return type == "addedSymlink" ? "uploaded" : type;

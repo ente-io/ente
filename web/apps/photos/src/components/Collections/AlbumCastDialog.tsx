@@ -40,10 +40,14 @@ export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
 );
 
 /**
- * [Note: MUI dialog state reset]
+ * [Note: MUI dialog state]
  *
- * Keep the dialog contents in a separate component so that they get rendered
+ * In some cases we keep the dialog contents in a separate component so that (a)
+ * they get rendered only when the dialog is shown, and (b) they get rendered
  * afresh when the dialog is unmounted and then shown again.
+ *
+ * Keeping it separate both resets the state of the component, and also ensures
+ * that the effects run again when the dialog is shown.
  *
  * Details:
  *
@@ -58,7 +62,8 @@ export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
  * circumstance. If it is undesirable, there are multiple approaches:
  * https://github.com/mui/material-ui/issues/16325
  *
- * One of those is to keep the dialog contents in a separate component.
+ * One of those approaches is to keep the dialog contents in a separate
+ * component.
  */
 export const AlbumCastDialogContents: React.FC<AlbumCastDialogProps> = ({
     open,
@@ -117,7 +122,7 @@ export const AlbumCastDialogContents: React.FC<AlbumCastDialogProps> = ({
                     log.error("Error requesting session", e);
                     return;
                 }
-                const session = instance.getCurrentSession();
+                const session = instance.getCurrentSession()!;
                 session.addMessageListener(
                     "urn:x-cast:pair-request",
                     (_, message) => {

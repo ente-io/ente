@@ -28,9 +28,9 @@ import type { FaceCluster } from "./cluster";
 import { regenerateFaceCrops } from "./crop";
 import {
     clearMLDB,
-    getIndexableAndIndexedCounts,
     resetFailedFileStatuses,
     savedFaceIndex,
+    savedIndexCounts,
 } from "./db";
 import {
     _applyPersonSuggestionUpdates,
@@ -56,7 +56,7 @@ class MLState {
      *
      * - On app start, this is read from local storage during {@link initML}.
      *
-     * - It gets updated when we sync with remote (so if the user
+     * - It gets updated when we pull from remote (so if the user
      *   enables/disables ML on a different device, this local value will also
      *   become true/false).
      *
@@ -446,9 +446,21 @@ export type MLStatus =
            *   user's library.
            */
           phase: "scheduled" | "indexing" | "fetching" | "clustering" | "done";
-          /** The number of files that have already been indexed. */
+          /**
+           * `true` if the phase is "done" but a significant fraction of files
+           * were marked as failed when indexing.
+           *
+           * This is not expected to happen normally, and points to a some
+           * systematic error in the environment (e.g. ONNX couldn't run).
+           */
+          phaseFailed?: boolean;
+          /**
+           * The number of files that have already been indexed.
+           */
           nSyncedFiles: number;
-          /** The total number of files that are eligible for indexing. */
+          /**
+           * The total number of files that are eligible for indexing.
+           */
           nTotalFiles: number;
       };
 
@@ -521,8 +533,8 @@ const getMLStatus = async (): Promise<MLStatus> => {
         };
     }
 
-    const { indexedCount, indexableCount } =
-        await getIndexableAndIndexedCounts();
+    const { indexedCount, indexableCount, failedCount } =
+        await savedIndexCounts();
 
     // During live uploads, the indexable count remains zero even as the indexer
     // is processing the newly uploaded items. This is because these "live
@@ -532,6 +544,7 @@ const getMLStatus = async (): Promise<MLStatus> => {
     // indexable count.
 
     let phase: MLStatus["phase"];
+    let phaseFailed = false;
     const state = await w.state;
     if (state == "indexing" || state == "fetching") {
         phase = state;
@@ -539,10 +552,12 @@ const getMLStatus = async (): Promise<MLStatus> => {
         phase = "scheduled";
     } else {
         phase = "done";
+        phaseFailed = failedCount > indexedCount && failedCount > 500;
     }
 
     return {
         phase,
+        phaseFailed,
         nSyncedFiles: indexedCount,
         nTotalFiles: indexableCount + indexedCount,
     };

@@ -1,12 +1,14 @@
 import { styled } from "@mui/material";
 import { isSameDay } from "ente-base/date";
 import { formattedDate } from "ente-base/i18n-date";
+import type { AddSaveGroup } from "ente-gallery/components/utils/save-groups";
 import {
     FileViewer,
     type FileViewerProps,
 } from "ente-gallery/components/viewer/FileViewer";
+import { downloadAndSaveFiles } from "ente-gallery/services/save";
 import type { Collection } from "ente-media/collection";
-import { EnteFile } from "ente-media/file";
+import type { EnteFile } from "ente-media/file";
 import { fileCreationTime, fileFileName } from "ente-media/file-metadata";
 import { moveToTrash } from "ente-new/photos/services/collection";
 import { PseudoCollectionID } from "ente-new/photos/services/collection-summary";
@@ -14,8 +16,6 @@ import { t } from "i18next";
 import { useCallback, useMemo, useState } from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { uploadManager } from "services/upload-manager";
-import { SetFilesDownloadProgressAttributesCreator } from "types/gallery";
-import { downloadSingleFile } from "utils/file";
 import {
     FileList,
     type FileListAnnotatedFile,
@@ -38,7 +38,6 @@ export type FileListWithViewerProps = {
      * Not set in the context of the shared albums app.
      */
     onMarkTempDeleted?: (files: EnteFile[]) => void;
-    setFilesDownloadProgressAttributesCreator?: SetFilesDownloadProgressAttributesCreator;
     /**
      * Called when the visibility of the file viewer dialog changes.
      */
@@ -48,17 +47,25 @@ export type FileListWithViewerProps = {
      * pull from remote.
      */
     onRemotePull: () => Promise<void>;
+    /**
+     * A function that can be used to create a UI notification to track the
+     * progress of user-initiated download, and to cancel it if needed.
+     */
+    onAddSaveGroup: AddSaveGroup;
 } & Pick<
     FileListProps,
     | "mode"
     | "modePlus"
+    | "header"
     | "showAppDownloadBanner"
+    | "isMagicSearchResult"
     | "selectable"
     | "selected"
     | "setSelected"
     | "activeCollectionID"
     | "activePersonID"
     | "favoriteFileIDs"
+    | "emailByUserID"
 > &
     Pick<
         FileViewerProps,
@@ -85,27 +92,30 @@ export type FileListWithViewerProps = {
 export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
     mode,
     modePlus,
+    header,
     user,
     files,
     enableDownload,
     showAppDownloadBanner,
+    isMagicSearchResult,
     selectable,
     selected,
     setSelected,
     activeCollectionID,
     activePersonID,
     favoriteFileIDs,
+    emailByUserID,
     isInIncomingSharedCollection,
     isInHiddenSection,
     fileNormalCollectionIDs,
     collectionNameByID,
     pendingFavoriteUpdates,
     pendingVisibilityUpdates,
-    setFilesDownloadProgressAttributesCreator,
     onSetOpenFileViewer,
     onRemotePull,
     onRemoteFilesPull,
     onVisualFeedback,
+    onAddSaveGroup,
     onToggleFavorite,
     onFileVisibilityUpdate,
     onMarkTempDeleted,
@@ -141,12 +151,9 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
     );
 
     const handleDownload = useCallback(
-        (file: EnteFile) => {
-            const setSingleFileDownloadProgress =
-                setFilesDownloadProgressAttributesCreator!(fileFileName(file));
-            void downloadSingleFile(file, setSingleFileDownloadProgress);
-        },
-        [setFilesDownloadProgressAttributesCreator],
+        (file: EnteFile) =>
+            downloadAndSaveFiles([file], fileFileName(file), onAddSaveGroup),
+        [onAddSaveGroup],
     );
 
     const handleDelete = useMemo(() => {
@@ -174,13 +181,17 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
                         {...{
                             mode,
                             modePlus,
+                            header,
+                            user,
                             showAppDownloadBanner,
+                            isMagicSearchResult,
                             selectable,
                             selected,
                             setSelected,
                             activeCollectionID,
                             activePersonID,
                             favoriteFileIDs,
+                            emailByUserID,
                         }}
                         onItemClick={handleThumbnailClick}
                     />

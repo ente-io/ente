@@ -174,7 +174,7 @@ export const pullTrash = async (
     }
 
     const trashCollectionIDs = new Set(
-        trashItemsByID.values().map((item) => item.file.collectionID),
+        [...trashItemsByID.values()].map((item) => item.file.collectionID),
     );
     await saveTrashItemCollectionKeys(
         [...collectionKeyByID.entries()]
@@ -203,24 +203,23 @@ const TrashDiffResponse = z.object({
  * pull changes from remote.
  */
 const getTrashDiff = async (sinceTime: number) => {
-    const res = await fetch(
-        await apiURL("/trash/v2/diff", { sinceTime: sinceTime.toString() }),
-        { headers: await authenticatedRequestHeaders() },
-    );
+    const res = await fetch(await apiURL("/trash/v2/diff", { sinceTime }), {
+        headers: await authenticatedRequestHeaders(),
+    });
     ensureOk(res);
     return TrashDiffResponse.parse(await res.json());
 };
 
 /**
- * Sort trash items such that the items which will be permanently deleted
- * earlier are first.
+ * Sort trash items such that the items which were recently deleted are first.
  *
  * This is a variant of {@link sortFiles}; it sorts {@link items} in place and
  * also returns a reference to the same mutated arrays.
  *
- * Items are sorted in ascending order of their time to deletion. For items with
- * the same time to deletion, the ordering is in descending order of the item's
- * file's modification or creation date.
+ * Items are sorted in descending order of their time to deletion (that is, the
+ * items which were the most recently deleted will be at the top). For items
+ * with the same time to deletion, the ordering is in descending order of the
+ * item's file's modification or creation date.
  */
 export const sortTrashItems = (trashItems: TrashItem[]) =>
     trashItems.sort((a, b) => {
@@ -233,7 +232,7 @@ export const sortTrashItems = (trashItems: TrashItem[]) =>
                 ? bf.metadata.modificationTime - af.metadata.modificationTime
                 : bt - at;
         }
-        return a.deleteBy - b.deleteBy;
+        return b.deleteBy - a.deleteBy;
     });
 
 /**

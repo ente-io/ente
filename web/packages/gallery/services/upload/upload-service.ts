@@ -652,7 +652,7 @@ interface UploadContext {
  */
 export const upload = async (
     { collection, localID, fileName, ...uploadAsset }: UploadableUploadItem,
-    uploaderName: string,
+    uploaderName: string | undefined,
     existingFiles: EnteFile[],
     parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>,
     worker: CryptoWorker,
