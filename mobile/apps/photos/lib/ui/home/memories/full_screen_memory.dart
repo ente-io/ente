@@ -261,7 +261,8 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
     } else if (widget.onNextMemory != null) {
       widget.onNextMemory!();
     } else {
-      Navigator.of(context).pop();
+      hasFinalFileLoaded = true;
+      _toggleAnimation(pause: false);
     }
   }
 
