@@ -11,6 +11,7 @@ import "package:photos/core/network/network.dart";
 import 'package:photos/db/files_db.dart';
 import "package:photos/db/local/table/path_config_table.dart";
 import "package:photos/db/local/table/upload_queue_table.dart";
+import "package:photos/db/remote/table/files_table.dart";
 import "package:photos/db/remote/table/mapping_table.dart";
 import 'package:photos/events/backup_folders_updated_event.dart';
 import 'package:photos/events/collection_updated_event.dart';
@@ -22,6 +23,7 @@ import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
 import "package:photos/models/local/path_config.dart";
+import "package:photos/models/metadata/file_magic.dart";
 import 'package:photos/models/upload_strategy.dart';
 import "package:photos/service_locator.dart";
 import 'package:photos/services/app_lifecycle_service.dart';
@@ -590,45 +592,47 @@ class RemoteSyncService {
     });
   }
 
-  bool _shouldShowNotification(int collectionID) {
-    // TODO: Add option to opt out of notifications for a specific collection
-    // Screen: https://www.figma.com/file/SYtMyLBs5SAOkTbfMMzhqt/ente-Visual-Design?type=design&node-id=7689-52943&t=IyWOfh0Gsb0p7yVC-4
+  bool _shouldShowNotification() {
     final isForeground = AppLifecycleService.instance.isForeground;
     final bool showNotification =
         NotificationService.instance.shouldShowNotificationsForSharedPhotos() &&
             isFirstRemoteSyncDone() &&
             !isForeground;
     _logger.info(
-      "[Collection-$collectionID] shouldShow notification: $showNotification, "
-      "isAppInForeground: $isForeground",
+      " notification: $showNotification isAppInForeground: $isForeground",
     );
     return showNotification;
   }
 
   Future<void> _notifyNewFiles(List<int> collectionIDs) async {
+    if (!_shouldShowNotification()) {
+      return;
+    }
     final userID = Configuration.instance.getUserID();
     final appOpenTime = AppLifecycleService.instance.getLastAppOpenTime();
+    final data = await remoteDB.getNotificationCandidate(
+      collectionIDs,
+      appOpenTime,
+    );
     for (final collectionID in collectionIDs) {
-      if (!_shouldShowNotification(collectionID)) {
-        continue;
-      }
-      final files =
-          await _db.getNewFilesInCollection(collectionID, appOpenTime);
-      final Set<int> sharedFilesIDs = {};
-      final Set<int> collectedFilesIDs = {};
-      for (final file in files) {
-        if (file.isUploaded && file.ownerID != userID) {
-          sharedFilesIDs.add(file.uploadedFileID!);
-        } else if (file.isUploaded && file.isCollect) {
-          collectedFilesIDs.add(file.uploadedFileID!);
+      // TODO: Add option to opt out of notifications for a specific collection
+      // Screen: https://www.figma.com/file/SYtMyLBs5SAOkTbfMMzhqt/ente-Visual-Design?type=design&node-id=7689-52943&t=IyWOfh0Gsb0p7yVC-4
+      final ownerAndMetadataList = data[collectionID] ?? [];
+      int sharedFileCount = 0;
+      int collectedFileCount = 0;
+      for (final (ownerID, metadata) in ownerAndMetadataList) {
+        if (ownerID != userID) {
+          sharedFileCount = sharedFileCount + 1;
+        } else if (metadata?.data.containsKey(uploaderNameKey) ?? false) {
+          collectedFileCount = collectedFileCount + 1;
         }
       }
-      final totalCount = sharedFilesIDs.length + collectedFilesIDs.length;
+      final totalCount = sharedFileCount + collectedFileCount;
       if (totalCount > 0) {
         final collection = _collectionsService.getCollectionByID(collectionID);
         _logger.info(
           'creating notification for ${collection?.displayName} '
-          'shared: $sharedFilesIDs, collected: $collectedFilesIDs files',
+          'shared: $sharedFileCount, collected: $collectedFileCount files',
         );
         final s = await LanguageService.s;
         // ignore: unawaited_futures

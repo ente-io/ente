@@ -597,22 +597,6 @@ class FilesDB with SqlDbBase {
     return files;
   }
 
-  Future<List<EnteFile>> getNewFilesInCollection(
-    int collectionID,
-    int addedTime,
-  ) async {
-    final db = await instance.sqliteAsyncDB;
-    const String whereClause =
-        '$columnCollectionID = ? AND $columnAddedTime > ?';
-    final List<Object> whereArgs = [collectionID, addedTime];
-    final results = await db.getAll(
-      'SELECT * FROM $filesTable WHERE $whereClause',
-      whereArgs,
-    );
-    final files = convertToFiles(results);
-    return files;
-  }
-
   // Files which user added to a collection manually but they are not
   // uploaded yet or files belonging to a collection which is marked for backup
   Future<List<EnteFile>> getFilesPendingForUpload() async {
