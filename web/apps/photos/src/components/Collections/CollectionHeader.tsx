@@ -139,7 +139,7 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
     const { show: showAlbumNameInput, props: albumNameInputVisibilityProps } =
         useModalVisibility();
 
-    const { type: collectionSummaryType } = collectionSummary;
+    const { type: collectionSummaryType, fileCount } = collectionSummary;
 
     /**
      * Return a new function by wrapping an async function in an error handler,
@@ -334,13 +334,17 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
 
         case "userFavorites":
             menuOptions = [
-                <DownloadOption
-                    key="download"
-                    isDownloadInProgress={isActiveCollectionDownloadInProgress}
-                    onClick={downloadCollection}
-                >
-                    {t("download_favorites")}
-                </DownloadOption>,
+                fileCount && (
+                    <DownloadOption
+                        key="download"
+                        isDownloadInProgress={
+                            isActiveCollectionDownloadInProgress
+                        }
+                        onClick={downloadCollection}
+                    >
+                        {t("download_favorites")}
+                    </DownloadOption>
+                ),
                 <OverflowMenuOption
                     key="share"
                     onClick={onCollectionShare}
@@ -360,20 +364,24 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
 
         case "uncategorized":
             menuOptions = [
-                <DownloadOption key="download" onClick={downloadCollection}>
-                    {t("download_uncategorized")}
-                </DownloadOption>,
+                fileCount && (
+                    <DownloadOption key="download" onClick={downloadCollection}>
+                        {t("download_uncategorized")}
+                    </DownloadOption>
+                ),
             ];
             break;
 
         case "hiddenItems":
             menuOptions = [
-                <DownloadOption
-                    key="download-hidden"
-                    onClick={downloadCollection}
-                >
-                    {t("download_hidden_items")}
-                </DownloadOption>,
+                fileCount && (
+                    <DownloadOption
+                        key="download-hidden"
+                        onClick={downloadCollection}
+                    >
+                        {t("download_hidden_items")}
+                    </DownloadOption>
+                ),
             ];
             break;
 
@@ -509,6 +517,8 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
             break;
     }
 
+    const validMenuOptions = menuOptions.filter((o) => !!o);
+
     return (
         <Box sx={{ display: "inline-flex", gap: "16px" }}>
             <QuickOptions
@@ -518,13 +528,16 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
                 onDownloadClick={downloadCollection}
                 onShareClick={onCollectionShare}
             />
-
-            <OverflowMenu
-                ariaID="collection-options"
-                triggerButtonIcon={<MoreHorizIcon ref={overflowMenuIconRef} />}
-            >
-                {...menuOptions}
-            </OverflowMenu>
+            {validMenuOptions.length > 0 && (
+                <OverflowMenu
+                    ariaID="collection-options"
+                    triggerButtonIcon={
+                        <MoreHorizIcon ref={overflowMenuIconRef} />
+                    }
+                >
+                    {validMenuOptions}
+                </OverflowMenu>
+            )}
             <CollectionSortOrderMenu
                 {...sortOrderMenuVisibilityProps}
                 overflowMenuIconRef={overflowMenuIconRef}
@@ -569,6 +582,7 @@ const QuickOptions: React.FC<QuickOptionsProps> = ({
             <EmptyTrashQuickOption onClick={onEmptyTrashClick} />
         )}
         {showDownloadQuickOption(collectionSummary) &&
+            collectionSummary.fileCount > 0 &&
             (isDownloadInProgress() ? (
                 <ActivityIndicator size="20px" sx={{ m: "12px" }} />
             ) : (
