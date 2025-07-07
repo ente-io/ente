@@ -153,6 +153,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
   /// Used to check if any pointer is on the screen.
   final hasPointerOnScreenNotifier = ValueNotifier<bool>(false);
   bool hasFinalFileLoaded = false;
+  bool isAtFirstOrLastFile = false;
 
   late final StreamSubscription<DetailsSheetEvent>
       _detailSheetEventSubscription;
@@ -219,7 +220,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
       _progressAnimationController?.stop();
       _zoomAnimationController?.stop();
     } else {
-      if (hasFinalFileLoaded) {
+      if (hasFinalFileLoaded || isAtFirstOrLastFile) {
         _progressAnimationController?.forward();
         _zoomAnimationController?.forward();
       }
@@ -261,7 +262,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
     } else if (widget.onNextMemory != null) {
       widget.onNextMemory!();
     } else {
-      hasFinalFileLoaded = true;
+      isAtFirstOrLastFile = true;
       _toggleAnimation(pause: false);
     }
   }
@@ -275,7 +276,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
     } else if (widget.onPreviousMemory != null) {
       widget.onPreviousMemory!();
     } else {
-      hasFinalFileLoaded = true;
+      isAtFirstOrLastFile = true;
       _onPageChange(inheritedData, currentIndex);
       _toggleAnimation(pause: false);
     }
