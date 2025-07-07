@@ -51,7 +51,7 @@ export const CustomHeadAlbums: React.FC = () => (
         />
         <meta
             name="og:image"
-            content="https://albums.ente.io/images/preview.png"
+            content="https://albums.ente.io/images/preview.jpg"
         />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="referrer" content="strict-origin-when-cross-origin" />
