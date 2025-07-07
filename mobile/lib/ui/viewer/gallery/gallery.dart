@@ -420,6 +420,7 @@ class GalleryState extends State<Gallery> {
         child: CustomScrollView(
           // physics: const BouncingScrollPhysics(),
           slivers: [
+            SliverToBoxAdapter(child: widget.header ?? const SizedBox.shrink()),
             FutureBuilder(
               future: groupHeaderExtent,
               builder: (context, snapshot) {
@@ -432,12 +433,15 @@ class GalleryState extends State<Gallery> {
                       selectedFiles: widget.selectedFiles,
                       tagPrefix: widget.tagPrefix,
                       headerExtent: snapshot.data!,
-                    ).getGroupLayouts(),
+                    ).groupLayouts,
                   );
                 } else {
                   return const SliverFillRemaining();
                 }
               },
+            ),
+            SliverToBoxAdapter(
+              child: widget.footer,
             ),
           ],
         ),

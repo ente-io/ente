@@ -38,35 +38,30 @@ class GalleryGroups {
     init();
   }
 
+  static const double spacing = 2.0;
+
+  late final int crossAxisCount;
+  late final List<FixedExtentSectionLayout> _groupLayouts;
+
   final List<String> _groupIds = [];
   final Map<String, List<EnteFile>> _groupIdToFilesMap = {};
   final Map<String, GroupHeaderData> _groupIdToHeaderDataMap = {};
-  late final int crossAxisCount;
   final currentUserID = Configuration.instance.getUserID();
-  static const double spacing = 2.0;
+  final _uuid = const Uuid();
 
   List<String> get groupIDs => _groupIds;
   Map<String, List<EnteFile>> get groupIDToFilesMap => _groupIdToFilesMap;
   Map<String, GroupHeaderData> get groupIdToheaderDataMap =>
       _groupIdToHeaderDataMap;
-
-  final _uuid = const Uuid();
+  List<FixedExtentSectionLayout> get groupLayouts => _groupLayouts;
 
   void init() {
-    final stopwatch = Stopwatch()..start();
     _buildGroups();
-    _logger.info(
-      "Built ${_groupIds.length} groups in ${stopwatch.elapsedMilliseconds} ms",
-    );
-    print(
-      "Built ${_groupIds.length} groups in ${stopwatch.elapsedMilliseconds} ms",
-    );
-    stopwatch.stop();
-
     crossAxisCount = localSettings.getPhotoGridSize();
+    _groupLayouts = _computeGroupLayouts();
   }
 
-  List<FixedExtentSectionLayout> getGroupLayouts() {
+  List<FixedExtentSectionLayout> _computeGroupLayouts() {
     final stopwatch = Stopwatch()..start();
     int currentIndex = 0;
     double currentOffset = 0.0;
@@ -184,6 +179,7 @@ class GalleryGroups {
 
 // TODO: compute this in isolate
   void _buildGroups() {
+    final stopwatch = Stopwatch()..start();
     List<EnteFile> groupFiles = [];
     for (int index = 0; index < allFiles.length; index++) {
       if (index > 0 &&
@@ -196,6 +192,13 @@ class GalleryGroups {
     if (groupFiles.isNotEmpty) {
       _createNewGroup(groupFiles);
     }
+    _logger.info(
+      "Built ${_groupIds.length} groups in ${stopwatch.elapsedMilliseconds} ms",
+    );
+    print(
+      "Built ${_groupIds.length} groups in ${stopwatch.elapsedMilliseconds} ms",
+    );
+    stopwatch.stop();
   }
 
   void _createNewGroup(
