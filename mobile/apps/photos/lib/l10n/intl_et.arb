@@ -218,6 +218,5 @@
   "storageBreakupYou": "Sina",
   "@storageBreakupYou": {
     "description": "Label to indicate how much storage you are using when you are part of a family plan"
-  },
-  "wishThemAHappyBirthday": "Wish ${name} a happy birthday! 🎉"
+  }
 }
