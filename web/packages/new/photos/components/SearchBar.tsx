@@ -83,7 +83,7 @@ export interface SearchBarProps {
     /**
      * Called when the user selects a person shown in the empty state view.
      */
-    onSelectPerson: (personID: string | undefined) => void;
+    onSelectPerson: (personID: string) => void;
 }
 
 /**
@@ -210,7 +210,7 @@ const SearchInput: React.FC<Omit<SearchBarProps, "onShowSearchInput">> = ({
         onSelectPeople();
     };
 
-    const handleSelectPerson = (personID: string | undefined) => {
+    const handleSelectPerson = (personID: string) => {
         resetSearch();
         onSelectPerson(personID);
     };

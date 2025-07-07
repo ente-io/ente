@@ -18,7 +18,7 @@ export interface SelectedState {
     [k: number]: boolean;
     ownCount: number;
     count: number;
-    collectionID: number;
+    collectionID: number | undefined;
     /**
      * The context in which the selection was made. Only set by newer code if
      * there is an active selection (older code continues to rely on the
