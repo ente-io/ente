@@ -5,7 +5,6 @@ import { albumsAppOrigin, isCustomAlbumsAppOrigin } from "../origins";
 
 interface CustomHeadProps {
     title: string;
-    description?: string;
 }
 
 /**
