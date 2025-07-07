@@ -9,7 +9,6 @@ import 'package:photos/models/file/file_type.dart';
 import "package:photos/models/file/remote/asset.dart";
 import "package:photos/models/file/remote/collection_file.dart";
 import 'package:photos/models/location/location.dart';
-import "package:photos/models/metadata/file_magic.dart";
 import "package:photos/module/download/file_url.dart";
 import "package:photos/services/local/asset_entity.service.dart";
 
@@ -20,8 +19,8 @@ class EnteFile {
   RemoteAsset? rAsset;
   CollectionFile? cf;
   TrashTime? trashTime;
+
   int? generatedID;
-  int? uploadedFileID;
   int? ownerID;
   int? collectionID;
   String? localID;
@@ -30,7 +29,6 @@ class EnteFile {
   int? creationTime;
   int? modificationTime;
   int? updationTime;
-  int? addedTime;
   late Location? location;
   late FileType fileType;
   int? fileSubType;
@@ -86,6 +84,8 @@ class EnteFile {
     }
   }
 
+  int? get uploadedFileID => rAsset?.id;
+
   static EnteFile fromRemoteAsset(
     RemoteAsset rAsset,
     CollectionFile collection, {
@@ -95,8 +95,6 @@ class EnteFile {
     file.rAsset = rAsset;
     file.cf = collection;
     file.lAsset = lAsset;
-
-    file.uploadedFileID = rAsset.id;
     file.ownerID = rAsset.ownerID;
     file.title = rAsset.title;
     file.deviceFolder = rAsset.deviceFolder;
@@ -215,7 +213,6 @@ class EnteFile {
 
   EnteFile copyWith({
     int? generatedID,
-    int? uploadedFileID,
     int? ownerID,
     int? collectionID,
     String? localID,
@@ -224,7 +221,6 @@ class EnteFile {
     int? creationTime,
     int? modificationTime,
     int? updationTime,
-    int? addedTime,
     Location? location,
     FileType? fileType,
     int? fileSubType,
@@ -239,7 +235,6 @@ class EnteFile {
       ..rAsset = rAsset
       ..cf = cf
       ..generatedID = generatedID ?? this.generatedID
-      ..uploadedFileID = uploadedFileID ?? this.uploadedFileID
       ..ownerID = ownerID ?? this.ownerID
       ..collectionID = collectionID ?? this.collectionID
       ..localID = localID ?? this.localID
@@ -248,7 +243,6 @@ class EnteFile {
       ..creationTime = creationTime ?? this.creationTime
       ..modificationTime = modificationTime ?? this.modificationTime
       ..updationTime = updationTime ?? this.updationTime
-      ..addedTime = addedTime ?? this.addedTime
       ..location = location ?? this.location
       ..fileType = fileType ?? this.fileType
       ..fileSubType = fileSubType ?? this.fileSubType

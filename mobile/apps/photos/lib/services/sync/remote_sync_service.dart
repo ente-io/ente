@@ -159,7 +159,7 @@ class RemoteSyncService {
         await queueLocalAssetForUpload();
         final hasMoreFilesToBackup = (await _getFilesToBeUploaded()).isNotEmpty;
         _logger.info("hasMoreFilesToBackup?" + hasMoreFilesToBackup.toString());
-        if (hasMoreFilesToBackup && !_shouldThrottleSync()) {
+        if (hasMoreFilesToBackup && !isMultiPartDisabled()) {
           // Skipping a resync to ensure that files that were ignored in this
           // session are not processed now
           await sync();
@@ -382,7 +382,7 @@ class RemoteSyncService {
       return originalFiles;
     }
     final bool shouldRemoveVideos =
-        !_config.shouldBackupVideos() || _shouldThrottleSync();
+        !_config.shouldBackupVideos() || isMultiPartDisabled();
     final ignoredIDs = await IgnoredFilesService.instance.idToIgnoreReasonMap;
     bool shouldSkipUploadFunc(EnteFile file) {
       return IgnoredFilesService.instance.shouldSkipUpload(ignoredIDs, file);
@@ -442,7 +442,7 @@ class RemoteSyncService {
     final List<Future> futures = [];
 
     for (final file in filesToBeUploaded) {
-      if (_shouldThrottleSync() &&
+      if (isMultiPartDisabled() &&
           futures.length >= kMaximumPermissibleUploadsInThrottledMode) {
         _logger.info("Skipping some new files as we are throttling uploads");
         break;
@@ -457,7 +457,7 @@ class RemoteSyncService {
     }
 
     for (final uploadedFileID in updatedFileIDs) {
-      if (_shouldThrottleSync() &&
+      if (isMultiPartDisabled() &&
           futures.length >= kMaximumPermissibleUploadsInThrottledMode) {
         _logger
             .info("Skipping some updated files as we are throttling uploads");
@@ -563,7 +563,7 @@ class RemoteSyncService {
     }
   }
 
-  bool _shouldThrottleSync() {
+  bool isMultiPartDisabled() {
     return !flagService.enableMobMultiPart ||
         !localSettings.userEnabledMultiplePart;
   }
@@ -584,21 +584,19 @@ class RemoteSyncService {
     });
   }
 
-  bool _shouldShowNotification() {
+  bool _shouldNotifyNewFiles() {
     final isForeground = AppLifecycleService.instance.isForeground;
     final bool showNotification =
         NotificationService.instance.shouldShowNotificationsForSharedPhotos() &&
             isFirstRemoteSyncDone() &&
             !isForeground;
-    _logger.info(
-      " notification: $showNotification isAppInForeground: $isForeground",
-    );
+    _logger.info("notification: $showNotification isAppInFg: $isForeground");
     return showNotification;
   }
 
   Future<void> _notifyOnCollectionChange(List<int> collectionIDs) async {
     try {
-      if (!_shouldShowNotification()) {
+      if (!_shouldNotifyNewFiles()) {
         return;
       }
       final userID = Configuration.instance.getUserID();

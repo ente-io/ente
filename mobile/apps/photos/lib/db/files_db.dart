@@ -1023,7 +1023,7 @@ class FilesDB with SqlDbBase {
       // file.pubMmdEncodedJson ?? '{}',
       // file.pubMmdVersion,
       file.fileSize,
-      file.addedTime ?? DateTime.now().microsecondsSinceEpoch,
+      DateTime.now().microsecondsSinceEpoch, // added Time
     ]);
 
     if (omitCollectionId) {
@@ -1037,8 +1037,8 @@ class FilesDB with SqlDbBase {
     final file = EnteFile();
     file.generatedID = row[columnGeneratedID];
     file.localID = row[columnLocalID];
-    file.uploadedFileID =
-        row[columnUploadedFileID] == -1 ? null : row[columnUploadedFileID];
+    // file.uploadedFileID =
+    //     row[columnUploadedFileID] == -1 ? null : row[columnUploadedFileID];
     file.ownerID = row[columnOwnerID];
     file.collectionID =
         row[columnCollectionID] == -1 ? null : row[columnCollectionID];
@@ -1054,7 +1054,6 @@ class FilesDB with SqlDbBase {
     file.creationTime = row[columnCreationTime];
     file.modificationTime = row[columnModificationTime];
     file.updationTime = row[columnUpdationTime] ?? -1;
-    file.addedTime = row[columnAddedTime];
     // file.encryptedKey = row[columnEncryptedKey];
     // file.keyDecryptionNonce = row[columnKeyDecryptionNonce];
     // file.fileDecryptionHeader = row[columnFileDecryptionHeader];
@@ -1069,7 +1068,7 @@ class FilesDB with SqlDbBase {
     // file.mMdVersion = row[columnMMdVersion] ?? 0;
     // file.mMdEncodedJson = row[columnMMdEncodedJson] ?? '{}';
 
-    // 
+    //
     return file;
   }
 }
