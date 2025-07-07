@@ -83,6 +83,7 @@ class RemoteSyncService {
       _collectionsService,
       RemoteFileDiffService(NetworkClient.instance.enteDio),
       _config,
+      onCollectionSynced: _notifyOnCollectionChange,
     );
 
     Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) async {
@@ -223,16 +224,7 @@ class RemoteSyncService {
   Future<void> _pullDiff() async {
     await remoteDiff.syncFromRemote();
     return;
-    _logger.info("Pulling remote diff");
-    final isFirstSync = !_collectionsService.hasSyncedCollections();
-    if (isFirstSync && !_isExistingSyncSilent) {
-      Bus.instance.fire(SyncStatusUpdate(SyncStatus.applyingRemoteDiff));
-    }
-    await _collectionsService.sync();
-    final idsToRemoteUpdationTimeMap =
-        await _collectionsService.getCollectionIDsToBeSynced();
     unawaited(_localFileUpdateService.markUpdatedFilesForReUpload());
-    unawaited(_notifyNewFiles(idsToRemoteUpdationTimeMap.keys.toList()));
   }
 
   Future<void> _syncCollectionFiles(int collectionID, int sinceTime) async {
@@ -604,46 +596,53 @@ class RemoteSyncService {
     return showNotification;
   }
 
-  Future<void> _notifyNewFiles(List<int> collectionIDs) async {
-    if (!_shouldShowNotification()) {
-      return;
-    }
-    final userID = Configuration.instance.getUserID();
-    final appOpenTime = AppLifecycleService.instance.getLastAppOpenTime();
-    final data = await remoteDB.getNotificationCandidate(
-      collectionIDs,
-      appOpenTime,
-    );
-    for (final collectionID in collectionIDs) {
-      // TODO: Add option to opt out of notifications for a specific collection
-      // Screen: https://www.figma.com/file/SYtMyLBs5SAOkTbfMMzhqt/ente-Visual-Design?type=design&node-id=7689-52943&t=IyWOfh0Gsb0p7yVC-4
-      final ownerAndMetadataList = data[collectionID] ?? [];
-      int sharedFileCount = 0;
-      int collectedFileCount = 0;
-      for (final (ownerID, metadata) in ownerAndMetadataList) {
-        if (ownerID != userID) {
-          sharedFileCount = sharedFileCount + 1;
-        } else if (metadata?.data.containsKey(uploaderNameKey) ?? false) {
-          collectedFileCount = collectedFileCount + 1;
+  Future<void> _notifyOnCollectionChange(List<int> collectionIDs) async {
+    try {
+      if (!_shouldShowNotification()) {
+        return;
+      }
+      final userID = Configuration.instance.getUserID();
+      final appOpenTime = AppLifecycleService.instance.getLastAppOpenTime();
+      final data = await remoteDB.getNotificationCandidate(
+        collectionIDs,
+        appOpenTime,
+      );
+      for (final collectionID in collectionIDs) {
+        // TODO: Add option to opt out of notifications for a specific collection
+        // Screen: https://www.figma.com/file/SYtMyLBs5SAOkTbfMMzhqt/ente-Visual-Design?type=design&node-id=7689-52943&t=IyWOfh0Gsb0p7yVC-4
+        final ownerAndMetadataList = data[collectionID] ?? [];
+        int sharedFileCount = 0;
+        int collectedFileCount = 0;
+        for (final (ownerID, metadata) in ownerAndMetadataList) {
+          if (ownerID != userID) {
+            sharedFileCount = sharedFileCount + 1;
+          } else if (metadata?.data.containsKey(uploaderNameKey) ?? false) {
+            collectedFileCount = collectedFileCount + 1;
+          }
+        }
+        final totalCount = sharedFileCount + collectedFileCount;
+        if (totalCount > 0) {
+          final collection =
+              _collectionsService.getCollectionByID(collectionID);
+          _logger.info(
+            'creating notification for ${collection?.displayName} '
+            'shared: $sharedFileCount, collected: $collectedFileCount files',
+          );
+          final s = await LanguageService.s;
+          // ignore: unawaited_futures
+          NotificationService.instance.showNotification(
+            collection!.displayName,
+            totalCount.toString() + s.newPhotosEmoji,
+            channelID: "collection:" + collectionID.toString(),
+            channelName: collection.displayName,
+            payload:
+                "ente://collection/?collectionID=" + collectionID.toString(),
+          );
         }
       }
-      final totalCount = sharedFileCount + collectedFileCount;
-      if (totalCount > 0) {
-        final collection = _collectionsService.getCollectionByID(collectionID);
-        _logger.info(
-          'creating notification for ${collection?.displayName} '
-          'shared: $sharedFileCount, collected: $collectedFileCount files',
-        );
-        final s = await LanguageService.s;
-        // ignore: unawaited_futures
-        NotificationService.instance.showNotification(
-          collection!.displayName,
-          totalCount.toString() + s.newPhotosEmoji,
-          channelID: "collection:" + collectionID.toString(),
-          channelName: collection.displayName,
-          payload: "ente://collection/?collectionID=" + collectionID.toString(),
-        );
-      }
+    } catch (e, s) {
+      _logger.warning("Error notifying new files", e, s);
+      // Do nothing
     }
   }
 }

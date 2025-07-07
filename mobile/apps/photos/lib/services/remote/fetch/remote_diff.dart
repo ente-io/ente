@@ -20,11 +20,15 @@ class RemoteDiffService {
   final CollectionsService _collectionsService;
   final RemoteFileDiffService filesDiffService;
   final Configuration _config;
+  // optional async callback that take list of collections ids that were updated
+  // remotely and return a future that completes when the callback is done.
+  final Future<void> Function(List<int>)? onCollectionSynced;
   RemoteDiffService(
     this._collectionsService,
     this.filesDiffService,
-    this._config,
-  );
+    this._config, {
+    this.onCollectionSynced,
+  });
 
   bool _isExistingSyncSilent = false;
 
@@ -40,11 +44,10 @@ class RemoteDiffService {
     _logger.info("All updated collections & files synced");
     Bus.instance.fire(DiffSyncCompleteEvent());
     _isExistingSyncSilent = false;
-
+    if (onCollectionSynced != null) {
+      await onCollectionSynced!(idsToRemoteUpdationTimeMap.keys.toList());
+    }
     // unawaited(_localFileUpdateService.markUpdatedFilesForReUpload());
-    // unawaited(_notifyNewFiles
-    //
-    // (idsToRemoteUpdationTimeMap.keys.toList()));
   }
 
   Future<void> _syncCollectionsFiles(
