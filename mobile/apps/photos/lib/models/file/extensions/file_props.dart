@@ -23,8 +23,8 @@ extension FilePropsExtn on EnteFile {
     if (fileType != FileType.image) {
       return false;
     }
-    if (pubMagicMetadata?.mediaType != null) {
-      return (pubMagicMetadata!.mediaType! & 1) == 1;
+    if (rAsset?.mediaType != null) {
+      return (rAsset!.mediaType! & 1) == 1;
     }
     return null;
   }

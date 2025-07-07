@@ -39,16 +39,6 @@ class EnteFile {
   String? hash;
   int? metadataVersion;
 
-  // public magic metadata is shared if during file/album sharing
-  String? pubMmdEncodedJson;
-  int pubMmdVersion = 0;
-  PubMagicMetadata? _pubMmd;
-
-  PubMagicMetadata? get pubMagicMetadata =>
-      _pubMmd ?? PubMagicMetadata.fromEncodedJson(pubMmdEncodedJson ?? '{}');
-
-  set pubMagicMetadata(val) => _pubMmd = val;
-
   // in Version 1, live photo hash is stored as zip's hash.
   // in V2: LivePhoto hash is stored as imgHash:vidHash
   static const kCurrentMetadataVersion = 2;
@@ -118,8 +108,6 @@ class EnteFile {
     file.metadataVersion = kCurrentMetadataVersion;
     file.duration = rAsset.durationInSec;
     file.collectionID = collection.collectionID;
-    file.pubMagicMetadata =
-        PubMagicMetadata.fromMap(rAsset.publicMetadata?.data);
     return file;
   }
 
@@ -154,11 +142,17 @@ class EnteFile {
 
   // return 0 if the height is not available
   int get height {
-    return pubMagicMetadata?.h ?? 0;
+    if (rAsset != null) {
+      return rAsset!.height ?? 0;
+    }
+    return lAsset?.height ?? 0;
   }
 
   int get width {
-    return pubMagicMetadata?.w ?? 0;
+    if (rAsset != null) {
+      return rAsset!.width ?? 0;
+    }
+    return lAsset?.width ?? 0;
   }
 
   bool get hasDimensions {
@@ -239,9 +233,6 @@ class EnteFile {
     String? hash,
     int? metadataVersion,
     int? fileSize,
-    String? pubMmdEncodedJson,
-    int? pubMmdVersion,
-    PubMagicMetadata? pubMagicMetadata,
   }) {
     return EnteFile()
       ..lAsset = lAsset
@@ -264,9 +255,6 @@ class EnteFile {
       ..duration = duration ?? this.duration
       ..exif = exif ?? this.exif
       ..hash = hash ?? this.hash
-      ..metadataVersion = metadataVersion ?? this.metadataVersion
-      ..pubMmdEncodedJson = pubMmdEncodedJson ?? this.pubMmdEncodedJson
-      ..pubMmdVersion = pubMmdVersion ?? this.pubMmdVersion
-      ..pubMagicMetadata = pubMagicMetadata ?? this.pubMagicMetadata;
+      ..metadataVersion = metadataVersion ?? this.metadataVersion;
   }
 }

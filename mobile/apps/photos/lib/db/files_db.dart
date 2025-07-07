@@ -999,16 +999,6 @@ class FilesDB with SqlDbBase {
     double? longitude = file.location?.longitude;
 
     int? creationTime = file.creationTime;
-    if (file.pubMagicMetadata != null) {
-      if (file.pubMagicMetadata!.editedTime != null) {
-        creationTime = file.pubMagicMetadata!.editedTime;
-      }
-      if (file.pubMagicMetadata!.lat != null &&
-          file.pubMagicMetadata!.long != null) {
-        latitude = file.pubMagicMetadata!.lat;
-        longitude = file.pubMagicMetadata!.long;
-      }
-    }
 
     if (file.generatedID != null) {
       values.add(file.generatedID);
@@ -1044,8 +1034,10 @@ class FilesDB with SqlDbBase {
       {}, // mMdEncodedJson is not used in this context
       0, // version
       0, // default visibility
-      file.pubMmdEncodedJson ?? '{}',
-      file.pubMmdVersion,
+      '{}', // pubMmdEncodedJson is not used in this context
+      0, // pubMmdVersion is not used in this context
+      // file.pubMmdEncodedJson ?? '{}',
+      // file.pubMmdVersion,
       file.fileSize,
       file.addedTime ?? DateTime.now().microsecondsSinceEpoch,
     ]);
@@ -1093,8 +1085,7 @@ class FilesDB with SqlDbBase {
     // file.mMdVersion = row[columnMMdVersion] ?? 0;
     // file.mMdEncodedJson = row[columnMMdEncodedJson] ?? '{}';
 
-    file.pubMmdVersion = row[columnPubMMdVersion] ?? 0;
-    file.pubMmdEncodedJson = row[columnPubMMdEncodedJson] ?? '{}';
+    // 
     return file;
   }
 }

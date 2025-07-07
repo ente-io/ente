@@ -23,8 +23,10 @@ import "package:photos/db/upload_locks_db.dart";
 import "package:photos/events/video_streaming_changed.dart";
 import "package:photos/models/base/id.dart";
 import "package:photos/models/ffmpeg/ffprobe_props.dart";
+import "package:photos/models/file/extensions/r_asset_props.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/file/file_type.dart";
+import "package:photos/models/file/remote/asset.dart";
 import "package:photos/models/preview/playlist_data.dart";
 import "package:photos/models/preview/preview_item.dart";
 import "package:photos/models/preview/preview_item_status.dart";
@@ -724,7 +726,8 @@ class VideoPreviewService {
   Future<(FFProbeProps?, bool, File?)> _checkFileForPreviewCreation(
     EnteFile enteFile,
   ) async {
-    if ((enteFile.pubMagicMetadata?.sv ?? 0) == 1) {
+    final RemoteAsset? rAsset = enteFile.rAsset;
+    if ((rAsset?.streamingVersion ?? 0) == 1) {
       _logger.info(
         "Skip Preview due to sv=1 for  ${enteFile.displayName}",
       );

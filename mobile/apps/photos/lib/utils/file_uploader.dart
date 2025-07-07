@@ -32,7 +32,6 @@ import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
 import "package:photos/models/file/remote/asset.dart";
 import "package:photos/models/file/remote/collection_file.dart";
-import "package:photos/models/metadata/file_magic.dart";
 import "package:photos/models/user_details.dart";
 import "package:photos/module/upload/model/update_response.dart";
 import "package:photos/module/upload/model/upload_data.dart";

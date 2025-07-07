@@ -110,11 +110,26 @@ class RemoteAsset {
 
   String? get caption => publicMetadata?.data[captionKey];
 
+  int? get height {
+    return publicMetadata?.data[heightKey];
+  }
+
+  int? get width {
+    return publicMetadata?.data[widthKey];
+  }
+
+  void inMemUpdateCaption(String? newCaption) {
+    if (publicMetadata == null) {
+      return;
+    }
+    publicMetadata!.data[captionKey] = newCaption;
+  }
+
   int get fileSize => info?.fileSize ?? -1;
 
   String? get uploaderName {
     return publicMetadata?.data[uploaderNameKey];
   }
 
-  int? get mediaType => null;
+  int? get mediaType => publicMetadata?.data[mediaTypeKey];
 }
