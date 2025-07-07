@@ -721,16 +721,16 @@ const Page: React.FC = () => {
         void (async () => {
             showLoadingBar();
             try {
-                const selectedFiles = getSelectedFiles(
-                    selected,
+                // When hiding use all non-hidden files instead of the filtered
+                // files since we want to move all files copies to the hidden
+                // collection.
+                const opFiles =
                     op == "hide"
-                        ? // passing files here instead of filteredData for hide since
-                          // we want to move all files copies to hidden collection
-                          state.collectionFiles.filter(
+                        ? state.collectionFiles.filter(
                               (f) => !state.hiddenFileIDs.has(f.id),
                           )
-                        : filteredFiles,
-                );
+                        : filteredFiles;
+                const selectedFiles = getSelectedFiles(selected, opFiles);
                 const toProcessFiles =
                     op == "download"
                         ? selectedFiles
