@@ -1,3 +1,4 @@
+// TODO: Too many null assertions in this file. The types need reworking.
 import { ensureLocalUser } from "ente-accounts/services/user";
 import { isDesktop } from "ente-base/app";
 import { createComlinkCryptoWorker } from "ente-base/crypto";
@@ -96,6 +97,8 @@ export type UploadItemWithCollection = UploadAsset & {
 };
 
 class UIService {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     private progressUpdater: ProgressUpdater;
 
     // UPLOAD LEVEL STATES
@@ -105,9 +108,9 @@ class UIService {
     private uploadProgressView = false;
 
     // STAGE LEVEL STATES
-    private perFileProgress: number;
-    private filesUploadedCount: number;
-    private totalFilesCount: number;
+    private perFileProgress = 0;
+    private filesUploadedCount = 0;
+    private totalFilesCount = 0;
     private inProgressUploads: InProgressUploads = new Map();
     private finishedUploads: FinishedUploads = new Map();
 
@@ -243,7 +246,7 @@ const groupByResult = (finishedUploads: FinishedUploads) => {
     const groups: SegregatedFinishedUploads = new Map();
     for (const [localID, result] of finishedUploads) {
         if (!groups.has(result)) groups.set(result, []);
-        groups.get(result).push(localID);
+        groups.get(result)!.push(localID);
     }
     return groups;
 };
@@ -251,13 +254,13 @@ const groupByResult = (finishedUploads: FinishedUploads) => {
 class UploadManager {
     private comlinkCryptoWorkers: ComlinkWorker<typeof CryptoWorker>[] =
         new Array(maxConcurrentUploads);
-    private parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>;
-    private itemsToBeUploaded: ClusteredUploadItem[];
-    private failedItems: ClusteredUploadItem[];
-    private existingFiles: EnteFile[];
-    private onUploadFile: (file: EnteFile) => void;
-    private collections: Map<number, Collection>;
-    private uploadInProgress: boolean;
+    private parsedMetadataJSONMap = new Map<string, ParsedMetadataJSON>();
+    private itemsToBeUploaded: ClusteredUploadItem[] = [];
+    private failedItems: ClusteredUploadItem[] = [];
+    private existingFiles: EnteFile[] = [];
+    private onUploadFile: ((file: EnteFile) => void) | undefined;
+    private collections = new Map<number, Collection>();
+    private uploadInProgress = false;
     private publicAlbumsCredentials: PublicAlbumsCredentials | undefined;
     private uploaderName: string | undefined;
     /**
@@ -481,14 +484,14 @@ class UploadManager {
         await UploadService.setFileCount(mediaItems.length);
         this.uiService.setUploadPhase("uploading");
 
-        const uploadProcesses = [];
+        const uploadProcesses = new Array<Promise<void>>();
         for (
             let i = 0;
             i < maxConcurrentUploads && this.itemsToBeUploaded.length > 0;
             i++
         ) {
             this.comlinkCryptoWorkers[i] = createComlinkCryptoWorker();
-            const worker = await this.comlinkCryptoWorkers[i].remote;
+            const worker = await this.comlinkCryptoWorkers[i]!.remote;
             uploadProcesses.push(this.uploadNextItemInQueue(worker));
         }
         await Promise.all(uploadProcesses);
@@ -508,9 +511,9 @@ class UploadManager {
             this.abortIfCancelled();
             logAboutMemoryPressureIfNeeded();
 
-            const clusteredItem = this.itemsToBeUploaded.pop();
+            const clusteredItem = this.itemsToBeUploaded.pop()!;
             const { localID, collectionID } = clusteredItem;
-            const collection = this.collections.get(collectionID);
+            const collection = this.collections.get(collectionID)!;
             const uploadableItem = { ...clusteredItem, collection };
 
             uiService.setFileProgress(localID, 0);
@@ -605,7 +608,7 @@ class UploadManager {
 
     private updateExistingFiles(file: EnteFile) {
         this.existingFiles.push(file);
-        this.onUploadFile(file);
+        this.onUploadFile!(file);
     }
 
     /**
@@ -668,8 +671,8 @@ const makeUploadItemWithCollectionIDAndName = (
     localID: f.localID!,
     collectionID: f.collectionID!,
     fileName: (f.isLivePhoto
-        ? uploadItemFileName(f.livePhotoAssets.image)
-        : uploadItemFileName(f.uploadItem))!,
+        ? uploadItemFileName(f.livePhotoAssets!.image)
+        : uploadItemFileName(f.uploadItem!))!,
     isLivePhoto: f.isLivePhoto,
     uploadItem: f.uploadItem,
     pathPrefix: f.pathPrefix,
@@ -689,7 +692,10 @@ const splitMetadataAndMediaItems = (
             else media.push(f);
             return [metadata, media];
         },
-        [[], []],
+        [
+            new Array<UploadItemWithCollectionIDAndName>(),
+            new Array<UploadItemWithCollectionIDAndName>(),
+        ],
     );
 
 /**
@@ -710,22 +716,22 @@ const clusterLivePhotos = async (
         .sort((f, g) => f.collectionID - g.collectionID);
     let index = 0;
     while (index < items.length - 1) {
-        const f = items[index];
-        const g = items[index + 1];
-        const fFileType = potentialFileTypeFromExtension(f.fileName);
-        const gFileType = potentialFileTypeFromExtension(g.fileName);
+        const f = items[index]!;
+        const g = items[index + 1]!;
+        const fFileType = potentialFileTypeFromExtension(f.fileName)!;
+        const gFileType = potentialFileTypeFromExtension(g.fileName)!;
         const fa: PotentialLivePhotoAsset = {
             fileName: f.fileName,
             fileType: fFileType,
             collectionID: f.collectionID,
-            uploadItem: f.uploadItem,
+            uploadItem: f.uploadItem!,
             pathPrefix: f.pathPrefix,
         };
         const ga: PotentialLivePhotoAsset = {
             fileName: g.fileName,
             fileType: gFileType,
             collectionID: g.collectionID,
-            uploadItem: g.uploadItem,
+            uploadItem: g.uploadItem!,
             pathPrefix: g.pathPrefix,
         };
         if (await areLivePhotoAssets(fa, ga, parsedMetadataJSONMap)) {
@@ -738,8 +744,8 @@ const clusterLivePhotos = async (
                 isLivePhoto: true,
                 pathPrefix: image.pathPrefix,
                 livePhotoAssets: {
-                    image: image.uploadItem,
-                    video: video.uploadItem,
+                    image: image.uploadItem!,
+                    video: video.uploadItem!,
                 },
             });
             index += 2;

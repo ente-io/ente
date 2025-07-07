@@ -1,3 +1,4 @@
+// TODO: Too many null assertions in this file. The types need reworking.
 // TODO: Audit this file
 /* eslint-disable @typescript-eslint/no-misused-promises */
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
@@ -272,7 +273,9 @@ export const Upload: React.FC<UploadProps> = ({
      * If set, this will be the name of the collection that our desktop app
      * wishes for us to upload into.
      */
-    const pendingDesktopUploadCollectionName = useRef<string>("");
+    const pendingDesktopUploadCollectionName = useRef<string | undefined>(
+        undefined,
+    );
 
     /**
      * This is set to thue user's choice when the user chooses one of the
@@ -368,6 +371,8 @@ export const Upload: React.FC<UploadProps> = ({
                 setInProgressUploads,
                 setFinishedUploads,
                 setUploadPhase,
+                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                // @ts-ignore
                 setUploadFilenames: setUploadFileNames,
                 setHasLivePhotos,
                 setUploadProgressView,
@@ -503,7 +508,7 @@ export const Upload: React.FC<UploadProps> = ({
         );
 
         uploadItemsAndPaths.current = prunedItemAndPaths;
-        if (uploadItemsAndPaths.current.length === 0) {
+        if (uploadItemsAndPaths.current.length == 0) {
             props.setLoading(false);
             return;
         }
@@ -518,15 +523,15 @@ export const Upload: React.FC<UploadProps> = ({
         log.debug(() => ["Import suggestion", importSuggestion]);
 
         const _selectedUploadType = selectedUploadType.current;
-        selectedUploadType.current = null;
+        selectedUploadType.current = undefined;
         props.setLoading(false);
 
         (async () => {
             if (publicCollectionGalleryContext.credentials) {
                 setUploaderName(
-                    await savedPublicCollectionUploaderName(
+                    (await savedPublicCollectionUploaderName(
                         publicCollectionGalleryContext.credentials.accessToken,
-                    ),
+                    )) ?? "",
                 );
                 showUploaderNameInput();
                 return;
@@ -539,7 +544,7 @@ export const Upload: React.FC<UploadProps> = ({
                         "root",
                         pendingDesktopUploadCollectionName.current,
                     );
-                    pendingDesktopUploadCollectionName.current = null;
+                    pendingDesktopUploadCollectionName.current = undefined;
                 } else {
                     uploadFilesToNewCollections("parent");
                 }
@@ -579,7 +584,7 @@ export const Upload: React.FC<UploadProps> = ({
                 };
             }
 
-            onOpenCollectionSelector({
+            onOpenCollectionSelector?.({
                 action: "upload",
                 onSelectCollection: uploadFilesToExistingCollection,
                 onCreateCollection: showNextModal,
@@ -613,7 +618,7 @@ export const Upload: React.FC<UploadProps> = ({
             [collection],
             uploaderName,
         );
-        uploadItemsAndPaths.current = null;
+        uploadItemsAndPaths.current = [];
     };
 
     const uploadFilesToNewCollections = async (
@@ -628,7 +633,9 @@ export const Upload: React.FC<UploadProps> = ({
         >();
         if (mapping == "root") {
             collectionNameToUploadItems.set(
-                collectionName,
+                // Un-enforced convention is that collectionName is always set
+                // when mapping is "root". TODO: Reflect this in types.
+                collectionName!,
                 uploadItemsAndPaths.current,
             );
         } else {
@@ -668,7 +675,7 @@ export const Upload: React.FC<UploadProps> = ({
             return;
         }
         await waitInQueueAndUploadFiles(uploadItemsWithCollection, collections);
-        uploadItemsAndPaths.current = null;
+        uploadItemsAndPaths.current = [];
     };
 
     const waitInQueueAndUploadFiles = async (
@@ -719,7 +726,7 @@ export const Upload: React.FC<UploadProps> = ({
                     collections,
                     uploadItemsWithCollection
                         .map(({ uploadItem }) => uploadItem)
-                        .filter((x) => x),
+                        .filter((x) => x !== undefined),
                 );
             }
             const wereFilesProcessed = await uploadManager.uploadItems(
@@ -825,14 +832,14 @@ export const Upload: React.FC<UploadProps> = ({
 
     const handlePublicUpload = (uploaderName: string) => {
         savePublicCollectionUploaderName(
-            publicCollectionGalleryContext.credentials.accessToken,
+            publicCollectionGalleryContext.credentials!.accessToken,
             uploaderName,
         );
 
         // Do not keep the uploader name input dialog open while the upload is
         // progressing (the upload progress indicator will take out now).
         void uploadFilesToExistingCollection(
-            props.uploadCollection,
+            props.uploadCollection!,
             uploaderName,
         );
     };
@@ -871,7 +878,7 @@ export const Upload: React.FC<UploadProps> = ({
                 open={uploadProgressView}
                 onClose={closeUploadProgress}
                 percentComplete={percentComplete}
-                uploadFileNames={uploadFileNames}
+                uploadFileNames={uploadFileNames!}
                 uploadCounter={uploadCounter}
                 uploadPhase={uploadPhase}
                 inProgressUploads={inProgressUploads}
@@ -892,7 +899,7 @@ export const Upload: React.FC<UploadProps> = ({
                 open={uploaderNameInputVisibilityProps.open}
                 onClose={handleUploaderNameInputClose}
                 uploaderName={uploaderName}
-                uploadFileCount={uploadItemsAndPaths.current?.length ?? 0}
+                uploadFileCount={uploadItemsAndPaths.current.length}
                 onSubmit={handlePublicUpload}
             />
         </>
@@ -984,7 +991,7 @@ const defaultImportSuggestion: ImportSuggestion = {
 };
 
 const deriveImportSuggestion = (
-    uploadType: UploadType,
+    uploadType: UploadType | undefined,
     paths: string[],
 ): ImportSuggestion => {
     if (isDesktop && uploadType == "files") {
@@ -996,8 +1003,8 @@ const deriveImportSuggestion = (
     );
     const separatorCount = (s: string) => separatorCounts.get(s)!;
     paths.sort((path1, path2) => separatorCount(path1) - separatorCount(path2));
-    const firstPath = paths[0];
-    const lastPath = paths[paths.length - 1];
+    const firstPath = paths[0]!;
+    const lastPath = paths[paths.length - 1]!;
 
     const L = firstPath.length;
     let i = 0;
@@ -1020,7 +1027,7 @@ const deriveImportSuggestion = (
     }
 
     return {
-        rootFolderName: commonPathPrefix || null,
+        rootFolderName: commonPathPrefix || "",
         hasNestedFolders: firstFileFolder !== lastFileFolder,
     };
 };
@@ -1074,7 +1081,7 @@ const setPendingUploads = async (
         and on next upload we can directly start uploading to this collection
     */
     if (collections.length == 1) {
-        collectionName = collections[0].name;
+        collectionName = collections[0]!.name;
     }
 
     const filePaths: string[] = [];
