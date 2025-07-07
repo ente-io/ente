@@ -51,7 +51,7 @@ import { usePhotosAppContext } from "ente-new/photos/types/context";
 import { t } from "i18next";
 import React, { useCallback, useRef } from "react";
 import { Trans } from "react-i18next";
-import { SetFilesDownloadProgressAttributesCreator } from "types/gallery";
+import type { SetFilesDownloadProgressAttributesCreator } from "types/gallery";
 import {
     downloadCollectionHelper,
     downloadDefaultHiddenCollectionHelper,
@@ -124,7 +124,7 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
 }) => {
     const { showMiniDialog, onGenericError } = useBaseContext();
     const { showLoadingBar, hideLoadingBar } = usePhotosAppContext();
-    const overflowMenuIconRef = useRef<SVGSVGElement>(null);
+    const overflowMenuIconRef = useRef<SVGSVGElement | null>(null);
 
     const { show: showSortOrderMenu, props: sortOrderMenuVisibilityProps } =
         useModalVisibility();
@@ -221,15 +221,15 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
         setActiveCollectionID(PseudoCollectionID.all);
     });
 
-    const _downloadCollection = () => {
+    const _downloadCollection = async () => {
         if (isActiveCollectionDownloadInProgress()) return;
 
         if (collectionSummaryType == "hiddenItems") {
-            return downloadDefaultHiddenCollectionHelper(
+            await downloadDefaultHiddenCollectionHelper(
                 setFilesDownloadProgressAttributesCreator,
             );
         } else {
-            return downloadCollectionHelper(
+            await downloadCollectionHelper(
                 activeCollection.id,
                 setFilesDownloadProgressAttributesCreator(
                     activeCollection.name,
@@ -674,7 +674,7 @@ const DownloadOption: React.FC<
 interface CollectionSortOrderMenuProps {
     open: boolean;
     onClose: () => void;
-    overflowMenuIconRef: React.RefObject<SVGSVGElement>;
+    overflowMenuIconRef: React.RefObject<SVGSVGElement | null>;
     onAscClick: () => void;
     onDescClick: () => void;
 }
@@ -699,7 +699,7 @@ const CollectionSortOrderMenu: React.FC<CollectionSortOrderMenuProps> = ({
     return (
         <Menu
             id="collection-files-sort"
-            anchorEl={overflowMenuIconRef.current}
+            anchorEl={overflowMenuIconRef?.current}
             open={open}
             onClose={onClose}
             slotProps={{

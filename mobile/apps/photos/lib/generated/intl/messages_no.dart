@@ -1067,8 +1067,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Feil gjenopprettingsnøkkel"),
         "indexedItems":
             MessageLookupByLibrary.simpleMessage("Indekserte elementer"),
-        "indexingIsPaused": MessageLookupByLibrary.simpleMessage(
-            "Indeksering er satt på pause. Den vil automatisk fortsette når enheten er klar."),
         "ineligible": MessageLookupByLibrary.simpleMessage("Ikke aktuell"),
         "info": MessageLookupByLibrary.simpleMessage("Info"),
         "insecureDevice": MessageLookupByLibrary.simpleMessage("Usikker enhet"),

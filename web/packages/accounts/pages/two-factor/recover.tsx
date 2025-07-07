@@ -4,8 +4,9 @@ import {
     AccountsPageFooter,
     AccountsPageTitle,
 } from "ente-accounts/components/layouts/centered-paper";
+import { savedPartialLocalUser } from "ente-accounts/services/accounts-db";
 import {
-    recoverTwoFactor,
+    getRecoverTwoFactor,
     recoverTwoFactorFinish,
     type TwoFactorRecoveryResponse,
     type TwoFactorType,
@@ -20,7 +21,6 @@ import {
 import { useBaseContext } from "ente-base/context";
 import { isHTTP4xxError, isHTTPErrorWithStatus } from "ente-base/http";
 import log from "ente-base/log";
-import { getData } from "ente-shared/storage/localStorage";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -64,20 +64,23 @@ const Page: React.FC<RecoverPageProps> = ({ twoFactorType }) => {
     );
 
     useEffect(() => {
-        const user = getData("user");
-        const sessionID = user.passkeySessionID || user.twoFactorSessionID;
-        if (!user?.email || !sessionID) {
-            void router.push("/");
-        } else if (
-            !(user.isTwoFactorEnabled || user.isTwoFactorEnabledPasskey) &&
-            (user.encryptedToken || user.token)
-        ) {
-            void router.push("/generate");
-        } else {
-            setSessionID(sessionID);
-            void recoverTwoFactor(twoFactorType, sessionID)
-                .then(setRecoveryResponse)
-                .catch((e: unknown) => {
+        void (async () => {
+            const user = savedPartialLocalUser();
+            const sessionID =
+                twoFactorType == "passkey"
+                    ? user?.passkeySessionID
+                    : user?.twoFactorSessionID;
+            if (!user?.email || !sessionID) {
+                await router.replace("/");
+            } else if (user.encryptedToken || user.token) {
+                await router.replace("/generate");
+            } else {
+                setSessionID(sessionID);
+                try {
+                    setRecoveryResponse(
+                        await getRecoverTwoFactor(twoFactorType, sessionID),
+                    );
+                } catch (e) {
                     log.error("Second factor recovery page setup failed", e);
                     if (isHTTPErrorWithStatus(e, 404)) {
                         logout();
@@ -86,8 +89,9 @@ const Page: React.FC<RecoverPageProps> = ({ twoFactorType }) => {
                     } else {
                         onGenericError(e);
                     }
-                });
-        }
+                }
+            }
+        })();
     }, [
         twoFactorType,
         logout,

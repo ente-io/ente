@@ -472,7 +472,7 @@ class MLStatusWidgetState extends State<MLStatusWidget> {
 
               if (!_isDeviceHealthy && pendingFiles > 0) {
                 return MenuSectionDescriptionWidget(
-                  content: S.of(context).indexingIsPaused,
+                  content: S.of(context).indexingPausedStatusDescription,
                 );
               }
 

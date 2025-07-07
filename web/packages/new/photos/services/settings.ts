@@ -2,7 +2,7 @@
  * @file Storage (in-memory, local, remote) and update of various settings.
  */
 
-import { partialLocalUser } from "ente-accounts/services/user";
+import { savedPartialLocalUser } from "ente-accounts/services/accounts-db";
 import { isDevBuild } from "ente-base/env";
 import log from "ente-base/log";
 import { updateShouldDisableCFUploadProxy } from "ente-gallery/services/upload";
@@ -195,10 +195,8 @@ const setSettingsSnapshot = (snapshot: Settings) => {
  */
 export const isDevBuildAndUser = () => isDevBuild && isDevUserViaEmail();
 
-const isDevUserViaEmail = () => {
-    const user = partialLocalUser();
-    return !!user?.email?.endsWith("@ente.io");
-};
+const isDevUserViaEmail = () =>
+    !!savedPartialLocalUser()?.email?.endsWith("@ente.io");
 
 /**
  * Persist the user's map enabled preference both locally and on remote.

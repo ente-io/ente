@@ -47,7 +47,11 @@ export const DeleteAccount: React.FC<DeleteAccountProps> = ({
     </TitledMiniDialog>
 );
 
-// See: [Note: MUI dialog state reset]
+/**
+ * The contents of the {@link DeleteAccount} dialog.
+ *
+ * See: [Note: MUI dialog state] for why this is a separate component.
+ */
 const DeleteAccountDialogContents: React.FC<
     Omit<DeleteAccountProps, "open">
 > = ({ onClose, onAuthenticateUser }) => {

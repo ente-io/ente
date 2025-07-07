@@ -1,4 +1,4 @@
-import type { LocalUser, User } from "ente-accounts/services/user";
+import type { LocalUser } from "ente-accounts/services/user";
 import { joinPath } from "ente-base/file-name";
 import log from "ente-base/log";
 import { type Electron } from "ente-base/types/ipc";
@@ -6,12 +6,8 @@ import { saveAsFileAndRevokeObjectURL } from "ente-base/utils/web";
 import { downloadManager } from "ente-gallery/services/download";
 import { detectFileTypeInfo } from "ente-gallery/utils/detect-type";
 import { writeStream } from "ente-gallery/utils/native-stream";
-import { EnteFile } from "ente-media/file";
-import {
-    ItemVisibility,
-    fileFileName,
-    isArchivedFile,
-} from "ente-media/file-metadata";
+import type { EnteFile } from "ente-media/file";
+import { ItemVisibility, fileFileName } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
 import { decodeLivePhoto } from "ente-media/live-photo";
 import { type FileOp } from "ente-new/photos/components/SelectedFileOptions";
@@ -23,10 +19,9 @@ import {
 } from "ente-new/photos/services/collection";
 import { updateFilesVisibility } from "ente-new/photos/services/file";
 import { safeFileName } from "ente-new/photos/utils/native-fs";
-import { getData } from "ente-shared/storage/localStorage";
 import { wait } from "ente-utils/promise";
 import { t } from "i18next";
-import {
+import type {
     SelectedState,
     SetFilesDownloadProgressAttributes,
     SetFilesDownloadProgressAttributesCreator,
@@ -278,18 +273,6 @@ async function downloadFileDesktop(
         );
     }
 }
-
-export const getArchivedFiles = (files: EnteFile[]) => {
-    return files.filter(isArchivedFile).map((file) => file.id);
-};
-
-export const getUserOwnedFiles = (files: EnteFile[]) => {
-    const user: User = getData("user");
-    if (!user?.id) {
-        throw Error("user missing");
-    }
-    return files.filter((file) => file.ownerID === user.id);
-};
 
 export const shouldShowAvatar = (
     file: EnteFile,

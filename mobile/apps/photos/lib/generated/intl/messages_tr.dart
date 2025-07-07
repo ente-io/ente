@@ -1117,8 +1117,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Yanlış kurtarma kodu"),
         "indexedItems":
             MessageLookupByLibrary.simpleMessage("Dizinlenmiş öğeler"),
-        "indexingIsPaused": MessageLookupByLibrary.simpleMessage(
-            "Dizin oluşturma duraklatıldı. Cihaz hazır olduğunda otomatik olarak devam edecektir."),
         "ineligible": MessageLookupByLibrary.simpleMessage("Uygun Değil"),
         "info": MessageLookupByLibrary.simpleMessage("Bilgi"),
         "insecureDevice":

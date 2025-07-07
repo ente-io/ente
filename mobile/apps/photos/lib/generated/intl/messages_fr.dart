@@ -1166,8 +1166,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Clé de secours non valide"),
         "indexedItems":
             MessageLookupByLibrary.simpleMessage("Éléments indexés"),
-        "indexingIsPaused": MessageLookupByLibrary.simpleMessage(
-            "L\'indexation est en pause. Elle reprendra automatiquement lorsque l\'appareil sera prêt."),
         "ineligible": MessageLookupByLibrary.simpleMessage("Non compatible"),
         "info": MessageLookupByLibrary.simpleMessage("Info"),
         "insecureDevice":

@@ -5,12 +5,18 @@ import {
     AccountsPageTitle,
 } from "ente-accounts/components/layouts/centered-paper";
 import { RecoveryKey } from "ente-accounts/components/RecoveryKey";
+import {
+    savedJustSignedUp,
+    savedOriginalKeyAttributes,
+    savedPartialLocalUser,
+    saveJustSignedUp,
+} from "ente-accounts/services/accounts-db";
 import { appHomeRoute } from "ente-accounts/services/redirect";
 import {
     generateSRPSetupAttributes,
+    getAndSaveSRPAttributes,
     setupSRP,
 } from "ente-accounts/services/srp";
-import type { KeyAttributes, User } from "ente-accounts/services/user";
 import {
     generateAndSaveInteractiveKeyAttributes,
     generateKeysAndAttributes,
@@ -22,94 +28,90 @@ import { useBaseContext } from "ente-base/context";
 import { deriveKeyInsufficientMemoryErrorMessage } from "ente-base/crypto/types";
 import log from "ente-base/log";
 import {
-    haveCredentialsInSession,
+    haveMasterKeyInSession,
     saveMasterKeyInSessionAndSafeStore,
 } from "ente-base/session";
-import { getData } from "ente-shared/storage/localStorage";
-import {
-    justSignedUp,
-    setJustSignedUp,
-} from "ente-shared/storage/localStorage/helpers";
 import { t } from "i18next";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
     NewPasswordForm,
     type NewPasswordFormProps,
 } from "../components/NewPasswordForm";
 
+/**
+ * A page that allows the user to generate key attributes if needed, and shows
+ * them their recovery key if they just signed up.
+ *
+ * See: [Note: Login pages]
+ */
 const Page: React.FC = () => {
     const { logout, showMiniDialog } = useBaseContext();
 
-    const [user, setUser] = useState<User>();
+    const [userEmail, setUserEmail] = useState("");
     const [openRecoveryKey, setOpenRecoveryKey] = useState(false);
-    const [loading, setLoading] = useState(true);
 
     const router = useRouter();
 
     useEffect(() => {
-        const keyAttributes: KeyAttributes = getData("originalKeyAttributes");
-        const user: User = getData("user");
-        setUser(user);
-        if (!user?.token) {
-            void router.push("/");
-        } else if (haveCredentialsInSession()) {
-            if (justSignedUp()) {
+        const user = savedPartialLocalUser();
+        if (!user?.email || !user.token) {
+            void router.replace("/");
+        } else if (haveMasterKeyInSession()) {
+            if (savedJustSignedUp()) {
                 setOpenRecoveryKey(true);
-                setLoading(false);
             } else {
-                void router.push(appHomeRoute);
+                void router.replace(appHomeRoute);
             }
-        } else if (keyAttributes?.encryptedKey) {
-            void router.push("/credentials");
+        } else if (savedOriginalKeyAttributes()) {
+            void router.replace("/credentials");
         } else {
-            setLoading(false);
+            setUserEmail(user.email);
         }
     }, [router]);
 
-    const handleSubmit: NewPasswordFormProps["onSubmit"] = async (
-        password,
-        setPasswordsFieldError,
-    ) => {
-        try {
-            const { masterKey, kek, keyAttributes } =
-                await generateKeysAndAttributes(password);
-            await putUserKeyAttributes(keyAttributes);
-            await setupSRP(await generateSRPSetupAttributes(kek));
-            await generateAndSaveInteractiveKeyAttributes(
-                password,
-                keyAttributes,
-                masterKey,
-            );
-            await saveMasterKeyInSessionAndSafeStore(masterKey);
-            setJustSignedUp(true);
-            setOpenRecoveryKey(true);
-        } catch (e) {
-            log.error("failed to generate password", e);
-            setPasswordsFieldError(
-                e instanceof Error &&
-                    e.message == deriveKeyInsufficientMemoryErrorMessage
-                    ? t("password_generation_failed")
-                    : t("generic_error"),
-            );
-        }
-    };
+    const handleSubmit: NewPasswordFormProps["onSubmit"] = useCallback(
+        async (password, setPasswordsFieldError) => {
+            try {
+                const { masterKey, kek, keyAttributes } =
+                    await generateKeysAndAttributes(password);
+                await putUserKeyAttributes(keyAttributes);
+                await setupSRP(await generateSRPSetupAttributes(kek));
+                await getAndSaveSRPAttributes(userEmail);
+                await generateAndSaveInteractiveKeyAttributes(
+                    password,
+                    keyAttributes,
+                    masterKey,
+                );
+                await saveMasterKeyInSessionAndSafeStore(masterKey);
+                saveJustSignedUp();
+                setOpenRecoveryKey(true);
+            } catch (e) {
+                log.error("Could not generate key attributes from password", e);
+                setPasswordsFieldError(
+                    e instanceof Error &&
+                        e.message == deriveKeyInsufficientMemoryErrorMessage
+                        ? t("password_generation_failed")
+                        : t("generic_error"),
+                );
+            }
+        },
+        [userEmail],
+    );
 
     return (
         <>
-            {loading || !user ? (
-                <LoadingIndicator />
-            ) : openRecoveryKey ? (
+            {openRecoveryKey ? (
                 <RecoveryKey
                     open={openRecoveryKey}
                     onClose={() => void router.push(appHomeRoute)}
                     showMiniDialog={showMiniDialog}
                 />
-            ) : (
+            ) : userEmail ? (
                 <AccountsPageContents>
                     <AccountsPageTitle>{t("set_password")}</AccountsPageTitle>
                     <NewPasswordForm
-                        userEmail={user.email}
+                        userEmail={userEmail}
                         submitButtonTitle={t("set_password")}
                         onSubmit={handleSubmit}
                     />
@@ -118,6 +120,8 @@ const Page: React.FC = () => {
                         <LinkButton onClick={logout}>{t("go_back")}</LinkButton>
                     </AccountsPageFooter>
                 </AccountsPageContents>
+            ) : (
+                <LoadingIndicator />
             )}
         </>
     );

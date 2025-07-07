@@ -1,7 +1,9 @@
 import { sortFiles } from "ente-gallery/utils/file";
-import { EnteFile } from "ente-media/file";
-import type { CollectionSummary } from "ente-new/photos/services/collection-summary";
-import { CollectionsSortBy } from "ente-new/photos/services/collection-summary";
+import type { EnteFile } from "ente-media/file";
+import type {
+    CollectionsSortBy,
+    CollectionSummary,
+} from "ente-new/photos/services/collection-summary";
 
 export const sortCollectionSummaries = (
     collectionSummaries: CollectionSummary[],

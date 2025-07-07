@@ -982,8 +982,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Невірний ключ відновлення"),
         "indexedItems":
             MessageLookupByLibrary.simpleMessage("Індексовані елементи"),
-        "indexingIsPaused": MessageLookupByLibrary.simpleMessage(
-            "Індексація припинена. Автоматично продовжуватиметься, коли пристрій буде готовий."),
         "info": MessageLookupByLibrary.simpleMessage("Інформація"),
         "insecureDevice":
             MessageLookupByLibrary.simpleMessage("Незахищений пристрій"),

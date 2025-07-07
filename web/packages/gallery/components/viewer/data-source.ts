@@ -723,15 +723,15 @@ export const updateFileInfoExifIfNeeded = async (itemData: ItemData) => {
     // We already have it available.
     if (_state.fileInfoExifByFileID.has(fileID)) return;
 
-    const updateNotifyAndReturn = (exifData: FileInfoExif) => {
+    const update = (exifData: FileInfoExif) => {
         _state.fileInfoExifByFileID.set(fileID, exifData);
         _state.exifObserverByFileID.get(fileID)?.(exifData);
-        return exifData;
     };
 
     // For videos, insert a placeholder.
     if (fileType == FileType.video) {
-        return updateNotifyAndReturn(createPlaceholderFileInfoExif());
+        update(createPlaceholderFileInfoExif());
+        return;
     }
 
     // This is not a video, but the original image is not available yet.
@@ -741,12 +741,12 @@ export const updateFileInfoExifIfNeeded = async (itemData: ItemData) => {
         const file = new File([originalImageBlob], "");
         const tags = await extractRawExif(file);
         const parsed = parseExif(tags);
-        return updateNotifyAndReturn({ tags, parsed });
+        update({ tags, parsed });
     } catch (e) {
         log.error("Failed to extract exif", e);
         // Save the empty placeholder exif corresponding to the file, no point
         // in unnecessarily retrying this, it will deterministically fail again.
-        return updateNotifyAndReturn(createPlaceholderFileInfoExif());
+        update(createPlaceholderFileInfoExif());
     }
 };
 

@@ -1,14 +1,16 @@
+// TODO: Audit this file
+/* eslint-disable @typescript-eslint/no-unused-expressions */
 import AddPhotoAlternateOutlinedIcon from "@mui/icons-material/AddPhotoAlternateOutlined";
 import CloseIcon from "@mui/icons-material/Close";
 import DownloadIcon from "@mui/icons-material/Download";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import { Box, Button, IconButton, Stack, styled, Tooltip } from "@mui/material";
 import Typography from "@mui/material/Typography";
-import { TimeStampListItem } from "components/FileList";
+import type { TimeStampListItem } from "components/FileList";
 import { FileListWithViewer } from "components/FileListWithViewer";
 import {
     FilesDownloadProgress,
-    FilesDownloadProgressAttributes,
+    type FilesDownloadProgressAttributes,
 } from "components/FilesDownloadProgress";
 import { Upload } from "components/Upload";
 import {
@@ -44,7 +46,7 @@ import { useBaseContext } from "ente-base/context";
 import {
     isHTTP401Error,
     isHTTPErrorWithStatus,
-    PublicAlbumsCredentials,
+    type PublicAlbumsCredentials,
 } from "ente-base/http";
 import log from "ente-base/log";
 import { FullScreenDropZone } from "ente-gallery/components/FullScreenDropZone";
@@ -81,7 +83,7 @@ import { useRouter } from "next/router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { type FileWithPath } from "react-dropzone";
 import { uploadManager } from "services/upload-manager";
-import {
+import type {
     SelectedState,
     SetFilesDownloadProgressAttributes,
     SetFilesDownloadProgressAttributesCreator,

@@ -4,18 +4,23 @@ import MenuIcon from "@mui/icons-material/Menu";
 import { IconButton, Stack, Typography } from "@mui/material";
 import { AuthenticateUser } from "components/AuthenticateUser";
 import { GalleryBarAndListHeader } from "components/Collections/GalleryBarAndListHeader";
-import { TimeStampListItem } from "components/FileList";
+import { type TimeStampListItem } from "components/FileList";
 import { FileListWithViewer } from "components/FileListWithViewer";
 import {
     FilesDownloadProgress,
-    FilesDownloadProgressAttributes,
+    type FilesDownloadProgressAttributes,
 } from "components/FilesDownloadProgress";
 import { FixCreationTime } from "components/FixCreationTime";
 import { Sidebar } from "components/Sidebar";
 import { Upload } from "components/Upload";
 import { sessionExpiredDialogAttributes } from "ente-accounts/components/utils/dialog";
+import {
+    getAndClearIsFirstLogin,
+    getAndClearJustSignedUp,
+} from "ente-accounts/services/accounts-db";
 import { stashRedirect } from "ente-accounts/services/redirect";
 import { isSessionInvalid } from "ente-accounts/services/session";
+import { ensureLocalUser } from "ente-accounts/services/user";
 import type { MiniDialogAttributes } from "ente-base/components/MiniDialog";
 import { NavbarBase } from "ente-base/components/Navbar";
 import { SingleInputDialog } from "ente-base/components/SingleInputDialog";
@@ -30,9 +35,10 @@ import { useBaseContext } from "ente-base/context";
 import log from "ente-base/log";
 import {
     clearSessionStorage,
-    haveCredentialsInSession,
+    haveMasterKeyInSession,
     masterKeyFromSession,
 } from "ente-base/session";
+import { savedAuthToken } from "ente-base/token";
 import { FullScreenDropZone } from "ente-gallery/components/FullScreenDropZone";
 import { type UploadTypeSelectorIntent } from "ente-gallery/components/Upload";
 import { type Collection } from "ente-media/collection";
@@ -71,7 +77,10 @@ import {
 } from "ente-new/photos/components/gallery/reducer";
 import { notifyOthersFilesDialogAttributes } from "ente-new/photos/components/utils/dialog-attributes";
 import { useIsOffline } from "ente-new/photos/components/utils/use-is-offline";
-import { usePeopleStateSnapshot } from "ente-new/photos/components/utils/use-snapshot";
+import {
+    usePeopleStateSnapshot,
+    useUserDetailsSnapshot,
+} from "ente-new/photos/components/utils/use-snapshot";
 import { shouldShowWhatsNew } from "ente-new/photos/services/changelog";
 import {
     addToFavoritesCollection,
@@ -102,28 +111,19 @@ import {
 import type { SearchOption } from "ente-new/photos/services/search/types";
 import { initSettings } from "ente-new/photos/services/settings";
 import {
-    initUserDetailsOrTriggerPull,
     redirectToCustomerPortal,
-    userDetailsSnapshot,
+    savedUserDetailsOrTriggerPull,
     verifyStripeSubscription,
 } from "ente-new/photos/services/user-details";
 import { usePhotosAppContext } from "ente-new/photos/types/context";
-import { getData } from "ente-shared/storage/localStorage";
-import {
-    getToken,
-    isFirstLogin,
-    justSignedUp,
-    setIsFirstLogin,
-    setJustSignedUp,
-} from "ente-shared/storage/localStorage/helpers";
 import { PromiseQueue } from "ente-utils/promise";
 import { t } from "i18next";
 import { useRouter, type NextRouter } from "next/router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { FileWithPath } from "react-dropzone";
+import type { FileWithPath } from "react-dropzone";
 import { Trans } from "react-i18next";
 import { uploadManager } from "services/upload-manager";
-import {
+import type {
     SelectedState,
     SetFilesDownloadProgressAttributes,
     SetFilesDownloadProgressAttributesCreator,
@@ -184,6 +184,7 @@ const Page: React.FC = () => {
         EnteFile[]
     >([]);
 
+    const userDetails = useUserDetailsSnapshot();
     const peopleState = usePeopleStateSnapshot();
 
     // The (non-sticky) header shown at the top of the gallery items.
@@ -277,49 +278,71 @@ const Page: React.FC = () => {
     const router = useRouter();
 
     useEffect(() => {
-        const token = getToken();
-        if (!haveCredentialsInSession() || !token) {
-            stashRedirect("/gallery");
-            router.push("/");
-            return;
-        }
-        preloadImage("/images/subscription-card-background");
-
         const electron = globalThis.electron;
         let syncIntervalID: ReturnType<typeof setInterval> | undefined;
 
         void (async () => {
+            if (!haveMasterKeyInSession() || !(await savedAuthToken())) {
+                // If we don't have master key or auth token, reauthenticate.
+                stashRedirect("/gallery");
+                router.push("/");
+                return;
+            }
+
             if (!(await validateKey())) {
+                // If we have credentials but they can't be decrypted, reset.
+                //
+                // This code is never expected to run, it is only kept as a
+                // safety valve.
                 logout();
                 return;
             }
+
+            // We are logged in and everything looks fine. Proceed with page
+            // load initialization.
+
+            // One time inits.
+            preloadImage("/images/subscription-card-background");
             initSettings();
-            await initUserDetailsOrTriggerPull();
             setupSelectAllKeyBoardShortcutHandler();
+
+            // Show the initial state while the rest of the sequence proceeds.
             dispatch({ type: "showAll" });
-            setIsFirstLoad(isFirstLogin());
-            if (justSignedUp()) {
+
+            // If this is the user's first login on this client, then show them
+            // a message informing the that the initial load might take time.
+            setIsFirstLoad(getAndClearIsFirstLogin());
+
+            // If the user created a new account on this client, show them the
+            // plan options.
+            if (getAndClearJustSignedUp()) {
                 showPlanSelector();
             }
-            setIsFirstLogin(false);
-            const user = getData("user");
-            // TODO: Pass entire snapshot to reducer?
-            const familyData = userDetailsSnapshot()?.familyData;
+
+            // Initialize the reducer.
+            const user = ensureLocalUser();
+            const userDetails = await savedUserDetailsOrTriggerPull();
             dispatch({
                 type: "mount",
                 user,
-                familyData,
+                familyData: userDetails?.familyData,
                 collections: await savedCollections(),
                 collectionFiles: await savedCollectionFiles(),
                 trashItems: await savedTrashItems(),
             });
+
+            // Fetch data from remote.
             await remotePull();
+
+            // Clear the first load message if needed.
             setIsFirstLoad(false);
-            setJustSignedUp(false);
+
+            // Start the interval that does a periodic pull.
             syncIntervalID = setInterval(
                 () => remotePull({ silent: true }),
                 5 * 60 * 1000 /* 5 minutes */,
             );
+
             if (electron) {
                 electron.onMainWindowFocus(() => remotePull({ silent: true }));
                 if (await shouldShowWhatsNew(electron)) showWhatsNew();
@@ -331,6 +354,13 @@ const Page: React.FC = () => {
             if (electron) electron.onMainWindowFocus(undefined);
         };
     }, []);
+
+    useEffect(() => {
+        // Only act on updates after the initial mount has completed.
+        if (state.user && userDetails) {
+            dispatch({ type: "setUserDetails", userDetails });
+        }
+    }, [state.user, userDetails]);
 
     useEffect(() => {
         if (typeof activeCollectionID == "undefined" || !router.isReady) {
@@ -346,7 +376,7 @@ const Page: React.FC = () => {
     }, [activeCollectionID, router.isReady]);
 
     useEffect(() => {
-        if (router.isReady && haveCredentialsInSession()) {
+        if (router.isReady && haveMasterKeyInSession()) {
             handleSubscriptionCompletionRedirectIfNeeded(
                 showMiniDialog,
                 showLoadingBar,
@@ -1279,11 +1309,11 @@ const HiddenSectionNavbarContents: React.FC<
  *
  * Check if these query parameters exist, and if so, act on them appropriately.
  */
-export async function handleSubscriptionCompletionRedirectIfNeeded(
+const handleSubscriptionCompletionRedirectIfNeeded = async (
     showMiniDialog: (attributes: MiniDialogAttributes) => void,
     showLoadingBar: () => void,
     router: NextRouter,
-) {
+) => {
     const { session_id: sessionID, status, reason } = router.query;
 
     if (status == "success") {
@@ -1307,7 +1337,7 @@ export async function handleSubscriptionCompletionRedirectIfNeeded(
             );
         }
     } else if (status == "fail") {
-        log.error(`Subscription purchase failed: ${reason}`);
+        log.error(`Subscription purchase failed`, reason);
         switch (reason) {
             case "canceled":
                 showMiniDialog({
@@ -1348,4 +1378,4 @@ export async function handleSubscriptionCompletionRedirectIfNeeded(
                 );
         }
     }
-}
+};

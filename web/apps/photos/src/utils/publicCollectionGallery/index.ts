@@ -1,4 +1,4 @@
-import { TimeStampListItem } from "components/FileList";
+import type { TimeStampListItem } from "components/FileList";
 import type { PublicAlbumsCredentials } from "ente-base/http";
 import { createContext } from "react";
 
