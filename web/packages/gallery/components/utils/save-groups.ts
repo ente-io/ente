@@ -58,7 +58,7 @@ export interface SaveGroup {
      */
     total: number;
     /**
-     * The number of files that have already been save.
+     * The number of files that have been saved so far.
      */
     success: number;
     /**
@@ -68,7 +68,7 @@ export interface SaveGroup {
     /**
      * An {@link AbortController} that can be used to cancel the save.
      */
-    canceller?: AbortController;
+    canceller: AbortController;
 }
 
 export const isSaveStarted = (group: SaveGroup) => group.total > 0;
@@ -90,7 +90,7 @@ export const isSaveCompleteWithErrors = (group: SaveGroup) =>
  * Return `true` if this save was cancelled on a user request.
  */
 export const isSaveCancelled = (group: SaveGroup) =>
-    group.canceller?.signal.aborted;
+    group.canceller.signal.aborted;
 
 /**
  * A function that can be used to add a save group.
@@ -99,7 +99,17 @@ export const isSaveCancelled = (group: SaveGroup) =>
  * by applying a transform to it (see {@link UpdateSaveGroup}). The UI will
  * react and update itself on updates done this way.
  */
-export type AddSaveGroup = (group: Partial<SaveGroup>) => UpdateSaveGroup;
+export type AddSaveGroup = (
+    group: Pick<
+        SaveGroup,
+        | "title"
+        | "collectionSummaryID"
+        | "isHiddenCollectionSummary"
+        | "downloadDirPath"
+        | "total"
+        | "canceller"
+    >,
+) => UpdateSaveGroup;
 
 /**
  * A function that can be used to update a instance of a save group by applying
@@ -133,15 +143,7 @@ export const useSaveGroups = () => {
         const id = Math.random();
         setSaveGroups((groups) => [
             ...groups,
-            {
-                ...saveGroup,
-                id,
-                // TODO(RE):
-                title: saveGroup.title ?? "",
-                total: saveGroup.total ?? 0,
-                success: 0,
-                failed: 0,
-            },
+            { ...saveGroup, id, success: 0, failed: 0 },
         ]);
         return (tx: (group: SaveGroup) => SaveGroup) => {
             setSaveGroups((groups) =>
