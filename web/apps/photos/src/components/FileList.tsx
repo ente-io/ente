@@ -245,12 +245,6 @@ export const FileList: React.FC<FileListProps> = ({
 
             if (header) {
                 timeStampList.push(asFullSpanListItem(header));
-            } else if (publicCollectionGalleryContext.photoListHeader) {
-                timeStampList.push(
-                    getPhotoListHeader(
-                        publicCollectionGalleryContext.photoListHeader,
-                    ),
-                );
             }
             if (isMagicSearchResult) {
                 noGrouping(timeStampList);
@@ -267,17 +261,12 @@ export const FileList: React.FC<FileListProps> = ({
             timeStampList.push(getVacuumItem(timeStampList));
             if (footer) {
                 timeStampList.push(asFullSpanListItem(footer));
-            } else if (publicCollectionGalleryContext.credentials) {
-                if (publicCollectionGalleryContext.photoListFooter) {
-                    timeStampList.push(
-                        getPhotoListFooter(
-                            publicCollectionGalleryContext.photoListFooter,
-                        ),
-                    );
-                }
-                timeStampList.push(getAlbumsFooter());
             } else if (showAppDownloadBanner) {
                 timeStampList.push(getAppDownloadFooter());
+            }
+
+            if (publicCollectionGalleryContext.credentials) {
+                timeStampList.push(getAlbumsFooter());
             }
 
             setTimeStampList(timeStampList);
@@ -293,8 +282,9 @@ export const FileList: React.FC<FileListProps> = ({
         height,
         annotatedFiles,
         header,
-        publicCollectionGalleryContext.photoListHeader,
+        footer,
         isMagicSearchResult,
+        publicCollectionGalleryContext.credentials,
     ]);
 
     useEffect(() => {
@@ -352,28 +342,6 @@ export const FileList: React.FC<FileListProps> = ({
                 });
             }
         });
-    };
-
-    const getPhotoListHeader = (photoListHeader) => {
-        return {
-            ...photoListHeader,
-            item: (
-                <ListItemContainer span={columns}>
-                    {photoListHeader.item}
-                </ListItemContainer>
-            ),
-        };
-    };
-
-    const getPhotoListFooter = (photoListFooter) => {
-        return {
-            ...photoListFooter,
-            item: (
-                <ListItemContainer span={columns}>
-                    {photoListFooter.item}
-                </ListItemContainer>
-            ),
-        };
     };
 
     const getEmptyListItem = () => {

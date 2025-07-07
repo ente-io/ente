@@ -1,5 +1,4 @@
 // TODO: Audit this file
-/* eslint-disable @typescript-eslint/no-unused-expressions */
 import AddPhotoAlternateOutlinedIcon from "@mui/icons-material/AddPhotoAlternateOutlined";
 import CloseIcon from "@mui/icons-material/Close";
 import DownloadIcon from "@mui/icons-material/Download";
@@ -7,7 +6,6 @@ import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import { Box, Button, IconButton, Stack, styled, Tooltip } from "@mui/material";
 import Typography from "@mui/material/Typography";
 import { DownloadStatusNotifications } from "components/DownloadStatusNotifications";
-import type { TimeStampListItem } from "components/FileList";
 import { FileListWithViewer } from "components/FileListWithViewer";
 import { Upload } from "components/Upload";
 import {
@@ -94,10 +92,6 @@ export default function PublicCollectionGallery() {
     const { showMiniDialog, onGenericError } = useBaseContext();
     const { showLoadingBar, hideLoadingBar } = usePhotosAppContext();
 
-    const credentials = useRef<PublicAlbumsCredentials | undefined>(undefined);
-    const collectionKey = useRef<string>(null);
-    const url = useRef<string>(null);
-    const referralCode = useRef<string>("");
     const [publicCollection, setPublicCollection] = useState<
         Collection | undefined
     >(undefined);
@@ -107,15 +101,6 @@ export default function PublicCollectionGallery() {
     const [errorMessage, setErrorMessage] = useState<string>(null);
     const [loading, setLoading] = useState(true);
     const [isPasswordProtected, setIsPasswordProtected] = useState(false);
-
-    const router = useRouter();
-
-    const [photoListHeader, setPhotoListHeader] =
-        useState<TimeStampListItem>(null);
-
-    const [photoListFooter, setPhotoListFooter] =
-        useState<TimeStampListItem>(null);
-
     const [uploadTypeSelectorView, setUploadTypeSelectorView] = useState(false);
     const [blockingLoad, setBlockingLoad] = useState(false);
     const [shouldDisableDropzone, setShouldDisableDropzone] = useState(false);
@@ -128,17 +113,15 @@ export default function PublicCollectionGallery() {
         collectionID: 0,
         context: undefined,
     });
+
+    const credentials = useRef<PublicAlbumsCredentials | undefined>(undefined);
+    const collectionKey = useRef<string>(null);
+    const url = useRef<string>(null);
+    const referralCode = useRef<string>("");
+
     const { saveGroups, onAddSaveGroup, onRemoveSaveGroup } = useSaveGroups();
 
-    const onAddPhotos = useMemo(() => {
-        return publicCollection?.publicURLs[0]?.enableCollect
-            ? () => setUploadTypeSelectorView(true)
-            : undefined;
-    }, [publicCollection]);
-
-    const closeUploadTypeSelectorView = () => {
-        setUploadTypeSelectorView(false);
-    };
+    const router = useRouter();
 
     const showPublicLinkExpiredMessage = () =>
         showMiniDialog({
@@ -228,35 +211,6 @@ export default function PublicCollectionGallery() {
 
     const downloadEnabled =
         publicCollection?.publicURLs?.[0]?.enableDownload ?? true;
-
-    useEffect(() => {
-        publicCollection &&
-            publicFiles &&
-            setPhotoListHeader({
-                item: (
-                    <ListHeader
-                        {...{ publicCollection, publicFiles, onAddSaveGroup }}
-                    />
-                ),
-                tag: "header",
-                height: 68,
-            });
-    }, [publicCollection, publicFiles]);
-
-    useEffect(() => {
-        setPhotoListFooter(
-            onAddPhotos
-                ? {
-                      item: (
-                          <CenteredFill sx={{ marginTop: "56px" }}>
-                              <AddMorePhotosButton onClick={onAddPhotos} />
-                          </CenteredFill>
-                      ),
-                      height: 104,
-                  }
-                : null,
-        );
-    }, [onAddPhotos]);
 
     /**
      * Pull the latest data related to the public album from remote, updating
@@ -421,6 +375,51 @@ export default function PublicCollectionGallery() {
         }
     };
 
+    const onAddPhotos = useMemo(() => {
+        return publicCollection?.publicURLs[0]?.enableCollect
+            ? () => setUploadTypeSelectorView(true)
+            : undefined;
+    }, [publicCollection]);
+
+    const closeUploadTypeSelectorView = () => {
+        setUploadTypeSelectorView(false);
+    };
+
+    const fileListHeader = useMemo(
+        () =>
+            publicCollection && publicFiles
+                ? {
+                      item: (
+                          <ListHeader
+                              {...{
+                                  publicCollection,
+                                  publicFiles,
+                                  onAddSaveGroup,
+                              }}
+                          />
+                      ),
+                      tag: "header" as const,
+                      height: 68,
+                  }
+                : undefined,
+        [onAddSaveGroup, publicCollection, publicFiles],
+    );
+
+    const fileListFooter = useMemo(
+        () =>
+            onAddPhotos
+                ? {
+                      item: (
+                          <CenteredFill sx={{ marginTop: "56px" }}>
+                              <AddMorePhotosButton onClick={onAddPhotos} />
+                          </CenteredFill>
+                      ),
+                      height: 104,
+                  }
+                : undefined,
+        [onAddPhotos],
+    );
+
     if (loading && (!publicFiles || !credentials.current)) {
         return <LoadingIndicator />;
     } else if (errorMessage) {
@@ -464,8 +463,6 @@ export default function PublicCollectionGallery() {
     const context = {
         credentials: credentials.current,
         referralCode: referralCode.current,
-        photoListHeader,
-        photoListFooter,
     };
 
     return (
@@ -503,6 +500,8 @@ export default function PublicCollectionGallery() {
 
                 <FileListWithViewer
                     files={publicFiles}
+                    header={fileListHeader}
+                    footer={fileListFooter}
                     enableDownload={downloadEnabled}
                     selectable={downloadEnabled}
                     selected={selected}

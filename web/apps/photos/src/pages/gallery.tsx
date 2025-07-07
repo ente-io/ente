@@ -180,22 +180,22 @@ const Page: React.FC = () => {
     const [fixCreationTimeFiles, setFixCreationTimeFiles] = useState<
         EnteFile[]
     >([]);
+    // The (non-sticky) header shown at the top of the gallery items.
+    const [fileListHeader, setFileListHeader] = useState<
+        TimeStampListItem | undefined
+    >(undefined);
+
+    const [openCollectionSelector, setOpenCollectionSelector] = useState(false);
+    const [collectionSelectorAttributes, setCollectionSelectorAttributes] =
+        useState<CollectionSelectorAttributes | undefined>();
 
     const userDetails = useUserDetailsSnapshot();
     const peopleState = usePeopleStateSnapshot();
-
-    // The (non-sticky) header shown at the top of the gallery items.
-    const [photoListHeader, setPhotoListHeader] =
-        useState<TimeStampListItem>(null);
 
     const { saveGroups, onAddSaveGroup, onRemoveSaveGroup } = useSaveGroups();
     const [, setPostCreateAlbumOp] = useState<CollectionOp | undefined>(
         undefined,
     );
-
-    const [openCollectionSelector, setOpenCollectionSelector] = useState(false);
-    const [collectionSelectorAttributes, setCollectionSelectorAttributes] =
-        useState<CollectionSelectorAttributes | undefined>();
 
     /**
      * The last time (epoch milliseconds) when we prompted the user for their
@@ -408,7 +408,7 @@ const Page: React.FC = () => {
 
     useEffect(() => {
         if (isInSearchMode && state.searchSuggestion) {
-            setPhotoListHeader({
+            setFileListHeader({
                 height: 104,
                 item: (
                     <SearchResultsHeader
@@ -1072,7 +1072,7 @@ const Page: React.FC = () => {
                     activeCollection,
                     activeCollectionID,
                     activePerson,
-                    setPhotoListHeader,
+                    setPhotoListHeader: setFileListHeader,
                     saveGroups,
                     onAddSaveGroup,
                 }}
@@ -1147,7 +1147,7 @@ const Page: React.FC = () => {
                 <FileListWithViewer
                     mode={barMode}
                     modePlus={isInSearchMode ? "search" : barMode}
-                    header={photoListHeader}
+                    header={fileListHeader}
                     user={user}
                     files={filteredFiles}
                     enableDownload={true}
