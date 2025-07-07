@@ -20,7 +20,7 @@ interface AvatarProps {
 const AvatarBase = styled("div")<{
     colorCode: string;
     size: number;
-    opacity: number;
+    opacity: number | undefined;
 }>`
     width: ${({ size }) => `${size}px`};
     height: ${({ size }) => `${size}px`};
@@ -43,21 +43,21 @@ const Avatar: React.FC<AvatarProps> = ({
     emailByUserID,
 }) => {
     const [colorCode, setColorCode] = useState("");
-    const [userLetter, setUserLetter] = useState("");
+    const [userLetter, setUserLetter] = useState<string | undefined>("");
 
     useLayoutEffect(() => {
         try {
             if (!file) {
                 return;
             }
-            if (file.ownerID !== user.id) {
+            if (file.ownerID !== user?.id) {
                 // getting email from in-memory id-email map
-                const email = emailByUserID.get(file.ownerID);
+                const email = emailByUserID?.get(file.ownerID);
                 if (!email) {
                     log.error("email not found in userIDToEmailMap");
                     return;
                 }
-                setUserLetter(email[0].toUpperCase());
+                setUserLetter(email[0]?.toUpperCase());
                 setColorCode(avatarBackgroundColor(file.ownerID));
             } else if (file.ownerID === user.id) {
                 const uploaderName = file.pubMagicMetadata?.data.uploaderName;
@@ -67,7 +67,7 @@ const Avatar: React.FC<AvatarProps> = ({
                     );
                     return;
                 }
-                setUserLetter(uploaderName[0].toUpperCase());
+                setUserLetter(uploaderName[0]?.toUpperCase());
                 setColorCode(avatarBackgroundColorPublicCollectedFile);
             }
         } catch (e) {
@@ -82,7 +82,7 @@ const Avatar: React.FC<AvatarProps> = ({
             }
 
             if (user?.email === email) {
-                setUserLetter(email[0].toUpperCase());
+                setUserLetter(email[0]?.toUpperCase());
                 setColorCode(avatarBackgroundColorPublicCollectedFile);
                 return;
             }
@@ -94,7 +94,7 @@ const Avatar: React.FC<AvatarProps> = ({
                 log.error(`ID not found for email: ${email}`);
                 return;
             }
-            setUserLetter(email[0].toUpperCase());
+            setUserLetter(email[0]?.toUpperCase());
             setColorCode(avatarBackgroundColor(id));
         } catch (e) {
             log.error("AvatarIcon.tsx - useLayoutEffect email failed", e);

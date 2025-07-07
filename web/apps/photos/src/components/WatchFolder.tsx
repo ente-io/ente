@@ -63,7 +63,7 @@ export const WatchFolder: React.FC<ModalVisibilityProps> = ({
             e.preventDefault();
             e.stopPropagation();
 
-            for (const file of e.dataTransfer.files) {
+            for (const file of e.dataTransfer?.files ?? []) {
                 void selectCollectionMappingAndAddWatchIfDirectory(file);
             }
         };
@@ -156,9 +156,7 @@ interface WatchList {
 }
 
 const WatchList: React.FC<WatchList> = ({ watches, removeWatch }) =>
-    (watches ?? []).length === 0 ? (
-        <NoWatches />
-    ) : (
+    watches?.length ? (
         <Stack sx={{ gap: 2, flex: 1, overflowY: "auto", pb: 2, pr: 1 }}>
             {watches.map((watch) => (
                 <WatchEntry
@@ -168,6 +166,8 @@ const WatchList: React.FC<WatchList> = ({ watches, removeWatch }) =>
                 />
             ))}
         </Stack>
+    ) : (
+        <NoWatches />
     );
 
 const NoWatches: React.FC = () => (
