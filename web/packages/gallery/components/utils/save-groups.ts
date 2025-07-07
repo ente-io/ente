@@ -71,8 +71,6 @@ export interface SaveGroup {
     canceller: AbortController;
 }
 
-export const isSaveStarted = (group: SaveGroup) => group.total > 0;
-
 /**
  * Return `true` if there are no files in this save group that are pending.
  */

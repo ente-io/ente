@@ -829,12 +829,12 @@ const Page: React.FC = () => {
             collectionSummaryID: number | undefined,
             isHiddenCollectionSummary: boolean | undefined,
         ) => {
-            if (isHiddenCollectionSummary) {
+            if (isHiddenCollectionSummary && barMode != "hidden-albums") {
                 await authenticateUser();
             }
             handleShowCollectionSummaryWithID(collectionSummaryID);
         },
-        [authenticateUser, handleShowCollectionSummaryWithID],
+        [authenticateUser, handleShowCollectionSummaryWithID, barMode],
     );
 
     const handleSidebarShowCollectionSummary = showCollectionSummary;
