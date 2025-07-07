@@ -1,3 +1,4 @@
+import { assertionFailed } from "ente-base/assert";
 import { joinPath } from "ente-base/file-name";
 import log from "ente-base/log";
 import { type Electron } from "ente-base/types/ipc";
@@ -86,6 +87,13 @@ const downloadAndSave = async (
 ) => {
     const electron = globalThis.electron;
 
+    const total = files.length;
+    if (!files.length) {
+        // Nothing to download.
+        assertionFailed();
+        return;
+    }
+
     let downloadDirPath: string | undefined;
     if (electron) {
         downloadDirPath = await electron.selectDirectory();
@@ -103,7 +111,6 @@ const downloadAndSave = async (
     }
 
     const canceller = new AbortController();
-    const total = files.length;
 
     const updateSaveGroup = onAddSaveGroup({
         title,

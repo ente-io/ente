@@ -2,7 +2,6 @@ import { useBaseContext } from "ente-base/context";
 import {
     isSaveComplete,
     isSaveCompleteWithErrors,
-    isSaveStarted,
     type SaveGroup,
 } from "ente-gallery/components/utils/save-groups";
 import { Notification } from "ente-new/photos/components/Notification";
@@ -91,42 +90,31 @@ export const DownloadStatusNotifications: React.FC<
         return <></>;
     }
 
-    const notifications: React.ReactNode[] = [];
-
-    let visibleIndex = 0;
-    for (const group of saveGroups) {
-        // Skip attempted downloads of empty albums, which had no effect.
-        if (!isSaveStarted(group)) continue;
-
-        const index = visibleIndex++;
-        notifications.push(
-            <Notification
-                key={group.id}
-                horizontal="left"
-                sx={{ "&&": { bottom: `${index * 80 + 20}px` } }}
-                open={isSaveStarted(group)}
-                onClose={createOnClose(group)}
-                keepOpenOnClick
-                attributes={{
-                    color: isSaveCompleteWithErrors(group)
-                        ? "critical"
-                        : "secondary",
-                    title: isSaveCompleteWithErrors(group)
-                        ? t("download_failed")
-                        : isSaveComplete(group)
-                          ? t("download_complete")
-                          : t("downloading_album", { name: group.title }),
-                    caption: isSaveComplete(group)
-                        ? group.title
-                        : t("download_progress", {
-                              count: group.success + group.failed,
-                              total: group.total,
-                          }),
-                    onClick: createOnClick(group),
-                }}
-            />,
-        );
-    }
-
-    return notifications;
+    return saveGroups.map((group, index) => (
+        <Notification
+            key={group.id}
+            horizontal="left"
+            sx={{ "&&": { bottom: `${index * 80 + 20}px` } }}
+            open={true}
+            onClose={createOnClose(group)}
+            keepOpenOnClick
+            attributes={{
+                color: isSaveCompleteWithErrors(group)
+                    ? "critical"
+                    : "secondary",
+                title: isSaveCompleteWithErrors(group)
+                    ? t("download_failed")
+                    : isSaveComplete(group)
+                      ? t("download_complete")
+                      : t("downloading_album", { name: group.title }),
+                caption: isSaveComplete(group)
+                    ? group.title
+                    : t("download_progress", {
+                          count: group.success + group.failed,
+                          total: group.total,
+                      }),
+                onClick: createOnClick(group),
+            }}
+        />
+    ));
 };
