@@ -107,7 +107,7 @@ class Gallery extends StatefulWidget {
 class GalleryState extends State<Gallery> {
   static const int kInitialLoadLimit = 100;
   late final Debouncer _debouncer;
-  late Future<double> groupHeaderExtent;
+  double? groupHeaderExtent;
 
   late Logger _logger;
   List<List<EnteFile>> currentGroupedFiles = [];
@@ -205,13 +205,17 @@ class GalleryState extends State<Gallery> {
       }
     });
 
-    groupHeaderExtent = getIntrinsicSizeOfWidget(
+    getIntrinsicSizeOfWidget(
       GroupHeaderWidget(
         title: "This is a temp title",
         gridSize: localSettings.getPhotoGridSize(),
       ),
       context,
-    ).then((size) => size.height);
+    ).then((size) {
+      setState(() {
+        groupHeaderExtent = size.height;
+      });
+    });
   }
 
   void _setFilesAndReload(List<EnteFile> files) {
@@ -383,7 +387,18 @@ class GalleryState extends State<Gallery> {
 
   @override
   Widget build(BuildContext context) {
+    if (groupHeaderExtent == null) return const SliverFillRemaining();
+
     _logger.info("Building Gallery  ${widget.tagPrefix}");
+
+    final galleryGroups = GalleryGroups(
+      allFiles: _allGalleryFiles,
+      groupType: widget.groupType,
+      widthAvailable: MediaQuery.sizeOf(context).width,
+      selectedFiles: widget.selectedFiles,
+      tagPrefix: widget.tagPrefix,
+      headerExtent: groupHeaderExtent!,
+    );
     GalleryFilesState.of(context).setGalleryFiles = _allGalleryFiles;
     if (!_hasLoadedFiles) {
       return widget.loadingWidget;
@@ -421,24 +436,8 @@ class GalleryState extends State<Gallery> {
           // physics: const BouncingScrollPhysics(),
           slivers: [
             SliverToBoxAdapter(child: widget.header ?? const SizedBox.shrink()),
-            FutureBuilder(
-              future: groupHeaderExtent,
-              builder: (context, snapshot) {
-                if (snapshot.hasData) {
-                  return SectionedListSliver(
-                    sectionLayouts: GalleryGroups(
-                      allFiles: _allGalleryFiles,
-                      groupType: widget.groupType,
-                      widthAvailable: MediaQuery.sizeOf(context).width,
-                      selectedFiles: widget.selectedFiles,
-                      tagPrefix: widget.tagPrefix,
-                      headerExtent: snapshot.data!,
-                    ).groupLayouts,
-                  );
-                } else {
-                  return const SliverFillRemaining();
-                }
-              },
+            SectionedListSliver(
+              sectionLayouts: galleryGroups.groupLayouts,
             ),
             SliverToBoxAdapter(
               child: widget.footer,
