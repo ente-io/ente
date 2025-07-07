@@ -24,7 +24,11 @@ interface DownloadStatusNotificationsProps {
     onRemoveSaveGroup: (saveGroup: SaveGroup) => void;
     /**
      * Called when the collection summary with the given {@link collectionID}
-     * and "hidden" {@link attribute} should be shown.
+     * should be shown. If {@link isHiddenCollectionSummary} is set, then any
+     * reauthentication as appropriate before switching to the hidden section of
+     * the app is performed first.
+     *
+     * and hidden attribute should be shown.
      *
      * This is only relevant in the context of the photos app, and can be
      * omitted by the public albums app. See the documentation of

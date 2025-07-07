@@ -89,7 +89,6 @@ import {
 import {
     haveOnlySystemCollections,
     PseudoCollectionID,
-    type CollectionSummary,
 } from "ente-new/photos/services/collection-summary";
 import exportService from "ente-new/photos/services/export";
 import { updateFilesVisibility } from "ente-new/photos/services/file";
@@ -790,79 +789,73 @@ const Page: React.FC = () => {
         setUploadTypeSelectorIntent(intent ?? "upload");
     };
 
-    const handleShowCollectionSummaryWithID = (
-        collectionSummaryID: number | undefined,
-    ) => {
-        // Trigger a pull of the latest data from remote when opening the trash.
-        //
-        // This is needed for a specific scenario:
-        //
-        // 1. User deletes a collection, selecting the option to delete files.
-        // 2. Museum acks, and then client does a trash pull.
-        //
-        // This trash pull will not contain the files that belonged to the
-        // collection that got deleted because the collection deletion is a
-        // asynchronous operation.
-        //
-        // So the user might not see the entry for the just deleted file if they
-        // were to go to the trash meanwhile (until the next pull happens). To
-        // avoid this, we trigger a trash pull whenever it is opened.
-        if (collectionSummaryID == PseudoCollectionID.trash) {
-            void remoteFilesPull();
-        }
+    const handleShowCollectionSummaryWithID = useCallback(
+        (collectionSummaryID: number | undefined) => {
+            // Trigger a pull of the latest data from remote when opening the trash.
+            //
+            // This is needed for a specific scenario:
+            //
+            // 1. User deletes a collection, selecting the option to delete files.
+            // 2. Museum acks, and then client does a trash pull.
+            //
+            // This trash pull will not contain the files that belonged to the
+            // collection that got deleted because the collection deletion is a
+            // asynchronous operation.
+            //
+            // So the user might not see the entry for the just deleted file if they
+            // were to go to the trash meanwhile (until the next pull happens). To
+            // avoid this, we trigger a trash pull whenever it is opened.
+            if (collectionSummaryID == PseudoCollectionID.trash) {
+                void remoteFilesPull();
+            }
 
-        dispatch({ type: "showCollectionSummary", collectionSummaryID });
-    };
-
-    /**
-     * Switch to gallery view to show the {@link CollectionSummary}.
-     *
-     * @param cs The {@link CollectionSummary} to show.
-     * If a {@link CollectionSummary} is not provided, show the "All" section.
-     *
-     * If the given {@link CollectionSummary} is hidden, first perform any
-     * reauthentication as would be needed for showing the hidden section in the
-     * app, and then shows the {@link CollectionSummary}.
-     */
-    // TODO(RE):
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const handleShowCollectionSummary = (cs: CollectionSummary | undefined) => {
-        if (cs?.attributes.has("hidden")) {
-            void handleShowHiddenSection().then(() => {
-                handleShowCollectionSummaryWithID(cs.id);
-            });
-        } else {
-            handleShowCollectionSummaryWithID(cs.id);
-        }
-    };
+            dispatch({ type: "showCollectionSummary", collectionSummaryID });
+        },
+        [],
+    );
 
     /**
-     * A variant / reimplementation of {@link handleShowCollectionSummary} for
-     * use by the {@link DownloadStatusNotifications} component (which does not
-     * know about the {@link CollectionSummary} TypeScript type).
+     * Switch to gallery view to show a collection or pseudo-collection.
+     *
+     * @param collectionSummaryID The ID of the {@link CollectionSummary} to
+     * show. If not provided, show the "All" section.
+     *
+     * @param isHidden If `true`, then any reauthentication as appropriate
+     * before switching to the hidden section of the app is performed first
+     * before before switching to the relevant collection or pseudo-collection.
      */
-    const handleDownloadStatusNotificationsShowCollectionSummary = (
-        collectionSummaryID: number | undefined,
-        isHiddenCollectionSummary: boolean | undefined,
-    ) => {
-        if (isHiddenCollectionSummary) {
-            void handleShowHiddenSection().then(() => {
-                handleShowCollectionSummaryWithID(collectionSummaryID);
-            });
-        } else {
+    const showCollectionSummary = useCallback(
+        async (
+            collectionSummaryID: number | undefined,
+            isHiddenCollectionSummary: boolean | undefined,
+        ) => {
+            if (isHiddenCollectionSummary) {
+                await authenticateUser();
+            }
             handleShowCollectionSummaryWithID(collectionSummaryID);
-        }
-    };
+        },
+        [authenticateUser, handleShowCollectionSummaryWithID],
+    );
+
+    const handleSidebarShowCollectionSummary = showCollectionSummary;
+
+    const handleDownloadStatusNotificationsShowCollectionSummary = useCallback(
+        (
+            collectionSummaryID: number | undefined,
+            isHiddenCollectionSummary: boolean | undefined,
+        ) => {
+            void showCollectionSummary(
+                collectionSummaryID,
+                isHiddenCollectionSummary,
+            );
+        },
+        [showCollectionSummary],
+    );
 
     const handleChangeBarMode = (mode: GalleryBarMode) =>
         mode == "people"
             ? dispatch({ type: "showPeople" })
             : dispatch({ type: "showAlbums" });
-
-    const handleShowHiddenSection = useCallback(
-        () => authenticateUser().then(() => dispatch({ type: "showHidden" })),
-        [],
-    );
 
     const handleFileViewerToggleFavorite = useCallback(
         async (file: EnteFile) => {
@@ -1114,8 +1107,7 @@ const Page: React.FC = () => {
                     state.uncategorizedCollectionSummaryID
                 }
                 onShowPlanSelector={showPlanSelector}
-                onShowCollectionSummary={handleShowCollectionSummaryWithID}
-                onShowHiddenSection={handleShowHiddenSection}
+                onShowCollectionSummary={handleSidebarShowCollectionSummary}
                 onShowExport={showExport}
                 onAuthenticateUser={authenticateUser}
             />

@@ -140,18 +140,23 @@ type SidebarProps = ModalVisibilityProps & {
      */
     onShowPlanSelector: () => void;
     /**
-     * Called when the collection summary with the given
-     * {@link collectionSummaryID} should be shown.
-     */
-    onShowCollectionSummary: (collectionSummaryID: number) => void;
-    /**
-     * Called when the hidden section should be shown.
+     * Called when the collection summary with the given {@link collectionID}
+     * should be shown.
      *
-     * This triggers the display of the dialog to authenticate the user, exactly
-     * as if {@link onAuthenticateUser} were called. Then, on successful
-     * authentication, the gallery will switch to the hidden section.
+     * @param collectionSummaryID The ID of the {@link CollectionSummary} to
+     * switch to.
+     *
+     * @param isHiddenCollectionSummary If `true`, then any reauthentication as
+     * appropriate before switching to the hidden section of the app is
+     * performed first before showing the collection summary.
+     *
+     * @return A promise that fullfills after any needed reauthentication has
+     * been peformed (The view transition might still be in progress).
      */
-    onShowHiddenSection: () => Promise<void>;
+    onShowCollectionSummary: (
+        collectionSummaryID: number,
+        isHiddenCollectionSummary?: boolean,
+    ) => Promise<void>;
     /**
      * Called when the export dialog should be shown.
      */
@@ -175,7 +180,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
     uncategorizedCollectionSummaryID,
     onShowPlanSelector,
     onShowCollectionSummary,
-    onShowHiddenSection,
     onShowExport,
     onAuthenticateUser,
 }) => (
@@ -189,7 +193,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     normalCollectionSummaries,
                     uncategorizedCollectionSummaryID,
                     onShowCollectionSummary,
-                    onShowHiddenSection,
                 }}
             />
             <UtilitySection
@@ -461,7 +464,6 @@ type ShortcutSectionProps = SectionProps &
         | "normalCollectionSummaries"
         | "uncategorizedCollectionSummaryID"
         | "onShowCollectionSummary"
-        | "onShowHiddenSection"
     >;
 
 const ShortcutSection: React.FC<ShortcutSectionProps> = ({
@@ -469,25 +471,26 @@ const ShortcutSection: React.FC<ShortcutSectionProps> = ({
     normalCollectionSummaries,
     uncategorizedCollectionSummaryID,
     onShowCollectionSummary,
-    onShowHiddenSection,
 }) => {
-    const openUncategorizedSection = () => {
-        onShowCollectionSummary(uncategorizedCollectionSummaryID);
-        onCloseSidebar();
-    };
+    const handleOpenUncategorizedSection = () =>
+        void onShowCollectionSummary(uncategorizedCollectionSummaryID).then(
+            onCloseSidebar,
+        );
 
-    const openTrashSection = () => {
-        onShowCollectionSummary(PseudoCollectionID.trash);
-        onCloseSidebar();
-    };
+    const handleOpenTrashSection = () =>
+        void onShowCollectionSummary(PseudoCollectionID.trash).then(
+            onCloseSidebar,
+        );
 
-    const openArchiveSection = () => {
-        onShowCollectionSummary(PseudoCollectionID.archiveItems);
-        onCloseSidebar();
-    };
+    const handleOpenArchiveSection = () =>
+        void onShowCollectionSummary(PseudoCollectionID.archiveItems).then(
+            onCloseSidebar,
+        );
 
-    const openHiddenSection = () =>
-        void onShowHiddenSection().then(onCloseSidebar);
+    const handleOpenHiddenSection = () =>
+        void onShowCollectionSummary(PseudoCollectionID.hiddenItems, true).then(
+            onCloseSidebar,
+        );
 
     const summaryCaption = (summaryID: number) =>
         normalCollectionSummaries.get(summaryID)?.fileCount.toString();
@@ -498,13 +501,13 @@ const ShortcutSection: React.FC<ShortcutSectionProps> = ({
                 startIcon={<CategoryIcon />}
                 label={t("section_uncategorized")}
                 caption={summaryCaption(uncategorizedCollectionSummaryID)}
-                onClick={openUncategorizedSection}
+                onClick={handleOpenUncategorizedSection}
             />
             <RowButton
                 startIcon={<ArchiveOutlinedIcon />}
                 label={t("section_archive")}
                 caption={summaryCaption(PseudoCollectionID.archiveItems)}
-                onClick={openArchiveSection}
+                onClick={handleOpenArchiveSection}
             />
             <RowButton
                 startIcon={<VisibilityOffIcon />}
@@ -517,13 +520,13 @@ const ShortcutSection: React.FC<ShortcutSectionProps> = ({
                         }}
                     />
                 }
-                onClick={openHiddenSection}
+                onClick={handleOpenHiddenSection}
             />
             <RowButton
                 startIcon={<DeleteOutlineIcon />}
                 label={t("section_trash")}
                 caption={summaryCaption(PseudoCollectionID.trash)}
-                onClick={openTrashSection}
+                onClick={handleOpenTrashSection}
             />
         </>
     );
