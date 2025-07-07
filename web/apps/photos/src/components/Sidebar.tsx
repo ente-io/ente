@@ -109,6 +109,7 @@ import {
 } from "ente-new/photos/services/user-details";
 import { usePhotosAppContext } from "ente-new/photos/types/context";
 import { initiateEmail, openURL } from "ente-new/photos/utils/web";
+import { wait } from "ente-utils/promise";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import React, {
@@ -488,9 +489,10 @@ const ShortcutSection: React.FC<ShortcutSectionProps> = ({
         );
 
     const handleOpenHiddenSection = () =>
-        void onShowCollectionSummary(PseudoCollectionID.hiddenItems, true).then(
-            onCloseSidebar,
-        );
+        void onShowCollectionSummary(PseudoCollectionID.hiddenItems, true)
+            // See: [Note: Workarounds for unactionable ARIA warnings]
+            .then(() => wait(10))
+            .then(onCloseSidebar);
 
     const summaryCaption = (summaryID: number) =>
         normalCollectionSummaries.get(summaryID)?.fileCount.toString();
