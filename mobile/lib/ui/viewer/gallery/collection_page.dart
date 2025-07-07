@@ -100,9 +100,9 @@ class CollectionPage extends StatelessWidget {
               isFromCollectPhotos: isFromCollectPhotos,
             )
           : const EmptyState(),
-      footer: isFromCollectPhotos
-          ? const SizedBox(height: 20)
-          : const SizedBox(height: 212),
+      // footer: isFromCollectPhotos
+      //     ? const SizedBox(height: 20)
+      //     : const SizedBox(height: 212),
     );
 
     return GalleryFilesState(

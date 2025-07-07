@@ -17,6 +17,7 @@ import 'package:photos/ui/common/loading_widget.dart';
 import "package:photos/ui/viewer/gallery/component/group/group_header_widget.dart";
 import "package:photos/ui/viewer/gallery/component/group/type.dart";
 import "package:photos/ui/viewer/gallery/component/sectioned_sliver_list.dart";
+import "package:photos/ui/viewer/gallery/custom_scroll_bar.dart";
 import 'package:photos/ui/viewer/gallery/empty_state.dart';
 import "package:photos/ui/viewer/gallery/state/gallery_context_state.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
@@ -80,9 +81,11 @@ class Gallery extends StatefulWidget {
     this.forceReloadEvents,
     this.removalEventTypes = const {},
     this.header,
-    this.footer = const SizedBox(height: 212),
+    // this.footer = const SizedBox(height: 212),
+    this.footer = const SizedBox.shrink(),
     this.emptyState = const EmptyState(),
-    this.scrollBottomSafeArea = 120.0,
+    // this.scrollBottomSafeArea = 120.0,
+    this.scrollBottomSafeArea = 0.0,
     this.albumName = '',
     this.groupType = GroupType.day,
     this.enableFileGrouping = true,
@@ -119,6 +122,7 @@ class GalleryState extends State<Gallery> {
   late String _logTag;
   bool _sortOrderAsc = false;
   List<EnteFile> _allGalleryFiles = [];
+  final _scrollController = ScrollController();
 
   @override
   void initState() {
@@ -382,6 +386,7 @@ class GalleryState extends State<Gallery> {
       subscription.cancel();
     }
     _debouncer.cancelDebounceTimer();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -430,10 +435,12 @@ class GalleryState extends State<Gallery> {
       //       widget.showSelectAllByDefault && widget.groupType.showGroupHeader(),
       //   isScrollablePositionedList: widget.isScrollablePositionedList,
       // ),
-      child: Scrollbar(
-        interactive: true,
+      child: CustomScrollBar(
+        scrollController: _scrollController,
+        galleryGroups: galleryGroups,
         child: CustomScrollView(
           // physics: const BouncingScrollPhysics(),
+          controller: _scrollController,
           slivers: [
             SliverToBoxAdapter(child: widget.header ?? const SizedBox.shrink()),
             SectionedListSliver(

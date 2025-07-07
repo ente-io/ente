@@ -125,10 +125,10 @@ class _HomeGalleryWidgetState extends State<HomeGalleryWidget> {
       ],
       tagPrefix: "home_gallery",
       selectedFiles: widget.selectedFiles,
-      header: widget.header,
-      footer: widget.footer,
+      // header: widget.header,
+      // footer: widget.footer,
       // scrollSafe area -> SafeArea + Preserver more + Nav Bar buttons
-      scrollBottomSafeArea: bottomSafeArea + 180,
+      // scrollBottomSafeArea: bottomSafeArea + 180,
       reloadDebounceTime: const Duration(seconds: 2),
       reloadDebounceExecutionInterval: const Duration(seconds: 5),
     );
