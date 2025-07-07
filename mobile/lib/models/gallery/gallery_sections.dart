@@ -46,6 +46,7 @@ class GalleryGroups {
   final List<String> _groupIds = [];
   final Map<String, List<EnteFile>> _groupIdToFilesMap = {};
   final Map<String, GroupHeaderData> _groupIdToHeaderDataMap = {};
+  final Map<double, String> _scrollOffsetToGroupIdMap = {};
   final currentUserID = Configuration.instance.getUserID();
   final _uuid = const Uuid();
 
@@ -53,6 +54,7 @@ class GalleryGroups {
   Map<String, List<EnteFile>> get groupIDToFilesMap => _groupIdToFilesMap;
   Map<String, GroupHeaderData> get groupIdToheaderDataMap =>
       _groupIdToHeaderDataMap;
+  Map<double, String> get scrollOffsetToGroupIdMap => _scrollOffsetToGroupIdMap;
   List<FixedExtentSectionLayout> get groupLayouts => _groupLayouts;
 
   void init() {
@@ -162,6 +164,9 @@ class GalleryGroups {
           },
         ),
       );
+
+      _scrollOffsetToGroupIdMap[currentOffset] = groupID;
+
       currentIndex = lastIndex;
       currentOffset = maxOffset;
     }
