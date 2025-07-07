@@ -4,12 +4,9 @@ import MenuIcon from "@mui/icons-material/Menu";
 import { IconButton, Stack, Typography } from "@mui/material";
 import { AuthenticateUser } from "components/AuthenticateUser";
 import { GalleryBarAndListHeader } from "components/Collections/GalleryBarAndListHeader";
+import { DownloadStatusNotifications } from "components/DownloadStatusNotifications";
 import { type TimeStampListItem } from "components/FileList";
 import { FileListWithViewer } from "components/FileListWithViewer";
-import {
-    FilesDownloadProgress,
-    type FilesDownloadProgressAttributes,
-} from "components/FilesDownloadProgress";
 import { FixCreationTime } from "components/FixCreationTime";
 import { Sidebar } from "components/Sidebar";
 import { Upload } from "components/Upload";
@@ -41,6 +38,7 @@ import {
 import { savedAuthToken } from "ente-base/token";
 import { FullScreenDropZone } from "ente-gallery/components/FullScreenDropZone";
 import { type UploadTypeSelectorIntent } from "ente-gallery/components/Upload";
+import { useSaveGroups } from "ente-gallery/components/utils/save-groups";
 import { type Collection } from "ente-media/collection";
 import { type EnteFile } from "ente-media/file";
 import { type ItemVisibility } from "ente-media/file-metadata";
@@ -123,11 +121,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { FileWithPath } from "react-dropzone";
 import { Trans } from "react-i18next";
 import { uploadManager } from "services/upload-manager";
-import type {
-    SelectedState,
-    SetFilesDownloadProgressAttributes,
-    SetFilesDownloadProgressAttributesCreator,
-} from "types/gallery";
+import type { SelectedState } from "types/gallery";
 import { getSelectedFiles, performFileOp } from "utils/file";
 
 /**
@@ -191,10 +185,7 @@ const Page: React.FC = () => {
     const [photoListHeader, setPhotoListHeader] =
         useState<TimeStampListItem>(null);
 
-    const [
-        filesDownloadProgressAttributesList,
-        setFilesDownloadProgressAttributesList,
-    ] = useState<FilesDownloadProgressAttributes[]>([]);
+    const { saveGroups, onAddSaveGroup, onRemoveSaveGroup } = useSaveGroups();
     const [, setPostCreateAlbumOp] = useState<CollectionOp | undefined>(
         undefined,
     );
@@ -631,39 +622,6 @@ const Page: React.FC = () => {
         };
     };
 
-    const setFilesDownloadProgressAttributesCreator: SetFilesDownloadProgressAttributesCreator =
-        useCallback((folderName, collectionID, isHidden) => {
-            const id = Math.random();
-            const updater: SetFilesDownloadProgressAttributes = (value) => {
-                setFilesDownloadProgressAttributesList((prev) => {
-                    const attributes = prev?.find((attr) => attr.id === id);
-                    const updatedAttributes =
-                        typeof value == "function"
-                            ? value(attributes)
-                            : { ...attributes, ...value };
-                    const updatedAttributesList = attributes
-                        ? prev.map((attr) =>
-                              attr.id === id ? updatedAttributes : attr,
-                          )
-                        : [...prev, updatedAttributes];
-
-                    return updatedAttributesList;
-                });
-            };
-            updater({
-                id,
-                folderName,
-                collectionID,
-                isHidden,
-                canceller: null,
-                total: 0,
-                success: 0,
-                failed: 0,
-                downloadDirPath: null,
-            });
-            return updater;
-        }, []);
-
     const handleRemoveFilesFromCollection = (collection: Collection) => {
         void (async () => {
             showLoadingBar();
@@ -771,6 +729,7 @@ const Page: React.FC = () => {
                     await performFileOp(
                         op,
                         toProcessFiles,
+                        onAddSaveGroup,
                         handleMarkTempDeleted,
                         () => dispatch({ type: "clearTempDeleted" }),
                         (files) => dispatch({ type: "markTempHidden", files }),
@@ -779,7 +738,6 @@ const Page: React.FC = () => {
                             setFixCreationTimeFiles(files);
                             showFixCreationTime();
                         },
-                        setFilesDownloadProgressAttributesCreator,
                     );
                 }
                 // Apart from download, the other operations currently only work
@@ -995,9 +953,8 @@ const Page: React.FC = () => {
                     )!
                 }
             />
-            <FilesDownloadProgress
-                attributesList={filesDownloadProgressAttributesList}
-                setAttributesList={setFilesDownloadProgressAttributesList}
+            <DownloadStatusNotifications
+                {...{ saveGroups, onRemoveSaveGroup }}
                 onShowHiddenSection={handleShowHiddenSection}
                 onShowCollection={handleShowCollection}
             />
@@ -1067,8 +1024,8 @@ const Page: React.FC = () => {
                     activeCollectionID,
                     activePerson,
                     setPhotoListHeader,
-                    setFilesDownloadProgressAttributesCreator,
-                    filesDownloadProgressAttributesList,
+                    saveGroups,
+                    onAddSaveGroup,
                 }}
                 mode={barMode}
                 shouldHide={isInSearchMode}
@@ -1165,11 +1122,9 @@ const Page: React.FC = () => {
                         fileNormalCollectionIDs,
                         pendingFavoriteUpdates,
                         pendingVisibilityUpdates,
+                        onAddSaveGroup,
                     }}
                     emailByUserID={state.emailByUserID}
-                    setFilesDownloadProgressAttributesCreator={
-                        setFilesDownloadProgressAttributesCreator
-                    }
                     onToggleFavorite={handleFileViewerToggleFavorite}
                     onFileVisibilityUpdate={
                         handleFileViewerFileVisibilityUpdate

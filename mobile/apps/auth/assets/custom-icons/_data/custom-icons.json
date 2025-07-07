@@ -1039,6 +1039,30 @@
       "title": "Proton"
     },
     {
+      "title": "Proton Calendar",
+      "slug": "proton_calendar"
+    },
+    {
+      "title": "Proton Drive",
+      "slug": "proton_drive"
+    },
+    {
+      "title": "Proton Mail",
+      "slug": "proton_mail"
+    },
+    {
+      "title": "Proton Pass",
+      "slug": "proton_pass"
+    },
+    {
+      "title": "Proton VPN",
+      "slug": "proton_vpn"
+    },
+    {
+      "title": "Proton Wallet",
+      "slug": "proton_wallet"
+    },
+    {
       "title": "Proxmox"
     },
     {

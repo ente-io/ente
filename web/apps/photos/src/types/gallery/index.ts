@@ -1,4 +1,3 @@
-import { type FilesDownloadProgressAttributes } from "components/FilesDownloadProgress";
 import { type SelectionContext } from "ente-new/photos/components/gallery";
 
 export interface SelectedState {
@@ -17,19 +16,6 @@ export type SetSelectedState = React.Dispatch<
     React.SetStateAction<SelectedState>
 >;
 export type SetLoading = React.Dispatch<React.SetStateAction<boolean>>;
-export type SetFilesDownloadProgressAttributes = (
-    value:
-        | Partial<FilesDownloadProgressAttributes>
-        | ((
-              prev: FilesDownloadProgressAttributes,
-          ) => FilesDownloadProgressAttributes),
-) => void;
-
-export type SetFilesDownloadProgressAttributesCreator = (
-    folderName: string,
-    collectionID?: number,
-    isHidden?: boolean,
-) => SetFilesDownloadProgressAttributes;
 
 export interface MergedSourceURL {
     original: string;
