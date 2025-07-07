@@ -4,7 +4,7 @@ import AlbumOutlinedIcon from "@mui/icons-material/AlbumOutlined";
 import FavoriteRoundedIcon from "@mui/icons-material/FavoriteRounded";
 import PlayCircleOutlineOutlinedIcon from "@mui/icons-material/PlayCircleOutlineOutlined";
 import { Box, Checkbox, Link, Typography, styled } from "@mui/material";
-import Avatar from "components/pages/gallery/Avatar";
+import Avatar from "components/Avatar";
 import type { LocalUser } from "ente-accounts/services/user";
 import { assertionFailed } from "ente-base/assert";
 import { Overlay } from "ente-base/components/containers";
