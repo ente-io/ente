@@ -194,6 +194,15 @@ const Page: React.FC = () => {
     const [collectionSelectorAttributes, setCollectionSelectorAttributes] =
         useState<CollectionSelectorAttributes | undefined>();
 
+    /**
+     * The last time (epoch milliseconds) when we prompted the user for their
+     * password when opening the hidden section.
+     *
+     * This is used to implement a grace window, where we don't reprompt them
+     * for their password for the same purpose again and again.
+     */
+    const lastAuthenticationForHiddenTimestamp = useRef<number>(0);
+
     const { show: showSidebar, props: sidebarVisibilityProps } =
         useModalVisibility();
     const { show: showPlanSelector, props: planSelectorVisibilityProps } =
@@ -829,8 +838,14 @@ const Page: React.FC = () => {
             collectionSummaryID: number | undefined,
             isHiddenCollectionSummary: boolean | undefined,
         ) => {
-            if (isHiddenCollectionSummary && barMode != "hidden-albums") {
+            const lastAuthAt = lastAuthenticationForHiddenTimestamp.current;
+            if (
+                isHiddenCollectionSummary &&
+                barMode != "hidden-albums" &&
+                Date.now() - lastAuthAt > 5 * 60 * 1e3 /* 5 minutes */
+            ) {
                 await authenticateUser();
+                lastAuthenticationForHiddenTimestamp.current = Date.now();
             }
             handleShowCollectionSummaryWithID(collectionSummaryID);
         },
