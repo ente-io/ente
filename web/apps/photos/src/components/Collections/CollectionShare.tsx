@@ -1347,9 +1347,7 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
     setBlockingLoad,
     onRemotePull,
 }) => {
-    const [errorMessage, setErrorMessage] = useState<string | undefined>(
-        undefined,
-    );
+    const [errorMessage, setErrorMessage] = useState("");
 
     const [copied, handleCopyLink] = useClipboardCopy(resolvedURL);
 
@@ -1362,7 +1360,7 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
         updates: UpdatePublicURLAttributes,
     ) => {
         setBlockingLoad(true);
-        setErrorMessage(undefined);
+        setErrorMessage("");
         try {
             setPublicURL(await updatePublicURL(collection.id, updates));
             void onRemotePull({ silent: true });
@@ -1375,7 +1373,7 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
     };
     const handleRemovePublicLink = async () => {
         setBlockingLoad(true);
-        setErrorMessage(undefined);
+        setErrorMessage("");
         try {
             await deleteShareURL(collection.id);
             setPublicURL(undefined);

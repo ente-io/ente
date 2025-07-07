@@ -98,7 +98,7 @@ export default function PublicCollectionGallery() {
     const [publicFiles, setPublicFiles] = useState<EnteFile[] | undefined>(
         undefined,
     );
-    const [errorMessage, setErrorMessage] = useState<string>(null);
+    const [errorMessage, setErrorMessage] = useState<string>("");
     const [loading, setLoading] = useState(true);
     const [isPasswordProtected, setIsPasswordProtected] = useState(false);
     const [uploadTypeSelectorView, setUploadTypeSelectorView] = useState(false);
@@ -229,7 +229,7 @@ export default function PublicCollectionGallery() {
             const isPasswordProtected =
                 !!collection.publicURLs[0]?.passwordEnabled;
             setIsPasswordProtected(isPasswordProtected);
-            setErrorMessage(null);
+            setErrorMessage("");
 
             // Remove the locally cached accessTokenJWT if the sharer has
             // disabled password protection on the link.

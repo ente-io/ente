@@ -9,7 +9,7 @@ import { imageURLGenerator } from "services/render";
 
 const Page: React.FC = () => {
     const [isEmpty, setIsEmpty] = useState(false);
-    const [imageURL, setImageURL] = useState<string | undefined>();
+    const [imageURL, setImageURL] = useState("");
 
     const router = useRouter();
 
