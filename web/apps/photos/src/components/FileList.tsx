@@ -37,8 +37,7 @@ import {
     type ListChildComponentProps,
     areEqual,
 } from "react-window";
-import type { SelectedState } from "types/gallery";
-import { shouldShowAvatar } from "utils/file";
+import { type SelectedState, shouldShowAvatar } from "utils/file";
 import {
     handleSelectCreator,
     handleSelectCreatorMulti,

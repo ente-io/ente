@@ -83,7 +83,6 @@ import type {
 } from "services/upload-manager";
 import { uploadManager } from "services/upload-manager";
 import watcher from "services/watch";
-import type { SetLoading } from "types/gallery";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
 import { UploadProgress } from "./UploadProgress";
 
@@ -103,7 +102,7 @@ interface UploadProps {
     uploadTypeSelectorIntent: UploadTypeSelectorIntent;
     activeCollection?: Collection;
     closeUploadTypeSelector: () => void;
-    setLoading: SetLoading;
+    setLoading: (loading: boolean) => void;
     setShouldDisableDropzone: (value: boolean) => void;
     showCollectionSelector?: () => void;
     /**

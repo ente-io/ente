@@ -121,8 +121,11 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { FileWithPath } from "react-dropzone";
 import { Trans } from "react-i18next";
 import { uploadManager } from "services/upload-manager";
-import type { SelectedState } from "types/gallery";
-import { getSelectedFiles, performFileOp } from "utils/file";
+import {
+    getSelectedFiles,
+    performFileOp,
+    type SelectedState,
+} from "utils/file";
 
 /**
  * The default view for logged in users.
