@@ -71,13 +71,7 @@ import { usePhotosAppContext } from "ente-new/photos/types/context";
 import { wait } from "ente-utils/promise";
 import { useFormik } from "formik";
 import { t } from "i18next";
-import React, {
-    useCallback,
-    useEffect,
-    useMemo,
-    useRef,
-    useState,
-} from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Trans } from "react-i18next";
 import { z } from "zod/v4";
 
@@ -217,11 +211,13 @@ const SharingDetails: React.FC<SharingDetailsProps> = ({
 
     const collaborators = collection.sharees
         .filter((sharee) => sharee.role == "COLLABORATOR")
-        .map((sharee) => sharee.email);
+        .map((sharee) => sharee.email)
+        .filter((email) => email !== undefined);
 
     const viewers = collection.sharees
         .filter((sharee) => sharee.role == "VIEWER")
-        .map((sharee) => sharee.email);
+        .map((sharee) => sharee.email)
+        .filter((email) => email !== undefined);
 
     const userOrEmail = (email: string) =>
         email == user.email ? t("you") : email;
@@ -240,7 +236,7 @@ const SharingDetails: React.FC<SharingDetailsProps> = ({
                                 {...{ user, emailByUserID }}
                             />
                         }
-                        label={isOwner ? t("you") : ownerEmail}
+                        label={isOwner ? t("you") : (ownerEmail ?? "")}
                     />
                 </RowButtonGroup>
             </Stack>
@@ -325,19 +321,20 @@ const EmailShare: React.FC<EmailShareProps> = ({
     const { show: showManageEmail, props: manageEmailVisibilityProps } =
         useModalVisibility();
 
-    const [participantRole, setParticipantRole] = useState<
-        CollectionNewParticipantRole | undefined
-    >(undefined);
+    const [participantRole, setParticipantRole] =
+        // Initial value is arbitrary, it always gets reset before
+        // `showAddParticipant` is called.
+        useState<CollectionNewParticipantRole>("VIEWER");
 
     const showAddViewer = useCallback(() => {
         setParticipantRole("VIEWER");
         showAddParticipant();
     }, [showAddParticipant]);
 
-    const showAddCollaborator = () => {
+    const showAddCollaborator = useCallback(() => {
         setParticipantRole("COLLABORATOR");
         showAddParticipant();
-    };
+    }, [showAddParticipant]);
 
     const participantCount = collection.sharees.length;
 
@@ -607,7 +604,7 @@ const AddParticipantForm: React.FC<AddParticipantFormProps> = ({
     onSubmit,
 }) => {
     const formik = useFormik({
-        initialValues: { email: "", selectedEmails: [] },
+        initialValues: { email: "", selectedEmails: new Array<string>() },
         onSubmit: async ({ email, selectedEmails }, { setFieldError }) => {
             const setEmailFieldError = (message: string) =>
                 setFieldError("email", message);
@@ -745,19 +742,31 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
         props: manageParticipantVisibilityProps,
     } = useModalVisibility();
 
-    const participantType = useRef<"COLLABORATOR" | "VIEWER">(null);
+    const [participantRole, setParticipantRole] =
+        useState<CollectionNewParticipantRole>("VIEWER");
+    const [selectedParticipant, setSelectedParticipant] = useState<
+        CollectionUser | undefined
+    >(undefined);
 
-    const selectedParticipant = useRef<CollectionUser>(null);
-
-    const openAddCollab = () => {
-        participantType.current = "COLLABORATOR";
+    const showAddViewer = useCallback(() => {
+        setParticipantRole("VIEWER");
         showAddParticipant();
-    };
+    }, [showAddParticipant]);
 
-    const openAddViewer = () => {
-        participantType.current = "VIEWER";
+    const showAddCollaborator = useCallback(() => {
+        setParticipantRole("COLLABORATOR");
         showAddParticipant();
-    };
+    }, [showAddParticipant]);
+
+    const selectAndManageParticipant = useCallback(
+        (email: string) => {
+            setSelectedParticipant(
+                collection.sharees.find((sharee) => sharee.email === email),
+            );
+            showManageParticipant();
+        },
+        [showManageParticipant],
+    );
 
     const handleRootClose = () => {
         onClose();
@@ -770,20 +779,14 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
     const isOwner = user.id == collection.owner?.id;
 
     const collaborators = collection.sharees
-        ?.filter((sharee) => sharee.role == "COLLABORATOR")
-        .map((sharee) => sharee.email);
+        .filter((sharee) => sharee.role == "COLLABORATOR")
+        .map((sharee) => sharee.email)
+        .filter((email) => email !== undefined);
 
-    const viewers =
-        collection.sharees
-            ?.filter((sharee) => sharee.role == "VIEWER")
-            .map((sharee) => sharee.email) || [];
-
-    const openManageParticipant = (email) => {
-        selectedParticipant.current = collection.sharees.find(
-            (sharee) => sharee.email === email,
-        );
-        showManageParticipant();
-    };
+    const viewers = collection.sharees
+        .filter((sharee) => sharee.role == "VIEWER")
+        .map((sharee) => sharee.email)
+        .filter((email) => email !== undefined);
 
     return (
         <>
@@ -807,7 +810,7 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
                                         {...{ user, emailByUserID }}
                                     />
                                 }
-                                label={isOwner ? t("you") : ownerEmail}
+                                label={isOwner ? t("you") : (ownerEmail ?? "")}
                             />
                         </RowButtonGroup>
                     </Stack>
@@ -821,7 +824,7 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
                                     <RowButton
                                         fontWeight="regular"
                                         onClick={() =>
-                                            openManageParticipant(item)
+                                            selectAndManageParticipant(item)
                                         }
                                         label={item}
                                         startIcon={
@@ -838,7 +841,7 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
 
                             <RowButton
                                 startIcon={<AddIcon />}
-                                onClick={openAddCollab}
+                                onClick={showAddCollaborator}
                                 label={
                                     collaborators?.length
                                         ? t("add_more")
@@ -857,7 +860,7 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
                                     <RowButton
                                         fontWeight="regular"
                                         onClick={() =>
-                                            openManageParticipant(item)
+                                            selectAndManageParticipant(item)
                                         }
                                         label={item}
                                         startIcon={
@@ -873,7 +876,7 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
                             ))}
                             <RowButton
                                 startIcon={<AddIcon />}
-                                onClick={openAddViewer}
+                                onClick={showAddViewer}
                                 label={
                                     viewers?.length
                                         ? t("add_more")
@@ -894,12 +897,12 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
                     onRootClose,
                     onRemotePull,
                 }}
-                role={participantType.current}
+                role={participantRole}
             />
             <ManageParticipant
                 {...manageParticipantVisibilityProps}
                 {...{ onRootClose, wrap, collection, onRemotePull }}
-                selectedParticipant={selectedParticipant.current}
+                participant={selectedParticipant}
             />
         </>
     );
@@ -908,7 +911,13 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
 type ManageParticipantProps = ModalVisibilityProps & {
     onRootClose: () => void;
     wrap: (f: () => Promise<void>) => () => void;
-    selectedParticipant: CollectionUser;
+    /**
+     * The participant in the collection who we're trying to manage.
+     *
+     * The caller semantically guarantees that participant will always be set
+     * when {@link open} is `true`, but the types don't reflect this.
+     */
+    participant: CollectionUser | undefined;
 } & Pick<CollectionShareProps, "collection" | "onRemotePull">;
 
 const ManageParticipant: React.FC<ManageParticipantProps> = ({
@@ -916,7 +925,7 @@ const ManageParticipant: React.FC<ManageParticipantProps> = ({
     onClose,
     onRootClose,
     collection,
-    selectedParticipant,
+    participant,
     wrap,
     onRemotePull,
 }) => {
@@ -928,7 +937,9 @@ const ManageParticipant: React.FC<ManageParticipantProps> = ({
     };
 
     const unshare = wrap(() =>
-        unshareCollection(collection.id, selectedParticipant.email),
+        // We should have a participant (with a valid email) if this ends up
+        // being called.
+        unshareCollection(collection.id, participant!.email!),
     );
 
     const handleRemove = () => {
@@ -952,9 +963,8 @@ const ManageParticipant: React.FC<ManageParticipantProps> = ({
                         values={{ selectedEmail }}
                     />
                 );
-
                 buttonText = t("confirm_convert_to_viewer");
-            } else if (newRole == "COLLABORATOR") {
+            } else {
                 message = t("change_permission_to_collaborator", {
                     selectedEmail,
                 });
@@ -975,13 +985,13 @@ const ManageParticipant: React.FC<ManageParticipantProps> = ({
         newRole: CollectionNewParticipantRole,
     ) => {
         await shareCollection(collection, selectedEmail, newRole);
-        selectedParticipant.role = newRole;
+        participant!.role = newRole;
         await onRemotePull({ silent: true });
     };
 
     const createOnRoleChange = (role: CollectionNewParticipantRole) => () => {
-        if (role == selectedParticipant.role) return;
-        const { email } = selectedParticipant;
+        if (role == participant!.role) return;
+        const email = participant!.email!;
         confirmChangeRolePermission(email, role, () =>
             updateCollectionRole(email, role),
         );
@@ -993,7 +1003,7 @@ const ManageParticipant: React.FC<ManageParticipantProps> = ({
             message: (
                 <Trans
                     i18nKey="remove_participant_message"
-                    values={{ selectedEmail: selectedParticipant.email }}
+                    values={{ selectedEmail: participant!.email! }}
                 />
             ),
             continue: {
@@ -1004,7 +1014,7 @@ const ManageParticipant: React.FC<ManageParticipantProps> = ({
         });
     };
 
-    if (!selectedParticipant) {
+    if (!participant) {
         return <></>;
     }
 
@@ -1014,7 +1024,7 @@ const ManageParticipant: React.FC<ManageParticipantProps> = ({
             {...{ open, onClose }}
             onRootClose={handleRootClose}
             title={t("manage")}
-            caption={selectedParticipant.email}
+            caption={participant.email}
         >
             <Stack sx={{ gap: "32px", py: "20px", px: "8px" }}>
                 <Stack>
@@ -1032,7 +1042,7 @@ const ManageParticipant: React.FC<ManageParticipantProps> = ({
                             label={"Collaborator"}
                             startIcon={<ModeEditIcon />}
                             endIcon={
-                                selectedParticipant.role === "COLLABORATOR" && (
+                                participant.role === "COLLABORATOR" && (
                                     <DoneIcon />
                                 )
                             }
@@ -1045,9 +1055,7 @@ const ManageParticipant: React.FC<ManageParticipantProps> = ({
                             label={"Viewer"}
                             startIcon={<PhotoIcon />}
                             endIcon={
-                                selectedParticipant.role == "VIEWER" && (
-                                    <DoneIcon />
-                                )
+                                participant.role == "VIEWER" && <DoneIcon />
                             }
                         />
                     </RowButtonGroup>
@@ -1094,14 +1102,17 @@ const PublicShare: React.FC<PublicShareProps> = ({
     setBlockingLoad,
     onRemotePull,
 }) => {
-    const [publicShareUrl, setPublicShareUrl] = useState<string>(null);
-    const [publicURL, setPublicURL] = useState<PublicURL | undefined>(
-        undefined,
-    );
     const {
         show: showPublicLinkCreated,
         props: publicLinkCreatedVisibilityProps,
     } = useModalVisibility();
+
+    const [publicURL, setPublicURL] = useState<PublicURL | undefined>(
+        undefined,
+    );
+    const [resolvedURL, setResolvedURL] = useState<string | undefined>(
+        undefined,
+    );
 
     useEffect(() => {
         setPublicURL(collection.publicURLs[0]);
@@ -1110,27 +1121,27 @@ const PublicShare: React.FC<PublicShareProps> = ({
     useEffect(() => {
         if (publicURL?.url) {
             appendCollectionKeyToShareURL(publicURL.url, collection.key).then(
-                (url) => setPublicShareUrl(url),
+                (url) => setResolvedURL(url),
             );
         } else {
-            setPublicShareUrl(null);
+            setResolvedURL(undefined);
         }
     }, [publicURL]);
 
     const handleCopyLink = () => {
-        navigator.clipboard.writeText(publicShareUrl);
+        if (resolvedURL) navigator.clipboard.writeText(resolvedURL);
     };
 
     return (
         <>
-            {publicURL ? (
+            {publicURL && resolvedURL ? (
                 <ManagePublicShare
                     {...{
                         onRootClose,
                         collection,
                         publicURL,
                         setPublicURL,
-                        publicShareUrl,
+                        resolvedURL,
                         setBlockingLoad,
                         onRemotePull,
                     }}
@@ -1229,23 +1240,21 @@ const EnablePublicShareOptions: React.FC<EnablePublicShareOptionsProps> = ({
     );
 };
 
-type ManagePublicShareProps = {
-    onRootClose: () => void;
-    collection: Collection;
-    publicURL: PublicURL;
-    setPublicURL: (publicURL: PublicURL | undefined) => void;
-    publicShareUrl: string;
-} & Pick<
-    CollectionShareProps,
-    "collection" | "setBlockingLoad" | "onRemotePull"
->;
+type ManagePublicShareProps = { onRootClose: () => void } & Pick<
+    ManagePublicShareOptionsProps,
+    "publicURL" | "setPublicURL" | "resolvedURL"
+> &
+    Pick<
+        CollectionShareProps,
+        "collection" | "setBlockingLoad" | "onRemotePull"
+    >;
 
 const ManagePublicShare: React.FC<ManagePublicShareProps> = ({
     onRootClose,
     collection,
     publicURL,
     setPublicURL,
-    publicShareUrl,
+    resolvedURL,
     setBlockingLoad,
     onRemotePull,
 }) => {
@@ -1254,7 +1263,7 @@ const ManagePublicShare: React.FC<ManagePublicShareProps> = ({
         props: managePublicShareVisibilityProps,
     } = useModalVisibility();
 
-    const [copied, handleCopyLink] = useClipboardCopy(publicShareUrl);
+    const [copied, handleCopyLink] = useClipboardCopy(resolvedURL);
 
     return (
         <>
@@ -1300,7 +1309,7 @@ const ManagePublicShare: React.FC<ManagePublicShareProps> = ({
                     onRootClose,
                     collection,
                     publicURL,
-                    publicShareUrl,
+                    resolvedURL,
                     setPublicURL,
                     setBlockingLoad,
                     onRemotePull,
@@ -1310,15 +1319,18 @@ const ManagePublicShare: React.FC<ManagePublicShareProps> = ({
     );
 };
 
-const isLinkExpired = (validTill: number) => {
-    return validTill && validTill < Date.now() * 1000;
-};
+const isLinkExpired = (validTill: number) =>
+    validTill > 0 && validTill < Date.now() * 1000;
 
 type ManagePublicShareOptionsProps = ModalVisibilityProps & {
     onRootClose: () => void;
     publicURL: PublicURL;
     setPublicURL: (publicURL: PublicURL | undefined) => void;
-    publicShareUrl: string;
+    /**
+     * The "resolved" publicURL, with both the full origin and the secret
+     * fragment appended to it.
+     */
+    resolvedURL: string;
 } & Pick<
         CollectionShareProps,
         "collection" | "setBlockingLoad" | "onRemotePull"
@@ -1331,13 +1343,15 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
     collection,
     publicURL,
     setPublicURL,
-    publicShareUrl,
+    resolvedURL,
     setBlockingLoad,
     onRemotePull,
 }) => {
-    const [sharableLinkError, setSharableLinkError] = useState(null);
+    const [errorMessage, setErrorMessage] = useState<string | undefined>(
+        undefined,
+    );
 
-    const [copied, handleCopyLink] = useClipboardCopy(publicShareUrl);
+    const [copied, handleCopyLink] = useClipboardCopy(resolvedURL);
 
     const handleRootClose = () => {
         onClose();
@@ -1347,27 +1361,29 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
     const handlePublicURLUpdate = async (
         updates: UpdatePublicURLAttributes,
     ) => {
+        setBlockingLoad(true);
+        setErrorMessage(undefined);
         try {
-            setBlockingLoad(true);
             setPublicURL(await updatePublicURL(collection.id, updates));
             void onRemotePull({ silent: true });
         } catch (e) {
             log.error("Could not update public link", e);
-            setSharableLinkError(t("generic_error"));
+            setErrorMessage(t("generic_error"));
         } finally {
             setBlockingLoad(false);
         }
     };
     const handleRemovePublicLink = async () => {
+        setBlockingLoad(true);
+        setErrorMessage(undefined);
         try {
-            setBlockingLoad(true);
             await deleteShareURL(collection.id);
             setPublicURL(undefined);
             void onRemotePull({ silent: true });
             onClose();
         } catch (e) {
             log.error("Failed to remove public link", e);
-            setSharableLinkError(t("generic_error"));
+            setErrorMessage(t("generic_error"));
         } finally {
             setBlockingLoad(false);
         }
@@ -1426,12 +1442,12 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
                         label={t("remove_link")}
                     />
                 </RowButtonGroup>
-                {sharableLinkError && (
+                {errorMessage && (
                     <Typography
                         variant="small"
                         sx={{ color: "critical.main", textAlign: "center" }}
                     >
-                        {sharableLinkError}
+                        {errorMessage}
                     </Typography>
                 )}
             </Stack>

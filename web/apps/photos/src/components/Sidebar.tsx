@@ -324,8 +324,8 @@ const SubscriptionStatus: React.FC<SubscriptionStatusProps> = ({
         return true;
     }, [userDetails]);
 
-    const handleClick = useMemo(() => {
-        const eventHandler: MouseEventHandler<HTMLSpanElement> = (e) => {
+    const handleClick: MouseEventHandler<HTMLSpanElement> = useCallback(
+        (e) => {
             e.stopPropagation();
 
             if (isSubscriptionActive(userDetails.subscription)) {
@@ -342,9 +342,9 @@ const SubscriptionStatus: React.FC<SubscriptionStatusProps> = ({
                     onShowPlanSelector();
                 }
             }
-        };
-        return eventHandler;
-    }, [userDetails]);
+        },
+        [userDetails],
+    );
 
     if (!hasAMessage) {
         return <></>;
@@ -387,8 +387,8 @@ const SubscriptionStatus: React.FC<SubscriptionStatusProps> = ({
         <Box sx={{ px: 1, pt: 0.5 }}>
             <Typography
                 variant="small"
-                onClick={handleClick && handleClick}
-                sx={{ color: "text.muted", cursor: handleClick && "pointer" }}
+                onClick={handleClick}
+                sx={{ color: "text.muted" }}
             >
                 {message}
             </Typography>

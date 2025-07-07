@@ -1,4 +1,3 @@
-import type { TimeStampListItem } from "components/FileList";
 import type { PublicAlbumsCredentials } from "ente-base/http";
 import { createContext } from "react";
 
@@ -10,14 +9,10 @@ export interface PublicCollectionGalleryContextType {
      */
     credentials: PublicAlbumsCredentials | undefined;
     referralCode: string | null;
-    photoListHeader: TimeStampListItem;
-    photoListFooter: TimeStampListItem;
 }
 
 export const PublicCollectionGalleryContext =
     createContext<PublicCollectionGalleryContextType>({
         credentials: undefined,
         referralCode: null,
-        photoListHeader: null,
-        photoListFooter: null,
     });

@@ -180,22 +180,22 @@ const Page: React.FC = () => {
     const [fixCreationTimeFiles, setFixCreationTimeFiles] = useState<
         EnteFile[]
     >([]);
+    // The (non-sticky) header shown at the top of the gallery items.
+    const [fileListHeader, setFileListHeader] = useState<
+        TimeStampListItem | undefined
+    >(undefined);
+
+    const [openCollectionSelector, setOpenCollectionSelector] = useState(false);
+    const [collectionSelectorAttributes, setCollectionSelectorAttributes] =
+        useState<CollectionSelectorAttributes | undefined>();
 
     const userDetails = useUserDetailsSnapshot();
     const peopleState = usePeopleStateSnapshot();
-
-    // The (non-sticky) header shown at the top of the gallery items.
-    const [photoListHeader, setPhotoListHeader] =
-        useState<TimeStampListItem>(null);
 
     const { saveGroups, onAddSaveGroup, onRemoveSaveGroup } = useSaveGroups();
     const [, setPostCreateAlbumOp] = useState<CollectionOp | undefined>(
         undefined,
     );
-
-    const [openCollectionSelector, setOpenCollectionSelector] = useState(false);
-    const [collectionSelectorAttributes, setCollectionSelectorAttributes] =
-        useState<CollectionSelectorAttributes | undefined>();
 
     /**
      * The last time (epoch milliseconds) when we prompted the user for their
@@ -408,7 +408,7 @@ const Page: React.FC = () => {
 
     useEffect(() => {
         if (isInSearchMode && state.searchSuggestion) {
-            setPhotoListHeader({
+            setFileListHeader({
                 height: 104,
                 item: (
                     <SearchResultsHeader
@@ -671,7 +671,8 @@ const Page: React.FC = () => {
                         filteredFiles,
                     );
                     const userFiles = selectedFiles.filter(
-                        (f) => f.ownerID == user.id,
+                        // If a selection is happening, there must be a user.
+                        (f) => f.ownerID == user!.id,
                     );
                     const sourceCollectionID = selected.collectionID;
                     if (userFiles.length > 0) {
@@ -735,7 +736,8 @@ const Page: React.FC = () => {
                     op == "download"
                         ? selectedFiles
                         : selectedFiles.filter(
-                              (file) => file.ownerID == user.id,
+                              // There'll be a user if files are being selected.
+                              (file) => file.ownerID == user!.id,
                           );
                 if (toProcessFiles.length > 0) {
                     await performFileOp(
@@ -772,24 +774,24 @@ const Page: React.FC = () => {
     const handleSelectSearchOption = (
         searchOption: SearchOption | undefined,
     ) => {
-        const type = searchOption?.suggestion.type;
-        if (type == "collection" || type == "person") {
+        if (searchOption) {
+            const type = searchOption.suggestion.type;
             if (type == "collection") {
                 dispatch({
                     type: "showCollectionSummary",
                     collectionSummaryID: searchOption.suggestion.collectionID,
                 });
-            } else {
+            } else if (type == "person") {
                 dispatch({
                     type: "showPerson",
                     personID: searchOption.suggestion.person.id,
                 });
+            } else {
+                dispatch({
+                    type: "enterSearchMode",
+                    searchSuggestion: searchOption.suggestion,
+                });
             }
-        } else if (searchOption) {
-            dispatch({
-                type: "enterSearchMode",
-                searchSuggestion: searchOption.suggestion,
-            });
         } else {
             dispatch({ type: "exitSearch" });
         }
@@ -914,12 +916,13 @@ const Page: React.FC = () => {
                 // 3. The caller (eventually) triggers a remote pull in the
                 //    background, but meanwhile uses this updated metadata.
                 //
-                // TODO(RE): Replace with file fetch?
+                // TODO: Replace with files pull?
                 dispatch({
                     type: "unsyncedPrivateMagicMetadataUpdate",
                     fileID,
                     privateMagicMetadata: {
                         ...file.magicMetadata,
+                        count: file.magicMetadata?.count ?? 0,
                         version: (file.magicMetadata?.version ?? 0) + 1,
                         data: { ...file.magicMetadata?.data, visibility },
                     },
@@ -992,13 +995,10 @@ const Page: React.FC = () => {
                 attributes={collectionSelectorAttributes}
                 collectionSummaries={normalCollectionSummaries}
                 collectionForCollectionSummaryID={(id) =>
-                    // Null assert since the collection selector should only
-                    // show "selectable" normalCollectionSummaries. See:
-                    // [Note: Picking from selectable collection summaries].
                     findCollectionCreatingUncategorizedIfNeeded(
                         state.collections,
                         id,
-                    )!
+                    )
                 }
             />
             <DownloadStatusNotifications
@@ -1072,7 +1072,7 @@ const Page: React.FC = () => {
                     activeCollection,
                     activeCollectionID,
                     activePerson,
-                    setPhotoListHeader,
+                    setPhotoListHeader: setFileListHeader,
                     saveGroups,
                     onAddSaveGroup,
                 }}
@@ -1082,7 +1082,7 @@ const Page: React.FC = () => {
                 emailByUserID={state.emailByUserID}
                 shareSuggestionEmails={state.shareSuggestionEmails}
                 people={
-                    (state.view.type == "people"
+                    (state?.view?.type == "people"
                         ? state.view.visiblePeople
                         : undefined) ?? []
                 }
@@ -1140,14 +1140,14 @@ const Page: React.FC = () => {
                 />
             ) : !isInSearchMode &&
               !isFirstLoad &&
-              state.view.type == "people" &&
+              state?.view?.type == "people" &&
               !state.view.activePerson ? (
                 <PeopleEmptyState />
             ) : (
                 <FileListWithViewer
                     mode={barMode}
                     modePlus={isInSearchMode ? "search" : barMode}
-                    header={photoListHeader}
+                    header={fileListHeader}
                     user={user}
                     files={filteredFiles}
                     enableDownload={true}
@@ -1225,7 +1225,7 @@ const OfflineMessage: React.FC = () => (
  * Preload all three variants of a responsive image.
  */
 const preloadImage = (imgBasePath: string) => {
-    const srcset = [];
+    const srcset: string[] = [];
     for (let i = 1; i <= 3; i++) srcset.push(`${imgBasePath}/${i}x.png ${i}x`);
     new Image().srcset = srcset.join(",");
 };

@@ -284,7 +284,7 @@ const compareCollectionsLatestFile = (
         return -1;
     } else {
         const sortedFiles = sortFiles([first, second]);
-        if (sortedFiles[0].id !== first.id) {
+        if (sortedFiles[0]?.id !== first.id) {
             return 1;
         } else {
             return -1;
