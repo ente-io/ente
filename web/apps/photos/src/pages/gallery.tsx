@@ -121,8 +121,11 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { FileWithPath } from "react-dropzone";
 import { Trans } from "react-i18next";
 import { uploadManager } from "services/upload-manager";
-import type { SelectedState } from "types/gallery";
-import { getSelectedFiles, performFileOp } from "utils/file";
+import {
+    getSelectedFiles,
+    performFileOp,
+    type SelectedState,
+} from "utils/file";
 
 /**
  * The default view for logged in users.
@@ -193,6 +196,15 @@ const Page: React.FC = () => {
     const [openCollectionSelector, setOpenCollectionSelector] = useState(false);
     const [collectionSelectorAttributes, setCollectionSelectorAttributes] =
         useState<CollectionSelectorAttributes | undefined>();
+
+    /**
+     * The last time (epoch milliseconds) when we prompted the user for their
+     * password when opening the hidden section.
+     *
+     * This is used to implement a grace window, where we don't reprompt them
+     * for their password for the same purpose again and again.
+     */
+    const lastAuthenticationForHiddenTimestamp = useRef<number>(0);
 
     const { show: showSidebar, props: sidebarVisibilityProps } =
         useModalVisibility();
@@ -709,16 +721,16 @@ const Page: React.FC = () => {
         void (async () => {
             showLoadingBar();
             try {
-                const selectedFiles = getSelectedFiles(
-                    selected,
+                // When hiding use all non-hidden files instead of the filtered
+                // files since we want to move all files copies to the hidden
+                // collection.
+                const opFiles =
                     op == "hide"
-                        ? // passing files here instead of filteredData for hide since
-                          // we want to move all files copies to hidden collection
-                          state.collectionFiles.filter(
+                        ? state.collectionFiles.filter(
                               (f) => !state.hiddenFileIDs.has(f.id),
                           )
-                        : filteredFiles,
-                );
+                        : filteredFiles;
+                const selectedFiles = getSelectedFiles(selected, opFiles);
                 const toProcessFiles =
                     op == "download"
                         ? selectedFiles
@@ -829,8 +841,14 @@ const Page: React.FC = () => {
             collectionSummaryID: number | undefined,
             isHiddenCollectionSummary: boolean | undefined,
         ) => {
-            if (isHiddenCollectionSummary && barMode != "hidden-albums") {
+            const lastAuthAt = lastAuthenticationForHiddenTimestamp.current;
+            if (
+                isHiddenCollectionSummary &&
+                barMode != "hidden-albums" &&
+                Date.now() - lastAuthAt > 5 * 60 * 1e3 /* 5 minutes */
+            ) {
                 await authenticateUser();
+                lastAuthenticationForHiddenTimestamp.current = Date.now();
             }
             handleShowCollectionSummaryWithID(collectionSummaryID);
         },

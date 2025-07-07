@@ -87,8 +87,7 @@ import { useRouter } from "next/router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { type FileWithPath } from "react-dropzone";
 import { uploadManager } from "services/upload-manager";
-import type { SelectedState } from "types/gallery";
-import { getSelectedFiles } from "utils/file";
+import { getSelectedFiles, type SelectedState } from "utils/file";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
 
 export default function PublicCollectionGallery() {
