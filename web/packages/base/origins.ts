@@ -82,11 +82,11 @@ export const uploaderOrigin = async () =>
     (await customAPIOrigin()) ?? "https://uploader.ente.io";
 
 /**
- * A static build time constant that is `true` if the {@link albumsAppOrigin} is
- * different from the default value (Ente's production instance).
+ * A static build time constant that is `true` if {@link albumsAppOrigin} has
+ * been customized.
  */
 export const isCustomAlbumsAppOrigin =
-    process.env.NEXT_PUBLIC_ENTE_ALBUMS_ENDPOINT != "https://albums.ente.io";
+    !!process.env.NEXT_PUBLIC_ENTE_ALBUMS_ENDPOINT;
 
 /**
  * Return the origin that serves public albums.
