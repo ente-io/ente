@@ -1,10 +1,16 @@
+import "dart:io";
+
 import "package:flutter/foundation.dart";
 import "package:logging/logging.dart";
+import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
+import "package:photos/db/remote/table/mapping_table.dart";
 import "package:photos/events/collection_updated_event.dart";
 import "package:photos/events/diff_sync_complete_event.dart";
 import "package:photos/events/sync_status_update_event.dart";
+import "package:photos/models/api/diff/diff.dart";
 import "package:photos/models/file/file.dart";
+import "package:photos/models/file/remote/rl_mapping.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/services/remote/fetch/files_diff.dart";
@@ -13,10 +19,11 @@ class RemoteDiffService {
   final Logger _logger = Logger('RemoteDiffService');
   final CollectionsService _collectionsService;
   final RemoteFileDiffService filesDiffService;
-
+  final Configuration _config;
   RemoteDiffService(
     this._collectionsService,
     this.filesDiffService,
+    this._config,
   );
 
   bool _isExistingSyncSilent = false;
@@ -79,6 +86,7 @@ class RemoteDiffService {
         await remoteDB.deleteFilesDiff(diff.deletedItems);
       }
       if (diff.updatedItems.isNotEmpty) {
+        await _mapRemoteToLocalItems(diff);
         await remoteCache.insertDiffItems(diff.updatedItems);
       }
       // todo:(rewrite) neeraj add logic to refresh home gallery when time or visibility changes
@@ -101,6 +109,120 @@ class RemoteDiffService {
         [],
         "diff",
       ),
+    );
+  }
+
+  Future<void> _mapRemoteToLocalItems(DiffResult diff) async {
+    final Map<int, (String, ApiFileItem)> fileIDtoLocalID = {};
+    final Map<int, String> unmappedFileIDtoLocalID = {};
+    for (final item in diff.updatedItems) {
+      if (item.fileItem.localID != null &&
+          item.fileItem.ownerID == _config.getUserID()!) {
+        fileIDtoLocalID[item.fileItem.fileID] =
+            (item.fileItem.localID!, item.fileItem);
+      }
+    }
+    if (fileIDtoLocalID.isEmpty) {
+      _logger.info("No remote files to map to local items");
+      return;
+    }
+    final mappedLocalIDs = await remoteDB.getLocalIDsWithMapping(
+      fileIDtoLocalID.values.map((e) => e.$1).toList(),
+    );
+    final remoteIDsWithMapping =
+        await remoteDB.getFilesWithMapping(fileIDtoLocalID.keys.toList());
+    // remote already claim mappings from fileIds to localIDs
+    int mapRemoteCount = 0;
+    int mapLocalCount = 0;
+    int bothMappedCount = 0;
+    int noLocalIDFoundCount = 0;
+    for (MapEntry<int, (String, ApiFileItem)> entry
+        in fileIDtoLocalID.entries) {
+      final lID = entry.value.$1;
+      final rID = entry.key;
+      if (mappedLocalIDs.contains(lID) && remoteIDsWithMapping.contains(rID)) {
+        bothMappedCount++;
+        continue;
+      } else if (mappedLocalIDs.contains(lID)) {
+        mapLocalCount++;
+      } else if (remoteIDsWithMapping.contains(rID)) {
+        mapRemoteCount++;
+      } else {
+        unmappedFileIDtoLocalID[rID] = lID;
+      }
+    }
+    if (unmappedFileIDtoLocalID.isEmpty) {
+      _logger.info("No unmapped remote files found");
+      return;
+    }
+
+    final unclaimedLocalAssets =
+        localDB.getLocalAssetsInfo(unmappedFileIDtoLocalID.values.toList());
+    final rmMappings = <RLMapping>[];
+    for (final entry in unmappedFileIDtoLocalID.entries) {
+      final remoteFileID = entry.key;
+      final localID = entry.value;
+      final localAsset = await unclaimedLocalAssets;
+      if (!localAsset.containsKey(localID)) {
+        noLocalIDFoundCount++;
+        continue;
+      }
+      final localAssetInfo = localAsset[localID]!;
+      final ApiFileItem remoteFile = fileIDtoLocalID[remoteFileID]!.$2;
+      late bool? isHashMatched;
+      late bool hasIdMatched;
+      if (localAssetInfo.hash != null && remoteFile.hash != null) {
+        isHashMatched = localAssetInfo.hash == remoteFile.hash;
+      } else {
+        isHashMatched = null; // hash status unknown
+      }
+      if (Platform.isAndroid) {
+        hasIdMatched = localAssetInfo.id == remoteFile.localID &&
+            remoteFile.deviceFolder == localAssetInfo.relativePath &&
+            localAssetInfo.name == remoteFile.nonEditedTitle;
+      } else if (Platform.isIOS) {
+        hasIdMatched = localAssetInfo.id == remoteFile.localID;
+      } else {
+        hasIdMatched = false; // Unsupported platform
+      }
+      if (!hasIdMatched) {
+        continue;
+      }
+      MatchType? mappingType;
+      if (isHashMatched == true) {
+        mappingType = MatchType.deviceHashMatched;
+      } else if (isHashMatched == null) {
+        mappingType = MatchType.localID;
+      } else {
+        _logger.warning(
+          "Remote file ${remoteFile.fileID} has localID $localID but hash does not match",
+        );
+        if (kDebugMode) {
+          throw Exception(
+            "Remote file ${remoteFile.fileID} has localID $localID but hash does not match",
+          );
+        }
+      }
+      if (mappingType != null) {
+        rmMappings.add(
+          RLMapping(
+            remoteUploadID: remoteFileID,
+            localID: localID,
+            localCloudID: localAssetInfo.id,
+            mappingType: mappingType,
+          ),
+        );
+      }
+    }
+    if (rmMappings.isNotEmpty) {
+      await remoteDB.insertMappings(rmMappings);
+    }
+    _logger.info(
+      "Mapped new ${rmMappings.length} remote files to local assets: "
+      "existing remoteID to localID: $mapRemoteCount, "
+      "existing localID to remoteID: $mapLocalCount, "
+      "existing both mapped: $bothMappedCount, "
+      "no localID found: $noLocalIDFoundCount",
     );
   }
 

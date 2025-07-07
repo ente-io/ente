@@ -80,6 +80,7 @@ class RemoteSyncService {
     remoteDiff = RemoteDiffService(
       _collectionsService,
       RemoteFileDiffService(NetworkClient.instance.enteDio),
+      _config,
     );
 
     Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) async {
@@ -567,8 +568,6 @@ class RemoteSyncService {
       throw error;
     }
   }
-
- 
 
   bool _shouldThrottleSync() {
     return !flagService.enableMobMultiPart ||

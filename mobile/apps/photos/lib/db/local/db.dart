@@ -10,6 +10,7 @@ import "package:photos/db/local/mappers.dart";
 import "package:photos/db/local/schema.dart";
 import "package:photos/log/devlog.dart";
 import 'package:photos/models/file/file.dart';
+import "package:photos/models/file/mapping/local_mapping.dart";
 import "package:photos/models/local/local_metadata.dart";
 import "package:sqlite_async/sqlite_async.dart";
 
@@ -80,6 +81,25 @@ class LocalDB with SqlDbBase {
       //   ],
       // );
     }
+  }
+
+  Future<Map<String, LocalAssetInfo>> getLocalAssetsInfo(
+    List<String> ids,
+  ) async {
+    if (ids.isEmpty) return {};
+    final stopwatch = Stopwatch()..start();
+    final result = await _sqliteDB.getAll(
+      'SELECT id, hash, name, relative_path, state FROM assets WHERE id IN (${List.filled(ids.length, "?").join(",")})',
+      ids,
+    );
+    debugPrint(
+      "getLocalAssetsInfo complete in ${stopwatch.elapsed.inMilliseconds}ms for ${ids.length} ids",
+    );
+    return Map.fromEntries(
+      result.map(
+        (row) => MapEntry(row['id'] as String, LocalAssetInfo.fromRow(row)),
+      ),
+    );
   }
 
   Future<List<EnteFile>> getAssets({LocalAssertsParam? params}) async {

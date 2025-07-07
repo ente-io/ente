@@ -15,13 +15,13 @@ class RLMapping {
         remoteUploadID,
         localID,
         localCloudID,
-        mappingType,
+        mappingType.name,
       ];
 }
 
 enum MatchType {
-  remote,
-  cloudIdMatched,
+  localID,
+  cloudID,
   deviceUpload,
   deviceHashMatched,
 }
@@ -29,10 +29,10 @@ enum MatchType {
 extension MappingTypeExtension on MatchType {
   String get name {
     switch (this) {
-      case MatchType.remote:
-        return "remote";
-      case MatchType.cloudIdMatched:
-        return "cloudIdMatched";
+      case MatchType.localID:
+        return "localID";
+      case MatchType.cloudID:
+        return "cloudID";
       case MatchType.deviceUpload:
         return "deviceUpload";
       case MatchType.deviceHashMatched:
@@ -42,10 +42,10 @@ extension MappingTypeExtension on MatchType {
 
   static MatchType fromName(String name) {
     switch (name) {
-      case "remote":
-        return MatchType.remote;
-      case "cloudIdMatched":
-        return MatchType.cloudIdMatched;
+      case "localID":
+        return MatchType.localID;
+      case "cloudID":
+        return MatchType.cloudID;
       case "deviceUpload":
         return MatchType.deviceUpload;
       case "deviceHashMatched":

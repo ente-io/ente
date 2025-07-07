@@ -134,6 +134,10 @@ class ApiFileItem {
   String get title =>
       pubMagicMetadata?.data['editedName'] ?? metadata?.data['title'] ?? "";
 
+  String get nonEditedTitle {
+    return metadata?.data['title'] ?? "";
+  }
+
   String? get localID => metadata?.data['localID'];
 
   String? get matchLocalID => localID == null || deviceFolder == null
