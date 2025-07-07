@@ -6,7 +6,6 @@ import "dart:io";
 import "package:collection/collection.dart";
 import "package:dio/dio.dart";
 import "package:encrypt/encrypt.dart" as enc;
-import "package:ffmpeg_kit_flutter/ffmpeg_session.dart";
 import "package:ffmpeg_kit_flutter/return_code.dart";
 import "package:flutter/foundation.dart";
 import "package:flutter/widgets.dart";
@@ -222,8 +221,6 @@ class VideoPreviewService {
         'Generating HLS Playlist ${enteFile.displayName} at $prefix/output.m3u8}',
       );
 
-      FFmpegSession? session;
-
       final reencodeVideo =
           !(isH264 && bitrate != null && bitrate <= 4000 * 1000);
       final rescaleVideo = !(bitrate != null && bitrate <= 2000 * 1000);
@@ -270,21 +267,26 @@ class VideoPreviewService {
 
       _logger.info(command);
 
-      session = await IsolatedFfmpegService.runFfmpeg(
+      final map = await IsolatedFfmpegService.runFfmpeg(
         // input file path
         '-i "${file.path}" ' +
             // main params for streaming
             command +
             // output file path
             '$prefix/output.m3u8',
+      ).onError(
+        (error, stackTrace) {
+          _logger.warning("FFmpeg command failed", error, stackTrace);
+          return {};
+        },
       );
 
-      final returnCode = await session?.getReturnCode();
+      final returnCode = map["returnCode"] as int?;
 
       String? objectId;
       int? objectSize;
 
-      if (ReturnCode.isSuccess(returnCode)) {
+      if (ReturnCode.success == returnCode) {
         try {
           _items[enteFile.uploadedFileID!] = PreviewItem(
             status: PreviewItemStatus.uploading,
@@ -303,13 +305,22 @@ class VideoPreviewService {
           objectSize = result.$2;
 
           // Fetch resolution of generated stream by decrypting a single frame
-          final FFmpegSession session2 = await IsolatedFfmpegService.runFfmpeg(
+          final map2 = await IsolatedFfmpegService.runFfmpeg(
             '-allowed_extensions ALL -i "$prefix/output.m3u8" -frames:v 1 -c copy "$prefix/frame.ts"',
+          ).onError(
+            (error, stackTrace) {
+              _logger.warning(
+                "FFmpeg command failed for frame",
+                error,
+                stackTrace,
+              );
+              return {};
+            },
           );
-          final returnCode2 = await session2.getReturnCode();
+          final returnCode2 = map2["returnCode"] as int?;
           int? width, height;
           try {
-            if (ReturnCode.isSuccess(returnCode2)) {
+            if (ReturnCode.success == returnCode2) {
               FFProbeProps? props2;
               final file2 = File("$prefix/frame.ts");
 
@@ -335,11 +346,11 @@ class VideoPreviewService {
           error = "Failed to upload video preview\nError: $err";
           _logger.shout("Something went wrong with preview upload", err, sT);
         }
-      } else if (ReturnCode.isCancel(returnCode)) {
+      } else if (ReturnCode.cancel == returnCode) {
         _logger.warning("FFmpeg command cancelled");
         error = "FFmpeg command cancelled";
       } else {
-        final output = await session?.getOutput();
+        final output = map["output"] as String?;
         _logger.shout(
           "FFmpeg command failed with return code $returnCode",
           output ?? "Error not found",
@@ -376,7 +387,9 @@ class VideoPreviewService {
       if (uploadingFileId == enteFile.uploadedFileID!) {
         uploadingFileId = -1;
       }
-      _logger.info("[chunk] Processing ${_items.length} items for streaming");
+      _logger.info(
+        "[chunk] Processing ${_items.length} items for streaming, $error",
+      );
       // process next file
       if (fileQueue.isNotEmpty) {
         final entry = fileQueue.entries.first;
