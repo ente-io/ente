@@ -40,6 +40,7 @@ class _MemoryProgressIndicatorState extends State<MemoryProgressIndicator>
     _animationController = AnimationController(
       vsync: this,
       duration: widget.duration,
+      animationBehavior: AnimationBehavior.preserve,
     );
 
     _animation =

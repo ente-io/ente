@@ -716,6 +716,7 @@ class _MemoriesZoomWidgetState extends State<MemoriesZoomWidget>
       duration: const Duration(
         seconds: 5,
       ),
+      animationBehavior: AnimationBehavior.preserve,
     );
 
     final startScale = widget.zoomIn ? 1.05 : 1.15;
