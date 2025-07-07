@@ -80,7 +80,6 @@ import {
     GalleryItemsHeaderAdapter,
     GalleryItemsSummary,
 } from "ente-new/photos/components/gallery/ListHeader";
-import { isHiddenCollection } from "ente-new/photos/services/collection";
 import { PseudoCollectionID } from "ente-new/photos/services/collection-summary";
 import { usePhotosAppContext } from "ente-new/photos/types/context";
 import { t } from "i18next";
@@ -649,7 +648,7 @@ const ListHeader: React.FC<ListHeaderProps> = ({
             publicCollection.name,
             publicCollection.id,
             publicFiles,
-            isHiddenCollection(publicCollection),
+            undefined,
             onAddSaveGroup,
         );
 

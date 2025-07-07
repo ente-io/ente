@@ -30,6 +30,12 @@ export interface SaveGroup {
     /**
      * If this save group is associated with a {@link CollectionSummary}, then
      * the ID of that collection summary.
+     *
+     * The {@link SaveGroup} type is also used in the context of the albums app,
+     * which does not use or need the concept of link {@link CollectionSummary},
+     * we to avoid taking a dependency of the type we store these two relevant
+     * properties - {@link collectionSummaryID} and
+     * {@link isHiddenCollectionSummary} - inline.
      */
     collectionSummaryID?: number;
     /**

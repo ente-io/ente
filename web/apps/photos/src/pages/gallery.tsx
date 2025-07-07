@@ -89,6 +89,7 @@ import {
 import {
     haveOnlySystemCollections,
     PseudoCollectionID,
+    type CollectionSummary,
 } from "ente-new/photos/services/collection-summary";
 import exportService from "ente-new/photos/services/export";
 import { updateFilesVisibility } from "ente-new/photos/services/file";
@@ -789,7 +790,7 @@ const Page: React.FC = () => {
         setUploadTypeSelectorIntent(intent ?? "upload");
     };
 
-    const handleShowCollectionSummary = (
+    const handleShowCollectionSummaryWithID = (
         collectionSummaryID: number | undefined,
     ) => {
         // Trigger a pull of the latest data from remote when opening the trash.
@@ -813,9 +814,45 @@ const Page: React.FC = () => {
         dispatch({ type: "showCollectionSummary", collectionSummaryID });
     };
 
-    // The same function can also be used to show collections since the
-    // namespace for the collection IDs and collection summary IDs are disjoint.
-    const handleShowCollection = handleShowCollectionSummary;
+    /**
+     * Switch to gallery view to show the {@link CollectionSummary}.
+     *
+     * @param cs The {@link CollectionSummary} to show.
+     * If a {@link CollectionSummary} is not provided, show the "All" section.
+     *
+     * If the given {@link CollectionSummary} is hidden, first perform any
+     * reauthentication as would be needed for showing the hidden section in the
+     * app, and then shows the {@link CollectionSummary}.
+     */
+    // TODO(RE):
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const handleShowCollectionSummary = (cs: CollectionSummary | undefined) => {
+        if (cs?.attributes.has("hidden")) {
+            void handleShowHiddenSection().then(() => {
+                handleShowCollectionSummaryWithID(cs.id);
+            });
+        } else {
+            handleShowCollectionSummaryWithID(cs.id);
+        }
+    };
+
+    /**
+     * A variant / reimplementation of {@link handleShowCollectionSummary} for
+     * use by the {@link DownloadStatusNotifications} component (which does not
+     * know about the {@link CollectionSummary} TypeScript type).
+     */
+    const handleDownloadStatusNotificationsShowCollectionSummary = (
+        collectionSummaryID: number | undefined,
+        isHiddenCollectionSummary: boolean | undefined,
+    ) => {
+        if (isHiddenCollectionSummary) {
+            void handleShowHiddenSection().then(() => {
+                handleShowCollectionSummaryWithID(collectionSummaryID);
+            });
+        } else {
+            handleShowCollectionSummaryWithID(collectionSummaryID);
+        }
+    };
 
     const handleChangeBarMode = (mode: GalleryBarMode) =>
         mode == "people"
@@ -955,8 +992,9 @@ const Page: React.FC = () => {
             />
             <DownloadStatusNotifications
                 {...{ saveGroups, onRemoveSaveGroup }}
-                onShowHiddenSection={handleShowHiddenSection}
-                onShowCollection={handleShowCollection}
+                onShowCollectionSummary={
+                    handleDownloadStatusNotificationsShowCollectionSummary
+                }
             />
             <FixCreationTime
                 {...fixCreationTimeVisibilityProps}
@@ -1039,7 +1077,7 @@ const Page: React.FC = () => {
                 }
                 onChangeMode={handleChangeBarMode}
                 setBlockingLoad={setBlockingLoad}
-                setActiveCollectionID={handleShowCollectionSummary}
+                setActiveCollectionID={handleShowCollectionSummaryWithID}
                 onRemotePull={remotePull}
                 onSelectPerson={handleSelectPerson}
             />
@@ -1076,7 +1114,7 @@ const Page: React.FC = () => {
                     state.uncategorizedCollectionSummaryID
                 }
                 onShowPlanSelector={showPlanSelector}
-                onShowCollectionSummary={handleShowCollectionSummary}
+                onShowCollectionSummary={handleShowCollectionSummaryWithID}
                 onShowHiddenSection={handleShowHiddenSection}
                 onShowExport={showExport}
                 onAuthenticateUser={authenticateUser}

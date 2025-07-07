@@ -52,12 +52,16 @@ export const downloadAndSaveFiles = (
  * When running in the context of the desktop app, instead of saving the files
  * in the directory selected by the user, files are saved in a directory with
  * the same name as the collection.
+ *
+ * @param isHiddenCollectionSummary `true` if the collection is associated with
+ * a "hidden" collection or pseudo-collection in the app. Only relevant when
+ * running in the context of the photos app, can be `undefined` otherwise.
  */
 export const downloadAndSaveCollectionFiles = async (
     collectionSummaryName: string,
     collectionSummaryID: number,
     files: EnteFile[],
-    isHiddenCollectionSummary: boolean,
+    isHiddenCollectionSummary: boolean | undefined,
     onAddSaveGroup: AddSaveGroup,
 ) =>
     downloadAndSave(
