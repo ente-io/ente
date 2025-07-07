@@ -6,12 +6,9 @@ import DownloadIcon from "@mui/icons-material/Download";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import { Box, Button, IconButton, Stack, styled, Tooltip } from "@mui/material";
 import Typography from "@mui/material/Typography";
+import { DownloadStatusNotifications } from "components/DownloadStatusNotifications";
 import type { TimeStampListItem } from "components/FileList";
 import { FileListWithViewer } from "components/FileListWithViewer";
-import {
-    FilesDownloadProgress,
-    type FilesDownloadProgressAttributes,
-} from "components/FilesDownloadProgress";
 import { Upload } from "components/Upload";
 import {
     AccountsPageContents,
@@ -50,7 +47,15 @@ import {
 } from "ente-base/http";
 import log from "ente-base/log";
 import { FullScreenDropZone } from "ente-gallery/components/FullScreenDropZone";
+import {
+    useSaveGroups,
+    type AddSaveGroup,
+} from "ente-gallery/components/utils/save-groups";
 import { downloadManager } from "ente-gallery/services/download";
+import {
+    downloadAndSaveCollectionFiles,
+    downloadAndSaveFiles,
+} from "ente-gallery/services/save";
 import { extractCollectionKeyFromShareURL } from "ente-gallery/services/share";
 import { updateShouldDisableCFUploadProxy } from "ente-gallery/services/upload";
 import { sortFiles } from "ente-gallery/utils/file";
@@ -83,13 +88,8 @@ import { useRouter } from "next/router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { type FileWithPath } from "react-dropzone";
 import { uploadManager } from "services/upload-manager";
-import type {
-    SelectedState,
-    SetFilesDownloadProgressAttributes,
-    SetFilesDownloadProgressAttributesCreator,
-} from "types/gallery";
-import { downloadCollectionFiles } from "utils/collection";
-import { downloadSelectedFiles, getSelectedFiles } from "utils/file";
+import type { SelectedState } from "types/gallery";
+import { getSelectedFiles } from "utils/file";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
 
 export default function PublicCollectionGallery() {
@@ -130,44 +130,7 @@ export default function PublicCollectionGallery() {
         collectionID: 0,
         context: undefined,
     });
-
-    const [
-        filesDownloadProgressAttributesList,
-        setFilesDownloadProgressAttributesList,
-    ] = useState<FilesDownloadProgressAttributes[]>([]);
-
-    const setFilesDownloadProgressAttributesCreator: SetFilesDownloadProgressAttributesCreator =
-        useCallback((folderName, collectionID, isHidden) => {
-            const id = Math.random();
-            const updater: SetFilesDownloadProgressAttributes = (value) => {
-                setFilesDownloadProgressAttributesList((prev) => {
-                    const attributes = prev?.find((attr) => attr.id === id);
-                    const updatedAttributes =
-                        typeof value == "function"
-                            ? value(attributes)
-                            : { ...attributes, ...value };
-                    const updatedAttributesList = attributes
-                        ? prev.map((attr) =>
-                              attr.id === id ? updatedAttributes : attr,
-                          )
-                        : [...prev, updatedAttributes];
-
-                    return updatedAttributesList;
-                });
-            };
-            updater({
-                id,
-                folderName,
-                collectionID,
-                isHidden,
-                canceller: null,
-                total: 0,
-                success: 0,
-                failed: 0,
-                downloadDirPath: null,
-            });
-            return updater;
-        }, []);
+    const { saveGroups, onAddSaveGroup, onRemoveSaveGroup } = useSaveGroups();
 
     const onAddPhotos = useMemo(() => {
         return publicCollection?.publicURLs[0]?.enableCollect
@@ -274,11 +237,7 @@ export default function PublicCollectionGallery() {
             setPhotoListHeader({
                 item: (
                     <ListHeader
-                        {...{
-                            publicCollection,
-                            publicFiles,
-                            setFilesDownloadProgressAttributesCreator,
-                        }}
+                        {...{ publicCollection, publicFiles, onAddSaveGroup }}
                     />
                 ),
                 tag: "header",
@@ -453,13 +412,10 @@ export default function PublicCollectionGallery() {
     const downloadFilesHelper = async () => {
         try {
             const selectedFiles = getSelectedFiles(selected, publicFiles);
-            const setFilesDownloadProgressAttributes =
-                setFilesDownloadProgressAttributesCreator(
-                    t("files_count", { count: selectedFiles.length }),
-                );
-            await downloadSelectedFiles(
+            await downloadAndSaveFiles(
                 selectedFiles,
-                setFilesDownloadProgressAttributes,
+                t("files_count", { count: selectedFiles.length }),
+                onAddSaveGroup,
             );
             clearSelection();
         } catch (e) {
@@ -554,11 +510,9 @@ export default function PublicCollectionGallery() {
                     selected={selected}
                     setSelected={setSelected}
                     activeCollectionID={PseudoCollectionID.all}
-                    setFilesDownloadProgressAttributesCreator={
-                        setFilesDownloadProgressAttributesCreator
-                    }
                     onRemotePull={publicAlbumsRemotePull}
                     onVisualFeedback={handleVisualFeedback}
+                    onAddSaveGroup={onAddSaveGroup}
                 />
                 {blockingLoad && <TranslucentLoadingOverlay />}
                 <Upload
@@ -573,9 +527,8 @@ export default function PublicCollectionGallery() {
                     onShowSessionExpiredDialog={showPublicLinkExpiredMessage}
                     {...{ dragAndDropFiles }}
                 />
-                <FilesDownloadProgress
-                    attributesList={filesDownloadProgressAttributesList}
-                    setAttributesList={setFilesDownloadProgressAttributesList}
+                <DownloadStatusNotifications
+                    {...{ saveGroups, onRemoveSaveGroup }}
                 />
             </FullScreenDropZone>
         </PublicCollectionGalleryContext.Provider>
@@ -680,30 +633,25 @@ const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
 interface ListHeaderProps {
     publicCollection: Collection;
     publicFiles: EnteFile[];
-    setFilesDownloadProgressAttributesCreator: SetFilesDownloadProgressAttributesCreator;
+    onAddSaveGroup: AddSaveGroup;
 }
 
 const ListHeader: React.FC<ListHeaderProps> = ({
     publicCollection,
     publicFiles,
-    setFilesDownloadProgressAttributesCreator,
+    onAddSaveGroup,
 }) => {
     const downloadEnabled =
         publicCollection.publicURLs?.[0]?.enableDownload ?? true;
 
-    const downloadAllFiles = async () => {
-        const setFilesDownloadProgressAttributes =
-            setFilesDownloadProgressAttributesCreator(
-                publicCollection.name,
-                publicCollection.id,
-                isHiddenCollection(publicCollection),
-            );
-        await downloadCollectionFiles(
+    const downloadAllFiles = () =>
+        downloadAndSaveCollectionFiles(
             publicCollection.name,
+            publicCollection.id,
             publicFiles,
-            setFilesDownloadProgressAttributes,
+            isHiddenCollection(publicCollection),
+            onAddSaveGroup,
         );
-    };
 
     return (
         <GalleryItemsHeaderAdapter>

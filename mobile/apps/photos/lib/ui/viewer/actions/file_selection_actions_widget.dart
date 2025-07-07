@@ -422,44 +422,7 @@ class _FileSelectionActionsWidgetState
           ),
           labelText: S.of(context).editLocation,
           icon: Icons.edit_location_alt_outlined,
-          onTap: () async {
-            await showBarModalBottomSheet(
-              shape: const RoundedRectangleBorder(
-                borderRadius: BorderRadius.vertical(
-                  top: Radius.circular(5),
-                ),
-              ),
-              backgroundColor: getEnteColorScheme(context).backgroundElevated,
-              barrierColor: backdropFaintDark,
-              topControl: Stack(
-                alignment: Alignment.bottomCenter,
-                children: [
-                  // This container is for increasing the tap area
-                  Container(
-                    width: double.infinity,
-                    height: 36,
-                    color: Colors.transparent,
-                  ),
-                  Container(
-                    height: 5,
-                    width: 40,
-                    decoration: const BoxDecoration(
-                      color: backgroundElevated2Light,
-                      borderRadius: BorderRadius.all(
-                        Radius.circular(5),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              context: context,
-              builder: (context) {
-                return UpdateLocationDataWidget(
-                  widget.selectedFiles.files.toList(),
-                );
-              },
-            );
-          },
+          onTap: _editLocation,
         ),
       );
     }
@@ -479,11 +442,7 @@ class _FileSelectionActionsWidgetState
           labelText: S.of(context).share,
           icon: Icons.adaptive.share_outlined,
           key: shareButtonKey,
-          onTap: () => shareSelected(
-            context,
-            shareButtonKey,
-            widget.selectedFiles.files.toList(),
-          ),
+          onTap: _shareSelectedFiles,
         ),
       );
     }
@@ -521,6 +480,54 @@ class _FileSelectionActionsWidgetState
       );
     }
     return const SizedBox();
+  }
+
+  Future<void> _editLocation() async {
+    await showBarModalBottomSheet(
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(5),
+        ),
+      ),
+      backgroundColor: getEnteColorScheme(context).backgroundElevated,
+      barrierColor: backdropFaintDark,
+      topControl: Stack(
+        alignment: Alignment.bottomCenter,
+        children: [
+          // This container is for increasing the tap area
+          Container(
+            width: double.infinity,
+            height: 36,
+            color: Colors.transparent,
+          ),
+          Container(
+            height: 5,
+            width: 40,
+            decoration: const BoxDecoration(
+              color: backgroundElevated2Light,
+              borderRadius: BorderRadius.all(
+                Radius.circular(5),
+              ),
+            ),
+          ),
+        ],
+      ),
+      context: context,
+      builder: (context) {
+        return UpdateLocationDataWidget(
+          widget.selectedFiles.files.toList(),
+        );
+      },
+    );
+  }
+
+  Future<void> _shareSelectedFiles() async {
+    shareSelected(
+      context,
+      shareButtonKey,
+      widget.selectedFiles.files.toList(),
+    );
+    widget.selectedFiles.clearAll();
   }
 
   Future<void> _moveFiles() async {
