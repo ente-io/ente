@@ -238,6 +238,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
 
   void onFinalFileLoad(int duration) {
     hasFinalFileLoaded = true;
+    isAtFirstOrLastFile = false;
     if (_progressAnimationController?.isAnimating == true) {
       _progressAnimationController!.stop();
     }
@@ -283,6 +284,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
   }
 
   void _onPageChange(FullScreenMemoryData inheritedData, int index) {
+    isAtFirstOrLastFile = false;
     unawaited(
       memoriesCacheService.markMemoryAsSeen(
         inheritedData.memories[index],
