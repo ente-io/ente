@@ -483,6 +483,7 @@ const Page: React.FC = () => {
                 selected.ownCount++;
             }
             selected.count++;
+            // @ts-expect-error Selection code needs type fixing
             selected[item.id] = true;
         });
         setSelected(selected);
@@ -1075,8 +1076,10 @@ const Page: React.FC = () => {
             <GalleryBarAndListHeader
                 {...{
                     user,
-                    activeCollection,
-                    activeCollectionID,
+                    // TODO: These are incorrect assertions, the types of the
+                    // component need to be updated.
+                    activeCollection: activeCollection!,
+                    activeCollectionID: activeCollectionID!,
                     activePerson,
                     setFileListHeader,
                     saveGroups,
@@ -1162,7 +1165,8 @@ const Page: React.FC = () => {
                     selectable={true}
                     selected={selected}
                     setSelected={setSelected}
-                    activeCollectionID={activeCollectionID}
+                    // TODO: Incorrect assertion, need to update the type
+                    activeCollectionID={activeCollectionID!}
                     activePersonID={activePerson?.id}
                     isInIncomingSharedCollection={activeCollectionSummary?.attributes.has(
                         "sharedIncoming",

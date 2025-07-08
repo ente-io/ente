@@ -202,7 +202,7 @@ const Page: React.FC = () => {
             // generated interactive key attributes to verify password.
             if (keyAttributes) {
                 if (!user.token && !user.encryptedToken) {
-                    // TODO(RE): Why? For now, add a dev mode circuit breaker.
+                    // TODO: Why? For now, add a dev mode circuit breaker.
                     if (isDevBuild) throw new Error("Unexpected case reached");
                     clearLocalStorage();
                     void router.replace("/");

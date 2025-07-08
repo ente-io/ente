@@ -30,6 +30,7 @@ import {
 } from "ente-base/components/utils/modal";
 import { useBaseContext } from "ente-base/context";
 import { basename, dirname, joinPath } from "ente-base/file-name";
+import type { PublicAlbumsCredentials } from "ente-base/http";
 import log from "ente-base/log";
 import type { CollectionMapping, Electron, ZipItem } from "ente-base/types/ipc";
 import { type UploadTypeSelectorIntent } from "ente-gallery/components/Upload";
@@ -68,13 +69,7 @@ import { redirectToCustomerPortal } from "ente-new/photos/services/user-details"
 import { usePhotosAppContext } from "ente-new/photos/types/context";
 import { firstNonEmpty } from "ente-utils/array";
 import { t } from "i18next";
-import React, {
-    useCallback,
-    useContext,
-    useEffect,
-    useRef,
-    useState,
-} from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import type {
     InProgressUpload,
     SegregatedFinishedUploads,
@@ -84,18 +79,24 @@ import type {
 } from "services/upload-manager";
 import { uploadManager } from "services/upload-manager";
 import watcher from "services/watch";
-import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
 import { UploadProgress } from "./UploadProgress";
 
 interface UploadProps {
     /**
-     * The currently logged in user, if any.
+     * The logged in user, if any.
      *
      * This is only expected to be present when we're running it the context of
      * the photos app, where there is a logged in user. When used by the public
      * albums app, this prop can be omitted.
      */
     user?: LocalUser;
+    /**
+     * The {@link PublicAlbumsCredentials} to use, if any.
+     *
+     * These are expected to be set if we are in the context of the public
+     * albums app, and should be undefined when we're in the photos app context.
+     */
+    publicAlbumsCredentials?: PublicAlbumsCredentials;
     isFirstUpload?: boolean;
     uploadTypeSelectorView: boolean;
     dragAndDropFiles: File[];
@@ -164,6 +165,7 @@ type UploadType = "files" | "folders" | "zips";
  */
 export const Upload: React.FC<UploadProps> = ({
     user,
+    publicAlbumsCredentials,
     isFirstUpload,
     dragAndDropFiles,
     onRemotePull,
@@ -177,9 +179,6 @@ export const Upload: React.FC<UploadProps> = ({
 }) => {
     const { showMiniDialog, onGenericError } = useBaseContext();
     const { showNotification, watchFolderView } = usePhotosAppContext();
-    const publicCollectionGalleryContext = useContext(
-        PublicCollectionGalleryContext,
-    );
 
     const [uploadProgressView, setUploadProgressView] = useState(false);
     const [uploadPhase, setUploadPhase] = useState<UploadPhase>("preparing");
@@ -378,7 +377,7 @@ export const Upload: React.FC<UploadProps> = ({
                 setUploadProgressView,
             },
             onUploadFile,
-            publicCollectionGalleryContext.credentials,
+            publicAlbumsCredentials,
         );
 
         if (uploadManager.isUploadRunning()) {
@@ -408,7 +407,7 @@ export const Upload: React.FC<UploadProps> = ({
                 setDesktopZipItems(zipItems);
             });
         }
-    }, [publicCollectionGalleryContext.credentials]);
+    }, [publicAlbumsCredentials]);
 
     // Handle selected files when user selects files for upload through the open
     // file / open folder selection dialog, or drag-and-drops them.
@@ -527,10 +526,10 @@ export const Upload: React.FC<UploadProps> = ({
         props.setLoading(false);
 
         (async () => {
-            if (publicCollectionGalleryContext.credentials) {
+            if (publicAlbumsCredentials) {
                 setUploaderName(
                     (await savedPublicCollectionUploaderName(
-                        publicCollectionGalleryContext.credentials.accessToken,
+                        publicAlbumsCredentials.accessToken,
                     )) ?? "",
                 );
                 showUploaderNameInput();
@@ -591,7 +590,13 @@ export const Upload: React.FC<UploadProps> = ({
                 onCancel: handleCollectionSelectorCancel,
             });
         })();
-    }, [webFiles, desktopFiles, desktopFilePaths, desktopZipItems]);
+    }, [
+        publicAlbumsCredentials,
+        webFiles,
+        desktopFiles,
+        desktopFilePaths,
+        desktopZipItems,
+    ]);
 
     const preCollectionCreationAction = () => {
         onCloseCollectionSelector?.();
@@ -832,7 +837,7 @@ export const Upload: React.FC<UploadProps> = ({
 
     const handlePublicUpload = (uploaderName: string) => {
         savePublicCollectionUploaderName(
-            publicCollectionGalleryContext.credentials!.accessToken,
+            publicAlbumsCredentials!.accessToken,
             uploaderName,
         );
 
@@ -868,6 +873,7 @@ export const Upload: React.FC<UploadProps> = ({
             <UploadTypeSelector
                 open={props.uploadTypeSelectorView}
                 onClose={props.closeUploadTypeSelector}
+                publicAlbumsCredentials={publicAlbumsCredentials}
                 intent={props.uploadTypeSelectorIntent}
                 pendingUploadType={
                     isInputPending ? selectedUploadType.current : undefined
@@ -1115,7 +1121,7 @@ type UploadTypeSelectorProps = ModalVisibilityProps & {
      * Called when the user selects one of the options.
      */
     onSelect: (type: UploadType) => void;
-};
+} & Pick<UploadProps, "publicAlbumsCredentials">;
 
 /**
  * Request the user to specify which type of file / folder / zip it is that they
@@ -1129,28 +1135,21 @@ type UploadTypeSelectorProps = ModalVisibilityProps & {
 const UploadTypeSelector: React.FC<UploadTypeSelectorProps> = ({
     open,
     onClose,
+    publicAlbumsCredentials,
     intent,
     pendingUploadType,
     onSelect,
 }) => {
-    const publicCollectionGalleryContext = useContext(
-        PublicCollectionGalleryContext,
-    );
-
     // Directly show the file selector for the public albums app on likely
     // mobile devices.
     const directlyShowUploadFiles = useIsTouchscreen();
 
     useEffect(() => {
-        if (
-            open &&
-            directlyShowUploadFiles &&
-            publicCollectionGalleryContext.credentials
-        ) {
+        if (open && directlyShowUploadFiles && publicAlbumsCredentials) {
             onSelect("files");
             onClose();
         }
-    }, [open]);
+    }, [open, publicAlbumsCredentials]);
 
     const handleClose: DialogProps["onClose"] = (_, reason) => {
         // Disable backdrop clicks and esc keypresses if a selection is pending

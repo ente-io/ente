@@ -235,7 +235,7 @@ class UIService {
     }
 }
 
-function convertInProgressUploadsToList(inProgressUploads) {
+function convertInProgressUploadsToList(inProgressUploads: InProgressUploads) {
     return [...inProgressUploads.entries()].map(
         ([localFileID, progress]) =>
             ({ localFileID, progress }) as InProgressUpload,
@@ -252,6 +252,7 @@ const groupByResult = (finishedUploads: FinishedUploads) => {
 };
 
 class UploadManager {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     private comlinkCryptoWorkers: ComlinkWorker<typeof CryptoWorker>[] =
         new Array(maxConcurrentUploads);
     private parsedMetadataJSONMap = new Map<string, ParsedMetadataJSON>();
@@ -297,6 +298,7 @@ class UploadManager {
     ) {
         this.itemsToBeUploaded = [];
         this.failedItems = [];
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         this.parsedMetadataJSONMap = parsedMetadataJSONMap ?? new Map();
         this.uploaderName = undefined;
         this.shouldUploadBeCancelled = false;
@@ -668,11 +670,11 @@ type UploadItemWithCollectionIDAndName = UploadAsset & {
 const makeUploadItemWithCollectionIDAndName = (
     f: UploadItemWithCollection,
 ): UploadItemWithCollectionIDAndName => ({
-    localID: f.localID!,
-    collectionID: f.collectionID!,
-    fileName: (f.isLivePhoto
+    localID: f.localID,
+    collectionID: f.collectionID,
+    fileName: f.isLivePhoto
         ? uploadItemFileName(f.livePhotoAssets!.image)
-        : uploadItemFileName(f.uploadItem!))!,
+        : uploadItemFileName(f.uploadItem!),
     isLivePhoto: f.isLivePhoto,
     uploadItem: f.uploadItem,
     pathPrefix: f.pathPrefix,
@@ -774,7 +776,9 @@ const logAboutMemoryPressureIfNeeded = () => {
     // is the method recommended by the Electron team (see the link about the V8
     // memory cage). The embedded Chromium supports it fine though, we just need
     // to goad TypeScript to accept the type.
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
     const heapSize = (performance as any).memory.totalJSHeapSize;
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
     const heapLimit = (performance as any).memory.jsHeapSizeLimit;
     if (heapSize / heapLimit > 0.7) {
         log.info(

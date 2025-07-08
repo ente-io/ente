@@ -1,3 +1,4 @@
+// TODO: Audit this file
 import type { SelectionContext } from "ente-new/photos/components/gallery";
 import type { GalleryBarMode } from "ente-new/photos/components/gallery/reducer";
 import type { SelectedState, SetSelectedState } from "utils/file";
@@ -10,14 +11,17 @@ export const handleSelectCreator =
         userID: number | undefined,
         activeCollectionID: number,
         activePersonID: string | undefined,
+        // @ts-expect-error Need to add types
         setRangeStart?,
     ) =>
     ({ id, ownerID }: { id: number; ownerID: number }, index?: number) =>
     (checked: boolean) => {
         if (typeof index != "undefined") {
             if (checked) {
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-call
                 setRangeStart(index);
             } else {
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-call
                 setRangeStart(undefined);
             }
         }
@@ -135,7 +139,7 @@ const createSelectedAndContext = (
             context:
                 mode == "people"
                     ? { mode, personID: activePersonID! }
-                    : { mode, collectionID: activeCollectionID! },
+                    : { mode, collectionID: activeCollectionID },
         };
     } else {
         // Both mode and context are defined.
@@ -148,7 +152,7 @@ const createSelectedAndContext = (
                 context:
                     mode == "people"
                         ? { mode, personID: activePersonID! }
-                        : { mode, collectionID: activeCollectionID! },
+                        : { mode, collectionID: activeCollectionID },
             };
         } else {
             if (selected.context?.mode == "people") {
@@ -173,7 +177,7 @@ const createSelectedAndContext = (
                         collectionID: 0,
                         context: {
                             mode: selected.context?.mode,
-                            collectionID: activeCollectionID!,
+                            collectionID: activeCollectionID,
                         },
                     };
                 }
@@ -185,7 +189,7 @@ const createSelectedAndContext = (
         ? undefined
         : mode == "people"
           ? { mode, personID: activePersonID! }
-          : { mode, collectionID: activeCollectionID! };
+          : { mode, collectionID: activeCollectionID };
 
     return { selected, newContext };
 };

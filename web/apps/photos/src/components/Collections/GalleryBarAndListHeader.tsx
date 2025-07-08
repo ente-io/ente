@@ -128,7 +128,7 @@ export const GalleryBarAndListHeader: React.FC<
         const group = saveGroups.find(
             (g) => g.collectionSummaryID === activeCollectionID,
         );
-        return group && !isSaveComplete(group) && !isSaveCancelled(group);
+        return !!group && !isSaveComplete(group) && !isSaveCancelled(group);
     }, [saveGroups, activeCollectionID]);
 
     useEffect(() => {
@@ -145,9 +145,9 @@ export const GalleryBarAndListHeader: React.FC<
                             onRemotePull,
                             onAddSaveGroup,
                         }}
-                        collectionSummary={toShowCollectionSummaries.get(
-                            activeCollectionID,
-                        )}
+                        collectionSummary={
+                            toShowCollectionSummaries.get(activeCollectionID!)!
+                        }
                         onCollectionShare={showCollectionShare}
                         onCollectionCast={showCollectionCast}
                     />
@@ -170,7 +170,7 @@ export const GalleryBarAndListHeader: React.FC<
         activePerson,
         showCollectionShare,
         showCollectionCast,
-        // TODO-Cluster
+        // TODO: Cluster
         // This causes a loop since it is an array dep
         // people,
     ]);
@@ -211,9 +211,9 @@ export const GalleryBarAndListHeader: React.FC<
             />
             <CollectionShare
                 {...collectionShareVisibilityProps}
-                collectionSummary={toShowCollectionSummaries.get(
-                    activeCollectionID,
-                )}
+                collectionSummary={
+                    toShowCollectionSummaries.get(activeCollectionID!)!
+                }
                 collection={activeCollection}
                 {...{
                     user,

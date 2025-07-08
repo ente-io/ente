@@ -1,5 +1,4 @@
 // TODO: Audit this file
-/* eslint-disable @typescript-eslint/restrict-plus-operands */
 import AlbumOutlinedIcon from "@mui/icons-material/AlbumOutlined";
 import FavoriteRoundedIcon from "@mui/icons-material/FavoriteRounded";
 import PlayCircleOutlineOutlinedIcon from "@mui/icons-material/PlayCircleOutlineOutlined";
@@ -30,10 +29,16 @@ import { TileBottomTextOverlay } from "ente-new/photos/components/Tiles";
 import { PseudoCollectionID } from "ente-new/photos/services/collection-summary";
 import { t } from "i18next";
 import memoize from "memoize-one";
-import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+    useDeferredValue,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from "react";
 import {
-    VariableSizeList as List,
     type ListChildComponentProps,
+    VariableSizeList,
     areEqual,
 } from "react-window";
 import { type SelectedState, shouldShowAvatar } from "utils/file";
@@ -41,12 +46,8 @@ import {
     handleSelectCreator,
     handleSelectCreatorMulti,
 } from "utils/photoFrame";
-import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
 
-export const DATE_CONTAINER_HEIGHT = 48;
 export const SPACE_BTW_DATES = 44;
-
-const SPACE_BTW_DATES_TO_IMAGE_CONTAINER_WIDTH_RATIO = 0.244;
 
 /**
  * A component with an explicit height suitable for being plugged in as the
@@ -71,7 +72,7 @@ interface TimeStampListItem {
     tag?: "date" | "file";
     items?: FileListAnnotatedFile[];
     itemStartIndex?: number;
-    date?: string;
+    date?: string | null;
     dates?: { date: string; span: number }[];
     groups?: number[];
     item?: any;
@@ -210,14 +211,12 @@ export const FileList: React.FC<FileListProps> = ({
     emailByUserID,
     onItemClick,
 }) => {
-    const publicCollectionGalleryContext = useContext(
-        PublicCollectionGalleryContext,
+    const [_timeStampList, setTimeStampList] = useState(
+        new Array<TimeStampListItem>(),
     );
+    const timeStampList = useDeferredValue(_timeStampList);
 
-    const [timeStampList, setTimeStampList] = useState<TimeStampListItem[]>([]);
-    const refreshInProgress = useRef(false);
-    const shouldRefresh = useRef(false);
-    const listRef = useRef(null);
+    const listRef = useRef<VariableSizeList | null>(null);
 
     // Timeline date strings for which all photos have been selected.
     //
@@ -225,8 +224,8 @@ export const FileList: React.FC<FileListProps> = ({
     const [checkedTimelineDateStrings, setCheckedTimelineDateStrings] =
         useState(new Set());
 
-    const [rangeStart, setRangeStart] = useState(null);
-    const [currentHover, setCurrentHover] = useState(null);
+    const [rangeStart, setRangeStart] = useState<number | null>(null);
+    const [currentHover, setCurrentHover] = useState<number | null>(null);
     const [isShiftKeyPressed, setIsShiftKeyPressed] = useState(false);
 
     const fittableColumns = getFractionFittableColumns(width);
@@ -237,65 +236,73 @@ export const FileList: React.FC<FileListProps> = ({
         columns = MIN_COLUMNS;
         skipMerge = true;
     }
+
     const shrinkRatio = getShrinkRatio(width, columns);
     const listItemHeight =
         IMAGE_CONTAINER_MAX_HEIGHT * shrinkRatio + GAP_BTW_TILES;
 
-    const refreshList = () => {
-        listRef.current?.resetAfterIndex(0);
-    };
-
     useEffect(() => {
-        const main = () => {
-            if (refreshInProgress.current) {
-                shouldRefresh.current = true;
-                return;
-            }
-            refreshInProgress.current = true;
-            let timeStampList: TimeStampListItem[] = [];
+        // Since width and height are dependencies, there might be too many
+        // updates to the list during a resize. The list computation too, while
+        // fast, is non-trivial.
+        //
+        // To avoid these issues, the we use `useDeferredValue`: if it gets
+        // another update when processing one, React will restart the background
+        // rerender from scratch.
 
-            if (header) {
-                timeStampList.push(asFullSpanListItem(header));
-            }
-            if (disableGrouping) {
-                noGrouping(timeStampList);
-            } else {
-                groupByTime(timeStampList);
-            }
+        let timeStampList: TimeStampListItem[] = [];
 
-            if (!skipMerge) {
-                timeStampList = mergeTimeStampList(timeStampList, columns);
-            }
-            if (timeStampList.length === 1) {
-                timeStampList.push(getEmptyListItem());
-            }
-            const footerHeight = footer?.height ?? 0;
-            timeStampList.push(getVacuumItem(timeStampList, footerHeight));
-            if (footer) {
-                timeStampList.push(asFullSpanListItem(footer));
-            }
+        if (header) {
+            timeStampList.push(asFullSpanListItem(header));
+        }
 
-            setTimeStampList(timeStampList);
-            refreshInProgress.current = false;
-            if (shouldRefresh.current) {
-                shouldRefresh.current = false;
-                setTimeout(main, 0);
-            }
-        };
-        main();
+        if (disableGrouping) {
+            noGrouping(timeStampList);
+        } else {
+            groupByTime(timeStampList);
+        }
+
+        if (!skipMerge) {
+            timeStampList = mergeTimeStampList(timeStampList, columns);
+        }
+
+        if (timeStampList.length == 1) {
+            timeStampList.push({
+                item: (
+                    <NoFilesContainer span={columns}>
+                        <Typography sx={{ color: "text.faint" }}>
+                            {t("nothing_here")}
+                        </Typography>
+                    </NoFilesContainer>
+                ),
+                id: "empty-list-banner",
+                height: height - 48,
+            });
+        }
+
+        const footerHeight = footer?.height ?? 0;
+        timeStampList.push(getVacuumItem(timeStampList, footerHeight));
+        if (footer) {
+            timeStampList.push(asFullSpanListItem(footer));
+        }
+
+        setTimeStampList(timeStampList);
     }, [
         width,
         height,
-        annotatedFiles,
         header,
         footer,
+        annotatedFiles,
         disableGrouping,
-        publicCollectionGalleryContext.credentials,
+        columns,
     ]);
 
     useEffect(() => {
-        refreshList();
+        // Refresh list.
+        listRef.current?.resetAfterIndex(0);
     }, [timeStampList]);
+
+    // TODO: Too many non-null assertions
 
     const groupByTime = (timeStampList: TimeStampListItem[]) => {
         let listItemIndex = 0;
@@ -320,7 +327,7 @@ export const FileList: React.FC<FileListProps> = ({
                 });
                 listItemIndex = 1;
             } else if (listItemIndex < columns) {
-                timeStampList[timeStampList.length - 1].items.push(item);
+                timeStampList[timeStampList.length - 1]!.items!.push(item);
                 listItemIndex++;
             } else {
                 listItemIndex = 1;
@@ -337,7 +344,7 @@ export const FileList: React.FC<FileListProps> = ({
         let listItemIndex = columns;
         annotatedFiles.forEach((item, index) => {
             if (listItemIndex < columns) {
-                timeStampList[timeStampList.length - 1].items.push(item);
+                timeStampList[timeStampList.length - 1]!.items!.push(item);
                 listItemIndex++;
             } else {
                 listItemIndex = 1;
@@ -350,21 +357,10 @@ export const FileList: React.FC<FileListProps> = ({
         });
     };
 
-    const getEmptyListItem = () => {
-        return {
-            item: (
-                <NothingContainer span={columns}>
-                    <Typography sx={{ color: "text.faint" }}>
-                        {t("nothing_here")}
-                    </Typography>
-                </NothingContainer>
-            ),
-            id: "empty-list-banner",
-            height: height - 48,
-        };
-    };
-
-    const getVacuumItem = (timeStampList, footerHeight: number) => {
+    const getVacuumItem = (
+        timeStampList: TimeStampListItem[],
+        footerHeight: number,
+    ) => {
         const fileListHeight = (() => {
             let sum = 0;
             const getCurrentItemSize = getItemSize(timeStampList);
@@ -393,30 +389,31 @@ export const FileList: React.FC<FileListProps> = ({
         let index = 0;
         let newIndex = 0;
         while (index < items.length) {
-            const currItem = items[index];
+            const currItem = items[index]!;
             // If the current item is of type time, then it is not part of an ongoing date.
             // So, there is a possibility of merge.
             if (currItem.tag == "date") {
                 // If new list pointer is not at the end of list then
                 // we can add more items to the same list.
                 if (newList[newIndex]) {
+                    const SPACE_BTW_DATES_TO_IMAGE_CONTAINER_WIDTH_RATIO = 0.244;
                     // Check if items can be added to same list
                     if (
-                        newList[newIndex + 1].items.length +
-                            items[index + 1].items.length +
+                        newList[newIndex + 1]!.items!.length +
+                            items[index + 1]!.items!.length +
                             Math.ceil(
-                                newList[newIndex].dates.length *
+                                newList[newIndex]!.dates!.length *
                                     SPACE_BTW_DATES_TO_IMAGE_CONTAINER_WIDTH_RATIO,
                             ) <=
                         columns
                     ) {
-                        newList[newIndex].dates.push({
-                            date: currItem.date,
-                            span: items[index + 1].items.length,
+                        newList[newIndex]!.dates!.push({
+                            date: currItem.date!,
+                            span: items[index + 1]!.items!.length,
                         });
-                        newList[newIndex + 1].items = [
-                            ...newList[newIndex + 1].items,
-                            ...items[index + 1].items,
+                        newList[newIndex + 1]!.items = [
+                            ...newList[newIndex + 1]!.items!,
+                            ...items[index + 1]!.items!,
                         ];
                         index += 2;
                     } else {
@@ -432,12 +429,12 @@ export const FileList: React.FC<FileListProps> = ({
                         date: null,
                         dates: [
                             {
-                                date: currItem.date,
-                                span: items[index + 1].items.length,
+                                date: currItem.date!,
+                                span: items[index + 1]!.items!.length,
                             },
                         ],
                     });
-                    newList.push(items[index + 1]);
+                    newList.push(items[index + 1]!);
                     index += 2;
                 }
             } else {
@@ -449,11 +446,11 @@ export const FileList: React.FC<FileListProps> = ({
             }
         }
         for (let i = 0; i < newList.length; i++) {
-            const currItem = newList[i];
-            const nextItem = newList[i + 1];
+            const currItem = newList[i]!;
+            const nextItem = newList[i + 1]!;
             if (currItem.tag == "date") {
-                if (currItem.dates.length > 1) {
-                    currItem.groups = currItem.dates.map((item) => item.span);
+                if (currItem.dates!.length > 1) {
+                    currItem.groups = currItem.dates!.map((item) => item.span);
                     nextItem.groups = currItem.groups;
                 }
             }
@@ -461,25 +458,26 @@ export const FileList: React.FC<FileListProps> = ({
         return newList;
     };
 
-    const getItemSize = (timeStampList) => (index) => {
-        switch (timeStampList[index].tag) {
-            case "date":
-                return DATE_CONTAINER_HEIGHT;
-            case "file":
-                return listItemHeight;
-            default:
-                return timeStampList[index].height;
-        }
-    };
+    const getItemSize =
+        (timeStampList: TimeStampListItem[]) => (index: number) => {
+            switch (timeStampList[index]!.tag) {
+                case "date":
+                    return dateContainerHeight;
+                case "file":
+                    return listItemHeight;
+                default:
+                    return timeStampList[index]!.height!;
+            }
+        };
 
-    const generateKey = (index) => {
-        switch (timeStampList[index].tag) {
+    const generateKey = (index: number) => {
+        switch (timeStampList[index]!.tag) {
             case "file":
-                return `${timeStampList[index].items[0].file.id}-${
-                    timeStampList[index].items.slice(-1)[0].file.id
+                return `${timeStampList[index]!.items![0]!.file.id}-${
+                    timeStampList[index]!.items!.slice(-1)[0]!.file.id
                 }`;
             default:
-                return `${timeStampList[index].id}-${index}`;
+                return `${timeStampList[index]!.id}-${index}`;
         }
     };
 
@@ -563,23 +561,23 @@ export const FileList: React.FC<FileListProps> = ({
     const handleRangeSelect = (index: number) => () => {
         if (typeof rangeStart != "undefined" && rangeStart !== index) {
             const direction =
-                (index - rangeStart) / Math.abs(index - rangeStart);
+                (index - rangeStart!) / Math.abs(index - rangeStart!);
             let checked = true;
             for (
-                let i = rangeStart;
+                let i = rangeStart!;
                 (index - i) * direction >= 0;
                 i += direction
             ) {
-                checked = checked && !!selected[annotatedFiles[i].file.id];
+                checked = checked && !!selected[annotatedFiles[i]!.file.id];
             }
             for (
-                let i = rangeStart;
+                let i = rangeStart!;
                 (index - i) * direction > 0;
                 i += direction
             ) {
-                handleSelect(annotatedFiles[i].file)(!checked);
+                handleSelect(annotatedFiles[i]!.file)(!checked);
             }
-            handleSelect(annotatedFiles[index].file, index)(!checked);
+            handleSelect(annotatedFiles[index]!.file, index)(!checked);
         }
     };
 
@@ -621,7 +619,7 @@ export const FileList: React.FC<FileListProps> = ({
             {...{ user, emailByUserID }}
             file={file}
             onClick={() => onItemClick(index)}
-            selectable={selectable}
+            selectable={selectable!}
             onSelect={handleSelect(file, index)}
             selected={
                 (!mode
@@ -637,8 +635,8 @@ export const FileList: React.FC<FileListProps> = ({
             onRangeSelect={handleRangeSelect(index)}
             isRangeSelectActive={isShiftKeyPressed && selected.count > 0}
             isInsSelectRange={
-                (index >= rangeStart && index <= currentHover) ||
-                (index >= currentHover && index <= rangeStart)
+                (index >= rangeStart! && index <= currentHover!) ||
+                (index >= currentHover! && index <= rangeStart!)
             }
             activeCollectionID={activeCollectionID}
             showPlaceholder={isScrolling}
@@ -648,7 +646,7 @@ export const FileList: React.FC<FileListProps> = ({
 
     const renderListItem = (
         listItem: TimeStampListItem,
-        isScrolling: boolean,
+        isScrolling: boolean | undefined,
     ) => {
         const haveSelection = (selected.count ?? 0) > 0;
         switch (listItem.tag) {
@@ -681,12 +679,12 @@ export const FileList: React.FC<FileListProps> = ({
                         {haveSelection && (
                             <Checkbox
                                 key={listItem.date}
-                                name={listItem.date}
+                                name={listItem.date!}
                                 checked={checkedTimelineDateStrings.has(
                                     listItem.date,
                                 )}
                                 onChange={() =>
-                                    onChangeSelectAllCheckBox(listItem.date)
+                                    onChangeSelectAllCheckBox(listItem.date!)
                                 }
                                 size="small"
                                 sx={{ pl: 0 }}
@@ -696,22 +694,22 @@ export const FileList: React.FC<FileListProps> = ({
                     </DateContainer>
                 );
             case "file": {
-                const ret = listItem.items.map((item, idx) =>
+                const ret = listItem.items!.map((item, idx) =>
                     getThumbnail(
                         item,
-                        listItem.itemStartIndex + idx,
-                        isScrolling,
+                        listItem.itemStartIndex! + idx,
+                        !!isScrolling,
                     ),
                 );
                 if (listItem.groups) {
                     let sum = 0;
                     for (let i = 0; i < listItem.groups.length - 1; i++) {
-                        sum = sum + listItem.groups[i];
+                        sum = sum + listItem.groups[i]!;
                         ret.splice(
                             sum,
                             0,
                             <div
-                                key={`${listItem.items[0].file.id}-gap-${i}`}
+                                key={`${listItem.items![0]!.file.id}-gap-${i}`}
                             />,
                         );
                         sum += 1;
@@ -720,6 +718,8 @@ export const FileList: React.FC<FileListProps> = ({
                 return ret;
             }
             default:
+                // TODO:
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-return
                 return listItem.item;
         }
     };
@@ -752,7 +752,7 @@ export const FileList: React.FC<FileListProps> = ({
     }
 
     return (
-        <List
+        <VariableSizeList
             key={key}
             itemData={itemData}
             ref={listRef}
@@ -765,7 +765,7 @@ export const FileList: React.FC<FileListProps> = ({
             useIsScrolling
         >
             {PhotoListRow}
-        </List>
+        </VariableSizeList>
     );
 };
 
@@ -835,34 +835,47 @@ const ListContainer = styled(Box, {
     }
 `;
 
+/**
+ * An grid item, spanning {@link span} columns.
+ */
 const ListItemContainer = styled("div")<{ span: number }>`
-    grid-column: span ${(props) => props.span};
+    grid-column: span ${({ span }) => span};
     display: flex;
     align-items: center;
 `;
 
+/**
+ * A grid items that spans all columns.
+ */
 const FullSpanListItemContainer = styled("div")`
     grid-column: 1 / -1;
     display: flex;
     align-items: center;
 `;
 
-const asFullSpanListItem = ({ item, ...rest }: TimeStampListItem) => ({
+/**
+ * Convert a {@link FileListHeaderOrFooter} into a {@link TimeStampListItem}
+ * that spans all columns.
+ */
+const asFullSpanListItem = ({ item, ...rest }: FileListHeaderOrFooter) => ({
     ...rest,
     item: <FullSpanListItemContainer>{item}</FullSpanListItemContainer>,
 });
 
-const DateContainer = styled(ListItemContainer)(
-    ({ theme }) => `
+/**
+ * The fixed height (in px) of {@link DateContainer}.
+ */
+const dateContainerHeight = 48;
+
+const DateContainer = styled(ListItemContainer)`
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    height: ${DATE_CONTAINER_HEIGHT}px;
-    color: ${theme.vars.palette.text.muted};
-`,
-);
+    height: ${dateContainerHeight}px;
+    color: "text.muted";
+`;
 
-const NothingContainer = styled(ListItemContainer)`
+const NoFilesContainer = styled(ListItemContainer)`
     text-align: center;
     justify-content: center;
 `;
@@ -903,10 +916,10 @@ const PhotoListRow = React.memo(
                     gridTemplateColumns={getTemplateColumns(
                         columns,
                         shrinkRatio,
-                        timeStampList[index].groups,
+                        timeStampList[index]!.groups,
                     )}
                 >
-                    {renderListItem(timeStampList[index], isScrolling)}
+                    {renderListItem(timeStampList[index]!, isScrolling)}
                 </ListContainer>
             </ListItem>
         );
@@ -927,7 +940,7 @@ type FileThumbnailProps = {
     isInsSelectRange: boolean;
     activeCollectionID: number;
     showPlaceholder: boolean;
-    isFav: boolean;
+    isFav: boolean | undefined;
 } & Pick<FileListProps, "user" | "emailByUserID">;
 
 const FileThumbnail: React.FC<FileThumbnailProps> = ({
