@@ -50,7 +50,12 @@ export const CustomHeadAlbums: React.FC = () => (
             content="Safely store and share your best moments"
         />
         <meta
-            name="og:image"
+            property="og:image"
+            content="https://albums.ente.io/images/preview.jpg"
+        />
+        {/* Twitter wants its own thing. */}
+        <meta
+            name="twitter:image"
             content="https://albums.ente.io/images/preview.jpg"
         />
         <meta name="viewport" content="width=device-width, initial-scale=1" />

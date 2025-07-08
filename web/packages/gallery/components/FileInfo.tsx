@@ -451,8 +451,8 @@ const FileInfoSidebar = styled(
         <SidebarDrawer
             {...props}
             anchor="right"
-            // See: [Note: Overzealous Chrome? Complicated ARIA?], but this time
-            // with a different workaround.
+            // See: [Note: Workarounds for unactionable ARIA warnings], but this
+            // time with a different workaround.
             //
             // https://github.com/mui/material-ui/issues/43106#issuecomment-2514637251
             disableRestoreFocus={true}

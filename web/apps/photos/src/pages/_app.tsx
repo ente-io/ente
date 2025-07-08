@@ -72,7 +72,8 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
         void isLocalStorageAndIndexedDBMismatch().then((mismatch) => {
             if (mismatch) {
                 log.error("Logging out (IndexedDB and local storage mismatch)");
-                return logout();
+                logout();
+                return;
             } else {
                 return runMigrations();
             }
@@ -88,8 +89,11 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
         // the user is logged in.
 
         const handleOpenEnteURL = (url: string) => {
-            if (url.startsWith("ente://app")) router.push(url);
-            else log.info(`Ignoring unhandled open request for URL ${url}`);
+            if (url.startsWith("ente://app")) {
+                void router.push(url);
+            } else {
+                log.info(`Ignoring unhandled open request for URL ${url}`);
+            }
         };
 
         const showUpdateDialog = (update: AppUpdate) => {
@@ -118,7 +122,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
             electron.onOpenEnteURL(undefined);
             electron.onAppUpdateAvailable(undefined);
         };
-    }, []);
+    }, [router, showMiniDialog, showNotification]);
 
     useEffect(() => {
         if (isDesktop) void resumeExportsIfNeeded();
@@ -130,9 +134,14 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
         if (needsFamilyRedirect && savedPartialLocalUser()?.token)
             redirectToFamilyPortal();
 
-        router.events.on("routeChangeStart", (url) => {
+        // Creating this inline, we need this on debug only and temporarily. Can
+        // remove the debug print itself after a while.
+        interface NROptions {
+            shallow: boolean;
+        }
+        router.events.on("routeChangeStart", (url: string, o: NROptions) => {
             if (process.env.NEXT_PUBLIC_ENTE_TRACE_RT) {
-                log.debug(() => ["route", url]);
+                log.debug(() => [o.shallow ? "route-shallow" : "route", url]);
             }
 
             if (needsFamilyRedirect && savedPartialLocalUser()?.token) {
@@ -143,6 +152,8 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
                 throw "Aborting route change, redirection in process....";
             }
         });
+        // TODO:
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const baseContext = useMemo(

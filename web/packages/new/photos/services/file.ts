@@ -27,13 +27,13 @@ import { savedCollectionFiles } from "./photos-fdb";
 const requestBatchSize = 1000;
 
 /**
- * Perform an operation on batches, concurrently.
+ * Perform an operation on batches, serially.
  *
  * The given {@link items} are split into batches, each of
  * {@link requestBatchSize}. The provided operation is called on all these
- * batches, in parallel, by using `Promise.all`. When all the operations are
- * complete, the function returns with an array of results (one from each batch
- * promise resolution).
+ * batches, one after the other. When all the operations are complete, the
+ * function returns with an array of results (one from each batch promise
+ * resolution).
  *
  * @param items The arbitrary items to break into {@link requestBatchSize}
  * batches.
@@ -41,15 +41,16 @@ const requestBatchSize = 1000;
  * @param op The operation to perform on each batch.
  *
  * @returns A promise for an array of results, one from each batch operation. If
- * any operations fails, then the promise rejects with the first failure reason.
- *
- * For more details see the documentation for the `Promise.all` primitive which
- * this function uses.
+ * any operations fails, then the promise rejects with its failure reason.
  */
-export const batched = <T, U>(
+export const batched = async <T, U>(
     items: T[],
     op: (batchItems: T[]) => Promise<U>,
-): Promise<U[]> => Promise.all(batch(items, requestBatchSize).map(op));
+): Promise<U[]> => {
+    const result: U[] = [];
+    for (const b of batch(items, requestBatchSize)) result.push(await op(b));
+    return result;
+};
 
 /**
  * Return all normal (non-hidden) files present in our local database.

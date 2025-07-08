@@ -19,8 +19,8 @@ export type CollectionSummaryAttribute =
     | "sharedIncomingCollaborator"
     | "sharedOnlyViaLink"
     | "system"
-    | "hideFromCollectionBar"
     | "archived"
+    | "hideFromCollectionBar"
     | "pinned";
 
 /**

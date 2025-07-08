@@ -2,7 +2,6 @@ import { useBaseContext } from "ente-base/context";
 import {
     isSaveComplete,
     isSaveCompleteWithErrors,
-    isSaveStarted,
     type SaveGroup,
 } from "ente-gallery/components/utils/save-groups";
 import { Notification } from "ente-new/photos/components/Notification";
@@ -23,24 +22,22 @@ interface DownloadStatusNotificationsProps {
      */
     onRemoveSaveGroup: (saveGroup: SaveGroup) => void;
     /**
-     * Called when the hidden section should be shown.
+     * Called when the collection summary with the given {@link collectionID}
+     * should be shown. If {@link isHiddenCollectionSummary} is set, then any
+     * reauthentication as appropriate before switching to the hidden section of
+     * the app is performed first.
      *
-     * This triggers the display of the dialog to authenticate the user, and the
-     * returned promise when (and only if) the user successfully reauthenticates.
-     *
-     * Since the hidden section is only relevant in the context of the photos
-     * app where there is a logged in user, this callback can be omitted in the
-     * context of the public albums app.
-     */
-    onShowHiddenSection?: () => Promise<void>;
-    /**
-     * Called when the collection with the given {@link collectionID} should be
-     * shown.
+     * and hidden attribute should be shown.
      *
      * This is only relevant in the context of the photos app, and can be
-     * omitted by the public albums app.
+     * omitted by the public albums app. See the documentation of
+     * {@link SaveGroup}'s {@link collectionSummaryID} property for why we don't
+     * store the collection summary itself.
      */
-    onShowCollection?: (collectionID: number) => void;
+    onShowCollectionSummary?: (
+        collectionSummaryID: number | undefined,
+        isHiddenCollectionSummary: boolean | undefined,
+    ) => void;
 }
 
 /**
@@ -49,12 +46,7 @@ interface DownloadStatusNotificationsProps {
  */
 export const DownloadStatusNotifications: React.FC<
     DownloadStatusNotificationsProps
-> = ({
-    saveGroups,
-    onRemoveSaveGroup,
-    onShowHiddenSection,
-    onShowCollection,
-}) => {
+> = ({ saveGroups, onRemoveSaveGroup, onShowCollectionSummary }) => {
     const { showMiniDialog } = useBaseContext();
 
     const confirmCancelDownload = (group: SaveGroup) =>
@@ -65,7 +57,7 @@ export const DownloadStatusNotifications: React.FC<
                 text: t("yes_stop_downloads"),
                 color: "critical",
                 action: () => {
-                    group?.canceller.abort();
+                    group.canceller.abort();
                     onRemoveSaveGroup(group);
                 },
             },
@@ -82,61 +74,43 @@ export const DownloadStatusNotifications: React.FC<
 
     const createOnClick = (group: SaveGroup) => () => {
         const electron = globalThis.electron;
-        if (electron) {
-            electron.openDirectory(group.downloadDirPath);
-        } else if (onShowCollection) {
-            if (group.isHiddenCollectionSummary) {
-                void onShowHiddenSection().then(() => {
-                    onShowCollection(group.collectionSummaryID);
-                });
-            } else {
-                onShowCollection(group.collectionSummaryID);
-            }
+        if (electron && group.downloadDirPath) {
+            void electron.openDirectory(group.downloadDirPath);
+        } else if (onShowCollectionSummary) {
+            onShowCollectionSummary(
+                group.collectionSummaryID,
+                group.isHiddenCollectionSummary,
+            );
         } else {
             return undefined;
         }
     };
 
-    if (!saveGroups) {
-        return <></>;
-    }
-
-    const notifications: React.ReactNode[] = [];
-
-    let visibleIndex = 0;
-    for (const group of saveGroups) {
-        // Skip attempted downloads of empty albums, which had no effect.
-        if (!isSaveStarted(group)) continue;
-
-        const index = visibleIndex++;
-        notifications.push(
-            <Notification
-                key={group.id}
-                horizontal="left"
-                sx={{ "&&": { bottom: `${index * 80 + 20}px` } }}
-                open={isSaveStarted(group)}
-                onClose={createOnClose(group)}
-                keepOpenOnClick
-                attributes={{
-                    color: isSaveCompleteWithErrors(group)
-                        ? "critical"
-                        : "secondary",
-                    title: isSaveCompleteWithErrors(group)
-                        ? t("download_failed")
-                        : isSaveComplete(group)
-                          ? t("download_complete")
-                          : t("downloading_album", { name: group.title }),
-                    caption: isSaveComplete(group)
-                        ? group.title
-                        : t("download_progress", {
-                              count: group.success + group.failed,
-                              total: group.total,
-                          }),
-                    onClick: createOnClick(group),
-                }}
-            />,
-        );
-    }
-
-    return notifications;
+    return saveGroups.map((group, index) => (
+        <Notification
+            key={group.id}
+            horizontal="left"
+            sx={{ "&&": { bottom: `${index * 80 + 20}px` } }}
+            open={true}
+            onClose={createOnClose(group)}
+            keepOpenOnClick
+            attributes={{
+                color: isSaveCompleteWithErrors(group)
+                    ? "critical"
+                    : "secondary",
+                title: isSaveCompleteWithErrors(group)
+                    ? t("download_failed")
+                    : isSaveComplete(group)
+                      ? t("download_complete")
+                      : t("downloading_album", { name: group.title }),
+                caption: isSaveComplete(group)
+                    ? group.title
+                    : t("download_progress", {
+                          count: group.success + group.failed,
+                          total: group.total,
+                      }),
+                onClick: createOnClick(group),
+            }}
+        />
+    ));
 };

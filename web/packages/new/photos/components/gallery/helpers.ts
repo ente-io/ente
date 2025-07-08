@@ -46,17 +46,26 @@ export const validateKey = async () => {
 
 /**
  * Return the {@link Collection} (from amongst {@link collections}) with the
- * given {@link collectionSummaryID}. As a special case, if the given
- * {@link collectionSummaryID} is the ID of the placeholder uncategorized
- * collection, create a new uncategorized collection and then return it.
+ * given {@link collectionSummaryID}.
+ *
+ * As a special case, if the given {@link collectionSummaryID} is the ID of the
+ * placeholder uncategorized collection, create a new uncategorized collection
+ * and then return it.
+ *
+ * This is used in the context of the collection summary, so one of the two
+ * cases must be true.
  */
 export const findCollectionCreatingUncategorizedIfNeeded = async (
     collections: Collection[],
     collectionSummaryID: number,
-): Promise<Collection | undefined> =>
+): Promise<Collection> =>
     collectionSummaryID == PseudoCollectionID.uncategorizedPlaceholder
         ? createUncategorizedCollection()
-        : collections.find(({ id }) => id == collectionSummaryID);
+        : // Null assert since the collection selector should only
+          // show "selectable" normalCollectionSummaries.
+          //
+          // See: [Note: Picking from selectable collection summaries].
+          collections.find(({ id }) => id == collectionSummaryID)!;
 
 /**
  * Perform a "collection operation" on the selected file(s).

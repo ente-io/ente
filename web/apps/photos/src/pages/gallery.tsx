@@ -1,11 +1,15 @@
+// TODO: Audit this file (the code here is mostly fine, but needs revisiting
+// the file it depends on have been audited and their interfaces fixed).
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable @typescript-eslint/no-floating-promises */
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined";
 import MenuIcon from "@mui/icons-material/Menu";
-import { IconButton, Stack, Typography } from "@mui/material";
+import { IconButton, Link, Stack, Typography } from "@mui/material";
 import { AuthenticateUser } from "components/AuthenticateUser";
 import { GalleryBarAndListHeader } from "components/Collections/GalleryBarAndListHeader";
 import { DownloadStatusNotifications } from "components/DownloadStatusNotifications";
-import { type TimeStampListItem } from "components/FileList";
+import type { FileListHeaderOrFooter } from "components/FileList";
 import { FileListWithViewer } from "components/FileListWithViewer";
 import { FixCreationTime } from "components/FixCreationTime";
 import { Sidebar } from "components/Sidebar";
@@ -121,8 +125,11 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { FileWithPath } from "react-dropzone";
 import { Trans } from "react-i18next";
 import { uploadManager } from "services/upload-manager";
-import type { SelectedState } from "types/gallery";
-import { getSelectedFiles, performFileOp } from "utils/file";
+import {
+    getSelectedFiles,
+    performFileOp,
+    type SelectedState,
+} from "utils/file";
 
 /**
  * The default view for logged in users.
@@ -177,22 +184,30 @@ const Page: React.FC = () => {
     const [fixCreationTimeFiles, setFixCreationTimeFiles] = useState<
         EnteFile[]
     >([]);
+    const [fileListHeader, setFileListHeader] = useState<
+        FileListHeaderOrFooter | undefined
+    >(undefined);
+
+    const [openCollectionSelector, setOpenCollectionSelector] = useState(false);
+    const [collectionSelectorAttributes, setCollectionSelectorAttributes] =
+        useState<CollectionSelectorAttributes | undefined>();
 
     const userDetails = useUserDetailsSnapshot();
     const peopleState = usePeopleStateSnapshot();
-
-    // The (non-sticky) header shown at the top of the gallery items.
-    const [photoListHeader, setPhotoListHeader] =
-        useState<TimeStampListItem>(null);
 
     const { saveGroups, onAddSaveGroup, onRemoveSaveGroup } = useSaveGroups();
     const [, setPostCreateAlbumOp] = useState<CollectionOp | undefined>(
         undefined,
     );
 
-    const [openCollectionSelector, setOpenCollectionSelector] = useState(false);
-    const [collectionSelectorAttributes, setCollectionSelectorAttributes] =
-        useState<CollectionSelectorAttributes | undefined>();
+    /**
+     * The last time (epoch milliseconds) when we prompted the user for their
+     * password when opening the hidden section.
+     *
+     * This is used to implement a grace window, where we don't reprompt them
+     * for their password for the same purpose again and again.
+     */
+    const lastAuthenticationForHiddenTimestamp = useRef<number>(0);
 
     const { show: showSidebar, props: sidebarVisibilityProps } =
         useModalVisibility();
@@ -396,15 +411,14 @@ const Page: React.FC = () => {
 
     useEffect(() => {
         if (isInSearchMode && state.searchSuggestion) {
-            setPhotoListHeader({
-                height: 104,
+            setFileListHeader({
                 item: (
                     <SearchResultsHeader
                         searchSuggestion={state.searchSuggestion}
                         fileCount={state.searchResults?.length ?? 0}
                     />
                 ),
-                tag: "header",
+                height: 104,
             });
         }
     }, [isInSearchMode, state.searchSuggestion, state.searchResults]);
@@ -439,7 +453,7 @@ const Page: React.FC = () => {
             // - We haven't fetched the user yet;
             !user ||
             // - There is nothing to select;
-            !filteredFiles?.length ||
+            !filteredFiles.length ||
             // - Any of the modals are open.
             uploadTypeSelectorView ||
             openCollectionSelector ||
@@ -473,13 +487,14 @@ const Page: React.FC = () => {
                 selected.ownCount++;
             }
             selected.count++;
+            // @ts-expect-error Selection code needs type fixing
             selected[item.id] = true;
         });
         setSelected(selected);
     };
 
     const clearSelection = () => {
-        if (!selected?.count) {
+        if (!selected.count) {
             return;
         }
         setSelected({
@@ -659,7 +674,8 @@ const Page: React.FC = () => {
                         filteredFiles,
                     );
                     const userFiles = selectedFiles.filter(
-                        (f) => f.ownerID == user.id,
+                        // If a selection is happening, there must be a user.
+                        (f) => f.ownerID == user!.id,
                     );
                     const sourceCollectionID = selected.collectionID;
                     if (userFiles.length > 0) {
@@ -709,21 +725,22 @@ const Page: React.FC = () => {
         void (async () => {
             showLoadingBar();
             try {
-                const selectedFiles = getSelectedFiles(
-                    selected,
+                // When hiding use all non-hidden files instead of the filtered
+                // files since we want to move all files copies to the hidden
+                // collection.
+                const opFiles =
                     op == "hide"
-                        ? // passing files here instead of filteredData for hide since
-                          // we want to move all files copies to hidden collection
-                          state.collectionFiles.filter(
+                        ? state.collectionFiles.filter(
                               (f) => !state.hiddenFileIDs.has(f.id),
                           )
-                        : filteredFiles,
-                );
+                        : filteredFiles;
+                const selectedFiles = getSelectedFiles(selected, opFiles);
                 const toProcessFiles =
                     op == "download"
                         ? selectedFiles
                         : selectedFiles.filter(
-                              (file) => file.ownerID == user.id,
+                              // There'll be a user if files are being selected.
+                              (file) => file.ownerID == user!.id,
                           );
                 if (toProcessFiles.length > 0) {
                     await performFileOp(
@@ -760,24 +777,24 @@ const Page: React.FC = () => {
     const handleSelectSearchOption = (
         searchOption: SearchOption | undefined,
     ) => {
-        const type = searchOption?.suggestion.type;
-        if (type == "collection" || type == "person") {
+        if (searchOption) {
+            const type = searchOption.suggestion.type;
             if (type == "collection") {
                 dispatch({
                     type: "showCollectionSummary",
                     collectionSummaryID: searchOption.suggestion.collectionID,
                 });
-            } else {
+            } else if (type == "person") {
                 dispatch({
                     type: "showPerson",
                     personID: searchOption.suggestion.person.id,
                 });
+            } else {
+                dispatch({
+                    type: "enterSearchMode",
+                    searchSuggestion: searchOption.suggestion,
+                });
             }
-        } else if (searchOption) {
-            dispatch({
-                type: "enterSearchMode",
-                searchSuggestion: searchOption.suggestion,
-            });
         } else {
             dispatch({ type: "exitSearch" });
         }
@@ -789,43 +806,79 @@ const Page: React.FC = () => {
         setUploadTypeSelectorIntent(intent ?? "upload");
     };
 
-    const handleShowCollectionSummary = (
-        collectionSummaryID: number | undefined,
-    ) => {
-        // Trigger a pull of the latest data from remote when opening the trash.
-        //
-        // This is needed for a specific scenario:
-        //
-        // 1. User deletes a collection, selecting the option to delete files.
-        // 2. Museum acks, and then client does a trash pull.
-        //
-        // This trash pull will not contain the files that belonged to the
-        // collection that got deleted because the collection deletion is a
-        // asynchronous operation.
-        //
-        // So the user might not see the entry for the just deleted file if they
-        // were to go to the trash meanwhile (until the next pull happens). To
-        // avoid this, we trigger a trash pull whenever it is opened.
-        if (collectionSummaryID == PseudoCollectionID.trash) {
-            void remoteFilesPull();
-        }
+    const handleShowCollectionSummaryWithID = useCallback(
+        (collectionSummaryID: number | undefined) => {
+            // Trigger a pull of the latest data from remote when opening the trash.
+            //
+            // This is needed for a specific scenario:
+            //
+            // 1. User deletes a collection, selecting the option to delete files.
+            // 2. Museum acks, and then client does a trash pull.
+            //
+            // This trash pull will not contain the files that belonged to the
+            // collection that got deleted because the collection deletion is a
+            // asynchronous operation.
+            //
+            // So the user might not see the entry for the just deleted file if they
+            // were to go to the trash meanwhile (until the next pull happens). To
+            // avoid this, we trigger a trash pull whenever it is opened.
+            if (collectionSummaryID == PseudoCollectionID.trash) {
+                void remoteFilesPull();
+            }
 
-        dispatch({ type: "showCollectionSummary", collectionSummaryID });
-    };
+            dispatch({ type: "showCollectionSummary", collectionSummaryID });
+        },
+        [],
+    );
 
-    // The same function can also be used to show collections since the
-    // namespace for the collection IDs and collection summary IDs are disjoint.
-    const handleShowCollection = handleShowCollectionSummary;
+    /**
+     * Switch to gallery view to show a collection or pseudo-collection.
+     *
+     * @param collectionSummaryID The ID of the {@link CollectionSummary} to
+     * show. If not provided, show the "All" section.
+     *
+     * @param isHidden If `true`, then any reauthentication as appropriate
+     * before switching to the hidden section of the app is performed first
+     * before before switching to the relevant collection or pseudo-collection.
+     */
+    const showCollectionSummary = useCallback(
+        async (
+            collectionSummaryID: number | undefined,
+            isHiddenCollectionSummary: boolean | undefined,
+        ) => {
+            const lastAuthAt = lastAuthenticationForHiddenTimestamp.current;
+            if (
+                isHiddenCollectionSummary &&
+                barMode != "hidden-albums" &&
+                Date.now() - lastAuthAt > 5 * 60 * 1e3 /* 5 minutes */
+            ) {
+                await authenticateUser();
+                lastAuthenticationForHiddenTimestamp.current = Date.now();
+            }
+            handleShowCollectionSummaryWithID(collectionSummaryID);
+        },
+        [authenticateUser, handleShowCollectionSummaryWithID, barMode],
+    );
+
+    const handleSidebarShowCollectionSummary = showCollectionSummary;
+
+    const handleDownloadStatusNotificationsShowCollectionSummary = useCallback(
+        (
+            collectionSummaryID: number | undefined,
+            isHiddenCollectionSummary: boolean | undefined,
+        ) => {
+            void showCollectionSummary(
+                collectionSummaryID,
+                isHiddenCollectionSummary,
+            );
+        },
+        [showCollectionSummary],
+    );
 
     const handleChangeBarMode = (mode: GalleryBarMode) =>
         mode == "people"
             ? dispatch({ type: "showPeople" })
             : dispatch({ type: "showAlbums" });
-
-    const handleShowHiddenSection = useCallback(
-        () => authenticateUser().then(() => dispatch({ type: "showHidden" })),
-        [],
-    );
 
     const handleFileViewerToggleFavorite = useCallback(
         async (file: EnteFile) => {
@@ -866,12 +919,13 @@ const Page: React.FC = () => {
                 // 3. The caller (eventually) triggers a remote pull in the
                 //    background, but meanwhile uses this updated metadata.
                 //
-                // TODO(RE): Replace with file fetch?
+                // TODO: Replace with files pull?
                 dispatch({
                     type: "unsyncedPrivateMagicMetadataUpdate",
                     fileID,
                     privateMagicMetadata: {
                         ...file.magicMetadata,
+                        count: file.magicMetadata?.count ?? 0,
                         version: (file.magicMetadata?.version ?? 0) + 1,
                         data: { ...file.magicMetadata?.data, visibility },
                     },
@@ -915,6 +969,14 @@ const Page: React.FC = () => {
         [],
     );
 
+    const showAppDownloadFooter =
+        state.collectionFiles.length < 30 && !isInSearchMode;
+
+    const fileListFooter = useMemo(
+        () => (showAppDownloadFooter ? createAppDownloadFooter() : undefined),
+        [showAppDownloadFooter],
+    );
+
     const showSelectionBar =
         selected.count > 0 && selected.collectionID === activeCollectionID;
 
@@ -944,19 +1006,17 @@ const Page: React.FC = () => {
                 attributes={collectionSelectorAttributes}
                 collectionSummaries={normalCollectionSummaries}
                 collectionForCollectionSummaryID={(id) =>
-                    // Null assert since the collection selector should only
-                    // show "selectable" normalCollectionSummaries. See:
-                    // [Note: Picking from selectable collection summaries].
                     findCollectionCreatingUncategorizedIfNeeded(
                         state.collections,
                         id,
-                    )!
+                    )
                 }
             />
             <DownloadStatusNotifications
                 {...{ saveGroups, onRemoveSaveGroup }}
-                onShowHiddenSection={handleShowHiddenSection}
-                onShowCollection={handleShowCollection}
+                onShowCollectionSummary={
+                    handleDownloadStatusNotificationsShowCollectionSummary
+                }
             />
             <FixCreationTime
                 {...fixCreationTimeVisibilityProps}
@@ -1020,10 +1080,12 @@ const Page: React.FC = () => {
             <GalleryBarAndListHeader
                 {...{
                     user,
-                    activeCollection,
-                    activeCollectionID,
+                    // TODO: These are incorrect assertions, the types of the
+                    // component need to be updated.
+                    activeCollection: activeCollection!,
+                    activeCollectionID: activeCollectionID!,
                     activePerson,
-                    setPhotoListHeader,
+                    setFileListHeader,
                     saveGroups,
                     onAddSaveGroup,
                 }}
@@ -1033,13 +1095,13 @@ const Page: React.FC = () => {
                 emailByUserID={state.emailByUserID}
                 shareSuggestionEmails={state.shareSuggestionEmails}
                 people={
-                    (state.view.type == "people"
+                    (state.view?.type == "people"
                         ? state.view.visiblePeople
                         : undefined) ?? []
                 }
                 onChangeMode={handleChangeBarMode}
                 setBlockingLoad={setBlockingLoad}
-                setActiveCollectionID={handleShowCollectionSummary}
+                setActiveCollectionID={handleShowCollectionSummaryWithID}
                 onRemotePull={remotePull}
                 onSelectPerson={handleSelectPerson}
             />
@@ -1076,8 +1138,7 @@ const Page: React.FC = () => {
                     state.uncategorizedCollectionSummaryID
                 }
                 onShowPlanSelector={showPlanSelector}
-                onShowCollectionSummary={handleShowCollectionSummary}
-                onShowHiddenSection={handleShowHiddenSection}
+                onShowCollectionSummary={handleSidebarShowCollectionSummary}
                 onShowExport={showExport}
                 onAuthenticateUser={authenticateUser}
             />
@@ -1092,25 +1153,24 @@ const Page: React.FC = () => {
                 />
             ) : !isInSearchMode &&
               !isFirstLoad &&
-              state.view.type == "people" &&
+              state.view?.type == "people" &&
               !state.view.activePerson ? (
                 <PeopleEmptyState />
             ) : (
                 <FileListWithViewer
                     mode={barMode}
                     modePlus={isInSearchMode ? "search" : barMode}
-                    header={photoListHeader}
+                    header={fileListHeader}
+                    footer={fileListFooter}
                     user={user}
                     files={filteredFiles}
                     enableDownload={true}
-                    showAppDownloadBanner={
-                        state.collectionFiles.length < 30 && !isInSearchMode
-                    }
-                    isMagicSearchResult={state.searchSuggestion?.type == "clip"}
+                    disableGrouping={state.searchSuggestion?.type == "clip"}
                     selectable={true}
                     selected={selected}
                     setSelected={setSelected}
-                    activeCollectionID={activeCollectionID}
+                    // TODO: Incorrect assertion, need to update the type
+                    activeCollectionID={activeCollectionID!}
                     activePersonID={activePerson?.id}
                     isInIncomingSharedCollection={activeCollectionSummary?.attributes.has(
                         "sharedIncoming",
@@ -1177,7 +1237,7 @@ const OfflineMessage: React.FC = () => (
  * Preload all three variants of a responsive image.
  */
 const preloadImage = (imgBasePath: string) => {
-    const srcset = [];
+    const srcset: string[] = [];
     for (let i = 1; i <= 3; i++) srcset.push(`${imgBasePath}/${i}x.png ${i}x`);
     new Image().srcset = srcset.join(",");
 };
@@ -1279,7 +1339,7 @@ const handleSubscriptionCompletionRedirectIfNeeded = async (
                 message: (
                     <Trans
                         i18nKey="subscription_purchase_success"
-                        values={{ date: subscription?.expiryTime }}
+                        values={{ date: subscription.expiryTime }}
                     />
                 ),
                 continue: { text: t("ok") },
@@ -1334,3 +1394,39 @@ const handleSubscriptionCompletionRedirectIfNeeded = async (
         }
     }
 };
+
+const createAppDownloadFooter = (): FileListHeaderOrFooter => ({
+    item: (
+        <Typography
+            variant="small"
+            sx={{
+                alignSelf: "flex-end",
+                marginInline: "auto",
+                marginBlock: 0.75,
+                textAlign: "center",
+                color: "text.faint",
+            }}
+        >
+            <Trans
+                i18nKey={"install_mobile_app"}
+                components={{
+                    a: (
+                        <Link
+                            href="https://play.google.com/store/apps/details?id=io.ente.photos"
+                            target="_blank"
+                            rel="noopener"
+                        />
+                    ),
+                    b: (
+                        <Link
+                            href="https://apps.apple.com/in/app/ente-photos/id1542026904"
+                            target="_blank"
+                            rel="noopener"
+                        />
+                    ),
+                }}
+            />
+        </Typography>
+    ),
+    height: 90,
+});

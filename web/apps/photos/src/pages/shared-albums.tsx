@@ -1,13 +1,20 @@
-// TODO: Audit this file
-/* eslint-disable @typescript-eslint/no-unused-expressions */
+// TODO: Audit this file (too many null assertions + other issues)
+/* eslint-disable @typescript-eslint/no-floating-promises */
 import AddPhotoAlternateOutlinedIcon from "@mui/icons-material/AddPhotoAlternateOutlined";
 import CloseIcon from "@mui/icons-material/Close";
 import DownloadIcon from "@mui/icons-material/Download";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
-import { Box, Button, IconButton, Stack, styled, Tooltip } from "@mui/material";
+import {
+    Box,
+    Button,
+    IconButton,
+    Link,
+    Stack,
+    styled,
+    Tooltip,
+} from "@mui/material";
 import Typography from "@mui/material/Typography";
 import { DownloadStatusNotifications } from "components/DownloadStatusNotifications";
-import type { TimeStampListItem } from "components/FileList";
 import { FileListWithViewer } from "components/FileListWithViewer";
 import { Upload } from "components/Upload";
 import {
@@ -80,44 +87,30 @@ import {
     GalleryItemsHeaderAdapter,
     GalleryItemsSummary,
 } from "ente-new/photos/components/gallery/ListHeader";
-import { isHiddenCollection } from "ente-new/photos/services/collection";
 import { PseudoCollectionID } from "ente-new/photos/services/collection-summary";
 import { usePhotosAppContext } from "ente-new/photos/types/context";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { type FileWithPath } from "react-dropzone";
+import { Trans } from "react-i18next";
 import { uploadManager } from "services/upload-manager";
-import type { SelectedState } from "types/gallery";
-import { getSelectedFiles } from "utils/file";
-import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
+import { getSelectedFiles, type SelectedState } from "utils/file";
 
 export default function PublicCollectionGallery() {
     const { showMiniDialog, onGenericError } = useBaseContext();
     const { showLoadingBar, hideLoadingBar } = usePhotosAppContext();
 
-    const credentials = useRef<PublicAlbumsCredentials | undefined>(undefined);
-    const collectionKey = useRef<string>(null);
-    const url = useRef<string>(null);
-    const referralCode = useRef<string>("");
     const [publicCollection, setPublicCollection] = useState<
         Collection | undefined
     >(undefined);
     const [publicFiles, setPublicFiles] = useState<EnteFile[] | undefined>(
         undefined,
     );
-    const [errorMessage, setErrorMessage] = useState<string>(null);
+    const [referralCode, setReferralCode] = useState<string>("");
+    const [errorMessage, setErrorMessage] = useState<string>("");
     const [loading, setLoading] = useState(true);
     const [isPasswordProtected, setIsPasswordProtected] = useState(false);
-
-    const router = useRouter();
-
-    const [photoListHeader, setPhotoListHeader] =
-        useState<TimeStampListItem>(null);
-
-    const [photoListFooter, setPhotoListFooter] =
-        useState<TimeStampListItem>(null);
-
     const [uploadTypeSelectorView, setUploadTypeSelectorView] = useState(false);
     const [blockingLoad, setBlockingLoad] = useState(false);
     const [shouldDisableDropzone, setShouldDisableDropzone] = useState(false);
@@ -130,17 +123,14 @@ export default function PublicCollectionGallery() {
         collectionID: 0,
         context: undefined,
     });
+
+    // TODO: Can we convert these to state
+    const credentials = useRef<PublicAlbumsCredentials | undefined>(undefined);
+    const collectionKey = useRef<string | undefined>(undefined);
+
     const { saveGroups, onAddSaveGroup, onRemoveSaveGroup } = useSaveGroups();
 
-    const onAddPhotos = useMemo(() => {
-        return publicCollection?.publicURLs[0]?.enableCollect
-            ? () => setUploadTypeSelectorView(true)
-            : undefined;
-    }, [publicCollection]);
-
-    const closeUploadTypeSelectorView = () => {
-        setUploadTypeSelectorView(false);
-    };
+    const router = useRouter();
 
     const showPublicLinkExpiredMessage = () =>
         showMiniDialog({
@@ -180,8 +170,7 @@ export default function PublicCollectionGallery() {
         const main = async () => {
             let redirectingToWebsite = false;
             try {
-                url.current = window.location.href;
-                const currentURL = new URL(url.current);
+                const currentURL = new URL(window.location.href);
                 const t = currentURL.searchParams.get("t");
                 const ck = await extractCollectionKeyFromShareURL(currentURL);
                 if (!t && !ck) {
@@ -192,15 +181,13 @@ export default function PublicCollectionGallery() {
                     return;
                 }
                 collectionKey.current = ck;
-                url.current = window.location.href;
-                const collection = await savedPublicCollectionByKey(
-                    collectionKey.current,
-                );
+                const collection = await savedPublicCollectionByKey(ck);
                 const accessToken = t;
                 let accessTokenJWT: string | undefined;
                 if (collection) {
-                    referralCode.current =
-                        await savedLastPublicCollectionReferralCode();
+                    setReferralCode(
+                        (await savedLastPublicCollectionReferralCode()) ?? "",
+                    );
                     setPublicCollection(collection);
                     setIsPasswordProtected(
                         !!collection.publicURLs[0]?.passwordEnabled,
@@ -226,73 +213,46 @@ export default function PublicCollectionGallery() {
             }
         };
         main();
+        // TODO:
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const downloadEnabled =
-        publicCollection?.publicURLs?.[0]?.enableDownload ?? true;
-
-    useEffect(() => {
-        publicCollection &&
-            publicFiles &&
-            setPhotoListHeader({
-                item: (
-                    <ListHeader
-                        {...{ publicCollection, publicFiles, onAddSaveGroup }}
-                    />
-                ),
-                tag: "header",
-                height: 68,
-            });
-    }, [publicCollection, publicFiles]);
-
-    useEffect(() => {
-        setPhotoListFooter(
-            onAddPhotos
-                ? {
-                      item: (
-                          <CenteredFill sx={{ marginTop: "56px" }}>
-                              <AddMorePhotosButton onClick={onAddPhotos} />
-                          </CenteredFill>
-                      ),
-                      height: 104,
-                  }
-                : null,
-        );
-    }, [onAddPhotos]);
+        publicCollection?.publicURLs[0]?.enableDownload ?? true;
 
     /**
      * Pull the latest data related to the public album from remote, updating
      * both our local database and component state.
      */
     const publicAlbumsRemotePull = useCallback(async () => {
-        const accessToken = credentials.current.accessToken;
+        const accessToken = credentials.current!.accessToken;
         showLoadingBar();
         setLoading(true);
         try {
             const { collection, referralCode: userReferralCode } =
-                await pullCollection(accessToken, collectionKey.current);
-            referralCode.current = userReferralCode;
+                await pullCollection(accessToken, collectionKey.current!);
+            setReferralCode(userReferralCode);
 
             setPublicCollection(collection);
             const isPasswordProtected =
                 !!collection.publicURLs[0]?.passwordEnabled;
             setIsPasswordProtected(isPasswordProtected);
-            setErrorMessage(null);
+            setErrorMessage("");
 
             // Remove the locally cached accessTokenJWT if the sharer has
             // disabled password protection on the link.
-            if (!isPasswordProtected && credentials.current.accessTokenJWT) {
+            if (!isPasswordProtected && credentials.current?.accessTokenJWT) {
                 credentials.current.accessTokenJWT = undefined;
                 downloadManager.setPublicAlbumsCredentials(credentials.current);
                 removePublicCollectionAccessTokenJWT(accessToken);
             }
 
-            if (isPasswordProtected && !credentials.current.accessTokenJWT) {
+            if (isPasswordProtected && !credentials.current?.accessTokenJWT) {
                 await removePublicCollectionFileData(accessToken);
             } else {
                 try {
                     await pullPublicCollectionFiles(
-                        credentials.current,
+                        credentials.current!,
                         collection,
                         (files) =>
                             setPublicFiles(
@@ -311,7 +271,7 @@ export default function PublicCollectionGallery() {
                     // Clear the locally cached accessTokenJWT and ask the user
                     // to reenter the password.
                     if (isHTTP401Error(e)) {
-                        credentials.current.accessTokenJWT = undefined;
+                        credentials.current!.accessTokenJWT = undefined;
                         downloadManager.setPublicAlbumsCredentials(
                             credentials.current,
                         );
@@ -342,7 +302,7 @@ export default function PublicCollectionGallery() {
                 );
                 // Sharing has been disabled. Clear out local cache.
                 await removePublicCollectionFileData(accessToken);
-                await removePublicCollectionByKey(collectionKey.current);
+                await removePublicCollectionByKey(collectionKey.current!);
                 setPublicCollection(undefined);
                 setPublicFiles(undefined);
             } else {
@@ -355,7 +315,7 @@ export default function PublicCollectionGallery() {
             hideLoadingBar();
             setLoading(false);
         }
-    }, [showLoadingBar, hideLoadingBar]);
+    }, [showLoadingBar, hideLoadingBar, onGenericError]);
 
     // See: [Note: Visual feedback to acknowledge user actions]
     const handleVisualFeedback = useCallback(() => {
@@ -368,13 +328,13 @@ export default function PublicCollectionGallery() {
         setFieldError,
     ) => {
         try {
-            const accessToken = credentials.current.accessToken;
+            const accessToken = credentials.current!.accessToken;
             const accessTokenJWT = await verifyPublicAlbumPassword(
-                publicCollection.publicURLs[0]!,
+                publicCollection!.publicURLs[0]!,
                 password,
                 accessToken,
             );
-            credentials.current.accessTokenJWT = accessTokenJWT;
+            credentials.current!.accessTokenJWT = accessTokenJWT;
             downloadManager.setPublicAlbumsCredentials(credentials.current);
             await savePublicCollectionAccessTokenJWT(
                 accessToken,
@@ -393,7 +353,7 @@ export default function PublicCollectionGallery() {
     };
 
     const clearSelection = () => {
-        if (!selected?.count) {
+        if (!selected.count) {
             return;
         }
         setSelected({
@@ -406,12 +366,12 @@ export default function PublicCollectionGallery() {
 
     const handleUploadFile = (file: EnteFile) =>
         setPublicFiles(
-            sortFilesForCollection([...publicFiles, file], publicCollection),
+            sortFilesForCollection([...publicFiles!, file], publicCollection),
         );
 
     const downloadFilesHelper = async () => {
         try {
-            const selectedFiles = getSelectedFiles(selected, publicFiles);
+            const selectedFiles = getSelectedFiles(selected, publicFiles!);
             await downloadAndSaveFiles(
                 selectedFiles,
                 t("files_count", { count: selectedFiles.length }),
@@ -423,6 +383,44 @@ export default function PublicCollectionGallery() {
         }
     };
 
+    const onAddPhotos = useMemo(() => {
+        return publicCollection?.publicURLs[0]?.enableCollect
+            ? () => setUploadTypeSelectorView(true)
+            : undefined;
+    }, [publicCollection]);
+
+    const closeUploadTypeSelectorView = () => {
+        setUploadTypeSelectorView(false);
+    };
+
+    const fileListHeader = useMemo(
+        () =>
+            publicCollection && publicFiles
+                ? {
+                      item: (
+                          <FileListHeader
+                              {...{
+                                  publicCollection,
+                                  publicFiles,
+                                  downloadEnabled,
+                                  onAddSaveGroup,
+                              }}
+                          />
+                      ),
+                      height: fileListHeaderHeight,
+                  }
+                : undefined,
+        [onAddSaveGroup, publicCollection, publicFiles, downloadEnabled],
+    );
+
+    const fileListFooter = useMemo(() => {
+        const props = { referralCode, onAddPhotos };
+        return {
+            item: <FileListFooter {...props} />,
+            height: fileListFooterHeightForProps(props),
+        };
+    }, [referralCode, onAddPhotos]);
+
     if (loading && (!publicFiles || !credentials.current)) {
         return <LoadingIndicator />;
     } else if (errorMessage) {
@@ -433,7 +431,7 @@ export default function PublicCollectionGallery() {
                 </Typography>
             </Stack100vhCenter>
         );
-    } else if (isPasswordProtected && !credentials.current.accessTokenJWT) {
+    } else if (isPasswordProtected && !credentials.current?.accessTokenJWT) {
         return (
             <AccountsPageContents>
                 <AccountsPageTitle>{t("password")}</AccountsPageTitle>
@@ -462,76 +460,69 @@ export default function PublicCollectionGallery() {
         );
     }
 
-    // TODO: memo this (after the dependencies are traceable).
-    const context = {
-        credentials: credentials.current,
-        referralCode: referralCode.current,
-        photoListHeader,
-        photoListFooter,
-    };
-
     return (
-        <PublicCollectionGalleryContext.Provider value={context}>
-            <FullScreenDropZone
-                disabled={shouldDisableDropzone}
-                onDrop={setDragAndDropFiles}
+        <FullScreenDropZone
+            disabled={shouldDisableDropzone}
+            onDrop={setDragAndDropFiles}
+        >
+            <NavbarBase
+                sx={{
+                    mb: "16px",
+                    px: "24px",
+                    "@media (width < 720px)": { px: "4px" },
+                }}
             >
-                <NavbarBase
-                    sx={{
-                        mb: "16px",
-                        px: "24px",
-                        "@media (width < 720px)": { px: "4px" },
-                    }}
-                >
-                    {selected.count > 0 ? (
-                        <SelectedFileOptions
-                            count={selected.count}
-                            clearSelection={clearSelection}
-                            downloadFilesHelper={downloadFilesHelper}
-                        />
-                    ) : (
-                        <SpacedRow sx={{ flex: 1 }}>
-                            <EnteLogoLink href="https://ente.io">
-                                <EnteLogo height={15} />
-                            </EnteLogoLink>
-                            {onAddPhotos ? (
-                                <AddPhotosButton onClick={onAddPhotos} />
-                            ) : (
-                                <GoToEnte />
-                            )}
-                        </SpacedRow>
-                    )}
-                </NavbarBase>
+                {selected.count > 0 ? (
+                    <SelectedFileOptions
+                        count={selected.count}
+                        clearSelection={clearSelection}
+                        downloadFilesHelper={downloadFilesHelper}
+                    />
+                ) : (
+                    <SpacedRow sx={{ flex: 1 }}>
+                        <EnteLogoLink href="https://ente.io">
+                            <EnteLogo height={15} />
+                        </EnteLogoLink>
+                        {onAddPhotos ? (
+                            <AddPhotosButton onClick={onAddPhotos} />
+                        ) : (
+                            <GoToEnte />
+                        )}
+                    </SpacedRow>
+                )}
+            </NavbarBase>
 
-                <FileListWithViewer
-                    files={publicFiles}
-                    enableDownload={downloadEnabled}
-                    selectable={downloadEnabled}
-                    selected={selected}
-                    setSelected={setSelected}
-                    activeCollectionID={PseudoCollectionID.all}
-                    onRemotePull={publicAlbumsRemotePull}
-                    onVisualFeedback={handleVisualFeedback}
-                    onAddSaveGroup={onAddSaveGroup}
-                />
-                {blockingLoad && <TranslucentLoadingOverlay />}
-                <Upload
-                    uploadCollection={publicCollection}
-                    setLoading={setBlockingLoad}
-                    setShouldDisableDropzone={setShouldDisableDropzone}
-                    uploadTypeSelectorIntent="collect"
-                    uploadTypeSelectorView={uploadTypeSelectorView}
-                    onRemotePull={publicAlbumsRemotePull}
-                    onUploadFile={handleUploadFile}
-                    closeUploadTypeSelector={closeUploadTypeSelectorView}
-                    onShowSessionExpiredDialog={showPublicLinkExpiredMessage}
-                    {...{ dragAndDropFiles }}
-                />
-                <DownloadStatusNotifications
-                    {...{ saveGroups, onRemoveSaveGroup }}
-                />
-            </FullScreenDropZone>
-        </PublicCollectionGalleryContext.Provider>
+            <FileListWithViewer
+                files={publicFiles}
+                header={fileListHeader}
+                footer={fileListFooter}
+                enableDownload={downloadEnabled}
+                selectable={downloadEnabled}
+                selected={selected}
+                setSelected={setSelected}
+                activeCollectionID={PseudoCollectionID.all}
+                onRemotePull={publicAlbumsRemotePull}
+                onVisualFeedback={handleVisualFeedback}
+                onAddSaveGroup={onAddSaveGroup}
+            />
+            {blockingLoad && <TranslucentLoadingOverlay />}
+            <Upload
+                publicAlbumsCredentials={credentials.current}
+                uploadCollection={publicCollection}
+                setLoading={setBlockingLoad}
+                setShouldDisableDropzone={setShouldDisableDropzone}
+                uploadTypeSelectorIntent="collect"
+                uploadTypeSelectorView={uploadTypeSelectorView}
+                onRemotePull={publicAlbumsRemotePull}
+                onUploadFile={handleUploadFile}
+                closeUploadTypeSelector={closeUploadTypeSelectorView}
+                onShowSessionExpiredDialog={showPublicLinkExpiredMessage}
+                {...{ dragAndDropFiles }}
+            />
+            <DownloadStatusNotifications
+                {...{ saveGroups, onRemoveSaveGroup }}
+            />
+        </FullScreenDropZone>
     );
 }
 
@@ -630,26 +621,36 @@ const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
     </Stack>
 );
 
-interface ListHeaderProps {
+interface FileListHeaderProps {
     publicCollection: Collection;
     publicFiles: EnteFile[];
+    downloadEnabled: boolean;
     onAddSaveGroup: AddSaveGroup;
 }
 
-const ListHeader: React.FC<ListHeaderProps> = ({
+/**
+ * The fixed height (in px) of {@link FileListHeader}.
+ */
+const fileListHeaderHeight = 68;
+
+/**
+ * A header shown before the listing of files.
+ *
+ * It scrolls along with the content. It has a fixed height,
+ * {@link fileListHeaderHeight}.
+ */
+const FileListHeader: React.FC<FileListHeaderProps> = ({
     publicCollection,
     publicFiles,
+    downloadEnabled,
     onAddSaveGroup,
 }) => {
-    const downloadEnabled =
-        publicCollection.publicURLs?.[0]?.enableDownload ?? true;
-
     const downloadAllFiles = () =>
         downloadAndSaveCollectionFiles(
             publicCollection.name,
             publicCollection.id,
             publicFiles,
-            isHiddenCollection(publicCollection),
+            undefined,
             onAddSaveGroup,
         );
 
@@ -674,3 +675,85 @@ const ListHeader: React.FC<ListHeaderProps> = ({
         </GalleryItemsHeaderAdapter>
     );
 };
+
+interface FileListFooterProps {
+    referralCode?: string;
+    onAddPhotos?: () => void;
+}
+
+/**
+ * The dynamic (prop-dependent) height of {@link FileListFooter}.
+ */
+const fileListFooterHeightForProps = ({
+    referralCode,
+    onAddPhotos,
+}: FileListFooterProps) => (onAddPhotos ? 104 : 0) + (referralCode ? 113 : 75);
+
+/**
+ * A footer shown after the listing of files.
+ *
+ * It scrolls along with the content. It has a dynamic height, dependent on the
+ * props, calculated using {@link fileListFooterHeightForProps}.
+ */
+
+const FileListFooter: React.FC<FileListFooterProps> = ({
+    referralCode,
+    onAddPhotos,
+}) => (
+    <Stack sx={{ flex: 1, alignSelf: "flex-end" }}>
+        {onAddPhotos && (
+            <CenteredFill>
+                <AddMorePhotosButton onClick={onAddPhotos} />
+            </CenteredFill>
+        )}
+        {/* Make the entire area tappable, otherwise it is hard to
+            get at on mobile devices. */}
+        <Link
+            color="text.muted"
+            sx={{
+                mt: "48px",
+                mb: "6px",
+                textAlign: "center",
+                "&:hover": { color: "inherit" },
+            }}
+            target="_blank"
+            href="https://ente.io"
+        >
+            <Typography variant="small">
+                <Trans
+                    i18nKey="shared_using"
+                    components={{
+                        a: (
+                            <Typography
+                                variant="small"
+                                component="span"
+                                sx={{ color: "accent.main" }}
+                            />
+                        ),
+                    }}
+                    values={{ url: "ente.io" }}
+                />
+            </Typography>
+        </Link>
+        {referralCode && (
+            <Typography
+                sx={{
+                    mt: "6px",
+                    mb: 0,
+                    /* Negative margin to extend to edges by counteracting the
+                       maximum margin that can be added by FileViewer. */
+                    mx: "-24px",
+                    padding: "8px",
+                    bgcolor: "accent.main",
+                    color: "accent.contrastText",
+                    textAlign: "center",
+                }}
+            >
+                <Trans
+                    i18nKey={"sharing_referral_code"}
+                    values={{ referralCode }}
+                />
+            </Typography>
+        )}
+    </Stack>
+);

@@ -349,14 +349,7 @@ export const hlsPlaylistDataForFile = async (
         playlist: playlistTemplate,
         width,
         height,
-    } = await decryptPlaylistJSON(
-        // See: [Note: strict mode migration]
-        //
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        playlistFileData,
-        file,
-    );
+    } = await decryptPlaylistJSON(playlistFileData, file);
 
     // A playlist format the current client does not understand.
     if (type != "hls_video") return undefined;

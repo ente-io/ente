@@ -529,13 +529,7 @@ export const decryptRemoteCollection = async (
         owner: parseRemoteCollectionUser(owner),
         name,
         sharees: sharees.map(parseRemoteCollectionUser),
-        // TODO:
-        //
-        // See: [Note: strict mode migration]
-        //
-        // We need to add the cast here, otherwise we get a tsc error when this
-        // file is imported in the photos app.
-        publicURLs: rest.publicURLs as PublicURL[],
+        publicURLs: rest.publicURLs,
         magicMetadata,
         pubMagicMetadata,
         sharedMagicMetadata,

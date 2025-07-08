@@ -1,8 +1,8 @@
-import type { LocalUser } from "ente-accounts/services/user";
 import type { AddSaveGroup } from "ente-gallery/components/utils/save-groups";
 import { downloadAndSaveFiles } from "ente-gallery/services/save";
 import type { EnteFile } from "ente-media/file";
 import { ItemVisibility } from "ente-media/file-metadata";
+import { type SelectionContext } from "ente-new/photos/components/gallery";
 import { type FileOp } from "ente-new/photos/components/SelectedFileOptions";
 import {
     addToFavoritesCollection,
@@ -12,7 +12,22 @@ import {
 } from "ente-new/photos/services/collection";
 import { updateFilesVisibility } from "ente-new/photos/services/file";
 import { t } from "i18next";
-import type { SelectedState } from "types/gallery";
+
+export interface SelectedState {
+    [k: number]: boolean;
+    ownCount: number;
+    count: number;
+    collectionID: number | undefined;
+    /**
+     * The context in which the selection was made. Only set by newer code if
+     * there is an active selection (older code continues to rely on the
+     * {@link collectionID} logic).
+     */
+    context: SelectionContext | undefined;
+}
+export type SetSelectedState = React.Dispatch<
+    React.SetStateAction<SelectedState>
+>;
 
 export function getSelectedFiles(
     selected: SelectedState,
@@ -27,28 +42,6 @@ export function getSelectedFiles(
 
     return files.filter((file) => selectedFilesIDs.has(file.id));
 }
-
-export const shouldShowAvatar = (
-    file: EnteFile,
-    user: LocalUser | undefined,
-) => {
-    if (!file || !user) {
-        return false;
-    }
-    // is Shared file
-    else if (file.ownerID !== user.id) {
-        return true;
-    }
-    // is public collected file
-    else if (
-        file.ownerID === user.id &&
-        file.pubMagicMetadata?.data?.uploaderName
-    ) {
-        return true;
-    } else {
-        return false;
-    }
-};
 
 export const performFileOp = async (
     op: FileOp,
