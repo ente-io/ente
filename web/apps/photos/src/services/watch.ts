@@ -61,14 +61,16 @@ class FolderWatcher {
      *
      * This is passed as a param to {@link init}.
      */
-    private upload: (collectionName: string, filePaths: string[]) => void;
+    private upload:
+        | ((collectionName: string, filePaths: string[]) => void)
+        | undefined;
     /**
      * A function to call when we want to trigger a full remote pull. It will
      * initiate the pull but will not await its completion.
      *
      * This is passed as a param to {@link init}.
      */
-    private onTriggerRemotePull: () => void;
+    private onTriggerRemotePull: (() => void) | undefined;
 
     /** A helper function that debounces invocations of {@link runNextEvent}. */
     private debouncedRunNextEvent: () => void;
@@ -94,7 +96,7 @@ class FolderWatcher {
         this.upload = upload;
         this.onTriggerRemotePull = onTriggerRemotePull;
         this.registerListeners();
-        this.syncWithDisk();
+        this.triggerSyncWithDisk();
     }
 
     /** Return `true` if we are currently using the uploader. */
@@ -124,7 +126,7 @@ class FolderWatcher {
      */
     resumePausedSync() {
         this.isPaused = false;
-        this.syncWithDisk();
+        this.triggerSyncWithDisk();
     }
 
     /** Return the list of folders we are watching for changes. */
@@ -150,7 +152,7 @@ class FolderWatcher {
      */
     async addWatch(folderPath: string, mapping: CollectionMapping) {
         const watches = await ensureElectron().watch.add(folderPath, mapping);
-        this.syncWithDisk();
+        this.triggerSyncWithDisk();
         return watches;
     }
 
@@ -163,10 +165,13 @@ class FolderWatcher {
         return await ensureElectron().watch.remove(folderPath);
     }
 
+    private triggerSyncWithDisk() {
+        void this.syncWithDisk();
+    }
+
     private async syncWithDisk() {
         try {
             const watches = await this.getWatches();
-            if (!watches) return;
 
             this.eventQueue = [];
             const events = await deduceEvents(watches);
@@ -225,15 +230,16 @@ class FolderWatcher {
         if (this.eventQueue.length == 0 || this.activeWatch || this.isPaused)
             return;
 
+        const event = this.dequeueClubbedEvent();
+        if (!event) return;
+        log.info(
+            `Processing ${event.action} event for folder watch ${event.folderPath} (collectionName ${event.collectionName}, ${event.filePaths.length} files)`,
+        );
+
         const skip = (reason: string) => {
             log.info(`Ignoring event since ${reason}`);
             this.debouncedRunNextEvent();
         };
-
-        const event = this.dequeueClubbedEvent();
-        log.info(
-            `Processing ${event.action} event for folder watch ${event.folderPath} (collectionName ${event.collectionName}, ${event.filePaths.length} files)`,
-        );
 
         const watch = (await this.getWatches()).find(
             (watch) => watch.folderPath == event.folderPath,
@@ -262,7 +268,7 @@ class FolderWatcher {
                 `Folder watch requested upload of ${paths.length} files to collection ${collectionName}`,
             );
 
-            this.upload(collectionName, paths);
+            this.upload!(collectionName, paths);
         } else {
             if (this.pruneFileEventsFromDeletedFolderPaths()) {
                 skip("event was from a deleted folder path");
@@ -277,7 +283,7 @@ class FolderWatcher {
                     ).push(syncedFile);
                     return [removed, rest];
                 },
-                [[], []],
+                [new Array<FolderWatchSyncedFile>(), []],
             );
 
             this.activeWatch = watch;
@@ -307,7 +313,7 @@ class FolderWatcher {
         const filePaths = [event.filePath];
         while (
             this.eventQueue.length > 0 &&
-            event.action === this.eventQueue[0].action &&
+            event.action === this.eventQueue[0]?.action &&
             event.folderPath === this.eventQueue[0].folderPath &&
             event.collectionName === this.eventQueue[0].collectionName
         ) {
@@ -334,11 +340,11 @@ class FolderWatcher {
                     // Done.
                     if (item.isLivePhoto) {
                         this.uploadedFileForPath.set(
-                            ensureString(item.livePhotoAssets.image),
+                            ensureString(item.livePhotoAssets?.image),
                             uploadResult.file,
                         );
                         this.uploadedFileForPath.set(
-                            ensureString(item.livePhotoAssets.video),
+                            ensureString(item.livePhotoAssets?.video),
                             uploadResult.file,
                         );
                     } else {
@@ -355,10 +361,10 @@ class FolderWatcher {
                     // Non-retriable error.
                     if (item.isLivePhoto) {
                         this.unUploadableFilePaths.add(
-                            ensureString(item.livePhotoAssets.image),
+                            ensureString(item.livePhotoAssets?.image),
                         );
                         this.unUploadableFilePaths.add(
-                            ensureString(item.livePhotoAssets.video),
+                            ensureString(item.livePhotoAssets?.video),
                         );
                     } else {
                         this.unUploadableFilePaths.add(
@@ -376,7 +382,7 @@ class FolderWatcher {
      */
     async allFileUploadsDone(uploadedItems: UploadAsset[]) {
         const electron = ensureElectron();
-        const watch = this.activeWatch;
+        const watch = this.activeWatch!;
 
         log.debug(() => [
             "watch/allFileUploadsDone",
@@ -428,8 +434,8 @@ class FolderWatcher {
             // possibility for a UploadItem is for it to be a string (the
             // absolute path to a file on disk).
             if (item.isLivePhoto) {
-                const imagePath = ensureString(item.livePhotoAssets.image);
-                const videoPath = ensureString(item.livePhotoAssets.video);
+                const imagePath = ensureString(item.livePhotoAssets?.image);
+                const videoPath = ensureString(item.livePhotoAssets?.video);
 
                 const imageFile = this.uploadedFileForPath.get(imagePath);
                 const videoFile = this.uploadedFileForPath.get(videoPath);
@@ -491,7 +497,7 @@ class FolderWatcher {
             await removeFromOwnCollection(id, files);
         }
 
-        this.onTriggerRemotePull();
+        this.onTriggerRemotePull!();
     }
 }
 

@@ -284,7 +284,7 @@ const DesktopBox = styled(CenteredRow)`
 
 const Slideshow: React.FC = () => {
     const [selectedIndex, setSelectedIndex] = useState(0);
-    const containerRef = useRef<HTMLDivElement | undefined>(undefined);
+    const containerRef = useRef<HTMLDivElement | null>(null);
 
     useEffect(() => {
         const intervalID = setInterval(() => {

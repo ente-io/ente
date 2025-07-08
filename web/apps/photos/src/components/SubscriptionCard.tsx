@@ -233,7 +233,7 @@ const IndividualUsageSection: React.FC<IndividualUsageSectionProps> = ({
                 {`${formattedStorageByteSize(storage - usage)} ${t("free")}`}
             </Typography>
             <Typography variant="mini" sx={{ fontWeight: "medium" }}>
-                {t("photos_count", { count: fileCount ?? 0 })}
+                {t("photos_count", { count: fileCount })}
             </Typography>
         </Stack>
     </Stack>
@@ -326,7 +326,7 @@ const FamilyUsageSection: React.FC<FamilyUsageSectionProps> = ({
                 <Legend label={t("family")} opacity={0.8} />
             </Stack>
             <Typography variant="mini" sx={{ fontWeight: "medium" }}>
-                {t("photos_count", { count: fileCount ?? 0 })}
+                {t("photos_count", { count: fileCount })}
             </Typography>
         </Stack>
     </Stack>

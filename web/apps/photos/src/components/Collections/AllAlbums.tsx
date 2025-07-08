@@ -1,3 +1,4 @@
+// TODO: Audit this file.
 import CloseIcon from "@mui/icons-material/Close";
 import {
     Box,
@@ -101,7 +102,15 @@ const AllAlbumsDialog = styled(Dialog)(({ theme }) => ({
     },
 }));
 
-const Title = ({
+type TitleProps = { collectionCount: number } & Pick<
+    AllAlbums,
+    | "onClose"
+    | "collectionsSortBy"
+    | "onChangeCollectionsSortBy"
+    | "isInHiddenSection"
+>;
+
+const Title: React.FC<TitleProps> = ({
     onClose,
     collectionCount,
     collectionsSortBy,
@@ -154,7 +163,10 @@ interface ItemData {
 // If we were only passing a single, stable value (e.g. items),
 // We could just pass the value directly.
 const createItemData = memoize((collectionRowList, onCollectionClick) => ({
+    // TODO:
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     collectionRowList,
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     onCollectionClick,
 }));
 
@@ -174,7 +186,7 @@ const AlbumsRow = React.memo(
         return (
             <div style={style}>
                 <Stack direction="row" sx={{ p: 2, gap: 0.5 }}>
-                    {collectionRow.map((item: any) => (
+                    {collectionRow.map((item) => (
                         <AlbumCard
                             isScrolling={isScrolling}
                             onCollectionClick={onCollectionClick}
@@ -214,9 +226,6 @@ const AllAlbumsContent: React.FC<AllAlbumsContentProps> = ({
         32; /* padding above first and below last row */
 
     useEffect(() => {
-        if (!collectionSummaries) {
-            return;
-        }
         const main = () => {
             if (refreshInProgress.current) {
                 shouldRefresh.current = true;

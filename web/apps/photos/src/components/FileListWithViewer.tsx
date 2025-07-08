@@ -57,8 +57,8 @@ export type FileListWithViewerProps = {
     | "mode"
     | "modePlus"
     | "header"
-    | "showAppDownloadBanner"
-    | "isMagicSearchResult"
+    | "footer"
+    | "disableGrouping"
     | "selectable"
     | "selected"
     | "setSelected"
@@ -93,11 +93,11 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
     mode,
     modePlus,
     header,
+    footer,
     user,
     files,
     enableDownload,
-    showAppDownloadBanner,
-    isMagicSearchResult,
+    disableGrouping,
     selectable,
     selected,
     setSelected,
@@ -134,16 +134,19 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
         [files],
     );
 
-    const handleThumbnailClick = useCallback((index: number) => {
-        setCurrentIndex(index);
-        setOpenFileViewer(true);
-        onSetOpenFileViewer?.(true);
-    }, []);
+    const handleThumbnailClick = useCallback(
+        (index: number) => {
+            setCurrentIndex(index);
+            setOpenFileViewer(true);
+            onSetOpenFileViewer?.(true);
+        },
+        [onSetOpenFileViewer],
+    );
 
     const handleCloseFileViewer = useCallback(() => {
         onSetOpenFileViewer?.(false);
         setOpenFileViewer(false);
-    }, []);
+    }, [onSetOpenFileViewer]);
 
     const handleTriggerRemotePull = useCallback(
         () => void onRemotePull(),
@@ -159,7 +162,7 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
     const handleDelete = useMemo(() => {
         return onMarkTempDeleted
             ? (file: EnteFile) =>
-                  moveToTrash([file]).then(() => onMarkTempDeleted?.([file]))
+                  moveToTrash([file]).then(() => onMarkTempDeleted([file]))
             : undefined;
     }, [onMarkTempDeleted]);
 
@@ -167,7 +170,7 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
         (editedFile: File, collection: Collection, enteFile: EnteFile) => {
             uploadManager.prepareForNewUpload();
             uploadManager.showUploadProgressDialog();
-            uploadManager.uploadFile(editedFile, collection, enteFile);
+            void uploadManager.uploadFile(editedFile, collection, enteFile);
         },
         [],
     );
@@ -182,9 +185,9 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
                             mode,
                             modePlus,
                             header,
+                            footer,
                             user,
-                            showAppDownloadBanner,
-                            isMagicSearchResult,
+                            disableGrouping,
                             selectable,
                             selected,
                             setSelected,
