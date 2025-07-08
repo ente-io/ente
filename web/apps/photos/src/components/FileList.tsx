@@ -38,8 +38,8 @@ import React, {
     useState,
 } from "react";
 import {
-    VariableSizeList as List,
     type ListChildComponentProps,
+    VariableSizeList,
     areEqual,
 } from "react-window";
 import { type SelectedState, shouldShowAvatar } from "utils/file";
@@ -217,7 +217,7 @@ export const FileList: React.FC<FileListProps> = ({
     );
     const timeStampList = useDeferredValue(_timeStampList);
 
-    const listRef = useRef(null);
+    const listRef = useRef<VariableSizeList | null>(null);
 
     // Timeline date strings for which all photos have been selected.
     //
@@ -747,7 +747,7 @@ export const FileList: React.FC<FileListProps> = ({
     }
 
     return (
-        <List
+        <VariableSizeList
             key={key}
             itemData={itemData}
             ref={listRef}
@@ -760,7 +760,7 @@ export const FileList: React.FC<FileListProps> = ({
             useIsScrolling
         >
             {PhotoListRow}
-        </List>
+        </VariableSizeList>
     );
 };
 
