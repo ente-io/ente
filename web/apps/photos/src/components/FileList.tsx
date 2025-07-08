@@ -42,10 +42,7 @@ import {
     handleSelectCreatorMulti,
 } from "utils/photoFrame";
 
-export const DATE_CONTAINER_HEIGHT = 48;
 export const SPACE_BTW_DATES = 44;
-
-const SPACE_BTW_DATES_TO_IMAGE_CONTAINER_WIDTH_RATIO = 0.244;
 
 /**
  * A component with an explicit height suitable for being plugged in as the
@@ -252,6 +249,7 @@ export const FileList: React.FC<FileListProps> = ({
             if (header) {
                 timeStampList.push(asFullSpanListItem(header));
             }
+
             if (disableGrouping) {
                 noGrouping(timeStampList);
             } else {
@@ -261,9 +259,21 @@ export const FileList: React.FC<FileListProps> = ({
             if (!skipMerge) {
                 timeStampList = mergeTimeStampList(timeStampList, columns);
             }
-            if (timeStampList.length === 1) {
-                timeStampList.push(getEmptyListItem());
+
+            if (timeStampList.length == 1) {
+                timeStampList.push({
+                    item: (
+                        <NoFilesContainer span={columns}>
+                            <Typography sx={{ color: "text.faint" }}>
+                                {t("nothing_here")}
+                            </Typography>
+                        </NoFilesContainer>
+                    ),
+                    id: "empty-list-banner",
+                    height: height - 48,
+                });
             }
+
             const footerHeight = footer?.height ?? 0;
             timeStampList.push(getVacuumItem(timeStampList, footerHeight));
             if (footer) {
@@ -278,7 +288,15 @@ export const FileList: React.FC<FileListProps> = ({
             }
         };
         main();
-    }, [width, height, header, footer, annotatedFiles, disableGrouping]);
+    }, [
+        width,
+        height,
+        header,
+        footer,
+        annotatedFiles,
+        disableGrouping,
+        columns,
+    ]);
 
     useEffect(() => {
         refreshList();
@@ -337,20 +355,6 @@ export const FileList: React.FC<FileListProps> = ({
         });
     };
 
-    const getEmptyListItem = () => {
-        return {
-            item: (
-                <NothingContainer span={columns}>
-                    <Typography sx={{ color: "text.faint" }}>
-                        {t("nothing_here")}
-                    </Typography>
-                </NothingContainer>
-            ),
-            id: "empty-list-banner",
-            height: height - 48,
-        };
-    };
-
     const getVacuumItem = (timeStampList, footerHeight: number) => {
         const fileListHeight = (() => {
             let sum = 0;
@@ -387,6 +391,7 @@ export const FileList: React.FC<FileListProps> = ({
                 // If new list pointer is not at the end of list then
                 // we can add more items to the same list.
                 if (newList[newIndex]) {
+                    const SPACE_BTW_DATES_TO_IMAGE_CONTAINER_WIDTH_RATIO = 0.244;
                     // Check if items can be added to same list
                     if (
                         newList[newIndex + 1].items.length +
@@ -451,7 +456,7 @@ export const FileList: React.FC<FileListProps> = ({
     const getItemSize = (timeStampList) => (index) => {
         switch (timeStampList[index].tag) {
             case "date":
-                return DATE_CONTAINER_HEIGHT;
+                return dateContainerHeight;
             case "file":
                 return listItemHeight;
             default:
@@ -822,34 +827,47 @@ const ListContainer = styled(Box, {
     }
 `;
 
+/**
+ * An grid item, spanning {@link span} columns.
+ */
 const ListItemContainer = styled("div")<{ span: number }>`
-    grid-column: span ${(props) => props.span};
+    grid-column: span ${({ span }) => span};
     display: flex;
     align-items: center;
 `;
 
+/**
+ * A grid items that spans all columns.
+ */
 const FullSpanListItemContainer = styled("div")`
     grid-column: 1 / -1;
     display: flex;
     align-items: center;
 `;
 
-const asFullSpanListItem = ({ item, ...rest }: TimeStampListItem) => ({
+/**
+ * Convert a {@link FileListHeaderOrFooter} into a {@link TimeStampListItem}
+ * that spans all columns.
+ */
+const asFullSpanListItem = ({ item, ...rest }: FileListHeaderOrFooter) => ({
     ...rest,
     item: <FullSpanListItemContainer>{item}</FullSpanListItemContainer>,
 });
 
-const DateContainer = styled(ListItemContainer)(
-    ({ theme }) => `
+/**
+ * The fixed height (in px) of {@link DateContainer}.
+ */
+const dateContainerHeight = 48;
+
+const DateContainer = styled(ListItemContainer)`
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    height: ${DATE_CONTAINER_HEIGHT}px;
-    color: ${theme.vars.palette.text.muted};
-`,
-);
+    height: ${dateContainerHeight}px;
+    color: "text.muted";
+`;
 
-const NothingContainer = styled(ListItemContainer)`
+const NoFilesContainer = styled(ListItemContainer)`
     text-align: center;
     justify-content: center;
 `;
