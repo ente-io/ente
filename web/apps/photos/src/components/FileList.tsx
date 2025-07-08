@@ -156,9 +156,12 @@ export interface FileListProps {
      */
     user?: LocalUser;
     /**
-     * If `true`, then the current listing is showing magic search results.
+     * If `true`, then the default behaviour of grouping files by their date is
+     * suppressed.
+     *
+     * This behaviour is used when showing magic search results.
      */
-    isMagicSearchResult?: boolean;
+    disableGrouping?: boolean;
     selectable?: boolean;
     setSelected: (
         selected: SelectedState | ((selected: SelectedState) => SelectedState),
@@ -202,7 +205,7 @@ export const FileList: React.FC<FileListProps> = ({
     footer,
     user,
     annotatedFiles,
-    isMagicSearchResult,
+    disableGrouping,
     selectable,
     selected,
     setSelected,
@@ -259,7 +262,7 @@ export const FileList: React.FC<FileListProps> = ({
             if (header) {
                 timeStampList.push(asFullSpanListItem(header));
             }
-            if (isMagicSearchResult) {
+            if (disableGrouping) {
                 noGrouping(timeStampList);
             } else {
                 groupByTime(timeStampList);
@@ -294,7 +297,7 @@ export const FileList: React.FC<FileListProps> = ({
         annotatedFiles,
         header,
         footer,
-        isMagicSearchResult,
+        disableGrouping,
         publicCollectionGalleryContext.credentials,
     ]);
 

@@ -1161,7 +1161,7 @@ const Page: React.FC = () => {
                     user={user}
                     files={filteredFiles}
                     enableDownload={true}
-                    isMagicSearchResult={state.searchSuggestion?.type == "clip"}
+                    disableGrouping={state.searchSuggestion?.type == "clip"}
                     selectable={true}
                     selected={selected}
                     setSelected={setSelected}
