@@ -80,7 +80,7 @@ const AuthenticateUserDialogContents: React.FC<AuthenticateUserProps> = ({
             // potentially transient issues.
             log.warn("Ignoring error when determining session validity", e);
         }
-    }, [logout, showMiniDialog]);
+    }, [logout, showMiniDialog, onClose]);
 
     useEffect(() => {
         setUser(ensureLocalUser());

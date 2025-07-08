@@ -1,3 +1,4 @@
+// TODO: Audit this file
 import { AllAlbums } from "components/Collections/AllAlbums";
 import {
     CollectionShare,
@@ -161,6 +162,7 @@ export const GalleryBarAndListHeader: React.FC<
                 ),
             height: 68,
         });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [
         shouldHide,
         mode,

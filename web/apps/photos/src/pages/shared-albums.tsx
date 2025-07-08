@@ -213,6 +213,8 @@ export default function PublicCollectionGallery() {
             }
         };
         main();
+        // TODO:
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const downloadEnabled =
@@ -313,7 +315,7 @@ export default function PublicCollectionGallery() {
             hideLoadingBar();
             setLoading(false);
         }
-    }, [showLoadingBar, hideLoadingBar]);
+    }, [showLoadingBar, hideLoadingBar, onGenericError]);
 
     // See: [Note: Visual feedback to acknowledge user actions]
     const handleVisualFeedback = useCallback(() => {

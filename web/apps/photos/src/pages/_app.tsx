@@ -122,7 +122,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
             electron.onOpenEnteURL(undefined);
             electron.onAppUpdateAvailable(undefined);
         };
-    }, []);
+    }, [router, showMiniDialog, showNotification]);
 
     useEffect(() => {
         if (isDesktop) void resumeExportsIfNeeded();
@@ -152,6 +152,8 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
                 throw "Aborting route change, redirection in process....";
             }
         });
+        // TODO:
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const baseContext = useMemo(

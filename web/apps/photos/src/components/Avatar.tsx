@@ -1,3 +1,5 @@
+// TODO: Audit this file
+/* eslint-disable react-hooks/exhaustive-deps */
 import { styled } from "@mui/material";
 import type { LocalUser } from "ente-accounts/services/user";
 import log from "ente-base/log";

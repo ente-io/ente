@@ -138,12 +138,12 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
         setCurrentIndex(index);
         setOpenFileViewer(true);
         onSetOpenFileViewer?.(true);
-    }, []);
+    }, [onSetOpenFileViewer]);
 
     const handleCloseFileViewer = useCallback(() => {
         onSetOpenFileViewer?.(false);
         setOpenFileViewer(false);
-    }, []);
+    }, [onSetOpenFileViewer]);
 
     const handleTriggerRemotePull = useCallback(
         () => void onRemotePull(),

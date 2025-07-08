@@ -1,5 +1,6 @@
-// TODO: Too many null assertions in this file. The types need reworking.
 // TODO: Audit this file
+// TODO: Too many null assertions in this file. The types need reworking.
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-misused-promises */
 /* eslint-disable @typescript-eslint/no-floating-promises */
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";

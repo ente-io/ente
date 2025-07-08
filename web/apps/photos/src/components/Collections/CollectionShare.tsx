@@ -497,7 +497,7 @@ const AddParticipant: React.FC<AddParticipantProps> = ({
                 email != user.email &&
                 !collection?.sharees?.find((value) => value.email == email),
         );
-    }, [shareSuggestionEmails, collection.sharees]);
+    }, [user.email, shareSuggestionEmails, collection.sharees]);
 
     const handleRootClose = () => {
         onClose();
@@ -1130,7 +1130,7 @@ const PublicShare: React.FC<PublicShareProps> = ({
         } else {
             setResolvedURL(undefined);
         }
-    }, [publicURL]);
+    }, [collection.key, publicURL]);
 
     const handleCopyLink = () => {
         if (resolvedURL) void navigator.clipboard.writeText(resolvedURL);

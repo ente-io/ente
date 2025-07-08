@@ -348,7 +348,7 @@ const SubscriptionStatus: React.FC<SubscriptionStatusProps> = ({
                 }
             }
         },
-        [userDetails],
+        [onShowPlanSelector, userDetails],
     );
 
     if (!hasAMessage) {
@@ -651,13 +651,13 @@ const ExitSection: React.FC = () => {
 };
 
 const InfoSection: React.FC = () => {
-    const [appVersion, setAppVersion] = useState<string | undefined>();
-    const [host, setHost] = useState<string | undefined>();
+    const [appVersion, setAppVersion] = useState("");
+    const [host, setHost] = useState<string | undefined>("");
 
     useEffect(() => {
         void globalThis.electron?.appVersion().then(setAppVersion);
         void customAPIHost().then(setHost);
-    });
+    }, []);
 
     return (
         <>
