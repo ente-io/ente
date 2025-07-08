@@ -390,7 +390,7 @@ export default function PublicCollectionGallery() {
             publicCollection && publicFiles
                 ? {
                       item: (
-                          <ListHeader
+                          <FileListHeader
                               {...{
                                   publicCollection,
                                   publicFiles,
@@ -398,26 +398,19 @@ export default function PublicCollectionGallery() {
                               }}
                           />
                       ),
-                      height: 68,
+                      height: fileListHeaderHeight,
                   }
                 : undefined,
         [onAddSaveGroup, publicCollection, publicFiles],
     );
 
-    const fileListFooter = useMemo(
-        () =>
-            onAddPhotos
-                ? {
-                      item: (
-                          <CenteredFill sx={{ marginTop: "56px" }}>
-                              <AddMorePhotosButton onClick={onAddPhotos} />
-                          </CenteredFill>
-                      ),
-                      height: 104,
-                  }
-                : undefined,
-        [onAddPhotos],
-    );
+    const fileListFooter = useMemo(() => {
+        const props = { referralCode: referralCode.current, onAddPhotos };
+        return {
+            item: <FileListFooter {...props} />,
+            height: fileListFooterHeightForProps(props),
+        };
+    }, [referralCode.current, onAddPhotos]);
 
     if (loading && (!publicFiles || !credentials.current)) {
         return <LoadingIndicator />;
@@ -626,13 +619,24 @@ const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
     </Stack>
 );
 
-interface ListHeaderProps {
+interface FileListHeaderProps {
     publicCollection: Collection;
     publicFiles: EnteFile[];
     onAddSaveGroup: AddSaveGroup;
 }
 
-const ListHeader: React.FC<ListHeaderProps> = ({
+/**
+ * The fixed height (in px) of {@link FileListHeader}.
+ */
+const fileListHeaderHeight = 68;
+
+/**
+ * A header shown before the listing of files.
+ *
+ * It scrolls along with the content. It has a fixed height,
+ * {@link fileListHeaderHeight}.
+ */
+const FileListHeader: React.FC<FileListHeaderProps> = ({
     publicCollection,
     publicFiles,
     onAddSaveGroup,
@@ -668,5 +672,90 @@ const ListHeader: React.FC<ListHeaderProps> = ({
                 )}
             </SpacedRow>
         </GalleryItemsHeaderAdapter>
+    );
+};
+
+interface FileListFooterProps {
+    referralCode?: string;
+    onAddPhotos?: () => void;
+}
+
+/**
+ * The dynamic (prop-depedent) height of {@link FileListFooter}.
+ */
+const fileListFooterHeightForProps = ({
+    referralCode,
+    onAddPhotos,
+}: FileListFooterProps) => (onAddPhotos ? 104 : 0) + (referralCode ? 113 : 75);
+
+/**
+ * A footer shown after the listing of files.
+ *
+ * It scrolls along with the content. It has a dynamic height, dependent on the
+ * props, calculated using {@link fileListFooterHeightForProps}.
+ */
+
+const FileListFooter: React.FC<FileListFooterProps> = ({
+    referralCode,
+    onAddPhotos,
+}) => {
+    if (onAddPhotos)
+        return (
+            <CenteredFill sx={{ marginTop: "56px" }}>
+                <AddMorePhotosButton onClick={onAddPhotos} />
+            </CenteredFill>
+        );
+
+    return (
+        <AlbumFooterContainer
+            span={columns}
+            hasReferral={!!publicCollectionGalleryContext.referralCode}
+        >
+            {/* Make the entire area tappable, otherwise it is hard to
+                    get at on mobile devices. */}
+            <Box sx={{ width: "100%" }}>
+                <Link
+                    color="text.base"
+                    sx={{ "&:hover": { color: "inherit" } }}
+                    target="_blank"
+                    href={"https://ente.io"}
+                >
+                    <Typography variant="small">
+                        <Trans
+                            i18nKey="shared_using"
+                            components={{
+                                a: (
+                                    <Typography
+                                        variant="small"
+                                        component="span"
+                                        sx={{ color: "accent.main" }}
+                                    />
+                                ),
+                            }}
+                            values={{ url: "ente.io" }}
+                        />
+                    </Typography>
+                </Link>
+                {publicCollectionGalleryContext.referralCode ? (
+                    <FullStretchContainer>
+                        <Typography
+                            sx={{
+                                marginTop: "12px",
+                                padding: "8px",
+                                color: "accent.contrastText",
+                            }}
+                        >
+                            <Trans
+                                i18nKey={"sharing_referral_code"}
+                                values={{
+                                    referralCode:
+                                        publicCollectionGalleryContext.referralCode,
+                                }}
+                            />
+                        </Typography>
+                    </FullStretchContainer>
+                ) : null}
+            </Box>
+        </AlbumFooterContainer>
     );
 };

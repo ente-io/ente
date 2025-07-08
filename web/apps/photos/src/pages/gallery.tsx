@@ -180,9 +180,6 @@ const Page: React.FC = () => {
     const [fixCreationTimeFiles, setFixCreationTimeFiles] = useState<
         EnteFile[]
     >([]);
-    /**
-     * The (non-sticky) header shown at the top of the gallery items.
-     */
     const [fileListHeader, setFileListHeader] = useState<
         FileListHeaderOrFooter | undefined
     >(undefined);

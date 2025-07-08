@@ -62,8 +62,8 @@ type GalleryBarAndListHeaderProps = Omit<
  * dialogs that might be triggered by actions on either the bar or the header..
  *
  * This component manages the sticky horizontally scrollable bar shown at the
- * top of the gallery, AND the non-sticky header shown below the bar, at the top
- * of the actual list of items.
+ * top of the gallery, AND the (non-sticky) header shown below the bar, at the
+ * top of the actual list of items.
  *
  * These are disparate views - indeed, the list header is not even a child of
  * this component but is instead proxied via {@link setFileListHeader}. Still,
