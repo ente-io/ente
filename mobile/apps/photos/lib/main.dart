@@ -25,6 +25,7 @@ import "package:photos/db/ml/db.dart";
 import 'package:photos/ente_theme_data.dart';
 import "package:photos/extensions/stop_watch.dart";
 import "package:photos/l10n/l10n.dart";
+import 'package:photos/module/upload/service/file_uploader.dart';
 import "package:photos/service_locator.dart";
 import "package:photos/services/account/user_service.dart";
 import 'package:photos/services/app_lifecycle_service.dart';
@@ -46,7 +47,6 @@ import "package:photos/services/wake_lock_service.dart";
 import 'package:photos/ui/tools/app_lock.dart';
 import 'package:photos/ui/tools/lock_screen.dart';
 import "package:photos/utils/email_util.dart";
-import 'package:photos/utils/file_uploader.dart';
 import "package:photos/utils/lock_screen_settings.dart";
 import 'package:shared_preferences/shared_preferences.dart';
 

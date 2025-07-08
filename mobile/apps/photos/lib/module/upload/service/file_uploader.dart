@@ -33,9 +33,11 @@ import 'package:photos/models/file/file_type.dart';
 import "package:photos/models/file/remote/asset.dart";
 import "package:photos/models/file/remote/collection_file.dart";
 import "package:photos/models/user_details.dart";
+import "package:photos/module/upload/model/item.dart";
 import "package:photos/module/upload/model/media.dart";
 import "package:photos/module/upload/model/update_response.dart";
 import 'package:photos/module/upload/model/upload_url.dart';
+import 'package:photos/module/upload/service/file_upload_metadata.dart';
 import "package:photos/module/upload/service/media.dart";
 import "package:photos/module/upload/service/multipart.dart";
 import "package:photos/service_locator.dart";
@@ -45,7 +47,6 @@ import "package:photos/services/ignored_files_service.dart";
 import "package:photos/services/local/shared_assert.service.dart";
 import 'package:photos/services/sync/sync_service.dart';
 import "package:photos/utils/file_key.dart";
-import 'package:photos/utils/file_upload_metadata.dart';
 import "package:photos/utils/network_util.dart";
 import 'package:photos/utils/standalone/data.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -1411,25 +1412,4 @@ class FileUploader {
       await _pollBackgroundUploadStatus();
     });
   }
-}
-
-class FileUploadItem {
-  final EnteFile file;
-  final int collectionID;
-  final Completer<EnteFile> completer;
-  UploadStatus status;
-
-  FileUploadItem(
-    this.file,
-    this.collectionID,
-    this.completer, {
-    this.status = UploadStatus.notStarted,
-  });
-}
-
-enum UploadStatus { notStarted, inProgress, inBackground, completed }
-
-enum ProcessType {
-  background,
-  foreground,
 }

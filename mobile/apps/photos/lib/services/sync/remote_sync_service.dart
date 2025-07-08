@@ -25,6 +25,7 @@ import 'package:photos/models/file/file_type.dart';
 import "package:photos/models/local/path_config.dart";
 import "package:photos/models/metadata/file_magic.dart";
 import 'package:photos/models/upload_strategy.dart';
+import 'package:photos/module/upload/service/file_uploader.dart';
 import "package:photos/service_locator.dart";
 import 'package:photos/services/app_lifecycle_service.dart';
 import 'package:photos/services/collections_service.dart';
@@ -36,7 +37,6 @@ import "package:photos/services/remote/fetch/files_diff.dart";
 import "package:photos/services/remote/fetch/remote_diff.dart";
 import 'package:photos/services/sync/sync_service.dart';
 import "package:photos/services/video_preview_service.dart";
-import 'package:photos/utils/file_uploader.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class RemoteSyncService {

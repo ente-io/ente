@@ -29,7 +29,7 @@ import 'package:photos/services/ignored_files_service.dart';
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import 'package:photos/services/search_service.dart';
 import 'package:photos/services/sync/sync_service.dart';
-import 'package:photos/utils/file_uploader.dart';
+import 'package:photos/module/upload/service/file_uploader.dart';
 import "package:photos/utils/lock_screen_settings.dart";
 import 'package:photos/utils/validator_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';

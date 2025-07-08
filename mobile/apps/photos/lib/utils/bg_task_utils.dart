@@ -5,7 +5,7 @@ import "package:permission_handler/permission_handler.dart";
 import "package:photos/db/upload_locks_db.dart";
 import "package:photos/extensions/stop_watch.dart";
 import "package:photos/main.dart";
-import "package:photos/utils/file_uploader.dart";
+import "package:photos/module/upload/model/item.dart";
 import "package:shared_preferences/shared_preferences.dart";
 import "package:workmanager/workmanager.dart" as workmanager;
 
