@@ -90,7 +90,7 @@ android {
         }
         dev {
             dimension "default"
-            applicationIdSuffix ".dev"
+//            applicationIdSuffix ".dev"
         }
         playstore {
             dimension "default"
@@ -107,7 +107,7 @@ android {
         }
         debug {
             debuggable true
-            applicationIdSuffix '.debug'
+//            applicationIdSuffix '.debug'
           versionNameSuffix "-debug"
           externalNativeBuild {
             cmake {

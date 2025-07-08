@@ -55,7 +55,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 
 final _logger = Logger("main");
-final ValueNotifier<Account?> _accountNotifier = ValueNotifier<Account?>(null);
+final ValueNotifier<Account?> accountNotifier = ValueNotifier<Account?>(null);
 
 
 bool _isProcessRunning = false;
@@ -99,7 +99,7 @@ Future<void> _runInForeground(AdaptiveThemeMode? savedThemeMode) async {
     runApp(
       AppLock(
         builder: (args) =>
-            EnteApp(_runBackgroundTask, _killBGTask, locale, savedThemeMode,  accountNotifier: _accountNotifier,),
+            EnteApp(_runBackgroundTask, _killBGTask, locale, savedThemeMode,  accountNotifier: accountNotifier,),
         lockScreen: const LockScreen(),
         enabled: await Configuration.instance.shouldShowLockScreen() ||
             localSettings.isOnGuestView(),

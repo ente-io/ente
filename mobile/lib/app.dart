@@ -34,7 +34,6 @@ class EnteApp extends StatefulWidget {
   final Locale? locale;
   final ValueNotifier<Account?> accountNotifier;
 
-
   const EnteApp(
     this.runBackgroundTask,
     this.killBackgroundTask,
@@ -65,6 +64,7 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
     _logger.info('init App');
     super.initState();
     locale = widget.locale;
+
     setupIntentAction();
     WidgetsBinding.instance.addObserver(this);
     setupSubscription();
@@ -189,6 +189,7 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _memoriesChangedSubscription.cancel();
+    widget.accountNotifier.removeListener(_onAccountChanged);
     super.dispose();
   }
 

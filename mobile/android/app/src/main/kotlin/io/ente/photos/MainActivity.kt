@@ -17,7 +17,7 @@ class MainActivity : FlutterFragmentActivity() {
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
-        Log.d("MainActivity", "configureFlutterEngine called")
+        Log.d("UpEnte", "configureFlutterEngine called")
 
         GeneratedPluginRegistrant.registerWith(flutterEngine)
 
@@ -32,12 +32,12 @@ class MainActivity : FlutterFragmentActivity() {
                         pendingAccountDetails = null
                         result.success(null)
                     } else {
-                        Log.d("MainActivity", "No pending account details to send.")
+                        Log.d("UpEnte", "No pending account details to send.")
                         result.success(null)
                     }
                 }
                 else -> {
-                    Log.w("MainActivity", "Unknown method from Flutter: ${call.method}")
+                    Log.w("UpEnte", "Unknown method from Flutter: ${call.method}")
                     result.notImplemented()
                 }
             }
@@ -52,6 +52,7 @@ class MainActivity : FlutterFragmentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         handleIntent(intent)
     }
 
@@ -68,7 +69,7 @@ class MainActivity : FlutterFragmentActivity() {
         val upToken = intent?.getStringExtra("up_token")
         val username = intent?.getStringExtra("username")
 
-        Log.d("MainActivity", "handleIntent: received service_password=$servicePassword, up_token=$upToken, username=$username")
+        Log.d("UpEnte", "handleIntent: received service_password=$servicePassword, up_token=$upToken, username=$username")
 
         if (servicePassword != null && upToken != null && username != null) {
             val accountDetails = mapOf(
@@ -92,15 +93,15 @@ class MainActivity : FlutterFragmentActivity() {
     private fun sendAccountDetailsToFlutter(accountDetails: Map<String, String>) {
         methodChannel?.invokeMethod("onAccountReceived", accountDetails, object : MethodChannel.Result {
             override fun success(result: Any?) {
-                 Log.d("MainActivity", "Account details sent to Flutter successfully.")
+                 Log.d("UpEnte", "Account details sent to Flutter successfully.")
             }
 
             override fun error(errorCode: String, errorMessage: String?, errorDetails: Any?) {
-                 Log.e("MainActivity", "Failed to send account details: $errorCode $errorMessage")
+                 Log.e("UpEnte", "Failed to send account details: $errorCode $errorMessage")
             }
 
             override fun notImplemented() {
-                 Log.w("MainActivity", "onAccountReceived not implemented on Dart side.")
+                 Log.w("UpEnte", "onAccountReceived not implemented on Dart side.")
             }
         })
     }

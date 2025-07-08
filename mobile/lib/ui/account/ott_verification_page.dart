@@ -12,14 +12,12 @@ class OTTVerificationPage extends StatefulWidget {
   final bool isChangeEmail;
   final bool isCreateAccountScreen;
   final bool isResetPasswordScreen;
-  final String token;
 
   const OTTVerificationPage(
     this.email, {
     this.isChangeEmail = false,
     this.isCreateAccountScreen = false,
     this.isResetPasswordScreen = false,
-    this.token = "",
     super.key,
   });
 

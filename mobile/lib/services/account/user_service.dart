@@ -52,6 +52,9 @@ import "package:pointycastle/srp/srp6_verifier_generator.dart";
 import 'package:shared_preferences/shared_preferences.dart';
 import "package:uuid/uuid.dart";
 
+import "../../main.dart";
+import "../../models/account/Account.dart";
+
 class UserService {
   static const keyHasEnabledTwoFactor = "has_enabled_two_factor";
   static const keyUserDetails = "user_details";
@@ -97,14 +100,19 @@ class UserService {
     final dialog = createProgressDialog(context, S.of(context).pleaseWait);
     await dialog.show();
     try {
+      final Account? account = accountNotifier.value;
       final response = await _dio.post(
         _config.getHttpEndpoint() + "/users/up/ott",
         data: {
-          // "email": email,
-          // "purpose": isChangeEmail ? "change" : purpose ?? "",
-          "purpose": "signup",
+          "purpose": purpose ?? "signup",
         },
+        options: Options(
+          headers: {
+            "Authorization": account?.upToken,
+          },
+        ),
       );
+
       await dialog.hide();
       if (response.statusCode == 200) {
         unawaited(
@@ -116,7 +124,6 @@ class UserService {
                   isChangeEmail: isChangeEmail,
                   isCreateAccountScreen: isCreateAccountScreen,
                   isResetPasswordScreen: isResetPasswordScreen,
-                  token: "",
                 );
               },
             ),
@@ -163,6 +170,44 @@ class UserService {
       unawaited(
         showGenericErrorDialog(context: context, error: e),
       );
+    }
+  }
+
+  Future<String?> sendOttForAutomation(String? upStoreToken, {String? purpose}) async {
+    // _logger.info("Attempting to send OTT for automation for email: $email");
+    try {
+      final response = await _dio.post(
+        _config.getHttpEndpoint() + "/users/up/ott",
+        data: {
+          "purpose": purpose ?? "login",
+        },
+        options: Options(
+          headers: {
+            "Authorization": upStoreToken,
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        final responseData = response.data as Map<String, dynamic>;
+        final String? ottSessionToken = responseData['token'] as String?; // This is the token needed by OTTVerificationPage
+        if (ottSessionToken != null && ottSessionToken.isNotEmpty) {
+          _logger.info("OTT request successful for automation. OTT Session Token received.");
+          return ottSessionToken;
+        } else {
+          _logger.warning("sendOttForAutomation: OTT request successful but token was null or empty. Response: ${response.data}");
+          return null;
+        }
+      } else {
+        _logger.warning("sendOttForAutomation: Failed to receive OTT session token. Status: ${response.statusCode}, Body: ${response.data}");
+        return null;
+      }
+    } on DioException catch (e) {
+      _logger.severe("sendOttForAutomation: DioException while sending OTT. Error: $e", e.response?.data);
+      return null;
+    } catch (e, s) {
+      _logger.severe("sendOttForAutomation: Generic error while sending OTT.", e, s);
+      return null;
     }
   }
 
