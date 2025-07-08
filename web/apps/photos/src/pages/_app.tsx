@@ -72,7 +72,8 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
         void isLocalStorageAndIndexedDBMismatch().then((mismatch) => {
             if (mismatch) {
                 log.error("Logging out (IndexedDB and local storage mismatch)");
-                return logout();
+                logout();
+                return;
             } else {
                 return runMigrations();
             }

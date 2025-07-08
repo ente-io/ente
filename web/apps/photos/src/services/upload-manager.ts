@@ -235,6 +235,7 @@ class UIService {
     }
 }
 
+// @ts-expect-error Need to add types
 function convertInProgressUploadsToList(inProgressUploads) {
     return [...inProgressUploads.entries()].map(
         ([localFileID, progress]) =>

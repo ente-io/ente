@@ -101,7 +101,15 @@ const AllAlbumsDialog = styled(Dialog)(({ theme }) => ({
     },
 }));
 
-const Title = ({
+type TitleProps = { collectionCount: number } & Pick<
+    AllAlbums,
+    | "onClose"
+    | "collectionsSortBy"
+    | "onChangeCollectionsSortBy"
+    | "isInHiddenSection"
+>;
+
+const Title: React.FC<TitleProps> = ({
     onClose,
     collectionCount,
     collectionsSortBy,

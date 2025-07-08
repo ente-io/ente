@@ -145,9 +145,9 @@ export const GalleryBarAndListHeader: React.FC<
                             onRemotePull,
                             onAddSaveGroup,
                         }}
-                        collectionSummary={toShowCollectionSummaries.get(
-                            activeCollectionID!,
-                        )!}
+                        collectionSummary={
+                            toShowCollectionSummaries.get(activeCollectionID!)!
+                        }
                         onCollectionShare={showCollectionShare}
                         onCollectionCast={showCollectionCast}
                     />
@@ -211,9 +211,9 @@ export const GalleryBarAndListHeader: React.FC<
             />
             <CollectionShare
                 {...collectionShareVisibilityProps}
-                collectionSummary={toShowCollectionSummaries.get(
-                    activeCollectionID!,
-                )!}
+                collectionSummary={
+                    toShowCollectionSummaries.get(activeCollectionID!)!
+                }
                 collection={activeCollection}
                 {...{
                     user,

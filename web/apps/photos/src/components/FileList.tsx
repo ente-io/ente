@@ -1,5 +1,4 @@
 // TODO: Audit this file
-/* eslint-disable @typescript-eslint/restrict-plus-operands */
 import AlbumOutlinedIcon from "@mui/icons-material/AlbumOutlined";
 import FavoriteRoundedIcon from "@mui/icons-material/FavoriteRounded";
 import PlayCircleOutlineOutlinedIcon from "@mui/icons-material/PlayCircleOutlineOutlined";
@@ -358,12 +357,15 @@ export const FileList: React.FC<FileListProps> = ({
         });
     };
 
-    const getVacuumItem = (timeStampList, footerHeight: number) => {
+    const getVacuumItem = (
+        timeStampList: TimeStampListItem[],
+        footerHeight: number,
+    ) => {
         const fileListHeight = (() => {
             let sum = 0;
             const getCurrentItemSize = getItemSize(timeStampList);
             for (let i = 0; i < timeStampList.length; i++) {
-                sum += getCurrentItemSize(i);
+                sum += getCurrentItemSize(i)!;
                 if (height - sum <= footerHeight) {
                     break;
                 }
@@ -456,16 +458,17 @@ export const FileList: React.FC<FileListProps> = ({
         return newList;
     };
 
-    const getItemSize = (timeStampList) => (index) => {
-        switch (timeStampList[index].tag) {
-            case "date":
-                return dateContainerHeight;
-            case "file":
-                return listItemHeight;
-            default:
-                return timeStampList[index].height;
-        }
-    };
+    const getItemSize =
+        (timeStampList: TimeStampListItem[]) => (index: number) => {
+            switch (timeStampList[index]!.tag) {
+                case "date":
+                    return dateContainerHeight;
+                case "file":
+                    return listItemHeight;
+                default:
+                    return timeStampList[index]!.height!;
+            }
+        };
 
     const generateKey = (index: number) => {
         switch (timeStampList[index]!.tag) {

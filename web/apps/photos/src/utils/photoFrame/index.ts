@@ -1,3 +1,4 @@
+// TODO: Audit this file
 import type { SelectionContext } from "ente-new/photos/components/gallery";
 import type { GalleryBarMode } from "ente-new/photos/components/gallery/reducer";
 import type { SelectedState, SetSelectedState } from "utils/file";
@@ -10,6 +11,7 @@ export const handleSelectCreator =
         userID: number | undefined,
         activeCollectionID: number,
         activePersonID: string | undefined,
+        // @ts-expect-error Need to add types
         setRangeStart?,
     ) =>
     ({ id, ownerID }: { id: number; ownerID: number }, index?: number) =>

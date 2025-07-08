@@ -381,6 +381,7 @@ const InProgressSection: React.FC = () => {
 
     const fileList = inProgressUploads ?? [];
 
+    // @ts-expect-error Need to add types
     const renderListItem = ({ localFileID, progress }) => {
         return (
             <InProgressItemContainer key={localFileID}>
@@ -396,10 +397,12 @@ const InProgressSection: React.FC = () => {
         );
     };
 
+    // @ts-expect-error Need to add types
     const getItemTitle = ({ localFileID, progress }) => {
         return `${uploadFileNames.get(localFileID)} - ${progress}%`;
     };
 
+    // @ts-expect-error Need to add types
     const generateItemKey = ({ localFileID, progress }) => {
         return `${localFileID}-${progress}`;
     };
@@ -501,6 +504,7 @@ const ResultSection: React.FC<ResultSectionProps> = ({
         return <></>;
     }
 
+    // @ts-expect-error Need to add types
     const renderListItem = (fileID) => {
         return (
             <ResultItemContainer key={fileID}>
@@ -509,10 +513,12 @@ const ResultSection: React.FC<ResultSectionProps> = ({
         );
     };
 
+    // @ts-expect-error Need to add types
     const getItemTitle = (fileID) => {
         return uploadFileNames.get(fileID)!;
     };
 
+    // @ts-expect-error Need to add types
     const generateItemKey = (fileID) => {
         return fileID;
     };
