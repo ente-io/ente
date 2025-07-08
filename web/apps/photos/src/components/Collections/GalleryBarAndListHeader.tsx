@@ -128,7 +128,7 @@ export const GalleryBarAndListHeader: React.FC<
         const group = saveGroups.find(
             (g) => g.collectionSummaryID === activeCollectionID,
         );
-        return group && !isSaveComplete(group) && !isSaveCancelled(group);
+        return !!group && !isSaveComplete(group) && !isSaveCancelled(group);
     }, [saveGroups, activeCollectionID]);
 
     useEffect(() => {
@@ -146,8 +146,8 @@ export const GalleryBarAndListHeader: React.FC<
                             onAddSaveGroup,
                         }}
                         collectionSummary={toShowCollectionSummaries.get(
-                            activeCollectionID,
-                        )}
+                            activeCollectionID!,
+                        )!}
                         onCollectionShare={showCollectionShare}
                         onCollectionCast={showCollectionCast}
                     />
@@ -212,8 +212,8 @@ export const GalleryBarAndListHeader: React.FC<
             <CollectionShare
                 {...collectionShareVisibilityProps}
                 collectionSummary={toShowCollectionSummaries.get(
-                    activeCollectionID,
-                )}
+                    activeCollectionID!,
+                )!}
                 collection={activeCollection}
                 {...{
                     user,

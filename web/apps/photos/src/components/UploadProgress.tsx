@@ -1,3 +1,4 @@
+// TODO: Audit this file
 import CloseIcon from "@mui/icons-material/Close";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import UnfoldLessIcon from "@mui/icons-material/UnfoldLess";
@@ -509,7 +510,7 @@ const ResultSection: React.FC<ResultSectionProps> = ({
     };
 
     const getItemTitle = (fileID) => {
-        return uploadFileNames.get(fileID);
+        return uploadFileNames.get(fileID)!;
     };
 
     const generateItemKey = (fileID) => {
@@ -593,6 +594,8 @@ const createItemData: <T>(
     items,
 }));
 
+// TODO: Too many non-null assertions
+
 // @ts-expect-error "TODO: Understand and fix the type error here"
 const Row: <T>({
     index,
@@ -612,12 +615,12 @@ const Row: <T>({
                         ],
                     },
                 }}
-                title={getItemTitle(items[index])}
+                title={getItemTitle(items[index]!)}
                 placement="bottom-start"
                 enterDelay={300}
                 enterNextDelay={100}
             >
-                <div style={style}>{renderListItem(items[index])}</div>
+                <div style={style}>{renderListItem(items[index]!)}</div>
             </Tooltip>
         );
     },
@@ -633,7 +636,7 @@ function ItemList<T>(props: ItemListProps<T>) {
 
     const getItemKey: ListItemKeySelector<ItemData<T>> = (index, data) => {
         const { items } = data;
-        return props.generateItemKey(items[index]);
+        return props.generateItemKey(items[index]!);
     };
 
     return (
@@ -641,11 +644,11 @@ function ItemList<T>(props: ItemListProps<T>) {
             <List
                 itemData={itemData}
                 height={Math.min(
-                    props.itemSize * props.items.length,
-                    props.maxHeight,
+                    props.itemSize! * props.items.length,
+                    props.maxHeight!,
                 )}
                 width={"100%"}
-                itemSize={props.itemSize}
+                itemSize={props.itemSize!}
                 itemCount={props.items.length}
                 itemKey={getItemKey}
             >

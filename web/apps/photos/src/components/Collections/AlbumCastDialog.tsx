@@ -87,6 +87,7 @@ export const AlbumCastDialogContents: React.FC<AlbumCastDialogProps> = ({
         // (effectively, only Chrome).
         //
         // Override, otherwise tsc complains about unknown property `chrome`.
+        // @ts-expect-error TODO why is this needed
         // eslint-disable-next-line @typescript-eslint/dot-notation
         setBrowserCanCast(typeof window["chrome"] != "undefined");
     }, []);
