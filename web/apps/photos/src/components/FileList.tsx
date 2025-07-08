@@ -365,7 +365,7 @@ export const FileList: React.FC<FileListProps> = ({
             let sum = 0;
             const getCurrentItemSize = getItemSize(timeStampList);
             for (let i = 0; i < timeStampList.length; i++) {
-                sum += getCurrentItemSize(i)!;
+                sum += getCurrentItemSize(i);
                 if (height - sum <= footerHeight) {
                     break;
                 }
@@ -718,6 +718,8 @@ export const FileList: React.FC<FileListProps> = ({
                 return ret;
             }
             default:
+                // TODO:
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-return
                 return listItem.item;
         }
     };

@@ -170,7 +170,7 @@ export const GalleryBarAndListHeader: React.FC<
         activePerson,
         showCollectionShare,
         showCollectionCast,
-        // TODO-Cluster
+        // TODO: Cluster
         // This causes a loop since it is an array dep
         // people,
     ]);

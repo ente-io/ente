@@ -139,7 +139,7 @@ const createSelectedAndContext = (
             context:
                 mode == "people"
                     ? { mode, personID: activePersonID! }
-                    : { mode, collectionID: activeCollectionID! },
+                    : { mode, collectionID: activeCollectionID },
         };
     } else {
         // Both mode and context are defined.
@@ -152,7 +152,7 @@ const createSelectedAndContext = (
                 context:
                     mode == "people"
                         ? { mode, personID: activePersonID! }
-                        : { mode, collectionID: activeCollectionID! },
+                        : { mode, collectionID: activeCollectionID },
             };
         } else {
             if (selected.context?.mode == "people") {
@@ -177,7 +177,7 @@ const createSelectedAndContext = (
                         collectionID: 0,
                         context: {
                             mode: selected.context?.mode,
-                            collectionID: activeCollectionID!,
+                            collectionID: activeCollectionID,
                         },
                     };
                 }
@@ -189,7 +189,7 @@ const createSelectedAndContext = (
         ? undefined
         : mode == "people"
           ? { mode, personID: activePersonID! }
-          : { mode, collectionID: activeCollectionID! };
+          : { mode, collectionID: activeCollectionID };
 
     return { selected, newContext };
 };

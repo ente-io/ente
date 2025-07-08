@@ -523,6 +523,7 @@ const ResultSection: React.FC<ResultSectionProps> = ({
 
     // @ts-expect-error Need to add types
     const generateItemKey = (fileID) => {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
         return fileID;
     };
 
