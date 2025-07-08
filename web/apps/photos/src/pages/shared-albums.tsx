@@ -1,4 +1,4 @@
-// TODO: Audit this file
+// TODO: Audit this file (too many null assertions)
 import AddPhotoAlternateOutlinedIcon from "@mui/icons-material/AddPhotoAlternateOutlined";
 import CloseIcon from "@mui/icons-material/Close";
 import DownloadIcon from "@mui/icons-material/Download";
@@ -123,9 +123,9 @@ export default function PublicCollectionGallery() {
         context: undefined,
     });
 
+    // TODO: Can we convert these to state
     const credentials = useRef<PublicAlbumsCredentials | undefined>(undefined);
-    const collectionKey = useRef<string>(null);
-    const url = useRef<string>(null);
+    const collectionKey = useRef<string | undefined>(undefined);
 
     const { saveGroups, onAddSaveGroup, onRemoveSaveGroup } = useSaveGroups();
 
@@ -169,8 +169,7 @@ export default function PublicCollectionGallery() {
         const main = async () => {
             let redirectingToWebsite = false;
             try {
-                url.current = window.location.href;
-                const currentURL = new URL(url.current);
+                const currentURL = new URL(window.location.href);
                 const t = currentURL.searchParams.get("t");
                 const ck = await extractCollectionKeyFromShareURL(currentURL);
                 if (!t && !ck) {
@@ -181,10 +180,7 @@ export default function PublicCollectionGallery() {
                     return;
                 }
                 collectionKey.current = ck;
-                url.current = window.location.href;
-                const collection = await savedPublicCollectionByKey(
-                    collectionKey.current,
-                );
+                const collection = await savedPublicCollectionByKey(ck);
                 const accessToken = t;
                 let accessTokenJWT: string | undefined;
                 if (collection) {
@@ -226,12 +222,12 @@ export default function PublicCollectionGallery() {
      * both our local database and component state.
      */
     const publicAlbumsRemotePull = useCallback(async () => {
-        const accessToken = credentials.current.accessToken;
+        const accessToken = credentials.current!.accessToken;
         showLoadingBar();
         setLoading(true);
         try {
             const { collection, referralCode: userReferralCode } =
-                await pullCollection(accessToken, collectionKey.current);
+                await pullCollection(accessToken, collectionKey.current!);
             setReferralCode(userReferralCode);
 
             setPublicCollection(collection);
@@ -242,18 +238,18 @@ export default function PublicCollectionGallery() {
 
             // Remove the locally cached accessTokenJWT if the sharer has
             // disabled password protection on the link.
-            if (!isPasswordProtected && credentials.current.accessTokenJWT) {
+            if (!isPasswordProtected && credentials.current?.accessTokenJWT) {
                 credentials.current.accessTokenJWT = undefined;
                 downloadManager.setPublicAlbumsCredentials(credentials.current);
                 removePublicCollectionAccessTokenJWT(accessToken);
             }
 
-            if (isPasswordProtected && !credentials.current.accessTokenJWT) {
+            if (isPasswordProtected && !credentials.current?.accessTokenJWT) {
                 await removePublicCollectionFileData(accessToken);
             } else {
                 try {
                     await pullPublicCollectionFiles(
-                        credentials.current,
+                        credentials.current!,
                         collection,
                         (files) =>
                             setPublicFiles(
@@ -272,7 +268,7 @@ export default function PublicCollectionGallery() {
                     // Clear the locally cached accessTokenJWT and ask the user
                     // to reenter the password.
                     if (isHTTP401Error(e)) {
-                        credentials.current.accessTokenJWT = undefined;
+                        credentials.current!.accessTokenJWT = undefined;
                         downloadManager.setPublicAlbumsCredentials(
                             credentials.current,
                         );
@@ -303,7 +299,7 @@ export default function PublicCollectionGallery() {
                 );
                 // Sharing has been disabled. Clear out local cache.
                 await removePublicCollectionFileData(accessToken);
-                await removePublicCollectionByKey(collectionKey.current);
+                await removePublicCollectionByKey(collectionKey.current!);
                 setPublicCollection(undefined);
                 setPublicFiles(undefined);
             } else {
@@ -329,13 +325,13 @@ export default function PublicCollectionGallery() {
         setFieldError,
     ) => {
         try {
-            const accessToken = credentials.current.accessToken;
+            const accessToken = credentials.current!.accessToken;
             const accessTokenJWT = await verifyPublicAlbumPassword(
-                publicCollection.publicURLs[0]!,
+                publicCollection!.publicURLs[0]!,
                 password,
                 accessToken,
             );
-            credentials.current.accessTokenJWT = accessTokenJWT;
+            credentials.current!.accessTokenJWT = accessTokenJWT;
             downloadManager.setPublicAlbumsCredentials(credentials.current);
             await savePublicCollectionAccessTokenJWT(
                 accessToken,
@@ -367,12 +363,12 @@ export default function PublicCollectionGallery() {
 
     const handleUploadFile = (file: EnteFile) =>
         setPublicFiles(
-            sortFilesForCollection([...publicFiles, file], publicCollection),
+            sortFilesForCollection([...publicFiles!, file], publicCollection),
         );
 
     const downloadFilesHelper = async () => {
         try {
-            const selectedFiles = getSelectedFiles(selected, publicFiles);
+            const selectedFiles = getSelectedFiles(selected, publicFiles!);
             await downloadAndSaveFiles(
                 selectedFiles,
                 t("files_count", { count: selectedFiles.length }),
@@ -431,7 +427,7 @@ export default function PublicCollectionGallery() {
                 </Typography>
             </Stack100vhCenter>
         );
-    } else if (isPasswordProtected && !credentials.current.accessTokenJWT) {
+    } else if (isPasswordProtected && !credentials.current?.accessTokenJWT) {
         return (
             <AccountsPageContents>
                 <AccountsPageTitle>{t("password")}</AccountsPageTitle>
