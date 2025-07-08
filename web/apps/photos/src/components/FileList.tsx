@@ -147,7 +147,6 @@ export interface FileListProps {
      * It is not sticky, and scrolls along with the content of the list.
      */
     footer?: FileListHeaderOrFooter;
-    showAppDownloadBanner?: boolean;
     /**
      * The logged in user, if any.
      *
@@ -203,7 +202,6 @@ export const FileList: React.FC<FileListProps> = ({
     footer,
     user,
     annotatedFiles,
-    showAppDownloadBanner,
     isMagicSearchResult,
     selectable,
     selected,
@@ -276,8 +274,6 @@ export const FileList: React.FC<FileListProps> = ({
             timeStampList.push(getVacuumItem(timeStampList));
             if (footer) {
                 timeStampList.push(asFullSpanListItem(footer));
-            } else if (showAppDownloadBanner) {
-                timeStampList.push(getAppDownloadFooter());
             }
 
             if (publicCollectionGalleryContext.credentials) {
@@ -398,35 +394,6 @@ export const FileList: React.FC<FileListProps> = ({
             height: Math.max(height - fileListHeight - footerHeight, 0),
         };
     };
-
-    const getAppDownloadFooter = (): TimeStampListItem => ({
-        height: FOOTER_HEIGHT,
-        item: (
-            <FooterContainer span={columns}>
-                <Typography variant="small" sx={{ color: "text.faint" }}>
-                    <Trans
-                        i18nKey={"install_mobile_app"}
-                        components={{
-                            a: (
-                                <Link
-                                    href="https://play.google.com/store/apps/details?id=io.ente.photos"
-                                    target="_blank"
-                                    rel="noopener"
-                                />
-                            ),
-                            b: (
-                                <Link
-                                    href="https://apps.apple.com/in/app/ente-photos/id1542026904"
-                                    target="_blank"
-                                    rel="noopener"
-                                />
-                            ),
-                        }}
-                    />
-                </Typography>
-            </FooterContainer>
-        ),
-    });
 
     const getAlbumsFooter = (): TimeStampListItem => ({
         height: publicCollectionGalleryContext.referralCode
@@ -965,18 +932,6 @@ const DateContainer = styled(ListItemContainer)(
     color: ${theme.vars.palette.text.muted};
 `,
 );
-
-const FooterContainer = styled(ListItemContainer)`
-    margin-bottom: 0.75rem;
-    @media (max-width: 540px) {
-        font-size: 12px;
-        margin-bottom: 0.5rem;
-    }
-    text-align: center;
-    justify-content: center;
-    align-items: flex-end;
-    margin-top: calc(2rem + 20px);
-`;
 
 const AlbumFooterContainer = styled(ListItemContainer, {
     shouldForwardProp: (propName) => propName != "hasReferral",

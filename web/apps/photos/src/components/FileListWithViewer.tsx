@@ -58,7 +58,6 @@ export type FileListWithViewerProps = {
     | "modePlus"
     | "header"
     | "footer"
-    | "showAppDownloadBanner"
     | "isMagicSearchResult"
     | "selectable"
     | "selected"
@@ -98,7 +97,6 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
     user,
     files,
     enableDownload,
-    showAppDownloadBanner,
     isMagicSearchResult,
     selectable,
     selected,
@@ -186,7 +184,6 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
                             header,
                             footer,
                             user,
-                            showAppDownloadBanner,
                             isMagicSearchResult,
                             selectable,
                             selected,

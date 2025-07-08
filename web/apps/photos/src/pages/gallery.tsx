@@ -1,7 +1,7 @@
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined";
 import MenuIcon from "@mui/icons-material/Menu";
-import { IconButton, Stack, Typography } from "@mui/material";
+import { IconButton, Link, Stack, Typography } from "@mui/material";
 import { AuthenticateUser } from "components/AuthenticateUser";
 import { GalleryBarAndListHeader } from "components/Collections/GalleryBarAndListHeader";
 import { DownloadStatusNotifications } from "components/DownloadStatusNotifications";
@@ -967,6 +967,14 @@ const Page: React.FC = () => {
         [],
     );
 
+    const showAppDownloadFooter =
+        state.collectionFiles.length < 30 && !isInSearchMode;
+
+    const fileListFooter = useMemo(
+        () => (showAppDownloadFooter ? createAppDownloadFooter() : undefined),
+        [showAppDownloadFooter],
+    );
+
     const showSelectionBar =
         selected.count > 0 && selected.collectionID === activeCollectionID;
 
@@ -1149,12 +1157,10 @@ const Page: React.FC = () => {
                     mode={barMode}
                     modePlus={isInSearchMode ? "search" : barMode}
                     header={fileListHeader}
+                    footer={fileListFooter}
                     user={user}
                     files={filteredFiles}
                     enableDownload={true}
-                    showAppDownloadBanner={
-                        state.collectionFiles.length < 30 && !isInSearchMode
-                    }
                     isMagicSearchResult={state.searchSuggestion?.type == "clip"}
                     selectable={true}
                     selected={selected}
@@ -1383,3 +1389,39 @@ const handleSubscriptionCompletionRedirectIfNeeded = async (
         }
     }
 };
+
+const createAppDownloadFooter = (): FileListHeaderOrFooter => ({
+    item: (
+        <Typography
+            variant="small"
+            sx={{
+                alignSelf: "flex-end",
+                marginInline: "auto",
+                marginBlock: 0.75,
+                textAlign: "center",
+                color: "text.faint",
+            }}
+        >
+            <Trans
+                i18nKey={"install_mobile_app"}
+                components={{
+                    a: (
+                        <Link
+                            href="https://play.google.com/store/apps/details?id=io.ente.photos"
+                            target="_blank"
+                            rel="noopener"
+                        />
+                    ),
+                    b: (
+                        <Link
+                            href="https://apps.apple.com/in/app/ente-photos/id1542026904"
+                            target="_blank"
+                            rel="noopener"
+                        />
+                    ),
+                }}
+            />
+        </Typography>
+    ),
+    height: 90,
+});
