@@ -1,4 +1,5 @@
 // TODO: Audit this file
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 import CloseIcon from "@mui/icons-material/Close";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import UnfoldLessIcon from "@mui/icons-material/UnfoldLess";
@@ -384,6 +385,7 @@ const InProgressSection: React.FC = () => {
     // @ts-expect-error Need to add types
     const renderListItem = ({ localFileID, progress }) => {
         return (
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             <InProgressItemContainer key={localFileID}>
                 <span>{uploadFileNames.get(localFileID)}</span>
                 {uploadPhase == "uploading" && (
@@ -507,6 +509,7 @@ const ResultSection: React.FC<ResultSectionProps> = ({
     // @ts-expect-error Need to add types
     const renderListItem = (fileID) => {
         return (
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             <ResultItemContainer key={fileID}>
                 {uploadFileNames.get(fileID)}
             </ResultItemContainer>
@@ -595,8 +598,12 @@ const createItemData: <T>(
     getItemTitle: (item: T) => string,
     items: T[],
 ) => ItemData<T> = memoize((renderListItem, getItemTitle, items) => ({
+    // TODO
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     renderListItem,
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     getItemTitle,
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     items,
 }));
 

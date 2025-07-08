@@ -235,8 +235,7 @@ class UIService {
     }
 }
 
-// @ts-expect-error Need to add types
-function convertInProgressUploadsToList(inProgressUploads) {
+function convertInProgressUploadsToList(inProgressUploads: InProgressUploads) {
     return [...inProgressUploads.entries()].map(
         ([localFileID, progress]) =>
             ({ localFileID, progress }) as InProgressUpload,
@@ -253,6 +252,7 @@ const groupByResult = (finishedUploads: FinishedUploads) => {
 };
 
 class UploadManager {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     private comlinkCryptoWorkers: ComlinkWorker<typeof CryptoWorker>[] =
         new Array(maxConcurrentUploads);
     private parsedMetadataJSONMap = new Map<string, ParsedMetadataJSON>();
@@ -298,6 +298,7 @@ class UploadManager {
     ) {
         this.itemsToBeUploaded = [];
         this.failedItems = [];
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         this.parsedMetadataJSONMap = parsedMetadataJSONMap ?? new Map();
         this.uploaderName = undefined;
         this.shouldUploadBeCancelled = false;
@@ -775,7 +776,9 @@ const logAboutMemoryPressureIfNeeded = () => {
     // is the method recommended by the Electron team (see the link about the V8
     // memory cage). The embedded Chromium supports it fine though, we just need
     // to goad TypeScript to accept the type.
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const heapSize = (performance as any).memory.totalJSHeapSize;
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const heapLimit = (performance as any).memory.jsHeapSizeLimit;
     if (heapSize / heapLimit > 0.7) {
         log.info(

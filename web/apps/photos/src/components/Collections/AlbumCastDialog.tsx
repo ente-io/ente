@@ -128,7 +128,10 @@ export const AlbumCastDialogContents: React.FC<AlbumCastDialogProps> = ({
                     "urn:x-cast:pair-request",
                     (_, message) => {
                         const data = message;
+                        // TODO:
+                        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                         const obj = JSON.parse(data);
+                        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                         const code = obj.code;
 
                         if (code) {

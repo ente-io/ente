@@ -18,8 +18,10 @@ export const handleSelectCreator =
     (checked: boolean) => {
         if (typeof index != "undefined") {
             if (checked) {
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-call
                 setRangeStart(index);
             } else {
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-call
                 setRangeStart(undefined);
             }
         }
