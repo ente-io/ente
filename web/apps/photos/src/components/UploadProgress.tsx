@@ -32,6 +32,7 @@ import { t } from "i18next";
 import memoize from "memoize-one";
 import React, {
     createContext,
+    useCallback,
     useContext,
     useEffect,
     useState,
@@ -87,7 +88,7 @@ export const UploadProgress: React.FC<UploadProgressProps> = ({
         if (open) setExpanded(false);
     }, [open]);
 
-    const handleClose = () => {
+    const handleClose = useCallback(() => {
         if (uploadPhase == "done") {
             onClose();
         } else {
@@ -102,7 +103,7 @@ export const UploadProgress: React.FC<UploadProgressProps> = ({
                 cancel: t("no"),
             });
         }
-    };
+    }, [uploadPhase, onClose, cancelUploads, showMiniDialog]);
 
     if (!open) {
         return <></>;
@@ -130,6 +131,9 @@ export const UploadProgress: React.FC<UploadProgressProps> = ({
     );
 };
 
+/**
+ * A context internal to the components of this file.
+ */
 interface UploadProgressContextT {
     open: boolean;
     onClose: () => void;
@@ -145,20 +149,19 @@ interface UploadProgressContextT {
     setExpanded: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const UploadProgressContext = createContext<UploadProgressContextT>({
-    open: null,
-    onClose: () => null,
-    uploadCounter: null,
-    uploadPhase: undefined,
-    percentComplete: null,
-    retryFailed: () => null,
-    inProgressUploads: null,
-    uploadFileNames: null,
-    finishedUploads: null,
-    hasLivePhotos: null,
-    expanded: null,
-    setExpanded: () => null,
-});
+const UploadProgressContext = createContext<UploadProgressContextT | undefined>(
+    undefined,
+);
+
+/**
+ * Convenience hook to obtain the non-null asserted
+ * {@link UploadProgressContext}.
+ *
+ * The non-null assertion is reasonable since we provide it to the tree always
+ * in an invariant that is local to this file (and thus has less chance of being
+ * invalid in the future).
+ */
+const useUploadProgressContext = () => useContext(UploadProgressContext)!;
 
 const MinimizedUploadProgress: React.FC = () => (
     <Snackbar open anchorOrigin={{ horizontal: "right", vertical: "bottom" }}>
@@ -176,9 +179,7 @@ const UploadProgressHeader: React.FC = () => (
 );
 
 const UploadProgressTitle: React.FC = () => {
-    const { setExpanded, onClose, expanded } = useContext(
-        UploadProgressContext,
-    );
+    const { setExpanded, onClose, expanded } = useUploadProgressContext();
     const toggleExpanded = () => setExpanded((expanded) => !expanded);
 
     return (
@@ -202,9 +203,8 @@ const UploadProgressTitle: React.FC = () => {
 };
 
 const UploadProgressSubtitleText: React.FC = () => {
-    const { uploadPhase, uploadCounter, finishedUploads } = useContext(
-        UploadProgressContext,
-    );
+    const { uploadPhase, uploadCounter, finishedUploads } =
+        useUploadProgressContext();
 
     return (
         <Typography
@@ -280,7 +280,7 @@ const notUploadedFileCount = (
 };
 
 const UploadProgressBar: React.FC = () => {
-    const { uploadPhase, percentComplete } = useContext(UploadProgressContext);
+    const { uploadPhase, percentComplete } = useUploadProgressContext();
 
     return (
         <Box>
@@ -300,9 +300,8 @@ const UploadProgressBar: React.FC = () => {
 };
 
 function UploadProgressDialog() {
-    const { open, onClose, uploadPhase, finishedUploads } = useContext(
-        UploadProgressContext,
-    );
+    const { open, onClose, uploadPhase, finishedUploads } =
+        useUploadProgressContext();
 
     const [hasUnUploadedFiles, setHasUnUploadedFiles] = useState(false);
 
@@ -377,7 +376,8 @@ function UploadProgressDialog() {
 
 const InProgressSection: React.FC = () => {
     const { inProgressUploads, hasLivePhotos, uploadFileNames, uploadPhase } =
-        useContext(UploadProgressContext);
+        useUploadProgressContext();
+
     const fileList = inProgressUploads ?? [];
 
     const renderListItem = ({ localFileID, progress }) => {
@@ -492,9 +492,8 @@ const ResultSection: React.FC<ResultSectionProps> = ({
     sectionTitle,
     sectionInfo,
 }) => {
-    const { finishedUploads, uploadFileNames } = useContext(
-        UploadProgressContext,
-    );
+    const { finishedUploads, uploadFileNames } = useUploadProgressContext();
+
     const fileList = finishedUploads.get(resultType);
 
     if (!fileList?.length) {
@@ -657,15 +656,14 @@ function ItemList<T>(props: ItemListProps<T>) {
 }
 
 const DoneFooter: React.FC = () => {
-    const { uploadPhase, finishedUploads, retryFailed, onClose } = useContext(
-        UploadProgressContext,
-    );
+    const { uploadPhase, finishedUploads, retryFailed, onClose } =
+        useUploadProgressContext();
 
     return (
         <DialogActions>
             {uploadPhase == "done" &&
-                (finishedUploads?.get("failed")?.length > 0 ||
-                finishedUploads?.get("blocked")?.length > 0 ? (
+                ((finishedUploads.get("failed")?.length ?? 0) > 0 ||
+                (finishedUploads.get("blocked")?.length ?? 0) > 0 ? (
                     <Button fullWidth onClick={retryFailed}>
                         {t("retry_failed_uploads")}
                     </Button>
