@@ -119,7 +119,6 @@ Future<FFProbeProps?> getVideoPropsAsync(File originalFile) async {
   }
 }
 
-
 class ParsedExifDateTime {
   late final DateTime? time;
   late final String? dateTime;
@@ -153,22 +152,27 @@ Future<ParsedExifDateTime?> tryParseExifDateTime(
 }
 
 ParsedExifDateTime? parseExifTime(Map<String, IfdTag> exif) {
-  final exifTime = exif.containsKey(kDateTimeOriginal)
-      ? exif[kDateTimeOriginal]!.printable
-      : exif.containsKey(kImageDateTime)
-          ? exif[kImageDateTime]!.printable
-          : null;
-  if (exifTime == null || exifTime == kEmptyExifDateTime) {
+  try {
+    final exifTime = exif.containsKey(kDateTimeOriginal)
+        ? exif[kDateTimeOriginal]!.printable
+        : exif.containsKey(kImageDateTime)
+            ? exif[kImageDateTime]!.printable
+            : null;
+    if (exifTime == null || exifTime == kEmptyExifDateTime) {
+      return null;
+    }
+    String? exifOffsetTime;
+    for (final key in kExifOffSetKeys) {
+      if (exif.containsKey(key)) {
+        exifOffsetTime = exif[key]!.printable;
+        break;
+      }
+    }
+    return getDateTimeInDeviceTimezone(exifTime, exifOffsetTime);
+  } catch (e, s) {
+    _logger.severe("failed to parse exif time", e, s);
     return null;
   }
-  String? exifOffsetTime;
-  for (final key in kExifOffSetKeys) {
-    if (exif.containsKey(key)) {
-      exifOffsetTime = exif[key]!.printable;
-      break;
-    }
-  }
-  return getDateTimeInDeviceTimezone(exifTime, exifOffsetTime);
 }
 
 ParsedExifDateTime getDateTimeInDeviceTimezone(

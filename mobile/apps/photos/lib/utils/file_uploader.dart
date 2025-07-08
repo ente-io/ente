@@ -33,9 +33,10 @@ import 'package:photos/models/file/file_type.dart';
 import "package:photos/models/file/remote/asset.dart";
 import "package:photos/models/file/remote/collection_file.dart";
 import "package:photos/models/user_details.dart";
+import "package:photos/module/upload/model/media.dart";
 import "package:photos/module/upload/model/update_response.dart";
-import "package:photos/module/upload/model/upload_data.dart";
 import 'package:photos/module/upload/model/upload_url.dart';
+import "package:photos/module/upload/service/media.dart";
 import "package:photos/module/upload/service/multipart.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/account/user_service.dart";
@@ -43,10 +44,8 @@ import 'package:photos/services/collections_service.dart';
 import "package:photos/services/ignored_files_service.dart";
 import "package:photos/services/local/shared_assert.service.dart";
 import 'package:photos/services/sync/sync_service.dart';
-import "package:photos/utils/exif_util.dart";
 import "package:photos/utils/file_key.dart";
-import 'package:photos/utils/upload_metadata.dart';
-import "package:photos/utils/file_util.dart";
+import 'package:photos/utils/file_upload_metadata.dart';
 import "package:photos/utils/network_util.dart";
 import 'package:photos/utils/standalone/data.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -507,9 +506,9 @@ class FileUploader {
       throw LockAlreadyAcquiredError();
     }
 
-    MediaUploadData? mediaUploadData;
+    UploadMedia? mediaUploadData;
     try {
-      mediaUploadData = await getUploadDataFromEnteFile(file, parseExif: true);
+      mediaUploadData = await getUploadMedia(file);
     } catch (e) {
       // This additional try catch block is added because for resumable upload,
       // we need to compute the hash before the next step. Previously, this
@@ -525,7 +524,7 @@ class FileUploader {
     final String? existingMultipartEncFileName =
         await _uploadLocks.getEncryptedFileName(
       lockKey,
-      mediaUploadData.hash.data,
+      mediaUploadData.hash,
       collectionID,
     );
 
@@ -559,7 +558,7 @@ class FileUploader {
       EncryptionResult? multiPartFileEncResult = multipartEntryExists
           ? await _multiPartUploader.getEncryptionResult(
               lockKey,
-              mediaUploadData.hash.data,
+              mediaUploadData.hash,
               collectionID,
             )
           : null;
@@ -609,12 +608,12 @@ class FileUploader {
         // otherwise just delete the file for singlepart upload
         await File(encryptedFilePath).delete();
       }
-      await _checkIfWithinStorageLimit(mediaUploadData.sourceFile);
+      await _checkIfWithinStorageLimit(mediaUploadData.uploadFile);
       final encryptedFile = File(encryptedFilePath);
 
       final EncryptionResult fileEncryptResult = multiPartFileEncResult ??
           await CryptoUtil.encryptFile(
-            mediaUploadData.sourceFile.path,
+            mediaUploadData.uploadFile.path,
             encryptedFilePath,
             key: key,
           );
@@ -664,7 +663,7 @@ class FileUploader {
           fileObjectKey = await _multiPartUploader.putExistingMultipartFile(
             encryptedFile,
             lockKey,
-            mediaUploadData.hash.data,
+            mediaUploadData.hash,
             collectionID,
           );
         } else {
@@ -673,7 +672,7 @@ class FileUploader {
           final encFileName = encryptedFile.path.split('/').last;
           await _multiPartUploader.createTableEntry(
             lockKey,
-            mediaUploadData.hash.data,
+            mediaUploadData.hash,
             collectionID,
             fileUploadURLs,
             encFileName,
@@ -698,14 +697,10 @@ class FileUploader {
           encThumbSize,
         );
       }
-      final ParsedExifDateTime? exifTime = await tryParseExifDateTime(
-        null,
-        mediaUploadData.exifData,
-      );
-      final Map<String, dynamic> metadata =
-          await getMetadata(mediaUploadData, exifTime, file);
+      final uploadMetadata = await getUploadMetadata(mediaUploadData, file);
+      final Map<String, dynamic> metadata = uploadMetadata.defaultMetadata;
       final Map<String, dynamic> pubMetadata =
-          buildPublicMagicData(mediaUploadData, exifTime, file.rAsset);
+          uploadMetadata.publicMetadata ?? <String, dynamic>{};
 
       final encryptedMetadataResult = await CryptoUtil.encryptChaCha(
         utf8.encode(jsonEncode(metadata)),
@@ -872,7 +867,7 @@ class FileUploader {
     duplicate files.
   */
   Future<Tuple2<bool, EnteFile>> _mapToExistingUploadWithSameHash(
-    MediaUploadData mediaUploadData,
+    UploadMedia mediaUploadData,
     EnteFile fileToUpload,
     int toCollectionID,
   ) async {
@@ -994,7 +989,7 @@ class FileUploader {
   }
 
   Future<void> _onUploadDone(
-    MediaUploadData? mediaUploadData,
+    UploadMedia? mediaUploadData,
     bool uploadCompleted,
     bool uploadHardFailure,
     EnteFile file,
@@ -1011,7 +1006,7 @@ class FileUploader {
       // succeeds.
       if ((Platform.isIOS && (uploadCompleted || uploadHardFailure)) ||
           (uploadCompleted && file.isSharedMediaToAppSandbox)) {
-        await mediaUploadData.sourceFile.delete();
+        await mediaUploadData.delete();
       }
     }
     if (File(encryptedFilePath).existsSync()) {

@@ -3,6 +3,16 @@ import "dart:typed_data";
 
 import "package:exif_reader/exif_reader.dart";
 
+class UploadMetadaData {
+  final Map<String, dynamic> defaultMetadata;
+  final Map<String, dynamic>? publicMetadata;
+
+  UploadMetadaData({
+    required this.defaultMetadata,
+    required this.publicMetadata,
+  });
+}
+
 class MediaUploadData {
   final File sourceFile;
   final Uint8List? thumbnail;

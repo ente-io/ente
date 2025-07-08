@@ -6,7 +6,7 @@ import "package:path_provider/path_provider.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/db/local/table/shared_assets.dart";
-import "package:photos/image/thumnail/upload_thumb.dart";
+import "package:photos/module/upload/service/media.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/utils/file_util.dart";
 import "package:video_thumbnail/video_thumbnail.dart";

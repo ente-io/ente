@@ -20,6 +20,7 @@ import 'package:photos/models/file/file_type.dart';
 import "package:photos/models/file/remote/asset.dart";
 import "package:photos/models/location/location.dart";
 import "package:photos/models/metadata/file_magic.dart";
+import "package:photos/module/upload/model/media.dart";
 import "package:photos/module/upload/model/upload_data.dart";
 import "package:photos/module/upload/service/media.dart";
 import "package:photos/services/local/asset_entity.service.dart";
@@ -168,12 +169,74 @@ Future<int?> motionVideoIndex(Map<String, dynamic> args) async {
   return (await MotionPhotos(path).getMotionVideoIndex())?.start;
 }
 
-Future<Map<String, dynamic>> getMetadata(
-  MediaUploadData mediaUploadData,
-  ParsedExifDateTime? exifTime,
+Future<UploadMetadaData> getUploadMetadata(
+  UploadMedia mediaUploadData,
   EnteFile file,
 ) async {
-  final AssetEntity? asset = await file.getAsset;
+  final FileType fileType = file.fileType;
+  Map<String, IfdTag>? exifData;
+  if (fileType == FileType.image) {
+    exifData = await readExifAsync(mediaUploadData.uploadFile);
+  } else if (fileType == FileType.livePhoto) {
+    final imageFile = File(mediaUploadData.livePhotoImage!);
+    exifData = await readExifAsync(imageFile);
+  }
+  final ParsedExifDateTime? exifTime =
+      exifData != null ? parseExifTime(exifData) : null;
+  bool? isPanorama;
+  int? mviIndex;
+  if (fileType == FileType.image) {
+    isPanorama = isPanoFromExif(exifData);
+    if (isPanorama != true) {
+      try {
+        final xmpData = await getXmp(mediaUploadData.uploadFile);
+        isPanorama = isPanoFromXmp(xmpData);
+      } catch (_) {}
+      isPanorama ??= false;
+    }
+    if (Platform.isAndroid) {
+      try {
+        mviIndex = await Computer.shared().compute(
+          motionVideoIndex,
+          param: {'path': mediaUploadData.uploadFile.path},
+          taskName: 'motionPhotoIndex',
+        );
+      } catch (e) {
+        _logger.severe('error while detecthing motion photo start index', e);
+      }
+    }
+  }
+  final Map<String, dynamic> defaultMetadata = await getMetadata(
+    mediaUploadData,
+    exifTime,
+    exifData,
+    file,
+  );
+
+  final Map<String, dynamic> publicMetadata = _buildPublicMagicData(
+    exifTime,
+    file.rAsset,
+    width: mediaUploadData.localAsset?.width,
+    height: mediaUploadData.localAsset?.height,
+    isPanorama: isPanorama,
+    motionPhotoStartIndex: mviIndex,
+    noThumbnail: mediaUploadData.thumbnail == null,
+  );
+
+  return UploadMetadaData(
+    defaultMetadata: defaultMetadata,
+    publicMetadata: publicMetadata.isEmpty ? null : publicMetadata,
+  );
+}
+
+Future<Map<String, dynamic>> getMetadata(
+  UploadMedia uploadMedia,
+  ParsedExifDateTime? exifTime,
+  Map<String, IfdTag>? exifData,
+  EnteFile file,
+) async {
+  final AssetEntity? asset = uploadMedia.localAsset;
+
   final FileType fileType = file.fileType;
   final String? deviceFolder = file.deviceFolder;
 
@@ -181,15 +244,14 @@ Future<Map<String, dynamic>> getMetadata(
   final (int creationTime, int modificationTime) =
       LocalMetadataService.computeCreationAndModification(
     asset,
-    mediaUploadData.exifData,
+    exifData,
   );
   String? title = file.title;
-
   final Location? location = await LocalMetadataService.detectLocation(
     fileType.isVideo,
     asset,
-    mediaUploadData.sourceFile,
-    mediaUploadData.exifData,
+    uploadMedia.uploadFile,
+    exifData,
   );
   // asset can be null for files shared to app
   if (asset != null) {
@@ -202,18 +264,9 @@ Future<Map<String, dynamic>> getMetadata(
     }
   }
 
-  mediaUploadData.isPanorama = isPanoFromExif(mediaUploadData.exifData);
-  if (mediaUploadData.isPanorama != true && fileType == FileType.image) {
-    try {
-      final xmpData = await getXmp(mediaUploadData.sourceFile);
-      mediaUploadData.isPanorama = isPanoFromXmp(xmpData);
-    } catch (_) {}
-    mediaUploadData.isPanorama ??= false;
-  }
-
   final metadata = <String, dynamic>{
     "localID": asset?.id,
-    "hash": mediaUploadData.hash.data,
+    "hash": uploadMedia.hash,
     "version": EnteFile.kCurrentMetadataVersion,
     "title": title,
     "deviceFolder": deviceFolder,
@@ -236,21 +289,25 @@ Future<Map<String, dynamic>> getMetadata(
   return metadata;
 }
 
-Map<String, dynamic> buildPublicMagicData(
-  MediaUploadData mediaUploadData,
+Map<String, dynamic> _buildPublicMagicData(
   ParsedExifDateTime? parsedExifTime,
-  RemoteAsset? rAsset,
-) {
+  RemoteAsset? rAsset, {
+  required int? width,
+  required int? height,
+  required bool? isPanorama,
+  required int? motionPhotoStartIndex,
+  required bool noThumbnail,
+}) {
   final Map<String, dynamic> pubMetadata = {};
-  if ((mediaUploadData.height ?? 0) != 0 && (mediaUploadData.width ?? 0) != 0) {
-    pubMetadata[heightKey] = mediaUploadData.height;
-    pubMetadata[widthKey] = mediaUploadData.width;
+  if ((height ?? 0) != 0 && (width ?? 0) != 0) {
+    pubMetadata[heightKey] = height;
+    pubMetadata[widthKey] = width;
   }
-  pubMetadata[mediaTypeKey] = mediaUploadData.isPanorama == true ? 1 : 0;
-  if (mediaUploadData.motionPhotoStartIndex != null) {
-    pubMetadata[motionVideoIndexKey] = mediaUploadData.motionPhotoStartIndex;
+  pubMetadata[mediaTypeKey] = isPanorama == true ? 1 : 0;
+  if (motionPhotoStartIndex != null) {
+    pubMetadata[motionVideoIndexKey] = motionPhotoStartIndex;
   }
-  if (mediaUploadData.thumbnail == null) {
+  if (noThumbnail) {
     pubMetadata[noThumbKey] = true;
   }
   if (parsedExifTime?.dateTime != null) {
