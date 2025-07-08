@@ -73,7 +73,7 @@ interface TimeStampListItem {
     tag?: "date" | "file";
     items?: FileListAnnotatedFile[];
     itemStartIndex?: number;
-    date?: string;
+    date?: string | null;
     dates?: { date: string; span: number }[];
     groups?: number[];
     item?: any;
@@ -225,8 +225,8 @@ export const FileList: React.FC<FileListProps> = ({
     const [checkedTimelineDateStrings, setCheckedTimelineDateStrings] =
         useState(new Set());
 
-    const [rangeStart, setRangeStart] = useState(null);
-    const [currentHover, setCurrentHover] = useState(null);
+    const [rangeStart, setRangeStart] = useState<number | null>(null);
+    const [currentHover, setCurrentHover] = useState<number | null>(null);
     const [isShiftKeyPressed, setIsShiftKeyPressed] = useState(false);
 
     const fittableColumns = getFractionFittableColumns(width);
@@ -237,13 +237,10 @@ export const FileList: React.FC<FileListProps> = ({
         columns = MIN_COLUMNS;
         skipMerge = true;
     }
+
     const shrinkRatio = getShrinkRatio(width, columns);
     const listItemHeight =
         IMAGE_CONTAINER_MAX_HEIGHT * shrinkRatio + GAP_BTW_TILES;
-
-    const refreshList = () => {
-        listRef.current?.resetAfterIndex(0);
-    };
 
     useEffect(() => {
         // Since width and height are dependencies, there might be too many
@@ -302,8 +299,11 @@ export const FileList: React.FC<FileListProps> = ({
     ]);
 
     useEffect(() => {
-        refreshList();
+        // Refresh list.
+        listRef.current?.resetAfterIndex(0);
     }, [timeStampList]);
+
+    // TODO: Too many non-null assertions
 
     const groupByTime = (timeStampList: TimeStampListItem[]) => {
         let listItemIndex = 0;
@@ -328,7 +328,7 @@ export const FileList: React.FC<FileListProps> = ({
                 });
                 listItemIndex = 1;
             } else if (listItemIndex < columns) {
-                timeStampList[timeStampList.length - 1].items.push(item);
+                timeStampList[timeStampList.length - 1]!.items!.push(item);
                 listItemIndex++;
             } else {
                 listItemIndex = 1;
@@ -345,7 +345,7 @@ export const FileList: React.FC<FileListProps> = ({
         let listItemIndex = columns;
         annotatedFiles.forEach((item, index) => {
             if (listItemIndex < columns) {
-                timeStampList[timeStampList.length - 1].items.push(item);
+                timeStampList[timeStampList.length - 1]!.items!.push(item);
                 listItemIndex++;
             } else {
                 listItemIndex = 1;
@@ -387,7 +387,7 @@ export const FileList: React.FC<FileListProps> = ({
         let index = 0;
         let newIndex = 0;
         while (index < items.length) {
-            const currItem = items[index];
+            const currItem = items[index]!;
             // If the current item is of type time, then it is not part of an ongoing date.
             // So, there is a possibility of merge.
             if (currItem.tag == "date") {
@@ -397,21 +397,21 @@ export const FileList: React.FC<FileListProps> = ({
                     const SPACE_BTW_DATES_TO_IMAGE_CONTAINER_WIDTH_RATIO = 0.244;
                     // Check if items can be added to same list
                     if (
-                        newList[newIndex + 1].items.length +
-                            items[index + 1].items.length +
+                        newList[newIndex + 1]!.items!.length +
+                            items[index + 1]!.items!.length +
                             Math.ceil(
-                                newList[newIndex].dates.length *
+                                newList[newIndex]!.dates!.length *
                                     SPACE_BTW_DATES_TO_IMAGE_CONTAINER_WIDTH_RATIO,
                             ) <=
                         columns
                     ) {
-                        newList[newIndex].dates.push({
-                            date: currItem.date,
-                            span: items[index + 1].items.length,
+                        newList[newIndex]!.dates!.push({
+                            date: currItem.date!,
+                            span: items[index + 1]!.items!.length,
                         });
-                        newList[newIndex + 1].items = [
-                            ...newList[newIndex + 1].items,
-                            ...items[index + 1].items,
+                        newList[newIndex + 1]!.items = [
+                            ...newList[newIndex + 1]!.items!,
+                            ...items[index + 1]!.items!,
                         ];
                         index += 2;
                     } else {
@@ -427,12 +427,12 @@ export const FileList: React.FC<FileListProps> = ({
                         date: null,
                         dates: [
                             {
-                                date: currItem.date,
-                                span: items[index + 1].items.length,
+                                date: currItem.date!,
+                                span: items[index + 1]!.items!.length,
                             },
                         ],
                     });
-                    newList.push(items[index + 1]);
+                    newList.push(items[index + 1]!);
                     index += 2;
                 }
             } else {
@@ -444,11 +444,11 @@ export const FileList: React.FC<FileListProps> = ({
             }
         }
         for (let i = 0; i < newList.length; i++) {
-            const currItem = newList[i];
-            const nextItem = newList[i + 1];
+            const currItem = newList[i]!;
+            const nextItem = newList[i + 1]!;
             if (currItem.tag == "date") {
-                if (currItem.dates.length > 1) {
-                    currItem.groups = currItem.dates.map((item) => item.span);
+                if (currItem.dates!.length > 1) {
+                    currItem.groups = currItem.dates!.map((item) => item.span);
                     nextItem.groups = currItem.groups;
                 }
             }
@@ -467,14 +467,14 @@ export const FileList: React.FC<FileListProps> = ({
         }
     };
 
-    const generateKey = (index) => {
-        switch (timeStampList[index].tag) {
+    const generateKey = (index: number) => {
+        switch (timeStampList[index]!.tag) {
             case "file":
-                return `${timeStampList[index].items[0].file.id}-${
-                    timeStampList[index].items.slice(-1)[0].file.id
+                return `${timeStampList[index]!.items![0]!.file.id}-${
+                    timeStampList[index]!.items!.slice(-1)[0]!.file.id
                 }`;
             default:
-                return `${timeStampList[index].id}-${index}`;
+                return `${timeStampList[index]!.id}-${index}`;
         }
     };
 
@@ -558,23 +558,23 @@ export const FileList: React.FC<FileListProps> = ({
     const handleRangeSelect = (index: number) => () => {
         if (typeof rangeStart != "undefined" && rangeStart !== index) {
             const direction =
-                (index - rangeStart) / Math.abs(index - rangeStart);
+                (index - rangeStart!) / Math.abs(index - rangeStart!);
             let checked = true;
             for (
-                let i = rangeStart;
+                let i = rangeStart!;
                 (index - i) * direction >= 0;
                 i += direction
             ) {
-                checked = checked && !!selected[annotatedFiles[i].file.id];
+                checked = checked && !!selected[annotatedFiles[i]!.file.id];
             }
             for (
-                let i = rangeStart;
+                let i = rangeStart!;
                 (index - i) * direction > 0;
                 i += direction
             ) {
-                handleSelect(annotatedFiles[i].file)(!checked);
+                handleSelect(annotatedFiles[i]!.file)(!checked);
             }
-            handleSelect(annotatedFiles[index].file, index)(!checked);
+            handleSelect(annotatedFiles[index]!.file, index)(!checked);
         }
     };
 
@@ -616,7 +616,7 @@ export const FileList: React.FC<FileListProps> = ({
             {...{ user, emailByUserID }}
             file={file}
             onClick={() => onItemClick(index)}
-            selectable={selectable}
+            selectable={selectable!}
             onSelect={handleSelect(file, index)}
             selected={
                 (!mode
@@ -632,8 +632,8 @@ export const FileList: React.FC<FileListProps> = ({
             onRangeSelect={handleRangeSelect(index)}
             isRangeSelectActive={isShiftKeyPressed && selected.count > 0}
             isInsSelectRange={
-                (index >= rangeStart && index <= currentHover) ||
-                (index >= currentHover && index <= rangeStart)
+                (index >= rangeStart! && index <= currentHover!) ||
+                (index >= currentHover! && index <= rangeStart!)
             }
             activeCollectionID={activeCollectionID}
             showPlaceholder={isScrolling}
@@ -643,7 +643,7 @@ export const FileList: React.FC<FileListProps> = ({
 
     const renderListItem = (
         listItem: TimeStampListItem,
-        isScrolling: boolean,
+        isScrolling: boolean | undefined,
     ) => {
         const haveSelection = (selected.count ?? 0) > 0;
         switch (listItem.tag) {
@@ -676,12 +676,12 @@ export const FileList: React.FC<FileListProps> = ({
                         {haveSelection && (
                             <Checkbox
                                 key={listItem.date}
-                                name={listItem.date}
+                                name={listItem.date!}
                                 checked={checkedTimelineDateStrings.has(
                                     listItem.date,
                                 )}
                                 onChange={() =>
-                                    onChangeSelectAllCheckBox(listItem.date)
+                                    onChangeSelectAllCheckBox(listItem.date!)
                                 }
                                 size="small"
                                 sx={{ pl: 0 }}
@@ -691,22 +691,22 @@ export const FileList: React.FC<FileListProps> = ({
                     </DateContainer>
                 );
             case "file": {
-                const ret = listItem.items.map((item, idx) =>
+                const ret = listItem.items!.map((item, idx) =>
                     getThumbnail(
                         item,
-                        listItem.itemStartIndex + idx,
-                        isScrolling,
+                        listItem.itemStartIndex! + idx,
+                        !!isScrolling,
                     ),
                 );
                 if (listItem.groups) {
                     let sum = 0;
                     for (let i = 0; i < listItem.groups.length - 1; i++) {
-                        sum = sum + listItem.groups[i];
+                        sum = sum + listItem.groups[i]!;
                         ret.splice(
                             sum,
                             0,
                             <div
-                                key={`${listItem.items[0].file.id}-gap-${i}`}
+                                key={`${listItem.items![0]!.file.id}-gap-${i}`}
                             />,
                         );
                         sum += 1;
@@ -911,10 +911,10 @@ const PhotoListRow = React.memo(
                     gridTemplateColumns={getTemplateColumns(
                         columns,
                         shrinkRatio,
-                        timeStampList[index].groups,
+                        timeStampList[index]!.groups,
                     )}
                 >
-                    {renderListItem(timeStampList[index], isScrolling)}
+                    {renderListItem(timeStampList[index]!, isScrolling)}
                 </ListContainer>
             </ListItem>
         );
@@ -935,7 +935,7 @@ type FileThumbnailProps = {
     isInsSelectRange: boolean;
     activeCollectionID: number;
     showPlaceholder: boolean;
-    isFav: boolean;
+    isFav: boolean | undefined;
 } & Pick<FileListProps, "user" | "emailByUserID">;
 
 const FileThumbnail: React.FC<FileThumbnailProps> = ({
