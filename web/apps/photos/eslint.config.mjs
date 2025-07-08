@@ -11,7 +11,6 @@ export default [
              */
             "@typescript-eslint/no-unnecessary-condition": "off",
             /** TODO: Disabled as we migrate, try to prune these again */
-            "@typescript-eslint/no-floating-promises": "off",
             "react-hooks/exhaustive-deps": "off",
         },
     },

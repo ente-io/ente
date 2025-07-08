@@ -1,3 +1,6 @@
+// TODO: Audit this file (the code here is mostly fine, but needs revisiting
+// the file it depends on have been audited and their interfaces fixed).
+/* eslint-disable @typescript-eslint/no-floating-promises */
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined";
 import MenuIcon from "@mui/icons-material/Menu";

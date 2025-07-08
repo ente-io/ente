@@ -627,7 +627,19 @@ const AddParticipantForm: React.FC<AddParticipantFormProps> = ({
     });
 
     const resetExistingSelection = () =>
-        formik.setFieldValue("selectedEmails", []);
+        void formik.setFieldValue("selectedEmails", []);
+
+    const createToggleEmail = (email: string) => {
+        return () => {
+            const emails = formik.values.selectedEmails;
+            void formik.setFieldValue(
+                "selectedEmails",
+                emails.includes(email)
+                    ? emails.filter((e) => e != email)
+                    : emails.concat(email),
+            );
+        };
+    };
 
     return (
         <form onSubmit={formik.handleSubmit}>
@@ -661,18 +673,7 @@ const AddParticipantForm: React.FC<AddParticipantFormProps> = ({
                                 <React.Fragment key={email}>
                                     <RowButton
                                         fontWeight="regular"
-                                        onClick={() => {
-                                            const emails =
-                                                formik.values.selectedEmails;
-                                            formik.setFieldValue(
-                                                "selectedEmails",
-                                                emails.includes(email)
-                                                    ? emails.filter(
-                                                          (e) => e != email,
-                                                      )
-                                                    : emails.concat(email),
-                                            );
-                                        }}
+                                        onClick={createToggleEmail(email)}
                                         label={email}
                                         startIcon={
                                             <Avatar
@@ -761,11 +762,11 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
     const selectAndManageParticipant = useCallback(
         (email: string) => {
             setSelectedParticipant(
-                collection.sharees.find((sharee) => sharee.email === email),
+                collection.sharees.find((sharee) => sharee.email == email),
             );
             showManageParticipant();
         },
-        [showManageParticipant],
+        [collection, showManageParticipant],
     );
 
     const handleRootClose = () => {
@@ -1120,16 +1121,17 @@ const PublicShare: React.FC<PublicShareProps> = ({
 
     useEffect(() => {
         if (publicURL?.url) {
-            appendCollectionKeyToShareURL(publicURL.url, collection.key).then(
-                (url) => setResolvedURL(url),
-            );
+            void appendCollectionKeyToShareURL(
+                publicURL.url,
+                collection.key,
+            ).then((url) => setResolvedURL(url));
         } else {
             setResolvedURL(undefined);
         }
     }, [publicURL]);
 
     const handleCopyLink = () => {
-        if (resolvedURL) navigator.clipboard.writeText(resolvedURL);
+        if (resolvedURL) void navigator.clipboard.writeText(resolvedURL);
     };
 
     return (
@@ -1475,7 +1477,7 @@ const ManagePublicCollect: React.FC<ManagePublicLinkSettingProps> = ({
     onUpdate,
 }) => {
     const handleFileDownloadSetting = () => {
-        onUpdate({ enableCollect: !publicURL.enableCollect });
+        void onUpdate({ enableCollect: !publicURL.enableCollect });
     };
 
     return (
@@ -1666,7 +1668,9 @@ const ManageDownloadAccess: React.FC<ManagePublicLinkSettingProps> = ({
                 },
             });
         } else {
-            onUpdate({ enableDownload: true });
+            // TODO: Various calls to onUpdate return promises. The UI should
+            // handle the in-progress states where needed.
+            void onUpdate({ enableDownload: true });
         }
     };
 

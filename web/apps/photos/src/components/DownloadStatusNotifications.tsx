@@ -75,7 +75,7 @@ export const DownloadStatusNotifications: React.FC<
     const createOnClick = (group: SaveGroup) => () => {
         const electron = globalThis.electron;
         if (electron && group.downloadDirPath) {
-            electron.openDirectory(group.downloadDirPath);
+            void electron.openDirectory(group.downloadDirPath);
         } else if (onShowCollectionSummary) {
             onShowCollectionSummary(
                 group.collectionSummaryID,

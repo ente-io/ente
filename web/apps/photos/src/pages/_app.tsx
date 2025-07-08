@@ -89,8 +89,11 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
         // the user is logged in.
 
         const handleOpenEnteURL = (url: string) => {
-            if (url.startsWith("ente://app")) router.push(url);
-            else log.info(`Ignoring unhandled open request for URL ${url}`);
+            if (url.startsWith("ente://app")) {
+                void router.push(url);
+            } else {
+                log.info(`Ignoring unhandled open request for URL ${url}`);
+            }
         };
 
         const showUpdateDialog = (update: AppUpdate) => {

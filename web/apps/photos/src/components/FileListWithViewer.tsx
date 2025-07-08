@@ -167,7 +167,7 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
         (editedFile: File, collection: Collection, enteFile: EnteFile) => {
             uploadManager.prepareForNewUpload();
             uploadManager.showUploadProgressDialog();
-            uploadManager.uploadFile(editedFile, collection, enteFile);
+            void uploadManager.uploadFile(editedFile, collection, enteFile);
         },
         [],
     );

@@ -96,7 +96,7 @@ class FolderWatcher {
         this.upload = upload;
         this.onTriggerRemotePull = onTriggerRemotePull;
         this.registerListeners();
-        this.syncWithDisk();
+        this.triggerSyncWithDisk();
     }
 
     /** Return `true` if we are currently using the uploader. */
@@ -126,7 +126,7 @@ class FolderWatcher {
      */
     resumePausedSync() {
         this.isPaused = false;
-        this.syncWithDisk();
+        this.triggerSyncWithDisk();
     }
 
     /** Return the list of folders we are watching for changes. */
@@ -152,7 +152,7 @@ class FolderWatcher {
      */
     async addWatch(folderPath: string, mapping: CollectionMapping) {
         const watches = await ensureElectron().watch.add(folderPath, mapping);
-        this.syncWithDisk();
+        this.triggerSyncWithDisk();
         return watches;
     }
 
@@ -163,6 +163,10 @@ class FolderWatcher {
      */
     async removeWatch(folderPath: string) {
         return await ensureElectron().watch.remove(folderPath);
+    }
+
+    private triggerSyncWithDisk() {
+        void this.syncWithDisk();
     }
 
     private async syncWithDisk() {
