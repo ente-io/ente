@@ -8,6 +8,7 @@ import "package:photos/models/api/diff/trash_time.dart";
 import 'package:photos/models/file/file_type.dart';
 import "package:photos/models/file/remote/asset.dart";
 import "package:photos/models/file/remote/collection_file.dart";
+import "package:photos/models/local/shared_asset.dart";
 import 'package:photos/models/location/location.dart';
 import "package:photos/module/download/file_url.dart";
 import "package:photos/services/local/asset_entity.service.dart";
@@ -19,6 +20,7 @@ class EnteFile {
   RemoteAsset? rAsset;
   CollectionFile? cf;
   TrashTime? trashTime;
+  SharedAsset? sharedAsset;
 
   int? generatedID;
   int? ownerID;

@@ -9,7 +9,9 @@ import 'package:photos/db/file_updation_db.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
+import "package:photos/module/upload/model/media.dart";
 import "package:photos/module/upload/model/upload_data.dart";
+import "package:photos/module/upload/service/media.dart";
 import 'package:photos/utils/upload_metadata.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -152,12 +154,10 @@ class LocalFileUpdateService {
         processedIDs.add(file.localID!);
         continue;
       }
-      MediaUploadData uploadData;
+      UploadMedia uploadData;
       try {
         uploadData = await getUploadData(file);
-        if (file.hash != null &&
-            (file.hash == uploadData.hash.data ||
-                file.hash == uploadData.hash.zipHash)) {
+        if (file.hash != null && (file.hash == uploadData.hash)) {
           _logger.info("Skip file update as hash matched ${file.tag}");
         } else {
           _logger.info(
@@ -208,13 +208,13 @@ class LocalFileUpdateService {
     );
   }
 
-  Future<MediaUploadData> getUploadData(EnteFile file) async {
-    final mediaUploadData = await getUploadDataFromEnteFile(file);
+  Future<UploadMedia> getUploadData(EnteFile file) async {
+    final mediaUploadData = await getUploadMedia(file);
     // delete the file from app's internal cache if it was copied to app
     // for upload. Shared Media should only be cleared when the upload
     // succeeds.
     if (Platform.isIOS) {
-      await mediaUploadData.sourceFile.delete();
+      await mediaUploadData.delete();
     }
     return mediaUploadData;
   }

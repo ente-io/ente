@@ -1,5 +1,5 @@
-import 'dart:async';
 import "dart:convert";
+import "dart:core";
 import "dart:io";
 import 'dart:typed_data';
 import 'dart:ui' as ui;
@@ -13,7 +13,6 @@ import 'package:path_provider/path_provider.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/errors.dart';
-import "package:photos/image/thumnail/upload_thumb.dart";
 import "package:photos/models/api/metadata.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
@@ -22,6 +21,7 @@ import "package:photos/models/file/remote/asset.dart";
 import "package:photos/models/location/location.dart";
 import "package:photos/models/metadata/file_magic.dart";
 import "package:photos/module/upload/model/upload_data.dart";
+import "package:photos/module/upload/service/media.dart";
 import "package:photos/services/local/asset_entity.service.dart";
 import "package:photos/services/local/import/local_import.dart";
 import "package:photos/services/local/livephoto.dart";
@@ -42,6 +42,58 @@ Future<MediaUploadData> getUploadDataFromEnteFile(
     return await _getSharedMediaUploadData(file);
   } else {
     return await _getMediaUploadDataFromAssetFile(file, parseExif);
+  }
+}
+
+Future<MediaUploadData> _getSharedMediaUploadData(EnteFile file) async {
+  final localPath = SharedAssetService.getPath(file.localID!);
+  final sourceFile = File(localPath);
+  if (!sourceFile.existsSync()) {
+    _logger.warning("File doesn't exist in app sandbox");
+    throw InvalidFileError(
+      "source missing in sandbox",
+      InvalidReason.sourceFileMissing,
+    );
+  }
+  try {
+    Map<String, IfdTag>? exifData;
+    final Uint8List? thumbnailData = await SharedAssetService.getThumbnail(
+      file.localID!,
+      file.isVideo,
+    );
+    final fileHash = await CryptoUtil.getHash(sourceFile);
+    ui.Image? decodedImage;
+    if (file.fileType == FileType.image) {
+      decodedImage = await decodeImageInIsolate(localPath);
+      exifData = await tryExifFromFile(sourceFile);
+    } else if (thumbnailData != null) {
+      // the thumbnail null check is to ensure that we are able to generate thum
+      // for video, we need to use the thumbnail data with any max width/height
+      final thumbforVidDimention = await VideoThumbnail.thumbnailFile(
+        video: localPath,
+        imageFormat: ImageFormat.JPEG,
+        thumbnailPath: (await getTemporaryDirectory()).path,
+        quality: 10,
+      );
+      if (thumbforVidDimention != null) {
+        decodedImage = await decodeImageInIsolate(thumbforVidDimention);
+      }
+    }
+    return MediaUploadData(
+      sourceFile,
+      thumbnailData,
+      false,
+      Hash(fileHash),
+      height: decodedImage?.height,
+      width: decodedImage?.width,
+      exifData: exifData,
+    );
+  } catch (e, s) {
+    _logger.warning("failed to generate thumbnail", e, s);
+    throw InvalidFileError(
+      "thumbnail failed for appCache fileType: ${file.fileType.toString()}",
+      InvalidReason.thumbnailMissing,
+    );
   }
 }
 
@@ -235,56 +287,4 @@ Future<MetadataRequest?> getPubMetadataRequest(
     data: CryptoUtil.bin2base64(encryptedMMd.encryptedData!),
     header: CryptoUtil.bin2base64(encryptedMMd.header!),
   );
-}
-
-Future<MediaUploadData> _getSharedMediaUploadData(EnteFile file) async {
-  final localPath = SharedAssetService.getPath(file.localID!);
-  final sourceFile = File(localPath);
-  if (!sourceFile.existsSync()) {
-    _logger.warning("File doesn't exist in app sandbox");
-    throw InvalidFileError(
-      "source missing in sandbox",
-      InvalidReason.sourceFileMissing,
-    );
-  }
-  try {
-    Map<String, IfdTag>? exifData;
-    final Uint8List? thumbnailData = await SharedAssetService.getThumbnail(
-      file.localID!,
-      file.isVideo,
-    );
-    final fileHash = await CryptoUtil.getHash(sourceFile);
-    ui.Image? decodedImage;
-    if (file.fileType == FileType.image) {
-      decodedImage = await decodeImageInIsolate(localPath);
-      exifData = await tryExifFromFile(sourceFile);
-    } else if (thumbnailData != null) {
-      // the thumbnail null check is to ensure that we are able to generate thum
-      // for video, we need to use the thumbnail data with any max width/height
-      final thumbforVidDimention = await VideoThumbnail.thumbnailFile(
-        video: localPath,
-        imageFormat: ImageFormat.JPEG,
-        thumbnailPath: (await getTemporaryDirectory()).path,
-        quality: 10,
-      );
-      if (thumbforVidDimention != null) {
-        decodedImage = await decodeImageInIsolate(thumbforVidDimention);
-      }
-    }
-    return MediaUploadData(
-      sourceFile,
-      thumbnailData,
-      false,
-      Hash(fileHash),
-      height: decodedImage?.height,
-      width: decodedImage?.width,
-      exifData: exifData,
-    );
-  } catch (e, s) {
-    _logger.warning("failed to generate thumbnail", e, s);
-    throw InvalidFileError(
-      "thumbnail failed for appCache fileType: ${file.fileType.toString()}",
-      InvalidReason.thumbnailMissing,
-    );
-  }
 }
