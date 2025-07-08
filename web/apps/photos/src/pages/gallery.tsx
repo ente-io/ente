@@ -1,3 +1,7 @@
+// TODO: Audit this file (the code here is mostly fine, but needs revisiting
+// the file it depends on have been audited and their interfaces fixed).
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable @typescript-eslint/no-floating-promises */
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined";
 import MenuIcon from "@mui/icons-material/Menu";
@@ -449,7 +453,7 @@ const Page: React.FC = () => {
             // - We haven't fetched the user yet;
             !user ||
             // - There is nothing to select;
-            !filteredFiles?.length ||
+            !filteredFiles.length ||
             // - Any of the modals are open.
             uploadTypeSelectorView ||
             openCollectionSelector ||
@@ -490,7 +494,7 @@ const Page: React.FC = () => {
     };
 
     const clearSelection = () => {
-        if (!selected?.count) {
+        if (!selected.count) {
             return;
         }
         setSelected({
@@ -1091,7 +1095,7 @@ const Page: React.FC = () => {
                 emailByUserID={state.emailByUserID}
                 shareSuggestionEmails={state.shareSuggestionEmails}
                 people={
-                    (state?.view?.type == "people"
+                    (state.view?.type == "people"
                         ? state.view.visiblePeople
                         : undefined) ?? []
                 }
@@ -1149,7 +1153,7 @@ const Page: React.FC = () => {
                 />
             ) : !isInSearchMode &&
               !isFirstLoad &&
-              state?.view?.type == "people" &&
+              state.view?.type == "people" &&
               !state.view.activePerson ? (
                 <PeopleEmptyState />
             ) : (
@@ -1335,7 +1339,7 @@ const handleSubscriptionCompletionRedirectIfNeeded = async (
                 message: (
                     <Trans
                         i18nKey="subscription_purchase_success"
-                        values={{ date: subscription?.expiryTime }}
+                        values={{ date: subscription.expiryTime }}
                     />
                 ),
                 continue: { text: t("ok") },

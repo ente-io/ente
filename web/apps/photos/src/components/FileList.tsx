@@ -41,7 +41,7 @@ import {
     VariableSizeList,
     areEqual,
 } from "react-window";
-import { type SelectedState, shouldShowAvatar } from "utils/file";
+import { type SelectedState } from "utils/file";
 import {
     handleSelectCreator,
     handleSelectCreatorMulti,
@@ -75,6 +75,7 @@ interface TimeStampListItem {
     date?: string | null;
     dates?: { date: string; span: number }[];
     groups?: number[];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     item?: any;
     id?: string;
     height?: number;
@@ -287,6 +288,8 @@ export const FileList: React.FC<FileListProps> = ({
         }
 
         setTimeStampList(timeStampList);
+        // TODO:
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [
         width,
         height,
@@ -482,10 +485,7 @@ export const FileList: React.FC<FileListProps> = ({
     };
 
     useEffect(() => {
-        // Nothing to do here if nothing is selected.
-        if (!selected) return;
-
-        const notSelectedFiles = (annotatedFiles ?? []).filter(
+        const notSelectedFiles = annotatedFiles.filter(
             (item) => !selected[item.file.id],
         );
 
@@ -493,7 +493,7 @@ export const FileList: React.FC<FileListProps> = ({
             notSelectedFiles.map((item) => item.timelineDateString),
         ); // to get file's date which were manually unselected
 
-        const localSelectedFiles = (annotatedFiles ?? []).filter(
+        const localSelectedFiles = annotatedFiles.filter(
             // to get files which were manually selected
             (item) => !unselectedDates.has(item.timelineDateString),
         );
@@ -512,6 +512,8 @@ export const FileList: React.FC<FileListProps> = ({
             localSelectedDates.forEach((date) => checked.add(date));
             return checked;
         });
+        // TODO:
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selected]);
 
     const handleSelectMulti = handleSelectCreatorMulti(
@@ -534,7 +536,7 @@ export const FileList: React.FC<FileListProps> = ({
         }
         setCheckedTimelineDateStrings(next);
 
-        const filesOnADay = annotatedFiles?.filter(
+        const filesOnADay = annotatedFiles.filter(
             (item) => item.timelineDateString === date,
         ); // all files on a checked/unchecked day
 
@@ -648,7 +650,7 @@ export const FileList: React.FC<FileListProps> = ({
         listItem: TimeStampListItem,
         isScrolling: boolean | undefined,
     ) => {
-        const haveSelection = (selected.count ?? 0) > 0;
+        const haveSelection = selected.count > 0;
         switch (listItem.tag) {
             case "date":
                 return listItem.dates ? (
@@ -724,7 +726,7 @@ export const FileList: React.FC<FileListProps> = ({
         }
     };
 
-    if (!timeStampList?.length) {
+    if (!timeStampList.length) {
         return <></>;
     }
 
@@ -1006,13 +1008,13 @@ const FileThumbnail: React.FC<FileThumbnailProps> = ({
                 onSelect(!selected);
             }
         } else if (imageURL) {
-            onClick?.();
+            onClick();
         }
     };
 
     const handleSelect: React.ChangeEventHandler<HTMLInputElement> = (e) => {
         if (isRangeSelectActive) {
-            onRangeSelect?.();
+            onRangeSelect();
         } else {
             onSelect(e.target.checked);
         }
@@ -1269,3 +1271,19 @@ const VideoDurationOverlay: React.FC<VideoDurationOverlayProps> = ({
         )}
     </FileTypeIndicatorOverlay>
 );
+
+/**
+ * Return `true` if the owner or uploader name avatar indicator should be shown
+ * for the given {@link file}.
+ */
+const shouldShowAvatar = (file: EnteFile, user: LocalUser | undefined) => {
+    // Public albums app.
+    if (!user) return false;
+    // A file shared with the user.
+    if (file.ownerID != user.id) return true;
+    // A public collected file (i.e. a file owned by the user, uploaded by an
+    // named guest via a public collect link)
+    if (file.pubMagicMetadata?.data.uploaderName) return true;
+    // Regular file.
+    return false;
+};

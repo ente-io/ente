@@ -380,7 +380,7 @@ const InProgressSection: React.FC = () => {
     const { inProgressUploads, hasLivePhotos, uploadFileNames, uploadPhase } =
         useUploadProgressContext();
 
-    const fileList = inProgressUploads ?? [];
+    const fileList = inProgressUploads;
 
     // @ts-expect-error Need to add types
     const renderListItem = ({ localFileID, progress }) => {
@@ -414,7 +414,7 @@ const InProgressSection: React.FC = () => {
             <SectionAccordionSummary expandIcon={<ExpandMoreIcon />}>
                 <TitleText
                     title={t("uploads_in_progress")}
-                    count={inProgressUploads?.length}
+                    count={inProgressUploads.length}
                 />
             </SectionAccordionSummary>
             <SectionAccordionDetails>
@@ -530,7 +530,7 @@ const ResultSection: React.FC<ResultSectionProps> = ({
     return (
         <SectionAccordion>
             <SectionAccordionSummary expandIcon={<ExpandMoreIcon />}>
-                <TitleText title={sectionTitle} count={fileList?.length} />
+                <TitleText title={sectionTitle} count={fileList.length} />
             </SectionAccordionSummary>
             <SectionAccordionDetails>
                 {sectionInfo && <SectionInfo>{sectionInfo}</SectionInfo>}

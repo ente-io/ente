@@ -57,7 +57,7 @@ export const DownloadStatusNotifications: React.FC<
                 text: t("yes_stop_downloads"),
                 color: "critical",
                 action: () => {
-                    group?.canceller.abort();
+                    group.canceller.abort();
                     onRemoveSaveGroup(group);
                 },
             },
@@ -75,7 +75,7 @@ export const DownloadStatusNotifications: React.FC<
     const createOnClick = (group: SaveGroup) => () => {
         const electron = globalThis.electron;
         if (electron && group.downloadDirPath) {
-            electron.openDirectory(group.downloadDirPath);
+            void electron.openDirectory(group.downloadDirPath);
         } else if (onShowCollectionSummary) {
             onShowCollectionSummary(
                 group.collectionSummaryID,
@@ -85,10 +85,6 @@ export const DownloadStatusNotifications: React.FC<
             return undefined;
         }
     };
-
-    if (!saveGroups) {
-        return <></>;
-    }
 
     return saveGroups.map((group, index) => (
         <Notification

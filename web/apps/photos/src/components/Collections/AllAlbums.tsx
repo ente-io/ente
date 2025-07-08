@@ -1,3 +1,4 @@
+// TODO: Audit this file.
 import CloseIcon from "@mui/icons-material/Close";
 import {
     Box,
@@ -225,9 +226,6 @@ const AllAlbumsContent: React.FC<AllAlbumsContentProps> = ({
         32; /* padding above first and below last row */
 
     useEffect(() => {
-        if (!collectionSummaries) {
-            return;
-        }
         const main = () => {
             if (refreshInProgress.current) {
                 shouldRefresh.current = true;

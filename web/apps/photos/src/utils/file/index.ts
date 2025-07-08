@@ -1,4 +1,3 @@
-import type { LocalUser } from "ente-accounts/services/user";
 import type { AddSaveGroup } from "ente-gallery/components/utils/save-groups";
 import { downloadAndSaveFiles } from "ente-gallery/services/save";
 import type { EnteFile } from "ente-media/file";
@@ -43,28 +42,6 @@ export function getSelectedFiles(
 
     return files.filter((file) => selectedFilesIDs.has(file.id));
 }
-
-export const shouldShowAvatar = (
-    file: EnteFile,
-    user: LocalUser | undefined,
-) => {
-    if (!file || !user) {
-        return false;
-    }
-    // is Shared file
-    else if (file.ownerID !== user.id) {
-        return true;
-    }
-    // is public collected file
-    else if (
-        file.ownerID === user.id &&
-        file.pubMagicMetadata?.data?.uploaderName
-    ) {
-        return true;
-    } else {
-        return false;
-    }
-};
 
 export const performFileOp = async (
     op: FileOp,

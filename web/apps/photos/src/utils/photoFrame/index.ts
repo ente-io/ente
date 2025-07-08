@@ -155,7 +155,7 @@ const createSelectedAndContext = (
                         : { mode, collectionID: activeCollectionID },
             };
         } else {
-            if (selected.context?.mode == "people") {
+            if (selected.context.mode == "people") {
                 if (selected.context.personID != activePersonID) {
                     // Clear selection if person has changed.
                     selected = {
@@ -163,7 +163,7 @@ const createSelectedAndContext = (
                         count: 0,
                         collectionID: 0,
                         context: {
-                            mode: selected.context?.mode,
+                            mode: selected.context.mode,
                             personID: activePersonID!,
                         },
                     };
@@ -176,7 +176,7 @@ const createSelectedAndContext = (
                         count: 0,
                         collectionID: 0,
                         context: {
-                            mode: selected.context?.mode,
+                            mode: selected.context.mode,
                             collectionID: activeCollectionID,
                         },
                     };

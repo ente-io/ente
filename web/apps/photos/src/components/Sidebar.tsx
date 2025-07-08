@@ -265,6 +265,10 @@ const UserDetailsSection: React.FC<UserDetailsSectionProps> = ({
                 isSubscriptionStripe(userDetails.subscription) &&
                 isSubscriptionPastDue(userDetails.subscription)
             ) {
+                // TODO: This makes an API request, so the UI should indicate
+                // the await.
+                //
+                // eslint-disable-next-line @typescript-eslint/no-floating-promises
                 redirectToCustomerPortal();
             } else {
                 onShowPlanSelector();
@@ -337,13 +341,14 @@ const SubscriptionStatus: React.FC<SubscriptionStatusProps> = ({
                     isSubscriptionStripe(userDetails.subscription) &&
                     isSubscriptionPastDue(userDetails.subscription)
                 ) {
+                    // eslint-disable-next-line @typescript-eslint/no-floating-promises
                     redirectToCustomerPortal();
                 } else {
                     onShowPlanSelector();
                 }
             }
         },
-        [userDetails],
+        [onShowPlanSelector, userDetails],
     );
 
     if (!hasAMessage) {
@@ -359,7 +364,7 @@ const SubscriptionStatus: React.FC<SubscriptionStatusProps> = ({
                 message = t("subscription_info_free");
             } else if (isSubscriptionCancelled(userDetails.subscription)) {
                 message = t("subscription_info_renewal_cancelled", {
-                    date: userDetails.subscription?.expiryTime,
+                    date: userDetails.subscription.expiryTime,
                 });
             }
         } else {
@@ -646,13 +651,13 @@ const ExitSection: React.FC = () => {
 };
 
 const InfoSection: React.FC = () => {
-    const [appVersion, setAppVersion] = useState<string | undefined>();
-    const [host, setHost] = useState<string | undefined>();
+    const [appVersion, setAppVersion] = useState("");
+    const [host, setHost] = useState<string | undefined>("");
 
     useEffect(() => {
         void globalThis.electron?.appVersion().then(setAppVersion);
         void customAPIHost().then(setHost);
-    });
+    }, []);
 
     return (
         <>
@@ -851,16 +856,17 @@ const LanguageSelector = () => {
     const locale = getLocaleInUse();
 
     const updateCurrentLocale = (newLocale: SupportedLocale) => {
-        setLocaleInUse(newLocale);
-        // [Note: Changing locale causes a full reload]
-        //
-        // A full reload is needed because we use the global `t` instance
-        // instead of the useTranslation hook.
-        //
-        // We also rely on this behaviour by caching various formatters in
-        // module static variables that not get updated if the i18n.language
-        // changes unless there is a full reload.
-        window.location.reload();
+        void setLocaleInUse(newLocale).then(() => {
+            // [Note: Changing locale causes a full reload]
+            //
+            // A full reload is needed because we use the global `t` instance
+            // instead of the useTranslation hook.
+            //
+            // We also rely on this behaviour by caching various formatters in
+            // module static variables that not get updated if the i18n.language
+            // changes unless there is a full reload.
+            window.location.reload();
+        });
     };
 
     const options = supportedLocales.map((locale) => ({
@@ -1088,11 +1094,14 @@ const Help: React.FC<NestedSidebarDrawerVisibilityProps> = ({
             continue: { text: t("view_logs"), action: viewLogs },
         });
 
-    const viewLogs = () => {
+    const viewLogs = async () => {
         log.info("Viewing logs");
         const electron = globalThis.electron;
-        if (electron) electron.openLogDirectory();
-        else saveStringAsFile(savedLogs(), `ente-web-logs-${Date.now()}.txt`);
+        if (electron) {
+            await electron.openLogDirectory();
+        } else {
+            saveStringAsFile(savedLogs(), `ente-web-logs-${Date.now()}.txt`);
+        }
     };
 
     return (

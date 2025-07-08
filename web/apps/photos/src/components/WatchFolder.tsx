@@ -53,7 +53,7 @@ export const WatchFolder: React.FC<ModalVisibilityProps> = ({
         useModalVisibility();
 
     useEffect(() => {
-        watcher.getWatches().then((ws) => setWatches(ws));
+        void watcher.getWatches().then((ws) => setWatches(ws));
     }, []);
 
     useEffect(() => {
@@ -72,6 +72,8 @@ export const WatchFolder: React.FC<ModalVisibilityProps> = ({
         return () => {
             removeEventListener("drop", handleWatchFolderDrop);
         };
+        // TODO:
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [open]);
 
     const selectCollectionMappingAndAddWatchIfDirectory = async (
@@ -87,7 +89,7 @@ export const WatchFolder: React.FC<ModalVisibilityProps> = ({
     const selectCollectionMappingAndAddWatch = async (path: string) => {
         const filePaths = await ensureElectron().fs.findFiles(path);
         if (areAllInSameDirectory(filePaths)) {
-            addWatch(path, "root");
+            await addWatch(path, "root");
         } else {
             setSavedFolderPath(path);
             showMappingChoice();
@@ -109,7 +111,7 @@ export const WatchFolder: React.FC<ModalVisibilityProps> = ({
 
     const handleCollectionMappingSelect = (mapping: CollectionMapping) => {
         setSavedFolderPath(undefined);
-        addWatch(savedFolderPath!, mapping);
+        void addWatch(savedFolderPath!, mapping);
     };
 
     return (

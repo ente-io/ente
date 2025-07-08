@@ -1,4 +1,5 @@
-// TODO: Audit this file (too many null assertions)
+// TODO: Audit this file (too many null assertions + other issues)
+/* eslint-disable @typescript-eslint/no-floating-promises */
 import AddPhotoAlternateOutlinedIcon from "@mui/icons-material/AddPhotoAlternateOutlined";
 import CloseIcon from "@mui/icons-material/Close";
 import DownloadIcon from "@mui/icons-material/Download";
@@ -212,10 +213,12 @@ export default function PublicCollectionGallery() {
             }
         };
         main();
+        // TODO:
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const downloadEnabled =
-        publicCollection?.publicURLs?.[0]?.enableDownload ?? true;
+        publicCollection?.publicURLs[0]?.enableDownload ?? true;
 
     /**
      * Pull the latest data related to the public album from remote, updating
@@ -312,7 +315,7 @@ export default function PublicCollectionGallery() {
             hideLoadingBar();
             setLoading(false);
         }
-    }, [showLoadingBar, hideLoadingBar]);
+    }, [showLoadingBar, hideLoadingBar, onGenericError]);
 
     // See: [Note: Visual feedback to acknowledge user actions]
     const handleVisualFeedback = useCallback(() => {
@@ -350,7 +353,7 @@ export default function PublicCollectionGallery() {
     };
 
     const clearSelection = () => {
-        if (!selected?.count) {
+        if (!selected.count) {
             return;
         }
         setSelected({
@@ -399,6 +402,7 @@ export default function PublicCollectionGallery() {
                               {...{
                                   publicCollection,
                                   publicFiles,
+                                  downloadEnabled,
                                   onAddSaveGroup,
                               }}
                           />
@@ -406,7 +410,7 @@ export default function PublicCollectionGallery() {
                       height: fileListHeaderHeight,
                   }
                 : undefined,
-        [onAddSaveGroup, publicCollection, publicFiles],
+        [onAddSaveGroup, publicCollection, publicFiles, downloadEnabled],
     );
 
     const fileListFooter = useMemo(() => {
@@ -620,6 +624,7 @@ const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
 interface FileListHeaderProps {
     publicCollection: Collection;
     publicFiles: EnteFile[];
+    downloadEnabled: boolean;
     onAddSaveGroup: AddSaveGroup;
 }
 
@@ -637,11 +642,9 @@ const fileListHeaderHeight = 68;
 const FileListHeader: React.FC<FileListHeaderProps> = ({
     publicCollection,
     publicFiles,
+    downloadEnabled,
     onAddSaveGroup,
 }) => {
-    const downloadEnabled =
-        publicCollection.publicURLs?.[0]?.enableDownload ?? true;
-
     const downloadAllFiles = () =>
         downloadAndSaveCollectionFiles(
             publicCollection.name,

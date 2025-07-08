@@ -117,10 +117,7 @@ export const checkSessionValidity = async (): Promise<SessionValidity> => {
                 // changed.
                 return {
                     status: "validButPasswordChanged",
-                    // TODO:
-                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                    // @ts-ignore
-                    updatedKeyAttributes: remoteKeyAttributes as KeyAttributes,
+                    updatedKeyAttributes: remoteKeyAttributes,
                     updatedSRPAttributes: remoteSRPAttributes,
                 };
             }
