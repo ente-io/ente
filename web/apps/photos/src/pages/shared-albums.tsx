@@ -3,7 +3,15 @@ import AddPhotoAlternateOutlinedIcon from "@mui/icons-material/AddPhotoAlternate
 import CloseIcon from "@mui/icons-material/Close";
 import DownloadIcon from "@mui/icons-material/Download";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
-import { Box, Button, IconButton, Stack, styled, Tooltip } from "@mui/material";
+import {
+    Box,
+    Button,
+    IconButton,
+    Link,
+    Stack,
+    styled,
+    Tooltip,
+} from "@mui/material";
 import Typography from "@mui/material/Typography";
 import { DownloadStatusNotifications } from "components/DownloadStatusNotifications";
 import { FileListWithViewer } from "components/FileListWithViewer";
@@ -75,6 +83,10 @@ import {
     verifyPublicAlbumPassword,
 } from "ente-new/albums/services/public-collection";
 import {
+    IMAGE_CONTAINER_MAX_WIDTH,
+    MIN_COLUMNS,
+} from "ente-new/photos/components/FileList";
+import {
     GalleryItemsHeaderAdapter,
     GalleryItemsSummary,
 } from "ente-new/photos/components/gallery/ListHeader";
@@ -84,6 +96,7 @@ import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { type FileWithPath } from "react-dropzone";
+import { Trans } from "react-i18next";
 import { uploadManager } from "services/upload-manager";
 import { getSelectedFiles, type SelectedState } from "utils/file";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
@@ -699,63 +712,80 @@ const FileListFooter: React.FC<FileListFooterProps> = ({
     referralCode,
     onAddPhotos,
 }) => {
-    if (onAddPhotos)
-        return (
-            <CenteredFill sx={{ marginTop: "56px" }}>
-                <AddMorePhotosButton onClick={onAddPhotos} />
-            </CenteredFill>
-        );
-
     return (
-        <AlbumFooterContainer
-            span={columns}
-            hasReferral={!!publicCollectionGalleryContext.referralCode}
-        >
-            {/* Make the entire area tappable, otherwise it is hard to
+        <Stack>
+            {onAddPhotos && (
+                <CenteredFill sx={{ marginTop: "56px" }}>
+                    <AddMorePhotosButton onClick={onAddPhotos} />
+                </CenteredFill>
+            )}
+            <AlbumFooterContainer hasReferral={!!referralCode}>
+                {/* Make the entire area tappable, otherwise it is hard to
                     get at on mobile devices. */}
-            <Box sx={{ width: "100%" }}>
-                <Link
-                    color="text.base"
-                    sx={{ "&:hover": { color: "inherit" } }}
-                    target="_blank"
-                    href={"https://ente.io"}
-                >
-                    <Typography variant="small">
-                        <Trans
-                            i18nKey="shared_using"
-                            components={{
-                                a: (
-                                    <Typography
-                                        variant="small"
-                                        component="span"
-                                        sx={{ color: "accent.main" }}
-                                    />
-                                ),
-                            }}
-                            values={{ url: "ente.io" }}
-                        />
-                    </Typography>
-                </Link>
-                {publicCollectionGalleryContext.referralCode ? (
-                    <FullStretchContainer>
-                        <Typography
-                            sx={{
-                                marginTop: "12px",
-                                padding: "8px",
-                                color: "accent.contrastText",
-                            }}
-                        >
+                <Box sx={{ width: "100%" }}>
+                    <Link
+                        color="text.base"
+                        sx={{ "&:hover": { color: "inherit" } }}
+                        target="_blank"
+                        href={"https://ente.io"}
+                    >
+                        <Typography variant="small">
                             <Trans
-                                i18nKey={"sharing_referral_code"}
-                                values={{
-                                    referralCode:
-                                        publicCollectionGalleryContext.referralCode,
+                                i18nKey="shared_using"
+                                components={{
+                                    a: (
+                                        <Typography
+                                            variant="small"
+                                            component="span"
+                                            sx={{ color: "accent.main" }}
+                                        />
+                                    ),
                                 }}
+                                values={{ url: "ente.io" }}
                             />
                         </Typography>
-                    </FullStretchContainer>
-                ) : null}
-            </Box>
-        </AlbumFooterContainer>
+                    </Link>
+                    {referralCode ? (
+                        <FullStretchContainer>
+                            <Typography
+                                sx={{
+                                    marginTop: "12px",
+                                    padding: "8px",
+                                    color: "accent.contrastText",
+                                }}
+                            >
+                                <Trans
+                                    i18nKey={"sharing_referral_code"}
+                                    values={{ referralCode }}
+                                />
+                            </Typography>
+                        </FullStretchContainer>
+                    ) : null}
+                </Box>
+            </AlbumFooterContainer>
+        </Stack>
     );
 };
+
+const AlbumFooterContainer = styled("div", {
+    shouldForwardProp: (propName) => propName != "hasReferral",
+})<{ hasReferral: boolean }>`
+    margin-top: 48px;
+    margin-bottom: ${({ hasReferral }) => (!hasReferral ? `10px` : "0px")};
+    text-align: center;
+    justify-content: center;
+`;
+
+const FullStretchContainer = styled("div")(
+    ({ theme }) => `
+    margin: 0 -24px;
+    width: calc(100% + 46px);
+    left: -24px;
+    @media (max-width: ${IMAGE_CONTAINER_MAX_WIDTH * MIN_COLUMNS}px) {
+        margin: 0 -4px;
+        width: calc(100% + 6px);
+        left: -4px;
+    }
+    background-color: ${theme.vars.palette.accent.main};
+`,
+);

@@ -3,7 +3,7 @@
 import AlbumOutlinedIcon from "@mui/icons-material/AlbumOutlined";
 import FavoriteRoundedIcon from "@mui/icons-material/FavoriteRounded";
 import PlayCircleOutlineOutlinedIcon from "@mui/icons-material/PlayCircleOutlineOutlined";
-import { Box, Checkbox, Link, Typography, styled } from "@mui/material";
+import { Box, Checkbox, Typography, styled } from "@mui/material";
 import Avatar from "components/Avatar";
 import type { LocalUser } from "ente-accounts/services/user";
 import { assertionFailed } from "ente-base/assert";
@@ -31,7 +31,6 @@ import { PseudoCollectionID } from "ente-new/photos/services/collection-summary"
 import { t } from "i18next";
 import memoize from "memoize-one";
 import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
-import { Trans } from "react-i18next";
 import {
     VariableSizeList as List,
     type ListChildComponentProps,
@@ -48,10 +47,6 @@ export const DATE_CONTAINER_HEIGHT = 48;
 export const SPACE_BTW_DATES = 44;
 
 const SPACE_BTW_DATES_TO_IMAGE_CONTAINER_WIDTH_RATIO = 0.244;
-
-const FOOTER_HEIGHT = 90;
-const ALBUM_FOOTER_HEIGHT = 75;
-const ALBUM_FOOTER_HEIGHT_WITH_REFERRAL = 113;
 
 /**
  * A component with an explicit height suitable for being plugged in as the
@@ -274,13 +269,10 @@ export const FileList: React.FC<FileListProps> = ({
             if (timeStampList.length === 1) {
                 timeStampList.push(getEmptyListItem());
             }
-            timeStampList.push(getVacuumItem(timeStampList));
+            const footerHeight = footer?.height ?? 0;
+            timeStampList.push(getVacuumItem(timeStampList, footerHeight));
             if (footer) {
                 timeStampList.push(asFullSpanListItem(footer));
-            }
-
-            if (publicCollectionGalleryContext.credentials) {
-                timeStampList.push(getAlbumsFooter());
             }
 
             setTimeStampList(timeStampList);
@@ -372,15 +364,7 @@ export const FileList: React.FC<FileListProps> = ({
         };
     };
 
-    const getVacuumItem = (timeStampList) => {
-        let footerHeight;
-        if (publicCollectionGalleryContext.credentials) {
-            footerHeight = publicCollectionGalleryContext.referralCode
-                ? ALBUM_FOOTER_HEIGHT_WITH_REFERRAL
-                : ALBUM_FOOTER_HEIGHT;
-        } else {
-            footerHeight = FOOTER_HEIGHT;
-        }
+    const getVacuumItem = (timeStampList, footerHeight: number) => {
         const fileListHeight = (() => {
             let sum = 0;
             const getCurrentItemSize = getItemSize(timeStampList);
@@ -397,64 +381,6 @@ export const FileList: React.FC<FileListProps> = ({
             height: Math.max(height - fileListHeight - footerHeight, 0),
         };
     };
-
-    const getAlbumsFooter = (): TimeStampListItem => ({
-        height: publicCollectionGalleryContext.referralCode
-            ? ALBUM_FOOTER_HEIGHT_WITH_REFERRAL
-            : ALBUM_FOOTER_HEIGHT,
-        item: (
-            <AlbumFooterContainer
-                span={columns}
-                hasReferral={!!publicCollectionGalleryContext.referralCode}
-            >
-                {/* Make the entire area tappable, otherwise it is hard to
-                    get at on mobile devices. */}
-                <Box sx={{ width: "100%" }}>
-                    <Link
-                        color="text.base"
-                        sx={{ "&:hover": { color: "inherit" } }}
-                        target="_blank"
-                        href={"https://ente.io"}
-                    >
-                        <Typography variant="small">
-                            <Trans
-                                i18nKey="shared_using"
-                                components={{
-                                    a: (
-                                        <Typography
-                                            variant="small"
-                                            component="span"
-                                            sx={{ color: "accent.main" }}
-                                        />
-                                    ),
-                                }}
-                                values={{ url: "ente.io" }}
-                            />
-                        </Typography>
-                    </Link>
-                    {publicCollectionGalleryContext.referralCode ? (
-                        <FullStretchContainer>
-                            <Typography
-                                sx={{
-                                    marginTop: "12px",
-                                    padding: "8px",
-                                    color: "accent.contrastText",
-                                }}
-                            >
-                                <Trans
-                                    i18nKey={"sharing_referral_code"}
-                                    values={{
-                                        referralCode:
-                                            publicCollectionGalleryContext.referralCode,
-                                    }}
-                                />
-                            </Typography>
-                        </FullStretchContainer>
-                    ) : null}
-                </Box>
-            </AlbumFooterContainer>
-        ),
-    });
 
     /**
      * Checks and merge multiple dates into a single row.
@@ -933,29 +859,6 @@ const DateContainer = styled(ListItemContainer)(
     text-overflow: ellipsis;
     height: ${DATE_CONTAINER_HEIGHT}px;
     color: ${theme.vars.palette.text.muted};
-`,
-);
-
-const AlbumFooterContainer = styled(ListItemContainer, {
-    shouldForwardProp: (propName) => propName != "hasReferral",
-})<{ hasReferral: boolean }>`
-    margin-top: 48px;
-    margin-bottom: ${({ hasReferral }) => (!hasReferral ? `10px` : "0px")};
-    text-align: center;
-    justify-content: center;
-`;
-
-const FullStretchContainer = styled("div")(
-    ({ theme }) => `
-    margin: 0 -24px;
-    width: calc(100% + 46px);
-    left: -24px;
-    @media (max-width: ${IMAGE_CONTAINER_MAX_WIDTH * MIN_COLUMNS}px) {
-        margin: 0 -4px;
-        width: calc(100% + 6px);
-        left: -4px;
-    }
-    background-color: ${theme.vars.palette.accent.main};
 `,
 );
 
