@@ -452,7 +452,7 @@ const Page: React.FC = () => {
             // - We haven't fetched the user yet;
             !user ||
             // - There is nothing to select;
-            !filteredFiles?.length ||
+            !filteredFiles.length ||
             // - Any of the modals are open.
             uploadTypeSelectorView ||
             openCollectionSelector ||
@@ -493,7 +493,7 @@ const Page: React.FC = () => {
     };
 
     const clearSelection = () => {
-        if (!selected?.count) {
+        if (!selected.count) {
             return;
         }
         setSelected({
@@ -1094,7 +1094,7 @@ const Page: React.FC = () => {
                 emailByUserID={state.emailByUserID}
                 shareSuggestionEmails={state.shareSuggestionEmails}
                 people={
-                    (state?.view?.type == "people"
+                    (state.view?.type == "people"
                         ? state.view.visiblePeople
                         : undefined) ?? []
                 }
@@ -1152,7 +1152,7 @@ const Page: React.FC = () => {
                 />
             ) : !isInSearchMode &&
               !isFirstLoad &&
-              state?.view?.type == "people" &&
+              state.view?.type == "people" &&
               !state.view.activePerson ? (
                 <PeopleEmptyState />
             ) : (
@@ -1338,7 +1338,7 @@ const handleSubscriptionCompletionRedirectIfNeeded = async (
                 message: (
                     <Trans
                         i18nKey="subscription_purchase_success"
-                        values={{ date: subscription?.expiryTime }}
+                        values={{ date: subscription.expiryTime }}
                     />
                 ),
                 continue: { text: t("ok") },

@@ -9,7 +9,6 @@ export default [
              * "This rule requires the `strictNullChecks` compiler option to be
              * turned on to function correctly"
              */
-            "@typescript-eslint/no-unnecessary-condition": "off",
             /** TODO: Disabled as we migrate, try to prune these again */
             "react-hooks/exhaustive-deps": "off",
         },

@@ -15,7 +15,6 @@ import UnarchiveIcon from "@mui/icons-material/Unarchive";
 import VisibilityOffOutlinedIcon from "@mui/icons-material/VisibilityOffOutlined";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import { Box, IconButton, Menu, Stack, Tooltip } from "@mui/material";
-import { assertionFailed } from "ente-base/assert";
 import { SpacedRow } from "ente-base/components/containers";
 import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
 import {
@@ -63,6 +62,7 @@ import { Trans } from "react-i18next";
 
 export interface CollectionHeaderProps {
     collectionSummary: CollectionSummary;
+    // TODO: This can be undefined
     activeCollection: Collection;
     setActiveCollectionID: (collectionID: number) => void;
     isActiveCollectionDownloadInProgress: () => boolean;
@@ -86,10 +86,6 @@ export interface CollectionHeaderProps {
  */
 export const CollectionHeader: React.FC<CollectionHeaderProps> = (props) => {
     const { collectionSummary } = props;
-    if (!collectionSummary) {
-        assertionFailed("Gallery/CollectionHeader without a collection");
-        return <></>;
-    }
 
     const { name, type, attributes, fileCount } = collectionSummary;
 
@@ -548,6 +544,8 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
                 {...albumNameInputVisibilityProps}
                 title={t("rename_album")}
                 label={t("album_name")}
+                // TODO: Need to ensure this cannot be undefined when we reach here
+                // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
                 initialValue={activeCollection?.name}
                 submitButtonColor="primary"
                 submitButtonTitle={t("rename")}
@@ -735,7 +733,7 @@ const CollectionSortOrderMenu: React.FC<CollectionSortOrderMenuProps> = ({
     return (
         <Menu
             id="collection-files-sort"
-            anchorEl={overflowMenuIconRef?.current}
+            anchorEl={overflowMenuIconRef.current}
             open={open}
             onClose={onClose}
             slotProps={{

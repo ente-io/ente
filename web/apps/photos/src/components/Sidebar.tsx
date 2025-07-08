@@ -364,7 +364,7 @@ const SubscriptionStatus: React.FC<SubscriptionStatusProps> = ({
                 message = t("subscription_info_free");
             } else if (isSubscriptionCancelled(userDetails.subscription)) {
                 message = t("subscription_info_renewal_cancelled", {
-                    date: userDetails.subscription?.expiryTime,
+                    date: userDetails.subscription.expiryTime,
                 });
             }
         } else {

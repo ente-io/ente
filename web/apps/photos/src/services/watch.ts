@@ -172,7 +172,6 @@ class FolderWatcher {
     private async syncWithDisk() {
         try {
             const watches = await this.getWatches();
-            if (!watches) return;
 
             this.eventQueue = [];
             const events = await deduceEvents(watches);

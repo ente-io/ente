@@ -1,3 +1,4 @@
+// TODO: Audit this file
 // TODO: Too many null assertions in this file. The types need reworking.
 import { ensureLocalUser } from "ente-accounts/services/user";
 import { isDesktop } from "ente-base/app";
@@ -204,15 +205,14 @@ class UIService {
         let percentComplete =
             this.perFileProgress *
             (this.finishedUploads.size || this.filesUploadedCount);
-        if (this.inProgressUploads) {
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            for (const [_, progress] of this.inProgressUploads) {
-                // filter  negative indicator values during percentComplete calculation
-                if (progress < 0) {
-                    continue;
-                }
-                percentComplete += (this.perFileProgress * progress) / 100;
+
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        for (const [_, progress] of this.inProgressUploads) {
+            // filter  negative indicator values during percentComplete calculation
+            if (progress < 0) {
+                continue;
             }
+            percentComplete += (this.perFileProgress * progress) / 100;
         }
 
         setPercentComplete(percentComplete);

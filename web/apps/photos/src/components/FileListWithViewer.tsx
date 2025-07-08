@@ -159,7 +159,7 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
     const handleDelete = useMemo(() => {
         return onMarkTempDeleted
             ? (file: EnteFile) =>
-                  moveToTrash([file]).then(() => onMarkTempDeleted?.([file]))
+                  moveToTrash([file]).then(() => onMarkTempDeleted([file]))
             : undefined;
     }, [onMarkTempDeleted]);
 

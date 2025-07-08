@@ -141,7 +141,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
         }
         router.events.on("routeChangeStart", (url: string, o: NROptions) => {
             if (process.env.NEXT_PUBLIC_ENTE_TRACE_RT) {
-                log.debug(() => [o?.shallow ? "route-shallow" : "route", url]);
+                log.debug(() => [o.shallow ? "route-shallow" : "route", url]);
             }
 
             if (needsFamilyRedirect && savedPartialLocalUser()?.token) {

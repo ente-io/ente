@@ -216,7 +216,7 @@ export default function PublicCollectionGallery() {
     }, []);
 
     const downloadEnabled =
-        publicCollection?.publicURLs?.[0]?.enableDownload ?? true;
+        publicCollection?.publicURLs[0]?.enableDownload ?? true;
 
     /**
      * Pull the latest data related to the public album from remote, updating
@@ -351,7 +351,7 @@ export default function PublicCollectionGallery() {
     };
 
     const clearSelection = () => {
-        if (!selected?.count) {
+        if (!selected.count) {
             return;
         }
         setSelected({
@@ -400,6 +400,7 @@ export default function PublicCollectionGallery() {
                               {...{
                                   publicCollection,
                                   publicFiles,
+                                  downloadEnabled,
                                   onAddSaveGroup,
                               }}
                           />
@@ -407,7 +408,7 @@ export default function PublicCollectionGallery() {
                       height: fileListHeaderHeight,
                   }
                 : undefined,
-        [onAddSaveGroup, publicCollection, publicFiles],
+        [onAddSaveGroup, publicCollection, publicFiles, downloadEnabled],
     );
 
     const fileListFooter = useMemo(() => {
@@ -621,6 +622,7 @@ const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
 interface FileListHeaderProps {
     publicCollection: Collection;
     publicFiles: EnteFile[];
+    downloadEnabled: boolean;
     onAddSaveGroup: AddSaveGroup;
 }
 
@@ -638,11 +640,9 @@ const fileListHeaderHeight = 68;
 const FileListHeader: React.FC<FileListHeaderProps> = ({
     publicCollection,
     publicFiles,
+    downloadEnabled,
     onAddSaveGroup,
 }) => {
-    const downloadEnabled =
-        publicCollection.publicURLs?.[0]?.enableDownload ?? true;
-
     const downloadAllFiles = () =>
         downloadAndSaveCollectionFiles(
             publicCollection.name,
