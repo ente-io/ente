@@ -3,7 +3,7 @@ import {
     CollectionShare,
     type CollectionShareProps,
 } from "components/Collections/CollectionShare";
-import type { TimeStampListItem } from "components/FileList";
+import type { FileListHeaderOrFooter } from "components/FileList";
 import { useModalVisibility } from "ente-base/components/utils/modal";
 import {
     isSaveCancelled,
@@ -49,7 +49,7 @@ type GalleryBarAndListHeaderProps = Omit<
     barCollectionSummaries: CollectionSummaries;
     activeCollection: Collection;
     setActiveCollectionID: (collectionID: number) => void;
-    setPhotoListHeader: (value: TimeStampListItem) => void;
+    setFileListHeader: (header: FileListHeaderOrFooter) => void;
     saveGroups: SaveGroup[];
 } & Pick<CollectionHeaderProps, "onRemotePull" | "onAddSaveGroup"> &
     Pick<
@@ -62,11 +62,11 @@ type GalleryBarAndListHeaderProps = Omit<
  * dialogs that might be triggered by actions on either the bar or the header..
  *
  * This component manages the sticky horizontally scrollable bar shown at the
- * top of the gallery, AND the non-sticky header shown below the bar, at the top
- * of the actual list of items.
+ * top of the gallery, AND the (non-sticky) header shown below the bar, at the
+ * top of the actual list of items.
  *
  * These are disparate views - indeed, the list header is not even a child of
- * this component but is instead proxied via {@link setPhotoListHeader}. Still,
+ * this component but is instead proxied via {@link setFileListHeader}. Still,
  * having this intermediate wrapper component allows us to move some of the
  * common concerns shared by both the gallery bar and list header (e.g. some
  * dialogs that can be invoked from both places) into this file instead of
@@ -95,7 +95,7 @@ export const GalleryBarAndListHeader: React.FC<
     onRemotePull,
     onAddSaveGroup,
     onSelectPerson,
-    setPhotoListHeader,
+    setFileListHeader,
 }) => {
     const { show: showAllAlbums, props: allAlbumsVisibilityProps } =
         useModalVisibility();
@@ -134,7 +134,7 @@ export const GalleryBarAndListHeader: React.FC<
     useEffect(() => {
         if (shouldHide) return;
 
-        setPhotoListHeader({
+        setFileListHeader({
             item:
                 mode != "people" ? (
                     <CollectionHeader
@@ -159,7 +159,6 @@ export const GalleryBarAndListHeader: React.FC<
                 ) : (
                     <></>
                 ),
-            tag: "header",
             height: 68,
         });
     }, [

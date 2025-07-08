@@ -3,7 +3,7 @@
 import AlbumOutlinedIcon from "@mui/icons-material/AlbumOutlined";
 import FavoriteRoundedIcon from "@mui/icons-material/FavoriteRounded";
 import PlayCircleOutlineOutlinedIcon from "@mui/icons-material/PlayCircleOutlineOutlined";
-import { Box, Checkbox, Link, Typography, styled } from "@mui/material";
+import { Box, Checkbox, Typography, styled } from "@mui/material";
 import Avatar from "components/Avatar";
 import type { LocalUser } from "ente-accounts/services/user";
 import { assertionFailed } from "ente-base/assert";
@@ -31,7 +31,6 @@ import { PseudoCollectionID } from "ente-new/photos/services/collection-summary"
 import { t } from "i18next";
 import memoize from "memoize-one";
 import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
-import { Trans } from "react-i18next";
 import {
     VariableSizeList as List,
     type ListChildComponentProps,
@@ -49,18 +48,27 @@ export const SPACE_BTW_DATES = 44;
 
 const SPACE_BTW_DATES_TO_IMAGE_CONTAINER_WIDTH_RATIO = 0.244;
 
-const FOOTER_HEIGHT = 90;
-const ALBUM_FOOTER_HEIGHT = 75;
-const ALBUM_FOOTER_HEIGHT_WITH_REFERRAL = 113;
+/**
+ * A component with an explicit height suitable for being plugged in as the
+ * {@link header} or {@link footer} of the {@link FileList}.
+ */
+export interface FileListHeaderOrFooter {
+    /**
+     * The component itself.
+     */
+    item: React.ReactNode;
+    /**
+     * The height of the component (in px).
+     */
+    height: number;
+}
 
-export type FileListItemTag = "header" | "publicAlbumsFooter" | "date" | "file";
-
-export interface TimeStampListItem {
+interface TimeStampListItem {
     /**
      * An optional {@link FileListItemTag} that can be used to identify item
      * types for conditional behaviour.
      */
-    tag?: FileListItemTag;
+    tag?: "date" | "file";
     items?: FileListAnnotatedFile[];
     itemStartIndex?: number;
     date?: string;
@@ -123,6 +131,18 @@ export interface FileListProps {
      */
     modePlus?: GalleryBarMode | "search";
     /**
+     * An optional component shown before all the items in the list.
+     *
+     * It is not sticky, and scrolls along with the content of the list.
+     */
+    header?: FileListHeaderOrFooter;
+    /**
+     * An optional component shown after all the items in the list.
+     *
+     * It is not sticky, and scrolls along with the content of the list.
+     */
+    footer?: FileListHeaderOrFooter;
+    /**
      * The logged in user, if any.
      *
      * This is only expected to be present when the listing is shown within the
@@ -130,11 +150,13 @@ export interface FileListProps {
      * omit this prop.
      */
     user?: LocalUser;
-    showAppDownloadBanner?: boolean;
     /**
-     * If `true`, then the current listing is showing magic search results.
+     * If `true`, then the default behaviour of grouping files by their date is
+     * suppressed.
+     *
+     * This behaviour is used when showing magic search results.
      */
-    isMagicSearchResult?: boolean;
+    disableGrouping?: boolean;
     selectable?: boolean;
     setSelected: (
         selected: SelectedState | ((selected: SelectedState) => SelectedState),
@@ -158,16 +180,6 @@ export interface FileListProps {
      */
     emailByUserID?: Map<number, string>;
     /**
-     * An optional {@link TimeStampListItem} shown before all the items in the
-     * list. It is not sticky, and scrolls along with the content of the list.
-     */
-    header?: TimeStampListItem;
-    /**
-     * An optional {@link TimeStampListItem} shown after all the items in the
-     * list. It is not sticky, and scrolls along with the content of the list.
-     */
-    footer?: TimeStampListItem;
-    /**
      * Called when the user activates the thumbnail at the given {@link index}.
      *
      * This corresponding file would be at the corresponding index of
@@ -185,10 +197,10 @@ export const FileList: React.FC<FileListProps> = ({
     mode,
     modePlus,
     header,
+    footer,
     user,
     annotatedFiles,
-    showAppDownloadBanner,
-    isMagicSearchResult,
+    disableGrouping,
     selectable,
     selected,
     setSelected,
@@ -196,7 +208,6 @@ export const FileList: React.FC<FileListProps> = ({
     activePersonID,
     favoriteFileIDs,
     emailByUserID,
-    footer,
     onItemClick,
 }) => {
     const publicCollectionGalleryContext = useContext(
@@ -246,7 +257,7 @@ export const FileList: React.FC<FileListProps> = ({
             if (header) {
                 timeStampList.push(asFullSpanListItem(header));
             }
-            if (isMagicSearchResult) {
+            if (disableGrouping) {
                 noGrouping(timeStampList);
             } else {
                 groupByTime(timeStampList);
@@ -258,15 +269,10 @@ export const FileList: React.FC<FileListProps> = ({
             if (timeStampList.length === 1) {
                 timeStampList.push(getEmptyListItem());
             }
-            timeStampList.push(getVacuumItem(timeStampList));
+            const footerHeight = footer?.height ?? 0;
+            timeStampList.push(getVacuumItem(timeStampList, footerHeight));
             if (footer) {
                 timeStampList.push(asFullSpanListItem(footer));
-            } else if (showAppDownloadBanner) {
-                timeStampList.push(getAppDownloadFooter());
-            }
-
-            if (publicCollectionGalleryContext.credentials) {
-                timeStampList.push(getAlbumsFooter());
             }
 
             setTimeStampList(timeStampList);
@@ -283,7 +289,7 @@ export const FileList: React.FC<FileListProps> = ({
         annotatedFiles,
         header,
         footer,
-        isMagicSearchResult,
+        disableGrouping,
         publicCollectionGalleryContext.credentials,
     ]);
 
@@ -358,15 +364,7 @@ export const FileList: React.FC<FileListProps> = ({
         };
     };
 
-    const getVacuumItem = (timeStampList) => {
-        let footerHeight;
-        if (publicCollectionGalleryContext.credentials) {
-            footerHeight = publicCollectionGalleryContext.referralCode
-                ? ALBUM_FOOTER_HEIGHT_WITH_REFERRAL
-                : ALBUM_FOOTER_HEIGHT;
-        } else {
-            footerHeight = FOOTER_HEIGHT;
-        }
+    const getVacuumItem = (timeStampList, footerHeight: number) => {
         const fileListHeight = (() => {
             let sum = 0;
             const getCurrentItemSize = getItemSize(timeStampList);
@@ -383,95 +381,6 @@ export const FileList: React.FC<FileListProps> = ({
             height: Math.max(height - fileListHeight - footerHeight, 0),
         };
     };
-
-    const getAppDownloadFooter = (): TimeStampListItem => ({
-        tag: "publicAlbumsFooter",
-        height: FOOTER_HEIGHT,
-        item: (
-            <FooterContainer span={columns}>
-                <Typography variant="small" sx={{ color: "text.faint" }}>
-                    <Trans
-                        i18nKey={"install_mobile_app"}
-                        components={{
-                            a: (
-                                <Link
-                                    href="https://play.google.com/store/apps/details?id=io.ente.photos"
-                                    target="_blank"
-                                    rel="noopener"
-                                />
-                            ),
-                            b: (
-                                <Link
-                                    href="https://apps.apple.com/in/app/ente-photos/id1542026904"
-                                    target="_blank"
-                                    rel="noopener"
-                                />
-                            ),
-                        }}
-                    />
-                </Typography>
-            </FooterContainer>
-        ),
-    });
-
-    const getAlbumsFooter = (): TimeStampListItem => ({
-        tag: "publicAlbumsFooter",
-        height: publicCollectionGalleryContext.referralCode
-            ? ALBUM_FOOTER_HEIGHT_WITH_REFERRAL
-            : ALBUM_FOOTER_HEIGHT,
-        item: (
-            <AlbumFooterContainer
-                span={columns}
-                hasReferral={!!publicCollectionGalleryContext.referralCode}
-            >
-                {/* Make the entire area tappable, otherwise it is hard to
-                    get at on mobile devices. */}
-                <Box sx={{ width: "100%" }}>
-                    <Link
-                        color="text.base"
-                        sx={{ "&:hover": { color: "inherit" } }}
-                        target="_blank"
-                        href={"https://ente.io"}
-                    >
-                        <Typography variant="small">
-                            <Trans
-                                i18nKey="shared_using"
-                                components={{
-                                    a: (
-                                        <Typography
-                                            variant="small"
-                                            component="span"
-                                            sx={{ color: "accent.main" }}
-                                        />
-                                    ),
-                                }}
-                                values={{ url: "ente.io" }}
-                            />
-                        </Typography>
-                    </Link>
-                    {publicCollectionGalleryContext.referralCode ? (
-                        <FullStretchContainer>
-                            <Typography
-                                sx={{
-                                    marginTop: "12px",
-                                    padding: "8px",
-                                    color: "accent.contrastText",
-                                }}
-                            >
-                                <Trans
-                                    i18nKey={"sharing_referral_code"}
-                                    values={{
-                                        referralCode:
-                                            publicCollectionGalleryContext.referralCode,
-                                    }}
-                                />
-                            </Typography>
-                        </FullStretchContainer>
-                    ) : null}
-                </Box>
-            </AlbumFooterContainer>
-        ),
-    });
 
     /**
      * Checks and merge multiple dates into a single row.
@@ -950,41 +859,6 @@ const DateContainer = styled(ListItemContainer)(
     text-overflow: ellipsis;
     height: ${DATE_CONTAINER_HEIGHT}px;
     color: ${theme.vars.palette.text.muted};
-`,
-);
-
-const FooterContainer = styled(ListItemContainer)`
-    margin-bottom: 0.75rem;
-    @media (max-width: 540px) {
-        font-size: 12px;
-        margin-bottom: 0.5rem;
-    }
-    text-align: center;
-    justify-content: center;
-    align-items: flex-end;
-    margin-top: calc(2rem + 20px);
-`;
-
-const AlbumFooterContainer = styled(ListItemContainer, {
-    shouldForwardProp: (propName) => propName != "hasReferral",
-})<{ hasReferral: boolean }>`
-    margin-top: 48px;
-    margin-bottom: ${({ hasReferral }) => (!hasReferral ? `10px` : "0px")};
-    text-align: center;
-    justify-content: center;
-`;
-
-const FullStretchContainer = styled("div")(
-    ({ theme }) => `
-    margin: 0 -24px;
-    width: calc(100% + 46px);
-    left: -24px;
-    @media (max-width: ${IMAGE_CONTAINER_MAX_WIDTH * MIN_COLUMNS}px) {
-        margin: 0 -4px;
-        width: calc(100% + 6px);
-        left: -4px;
-    }
-    background-color: ${theme.vars.palette.accent.main};
 `,
 );
 

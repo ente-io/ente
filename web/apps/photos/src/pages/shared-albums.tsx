@@ -3,7 +3,15 @@ import AddPhotoAlternateOutlinedIcon from "@mui/icons-material/AddPhotoAlternate
 import CloseIcon from "@mui/icons-material/Close";
 import DownloadIcon from "@mui/icons-material/Download";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
-import { Box, Button, IconButton, Stack, styled, Tooltip } from "@mui/material";
+import {
+    Box,
+    Button,
+    IconButton,
+    Link,
+    Stack,
+    styled,
+    Tooltip,
+} from "@mui/material";
 import Typography from "@mui/material/Typography";
 import { DownloadStatusNotifications } from "components/DownloadStatusNotifications";
 import { FileListWithViewer } from "components/FileListWithViewer";
@@ -84,6 +92,7 @@ import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { type FileWithPath } from "react-dropzone";
+import { Trans } from "react-i18next";
 import { uploadManager } from "services/upload-manager";
 import { getSelectedFiles, type SelectedState } from "utils/file";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
@@ -98,7 +107,8 @@ export default function PublicCollectionGallery() {
     const [publicFiles, setPublicFiles] = useState<EnteFile[] | undefined>(
         undefined,
     );
-    const [errorMessage, setErrorMessage] = useState<string>(null);
+    const [referralCode, setReferralCode] = useState<string>("");
+    const [errorMessage, setErrorMessage] = useState<string>("");
     const [loading, setLoading] = useState(true);
     const [isPasswordProtected, setIsPasswordProtected] = useState(false);
     const [uploadTypeSelectorView, setUploadTypeSelectorView] = useState(false);
@@ -117,7 +127,6 @@ export default function PublicCollectionGallery() {
     const credentials = useRef<PublicAlbumsCredentials | undefined>(undefined);
     const collectionKey = useRef<string>(null);
     const url = useRef<string>(null);
-    const referralCode = useRef<string>("");
 
     const { saveGroups, onAddSaveGroup, onRemoveSaveGroup } = useSaveGroups();
 
@@ -180,8 +189,9 @@ export default function PublicCollectionGallery() {
                 const accessToken = t;
                 let accessTokenJWT: string | undefined;
                 if (collection) {
-                    referralCode.current =
-                        await savedLastPublicCollectionReferralCode();
+                    setReferralCode(
+                        (await savedLastPublicCollectionReferralCode()) ?? "",
+                    );
                     setPublicCollection(collection);
                     setIsPasswordProtected(
                         !!collection.publicURLs[0]?.passwordEnabled,
@@ -223,13 +233,13 @@ export default function PublicCollectionGallery() {
         try {
             const { collection, referralCode: userReferralCode } =
                 await pullCollection(accessToken, collectionKey.current);
-            referralCode.current = userReferralCode;
+            setReferralCode(userReferralCode);
 
             setPublicCollection(collection);
             const isPasswordProtected =
                 !!collection.publicURLs[0]?.passwordEnabled;
             setIsPasswordProtected(isPasswordProtected);
-            setErrorMessage(null);
+            setErrorMessage("");
 
             // Remove the locally cached accessTokenJWT if the sharer has
             // disabled password protection on the link.
@@ -390,7 +400,7 @@ export default function PublicCollectionGallery() {
             publicCollection && publicFiles
                 ? {
                       item: (
-                          <ListHeader
+                          <FileListHeader
                               {...{
                                   publicCollection,
                                   publicFiles,
@@ -398,27 +408,19 @@ export default function PublicCollectionGallery() {
                               }}
                           />
                       ),
-                      tag: "header" as const,
-                      height: 68,
+                      height: fileListHeaderHeight,
                   }
                 : undefined,
         [onAddSaveGroup, publicCollection, publicFiles],
     );
 
-    const fileListFooter = useMemo(
-        () =>
-            onAddPhotos
-                ? {
-                      item: (
-                          <CenteredFill sx={{ marginTop: "56px" }}>
-                              <AddMorePhotosButton onClick={onAddPhotos} />
-                          </CenteredFill>
-                      ),
-                      height: 104,
-                  }
-                : undefined,
-        [onAddPhotos],
-    );
+    const fileListFooter = useMemo(() => {
+        const props = { referralCode, onAddPhotos };
+        return {
+            item: <FileListFooter {...props} />,
+            height: fileListFooterHeightForProps(props),
+        };
+    }, [referralCode, onAddPhotos]);
 
     if (loading && (!publicFiles || !credentials.current)) {
         return <LoadingIndicator />;
@@ -460,10 +462,7 @@ export default function PublicCollectionGallery() {
     }
 
     // TODO: memo this (after the dependencies are traceable).
-    const context = {
-        credentials: credentials.current,
-        referralCode: referralCode.current,
-    };
+    const context = { credentials: credentials.current };
 
     return (
         <PublicCollectionGalleryContext.Provider value={context}>
@@ -627,13 +626,24 @@ const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
     </Stack>
 );
 
-interface ListHeaderProps {
+interface FileListHeaderProps {
     publicCollection: Collection;
     publicFiles: EnteFile[];
     onAddSaveGroup: AddSaveGroup;
 }
 
-const ListHeader: React.FC<ListHeaderProps> = ({
+/**
+ * The fixed height (in px) of {@link FileListHeader}.
+ */
+const fileListHeaderHeight = 68;
+
+/**
+ * A header shown before the listing of files.
+ *
+ * It scrolls along with the content. It has a fixed height,
+ * {@link fileListHeaderHeight}.
+ */
+const FileListHeader: React.FC<FileListHeaderProps> = ({
     publicCollection,
     publicFiles,
     onAddSaveGroup,
@@ -671,3 +681,85 @@ const ListHeader: React.FC<ListHeaderProps> = ({
         </GalleryItemsHeaderAdapter>
     );
 };
+
+interface FileListFooterProps {
+    referralCode?: string;
+    onAddPhotos?: () => void;
+}
+
+/**
+ * The dynamic (prop-depedent) height of {@link FileListFooter}.
+ */
+const fileListFooterHeightForProps = ({
+    referralCode,
+    onAddPhotos,
+}: FileListFooterProps) => (onAddPhotos ? 104 : 0) + (referralCode ? 113 : 75);
+
+/**
+ * A footer shown after the listing of files.
+ *
+ * It scrolls along with the content. It has a dynamic height, dependent on the
+ * props, calculated using {@link fileListFooterHeightForProps}.
+ */
+
+const FileListFooter: React.FC<FileListFooterProps> = ({
+    referralCode,
+    onAddPhotos,
+}) => (
+    <Stack sx={{ flex: 1, alignSelf: "flex-end" }}>
+        {onAddPhotos && (
+            <CenteredFill>
+                <AddMorePhotosButton onClick={onAddPhotos} />
+            </CenteredFill>
+        )}
+        {/* Make the entire area tappable, otherwise it is hard to
+            get at on mobile devices. */}
+        <Link
+            color="text.muted"
+            sx={{
+                mt: "48px",
+                mb: "6px",
+                textAlign: "center",
+                "&:hover": { color: "inherit" },
+            }}
+            target="_blank"
+            href="https://ente.io"
+        >
+            <Typography variant="small">
+                <Trans
+                    i18nKey="shared_using"
+                    components={{
+                        a: (
+                            <Typography
+                                variant="small"
+                                component="span"
+                                sx={{ color: "accent.main" }}
+                            />
+                        ),
+                    }}
+                    values={{ url: "ente.io" }}
+                />
+            </Typography>
+        </Link>
+        {referralCode && (
+            <Typography
+                sx={{
+                    mt: "6px",
+                    mb: 0,
+                    /* Negative margin to extend to edges by counteracting the
+                       maximum margin that can be added by FileViewer. */
+                    mx: "-24px",
+                    padding: "8px",
+                    bgcolor: "accent.main",
+                    color: "accent.contrastText",
+                    textAlign: "center",
+                }}
+            >
+                <Trans
+                    i18nKey={"sharing_referral_code"}
+                    values={{ referralCode }}
+                />
+            </Typography>
+        )}
+    </Stack>
+);

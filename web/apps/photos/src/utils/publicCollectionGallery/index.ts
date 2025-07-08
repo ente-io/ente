@@ -8,11 +8,9 @@ export interface PublicCollectionGalleryContextType {
      * undefined when we're in the default photos app context.
      */
     credentials: PublicAlbumsCredentials | undefined;
-    referralCode: string | null;
 }
 
 export const PublicCollectionGalleryContext =
     createContext<PublicCollectionGalleryContextType>({
         credentials: undefined,
-        referralCode: null,
     });
