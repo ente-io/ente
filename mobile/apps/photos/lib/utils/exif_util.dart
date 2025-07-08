@@ -70,7 +70,8 @@ Future<FFProbeProps?> getVideoPropsAsync(File originalFile) async {
   try {
     final stopwatch = Stopwatch()..start();
 
-    final mediaInfo = await IsolatedFfmpegService.getVideoInfo(originalFile);
+    final mediaInfo =
+        await IsolatedFfmpegService.getVideoInfo(originalFile.path);
     if (mediaInfo.isEmpty) {
       return null;
     }

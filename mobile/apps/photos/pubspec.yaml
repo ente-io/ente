@@ -36,6 +36,10 @@ dependencies:
       url: https://github.com/ente-io/chewie.git
       ref: mybranched
   collection: #dart
+  combine:
+    git:
+      url: https://github.com/mobaink/combine.git
+      ref: feat_version_3.32.0
   computer: # logged task name in verbose in fork
     git: "https://github.com/ente-io/computer.git"
   connectivity_plus: ^6.0.2

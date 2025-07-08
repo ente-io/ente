@@ -324,6 +324,15 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.19.1"
+  combine:
+    dependency: "direct main"
+    description:
+      path: "."
+      ref: "feat_version_3.32.0"
+      resolved-ref: "49a02bc7b2d3636f7c3dba294371959f9f60a513"
+      url: "https://github.com/mobaink/combine.git"
+    source: git
+    version: "0.5.8"
   computer:
     dependency: "direct main"
     description:

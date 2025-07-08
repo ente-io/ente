@@ -1,8 +1,7 @@
 import "dart:async";
-import "dart:io";
 
+import "package:combine/combine.dart";
 import "package:computer/computer.dart";
-import "package:dart_ui_isolate/dart_ui_isolate.dart";
 import "package:ffmpeg_kit_flutter/ffmpeg_kit.dart";
 import "package:ffmpeg_kit_flutter/ffprobe_kit.dart";
 import "package:ffmpeg_kit_flutter/media_information.dart";
@@ -18,14 +17,13 @@ class IsolatedFfmpegService {
   }
 
   static Future<Map> runFfmpeg(String command) async {
-    return await flutterCompute<Map, String>(
-      _ffmpegRun,
-      command,
-    );
+    return await CombineWorker()
+        .executeWithArg<Map, String>(_ffmpegRun, command);
   }
 
-  static Future<Map> getVideoInfo(File file) async {
-    return flutterCompute<Map, String>(_getVideoProps, file.path);
+  static Future<Map> getVideoInfo(String file) async {
+    return await CombineWorker()
+        .executeWithArg<Map, String>(_getVideoProps, file);
   }
 }
 
@@ -56,9 +54,7 @@ Future<Map> _getVideoProps(String filePath) async {
 }
 
 @pragma('vm:entry-point')
-Future<Map> _ffmpegRun(
-  String value,
-) async {
+Future<Map> _ffmpegRun(String value) async {
   final session = await FFmpegKit.execute(value, true);
   final returnCode = (await session.getReturnCode())?.getValue();
 
