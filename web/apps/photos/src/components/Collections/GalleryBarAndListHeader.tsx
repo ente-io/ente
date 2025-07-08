@@ -162,7 +162,7 @@ export const GalleryBarAndListHeader: React.FC<
                 ),
             height: 68,
         });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [
         shouldHide,
         mode,

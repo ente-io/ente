@@ -134,11 +134,14 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
         [files],
     );
 
-    const handleThumbnailClick = useCallback((index: number) => {
-        setCurrentIndex(index);
-        setOpenFileViewer(true);
-        onSetOpenFileViewer?.(true);
-    }, [onSetOpenFileViewer]);
+    const handleThumbnailClick = useCallback(
+        (index: number) => {
+            setCurrentIndex(index);
+            setOpenFileViewer(true);
+            onSetOpenFileViewer?.(true);
+        },
+        [onSetOpenFileViewer],
+    );
 
     const handleCloseFileViewer = useCallback(() => {
         onSetOpenFileViewer?.(false);

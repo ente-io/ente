@@ -431,10 +431,6 @@ const defaultCityRadius = 10;
 const kmsPerDegree = 111.16;
 
 const isInsideLocationTag = (location: Location, locationTag: LocationTag) =>
-    // See: [Note: strict mode migration]
-    //
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
     isWithinRadius(location, locationTag.centerPoint, locationTag.radius);
 
 const isInsideCity = (location: Location, city: City) =>
