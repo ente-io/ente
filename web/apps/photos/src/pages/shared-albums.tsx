@@ -83,10 +83,6 @@ import {
     verifyPublicAlbumPassword,
 } from "ente-new/albums/services/public-collection";
 import {
-    IMAGE_CONTAINER_MAX_WIDTH,
-    MIN_COLUMNS,
-} from "ente-new/photos/components/FileList";
-import {
     GalleryItemsHeaderAdapter,
     GalleryItemsSummary,
 } from "ente-new/photos/components/gallery/ListHeader";
@@ -111,6 +107,7 @@ export default function PublicCollectionGallery() {
     const [publicFiles, setPublicFiles] = useState<EnteFile[] | undefined>(
         undefined,
     );
+    const [referralCode, setReferralCode] = useState<string>("");
     const [errorMessage, setErrorMessage] = useState<string>("");
     const [loading, setLoading] = useState(true);
     const [isPasswordProtected, setIsPasswordProtected] = useState(false);
@@ -130,7 +127,6 @@ export default function PublicCollectionGallery() {
     const credentials = useRef<PublicAlbumsCredentials | undefined>(undefined);
     const collectionKey = useRef<string>(null);
     const url = useRef<string>(null);
-    const referralCode = useRef<string>("");
 
     const { saveGroups, onAddSaveGroup, onRemoveSaveGroup } = useSaveGroups();
 
@@ -193,8 +189,9 @@ export default function PublicCollectionGallery() {
                 const accessToken = t;
                 let accessTokenJWT: string | undefined;
                 if (collection) {
-                    referralCode.current =
-                        await savedLastPublicCollectionReferralCode();
+                    setReferralCode(
+                        (await savedLastPublicCollectionReferralCode()) ?? "",
+                    );
                     setPublicCollection(collection);
                     setIsPasswordProtected(
                         !!collection.publicURLs[0]?.passwordEnabled,
@@ -236,7 +233,7 @@ export default function PublicCollectionGallery() {
         try {
             const { collection, referralCode: userReferralCode } =
                 await pullCollection(accessToken, collectionKey.current);
-            referralCode.current = userReferralCode;
+            setReferralCode(userReferralCode);
 
             setPublicCollection(collection);
             const isPasswordProtected =
@@ -418,12 +415,12 @@ export default function PublicCollectionGallery() {
     );
 
     const fileListFooter = useMemo(() => {
-        const props = { referralCode: referralCode.current, onAddPhotos };
+        const props = { referralCode, onAddPhotos };
         return {
             item: <FileListFooter {...props} />,
             height: fileListFooterHeightForProps(props),
         };
-    }, [referralCode.current, onAddPhotos]);
+    }, [referralCode, onAddPhotos]);
 
     if (loading && (!publicFiles || !credentials.current)) {
         return <LoadingIndicator />;
@@ -465,10 +462,7 @@ export default function PublicCollectionGallery() {
     }
 
     // TODO: memo this (after the dependencies are traceable).
-    const context = {
-        credentials: credentials.current,
-        referralCode: referralCode.current,
-    };
+    const context = { credentials: credentials.current };
 
     return (
         <PublicCollectionGalleryContext.Provider value={context}>
@@ -711,81 +705,61 @@ const fileListFooterHeightForProps = ({
 const FileListFooter: React.FC<FileListFooterProps> = ({
     referralCode,
     onAddPhotos,
-}) => {
-    return (
-        <Stack>
-            {onAddPhotos && (
-                <CenteredFill sx={{ marginTop: "56px" }}>
-                    <AddMorePhotosButton onClick={onAddPhotos} />
-                </CenteredFill>
-            )}
-            <AlbumFooterContainer hasReferral={!!referralCode}>
-                {/* Make the entire area tappable, otherwise it is hard to
-                    get at on mobile devices. */}
-                <Box sx={{ width: "100%" }}>
-                    <Link
-                        color="text.base"
-                        sx={{ "&:hover": { color: "inherit" } }}
-                        target="_blank"
-                        href={"https://ente.io"}
-                    >
-                        <Typography variant="small">
-                            <Trans
-                                i18nKey="shared_using"
-                                components={{
-                                    a: (
-                                        <Typography
-                                            variant="small"
-                                            component="span"
-                                            sx={{ color: "accent.main" }}
-                                        />
-                                    ),
-                                }}
-                                values={{ url: "ente.io" }}
-                            />
-                        </Typography>
-                    </Link>
-                    {referralCode ? (
-                        <FullStretchContainer>
+}) => (
+    <Stack sx={{ flex: 1, alignSelf: "flex-end" }}>
+        {onAddPhotos && (
+            <CenteredFill>
+                <AddMorePhotosButton onClick={onAddPhotos} />
+            </CenteredFill>
+        )}
+        {/* Make the entire area tappable, otherwise it is hard to
+            get at on mobile devices. */}
+        <Link
+            color="text.muted"
+            sx={{
+                mt: "48px",
+                mb: "6px",
+                textAlign: "center",
+                "&:hover": { color: "inherit" },
+            }}
+            target="_blank"
+            href="https://ente.io"
+        >
+            <Typography variant="small">
+                <Trans
+                    i18nKey="shared_using"
+                    components={{
+                        a: (
                             <Typography
-                                sx={{
-                                    marginTop: "12px",
-                                    padding: "8px",
-                                    color: "accent.contrastText",
-                                }}
-                            >
-                                <Trans
-                                    i18nKey={"sharing_referral_code"}
-                                    values={{ referralCode }}
-                                />
-                            </Typography>
-                        </FullStretchContainer>
-                    ) : null}
-                </Box>
-            </AlbumFooterContainer>
-        </Stack>
-    );
-};
-
-const AlbumFooterContainer = styled("div", {
-    shouldForwardProp: (propName) => propName != "hasReferral",
-})<{ hasReferral: boolean }>`
-    margin-top: 48px;
-    margin-bottom: ${({ hasReferral }) => (!hasReferral ? `10px` : "0px")};
-    text-align: center;
-    justify-content: center;
-`;
-
-const FullStretchContainer = styled("div")(
-    ({ theme }) => `
-    margin: 0 -24px;
-    width: calc(100% + 46px);
-    left: -24px;
-    @media (max-width: ${IMAGE_CONTAINER_MAX_WIDTH * MIN_COLUMNS}px) {
-        margin: 0 -4px;
-        width: calc(100% + 6px);
-        left: -4px;
-    }
-    background-color: ${theme.vars.palette.accent.main};
-`,
+                                variant="small"
+                                component="span"
+                                sx={{ color: "accent.main" }}
+                            />
+                        ),
+                    }}
+                    values={{ url: "ente.io" }}
+                />
+            </Typography>
+        </Link>
+        {referralCode && (
+            <Typography
+                sx={{
+                    mt: "6px",
+                    mb: 0,
+                    /* Negative margin to extend to edges by counteracting the
+                       maximum margin that can be added by FileViewer. */
+                    mx: "-24px",
+                    padding: "8px",
+                    bgcolor: "accent.main",
+                    color: "accent.contrastText",
+                    textAlign: "center",
+                }}
+            >
+                <Trans
+                    i18nKey={"sharing_referral_code"}
+                    values={{ referralCode }}
+                />
+            </Typography>
+        )}
+    </Stack>
 );
