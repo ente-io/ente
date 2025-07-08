@@ -30,7 +30,7 @@ import { TileBottomTextOverlay } from "ente-new/photos/components/Tiles";
 import { PseudoCollectionID } from "ente-new/photos/services/collection-summary";
 import { t } from "i18next";
 import memoize from "memoize-one";
-import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
     VariableSizeList as List,
     type ListChildComponentProps,
@@ -41,7 +41,6 @@ import {
     handleSelectCreator,
     handleSelectCreatorMulti,
 } from "utils/photoFrame";
-import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
 
 export const DATE_CONTAINER_HEIGHT = 48;
 export const SPACE_BTW_DATES = 44;
@@ -210,10 +209,6 @@ export const FileList: React.FC<FileListProps> = ({
     emailByUserID,
     onItemClick,
 }) => {
-    const publicCollectionGalleryContext = useContext(
-        PublicCollectionGalleryContext,
-    );
-
     const [timeStampList, setTimeStampList] = useState<TimeStampListItem[]>([]);
     const refreshInProgress = useRef(false);
     const shouldRefresh = useRef(false);
@@ -283,15 +278,7 @@ export const FileList: React.FC<FileListProps> = ({
             }
         };
         main();
-    }, [
-        width,
-        height,
-        annotatedFiles,
-        header,
-        footer,
-        disableGrouping,
-        publicCollectionGalleryContext.credentials,
-    ]);
+    }, [width, height, header, footer, annotatedFiles, disableGrouping]);
 
     useEffect(() => {
         refreshList();

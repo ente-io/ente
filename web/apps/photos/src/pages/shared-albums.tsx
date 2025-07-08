@@ -95,7 +95,6 @@ import { type FileWithPath } from "react-dropzone";
 import { Trans } from "react-i18next";
 import { uploadManager } from "services/upload-manager";
 import { getSelectedFiles, type SelectedState } from "utils/file";
-import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
 
 export default function PublicCollectionGallery() {
     const { showMiniDialog, onGenericError } = useBaseContext();
@@ -461,73 +460,69 @@ export default function PublicCollectionGallery() {
         );
     }
 
-    // TODO: memo this (after the dependencies are traceable).
-    const context = { credentials: credentials.current };
-
     return (
-        <PublicCollectionGalleryContext.Provider value={context}>
-            <FullScreenDropZone
-                disabled={shouldDisableDropzone}
-                onDrop={setDragAndDropFiles}
+        <FullScreenDropZone
+            disabled={shouldDisableDropzone}
+            onDrop={setDragAndDropFiles}
+        >
+            <NavbarBase
+                sx={{
+                    mb: "16px",
+                    px: "24px",
+                    "@media (width < 720px)": { px: "4px" },
+                }}
             >
-                <NavbarBase
-                    sx={{
-                        mb: "16px",
-                        px: "24px",
-                        "@media (width < 720px)": { px: "4px" },
-                    }}
-                >
-                    {selected.count > 0 ? (
-                        <SelectedFileOptions
-                            count={selected.count}
-                            clearSelection={clearSelection}
-                            downloadFilesHelper={downloadFilesHelper}
-                        />
-                    ) : (
-                        <SpacedRow sx={{ flex: 1 }}>
-                            <EnteLogoLink href="https://ente.io">
-                                <EnteLogo height={15} />
-                            </EnteLogoLink>
-                            {onAddPhotos ? (
-                                <AddPhotosButton onClick={onAddPhotos} />
-                            ) : (
-                                <GoToEnte />
-                            )}
-                        </SpacedRow>
-                    )}
-                </NavbarBase>
+                {selected.count > 0 ? (
+                    <SelectedFileOptions
+                        count={selected.count}
+                        clearSelection={clearSelection}
+                        downloadFilesHelper={downloadFilesHelper}
+                    />
+                ) : (
+                    <SpacedRow sx={{ flex: 1 }}>
+                        <EnteLogoLink href="https://ente.io">
+                            <EnteLogo height={15} />
+                        </EnteLogoLink>
+                        {onAddPhotos ? (
+                            <AddPhotosButton onClick={onAddPhotos} />
+                        ) : (
+                            <GoToEnte />
+                        )}
+                    </SpacedRow>
+                )}
+            </NavbarBase>
 
-                <FileListWithViewer
-                    files={publicFiles}
-                    header={fileListHeader}
-                    footer={fileListFooter}
-                    enableDownload={downloadEnabled}
-                    selectable={downloadEnabled}
-                    selected={selected}
-                    setSelected={setSelected}
-                    activeCollectionID={PseudoCollectionID.all}
-                    onRemotePull={publicAlbumsRemotePull}
-                    onVisualFeedback={handleVisualFeedback}
-                    onAddSaveGroup={onAddSaveGroup}
-                />
-                {blockingLoad && <TranslucentLoadingOverlay />}
-                <Upload
-                    uploadCollection={publicCollection}
-                    setLoading={setBlockingLoad}
-                    setShouldDisableDropzone={setShouldDisableDropzone}
-                    uploadTypeSelectorIntent="collect"
-                    uploadTypeSelectorView={uploadTypeSelectorView}
-                    onRemotePull={publicAlbumsRemotePull}
-                    onUploadFile={handleUploadFile}
-                    closeUploadTypeSelector={closeUploadTypeSelectorView}
-                    onShowSessionExpiredDialog={showPublicLinkExpiredMessage}
-                    {...{ dragAndDropFiles }}
-                />
-                <DownloadStatusNotifications
-                    {...{ saveGroups, onRemoveSaveGroup }}
-                />
-            </FullScreenDropZone>
-        </PublicCollectionGalleryContext.Provider>
+            <FileListWithViewer
+                files={publicFiles}
+                header={fileListHeader}
+                footer={fileListFooter}
+                enableDownload={downloadEnabled}
+                selectable={downloadEnabled}
+                selected={selected}
+                setSelected={setSelected}
+                activeCollectionID={PseudoCollectionID.all}
+                onRemotePull={publicAlbumsRemotePull}
+                onVisualFeedback={handleVisualFeedback}
+                onAddSaveGroup={onAddSaveGroup}
+            />
+            {blockingLoad && <TranslucentLoadingOverlay />}
+            <Upload
+                publicAlbumsCredentials={credentials.current}
+                uploadCollection={publicCollection}
+                setLoading={setBlockingLoad}
+                setShouldDisableDropzone={setShouldDisableDropzone}
+                uploadTypeSelectorIntent="collect"
+                uploadTypeSelectorView={uploadTypeSelectorView}
+                onRemotePull={publicAlbumsRemotePull}
+                onUploadFile={handleUploadFile}
+                closeUploadTypeSelector={closeUploadTypeSelectorView}
+                onShowSessionExpiredDialog={showPublicLinkExpiredMessage}
+                {...{ dragAndDropFiles }}
+            />
+            <DownloadStatusNotifications
+                {...{ saveGroups, onRemoveSaveGroup }}
+            />
+        </FullScreenDropZone>
     );
 }
 
@@ -688,7 +683,7 @@ interface FileListFooterProps {
 }
 
 /**
- * The dynamic (prop-depedent) height of {@link FileListFooter}.
+ * The dynamic (prop-dependent) height of {@link FileListFooter}.
  */
 const fileListFooterHeightForProps = ({
     referralCode,
