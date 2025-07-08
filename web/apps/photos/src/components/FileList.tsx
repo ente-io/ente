@@ -53,14 +53,27 @@ const FOOTER_HEIGHT = 90;
 const ALBUM_FOOTER_HEIGHT = 75;
 const ALBUM_FOOTER_HEIGHT_WITH_REFERRAL = 113;
 
-export type FileListItemTag = "header" | "publicAlbumsFooter" | "date" | "file";
+/**
+ * A component with an explicit height suitable for being plugged in as the
+ * {@link header} or {@link footer} of the {@link FileList}.
+ */
+export interface FileListHeaderOrFooter {
+    /**
+     * The component itself.
+     */
+    item: React.ReactNode;
+    /**
+     * The height of the component (in px).
+     */
+    height: number;
+}
 
-export interface TimeStampListItem {
+interface TimeStampListItem {
     /**
      * An optional {@link FileListItemTag} that can be used to identify item
      * types for conditional behaviour.
      */
-    tag?: FileListItemTag;
+    tag?: "date" | "file";
     items?: FileListAnnotatedFile[];
     itemStartIndex?: number;
     date?: string;
@@ -123,6 +136,19 @@ export interface FileListProps {
      */
     modePlus?: GalleryBarMode | "search";
     /**
+     * An optional component shown before all the items in the list.
+     *
+     * It is not sticky, and scrolls along with the content of the list.
+     */
+    header?: FileListHeaderOrFooter;
+    /**
+     * An optional component shown after all the items in the list.
+     *
+     * It is not sticky, and scrolls along with the content of the list.
+     */
+    footer?: FileListHeaderOrFooter;
+    showAppDownloadBanner?: boolean;
+    /**
      * The logged in user, if any.
      *
      * This is only expected to be present when the listing is shown within the
@@ -130,7 +156,6 @@ export interface FileListProps {
      * omit this prop.
      */
     user?: LocalUser;
-    showAppDownloadBanner?: boolean;
     /**
      * If `true`, then the current listing is showing magic search results.
      */
@@ -158,16 +183,6 @@ export interface FileListProps {
      */
     emailByUserID?: Map<number, string>;
     /**
-     * An optional {@link TimeStampListItem} shown before all the items in the
-     * list. It is not sticky, and scrolls along with the content of the list.
-     */
-    header?: TimeStampListItem;
-    /**
-     * An optional {@link TimeStampListItem} shown after all the items in the
-     * list. It is not sticky, and scrolls along with the content of the list.
-     */
-    footer?: TimeStampListItem;
-    /**
      * Called when the user activates the thumbnail at the given {@link index}.
      *
      * This corresponding file would be at the corresponding index of
@@ -185,6 +200,7 @@ export const FileList: React.FC<FileListProps> = ({
     mode,
     modePlus,
     header,
+    footer,
     user,
     annotatedFiles,
     showAppDownloadBanner,
@@ -196,7 +212,6 @@ export const FileList: React.FC<FileListProps> = ({
     activePersonID,
     favoriteFileIDs,
     emailByUserID,
-    footer,
     onItemClick,
 }) => {
     const publicCollectionGalleryContext = useContext(
@@ -385,7 +400,6 @@ export const FileList: React.FC<FileListProps> = ({
     };
 
     const getAppDownloadFooter = (): TimeStampListItem => ({
-        tag: "publicAlbumsFooter",
         height: FOOTER_HEIGHT,
         item: (
             <FooterContainer span={columns}>
@@ -415,7 +429,6 @@ export const FileList: React.FC<FileListProps> = ({
     });
 
     const getAlbumsFooter = (): TimeStampListItem => ({
-        tag: "publicAlbumsFooter",
         height: publicCollectionGalleryContext.referralCode
             ? ALBUM_FOOTER_HEIGHT_WITH_REFERRAL
             : ALBUM_FOOTER_HEIGHT,

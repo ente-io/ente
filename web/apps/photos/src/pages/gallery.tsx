@@ -5,7 +5,7 @@ import { IconButton, Stack, Typography } from "@mui/material";
 import { AuthenticateUser } from "components/AuthenticateUser";
 import { GalleryBarAndListHeader } from "components/Collections/GalleryBarAndListHeader";
 import { DownloadStatusNotifications } from "components/DownloadStatusNotifications";
-import { type TimeStampListItem } from "components/FileList";
+import type { FileListHeaderOrFooter } from "components/FileList";
 import { FileListWithViewer } from "components/FileListWithViewer";
 import { FixCreationTime } from "components/FixCreationTime";
 import { Sidebar } from "components/Sidebar";
@@ -180,9 +180,11 @@ const Page: React.FC = () => {
     const [fixCreationTimeFiles, setFixCreationTimeFiles] = useState<
         EnteFile[]
     >([]);
-    // The (non-sticky) header shown at the top of the gallery items.
+    /**
+     * The (non-sticky) header shown at the top of the gallery items.
+     */
     const [fileListHeader, setFileListHeader] = useState<
-        TimeStampListItem | undefined
+        FileListHeaderOrFooter | undefined
     >(undefined);
 
     const [openCollectionSelector, setOpenCollectionSelector] = useState(false);
@@ -409,14 +411,13 @@ const Page: React.FC = () => {
     useEffect(() => {
         if (isInSearchMode && state.searchSuggestion) {
             setFileListHeader({
-                height: 104,
                 item: (
                     <SearchResultsHeader
                         searchSuggestion={state.searchSuggestion}
                         fileCount={state.searchResults?.length ?? 0}
                     />
                 ),
-                tag: "header",
+                height: 104,
             });
         }
     }, [isInSearchMode, state.searchSuggestion, state.searchResults]);
@@ -1072,7 +1073,7 @@ const Page: React.FC = () => {
                     activeCollection,
                     activeCollectionID,
                     activePerson,
-                    setPhotoListHeader: setFileListHeader,
+                    setFileListHeader,
                     saveGroups,
                     onAddSaveGroup,
                 }}

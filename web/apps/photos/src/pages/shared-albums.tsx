@@ -398,7 +398,6 @@ export default function PublicCollectionGallery() {
                               }}
                           />
                       ),
-                      tag: "header" as const,
                       height: 68,
                   }
                 : undefined,
