@@ -267,9 +267,9 @@ func (c *Controller) fetchS3FileMetadata(ctx context.Context, row fileData.Row, 
 	// :todo:neeraj make it configurable to
 	// specify preferred dc to read from
 	// and fallback logic to read from different bucket when we fail to read from preferred dc
-	if dc == "b6" {
-		if array.StringInList("b5", row.ReplicatedBuckets) {
-			dc = "b5"
+	if dc == "b5" {
+		if array.StringInList("b6", row.ReplicatedBuckets) {
+			dc = "b6"
 		}
 	}
 	opt := _defaultFetchConfig
