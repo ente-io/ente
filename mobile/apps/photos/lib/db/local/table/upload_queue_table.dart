@@ -18,17 +18,27 @@ extension UploadQueueTable on LocalDB {
     return assetIDs;
   }
 
-  Future<void> clearMappingsWithPath(
+  Future<void> clearMappingsWithDiffPath(
     int ownerID,
-    Set<int> collectionIDs,
+    Set<String> pathIDs,
   ) async {
-    if (collectionIDs.isEmpty) {
-      return;
+    if (pathIDs.isEmpty) {
+      // delete all mapping with path ids
+      await sqliteDB.execute(
+        'DELETE FROM asset_upload_queue WHERE owner_id = ? AND path_id IS NOT NULL',
+        [ownerID],
+      );
+    } else {
+      // delete mappings where path_id is not null and not in pathIDs
+      final stopwatch = Stopwatch()..start();
+      await sqliteDB.execute(
+        'DELETE FROM asset_upload_queue WHERE owner_id = ? AND path_id IS NOT NULL AND path_id NOT IN (${pathIDs.map((_) => '?').join(',')})',
+        [ownerID, ...pathIDs],
+      );
+      debugPrint(
+        '$runtimeType clearMappingsWithDiffPath complete in ${stopwatch.elapsed.inMilliseconds}ms for ${pathIDs.length} paths',
+      );
     }
-    await sqliteDB.executeBatch(
-      'DELETE FROM asset_upload_queue WHERE owner_id = $ownerID AND dest_collection_id IN (${collectionIDs.join(',')}) AND path_id IS NOT NULL',
-      [],
-    );
   }
 
   Future<List<AssetUploadQueue>> getQueueEntries(

@@ -326,9 +326,15 @@ class RemoteSyncService {
     SyncService.instance.onDeviceCollectionSet(newDestCollection);
     // remove all collectionIDs which are still marked for backup
     oldDestCollection.removeAll(newDestCollection);
-    await localDB.clearMappingsWithPath(
+    final Set<String> enabledPathIDs = {};
+    for (final entry in syncStatusUpdate.entries) {
+      if (entry.value) {
+        enabledPathIDs.add(entry.key);
+      }
+    }
+    await localDB.clearMappingsWithDiffPath(
       ownerID,
-      oldDestCollection,
+      enabledPathIDs,
     );
     if (syncStatusUpdate.values.any((syncStatus) => syncStatus == false)) {
       Configuration.instance.setSelectAllFoldersForBackup(false).ignore();
