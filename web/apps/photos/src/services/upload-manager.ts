@@ -771,15 +771,19 @@ const clusterLivePhotos = async (
  */
 const logAboutMemoryPressureIfNeeded = () => {
     if (!globalThis.electron) return;
+
     // performance.memory is deprecated in general as a Web standard, and is
     // also not available in the DOM types provided by TypeScript. However, it
     // is the method recommended by the Electron team (see the link about the V8
     // memory cage). The embedded Chromium supports it fine though, we just need
     // to goad TypeScript to accept the type.
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-    const heapSize = (performance as any).memory.totalJSHeapSize;
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-    const heapLimit = (performance as any).memory.jsHeapSizeLimit;
+
+    const { memory } = performance as unknown as {
+        memory: { totalJSHeapSize: number; jsHeapSizeLimit: number };
+    };
+
+    const heapSize = memory.totalJSHeapSize;
+    const heapLimit = memory.jsHeapSizeLimit;
     if (heapSize / heapLimit > 0.7) {
         log.info(
             `Memory usage (${heapSize} bytes of ${heapLimit} bytes) exceeds the high water mark`,

@@ -75,6 +75,7 @@ interface TimeStampListItem {
     date?: string | null;
     dates?: { date: string; span: number }[];
     groups?: number[];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     item?: any;
     id?: string;
     height?: number;
