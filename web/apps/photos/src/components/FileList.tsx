@@ -30,7 +30,13 @@ import { TileBottomTextOverlay } from "ente-new/photos/components/Tiles";
 import { PseudoCollectionID } from "ente-new/photos/services/collection-summary";
 import { t } from "i18next";
 import memoize from "memoize-one";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, {
+    useDeferredValue,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from "react";
 import {
     VariableSizeList as List,
     type ListChildComponentProps,
@@ -206,9 +212,11 @@ export const FileList: React.FC<FileListProps> = ({
     emailByUserID,
     onItemClick,
 }) => {
-    const [timeStampList, setTimeStampList] = useState<TimeStampListItem[]>([]);
-    const refreshInProgress = useRef(false);
-    const shouldRefresh = useRef(false);
+    const [_timeStampList, setTimeStampList] = useState(
+        new Array<TimeStampListItem>(),
+    );
+    const timeStampList = useDeferredValue(_timeStampList);
+
     const listRef = useRef(null);
 
     // Timeline date strings for which all photos have been selected.
@@ -238,56 +246,51 @@ export const FileList: React.FC<FileListProps> = ({
     };
 
     useEffect(() => {
-        const main = () => {
-            if (refreshInProgress.current) {
-                shouldRefresh.current = true;
-                return;
-            }
-            refreshInProgress.current = true;
-            let timeStampList: TimeStampListItem[] = [];
+        // Since width and height are dependencies, there might be too many
+        // updates to the list during a resize. The list computation too, while
+        // fast, is non-trivial.
+        //
+        // To avoid these issues, the we use `useDeferredValue`: if it gets
+        // another update when processing one, React will restart the background
+        // rerender from scratch.
 
-            if (header) {
-                timeStampList.push(asFullSpanListItem(header));
-            }
+        let timeStampList: TimeStampListItem[] = [];
 
-            if (disableGrouping) {
-                noGrouping(timeStampList);
-            } else {
-                groupByTime(timeStampList);
-            }
+        if (header) {
+            timeStampList.push(asFullSpanListItem(header));
+        }
 
-            if (!skipMerge) {
-                timeStampList = mergeTimeStampList(timeStampList, columns);
-            }
+        if (disableGrouping) {
+            noGrouping(timeStampList);
+        } else {
+            groupByTime(timeStampList);
+        }
 
-            if (timeStampList.length == 1) {
-                timeStampList.push({
-                    item: (
-                        <NoFilesContainer span={columns}>
-                            <Typography sx={{ color: "text.faint" }}>
-                                {t("nothing_here")}
-                            </Typography>
-                        </NoFilesContainer>
-                    ),
-                    id: "empty-list-banner",
-                    height: height - 48,
-                });
-            }
+        if (!skipMerge) {
+            timeStampList = mergeTimeStampList(timeStampList, columns);
+        }
 
-            const footerHeight = footer?.height ?? 0;
-            timeStampList.push(getVacuumItem(timeStampList, footerHeight));
-            if (footer) {
-                timeStampList.push(asFullSpanListItem(footer));
-            }
+        if (timeStampList.length == 1) {
+            timeStampList.push({
+                item: (
+                    <NoFilesContainer span={columns}>
+                        <Typography sx={{ color: "text.faint" }}>
+                            {t("nothing_here")}
+                        </Typography>
+                    </NoFilesContainer>
+                ),
+                id: "empty-list-banner",
+                height: height - 48,
+            });
+        }
 
-            setTimeStampList(timeStampList);
-            refreshInProgress.current = false;
-            if (shouldRefresh.current) {
-                shouldRefresh.current = false;
-                setTimeout(main, 0);
-            }
-        };
-        main();
+        const footerHeight = footer?.height ?? 0;
+        timeStampList.push(getVacuumItem(timeStampList, footerHeight));
+        if (footer) {
+            timeStampList.push(asFullSpanListItem(footer));
+        }
+
+        setTimeStampList(timeStampList);
     }, [
         width,
         height,
