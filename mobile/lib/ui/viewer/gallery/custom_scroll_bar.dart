@@ -1,21 +1,4 @@
-// import "package:flutter/material.dart";
-
-// class CustomScrollBar extends StatefulWidget {
-//   const CustomScrollBar({super.key});
-
-//   @override
-//   State<CustomScrollBar> createState() => _CustomScrollBarState();
-// }
-
-// class _CustomScrollBarState extends State<CustomScrollBar> {
-//   @override
-//   Widget build(BuildContext context) {
-//     return const Placeholder();
-//   }
-// }
-
 import 'package:flutter/material.dart';
-import "package:logging/logging.dart";
 import "package:photos/models/gallery/gallery_sections.dart";
 import "package:photos/ui/viewer/gallery/component/group/type.dart";
 import "package:photos/utils/misc_util.dart";
@@ -56,7 +39,6 @@ class CustomScrollBarState extends State<CustomScrollBar> {
   double? _heightOfVisualTrack;
   double? _heightOfLogicalTrack;
   String toolTipText = "";
-  final _logger = Logger("CustomScrollBar");
 
   @override
   void initState() {
