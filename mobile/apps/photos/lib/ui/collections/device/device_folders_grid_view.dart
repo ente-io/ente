@@ -76,8 +76,7 @@ class _DeviceFoldersGridViewState extends State<DeviceFoldersGridView> {
       child: Align(
         alignment: Alignment.centerLeft,
         child: FutureBuilder<List<DeviceCollection>>(
-          future: LocalImportService.instance
-              .getDeviceCollections(),
+          future: LocalImportService.instance.getDeviceCollections(),
           builder: (context, snapshot) {
             if (snapshot.hasData) {
               return snapshot.data!.isEmpty
@@ -109,7 +108,11 @@ class _DeviceFoldersGridViewState extends State<DeviceFoldersGridView> {
                       ),
                     );
             } else if (snapshot.hasError) {
-              _logger.severe("failed to load device gallery", snapshot.error);
+              _logger.severe(
+                "failed to load device gallery",
+                snapshot.error,
+                snapshot.stackTrace,
+              );
               return Text(S.of(context).failedToLoadAlbums);
             } else {
               return const EnteLoadingWidget();
