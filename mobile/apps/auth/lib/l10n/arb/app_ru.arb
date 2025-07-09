@@ -173,6 +173,7 @@
   "invalidQRCode": "Неверный QR-код",
   "noRecoveryKeyTitle": "Нет ключа восстановления?",
   "enterEmailHint": "Введите адрес электронной почты",
+  "enterNewEmailHint": "Введите ваш новый адрес электронной почты",
   "invalidEmailTitle": "Неверный адрес электронной почты",
   "invalidEmailMessage": "Пожалуйста, введите действительный адрес электронной почты.",
   "deleteAccount": "Удалить аккаунт",
@@ -334,10 +335,10 @@
       }
     }
   },
-  "manualSort": "Ручная",
+  "manualSort": "Пользовательская",
   "editOrder": "Изменить порядок",
-  "mostFrequentlyUsed": "Частота использования",
-  "mostRecentlyUsed": "Недавно использованные",
+  "mostFrequentlyUsed": "Часто используемые",
+  "mostRecentlyUsed": "Недавно используемые",
   "activeSessions": "Активные сеансы",
   "somethingWentWrongPleaseTryAgain": "Что-то пошло не так. Попробуйте еще раз",
   "thisWillLogYouOutOfThisDevice": "Вы выйдете из этого устройства!",
@@ -513,5 +514,10 @@
   "free5GB": "5Гб бесплатного пространства на <bold-green>ente</bold-green> Фото",
   "loginWithAuthAccount": "Войти с помощью учетной записи Auth",
   "freeStorageOffer": "Скидка 10% на <bold-green>ente</bold-green> фото",
-  "freeStorageOfferDescription": "Используйте код \"AUTH\", чтобы получить скидку 10% в первый год"
+  "freeStorageOfferDescription": "Используйте код \"AUTH\", чтобы получить скидку 10% в первый год",
+  "advanced": "Расширенные",
+  "algorithm": "Алгоритм",
+  "type": "Тип",
+  "period": "Период",
+  "digits": "Цифр"
 }

@@ -153,7 +153,7 @@ const Progress: React.FC<FixProgress> = ({ completed, total }) => (
 );
 
 interface OptionsFormProps {
-    step: Step;
+    step: Step | undefined;
     onSubmit: (values: FormValues) => Promise<void>;
     onClose: () => void;
 }
@@ -226,7 +226,7 @@ const OptionsForm: React.FC<OptionsFormProps> = ({
 };
 
 interface FooterProps {
-    step: Step;
+    step: Step | undefined;
     onSubmit: () => void;
     onClose: () => void;
 }

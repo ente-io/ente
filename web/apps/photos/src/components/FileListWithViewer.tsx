@@ -1,10 +1,12 @@
 import { styled } from "@mui/material";
 import { isSameDay } from "ente-base/date";
 import { formattedDate } from "ente-base/i18n-date";
+import type { AddSaveGroup } from "ente-gallery/components/utils/save-groups";
 import {
     FileViewer,
     type FileViewerProps,
 } from "ente-gallery/components/viewer/FileViewer";
+import { downloadAndSaveFiles } from "ente-gallery/services/save";
 import type { Collection } from "ente-media/collection";
 import type { EnteFile } from "ente-media/file";
 import { fileCreationTime, fileFileName } from "ente-media/file-metadata";
@@ -14,8 +16,6 @@ import { t } from "i18next";
 import { useCallback, useMemo, useState } from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { uploadManager } from "services/upload-manager";
-import type { SetFilesDownloadProgressAttributesCreator } from "types/gallery";
-import { downloadSingleFile } from "utils/file";
 import {
     FileList,
     type FileListAnnotatedFile,
@@ -38,7 +38,6 @@ export type FileListWithViewerProps = {
      * Not set in the context of the shared albums app.
      */
     onMarkTempDeleted?: (files: EnteFile[]) => void;
-    setFilesDownloadProgressAttributesCreator?: SetFilesDownloadProgressAttributesCreator;
     /**
      * Called when the visibility of the file viewer dialog changes.
      */
@@ -48,13 +47,18 @@ export type FileListWithViewerProps = {
      * pull from remote.
      */
     onRemotePull: () => Promise<void>;
+    /**
+     * A function that can be used to create a UI notification to track the
+     * progress of user-initiated download, and to cancel it if needed.
+     */
+    onAddSaveGroup: AddSaveGroup;
 } & Pick<
     FileListProps,
     | "mode"
     | "modePlus"
     | "header"
-    | "showAppDownloadBanner"
-    | "isMagicSearchResult"
+    | "footer"
+    | "disableGrouping"
     | "selectable"
     | "selected"
     | "setSelected"
@@ -89,11 +93,11 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
     mode,
     modePlus,
     header,
+    footer,
     user,
     files,
     enableDownload,
-    showAppDownloadBanner,
-    isMagicSearchResult,
+    disableGrouping,
     selectable,
     selected,
     setSelected,
@@ -107,11 +111,11 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
     collectionNameByID,
     pendingFavoriteUpdates,
     pendingVisibilityUpdates,
-    setFilesDownloadProgressAttributesCreator,
     onSetOpenFileViewer,
     onRemotePull,
     onRemoteFilesPull,
     onVisualFeedback,
+    onAddSaveGroup,
     onToggleFavorite,
     onFileVisibilityUpdate,
     onMarkTempDeleted,
@@ -130,16 +134,19 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
         [files],
     );
 
-    const handleThumbnailClick = useCallback((index: number) => {
-        setCurrentIndex(index);
-        setOpenFileViewer(true);
-        onSetOpenFileViewer?.(true);
-    }, []);
+    const handleThumbnailClick = useCallback(
+        (index: number) => {
+            setCurrentIndex(index);
+            setOpenFileViewer(true);
+            onSetOpenFileViewer?.(true);
+        },
+        [onSetOpenFileViewer],
+    );
 
     const handleCloseFileViewer = useCallback(() => {
         onSetOpenFileViewer?.(false);
         setOpenFileViewer(false);
-    }, []);
+    }, [onSetOpenFileViewer]);
 
     const handleTriggerRemotePull = useCallback(
         () => void onRemotePull(),
@@ -147,18 +154,15 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
     );
 
     const handleDownload = useCallback(
-        (file: EnteFile) => {
-            const setSingleFileDownloadProgress =
-                setFilesDownloadProgressAttributesCreator!(fileFileName(file));
-            void downloadSingleFile(file, setSingleFileDownloadProgress);
-        },
-        [setFilesDownloadProgressAttributesCreator],
+        (file: EnteFile) =>
+            downloadAndSaveFiles([file], fileFileName(file), onAddSaveGroup),
+        [onAddSaveGroup],
     );
 
     const handleDelete = useMemo(() => {
         return onMarkTempDeleted
             ? (file: EnteFile) =>
-                  moveToTrash([file]).then(() => onMarkTempDeleted?.([file]))
+                  moveToTrash([file]).then(() => onMarkTempDeleted([file]))
             : undefined;
     }, [onMarkTempDeleted]);
 
@@ -166,7 +170,7 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
         (editedFile: File, collection: Collection, enteFile: EnteFile) => {
             uploadManager.prepareForNewUpload();
             uploadManager.showUploadProgressDialog();
-            uploadManager.uploadFile(editedFile, collection, enteFile);
+            void uploadManager.uploadFile(editedFile, collection, enteFile);
         },
         [],
     );
@@ -181,9 +185,9 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
                             mode,
                             modePlus,
                             header,
+                            footer,
                             user,
-                            showAppDownloadBanner,
-                            isMagicSearchResult,
+                            disableGrouping,
                             selectable,
                             selected,
                             setSelected,

@@ -102,10 +102,6 @@ export type CGroup = Omit<LocalUserEntity, "data"> & {
  * Return the list of locally available cgroup user entities.
  */
 export const savedCGroups = (): Promise<CGroup[]> =>
-    // See: [Note: strict mode migration]
-    //
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
     savedEntities("cgroup").then((es) =>
         es.map((e) => ({ ...e, data: RemoteCGroupData.parse(e.data) })),
     );

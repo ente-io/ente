@@ -15,7 +15,6 @@ import UnarchiveIcon from "@mui/icons-material/Unarchive";
 import VisibilityOffOutlinedIcon from "@mui/icons-material/VisibilityOffOutlined";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import { Box, IconButton, Menu, Stack, Tooltip } from "@mui/material";
-import { assertionFailed } from "ente-base/assert";
 import { SpacedRow } from "ente-base/components/containers";
 import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
 import {
@@ -25,6 +24,9 @@ import {
 import { SingleInputDialog } from "ente-base/components/SingleInputDialog";
 import { useModalVisibility } from "ente-base/components/utils/modal";
 import { useBaseContext } from "ente-base/context";
+import type { AddSaveGroup } from "ente-gallery/components/utils/save-groups";
+import { downloadAndSaveCollectionFiles } from "ente-gallery/services/save";
+import { uniqueFilesByID } from "ente-gallery/utils/file";
 import { CollectionOrder, type Collection } from "ente-media/collection";
 import { ItemVisibility } from "ente-media/file-metadata";
 import type { RemotePullOpts } from "ente-new/photos/components/gallery";
@@ -33,7 +35,9 @@ import {
     GalleryItemsSummary,
 } from "ente-new/photos/components/gallery/ListHeader";
 import {
+    defaultHiddenCollectionUserFacingName,
     deleteCollection,
+    findDefaultHiddenCollectionIDs,
     isHiddenCollection,
     leaveSharedCollection,
     renameCollection,
@@ -46,19 +50,19 @@ import {
     type CollectionSummary,
     type CollectionSummaryType,
 } from "ente-new/photos/services/collection-summary";
+import {
+    savedCollectionFiles,
+    savedCollections,
+} from "ente-new/photos/services/photos-fdb";
 import { emptyTrash } from "ente-new/photos/services/trash";
 import { usePhotosAppContext } from "ente-new/photos/types/context";
 import { t } from "i18next";
 import React, { useCallback, useRef } from "react";
 import { Trans } from "react-i18next";
-import type { SetFilesDownloadProgressAttributesCreator } from "types/gallery";
-import {
-    downloadCollectionHelper,
-    downloadDefaultHiddenCollectionHelper,
-} from "utils/collection";
 
 export interface CollectionHeaderProps {
     collectionSummary: CollectionSummary;
+    // TODO: This can be undefined
     activeCollection: Collection;
     setActiveCollectionID: (collectionID: number) => void;
     isActiveCollectionDownloadInProgress: () => boolean;
@@ -69,7 +73,11 @@ export interface CollectionHeaderProps {
     onRemotePull: (opts?: RemotePullOpts) => Promise<void>;
     onCollectionShare: () => void;
     onCollectionCast: () => void;
-    setFilesDownloadProgressAttributesCreator: SetFilesDownloadProgressAttributesCreator;
+    /**
+     * A function that can be used to create a UI notification to track the
+     * progress of user-initiated download, and to cancel it if needed.
+     */
+    onAddSaveGroup: AddSaveGroup;
 }
 
 /**
@@ -78,10 +86,6 @@ export interface CollectionHeaderProps {
  */
 export const CollectionHeader: React.FC<CollectionHeaderProps> = (props) => {
     const { collectionSummary } = props;
-    if (!collectionSummary) {
-        assertionFailed("Gallery/CollectionHeader without a collection");
-        return <></>;
-    }
 
     const { name, type, attributes, fileCount } = collectionSummary;
 
@@ -119,7 +123,7 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
     onRemotePull,
     onCollectionShare,
     onCollectionCast,
-    setFilesDownloadProgressAttributesCreator,
+    onAddSaveGroup,
     isActiveCollectionDownloadInProgress,
 }) => {
     const { showMiniDialog, onGenericError } = useBaseContext();
@@ -131,7 +135,7 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
     const { show: showAlbumNameInput, props: albumNameInputVisibilityProps } =
         useModalVisibility();
 
-    const { type: collectionSummaryType } = collectionSummary;
+    const { type: collectionSummaryType, fileCount } = collectionSummary;
 
     /**
      * Return a new function by wrapping an async function in an error handler,
@@ -225,17 +229,31 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
         if (isActiveCollectionDownloadInProgress()) return;
 
         if (collectionSummaryType == "hiddenItems") {
-            await downloadDefaultHiddenCollectionHelper(
-                setFilesDownloadProgressAttributesCreator,
+            const defaultHiddenCollectionsIDs = findDefaultHiddenCollectionIDs(
+                await savedCollections(),
+            );
+            const collectionFiles = await savedCollectionFiles();
+            const defaultHiddenCollectionFiles = uniqueFilesByID(
+                collectionFiles.filter((file) =>
+                    defaultHiddenCollectionsIDs.has(file.collectionID),
+                ),
+            );
+            await downloadAndSaveCollectionFiles(
+                defaultHiddenCollectionUserFacingName,
+                PseudoCollectionID.hiddenItems,
+                defaultHiddenCollectionFiles,
+                true,
+                onAddSaveGroup,
             );
         } else {
-            await downloadCollectionHelper(
+            await downloadAndSaveCollectionFiles(
+                activeCollection.name,
                 activeCollection.id,
-                setFilesDownloadProgressAttributesCreator(
-                    activeCollection.name,
-                    activeCollection.id,
-                    isHiddenCollection(activeCollection),
+                (await savedCollectionFiles()).filter(
+                    (file) => file.collectionID == activeCollection.id,
                 ),
+                isHiddenCollection(activeCollection),
+                onAddSaveGroup,
             );
         }
     };
@@ -312,13 +330,17 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
 
         case "userFavorites":
             menuOptions = [
-                <DownloadOption
-                    key="download"
-                    isDownloadInProgress={isActiveCollectionDownloadInProgress}
-                    onClick={downloadCollection}
-                >
-                    {t("download_favorites")}
-                </DownloadOption>,
+                fileCount && (
+                    <DownloadOption
+                        key="download"
+                        isDownloadInProgress={
+                            isActiveCollectionDownloadInProgress
+                        }
+                        onClick={downloadCollection}
+                    >
+                        {t("download_favorites")}
+                    </DownloadOption>
+                ),
                 <OverflowMenuOption
                     key="share"
                     onClick={onCollectionShare}
@@ -338,20 +360,24 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
 
         case "uncategorized":
             menuOptions = [
-                <DownloadOption key="download" onClick={downloadCollection}>
-                    {t("download_uncategorized")}
-                </DownloadOption>,
+                fileCount && (
+                    <DownloadOption key="download" onClick={downloadCollection}>
+                        {t("download_uncategorized")}
+                    </DownloadOption>
+                ),
             ];
             break;
 
         case "hiddenItems":
             menuOptions = [
-                <DownloadOption
-                    key="download-hidden"
-                    onClick={downloadCollection}
-                >
-                    {t("download_hidden_items")}
-                </DownloadOption>,
+                fileCount && (
+                    <DownloadOption
+                        key="download-hidden"
+                        onClick={downloadCollection}
+                    >
+                        {t("download_hidden_items")}
+                    </DownloadOption>
+                ),
             ];
             break;
 
@@ -487,6 +513,8 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
             break;
     }
 
+    const validMenuOptions = menuOptions.filter((o) => !!o);
+
     return (
         <Box sx={{ display: "inline-flex", gap: "16px" }}>
             <QuickOptions
@@ -496,13 +524,16 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
                 onDownloadClick={downloadCollection}
                 onShareClick={onCollectionShare}
             />
-
-            <OverflowMenu
-                ariaID="collection-options"
-                triggerButtonIcon={<MoreHorizIcon ref={overflowMenuIconRef} />}
-            >
-                {...menuOptions}
-            </OverflowMenu>
+            {validMenuOptions.length > 0 && (
+                <OverflowMenu
+                    ariaID="collection-options"
+                    triggerButtonIcon={
+                        <MoreHorizIcon ref={overflowMenuIconRef} />
+                    }
+                >
+                    {validMenuOptions}
+                </OverflowMenu>
+            )}
             <CollectionSortOrderMenu
                 {...sortOrderMenuVisibilityProps}
                 overflowMenuIconRef={overflowMenuIconRef}
@@ -513,6 +544,8 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
                 {...albumNameInputVisibilityProps}
                 title={t("rename_album")}
                 label={t("album_name")}
+                // TODO: Need to ensure this cannot be undefined when we reach here
+                // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
                 initialValue={activeCollection?.name}
                 submitButtonColor="primary"
                 submitButtonTitle={t("rename")}
@@ -547,6 +580,7 @@ const QuickOptions: React.FC<QuickOptionsProps> = ({
             <EmptyTrashQuickOption onClick={onEmptyTrashClick} />
         )}
         {showDownloadQuickOption(collectionSummary) &&
+            collectionSummary.fileCount > 0 &&
             (isDownloadInProgress() ? (
                 <ActivityIndicator size="20px" sx={{ m: "12px" }} />
             ) : (
@@ -699,7 +733,7 @@ const CollectionSortOrderMenu: React.FC<CollectionSortOrderMenuProps> = ({
     return (
         <Menu
             id="collection-files-sort"
-            anchorEl={overflowMenuIconRef?.current}
+            anchorEl={overflowMenuIconRef.current}
             open={open}
             onClose={onClose}
             slotProps={{
