@@ -1,7 +1,6 @@
 import "dart:io";
 
 import "package:flutter/foundation.dart";
-import "package:photos/core/constants.dart";
 import "package:sqlite_async/sqlite_async.dart";
 
 const assetColumns =
@@ -157,6 +156,8 @@ class LocalDBMigration {
        created_at INTEGER NOT NULL,
        duration_in_sec INTEGER DEFAULT 0,
        owner_id INTEGER NOT NULL,
+       latitude REAL,
+       longitude REAL,
        PRIMARY KEY (dest_collection_id, id)
     );
   ''',

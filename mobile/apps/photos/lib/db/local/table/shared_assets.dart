@@ -16,7 +16,7 @@ extension SharedAssetsTable on LocalDB {
         final List<List<Object?>> values =
             slice.map((e) => e.rowProps).toList();
         await sqliteDB.executeBatch(
-          'INSERT INTO shared_assets (id, name, type, creation_time, duration_in_seconds, dest_collection_id, owner_id) VALUES (?, ?, ?, ?, ?, ?, ?)',
+          'INSERT INTO shared_assets (id, name, type, creation_time, duration_in_seconds, dest_collection_id, owner_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
           values,
         );
       },

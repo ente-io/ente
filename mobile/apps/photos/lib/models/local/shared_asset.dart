@@ -8,8 +8,8 @@ class SharedAsset {
   final int durationInSeconds;
   final int destCollectionID;
   final int ownerID;
-  final int? latitude;
-  final int? longitude;
+  final double? latitude;
+  final double? longitude;
 
   SharedAsset({
     required this.id,
@@ -44,8 +44,8 @@ class SharedAsset {
       durationInSeconds: map['duration_in_seconds'] as int,
       destCollectionID: map['dest_collection_id'] as int,
       ownerID: map['owner_id'] as int,
-      latitude: map['latitude'] as int?,
-      longitude: map['longitude'] as int?,
+      latitude: map['latitude'] as double?,
+      longitude: map['longitude'] as double?,
     );
   }
 }
