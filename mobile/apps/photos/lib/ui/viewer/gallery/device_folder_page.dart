@@ -38,7 +38,7 @@ class DeviceFolderPage extends StatelessWidget {
     final gallery = Gallery(
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) async {
         final files = await localDB.getPathAssets(
-          deviceCollection.id,
+          deviceCollection.assetPathEntity.id,
           params: LocalAssertsParam(
             limit: limit,
             isAsc: asc ?? false,
@@ -56,7 +56,7 @@ class DeviceFolderPage extends StatelessWidget {
         EventType.deletedFromEverywhere,
         EventType.hide,
       },
-      tagPrefix: "device_folder:" + deviceCollection.name,
+      tagPrefix: "device_folder:" + deviceCollection.assetPathEntity.name,
       selectedFiles: _selectedFiles,
       header: Configuration.instance.hasConfiguredAccount()
           ? BackupHeaderWidget(deviceCollection)
@@ -69,7 +69,7 @@ class DeviceFolderPage extends StatelessWidget {
           preferredSize: const Size.fromHeight(50.0),
           child: GalleryAppBarWidget(
             GalleryType.localFolder,
-            deviceCollection.name,
+            deviceCollection.assetPathEntity.name,
             _selectedFiles,
             deviceCollection: deviceCollection,
           ),

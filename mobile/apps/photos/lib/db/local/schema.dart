@@ -39,11 +39,13 @@ const String deviceCollectionWithOneAssetQuery = '''
 WITH latest_per_path AS (
     SELECT 
         dpa.path_id,
-        MAX(a.created_at) as max_created
+        MAX(a.created_at) as max_created,
+		count(*) as asset_count
     FROM 
         device_path_assets dpa
     JOIN 
         assets a ON dpa.asset_id = a.id
+
     GROUP BY 
         dpa.path_id
 ),
@@ -51,7 +53,8 @@ ranked_assets AS (
     SELECT 
         dpa.path_id,
         a.*,
-        ROW_NUMBER() OVER (PARTITION BY dpa.path_id ORDER BY a.id) as rn
+        ROW_NUMBER() OVER (PARTITION BY dpa.path_id ORDER BY a.id) as rn,
+		lpp.asset_count
     FROM 
         device_path_assets dpa
     JOIN 
@@ -61,11 +64,14 @@ ranked_assets AS (
 )
 SELECT 
     dp.*,
-    ra.*
+    ra.*,
+	pc.*
 FROM 
     device_path dp
 JOIN 
     ranked_assets ra ON dp.path_id = ra.path_id AND ra.rn = 1
+LEFT JOIN path_backup_config pc
+    on dp.path_id = pc.device_path_id
     ''';
 
 class LocalAssertsParam {

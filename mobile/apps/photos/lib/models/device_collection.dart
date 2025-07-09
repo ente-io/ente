@@ -1,13 +1,12 @@
+import "package:photo_manager/photo_manager.dart";
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/upload_strategy.dart';
 
 class DeviceCollection {
-  final String id;
-  final String name;
+  AssetPathEntity assetPathEntity;
   final int count;
   final bool shouldBackup;
   UploadStrategy uploadStrategy;
-  final String? coverId;
   int? collectionID;
   EnteFile? thumbnail;
 
@@ -15,10 +14,16 @@ class DeviceCollection {
     return collectionID != null && collectionID! != -1;
   }
 
+  String get name {
+    return assetPathEntity.name;
+  }
+
+  String get id {
+    return assetPathEntity.id;
+  }
+
   DeviceCollection(
-    this.id,
-    this.name, {
-    this.coverId,
+    this.assetPathEntity, {
     this.count = 0,
     this.collectionID,
     this.thumbnail,
