@@ -278,7 +278,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
       widget.onPreviousMemory!();
     } else {
       isAtFirstOrLastFile = true;
-      _onPageChange(inheritedData, currentIndex);
+      _resetAnimation();
       _toggleAnimation(pause: false);
     }
   }
