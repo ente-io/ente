@@ -146,22 +146,16 @@ class RemoteSyncService {
         }).ignore();
       }
 
-      final filesToBeUploaded = await _getFilesToBeUploaded();
-      final hasUploadedFiles = await _uploadFiles(filesToBeUploaded);
-      if (filesToBeUploaded.isNotEmpty) {
-        _logger.info(
-            "Files ${filesToBeUploaded.length} queued for upload, completed: "
-            "$_completedUploads, ignored $_ignoredUploads");
-      } else {
-        _logger.info("No files to upload for this session");
-      }
+      final hasUploadedFiles = await _uploadFiles();
       if (hasUploadedFiles) {
         await _pullDiff();
         _existingSync?.complete();
         _existingSync = null;
         await queueLocalAssetForUpload();
-        final hasMoreFilesToBackup = (await _getFilesToBeUploaded()).isNotEmpty;
-        _logger.info("hasMoreFilesToBackup?" + hasMoreFilesToBackup.toString());
+        final hasMoreFilesToBackup = await localDB.hasAssetQueueOrSharedAsset(
+          _config.getUserID()!,
+        );
+        _logger.info("hasMoreFilesToBackup $hasMoreFilesToBackup");
         if (hasMoreFilesToBackup && !isMultiPartDisabled()) {
           // Skipping a resync to ensure that files that were ignored in this
           // session are not processed now
@@ -171,9 +165,10 @@ class RemoteSyncService {
           Bus.instance.fire(SyncStatusUpdate(SyncStatus.completedBackup));
         }
       } else {
-        // if filesToBeUploaded is empty, clear any stale files in the temp
-        // directory
-        if (filesToBeUploaded.isEmpty) {
+        // If nothing is pending for upload, we can safely remove stale files
+        if (!await localDB.hasAssetQueueOrSharedAsset(
+          _config.getUserID()!,
+        )) {
           await _uploader.removeStaleFiles();
         }
         if (_ignoredUploads > 0) {
@@ -425,7 +420,9 @@ class RemoteSyncService {
     return filesToBeUploaded;
   }
 
-  Future<bool> _uploadFiles(List<EnteFile> filesToBeUploaded) async {
+  Future<bool> _uploadFiles() async {
+    final filesToBeUploaded = await _getFilesToBeUploaded();
+
     final int ownerID = _config.getUserID()!;
     final updatedFileIDs = [];
     // todo: rewrite
@@ -512,6 +509,13 @@ class RemoteSyncService {
       // Do nothing
     } catch (e) {
       rethrow;
+    }
+    if (filesToBeUploaded.isNotEmpty) {
+      _logger.info(
+          "Files ${filesToBeUploaded.length} queued for upload, completed: "
+          "$_completedUploads, ignored $_ignoredUploads");
+    } else {
+      _logger.info("No files to upload for this session");
     }
     return _completedUploads > 0;
   }

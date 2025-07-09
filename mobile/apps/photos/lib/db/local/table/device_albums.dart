@@ -16,7 +16,6 @@ extension DeviceAlbums on LocalDB {
       if (row['id'] != null) {
         asset = LocalDBMappers.asset(row);
       }
-
       collections.add(
         DeviceCollection(
           path,

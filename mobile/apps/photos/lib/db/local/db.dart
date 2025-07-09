@@ -266,4 +266,21 @@ class LocalDB with SqlDbBase {
       '$runtimeType deleteEntries complete in ${stopwatch.elapsed.inMilliseconds}ms for ${pathIds.length} path entries',
     );
   }
+
+  // returns true if either asset queue or shared_assets has any entry for given ownerID
+  Future<bool> hasAssetQueueOrSharedAsset(int ownerID) async {
+    final result = await _sqliteDB.getAll(
+      '''
+      SELECT 1 
+      FROM (
+        SELECT 1 FROM asset_upload_queue WHERE owner_id = ? LIMIT 1
+        UNION ALL
+        SELECT 1 FROM shared_assets WHERE owner_id = ? LIMIT 1
+      ) 
+      LIMIT 1
+      ''',
+      [ownerID, ownerID],
+    );
+    return result.isNotEmpty;
+  }
 }
