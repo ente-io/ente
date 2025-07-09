@@ -18,6 +18,7 @@ import 'package:flutter/material.dart';
 import "package:logging/logging.dart";
 import "package:photos/models/gallery/gallery_sections.dart";
 import "package:photos/ui/viewer/gallery/component/group/type.dart";
+import "package:photos/utils/misc_util.dart";
 
 class PositionConstraints {
   final double top;
@@ -191,36 +192,10 @@ class CustomScrollBarState extends State<CustomScrollBar> {
     final renderBox = _key.currentContext?.findRenderObject() as RenderBox?;
     assert(renderBox != null, "RenderBox is null");
     // Retry for : https://github.com/flutter/flutter/issues/25827
-    return _getNonZeroDoubleWithRetry(
+    return MiscUtil().getNonZeroDoubleWithRetry(
       () => renderBox!.size.height,
       id: "getHeightOfVisualTrack",
     );
-  }
-
-  Future<double> _getNonZeroDoubleWithRetry(
-    double Function() getValue, {
-    Duration retryInterval = const Duration(milliseconds: 8),
-    String? id,
-  }) async {
-    final value = getValue();
-    if (value != 0) {
-      return value;
-    } else {
-      return await Future.delayed(retryInterval, () {
-        if (id != null) {
-          _logger.info(
-            "Retrying to get non-zero double value for $id after ${retryInterval.inMilliseconds} ms",
-          );
-          print(
-            "Retrying to get non-zero double value for $id after ${retryInterval.inMilliseconds} ms",
-          );
-        }
-        return _getNonZeroDoubleWithRetry(
-          getValue,
-          retryInterval: retryInterval,
-        );
-      });
-    }
   }
 
   bool _isSortedAscending(List<double> list) {

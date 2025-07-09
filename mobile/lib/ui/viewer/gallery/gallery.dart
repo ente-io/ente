@@ -13,6 +13,7 @@ import 'package:photos/models/file_load_result.dart';
 import "package:photos/models/gallery/gallery_sections.dart";
 import 'package:photos/models/selected_files.dart';
 import "package:photos/service_locator.dart";
+import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/common/loading_widget.dart';
 import "package:photos/ui/viewer/gallery/component/group/group_header_widget.dart";
 import "package:photos/ui/viewer/gallery/component/group/type.dart";
@@ -23,6 +24,7 @@ import "package:photos/ui/viewer/gallery/state/gallery_context_state.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
 import "package:photos/ui/viewer/gallery/state/inherited_search_filter_data.dart";
 import "package:photos/utils/hierarchical_search_util.dart";
+import "package:photos/utils/misc_util.dart";
 import "package:photos/utils/standalone/date_time.dart";
 import "package:photos/utils/standalone/debouncer.dart";
 import "package:photos/utils/widget_util.dart";
@@ -81,11 +83,9 @@ class Gallery extends StatefulWidget {
     this.forceReloadEvents,
     this.removalEventTypes = const {},
     this.header,
-    // this.footer = const SizedBox(height: 212),
-    this.footer = const SizedBox.shrink(),
+    this.footer = const SizedBox(height: 212),
     this.emptyState = const EmptyState(),
-    // this.scrollBottomSafeArea = 120.0,
-    this.scrollBottomSafeArea = 0.0,
+    this.scrollBottomSafeArea = 120.0,
     this.albumName = '',
     this.groupType = GroupType.day,
     this.enableFileGrouping = true,
@@ -123,6 +123,21 @@ class GalleryState extends State<Gallery> {
   bool _sortOrderAsc = false;
   List<EnteFile> _allGalleryFiles = [];
   final _scrollController = ScrollController();
+  final _sectionedListSliverKey = GlobalKey();
+  final _stackKey = GlobalKey();
+  double? _stackRenderBoxYOffset;
+  double? _sectionedListSliverRenderBoxYOffset;
+  double? get _sectionedListSliverRenderBoxYOffsetRelativeToStackRenderBox {
+    if (_sectionedListSliverRenderBoxYOffset != null &&
+        _stackRenderBoxYOffset != null) {
+      return _sectionedListSliverRenderBoxYOffset! - _stackRenderBoxYOffset!;
+    }
+    return null;
+  }
+
+  final miscUtil = MiscUtil();
+
+  final _showPinnedHeader = ValueNotifier<bool>(false);
 
   @override
   void initState() {
@@ -220,6 +235,51 @@ class GalleryState extends State<Gallery> {
         groupHeaderExtent = size.height;
       });
     });
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      try {
+        final sectionedListSliverRenderBox = await miscUtil
+            .getNonNullValueWithRetry(
+              () => _sectionedListSliverKey.currentContext?.findRenderObject(),
+              retryInterval: const Duration(milliseconds: 750),
+              id: "sectionedListSliverRenderBox",
+            )
+            .then((value) => value as RenderBox);
+        final stackRenderBox = await miscUtil
+            .getNonNullValueWithRetry(
+              () => _stackKey.currentContext?.findRenderObject(),
+              retryInterval: const Duration(milliseconds: 750),
+              id: "stackRenderBox",
+            )
+            .then((value) => value as RenderBox);
+
+        _sectionedListSliverRenderBoxYOffset =
+            sectionedListSliverRenderBox.localToGlobal(Offset.zero).dy;
+        _stackRenderBoxYOffset = stackRenderBox.localToGlobal(Offset.zero).dy;
+      } catch (e, s) {
+        _logger.warning("Error getting renderBox offset", e, s);
+      }
+      setState(() {});
+    });
+
+    _scrollController.addListener(_scrollControllerListener);
+  }
+
+  void _scrollControllerListener() {
+    if (_sectionedListSliverRenderBoxYOffsetRelativeToStackRenderBox == null) {
+      return;
+    }
+
+    if (_scrollController.offset >=
+        _sectionedListSliverRenderBoxYOffsetRelativeToStackRenderBox!) {
+      if (!_showPinnedHeader.value) {
+        _showPinnedHeader.value = true;
+      }
+    } else {
+      if (_showPinnedHeader.value) {
+        _showPinnedHeader.value = false;
+      }
+    }
   }
 
   void _setFilesAndReload(List<EnteFile> files) {
@@ -395,6 +455,7 @@ class GalleryState extends State<Gallery> {
     if (groupHeaderExtent == null) return const SliverFillRemaining();
 
     _logger.info("Building Gallery  ${widget.tagPrefix}");
+    final colorScheme = getEnteColorScheme(context);
 
     final galleryGroups = GalleryGroups(
       allFiles: _allGalleryFiles,
@@ -438,16 +499,44 @@ class GalleryState extends State<Gallery> {
       child: CustomScrollBar(
         scrollController: _scrollController,
         galleryGroups: galleryGroups,
-        child: CustomScrollView(
-          // physics: const BouncingScrollPhysics(),
-          controller: _scrollController,
-          slivers: [
-            SliverToBoxAdapter(child: widget.header ?? const SizedBox.shrink()),
-            SectionedListSliver(
-              sectionLayouts: galleryGroups.groupLayouts,
+        child: Stack(
+          key: _stackKey,
+          clipBehavior: Clip.none,
+          children: [
+            CustomScrollView(
+              // physics: const BouncingScrollPhysics(),
+              controller: _scrollController,
+              slivers: [
+                SliverToBoxAdapter(
+                  child: widget.header ?? const SizedBox.shrink(),
+                ),
+                SliverToBoxAdapter(
+                  child: SizedBox.shrink(
+                    key: _sectionedListSliverKey,
+                  ),
+                ),
+                SectionedListSliver(
+                  sectionLayouts: galleryGroups.groupLayouts,
+                ),
+                SliverToBoxAdapter(
+                  child: widget.footer,
+                ),
+              ],
             ),
-            SliverToBoxAdapter(
-              child: widget.footer,
+            ValueListenableBuilder(
+              valueListenable: _showPinnedHeader,
+              builder: (context, value, _) {
+                return value
+                    ? Container(
+                        color: colorScheme.backgroundBase,
+                        child: GroupHeaderWidget(
+                          title: "Temp title",
+                          gridSize: localSettings.getPhotoGridSize(),
+                          height: groupHeaderExtent,
+                        ),
+                      )
+                    : const SizedBox.shrink();
+              },
             ),
           ],
         ),
