@@ -8,7 +8,7 @@ extension UploadQueueTable on LocalDB {
   Future<Set<String>> getQueueAssetIDs(int ownerID) async {
     final stopwatch = Stopwatch()..start();
     final result = await sqliteDB.getAll(
-      'SELECT id FROM asset_upload_queue WHERE   owner_id = ?',
+      'SELECT asset_id FROM asset_upload_queue WHERE   owner_id = ?',
       [ownerID],
     );
     final assetIDs = result.map((row) => row['id'] as String).toSet();
@@ -47,13 +47,13 @@ extension UploadQueueTable on LocalDB {
   }) async {
     final stopwatch = Stopwatch()..start();
     final result = await sqliteDB.getAll(
-      'SELECT asset_upload_queue.*, type, created_at FROM * join assets on assets.id = asset_upload_queue.id WHERE owner_id = ? ${destCollection != null ? 'AND dest_collection_id = ?' : ''} ORDER BY created_at DESC',
+      'SELECT asset_upload_queue.*, assets.* FROM asset_upload_queue JOIN assets ON assets.id = asset_upload_queue.asset_id WHERE owner_id = ? ${destCollection != null ? 'AND dest_collection_id = ?' : ''} ORDER BY created_at DESC',
       destCollection != null ? [ownerID, destCollection] : [ownerID],
     );
     final entries = result
         .map(
           (row) => AssetUploadQueue(
-            id: row['id'] as String,
+            id: row['asset_id'] as String,
             pathId: row['path_id'] as String?,
             destCollectionId: row['dest_collection_id'] as int,
             ownerId: row['owner_id'] as int,

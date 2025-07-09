@@ -21,8 +21,9 @@ extension DeviceAlbums on LocalDB {
           path,
           count: row['asset_count'] as int,
           thumbnail: asset != null ? EnteFile.fromAssetSync(asset) : null,
-          shouldBackup: (row['should_backup'] as int) == 1,
-          uploadStrategy: UploadStrategy.values[row['upload_strategy'] as int],
+          shouldBackup: (row['should_backup'] ?? 0) as int == 1,
+          uploadStrategy:
+              UploadStrategy.values[(row['upload_strategy'] ?? 0) as int],
         ),
       );
     }

@@ -15,7 +15,7 @@ import "package:photos/models/local/local_metadata.dart";
 import "package:sqlite_async/sqlite_async.dart";
 
 class LocalDB with SqlDbBase {
-  static const _databaseName = "local_5.db";
+  static const _databaseName = "local_6.db";
   static const batchInsertMaxCount = 1000;
   static const _smallTableBatchInsertMaxCount = 5000;
   late final SqliteDatabase _sqliteDB;
@@ -271,12 +271,9 @@ class LocalDB with SqlDbBase {
   Future<bool> hasAssetQueueOrSharedAsset(int ownerID) async {
     final result = await _sqliteDB.getAll(
       '''
-      SELECT 1 
-      FROM (
-        SELECT 1 FROM asset_upload_queue WHERE owner_id = ? LIMIT 1
-        UNION ALL
-        SELECT 1 FROM shared_assets WHERE owner_id = ? LIMIT 1
-      ) 
+      SELECT 1 FROM asset_upload_queue WHERE owner_id = ? 
+      UNION ALL
+      SELECT 1 FROM shared_assets WHERE owner_id = ? 
       LIMIT 1
       ''',
       [ownerID, ownerID],

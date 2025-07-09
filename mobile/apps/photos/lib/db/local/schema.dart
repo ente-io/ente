@@ -201,12 +201,12 @@ class LocalDBMigration {
     '''
     CREATE TABLE asset_upload_queue (
       dest_collection_id INTEGER NOT NULL,
-      id TEXT NOT NULL,
+      asset_id TEXT NOT NULL,
       path_id TEXT,
       owner_id INTEGER NOT NULL,
       manual INTEGER NOT NULL DEFAULT 0,
-      PRIMARY KEY (dest_collection_id, id),
-      FOREIGN KEY(id) REFERENCES assets(id) ON DELETE CASCADE
+      PRIMARY KEY (dest_collection_id, asset_id),
+      FOREIGN KEY(asset_id) REFERENCES assets(id) ON DELETE CASCADE
     );
     CREATE INDEX IF NOT EXISTS idx_asset_upload_queue_owner_id 
       ON asset_upload_queue(owner_id) 
