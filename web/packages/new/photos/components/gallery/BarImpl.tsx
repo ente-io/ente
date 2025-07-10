@@ -146,7 +146,7 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
     >(
         (ref) => {
             listContainerRef.current = ref;
-            if (!ref) return;
+            if (!ref) return undefined;
 
             // Listen for scrolls and resize.
             ref.addEventListener("scroll", updateScrollState);

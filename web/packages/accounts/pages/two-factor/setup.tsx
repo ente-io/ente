@@ -124,12 +124,12 @@ const SetupQRMode: React.FC<SetupQRModeProps> = ({
         <Typography sx={{ color: "text.muted", textAlign: "center" }}>
             {t("two_factor_qr_help")}
         </Typography>
-        {!twoFactorSecret ? (
+        {twoFactorSecret ? (
+            <QRCode src={`data:image/png;base64,${twoFactorSecret.qrCode}`} />
+        ) : (
             <LoadingQRCode>
                 <ActivityIndicator />
             </LoadingQRCode>
-        ) : (
-            <QRCode src={`data:image/png;base64,${twoFactorSecret?.qrCode}`} />
         )}
         <LinkButton onClick={onChangeMode}>
             {t("two_factor_manual_entry_title")}

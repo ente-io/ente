@@ -1,7 +1,7 @@
 import { Box, Stack, Typography, styled } from "@mui/material";
 import { LoginContents } from "ente-accounts/components/LoginContents";
 import { SignUpContents } from "ente-accounts/components/SignUpContents";
-import { getData } from "ente-accounts/services/accounts-db";
+import { savedPartialLocalUser } from "ente-accounts/services/accounts-db";
 import { CenteredFill, CenteredRow } from "ente-base/components/containers";
 import { EnteLogo } from "ente-base/components/EnteLogo";
 import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
@@ -9,9 +9,10 @@ import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton"
 import { useBaseContext } from "ente-base/context";
 import { albumsAppOrigin, customAPIHost } from "ente-base/origins";
 import {
-    haveAuthenticatedSession,
+    masterKeyFromSession,
     updateSessionFromElectronSafeStorageIfNeeded,
 } from "ente-base/session";
+import { savedAuthToken } from "ente-base/token";
 import { canAccessIndexedDB } from "ente-gallery/services/files-db";
 import { DevSettings } from "ente-new/photos/components/DevSettings";
 import { t } from "i18next";
@@ -34,53 +35,47 @@ const Page: React.FC = () => {
     );
 
     useEffect(() => {
-        refreshHost();
-        const currentURL = new URL(window.location.href);
-        const albumsURL = new URL(albumsAppOrigin());
-        currentURL.pathname = router.pathname;
-        if (
-            currentURL.host === albumsURL.host &&
-            currentURL.pathname != "/shared-albums"
-        ) {
-            handleAlbumsRedirect(currentURL);
-        } else {
-            handleNormalRedirect();
-        }
-    }, [refreshHost]);
-
-    const handleAlbumsRedirect = async (currentURL: URL) => {
-        const end = currentURL.hash.lastIndexOf("&");
-        const hash = currentURL.hash.slice(1, end !== -1 ? end : undefined);
-        await router.replace({
-            pathname: "/shared-albums",
-            search: currentURL.search,
-            hash: hash,
-        });
-        await ensureIndexedDBAccess();
-    };
-
-    const handleNormalRedirect = async () => {
-        const user = getData("user");
-        await updateSessionFromElectronSafeStorageIfNeeded();
-        if (await haveAuthenticatedSession()) {
-            await router.push("/gallery");
-        } else if (user?.email) {
-            await router.push("/verify");
-        }
-        await ensureIndexedDBAccess();
-    };
-
-    const ensureIndexedDBAccess = useCallback(async () => {
-        if (!(await canAccessIndexedDB())) {
-            showMiniDialog({
-                title: t("error"),
-                message: t("local_storage_not_accessible"),
-                nonClosable: true,
-                cancel: false,
-            });
-        }
-        setLoading(false);
-    }, [showMiniDialog]);
+        void (async () => {
+            refreshHost();
+            const currentURL = new URL(window.location.href);
+            const albumsURL = new URL(albumsAppOrigin());
+            currentURL.pathname = router.pathname;
+            if (
+                currentURL.host == albumsURL.host &&
+                currentURL.pathname != "/shared-albums"
+            ) {
+                const end = currentURL.hash.lastIndexOf("&");
+                const hash = currentURL.hash.slice(
+                    1,
+                    end !== -1 ? end : undefined,
+                );
+                await router.replace({
+                    pathname: "/shared-albums",
+                    search: currentURL.search,
+                    hash: hash,
+                });
+            } else {
+                await updateSessionFromElectronSafeStorageIfNeeded();
+                if (
+                    (await masterKeyFromSession()) &&
+                    (await savedAuthToken())
+                ) {
+                    await router.push("/gallery");
+                } else if (savedPartialLocalUser()?.email) {
+                    await router.push("/verify");
+                }
+            }
+            if (!(await canAccessIndexedDB())) {
+                showMiniDialog({
+                    title: t("error"),
+                    message: t("local_storage_not_accessible"),
+                    nonClosable: true,
+                    cancel: false,
+                });
+            }
+            setLoading(false);
+        })();
+    }, [showMiniDialog, router, refreshHost]);
 
     return (
         <TappableContainer onMaybeChangeHost={refreshHost}>
@@ -289,7 +284,7 @@ const DesktopBox = styled(CenteredRow)`
 
 const Slideshow: React.FC = () => {
     const [selectedIndex, setSelectedIndex] = useState(0);
-    const containerRef = useRef<HTMLDivElement | undefined>(undefined);
+    const containerRef = useRef<HTMLDivElement | null>(null);
 
     useEffect(() => {
         const intervalID = setInterval(() => {

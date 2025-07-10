@@ -5,7 +5,7 @@ on:
         branches: [main]
         paths:
             # Run workflow when mobiles's intl_en.arb is changed
-            - "mobile/lib/l10n/intl_en.arb"
+            - "mobile/apps/photos/lib/l10n/intl_en.arb"
             # Or the workflow itself is changed
             - ".github/workflows/mobile-crowdin.yml"
 
@@ -24,8 +24,8 @@ jobs:
             - name: Crowdin's action
               uses: crowdin/github-action@v2
               with:
-                  base_path: "mobile/"
-                  config: "mobile/crowdin.yml"
+                  base_path: "mobile/apps/photos/"
+                  config: "mobile/apps/photos/crowdin.yml"
                   upload_sources: true
                   upload_translations: false
                   download_translations: false

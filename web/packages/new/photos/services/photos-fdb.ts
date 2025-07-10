@@ -22,15 +22,7 @@ import type { TrashItem } from "./trash";
  * Use {@link saveCollections} to update the database.
  */
 export const savedCollections = async (): Promise<Collection[]> =>
-    // TODO:
-    //
-    // See: [Note: strict mode migration]
-    //
-    // We need to add the cast here, otherwise we get a tsc error when this
-    // file is imported in the photos app.
-    LocalCollections.parse(
-        (await localForage.getItem("collections")) ?? [],
-    ) as Collection[];
+    LocalCollections.parse((await localForage.getItem("collections")) ?? []);
 
 /**
  * Replace the list of collections stored in our local database.

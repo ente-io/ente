@@ -1,9 +1,8 @@
 ## ente-new
 
-This package only exists so that we can write code that works with TypeScript
-strict mode. This provides a gradual way of migrating the existing apps code to
-strict mode. Once there is sufficient gravity here, we can flip the switch and
-move these back to where they came from.
+This package is only transient. Once the remaining files in apps/photos have
+been revisited for clarity, and the albums app has been split into a separate
+folder, this package will not exist.
 
 ### Packaging
 

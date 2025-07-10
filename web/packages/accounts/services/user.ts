@@ -1,156 +1,93 @@
 import {
-    getData,
+    replaceSavedLocalUser,
     savedKeyAttributes,
+    savedLocalUser,
+    savedPartialLocalUser,
     saveKeyAttributes,
-    setLSUser,
+    saveSRPAttributes,
+    updateSavedLocalUser,
 } from "ente-accounts/services/accounts-db";
 import {
     generateSRPSetupAttributes,
+    getAndSaveSRPAttributes,
     getSRPAttributes,
-    saveSRPAttributes,
     updateSRPAndKeyAttributes,
     type UpdatedKeyAttr,
 } from "ente-accounts/services/srp";
 import {
+    boxSealOpenBytes,
     decryptBox,
     deriveInteractiveKey,
     deriveSensitiveKey,
     encryptBox,
     generateKey,
     generateKeyPair,
+    toB64URLSafe,
 } from "ente-base/crypto";
-import { isDevBuild } from "ente-base/env";
 import {
     authenticatedRequestHeaders,
     ensureOk,
     publicRequestHeaders,
 } from "ente-base/http";
 import { apiURL } from "ente-base/origins";
+import { ensureMasterKeyFromSession } from "ente-base/session";
 import {
-    ensureMasterKeyFromSession,
-    saveMasterKeyInSessionAndSafeStore,
-} from "ente-base/session";
-import { getAuthToken } from "ente-base/token";
+    removeAuthToken,
+    saveAuthToken,
+    savedAuthToken,
+} from "ente-base/token";
 import { ensure } from "ente-utils/ensure";
 import { nullToUndefined } from "ente-utils/transform";
 import { z } from "zod/v4";
+import { clearInflightPasskeySessionID } from "./passkey";
 import { getUserRecoveryKey, recoveryKeyFromMnemonic } from "./recovery-key";
 
-export interface User {
-    id: number;
-    email: string;
-    token: string;
-    encryptedToken: string;
-    isTwoFactorEnabled: boolean;
-    twoFactorSessionID: string;
-}
-
 /**
- * The local storage data about the user after they've logged in.
+ * The locally persisted data we have about the user after they've logged in.
+ *
+ * This type arguably belongs to accounts-db (since that's what persists it and
+ * its shadow alias, {@link PartialLocalUser}), but since most code that will
+ * need this will need this after login has completed, and will be using the
+ * {@link ensureLocalUser} method below, we keep this in the same file to reduce
+ * the need to import the type from a separate file.
  */
-const LocalUser = z.object({
+export interface LocalUser {
     /**
      * The user's ID.
      */
-    id: z.number(),
+    id: number;
     /**
-     * The user's email.
+     * The email associated with the user's Ente account.
      */
-    email: z.string(),
+    email: string;
     /**
      * The user's (plaintext) auth token.
      *
      * It is used for making API calls on their behalf, by passing this token as
      * the value of the X-Auth-Token header in the HTTP request.
      *
-     * Deprecated, use `getAuthToken()` instead (which fetches it from IDB).
+     * Usually you shouldn't be needing to access this property; instead use
+     * {@link savedAuthToken()} which is kept in sync with this value, and lives
+     * in IndexedDB and thus can also be used in web workers.
      */
-    token: z.string(),
-});
+    token: string;
+    /**
+     * `true` if the TOTP based second factor is enabled for the user.
+     */
+    isTwoFactorEnabled?: boolean;
+}
 
 /**
- * The local storage data about the user after they've logged in.
- */
-export type LocalUser = z.infer<typeof LocalUser>;
-
-/**
- * The local storage data about the user before login or signup is complete.
+ * Return the currently logged in {@link LocalUser}, throwing it the user is not
+ * logged in.
  *
- * [Note: Partial local user]
- *
- * During login or signup, the user object exists in various partial states in
- * local storage.
- *
- * - Initially, there is no user object in local storage.
- *
- * - When the user enters their email, the email property of the stored object
- *   is set, but nothing else.
- *
- * - After they verify their password, we have two cases: if second factor
- *   verification is not set, and when it is set.
- *
- * - If second factor verification is not set, then after verifying their
- *   password their {@link id} and {@link encryptedToken} will get filled in,
- *   and {@link isTwoFactorEnabled} will be set to false.
- *
- * - If they have second factor verification set, then after verifying their
- *   password {@link isTwoFactorEnabled} and {@link twoFactorSessionID} will
- *   also get filled in. Once they verify their TOTP based second factor, their
- *   {@link id} and {@link encryptedToken} will also get filled in.
- *
- * So while the underlying storage is the same, we offer two APIs for code to
- * obtain the user:
- *
- * - Before login is complete, or when it is unknown if login is complete or
- *   not, then {@link partialLocalUser} can be used to obtain a
- *   {@link LocalUser} with all of its properties set to be optional.
- *
- * - When we know that the login has completed, we can use either
- *   {@link localUser} (which returns `undefined` if our presumption is false)
- *   or {@link ensureLocalUser} (which throws if our presumption is false) to
- *   obtain an object with all the properties expected to be present for a
- *   locally persisted user set to be required.
- */
-export const partialLocalUser = (): Partial<LocalUser> | undefined => {
-    // TODO: duplicate of getData("user")
-    const s = localStorage.getItem("user");
-    if (!s) return undefined;
-    return LocalUser.partial().parse(JSON.parse(s));
-};
-
-/**
- * Save the users data as we accrue it during the signup or login flow.
- *
- * See: [Note: Partial local user].
- *
- * TODO: WARNING: This does not update the KV token. The idea is to gradually
- * move over uses of setLSUser to this while explicitly setting the KV token
- * where needed.
- */
-export const savePartialLocalUser = (partialLocalUser: Partial<LocalUser>) =>
-    localStorage.setItem("user", JSON.stringify(partialLocalUser));
-
-/**
- * Return the logged-in user, if someone is indeed logged in. Otherwise return
- * `undefined`.
- *
- * The user's data is stored in the browser's localStorage. Thus, this function
- * only works from the main thread, not from web workers (local storage is not
- * accessible to web workers).
- */
-export const localUser = (): LocalUser | undefined => {
-    // TODO: duplicate of getData("user")
-    const s = localStorage.getItem("user");
-    if (!s) return undefined;
-    const { success, data } = LocalUser.safeParse(JSON.parse(s));
-    return success ? data : undefined;
-};
-
-/**
- * A wrapper over {@link localUser} with that throws if no one is logged in.
+ * This is a wrapper over the {@link savedLocalUser} function that throws if no
+ * one is logged in. A more appropriate name for this function, keeping in line
+ * with the conventions the other methods follow, would've been
+ * {@link ensureSavedLocalUser}. The shorter name is for readability.
  */
 export const ensureLocalUser = (): LocalUser =>
-    ensureExpectedLoggedInValue(localUser());
+    ensureExpectedLoggedInValue(savedLocalUser());
 
 /**
  * A function throws an error if a value that is expected to be truthy when the
@@ -645,9 +582,9 @@ export const verifyEmail = async (
  * Log the user out on remote, if possible and needed.
  */
 export const remoteLogoutIfNeeded = async () => {
-    if (!(await getAuthToken())) {
-        // If the logout is attempted during the signup flow itself, then we
-        // won't have an auth token.
+    if (!(await savedAuthToken())) {
+        // If the logout is attempted during the login / signup flow itself,
+        // then we won't have an auth token. Handle that gracefully.
         return;
     }
 
@@ -732,7 +669,7 @@ export const generateAndSaveInteractiveKeyAttributes = async (
  */
 export const changeEmail = async (email: string, ott: string) => {
     await postChangeEmail(email, ott);
-    await setLSUser({ ...getData("user"), email });
+    updateSavedLocalUser({ email });
 };
 
 /**
@@ -783,6 +720,8 @@ export const changePassword = async (password: string) => {
     );
 
     // Update SRP attributes locally.
+    await getAndSaveSRPAttributes(user.email);
+
     const srpAttributes = await getSRPAttributes(user.email);
     saveSRPAttributes(ensure(srpAttributes));
 
@@ -793,12 +732,72 @@ export const changePassword = async (password: string) => {
         { ...keyAttributes, ...updatedKeyAttr },
         masterKey,
     );
+};
 
-    // TODO(RE): This shouldn't be needed, remove me. As a soft remove,
-    // disabling it for dev builds. (tag: Migration)
-    if (!isDevBuild) {
-        await saveMasterKeyInSessionAndSafeStore(masterKey);
+/**
+ * Update the {@link id} and {@link encryptedToken} present in the saved partial
+ * local user.
+ *
+ * This function removes the {@link token}, if any, present in the saved partial
+ * local user and sets the provided {@link encryptedToken}.
+ *
+ * It is expected that the code will subsequently redirect to "/credentials",
+ * which should call {@link decryptAndStoreTokenIfNeeded} which will decrypt the
+ * newly set {@link encryptedToken} and write out the decrypted value as the
+ * {@link token} in the saved local user.
+ *
+ * @param userID The ID of the user whose token this is. This is also saved to
+ * the partial local user (after doing a sanity check that we're not replacing
+ * partial data with a different userID).
+ *
+ * @param encryptedToken The newly obtained base64 encoded encrypted token from
+ * remote (e.g. as a result of the user verifying their email).
+ */
+export const resetSavedLocalUserTokens = async (
+    userID: number,
+    encryptedToken: string,
+) => {
+    const user = savedPartialLocalUser();
+    if (user?.id && user.id != userID) {
+        throw new Error(`User ID mismatch (${user.id}, ${userID})`);
     }
+    replaceSavedLocalUser({
+        ...user,
+        id: userID,
+        token: undefined,
+        encryptedToken,
+    });
+    return removeAuthToken();
+};
+
+/**
+ * Decrypt the user's {@link encryptedToken}, if present, and use it to update
+ * both the locally saved user and the KV DB.
+ *
+ * @param keyAttributes The user's key attributes.
+ *
+ * @param masterKey The user's master key (base64 encoded).
+ */
+export const decryptAndStoreTokenIfNeeded = async (
+    keyAttributes: KeyAttributes,
+    masterKey: string,
+) => {
+    const { encryptedToken } = savedPartialLocalUser() ?? {};
+    if (!encryptedToken) return;
+
+    const { encryptedSecretKey, secretKeyDecryptionNonce, publicKey } =
+        keyAttributes;
+    const privateKey = await decryptBox(
+        { encryptedData: encryptedSecretKey, nonce: secretKeyDecryptionNonce },
+        masterKey,
+    );
+
+    const token = await toB64URLSafe(
+        await boxSealOpenBytes(encryptedToken, { publicKey, privateKey }),
+    );
+
+    updateSavedLocalUser({ token, encryptedToken: undefined });
+    return saveAuthToken(token);
 };
 
 const TwoFactorSecret = z.object({
@@ -852,7 +851,7 @@ export const setupTwoFactorFinish = async (
         encryptedTwoFactorSecret: box.encryptedData,
         twoFactorSecretDecryptionNonce: box.nonce,
     });
-    await setLSUser({ ...getData("user"), isTwoFactorEnabled: true });
+    updateSavedLocalUser({ isTwoFactorEnabled: true });
 };
 
 interface EnableTwoFactorRequest {
@@ -961,7 +960,7 @@ export type TwoFactorRecoveryResponse = z.infer<
  *    sends a encrypted recovery secret (see {@link configurePasskeyRecovery}).
  *
  * 3. When the user wishes to reset or bypass their second factor, the client
- *    asks remote for these encrypted secrets (using {@link recoverTwoFactor}).
+ *    asks remote for these encrypted secrets (using {@link getRecoverTwoFactor}).
  *
  * 4. User then enters their recovery key, which the client uses to decrypt the
  *    recovery secret and provide it back to remote for verification (using
@@ -970,7 +969,7 @@ export type TwoFactorRecoveryResponse = z.infer<
  * 5. If the recovery secret matches, then remote resets (TOTP based) or bypass
  *    (passkey based) the user's second factor.
  */
-export const recoverTwoFactor = async (
+export const getRecoverTwoFactor = async (
     twoFactorType: TwoFactorType,
     sessionID: string,
 ): Promise<TwoFactorRecoveryResponse> => {
@@ -984,22 +983,23 @@ export const recoverTwoFactor = async (
 
 /**
  * Finish the second factor recovery / bypass initiated by
- * {@link recoverTwoFactor} using the provided recovery key mnemonic entered by
- * the user.
+ * {@link getRecoverTwoFactor} using the provided recovery key mnemonic entered
+ * by the user.
  *
  * See: [Note: Second factor recovery].
  *
  * This completes the recovery process both locally, and on remote.
  *
  * @param twoFactorType The second factor type (same value as what would've been
- * passed to {@link recoverTwoFactor} for obtaining {@link recoveryResponse}).
+ * passed to {@link getRecoverTwoFactor} for obtaining
+ * {@link recoveryResponse}).
  *
  * @param sessionID The second factor session ID (same value as what would've
- * been passed to {@link recoverTwoFactor} for obtaining
+ * been passed to {@link getRecoverTwoFactor} for obtaining
  * {@link recoveryResponse}).
  *
  * @param recoveryResponse The response to a previous call to
- * {@link recoverTwoFactor}.
+ * {@link getRecoverTwoFactor}.
  *
  * @param recoveryKeyMnemonic The 24-word BIP-39 recovery key mnemonic provided
  * by the user to complete recovery.
@@ -1021,13 +1021,13 @@ export const recoverTwoFactorFinish = async (
         sessionID,
         twoFactorSecret,
     );
-    await setLSUser({
-        ...getData("user"),
-        id,
-        isTwoFactorEnabled: false,
-        encryptedToken,
-        token: undefined,
+    await resetSavedLocalUserTokens(id, encryptedToken);
+    updateSavedLocalUser({
+        isTwoFactorEnabled: undefined,
+        twoFactorSessionID: undefined,
+        passkeySessionID: undefined,
     });
+    if (twoFactorType == "passkey") clearInflightPasskeySessionID();
     saveKeyAttributes(keyAttributes);
 };
 

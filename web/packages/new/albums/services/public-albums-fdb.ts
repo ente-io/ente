@@ -20,15 +20,9 @@ import { z } from "zod/v4";
  * Use {@link savePublicCollections} to update the database.
  */
 const savedPublicCollections = async (): Promise<Collection[]> =>
-    // TODO:
-    //
-    // See: [Note: strict mode migration]
-    //
-    // We need to add the cast here, otherwise we get a tsc error when this
-    // file is imported in the photos app.
     LocalCollections.parse(
         (await localForage.getItem("public-collections")) ?? [],
-    ) as Collection[];
+    );
 
 /**
  * Replace the list of public collections stored in our local database.

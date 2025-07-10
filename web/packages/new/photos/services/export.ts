@@ -172,7 +172,7 @@ interface CancellationStatus {
 class ExportService {
     private exportSettings: ExportSettings | undefined;
     // @ts-ignore
-    private exportInProgress: RequestCanceller = null;
+    private exportInProgress: RequestCanceller | null = null;
     private resync = true;
     private reRunNeeded = false;
     private exportRecordUpdater = new PromiseQueue<ExportRecord>();
@@ -336,7 +336,7 @@ class ExportService {
     async stopRunningExport() {
         try {
             log.info("user requested export cancellation");
-            this.exportInProgress.exec();
+            this.exportInProgress?.exec();
             // @ts-ignore
             this.exportInProgress = null;
             this.reRunNeeded = false;

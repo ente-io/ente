@@ -8,11 +8,17 @@ import { VerifyingPasskey } from "ente-accounts/components/LoginComponents";
 import { SecondFactorChoice } from "ente-accounts/components/SecondFactorChoice";
 import { useSecondFactorChoiceIfNeeded } from "ente-accounts/components/utils/second-factor-choice";
 import {
-    getData,
+    replaceSavedLocalUser,
+    savedKeyAttributes,
+    savedOriginalKeyAttributes,
+    savedPartialLocalUser,
+    savedSRPAttributes,
     saveIsFirstLogin,
-    setData,
-    setLSUser,
+    saveKeyAttributes,
+    saveOriginalKeyAttributes,
+    unstashAfterUseSRPSetupAttributes,
     unstashReferralSource,
+    updateSavedLocalUser,
 } from "ente-accounts/services/accounts-db";
 import {
     openPasskeyVerificationURL,
@@ -23,12 +29,10 @@ import {
     unstashRedirect,
 } from "ente-accounts/services/redirect";
 import {
+    getAndSaveSRPAttributes,
     getSRPAttributes,
     setupSRP,
-    unstashAndUseSRPSetupAttributes,
-    type SRPAttributes,
 } from "ente-accounts/services/srp";
-import type { KeyAttributes, User } from "ente-accounts/services/user";
 import {
     putUserKeyAttributes,
     sendOTT,
@@ -44,19 +48,28 @@ import { useBaseContext } from "ente-base/context";
 import { isHTTPErrorWithStatus } from "ente-base/http";
 import log from "ente-base/log";
 import { clearSessionStorage } from "ente-base/session";
+import { saveAuthToken } from "ente-base/token";
 import { t } from "i18next";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Trans } from "react-i18next";
 
+/**
+ * A page that allows the user to verify their email.
+ *
+ * See: [Note: Login pages]
+ */
 const Page: React.FC = () => {
     const { logout, showMiniDialog } = useBaseContext();
 
     const [email, setEmail] = useState("");
-    const [resend, setResend] = useState(0);
+    const [resend, setResend] = useState<"enable" | "sending" | "sent">(
+        "enable",
+    );
     const [passkeyVerificationData, setPasskeyVerificationData] = useState<
         { passkeySessionID: string; url: string } | undefined
     >();
+
     const {
         secondFactorChoiceProps,
         userVerificationResultAfterResolvingSecondFactorChoice,
@@ -65,17 +78,13 @@ const Page: React.FC = () => {
     const router = useRouter();
 
     useEffect(() => {
-        const main = async () => {
-            const user: User = getData("user");
-
-            const redirect = await redirectionIfNeeded(user);
-            if (redirect) {
-                void router.push(redirect);
+        void redirectionIfNeededOrEmail().then((redirectOrEmail) => {
+            if (typeof redirectOrEmail == "string") {
+                void router.replace(redirectOrEmail);
             } else {
-                setEmail(user.email);
+                setEmail(redirectOrEmail.email);
             }
-        };
-        void main();
+        });
     }, [router]);
 
     const onSubmit: SingleInputFormProps["onSubmit"] = async (
@@ -98,14 +107,12 @@ const Page: React.FC = () => {
             } = await userVerificationResultAfterResolvingSecondFactorChoice(
                 await verifyEmail(email, ott, cleanedReferral),
             );
+
+            // The following flow is similar to (but not the same) as what
+            // happens after `verifySRP` in the `/credentials` page.
+
             if (passkeySessionID) {
-                const user = getData("user");
-                await setLSUser({
-                    ...user,
-                    passkeySessionID,
-                    isTwoFactorEnabled: true,
-                    isTwoFactorPasskeysEnabled: true,
-                });
+                updateSavedLocalUser({ passkeySessionID });
                 saveIsFirstLogin();
                 const url = passkeyVerificationRedirectURL(
                     accountsUrl!,
@@ -114,40 +121,32 @@ const Page: React.FC = () => {
                 setPasskeyVerificationData({ passkeySessionID, url });
                 openPasskeyVerificationURL({ passkeySessionID, url });
             } else if (twoFactorSessionID) {
-                await setLSUser({
-                    email,
-                    twoFactorSessionID,
+                updateSavedLocalUser({
                     isTwoFactorEnabled: true,
+                    twoFactorSessionID,
                 });
                 saveIsFirstLogin();
                 void router.push("/two-factor/verify");
             } else {
-                await setLSUser({
-                    email,
-                    token,
-                    encryptedToken,
-                    id,
-                    isTwoFactorEnabled: false,
-                });
+                if (token) await saveAuthToken(token);
+                replaceSavedLocalUser({ id, email, token, encryptedToken });
                 if (keyAttributes) {
-                    setData("keyAttributes", keyAttributes);
-                    setData("originalKeyAttributes", keyAttributes);
+                    saveKeyAttributes(keyAttributes);
+                    saveOriginalKeyAttributes(keyAttributes);
                 } else {
-                    const originalKeyAttributes = getData(
-                        "originalKeyAttributes",
-                    );
+                    const originalKeyAttributes = savedOriginalKeyAttributes();
                     if (originalKeyAttributes) {
                         await putUserKeyAttributes(originalKeyAttributes);
                     }
-                    await unstashAndUseSRPSetupAttributes(setupSRP);
+                    await unstashAfterUseSRPSetupAttributes(setupSRP);
+                    await getAndSaveSRPAttributes(email);
                 }
                 saveIsFirstLogin();
-                const redirectURL = unstashRedirect();
-                if (keyAttributes?.encryptedKey) {
+                if (keyAttributes) {
                     clearSessionStorage();
-                    void router.push(redirectURL ?? "/credentials");
+                    void router.push(unstashRedirect() ?? "/credentials");
                 } else {
-                    void router.push(redirectURL ?? "/generate");
+                    void router.push(unstashRedirect() ?? "/generate");
                 }
             }
         } catch (e) {
@@ -162,12 +161,12 @@ const Page: React.FC = () => {
         }
     };
 
-    const resendEmail = async () => {
-        setResend(1);
+    const resendEmail = useCallback(async () => {
+        setResend("sending");
         await sendOTT(email, undefined);
-        setResend(2);
-        setTimeout(() => setResend(0), 3000);
-    };
+        setResend("sent");
+        setTimeout(() => setResend("enable"), 3000);
+    }, [email]);
 
     if (!email) {
         return <LoadingIndicator />;
@@ -230,13 +229,13 @@ const Page: React.FC = () => {
             />
 
             <AccountsPageFooter>
-                {resend === 0 && (
+                {resend == "enable" && (
                     <LinkButton onClick={resendEmail}>
                         {t("resend_code")}
                     </LinkButton>
                 )}
-                {resend === 1 && <span>{t("status_sending")}</span>}
-                {resend === 2 && <span>{t("status_sent")}</span>}
+                {resend == "sending" && <span>{t("status_sending")}</span>}
+                {resend == "sent" && <span>{t("status_sent")}</span>}
                 <LinkButton onClick={logout}>{t("change_email")}</LinkButton>
             </AccountsPageFooter>
 
@@ -250,22 +249,23 @@ export default Page;
 /**
  * A function called during page load to see if a redirection is required
  *
- * @returns The slug to redirect to, if needed.
+ * @returns The slug to redirect to, if needed. Otherwise an object containing
+ * the saved partial user's email.
  */
-const redirectionIfNeeded = async (user: User | undefined) => {
+const redirectionIfNeededOrEmail = async () => {
+    const user = savedPartialLocalUser();
+
     const email = user?.email;
     if (!email) {
         return "/";
     }
 
-    const keyAttributes: KeyAttributes = getData("keyAttributes");
-
-    if (keyAttributes?.encryptedKey && (user.token || user.encryptedToken)) {
+    if (savedKeyAttributes() && (user.token || user.encryptedToken)) {
         return "/credentials";
     }
 
     // If we're coming here during the recover flow, do not redirect.
-    if (stashedRedirect() == "/recover") return undefined;
+    if (stashedRedirect() == "/recover") return { email };
 
     // The user might have email verification disabled, but after previously
     // entering their email on the login screen, they might've closed the tab
@@ -278,7 +278,7 @@ const redirectionIfNeeded = async (user: User | undefined) => {
     // saved them). If they are present and indicate that email verification is
     // not required, redirect to the password verification page.
 
-    const srpAttributes: SRPAttributes = getData("srpAttributes");
+    const srpAttributes = savedSRPAttributes();
     if (srpAttributes && !srpAttributes.isEmailMFAEnabled) {
         // Fetch the latest SRP attributes instead of relying on the potentially
         // stale stored values. This is an infrequent scenario path, so extra
@@ -289,5 +289,5 @@ const redirectionIfNeeded = async (user: User | undefined) => {
         }
     }
 
-    return undefined;
+    return { email };
 };

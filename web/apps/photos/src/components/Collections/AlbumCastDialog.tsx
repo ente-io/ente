@@ -20,6 +20,7 @@ import { loadCast } from "ente-new/photos/utils/chromecast-sender";
 import { t } from "i18next";
 import React, { useCallback, useEffect, useState } from "react";
 import { Trans } from "react-i18next";
+import { z } from "zod/v4";
 
 type AlbumCastDialogProps = ModalVisibilityProps & {
     /** The collection that we want to cast. */
@@ -40,10 +41,14 @@ export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
 );
 
 /**
- * [Note: MUI dialog state reset]
+ * [Note: MUI dialog state]
  *
- * Keep the dialog contents in a separate component so that they get rendered
+ * In some cases we keep the dialog contents in a separate component so that (a)
+ * they get rendered only when the dialog is shown, and (b) they get rendered
  * afresh when the dialog is unmounted and then shown again.
+ *
+ * Keeping it separate both resets the state of the component, and also ensures
+ * that the effects run again when the dialog is shown.
  *
  * Details:
  *
@@ -58,7 +63,8 @@ export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
  * circumstance. If it is undesirable, there are multiple approaches:
  * https://github.com/mui/material-ui/issues/16325
  *
- * One of those is to keep the dialog contents in a separate component.
+ * One of those approaches is to keep the dialog contents in a separate
+ * component.
  */
 export const AlbumCastDialogContents: React.FC<AlbumCastDialogProps> = ({
     open,
@@ -82,6 +88,7 @@ export const AlbumCastDialogContents: React.FC<AlbumCastDialogProps> = ({
         // (effectively, only Chrome).
         //
         // Override, otherwise tsc complains about unknown property `chrome`.
+        // @ts-expect-error TODO: why is this needed
         // eslint-disable-next-line @typescript-eslint/dot-notation
         setBrowserCanCast(typeof window["chrome"] != "undefined");
     }, []);
@@ -108,7 +115,7 @@ export const AlbumCastDialogContents: React.FC<AlbumCastDialogProps> = ({
 
     useEffect(() => {
         if (view == "auto") {
-            loadCast().then(async (cast) => {
+            void loadCast().then(async (cast) => {
                 const instance = cast.framework.CastContext.getInstance();
                 try {
                     await instance.requestSession();
@@ -117,37 +124,35 @@ export const AlbumCastDialogContents: React.FC<AlbumCastDialogProps> = ({
                     log.error("Error requesting session", e);
                     return;
                 }
-                const session = instance.getCurrentSession();
+                const session = instance.getCurrentSession()!;
                 session.addMessageListener(
                     "urn:x-cast:pair-request",
                     (_, message) => {
-                        const data = message;
-                        const obj = JSON.parse(data);
-                        const code = obj.code;
+                        const { code } = CastPairRequest.parse(
+                            JSON.parse(message),
+                        );
 
-                        if (code) {
-                            publishCastPayload(`${code}`, collection)
-                                .then(() => {
-                                    setView("choose");
-                                    onClose();
-                                })
-                                .catch((e: unknown) => {
-                                    log.error("Error casting to TV", e);
-                                    setView("auto-cast-error");
-                                });
-                        }
+                        void publishCastPayload(code, collection)
+                            .then(() => {
+                                setView("choose");
+                                onClose();
+                            })
+                            .catch((e: unknown) => {
+                                log.error("Error casting to TV", e);
+                                setView("auto-cast-error");
+                            });
                     },
                 );
 
                 const collectionID = collection.id;
-                session
+                void session
                     .sendMessage("urn:x-cast:pair-request", { collectionID })
                     .then(() => {
                         log.debug(() => "urn:x-cast:pair-request sent");
                     });
             });
         }
-    }, [view, collection]);
+    }, [onClose, view, collection]);
 
     useEffect(() => {
         // Make API call to clear all previous sessions (if any) whenever the
@@ -243,3 +248,8 @@ export const AlbumCastDialogContents: React.FC<AlbumCastDialogProps> = ({
         </>
     );
 };
+
+/**
+ * Zod schema for the "x-cast:pair-request" payload sent by the cast app.
+ */
+const CastPairRequest = z.object({ code: z.string() });

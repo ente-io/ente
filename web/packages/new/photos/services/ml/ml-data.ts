@@ -171,10 +171,6 @@ export const fetchMLData = async (
         try {
             const decryptedBytes = await decryptBlobBytes(
                 remoteFileData,
-                // See: [Note: strict mode migration]
-                //
-                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                // @ts-ignore
                 file.key,
             );
             const jsonString = await gunzip(decryptedBytes);
@@ -199,14 +195,6 @@ const remoteMLDataFromJSONString = (
 ) => {
     const raw = RawRemoteMLData.parse(JSON.parse(jsonString));
     const parseResult = ParsedRemoteMLData.safeParse(raw);
-    // TODO: [Note: strict mode migration]
-    //
-    // This code is included in apps/photos where it causes spurious tsc failure
-    // since the photos app currently does not have the TypeScript strict mode
-    // enabled (unlike the current file).
-    //
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
     const parsed = parseResult.success
         ? (parseResult.data as ParsedRemoteMLData)
         : undefined;

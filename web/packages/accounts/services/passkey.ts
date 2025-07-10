@@ -1,9 +1,11 @@
 import {
-    getData,
-    setData,
-    setLSUser,
+    saveKeyAttributes,
+    updateSavedLocalUser,
 } from "ente-accounts/services/accounts-db";
-import { TwoFactorAuthorizationResponse } from "ente-accounts/services/user";
+import {
+    resetSavedLocalUserTokens,
+    TwoFactorAuthorizationResponse,
+} from "ente-accounts/services/user";
 import { clientPackageName, isDesktop } from "ente-base/app";
 import { encryptBox, generateKey } from "ente-base/crypto";
 import {
@@ -243,12 +245,36 @@ export const checkPasskeyVerificationStatus = async (
 export const saveCredentialsAndNavigateTo = async (
     response: TwoFactorAuthorizationResponse,
 ) => {
-    // This method somewhat duplicates `saveCredentialsAndNavigateTo` in the
-    // /passkeys/finish page.
+    // [Note: Ending the passkey flow]
+    //
+    // The implementation of this function is similar to that of the
+    // `saveQueryCredentialsAndNavigateTo` on the "/passkeys/finish" page.
+    //
+    // This one, `saveCredentialsAndNavigateTo`, is used when the user presses
+    // the check verification status button on the page that triggered the
+    // passkey flow (when they're using the desktop app).
+    //
+    // The other one, `saveQueryCredentialsAndNavigateTo`, is used when the user
+    // goes through the passkey flow in the browser itself (when they are using
+    // the web app).
+
+    clearInflightPasskeySessionID();
+
     const { id, encryptedToken, keyAttributes } = response;
 
-    await setLSUser({ ...getData("user"), encryptedToken, id });
-    setData("keyAttributes", keyAttributes);
+    await resetSavedLocalUserTokens(id, encryptedToken);
+    updateSavedLocalUser({ passkeySessionID: undefined });
+    saveKeyAttributes(keyAttributes);
 
     return unstashRedirect() ?? "/credentials";
+};
+
+/**
+ * Remove the inflight passkey session ID, if any, present in session storage.
+ *
+ * This should be called whenever we get back control from the passkey app to
+ * clean up after ourselves.
+ */
+export const clearInflightPasskeySessionID = () => {
+    sessionStorage.removeItem("inflightPasskeySessionID");
 };

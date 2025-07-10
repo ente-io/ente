@@ -14,18 +14,16 @@ import {
     Typography,
 } from "@mui/material";
 import {
+    replaceSavedLocalUser,
     saveJustSignedUp,
-    setData,
+    saveOriginalKeyAttributes,
     stashReferralSource,
-} from "ente-accounts/services/accounts-db";
-import {
-    generateSRPSetupAttributes,
     stashSRPSetupAttributes,
-} from "ente-accounts/services/srp";
+} from "ente-accounts/services/accounts-db";
+import { generateSRPSetupAttributes } from "ente-accounts/services/srp";
 import {
     generateAndSaveInteractiveKeyAttributes,
     generateKeysAndAttributes,
-    savePartialLocalUser,
     sendOTT,
     type GenerateKeysAndAttributesResult,
 } from "ente-accounts/services/user";
@@ -57,6 +55,12 @@ interface SignUpContentsProps {
     host: string | undefined;
 }
 
+/**
+ * A contents of the "signup" form.
+ *
+ * It is used both on the "/signup" page itself, and as a subcomponent of the
+ * "/" page where the user can toggle between the signup and login forms inline.
+ */
 export const SignUpContents: React.FC<SignUpContentsProps> = ({
     router,
     onLogin,
@@ -126,7 +130,7 @@ export const SignUpContents: React.FC<SignUpContentsProps> = ({
                     throw e;
                 }
 
-                savePartialLocalUser({ email });
+                replaceSavedLocalUser({ email });
 
                 let gkResult: GenerateKeysAndAttributesResult;
                 try {
@@ -146,7 +150,7 @@ export const SignUpContents: React.FC<SignUpContentsProps> = ({
                 }
 
                 const { masterKey, kek, keyAttributes } = gkResult;
-                setData("originalKeyAttributes", keyAttributes);
+                saveOriginalKeyAttributes(keyAttributes);
                 stashSRPSetupAttributes(await generateSRPSetupAttributes(kek));
                 await generateAndSaveInteractiveKeyAttributes(
                     password,

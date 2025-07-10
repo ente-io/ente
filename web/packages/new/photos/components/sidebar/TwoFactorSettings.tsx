@@ -1,6 +1,9 @@
 import LockIcon from "@mui/icons-material/Lock";
 import { Stack, Typography } from "@mui/material";
-import { getData, setLSUser } from "ente-accounts/services/accounts-db";
+import {
+    savedPartialLocalUser,
+    updateSavedLocalUser,
+} from "ente-accounts/services/accounts-db";
 import {
     RowButton,
     RowButtonGroup,
@@ -24,12 +27,9 @@ export const TwoFactorSettings: React.FC<
     const [isTwoFactorEnabled, setIsTwoFactorEnabled] = useState(false);
 
     useEffect(() => {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        const isTwoFactorEnabled =
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-            getData("user").isTwoFactorEnabled ?? false;
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-        setIsTwoFactorEnabled(isTwoFactorEnabled);
+        if (savedPartialLocalUser()?.isTwoFactorEnabled) {
+            setIsTwoFactorEnabled(true);
+        }
     }, []);
 
     useEffect(() => {
@@ -37,11 +37,7 @@ export const TwoFactorSettings: React.FC<
         void (async () => {
             const isEnabled = await get2FAStatus();
             setIsTwoFactorEnabled(isEnabled);
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-            await setLSUser({
-                ...getData("user"),
-                isTwoFactorEnabled: isEnabled,
-            });
+            updateSavedLocalUser({ isTwoFactorEnabled: isEnabled });
         })();
     }, [open]);
 
@@ -112,8 +108,7 @@ const ManageDrawerContents: React.FC<ContentsProps> = ({ onRootClose }) => {
 
     const disable = async () => {
         await disable2FA();
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-        await setLSUser({ ...getData("user"), isTwoFactorEnabled: false });
+        updateSavedLocalUser({ isTwoFactorEnabled: undefined });
         onRootClose();
     };
 
