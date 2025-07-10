@@ -79,7 +79,7 @@ class BgTaskUtils {
     try {
       await workmanager.Workmanager().initialize(
         callbackDispatcher,
-        isInDebugMode: false,
+        isInDebugMode: Platform.isIOS,
       );
       await workmanager.Workmanager().registerPeriodicTask(
         backgroundTaskIdentifier,
