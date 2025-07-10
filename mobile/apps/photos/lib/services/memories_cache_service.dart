@@ -3,7 +3,6 @@ import "dart:io" show File;
 
 import "package:flutter/cupertino.dart";
 import "package:flutter/foundation.dart" show kDebugMode;
-import "package:flutter/material.dart" show BuildContext;
 import "package:logging/logging.dart";
 import "package:path_provider/path_provider.dart";
 import "package:photos/core/event_bus.dart";

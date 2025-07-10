@@ -27,7 +27,7 @@ class AlbumRowItemWidget extends StatelessWidget {
   final SelectedAlbums? selectedAlbums;
   static const _borderWidth = 1.0;
   static const _cornerRadius = 12.0;
-  static const _cornerSmoothing = 1.0;
+  static const _cornerSmoothing = 0.6;
 
   const AlbumRowItemWidget(
     this.c,
@@ -120,8 +120,8 @@ class AlbumRowItemWidget extends StatelessWidget {
                                 child: isSelected
                                     ? ColorFiltered(
                                         colorFilter: ColorFilter.mode(
-                                          Colors.black.withOpacity(
-                                            0.4,
+                                          Colors.black.withValues(
+                                            alpha: 0.4,
                                           ),
                                           BlendMode.darken,
                                         ),
