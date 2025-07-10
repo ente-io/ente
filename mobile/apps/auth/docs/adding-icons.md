@@ -4,8 +4,8 @@ Ente Auth supports the icon pack provided by
 [simple-icons](https://github.com/simple-icons/simple-icons).
 
 If you would like to add your own custom icon, please open a pull-request with
-the relevant SVG placed within `assets/custom-icons/icons` and add the
-corresponding entry within `assets/custom-icons/_data/custom-icons.json`.
+the relevant SVG placed within `mobile/apps/auth/assets/custom-icons/icons` and add the
+corresponding entry within `mobile/apps/auth/assets/custom-icons/_data/custom-icons.json`.
 
 Please be careful to upload small and optimized icon files. If your icon file 
 is over 50KB, it is likely not optimized.
