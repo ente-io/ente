@@ -137,8 +137,6 @@ class GalleryState extends State<Gallery> {
 
   final miscUtil = MiscUtil();
 
-  final _showPinnedHeader = ValueNotifier<bool>(false);
-
   @override
   void initState() {
     super.initState();
@@ -261,25 +259,6 @@ class GalleryState extends State<Gallery> {
       }
       setState(() {});
     });
-
-    _scrollController.addListener(_scrollControllerListener);
-  }
-
-  void _scrollControllerListener() {
-    if (_sectionedListSliverRenderBoxYOffsetRelativeToStackRenderBox == null) {
-      return;
-    }
-
-    if (_scrollController.offset >=
-        _sectionedListSliverRenderBoxYOffsetRelativeToStackRenderBox!) {
-      if (!_showPinnedHeader.value) {
-        _showPinnedHeader.value = true;
-      }
-    } else {
-      if (_showPinnedHeader.value) {
-        _showPinnedHeader.value = false;
-      }
-    }
   }
 
   void _setFilesAndReload(List<EnteFile> files) {
@@ -523,20 +502,11 @@ class GalleryState extends State<Gallery> {
                 ),
               ],
             ),
-            ValueListenableBuilder(
-              valueListenable: _showPinnedHeader,
-              builder: (context, value, _) {
-                return value
-                    ? Container(
-                        color: colorScheme.backgroundBase,
-                        child: GroupHeaderWidget(
-                          title: "Temp title",
-                          gridSize: localSettings.getPhotoGridSize(),
-                          height: groupHeaderExtent,
-                        ),
-                      )
-                    : const SizedBox.shrink();
-              },
+            PinnedGroupHeader(
+              scrollController: _scrollController,
+              galleryGroups: galleryGroups,
+              getSectionedListSliverRenderBoxYOffsetRelativeToStackRenderBox: () =>
+                  _sectionedListSliverRenderBoxYOffsetRelativeToStackRenderBox,
             ),
           ],
         ),
@@ -603,6 +573,72 @@ class GalleryState extends State<Gallery> {
           .sort((a, b) => b[0].creationTime!.compareTo(a[0].creationTime!));
     }
     return resultGroupedFiles;
+  }
+}
+
+class PinnedGroupHeader extends StatefulWidget {
+  final ScrollController scrollController;
+  final GalleryGroups galleryGroups;
+  final double? Function()
+      getSectionedListSliverRenderBoxYOffsetRelativeToStackRenderBox;
+  const PinnedGroupHeader({
+    required this.scrollController,
+    required this.galleryGroups,
+    required this.getSectionedListSliverRenderBoxYOffsetRelativeToStackRenderBox,
+    super.key,
+  });
+
+  @override
+  State<PinnedGroupHeader> createState() => _PinnedGroupHeaderState();
+}
+
+class _PinnedGroupHeaderState extends State<PinnedGroupHeader> {
+  String? currentGroupID;
+  @override
+  void initState() {
+    super.initState();
+    widget.scrollController.addListener(_scrollControllerListener);
+  }
+
+  @override
+  void dispose() {
+    widget.scrollController.removeListener(_scrollControllerListener);
+    super.dispose();
+  }
+
+  void _scrollControllerListener() {
+    final normalizedScrollOffset = widget.scrollController.offset -
+        widget
+            .getSectionedListSliverRenderBoxYOffsetRelativeToStackRenderBox()!;
+    if (normalizedScrollOffset < 0) {
+      currentGroupID = null;
+    } else {
+      //TODO: make this more efficient. This is very less thought out.
+      final entry =
+          widget.galleryGroups.scrollOffsetToGroupIdMap.entries.firstWhere(
+        (element) => element.key >= normalizedScrollOffset,
+        orElse: () =>
+            widget.galleryGroups.scrollOffsetToGroupIdMap.entries.last,
+      );
+      currentGroupID = entry.value;
+    }
+    setState(() {});
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return currentGroupID != null
+        ? GroupHeaderWidget(
+            title: widget.galleryGroups.groupIdToheaderDataMap[currentGroupID!]!
+                .groupType
+                .getTitle(
+              context,
+              widget.galleryGroups.groupIDToFilesMap[currentGroupID]!.first,
+            ),
+            gridSize: localSettings.getPhotoGridSize(),
+            height: widget.galleryGroups.headerExtent,
+          )
+        : const SizedBox.shrink();
   }
 }
 
