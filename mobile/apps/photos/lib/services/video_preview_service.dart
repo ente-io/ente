@@ -751,12 +751,12 @@ class VideoPreviewService {
     }
     final int size = enteFile.fileSize!;
     final int duration = enteFile.duration!;
-    // if (size >= 500 * 1024 * 1024 || duration > 60) {
-    //   _logger.info(
-    //     "Skip Preview due to size: $size or duration: $duration",
-    //   );
-    //   return (null, true, null);
-    // }
+    if (size >= 500 * 1024 * 1024 || duration > 60) {
+      _logger.info(
+        "Skip Preview due to size: $size or duration: $duration",
+      );
+      return (null, true, null);
+    }
     FFProbeProps? props;
     File? file;
     bool skipFile = false;
