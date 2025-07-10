@@ -125,14 +125,15 @@ class RemoteSyncService {
       final bool isFirstSync = !_prefs.containsKey(_isFirstRemoteSyncDone);
       if (isFirstSync) {
         // For first sync, pull remote diff first, then queue uploads
-        await _pullDiff();
+
+        await remoteDiff.syncFromRemote();
         await trashSyncService.syncTrash();
         await _prefs.setBool(_isFirstRemoteSyncDone, true);
         await queueLocalAssetForUpload();
       } else {
         // For subsequent syncs, queue uploads before remote sync
         await queueLocalAssetForUpload();
-        await _pullDiff();
+        await remoteDiff.syncFromRemote();
         await trashSyncService.syncTrash();
       }
 
@@ -148,7 +149,7 @@ class RemoteSyncService {
 
       final hasUploadedFiles = await _uploadFiles();
       if (hasUploadedFiles) {
-        await _pullDiff();
+        await remoteDiff.syncFromRemote();
         _existingSync?.complete();
         _existingSync = null;
         await queueLocalAssetForUpload();
@@ -217,12 +218,6 @@ class RemoteSyncService {
       return _prefs.setStringList(_ignoreBackUpSettingsForIDs_, whitelistedIDs);
     }
     return false;
-  }
-
-  Future<void> _pullDiff() async {
-    await remoteDiff.syncFromRemote();
-    return;
-    unawaited(_localFileUpdateService.markUpdatedFilesForReUpload());
   }
 
   Future<void> _syncCollectionFiles(int collectionID, int sinceTime) async {
