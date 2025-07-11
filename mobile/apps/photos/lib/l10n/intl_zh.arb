@@ -459,7 +459,7 @@
   "selectAll": "全选",
   "skip": "跳过",
   "updatingFolderSelection": "正在更新文件夹选择...",
-  "itemCount": "{count, plural, one{{count} 个项目} other{{count} 个项目}}",
+  "itemCount": "{count, plural, other{{count} 个项目}}",
   "deleteItemCount": "{count, plural, =1 {删除 {count} 个项目} other {删除 {count} 个项目}}",
   "duplicateItemsGroup": "{count} 个文件，每个文件 {formattedSize}",
   "@duplicateItemsGroup": {
@@ -477,7 +477,7 @@
     }
   },
   "showMemories": "显示回忆",
-  "yearsAgo": "{count, plural, one{{count} 年前} other{{count} 年前}}",
+  "yearsAgo": "{count, plural, other{{count} 年前}}",
   "backupSettings": "备份设置",
   "backupStatus": "备份状态",
   "backupStatusDescription": "已备份的项目将显示在此处",
