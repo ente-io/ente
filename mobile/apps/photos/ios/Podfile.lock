@@ -127,9 +127,6 @@ PODS:
   - libwebp/sharpyuv (1.5.0)
   - libwebp/webp (1.5.0):
     - libwebp/sharpyuv
-  - local_auth_darwin (0.0.1):
-    - Flutter
-    - FlutterMacOS
   - local_auth_ios (0.0.1):
     - Flutter
   - Mantle (2.2.0):
@@ -272,7 +269,6 @@ DEPENDENCIES:
   - in_app_purchase_storekit (from `.symlinks/plugins/in_app_purchase_storekit/darwin`)
   - integration_test (from `.symlinks/plugins/integration_test/ios`)
   - launcher_icon_switcher (from `.symlinks/plugins/launcher_icon_switcher/ios`)
-  - local_auth_darwin (from `.symlinks/plugins/local_auth_darwin/darwin`)
   - local_auth_ios (from `.symlinks/plugins/local_auth_ios/ios`)
   - maps_launcher (from `.symlinks/plugins/maps_launcher/ios`)
   - media_extension (from `.symlinks/plugins/media_extension/ios`)
@@ -380,8 +376,6 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/integration_test/ios"
   launcher_icon_switcher:
     :path: ".symlinks/plugins/launcher_icon_switcher/ios"
-  local_auth_darwin:
-    :path: ".symlinks/plugins/local_auth_darwin/darwin"
   local_auth_ios:
     :path: ".symlinks/plugins/local_auth_ios/ios"
   maps_launcher:
@@ -505,14 +499,14 @@ SPEC CHECKSUMS:
   photo_manager: 1d80ae07a89a67dfbcae95953a1e5a24af7c3e62
   privacy_screen: 3159a541f5d3a31bea916cfd4e58f9dc722b3fd4
   PromisesObjC: f5707f49cb48b9636751c5b2e7d227e43fba9f47
-  receive_sharing_intent: 79c848f5b045674ad60b9fea3bafea59962ad2c1
+  receive_sharing_intent: 222384f00ffe7e952bbfabaa9e3967cb87e5fe00
   SDWebImage: f29024626962457f3470184232766516dee8dfea
   SDWebImageWebPCoder: e38c0a70396191361d60c092933e22c20d5b1380
   Sentry: da60d980b197a46db0b35ea12cb8f39af48d8854
-  sentry_flutter: 2df8b0aab7e4aba81261c230cbea31c82a62dd1b
-  share_plus: 8b6f8b3447e494cca5317c8c3073de39b3600d1f
-  shared_preferences_foundation: fcdcbc04712aee1108ac7fda236f363274528f78
-  sqflite_darwin: 5a7236e3b501866c1c9befc6771dfd73ffb8702d
+  sentry_flutter: 27892878729f42701297c628eb90e7c6529f3684
+  share_plus: 50da8cb520a8f0f65671c6c6a99b3617ed10a58a
+  shared_preferences_foundation: 9e1978ff2562383bd5676f64ec4e9aa8fa06a6f7
+  sqflite_darwin: 20b2a3a3b70e43edae938624ce550a3cbf66a3d0
   sqlite3: 3c950dc86011117c307eb0b28c4a7bb449dce9f1
   sqlite3_flutter_libs: 74334e3ef2dbdb7d37e50859bb45da43935779c4
   system_info_plus: 555ce7047fbbf29154726db942ae785c29211740
