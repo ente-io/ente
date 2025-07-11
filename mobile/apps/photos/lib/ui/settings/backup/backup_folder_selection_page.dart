@@ -15,6 +15,7 @@ import "package:photos/service_locator.dart";
 import "package:photos/services/local/import/local_import.dart";
 import "package:photos/services/local/local_assets_cache.dart";
 import 'package:photos/services/sync/remote_sync_service.dart';
+import "package:photos/services/sync/upload_candidate.dart";
 import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/common/loading_widget.dart';
 import "package:photos/ui/viewer/file/no_thumbnail_widget.dart";
@@ -274,7 +275,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
       await Configuration.instance.setSelectAllFoldersForBackup(
         _allDevicePathIDs.length == _selectedDevicePathIDs.length,
       );
-      await RemoteSyncService.instance.updateDeviceFolderSyncStatus(syncStatus);
+      await UploadCandidateService.instance.updatePathBackUpStatus(syncStatus);
       await dialog.hide();
       Navigator.of(context).pop();
     } catch (e, s) {

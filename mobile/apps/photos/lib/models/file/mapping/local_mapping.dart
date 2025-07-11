@@ -1,14 +1,14 @@
 class LocalAssetInfo {
   final String id;
   final String? hash;
-  final String? name;
+  final String? title;
   final String? relativePath;
   final int state;
 
   LocalAssetInfo({
     required this.id,
     this.hash,
-    this.name,
+    this.title,
     this.relativePath,
     required this.state,
   });
@@ -17,9 +17,9 @@ class LocalAssetInfo {
     return LocalAssetInfo(
       id: row['id'] as String,
       hash: row['hash'] as String?,
-      name: row['name'] as String?,
+      title: row['title'] as String?,
       relativePath: row['relative_path'] as String?,
-      state: row['state'] as int,
+      state: row['scan_state'] as int,
     );
   }
 }

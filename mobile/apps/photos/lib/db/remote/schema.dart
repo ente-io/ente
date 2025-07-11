@@ -23,7 +23,7 @@ final String collectionFilesUpdateColumns = collectionFilesColumns
     )
     .map((column) => '$column = excluded.$column') // Use excluded virtual table
     .join(', ');
-const  filesColumns =
+const filesColumns =
     'id, owner_id, file_header, thumb_header, creation_time, modification_time, title, size, hash, lat, lng, '
     'metadata, priv_metadata, pub_metadata, info';
 
@@ -43,7 +43,7 @@ final String trashedFilesUpdateColumns = trashedFilesColumns
     .join(', ');
 
 const uploadLocalMappingColumns =
-    'file_id, local_id, local_clould_id, local_mapping_src';
+    'file_id, local_id, local_cloud_id, local_mapping_src';
 String collectionValuePlaceHolder =
     collectionColumns.split(',').map((_) => '?').join(',');
 

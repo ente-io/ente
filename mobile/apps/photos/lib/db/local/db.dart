@@ -89,7 +89,7 @@ class LocalDB with SqlDbBase {
     if (ids.isEmpty) return {};
     final stopwatch = Stopwatch()..start();
     final result = await _sqliteDB.getAll(
-      'SELECT id, hash, name, relative_path, state FROM assets WHERE id IN (${List.filled(ids.length, "?").join(",")})',
+      'SELECT id, hash, title, relative_path, scan_state FROM assets WHERE id IN (${List.filled(ids.length, "?").join(",")})',
       ids,
     );
     debugPrint(
@@ -279,5 +279,23 @@ class LocalDB with SqlDbBase {
       [ownerID, ownerID],
     );
     return result.isNotEmpty;
+  }
+
+  Future<(int, int)> getUniqueQueueAndSharedAssetsCount(
+    int ownerID,
+  ) async {
+    final queuedAssets = await _sqliteDB.getAll(
+      'SELECT COUNT(distinct asset_id) as count FROM asset_upload_queue WHERE owner_id = ?',
+      [ownerID],
+    );
+    final sharedAssets = await _sqliteDB.getAll(
+      'SELECT COUNT(*) as count FROM shared_assets WHERE owner_id = ?',
+      [ownerID],
+    );
+    final queuedCount =
+        queuedAssets.isNotEmpty ? (queuedAssets.first['count'] as int) : 0;
+    final sharedCount =
+        sharedAssets.isNotEmpty ? (sharedAssets.first['count'] as int) : 0;
+    return (queuedCount, sharedCount);
   }
 }

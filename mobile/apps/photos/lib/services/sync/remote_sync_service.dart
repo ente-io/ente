@@ -3,39 +3,33 @@ import 'dart:io';
 
 import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
-import "package:photo_manager/photo_manager.dart";
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/errors.dart';
 import 'package:photos/core/event_bus.dart';
 import "package:photos/core/network/network.dart";
 import 'package:photos/db/files_db.dart';
-import "package:photos/db/local/table/path_config_table.dart";
 import "package:photos/db/local/table/upload_queue_table.dart";
 import "package:photos/db/remote/table/files_table.dart";
-import "package:photos/db/remote/table/mapping_table.dart";
-import 'package:photos/events/backup_folders_updated_event.dart';
 import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/files_updated_event.dart';
-import 'package:photos/events/force_reload_home_gallery_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/sync_status_update_event.dart';
-import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
-import "package:photos/models/local/path_config.dart";
+import "package:photos/models/local/asset_upload_queue.dart";
 import "package:photos/models/metadata/file_magic.dart";
-import 'package:photos/models/upload_strategy.dart';
 import 'package:photos/module/upload/service/file_uploader.dart';
 import "package:photos/service_locator.dart";
 import 'package:photos/services/app_lifecycle_service.dart';
 import 'package:photos/services/collections_service.dart';
+import "package:photos/services/hidden_service.dart";
 import 'package:photos/services/ignored_files_service.dart';
 import "package:photos/services/language_service.dart";
 import 'package:photos/services/local_file_update_service.dart';
 import "package:photos/services/notification_service.dart";
 import "package:photos/services/remote/fetch/files_diff.dart";
 import "package:photos/services/remote/fetch/remote_diff.dart";
-import 'package:photos/services/sync/sync_service.dart';
+import "package:photos/services/sync/upload_candidate.dart";
 import "package:photos/services/video_preview_service.dart";
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -47,6 +41,8 @@ class RemoteSyncService {
   final CollectionsService _collectionsService = CollectionsService.instance;
   final LocalFileUpdateService _localFileUpdateService =
       LocalFileUpdateService.instance;
+  final UploadCandidateService _uploadCandidateService =
+      UploadCandidateService.instance;
   int _completedUploads = 0;
   int _ignoredUploads = 0;
   late SharedPreferences _prefs;
@@ -129,10 +125,10 @@ class RemoteSyncService {
         await remoteDiff.syncFromRemote();
         await trashSyncService.syncTrash();
         await _prefs.setBool(_isFirstRemoteSyncDone, true);
-        await queueLocalAssetForUpload();
+        await _uploadCandidateService.markLocalAssetForAutoUpload();
       } else {
         // For subsequent syncs, queue uploads before remote sync
-        await queueLocalAssetForUpload();
+        await _uploadCandidateService.markLocalAssetForAutoUpload();
         await remoteDiff.syncFromRemote();
         await trashSyncService.syncTrash();
       }
@@ -152,7 +148,7 @@ class RemoteSyncService {
         await remoteDiff.syncFromRemote();
         _existingSync?.complete();
         _existingSync = null;
-        await queueLocalAssetForUpload();
+        await UploadCandidateService.instance.markLocalAssetForAutoUpload();
         final hasMoreFilesToBackup = await localDB.hasAssetQueueOrSharedAsset(
           _config.getUserID()!,
         );
@@ -208,18 +204,6 @@ class RemoteSyncService {
     return _prefs.containsKey(_isFirstRemoteSyncDone);
   }
 
-  Future<bool> whiteListVideoForUpload(EnteFile file) async {
-    if (file.fileType == FileType.video &&
-        !_config.shouldBackupVideos() &&
-        file.localID != null) {
-      final List<String> whitelistedIDs =
-          _prefs.getStringList(_ignoreBackUpSettingsForIDs_) ?? <String>[];
-      whitelistedIDs.add(file.localID!);
-      return _prefs.setStringList(_ignoreBackUpSettingsForIDs_, whitelistedIDs);
-    }
-    return false;
-  }
-
   Future<void> _syncCollectionFiles(int collectionID, int sinceTime) async {
     _logger.info(
       "[Collection-$collectionID] fetch diff silently: $_isExistingSyncSilent "
@@ -240,163 +224,30 @@ class RemoteSyncService {
     await _syncCollectionFiles(collectionID, 0);
   }
 
-  Future<void> queueLocalAssetForUpload() async {
-    _logger.info("Syncing device collections to be uploaded");
-    final int ownerID = _config.getUserID()!;
-
-    final devicePathConfigs = await localDB.getPathConfigs(ownerID);
-    final assetPaths = await localDB.getAssetPaths();
-    final Map<String, AssetPathEntity> pathIDToAssetPath = {};
-    for (final assetPath in assetPaths) {
-      pathIDToAssetPath[assetPath.id] = assetPath;
+  Future<List<Future>> getLocalAssetsForUploads() async {
+    final List<Future> futures = [];
+    final int userID = _config.getUserID()!;
+    final List<(AssetUploadQueue, EnteFile)> enteries =
+        await localDB.getQueueEntriesWithFiles(userID);
+    if (enteries.isEmpty) {
+      return futures;
     }
-    devicePathConfigs.removeWhere((element) => !element.shouldBackup);
-
-    final pathIdToLocalIDs = await localDB.pathToAssetIDs();
-    devicePathConfigs.sort(
-      (a, b) => (pathIdToLocalIDs[a.pathID]?.length ?? 0)
-          .compareTo((pathIdToLocalIDs[b.pathID]?.length ?? 0)),
-    );
-    // Sort by count to ensure that photos in iOS are first inserted in
-    // smallest album marked for backup. This is to ensure that photo is
-    // first attempted to upload in a non-recent album.
-    final rlMapping = await remoteDB.getLocalIDToMappingForActiveFiles();
-    final Set<String> queuedLocalIDs = await localDB.getQueueAssetIDs(ownerID);
-    queuedLocalIDs.addAll(rlMapping.keys);
-    bool moreFilesMarkedForBackup = false;
-    for (final deviceCollection in devicePathConfigs) {
-      final AssetPathEntity? assetPath =
-          pathIDToAssetPath[deviceCollection.pathID];
-      if (assetPath == null) {
-        _logger.warning(
-          "AssetPathEntity not found for pathID ${deviceCollection.pathID}",
-        );
-        continue;
-      }
-      final Set<String> localIDsToSync =
-          pathIdToLocalIDs[deviceCollection.pathID] ?? {};
-      if (deviceCollection.uploadStrategy == UploadStrategy.ifMissing) {
-        localIDsToSync.removeAll(queuedLocalIDs);
-      }
-      if (localIDsToSync.isEmpty) {
-        continue;
-      }
-      final collectionID = await _getCollectionID(deviceCollection, assetPath);
-      if (collectionID == null) {
-        _logger.warning('DeviceCollection was either deleted or missing');
-        continue;
-      }
-
-      moreFilesMarkedForBackup = true;
-      await localDB.insertOrUpdateQueue(
-        localIDsToSync,
-        collectionID,
-        ownerID,
-        path: deviceCollection.pathID,
-      );
-      _logger.info(
-        "Queued ${localIDsToSync.length} files for upload in collection "
-        "$collectionID for path ${deviceCollection.pathID}",
-      );
-      queuedLocalIDs.addAll(localIDsToSync);
-    }
-    if (moreFilesMarkedForBackup && !_config.hasSelectedAllFoldersForBackup()) {
-      // "force reload due to display new files"
-      Bus.instance.fire(ForceReloadHomeGalleryEvent("newFilesDisplay"));
-    }
-  }
-
-  Future<void> updateDeviceFolderSyncStatus(
-    Map<String, bool> syncStatusUpdate,
-  ) async {
-    final int ownerID = _config.getUserID()!;
-    final Set<int> oldDestCollection =
-        await localDB.destCollectionWithBackup(ownerID);
-    await localDB.insertOrUpdatePathConfigs(syncStatusUpdate, ownerID);
-    final Set<int> newDestCollection =
-        await localDB.destCollectionWithBackup(ownerID);
-    // Cancel any existing sync if the destination collection has changed
-    SyncService.instance.onDeviceCollectionSet(newDestCollection);
-    // remove all collectionIDs which are still marked for backup
-    oldDestCollection.removeAll(newDestCollection);
-    final Set<String> enabledPathIDs = {};
-    for (final entry in syncStatusUpdate.entries) {
-      if (entry.value) {
-        enabledPathIDs.add(entry.key);
-      }
-    }
-    await localDB.clearMappingsWithDiffPath(
-      ownerID,
-      enabledPathIDs,
-    );
-    if (syncStatusUpdate.values.any((syncStatus) => syncStatus == false)) {
-      Configuration.instance.setSelectAllFoldersForBackup(false).ignore();
-    }
-    Bus.instance.fire(
-      LocalPhotosUpdatedEvent(<EnteFile>[], source: "deviceFolderSync"),
-    );
-    Bus.instance.fire(BackupFoldersUpdatedEvent());
-  }
-
-  Future<int?> _getCollectionID(
-    PathConfig pathConfig,
-    AssetPathEntity assetPath,
-  ) async {
-    if (pathConfig.destCollectionID != null) {
-      final int destCollectionID = pathConfig.destCollectionID!;
-      final collection =
-          _collectionsService.getCollectionByID(destCollectionID);
-      if (collection != null && !collection.isDeleted) {
-        return collection.id;
-      }
-      if (collection == null) {
-        // ideally, this should never happen because the app keeps a track of
-        // all collections and their IDs. But, if somehow the collection is
-        // deleted, we should fetch it again
-        _logger.severe("Collection $destCollectionID missing "
-            "for pathID ${assetPath.id}");
-        _collectionsService.fetchCollectionByID(destCollectionID).ignore();
-        // return, by next run collection should be available.
-        // we are not waiting on fetch by choice because device might have wrong
-        // mapping which will result in breaking upload for other device path
-        return null;
-      } else if (collection.isDeleted) {
-        _logger.warning("Collection $destCollectionID deleted "
-            "for pathID ${assetPath.id}, new collection will be created");
-      }
-    }
-    final collection =
-        await _collectionsService.getOrCreateForPath(assetPath.name);
-    await localDB.updateDestConnection(
-      assetPath.id,
-      collection.id,
-      _config.getUserID()!,
-    );
-    return collection.id;
-  }
-
-  Future<List<EnteFile>> _getFilesToBeUploaded() async {
-    final List<EnteFile> originalFiles = await _db.getFilesPendingForUpload();
-    if (originalFiles.isEmpty) {
-      return originalFiles;
-    }
-    final bool shouldRemoveVideos =
-        !_config.shouldBackupVideos() || isMultiPartDisabled();
+    final bool shouldRemoveVideos = !_config.shouldBackupVideos();
     final ignoredIDs = await IgnoredFilesService.instance.idToIgnoreReasonMap;
     bool shouldSkipUploadFunc(EnteFile file) {
+      // todo: review this
       return IgnoredFilesService.instance.shouldSkipUpload(ignoredIDs, file);
     }
 
     final List<EnteFile> filesToBeUploaded = [];
     int ignoredForUpload = 0;
     int skippedVideos = 0;
-    final whitelistedIDs =
-        (_prefs.getStringList(_ignoreBackUpSettingsForIDs_) ?? <String>[])
-            .toSet();
-    for (var file in originalFiles) {
+
+    for (var entry in enteries) {
+      final queueEntry = entry.$1;
+      final file = entry.$2;
       if (shouldRemoveVideos &&
-          (file.fileType == FileType.video &&
-              !whitelistedIDs.contains(file.localID))) {
+          (file.fileType == FileType.video && queueEntry.manual == false)) {
         skippedVideos++;
         continue;
       }
@@ -406,29 +257,27 @@ class RemoteSyncService {
       }
       filesToBeUploaded.add(file);
     }
-    if (skippedVideos > 0 || ignoredForUpload > 0) {
-      _logger.info("Skipped $skippedVideos videos and $ignoredForUpload "
-          "ignored files for upload");
+    if (futures.isNotEmpty || skippedVideos > 0 || ignoredForUpload > 0) {
+      _logger.info(
+        "Queued ${filesToBeUploaded.length} files for upload, skipped videos: "
+        "$skippedVideos, ignored for upload: $ignoredForUpload",
+      );
     }
-    _sortByTime(filesToBeUploaded);
-    _logger.info("${filesToBeUploaded.length} new files to be uploaded.");
-    return filesToBeUploaded;
+    return futures;
   }
 
   Future<bool> _uploadFiles() async {
-    final filesToBeUploaded = await _getFilesToBeUploaded();
-
-    final int ownerID = _config.getUserID()!;
-    final updatedFileIDs = [];
-    // todo: rewrite
-    // final updatedFileIDs = await _db.getUploadedFileIDsToBeUpdated(ownerID);
-    if (updatedFileIDs.isNotEmpty) {
-      _logger.info("Identified ${updatedFileIDs.length} files for reupload");
-    }
-
     _completedUploads = 0;
     _ignoredUploads = 0;
-    final int toBeUploaded = filesToBeUploaded.length + updatedFileIDs.length;
+    final int ownerID = _config.getUserID()!;
+    final bool includeVideos = _config.shouldBackupVideos();
+
+    final candidate = await _uploadCandidateService.getLocalAssetsForUploads(
+      ownerID,
+      includeVideos,
+    );
+    _logger.info("Upload candaites $candidate");
+    final int toBeUploaded = candidate.own.length + candidate.shared.length;
     if (toBeUploaded > 0) {
       Bus.instance.fire(
         SyncStatusUpdate(SyncStatus.preparingForUpload, total: toBeUploaded),
@@ -440,52 +289,13 @@ class RemoteSyncService {
       // fetchUploadUrls as alternative method.
       await _uploader.fetchUploadURLs(toBeUploaded);
     }
+
     final List<Future> futures = [];
-
-    for (final file in filesToBeUploaded) {
-      if (isMultiPartDisabled() &&
-          futures.length >= kMaximumPermissibleUploadsInThrottledMode) {
-        _logger.info("Skipping some new files as we are throttling uploads");
-        break;
-      }
-      // prefer existing collection ID for manually uploaded files.
-      // See https://github.com/ente-io/photos-app/pull/187
-      final collectionID = file.collectionID ??
-          (await _collectionsService
-                  .getOrCreateForPath(file.deviceFolder ?? 'Unknown Folder'))
-              .id;
-      _uploadFile(file, collectionID, futures);
+    for (final entry in candidate.own) {
+      futures.add(_uploadDirectlyToCollection(entry.$1, entry.$2));
     }
-
-    for (final uploadedFileID in updatedFileIDs) {
-      if (isMultiPartDisabled() &&
-          futures.length >= kMaximumPermissibleUploadsInThrottledMode) {
-        _logger
-            .info("Skipping some updated files as we are throttling uploads");
-        break;
-      }
-      final allFiles = await _db.getFilesInAllCollection(
-        uploadedFileID,
-        ownerID,
-      );
-      if (allFiles.isEmpty) {
-        _logger.warning("No files found for uploadedFileID $uploadedFileID");
-        continue;
-      }
-      EnteFile? fileInCollectionOwnedByUser;
-      for (final file in allFiles) {
-        if (file.canReUpload(ownerID)) {
-          fileInCollectionOwnedByUser = file;
-          break;
-        }
-      }
-      if (fileInCollectionOwnedByUser != null) {
-        _uploadFile(
-          fileInCollectionOwnedByUser,
-          fileInCollectionOwnedByUser.collectionID!,
-          futures,
-        );
-      }
+    for (final entry in candidate.shared) {
+      futures.add(_uploadToUncategorizedThenMove(entry.$1, entry.$2));
     }
 
     try {
@@ -505,14 +315,49 @@ class RemoteSyncService {
     } catch (e) {
       rethrow;
     }
-    if (filesToBeUploaded.isNotEmpty) {
-      _logger.info(
-          "Files ${filesToBeUploaded.length} queued for upload, completed: "
+    if (futures.isNotEmpty) {
+      _logger.info("Files ${futures.length} queued for upload, completed: "
           "$_completedUploads, ignored $_ignoredUploads");
     } else {
       _logger.info("No files to upload for this session");
     }
     return _completedUploads > 0;
+  }
+
+  Future<void> _uploadToUncategorizedThenMove(
+    AssetUploadQueue queueEntry,
+    EnteFile file,
+  ) async {
+    try {
+      final uncategorizedCollection =
+          await _collectionsService.getUncategorizedCollection();
+      final uploadedFile =
+          await _uploader.upload(file, uncategorizedCollection.id);
+      await _collectionsService.addOrCopyToCollection(
+        queueEntry.destCollectionId,
+        [uploadedFile],
+      );
+      _onFileUploaded(uploadedFile, queueEntry: queueEntry);
+    } catch (error, stackTrace) {
+      _onFileUploadError(error, stackTrace, file);
+    }
+  }
+
+  Future<void> _uploadDirectlyToCollection(
+    AssetUploadQueue queueEntry,
+    EnteFile file,
+  ) async {
+    try {
+      final uploadedFile =
+          await _uploader.upload(file, queueEntry.destCollectionId);
+      await _collectionsService.addOrCopyToCollection(
+        queueEntry.destCollectionId,
+        [uploadedFile],
+      );
+      _onFileUploaded(uploadedFile, queueEntry: queueEntry);
+    } catch (error, stackTrace) {
+      _onFileUploadError(error, stackTrace, file);
+    }
   }
 
   void _uploadFile(EnteFile file, int collectionID, List<Future> futures) {
@@ -525,7 +370,10 @@ class RemoteSyncService {
     futures.add(future);
   }
 
-  Future<void> _onFileUploaded(EnteFile file) async {
+  void _onFileUploaded(
+    EnteFile file, {
+    AssetUploadQueue? queueEntry,
+  }) {
     Bus.instance.fire(
       CollectionUpdatedEvent(file.collectionID, [file], "fileUpload"),
     );
@@ -564,8 +412,10 @@ class RemoteSyncService {
       return;
     }
     if (error is InvalidFileError) {
+      // On invalid file errors, we are not throwing the errors to
+      // ensure that the upload queue is not interrupted.
       _ignoredUploads++;
-      _logger.warning("Invalid file error", error);
+      _logger.warning("Invalid file error", error, stackTrace);
     } else {
       throw error;
     }
@@ -574,22 +424,6 @@ class RemoteSyncService {
   bool isMultiPartDisabled() {
     return !flagService.enableMobMultiPart ||
         !localSettings.userEnabledMultiplePart;
-  }
-
-  // _sortByTime sort by creation time (desc).
-  // This is done to upload most recent photo first.
-  void _sortByTime(List<EnteFile> file) {
-    file.sort((first, second) {
-      // 1. fileType: move videos to end when in bg
-      if (!AppLifecycleService.instance.isForeground &&
-          first.fileType != second.fileType) {
-        if (first.fileType == FileType.video) return 1;
-        if (second.fileType == FileType.video) return -1;
-      }
-
-      // 2. creationTime descending
-      return second.creationTime!.compareTo(first.creationTime!);
-    });
   }
 
   bool _shouldNotifyNewFiles() {

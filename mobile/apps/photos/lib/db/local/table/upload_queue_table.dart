@@ -1,7 +1,9 @@
 import "package:collection/collection.dart";
 import "package:flutter/foundation.dart";
 import "package:photos/db/local/db.dart";
+import "package:photos/db/local/mappers.dart";
 import "package:photos/db/local/schema.dart";
+import "package:photos/models/file/file.dart";
 import "package:photos/models/local/asset_upload_queue.dart";
 
 extension UploadQueueTable on LocalDB {
@@ -11,7 +13,7 @@ extension UploadQueueTable on LocalDB {
       'SELECT asset_id FROM asset_upload_queue WHERE   owner_id = ?',
       [ownerID],
     );
-    final assetIDs = result.map((row) => row['id'] as String).toSet();
+    final assetIDs = result.map((row) => row['asset_id'] as String).toSet();
     debugPrint(
       '$runtimeType getQueueAssetIDs complete in ${stopwatch.elapsed.inMilliseconds}ms',
     );
@@ -39,6 +41,35 @@ extension UploadQueueTable on LocalDB {
         '$runtimeType clearMappingsWithDiffPath complete in ${stopwatch.elapsed.inMilliseconds}ms for ${pathIDs.length} paths',
       );
     }
+  }
+
+  Future<List<(AssetUploadQueue, EnteFile)>> getQueueEntriesWithFiles(
+    int ownerID, {
+    int? destCollection,
+  }) async {
+    final stopwatch = Stopwatch()..start();
+    final result = await sqliteDB.getAll(
+      'SELECT asset_upload_queue.*, assets.* FROM asset_upload_queue JOIN assets ON assets.id = asset_upload_queue.asset_id WHERE owner_id = ? ${destCollection != null ? 'AND dest_collection_id = ?' : ''} ORDER BY created_at DESC',
+      destCollection != null ? [ownerID, destCollection] : [ownerID],
+    );
+    final entries = result
+        .map(
+          (row) => (
+            AssetUploadQueue(
+              id: row['asset_id'] as String,
+              pathId: row['path_id'] as String?,
+              destCollectionId: row['dest_collection_id'] as int,
+              ownerId: row['owner_id'] as int,
+              manual: (row['manual'] as int) == 1,
+            ),
+            EnteFile.fromAssetSync(LocalDBMappers.asset(row)),
+          ),
+        )
+        .toList();
+    debugPrint(
+      '$runtimeType getQueueEntriesWithFiles complete in ${stopwatch.elapsed.inMilliseconds}ms for ${entries.length} entries',
+    );
+    return entries;
   }
 
   Future<List<AssetUploadQueue>> getQueueEntries(

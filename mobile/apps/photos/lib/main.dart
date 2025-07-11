@@ -340,9 +340,9 @@ Future runWithLogs(Function() function, {String prefix = ""}) async {
       body: function,
       logDirPath: (await getApplicationSupportDirectory()).path + "/logs",
       maxLogFiles: 5,
-      sentryDsn: kDebugMode ? sentryDebugDSN : sentryDSN,
+      sentryDsn: kDebugMode ? null : sentryDSN,
       tunnel: sentryTunnel,
-      enableInDebugMode: true,
+      enableInDebugMode: !kDebugMode, // todo: rewrite neeraj revert this
       prefix: prefix,
     ),
   );

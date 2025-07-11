@@ -43,6 +43,7 @@ import 'package:photos/services/app_lifecycle_service.dart';
 import "package:photos/services/collections_service_mapper.dart";
 import "package:photos/services/favorites_service.dart";
 import 'package:photos/services/sync/remote_sync_service.dart';
+import "package:photos/services/sync/upload_candidate.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/file_key.dart";
 import "package:photos/utils/local_settings.dart";
@@ -675,8 +676,8 @@ class CollectionsService {
       _logger.info(
         'turning off backup status for folders $devicePathIDsToUnSync',
       );
-      await RemoteSyncService.instance
-          .updateDeviceFolderSyncStatus(devicePathIDsToUnSync);
+      await UploadCandidateService.instance
+          .updatePathBackUpStatus(devicePathIDsToUnSync);
     }
   }
 

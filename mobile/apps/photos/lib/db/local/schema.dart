@@ -7,7 +7,7 @@ const assetColumns =
     "id, type, sub_type, width, height, duration_in_sec, orientation, is_fav, title, relative_path, created_at, modified_at, mime_type, latitude, longitude, scan_state";
 
 const assetUploadQueueColumns =
-    "dest_collection_id, id, path_id, owner_id, manual";
+    "dest_collection_id, asset_id, path_id, owner_id, manual";
 const androidAssetState = 1;
 const androidHashState = 1 << 2;
 const androidMediaType = 1 << 3;

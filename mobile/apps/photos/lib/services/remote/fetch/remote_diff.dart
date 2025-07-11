@@ -182,7 +182,7 @@ class RemoteDiffService {
       if (Platform.isAndroid) {
         hasIdMatched = localAssetInfo.id == remoteFile.localID &&
             remoteFile.deviceFolder == localAssetInfo.relativePath &&
-            localAssetInfo.name == remoteFile.nonEditedTitle;
+            localAssetInfo.title == remoteFile.nonEditedTitle;
       } else if (Platform.isIOS) {
         hasIdMatched = localAssetInfo.id == remoteFile.localID;
       } else {

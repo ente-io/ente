@@ -16,6 +16,7 @@ import 'package:photos/services/ignored_files_service.dart';
 import "package:photos/services/local/device_albums.dart";
 import "package:photos/services/local/import/local_import.dart";
 import 'package:photos/services/sync/remote_sync_service.dart';
+import "package:photos/services/sync/upload_candidate.dart";
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/menu_item_widget/menu_item_widget.dart';
@@ -139,8 +140,8 @@ class _BackupHeaderWidgetState extends State<BackupHeaderWidget> {
                       "${!shouldBackup.value}",
                     );
                     try {
-                      await RemoteSyncService.instance
-                          .updateDeviceFolderSyncStatus(
+                      await UploadCandidateService.instance
+                          .updatePathBackUpStatus(
                         {widget.deviceCollection.id: !shouldBackup.value},
                       );
                       if (mounted) {

@@ -26,6 +26,19 @@ extension FilesTable on RemoteDB {
     return result;
   }
 
+  Future<Set<int>> idsWithSameHashAndType(String hash, int ownerID) {
+    return sqliteDB.getAll(
+      "SELECT id FROM files WHERE hash = ? AND owner_id = ?",
+      [hash, ownerID],
+    ).then((rows) {
+      final result = <int>{};
+      for (final row in rows) {
+        result.add(row['id'] as int);
+      }
+      return result;
+    });
+  }
+
   // updateSizeForUploadIDs takes a map of upploadedFileID and fileSize and
   // update the fileSize for the given uploadedFileID
   Future<void> updateSize(

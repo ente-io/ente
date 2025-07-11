@@ -17,6 +17,7 @@ import 'package:photos/core/errors.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/core/network/network.dart';
 import 'package:photos/db/files_db.dart';
+import "package:photos/db/remote/table/files_table.dart";
 import 'package:photos/db/upload_locks_db.dart';
 import "package:photos/events/backup_updated_event.dart";
 import "package:photos/events/file_uploaded_event.dart";
@@ -429,30 +430,6 @@ class FileUploader {
     }
   }
 
-  Future<EnteFile> forceUpload(EnteFile file, int collectionID) async {
-    _hasInitiatedForceUpload = true;
-    final isInQueue = _allBackups[file.localID!] != null;
-    try {
-      final result = await _tryToUpload(file, collectionID, true);
-      if (isInQueue) {
-        _allBackups[file.localID!] = _allBackups[file.localID]!.copyWith(
-          status: BackupItemStatus.uploaded,
-        );
-        Bus.instance.fire(BackupUpdatedEvent(_allBackups));
-      }
-      return result;
-    } catch (error) {
-      if (isInQueue) {
-        _allBackups[file.localID!] = _allBackups[file.localID]!.copyWith(
-          status: BackupItemStatus.retry,
-          error: error,
-        );
-        Bus.instance.fire(BackupUpdatedEvent(_allBackups));
-      }
-      rethrow;
-    }
-  }
-
   Future<EnteFile> _tryToUpload(
     EnteFile file,
     int collectionID,
@@ -460,15 +437,15 @@ class FileUploader {
   ) async {
     await checkNetworkForUpload(isForceUpload: forcedUpload);
     if (!forcedUpload) {
-      final fileOnDisk = await FilesDB.instance.getFile(file.generatedID!);
-      final wasAlreadyUploaded = fileOnDisk != null &&
-          fileOnDisk.uploadedFileID != null &&
-          (fileOnDisk.updationTime ?? -1) != -1 &&
-          (fileOnDisk.collectionID ?? -1) == collectionID;
-      if (wasAlreadyUploaded) {
-        _logger.info("File is already uploaded ${fileOnDisk.tag}");
-        return fileOnDisk;
-      }
+      // final fileOnDisk = await FilesDB.instance.getFile(file.generatedID!);
+      // final wasAlreadyUploaded = fileOnDisk != null &&
+      //     fileOnDisk.uploadedFileID != null &&
+      //     (fileOnDisk.updationTime ?? -1) != -1 &&
+      //     (fileOnDisk.collectionID ?? -1) == collectionID;
+      // if (wasAlreadyUploaded) {
+      //   _logger.info("File is already uploaded ${fileOnDisk.tag}");
+      //   return fileOnDisk;
+      // }
     }
 
     if (_allBackups[file.localID!] != null &&
@@ -868,11 +845,11 @@ class FileUploader {
     duplicate files.
   */
   Future<Tuple2<bool, EnteFile>> _mapToExistingUploadWithSameHash(
-    UploadMedia mediaUploadData,
+    UploadMedia uploadMedia,
     EnteFile fileToUpload,
     int toCollectionID,
   ) async {
-    if (fileToUpload.uploadedFileID != null) {
+    if (fileToUpload.rAsset != null) {
       // ideally this should never happen, but because the code below this case
       // can do unexpected mapping, we are adding this additional check
       _logger.severe(
@@ -881,6 +858,13 @@ class FileUploader {
       return Tuple2(false, fileToUpload);
     }
     final bool isSandBoxFile = fileToUpload.isSharedMediaToAppSandbox;
+    final existingIDs = await remoteDB.idsWithSameHashAndType(
+      uploadMedia.hash,
+      Configuration.instance.getUserID()!,
+    );
+    if (existingIDs.isNotEmpty) {
+      throw AssertionError("Found existing IDs with same hash: $existingIDs");
+    }
 
     // todo:neeraj rewrite this to use the new FilesDB
     final List<EnteFile> existingUploadedFiles = [];

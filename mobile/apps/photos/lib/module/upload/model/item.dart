@@ -1,7 +1,6 @@
 import "dart:async";
 
 import "package:photos/models/file/file.dart";
-import "package:photos/models/local/asset_upload_queue.dart";
 
 class FileUploadItem {
   final EnteFile file;
