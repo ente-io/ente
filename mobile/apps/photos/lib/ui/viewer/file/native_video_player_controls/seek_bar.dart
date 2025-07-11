@@ -32,6 +32,7 @@ class _SeekBarState extends State<SeekBar> with SingleTickerProviderStateMixin {
 
     _animationController = AnimationController(
       vsync: this,
+      animationBehavior: AnimationBehavior.preserve,
       value: 0,
     );
 

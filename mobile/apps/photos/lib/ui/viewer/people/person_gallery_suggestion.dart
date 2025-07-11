@@ -65,10 +65,12 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
     _slideController = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,
+      animationBehavior: AnimationBehavior.preserve,
     );
     _fadeController = AnimationController(
       duration: const Duration(milliseconds: 200),
       vsync: this,
+      animationBehavior: AnimationBehavior.preserve,
     );
 
     _slideAnimation = Tween<Offset>(
