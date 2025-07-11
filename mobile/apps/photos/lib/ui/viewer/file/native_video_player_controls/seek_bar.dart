@@ -122,7 +122,7 @@ class _SeekBarState extends State<SeekBar> with SingleTickerProviderStateMixin {
       if (!mounted) {
         return;
       }
-      if (widget.duration != null) {
+      if (widget.duration != null || widget.duration! > 0) {
         unawaited(
           _animationController.animateTo(
             (1 / widget.duration!),
