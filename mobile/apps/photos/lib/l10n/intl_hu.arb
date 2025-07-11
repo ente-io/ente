@@ -264,7 +264,7 @@
     }
   },
   "verificationId": "Ellenőrző azonosító",
-  "verifyEmailID": "{email cím} ellenőrzése",
+  "verifyEmailID": "{email} ellenőrzése",
   "emailNoEnteAccount": "{email} címnek nincs Ente fiókja.\n\nKüldjön nekik meghívót fotók megosztására.",
   "shareMyVerificationID": "Itt az ellenőrző azonosítóm: {verificationID} az ente.io-hoz.",
   "shareTextConfirmOthersVerificationID": "Szia, meg tudnád erősíteni, hogy ez az ente.io ellenőrző azonosítód? {verificationID}",
@@ -362,7 +362,7 @@
   "videoSmallCase": "videó",
   "photoSmallCase": "fénykép",
   "singleFileDeleteHighlight": "Az összes albumból törlésre kerül.",
-  "singleFileInBothLocalAndRemote": "Ez a {file Type} fájltípus megtalálható mind az Enterben, mind az eszközödön.",
+  "singleFileInBothLocalAndRemote": "Ez a {fileType} fájltípus megtalálható mind az Enterben, mind az eszközödön.",
   "singleFileInRemoteOnly": "Ez a {fileType} fájl törlődik az Ente-ből.",
   "singleFileDeleteFromDevice": "Ez a {fileType} fájl törlődni fog az eszközéről.",
   "deleteFromEnte": "Törlés az Ente-ből",
@@ -459,7 +459,7 @@
   "selectAll": "Összes kijelölése",
   "skip": "Kihagyás",
   "updatingFolderSelection": "Mappakijelölés frissítése...",
-  "itemCount": "{count, plural, one{{count} elem} other{{count} elem}}",
+  "itemCount": "{count, plural, other{{count} elem}}",
   "deleteItemCount": "{count, plural, =1 {Elem {count} törlése} other {Elemek {count} törlése}}",
   "duplicateItemsGroup": "{count} fájl, {formattedSize} mindegyik",
   "@duplicateItemsGroup": {

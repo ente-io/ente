@@ -289,9 +289,11 @@ class _ButtonState extends State<Button> with TickerProviderStateMixin {
   void initState() {
     super.initState();
     _expanded = widget.active;
-    expandController =
-        AnimationController(vsync: this, duration: widget.duration)
-          ..addListener(() => setState(() {}));
+    expandController = AnimationController(
+      vsync: this,
+      duration: widget.duration,
+      animationBehavior: AnimationBehavior.preserve,
+    )..addListener(() => setState(() {}));
   }
 
   @override
