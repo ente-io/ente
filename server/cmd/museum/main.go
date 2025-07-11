@@ -995,6 +995,10 @@ func setupAndStartCrons(userAuthRepo *repo.UserAuthRepository, publicCollectionR
 		emailNotificationCtrl.SayHelloToCustomers()
 	})
 
+	scheduleAndRun(c, "@every 24h", func() {
+		emailNotificationCtrl.NudgePaidSubscriberForFamily()
+	})
+
 	schedule(c, "@every 1m", func() {
 		pushController.SendPushes()
 	})

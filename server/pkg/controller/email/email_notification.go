@@ -44,6 +44,11 @@ const (
 
 	LoginSuccessSubject  = "New login to your Ente account"
 	LoginSuccessTemplate = "on_login.html"
+
+	FamilyNudgeMailLock   = "family_nudge_mail_lock"
+	FamilyNudgeTemplate   = "family_nudge.html"
+	FamilyNudgeSubject    = "Share your Ente Subscription with your Family!"
+	FamilyNudgeTemplateID = "family_nudge"
 )
 
 type EmailNotificationController struct {
@@ -244,4 +249,48 @@ func (c *EmailNotificationController) SendStorageLimitExceededMails() {
 
 func (c *EmailNotificationController) setStorageLimitExceededMailerJobStatus(isSending bool) {
 	c.isSendingStorageLimitExceededMails = isSending
+}
+
+func (c *EmailNotificationController) NudgePaidSubscriberForFamily() {
+	log.Info("Running NudgePaidSubscriberForFamily")
+	lockStatus := c.LockController.TryLock(FamilyNudgeMailLock, time.MicrosecondsAfterHours(24))
+	if !lockStatus {
+		log.Error("Could not acquire lock to send family nudge mails")
+		return
+	}
+	defer c.LockController.ReleaseLock(FamilyNudgeMailLock)
+
+	users, err := c.UserRepo.GetUsersWhoUpgradedNDaysAgo(30)
+	if err != nil {
+		log.Error("Error while fetching users", err)
+		return
+	}
+	for _, u := range users {
+		lastNotificationTime, err := c.NotificationHistoryRepo.GetLastNotificationTime(u.ID, FamilyNudgeTemplateID)
+		logger := log.WithFields(log.Fields{
+			"user_id": u.ID,
+			"email":   u.Email,
+		})
+
+		if err != nil {
+			logger.Error("Could not fetch last notification time", err)
+			continue
+		}
+
+		if lastNotificationTime > 0 {
+			continue
+		}
+
+		if u.FamilyAdminID != nil {
+			continue
+		}
+
+		logger.Info("Sending family nudge mail to paid subscriber")
+		err = email.SendTemplatedEmail([]string{u.Email}, "team@ente.io", "team@ente.io", FamilyNudgeSubject, FamilyNudgeTemplate, nil, nil)
+		if err != nil {
+			logger.Info("Error notifying", err)
+			continue
+		}
+		c.NotificationHistoryRepo.SetLastNotificationTimeToNow(u.ID, FamilyNudgeTemplateID)
+	}
 }
