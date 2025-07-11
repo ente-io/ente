@@ -210,8 +210,8 @@ class RemoteDiffService {
         rmMappings.add(
           RLMapping(
             remoteUploadID: remoteFileID,
-            localID: localID,
-            localCloudID: localAssetInfo.id,
+            localID: localAssetInfo.id,
+            localCloudID: null,
             mappingType: mappingType,
           ),
         );

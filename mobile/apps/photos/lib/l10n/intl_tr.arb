@@ -1309,7 +1309,6 @@
   "faceRecognition": "Yüz Tanıma",
   "foundFaces": "Yüzler bulundu",
   "clusteringProgress": "Kümeleme ilerlemesi",
-  "indexingIsPaused": "Dizin oluşturma duraklatıldı. Cihaz hazır olduğunda otomatik olarak devam edecektir.",
   "trim": "Kes",
   "crop": "Kırp",
   "rotate": "Döndür",
@@ -1735,6 +1734,5 @@
   "addParticipants": "Katılımcı ekle",
   "selectedAlbums": "{count} seçildi",
   "actionNotSupportedOnFavouritesAlbum": "Favoriler albümünde eylem desteklenmiyor",
-  "onThisDay": "Bu günde",
-  "wishThemAHappyBirthday": "Wish ${name} a happy birthday! 🎉"
+  "onThisDay": "Bu günde"
 }

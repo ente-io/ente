@@ -1289,7 +1289,6 @@
   "faceRecognition": "Ansiktsgjenkjenning",
   "foundFaces": "Fant ansikter",
   "clusteringProgress": "Fremdrift for klynging",
-  "indexingIsPaused": "Indeksering er satt på pause. Den vil automatisk fortsette når enheten er klar.",
   "trim": "Beskjær",
   "crop": "Beskjær",
   "rotate": "Roter",
@@ -1679,15 +1678,5 @@
   "moon": "I månelyset",
   "onTheRoad": "På veien igjen",
   "food": "Kulinær glede",
-  "pets": "Pelsvenner",
-  "cLIcon": "Nytt ikon",
-  "cLIconDesc": "Endelig er et nytt appikon, som vi tror best representerer arbeidet vårt. Vi har også lagt til en icon-switcher slik at du kan fortsette å bruke det gamle ikonet.",
-  "cLMemories": "Minner",
-  "cLMemoriesDesc": "Gjenoppdag dine spesielle øyeblikk - fremhev dine favorittpersoner, dine turer og ferier, de beste bildene dine, og mye mer.  Skru på maskinlæring, merk deg selv og navngi vennene dine for best mulig opplevelse.",
-  "cLWidgets": "Widgeter",
-  "cLWidgetsDesc": "Hjemmeskjermwidgeter som er integrert med minner er nå tilgjengelige. De vil vise dine spesielle øyeblikk uten å åpne appen.",
-  "cLFamilyPlan": "Begrensninger for familieabonnement",
-  "cLFamilyPlanDesc": "Du kan nå sette grenser for hvor mye lagringsplass familiemedlemmer kan bruke.",
-  "cLBulkEdit": "Masseendring av datoer",
-  "cLBulkEditDesc": "Du kan nå velge flere bilder, og redigere dato/klokkeslett for alle med en rask handling. Forskyving av datoer støttes også."
+  "pets": "Pelsvenner"
 }

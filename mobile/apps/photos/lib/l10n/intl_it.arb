@@ -1300,7 +1300,6 @@
   "faceRecognition": "Riconoscimento facciale",
   "foundFaces": "Volti trovati",
   "clusteringProgress": "Progresso del raggruppamento",
-  "indexingIsPaused": "L'indicizzazione è in pausa. Riprenderà automaticamente quando il dispositivo è pronto.",
   "trim": "Taglia",
   "crop": "Ritaglia",
   "rotate": "Ruota",
@@ -1746,7 +1745,5 @@
   "birthdayNotifications": "Notifiche dei compleanni",
   "receiveRemindersOnBirthdays": "Ricevi promemoria quando è il compleanno di qualcuno. Toccare la notifica ti porterà alle foto della persona che compie gli anni.",
   "happyBirthday": "Buon compleanno! 🥳",
-  "happyBirthdayToPerson": "Buon compleanno a {name}! 🎉",
-  "birthdays": "Compleanni",
-  "wishThemAHappyBirthday": "Wish ${name} a happy birthday! 🎉"
+  "birthdays": "Compleanni"
 }

@@ -1265,7 +1265,6 @@
   "faceRecognition": "Rozpoznawanie twarzy",
   "foundFaces": "Znaleziono twarze",
   "clusteringProgress": "Postęp tworzenia klastrów",
-  "indexingIsPaused": "Wstrzymano indeksowanie. Zostanie ono automatycznie wznowione, gdy urządzenie będzie gotowe.",
   "trim": "Przytnij",
   "crop": "Kadruj",
   "rotate": "Obróć",
@@ -1533,6 +1532,5 @@
   "joinAlbumSubtextViewer": "aby dodać to do udostępnionych albumów",
   "join": "Dołącz",
   "linkEmail": "Połącz adres e-mail",
-  "noEnteAccountExclamation": "Brak konta Ente!",
-  "wishThemAHappyBirthday": "Wish ${name} a happy birthday! 🎉"
+  "noEnteAccountExclamation": "Brak konta Ente!"
 }

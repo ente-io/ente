@@ -13,7 +13,7 @@ class DeviceFolderItem extends StatelessWidget {
   final double sideOfThumbnail;
 
   static const _cornerRadius = 12.0;
-  static const _cornerSmoothing = 1.0;
+  static const _cornerSmoothing = 0.6;
   static const _borderWidth = 1.0;
 
   const DeviceFolderItem(

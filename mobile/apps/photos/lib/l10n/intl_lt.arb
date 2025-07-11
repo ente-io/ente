@@ -1306,7 +1306,6 @@
   "faceRecognition": "Veido atpažinimas",
   "foundFaces": "Rasti veidai",
   "clusteringProgress": "Sankaupos vykdymas",
-  "indexingIsPaused": "Indeksavimas pristabdytas. Jis bus automatiškai tęsiamas, kai įrenginys yra paruoštas.",
   "trim": "Trumpinti",
   "crop": "Apkirpti",
   "rotate": "Sukti",
@@ -1739,5 +1738,9 @@
   "addMemoriesWidgetPrompt": "Pridėkite prisiminimų valdiklį prie savo pradžios ekrano ir grįžkite čia, kad tinkintumėte.",
   "addAlbumWidgetPrompt": "Pridėkite albumo valdiklį prie savo pradžios ekrano ir grįžkite čia, kad tinkintumėte.",
   "addPeopleWidgetPrompt": "Pridėkite asmenų valdiklį prie savo pradžios ekrano ir grįžkite čia, kad tinkintumėte.",
-  "wishThemAHappyBirthday": "Wish ${name} a happy birthday! 🎉"
+  "birthdayNotifications": "Gimtadienio pranešimai",
+  "receiveRemindersOnBirthdays": "Gaukite priminimus, kai yra kažkieno gimtadienis. Paliesdami pranešimą, pateksite į gimtadienio šventės asmens nuotraukas.",
+  "happyBirthday": "Su gimtadieniu! 🥳",
+  "birthdays": "Gimtadieniai",
+  "wishThemAHappyBirthday": "Palinkėkite {name} su gimtadieniu! 🎉"
 }

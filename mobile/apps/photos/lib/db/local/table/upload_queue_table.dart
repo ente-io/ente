@@ -43,6 +43,18 @@ extension UploadQueueTable on LocalDB {
     }
   }
 
+  Future<int> delete(AssetUploadQueue entry) async {
+    final stopwatch = Stopwatch()..start();
+    final result = await sqliteDB.execute(
+      'DELETE FROM asset_upload_queue WHERE asset_id = ? AND owner_id = ? and dest_collection_id = ?',
+      [entry.id, entry.ownerId, entry.destCollectionId],
+    );
+    debugPrint(
+      '$runtimeType delete complete in ${stopwatch.elapsed.inMilliseconds}ms for entry: $entry',
+    );
+    return result.isNotEmpty ? result[0]['changes'] as int : 0;
+  }
+
   Future<List<(AssetUploadQueue, EnteFile)>> getQueueEntriesWithFiles(
     int ownerID, {
     int? destCollection,

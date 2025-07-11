@@ -148,12 +148,11 @@ class RemoteSyncService {
         await remoteDiff.syncFromRemote();
         _existingSync?.complete();
         _existingSync = null;
-        await UploadCandidateService.instance.markLocalAssetForAutoUpload();
-        final hasMoreFilesToBackup = await localDB.hasAssetQueueOrSharedAsset(
-          _config.getUserID()!,
-        );
-        _logger.info("hasMoreFilesToBackup $hasMoreFilesToBackup");
-        if (hasMoreFilesToBackup && !isMultiPartDisabled()) {
+        await _uploadCandidateService.markLocalAssetForAutoUpload();
+        final hasMoreFilesToBackup =
+            await localDB.hasAssetQueueOrSharedAsset(_config.getUserID()!);
+        _logger.info("hasMoreFilesToBackup?" + hasMoreFilesToBackup.toString());
+        if (hasMoreFilesToBackup && !_shouldThrottleSync()) {
           // Skipping a resync to ensure that files that were ignored in this
           // session are not processed now
           await sync();
@@ -222,48 +221,6 @@ class RemoteSyncService {
     await _collectionsService.joinPublicCollection(context, collectionID);
     await _collectionsService.sync();
     await _syncCollectionFiles(collectionID, 0);
-  }
-
-  Future<List<Future>> getLocalAssetsForUploads() async {
-    final List<Future> futures = [];
-    final int userID = _config.getUserID()!;
-    final List<(AssetUploadQueue, EnteFile)> enteries =
-        await localDB.getQueueEntriesWithFiles(userID);
-    if (enteries.isEmpty) {
-      return futures;
-    }
-    final bool shouldRemoveVideos = !_config.shouldBackupVideos();
-    final ignoredIDs = await IgnoredFilesService.instance.idToIgnoreReasonMap;
-    bool shouldSkipUploadFunc(EnteFile file) {
-      // todo: review this
-      return IgnoredFilesService.instance.shouldSkipUpload(ignoredIDs, file);
-    }
-
-    final List<EnteFile> filesToBeUploaded = [];
-    int ignoredForUpload = 0;
-    int skippedVideos = 0;
-
-    for (var entry in enteries) {
-      final queueEntry = entry.$1;
-      final file = entry.$2;
-      if (shouldRemoveVideos &&
-          (file.fileType == FileType.video && queueEntry.manual == false)) {
-        skippedVideos++;
-        continue;
-      }
-      if (shouldSkipUploadFunc(file)) {
-        ignoredForUpload++;
-        continue;
-      }
-      filesToBeUploaded.add(file);
-    }
-    if (futures.isNotEmpty || skippedVideos > 0 || ignoredForUpload > 0) {
-      _logger.info(
-        "Queued ${filesToBeUploaded.length} files for upload, skipped videos: "
-        "$skippedVideos, ignored for upload: $ignoredForUpload",
-      );
-    }
-    return futures;
   }
 
   Future<bool> _uploadFiles() async {
@@ -411,7 +368,7 @@ class RemoteSyncService {
     }
   }
 
-  bool isMultiPartDisabled() {
+  bool _shouldThrottleSync() {
     return !flagService.enableMobMultiPart ||
         !localSettings.userEnabledMultiplePart;
   }

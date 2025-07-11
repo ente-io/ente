@@ -1266,7 +1266,6 @@
   "faceRecognition": "顔認識",
   "foundFaces": "見つかった顔",
   "clusteringProgress": "クラスタリングの進行状況",
-  "indexingIsPaused": "インデックス作成は一時停止されています。デバイスの準備ができたら自動的に再開します。",
   "trim": "トリミング",
   "crop": "クロップ",
   "rotate": "回転",
@@ -1666,6 +1665,5 @@
   "moon": "月明かりの中",
   "onTheRoad": "再び道で",
   "food": "料理を楽しむ",
-  "pets": "毛むくじゃらな仲間たち",
-  "wishThemAHappyBirthday": "Wish ${name} a happy birthday! 🎉"
+  "pets": "毛むくじゃらな仲間たち"
 }
