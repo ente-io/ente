@@ -50,7 +50,7 @@ class _AllQuickLinksPageState extends State<AllQuickLinksPage> {
     if (selectedQuickLinks.contains(c)) {
       selectedQuickLinks.remove(c);
     } else {
-      selectedQuickLinks.isEmpty ? await HapticFeedback.vibrate() : null;
+      selectedQuickLinks.isEmpty ? await HapticFeedback.mediumImpact() : null;
       selectedQuickLinks.add(c);
     }
     setState(() {
