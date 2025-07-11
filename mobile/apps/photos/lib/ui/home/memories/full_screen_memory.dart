@@ -153,6 +153,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
   /// Used to check if any pointer is on the screen.
   final hasPointerOnScreenNotifier = ValueNotifier<bool>(false);
   bool hasFinalFileLoaded = false;
+  bool isAtFirstOrLastFile = false;
 
   late final StreamSubscription<DetailsSheetEvent>
       _detailSheetEventSubscription;
@@ -219,7 +220,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
       _progressAnimationController?.stop();
       _zoomAnimationController?.stop();
     } else {
-      if (hasFinalFileLoaded) {
+      if (hasFinalFileLoaded || isAtFirstOrLastFile) {
         _progressAnimationController?.forward();
         _zoomAnimationController?.forward();
       }
@@ -237,6 +238,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
 
   void onFinalFileLoad(int duration) {
     hasFinalFileLoaded = true;
+    isAtFirstOrLastFile = false;
     if (_progressAnimationController?.isAnimating == true) {
       _progressAnimationController!.stop();
     }
@@ -260,6 +262,9 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
       _onPageChange(inheritedData, currentIndex + 1);
     } else if (widget.onNextMemory != null) {
       widget.onNextMemory!();
+    } else {
+      isAtFirstOrLastFile = true;
+      _toggleAnimation(pause: false);
     }
   }
 
@@ -271,10 +276,15 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
       _onPageChange(inheritedData, currentIndex - 1);
     } else if (widget.onPreviousMemory != null) {
       widget.onPreviousMemory!();
+    } else {
+      isAtFirstOrLastFile = true;
+      _resetAnimation();
+      _toggleAnimation(pause: false);
     }
   }
 
   void _onPageChange(FullScreenMemoryData inheritedData, int index) {
+    isAtFirstOrLastFile = false;
     unawaited(
       memoriesCacheService.markMemoryAsSeen(
         inheritedData.memories[index],
@@ -709,6 +719,7 @@ class _MemoriesZoomWidgetState extends State<MemoriesZoomWidget>
       duration: const Duration(
         seconds: 5,
       ),
+      animationBehavior: AnimationBehavior.preserve,
     );
 
     final startScale = widget.zoomIn ? 1.05 : 1.15;

@@ -1105,12 +1105,10 @@
   "pairWithPin": "Tautkan dengan PIN",
   "faceRecognition": "Pengenalan wajah",
   "foundFaces": "Wajah yang ditemukan",
-  "indexingIsPaused": "Proses indeks dijeda, dan akan otomatis dilanjutkan saat perangkat siap.",
   "trim": "Pangkas",
   "crop": "Potong",
   "rotate": "Putar",
   "left": "Kiri",
   "right": "Kanan",
-  "whatsNew": "Hal yang baru",
-  "wishThemAHappyBirthday": "Wish ${name} a happy birthday! 🎉"
+  "whatsNew": "Hal yang baru"
 }

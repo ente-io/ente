@@ -794,11 +794,11 @@
   "share": "Condividi",
   "unhideToAlbum": "Non nascondere l'album",
   "restoreToAlbum": "Ripristina l'album",
-  "moveItem": "{count, plural, =1 {Sposta elemento} other {Sposta elementi}}",
+  "moveItem": "{count, plural, one {}=1 {Sposta elemento} other {Sposta elementi}}",
   "@moveItem": {
     "description": "Page title while moving one or more items to an album"
   },
-  "addItem": "{count, plural, =1 {Aggiungi elemento} other {Aggiungi elementi}}",
+  "addItem": "{count, plural, one {}=1 {Aggiungi elemento} other {Aggiungi elementi}}",
   "@addItem": {
     "description": "Page title while adding one or more items to album"
   },
@@ -899,7 +899,7 @@
   "authToViewYourMemories": "Autenticati per visualizzare le tue foto",
   "unlock": "Sblocca",
   "freeUpSpace": "Libera spazio",
-  "freeUpSpaceSaving": "{count, plural, =1 {Può essere cancellato per liberare {formattedSize}} other {Possono essere cancellati per liberare {formattedSize}}}",
+  "freeUpSpaceSaving": "{count, plural, one {}=1 {Può essere cancellato per liberare {formattedSize}} other {Possono essere cancellati per liberare {formattedSize}}}",
   "filesBackedUpInAlbum": "{count, plural, one {1 file} other {{formattedNumber} file}} di quest'album sono stati salvati in modo sicuro",
   "@filesBackedUpInAlbum": {
     "description": "Text to tell user how many files have been backed up in the album",
@@ -1260,8 +1260,8 @@
     "description": "Subtitle to indicate that the user can find people quickly by name"
   },
   "findPeopleByName": "Trova rapidamente le persone per nome",
-  "addViewers": "{count, plural, =0 {Aggiungi visualizzatore} =1 {Add viewer} other {Aggiungi visualizzatori}}",
-  "addCollaborators": "{count, plural, =0 {Aggiungi collaboratore} =1 {Aggiungi collaboratore} other {Aggiungi collaboratori}}",
+  "addViewers": "{count, plural, one {}=0 {Aggiungi visualizzatore} =1 {Add viewer} other {Aggiungi visualizzatori}}",
+  "addCollaborators": "{count, plural, one {}=0 {Aggiungi collaboratore} =1 {Aggiungi collaboratore} other {Aggiungi collaboratori}}",
   "longPressAnEmailToVerifyEndToEndEncryption": "Premi a lungo un'email per verificare la crittografia end to end.",
   "developerSettingsWarning": "Sei sicuro di voler modificare le Impostazioni sviluppatore?",
   "developerSettings": "Impostazioni sviluppatore",
@@ -1300,7 +1300,6 @@
   "faceRecognition": "Riconoscimento facciale",
   "foundFaces": "Volti trovati",
   "clusteringProgress": "Progresso del raggruppamento",
-  "indexingIsPaused": "L'indicizzazione è in pausa. Riprenderà automaticamente quando il dispositivo è pronto.",
   "trim": "Taglia",
   "crop": "Ritaglia",
   "rotate": "Ruota",
@@ -1395,7 +1394,7 @@
   "enableMachineLearningBanner": "Abilita l'apprendimento automatico per la ricerca magica e il riconoscimento facciale",
   "searchDiscoverEmptySection": "Le immagini saranno mostrate qui una volta che l'elaborazione e la sincronizzazione saranno completate",
   "searchPersonsEmptySection": "Le persone saranno mostrate qui una volta che l'elaborazione e la sincronizzazione saranno completate",
-  "viewersSuccessfullyAdded": "{count, plural, =0 {Added 0 visualizzatori} =1 {Added 1 visualizzatore} other {Added {count} visualizzatori}}",
+  "viewersSuccessfullyAdded": "{count, plural, one {}=0 {Added 0 visualizzatori} =1 {Added 1 visualizzatore} other {Added {count} visualizzatori}}",
   "@viewersSuccessfullyAdded": {
     "placeholders": {
       "count": {
@@ -1480,7 +1479,7 @@
   },
   "currentlyRunning": "attualmente in esecuzione",
   "ignored": "ignorato",
-  "photosCount": "{count, plural, =0 {0 foto} =1 {1 foto} other {{count} foto}}",
+  "photosCount": "{count, plural, one {}=0 {0 foto} =1 {1 foto} other {{count} foto}}",
   "@photosCount": {
     "placeholders": {
       "count": {
@@ -1678,7 +1677,7 @@
   "moveSelectedPhotosToOneDate": "Sposta foto selezionate in una data specifica",
   "shiftDatesAndTime": "Sposta date e orari",
   "photosKeepRelativeTimeDifference": "Le foto mantengono una differenza di tempo relativa",
-  "photocountPhotos": "{count, plural, =0 {Nessuna foto} =1 {1 foto} other {{count} foto}}",
+  "photocountPhotos": "{count, plural, one {}=0 {Nessuna foto} =1 {1 foto} other {{count} foto}}",
   "@photocountPhotos": {
     "placeholders": {
       "count": {
@@ -1692,7 +1691,7 @@
   "selectedItemsWillBeRemovedFromThisPerson": "Gli elementi selezionati verranno rimossi da questa persona, ma non eliminati dalla tua libreria.",
   "throughTheYears": "{dateFormat} negli anni",
   "thisWeekThroughTheYears": "Questa settimana negli anni",
-  "thisWeekXYearsAgo": "{count, plural, =1 {Questa settimana, {count} anno fa} other {Questa settimana, {count} anni fa}}",
+  "thisWeekXYearsAgo": "{count, plural, one {}=1 {Questa settimana, {count} anno fa} other {Questa settimana, {count} anni fa}}",
   "youAndThem": "Tu e {name}",
   "admiringThem": "Ammirando {name}",
   "embracingThem": "Abbracciando {name}",
@@ -1746,19 +1745,5 @@
   "birthdayNotifications": "Notifiche dei compleanni",
   "receiveRemindersOnBirthdays": "Ricevi promemoria quando è il compleanno di qualcuno. Toccare la notifica ti porterà alle foto della persona che compie gli anni.",
   "happyBirthday": "Buon compleanno! 🥳",
-  "happyBirthdayToPerson": "Buon compleanno a {name}! 🎉",
-  "birthdays": "Compleanni",
-  "wishThemAHappyBirthday": "Wish ${name} a happy birthday! 🎉",
-  "cLTitle1": "Caricamento di file video di grandi dimensioni",
-  "cLDesc1": "Dopo la versione beta dello streaming video e il lavoro sui caricamenti e download ripresi, abbiamo ora aumentato il limite di caricamento file a 10GB. Questo è ora disponibile sia nelle app desktop che mobili.",
-  "cLTitle2": "Caricamento in background",
-  "cLDesc2": "I caricamenti in background sono ora supportati anche su iOS, oltre ai dispositivi Android. Non è necessario aprire l'app per eseguire il backup delle tue foto e video più recenti.",
-  "cLTitle3": "Riproduzione automatica dei ricordi",
-  "cLDesc3": "Abbiamo apportato miglioramenti significativi alla nostra esperienza dei ricordi, inclusa la riproduzione automatica, scorrimento al ricordo successivo e molto altro.",
-  "cLTitle4": "Riconoscimento facciale migliorato",
-  "cLDesc4": "Insieme a un sacco di miglioramenti interni, ora è molto più facile vedere tutti i volti rilevati, fornire feedback sui volti simili e aggiungere/rimuovere volti da una singola foto.",
-  "cLTitle5": "Notifiche di compleanno",
-  "cLDesc5": "Ora riceverai una notifica opzionale per tutti i compleanni che hai salvato su Ente, insieme a una raccolta delle loro migliori foto.",
-  "cLTitle6": "Caricamenti e download ripresi",
-  "cLDesc6": "Non più attese per il completamento di caricamenti/download prima di poter chiudere l'app. Tutti i caricamenti e download ora hanno la capacità di essere messi in pausa a metà e ripresi da dove hai lasciato."
+  "birthdays": "Compleanni"
 }
