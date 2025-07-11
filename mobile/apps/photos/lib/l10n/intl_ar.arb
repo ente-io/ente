@@ -372,7 +372,7 @@
   "deleteFromBoth": "الحذف من كليهما",
   "newAlbum": "ألبوم جديد",
   "albums": "الألبومات",
-  "memoryCount": "{count, plural, =0 {لا توجد ذكريات} one {ذكرى واحدة} two {ذكريتان} few {{formattedCount} ذكريات} many {{formattedCount} ذكرى} other {{formattedCount} ذكرى}}",
+  "memoryCount": "{count, plural, =0 {لا توجد ذكريات} one {ذكرى واحدة} two {ذكريتان} other {{formattedCount} ذكرى}}",
   "@memoryCount": {
     "description": "The text to display the number of memories",
     "type": "text",
@@ -460,7 +460,7 @@
   "skip": "تخط",
   "updatingFolderSelection": "جارٍ تحديث تحديد المجلد...",
   "itemCount": "{count, plural, one {{count} عُنْصُر} other {{count} عَنَاصِر}}",
-  "deleteItemCount": "{count, plural, =1 {حذف عنصر واحد} two {حذف عنصرين} few {حذف {count} عناصر} many {حذف {count} عنصرًا} other {حذف {count} عنصرًا}}",
+  "deleteItemCount": "{count, plural, =1 {حذف عنصر واحد} two {حذف عنصرين} other {حذف {count} عنصرًا}}",
   "duplicateItemsGroup": "{count} ملفات، {formattedSize} لكل منها",
   "@duplicateItemsGroup": {
     "description": "Display the number of duplicate files and their size",
@@ -477,7 +477,7 @@
     }
   },
   "showMemories": "عرض الذكريات",
-  "yearsAgo": "{count, plural, one {قبل سنة} two {قبل سنتين} few {قبل {count} سنوات} many {قبل {count} سنة} other {قبل {count} سنة}}",
+  "yearsAgo": "{count, plural, one {قبل سنة} two {قبل سنتين} other {قبل {count} سنة}}",
   "backupSettings": "إعدادات النسخ الاحتياطي",
   "backupStatus": "حالة النسخ الاحتياطي",
   "backupStatusDescription": "ستظهر العناصر التي تم نسخها احتياطيًا هنا",
@@ -543,7 +543,7 @@
   },
   "remindToEmptyEnteTrash": "تذكر أيضًا إفراغ \"سلة المهملات\" لاستعادة المساحة المحررة.",
   "sparkleSuccess": "✨ نجاح",
-  "duplicateFileCountWithStorageSaved": "لقد قمت بتنظيف {count, plural, one {ملف مكرر واحد} two {ملفين مكررين} few {{count} ملفات مكررة} many {{count} ملفًا مكررًا} other {{count} ملفًا مكررًا}}، مما وفر {storageSaved}!",
+  "duplicateFileCountWithStorageSaved": "لقد قمت بتنظيف {count, plural, one {ملف مكرر واحد} two {ملفين مكررين} other {{count} ملفًا مكررًا}}، مما وفر {storageSaved}!",
   "@duplicateFileCountWithStorageSaved": {
     "description": "The text to display when the user has successfully cleaned up duplicate files",
     "type": "text",
@@ -794,11 +794,11 @@
   "share": "مشاركة",
   "unhideToAlbum": "إظهار في الألبوم",
   "restoreToAlbum": "استعادة إلى الألبوم",
-  "moveItem": "{count, plural, =1 {نقل عنصر} two {نقل عنصرين} few {نقل {count} عناصر} many {نقل {count} عنصرًا} other {نقل {count} عنصرًا}}",
+  "moveItem": "{count, plural, =1 {نقل عنصر} two {نقل عنصرين} other {نقل {count} عنصرًا}}",
   "@moveItem": {
     "description": "Page title while moving one or more items to an album"
   },
-  "addItem": "{count, plural, =1 {إضافة عنصر} two {إضافة عنصرين} few {إضافة {count} عناصر} many {إضافة {count} عنصرًا} other {إضافة {count} عنصرًا}}",
+  "addItem": "{count, plural, =1 {إضافة عنصر} two {إضافة عنصرين} other {إضافة {count} عنصرًا}}",
   "@addItem": {
     "description": "Page title while adding one or more items to album"
   },
@@ -826,7 +826,7 @@
   "referFriendsAnd2xYourPlan": "أحِل الأصدقاء وضاعف خطتك مرتين",
   "shareAlbumHint": "افتح ألبومًا وانقر على زر المشاركة في الزاوية اليمنى العليا للمشاركة.",
   "itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion": "تعرض العناصر عدد الأيام المتبقية قبل الحذف الدائم.",
-  "trashDaysLeft": "{count, plural, =0 {قريبًا} =1 {يوم واحد} two {يومان} few {{count} أيام} many {{count} يومًا} other {{count} يومًا}}",
+  "trashDaysLeft": "{count, plural, =0 {قريبًا} =1 {يوم واحد} two {يومان} other {{count} يومًا}}",
   "@trashDaysLeft": {
     "description": "Text to indicate number of days remaining before permanent deletion",
     "placeholders": {
@@ -899,8 +899,8 @@
   "authToViewYourMemories": "يرجى المصادقة لعرض ذكرياتك.",
   "unlock": "فتح",
   "freeUpSpace": "تحرير المساحة",
-  "freeUpSpaceSaving": "{count, plural, =1 {يمكن حذفه من الجهاز لتحرير {formattedSize}} two {يمكن حذفهما من الجهاز لتحرير {formattedSize}} few {يمكن حذفها من الجهاز لتحرير {formattedSize}} many {يمكن حذفها من الجهاز لتحرير {formattedSize}} other {يمكن حذفها من الجهاز لتحرير {formattedSize}}}",
-  "filesBackedUpInAlbum": "{count, plural, one {ملف واحد} two {ملفان} few {{formattedNumber} ملفات} many {{formattedNumber} ملفًا} other {{formattedNumber} ملفًا}} في هذا الألبوم تم نسخه احتياطيًا بأمان",
+  "freeUpSpaceSaving": "{count, plural, =1 {يمكن حذفه من الجهاز لتحرير {formattedSize}} two {يمكن حذفهما من الجهاز لتحرير {formattedSize}} other {يمكن حذفها من الجهاز لتحرير {formattedSize}}}",
+  "filesBackedUpInAlbum": "{count, plural, one {ملف واحد} two {ملفان} other {{formattedNumber} ملفًا}} في هذا الألبوم تم نسخه احتياطيًا بأمان",
   "@filesBackedUpInAlbum": {
     "description": "Text to tell user how many files have been backed up in the album",
     "placeholders": {
@@ -915,7 +915,7 @@
       }
     }
   },
-  "filesBackedUpFromDevice": "{count, plural, one {ملف واحد} two {ملفان} few {{formattedNumber} ملفات} many {{formattedNumber} ملفًا} other {{formattedNumber} ملفًا}} على هذا الجهاز تم نسخه احتياطيًا بأمان",
+  "filesBackedUpFromDevice": "{count, plural, one {ملف واحد} two {ملفان} other {{formattedNumber} ملفًا}} على هذا الجهاز تم نسخه احتياطيًا بأمان",
   "@filesBackedUpFromDevice": {
     "description": "Text to tell user how many files have been backed up from this device",
     "placeholders": {
@@ -1217,7 +1217,7 @@
   "searchHint4": "الموقع",
   "searchHint5": "قريبًا: الوجوه والبحث السحري ✨",
   "addYourPhotosNow": "أضف صورك الآن",
-  "searchResultCount": "{count, plural, one{{count} النتائج التي تم العثور عليها} other{{count} النتائج التي تم العثور عليها}}",
+  "searchResultCount": "{count, plural, other{{count} النتائج التي تم العثور عليها}}",
   "@searchResultCount": {
     "description": "Text to tell user how many results were found for their search query",
     "placeholders": {
@@ -1269,8 +1269,8 @@
     "description": "Subtitle to indicate that the user can find people quickly by name"
   },
   "findPeopleByName": "البحث عن الأشخاص بسرعة بالاسم",
-  "addViewers": "{count, plural, =0 {إضافة مشاهد} =1 {إضافة مشاهد} two {إضافة مشاهدين} few {إضافة {count} مشاهدين} many {إضافة {count} مشاهدًا} other {إضافة {count} مشاهدًا}}",
-  "addCollaborators": "{count, plural, =0 {إضافة متعاون} =1 {إضافة متعاون} two {إضافة متعاونين} few {إضافة {count} متعاونين} many {إضافة {count} متعاونًا} other {إضافة {count} متعاونًا}}",
+  "addViewers": "{count, plural, =0 {إضافة مشاهد} =1 {إضافة مشاهد} two {إضافة مشاهدين} other {إضافة {count} مشاهدًا}}",
+  "addCollaborators": "{count, plural, =0 {إضافة متعاون} =1 {إضافة متعاون} two {إضافة متعاونين} other {إضافة {count} متعاونًا}}",
   "longPressAnEmailToVerifyEndToEndEncryption": "اضغط مطولاً على بريد إلكتروني للتحقق من التشفير من طرف إلى طرف.",
   "developerSettingsWarning": "هل أنت متأكد من رغبتك في تعديل إعدادات المطور؟",
   "developerSettings": "إعدادات المطور",
@@ -1403,7 +1403,7 @@
   "enableMachineLearningBanner": "قم بتمكين تعلم الآلة للبحث السحري والتعرف على الوجوه.",
   "searchDiscoverEmptySection": "سيتم عرض الصور هنا بمجرد اكتمال المعالجة والمزامنة.",
   "searchPersonsEmptySection": "سيتم عرض الأشخاص هنا بمجرد اكتمال المعالجة والمزامنة.",
-  "viewersSuccessfullyAdded": "{count, plural, =0 {تمت إضافة 0 مشاهدين} =1 {تمت إضافة مشاهد واحد} two {تمت إضافة مشاهدين} few {تمت إضافة {count} مشاهدين} many {تمت إضافة {count} مشاهدًا} other {تمت إضافة {count} مشاهدًا}}",
+  "viewersSuccessfullyAdded": "{count, plural, =0 {تمت إضافة 0 مشاهدين} =1 {تمت إضافة مشاهد واحد} two {تمت إضافة مشاهدين} other {تمت إضافة {count} مشاهدًا}}",
   "@viewersSuccessfullyAdded": {
     "placeholders": {
       "count": {
@@ -1413,7 +1413,7 @@
     },
     "description": "Number of viewers that were successfully added to an album."
   },
-  "collaboratorsSuccessfullyAdded": "{count, plural, =0 {تمت إضافة 0 متعاونين} =1 {تمت إضافة متعاون واحد} two {تمت إضافة متعاونين} few {تمت إضافة {count} متعاونين} many {تمت إضافة {count} متعاونًا} other {تمت إضافة {count} متعاونًا}}",
+  "collaboratorsSuccessfullyAdded": "{count, plural, =0 {تمت إضافة 0 متعاونين} =1 {تمت إضافة متعاون واحد} two {تمت إضافة متعاونين} other {تمت إضافة {count} متعاونًا}}",
   "@collaboratorsSuccessfullyAdded": {
     "placeholders": {
       "count": {
@@ -1488,7 +1488,7 @@
   },
   "currentlyRunning": "قيد التشغيل حاليًا",
   "ignored": "تم التجاهل",
-  "photosCount": "{count, plural, =0 {لا توجد صور} =1 {صورة واحدة} two {صورتان} few {{count} صور} many {{count} صورة} other {{count} صورة}}",
+  "photosCount": "{count, plural, =0 {لا توجد صور} =1 {صورة واحدة} two {صورتان} other {{count} صورة}}",
   "@photosCount": {
     "placeholders": {
       "count": {
@@ -1686,7 +1686,7 @@
   "moveSelectedPhotosToOneDate": "نقل الصور المحددة إلى تاريخ واحد",
   "shiftDatesAndTime": "تغيير التواريخ والوقت",
   "photosKeepRelativeTimeDifference": "تحتفظ الصور بالفرق الزمني النسبي",
-  "photocountPhotos": "{count, plural, =0 {لا توجد صور} =1 {صورة واحدة} two {صورتان} few {{count} صور} many {{count} صورة} other {{count} صورة}}",
+  "photocountPhotos": "{count, plural, =0 {لا توجد صور} =1 {صورة واحدة} two {صورتان} other {{count} صورة}}",
   "@photocountPhotos": {
     "placeholders": {
       "count": {
@@ -1700,7 +1700,7 @@
   "selectedItemsWillBeRemovedFromThisPerson": "سيتم إزالة العناصر المحددة من هذا الشخص، ولكن لن يتم حذفها من مكتبتك.",
   "throughTheYears": "{dateFormat} عبر السنين",
   "thisWeekThroughTheYears": "هذا الأسبوع عبر السنين",
-  "thisWeekXYearsAgo": "{count, plural, =1 {هذا الأسبوع، قبل سنة} two {هذا الأسبوع، قبل سنتين} few {هذا الأسبوع، قبل {count} سنوات} many {هذا الأسبوع، قبل {count} سنة} other {هذا الأسبوع، قبل {count} سنة}}",
+  "thisWeekXYearsAgo": "{count, plural, =1 {هذا الأسبوع، قبل سنة} two {هذا الأسبوع، قبل سنتين} other {هذا الأسبوع، قبل {count} سنة}}",
   "youAndThem": "أنت و {name}",
   "admiringThem": "الإعجاب بـ {name}",
   "embracingThem": "معانقة {name}",

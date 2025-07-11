@@ -477,7 +477,7 @@
     }
   },
   "showMemories": "Toon herinneringen",
-  "yearsAgo": "{count, plural, one{{count} jaar geleden} other{{count} jaar geleden}}",
+  "yearsAgo": "{count, plural, other{{count} jaar geleden}}",
   "backupSettings": "Back-up instellingen",
   "backupStatus": "Back-up status",
   "backupStatusDescription": "Items die zijn geback-upt, worden hier getoond",
