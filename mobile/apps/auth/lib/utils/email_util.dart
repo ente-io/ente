@@ -232,9 +232,13 @@ Future<void> exportLogs(
       MimeType.zip,
     );
   } else {
-    await Share.shareXFiles(
-      [XFile(zipFilePath, mimeType: 'application/zip')],
-      sharePositionOrigin: Rect.fromLTWH(0, 0, size.width, size.height / 2),
+    await SharePlus.instance.share(
+      ShareParams(
+        files: <XFile>[
+          XFile(zipFilePath, mimeType: 'application/zip'),
+        ],
+        sharePositionOrigin: Rect.fromLTWH(0, 0, size.width, size.height / 2),
+      ),
     );
   }
 }

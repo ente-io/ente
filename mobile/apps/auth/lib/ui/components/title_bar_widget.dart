@@ -123,7 +123,7 @@ class TitleBarWidget extends StatelessWidget {
     );
   }
 
-  _actionsWithPaddingInBetween() {
+  List<Widget> _actionsWithPaddingInBetween() {
     if (actionIcons == null) {
       return <Widget>[const SizedBox.shrink()];
     }
@@ -135,7 +135,7 @@ class TitleBarWidget extends StatelessWidget {
       return <Widget>[const SizedBox.shrink()];
     }
     if (length == 1) {
-      return actionIcons;
+      return actionIcons!;
     }
     while (index < length) {
       if (!addWhiteSpace) {
