@@ -301,7 +301,7 @@ class FileUploader {
                 .copyWith(status: BackupItemStatus.uploading);
         Bus.instance.fire(BackupUpdatedEvent(_allBackups));
         _encryptAndUploadFileToCollection(
-          pendingEntry.file,
+          pendingEntry,
           pendingEntry.collectionID,
         );
       }
@@ -309,10 +309,11 @@ class FileUploader {
   }
 
   Future<EnteFile?> _encryptAndUploadFileToCollection(
-    EnteFile file,
+    FileUploadItem item,
     int collectionID, {
     bool forcedUpload = false,
   }) async {
+    final EnteFile file = item.file;
     _uploadCounter++;
     if (file.fileType == FileType.video) {
       _videoUploadCounter++;

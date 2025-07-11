@@ -360,16 +360,6 @@ class RemoteSyncService {
     }
   }
 
-  void _uploadFile(EnteFile file, int collectionID, List<Future> futures) {
-    final future = _uploader
-        .upload(file, collectionID)
-        .then((uploadedFile) => _onFileUploaded(uploadedFile))
-        .onError(
-          (error, stackTrace) => _onFileUploadError(error, stackTrace, file),
-        );
-    futures.add(future);
-  }
-
   void _onFileUploaded(
     EnteFile file, {
     AssetUploadQueue? queueEntry,
