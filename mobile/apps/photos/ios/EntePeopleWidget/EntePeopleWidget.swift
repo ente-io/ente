@@ -216,7 +216,7 @@ struct EntePeopleWidget: Widget {
                     .background()
             }
         }
-        .configurationDisplayName("People Widget")
+        .configurationDisplayName("People")
         .description("See photos of your favorite people")
         .contentMarginsDisabled()
     }
