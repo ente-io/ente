@@ -49,6 +49,11 @@ const (
 	FamilyNudgeTemplate   = "family_nudge.html"
 	FamilyNudgeSubject    = "Share your Ente Subscription with your Family!"
 	FamilyNudgeTemplateID = "family_nudge"
+
+	StorageLimitExceedingPaidMailLock   = "storage_limit_exceeding_paid"
+	StorageLimitExceedingPaidTemplate   = "storage_limit_exceeding_paid.html"
+	StorageLimitExceedingPaidSubject    = " Your Ente storage is 95% full"
+	StorageLimitExceedingPaidTemplateID = "storage_limit_exceeding_paid"
 )
 
 type EmailNotificationController struct {
