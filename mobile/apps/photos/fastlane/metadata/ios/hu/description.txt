@@ -1,33 +1,33 @@
-Ente is a simple app to automatically backup and organize your photos and videos.
+Az Ente egy egyszerű alkalmazás, amellyel automatikusan mentheti és rendszerezheti fényképeit és videóit.
 
-If you've been looking for a privacy-friendly alternative to preserve your memories, you've come to the right place. With Ente, they are stored end-to-end encrypted (e2ee). This means that only you can view them.
+Ha adatvédelmet nem igénylő alternatívát keresel emlékeid megőrzésére, jó helyen jársz. Az Ente esetében ezek végponttól végpontig titkosítva (e2ee) tárolódnak. Ez azt jelenti hogy csak te tudod megtekinteni őket.
 
-We have apps across all platforms, and your photos will seamlessly sync between all your devices in an end-to-end encrypted (e2ee) manner.
+Minden platformon vannak alkalmazásaink, és a fotóid zökkenőmentesen szinkronizálódnak az összes eszközöd között, végponttól végpontig titkosított (e2ee) módon.
 
-Ente also makes it simple to share your albums with your loved ones. You can either share them directly with other Ente users, end-to-end encrypted; or with publicly viewable links.
+Az Ente segítségével egyszerűen megoszthatod albumaidat szeretteiddel. Megoszthatod őket közvetlenül más Ente felhasználókkal, végponttól végpontig titkosítva; vagy nyilvánosan látható linkeken keresztül.
 
-Your encrypted data is stored across multiple locations, including a fall-out shelter in Paris. We take posterity seriously and make it easy to ensure that your memories outlive you.
+A titkosított adatait több helyszínen tároljuk, beleértve egy párizsi óvóhelyet is. Komolyan vesszük az örökséget, és megkönnyítjük annak biztosítását, hogy emlékei túléljék Önt.
 
-We are here to make the safest photos app ever, come join our journey!
+Azért vagyunk itt, hogy a legbiztonságosabb fotóalkalmazást hozzuk létre, csatlakozz hozzánk!
 
-FEATURES
-- Original quality backups, because every pixel is important
-- Family plans, so you can share storage with your family
-- Shared folders, in case you want your partner to enjoy your "Camera" clicks
-- Album links, that can be protected with a password and set to expire
-- Ability to free up space, by removing files that have been safely backed up
-- Image editor, to add finishing touches
-- Favorite, hide and relive your memories, for they are precious
-- One-click import from all major storage providers
-- Dark theme, because your photos look good in it
-- 2FA, 3FA, biometric auth
-- and a LOT more!
+TULAJDONSÁGOK
+- Eredeti minőségű biztonsági mentések, mert minden pixel számít
+- Családi csomagok, így megoszthatod a tárhelyet a családoddal
+- Megosztott mappák, arra az esetre, ha azt szeretnéd, hogy partnered is élvezze a "Kamera" kattintásaid
+- Albumlinkek, amelyek jelszóval védhetők és lejárati idő is beállítható
+- Lehetőség a tárhely felszabadítására a biztonságosan mentett fájlok eltávolításával
+- Képszerkesztő, a végső simítások hozzáadásához
+- Kedvenc, rejtsd el és éld át újra emlékeidet, mert értékesek
+- Importálás egy kattintással az összes nagyobb tárhelyszolgáltatótól
+- Sötét téma, mert a fotóid jól mutatnak benne
+- 2FA, 3FA, biometrikus hitelesítés
+- és még sok minden más!
 
-PRICING
-We don't offer forever free plans, because it is important to us that we remain sustainable and withstand the test of time. Instead we offer affordable plans that you can freely share with your family. You can find more information at ente.io.
+ÁRAZÁS
+Nem kínálunk örökké ingyenes csomagokat, mert fontos számunkra, hogy fenntarthatóak maradjunk és kiálljuk az idő próbáját. Ehelyett megfizethető csomagokat kínálunk, amelyeket szabadon megoszthat családjával. További információt az ente.io oldalon találhat.
 
-SUPPORT
-We take pride in offering human support. If you are our paid customer, you can reach out to team@ente.io and expect a response from our team within 24 hours.
+TÁMOGATÁS
+Büszkék vagyunk arra, hogy emberi támogatást nyújthatunk. Ha fizetős ügyfelünk vagy, írj a team@ente.io címre, és csapatunk 24 órán belül válaszol.
 
-TERMS
+FELTÉTELEK
 https://ente.io/terms
