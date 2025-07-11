@@ -242,26 +242,61 @@ export const sidebar = [
         text: "Self hosting",
         collapsed: true,
         items: [
-            { text: "Getting started", link: "/self-hosting/" },
             {
-                text: "Connecting to custom server",
-                link: "/self-hosting/guides/custom-server/",
+                text: "Introduction",
+                link: "/self-hosting/",
             },
             {
-                text: "Creating accounts",
-                link: "/self-hosting/creating-accounts",
+                text: "Quickstart",
+                link: "/self-hosting/quickstart",
             },
             {
-                text: "Configuring your server",
-                link: "/self-hosting/museum",
+                text: "Install",
+                collapsed: true,
+                items: [
+                    {
+                        text: "Requirements",
+                        link: "/self-hosting/install/requirements",
+                    },
+                    {
+                        text: "Quickstart Script (recommended)",
+                        link: "/self-hosting/install/quickstart",
+                    },
+                    {
+                        text: "Environment variables",
+                        link: "/self-hosting/install/environment",
+                    },
+                    {
+                        text: "Post-installation Steps",
+                        link: "/self-hosting/install/post-install",
+                    },
+                    {
+                        text: "Connecting to Custom Server",
+                        link: "/self-hosting/install/custom-server/"
+                    }
+                ],
             },
             {
-                text: "Configuring S3",
-                link: "/self-hosting/guides/configuring-s3",
-            },
-            {
-                text: "Reverse proxy",
-                link: "/self-hosting/reverse-proxy",
+                text: "Administration",
+                collapsed: true,
+                items: [
+                    {
+                        text: "Creating accounts",
+                        link: "/self-hosting/creating-accounts",
+                    },
+                    {
+                        text: "Configuring your server",
+                        link: "/self-hosting/museum",
+                    },
+                    {
+                        text: "Configuring S3",
+                        link: "/self-hosting/guides/configuring-s3",
+                    },
+                    {
+                        text: "Reverse proxy",
+                        link: "/self-hosting/reverse-proxy",
+                    },
+                ],
             },
             {
                 text: "Guides",
@@ -342,11 +377,7 @@ export const sidebar = [
                     {
                         text: "Backups",
                         link: "/self-hosting/faq/backup",
-                    },
-                    {
-                        text: "Environment variables",
-                        link: "/self-hosting/faq/environment",
-                    },
+                    }
                 ],
             },
         ],

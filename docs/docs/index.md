@@ -6,7 +6,7 @@ description: >
 
 # Welcome!
 
-![Ducky: Ente's Mascot](/public/ducky.png){width=50% style="margin: 0 auto"}
+![Ducky: Ente's Mascot](/ducky.png){width=50% style="margin: 0 auto"}
 
 ## Introduction
 
