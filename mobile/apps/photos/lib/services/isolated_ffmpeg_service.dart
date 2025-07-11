@@ -3,9 +3,8 @@ import "dart:async";
 import "package:combine/combine.dart";
 import "package:computer/computer.dart";
 import "package:ffmpeg_kit_flutter/ffmpeg_kit.dart";
+import "package:ffmpeg_kit_flutter/ffmpeg_kit_config.dart";
 import "package:ffmpeg_kit_flutter/ffprobe_kit.dart";
-import "package:ffmpeg_kit_flutter/media_information.dart";
-import "package:ffmpeg_kit_flutter/media_information_session.dart";
 import "package:photos/utils/ffprobe_util.dart";
 
 class IsolatedFfmpegService {
@@ -29,21 +28,9 @@ class IsolatedFfmpegService {
 
 @pragma('vm:entry-point')
 Future<Map> _getVideoProps(String filePath) async {
-  final completer = Completer<MediaInformation?>();
-  final session = await FFprobeKit.getMediaInformationAsync(
-    filePath,
-    (MediaInformationSession session) async {
-      // This callback is called when the session is complete
-      final mediaInfo = session.getMediaInformation();
-
-      completer.complete(mediaInfo);
-    },
-    (log) {},
-  );
-
-  // Wait for the session to complete
-  await session.getReturnCode();
-  final mediaInfo = await completer.future;
+  await FFmpegKitConfig.setLogLevel(-8);
+  final session = await FFprobeKit.getMediaInformation(filePath);
+  final mediaInfo = session.getMediaInformation();
 
   if (mediaInfo == null) {
     return {};
@@ -55,6 +42,7 @@ Future<Map> _getVideoProps(String filePath) async {
 
 @pragma('vm:entry-point')
 Future<Map> _ffmpegRun(String value) async {
+  await FFmpegKitConfig.setLogLevel(-8);
   final session = await FFmpegKit.execute(value, true);
   final returnCode = (await session.getReturnCode())?.getValue();
 
