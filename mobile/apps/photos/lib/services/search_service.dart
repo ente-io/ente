@@ -44,6 +44,7 @@ import "package:photos/models/search/search_types.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/account/user_service.dart";
 import 'package:photos/services/collections_service.dart';
+import "package:photos/services/date_parse_service.dart";
 import "package:photos/services/filter/db_filters.dart";
 import "package:photos/services/location_service.dart";
 import "package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart";
@@ -60,7 +61,6 @@ import "package:photos/utils/cache_util.dart";
 import "package:photos/utils/file_util.dart";
 import "package:photos/utils/navigation_util.dart";
 import 'package:photos/utils/standalone/date_time.dart';
-import 'package:tuple/tuple.dart';
 
 class SearchService {
   Future<List<EnteFile>>? _cachedFilesFuture;
@@ -1172,20 +1172,56 @@ class SearchService {
     String query,
   ) async {
     final List<GenericSearchResult> searchResults = [];
-    final potentialDates = _getPossibleEventDate(context, query);
 
-    for (var potentialDate in potentialDates) {
-      final int day = potentialDate.item1;
-      final int month = potentialDate.item2.monthNumber;
-      final int? year = potentialDate.item3; // nullable
-      final matchedFiles =
-          await FilesDB.instance.getFilesCreatedWithinDurations(
-        _getDurationsForCalendarDateInEveryYear(day, month, year: year),
-        ignoreCollections(),
-        order: 'DESC',
-      );
-      if (matchedFiles.isNotEmpty) {
-        final name = '$day ${potentialDate.item2.name} ${year ?? ''}';
+    final dateVariations = DateParseService.instance.parseDateVariations(query);
+
+    // Handle month-year queries
+    if (DateParseService.instance.isMonthYearQuery(query)) {
+      final monthYearResult = DateParseService.instance.parseDate(query);
+      if (monthYearResult.item2 != null && monthYearResult.item3 != null) {
+        final month = monthYearResult.item2!.monthNumber;
+        final year = monthYearResult.item3!;
+        final monthYearFiles =
+            await FilesDB.instance.getFilesCreatedWithinDurations(
+          [_getDurationForMonthInYear(month, year)],
+          ignoreCollections(),
+          order: 'DESC',
+        );
+        if (monthYearFiles.isNotEmpty) {
+          final name = '${monthYearResult.item2!.name} $year';
+          searchResults.add(
+            GenericSearchResult(
+              ResultType.month,
+              name,
+              monthYearFiles,
+              hierarchicalSearchFilter: TopLevelGenericFilter(
+                filterName: name,
+                occurrence: kMostRelevantFilter,
+                filterResultType: ResultType.month,
+                matchedUploadedIDs: filesToUploadedFileIDs(monthYearFiles),
+                filterIcon: Icons.calendar_month_outlined,
+              ),
+            ),
+          );
+        }
+      }
+    }
+
+    for (final dateVar in dateVariations) {
+      if (dateVar.item1 != null && dateVar.item2 != null) {
+        final int day = dateVar.item1!;
+        final int month = dateVar.item2!.monthNumber;
+        final int? year = dateVar.item3; // nullable for generic dates
+
+        final matchedFiles =
+            await FilesDB.instance.getFilesCreatedWithinDurations(
+          _getDurationsForCalendarDateInEveryYear(day, month, year: year),
+          ignoreCollections(),
+          order: 'DESC',
+        );
+
+        final name =
+            '$day ${dateVar.item2!.name}${year != null ? ' $year' : ''}';
         searchResults.add(
           GenericSearchResult(
             ResultType.event,
@@ -1641,55 +1677,12 @@ class SearchService {
     return durationsOfMonthInEveryYear;
   }
 
-  List<Tuple3<int, MonthData, int?>> _getPossibleEventDate(
-    BuildContext context,
-    String query,
-  ) {
-    final List<Tuple3<int, MonthData, int?>> possibleEvents = [];
-    if (query.trim().isEmpty) {
-      return possibleEvents;
-    }
-    final result = query
-        .trim()
-        .split(RegExp('[ ,-/]+'))
-        .map((e) => e.trim())
-        .where((e) => e.isNotEmpty)
-        .toList();
-    final resultCount = result.length;
-    if (resultCount < 1 || resultCount > 4) {
-      return possibleEvents;
-    }
-
-    final int? day = int.tryParse(result[0]);
-    if (day == null || day < 1 || day > 31) {
-      return possibleEvents;
-    }
-    final List<MonthData> potentialMonth = resultCount > 1
-        ? _getMatchingMonths(context, result[1])
-        : getMonthData(context);
-    final int? parsedYear = resultCount >= 3 ? int.tryParse(result[2]) : null;
-    final List<int> matchingYears = [];
-    if (parsedYear != null) {
-      bool foundMatch = false;
-      for (int i = searchStartYear; i <= currentYear; i++) {
-        if (i.toString().startsWith(parsedYear.toString())) {
-          matchingYears.add(i);
-          foundMatch = foundMatch || (i == parsedYear);
-        }
-      }
-      if (!foundMatch && parsedYear > 1000 && parsedYear <= currentYear) {
-        matchingYears.add(parsedYear);
-      }
-    }
-    for (var element in potentialMonth) {
-      if (matchingYears.isEmpty) {
-        possibleEvents.add(Tuple3(day, element, null));
-      } else {
-        for (int yr in matchingYears) {
-          possibleEvents.add(Tuple3(day, element, yr));
-        }
-      }
-    }
-    return possibleEvents;
+  List<int> _getDurationForMonthInYear(int month, int year) {
+    return [
+      DateTime(year, month, 1).microsecondsSinceEpoch,
+      month == 12
+          ? DateTime(year + 1, 1, 1).microsecondsSinceEpoch
+          : DateTime(year, month + 1, 1).microsecondsSinceEpoch,
+    ];
   }
 }
