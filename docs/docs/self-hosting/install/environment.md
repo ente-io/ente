@@ -1,16 +1,21 @@
 ---
-title: "Environment Variables and Ports"
+title: "Environment Variables"
 description:
     "Information about all the Environment Variables needed to run Ente"
 ---
 
-# Environment variables and ports
+# Environment Variables
 
 A self-hosted Ente instance requires specific endpoints in both Museum (the
 server) and web apps. This document outlines the essential environment variables
 and port mappings of the web apps.
 
-Here's the list of important variables that a self hoster should know about:
+Here's the list of environment variables that need to be configured:
+
+| Service | Environment Variable | Description                          | Default Value         |
+| ------- | -------------------- | ------------------------------------ | --------------------- |
+| Web     | ENTE_API_ORIGIN      | API Endpoint for Ente's API (Museum) | http://localhost:8080 |
+| Web     | ENTE_ALBUMS_ORIGIN   | Base URL for album                   | http://localhost:3002 |
 
 ### Museum
 
@@ -39,14 +44,3 @@ information about and connects to other web apps like albums, cast, etc.
 
 This environment variable is used to configure and declare the endpoint for the
 Albums web app.
-
-## Ports
-
-The below format is according to how ports are mapped in Docker.
-Typically,`<host>:<container-port>`
-
-1. `8080:8080`: Museum (Ente's server)
-2. `3000:3000`: Ente Photos web app
-3. `3001:3001`: Ente Accounts web app
-4. `3003:3003`: [Ente Auth web app](https://ente.io/auth/)
-5. `3004:3004`: [Ente Cast web app](http://ente.io/cast)

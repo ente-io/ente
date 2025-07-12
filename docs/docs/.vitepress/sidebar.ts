@@ -243,12 +243,8 @@ export const sidebar = [
         collapsed: true,
         items: [
             {
-                text: "Introduction",
-                link: "/self-hosting/",
-            },
-            {
-                text: "Quickstart",
-                link: "/self-hosting/quickstart",
+                text: "Get Started",
+                link: "/self-hosting/get-started",
             },
             {
                 text: "Install",
@@ -263,8 +259,20 @@ export const sidebar = [
                         link: "/self-hosting/install/quickstart",
                     },
                     {
+                        text: "Running Ente from source",
+                        link: "/self-hosting/install/from-source",
+                    },
+                    {
+                        text: "Running Ente without Docker",
+                        link: "/self-hosting/install/standalone-ente",
+                    },
+                    {
                         text: "Environment variables",
                         link: "/self-hosting/install/environment",
+                    },
+                    {
+                        text: "Default Configuration",
+                        link: "/self-hosting/install/defaults",
                     },
                     {
                         text: "Post-installation Steps",
@@ -310,15 +318,7 @@ export const sidebar = [
                     {
                         text: "Configuring CLI for your instance",
                         link: "/self-hosting/guides/selfhost-cli",
-                    },
-                    {
-                        text: "Running Ente from source",
-                        link: "/self-hosting/guides/from-source",
-                    },
-                    {
-                        text: "Running Ente without Docker",
-                        link: "/self-hosting/guides/standalone-ente",
-                    },
+                    }
                 ],
             },
             {
