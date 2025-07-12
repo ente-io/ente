@@ -2,10 +2,10 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:ente_auth/core/configuration.dart';
-import 'package:ente_auth/core/event_bus.dart';
-import 'package:ente_auth/events/endpoint_updated_event.dart';
 import 'package:ente_auth/utils/package_info_util.dart';
 import 'package:ente_auth/utils/platform_util.dart';
+import 'package:ente_events/event_bus.dart';
+import 'package:ente_events/models/endpoint_updated_event.dart';
 import 'package:fk_user_agent/fk_user_agent.dart';
 import 'package:flutter/foundation.dart';
 import 'package:native_dio_adapter/native_dio_adapter.dart';

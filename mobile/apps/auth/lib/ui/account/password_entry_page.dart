@@ -1,6 +1,5 @@
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/l10n/l10n.dart';
-import 'package:ente_auth/models/key_gen_result.dart';
 import 'package:ente_auth/services/user_service.dart';
 import 'package:ente_auth/ui/account/recovery_key_page.dart';
 import 'package:ente_auth/ui/common/dynamic_fab.dart';
@@ -451,7 +450,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
       if (usingVolatilePassword) {
         _logger.info('Using volatile password');
       }
-      final KeyGenResult result =
+      final result =
           await Configuration.instance.generateKey(password);
       Configuration.instance.resetVolatilePassword();
       await dialog.hide();
