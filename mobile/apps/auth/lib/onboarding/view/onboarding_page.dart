@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:ente_auth/app/view/app.dart';
 import 'package:ente_auth/core/configuration.dart';
-import 'package:ente_auth/core/event_bus.dart';
 import 'package:ente_auth/ente_theme_data.dart';
 import 'package:ente_auth/events/trigger_logout_event.dart';
 import "package:ente_auth/l10n/l10n.dart";
@@ -24,6 +23,7 @@ import 'package:ente_auth/ui/settings/language_picker.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_auth/utils/navigation_util.dart';
 import 'package:ente_auth/utils/toast_util.dart';
+import 'package:ente_events/event_bus.dart';
 import 'package:flutter/foundation.dart';
 import "package:flutter/material.dart";
 import 'package:local_auth/local_auth.dart';

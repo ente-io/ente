@@ -2,7 +2,6 @@ library configuration;
 
 import 'dart:convert';
 import 'dart:io' as io;
-import 'dart:typed_data';
 
 import 'package:bip39/bip39.dart' as bip39;
 import 'package:ente_configuration/constants.dart';
@@ -16,32 +15,26 @@ import 'package:ente_events/models/endpoint_updated_event.dart';
 import 'package:ente_events/models/signed_in_event.dart';
 import 'package:ente_events/models/signed_out_event.dart';
 import 'package:ente_logging/logging.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tuple/tuple.dart';
 
 class BaseConfiguration {
-  BaseConfiguration._privateConstructor();
-
-  static final BaseConfiguration instance =
-      BaseConfiguration._privateConstructor();
   static const endpoint = String.fromEnvironment(
     "endpoint",
     defaultValue: kDefaultProductionEndpoint,
   );
   static const emailKey = "email";
   static const keyAttributesKey = "key_attributes";
-
-  static const lastTempFolderClearTimeKey = "last_temp_folder_clear_time";
   static const keyKey = "key";
   static const secretKeyKey = "secret_key";
-  static const authSecretKeyKey = "auth_secret_key";
-  static const offlineAuthSecretKey = "offline_auth_secret_key";
   static const tokenKey = "token";
   static const encryptedTokenKey = "encrypted_token";
   static const userIDKey = "user_id";
   static const endPointKey = "endpoint";
+  static const lastTempFolderClearTimeKey = "last_temp_folder_clear_time";
 
   final kTempFolderDeletionTimeBuffer = const Duration(days: 1).inMicroseconds;
 
@@ -69,27 +62,8 @@ class BaseConfiguration {
         accessibility: KeychainAccessibility.first_unlock_this_device,
       ),
     );
-    final tempDirectory = io.Directory(_tempDocumentsDirPath);
-    try {
-      final currentTime = DateTime.now().microsecondsSinceEpoch;
-      if (tempDirectory.existsSync() &&
-          (_preferences.getInt(lastTempFolderClearTimeKey) ?? 0) <
-              (currentTime - kTempFolderDeletionTimeBuffer)) {
-        await tempDirectory.delete(recursive: true);
-        await _preferences.setInt(lastTempFolderClearTimeKey, currentTime);
-        _logger.info("Cleared temp folder");
-      } else {
-        _logger.info("Skipping temp folder clear");
-      }
-    } catch (e) {
-      _logger.warning(e);
-    }
-    tempDirectory.createSync(recursive: true);
-
-    _cacheDirectory = "$_documentsDirectory/cache/";
-    if (!io.Directory(_cacheDirectory).existsSync()) {
-      io.Directory(_cacheDirectory).createSync(recursive: true);
-    }
+    _setupKeys();
+    _setupFolders();
   }
 
   Future<void> logout({bool autoLogout = false}) async {
@@ -403,5 +377,62 @@ class BaseConfiguration {
 
   String? getVolatilePassword() {
     return _volatilePassword;
+  }
+
+  Future<void> _setupKeys() async {
+    try {
+      if (!_preferences.containsKey(tokenKey)) {
+        await _secureStorage.deleteAll();
+        return;
+      }
+      _key = await _secureStorage.read(key: keyKey);
+      if (_key == null) {
+        _logger.warning("No key found in secure storage");
+        await logout(autoLogout: true);
+      }
+      _secretKey = await _secureStorage.read(key: secretKeyKey);
+    } catch (e, s) {
+      _logger.severe("Configuration init failed", e, s);
+      /*
+      Check if it's a known is related to reading secret from secure storage
+      on android https://github.com/mogol/flutter_secure_storage/issues/541
+       */
+      if (e is PlatformException) {
+        final PlatformException error = e;
+        final bool isBadPaddingError =
+            error.toString().contains('BadPaddingException') ||
+                (error.message ?? '').contains('BadPaddingException');
+        if (isBadPaddingError) {
+          await logout(autoLogout: true);
+          return;
+        }
+      } else {
+        rethrow;
+      }
+    }
+  }
+
+  Future<void> _setupFolders() async {
+    final tempDirectory = io.Directory(_tempDocumentsDirPath);
+    try {
+      final currentTime = DateTime.now().microsecondsSinceEpoch;
+      if (tempDirectory.existsSync() &&
+          (_preferences.getInt(lastTempFolderClearTimeKey) ?? 0) <
+              (currentTime - kTempFolderDeletionTimeBuffer)) {
+        await tempDirectory.delete(recursive: true);
+        await _preferences.setInt(lastTempFolderClearTimeKey, currentTime);
+        _logger.info("Cleared temp folder");
+      } else {
+        _logger.info("Skipping temp folder clear");
+      }
+    } catch (e) {
+      _logger.warning(e);
+    }
+    tempDirectory.createSync(recursive: true);
+
+    _cacheDirectory = "$_documentsDirectory/cache/";
+    if (!io.Directory(_cacheDirectory).existsSync()) {
+      io.Directory(_cacheDirectory).createSync(recursive: true);
+    }
   }
 }

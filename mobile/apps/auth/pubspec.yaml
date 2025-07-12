@@ -25,9 +25,15 @@ dependencies:
   dotted_border: ^2.0.0+2
   dropdown_button2: ^2.3.9
   email_validator: ^3.0.0
+  ente_base:
+    path: ../../packages/base
+  ente_configuration:
+    path: ../../packages/configuration
   ente_crypto_dart:
     git:
       url: https://github.com/ente-io/ente_crypto_dart.git
+  ente_events:
+    path: ../../packages/events 
   ente_logging:
     path: ../../packages/logging
   event_bus: ^2.0.0

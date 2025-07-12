@@ -15,6 +15,7 @@ import 'package:ente_auth/services/preference_service.dart';
 import 'package:ente_auth/services/update_service.dart';
 import 'package:ente_auth/services/user_service.dart';
 import 'package:ente_auth/services/window_listener_service.dart';
+import 'package:ente_auth/store/authenticator_db.dart';
 import 'package:ente_auth/store/code_display_store.dart';
 import 'package:ente_auth/store/code_store.dart';
 import 'package:ente_auth/ui/tools/app_lock.dart';
@@ -151,7 +152,7 @@ Future<void> _init(bool bool, {String? via}) async {
   await PreferenceService.instance.init();
   await CodeStore.instance.init();
   await CodeDisplayStore.instance.init();
-  await Configuration.instance.init();
+  await Configuration.instance.init([AuthenticatorDB.instance]);
   await Network.instance.init();
   await UserService.instance.init();
   await AuthenticatorService.instance.init();

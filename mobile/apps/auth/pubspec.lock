@@ -398,6 +398,20 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.0"
+  ente_base:
+    dependency: "direct main"
+    description:
+      path: "../../packages/base"
+      relative: true
+    source: path
+    version: "1.0.0"
+  ente_configuration:
+    dependency: "direct main"
+    description:
+      path: "../../packages/configuration"
+      relative: true
+    source: path
+    version: "1.0.0"
   ente_crypto_dart:
     dependency: "direct main"
     description:
@@ -406,6 +420,13 @@ packages:
       resolved-ref: f91e1545f8263df127762240c4da54a0c42835b2
       url: "https://github.com/ente-io/ente_crypto_dart.git"
     source: git
+    version: "1.0.0"
+  ente_events:
+    dependency: "direct main"
+    description:
+      path: "../../packages/events"
+      relative: true
+    source: path
     version: "1.0.0"
   ente_logging:
     dependency: "direct main"
