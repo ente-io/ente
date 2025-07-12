@@ -28,6 +28,8 @@ dependencies:
   ente_crypto_dart:
     git:
       url: https://github.com/ente-io/ente_crypto_dart.git
+  ente_logging:
+    path: ../../packages/logging
   event_bus: ^2.0.0
   expandable: ^5.0.1
   expansion_tile_card: ^3.0.0
