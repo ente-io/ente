@@ -652,7 +652,7 @@ Future<void> _recursivelyReduceBatchSizeAndRetryDeletion({
       "Batch size is too small ($batchSize), stopping further retries.",
     );
     throw Exception(
-      "Batch size reached minimum threshold: $batchSize. Stopping further retries.",
+      "Batch size is too small ($batchSize), stopping further retries.",
     );
   }
   try {
