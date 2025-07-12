@@ -483,7 +483,7 @@ class GalleryState extends State<Gallery> {
           clipBehavior: Clip.none,
           children: [
             CustomScrollView(
-              // physics: const BouncingScrollPhysics(),
+              physics: const BouncingScrollPhysics(),
               controller: _scrollController,
               slivers: [
                 SliverToBoxAdapter(
