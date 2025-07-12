@@ -244,7 +244,7 @@ export const sidebar = [
         items: [
             {
                 text: "Get Started",
-                link: "/self-hosting/get-started",
+                link: "/self-hosting/",
             },
             {
                 text: "Install",
@@ -255,7 +255,7 @@ export const sidebar = [
                         link: "/self-hosting/install/requirements",
                     },
                     {
-                        text: "Quickstart Script (recommended)",
+                        text: "Quickstart Script (Recommended)",
                         link: "/self-hosting/install/quickstart",
                     },
                     {
@@ -271,7 +271,7 @@ export const sidebar = [
                         link: "/self-hosting/install/config",
                     },
                     {
-                        text: "Post-installation Steps",
+                        text: "Post Installation",
                         link: "/self-hosting/install/post-install",
                     },
                     {

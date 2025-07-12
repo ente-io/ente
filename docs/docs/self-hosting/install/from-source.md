@@ -5,7 +5,8 @@ description: Getting started self hosting Ente Photos and/or Ente Auth
 
 # Ente from Source
 
-> [!WARNING] NOTE The below documentation will cover instructions about
+> [!WARNING] NOTE
+> The below documentation will cover instructions about
 > self-hosting the web app manually. If you want to deploy Ente hassle free, use
 > the [one line](https://ente.io/blog/self-hosting-quickstart/) command to setup
 > Ente. This guide might be deprecated in the near future.
@@ -188,42 +189,3 @@ to configure the endpoints. Make sure to setup up your DNS Records accordingly
 to the similar URL's you set up in `museum.yaml`.
 
 Next part is to configure the web server.
-
-# Web server configuration
-
-The last step ahead is configuring reverse_proxy for the ports on which the apps
-are being served (you will have to make changes, if you have cusotmized the
-ports). The web server of choice in this guide is
-[Caddy](https://caddyserver.com) because with caddy you don't have to manually
-configure/setup SSL ceritifcates as caddy will take care of that.
-
-```groovy
-photos.yourdomain.com {
-	reverse_proxy http://localhost:3001
-    # for logging
-    log {
-        level error
-    }
-}
-
-auth.yourdomain.com {
-    reverse_proxy http://localhost:3002
-}
-# and so on ...
-```
-
-Next, start the caddy server :).
-
-```sh
-# If caddy service is not enabled
-sudo systemctl enable caddy
-
-sudo systemctl daemon-reload
-
-sudo systemctl start caddy
-```
-
-## Contributing
-
-Please start a discussion on the Github Repo if you have any suggestions for the
-Dockerfile, You can also share your setups on Github Discussions.

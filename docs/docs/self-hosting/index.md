@@ -6,9 +6,7 @@ description: Getting started with self-hosting Ente
 # Get Started
 
 The entire source code for Ente is open source,
-[including the servers](https://ente.io/blog/open-sourcing-our-server/).
-
-This is the same code we use for our own cloud service.
+[including the servers](https://ente.io/blog/open-sourcing-our-server/). This is the same code we use for our own cloud service.
 
 For a quick preview of running Ente on your server, make sure you have the following installed on your system and meets the requirements mentioned below:
 
@@ -27,12 +25,31 @@ Run this command on your terminal to setup Ente.
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/ente-io/ente/main/server/quickstart.sh)"
 ```
 
-The above `curl` command pulls the Docker image, creates a directory `my-ente`
-in the current working directory, prompts to start the cluster and starts all the containers required to run Ente.
+The above command creates a directory `my-ente` in the current working directory, prompts to start the cluster after pulling the images and starts all the containers required to run Ente.
 
 ![quickstart](/quickstart.png)
 
-![self-hosted-ente](/web-app.webp)
+## Try the web app
+
+The first user to be registered will be treated as the admin user.
+
+Open the web app at `http://<machine-ip>:3000` (or `http://localhost:3000` if using on same local machine) and select **Don't have an account?** to create a new user.
+
+![Onboarding Screen](/onboarding.png)
+
+Follow the prompts to sign up.
+
+![Sign Up Page](/sign-up.png)
+
+You will be prompted to enter verification code. Check the cluster logs using `sudo docker compose logs` and enter the same.
+
+![Verification Code](/otp.png)
+
+## Try the mobile app
+
+
+
+## What next?
 
 
 ## Queries?

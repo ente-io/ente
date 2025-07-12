@@ -5,6 +5,8 @@ description: Requirements for self-hosting Ente
 
 # Requirements
 
+## Hardware
+
 The server is capable of running on minimal resource requirements as a
 lightweight Go binary, since most of the intensive computational tasks are done
 on the client. It performs well on small cloud instances, old laptops, and even
@@ -21,4 +23,9 @@ experience with Docker and difficulty with troubleshooting and assistance.
 ### Docker
 
 Required for running Ente's server, web application and dependent services
-(database and object storage)
+(database and object storage). Ente also requires **Docker Compose plugin** to be installed.
+
+> [!NOTE]
+> Ente requires **Docker Compose version 2.25 or higher**.
+> 
+> Furthermore, Ente uses the command `docker compose`, `docker-compose` is no longer supported.
