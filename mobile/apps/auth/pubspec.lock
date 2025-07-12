@@ -407,6 +407,13 @@ packages:
       url: "https://github.com/ente-io/ente_crypto_dart.git"
     source: git
     version: "1.0.0"
+  ente_logging:
+    dependency: "direct main"
+    description:
+      path: "../../packages/logging"
+      relative: true
+    source: path
+    version: "1.0.0"
   event_bus:
     dependency: "direct main"
     description:
