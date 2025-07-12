@@ -47,6 +47,7 @@ class GalleryGroups {
   final Map<String, List<EnteFile>> _groupIdToFilesMap = {};
   final Map<String, GroupHeaderData> _groupIdToHeaderDataMap = {};
   final Map<double, String> _scrollOffsetToGroupIdMap = {};
+  final List<double> _groupScrollOffsets = [];
   final currentUserID = Configuration.instance.getUserID();
   final _uuid = const Uuid();
 
@@ -56,11 +57,18 @@ class GalleryGroups {
       _groupIdToHeaderDataMap;
   Map<double, String> get scrollOffsetToGroupIdMap => _scrollOffsetToGroupIdMap;
   List<FixedExtentSectionLayout> get groupLayouts => _groupLayouts;
+  List<double> get groupScrollOffsets => _groupScrollOffsets;
 
   void init() {
     _buildGroups();
     crossAxisCount = localSettings.getPhotoGridSize();
     _groupLayouts = _computeGroupLayouts();
+    assert(groupIDs.length == _groupIdToFilesMap.length);
+    assert(groupIDs.length == _groupIdToHeaderDataMap.length);
+    assert(
+      groupIDs.length == _scrollOffsetToGroupIdMap.length,
+    );
+    assert(groupIDs.length == _groupScrollOffsets.length);
   }
 
   List<FixedExtentSectionLayout> _computeGroupLayouts() {
@@ -166,6 +174,7 @@ class GalleryGroups {
       );
 
       _scrollOffsetToGroupIdMap[currentOffset] = groupID;
+      _groupScrollOffsets.add(currentOffset);
 
       currentIndex = lastIndex;
       currentOffset = maxOffset;

@@ -613,15 +613,40 @@ class _PinnedGroupHeaderState extends State<PinnedGroupHeader> {
     if (normalizedScrollOffset < 0) {
       currentGroupID = null;
     } else {
-      //TODO: make this more efficient. This is very less thought out.
-      final entry =
-          widget.galleryGroups.scrollOffsetToGroupIdMap.entries.firstWhere(
-        (element) => element.key >= normalizedScrollOffset,
-        orElse: () =>
-            widget.galleryGroups.scrollOffsetToGroupIdMap.entries.last,
-      );
-      currentGroupID = entry.value;
+      final groupScrollOffsets = widget.galleryGroups.groupScrollOffsets;
+
+      // Binary search to find the index of the largest scrollOffset in
+      // groupScrollOffsets which is <= scrollPosition
+      int low = 0;
+      int high = groupScrollOffsets.length - 1;
+      int floorIndex = 0;
+
+      // Handle the case where scrollPosition is smaller than the first key.
+      // In this scenario, we associate it with the first heading.
+      if (normalizedScrollOffset < groupScrollOffsets.first) {
+        return;
+      }
+
+      while (low <= high) {
+        final mid = low + (high - low) ~/ 2;
+        final midValue = groupScrollOffsets[mid];
+
+        if (midValue <= normalizedScrollOffset) {
+          // This key is less than or equal to the target scrollPosition.
+          // It's a potential floor. Store its index and try searching higher
+          // for a potentially closer floor value.
+          floorIndex = mid;
+          low = mid + 1;
+        } else {
+          // This key is greater than the target scrollPosition.
+          // The floor must be in the lower half.
+          high = mid - 1;
+        }
+      }
+      currentGroupID = widget.galleryGroups
+          .scrollOffsetToGroupIdMap[groupScrollOffsets[floorIndex]];
     }
+
     setState(() {});
   }
 
@@ -629,12 +654,13 @@ class _PinnedGroupHeaderState extends State<PinnedGroupHeader> {
   Widget build(BuildContext context) {
     return currentGroupID != null
         ? GroupHeaderWidget(
-            title: widget.galleryGroups.groupIdToheaderDataMap[currentGroupID!]!
-                .groupType
-                .getTitle(
-              context,
-              widget.galleryGroups.groupIDToFilesMap[currentGroupID]!.first,
-            ),
+            title: widget.galleryGroups.groupIdToheaderDataMap[currentGroupID!]
+                    ?.groupType
+                    .getTitle(
+                  context,
+                  widget.galleryGroups.groupIDToFilesMap[currentGroupID]!.first,
+                ) ??
+                '',
             gridSize: localSettings.getPhotoGridSize(),
             height: widget.galleryGroups.headerExtent,
           )
