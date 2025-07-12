@@ -40,7 +40,7 @@ class _AppState extends State<App>
   late StreamSubscription<SignedOutEvent> _signedOutEvent;
   late StreamSubscription<SignedInEvent> _signedInEvent;
   Locale? locale;
-  setLocale(Locale newLocale) {
+  void setLocale(Locale newLocale) {
     setState(() {
       locale = newLocale;
     });
@@ -82,7 +82,7 @@ class _AppState extends State<App>
                 UpdateService.instance.getLatestVersionInfo(),
               );
             },
-            barrierColor: Colors.black.withOpacity(0.85),
+            barrierColor: Colors.black.withValues(alpha: 0.85),
           );
         });
       }

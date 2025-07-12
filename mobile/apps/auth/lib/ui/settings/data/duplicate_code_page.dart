@@ -83,7 +83,7 @@ class _DuplicateCodePageState extends State<DuplicateCodePage> {
                                     color: Theme.of(context)
                                         .iconTheme
                                         .color!
-                                        .withOpacity(0.7),
+                                        .withValues(alpha: 0.7),
                                   ),
                         ),
                         const Padding(padding: EdgeInsets.only(left: 4)),

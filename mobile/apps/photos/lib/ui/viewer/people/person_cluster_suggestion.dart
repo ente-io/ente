@@ -503,7 +503,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
                   ),
                   child: Container(
                     decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.7),
+                      color: Colors.black.withValues(alpha: 0.7),
                     ),
                     child: Center(
                       child: Text(

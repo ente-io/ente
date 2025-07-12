@@ -47,6 +47,6 @@ void showToast(
   }
 }
 
-void showShortToast(context, String message) {
+void showShortToast(BuildContext context, String message) {
   showToast(context, message, toastLength: Toast.LENGTH_SHORT);
 }

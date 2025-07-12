@@ -249,7 +249,11 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
     }
     _recoveryKeyFile.writeAsStringSync(recoveryKey);
 
-    await Share.shareXFiles([XFile(_recoveryKeyFile.path)]);
+    await SharePlus.instance.share(
+      ShareParams(
+        files: [XFile(_recoveryKeyFile.path)],
+      ),
+    );
     Future.delayed(const Duration(milliseconds: 500), () {
       if (mounted) {
         setState(() {

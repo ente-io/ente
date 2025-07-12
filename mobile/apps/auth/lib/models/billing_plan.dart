@@ -2,7 +2,7 @@ import 'dart:convert';
 
 class BillingPlans {
   final List<BillingPlan> plans;
-  final FreePlan freePlan;
+  final FreePlan? freePlan;
 
   BillingPlans({
     required this.plans,
@@ -12,12 +12,12 @@ class BillingPlans {
   Map<String, dynamic> toMap() {
     return {
       'plans': plans.map((x) => x.toMap()).toList(),
-      'freePlan': freePlan.toMap(),
+      'freePlan': freePlan?.toMap(),
     };
   }
 
-  static fromMap(Map<String, dynamic>? map) {
-    if (map == null) return null;
+  static BillingPlans fromMap(Map<String, dynamic>? map) {
+    if (map == null) return BillingPlans(plans: [], freePlan: null);
 
     return BillingPlans(
       plans: List<BillingPlan>.from(
@@ -49,7 +49,7 @@ class FreePlan {
     };
   }
 
-  static fromMap(Map<String, dynamic>? map) {
+  static FreePlan? fromMap(Map<String, dynamic>? map) {
     if (map == null) return null;
 
     return FreePlan(
@@ -91,7 +91,7 @@ class BillingPlan {
     };
   }
 
-  static fromMap(Map<String, dynamic>? map) {
+  static BillingPlan? fromMap(Map<String, dynamic>? map) {
     if (map == null) return null;
 
     return BillingPlan(
