@@ -13,7 +13,6 @@ import 'package:photos/models/file_load_result.dart';
 import "package:photos/models/gallery/gallery_sections.dart";
 import 'package:photos/models/selected_files.dart';
 import "package:photos/service_locator.dart";
-import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/common/loading_widget.dart';
 import "package:photos/ui/viewer/gallery/component/group/group_header_widget.dart";
 import "package:photos/ui/viewer/gallery/component/group/type.dart";
@@ -224,8 +223,11 @@ class GalleryState extends State<Gallery> {
 
     getIntrinsicSizeOfWidget(
       GroupHeaderWidget(
-        title: "This is a temp title",
+        title: "Dummy title",
         gridSize: localSettings.getPhotoGridSize(),
+        filesInGroup: const [],
+        selectedFiles: null,
+        showSelectAllByDefault: false,
       ),
       context,
     ).then((size) {
@@ -434,7 +436,6 @@ class GalleryState extends State<Gallery> {
     if (groupHeaderExtent == null) return const SliverFillRemaining();
 
     _logger.info("Building Gallery  ${widget.tagPrefix}");
-    final colorScheme = getEnteColorScheme(context);
 
     final galleryGroups = GalleryGroups(
       allFiles: _allGalleryFiles,
@@ -443,6 +444,7 @@ class GalleryState extends State<Gallery> {
       selectedFiles: widget.selectedFiles,
       tagPrefix: widget.tagPrefix,
       headerExtent: groupHeaderExtent!,
+      showSelectAllByDefault: widget.showSelectAllByDefault,
     );
     GalleryFilesState.of(context).setGalleryFiles = _allGalleryFiles;
     if (!_hasLoadedFiles) {
@@ -507,6 +509,8 @@ class GalleryState extends State<Gallery> {
               galleryGroups: galleryGroups,
               getSectionedListSliverRenderBoxYOffsetRelativeToStackRenderBox: () =>
                   _sectionedListSliverRenderBoxYOffsetRelativeToStackRenderBox,
+              selectedFiles: widget.selectedFiles,
+              showSelectAllByDefault: widget.showSelectAllByDefault,
             ),
           ],
         ),
@@ -581,10 +585,15 @@ class PinnedGroupHeader extends StatefulWidget {
   final GalleryGroups galleryGroups;
   final double? Function()
       getSectionedListSliverRenderBoxYOffsetRelativeToStackRenderBox;
+  final SelectedFiles? selectedFiles;
+  final bool showSelectAllByDefault;
+
   const PinnedGroupHeader({
     required this.scrollController,
     required this.galleryGroups,
     required this.getSectionedListSliverRenderBoxYOffsetRelativeToStackRenderBox,
+    required this.selectedFiles,
+    required this.showSelectAllByDefault,
     super.key,
   });
 
@@ -593,7 +602,7 @@ class PinnedGroupHeader extends StatefulWidget {
 }
 
 class _PinnedGroupHeaderState extends State<PinnedGroupHeader> {
-  String? currentGroupID;
+  String? currentGroupId;
   @override
   void initState() {
     super.initState();
@@ -617,7 +626,7 @@ class _PinnedGroupHeaderState extends State<PinnedGroupHeader> {
         widget
             .getSectionedListSliverRenderBoxYOffsetRelativeToStackRenderBox()!;
     if (normalizedScrollOffset < 0) {
-      currentGroupID = null;
+      currentGroupId = null;
     } else {
       final groupScrollOffsets = widget.galleryGroups.groupScrollOffsets;
 
@@ -649,7 +658,7 @@ class _PinnedGroupHeaderState extends State<PinnedGroupHeader> {
           high = mid - 1;
         }
       }
-      currentGroupID = widget.galleryGroups
+      currentGroupId = widget.galleryGroups
           .scrollOffsetToGroupIdMap[groupScrollOffsets[floorIndex]];
     }
 
@@ -658,16 +667,20 @@ class _PinnedGroupHeaderState extends State<PinnedGroupHeader> {
 
   @override
   Widget build(BuildContext context) {
-    return currentGroupID != null
+    return currentGroupId != null
         ? GroupHeaderWidget(
-            title: widget.galleryGroups.groupIdToheaderDataMap[currentGroupID!]!
+            title: widget.galleryGroups.groupIdToheaderDataMap[currentGroupId!]!
                 .groupType
                 .getTitle(
               context,
-              widget.galleryGroups.groupIDToFilesMap[currentGroupID]!.first,
+              widget.galleryGroups.groupIDToFilesMap[currentGroupId]!.first,
             ),
             gridSize: localSettings.getPhotoGridSize(),
             height: widget.galleryGroups.headerExtent,
+            filesInGroup:
+                widget.galleryGroups.groupIDToFilesMap[currentGroupId!]!,
+            selectedFiles: widget.selectedFiles,
+            showSelectAllByDefault: widget.showSelectAllByDefault,
           )
         : const SizedBox.shrink();
   }

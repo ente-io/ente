@@ -19,6 +19,7 @@ class GalleryGroups {
   final SelectedFiles? selectedFiles;
   final bool limitSelectionToOne;
   final String tagPrefix;
+  final bool showSelectAllByDefault;
   final _logger = Logger("GalleryGroups");
 
   //TODO: Add support for sort order
@@ -33,6 +34,7 @@ class GalleryGroups {
     required this.tagPrefix,
     this.sortOrderAsc = true,
     required this.headerExtent,
+    required this.showSelectAllByDefault,
     this.limitSelectionToOne = false,
   }) {
     init();
@@ -109,6 +111,9 @@ class GalleryGroups {
                     .groupType
                     .getTitle(context, groupIDToFilesMap[groupID]!.first),
                 gridSize: crossAxisCount,
+                filesInGroup: groupIDToFilesMap[groupID]!,
+                selectedFiles: selectedFiles,
+                showSelectAllByDefault: showSelectAllByDefault,
               );
             } else {
               final gridRowChildren = <Widget>[];
