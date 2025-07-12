@@ -597,16 +597,22 @@ class _PinnedGroupHeaderState extends State<PinnedGroupHeader> {
   @override
   void initState() {
     super.initState();
-    widget.scrollController.addListener(_scrollControllerListener);
+    widget.scrollController.addListener(_setCurrentGroupID);
+  }
+
+  @override
+  void didUpdateWidget(covariant PinnedGroupHeader oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _setCurrentGroupID();
   }
 
   @override
   void dispose() {
-    widget.scrollController.removeListener(_scrollControllerListener);
+    widget.scrollController.removeListener(_setCurrentGroupID);
     super.dispose();
   }
 
-  void _scrollControllerListener() {
+  void _setCurrentGroupID() {
     final normalizedScrollOffset = widget.scrollController.offset -
         widget
             .getSectionedListSliverRenderBoxYOffsetRelativeToStackRenderBox()!;
@@ -654,13 +660,12 @@ class _PinnedGroupHeaderState extends State<PinnedGroupHeader> {
   Widget build(BuildContext context) {
     return currentGroupID != null
         ? GroupHeaderWidget(
-            title: widget.galleryGroups.groupIdToheaderDataMap[currentGroupID!]
-                    ?.groupType
-                    .getTitle(
-                  context,
-                  widget.galleryGroups.groupIDToFilesMap[currentGroupID]!.first,
-                ) ??
-                '',
+            title: widget.galleryGroups.groupIdToheaderDataMap[currentGroupID!]!
+                .groupType
+                .getTitle(
+              context,
+              widget.galleryGroups.groupIDToFilesMap[currentGroupID]!.first,
+            ),
             gridSize: localSettings.getPhotoGridSize(),
             height: widget.galleryGroups.headerExtent,
           )
