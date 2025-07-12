@@ -5,7 +5,7 @@ import 'dart:io' as io;
 import 'dart:typed_data';
 
 import 'package:bip39/bip39.dart' as bip39;
-import 'package:configuration/constants.dart';
+import 'package:ente_configuration/constants.dart';
 import 'package:ente_base/models/database.dart';
 import 'package:ente_base/models/key_attributes.dart';
 import 'package:ente_base/models/key_gen_result.dart';
@@ -21,10 +21,11 @@ import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tuple/tuple.dart';
 
-class Configuration {
-  Configuration._privateConstructor();
+class BaseConfiguration {
+  BaseConfiguration._privateConstructor();
 
-  static final Configuration instance = Configuration._privateConstructor();
+  static final BaseConfiguration instance =
+      BaseConfiguration._privateConstructor();
   static const endpoint = String.fromEnvironment(
     "endpoint",
     defaultValue: kDefaultProductionEndpoint,
