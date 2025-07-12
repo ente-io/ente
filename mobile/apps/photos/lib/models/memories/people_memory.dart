@@ -108,6 +108,8 @@ class PeopleMemory extends SmartMemory {
     this.peopleMemoryType,
     this.personID,
     this.personName, {
+    String? title,
+    String? id,
     super.firstCreationTime,
     super.lastCreationTime,
     this.activity,
@@ -116,9 +118,10 @@ class PeopleMemory extends SmartMemory {
   }) : super(
           memories,
           MemoryType.people,
-          '',
+          title ?? '',
           firstDateToShow,
           lastDateToShow,
+          id: id,
         );
 
   PeopleMemory copyWith({

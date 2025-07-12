@@ -48,10 +48,10 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
   bool get personPage => widget.person != null;
   PersonEntity get relevantPerson => widget.person ?? person!;
 
-  late AnimationController _slideController;
-  late AnimationController _fadeController;
-  late Animation<Offset> _slideAnimation;
-  late Animation<double> _fadeAnimation;
+  AnimationController? _slideController;
+  AnimationController? _fadeController;
+  Animation<Offset>? _slideAnimation;
+  Animation<double>? _fadeAnimation;
 
   @override
   void initState() {
@@ -76,7 +76,7 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
       end: Offset.zero,
     ).animate(
       CurvedAnimation(
-        parent: _slideController,
+        parent: _slideController!,
         curve: Curves.easeOutCubic,
       ),
     );
@@ -86,7 +86,7 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
       end: 1.0,
     ).animate(
       CurvedAnimation(
-        parent: _fadeController,
+        parent: _fadeController!,
         curve: Curves.easeInOut,
       ),
     );
@@ -121,8 +121,10 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
           });
         }
 
-        unawaited(_fadeController.forward());
-        unawaited(_slideController.forward());
+        if (mounted && _fadeController != null && _slideController != null) {
+          unawaited(_fadeController!.forward());
+          unawaited(_slideController!.forward());
+        }
 
         unawaited(_precomputeNextSuggestions());
       } else {
@@ -371,25 +373,29 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
   }
 
   Future<void> _animateOut() async {
-    await Future.wait([
-      _fadeController.reverse(),
-      _slideController.reverse(),
-    ]);
+    if (mounted && _fadeController != null && _slideController != null) {
+      await Future.wait([
+        _fadeController!.reverse(),
+        _slideController!.reverse(),
+      ]);
+    }
   }
 
   Future<void> _animateIn() async {
-    _slideController.reset();
-    _fadeController.reset();
-    await Future.wait([
-      _fadeController.forward(),
-      _slideController.forward(),
-    ]);
+    if (mounted && _fadeController != null && _slideController != null) {
+      _slideController!.reset();
+      _fadeController!.reset();
+      await Future.wait([
+        _fadeController!.forward(),
+        _slideController!.forward(),
+      ]);
+    }
   }
 
   @override
   void dispose() {
-    _slideController.dispose();
-    _fadeController.dispose();
+    _slideController?.dispose();
+    _fadeController?.dispose();
     super.dispose();
   }
 
@@ -398,7 +404,9 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
     if (isLoading ||
         allSuggestions.isEmpty ||
         currentSuggestionIndex >= allSuggestions.length ||
-        !hasCurrentSuggestion) {
+        !hasCurrentSuggestion ||
+        _slideAnimation == null ||
+        _fadeAnimation == null) {
       return const SizedBox.shrink();
     }
 
@@ -406,9 +414,9 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
     final textTheme = getEnteTextTheme(context);
 
     return SlideTransition(
-      position: _slideAnimation,
+      position: _slideAnimation!,
       child: FadeTransition(
-        opacity: _fadeAnimation,
+        opacity: _fadeAnimation!,
         child: GestureDetector(
           key: ValueKey('suggestion_$currentSuggestionIndex'),
           onTap: _navigateToCluster,
