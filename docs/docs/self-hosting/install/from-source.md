@@ -5,16 +5,9 @@ description: Getting started self hosting Ente Photos and/or Ente Auth
 
 # Ente from Source
 
-> [!WARNING] NOTE
-> The below documentation will cover instructions about
-> self-hosting the web app manually. If you want to deploy Ente hassle free, use
-> the [one line](https://ente.io/blog/self-hosting-quickstart/) command to setup
-> Ente. This guide might be deprecated in the near future.
-
 ## Installing Docker
 
-Refer to
-[How to install Docker from the APT repository](https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository)
+Refer to [How to install Docker from the APT repository](https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository)
 for detailed instructions.
 
 ## Start the server
@@ -187,5 +180,3 @@ Albums Family and Cast in your `museum.yaml` configuration file. Checkout
 [`local.yaml`](https://github.com/ente-io/ente/blob/543411254b2bb55bd00a0e515dcafa12d12d3b35/server/configurations/local.yaml#L76-L89)
 to configure the endpoints. Make sure to setup up your DNS Records accordingly
 to the similar URL's you set up in `museum.yaml`.
-
-Next part is to configure the web server.

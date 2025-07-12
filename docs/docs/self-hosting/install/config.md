@@ -26,18 +26,23 @@ Here's the list of environment variables that need to be configured:
 
 ## Config File
 
+Ente's server, Museum, uses a configuration file
+
 ## Default Configuration
 
 ### Ports
 
-The below format is according to how ports are mapped in Docker when using quickstart script.
-The mapping is of the format `- <host-port>:<container-port>` in `ports`.
+The below format is according to how ports are mapped in Docker when using
+quickstart script. The mapping is of the format `- <host-port>:<container-port>`
+in `ports`.
 
-| Service                            | Type   | Host Port | Container Port |
-| ---------------------------------- | ------ | --------- | -------------- |
-| Museum                             | Server | 8080      | 8080           |
-| Ente Photos                        | Web    | 3000      | 3000           |
-| Ente Accounts                      | Web    | 3001      | 3001           |
-| Ente Albums                        | Web    | 3002      | 3002           |
-| [Ente Auth](https://ente.io/auth/) | Web    | 3003      | 3003           |
-| [Ente Cast](http://ente.io/cast)   | Web    | 3004      | 3004           |
+| Service                            | Type     | Host Port | Container Port |
+| ---------------------------------- | -------- | --------- | -------------- |
+| Museum                             | Server   | 8080      | 8080           |
+| Ente Photos                        | Web      | 3000      | 3000           |
+| Ente Accounts                      | Web      | 3001      | 3001           |
+| Ente Albums                        | Web      | 3002      | 3002           |
+| [Ente Auth](https://ente.io/auth/) | Web      | 3003      | 3003           |
+| [Ente Cast](http://ente.io/cast)   | Web      | 3004      | 3004           |
+| MinIO                              | S3       | 3200      | 3200           |
+| PostgreSQL                         | Database |           | 5432           |
