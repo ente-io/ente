@@ -1,5 +1,5 @@
 ---
-title: Quickstart Script
+title: Quickstart Script (Recommended) - Self-hosting
 description: Self-hosting Ente with quickstart script
 ---
 

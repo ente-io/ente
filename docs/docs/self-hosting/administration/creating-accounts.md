@@ -1,5 +1,5 @@
 ---
-title: Creating accounts
+title: Creating Accounts - Self-hosting
 description: Creating accounts on your deployment
 ---
 

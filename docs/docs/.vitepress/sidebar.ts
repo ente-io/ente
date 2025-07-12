@@ -259,20 +259,16 @@ export const sidebar = [
                         link: "/self-hosting/install/quickstart",
                     },
                     {
-                        text: "Running Ente from source",
+                        text: "Docker Compose",
                         link: "/self-hosting/install/from-source",
                     },
                     {
-                        text: "Running Ente without Docker",
+                        text: "Without Docker",
                         link: "/self-hosting/install/standalone-ente",
                     },
                     {
-                        text: "Environment variables",
-                        link: "/self-hosting/install/environment",
-                    },
-                    {
-                        text: "Default Configuration",
-                        link: "/self-hosting/install/defaults",
+                        text: "Configuration",
+                        link: "/self-hosting/install/config",
                     },
                     {
                         text: "Post-installation Steps",
@@ -290,11 +286,11 @@ export const sidebar = [
                 items: [
                     {
                         text: "Creating accounts",
-                        link: "/self-hosting/creating-accounts",
+                        link: "/self-hosting/administration/creating-accounts",
                     },
                     {
                         text: "Configuring your server",
-                        link: "/self-hosting/museum",
+                        link: "/self-hosting/administration/museum",
                     },
                     {
                         text: "Configuring S3",
@@ -302,7 +298,7 @@ export const sidebar = [
                     },
                     {
                         text: "Reverse proxy",
-                        link: "/self-hosting/reverse-proxy",
+                        link: "/self-hosting/administration/reverse-proxy",
                     },
                 ],
             },

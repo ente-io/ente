@@ -1,9 +1,9 @@
 ---
-title: Installing Ente Standalone (without Docker)
-description: Installing and setting up Ente standalone without docker.
+title: Running Ente Without Docker - Self-hosting
+description: Installing and setting up Ente without Docker
 ---
 
-# Installing and Deploying Ente Standalone (without Docker)
+# Running Ente without Docker
 
 ## Running Museum (Ente's server) without Docker
 
