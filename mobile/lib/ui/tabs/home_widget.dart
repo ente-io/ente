@@ -47,6 +47,7 @@ import 'package:photos/states/user_details_state.dart';
 import 'package:photos/theme/colors.dart';
 import "package:photos/theme/effects.dart";
 import 'package:photos/theme/ente_theme.dart';
+import 'package:photos/ui/account/up_login_page.dart';
 import 'package:photos/ui/collections/collection_action_sheet.dart';
 import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
@@ -55,7 +56,7 @@ import 'package:photos/ui/home/grant_permissions_widget.dart';
 import 'package:photos/ui/home/header_widget.dart';
 import 'package:photos/ui/home/home_bottom_nav_bar.dart';
 import 'package:photos/ui/home/home_gallery_widget.dart';
-import 'package:photos/ui/home/landing_page_widget.dart';
+//import 'package:photos/ui/home/landing_page_widget.dart';
 import "package:photos/ui/home/loading_photos_widget.dart";
 import 'package:photos/ui/home/start_backup_hook_widget.dart';
 import 'package:photos/ui/notification/update/change_log_page.dart';
@@ -650,7 +651,10 @@ class _HomeWidgetState extends State<HomeWidget> {
   Widget _getBody(BuildContext context) {
     if (!Configuration.instance.hasConfiguredAccount()) {
       _closeDrawerIfOpen(context);
-      return const LandingPageWidget();
+      _logger.info('LandingPageWidget1');
+
+      // return const LandingPageWidget();
+       return const LoadingPage();
     }
     if (!permissionService.hasGrantedPermissions()) {
       entityService.syncEntities().then((_) {
@@ -659,6 +663,7 @@ class _HomeWidgetState extends State<HomeWidget> {
       return const GrantPermissionsWidget();
     }
     if (!LocalSyncService.instance.hasCompletedFirstImport()) {
+      _logger.info('hasCompletedFirstImport');
       return const LoadingPhotosWidget();
     }
     if (_sharedFiles != null &&

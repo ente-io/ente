@@ -68,10 +68,35 @@ const kBGTaskTimeout = Duration(seconds: 25);
 const kBGPushTimeout = Duration(seconds: 28);
 const kFGTaskDeathTimeoutInMicroseconds = 5000000;
 
-void main() async {
-  debugRepaintRainbowEnabled = false;
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   MediaKit.ensureInitialized();
+
+  const MethodChannel _accountChannel = MethodChannel('com.unplugged.photos/account');
+  _accountChannel.setMethodCallHandler((MethodCall call) async {
+    if (call.method == "onAccountReceived") {
+      final Map<dynamic, dynamic>? accountMap = call.arguments as Map<dynamic, dynamic>?;
+      if (accountMap != null) {
+        try {
+          final receivedAccount = Account.fromMap(accountMap);
+          accountNotifier.value = receivedAccount;
+          _logger.info("account 4: user name: ${accountNotifier.value?.username}, uptoken: X${accountNotifier.value?.upToken}X, password: ${accountNotifier.value?.servicePassword}");
+
+          _logger.info("Account details received in Flutter: \${receivedAccount.username}");
+        } catch (e, s) {
+          _logger.severe("Failed to parse account from native", e, s);
+        }
+      }
+    } else {
+      throw MissingPluginException('No such method \${call.method}');
+    }
+  });
+
+  try {
+    await _accountChannel.invokeMethod("requestAccount");
+  } catch (e, s) {
+    _logger.warning("Failed to request account from native", e, s);
+  }
 
   final savedThemeMode = await AdaptiveTheme.getThemeMode();
   await _runInForeground(savedThemeMode);
@@ -85,12 +110,9 @@ void main() async {
   );
 
   unawaited(
-    SystemChrome.setEnabledSystemUIMode(
-      SystemUiMode.edgeToEdge,
-    ),
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge),
   );
 }
-
 Future<void> _runInForeground(AdaptiveThemeMode? savedThemeMode) async {
   return await _runWithLogs(() async {
     _logger.info("Starting app in foreground");

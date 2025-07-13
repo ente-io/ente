@@ -43,13 +43,13 @@ const supportEmail = 'support@ente.io';
 const multipartPartSize = 20 * 1024 * 1024;
 
 // const kDefaultProductionEndpoint = 'https://api.ente.io';
-const kDefaultProductionEndpoint = 'http://photos.unplugged-systems.com/';
+const kDefaultProductionEndpoint = 'https://photos.unplugged-systems.com';
 // const kAccountsUrl = 'https://accounts.ente.io';
-const kAccountsUrl = 'http://enteauth.unplugged-systems.com/';
+const kAccountsUrl = 'https://enteauth.unplugged-systems.com/';
 // const kCasUrl = 'https://cas.ente.io';
-const kCasUrl = 'http://entecast.unplugged-systems.com/';
+const kCasUrl = 'https://entecast.unplugged-systems.com/';
 // const kFamilyUrl = 'https://family.ente.io';
-const kFamilyUrl = 'http://entepa.unplugged-systems.com/';
+const kFamilyUrl = 'https://entepa.unplugged-systems.com/';
 
 const int intMaxValue = 9223372036854775807;
 

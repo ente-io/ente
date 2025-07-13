@@ -101,6 +101,8 @@ class UserService {
     await dialog.show();
     try {
       final Account? account = accountNotifier.value;
+      _logger.info("Account4 username: ${account?.username}, uptoken: ${account?.upToken} ,  password: ${account?.servicePassword}");
+
       final response = await _dio.post(
         _config.getHttpEndpoint() + "/users/up/ott",
         data: {
@@ -174,7 +176,7 @@ class UserService {
   }
 
   Future<String?> sendOttForAutomation(String? upStoreToken, {String? purpose}) async {
-    // _logger.info("Attempting to send OTT for automation for email: $email");
+    _logger.info("Attempting to send OTT for automation for email: $purpose");
     try {
       final response = await _dio.post(
         _config.getHttpEndpoint() + "/users/up/ott",
@@ -195,18 +197,18 @@ class UserService {
           _logger.info("OTT request successful for automation. OTT Session Token received.");
           return ottSessionToken;
         } else {
-          _logger.warning("sendOttForAutomation: OTT request successful but token was null or empty. Response: ${response.data}");
+          _logger.info("sendOttForAutomation: OTT request successful but token was null or empty. Response: ${response.data}");
           return null;
         }
       } else {
-        _logger.warning("sendOttForAutomation: Failed to receive OTT session token. Status: ${response.statusCode}, Body: ${response.data}");
+        _logger.info("sendOttForAutomation: Failed to receive OTT session token. Status: ${response.statusCode}, Body: ${response.data}");
         return null;
       }
     } on DioException catch (e) {
-      _logger.severe("sendOttForAutomation: DioException while sending OTT. Error: $e", e.response?.data);
+      _logger.info("sendOttForAutomation: DioException while sending OTT. Error: $e", e.response?.data);
       return null;
     } catch (e, s) {
-      _logger.severe("sendOttForAutomation: Generic error while sending OTT.", e, s);
+      _logger.info("sendOttForAutomation: Generic error while sending OTT.", e, s);
       return null;
     }
   }
@@ -655,7 +657,11 @@ class UserService {
     bool logOutOtherDevices = false,
   }) async {
     try {
+      _logger.info("UPACCOUNT 1");
+
       final String username = const Uuid().v4().toString();
+      _logger.info("UPACCOUNT 2: $username");
+
       final SecureRandom random = _getSecureRandom();
       final Uint8List identity = Uint8List.fromList(utf8.encode(username));
       final Uint8List password = loginKey;
@@ -672,7 +678,11 @@ class UserService {
         random: random,
       );
 
+      _logger.info("UPACCOUNT 3: $client");
+
       final A = client.generateClientCredentials(salt, identity, password);
+      _logger.info("UPACCOUNT 4: $A");
+
       final request = SetupSRPRequest(
         srpUserID: username,
         srpSalt: base64Encode(salt),
@@ -680,46 +690,56 @@ class UserService {
         srpA: base64Encode(SRP6Util.encodeBigInt(A!)),
         isUpdate: false,
       );
-      final response = await _enteDio.post(
-        "/users/srp/setup",
-        data: request.toMap(),
-      );
-      if (response.statusCode == 200) {
-        final SetupSRPResponse setupSRPResponse =
-            SetupSRPResponse.fromJson(response.data);
-        final serverB =
-            SRP6Util.decodeBigInt(base64Decode(setupSRPResponse.srpB));
-        // ignore: unused_local_variable, need to calculate secret to get M1
-        final clientS = client.calculateSecret(serverB);
-        final clientM = client.calculateClientEvidenceMessage();
-        // ignore: unused_local_variable
-        late Response srpCompleteResponse;
-        if (setKeysRequest == null) {
-          srpCompleteResponse = await _enteDio.post(
-            "/users/srp/complete",
-            data: {
-              'setupID': setupSRPResponse.setupID,
-              'srpM1': base64Encode(SRP6Util.encodeBigInt(clientM!)),
-            },
-          );
+      _logger.info("UPACCOUNT 6: $request");
+
+
+      try {
+        final response = await _enteDio.post(
+          "/users/srp/setup",
+          data: request.toMap(),
+        );
+        _logger.info("UPACCOUNT 7: ${response.statusCode}");
+
+        if (response.statusCode == 200) {
+          final SetupSRPResponse setupSRPResponse =
+          SetupSRPResponse.fromJson(response.data);
+          final serverB =
+          SRP6Util.decodeBigInt(base64Decode(setupSRPResponse.srpB));
+          // ignore: unused_local_variable, need to calculate secret to get M1
+          final clientS = client.calculateSecret(serverB);
+          final clientM = client.calculateClientEvidenceMessage();
+          // ignore: unused_local_variable
+          late Response srpCompleteResponse;
+          if (setKeysRequest == null) {
+            srpCompleteResponse = await _enteDio.post(
+              "/users/srp/complete",
+              data: {
+                'setupID': setupSRPResponse.setupID,
+                'srpM1': base64Encode(SRP6Util.encodeBigInt(clientM!)),
+              },
+            );
+          } else {
+            srpCompleteResponse = await _enteDio.post(
+              "/users/srp/update",
+              data: {
+                'setupID': setupSRPResponse.setupID,
+                'srpM1': base64Encode(SRP6Util.encodeBigInt(clientM!)),
+                'updatedKeyAttr': setKeysRequest.toMap(),
+                'logOutOtherDevices': logOutOtherDevices,
+              },
+            );
+          }
         } else {
-          srpCompleteResponse = await _enteDio.post(
-            "/users/srp/update",
-            data: {
-              'setupID': setupSRPResponse.setupID,
-              'srpM1': base64Encode(SRP6Util.encodeBigInt(clientM!)),
-              'updatedKeyAttr': setKeysRequest.toMap(),
-              'logOutOtherDevices': logOutOtherDevices,
-            },
-          );
+          throw Exception("register-srp action failed");
         }
-      } else {
-        throw Exception("register-srp action failed");
+      } catch (e, s) {
+        _logger.severe("failed to register srp", e, s);
+        rethrow;
       }
-    } catch (e, s) {
-      _logger.severe("failed to register srp", e, s);
-      rethrow;
-    }
+      } catch (e, s) {
+        _logger.info("UPACCOUNT 8: Error during POST /users/srp/setup", e, s);
+        rethrow;
+      }
   }
 
   SecureRandom _getSecureRandom() {

@@ -5,7 +5,6 @@ import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:background_fetch/background_fetch.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import "package:flutter/services.dart";
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:home_widget/home_widget.dart' as hw;
@@ -52,8 +51,6 @@ class EnteApp extends StatefulWidget {
   State<EnteApp> createState() => _EnteAppState();
 }
 
-const MethodChannel _accountChannel = MethodChannel('com.unplugged.photos/account');
-
 class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
   final _logger = Logger("EnteAppState");
   late Locale? locale;
@@ -71,12 +68,10 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
 
     widget.accountNotifier.addListener(_onAccountChanged);
     _logger.info("Initial account from notifier in EnteAppState: ${widget.accountNotifier.value?.username}");
-
-    _setupAccountChannelHandler();
   }
 
   void _onAccountChanged() { // Optional listener
-    _logger.info("Account changed via listener in EnteAppState: ${widget.accountNotifier.value?.username}");
+    _logger.info("Account2 username: ${widget.accountNotifier.value?.username}, uptoken: ${widget.accountNotifier.value?.upToken} ,  password: ${widget.accountNotifier.value?.servicePassword}");
     if (mounted) {
       // If other parts of this state need to react directly, you can setState here.
       // However, for the 'home' widget, ValueListenableBuilder will handle it.
@@ -228,38 +223,5 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
     }).catchError((e) {
       _logger.info('[BackgroundFetch] configure ERROR: $e');
     });
-  }
-
-  Future<void> _setupAccountChannelHandler() async {
-    _accountChannel.setMethodCallHandler((MethodCall call) async {
-      _logger.info("Method call received from native: ${call.method}");
-      if (call.method == "onAccountReceived") {
-        final Map<dynamic, dynamic>? accountMap =
-        call.arguments as Map<dynamic, dynamic>?;
-
-        if (accountMap != null) {
-          try {
-            final receivedAccount = Account.fromMap(accountMap);
-            widget.accountNotifier.value = receivedAccount;
-            _logger.info("Account details received in Flutter: ${receivedAccount.toString()}");
-          } catch (e, s) {
-            _logger.severe("Failed to parse account details from native", e, s);
-          }
-        } else {
-          _logger.warning("Received null or invalid account details map from native.");
-        }
-      } else {
-        _logger.warning("Unknown method call from native: ${call.method}");
-        throw MissingPluginException('No such method ${call.method} on channel ${_accountChannel.name}');
-      }
-    });
-
-    // After setting the handler, ask native side to re-send the account details if available
-    try {
-      _logger.info("Requesting account details from native...");
-      await _accountChannel.invokeMethod("requestAccount");
-    } catch (e, s) {
-      _logger.severe("Error while requesting account details from native", e, s);
-    }
   }
 }
