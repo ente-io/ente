@@ -73,7 +73,7 @@ If the code you're working needs to modify user facing strings, see
 ## 🔩 Architecture
 
 The architecture that powers end-to-end encrypted storage and sync of your
-tokens has been documented [here](../architecture/README.md).
+tokens has been documented [here](architecture/README.md).
 
 ## 🌍 Translate
 
