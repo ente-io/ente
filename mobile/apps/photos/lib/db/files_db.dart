@@ -421,19 +421,6 @@ class FilesDB with SqlDbBase {
     await db.execute('DELETE FROM entities');
   }
 
-  Future<void> insert(EnteFile file) async {
-    _logger.info("Inserting $file");
-    final db = await instance.sqliteAsyncDB;
-    final columnsAndPlaceholders =
-        _generateColumnsAndPlaceholdersForInsert(fileGenId: file.generatedID);
-    final values = _getParameterSetForFile(file);
-
-    await db.execute(
-      'INSERT OR REPLACE INTO $filesTable (${columnsAndPlaceholders["columns"]}) VALUES (${columnsAndPlaceholders["placeholders"]})',
-      values,
-    );
-  }
-
   // blocked upload queue (shared assets rendering)
   Future<int> insertAndGetId(EnteFile file) async {
     _logger.info("Inserting $file");

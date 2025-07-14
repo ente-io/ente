@@ -350,10 +350,10 @@ class _ZoomableImageState extends State<ZoomableImage> {
           _logger.info("File was deleted " + _photo.toString());
           if (_photo.isUploaded) {
             _photo.localID = null;
-            FilesDB.instance.update(_photo);
+            // FilesDB.instance.update(_photo);
             _loadNetworkImage();
           } else {
-            FilesDB.instance.deleteLocalFile(_photo);
+            // FilesDB.instance.deleteLocalFile(_photo);
             Bus.instance.fire(
               LocalPhotosUpdatedEvent(
                 [_photo],

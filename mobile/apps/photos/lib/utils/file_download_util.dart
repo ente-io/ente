@@ -10,10 +10,11 @@ import "package:photo_manager/photo_manager.dart";
 import 'package:photos/core/configuration.dart';
 import "package:photos/core/event_bus.dart";
 import 'package:photos/core/network/network.dart';
-import "package:photos/db/files_db.dart";
+import "package:photos/db/remote/table/mapping_table.dart";
 import "package:photos/events/local_photos_updated_event.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/file/file_type.dart";
+import "package:photos/models/file/remote/rl_mapping.dart";
 import "package:photos/models/ignored_file.dart";
 import "package:photos/module/download/file_url.dart";
 import "package:photos/module/download/task.dart";
@@ -232,8 +233,17 @@ Future<void> downloadToGallery(EnteFile file) async {
       }
 
       if (savedAsset != null) {
-        file.localID = savedAsset!.id;
-        await FilesDB.instance.insert(file);
+        // add rlMapping
+        if (file.lAsset == null) {
+          final rlMapping = RLMapping(
+            remoteUploadID: file.remoteID,
+            localID: savedAsset!.id,
+            localCloudID: null,
+            mappingType: MatchType.deviceHashMatched,
+          );
+          remoteDB.insertMappings([rlMapping]).ignore();
+          file.lAsset = savedAsset;
+        }
         Bus.instance.fire(
           LocalPhotosUpdatedEvent(
             [file],
