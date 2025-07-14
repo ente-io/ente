@@ -15,6 +15,7 @@ import "package:photos/events/memories_changed_event.dart";
 import "package:photos/events/people_changed_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
+import "package:photos/models/collection/smart_album_config.dart";
 import "package:photos/service_locator.dart";
 import 'package:photos/services/app_lifecycle_service.dart';
 import "package:photos/services/home_widget_service.dart";
@@ -74,8 +75,10 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
     _peopleChangedSubscription = Bus.instance.on<PeopleChangedEvent>().listen(
       (event) async {
         _changeCallbackDebouncer.run(
-          () async =>
-              unawaited(PeopleHomeWidgetService.instance.checkPeopleChanged()),
+          () async {
+            unawaited(PeopleHomeWidgetService.instance.checkPeopleChanged());
+            unawaited(syncSmartAlbums());
+          },
         );
       },
     );

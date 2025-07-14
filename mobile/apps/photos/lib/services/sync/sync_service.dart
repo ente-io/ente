@@ -12,6 +12,7 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/subscription_purchased_event.dart';
 import 'package:photos/events/sync_status_update_event.dart';
 import 'package:photos/events/trigger_logout_event.dart';
+import "package:photos/models/collection/smart_album_config.dart";
 import 'package:photos/models/file/file_type.dart';
 import "package:photos/services/language_service.dart";
 import 'package:photos/services/notification_service.dart';
@@ -199,6 +200,7 @@ class SyncService {
       if (shouldSync) {
         await _remoteSyncService.sync();
       }
+      await syncSmartAlbums();
     }
   }
 

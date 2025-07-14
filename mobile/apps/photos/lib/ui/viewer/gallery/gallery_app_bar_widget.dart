@@ -32,6 +32,7 @@ import "package:photos/theme/colors.dart";
 import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
 import "package:photos/ui/cast/auto.dart";
 import "package:photos/ui/cast/choose.dart";
+import "package:photos/ui/collections/album/smart_album_people.dart";
 import "package:photos/ui/common/popup_item.dart";
 import "package:photos/ui/common/web_page.dart";
 import 'package:photos/ui/components/action_sheet_widget.dart';
@@ -399,6 +400,26 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         ),
       );
     }
+
+    if (widget.collection != null) {
+      actions.add(
+        Tooltip(
+          message: S.of(context).goToSettings,
+          child: IconButton(
+            icon: const Icon(Icons.settings_outlined),
+            onPressed: () async {
+              await routeToPage(
+                context,
+                SmartAlbumPeople(
+                  collectionId: widget.collection!.id,
+                ),
+              );
+            },
+          ),
+        ),
+      );
+    }
+
     if (galleryType.isSharable() && !widget.isFromCollectPhotos) {
       actions.add(
         Tooltip(
