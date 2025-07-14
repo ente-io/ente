@@ -16,15 +16,15 @@ import "package:photos/ui/viewer/search/search_section_cta.dart";
 import "package:photos/ui/viewer/search_tab/section_header.dart";
 import "package:photos/utils/navigation_util.dart";
 
-class MomentsSection extends StatefulWidget {
+class MemoriesDebugSection extends StatefulWidget {
   final List<GenericSearchResult> momentsSearchResults;
-  const MomentsSection(this.momentsSearchResults, {super.key});
+  const MemoriesDebugSection(this.momentsSearchResults, {super.key});
 
   @override
-  State<MomentsSection> createState() => _MomentsSectionState();
+  State<MemoriesDebugSection> createState() => _MemoriesDebugSectionState();
 }
 
-class _MomentsSectionState extends State<MomentsSection> {
+class _MemoriesDebugSectionState extends State<MemoriesDebugSection> {
   late List<GenericSearchResult> _momentsSearchResults;
   final streamSubscriptions = <StreamSubscription>[];
 
@@ -56,7 +56,7 @@ class _MomentsSectionState extends State<MomentsSection> {
   }
 
   @override
-  void didUpdateWidget(covariant MomentsSection oldWidget) {
+  void didUpdateWidget(covariant MemoriesDebugSection oldWidget) {
     super.didUpdateWidget(oldWidget);
     _momentsSearchResults = widget.momentsSearchResults;
   }

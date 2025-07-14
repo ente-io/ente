@@ -19,7 +19,7 @@ import 'package:photos/ui/viewer/search_tab/albums_section.dart';
 import "package:photos/ui/viewer/search_tab/file_type_section.dart";
 import "package:photos/ui/viewer/search_tab/locations_section.dart";
 import "package:photos/ui/viewer/search_tab/magic_section.dart";
-import "package:photos/ui/viewer/search_tab/moments_section.dart";
+import "package:photos/ui/viewer/search_tab/memories_debug_section.dart";
 import "package:photos/ui/viewer/search_tab/people_section.dart";
 
 class SearchTab extends StatefulWidget {
@@ -133,7 +133,7 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
                       case SectionType.memoriesDebug:
                         if (flagService.internalUser &&
                             localSettings.isDebugMemoriesEnabled) {
-                          return MomentsSection(
+                          return MemoriesDebugSection(
                             snapshot.data!.elementAt(index)
                                 as List<GenericSearchResult>,
                           );
