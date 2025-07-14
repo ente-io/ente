@@ -108,7 +108,6 @@ extension SectionTypeExtensions on SectionType {
     }
   }
 
-  // TODO: lau: check if we should sort moment again
   bool get sortByName =>
       this != SectionType.face &&
       this != SectionType.magic &&
@@ -238,7 +237,6 @@ extension SectionTypeExtensions on SectionType {
 
       case SectionType.moment:
         if (flagService.internalUser) {
-          // TODO: lau: remove this whole smart memories and moment altogether
           return SearchService.instance.smartMemories(context!, limit);
         }
         return SearchService.instance.getRandomMomentsSearchResults(context!);
