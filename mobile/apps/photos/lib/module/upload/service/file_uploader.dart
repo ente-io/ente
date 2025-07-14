@@ -185,7 +185,7 @@ class FileUploader {
         file,
         uploadCollectionID,
         completer,
-        queue: queue!,
+        assetQueue: queue!,
       );
       _allBackups[uploadKey] = BackupItem(
         status: BackupItemStatus.inQueue,
@@ -329,9 +329,9 @@ class FileUploader {
     }
     final uploadLockID = file.lAsset!.id;
     try {
-      final uploadedFile =
-          await _tryToUpload(file, collectionID, item.queue?.manual ?? false)
-              .timeout(
+      final uploadedFile = await _tryToUpload(
+              file, collectionID, item.assetQueue?.manual ?? false)
+          .timeout(
         kFileUploadTimeout,
         onTimeout: () {
           final message = "Upload timed out for file " + file.toString();
@@ -339,8 +339,8 @@ class FileUploader {
           throw TimeoutException(message);
         },
       );
-      if (item.queue != null) {
-        await localDB.delete(item.queue!);
+      if (item.assetQueue != null) {
+        await localDB.delete(item.assetQueue!);
       }
       _queue.remove(uploadLockID)!.completer.complete(uploadedFile);
       _allBackups[uploadLockID] = _allBackups[uploadLockID]!
