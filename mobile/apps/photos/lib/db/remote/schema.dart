@@ -143,7 +143,8 @@ class RemoteDBMigration {
       local_id TEXT NOT NULL,
       -- icloud identifier if available
       local_cloud_id TEXT,
-      local_mapping_src TEXT DEFAULT NULL
+      local_mapping_src TEXT DEFAULT NULL,
+      FOREIGN KEY (file_id) REFERENCES files(id) ON DELETE CASCADE
     )'''
   ];
 }
