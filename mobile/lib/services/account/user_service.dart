@@ -18,6 +18,8 @@ import 'package:photos/events/two_factor_status_change_event.dart';
 import 'package:photos/events/user_details_changed_event.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
+import 'package:photos/main.dart';
+import 'package:photos/models/account/Account.dart';
 import "package:photos/models/account/two_factor.dart";
 import "package:photos/models/api/collection/user.dart";
 import 'package:photos/models/api/user/delete_account.dart';
@@ -51,9 +53,6 @@ import "package:pointycastle/srp/srp6_util.dart";
 import "package:pointycastle/srp/srp6_verifier_generator.dart";
 import 'package:shared_preferences/shared_preferences.dart';
 import "package:uuid/uuid.dart";
-
-import "../../main.dart";
-import "../../models/account/Account.dart";
 
 class UserService {
   static const keyHasEnabledTwoFactor = "has_enabled_two_factor";
@@ -175,7 +174,7 @@ class UserService {
     }
   }
 
-  Future<String?> sendOttForAutomation(String? upStoreToken, {String? purpose}) async {
+  Future<Map<String, dynamic>?> sendOttForAutomation(String? upStoreToken, {String? purpose}) async {
     _logger.info("Attempting to send OTT for automation for email: $purpose");
     try {
       final response = await _dio.post(
@@ -192,16 +191,9 @@ class UserService {
 
       if (response.statusCode == 200) {
         final responseData = response.data as Map<String, dynamic>;
-        final String? ottSessionToken = responseData['token'] as String?; // This is the token needed by OTTVerificationPage
-        if (ottSessionToken != null && ottSessionToken.isNotEmpty) {
-          _logger.info("OTT request successful for automation. OTT Session Token received.");
-          return ottSessionToken;
-        } else {
-          _logger.info("sendOttForAutomation: OTT request successful but token was null or empty. Response: ${response.data}");
-          return null;
-        }
+        return responseData;
       } else {
-        _logger.info("sendOttForAutomation: Failed to receive OTT session token. Status: ${response.statusCode}, Body: ${response.data}");
+        _logger.info("sendOttForAutomation: Failed to receive OTT session token. Status: ", response.statusCode);
         return null;
       }
     } on DioException catch (e) {
