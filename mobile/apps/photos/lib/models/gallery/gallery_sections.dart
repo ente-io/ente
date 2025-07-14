@@ -11,6 +11,7 @@ import "package:photos/service_locator.dart";
 import "package:photos/ui/viewer/gallery/component/gallery_file_widget.dart";
 import "package:photos/ui/viewer/gallery/component/group/group_header_widget.dart";
 import "package:photos/ui/viewer/gallery/component/group/type.dart";
+import "package:photos/ui/viewer/gallery/scrollbar/custom_scroll_bar_2.dart";
 import "package:uuid/uuid.dart";
 
 class GalleryGroups {
@@ -49,7 +50,9 @@ class GalleryGroups {
   final Map<String, List<EnteFile>> _groupIdToFilesMap = {};
   final Map<String, GroupHeaderData> _groupIdToHeaderDataMap = {};
   final Map<double, String> _scrollOffsetToGroupIdMap = {};
+  final Map<String, double> _groupIdToScrollOffsetMap = {};
   final List<double> _groupScrollOffsets = [];
+  final List<ScrollbarDivision> _scrollbarDivisions = [];
   final currentUserID = Configuration.instance.getUserID();
   final _uuid = const Uuid();
 
@@ -58,8 +61,10 @@ class GalleryGroups {
   Map<String, GroupHeaderData> get groupIdToheaderDataMap =>
       _groupIdToHeaderDataMap;
   Map<double, String> get scrollOffsetToGroupIdMap => _scrollOffsetToGroupIdMap;
+  Map<String, double> get groupIdToScrollOffsetMap => _groupIdToScrollOffsetMap;
   List<FixedExtentSectionLayout> get groupLayouts => _groupLayouts;
   List<double> get groupScrollOffsets => _groupScrollOffsets;
+  List<ScrollbarDivision> get scrollbarDivisions => _scrollbarDivisions;
 
   void init() {
     _buildGroups();
@@ -69,6 +74,9 @@ class GalleryGroups {
     assert(groupIDs.length == _groupIdToHeaderDataMap.length);
     assert(
       groupIDs.length == _scrollOffsetToGroupIdMap.length,
+    );
+    assert(
+      groupIDs.length == _groupIdToScrollOffsetMap.length,
     );
     assert(groupIDs.length == _groupScrollOffsets.length);
   }
@@ -179,6 +187,7 @@ class GalleryGroups {
       );
 
       _scrollOffsetToGroupIdMap[currentOffset] = groupID;
+      _groupIdToScrollOffsetMap[groupID] = currentOffset;
       _groupScrollOffsets.add(currentOffset);
 
       currentIndex = lastIndex;
@@ -199,17 +208,18 @@ class GalleryGroups {
 // TODO: compute this in isolate
   void _buildGroups() {
     final stopwatch = Stopwatch()..start();
+    final years = <int>{};
     List<EnteFile> groupFiles = [];
     for (int index = 0; index < allFiles.length; index++) {
       if (index > 0 &&
           !groupType.areFromSameGroup(allFiles[index - 1], allFiles[index])) {
-        _createNewGroup(groupFiles);
+        _createNewGroup(groupFiles, years);
         groupFiles = [];
       }
       groupFiles.add(allFiles[index]);
     }
     if (groupFiles.isNotEmpty) {
-      _createNewGroup(groupFiles);
+      _createNewGroup(groupFiles, years);
     }
     _logger.info(
       "Built ${_groupIds.length} groups in ${stopwatch.elapsedMilliseconds} ms",
@@ -222,6 +232,7 @@ class GalleryGroups {
 
   void _createNewGroup(
     List<EnteFile> groupFiles,
+    Set<int> years,
   ) {
     final uuid = _uuid.v1();
     _groupIds.add(uuid);
@@ -229,6 +240,19 @@ class GalleryGroups {
     _groupIdToHeaderDataMap[uuid] = GroupHeaderData(
       groupType: groupType,
     );
+
+    final yearOfGroup = DateTime.fromMicrosecondsSinceEpoch(
+      groupFiles.first.creationTime!,
+    ).year;
+    if (!years.contains(yearOfGroup)) {
+      years.add(yearOfGroup);
+      _scrollbarDivisions.add(
+        ScrollbarDivision(
+          groupID: uuid,
+          title: yearOfGroup.toString(),
+        ),
+      );
+    }
   }
 }
 

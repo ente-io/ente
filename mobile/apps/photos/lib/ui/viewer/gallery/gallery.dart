@@ -479,6 +479,7 @@ class GalleryState extends State<Gallery> {
       // ),
       child: CustomScrollBar2(
         scrollController: _scrollController,
+        galleryGroups: galleryGroups,
         child: Stack(
           key: _stackKey,
           clipBehavior: Clip.none,
