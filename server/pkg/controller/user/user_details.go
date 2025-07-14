@@ -5,6 +5,7 @@ import (
 	"github.com/ente-io/museum/ente"
 	"github.com/ente-io/museum/ente/details"
 	bonus "github.com/ente-io/museum/ente/storagebonus"
+	"github.com/ente-io/museum/pkg/utils/billing"
 	"github.com/ente-io/museum/pkg/utils/recover"
 	"github.com/ente-io/museum/pkg/utils/time"
 	"github.com/ente-io/stacktrace"
@@ -100,11 +101,15 @@ func (c *UserController) GetDetailsV2(ctx *gin.Context, userID int64, fetchMemor
 		return details.UserDetailsResponse{}, stacktrace.Propagate(err, "")
 	}
 	var planStoreForBonusComputation = subscription.Storage
-	if subscription.ExpiryTime < time.Microseconds() {
+	expiryBuffer := int64(0)
+	if value, ok := billing.ProviderToExpiryGracePeriodMap[subscription.PaymentProvider]; ok {
+		expiryBuffer = value
+	}
+	if (subscription.ExpiryTime + expiryBuffer) < time.Microseconds() {
 		planStoreForBonusComputation = 0
 	}
 	if familyData != nil {
-		if familyData.ExpiryTime < time.Microseconds() {
+		if (familyData.ExpiryTime + expiryBuffer) < time.Microseconds() {
 			familyData.Storage = 0
 		} else {
 			planStoreForBonusComputation = familyData.Storage
