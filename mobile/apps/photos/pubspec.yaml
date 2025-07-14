@@ -36,10 +36,6 @@ dependencies:
       url: https://github.com/ente-io/chewie.git
       ref: mybranched
   collection: #dart
-  combine:
-    git:
-      url: https://github.com/mobaink/combine.git
-      ref: feat_version_3.32.0
   computer: # logged task name in verbose in fork
     git: "https://github.com/ente-io/computer.git"
   connectivity_plus: ^6.0.2
@@ -78,7 +74,7 @@ dependencies:
     git:
       url: https://github.com/ente-io/ffmpeg-kit
       path: flutter/flutter
-      ref: android-packaged
+      ref: remove-event-sub
   figma_squircle: ^0.6.3
   file_saver: ^0.2.14
   firebase_core: ^3.6.0

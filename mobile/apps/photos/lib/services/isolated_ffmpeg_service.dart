@@ -1,10 +1,11 @@
 import "dart:async";
+import "dart:isolate";
 
-import "package:combine/combine.dart";
 import "package:computer/computer.dart";
 import "package:ffmpeg_kit_flutter/ffmpeg_kit.dart";
 import "package:ffmpeg_kit_flutter/ffmpeg_kit_config.dart";
 import "package:ffmpeg_kit_flutter/ffprobe_kit.dart";
+import "package:flutter/services.dart";
 import "package:photos/utils/ffprobe_util.dart";
 
 class IsolatedFfmpegService {
@@ -16,18 +17,22 @@ class IsolatedFfmpegService {
   }
 
   static Future<Map> runFfmpeg(String command) async {
-    return await CombineWorker()
-        .executeWithArg<Map, String>(_ffmpegRun, command);
+    final rootIsolateToken = RootIsolateToken.instance!;
+    return await Isolate.run<Map>(() => _ffmpegRun(command, rootIsolateToken));
   }
 
   static Future<Map> getVideoInfo(String file) async {
-    return await CombineWorker()
-        .executeWithArg<Map, String>(_getVideoProps, file);
+    final rootIsolateToken = RootIsolateToken.instance!;
+    return await Isolate.run<Map>(() => _getVideoProps(file, rootIsolateToken));
   }
 }
 
 @pragma('vm:entry-point')
-Future<Map> _getVideoProps(String filePath) async {
+Future<Map> _getVideoProps(
+  String filePath,
+  RootIsolateToken rootIsolateToken,
+) async {
+  BackgroundIsolateBinaryMessenger.ensureInitialized(rootIsolateToken);
   await FFmpegKitConfig.setLogLevel(-8);
   final session = await FFprobeKit.getMediaInformation(filePath);
   final mediaInfo = session.getMediaInformation();
@@ -41,13 +46,15 @@ Future<Map> _getVideoProps(String filePath) async {
 }
 
 @pragma('vm:entry-point')
-Future<Map> _ffmpegRun(String value) async {
+Future<Map> _ffmpegRun(String value, RootIsolateToken rootIsolateToken) async {
+  BackgroundIsolateBinaryMessenger.ensureInitialized(rootIsolateToken);
   await FFmpegKitConfig.setLogLevel(-8);
   final session = await FFmpegKit.execute(value, true);
-  final returnCode = (await session.getReturnCode())?.getValue();
+  final returnCode = await session.getReturnCode();
+  final output = await session.getOutput();
 
   return {
-    "returnCode": returnCode,
-    "output": await session.getOutput(),
+    "returnCode": returnCode?.getValue(),
+    "output": output,
   };
 }
