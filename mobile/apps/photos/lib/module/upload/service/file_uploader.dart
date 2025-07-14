@@ -456,14 +456,9 @@ class FileUploader {
       Bus.instance.fire(BackupUpdatedEvent(_allBackups));
     }
     if (!CollectionsService.instance.allowUpload(collectionID)) {
-      _logger.warning(
+      throw ArgumentError(
         'Upload not allowed for collection $collectionID',
       );
-      if (!file.isUploaded && file.generatedID != null) {
-        _logger.info("Deleting file entry for " + file.toString());
-        await FilesDB.instance.deleteByGeneratedID(file.generatedID!);
-      }
-      return file;
     }
     try {
       await _uploadLocks.acquireLock(
