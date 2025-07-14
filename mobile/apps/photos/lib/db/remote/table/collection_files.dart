@@ -26,11 +26,18 @@ extension CollectionFiles on RemoteDB {
   }
 
   Future<Set<int>> getAllCollectionIDsOfFile(int fileID) async {
+    return getAllCollectionIDsOfFile(fileID);
+  }
+
+  Future<List<CollectionFile>> getAllCFForFileIDs(
+    List<int> fileIDs,
+  ) async {
     final rows = await sqliteDB.getAll(
-      "SELECT collection_id FROM collection_files WHERE file_id = ?",
-      [fileID],
+      "SELECT * FROM collection_files WHERE file_id IN (${fileIDs.join(",")})",
     );
-    return rows.map((row) => row["collection_id"] as int).toSet();
+    return rows
+        .map((row) => CollectionFile.fromMap(row))
+        .toList(growable: false);
   }
 
   Future<Map<int, int>> getCollectionIdToFileCount(List<int> fileIDs) async {

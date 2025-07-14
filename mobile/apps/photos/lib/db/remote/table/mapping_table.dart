@@ -52,6 +52,20 @@ extension UploadMappingTable on RemoteDB {
     return cursor.map((row) => row['local_id'] as String).toSet();
   }
 
+  Future<Map<int, String>> getFileIDToLocalIDMapping(List<int> fileIDs) async {
+    if (fileIDs.isEmpty) return {};
+    final placeholders = List.filled(fileIDs.length, '?').join(',');
+    final cursor = await sqliteDB.getAll(
+      'SELECT file_id, local_id FROM upload_mapping WHERE file_id IN ($placeholders)',
+      fileIDs,
+    );
+    return Map.fromEntries(
+      cursor.map(
+        (row) => MapEntry(row['file_id'] as int, row['local_id'] as String),
+      ),
+    );
+  }
+
   Future<Set<int>> getFilesWithMapping(List<int> fileIDs) async {
     if (fileIDs.isEmpty) return {};
     final placeholders = List.filled(fileIDs.length, '?').join(',');

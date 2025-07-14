@@ -288,8 +288,11 @@ class RemoteSyncService {
     try {
       final uncategorizedCollection =
           await _collectionsService.getUncategorizedCollection();
-      final uploadedFile =
-          await _uploader.upload(file, uncategorizedCollection.id);
+      final uploadedFile = await _uploader.upload(
+        file,
+        uncategorizedCollection.id,
+        queue: queueEntry,
+      );
       await _collectionsService.addOrCopyToCollection(
         queueEntry.destCollectionId,
         [uploadedFile],
@@ -306,7 +309,7 @@ class RemoteSyncService {
   ) async {
     try {
       final uploadedFile =
-          await _uploader.upload(file, queueEntry.destCollectionId);
+          await _uploader.upload(file, queueEntry.destCollectionId, queue: queueEntry);
       await _collectionsService.addOrCopyToCollection(
         queueEntry.destCollectionId,
         [uploadedFile],

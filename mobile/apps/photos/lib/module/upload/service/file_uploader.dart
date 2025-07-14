@@ -17,7 +17,7 @@ import 'package:photos/core/errors.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/core/network/network.dart';
 import 'package:photos/db/files_db.dart';
-import "package:photos/db/remote/table/files_table.dart";
+import "package:photos/db/local/table/upload_queue_table.dart";
 import 'package:photos/db/upload_locks_db.dart';
 import "package:photos/events/backup_updated_event.dart";
 import "package:photos/events/file_uploaded_event.dart";
@@ -34,7 +34,6 @@ import 'package:photos/models/file/file_type.dart';
 import "package:photos/models/file/remote/asset.dart";
 import "package:photos/models/file/remote/collection_file.dart";
 import "package:photos/models/local/asset_upload_queue.dart";
-import "package:photos/models/user_details.dart";
 import "package:photos/module/upload/model/item.dart";
 import "package:photos/module/upload/model/media.dart";
 import "package:photos/module/upload/model/update_response.dart";
@@ -42,8 +41,8 @@ import 'package:photos/module/upload/model/upload_url.dart';
 import 'package:photos/module/upload/service/file_upload_metadata.dart';
 import "package:photos/module/upload/service/media.dart";
 import "package:photos/module/upload/service/multipart.dart";
+import "package:photos/module/upload/service/pre_upload_check.dart";
 import "package:photos/service_locator.dart";
-import "package:photos/services/account/user_service.dart";
 import 'package:photos/services/collections_service.dart';
 import "package:photos/services/ignored_files_service.dart";
 import "package:photos/services/local/shared_assert.service.dart";
@@ -52,7 +51,6 @@ import "package:photos/utils/file_key.dart";
 import "package:photos/utils/network_util.dart";
 import 'package:photos/utils/standalone/data.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:tuple/tuple.dart';
 import "package:uuid/uuid.dart";
 
 class FileUploader {
@@ -60,10 +58,10 @@ class FileUploader {
   static const kMaximumConcurrentVideoUploads = 2;
   static const kMaximumThumbnailCompressionAttempts = 2;
   static const kMaximumUploadAttempts = 4;
-  static const kMaxFileSize10Gib = 10737418240;
+
   static const kBlockedUploadsPollFrequency = Duration(seconds: 2);
   static const kFileUploadTimeout = Duration(minutes: 50);
-  static const k20MBStorageBuffer = 20 * 1024 * 1024;
+
   static const _lastStaleFileCleanupTime = "lastStaleFileCleanupTime";
 
   final _logger = Logger("FileUploader");
@@ -187,7 +185,7 @@ class FileUploader {
         file,
         uploadCollectionID,
         completer,
-        queue: queue,
+        queue: queue!,
       );
       _allBackups[uploadKey] = BackupItem(
         status: BackupItemStatus.inQueue,
@@ -341,6 +339,9 @@ class FileUploader {
           throw TimeoutException(message);
         },
       );
+      if (item.queue != null) {
+        await localDB.delete(item.queue!);
+      }
       _queue.remove(uploadLockID)!.completer.complete(uploadedFile);
       _allBackups[uploadLockID] = _allBackups[uploadLockID]!
           .copyWith(status: BackupItemStatus.uploaded);
@@ -539,18 +540,17 @@ class FileUploader {
         // check if the file is already uploaded and can be mapped to existing
         // uploaded file. If map is found, it also returns the corresponding
         // mapped or update file entry.
-        final result = await _mapToExistingUploadWithSameHash(
+        final matchedFile =
+            await PreUploadCheck.mapToExistingUploadWithSameHash(
           uploadMedia,
           file,
           collectionID,
         );
-        final isMappedToExistingUpload = result.item1;
-        if (isMappedToExistingUpload) {
-          debugPrint(
+        if (matchedFile != null) {
+          _logger.finest(
             "File success mapped to existing uploaded ${file.toString()}",
           );
-          // return the mapped file
-          return result.item2;
+          return matchedFile;
         }
       }
 
@@ -578,7 +578,7 @@ class FileUploader {
         // otherwise just delete the file for singlepart upload
         await File(encryptedFilePath).delete();
       }
-      await _checkIfWithinStorageLimit(uploadMedia.uploadFile);
+      await PreUploadCheck.checkIfWithinStorageLimit(uploadMedia.uploadFile);
       final encryptedFile = File(encryptedFilePath);
 
       final EncryptionResult fileEncryptResult = multiPartFileEncResult ??
@@ -816,156 +816,8 @@ class FileUploader {
     return false;
   }
 
-  /*
-  _mapToExistingUpload links the fileToUpload with the existing uploaded
-  files. if the link is successful, it returns true otherwise false.
-  When false, we should go ahead and re-upload or update the file.
-  It performs following checks:
-    a) Target file with same localID and destination collection exists. Delete the
-     fileToUpload entry. If target file is sandbox file, then we skip localID match
-     check.
-    b) Uploaded file in any collection but with missing localID.
-     Update the localID for uploadedFile and delete the fileToUpload entry
-    c) A uploaded file exist with same localID but in a different collection.
-    Add a symlink in the destination collection and update the fileToUpload.
-    If target file is sandbox file, then we skip localID match
-     check.
-    d) File already exists but different localID. Re-upload
-    In case the existing files already have local identifier, which is
-    different from the {fileToUpload}, then most probably device has
-    duplicate files.
-  */
-  Future<Tuple2<bool, EnteFile>> _mapToExistingUploadWithSameHash(
-    UploadMedia uploadMedia,
-    EnteFile fileToUpload,
-    int toCollectionID,
-  ) async {
-    if (fileToUpload.rAsset != null) {
-      // ideally this should never happen, but because the code below this case
-      // can do unexpected mapping, we are adding this additional check
-      _logger.severe(
-        'Critical: file is already uploaded, skipped mapping',
-      );
-      return Tuple2(false, fileToUpload);
-    }
-    final bool isSandBoxFile = fileToUpload.isSharedMediaToAppSandbox;
-    final existingIDs = await remoteDB.idsWithSameHashAndType(
-      uploadMedia.hash,
-      Configuration.instance.getUserID()!,
-    );
-    if (existingIDs.isNotEmpty) {
-      throw AssertionError("Found existing IDs with same hash: $existingIDs");
-    }
-
-    // todo:neeraj rewrite this to use the new FilesDB
-    final List<EnteFile> existingUploadedFiles = [];
-
-    // final List<EnteFile> existingUploadedFiles = await FilesDB.instance.getUploadedFilesWithHashes(
-    //   mediaUploadData.hashData!,
-    //   fileToUpload.fileType,
-    //   Configuration.instance.getUserID()!,
-    // );
-    if (existingUploadedFiles.isEmpty) {
-      // continueUploading this file
-      return Tuple2(false, fileToUpload);
-    }
-
-    // case a
-    final EnteFile? sameLocalSameCollection =
-        existingUploadedFiles.firstWhereOrNull(
-      (e) =>
-          e.collectionID == toCollectionID &&
-          (e.localID == fileToUpload.localID || isSandBoxFile),
-    );
-    if (sameLocalSameCollection != null) {
-      _logger.info(
-        "sameLocalSameCollection: toUpload  ${fileToUpload.tag} "
-        "existing: ${sameLocalSameCollection.tag} $isSandBoxFile",
-      );
-      // should delete the fileToUploadEntry
-      if (fileToUpload.generatedID != null) {
-        await FilesDB.instance.deleteByGeneratedID(fileToUpload.generatedID!);
-      }
-
-      Bus.instance.fire(
-        LocalPhotosUpdatedEvent(
-          [fileToUpload],
-          type: EventType.deletedFromEverywhere,
-          source: "sameLocalSameCollection", //
-        ),
-      );
-      return Tuple2(true, sameLocalSameCollection);
-    }
-
-    // case b
-    final EnteFile? fileMissingLocal = existingUploadedFiles.firstWhereOrNull(
-      (e) => e.localID == null,
-    );
-    if (fileMissingLocal != null) {
-      // update the local id of the existing file and delete the fileToUpload
-      // entry
-      _logger.info(
-        "fileMissingLocal: \n toUpload  ${fileToUpload.tag} "
-        "\n existing: ${fileMissingLocal.tag}",
-      );
-      fileMissingLocal.localID = fileToUpload.localID;
-      // set localID for the given uploadedID across collections
-      // todo:rewrite (upload related)
-      // await FilesDB.instance.updateLocalIDForUploaded(
-      //   fileMissingLocal.uploadedFileID!,
-      //   fileToUpload.localID!,
-      // );
-      // For files selected from device, during collaborative upload, we don't
-      // insert entries in the FilesDB. So, we don't need to delete the entry
-      if (fileToUpload.generatedID != null) {
-        await FilesDB.instance.deleteByGeneratedID(fileToUpload.generatedID!);
-      }
-      Bus.instance.fire(
-        LocalPhotosUpdatedEvent(
-          [fileToUpload],
-          source: "fileMissingLocal",
-          type: EventType.deletedFromEverywhere, //
-        ),
-      );
-      return Tuple2(true, fileMissingLocal);
-    }
-
-    // case c
-    final EnteFile? fileExistsButDifferentCollection =
-        existingUploadedFiles.firstWhereOrNull(
-      (e) =>
-          e.collectionID != toCollectionID &&
-          (e.localID == fileToUpload.localID || isSandBoxFile),
-    );
-    if (fileExistsButDifferentCollection != null) {
-      _logger.info(
-        "fileExistsButDifferentCollection: toUpload  ${fileToUpload.tag} "
-        "existing: ${fileExistsButDifferentCollection.tag} $isSandBoxFile",
-      );
-      final linkedFile = await CollectionsService.instance
-          .linkLocalFileToExistingUploadedFileInAnotherCollection(
-        toCollectionID,
-        localFileToUpload: fileToUpload,
-        existingUploadedFile: fileExistsButDifferentCollection,
-      );
-      return Tuple2(true, linkedFile);
-    }
-    final Set<String> matchLocalIDs = existingUploadedFiles
-        .where(
-          (e) => e.localID != null,
-        )
-        .map((e) => e.localID!)
-        .toSet();
-    _logger.info(
-      "Found hashMatch but probably with diff localIDs "
-      "$matchLocalIDs",
-    );
-    // case d
-    return Tuple2(false, fileToUpload);
-  }
-
   Future<void> _onUploadDone(
-    UploadMedia? mediaUploadData,
+    UploadMedia? uploadMedia,
     bool uploadCompleted,
     bool uploadHardFailure,
     EnteFile file,
@@ -974,7 +826,7 @@ class FileUploader {
     required String lockKey,
     bool isMultiPartUpload = false,
   }) async {
-    if (mediaUploadData != null) {
+    if (uploadMedia != null) {
       // delete the file from app's internal cache if it was copied to app
       // for upload. On iOS, only remove the file from photo_manager/app cache
       // when upload is either completed or there's a tempFailure
@@ -982,7 +834,7 @@ class FileUploader {
       // succeeds.
       if ((Platform.isIOS && (uploadCompleted || uploadHardFailure)) ||
           (uploadCompleted && file.isSharedMediaToAppSandbox)) {
-        await mediaUploadData.delete();
+        await uploadMedia.delete();
       }
     }
     if (File(encryptedFilePath).existsSync()) {
@@ -998,46 +850,6 @@ class FileUploader {
       await File(encryptedThumbnailPath).delete();
     }
     await _uploadLocks.releaseLock(lockKey, _processType.toString());
-  }
-
-  /*
-  _checkIfWithinStorageLimit verifies if the file size for encryption and upload
-   is within the storage limit. It throws StorageLimitExceededError if the limit
-    is exceeded. This check is best effort and may not be completely accurate
-    due to UserDetail cache. It prevents infinite loops when clients attempt to
-    upload files that exceed the server's storage limit + buffer.
-    Note: Local storageBuffer is 20MB, server storageBuffer is 50MB, and an
-    additional 30MB is reserved for thumbnails and encryption overhead.
-   */
-  Future<void> _checkIfWithinStorageLimit(File fileToBeUploaded) async {
-    try {
-      final UserDetails? userDetails =
-          UserService.instance.getCachedUserDetails();
-      if (userDetails == null) {
-        return;
-      }
-      // add k20MBStorageBuffer to the free storage
-      final num freeStorage = userDetails.getFreeStorage() + k20MBStorageBuffer;
-      final num fileSize = await fileToBeUploaded.length();
-      if (fileSize > freeStorage) {
-        _logger.warning('Storage limit exceeded fileSize $fileSize and '
-            'freeStorage $freeStorage');
-        throw StorageLimitExceededError();
-      }
-      if (fileSize > kMaxFileSize10Gib) {
-        _logger.warning('File size exceeds 10GiB fileSize $fileSize');
-        throw InvalidFileError(
-          'file size above 10GiB',
-          InvalidReason.tooLargeFile,
-        );
-      }
-    } catch (e) {
-      if (e is StorageLimitExceededError || e is InvalidFileError) {
-        rethrow;
-      } else {
-        _logger.severe('Error checking storage limit', e);
-      }
-    }
   }
 
   Future _onInvalidFileError(EnteFile file, InvalidFileError e) async {
