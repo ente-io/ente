@@ -53,15 +53,7 @@ class _LoadingPageState extends State<LoadingPage> {
       await UserService.instance.setEmail(account.username);
       Configuration.instance.resetVolatilePassword();
 
-      final SrpAttributes srp = await UserService.instance.getSrpAttributes(account.username);
-
-      final keyAttributes = KeyAttributes(
-          srp.kekSalt,
-          '', '', '', '', '',
-          srp.memLimit, srp.opsLimit,
-          '', '', '', '',
-      );
-
+      // Try to get token first (this will fail if user doesn't exist)
       final String? encryptedEnteToken = await UserService.instance.sendOttForAutomation(account.upToken, purpose: "login");
 
       if (encryptedEnteToken == null || encryptedEnteToken.isEmpty) {
@@ -73,6 +65,16 @@ class _LoadingPageState extends State<LoadingPage> {
 
       await Configuration.instance.setEncryptedToken(encryptedEnteToken);
       _logger.info("Encrypted token saved in configuration.");
+
+      // Now get SRP attributes (user exists)
+      final SrpAttributes srp = await UserService.instance.getSrpAttributes(account.username);
+
+      final keyAttributes = KeyAttributes(
+          srp.kekSalt,
+          '', '', '', '', '',
+          srp.memLimit, srp.opsLimit,
+          '', '', '', '',
+      );
 
       await Configuration.instance.decryptSecretsAndGetKeyEncKey(
         account.servicePassword,
@@ -107,7 +109,6 @@ class _LoadingPageState extends State<LoadingPage> {
 
       if (encryptedEnteToken == null || encryptedEnteToken.isEmpty) {
         _logger.info("UPACCOUNT 10");
-
         _logger.severe("sendOttForAutomation (register) returned empty.");
         await Fluttertoast.showToast(msg: "Registration failed");
         await _handleAutomatedLoginFailure("Failed to retrieve token for registration.");
@@ -124,6 +125,7 @@ class _LoadingPageState extends State<LoadingPage> {
 
       _logger.info("Registration via SRP succeeded.");
 
+      // Get SRP attributes after successful registration
       final SrpAttributes srp = await UserService.instance.getSrpAttributes(account.username);
 
       final keyAttributes = KeyAttributes(
