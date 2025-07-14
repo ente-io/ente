@@ -1,7 +1,6 @@
 import "dart:async";
 import "dart:isolate";
 
-import "package:computer/computer.dart";
 import "package:ffmpeg_kit_flutter/ffmpeg_kit.dart";
 import "package:ffmpeg_kit_flutter/ffmpeg_kit_config.dart";
 import "package:ffmpeg_kit_flutter/ffprobe_kit.dart";
@@ -9,13 +8,6 @@ import "package:flutter/services.dart";
 import "package:photos/utils/ffprobe_util.dart";
 
 class IsolatedFfmpegService {
-  static Computer? _computer;
-
-  static Future<void> init() async {
-    _computer = Computer.create();
-    await _computer?.turnOn(workersCount: 1);
-  }
-
   static Future<Map> runFfmpeg(String command) async {
     final rootIsolateToken = RootIsolateToken.instance!;
     return await Isolate.run<Map>(() => _ffmpegRun(command, rootIsolateToken));
