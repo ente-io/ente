@@ -109,13 +109,16 @@ import type { CryptoWorker } from "./worker";
 let _comlinkWorker: ComlinkWorker<typeof CryptoWorker> | undefined;
 
 /**
- * Lazily created, cached, instance of a CryptoWorker web worker.
+ * Lazily created, cached, instance of a "shared" CryptoWorker web worker.
+ *
+ * Some code which needs to do operations in parallel (e.g. during the upload
+ * flow) creates its own CryptoWorker web workers. But those are exceptions; the
+ * rest of the code normally calls the functions in this file, and they all
+ * implicitly use a default "shared" web worker (unless we're already running in
+ * the context of a web worker).
  */
-export const sharedCryptoWorker = () =>
+const sharedWorker = () =>
     (_comlinkWorker ??= createComlinkCryptoWorker()).remote;
-
-/** A shorter alias of {@link sharedCryptoWorker} for use within this file. */
-const sharedWorker = sharedCryptoWorker;
 
 /**
  * Create a new instance of a comlink worker that wraps a {@link CryptoWorker}

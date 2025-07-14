@@ -215,7 +215,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
     const annotatedExif = useMemo(() => annotateExif(exif), [exif]);
 
     useEffect(() => {
-        if (!isMLEnabled()) return;
+        if (!isMLEnabled()) return undefined;
 
         // Take a dependency on open so that we refresh the list of people by
         // calling `getAnnotatedFacesForFile` again when the file info dialog is
@@ -230,7 +230,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
         // Since the `file` hasn't changed, this hook wouldn't rerun. So we also
         // take a dependency on the open state of the dialog, causing us to
         // rerun whenever reopened (even if for the same file).
-        if (!open) return;
+        if (!open) return undefined;
 
         let didCancel = false;
 
@@ -451,8 +451,8 @@ const FileInfoSidebar = styled(
         <SidebarDrawer
             {...props}
             anchor="right"
-            // See: [Note: Overzealous Chrome? Complicated ARIA?], but this time
-            // with a different workaround.
+            // See: [Note: Workarounds for unactionable ARIA warnings], but this
+            // time with a different workaround.
             //
             // https://github.com/mui/material-ui/issues/43106#issuecomment-2514637251
             disableRestoreFocus={true}

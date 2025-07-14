@@ -5,16 +5,11 @@ import {
     AccountsPageTitle,
 } from "ente-accounts/components/layouts/centered-paper";
 import { appHomeRoute, stashRedirect } from "ente-accounts/services/redirect";
-import {
-    changePassword,
-    localUser,
-    type LocalUser,
-} from "ente-accounts/services/user";
+import { changePassword, type LocalUser } from "ente-accounts/services/user";
 import { LinkButton } from "ente-base/components/LinkButton";
 import { LoadingIndicator } from "ente-base/components/loaders";
 import { deriveKeyInsufficientMemoryErrorMessage } from "ente-base/crypto/types";
 import log from "ente-base/log";
-import { getData, setData } from "ente-shared/storage/localStorage";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import React, { useCallback, useEffect, useState } from "react";
@@ -22,57 +17,66 @@ import {
     NewPasswordForm,
     type NewPasswordFormProps,
 } from "../components/NewPasswordForm";
+import { savedLocalUser } from "../services/accounts-db";
 
 /**
  * A page that allows a user to reset or change their password.
+ *
+ * See: [Note: Login pages]
  */
 const Page: React.FC = () => {
-    const [user, setUser] = useState<LocalUser>();
+    const [user, setUser] = useState<LocalUser | undefined>(undefined);
 
     const router = useRouter();
 
+    // We're invoked with the "?op=reset" query parameter in the recovery flow.
+    const isReset = router.query.op == "reset";
+
     useEffect(() => {
-        const user = localUser();
+        const user = savedLocalUser();
         if (user) {
             setUser(user);
         } else {
             stashRedirect("/change-password");
-            void router.push("/");
+            void router.replace("/");
         }
     }, [router]);
 
-    return user ? <PageContents {...{ user }} /> : <LoadingIndicator />;
+    return user ? (
+        <PageContents {...{ user, isReset }} />
+    ) : (
+        <LoadingIndicator />
+    );
 };
 
 export default Page;
 
 interface PageContentsProps {
     user: LocalUser;
+    /**
+     * True if the password is being reset during the account recovery flow.
+     */
+    isReset: boolean;
 }
 
-const PageContents: React.FC<PageContentsProps> = ({ user }) => {
+const PageContents: React.FC<PageContentsProps> = ({ user, isReset }) => {
     const router = useRouter();
 
-    const redirectToAppHome = useCallback(() => {
-        setData("showBackButton", { value: true });
-        void router.push(appHomeRoute);
-    }, [router]);
-
-    const handleSubmit: NewPasswordFormProps["onSubmit"] = async (
-        password,
-        setPasswordsFieldError,
-    ) =>
-        changePassword(password)
-            .then(redirectToAppHome)
-            .catch((e: unknown) => {
-                log.error("Could not change password", e);
-                setPasswordsFieldError(
-                    e instanceof Error &&
-                        e.message == deriveKeyInsufficientMemoryErrorMessage
-                        ? t("password_generation_failed")
-                        : t("generic_error"),
-                );
-            });
+    const handleSubmit: NewPasswordFormProps["onSubmit"] = useCallback(
+        async (password, setPasswordsFieldError) =>
+            changePassword(password)
+                .then(() => void router.push(appHomeRoute))
+                .catch((e: unknown) => {
+                    log.error("Could not change password", e);
+                    setPasswordsFieldError(
+                        e instanceof Error &&
+                            e.message == deriveKeyInsufficientMemoryErrorMessage
+                            ? t("password_generation_failed")
+                            : t("generic_error"),
+                    );
+                }),
+        [router],
+    );
 
     return (
         <AccountsPageContents>
@@ -82,7 +86,7 @@ const PageContents: React.FC<PageContentsProps> = ({ user }) => {
                 submitButtonTitle={t("change_password")}
                 onSubmit={handleSubmit}
             />
-            {(getData("showBackButton")?.value ?? true) && (
+            {!isReset && (
                 <>
                     <Divider sx={{ mt: 1 }} />
                     <AccountsPageFooter>

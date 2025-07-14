@@ -198,7 +198,9 @@ class DownloadManager {
      * Set the credentials that should be used for download files when we're
      * running in the context of the public albums app.
      */
-    setPublicAlbumsCredentials(credentials: PublicAlbumsCredentials) {
+    setPublicAlbumsCredentials(
+        credentials: PublicAlbumsCredentials | undefined,
+    ) {
         this.publicAlbumsCredentials = credentials;
     }
 

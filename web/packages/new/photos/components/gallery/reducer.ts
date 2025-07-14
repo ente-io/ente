@@ -1,4 +1,4 @@
-import type { User } from "ente-accounts/services/user";
+import { type LocalUser } from "ente-accounts/services/user";
 import {
     groupFilesByCollectionID,
     sortFiles,
@@ -38,7 +38,7 @@ import {
 } from "../../services/collection-summary";
 import type { PeopleState, Person } from "../../services/ml/people";
 import type { SearchSuggestion } from "../../services/search/types";
-import type { FamilyData } from "../../services/user-details";
+import type { FamilyData, UserDetails } from "../../services/user-details";
 
 /**
  * Specifies what the bar at the top of the gallery is displaying currently.
@@ -108,15 +108,15 @@ export interface GalleryState {
     /*--<  Mostly static state  >--*/
 
     /**
-     * The logged in {@link User}.
+     * The logged in {@link LocalUser}.
      *
      * This is expected to be undefined only for a brief duration until the code
      * for the initial "mount" runs (If we're not logged in, then the gallery
      * will redirect the user to an appropriate authentication page).
      */
-    user: User | undefined;
+    user: LocalUser | undefined;
     /**
-     * Family plan related information for the logged in {@link User}.
+     * Family plan related information for the logged in {@link LocalUser}.
      */
     familyData: FamilyData | undefined;
 
@@ -449,12 +449,13 @@ export interface GalleryState {
 export type GalleryAction =
     | {
           type: "mount";
-          user: User;
+          user: LocalUser;
           familyData: FamilyData | undefined;
           collections: Collection[];
           collectionFiles: EnteFile[];
           trashItems: TrashItem[];
       }
+    | { type: "setUserDetails"; userDetails: UserDetails }
     | { type: "setCollections"; collections: Collection[] }
     | { type: "setCollectionFiles"; collectionFiles: EnteFile[] }
     | { type: "uploadFile"; file: EnteFile }
@@ -621,6 +622,32 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                     deriveUncategorizedCollectionSummaryID(normalCollections),
                 view,
             });
+        }
+
+        case "setUserDetails": {
+            // While user details have more state that can change, the only
+            // changes that affect the reducer's state (so far) are if the
+            // user's own email changes, or the list of their family members
+            // changes.
+            //
+            // Both of these affect only the list of share suggestion emails.
+
+            let user = state.user!;
+            const { email, familyData } = action.userDetails;
+            if (email != user.email) {
+                user = { ...user, email };
+            }
+
+            return {
+                ...state,
+                user,
+                familyData,
+                shareSuggestionEmails: createShareSuggestionEmails(
+                    user,
+                    familyData,
+                    state.collections,
+                ),
+            };
         }
 
         case "setCollections": {
@@ -1225,7 +1252,7 @@ const deriveArchivedFileIDs = (
  * Compute favorite file IDs from their dependencies.
  */
 const deriveFavoriteFileIDs = (
-    user: User,
+    user: LocalUser,
     collections: GalleryState["collections"],
     collectionFiles: GalleryState["collectionFiles"],
     unsyncedFavoriteUpdates: GalleryState["unsyncedFavoriteUpdates"],
@@ -1278,7 +1305,7 @@ const createFileCollectionIDs = (files: EnteFile[]) =>
  */
 const deriveNormalCollectionSummaries = (
     normalCollections: Collection[],
-    user: User,
+    user: LocalUser,
     trashItems: GalleryState["trashItems"],
     collectionFiles: GalleryState["collectionFiles"],
     hiddenFileIDs: GalleryState["hiddenFileIDs"],
@@ -1378,7 +1405,7 @@ const pseudoCollectionOptionsForLatestFileAndCount = (
  */
 const deriveHiddenCollectionSummaries = (
     hiddenCollections: Collection[],
-    user: User,
+    user: LocalUser,
     collectionFiles: GalleryState["collectionFiles"],
 ) => {
     const hiddenCollectionSummaries = createCollectionSummaries(
@@ -1414,7 +1441,7 @@ const deriveUncategorizedCollectionSummaryID = (
     PseudoCollectionID.uncategorizedPlaceholder;
 
 const createCollectionSummaries = (
-    user: User,
+    user: LocalUser,
     collections: Collection[],
     collectionFiles: EnteFile[],
 ) => {
@@ -1968,7 +1995,7 @@ const enqueuePendingSearchSuggestionsIfNeeded = (
  * users who have shared a collection with the user.
  */
 const constructUserIDToEmailMap = (
-    user: User,
+    user: LocalUser,
     collections: GalleryState["collections"],
 ): Map<number, string> => {
     const userIDToEmail = new Map<number, string>();
@@ -1990,7 +2017,7 @@ const constructUserIDToEmailMap = (
  * are trying to share albums with specific users.
  */
 const createShareSuggestionEmails = (
-    user: User,
+    user: LocalUser,
     familyData: FamilyData | undefined,
     collections: Collection[],
 ): string[] => [

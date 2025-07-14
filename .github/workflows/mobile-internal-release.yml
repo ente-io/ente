@@ -15,7 +15,7 @@ jobs:
 
         defaults:
             run:
-                working-directory: mobile
+                working-directory: mobile/apps/photos
 
         steps:
             - name: Checkout code and submodules
@@ -55,7 +55,7 @@ jobs:
               with:
                   serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
                   packageName: io.ente.photos
-                  releaseFiles: mobile/build/app/outputs/bundle/playstoreRelease/app-playstore-release.aab
+                  releaseFiles: mobile/apps/photos/build/app/outputs/bundle/playstoreRelease/app-playstore-release.aab
                   track: internal
 
             - name: Notify Discord

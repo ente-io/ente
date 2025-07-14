@@ -109,14 +109,15 @@ import {
 } from "ente-new/photos/services/user-details";
 import { usePhotosAppContext } from "ente-new/photos/types/context";
 import { initiateEmail, openURL } from "ente-new/photos/utils/web";
+import { wait } from "ente-utils/promise";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import React, {
-    MouseEventHandler,
     useCallback,
     useEffect,
     useMemo,
     useState,
+    type MouseEventHandler,
 } from "react";
 import { Trans } from "react-i18next";
 import { testUpload } from "../../tests/upload.test";
@@ -140,18 +141,23 @@ type SidebarProps = ModalVisibilityProps & {
      */
     onShowPlanSelector: () => void;
     /**
-     * Called when the collection summary with the given
-     * {@link collectionSummaryID} should be shown.
-     */
-    onShowCollectionSummary: (collectionSummaryID: number) => void;
-    /**
-     * Called when the hidden section should be shown.
+     * Called when the collection summary with the given {@link collectionID}
+     * should be shown.
      *
-     * This triggers the display of the dialog to authenticate the user, exactly
-     * as if {@link onAuthenticateUser} were called. Then, on successful
-     * authentication, the gallery will switch to the hidden section.
+     * @param collectionSummaryID The ID of the {@link CollectionSummary} to
+     * switch to.
+     *
+     * @param isHiddenCollectionSummary If `true`, then any reauthentication as
+     * appropriate before switching to the hidden section of the app is
+     * performed first before showing the collection summary.
+     *
+     * @return A promise that fullfills after any needed reauthentication has
+     * been peformed (The view transition might still be in progress).
      */
-    onShowHiddenSection: () => Promise<void>;
+    onShowCollectionSummary: (
+        collectionSummaryID: number,
+        isHiddenCollectionSummary?: boolean,
+    ) => Promise<void>;
     /**
      * Called when the export dialog should be shown.
      */
@@ -175,7 +181,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
     uncategorizedCollectionSummaryID,
     onShowPlanSelector,
     onShowCollectionSummary,
-    onShowHiddenSection,
     onShowExport,
     onAuthenticateUser,
 }) => (
@@ -189,7 +194,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     normalCollectionSummaries,
                     uncategorizedCollectionSummaryID,
                     onShowCollectionSummary,
-                    onShowHiddenSection,
                 }}
             />
             <UtilitySection
@@ -261,6 +265,10 @@ const UserDetailsSection: React.FC<UserDetailsSectionProps> = ({
                 isSubscriptionStripe(userDetails.subscription) &&
                 isSubscriptionPastDue(userDetails.subscription)
             ) {
+                // TODO: This makes an API request, so the UI should indicate
+                // the await.
+                //
+                // eslint-disable-next-line @typescript-eslint/no-floating-promises
                 redirectToCustomerPortal();
             } else {
                 onShowPlanSelector();
@@ -320,8 +328,8 @@ const SubscriptionStatus: React.FC<SubscriptionStatusProps> = ({
         return true;
     }, [userDetails]);
 
-    const handleClick = useMemo(() => {
-        const eventHandler: MouseEventHandler<HTMLSpanElement> = (e) => {
+    const handleClick: MouseEventHandler<HTMLSpanElement> = useCallback(
+        (e) => {
             e.stopPropagation();
 
             if (isSubscriptionActive(userDetails.subscription)) {
@@ -333,14 +341,15 @@ const SubscriptionStatus: React.FC<SubscriptionStatusProps> = ({
                     isSubscriptionStripe(userDetails.subscription) &&
                     isSubscriptionPastDue(userDetails.subscription)
                 ) {
+                    // eslint-disable-next-line @typescript-eslint/no-floating-promises
                     redirectToCustomerPortal();
                 } else {
                     onShowPlanSelector();
                 }
             }
-        };
-        return eventHandler;
-    }, [userDetails]);
+        },
+        [onShowPlanSelector, userDetails],
+    );
 
     if (!hasAMessage) {
         return <></>;
@@ -355,7 +364,7 @@ const SubscriptionStatus: React.FC<SubscriptionStatusProps> = ({
                 message = t("subscription_info_free");
             } else if (isSubscriptionCancelled(userDetails.subscription)) {
                 message = t("subscription_info_renewal_cancelled", {
-                    date: userDetails.subscription?.expiryTime,
+                    date: userDetails.subscription.expiryTime,
                 });
             }
         } else {
@@ -383,8 +392,8 @@ const SubscriptionStatus: React.FC<SubscriptionStatusProps> = ({
         <Box sx={{ px: 1, pt: 0.5 }}>
             <Typography
                 variant="small"
-                onClick={handleClick && handleClick}
-                sx={{ color: "text.muted", cursor: handleClick && "pointer" }}
+                onClick={handleClick}
+                sx={{ color: "text.muted" }}
             >
                 {message}
             </Typography>
@@ -461,7 +470,6 @@ type ShortcutSectionProps = SectionProps &
         | "normalCollectionSummaries"
         | "uncategorizedCollectionSummaryID"
         | "onShowCollectionSummary"
-        | "onShowHiddenSection"
     >;
 
 const ShortcutSection: React.FC<ShortcutSectionProps> = ({
@@ -469,25 +477,27 @@ const ShortcutSection: React.FC<ShortcutSectionProps> = ({
     normalCollectionSummaries,
     uncategorizedCollectionSummaryID,
     onShowCollectionSummary,
-    onShowHiddenSection,
 }) => {
-    const openUncategorizedSection = () => {
-        onShowCollectionSummary(uncategorizedCollectionSummaryID);
-        onCloseSidebar();
-    };
+    const handleOpenUncategorizedSection = () =>
+        void onShowCollectionSummary(uncategorizedCollectionSummaryID).then(
+            onCloseSidebar,
+        );
 
-    const openTrashSection = () => {
-        onShowCollectionSummary(PseudoCollectionID.trash);
-        onCloseSidebar();
-    };
+    const handleOpenTrashSection = () =>
+        void onShowCollectionSummary(PseudoCollectionID.trash).then(
+            onCloseSidebar,
+        );
 
-    const openArchiveSection = () => {
-        onShowCollectionSummary(PseudoCollectionID.archiveItems);
-        onCloseSidebar();
-    };
+    const handleOpenArchiveSection = () =>
+        void onShowCollectionSummary(PseudoCollectionID.archiveItems).then(
+            onCloseSidebar,
+        );
 
-    const openHiddenSection = () =>
-        void onShowHiddenSection().then(onCloseSidebar);
+    const handleOpenHiddenSection = () =>
+        void onShowCollectionSummary(PseudoCollectionID.hiddenItems, true)
+            // See: [Note: Workarounds for unactionable ARIA warnings]
+            .then(() => wait(10))
+            .then(onCloseSidebar);
 
     const summaryCaption = (summaryID: number) =>
         normalCollectionSummaries.get(summaryID)?.fileCount.toString();
@@ -498,13 +508,13 @@ const ShortcutSection: React.FC<ShortcutSectionProps> = ({
                 startIcon={<CategoryIcon />}
                 label={t("section_uncategorized")}
                 caption={summaryCaption(uncategorizedCollectionSummaryID)}
-                onClick={openUncategorizedSection}
+                onClick={handleOpenUncategorizedSection}
             />
             <RowButton
                 startIcon={<ArchiveOutlinedIcon />}
                 label={t("section_archive")}
                 caption={summaryCaption(PseudoCollectionID.archiveItems)}
-                onClick={openArchiveSection}
+                onClick={handleOpenArchiveSection}
             />
             <RowButton
                 startIcon={<VisibilityOffIcon />}
@@ -517,13 +527,13 @@ const ShortcutSection: React.FC<ShortcutSectionProps> = ({
                         }}
                     />
                 }
-                onClick={openHiddenSection}
+                onClick={handleOpenHiddenSection}
             />
             <RowButton
                 startIcon={<DeleteOutlineIcon />}
                 label={t("section_trash")}
                 caption={summaryCaption(PseudoCollectionID.trash)}
-                onClick={openTrashSection}
+                onClick={handleOpenTrashSection}
             />
         </>
     );
@@ -641,13 +651,13 @@ const ExitSection: React.FC = () => {
 };
 
 const InfoSection: React.FC = () => {
-    const [appVersion, setAppVersion] = useState<string | undefined>();
-    const [host, setHost] = useState<string | undefined>();
+    const [appVersion, setAppVersion] = useState("");
+    const [host, setHost] = useState<string | undefined>("");
 
     useEffect(() => {
         void globalThis.electron?.appVersion().then(setAppVersion);
         void customAPIHost().then(setHost);
-    });
+    }, []);
 
     return (
         <>
@@ -846,16 +856,17 @@ const LanguageSelector = () => {
     const locale = getLocaleInUse();
 
     const updateCurrentLocale = (newLocale: SupportedLocale) => {
-        setLocaleInUse(newLocale);
-        // [Note: Changing locale causes a full reload]
-        //
-        // A full reload is needed because we use the global `t` instance
-        // instead of the useTranslation hook.
-        //
-        // We also rely on this behaviour by caching various formatters in
-        // module static variables that not get updated if the i18n.language
-        // changes unless there is a full reload.
-        window.location.reload();
+        void setLocaleInUse(newLocale).then(() => {
+            // [Note: Changing locale causes a full reload]
+            //
+            // A full reload is needed because we use the global `t` instance
+            // instead of the useTranslation hook.
+            //
+            // We also rely on this behaviour by caching various formatters in
+            // module static variables that not get updated if the i18n.language
+            // changes unless there is a full reload.
+            window.location.reload();
+        });
     };
 
     const options = supportedLocales.map((locale) => ({
@@ -1083,11 +1094,14 @@ const Help: React.FC<NestedSidebarDrawerVisibilityProps> = ({
             continue: { text: t("view_logs"), action: viewLogs },
         });
 
-    const viewLogs = () => {
+    const viewLogs = async () => {
         log.info("Viewing logs");
         const electron = globalThis.electron;
-        if (electron) electron.openLogDirectory();
-        else saveStringAsFile(savedLogs(), `ente-web-logs-${Date.now()}.txt`);
+        if (electron) {
+            await electron.openLogDirectory();
+        } else {
+            saveStringAsFile(savedLogs(), `ente-web-logs-${Date.now()}.txt`);
+        }
     };
 
     return (

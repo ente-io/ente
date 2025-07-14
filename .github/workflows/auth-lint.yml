@@ -18,7 +18,7 @@ jobs:
         runs-on: ubuntu-latest
         defaults:
             run:
-                working-directory: auth
+                working-directory: mobile/apps/auth
         steps:
             - name: Checkout code and submodules
               uses: actions/checkout@v4

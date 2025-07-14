@@ -1,3 +1,6 @@
+// TODO: Audit this file
+// TODO: Too many null assertions in this file. The types need reworking.
+import { ensureLocalUser } from "ente-accounts/services/user";
 import { isDesktop } from "ente-base/app";
 import { createComlinkCryptoWorker } from "ente-base/crypto";
 import { type CryptoWorker } from "ente-base/crypto/worker";
@@ -41,7 +44,6 @@ import { computeNormalCollectionFilesFromSaved } from "ente-new/photos/services/
 import { indexNewUpload } from "ente-new/photos/services/ml";
 import { wait } from "ente-utils/promise";
 import watcher from "services/watch";
-import { getUserOwnedFiles } from "utils/file";
 
 export type FileID = number;
 
@@ -96,18 +98,20 @@ export type UploadItemWithCollection = UploadAsset & {
 };
 
 class UIService {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     private progressUpdater: ProgressUpdater;
 
     // UPLOAD LEVEL STATES
     private uploadPhase: UploadPhase = "preparing";
     private filenames = new Map<number, string>();
-    private hasLivePhoto: boolean = false;
-    private uploadProgressView: boolean = false;
+    private hasLivePhoto = false;
+    private uploadProgressView = false;
 
     // STAGE LEVEL STATES
-    private perFileProgress: number;
-    private filesUploadedCount: number;
-    private totalFilesCount: number;
+    private perFileProgress = 0;
+    private filesUploadedCount = 0;
+    private totalFilesCount = 0;
     private inProgressUploads: InProgressUploads = new Map();
     private finishedUploads: FinishedUploads = new Map();
 
@@ -201,15 +205,14 @@ class UIService {
         let percentComplete =
             this.perFileProgress *
             (this.finishedUploads.size || this.filesUploadedCount);
-        if (this.inProgressUploads) {
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            for (const [_, progress] of this.inProgressUploads) {
-                // filter  negative indicator values during percentComplete calculation
-                if (progress < 0) {
-                    continue;
-                }
-                percentComplete += (this.perFileProgress * progress) / 100;
+
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        for (const [_, progress] of this.inProgressUploads) {
+            // filter  negative indicator values during percentComplete calculation
+            if (progress < 0) {
+                continue;
             }
+            percentComplete += (this.perFileProgress * progress) / 100;
         }
 
         setPercentComplete(percentComplete);
@@ -232,7 +235,7 @@ class UIService {
     }
 }
 
-function convertInProgressUploadsToList(inProgressUploads) {
+function convertInProgressUploadsToList(inProgressUploads: InProgressUploads) {
     return [...inProgressUploads.entries()].map(
         ([localFileID, progress]) =>
             ({ localFileID, progress }) as InProgressUpload,
@@ -243,23 +246,24 @@ const groupByResult = (finishedUploads: FinishedUploads) => {
     const groups: SegregatedFinishedUploads = new Map();
     for (const [localID, result] of finishedUploads) {
         if (!groups.has(result)) groups.set(result, []);
-        groups.get(result).push(localID);
+        groups.get(result)!.push(localID);
     }
     return groups;
 };
 
 class UploadManager {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     private comlinkCryptoWorkers: ComlinkWorker<typeof CryptoWorker>[] =
         new Array(maxConcurrentUploads);
-    private parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>;
-    private itemsToBeUploaded: ClusteredUploadItem[];
-    private failedItems: ClusteredUploadItem[];
-    private existingFiles: EnteFile[];
-    private onUploadFile: (file: EnteFile) => void;
-    private collections: Map<number, Collection>;
-    private uploadInProgress: boolean;
+    private parsedMetadataJSONMap = new Map<string, ParsedMetadataJSON>();
+    private itemsToBeUploaded: ClusteredUploadItem[] = [];
+    private failedItems: ClusteredUploadItem[] = [];
+    private existingFiles: EnteFile[] = [];
+    private onUploadFile: ((file: EnteFile) => void) | undefined;
+    private collections = new Map<number, Collection>();
+    private uploadInProgress = false;
     private publicAlbumsCredentials: PublicAlbumsCredentials | undefined;
-    private uploaderName: string;
+    private uploaderName: string | undefined;
     /**
      * When `true`, then the next call to {@link abortIfCancelled} will throw.
      *
@@ -269,7 +273,7 @@ class UploadManager {
 
     private uiService = new UIService();
 
-    public async init(
+    public init(
         progressUpdater: ProgressUpdater,
         onUploadFile: (file: EnteFile) => void,
         publicAlbumsCredentials: PublicAlbumsCredentials | undefined,
@@ -294,8 +298,9 @@ class UploadManager {
     ) {
         this.itemsToBeUploaded = [];
         this.failedItems = [];
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         this.parsedMetadataJSONMap = parsedMetadataJSONMap ?? new Map();
-        this.uploaderName = null;
+        this.uploaderName = undefined;
         this.shouldUploadBeCancelled = false;
 
         this.uiService.reset();
@@ -443,9 +448,9 @@ class UploadManager {
                 this.publicAlbumsCredentials.accessToken,
             );
         } else {
-            this.existingFiles = getUserOwnedFiles(
-                await computeNormalCollectionFilesFromSaved(),
-            );
+            const files = await computeNormalCollectionFilesFromSaved();
+            const userID = ensureLocalUser().id;
+            this.existingFiles = files.filter((file) => file.ownerID == userID);
         }
         this.collections = new Map(
             collections.map((collection) => [collection.id, collection]),
@@ -481,14 +486,14 @@ class UploadManager {
         await UploadService.setFileCount(mediaItems.length);
         this.uiService.setUploadPhase("uploading");
 
-        const uploadProcesses = [];
+        const uploadProcesses = new Array<Promise<void>>();
         for (
             let i = 0;
             i < maxConcurrentUploads && this.itemsToBeUploaded.length > 0;
             i++
         ) {
             this.comlinkCryptoWorkers[i] = createComlinkCryptoWorker();
-            const worker = await this.comlinkCryptoWorkers[i].remote;
+            const worker = await this.comlinkCryptoWorkers[i]!.remote;
             uploadProcesses.push(this.uploadNextItemInQueue(worker));
         }
         await Promise.all(uploadProcesses);
@@ -508,9 +513,9 @@ class UploadManager {
             this.abortIfCancelled();
             logAboutMemoryPressureIfNeeded();
 
-            const clusteredItem = this.itemsToBeUploaded.pop();
+            const clusteredItem = this.itemsToBeUploaded.pop()!;
             const { localID, collectionID } = clusteredItem;
-            const collection = this.collections.get(collectionID);
+            const collection = this.collections.get(collectionID)!;
             const uploadableItem = { ...clusteredItem, collection };
 
             uiService.setFileProgress(localID, 0);
@@ -571,7 +576,7 @@ class UploadManager {
             }
 
             if (isDesktop && watcher.isUploadRunning()) {
-                await watcher.onFileUpload(uploadableItem, uploadResult);
+                watcher.onFileUpload(uploadableItem, uploadResult);
             }
 
             return type == "addedSymlink" ? "uploaded" : type;
@@ -605,7 +610,7 @@ class UploadManager {
 
     private updateExistingFiles(file: EnteFile) {
         this.existingFiles.push(file);
-        this.onUploadFile(file);
+        this.onUploadFile!(file);
     }
 
     /**
@@ -665,11 +670,11 @@ type UploadItemWithCollectionIDAndName = UploadAsset & {
 const makeUploadItemWithCollectionIDAndName = (
     f: UploadItemWithCollection,
 ): UploadItemWithCollectionIDAndName => ({
-    localID: f.localID!,
-    collectionID: f.collectionID!,
-    fileName: (f.isLivePhoto
-        ? uploadItemFileName(f.livePhotoAssets.image)
-        : uploadItemFileName(f.uploadItem))!,
+    localID: f.localID,
+    collectionID: f.collectionID,
+    fileName: f.isLivePhoto
+        ? uploadItemFileName(f.livePhotoAssets!.image)
+        : uploadItemFileName(f.uploadItem!),
     isLivePhoto: f.isLivePhoto,
     uploadItem: f.uploadItem,
     pathPrefix: f.pathPrefix,
@@ -689,7 +694,10 @@ const splitMetadataAndMediaItems = (
             else media.push(f);
             return [metadata, media];
         },
-        [[], []],
+        [
+            new Array<UploadItemWithCollectionIDAndName>(),
+            new Array<UploadItemWithCollectionIDAndName>(),
+        ],
     );
 
 /**
@@ -710,22 +718,22 @@ const clusterLivePhotos = async (
         .sort((f, g) => f.collectionID - g.collectionID);
     let index = 0;
     while (index < items.length - 1) {
-        const f = items[index];
-        const g = items[index + 1];
-        const fFileType = potentialFileTypeFromExtension(f.fileName);
-        const gFileType = potentialFileTypeFromExtension(g.fileName);
+        const f = items[index]!;
+        const g = items[index + 1]!;
+        const fFileType = potentialFileTypeFromExtension(f.fileName)!;
+        const gFileType = potentialFileTypeFromExtension(g.fileName)!;
         const fa: PotentialLivePhotoAsset = {
             fileName: f.fileName,
             fileType: fFileType,
             collectionID: f.collectionID,
-            uploadItem: f.uploadItem,
+            uploadItem: f.uploadItem!,
             pathPrefix: f.pathPrefix,
         };
         const ga: PotentialLivePhotoAsset = {
             fileName: g.fileName,
             fileType: gFileType,
             collectionID: g.collectionID,
-            uploadItem: g.uploadItem,
+            uploadItem: g.uploadItem!,
             pathPrefix: g.pathPrefix,
         };
         if (await areLivePhotoAssets(fa, ga, parsedMetadataJSONMap)) {
@@ -738,8 +746,8 @@ const clusterLivePhotos = async (
                 isLivePhoto: true,
                 pathPrefix: image.pathPrefix,
                 livePhotoAssets: {
-                    image: image.uploadItem,
-                    video: video.uploadItem,
+                    image: image.uploadItem!,
+                    video: video.uploadItem!,
                 },
             });
             index += 2;
@@ -763,13 +771,19 @@ const clusterLivePhotos = async (
  */
 const logAboutMemoryPressureIfNeeded = () => {
     if (!globalThis.electron) return;
+
     // performance.memory is deprecated in general as a Web standard, and is
     // also not available in the DOM types provided by TypeScript. However, it
     // is the method recommended by the Electron team (see the link about the V8
     // memory cage). The embedded Chromium supports it fine though, we just need
     // to goad TypeScript to accept the type.
-    const heapSize = (performance as any).memory.totalJSHeapSize;
-    const heapLimit = (performance as any).memory.jsHeapSizeLimit;
+
+    const { memory } = performance as unknown as {
+        memory: { totalJSHeapSize: number; jsHeapSizeLimit: number };
+    };
+
+    const heapSize = memory.totalJSHeapSize;
+    const heapLimit = memory.jsHeapSizeLimit;
     if (heapSize / heapLimit > 0.7) {
         log.info(
             `Memory usage (${heapSize} bytes of ${heapLimit} bytes) exceeds the high water mark`,

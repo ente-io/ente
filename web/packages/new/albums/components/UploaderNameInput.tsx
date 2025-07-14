@@ -29,7 +29,7 @@ type UploaderNameInput = ModalVisibilityProps & {
     /**
      * Callback invoked when the user presses submit after entering a name.
      */
-    onSubmit: (name: string) => Promise<void>;
+    onSubmit: (name: string) => void | Promise<void>;
 };
 
 /**
