@@ -2,7 +2,6 @@ import "dart:async";
 import "dart:isolate";
 
 import "package:ffmpeg_kit_flutter/ffmpeg_kit.dart";
-import "package:ffmpeg_kit_flutter/ffmpeg_kit_config.dart";
 import "package:ffmpeg_kit_flutter/ffprobe_kit.dart";
 import "package:flutter/services.dart";
 import "package:photos/utils/ffprobe_util.dart";
@@ -25,7 +24,6 @@ Future<Map> _getVideoProps(
   RootIsolateToken rootIsolateToken,
 ) async {
   BackgroundIsolateBinaryMessenger.ensureInitialized(rootIsolateToken);
-  await FFmpegKitConfig.setLogLevel(-8);
   final session = await FFprobeKit.getMediaInformation(filePath);
   final mediaInfo = session.getMediaInformation();
 
@@ -40,7 +38,6 @@ Future<Map> _getVideoProps(
 @pragma('vm:entry-point')
 Future<Map> _ffmpegRun(String value, RootIsolateToken rootIsolateToken) async {
   BackgroundIsolateBinaryMessenger.ensureInitialized(rootIsolateToken);
-  await FFmpegKitConfig.setLogLevel(-8);
   final session = await FFmpegKit.execute(value, true);
   final returnCode = await session.getReturnCode();
   final output = await session.getOutput();
