@@ -33,11 +33,11 @@ class _MomentsSectionState extends State<MomentsSection> {
     super.initState();
     _momentsSearchResults = widget.momentsSearchResults;
 
-    final streamsToListenTo = SectionType.moment.sectionUpdateEvents();
+    final streamsToListenTo = SectionType.memoriesDebug.sectionUpdateEvents();
     for (Stream<Event> stream in streamsToListenTo) {
       streamSubscriptions.add(
         stream.listen((event) async {
-          _momentsSearchResults = (await SectionType.moment.getData(
+          _momentsSearchResults = (await SectionType.memoriesDebug.getData(
             context,
             limit: kSearchSectionLimit,
           )) as List<GenericSearchResult>;
@@ -74,14 +74,14 @@ class _MomentsSectionState extends State<MomentsSection> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    SectionType.moment.sectionTitle(context),
+                    SectionType.memoriesDebug.sectionTitle(context),
                     style: textTheme.largeBold,
                   ),
                   const SizedBox(height: 24),
                   Padding(
                     padding: const EdgeInsets.only(left: 4),
                     child: Text(
-                      SectionType.moment.getEmptyStateText(context),
+                      SectionType.memoriesDebug.getEmptyStateText(context),
                       style: textTheme.smallMuted,
                     ),
                   ),
@@ -89,7 +89,7 @@ class _MomentsSectionState extends State<MomentsSection> {
               ),
             ),
             const SizedBox(width: 8),
-            const SearchSectionEmptyCTAIcon(SectionType.moment),
+            const SearchSectionEmptyCTAIcon(SectionType.memoriesDebug),
           ],
         ),
       );
@@ -100,7 +100,7 @@ class _MomentsSectionState extends State<MomentsSection> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SectionHeader(
-              SectionType.moment,
+              SectionType.memoriesDebug,
               hasMore:
                   (_momentsSearchResults.length >= kSearchSectionLimit - 1),
             ),

@@ -130,11 +130,16 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
                           snapshot.data!.elementAt(index)
                               as List<AlbumSearchResult>,
                         );
-                      case SectionType.moment:
-                        return MomentsSection(
-                          snapshot.data!.elementAt(index)
-                              as List<GenericSearchResult>,
-                        );
+                      case SectionType.memoriesDebug:
+                        if (flagService.internalUser &&
+                            localSettings.isDebugMemoriesEnabled) {
+                          return MomentsSection(
+                            snapshot.data!.elementAt(index)
+                                as List<GenericSearchResult>,
+                          );
+                        } else {
+                          return const SizedBox.shrink();
+                        }
                       case SectionType.location:
                         return LocationsSection(
                           snapshot.data!.elementAt(index)
