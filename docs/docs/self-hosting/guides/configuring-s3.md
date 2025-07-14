@@ -5,68 +5,16 @@ description:
     from outside localhost
 ---
 
-# Architecture
-
-![Client, Museum, S3](/client-museum-s3.png)
-
-There are three components involved in uploading a file:
-
-1.  The client (e.g. the web app or the mobile app)
-2.  Ente's server (museum)
-3.  The S3-compatible object storage (e.g. MinIO in the default starter)
-
-For the uploads to work, all three of them need to be able to reach each other.
-This is because the client uploads directly to the object storage.
-
-A file upload flows as follows:
-
-1.  Client that wants to upload a file asks museum where it should upload the
-    file to
-2.  museum creates pre-signed URLs for the S3 bucket that was configured
-3.  Client directly uploads to the S3 buckets these URLs
-4.  Client finally informs museum that a file has been uploaded to this URL
-
-The upshot of this is that _both_ the client and museum should be able to reach
-your S3 bucket.
-
-## Configuring S3
-
-The URL for the S3 bucket is configured in
-[scripts/compose/credentials.yaml](https://github.com/ente-io/ente/blob/main/server/scripts/compose/credentials.yaml#L10).
-
-You can edit this file directly while testing, though it is more robust to
-create a `museum.yaml` (in the same folder as the Docker compose file) and to
-setup your custom configuration there.
-
-> [!TIP] For more details about these configuration objects, see the
-> documentation for the `s3` object in
-> [configurations/local.yaml](https://github.com/ente-io/ente/blob/main/server/configurations/local.yaml).
-
-By default, you only need to configure the endpoint for the first bucket.
-
-The Docker compose file is shipped with MinIO as the self hosted S3 compatible
-storage. By default, MinIO server is served on `localhost:3200` and the MinIO UI
-on `localhost:3201`.
-
-For example, in a localhost network situation, the way this connection works is,
-museum (`1`) and MinIO (`2`) run on the same Docker network and the web app
-(`3`) will also be hosted on your localhost. This enables all the three
-components of the setup to communicate with each other seamlessly.
-
-The same principle applies if you're deploying to your custom domain.
+# Configuring S3
 
 ## Replication
-
-![Replication](/replication.png)
-
-<p align="center">Community contributed diagram of Ente's replication process</p>
 
 > [!IMPORTANT]
 >
 > As of now, replication works only if all the 3 storage type needs are
 > fulfilled (1 hot, 1 cold and 1 glacier storage).
 >
-> [Reference](https://github.com/ente-io/ente/discussions/3167#discussioncomment-10585970)
+> For more information, check this [discussion](https://github.com/ente-io/ente/discussions/3167#discussioncomment-10585970).
 
 If you're wondering why there are 3 buckets on the MinIO UI - that's because our
 production instance uses these to perform

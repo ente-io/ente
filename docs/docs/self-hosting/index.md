@@ -12,7 +12,7 @@ For a quick preview of running Ente on your server, make sure you have the follo
 
 ## Requirements
 
-- A system with at least 2 GB of RAM and 1 CPU core
+- A system with at least 1 GB of RAM and 1 CPU core
 - [Docker Compose v2](https://docs.docker.com/compose/)
 
 > For more details, check out [requirements page](/self-hosting/install/requirements)
