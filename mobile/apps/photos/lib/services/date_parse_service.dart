@@ -7,13 +7,40 @@ class DateParseService {
   DateParseService._privateConstructor();
 
   static const Map<String, int> _monthMap = {
-    "january": 1, "february": 2, "march": 3, "april": 4,
-    "may": 5, "june": 6, "july": 7, "august": 8,
-    "september": 9, "october": 10, "november": 11, "december": 12,
-    "jan": 1, "feb": 2, "mar": 3, "apr": 4, "jun": 6,
-    "jul": 7, "aug": 8, "sep": 9, "sept": 9, "oct": 10, "nov": 11, "dec": 12,
-    "janu": 1, "febr": 2, "marc": 3, "apri": 4, "juli": 7,
-    "augu": 8, "sepe": 9, "octo": 10, "nove": 11, "dece": 12,
+    "january": 1,
+    "february": 2,
+    "march": 3,
+    "april": 4,
+    "may": 5,
+    "june": 6,
+    "july": 7,
+    "august": 8,
+    "september": 9,
+    "october": 10,
+    "november": 11,
+    "december": 12,
+    "jan": 1,
+    "feb": 2,
+    "mar": 3,
+    "apr": 4,
+    "jun": 6,
+    "jul": 7,
+    "aug": 8,
+    "sep": 9,
+    "sept": 9,
+    "oct": 10,
+    "nov": 11,
+    "dec": 12,
+    "janu": 1,
+    "febr": 2,
+    "marc": 3,
+    "apri": 4,
+    "juli": 7,
+    "augu": 8,
+    "sepe": 9,
+    "octo": 10,
+    "nove": 11,
+    "dece": 12,
   };
 
   static const Map<int, String> monthNumberToName = {
@@ -74,11 +101,11 @@ class DateParseService {
       }
 
       // Heuristic: if first number > 12, assume DD/MM format
-      if (first > 12) { 
+      if (first > 12) {
         if (second > 12) return const Tuple3(null, null, null);
         return Tuple3(first, second, year);
-      } else { 
-        if (first > 12) return const Tuple3(null, null, null);
+      } else {
+        if (second > 12) return const Tuple3(null, null, null);
         return Tuple3(second, first, year);
       }
     }
@@ -105,7 +132,7 @@ class DateParseService {
         if (second > 12) return const Tuple3(null, null, null);
         return Tuple3(first, second, year);
       } else {
-        if (first > 12) return const Tuple3(null, null, null);
+        if (second > 12) return const Tuple3(null, null, null);
         return Tuple3(second, first, year);
       }
     }
@@ -178,11 +205,11 @@ class DateParseService {
         return const Tuple3(null, null, null);
       }
 
-      if (first > 12) { 
+      if (first > 12) {
         if (second > 12) return const Tuple3(null, null, null);
         return Tuple3(first, second, null);
-      } else { 
-        if (first > 12) return const Tuple3(null, null, null);
+      } else {
+        if (second > 12) return const Tuple3(null, null, null);
         return Tuple3(second, first, null);
       }
     }
@@ -334,23 +361,9 @@ class DateParseService {
     final primaryResult = _parseDateParts(input);
 
     variations.add(primaryResult);
-
-    if (primaryResult.item1 != null &&
-        primaryResult.item2 != null &&
-        primaryResult.item3 != null) {
-      final genericVersion = Tuple3(
-        primaryResult.item1,
-        primaryResult.item2,
-        null,
-      );
-      if (!variations.contains(genericVersion)) {
-        variations.add(genericVersion);
-      }
-    }
-
     return variations;
   }
- 
+
   bool isYearQuery(String input) {
     final yearOnlyMatch = RegExp(r'^\s*(\d{4})\s*$').firstMatch(input.trim());
     if (yearOnlyMatch != null) {
@@ -359,12 +372,7 @@ class DateParseService {
     }
     return false;
   }
- 
-  bool isMonthYearQuery(String input) {
-    final result = _parseDateParts(input);
-    return result.item1 == null && result.item2 != null && result.item3 != null;
-  }
- 
+
   bool isGenericDateQuery(String input) {
     final result = _parseDateParts(input);
     return result.item1 != null && result.item2 != null && result.item3 == null;

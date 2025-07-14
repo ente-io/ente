@@ -1175,12 +1175,13 @@ class SearchService {
 
     final dateVariations = DateParseService.instance.parseDateVariations(query);
 
-    // Handle month-year queries
-    if (DateParseService.instance.isMonthYearQuery(query)) {
-      final monthYearResult = DateParseService.instance.parseDate(query);
-      if (monthYearResult.item2 != null && monthYearResult.item3 != null) {
-        final month = monthYearResult.item2!.monthNumber;
-        final year = monthYearResult.item3!;
+    for (final dateVar in dateVariations) {
+      // Handle month-year queries
+      if (dateVar.item1 == null &&
+          dateVar.item2 != null &&
+          dateVar.item3 != null) {
+        final month = dateVar.item2!.monthNumber;
+        final year = dateVar.item3!;
         final monthYearFiles =
             await FilesDB.instance.getFilesCreatedWithinDurations(
           [_getDurationForMonthInYear(month, year)],
@@ -1188,7 +1189,7 @@ class SearchService {
           order: 'DESC',
         );
         if (monthYearFiles.isNotEmpty) {
-          final name = '${monthYearResult.item2!.name} $year';
+          final name = '${dateVar.item2!.name} $year';
           searchResults.add(
             GenericSearchResult(
               ResultType.month,
@@ -1205,10 +1206,8 @@ class SearchService {
           );
         }
       }
-    }
-
-    for (final dateVar in dateVariations) {
-      if (dateVar.item1 != null && dateVar.item2 != null) {
+      // Handle day-month queries (with or without year)
+      else if (dateVar.item1 != null && dateVar.item2 != null) {
         final int day = dateVar.item1!;
         final int month = dateVar.item2!.monthNumber;
         final int? year = dateVar.item3; // nullable for generic dates
@@ -1220,22 +1219,24 @@ class SearchService {
           order: 'DESC',
         );
 
-        final name =
-            '$day ${dateVar.item2!.name}${year != null ? ' $year' : ''}';
-        searchResults.add(
-          GenericSearchResult(
-            ResultType.event,
-            name,
-            matchedFiles,
-            hierarchicalSearchFilter: TopLevelGenericFilter(
-              filterName: name,
-              occurrence: kMostRelevantFilter,
-              filterResultType: ResultType.event,
-              matchedUploadedIDs: filesToUploadedFileIDs(matchedFiles),
-              filterIcon: Icons.event_outlined,
+        if (matchedFiles.isNotEmpty) {
+          final name =
+              '$day ${dateVar.item2!.name}${year != null ? ' $year' : ''}';
+          searchResults.add(
+            GenericSearchResult(
+              ResultType.event,
+              name,
+              matchedFiles,
+              hierarchicalSearchFilter: TopLevelGenericFilter(
+                filterName: name,
+                occurrence: kMostRelevantFilter,
+                filterResultType: ResultType.event,
+                matchedUploadedIDs: filesToUploadedFileIDs(matchedFiles),
+                filterIcon: Icons.event_outlined,
+              ),
             ),
-          ),
-        );
+          );
+        }
       }
     }
     return searchResults;
