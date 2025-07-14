@@ -14,7 +14,8 @@ description:
 > As of now, replication works only if all the 3 storage type needs are
 > fulfilled (1 hot, 1 cold and 1 glacier storage).
 >
-> For more information, check this [discussion](https://github.com/ente-io/ente/discussions/3167#discussioncomment-10585970).
+> For more information, check this
+> [discussion](https://github.com/ente-io/ente/discussions/3167#discussioncomment-10585970).
 
 If you're wondering why there are 3 buckets on the MinIO UI - that's because our
 production instance uses these to perform

@@ -17,7 +17,7 @@ development.
     brew install go
     ```
 - For Debian/Ubuntu-based distros
-    ``` sh
+    ```sh
     sudo apt update && sudo apt upgrade
     sudo apt install golang-go
     ```
@@ -33,7 +33,7 @@ Alternatively, you can also download the latest binaries from
     brew install libsodium
     ```
 - For Debian/Ubuntu-based distros
-    ``` sh
+    ```sh
     sudo apt install postgresql
     sudo apt install libsodium23 libsodium-dev
     ```
@@ -47,7 +47,7 @@ Install `pkg-config`
     brew install pkg-config
     ```
 - For Debian/Ubuntu-based distros
-    ``` sh
+    ```sh
     sudo apt install pkg-config
     ```
 
@@ -63,9 +63,9 @@ Depending on the operating system type, the path for postgres binary or
 configuration file might be different, please check if the command keeps failing
 for you.
 
-Ideally, if you are on a Linux system with `systemd` as the initialization ("init") system. You can also
-start postgres as a systemd service. After Installation execute the following
-commands:
+Ideally, if you are on a Linux system with `systemd` as the initialization
+("init") system. You can also start postgres as a systemd service. After
+Installation execute the following commands:
 
 ```sh
 sudo systemctl enable postgresql

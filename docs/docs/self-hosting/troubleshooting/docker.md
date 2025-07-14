@@ -138,7 +138,10 @@ afresh for it.
 
 ## MinIO provisioning error
 
-If you have used our quickstart script for self-hosting Ente (new users will be unaffected) and are using the default MinIO container for object storage, you may run into issues while starting the cluster after pulling latest images with provisioning MinIO and creating buckets.
+If you have used our quickstart script for self-hosting Ente (new users will be
+unaffected) and are using the default MinIO container for object storage, you
+may run into issues while starting the cluster after pulling latest images with
+provisioning MinIO and creating buckets.
 
 You may encounter similar logs while trying to start the cluster:
 
@@ -148,14 +151,18 @@ my-ente-minio-1 ->  | Waiting for minio...
 my-ente-minio-1 ->  | Waiting for minio...
 ```
 
-MinIO has deprecated the `mc config` command in favor of `mc alias set` resulting in failure in execution of the command for creating bucket using `post_start` hook.
+MinIO has deprecated the `mc config` command in favor of `mc alias set`
+resulting in failure in execution of the command for creating bucket using
+`post_start` hook.
 
-This can be resolved by changing `mc config host h0 add http://minio:3200 $minio_user $minio_pass` to `mc alias set h0 http://minio:3200  $minio_user $minio_pass`
+This can be resolved by changing
+`mc config host h0 add http://minio:3200 $minio_user $minio_pass` to
+`mc alias set h0 http://minio:3200  $minio_user $minio_pass`
 
 Thus the updated `post_start` will look as follows for `minio` service:
 
-``` yaml
-    minio: 
+```yaml
+    minio:
         ...
         post_start:
         - command: |

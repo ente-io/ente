@@ -276,8 +276,8 @@ export const sidebar = [
                     },
                     {
                         text: "Connecting to Custom Server",
-                        link: "/self-hosting/install/custom-server/"
-                    }
+                        link: "/self-hosting/install/custom-server/",
+                    },
                 ],
             },
             {
@@ -314,7 +314,7 @@ export const sidebar = [
                     {
                         text: "Configuring CLI for your instance",
                         link: "/self-hosting/guides/selfhost-cli",
-                    }
+                    },
                 ],
             },
             {
@@ -373,7 +373,7 @@ export const sidebar = [
                     {
                         text: "Backups",
                         link: "/self-hosting/faq/backup",
-                    }
+                    },
                 ],
             },
         ],

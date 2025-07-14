@@ -7,7 +7,8 @@ description: Getting started self hosting Ente Photos and/or Ente Auth
 
 ## Installing Docker
 
-Refer to [How to install Docker from the APT repository](https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository)
+Refer to
+[How to install Docker from the APT repository](https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository)
 for detailed instructions.
 
 ## Start the server

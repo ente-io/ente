@@ -6,16 +6,20 @@ description: Getting started with self-hosting Ente
 # Get Started
 
 The entire source code for Ente is open source,
-[including the servers](https://ente.io/blog/open-sourcing-our-server/). This is the same code we use for our own cloud service.
+[including the server](https://ente.io/blog/open-sourcing-our-server/). This is
+the same code we use for our own cloud service.
 
-For a quick preview of running Ente on your server, make sure you have the following installed on your system and meets the requirements mentioned below:
+For a quick preview of Ente on your server, make sure your system meets the
+requirements mentioned below. After trying the preview, you can explore other
+ways of self-hosting Ente on your server as described in the documentation.
 
 ## Requirements
 
 - A system with at least 1 GB of RAM and 1 CPU core
 - [Docker Compose v2](https://docs.docker.com/compose/)
 
-> For more details, check out [requirements page](/self-hosting/install/requirements)
+> For more details, check out the
+> [requirements page](/self-hosting/install/requirements).
 
 ## Set up the server
 
@@ -25,7 +29,9 @@ Run this command on your terminal to setup Ente.
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/ente-io/ente/main/server/quickstart.sh)"
 ```
 
-The above command creates a directory `my-ente` in the current working directory, prompts to start the cluster after pulling the images and starts all the containers required to run Ente.
+The above command creates a directory `my-ente` in the current working
+directory, prompts to start the cluster with needed containers after pulling the
+images required to run Ente.
 
 ![quickstart](/quickstart.png)
 
@@ -33,7 +39,9 @@ The above command creates a directory `my-ente` in the current working directory
 
 The first user to be registered will be treated as the admin user.
 
-Open the web app at `http://<machine-ip>:3000` (or `http://localhost:3000` if using on same local machine) and select **Don't have an account?** to create a new user.
+Open Ente Photos web app at `http://<machine-ip>:3000` (or `http://localhost:3000` if
+using on same local machine) and select **Don't have an account?** to create a
+new user.
 
 ![Onboarding Screen](/onboarding.png)
 
@@ -41,15 +49,48 @@ Follow the prompts to sign up.
 
 ![Sign Up Page](/sign-up.png)
 
-You will be prompted to enter verification code. Check the cluster logs using `sudo docker compose logs` and enter the same.
+You will be prompted to enter verification code. Check the cluster logs using
+`sudo docker compose logs` and enter the same.
 
 ![Verification Code](/otp.png)
 
+Upload a picture via the web user interface.
+
+Alternatively, if using Ente Auth, get started by adding an account (assuming you are running Ente Auth at `http://<machine-ip>:3002` or `http://localhost:3002`).
+
 ## Try the mobile app
 
+### Install the Mobile App
 
+You can install Ente Photos by following the [installation section](/photos/faq/installing).
+
+Alternatively, you can install Ente Auth (if you are planning to use Auth) by following the [installation section](/auth/faq/installing).
+
+### Login to the Mobile App
+
+Tap the onboarding screen 7 times to modify developer settings.
+
+<center>
+<img src="/developer-settings.png" alt="Developer Settings" height="50%" width="50%" />
+</center>
+
+<br>
+Enter your Ente server's endpoint.
+<br>
+
+<center>
+<img src="/developer-settings-endpoint.png" alt="Developer Settings - Server Endpoint" height="50%" width="50%" />
+</center>
+
+You should be able to access the uploaded picture from the web user interface.
 
 ## What next?
+
+Now that you have spinned up a cluster in quick manner, you may wish to install using a different way for your needs. Check the "Install" section for information regarding that.
+
+You can import your pictures from Google Takeout or from other services to Ente Photos. For more information, check out our [migration guide](/photos/migration/).
+
+You can import your codes from other authenticator providers to Ente Auth. Check out the [migration guide](/auth/migration/) for more information.
 
 
 ## Queries?
