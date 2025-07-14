@@ -433,6 +433,23 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: const CaptionedTextWidget(
+            title: "Debug memories section",
+          ),
+          trailingWidget: ToggleSwitchWidget(
+            value: () => localSettings.isDebugMemoriesEnabled,
+            onChanged: () async {
+              await localSettings.toggleDebugMemories();
+              if (mounted) {
+                setState(() {});
+              }
+            },
+          ),
+          singleBorderRadius: 8,
+          isGestureDetectorDisabled: true,
+        ),
+        sectionOptionSpacing,
+        MenuItemWidget(
+          captionedTextWidget: const CaptionedTextWidget(
             title: "Sync person mappings ",
           ),
           pressedColor: getEnteColorScheme(context).fillFaint,
