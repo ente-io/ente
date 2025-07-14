@@ -161,7 +161,11 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
       _isLoading = true;
       _fetchSubData();
     }
-    _dialog = createProgressDialog(context, S.of(context).pleaseWait);
+    _dialog = createProgressDialog(
+      context,
+      S.of(context).pleaseWait,
+      isDismissible: true,
+    );
     return Scaffold(
       appBar: AppBar(),
       body: Column(
