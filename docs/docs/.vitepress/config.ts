@@ -1,6 +1,7 @@
 import { defineConfig } from "vitepress";
 import { sidebar } from "./sidebar";
 
+
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
     title: "Ente Help",
@@ -26,6 +27,9 @@ export default defineConfig({
             },
         },
         sidebar: sidebar,
+        outline: {
+            level: [2, 3]
+        },
         socialLinks: [
             { icon: "github", link: "https://github.com/ente-io/ente/" },
             { icon: "twitter", link: "https://twitter.com/enteio" },

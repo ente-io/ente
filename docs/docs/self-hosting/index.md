@@ -16,7 +16,7 @@ ways of self-hosting Ente on your server as described in the documentation.
 ## Requirements
 
 - A system with at least 1 GB of RAM and 1 CPU core
-- [Docker Compose v2](https://docs.docker.com/compose/)
+- [Docker Compose](https://docs.docker.com/compose/)
 
 > For more details, check out the
 > [requirements page](/self-hosting/install/requirements).
