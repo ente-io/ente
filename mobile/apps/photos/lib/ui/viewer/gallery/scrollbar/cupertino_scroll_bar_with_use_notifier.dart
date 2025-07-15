@@ -12,7 +12,6 @@ import "package:flutter/cupertino.dart";
 import 'package:flutter/services.dart';
 
 // All values eyeballed.
-const double _kScrollbarMinLength = 36.0;
 const double _kScrollbarMinOverscrollLength = 8.0;
 const Duration _kScrollbarTimeToFade = Duration(milliseconds: 1200);
 const Duration _kScrollbarFadeDuration = Duration(milliseconds: 250);
@@ -76,10 +75,13 @@ class CupertinoScrollbarWithUseNotifier extends RawScrollbar {
   /// typically a [Scrollable] widget.
 
   final ValueNotifier<bool> inUseNotifier;
+  final double minScrollbarLength;
+
   const CupertinoScrollbarWithUseNotifier({
     super.key,
     required super.child,
     required this.inUseNotifier,
+    required this.minScrollbarLength,
     super.controller,
     bool? thumbVisibility,
     double super.thickness = defaultThickness,
@@ -173,7 +175,7 @@ class _CupertinoScrollbarState
       ..crossAxisMargin = _kScrollbarCrossAxisMargin
       ..radius = _radius
       ..padding = MediaQuery.paddingOf(context)
-      ..minLength = _kScrollbarMinLength
+      ..minLength = widget.minScrollbarLength
       ..minOverscrollLength = _kScrollbarMinOverscrollLength
       ..scrollbarOrientation = widget.scrollbarOrientation;
   }

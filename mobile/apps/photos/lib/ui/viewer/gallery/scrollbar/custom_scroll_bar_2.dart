@@ -5,6 +5,17 @@ import "package:photos/models/gallery/gallery_sections.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/viewer/gallery/scrollbar/scroll_bar_with_use_notifier.dart";
 import "package:photos/utils/misc_util.dart";
+import "package:photos/utils/widget_util.dart";
+
+class ScrollbarDivision {
+  final String groupID;
+  final String title;
+
+  ScrollbarDivision({
+    required this.groupID,
+    required this.title,
+  });
+}
 
 class CustomScrollBar2 extends StatefulWidget {
   final Widget child;
@@ -39,15 +50,30 @@ division and populate position to title mapping.
 
 class _CustomScrollBar2State extends State<CustomScrollBar2> {
   final _logger = Logger("CustomScrollBar2");
-  final _key = GlobalKey();
+  final _scrollbarKey = GlobalKey();
   List<({double position, String title})>? positionToTitleMap;
   static const _bottomPadding = 92.0;
+  double? heightOfScrollbarDivider;
+  double? heightOfScrollTrack;
+  static const _kScrollbarMinLength = 36.0;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _computePositionToTitleMap();
+
+    getIntrinsicSizeOfWidget(const ScrollBarDivider(title: "Temp"), context)
+        .then((size) {
+      if (mounted) {
+        setState(() {
+          heightOfScrollbarDivider = size.height;
+        });
+      }
+
+      // Reason for calling _computePositionToTileMap here is, it needs
+      // heightOfScrollbarDivider to be set.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _computePositionToTitleMap();
+      });
     });
   }
 
@@ -57,15 +83,10 @@ class _CustomScrollBar2State extends State<CustomScrollBar2> {
     _computePositionToTitleMap();
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
   Future<void> _computePositionToTitleMap() async {
     _logger.info("computing postition to title map");
     final result = <({double position, String title})>[];
-    final heightOfScrollTrack = await _getHeightOfScrollTrack();
+    heightOfScrollTrack = await _getHeightOfScrollTrack();
     final maxScrollExtent = widget.scrollController.position.maxScrollExtent;
 
     for (ScrollbarDivision scrollbarDivision
@@ -73,14 +94,48 @@ class _CustomScrollBar2State extends State<CustomScrollBar2> {
       final scrollOffsetOfGroup = widget
           .galleryGroups.groupIdToScrollOffsetMap[scrollbarDivision.groupID]!;
 
-      final groupScrollOffsetToUse = scrollOffsetOfGroup - heightOfScrollTrack;
+      final groupScrollOffsetToUse = scrollOffsetOfGroup - heightOfScrollTrack!;
       if (groupScrollOffsetToUse < 0) {
         result.add((position: 0, title: scrollbarDivision.title));
       } else {
-        final normalizedPosition =
-            (groupScrollOffsetToUse / maxScrollExtent) * heightOfScrollTrack;
+        // By default, the exact scroll position of the scrollable isn't tied
+        // to the center or one constant point of it's scrollbar. This point of
+        // the scrollbar moves from top to bottom across it when the scrollable
+        // is scolled from top to bottom.
+
+        // This correction is to ensure that the scrollbar division elements
+        // appear at the same point of the scrollbar everytime and are
+        // accurate in terms of UX (that is, when scrollbar's is dragged to a
+        // particular scrollbar division (start of the division in gallery),
+        // the division element is always at the same point of the scrollbar).
+        // Ideally this point should be the mid of the scrollbar, but it's
+        // slightly off, not sure why. But this is fine enough.
+        final fractionOfGroupScrollOffsetWrtMaxExtent =
+            groupScrollOffsetToUse / maxScrollExtent;
+        late final double positionCorrection;
+
+        // This value is the distance from the mid of the scrollbar to the mid
+        // of the scrollbar divider element when both pinned to the top, that
+        // is, their top edges are overlapping.
+        final value = (_kScrollbarMinLength - heightOfScrollbarDivider!) / 2;
+
+        if (fractionOfGroupScrollOffsetWrtMaxExtent < 0.5) {
+          positionCorrection = value * fractionOfGroupScrollOffsetWrtMaxExtent -
+              (heightOfScrollbarDivider! *
+                  fractionOfGroupScrollOffsetWrtMaxExtent);
+        } else {
+          positionCorrection =
+              -value * fractionOfGroupScrollOffsetWrtMaxExtent -
+                  (heightOfScrollbarDivider! *
+                      fractionOfGroupScrollOffsetWrtMaxExtent);
+        }
+
+        final adaptedPosition =
+            heightOfScrollTrack! * fractionOfGroupScrollOffsetWrtMaxExtent +
+                positionCorrection;
+
         result.add(
-          (position: normalizedPosition, title: scrollbarDivision.title),
+          (position: adaptedPosition, title: scrollbarDivision.title),
         );
       }
     }
@@ -93,19 +148,21 @@ class _CustomScrollBar2State extends State<CustomScrollBar2> {
     if (result.isNotEmpty) {
       filteredResult.add(result.first);
       for (int i = 1; i < result.length; i++) {
-        if ((result[i].position - filteredResult.last.position).abs() >= 60) {
+        if ((result[i].position - filteredResult.last.position).abs() >= 48) {
           filteredResult.add(result[i]);
         }
       }
     }
-
-    setState(() {
-      positionToTitleMap = filteredResult;
-    });
+    if (mounted) {
+      setState(() {
+        positionToTitleMap = filteredResult;
+      });
+    }
   }
 
   Future<double> _getHeightOfScrollTrack() {
-    final renderBox = _key.currentContext?.findRenderObject() as RenderBox?;
+    final renderBox =
+        _scrollbarKey.currentContext?.findRenderObject() as RenderBox?;
     assert(renderBox != null, "RenderBox is null");
     // Retry for : https://github.com/flutter/flutter/issues/25827
     return MiscUtil()
@@ -118,8 +175,6 @@ class _CustomScrollBar2State extends State<CustomScrollBar2> {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = getEnteTextTheme(context);
-    final colorScheme = getEnteColorScheme(context);
     return Stack(
       clipBehavior: Clip.none,
       alignment: Alignment.centerLeft,
@@ -130,14 +185,15 @@ class _CustomScrollBar2State extends State<CustomScrollBar2> {
             padding: const EdgeInsets.only(bottom: _bottomPadding),
           ),
           child: ScrollbarWithUseNotifer(
-            key: _key,
+            key: _scrollbarKey,
             controller: widget.scrollController,
             interactive: true,
             inUseNotifier: widget.inUseNotifier,
+            minScrollbarLength: _kScrollbarMinLength,
             child: widget.child,
           ),
         ),
-        positionToTitleMap == null
+        positionToTitleMap == null || heightOfScrollbarDivider == null
             ? const SizedBox.shrink()
             : ValueListenableBuilder<bool>(
                 valueListenable: widget.inUseNotifier,
@@ -153,36 +209,8 @@ class _CustomScrollBar2State extends State<CustomScrollBar2> {
                             children: positionToTitleMap!.map((record) {
                               return Positioned(
                                 top: record.position,
-                                right: 24,
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    color: colorScheme.backgroundElevated2,
-                                    borderRadius: BorderRadius.circular(6),
-                                    border: Border.all(
-                                      color: colorScheme.strokeFaint,
-                                      width: 0.5,
-                                    ),
-                                    // TODO: Remove shadow if scrolling perf
-                                    // is affected.
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withOpacity(0.1),
-                                        blurRadius: 3,
-                                        offset: const Offset(0, 2),
-                                      ),
-                                    ],
-                                  ),
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 8,
-                                    vertical: 4,
-                                  ),
-                                  child: Center(
-                                    child: Text(
-                                      record.title,
-                                      style: textTheme.miniMuted,
-                                    ),
-                                  ),
-                                ),
+                                right: 32,
+                                child: ScrollBarDivider(title: record.title),
                               );
                             }).toList(),
                           ),
@@ -194,12 +222,43 @@ class _CustomScrollBar2State extends State<CustomScrollBar2> {
   }
 }
 
-class ScrollbarDivision {
-  final String groupID;
+class ScrollBarDivider extends StatelessWidget {
   final String title;
+  const ScrollBarDivider({super.key, required this.title});
 
-  ScrollbarDivision({
-    required this.groupID,
-    required this.title,
-  });
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
+    return Container(
+      decoration: BoxDecoration(
+        color: colorScheme.backgroundElevated2,
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(
+          color: colorScheme.strokeFaint,
+          width: 0.5,
+        ),
+        // TODO: Remove shadow if scrolling perf
+        // is affected.
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 3,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.symmetric(
+        horizontal: 8,
+        vertical: 4,
+      ),
+      child: Center(
+        child: Text(
+          title,
+          style: textTheme.miniMuted,
+          maxLines: 1,
+        ),
+      ),
+    );
+  }
 }

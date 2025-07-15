@@ -13,7 +13,6 @@ import "package:photos/ui/viewer/gallery/scrollbar/cupertino_scroll_bar_with_use
 const double _kScrollbarThickness = 8.0;
 const double _kScrollbarThicknessWithTrack = 12.0;
 const double _kScrollbarMargin = 2.0;
-const double _kScrollbarMinLength = 48.0;
 const Radius _kScrollbarRadius = Radius.circular(8.0);
 const Duration _kScrollbarFadeDuration = Duration(milliseconds: 300);
 const Duration _kScrollbarTimeToFade = Duration(milliseconds: 600);
@@ -88,6 +87,7 @@ class ScrollbarWithUseNotifer extends StatelessWidget {
     super.key,
     required this.child,
     required this.inUseNotifier,
+    required this.minScrollbarLength,
     this.controller,
     this.thumbVisibility,
     this.trackVisibility,
@@ -153,6 +153,8 @@ class ScrollbarWithUseNotifer extends StatelessWidget {
 
   final ValueNotifier<bool> inUseNotifier;
 
+  final double minScrollbarLength;
+
   @override
   Widget build(BuildContext context) {
     if (Theme.of(context).platform == TargetPlatform.iOS) {
@@ -168,6 +170,7 @@ class ScrollbarWithUseNotifer extends StatelessWidget {
         notificationPredicate: notificationPredicate,
         scrollbarOrientation: scrollbarOrientation,
         inUseNotifier: inUseNotifier,
+        minScrollbarLength: minScrollbarLength,
         child: child,
       );
     }
@@ -181,6 +184,7 @@ class ScrollbarWithUseNotifer extends StatelessWidget {
       interactive: interactive,
       scrollbarOrientation: scrollbarOrientation,
       inUseNotifier: inUseNotifier,
+      minScrollbarLength: minScrollbarLength,
       child: child,
     );
   }
@@ -188,9 +192,11 @@ class ScrollbarWithUseNotifer extends StatelessWidget {
 
 class _MaterialScrollbar extends RawScrollbar {
   final ValueNotifier<bool> inUseNotifier;
+  final double minScrollbarLength;
   const _MaterialScrollbar({
     required super.child,
     required this.inUseNotifier,
+    required this.minScrollbarLength,
     super.controller,
     super.thumbVisibility,
     super.trackVisibility,
@@ -373,7 +379,7 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
       ..crossAxisMargin = _scrollbarTheme.crossAxisMargin ??
           (_useAndroidScrollbar ? 0.0 : _kScrollbarMargin)
       ..mainAxisMargin = _scrollbarTheme.mainAxisMargin ?? 0.0
-      ..minLength = _scrollbarTheme.minThumbLength ?? _kScrollbarMinLength
+      ..minLength = widget.minScrollbarLength
       ..padding = MediaQuery.paddingOf(context)
       ..scrollbarOrientation = widget.scrollbarOrientation
       ..ignorePointer = !enableGestures;
