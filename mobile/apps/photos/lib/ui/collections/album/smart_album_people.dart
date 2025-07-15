@@ -6,7 +6,6 @@ import "package:photos/models/collection/smart_album_config.dart";
 import "package:photos/models/selected_people.dart";
 import "package:photos/services/smart_albums_service.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
-import 'package:photos/ui/components/buttons/icon_button_widget.dart';
 import "package:photos/ui/components/models/button_type.dart";
 import 'package:photos/ui/components/title_bar_title_widget.dart';
 import 'package:photos/ui/components/title_bar_widget.dart';
@@ -116,17 +115,7 @@ class _SmartAlbumPeopleState extends State<SmartAlbumPeople> {
                 ),
                 expandedHeight: MediaQuery.textScalerOf(context).scale(120),
                 flexibleSpaceCaption: S.of(context).peopleWidgetDesc,
-                actionIcons: [
-                  IconButtonWidget(
-                    icon: Icons.close_outlined,
-                    iconButtonType: IconButtonType.secondary,
-                    onTap: () {
-                      Navigator.pop(context);
-                      Navigator.pop(context);
-                      Navigator.pop(context);
-                    },
-                  ),
-                ],
+                actionIcons: const [],
               ),
               SliverFillRemaining(
                 child: PeopleSectionAllWidget(
