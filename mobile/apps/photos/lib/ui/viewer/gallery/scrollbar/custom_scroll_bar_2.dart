@@ -82,8 +82,20 @@ class _CustomScrollBar2State extends State<CustomScrollBar2> {
         );
       }
     }
+    final filteredResult = <({double position, String title})>[];
+
+    // Filter out positions that are too close to each other
+    if (result.isNotEmpty) {
+      filteredResult.add(result.first);
+      for (int i = 1; i < result.length; i++) {
+        if ((result[i].position - filteredResult.last.position).abs() >= 60) {
+          filteredResult.add(result[i]);
+        }
+      }
+    }
+
     setState(() {
-      positionToTitleMap = result;
+      positionToTitleMap = filteredResult;
     });
   }
 
