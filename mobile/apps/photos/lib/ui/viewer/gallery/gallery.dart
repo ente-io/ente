@@ -13,6 +13,7 @@ import 'package:photos/models/file_load_result.dart';
 import "package:photos/models/gallery/gallery_sections.dart";
 import 'package:photos/models/selected_files.dart';
 import "package:photos/service_locator.dart";
+import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/common/loading_widget.dart';
 import "package:photos/ui/viewer/gallery/component/group/group_header_widget.dart";
 import "package:photos/ui/viewer/gallery/component/group/type.dart";
@@ -668,19 +669,22 @@ class _PinnedGroupHeaderState extends State<PinnedGroupHeader> {
   @override
   Widget build(BuildContext context) {
     return currentGroupId != null
-        ? GroupHeaderWidget(
-            title: widget.galleryGroups.groupIdToheaderDataMap[currentGroupId!]!
-                .groupType
-                .getTitle(
-              context,
-              widget.galleryGroups.groupIDToFilesMap[currentGroupId]!.first,
+        ? ColoredBox(
+            color: getEnteColorScheme(context).backgroundBase,
+            child: GroupHeaderWidget(
+              title: widget.galleryGroups
+                  .groupIdToheaderDataMap[currentGroupId!]!.groupType
+                  .getTitle(
+                context,
+                widget.galleryGroups.groupIDToFilesMap[currentGroupId]!.first,
+              ),
+              gridSize: localSettings.getPhotoGridSize(),
+              height: widget.galleryGroups.headerExtent,
+              filesInGroup:
+                  widget.galleryGroups.groupIDToFilesMap[currentGroupId!]!,
+              selectedFiles: widget.selectedFiles,
+              showSelectAllByDefault: widget.showSelectAllByDefault,
             ),
-            gridSize: localSettings.getPhotoGridSize(),
-            height: widget.galleryGroups.headerExtent,
-            filesInGroup:
-                widget.galleryGroups.groupIDToFilesMap[currentGroupId!]!,
-            selectedFiles: widget.selectedFiles,
-            showSelectAllByDefault: widget.showSelectAllByDefault,
           )
         : const SizedBox.shrink();
   }
