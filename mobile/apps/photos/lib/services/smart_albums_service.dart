@@ -8,14 +8,12 @@ import "package:photos/services/collections_service.dart";
 import "package:photos/services/search_service.dart";
 import "package:photos/ui/actions/collection/collection_file_actions.dart";
 import "package:photos/ui/actions/collection/collection_sharing_actions.dart";
-import "package:synchronized/synchronized.dart";
 
 class SmartAlbumsService {
   SmartAlbumsService._();
 
   static final SmartAlbumsService instance = SmartAlbumsService._();
 
-  final _lock = Lock();
   final _logger = Logger((SmartAlbumsService).toString());
 
   final Map<int, SmartAlbumConfig> _cachedConfigs = {};
@@ -27,87 +25,81 @@ class SmartAlbumsService {
   }
 
   Future<void> refresh() async {
-    await _lock.synchronized(() async {
-      if (isInitialized) return;
+    if (isInitialized) return;
 
-      _logger.info("Refreshing SmartAlbumsService");
+    _logger.info("Refreshing SmartAlbumsService");
 
-      final collections =
-          CollectionsService.instance.nonHiddenOwnedCollections();
+    final collections = CollectionsService.instance.nonHiddenOwnedCollections();
 
-      for (final collectionId in collections) {
-        try {
-          final config = await loadConfig(collectionId);
-          _cachedConfigs[collectionId] = config;
-        } catch (_) {}
-      }
+    for (final collectionId in collections) {
+      try {
+        final config = await loadConfig(collectionId);
+        _cachedConfigs[collectionId] = config;
+      } catch (_) {}
+    }
 
-      isInitialized = true;
-    });
+    isInitialized = true;
   }
 
   void updateCachedCollection(SmartAlbumConfig config) =>
       _cachedConfigs[config.collectionId] = config;
 
   Future<void> syncSmartAlbums() async {
-    await _lock.synchronized(() async {
-      if (!isInitialized) await refresh();
+    if (!isInitialized) await refresh();
 
-      for (final entry in _cachedConfigs.entries) {
-        final collectionId = entry.key;
-        final config = entry.value;
+    for (final entry in _cachedConfigs.entries) {
+      final collectionId = entry.key;
+      final config = entry.value;
 
-        final infoMap = config.infoMap;
+      final infoMap = config.infoMap;
 
-        // Person Id key mapped to updatedAt value
-        final updatedAtMap = await entityService.getUpdatedAts(
-          EntityType.cgroup,
-          config.personIDs.toList(),
-        );
+      // Person Id key mapped to updatedAt value
+      final updatedAtMap = await entityService.getUpdatedAts(
+        EntityType.cgroup,
+        config.personIDs.toList(),
+      );
 
-        for (final personId in config.personIDs) {
-          // compares current updateAt with last added file's updatedAt
-          if (updatedAtMap[personId] == null ||
-              infoMap[personId] == null ||
-              (updatedAtMap[personId]! <= infoMap[personId]!.updatedAt)) {
-            continue;
-          }
+      for (final personId in config.personIDs) {
+        // compares current updateAt with last added file's updatedAt
+        if (updatedAtMap[personId] == null ||
+            infoMap[personId] == null ||
+            (updatedAtMap[personId]! <= infoMap[personId]!.updatedAt)) {
+          continue;
+        }
 
-          final toBeSynced = (await SearchService.instance
-                  .getClusterFilesForPersonID(personId))
-              .entries
-              .expand((e) => e.value)
-              .toList()
-            ..removeWhere(
-              (e) =>
-                  e.uploadedFileID == null ||
-                  config.infoMap[personId]!.addedFiles
-                      .contains(e.uploadedFileID),
+        final toBeSynced = (await SearchService.instance
+                .getClusterFilesForPersonID(personId))
+            .entries
+            .expand((e) => e.value)
+            .toList()
+          ..removeWhere(
+            (e) =>
+                e.uploadedFileID == null ||
+                config.infoMap[personId]!.addedFiles.contains(e.uploadedFileID),
+          );
+
+        if (toBeSynced.isNotEmpty) {
+          final CollectionActions collectionActions =
+              CollectionActions(CollectionsService.instance);
+
+          final result = await collectionActions.addToCollection(
+            null,
+            collectionId,
+            false,
+            selectedFiles: toBeSynced,
+          );
+
+          if (result) {
+            final newConfig = await config.addFiles(
+              personId,
+              updatedAtMap[personId]!,
+              toBeSynced.map((e) => e.uploadedFileID!).toSet(),
             );
-
-          if (toBeSynced.isNotEmpty) {
-            final CollectionActions collectionActions =
-                CollectionActions(CollectionsService.instance);
-
-            final result = await collectionActions.addToCollection(
-              null,
-              collectionId,
-              false,
-              selectedFiles: toBeSynced,
-            );
-
-            if (result) {
-              final newConfig = await config.addFiles(
-                personId,
-                updatedAtMap[personId]!,
-                toBeSynced.map((e) => e.uploadedFileID!).toSet(),
-              );
-              await saveConfig(newConfig);
-            }
+            await saveConfig(newConfig);
           }
         }
       }
-    });
+    }
   }
 
   static const _personIdsKey = "smart_album_person_ids";
@@ -132,14 +124,14 @@ class SmartAlbumsService {
     updateCachedCollection(config);
   }
 
-  Future<SmartAlbumConfig> getConfig(int collectionId) async {
-    if (isInitialized && _cachedConfigs.containsKey(collectionId)) {
+  Future<SmartAlbumConfig?> getConfig(int collectionId) async {
+    await refresh();
+
+    if (_cachedConfigs.containsKey(collectionId)) {
       return _cachedConfigs[collectionId]!;
     }
 
-    unawaited(refresh());
-    final config = await loadConfig(collectionId);
-    return config;
+    return null;
   }
 
   Future<SmartAlbumConfig> loadConfig(int collectionId) async {

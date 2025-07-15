@@ -64,44 +64,53 @@ class _SmartAlbumPeopleState extends State<SmartAlbumPeople> {
               buttonSize: ButtonSize.large,
               labelText: S.of(context).save,
               shouldSurfaceExecutionStates: false,
-              isDisabled: _selectedPeople.personIds.isEmpty,
-              onTap: _selectedPeople.personIds.isEmpty
-                  ? null
-                  : () async {
-                      isLoading = true;
-                      if (mounted) setState(() {});
+              onTap: () async {
+                if (isLoading) return;
 
-                      try {
-                        SmartAlbumConfig newConfig;
+                isLoading = true;
+                if (mounted) setState(() {});
 
-                        if (currentConfig == null) {
-                          final infoMap = <String, PersonInfo>{};
+                if (_selectedPeople.personIds.length ==
+                        currentConfig?.personIDs.length &&
+                    _selectedPeople.personIds
+                        .toSet()
+                        .difference(currentConfig?.personIDs.toSet() ?? {})
+                        .isEmpty) {
+                  Navigator.pop(context);
+                  return;
+                }
 
-                          // Add files which are needed
-                          for (final personId in _selectedPeople.personIds) {
-                            infoMap[personId] = (updatedAt: 0, addedFiles: {});
-                          }
+                try {
+                  SmartAlbumConfig newConfig;
 
-                          newConfig = SmartAlbumConfig(
-                            collectionId: widget.collectionId,
-                            personIDs: _selectedPeople.personIds,
-                            infoMap: infoMap,
-                          );
-                        } else {
-                          newConfig = await currentConfig!.getUpdatedConfig(
-                            _selectedPeople.personIds,
-                          );
-                        }
+                  if (currentConfig == null) {
+                    final infoMap = <String, PersonInfo>{};
 
-                        await SmartAlbumsService.instance.saveConfig(newConfig);
-                        SmartAlbumsService.instance.syncSmartAlbums().ignore();
+                    // Add files which are needed
+                    for (final personId in _selectedPeople.personIds) {
+                      infoMap[personId] = (updatedAt: 0, addedFiles: {});
+                    }
 
-                        Navigator.pop(context);
-                      } catch (_) {
-                        isLoading = false;
-                        if (mounted) setState(() {});
-                      }
-                    },
+                    newConfig = SmartAlbumConfig(
+                      collectionId: widget.collectionId,
+                      personIDs: _selectedPeople.personIds,
+                      infoMap: infoMap,
+                    );
+                  } else {
+                    newConfig = await currentConfig!.getUpdatedConfig(
+                      _selectedPeople.personIds,
+                    );
+                  }
+
+                  await SmartAlbumsService.instance.saveConfig(newConfig);
+                  SmartAlbumsService.instance.syncSmartAlbums().ignore();
+
+                  Navigator.pop(context);
+                } catch (_) {
+                  isLoading = false;
+                  if (mounted) setState(() {});
+                }
+              },
             );
           },
         ),
