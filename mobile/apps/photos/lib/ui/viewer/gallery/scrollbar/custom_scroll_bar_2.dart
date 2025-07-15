@@ -85,6 +85,9 @@ class _CustomScrollBar2State extends State<CustomScrollBar2> {
     }
     final filteredResult = <({double position, String title})>[];
 
+    // Remove first scrollbar division since it doesn't add value in terms of UX
+    result.removeAt(0);
+
     // Filter out positions that are too close to each other
     if (result.isNotEmpty) {
       filteredResult.add(result.first);
