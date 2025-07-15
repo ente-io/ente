@@ -10,11 +10,13 @@ class CustomScrollBar2 extends StatefulWidget {
   final Widget child;
   final ScrollController scrollController;
   final GalleryGroups galleryGroups;
+  final ValueNotifier<bool> inUseNotifier;
   const CustomScrollBar2({
     super.key,
     required this.child,
     required this.scrollController,
     required this.galleryGroups,
+    required this.inUseNotifier,
   });
 
   @override
@@ -38,7 +40,6 @@ division and populate position to title mapping.
 class _CustomScrollBar2State extends State<CustomScrollBar2> {
   final _logger = Logger("CustomScrollBar2");
   final _key = GlobalKey();
-  final inUseNotifier = ValueNotifier<bool>(false);
   List<({double position, String title})>? positionToTitleMap;
   static const _bottomPadding = 92.0;
 
@@ -58,7 +59,6 @@ class _CustomScrollBar2State extends State<CustomScrollBar2> {
 
   @override
   void dispose() {
-    inUseNotifier.dispose();
     super.dispose();
   }
 
@@ -133,14 +133,14 @@ class _CustomScrollBar2State extends State<CustomScrollBar2> {
             key: _key,
             controller: widget.scrollController,
             interactive: true,
-            inUseNotifier: inUseNotifier,
+            inUseNotifier: widget.inUseNotifier,
             child: widget.child,
           ),
         ),
         positionToTitleMap == null
             ? const SizedBox.shrink()
             : ValueListenableBuilder<bool>(
-                valueListenable: inUseNotifier,
+                valueListenable: widget.inUseNotifier,
                 builder: (context, inUse, _) {
                   return AnimatedSwitcher(
                     duration: const Duration(milliseconds: 250),

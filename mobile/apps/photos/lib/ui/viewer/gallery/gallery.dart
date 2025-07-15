@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import "package:flutter/services.dart";
 import 'package:logging/logging.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/event_bus.dart';
@@ -136,6 +137,7 @@ class GalleryState extends State<Gallery> {
   }
 
   final miscUtil = MiscUtil();
+  final scrollBarInUseNotifier = ValueNotifier<bool>(false);
 
   @override
   void initState() {
@@ -429,6 +431,7 @@ class GalleryState extends State<Gallery> {
     }
     _debouncer.cancelDebounceTimer();
     _scrollController.dispose();
+    scrollBarInUseNotifier.dispose();
     super.dispose();
   }
 
@@ -481,6 +484,7 @@ class GalleryState extends State<Gallery> {
       child: CustomScrollBar2(
         scrollController: _scrollController,
         galleryGroups: galleryGroups,
+        inUseNotifier: scrollBarInUseNotifier,
         child: Stack(
           key: _stackKey,
           clipBehavior: Clip.none,
@@ -512,6 +516,7 @@ class GalleryState extends State<Gallery> {
                   _sectionedListSliverRenderBoxYOffsetRelativeToStackRenderBox,
               selectedFiles: widget.selectedFiles,
               showSelectAllByDefault: widget.showSelectAllByDefault,
+              scrollbarInUseNotifier: scrollBarInUseNotifier,
             ),
           ],
         ),
@@ -588,6 +593,7 @@ class PinnedGroupHeader extends StatefulWidget {
       getSectionedListSliverRenderBoxYOffsetRelativeToStackRenderBox;
   final SelectedFiles? selectedFiles;
   final bool showSelectAllByDefault;
+  final ValueNotifier<bool> scrollbarInUseNotifier;
 
   const PinnedGroupHeader({
     required this.scrollController,
@@ -595,6 +601,7 @@ class PinnedGroupHeader extends StatefulWidget {
     required this.getSectionedListSliverRenderBoxYOffsetRelativeToStackRenderBox,
     required this.selectedFiles,
     required this.showSelectAllByDefault,
+    required this.scrollbarInUseNotifier,
     super.key,
   });
 
@@ -672,6 +679,9 @@ class _PinnedGroupHeaderState extends State<PinnedGroupHeader> {
     }
 
     setState(() {});
+    if (widget.scrollbarInUseNotifier.value) {
+      HapticFeedback.selectionClick();
+    }
   }
 
   @override
