@@ -104,6 +104,7 @@ class _HomeWidgetState extends State<HomeWidget> {
   bool _shouldRenderCreateCollectionSheet = false;
   bool _showShowBackupHook = false;
   final isOnSearchTabNotifier = ValueNotifier<bool>(false);
+  bool _isLoadingPageActive = false;
 
   late StreamSubscription<TabChangedEvent> _tabChangedEventSubscription;
   late StreamSubscription<SubscriptionPurchasedEvent>
@@ -650,11 +651,18 @@ class _HomeWidgetState extends State<HomeWidget> {
 
   Widget _getBody(BuildContext context) {
     if (!Configuration.instance.hasConfiguredAccount()) {
-      _closeDrawerIfOpen(context);
-      _logger.info('LandingPageWidget1');
-
-      // return const LandingPageWidget();
-       return const LoadingPage();
+      if (!_isLoadingPageActive) {
+        _isLoadingPageActive = true;
+        _logger.info('LandingPageWidget1');
+        return LoadingPage(
+          onLoginComplete: () {
+            if (mounted) setState(() => _isLoadingPageActive = false);
+          },
+        );
+      } else {
+        // Show a spinner while login is in progress
+        return const Center(child: CircularProgressIndicator());
+      }
     }
     if (!permissionService.hasGrantedPermissions()) {
       entityService.syncEntities().then((_) {

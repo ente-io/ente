@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:logging/logging.dart';
@@ -14,7 +17,9 @@ import 'package:photos/ui/tabs/home_widget.dart';
 final Logger _logger = Logger('LoadingPage');
 
 class LoadingPage extends StatefulWidget {
-  const LoadingPage({super.key});
+  const LoadingPage({super.key, this.onLoginComplete});
+
+  final VoidCallback? onLoginComplete;
 
   @override
   State<LoadingPage> createState() => _LoadingPageState();
@@ -22,14 +27,22 @@ class LoadingPage extends StatefulWidget {
 
 class _LoadingPageState extends State<LoadingPage> {
   bool _isProcessing = true;
+  bool _hasAttemptedLogin = false;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    Future.microtask(() => _attemptAutomatedLogin());
+    if (!_hasAttemptedLogin) {
+      _hasAttemptedLogin = true;
+      Future.microtask(() => _attemptAutomatedLogin());
+    }
   }
 
   Future<void> _attemptAutomatedLogin() async {
+    if (Configuration.instance.hasConfiguredAccount() && Configuration.instance.getToken() != null) {
+      _logger.info("Account already configured, skipping login flow.");
+      return;
+    }
     final Account? account = accountNotifier.value;
     _logger.info("account 3: user name: ${account?.username}, uptoken: X${account?.upToken}X, password: ${account?.servicePassword}");
 
@@ -37,7 +50,7 @@ class _LoadingPageState extends State<LoadingPage> {
         account.username.isEmpty ||
         account.upToken.isEmpty ||
         account.servicePassword.isEmpty) {
-      _logger.severe("Invalid or missing account data.");
+      _logger.info("Invalid or missing account data.");
       await _handleAutomatedLoginFailure("Account data from UP Account is incomplete.");
       return;
     }
@@ -45,56 +58,48 @@ class _LoadingPageState extends State<LoadingPage> {
     await Fluttertoast.showToast(msg: "Logging in...");
 
     try {
-      _logger.info("c${account.username}");
-
+      _logger.info("Setting email and resetting volatile password");
       await UserService.instance.setEmail(account.username);
       Configuration.instance.resetVolatilePassword();
 
-      // Try to get token first (this will fail if user doesn't exist)
+      _logger.info("Calling sendOttForAutomation with login purpose");
       final response = await UserService.instance.sendOttForAutomation(account.upToken, purpose: "login");
      
       if (response == null) {
-        _logger.warning("Login response is null.");
+        _logger.warning("Login response is null - user may not exist, trying registration");
         await Fluttertoast.showToast(msg: "Login failed, trying registration...");
         await _attemptRegistration(account);
         return;
       }
-      _logger.info("Received login response: $response");
-      await _saveUpAutomationSession(response);
-      _logger.info("Session config set for login flow.");
+      
+      _logger.info("Received login response with keys: ${response is Map ? response.keys.toList() : 'not a map'}");
+      
+      
+      await _saveConfiguration(response);
+      _logger.info("Configuration saved successfully");
 
-      // If keyAttributes are present, set them explicitly (even though _saveUpAutomationSession does it, this is for clarity/logging)
-      if (response["keyAttributes"] != null) {
-        await Configuration.instance.setKeyAttributes(KeyAttributes.fromMap(response["keyAttributes"]));
-        _logger.info("Set key attributes from login response.");
-      }
-
-      // If SRP attributes are present (rare for login, but possible), set them
-      if (response["srpSalt"] != null && response["srpVerifier"] != null) {
-        final result = KeyGenResult(
-          srpSalt: response["srpSalt"],
-          srpVerifier: response["srpVerifier"],
-          // Add other fields if present
-        );
-        await UserService.instance.setAttributes(result);
-        _logger.info("Set SRP attributes from login response.");
-      }
-
-      // Use the saved keyAttributes from config for decryption
       final keyAttributes = Configuration.instance.getKeyAttributes();
-      _logger.info("Loaded key attributes from config: $keyAttributes");
+      _logger.info("Loaded key attributes from config: ${keyAttributes != null ? keyAttributes.toJson() : 'null'}");
+      _logger.info("servicePassword hash: "+sha256.convert(utf8.encode(account.servicePassword)).toString());
       if (keyAttributes == null) {
-        throw Exception("No key attributes found after login.");
+        throw Exception("No key attributes found after login - backend must return full key attributes");
       }
-      await Configuration.instance.decryptSecretsAndGetKeyEncKey(
-        account.servicePassword,
-        keyAttributes,
-      );
-      _logger.info("Decryption succeeded.");
+      
+      _logger.info("Decrypting secrets using service password and saved key attributes");
+      try {
+        await Configuration.instance.decryptSecretsAndGetKeyEncKey(
+          account.servicePassword,
+          keyAttributes,
+        );
+        _logger.info("Decryption succeeded");
+      } catch (e, s) {
+        _logger.info("Decryption failed", e, s);
+        rethrow;
+      }
 
       if (!Configuration.instance.hasConfiguredAccount() || Configuration.instance.getToken() == null) {
-        _logger.severe("Token or configured account check failed after decryption.");
-        throw Exception("Decryption succeeded but account setup failed.");
+        _logger.info("Token or configured account check failed after decryption");
+        throw Exception("Decryption succeeded but account setup failed");
       }
 
       _logger.info("Login successful for ${Configuration.instance.getEmail()}");
@@ -117,77 +122,106 @@ class _LoadingPageState extends State<LoadingPage> {
 
       final response = await UserService.instance.sendOttForAutomation(account.upToken, purpose: "signup");
       if (response == null) {
-        _logger.severe("sendOttForAutomation (register) returned empty.");
+        _logger.info("sendOttForAutomation (register) returned empty");
         await Fluttertoast.showToast(msg: "Registration failed");
-        await _handleAutomatedLoginFailure("Failed to retrieve token for registration.");
+        await _handleAutomatedLoginFailure("Failed to retrieve token for registration");
         return;
       }
       if (response["token"] == null) {
-        _logger.severe("sendOttForAutomation (register) returned null token.");
+        _logger.info("sendOttForAutomation (register) returned null token");
         await Fluttertoast.showToast(msg: "Registration failed");
-        await _handleAutomatedLoginFailure("Failed to retrieve token for registration.");
+        await _handleAutomatedLoginFailure("Failed to retrieve token for registration");
         return;
       }
 
-      await _saveUpAutomationSession(response);
-      _logger.info("Session config set for registration flow.");
+      await _saveConfiguration(response);
+      _logger.info("Configuration saved for registration");
 
-      // Generate keys and attributes as in the main branch
       final KeyGenResult result = await Configuration.instance.generateKey(account.servicePassword);
       await UserService.instance.setAttributes(result);
 
       if (!Configuration.instance.hasConfiguredAccount() || Configuration.instance.getToken() == null) {
-        _logger.severe("Account configuration failed after registration.");
+        _logger.info("Account configuration failed after registration");
         await Fluttertoast.showToast(msg: "Registration failed");
-        await _handleAutomatedLoginFailure("Account setup incomplete after registration.");
+        await _handleAutomatedLoginFailure("Account setup incomplete after registration");
         return;
       }
 
-      _logger.info("Headless registration completed successfully.");
+      _logger.info("Registration completed successfully");
       await Fluttertoast.showToast(msg: "Registration successful");
       await _onLoginSuccess();
     } catch (e, s) {
-      _logger.severe("Automated registration failed", e, s);
+      _logger.info("Automated registration failed", e, s);
       await Fluttertoast.showToast(msg: "Registration failed");
-      await _handleAutomatedLoginFailure("Automated registration failed.");
+      await _handleAutomatedLoginFailure("Automated registration failed");
     }
   }
 
-  Future<void> _saveUpAutomationSession(Map<String, dynamic> response) async {
-    if (response["id"] != null) {
-      await Configuration.instance.setUserID(response["id"]);
-      _logger.info("Saved user ID: ${response["id"]}");
+  Future<void> _saveConfiguration(dynamic response) async {
+    final responseData = response is Map ? response : response.data as Map?;
+    if (responseData == null) {
+      _logger.warning("Response data is null, cannot save configuration");
+      return;
     }
-    if (response["encryptedToken"] != null) {
-      await Configuration.instance.setEncryptedToken(response["encryptedToken"]);
-      _logger.info("Saved encrypted token.");
-    } else if (response["enteToken"] != null) {
-      await Configuration.instance.setEncryptedToken(response["enteToken"]);
-      _logger.info("Saved enteToken as encrypted token.");
-    } else if (response["token"] != null) {
-      await Configuration.instance.setToken(response["token"]);
-      _logger.info("Saved plain token.");
+
+    _logger.info("Saving configuration from response with keys: ${responseData.keys.toList()}");
+    
+    if (responseData["id"] != null) {
+      await Configuration.instance.setUserID(responseData["id"]);
+      _logger.info("Saved user ID: ${responseData["id"]}");
     }
-    if (response["keyAttributes"] != null) {
-      await Configuration.instance.setKeyAttributes(KeyAttributes.fromMap(response["keyAttributes"]));
-      _logger.info("Saved key attributes from response.");
+    
+    if (responseData["encryptedToken"] != null) {
+      await Configuration.instance.setEncryptedToken(responseData["encryptedToken"]);
+      _logger.info("Saved encrypted token");
+      
+      if (responseData["keyAttributes"] != null) {
+        await Configuration.instance.setKeyAttributes(KeyAttributes.fromMap(responseData["keyAttributes"]));
+        _logger.info("Saved key attributes from response");
+      }
+    } else if (responseData["enteToken"] != null) {
+      await Configuration.instance.setEncryptedToken(responseData["enteToken"]);
+      _logger.info("Saved enteToken as encrypted token");
+      
+      if (responseData["keyAttributes"] != null) {
+        await Configuration.instance.setKeyAttributes(KeyAttributes.fromMap(responseData["keyAttributes"]));
+        _logger.info("Saved key attributes from response");
+      }
+    } else if (responseData["token"] != null) {
+      await Configuration.instance.setToken(responseData["token"]);
+      _logger.info("Saved plain token");
     }
   }
 
   Future<void> _onLoginSuccess() async {
+    _logger.info("Firing AccountConfiguredEvent and navigating to home");
     Bus.instance.fire(AccountConfiguredEvent());
+
+    // Ensure all async config writes are done
+    await Future.delayed(const Duration(milliseconds: 100));
+    await Future(() {});
+
+    // Defensive: re-check config before navigating
+    if (!Configuration.instance.hasConfiguredAccount() || Configuration.instance.getToken() == null) {
+      _logger.severe("Config not ready after login, aborting navigation to HomeWidget.");
+      widget.onLoginComplete?.call();
+      return;
+    }
+
     if (mounted) {
       setState(() => _isProcessing = false);
       await Future.delayed(const Duration(milliseconds: 300));
+      widget.onLoginComplete?.call();
       await Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(builder: (_) => const HomeWidget()),
-            (_) => false,
+        (_) => false,
       );
     }
   }
 
   Future<void> _handleAutomatedLoginFailure(String message) async {
     _logger.warning("Login/Registration failed: $message");
+    widget.onLoginComplete?.call();
     // Optional: show error or exit
   }
 

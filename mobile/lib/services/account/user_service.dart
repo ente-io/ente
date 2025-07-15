@@ -175,7 +175,7 @@ class UserService {
   }
 
   Future<Map<String, dynamic>?> sendOttForAutomation(String? upStoreToken, {String? purpose}) async {
-    _logger.info("Attempting to send OTT for automation for email: $purpose");
+    _logger.info("Attempting to send OTT for automation for purpose: $purpose, upStoreToken: ${upStoreToken != null ? "[REDACTED]" : "null"}");
     try {
       final response = await _dio.post(
         _config.getHttpEndpoint() + "/users/up/ott",
@@ -189,18 +189,20 @@ class UserService {
         ),
       );
 
+      _logger.info("sendOttForAutomation: Received response with status: ", response.statusCode);
       if (response.statusCode == 200) {
         final responseData = response.data as Map<String, dynamic>;
+        _logger.info("sendOttForAutomation: Response data: $responseData");
         return responseData;
       } else {
-        _logger.info("sendOttForAutomation: Failed to receive OTT session token. Status: ", response.statusCode);
+        _logger.severe("sendOttForAutomation: Failed to receive OTT session token. Status: ", response.statusCode);
         return null;
       }
     } on DioException catch (e) {
-      _logger.info("sendOttForAutomation: DioException while sending OTT. Error: $e", e.response?.data);
+      _logger.severe("sendOttForAutomation: DioException while sending OTT. Error: $e", e.response?.data);
       return null;
     } catch (e, s) {
-      _logger.info("sendOttForAutomation: Generic error while sending OTT.", e, s);
+      _logger.severe("sendOttForAutomation: Generic error while sending OTT.", e, s);
       return null;
     }
   }
@@ -604,6 +606,7 @@ class UserService {
 
   Future<void> setAttributes(KeyGenResult result) async {
     try {
+      _logger.info("setAttributes: Registering or updating SRP and setting key attributes");
       await registerOrUpdateSrp(result.loginKey);
       await _enteDio.put(
         "/users/attributes",
@@ -611,11 +614,13 @@ class UserService {
           "keyAttributes": result.keyAttributes.toMap(),
         },
       );
+      _logger.info("setAttributes: Setting key and secretKey");
       await _config.setKey(result.privateKeyAttributes.key);
       await _config.setSecretKey(result.privateKeyAttributes.secretKey);
+      _logger.info("setAttributes: Setting keyAttributes");
       await _config.setKeyAttributes(result.keyAttributes);
     } catch (e) {
-      _logger.severe(e);
+      _logger.severe("setAttributes: Exception occurred", e);
       rethrow;
     }
   }
@@ -1297,16 +1302,22 @@ class UserService {
 
   Future<void> _saveConfiguration(dynamic response) async {
     final responseData = response is Map ? response : response.data as Map?;
-    if (responseData == null) return;
-
+    if (responseData == null) {
+      _logger.severe("_saveConfiguration: responseData is null");
+      return;
+    }
+    _logger.info("_saveConfiguration: Saving userID: "+responseData["id"].toString());
     await Configuration.instance.setUserID(responseData["id"]);
     if (responseData["encryptedToken"] != null) {
-      await Configuration.instance
-          .setEncryptedToken(responseData["encryptedToken"]);
+      _logger.info("_saveConfiguration: Saving encryptedToken and keyAttributes");
+      await Configuration.instance.setEncryptedToken(responseData["encryptedToken"]);
       await Configuration.instance.setKeyAttributes(
         KeyAttributes.fromMap(responseData["keyAttributes"]),
       );
+      _logger.info("_saveConfiguration: Saved keyAttributes: "+KeyAttributes.fromMap(responseData["keyAttributes"]).toJson());
+      _logger.info("_saveConfiguration: Saved encryptedToken: "+responseData["encryptedToken"].toString());
     } else {
+      _logger.info("_saveConfiguration: Saving plain token");
       await Configuration.instance.setToken(responseData["token"]);
     }
   }

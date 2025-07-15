@@ -22,7 +22,7 @@ class LoginActivity : AppCompatActivity() {
 
         private const val ACCOUNT_ACTIVITY_CLASS_NAME =
             "com.unplugged.account.ui.thirdparty.ThirdPartyCredentialsActivity"
-        private const val ACCOUNT_PACKAGE_NAME = "com.unplugged.accountsample.dev"
+        private const val ACCOUNT_PACKAGE_NAME = "com.unplugged.store.dev"
     }
 
     private val accountLoginLauncher =
