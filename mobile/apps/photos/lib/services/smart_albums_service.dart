@@ -6,7 +6,6 @@ import "package:photos/services/collections_service.dart";
 import "package:photos/services/search_service.dart";
 import "package:photos/ui/actions/collection/collection_file_actions.dart";
 import "package:photos/ui/actions/collection/collection_sharing_actions.dart";
-import "package:shared_preferences/shared_preferences.dart";
 import "package:synchronized/synchronized.dart";
 
 class SmartAlbumsService {
@@ -115,18 +114,16 @@ class SmartAlbumsService {
   static const _addedFilesKey = "smart_album_added_files";
 
   Future<void> saveConfig(SmartAlbumConfig config) async {
-    final prefs = await SharedPreferences.getInstance();
-
     final collectionId = config.collectionId;
     final personIDs = config.personIDs;
     final addedFiles = config.addedFiles;
 
-    await prefs.setStringList(
+    await ServiceLocator.instance.prefs.setStringList(
       "${_personIdsKey}_$collectionId",
       personIDs.toList(),
     );
 
-    await prefs.setString(
+    await ServiceLocator.instance.prefs.setString(
       "${_addedFilesKey}_$collectionId",
       addedFiles.entries
           .map((e) => "${e.key}:${e.value.$1}|${e.value.$2.join(',')}")
