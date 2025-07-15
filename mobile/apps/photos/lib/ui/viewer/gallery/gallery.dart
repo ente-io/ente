@@ -627,6 +627,8 @@ class _PinnedGroupHeaderState extends State<PinnedGroupHeader> {
         widget
             .getSectionedListSliverRenderBoxYOffsetRelativeToStackRenderBox()!;
     if (normalizedScrollOffset < 0) {
+      // No change in group ID, no need to call setState
+      if (currentGroupId == null) return;
       currentGroupId = null;
     } else {
       final groupScrollOffsets = widget.galleryGroups.groupScrollOffsets;
@@ -658,6 +660,12 @@ class _PinnedGroupHeaderState extends State<PinnedGroupHeader> {
           // The floor must be in the lower half.
           high = mid - 1;
         }
+      }
+      if (currentGroupId ==
+          widget.galleryGroups
+              .scrollOffsetToGroupIdMap[groupScrollOffsets[floorIndex]]) {
+        // No change in group ID, no need to call setState
+        return;
       }
       currentGroupId = widget.galleryGroups
           .scrollOffsetToGroupIdMap[groupScrollOffsets[floorIndex]];
