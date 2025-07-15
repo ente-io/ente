@@ -2,16 +2,19 @@ import "dart:async";
 
 import 'package:flutter/material.dart';
 import "package:logging/logging.dart";
+import "package:photos/core/constants.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/db/ml/db.dart";
 import "package:photos/events/people_changed_event.dart";
 import "package:photos/models/ml/face/person.dart";
+import "package:photos/models/search/generic_search_result.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/services/machine_learning/ml_indexing_isolate.dart";
 import 'package:photos/services/machine_learning/ml_service.dart';
 import "package:photos/services/machine_learning/semantic_search/semantic_search_service.dart";
 import "package:photos/services/notification_service.dart";
+import "package:photos/services/search_service.dart";
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/expandable_menu_item_widget.dart';
@@ -19,6 +22,7 @@ import 'package:photos/ui/components/menu_item_widget/menu_item_widget.dart';
 import "package:photos/ui/components/toggle_switch_widget.dart";
 import 'package:photos/ui/notification/toast.dart';
 import 'package:photos/ui/settings/common_settings.dart';
+import "package:photos/ui/viewer/search_tab/memories_debug_section.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/ml_util.dart";
 
@@ -32,6 +36,7 @@ class MLDebugSectionWidget extends StatefulWidget {
 class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
   Timer? _timer;
   bool isExpanded = false;
+  bool _showMemoriesDebugSection = false;
   final Logger logger = Logger("MLDebugSectionWidget");
   late final mlDataDB = MLDataDB.instance;
   @override
@@ -433,23 +438,6 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: const CaptionedTextWidget(
-            title: "Debug memories section",
-          ),
-          trailingWidget: ToggleSwitchWidget(
-            value: () => localSettings.isDebugMemoriesEnabled,
-            onChanged: () async {
-              await localSettings.toggleDebugMemories();
-              if (mounted) {
-                setState(() {});
-              }
-            },
-          ),
-          singleBorderRadius: 8,
-          isGestureDetectorDisabled: true,
-        ),
-        sectionOptionSpacing,
-        MenuItemWidget(
-          captionedTextWidget: const CaptionedTextWidget(
             title: "Sync person mappings ",
           ),
           pressedColor: getEnteColorScheme(context).fillFaint,
@@ -595,6 +583,36 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
             );
           },
         ),
+        sectionOptionSpacing,
+        MenuItemWidget(
+          captionedTextWidget: const CaptionedTextWidget(
+            title: "Toggle memories section",
+          ),
+          trailingWidget: ToggleSwitchWidget(
+            value: () => _showMemoriesDebugSection,
+            onChanged: () async {
+              _showMemoriesDebugSection = !_showMemoriesDebugSection;
+              if (mounted) {
+                setState(() {});
+              }
+            },
+          ),
+          singleBorderRadius: 8,
+          isGestureDetectorDisabled: true,
+        ),
+        if (_showMemoriesDebugSection) sectionOptionSpacing,
+        if (_showMemoriesDebugSection)
+          FutureBuilder<List<GenericSearchResult>>(
+            future: SearchService.instance
+                .smartMemories(context, kSearchSectionLimit),
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                final memories = snapshot.data!;
+                return MemoriesDebugSection(memories);
+              }
+              return const SizedBox.shrink();
+            },
+          ),
       ],
     );
   }
