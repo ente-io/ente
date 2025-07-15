@@ -1,3 +1,5 @@
+import "dart:async";
+
 import "package:logging/logging.dart";
 import "package:photos/models/api/entity/type.dart";
 import "package:photos/models/collection/smart_album_config.dart";
@@ -21,7 +23,7 @@ class SmartAlbumsService {
 
   void init() {
     _logger.info("SmartAlbumsService initialized");
-    refresh().ignore();
+    refresh();
   }
 
   Future<void> refresh() async {
@@ -135,8 +137,9 @@ class SmartAlbumsService {
       return _cachedConfigs[collectionId]!;
     }
 
-    refresh().ignore();
-    return await loadConfig(collectionId);
+    unawaited(refresh());
+    final config = await loadConfig(collectionId);
+    return config;
   }
 
   Future<SmartAlbumConfig> loadConfig(int collectionId) async {
@@ -158,10 +161,11 @@ class SmartAlbumsService {
         final parts = entry.split(':');
 
         if (parts.length == 2) {
+          final part2 = parts[1].split('|')[1];
           addedFiles[parts[0]] = (
             updatedAt: int.parse(parts[1].split('|')[0]),
             addedFiles:
-                parts[1].split('|')[1].split(',').map(int.parse).toSet(),
+                part2.isNotEmpty ? part2.split(',').map(int.parse).toSet() : {},
           );
         }
       }

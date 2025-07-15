@@ -39,7 +39,9 @@ class _SmartAlbumPeopleState extends State<SmartAlbumPeople> {
     currentConfig =
         await SmartAlbumsService.instance.getConfig(widget.collectionId);
 
-    if (currentConfig == null) {
+    if (currentConfig != null &&
+        currentConfig!.personIDs.isNotEmpty &&
+        mounted) {
       _selectedPeople.select(currentConfig!.personIDs);
     }
   }
