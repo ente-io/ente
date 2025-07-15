@@ -55,7 +55,7 @@ class SmartAlbumsService {
         final collectionId = entry.key;
         final config = entry.value;
 
-        final addedFiles = config.addedFiles;
+        final infoMap = config.infoMap;
 
         // Person Id key mapped to updatedAt value
         final updatedAtMap = await entityService.getUpdatedAts(
@@ -66,23 +66,21 @@ class SmartAlbumsService {
         for (final personId in config.personIDs) {
           // compares current updateAt with last added file's updatedAt
           if (updatedAtMap[personId] == null ||
-              addedFiles[personId] == null ||
-              (updatedAtMap[personId]! <= addedFiles[personId]!.$1)) {
+              infoMap[personId] == null ||
+              (updatedAtMap[personId]! <= infoMap[personId]!.updatedAt)) {
             continue;
           }
 
-          final files = (await SearchService.instance
+          final toBeSynced = (await SearchService.instance
                   .getClusterFilesForPersonID(personId))
               .entries
               .expand((e) => e.value)
-              .toList();
-
-          // TODO: Can we optimize it more?
-          final toBeSynced = files
+              .toList()
             ..removeWhere(
               (e) =>
                   e.uploadedFileID == null ||
-                  config.addedFiles[personId]!.$2.contains(e.uploadedFileID),
+                  config.infoMap[personId]!.addedFiles
+                      .contains(e.uploadedFileID),
             );
 
           if (toBeSynced.isNotEmpty) {
@@ -114,21 +112,21 @@ class SmartAlbumsService {
   static const _addedFilesKey = "smart_album_added_files";
 
   Future<void> saveConfig(SmartAlbumConfig config) async {
-    final collectionId = config.collectionId;
-    final personIDs = config.personIDs;
-    final addedFiles = config.addedFiles;
-
     await ServiceLocator.instance.prefs.setStringList(
-      "${_personIdsKey}_$collectionId",
-      personIDs.toList(),
+      "${_personIdsKey}_${config.collectionId}",
+      config.personIDs.toList(),
     );
 
     await ServiceLocator.instance.prefs.setString(
-      "${_addedFilesKey}_$collectionId",
-      addedFiles.entries
-          .map((e) => "${e.key}:${e.value.$1}|${e.value.$2.join(',')}")
+      "${_addedFilesKey}_${config.collectionId}",
+      config.infoMap.entries
+          .map(
+            (e) => "${e.key}:${e.value.updatedAt}|"
+                "${e.value.addedFiles.join(',')}",
+          )
           .join(';'),
     );
+
     updateCachedCollection(config);
   }
 
@@ -153,14 +151,17 @@ class SmartAlbumsService {
             .getString("${_addedFilesKey}_$collectionId") ??
         "";
 
-    final addedFiles = <String, (int, Set<int>)>{};
+    final addedFiles = <String, PersonInfo>{};
+
     if (addedFilesString.isNotEmpty) {
       for (final entry in addedFilesString.split(';')) {
         final parts = entry.split(':');
+
         if (parts.length == 2) {
           addedFiles[parts[0]] = (
-            int.parse(parts[1].split('|')[0]),
-            parts[1].split('|')[1].split(',').map(int.parse).toSet(),
+            updatedAt: int.parse(parts[1].split('|')[0]),
+            addedFiles:
+                parts[1].split('|')[1].split(',').map(int.parse).toSet(),
           );
         }
       }
@@ -169,7 +170,7 @@ class SmartAlbumsService {
     return SmartAlbumConfig(
       collectionId: collectionId,
       personIDs: personIDs.toSet(),
-      addedFiles: addedFiles,
+      infoMap: addedFiles,
     );
   }
 }

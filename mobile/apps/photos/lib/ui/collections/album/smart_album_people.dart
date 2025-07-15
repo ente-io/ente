@@ -73,17 +73,17 @@ class _SmartAlbumPeopleState extends State<SmartAlbumPeople> {
                         SmartAlbumConfig newConfig;
 
                         if (currentConfig == null) {
-                          final newFiles = <String, (int, Set<int>)>{};
+                          final infoMap = <String, PersonInfo>{};
 
                           // Add files which are needed
                           for (final personId in _selectedPeople.personIds) {
-                            newFiles[personId] = (0, {});
+                            infoMap[personId] = (updatedAt: 0, addedFiles: {});
                           }
 
                           newConfig = SmartAlbumConfig(
                             collectionId: widget.collectionId,
                             personIDs: _selectedPeople.personIds,
-                            addedFiles: newFiles,
+                            infoMap: infoMap,
                           );
                         } else {
                           newConfig = await currentConfig!.getUpdatedConfig(

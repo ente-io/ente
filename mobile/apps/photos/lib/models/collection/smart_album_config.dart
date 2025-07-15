@@ -1,35 +1,37 @@
+typedef PersonInfo = ({int updatedAt, Set<int> addedFiles});
+
 class SmartAlbumConfig {
   final int collectionId;
   // person ids
   final Set<String> personIDs;
   // person id mapped with updatedat, file ids
-  final Map<String, (int, Set<int>)> addedFiles;
+  final Map<String, PersonInfo> infoMap;
 
   SmartAlbumConfig({
     required this.collectionId,
     required this.personIDs,
-    required this.addedFiles,
+    required this.infoMap,
   });
 
   Future<SmartAlbumConfig> getUpdatedConfig(Set<String> newPersonsIds) async {
     final toAdd = newPersonsIds.difference(personIDs);
     final toRemove = personIDs.difference(newPersonsIds);
-    final newFiles = Map<String, (int, Set<int>)>.from(addedFiles);
+    final newInfoMap = Map<String, PersonInfo>.from(infoMap);
 
     // Remove whats not needed
     for (final personId in toRemove) {
-      newFiles.remove(personId);
+      newInfoMap.remove(personId);
     }
 
     // Add files which are needed
     for (final personId in toAdd) {
-      newFiles[personId] = (0, {});
+      newInfoMap[personId] = (updatedAt: 0, addedFiles: <int>{});
     }
 
     return SmartAlbumConfig(
       collectionId: collectionId,
       personIDs: newPersonsIds,
-      addedFiles: newFiles,
+      infoMap: newInfoMap,
     );
   }
 
@@ -38,19 +40,19 @@ class SmartAlbumConfig {
     int updatedAt,
     Set<int> fileId,
   ) async {
-    if (!addedFiles.containsKey(personId)) {
+    if (!infoMap.containsKey(personId)) {
       return this;
     }
 
-    final newFiles = Map<String, (int, Set<int>)>.from(addedFiles);
-    newFiles[personId] = (
-      updatedAt,
-      newFiles[personId]!.$2.union(fileId),
+    final newInfoMap = Map<String, PersonInfo>.from(infoMap);
+    newInfoMap[personId] = (
+      updatedAt: updatedAt,
+      addedFiles: newInfoMap[personId]!.addedFiles.union(fileId),
     );
     return SmartAlbumConfig(
       collectionId: collectionId,
       personIDs: personIDs,
-      addedFiles: newFiles,
+      infoMap: newInfoMap,
     );
   }
 }
