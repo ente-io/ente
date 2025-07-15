@@ -26,7 +26,6 @@ class LocalSettings {
   static const kRateUsShownCount = "rate_us_shown_count";
   static const kEnableMultiplePart = "ls.enable_multiple_part";
   static const kCuratedMemoriesEnabled = "ls.curated_memories_enabled";
-  static const _kDebugMemoriesEnabled = "ls.debug_memories_enabled";
   static const kOnThisDayNotificationsEnabled =
       "ls.on_this_day_notifications_enabled";
   static const kBirthdayNotificationsEnabled =
@@ -119,17 +118,9 @@ class LocalSettings {
   bool get isSmartMemoriesEnabled =>
       _prefs.getBool(kCuratedMemoriesEnabled) ?? true;
 
-  bool get isDebugMemoriesEnabled =>
-      _prefs.getBool(_kDebugMemoriesEnabled) ?? false;
-
   Future<bool> setSmartMemories(bool value) async {
     await _prefs.setBool(kCuratedMemoriesEnabled, value);
     return value;
-  }
-
-  Future<bool> toggleDebugMemories() async {
-    await _prefs.setBool(_kDebugMemoriesEnabled, !isDebugMemoriesEnabled);
-    return isDebugMemoriesEnabled;
   }
 
   bool get isOnThisDayNotificationsEnabled =>

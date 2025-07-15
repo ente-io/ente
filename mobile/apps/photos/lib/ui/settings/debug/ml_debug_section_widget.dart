@@ -37,6 +37,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
   Timer? _timer;
   bool isExpanded = false;
   bool _showMemoriesDebugSection = false;
+  bool _showAllMemories = false;
   final Logger logger = Logger("MLDebugSectionWidget");
   late final mlDataDB = MLDataDB.instance;
   @override
@@ -603,12 +604,21 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
         if (_showMemoriesDebugSection) sectionOptionSpacing,
         if (_showMemoriesDebugSection)
           FutureBuilder<List<GenericSearchResult>>(
-            future: SearchService.instance
-                .smartMemories(context, kSearchSectionLimit),
+            key: ValueKey(_showAllMemories),
+            future: SearchService.instance.smartMemories(
+              context,
+              _showAllMemories ? null : kSearchSectionLimit,
+            ),
             builder: (context, snapshot) {
               if (snapshot.hasData) {
                 final memories = snapshot.data!;
-                return MemoriesDebugSection(memories);
+                return MemoriesDebugSection(memories, () async {
+                  _showAllMemories = !_showAllMemories;
+                  _timer?.cancel();
+                  if (mounted) {
+                    setState(() {});
+                  }
+                });
               }
               return const SizedBox.shrink();
             },

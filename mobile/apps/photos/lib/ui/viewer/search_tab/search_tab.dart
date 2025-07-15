@@ -19,7 +19,6 @@ import 'package:photos/ui/viewer/search_tab/albums_section.dart';
 import "package:photos/ui/viewer/search_tab/file_type_section.dart";
 import "package:photos/ui/viewer/search_tab/locations_section.dart";
 import "package:photos/ui/viewer/search_tab/magic_section.dart";
-import "package:photos/ui/viewer/search_tab/memories_debug_section.dart";
 import "package:photos/ui/viewer/search_tab/people_section.dart";
 
 class SearchTab extends StatefulWidget {
@@ -125,21 +124,10 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
                               as List<GenericSearchResult>,
                         );
                       case SectionType.album:
-                        // return const SizedBox.shrink();
                         return AlbumsSection(
                           snapshot.data!.elementAt(index)
                               as List<AlbumSearchResult>,
                         );
-                      case SectionType.memoriesDebug:
-                        if (flagService.internalUser &&
-                            localSettings.isDebugMemoriesEnabled) {
-                          return MemoriesDebugSection(
-                            snapshot.data!.elementAt(index)
-                                as List<GenericSearchResult>,
-                          );
-                        } else {
-                          return const SizedBox.shrink();
-                        }
                       case SectionType.location:
                         return LocationsSection(
                           snapshot.data!.elementAt(index)
