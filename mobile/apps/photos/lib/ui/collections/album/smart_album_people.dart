@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/collection/smart_album_config.dart";
 import "package:photos/models/selected_people.dart";
+import "package:photos/services/smart_albums_service.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
 import 'package:photos/ui/components/buttons/icon_button_widget.dart';
 import "package:photos/ui/components/models/button_type.dart";
@@ -26,7 +27,7 @@ class SmartAlbumPeople extends StatefulWidget {
 
 class _SmartAlbumPeopleState extends State<SmartAlbumPeople> {
   final _selectedPeople = SelectedPeople();
-  late SmartAlbumConfig currentConfig;
+  SmartAlbumConfig? currentConfig;
   bool isLoading = false;
 
   @override
@@ -36,9 +37,12 @@ class _SmartAlbumPeopleState extends State<SmartAlbumPeople> {
   }
 
   Future<void> getSelections() async {
-    currentConfig = await SmartAlbumConfig.loadConfig(widget.collectionId);
+    currentConfig =
+        await SmartAlbumsService.instance.getConfig(widget.collectionId);
 
-    _selectedPeople.select(currentConfig.personIDs);
+    if (currentConfig == null) {
+      _selectedPeople.select(currentConfig!.personIDs);
+    }
   }
 
   @override
@@ -65,12 +69,32 @@ class _SmartAlbumPeopleState extends State<SmartAlbumPeople> {
                   : () async {
                       isLoading = true;
                       if (mounted) setState(() {});
+
                       try {
-                        final newConfig = await currentConfig.getUpdatedConfig(
-                          _selectedPeople.personIds,
-                        );
-                        await newConfig.saveConfig();
-                        syncSmartAlbums().ignore();
+                        SmartAlbumConfig newConfig;
+
+                        if (currentConfig == null) {
+                          final newFiles = <String, (int, Set<int>)>{};
+
+                          // Add files which are needed
+                          for (final personId in _selectedPeople.personIds) {
+                            newFiles[personId] = (0, {});
+                          }
+
+                          newConfig = SmartAlbumConfig(
+                            collectionId: widget.collectionId,
+                            personIDs: _selectedPeople.personIds,
+                            addedFiles: newFiles,
+                          );
+                        } else {
+                          newConfig = await currentConfig!.getUpdatedConfig(
+                            _selectedPeople.personIds,
+                          );
+                        }
+
+                        await SmartAlbumsService.instance.saveConfig(newConfig);
+                        SmartAlbumsService.instance.syncSmartAlbums().ignore();
+
                         Navigator.pop(context);
                       } catch (_) {
                         isLoading = false;

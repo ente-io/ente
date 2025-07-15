@@ -15,12 +15,12 @@ import "package:photos/events/memories_changed_event.dart";
 import "package:photos/events/people_changed_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
-import "package:photos/models/collection/smart_album_config.dart";
 import "package:photos/service_locator.dart";
 import 'package:photos/services/app_lifecycle_service.dart';
 import "package:photos/services/home_widget_service.dart";
 import "package:photos/services/memory_home_widget_service.dart";
 import "package:photos/services/people_home_widget_service.dart";
+import "package:photos/services/smart_albums_service.dart";
 import 'package:photos/services/sync/sync_service.dart';
 import 'package:photos/ui/tabs/home_widget.dart';
 import "package:photos/ui/viewer/actions/file_viewer.dart";
@@ -77,7 +77,7 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
         _changeCallbackDebouncer.run(
           () async {
             unawaited(PeopleHomeWidgetService.instance.checkPeopleChanged());
-            unawaited(syncSmartAlbums());
+            unawaited(SmartAlbumsService.instance.syncSmartAlbums());
           },
         );
       },

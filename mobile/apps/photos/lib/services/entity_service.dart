@@ -249,4 +249,11 @@ class EntityService {
     final hash = md5.convert(utf8.encode(preHash)).toString().substring(0, 10);
     return hash;
   }
+
+  Future<Map<String, int>> getUpdatedAts(
+    EntityType type,
+    List<String> personIds,
+  ) async {
+    return await _db.getUpdatedAts(type, personIds);
+  }
 }

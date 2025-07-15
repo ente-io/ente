@@ -45,10 +45,6 @@ class ServiceLocator {
   }
 }
 
-SharedPreferences get prefs {
-  return ServiceLocator.instance.prefs;
-}
-
 FlagService? _flagService;
 
 FlagService get flagService {
