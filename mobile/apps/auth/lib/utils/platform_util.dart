@@ -28,7 +28,11 @@ class PlatformUtil {
           ? cupertinoTextSelectionControls
           : desktopTextSelectionControls;
 
-  static openWebView(BuildContext context, String title, String url) async {
+  static Future<void> openWebView(
+    BuildContext context,
+    String title,
+    String url,
+  ) async {
     if (PlatformUtil.isDesktop()) {
       await launchUrlString(url);
       return;

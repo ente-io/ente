@@ -28,7 +28,7 @@ class ArchivedCollectionsButton extends StatelessWidget {
         padding: const EdgeInsets.all(0),
         side: BorderSide(
           width: 0.5,
-          color: Theme.of(context).iconTheme.color!.withOpacity(0.24),
+          color: Theme.of(context).iconTheme.color!.withValues(alpha: 0.24),
         ),
       ),
       child: SizedBox(

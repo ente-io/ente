@@ -1,7 +1,6 @@
-# Uncomment this line to define a global platform for your project
+source 'https://github.com/ente-io/ffmpeg-kit-custom-repo-ios.git'
 platform :ios, '13.0'
 
-source 'https://github.com/ente-io/ffmpeg-kit-custom-repo-ios.git'
 source 'https://cdn.cocoapods.org/'
 
 # CocoaPods analytics sends network stats synchronously affecting flutter build latency.
