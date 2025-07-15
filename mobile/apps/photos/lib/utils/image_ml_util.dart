@@ -65,6 +65,8 @@ Future<DecodedImage> decodeImageFromPath(
           await FlutterImageCompress.compressWithFile(
         imagePath,
         format: CompressFormat.jpeg,
+        minWidth: 8000, // High value to ensure image is not scaled down
+        minHeight: 8000, // High value to ensure image is not scaled down
       );
       final image = await decodeImageFromData(convertedData!);
       _logger.info('Conversion successful, jpeg decoded');
