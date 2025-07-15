@@ -39,6 +39,7 @@ class _CustomScrollBar2State extends State<CustomScrollBar2> {
   final _key = GlobalKey();
   final inUseNotifier = ValueNotifier<bool>(false);
   List<({double position, String title})>? positionToTitleMap;
+  static const _bottomPadding = 92.0;
 
   @override
   void initState() {
@@ -103,10 +104,12 @@ class _CustomScrollBar2State extends State<CustomScrollBar2> {
     final renderBox = _key.currentContext?.findRenderObject() as RenderBox?;
     assert(renderBox != null, "RenderBox is null");
     // Retry for : https://github.com/flutter/flutter/issues/25827
-    return MiscUtil().getNonZeroDoubleWithRetry(
-      () => renderBox!.size.height,
-      id: "getHeightOfScrollTrack",
-    );
+    return MiscUtil()
+        .getNonZeroDoubleWithRetry(
+          () => renderBox!.size.height,
+          id: "getHeightOfScrollTrack",
+        )
+        .then((value) => value - _bottomPadding);
   }
 
   @override
@@ -115,12 +118,18 @@ class _CustomScrollBar2State extends State<CustomScrollBar2> {
       clipBehavior: Clip.none,
       alignment: Alignment.centerLeft,
       children: [
-        ScrollbarWithUseNotifer(
-          key: _key,
-          controller: widget.scrollController,
-          interactive: true,
-          inUseNotifier: inUseNotifier,
-          child: widget.child,
+        // This media query is used to adjust the bottom padding of the scrollbar
+        MediaQuery(
+          data: MediaQuery.of(context).copyWith(
+            padding: const EdgeInsets.only(bottom: _bottomPadding),
+          ),
+          child: ScrollbarWithUseNotifer(
+            key: _key,
+            controller: widget.scrollController,
+            interactive: true,
+            inUseNotifier: inUseNotifier,
+            child: widget.child,
+          ),
         ),
         positionToTitleMap == null
             ? const SizedBox.shrink()
