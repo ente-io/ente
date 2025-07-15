@@ -22,7 +22,7 @@ import 'package:photos/ui/components/menu_item_widget/menu_item_widget.dart';
 import "package:photos/ui/components/toggle_switch_widget.dart";
 import 'package:photos/ui/notification/toast.dart';
 import 'package:photos/ui/settings/common_settings.dart';
-import "package:photos/ui/viewer/search_tab/memories_debug_section.dart";
+import "package:photos/ui/settings/debug/memories_debug_section.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/ml_util.dart";
 
