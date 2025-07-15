@@ -7,7 +7,7 @@ import { isDesktop } from "ente-base/app";
 import { blobCache } from "ente-base/blob-cache";
 import { ensureElectron } from "ente-base/electron";
 import log from "ente-base/log";
-import { masterKeyFromSession } from "ente-base/session";
+import { ensureMasterKeyFromSession } from "ente-base/session";
 import { ComlinkWorker } from "ente-base/worker/comlink-worker";
 import { type ProcessableUploadItem } from "ente-gallery/services/upload";
 import { createUtilityProcess } from "ente-gallery/utils/native-worker";
@@ -28,9 +28,9 @@ import type { FaceCluster } from "./cluster";
 import { regenerateFaceCrops } from "./crop";
 import {
     clearMLDB,
-    getIndexableAndIndexedCounts,
     resetFailedFileStatuses,
     savedFaceIndex,
+    savedIndexCounts,
 } from "./db";
 import {
     _applyPersonSuggestionUpdates,
@@ -56,7 +56,7 @@ class MLState {
      *
      * - On app start, this is read from local storage during {@link initML}.
      *
-     * - It gets updated when we sync with remote (so if the user
+     * - It gets updated when we pull from remote (so if the user
      *   enables/disables ML on a different device, this local value will also
      *   become true/false).
      *
@@ -304,7 +304,7 @@ export const retryIndexingFailuresIfNeeded = () => {
 };
 
 /**
- * Sync the ML status with remote.
+ * Update our local ML status with the latest value from remote.
  *
  * This is called an at early point in the global sync sequence, without waiting
  * for the potentially long file information sync to complete.
@@ -312,9 +312,9 @@ export const retryIndexingFailuresIfNeeded = () => {
  * It checks with remote if the ML flag is set, and updates our local flag to
  * reflect that value.
  *
- * To perform the actual ML sync, use {@link mlSync}.
+ * To perform the actual ML data pull, use {@link mlSync}.
  */
-export const mlStatusSync = async () => {
+export const pullMLStatus = async () => {
     _state.isMLEnabled = await getIsMLEnabledRemote();
     setIsMLEnabledLocal(_state.isMLEnabled);
     return updateMLStatusSnapshot();
@@ -323,16 +323,16 @@ export const mlStatusSync = async () => {
 /**
  * Perform a ML sync, whatever is applicable.
  *
- * This is called during the global sync sequence, after files information have
- * been synced with remote.
+ * This is called during the global pull sequence, after files information have
+ * been pulled with remote.
  *
  * If ML is enabled, it pulls any missing embeddings from remote and starts
- * indexing to backfill any missing values. It also syncs cgroups and updates
+ * indexing to backfill any missing values. It also pulls cgroups and updates
  * the search service to use the latest values. Finally, it uses the latest
  * files, faces and cgroups to update the people shown in the UI.
  *
- * This will only have an effect if {@link mlStatusSync} has been called at
- * least once prior to calling this in the sync sequence.
+ * This will only have an effect if {@link pullMLStatus} has been called at
+ * least once prior to calling this in the pull sequence.
  */
 export const mlSync = async () => {
     if (!_state.isMLEnabled) return;
@@ -360,7 +360,7 @@ export const mlSync = async () => {
 };
 
 const updateClustersAndPeople = async () => {
-    const masterKey = await masterKeyFromSession();
+    const masterKey = await ensureMasterKeyFromSession();
 
     // Fetch existing cgroups from remote.
     await pullUserEntities("cgroup", masterKey);
@@ -418,7 +418,7 @@ export const indexNewUpload = (
 ) => {
     if (!isMLEnabled()) return;
     if (!isDesktop) return;
-    if (file.metadata.fileType !== FileType.image) return;
+    if (file.metadata.fileType != FileType.image) return;
     log.debug(() => ["ml/liveq", { file, processableUploadItem }]);
     void worker().then((w) => w.onUpload(file, processableUploadItem));
 };
@@ -446,9 +446,21 @@ export type MLStatus =
            *   user's library.
            */
           phase: "scheduled" | "indexing" | "fetching" | "clustering" | "done";
-          /** The number of files that have already been indexed. */
+          /**
+           * `true` if the phase is "done" but a significant fraction of files
+           * were marked as failed when indexing.
+           *
+           * This is not expected to happen normally, and points to a some
+           * systematic error in the environment (e.g. ONNX couldn't run).
+           */
+          phaseFailed?: boolean;
+          /**
+           * The number of files that have already been indexed.
+           */
           nSyncedFiles: number;
-          /** The total number of files that are eligible for indexing. */
+          /**
+           * The total number of files that are eligible for indexing.
+           */
           nTotalFiles: number;
       };
 
@@ -521,8 +533,8 @@ const getMLStatus = async (): Promise<MLStatus> => {
         };
     }
 
-    const { indexedCount, indexableCount } =
-        await getIndexableAndIndexedCounts();
+    const { indexedCount, indexableCount, failedCount } =
+        await savedIndexCounts();
 
     // During live uploads, the indexable count remains zero even as the indexer
     // is processing the newly uploaded items. This is because these "live
@@ -532,6 +544,7 @@ const getMLStatus = async (): Promise<MLStatus> => {
     // indexable count.
 
     let phase: MLStatus["phase"];
+    let phaseFailed = false;
     const state = await w.state;
     if (state == "indexing" || state == "fetching") {
         phase = state;
@@ -539,10 +552,12 @@ const getMLStatus = async (): Promise<MLStatus> => {
         phase = "scheduled";
     } else {
         phase = "done";
+        phaseFailed = failedCount > indexedCount && failedCount > 500;
     }
 
     return {
         phase,
+        phaseFailed,
         nSyncedFiles: indexedCount,
         nTotalFiles: indexableCount + indexedCount,
     };
@@ -748,11 +763,10 @@ const regenerateFaceCropsIfNeeded = async (file: EnteFile) => {
  * @returns The entity ID of the newly created cgroup.
  */
 export const addCGroup = async (name: string, cluster: FaceCluster) => {
-    const masterKey = await masterKeyFromSession();
     const id = await addUserEntity(
         "cgroup",
         { name, assigned: [cluster], isHidden: false },
-        masterKey,
+        await ensureMasterKeyFromSession(),
     );
     await mlSync();
     return id;
@@ -780,11 +794,10 @@ export const addClusterToCGroup = async (
         (id) => !clusterFaceIDs.has(id),
     );
 
-    const masterKey = await masterKeyFromSession();
     await updateOrCreateUserEntities(
         "cgroup",
         [{ ...cgroup, data: { ...cgroup.data, assigned, rejectedFaceIDs } }],
-        masterKey,
+        await ensureMasterKeyFromSession(),
     );
     return mlSync();
 };
@@ -798,11 +811,10 @@ export const addClusterToCGroup = async (
  * user entity that will get updated.
  */
 export const renameCGroup = async (cgroup: CGroup, name: string) => {
-    const masterKey = await masterKeyFromSession();
     await updateOrCreateUserEntities(
         "cgroup",
         [{ ...cgroup, data: { ...cgroup.data, name } }],
-        masterKey,
+        await ensureMasterKeyFromSession(),
     );
     return mlSync();
 };
@@ -834,8 +846,11 @@ export const applyPersonSuggestionUpdates = async (
     cgroup: CGroup,
     updates: PersonSuggestionUpdates,
 ) => {
-    const masterKey = await masterKeyFromSession();
-    await _applyPersonSuggestionUpdates(cgroup, updates, masterKey);
+    await _applyPersonSuggestionUpdates(
+        cgroup,
+        updates,
+        await ensureMasterKeyFromSession(),
+    );
     return mlSync();
 };
 
@@ -848,11 +863,10 @@ export const applyPersonSuggestionUpdates = async (
  * @param cluster The {@link FaceCluster} to hide.
  */
 export const ignoreCluster = async (cluster: FaceCluster) => {
-    const masterKey = await masterKeyFromSession();
     await addUserEntity(
         "cgroup",
         { name: "", assigned: [cluster], isHidden: true },
-        masterKey,
+        await ensureMasterKeyFromSession(),
     );
     return mlSync();
 };

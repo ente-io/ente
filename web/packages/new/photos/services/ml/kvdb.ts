@@ -1,5 +1,5 @@
 import { getKV, setKV } from "ente-base/kv";
-import { z } from "zod";
+import { z } from "zod/v4";
 
 /**
  * Zod schema for {@link ClusterIDsByCGroupID}.

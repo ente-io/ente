@@ -3,13 +3,12 @@ title: Ente from Source
 description: Getting started self hosting Ente Photos and/or Ente Auth
 ---
 
-
 # Ente from Source
 
-> [!WARNING] NOTE
-> The below documentation will cover instructions about self-hosting the web app manually. If you
-> want to deploy Ente hassle free, use the [one line](https://ente.io/blog/self-hosting-quickstart/) 
-> command to setup Ente. This guide might be deprecated in the near future.
+> [!WARNING] NOTE The below documentation will cover instructions about
+> self-hosting the web app manually. If you want to deploy Ente hassle free, use
+> the [one line](https://ente.io/blog/self-hosting-quickstart/) command to setup
+> Ente. This guide might be deprecated in the near future.
 
 ## Installing Docker
 
@@ -63,8 +62,9 @@ apps and configure them to use your
 
 ## Web app with Docker and Compose
 
-The instructoins in previous section were just a temporary way to run the web app locally. 
-To run the web apps as services, the user has to build a docker image manually. 
+The instructoins in previous section were just a temporary way to run the web
+app locally. To run the web apps as services, the user has to build a docker
+image manually.
 
 > [!IMPORTANT]
 >
@@ -144,7 +144,7 @@ docker build -t <image-name>:<tag> --no-cache --progress plain .
 You can always edit the Dockerfile and remove the steps for apps which you do
 not intend to install on your system (like auth or cast) and opt out of those.
 
-Regarding Albums App, take a note that they are not apps with navigable pages, 
+Regarding Albums App, take a note that they are not apps with navigable pages,
 if accessed on the web-browser they will simply redirect to ente.web.io.
 
 ## compose.yaml
@@ -175,17 +175,17 @@ docker compose up -d # --build
 docker compose logs <container-name>
 ```
 
-## Configure App Endpoints 
+## Configure App Endpoints
 
-> [!NOTE] 
-> Previously, this was dependent on the env variables `NEXT_ENTE_PUBLIC_ACCOUNTS_ENDPOINT`
-> and etc. Please check the below documentation to update your setup configurations
+> [!NOTE] Previously, this was dependent on the env variables
+> `NEXT_ENTE_PUBLIC_ACCOUNTS_ENDPOINT` and etc. Please check the below
+> documentation to update your setup configurations
 
-You can configure the web endpoints for the other apps including Accounts, Albums
-Family and Cast in your `museum.yaml` configuration file. Checkout 
+You can configure the web endpoints for the other apps including Accounts,
+Albums Family and Cast in your `museum.yaml` configuration file. Checkout
 [`local.yaml`](https://github.com/ente-io/ente/blob/543411254b2bb55bd00a0e515dcafa12d12d3b35/server/configurations/local.yaml#L76-L89)
-to configure the endpoints. Make sure to setup up your DNS Records accordingly to the 
-similar URL's you set up in `museum.yaml`.
+to configure the endpoints. Make sure to setup up your DNS Records accordingly
+to the similar URL's you set up in `museum.yaml`.
 
 Next part is to configure the web server.
 
@@ -197,7 +197,7 @@ ports). The web server of choice in this guide is
 [Caddy](https://caddyserver.com) because with caddy you don't have to manually
 configure/setup SSL ceritifcates as caddy will take care of that.
 
-```sh
+```groovy
 photos.yourdomain.com {
 	reverse_proxy http://localhost:3001
     # for logging
@@ -219,6 +219,7 @@ Next, start the caddy server :).
 sudo systemctl enable caddy
 
 sudo systemctl daemon-reload
+
 sudo systemctl start caddy
 ```
 

@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/ente-io/museum/pkg/controller/access"
 	"github.com/ente-io/museum/pkg/repo/public"
 
 	"github.com/ente-io/museum/ente"
@@ -56,28 +55,20 @@ type PublicCollectionController struct {
 	FileController        *FileController
 	EmailNotificationCtrl *emailCtrl.EmailNotificationController
 	PublicCollectionRepo  *public.PublicCollectionRepository
-	PublicFileRepo        *public.PublicFileRepository
 	CollectionRepo        *repo.CollectionRepository
 	UserRepo              *repo.UserRepository
 	JwtSecret             []byte
 }
 
-func (c *PublicCollectionController) CreateFileUrl(ctx *gin.Context, req ente.CreateFileUrl) (*ente.FileUrl, error) {
-
-	userID := auth.GetUserID(ctx.Request.Header)
-	if err := c.FileController.AccessCtrl.VerifyFileOwnership(ctx, &access.VerifyFileOwnershipParams{
-		ActorUserId: userID,
-		FileIDs:     []int64{req.FileID},
-	}); err != nil {
-		return nil, stacktrace.Propagate(err, "failed to verify file ownership")
-	}
+func (c *PublicCollectionController) CreateAccessToken(ctx context.Context, req ente.CreatePublicAccessTokenRequest) (ente.PublicURL, error) {
 	accessToken := shortuuid.New()[0:AccessTokenLength]
-	err := c.PublicFileRepo.Insert(ctx, req.FileID, userID, accessToken)
+	err := c.PublicCollectionRepo.
+		Insert(ctx, req.CollectionID, accessToken, req.ValidTill, req.DeviceLimit, req.EnableCollect, req.EnableJoin)
 	if err != nil {
 		if errors.Is(err, ente.ErrActiveLinkAlreadyExists) {
 			collectionToPubUrlMap, err2 := c.PublicCollectionRepo.GetCollectionToActivePublicURLMap(ctx, []int64{req.CollectionID})
 			if err2 != nil {
-				return nil, stacktrace.Propagate(err2, "")
+				return ente.PublicURL{}, stacktrace.Propagate(err2, "")
 			}
 			if publicUrls, ok := collectionToPubUrlMap[req.CollectionID]; ok {
 				if len(publicUrls) > 0 {

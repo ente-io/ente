@@ -1,171 +1,136 @@
 import { Link } from "@mui/material";
-import { HttpStatusCode } from "axios";
 import {
     AccountsPageContents,
     AccountsPageFooter,
     AccountsPageTitle,
 } from "ente-accounts/components/layouts/centered-paper";
+import { savedPartialLocalUser } from "ente-accounts/services/accounts-db";
 import {
-    recoverTwoFactor,
-    removeTwoFactor,
+    getRecoverTwoFactor,
+    recoverTwoFactorFinish,
+    type TwoFactorRecoveryResponse,
     type TwoFactorType,
 } from "ente-accounts/services/user";
 import { LinkButton } from "ente-base/components/LinkButton";
+import { LoadingIndicator } from "ente-base/components/loaders";
 import type { MiniDialogAttributes } from "ente-base/components/MiniDialog";
-import { useBaseContext } from "ente-base/context";
-import { sharedCryptoWorker } from "ente-base/crypto";
-import type { B64EncryptionResult } from "ente-base/crypto/libsodium";
-import log from "ente-base/log";
-import SingleInputForm, {
+import {
+    SingleInputForm,
     type SingleInputFormProps,
-} from "ente-shared/components/SingleInputForm";
-import { ApiError } from "ente-shared/error";
-import { getData, setData, setLSUser } from "ente-shared/storage/localStorage";
+} from "ente-base/components/SingleInputForm";
+import { useBaseContext } from "ente-base/context";
+import { isHTTP4xxError, isHTTPErrorWithStatus } from "ente-base/http";
+import log from "ente-base/log";
 import { t } from "i18next";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Trans } from "react-i18next";
-
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const bip39 = require("bip39");
-// mobile client library only supports english.
-bip39.setDefaultWordlist("english");
 
 export interface RecoverPageProps {
     twoFactorType: TwoFactorType;
 }
 
+/**
+ * A page where the user can enter their recovery key to reset or bypass their
+ * second factor in case they no longer have access to it.
+ */
 const Page: React.FC<RecoverPageProps> = ({ twoFactorType }) => {
-    const { logout, showMiniDialog } = useBaseContext();
+    const { logout, showMiniDialog, onGenericError } = useBaseContext();
 
-    const [encryptedTwoFactorSecret, setEncryptedTwoFactorSecret] =
-        useState<Omit<B64EncryptionResult, "key"> | null>(null);
-    const [sessionID, setSessionID] = useState<string | null>(null);
-    const [doesHaveEncryptedRecoveryKey, setDoesHaveEncryptedRecoveryKey] =
-        useState(false);
+    const [sessionID, setSessionID] = useState<string | undefined>(undefined);
+    const [recoveryResponse, setRecoveryResponse] = useState<
+        TwoFactorRecoveryResponse | undefined
+    >(undefined);
 
     const router = useRouter();
 
+    const showContactSupportDialog = useCallback(
+        (dialogContinue?: MiniDialogAttributes["continue"]) =>
+            showMiniDialog({
+                title: t("contact_support"),
+                message: (
+                    <Trans
+                        i18nKey={"no_two_factor_recovery_key_message"}
+                        components={{
+                            a: <Link href="mailto:support@ente.io" />,
+                        }}
+                        values={{ emailID: "support@ente.io" }}
+                    />
+                ),
+                continue: { color: "secondary", ...(dialogContinue ?? {}) },
+                cancel: false,
+            }),
+        [showMiniDialog],
+    );
+
     useEffect(() => {
-        const user = getData("user");
-        const sid = user.passkeySessionID || user.twoFactorSessionID;
-        if (!user?.email || !sid) {
-            void router.push("/");
-        } else if (
-            !(user.isTwoFactorEnabled || user.isTwoFactorEnabledPasskey) &&
-            (user.encryptedToken || user.token)
-        ) {
-            void router.push("/generate");
-        } else {
-            setSessionID(sid);
-        }
-        const main = async () => {
-            try {
-                const resp = await recoverTwoFactor(sid, twoFactorType);
-                setDoesHaveEncryptedRecoveryKey(!!resp.encryptedSecret);
-                if (!resp.encryptedSecret) {
-                    showContactSupportDialog({ action: router.back });
-                } else {
-                    setEncryptedTwoFactorSecret({
-                        encryptedData: resp.encryptedSecret,
-                        nonce: resp.secretDecryptionNonce,
-                    });
-                }
-            } catch (e) {
-                if (
-                    e instanceof ApiError &&
-                    // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
-                    e.httpStatusCode === HttpStatusCode.NotFound
-                ) {
-                    logout();
-                } else {
-                    log.error("two factor recovery page setup failed", e);
-                    setDoesHaveEncryptedRecoveryKey(false);
-                    showContactSupportDialog({ action: router.back });
+        void (async () => {
+            const user = savedPartialLocalUser();
+            const sessionID =
+                twoFactorType == "passkey"
+                    ? user?.passkeySessionID
+                    : user?.twoFactorSessionID;
+            if (!user?.email || !sessionID) {
+                await router.replace("/");
+            } else if (user.encryptedToken || user.token) {
+                await router.replace("/generate");
+            } else {
+                setSessionID(sessionID);
+                try {
+                    setRecoveryResponse(
+                        await getRecoverTwoFactor(twoFactorType, sessionID),
+                    );
+                } catch (e) {
+                    log.error("Second factor recovery page setup failed", e);
+                    if (isHTTPErrorWithStatus(e, 404)) {
+                        logout();
+                    } else if (isHTTP4xxError(e)) {
+                        showContactSupportDialog({ action: router.back });
+                    } else {
+                        onGenericError(e);
+                    }
                 }
             }
-        };
-        void main();
-        // TODO:
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+        })();
+    }, [
+        twoFactorType,
+        logout,
+        showContactSupportDialog,
+        onGenericError,
+        router,
+    ]);
 
-    const recover: SingleInputFormProps["callback"] = async (
-        recoveryKey: string,
-        setFieldError,
-    ) => {
-        try {
-            recoveryKey = recoveryKey
-                .trim()
-                .split(" ")
-                .map((part) => part.trim())
-                .filter((part) => !!part)
-                .join(" ");
-            // check if user is entering mnemonic recovery key
-            if (recoveryKey.indexOf(" ") > 0) {
-                if (recoveryKey.split(" ").length !== 24) {
-                    throw new Error("recovery code should have 24 words");
-                }
-                recoveryKey = bip39.mnemonicToEntropy(recoveryKey);
-            }
-            const cryptoWorker = await sharedCryptoWorker();
-            const { encryptedData, nonce } = encryptedTwoFactorSecret!;
-            const twoFactorSecret = await cryptoWorker.decryptB64(
-                encryptedData,
-                nonce,
-                await cryptoWorker.fromHex(recoveryKey),
-            );
-            const resp = await removeTwoFactor(
-                sessionID!,
-                twoFactorSecret,
-                twoFactorType,
-            );
-            const { keyAttributes, encryptedToken, token, id } = resp;
-            await setLSUser({
-                ...getData("user"),
-                token,
-                encryptedToken,
-                id,
-                isTwoFactorEnabled: false,
-            });
-            setData("keyAttributes", keyAttributes);
-            void router.push("/credentials");
-        } catch (e) {
-            log.error("two factor recovery failed", e);
-            setFieldError(t("incorrect_recovery_key"));
-        }
-    };
+    const handleSubmit: SingleInputFormProps["onSubmit"] | undefined = useMemo(
+        () =>
+            sessionID && recoveryResponse
+                ? (recoveryKeyMnemonic, setFieldError) =>
+                      recoverTwoFactorFinish(
+                          twoFactorType,
+                          sessionID,
+                          recoveryResponse,
+                          recoveryKeyMnemonic,
+                      )
+                          .then(() => router.push("/credentials"))
+                          .catch((e: unknown) => {
+                              log.error("Second factor recovery failed", e);
+                              setFieldError(t("incorrect_recovery_key"));
+                          })
+                : undefined,
+        [twoFactorType, router, sessionID, recoveryResponse],
+    );
 
-    const showContactSupportDialog = (
-        dialogContinue?: MiniDialogAttributes["continue"],
-    ) => {
-        showMiniDialog({
-            title: t("contact_support"),
-            message: (
-                <Trans
-                    i18nKey={"no_two_factor_recovery_key_message"}
-                    components={{ a: <Link href="mailto:support@ente.io" /> }}
-                    values={{ emailID: "support@ente.io" }}
-                />
-            ),
-            continue: { color: "secondary", ...(dialogContinue ?? {}) },
-            cancel: false,
-        });
-    };
-
-    if (!doesHaveEncryptedRecoveryKey) {
-        return <></>;
+    if (!handleSubmit) {
+        return <LoadingIndicator />;
     }
 
     return (
         <AccountsPageContents>
             <AccountsPageTitle>{t("recover_two_factor")}</AccountsPageTitle>
             <SingleInputForm
-                callback={recover}
-                fieldType="text"
-                placeholder={t("recovery_key")}
-                buttonText={t("recover")}
-                disableAutoComplete
+                autoComplete="off"
+                label={t("recovery_key")}
+                submitButtonTitle={t("recover")}
+                onSubmit={handleSubmit}
             />
             <AccountsPageFooter>
                 <LinkButton onClick={() => showContactSupportDialog()}>

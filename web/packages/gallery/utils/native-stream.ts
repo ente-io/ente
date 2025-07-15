@@ -7,7 +7,7 @@
  */
 
 import type { Electron, ElectronMLWorker, ZipItem } from "ente-base/types/ipc";
-import { z } from "zod";
+import { z } from "zod/v4";
 import type { FileSystemUploadItem } from "../services/upload";
 
 /**
@@ -91,7 +91,7 @@ const readNumericHeader = (res: Response, key: string) => {
 export const writeStream = async (
     _: Electron,
     path: string,
-    stream: ReadableStream,
+    stream: ReadableStream | null,
 ) => {
     const params = new URLSearchParams({ path });
     const url = new URL(`stream://write?${params.toString()}`);

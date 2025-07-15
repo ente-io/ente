@@ -1,34 +1,25 @@
+import { ensureLocalUser } from "ente-accounts/services/user";
 import { isDesktop } from "ente-base/app";
 import { assertionFailed } from "ente-base/assert";
-import { decryptBlob } from "ente-base/crypto";
+import { decryptBlobBytes, encryptBlob } from "ente-base/crypto";
 import type { EncryptedBlob } from "ente-base/crypto/types";
 import { ensureElectron } from "ente-base/electron";
-import {
-    isHTTP4xxError,
-    retryAsyncOperation,
-    type PublicAlbumsCredentials,
-} from "ente-base/http";
+import { isHTTP4xxError, type PublicAlbumsCredentials } from "ente-base/http";
 import { getKV, getKVB, getKVN, setKV } from "ente-base/kv";
-import { ensureAuthToken, ensureLocalUser } from "ente-base/local-user";
 import log from "ente-base/log";
 import { apiURL } from "ente-base/origins";
+import { ensureAuthToken } from "ente-base/token";
+import { uniqueFilesByID } from "ente-gallery/utils/file";
 import { fileLogID, type EnteFile } from "ente-media/file";
-import {
-    filePublicMagicMetadata,
-    updateRemotePublicMagicMetadata,
-} from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
-import {
-    getAllLocalFiles,
-    getLocalTrashFileIDs,
-    uniqueFilesByID,
-} from "ente-new/photos/services/files";
-import { settingsSnapshot } from "ente-new/photos/services/settings";
+import { updateFilePublicMagicMetadata } from "ente-new/photos/services/file";
+import { savedCollectionFiles } from "ente-new/photos/services/photos-fdb";
+import { savedTrashItemFileIDs } from "ente-new/photos/services/trash";
 import { gunzip, gzip } from "ente-new/photos/utils/gzip";
 import { randomSample } from "ente-utils/array";
 import { ensurePrecondition } from "ente-utils/ensure";
 import { wait } from "ente-utils/promise";
-import { z } from "zod";
+import { z } from "zod/v4";
 import {
     initiateGenerateHLS,
     readVideoStream,
@@ -208,21 +199,11 @@ const updateSnapshotIfNeeded = (
 /**
  * Return `true` if this client is capable of generating HLS streams for
  * uploaded videos.
- *
- * This function implementation is fast and can be called many times (e.g.
- * during UI rendering).
  */
-export const isHLSGenerationSupported = () =>
-    // Keep this check fast, we get called many times.
-    isDesktop &&
-    // TODO(HLS):
-    settingsSnapshot().isInternalUser;
-
-// TODO(HLS): Only the isDesktop flag is needed eventually.
-export const isHLSGenerationSupportedTemp = () => isDesktop;
+export const isHLSGenerationSupported = isDesktop;
 
 /**
- * Initialize the video processing subsystem if the user has enabled HLS
+ * Initialize the video processing subsystem unless the user has disabled HLS
  * generation in settings.
  */
 export const initVideoProcessing = async () => {
@@ -239,7 +220,7 @@ export const initVideoProcessing = async () => {
 /**
  * Return the persisted user preference for HLS generation.
  */
-const savedGenerateHLS = () => getKVB("generateHLS");
+const savedGenerateHLS = async () => await getKVB("generateHLS");
 
 /**
  * Update the persisted user preference for HLS generation.
@@ -257,7 +238,7 @@ const saveGenerateHLS = (enabled: boolean) => setKV("generateHLS", enabled);
  * Precondition: {@link isHLSGenerationSupported} must be `true`.
  */
 export const toggleHLSGeneration = async () => {
-    if (!isHLSGenerationSupported()) {
+    if (!isHLSGenerationSupported) {
         assertionFailed();
         return;
     }
@@ -352,7 +333,7 @@ export const hlsPlaylistDataForFile = async (
 ): Promise<HLSPlaylistDataForFile> => {
     ensurePrecondition(file.metadata.fileType == FileType.video);
 
-    if (filePublicMagicMetadata(file)?.sv == 1) {
+    if (file.pubMagicMetadata?.data.sv == 1) {
         return "skip";
     }
 
@@ -368,14 +349,7 @@ export const hlsPlaylistDataForFile = async (
         playlist: playlistTemplate,
         width,
         height,
-    } = await decryptPlaylistJSON(
-        // See: [Note: strict mode migration]
-        //
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        playlistFileData,
-        file,
-    );
+    } = await decryptPlaylistJSON(playlistFileData, file);
 
     // A playlist format the current client does not understand.
     if (type != "hls_video") return undefined;
@@ -499,7 +473,7 @@ const decryptPlaylistJSON = async (
     encryptedPlaylist: EncryptedBlob,
     file: EnteFile,
 ) => {
-    const decryptedBytes = await decryptBlob(encryptedPlaylist, file.key);
+    const decryptedBytes = await decryptBlobBytes(encryptedPlaylist, file.key);
     const jsonString = await gunzip(decryptedBytes);
     return PlaylistJSON.parse(JSON.parse(jsonString));
 };
@@ -533,16 +507,7 @@ const blobToDataURL = (blob: Blob) =>
  * an array.
  */
 const savedProcessedVideoFileIDs = () =>
-    // [Note: Avoiding zod parsing overhead for DB arrays]
-    //
-    // Validating that the value we read from the DB is indeed the same as the
-    // type we expect can be done using zod, but for potentially very large
-    // arrays, this has an overhead that is perhaps not justified when dealing
-    // with DB entries we ourselves wrote.
-    //
-    // As an optimization, we skip the runtime check here and cast. This might
-    // not be the most optimal choice in the future, so (a) use it sparingly,
-    // and (b) mark all such cases with the title of this note.
+    // See: [Note: Avoiding Zod parsing for large DB arrays]
     getKV("videoPreviewProcessedFileIDs").then((v) => new Set(v as number[]));
 
 /**
@@ -552,7 +517,7 @@ const savedProcessedVideoFileIDs = () =>
  * @see also {@link savedProcessedVideoFileIDs}.
  */
 const savedFailedVideoFileIDs = () =>
-    // See: [Note: Avoiding zod parsing overhead for DB arrays]
+    // See: [Note: Avoiding Zod parsing for large DB arrays]
     getKV("videoPreviewFailedFileIDs").then((v) => new Set(v as number[]));
 
 /**
@@ -645,7 +610,7 @@ const saveSyncLastUpdatedAt = (lastUpdatedAt: number) =>
  * Fetch IDs of files from remote that have been processed by other clients
  * since the last time we checked.
  */
-const syncProcessedFileIDs = async () =>
+const pullProcessedFileIDs = async () =>
     syncUpdatedFileDataFileIDs(
         "vid_preview",
         (await savedSyncLastUpdatedAt()) ?? 0,
@@ -673,7 +638,7 @@ const syncProcessedFileIDs = async () =>
 export const videoPrunePermanentlyDeletedFileIDsIfNeeded = async (
     deletedFileIDs: Set<number>,
 ) => {
-    if (!isHLSGenerationSupported()) return;
+    if (!isHLSGenerationSupported) return;
 
     const existing = await savedProcessedVideoFileIDs();
     if (existing.size > 0) {
@@ -685,24 +650,24 @@ export const videoPrunePermanentlyDeletedFileIDsIfNeeded = async (
 };
 
 /**
- * If video processing is enabled, trigger a sync with remote and any subsequent
- * backfill queue processing for pending videos.
+ * If video processing is enabled, trigger a pull from remote and then proceed
+ * with any subsequent backfill queue processing of pending videos.
  *
- * This function is expected to be called during a regular sync that the app
- * makes with remote (See: [Note: Remote sync]). It is a no-op if video
- * processing is not enabled or eligible on this device. Otherwise it syncs the
- * list of already processed file IDs with remote.
+ * This function is intended to be called during a full remote pull (See: [Note:
+ * Remote pull]). It is a no-op if video processing is not enabled or eligible
+ * on this device. Otherwise it pulls the list of already processed file IDs
+ * with remote.
  *
- * At this point it also triggers a backfill (if needed), but doesn't wait for
- * it to complete (which might take a time for big libraries).
+ * At this point it also triggers processing of the backfill (if needed), but
+ * doesn't wait for it to complete (which might take a time for big libraries).
  *
  * Calling it when a backfill has already been triggered by a previous sync is
- * also a no-op. However, a backfill does not start until at least one sync of
+ * also a no-op. However, a backfill does not start until at least one pull of
  * file IDs has been completed with remote, to avoid picking up work on file IDs
  * that have already been processed elsewhere.
  */
 export const videoProcessingSyncIfNeeded = async () => {
-    if (!isHLSGenerationSupported()) return;
+    if (!isHLSGenerationSupported) return;
 
     // The `haveSyncedOnce` flag tracks whether or not a sync has happened for
     // the app, and is not specific to video processing. We always set it even
@@ -713,7 +678,7 @@ export const videoProcessingSyncIfNeeded = async () => {
 
     if (!isHLSGenerationEnabled()) return;
 
-    await syncProcessedFileIDs();
+    await pullProcessedFileIDs();
 
     tickNow(); /* if not already ticking */
 };
@@ -745,9 +710,9 @@ export const processVideoNewUpload = (
     file: EnteFile,
     processableUploadItem: ProcessableUploadItem,
 ) => {
-    if (!isHLSGenerationSupported()) return;
+    if (!isHLSGenerationSupported) return;
     if (!isHLSGenerationEnabled()) return;
-    if (file.metadata.fileType !== FileType.video) return;
+    if (file.metadata.fileType != FileType.video) return;
     if (processableUploadItem instanceof File) {
         // While the types don't guarantee it, we really shouldn't be getting
         // here. The only time a processableUploadItem can be File when we're
@@ -830,7 +795,7 @@ export const isHLSGenerationEnabled = () => _state.isHLSGenerationEnabled;
  * batches, and the externally triggered processing of live uploads.
  */
 const processQueue = async () => {
-    if (!isHLSGenerationSupported() || !isHLSGenerationEnabled()) {
+    if (!isHLSGenerationSupported || !isHLSGenerationEnabled()) {
         assertionFailed(); /* we shouldn't have come here */
         return;
     }
@@ -905,8 +870,8 @@ const processQueue = async () => {
 const backfillQueue = async (
     userID: number,
 ): Promise<VideoProcessingQueueItem[]> => {
-    const allCollectionFiles = await getAllLocalFiles();
-    const localTrashFileIDs = await getLocalTrashFileIDs();
+    const allCollectionFiles = await savedCollectionFiles();
+    const localTrashFileIDs = await savedTrashItemFileIDs();
     const videoFiles = uniqueFilesByID(
         allCollectionFiles.filter(
             (f) =>
@@ -917,7 +882,7 @@ const backfillQueue = async (
                 // Not in trash.
                 !localTrashFileIDs.has(f.id) &&
                 // See: [Note: Marking files which do not need video processing]
-                filePublicMagicMetadata(f)?.sv != 1,
+                f.pubMagicMetadata?.data.sv != 1,
         ),
     );
 
@@ -980,7 +945,9 @@ const processQueueItem = async ({
         uploadItem;
     if (!sourceVideo) {
         try {
-            sourceVideo = (await downloadManager.fileStream(file))!;
+            sourceVideo = (await downloadManager.fileStream(file, {
+                background: true,
+            }))!;
         } catch (e) {
             if (!isNetworkDownloadError(e)) await markFailedVideoFile(file);
             throw e;
@@ -1052,7 +1019,7 @@ const processQueueItem = async ({
     if (!res) {
         log.info(`Generate HLS for ${fileLogID(file)} | not-required`);
         // See: [Note: Marking files which do not need video processing]
-        await updateRemotePublicMagicMetadata(file, { sv: 1 });
+        await updateFilePublicMagicMetadata(file, { sv: 1 });
         return;
     }
 
@@ -1069,11 +1036,14 @@ const processQueueItem = async ({
             size: videoSize,
         });
 
+        const encryptedPlaylist = await encryptBlob(playlistData, file.key);
+
         try {
-            await retryAsyncOperation(
-                () =>
-                    putVideoData(file, playlistData, videoObjectID, videoSize),
-                { retryProfile: "background" },
+            await putVideoData(
+                file,
+                encryptedPlaylist,
+                videoObjectID,
+                videoSize,
             );
         } catch (e) {
             if (isHTTP4xxError(e)) await markFailedVideoFile(file);

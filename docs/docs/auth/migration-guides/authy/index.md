@@ -10,8 +10,9 @@ A guide written by Green, an ente.io lover
 > [!WARNING]
 >
 > Authy has dropped all support for its desktop apps. It is no longer possible
-> to export data from Authy using methods 1 and 2. You will need either an iOS device
-> and computer (method 4) or a rooted Android phone (method 3) to follow this guide.
+> to export data from Authy using methods 1 and 2. You will need either an iOS
+> device and computer (method 4) or a rooted Android phone (method 3) to follow
+> this guide.
 
 ---
 
@@ -204,11 +205,24 @@ This uses the tool [Aegis Authenticator](https://getaegis.app/) from
 
 ## Method 4: Authy-iOS-MiTM
 
-**Who should use this?** Technical iOS users of Authy that cannot export their tokens with methods 1 or 2 (due to those methods being patched) or method 3 (due to that method requiring a rooted Android device).
+**Who should use this?** Technical iOS users of Authy that cannot export their
+tokens with methods 1 or 2 (due to those methods being patched) or method 3 (due
+to that method requiring a rooted Android device).
 
-This method works by intercepting the data the Authy app receives while logging in for the first time, which contains your encrypted authenticator tokens. After the encrypted authenticator tokens are dumped, you can decrypt them using your backup password and convert them to an Ente token file.
+This method works by intercepting the data the Authy app receives while logging
+in for the first time, which contains your encrypted authenticator tokens. After
+the encrypted authenticator tokens are dumped, you can decrypt them using your
+backup password and convert them to an Ente token file.
 
-For an up-to-date guide of how to retrieve the encrypted authenticator tokens and decrypt them, please see [Authy-iOS-MiTM](https://github.com/AlexTech01/Authy-iOS-MiTM). To convert the `decrypted_tokens.json` file from that guide into a format Ente Authenticator can recognize, use [this](https://gist.github.com/gboudreau/94bb0c11a6209c82418d01a59d958c93?permalink_comment_id=5317087#gistcomment-5317087) Python script. Once you have the `ente_auth_import.plain` file from that script, transfer it to your device and follow the instructions below to import it into Ente Authenticator.
+For an up-to-date guide of how to retrieve the encrypted authenticator tokens
+and decrypt them, please see
+[Authy-iOS-MiTM](https://github.com/AlexTech01/Authy-iOS-MiTM). To convert the
+`decrypted_tokens.json` file from that guide into a format Ente Authenticator
+can recognize, use
+[this](https://gist.github.com/gboudreau/94bb0c11a6209c82418d01a59d958c93?permalink_comment_id=5317087#gistcomment-5317087)
+Python script. Once you have the `ente_auth_import.plain` file from that script,
+transfer it to your device and follow the instructions below to import it into
+Ente Authenticator.
 
 ## Importing to Ente Authenticator (Method 1, method 2.1, method 4)
 

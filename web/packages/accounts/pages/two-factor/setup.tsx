@@ -3,13 +3,14 @@ import { CodeBlock } from "ente-accounts/components/CodeBlock";
 import { Verify2FACodeForm } from "ente-accounts/components/Verify2FACodeForm";
 import { appHomeRoute } from "ente-accounts/services/redirect";
 import type { TwoFactorSecret } from "ente-accounts/services/user";
-import { enableTwoFactor, setupTwoFactor } from "ente-accounts/services/user";
+import {
+    setupTwoFactor,
+    setupTwoFactorFinish,
+} from "ente-accounts/services/user";
 import { CenteredFill } from "ente-base/components/containers";
 import { LinkButton } from "ente-base/components/LinkButton";
 import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
 import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
-import { encryptWithRecoveryKey } from "ente-shared/crypto/helpers";
-import { getData, setLSUser } from "ente-shared/storage/localStorage";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
@@ -26,16 +27,7 @@ const Page: React.FC = () => {
     }, []);
 
     const handleSubmit = async (otp: string) => {
-        const {
-            encryptedData: encryptedTwoFactorSecret,
-            nonce: twoFactorSecretDecryptionNonce,
-        } = await encryptWithRecoveryKey(twoFactorSecret!.secretCode);
-        await enableTwoFactor({
-            code: otp,
-            encryptedTwoFactorSecret,
-            twoFactorSecretDecryptionNonce,
-        });
-        await setLSUser({ ...getData("user"), isTwoFactorEnabled: true });
+        await setupTwoFactorFinish(twoFactorSecret!.secretCode, otp);
         await router.push(appHomeRoute);
     };
 
@@ -132,12 +124,12 @@ const SetupQRMode: React.FC<SetupQRModeProps> = ({
         <Typography sx={{ color: "text.muted", textAlign: "center" }}>
             {t("two_factor_qr_help")}
         </Typography>
-        {!twoFactorSecret ? (
+        {twoFactorSecret ? (
+            <QRCode src={`data:image/png;base64,${twoFactorSecret.qrCode}`} />
+        ) : (
             <LoadingQRCode>
                 <ActivityIndicator />
             </LoadingQRCode>
-        ) : (
-            <QRCode src={`data:image/png;base64,${twoFactorSecret?.qrCode}`} />
         )}
         <LinkButton onClick={onChangeMode}>
             {t("two_factor_manual_entry_title")}

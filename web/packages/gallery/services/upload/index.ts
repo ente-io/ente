@@ -1,9 +1,12 @@
+import { basename, dirname } from "ente-base/file-name";
 import log from "ente-base/log";
 import { customAPIOrigin } from "ente-base/origins";
 import type { ZipItem } from "ente-base/types/ipc";
+import { exportMetadataDirectoryName } from "ente-gallery/export-dirs";
 import type { Collection } from "ente-media/collection";
+import type { EnteFile } from "ente-media/file";
 import { nullToUndefined } from "ente-utils/transform";
-import { z } from "zod";
+import { z } from "zod/v4";
 
 /**
  * Internal in-memory state shared by the functions in this module.
@@ -111,6 +114,139 @@ export interface TimestampedFileSystemUploadItem {
     lastModifiedMs: number;
 }
 
+/**
+ * An "path prefix"-like opaque string which can be used to disambiguate
+ * distinct source {@link UploadItem}s with the same name that are meant to be
+ * uploaded to the same destination Ente album.
+ *
+ * Th documentation of {@link UploadItem} describes the four cases that an
+ * {@link UploadItem} can be. For each of these, we augment an
+ * {@link UploadItem} with a prefix ("dirname") derived from its best "path":
+ *
+ * - Relative path or name in the case of web {@link File}s.
+ *
+ * - Absolute path in the case of desktop {@link File} or path or
+ *   {@link FileAndPath}.
+ *
+ * - Path within the zip file for desktop {@link ZipItem}s.
+ *
+ * Thus, this path should not be treated as an address that can be used to
+ * retrieve the upload item, but rather as extra context that can help us
+ * distinguish between items by their relative or path prefix when their file
+ * names are the same and they're being uploaded to the same album.
+ *
+ * Consider the following hierarchy:
+ *
+ *     Foo/2017/Album1/1.png
+ *     Foo/2017/Album1/1.png.json
+ *
+ *     Foo/2020/Album1/1.png
+ *     Foo/2020/Album1/1.png.json
+ *
+ * If user uploads `Foo`, irrespective of if they select the "root" or "parent"
+ * option {@link CollectionMapping} option, when matching the takeout, only the
+ * Ente album is considered. So it will be undefined which JSON will get used,
+ * and both PNG files will get the same JSON, not their file system siblings.
+ *
+ * In such cases, the path prefix of the item being uploaded can act as extra
+ * context that can help us disambiguate and pick the sibling. Note how we don't
+ * need the path prefix to be absolute or relative or even addressable, we just
+ * need it as extra context that can help us disambiguate two items with
+ * otherwise the same name and that are destined for the same Ente album.
+ *
+ * So for our example, the path prefixes will be
+ *
+ *     Foo/2017/Album1/1.png          "Foo/2017/Album1"
+ *     Foo/2017/Album1/1.png.json     "Foo/2017/Album1"
+ *
+ *     Foo/2020/Album1/1.png          "Foo/2020/Album1"
+ *     Foo/2020/Album1/1.png.json     "Foo/2020/Album1"
+ *
+ * And can thus be used to associate the correct metadata JSON with the
+ * corresponding {@link UploadItem}.
+ *
+ * As a special case, "/metadata" at the end of the path prefix is discarded.
+ * This allows the metadata JSON written by export to be read back in during
+ * uploads. See: [Note: Fold "metadata" directory into parent folder].
+ */
+export type UploadPathPrefix = string;
+
+/**
+ * Return the {@link UploadPathPrefix} for the given {@link pathOrName} of an
+ * item being uploaded.
+ */
+export const uploadPathPrefix = (pathOrName: string) => {
+    const folderPath = dirname(pathOrName);
+    if (basename(folderPath) == exportMetadataDirectoryName) {
+        return dirname(folderPath);
+    }
+    return folderPath;
+};
+
+export type UploadItemAndPath = [UploadItem, string];
+
+/**
+ * Group files that are that have the same parent folder into collections.
+ *
+ * This is used to segregate the list of {@link UploadItemAndPath}s that we
+ * obtain when an upload is initiated into per-collection groups when the user
+ * chooses the "parent" {@link CollectionMapping} option.
+ *
+ * For example, if the user selects files have a directory structure like:
+ *
+ *               a
+ *             / |  \
+ *            b  j   c
+ *           /|\    /  \
+ *          e f g   h  i
+ *
+ * The files will grouped into 3 collections:
+ *
+ *     [
+ *       a => [j],
+ *       b => [e, f, g],
+ *       c => [h, i]
+ *     ]
+ *
+ * @param defaultFolderName Optional collection name to use for any rooted files
+ * that do not have a parent folder. The function will throw if a default is not
+ * provided and we encounter any such files without a parent.
+ */
+export const groupItemsBasedOnParentFolder = (
+    uploadItemAndPaths: UploadItemAndPath[],
+    defaultFolderName: string | undefined,
+) => {
+    const result = new Map<string, UploadItemAndPath[]>();
+    for (const [uploadItem, pathOrName] of uploadItemAndPaths) {
+        const folderPath = dirname(pathOrName);
+        let folderName = basename(folderPath);
+        // [Note: Fold "metadata" directory into parent folder]
+        //
+        // If the parent folder of a file is "metadata" (the directory in which
+        // the exported JSON files are written), then we consider it to be part
+        // of the parent folder.
+        //
+        // e.g. for the file list
+        //
+        //    [a/x.png, a/metadata/x.png.json]
+        //
+        // we want both to be grouped into the collection "a". This is so that
+        // we can cluster the metadata JSON files in the same collection as the
+        // file it is for.
+        if (folderName == exportMetadataDirectoryName) {
+            folderName = basename(dirname(folderPath));
+        }
+        if (!folderName) {
+            if (!defaultFolderName)
+                throw Error(`Leaf file (without default): ${pathOrName}`);
+            folderName = defaultFolderName;
+        }
+        if (!result.has(folderName)) result.set(folderName, []);
+        result.get(folderName)!.push([uploadItem, pathOrName]);
+    }
+    return result;
+};
+
 export interface LivePhotoAssets {
     image: UploadItem;
     video: UploadItem;
@@ -127,6 +263,7 @@ export interface ClusteredUploadItem {
     fileName: string;
     isLivePhoto: boolean;
     uploadItem?: UploadItem;
+    pathPrefix: UploadPathPrefix | undefined;
     // TODO: Tie this to the isLivePhoto flag using a discriminated union.
     livePhotoAssets?: LivePhotoAssets;
 }
@@ -142,8 +279,8 @@ export type UploadableUploadItem = ClusteredUploadItem & {
 };
 
 /**
- * Result of {@link markUploadedAndObtainPostProcessableItem}; see the
- * documentation of that function for the meaning and cases of this type.
+ * Result of {@link markUploadedAndObtainProcessableItem}; see the documentation
+ * of that function for the meaning and cases of this type.
  */
 export type ProcessableUploadItem = File | TimestampedFileSystemUploadItem;
 
@@ -296,18 +433,20 @@ export type UploadPhase =
     | "done";
 
 export type UploadResult =
-    | "failed"
-    | "alreadyUploaded"
-    | "unsupported"
-    | "blocked"
-    | "tooLarge"
-    | "largerThanAvailableStorage"
-    | "uploaded"
-    | "uploadedWithStaticThumbnail"
-    | "addedSymlink";
+    | { type: "unsupported" }
+    | { type: "tooLarge" }
+    | { type: "largerThanAvailableStorage" }
+    | { type: "blocked" }
+    | { type: "failed" }
+    | { type: "alreadyUploaded"; file: EnteFile }
+    | { type: "addedSymlink"; file: EnteFile }
+    | { type: "uploadedWithStaticThumbnail"; file: EnteFile }
+    | { type: "uploaded"; file: EnteFile };
 
 /**
  * Return true to disable the upload of files via Cloudflare Workers.
+ *
+ * [Note: Faster uploads via workers]
  *
  * These workers were introduced as a way of make file uploads faster:
  * https://ente.io/blog/tech/making-uploads-faster/

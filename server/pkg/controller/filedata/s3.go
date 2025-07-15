@@ -61,7 +61,7 @@ func (c *Controller) getMultiPartUploadURL(dc string, objectKey string, count *i
 	urls := make([]string, 0)
 	for i := int64(1); i <= *count; i++ {
 		partReq, _ := s3Client.UploadPartRequest(&s3.UploadPartInput{
-			Bucket:     c.S3Config.GetHotBucket(),
+			Bucket:     bucket,
 			Key:        &objectKey,
 			UploadId:   r.UploadId,
 			PartNumber: &i,
@@ -74,7 +74,7 @@ func (c *Controller) getMultiPartUploadURL(dc string, objectKey string, count *i
 	}
 	multipartUploadURLs.PartURLs = urls
 	r2, _ := s3Client.CompleteMultipartUploadRequest(&s3.CompleteMultipartUploadInput{
-		Bucket:   c.S3Config.GetHotBucket(),
+		Bucket:   bucket,
 		Key:      &objectKey,
 		UploadId: r.UploadId,
 	})

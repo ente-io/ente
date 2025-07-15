@@ -22,7 +22,8 @@ const handleOPTIONS = (request: Request) => {
             "Access-Control-Allow-Origin": "*",
             "Access-Control-Allow-Methods": "GET, OPTIONS",
             "Access-Control-Max-Age": "86400",
-            "Access-Control-Allow-Headers": "X-Cast-Access-Token",
+            "Access-Control-Allow-Headers":
+                "X-Cast-Access-Token, X-Client-Package, X-Client-Version",
         },
     });
 };
@@ -60,8 +61,15 @@ const handleGET = async (request: Request) => {
     const pathname = url.pathname;
     const params = new URLSearchParams({ castToken });
 
+    const headers = {
+        "X-Client-Package": request.headers.get("X-Client-Package") ?? "",
+        "X-Client-Version": request.headers.get("X-Client-Version") ?? "",
+        "User-Agent": request.headers.get("User-Agent") ?? "",
+    };
+
     let response = await fetch(
         `https://api.ente.io/cast/files${pathname}${fileID}?${params.toString()}`,
+        { headers },
     );
 
     if (!response.ok) console.log("Upstream error", response.status);

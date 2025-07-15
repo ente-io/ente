@@ -1,14 +1,16 @@
-import { encryptBlobB64 } from "ente-base/crypto";
+import { encryptBlob } from "ente-base/crypto";
+import type { EncryptedBlobB64 } from "ente-base/crypto/types";
 import {
     authenticatedPublicAlbumsRequestHeaders,
     authenticatedRequestHeaders,
     ensureOk,
+    retryEnsuringHTTPOk,
     type PublicAlbumsCredentials,
 } from "ente-base/http";
 import { apiURL } from "ente-base/origins";
 import type { EnteFile } from "ente-media/file";
 import { nullToUndefined } from "ente-utils/transform";
-import { z } from "zod";
+import { z } from "zod/v4";
 
 /**
  * [Note: File data APIs]
@@ -194,8 +196,8 @@ export interface UpdatedFileDataFileIDsPage {
     fileIDs: Set<number>;
     /**
      * The latest updatedAt (epoch microseconds) time obtained from remote in
-     * this batch of sync (from amongst all of the files in the batch, not just
-     * those that were filtered to be part of {@link fileIDs}).
+     * this batch being fetched (from amongst all of the files in the batch, not
+     * just those that were filtered to be part of {@link fileIDs}).
      */
     lastUpdatedAt: number;
 }
@@ -291,7 +293,7 @@ export const putFileData = async (
     data: Uint8Array,
     lastUpdatedAt: number,
 ) => {
-    const { encryptedData, decryptionHeader } = await encryptBlobB64(
+    const { encryptedData, decryptionHeader } = await encryptBlob(
         data,
         file.key,
     );
@@ -394,8 +396,8 @@ export const fetchFilePreviewData = async (
  *
  * @param file {@link EnteFile} which this data is associated with.
  *
- * @param playlistData The playlist data, suitably encoded in a form ready for
- * encryption.
+ * @param encryptedPlaylist The encrypted playlist data (along with the nonce
+ * used during encryption).
  *
  * @param objectID Object ID of an already uploaded "file preview data" (see
  * {@link getFilePreviewDataUploadURL}).
@@ -405,25 +407,22 @@ export const fetchFilePreviewData = async (
  */
 export const putVideoData = async (
     file: EnteFile,
-    playlistData: Uint8Array,
+    encryptedPlaylist: EncryptedBlobB64,
     objectID: string,
     objectSize: number,
-) => {
-    const { encryptedData, decryptionHeader } = await encryptBlobB64(
-        playlistData,
-        file.key,
+) =>
+    retryEnsuringHTTPOk(
+        async () =>
+            fetch(await apiURL("/files/video-data"), {
+                method: "PUT",
+                headers: await authenticatedRequestHeaders(),
+                body: JSON.stringify({
+                    fileID: file.id,
+                    objectID,
+                    objectSize,
+                    playlist: encryptedPlaylist.encryptedData,
+                    playlistHeader: encryptedPlaylist.decryptionHeader,
+                }),
+            }),
+        { retryProfile: "background" },
     );
-
-    const res = await fetch(await apiURL("/files/video-data"), {
-        method: "PUT",
-        headers: await authenticatedRequestHeaders(),
-        body: JSON.stringify({
-            fileID: file.id,
-            objectID,
-            objectSize,
-            playlist: encryptedData,
-            playlistHeader: decryptionHeader,
-        }),
-    });
-    ensureOk(res);
-};

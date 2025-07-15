@@ -111,5 +111,5 @@ network, you need to use the public IP or hostname.
 > [!TIP]
 >
 > If you're having trouble uploading from your mobile app, it is likely that
-> museum is not able to connect to your S3 storage. See the [Configuring
-> S3](/self-hosting/guides/configuring-s3) guide for more details.
+> museum is not able to connect to your S3 storage. See the
+> [Configuring S3](/self-hosting/guides/configuring-s3) guide for more details.

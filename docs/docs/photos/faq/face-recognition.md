@@ -1,7 +1,6 @@
 ---
 title: Face recognition
-description:
-    Frequently asked questions about Ente's face recognition
+description: Frequently asked questions about Ente's face recognition
 ---
 
 # Face recognition

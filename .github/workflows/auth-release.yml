@@ -40,7 +40,7 @@ jobs:
 
         defaults:
             run:
-                working-directory: auth
+                working-directory: mobile/apps/auth
 
         steps:
             - name: Checkout code and submodules
@@ -124,7 +124,7 @@ jobs:
             - name: Create a draft GitHub release
               uses: ncipollo/release-action@v1
               with:
-                  artifacts: "auth/artifacts/*"
+                  artifacts: "mobile/apps/auth/artifacts/*"
                   draft: true
                   allowUpdates: true
                   updateOnlyUnreleased: true
@@ -136,15 +136,16 @@ jobs:
               with:
                   serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
                   packageName: io.ente.auth
-                  releaseFiles: auth/build/app/outputs/bundle/playstoreRelease/app-playstore-release.aab
+                  releaseFiles: mobile/apps/auth/build/app/outputs/bundle/playstoreRelease/app-playstore-release.aab
                   track: internal
 
     build-windows:
         runs-on: windows-latest
+        environment: "auth-win-build"
 
         defaults:
             run:
-                working-directory: auth
+                working-directory: mobile/apps/auth
 
         steps:
             - name: Checkout code and submodules
@@ -174,14 +175,22 @@ jobs:
             - name: Retain Windows EXE and DLLs
               run: cp -r build/windows/x64/runner/Release ente-${{ github.ref_name }}-windows
 
-            - name: Code sign Windows installer and EXE
-              uses: dlemstra/code-sign-action@v1
+            - name: Sign files with Trusted Signing
+              uses: azure/trusted-signing-action@v0
               with:
-                  certificate: "${{ secrets.WINDOWS_CERTIFICATE }}"
-                  password: "${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}"
-                  files: |
-                      auth/artifacts/ente-${{ github.ref_name }}-installer.exe
-                      auth/ente-${{ github.ref_name }}-windows/auth.exe
+                azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+                azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
+                azure-client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
+                endpoint: ${{ secrets.AZURE_ENDPOINT }}
+                trusted-signing-account-name: ${{ secrets.AZURE_CODE_SIGNING_NAME }}
+                certificate-profile-name: ${{ secrets.AZURE_CERT_PROFILE_NAME }}
+                files: |
+                      ${{ github.workspace }}/mobile/apps/auth/artifacts/ente-${{ github.ref_name }}-installer.exe
+                      ${{ github.workspace }}/mobile/apps/auth/ente-${{ github.ref_name }}-windows/auth.exe
+                file-digest: SHA256
+                timestamp-rfc3161: http://timestamp.acs.microsoft.com
+                timestamp-digest: SHA256  
+
 
             - name: Zip Windows EXE and DLLs
               run: tar.exe -a -c -f artifacts/ente-${{ github.ref_name }}-windows.zip ente-${{ github.ref_name }}-windows
@@ -192,7 +201,7 @@ jobs:
             - name: Create a draft GitHub release
               uses: ncipollo/release-action@v1
               with:
-                  artifacts: "auth/artifacts/*"
+                  artifacts: "mobile/apps/auth/artifacts/*"
                   draft: true
                   allowUpdates: true
                   updateOnlyUnreleased: true
@@ -202,7 +211,7 @@ jobs:
 
         defaults:
             run:
-                working-directory: auth
+                working-directory: mobile/apps/auth
 
         steps:
             - name: Checkout code and submodules
@@ -289,7 +298,7 @@ jobs:
             - name: Create a draft GitHub release
               uses: ncipollo/release-action@v1
               with:
-                  artifacts: "auth/artifacts/*"
+                  artifacts: "mobile/apps/auth/artifacts/*"
                   draft: true
                   allowUpdates: true
                   updateOnlyUnreleased: true

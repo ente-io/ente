@@ -1,13 +1,19 @@
 import { Verify2FACodeForm } from "ente-accounts/components/Verify2FACodeForm";
-import { verifyTwoFactor } from "ente-accounts/services/user";
+import {
+    savedPartialLocalUser,
+    saveKeyAttributes,
+    updateSavedLocalUser,
+} from "ente-accounts/services/accounts-db";
+import {
+    resetSavedLocalUserTokens,
+    verifyTwoFactor,
+} from "ente-accounts/services/user";
 import { LinkButton } from "ente-base/components/LinkButton";
 import { useBaseContext } from "ente-base/context";
-import { HTTPError } from "ente-base/http";
-import { getData, setData, setLSUser } from "ente-shared/storage/localStorage";
-import type { User } from "ente-shared/user/types";
+import { isHTTPErrorWithStatus } from "ente-base/http";
 import { t } from "i18next";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
     AccountsPageContents,
     AccountsPageFooter,
@@ -15,42 +21,51 @@ import {
 } from "../../components/layouts/centered-paper";
 import { unstashRedirect } from "../../services/redirect";
 
+/**
+ * A page that allows the user to verify their TOTP based second factor.
+ *
+ * See: [Note: Login pages]
+ */
 const Page: React.FC = () => {
     const { logout } = useBaseContext();
 
-    const [sessionID, setSessionID] = useState("");
+    const [twoFactorSessionID, setTwoFactorSessionID] = useState("");
 
     const router = useRouter();
 
     useEffect(() => {
-        const user: User = getData("user");
+        const user = savedPartialLocalUser();
         if (!user?.email || !user.twoFactorSessionID) {
-            void router.push("/");
+            void router.replace("/");
         } else if (
             !user.isTwoFactorEnabled &&
             (user.encryptedToken || user.token)
         ) {
-            void router.push("/credentials");
+            void router.replace("/credentials");
         } else {
-            setSessionID(user.twoFactorSessionID);
+            setTwoFactorSessionID(user.twoFactorSessionID);
         }
     }, [router]);
 
-    const handleSubmit = async (otp: string) => {
-        try {
-            const resp = await verifyTwoFactor(otp, sessionID);
-            const { keyAttributes, encryptedToken, token, id } = resp;
-            await setLSUser({ ...getData("user"), token, encryptedToken, id });
-            setData("keyAttributes", keyAttributes!);
-            await router.push(unstashRedirect() ?? "/credentials");
-        } catch (e) {
-            if (e instanceof HTTPError && e.res.status == 404) {
-                logout();
-            } else {
-                throw e;
+    const handleSubmit = useCallback(
+        async (otp: string) => {
+            try {
+                const { keyAttributes, encryptedToken, id } =
+                    await verifyTwoFactor(otp, twoFactorSessionID);
+                await resetSavedLocalUserTokens(id, encryptedToken);
+                updateSavedLocalUser({ twoFactorSessionID: undefined });
+                saveKeyAttributes(keyAttributes);
+                await router.push(unstashRedirect() ?? "/credentials");
+            } catch (e) {
+                if (isHTTPErrorWithStatus(e, 404)) {
+                    logout();
+                } else {
+                    throw e;
+                }
             }
-        }
-    };
+        },
+        [logout, router, twoFactorSessionID],
+    );
 
     return (
         <AccountsPageContents>

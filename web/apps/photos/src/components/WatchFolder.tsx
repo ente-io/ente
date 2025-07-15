@@ -53,7 +53,7 @@ export const WatchFolder: React.FC<ModalVisibilityProps> = ({
         useModalVisibility();
 
     useEffect(() => {
-        watcher.getWatches().then((ws) => setWatches(ws));
+        void watcher.getWatches().then((ws) => setWatches(ws));
     }, []);
 
     useEffect(() => {
@@ -63,7 +63,7 @@ export const WatchFolder: React.FC<ModalVisibilityProps> = ({
             e.preventDefault();
             e.stopPropagation();
 
-            for (const file of e.dataTransfer.files) {
+            for (const file of e.dataTransfer?.files ?? []) {
                 void selectCollectionMappingAndAddWatchIfDirectory(file);
             }
         };
@@ -72,6 +72,8 @@ export const WatchFolder: React.FC<ModalVisibilityProps> = ({
         return () => {
             removeEventListener("drop", handleWatchFolderDrop);
         };
+        // TODO:
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [open]);
 
     const selectCollectionMappingAndAddWatchIfDirectory = async (
@@ -87,7 +89,7 @@ export const WatchFolder: React.FC<ModalVisibilityProps> = ({
     const selectCollectionMappingAndAddWatch = async (path: string) => {
         const filePaths = await ensureElectron().fs.findFiles(path);
         if (areAllInSameDirectory(filePaths)) {
-            addWatch(path, "root");
+            await addWatch(path, "root");
         } else {
             setSavedFolderPath(path);
             showMappingChoice();
@@ -109,7 +111,7 @@ export const WatchFolder: React.FC<ModalVisibilityProps> = ({
 
     const handleCollectionMappingSelect = (mapping: CollectionMapping) => {
         setSavedFolderPath(undefined);
-        addWatch(savedFolderPath!, mapping);
+        void addWatch(savedFolderPath!, mapping);
     };
 
     return (
@@ -152,13 +154,11 @@ export const WatchFolder: React.FC<ModalVisibilityProps> = ({
 
 interface WatchList {
     watches: FolderWatch[] | undefined;
-    removeWatch: (watch: FolderWatch) => void;
+    removeWatch: (watch: FolderWatch) => Promise<void>;
 }
 
 const WatchList: React.FC<WatchList> = ({ watches, removeWatch }) =>
-    (watches ?? []).length === 0 ? (
-        <NoWatches />
-    ) : (
+    watches?.length ? (
         <Stack sx={{ gap: 2, flex: 1, overflowY: "auto", pb: 2, pr: 1 }}>
             {watches.map((watch) => (
                 <WatchEntry
@@ -168,6 +168,8 @@ const WatchList: React.FC<WatchList> = ({ watches, removeWatch }) =>
                 />
             ))}
         </Stack>
+    ) : (
+        <NoWatches />
     );
 
 const NoWatches: React.FC = () => (
@@ -201,13 +203,13 @@ const Check: React.FC = () => (
 
 interface WatchEntryProps {
     watch: FolderWatch;
-    removeWatch: (watch: FolderWatch) => void;
+    removeWatch: (watch: FolderWatch) => Promise<void>;
 }
 
 const WatchEntry: React.FC<WatchEntryProps> = ({ watch, removeWatch }) => {
     const { showMiniDialog } = useBaseContext();
 
-    const confirmStopWatching = () => {
+    const confirmStopWatching = () =>
         showMiniDialog({
             title: t("stop_watching_folder_title"),
             message: t("stop_watching_folder_message"),
@@ -217,7 +219,6 @@ const WatchEntry: React.FC<WatchEntryProps> = ({ watch, removeWatch }) => {
                 action: () => removeWatch(watch),
             },
         });
-    };
 
     return (
         <SpacedRow sx={{ overflow: "hidden", flexShrink: 0 }}>

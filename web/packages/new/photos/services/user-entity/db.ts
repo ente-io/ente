@@ -1,5 +1,5 @@
 import { getKV, getKVN, setKV } from "ente-base/kv";
-import { z } from "zod";
+import { z } from "zod/v4";
 import { type EntityType } from ".";
 import { RemoteUserEntityKey } from "./remote";
 
@@ -37,7 +37,7 @@ export interface LocalUserEntity {
 const LocalUserEntity = z.object({
     id: z.string(),
     // Retain the data verbatim.
-    data: z.object({}).passthrough(),
+    data: z.looseObject({}),
     updatedAt: z.number(),
 });
 
@@ -53,10 +53,6 @@ export const saveEntities = (type: EntityType, items: LocalUserEntity[]) =>
 export const savedEntities = async (
     type: EntityType,
 ): Promise<LocalUserEntity[]> =>
-    // See: [Note: strict mode migration]
-    //
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
     LocalUserEntity.array().parse((await getKV(entitiesKey(type))) ?? []);
 
 /**

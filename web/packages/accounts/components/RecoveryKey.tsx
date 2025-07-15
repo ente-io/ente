@@ -6,7 +6,6 @@ import {
     Stack,
     Typography,
 } from "@mui/material";
-import * as bip39 from "bip39";
 import { type MiniDialogAttributes } from "ente-base/components/MiniDialog";
 import { SpacedRow } from "ente-base/components/containers";
 import { DialogCloseIconButton } from "ente-base/components/mui/DialogCloseIconButton";
@@ -15,14 +14,14 @@ import { errorDialogAttributes } from "ente-base/components/utils/dialog";
 import { useIsSmallWidth } from "ente-base/components/utils/hooks";
 import type { ModalVisibilityProps } from "ente-base/components/utils/modal";
 import log from "ente-base/log";
-import { downloadString } from "ente-base/utils/web";
-import { getRecoveryKey } from "ente-shared/crypto/helpers";
+import { saveStringAsFile } from "ente-base/utils/web";
 import { t } from "i18next";
 import { useCallback, useEffect, useState } from "react";
+import {
+    getUserRecoveryKey,
+    recoveryKeyToMnemonic,
+} from "../services/recovery-key";
 import { CodeBlock } from "./CodeBlock";
-
-// mobile client library only supports english.
-bip39.setDefaultWordlist("english");
 
 type RecoveryKeyProps = ModalVisibilityProps & {
     showMiniDialog: (attributes: MiniDialogAttributes) => void;
@@ -50,13 +49,13 @@ export const RecoveryKey: React.FC<RecoveryKeyProps> = ({
     useEffect(() => {
         if (!open) return;
 
-        void getRecoveryKeyMnemonic()
+        void getUserRecoveryKeyMnemonic()
             .then((key) => setRecoveryKey(key))
             .catch(handleLoadError);
     }, [open, handleLoadError]);
 
     const handleSaveClick = () => {
-        downloadRecoveryKeyMnemonic(recoveryKey!);
+        saveRecoveryKeyMnemonicAsFile(recoveryKey!);
         onClose();
     };
 
@@ -115,8 +114,8 @@ export const RecoveryKey: React.FC<RecoveryKeyProps> = ({
     );
 };
 
-const getRecoveryKeyMnemonic = async () =>
-    bip39.entropyToMnemonic(await getRecoveryKey());
+const getUserRecoveryKeyMnemonic = async () =>
+    recoveryKeyToMnemonic(await getUserRecoveryKey());
 
-const downloadRecoveryKeyMnemonic = (key: string) =>
-    downloadString(key, "ente-recovery-key.txt");
+const saveRecoveryKeyMnemonicAsFile = (key: string) =>
+    saveStringAsFile(key, "ente-recovery-key.txt");

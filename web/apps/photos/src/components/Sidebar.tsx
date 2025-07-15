@@ -7,11 +7,9 @@ import HealthAndSafetyIcon from "@mui/icons-material/HealthAndSafety";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import NorthEastIcon from "@mui/icons-material/NorthEast";
-import ScienceIcon from "@mui/icons-material/Science";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import {
     Box,
-    Button,
     Dialog,
     DialogContent,
     Divider,
@@ -32,18 +30,17 @@ import { LinkButton } from "ente-base/components/LinkButton";
 import {
     RowButton,
     RowButtonDivider,
+    RowButtonEndActivityIndicator,
     RowButtonGroup,
     RowButtonGroupHint,
-    RowButtonGroupTitle,
     RowSwitch,
 } from "ente-base/components/RowButton";
 import { SpacedRow } from "ente-base/components/containers";
-import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
 import { DialogCloseIconButton } from "ente-base/components/mui/DialogCloseIconButton";
+import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
 import {
-    NestedSidebarDrawer,
     SidebarDrawer,
-    SidebarDrawerTitlebar,
+    TitledNestedSidebarDrawer,
     type NestedSidebarDrawerVisibilityProps,
 } from "ente-base/components/mui/SidebarDrawer";
 import { useIsSmallWidth } from "ente-base/components/utils/hooks";
@@ -62,7 +59,7 @@ import {
 import log from "ente-base/log";
 import { savedLogs } from "ente-base/log-web";
 import { customAPIHost } from "ente-base/origins";
-import { downloadString } from "ente-base/utils/web";
+import { saveStringAsFile } from "ente-base/utils/web";
 import {
     isHLSGenerationSupported,
     toggleHLSGeneration,
@@ -74,7 +71,7 @@ import { TwoFactorSettings } from "ente-new/photos/components/sidebar/TwoFactorS
 import {
     confirmDisableMapsDialogAttributes,
     confirmEnableMapsDialogAttributes,
-} from "ente-new/photos/components/utils/dialog";
+} from "ente-new/photos/components/utils/dialog-attributes";
 import { downloadAppDialogAttributes } from "ente-new/photos/components/utils/download";
 import {
     useHLSGenerationStatusSnapshot,
@@ -82,16 +79,14 @@ import {
     useUserDetailsSnapshot,
 } from "ente-new/photos/components/utils/use-snapshot";
 import {
-    ARCHIVE_SECTION,
-    DUMMY_UNCATEGORIZED_COLLECTION,
-    TRASH_SECTION,
-} from "ente-new/photos/services/collection";
-import type { CollectionSummaries } from "ente-new/photos/services/collection/ui";
+    PseudoCollectionID,
+    type CollectionSummaries,
+} from "ente-new/photos/services/collection-summary";
 import exportService from "ente-new/photos/services/export";
 import { isMLSupported } from "ente-new/photos/services/ml";
 import {
     isDevBuildAndUser,
-    syncSettings,
+    pullSettings,
     updateCFProxyDisabledPreference,
     updateMapEnabled,
 } from "ente-new/photos/services/settings";
@@ -107,45 +102,62 @@ import {
     isSubscriptionPastDue,
     isSubscriptionStripe,
     leaveFamily,
+    pullUserDetails,
     redirectToCustomerPortal,
-    syncUserDetails,
     userDetailsAddOnBonuses,
     type UserDetails,
 } from "ente-new/photos/services/user-details";
 import { usePhotosAppContext } from "ente-new/photos/types/context";
 import { initiateEmail, openURL } from "ente-new/photos/utils/web";
-import {
-    FlexWrapper,
-    VerticallyCentered,
-} from "ente-shared/components/Container";
+import { wait } from "ente-utils/promise";
 import { t } from "i18next";
 import { useRouter } from "next/router";
-import { GalleryContext } from "pages/gallery";
 import React, {
-    MouseEventHandler,
     useCallback,
-    useContext,
     useEffect,
     useMemo,
     useState,
+    type MouseEventHandler,
 } from "react";
 import { Trans } from "react-i18next";
-import { getUncategorizedCollection } from "services/collectionService";
 import { testUpload } from "../../tests/upload.test";
 import { SubscriptionCard } from "./SubscriptionCard";
 
 type SidebarProps = ModalVisibilityProps & {
     /**
-     * The latest UI collections.
+     * Information about non-hidden collections and pseudo-collections.
      *
-     * These are used to obtain data about the uncategorized, hidden and other
-     * items shown in the shortcut section within the sidebar.
+     * These are used to obtain data about the archive, hidden and trash
+     * "section" entries shown within the shortcut section of the sidebar.
      */
-    collectionSummaries: CollectionSummaries;
+    normalCollectionSummaries: CollectionSummaries;
+    /**
+     * The ID of the collection summary that should be shown when the user
+     * activates the "Uncategorized" section shortcut.
+     */
+    uncategorizedCollectionSummaryID: number;
     /**
      * Called when the plan selection modal should be shown.
      */
     onShowPlanSelector: () => void;
+    /**
+     * Called when the collection summary with the given {@link collectionID}
+     * should be shown.
+     *
+     * @param collectionSummaryID The ID of the {@link CollectionSummary} to
+     * switch to.
+     *
+     * @param isHiddenCollectionSummary If `true`, then any reauthentication as
+     * appropriate before switching to the hidden section of the app is
+     * performed first before showing the collection summary.
+     *
+     * @return A promise that fullfills after any needed reauthentication has
+     * been peformed (The view transition might still be in progress).
+     */
+    onShowCollectionSummary: (
+        collectionSummaryID: number,
+        isHiddenCollectionSummary?: boolean,
+    ) => Promise<void>;
     /**
      * Called when the export dialog should be shown.
      */
@@ -155,6 +167,9 @@ type SidebarProps = ModalVisibilityProps & {
      *
      * This will be invoked before sensitive actions, and the action will only
      * proceed if the promise returned by this function is fulfilled.
+     *
+     * On errors or if the user cancels the reauthentication, the promise will
+     * not settle.
      */
     onAuthenticateUser: () => Promise<void>;
 };
@@ -162,8 +177,10 @@ type SidebarProps = ModalVisibilityProps & {
 export const Sidebar: React.FC<SidebarProps> = ({
     open,
     onClose,
-    collectionSummaries,
+    normalCollectionSummaries,
+    uncategorizedCollectionSummaryID,
     onShowPlanSelector,
+    onShowCollectionSummary,
     onShowExport,
     onAuthenticateUser,
 }) => (
@@ -173,7 +190,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <Stack sx={{ gap: 0.5, mb: 3 }}>
             <ShortcutSection
                 onCloseSidebar={onClose}
-                collectionSummaries={collectionSummaries}
+                {...{
+                    normalCollectionSummaries,
+                    uncategorizedCollectionSummaryID,
+                    onShowCollectionSummary,
+                }}
             />
             <UtilitySection
                 onCloseSidebar={onClose}
@@ -218,16 +239,13 @@ const UserDetailsSection: React.FC<UserDetailsSectionProps> = ({
     onShowPlanSelector,
 }) => {
     const userDetails = useUserDetailsSnapshot();
-    const [memberSubscriptionManageView, setMemberSubscriptionManageView] =
-        useState(false);
-
-    const openMemberSubscriptionManage = () =>
-        setMemberSubscriptionManageView(true);
-    const closeMemberSubscriptionManage = () =>
-        setMemberSubscriptionManageView(false);
+    const {
+        show: showManageMemberSubscription,
+        props: manageMemberSubscriptionVisibilityProps,
+    } = useModalVisibility();
 
     useEffect(() => {
-        if (sidebarOpen) void syncUserDetails();
+        if (sidebarOpen) void pullUserDetails();
     }, [sidebarOpen]);
 
     const isNonAdminFamilyMember = useMemo(
@@ -240,13 +258,17 @@ const UserDetailsSection: React.FC<UserDetailsSectionProps> = ({
 
     const handleSubscriptionCardClick = () => {
         if (isNonAdminFamilyMember) {
-            openMemberSubscriptionManage();
+            showManageMemberSubscription();
         } else {
             if (
                 userDetails &&
                 isSubscriptionStripe(userDetails.subscription) &&
                 isSubscriptionPastDue(userDetails.subscription)
             ) {
+                // TODO: This makes an API request, so the UI should indicate
+                // the await.
+                //
+                // eslint-disable-next-line @typescript-eslint/no-floating-promises
                 redirectToCustomerPortal();
             } else {
                 onShowPlanSelector();
@@ -275,11 +297,10 @@ const UserDetailsSection: React.FC<UserDetailsSectionProps> = ({
                     />
                 )}
             </Box>
-            {isNonAdminFamilyMember && (
-                <MemberSubscriptionManage
-                    userDetails={userDetails}
-                    open={memberSubscriptionManageView}
-                    onClose={closeMemberSubscriptionManage}
+            {isNonAdminFamilyMember && userDetails && (
+                <ManageMemberSubscription
+                    {...manageMemberSubscriptionVisibilityProps}
+                    {...{ userDetails }}
                 />
             )}
         </>
@@ -307,8 +328,8 @@ const SubscriptionStatus: React.FC<SubscriptionStatusProps> = ({
         return true;
     }, [userDetails]);
 
-    const handleClick = useMemo(() => {
-        const eventHandler: MouseEventHandler<HTMLSpanElement> = (e) => {
+    const handleClick: MouseEventHandler<HTMLSpanElement> = useCallback(
+        (e) => {
             e.stopPropagation();
 
             if (isSubscriptionActive(userDetails.subscription)) {
@@ -320,14 +341,15 @@ const SubscriptionStatus: React.FC<SubscriptionStatusProps> = ({
                     isSubscriptionStripe(userDetails.subscription) &&
                     isSubscriptionPastDue(userDetails.subscription)
                 ) {
+                    // eslint-disable-next-line @typescript-eslint/no-floating-promises
                     redirectToCustomerPortal();
                 } else {
                     onShowPlanSelector();
                 }
             }
-        };
-        return eventHandler;
-    }, [userDetails]);
+        },
+        [onShowPlanSelector, userDetails],
+    );
 
     if (!hasAMessage) {
         return <></>;
@@ -342,7 +364,7 @@ const SubscriptionStatus: React.FC<SubscriptionStatusProps> = ({
                 message = t("subscription_info_free");
             } else if (isSubscriptionCancelled(userDetails.subscription)) {
                 message = t("subscription_info_renewal_cancelled", {
-                    date: userDetails.subscription?.expiryTime,
+                    date: userDetails.subscription.expiryTime,
                 });
             }
         } else {
@@ -370,8 +392,8 @@ const SubscriptionStatus: React.FC<SubscriptionStatusProps> = ({
         <Box sx={{ px: 1, pt: 0.5 }}>
             <Typography
                 variant="small"
-                onClick={handleClick && handleClick}
-                sx={{ color: "text.muted", cursor: handleClick && "pointer" }}
+                onClick={handleClick}
+                sx={{ color: "text.muted" }}
             >
                 {message}
             </Typography>
@@ -379,7 +401,15 @@ const SubscriptionStatus: React.FC<SubscriptionStatusProps> = ({
     );
 };
 
-function MemberSubscriptionManage({ open, userDetails, onClose }) {
+type ManageMemberSubscriptionProps = ModalVisibilityProps & {
+    userDetails: UserDetails;
+};
+
+const ManageMemberSubscription: React.FC<ManageMemberSubscriptionProps> = ({
+    open,
+    onClose,
+    userDetails,
+}) => {
     const { showMiniDialog } = useBaseContext();
     const fullScreen = useIsSmallWidth();
 
@@ -394,10 +424,6 @@ function MemberSubscriptionManage({ open, userDetails, onClose }) {
             },
         });
 
-    if (!userDetails) {
-        return <></>;
-    }
-
     return (
         <Dialog {...{ open, onClose, fullScreen }} maxWidth="xs" fullWidth>
             <SpacedRow sx={{ p: "20px 8px 12px 16px" }}>
@@ -410,7 +436,7 @@ function MemberSubscriptionManage({ open, userDetails, onClose }) {
                 <DialogCloseIconButton {...{ onClose }} />
             </SpacedRow>
             <DialogContent>
-                <VerticallyCentered>
+                <Stack sx={{ alignItems: "center", mx: 2 }}>
                     <Box sx={{ mb: 4 }}>
                         <Typography sx={{ color: "text.muted" }}>
                             {t("subscription_info_family")}
@@ -419,86 +445,76 @@ function MemberSubscriptionManage({ open, userDetails, onClose }) {
                             {familyAdminEmail(userDetails) ?? ""}
                         </Typography>
                     </Box>
-
                     <img
                         height={256}
                         src="/images/family-plan/1x.png"
                         srcSet="/images/family-plan/2x.png 2x, /images/family-plan/3x.png 3x"
                     />
-                    <FlexWrapper px={2}>
-                        <Button
-                            fullWidth
-                            variant="outlined"
-                            color="critical"
-                            onClick={confirmLeaveFamily}
-                        >
-                            {t("leave_family_plan")}
-                        </Button>
-                    </FlexWrapper>
-                </VerticallyCentered>
+                    <FocusVisibleButton
+                        fullWidth
+                        variant="outlined"
+                        color="critical"
+                        onClick={confirmLeaveFamily}
+                    >
+                        {t("leave_family_plan")}
+                    </FocusVisibleButton>
+                </Stack>
             </DialogContent>
         </Dialog>
     );
-}
-
-type ShortcutSectionProps = SectionProps & {
-    collectionSummaries: SidebarProps["collectionSummaries"];
 };
+
+type ShortcutSectionProps = SectionProps &
+    Pick<
+        SidebarProps,
+        | "normalCollectionSummaries"
+        | "uncategorizedCollectionSummaryID"
+        | "onShowCollectionSummary"
+    >;
 
 const ShortcutSection: React.FC<ShortcutSectionProps> = ({
     onCloseSidebar,
-    collectionSummaries,
+    normalCollectionSummaries,
+    uncategorizedCollectionSummaryID,
+    onShowCollectionSummary,
 }) => {
-    const galleryContext = useContext(GalleryContext);
-    const [uncategorizedCollectionId, setUncategorizedCollectionID] =
-        useState<number>();
-
-    useEffect(() => {
-        void getUncategorizedCollection().then((uncat) =>
-            setUncategorizedCollectionID(
-                uncat?.id ?? DUMMY_UNCATEGORIZED_COLLECTION,
-            ),
+    const handleOpenUncategorizedSection = () =>
+        void onShowCollectionSummary(uncategorizedCollectionSummaryID).then(
+            onCloseSidebar,
         );
-    }, []);
 
-    const openUncategorizedSection = () => {
-        galleryContext.setActiveCollectionID(uncategorizedCollectionId);
-        onCloseSidebar();
-    };
+    const handleOpenTrashSection = () =>
+        void onShowCollectionSummary(PseudoCollectionID.trash).then(
+            onCloseSidebar,
+        );
 
-    const openTrashSection = () => {
-        galleryContext.setActiveCollectionID(TRASH_SECTION);
-        onCloseSidebar();
-    };
+    const handleOpenArchiveSection = () =>
+        void onShowCollectionSummary(PseudoCollectionID.archiveItems).then(
+            onCloseSidebar,
+        );
 
-    const openArchiveSection = () => {
-        galleryContext.setActiveCollectionID(ARCHIVE_SECTION);
-        onCloseSidebar();
-    };
+    const handleOpenHiddenSection = () =>
+        void onShowCollectionSummary(PseudoCollectionID.hiddenItems, true)
+            // See: [Note: Workarounds for unactionable ARIA warnings]
+            .then(() => wait(10))
+            .then(onCloseSidebar);
 
-    const openHiddenSection = () => {
-        galleryContext.openHiddenSection(() => {
-            onCloseSidebar();
-        });
-    };
+    const summaryCaption = (summaryID: number) =>
+        normalCollectionSummaries.get(summaryID)?.fileCount.toString();
 
     return (
         <>
             <RowButton
                 startIcon={<CategoryIcon />}
                 label={t("section_uncategorized")}
-                caption={collectionSummaries
-                    .get(uncategorizedCollectionId)
-                    ?.fileCount.toString()}
-                onClick={openUncategorizedSection}
+                caption={summaryCaption(uncategorizedCollectionSummaryID)}
+                onClick={handleOpenUncategorizedSection}
             />
             <RowButton
                 startIcon={<ArchiveOutlinedIcon />}
                 label={t("section_archive")}
-                caption={collectionSummaries
-                    .get(ARCHIVE_SECTION)
-                    ?.fileCount.toString()}
-                onClick={openArchiveSection}
+                caption={summaryCaption(PseudoCollectionID.archiveItems)}
+                onClick={handleOpenArchiveSection}
             />
             <RowButton
                 startIcon={<VisibilityOffIcon />}
@@ -511,15 +527,13 @@ const ShortcutSection: React.FC<ShortcutSectionProps> = ({
                         }}
                     />
                 }
-                onClick={openHiddenSection}
+                onClick={handleOpenHiddenSection}
             />
             <RowButton
                 startIcon={<DeleteOutlineIcon />}
                 label={t("section_trash")}
-                caption={collectionSummaries
-                    .get(TRASH_SECTION)
-                    ?.fileCount.toString()}
-                onClick={openTrashSection}
+                caption={summaryCaption(PseudoCollectionID.trash)}
+                onClick={handleOpenTrashSection}
             />
         </>
     );
@@ -589,7 +603,7 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({
                 label={t("export_data")}
                 endIcon={
                     exportService.isExportInProgress() && (
-                        <ActivityIndicator size="20px" />
+                        <RowButtonEndActivityIndicator />
                     )
                 }
                 onClick={handleExport}
@@ -637,13 +651,13 @@ const ExitSection: React.FC = () => {
 };
 
 const InfoSection: React.FC = () => {
-    const [appVersion, setAppVersion] = useState<string | undefined>();
-    const [host, setHost] = useState<string | undefined>();
+    const [appVersion, setAppVersion] = useState("");
+    const [host, setHost] = useState<string | undefined>("");
 
     useEffect(() => {
         void globalThis.electron?.appVersion().then(setAppVersion);
         void customAPIHost().then(setHost);
-    });
+    }, []);
 
     return (
         <>
@@ -665,6 +679,7 @@ const InfoSection: React.FC = () => {
 
 type AccountProps = NestedSidebarDrawerVisibilityProps &
     Pick<SidebarProps, "onAuthenticateUser">;
+
 const Account: React.FC<AccountProps> = ({
     open,
     onClose,
@@ -696,55 +711,49 @@ const Account: React.FC<AccountProps> = ({
     };
 
     return (
-        <NestedSidebarDrawer {...{ open, onClose }} onRootClose={onRootClose}>
-            <Stack sx={{ gap: "4px", py: "12px" }}>
-                <SidebarDrawerTitlebar
-                    onClose={onClose}
-                    title={t("account")}
-                    onRootClose={handleRootClose}
-                />
-                <Stack sx={{ px: "16px", py: "8px", gap: "24px" }}>
-                    <RowButtonGroup>
-                        <RowButton
-                            endIcon={
-                                <HealthAndSafetyIcon
-                                    sx={{ color: "accent.main" }}
-                                />
-                            }
-                            label={t("recovery_key")}
-                            onClick={showRecoveryKey}
-                        />
-                    </RowButtonGroup>
-                    <RowButtonGroup>
-                        <RowButton
-                            label={t("two_factor")}
-                            onClick={showTwoFactor}
-                        />
-                        <RowButtonDivider />
-                        <RowButton
-                            label={t("passkeys")}
-                            onClick={handlePasskeys}
-                        />
-                    </RowButtonGroup>
-                    <RowButtonGroup>
-                        <RowButton
-                            label={t("change_password")}
-                            onClick={handleChangePassword}
-                        />
-                        <RowButtonDivider />
-                        <RowButton
-                            label={t("change_email")}
-                            onClick={handleChangeEmail}
-                        />
-                    </RowButtonGroup>
-                    <RowButtonGroup>
-                        <RowButton
-                            color="critical"
-                            label={t("delete_account")}
-                            onClick={showDeleteAccount}
-                        />
-                    </RowButtonGroup>
-                </Stack>
+        <TitledNestedSidebarDrawer
+            {...{ open, onClose }}
+            onRootClose={handleRootClose}
+            title={t("account")}
+        >
+            <Stack sx={{ px: 2, py: 1, gap: 3 }}>
+                <RowButtonGroup>
+                    <RowButton
+                        endIcon={
+                            <HealthAndSafetyIcon
+                                sx={{ color: "accent.main" }}
+                            />
+                        }
+                        label={t("recovery_key")}
+                        onClick={showRecoveryKey}
+                    />
+                </RowButtonGroup>
+                <RowButtonGroup>
+                    <RowButton
+                        label={t("two_factor")}
+                        onClick={showTwoFactor}
+                    />
+                    <RowButtonDivider />
+                    <RowButton label={t("passkeys")} onClick={handlePasskeys} />
+                </RowButtonGroup>
+                <RowButtonGroup>
+                    <RowButton
+                        label={t("change_password")}
+                        onClick={handleChangePassword}
+                    />
+                    <RowButtonDivider />
+                    <RowButton
+                        label={t("change_email")}
+                        onClick={handleChangeEmail}
+                    />
+                </RowButtonGroup>
+                <RowButtonGroup>
+                    <RowButton
+                        color="critical"
+                        label={t("delete_account")}
+                        onClick={showDeleteAccount}
+                    />
+                </RowButtonGroup>
             </Stack>
             <RecoveryKey
                 {...recoveryKeyVisibilityProps}
@@ -758,7 +767,7 @@ const Account: React.FC<AccountProps> = ({
                 {...deleteAccountVisibilityProps}
                 {...{ onAuthenticateUser }}
             />
-        </NestedSidebarDrawer>
+        </TitledNestedSidebarDrawer>
     );
 };
 
@@ -780,7 +789,7 @@ const Preferences: React.FC<NestedSidebarDrawerVisibilityProps> = ({
     const isHLSGenerationEnabled = !!hlsGenStatusSnapshot?.enabled;
 
     useEffect(() => {
-        if (open) void syncSettings();
+        if (open) void pullSettings();
     }, [open]);
 
     const handleRootClose = () => {
@@ -789,51 +798,43 @@ const Preferences: React.FC<NestedSidebarDrawerVisibilityProps> = ({
     };
 
     return (
-        <NestedSidebarDrawer {...{ open, onClose }} onRootClose={onRootClose}>
-            <Stack sx={{ gap: "4px", py: "12px" }}>
-                <SidebarDrawerTitlebar
-                    onClose={onClose}
-                    title={t("preferences")}
-                    onRootClose={handleRootClose}
+        <TitledNestedSidebarDrawer
+            {...{ open, onClose }}
+            onRootClose={handleRootClose}
+            title={t("preferences")}
+        >
+            <Stack sx={{ px: 2, py: 1, gap: 3 }}>
+                <LanguageSelector />
+                <ThemeSelector />
+                <Divider sx={{ my: "2px", opacity: 0.1 }} />
+                {isMLSupported && (
+                    <RowButtonGroup>
+                        <RowButton
+                            endIcon={<ChevronRightIcon />}
+                            label={t("ml_search")}
+                            onClick={showMLSettings}
+                        />
+                    </RowButtonGroup>
+                )}
+                <RowButton
+                    endIcon={<ChevronRightIcon />}
+                    label={t("map")}
+                    onClick={showMapSettings}
                 />
-                <Stack sx={{ px: "16px", py: "8px", gap: "24px" }}>
-                    <LanguageSelector />
-                    <ThemeSelector />
-                    <Divider sx={{ my: "2px", opacity: 0.1 }} />
-                    {isMLSupported && (
-                        <RowButtonGroup>
-                            <RowButton
-                                endIcon={<ChevronRightIcon />}
-                                label={t("ml_search")}
-                                onClick={showMLSettings}
-                            />
-                        </RowButtonGroup>
-                    )}
-                    <RowButton
-                        endIcon={<ChevronRightIcon />}
-                        label={t("map")}
-                        onClick={showMapSettings}
-                    />
-                    <RowButton
-                        endIcon={<ChevronRightIcon />}
-                        label={t("advanced")}
-                        onClick={showAdvancedSettings}
-                    />
-                    {isHLSGenerationSupported() && (
-                        <Stack>
-                            <RowButtonGroupTitle icon={<ScienceIcon />}>
-                                {t("labs")}
-                            </RowButtonGroupTitle>
-                            <RowButtonGroup>
-                                <RowSwitch
-                                    label={t("streamable_videos")}
-                                    checked={isHLSGenerationEnabled}
-                                    onClick={() => void toggleHLSGeneration()}
-                                />
-                            </RowButtonGroup>
-                        </Stack>
-                    )}
-                </Stack>
+                <RowButton
+                    endIcon={<ChevronRightIcon />}
+                    label={t("advanced")}
+                    onClick={showAdvancedSettings}
+                />
+                {isHLSGenerationSupported && (
+                    <RowButtonGroup>
+                        <RowSwitch
+                            label={t("streamable_videos")}
+                            checked={isHLSGenerationEnabled}
+                            onClick={() => void toggleHLSGeneration()}
+                        />
+                    </RowButtonGroup>
+                )}
             </Stack>
             <MapSettings
                 {...mapSettingsVisibilityProps}
@@ -847,7 +848,7 @@ const Preferences: React.FC<NestedSidebarDrawerVisibilityProps> = ({
                 {...mlSettingsVisibilityProps}
                 onRootClose={handleRootClose}
             />
-        </NestedSidebarDrawer>
+        </TitledNestedSidebarDrawer>
     );
 };
 
@@ -855,16 +856,17 @@ const LanguageSelector = () => {
     const locale = getLocaleInUse();
 
     const updateCurrentLocale = (newLocale: SupportedLocale) => {
-        setLocaleInUse(newLocale);
-        // [Note: Changing locale causes a full reload]
-        //
-        // A full reload is needed because we use the global `t` instance
-        // instead of the useTranslation hook.
-        //
-        // We also rely on this behaviour by caching various formatters in
-        // module static variables that not get updated if the i18n.language
-        // changes unless there is a full reload.
-        window.location.reload();
+        void setLocaleInUse(newLocale).then(() => {
+            // [Note: Changing locale causes a full reload]
+            //
+            // A full reload is needed because we use the global `t` instance
+            // instead of the useTranslation hook.
+            //
+            // We also rely on this behaviour by caching various formatters in
+            // module static variables that not get updated if the i18n.language
+            // changes unless there is a full reload.
+            window.location.reload();
+        });
     };
 
     const options = supportedLocales.map((locale) => ({
@@ -981,28 +983,21 @@ const MapSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
     };
 
     return (
-        <NestedSidebarDrawer
+        <TitledNestedSidebarDrawer
             {...{ open, onClose }}
             onRootClose={handleRootClose}
+            title={t("map")}
         >
-            <Stack sx={{ gap: "4px", py: "12px" }}>
-                <SidebarDrawerTitlebar
-                    onClose={onClose}
-                    onRootClose={handleRootClose}
-                    title={t("map")}
-                />
-
-                <Stack sx={{ px: "16px", py: "20px" }}>
-                    <RowButtonGroup>
-                        <RowSwitch
-                            label={t("enabled")}
-                            checked={mapEnabled}
-                            onClick={confirmToggle}
-                        />
-                    </RowButtonGroup>
-                </Stack>
+            <Stack sx={{ px: 2, py: "20px" }}>
+                <RowButtonGroup>
+                    <RowSwitch
+                        label={t("enabled")}
+                        checked={mapEnabled}
+                        onClick={confirmToggle}
+                    />
+                </RowButtonGroup>
             </Stack>
-        </NestedSidebarDrawer>
+        </TitledNestedSidebarDrawer>
     );
 };
 
@@ -1039,41 +1034,35 @@ const AdvancedSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
         void electron?.toggleAutoLaunch().then(refreshAutoLaunchEnabled);
 
     return (
-        <NestedSidebarDrawer
+        <TitledNestedSidebarDrawer
             {...{ open, onClose }}
             onRootClose={handleRootClose}
+            title={t("advanced")}
         >
-            <Stack sx={{ gap: "4px", py: "12px" }}>
-                <SidebarDrawerTitlebar
-                    onClose={onClose}
-                    onRootClose={handleRootClose}
-                    title={t("advanced")}
-                />
-                <Stack sx={{ px: "16px", py: "20px", gap: "24px" }}>
-                    <Stack>
-                        <RowButtonGroup>
-                            <RowSwitch
-                                label={t("faster_upload")}
-                                checked={!cfUploadProxyDisabled}
-                                onClick={toggleProxy}
-                            />
-                        </RowButtonGroup>
-                        <RowButtonGroupHint>
-                            {t("faster_upload_description")}
-                        </RowButtonGroupHint>
-                    </Stack>
-                    {electron && (
-                        <RowButtonGroup>
-                            <RowSwitch
-                                label={t("open_ente_on_startup")}
-                                checked={isAutoLaunchEnabled}
-                                onClick={toggleAutoLaunch}
-                            />
-                        </RowButtonGroup>
-                    )}
+            <Stack sx={{ px: 2, py: "20px", gap: 3 }}>
+                <Stack>
+                    <RowButtonGroup>
+                        <RowSwitch
+                            label={t("faster_upload")}
+                            checked={!cfUploadProxyDisabled}
+                            onClick={toggleProxy}
+                        />
+                    </RowButtonGroup>
+                    <RowButtonGroupHint>
+                        {t("faster_upload_description")}
+                    </RowButtonGroupHint>
                 </Stack>
+                {electron && (
+                    <RowButtonGroup>
+                        <RowSwitch
+                            label={t("open_ente_on_startup")}
+                            checked={isAutoLaunchEnabled}
+                            onClick={toggleAutoLaunch}
+                        />
+                    </RowButtonGroup>
+                )}
             </Stack>
-        </NestedSidebarDrawer>
+        </TitledNestedSidebarDrawer>
     );
 };
 
@@ -1105,79 +1094,79 @@ const Help: React.FC<NestedSidebarDrawerVisibilityProps> = ({
             continue: { text: t("view_logs"), action: viewLogs },
         });
 
-    const viewLogs = () => {
+    const viewLogs = async () => {
         log.info("Viewing logs");
         const electron = globalThis.electron;
-        if (electron) electron.openLogDirectory();
-        else downloadString(savedLogs(), `ente-web-logs-${Date.now()}.txt`);
+        if (electron) {
+            await electron.openLogDirectory();
+        } else {
+            saveStringAsFile(savedLogs(), `ente-web-logs-${Date.now()}.txt`);
+        }
     };
 
     return (
-        <NestedSidebarDrawer {...{ open, onClose }} onRootClose={onRootClose}>
-            <Stack sx={{ gap: "4px", py: "12px" }}>
-                <SidebarDrawerTitlebar
-                    onClose={onClose}
-                    title={t("help")}
-                    onRootClose={handleRootClose}
+        <TitledNestedSidebarDrawer
+            {...{ open, onClose }}
+            onRootClose={handleRootClose}
+            title={t("help")}
+        >
+            <Stack sx={{ px: 2, py: 1, gap: 3 }}>
+                <RowButtonGroup>
+                    <RowButton
+                        endIcon={<InfoOutlinedIcon />}
+                        label={t("ente_help")}
+                        onClick={handleHelp}
+                    />
+                </RowButtonGroup>
+                <RowButtonGroup>
+                    <RowButton
+                        endIcon={<NorthEastIcon />}
+                        label={t("blog")}
+                        onClick={handleBlog}
+                    />
+                    <RowButtonDivider />
+                    <RowButton
+                        endIcon={<NorthEastIcon />}
+                        label={t("request_feature")}
+                        onClick={handleRequestFeature}
+                    />
+                </RowButtonGroup>
+                <RowButtonGroup>
+                    <RowButton
+                        endIcon={<ChevronRightIcon />}
+                        label={
+                            <Tooltip title="support@ente.io">
+                                <Typography sx={{ fontWeight: "medium" }}>
+                                    {t("support")}
+                                </Typography>
+                            </Tooltip>
+                        }
+                        onClick={handleSupport}
+                    />
+                </RowButtonGroup>
+            </Stack>
+            <Stack sx={{ px: "16px" }}>
+                <RowButton
+                    variant="secondary"
+                    label={
+                        <Typography variant="mini" color="text.muted">
+                            {t("view_logs")}
+                        </Typography>
+                    }
+                    onClick={confirmViewLogs}
                 />
-                <Stack sx={{ px: "16px", py: "8px", gap: "24px" }}>
-                    <RowButtonGroup>
-                        <RowButton
-                            endIcon={<InfoOutlinedIcon />}
-                            label={t("ente_help")}
-                            onClick={handleHelp}
-                        />
-                    </RowButtonGroup>
-                    <RowButtonGroup>
-                        <RowButton
-                            endIcon={<NorthEastIcon />}
-                            label={t("blog")}
-                            onClick={handleBlog}
-                        />
-                        <RowButtonDivider />
-                        <RowButton
-                            endIcon={<NorthEastIcon />}
-                            label={t("request_feature")}
-                            onClick={handleRequestFeature}
-                        />
-                    </RowButtonGroup>
-                    <RowButtonGroup>
-                        <RowButton
-                            endIcon={<ChevronRightIcon />}
-                            label={
-                                <Tooltip title="support@ente.io">
-                                    <Typography sx={{ fontWeight: "medium" }}>
-                                        {t("support")}
-                                    </Typography>
-                                </Tooltip>
-                            }
-                            onClick={handleSupport}
-                        />
-                    </RowButtonGroup>
-                </Stack>
-                <Stack sx={{ px: "16px" }}>
+                {isDevBuildAndUser() && (
                     <RowButton
                         variant="secondary"
                         label={
                             <Typography variant="mini" color="text.muted">
-                                {t("view_logs")}
+                                {ut("Test upload")}
                             </Typography>
                         }
-                        onClick={confirmViewLogs}
+                        onClick={testUpload}
                     />
-                    {isDevBuildAndUser() && (
-                        <RowButton
-                            variant="secondary"
-                            label={
-                                <Typography variant="mini" color="text.muted">
-                                    {ut("Test upload")}
-                                </Typography>
-                            }
-                            onClick={testUpload}
-                        />
-                    )}
-                </Stack>
+                )}
             </Stack>
-        </NestedSidebarDrawer>
+        </TitledNestedSidebarDrawer>
     );
 };

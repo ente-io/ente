@@ -1,28 +1,19 @@
-/* TODO: Various lint issues in the decryptEnteFile function */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
-/* eslint-disable @typescript-eslint/no-unnecessary-condition */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-
-import type { AxiosResponse } from "axios";
-import { sharedCryptoWorker } from "ente-base/crypto";
+import { decryptStreamBytes } from "ente-base/crypto";
 import { nameAndExtension } from "ente-base/file-name";
+import { ensureOk, isHTTP401Error, publicRequestHeaders } from "ente-base/http";
 import log from "ente-base/log";
 import { apiURL, customAPIOrigin } from "ente-base/origins";
-import type {
-    EncryptedEnteFile,
-    EnteFile,
-    FileMagicMetadata,
-    FilePublicMagicMetadata,
+import {
+    decryptRemoteFile,
+    FileDiffResponse,
+    RemoteEnteFile,
+    type EnteFile,
 } from "ente-media/file";
-import { mergeMetadata1 } from "ente-media/file";
+import { fileFileName } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
 import { isHEICExtension, needsJPEGConversion } from "ente-media/formats";
 import { heicToJPEG } from "ente-media/heic-convert";
 import { decodeLivePhoto } from "ente-media/live-photo";
-import { ApiError } from "ente-shared/error";
-import HTTPService from "ente-shared/network/HTTPService";
 import { shuffled } from "ente-utils/array";
 import { wait } from "ente-utils/promise";
 import type { CastData } from "services/cast-data";
@@ -91,13 +82,13 @@ export const imageURLGenerator = async function* (castData: CastData) {
 
     while (true) {
         const encryptedFiles = shuffled(
-            await getEncryptedCollectionFiles(castToken),
+            await getRemoteCastCollectionFiles(castToken),
         );
 
         let haveEligibleFiles = false;
 
         for (const encryptedFile of encryptedFiles) {
-            const file = await decryptEnteFile(encryptedFile, collectionKey);
+            const file = await decryptRemoteFile(encryptedFile, collectionKey);
 
             if (!isFileEligible(file)) continue;
 
@@ -111,7 +102,7 @@ export const imageURLGenerator = async function* (castData: CastData) {
                 // 1, 2, bang!
                 if (consecutiveFailures == 3) throw e;
 
-                if (e instanceof ApiError && e.httpStatusCode == 401) {
+                if (isHTTP401Error(e)) {
                     // The token has expired. This can happen, e.g., if the user
                     // opens the dialog to cast again, causing the client to
                     // invalidate existing tokens.
@@ -151,105 +142,51 @@ export const imageURLGenerator = async function* (castData: CastData) {
 };
 
 /**
- * Fetch the list of non-deleted files in the given collection.
+ * Fetch all the {@link RemoteEnteFile}s present in the collection corresponding
+ * to the given {@link castToken}.
  *
- * The returned files are not decrypted yet, so their metadata will not be
- * readable.
+ * The remote files are not decrypted or otherwise used at this point, we will
+ * decrypt and use them on demand when they need to be displayed.
+ *
+ * @param castToken A token used both for authentication, and also identifying
+ * the collection corresponding to the cast session.
+ *
+ * @returns All the files in the collection in an arbitrary order. Since we are
+ * anyways going to be shuffling these files, the order has no bearing.
  */
-const getEncryptedCollectionFiles = async (
+export const getRemoteCastCollectionFiles = async (
     castToken: string,
-): Promise<EncryptedEnteFile[]> => {
-    let files: EncryptedEnteFile[] = [];
+): Promise<RemoteEnteFile[]> => {
+    const filesByID = new Map<number, RemoteEnteFile>();
     let sinceTime = 0;
-    let resp: AxiosResponse;
-    do {
-        resp = await HTTPService.get(
-            await apiURL("/cast/diff"),
-            { sinceTime },
-            { "X-Cast-Access-Token": castToken },
-        );
-        const diff = resp.data.diff;
-        files = files.concat(diff.filter((file: EnteFile) => !file.isDeleted));
-        sinceTime = diff.reduce(
-            (max: number, file: EnteFile) => Math.max(max, file.updationTime),
-            sinceTime,
-        );
-    } while (resp.data.hasMore);
-    return files;
-};
-
-/**
- * Decrypt the given {@link EncryptedEnteFile}, returning a {@link EnteFile}.
- */
-const decryptEnteFile = async (
-    encryptedFile: EncryptedEnteFile,
-    collectionKey: string,
-): Promise<EnteFile> => {
-    const worker = await sharedCryptoWorker();
-    const {
-        encryptedKey,
-        keyDecryptionNonce,
-        metadata,
-        magicMetadata,
-        pubMagicMetadata,
-        ...restFileProps
-    } = encryptedFile;
-    const fileKey = await worker.decryptB64(
-        encryptedKey,
-        keyDecryptionNonce,
-        collectionKey,
-    );
-    const fileMetadata = await worker.decryptMetadataJSON({
-        encryptedDataB64: metadata.encryptedData,
-        decryptionHeaderB64: metadata.decryptionHeader,
-        keyB64: fileKey,
-    });
-    let fileMagicMetadata: FileMagicMetadata | undefined;
-    let filePubMagicMetadata: FilePublicMagicMetadata | undefined;
-    if (magicMetadata?.data) {
-        fileMagicMetadata = {
-            ...encryptedFile.magicMetadata,
-            // @ts-expect-error TODO: Need to use zod here.
-            data: await worker.decryptMetadataJSON({
-                encryptedDataB64: magicMetadata.data,
-                decryptionHeaderB64: magicMetadata.header,
-                keyB64: fileKey,
-            }),
-        };
+    while (true) {
+        const res = await fetch(await apiURL("/cast/diff", { sinceTime }), {
+            headers: { "X-Cast-Access-Token": castToken },
+        });
+        ensureOk(res);
+        const { diff, hasMore } = FileDiffResponse.parse(await res.json());
+        if (!diff.length) break;
+        for (const change of diff) {
+            sinceTime = Math.max(sinceTime, change.updationTime);
+            if (!change.isDeleted) {
+                filesByID.set(change.id, change);
+            }
+        }
+        if (!hasMore) break;
     }
-    if (pubMagicMetadata?.data) {
-        filePubMagicMetadata = {
-            ...pubMagicMetadata,
-            // @ts-expect-error TODO: Need to use zod here.
-            data: await worker.decryptMetadataJSON({
-                encryptedDataB64: pubMagicMetadata.data,
-                decryptionHeaderB64: pubMagicMetadata.header,
-                keyB64: fileKey,
-            }),
-        };
-    }
-    return mergeMetadata1({
-        ...restFileProps,
-        key: fileKey,
-        // @ts-expect-error The types need to be updated here
-        metadata: fileMetadata,
-        // @ts-expect-error The types need to be updated here
-        magicMetadata: fileMagicMetadata,
-        pubMagicMetadata: filePubMagicMetadata,
-    });
+    return [...filesByID.values()];
 };
 
 const isFileEligible = (file: EnteFile) => {
     if (!isImageOrLivePhoto(file)) return false;
-    // @ts-expect-error TODO: The core types need to be updated to allow the
-    // possibility of missing info fields (or do they?)
-    if (file.info.fileSize > 100 * 1024 * 1024) return false;
+
+    if ((file.info?.fileSize ?? 0) > 100 * 1024 * 1024) return false;
 
     // This check is fast but potentially incorrect because in practice we do
     // encounter files that are incorrectly named and have a misleading
     // extension. To detect the actual type, we need to sniff the MIME type, but
     // that requires downloading and decrypting the file first.
-    const [, extension] = nameAndExtension(file.metadata.title);
+    const [, extension] = nameAndExtension(fileFileName(file));
     if (extension && needsJPEGConversion(extension)) {
         // On the web, we only support HEIC conversion.
         return isHEICExtension(extension);
@@ -258,10 +195,9 @@ const isFileEligible = (file: EnteFile) => {
     return true;
 };
 
-const isImageOrLivePhoto = (file: EnteFile) => {
-    const fileType = file.metadata.fileType;
-    return fileType == FileType.image || fileType == FileType.livePhoto;
-};
+const isImageOrLivePhoto = (file: EnteFile) =>
+    file.metadata.fileType == FileType.image ||
+    file.metadata.fileType == FileType.livePhoto;
 
 /**
  * Create and return a new data URL that can be used to show the given
@@ -280,7 +216,7 @@ const renderableImageBlob = async (castToken: string, file: EnteFile) => {
 
     let blob = await downloadFile(castToken, file, shouldUseThumbnail);
 
-    let fileName = file.metadata.title;
+    let fileName = fileFileName(file);
     if (!shouldUseThumbnail && file.metadata.fileType == FileType.livePhoto) {
         const { imageData, imageFileName } = await decodeLivePhoto(
             fileName,
@@ -320,25 +256,26 @@ const downloadFile = async (
             const baseURL = shouldUseThumbnail
                 ? `${customOrigin}/cast/files/preview/${file.id}`
                 : `${customOrigin}/cast/files/download/${file.id}`;
-            return fetch(`${baseURL}?${params.toString()}`);
+            return fetch(`${baseURL}?${params.toString()}`, {
+                headers: publicRequestHeaders(),
+            });
         } else {
             const url = shouldUseThumbnail
                 ? `https://cast-albums.ente.io/preview/?fileID=${file.id}`
                 : `https://cast-albums.ente.io/download/?fileID=${file.id}`;
             return fetch(url, {
-                headers: { "X-Cast-Access-Token": castToken },
+                headers: {
+                    ...publicRequestHeaders(),
+                    "X-Cast-Access-Token": castToken,
+                },
             });
         }
     };
 
     const res = await getFile();
-    if (!res.ok)
-        throw new Error(
-            `Failed to fetch file with ID ${file.id}: HTTP ${res.status}`,
-        );
+    ensureOk(res);
 
-    const cryptoWorker = await sharedCryptoWorker();
-    const decrypted = await cryptoWorker.decryptStreamBytes(
+    const decrypted = await decryptStreamBytes(
         {
             encryptedData: new Uint8Array(await res.arrayBuffer()),
             decryptionHeader: shouldUseThumbnail

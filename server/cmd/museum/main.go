@@ -925,8 +925,8 @@ func setupAndStartCrons(userAuthRepo *repo.UserAuthRepository, publicCollectionR
 	})
 
 	schedule(c, "@every 24h", func() {
-		_ = userAuthRepo.RemoveDeletedTokens(timeUtil.MicrosecondBeforeDays(30))
-		_ = castDb.DeleteOldSessions(context.Background(), timeUtil.MicrosecondBeforeDays(7))
+		_ = userAuthRepo.RemoveDeletedTokens(timeUtil.MicrosecondsBeforeDays(30))
+		_ = castDb.DeleteOldSessions(context.Background(), timeUtil.MicrosecondsBeforeDays(7))
 		_ = publicCollectionRepo.CleanupAccessHistory(context.Background())
 	})
 
@@ -991,6 +991,14 @@ func setupAndStartCrons(userAuthRepo *repo.UserAuthRepository, publicCollectionR
 
 	schedule(c, "@every 24h", func() {
 		emailNotificationCtrl.SendStorageLimitExceededMails()
+	})
+
+	scheduleAndRun(c, "@every 24h", func() {
+		emailNotificationCtrl.SayHelloToCustomers()
+	})
+
+	scheduleAndRun(c, "@every 24h", func() {
+		emailNotificationCtrl.NudgePaidSubscriberForFamily()
 	})
 
 	schedule(c, "@every 1m", func() {

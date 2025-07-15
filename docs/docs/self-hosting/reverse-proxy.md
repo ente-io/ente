@@ -22,28 +22,32 @@ server on your machine.
 
 Setting up a reverse proxy with Caddy is easy and straightforward.
 
-Firstly, install Caddy on your server. 
+Firstly, install Caddy on your server.
 
 ```sh
 sudo apt install caddy
-``` 
+```
 
 After the installation is complete, a `Caddyfile` is created on the path
 `/etc/caddy/`. This file is used to configure reverse proxies among other
 things.
 
-```yaml 
+```groovy
 # Caddyfile - myente.xyz is just an example.
+
 api.myente.xyz {
     reverse_proxy http://localhost:8080
 }
+
 ente.myente.xyz {
     reverse_proxy http://localhost:3000
 }
+
 #...and so on for other endpoints
 ```
 
-After a hard-reload, the Ente Photos web app should be up on https://ente.myente.xyz.
+After a hard-reload, the Ente Photos web app should be up on
+https://ente.myente.xyz.
 
 If you are using a different tool for reverse proxy (like nginx), please check
 out their documentation.

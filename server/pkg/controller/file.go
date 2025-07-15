@@ -415,12 +415,9 @@ func (c *FileController) getSignedURLForType(ctx *gin.Context, fileID int64, obj
 
 // ignore lint unused inspection
 func isCliRequest(ctx *gin.Context) bool {
-	// todo: (neeraj) remove this short-circuit after wasabi migration
-	return false
 	// check if user-agent contains go-resty
-	//userAgent := ctx.Request.Header.Get("User-Agent")
-	//return strings.Contains(userAgent, "go-resty")
-
+	userAgent := ctx.Request.Header.Get("User-Agent")
+	return strings.Contains(userAgent, "go-resty")
 }
 
 // getWasabiSignedUrlIfAvailable returns a signed URL for the given fileID and objectType. It prefers wasabi over b2
@@ -435,10 +432,6 @@ func (c *FileController) getWasabiSignedUrlIfAvailable(fileID int64, objType ent
 			return c.getPreSignedURLForDC(s3Object.ObjectKey, dc)
 		}
 	}
-	// todo: (neeraj) remove this log after some time
-	log.WithFields(log.Fields{
-		"fileID": fileID}).Info("File not found in wasabi, returning signed url from B2")
-	// return signed url from default hot bucket
 	return c.getHotDcSignedUrl(s3Object.ObjectKey)
 }
 
