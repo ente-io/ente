@@ -680,7 +680,7 @@ class _PinnedGroupHeaderState extends State<PinnedGroupHeader> {
 
     setState(() {});
     if (widget.scrollbarInUseNotifier.value) {
-      HapticFeedback.selectionClick();
+      HapticFeedback.vibrate();
     }
   }
 
