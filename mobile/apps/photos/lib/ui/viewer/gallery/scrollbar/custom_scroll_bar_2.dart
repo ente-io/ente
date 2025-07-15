@@ -2,6 +2,7 @@ import "dart:async";
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import "package:photos/models/gallery/gallery_sections.dart";
+import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/viewer/gallery/scrollbar/scroll_bar_with_use_notifier.dart";
 import "package:photos/utils/misc_util.dart";
 
@@ -117,6 +118,8 @@ class _CustomScrollBar2State extends State<CustomScrollBar2> {
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = getEnteTextTheme(context);
+    final colorScheme = getEnteColorScheme(context);
     return Stack(
       clipBehavior: Clip.none,
       alignment: Alignment.centerLeft,
@@ -146,18 +149,37 @@ class _CustomScrollBar2State extends State<CustomScrollBar2> {
                     child: !inUse
                         ? const SizedBox.shrink()
                         : Stack(
+                            clipBehavior: Clip.none,
                             children: positionToTitleMap!.map((record) {
                               return Positioned(
                                 top: record.position,
                                 right: 24,
                                 child: Container(
-                                  color: Colors.teal,
+                                  decoration: BoxDecoration(
+                                    color: colorScheme.backgroundElevated2,
+                                    borderRadius: BorderRadius.circular(6),
+                                    border: Border.all(
+                                      color: colorScheme.strokeFaint,
+                                      width: 0.5,
+                                    ),
+                                    // TODO: Remove shadow if scrolling perf
+                                    // is affected.
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.1),
+                                        blurRadius: 3,
+                                        offset: const Offset(0, 2),
+                                      ),
+                                    ],
+                                  ),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 4,
+                                  ),
                                   child: Center(
                                     child: Text(
                                       record.title,
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                      ),
+                                      style: textTheme.miniMuted,
                                     ),
                                   ),
                                 ),
