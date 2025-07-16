@@ -28,11 +28,9 @@ extension EntityTypeExtn on EntityType {
     switch (this) {
       case EntityType.location:
       case EntityType.person:
-      case EntityType.smartConfig:
-        return true;
-      case EntityType.cgroup:
-      case EntityType.unknown:
         return false;
+      default:
+        return true;
     }
   }
 

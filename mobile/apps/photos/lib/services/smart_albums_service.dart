@@ -21,7 +21,10 @@ class SmartAlbumsService {
 
   int _lastCacheRefreshTime = 0;
 
+  Map<int, SmartAlbumConfig>? configs;
   Future<Map<int, SmartAlbumConfig>>? _cachedConfigsFuture;
+
+  static const type = EntityType.person;
 
   void clearCache() {
     _cachedConfigsFuture = null;
@@ -35,21 +38,23 @@ class SmartAlbumsService {
   }
 
   int lastRemoteSyncTime() {
-    return entityService.lastSyncTime(EntityType.smartConfig);
+    return entityService.lastSyncTime(type);
   }
 
   Future<Map<int, SmartAlbumConfig>> getSmartConfigs() async {
-    if (_lastCacheRefreshTime != lastRemoteSyncTime()) {
+    final lastRemoteSyncTimeValue = lastRemoteSyncTime();
+    if (_lastCacheRefreshTime != lastRemoteSyncTimeValue) {
       _lastCacheRefreshTime = lastRemoteSyncTime();
       _cachedConfigsFuture = null; // Invalidate cache
     }
     _cachedConfigsFuture ??= _fetchAndCacheSConfigs();
-    return _cachedConfigsFuture!;
+    configs = await _cachedConfigsFuture!;
+    return configs!;
   }
 
   Future<Map<int, SmartAlbumConfig>> _fetchAndCacheSConfigs() async {
     _logger.finest("reading all smart configs from local db");
-    final entities = await entityService.getEntities(EntityType.smartConfig);
+    final entities = await entityService.getEntities(type);
     final sconfigs = await Computer.shared().compute(
       _decodeSConfigEntities,
       param: {"entity": entities},
@@ -63,17 +68,23 @@ class SmartAlbumsService {
     Map<String, dynamic> param,
   ) {
     final entities = param["entity"] as List<LocalEntityData>;
-    return Map.fromEntries(
-      entities.map(
-        (e) {
-          final config = SmartAlbumConfig.fromJson(
-            json.decode(e.data),
-            e.id,
-          );
-          return MapEntry(config.collectionId, config);
-        },
-      ),
-    );
+
+    final Map<int, SmartAlbumConfig> sconfigs = {};
+    for (final entity in entities) {
+      var config = SmartAlbumConfig.fromJson(
+        json.decode(entity.data),
+        entity.id,
+      );
+
+      if (sconfigs.containsKey(config.collectionId)) {
+        // Merge with existing config if it exists
+        config = sconfigs[config.collectionId]!.merge(config);
+      }
+
+      sconfigs[config.collectionId] = config;
+    }
+
+    return sconfigs;
   }
 
   Future<void> syncSmartAlbums() async {
@@ -136,14 +147,14 @@ class SmartAlbumsService {
 
   Future<void> saveConfig(SmartAlbumConfig config) async {
     await _addOrUpdateEntity(
-      EntityType.smartConfig,
+      type,
       config.toJson(),
     );
   }
 
   Future<SmartAlbumConfig?> getConfig(int collectionId) async {
     final cachedConfigs = await getSmartConfigs();
-    return cachedConfigs[collectionId]!;
+    return cachedConfigs[collectionId];
   }
 
   /// Wrapper method for entityService.addOrUpdate that handles cache refresh

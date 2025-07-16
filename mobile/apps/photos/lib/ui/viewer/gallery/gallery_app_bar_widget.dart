@@ -27,6 +27,7 @@ import 'package:photos/models/selected_files.dart';
 import 'package:photos/service_locator.dart';
 import 'package:photos/services/collections_service.dart';
 import "package:photos/services/files_service.dart";
+import "package:photos/services/smart_albums_service.dart";
 import "package:photos/states/location_screen_state.dart";
 import "package:photos/theme/colors.dart";
 import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
@@ -90,6 +91,7 @@ enum AlbumPopupAction {
   sharedArchive,
   ownedHide,
   playOnTv,
+  autoAddPhotos,
   sort,
   leave,
   freeUpSpace,
@@ -401,25 +403,6 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       );
     }
 
-    if (widget.collection != null) {
-      actions.add(
-        Tooltip(
-          message: S.of(context).goToSettings,
-          child: IconButton(
-            icon: const Icon(Icons.settings_outlined),
-            onPressed: () async {
-              await routeToPage(
-                context,
-                SmartAlbumPeople(
-                  collectionId: widget.collection!.id,
-                ),
-              );
-            },
-          ),
-        ),
-      );
-    }
-
     if (galleryType.isSharable() && !widget.isFromCollectPhotos) {
       actions.add(
         Tooltip(
@@ -523,6 +506,9 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     final bool isArchived = widget.collection?.isArchived() ?? false;
     final bool isHidden = widget.collection?.isHidden() ?? false;
 
+    final smartConfig =
+        SmartAlbumsService.instance.configs?[widget.collection?.id];
+
     items.addAll(
       [
         // Do not show archive option for favorite collection. If collection is
@@ -548,6 +534,12 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
             value: AlbumPopupAction.playOnTv,
             context.l10n.playOnTv,
             icon: Icons.tv_outlined,
+          ),
+        if (widget.collection != null)
+          EntePopupMenuItem(
+            value: AlbumPopupAction.autoAddPhotos,
+            smartConfig == null ? "Auto-add people" : "Edit auto-add people",
+            icon: Icons.add,
           ),
         if (galleryType.canDelete())
           EntePopupMenuItem(
@@ -621,6 +613,13 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
               await _leaveAlbum(context);
             } else if (value == AlbumPopupAction.playOnTv) {
               await _castChoiceDialog();
+            } else if (value == AlbumPopupAction.autoAddPhotos) {
+              await routeToPage(
+                context,
+                SmartAlbumPeople(
+                  collectionId: widget.collection!.id,
+                ),
+              );
             } else if (value == AlbumPopupAction.freeUpSpace) {
               await _deleteBackedUpFiles(context);
             } else if (value == AlbumPopupAction.setCover) {

@@ -101,4 +101,28 @@ class SmartAlbumConfig {
       infoMap: infoMap,
     );
   }
+
+  SmartAlbumConfig merge(SmartAlbumConfig b) {
+    return SmartAlbumConfig(
+      remoteId: remoteId ?? b.remoteId,
+      collectionId: b.collectionId,
+      personIDs: personIDs.union(b.personIDs),
+      infoMap: {
+        ...infoMap,
+        ...b.infoMap.map(
+          (key, value) => MapEntry(
+            key,
+            (
+              updatedAt: infoMap[key]?.updatedAt != null &&
+                      infoMap[key]!.updatedAt > value.updatedAt
+                  ? infoMap[key]!.updatedAt
+                  : value.updatedAt,
+              addedFiles: infoMap[key]?.addedFiles.union(value.addedFiles) ??
+                  value.addedFiles,
+            ),
+          ),
+        ),
+      },
+    );
+  }
 }
