@@ -2,7 +2,7 @@
 import AlbumOutlinedIcon from "@mui/icons-material/AlbumOutlined";
 import FavoriteRoundedIcon from "@mui/icons-material/FavoriteRounded";
 import PlayCircleOutlineOutlinedIcon from "@mui/icons-material/PlayCircleOutlineOutlined";
-import { Box, Checkbox, Typography, styled } from "@mui/material";
+import { Checkbox, Typography, styled } from "@mui/material";
 import Avatar from "components/Avatar";
 import type { LocalUser } from "ente-accounts/services/user";
 import { assertionFailed } from "ente-base/assert";
@@ -747,11 +747,6 @@ const mergeTimeStampList = (
     return newList;
 };
 
-const ListItem = styled("div")`
-    display: flex;
-    justify-content: center;
-`;
-
 const getTemplateColumns = (
     { columns, itemWidth }: ThumbnailGridLayoutParams,
     groups?: number[],
@@ -760,7 +755,7 @@ const getTemplateColumns = (
         ? groups.map((x) => `repeat(${x}, ${itemWidth}px)`).join(" 44px ")
         : `repeat(${columns},${itemWidth}px)`;
 
-const ListContainer = styled(Box, {
+const ListItemGrid = styled("div", {
     shouldForwardProp: (propName) => propName != "gridTemplateColumns",
 })<{ gridTemplateColumns: string }>`
     display: grid;
@@ -841,16 +836,15 @@ const FileListRow = memo(
         const { items, layoutParams, renderListItem } = data;
         const item = items[index]!;
         return (
-            <ListItem style={style}>
-                <ListContainer
-                    gridTemplateColumns={getTemplateColumns(
-                        layoutParams,
-                        item.groups,
-                    )}
-                >
-                    {renderListItem(item, isScrolling)}
-                </ListContainer>
-            </ListItem>
+            <ListItemGrid
+                style={style}
+                gridTemplateColumns={getTemplateColumns(
+                    layoutParams,
+                    item.groups,
+                )}
+            >
+                {renderListItem(item, isScrolling)}
+            </ListItemGrid>
         );
     },
     areEqual,
