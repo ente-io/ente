@@ -14,11 +14,7 @@ import { downloadManager } from "ente-gallery/services/download";
 import type { EnteFile } from "ente-media/file";
 import { fileCreationTime, fileDurationString } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
-import {
-    GAP_BTW_TILES,
-    IMAGE_CONTAINER_MAX_WIDTH,
-    MIN_COLUMNS,
-} from "ente-new/photos/components/FileList";
+import { GAP_BTW_TILES } from "ente-new/photos/components/FileList";
 import type { GalleryBarMode } from "ente-new/photos/components/gallery/reducer";
 import {
     LoadingThumbnail,
@@ -27,12 +23,13 @@ import {
 import { TileBottomTextOverlay } from "ente-new/photos/components/Tiles";
 import {
     computeThumbnailGridLayoutParams,
-    getShrinkRatio,
+    type ThumbnailGridLayoutParams,
 } from "ente-new/photos/components/utils/thumbnail-grid-layout";
 import { PseudoCollectionID } from "ente-new/photos/services/collection-summary";
 import { t } from "i18next";
-import memoize from "memoize-one";
 import React, {
+    memo,
+    useCallback,
     useDeferredValue,
     useEffect,
     useMemo,
@@ -40,9 +37,9 @@ import React, {
     useState,
 } from "react";
 import {
-    type ListChildComponentProps,
     VariableSizeList,
     areEqual,
+    type ListChildComponentProps,
 } from "react-window";
 import { type SelectedState } from "utils/file";
 import {
@@ -58,31 +55,45 @@ export interface FileListHeaderOrFooter {
     /**
      * The component itself.
      */
-    item: React.ReactNode;
+    component: React.ReactNode;
     /**
      * The height of the component (in px).
      */
     height: number;
+    /**
+     * By default, all items in the {@link FileList}, including headers and
+     * footers injected using this type, get an inline margin.
+     *
+     * Set this property to `true` to omit this default margin, and instead
+     * have the component extend to the container's edges.
+     */
+    extendToInlineEdges?: boolean;
 }
 
-interface TimeStampListItem {
+/**
+ * Data needed to render each row in the variable size list that comprises the
+ * file list.
+ */
+type FileListItem = {
     /**
-     * An optional {@link FileListItemTag} that can be used to identify item
-     * types for conditional behaviour.
+     * The height of the row that will render this item.
      */
-    tag?: "date" | "file";
+    height: number;
+    /**
+     * An optional tag that can be used to identify item types for conditional
+     * behaviour.
+     */
+    tag?: "date" | "file" | "span";
     items?: FileListAnnotatedFile[];
     itemStartIndex?: number;
     date?: string | null;
     dates?: { date: string; span: number }[];
     groups?: number[];
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    item?: any;
-    id?: string;
-    height?: number;
-    fileSize?: number;
-    fileCount?: number;
-}
+    /**
+     * The React component that is the rendered representation of the item.
+     */
+    component?: React.ReactNode;
+} & Pick<FileListHeaderOrFooter, "extendToInlineEdges">;
 
 export interface FileListAnnotatedFile {
     file: EnteFile;
@@ -213,10 +224,8 @@ export const FileList: React.FC<FileListProps> = ({
     emailByUserID,
     onItemClick,
 }) => {
-    const [_timeStampList, setTimeStampList] = useState(
-        new Array<TimeStampListItem>(),
-    );
-    const timeStampList = useDeferredValue(_timeStampList);
+    const [_items, setItems] = useState<FileListItem[]>([]);
+    const items = useDeferredValue(_items);
 
     const listRef = useRef<VariableSizeList | null>(null);
 
@@ -234,18 +243,16 @@ export const FileList: React.FC<FileListProps> = ({
         () => computeThumbnailGridLayoutParams(width),
         [width],
     );
+
     const {
         // containerWidth,
-        isSmallerLayout,
+        // isSmallerLayout,
         // paddingInline,
         columns,
         // itemWidth,
-        itemHeight,
-        gap,
+        // itemHeight,
+        // gap,
     } = layoutParams;
-    // TODO(RE):
-    const shrinkRatio = getShrinkRatio(width, columns);
-    const listItemHeight = itemHeight + gap;
 
     useEffect(() => {
         // Since width and height are dependencies, there might be too many
@@ -256,45 +263,103 @@ export const FileList: React.FC<FileListProps> = ({
         // another update when processing one, React will restart the background
         // rerender from scratch.
 
-        let timeStampList: TimeStampListItem[] = [];
+        let items: FileListItem[] = [];
 
-        if (header) {
-            timeStampList.push(asFullSpanListItem(header));
-        }
+        if (header) items.push(asFullSpanFileListItem(header));
 
+        const { isSmallerLayout, columns } = layoutParams;
+        const fileItemHeight = layoutParams.itemHeight + layoutParams.gap;
         if (disableGrouping) {
-            noGrouping(timeStampList);
+            let listItemIndex = columns;
+            for (const [index, af] of annotatedFiles.entries()) {
+                if (listItemIndex < columns) {
+                    items[items.length - 1]!.items!.push(af);
+                    listItemIndex++;
+                } else {
+                    listItemIndex = 1;
+                    items.push({
+                        height: fileItemHeight,
+                        tag: "file",
+                        items: [af],
+                        itemStartIndex: index,
+                    });
+                }
+            }
         } else {
-            groupByTime(timeStampList);
+            let listItemIndex = 0;
+            let lastCreationTime: number | undefined;
+            for (const [index, af] of annotatedFiles.entries()) {
+                const creationTime = fileCreationTime(af.file) / 1000;
+                if (
+                    !lastCreationTime ||
+                    !isSameDay(
+                        new Date(creationTime),
+                        new Date(lastCreationTime),
+                    )
+                ) {
+                    lastCreationTime = creationTime;
+
+                    items.push({
+                        height: dateListItemHeight,
+                        tag: "date",
+                        date: af.timelineDateString,
+                    });
+                    items.push({
+                        height: fileItemHeight,
+                        tag: "file",
+                        items: [af],
+                        itemStartIndex: index,
+                    });
+                    listItemIndex = 1;
+                } else if (listItemIndex < columns) {
+                    items[items.length - 1]!.items!.push(af);
+                    listItemIndex++;
+                } else {
+                    listItemIndex = 1;
+                    items.push({
+                        height: fileItemHeight,
+                        tag: "file",
+                        items: [af],
+                        itemStartIndex: index,
+                    });
+                }
+            }
         }
 
         if (!isSmallerLayout) {
-            timeStampList = mergeTimeStampList(timeStampList, columns);
+            items = mergeTimeStampList(items, columns);
         }
 
-        if (timeStampList.length == 1) {
-            timeStampList.push({
-                item: (
-                    <NoFilesContainer span={columns}>
+        if (annotatedFiles.length == 0) {
+            items.push({
+                height: height - 48,
+                tag: "span",
+                component: (
+                    <NoFilesListItem>
                         <Typography sx={{ color: "text.faint" }}>
                             {t("nothing_here")}
                         </Typography>
-                    </NoFilesContainer>
+                    </NoFilesListItem>
                 ),
-                id: "empty-list-banner",
-                height: height - 48,
             });
         }
 
-        const footerHeight = footer?.height ?? 0;
-        timeStampList.push(getVacuumItem(timeStampList, footerHeight));
-        if (footer) {
-            timeStampList.push(asFullSpanListItem(footer));
+        let leftoverHeight = height - (footer?.height ?? 0);
+        for (const item of items) {
+            leftoverHeight -= item.height;
+            if (leftoverHeight <= 0) break;
+        }
+        if (leftoverHeight > 0) {
+            items.push({
+                height: leftoverHeight,
+                tag: "span",
+                component: <></>,
+            });
         }
 
-        setTimeStampList(timeStampList);
-        // TODO:
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+        if (footer) items.push(asFullSpanFileListItem(footer));
+
+        setItems(items);
     }, [
         width,
         height,
@@ -302,210 +367,35 @@ export const FileList: React.FC<FileListProps> = ({
         footer,
         annotatedFiles,
         disableGrouping,
-        columns,
+        layoutParams,
     ]);
 
     useEffect(() => {
-        // Refresh list.
+        // Refresh list
         listRef.current?.resetAfterIndex(0);
-    }, [timeStampList]);
+    }, [items]);
 
     // TODO: Too many non-null assertions
 
-    const groupByTime = (timeStampList: TimeStampListItem[]) => {
-        let listItemIndex = 0;
-        let lastCreationTime: number | undefined;
-        annotatedFiles.forEach((item, index) => {
-            const creationTime = fileCreationTime(item.file) / 1000;
-            if (
-                !lastCreationTime ||
-                !isSameDay(new Date(creationTime), new Date(lastCreationTime))
-            ) {
-                lastCreationTime = creationTime;
-
-                timeStampList.push({
-                    tag: "date",
-                    date: item.timelineDateString,
-                    id: lastCreationTime.toString(),
-                });
-                timeStampList.push({
-                    tag: "file",
-                    items: [item],
-                    itemStartIndex: index,
-                });
-                listItemIndex = 1;
-            } else if (listItemIndex < columns) {
-                timeStampList[timeStampList.length - 1]!.items!.push(item);
-                listItemIndex++;
-            } else {
-                listItemIndex = 1;
-                timeStampList.push({
-                    tag: "file",
-                    items: [item],
-                    itemStartIndex: index,
-                });
-            }
-        });
-    };
-
-    const noGrouping = (timeStampList: TimeStampListItem[]) => {
-        let listItemIndex = columns;
-        annotatedFiles.forEach((item, index) => {
-            if (listItemIndex < columns) {
-                timeStampList[timeStampList.length - 1]!.items!.push(item);
-                listItemIndex++;
-            } else {
-                listItemIndex = 1;
-                timeStampList.push({
-                    tag: "file",
-                    items: [item],
-                    itemStartIndex: index,
-                });
-            }
-        });
-    };
-
-    const getVacuumItem = (
-        timeStampList: TimeStampListItem[],
-        footerHeight: number,
-    ) => {
-        const fileListHeight = (() => {
-            let sum = 0;
-            const getCurrentItemSize = getItemSize(timeStampList);
-            for (let i = 0; i < timeStampList.length; i++) {
-                sum += getCurrentItemSize(i);
-                if (height - sum <= footerHeight) {
-                    break;
-                }
-            }
-            return sum;
-        })();
-        return {
-            item: <></>,
-            height: Math.max(height - fileListHeight - footerHeight, 0),
-        };
-    };
-
-    /**
-     * Checks and merge multiple dates into a single row.
-     */
-    const mergeTimeStampList = (
-        items: TimeStampListItem[],
-        columns: number,
-    ): TimeStampListItem[] => {
-        const newList: TimeStampListItem[] = [];
-        let index = 0;
-        let newIndex = 0;
-        while (index < items.length) {
-            const currItem = items[index]!;
-            // If the current item is of type time, then it is not part of an ongoing date.
-            // So, there is a possibility of merge.
-            if (currItem.tag == "date") {
-                // If new list pointer is not at the end of list then
-                // we can add more items to the same list.
-                if (newList[newIndex]) {
-                    const SPACE_BTW_DATES_TO_IMAGE_CONTAINER_WIDTH_RATIO = 0.244;
-                    // Check if items can be added to same list
-                    if (
-                        newList[newIndex + 1]!.items!.length +
-                            items[index + 1]!.items!.length +
-                            Math.ceil(
-                                newList[newIndex]!.dates!.length *
-                                    SPACE_BTW_DATES_TO_IMAGE_CONTAINER_WIDTH_RATIO,
-                            ) <=
-                        columns
-                    ) {
-                        newList[newIndex]!.dates!.push({
-                            date: currItem.date!,
-                            span: items[index + 1]!.items!.length,
-                        });
-                        newList[newIndex + 1]!.items = [
-                            ...newList[newIndex + 1]!.items!,
-                            ...items[index + 1]!.items!,
-                        ];
-                        index += 2;
-                    } else {
-                        // Adding items would exceed the number of columns.
-                        // So, move new list pointer to the end. Hence, in next iteration,
-                        // items will be added to a new list.
-                        newIndex += 2;
-                    }
-                } else {
-                    // New list pointer was at the end of list so simply add new items to the list.
-                    newList.push({
-                        ...currItem,
-                        date: null,
-                        dates: [
-                            {
-                                date: currItem.date!,
-                                span: items[index + 1]!.items!.length,
-                            },
-                        ],
-                    });
-                    newList.push(items[index + 1]!);
-                    index += 2;
-                }
-            } else {
-                // Merge cannot happen. Simply add all items to new list
-                // and set new list point to the end of list.
-                newList.push(currItem);
-                index++;
-                newIndex = newList.length;
-            }
-        }
-        for (let i = 0; i < newList.length; i++) {
-            const currItem = newList[i]!;
-            const nextItem = newList[i + 1]!;
-            if (currItem.tag == "date") {
-                if (currItem.dates!.length > 1) {
-                    currItem.groups = currItem.dates!.map((item) => item.span);
-                    nextItem.groups = currItem.groups;
-                }
-            }
-        }
-        return newList;
-    };
-
-    const getItemSize =
-        (timeStampList: TimeStampListItem[]) => (index: number) => {
-            switch (timeStampList[index]!.tag) {
-                case "date":
-                    return dateContainerHeight;
-                case "file":
-                    return listItemHeight;
-                default:
-                    return timeStampList[index]!.height!;
-            }
-        };
-
-    const generateKey = (index: number) => {
-        switch (timeStampList[index]!.tag) {
-            case "file":
-                return `${timeStampList[index]!.items![0]!.file.id}-${
-                    timeStampList[index]!.items!.slice(-1)[0]!.file.id
-                }`;
-            default:
-                return `${timeStampList[index]!.id}-${index}`;
-        }
-    };
-
     useEffect(() => {
         const notSelectedFiles = annotatedFiles.filter(
-            (item) => !selected[item.file.id],
+            (af) => !selected[af.file.id],
         );
 
+        // Get dates of files which were manually unselected.
         const unselectedDates = new Set(
-            notSelectedFiles.map((item) => item.timelineDateString),
-        ); // to get file's date which were manually unselected
-
-        const localSelectedFiles = annotatedFiles.filter(
-            // to get files which were manually selected
-            (item) => !unselectedDates.has(item.timelineDateString),
+            notSelectedFiles.map((af) => af.timelineDateString),
         );
 
+        // Get files which were manually selected.
+        const localSelectedFiles = annotatedFiles.filter(
+            (af) => !unselectedDates.has(af.timelineDateString),
+        );
+
+        // Get dates of files which were manually selected.
         const localSelectedDates = new Set(
-            localSelectedFiles.map((item) => item.timelineDateString),
-        ); // to get file's date which were manually selected
+            localSelectedFiles.map((af) => af.timelineDateString),
+        );
 
         setCheckedTimelineDateStrings((prev) => {
             const checked = new Set(prev);
@@ -517,9 +407,7 @@ export const FileList: React.FC<FileListProps> = ({
             localSelectedDates.forEach((date) => checked.add(date));
             return checked;
         });
-        // TODO:
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [selected]);
+    }, [annotatedFiles, selected]);
 
     const handleSelectMulti = handleSelectCreatorMulti(
         setSelected,
@@ -541,9 +429,10 @@ export const FileList: React.FC<FileListProps> = ({
         }
         setCheckedTimelineDateStrings(next);
 
+        // All files on a checked/unchecked day.
         const filesOnADay = annotatedFiles.filter(
-            (item) => item.timelineDateString === date,
-        ); // all files on a checked/unchecked day
+            (af) => af.timelineDateString === date,
+        );
 
         handleSelectMulti(filesOnADay.map((af) => af.file))(isDateSelected);
     };
@@ -651,8 +540,9 @@ export const FileList: React.FC<FileListProps> = ({
         />
     );
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     const renderListItem = (
-        listItem: TimeStampListItem,
+        listItem: FileListItem,
         isScrolling: boolean | undefined,
     ) => {
         const haveSelection = selected.count > 0;
@@ -661,7 +551,7 @@ export const FileList: React.FC<FileListProps> = ({
                 return listItem.dates ? (
                     listItem.dates
                         .map((item) => [
-                            <DateContainer key={item.date} span={item.span}>
+                            <DateListItem key={item.date} span={item.span}>
                                 {haveSelection && (
                                     <Checkbox
                                         key={item.date}
@@ -677,12 +567,12 @@ export const FileList: React.FC<FileListProps> = ({
                                     />
                                 )}
                                 {item.date}
-                            </DateContainer>,
+                            </DateListItem>,
                             <div key={`${item.date}-gap`} />,
                         ])
                         .flat()
                 ) : (
-                    <DateContainer span={columns}>
+                    <DateListItem span={columns}>
                         {haveSelection && (
                             <Checkbox
                                 key={listItem.date}
@@ -698,7 +588,7 @@ export const FileList: React.FC<FileListProps> = ({
                             />
                         )}
                         {listItem.date}
-                    </DateContainer>
+                    </DateListItem>
                 );
             case "file": {
                 const ret = listItem.items!.map((item, idx) =>
@@ -725,22 +615,37 @@ export const FileList: React.FC<FileListProps> = ({
                 return ret;
             }
             default:
-                // TODO:
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-                return listItem.item;
+                return listItem.component;
         }
     };
 
-    if (!timeStampList.length) {
+    const itemData = useMemo(
+        () => ({ items, layoutParams, renderListItem }),
+        [items, layoutParams, renderListItem],
+    );
+
+    const itemSize = useCallback(
+        (index: number) => itemData.items[index]!.height,
+        [itemData],
+    );
+
+    const itemKey = useCallback((index: number, itemData: FileListItemData) => {
+        const item = itemData.items[index]!;
+        switch (item.tag) {
+            case "date":
+                return `${item.date ?? ""}-${index}`;
+            case "file":
+                return `${item.items![0]!.file.id}-${
+                    item.items!.slice(-1)[0]!.file.id
+                }`;
+            default:
+                return `${index}`;
+        }
+    }, []);
+
+    if (!items.length) {
         return <></>;
     }
-
-    const itemData = createItemData(
-        timeStampList,
-        columns,
-        shrinkRatio,
-        renderListItem,
-    );
 
     // The old, mode unaware, behaviour.
     let key = `${activeCollectionID}`;
@@ -759,152 +664,194 @@ export const FileList: React.FC<FileListProps> = ({
     }
 
     return (
+        // TODO(RE):
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         <VariableSizeList
             key={key}
-            itemData={itemData}
             ref={listRef}
-            itemSize={getItemSize(timeStampList)}
-            height={height}
-            width={width}
-            itemCount={timeStampList.length}
-            itemKey={generateKey}
+            {...{ width, height, itemData, itemSize, itemKey }}
+            itemCount={items.length}
             overscanCount={3}
             useIsScrolling
         >
-            {PhotoListRow}
+            {FileListRow}
         </VariableSizeList>
     );
 };
 
-const ListItem = styled("div")`
+/**
+ * Checks and merge multiple dates into a single row.
+ */
+const mergeTimeStampList = (
+    items: FileListItem[],
+    columns: number,
+): FileListItem[] => {
+    const newList: FileListItem[] = [];
+    let index = 0;
+    let newIndex = 0;
+    while (index < items.length) {
+        const currItem = items[index]!;
+        // If the current item is of type time, then it is not part of an ongoing date.
+        // So, there is a possibility of merge.
+        if (currItem.tag == "date") {
+            // If new list pointer is not at the end of list then
+            // we can add more items to the same list.
+            if (newList[newIndex]) {
+                const SPACE_BTW_DATES_TO_IMAGE_CONTAINER_WIDTH_RATIO = 0.244;
+                // Check if items can be added to same list
+                if (
+                    newList[newIndex + 1]!.items!.length +
+                        items[index + 1]!.items!.length +
+                        Math.ceil(
+                            newList[newIndex]!.dates!.length *
+                                SPACE_BTW_DATES_TO_IMAGE_CONTAINER_WIDTH_RATIO,
+                        ) <=
+                    columns
+                ) {
+                    newList[newIndex]!.dates!.push({
+                        date: currItem.date!,
+                        span: items[index + 1]!.items!.length,
+                    });
+                    newList[newIndex + 1]!.items = [
+                        ...newList[newIndex + 1]!.items!,
+                        ...items[index + 1]!.items!,
+                    ];
+                    index += 2;
+                } else {
+                    // Adding items would exceed the number of columns.
+                    // So, move new list pointer to the end. Hence, in next iteration,
+                    // items will be added to a new list.
+                    newIndex += 2;
+                }
+            } else {
+                // New list pointer was at the end of list so simply add new items to the list.
+                newList.push({
+                    ...currItem,
+                    date: null,
+                    dates: [
+                        {
+                            date: currItem.date!,
+                            span: items[index + 1]!.items!.length,
+                        },
+                    ],
+                });
+                newList.push(items[index + 1]!);
+                index += 2;
+            }
+        } else {
+            // Merge cannot happen. Simply add all items to new list
+            // and set new list point to the end of list.
+            newList.push(currItem);
+            index++;
+            newIndex = newList.length;
+        }
+    }
+    for (let i = 0; i < newList.length; i++) {
+        const currItem = newList[i]!;
+        const nextItem = newList[i + 1]!;
+        if (currItem.tag == "date") {
+            if (currItem.dates!.length > 1) {
+                currItem.groups = currItem.dates!.map((item) => item.span);
+                nextItem.groups = currItem.groups;
+            }
+        }
+    }
+    return newList;
+};
+
+/**
+ * A list item container that spans the full width.
+ */
+const FullSpanListItem = styled("div")`
     display: flex;
+    align-items: center;
+`;
+
+const NoFilesListItem = styled(FullSpanListItem)`
+    min-height: 100%;
     justify-content: center;
 `;
 
-const getTemplateColumns = (
-    columns: number,
-    shrinkRatio: number,
-    groups?: number[],
-): string => {
-    if (groups) {
-        return (
-            groups
-                .map(
-                    (x) =>
-                        `repeat(${x}, ${IMAGE_CONTAINER_MAX_WIDTH * shrinkRatio}px)`,
-                )
-                // Space between date groups
-                .join(` 44px `)
-        );
-    } else {
-        return `repeat(${columns},${
-            IMAGE_CONTAINER_MAX_WIDTH * shrinkRatio
-        }px)`;
-    }
-};
-
-const ListContainer = styled(Box, {
-    shouldForwardProp: (propName) => propName != "gridTemplateColumns",
-})<{ gridTemplateColumns: string }>`
-    display: grid;
-    grid-template-columns: ${(props) => props.gridTemplateColumns};
-    grid-column-gap: ${GAP_BTW_TILES}px;
-    width: 100%;
-    padding: 0 24px;
-    @media (max-width: ${IMAGE_CONTAINER_MAX_WIDTH * MIN_COLUMNS}px) {
-        padding: 0 4px;
-    }
-`;
+/**
+ * Convert a {@link FileListHeaderOrFooter} into a {@link FileListItem}
+ * that spans the entire width available to the row.
+ */
+const asFullSpanFileListItem = ({
+    component,
+    ...rest
+}: FileListHeaderOrFooter): FileListItem => ({
+    ...rest,
+    tag: "span",
+    component: <FullSpanListItem>{component}</FullSpanListItem>,
+});
 
 /**
  * An grid item, spanning {@link span} columns.
  */
-const ListItemContainer = styled("div")<{ span: number }>`
+const GridSpanListItem = styled("div")<{ span: number }>`
     grid-column: span ${({ span }) => span};
     display: flex;
     align-items: center;
 `;
 
 /**
- * A grid items that spans all columns.
+ * The fixed height (in px) of {@link DateListItem}.
  */
-const FullSpanListItemContainer = styled("div")`
-    grid-column: 1 / -1;
-    display: flex;
-    align-items: center;
-`;
+const dateListItemHeight = 48;
 
-/**
- * Convert a {@link FileListHeaderOrFooter} into a {@link TimeStampListItem}
- * that spans all columns.
- */
-const asFullSpanListItem = ({ item, ...rest }: FileListHeaderOrFooter) => ({
-    ...rest,
-    item: <FullSpanListItemContainer>{item}</FullSpanListItemContainer>,
-});
-
-/**
- * The fixed height (in px) of {@link DateContainer}.
- */
-const dateContainerHeight = 48;
-
-const DateContainer = styled(ListItemContainer)(
+const DateListItem = styled(GridSpanListItem)(
     ({ theme }) => `
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    height: ${dateContainerHeight}px;
+    height: ${dateListItemHeight}px;
     color: ${theme.vars.palette.text.muted};
 `,
 );
 
-const NoFilesContainer = styled(ListItemContainer)`
-    text-align: center;
-    justify-content: center;
-`;
-
-interface ItemData {
-    timeStampList: TimeStampListItem[];
-    columns: number;
-    shrinkRatio: number;
+interface FileListItemData {
+    items: FileListItem[];
+    layoutParams: ThumbnailGridLayoutParams;
     renderListItem: (
-        timeStampListItem: TimeStampListItem,
+        timeStampListItem: FileListItem,
         isScrolling?: boolean,
     ) => React.JSX.Element;
 }
 
-const createItemData = memoize(
-    (
-        timeStampList: TimeStampListItem[],
-        columns: number,
-        shrinkRatio: number,
-        renderListItem: (
-            timeStampListItem: TimeStampListItem,
-            isScrolling?: boolean,
-        ) => React.JSX.Element,
-    ): ItemData => ({ timeStampList, columns, shrinkRatio, renderListItem }),
-);
-
-const PhotoListRow = React.memo(
+const FileListRow = memo(
     ({
         index,
         style,
         isScrolling,
         data,
-    }: ListChildComponentProps<ItemData>) => {
-        const { timeStampList, columns, shrinkRatio, renderListItem } = data;
+    }: ListChildComponentProps<FileListItemData>) => {
+        const { items, layoutParams, renderListItem } = data;
+        const { columns, itemWidth, paddingInline, gap } = layoutParams;
+
+        const item = items[index]!;
+
         return (
-            <ListItem style={style}>
-                <ListContainer
-                    gridTemplateColumns={getTemplateColumns(
-                        columns,
-                        shrinkRatio,
-                        timeStampList[index]!.groups,
-                    )}
-                >
-                    {renderListItem(timeStampList[index]!, isScrolling)}
-                </ListContainer>
-            </ListItem>
+            <Box
+                style={style}
+                sx={[
+                    {
+                        width: "100%",
+                        paddingInline: `${item.extendToInlineEdges ? 0 : paddingInline}px`,
+                    },
+                    item.tag != "span" && {
+                        display: "grid",
+                        gridTemplateColumns: item.groups
+                            ? item.groups
+                                  .map((x) => `repeat(${x}, ${itemWidth}px)`)
+                                  .join(" 44px ")
+                            : `repeat(${columns}, ${itemWidth}px)`,
+                        columnGap: `${gap}px`,
+                    },
+                ]}
+            >
+                {renderListItem(item, isScrolling)}
+            </Box>
         );
     },
     areEqual,
