@@ -848,13 +848,15 @@ const asFullSpanListItem = ({ item, ...rest }: FileListHeaderOrFooter) => ({
  */
 const dateContainerHeight = 48;
 
-const DateContainer = styled(ListItemContainer)`
+const DateContainer = styled(ListItemContainer)(
+    ({ theme }) => `
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     height: ${dateContainerHeight}px;
-    color: "text.muted";
-`;
+    color: ${theme.vars.palette.text.muted};
+`,
+);
 
 const NoFilesContainer = styled(ListItemContainer)`
     text-align: center;
