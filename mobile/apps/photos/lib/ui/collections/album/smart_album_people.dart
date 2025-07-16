@@ -1,9 +1,11 @@
 import "dart:async";
 
 import 'package:flutter/material.dart';
+import "package:photos/db/files_db.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/collection/smart_album_config.dart";
 import "package:photos/models/selected_people.dart";
+import "package:photos/services/collections_service.dart";
 import "package:photos/services/smart_albums_service.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
@@ -97,6 +99,38 @@ class _SmartAlbumPeopleState extends State<SmartAlbumPeople> {
                       infoMap: infoMap,
                     );
                   } else {
+                    final removedPersonIds = currentConfig!.personIDs
+                        .toSet()
+                        .difference(_selectedPeople.personIds.toSet())
+                        .toList();
+
+                    if (removedPersonIds.isNotEmpty) {
+                      final toDelete =
+                          await SmartAlbumsService.instance.removeFilesDialog(
+                        context,
+                      );
+
+                      if (toDelete) {
+                        for (final personId in removedPersonIds) {
+                          final files =
+                              currentConfig!.infoMap[personId]?.addedFiles;
+
+                          final enteFiles =
+                              await FilesDB.instance.getFilesFromIDs(
+                            files?.toList() ?? [],
+                            collectionID: widget.collectionId,
+                          );
+
+                          if (files?.isNotEmpty ?? false) {
+                            await CollectionsService.instance
+                                .removeFromCollection(
+                              widget.collectionId,
+                              enteFiles,
+                            );
+                          }
+                        }
+                      }
+                    }
                     newConfig = await currentConfig!.getUpdatedConfig(
                       _selectedPeople.personIds,
                     );

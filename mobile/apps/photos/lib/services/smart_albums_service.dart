@@ -2,7 +2,9 @@ import "dart:async";
 import "dart:convert";
 
 import "package:computer/computer.dart";
+import "package:flutter/widgets.dart" show BuildContext;
 import "package:logging/logging.dart";
+import "package:photos/generated/l10n.dart";
 import "package:photos/models/api/entity/type.dart";
 import "package:photos/models/collection/smart_album_config.dart";
 import "package:photos/models/local_entity_data.dart";
@@ -11,6 +13,10 @@ import "package:photos/services/collections_service.dart";
 import "package:photos/services/search_service.dart";
 import "package:photos/ui/actions/collection/collection_file_actions.dart";
 import "package:photos/ui/actions/collection/collection_sharing_actions.dart";
+import "package:photos/ui/components/action_sheet_widget.dart"
+    show showActionSheet;
+import "package:photos/ui/components/buttons/button_widget.dart";
+import "package:photos/ui/components/models/button_type.dart";
 
 class SmartAlbumsService {
   SmartAlbumsService._();
@@ -187,6 +193,43 @@ class SmartAlbumsService {
   Future<SmartAlbumConfig?> getConfig(int collectionId) async {
     final cachedConfigs = await getSmartConfigs();
     return cachedConfigs[collectionId];
+  }
+
+  Future<bool> removeFilesDialog(
+    BuildContext context,
+  ) async {
+    final completer = Completer<bool>();
+    await showActionSheet(
+      context: context,
+      body: "Should the files related to the person be removed?",
+      buttons: [
+        ButtonWidget(
+          labelText: S.of(context).yes,
+          buttonType: ButtonType.neutral,
+          buttonSize: ButtonSize.large,
+          shouldStickToDarkTheme: true,
+          buttonAction: ButtonAction.first,
+          shouldSurfaceExecutionStates: true,
+          isInAlert: true,
+          onTap: () async {
+            completer.complete(true);
+          },
+        ),
+        ButtonWidget(
+          labelText: S.of(context).cancel,
+          buttonType: ButtonType.secondary,
+          buttonSize: ButtonSize.large,
+          shouldStickToDarkTheme: true,
+          buttonAction: ButtonAction.cancel,
+          isInAlert: true,
+          onTap: () async {
+            completer.complete(false);
+          },
+        ),
+      ],
+    );
+
+    return completer.future;
   }
 
   /// Wrapper method for entityService.addOrUpdate that handles cache refresh

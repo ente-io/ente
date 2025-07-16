@@ -1471,6 +1471,7 @@ class FilesDB with SqlDbBase {
     bool asc = false,
     bool dedupeByUploadId = false,
     Set<int> collectionsToIgnore = const {},
+    int? collectionID,
   }) async {
     final order = (asc ? 'ASC' : 'DESC');
     if (ids.isEmpty) {
@@ -1479,8 +1480,13 @@ class FilesDB with SqlDbBase {
 
     final inParam = ids.map((id) => "'$id'").join(',');
     final db = await instance.sqliteAsyncDB;
+    String collectionIdClause = '';
+    if (collectionID != null) {
+      collectionIdClause = '$columnCollectionID = $collectionID AND ';
+    }
+
     final results = await db.getAll(
-      'SELECT * FROM $filesTable WHERE $columnUploadedFileID IN ($inParam) ORDER BY $columnCreationTime $order',
+      'SELECT * FROM $filesTable WHERE $collectionIdClause $columnUploadedFileID IN ($inParam) ORDER BY $columnCreationTime $order',
     );
     final files = convertToFiles(results);
     final result = await applyDBFilters(
