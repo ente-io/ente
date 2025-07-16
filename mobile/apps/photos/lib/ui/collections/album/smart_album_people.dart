@@ -119,7 +119,6 @@ class _SmartAlbumPeopleState extends State<SmartAlbumPeople> {
                           final enteFiles =
                               await FilesDB.instance.getFilesFromIDs(
                             files?.toList() ?? [],
-                            collectionID: widget.collectionId,
                           );
 
                           final collection = CollectionsService.instance
