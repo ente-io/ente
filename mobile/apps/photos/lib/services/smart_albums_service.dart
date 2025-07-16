@@ -74,6 +74,7 @@ class SmartAlbumsService {
       var config = SmartAlbumConfig.fromJson(
         json.decode(entity.data),
         entity.id,
+        entity.updatedAt,
       );
 
       if (sconfigs.containsKey(config.collectionId)) {

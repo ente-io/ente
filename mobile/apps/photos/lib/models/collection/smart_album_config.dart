@@ -9,12 +9,14 @@ class SmartAlbumConfig {
   final Set<String> personIDs;
   // person id mapped with updatedat, file ids
   final Map<String, PersonInfo> infoMap;
+  final int updatedAt;
 
   SmartAlbumConfig({
     this.remoteId,
     required this.collectionId,
     required this.personIDs,
     required this.infoMap,
+    this.updatedAt = 0,
   });
 
   Future<SmartAlbumConfig> getUpdatedConfig(Set<String> newPersonsIds) async {
@@ -37,6 +39,7 @@ class SmartAlbumConfig {
       collectionId: collectionId,
       personIDs: newPersonsIds,
       infoMap: newInfoMap,
+      updatedAt: DateTime.now().millisecondsSinceEpoch,
     );
   }
 
@@ -59,6 +62,7 @@ class SmartAlbumConfig {
       collectionId: collectionId,
       personIDs: personIDs,
       infoMap: newInfoMap,
+      updatedAt: DateTime.now().millisecondsSinceEpoch,
     );
   }
 
@@ -82,6 +86,7 @@ class SmartAlbumConfig {
   factory SmartAlbumConfig.fromJson(
     Map<String, dynamic> json,
     String? remoteId,
+    int? updatedAt,
   ) {
     final personIDs = Set<String>.from(json["person_ids"] as List);
     final infoMap = (json["info_map"] as Map<String, dynamic>).map(
@@ -99,10 +104,17 @@ class SmartAlbumConfig {
       collectionId: json["collection_id"] as int,
       personIDs: personIDs,
       infoMap: infoMap,
+      updatedAt: updatedAt ?? DateTime.now().millisecondsSinceEpoch,
     );
   }
 
   SmartAlbumConfig merge(SmartAlbumConfig b) {
+    if (remoteId == b.remoteId) {
+      if (updatedAt >= b.updatedAt) {
+        return this;
+      }
+      return b;
+    }
     return SmartAlbumConfig(
       remoteId: remoteId ?? b.remoteId,
       collectionId: b.collectionId,
