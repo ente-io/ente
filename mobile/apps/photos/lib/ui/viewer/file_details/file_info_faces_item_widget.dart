@@ -351,6 +351,12 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
         defaultFaces.add(face);
       } else if (face.score >= kMinFaceDetectionScore) {
         remainingFaces.add(face);
+      } else if (face.score == -1.0) {
+        return _FaceDataResult(
+          defaultFaces: [],
+          remainingFaces: [],
+          errorReason: NoFacesReason.fileAnalysisFailed,
+        );
       }
     }
     if (defaultFaces.isEmpty && remainingFaces.isEmpty) {
@@ -433,6 +439,7 @@ enum NoFacesReason {
   fileNotAnalyzed,
   noFacesFound,
   faceThumbnailGenerationFailed,
+  fileAnalysisFailed,
 }
 
 String getNoFaceReasonText(BuildContext context, NoFacesReason reason) {
@@ -445,5 +452,7 @@ String getNoFaceReasonText(BuildContext context, NoFacesReason reason) {
       return S.of(context).noFacesFound;
     case NoFacesReason.faceThumbnailGenerationFailed:
       return "Unable to generate face thumbnails";
+    case NoFacesReason.fileAnalysisFailed:
+      return "File analysis failed";
   }
 }
