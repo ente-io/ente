@@ -26,6 +26,10 @@ import {
     StaticThumbnail,
 } from "ente-new/photos/components/PlaceholderThumbnails";
 import { TileBottomTextOverlay } from "ente-new/photos/components/Tiles";
+import {
+    getFractionFittableColumns,
+    getShrinkRatio,
+} from "ente-new/photos/components/utils/thumbnail-grid-layout";
 import { PseudoCollectionID } from "ente-new/photos/services/collection-summary";
 import { t } from "i18next";
 import memoize from "memoize-one";
@@ -799,30 +803,6 @@ const getTemplateColumns = (
         }px)`;
     }
 };
-
-function getFractionFittableColumns(width: number): number {
-    return (
-        (width - 2 * getGapFromScreenEdge(width) + GAP_BTW_TILES) /
-        (IMAGE_CONTAINER_MAX_WIDTH + GAP_BTW_TILES)
-    );
-}
-
-function getGapFromScreenEdge(width: number) {
-    if (width > MIN_COLUMNS * IMAGE_CONTAINER_MAX_WIDTH) {
-        return 24;
-    } else {
-        return 4;
-    }
-}
-
-function getShrinkRatio(width: number, columns: number) {
-    return (
-        (width -
-            2 * getGapFromScreenEdge(width) -
-            (columns - 1) * GAP_BTW_TILES) /
-        (columns * IMAGE_CONTAINER_MAX_WIDTH)
-    );
-}
 
 const ListContainer = styled(Box, {
     shouldForwardProp: (propName) => propName != "gridTemplateColumns",
