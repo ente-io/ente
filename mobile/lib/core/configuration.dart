@@ -47,6 +47,7 @@ class Configuration {
   );
 
   static const emailKey = "email";
+  static const usernameKey = "username";
   static const foldersToBackUpKey = "folders_to_back_up";
   static const keyAttributesKey = "key_attributes";
   static const keyKey = "key";
@@ -462,6 +463,14 @@ class Configuration {
 
   Future<void> setEmail(String email) async {
     await _preferences.setString(emailKey, email);
+  }
+
+  String? getUsername() {
+    return _preferences.getString(usernameKey);
+  }
+
+  Future<void> setUsername(String username) async {
+    await _preferences.setString(usernameKey, username);
   }
 
   int? getUserID() {

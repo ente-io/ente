@@ -166,6 +166,13 @@ class _LoadingPageState extends State<LoadingPage> {
 
     _logger.info("Saving configuration from response with keys: ${responseData.keys.toList()}");
     
+    // Save username from account object
+    final Account? account = accountNotifier.value;
+    if (account != null && account.username.isNotEmpty) {
+      await Configuration.instance.setUsername(account.username);
+      _logger.info("Saved username: ${account.username}");
+    }
+    
     if (responseData["id"] != null) {
       await Configuration.instance.setUserID(responseData["id"]);
       _logger.info("Saved user ID: ${responseData["id"]}");

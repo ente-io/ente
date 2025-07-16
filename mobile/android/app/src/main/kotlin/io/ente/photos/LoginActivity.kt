@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.ActivityNotFoundException
 import android.content.ComponentName
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.result.contract.ActivityResultContracts
@@ -81,6 +82,28 @@ class LoginActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        
+        // Check if username is already saved
+        val sharedPrefs: SharedPreferences = getSharedPreferences("ente_prefs", MODE_PRIVATE)
+        val savedUsername = sharedPrefs.getString("username", null)
+        
+        if (!savedUsername.isNullOrEmpty()) {
+            Log.d("UpEnte", "Username already saved: $savedUsername, skipping account app call")
+            // Username exists, go directly to MainActivity
+            resultIntent.putExtra(EXTRA_LOGIN_STATUS, true)
+            setResult(Activity.RESULT_OK, resultIntent)
+            
+            val openFlutterIntent = Intent(this, MainActivity::class.java).apply {
+                putExtra("username", savedUsername)
+                // Note: service_password and up_token will be null, but that's okay
+                // since we're skipping the account app flow
+            }
+            startActivity(openFlutterIntent)
+            finish()
+            return
+        }
+        
+        // No saved username, proceed with normal account app flow
         var launchSuccessful = true
         val credentialsIntent = Intent().apply {
             component = ComponentName(
@@ -119,6 +142,14 @@ class LoginActivity : AppCompatActivity() {
             // Login was successful
             resultIntent.putExtra(EXTRA_LOGIN_STATUS, true)
             Log.d("UpEnte", "Login successful. User: ${account?.username}")
+            
+            // Save username to SharedPreferences for future use
+            val sharedPrefs: SharedPreferences = getSharedPreferences("ente_prefs", MODE_PRIVATE)
+            val editor = sharedPrefs.edit()
+            editor.putString("username", account?.username)
+            editor.apply()
+            Log.d("UpEnte", "Saved username to SharedPreferences: ${account?.username}")
+            
             loginSuccess = true
         } else {
             // Login failed (account is null)
