@@ -33,6 +33,7 @@ import { PseudoCollectionID } from "ente-new/photos/services/collection-summary"
 import { t } from "i18next";
 import memoize from "memoize-one";
 import React, {
+    memo,
     useDeferredValue,
     useEffect,
     useMemo,
@@ -65,10 +66,14 @@ export interface FileListHeaderOrFooter {
     height: number;
 }
 
-interface TimeStampListItem {
+/**
+ * Data needed to render each row in the variable size list that comprises the
+ * file list.
+ */
+interface FileListRow {
     /**
-     * An optional {@link FileListItemTag} that can be used to identify item
-     * types for conditional behaviour.
+     * An optional tag that can be used to identify item types for conditional
+     * behaviour.
      */
     tag?: "date" | "file";
     items?: FileListAnnotatedFile[];
@@ -213,10 +218,8 @@ export const FileList: React.FC<FileListProps> = ({
     emailByUserID,
     onItemClick,
 }) => {
-    const [_timeStampList, setTimeStampList] = useState(
-        new Array<TimeStampListItem>(),
-    );
-    const timeStampList = useDeferredValue(_timeStampList);
+    const [_rows, setRows] = useState<FileListRow[]>([]);
+    const rows = useDeferredValue(_rows);
 
     const listRef = useRef<VariableSizeList | null>(null);
 
@@ -256,22 +259,20 @@ export const FileList: React.FC<FileListProps> = ({
         // another update when processing one, React will restart the background
         // rerender from scratch.
 
-        let timeStampList: TimeStampListItem[] = [];
+        let rows: FileListRow[] = [];
 
-        if (header) {
-            timeStampList.push(asFullSpanListItem(header));
-        }
+        if (header) rows.push(asFullSpanListItem(header));
 
         const { isSmallerLayout, columns } = layoutParams;
         if (disableGrouping) {
             let listItemIndex = columns;
             annotatedFiles.forEach((item, index) => {
                 if (listItemIndex < columns) {
-                    timeStampList[timeStampList.length - 1]!.items!.push(item);
+                    rows[rows.length - 1]!.items!.push(item);
                     listItemIndex++;
                 } else {
                     listItemIndex = 1;
-                    timeStampList.push({
+                    rows.push({
                         tag: "file",
                         items: [item],
                         itemStartIndex: index,
@@ -279,15 +280,15 @@ export const FileList: React.FC<FileListProps> = ({
                 }
             });
         } else {
-            groupByTime(timeStampList);
+            groupByTime(rows);
         }
 
         if (!isSmallerLayout) {
-            timeStampList = mergeTimeStampList(timeStampList, columns);
+            rows = mergeTimeStampList(rows, columns);
         }
 
-        if (timeStampList.length == 1) {
-            timeStampList.push({
+        if (rows.length == 1) {
+            rows.push({
                 item: (
                     <NoFilesContainer span={columns}>
                         <Typography sx={{ color: "text.faint" }}>
@@ -301,12 +302,14 @@ export const FileList: React.FC<FileListProps> = ({
         }
 
         const footerHeight = footer?.height ?? 0;
-        timeStampList.push(getVacuumItem(timeStampList, footerHeight));
+        rows.push(getVacuumItem(rows, footerHeight));
         if (footer) {
-            timeStampList.push(asFullSpanListItem(footer));
+            rows.push(asFullSpanListItem(footer));
         }
 
-        setTimeStampList(timeStampList);
+        setRows(rows);
+        // Refresh list.
+        listRef.current?.resetAfterIndex(0);
         // TODO:
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [
@@ -319,14 +322,9 @@ export const FileList: React.FC<FileListProps> = ({
         layoutParams,
     ]);
 
-    useEffect(() => {
-        // Refresh list.
-        listRef.current?.resetAfterIndex(0);
-    }, [timeStampList]);
-
     // TODO: Too many non-null assertions
 
-    const groupByTime = (timeStampList: TimeStampListItem[]) => {
+    const groupByTime = (timeStampList: FileListRow[]) => {
         let listItemIndex = 0;
         let lastCreationTime: number | undefined;
         annotatedFiles.forEach((item, index) => {
@@ -362,14 +360,11 @@ export const FileList: React.FC<FileListProps> = ({
         });
     };
 
-    const getVacuumItem = (
-        timeStampList: TimeStampListItem[],
-        footerHeight: number,
-    ) => {
+    const getVacuumItem = (rows: FileListRow[], footerHeight: number) => {
         const fileListHeight = (() => {
             let sum = 0;
-            const getCurrentItemSize = getItemSize(timeStampList);
-            for (let i = 0; i < timeStampList.length; i++) {
+            const getCurrentItemSize = getItemSize(rows);
+            for (let i = 0; i < rows.length; i++) {
                 sum += getCurrentItemSize(i);
                 if (height - sum <= footerHeight) {
                     break;
@@ -387,10 +382,10 @@ export const FileList: React.FC<FileListProps> = ({
      * Checks and merge multiple dates into a single row.
      */
     const mergeTimeStampList = (
-        items: TimeStampListItem[],
+        items: FileListRow[],
         columns: number,
-    ): TimeStampListItem[] => {
-        const newList: TimeStampListItem[] = [];
+    ): FileListRow[] => {
+        const newList: FileListRow[] = [];
         let index = 0;
         let newIndex = 0;
         while (index < items.length) {
@@ -463,26 +458,25 @@ export const FileList: React.FC<FileListProps> = ({
         return newList;
     };
 
-    const getItemSize =
-        (timeStampList: TimeStampListItem[]) => (index: number) => {
-            switch (timeStampList[index]!.tag) {
-                case "date":
-                    return dateContainerHeight;
-                case "file":
-                    return listItemHeight;
-                default:
-                    return timeStampList[index]!.height!;
-            }
-        };
+    const getItemSize = (timeStampList: FileListRow[]) => (index: number) => {
+        switch (timeStampList[index]!.tag) {
+            case "date":
+                return dateContainerHeight;
+            case "file":
+                return listItemHeight;
+            default:
+                return timeStampList[index]!.height!;
+        }
+    };
 
     const generateKey = (index: number) => {
-        switch (timeStampList[index]!.tag) {
+        switch (rows[index]!.tag) {
             case "file":
-                return `${timeStampList[index]!.items![0]!.file.id}-${
-                    timeStampList[index]!.items!.slice(-1)[0]!.file.id
+                return `${rows[index]!.items![0]!.file.id}-${
+                    rows[index]!.items!.slice(-1)[0]!.file.id
                 }`;
             default:
-                return `${timeStampList[index]!.id}-${index}`;
+                return `${rows[index]!.id}-${index}`;
         }
     };
 
@@ -649,7 +643,7 @@ export const FileList: React.FC<FileListProps> = ({
     );
 
     const renderListItem = (
-        listItem: TimeStampListItem,
+        listItem: FileListRow,
         isScrolling: boolean | undefined,
     ) => {
         const haveSelection = selected.count > 0;
@@ -728,15 +722,11 @@ export const FileList: React.FC<FileListProps> = ({
         }
     };
 
-    if (!timeStampList.length) {
+    if (!rows.length) {
         return <></>;
     }
 
-    const itemData = createItemData(
-        timeStampList,
-        layoutParams,
-        renderListItem,
-    );
+    const itemData = createItemData(rows, layoutParams, renderListItem);
 
     // The old, mode unaware, behaviour.
     let key = `${activeCollectionID}`;
@@ -759,15 +749,15 @@ export const FileList: React.FC<FileListProps> = ({
             key={key}
             itemData={itemData}
             ref={listRef}
-            itemSize={getItemSize(timeStampList)}
+            itemSize={getItemSize(rows)}
             height={height}
             width={width}
-            itemCount={timeStampList.length}
+            itemCount={rows.length}
             itemKey={generateKey}
             overscanCount={3}
             useIsScrolling
         >
-            {PhotoListRow}
+            {FileListItem}
         </VariableSizeList>
     );
 };
@@ -817,7 +807,7 @@ const FullSpanListItemContainer = styled("div")`
 `;
 
 /**
- * Convert a {@link FileListHeaderOrFooter} into a {@link TimeStampListItem}
+ * Convert a {@link FileListHeaderOrFooter} into a {@link FileListRow}
  * that spans all columns.
  */
 const asFullSpanListItem = ({ item, ...rest }: FileListHeaderOrFooter) => ({
@@ -846,26 +836,26 @@ const NoFilesContainer = styled(ListItemContainer)`
 `;
 
 interface FileListItemData {
-    items: TimeStampListItem[];
+    items: FileListRow[];
     layoutParams: ThumbnailGridLayoutParams;
     renderListItem: (
-        timeStampListItem: TimeStampListItem,
+        timeStampListItem: FileListRow,
         isScrolling?: boolean,
     ) => React.JSX.Element;
 }
 
 const createItemData = memoize(
     (
-        items: TimeStampListItem[],
+        rowDatas: FileListRow[],
         layoutParams: ThumbnailGridLayoutParams,
         renderListItem: (
-            timeStampListItem: TimeStampListItem,
+            timeStampListItem: FileListRow,
             isScrolling?: boolean,
         ) => React.JSX.Element,
-    ): FileListItemData => ({ items, layoutParams, renderListItem }),
+    ): FileListItemData => ({ items: rowDatas, layoutParams, renderListItem }),
 );
 
-const PhotoListRow = React.memo(
+const FileListItem = memo(
     ({
         index,
         style,
