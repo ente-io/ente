@@ -7,6 +7,7 @@ import "package:photos/models/collection/smart_album_config.dart";
 import "package:photos/models/selected_people.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/services/smart_albums_service.dart";
+import "package:photos/ui/actions/collection/collection_sharing_actions.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
 import 'package:photos/ui/components/title_bar_title_widget.dart';
@@ -121,11 +122,16 @@ class _SmartAlbumPeopleState extends State<SmartAlbumPeople> {
                             collectionID: widget.collectionId,
                           );
 
+                          final collection = CollectionsService.instance
+                              .getCollectionByID(widget.collectionId);
+
                           if (files?.isNotEmpty ?? false) {
-                            await CollectionsService.instance
-                                .removeFromCollection(
-                              widget.collectionId,
+                            await CollectionActions(CollectionsService.instance)
+                                .moveFilesFromCurrentCollection(
+                              context,
+                              collection!,
                               enteFiles,
+                              isHidden: collection.isHidden(),
                             );
                           }
                         }
