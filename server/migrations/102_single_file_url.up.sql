@@ -10,7 +10,10 @@ CREATE TABLE IF NOT EXISTS public_file_tokens
     device_limit  int    not null DEFAULT 0,
     is_disabled   bool   not null DEFAULT FALSE,
     enable_download bool  not null DEFAULT TRUE,
-    password_info  JSONB,
+    pw_hash         TEXT,
+    pw_nonce        TEXT,
+    mem_limit       BIGINT,
+    ops_limit       BIGINT,
     created_at    bigint NOT NULL DEFAULT now_utc_micro_seconds(),
     updated_at    bigint NOT NULL DEFAULT now_utc_micro_seconds()
 );
