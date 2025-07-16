@@ -50,17 +50,19 @@ const (
 	FamilyNudgeSubject    = "Share your Ente Subscription with your Family!"
 	FamilyNudgeTemplateID = "family_nudge"
 
-	StorageLimitExceedingPaidMailLock   = "storage_limit_exceeding_paid"
-	StorageLimitExceedingPaidTemplate   = "storage_limit_exceeding_paid.html"
-	StorageLimitExceedingPaidSubject    = " Your Ente storage is 95% full"
-	StorageLimitExceedingPaidTemplateID = "storage_limit_exceeding_paid"
+	StorageLimitExceedingMailLock     = "storage_limit_exceeding"
+	StorageLimitExceedingPaidTemplate = "storage_limit_exceeding_paid.html"
+	StorageLimitExceedingFreeTemplate = "storage_limit_exceeding_free.html"
+	StorageLimitExceedingSubject      = "Your Ente storage is 95% full"
+	StorageLimitExceedingTemplateID   = "storage_limit_exceeding"
 )
 
 type EmailNotificationController struct {
-	UserRepo                           *repo.UserRepository
-	LockController                     *lock.LockController
-	NotificationHistoryRepo            *repo.NotificationHistoryRepository
-	isSendingStorageLimitExceededMails bool
+	UserRepo                            *repo.UserRepository
+	LockController                      *lock.LockController
+	NotificationHistoryRepo             *repo.NotificationHistoryRepository
+	isSendingStorageLimitExceededMails  bool
+	isSendingStorageLimitExceedingMails bool
 }
 
 func (c *EmailNotificationController) OnFirstFileUpload(userID int64, userAgent string) {
@@ -166,17 +168,24 @@ func (c *EmailNotificationController) OnSubscriptionCancelled(userID int64) {
 		log.Error("Could not find user to email", err)
 		return
 	}
+
 	log.Info(fmt.Sprintf("Emailing on subscription cancellation %d", user.ID))
 	err = email.SendTemplatedEmail([]string{user.Email}, "vishnu@ente.io", "vishnu@ente.io", SubscriptionCancelledSubject, SubscriptionCancelledTemplate, nil, nil)
 	if err != nil {
 		log.Error("Error sending email", err)
 	}
+
+	// deletion for storage limit exceeding email notification
+	c.NotificationHistoryRepo.DeleteLastNotification(userID, StorageLimitExceedingTemplateID)
+
+	// deletion for storage limit exceeded email notification
+	c.NotificationHistoryRepo.DeleteLastNotification(userID, StorageLimitExceededTemplateID)
 }
 
 // SayHelloToCustomers sends an email to check in with customers who upgraded 7
 // days ago.
 func (c *EmailNotificationController) SayHelloToCustomers() {
-	log.Info("Running SayHelloToCustomers")
+	log.Info("Sending hello mail to paid users")
 	lockStatus := c.LockController.TryLock(CustomerHelloMailLock, time.MicrosecondsAfterHours(24))
 	if !lockStatus {
 		log.Error("Could not acquire lock to send customer hellos")
@@ -256,8 +265,12 @@ func (c *EmailNotificationController) setStorageLimitExceededMailerJobStatus(isS
 	c.isSendingStorageLimitExceededMails = isSending
 }
 
+func (c *EmailNotificationController) setStorageLimitExceedingMailerJobStatus(isSending bool) {
+	c.isSendingStorageLimitExceedingMails = isSending
+}
+
 func (c *EmailNotificationController) NudgePaidSubscriberForFamily() {
-	log.Info("Running NudgePaidSubscriberForFamily")
+	log.Info("Running family nudge for family")
 	lockStatus := c.LockController.TryLock(FamilyNudgeMailLock, time.MicrosecondsAfterHours(24))
 	if !lockStatus {
 		log.Error("Could not acquire lock to send family nudge mails")
@@ -297,5 +310,68 @@ func (c *EmailNotificationController) NudgePaidSubscriberForFamily() {
 			continue
 		}
 		c.NotificationHistoryRepo.SetLastNotificationTimeToNow(u.ID, FamilyNudgeTemplateID)
+	}
+}
+
+func (c *EmailNotificationController) SendStorageLimitExceedingMails() {
+	if c.isSendingStorageLimitExceedingMails {
+		log.Info("Skipping sending storage limit exceeding mails as another instance is still running")
+		return
+	}
+	c.setStorageLimitExceedingMailerJobStatus(true)
+	defer c.setStorageLimitExceedingMailerJobStatus(false)
+	lockStatus := c.LockController.TryLock(StorageLimitExceedingMailLock, time.MicrosecondsAfterHours(24))
+	if !lockStatus {
+		log.Error("Could not acquire lock to send storage limit exceeding mails")
+		return
+	}
+	defer c.LockController.ReleaseLock(StorageLimitExceedingMailLock)
+
+	notifications := []struct {
+		getSubscribers func() ([]ente.User, error)
+		template       string
+	}{
+		{
+			getSubscribers: func() ([]ente.User, error) {
+				return c.UserRepo.GetFreeUsersWhoAreExceedingStorageQuota()
+			},
+			template: StorageLimitExceedingPaidTemplate,
+		},
+		{
+			getSubscribers: func() ([]ente.User, error) {
+				return c.UserRepo.GetPaidUsersWhoAreExceedingStorageQuota()
+			},
+			template: StorageLimitExceedingFreeTemplate,
+		},
+	}
+
+	for _, notification := range notifications {
+		users, err := notification.getSubscribers()
+		if err != nil {
+			log.Error("Error while fetching user list", err)
+			return
+		}
+
+		for _, u := range users {
+			lastNotificationTime, err := c.NotificationHistoryRepo.GetLastNotificationTime(u.ID, StorageLimitExceedingTemplateID)
+			logger := log.WithFields(log.Fields{
+				"user_id": u.ID,
+			})
+			if err != nil {
+				logger.Error("Could not fetch last notification time", err)
+				continue
+			}
+			if lastNotificationTime > 0 {
+				continue
+			}
+			logger.Info("Alerting about storage limit exceeding")
+			err = email.SendTemplatedEmail([]string{u.Email}, "team@ente.io", "team@ente.io", StorageLimitExceedingSubject, notification.template, nil, nil)
+			if err != nil {
+				logger.Info("Error notifying", err)
+				continue
+			}
+			c.NotificationHistoryRepo.SetLastNotificationTimeToNow(u.ID, StorageLimitExceedingTemplateID)
+		}
+
 	}
 }

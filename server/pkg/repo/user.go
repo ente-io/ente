@@ -332,16 +332,76 @@ func (repo *UserRepository) GetUsersWithIndividualPlanWhoHaveExceededStorageQuot
 	return users, nil
 }
 
-// GetUsersWithIndividualPlanWhoAreReachingStorageQuota returns list of users who
+// GetPaidUsersWhoAreExceedingStorageQuota returns list of paid users who
 // have consumed more than 95% of their storage quota and they are not part of any family plan
-func (repo *UserRepository) GetUsersWithIndividualPlanWhoAreReachingStorageQuota() ([]ente.User, error) {
+func (repo *UserRepository) GetPaidUsersWhoAreExceedingStorageQuota() ([]ente.User, error) {
 	rows, err := repo.DB.Query(`
 		SELECT users.user_id, users.encrypted_email, users.email_decryption_nonce, users.email_hash, usage.storage_consumed, subscriptions.storage
 		FROM users 
 		INNER JOIN usage 
 		ON users.user_id = usage.user_id 
 		INNER JOIN subscriptions 
-		ON users.user_id = subscriptions.user_id AND usage.storage_consumed > 0.95 * subscriptions.storage AND users.encrypted_email IS NOT NULL AND users.family_admin_id IS NULL;
+		ON users.user_id = subscriptions.user_id
+		AND subscriptions.product_id != 'free'
+		AND usage.storage_consumed > 0.95 * subscriptions.storage
+		AND users.encrypted_email IS NOT NULL
+		AND users.family_admin_id IS NULL;
+	`)
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "")
+	}
+	refBonus, addOnBonus, bonusErr := repo.StorageBonusRepo.GetAllUsersSurplusBonus(context.Background())
+	if bonusErr != nil {
+		return nil, stacktrace.Propagate(bonusErr, "failed to fetch bonusInfo")
+	}
+	defer rows.Close()
+	users := make([]ente.User, 0)
+	for rows.Next() {
+		var user ente.User
+		var encryptedEmail, nonce []byte
+		var storageConsumed, subStorage int64
+		err := rows.Scan(&user.ID, &encryptedEmail, &nonce, &user.Hash, &storageConsumed, &subStorage)
+		if err != nil {
+			return users, stacktrace.Propagate(err, "")
+		}
+		// ignore deleted users
+		if strings.EqualFold(user.Hash, fmt.Sprintf(DELETED_EMAIL_HASH_FORMAT, &user.ID)) || len(encryptedEmail) == 0 {
+			continue
+		}
+		if refBonusStorage, ok := refBonus[user.ID]; ok {
+			addOnBonusStorage := addOnBonus[user.ID]
+			// cap usable ref bonus to the subscription storage + addOnBonus
+			if refBonusStorage > (subStorage + addOnBonusStorage) {
+				refBonusStorage = subStorage + addOnBonusStorage
+			}
+			if (storageConsumed) <= (95 * (subStorage + refBonusStorage + addOnBonusStorage) / 100) {
+				continue
+			}
+		}
+		email, err := crypto.Decrypt(encryptedEmail, repo.SecretEncryptionKey, nonce)
+		if err != nil {
+			return users, stacktrace.Propagate(err, "")
+		}
+		user.Email = email
+		users = append(users, user)
+	}
+	return users, nil
+}
+
+// GetFreeUsersWhoAreExceedingStorageQuota returns list of free users who
+// have consumed more than 95% of their storage quota and they are not part of any family plan
+func (repo *UserRepository) GetFreeUsersWhoAreExceedingStorageQuota() ([]ente.User, error) {
+	rows, err := repo.DB.Query(`
+		SELECT users.user_id, users.encrypted_email, users.email_decryption_nonce, users.email_hash, usage.storage_consumed, subscriptions.storage
+		FROM users 
+		INNER JOIN usage 
+		ON users.user_id = usage.user_id 
+		INNER JOIN subscriptions 
+		ON users.user_id = subscriptions.user_id
+		AND subscriptions.product_id = 'free'
+		AND usage.storage_consumed > 0.95 * subscriptions.storage
+		AND users.encrypted_email IS NOT NULL
+		AND users.family_admin_id IS NULL;
 	`)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "")

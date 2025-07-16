@@ -2,6 +2,7 @@ package repo
 
 import (
 	"database/sql"
+
 	"github.com/ente-io/stacktrace"
 
 	"github.com/ente-io/museum/pkg/utils/time"
@@ -22,6 +23,26 @@ func (repo *NotificationHistoryRepository) GetLastNotificationTime(userID int64,
 		return lastNotificationTime.Int64, nil
 	}
 	return 0, nil
+}
+
+func (repo *NotificationHistoryRepository) DeleteLastNotification(userID int64, templateID string) error {
+	var lastNotificationTime sql.NullInt64
+	row := repo.DB.QueryRow(`SELECT MAX(sent_time) FROM notification_history WHERE user_id = $1 and template_id = $2`, userID, templateID)
+	err := row.Scan(&lastNotificationTime)
+	if err != nil {
+		return stacktrace.Propagate(err, "")
+	}
+	if lastNotificationTime.Valid {
+		_, err := repo.DB.Exec(`
+			DELETE FROM notification_history 
+			WHERE user_id = $1 AND template_id = $2 AND sent_time = $3
+		`, userID, templateID, lastNotificationTime.Int64)
+
+		if err != nil {
+			return stacktrace.Propagate(err, "failed to delete last notification")
+		}
+	}
+	return nil
 }
 
 func (repo *NotificationHistoryRepository) SetLastNotificationTimeToNow(userID int64, templateID string) error {
