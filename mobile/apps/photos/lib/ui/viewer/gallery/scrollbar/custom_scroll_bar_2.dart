@@ -57,7 +57,7 @@ class _CustomScrollBar2State extends State<CustomScrollBar2> {
   static const _bottomPadding = 92.0;
   double? heightOfScrollbarDivider;
   double? heightOfScrollTrack;
-  late final bool _showScrollbarDivisions;
+  late bool _showScrollbarDivisions;
 
   // Scrollbar's heigh is not fixed by default. If the scrollable is short
   // enough, the scrollbar's height can go above the minimum length.
@@ -69,6 +69,17 @@ class _CustomScrollBar2State extends State<CustomScrollBar2> {
   @override
   void initState() {
     super.initState();
+    _init();
+  }
+
+  @override
+  void didUpdateWidget(covariant CustomScrollBar2 oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _init();
+  }
+
+  void _init() {
+    _logger.info("Initializing CustomScrollBar2");
     if (widget.galleryGroups.groupLayouts.last.maxOffset >
         widget.heighOfViewport * 5) {
       _showScrollbarDivisions = true;
@@ -94,16 +105,7 @@ class _CustomScrollBar2State extends State<CustomScrollBar2> {
     }
   }
 
-  @override
-  void didUpdateWidget(covariant CustomScrollBar2 oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (_showScrollbarDivisions) {
-      _computePositionToTitleMap();
-    }
-  }
-
   Future<void> _computePositionToTitleMap() async {
-    _logger.info("computing postition to title map");
     final result = <({double position, String title})>[];
     heightOfScrollTrack = await _getHeightOfScrollTrack();
     final maxScrollExtent = widget.scrollController.position.maxScrollExtent;
