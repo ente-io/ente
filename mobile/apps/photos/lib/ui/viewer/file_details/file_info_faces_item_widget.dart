@@ -451,8 +451,8 @@ String getNoFaceReasonText(BuildContext context, NoFacesReason reason) {
     case NoFacesReason.noFacesFound:
       return S.of(context).noFacesFound;
     case NoFacesReason.faceThumbnailGenerationFailed:
-      return "Unable to generate face thumbnails";
+      return S.of(context).faceThumbnailGenerationFailed;
     case NoFacesReason.fileAnalysisFailed:
-      return "File analysis failed";
+      return S.of(context).fileAnalysisFailed;
   }
 }

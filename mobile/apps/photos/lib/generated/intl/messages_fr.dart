@@ -321,7 +321,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m114(email) =>
       "Nous avons envoyé un email à <green>${email}</green>";
 
-  static String m115(name) => "Wish \$${name} a happy birthday! 🎉";
+  static String m115(name) => "Souhaitez à ${name} un joyeux anniversaire ! 🎉";
 
   static String m116(count) =>
       "${Intl.plural(count, one: 'il y a ${count} an', other: 'il y a ${count} ans')}";
@@ -427,6 +427,9 @@ class MessageLookup extends MessageLookupByLibrary {
             "Tous les souvenirs sont sauvegardés"),
         "allPersonGroupingWillReset": MessageLookupByLibrary.simpleMessage(
             "Tous les groupements pour cette personne seront réinitialisés, et vous perdrez toutes les suggestions faites pour cette personne"),
+        "allUnnamedGroupsWillBeMergedIntoTheSelectedPerson":
+            MessageLookupByLibrary.simpleMessage(
+                "Tous les groupes sans nom seront fusionnés dans la personne sélectionnée. Cela peut toujours être annulé à partir de l\'historique des suggestions de la personne."),
         "allWillShiftRangeBasedOnFirst": MessageLookupByLibrary.simpleMessage(
             "C\'est la première dans le groupe. Les autres photos sélectionnées se déplaceront automatiquement en fonction de cette nouvelle date"),
         "allow": MessageLookupByLibrary.simpleMessage("Autoriser"),
@@ -480,6 +483,10 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Archiver l\'album"),
         "archiving":
             MessageLookupByLibrary.simpleMessage("Archivage en cours..."),
+        "areThey": MessageLookupByLibrary.simpleMessage("Vraiment"),
+        "areYouSureRemoveThisFaceFromPerson":
+            MessageLookupByLibrary.simpleMessage(
+                "Êtes-vous sûr de vouloir retirer ce visage de cette personne ?"),
         "areYouSureThatYouWantToLeaveTheFamily":
             MessageLookupByLibrary.simpleMessage(
                 "Êtes-vous certains de vouloir quitter le plan familial?"),
@@ -490,8 +497,16 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Êtes-vous certains de vouloir changer d\'offre ?"),
         "areYouSureYouWantToExit": MessageLookupByLibrary.simpleMessage(
             "Êtes-vous sûr de vouloir quitter ?"),
+        "areYouSureYouWantToIgnoreThesePersons":
+            MessageLookupByLibrary.simpleMessage(
+                "Êtes-vous sûr de vouloir ignorer ces personnes ?"),
+        "areYouSureYouWantToIgnoreThisPerson":
+            MessageLookupByLibrary.simpleMessage(
+                "Êtes-vous sûr de vouloir ignorer cette personne ?"),
         "areYouSureYouWantToLogout": MessageLookupByLibrary.simpleMessage(
             "Voulez-vous vraiment vous déconnecter ?"),
+        "areYouSureYouWantToMergeThem": MessageLookupByLibrary.simpleMessage(
+            "Êtes-vous sûr de vouloir les fusionner?"),
         "areYouSureYouWantToRenew": MessageLookupByLibrary.simpleMessage(
             "Êtes-vous sûr de vouloir renouveler ?"),
         "areYouSureYouWantToResetThisPerson":
@@ -583,29 +598,29 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Offre Black Friday"),
         "blog": MessageLookupByLibrary.simpleMessage("Blog"),
         "cLDesc1": MessageLookupByLibrary.simpleMessage(
-            "Suite à la version bêta du streaming vidéo et au travail sur les téléchargements reprenables, nous avons maintenant augmenté la limite de téléchargement de fichiers à 10 Go. Ceci est maintenant disponible dans les applications desktop et mobiles."),
+            "Derrière la version beta du streaming vidéo, tout en travaillant sur la reprise des chargements et téléchargements, nous avons maintenant augmenté la limite de téléchargement de fichiers à 10 Go. Ceci est maintenant disponible dans les applications bureau et mobiles."),
         "cLDesc2": MessageLookupByLibrary.simpleMessage(
-            "Les téléchargements en arrière-plan sont maintenant pris en charge sur iOS également, en plus des appareils Android. Pas besoin d\'ouvrir l\'application pour sauvegarder vos dernières photos et vidéos."),
+            "Les chargements en arrière-plan sont maintenant pris en charge sur iOS, en plus des appareils Android. Inutile d\'ouvrir l\'application pour sauvegarder vos dernières photos et vidéos."),
         "cLDesc3": MessageLookupByLibrary.simpleMessage(
-            "Nous avons apporté des améliorations significatives à notre expérience de souvenirs, y compris la lecture automatique, le balayage vers le souvenir suivant et bien plus encore."),
+            "Nous avons apporté des améliorations significatives à l\'expérience des souvenirs, comme la lecture automatique, la glisse vers le souvenir suivant et bien plus encore."),
         "cLDesc4": MessageLookupByLibrary.simpleMessage(
-            "Avec un tas d\'améliorations internes, il est maintenant beaucoup plus facile de voir tous les visages détectés, de donner des commentaires sur les visages similaires et d\'ajouter/supprimer des visages d\'une seule photo."),
+            "Avec un tas d\'améliorations sous le capot, il est maintenant beaucoup plus facile de voir tous les visages détectés, mettre des commentaires sur des visages similaires, et ajouter/supprimer des visages depuis une seule photo."),
         "cLDesc5": MessageLookupByLibrary.simpleMessage(
-            "Vous recevrez maintenant une notification optionnelle pour tous les anniversaires que vous avez sauvegardés sur Ente, ainsi qu\'une collection de leurs meilleures photos."),
+            "Vous recevrez maintenant une notification de désinscription pour tous les anniversaires que vous avez enregistrés sur Ente, ainsi qu\'une collection de leurs meilleures photos."),
         "cLDesc6": MessageLookupByLibrary.simpleMessage(
-            "Plus besoin d\'attendre que les téléchargements se terminent avant de pouvoir fermer l\'application. Tous les téléchargements ont maintenant la capacité d\'être mis en pause à mi-chemin et de reprendre là où vous vous êtes arrêté."),
+            "Plus besoin d\'attendre la fin des chargements/téléchargements avant de pouvoir fermer l\'application. Tous peuvent maintenant être mis en pause en cours de route et reprendre à partir de là où ça s\'est arrêté."),
         "cLTitle1": MessageLookupByLibrary.simpleMessage(
-            "Téléchargement de fichiers vidéo volumineux"),
-        "cLTitle2": MessageLookupByLibrary.simpleMessage(
-            "Téléchargement en arrière-plan"),
+            "Envoi de gros fichiers vidéo"),
+        "cLTitle2":
+            MessageLookupByLibrary.simpleMessage("Charger en arrière-plan"),
         "cLTitle3": MessageLookupByLibrary.simpleMessage(
             "Lecture automatique des souvenirs"),
         "cLTitle4": MessageLookupByLibrary.simpleMessage(
-            "Reconnaissance faciale améliorée"),
+            "Amélioration de la reconnaissance faciale"),
         "cLTitle5": MessageLookupByLibrary.simpleMessage(
-            "Notifications d\'anniversaire"),
-        "cLTitle6":
-            MessageLookupByLibrary.simpleMessage("Téléchargements reprenables"),
+            "Notifications d’anniversaire"),
+        "cLTitle6": MessageLookupByLibrary.simpleMessage(
+            "Reprise des chargements et téléchargements"),
         "cachedData":
             MessageLookupByLibrary.simpleMessage("Données mises en cache"),
         "calculating":
@@ -871,6 +886,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "deviceNotFound":
             MessageLookupByLibrary.simpleMessage("Appareil non trouvé"),
         "didYouKnow": MessageLookupByLibrary.simpleMessage("Le savais-tu ?"),
+        "different": MessageLookupByLibrary.simpleMessage("Différent(e)"),
         "disableAutoLock": MessageLookupByLibrary.simpleMessage(
             "Désactiver le verrouillage automatique"),
         "disableDownloadWarningBody": MessageLookupByLibrary.simpleMessage(
@@ -1169,6 +1185,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "iOSLockOut": MessageLookupByLibrary.simpleMessage(
             "L\'authentification biométrique est désactivée. Veuillez verrouiller et déverrouiller votre écran pour l\'activer."),
         "iOSOkButton": MessageLookupByLibrary.simpleMessage("Ok"),
+        "ignore": MessageLookupByLibrary.simpleMessage("Ignorer"),
         "ignoreUpdate": MessageLookupByLibrary.simpleMessage("Ignorer"),
         "ignored": MessageLookupByLibrary.simpleMessage("ignoré"),
         "ignoredFolderUploadReason": MessageLookupByLibrary.simpleMessage(
@@ -1190,6 +1207,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Clé de secours non valide"),
         "indexedItems":
             MessageLookupByLibrary.simpleMessage("Éléments indexés"),
+        "indexingPausedStatusDescription": MessageLookupByLibrary.simpleMessage(
+            "L\'indexation est en pause. Elle reprendra automatiquement lorsque l\'appareil sera prêt. Celui-ci est considéré comme prêt lorsque le niveau de batterie, sa santé et son état thermique sont dans une plage saine."),
         "ineligible": MessageLookupByLibrary.simpleMessage("Non compatible"),
         "info": MessageLookupByLibrary.simpleMessage("Info"),
         "insecureDevice":
@@ -1377,6 +1396,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Sélectionnez le type de souvenirs que vous souhaitez voir sur votre écran d\'accueil."),
         "memoryCount": m50,
         "merchandise": MessageLookupByLibrary.simpleMessage("Boutique"),
+        "merge": MessageLookupByLibrary.simpleMessage("Fusionner"),
         "mergeWithExisting":
             MessageLookupByLibrary.simpleMessage("Fusionner avec existant"),
         "mergedPhotos":
@@ -1519,6 +1539,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Ou sélectionner un email existant"),
         "orPickFromYourContacts": MessageLookupByLibrary.simpleMessage(
             "ou choisissez parmi vos contacts"),
+        "otherDetectedFaces":
+            MessageLookupByLibrary.simpleMessage("Autres visages détectés"),
         "pair": MessageLookupByLibrary.simpleMessage("Associer"),
         "pairWithPin":
             MessageLookupByLibrary.simpleMessage("Appairer avec le code PIN"),
@@ -1657,6 +1679,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Lien public créé"),
         "publicLinkEnabled":
             MessageLookupByLibrary.simpleMessage("Lien public activé"),
+        "questionmark": MessageLookupByLibrary.simpleMessage("?"),
         "queued": MessageLookupByLibrary.simpleMessage("En file d\'attente"),
         "quickLinks": MessageLookupByLibrary.simpleMessage("Liens rapides"),
         "radius": MessageLookupByLibrary.simpleMessage("Rayon"),
@@ -1774,6 +1797,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "reportBug": MessageLookupByLibrary.simpleMessage("Signaler un bogue"),
         "resendEmail":
             MessageLookupByLibrary.simpleMessage("Renvoyer l\'email"),
+        "reset": MessageLookupByLibrary.simpleMessage("Réinitialiser"),
         "resetIgnoredFiles": MessageLookupByLibrary.simpleMessage(
             "Réinitialiser les fichiers ignorés"),
         "resetPasswordTitle": MessageLookupByLibrary.simpleMessage(
@@ -1802,7 +1826,11 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Faire pivoter à droite"),
         "safelyStored":
             MessageLookupByLibrary.simpleMessage("Stockage sécurisé"),
+        "same": MessageLookupByLibrary.simpleMessage("Identique"),
+        "sameperson": MessageLookupByLibrary.simpleMessage("Même personne ?"),
         "save": MessageLookupByLibrary.simpleMessage("Sauvegarder"),
+        "saveAsAnotherPerson": MessageLookupByLibrary.simpleMessage(
+            "Enregistrer comme une autre personne"),
         "saveChangesBeforeLeavingQuestion":
             MessageLookupByLibrary.simpleMessage(
                 "Enregistrer les modifications avant de quitter ?"),
@@ -1974,8 +2002,12 @@ class MessageLookup extends MessageLookupByLibrary {
         "sharing": MessageLookupByLibrary.simpleMessage("Partage..."),
         "shiftDatesAndTime":
             MessageLookupByLibrary.simpleMessage("Dates et heure de décalage"),
+        "showLessFaces":
+            MessageLookupByLibrary.simpleMessage("Afficher moins de visages"),
         "showMemories":
             MessageLookupByLibrary.simpleMessage("Afficher les souvenirs"),
+        "showMoreFaces":
+            MessageLookupByLibrary.simpleMessage("Afficher plus de visages"),
         "showPerson":
             MessageLookupByLibrary.simpleMessage("Montrer la personne"),
         "signOutFromOtherDevices": MessageLookupByLibrary.simpleMessage(
@@ -2104,6 +2136,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "theLinkYouAreTryingToAccessHasExpired":
             MessageLookupByLibrary.simpleMessage(
                 "Le lien que vous essayez d\'accéder a expiré."),
+        "thePersonGroupsWillNotBeDisplayed": MessageLookupByLibrary.simpleMessage(
+            "Les groupes de personnes ne seront plus affichés dans la section personnes. Les photos resteront intactes."),
+        "thePersonWillNotBeDisplayed": MessageLookupByLibrary.simpleMessage(
+            "Les groupes de personnes ne seront plus affichés dans la section personnes. Les photos resteront intactes."),
         "theRecoveryKeyYouEnteredIsIncorrect":
             MessageLookupByLibrary.simpleMessage(
                 "La clé de récupération que vous avez entrée est incorrecte"),
@@ -2307,6 +2343,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "yesDelete": MessageLookupByLibrary.simpleMessage("Oui, supprimer"),
         "yesDiscardChanges": MessageLookupByLibrary.simpleMessage(
             "Oui, ignorer les modifications"),
+        "yesIgnore": MessageLookupByLibrary.simpleMessage("Oui, ignorer"),
         "yesLogout":
             MessageLookupByLibrary.simpleMessage("Oui, se déconnecter"),
         "yesRemove": MessageLookupByLibrary.simpleMessage("Oui, supprimer"),
