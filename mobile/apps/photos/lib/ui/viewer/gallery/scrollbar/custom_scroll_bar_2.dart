@@ -22,12 +22,14 @@ class CustomScrollBar2 extends StatefulWidget {
   final ScrollController scrollController;
   final GalleryGroups galleryGroups;
   final ValueNotifier<bool> inUseNotifier;
+  final double heighOfViewport;
   const CustomScrollBar2({
     super.key,
     required this.child,
     required this.scrollController,
     required this.galleryGroups,
     required this.inUseNotifier,
+    required this.heighOfViewport,
   });
 
   @override
@@ -55,32 +57,49 @@ class _CustomScrollBar2State extends State<CustomScrollBar2> {
   static const _bottomPadding = 92.0;
   double? heightOfScrollbarDivider;
   double? heightOfScrollTrack;
+  late final bool _showScrollbarDivisions;
+
+  // Scrollbar's heigh is not fixed by default. If the scrollable is short
+  // enough, the scrollbar's height can go above the minimum length.
+  // In our case, we only depend on this value for showing scrollbar divisions,
+  // which we do not show unless scrollable is long enough. So we can safely
+  // assume that the scrollbar's height will always this minimum value.
   static const _kScrollbarMinLength = 36.0;
 
   @override
   void initState() {
     super.initState();
+    if (widget.galleryGroups.groupLayouts.last.maxOffset <
+        widget.heighOfViewport * 5) {
+      _showScrollbarDivisions = true;
+    } else {
+      _showScrollbarDivisions = false;
+    }
 
-    getIntrinsicSizeOfWidget(const ScrollBarDivider(title: "Temp"), context)
-        .then((size) {
-      if (mounted) {
-        setState(() {
-          heightOfScrollbarDivider = size.height;
+    if (_showScrollbarDivisions) {
+      getIntrinsicSizeOfWidget(const ScrollBarDivider(title: "Temp"), context)
+          .then((size) {
+        if (mounted) {
+          setState(() {
+            heightOfScrollbarDivider = size.height;
+          });
+        }
+
+        // Reason for calling _computePositionToTileMap here is, it needs
+        // heightOfScrollbarDivider to be set.
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _computePositionToTitleMap();
         });
-      }
-
-      // Reason for calling _computePositionToTileMap here is, it needs
-      // heightOfScrollbarDivider to be set.
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _computePositionToTitleMap();
       });
-    });
+    }
   }
 
   @override
   void didUpdateWidget(covariant CustomScrollBar2 oldWidget) {
     super.didUpdateWidget(oldWidget);
-    _computePositionToTitleMap();
+    if (_showScrollbarDivisions) {
+      _computePositionToTitleMap();
+    }
   }
 
   Future<void> _computePositionToTitleMap() async {

@@ -485,6 +485,7 @@ class GalleryState extends State<Gallery> {
         scrollController: _scrollController,
         galleryGroups: galleryGroups,
         inUseNotifier: scrollBarInUseNotifier,
+        heighOfViewport: MediaQuery.sizeOf(context).height,
         child: Stack(
           key: _stackKey,
           clipBehavior: Clip.none,
