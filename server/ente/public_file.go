@@ -7,20 +7,16 @@ type CreateFileUrl struct {
 
 // UpdateFileUrl ..
 type UpdateFileUrl struct {
-	LinkID          string        `json:"linkID" binding:"required"`
-	FileID          int64         `json:"fileID" binding:"required"`
-	ValidTill       *int64        `json:"validTill"`
-	DeviceLimit     *int          `json:"deviceLimit"`
-	PasswordInfo    *PassWordInfo `json:"passHash"`
-	EnableDownload  *bool         `json:"enableDownload"`
-	DisablePassword *bool         `json:"disablePassword"`
-}
-
-type PassWordInfo struct {
-	PassHash string `json:"passHash" binding:"required"`
-	Nonce    string `json:"nonce" binding:"required"`
-	MemLimit int64  `json:"memLimit" binding:"required"`
-	OpsLimit int64  `json:"opsLimit" binding:"required"`
+	LinkID          string `json:"linkID" binding:"required"`
+	FileID          int64  `json:"fileID" binding:"required"`
+	ValidTill       *int64 `json:"validTill"`
+	DeviceLimit     *int   `json:"deviceLimit"`
+	PassHash        *string
+	Nonce           *string
+	MemLimit        *int64
+	OpsLimit        *int64
+	EnableDownload  *bool `json:"enableDownload"`
+	DisablePassword *bool `json:"disablePassword"`
 }
 
 type PublicFileUrlRow struct {
@@ -31,7 +27,10 @@ type PublicFileUrlRow struct {
 	DeviceLimit    int
 	ValidTill      int64
 	IsDisabled     bool
-	PasswordInfo   *PassWordInfo
+	PassHash       *string
+	Nonce          *string
+	MemLimit       *int64
+	OpsLimit       *int64
 	EnableDownload bool
 	CreatedAt      int64
 	UpdatedAt      int64
@@ -39,11 +38,23 @@ type PublicFileUrlRow struct {
 
 type FileUrl struct {
 	LinkID          string `json:"linkID" binding:"required"`
+	URL             string `json:"url" binding:"required"`
 	OwnerID         int64  `json:"ownerID" binding:"required"`
 	FileID          int64  `json:"fileID" binding:"required"`
 	ValidTill       int64  `json:"validTill"`
 	DeviceLimit     int    `json:"deviceLimit"`
 	PasswordEnabled bool   `json:"passwordEnabled"`
-	EnableDownload  bool   `json:"enableDownload"`
-	CreatedAt       int64  `json:"createdAt"`
+	// Nonce contains the nonce value for the password if the link is password protected.
+	Nonce          *string `json:"nonce,omitempty"`
+	MemLimit       *int64  `json:"memLimit,omitempty"`
+	OpsLimit       *int64  `json:"opsLimit,omitempty"`
+	EnableDownload bool    `json:"enableDownload"`
+	CreatedAt      int64   `json:"createdAt"`
+}
+
+type PublicFileAccessContext struct {
+	ID           int64
+	IP           string
+	UserAgent    string
+	CollectionID int64
 }

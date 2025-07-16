@@ -25,11 +25,12 @@ type PublicFileController struct {
 func (c *PublicFileController) CreateFileUrl(ctx *gin.Context, req ente.CreateFileUrl) (*ente.FileUrl, error) {
 	actorUserID := auth.GetUserID(ctx.Request.Header)
 	accessToken := shortuuid.New()[0:AccessTokenLength]
-	err := c.PublicFileRepo.Insert(ctx, req.FileID, actorUserID, accessToken)
+	id, err := c.PublicFileRepo.Insert(ctx, req.FileID, actorUserID, accessToken)
 	if err == nil {
 		return &ente.FileUrl{
-			LinkID: accessToken,
-			FileID: req.FileID,
+			LinkID:  *id,
+			FileID:  req.FileID,
+			OwnerID: actorUserID,
 		}, nil
 	}
 	return nil, stacktrace.NewError("This endpoint is deprecated. Please use CreatePublicCollectionToken instead")

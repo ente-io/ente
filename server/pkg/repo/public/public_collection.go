@@ -123,7 +123,7 @@ func (pcr *PublicCollectionRepository) RecordAbuseReport(ctx context.Context, ac
 	url string, reason string, details ente.AbuseReportDetails) error {
 	_, err := pcr.DB.ExecContext(ctx, `INSERT INTO public_abuse_report 
     (share_id, ip, user_agent, url, reason, details) VALUES ($1, $2, $3, $4, $5, $6) 
-    ON CONFLICT ON CONSTRAINT unique_report_public_collection_id_ip_ua DO UPDATE SET (reason, details) = ($5, $6)`,
+    ON CONFLICT ON CONSTRAINT unique_report_sid_ip_ua DO UPDATE SET (reason, details) = ($5, $6)`,
 		accessCtx.ID, accessCtx.IP, accessCtx.UserAgent, url, reason, details)
 	return stacktrace.Propagate(err, "failed to record abuse report")
 }
