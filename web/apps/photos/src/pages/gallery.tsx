@@ -412,7 +412,7 @@ const Page: React.FC = () => {
     useEffect(() => {
         if (isInSearchMode && state.searchSuggestion) {
             setFileListHeader({
-                item: (
+                component: (
                     <SearchResultsHeader
                         searchSuggestion={state.searchSuggestion}
                         fileCount={state.searchResults?.length ?? 0}
@@ -1396,7 +1396,7 @@ const handleSubscriptionCompletionRedirectIfNeeded = async (
 };
 
 const createAppDownloadFooter = (): FileListHeaderOrFooter => ({
-    item: (
+    component: (
         <Typography
             variant="small"
             sx={{

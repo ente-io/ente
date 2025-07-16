@@ -15,6 +15,7 @@ import {
 } from "@mui/material";
 import Typography from "@mui/material/Typography";
 import { DownloadStatusNotifications } from "components/DownloadStatusNotifications";
+import { type FileListHeaderOrFooter } from "components/FileList";
 import { FileListWithViewer } from "components/FileListWithViewer";
 import { Upload } from "components/Upload";
 import {
@@ -393,11 +394,11 @@ export default function PublicCollectionGallery() {
         setUploadTypeSelectorView(false);
     };
 
-    const fileListHeader = useMemo(
+    const fileListHeader = useMemo<FileListHeaderOrFooter | undefined>(
         () =>
             publicCollection && publicFiles
                 ? {
-                      item: (
+                      component: (
                           <FileListHeader
                               {...{
                                   publicCollection,
@@ -413,10 +414,10 @@ export default function PublicCollectionGallery() {
         [onAddSaveGroup, publicCollection, publicFiles, downloadEnabled],
     );
 
-    const fileListFooter = useMemo(() => {
+    const fileListFooter = useMemo<FileListHeaderOrFooter>(() => {
         const props = { referralCode, onAddPhotos };
         return {
-            item: <FileListFooter {...props} />,
+            component: <FileListFooter {...props} />,
             height: fileListFooterHeightForProps(props),
         };
     }, [referralCode, onAddPhotos]);
