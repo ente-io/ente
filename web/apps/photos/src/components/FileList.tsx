@@ -27,7 +27,6 @@ import {
 import { TileBottomTextOverlay } from "ente-new/photos/components/Tiles";
 import {
     computeThumbnailGridLayoutParams,
-    getShrinkRatio,
     type ThumbnailGridLayoutParams,
 } from "ente-new/photos/components/utils/thumbnail-grid-layout";
 import { PseudoCollectionID } from "ente-new/photos/services/collection-summary";
@@ -235,9 +234,10 @@ export const FileList: React.FC<FileListProps> = ({
         () => computeThumbnailGridLayoutParams(width),
         [width],
     );
+
     const {
         // containerWidth,
-        isSmallerLayout,
+        // isSmallerLayout,
         // paddingInline,
         columns,
         // itemWidth,
@@ -262,8 +262,22 @@ export const FileList: React.FC<FileListProps> = ({
             timeStampList.push(asFullSpanListItem(header));
         }
 
+        const { isSmallerLayout, columns } = layoutParams;
         if (disableGrouping) {
-            noGrouping(timeStampList);
+            let listItemIndex = columns;
+            annotatedFiles.forEach((item, index) => {
+                if (listItemIndex < columns) {
+                    timeStampList[timeStampList.length - 1]!.items!.push(item);
+                    listItemIndex++;
+                } else {
+                    listItemIndex = 1;
+                    timeStampList.push({
+                        tag: "file",
+                        items: [item],
+                        itemStartIndex: index,
+                    });
+                }
+            });
         } else {
             groupByTime(timeStampList);
         }
@@ -302,7 +316,7 @@ export const FileList: React.FC<FileListProps> = ({
         footer,
         annotatedFiles,
         disableGrouping,
-        columns,
+        layoutParams,
     ]);
 
     useEffect(() => {
@@ -335,23 +349,6 @@ export const FileList: React.FC<FileListProps> = ({
                 });
                 listItemIndex = 1;
             } else if (listItemIndex < columns) {
-                timeStampList[timeStampList.length - 1]!.items!.push(item);
-                listItemIndex++;
-            } else {
-                listItemIndex = 1;
-                timeStampList.push({
-                    tag: "file",
-                    items: [item],
-                    itemStartIndex: index,
-                });
-            }
-        });
-    };
-
-    const noGrouping = (timeStampList: TimeStampListItem[]) => {
-        let listItemIndex = columns;
-        annotatedFiles.forEach((item, index) => {
-            if (listItemIndex < columns) {
                 timeStampList[timeStampList.length - 1]!.items!.push(item);
                 listItemIndex++;
             } else {
@@ -737,9 +734,7 @@ export const FileList: React.FC<FileListProps> = ({
 
     const itemData = createItemData(
         timeStampList,
-        columns,
         layoutParams,
-        layoutParams.shrinkRatio,
         renderListItem,
     );
 
@@ -783,26 +778,15 @@ const ListItem = styled("div")`
 `;
 
 const getTemplateColumns = (
-    columns: number,
-    shrinkRatio: number,
+    { columns, itemWidth }: ThumbnailGridLayoutParams,
     groups?: number[],
-): string => {
-    if (groups) {
-        return (
-            groups
-                .map(
-                    (x) =>
-                        `repeat(${x}, ${IMAGE_CONTAINER_MAX_WIDTH * shrinkRatio}px)`,
-                )
-                // Space between date groups
-                .join(` 44px `)
-        );
-    } else {
-        return `repeat(${columns},${
-            IMAGE_CONTAINER_MAX_WIDTH * shrinkRatio
-        }px)`;
-    }
-};
+): string =>
+    groups
+        ? groups
+              .map((x) => `repeat(${x}, ${itemWidth}px)`)
+              // Space between date groups
+              .join(` 44px `)
+        : `repeat(${columns},${itemWidth}px)`;
 
 const ListContainer = styled(Box, {
     shouldForwardProp: (propName) => propName != "gridTemplateColumns",
@@ -866,9 +850,7 @@ const NoFilesContainer = styled(ListItemContainer)`
 
 interface ItemData {
     timeStampList: TimeStampListItem[];
-    columns: number;
     layoutParams: ThumbnailGridLayoutParams;
-    shrinkRatio: number;
     renderListItem: (
         timeStampListItem: TimeStampListItem,
         isScrolling?: boolean,
@@ -878,20 +860,12 @@ interface ItemData {
 const createItemData = memoize(
     (
         timeStampList: TimeStampListItem[],
-        columns: number,
         layoutParams: ThumbnailGridLayoutParams,
-        shrinkRatio: number,
         renderListItem: (
             timeStampListItem: TimeStampListItem,
             isScrolling?: boolean,
         ) => React.JSX.Element,
-    ): ItemData => ({
-        timeStampList,
-        columns,
-        layoutParams,
-        shrinkRatio,
-        renderListItem,
-    }),
+    ): ItemData => ({ timeStampList, layoutParams, renderListItem }),
 );
 
 const PhotoListRow = React.memo(
@@ -901,13 +875,12 @@ const PhotoListRow = React.memo(
         isScrolling,
         data,
     }: ListChildComponentProps<ItemData>) => {
-        const { timeStampList, columns, shrinkRatio, renderListItem } = data;
+        const { timeStampList, layoutParams, renderListItem } = data;
         return (
             <ListItem style={style}>
                 <ListContainer
                     gridTemplateColumns={getTemplateColumns(
-                        columns,
-                        shrinkRatio,
+                        layoutParams,
                         timeStampList[index]!.groups,
                     )}
                 >

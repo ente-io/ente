@@ -84,13 +84,13 @@ const IMAGE_CONTAINER_MAX_HEIGHT = 180;
 const IMAGE_CONTAINER_MAX_WIDTH = 180;
 const MIN_COLUMNS = 4;
 
-export const getFractionFittableColumns = (width: number): number =>
+const getFractionFittableColumns = (width: number): number =>
     (width - 2 * getGapFromScreenEdge(width) + GAP_BTW_TILES) /
     (IMAGE_CONTAINER_MAX_WIDTH + GAP_BTW_TILES);
 
-export const getGapFromScreenEdge = (width: number) =>
+const getGapFromScreenEdge = (width: number) =>
     width > MIN_COLUMNS * IMAGE_CONTAINER_MAX_WIDTH ? 24 : 4;
 
-export const getShrinkRatio = (width: number, columns: number) =>
+const getShrinkRatio = (width: number, columns: number) =>
     (width - 2 * getGapFromScreenEdge(width) - (columns - 1) * GAP_BTW_TILES) /
     (columns * IMAGE_CONTAINER_MAX_WIDTH);
