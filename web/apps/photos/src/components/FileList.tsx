@@ -37,9 +37,9 @@ import React, {
     useState,
 } from "react";
 import {
-    type ListChildComponentProps,
     VariableSizeList,
     areEqual,
+    type ListChildComponentProps,
 } from "react-window";
 import { type SelectedState } from "utils/file";
 import {
@@ -265,7 +265,7 @@ export const FileList: React.FC<FileListProps> = ({
 
         let items: FileListItem[] = [];
 
-        if (header) items.push(asFullSpanListItem(header));
+        if (header) items.push(asFullSpanFileListItem(header));
 
         const { isSmallerLayout, columns } = layoutParams;
         const fileItemHeight = layoutParams.itemHeight + layoutParams.gap;
@@ -300,7 +300,7 @@ export const FileList: React.FC<FileListProps> = ({
                     lastCreationTime = creationTime;
 
                     items.push({
-                        height: dateContainerHeight,
+                        height: dateListItemHeight,
                         tag: "date",
                         date: af.timelineDateString,
                     });
@@ -330,15 +330,16 @@ export const FileList: React.FC<FileListProps> = ({
             items = mergeTimeStampList(items, columns);
         }
 
-        if (items.length == 1) {
+        if (annotatedFiles.length == 0) {
             items.push({
                 height: height - 48,
+                tag: "span",
                 component: (
-                    <NoFilesContainer span={columns}>
+                    <NoFilesListItem>
                         <Typography sx={{ color: "text.faint" }}>
                             {t("nothing_here")}
                         </Typography>
-                    </NoFilesContainer>
+                    </NoFilesListItem>
                 ),
             });
         }
@@ -349,10 +350,14 @@ export const FileList: React.FC<FileListProps> = ({
             if (leftoverHeight <= 0) break;
         }
         if (leftoverHeight > 0) {
-            items.push({ height: leftoverHeight, component: <></> });
+            items.push({
+                height: leftoverHeight,
+                tag: "span",
+                component: <></>,
+            });
         }
 
-        if (footer) items.push(asFullSpanListItem(footer));
+        if (footer) items.push(asFullSpanFileListItem(footer));
 
         setItems(items);
     }, [
@@ -424,9 +429,10 @@ export const FileList: React.FC<FileListProps> = ({
         }
         setCheckedTimelineDateStrings(next);
 
+        // All files on a checked/unchecked day.
         const filesOnADay = annotatedFiles.filter(
-            (item) => item.timelineDateString === date,
-        ); // all files on a checked/unchecked day
+            (af) => af.timelineDateString === date,
+        );
 
         handleSelectMulti(filesOnADay.map((af) => af.file))(isDateSelected);
     };
@@ -545,7 +551,7 @@ export const FileList: React.FC<FileListProps> = ({
                 return listItem.dates ? (
                     listItem.dates
                         .map((item) => [
-                            <DateContainer key={item.date} span={item.span}>
+                            <DateListItem key={item.date} span={item.span}>
                                 {haveSelection && (
                                     <Checkbox
                                         key={item.date}
@@ -561,12 +567,12 @@ export const FileList: React.FC<FileListProps> = ({
                                     />
                                 )}
                                 {item.date}
-                            </DateContainer>,
+                            </DateListItem>,
                             <div key={`${item.date}-gap`} />,
                         ])
                         .flat()
                 ) : (
-                    <DateContainer span={columns}>
+                    <DateListItem span={columns}>
                         {haveSelection && (
                             <Checkbox
                                 key={listItem.date}
@@ -582,7 +588,7 @@ export const FileList: React.FC<FileListProps> = ({
                             />
                         )}
                         {listItem.date}
-                    </DateContainer>
+                    </DateListItem>
                 );
             case "file": {
                 const ret = listItem.items!.map((item, idx) =>
@@ -658,6 +664,9 @@ export const FileList: React.FC<FileListProps> = ({
     }
 
     return (
+        // TODO(RE):
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         <VariableSizeList
             key={key}
             ref={listRef}
@@ -752,57 +761,54 @@ const mergeTimeStampList = (
 };
 
 /**
+ * A list item container that spans the full width.
+ */
+const FullSpanListItem = styled("div")`
+    display: flex;
+    align-items: center;
+`;
+
+const NoFilesListItem = styled(FullSpanListItem)`
+    min-height: 100%;
+    justify-content: center;
+`;
+
+/**
+ * Convert a {@link FileListHeaderOrFooter} into a {@link FileListItem}
+ * that spans the entire width available to the row.
+ */
+const asFullSpanFileListItem = ({
+    component,
+    ...rest
+}: FileListHeaderOrFooter): FileListItem => ({
+    ...rest,
+    tag: "span",
+    component: <FullSpanListItem>{component}</FullSpanListItem>,
+});
+
+/**
  * An grid item, spanning {@link span} columns.
  */
-const ListItemContainer = styled("div")<{ span: number }>`
+const GridSpanListItem = styled("div")<{ span: number }>`
     grid-column: span ${({ span }) => span};
     display: flex;
     align-items: center;
 `;
 
 /**
- * A grid items that spans all columns.
+ * The fixed height (in px) of {@link DateListItem}.
  */
-const FullSpanListItemContainer = styled("div")`
-    // grid-column: 1 / -1;
-    display: flex;
-    align-items: center;
-`;
+const dateListItemHeight = 48;
 
-/**
- * Convert a {@link FileListHeaderOrFooter} into a {@link FileListItem}
- * that spans all columns.
- */
-const asFullSpanListItem = ({
-    component,
-    ...rest
-}: FileListHeaderOrFooter) => ({
-    ...rest,
-    tag: "span",
-    component: (
-        <FullSpanListItemContainer>{component}</FullSpanListItemContainer>
-    ),
-});
-
-/**
- * The fixed height (in px) of {@link DateContainer}.
- */
-const dateContainerHeight = 48;
-
-const DateContainer = styled(ListItemContainer)(
+const DateListItem = styled(GridSpanListItem)(
     ({ theme }) => `
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    height: ${dateContainerHeight}px;
+    height: ${dateListItemHeight}px;
     color: ${theme.vars.palette.text.muted};
 `,
 );
-
-const NoFilesContainer = styled(ListItemContainer)`
-    text-align: center;
-    justify-content: center;
-`;
 
 interface FileListItemData {
     items: FileListItem[];
@@ -824,33 +830,25 @@ const FileListRow = memo(
         const { columns, itemWidth, paddingInline, gap } = layoutParams;
 
         const item = items[index]!;
-        const { groups } = item;
 
-        const gridTemplateColumns = groups
-            ? groups.map((x) => `repeat(${x}, ${itemWidth}px)`).join(" 44px ")
-            : `repeat(${columns}, ${itemWidth}px)`;
-        const px = item.extendToInlineEdges ? 0 : paddingInline;
-
-        if (item.tag == "span") {
-            return (
-                <Box
-                    style={style}
-                    sx={{ width: "100%", paddingInline: `${px}px` }}
-                >
-                    {renderListItem(item, isScrolling)}
-                </Box>
-            );
-        }
         return (
             <Box
                 style={style}
-                sx={{
-                    display: "grid",
-                    gridTemplateColumns,
-                    columnGap: `${gap}px`,
-                    width: "100%",
-                    paddingInline: `${px}px`,
-                }}
+                sx={[
+                    {
+                        width: "100%",
+                        paddingInline: `${item.extendToInlineEdges ? 0 : paddingInline}px`,
+                    },
+                    item.tag != "span" && {
+                        display: "grid",
+                        gridTemplateColumns: item.groups
+                            ? item.groups
+                                  .map((x) => `repeat(${x}, ${itemWidth}px)`)
+                                  .join(" 44px ")
+                            : `repeat(${columns}, ${itemWidth}px)`,
+                        columnGap: `${gap}px`,
+                    },
+                ]}
             >
                 {renderListItem(item, isScrolling)}
             </Box>
