@@ -2,7 +2,7 @@
 import AlbumOutlinedIcon from "@mui/icons-material/AlbumOutlined";
 import FavoriteRoundedIcon from "@mui/icons-material/FavoriteRounded";
 import PlayCircleOutlineOutlinedIcon from "@mui/icons-material/PlayCircleOutlineOutlined";
-import { Checkbox, Typography, styled } from "@mui/material";
+import { Box, Checkbox, Typography, styled } from "@mui/material";
 import Avatar from "components/Avatar";
 import type { LocalUser } from "ente-accounts/services/user";
 import { assertionFailed } from "ente-base/assert";
@@ -14,11 +14,7 @@ import { downloadManager } from "ente-gallery/services/download";
 import type { EnteFile } from "ente-media/file";
 import { fileCreationTime, fileDurationString } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
-import {
-    GAP_BTW_TILES,
-    IMAGE_CONTAINER_MAX_WIDTH,
-    MIN_COLUMNS,
-} from "ente-new/photos/components/FileList";
+import { GAP_BTW_TILES } from "ente-new/photos/components/FileList";
 import type { GalleryBarMode } from "ente-new/photos/components/gallery/reducer";
 import {
     LoadingThumbnail,
@@ -64,13 +60,21 @@ export interface FileListHeaderOrFooter {
      * The height of the component (in px).
      */
     height: number;
+    /**
+     * By default, all items in the {@link FileList}, including headers and
+     * footers injected using this type, get an inline margin.
+     *
+     * Set this property to `true` to omit this default margin, and instead
+     * have the component extend to the container's edges.
+     */
+    extendToInlineEdges?: boolean;
 }
 
 /**
  * Data needed to render each row in the variable size list that comprises the
  * file list.
  */
-interface FileListItem {
+type FileListItem = {
     /**
      * The height of the row that will render this item.
      */
@@ -79,7 +83,7 @@ interface FileListItem {
      * An optional tag that can be used to identify item types for conditional
      * behaviour.
      */
-    tag?: "date" | "file";
+    tag?: "date" | "file" | "span";
     items?: FileListAnnotatedFile[];
     itemStartIndex?: number;
     date?: string | null;
@@ -89,7 +93,7 @@ interface FileListItem {
      * The React component that is the rendered representation of the item.
      */
     component?: React.ReactNode;
-}
+} & Pick<FileListHeaderOrFooter, "extendToInlineEdges">;
 
 export interface FileListAnnotatedFile {
     file: EnteFile;
@@ -747,27 +751,6 @@ const mergeTimeStampList = (
     return newList;
 };
 
-const getTemplateColumns = (
-    { columns, itemWidth }: ThumbnailGridLayoutParams,
-    groups?: number[],
-): string =>
-    groups
-        ? groups.map((x) => `repeat(${x}, ${itemWidth}px)`).join(" 44px ")
-        : `repeat(${columns},${itemWidth}px)`;
-
-const ListItemGrid = styled("div", {
-    shouldForwardProp: (propName) => propName != "gridTemplateColumns",
-})<{ gridTemplateColumns: string }>`
-    display: grid;
-    grid-template-columns: ${(props) => props.gridTemplateColumns};
-    grid-column-gap: ${GAP_BTW_TILES}px;
-    width: 100%;
-    padding: 0 24px;
-    @media (max-width: ${IMAGE_CONTAINER_MAX_WIDTH * MIN_COLUMNS}px) {
-        padding: 0 4px;
-    }
-`;
-
 /**
  * An grid item, spanning {@link span} columns.
  */
@@ -781,7 +764,7 @@ const ListItemContainer = styled("div")<{ span: number }>`
  * A grid items that spans all columns.
  */
 const FullSpanListItemContainer = styled("div")`
-    grid-column: 1 / -1;
+    // grid-column: 1 / -1;
     display: flex;
     align-items: center;
 `;
@@ -790,8 +773,12 @@ const FullSpanListItemContainer = styled("div")`
  * Convert a {@link FileListHeaderOrFooter} into a {@link FileListItem}
  * that spans all columns.
  */
-const asFullSpanListItem = ({ component, height }: FileListHeaderOrFooter) => ({
-    height,
+const asFullSpanListItem = ({
+    component,
+    ...rest
+}: FileListHeaderOrFooter) => ({
+    ...rest,
+    tag: "span",
     component: (
         <FullSpanListItemContainer>{component}</FullSpanListItemContainer>
     ),
@@ -834,17 +821,39 @@ const FileListRow = memo(
         data,
     }: ListChildComponentProps<FileListItemData>) => {
         const { items, layoutParams, renderListItem } = data;
+        const { columns, itemWidth, paddingInline, gap } = layoutParams;
+
         const item = items[index]!;
+        const { groups } = item;
+
+        const gridTemplateColumns = groups
+            ? groups.map((x) => `repeat(${x}, ${itemWidth}px)`).join(" 44px ")
+            : `repeat(${columns}, ${itemWidth}px)`;
+        const px = item.extendToInlineEdges ? 0 : paddingInline;
+
+        if (item.tag == "span") {
+            return (
+                <Box
+                    style={style}
+                    sx={{ width: "100%", paddingInline: `${px}px` }}
+                >
+                    {renderListItem(item, isScrolling)}
+                </Box>
+            );
+        }
         return (
-            <ListItemGrid
+            <Box
                 style={style}
-                gridTemplateColumns={getTemplateColumns(
-                    layoutParams,
-                    item.groups,
-                )}
+                sx={{
+                    display: "grid",
+                    gridTemplateColumns,
+                    columnGap: `${gap}px`,
+                    width: "100%",
+                    paddingInline: `${px}px`,
+                }}
             >
                 {renderListItem(item, isScrolling)}
-            </ListItemGrid>
+            </Box>
         );
     },
     areEqual,

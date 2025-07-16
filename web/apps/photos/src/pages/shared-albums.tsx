@@ -419,6 +419,7 @@ export default function PublicCollectionGallery() {
         return {
             component: <FileListFooter {...props} />,
             height: fileListFooterHeightForProps(props),
+            extendToInlineEdges: true,
         };
     }, [referralCode, onAddPhotos]);
 
@@ -741,9 +742,6 @@ const FileListFooter: React.FC<FileListFooterProps> = ({
                 sx={{
                     mt: "6px",
                     mb: 0,
-                    /* Negative margin to extend to edges by counteracting the
-                       maximum margin that can be added by FileViewer. */
-                    mx: "-24px",
                     padding: "8px",
                     bgcolor: "accent.main",
                     color: "accent.contrastText",
