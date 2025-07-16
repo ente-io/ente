@@ -149,6 +149,7 @@ class SmartAlbumsService {
     await _addOrUpdateEntity(
       type,
       config.toJson(),
+      id: config.remoteId,
     );
   }
 
