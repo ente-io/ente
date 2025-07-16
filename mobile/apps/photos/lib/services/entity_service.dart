@@ -117,6 +117,8 @@ class EntityService {
     try {
       await _remoteToLocalSync(EntityType.location);
       await _remoteToLocalSync(EntityType.cgroup);
+      // TODO: Change to smart config
+      await _remoteToLocalSync(EntityType.person);
     } catch (e) {
       _logger.severe("Failed to sync entities", e);
     }
