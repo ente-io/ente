@@ -28,6 +28,7 @@ import { TileBottomTextOverlay } from "ente-new/photos/components/Tiles";
 import {
     computeThumbnailGridLayoutParams,
     getShrinkRatio,
+    type ThumbnailGridLayoutParams,
 } from "ente-new/photos/components/utils/thumbnail-grid-layout";
 import { PseudoCollectionID } from "ente-new/photos/services/collection-summary";
 import { t } from "i18next";
@@ -240,12 +241,11 @@ export const FileList: React.FC<FileListProps> = ({
         // paddingInline,
         columns,
         // itemWidth,
-        itemHeight,
-        gap,
+        // itemHeight,
+        // gap,
     } = layoutParams;
     // TODO(RE):
-    const shrinkRatio = getShrinkRatio(width, columns);
-    const listItemHeight = itemHeight + gap;
+    const listItemHeight = layoutParams.itemHeight + layoutParams.gap;
 
     useEffect(() => {
         // Since width and height are dependencies, there might be too many
@@ -738,7 +738,8 @@ export const FileList: React.FC<FileListProps> = ({
     const itemData = createItemData(
         timeStampList,
         columns,
-        shrinkRatio,
+        layoutParams,
+        layoutParams.shrinkRatio,
         renderListItem,
     );
 
@@ -866,6 +867,7 @@ const NoFilesContainer = styled(ListItemContainer)`
 interface ItemData {
     timeStampList: TimeStampListItem[];
     columns: number;
+    layoutParams: ThumbnailGridLayoutParams;
     shrinkRatio: number;
     renderListItem: (
         timeStampListItem: TimeStampListItem,
@@ -877,12 +879,19 @@ const createItemData = memoize(
     (
         timeStampList: TimeStampListItem[],
         columns: number,
+        layoutParams: ThumbnailGridLayoutParams,
         shrinkRatio: number,
         renderListItem: (
             timeStampListItem: TimeStampListItem,
             isScrolling?: boolean,
         ) => React.JSX.Element,
-    ): ItemData => ({ timeStampList, columns, shrinkRatio, renderListItem }),
+    ): ItemData => ({
+        timeStampList,
+        columns,
+        layoutParams,
+        shrinkRatio,
+        renderListItem,
+    }),
 );
 
 const PhotoListRow = React.memo(
