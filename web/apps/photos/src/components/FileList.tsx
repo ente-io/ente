@@ -326,11 +326,9 @@ export const FileList: React.FC<FileListProps> = ({
             }
         }
 
-        if (!isSmallerLayout) {
-            items = mergeTimeStampList(items, columns);
-        }
+        if (!isSmallerLayout) items = mergeRowsWherePossible(items, columns);
 
-        if (annotatedFiles.length == 0) {
+        if (!annotatedFiles.length) {
             items.push({
                 height: height - 48,
                 tag: "span",
@@ -450,12 +448,8 @@ export const FileList: React.FC<FileListProps> = ({
         [setSelected, mode, user?.id, activeCollectionID, activePersonID],
     );
 
-    const onHoverOver = (index: number) => () => {
-        setCurrentHover(index);
-    };
-
     const handleRangeSelect = (index: number) => () => {
-        if (typeof rangeStart != "undefined" && rangeStart !== index) {
+        if (rangeStart !== index) {
             const direction =
                 (index - rangeStart!) / Math.abs(index - rangeStart!);
             let checked = true;
@@ -500,45 +494,8 @@ export const FileList: React.FC<FileListProps> = ({
     }, []);
 
     useEffect(() => {
-        if (selected.count === 0) {
-            setRangeStart(null);
-        }
+        if (selected.count == 0) setRangeStart(null);
     }, [selected]);
-
-    const getThumbnail = (
-        { file }: FileListAnnotatedFile,
-        index: number,
-        isScrolling: boolean,
-    ) => (
-        <FileThumbnail
-            key={`tile-${file.id}-selected-${selected[file.id] ?? false}`}
-            {...{ user, emailByUserID }}
-            file={file}
-            onClick={() => onItemClick(index)}
-            selectable={selectable!}
-            onSelect={handleSelect(file, index)}
-            selected={
-                (!mode
-                    ? selected.collectionID === activeCollectionID
-                    : mode == selected.context?.mode &&
-                      (selected.context.mode == "people"
-                          ? selected.context.personID == activePersonID
-                          : selected.context.collectionID ==
-                            activeCollectionID)) && !!selected[file.id]
-            }
-            selectOnClick={selected.count > 0}
-            onHover={onHoverOver(index)}
-            onRangeSelect={handleRangeSelect(index)}
-            isRangeSelectActive={isShiftKeyPressed && selected.count > 0}
-            isInsSelectRange={
-                (index >= rangeStart! && index <= currentHover!) ||
-                (index >= currentHover! && index <= rangeStart!)
-            }
-            activeCollectionID={activeCollectionID}
-            showPlaceholder={isScrolling}
-            isFav={favoriteFileIDs?.has(file.id)}
-        />
-    );
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     const renderListItem = (
@@ -591,13 +548,45 @@ export const FileList: React.FC<FileListProps> = ({
                     </DateListItem>
                 );
             case "file": {
-                const ret = listItem.items!.map((item, idx) =>
-                    getThumbnail(
-                        item,
-                        listItem.itemStartIndex! + idx,
-                        !!isScrolling,
-                    ),
-                );
+                const ret = listItem.items!.map(({ file }, i) => {
+                    const index = listItem.itemStartIndex! + i;
+                    return (
+                        <FileThumbnail
+                            key={`tile-${file.id}-selected-${selected[file.id] ?? false}`}
+                            {...{ user, emailByUserID }}
+                            file={file}
+                            onClick={() => onItemClick(index)}
+                            selectable={selectable!}
+                            onSelect={handleSelect(file, index)}
+                            selected={
+                                (!mode
+                                    ? selected.collectionID ===
+                                      activeCollectionID
+                                    : mode == selected.context?.mode &&
+                                      (selected.context.mode == "people"
+                                          ? selected.context.personID ==
+                                            activePersonID
+                                          : selected.context.collectionID ==
+                                            activeCollectionID)) &&
+                                !!selected[file.id]
+                            }
+                            selectOnClick={selected.count > 0}
+                            onHover={() => setCurrentHover(index)}
+                            onRangeSelect={handleRangeSelect(index)}
+                            isRangeSelectActive={
+                                isShiftKeyPressed && selected.count > 0
+                            }
+                            isInsSelectRange={
+                                (index >= rangeStart! &&
+                                    index <= currentHover!) ||
+                                (index >= currentHover! && index <= rangeStart!)
+                            }
+                            activeCollectionID={activeCollectionID}
+                            showPlaceholder={!!isScrolling}
+                            isFav={favoriteFileIDs?.has(file.id)}
+                        />
+                    );
+                });
                 if (listItem.groups) {
                     let sum = 0;
                     for (let i = 0; i < listItem.groups.length - 1; i++) {
@@ -681,9 +670,9 @@ export const FileList: React.FC<FileListProps> = ({
 };
 
 /**
- * Checks and merge multiple dates into a single row.
+ * Merge multiple dates into a single row.
  */
-const mergeTimeStampList = (
+const mergeRowsWherePossible = (
     items: FileListItem[],
     columns: number,
 ): FileListItem[] => {
@@ -815,8 +804,8 @@ interface FileListItemData {
     layoutParams: ThumbnailGridLayoutParams;
     renderListItem: (
         timeStampListItem: FileListItem,
-        isScrolling?: boolean,
-    ) => React.JSX.Element;
+        isScrolling: boolean | undefined,
+    ) => React.ReactNode;
 }
 
 const FileListRow = memo(
