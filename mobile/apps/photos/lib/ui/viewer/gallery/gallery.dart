@@ -711,7 +711,7 @@ class _PinnedGroupHeaderState extends State<PinnedGroupHeader> {
               return AnimatedScale(
                 scale: inUse ? 1.3 : 1.0,
                 alignment: Alignment.topLeft,
-                duration: const Duration(milliseconds: 300),
+                duration: const Duration(milliseconds: 200),
                 curve: Curves.easeInOutSine,
                 child: ColoredBox(
                   color: getEnteColorScheme(context).backgroundBase,
