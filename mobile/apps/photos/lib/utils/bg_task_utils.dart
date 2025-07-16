@@ -87,7 +87,7 @@ class BgTaskUtils {
         frequency: Platform.isIOS
             ? const Duration(minutes: 30)
             : const Duration(minutes: 15),
-        initialDelay: const Duration(minutes: 10),
+        // initialDelay: const Duration(minutes: 10),
         constraints: workmanager.Constraints(
           networkType: workmanager.NetworkType.connected,
           requiresCharging: false,
