@@ -106,6 +106,11 @@ class _CustomScrollBar2State extends State<CustomScrollBar2> {
     }
   }
 
+  // Galleries where this scrollbar is used can gave different extents of headers
+  // and footers. These extents are not taken into account while computing
+  // the position of scrollbar divisions since we only show scrollbar divisions
+  // if the scrollable is long enough, where the header and footer extents
+  // are negligible compared to max extent of the scrollable.
   Future<void> _computePositionToTitleMap() async {
     final result = <({double position, String title})>[];
     heightOfScrollTrack = await _getHeightOfScrollTrack();
