@@ -70,6 +70,12 @@ Future<DecodedImage> decodeImageFromPath(
       );
       final image = await decodeImageFromData(convertedData!);
       _logger.info('Conversion successful, jpeg decoded');
+      if (image.width >= 20000 || image.height >= 20000) {
+        // Failing and storing empty result when the image dimensions are higher than max compression limits
+        _logger
+            .severe('Image res too high, W:${image.width} H:${image.height}');
+        throw Exception('Res too high W:${image.width} H:${image.height}');
+      }
       if (!includeRgbaBytes) {
         return DecodedImage(image);
       }
