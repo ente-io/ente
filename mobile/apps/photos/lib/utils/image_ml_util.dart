@@ -4,6 +4,7 @@ import "dart:math" show exp, max, min, pi;
 import "dart:typed_data" show Float32List, Uint8List;
 import "dart:ui";
 
+import "package:exif_reader/exif_reader.dart";
 import 'package:flutter/painting.dart' as paint show decodeImageFromList;
 import "package:flutter_image_compress/flutter_image_compress.dart";
 import "package:logging/logging.dart";
@@ -47,14 +48,21 @@ Future<DecodedImage> decodeImageFromPath(
   String imagePath, {
   required bool includeRgbaBytes,
 }) async {
+  final imageData = await File(imagePath).readAsBytes();
+
+  final Map<String, IfdTag> exifData = await readExifFromBytes(imageData);
+  final int orientation =
+      exifData['Image Orientation']?.values.firstAsInt() ?? 1;
+  if (orientation > 1 && includeRgbaBytes) {
+    _logger.severe("Image EXIF orientation $orientation is not supported");
+    throw Exception(
+      'UnhandledExifOrientation: exif orientation $orientation',
+    );
+  }
+
+  late Image image;
   try {
-    final imageData = await File(imagePath).readAsBytes();
-    final image = await decodeImageFromData(imageData);
-    if (!includeRgbaBytes) {
-      return DecodedImage(image);
-    }
-    final rawRgbaBytes = await _getRawRgbaBytes(image);
-    return DecodedImage(image, rawRgbaBytes);
+    image = await decodeImageFromData(imageData);
   } catch (e, s) {
     final format = imagePath.split('.').last;
     _logger.info(
@@ -68,7 +76,7 @@ Future<DecodedImage> decodeImageFromPath(
         minWidth: 20000, // High value to ensure image is not scaled down
         minHeight: 20000, // High value to ensure image is not scaled down
       );
-      final image = await decodeImageFromData(convertedData!);
+      image = await decodeImageFromData(convertedData!);
       _logger.info('Conversion successful, jpeg decoded');
       if (image.width >= 20000 || image.height >= 20000) {
         // Failing and storing empty result when the image dimensions are higher than max compression limits
@@ -76,11 +84,6 @@ Future<DecodedImage> decodeImageFromPath(
             .severe('Image res too high, W:${image.width} H:${image.height}');
         throw Exception('Res too high W:${image.width} H:${image.height}');
       }
-      if (!includeRgbaBytes) {
-        return DecodedImage(image);
-      }
-      final rawRgbaBytes = await _getRawRgbaBytes(image);
-      return DecodedImage(image, rawRgbaBytes);
     } catch (e) {
       _logger.severe(
         'Error decoding image of format $format on ${Platform.isAndroid ? "Android" : "iOS"}',
@@ -92,6 +95,11 @@ Future<DecodedImage> decodeImageFromPath(
       );
     }
   }
+  if (!includeRgbaBytes) {
+    return DecodedImage(image);
+  }
+  final rawRgbaBytes = await _getRawRgbaBytes(image);
+  return DecodedImage(image, rawRgbaBytes);
 }
 
 /// Decodes [Uint8List] image data to an ui.[Image] object.
