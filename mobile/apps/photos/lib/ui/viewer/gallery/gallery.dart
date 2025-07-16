@@ -612,9 +612,12 @@ class PinnedGroupHeader extends StatefulWidget {
 
 class _PinnedGroupHeaderState extends State<PinnedGroupHeader> {
   String? currentGroupId;
+  final _enlargeHeader = ValueNotifier<bool>(false);
+  Timer? _enlargeHeaderTimer;
   @override
   void initState() {
     super.initState();
+    widget.scrollbarInUseNotifier.addListener(scrollbarInUseListener);
     widget.scrollController.addListener(_setCurrentGroupID);
   }
 
@@ -627,6 +630,9 @@ class _PinnedGroupHeaderState extends State<PinnedGroupHeader> {
   @override
   void dispose() {
     widget.scrollController.removeListener(_setCurrentGroupID);
+    widget.scrollbarInUseNotifier.removeListener(scrollbarInUseListener);
+    _enlargeHeaderTimer?.cancel();
+    _enlargeHeader.dispose();
     super.dispose();
   }
 
@@ -685,25 +691,48 @@ class _PinnedGroupHeaderState extends State<PinnedGroupHeader> {
     }
   }
 
+  void scrollbarInUseListener() {
+    _enlargeHeaderTimer?.cancel();
+    if (widget.scrollbarInUseNotifier.value) {
+      _enlargeHeader.value = true;
+    } else {
+      _enlargeHeaderTimer = Timer(const Duration(milliseconds: 250), () {
+        _enlargeHeader.value = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return currentGroupId != null
-        ? ColoredBox(
-            color: getEnteColorScheme(context).backgroundBase,
-            child: GroupHeaderWidget(
-              title: widget.galleryGroups
-                  .groupIdToheaderDataMap[currentGroupId!]!.groupType
-                  .getTitle(
-                context,
-                widget.galleryGroups.groupIDToFilesMap[currentGroupId]!.first,
-              ),
-              gridSize: localSettings.getPhotoGridSize(),
-              height: widget.galleryGroups.headerExtent,
-              filesInGroup:
-                  widget.galleryGroups.groupIDToFilesMap[currentGroupId!]!,
-              selectedFiles: widget.selectedFiles,
-              showSelectAllByDefault: widget.showSelectAllByDefault,
-            ),
+        ? ValueListenableBuilder(
+            valueListenable: _enlargeHeader,
+            builder: (context, inUse, _) {
+              return AnimatedScale(
+                scale: inUse ? 1.3 : 1.0,
+                alignment: Alignment.topLeft,
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeInOutSine,
+                child: ColoredBox(
+                  color: getEnteColorScheme(context).backgroundBase,
+                  child: GroupHeaderWidget(
+                    title: widget.galleryGroups
+                        .groupIdToheaderDataMap[currentGroupId!]!.groupType
+                        .getTitle(
+                      context,
+                      widget.galleryGroups.groupIDToFilesMap[currentGroupId]!
+                          .first,
+                    ),
+                    gridSize: localSettings.getPhotoGridSize(),
+                    height: widget.galleryGroups.headerExtent,
+                    filesInGroup: widget
+                        .galleryGroups.groupIDToFilesMap[currentGroupId!]!,
+                    selectedFiles: widget.selectedFiles,
+                    showSelectAllByDefault: widget.showSelectAllByDefault,
+                  ),
+                ),
+              );
+            },
           )
         : const SizedBox.shrink();
   }
