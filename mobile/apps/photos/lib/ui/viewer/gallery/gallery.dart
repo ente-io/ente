@@ -614,11 +614,18 @@ class _PinnedGroupHeaderState extends State<PinnedGroupHeader> {
   String? currentGroupId;
   final _enlargeHeader = ValueNotifier<bool>(false);
   Timer? _enlargeHeaderTimer;
+  late final ValueNotifier<bool> _atZeroScrollNotifier;
   @override
   void initState() {
     super.initState();
     widget.scrollbarInUseNotifier.addListener(scrollbarInUseListener);
     widget.scrollController.addListener(_setCurrentGroupID);
+    _atZeroScrollNotifier = ValueNotifier<bool>(
+      widget.scrollController.offset == 0,
+    );
+    widget.scrollController.addListener(
+      _scrollControllerListenerForZeroScrollNotifier,
+    );
   }
 
   @override
@@ -631,8 +638,12 @@ class _PinnedGroupHeaderState extends State<PinnedGroupHeader> {
   void dispose() {
     widget.scrollController.removeListener(_setCurrentGroupID);
     widget.scrollbarInUseNotifier.removeListener(scrollbarInUseListener);
-    _enlargeHeaderTimer?.cancel();
+    _atZeroScrollNotifier.removeListener(
+      _scrollControllerListenerForZeroScrollNotifier,
+    );
     _enlargeHeader.dispose();
+    _atZeroScrollNotifier.dispose();
+    _enlargeHeaderTimer?.cancel();
     super.dispose();
   }
 
@@ -691,6 +702,10 @@ class _PinnedGroupHeaderState extends State<PinnedGroupHeader> {
     }
   }
 
+  void _scrollControllerListenerForZeroScrollNotifier() {
+    _atZeroScrollNotifier.value = widget.scrollController.offset == 0;
+  }
+
   void scrollbarInUseListener() {
     _enlargeHeaderTimer?.cancel();
     if (widget.scrollbarInUseNotifier.value) {
@@ -713,22 +728,43 @@ class _PinnedGroupHeaderState extends State<PinnedGroupHeader> {
                 alignment: Alignment.topLeft,
                 duration: const Duration(milliseconds: 200),
                 curve: Curves.easeInOutSine,
-                child: ColoredBox(
-                  color: getEnteColorScheme(context).backgroundBase,
-                  child: GroupHeaderWidget(
-                    title: widget.galleryGroups
-                        .groupIdToheaderDataMap[currentGroupId!]!.groupType
-                        .getTitle(
-                      context,
-                      widget.galleryGroups.groupIDToFilesMap[currentGroupId]!
-                          .first,
+                child: ValueListenableBuilder<bool>(
+                  valueListenable: _atZeroScrollNotifier,
+                  builder: (context, atZeroScroll, child) {
+                    return AnimatedContainer(
+                      duration: const Duration(milliseconds: 250),
+                      curve: Curves.easeOut,
+                      decoration: BoxDecoration(
+                        boxShadow: atZeroScroll
+                            ? []
+                            : [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.15),
+                                  blurRadius: 4,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                      ),
+                      child: child,
+                    );
+                  },
+                  child: ColoredBox(
+                    color: getEnteColorScheme(context).backgroundBase,
+                    child: GroupHeaderWidget(
+                      title: widget.galleryGroups
+                          .groupIdToheaderDataMap[currentGroupId!]!.groupType
+                          .getTitle(
+                        context,
+                        widget.galleryGroups.groupIDToFilesMap[currentGroupId]!
+                            .first,
+                      ),
+                      gridSize: localSettings.getPhotoGridSize(),
+                      height: widget.galleryGroups.headerExtent,
+                      filesInGroup: widget
+                          .galleryGroups.groupIDToFilesMap[currentGroupId!]!,
+                      selectedFiles: widget.selectedFiles,
+                      showSelectAllByDefault: widget.showSelectAllByDefault,
                     ),
-                    gridSize: localSettings.getPhotoGridSize(),
-                    height: widget.galleryGroups.headerExtent,
-                    filesInGroup: widget
-                        .galleryGroups.groupIDToFilesMap[currentGroupId!]!,
-                    selectedFiles: widget.selectedFiles,
-                    showSelectAllByDefault: widget.showSelectAllByDefault,
                   ),
                 ),
               );
