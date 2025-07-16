@@ -5,6 +5,7 @@ enum EntityType {
   person,
   cgroup,
   unknown,
+  smartConfig,
 }
 
 EntityType typeFromString(String type) {
@@ -15,6 +16,8 @@ EntityType typeFromString(String type) {
       return EntityType.location;
     case "cgroup":
       return EntityType.cgroup;
+    case "sconfig":
+      return EntityType.cgroup;
   }
   debugPrint("unexpected entity type $type");
   return EntityType.unknown;
@@ -22,10 +25,15 @@ EntityType typeFromString(String type) {
 
 extension EntityTypeExtn on EntityType {
   bool isZipped() {
-    if (this == EntityType.location || this == EntityType.person) {
-      return false;
+    switch (this) {
+      case EntityType.location:
+      case EntityType.person:
+      case EntityType.smartConfig:
+        return true;
+      case EntityType.cgroup:
+      case EntityType.unknown:
+        return false;
     }
-    return true;
   }
 
   String typeToString() {
@@ -36,6 +44,8 @@ extension EntityTypeExtn on EntityType {
         return "person";
       case EntityType.cgroup:
         return "cgroup";
+      case EntityType.smartConfig:
+        return "sconfig";
       case EntityType.unknown:
         return "unknown";
     }

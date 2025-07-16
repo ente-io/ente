@@ -1,6 +1,9 @@
 typedef PersonInfo = ({int updatedAt, Set<int> addedFiles});
 
 class SmartAlbumConfig {
+  // A nullable remote ID for syncing purposes
+  final String? remoteId;
+
   final int collectionId;
   // person ids
   final Set<String> personIDs;
@@ -8,6 +11,7 @@ class SmartAlbumConfig {
   final Map<String, PersonInfo> infoMap;
 
   SmartAlbumConfig({
+    this.remoteId,
     required this.collectionId,
     required this.personIDs,
     required this.infoMap,
@@ -29,6 +33,7 @@ class SmartAlbumConfig {
     }
 
     return SmartAlbumConfig(
+      remoteId: remoteId,
       collectionId: collectionId,
       personIDs: newPersonsIds,
       infoMap: newInfoMap,
@@ -50,9 +55,50 @@ class SmartAlbumConfig {
       addedFiles: newInfoMap[personId]!.addedFiles.union(fileId),
     );
     return SmartAlbumConfig(
+      remoteId: remoteId,
       collectionId: collectionId,
       personIDs: personIDs,
       infoMap: newInfoMap,
+    );
+  }
+
+  // toJson and fromJson methods
+  Map<String, dynamic> toJson() {
+    return {
+      "collection_id": collectionId,
+      "person_ids": personIDs.toList(),
+      "info_map": infoMap.map(
+        (key, value) => MapEntry(
+          key,
+          {
+            "updated_at": value.updatedAt,
+            "added_files": value.addedFiles.toList(),
+          },
+        ),
+      ),
+    };
+  }
+
+  factory SmartAlbumConfig.fromJson(
+    Map<String, dynamic> json,
+    String? remoteId,
+  ) {
+    final personIDs = Set<String>.from(json["person_ids"] as List);
+    final infoMap = (json["info_map"] as Map<String, dynamic>).map(
+      (key, value) => MapEntry(
+        key,
+        (
+          updatedAt: value["updated_at"] as int,
+          addedFiles: Set<int>.from(value["added_files"] as List),
+        ),
+      ),
+    );
+
+    return SmartAlbumConfig(
+      remoteId: remoteId,
+      collectionId: json["collection_id"] as int,
+      personIDs: personIDs,
+      infoMap: infoMap,
     );
   }
 }

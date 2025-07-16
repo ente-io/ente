@@ -1,9 +1,12 @@
 import "dart:async";
+import "dart:convert";
 
+import "package:computer/computer.dart";
 import "package:logging/logging.dart";
 import "package:photos/models/api/entity/type.dart";
 import "package:photos/models/collection/smart_album_config.dart";
-import "package:photos/service_locator.dart" show entityService, ServiceLocator;
+import "package:photos/models/local_entity_data.dart";
+import "package:photos/service_locator.dart" show entityService;
 import "package:photos/services/collections_service.dart";
 import "package:photos/services/search_service.dart";
 import "package:photos/ui/actions/collection/collection_file_actions.dart";
@@ -16,38 +19,67 @@ class SmartAlbumsService {
 
   final _logger = Logger((SmartAlbumsService).toString());
 
-  final Map<int, SmartAlbumConfig> _cachedConfigs = {};
-  bool isInitialized = false;
+  int _lastCacheRefreshTime = 0;
 
-  void init() {
-    _logger.info("SmartAlbumsService initialized");
-    refresh();
+  Future<Map<int, SmartAlbumConfig>>? _cachedConfigsFuture;
+
+  void clearCache() {
+    _cachedConfigsFuture = null;
+    _lastCacheRefreshTime = 0;
   }
 
-  Future<void> refresh() async {
-    if (isInitialized) return;
+  Future<void> refreshSmartConfigCache() async {
+    _lastCacheRefreshTime = 0;
+    // wait to ensure cache is refreshed
+    final _ = await getSmartConfigs();
+  }
 
-    _logger.info("Refreshing SmartAlbumsService");
+  int lastRemoteSyncTime() {
+    return entityService.lastSyncTime(EntityType.smartConfig);
+  }
 
-    final collections = CollectionsService.instance.nonHiddenOwnedCollections();
-
-    for (final collectionId in collections) {
-      try {
-        final config = await loadConfig(collectionId);
-        _cachedConfigs[collectionId] = config;
-      } catch (_) {}
+  Future<Map<int, SmartAlbumConfig>> getSmartConfigs() async {
+    if (_lastCacheRefreshTime != lastRemoteSyncTime()) {
+      _lastCacheRefreshTime = lastRemoteSyncTime();
+      _cachedConfigsFuture = null; // Invalidate cache
     }
-
-    isInitialized = true;
+    _cachedConfigsFuture ??= _fetchAndCacheSConfigs();
+    return _cachedConfigsFuture!;
   }
 
-  void updateCachedCollection(SmartAlbumConfig config) =>
-      _cachedConfigs[config.collectionId] = config;
+  Future<Map<int, SmartAlbumConfig>> _fetchAndCacheSConfigs() async {
+    _logger.finest("reading all smart configs from local db");
+    final entities = await entityService.getEntities(EntityType.smartConfig);
+    final sconfigs = await Computer.shared().compute(
+      _decodeSConfigEntities,
+      param: {"entity": entities},
+      taskName: "decode_sconfig_entities",
+    );
+
+    return sconfigs;
+  }
+
+  static Map<int, SmartAlbumConfig> _decodeSConfigEntities(
+    Map<String, dynamic> param,
+  ) {
+    final entities = param["entity"] as List<LocalEntityData>;
+    return Map.fromEntries(
+      entities.map(
+        (e) {
+          final config = SmartAlbumConfig.fromJson(
+            json.decode(e.data),
+            e.id,
+          );
+          return MapEntry(config.collectionId, config);
+        },
+      ),
+    );
+  }
 
   Future<void> syncSmartAlbums() async {
-    if (!isInitialized) await refresh();
+    final cachedConfigs = await _fetchAndCacheSConfigs();
 
-    for (final entry in _cachedConfigs.entries) {
+    for (final entry in cachedConfigs.entries) {
       final collectionId = entry.key;
       final config = entry.value;
 
@@ -102,71 +134,30 @@ class SmartAlbumsService {
     }
   }
 
-  static const _personIdsKey = "smart_album_person_ids";
-  static const _addedFilesKey = "smart_album_added_files";
-
   Future<void> saveConfig(SmartAlbumConfig config) async {
-    await ServiceLocator.instance.prefs.setStringList(
-      "${_personIdsKey}_${config.collectionId}",
-      config.personIDs.toList(),
+    await _addOrUpdateEntity(
+      EntityType.smartConfig,
+      config.toJson(),
     );
-
-    await ServiceLocator.instance.prefs.setString(
-      "${_addedFilesKey}_${config.collectionId}",
-      config.infoMap.entries
-          .map(
-            (e) => "${e.key}:${e.value.updatedAt}|"
-                "${e.value.addedFiles.join(',')}",
-          )
-          .join(';'),
-    );
-
-    updateCachedCollection(config);
   }
 
   Future<SmartAlbumConfig?> getConfig(int collectionId) async {
-    await refresh();
-
-    if (_cachedConfigs.containsKey(collectionId)) {
-      return _cachedConfigs[collectionId]!;
-    }
-
-    return null;
+    final cachedConfigs = await getSmartConfigs();
+    return cachedConfigs[collectionId]!;
   }
 
-  Future<SmartAlbumConfig> loadConfig(int collectionId) async {
-    final personIDs = ServiceLocator.instance.prefs
-        .getStringList("${_personIdsKey}_$collectionId");
-    if (personIDs == null || personIDs.isEmpty) {
-      throw Exception(
-        "No person IDs found for collection $collectionId",
-      );
-    }
-    final addedFilesString = ServiceLocator.instance.prefs
-            .getString("${_addedFilesKey}_$collectionId") ??
-        "";
-
-    final addedFiles = <String, PersonInfo>{};
-
-    if (addedFilesString.isNotEmpty) {
-      for (final entry in addedFilesString.split(';')) {
-        final parts = entry.split(':');
-
-        if (parts.length == 2) {
-          final part2 = parts[1].split('|')[1];
-          addedFiles[parts[0]] = (
-            updatedAt: int.parse(parts[1].split('|')[0]),
-            addedFiles:
-                part2.isNotEmpty ? part2.split(',').map(int.parse).toSet() : {},
-          );
-        }
-      }
-    }
-
-    return SmartAlbumConfig(
-      collectionId: collectionId,
-      personIDs: personIDs.toSet(),
-      infoMap: addedFiles,
+  /// Wrapper method for entityService.addOrUpdate that handles cache refresh
+  Future<LocalEntityData> _addOrUpdateEntity(
+    EntityType type,
+    Map<String, dynamic> jsonMap, {
+    String? id,
+  }) async {
+    final result = await entityService.addOrUpdate(
+      type,
+      jsonMap,
+      id: id,
     );
+    _lastCacheRefreshTime = 0; // Invalidate cache
+    return result;
   }
 }

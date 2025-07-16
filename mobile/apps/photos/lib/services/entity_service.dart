@@ -13,6 +13,7 @@ import "package:photos/gateways/entity_gw.dart";
 import "package:photos/models/api/entity/data.dart";
 import "package:photos/models/api/entity/key.dart";
 import "package:photos/models/api/entity/type.dart";
+import "package:photos/models/base/id.dart";
 import "package:photos/models/local_entity_data.dart";
 import "package:photos/utils/gzip.dart";
 import 'package:shared_preferences/shared_preferences.dart';
@@ -79,16 +80,29 @@ class EntityService {
       " ${id == null ? 'Adding' : 'Updating'} entity of type: " +
           type.typeToString(),
     );
-    final EntityData data = id == null
-        ? await _gateway.createEntity(type, encryptedData, header)
-        : await _gateway.updateEntity(type, id, encryptedData, header);
-    final LocalEntityData localData = LocalEntityData(
-      id: data.id,
-      type: type,
-      data: plainText,
-      ownerID: data.userID,
-      updatedAt: data.updatedAt,
-    );
+    late LocalEntityData localData;
+    if (type == EntityType.smartConfig) {
+      debugPrint("SmartConfig entity, skipping DB update");
+      final userID = Configuration.instance.getUserID();
+      localData = LocalEntityData(
+        id: newID("sconfig"),
+        type: type,
+        data: plainText,
+        ownerID: userID!,
+        updatedAt: DateTime.now().millisecondsSinceEpoch,
+      );
+    } else {
+      final EntityData data = id == null
+          ? await _gateway.createEntity(type, encryptedData, header)
+          : await _gateway.updateEntity(type, id, encryptedData, header);
+      localData = LocalEntityData(
+        id: data.id,
+        type: type,
+        data: plainText,
+        ownerID: data.userID,
+        updatedAt: data.updatedAt,
+      );
+    }
     await _db.upsertEntities([localData]);
     syncEntities().ignore();
     return localData;
