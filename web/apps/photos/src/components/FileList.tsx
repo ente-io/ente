@@ -16,7 +16,6 @@ import { fileCreationTime, fileDurationString } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
 import {
     GAP_BTW_TILES,
-    IMAGE_CONTAINER_MAX_HEIGHT,
     IMAGE_CONTAINER_MAX_WIDTH,
     MIN_COLUMNS,
 } from "ente-new/photos/components/FileList";
@@ -26,6 +25,10 @@ import {
     StaticThumbnail,
 } from "ente-new/photos/components/PlaceholderThumbnails";
 import { TileBottomTextOverlay } from "ente-new/photos/components/Tiles";
+import {
+    computeThumbnailGridLayoutParams,
+    getShrinkRatio,
+} from "ente-new/photos/components/utils/thumbnail-grid-layout";
 import { PseudoCollectionID } from "ente-new/photos/services/collection-summary";
 import { t } from "i18next";
 import memoize from "memoize-one";
@@ -46,8 +49,6 @@ import {
     handleSelectCreator,
     handleSelectCreatorMulti,
 } from "utils/photoFrame";
-
-export const SPACE_BTW_DATES = 44;
 
 /**
  * A component with an explicit height suitable for being plugged in as the
@@ -229,18 +230,22 @@ export const FileList: React.FC<FileListProps> = ({
     const [currentHover, setCurrentHover] = useState<number | null>(null);
     const [isShiftKeyPressed, setIsShiftKeyPressed] = useState(false);
 
-    const fittableColumns = getFractionFittableColumns(width);
-    let columns = Math.floor(fittableColumns);
-
-    let skipMerge = false;
-    if (columns < MIN_COLUMNS) {
-        columns = MIN_COLUMNS;
-        skipMerge = true;
-    }
-
+    const layoutParams = useMemo(
+        () => computeThumbnailGridLayoutParams(width),
+        [width],
+    );
+    const {
+        // containerWidth,
+        isSmallerLayout,
+        // paddingInline,
+        columns,
+        // itemWidth,
+        itemHeight,
+        gap,
+    } = layoutParams;
+    // TODO(RE):
     const shrinkRatio = getShrinkRatio(width, columns);
-    const listItemHeight =
-        IMAGE_CONTAINER_MAX_HEIGHT * shrinkRatio + GAP_BTW_TILES;
+    const listItemHeight = itemHeight + gap;
 
     useEffect(() => {
         // Since width and height are dependencies, there might be too many
@@ -263,7 +268,7 @@ export const FileList: React.FC<FileListProps> = ({
             groupByTime(timeStampList);
         }
 
-        if (!skipMerge) {
+        if (!isSmallerLayout) {
             timeStampList = mergeTimeStampList(timeStampList, columns);
         }
 
@@ -782,47 +787,21 @@ const getTemplateColumns = (
     groups?: number[],
 ): string => {
     if (groups) {
-        // need to confirm why this was there
-        // const sum = groups.reduce((acc, item) => acc + item, 0);
-        // if (sum < columns) {
-        //     groups[groups.length - 1] += columns - sum;
-        // }
-        return groups
-            .map(
-                (x) =>
-                    `repeat(${x}, ${IMAGE_CONTAINER_MAX_WIDTH * shrinkRatio}px)`,
-            )
-            .join(` ${SPACE_BTW_DATES}px `);
+        return (
+            groups
+                .map(
+                    (x) =>
+                        `repeat(${x}, ${IMAGE_CONTAINER_MAX_WIDTH * shrinkRatio}px)`,
+                )
+                // Space between date groups
+                .join(` 44px `)
+        );
     } else {
         return `repeat(${columns},${
             IMAGE_CONTAINER_MAX_WIDTH * shrinkRatio
         }px)`;
     }
 };
-
-function getFractionFittableColumns(width: number): number {
-    return (
-        (width - 2 * getGapFromScreenEdge(width) + GAP_BTW_TILES) /
-        (IMAGE_CONTAINER_MAX_WIDTH + GAP_BTW_TILES)
-    );
-}
-
-function getGapFromScreenEdge(width: number) {
-    if (width > MIN_COLUMNS * IMAGE_CONTAINER_MAX_WIDTH) {
-        return 24;
-    } else {
-        return 4;
-    }
-}
-
-function getShrinkRatio(width: number, columns: number) {
-    return (
-        (width -
-            2 * getGapFromScreenEdge(width) -
-            (columns - 1) * GAP_BTW_TILES) /
-        (columns * IMAGE_CONTAINER_MAX_WIDTH)
-    );
-}
 
 const ListContainer = styled(Box, {
     shouldForwardProp: (propName) => propName != "gridTemplateColumns",
@@ -869,13 +848,15 @@ const asFullSpanListItem = ({ item, ...rest }: FileListHeaderOrFooter) => ({
  */
 const dateContainerHeight = 48;
 
-const DateContainer = styled(ListItemContainer)`
+const DateContainer = styled(ListItemContainer)(
+    ({ theme }) => `
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     height: ${dateContainerHeight}px;
-    color: "text.muted";
-`;
+    color: ${theme.vars.palette.text.muted};
+`,
+);
 
 const NoFilesContainer = styled(ListItemContainer)`
     text-align: center;

@@ -84,26 +84,13 @@ const IMAGE_CONTAINER_MAX_HEIGHT = 180;
 const IMAGE_CONTAINER_MAX_WIDTH = 180;
 const MIN_COLUMNS = 4;
 
-function getFractionFittableColumns(width: number): number {
-    return (
-        (width - 2 * getGapFromScreenEdge(width) + GAP_BTW_TILES) /
-        (IMAGE_CONTAINER_MAX_WIDTH + GAP_BTW_TILES)
-    );
-}
+export const getFractionFittableColumns = (width: number): number =>
+    (width - 2 * getGapFromScreenEdge(width) + GAP_BTW_TILES) /
+    (IMAGE_CONTAINER_MAX_WIDTH + GAP_BTW_TILES);
 
-function getGapFromScreenEdge(width: number) {
-    if (width > MIN_COLUMNS * IMAGE_CONTAINER_MAX_WIDTH) {
-        return 24;
-    } else {
-        return 4;
-    }
-}
+export const getGapFromScreenEdge = (width: number) =>
+    width > MIN_COLUMNS * IMAGE_CONTAINER_MAX_WIDTH ? 24 : 4;
 
-function getShrinkRatio(width: number, columns: number) {
-    return (
-        (width -
-            2 * getGapFromScreenEdge(width) -
-            (columns - 1) * GAP_BTW_TILES) /
-        (columns * IMAGE_CONTAINER_MAX_WIDTH)
-    );
-}
+export const getShrinkRatio = (width: number, columns: number) =>
+    (width - 2 * getGapFromScreenEdge(width) - (columns - 1) * GAP_BTW_TILES) /
+    (columns * IMAGE_CONTAINER_MAX_WIDTH);
