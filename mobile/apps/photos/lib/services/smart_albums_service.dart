@@ -44,7 +44,7 @@ class SmartAlbumsService {
   Future<Map<int, SmartAlbumConfig>> getSmartConfigs() async {
     final lastRemoteSyncTimeValue = lastRemoteSyncTime();
     if (_lastCacheRefreshTime != lastRemoteSyncTimeValue) {
-      _lastCacheRefreshTime = lastRemoteSyncTime();
+      _lastCacheRefreshTime = lastRemoteSyncTimeValue;
       _cachedConfigsFuture = null; // Invalidate cache
     }
     _cachedConfigsFuture ??= _fetchAndCacheSConfigs();
@@ -55,21 +55,37 @@ class SmartAlbumsService {
   Future<Map<int, SmartAlbumConfig>> _fetchAndCacheSConfigs() async {
     _logger.finest("reading all smart configs from local db");
     final entities = await entityService.getEntities(type);
-    final sconfigs = await Computer.shared().compute(
+    final result = await Computer.shared().compute(
       _decodeSConfigEntities,
       param: {"entity": entities},
       taskName: "decode_sconfig_entities",
-    );
+    ) as (Map<int, SmartAlbumConfig>, Map<int, (String, Set<String>)>);
 
-    return sconfigs;
+    for (final entry in result.$2.entries) {
+      await _addOrUpdateEntity(
+        type,
+        result.$1[entry.key]!.toJson(),
+        id: entry.value.$1,
+      );
+
+      for (final remoteId in entry.value.$2) {
+        await _deleteEntry(
+          id: remoteId,
+        );
+      }
+    }
+
+    return result.$1;
   }
 
-  static Map<int, SmartAlbumConfig> _decodeSConfigEntities(
+  static (Map<int, SmartAlbumConfig>, Map<int, (String, Set<String>)>)
+      _decodeSConfigEntities(
     Map<String, dynamic> param,
   ) {
     final entities = param["entity"] as List<LocalEntityData>;
 
     final Map<int, SmartAlbumConfig> sconfigs = {};
+    final Map<int, (String, Set<String>)> collectionToRemote = {};
     for (final entity in entities) {
       var config = SmartAlbumConfig.fromJson(
         json.decode(entity.data),
@@ -78,14 +94,28 @@ class SmartAlbumsService {
       );
 
       if (sconfigs.containsKey(config.collectionId)) {
-        // Merge with existing config if it exists
+        final existingConfig = sconfigs[config.collectionId]!;
+        final configToKeep = config.updatedAt < existingConfig.updatedAt
+            ? config
+            : existingConfig;
+        final configToDelete = config.updatedAt < existingConfig.updatedAt
+            ? existingConfig
+            : config;
+        collectionToRemote[configToKeep.collectionId] = (
+          configToKeep.remoteId!,
+          {
+            ...?collectionToRemote[configToKeep.collectionId]?.$2,
+            configToDelete.remoteId!,
+          },
+        );
+
         config = sconfigs[config.collectionId]!.merge(config);
       }
 
       sconfigs[config.collectionId] = config;
     }
 
-    return sconfigs;
+    return (sconfigs, collectionToRemote);
   }
 
   Future<void> syncSmartAlbums() async {
@@ -172,5 +202,12 @@ class SmartAlbumsService {
     );
     _lastCacheRefreshTime = 0; // Invalidate cache
     return result;
+  }
+
+  Future<void> _deleteEntry({
+    required String id,
+  }) async {
+    await entityService.deleteEntry(id);
+    _lastCacheRefreshTime = 0; // Invalidate cache
   }
 }

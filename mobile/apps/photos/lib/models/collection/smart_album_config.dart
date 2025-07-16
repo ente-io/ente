@@ -116,7 +116,7 @@ class SmartAlbumConfig {
       return b;
     }
     return SmartAlbumConfig(
-      remoteId: remoteId ?? b.remoteId,
+      remoteId: b.updatedAt <= updatedAt ? b.remoteId : remoteId,
       collectionId: b.collectionId,
       personIDs: personIDs.union(b.personIDs),
       infoMap: {
