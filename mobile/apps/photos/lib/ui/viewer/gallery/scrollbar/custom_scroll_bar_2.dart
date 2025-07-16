@@ -55,6 +55,7 @@ class _CustomScrollBar2State extends State<CustomScrollBar2> {
   final _scrollbarKey = GlobalKey();
   List<({double position, String title})>? positionToTitleMap;
   static const _bottomPadding = 92.0;
+  static const _topPadding = 20.0;
   double? heightOfScrollbarDivider;
   double? heightOfScrollTrack;
   late bool _showScrollbarDivisions;
@@ -191,7 +192,7 @@ class _CustomScrollBar2State extends State<CustomScrollBar2> {
           () => renderBox!.size.height,
           id: "getHeightOfScrollTrack",
         )
-        .then((value) => value - _bottomPadding);
+        .then((value) => value - _bottomPadding - _topPadding);
   }
 
   @override
@@ -203,7 +204,8 @@ class _CustomScrollBar2State extends State<CustomScrollBar2> {
         // This media query is used to adjust the bottom padding of the scrollbar
         MediaQuery(
           data: MediaQuery.of(context).copyWith(
-            padding: const EdgeInsets.only(bottom: _bottomPadding),
+            padding:
+                const EdgeInsets.only(bottom: _bottomPadding, top: _topPadding),
           ),
           child: ScrollbarWithUseNotifer(
             key: _scrollbarKey,
@@ -216,27 +218,33 @@ class _CustomScrollBar2State extends State<CustomScrollBar2> {
         ),
         positionToTitleMap == null || heightOfScrollbarDivider == null
             ? const SizedBox.shrink()
-            : ValueListenableBuilder<bool>(
-                valueListenable: widget.inUseNotifier,
-                builder: (context, inUse, _) {
-                  return AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 250),
-                    switchInCurve: Curves.easeInOut,
-                    switchOutCurve: Curves.easeInOut,
-                    child: !inUse
-                        ? const SizedBox.shrink()
-                        : Stack(
-                            clipBehavior: Clip.none,
-                            children: positionToTitleMap!.map((record) {
-                              return Positioned(
-                                top: record.position,
-                                right: 32,
-                                child: ScrollBarDivider(title: record.title),
-                              );
-                            }).toList(),
-                          ),
-                  );
-                },
+            : Padding(
+                padding: const EdgeInsets.only(
+                  top: _topPadding,
+                  bottom: _bottomPadding,
+                ),
+                child: ValueListenableBuilder<bool>(
+                  valueListenable: widget.inUseNotifier,
+                  builder: (context, inUse, _) {
+                    return AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 250),
+                      switchInCurve: Curves.easeInOut,
+                      switchOutCurve: Curves.easeInOut,
+                      child: !inUse
+                          ? const SizedBox.shrink()
+                          : Stack(
+                              clipBehavior: Clip.none,
+                              children: positionToTitleMap!.map((record) {
+                                return Positioned(
+                                  top: record.position,
+                                  right: 32,
+                                  child: ScrollBarDivider(title: record.title),
+                                );
+                              }).toList(),
+                            ),
+                    );
+                  },
+                ),
               ),
       ],
     );
