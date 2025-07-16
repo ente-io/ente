@@ -782,10 +782,7 @@ const getTemplateColumns = (
     groups?: number[],
 ): string =>
     groups
-        ? groups
-              .map((x) => `repeat(${x}, ${itemWidth}px)`)
-              // Space between date groups
-              .join(` 44px `)
+        ? groups.map((x) => `repeat(${x}, ${itemWidth}px)`).join(" 44px ")
         : `repeat(${columns},${itemWidth}px)`;
 
 const ListContainer = styled(Box, {
@@ -848,8 +845,8 @@ const NoFilesContainer = styled(ListItemContainer)`
     justify-content: center;
 `;
 
-interface ItemData {
-    timeStampList: TimeStampListItem[];
+interface FileListItemData {
+    items: TimeStampListItem[];
     layoutParams: ThumbnailGridLayoutParams;
     renderListItem: (
         timeStampListItem: TimeStampListItem,
@@ -859,13 +856,13 @@ interface ItemData {
 
 const createItemData = memoize(
     (
-        timeStampList: TimeStampListItem[],
+        items: TimeStampListItem[],
         layoutParams: ThumbnailGridLayoutParams,
         renderListItem: (
             timeStampListItem: TimeStampListItem,
             isScrolling?: boolean,
         ) => React.JSX.Element,
-    ): ItemData => ({ timeStampList, layoutParams, renderListItem }),
+    ): FileListItemData => ({ items, layoutParams, renderListItem }),
 );
 
 const PhotoListRow = React.memo(
@@ -874,17 +871,18 @@ const PhotoListRow = React.memo(
         style,
         isScrolling,
         data,
-    }: ListChildComponentProps<ItemData>) => {
-        const { timeStampList, layoutParams, renderListItem } = data;
+    }: ListChildComponentProps<FileListItemData>) => {
+        const { items, layoutParams, renderListItem } = data;
+        const item = items[index]!;
         return (
             <ListItem style={style}>
                 <ListContainer
                     gridTemplateColumns={getTemplateColumns(
                         layoutParams,
-                        timeStampList[index]!.groups,
+                        item.groups,
                     )}
                 >
-                    {renderListItem(timeStampList[index]!, isScrolling)}
+                    {renderListItem(item, isScrolling)}
                 </ListContainer>
             </ListItem>
         );
