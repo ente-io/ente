@@ -8,7 +8,6 @@ import (
 	"github.com/ente-io/museum/pkg/repo/public"
 
 	"github.com/ente-io/museum/ente"
-	enteJWT "github.com/ente-io/museum/ente/jwt"
 	emailCtrl "github.com/ente-io/museum/pkg/controller/email"
 	"github.com/ente-io/museum/pkg/repo"
 	"github.com/ente-io/museum/pkg/utils/auth"
@@ -16,7 +15,6 @@ import (
 	"github.com/ente-io/museum/pkg/utils/time"
 	"github.com/ente-io/stacktrace"
 	"github.com/gin-gonic/gin"
-	"github.com/golang-jwt/jwt"
 	"github.com/lithammer/shortuuid/v3"
 	"github.com/sirupsen/logrus"
 )
@@ -94,7 +92,7 @@ func (c *CollectionLinkController) CreateLink(ctx context.Context, req ente.Crea
 }
 
 func (c *CollectionLinkController) GetActiveCollectionLinkToken(ctx context.Context, collectionID int64) (ente.CollectionLinkRow, error) {
-	return c.PublicCollectionRepo.GetActivePublicCollectionToken(ctx, collectionID)
+	return c.PublicCollectionRepo.GetActiveCollectionLinkRow(ctx, collectionID)
 }
 
 func (c *CollectionLinkController) CreateFile(ctx *gin.Context, file ente.File, app ente.App) (ente.File, error) {
@@ -126,7 +124,7 @@ func (c *CollectionLinkController) Disable(ctx context.Context, cID int64) error
 }
 
 func (c *CollectionLinkController) UpdateSharedUrl(ctx context.Context, req ente.UpdatePublicAccessTokenRequest) (ente.PublicURL, error) {
-	publicCollectionToken, err := c.PublicCollectionRepo.GetActivePublicCollectionToken(ctx, req.CollectionID)
+	publicCollectionToken, err := c.PublicCollectionRepo.GetActiveCollectionLinkRow(ctx, req.CollectionID)
 	if err != nil {
 		return ente.PublicURL{}, err
 	}
@@ -180,50 +178,15 @@ func (c *CollectionLinkController) UpdateSharedUrl(ctx context.Context, req ente
 // attack for guessing password.
 func (c *CollectionLinkController) VerifyPassword(ctx *gin.Context, req ente.VerifyPasswordRequest) (*ente.VerifyPasswordResponse, error) {
 	accessContext := auth.MustGetPublicAccessContext(ctx)
-	publicCollectionToken, err := c.PublicCollectionRepo.GetActivePublicCollectionToken(ctx, accessContext.CollectionID)
+	collectionLinkRow, err := c.PublicCollectionRepo.GetActiveCollectionLinkRow(ctx, accessContext.CollectionID)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "failed to get public collection info")
 	}
-	if publicCollectionToken.PassHash == nil || *publicCollectionToken.PassHash == "" {
-		return nil, stacktrace.Propagate(ente.ErrBadRequest, "password is not configured for the link")
-	}
-	if req.PassHash != *publicCollectionToken.PassHash {
-		return nil, stacktrace.Propagate(ente.ErrInvalidPassword, "incorrect password for link")
-	}
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &enteJWT.LinkPasswordClaim{
-		PassHash:   req.PassHash,
-		ExpiryTime: time.NDaysFromNow(365),
-	})
-	// Sign and get the complete encoded token as a string using the secret
-	tokenString, err := token.SignedString(c.JwtSecret)
-
-	if err != nil {
-		return nil, stacktrace.Propagate(err, "")
-	}
-	return &ente.VerifyPasswordResponse{
-		JWTToken: tokenString,
-	}, nil
+	return verifyPassword(c.JwtSecret, collectionLinkRow.PassHash, req)
 }
 
 func (c *CollectionLinkController) ValidateJWTToken(ctx *gin.Context, jwtToken string, passwordHash string) error {
-	token, err := jwt.ParseWithClaims(jwtToken, &enteJWT.LinkPasswordClaim{}, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return stacktrace.Propagate(fmt.Errorf("unexpected signing method: %v", token.Header["alg"]), ""), nil
-		}
-		return c.JwtSecret, nil
-	})
-	if err != nil {
-		return stacktrace.Propagate(err, "JWT parsed failed")
-	}
-	claims, ok := token.Claims.(*enteJWT.LinkPasswordClaim)
-
-	if !ok {
-		return stacktrace.Propagate(errors.New("no claim in jwt token"), "")
-	}
-	if token.Valid && claims.PassHash == passwordHash {
-		return nil
-	}
-	return ente.ErrInvalidPassword
+	return validateJWTToken(c.JwtSecret, jwtToken, passwordHash)
 }
 
 // ReportAbuse captures abuse report for a publicly shared collection.

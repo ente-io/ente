@@ -51,8 +51,8 @@ type FileUrl struct {
 	CreatedAt      int64   `json:"createdAt"`
 }
 
-type PublicFileAccessContext struct {
-	ID        string
+type FileLinkAccessContext struct {
+	LinkID    string
 	IP        string
 	UserAgent string
 	FileID    int64

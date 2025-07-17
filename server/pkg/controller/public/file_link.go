@@ -34,6 +34,23 @@ func (c *FileLinkController) CreateLink(ctx *gin.Context, req ente.CreateFileUrl
 	return nil, stacktrace.Propagate(err, "failed to create public file link")
 }
 
+// VerifyPassword verifies if the user has provided correct pw hash. If yes, it returns a signed jwt token which can be
+// used by the client to pass in other requests for public collection.
+// Having a separate endpoint for password validation allows us to easily rate-limit the attempts for brute-force
+// attack for guessing password.
+func (c *FileLinkController) VerifyPassword(ctx *gin.Context, req ente.VerifyPasswordRequest) (*ente.VerifyPasswordResponse, error) {
+	accessContext := auth.MustGetFileLinkAccessContext(ctx)
+	collectionLinkRow, err := c.FileLinkRepo.GetActiveFileUrlToken(ctx, accessContext.FileID)
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "failed to get public collection info")
+	}
+	return verifyPassword(c.JwtSecret, collectionLinkRow.PassHash, req)
+}
+
+func (c *FileLinkController) ValidateJWTToken(ctx *gin.Context, jwtToken string, passwordHash string) error {
+	return validateJWTToken(c.JwtSecret, jwtToken, passwordHash)
+}
+
 func (c *FileLinkController) mapRowToFileUrl(ctx *gin.Context, row *ente.FileLinkRow) *ente.FileUrl {
 	app := auth.GetApp(ctx)
 	var url string

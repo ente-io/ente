@@ -133,6 +133,10 @@ func MustGetPublicAccessContext(c *gin.Context) ente.PublicAccessContext {
 	return c.MustGet(PublicAccessKey).(ente.PublicAccessContext)
 }
 
+func MustGetFileLinkAccessContext(c *gin.Context) *ente.FileLinkAccessContext {
+	return c.MustGet(FileLinkAccessKey).(*ente.FileLinkAccessContext)
+}
+
 func GetCastCtx(c *gin.Context) cast.AuthContext {
 	return c.MustGet(CastContext).(cast.AuthContext)
 }

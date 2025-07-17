@@ -25,12 +25,12 @@ var filePasswordWhiteListedURLs = []string{"/public-collection/info", "/public-c
 
 // FileLinkMiddleware intercepts and authenticates incoming requests
 type FileLinkMiddleware struct {
-	FileLinkRepo         *public.FileLinkRepository
-	PublicCollectionCtrl *publicCtrl.CollectionLinkController
-	CollectionRepo       *repo.CollectionRepository
-	Cache                *cache.Cache
-	BillingCtrl          *controller.BillingController
-	DiscordController    *discord.DiscordController
+	FileLinkRepo      *public.FileLinkRepository
+	FileLinkCtrl      *publicCtrl.FileLinkController
+	CollectionRepo    *repo.CollectionRepository
+	Cache             *cache.Cache
+	BillingCtrl       *controller.BillingController
+	DiscordController *discord.DiscordController
 }
 
 // Authenticate returns a middle ware that extracts the `X-Auth-Access-Token`
@@ -48,27 +48,27 @@ func (m *FileLinkMiddleware) Authenticate(urlSanitizer func(_ *gin.Context) stri
 
 		cacheKey := computeHashKeyForList([]string{accessToken, clientIP, userAgent}, ":")
 		cachedValue, cacheHit := m.Cache.Get(cacheKey)
-		var publicCollectionSummary *ente.FileLinkRow
+		var fileLinkRow *ente.FileLinkRow
 		var err error
 		if !cacheHit {
-			publicCollectionSummary, err = m.FileLinkRepo.GetFileUrlRowByToken(c, accessToken)
+			fileLinkRow, err = m.FileLinkRepo.GetFileUrlRowByToken(c, accessToken)
 			if err != nil {
 				c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "invalid token"})
 				return
 			}
-			if publicCollectionSummary.IsDisabled {
+			if fileLinkRow.IsDisabled {
 				c.AbortWithStatusJSON(http.StatusGone, gin.H{"error": "disabled token"})
 				return
 			}
 			// validate if user still has active paid subscription
-			if err = m.BillingCtrl.HasActiveSelfOrFamilySubscription(publicCollectionSummary.OwnerID, true); err != nil {
+			if err = m.BillingCtrl.HasActiveSelfOrFamilySubscription(fileLinkRow.OwnerID, true); err != nil {
 				logrus.WithError(err).Warn("failed to verify active paid subscription")
 				c.AbortWithStatusJSON(http.StatusGone, gin.H{"error": "no active subscription"})
 				return
 			}
 
 			// validate device limit
-			reached, err := m.isDeviceLimitReached(c, publicCollectionSummary, clientIP, userAgent)
+			reached, err := m.isDeviceLimitReached(c, fileLinkRow, clientIP, userAgent)
 			if err != nil {
 				logrus.WithError(err).Error("failed to check device limit")
 				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "something went wrong"})
@@ -79,19 +79,19 @@ func (m *FileLinkMiddleware) Authenticate(urlSanitizer func(_ *gin.Context) stri
 				return
 			}
 		} else {
-			publicCollectionSummary = cachedValue.(*ente.FileLinkRow)
+			fileLinkRow = cachedValue.(*ente.FileLinkRow)
 		}
 
-		if publicCollectionSummary.ValidTill > 0 && // expiry time is defined, 0 indicates no expiry
-			publicCollectionSummary.ValidTill < time.Microseconds() {
+		if fileLinkRow.ValidTill > 0 && // expiry time is defined, 0 indicates no expiry
+			fileLinkRow.ValidTill < time.Microseconds() {
 			c.AbortWithStatusJSON(http.StatusGone, gin.H{"error": "expired token"})
 			return
 		}
 
 		// checks password protected public collection
-		if publicCollectionSummary.PassHash != nil && *publicCollectionSummary.PassHash != "" {
+		if fileLinkRow.PassHash != nil && *fileLinkRow.PassHash != "" {
 			reqPath := urlSanitizer(c)
-			if err = m.validatePassword(c, reqPath, publicCollectionSummary); err != nil {
+			if err = m.validatePassword(c, reqPath, fileLinkRow); err != nil {
 				logrus.WithError(err).Warn("password validation failed")
 				c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err})
 				return
@@ -99,14 +99,14 @@ func (m *FileLinkMiddleware) Authenticate(urlSanitizer func(_ *gin.Context) stri
 		}
 
 		if !cacheHit {
-			m.Cache.Set(cacheKey, publicCollectionSummary, cache.DefaultExpiration)
+			m.Cache.Set(cacheKey, fileLinkRow, cache.DefaultExpiration)
 		}
 
-		c.Set(auth.FileLinkAccessKey, &ente.PublicFileAccessContext{
-			ID:        publicCollectionSummary.LinkID,
+		c.Set(auth.FileLinkAccessKey, &ente.FileLinkAccessContext{
+			LinkID:    fileLinkRow.LinkID,
 			IP:        clientIP,
 			UserAgent: userAgent,
-			FileID:    publicCollectionSummary.FileID,
+			FileID:    fileLinkRow.FileID,
 		})
 		c.Next()
 	}
@@ -168,5 +168,5 @@ func (m *FileLinkMiddleware) validatePassword(c *gin.Context, reqPath string,
 	if accessTokenJWT == "" {
 		return ente.ErrAuthenticationRequired
 	}
-	return m.PublicCollectionCtrl.ValidateJWTToken(c, accessTokenJWT, *fileLinkRow.PassHash)
+	return m.FileLinkCtrl.ValidateJWTToken(c, accessTokenJWT, *fileLinkRow.PassHash)
 }
