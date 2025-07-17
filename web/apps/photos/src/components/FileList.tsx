@@ -84,6 +84,18 @@ type FileListItem = {
      * behaviour.
      */
     tag?: "date" | "file" | "span";
+    /**
+     * Groups of items that are shown in the row.
+     *
+     * Each group spans multiple columns (the number of columns being given by
+     * the length of {@link annotatedFiles} or the {@link span}). Groups are
+     * separated by gaps.
+     */
+    fGroups?: {
+        annotatedFiles: FileListAnnotatedFile[];
+        annotatedFilesStartIndex: number;
+    }[];
+    dGroups?: { date: string; span: number }[];
     items?: FileListAnnotatedFile[];
     itemStartIndex?: number;
     date?: string | null;
@@ -319,9 +331,10 @@ export const FileList: React.FC<FileListProps> = ({
                     });
                 }
             }
+            if (!isSmallerLayout) {
+                items = mergeRowsWherePossible(items, columns);
+            }
         }
-
-        if (!isSmallerLayout) items = mergeRowsWherePossible(items, columns);
 
         if (!annotatedFiles.length) {
             items.push({
