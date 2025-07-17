@@ -735,7 +735,7 @@ class _PinnedGroupHeaderState extends State<PinnedGroupHeader> {
             valueListenable: _enlargeHeader,
             builder: (context, inUse, _) {
               return AnimatedScale(
-                scale: inUse ? 1.3 : 1.0,
+                scale: inUse ? 1.2 : 1.0,
                 alignment: Alignment.topLeft,
                 duration: const Duration(milliseconds: 200),
                 curve: Curves.easeInOutSine,
