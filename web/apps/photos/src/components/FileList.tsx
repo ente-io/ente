@@ -7,12 +7,11 @@ import Avatar from "components/Avatar";
 import type { LocalUser } from "ente-accounts/services/user";
 import { assertionFailed } from "ente-base/assert";
 import { Overlay } from "ente-base/components/containers";
-import { isSameDay } from "ente-base/date";
 import { formattedDateRelative } from "ente-base/i18n-date";
 import log from "ente-base/log";
 import { downloadManager } from "ente-gallery/services/download";
 import type { EnteFile } from "ente-media/file";
-import { fileCreationTime, fileDurationString } from "ente-media/file-metadata";
+import { fileDurationString } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
 import { GAP_BTW_TILES } from "ente-new/photos/components/FileList";
 import type { GalleryBarMode } from "ente-new/photos/components/gallery/reducer";
@@ -321,13 +320,20 @@ export const FileList: React.FC<FileListProps> = ({
                         },
                     ],
                 });
-                items.push({
-                    height: fileItemHeight,
-                    tag: "file",
-                    fGroups: [
-                        { annotatedFiles: split, annotatedFilesStartIndex: i },
-                    ],
-                });
+
+                items = items.concat(
+                    batch(split, columns).map((batchFiles, batchIndex) => ({
+                        height: fileItemHeight,
+                        tag: "file",
+                        fGroups: [
+                            {
+                                annotatedFiles: batchFiles,
+                                annotatedFilesStartIndex:
+                                    i + batchIndex * columns,
+                            },
+                        ],
+                    })),
+                );
                 i += split.length;
             }
             // TODO(RE):
@@ -524,243 +530,99 @@ export const FileList: React.FC<FileListProps> = ({
             const haveSelection = selected.count > 0;
             switch (listItem.tag) {
                 case "date":
-                    if (listItem.dGroups) {
-                        return intersperseWithGaps(
-                            listItem.dGroups,
-                            ({ date, dateSpan }) => (
-                                <DateListItem
-                                    key={date}
-                                    span={
-                                        dateSpan == 1
-                                            ? layoutParams.columns
-                                            : dateSpan /* TODO(RE) */
-                                    }
-                                >
-                                    {haveSelection && (
-                                        <Checkbox
-                                            key={date}
-                                            name={date}
-                                            checked={checkedTimelineDateStrings.has(
-                                                date,
-                                            )}
-                                            onChange={() =>
-                                                onChangeSelectAllCheckBox(date)
-                                            }
-                                            size="small"
-                                            sx={{ pl: 0 }}
-                                        />
-                                    )}
-                                    {date}
-                                </DateListItem>
-                            ),
-                            ({ date }) => <div key={`${date}-gap`} />,
-                        );
-                    }
-                    return listItem.dates ? (
-                        listItem.dates
-                            .map((item) => [
-                                <DateListItem key={item.date} span={item.span}>
-                                    {haveSelection && (
-                                        <Checkbox
-                                            key={item.date}
-                                            name={item.date}
-                                            checked={checkedTimelineDateStrings.has(
-                                                item.date,
-                                            )}
-                                            onChange={() =>
-                                                onChangeSelectAllCheckBox(
-                                                    item.date,
-                                                )
-                                            }
-                                            size="small"
-                                            sx={{ pl: 0 }}
-                                        />
-                                    )}
-                                    {item.date}
-                                </DateListItem>,
-                                <div key={`${item.date}-gap`} />,
-                            ])
-                            .flat()
-                    ) : (
-                        <DateListItem span={layoutParams.columns}>
-                            {haveSelection && (
-                                <Checkbox
-                                    key={listItem.date}
-                                    name={listItem.date!}
-                                    checked={checkedTimelineDateStrings.has(
-                                        listItem.date!,
-                                    )}
-                                    onChange={() =>
-                                        onChangeSelectAllCheckBox(
-                                            listItem.date!,
-                                        )
-                                    }
-                                    size="small"
-                                    sx={{ pl: 0 }}
-                                />
-                            )}
-                            {listItem.date}
-                        </DateListItem>
+                    return intersperseWithGaps(
+                        listItem.dGroups!,
+                        ({ date, dateSpan }) => [
+                            <DateListItem
+                                key={date}
+                                span={
+                                    dateSpan == 1
+                                        ? layoutParams.columns
+                                        : dateSpan /* TODO(RE) */
+                                }
+                            >
+                                {haveSelection && (
+                                    <Checkbox
+                                        key={date}
+                                        name={date}
+                                        checked={checkedTimelineDateStrings.has(
+                                            date,
+                                        )}
+                                        onChange={() =>
+                                            onChangeSelectAllCheckBox(date)
+                                        }
+                                        size="small"
+                                        sx={{ pl: 0 }}
+                                    />
+                                )}
+                                {date}
+                            </DateListItem>,
+                        ],
+                        ({ date }) => <div key={`${date}-gap`} />,
                     );
-                case "file": {
-                    if (listItem.fGroups) {
-                        return listItem.fGroups
-                            .map(
-                                (
-                                    {
-                                        annotatedFiles,
-                                        annotatedFilesStartIndex,
-                                    },
-                                    i,
-                                ) => [
-                                    ...annotatedFiles.map(
-                                        (annotatedFile, j) => {
-                                            const file = annotatedFile.file;
-                                            const index =
-                                                annotatedFilesStartIndex + j;
-                                            return (
-                                                <FileThumbnail
-                                                    key={`tile-${file.id}-selected-${selected[file.id] ?? false}`}
-                                                    {...{
-                                                        user,
-                                                        emailByUserID,
-                                                        enableSelect,
-                                                    }}
-                                                    file={file}
-                                                    selected={
-                                                        (!mode
-                                                            ? selected.collectionID ===
-                                                              activeCollectionID
-                                                            : mode ==
-                                                                  selected
-                                                                      .context
-                                                                      ?.mode &&
-                                                              (selected.context
-                                                                  .mode ==
-                                                              "people"
-                                                                  ? selected
-                                                                        .context
-                                                                        .personID ==
-                                                                    activePersonID
-                                                                  : selected
-                                                                        .context
-                                                                        .collectionID ==
-                                                                    activeCollectionID)) &&
-                                                        !!selected[file.id]
-                                                    }
-                                                    selectOnClick={
-                                                        selected.count > 0
-                                                    }
-                                                    isRangeSelectActive={
-                                                        isShiftKeyPressed &&
-                                                        selected.count > 0
-                                                    }
-                                                    isInSelectRange={
-                                                        rangeStartIndex !==
-                                                            undefined &&
-                                                        hoverIndex !==
-                                                            undefined &&
-                                                        ((index >=
-                                                            rangeStartIndex &&
-                                                            index <=
-                                                                hoverIndex) ||
-                                                            (index >=
-                                                                hoverIndex &&
-                                                                index <=
-                                                                    rangeStartIndex))
-                                                    }
-                                                    activeCollectionID={
-                                                        activeCollectionID
-                                                    }
-                                                    showPlaceholder={
-                                                        isScrolling
-                                                    }
-                                                    isFav={
-                                                        !!favoriteFileIDs?.has(
-                                                            file.id,
-                                                        )
-                                                    }
-                                                    onClick={() =>
-                                                        onItemClick(index)
-                                                    }
-                                                    onSelect={handleSelect(
-                                                        file,
-                                                        index,
-                                                    )}
-                                                    onHover={() =>
-                                                        setHoverIndex(index)
-                                                    }
-                                                    onRangeSelect={() =>
-                                                        handleRangeSelect(index)
-                                                    }
-                                                />
-                                            );
-                                        },
-                                    ),
-                                    <div
-                                        key={`gap-files-${annotatedFilesStartIndex}-${i}`}
-                                    />,
-                                ],
-                            )
-                            .flat();
-                    }
-                    const ret = listItem.items!.map(({ file }, i) => {
-                        const index = listItem.itemStartIndex! + i;
-                        return (
-                            <FileThumbnail
-                                key={`tile-${file.id}-selected-${selected[file.id] ?? false}`}
-                                {...{ user, emailByUserID, enableSelect }}
-                                file={file}
-                                selected={
-                                    (!mode
-                                        ? selected.collectionID ===
-                                          activeCollectionID
-                                        : mode == selected.context?.mode &&
-                                          (selected.context.mode == "people"
-                                              ? selected.context.personID ==
-                                                activePersonID
-                                              : selected.context.collectionID ==
-                                                activeCollectionID)) &&
-                                    !!selected[file.id]
-                                }
-                                selectOnClick={selected.count > 0}
-                                isRangeSelectActive={
-                                    isShiftKeyPressed && selected.count > 0
-                                }
-                                isInSelectRange={
-                                    rangeStartIndex !== undefined &&
-                                    hoverIndex !== undefined &&
-                                    ((index >= rangeStartIndex &&
-                                        index <= hoverIndex) ||
-                                        (index >= hoverIndex &&
-                                            index <= rangeStartIndex))
-                                }
-                                activeCollectionID={activeCollectionID}
-                                showPlaceholder={isScrolling}
-                                isFav={!!favoriteFileIDs?.has(file.id)}
-                                onClick={() => onItemClick(index)}
-                                onSelect={handleSelect(file, index)}
-                                onHover={() => setHoverIndex(index)}
-                                onRangeSelect={() => handleRangeSelect(index)}
+                case "file":
+                    return intersperseWithGaps(
+                        listItem.fGroups!,
+                        ({ annotatedFiles, annotatedFilesStartIndex }) =>
+                            annotatedFiles.map((annotatedFile, j) => {
+                                const file = annotatedFile.file;
+                                const index = annotatedFilesStartIndex + j;
+                                return (
+                                    <FileThumbnail
+                                        key={`tile-${file.id}-selected-${selected[file.id] ?? false}`}
+                                        {...{
+                                            user,
+                                            emailByUserID,
+                                            enableSelect,
+                                        }}
+                                        file={file}
+                                        selected={
+                                            (!mode
+                                                ? selected.collectionID ===
+                                                  activeCollectionID
+                                                : mode ==
+                                                      selected.context?.mode &&
+                                                  (selected.context.mode ==
+                                                  "people"
+                                                      ? selected.context
+                                                            .personID ==
+                                                        activePersonID
+                                                      : selected.context
+                                                            .collectionID ==
+                                                        activeCollectionID)) &&
+                                            !!selected[file.id]
+                                        }
+                                        selectOnClick={selected.count > 0}
+                                        isRangeSelectActive={
+                                            isShiftKeyPressed &&
+                                            selected.count > 0
+                                        }
+                                        isInSelectRange={
+                                            rangeStartIndex !== undefined &&
+                                            hoverIndex !== undefined &&
+                                            ((index >= rangeStartIndex &&
+                                                index <= hoverIndex) ||
+                                                (index >= hoverIndex &&
+                                                    index <= rangeStartIndex))
+                                        }
+                                        activeCollectionID={activeCollectionID}
+                                        showPlaceholder={isScrolling}
+                                        isFav={!!favoriteFileIDs?.has(file.id)}
+                                        onClick={() => onItemClick(index)}
+                                        onSelect={handleSelect(file, index)}
+                                        onHover={() => setHoverIndex(index)}
+                                        onRangeSelect={() =>
+                                            handleRangeSelect(index)
+                                        }
+                                    />
+                                );
+                            }),
+                        ({ annotatedFilesStartIndex }) => (
+                            <div
+                                key={`gap-files-${annotatedFilesStartIndex}`}
                             />
-                        );
-                    });
-                    if (listItem.groups) {
-                        let sum = 0;
-                        for (let i = 0; i < listItem.groups.length - 1; i++) {
-                            sum = sum + listItem.groups[i]!;
-                            ret.splice(
-                                sum,
-                                0,
-                                <div
-                                    key={`${listItem.items![0]!.file.id}-gap-${i}`}
-                                />,
-                            );
-                            sum += 1;
-                        }
-                    }
-                    return ret;
-                }
+                        ),
+                    );
                 default:
                     return listItem.component;
             }
@@ -946,12 +808,16 @@ const mergeRowsWherePossible = (
 };
 
 /**
- * For each element of {@link xs}, obtain an element by applying {@link f},
+ * For each element of {@link xs}, obtain an array by applying {@link f},
  * then obtain a gap element by applying {@link g}. Return a flattened array
  * containing all of these, except the trailing gap.
  */
-const intersperseWithGaps = <T, U>(xs: T[], f: (x: T) => U, g: (x: T) => U) => {
-    const ys = xs.map((x) => [f(x), g(x)]).flat();
+const intersperseWithGaps = <T, U>(
+    xs: T[],
+    f: (x: T) => U[],
+    g: (x: T) => U,
+) => {
+    const ys = xs.map((x) => [...f(x), g(x)]).flat();
     return ys.slice(0, ys.length - 1);
 };
 
