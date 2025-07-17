@@ -30,7 +30,6 @@ import "package:photos/utils/misc_util.dart";
 import "package:photos/utils/standalone/date_time.dart";
 import "package:photos/utils/standalone/debouncer.dart";
 import "package:photos/utils/widget_util.dart";
-import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 typedef GalleryLoader = Future<FileLoadResult> Function(
   int creationStartTime,
@@ -117,7 +116,6 @@ class GalleryState extends State<Gallery> {
   late Logger _logger;
   List<List<EnteFile>> currentGroupedFiles = [];
   bool _hasLoadedFiles = false;
-  late ItemScrollController _itemScroller;
   StreamSubscription<FilesUpdatedEvent>? _reloadEventSubscription;
   StreamSubscription<TabDoubleTapEvent>? _tabDoubleTapEvent;
   final _forceReloadEventSubscriptions = <StreamSubscription<Event>>[];
@@ -147,7 +145,6 @@ class GalleryState extends State<Gallery> {
       leading: true,
     );
     _sortOrderAsc = widget.sortAsyncFn != null ? widget.sortAsyncFn!() : false;
-    _itemScroller = ItemScrollController();
     if (widget.reloadEvent != null) {
       _reloadEventSubscription = widget.reloadEvent!.listen((event) async {
         bool shouldReloadFromDB = true;
@@ -447,7 +444,6 @@ class GalleryState extends State<Gallery> {
       type: widget.groupType,
       // Replace this with the new gallery and use `_allGalleryFiles`
       // child: MultipleGroupsGalleryView(
-      //   itemScroller: _itemScroller,
       //   groupedFiles: currentGroupedFiles,
       //   disableScroll: widget.disableScroll,
       //   emptyState: widget.emptyState,
