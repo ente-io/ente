@@ -1788,5 +1788,7 @@
   "cLDesc5": "You will now receive an opt-out notification for all the birthdays your have saved on Ente, along with a collection of their best photos.",
   "cLTitle6": "Resumable Uploads and Downloads",
   "cLDesc6": "No more waiting for uploads/downloads to complete before you can close the app. All uploads and downloads now have the ability to be paused midway, and resume from where you left off.",
-  "indexingPausedStatusDescription": "Indexing is paused. It will automatically resume when the device is ready. The device is considered ready when its battery level, battery health, and thermal status are within a healthy range."
+  "indexingPausedStatusDescription": "Indexing is paused. It will automatically resume when the device is ready. The device is considered ready when its battery level, battery health, and thermal status are within a healthy range.",
+  "faceThumbnailGenerationFailed": "Unable to generate face thumbnails",
+  "fileAnalysisFailed": "Unable to analyze file"
 }

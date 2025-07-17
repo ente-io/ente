@@ -42,8 +42,6 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m114(email) =>
       "ما یک ایمیل به <green>${email}</green> ارسال کرده‌ایم";
 
-  static String m115(name) => "Wish \$${name} a happy birthday! 🎉";
-
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
         "aNewVersionOfEnteIsAvailable": MessageLookupByLibrary.simpleMessage(
@@ -426,7 +424,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "weakStrength": MessageLookupByLibrary.simpleMessage("ضعیف"),
         "welcomeBack": MessageLookupByLibrary.simpleMessage("خوش آمدید!"),
         "whatsNew": MessageLookupByLibrary.simpleMessage("تغییرات جدید"),
-        "wishThemAHappyBirthday": m115,
         "yes": MessageLookupByLibrary.simpleMessage("بله"),
         "yesConvertToViewer":
             MessageLookupByLibrary.simpleMessage("بله، تبدیل به بیننده شود"),

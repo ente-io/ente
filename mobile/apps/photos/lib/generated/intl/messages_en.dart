@@ -1005,6 +1005,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Face not clustered yet, please come back later"),
         "faceRecognition":
             MessageLookupByLibrary.simpleMessage("Face recognition"),
+        "faceThumbnailGenerationFailed": MessageLookupByLibrary.simpleMessage(
+            "Unable to generate face thumbnails"),
         "faces": MessageLookupByLibrary.simpleMessage("Faces"),
         "failed": MessageLookupByLibrary.simpleMessage("Failed"),
         "failedToApplyCode":
@@ -1040,6 +1042,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "feastingWithThem": m34,
         "feedback": MessageLookupByLibrary.simpleMessage("Feedback"),
         "file": MessageLookupByLibrary.simpleMessage("File"),
+        "fileAnalysisFailed":
+            MessageLookupByLibrary.simpleMessage("Unable to analyze file"),
         "fileFailedToSaveToGallery": MessageLookupByLibrary.simpleMessage(
             "Failed to save file to gallery"),
         "fileInfoAddDescHint":

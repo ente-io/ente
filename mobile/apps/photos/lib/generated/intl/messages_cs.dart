@@ -32,8 +32,6 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m111(email) => "Ověřit ${email}";
 
-  static String m115(name) => "Wish \$${name} a happy birthday! 🎉";
-
   static String m117(name) => "Vy a ${name}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -80,10 +78,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "archiveAlbum":
             MessageLookupByLibrary.simpleMessage("Archivovat album"),
         "archiving": MessageLookupByLibrary.simpleMessage("Archivování..."),
-        "areThey": MessageLookupByLibrary.simpleMessage("Are they "),
-        "areYouSureRemoveThisFaceFromPerson":
-            MessageLookupByLibrary.simpleMessage(
-                "Are you sure you want to remove this face from this person?"),
         "areYouSureYouWantToLogout":
             MessageLookupByLibrary.simpleMessage("Opravdu se chcete odhlásit?"),
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
@@ -365,8 +359,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "openFile": MessageLookupByLibrary.simpleMessage("Otevřít soubor"),
         "openSettings":
             MessageLookupByLibrary.simpleMessage("Otevřít Nastavení"),
-        "otherDetectedFaces":
-            MessageLookupByLibrary.simpleMessage("Other detected faces"),
         "pair": MessageLookupByLibrary.simpleMessage("Spárovat"),
         "panorama": MessageLookupByLibrary.simpleMessage("Panorama"),
         "password": MessageLookupByLibrary.simpleMessage("Heslo"),
@@ -390,7 +382,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "processing": MessageLookupByLibrary.simpleMessage("Zpracovává se"),
         "publicLinkCreated":
             MessageLookupByLibrary.simpleMessage("Veřejný odkaz vytvořen"),
-        "questionmark": MessageLookupByLibrary.simpleMessage("?"),
         "queued": MessageLookupByLibrary.simpleMessage("Ve frontě"),
         "radius": MessageLookupByLibrary.simpleMessage("Rádius"),
         "rateUs": MessageLookupByLibrary.simpleMessage("Ohodnoť nás"),
@@ -442,8 +433,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "safelyStored":
             MessageLookupByLibrary.simpleMessage("Bezpečně uloženo"),
         "save": MessageLookupByLibrary.simpleMessage("Uložit"),
-        "saveAsAnotherPerson":
-            MessageLookupByLibrary.simpleMessage("Save as another person"),
         "saveCopy": MessageLookupByLibrary.simpleMessage("Uložit kopii"),
         "saveKey": MessageLookupByLibrary.simpleMessage("Uložit klíč"),
         "savePerson": MessageLookupByLibrary.simpleMessage("Uložit osobu"),
@@ -486,10 +475,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "sharedWithMe": MessageLookupByLibrary.simpleMessage("Sdíleno se mnou"),
         "sharedWithYou": MessageLookupByLibrary.simpleMessage("Sdíleno s vámi"),
         "sharing": MessageLookupByLibrary.simpleMessage("Sdílení..."),
-        "showLessFaces":
-            MessageLookupByLibrary.simpleMessage("Show less faces"),
-        "showMoreFaces":
-            MessageLookupByLibrary.simpleMessage("Show more faces"),
         "skip": MessageLookupByLibrary.simpleMessage("Přeskočit"),
         "sorry": MessageLookupByLibrary.simpleMessage("Omlouváme se"),
         "sort": MessageLookupByLibrary.simpleMessage("Seřadit"),
@@ -553,7 +538,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "weakStrength": MessageLookupByLibrary.simpleMessage("Slabé"),
         "welcomeBack": MessageLookupByLibrary.simpleMessage("Vítejte zpět!"),
         "whatsNew": MessageLookupByLibrary.simpleMessage("Co je nového"),
-        "wishThemAHappyBirthday": m115,
         "yearly": MessageLookupByLibrary.simpleMessage("Ročně"),
         "yes": MessageLookupByLibrary.simpleMessage("Ano"),
         "yesCancel": MessageLookupByLibrary.simpleMessage("Ano, zrušit"),
