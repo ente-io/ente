@@ -5,6 +5,7 @@ import (
 	"context"
 	"crypto/sha256"
 	"fmt"
+	public2 "github.com/ente-io/museum/pkg/controller/public"
 	"github.com/ente-io/museum/pkg/repo/public"
 	"net/http"
 
@@ -28,7 +29,7 @@ var whitelistedCollectionShareIDs = []int64{111}
 // CollectionTokenMiddleware intercepts and authenticates incoming requests
 type CollectionTokenMiddleware struct {
 	PublicCollectionRepo *public.PublicCollectionRepository
-	PublicCollectionCtrl *controller.PublicCollectionController
+	PublicCollectionCtrl *public2.CollectionLinkController
 	CollectionRepo       *repo.CollectionRepository
 	Cache                *cache.Cache
 	BillingCtrl          *controller.BillingController
@@ -143,11 +144,11 @@ func (m *CollectionTokenMiddleware) isDeviceLimitReached(ctx context.Context,
 	}
 
 	deviceLimit := int64(collectionSummary.DeviceLimit)
-	if deviceLimit == controller.DeviceLimitThreshold {
-		deviceLimit = controller.DeviceLimitThresholdMultiplier * controller.DeviceLimitThreshold
+	if deviceLimit == public2.DeviceLimitThreshold {
+		deviceLimit = public2.DeviceLimitThresholdMultiplier * public2.DeviceLimitThreshold
 	}
 
-	if count >= controller.DeviceLimitWarningThreshold {
+	if count >= public2.DeviceLimitWarningThreshold {
 		if !array.Int64InList(sharedID, whitelistedCollectionShareIDs) {
 			m.DiscordController.NotifyPotentialAbuse(
 				fmt.Sprintf("Album exceeds warning threshold: {CollectionID: %d, ShareID: %d}",

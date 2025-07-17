@@ -40,8 +40,8 @@ type VerifyPasswordResponse struct {
 	JWTToken string `json:"jwtToken"`
 }
 
-// PublicCollectionToken represents row entity for public_collection_token table
-type PublicCollectionToken struct {
+// CollectionLinkRow represents row entity for public_collection_token table
+type CollectionLinkRow struct {
 	ID             int64
 	CollectionID   int64
 	Token          string
@@ -57,7 +57,7 @@ type PublicCollectionToken struct {
 	EnableJoin     bool
 }
 
-func (p PublicCollectionToken) CanJoin() error {
+func (p CollectionLinkRow) CanJoin() error {
 	if p.IsDisabled {
 		return NewBadRequestWithMessage("link disabled")
 	}

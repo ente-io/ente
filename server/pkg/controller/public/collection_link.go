@@ -1,9 +1,10 @@
-package controller
+package public
 
 import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/ente-io/museum/pkg/controller"
 	"github.com/ente-io/museum/pkg/repo/public"
 
 	"github.com/ente-io/museum/ente"
@@ -50,9 +51,9 @@ const (
 	AbuseLimitExceededTemplate = "report_limit_exceeded_alert.html"
 )
 
-// PublicCollectionController controls share collection operations
-type PublicCollectionController struct {
-	FileController        *FileController
+// CollectionLinkController controls share collection operations
+type CollectionLinkController struct {
+	FileController        *controller.FileController
 	EmailNotificationCtrl *emailCtrl.EmailNotificationController
 	PublicCollectionRepo  *public.PublicCollectionRepository
 	CollectionRepo        *repo.CollectionRepository
@@ -60,7 +61,7 @@ type PublicCollectionController struct {
 	JwtSecret             []byte
 }
 
-func (c *PublicCollectionController) CreateAccessToken(ctx context.Context, req ente.CreatePublicAccessTokenRequest) (ente.PublicURL, error) {
+func (c *CollectionLinkController) CreateLink(ctx context.Context, req ente.CreatePublicAccessTokenRequest) (ente.PublicURL, error) {
 	accessToken := shortuuid.New()[0:AccessTokenLength]
 	err := c.PublicCollectionRepo.
 		Insert(ctx, req.CollectionID, accessToken, req.ValidTill, req.DeviceLimit, req.EnableCollect, req.EnableJoin)
@@ -92,11 +93,11 @@ func (c *PublicCollectionController) CreateAccessToken(ctx context.Context, req 
 	return response, nil
 }
 
-func (c *PublicCollectionController) GetActivePublicCollectionToken(ctx context.Context, collectionID int64) (ente.PublicCollectionToken, error) {
+func (c *CollectionLinkController) GetActiveCollectionLinkToken(ctx context.Context, collectionID int64) (ente.CollectionLinkRow, error) {
 	return c.PublicCollectionRepo.GetActivePublicCollectionToken(ctx, collectionID)
 }
 
-func (c *PublicCollectionController) CreateFile(ctx *gin.Context, file ente.File, app ente.App) (ente.File, error) {
+func (c *CollectionLinkController) CreateFile(ctx *gin.Context, file ente.File, app ente.App) (ente.File, error) {
 	collection, err := c.GetPublicCollection(ctx, true)
 	if err != nil {
 		return ente.File{}, stacktrace.Propagate(err, "")
@@ -119,12 +120,12 @@ func (c *PublicCollectionController) CreateFile(ctx *gin.Context, file ente.File
 }
 
 // Disable all public accessTokens generated for the given cID till date.
-func (c *PublicCollectionController) Disable(ctx context.Context, cID int64) error {
+func (c *CollectionLinkController) Disable(ctx context.Context, cID int64) error {
 	err := c.PublicCollectionRepo.DisableSharing(ctx, cID)
 	return stacktrace.Propagate(err, "")
 }
 
-func (c *PublicCollectionController) UpdateSharedUrl(ctx context.Context, req ente.UpdatePublicAccessTokenRequest) (ente.PublicURL, error) {
+func (c *CollectionLinkController) UpdateSharedUrl(ctx context.Context, req ente.UpdatePublicAccessTokenRequest) (ente.PublicURL, error) {
 	publicCollectionToken, err := c.PublicCollectionRepo.GetActivePublicCollectionToken(ctx, req.CollectionID)
 	if err != nil {
 		return ente.PublicURL{}, err
@@ -177,7 +178,7 @@ func (c *PublicCollectionController) UpdateSharedUrl(ctx context.Context, req en
 // used by the client to pass in other requests for public collection.
 // Having a separate endpoint for password validation allows us to easily rate-limit the attempts for brute-force
 // attack for guessing password.
-func (c *PublicCollectionController) VerifyPassword(ctx *gin.Context, req ente.VerifyPasswordRequest) (*ente.VerifyPasswordResponse, error) {
+func (c *CollectionLinkController) VerifyPassword(ctx *gin.Context, req ente.VerifyPasswordRequest) (*ente.VerifyPasswordResponse, error) {
 	accessContext := auth.MustGetPublicAccessContext(ctx)
 	publicCollectionToken, err := c.PublicCollectionRepo.GetActivePublicCollectionToken(ctx, accessContext.CollectionID)
 	if err != nil {
@@ -189,7 +190,7 @@ func (c *PublicCollectionController) VerifyPassword(ctx *gin.Context, req ente.V
 	if req.PassHash != *publicCollectionToken.PassHash {
 		return nil, stacktrace.Propagate(ente.ErrInvalidPassword, "incorrect password for link")
 	}
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &enteJWT.PublicAlbumPasswordClaim{
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &enteJWT.LinkPasswordClaim{
 		PassHash:   req.PassHash,
 		ExpiryTime: time.NDaysFromNow(365),
 	})
@@ -204,8 +205,8 @@ func (c *PublicCollectionController) VerifyPassword(ctx *gin.Context, req ente.V
 	}, nil
 }
 
-func (c *PublicCollectionController) ValidateJWTToken(ctx *gin.Context, jwtToken string, passwordHash string) error {
-	token, err := jwt.ParseWithClaims(jwtToken, &enteJWT.PublicAlbumPasswordClaim{}, func(token *jwt.Token) (interface{}, error) {
+func (c *CollectionLinkController) ValidateJWTToken(ctx *gin.Context, jwtToken string, passwordHash string) error {
+	token, err := jwt.ParseWithClaims(jwtToken, &enteJWT.LinkPasswordClaim{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return stacktrace.Propagate(fmt.Errorf("unexpected signing method: %v", token.Header["alg"]), ""), nil
 		}
@@ -214,7 +215,7 @@ func (c *PublicCollectionController) ValidateJWTToken(ctx *gin.Context, jwtToken
 	if err != nil {
 		return stacktrace.Propagate(err, "JWT parsed failed")
 	}
-	claims, ok := token.Claims.(*enteJWT.PublicAlbumPasswordClaim)
+	claims, ok := token.Claims.(*enteJWT.LinkPasswordClaim)
 
 	if !ok {
 		return stacktrace.Propagate(errors.New("no claim in jwt token"), "")
@@ -228,7 +229,7 @@ func (c *PublicCollectionController) ValidateJWTToken(ctx *gin.Context, jwtToken
 // ReportAbuse captures abuse report for a publicly shared collection.
 // It will also disable the accessToken for the collection if total abuse reports for the said collection
 // reaches AutoDisableAbuseThreshold
-func (c *PublicCollectionController) ReportAbuse(ctx *gin.Context, req ente.AbuseReportRequest) error {
+func (c *CollectionLinkController) ReportAbuse(ctx *gin.Context, req ente.AbuseReportRequest) error {
 	accessContext := auth.MustGetPublicAccessContext(ctx)
 	readableReason, found := AllowedReasons[req.Reason]
 	if !found {
@@ -254,7 +255,7 @@ func (c *PublicCollectionController) ReportAbuse(ctx *gin.Context, req ente.Abus
 	return nil
 }
 
-func (c *PublicCollectionController) onAbuseReportReceived(collectionID int64, report ente.AbuseReportRequest, readableReason string, abuseCount int64) {
+func (c *CollectionLinkController) onAbuseReportReceived(collectionID int64, report ente.AbuseReportRequest, readableReason string, abuseCount int64) {
 	collection, err := c.CollectionRepo.Get(collectionID)
 	if err != nil {
 		logrus.Error("Could not get collection for abuse report")
@@ -293,7 +294,7 @@ func (c *PublicCollectionController) onAbuseReportReceived(collectionID int64, r
 	}
 }
 
-func (c *PublicCollectionController) HandleAccountDeletion(ctx context.Context, userID int64, logger *logrus.Entry) error {
+func (c *CollectionLinkController) HandleAccountDeletion(ctx context.Context, userID int64, logger *logrus.Entry) error {
 	logger.Info("updating public collection on account deletion")
 	collectionIDs, err := c.PublicCollectionRepo.GetActivePublicTokenForUser(ctx, userID)
 	if err != nil {
@@ -311,7 +312,7 @@ func (c *PublicCollectionController) HandleAccountDeletion(ctx context.Context, 
 
 // GetPublicCollection will return collection info for a public url.
 // is mustAllowCollect is set to true but the underlying collection doesn't allow uploading
-func (c *PublicCollectionController) GetPublicCollection(ctx *gin.Context, mustAllowCollect bool) (ente.Collection, error) {
+func (c *CollectionLinkController) GetPublicCollection(ctx *gin.Context, mustAllowCollect bool) (ente.Collection, error) {
 	accessContext := auth.MustGetPublicAccessContext(ctx)
 	collection, err := c.CollectionRepo.Get(accessContext.CollectionID)
 	if err != nil {

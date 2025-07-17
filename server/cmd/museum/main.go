@@ -6,6 +6,7 @@ import (
 	b64 "encoding/base64"
 	"fmt"
 	"github.com/ente-io/museum/pkg/controller/collections"
+	publicCtrl "github.com/ente-io/museum/pkg/controller/public"
 	"github.com/ente-io/museum/pkg/repo/public"
 	"net/http"
 	"os"
@@ -300,7 +301,7 @@ func main() {
 		UsageRepo:     usageRepo,
 	}
 
-	publicCollectionCtrl := &controller.PublicCollectionController{
+	collectionLinkCtrl := &publicCtrl.CollectionLinkController{
 		FileController:        fileController,
 		EmailNotificationCtrl: emailNotificationCtrl,
 		PublicCollectionRepo:  publicCollectionRepo,
@@ -310,16 +311,16 @@ func main() {
 	}
 
 	collectionController := &collections.CollectionController{
-		CollectionRepo:       collectionRepo,
-		EmailCtrl:            emailNotificationCtrl,
-		AccessCtrl:           accessCtrl,
-		PublicCollectionCtrl: publicCollectionCtrl,
-		UserRepo:             userRepo,
-		FileRepo:             fileRepo,
-		CastRepo:             &castDb,
-		BillingCtrl:          billingController,
-		QueueRepo:            queueRepo,
-		TaskRepo:             taskLockingRepo,
+		CollectionRepo:           collectionRepo,
+		EmailCtrl:                emailNotificationCtrl,
+		AccessCtrl:               accessCtrl,
+		CollectionLinkController: collectionLinkCtrl,
+		UserRepo:                 userRepo,
+		FileRepo:                 fileRepo,
+		CastRepo:                 &castDb,
+		BillingCtrl:              billingController,
+		QueueRepo:                queueRepo,
+		TaskRepo:                 taskLockingRepo,
 	}
 
 	kexCtrl := &kexCtrl.Controller{
@@ -360,7 +361,7 @@ func main() {
 	authMiddleware := middleware.AuthMiddleware{UserAuthRepo: userAuthRepo, Cache: authCache, UserController: userController}
 	collectionTokenMiddleware := middleware.CollectionTokenMiddleware{
 		PublicCollectionRepo: publicCollectionRepo,
-		PublicCollectionCtrl: publicCollectionCtrl,
+		PublicCollectionCtrl: collectionLinkCtrl,
 		CollectionRepo:       collectionRepo,
 		Cache:                accessTokenCache,
 		BillingCtrl:          billingController,
@@ -568,7 +569,7 @@ func main() {
 	privateAPI.PUT("/collections/sharee-magic-metadata", collectionHandler.ShareeMagicMetadataUpdate)
 
 	publicCollectionHandler := &api.PublicCollectionHandler{
-		Controller:             publicCollectionCtrl,
+		Controller:             collectionLinkCtrl,
 		FileCtrl:               fileController,
 		CollectionCtrl:         collectionController,
 		FileDataCtrl:           fileDataCtrl,

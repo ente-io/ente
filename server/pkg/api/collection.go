@@ -3,6 +3,7 @@ package api
 import (
 	"fmt"
 	"github.com/ente-io/museum/pkg/controller/collections"
+	"github.com/ente-io/museum/pkg/controller/public"
 	"net/http"
 	"strconv"
 
@@ -10,7 +11,6 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/ente-io/museum/ente"
-	"github.com/ente-io/museum/pkg/controller"
 	"github.com/ente-io/museum/pkg/utils/auth"
 	"github.com/ente-io/museum/pkg/utils/handler"
 	"github.com/ente-io/museum/pkg/utils/time"
@@ -178,7 +178,7 @@ func (h *CollectionHandler) UpdateShareURL(c *gin.Context) {
 		return
 	}
 
-	if req.DeviceLimit != nil && (*req.DeviceLimit < 0 || *req.DeviceLimit > controller.DeviceLimitThreshold) {
+	if req.DeviceLimit != nil && (*req.DeviceLimit < 0 || *req.DeviceLimit > public.DeviceLimitThreshold) {
 		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, fmt.Sprintf("device limit: %d out of range", *req.DeviceLimit)))
 		return
 	}

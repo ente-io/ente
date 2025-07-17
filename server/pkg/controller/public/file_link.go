@@ -1,8 +1,8 @@
-package controller
+package public
 
 import (
 	"github.com/ente-io/museum/ente"
-	emailCtrl "github.com/ente-io/museum/pkg/controller/email"
+	"github.com/ente-io/museum/pkg/controller"
 	"github.com/ente-io/museum/pkg/repo"
 	"github.com/ente-io/museum/pkg/repo/public"
 	"github.com/ente-io/museum/pkg/utils/auth"
@@ -11,18 +11,16 @@ import (
 	"github.com/lithammer/shortuuid/v3"
 )
 
-// PublicFileLinkController controls share collection operations
-type PublicFileLinkController struct {
-	FileController        *FileController
-	EmailNotificationCtrl *emailCtrl.EmailNotificationController
-	PublicCollectionRepo  *public.PublicCollectionRepository
-	FileLinkRepo          *public.FileLinkRepository
-	CollectionRepo        *repo.CollectionRepository
-	UserRepo              *repo.UserRepository
-	JwtSecret             []byte
+// FileLinkController controls share collection operations
+type FileLinkController struct {
+	FileController *controller.FileController
+	FileLinkRepo   *public.FileLinkRepository
+	CollectionRepo *repo.CollectionRepository
+	UserRepo       *repo.UserRepository
+	JwtSecret      []byte
 }
 
-func (c *PublicFileLinkController) CreateFileUrl(ctx *gin.Context, req ente.CreateFileUrl) (*ente.FileUrl, error) {
+func (c *FileLinkController) CreateLink(ctx *gin.Context, req ente.CreateFileUrl) (*ente.FileUrl, error) {
 	actorUserID := auth.GetUserID(ctx.Request.Header)
 	accessToken := shortuuid.New()[0:AccessTokenLength]
 	_, err := c.FileLinkRepo.Insert(ctx, req.FileID, actorUserID, accessToken)
@@ -36,7 +34,7 @@ func (c *PublicFileLinkController) CreateFileUrl(ctx *gin.Context, req ente.Crea
 	return nil, stacktrace.Propagate(err, "failed to create public file link")
 }
 
-func (c *PublicFileLinkController) mapRowToFileUrl(ctx *gin.Context, row *ente.FileLinkRow) *ente.FileUrl {
+func (c *FileLinkController) mapRowToFileUrl(ctx *gin.Context, row *ente.FileLinkRow) *ente.FileUrl {
 	app := auth.GetApp(ctx)
 	var url string
 	if app == ente.Locker {

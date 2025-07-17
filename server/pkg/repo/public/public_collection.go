@@ -92,26 +92,26 @@ func (pcr *PublicCollectionRepository) GetCollectionToActivePublicURLMap(ctx con
 	return result, nil
 }
 
-// GetActivePublicCollectionToken will return ente.PublicCollectionToken for given collection ID
+// GetActivePublicCollectionToken will return ente.CollectionLinkRow for given collection ID
 // Note: The token could be expired or deviceLimit is already reached
-func (pcr *PublicCollectionRepository) GetActivePublicCollectionToken(ctx context.Context, collectionID int64) (ente.PublicCollectionToken, error) {
+func (pcr *PublicCollectionRepository) GetActivePublicCollectionToken(ctx context.Context, collectionID int64) (ente.CollectionLinkRow, error) {
 	row := pcr.DB.QueryRowContext(ctx, `SELECT id, collection_id, access_token, valid_till, device_limit, 
        is_disabled, pw_hash, pw_nonce, mem_limit, ops_limit, enable_download, enable_collect, enable_join FROM 
                                                    public_collection_tokens WHERE collection_id = $1 and is_disabled = FALSE`,
 		collectionID)
 
 	//defer rows.Close()
-	ret := ente.PublicCollectionToken{}
+	ret := ente.CollectionLinkRow{}
 	err := row.Scan(&ret.ID, &ret.CollectionID, &ret.Token, &ret.ValidTill, &ret.DeviceLimit,
 		&ret.IsDisabled, &ret.PassHash, &ret.Nonce, &ret.MemLimit, &ret.OpsLimit, &ret.EnableDownload, &ret.EnableCollect, &ret.EnableJoin)
 	if err != nil {
-		return ente.PublicCollectionToken{}, stacktrace.Propagate(err, "")
+		return ente.CollectionLinkRow{}, stacktrace.Propagate(err, "")
 	}
 	return ret, nil
 }
 
 // UpdatePublicCollectionToken will update the row for corresponding public collection token
-func (pcr *PublicCollectionRepository) UpdatePublicCollectionToken(ctx context.Context, pct ente.PublicCollectionToken) error {
+func (pcr *PublicCollectionRepository) UpdatePublicCollectionToken(ctx context.Context, pct ente.CollectionLinkRow) error {
 	_, err := pcr.DB.ExecContext(ctx, `UPDATE public_collection_tokens SET valid_till = $1, device_limit = $2, 
                                     pw_hash = $3, pw_nonce = $4, mem_limit = $5, ops_limit = $6, enable_download = $7, enable_collect = $8, enable_join = $9 
                                 where id = $10`,

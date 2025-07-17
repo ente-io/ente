@@ -16,7 +16,7 @@ func (h *FileHandler) ShareUrl(c *gin.Context) {
 		return
 	}
 
-	response, err := h.FileUrlCtrl.CreateFileUrl(c, file)
+	response, err := h.FileUrlCtrl.CreateLink(c, file)
 	if err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return

@@ -3,6 +3,7 @@ package middleware
 import (
 	"context"
 	"fmt"
+	publicCtrl "github.com/ente-io/museum/pkg/controller/public"
 	"github.com/ente-io/museum/pkg/repo/public"
 	"net/http"
 
@@ -25,7 +26,7 @@ var filePasswordWhiteListedURLs = []string{"/public-collection/info", "/public-c
 // FileLinkMiddleware intercepts and authenticates incoming requests
 type FileLinkMiddleware struct {
 	FileLinkRepo         *public.FileLinkRepository
-	PublicCollectionCtrl *controller.PublicCollectionController
+	PublicCollectionCtrl *publicCtrl.CollectionLinkController
 	CollectionRepo       *repo.CollectionRepository
 	Cache                *cache.Cache
 	BillingCtrl          *controller.BillingController
@@ -140,13 +141,13 @@ func (m *FileLinkMiddleware) isDeviceLimitReached(ctx context.Context,
 	}
 
 	deviceLimit := int64(collectionSummary.DeviceLimit)
-	if deviceLimit == controller.DeviceLimitThreshold {
-		deviceLimit = controller.DeviceLimitThresholdMultiplier * controller.DeviceLimitThreshold
+	if deviceLimit == publicCtrl.DeviceLimitThreshold {
+		deviceLimit = publicCtrl.DeviceLimitThresholdMultiplier * publicCtrl.DeviceLimitThreshold
 	}
 
-	if count >= controller.DeviceLimitWarningThreshold {
+	if count >= publicCtrl.DeviceLimitWarningThreshold {
 		m.DiscordController.NotifyPotentialAbuse(
-			fmt.Sprintf("Album exceeds warning threshold: {FileID: %d, ShareID: %s}",
+			fmt.Sprintf("FileLink exceeds warning threshold: {FileID: %d, ShareID: %s}",
 				collectionSummary.FileID, collectionSummary.LinkID))
 	}
 

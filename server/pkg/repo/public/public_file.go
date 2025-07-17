@@ -63,7 +63,7 @@ func (pcr *FileLinkRepository) Insert(
 	return id, nil
 }
 
-// GetActiveFileUrlToken will return ente.PublicCollectionToken for given collection ID
+// GetActiveFileUrlToken will return ente.CollectionLinkRow for given collection ID
 // Note: The token could be expired or deviceLimit is already reached
 func (pcr *FileLinkRepository) GetActiveFileUrlToken(ctx context.Context, fileID int64) (*ente.FileLinkRow, error) {
 	row := pcr.DB.QueryRowContext(ctx, `SELECT id, file_id, owner_id, access_token, valid_till, device_limit, 

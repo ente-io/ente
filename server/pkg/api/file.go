@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/ente-io/museum/pkg/controller/file_copy"
 	"github.com/ente-io/museum/pkg/controller/filedata"
+	"github.com/ente-io/museum/pkg/controller/public"
 	"net/http"
 	"os"
 	"strconv"
@@ -24,7 +25,7 @@ import (
 // FileHandler exposes request handlers for all encrypted file related requests
 type FileHandler struct {
 	Controller   *controller.FileController
-	FileUrlCtrl  *controller.PublicFileLinkController
+	FileUrlCtrl  *public.FileLinkController
 	FileCopyCtrl *file_copy.FileCopyController
 	FileDataCtrl *filedata.Controller
 }
