@@ -227,17 +227,18 @@ export const FileList: React.FC<FileListProps> = ({
     const [_items, setItems] = useState<FileListItem[]>([]);
     const items = useDeferredValue(_items);
 
-    const listRef = useRef<VariableSizeList | null>(null);
-
+    const [rangeStartIndex, setRangeStartIndex] = useState<number | undefined>(
+        undefined,
+    );
+    const [hoverIndex, setHoverIndex] = useState<number | undefined>(undefined);
+    const [isShiftKeyPressed, setIsShiftKeyPressed] = useState(false);
     // Timeline date strings for which all photos have been selected.
     //
     // See: [Note: Timeline date string]
     const [checkedTimelineDateStrings, setCheckedTimelineDateStrings] =
-        useState(new Set());
+        useState(new Set<string>());
 
-    const [rangeStart, setRangeStart] = useState<number | null>(null);
-    const [currentHover, setCurrentHover] = useState<number | null>(null);
-    const [isShiftKeyPressed, setIsShiftKeyPressed] = useState(false);
+    const listRef = useRef<VariableSizeList | null>(null);
 
     const layoutParams = useMemo(
         () => computeThumbnailGridLayoutParams(width),
@@ -397,33 +398,40 @@ export const FileList: React.FC<FileListProps> = ({
         });
     }, [annotatedFiles, selected]);
 
-    const handleSelectMulti = handleSelectCreatorMulti(
-        setSelected,
-        mode,
-        user?.id,
-        activeCollectionID,
-        activePersonID,
+    const handleSelectMulti = useMemo(
+        () =>
+            handleSelectCreatorMulti(
+                setSelected,
+                mode,
+                user?.id,
+                activeCollectionID,
+                activePersonID,
+            ),
+        [setSelected, mode, user?.id, activeCollectionID, activePersonID],
     );
 
-    const onChangeSelectAllCheckBox = (date: string) => {
-        const next = new Set(checkedTimelineDateStrings);
-        let isDateSelected: boolean;
-        if (!next.has(date)) {
-            next.add(date);
-            isDateSelected = true;
-        } else {
-            next.delete(date);
-            isDateSelected = false;
-        }
-        setCheckedTimelineDateStrings(next);
+    const onChangeSelectAllCheckBox = useCallback(
+        (date: string) => {
+            const next = new Set(checkedTimelineDateStrings);
+            let isDateSelected: boolean;
+            if (!next.has(date)) {
+                next.add(date);
+                isDateSelected = true;
+            } else {
+                next.delete(date);
+                isDateSelected = false;
+            }
+            setCheckedTimelineDateStrings(next);
 
-        // All files on a checked/unchecked day.
-        const filesOnADay = annotatedFiles.filter(
-            (af) => af.timelineDateString === date,
-        );
+            // All files on a checked/unchecked day.
+            const filesOnADay = annotatedFiles.filter(
+                (af) => af.timelineDateString === date,
+            );
 
-        handleSelectMulti(filesOnADay.map((af) => af.file))(isDateSelected);
-    };
+            handleSelectMulti(filesOnADay.map((af) => af.file))(isDateSelected);
+        },
+        [annotatedFiles, checkedTimelineDateStrings, handleSelectMulti],
+    );
 
     const handleSelect = useMemo(
         () =>
@@ -433,33 +441,36 @@ export const FileList: React.FC<FileListProps> = ({
                 user?.id,
                 activeCollectionID,
                 activePersonID,
-                setRangeStart,
+                setRangeStartIndex,
             ),
         [setSelected, mode, user?.id, activeCollectionID, activePersonID],
     );
 
-    const handleRangeSelect = (index: number) => () => {
-        if (rangeStart !== index) {
-            const direction =
-                (index - rangeStart!) / Math.abs(index - rangeStart!);
+    const handleRangeSelect = useCallback(
+        (index: number) => {
+            if (rangeStartIndex === undefined || rangeStartIndex == index)
+                return;
+
+            const direction = index > rangeStartIndex ? 1 : -1;
             let checked = true;
             for (
-                let i = rangeStart!;
+                let i = rangeStartIndex;
                 (index - i) * direction >= 0;
                 i += direction
             ) {
                 checked = checked && !!selected[annotatedFiles[i]!.file.id];
             }
             for (
-                let i = rangeStart!;
+                let i = rangeStartIndex;
                 (index - i) * direction > 0;
                 i += direction
             ) {
                 handleSelect(annotatedFiles[i]!.file)(!checked);
             }
             handleSelect(annotatedFiles[index]!.file, index)(!checked);
-        }
-    };
+        },
+        [annotatedFiles, selected, rangeStartIndex, handleSelect],
+    );
 
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
@@ -484,120 +495,146 @@ export const FileList: React.FC<FileListProps> = ({
     }, []);
 
     useEffect(() => {
-        if (selected.count == 0) setRangeStart(null);
+        if (selected.count == 0) setRangeStartIndex(undefined);
     }, [selected]);
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    const renderListItem = (
-        listItem: FileListItem,
-        layoutParams: ThumbnailGridLayoutParams,
-        isScrolling: boolean,
-    ) => {
-        const haveSelection = selected.count > 0;
-        switch (listItem.tag) {
-            case "date":
-                return listItem.dates ? (
-                    listItem.dates
-                        .map((item) => [
-                            <DateListItem key={item.date} span={item.span}>
-                                {haveSelection && (
-                                    <Checkbox
-                                        key={item.date}
-                                        name={item.date}
-                                        checked={checkedTimelineDateStrings.has(
-                                            item.date,
-                                        )}
-                                        onChange={() =>
-                                            onChangeSelectAllCheckBox(item.date)
-                                        }
-                                        size="small"
-                                        sx={{ pl: 0 }}
-                                    />
-                                )}
-                                {item.date}
-                            </DateListItem>,
-                            <div key={`${item.date}-gap`} />,
-                        ])
-                        .flat()
-                ) : (
-                    <DateListItem span={layoutParams.columns}>
-                        {haveSelection && (
-                            <Checkbox
-                                key={listItem.date}
-                                name={listItem.date!}
-                                checked={checkedTimelineDateStrings.has(
-                                    listItem.date,
-                                )}
-                                onChange={() =>
-                                    onChangeSelectAllCheckBox(listItem.date!)
-                                }
-                                size="small"
-                                sx={{ pl: 0 }}
-                            />
-                        )}
-                        {listItem.date}
-                    </DateListItem>
-                );
-            case "file": {
-                const ret = listItem.items!.map(({ file }, i) => {
-                    const index = listItem.itemStartIndex! + i;
-                    return (
-                        <FileThumbnail
-                            key={`tile-${file.id}-selected-${selected[file.id] ?? false}`}
-                            {...{ user, emailByUserID }}
-                            file={file}
-                            onClick={() => onItemClick(index)}
-                            selectable={selectable!}
-                            onSelect={handleSelect(file, index)}
-                            selected={
-                                (!mode
-                                    ? selected.collectionID ===
-                                      activeCollectionID
-                                    : mode == selected.context?.mode &&
-                                      (selected.context.mode == "people"
-                                          ? selected.context.personID ==
-                                            activePersonID
-                                          : selected.context.collectionID ==
-                                            activeCollectionID)) &&
-                                !!selected[file.id]
-                            }
-                            selectOnClick={selected.count > 0}
-                            onHover={() => setCurrentHover(index)}
-                            onRangeSelect={handleRangeSelect(index)}
-                            isRangeSelectActive={
-                                isShiftKeyPressed && selected.count > 0
-                            }
-                            isInsSelectRange={
-                                (index >= rangeStart! &&
-                                    index <= currentHover!) ||
-                                (index >= currentHover! && index <= rangeStart!)
-                            }
-                            activeCollectionID={activeCollectionID}
-                            showPlaceholder={isScrolling}
-                            isFav={favoriteFileIDs?.has(file.id)}
-                        />
+    const renderListItem = useCallback(
+        (
+            listItem: FileListItem,
+            layoutParams: ThumbnailGridLayoutParams,
+            isScrolling: boolean,
+        ) => {
+            const haveSelection = selected.count > 0;
+            switch (listItem.tag) {
+                case "date":
+                    return listItem.dates ? (
+                        listItem.dates
+                            .map((item) => [
+                                <DateListItem key={item.date} span={item.span}>
+                                    {haveSelection && (
+                                        <Checkbox
+                                            key={item.date}
+                                            name={item.date}
+                                            checked={checkedTimelineDateStrings.has(
+                                                item.date,
+                                            )}
+                                            onChange={() =>
+                                                onChangeSelectAllCheckBox(
+                                                    item.date,
+                                                )
+                                            }
+                                            size="small"
+                                            sx={{ pl: 0 }}
+                                        />
+                                    )}
+                                    {item.date}
+                                </DateListItem>,
+                                <div key={`${item.date}-gap`} />,
+                            ])
+                            .flat()
+                    ) : (
+                        <DateListItem span={layoutParams.columns}>
+                            {haveSelection && (
+                                <Checkbox
+                                    key={listItem.date}
+                                    name={listItem.date!}
+                                    checked={checkedTimelineDateStrings.has(
+                                        listItem.date!,
+                                    )}
+                                    onChange={() =>
+                                        onChangeSelectAllCheckBox(
+                                            listItem.date!,
+                                        )
+                                    }
+                                    size="small"
+                                    sx={{ pl: 0 }}
+                                />
+                            )}
+                            {listItem.date}
+                        </DateListItem>
                     );
-                });
-                if (listItem.groups) {
-                    let sum = 0;
-                    for (let i = 0; i < listItem.groups.length - 1; i++) {
-                        sum = sum + listItem.groups[i]!;
-                        ret.splice(
-                            sum,
-                            0,
-                            <div
-                                key={`${listItem.items![0]!.file.id}-gap-${i}`}
-                            />,
+                case "file": {
+                    const ret = listItem.items!.map(({ file }, i) => {
+                        const index = listItem.itemStartIndex! + i;
+                        return (
+                            <FileThumbnail
+                                key={`tile-${file.id}-selected-${selected[file.id] ?? false}`}
+                                {...{ user, emailByUserID }}
+                                file={file}
+                                selectable={selectable!}
+                                selected={
+                                    (!mode
+                                        ? selected.collectionID ===
+                                          activeCollectionID
+                                        : mode == selected.context?.mode &&
+                                          (selected.context.mode == "people"
+                                              ? selected.context.personID ==
+                                                activePersonID
+                                              : selected.context.collectionID ==
+                                                activeCollectionID)) &&
+                                    !!selected[file.id]
+                                }
+                                selectOnClick={selected.count > 0}
+                                isRangeSelectActive={
+                                    isShiftKeyPressed && selected.count > 0
+                                }
+                                isInSelectRange={
+                                    rangeStartIndex !== undefined &&
+                                    hoverIndex !== undefined &&
+                                    ((index >= rangeStartIndex &&
+                                        index <= hoverIndex) ||
+                                        (index >= hoverIndex &&
+                                            index <= rangeStartIndex))
+                                }
+                                activeCollectionID={activeCollectionID}
+                                showPlaceholder={isScrolling}
+                                isFav={!!favoriteFileIDs?.has(file.id)}
+                                onClick={() => onItemClick(index)}
+                                onSelect={handleSelect(file, index)}
+                                onHover={() => setHoverIndex(index)}
+                                onRangeSelect={() => handleRangeSelect(index)}
+                            />
                         );
-                        sum += 1;
+                    });
+                    if (listItem.groups) {
+                        let sum = 0;
+                        for (let i = 0; i < listItem.groups.length - 1; i++) {
+                            sum = sum + listItem.groups[i]!;
+                            ret.splice(
+                                sum,
+                                0,
+                                <div
+                                    key={`${listItem.items![0]!.file.id}-gap-${i}`}
+                                />,
+                            );
+                            sum += 1;
+                        }
                     }
+                    return ret;
                 }
-                return ret;
+                default:
+                    return listItem.component;
             }
-            default:
-                return listItem.component;
-        }
-    };
+        },
+        [
+            activeCollectionID,
+            activePersonID,
+            checkedTimelineDateStrings,
+            emailByUserID,
+            favoriteFileIDs,
+            handleRangeSelect,
+            handleSelect,
+            hoverIndex,
+            isShiftKeyPressed,
+            mode,
+            onChangeSelectAllCheckBox,
+            onItemClick,
+            rangeStartIndex,
+            selectable,
+            selected,
+            user,
+        ],
+    );
 
     const itemData = useMemo(
         () => ({ items, layoutParams, renderListItem }),
@@ -840,36 +877,36 @@ const FileListRow = memo(
 
 type FileThumbnailProps = {
     file: EnteFile;
-    onClick: () => void;
     selectable: boolean;
     selected: boolean;
+    isRangeSelectActive: boolean;
+    selectOnClick: boolean;
+    isInSelectRange: boolean;
+    activeCollectionID: number;
+    showPlaceholder: boolean;
+    isFav: boolean;
+    onClick: () => void;
     onSelect: (checked: boolean) => void;
     onHover: () => void;
     onRangeSelect: () => void;
-    isRangeSelectActive: boolean;
-    selectOnClick: boolean;
-    isInsSelectRange: boolean;
-    activeCollectionID: number;
-    showPlaceholder: boolean;
-    isFav: boolean | undefined;
 } & Pick<FileListProps, "user" | "emailByUserID">;
 
 const FileThumbnail: React.FC<FileThumbnailProps> = ({
     file,
     user,
-    onClick,
     selectable,
     selected,
-    onSelect,
     selectOnClick,
-    onHover,
-    onRangeSelect,
     isRangeSelectActive,
-    isInsSelectRange,
+    isInSelectRange,
     isFav,
     emailByUserID,
     activeCollectionID,
     showPlaceholder,
+    onClick,
+    onSelect,
+    onHover,
+    onRangeSelect,
 }) => {
     const [imageURL, setImageURL] = useState<string | undefined>(undefined);
     const [isLongPressing, setIsLongPressing] = useState(false);
@@ -953,7 +990,7 @@ const FileThumbnail: React.FC<FileThumbnailProps> = ({
                     type="checkbox"
                     checked={selected}
                     onChange={handleSelect}
-                    $active={isRangeSelectActive && isInsSelectRange}
+                    $active={isRangeSelectActive && isInSelectRange}
                     onClick={(e) => e.stopPropagation()}
                 />
             )}
@@ -989,9 +1026,7 @@ const FileThumbnail: React.FC<FileThumbnailProps> = ({
                 className="preview-card-hover-overlay"
                 checked={selected}
             />
-            {isRangeSelectActive && isInsSelectRange && (
-                <InSelectRangeOverlay />
-            )}
+            {isRangeSelectActive && isInSelectRange && <InSelectRangeOverlay />}
 
             {deleteBy && (
                 <TileBottomTextOverlay>
