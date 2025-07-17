@@ -185,9 +185,10 @@ class GalleryState extends State<Gallery> {
       // todo: Assign ID to Gallery and fire generic event with ID &
       //  target index/date
       if (mounted && event.selectedIndex == 0) {
-        await _itemScroller.scrollTo(
-          index: 0,
-          duration: const Duration(milliseconds: 150),
+        await _scrollController.animateTo(
+          0,
+          duration: const Duration(milliseconds: 250),
+          curve: Curves.easeOutExpo,
         );
       }
     });
