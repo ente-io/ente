@@ -36,7 +36,7 @@ func (c *PublicFileLinkController) CreateFileUrl(ctx *gin.Context, req ente.Crea
 	return nil, stacktrace.Propagate(err, "failed to create public file link")
 }
 
-func (c *PublicFileLinkController) mapRowToFileUrl(ctx *gin.Context, row *ente.PublicFileUrlRow) *ente.FileUrl {
+func (c *PublicFileLinkController) mapRowToFileUrl(ctx *gin.Context, row *ente.FileLinkRow) *ente.FileUrl {
 	app := auth.GetApp(ctx)
 	var url string
 	if app == ente.Locker {

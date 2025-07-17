@@ -3,6 +3,7 @@ package public
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"github.com/ente-io/museum/ente/base"
 
@@ -64,13 +65,13 @@ func (pcr *FileLinkRepository) Insert(
 
 // GetActiveFileUrlToken will return ente.PublicCollectionToken for given collection ID
 // Note: The token could be expired or deviceLimit is already reached
-func (pcr *FileLinkRepository) GetActiveFileUrlToken(ctx context.Context, fileID int64) (*ente.PublicFileUrlRow, error) {
+func (pcr *FileLinkRepository) GetActiveFileUrlToken(ctx context.Context, fileID int64) (*ente.FileLinkRow, error) {
 	row := pcr.DB.QueryRowContext(ctx, `SELECT id, file_id, owner_id, access_token, valid_till, device_limit, 
        is_disabled, pw_hash, pw_nonce, mem_limit, ops_limit, enable_download FROM 
                                                    public_file_tokens WHERE file_id = $1 and is_disabled = FALSE`,
 		fileID)
 
-	ret := ente.PublicFileUrlRow{}
+	ret := ente.FileLinkRow{}
 	err := row.Scan(&ret.LinkID, &ret.FileID, ret.OwnerID, &ret.Token, &ret.ValidTill, &ret.DeviceLimit,
 		&ret.IsDisabled, &ret.PassHash, &ret.Nonce, &ret.MemLimit, &ret.OpsLimit, &ret.EnableDownload)
 	if err != nil {
@@ -79,14 +80,14 @@ func (pcr *FileLinkRepository) GetActiveFileUrlToken(ctx context.Context, fileID
 	return &ret, nil
 }
 
-func (pcr *FileLinkRepository) GetFileUrlRowByToken(ctx context.Context, accessToken string) (*ente.PublicFileUrlRow, error) {
+func (pcr *FileLinkRepository) GetFileUrlRowByToken(ctx context.Context, accessToken string) (*ente.FileLinkRow, error) {
 	row := pcr.DB.QueryRowContext(ctx,
 		`SELECT id, file_id, owner_id, is_disabled, valid_till, device_limit, enable_download, pw_hash, pw_nonce, mem_limit, ops_limit
        created_at, updated_at
 		from public_file_tokens 
 		where access_token = $1
 `, accessToken)
-	var result = ente.PublicFileUrlRow{}
+	var result = ente.FileLinkRow{}
 	err := row.Scan(&result.LinkID, &result.FileID, &result.OwnerID, &result.IsDisabled, &result.EnableDownload, &result.ValidTill, &result.DeviceLimit, &result.PassHash, &result.Nonce, &result.MemLimit, &result.OpsLimit, &result.CreatedAt, &result.UpdatedAt)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -98,7 +99,7 @@ func (pcr *FileLinkRepository) GetFileUrlRowByToken(ctx context.Context, accessT
 }
 
 // UpdateLink will update the row for corresponding public file token
-func (pcr *FileLinkRepository) UpdateLink(ctx context.Context, pct ente.PublicFileUrlRow) error {
+func (pcr *FileLinkRepository) UpdateLink(ctx context.Context, pct ente.FileLinkRow) error {
 	_, err := pcr.DB.ExecContext(ctx, `UPDATE public_file_tokens SET valid_till = $1, device_limit = $2, 
                                     pw_hash = $3, pw_nonce = $4, mem_limit = $5, ops_limit = $6, enable_download = $7  
                                 where id = $8`,
@@ -116,7 +117,7 @@ func (pcr *FileLinkRepository) GetUniqueAccessCount(ctx context.Context, linkId 
 	return count, nil
 }
 
-func (pcr *FileLinkRepository) RecordAccessHistory(ctx context.Context, shareID int64, ip string, ua string) error {
+func (pcr *FileLinkRepository) RecordAccessHistory(ctx context.Context, shareID string, ip string, ua string) error {
 	_, err := pcr.DB.ExecContext(ctx, `INSERT INTO public_file_tokens_access_history 
     (id, ip, user_agent) VALUES ($1, $2, $3) 
     ON CONFLICT ON CONSTRAINT unique_access_id_ip_ua DO NOTHING;`,
@@ -125,8 +126,15 @@ func (pcr *FileLinkRepository) RecordAccessHistory(ctx context.Context, shareID 
 }
 
 // AccessedInPast returns true if the given ip, ua agent combination has accessed the url in the past
-func (pcr *FileLinkRepository) AccessedInPast(ctx context.Context, shareID int64, ip string, ua string) (bool, error) {
-	panic("not implemented, refactor &  public file")
+func (pcr *FileLinkRepository) AccessedInPast(ctx context.Context, shareID string, ip string, ua string) (bool, error) {
+	row := pcr.DB.QueryRowContext(ctx, `select id from public_file_tokens_access_history where id =$1 and ip = $2 and user_agent = $3`,
+		shareID, ip, ua)
+	var tempID int64
+	err := row.Scan(&tempID)
+	if errors.Is(err, sql.ErrNoRows) {
+		return false, nil
+	}
+	return true, stacktrace.Propagate(err, "failed to record access history")
 }
 
 // CleanupAccessHistory public_file_tokens_access_history where public_collection_tokens is disabled and the last updated time is older than 30 days

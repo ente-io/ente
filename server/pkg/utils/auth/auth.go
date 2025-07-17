@@ -17,8 +17,9 @@ import (
 )
 
 const (
-	PublicAccessKey = "X-Public-Access-ID"
-	CastContext     = "X-Cast-Context"
+	PublicAccessKey   = "X-Public-Access-ID"
+	FileLinkAccessKey = "X-Public-FileLink-Access-ID"
+	CastContext       = "X-Cast-Context"
 )
 
 // GenerateRandomBytes returns securely generated random bytes.

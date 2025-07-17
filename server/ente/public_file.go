@@ -19,7 +19,7 @@ type UpdateFileUrl struct {
 	DisablePassword *bool `json:"disablePassword"`
 }
 
-type PublicFileUrlRow struct {
+type FileLinkRow struct {
 	LinkID         string
 	OwnerID        int64
 	FileID         int64
@@ -52,8 +52,8 @@ type FileUrl struct {
 }
 
 type PublicFileAccessContext struct {
-	ID           int64
-	IP           string
-	UserAgent    string
-	CollectionID int64
+	ID        string
+	IP        string
+	UserAgent string
+	FileID    int64
 }

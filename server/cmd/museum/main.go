@@ -358,7 +358,7 @@ func main() {
 	}
 
 	authMiddleware := middleware.AuthMiddleware{UserAuthRepo: userAuthRepo, Cache: authCache, UserController: userController}
-	accessTokenMiddleware := middleware.AccessTokenMiddleware{
+	collectionTokenMiddleware := middleware.CollectionTokenMiddleware{
 		PublicCollectionRepo: publicCollectionRepo,
 		PublicCollectionCtrl: publicCollectionCtrl,
 		CollectionRepo:       collectionRepo,
@@ -404,7 +404,7 @@ func main() {
 	familiesJwtAuthAPI.Use(rateLimiter.GlobalRateLimiter(), authMiddleware.TokenAuthMiddleware(jwt.FAMILIES.Ptr()), rateLimiter.APIRateLimitForUserMiddleware(urlSanitizer))
 
 	publicCollectionAPI := server.Group("/public-collection")
-	publicCollectionAPI.Use(rateLimiter.GlobalRateLimiter(), accessTokenMiddleware.AccessTokenAuthMiddleware(urlSanitizer))
+	publicCollectionAPI.Use(rateLimiter.GlobalRateLimiter(), collectionTokenMiddleware.Authenticate(urlSanitizer))
 
 	healthCheckHandler := &api.HealthCheckHandler{
 		DB: db,
