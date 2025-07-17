@@ -1166,7 +1166,7 @@ const Page: React.FC = () => {
                     files={filteredFiles}
                     enableDownload={true}
                     disableGrouping={state.searchSuggestion?.type == "clip"}
-                    selectable={true}
+                    enableSelect={true}
                     selected={selected}
                     setSelected={setSelected}
                     // TODO: Incorrect assertion, need to update the type

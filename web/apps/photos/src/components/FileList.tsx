@@ -171,7 +171,11 @@ export interface FileListProps {
      * This behaviour is used when showing magic search results.
      */
     disableGrouping?: boolean;
-    selectable?: boolean;
+    /**
+     * If `true`, then the user can select files in the listing by clicking on
+     * their thumbnails (and other range selection mechanisms).
+     */
+    enableSelect?: boolean;
     setSelected: (
         selected: SelectedState | ((selected: SelectedState) => SelectedState),
     ) => void;
@@ -215,7 +219,7 @@ export const FileList: React.FC<FileListProps> = ({
     user,
     annotatedFiles,
     disableGrouping,
-    selectable,
+    enableSelect,
     selected,
     setSelected,
     activeCollectionID,
@@ -559,9 +563,8 @@ export const FileList: React.FC<FileListProps> = ({
                         return (
                             <FileThumbnail
                                 key={`tile-${file.id}-selected-${selected[file.id] ?? false}`}
-                                {...{ user, emailByUserID }}
+                                {...{ user, emailByUserID, enableSelect }}
                                 file={file}
-                                selectable={selectable!}
                                 selected={
                                     (!mode
                                         ? selected.collectionID ===
@@ -630,7 +633,7 @@ export const FileList: React.FC<FileListProps> = ({
             onChangeSelectAllCheckBox,
             onItemClick,
             rangeStartIndex,
-            selectable,
+            enableSelect,
             selected,
             user,
         ],
@@ -877,7 +880,6 @@ const FileListRow = memo(
 
 type FileThumbnailProps = {
     file: EnteFile;
-    selectable: boolean;
     selected: boolean;
     isRangeSelectActive: boolean;
     selectOnClick: boolean;
@@ -889,12 +891,12 @@ type FileThumbnailProps = {
     onSelect: (checked: boolean) => void;
     onHover: () => void;
     onRangeSelect: () => void;
-} & Pick<FileListProps, "user" | "emailByUserID">;
+} & Pick<FileListProps, "user" | "emailByUserID" | "enableSelect">;
 
 const FileThumbnail: React.FC<FileThumbnailProps> = ({
     file,
     user,
-    selectable,
+    enableSelect,
     selected,
     selectOnClick,
     isRangeSelectActive,
@@ -983,9 +985,9 @@ const FileThumbnail: React.FC<FileThumbnailProps> = ({
             onClick={handleClick}
             onMouseEnter={handleHover}
             disabled={!imageURL}
-            {...(selectable && longPressHandlers)}
+            {...(enableSelect && longPressHandlers)}
         >
-            {selectable && (
+            {enableSelect && (
                 <Check
                     type="checkbox"
                     checked={selected}
