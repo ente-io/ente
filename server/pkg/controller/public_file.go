@@ -11,27 +11,51 @@ import (
 	"github.com/lithammer/shortuuid/v3"
 )
 
-// PublicFileController controls share collection operations
-type PublicFileController struct {
+// PublicFileLinkController controls share collection operations
+type PublicFileLinkController struct {
 	FileController        *FileController
 	EmailNotificationCtrl *emailCtrl.EmailNotificationController
 	PublicCollectionRepo  *public.PublicCollectionRepository
-	PublicFileRepo        *public.PublicFileRepository
+	FileLinkRepo          *public.FileLinkRepository
 	CollectionRepo        *repo.CollectionRepository
 	UserRepo              *repo.UserRepository
 	JwtSecret             []byte
 }
 
-func (c *PublicFileController) CreateFileUrl(ctx *gin.Context, req ente.CreateFileUrl) (*ente.FileUrl, error) {
+func (c *PublicFileLinkController) CreateFileUrl(ctx *gin.Context, req ente.CreateFileUrl) (*ente.FileUrl, error) {
 	actorUserID := auth.GetUserID(ctx.Request.Header)
 	accessToken := shortuuid.New()[0:AccessTokenLength]
-	id, err := c.PublicFileRepo.Insert(ctx, req.FileID, actorUserID, accessToken)
+	_, err := c.FileLinkRepo.Insert(ctx, req.FileID, actorUserID, accessToken)
 	if err == nil {
-		return &ente.FileUrl{
-			LinkID:  *id,
-			FileID:  req.FileID,
-			OwnerID: actorUserID,
-		}, nil
+		row, rowErr := c.FileLinkRepo.GetActiveFileUrlToken(ctx, req.FileID)
+		if rowErr != nil {
+			return nil, stacktrace.Propagate(rowErr, "failed to get active file url token")
+		}
+		return c.mapRowToFileUrl(ctx, row), nil
 	}
-	return nil, stacktrace.NewError("This endpoint is deprecated. Please use CreatePublicCollectionToken instead")
+	return nil, stacktrace.Propagate(err, "failed to create public file link")
+}
+
+func (c *PublicFileLinkController) mapRowToFileUrl(ctx *gin.Context, row *ente.PublicFileUrlRow) *ente.FileUrl {
+	app := auth.GetApp(ctx)
+	var url string
+	if app == ente.Locker {
+		url = c.FileLinkRepo.LockerFileLink(row.Token)
+	} else {
+		url = c.FileLinkRepo.PhotoLink(row.Token)
+	}
+	return &ente.FileUrl{
+		LinkID:          row.LinkID,
+		FileID:          row.FileID,
+		URL:             url,
+		OwnerID:         row.OwnerID,
+		ValidTill:       row.ValidTill,
+		DeviceLimit:     row.DeviceLimit,
+		PasswordEnabled: row.PassHash != nil,
+		Nonce:           row.Nonce,
+		OpsLimit:        row.OpsLimit,
+		MemLimit:        row.MemLimit,
+		EnableDownload:  row.EnableDownload,
+		CreatedAt:       row.CreatedAt,
+	}
 }

@@ -24,7 +24,7 @@ import (
 // FileHandler exposes request handlers for all encrypted file related requests
 type FileHandler struct {
 	Controller   *controller.FileController
-	FileUrlCtrl  *controller.PublicFileController
+	FileUrlCtrl  *controller.PublicFileLinkController
 	FileCopyCtrl *file_copy.FileCopyController
 	FileDataCtrl *filedata.Controller
 }

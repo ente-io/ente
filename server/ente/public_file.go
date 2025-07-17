@@ -35,7 +35,6 @@ type PublicFileUrlRow struct {
 	CreatedAt      int64
 	UpdatedAt      int64
 }
-
 type FileUrl struct {
 	LinkID          string `json:"linkID" binding:"required"`
 	URL             string `json:"url" binding:"required"`
