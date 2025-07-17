@@ -309,47 +309,31 @@ export const FileList: React.FC<FileListProps> = ({
                 ),
             );
         } else {
-            let listItemIndex = 0;
-            let lastCreationTime: number | undefined;
-            for (const [index, af] of annotatedFiles.entries()) {
-                const creationTime = fileCreationTime(af.file) / 1000;
-                if (
-                    !lastCreationTime ||
-                    !isSameDay(
-                        new Date(creationTime),
-                        new Date(lastCreationTime),
-                    )
-                ) {
-                    lastCreationTime = creationTime;
-
-                    items.push({
-                        height: dateListItemHeight,
-                        tag: "date",
-                        date: af.timelineDateString,
-                    });
-                    items.push({
-                        height: fileItemHeight,
-                        tag: "file",
-                        items: [af],
-                        itemStartIndex: index,
-                    });
-                    listItemIndex = 1;
-                } else if (listItemIndex < columns) {
-                    items[items.length - 1]!.items!.push(af);
-                    listItemIndex++;
-                } else {
-                    listItemIndex = 1;
-                    items.push({
-                        height: fileItemHeight,
-                        tag: "file",
-                        items: [af],
-                        itemStartIndex: index,
-                    });
-                }
+            let i = 0;
+            for (const split of splitByDate(annotatedFiles)) {
+                items.push({
+                    height: dateListItemHeight,
+                    tag: "date",
+                    dGroups: [
+                        {
+                            date: split[0]!.timelineDateString,
+                            dateSpan: split.length,
+                        },
+                    ],
+                });
+                items.push({
+                    height: fileItemHeight,
+                    tag: "file",
+                    fGroups: [
+                        { annotatedFiles: split, annotatedFilesStartIndex: i },
+                    ],
+                });
+                i += split.length;
             }
-            if (!isSmallerLayout) {
-                items = mergeRowsWherePossible(items, columns);
-            }
+            // TODO(RE):
+            // if (!isSmallerLayout) {
+            //     items = mergeRowsWherePossible(items, columns);
+            // }
         }
 
         if (!annotatedFiles.length) {
@@ -540,6 +524,38 @@ export const FileList: React.FC<FileListProps> = ({
             const haveSelection = selected.count > 0;
             switch (listItem.tag) {
                 case "date":
+                    if (listItem.dGroups) {
+                        return intersperseWithGaps(
+                            listItem.dGroups,
+                            ({ date, dateSpan }) => (
+                                <DateListItem
+                                    key={date}
+                                    span={
+                                        dateSpan == 1
+                                            ? layoutParams.columns
+                                            : dateSpan /* TODO(RE) */
+                                    }
+                                >
+                                    {haveSelection && (
+                                        <Checkbox
+                                            key={date}
+                                            name={date}
+                                            checked={checkedTimelineDateStrings.has(
+                                                date,
+                                            )}
+                                            onChange={() =>
+                                                onChangeSelectAllCheckBox(date)
+                                            }
+                                            size="small"
+                                            sx={{ pl: 0 }}
+                                        />
+                                    )}
+                                    {date}
+                                </DateListItem>
+                            ),
+                            ({ date }) => <div key={`${date}-gap`} />,
+                        );
+                    }
                     return listItem.dates ? (
                         listItem.dates
                             .map((item) => [
@@ -834,6 +850,22 @@ export const FileList: React.FC<FileListProps> = ({
 };
 
 /**
+ * Return a new array of splits, each split containing {@link annotatedFiles}
+ * which have the same {@link timelineDateString}.
+ */
+const splitByDate = (annotatedFiles: FileListAnnotatedFile[]) =>
+    annotatedFiles.reduce(
+        (splits, annotatedFile) => (
+            splits.at(-1)?.at(0)?.timelineDateString ==
+            annotatedFile.timelineDateString
+                ? splits.at(-1)?.push(annotatedFile)
+                : splits.push([annotatedFile]),
+            splits
+        ),
+        new Array<FileListAnnotatedFile[]>(),
+    );
+
+/**
  * Merge multiple dates into a single row.
  */
 const mergeRowsWherePossible = (
@@ -911,6 +943,16 @@ const mergeRowsWherePossible = (
         }
     }
     return newList;
+};
+
+/**
+ * For each element of {@link xs}, obtain an element by applying {@link f},
+ * then obtain a gap element by applying {@link g}. Return a flattened array
+ * containing all of these, except the trailing gap.
+ */
+const intersperseWithGaps = <T, U>(xs: T[], f: (x: T) => U, g: (x: T) => U) => {
+    const ys = xs.map((x) => [f(x), g(x)]).flat();
+    return ys.slice(0, ys.length - 1);
 };
 
 /**
