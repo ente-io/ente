@@ -320,7 +320,6 @@ export const FileList: React.FC<FileListProps> = ({
                         },
                     ],
                 });
-
                 items = items.concat(
                     batch(split, columns).map((batchFiles, batchIndex) => ({
                         height: fileItemHeight,
@@ -336,10 +335,9 @@ export const FileList: React.FC<FileListProps> = ({
                 );
                 i += split.length;
             }
-            // TODO(RE):
-            // if (!isSmallerLayout) {
-            //     items = mergeRowsWherePossible(items, columns);
-            // }
+            if (!isSmallerLayout) {
+                items = mergeRowsWherePossible(items, columns);
+            }
         }
 
         if (!annotatedFiles.length) {
@@ -734,77 +732,61 @@ const mergeRowsWherePossible = (
     items: FileListItem[],
     columns: number,
 ): FileListItem[] => {
-    const newList: FileListItem[] = [];
-    let index = 0;
-    let newIndex = 0;
-    while (index < items.length) {
-        const currItem = items[index]!;
-        // If the current item is of type time, then it is not part of an ongoing date.
-        // So, there is a possibility of merge.
-        if (currItem.tag == "date") {
-            // If new list pointer is not at the end of list then
-            // we can add more items to the same list.
-            if (newList[newIndex]) {
-                const SPACE_BTW_DATES_TO_IMAGE_CONTAINER_WIDTH_RATIO = 0.244;
-                // Check if items can be added to same list
-                if (
-                    newList[newIndex + 1]!.items!.length +
-                        items[index + 1]!.items!.length +
-                        Math.ceil(
-                            newList[newIndex]!.dates!.length *
-                                SPACE_BTW_DATES_TO_IMAGE_CONTAINER_WIDTH_RATIO,
-                        ) <=
-                    columns
-                ) {
-                    newList[newIndex]!.dates!.push({
-                        date: currItem.date!,
-                        span: items[index + 1]!.items!.length,
-                    });
-                    newList[newIndex + 1]!.items = [
-                        ...newList[newIndex + 1]!.items!,
-                        ...items[index + 1]!.items!,
-                    ];
-                    index += 2;
-                } else {
-                    // Adding items would exceed the number of columns.
-                    // So, move new list pointer to the end. Hence, in next iteration,
-                    // items will be added to a new list.
-                    newIndex += 2;
-                }
+    const result: FileListItem[] = [];
+    let i = 0;
+    let j = 0;
+    while (i < items.length) {
+        const item = items[i]!;
+        if (i.tag !== "date") {
+            // Pass everything else through unchanged.
+            result.push(item);
+            i++;
+            j = result.length;
+            continue;
+        }
+
+        // Current item is a date. It will be necessarily followed by one (or
+        // more) file items. There is a possibility of a merge.
+        const nextItem = items[i + 1]!;
+
+        // If new list pointer is not at the end of list then
+        // we can add more items to the same list.
+        if (result[j]) {
+            const spaceBetweenDatesToImageContainerWidthRatio = 0.244;
+            const filledColumns = result[j + 1]!.fGroups!.reduce(
+                (a, g) => a + g.annotatedFiles.length,
+                0,
+            );
+            const incomingColumns =
+                items[i + 1]!.fGroups![0]?.annotatedFiles.length;
+
+            // Check if items can be added to same list
+            if (
+                filledColumns +
+                    incomingColumns +
+                    Math.ceil(
+                        result[j]!.dGroups!.length *
+                            spaceBetweenDatesToImageContainerWidthRatio,
+                    ) <=
+                columns
+            ) {
+                result[j]!.dGroups!.push(item.dGroups![0]!);
+                result[j + 1]!.fGroups!.push(nextItem.fGroups![0]!);
+                i += 2;
             } else {
-                // New list pointer was at the end of list so simply add new items to the list.
-                newList.push({
-                    ...currItem,
-                    date: null,
-                    dates: [
-                        {
-                            date: currItem.date!,
-                            span: items[index + 1]!.items!.length,
-                        },
-                    ],
-                });
-                newList.push(items[index + 1]!);
-                index += 2;
+                // Adding items would exceed the number of columns.
+                // So, move new list pointer to the end. Hence, in next iteration,
+                // items will be added to a new list.
+                j += 2;
             }
         } else {
-            // Merge cannot happen. Simply add all items to new list
-            // and set new list point to the end of list.
-            newList.push(currItem);
-            index++;
-            newIndex = newList.length;
+            // New list pointer was at the end of list so simply add new items to the list.
+            result.push(item);
+            result.push(nextItem);
+            i += 2;
         }
     }
-    for (let i = 0; i < newList.length; i++) {
-        const currItem = newList[i]!;
-        const nextItem = newList[i + 1]!;
-        if (currItem.tag == "date") {
-            if (currItem.dates!.length > 1) {
-                currItem.groups = currItem.dates!.map((item) => item.span);
-                nextItem.groups = currItem.groups;
-            }
-        }
-    }
-    return newList;
+    return result;
 };
 
 /**
