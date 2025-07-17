@@ -67,6 +67,7 @@ class Configuration {
   static const anonymousUserIDKey = "anonymous_user_id";
   static const endPointKey = "endpoint";
   static final _logger = Logger("Configuration");
+  static const MethodChannel _loginChannel = MethodChannel('ente_login_channel');
 
   String? _cachedToken;
   late String _documentsDirectory;
@@ -198,6 +199,14 @@ class Configuration {
     await IgnoredFilesService.instance.reset();
     await TrashDB.instance.clearTable();
     unawaited(HomeWidgetService.instance.clearWidget(autoLogout));
+    
+    // Clear native SharedPreferences username on logout
+    try {
+      await _loginChannel.invokeMethod('clearUsername');
+    } catch (e) {
+      _logger.warning('Failed to clear native username on logout', e);
+    }
+    
     if (!autoLogout) {
       // Following services won't be initialized if it's the case of autoLogout
       FileUploader.instance.clearCachedUploadURLs();

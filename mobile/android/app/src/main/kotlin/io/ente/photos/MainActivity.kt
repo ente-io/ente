@@ -9,8 +9,10 @@ import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugins.GeneratedPluginRegistrant // Keep this
 
 class MainActivity : FlutterFragmentActivity() {
+    // Channel for receiving account details from LoginActivity
     private val ACCOUNT_CHANNEL_NAME = "com.unplugged.photos/account"
     private var methodChannel: MethodChannel? = null
+    private lateinit var methodChannelHandler: MethodChannelHandler
 
     private var pendingAccountDetails: Map<String, String>? = null
 
@@ -20,6 +22,11 @@ class MainActivity : FlutterFragmentActivity() {
         Log.d("UpEnte", "configureFlutterEngine called")
 
         GeneratedPluginRegistrant.registerWith(flutterEngine)
+
+        // Initialize MethodChannelHandler
+        methodChannelHandler = MethodChannelHandler()
+        methodChannelHandler.onAttachedToEngine(flutterEngine.dartExecutor.binaryMessenger)
+        methodChannelHandler.setActivity(this)
 
         methodChannel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, ACCOUNT_CHANNEL_NAME)
 
@@ -108,6 +115,9 @@ class MainActivity : FlutterFragmentActivity() {
 
     override fun onDestroy() {
         methodChannel = null // Clean up the channel
+        if (::methodChannelHandler.isInitialized) {
+            methodChannelHandler.onDetachedFromEngine()
+        }
         super.onDestroy()
     }
 }

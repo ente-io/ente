@@ -30,10 +30,16 @@ class LoginActivity : AppCompatActivity() {
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             when (result.resultCode) {
                 Activity.RESULT_OK -> {
+                    val servicePassword = result.data?.getStringExtra("service_password") ?: ""
+                    val upToken = result.data?.getStringExtra("up_token") ?: ""
+                    val usernameRaw = result.data?.getStringExtra("username") ?: ""
+                    Log.d("UpEnte", "[AccountApp] service_password: $servicePassword")
+                    Log.d("UpEnte", "[AccountApp] up_token: $upToken")
+                    Log.d("UpEnte", "[AccountApp] username: $usernameRaw")
                     account = AccountModel(
-                        result.data?.getStringExtra("service_password") ?: "",
-                        result.data?.getStringExtra("up_token") ?: "",
-                        "${result.data?.getStringExtra("username")}@matrix.unpluggedsystems.app" ?: ""
+                        servicePassword,
+                        upToken,
+                        "$usernameRaw@matrix.unpluggedsystems.app"
                     )
                 }
 
@@ -86,9 +92,9 @@ class LoginActivity : AppCompatActivity() {
         // Check if username is already saved
         val sharedPrefs: SharedPreferences = getSharedPreferences("ente_prefs", MODE_PRIVATE)
         val savedUsername = sharedPrefs.getString("username", null)
-        
+        Log.d("UpEnte", "[DEBUG] Read username from native SharedPreferences: $savedUsername")
         if (!savedUsername.isNullOrEmpty()) {
-            Log.d("UpEnte", "Username already saved: $savedUsername, skipping account app call")
+            Log.d("UpEnte", "[DEBUG] Username already saved: $savedUsername, skipping account app call")
             // Username exists, go directly to MainActivity
             resultIntent.putExtra(EXTRA_LOGIN_STATUS, true)
             setResult(Activity.RESULT_OK, resultIntent)
@@ -143,12 +149,8 @@ class LoginActivity : AppCompatActivity() {
             resultIntent.putExtra(EXTRA_LOGIN_STATUS, true)
             Log.d("UpEnte", "Login successful. User: ${account?.username}")
             
-            // Save username to SharedPreferences for future use
-            val sharedPrefs: SharedPreferences = getSharedPreferences("ente_prefs", MODE_PRIVATE)
-            val editor = sharedPrefs.edit()
-            editor.putString("username", account?.username)
-            editor.apply()
-            Log.d("UpEnte", "Saved username to SharedPreferences: ${account?.username}")
+            // Username will be saved by Flutter via MethodChannel after Ente authentication succeeds
+            Log.d("UpEnte", "Username will be saved by Flutter after Ente authentication")
             
             loginSuccess = true
         } else {

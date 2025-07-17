@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
@@ -26,6 +27,7 @@ class LoadingPage extends StatefulWidget {
 }
 
 class _LoadingPageState extends State<LoadingPage> {
+  static const MethodChannel _channel = MethodChannel('ente_login_channel');
   bool _isProcessing = true;
   bool _hasAttemptedLogin = false;
 
@@ -166,7 +168,7 @@ class _LoadingPageState extends State<LoadingPage> {
 
     _logger.info("Saving configuration from response with keys: ${responseData.keys.toList()}");
     
-    // Save username from account object
+    // Save username from account object (only in Flutter prefs, not native)
     final Account? account = accountNotifier.value;
     if (account != null && account.username.isNotEmpty) {
       await Configuration.instance.setUsername(account.username);
@@ -215,6 +217,17 @@ class _LoadingPageState extends State<LoadingPage> {
       return;
     }
 
+    // Save username to native SharedPreferences before navigation
+    final username = Configuration.instance.getUsername();
+    if (username != null && username.isNotEmpty) {
+      try {
+        await _channel.invokeMethod('saveUsername', {'username': username});
+        _logger.info("[DEBUG] Sent username to native: $username");
+      } catch (e) {
+        _logger.warning("[DEBUG] Failed to send username to native: $e");
+      }
+    }
+
     if (mounted) {
       setState(() => _isProcessing = false);
       await Future.delayed(const Duration(milliseconds: 300));
@@ -228,8 +241,7 @@ class _LoadingPageState extends State<LoadingPage> {
 
   Future<void> _handleAutomatedLoginFailure(String message) async {
     _logger.warning("Login/Registration failed: $message");
-    widget.onLoginComplete?.call();
-    // Optional: show error or exit
+    await Fluttertoast.showToast(msg: "Login failed: $message");
   }
 
   @override

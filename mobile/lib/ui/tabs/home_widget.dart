@@ -56,7 +56,6 @@ import 'package:photos/ui/home/grant_permissions_widget.dart';
 import 'package:photos/ui/home/header_widget.dart';
 import 'package:photos/ui/home/home_bottom_nav_bar.dart';
 import 'package:photos/ui/home/home_gallery_widget.dart';
-//import 'package:photos/ui/home/landing_page_widget.dart';
 import "package:photos/ui/home/loading_photos_widget.dart";
 import 'package:photos/ui/home/start_backup_hook_widget.dart';
 import 'package:photos/ui/notification/update/change_log_page.dart';
@@ -73,6 +72,7 @@ import "package:photos/utils/collection_util.dart";
 import 'package:photos/utils/dialog_util.dart';
 import "package:photos/utils/navigation_util.dart";
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HomeWidget extends StatefulWidget {
   const HomeWidget({
@@ -83,13 +83,15 @@ class HomeWidget extends StatefulWidget {
   State<StatefulWidget> createState() => _HomeWidgetState();
 }
 
-class _HomeWidgetState extends State<HomeWidget> {
+class _HomeWidgetState extends State<HomeWidget> with WidgetsBindingObserver {
   static const _userCollectionsTab = UserCollectionsTab();
   static const _sharedCollectionTab = SharedCollectionsTab();
   static const _searchTab = SearchTab();
   static final _settingsPage = SettingsPage(
     emailNotifier: UserService.instance.emailValueNotifier,
   );
+
+  static const String _loginFlowActiveKey = "login_flow_active";
 
   final _logger = Logger("HomeWidgetState");
   final _selectedFiles = SelectedFiles();
@@ -105,6 +107,7 @@ class _HomeWidgetState extends State<HomeWidget> {
   bool _showShowBackupHook = false;
   final isOnSearchTabNotifier = ValueNotifier<bool>(false);
   bool _isLoadingPageActive = false;
+  bool _shouldShowLoadingPage = false;
 
   late StreamSubscription<TabChangedEvent> _tabChangedEventSubscription;
   late StreamSubscription<SubscriptionPurchasedEvent>
@@ -122,6 +125,7 @@ class _HomeWidgetState extends State<HomeWidget> {
 
   @override
   void initState() {
+    WidgetsBinding.instance.addObserver(this);
     _logger.info("Building initstate");
     super.initState();
 
@@ -162,9 +166,16 @@ class _HomeWidgetState extends State<HomeWidget> {
         Bus.instance.on<TriggerLogoutEvent>().listen((event) async {
       await _autoLogoutAlert();
     });
-    _loggedOutEvent = Bus.instance.on<UserLoggedOutEvent>().listen((event) {
+    _loggedOutEvent = Bus.instance.on<UserLoggedOutEvent>().listen((event) async {
       _logger.info('logged out, selectTab index to 0');
       _selectedTabIndex = 0;
+      
+      // Clear login flow state on logout
+      _isLoadingPageActive = false;
+      _shouldShowLoadingPage = false;
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool(_loginFlowActiveKey, false);
+      
       if (mounted) {
         setState(() {});
       }
@@ -268,6 +279,15 @@ class _HomeWidgetState extends State<HomeWidget> {
           });
         }
       });
+    }
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) async {
+    if (state == AppLifecycleState.detached || state == AppLifecycleState.inactive) {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool(_loginFlowActiveKey, false);
+      _logger.info('Cleared _loginFlowActiveKey due to app lifecycle state: $state');
     }
   }
 
@@ -420,6 +440,7 @@ class _HomeWidgetState extends State<HomeWidget> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _tabChangedEventSubscription.cancel();
     _subscriptionPurchaseEvent.cancel();
     _triggerLogoutEvent.cancel();
@@ -651,12 +672,25 @@ class _HomeWidgetState extends State<HomeWidget> {
 
   Widget _getBody(BuildContext context) {
     if (!Configuration.instance.hasConfiguredAccount()) {
+      // Check if login flow is already active using persistent state
       if (!_isLoadingPageActive) {
-        _isLoadingPageActive = true;
-        _logger.info('LandingPageWidget1');
+        _checkAndStartLoginFlow();
+        return const Center(child: CircularProgressIndicator());
+      } else if (_shouldShowLoadingPage) {
         return LoadingPage(
-          onLoginComplete: () {
-            if (mounted) setState(() => _isLoadingPageActive = false);
+          onLoginComplete: () async {
+            _logger.info("[DEBUG] onLoginComplete fired");
+            final username = Configuration.instance.getUsername();
+            _logger.info("[DEBUG] Username in onLoginComplete: $username");
+            _logger.info("[DEBUG] hasConfiguredAccount: "+Configuration.instance.hasConfiguredAccount().toString());
+            // Username-to-native logic removed; now handled in LoadingPage
+            _isLoadingPageActive = false;
+            _shouldShowLoadingPage = false;
+            final prefs = await SharedPreferences.getInstance();
+            await prefs.setBool(_loginFlowActiveKey, false);
+            if (mounted) {
+              setState(() {});
+            }
           },
         );
       } else {
@@ -779,6 +813,34 @@ class _HomeWidgetState extends State<HomeWidget> {
         ),
       ],
     );
+  }
+
+  Future<void> _checkAndStartLoginFlow() async {
+    if (_isLoadingPageActive) return; // Already checking/starting
+    
+    final prefs = await SharedPreferences.getInstance();
+    final isLoginFlowActive = prefs.getBool(_loginFlowActiveKey) ?? false;
+    
+    if (isLoginFlowActive) {
+      _logger.info('Login flow already active, showing spinner');
+      _isLoadingPageActive = true;
+      if (mounted) {
+        setState(() {});
+      }
+      return;
+    }
+    
+    // Start login flow
+    _logger.info('Starting login flow');
+    _isLoadingPageActive = true;
+    _shouldShowLoadingPage = true;
+    await prefs.setBool(_loginFlowActiveKey, true);
+    
+    if (mounted) {
+      setState(() {
+        // This will trigger a rebuild and show the LoadingPage
+      });
+    }
   }
 
   void _closeDrawerIfOpen(BuildContext context) {
