@@ -126,15 +126,8 @@ class GalleryState extends State<Gallery> {
   final _scrollController = ScrollController();
   final _sectionedListSliverKey = GlobalKey();
   final _stackKey = GlobalKey();
-  double? _stackRenderBoxYOffset;
-  double? _sectionedListSliverRenderBoxYOffset;
-  double? get _sectionedListSliverRenderBoxYOffsetRelativeToStackRenderBox {
-    if (_sectionedListSliverRenderBoxYOffset != null &&
-        _stackRenderBoxYOffset != null) {
-      return _sectionedListSliverRenderBoxYOffset! - _stackRenderBoxYOffset!;
-    }
-    return null;
-  }
+  final _headerKey = GlobalKey();
+  final _headerHeightNotifier = ValueNotifier<double?>(null);
 
   final miscUtil = MiscUtil();
   final scrollBarInUseNotifier = ValueNotifier<bool>(false);
@@ -241,24 +234,15 @@ class GalleryState extends State<Gallery> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       try {
-        final sectionedListSliverRenderBox = await miscUtil
+        final headerRenderBox = await miscUtil
             .getNonNullValueWithRetry(
-              () => _sectionedListSliverKey.currentContext?.findRenderObject(),
+              () => _headerKey.currentContext?.findRenderObject(),
               retryInterval: const Duration(milliseconds: 750),
-              id: "sectionedListSliverRenderBox",
-            )
-            .then((value) => value as RenderBox);
-        final stackRenderBox = await miscUtil
-            .getNonNullValueWithRetry(
-              () => _stackKey.currentContext?.findRenderObject(),
-              retryInterval: const Duration(milliseconds: 750),
-              id: "stackRenderBox",
+              id: "headerRenderBox",
             )
             .then((value) => value as RenderBox);
 
-        _sectionedListSliverRenderBoxYOffset =
-            sectionedListSliverRenderBox.localToGlobal(Offset.zero).dy;
-        _stackRenderBoxYOffset = stackRenderBox.localToGlobal(Offset.zero).dy;
+        _headerHeightNotifier.value = headerRenderBox.size.height;
       } catch (e, s) {
         _logger.warning("Error getting renderBox offset", e, s);
       }
@@ -432,6 +416,7 @@ class GalleryState extends State<Gallery> {
     _debouncer.cancelDebounceTimer();
     _scrollController.dispose();
     scrollBarInUseNotifier.dispose();
+    _headerHeightNotifier.dispose();
     super.dispose();
   }
 
@@ -486,40 +471,59 @@ class GalleryState extends State<Gallery> {
         galleryGroups: galleryGroups,
         inUseNotifier: scrollBarInUseNotifier,
         heighOfViewport: MediaQuery.sizeOf(context).height,
-        child: Stack(
-          key: _stackKey,
-          clipBehavior: Clip.none,
-          children: [
-            CustomScrollView(
-              physics: const BouncingScrollPhysics(),
-              controller: _scrollController,
-              slivers: [
-                SliverToBoxAdapter(
-                  child: widget.header ?? const SizedBox.shrink(),
-                ),
-                SliverToBoxAdapter(
-                  child: SizedBox.shrink(
-                    key: _sectionedListSliverKey,
+        child: NotificationListener<SizeChangedLayoutNotification>(
+          onNotification: (notification) {
+            final renderBox =
+                _headerKey.currentContext?.findRenderObject() as RenderBox?;
+            if (renderBox != null) {
+              _headerHeightNotifier.value = renderBox.size.height;
+            } else {
+              _logger.info(
+                "Header render box is null, cannot get height",
+              );
+            }
+
+            return true;
+          },
+          child: Stack(
+            key: _stackKey,
+            clipBehavior: Clip.none,
+            children: [
+              CustomScrollView(
+                physics: const BouncingScrollPhysics(),
+                controller: _scrollController,
+                slivers: [
+                  SliverToBoxAdapter(
+                    child: SizeChangedLayoutNotifier(
+                      child: SizedBox(
+                        key: _headerKey,
+                        child: widget.header ?? const SizedBox.shrink(),
+                      ),
+                    ),
                   ),
-                ),
-                SectionedListSliver(
-                  sectionLayouts: galleryGroups.groupLayouts,
-                ),
-                SliverToBoxAdapter(
-                  child: widget.footer,
-                ),
-              ],
-            ),
-            PinnedGroupHeader(
-              scrollController: _scrollController,
-              galleryGroups: galleryGroups,
-              getSectionedListSliverRenderBoxYOffsetRelativeToStackRenderBox: () =>
-                  _sectionedListSliverRenderBoxYOffsetRelativeToStackRenderBox,
-              selectedFiles: widget.selectedFiles,
-              showSelectAllByDefault: widget.showSelectAllByDefault,
-              scrollbarInUseNotifier: scrollBarInUseNotifier,
-            ),
-          ],
+                  SliverToBoxAdapter(
+                    child: SizedBox.shrink(
+                      key: _sectionedListSliverKey,
+                    ),
+                  ),
+                  SectionedListSliver(
+                    sectionLayouts: galleryGroups.groupLayouts,
+                  ),
+                  SliverToBoxAdapter(
+                    child: widget.footer,
+                  ),
+                ],
+              ),
+              PinnedGroupHeader(
+                scrollController: _scrollController,
+                galleryGroups: galleryGroups,
+                headerHeightNotifier: _headerHeightNotifier,
+                selectedFiles: widget.selectedFiles,
+                showSelectAllByDefault: widget.showSelectAllByDefault,
+                scrollbarInUseNotifier: scrollBarInUseNotifier,
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -590,8 +594,7 @@ class GalleryState extends State<Gallery> {
 class PinnedGroupHeader extends StatefulWidget {
   final ScrollController scrollController;
   final GalleryGroups galleryGroups;
-  final double? Function()
-      getSectionedListSliverRenderBoxYOffsetRelativeToStackRenderBox;
+  final ValueNotifier<double?> headerHeightNotifier;
   final SelectedFiles? selectedFiles;
   final bool showSelectAllByDefault;
   final ValueNotifier<bool> scrollbarInUseNotifier;
@@ -599,7 +602,7 @@ class PinnedGroupHeader extends StatefulWidget {
   const PinnedGroupHeader({
     required this.scrollController,
     required this.galleryGroups,
-    required this.getSectionedListSliverRenderBoxYOffsetRelativeToStackRenderBox,
+    required this.headerHeightNotifier,
     required this.selectedFiles,
     required this.showSelectAllByDefault,
     required this.scrollbarInUseNotifier,
@@ -615,6 +618,7 @@ class _PinnedGroupHeaderState extends State<PinnedGroupHeader> {
   final _enlargeHeader = ValueNotifier<bool>(false);
   Timer? _enlargeHeaderTimer;
   late final ValueNotifier<bool> _atZeroScrollNotifier;
+  Timer? _timer;
   @override
   void initState() {
     super.initState();
@@ -626,6 +630,7 @@ class _PinnedGroupHeaderState extends State<PinnedGroupHeader> {
     widget.scrollController.addListener(
       _scrollControllerListenerForZeroScrollNotifier,
     );
+    widget.headerHeightNotifier.addListener(_headerHeightNotifierListener);
   }
 
   @override
@@ -641,16 +646,17 @@ class _PinnedGroupHeaderState extends State<PinnedGroupHeader> {
     _atZeroScrollNotifier.removeListener(
       _scrollControllerListenerForZeroScrollNotifier,
     );
+    widget.headerHeightNotifier.removeListener(_headerHeightNotifierListener);
     _enlargeHeader.dispose();
     _atZeroScrollNotifier.dispose();
     _enlargeHeaderTimer?.cancel();
+    _timer?.cancel();
     super.dispose();
   }
 
   void _setCurrentGroupID() {
-    final normalizedScrollOffset = widget.scrollController.offset -
-        widget
-            .getSectionedListSliverRenderBoxYOffsetRelativeToStackRenderBox()!;
+    final normalizedScrollOffset =
+        widget.scrollController.offset - widget.headerHeightNotifier.value!;
     if (normalizedScrollOffset < 0) {
       // No change in group ID, no need to call setState
       if (currentGroupId == null) return;
@@ -715,6 +721,13 @@ class _PinnedGroupHeaderState extends State<PinnedGroupHeader> {
         _enlargeHeader.value = false;
       });
     }
+  }
+
+  void _headerHeightNotifierListener() {
+    _timer?.cancel();
+    _timer = Timer(const Duration(milliseconds: 500), () {
+      _setCurrentGroupID();
+    });
   }
 
   @override
