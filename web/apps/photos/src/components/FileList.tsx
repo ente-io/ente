@@ -26,6 +26,7 @@ import {
     type ThumbnailGridLayoutParams,
 } from "ente-new/photos/components/utils/thumbnail-grid-layout";
 import { PseudoCollectionID } from "ente-new/photos/services/collection-summary";
+import { batch } from "ente-utils/array";
 import { t } from "i18next";
 import React, {
     memo,
@@ -92,10 +93,26 @@ type FileListItem = {
      * separated by gaps.
      */
     fGroups?: {
+        /**
+         * The annotated files in this group.
+         */
         annotatedFiles: FileListAnnotatedFile[];
+        /**
+         * The index of the first annotated file in the component's global list
+         * of annotated files.
+         */
         annotatedFilesStartIndex: number;
     }[];
-    dGroups?: { date: string; span: number }[];
+    dGroups?: {
+        /**
+         * The date string to show.
+         */
+        date: string;
+        /**
+         * The number of columns to span.
+         */
+        dateSpan: number;
+    }[];
     items?: FileListAnnotatedFile[];
     itemStartIndex?: number;
     date?: string | null;
@@ -277,21 +294,20 @@ export const FileList: React.FC<FileListProps> = ({
         const { isSmallerLayout, columns } = layoutParams;
         const fileItemHeight = layoutParams.itemHeight + layoutParams.gap;
         if (disableGrouping) {
-            let listItemIndex = columns;
-            for (const [index, af] of annotatedFiles.entries()) {
-                if (listItemIndex < columns) {
-                    items[items.length - 1]!.items!.push(af);
-                    listItemIndex++;
-                } else {
-                    listItemIndex = 1;
-                    items.push({
+            items = items.concat(
+                batch(annotatedFiles, columns).map(
+                    (batchFiles, batchIndex) => ({
                         height: fileItemHeight,
                         tag: "file",
-                        items: [af],
-                        itemStartIndex: index,
-                    });
-                }
-            }
+                        fGroups: [
+                            {
+                                annotatedFiles: batchFiles,
+                                annotatedFilesStartIndex: batchIndex * columns,
+                            },
+                        ],
+                    }),
+                ),
+            );
         } else {
             let listItemIndex = 0;
             let lastCreationTime: number | undefined;
@@ -571,6 +587,107 @@ export const FileList: React.FC<FileListProps> = ({
                         </DateListItem>
                     );
                 case "file": {
+                    if (listItem.fGroups) {
+                        return listItem.fGroups
+                            .map(
+                                (
+                                    {
+                                        annotatedFiles,
+                                        annotatedFilesStartIndex,
+                                    },
+                                    i,
+                                ) => [
+                                    ...annotatedFiles.map(
+                                        (annotatedFile, j) => {
+                                            const file = annotatedFile.file;
+                                            const index =
+                                                annotatedFilesStartIndex + j;
+                                            return (
+                                                <FileThumbnail
+                                                    key={`tile-${file.id}-selected-${selected[file.id] ?? false}`}
+                                                    {...{
+                                                        user,
+                                                        emailByUserID,
+                                                        enableSelect,
+                                                    }}
+                                                    file={file}
+                                                    selected={
+                                                        (!mode
+                                                            ? selected.collectionID ===
+                                                              activeCollectionID
+                                                            : mode ==
+                                                                  selected
+                                                                      .context
+                                                                      ?.mode &&
+                                                              (selected.context
+                                                                  .mode ==
+                                                              "people"
+                                                                  ? selected
+                                                                        .context
+                                                                        .personID ==
+                                                                    activePersonID
+                                                                  : selected
+                                                                        .context
+                                                                        .collectionID ==
+                                                                    activeCollectionID)) &&
+                                                        !!selected[file.id]
+                                                    }
+                                                    selectOnClick={
+                                                        selected.count > 0
+                                                    }
+                                                    isRangeSelectActive={
+                                                        isShiftKeyPressed &&
+                                                        selected.count > 0
+                                                    }
+                                                    isInSelectRange={
+                                                        rangeStartIndex !==
+                                                            undefined &&
+                                                        hoverIndex !==
+                                                            undefined &&
+                                                        ((index >=
+                                                            rangeStartIndex &&
+                                                            index <=
+                                                                hoverIndex) ||
+                                                            (index >=
+                                                                hoverIndex &&
+                                                                index <=
+                                                                    rangeStartIndex))
+                                                    }
+                                                    activeCollectionID={
+                                                        activeCollectionID
+                                                    }
+                                                    showPlaceholder={
+                                                        isScrolling
+                                                    }
+                                                    isFav={
+                                                        !!favoriteFileIDs?.has(
+                                                            file.id,
+                                                        )
+                                                    }
+                                                    onClick={() =>
+                                                        onItemClick(index)
+                                                    }
+                                                    onSelect={handleSelect(
+                                                        file,
+                                                        index,
+                                                    )}
+                                                    onHover={() =>
+                                                        setHoverIndex(index)
+                                                    }
+                                                    onRangeSelect={() =>
+                                                        handleRangeSelect(index)
+                                                    }
+                                                />
+                                            );
+                                        },
+                                    ),
+                                    <div
+                                        key={`gap-files-${annotatedFilesStartIndex}-${i}`}
+                                    />,
+                                ],
+                            )
+                            .flat();
+                    }
                     const ret = listItem.items!.map(({ file }, i) => {
                         const index = listItem.itemStartIndex! + i;
                         return (
@@ -668,6 +785,9 @@ export const FileList: React.FC<FileListProps> = ({
             case "date":
                 return `${item.date ?? ""}-${index}`;
             case "file":
+                if (item.fGroups) {
+                    return `file-group-${item.fGroups[0]!.annotatedFilesStartIndex}`;
+                }
                 return `${item.items![0]!.file.id}-${
                     item.items!.slice(-1)[0]!.file.id
                 }`;
