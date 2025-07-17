@@ -244,16 +244,6 @@ export const FileList: React.FC<FileListProps> = ({
         [width],
     );
 
-    const {
-        // containerWidth,
-        // isSmallerLayout,
-        // paddingInline,
-        columns,
-        // itemWidth,
-        // itemHeight,
-        // gap,
-    } = layoutParams;
-
     useEffect(() => {
         // Since width and height are dependencies, there might be too many
         // updates to the list during a resize. The list computation too, while
@@ -500,7 +490,8 @@ export const FileList: React.FC<FileListProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
     const renderListItem = (
         listItem: FileListItem,
-        isScrolling: boolean | undefined,
+        layoutParams: ThumbnailGridLayoutParams,
+        isScrolling: boolean,
     ) => {
         const haveSelection = selected.count > 0;
         switch (listItem.tag) {
@@ -529,7 +520,7 @@ export const FileList: React.FC<FileListProps> = ({
                         ])
                         .flat()
                 ) : (
-                    <DateListItem span={columns}>
+                    <DateListItem span={layoutParams.columns}>
                         {haveSelection && (
                             <Checkbox
                                 key={listItem.date}
@@ -582,7 +573,7 @@ export const FileList: React.FC<FileListProps> = ({
                                 (index >= currentHover! && index <= rangeStart!)
                             }
                             activeCollectionID={activeCollectionID}
-                            showPlaceholder={!!isScrolling}
+                            showPlaceholder={isScrolling}
                             isFav={favoriteFileIDs?.has(file.id)}
                         />
                     );
@@ -803,8 +794,9 @@ interface FileListItemData {
     items: FileListItem[];
     layoutParams: ThumbnailGridLayoutParams;
     renderListItem: (
-        timeStampListItem: FileListItem,
-        isScrolling: boolean | undefined,
+        listItem: FileListItem,
+        layoutParams: ThumbnailGridLayoutParams,
+        isScrolling: boolean,
     ) => React.ReactNode;
 }
 
@@ -839,7 +831,7 @@ const FileListRow = memo(
                     },
                 ]}
             >
-                {renderListItem(item, isScrolling)}
+                {renderListItem(item, layoutParams, !!isScrolling)}
             </Box>
         );
     },
