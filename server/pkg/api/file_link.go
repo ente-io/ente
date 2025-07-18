@@ -88,7 +88,7 @@ func (h *FileHandler) GetUrls(c *gin.Context) {
 	})
 }
 
-// VerifyPassword verifies the password for given public access token and return signed jwt token if it's valid
+// VerifyPassword verifies the password for given link access token and return signed jwt token if it's valid
 func (h *FileHandler) VerifyPassword(c *gin.Context) {
 	var req ente.VerifyPasswordRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
