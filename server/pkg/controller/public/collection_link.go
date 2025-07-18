@@ -53,7 +53,7 @@ const (
 type CollectionLinkController struct {
 	FileController        *controller.FileController
 	EmailNotificationCtrl *emailCtrl.EmailNotificationController
-	PublicCollectionRepo  *public.PublicCollectionRepository
+	CollectionLinkRepo    *public.CollectionLinkRepo
 	CollectionRepo        *repo.CollectionRepository
 	UserRepo              *repo.UserRepository
 	JwtSecret             []byte
@@ -61,11 +61,11 @@ type CollectionLinkController struct {
 
 func (c *CollectionLinkController) CreateLink(ctx context.Context, req ente.CreatePublicAccessTokenRequest) (ente.PublicURL, error) {
 	accessToken := shortuuid.New()[0:AccessTokenLength]
-	err := c.PublicCollectionRepo.
+	err := c.CollectionLinkRepo.
 		Insert(ctx, req.CollectionID, accessToken, req.ValidTill, req.DeviceLimit, req.EnableCollect, req.EnableJoin)
 	if err != nil {
 		if errors.Is(err, ente.ErrActiveLinkAlreadyExists) {
-			collectionToPubUrlMap, err2 := c.PublicCollectionRepo.GetCollectionToActivePublicURLMap(ctx, []int64{req.CollectionID})
+			collectionToPubUrlMap, err2 := c.CollectionLinkRepo.GetCollectionToActivePublicURLMap(ctx, []int64{req.CollectionID})
 			if err2 != nil {
 				return ente.PublicURL{}, stacktrace.Propagate(err2, "")
 			}
@@ -81,7 +81,7 @@ func (c *CollectionLinkController) CreateLink(ctx context.Context, req ente.Crea
 		}
 	}
 	response := ente.PublicURL{
-		URL:             c.PublicCollectionRepo.GetAlbumUrl(accessToken),
+		URL:             c.CollectionLinkRepo.GetAlbumUrl(accessToken),
 		ValidTill:       req.ValidTill,
 		DeviceLimit:     req.DeviceLimit,
 		EnableDownload:  true,
@@ -92,7 +92,7 @@ func (c *CollectionLinkController) CreateLink(ctx context.Context, req ente.Crea
 }
 
 func (c *CollectionLinkController) GetActiveCollectionLinkToken(ctx context.Context, collectionID int64) (ente.CollectionLinkRow, error) {
-	return c.PublicCollectionRepo.GetActiveCollectionLinkRow(ctx, collectionID)
+	return c.CollectionLinkRepo.GetActiveCollectionLinkRow(ctx, collectionID)
 }
 
 func (c *CollectionLinkController) CreateFile(ctx *gin.Context, file ente.File, app ente.App) (ente.File, error) {
@@ -119,12 +119,12 @@ func (c *CollectionLinkController) CreateFile(ctx *gin.Context, file ente.File, 
 
 // Disable all public accessTokens generated for the given cID till date.
 func (c *CollectionLinkController) Disable(ctx context.Context, cID int64) error {
-	err := c.PublicCollectionRepo.DisableSharing(ctx, cID)
+	err := c.CollectionLinkRepo.DisableSharing(ctx, cID)
 	return stacktrace.Propagate(err, "")
 }
 
 func (c *CollectionLinkController) UpdateSharedUrl(ctx context.Context, req ente.UpdatePublicAccessTokenRequest) (ente.PublicURL, error) {
-	publicCollectionToken, err := c.PublicCollectionRepo.GetActiveCollectionLinkRow(ctx, req.CollectionID)
+	publicCollectionToken, err := c.CollectionLinkRepo.GetActiveCollectionLinkRow(ctx, req.CollectionID)
 	if err != nil {
 		return ente.PublicURL{}, err
 	}
@@ -154,12 +154,12 @@ func (c *CollectionLinkController) UpdateSharedUrl(ctx context.Context, req ente
 	if req.EnableJoin != nil {
 		publicCollectionToken.EnableJoin = *req.EnableJoin
 	}
-	err = c.PublicCollectionRepo.UpdatePublicCollectionToken(ctx, publicCollectionToken)
+	err = c.CollectionLinkRepo.UpdatePublicCollectionToken(ctx, publicCollectionToken)
 	if err != nil {
 		return ente.PublicURL{}, stacktrace.Propagate(err, "")
 	}
 	return ente.PublicURL{
-		URL:             c.PublicCollectionRepo.GetAlbumUrl(publicCollectionToken.Token),
+		URL:             c.CollectionLinkRepo.GetAlbumUrl(publicCollectionToken.Token),
 		DeviceLimit:     publicCollectionToken.DeviceLimit,
 		ValidTill:       publicCollectionToken.ValidTill,
 		EnableDownload:  publicCollectionToken.EnableDownload,
@@ -178,7 +178,7 @@ func (c *CollectionLinkController) UpdateSharedUrl(ctx context.Context, req ente
 // attack for guessing password.
 func (c *CollectionLinkController) VerifyPassword(ctx *gin.Context, req ente.VerifyPasswordRequest) (*ente.VerifyPasswordResponse, error) {
 	accessContext := auth.MustGetPublicAccessContext(ctx)
-	collectionLinkRow, err := c.PublicCollectionRepo.GetActiveCollectionLinkRow(ctx, accessContext.CollectionID)
+	collectionLinkRow, err := c.CollectionLinkRepo.GetActiveCollectionLinkRow(ctx, accessContext.CollectionID)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "failed to get public collection info")
 	}
@@ -200,11 +200,11 @@ func (c *CollectionLinkController) ReportAbuse(ctx *gin.Context, req ente.AbuseR
 	}
 	logrus.WithField("collectionID", accessContext.CollectionID).Error("CRITICAL: received abuse report")
 
-	err := c.PublicCollectionRepo.RecordAbuseReport(ctx, accessContext, req.URL, req.Reason, req.Details)
+	err := c.CollectionLinkRepo.RecordAbuseReport(ctx, accessContext, req.URL, req.Reason, req.Details)
 	if err != nil {
 		return stacktrace.Propagate(err, "")
 	}
-	count, err := c.PublicCollectionRepo.GetAbuseReportCount(ctx, accessContext)
+	count, err := c.CollectionLinkRepo.GetAbuseReportCount(ctx, accessContext)
 	if err != nil {
 		return stacktrace.Propagate(err, "")
 	}
@@ -259,7 +259,7 @@ func (c *CollectionLinkController) onAbuseReportReceived(collectionID int64, rep
 
 func (c *CollectionLinkController) HandleAccountDeletion(ctx context.Context, userID int64, logger *logrus.Entry) error {
 	logger.Info("updating public collection on account deletion")
-	collectionIDs, err := c.PublicCollectionRepo.GetActivePublicTokenForUser(ctx, userID)
+	collectionIDs, err := c.CollectionLinkRepo.GetActivePublicTokenForUser(ctx, userID)
 	if err != nil {
 		return stacktrace.Propagate(err, "")
 	}

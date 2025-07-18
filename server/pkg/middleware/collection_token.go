@@ -28,7 +28,7 @@ var whitelistedCollectionShareIDs = []int64{111}
 
 // CollectionTokenMiddleware intercepts and authenticates incoming requests
 type CollectionTokenMiddleware struct {
-	PublicCollectionRepo *public.PublicCollectionRepository
+	CollectionLinkRepo   *public.CollectionLinkRepo
 	PublicCollectionCtrl *public2.CollectionLinkController
 	CollectionRepo       *repo.CollectionRepository
 	Cache                *cache.Cache
@@ -54,7 +54,7 @@ func (m *CollectionTokenMiddleware) Authenticate(urlSanitizer func(_ *gin.Contex
 		cacheKey := computeHashKeyForList([]string{accessToken, clientIP, userAgent}, ":")
 		cachedValue, cacheHit := m.Cache.Get(cacheKey)
 		if !cacheHit {
-			publicCollectionSummary, err = m.PublicCollectionRepo.GetCollectionSummaryByToken(c, accessToken)
+			publicCollectionSummary, err = m.CollectionLinkRepo.GetCollectionSummaryByToken(c, accessToken)
 			if err != nil {
 				c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "invalid token"})
 				return
@@ -130,7 +130,7 @@ func (m *CollectionTokenMiddleware) isDeviceLimitReached(ctx context.Context,
 	}
 
 	sharedID := collectionSummary.ID
-	hasAccessedInPast, err := m.PublicCollectionRepo.AccessedInPast(ctx, sharedID, ip, ua)
+	hasAccessedInPast, err := m.CollectionLinkRepo.AccessedInPast(ctx, sharedID, ip, ua)
 	if err != nil {
 		return false, stacktrace.Propagate(err, "")
 	}
@@ -138,7 +138,7 @@ func (m *CollectionTokenMiddleware) isDeviceLimitReached(ctx context.Context,
 	if hasAccessedInPast {
 		return false, nil
 	}
-	count, err := m.PublicCollectionRepo.GetUniqueAccessCount(ctx, sharedID)
+	count, err := m.CollectionLinkRepo.GetUniqueAccessCount(ctx, sharedID)
 	if err != nil {
 		return false, stacktrace.Propagate(err, "failed to get unique access count")
 	}
@@ -159,7 +159,7 @@ func (m *CollectionTokenMiddleware) isDeviceLimitReached(ctx context.Context,
 	if deviceLimit > 0 && count >= deviceLimit {
 		return true, nil
 	}
-	err = m.PublicCollectionRepo.RecordAccessHistory(ctx, sharedID, ip, ua)
+	err = m.CollectionLinkRepo.RecordAccessHistory(ctx, sharedID, ip, ua)
 	return false, stacktrace.Propagate(err, "failed to record access history")
 }
 

@@ -178,8 +178,8 @@ func main() {
 	fileDataRepo := &fileDataRepo.Repository{DB: db, ObjectCleanupRepo: objectCleanupRepo}
 	familyRepo := &repo.FamilyRepository{DB: db}
 	trashRepo := &repo.TrashRepository{DB: db, ObjectRepo: objectRepo, FileRepo: fileRepo, QueueRepo: queueRepo}
-	publicCollectionRepo := public.NewPublicCollectionRepository(db, viper.GetString("apps.public-albums"))
-	collectionRepo := &repo.CollectionRepository{DB: db, FileRepo: fileRepo, PublicCollectionRepo: publicCollectionRepo,
+	collectionLinkRepo := public.NewCollectionLinkRepository(db, viper.GetString("apps.public-albums"))
+	collectionRepo := &repo.CollectionRepository{DB: db, FileRepo: fileRepo, CollectionLinkRepo: collectionLinkRepo,
 		TrashRepo: trashRepo, SecretEncryptionKey: secretEncryptionKeyBytes, QueueRepo: queueRepo, LatencyLogger: latencyLogger}
 	pushRepo := &repo.PushTokenRepository{DB: db}
 	kexRepo := &kex.Repository{
@@ -304,7 +304,7 @@ func main() {
 	collectionLinkCtrl := &publicCtrl.CollectionLinkController{
 		FileController:        fileController,
 		EmailNotificationCtrl: emailNotificationCtrl,
-		PublicCollectionRepo:  publicCollectionRepo,
+		CollectionLinkRepo:    collectionLinkRepo,
 		CollectionRepo:        collectionRepo,
 		UserRepo:              userRepo,
 		JwtSecret:             jwtSecretBytes,
@@ -360,7 +360,7 @@ func main() {
 
 	authMiddleware := middleware.AuthMiddleware{UserAuthRepo: userAuthRepo, Cache: authCache, UserController: userController}
 	collectionTokenMiddleware := middleware.CollectionTokenMiddleware{
-		PublicCollectionRepo: publicCollectionRepo,
+		CollectionLinkRepo:   collectionLinkRepo,
 		PublicCollectionCtrl: collectionLinkCtrl,
 		CollectionRepo:       collectionRepo,
 		Cache:                accessTokenCache,
@@ -428,11 +428,18 @@ func main() {
 		ObjectRepo:     objectRepo,
 		FileRepo:       fileRepo,
 	}
+	fileLinkCtrl := &publicCtrl.FileLinkController{
+		FileController: fileController,
+		FileLinkRepo:   nil,
+		FileRepo:       fileRepo,
+		JwtSecret:      jwtSecretBytes,
+	}
 
 	fileHandler := &api.FileHandler{
 		Controller:   fileController,
 		FileCopyCtrl: fileCopyCtrl,
 		FileDataCtrl: fileDataCtrl,
+		FileUrlCtrl:  fileLinkCtrl,
 	}
 	privateAPI.GET("/files/upload-urls", fileHandler.GetUploadURLs)
 	privateAPI.GET("/files/multipart-upload-urls", fileHandler.GetMultipartUploadURLs)
@@ -776,7 +783,7 @@ func main() {
 	setKnownAPIs(server.Routes())
 	setupAndStartBackgroundJobs(objectCleanupController, replicationController3, fileDataCtrl)
 	setupAndStartCrons(
-		userAuthRepo, publicCollectionRepo, twoFactorRepo, passkeysRepo, fileController, taskLockingRepo, emailNotificationCtrl,
+		userAuthRepo, collectionLinkRepo, twoFactorRepo, passkeysRepo, fileController, taskLockingRepo, emailNotificationCtrl,
 		trashController, pushController, objectController, dataCleanupController, storageBonusCtrl, emergencyCtrl,
 		embeddingController, healthCheckHandler, kexCtrl, castDb)
 
@@ -905,7 +912,7 @@ func setupAndStartBackgroundJobs(
 	objectCleanupController.StartClearingOrphanObjects()
 }
 
-func setupAndStartCrons(userAuthRepo *repo.UserAuthRepository, publicCollectionRepo *public.PublicCollectionRepository,
+func setupAndStartCrons(userAuthRepo *repo.UserAuthRepository, collectionLinkRepo *public.CollectionLinkRepo,
 	twoFactorRepo *repo.TwoFactorRepository, passkeysRepo *passkey.Repository, fileController *controller.FileController,
 	taskRepo *repo.TaskLockRepository, emailNotificationCtrl *email.EmailNotificationController,
 	trashController *controller.TrashController, pushController *controller.PushController,
@@ -931,7 +938,7 @@ func setupAndStartCrons(userAuthRepo *repo.UserAuthRepository, publicCollectionR
 	schedule(c, "@every 24h", func() {
 		_ = userAuthRepo.RemoveDeletedTokens(timeUtil.MicrosecondsBeforeDays(30))
 		_ = castDb.DeleteOldSessions(context.Background(), timeUtil.MicrosecondsBeforeDays(7))
-		_ = publicCollectionRepo.CleanupAccessHistory(context.Background())
+		_ = collectionLinkRepo.CleanupAccessHistory(context.Background())
 	})
 
 	schedule(c, "@every 1m", func() {
