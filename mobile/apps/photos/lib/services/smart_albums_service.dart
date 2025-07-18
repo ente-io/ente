@@ -60,68 +60,84 @@ class SmartAlbumsService {
 
   Future<Map<int, SmartAlbumConfig>> _fetchAndCacheSConfigs() async {
     _logger.finest("reading all smart configs from local db");
+
     final entities = await entityService.getEntities(type);
     final result = await Computer.shared().compute(
       _decodeSConfigEntities,
       param: {"entity": entities},
       taskName: "decode_sconfig_entities",
-    ) as (Map<int, SmartAlbumConfig>, Map<int, (String, Set<String>)>);
+    ) as Map<String, dynamic>;
 
-    for (final entry in result.$2.entries) {
+    final sconfigs = result["sconfigs"] as Map<int, SmartAlbumConfig>;
+
+    final collectionToUpdate = result["collectionToUpdate"] as Set<int>;
+    final idToDelete = result["idToDelete"] as Set<String>;
+
+    // update the merged config to remote db
+    for (final collectionid in collectionToUpdate) {
       await _addOrUpdateEntity(
         type,
-        result.$1[entry.key]!.toJson(),
-        id: entry.value.$1,
+        sconfigs[collectionid]!.toJson(),
+        id: sconfigs[collectionid]!.remoteId,
       );
-
-      for (final remoteId in entry.value.$2) {
-        await _deleteEntry(
-          id: remoteId,
-        );
-      }
     }
 
-    return result.$1;
+    // delete all remote ids that are merged into the config
+    for (final remoteId in idToDelete) {
+      await _deleteEntry(id: remoteId);
+    }
+
+    return sconfigs;
   }
 
-  static (Map<int, SmartAlbumConfig>, Map<int, (String, Set<String>)>)
-      _decodeSConfigEntities(
+  Map<String, dynamic> _decodeSConfigEntities(
     Map<String, dynamic> param,
   ) {
     final entities = param["entity"] as List<LocalEntityData>;
 
     final Map<int, SmartAlbumConfig> sconfigs = {};
-    final Map<int, (String, Set<String>)> collectionToRemote = {};
-    for (final entity in entities) {
-      var config = SmartAlbumConfig.fromJson(
-        json.decode(entity.data),
-        entity.id,
-        entity.updatedAt,
-      );
+    final Set<int> collectionToUpdate = {};
+    final Set<String> idToDelete = {};
 
-      if (sconfigs.containsKey(config.collectionId)) {
-        final existingConfig = sconfigs[config.collectionId]!;
-        final configToKeep = config.updatedAt < existingConfig.updatedAt
-            ? config
-            : existingConfig;
-        final configToDelete = config.updatedAt < existingConfig.updatedAt
-            ? existingConfig
-            : config;
-        collectionToRemote[configToKeep.collectionId] = (
-          configToKeep.remoteId!,
-          {
-            ...?collectionToRemote[configToKeep.collectionId]?.$2,
-            configToDelete.remoteId!,
-          },
+    for (final entity in entities) {
+      try {
+        var config = SmartAlbumConfig.fromJson(
+          json.decode(entity.data),
+          entity.id,
+          entity.updatedAt,
         );
 
-        config = sconfigs[config.collectionId]!.merge(config);
-      }
+        if (sconfigs.containsKey(config.collectionId)) {
+          final existingConfig = sconfigs[config.collectionId]!;
+          final collectionIdToKeep = config.updatedAt < existingConfig.updatedAt
+              ? config.collectionId
+              : existingConfig.collectionId;
+          final remoteIdToDelete = config.updatedAt < existingConfig.updatedAt
+              ? existingConfig.remoteId
+              : config.remoteId;
 
-      sconfigs[config.collectionId] = config;
+          config = sconfigs[config.collectionId]!.merge(config);
+
+          // Update the config to be updated and deleted list
+          collectionToUpdate.add(collectionIdToKeep);
+          idToDelete.add(remoteIdToDelete!);
+        }
+
+        sconfigs[config.collectionId] = config;
+      } catch (error, stackTrace) {
+        _logger.severe(
+          "Failed to decode smart album config",
+          error,
+          stackTrace,
+        );
+      }
     }
 
-    return (sconfigs, collectionToRemote);
+    return {
+      "sconfigs": sconfigs,
+      "collectionToUpdate": collectionToUpdate,
+      "idToDelete": idToDelete,
+    };
   }
 
   Future<void> syncSmartAlbums() async {
