@@ -73,45 +73,55 @@ export interface FileListHeaderOrFooter {
  * Data needed to render each row in the variable size list that comprises the
  * file list.
  */
-type FileListItem = {
-    /**
-     * The height of the row that will render this item.
-     */
-    height: number;
-    type: "date" | "file" | "span";
-    /**
-     * Groups of items that are shown in the row.
-     *
-     * Each group spans multiple columns (the number of columns being given by
-     * the length of {@link annotatedFiles} or the {@link span}). Groups are
-     * separated by gaps.
-     */
-    fGroups?: {
-        /**
-         * The annotated files in this group.
-         */
-        annotatedFiles: FileListAnnotatedFile[];
-        /**
-         * The index of the first annotated file in the component's global list
-         * of annotated files.
-         */
-        annotatedFilesStartIndex: number;
-    }[];
-    dGroups?: {
-        /**
-         * The date string to show.
-         */
-        date: string;
-        /**
-         * The number of columns to span.
-         */
-        dateSpan: number;
-    }[];
-    /**
-     * The React component that is the rendered representation of the item.
-     */
-    component?: React.ReactNode;
-} & Pick<FileListHeaderOrFooter, "extendToInlineEdges">;
+type FileListItem =
+    | {
+          type: "file";
+          /**
+           * The height of the row that will render this item.
+           */
+          height: number;
+          /**
+           * Groups of items that are shown in the row.
+           *
+           * Each group spans multiple columns (the number of columns being given by
+           * the length of {@link annotatedFiles} or the {@link span}). Groups are
+           * separated by gaps.
+           */
+          groups: {
+              /**
+               * The annotated files in this group.
+               */
+              annotatedFiles: FileListAnnotatedFile[];
+              /**
+               * The index of the first annotated file in the component's global list
+               * of annotated files.
+               */
+              annotatedFilesStartIndex: number;
+          }[];
+      }
+    | {
+          type: "date";
+          height: number;
+          groups: {
+              /**
+               * The date string to show.
+               */
+              date: string;
+              /**
+               * The number of columns to span.
+               */
+              dateSpan: number;
+          }[];
+      }
+    | {
+          type: "span";
+          height: number;
+          /**
+           * The React component that is the rendered representation of the item.
+           */
+          component: React.ReactNode;
+          extendToInlineEdges?: boolean;
+      };
 
 export interface FileListAnnotatedFile {
     file: EnteFile;
@@ -288,7 +298,7 @@ export const FileList: React.FC<FileListProps> = ({
                     (batchFiles, batchIndex) => ({
                         height: fileItemHeight,
                         type: "file",
-                        fGroups: [
+                        groups: [
                             {
                                 annotatedFiles: batchFiles,
                                 annotatedFilesStartIndex: batchIndex * columns,
@@ -305,7 +315,7 @@ export const FileList: React.FC<FileListProps> = ({
                 ({
                     height: fileItemHeight,
                     type: "file",
-                    fGroups: splits.map((split) => {
+                    groups: splits.map((split) => {
                         const group = {
                             annotatedFiles: split,
                             annotatedFilesStartIndex: fileIndex,
@@ -322,7 +332,7 @@ export const FileList: React.FC<FileListProps> = ({
                     items.push({
                         height: dateListItemHeight,
                         type: "date",
-                        dGroups: splits.map((s) => ({
+                        groups: splits.map((s) => ({
                             date: s[0]!.timelineDateString,
                             dateSpan: s.length,
                         })),
@@ -334,7 +344,7 @@ export const FileList: React.FC<FileListProps> = ({
                     items.push({
                         height: dateListItemHeight,
                         type: "date",
-                        dGroups: splits.map((s) => ({
+                        groups: splits.map((s) => ({
                             date: s[0]!.timelineDateString,
                             dateSpan: columns,
                         })),
@@ -422,8 +432,6 @@ export const FileList: React.FC<FileListProps> = ({
         // Refresh list
         listRef.current?.resetAfterIndex(0);
     }, [items]);
-
-    // TODO: Too many non-null assertions
 
     useEffect(() => {
         const notSelectedFiles = annotatedFiles.filter(
@@ -563,7 +571,7 @@ export const FileList: React.FC<FileListProps> = ({
             switch (item.type) {
                 case "date":
                     return intersperseWithGaps(
-                        item.dGroups!,
+                        item.groups,
                         ({ date, dateSpan }) => [
                             <DateListItem key={date} span={dateSpan}>
                                 {haveSelection && (
@@ -587,7 +595,7 @@ export const FileList: React.FC<FileListProps> = ({
                     );
                 case "file":
                     return intersperseWithGaps(
-                        item.fGroups!,
+                        item.groups,
                         ({ annotatedFiles, annotatedFilesStartIndex }) =>
                             annotatedFiles.map((annotatedFile, j) => {
                                 const file = annotatedFile.file;
@@ -646,7 +654,7 @@ export const FileList: React.FC<FileListProps> = ({
                             <div key={`${annotatedFilesStartIndex}-gap`} />
                         ),
                     );
-                default:
+                case "span":
                     return item.component;
             }
         },
@@ -684,10 +692,10 @@ export const FileList: React.FC<FileListProps> = ({
         const item = itemData.items[index]!;
         switch (item.type) {
             case "date":
-                return `date-${item.dGroups![0]!.date}-${index}`;
+                return `date-${item.groups[0]!.date}-${index}`;
             case "file":
-                return `file-${item.fGroups![0]!.annotatedFilesStartIndex}-${index}`;
-            default:
+                return `file-${item.groups[0]!.annotatedFilesStartIndex}-${index}`;
+            case "span":
                 return `span-${index}`;
         }
     }, []);
@@ -713,9 +721,6 @@ export const FileList: React.FC<FileListProps> = ({
     }
 
     return (
-        // TODO(RE):
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
         <VariableSizeList
             key={key}
             ref={listRef}
@@ -832,22 +837,21 @@ const FileListRow = memo(
         const itemSpans = (() => {
             switch (item.type) {
                 case "date":
-                    return item.dGroups!.map((g) => g.dateSpan);
+                    return item.groups.map((g) => g.dateSpan);
                 case "file":
-                    return item.fGroups!.map((g) => g.annotatedFiles.length);
-                default:
+                    return item.groups.map((g) => g.annotatedFiles.length);
+                case "span":
                     return [];
             }
         })();
+        const px =
+            item.type == "span" && item.extendToInlineEdges ? 0 : paddingInline;
 
         return (
             <Box
                 style={style}
                 sx={[
-                    {
-                        width: "100%",
-                        paddingInline: `${item.extendToInlineEdges ? 0 : paddingInline}px`,
-                    },
+                    { width: "100%", paddingInline: `${px}px` },
                     itemSpans.length > 0 && {
                         display: "grid",
                         gridTemplateColumns: itemSpans
