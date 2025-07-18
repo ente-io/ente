@@ -17,6 +17,7 @@ import 'package:photos/models/selected_files.dart';
 import "package:photos/service_locator.dart";
 import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/common/loading_widget.dart';
+import "package:photos/ui/viewer/gallery/component/gallery_file_widget.dart";
 import "package:photos/ui/viewer/gallery/component/group/group_header_widget.dart";
 import "package:photos/ui/viewer/gallery/component/group/type.dart";
 import "package:photos/ui/viewer/gallery/component/sectioned_sliver_list.dart";
@@ -444,18 +445,52 @@ class GalleryState extends State<Gallery> {
 
   @override
   Widget build(BuildContext context) {
-    if (groupHeaderExtent == null) {
-      return const SizedBox.shrink();
-    }
-
     _logger.info("Building Gallery  ${widget.tagPrefix}");
+    final widthAvailable = MediaQuery.sizeOf(context).width;
+
+    if (groupHeaderExtent == null) {
+      final photoGridSize = localSettings.getPhotoGridSize();
+      final tileHeight =
+          (widthAvailable - (photoGridSize - 1) * GalleryGroups.spacing) /
+              photoGridSize;
+      return widget.initialFiles != null && widget.initialFiles!.isNotEmpty
+          ? Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                widget.header ?? const SizedBox.shrink(),
+                GroupHeaderWidget(
+                  title: "",
+                  gridSize: photoGridSize,
+                  filesInGroup: const [],
+                  selectedFiles: null,
+                  showSelectAll: false,
+                ),
+                Align(
+                  alignment: Alignment.topLeft,
+                  child: SizedBox(
+                    height: tileHeight,
+                    width: tileHeight,
+                    child: GalleryFileWidget(
+                      file: widget.initialFiles!.first,
+                      selectedFiles: null,
+                      limitSelectionToOne: false,
+                      tag: widget.tagPrefix,
+                      photoGridSize: photoGridSize,
+                      currentUserID: null,
+                    ),
+                  ),
+                ),
+              ],
+            )
+          : const SizedBox.shrink();
+    }
 
     final double bottomPadding = MediaQuery.paddingOf(context).bottom + 180;
 
     final galleryGroups = GalleryGroups(
       allFiles: _allGalleryFiles,
       groupType: _groupType,
-      widthAvailable: MediaQuery.sizeOf(context).width,
+      widthAvailable: widthAvailable,
       selectedFiles: widget.selectedFiles,
       tagPrefix: widget.tagPrefix,
       groupHeaderExtent: groupHeaderExtent!,
