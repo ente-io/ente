@@ -309,35 +309,80 @@ export const FileList: React.FC<FileListProps> = ({
             );
         } else {
             let i = 0;
-            for (const split of splitByDate(annotatedFiles)) {
+            const pushItemsFromSplits = (splits: FileListAnnotatedFile[][]) => {
                 items.push({
                     height: dateListItemHeight,
                     tag: "date",
-                    dGroups: [
-                        {
-                            date: split[0]!.timelineDateString,
-                            dateSpan: split.length,
-                        },
-                    ],
+                    dGroups: splits.map((s) => ({
+                        date: s[0]!.timelineDateString,
+                        dateSpan: s.length,
+                    })),
                 });
-                items = items.concat(
-                    batch(split, columns).map((batchFiles, batchIndex) => ({
+                if (splits.length > 1) {
+                    // If we get here, the combined number of files across
+                    // `thisRowSplits` is less than the number of columns.
+                    items.push({
                         height: fileItemHeight,
                         tag: "file",
-                        fGroups: [
-                            {
-                                annotatedFiles: batchFiles,
-                                annotatedFilesStartIndex:
-                                    i + batchIndex * columns,
-                            },
-                        ],
-                    })),
+                        fGroups: splits.map((s) => {
+                            const group = {
+                                annotatedFiles: s,
+                                annotatedFilesStartIndex: i,
+                            };
+                            i += s.length;
+                            return group;
+                        }),
+                    });
+                } else {
+                    // A single group of files, but the number of such files
+                    // might be more than what fits a single row.
+                    const split = splits[0]!;
+                    items = items.concat(
+                        batch(split, columns).map((batchFiles, batchIndex) => ({
+                            height: fileItemHeight,
+                            tag: "file",
+                            fGroups: [
+                                {
+                                    annotatedFiles: batchFiles,
+                                    annotatedFilesStartIndex:
+                                        i + batchIndex * columns,
+                                },
+                            ],
+                        })),
+                    );
+                    i += split.length;
+                }
+            };
+
+            const spaceBetweenDatesToImageContainerWidthRatio = 0.244;
+
+            let thisRowSplits = new Array<FileListAnnotatedFile[]>();
+            for (const split of splitByDate(annotatedFiles)) {
+                const filledColumns = thisRowSplits.reduce(
+                    (a, s) => a + s.length,
+                    0,
                 );
-                i += split.length;
+                const incomingColumns = split.length;
+
+                // Check if items can be added to same list.
+                if (
+                    !isSmallerLayout &&
+                    filledColumns +
+                        incomingColumns +
+                        Math.ceil(
+                            thisRowSplits.length *
+                                spaceBetweenDatesToImageContainerWidthRatio,
+                        ) <=
+                        columns
+                ) {
+                    thisRowSplits.push(split);
+                    continue;
+                }
+
+                if (thisRowSplits.length) pushItemsFromSplits(thisRowSplits);
+                thisRowSplits = [split];
             }
-            if (!isSmallerLayout) {
-                items = mergeRowsWherePossible(items, columns);
-            }
+            pushItemsFromSplits(thisRowSplits);
         }
 
         if (!annotatedFiles.length) {
@@ -724,70 +769,6 @@ const splitByDate = (annotatedFiles: FileListAnnotatedFile[]) =>
         ),
         new Array<FileListAnnotatedFile[]>(),
     );
-
-/**
- * Merge multiple dates into a single row.
- */
-const mergeRowsWherePossible = (
-    items: FileListItem[],
-    columns: number,
-): FileListItem[] => {
-    const result: FileListItem[] = [];
-    let i = 0;
-    let j = 0;
-    while (i < items.length) {
-        const item = items[i]!;
-        if (i.tag !== "date") {
-            // Pass everything else through unchanged.
-            result.push(item);
-            i++;
-            j = result.length;
-            continue;
-        }
-
-        // Current item is a date. It will be necessarily followed by one (or
-        // more) file items. There is a possibility of a merge.
-        const nextItem = items[i + 1]!;
-
-        // If new list pointer is not at the end of list then
-        // we can add more items to the same list.
-        if (result[j]) {
-            const spaceBetweenDatesToImageContainerWidthRatio = 0.244;
-            const filledColumns = result[j + 1]!.fGroups!.reduce(
-                (a, g) => a + g.annotatedFiles.length,
-                0,
-            );
-            const incomingColumns =
-                items[i + 1]!.fGroups![0]?.annotatedFiles.length;
-
-            // Check if items can be added to same list
-            if (
-                filledColumns +
-                    incomingColumns +
-                    Math.ceil(
-                        result[j]!.dGroups!.length *
-                            spaceBetweenDatesToImageContainerWidthRatio,
-                    ) <=
-                columns
-            ) {
-                result[j]!.dGroups!.push(item.dGroups![0]!);
-                result[j + 1]!.fGroups!.push(nextItem.fGroups![0]!);
-                i += 2;
-            } else {
-                // Adding items would exceed the number of columns.
-                // So, move new list pointer to the end. Hence, in next iteration,
-                // items will be added to a new list.
-                j += 2;
-            }
-        } else {
-            // New list pointer was at the end of list so simply add new items to the list.
-            result.push(item);
-            result.push(nextItem);
-            i += 2;
-        }
-    }
-    return result;
-};
 
 /**
  * For each element of {@link xs}, obtain an array by applying {@link f},
