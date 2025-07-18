@@ -3,6 +3,7 @@ import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import "package:photos/models/gallery/gallery_sections.dart";
 import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/viewer/gallery/component/group/type.dart";
 import "package:photos/ui/viewer/gallery/scrollbar/scroll_bar_with_use_notifier.dart";
 import "package:photos/utils/misc_util.dart";
 import "package:photos/utils/widget_util.dart";
@@ -81,8 +82,9 @@ class _CustomScrollBar2State extends State<CustomScrollBar2> {
 
   void _init() {
     _logger.info("Initializing CustomScrollBar2");
-    if (widget.galleryGroups.groupLayouts.last.maxOffset >
-        widget.heighOfViewport * 5) {
+    if (widget.galleryGroups.groupType.showScrollbarDivisions() &&
+        widget.galleryGroups.groupLayouts.last.maxOffset >
+            widget.heighOfViewport * 5) {
       _showScrollbarDivisions = true;
     } else {
       _showScrollbarDivisions = false;

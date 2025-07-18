@@ -14,6 +14,9 @@ import "package:photos/ui/viewer/gallery/component/group/type.dart";
 import "package:photos/ui/viewer/gallery/scrollbar/custom_scroll_bar_2.dart";
 import "package:uuid/uuid.dart";
 
+/// In order to make the gallery performant when GroupTypes do not show group
+/// headers, groups are still created here but with the group header replaced by
+/// the grid's main axis spacing.
 class GalleryGroups {
   final List<EnteFile> allFiles;
   final GroupType groupType;
@@ -26,7 +29,7 @@ class GalleryGroups {
   //TODO: Add support for sort order
   final bool sortOrderAsc;
   final double widthAvailable;
-  final double headerExtent;
+  final double groupHeaderExtent;
   GalleryGroups({
     required this.allFiles,
     required this.groupType,
@@ -34,11 +37,20 @@ class GalleryGroups {
     required this.selectedFiles,
     required this.tagPrefix,
     this.sortOrderAsc = true,
-    required this.headerExtent,
+
+    /// Should be GroupGallery.spacing if GroupType.showGroupHeader() is false.
+    required this.groupHeaderExtent,
     required this.showSelectAllByDefault,
     this.limitSelectionToOne = false,
   }) {
     init();
+    if (!groupType.showGroupHeader()) {
+      assert(
+        groupHeaderExtent == spacing,
+        '''groupHeaderExtent should be equal to spacing when group header is not 
+        shown since the header is just replaced by the grid's main axis spacing''',
+      );
+    }
   }
 
   static const double spacing = 2.0;
@@ -67,8 +79,8 @@ class GalleryGroups {
   List<ScrollbarDivision> get scrollbarDivisions => _scrollbarDivisions;
 
   void init() {
-    _buildGroups();
     crossAxisCount = localSettings.getPhotoGridSize();
+    _buildGroups();
     _groupLayouts = _computeGroupLayouts();
     assert(groupIDs.length == _groupIdToFilesMap.length);
     assert(groupIDs.length == _groupIdToHeaderDataMap.length);
@@ -83,6 +95,7 @@ class GalleryGroups {
 
   List<FixedExtentSectionLayout> _computeGroupLayouts() {
     final stopwatch = Stopwatch()..start();
+    final showGroupHeader = groupType.showGroupHeader();
     int currentIndex = 0;
     double currentOffset = 0.0;
     final tileHeight =
@@ -100,7 +113,7 @@ class GalleryGroups {
       final maxOffset = minOffset +
           (numberOfGridRows * tileHeight) +
           (numberOfGridRows - 1) * spacing +
-          headerExtent;
+          groupHeaderExtent;
       final bodyFirstIndex = firstIndex + 1;
 
       groupLayouts.add(
@@ -109,20 +122,24 @@ class GalleryGroups {
           lastIndex: lastIndex,
           minOffset: minOffset,
           maxOffset: maxOffset,
-          headerExtent: headerExtent,
+          headerExtent: groupHeaderExtent,
           tileHeight: tileHeight,
           spacing: spacing,
           builder: (context, rowIndex) {
             if (rowIndex == firstIndex) {
-              return GroupHeaderWidget(
-                title: _groupIdToHeaderDataMap[groupID]!
-                    .groupType
-                    .getTitle(context, groupIDToFilesMap[groupID]!.first),
-                gridSize: crossAxisCount,
-                filesInGroup: groupIDToFilesMap[groupID]!,
-                selectedFiles: selectedFiles,
-                showSelectAllByDefault: showSelectAllByDefault,
-              );
+              if (showGroupHeader) {
+                return GroupHeaderWidget(
+                  title: _groupIdToHeaderDataMap[groupID]!
+                      .groupType
+                      .getTitle(context, groupIDToFilesMap[groupID]!.first),
+                  gridSize: crossAxisCount,
+                  filesInGroup: groupIDToFilesMap[groupID]!,
+                  selectedFiles: selectedFiles,
+                  showSelectAllByDefault: showSelectAllByDefault,
+                );
+              } else {
+                return const SizedBox(height: spacing);
+              }
             } else {
               final gridRowChildren = <Widget>[];
               final firstIndexOfRowWrtFilesInGroup =
@@ -208,31 +225,47 @@ class GalleryGroups {
 // TODO: compute this in isolate
   void _buildGroups() {
     final stopwatch = Stopwatch()..start();
-    final years = <int>{};
+
+    final yearsInGroups = <int>{}; //Only relevant for time grouping
     List<EnteFile> groupFiles = [];
-    for (int index = 0; index < allFiles.length; index++) {
-      if (index > 0 &&
-          !groupType.areFromSameGroup(allFiles[index - 1], allFiles[index])) {
-        _createNewGroup(groupFiles, years);
-        groupFiles = [];
+    final allFilesLength = allFiles.length;
+
+    if (groupType.showGroupHeader()) {
+      for (int index = 0; index < allFilesLength; index++) {
+        if (index > 0 &&
+            !groupType.areFromSameGroup(allFiles[index - 1], allFiles[index])) {
+          _createNewGroup(groupFiles, yearsInGroups);
+          groupFiles = [];
+        }
+        groupFiles.add(allFiles[index]);
       }
-      groupFiles.add(allFiles[index]);
+      if (groupFiles.isNotEmpty) {
+        _createNewGroup(groupFiles, yearsInGroups);
+      }
+    } else {
+// Split allFiles into groups of max length 10 * crossAxisCount for
+      // better performance since SectionedSliverList is used.
+      for (int i = 0; i < allFiles.length; i += 10 * crossAxisCount) {
+        final end = (i + 10 * crossAxisCount < allFiles.length)
+            ? i + 10 * crossAxisCount
+            : allFiles.length;
+        final subGroup = allFiles.sublist(i, end);
+        _createNewGroup(subGroup, yearsInGroups);
+      }
     }
-    if (groupFiles.isNotEmpty) {
-      _createNewGroup(groupFiles, years);
-    }
+
     _logger.info(
-      "Built ${_groupIds.length} groups in ${stopwatch.elapsedMilliseconds} ms",
+      "Built ${_groupIds.length} groups for group type ${groupType.name} in ${stopwatch.elapsedMilliseconds} ms",
     );
     print(
-      "Built ${_groupIds.length} groups in ${stopwatch.elapsedMilliseconds} ms",
+      "Built ${_groupIds.length} groups for group type ${groupType.name} in ${stopwatch.elapsedMilliseconds} ms",
     );
     stopwatch.stop();
   }
 
   void _createNewGroup(
     List<EnteFile> groupFiles,
-    Set<int> years,
+    Set<int> yearsInGroups,
   ) {
     final uuid = _uuid.v1();
     _groupIds.add(uuid);
@@ -241,17 +274,20 @@ class GalleryGroups {
       groupType: groupType,
     );
 
-    final yearOfGroup = DateTime.fromMicrosecondsSinceEpoch(
-      groupFiles.first.creationTime!,
-    ).year;
-    if (!years.contains(yearOfGroup)) {
-      years.add(yearOfGroup);
-      _scrollbarDivisions.add(
-        ScrollbarDivision(
-          groupID: uuid,
-          title: yearOfGroup.toString(),
-        ),
-      );
+    // For scrollbar divisions
+    if (groupType.timeGrouping()) {
+      final yearOfGroup = DateTime.fromMicrosecondsSinceEpoch(
+        groupFiles.first.creationTime!,
+      ).year;
+      if (!yearsInGroups.contains(yearOfGroup)) {
+        yearsInGroups.add(yearOfGroup);
+        _scrollbarDivisions.add(
+          ScrollbarDivision(
+            groupID: uuid,
+            title: yearOfGroup.toString(),
+          ),
+        );
+      }
     }
   }
 }

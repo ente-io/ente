@@ -127,9 +127,9 @@ class GalleryState extends State<Gallery> {
   final _stackKey = GlobalKey();
   final _headerKey = GlobalKey();
   final _headerHeightNotifier = ValueNotifier<double?>(null);
-
   final miscUtil = MiscUtil();
   final scrollBarInUseNotifier = ValueNotifier<bool>(false);
+  late GroupType _groupType;
 
   @override
   void initState() {
@@ -139,6 +139,7 @@ class GalleryState extends State<Gallery> {
         "Gallery_${widget.tagPrefix}${kDebugMode ? "_" + widget.albumName! : ""}_x";
     _logger = Logger(_logTag);
     _logger.info("init Gallery");
+    _setGroupType();
     _debouncer = Debouncer(
       widget.reloadDebounceTime,
       executionInterval: widget.reloadDebounceExecutionInterval,
@@ -216,20 +217,24 @@ class GalleryState extends State<Gallery> {
       }
     });
 
-    getIntrinsicSizeOfWidget(
-      GroupHeaderWidget(
-        title: "Dummy title",
-        gridSize: localSettings.getPhotoGridSize(),
-        filesInGroup: const [],
-        selectedFiles: null,
-        showSelectAllByDefault: false,
-      ),
-      context,
-    ).then((size) {
-      setState(() {
-        groupHeaderExtent = size.height;
+    if (_groupType.showGroupHeader()) {
+      getIntrinsicSizeOfWidget(
+        GroupHeaderWidget(
+          title: "Dummy title",
+          gridSize: localSettings.getPhotoGridSize(),
+          filesInGroup: const [],
+          selectedFiles: null,
+          showSelectAllByDefault: false,
+        ),
+        context,
+      ).then((size) {
+        setState(() {
+          groupHeaderExtent = size.height;
+        });
       });
-    });
+    } else {
+      groupHeaderExtent = GalleryGroups.spacing;
+    }
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       try {
@@ -247,6 +252,21 @@ class GalleryState extends State<Gallery> {
       }
       setState(() {});
     });
+  }
+
+  @override
+  void didUpdateWidget(covariant Gallery oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.groupType != widget.groupType) {
+      _setGroupType();
+      if (mounted) {
+        setState(() {});
+      }
+    }
+  }
+
+  void _setGroupType() {
+    _groupType = widget.enableFileGrouping ? widget.groupType : GroupType.none;
   }
 
   void _setFilesAndReload(List<EnteFile> files) {
@@ -346,7 +366,7 @@ class GalleryState extends State<Gallery> {
     _allGalleryFiles = files;
 
     final updatedGroupedFiles =
-        widget.enableFileGrouping && widget.groupType.timeGrouping()
+        widget.enableFileGrouping && _groupType.timeGrouping()
             ? _groupBasedOnTime(files)
             : _genericGroupForPerf(files);
     if (currentGroupedFiles.length != updatedGroupedFiles.length ||
@@ -427,11 +447,11 @@ class GalleryState extends State<Gallery> {
 
     final galleryGroups = GalleryGroups(
       allFiles: _allGalleryFiles,
-      groupType: widget.groupType,
+      groupType: _groupType,
       widthAvailable: MediaQuery.sizeOf(context).width,
       selectedFiles: widget.selectedFiles,
       tagPrefix: widget.tagPrefix,
-      headerExtent: groupHeaderExtent!,
+      groupHeaderExtent: groupHeaderExtent!,
       showSelectAllByDefault: widget.showSelectAllByDefault,
     );
     GalleryFilesState.of(context).setGalleryFiles = _allGalleryFiles;
@@ -441,7 +461,7 @@ class GalleryState extends State<Gallery> {
     return GalleryContextState(
       sortOrderAsc: _sortOrderAsc,
       inSelectionMode: widget.inSelectionMode,
-      type: widget.groupType,
+      type: _groupType,
       // Replace this with the new gallery and use `_allGalleryFiles`
       // child: MultipleGroupsGalleryView(
       //   groupedFiles: currentGroupedFiles,
@@ -512,14 +532,16 @@ class GalleryState extends State<Gallery> {
                   ),
                 ],
               ),
-              PinnedGroupHeader(
-                scrollController: _scrollController,
-                galleryGroups: galleryGroups,
-                headerHeightNotifier: _headerHeightNotifier,
-                selectedFiles: widget.selectedFiles,
-                showSelectAllByDefault: widget.showSelectAllByDefault,
-                scrollbarInUseNotifier: scrollBarInUseNotifier,
-              ),
+              galleryGroups.groupType.showGroupHeader()
+                  ? PinnedGroupHeader(
+                      scrollController: _scrollController,
+                      galleryGroups: galleryGroups,
+                      headerHeightNotifier: _headerHeightNotifier,
+                      selectedFiles: widget.selectedFiles,
+                      showSelectAllByDefault: widget.showSelectAllByDefault,
+                      scrollbarInUseNotifier: scrollBarInUseNotifier,
+                    )
+                  : const SizedBox.shrink(),
             ],
           ),
         ),
@@ -529,7 +551,7 @@ class GalleryState extends State<Gallery> {
 
   // create groups of 200 files for performance
   List<List<EnteFile>> _genericGroupForPerf(List<EnteFile> files) {
-    if (widget.groupType == GroupType.size) {
+    if (_groupType == GroupType.size) {
       // sort files by fileSize on the bases of _sortOrderAsc
       files.sort((a, b) {
         if (_sortOrderAsc) {
@@ -542,7 +564,7 @@ class GalleryState extends State<Gallery> {
     // todo:(neeraj) Stick to default group behaviour for magicSearch and editLocationGallery
     // In case of Magic search, we need to hide the scrollbar title (can be done
     // by specifying none as groupType)
-    if (widget.groupType != GroupType.size) {
+    if (_groupType != GroupType.size) {
       return [files];
     }
 
@@ -770,7 +792,7 @@ class _PinnedGroupHeaderState extends State<PinnedGroupHeader> {
                             .first,
                       ),
                       gridSize: localSettings.getPhotoGridSize(),
-                      height: widget.galleryGroups.headerExtent,
+                      height: widget.galleryGroups.groupHeaderExtent,
                       filesInGroup: widget
                           .galleryGroups.groupIDToFilesMap[currentGroupId!]!,
                       selectedFiles: widget.selectedFiles,

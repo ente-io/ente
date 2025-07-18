@@ -39,12 +39,9 @@ extension GroupTypeExtension on GroupType {
         this == GroupType.year;
   }
 
-  bool showGroupHeader() {
-    if (this == GroupType.size || this == GroupType.none) {
-      return false;
-    }
-    return true;
-  }
+  bool showGroupHeader() => timeGrouping();
+
+  bool showScrollbarDivisions() => timeGrouping();
 
   String getTitle(
     BuildContext context,
