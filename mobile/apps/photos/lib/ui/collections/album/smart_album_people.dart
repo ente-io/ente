@@ -14,6 +14,7 @@ import 'package:photos/ui/components/title_bar_title_widget.dart';
 import 'package:photos/ui/components/title_bar_widget.dart';
 import "package:photos/ui/viewer/search/result/people_section_all_page.dart"
     show PeopleSectionAllWidget;
+import "package:photos/utils/dialog_util.dart";
 
 class SmartAlbumPeople extends StatefulWidget {
   const SmartAlbumPeople({
@@ -71,7 +72,13 @@ class _SmartAlbumPeopleState extends State<SmartAlbumPeople> {
                 if (isLoading) return;
 
                 isLoading = true;
-                if (mounted) setState(() {});
+
+                final dialog = createProgressDialog(
+                  context,
+                  S.of(context).pleaseWait,
+                  isDismissible: true,
+                );
+                await dialog.show();
 
                 if (_selectedPeople.personIds.length ==
                         currentConfig?.personIDs.length &&
@@ -145,45 +152,33 @@ class _SmartAlbumPeopleState extends State<SmartAlbumPeople> {
                   SmartAlbumsService.instance.syncSmartAlbums().ignore();
 
                   Navigator.pop(context);
-                } catch (_) {
+                } catch (e) {
                   isLoading = false;
-                  if (mounted) setState(() {});
+                  await dialog.hide();
+                  await showGenericErrorDialog(context: context, error: e);
                 }
               },
             );
           },
         ),
       ),
-      body: Stack(
-        children: [
-          CustomScrollView(
-            primary: false,
-            slivers: <Widget>[
-              TitleBarWidget(
-                flexibleSpaceTitle: TitleBarTitleWidget(
-                  title: S.of(context).people,
-                ),
-                expandedHeight: MediaQuery.textScalerOf(context).scale(120),
-                flexibleSpaceCaption: S.of(context).peopleWidgetDesc,
-                actionIcons: const [],
-              ),
-              SliverFillRemaining(
-                child: PeopleSectionAllWidget(
-                  selectedPeople: _selectedPeople,
-                  namedOnly: true,
-                ),
-              ),
-            ],
-          ),
-          if (isLoading)
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.black.withValues(alpha: 0.5),
-              ),
-              child: const Center(
-                child: CircularProgressIndicator(),
-              ),
+      body: CustomScrollView(
+        primary: false,
+        slivers: <Widget>[
+          TitleBarWidget(
+            flexibleSpaceTitle: TitleBarTitleWidget(
+              title: S.of(context).people,
             ),
+            expandedHeight: MediaQuery.textScalerOf(context).scale(120),
+            flexibleSpaceCaption: S.of(context).peopleWidgetDesc,
+            actionIcons: const [],
+          ),
+          SliverFillRemaining(
+            child: PeopleSectionAllWidget(
+              selectedPeople: _selectedPeople,
+              namedOnly: true,
+            ),
+          ),
         ],
       ),
     );
