@@ -1,4 +1,3 @@
-// TODO: Audit this file
 import AlbumOutlinedIcon from "@mui/icons-material/AlbumOutlined";
 import FavoriteRoundedIcon from "@mui/icons-material/FavoriteRounded";
 import PlayCircleOutlineOutlinedIcon from "@mui/icons-material/PlayCircleOutlineOutlined";
@@ -79,11 +78,7 @@ type FileListItem = {
      * The height of the row that will render this item.
      */
     height: number;
-    /**
-     * An optional tag that can be used to identify item types for conditional
-     * behaviour.
-     */
-    tag?: "date" | "file" | "span";
+    type: "date" | "file" | "span";
     /**
      * Groups of items that are shown in the row.
      *
@@ -112,11 +107,6 @@ type FileListItem = {
          */
         dateSpan: number;
     }[];
-    items?: FileListAnnotatedFile[];
-    itemStartIndex?: number;
-    date?: string | null;
-    dates?: { date: string; span: number }[];
-    groups?: number[];
     /**
      * The React component that is the rendered representation of the item.
      */
@@ -297,7 +287,7 @@ export const FileList: React.FC<FileListProps> = ({
                 batch(annotatedFiles, columns).map(
                     (batchFiles, batchIndex) => ({
                         height: fileItemHeight,
-                        tag: "file",
+                        type: "file",
                         fGroups: [
                             {
                                 annotatedFiles: batchFiles,
@@ -314,7 +304,7 @@ export const FileList: React.FC<FileListProps> = ({
             const createFileItem = (splits: FileListAnnotatedFile[][]) =>
                 ({
                     height: fileItemHeight,
-                    tag: "file",
+                    type: "file",
                     fGroups: splits.map((split) => {
                         const group = {
                             annotatedFiles: split,
@@ -331,7 +321,7 @@ export const FileList: React.FC<FileListProps> = ({
                     // splits is less than the number of columns.
                     items.push({
                         height: dateListItemHeight,
-                        tag: "date",
+                        type: "date",
                         dGroups: splits.map((s) => ({
                             date: s[0]!.timelineDateString,
                             dateSpan: s.length,
@@ -343,7 +333,7 @@ export const FileList: React.FC<FileListProps> = ({
                     // might be more than what fits a single row.
                     items.push({
                         height: dateListItemHeight,
-                        tag: "date",
+                        type: "date",
                         dGroups: splits.map((s) => ({
                             date: s[0]!.timelineDateString,
                             dateSpan: columns,
@@ -391,7 +381,7 @@ export const FileList: React.FC<FileListProps> = ({
         if (!annotatedFiles.length) {
             items.push({
                 height: height - 48,
-                tag: "span",
+                type: "span",
                 component: (
                     <NoFilesListItem>
                         <Typography sx={{ color: "text.faint" }}>
@@ -410,7 +400,7 @@ export const FileList: React.FC<FileListProps> = ({
         if (leftoverHeight > 0) {
             items.push({
                 height: leftoverHeight,
-                tag: "span",
+                type: "span",
                 component: <></>,
             });
         }
@@ -570,7 +560,7 @@ export const FileList: React.FC<FileListProps> = ({
     const renderListItem = useCallback(
         (item: FileListItem, isScrolling: boolean) => {
             const haveSelection = selected.count > 0;
-            switch (item.tag) {
+            switch (item.type) {
                 case "date":
                     return intersperseWithGaps(
                         item.dGroups!,
@@ -692,7 +682,7 @@ export const FileList: React.FC<FileListProps> = ({
 
     const itemKey = useCallback((index: number, itemData: FileListItemData) => {
         const item = itemData.items[index]!;
-        switch (item.tag) {
+        switch (item.type) {
             case "date":
                 return `date-${item.dGroups![0]!.date}-${index}`;
             case "file":
@@ -791,7 +781,7 @@ const asFullSpanFileListItem = ({
     ...rest
 }: FileListHeaderOrFooter): FileListItem => ({
     ...rest,
-    tag: "span",
+    type: "span",
     component: <FullSpanListItem>{component}</FullSpanListItem>,
 });
 
@@ -840,7 +830,7 @@ const FileListRow = memo(
 
         const item = items[index]!;
         const itemSpans = (() => {
-            switch (item.tag) {
+            switch (item.type) {
                 case "date":
                     return item.dGroups!.map((g) => g.dateSpan);
                 case "file":
