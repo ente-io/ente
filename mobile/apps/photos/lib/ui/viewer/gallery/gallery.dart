@@ -508,7 +508,9 @@ class GalleryState extends State<Gallery> {
             clipBehavior: Clip.none,
             children: [
               CustomScrollView(
-                physics: const ExponentialBouncingScrollPhysics(),
+                physics: widget.disableScroll
+                    ? const NeverScrollableScrollPhysics()
+                    : const ExponentialBouncingScrollPhysics(),
                 controller: _scrollController,
                 slivers: [
                   SliverToBoxAdapter(
