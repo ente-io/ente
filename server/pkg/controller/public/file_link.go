@@ -15,23 +15,99 @@ import (
 type FileLinkController struct {
 	FileController *controller.FileController
 	FileLinkRepo   *public.FileLinkRepository
-	CollectionRepo *repo.CollectionRepository
-	UserRepo       *repo.UserRepository
+	FileRepo       *repo.FileRepository
 	JwtSecret      []byte
 }
 
 func (c *FileLinkController) CreateLink(ctx *gin.Context, req ente.CreateFileUrl) (*ente.FileUrl, error) {
 	actorUserID := auth.GetUserID(ctx.Request.Header)
+	app := auth.GetApp(ctx)
+	if req.App != app {
+		return nil, stacktrace.Propagate(ente.NewBadRequestWithMessage("app mismatch"), "app mismatch")
+	}
+	file, err := c.FileRepo.GetFileAttributes(req.FileID)
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "failed to get file attributes")
+	}
+	if actorUserID != file.OwnerID {
+		return nil, stacktrace.Propagate(ente.NewPermissionDeniedError("not file owner"), "")
+	}
 	accessToken := shortuuid.New()[0:AccessTokenLength]
-	_, err := c.FileLinkRepo.Insert(ctx, req.FileID, actorUserID, accessToken)
-	if err == nil {
-		row, rowErr := c.FileLinkRepo.GetActiveFileUrlToken(ctx, req.FileID)
+	_, err = c.FileLinkRepo.Insert(ctx, req.FileID, actorUserID, accessToken, app)
+	if err == nil || err == ente.ErrActiveLinkAlreadyExists {
+		row, rowErr := c.FileLinkRepo.GetFileUrlRowByFileID(ctx, req.FileID)
 		if rowErr != nil {
 			return nil, stacktrace.Propagate(rowErr, "failed to get active file url token")
 		}
 		return c.mapRowToFileUrl(ctx, row), nil
 	}
 	return nil, stacktrace.Propagate(err, "failed to create public file link")
+}
+
+// Disable all public accessTokens generated for the given fileID till date.
+func (c *FileLinkController) Disable(ctx *gin.Context, fileID int64) error {
+	userID := auth.GetUserID(ctx.Request.Header)
+	file, err := c.FileRepo.GetFileAttributes(fileID)
+	if err != nil {
+		return stacktrace.Propagate(err, "failed to get file attributes")
+	}
+	if userID != file.OwnerID {
+		return stacktrace.Propagate(ente.NewPermissionDeniedError("not file owner"), "")
+	}
+	return c.FileLinkRepo.DisableLinkForFiles(ctx, []int64{fileID})
+}
+
+func (c *FileLinkController) GetUrls(ctx *gin.Context, sinceTime int64, limit int64) ([]*ente.FileUrl, error) {
+	userID := auth.GetUserID(ctx.Request.Header)
+	app := auth.GetApp(ctx)
+	fileLinks, err := c.FileLinkRepo.GetFileUrls(ctx, userID, sinceTime, limit, app)
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "failed to get file urls")
+	}
+	var fileUrls []*ente.FileUrl
+	for _, row := range fileLinks {
+		fileUrls = append(fileUrls, c.mapRowToFileUrl(ctx, row))
+	}
+	return fileUrls, nil
+}
+
+func (c *FileLinkController) UpdateSharedUrl(ctx *gin.Context, req ente.UpdateFileUrl) (*ente.FileUrl, error) {
+	if err := req.Validate(); err != nil {
+		return nil, stacktrace.Propagate(err, "invalid request")
+	}
+	fileLinkRow, err := c.FileLinkRepo.GetActiveFileUrlToken(ctx, req.FileID)
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "failed to get file link info")
+	}
+	if fileLinkRow.OwnerID != auth.GetUserID(ctx.Request.Header) {
+		return nil, stacktrace.Propagate(ente.NewPermissionDeniedError("not file owner"), "")
+	}
+	if req.ValidTill != nil {
+		fileLinkRow.ValidTill = *req.ValidTill
+	}
+	if req.DeviceLimit != nil {
+		fileLinkRow.DeviceLimit = *req.DeviceLimit
+	}
+	if req.PassHash != nil && req.Nonce != nil && req.OpsLimit != nil && req.MemLimit != nil {
+		fileLinkRow.PassHash = req.PassHash
+		fileLinkRow.Nonce = req.Nonce
+		fileLinkRow.OpsLimit = req.OpsLimit
+		fileLinkRow.MemLimit = req.MemLimit
+	} else if req.DisablePassword != nil && *req.DisablePassword {
+		fileLinkRow.PassHash = nil
+		fileLinkRow.Nonce = nil
+		fileLinkRow.OpsLimit = nil
+		fileLinkRow.MemLimit = nil
+	}
+	if req.EnableDownload != nil {
+		fileLinkRow.EnableDownload = *req.EnableDownload
+	}
+
+	err = c.FileLinkRepo.UpdateLink(ctx, *fileLinkRow)
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "")
+	}
+	return c.mapRowToFileUrl(ctx, fileLinkRow), nil
 }
 
 // VerifyPassword verifies if the user has provided correct pw hash. If yes, it returns a signed jwt token which can be

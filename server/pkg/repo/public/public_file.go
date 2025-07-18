@@ -46,16 +46,17 @@ func (pcr *FileLinkRepository) Insert(
 	fileID int64,
 	ownerID int64,
 	token string,
+	app ente.App,
 ) (*string, error) {
 	id, err := base.NewID("pft")
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "failed to generate new ID for public file token")
 	}
 	_, err = pcr.DB.ExecContext(ctx, `INSERT INTO public_file_tokens 
-    (id, file_id, owner_id, access_token) VALUES ($1, $2, $3, $4)`,
-		id, fileID, ownerID, token)
+    (id, file_id, owner_id, access_token, app) VALUES ($1, $2, $3, $4, $5)`,
+		id, fileID, ownerID, token, string(app))
 	if err != nil {
-		if err.Error() == "pq: duplicate key value violates unique constraint \"public_access_token_unique_idx\"" {
+		if err.Error() == "pq: duplicate key value violates unique constraint \"public_file_token_unique_idx\"" {
 			return nil, ente.ErrActiveLinkAlreadyExists
 		}
 		return nil, stacktrace.Propagate(err, "failed to insert")
@@ -79,6 +80,54 @@ func (pcr *FileLinkRepository) GetActiveFileUrlToken(ctx context.Context, fileID
 	}
 	return &ret, nil
 }
+func (pcr *FileLinkRepository) GetFileUrls(ctx context.Context, userID int64, sinceTime int64, limit int64, app ente.App) ([]*ente.FileLinkRow, error) {
+	if limit <= 0 {
+		limit = 500
+	}
+	query := `SELECT id, file_id, owner_id, is_disabled, valid_till, device_limit, enable_download, pw_hash, pw_nonce, mem_limit, ops_limit,
+	   created_at, updated_at FROM public_file_tokens
+	   WHERE owner_id = $1 AND created_at > $2 AND app = $3 ORDER BY updated_at DESC LIMIT $4`
+	rows, err := pcr.DB.QueryContext(ctx, query, userID, sinceTime, string(app), limit)
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "failed to get public file urls")
+	}
+	defer rows.Close()
+
+	var result []*ente.FileLinkRow
+	for rows.Next() {
+		var row ente.FileLinkRow
+		err = rows.Scan(&row.LinkID, &row.FileID, &row.OwnerID, &row.IsDisabled,
+			&row.ValidTill, &row.DeviceLimit, &row.EnableDownload,
+			&row.PassHash, &row.Nonce, &row.MemLimit,
+			&row.OpsLimit, &row.CreatedAt, &row.UpdatedAt)
+		if err != nil {
+			return nil, stacktrace.Propagate(err, "failed to scan public file url row")
+		}
+		result = append(result, &row)
+	}
+	return result, nil
+}
+
+func (pcr *FileLinkRepository) DisableLinkForFiles(ctx context.Context, fileIDs []int64) error {
+	if len(fileIDs) == 0 {
+		return nil
+	}
+	query := `UPDATE public_file_tokens SET is_disabled = TRUE WHERE file_id = ANY($1)`
+	_, err := pcr.DB.ExecContext(ctx, query, fileIDs)
+	if err != nil {
+		return stacktrace.Propagate(err, "failed to disable public file links")
+	}
+	return nil
+}
+
+// DisableLinksForUser will disable all public file links for the given user
+func (pcr *FileLinkRepository) DisableLinksForUser(ctx context.Context, linkID string) error {
+	_, err := pcr.DB.ExecContext(ctx, `UPDATE public_file_tokens SET is_disabled = TRUE WHERE id = $1`, linkID)
+	if err != nil {
+		return stacktrace.Propagate(err, "failed to disable public file link")
+	}
+	return nil
+}
 
 func (pcr *FileLinkRepository) GetFileUrlRowByToken(ctx context.Context, accessToken string) (*ente.FileLinkRow, error) {
 	row := pcr.DB.QueryRowContext(ctx,
@@ -94,6 +143,23 @@ func (pcr *FileLinkRepository) GetFileUrlRowByToken(ctx context.Context, accessT
 			return nil, ente.ErrNotFound
 		}
 		return nil, stacktrace.Propagate(err, "failed to get public file url summary by token")
+	}
+	return &result, nil
+}
+
+func (pcr *FileLinkRepository) GetFileUrlRowByFileID(ctx context.Context, fileID int64) (*ente.FileLinkRow, error) {
+	row := pcr.DB.QueryRowContext(ctx,
+		`SELECT id, file_id, owner_id, is_disabled, valid_till, device_limit, enable_download, pw_hash, pw_nonce, mem_limit, ops_limit
+	   created_at, updated_at
+		from public_file_tokens 
+		where file_id = $1 and is_disabled = FALSE`, fileID)
+	var result = ente.FileLinkRow{}
+	err := row.Scan(&result.LinkID, &result.FileID, &result.OwnerID, &result.IsDisabled, &result.EnableDownload, &result.ValidTill, &result.DeviceLimit, &result.PassHash, &result.Nonce, &result.MemLimit, &result.OpsLimit, &result.CreatedAt, &result.UpdatedAt)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, ente.ErrNotFound
+		}
+		return nil, stacktrace.Propagate(err, "failed to get public file url summary by file ID")
 	}
 	return &result, nil
 }

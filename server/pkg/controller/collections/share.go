@@ -70,7 +70,7 @@ func (c *CollectionController) JoinViaLink(ctx *gin.Context, req ente.JoinCollec
 	if !collection.AllowSharing() {
 		return stacktrace.Propagate(ente.ErrBadRequest, fmt.Sprintf("joining %s is not allowed", collection.Type))
 	}
-	collectionLinkToken, err := c.CollectionLinkController.GetActiveCollectionLinkToken(ctx, req.CollectionID)
+	collectionLinkToken, err := c.CollectionLinkCtrl.GetActiveCollectionLinkToken(ctx, req.CollectionID)
 	if err != nil {
 		return stacktrace.Propagate(err, "")
 	}
@@ -84,7 +84,7 @@ func (c *CollectionController) JoinViaLink(ctx *gin.Context, req ente.JoinCollec
 	}
 	if collectionLinkToken.PassHash != nil && *collectionLinkToken.PassHash != "" {
 		accessTokenJWT := auth.GetAccessTokenJWT(ctx)
-		if passCheckErr := c.CollectionLinkController.ValidateJWTToken(ctx, accessTokenJWT, *collectionLinkToken.PassHash); passCheckErr != nil {
+		if passCheckErr := c.CollectionLinkCtrl.ValidateJWTToken(ctx, accessTokenJWT, *collectionLinkToken.PassHash); passCheckErr != nil {
 			return stacktrace.Propagate(passCheckErr, "")
 		}
 	}
@@ -197,7 +197,7 @@ func (c *CollectionController) ShareURL(ctx context.Context, userID int64, req e
 	if err != nil {
 		return ente.PublicURL{}, stacktrace.Propagate(err, "")
 	}
-	response, err := c.CollectionLinkController.CreateLink(ctx, req)
+	response, err := c.CollectionLinkCtrl.CreateLink(ctx, req)
 	if err != nil {
 		return ente.PublicURL{}, stacktrace.Propagate(err, "")
 	}
@@ -205,20 +205,26 @@ func (c *CollectionController) ShareURL(ctx context.Context, userID int64, req e
 }
 
 // UpdateShareURL updates the shared url configuration
-func (c *CollectionController) UpdateShareURL(ctx context.Context, userID int64, req ente.UpdatePublicAccessTokenRequest) (
-	ente.PublicURL, error) {
+func (c *CollectionController) UpdateShareURL(
+	ctx context.Context,
+	userID int64,
+	req ente.UpdatePublicAccessTokenRequest,
+) (*ente.PublicURL, error) {
+	if err := req.Validate(); err != nil {
+		return nil, stacktrace.Propagate(err, "")
+	}
 	if err := c.verifyOwnership(req.CollectionID, userID); err != nil {
-		return ente.PublicURL{}, stacktrace.Propagate(err, "")
+		return nil, stacktrace.Propagate(err, "")
 	}
 	err := c.BillingCtrl.HasActiveSelfOrFamilySubscription(userID, true)
 	if err != nil {
-		return ente.PublicURL{}, stacktrace.Propagate(err, "")
+		return nil, stacktrace.Propagate(err, "")
 	}
-	response, err := c.CollectionLinkController.UpdateSharedUrl(ctx, req)
+	response, err := c.CollectionLinkCtrl.UpdateSharedUrl(ctx, req)
 	if err != nil {
-		return ente.PublicURL{}, stacktrace.Propagate(err, "")
+		return nil, stacktrace.Propagate(err, "")
 	}
-	return response, nil
+	return &response, nil
 }
 
 // DisableSharedURL disable a public auth-token for the given collectionID
@@ -226,7 +232,7 @@ func (c *CollectionController) DisableSharedURL(ctx context.Context, userID int6
 	if err := c.verifyOwnership(cID, userID); err != nil {
 		return stacktrace.Propagate(err, "")
 	}
-	err := c.CollectionLinkController.Disable(ctx, cID)
+	err := c.CollectionLinkCtrl.Disable(ctx, cID)
 	return stacktrace.Propagate(err, "")
 }
 

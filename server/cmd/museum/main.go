@@ -311,16 +311,16 @@ func main() {
 	}
 
 	collectionController := &collections.CollectionController{
-		CollectionRepo:           collectionRepo,
-		EmailCtrl:                emailNotificationCtrl,
-		AccessCtrl:               accessCtrl,
-		CollectionLinkController: collectionLinkCtrl,
-		UserRepo:                 userRepo,
-		FileRepo:                 fileRepo,
-		CastRepo:                 &castDb,
-		BillingCtrl:              billingController,
-		QueueRepo:                queueRepo,
-		TaskRepo:                 taskLockingRepo,
+		CollectionRepo:     collectionRepo,
+		EmailCtrl:          emailNotificationCtrl,
+		AccessCtrl:         accessCtrl,
+		CollectionLinkCtrl: collectionLinkCtrl,
+		UserRepo:           userRepo,
+		FileRepo:           fileRepo,
+		CastRepo:           &castDb,
+		BillingCtrl:        billingController,
+		QueueRepo:          queueRepo,
+		TaskRepo:           taskLockingRepo,
 	}
 
 	kexCtrl := &kexCtrl.Controller{
@@ -442,6 +442,9 @@ func main() {
 	privateAPI.GET("/files/preview/v2/:fileID", fileHandler.GetThumbnail)
 
 	privateAPI.POST("files/share-url", fileHandler.ShareUrl)
+	privateAPI.PUT("files/share-url", fileHandler.UpdateFileURL)
+	privateAPI.DELETE("files/share-url/:fileID", fileHandler.DisableUrl)
+	privateAPI.GET("files/share-urls/", fileHandler.DisableUrl)
 
 	privateAPI.PUT("/files/data", fileHandler.PutFileData)
 	privateAPI.PUT("/files/video-data", fileHandler.PutVideoData)

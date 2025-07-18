@@ -25,16 +25,16 @@ const (
 
 // CollectionController encapsulates logic that deals with collections
 type CollectionController struct {
-	CollectionLinkController *public.CollectionLinkController
-	EmailCtrl                *email.EmailNotificationController
-	AccessCtrl               access.Controller
-	BillingCtrl              *controller.BillingController
-	CollectionRepo           *repo.CollectionRepository
-	UserRepo                 *repo.UserRepository
-	FileRepo                 *repo.FileRepository
-	QueueRepo                *repo.QueueRepository
-	CastRepo                 *cast.Repository
-	TaskRepo                 *repo.TaskLockRepository
+	CollectionLinkCtrl *public.CollectionLinkController
+	EmailCtrl          *email.EmailNotificationController
+	AccessCtrl         access.Controller
+	BillingCtrl        *controller.BillingController
+	CollectionRepo     *repo.CollectionRepository
+	UserRepo           *repo.UserRepository
+	FileRepo           *repo.FileRepository
+	QueueRepo          *repo.QueueRepository
+	CastRepo           *cast.Repository
+	TaskRepo           *repo.TaskLockRepository
 }
 
 // Create creates a collection
@@ -149,7 +149,7 @@ func (c *CollectionController) TrashV3(ctx *gin.Context, req ente.TrashCollectio
 		}
 
 	}
-	err = c.CollectionLinkController.Disable(ctx, cID)
+	err = c.CollectionLinkCtrl.Disable(ctx, cID)
 	if err != nil {
 		return stacktrace.Propagate(err, "failed to disabled public share url")
 	}
@@ -210,7 +210,7 @@ func (c *CollectionController) HandleAccountDeletion(ctx context.Context, userID
 	if err != nil {
 		return stacktrace.Propagate(err, "failed to revoke cast token for user")
 	}
-	err = c.CollectionLinkController.HandleAccountDeletion(ctx, userID, logger)
+	err = c.CollectionLinkCtrl.HandleAccountDeletion(ctx, userID, logger)
 	return stacktrace.Propagate(err, "")
 }
 

@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS public_file_tokens
     id           text primary key,
     file_id bigint NOT NULL,
     owner_id bigint NOT NULL,
+    app text NOT NULL,
     access_token  text   not null,
     valid_till    bigint not null DEFAULT 0,
     device_limit  int    not null DEFAULT 0,
@@ -40,6 +41,6 @@ CREATE TABLE IF NOT EXISTS public_file_tokens_access_history
             ON DELETE CASCADE
 );
 
-CREATE UNIQUE INDEX IF NOT EXISTS public_access_token_unique_idx ON public_file_tokens (access_token) WHERE is_disabled = FALSE;
+CREATE UNIQUE INDEX IF NOT EXISTS public_file_token_unique_idx ON public_file_tokens (access_token) WHERE is_disabled = FALSE;
 CREATE INDEX IF NOT EXISTS public_file_tokens_owner_id_updated_at_idx ON public_file_tokens (owner_id, updated_at);
 
