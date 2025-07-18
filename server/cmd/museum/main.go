@@ -98,6 +98,7 @@ func main() {
 	}
 
 	viper.SetDefault("apps.public-albums", "https://albums.ente.io")
+	viper.SetDefault("apps.public-locker", "https://locker.ente.io")
 	viper.SetDefault("apps.accounts", "https://accounts.ente.io")
 	viper.SetDefault("apps.cast", "https://cast.ente.io")
 	viper.SetDefault("apps.family", "https://family.ente.io")
@@ -179,6 +180,7 @@ func main() {
 	familyRepo := &repo.FamilyRepository{DB: db}
 	trashRepo := &repo.TrashRepository{DB: db, ObjectRepo: objectRepo, FileRepo: fileRepo, QueueRepo: queueRepo}
 	collectionLinkRepo := public.NewCollectionLinkRepository(db, viper.GetString("apps.public-albums"))
+	fileLinkRepo := public.NewFileLinkRepo(db)
 	collectionRepo := &repo.CollectionRepository{DB: db, FileRepo: fileRepo, CollectionLinkRepo: collectionLinkRepo,
 		TrashRepo: trashRepo, SecretEncryptionKey: secretEncryptionKeyBytes, QueueRepo: queueRepo, LatencyLogger: latencyLogger}
 	pushRepo := &repo.PushTokenRepository{DB: db}
@@ -430,7 +432,7 @@ func main() {
 	}
 	fileLinkCtrl := &publicCtrl.FileLinkController{
 		FileController: fileController,
-		FileLinkRepo:   nil,
+		FileLinkRepo:   fileLinkRepo,
 		FileRepo:       fileRepo,
 		JwtSecret:      jwtSecretBytes,
 	}

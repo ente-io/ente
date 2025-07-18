@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/ente-io/museum/ente/base"
+	"github.com/spf13/viper"
 
 	"github.com/ente-io/museum/ente"
 	"github.com/ente-io/stacktrace"
@@ -20,10 +21,12 @@ type FileLinkRepository struct {
 }
 
 // NewFileLinkRepo ..
-func NewFileLinkRepo(db *sql.DB, albumHost string, lockerHost string) *FileLinkRepository {
+func NewFileLinkRepo(db *sql.DB) *FileLinkRepository {
+	albumHost := viper.GetString("apps.public-albums")
 	if albumHost == "" {
 		albumHost = "https://albums.ente.io"
 	}
+	lockerHost := viper.GetString("apps.public-locker")
 	if lockerHost == "" {
 		lockerHost = "https://locker.ente.io"
 	}
