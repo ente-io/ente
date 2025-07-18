@@ -26,8 +26,8 @@ import (
 var passwordWhiteListedURLs = []string{"/public-collection/info", "/public-collection/report-abuse", "/public-collection/verify-password"}
 var whitelistedCollectionShareIDs = []int64{111}
 
-// CollectionTokenMiddleware intercepts and authenticates incoming requests
-type CollectionTokenMiddleware struct {
+// CollectionLinkMiddleware intercepts and authenticates incoming requests
+type CollectionLinkMiddleware struct {
 	CollectionLinkRepo   *public.CollectionLinkRepo
 	PublicCollectionCtrl *public2.CollectionLinkController
 	CollectionRepo       *repo.CollectionRepository
@@ -39,7 +39,7 @@ type CollectionTokenMiddleware struct {
 // Authenticate returns a middle ware that extracts the `X-Auth-Access-Token`
 // within the header of a request and uses it to validate the access token and set the
 // ente.PublicAccessContext with auth.PublicAccessKey as key
-func (m *CollectionTokenMiddleware) Authenticate(urlSanitizer func(_ *gin.Context) string) gin.HandlerFunc {
+func (m *CollectionLinkMiddleware) Authenticate(urlSanitizer func(_ *gin.Context) string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		accessToken := auth.GetAccessToken(c)
 		if accessToken == "" {
@@ -114,7 +114,7 @@ func (m *CollectionTokenMiddleware) Authenticate(urlSanitizer func(_ *gin.Contex
 		c.Next()
 	}
 }
-func (m *CollectionTokenMiddleware) validateOwnersSubscription(cID int64) error {
+func (m *CollectionLinkMiddleware) validateOwnersSubscription(cID int64) error {
 	userID, err := m.CollectionRepo.GetOwnerID(cID)
 	if err != nil {
 		return stacktrace.Propagate(err, "")
@@ -122,7 +122,7 @@ func (m *CollectionTokenMiddleware) validateOwnersSubscription(cID int64) error 
 	return m.BillingCtrl.HasActiveSelfOrFamilySubscription(userID, false)
 }
 
-func (m *CollectionTokenMiddleware) isDeviceLimitReached(ctx context.Context,
+func (m *CollectionLinkMiddleware) isDeviceLimitReached(ctx context.Context,
 	collectionSummary ente.PublicCollectionSummary, ip string, ua string) (bool, error) {
 	// skip deviceLimit check & record keeping for requests via CF worker
 	if network.IsCFWorkerIP(ip) {
@@ -164,7 +164,7 @@ func (m *CollectionTokenMiddleware) isDeviceLimitReached(ctx context.Context,
 }
 
 // validatePassword will verify if the user is provided correct password for the public album
-func (m *CollectionTokenMiddleware) validatePassword(c *gin.Context, reqPath string,
+func (m *CollectionLinkMiddleware) validatePassword(c *gin.Context, reqPath string,
 	collectionSummary ente.PublicCollectionSummary) error {
 	if array.StringInList(reqPath, passwordWhiteListedURLs) {
 		return nil

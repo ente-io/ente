@@ -354,6 +354,12 @@ func main() {
 		userCache,
 		userCacheCtrl,
 	)
+	fileLinkCtrl := &publicCtrl.FileLinkController{
+		FileController: fileController,
+		FileLinkRepo:   fileLinkRepo,
+		FileRepo:       fileRepo,
+		JwtSecret:      jwtSecretBytes,
+	}
 
 	passkeyCtrl := &controller.PasskeyController{
 		Repo:     passkeysRepo,
@@ -361,13 +367,20 @@ func main() {
 	}
 
 	authMiddleware := middleware.AuthMiddleware{UserAuthRepo: userAuthRepo, Cache: authCache, UserController: userController}
-	collectionTokenMiddleware := middleware.CollectionTokenMiddleware{
+	collectionLinkMiddleware := middleware.CollectionLinkMiddleware{
 		CollectionLinkRepo:   collectionLinkRepo,
 		PublicCollectionCtrl: collectionLinkCtrl,
 		CollectionRepo:       collectionRepo,
 		Cache:                accessTokenCache,
 		BillingCtrl:          billingController,
 		DiscordController:    discordController,
+	}
+	fileLinkMiddleware := &middleware.FileLinkMiddleware{
+		FileLinkRepo:      fileLinkRepo,
+		FileLinkCtrl:      fileLinkCtrl,
+		Cache:             accessTokenCache,
+		BillingCtrl:       billingController,
+		DiscordController: discordController,
 	}
 
 	if environment != "local" {
@@ -407,7 +420,9 @@ func main() {
 	familiesJwtAuthAPI.Use(rateLimiter.GlobalRateLimiter(), authMiddleware.TokenAuthMiddleware(jwt.FAMILIES.Ptr()), rateLimiter.APIRateLimitForUserMiddleware(urlSanitizer))
 
 	publicCollectionAPI := server.Group("/public-collection")
-	publicCollectionAPI.Use(rateLimiter.GlobalRateLimiter(), collectionTokenMiddleware.Authenticate(urlSanitizer))
+	publicCollectionAPI.Use(rateLimiter.GlobalRateLimiter(), collectionLinkMiddleware.Authenticate(urlSanitizer))
+	fileLinkApi := server.GET("/file-link")
+	fileLinkApi.Use(rateLimiter.GlobalRateLimiter(), fileLinkMiddleware.Authenticate(urlSanitizer))
 
 	healthCheckHandler := &api.HealthCheckHandler{
 		DB: db,
@@ -429,12 +444,6 @@ func main() {
 		S3Config:       s3Config,
 		ObjectRepo:     objectRepo,
 		FileRepo:       fileRepo,
-	}
-	fileLinkCtrl := &publicCtrl.FileLinkController{
-		FileController: fileController,
-		FileLinkRepo:   fileLinkRepo,
-		FileRepo:       fileRepo,
-		JwtSecret:      jwtSecretBytes,
 	}
 
 	fileHandler := &api.FileHandler{

@@ -5,13 +5,12 @@ import (
 	"fmt"
 	publicCtrl "github.com/ente-io/museum/pkg/controller/public"
 	"github.com/ente-io/museum/pkg/repo/public"
+	"github.com/ente-io/museum/pkg/utils/array"
 	"net/http"
 
 	"github.com/ente-io/museum/ente"
 	"github.com/ente-io/museum/pkg/controller"
 	"github.com/ente-io/museum/pkg/controller/discord"
-	"github.com/ente-io/museum/pkg/repo"
-	"github.com/ente-io/museum/pkg/utils/array"
 	"github.com/ente-io/museum/pkg/utils/auth"
 	"github.com/ente-io/museum/pkg/utils/network"
 	"github.com/ente-io/museum/pkg/utils/time"
@@ -21,13 +20,12 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-var filePasswordWhiteListedURLs = []string{"/public-collection/info", "/public-collection/report-abuse", "/public-collection/verify-password"}
+var filePasswordWhiteListedURLs = []string{"/file-link/info", "/file-link/verify-password"}
 
 // FileLinkMiddleware intercepts and authenticates incoming requests
 type FileLinkMiddleware struct {
 	FileLinkRepo      *public.FileLinkRepository
 	FileLinkCtrl      *publicCtrl.FileLinkController
-	CollectionRepo    *repo.CollectionRepository
 	Cache             *cache.Cache
 	BillingCtrl       *controller.BillingController
 	DiscordController *discord.DiscordController
@@ -53,6 +51,7 @@ func (m *FileLinkMiddleware) Authenticate(urlSanitizer func(_ *gin.Context) stri
 		if !cacheHit {
 			fileLinkRow, err = m.FileLinkRepo.GetFileUrlRowByToken(c, accessToken)
 			if err != nil {
+				logrus.WithError(err).Info("failed to get file link row by token")
 				c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "invalid token"})
 				return
 			}
@@ -62,15 +61,15 @@ func (m *FileLinkMiddleware) Authenticate(urlSanitizer func(_ *gin.Context) stri
 			}
 			// validate if user still has active paid subscription
 			if err = m.BillingCtrl.HasActiveSelfOrFamilySubscription(fileLinkRow.OwnerID, true); err != nil {
-				logrus.WithError(err).Warn("failed to verify active paid subscription")
+				logrus.WithError(err).Info("failed to verify active paid subscription")
 				c.AbortWithStatusJSON(http.StatusGone, gin.H{"error": "no active subscription"})
 				return
 			}
 
 			// validate device limit
-			reached, err := m.isDeviceLimitReached(c, fileLinkRow, clientIP, userAgent)
-			if err != nil {
-				logrus.WithError(err).Error("failed to check device limit")
+			reached, limitErr := m.isDeviceLimitReached(c, fileLinkRow, clientIP, userAgent)
+			if limitErr != nil {
+				logrus.WithError(limitErr).Error("failed to check device limit")
 				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "something went wrong"})
 				return
 			}
@@ -110,13 +109,6 @@ func (m *FileLinkMiddleware) Authenticate(urlSanitizer func(_ *gin.Context) stri
 		})
 		c.Next()
 	}
-}
-func (m *FileLinkMiddleware) validateOwnersSubscription(cID int64) error {
-	userID, err := m.CollectionRepo.GetOwnerID(cID)
-	if err != nil {
-		return stacktrace.Propagate(err, "")
-	}
-	return m.BillingCtrl.HasActiveSelfOrFamilySubscription(userID, true)
 }
 
 func (m *FileLinkMiddleware) isDeviceLimitReached(ctx context.Context,
@@ -161,11 +153,11 @@ func (m *FileLinkMiddleware) isDeviceLimitReached(ctx context.Context,
 // validatePassword will verify if the user is provided correct password for the public album
 func (m *FileLinkMiddleware) validatePassword(c *gin.Context, reqPath string,
 	fileLinkRow *ente.FileLinkRow) error {
-	if array.StringInList(reqPath, passwordWhiteListedURLs) {
-		return nil
-	}
 	accessTokenJWT := auth.GetAccessTokenJWT(c)
 	if accessTokenJWT == "" {
+		if array.StringInList(reqPath, filePasswordWhiteListedURLs) {
+			return nil
+		}
 		return ente.ErrAuthenticationRequired
 	}
 	return m.FileLinkCtrl.ValidateJWTToken(c, accessTokenJWT, *fileLinkRow.PassHash)
