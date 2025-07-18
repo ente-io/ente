@@ -11,7 +11,7 @@ class GroupHeaderWidget extends StatefulWidget {
   final double? height;
   final List<EnteFile> filesInGroup;
   final SelectedFiles? selectedFiles;
-  final bool showSelectAllByDefault;
+  final bool showSelectAll;
 
   const GroupHeaderWidget({
     super.key,
@@ -19,7 +19,7 @@ class GroupHeaderWidget extends StatefulWidget {
     required this.gridSize,
     required this.filesInGroup,
     required this.selectedFiles,
-    required this.showSelectAllByDefault,
+    required this.showSelectAll,
     this.height,
   });
 
@@ -28,7 +28,6 @@ class GroupHeaderWidget extends StatefulWidget {
 }
 
 class _GroupHeaderWidgetState extends State<GroupHeaderWidget> {
-  late final ValueNotifier<bool> _showSelectAllButtonNotifier;
   late final ValueNotifier<bool> _areAllFromGroupSelectedNotifier;
 
   @override
@@ -38,13 +37,11 @@ class _GroupHeaderWidgetState extends State<GroupHeaderWidget> {
         ValueNotifier(_areAllFromGroupSelected());
 
     widget.selectedFiles?.addListener(_selectedFilesListener);
-    _showSelectAllButtonNotifier = ValueNotifier(widget.showSelectAllByDefault);
   }
 
   @override
   void dispose() {
     _areAllFromGroupSelectedNotifier.dispose();
-    _showSelectAllButtonNotifier.dispose();
     widget.selectedFiles?.removeListener(_selectedFilesListener);
     super.dispose();
   }
@@ -82,37 +79,31 @@ class _GroupHeaderWidgetState extends State<GroupHeaderWidget> {
               ),
             ),
             Expanded(child: Container()),
-            ValueListenableBuilder(
-              valueListenable: _showSelectAllButtonNotifier,
-              builder: (context, value, _) {
-                return !value
-                    ? const SizedBox.shrink()
-                    : GestureDetector(
-                        behavior: HitTestBehavior.translucent,
-                        child: ValueListenableBuilder(
-                          valueListenable: _areAllFromGroupSelectedNotifier,
-                          builder: (context, dynamic value, _) {
-                            return value
-                                ? const Icon(
-                                    Icons.check_circle,
-                                    size: 18,
-                                  )
-                                : Icon(
-                                    Icons.check_circle_outlined,
-                                    color:
-                                        getEnteColorScheme(context).strokeMuted,
-                                    size: 18,
-                                  );
-                          },
-                        ),
-                        onTap: () {
-                          widget.selectedFiles?.toggleGroupSelection(
-                            widget.filesInGroup.toSet(),
-                          );
-                        },
+            !widget.showSelectAll
+                ? const SizedBox.shrink()
+                : GestureDetector(
+                    behavior: HitTestBehavior.translucent,
+                    child: ValueListenableBuilder(
+                      valueListenable: _areAllFromGroupSelectedNotifier,
+                      builder: (context, dynamic value, _) {
+                        return value
+                            ? const Icon(
+                                Icons.check_circle,
+                                size: 18,
+                              )
+                            : Icon(
+                                Icons.check_circle_outlined,
+                                color: getEnteColorScheme(context).strokeMuted,
+                                size: 18,
+                              );
+                      },
+                    ),
+                    onTap: () {
+                      widget.selectedFiles?.toggleGroupSelection(
+                        widget.filesInGroup.toSet(),
                       );
-              },
-            ),
+                    },
+                  ),
           ],
         ),
       ),
@@ -123,13 +114,6 @@ class _GroupHeaderWidgetState extends State<GroupHeaderWidget> {
     if (widget.selectedFiles == null) return;
     _areAllFromGroupSelectedNotifier.value =
         widget.selectedFiles!.files.containsAll(widget.filesInGroup.toSet());
-
-    //Can remove this if we decide to show select all by default for all galleries
-    if (widget.selectedFiles!.files.isEmpty && !widget.showSelectAllByDefault) {
-      _showSelectAllButtonNotifier.value = false;
-    } else {
-      _showSelectAllButtonNotifier.value = true;
-    }
   }
 
   bool _areAllFromGroupSelected() {

@@ -309,7 +309,7 @@ class _DelayedGalleryState extends State<DelayedGallery> {
           },
           tagPrefix: "pick_add_photos_gallery",
           selectedFiles: widget.selectedFiles,
-          showSelectAllByDefault: true,
+          showSelectAll: true,
           sortAsyncFn: () => false,
         ).animate().fadeIn(
               duration: const Duration(milliseconds: 175),

@@ -119,7 +119,7 @@ class PickPersonCoverPhotoWidget extends StatelessWidget {
                               tagPrefix: "pick_center_point_gallery",
                               selectedFiles: selectedFiles,
                               limitSelectionToOne: true,
-                              showSelectAllByDefault: false,
+                              showSelectAll: false,
                             ),
                           ),
                         ),

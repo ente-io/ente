@@ -23,7 +23,7 @@ class GalleryGroups {
   final SelectedFiles? selectedFiles;
   final bool limitSelectionToOne;
   final String tagPrefix;
-  final bool showSelectAllByDefault;
+  final bool showSelectAll;
   final _logger = Logger("GalleryGroups");
 
   //TODO: Add support for sort order
@@ -40,7 +40,7 @@ class GalleryGroups {
 
     /// Should be GroupGallery.spacing if GroupType.showGroupHeader() is false.
     required this.groupHeaderExtent,
-    required this.showSelectAllByDefault,
+    required this.showSelectAll,
     this.limitSelectionToOne = false,
   }) {
     init();
@@ -135,7 +135,7 @@ class GalleryGroups {
                   gridSize: crossAxisCount,
                   filesInGroup: groupIDToFilesMap[groupID]!,
                   selectedFiles: selectedFiles,
-                  showSelectAllByDefault: showSelectAllByDefault,
+                  showSelectAll: showSelectAll && !limitSelectionToOne,
                 );
               } else {
                 return const SizedBox(height: spacing);

@@ -67,7 +67,7 @@ class Gallery extends StatefulWidget {
   /// make selection possible without long pressing. If a gallery has selected
   /// files, it's not necessary that this will be true.
   final bool inSelectionMode;
-  final bool showSelectAllByDefault;
+  final bool showSelectAll;
   final bool isScrollablePositionedList;
 
   // add a Function variable to get sort value in bool
@@ -93,7 +93,7 @@ class Gallery extends StatefulWidget {
     this.limitSelectionToOne = false,
     this.inSelectionMode = false,
     this.sortAsyncFn,
-    this.showSelectAllByDefault = true,
+    this.showSelectAll = true,
     this.isScrollablePositionedList = true,
     this.reloadDebounceTime = const Duration(milliseconds: 500),
     this.reloadDebounceExecutionInterval = const Duration(seconds: 2),
@@ -137,6 +137,11 @@ class GalleryState extends State<Gallery> {
         "Gallery_${widget.tagPrefix}${kDebugMode ? "_" + widget.albumName! : ""}_x";
     _logger = Logger(_logTag);
     _logger.info("init Gallery");
+
+    if (widget.limitSelectionToOne) {
+      assert(widget.showSelectAll == false);
+    }
+
     _setGroupType();
     _debouncer = Debouncer(
       widget.reloadDebounceTime,
@@ -222,7 +227,7 @@ class GalleryState extends State<Gallery> {
           gridSize: localSettings.getPhotoGridSize(),
           filesInGroup: const [],
           selectedFiles: null,
-          showSelectAllByDefault: false,
+          showSelectAll: false,
         ),
         context,
       ).then((size) {
@@ -452,7 +457,8 @@ class GalleryState extends State<Gallery> {
       selectedFiles: widget.selectedFiles,
       tagPrefix: widget.tagPrefix,
       groupHeaderExtent: groupHeaderExtent!,
-      showSelectAllByDefault: widget.showSelectAllByDefault,
+      showSelectAll: widget.showSelectAll,
+      limitSelectionToOne: widget.limitSelectionToOne,
     );
     GalleryFilesState.of(context).setGalleryFiles = _allGalleryFiles;
     if (!_hasLoadedFiles) {
@@ -551,8 +557,8 @@ class GalleryState extends State<Gallery> {
                             galleryGroups: galleryGroups,
                             headerHeightNotifier: _headerHeightNotifier,
                             selectedFiles: widget.selectedFiles,
-                            showSelectAllByDefault:
-                                widget.showSelectAllByDefault,
+                            showSelectAll: widget.showSelectAll &&
+                                !widget.limitSelectionToOne,
                             scrollbarInUseNotifier: scrollBarInUseNotifier,
                           )
                         : const SizedBox.shrink(),
@@ -630,7 +636,7 @@ class PinnedGroupHeader extends StatefulWidget {
   final GalleryGroups galleryGroups;
   final ValueNotifier<double?> headerHeightNotifier;
   final SelectedFiles? selectedFiles;
-  final bool showSelectAllByDefault;
+  final bool showSelectAll;
   final ValueNotifier<bool> scrollbarInUseNotifier;
 
   const PinnedGroupHeader({
@@ -638,7 +644,7 @@ class PinnedGroupHeader extends StatefulWidget {
     required this.galleryGroups,
     required this.headerHeightNotifier,
     required this.selectedFiles,
-    required this.showSelectAllByDefault,
+    required this.showSelectAll,
     required this.scrollbarInUseNotifier,
     super.key,
   });
@@ -810,7 +816,7 @@ class _PinnedGroupHeaderState extends State<PinnedGroupHeader> {
                       filesInGroup: widget
                           .galleryGroups.groupIDToFilesMap[currentGroupId!]!,
                       selectedFiles: widget.selectedFiles,
-                      showSelectAllByDefault: widget.showSelectAllByDefault,
+                      showSelectAll: widget.showSelectAll,
                     ),
                   ),
                 ),

@@ -115,7 +115,7 @@ class PickCenterPointWidget extends StatelessWidget {
                               tagPrefix: "pick_center_point_gallery",
                               selectedFiles: selectedFiles,
                               limitSelectionToOne: true,
-                              showSelectAllByDefault: false,
+                              showSelectAll: false,
                               header: const Padding(
                                 padding: EdgeInsets.all(10),
                                 child: NotificationTipWidget(
