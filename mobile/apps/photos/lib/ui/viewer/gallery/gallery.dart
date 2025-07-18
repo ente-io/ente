@@ -444,7 +444,9 @@ class GalleryState extends State<Gallery> {
 
   @override
   Widget build(BuildContext context) {
-    if (groupHeaderExtent == null) return const SliverFillRemaining();
+    if (groupHeaderExtent == null) {
+      return const SizedBox.shrink();
+    }
 
     _logger.info("Building Gallery  ${widget.tagPrefix}");
 
