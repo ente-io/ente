@@ -385,7 +385,7 @@ export const FileList: React.FC<FileListProps> = ({
                 if (pendingSplits.length) pushItemsFromSplits(pendingSplits);
                 pendingSplits = [split];
             }
-            pushItemsFromSplits(pendingSplits);
+            if (pendingSplits.length) pushItemsFromSplits(pendingSplits);
         }
 
         if (!annotatedFiles.length) {
@@ -568,16 +568,12 @@ export const FileList: React.FC<FileListProps> = ({
     }, [selected]);
 
     const renderListItem = useCallback(
-        (
-            listItem: FileListItem,
-            layoutParams: ThumbnailGridLayoutParams,
-            isScrolling: boolean,
-        ) => {
+        (item: FileListItem, isScrolling: boolean) => {
             const haveSelection = selected.count > 0;
-            switch (listItem.tag) {
+            switch (item.tag) {
                 case "date":
                     return intersperseWithGaps(
-                        listItem.dGroups!,
+                        item.dGroups!,
                         ({ date, dateSpan }) => [
                             <DateListItem key={date} span={dateSpan}>
                                 {haveSelection && (
@@ -601,7 +597,7 @@ export const FileList: React.FC<FileListProps> = ({
                     );
                 case "file":
                     return intersperseWithGaps(
-                        listItem.fGroups!,
+                        item.fGroups!,
                         ({ annotatedFiles, annotatedFilesStartIndex }) =>
                             annotatedFiles.map((annotatedFile, j) => {
                                 const file = annotatedFile.file;
@@ -661,7 +657,7 @@ export const FileList: React.FC<FileListProps> = ({
                         ),
                     );
                 default:
-                    return listItem.component;
+                    return item.component;
             }
         },
         [
@@ -827,8 +823,7 @@ interface FileListItemData {
     items: FileListItem[];
     layoutParams: ThumbnailGridLayoutParams;
     renderListItem: (
-        listItem: FileListItem,
-        layoutParams: ThumbnailGridLayoutParams,
+        item: FileListItem,
         isScrolling: boolean,
     ) => React.ReactNode;
 }
@@ -841,7 +836,7 @@ const FileListRow = memo(
         data,
     }: ListChildComponentProps<FileListItemData>) => {
         const { items, layoutParams, renderListItem } = data;
-        const { columns, itemWidth, paddingInline, gap } = layoutParams;
+        const { itemWidth, paddingInline, gap } = layoutParams;
 
         const item = items[index]!;
         const itemSpans = (() => {
@@ -872,7 +867,7 @@ const FileListRow = memo(
                     },
                 ]}
             >
-                {renderListItem(item, layoutParams, !!isScrolling)}
+                {renderListItem(item, !!isScrolling)}
             </Box>
         );
     },
