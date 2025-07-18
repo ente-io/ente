@@ -484,70 +484,80 @@ class GalleryState extends State<Gallery> {
       //       widget.showSelectAllByDefault && widget.groupType.showGroupHeader(),
       //   isScrollablePositionedList: widget.isScrollablePositionedList,
       // ),
-      child: CustomScrollBar2(
-        scrollController: _scrollController,
-        galleryGroups: galleryGroups,
-        inUseNotifier: scrollBarInUseNotifier,
-        heighOfViewport: MediaQuery.sizeOf(context).height,
-        child: NotificationListener<SizeChangedLayoutNotification>(
-          onNotification: (notification) {
-            final renderBox =
-                _headerKey.currentContext?.findRenderObject() as RenderBox?;
-            if (renderBox != null) {
-              _headerHeightNotifier.value = renderBox.size.height;
-            } else {
-              _logger.info(
-                "Header render box is null, cannot get height",
-              );
-            }
+      child: _allGalleryFiles.isEmpty
+          ? Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                widget.header ?? const SizedBox.shrink(),
+                Expanded(child: widget.emptyState),
+                widget.footer ?? const SizedBox.shrink(),
+              ],
+            )
+          : CustomScrollBar2(
+              scrollController: _scrollController,
+              galleryGroups: galleryGroups,
+              inUseNotifier: scrollBarInUseNotifier,
+              heighOfViewport: MediaQuery.sizeOf(context).height,
+              child: NotificationListener<SizeChangedLayoutNotification>(
+                onNotification: (notification) {
+                  final renderBox = _headerKey.currentContext
+                      ?.findRenderObject() as RenderBox?;
+                  if (renderBox != null) {
+                    _headerHeightNotifier.value = renderBox.size.height;
+                  } else {
+                    _logger.info(
+                      "Header render box is null, cannot get height",
+                    );
+                  }
 
-            return true;
-          },
-          child: Stack(
-            key: _stackKey,
-            clipBehavior: Clip.none,
-            children: [
-              CustomScrollView(
-                physics: widget.disableScroll
-                    ? const NeverScrollableScrollPhysics()
-                    : const ExponentialBouncingScrollPhysics(),
-                controller: _scrollController,
-                slivers: [
-                  SliverToBoxAdapter(
-                    child: SizeChangedLayoutNotifier(
-                      child: SizedBox(
-                        key: _headerKey,
-                        child: widget.header ?? const SizedBox.shrink(),
-                      ),
+                  return true;
+                },
+                child: Stack(
+                  key: _stackKey,
+                  clipBehavior: Clip.none,
+                  children: [
+                    CustomScrollView(
+                      physics: widget.disableScroll
+                          ? const NeverScrollableScrollPhysics()
+                          : const ExponentialBouncingScrollPhysics(),
+                      controller: _scrollController,
+                      slivers: [
+                        SliverToBoxAdapter(
+                          child: SizeChangedLayoutNotifier(
+                            child: SizedBox(
+                              key: _headerKey,
+                              child: widget.header ?? const SizedBox.shrink(),
+                            ),
+                          ),
+                        ),
+                        SliverToBoxAdapter(
+                          child: SizedBox.shrink(
+                            key: _sectionedListSliverKey,
+                          ),
+                        ),
+                        SectionedListSliver(
+                          sectionLayouts: galleryGroups.groupLayouts,
+                        ),
+                        SliverToBoxAdapter(
+                          child: widget.footer,
+                        ),
+                      ],
                     ),
-                  ),
-                  SliverToBoxAdapter(
-                    child: SizedBox.shrink(
-                      key: _sectionedListSliverKey,
-                    ),
-                  ),
-                  SectionedListSliver(
-                    sectionLayouts: galleryGroups.groupLayouts,
-                  ),
-                  SliverToBoxAdapter(
-                    child: widget.footer,
-                  ),
-                ],
+                    galleryGroups.groupType.showGroupHeader()
+                        ? PinnedGroupHeader(
+                            scrollController: _scrollController,
+                            galleryGroups: galleryGroups,
+                            headerHeightNotifier: _headerHeightNotifier,
+                            selectedFiles: widget.selectedFiles,
+                            showSelectAllByDefault:
+                                widget.showSelectAllByDefault,
+                            scrollbarInUseNotifier: scrollBarInUseNotifier,
+                          )
+                        : const SizedBox.shrink(),
+                  ],
+                ),
               ),
-              galleryGroups.groupType.showGroupHeader()
-                  ? PinnedGroupHeader(
-                      scrollController: _scrollController,
-                      galleryGroups: galleryGroups,
-                      headerHeightNotifier: _headerHeightNotifier,
-                      selectedFiles: widget.selectedFiles,
-                      showSelectAllByDefault: widget.showSelectAllByDefault,
-                      scrollbarInUseNotifier: scrollBarInUseNotifier,
-                    )
-                  : const SizedBox.shrink(),
-            ],
-          ),
-        ),
-      ),
+            ),
     );
   }
 
