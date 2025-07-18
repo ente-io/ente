@@ -67,7 +67,7 @@ func (h *FileHandler) DisableUrl(c *gin.Context) {
 func (h *FileHandler) GetUrls(c *gin.Context) {
 	sinceTime, err := strconv.ParseInt(c.Query("sinceTime"), 10, 64)
 	if err != nil {
-		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, ""))
+		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, "sinceTime parsing failed"))
 		return
 	}
 	limit := 500

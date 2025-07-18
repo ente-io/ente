@@ -462,7 +462,7 @@ func main() {
 	privateAPI.POST("files/share-url", fileHandler.ShareUrl)
 	privateAPI.PUT("files/share-url", fileHandler.UpdateFileURL)
 	privateAPI.DELETE("files/share-url/:fileID", fileHandler.DisableUrl)
-	privateAPI.GET("files/share-urls/", fileHandler.DisableUrl)
+	privateAPI.GET("files/share-urls/", fileHandler.GetUrls)
 
 	privateAPI.PUT("/files/data", fileHandler.PutFileData)
 	privateAPI.PUT("/files/video-data", fileHandler.PutVideoData)
