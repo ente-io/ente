@@ -498,6 +498,8 @@ class GalleryState extends State<Gallery> {
               galleryGroups: galleryGroups,
               inUseNotifier: scrollBarInUseNotifier,
               heighOfViewport: MediaQuery.sizeOf(context).height,
+              topPadding: groupHeaderExtent!,
+              bottomPadding: widget.scrollBottomSafeArea,
               child: NotificationListener<SizeChangedLayoutNotification>(
                 onNotification: (notification) {
                   final renderBox = _headerKey.currentContext

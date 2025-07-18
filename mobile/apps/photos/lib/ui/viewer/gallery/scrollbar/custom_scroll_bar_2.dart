@@ -20,6 +20,8 @@ class ScrollbarDivision {
 
 class CustomScrollBar2 extends StatefulWidget {
   final Widget child;
+  final double bottomPadding;
+  final double topPadding;
   final ScrollController scrollController;
   final GalleryGroups galleryGroups;
   final ValueNotifier<bool> inUseNotifier;
@@ -31,6 +33,8 @@ class CustomScrollBar2 extends StatefulWidget {
     required this.galleryGroups,
     required this.inUseNotifier,
     required this.heighOfViewport,
+    required this.bottomPadding,
+    required this.topPadding,
   });
 
   @override
@@ -55,8 +59,6 @@ class _CustomScrollBar2State extends State<CustomScrollBar2> {
   final _logger = Logger("CustomScrollBar2");
   final _scrollbarKey = GlobalKey();
   List<({double position, String title})>? positionToTitleMap;
-  static const _bottomPadding = 92.0;
-  static const _topPadding = 20.0;
   double? heightOfScrollbarDivider;
   double? heightOfScrollTrack;
   late bool _showScrollbarDivisions;
@@ -199,7 +201,7 @@ class _CustomScrollBar2State extends State<CustomScrollBar2> {
           () => renderBox!.size.height,
           id: "getHeightOfScrollTrack",
         )
-        .then((value) => value - _bottomPadding - _topPadding);
+        .then((value) => value - widget.bottomPadding - widget.topPadding);
   }
 
   @override
@@ -211,8 +213,10 @@ class _CustomScrollBar2State extends State<CustomScrollBar2> {
         // This media query is used to adjust the bottom padding of the scrollbar
         MediaQuery(
           data: MediaQuery.of(context).copyWith(
-            padding:
-                const EdgeInsets.only(bottom: _bottomPadding, top: _topPadding),
+            padding: EdgeInsets.only(
+              bottom: widget.bottomPadding,
+              top: widget.topPadding,
+            ),
           ),
           child: ScrollbarWithUseNotifer(
             key: _scrollbarKey,
@@ -226,9 +230,9 @@ class _CustomScrollBar2State extends State<CustomScrollBar2> {
         positionToTitleMap == null || heightOfScrollbarDivider == null
             ? const SizedBox.shrink()
             : Padding(
-                padding: const EdgeInsets.only(
-                  top: _topPadding,
-                  bottom: _bottomPadding,
+                padding: EdgeInsets.only(
+                  top: widget.topPadding,
+                  bottom: widget.bottomPadding,
                 ),
                 child: ValueListenableBuilder<bool>(
                   valueListenable: widget.inUseNotifier,
