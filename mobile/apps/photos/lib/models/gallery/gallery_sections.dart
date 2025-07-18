@@ -11,7 +11,7 @@ import "package:photos/service_locator.dart";
 import "package:photos/ui/viewer/gallery/component/gallery_file_widget.dart";
 import "package:photos/ui/viewer/gallery/component/group/group_header_widget.dart";
 import "package:photos/ui/viewer/gallery/component/group/type.dart";
-import "package:photos/ui/viewer/gallery/scrollbar/custom_scroll_bar_2.dart";
+import "package:photos/ui/viewer/gallery/scrollbar/custom_scroll_bar.dart";
 import "package:uuid/uuid.dart";
 
 /// In order to make the gallery performant when GroupTypes do not show group

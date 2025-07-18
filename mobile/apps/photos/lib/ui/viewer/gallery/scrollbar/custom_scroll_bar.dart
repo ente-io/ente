@@ -18,7 +18,7 @@ class ScrollbarDivision {
   });
 }
 
-class CustomScrollBar2 extends StatefulWidget {
+class CustomScrollBar extends StatefulWidget {
   final Widget child;
   final double bottomPadding;
   final double topPadding;
@@ -26,7 +26,7 @@ class CustomScrollBar2 extends StatefulWidget {
   final GalleryGroups galleryGroups;
   final ValueNotifier<bool> inUseNotifier;
   final double heighOfViewport;
-  const CustomScrollBar2({
+  const CustomScrollBar({
     super.key,
     required this.child,
     required this.scrollController,
@@ -38,7 +38,7 @@ class CustomScrollBar2 extends StatefulWidget {
   });
 
   @override
-  State<CustomScrollBar2> createState() => _CustomScrollBar2State();
+  State<CustomScrollBar> createState() => _CustomScrollBarState();
 }
 
 /*
@@ -55,7 +55,7 @@ Get the height of the scrollbar and create a normalized position for each
 division and populate position to title mapping. 
 */
 
-class _CustomScrollBar2State extends State<CustomScrollBar2> {
+class _CustomScrollBarState extends State<CustomScrollBar> {
   final _logger = Logger("CustomScrollBar2");
   final _scrollbarKey = GlobalKey();
   List<({double position, String title})>? positionToTitleMap;
@@ -77,7 +77,7 @@ class _CustomScrollBar2State extends State<CustomScrollBar2> {
   }
 
   @override
-  void didUpdateWidget(covariant CustomScrollBar2 oldWidget) {
+  void didUpdateWidget(covariant CustomScrollBar oldWidget) {
     super.didUpdateWidget(oldWidget);
     _init();
   }

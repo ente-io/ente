@@ -21,7 +21,7 @@ import "package:photos/ui/viewer/gallery/component/group/group_header_widget.dar
 import "package:photos/ui/viewer/gallery/component/group/type.dart";
 import "package:photos/ui/viewer/gallery/component/sectioned_sliver_list.dart";
 import 'package:photos/ui/viewer/gallery/empty_state.dart';
-import "package:photos/ui/viewer/gallery/scrollbar/custom_scroll_bar_2.dart";
+import "package:photos/ui/viewer/gallery/scrollbar/custom_scroll_bar.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_context_state.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
 import "package:photos/ui/viewer/gallery/state/inherited_search_filter_data.dart";
@@ -501,7 +501,7 @@ class GalleryState extends State<Gallery> {
                 widget.footer ?? const SizedBox.shrink(),
               ],
             )
-          : CustomScrollBar2(
+          : CustomScrollBar(
               scrollController: _scrollController,
               galleryGroups: galleryGroups,
               inUseNotifier: scrollBarInUseNotifier,
