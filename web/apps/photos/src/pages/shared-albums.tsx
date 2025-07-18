@@ -499,7 +499,7 @@ export default function PublicCollectionGallery() {
                 header={fileListHeader}
                 footer={fileListFooter}
                 enableDownload={downloadEnabled}
-                selectable={downloadEnabled}
+                enableSelect={downloadEnabled}
                 selected={selected}
                 setSelected={setSelected}
                 activeCollectionID={PseudoCollectionID.all}
