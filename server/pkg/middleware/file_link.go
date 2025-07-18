@@ -106,6 +106,7 @@ func (m *FileLinkMiddleware) Authenticate(urlSanitizer func(_ *gin.Context) stri
 			IP:        clientIP,
 			UserAgent: userAgent,
 			FileID:    fileLinkRow.FileID,
+			OwnerID:   fileLinkRow.OwnerID,
 		})
 		c.Next()
 	}
@@ -151,8 +152,11 @@ func (m *FileLinkMiddleware) isDeviceLimitReached(ctx context.Context,
 }
 
 // validatePassword will verify if the user is provided correct password for the public album
-func (m *FileLinkMiddleware) validatePassword(c *gin.Context, reqPath string,
-	fileLinkRow *ente.FileLinkRow) error {
+func (m *FileLinkMiddleware) validatePassword(
+	c *gin.Context,
+	reqPath string,
+	fileLinkRow *ente.FileLinkRow,
+) error {
 	accessTokenJWT := auth.GetAccessTokenJWT(c)
 	if accessTokenJWT == "" {
 		if array.StringInList(reqPath, filePasswordWhiteListedURLs) {

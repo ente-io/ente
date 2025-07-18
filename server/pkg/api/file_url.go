@@ -2,6 +2,7 @@ package api
 
 import (
 	"github.com/ente-io/museum/ente"
+	"github.com/ente-io/museum/pkg/utils/auth"
 	"github.com/ente-io/museum/pkg/utils/handler"
 	"github.com/ente-io/stacktrace"
 	"github.com/gin-gonic/gin"
@@ -23,6 +24,30 @@ func (h *FileHandler) ShareUrl(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, response)
+}
+
+func (h *FileHandler) LinkInfo(c *gin.Context) {
+
+}
+
+func (h *FileHandler) LinkThumbnail(c *gin.Context) {
+	linkCtx := auth.MustGetFileLinkAccessContext(c)
+	url, err := h.Controller.GetThumbnailURL(c, linkCtx.OwnerID, linkCtx.FileID)
+	if err != nil {
+		handler.Error(c, stacktrace.Propagate(err, ""))
+		return
+	}
+	c.Redirect(http.StatusTemporaryRedirect, url)
+}
+
+func (h *FileHandler) LinkFile(c *gin.Context) {
+	linkCtx := auth.MustGetFileLinkAccessContext(c)
+	url, err := h.Controller.GetFileURL(c, linkCtx.OwnerID, linkCtx.FileID)
+	if err != nil {
+		handler.Error(c, stacktrace.Propagate(err, ""))
+		return
+	}
+	c.Redirect(http.StatusTemporaryRedirect, url)
 }
 
 func (h *FileHandler) DisableUrl(c *gin.Context) {

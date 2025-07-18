@@ -597,6 +597,10 @@ func main() {
 		StorageBonusController: storageBonusCtrl,
 	}
 
+	fileLinkApi.GET("/info", fileHandler.LinkInfo)
+	fileLinkApi.GET("/thumbnail", fileHandler.LinkThumbnail)
+	fileLinkApi.GET("/file", fileHandler.LinkFile)
+
 	publicCollectionAPI.GET("/files/preview/:fileID", publicCollectionHandler.GetThumbnail)
 	publicCollectionAPI.GET("/files/download/:fileID", publicCollectionHandler.GetFile)
 	publicCollectionAPI.GET("/files/data/fetch", publicCollectionHandler.GetFileData)

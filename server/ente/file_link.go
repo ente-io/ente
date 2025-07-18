@@ -90,4 +90,5 @@ type FileLinkAccessContext struct {
 	IP        string
 	UserAgent string
 	FileID    int64
+	OwnerID   int64
 }
