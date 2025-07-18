@@ -308,81 +308,84 @@ export const FileList: React.FC<FileListProps> = ({
                 ),
             );
         } else {
-            let i = 0;
+            // A running counter of files that have been pushed into items, and
+            // a function to push them (incrementing the counter).
+            let fileIndex = 0;
+            const createFileItem = (splits: FileListAnnotatedFile[][]) =>
+                ({
+                    height: fileItemHeight,
+                    tag: "file",
+                    fGroups: splits.map((split) => {
+                        const group = {
+                            annotatedFiles: split,
+                            annotatedFilesStartIndex: fileIndex,
+                        };
+                        fileIndex += split.length;
+                        return group;
+                    }),
+                }) satisfies FileListItem;
+
             const pushItemsFromSplits = (splits: FileListAnnotatedFile[][]) => {
-                items.push({
-                    height: dateListItemHeight,
-                    tag: "date",
-                    dGroups: splits.map((s) => ({
-                        date: s[0]!.timelineDateString,
-                        dateSpan: s.length,
-                    })),
-                });
                 if (splits.length > 1) {
                     // If we get here, the combined number of files across
-                    // `thisRowSplits` is less than the number of columns.
+                    // splits is less than the number of columns.
                     items.push({
-                        height: fileItemHeight,
-                        tag: "file",
-                        fGroups: splits.map((s) => {
-                            const group = {
-                                annotatedFiles: s,
-                                annotatedFilesStartIndex: i,
-                            };
-                            i += s.length;
-                            return group;
-                        }),
+                        height: dateListItemHeight,
+                        tag: "date",
+                        dGroups: splits.map((s) => ({
+                            date: s[0]!.timelineDateString,
+                            dateSpan: s.length,
+                        })),
                     });
+                    items.push(createFileItem(splits));
                 } else {
                     // A single group of files, but the number of such files
                     // might be more than what fits a single row.
-                    const split = splits[0]!;
-                    items = items.concat(
-                        batch(split, columns).map((batchFiles, batchIndex) => ({
-                            height: fileItemHeight,
-                            tag: "file",
-                            fGroups: [
-                                {
-                                    annotatedFiles: batchFiles,
-                                    annotatedFilesStartIndex:
-                                        i + batchIndex * columns,
-                                },
-                            ],
+                    items.push({
+                        height: dateListItemHeight,
+                        tag: "date",
+                        dGroups: splits.map((s) => ({
+                            date: s[0]!.timelineDateString,
+                            dateSpan: columns,
                         })),
+                    });
+                    items = items.concat(
+                        batch(splits[0]!, columns).map((batchFiles) =>
+                            createFileItem([batchFiles]),
+                        ),
                     );
-                    i += split.length;
                 }
             };
 
             const spaceBetweenDatesToImageContainerWidthRatio = 0.244;
 
-            let thisRowSplits = new Array<FileListAnnotatedFile[]>();
+            let pendingSplits = new Array<FileListAnnotatedFile[]>();
             for (const split of splitByDate(annotatedFiles)) {
-                const filledColumns = thisRowSplits.reduce(
+                const filledColumns = pendingSplits.reduce(
                     (a, s) => a + s.length,
                     0,
                 );
                 const incomingColumns = split.length;
 
-                // Check if items can be added to same list.
+                // Check if the files in this split can be added to same row.
                 if (
                     !isSmallerLayout &&
                     filledColumns +
                         incomingColumns +
                         Math.ceil(
-                            thisRowSplits.length *
+                            pendingSplits.length *
                                 spaceBetweenDatesToImageContainerWidthRatio,
                         ) <=
                         columns
                 ) {
-                    thisRowSplits.push(split);
+                    pendingSplits.push(split);
                     continue;
                 }
 
-                if (thisRowSplits.length) pushItemsFromSplits(thisRowSplits);
-                thisRowSplits = [split];
+                if (pendingSplits.length) pushItemsFromSplits(pendingSplits);
+                pendingSplits = [split];
             }
-            pushItemsFromSplits(thisRowSplits);
+            pushItemsFromSplits(pendingSplits);
         }
 
         if (!annotatedFiles.length) {
@@ -576,14 +579,7 @@ export const FileList: React.FC<FileListProps> = ({
                     return intersperseWithGaps(
                         listItem.dGroups!,
                         ({ date, dateSpan }) => [
-                            <DateListItem
-                                key={date}
-                                span={
-                                    dateSpan == 1
-                                        ? layoutParams.columns
-                                        : dateSpan /* TODO(RE) */
-                                }
-                            >
+                            <DateListItem key={date} span={dateSpan}>
                                 {haveSelection && (
                                     <Checkbox
                                         key={date}
@@ -661,9 +657,7 @@ export const FileList: React.FC<FileListProps> = ({
                                 );
                             }),
                         ({ annotatedFilesStartIndex }) => (
-                            <div
-                                key={`gap-files-${annotatedFilesStartIndex}`}
-                            />
+                            <div key={`${annotatedFilesStartIndex}-gap`} />
                         ),
                     );
                 default:
@@ -704,16 +698,11 @@ export const FileList: React.FC<FileListProps> = ({
         const item = itemData.items[index]!;
         switch (item.tag) {
             case "date":
-                return `${item.date ?? ""}-${index}`;
+                return `date-${item.dGroups![0]!.date}-${index}`;
             case "file":
-                if (item.fGroups) {
-                    return `file-group-${item.fGroups[0]!.annotatedFilesStartIndex}`;
-                }
-                return `${item.items![0]!.file.id}-${
-                    item.items!.slice(-1)[0]!.file.id
-                }`;
+                return `file-${item.fGroups![0]!.annotatedFilesStartIndex}-${index}`;
             default:
-                return `${index}`;
+                return `span-${index}`;
         }
     }, []);
 
@@ -855,6 +844,16 @@ const FileListRow = memo(
         const { columns, itemWidth, paddingInline, gap } = layoutParams;
 
         const item = items[index]!;
+        const itemSpans = (() => {
+            switch (item.tag) {
+                case "date":
+                    return item.dGroups!.map((g) => g.dateSpan);
+                case "file":
+                    return item.fGroups!.map((g) => g.annotatedFiles.length);
+                default:
+                    return [];
+            }
+        })();
 
         return (
             <Box
@@ -864,13 +863,11 @@ const FileListRow = memo(
                         width: "100%",
                         paddingInline: `${item.extendToInlineEdges ? 0 : paddingInline}px`,
                     },
-                    item.tag != "span" && {
+                    itemSpans.length > 0 && {
                         display: "grid",
-                        gridTemplateColumns: item.groups
-                            ? item.groups
-                                  .map((x) => `repeat(${x}, ${itemWidth}px)`)
-                                  .join(" 44px ")
-                            : `repeat(${columns}, ${itemWidth}px)`,
+                        gridTemplateColumns: itemSpans
+                            .map((x) => `repeat(${x}, ${itemWidth}px)`)
+                            .join(" 44px "),
                         columnGap: `${gap}px`,
                     },
                 ]}
