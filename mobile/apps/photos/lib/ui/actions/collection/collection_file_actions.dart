@@ -183,14 +183,14 @@ extension CollectionFileActions on CollectionActions {
   }
 
   Future<bool> addToCollection(
-    BuildContext context,
+    BuildContext? context,
     int collectionID,
     bool showProgressDialog, {
     List<EnteFile>? selectedFiles,
     List<SharedMediaFile>? sharedFiles,
     List<AssetEntity>? picketAssets,
   }) async {
-    ProgressDialog? dialog = showProgressDialog
+    ProgressDialog? dialog = showProgressDialog && context != null
         ? createProgressDialog(
             context,
             S.of(context).uploadingFilesToAlbum,
@@ -246,7 +246,7 @@ extension CollectionFileActions on CollectionActions {
         final Collection? c =
             CollectionsService.instance.getCollectionByID(collectionID);
         if (c != null && c.owner.id != currentUserID) {
-          if (!showProgressDialog) {
+          if (!showProgressDialog && context != null) {
             dialog = createProgressDialog(
               context,
               S.of(context).uploadingFilesToAlbum,
@@ -291,7 +291,9 @@ extension CollectionFileActions on CollectionActions {
     } catch (e, s) {
       logger.severe("Failed to add to album", e, s);
       await dialog?.hide();
-      await showGenericErrorDialog(context: context, error: e);
+      if (context != null) {
+        await showGenericErrorDialog(context: context, error: e);
+      }
       rethrow;
     }
   }

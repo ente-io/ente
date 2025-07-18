@@ -128,4 +128,21 @@ extension EntitiesDB on FilesDB {
     }
     return maps.values.first as String?;
   }
+
+  Future<Map<String, int>> getUpdatedAts(
+    EntityType type,
+    List<String> ids,
+  ) async {
+    final db = await sqliteAsyncDB;
+    final List<Map<String, dynamic>> maps = await db.getAll(
+      'SELECT id, updatedAt FROM entities WHERE type = ? AND id IN (${List.filled(ids.length, '?').join(',')})',
+      [type.name, ...ids],
+    );
+    return Map<String, int>.fromEntries(
+      List.generate(
+        maps.length,
+        (i) => MapEntry(maps[i]['id'] as String, maps[i]['updatedAt'] as int),
+      ),
+    );
+  }
 }
