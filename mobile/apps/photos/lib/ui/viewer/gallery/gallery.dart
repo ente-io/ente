@@ -52,7 +52,6 @@ class Gallery extends StatefulWidget {
   final Widget? footer;
   final Widget emptyState;
   final String? albumName;
-  final double scrollBottomSafeArea;
   final bool enableFileGrouping;
   final Widget loadingWidget;
   final bool disableScroll;
@@ -86,7 +85,6 @@ class Gallery extends StatefulWidget {
     this.header,
     this.footer = const SizedBox(height: 212),
     this.emptyState = const EmptyState(),
-    this.scrollBottomSafeArea = 120.0,
     this.albumName = '',
     this.groupType = GroupType.day,
     this.enableFileGrouping = true,
@@ -445,6 +443,8 @@ class GalleryState extends State<Gallery> {
 
     _logger.info("Building Gallery  ${widget.tagPrefix}");
 
+    final double bottomPadding = MediaQuery.paddingOf(context).bottom + 180;
+
     final galleryGroups = GalleryGroups(
       allFiles: _allGalleryFiles,
       groupType: _groupType,
@@ -499,7 +499,7 @@ class GalleryState extends State<Gallery> {
               inUseNotifier: scrollBarInUseNotifier,
               heighOfViewport: MediaQuery.sizeOf(context).height,
               topPadding: groupHeaderExtent!,
-              bottomPadding: widget.scrollBottomSafeArea,
+              bottomPadding: bottomPadding,
               child: NotificationListener<SizeChangedLayoutNotification>(
                 onNotification: (notification) {
                   final renderBox = _headerKey.currentContext
