@@ -600,6 +600,7 @@ func main() {
 	fileLinkApi.GET("/info", fileHandler.LinkInfo)
 	fileLinkApi.GET("/thumbnail", fileHandler.LinkThumbnail)
 	fileLinkApi.GET("/file", fileHandler.LinkFile)
+	fileLinkApi.POST("/verify-password", fileHandler.VerifyPassword)
 
 	publicCollectionAPI.GET("/files/preview/:fileID", publicCollectionHandler.GetThumbnail)
 	publicCollectionAPI.GET("/files/download/:fileID", publicCollectionHandler.GetFile)

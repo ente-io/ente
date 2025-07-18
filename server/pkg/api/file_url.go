@@ -88,6 +88,21 @@ func (h *FileHandler) GetUrls(c *gin.Context) {
 	})
 }
 
+// VerifyPassword verifies the password for given public access token and return signed jwt token if it's valid
+func (h *FileHandler) VerifyPassword(c *gin.Context) {
+	var req ente.VerifyPasswordRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		handler.Error(c, stacktrace.Propagate(err, ""))
+		return
+	}
+	resp, err := h.FileUrlCtrl.VerifyPassword(c, req)
+	if err != nil {
+		handler.Error(c, stacktrace.Propagate(err, ""))
+		return
+	}
+	c.JSON(http.StatusOK, resp)
+}
+
 // UpdateFileURL updates the share URL for a file
 func (h *FileHandler) UpdateFileURL(c *gin.Context) {
 	var req ente.UpdateFileUrl
