@@ -264,7 +264,6 @@
     }
   },
   "verificationId": "Ellenőrző azonosító",
-  "verifyEmailID": "{email} ellenőrzése",
   "emailNoEnteAccount": "{email} címnek nincs Ente fiókja.\n\nKüldjön nekik meghívót fotók megosztására.",
   "shareMyVerificationID": "Itt az ellenőrző azonosítóm: {verificationID} az ente.io-hoz.",
   "shareTextConfirmOthersVerificationID": "Szia, meg tudnád erősíteni, hogy ez az ente.io ellenőrző azonosítód? {verificationID}",
@@ -459,7 +458,7 @@
   "selectAll": "Összes kijelölése",
   "skip": "Kihagyás",
   "updatingFolderSelection": "Mappakijelölés frissítése...",
-  "itemCount": "{count, plural, other{{count} elem}}",
+  "itemCount": "{count, plural, one{{count} elem} other{{count} elem}}",
   "deleteItemCount": "{count, plural, =1 {Elem {count} törlése} other {Elemek {count} törlése}}",
   "duplicateItemsGroup": "{count} fájl, {formattedSize} mindegyik",
   "@duplicateItemsGroup": {

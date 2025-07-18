@@ -389,8 +389,8 @@
   "selectAll": "בחר הכל",
   "skip": "דלג",
   "updatingFolderSelection": "מעדכן את בחירת התיקיות...",
-  "itemCount": "{count, plural, one{{count} פריט} other{{count} פריטים}}",
-  "deleteItemCount": "{count, plural, =1 {מחק {count} פריט} other {מחק {count} פריטים}}",
+  "itemCount": "{count, plural, one{{count} פריט} two {{count} פריטים} many {{count} פריטים} other{{count} פריטים}}",
+  "deleteItemCount": "{count, plural, =1 {מחק {count} פריט} two {מחק {count} פריטים} other {מחק {count} פריטים}}",
   "duplicateItemsGroup": "{count} קבצים, כל אחד {formattedSize}",
   "@duplicateItemsGroup": {
     "description": "Display the number of duplicate files and their size",
@@ -407,7 +407,7 @@
     }
   },
   "showMemories": "הצג זכרונות",
-  "yearsAgo": "{count, plural, one{לפני {count} שנה} other{לפני {count} שנים}}",
+  "yearsAgo": "{count, plural, one{לפני {count} שנה} two {לפני {count} שנים} many {לפני {count} שנים} other{לפני {count} שנים}}",
   "backupSettings": "הגדרות גיבוי",
   "backupOverMobileData": "גבה על רשת סלולרית",
   "backupVideos": "גבה סרטונים",
