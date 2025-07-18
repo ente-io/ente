@@ -1788,5 +1788,7 @@
   "cLDesc5": "Du erhältst jetzt eine Opt-Out-Benachrichtigung für alle Geburtstage, die du bei Ente gespeichert hast, zusammen mit einer Sammlung der besten Fotos.",
   "cLTitle6": "Wiederaufnehmbares Hoch- und Herunterladen",
   "cLDesc6": "Kein Warten mehr auf das Hoch- oder Herunterladen, bevor du die App schließen kannst. Alle Übertragungen können jetzt mittendrin pausiert und fortgesetzt werden, wo du aufgehört hast.",
-  "indexingPausedStatusDescription": "Die Indizierung ist pausiert. Sie wird automatisch fortgesetzt, wenn das Gerät bereit ist. Das Gerät wird als bereit angesehen, wenn sich der Akkustand, die Akkugesundheit und der thermische Zustand in einem gesunden Bereich befinden."
+  "indexingPausedStatusDescription": "Die Indizierung ist pausiert. Sie wird automatisch fortgesetzt, wenn das Gerät bereit ist. Das Gerät wird als bereit angesehen, wenn sich der Akkustand, die Akkugesundheit und der thermische Zustand in einem gesunden Bereich befinden.",
+  "faceThumbnailGenerationFailed": "Vorschaubilder konnten nicht erstellt werden",
+  "fileAnalysisFailed": "Datei konnte nicht analysiert werden"
 }

@@ -1,6 +1,7 @@
 {
   "@@locale ": "en",
   "enterYourEmailAddress": "Podaj swój adres e-mail",
+  "enterYourNewEmailAddress": "Podaj swój nowy adres e-mail",
   "accountWelcomeBack": "Witaj ponownie!",
   "emailAlreadyRegistered": "Adres e-mail jest już zarejestrowany.",
   "emailNotRegistered": "Adres e-mail nie jest zarejestrowany.",
@@ -443,8 +444,8 @@
   "selectAll": "Zaznacz wszystko",
   "skip": "Pomiń",
   "updatingFolderSelection": "Aktualizowanie wyboru folderu...",
-  "itemCount": "{count, plural, one{{count} element} other{{count} elementu}}",
-  "deleteItemCount": "{count, plural, =1 {Usuń {count} element} other{Usuń {count} elementu}}",
+  "itemCount": "{count, plural, one{{count} element} few {{count} elementy} many {{count} elementów} other{{count} elementu}}",
+  "deleteItemCount": "{count, plural, =1 {Usuń {count} element} few {Usuń {count} elementy} many {Usuń {count} elementów} other{Usuń {count} elementu}}",
   "duplicateItemsGroup": "{count} plików, każdy po {formattedSize}",
   "@duplicateItemsGroup": {
     "description": "Display the number of duplicate files and their size",
@@ -461,7 +462,7 @@
     }
   },
   "showMemories": "Pokaż wspomnienia",
-  "yearsAgo": "{count, plural, one{{count} rok temu} other{{count} lata temu}}",
+  "yearsAgo": "{count, plural, one{{count} rok temu} few {{count} lata temu} many {{count} lat temu} other{{count} lata temu}}",
   "backupSettings": "Ustawienia kopii zapasowej",
   "backupStatus": "Status kopii zapasowej",
   "backupStatusDescription": "Elementy, których kopia zapasowa została utworzona, zostaną wyświetlone w tym miejscu",
@@ -510,6 +511,7 @@
   "viewLargeFiles": "Duże pliki",
   "viewLargeFilesDesc": "Wyświetl pliki zużywające największą ilość pamięci.",
   "noDuplicates": "✨ Brak duplikatów",
+  "youveNoDuplicateFilesThatCanBeCleared": "Nie masz zduplikowanych plików, które można wyczyścić",
   "success": "Sukces",
   "rateUs": "Oceń nas",
   "remindToEmptyDeviceTrash": "Również opróżnij \"Ostatnio usunięte\" z \"Ustawienia\" -> \"Pamięć\", aby odebrać wolną przestrzeń",
@@ -705,6 +707,7 @@
     "type": "text"
   },
   "backupFailed": "Tworzenie kopii zapasowej nie powiodło się",
+  "sorryBackupFailedDesc": "Przepraszamy, nie mogliśmy utworzyć kopii zapasowej tego pliku teraz, spróbujemy ponownie później.",
   "couldNotBackUpTryLater": "Nie można utworzyć kopii zapasowej Twoich danych.\nSpróbujemy ponownie później.",
   "enteCanEncryptAndPreserveFilesOnlyIfYouGrant": "Ente może zaszyfrować i zachować pliki tylko wtedy, gdy udzielisz do nich dostępu",
   "pleaseGrantPermissions": "Prosimy przyznać uprawnienia",
@@ -800,7 +803,7 @@
   "referFriendsAnd2xYourPlan": "Poleć znajomym i podwój swój plan",
   "shareAlbumHint": "Otwórz album i dotknij przycisk udostępniania w prawym górnym rogu, aby udostępnić.",
   "itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion": "Elementy pokazują liczbę dni pozostałych przed trwałym usunięciem",
-  "trashDaysLeft": "{count, plural, =0 {Wkrótce} =1{1 dzień} other{{count} dni}}",
+  "trashDaysLeft": "{count, plural, =0 {Wkrótce} =1{1 dzień} few {{count} dni} other{{count} dni}}",
   "@trashDaysLeft": {
     "description": "Text to indicate number of days remaining before permanent deletion",
     "placeholders": {
@@ -992,6 +995,7 @@
   "didYouKnow": "Czy wiedziałeś/aś?",
   "loadingMessage": "Wczytywanie Twoich zdjęć...",
   "loadMessage1": "Możesz udostępnić swoją subskrypcję swojej rodzinie",
+  "loadMessage2": "Do tej pory zachowaliśmy ponad 200 milionów wspomnień",
   "loadMessage3": "Przechowujemy 3 kopie Twoich danych, jedną w podziemnym schronie",
   "loadMessage4": "Wszystkie nasze aplikacje są otwarto źródłowe",
   "loadMessage5": "Nasz kod źródłowy i kryptografia zostały poddane zewnętrznemu audytowi",
@@ -1177,7 +1181,7 @@
   "searchHint4": "Lokalizacja",
   "searchHint5": "Wkrótce: Twarze i magiczne wyszukiwanie ✨",
   "addYourPhotosNow": "Dodaj swoje zdjęcia teraz",
-  "searchResultCount": "{count, plural, one{Znaleziono {count} wynik} other{Znaleziono {count} wyników}}",
+  "searchResultCount": "{count, plural, one{Znaleziono {count} wynik} few {Znaleziono {count} wyniki} other{Znaleziono {count} wyników}}",
   "@searchResultCount": {
     "description": "Text to tell user how many results were found for their search query",
     "placeholders": {
@@ -1240,6 +1244,8 @@
   "createCollaborativeLink": "Utwórz link współpracy",
   "search": "Szukaj",
   "enterPersonName": "Wprowadź imię osoby",
+  "editEmailAlreadyLinked": "Ten e-mail jest już powiązany z {name}.",
+  "viewPersonToUnlink": "Zobacz {name}, aby odłączyć",
   "enterName": "Wprowadź nazwę",
   "savePerson": "Zapisz osobę",
   "editPerson": "Edytuj osobę",
@@ -1526,11 +1532,178 @@
   "legacyInvite": "{email} zaprosił Cię do zostania zaufanym kontaktem",
   "authToManageLegacy": "Prosimy uwierzytelnić się, aby zarządzać zaufanymi kontaktami",
   "useDifferentPlayerInfo": "Masz problem z odtwarzaniem tego wideo? Przytrzymaj tutaj, aby spróbować innego odtwarzacza.",
+  "hideSharedItemsFromHomeGallery": "Ukryj współdzielone elementy w galerii głównej",
   "gallery": "Galeria",
   "joinAlbum": "Dołącz do albumu",
   "joinAlbumSubtext": "aby wyświetlić i dodać swoje zdjęcia",
   "joinAlbumSubtextViewer": "aby dodać to do udostępnionych albumów",
   "join": "Dołącz",
   "linkEmail": "Połącz adres e-mail",
-  "noEnteAccountExclamation": "Brak konta Ente!"
+  "noEnteAccountExclamation": "Brak konta Ente!",
+  "orPickFromYourContacts": "lub wybierz ze swoich kontaktów",
+  "emailDoesNotHaveEnteAccount": "{email} nie posiada konta Ente.",
+  "@emailDoesNotHaveEnteAccount": {
+    "description": "Shown when email doesn't have an Ente account",
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "accountOwnerPersonAppbarTitle": "{title} (Ja)",
+  "@accountOwnerPersonAppbarTitle": {
+    "description": "Title of appbar for account owner person",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "me": "Ja",
+  "linkEmailToContactBannerCaption": "aby szybciej udostępniać",
+  "@linkEmailToContactBannerCaption": {
+    "description": "Caption for the 'Link email' title. It should be a continuation of the 'Link email' title. Just like how 'Link email' + 'for faster sharing' forms a proper sentence in English, the combination of these two strings should also be a proper sentence in other languages."
+  },
+  "selectPersonToLink": "Wybierz osobę do powiązania",
+  "linkPersonToEmail": "Połącz osobę z {email}",
+  "@linkPersonToEmail": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "linkPersonToEmailConfirmation": "Spowoduje to powiązanie {personName} z {email}",
+  "@linkPersonToEmailConfirmation": {
+    "description": "Confirmation message when linking a person to an email",
+    "placeholders": {
+      "personName": {
+        "type": "String"
+      },
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "selectYourFace": "Wybierz swoją twarz",
+  "reassignedToName": "Ponownie przypisano cię do {name}",
+  "@reassignedToName": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "saveChangesBeforeLeavingQuestion": "Zapisać zmiany przed wyjściem?",
+  "dontSave": "Nie zapisuj",
+  "thisIsMeExclamation": "To ja!",
+  "videoStreaming": "Streamowalne wideo",
+  "processingVideos": "Przetwarzanie wideo",
+  "processing": "Przetwarzanie",
+  "queued": "W kolejce",
+  "ineligible": "Nie kwalifikuje się",
+  "playOriginal": "Odtwórz oryginał",
+  "joinAlbumConfirmationDialogBody": "Dołączenie do albumu sprawi, że Twój e-mail będzie widoczny dla jego uczestników.",
+  "pleaseWaitThisWillTakeAWhile": "Prosimy czekać, to może zająć chwilę.",
+  "editTime": "Edytuj czas",
+  "selectTime": "Wybierz czas",
+  "selectDate": "Wybierz datę",
+  "previous": "Poprzedni",
+  "selectOneDateAndTimeForAll": "Wybierz jedną datę i czas dla wszystkich",
+  "selectStartOfRange": "Wybierz początek zakresu",
+  "thisWillMakeTheDateAndTimeOfAllSelected": "To sprawi, że data i czas wszystkich wybranych zdjęć będą takie same.",
+  "allWillShiftRangeBasedOnFirst": "To jest pierwsze w grupie. Inne wybrane zdjęcia zostaną automatycznie przesunięte w oparciu o tę nową datę",
+  "newRange": "Nowy zakres",
+  "selectOneDateAndTime": "Wybierz jedną datę i czas",
+  "moveSelectedPhotosToOneDate": "Przenieś wybrane zdjęcia na jedną datę",
+  "shiftDatesAndTime": "Zmień daty i czas",
+  "photosKeepRelativeTimeDifference": "Zdjęcia zachowują względną różnicę czasu",
+  "appIcon": "Ikona aplikacji",
+  "notThisPerson": "Nie ta osoba?",
+  "selectedItemsWillBeRemovedFromThisPerson": "Wybrane elementy zostaną usunięte z tej osoby, ale nie zostaną usunięte z Twojej biblioteki.",
+  "thisWeekThroughTheYears": "Ten tydzień przez lata",
+  "youAndThem": "Ty i {name}",
+  "admiringThem": "Podziwianie {name}",
+  "hikingWithThem": "Wędrówka z {name}",
+  "feastingWithThem": "Ucztowanie z {name}",
+  "selfiesWithThem": "Selfie z {name}",
+  "posingWithThem": "Pozowanie z {name}",
+  "backgroundWithThem": "Piękne widoki z {name}",
+  "sportsWithThem": "Sport z {name}",
+  "roadtripWithThem": "Wycieczka z {name}",
+  "spotlightOnYourself": "Uwaga na siebie",
+  "spotlightOnThem": "Uwaga na {name}",
+  "personIsAge": "{name} ma {age} lat!",
+  "personTurningAge": "{name} wkrótce będzie mieć {age} lat",
+  "lastTimeWithThem": "Ostatnio z {name}",
+  "tripInYear": "Podróż w {year}",
+  "lastYearsTrip": "Zeszłoroczna podróż",
+  "sunrise": "Na horyzoncie",
+  "mountains": "Na wzgórzach",
+  "greenery": "Zielone życie",
+  "beach": "Piasek i morze",
+  "city": "W mieście",
+  "moon": "W świetle księżyca",
+  "onTheRoad": "Znowu na drodze",
+  "food": "Kulinarna rozkosz",
+  "pets": "Futrzani towarzysze",
+  "curatedMemories": "Wyselekcjonowane wspomnienia",
+  "widgets": "Widżety",
+  "memories": "Wspomnienia",
+  "peopleWidgetDesc": "Wybierz osoby, które chcesz zobaczyć na ekranie głównym.",
+  "albumsWidgetDesc": "Wybierz albumy, które chcesz zobaczyć na ekranie głównym.",
+  "memoriesWidgetDesc": "Wybierz rodzaj wspomnień, które chcesz zobaczyć na ekranie głównym.",
+  "pastYearsMemories": "Wspomnienia z ubiegłych lat",
+  "deleteMultipleAlbumDialog": "Usunąć również zdjęcia (i filmy) obecne w tych albumach {count} z <bold>wszystkich</bold> innych albumów, których są częścią?",
+  "addParticipants": "Dodaj uczestników",
+  "selectedAlbums": "Wybrano {count}",
+  "actionNotSupportedOnFavouritesAlbum": "Akcja nie jest obsługiwana na Ulubionym albumie",
+  "onThisDayMemories": "Wspomnienia z tego dnia",
+  "onThisDay": "Tego dnia",
+  "lookBackOnYourMemories": "Spójrz ponownie na swoje wspomnienia 🌄",
+  "newPhotosEmoji": " nowe 📸",
+  "sorryWeHadToPauseYourBackups": "Przepraszamy, musieliśmy wstrzymać tworzenie kopii zapasowych",
+  "clickToInstallOurBestVersionYet": "Kliknij, aby zainstalować naszą najlepszą wersję",
+  "onThisDayNotificationExplanation": "Otrzymuj przypomnienia o wspomnieniach z tego dnia w poprzednich latach.",
+  "addMemoriesWidgetPrompt": "Dodaj widżet wspomnień do ekranu głównego i wróć tutaj, aby dostosować.",
+  "addAlbumWidgetPrompt": "Dodaj widżet albumu do ekranu głównego i wróć tutaj, aby dostosować.",
+  "addPeopleWidgetPrompt": "Dodaj widżet ludzi do ekranu głównego i wróć tutaj, aby dostosować.",
+  "birthdayNotifications": "Powiadomienia o urodzinach",
+  "receiveRemindersOnBirthdays": "Otrzymuj przypomnienia, kiedy są czyjeś urodziny. Naciskając na powiadomienie zabierze Cię do zdjęć osoby, która ma urodziny.",
+  "happyBirthday": "Wszystkiego najlepszego! 🥳",
+  "birthdays": "Urodziny",
+  "wishThemAHappyBirthday": "Życz {name} wszystkiego  najlepszego! 🎉",
+  "areYouSureRemoveThisFaceFromPerson": "Czy na pewno chcesz usunąć tę twarz z tej osoby?",
+  "otherDetectedFaces": "Inne wykryte twarze",
+  "areThey": "Czy są ",
+  "questionmark": "?",
+  "saveAsAnotherPerson": "Zapisz jako inną osobę",
+  "showLessFaces": "Pokaż mniej twarzy",
+  "showMoreFaces": "Pokaż więcej twarzy",
+  "ignore": "Ignoruj",
+  "merge": "Scal",
+  "reset": "Zresetuj",
+  "areYouSureYouWantToIgnoreThisPerson": "Czy na pewno chcesz zignorować tę osobę?",
+  "areYouSureYouWantToIgnoreThesePersons": "Czy na pewno chcesz zignorować te osoby?",
+  "thePersonGroupsWillNotBeDisplayed": "Grupy osób nie będą już wyświetlane w sekcji ludzi. Zdjęcia pozostaną nienaruszone.",
+  "thePersonWillNotBeDisplayed": "Osoba nie będzie już wyświetlana w sekcji ludzi. Zdjęcia pozostaną nienaruszone.",
+  "areYouSureYouWantToMergeThem": "Czy na pewno chcesz je scalić?",
+  "allUnnamedGroupsWillBeMergedIntoTheSelectedPerson": "Wszystkie nienazwane grupy zostaną scalone z wybraną osobą. To nadal może zostać cofnięte z przeglądu historii sugestii danej osoby.",
+  "yesIgnore": "Tak, ignoruj",
+  "same": "Identyczne",
+  "different": "Inne",
+  "sameperson": "Ta sama osoba?",
+  "cLTitle1": "Przesyłanie Dużych Plików Wideo",
+  "cLDesc1": "W związku z uruchomieniem wersji beta przesyłania strumieniowego wideo oraz pracami nad możliwością wznawiania przesyłania i pobierania plików, zwiększyliśmy limit przesyłanych plików do 10 GB. Jest to już dostępne zarówno w aplikacjach na komputery, jak i na urządzenia mobilne.",
+  "cLTitle2": "Przesyłanie w Tle",
+  "cLDesc2": "Funkcja przesyłania w tle jest teraz obsługiwana również na urządzeniach z systemem iOS, oprócz urządzeń z Androidem. Nie trzeba już otwierać aplikacji, aby utworzyć kopię zapasową najnowszych zdjęć i filmów.",
+  "cLTitle3": "Automatyczne Odtwarzanie Wspomnień",
+  "cLDesc3": "Wprowadziliśmy istotne ulepszenia w funkcji wspomnień, w tym automatyczne odtwarzanie, przesuwanie do kolejnego wspomnienia i wiele innych.",
+  "cLTitle4": "Ulepszone Rozpoznawanie Twarzy",
+  "cLDesc4": "Wraz z kilkoma ulepszeniami w mechanizmie teraz znacznie łatwiej jest widzieć wszystkie wykryte twarze, zapewniać informacje zwrotne o podobnych twarzach i dodawać/usuwać twarze z jednego zdjęcia.",
+  "cLTitle5": "Powiadomienia o Urodzinach",
+  "cLDesc5": "Od teraz otrzymasz powiadomienie z możliwością rezygnacji dotyczące wszystkich zapisanych urodzin w Ente, wraz z kolekcją najlepszych zdjęć danej osoby.",
+  "cLTitle6": "Wznawialne Przesyłanie i Pobieranie Danych",
+  "cLDesc6": "Nie musisz już czekać na zakończenie przesyłania ani pobierania, żeby móc zamknąć aplikację. Wszystkie operacje przesyłania i pobierania można teraz wstrzymać w dowolnym momencie i wznowić od miejsca, w którym zostały przerwane.",
+  "indexingPausedStatusDescription": "Indeksowanie zostało wstrzymane. Zostanie automatycznie wznowione, gdy urządzenie będzie gotowe. Urządzenie uznaje się za gotowe, gdy poziom baterii, stan jej zdrowia oraz status termiczny znajdują się w bezpiecznym zakresie."
 }
