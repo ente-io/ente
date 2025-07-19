@@ -7,6 +7,7 @@ import 'package:ente_strings/extensions.dart';
 import 'package:ente_ui/components/buttons/button_widget.dart';
 import 'package:ente_ui/components/buttons/models/button_type.dart';
 import 'package:ente_ui/components/dialog_widget.dart';
+import 'package:ente_ui/pages/log_file_viewer.dart';
 import 'package:flutter_email_sender/flutter_email_sender.dart';
 import 'package:ente_configuration/base_configuration.dart';
 import 'package:ente_utils/directory_utils.dart';
@@ -16,7 +17,6 @@ import "package:file_saver/file_saver.dart";
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import "package:intl/intl.dart";
-import 'package:logging/logging.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
@@ -32,6 +32,71 @@ bool isValidEmail(String? email) {
 }
 
 Future<void> sendLogs(
+  BuildContext context,
+  String toEmail, {
+  Function? postShare,
+  String? subject,
+  String? body,
+}) async {
+  // ignore: unawaited_futures
+  showDialogWidget(
+    context: context,
+    title: context.strings.reportABug,
+    icon: Icons.bug_report_outlined,
+    body: context.strings.logsDialogBody,
+    buttons: [
+      ButtonWidget(
+        isInAlert: true,
+        buttonType: ButtonType.neutral,
+        labelText: context.strings.reportABug,
+        buttonAction: ButtonAction.first,
+        shouldSurfaceExecutionStates: false,
+        onTap: () async {
+          await _sendLogs(context, toEmail, subject, body);
+          if (postShare != null) {
+            postShare();
+          }
+        },
+      ),
+      //isInAlert is false here as we don't want to the dialog to dismiss
+      //on pressing this button
+      ButtonWidget(
+        buttonType: ButtonType.secondary,
+        labelText: context.strings.viewLogs,
+        buttonAction: ButtonAction.second,
+        onTap: () async {
+          // ignore: unawaited_futures
+          showDialog(
+            useRootNavigator: false,
+            context: context,
+            builder: (BuildContext context) {
+              return LogFileViewer(SuperLogging.logFile!);
+            },
+            barrierColor: Colors.black87,
+            barrierDismissible: false,
+          );
+        },
+      ),
+      ButtonWidget(
+        buttonType: ButtonType.secondary,
+        labelText: context.strings.exportLogs,
+        buttonAction: ButtonAction.third,
+        onTap: () async {
+          final zipFilePath = await getZippedLogsFile();
+          await exportLogs(context, zipFilePath);
+        },
+      ),
+      ButtonWidget(
+        isInAlert: true,
+        buttonType: ButtonType.secondary,
+        labelText: context.strings.cancel,
+        buttonAction: ButtonAction.cancel,
+      ),
+    ],
+  );
+}
+
+Future<void> _sendLogs(
   BuildContext context,
   String toEmail,
   String? subject,
