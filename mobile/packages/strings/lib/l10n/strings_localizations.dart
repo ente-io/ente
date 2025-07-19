@@ -283,6 +283,24 @@ abstract class StringsLocalizations {
   /// In en, this message translates to:
   /// **'zip'**
   String get zipFileExtension;
+
+  /// Label for reporting a bug
+  ///
+  /// In en, this message translates to:
+  /// **'Report a bug'**
+  String get reportABug;
+
+  /// Body text for the logs dialog explaining what will be sent
+  ///
+  /// In en, this message translates to:
+  /// **'This will send across logs to help us debug your issue. Please note that file names will be included to help track issues with specific files.'**
+  String get logsDialogBody;
+
+  /// Button to view logs
+  ///
+  /// In en, this message translates to:
+  /// **'View logs'**
+  String get viewLogs;
 }
 
 class _StringsLocalizationsDelegate
