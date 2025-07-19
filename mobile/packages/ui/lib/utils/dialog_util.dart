@@ -22,9 +22,7 @@ typedef DialogBuilder = DialogWidget Function(BuildContext context);
 Future<ButtonResult?> showErrorDialog(
   BuildContext context,
   String title,
-  String? body,
-  String primaryButtonLabel,
-  FutureVoidCallback primaryButtonAction, {
+  String? body, {
   bool isDismissable = true,
 }) async {
   return showDialogWidget(
@@ -35,11 +33,11 @@ Future<ButtonResult?> showErrorDialog(
     buttons: [
       ButtonWidget(
         buttonType: ButtonType.primary,
-        labelText: primaryButtonLabel,
+        labelText: context.strings.contactSupport,
         isInAlert: true,
         buttonAction: ButtonAction.first,
         onTap: () async {
-          await primaryButtonAction();
+          await openSupportPage(body, null);
         },
       ),
       const ButtonWidget(

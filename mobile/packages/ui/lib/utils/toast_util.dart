@@ -1,4 +1,4 @@
-import '../theme/ente_theme.dart';
+import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
