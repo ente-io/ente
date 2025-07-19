@@ -118,5 +118,6 @@
   "viewLogs": "View logs",
   "@viewLogs": {
     "description": "Button to view logs"
-  }
+  },
+  "customEndpoint": "Connected to {endpoint}"
 }

@@ -97,4 +97,9 @@ class StringsLocalizationsTr extends StringsLocalizations {
 
   @override
   String get viewLogs => 'View logs';
+
+  @override
+  String customEndpoint(Object endpoint) {
+    return 'Connected to $endpoint';
+  }
 }
