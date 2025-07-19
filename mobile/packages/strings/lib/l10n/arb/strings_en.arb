@@ -119,5 +119,30 @@
   "@viewLogs": {
     "description": "Button to view logs"
   },
-  "customEndpoint": "Connected to {endpoint}"
+  "customEndpoint": "Connected to {endpoint}",
+  "@customEndpoint": {
+    "description": "Text showing user is connected to a custom endpoint",
+    "placeholders": {
+      "endpoint": {
+        "type": "String",
+        "description": "URL of the custom endpoint"
+      }
+    }
+  },
+  "save": "Save",
+  "@save": {
+    "description": "Label for save button"
+  },
+  "send": "Send",
+  "@send": {
+    "description": "Label for send button"
+  },
+  "saveOrSendDescription": "Do you want to save this to your storage (Downloads folder by default) or send it to other apps?",
+  "@saveOrSendDescription": {
+    "description": "Description text asking user if they want to save to storage or share with other apps"
+  },
+  "saveOnlyDescription": "Do you want to save this to your storage (Downloads folder by default)?",
+  "@saveOnlyDescription": {
+    "description": "Description text asking user if they want to save to storage (for platforms that don't support sharing)"
+  }
 }
