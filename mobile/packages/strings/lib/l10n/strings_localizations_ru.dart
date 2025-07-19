@@ -87,4 +87,14 @@ class StringsLocalizationsRu extends StringsLocalizations {
 
   @override
   String get zipFileExtension => 'zip';
+
+  @override
+  String get reportABug => 'Report a bug';
+
+  @override
+  String get logsDialogBody =>
+      'This will send across logs to help us debug your issue. Please note that file names will be included to help track issues with specific files.';
+
+  @override
+  String get viewLogs => 'View logs';
 }
