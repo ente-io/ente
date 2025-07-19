@@ -1,0 +1,6 @@
+include: package:flutter_lints/flutter.yaml
+
+# Additional rules for Flutter packages
+linter:
+  rules:
+    public_member_api_docs: false

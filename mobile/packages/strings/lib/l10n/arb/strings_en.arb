@@ -1,0 +1,110 @@
+{
+  "networkHostLookUpErr": "Unable to connect to Ente, please check your network settings and contact support if the error persists.",
+  "@networkHostLookUpErr": {
+    "description": "Error message shown when the app cannot connect to Ente due to network host lookup failure"
+  },
+  "networkConnectionRefusedErr": "Unable to connect to Ente, please retry after sometime. If the error persists, please contact support.",
+  "@networkConnectionRefusedErr": {
+    "description": "Error message shown when the app cannot connect to Ente due to connection refused"
+  },
+  "itLooksLikeSomethingWentWrongPleaseRetryAfterSome": "It looks like something went wrong. Please retry after some time. If the error persists, please contact our support team.",
+  "@itLooksLikeSomethingWentWrongPleaseRetryAfterSome": {
+    "description": "Generic error message for temporary issues"
+  },
+  "error": "Error",
+  "@error": {
+    "description": "Generic error title"
+  },
+  "ok": "Ok",
+  "@ok": {
+    "description": "Generic OK button label"
+  },
+  "faq": "FAQ",
+  "@faq": {
+    "description": "FAQ link label"
+  },
+  "contactSupport": "Contact support",
+  "@contactSupport": {
+    "description": "Contact support button label"
+  },
+  "emailYourLogs": "Email your logs",
+  "@emailYourLogs": {
+    "description": "Title for emailing logs dialog"
+  },
+  "pleaseSendTheLogsTo": "Please send the logs to \n{toEmail}",
+  "@pleaseSendTheLogsTo": {
+    "description": "Message asking user to send logs to email address",
+    "placeholders": {
+      "toEmail": {
+        "type": "String",
+        "description": "Email address to send logs to"
+      }
+    }
+  },
+  "copyEmailAddress": "Copy email address",
+  "@copyEmailAddress": {
+    "description": "Button to copy email address to clipboard"
+  },
+  "exportLogs": "Export logs",
+  "@exportLogs": {
+    "description": "Button to export logs"
+  },
+  "cancel": "Cancel",
+  "@cancel": {
+    "description": "Cancel button label"
+  },
+  "pleaseEmailUsAt": "Email us at {toEmail}",
+  "@pleaseEmailUsAt": {
+    "description": "Message showing email address for support",
+    "placeholders": {
+      "toEmail": {
+        "type": "String",
+        "description": "Support email address"
+      }
+    }
+  },
+  "emailAddressCopied": "Email address copied",
+  "@emailAddressCopied": {
+    "description": "Snackbar message when email address is copied"
+  },
+  "supportEmailSubject": "[Support]",
+  "@supportEmailSubject": {
+    "description": "Default subject for support emails"
+  },
+  "clientDebugInfoLabel": "Following information can help us in debugging if you are facing any issue",
+  "@clientDebugInfoLabel": {
+    "description": "Label for debug information in emails"
+  },
+  "registeredEmailLabel": "Registered email:",
+  "@registeredEmailLabel": {
+    "description": "Label for registered email in debug info"
+  },
+  "clientLabel": "Client:",
+  "@clientLabel": {
+    "description": "Label for client information in debug info"
+  },
+  "versionLabel": "Version :",
+  "@versionLabel": {
+    "description": "Label for version information in debug info"
+  },
+  "notAvailable": "N/A",
+  "@notAvailable": {
+    "description": "Not available text"
+  },
+  "enteLogsPrefix": "ente-logs-",
+  "@enteLogsPrefix": {
+    "description": "Prefix for log file names"
+  },
+  "logsDirectoryName": "logs",
+  "@logsDirectoryName": {
+    "description": "Name of logs directory"
+  },
+  "logsZipFileName": "logs.zip",
+  "@logsZipFileName": {
+    "description": "Name of zipped log file"
+  },
+  "zipFileExtension": "zip",
+  "@zipFileExtension": {
+    "description": "File extension for zip files"
+  }
+}

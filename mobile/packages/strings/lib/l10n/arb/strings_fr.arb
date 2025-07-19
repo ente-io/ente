@@ -1,0 +1,9 @@
+{
+  "networkHostLookUpErr": "Impossible de se connecter à Ente, veuillez vérifier vos paramètres réseau et contacter le support si l'erreur persiste.",
+  "networkConnectionRefusedErr": "Impossible de se connecter à Ente, veuillez réessayer après un certain temps. Si l'erreur persiste, veuillez contacter le support.",
+  "itLooksLikeSomethingWentWrongPleaseRetryAfterSome": "Il semble qu'une erreur s'est produite. Veuillez réessayer après un certain temps. Si l'erreur persiste, veuillez contacter notre équipe d'assistance.",
+  "error": "Erreur",
+  "ok": "Ok",
+  "faq": "FAQ",
+  "contactSupport": "Contacter le support"
+}
