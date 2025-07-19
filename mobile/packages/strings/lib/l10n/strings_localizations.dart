@@ -301,6 +301,12 @@ abstract class StringsLocalizations {
   /// In en, this message translates to:
   /// **'View logs'**
   String get viewLogs;
+
+  /// No description provided for @customEndpoint.
+  ///
+  /// In en, this message translates to:
+  /// **'Connected to {endpoint}'**
+  String customEndpoint(Object endpoint);
 }
 
 class _StringsLocalizationsDelegate
