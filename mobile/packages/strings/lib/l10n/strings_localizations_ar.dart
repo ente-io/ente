@@ -99,7 +99,21 @@ class StringsLocalizationsAr extends StringsLocalizations {
   String get viewLogs => 'View logs';
 
   @override
-  String customEndpoint(Object endpoint) {
+  String customEndpoint(String endpoint) {
     return 'Connected to $endpoint';
   }
+
+  @override
+  String get save => 'Save';
+
+  @override
+  String get send => 'Send';
+
+  @override
+  String get saveOrSendDescription =>
+      'Do you want to save this to your storage (Downloads folder by default) or send it to other apps?';
+
+  @override
+  String get saveOnlyDescription =>
+      'Do you want to save this to your storage (Downloads folder by default)?';
 }

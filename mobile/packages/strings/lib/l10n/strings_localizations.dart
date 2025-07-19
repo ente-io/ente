@@ -302,11 +302,35 @@ abstract class StringsLocalizations {
   /// **'View logs'**
   String get viewLogs;
 
-  /// No description provided for @customEndpoint.
+  /// Text showing user is connected to a custom endpoint
   ///
   /// In en, this message translates to:
   /// **'Connected to {endpoint}'**
-  String customEndpoint(Object endpoint);
+  String customEndpoint(String endpoint);
+
+  /// Label for save button
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get save;
+
+  /// Label for send button
+  ///
+  /// In en, this message translates to:
+  /// **'Send'**
+  String get send;
+
+  /// Description text asking user if they want to save to storage or share with other apps
+  ///
+  /// In en, this message translates to:
+  /// **'Do you want to save this to your storage (Downloads folder by default) or send it to other apps?'**
+  String get saveOrSendDescription;
+
+  /// Description text asking user if they want to save to storage (for platforms that don't support sharing)
+  ///
+  /// In en, this message translates to:
+  /// **'Do you want to save this to your storage (Downloads folder by default)?'**
+  String get saveOnlyDescription;
 }
 
 class _StringsLocalizationsDelegate
