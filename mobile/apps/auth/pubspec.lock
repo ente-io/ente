@@ -430,6 +430,13 @@ packages:
       relative: true
     source: path
     version: "1.0.0"
+  ente_network:
+    dependency: "direct main"
+    description:
+      path: "../../packages/network"
+      relative: true
+    source: path
+    version: "1.0.0"
   event_bus:
     dependency: "direct main"
     description:
@@ -1760,6 +1767,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.4.0"
+  ua_client_hints:
+    dependency: transitive
+    description:
+      name: ua_client_hints
+      sha256: "1b8759a46bfeab355252881df27f2604c01bded86aa2b578869fb1b638b23118"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.4.1"
   universal_io:
     dependency: transitive
     description:

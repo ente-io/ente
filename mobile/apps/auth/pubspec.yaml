@@ -36,6 +36,8 @@ dependencies:
     path: ../../packages/events 
   ente_logging:
     path: ../../packages/logging
+  ente_network:
+    path: ../../packages/network
   event_bus: ^2.0.0
   expandable: ^5.0.1
   expansion_tile_card: ^3.0.0

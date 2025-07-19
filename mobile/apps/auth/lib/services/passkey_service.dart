@@ -1,6 +1,6 @@
 import 'package:ente_auth/core/constants.dart';
-import 'package:ente_auth/core/network.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
+import 'package:ente_network/network.dart';
 import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
 import 'package:url_launcher/url_launcher_string.dart';
