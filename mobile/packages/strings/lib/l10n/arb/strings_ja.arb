@@ -1,0 +1,9 @@
+{
+  "networkHostLookUpErr": "Enteに接続できませんでした。ネットワーク設定を確認し、エラーが解決しない場合はサポートにお問い合わせください。",
+  "networkConnectionRefusedErr": "Enteに接続できません。しばらくしてから再試行してください。エラーが継続する場合は、サポートにお問い合わせください。",
+  "itLooksLikeSomethingWentWrongPleaseRetryAfterSome": "問題が発生したようです。しばらくしてから再試行してください。エラーが継続する場合は、サポートチームにお問い合わせください。",
+  "error": "エラー",
+  "ok": "OK",
+  "faq": "FAQ",
+  "contactSupport": "サポートに連絡する"
+}
