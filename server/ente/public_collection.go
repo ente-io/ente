@@ -3,7 +3,7 @@ package ente
 import (
 	"database/sql/driver"
 	"encoding/json"
-
+	"fmt"
 	"github.com/ente-io/museum/pkg/utils/time"
 	"github.com/ente-io/stacktrace"
 )
@@ -32,6 +32,33 @@ type UpdatePublicAccessTokenRequest struct {
 	EnableJoin      *bool   `json:"enableJoin"`
 }
 
+func (ut *UpdatePublicAccessTokenRequest) Validate() error {
+	if ut.DeviceLimit == nil && ut.ValidTill == nil && ut.DisablePassword == nil &&
+		ut.Nonce == nil && ut.PassHash == nil && ut.EnableDownload == nil && ut.EnableCollect == nil {
+		return NewBadRequestWithMessage("all parameters are missing")
+	}
+
+	if ut.DeviceLimit != nil && (*ut.DeviceLimit < 0 || *ut.DeviceLimit > 50) {
+		return NewBadRequestWithMessage(fmt.Sprintf("device limit: %d out of range [0-50]", *ut.DeviceLimit))
+	}
+
+	if ut.ValidTill != nil && *ut.ValidTill != 0 && *ut.ValidTill < time.Microseconds() {
+		return NewBadRequestWithMessage("valid till should be greater than current timestamp")
+	}
+
+	var allPassParamsMissing = ut.Nonce == nil && ut.PassHash == nil && ut.MemLimit == nil && ut.OpsLimit == nil
+	var allPassParamsPresent = ut.Nonce != nil && ut.PassHash != nil && ut.MemLimit != nil && ut.OpsLimit != nil
+
+	if !(allPassParamsMissing || allPassParamsPresent) {
+		return NewBadRequestWithMessage("all password params should be either present or missing")
+	}
+
+	if allPassParamsPresent && ut.DisablePassword != nil && *ut.DisablePassword {
+		return NewBadRequestWithMessage("can not set and disable password in same request")
+	}
+	return nil
+}
+
 type VerifyPasswordRequest struct {
 	PassHash string `json:"passHash" binding:"required"`
 }
@@ -40,8 +67,8 @@ type VerifyPasswordResponse struct {
 	JWTToken string `json:"jwtToken"`
 }
 
-// PublicCollectionToken represents row entity for public_collection_token table
-type PublicCollectionToken struct {
+// CollectionLinkRow represents row entity for public_collection_token table
+type CollectionLinkRow struct {
 	ID             int64
 	CollectionID   int64
 	Token          string
@@ -57,7 +84,7 @@ type PublicCollectionToken struct {
 	EnableJoin     bool
 }
 
-func (p PublicCollectionToken) CanJoin() error {
+func (p CollectionLinkRow) CanJoin() error {
 	if p.IsDisabled {
 		return NewBadRequestWithMessage("link disabled")
 	}

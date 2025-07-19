@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"github.com/ente-io/museum/pkg/repo/public"
 	"strconv"
 	t "time"
 
@@ -22,13 +23,13 @@ import (
 // CollectionRepository defines the methods for inserting, updating and
 // retrieving collection entities from the underlying repository
 type CollectionRepository struct {
-	DB                   *sql.DB
-	FileRepo             *FileRepository
-	PublicCollectionRepo *PublicCollectionRepository
-	TrashRepo            *TrashRepository
-	SecretEncryptionKey  []byte
-	QueueRepo            *QueueRepository
-	LatencyLogger        *prometheus.HistogramVec
+	DB                  *sql.DB
+	FileRepo            *FileRepository
+	CollectionLinkRepo  *public.CollectionLinkRepo
+	TrashRepo           *TrashRepository
+	SecretEncryptionKey []byte
+	QueueRepo           *QueueRepository
+	LatencyLogger       *prometheus.HistogramVec
 }
 
 type SharedCollection struct {
@@ -74,7 +75,7 @@ func (repo *CollectionRepository) Get(collectionID int64) (ente.Collection, erro
 		c.EncryptedName = encryptedName.String
 		c.NameDecryptionNonce = nameDecryptionNonce.String
 	}
-	urlMap, err := repo.PublicCollectionRepo.GetCollectionToActivePublicURLMap(context.Background(), []int64{collectionID})
+	urlMap, err := repo.CollectionLinkRepo.GetCollectionToActivePublicURLMap(context.Background(), []int64{collectionID})
 	if err != nil {
 		return ente.Collection{}, stacktrace.Propagate(err, "failed to get publicURL info")
 	}
@@ -174,7 +175,7 @@ pct.access_token, pct.valid_till, pct.device_limit, pct.created_at, pct.updated_
 			if _, ok := addPublicUrlMap[pctToken.String]; !ok {
 				addPublicUrlMap[pctToken.String] = true
 				url := ente.PublicURL{
-					URL:             repo.PublicCollectionRepo.GetAlbumUrl(pctToken.String),
+					URL:             repo.CollectionLinkRepo.GetAlbumUrl(pctToken.String),
 					DeviceLimit:     int(pctDeviceLimit.Int32),
 					ValidTill:       pctValidTill.Int64,
 					EnableDownload:  pctEnableDownload.Bool,
