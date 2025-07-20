@@ -69,7 +69,7 @@ dependencies:
   google_nav_bar: ^5.0.5 #supported
   gradient_borders: ^1.0.0
   http: ^1.1.0
-  intl: ^0.20.2
+  intl: ^0.19.0
   io: ^1.0.4
   json_annotation: ^4.5.0
   local_auth: ^2.3.0
@@ -94,10 +94,7 @@ dependencies:
   sentry_flutter: ^8.14.2
   share_plus: ^11.0.0
   shared_preferences: ^2.0.5
-  sqflite:
-    git:
-      url: https://github.com/tekartik/sqflite
-      path: sqflite
+  sqflite: ^2.4.2
   sqflite_common_ffi: ^2.3.0+4
   sqlite3: ^2.4.3
   sqlite3_flutter_libs: ^0.5.24
@@ -118,7 +115,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   json_serializable: ^6.2.0
-  lints: ^6.0.0
+  lints: ^5.1.1
   mocktail: ^1.0.3
 
 # The following section is specific to Flutter.
