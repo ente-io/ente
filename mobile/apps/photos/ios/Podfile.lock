@@ -240,7 +240,7 @@ PODS:
     - Flutter
   - wakelock_plus (0.0.1):
     - Flutter
-  - workmanager_apple (0.0.1):
+  - workmanager (0.0.1):
     - Flutter
 
 DEPENDENCIES:
@@ -300,7 +300,7 @@ DEPENDENCIES:
   - video_thumbnail (from `.symlinks/plugins/video_thumbnail/ios`)
   - volume_controller (from `.symlinks/plugins/volume_controller/ios`)
   - wakelock_plus (from `.symlinks/plugins/wakelock_plus/ios`)
-  - workmanager_apple (from `.symlinks/plugins/workmanager_apple/ios`)
+  - workmanager (from `.symlinks/plugins/workmanager/ios`)
 
 SPEC REPOS:
   https://github.com/ente-io/ffmpeg-kit-custom-repo-ios:
@@ -438,8 +438,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/volume_controller/ios"
   wakelock_plus:
     :path: ".symlinks/plugins/wakelock_plus/ios"
-  workmanager_apple:
-    :path: ".symlinks/plugins/workmanager_apple/ios"
+  workmanager:
+    :path: ".symlinks/plugins/workmanager/ios"
 
 SPEC CHECKSUMS:
   app_links: 76b66b60cc809390ca1ad69bfd66b998d2387ac7
@@ -517,7 +517,7 @@ SPEC CHECKSUMS:
   video_thumbnail: b637e0ad5f588ca9945f6e2c927f73a69a661140
   volume_controller: 3657a1f65bedb98fa41ff7dc5793537919f31b12
   wakelock_plus: e29112ab3ef0b318e58cfa5c32326458be66b556
-  workmanager_apple: f540d652595dfe5c8b8200c4c85ba622d6fb5c5b
+  workmanager: b89e4e4445d8b57ee2fdbf1c3925696ebe5b8990
 
 PODFILE CHECKSUM: cce2cd3351d3488dca65b151118552b680e23635
 
