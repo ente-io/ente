@@ -43,3 +43,6 @@ fastlane/report.xml
 
 # Android related
 android/app/build/
+
+# FVM Version Cache
+.fvm/
