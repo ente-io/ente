@@ -1,5 +1,5 @@
+import 'package:ente_strings/l10n/strings_localizations.dart';
 import 'package:flutter/widgets.dart';
-import 'l10n/strings_localizations.dart';
 
 // Re-export the localizations for convenience
 export 'l10n/strings_localizations.dart';
