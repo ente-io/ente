@@ -317,8 +317,6 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m114(email) =>
       "Abbiamo inviato una mail a <green>${email}</green>";
 
-  static String m115(name) => "Wish \$${name} a happy birthday! 🎉";
-
   static String m116(count) =>
       "${Intl.plural(count, one: '${count} anno fa', other: '${count} anni fa')}";
 
@@ -2216,7 +2214,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "whyAddTrustContact": MessageLookupByLibrary.simpleMessage(
             "Un contatto fidato può aiutare a recuperare i tuoi dati."),
         "widgets": MessageLookupByLibrary.simpleMessage("Widget"),
-        "wishThemAHappyBirthday": m115,
         "yearShort": MessageLookupByLibrary.simpleMessage("anno"),
         "yearly": MessageLookupByLibrary.simpleMessage("Annuale"),
         "yearsAgo": m116,

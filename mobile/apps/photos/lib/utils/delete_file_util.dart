@@ -335,6 +335,9 @@ Future<bool> deleteLocalFiles(
   final List<String> delLocalIDs = [];
   final List<String> localAssetIDs = [];
   final List<String> localSharedMediaIDs = [];
+
+  const largeCountThreshold = 20000;
+  final tooManyAssets = localIDs.length > largeCountThreshold;
   try {
     for (String id in localIDs) {
       if (id.startsWith(sharedMediaIdentifier)) {
@@ -346,11 +349,23 @@ Future<bool> deleteLocalFiles(
     delLocalIDs.addAll(await SharedAssetService.tryDelete(localSharedMediaIDs));
 
     final bool shouldDeleteInBatches =
-        await isAndroidSDKVersionLowerThan(android11SDKINT);
+        await isAndroidSDKVersionLowerThan(android11SDKINT) || tooManyAssets;
     if (shouldDeleteInBatches) {
-      _logger.info("Deleting in batches");
-      delLocalIDs
-          .addAll(await deleteLocalFilesInBatches(context, localAssetIDs));
+      if (tooManyAssets) {
+        _logger.info(
+          "Too many assets (${localIDs.length}) to delete in one shot, deleting in batches",
+        );
+        await _recursivelyReduceBatchSizeAndRetryDeletion(
+          batchSize: largeCountThreshold,
+          context: context,
+          localIDs: localIDs,
+          deletedIDs: deletedIDs,
+        );
+      } else {
+        _logger.info("Deleting in batches");
+        deletedIDs
+            .addAll(await deleteLocalFilesInBatches(context, localAssetIDs));
+      }
     } else {
       _logger.info("Deleting in one shot");
       delLocalIDs
@@ -619,6 +634,45 @@ Future<List<String>> deleteLocalFilesInBatches(
   }
   Navigator.of(dialogKey.currentContext!).pop('dialog');
   return delLocalIDs;
+}
+
+Future<void> _recursivelyReduceBatchSizeAndRetryDeletion({
+  required int batchSize,
+  required BuildContext context,
+  required List<String> localIDs,
+  required List<String> deletedIDs,
+  int minimumBatchSizeThresholdToStopRetry = 2000,
+}) async {
+  if (batchSize < minimumBatchSizeThresholdToStopRetry) {
+    _logger.warning(
+      "Batch size is too small ($batchSize), stopping further retries.",
+    );
+    throw Exception(
+      "Batch size is too small ($batchSize), stopping further retries.",
+    );
+  }
+  try {
+    deletedIDs.addAll(
+      await deleteLocalFilesInBatches(
+        context,
+        localIDs,
+        minimumBatchSize: 1,
+        maximumBatchSize: batchSize,
+        minimumParts: 1,
+      ),
+    );
+  } catch (e) {
+    _logger.warning(
+      "Failed to delete local files in batches of $batchSize. Reducing batch size and retrying.",
+      e,
+    );
+    await _recursivelyReduceBatchSizeAndRetryDeletion(
+      batchSize: (batchSize / 2).floor(),
+      context: context,
+      localIDs: localIDs,
+      deletedIDs: deletedIDs,
+    );
+  }
 }
 
 Future<bool> _localFileExist(EnteFile file) async {

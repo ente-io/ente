@@ -25,6 +25,7 @@ class LinearProgressDialogState extends State<LinearProgressDialog>
     controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 300),
+      animationBehavior: AnimationBehavior.preserve,
     );
 
     _tween = Tween<double>(begin: _target, end: _target);

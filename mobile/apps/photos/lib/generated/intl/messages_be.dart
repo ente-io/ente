@@ -28,8 +28,6 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m114(email) =>
       "Ліст адпраўлены на электронную пошту <green>${email}</green>";
 
-  static String m115(name) => "Wish \$${name} a happy birthday! 🎉";
-
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
         "about": MessageLookupByLibrary.simpleMessage("Пра праграму"),
@@ -297,7 +295,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "weHaveSendEmailTo": m114,
         "weakStrength": MessageLookupByLibrary.simpleMessage("Ненадзейны"),
         "welcomeBack": MessageLookupByLibrary.simpleMessage("З вяртаннем!"),
-        "wishThemAHappyBirthday": m115,
         "yesDelete": MessageLookupByLibrary.simpleMessage("Так, выдаліць"),
         "yesLogout": MessageLookupByLibrary.simpleMessage("Так, выйсці"),
         "yesRemove": MessageLookupByLibrary.simpleMessage("Так, выдаліць"),

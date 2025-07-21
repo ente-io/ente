@@ -46,8 +46,6 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m114(email) =>
       "Vi har sendt en email til <green>${email}</green>";
 
-  static String m115(name) => "Wish \$${name} a happy birthday! 🎉";
-
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
         "accountWelcomeBack":
@@ -458,7 +456,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "weakStrength": MessageLookupByLibrary.simpleMessage("Svagt"),
         "welcomeBack":
             MessageLookupByLibrary.simpleMessage("Velkommen tilbage!"),
-        "wishThemAHappyBirthday": m115,
         "yesConvertToViewer": MessageLookupByLibrary.simpleMessage(
             "Ja, konverter til præsentation"),
         "yesRemove": MessageLookupByLibrary.simpleMessage("Ja, fjern"),

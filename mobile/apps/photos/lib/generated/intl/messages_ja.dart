@@ -265,8 +265,6 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m114(email) => "<green>${email}</green>にメールを送りました";
 
-  static String m115(name) => "Wish \$${name} a happy birthday! 🎉";
-
   static String m116(count) => "${Intl.plural(count, other: '${count} 年前')}";
 
   static String m117(name) => "あなたと${name}";
@@ -1806,7 +1804,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "whatsNew": MessageLookupByLibrary.simpleMessage("最新情報"),
         "whyAddTrustContact":
             MessageLookupByLibrary.simpleMessage("信頼する連絡先は、データの復旧が必要な際に役立ちます。"),
-        "wishThemAHappyBirthday": m115,
         "yearShort": MessageLookupByLibrary.simpleMessage("年"),
         "yearly": MessageLookupByLibrary.simpleMessage("年額"),
         "yearsAgo": m116,

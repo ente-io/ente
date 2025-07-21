@@ -226,8 +226,6 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m114(email) => "Ми надіслали листа на <green>${email}</green>";
 
-  static String m115(name) => "Wish \$${name} a happy birthday! 🎉";
-
   static String m116(count) =>
       "${Intl.plural(count, one: '${count} рік тому', other: '${count} років тому')}";
 
@@ -1933,7 +1931,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "whatsNew": MessageLookupByLibrary.simpleMessage("Що нового"),
         "whyAddTrustContact": MessageLookupByLibrary.simpleMessage(
             "Довірений контакт може допомогти у відновленні ваших даних."),
-        "wishThemAHappyBirthday": m115,
         "yearShort": MessageLookupByLibrary.simpleMessage("рік"),
         "yearly": MessageLookupByLibrary.simpleMessage("Щороку"),
         "yearsAgo": m116,

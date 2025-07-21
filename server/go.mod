@@ -11,6 +11,7 @@ require (
 	github.com/aws/aws-sdk-go v1.34.13
 	github.com/bwmarrin/discordgo v0.25.0
 	github.com/dlmiddlecote/sqlstats v1.0.2
+	github.com/ente-io/go-srp v0.0.0-20250116115009-d52061067e78
 	github.com/ente-io/stacktrace v0.0.0-20210619050357-0af9fad4639c
 	github.com/gin-contrib/gzip v0.0.5
 	github.com/gin-contrib/requestid v0.0.2-0.20210619060739-3f23d9a07dc5
@@ -19,7 +20,6 @@ require (
 	github.com/go-playground/validator/v10 v10.14.0
 	github.com/golang-jwt/jwt v3.2.1+incompatible
 	github.com/golang-migrate/migrate/v4 v4.12.2
-	github.com/google/go-cmp v0.6.0
 	github.com/google/uuid v1.6.0
 	github.com/lib/pq v1.8.0
 	github.com/lithammer/shortuuid/v3 v3.0.4
@@ -48,12 +48,12 @@ require (
 	cloud.google.com/go/longrunning v0.4.1 // indirect
 	github.com/bytedance/sonic v1.9.1 // indirect
 	github.com/chenzhuoyu/base64x v0.0.0-20221115062448-fe3a3abad311 // indirect
-	github.com/ente-io/go-srp v0.0.0-20250116115009-d52061067e78 // indirect
 	github.com/fxamacker/cbor/v2 v2.6.0 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.2 // indirect
 	github.com/go-webauthn/x v0.1.9 // indirect
 	github.com/goccy/go-json v0.10.2 // indirect
 	github.com/golang-jwt/jwt/v5 v5.2.1 // indirect
+	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/google/go-tpm v0.9.0 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.2.3 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.4 // indirect

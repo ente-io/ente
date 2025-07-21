@@ -321,7 +321,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m114(email) =>
       "Nous avons envoyé un email à <green>${email}</green>";
 
-  static String m115(name) => "Wish \$${name} a happy birthday! 🎉";
+  static String m115(name) => "Souhaitez à ${name} un joyeux anniversaire ! 🎉";
 
   static String m116(count) =>
       "${Intl.plural(count, one: 'il y a ${count} an', other: 'il y a ${count} ans')}";
@@ -427,6 +427,9 @@ class MessageLookup extends MessageLookupByLibrary {
             "Tous les souvenirs sont sauvegardés"),
         "allPersonGroupingWillReset": MessageLookupByLibrary.simpleMessage(
             "Tous les groupements pour cette personne seront réinitialisés, et vous perdrez toutes les suggestions faites pour cette personne"),
+        "allUnnamedGroupsWillBeMergedIntoTheSelectedPerson":
+            MessageLookupByLibrary.simpleMessage(
+                "Tous les groupes sans nom seront fusionnés dans la personne sélectionnée. Cela peut toujours être annulé à partir de l\'historique des suggestions de la personne."),
         "allWillShiftRangeBasedOnFirst": MessageLookupByLibrary.simpleMessage(
             "C\'est la première dans le groupe. Les autres photos sélectionnées se déplaceront automatiquement en fonction de cette nouvelle date"),
         "allow": MessageLookupByLibrary.simpleMessage("Autoriser"),
@@ -480,6 +483,10 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Archiver l\'album"),
         "archiving":
             MessageLookupByLibrary.simpleMessage("Archivage en cours..."),
+        "areThey": MessageLookupByLibrary.simpleMessage("Vraiment"),
+        "areYouSureRemoveThisFaceFromPerson":
+            MessageLookupByLibrary.simpleMessage(
+                "Êtes-vous sûr de vouloir retirer ce visage de cette personne ?"),
         "areYouSureThatYouWantToLeaveTheFamily":
             MessageLookupByLibrary.simpleMessage(
                 "Êtes-vous certains de vouloir quitter le plan familial?"),
@@ -490,8 +497,16 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Êtes-vous certains de vouloir changer d\'offre ?"),
         "areYouSureYouWantToExit": MessageLookupByLibrary.simpleMessage(
             "Êtes-vous sûr de vouloir quitter ?"),
+        "areYouSureYouWantToIgnoreThesePersons":
+            MessageLookupByLibrary.simpleMessage(
+                "Êtes-vous sûr de vouloir ignorer ces personnes ?"),
+        "areYouSureYouWantToIgnoreThisPerson":
+            MessageLookupByLibrary.simpleMessage(
+                "Êtes-vous sûr de vouloir ignorer cette personne ?"),
         "areYouSureYouWantToLogout": MessageLookupByLibrary.simpleMessage(
             "Voulez-vous vraiment vous déconnecter ?"),
+        "areYouSureYouWantToMergeThem": MessageLookupByLibrary.simpleMessage(
+            "Êtes-vous sûr de vouloir les fusionner?"),
         "areYouSureYouWantToRenew": MessageLookupByLibrary.simpleMessage(
             "Êtes-vous sûr de vouloir renouveler ?"),
         "areYouSureYouWantToResetThisPerson":
@@ -847,6 +862,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "deviceNotFound":
             MessageLookupByLibrary.simpleMessage("Appareil non trouvé"),
         "didYouKnow": MessageLookupByLibrary.simpleMessage("Le savais-tu ?"),
+        "different": MessageLookupByLibrary.simpleMessage("Différent(e)"),
         "disableAutoLock": MessageLookupByLibrary.simpleMessage(
             "Désactiver le verrouillage automatique"),
         "disableDownloadWarningBody": MessageLookupByLibrary.simpleMessage(
@@ -1145,6 +1161,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "iOSLockOut": MessageLookupByLibrary.simpleMessage(
             "L\'authentification biométrique est désactivée. Veuillez verrouiller et déverrouiller votre écran pour l\'activer."),
         "iOSOkButton": MessageLookupByLibrary.simpleMessage("Ok"),
+        "ignore": MessageLookupByLibrary.simpleMessage("Ignorer"),
         "ignoreUpdate": MessageLookupByLibrary.simpleMessage("Ignorer"),
         "ignored": MessageLookupByLibrary.simpleMessage("ignoré"),
         "ignoredFolderUploadReason": MessageLookupByLibrary.simpleMessage(
@@ -1166,6 +1183,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Clé de secours non valide"),
         "indexedItems":
             MessageLookupByLibrary.simpleMessage("Éléments indexés"),
+        "indexingPausedStatusDescription": MessageLookupByLibrary.simpleMessage(
+            "L\'indexation est en pause. Elle reprendra automatiquement lorsque l\'appareil sera prêt. Celui-ci est considéré comme prêt lorsque le niveau de batterie, sa santé et son état thermique sont dans une plage saine."),
         "ineligible": MessageLookupByLibrary.simpleMessage("Non compatible"),
         "info": MessageLookupByLibrary.simpleMessage("Info"),
         "insecureDevice":
@@ -1353,6 +1372,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Sélectionnez le type de souvenirs que vous souhaitez voir sur votre écran d\'accueil."),
         "memoryCount": m50,
         "merchandise": MessageLookupByLibrary.simpleMessage("Boutique"),
+        "merge": MessageLookupByLibrary.simpleMessage("Fusionner"),
         "mergeWithExisting":
             MessageLookupByLibrary.simpleMessage("Fusionner avec existant"),
         "mergedPhotos":
@@ -1495,6 +1515,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Ou sélectionner un email existant"),
         "orPickFromYourContacts": MessageLookupByLibrary.simpleMessage(
             "ou choisissez parmi vos contacts"),
+        "otherDetectedFaces":
+            MessageLookupByLibrary.simpleMessage("Autres visages détectés"),
         "pair": MessageLookupByLibrary.simpleMessage("Associer"),
         "pairWithPin":
             MessageLookupByLibrary.simpleMessage("Appairer avec le code PIN"),
@@ -1633,6 +1655,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Lien public créé"),
         "publicLinkEnabled":
             MessageLookupByLibrary.simpleMessage("Lien public activé"),
+        "questionmark": MessageLookupByLibrary.simpleMessage("?"),
         "queued": MessageLookupByLibrary.simpleMessage("En file d\'attente"),
         "quickLinks": MessageLookupByLibrary.simpleMessage("Liens rapides"),
         "radius": MessageLookupByLibrary.simpleMessage("Rayon"),
@@ -1750,6 +1773,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "reportBug": MessageLookupByLibrary.simpleMessage("Signaler un bogue"),
         "resendEmail":
             MessageLookupByLibrary.simpleMessage("Renvoyer l\'email"),
+        "reset": MessageLookupByLibrary.simpleMessage("Réinitialiser"),
         "resetIgnoredFiles": MessageLookupByLibrary.simpleMessage(
             "Réinitialiser les fichiers ignorés"),
         "resetPasswordTitle": MessageLookupByLibrary.simpleMessage(
@@ -1778,7 +1802,11 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Faire pivoter à droite"),
         "safelyStored":
             MessageLookupByLibrary.simpleMessage("Stockage sécurisé"),
+        "same": MessageLookupByLibrary.simpleMessage("Identique"),
+        "sameperson": MessageLookupByLibrary.simpleMessage("Même personne ?"),
         "save": MessageLookupByLibrary.simpleMessage("Sauvegarder"),
+        "saveAsAnotherPerson": MessageLookupByLibrary.simpleMessage(
+            "Enregistrer comme une autre personne"),
         "saveChangesBeforeLeavingQuestion":
             MessageLookupByLibrary.simpleMessage(
                 "Enregistrer les modifications avant de quitter ?"),
@@ -1950,8 +1978,12 @@ class MessageLookup extends MessageLookupByLibrary {
         "sharing": MessageLookupByLibrary.simpleMessage("Partage..."),
         "shiftDatesAndTime":
             MessageLookupByLibrary.simpleMessage("Dates et heure de décalage"),
+        "showLessFaces":
+            MessageLookupByLibrary.simpleMessage("Afficher moins de visages"),
         "showMemories":
             MessageLookupByLibrary.simpleMessage("Afficher les souvenirs"),
+        "showMoreFaces":
+            MessageLookupByLibrary.simpleMessage("Afficher plus de visages"),
         "showPerson":
             MessageLookupByLibrary.simpleMessage("Montrer la personne"),
         "signOutFromOtherDevices": MessageLookupByLibrary.simpleMessage(
@@ -2080,6 +2112,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "theLinkYouAreTryingToAccessHasExpired":
             MessageLookupByLibrary.simpleMessage(
                 "Le lien que vous essayez d\'accéder a expiré."),
+        "thePersonGroupsWillNotBeDisplayed": MessageLookupByLibrary.simpleMessage(
+            "Les groupes de personnes ne seront plus affichés dans la section personnes. Les photos resteront intactes."),
+        "thePersonWillNotBeDisplayed": MessageLookupByLibrary.simpleMessage(
+            "Les groupes de personnes ne seront plus affichés dans la section personnes. Les photos resteront intactes."),
         "theRecoveryKeyYouEnteredIsIncorrect":
             MessageLookupByLibrary.simpleMessage(
                 "La clé de récupération que vous avez entrée est incorrecte"),
@@ -2283,6 +2319,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "yesDelete": MessageLookupByLibrary.simpleMessage("Oui, supprimer"),
         "yesDiscardChanges": MessageLookupByLibrary.simpleMessage(
             "Oui, ignorer les modifications"),
+        "yesIgnore": MessageLookupByLibrary.simpleMessage("Oui, ignorer"),
         "yesLogout":
             MessageLookupByLibrary.simpleMessage("Oui, se déconnecter"),
         "yesRemove": MessageLookupByLibrary.simpleMessage("Oui, supprimer"),

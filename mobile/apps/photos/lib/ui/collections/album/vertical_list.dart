@@ -107,7 +107,7 @@ class _AlbumVerticalListWidgetState extends State<AlbumVerticalListWidget> {
       widget.selectedCollections.remove(collection);
     } else {
       widget.selectedCollections.isEmpty
-          ? await HapticFeedback.vibrate()
+          ? await HapticFeedback.mediumImpact()
           : null;
       widget.selectedCollections.add(collection);
     }

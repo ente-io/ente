@@ -75,6 +75,7 @@ class DraggableScrollbarState extends State<DraggableScrollbar>
     _thumbAnimationController = AnimationController(
       vsync: this,
       duration: thumbAnimationDuration,
+      animationBehavior: AnimationBehavior.preserve,
     );
 
     _thumbAnimation = CurvedAnimation(
@@ -85,6 +86,7 @@ class DraggableScrollbarState extends State<DraggableScrollbar>
     _labelAnimationController = AnimationController(
       vsync: this,
       duration: labelAnimationDuration,
+      animationBehavior: AnimationBehavior.preserve,
     );
 
     _labelAnimation = CurvedAnimation(

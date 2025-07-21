@@ -81,6 +81,8 @@ class ToShowMemory {
   final String id;
 
   final String? personID;
+  final String? personName;
+  final bool? isBirthday;
   final PeopleMemoryType? peopleMemoryType;
   final ClipMemoryType? clipMemoryType;
   final Location? location;
@@ -107,6 +109,8 @@ class ToShowMemory {
     this.id,
     this.calculationTime, {
     this.personID,
+    this.personName,
+    this.isBirthday,
     this.peopleMemoryType,
     this.clipMemoryType,
     this.location,
@@ -124,11 +128,15 @@ class ToShowMemory {
 
   factory ToShowMemory.fromSmartMemory(SmartMemory memory, DateTime calcTime) {
     String? personID;
+    String? personName;
+    bool? isBirthday;
     PeopleMemoryType? peopleMemoryType;
     ClipMemoryType? clipMemoryType;
     Location? location;
     if (memory is PeopleMemory) {
       personID = memory.personID;
+      personName = memory.personName;
+      isBirthday = memory.isBirthday;
       peopleMemoryType = memory.peopleMemoryType;
     } else if (memory is TripMemory) {
       location = memory.location;
@@ -147,6 +155,8 @@ class ToShowMemory {
       memory.id,
       calcTime.microsecondsSinceEpoch,
       personID: personID,
+      personName: personName,
+      isBirthday: isBirthday,
       peopleMemoryType: peopleMemoryType,
       clipMemoryType: clipMemoryType,
       location: location,
@@ -163,6 +173,8 @@ class ToShowMemory {
       json['id'] ?? newID(json['type'] as String),
       json['calculationTime'],
       personID: json['personID'],
+      isBirthday: json['isBirthday'],
+      personName: json['personName'],
       peopleMemoryType: json['peopleMemoryType'] != null
           ? peopleMemoryTypeFromString(json['peopleMemoryType'])
           : null,
@@ -188,6 +200,8 @@ class ToShowMemory {
       'id': id,
       'calculationTime': calculationTime,
       'personID': personID,
+      'isBirthday': isBirthday,
+      'personName': personName,
       'peopleMemoryType': peopleMemoryType?.toString().split('.').last,
       'clipMemoryType': clipMemoryType?.toString().split('.').last,
       'location': location != null

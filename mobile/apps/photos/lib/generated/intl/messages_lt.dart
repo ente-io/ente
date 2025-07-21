@@ -310,7 +310,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m114(email) =>
       "Išsiuntėme laišką adresu <green>${email}</green>";
 
-  static String m115(name) => "Wish \$${name} a happy birthday! 🎉";
+  static String m115(name) => "Palinkėkite ${name} su gimtadieniu! 🎉";
 
   static String m116(count) =>
       "${Intl.plural(count, one: 'prieš ${count} metus', other: 'prieš ${count} metų')}";
@@ -561,6 +561,9 @@ class MessageLookup extends MessageLookupByLibrary {
             "Kurti atsargines vaizdo įrašų kopijas"),
         "beach": MessageLookupByLibrary.simpleMessage("Smėlis ir jūra"),
         "birthday": MessageLookupByLibrary.simpleMessage("Gimtadienis"),
+        "birthdayNotifications":
+            MessageLookupByLibrary.simpleMessage("Gimtadienio pranešimai"),
+        "birthdays": MessageLookupByLibrary.simpleMessage("Gimtadieniai"),
         "blackFridaySale": MessageLookupByLibrary.simpleMessage(
             "Juodojo penktadienio išpardavimas"),
         "blog": MessageLookupByLibrary.simpleMessage("Tinklaraštis"),
@@ -1086,6 +1089,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "guestView": MessageLookupByLibrary.simpleMessage("Svečio peržiūra"),
         "guestViewEnablePreSteps": MessageLookupByLibrary.simpleMessage(
             "Kad įjungtumėte svečio peržiūrą, sistemos nustatymuose nustatykite įrenginio prieigos kodą arba ekrano užraktą."),
+        "happyBirthday":
+            MessageLookupByLibrary.simpleMessage("Su gimtadieniu! 🥳"),
         "hearUsExplanation": MessageLookupByLibrary.simpleMessage(
             "Mes nesekame programų diegimų. Mums padėtų, jei pasakytumėte, kur mus radote."),
         "hearUsWhereTitle": MessageLookupByLibrary.simpleMessage(
@@ -1601,6 +1606,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "reassignedToName": m69,
         "reassigningLoading":
             MessageLookupByLibrary.simpleMessage("Perskirstoma..."),
+        "receiveRemindersOnBirthdays": MessageLookupByLibrary.simpleMessage(
+            "Gaukite priminimus, kai yra kažkieno gimtadienis. Paliesdami pranešimą, pateksite į gimtadienio šventės asmens nuotraukas."),
         "recover": MessageLookupByLibrary.simpleMessage("Atkurti"),
         "recoverAccount":
             MessageLookupByLibrary.simpleMessage("Atkurti paskyrą"),

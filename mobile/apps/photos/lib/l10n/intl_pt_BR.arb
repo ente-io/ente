@@ -1788,5 +1788,7 @@
   "cLDesc5": "Você receberá uma notificação opcional para todos os aniversários salvos no Ente, além de uma coleção de melhores fotos.",
   "cLTitle6": "Envios e downloads retomáveis",
   "cLDesc6": "Nada de esperar os envios/downloads terminarem para fechar o aplicativo. Todos os envios e downloads agora possuem a habilidade de ser pausado na metade do processo, e retomar de onde você parou.",
-  "indexingPausedStatusDescription": "A indexação foi pausada. Ela retomará automaticamente quando o dispositivo estiver pronto. O dispositivo é considerado pronto quando o nível de bateria, saúde da bateria, e estado térmico estejam num alcance saudável."
+  "indexingPausedStatusDescription": "A indexação foi pausada. Ela retomará automaticamente quando o dispositivo estiver pronto. O dispositivo é considerado pronto quando o nível de bateria, saúde da bateria, e estado térmico estejam num alcance saudável.",
+  "faceThumbnailGenerationFailed": "Incapaz de gerar miniaturas de rosto",
+  "fileAnalysisFailed": "Incapaz de analisar rosto"
 }

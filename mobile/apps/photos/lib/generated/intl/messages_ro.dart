@@ -232,8 +232,6 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m114(email) => "Am trimis un e-mail la <green>${email}</green>";
 
-  static String m115(name) => "Wish \$${name} a happy birthday! 🎉";
-
   static String m116(count) =>
       "${Intl.plural(count, one: 'acum ${count} an', other: 'acum ${count} de ani')}";
 
@@ -1969,7 +1967,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "whatsNew": MessageLookupByLibrary.simpleMessage("Noutăți"),
         "whyAddTrustContact": MessageLookupByLibrary.simpleMessage(
             "Contactul de încredere vă poate ajuta la recuperarea datelor."),
-        "wishThemAHappyBirthday": m115,
         "yearShort": MessageLookupByLibrary.simpleMessage("an"),
         "yearly": MessageLookupByLibrary.simpleMessage("Anual"),
         "yearsAgo": m116,

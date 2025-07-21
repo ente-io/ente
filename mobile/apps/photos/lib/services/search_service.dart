@@ -3,7 +3,6 @@ import "dart:math";
 
 import "package:flutter/cupertino.dart";
 import "package:flutter/material.dart";
-import "package:intl/intl.dart";
 import 'package:logging/logging.dart';
 import "package:path_provider/path_provider.dart";
 import "package:photos/core/configuration.dart";
@@ -248,56 +247,6 @@ class SearchService {
     }
   }
 
-  Future<List<GenericSearchResult>> getRandomMomentsSearchResults(
-    BuildContext context,
-  ) async {
-    try {
-      final nonNullSearchResults = <GenericSearchResult>[];
-      final randomYear = getRadomYearSearchResult();
-      final randomMonth = getRandomMonthSearchResult(context);
-      final randomDate = getRandomDateResults(context);
-      final randomHoliday = getRandomHolidaySearchResult(context);
-
-      final searchResults = await Future.wait(
-        [randomYear, randomMonth, randomDate, randomHoliday],
-      );
-
-      for (GenericSearchResult? searchResult in searchResults) {
-        if (searchResult != null) {
-          nonNullSearchResults.add(searchResult);
-        }
-      }
-
-      return nonNullSearchResults;
-    } catch (e) {
-      _logger.severe("Error getting RandomMomentsSearchResult", e);
-      return [];
-    }
-  }
-
-  Future<GenericSearchResult?> getRadomYearSearchResult() async {
-    for (var yearData in YearsData.instance.yearsData..shuffle()) {
-      final List<EnteFile> filesInYear =
-          await _getFilesWithDuration([yearData.duration]);
-      if (filesInYear.isNotEmpty) {
-        return GenericSearchResult(
-          ResultType.year,
-          yearData.year,
-          filesInYear,
-          hierarchicalSearchFilter: TopLevelGenericFilter(
-            filterName: yearData.year,
-            occurrence: kMostRelevantFilter,
-            filterResultType: ResultType.year,
-            matchedUploadedIDs: filesToUploadedFileIDs(filesInYear),
-            filterIcon: Icons.calendar_month_outlined,
-          ),
-        );
-      }
-    }
-    //todo this throws error
-    return null;
-  }
-
   Future<List<GenericSearchResult>> getMonthSearchResults(
     BuildContext context,
     String query,
@@ -325,32 +274,6 @@ class SearchService {
       }
     }
     return searchResults;
-  }
-
-  Future<GenericSearchResult?> getRandomMonthSearchResult(
-    BuildContext context,
-  ) async {
-    final months = getMonthData(context)..shuffle();
-    for (MonthData month in months) {
-      final matchedFiles = await _getFilesWithDuration(
-        _getDurationsOfMonthInEveryYear(month.monthNumber),
-      );
-      if (matchedFiles.isNotEmpty) {
-        return GenericSearchResult(
-          ResultType.month,
-          month.name,
-          matchedFiles,
-          hierarchicalSearchFilter: TopLevelGenericFilter(
-            filterName: month.name,
-            occurrence: kMostRelevantFilter,
-            filterResultType: ResultType.month,
-            matchedUploadedIDs: filesToUploadedFileIDs(matchedFiles),
-            filterIcon: Icons.calendar_month_outlined,
-          ),
-        );
-      }
-    }
-    return null;
   }
 
   Future<List<GenericSearchResult>> getHolidaySearchResults(
@@ -387,32 +310,6 @@ class SearchService {
       }
     }
     return searchResults;
-  }
-
-  Future<GenericSearchResult?> getRandomHolidaySearchResult(
-    BuildContext context,
-  ) async {
-    final holidays = getHolidays(context)..shuffle();
-    for (var holiday in holidays) {
-      final matchedFiles = await _getFilesWithDuration(
-        _getDurationsForCalendarDateInEveryYear(holiday.day, holiday.month),
-      );
-      if (matchedFiles.isNotEmpty) {
-        return GenericSearchResult(
-          ResultType.event,
-          holiday.name,
-          matchedFiles,
-          hierarchicalSearchFilter: TopLevelGenericFilter(
-            filterName: holiday.name,
-            occurrence: kMostRelevantFilter,
-            filterResultType: ResultType.event,
-            matchedUploadedIDs: filesToUploadedFileIDs(matchedFiles),
-            filterIcon: Icons.event_outlined,
-          ),
-        );
-      }
-    }
-    return null;
   }
 
   Future<List<GenericSearchResult>> getFileTypeResults(
@@ -1304,54 +1201,6 @@ class SearchService {
       );
     }
     return searchResults;
-  }
-
-  Future<GenericSearchResult?> getRandomDateResults(
-    BuildContext context,
-  ) async {
-    final allFiles = await getAllFilesForSearch();
-    if (allFiles.isEmpty) return null;
-
-    final length = allFiles.length;
-    final randomFile = allFiles[Random().nextInt(length)];
-    final creationTime = randomFile.creationTime!;
-
-    final originalDateTime = DateTime.fromMicrosecondsSinceEpoch(creationTime);
-    final startOfDay = DateTime(
-      originalDateTime.year,
-      originalDateTime.month,
-      originalDateTime.day,
-    );
-
-    final endOfDay = DateTime(
-      originalDateTime.year,
-      originalDateTime.month,
-      originalDateTime.day + 1,
-    );
-
-    final durationOfDay = [
-      startOfDay.microsecondsSinceEpoch,
-      endOfDay.microsecondsSinceEpoch,
-    ];
-
-    final matchedFiles = await _getFilesWithDuration(
-      [durationOfDay],
-    );
-
-    final name = DateFormat.yMMMd(Localizations.localeOf(context).languageCode)
-        .format(originalDateTime.toLocal());
-    return GenericSearchResult(
-      ResultType.event,
-      name,
-      matchedFiles,
-      hierarchicalSearchFilter: TopLevelGenericFilter(
-        filterName: name,
-        occurrence: kMostRelevantFilter,
-        filterResultType: ResultType.event,
-        matchedUploadedIDs: filesToUploadedFileIDs(matchedFiles),
-        filterIcon: Icons.event_outlined,
-      ),
-    );
   }
 
   Future<List<GenericSearchResult>> getContactSearchResults(

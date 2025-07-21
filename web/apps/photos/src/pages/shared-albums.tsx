@@ -15,6 +15,7 @@ import {
 } from "@mui/material";
 import Typography from "@mui/material/Typography";
 import { DownloadStatusNotifications } from "components/DownloadStatusNotifications";
+import { type FileListHeaderOrFooter } from "components/FileList";
 import { FileListWithViewer } from "components/FileListWithViewer";
 import { Upload } from "components/Upload";
 import {
@@ -393,11 +394,11 @@ export default function PublicCollectionGallery() {
         setUploadTypeSelectorView(false);
     };
 
-    const fileListHeader = useMemo(
+    const fileListHeader = useMemo<FileListHeaderOrFooter | undefined>(
         () =>
             publicCollection && publicFiles
                 ? {
-                      item: (
+                      component: (
                           <FileListHeader
                               {...{
                                   publicCollection,
@@ -413,11 +414,12 @@ export default function PublicCollectionGallery() {
         [onAddSaveGroup, publicCollection, publicFiles, downloadEnabled],
     );
 
-    const fileListFooter = useMemo(() => {
+    const fileListFooter = useMemo<FileListHeaderOrFooter>(() => {
         const props = { referralCode, onAddPhotos };
         return {
-            item: <FileListFooter {...props} />,
+            component: <FileListFooter {...props} />,
             height: fileListFooterHeightForProps(props),
+            extendToInlineEdges: true,
         };
     }, [referralCode, onAddPhotos]);
 
@@ -497,7 +499,7 @@ export default function PublicCollectionGallery() {
                 header={fileListHeader}
                 footer={fileListFooter}
                 enableDownload={downloadEnabled}
-                selectable={downloadEnabled}
+                enableSelect={downloadEnabled}
                 selected={selected}
                 setSelected={setSelected}
                 activeCollectionID={PseudoCollectionID.all}
@@ -740,9 +742,6 @@ const FileListFooter: React.FC<FileListFooterProps> = ({
                 sx={{
                     mt: "6px",
                     mb: 0,
-                    /* Negative margin to extend to edges by counteracting the
-                       maximum margin that can be added by FileViewer. */
-                    mx: "-24px",
                     padding: "8px",
                     bgcolor: "accent.main",
                     color: "accent.contrastText",

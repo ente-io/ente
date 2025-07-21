@@ -897,7 +897,7 @@
   "unlock": "Atrakinti",
   "freeUpSpace": "Atlaisvinti vietos",
   "freeUpSpaceSaving": "{count, plural, =1 {Jį galima ištrinti iš įrenginio, kad atlaisvintų {formattedSize}} other {Jų galima ištrinti iš įrenginio, kad atlaisvintų {formattedSize}}}",
-  "filesBackedUpInAlbum": "{count, plural, one {{formattedNumber} failas šiame albume saugiai sukurta atsarginė kopija} other {{formattedNumber} failų šiame albume saugiai sukurta atsarginė kopija}}.",
+  "filesBackedUpInAlbum": "{count, plural, one {{formattedNumber} failas šiame albume saugiai sukurta atsarginė kopija} few {{formattedNumber} failai šiame albume saugiai sukurtos atsarginės kopijos} many {{formattedNumber} failo šiame albume saugiai sukurtos atsargines kopijos} other {{formattedNumber} failų šiame albume saugiai sukurta atsarginė kopija}}.",
   "@filesBackedUpInAlbum": {
     "description": "Text to tell user how many files have been backed up in the album",
     "placeholders": {
@@ -912,7 +912,7 @@
       }
     }
   },
-  "filesBackedUpFromDevice": "{count, plural, one {{formattedNumber} failas šiame įrenginyje saugiai sukurta atsarginė kopija} other {{formattedNumber} failų šiame įrenginyje saugiai sukurta atsarginių kopijų}}.",
+  "filesBackedUpFromDevice": "{count, plural, one {{formattedNumber} failas šiame įrenginyje saugiai sukurta atsarginė kopija} few {{formattedNumber} failai šiame įrenginyje saugiai sukurtos atsarginės kopijos} many {{formattedNumber} failo šiame įrenginyje saugiai sukurtos atsargines kopijos} other {{formattedNumber} failų šiame įrenginyje saugiai sukurta atsarginių kopijų}}.",
   "@filesBackedUpFromDevice": {
     "description": "Text to tell user how many files have been backed up from this device",
     "placeholders": {
@@ -1400,7 +1400,7 @@
   "enableMachineLearningBanner": "Įjunkite mašininį mokymąsi magiškai paieškai ir veidų atpažinimui",
   "searchDiscoverEmptySection": "Vaizdai bus rodomi čia, kai bus užbaigtas apdorojimas ir sinchronizavimas.",
   "searchPersonsEmptySection": "Asmenys bus rodomi čia, kai bus užbaigtas apdorojimas ir sinchronizavimas.",
-  "viewersSuccessfullyAdded": "{count, plural, =0 {Įtraukta 0 žiūrėtojų} =1 {Įtrauktas 1 žiūrėtojas} other {Įtraukta {count} žiūrėtojų}}",
+  "viewersSuccessfullyAdded": "{count, plural, one {Įtrauktas {count} žiūrėtojas} few {Įtraukti {count} žiūrėtojai} many {Įtraukta {count} žiūrėtojo} =0 {Įtraukta 0 žiūrėtojų} =1 {Įtrauktas 1 žiūrėtojas} other {Įtraukta {count} žiūrėtojų}}",
   "@viewersSuccessfullyAdded": {
     "placeholders": {
       "count": {
@@ -1485,7 +1485,7 @@
   },
   "currentlyRunning": "šiuo metu vykdoma",
   "ignored": "ignoruota",
-  "photosCount": "{count, plural, =0 {0 nuotraukų} =1 {1 nuotrauka} other {{count} nuotraukų}}",
+  "photosCount": "{count, plural, one {{count} nuotrauka} few {{count} nuotraukos} many {{count} nuotraukos} =0 {0 nuotraukų} =1 {1 nuotrauka} other {{count} nuotraukų}}",
   "@photosCount": {
     "placeholders": {
       "count": {

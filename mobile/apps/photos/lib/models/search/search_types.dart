@@ -14,7 +14,6 @@ import "package:photos/models/collection/collection.dart";
 import "package:photos/models/collection/collection_items.dart";
 import "package:photos/models/search/search_result.dart";
 import "package:photos/models/typedefs.dart";
-import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/services/search_service.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
@@ -45,8 +44,6 @@ enum SectionType {
   face,
   magic,
   location,
-  // includes year, month , day, event ResultType
-  moment,
   album,
   // People section shows the files shared by other persons
   contacts,
@@ -61,8 +58,6 @@ extension SectionTypeExtensions on SectionType {
         return S.of(context).people;
       case SectionType.magic:
         return S.of(context).discover;
-      case SectionType.moment:
-        return S.of(context).moments;
       case SectionType.location:
         return S.of(context).locations;
       case SectionType.contacts:
@@ -80,8 +75,6 @@ extension SectionTypeExtensions on SectionType {
         return S.of(context).searchPersonsEmptySection;
       case SectionType.magic:
         return S.of(context).searchDiscoverEmptySection;
-      case SectionType.moment:
-        return S.of(context).searchDatesEmptySection;
       case SectionType.location:
         return S.of(context).searchLocationEmptySection;
       case SectionType.contacts:
@@ -99,7 +92,6 @@ extension SectionTypeExtensions on SectionType {
     switch (this) {
       case SectionType.face:
       case SectionType.magic:
-      case SectionType.moment:
       case SectionType.fileTypesAndExtension:
         return false;
       case SectionType.location:
@@ -109,18 +101,15 @@ extension SectionTypeExtensions on SectionType {
     }
   }
 
-  // TODO: lau: check if we should sort moment again
   bool get sortByName =>
       this != SectionType.face &&
       this != SectionType.magic &&
-      this != SectionType.moment &&
       this != SectionType.contacts;
 
   bool get isEmptyCTAVisible {
     switch (this) {
       case SectionType.face:
       case SectionType.magic:
-      case SectionType.moment:
       case SectionType.fileTypesAndExtension:
         return false;
       case SectionType.location:
@@ -138,8 +127,6 @@ extension SectionTypeExtensions on SectionType {
       case SectionType.magic:
         // todo: later
         return "temp";
-      case SectionType.moment:
-        return S.of(context).addNew;
       case SectionType.location:
         return S.of(context).addNew;
       case SectionType.contacts:
@@ -156,8 +143,6 @@ extension SectionTypeExtensions on SectionType {
       case SectionType.face:
         return Icons.adaptive.arrow_forward_outlined;
       case SectionType.magic:
-        return null;
-      case SectionType.moment:
         return null;
       case SectionType.location:
         return Icons.add_location_alt_outlined;
@@ -236,13 +221,6 @@ extension SectionTypeExtensions on SectionType {
         return SearchService.instance.getAllFace(limit);
       case SectionType.magic:
         return SearchService.instance.getMagicSectionResults(context!);
-
-      case SectionType.moment:
-        if (flagService.internalUser && !kDebugMode) {
-          // TODO: lau: remove this whole smart memories and moment altogether
-          return SearchService.instance.smartMemories(context!, limit);
-        }
-        return SearchService.instance.getRandomMomentsSearchResults(context!);
 
       case SectionType.location:
         return SearchService.instance.getAllLocationTags(limit);
