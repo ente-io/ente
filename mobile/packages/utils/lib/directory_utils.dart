@@ -21,7 +21,7 @@ class DirectoryUtils {
   }
 
   static Future<Directory> getDirectoryForInit() async {
-    Directory directory = await getApplicationCacheDirectory();
+    final directory = await getApplicationCacheDirectory();
 
     return Directory(p.join(directory.path, "init"));
   }
