@@ -20,19 +20,19 @@ import 'package:ente_accounts/pages/password_reentry_page.dart';
 import 'package:ente_accounts/pages/recovery_page.dart';
 import 'package:ente_accounts/pages/two_factor_authentication_page.dart';
 import 'package:ente_accounts/pages/two_factor_recovery_page.dart';
-import 'package:ente_base/models/key_attributes.dart';
-import 'package:ente_base/models/key_gen_result.dart';
 import 'package:ente_configuration/base_configuration.dart';
 import 'package:ente_configuration/constants.dart';
-import 'package:ente_crypto_dart/ente_crypto_dart.dart';
-import 'package:ente_events/event_bus.dart';
-import 'package:ente_events/models/user_details_changed_event.dart';
 import 'package:ente_network/network.dart';
-import 'package:ente_strings/ente_strings.dart';
 import 'package:ente_ui/components/progress_dialog.dart';
 import 'package:ente_ui/pages/base_home_page.dart';
 import 'package:ente_ui/utils/dialog_util.dart';
 import 'package:ente_ui/utils/toast_util.dart';
+import 'package:ente_base/models/key_attributes.dart';
+import 'package:ente_base/models/key_gen_result.dart';
+import 'package:ente_events/event_bus.dart';
+import 'package:ente_events/models/user_details_changed_event.dart';
+import 'package:ente_strings/ente_strings.dart';
+import 'package:ente_crypto_dart/ente_crypto_dart.dart';
 import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
@@ -348,10 +348,7 @@ class UserService {
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
             builder: (BuildContext context) {
-              return PasswordReentryPage(
-                _config,
-                _homePage,
-              );
+              return PasswordReentryPage(_homePage, _config);
             },
           ),
           (route) => route.isFirst,
@@ -429,15 +426,9 @@ class UserService {
           await _saveConfiguration(response);
           if (_config.getEncryptedToken() != null) {
             if (isResettingPasswordScreen) {
-              page = RecoveryPage(
-                _config,
-                _homePage,
-              );
+              page = RecoveryPage(_homePage, _config);
             } else {
-              page = PasswordReentryPage(
-                _config,
-                _homePage,
-              );
+              page = PasswordReentryPage(_homePage, _config);
             }
           } else {
             page = PasswordEntryPage(
@@ -846,10 +837,7 @@ class UserService {
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
             builder: (BuildContext context) {
-              return PasswordReentryPage(
-                _config,
-                _homePage,
-              );
+              return PasswordReentryPage(_homePage, _config);
             },
           ),
           (route) => route.isFirst,
@@ -1013,10 +1001,7 @@ class UserService {
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
             builder: (BuildContext context) {
-              return PasswordReentryPage(
-                _config,
-                _homePage,
-              );
+              return PasswordReentryPage(_homePage, _config);
             },
           ),
           (route) => route.isFirst,

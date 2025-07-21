@@ -4,25 +4,22 @@ import 'dart:typed_data';
 import 'package:ente_accounts/ente_accounts.dart';
 import 'package:ente_accounts/models/errors.dart';
 import 'package:ente_configuration/base_configuration.dart';
-import 'package:ente_crypto_dart/ente_crypto_dart.dart';
-import 'package:ente_strings/ente_strings.dart';
 import 'package:ente_ui/components/buttons/button_widget.dart';
 import 'package:ente_ui/components/buttons/dynamic_fab.dart';
 import 'package:ente_ui/pages/base_home_page.dart';
 import 'package:ente_ui/utils/dialog_util.dart';
 import 'package:ente_utils/email_util.dart';
 import 'package:flutter/material.dart';
+import 'package:ente_strings/ente_strings.dart';
 import 'package:logging/logging.dart';
 
-class PasswordReentryPage extends StatefulWidget {
-  final BaseConfiguration config;
-  final BaseHomePage homePage;
+import 'package:ente_crypto_dart/ente_crypto_dart.dart';
 
-  const PasswordReentryPage(
-    this.config,
-    this.homePage, {
-    super.key,
-  });
+class PasswordReentryPage extends StatefulWidget {
+  final BaseHomePage homePage;
+  final BaseConfiguration config;
+
+  const PasswordReentryPage(this.homePage, this.config, {super.key});
 
   @override
   State<PasswordReentryPage> createState() => _PasswordReentryPageState();
@@ -126,10 +123,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
         Navigator.of(context).push(
           MaterialPageRoute(
             builder: (BuildContext context) {
-              return RecoveryPage(
-                widget.config,
-                widget.homePage,
-              );
+              return RecoveryPage(widget.homePage, widget.config);
             },
           ),
         );
@@ -279,8 +273,8 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
                             MaterialPageRoute(
                               builder: (BuildContext context) {
                                 return RecoveryPage(
-                                  widget.config,
                                   widget.homePage,
+                                  widget.config,
                                 );
                               },
                             ),

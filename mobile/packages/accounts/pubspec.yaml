@@ -7,50 +7,54 @@ environment:
   flutter: ">=1.17.0"
 
 dependencies:
-  app_links: ^6.3.3
-  bip39: ^1.0.6
-  collection: ^1.18.0
-  dio: ^5.4.0
-  dotted_border: ^3.1.0
-  email_validator: ^3.0.0
-  ente_base:
-    path: ../base
-  ente_configuration:
-    path: ../configuration
-  ente_crypto_dart:
-    git:
-      url: https://github.com/ente-io/ente_crypto_dart.git
-  ente_events:
-    path: ../events
-  ente_lock_screen:
-    path: ../lock_screen
-  ente_network:
-    path: ../network
+  flutter:
+    sdk: flutter
+  
+  # Ente packages
   ente_strings:
     path: ../strings
   ente_ui:
     path: ../ui
   ente_utils:
     path: ../utils
-  file_saver: ^0.3.0
-  flutter:
-    sdk: flutter
+  ente_base:
+    path: ../base
+  ente_configuration:
+    path: ../configuration
+  ente_network:
+    path: ../network
+  ente_events:
+    path: ../events
+  ente_crypto_dart:
+    git:
+      url: https://github.com/ente-io/ente_crypto_dart.git
+  ente_lock_screen:
+    path: ../lock_screen
+  
+  # Third-party dependencies
+  bip39: ^1.0.6
+  dio: ^5.4.0
   logging: ^1.2.0
-  password_strength: ^0.2.0
-  pinput: ^5.0.1
   pointycastle: ^3.7.3
-  share_plus: ^11.0.0
   shared_preferences: ^2.2.2
+  file_saver: ^0.3.0
+  share_plus: ^11.0.0
+  uuid: ^4.2.1
+  collection: ^1.18.0
+  dotted_border: ^3.1.0
+  password_strength: ^0.2.0
   step_progress_indicator: ^1.0.2
   styled_text: ^8.1.0
+  email_validator: ^3.0.0
+  pinput: ^5.0.1
+  app_links: ^6.3.3
   url_launcher: ^6.3.1
   url_launcher_ios: ^6.3.1
-  uuid: ^4.2.1
 
 dev_dependencies:
-  flutter_lints: ^5.0.0
   flutter_test:
     sdk: flutter
+  flutter_lints: ^5.0.0
 
 flutter:
 
