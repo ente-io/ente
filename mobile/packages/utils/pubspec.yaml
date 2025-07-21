@@ -13,7 +13,7 @@ dependencies:
   # Core dependencies
   archive: ^4.0.7
   email_validator: ^3.0.0
-  file_saver: ^0.2.14
+  file_saver: ^0.3.0
   flutter_email_sender: ^7.0.0
   ente_logging:
     path: ../../packages/logging
@@ -26,7 +26,7 @@ dependencies:
   package_info_plus: ^8.1.1
   path: ^1.9.1
   path_provider: ^2.1.5
-  share_plus: ^10.1.2
+  share_plus: ^11.0.0
   url_launcher: ^6.3.1
   window_manager: ^0.5.0
   
