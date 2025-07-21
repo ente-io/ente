@@ -320,8 +320,6 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m114(email) =>
       "E-postayı <green>${email}</green> adresine gönderdik";
 
-  static String m115(name) => "Wish \$${name} a happy birthday! 🎉";
-
   static String m116(count) =>
       "${Intl.plural(count, other: '${count} yıl önce')}";
 
@@ -2161,7 +2159,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Tekrardan hoşgeldin!"),
         "whatsNew": MessageLookupByLibrary.simpleMessage("Yenilikler"),
         "whyAddTrustContact": MessageLookupByLibrary.simpleMessage("."),
-        "wishThemAHappyBirthday": m115,
         "yearShort": MessageLookupByLibrary.simpleMessage("yıl"),
         "yearly": MessageLookupByLibrary.simpleMessage("Yıllık"),
         "yearsAgo": m116,

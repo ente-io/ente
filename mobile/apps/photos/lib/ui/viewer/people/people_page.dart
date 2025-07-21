@@ -108,7 +108,7 @@ class _PeoplePageState extends State<PeoplePage> {
       );
       return [];
     }
-    final List<EnteFile> resultFiles = [];
+    final Set<EnteFile> resultFiles = {};
     for (final e in result.entries) {
       resultFiles.addAll(e.value);
     }

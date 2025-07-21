@@ -32,6 +32,9 @@ func (c *Controller) GetKey(ctx *gin.Context, req model.GetEntityKeyRequest) (*m
 // CreateEntity stores entity data for the given type
 func (c *Controller) CreateEntity(ctx *gin.Context, req model.EntityDataRequest) (*model.EntityData, error) {
 	userID := auth.GetUserID(ctx.Request.Header)
+	if err := req.IsValid(userID); err != nil {
+		return nil, stacktrace.Propagate(err, "invalid EntityDataRequest")
+	}
 	id, err := c.Repo.Create(ctx, userID, req)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "failed to createEntity")

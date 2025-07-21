@@ -740,6 +740,10 @@
       ]
     },
     {
+      "title": "MangaDex",
+      "slug": "mangadex"
+    },
+    {
       "title": "Marketplace.tf",
       "slug": "marketplacedottf"
     },
@@ -1301,6 +1305,10 @@
       "hex": "858585"
     },
     {
+      "title": "Temu",
+      "slug": "temu"
+    },
+    {
       "title": "tianyiyun",
       "altNames": [
         "天翼云"
@@ -1511,6 +1519,10 @@
     },
     {
       "title": "Zitadel"
+    },
+    {
+      "title": "Co-Wheels",
+      "slug": "cowheels"
     }
   ]
 }

@@ -1,0 +1,11 @@
+{
+    "name": "locker",
+    "version": "0.0.0",
+    "private": true,
+    "dependencies": {
+        "ente-base": "*"
+    },
+    "devDependencies": {
+        "ente-build-config": "*"
+    }
+}

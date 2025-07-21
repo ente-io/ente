@@ -99,8 +99,6 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m114(email) =>
       "Mezua bidali dugu <green>${email}</green> helbidera";
 
-  static String m115(name) => "Wish \$${name} a happy birthday! 🎉";
-
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
         "accountWelcomeBack":
@@ -631,7 +629,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "weakStrength": MessageLookupByLibrary.simpleMessage("Ahula"),
         "welcomeBack":
             MessageLookupByLibrary.simpleMessage("Ongi etorri berriro!"),
-        "wishThemAHappyBirthday": m115,
         "yesConvertToViewer":
             MessageLookupByLibrary.simpleMessage("Bai, egin ikusle"),
         "yesDelete": MessageLookupByLibrary.simpleMessage("Bai, ezabatu"),
