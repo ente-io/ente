@@ -1220,18 +1220,6 @@ abstract class StringsLocalizations {
   /// **'No recovery key'**
   String get noRecoveryKey;
 
-  /// Status message while waiting for WiFi connection
-  ///
-  /// In en, this message translates to:
-  /// **'Waiting for WiFi...'**
-  String get waitingForWifi;
-
-  /// Error message when attempting to delete the default account
-  ///
-  /// In en, this message translates to:
-  /// **'You cannot delete your default account'**
-  String get youCannotDeleteYourDefaultAccount;
-
   /// Confirmation message when account has been deleted
   ///
   /// In en, this message translates to:
