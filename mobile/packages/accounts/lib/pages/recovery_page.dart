@@ -8,10 +8,10 @@ import 'package:ente_ui/utils/toast_util.dart';
 import 'package:flutter/material.dart';
 
 class RecoveryPage extends StatefulWidget {
-  final BaseHomePage homePage;
   final BaseConfiguration config;
+  final BaseHomePage homePage;
 
-  const RecoveryPage(this.homePage, this.config, {super.key});
+  const RecoveryPage(this.config, this.homePage, {super.key});
 
   @override
   State<RecoveryPage> createState() => _RecoveryPageState();
