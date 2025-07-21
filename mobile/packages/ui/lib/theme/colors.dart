@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// A comprehensive color scheme for consistent theming across apps.
-///
 /// This color scheme provides all the colors needed for a modern Flutter app,
 /// including background, text, fill, stroke, and accent colors for both light
 /// and dark themes.
