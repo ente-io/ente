@@ -11,6 +11,9 @@ import "package:ente_ui/components/text_input_widget.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
+import "package:ente_lock_screen/lock_screen_settings.dart";
+import "package:ente_lock_screen/ui/lock_screen_confirm_password.dart";
+import "package:ente_lock_screen/ui/lock_screen_options.dart";
 
 /// [isChangingLockScreenSettings] Authentication required for changing lock screen settings.
 /// Set to true when the app requires the user to authenticate before allowing

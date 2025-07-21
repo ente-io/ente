@@ -8,6 +8,7 @@ import 'package:ente_ui/components/title_bar_title_widget.dart';
 import 'package:ente_ui/components/title_bar_widget.dart';
 import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:flutter/material.dart';
+import 'package:ente_lock_screen/lock_screen_settings.dart';
 
 class LockScreenAutoLock extends StatefulWidget {
   const LockScreenAutoLock({super.key});
