@@ -11,14 +11,18 @@ type EntityType string
 
 const (
 	Location EntityType = "location"
-	Person   EntityType = "person"
+	// Person entity is deprecated and will be removed in the future.
+	//Deprecated ..
+	Person EntityType = "person"
 	// CGroup is a new version of Person entity, where the data is gzipped before encryption
 	CGroup EntityType = "cgroup"
+	// SmartAlbum is a new entity type for storing smart album config data
+	SmartAlbum EntityType = "smart_album"
 )
 
 func (et EntityType) IsValid() error {
 	switch et {
-	case Location, Person, CGroup:
+	case Location, Person, CGroup, SmartAlbum:
 		return nil
 	}
 	return ente.NewBadRequestWithMessage(fmt.Sprintf("Invalid EntityType: %s", et))
