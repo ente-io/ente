@@ -26,7 +26,10 @@ dependencies:
   ente_utils:
     path: ../utils
   flutter_animate: ^4.1.0
-  flutter_local_authentication: ^1.1.11
+  flutter_local_authentication:
+    git:
+      url: https://github.com/eaceto/flutter_local_authentication
+      ref: 1ac346a04592a05fd75acccf2e01fa3c7e955d96
   flutter_secure_storage: ^9.0.0
   local_auth: ^2.1.8
   logging: ^1.1.1
