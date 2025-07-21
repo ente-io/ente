@@ -267,7 +267,6 @@ class GalleryState extends State<Gallery> {
     });
 
     widget.selectedFiles?.addListener(_selectedFilesListener);
-    // To set the initial value of scrollbar bottom padding
   }
 
   @override
