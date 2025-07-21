@@ -1,4 +1,4 @@
-name: lock_screen
+name: ente_lock_screen
 description: A Flutter package containing lock screen UI components and services for Ente apps
 version: 1.0.0
 publish_to: none
