@@ -162,7 +162,7 @@ func (m *FileLinkMiddleware) validatePassword(
 		if array.StringInList(reqPath, filePasswordWhiteListedURLs) {
 			return nil
 		}
-		return ente.ErrAuthenticationRequired
+		return &ente.ErrPassProtectedResource
 	}
 	return m.FileLinkCtrl.ValidateJWTToken(c, accessTokenJWT, *fileLinkRow.PassHash)
 }

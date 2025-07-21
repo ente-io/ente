@@ -176,6 +176,11 @@ var ErrMaxPasskeysReached = ApiError{
 	Message:        "Max passkeys limit reached",
 	HttpStatusCode: http.StatusConflict,
 }
+var ErrPassProtectedResource = ApiError{
+	Code:           "PASS_PROTECTED_RESOURCE",
+	Message:        "This resource is password protected",
+	HttpStatusCode: http.StatusForbidden,
+}
 
 var ErrCastPermissionDenied = ApiError{
 	Code:           "CAST_PERMISSION_DENIED",
