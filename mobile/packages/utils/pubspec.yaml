@@ -10,8 +10,8 @@ environment:
 dependencies:
   archive: ^4.0.7
   email_validator: ^3.0.0
-  ente_configuration:
-    path: ../../packages/configuration
+  file_saver: ^0.3.0
+  flutter_email_sender: ^7.0.0
   ente_logging:
     path: ../../packages/logging
   ente_strings:
