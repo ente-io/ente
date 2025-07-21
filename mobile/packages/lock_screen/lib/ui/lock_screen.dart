@@ -9,9 +9,9 @@ import 'package:ente_ui/utils/dialog_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:lock_screen/auth_util.dart';
-import 'package:lock_screen/lock_screen_settings.dart';
-import 'package:lock_screen/ui/app_lock.dart';
+import 'package:ente_lock_screen/auth_util.dart';
+import 'package:ente_lock_screen/lock_screen_settings.dart';
+import 'package:ente_lock_screen/ui/app_lock.dart';
 import 'package:logging/logging.dart';
 
 class LockScreen extends StatefulWidget {
