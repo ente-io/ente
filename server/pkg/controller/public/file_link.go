@@ -110,6 +110,11 @@ func (c *FileLinkController) UpdateSharedUrl(ctx *gin.Context, req ente.UpdateFi
 	return c.mapRowToFileUrl(ctx, fileLinkRow), nil
 }
 
+func (c *FileLinkController) Info(ctx *gin.Context) (*ente.File, error) {
+	accessContext := auth.MustGetFileLinkAccessContext(ctx)
+	return c.FileRepo.GetFileAttributes(accessContext.FileID)
+}
+
 // VerifyPassword verifies if the user has provided correct pw hash. If yes, it returns a signed jwt token which can be
 // used by the client to pass in other requests for public collection.
 // Having a separate endpoint for password validation allows us to easily rate-limit the attempts for brute-force

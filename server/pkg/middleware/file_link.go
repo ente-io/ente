@@ -20,7 +20,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-var filePasswordWhiteListedURLs = []string{"/file-link/info", "/file-link/verify-password"}
+var filePasswordWhiteListedURLs = []string{"/file-link/pass-info", "/file-link/verify-password"}
 
 // FileLinkMiddleware intercepts and authenticates incoming requests
 type FileLinkMiddleware struct {

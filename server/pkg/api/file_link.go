@@ -27,7 +27,14 @@ func (h *FileHandler) ShareUrl(c *gin.Context) {
 }
 
 func (h *FileHandler) LinkInfo(c *gin.Context) {
-
+	resp, err := h.FileUrlCtrl.Info(c)
+	if err != nil {
+		handler.Error(c, stacktrace.Propagate(err, ""))
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"file": resp,
+	})
 }
 
 func (h *FileHandler) LinkThumbnail(c *gin.Context) {
