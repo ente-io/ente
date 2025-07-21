@@ -348,7 +348,10 @@ class UserService {
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
             builder: (BuildContext context) {
-              return PasswordReentryPage(_homePage, _config);
+              return PasswordReentryPage(
+                _config,
+                _homePage,
+              );
             },
           ),
           (route) => route.isFirst,
@@ -426,9 +429,15 @@ class UserService {
           await _saveConfiguration(response);
           if (_config.getEncryptedToken() != null) {
             if (isResettingPasswordScreen) {
-              page = RecoveryPage(_homePage, _config);
+              page = RecoveryPage(
+                _config,
+                _homePage,
+              );
             } else {
-              page = PasswordReentryPage(_homePage, _config);
+              page = PasswordReentryPage(
+                _config,
+                _homePage,
+              );
             }
           } else {
             page = PasswordEntryPage(
@@ -837,7 +846,10 @@ class UserService {
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
             builder: (BuildContext context) {
-              return PasswordReentryPage(_homePage, _config);
+              return PasswordReentryPage(
+                _config,
+                _homePage,
+              );
             },
           ),
           (route) => route.isFirst,
@@ -1001,7 +1013,10 @@ class UserService {
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
             builder: (BuildContext context) {
-              return PasswordReentryPage(_homePage, _config);
+              return PasswordReentryPage(
+                _config,
+                _homePage,
+              );
             },
           ),
           (route) => route.isFirst,

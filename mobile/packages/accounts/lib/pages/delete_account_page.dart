@@ -13,10 +13,10 @@ import 'package:ente_utils/platform_util.dart';
 import 'package:flutter/material.dart';
 
 class DeleteAccountPage extends StatelessWidget {
-  final BaseConfiguration configuration;
+  final BaseConfiguration config;
 
   const DeleteAccountPage(
-    this.configuration, {
+    this.config, {
     super.key,
   });
 
@@ -169,9 +169,9 @@ class DeleteAccountPage extends StatelessWidget {
       final decryptChallenge = CryptoUtil.openSealSync(
         CryptoUtil.base642bin(response.encryptedChallenge),
         CryptoUtil.base642bin(
-          configuration.getKeyAttributes()!.publicKey,
+          config.getKeyAttributes()!.publicKey,
         ),
-        configuration.getSecretKey()!,
+        config.getSecretKey()!,
       );
       final challengeResponseStr = utf8.decode(decryptChallenge);
       await UserService.instance.deleteAccount(context, challengeResponseStr);

@@ -15,10 +15,14 @@ import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 
 class PasswordReentryPage extends StatefulWidget {
-  final BaseHomePage homePage;
   final BaseConfiguration config;
+  final BaseHomePage homePage;
 
-  const PasswordReentryPage(this.homePage, this.config, {super.key});
+  const PasswordReentryPage(
+    this.config,
+    this.homePage, {
+    super.key,
+  });
 
   @override
   State<PasswordReentryPage> createState() => _PasswordReentryPageState();
@@ -122,7 +126,10 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
         Navigator.of(context).push(
           MaterialPageRoute(
             builder: (BuildContext context) {
-              return RecoveryPage(widget.homePage, widget.config);
+              return RecoveryPage(
+                widget.config,
+                widget.homePage,
+              );
             },
           ),
         );
@@ -272,8 +279,8 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
                             MaterialPageRoute(
                               builder: (BuildContext context) {
                                 return RecoveryPage(
-                                  widget.homePage,
                                   widget.config,
+                                  widget.homePage,
                                 );
                               },
                             ),
