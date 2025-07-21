@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'dart:math';
 
-import 'bonus.dart';
-import 'subscription.dart';
+import 'package:ente_accounts/models/bonus.dart';
+import 'package:ente_accounts/models/subscription.dart';
 
 class UserDetails {
   final String email;
