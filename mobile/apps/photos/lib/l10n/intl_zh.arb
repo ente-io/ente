@@ -1788,5 +1788,7 @@
   "cLDesc5": "您现在将收到 Ente 上保存的所有生日的可选退出通知，同时附上他们最佳照片的合集。",
   "cLTitle6": "可恢复的上传和下载",
   "cLDesc6": "无需等待上传/下载完成即可关闭应用程序。所有上传和下载现在都可以中途暂停，并从中断处继续。",
-  "indexingPausedStatusDescription": "索引已暂停。待设备准备就绪后，索引将自动恢复。当设备的电池电量、电池健康度和温度状态处于健康范围内时，设备即被视为准备就绪。"
+  "indexingPausedStatusDescription": "索引已暂停。待设备准备就绪后，索引将自动恢复。当设备的电池电量、电池健康度和温度状态处于健康范围内时，设备即被视为准备就绪。",
+  "faceThumbnailGenerationFailed": "无法生成人脸缩略图",
+  "fileAnalysisFailed": "无法分析文件"
 }
