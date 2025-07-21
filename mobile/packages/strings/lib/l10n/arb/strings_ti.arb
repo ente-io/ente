@@ -1,12 +1,4 @@
 {
-  "networkHostLookUpErr": "Unable to connect to Ente, please check your network settings and contact support if the error persists.",
-  "@networkHostLookUpErr": {
-    "description": "Error message shown when the app cannot connect to Ente due to network host lookup failure"
-  },
-  "networkConnectionRefusedErr": "Unable to connect to Ente, please retry after sometime. If the error persists, please contact support.",
-  "@networkConnectionRefusedErr": {
-    "description": "Error message shown when the app cannot connect to Ente due to connection refused"
-  },
   "itLooksLikeSomethingWentWrongPleaseRetryAfterSome": "It looks like something went wrong. Please retry after some time. If the error persists, please contact our support team.",
   "@itLooksLikeSomethingWentWrongPleaseRetryAfterSome": {
     "description": "Generic error message for temporary issues"
@@ -23,7 +15,7 @@
   "@faq": {
     "description": "FAQ link label"
   },
-  "contactSupport": "Contact support",
+  "contactSupport": "ደገፍ ኣድራሻ",
   "@contactSupport": {
     "description": "Contact support button label"
   },
@@ -53,86 +45,9 @@
   "@cancel": {
     "description": "Cancel button label"
   },
-  "pleaseEmailUsAt": "Email us at {toEmail}",
-  "@pleaseEmailUsAt": {
-    "description": "Message showing email address for support",
-    "placeholders": {
-      "toEmail": {
-        "type": "String",
-        "description": "Support email address"
-      }
-    }
-  },
-  "emailAddressCopied": "Email address copied",
-  "@emailAddressCopied": {
-    "description": "Snackbar message when email address is copied"
-  },
-  "supportEmailSubject": "[Support]",
-  "@supportEmailSubject": {
-    "description": "Default subject for support emails"
-  },
-  "clientDebugInfoLabel": "Following information can help us in debugging if you are facing any issue",
-  "@clientDebugInfoLabel": {
-    "description": "Label for debug information in emails"
-  },
-  "registeredEmailLabel": "Registered email:",
-  "@registeredEmailLabel": {
-    "description": "Label for registered email in debug info"
-  },
-  "clientLabel": "Client:",
-  "@clientLabel": {
-    "description": "Label for client information in debug info"
-  },
-  "versionLabel": "Version :",
-  "@versionLabel": {
-    "description": "Label for version information in debug info"
-  },
-  "notAvailable": "N/A",
-  "@notAvailable": {
-    "description": "Not available text"
-  },
-
-  "reportABug": "Report a bug",
+  "reportABug": "ጌጋ ጸብጻብ ልኣኸ",
   "@reportABug": {
     "description": "Label for reporting a bug"
-  },
-  "logsDialogBody": "This will send across logs to help us debug your issue. Please note that file names will be included to help track issues with specific files.",
-  "@logsDialogBody": {
-    "description": "Body text for the logs dialog explaining what will be sent"
-  },
-  "viewLogs": "View logs",
-  "@viewLogs": {
-    "description": "Button to view logs"
-  },
-  "customEndpoint": "Connected to {endpoint}",
-  "@customEndpoint": {
-    "description": "Text showing user is connected to a custom endpoint",
-    "placeholders": {
-      "endpoint": {
-        "type": "String",
-        "description": "URL of the custom endpoint"
-      }
-    }
-  },
-  "save": "Save",
-  "@save": {
-    "description": "Label for save button"
-  },
-  "send": "Send",
-  "@send": {
-    "description": "Label for send button"
-  },
-  "saveOrSendDescription": "Do you want to save this to your storage (Downloads folder by default) or send it to other apps?",
-  "@saveOrSendDescription": {
-    "description": "Description text asking user if they want to save to storage or share with other apps"
-  },
-  "saveOnlyDescription": "Do you want to save this to your storage (Downloads folder by default)?",
-  "@saveOnlyDescription": {
-    "description": "Description text asking user if they want to save to storage (for platforms that don't support sharing)"
-  },
-  "enterNewEmailHint": "Enter your new email address",
-  "@enterNewEmailHint": {
-    "description": "Hint text for entering new email address"
   },
   "email": "Email",
   "@email": {
@@ -150,15 +65,15 @@
   "@invalidEmailMessage": {
     "description": "Message for invalid email error dialog"
   },
-  "pleaseWait": "Please wait...",
+  "pleaseWait": "በጃኻ ተጸበ...",
   "@pleaseWait": {
     "description": "Please wait message"
   },
-  "verifyPassword": "Verify password",
+  "verifyPassword": "ቃለ-ምስጢር ኣረጋግጽ",
   "@verifyPassword": {
     "description": "Verify password button label"
   },
-  "incorrectPasswordTitle": "Incorrect password",
+  "incorrectPasswordTitle": "ግጉይ ቃለ-ምስጢር",
   "@incorrectPasswordTitle": {
     "description": "Title for incorrect password error"
   },
@@ -178,7 +93,7 @@
   "@activeSessions": {
     "description": "Title for active sessions page"
   },
-  "oops": "Oops",
+  "oops": "ዉዉኡ",
   "@oops": {
     "description": "Oops error title"
   },
@@ -246,10 +161,6 @@
   "@confirmAccountDeleteTitle": {
     "description": "Title for account deletion confirmation dialog"
   },
-  "confirmAccountDeleteMessage": "This account is linked to other Ente apps, if you use any.\n\nYour uploaded data, across all Ente apps, will be scheduled for deletion, and your account will be permanently deleted.",
-  "@confirmAccountDeleteMessage": {
-    "description": "Message warning about account deletion consequences"
-  },
   "delete": "Delete",
   "@delete": {
     "description": "Delete button label"
@@ -281,7 +192,7 @@
   "@hearUsWhereTitle": {
     "description": "Title asking how user heard about Ente"
   },
-  "hearUsExplanation": "We don't track app installs. It'd help if you told us where you found us!",
+  "hearUsExplanation": "ተጠቀምትና ኣይንከታተልን ኢና። ኣበይ ከም ዝረኸብካና እንተ ትነግረና ሓጋዚ እዩ፦",
   "@hearUsExplanation": {
     "description": "Explanation for asking how user heard about Ente"
   },
@@ -309,7 +220,7 @@
   "@logInLabel": {
     "description": "Log in button label"
   },
-  "welcomeBack": "Welcome back!",
+  "welcomeBack": "እንኳዕ ብደሓን ተመለስካ!",
   "@welcomeBack": {
     "description": "Welcome back message"
   },
@@ -337,7 +248,7 @@
   "@recreatePasswordBody": {
     "description": "Body text for recreate password dialog"
   },
-  "useRecoveryKey": "Use recovery key",
+  "useRecoveryKey": "ምሕዋይ መፍትሕ ተጠቐም",
   "@useRecoveryKey": {
     "description": "Use recovery key button label"
   },
@@ -381,37 +292,9 @@
   "@resendEmail": {
     "description": "Resend email button label"
   },
-  "passKeyPendingVerification": "Verification is still pending",
-  "@passKeyPendingVerification": {
-    "description": "Message when passkey verification is pending"
-  },
-  "loginSessionExpired": "Session expired",
-  "@loginSessionExpired": {
-    "description": "Login session expired title"
-  },
-  "loginSessionExpiredDetails": "Your session has expired. Please login again.",
-  "@loginSessionExpiredDetails": {
-    "description": "Login session expired details"
-  },
-  "passkeyAuthTitle": "Passkey verification",
-  "@passkeyAuthTitle": {
-    "description": "Passkey authentication title"
-  },
-  "waitingForVerification": "Waiting for verification...",
-  "@waitingForVerification": {
-    "description": "Waiting for verification message"
-  },
   "tryAgain": "Try again",
   "@tryAgain": {
     "description": "Try again button label"
-  },
-  "checkStatus": "Check status",
-  "@checkStatus": {
-    "description": "Check status button label"
-  },
-  "loginWithTOTP": "Login with TOTP",
-  "@loginWithTOTP": {
-    "description": "Login with TOTP button label"
   },
   "recoverAccount": "Recover account",
   "@recoverAccount": {
@@ -465,15 +348,15 @@
   "@signOutOtherBody": {
     "description": "Sign out other devices explanation"
   },
-  "signOutOtherDevices": "Sign out other devices",
+  "signOutOtherDevices": "ካብ ካልኦት መሳርሒታት ኣውጽኡኒ።",
   "@signOutOtherDevices": {
     "description": "Sign out other devices button label"
   },
-  "doNotSignOut": "Do not sign out",
+  "doNotSignOut": "ኣውጽኡኒ።",
   "@doNotSignOut": {
     "description": "Do not sign out button label"
   },
-  "generatingEncryptionKeysTitle": "Generating encryption keys...",
+  "generatingEncryptionKeysTitle": "ናይ ምስጢራዊ ቁልፊ ዪፍጠር...",
   "@generatingEncryptionKeysTitle": {
     "description": "Generating encryption keys title"
   },
@@ -493,7 +376,7 @@
   "@recoveryKeyCopiedToClipboard": {
     "description": "Recovery key copied message"
   },
-  "recoveryKey": "Recovery key",
+  "recoveryKey": "ምሕዋይ መፍትሕ",
   "@recoveryKey": {
     "description": "Recovery key label"
   },
@@ -512,10 +395,6 @@
   "saveKey": "Save key",
   "@saveKey": {
     "description": "Save key button label"
-  },
-  "recoveryKeySaved": "Recovery key saved in Downloads folder!",
-  "@recoveryKeySaved": {
-    "description": "Recovery key saved confirmation message"
   },
   "noRecoveryKeyTitle": "No recovery key?",
   "@noRecoveryKeyTitle": {
@@ -541,65 +420,9 @@
   "@recover": {
     "description": "Recover button label"
   },
-  "loggingOut": "Logging out...",
+  "loggingOut": "ወጸ...",
   "@loggingOut": {
     "description": "Message shown while logging out"
-  },
-  "immediately": "Immediately",
-  "@immediately": {
-    "description": "Immediately option for auto lock timing"
-  },
-  "appLock": "App lock",
-  "@appLock": {
-    "description": "App lock setting title"
-  },
-  "autoLock": "Auto lock",
-  "@autoLock": {
-    "description": "Auto lock setting title"
-  },
-  "noSystemLockFound": "No system lock found",
-  "@noSystemLockFound": {
-    "description": "Error when no system lock is found"
-  },
-  "deviceLockEnablePreSteps": "To enable device lock, please setup device passcode or screen lock in your system settings.",
-  "@deviceLockEnablePreSteps": {
-    "description": "Instructions for enabling device lock"
-  },
-  "appLockDescription": "Choose between your device's default lock screen and a custom lock screen with a PIN or password.",
-  "@appLockDescription": {
-    "description": "Description of app lock feature"
-  },
-  "deviceLock": "Device lock",
-  "@deviceLock": {
-    "description": "Device lock option title"
-  },
-  "pinLock": "Pin lock",
-  "@pinLock": {
-    "description": "PIN lock option title"
-  },
-  "autoLockFeatureDescription": "Time after which the app locks after being put in the background",
-  "@autoLockFeatureDescription": {
-    "description": "Description of auto lock feature"
-  },
-  "hideContent": "Hide content",
-  "@hideContent": {
-    "description": "Hide content setting title"
-  },
-  "hideContentDescriptionAndroid": "Hides app content in the app switcher and disables screenshots",
-  "@hideContentDescriptionAndroid": {
-    "description": "Description of hide content feature on Android"
-  },
-  "hideContentDescriptioniOS": "Hides app content in the app switcher",
-  "@hideContentDescriptioniOS": {
-    "description": "Description of hide content feature on iOS"
-  },
-  "tooManyIncorrectAttempts": "Too many incorrect attempts",
-  "@tooManyIncorrectAttempts": {
-    "description": "Message shown when too many incorrect attempts are made"
-  },
-  "tapToUnlock": "Tap to unlock",
-  "@tapToUnlock": {
-    "description": "Message prompting user to tap to unlock"
   },
   "areYouSureYouWantToLogout": "Are you sure you want to logout?",
   "@areYouSureYouWantToLogout": {
@@ -613,33 +436,9 @@
   "@authToViewSecrets": {
     "description": "Message prompting authentication to view secrets"
   },
-  "next": "Next",
-  "@next": {
-    "description": "Next button label"
-  },
-  "setNewPassword": "Set new password",
-  "@setNewPassword": {
-    "description": "Set new password title"
-  },
-  "enterPin": "Enter PIN",
-  "@enterPin": {
-    "description": "Enter PIN prompt"
-  },
-  "setNewPin": "Set new PIN",
-  "@setNewPin": {
-    "description": "Set new PIN title"
-  },
   "confirm": "Confirm",
   "@confirm": {
     "description": "Confirm button label"
-  },
-  "reEnterPassword": "Re-enter password",
-  "@reEnterPassword": {
-    "description": "Re-enter password prompt"
-  },
-  "reEnterPin": "Re-enter PIN",
-  "@reEnterPin": {
-    "description": "Re-enter PIN prompt"
   },
   "androidBiometricHint": "Verify identity",
   "@androidBiometricHint": {
@@ -689,14 +488,6 @@
   "@iOSOkButton": {
     "description": "Message showed on a button that the user can click to leave the current dialog. It is used on iOS side. Maximum 30 characters."
   },
-  "emailAlreadyRegistered": "Email already registered.",
-  "@emailAlreadyRegistered": {
-    "description": "Error message when email is already registered"
-  },
-  "emailNotRegistered": "Email not registered.",
-  "@emailNotRegistered": {
-    "description": "Error message when email is not registered"
-  },
   "thisEmailIsAlreadyInUse": "This email is already in use",
   "@thisEmailIsAlreadyInUse": {
     "description": "Error message when email is already in use"
@@ -720,7 +511,7 @@
   "@authenticationSuccessful": {
     "description": "Success message when authentication is successful"
   },
-  "sessionExpired": "Session expired",
+  "sessionExpired": "ክፍለ ግዜኡ ኣኺሉ።",
   "@sessionExpired": {
     "description": "Error message when session has expired"
   },
@@ -735,18 +526,6 @@
   "twofactorAuthenticationSuccessfullyReset": "Two-factor authentication successfully reset",
   "@twofactorAuthenticationSuccessfullyReset": {
     "description": "Message when two-factor authentication is successfully reset"
-  },
-  "noRecoveryKey": "No recovery key",
-  "@noRecoveryKey": {
-    "description": "Error message when no recovery key is found"
-  },
-  "yourAccountHasBeenDeleted": "Your account has been deleted",
-  "@yourAccountHasBeenDeleted": {
-    "description": "Confirmation message when account has been deleted"
-  },
-  "verificationId": "Verification ID",
-  "@verificationId": {
-    "description": "Label for verification ID"
   },
   "yourVerificationCodeHasExpired": "Your verification code has expired",
   "@yourVerificationCodeHasExpired": {
