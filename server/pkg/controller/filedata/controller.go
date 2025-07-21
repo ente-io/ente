@@ -22,6 +22,7 @@ import (
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 	"net/http"
+	"strings"
 	"sync"
 	gTime "time"
 )
@@ -264,12 +265,12 @@ func (c *Controller) getS3FileMetadataParallel(ctx *gin.Context, dbRows []fileDa
 
 func (c *Controller) fetchS3FileMetadata(ctx context.Context, row fileData.Row, ctxLogger *log.Entry) (*fileData.S3FileMetadata, error) {
 	dc := row.LatestBucket
-	// :todo:neeraj make it configurable to
-	// specify preferred dc to read from
-	// and fallback logic to read from different bucket when we fail to read from preferred dc
-	if dc == "b5" {
-		if array.StringInList("b6", row.ReplicatedBuckets) {
-			dc = "b6"
+	preferredBucket := c.S3Config.GetBucketID(row.Type)
+	// If the current primary bucket is different from the latest bucket where data was written,
+	// check and use the preferred bucket if the data is replicated there.
+	if !strings.EqualFold(preferredBucket, dc) {
+		if array.StringInList(preferredBucket, row.ReplicatedBuckets) {
+			dc = preferredBucket
 		}
 	}
 	opt := _defaultFetchConfig
