@@ -703,5 +703,76 @@
   "iOSOkButton": "OK",
   "@iOSOkButton": {
     "description": "Message showed on a button that the user can click to leave the current dialog. It is used on iOS side. Maximum 30 characters."
+  },
+  "emailAlreadyRegistered": "Email already registered.",
+  "@emailAlreadyRegistered": {
+    "description": "Error message when email is already registered"
+  },
+  "emailNotRegistered": "Email not registered.",
+  "@emailNotRegistered": {
+    "description": "Error message when email is not registered"
+  },
+  "thisEmailIsAlreadyInUse": "This email is already in use",
+  "@thisEmailIsAlreadyInUse": {
+    "description": "Error message when email is already in use"
+  },
+  "emailChangedTo": "Email changed to {newEmail}",
+  "@emailChangedTo": {
+    "description": "Message when email has been changed",
+    "placeholders": {
+      "newEmail": {
+        "description": "The new email address",
+        "type": "String",
+        "example": "new@example.com"
+      }
+    }
+  },
+  "authenticationFailedPleaseTryAgain": "Authentication failed, please try again",
+  "@authenticationFailedPleaseTryAgain": {
+    "description": "Error message when authentication fails"
+  },
+  "authenticationSuccessful": "Authentication successful!",
+  "@authenticationSuccessful": {
+    "description": "Success message when authentication is successful"
+  },
+  "sessionExpired": "Session expired",
+  "@sessionExpired": {
+    "description": "Error message when session has expired"
+  },
+  "incorrectRecoveryKey": "Incorrect recovery key",
+  "@incorrectRecoveryKey": {
+    "description": "Error message when recovery key is incorrect"
+  },
+  "theRecoveryKeyYouEnteredIsIncorrect": "The recovery key you entered is incorrect",
+  "@theRecoveryKeyYouEnteredIsIncorrect": {
+    "description": "Detailed error message when recovery key is incorrect"
+  },
+  "twofactorAuthenticationSuccessfullyReset": "Two-factor authentication successfully reset",
+  "@twofactorAuthenticationSuccessfullyReset": {
+    "description": "Message when two-factor authentication is successfully reset"
+  },
+  "noRecoveryKey": "No recovery key",
+  "@noRecoveryKey": {
+    "description": "Error message when no recovery key is found"
+  },
+  "yourAccountHasBeenDeleted": "Your account has been deleted",
+  "@yourAccountHasBeenDeleted": {
+    "description": "Confirmation message when account has been deleted"
+  },
+  "verificationId": "Verification ID",
+  "@verificationId": {
+    "description": "Label for verification ID"
+  },
+  "yourVerificationCodeHasExpired": "Your verification code has expired",
+  "@yourVerificationCodeHasExpired": {
+    "description": "Error message when verification code has expired"
+  },
+  "incorrectCode": "Incorrect code",
+  "@incorrectCode": {
+    "description": "Error message when code is incorrect"
+  },
+  "sorryTheCodeYouveEnteredIsIncorrect": "Sorry, the code you've entered is incorrect",
+  "@sorryTheCodeYouveEnteredIsIncorrect": {
+    "description": "Detailed error message when code is incorrect"
   }
 }

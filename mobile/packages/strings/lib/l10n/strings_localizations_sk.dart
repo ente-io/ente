@@ -564,4 +564,66 @@ class StringsLocalizationsSk extends StringsLocalizations {
 
   @override
   String get iOSOkButton => 'OK';
+
+  @override
+  String get emailAlreadyRegistered => 'Email already registered.';
+
+  @override
+  String get emailNotRegistered => 'Email not registered.';
+
+  @override
+  String get thisEmailIsAlreadyInUse => 'This email is already in use';
+
+  @override
+  String emailChangedTo(String newEmail) {
+    return 'Email changed to $newEmail';
+  }
+
+  @override
+  String get authenticationFailedPleaseTryAgain =>
+      'Authentication failed, please try again';
+
+  @override
+  String get authenticationSuccessful => 'Authentication successful!';
+
+  @override
+  String get sessionExpired => 'Session expired';
+
+  @override
+  String get incorrectRecoveryKey => 'Incorrect recovery key';
+
+  @override
+  String get theRecoveryKeyYouEnteredIsIncorrect =>
+      'The recovery key you entered is incorrect';
+
+  @override
+  String get twofactorAuthenticationSuccessfullyReset =>
+      'Two-factor authentication successfully reset';
+
+  @override
+  String get noRecoveryKey => 'No recovery key';
+
+  @override
+  String get waitingForWifi => 'Waiting for WiFi...';
+
+  @override
+  String get youCannotDeleteYourDefaultAccount =>
+      'You cannot delete your default account';
+
+  @override
+  String get yourAccountHasBeenDeleted => 'Your account has been deleted';
+
+  @override
+  String get verificationId => 'Verification ID';
+
+  @override
+  String get yourVerificationCodeHasExpired =>
+      'Your verification code has expired';
+
+  @override
+  String get incorrectCode => 'Incorrect code';
+
+  @override
+  String get sorryTheCodeYouveEnteredIsIncorrect =>
+      'Sorry, the code you\'ve entered is incorrect';
 }

@@ -1153,6 +1153,114 @@ abstract class StringsLocalizations {
   /// In en, this message translates to:
   /// **'OK'**
   String get iOSOkButton;
+
+  /// Error message when email is already registered
+  ///
+  /// In en, this message translates to:
+  /// **'Email already registered.'**
+  String get emailAlreadyRegistered;
+
+  /// Error message when email is not registered
+  ///
+  /// In en, this message translates to:
+  /// **'Email not registered.'**
+  String get emailNotRegistered;
+
+  /// Error message when email is already in use
+  ///
+  /// In en, this message translates to:
+  /// **'This email is already in use'**
+  String get thisEmailIsAlreadyInUse;
+
+  /// Message when email has been changed
+  ///
+  /// In en, this message translates to:
+  /// **'Email changed to {newEmail}'**
+  String emailChangedTo(String newEmail);
+
+  /// Error message when authentication fails
+  ///
+  /// In en, this message translates to:
+  /// **'Authentication failed, please try again'**
+  String get authenticationFailedPleaseTryAgain;
+
+  /// Success message when authentication is successful
+  ///
+  /// In en, this message translates to:
+  /// **'Authentication successful!'**
+  String get authenticationSuccessful;
+
+  /// Error message when session has expired
+  ///
+  /// In en, this message translates to:
+  /// **'Session expired'**
+  String get sessionExpired;
+
+  /// Error message when recovery key is incorrect
+  ///
+  /// In en, this message translates to:
+  /// **'Incorrect recovery key'**
+  String get incorrectRecoveryKey;
+
+  /// Detailed error message when recovery key is incorrect
+  ///
+  /// In en, this message translates to:
+  /// **'The recovery key you entered is incorrect'**
+  String get theRecoveryKeyYouEnteredIsIncorrect;
+
+  /// Message when two-factor authentication is successfully reset
+  ///
+  /// In en, this message translates to:
+  /// **'Two-factor authentication successfully reset'**
+  String get twofactorAuthenticationSuccessfullyReset;
+
+  /// Error message when no recovery key is found
+  ///
+  /// In en, this message translates to:
+  /// **'No recovery key'**
+  String get noRecoveryKey;
+
+  /// Status message while waiting for WiFi connection
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for WiFi...'**
+  String get waitingForWifi;
+
+  /// Error message when attempting to delete the default account
+  ///
+  /// In en, this message translates to:
+  /// **'You cannot delete your default account'**
+  String get youCannotDeleteYourDefaultAccount;
+
+  /// Confirmation message when account has been deleted
+  ///
+  /// In en, this message translates to:
+  /// **'Your account has been deleted'**
+  String get yourAccountHasBeenDeleted;
+
+  /// Label for verification ID
+  ///
+  /// In en, this message translates to:
+  /// **'Verification ID'**
+  String get verificationId;
+
+  /// Error message when verification code has expired
+  ///
+  /// In en, this message translates to:
+  /// **'Your verification code has expired'**
+  String get yourVerificationCodeHasExpired;
+
+  /// Error message when code is incorrect
+  ///
+  /// In en, this message translates to:
+  /// **'Incorrect code'**
+  String get incorrectCode;
+
+  /// Detailed error message when code is incorrect
+  ///
+  /// In en, this message translates to:
+  /// **'Sorry, the code you\'ve entered is incorrect'**
+  String get sorryTheCodeYouveEnteredIsIncorrect;
 }
 
 class _StringsLocalizationsDelegate
