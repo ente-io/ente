@@ -70,3 +70,5 @@ analyzer:
     prefer_interpolation_to_compose_strings: ignore # later too many warnings
     prefer_double_quotes: ignore # too many warnings
     avoid_renaming_method_parameters: ignore # incorrect warnings for `equals` overrides
+
+include: package:flutter_lints/flutter.yaml
