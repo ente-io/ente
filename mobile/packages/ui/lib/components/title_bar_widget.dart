@@ -1,5 +1,5 @@
-import '../theme/ente_theme.dart';
-import '../components/buttons/icon_button_widget.dart';
+import 'package:ente_ui/components/buttons/icon_button_widget.dart';
+import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:flutter/material.dart';
 
 class TitleBarWidget extends StatelessWidget {

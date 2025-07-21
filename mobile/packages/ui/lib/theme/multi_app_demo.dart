@@ -1,10 +1,10 @@
 // Demo: Complete working example showing multi-app theme compatibility
 // This file demonstrates how the reusable theme system works for different apps
 
+import 'package:ente_ui/theme/colors.dart';
+import 'package:ente_ui/theme/ente_theme.dart';
+import 'package:ente_ui/theme/ente_theme_data.dart';
 import 'package:flutter/material.dart';
-import 'colors.dart';
-import 'ente_theme_data.dart';
-import 'ente_theme.dart';
 
 /// App 1: E-commerce app with blue theme
 class ECommerceApp {
@@ -210,7 +210,8 @@ class DemoHomePage extends StatelessWidget {
                 final isSelected = index == currentAppIndex;
                 return FilterChip(
                   label: Text(
-                      ['E-commerce', 'Social', 'Finance', 'Gaming'][index]),
+                    ['E-commerce', 'Social', 'Finance', 'Gaming'][index],
+                  ),
                   selected: isSelected,
                   onSelected: (_) => onAppChanged(index),
                   backgroundColor: colorScheme.fillFaint,

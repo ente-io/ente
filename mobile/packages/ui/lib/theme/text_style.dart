@@ -1,6 +1,6 @@
+import 'package:ente_ui/theme/colors.dart';
+import 'package:ente_ui/theme/platform_text_config.dart';
 import 'package:flutter/material.dart';
-import '../theme/colors.dart';
-import '../theme/platform_text_config.dart';
 
 const FontWeight _regularWeight = FontWeight.w500;
 const FontWeight _boldWeight = FontWeight.w600;

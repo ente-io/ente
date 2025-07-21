@@ -1,6 +1,6 @@
-import '../theme/colors.dart';
+import 'package:ente_ui/theme/colors.dart';
+import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:flutter/material.dart';
-import '../theme/ente_theme.dart';
 
 final lightThemeData = ThemeData(
   fontFamily: 'Inter',

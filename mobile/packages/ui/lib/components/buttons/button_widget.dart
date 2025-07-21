@@ -8,9 +8,9 @@ import 'package:ente_ui/theme/colors.dart';
 import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:ente_ui/theme/text_style.dart';
 import 'package:ente_ui/utils/dialog_util.dart';
+import 'package:ente_utils/debouncer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:ente_utils/debouncer.dart';
 
 enum ButtonSize { small, large }
 
