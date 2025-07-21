@@ -31,7 +31,6 @@ class SmartAlbumPeople extends StatefulWidget {
 class _SmartAlbumPeopleState extends State<SmartAlbumPeople> {
   final _selectedPeople = SelectedPeople();
   SmartAlbumConfig? currentConfig;
-  bool isLoading = false;
 
   @override
   void initState() {
@@ -69,10 +68,6 @@ class _SmartAlbumPeopleState extends State<SmartAlbumPeople> {
               labelText: S.of(context).save,
               shouldSurfaceExecutionStates: false,
               onTap: () async {
-                if (isLoading) return;
-
-                isLoading = true;
-
                 final dialog = createProgressDialog(
                   context,
                   S.of(context).pleaseWait,
@@ -151,9 +146,9 @@ class _SmartAlbumPeopleState extends State<SmartAlbumPeople> {
                   await SmartAlbumsService.instance.saveConfig(newConfig);
                   SmartAlbumsService.instance.syncSmartAlbums().ignore();
 
+                  await dialog.hide();
                   Navigator.pop(context);
                 } catch (e) {
-                  isLoading = false;
                   await dialog.hide();
                   await showGenericErrorDialog(context: context, error: e);
                 }
