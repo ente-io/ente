@@ -5,7 +5,7 @@ on:
     workflow_dispatch: # Allow manually running the action
 
 env:
-    FLUTTER_VERSION: "3.24.3"
+    FLUTTER_VERSION: "3.29.3"
 
 permissions:
     contents: write
