@@ -409,11 +409,10 @@ packages:
   flutter_local_authentication:
     dependency: transitive
     description:
-      path: "."
-      ref: "1ac346a04592a05fd75acccf2e01fa3c7e955d96"
-      resolved-ref: "1ac346a04592a05fd75acccf2e01fa3c7e955d96"
-      url: "https://github.com/eaceto/flutter_local_authentication"
-    source: git
+      name: flutter_local_authentication
+      sha256: eb2e471ba77fbc42b6ce8b358939dc9878dc71fcce5a482a8ddcb045563d87cd
+      url: "https://pub.dev"
+    source: hosted
     version: "1.2.0"
   flutter_localizations:
     dependency: transitive
