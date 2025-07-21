@@ -3,10 +3,10 @@ import "dart:io";
 import "dart:typed_data";
 
 import "package:ente_configuration/base_configuration.dart";
-import "package:ente_utils/platform_util.dart";
+import "package:ente_crypto_dart/ente_crypto_dart.dart";
 import "package:ente_events/event_bus.dart";
 import "package:ente_events/models/signed_out_event.dart";
-import "package:ente_crypto_dart/ente_crypto_dart.dart";
+import "package:ente_utils/platform_util.dart";
 import "package:flutter/material.dart";
 import "package:flutter_secure_storage/flutter_secure_storage.dart";
 import "package:privacy_screen/privacy_screen.dart";
