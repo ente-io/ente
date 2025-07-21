@@ -100,8 +100,10 @@ class _PeoplePageState extends State<PeoplePage> {
   }
 
   Future<List<EnteFile>> loadPersonFiles() async {
-    final result = await SearchService.instance
-        .getClusterFilesForPersonID(_person.remoteID);
+    final result = await SearchService.instance.getClusterFilesForPersonID(
+      _person.remoteID,
+      dedupeFilesAcrossClusters: true,
+    );
     if (result.isEmpty) {
       _logger.severe(
         "No files found for person with id ${_person.remoteID}, can't load files",

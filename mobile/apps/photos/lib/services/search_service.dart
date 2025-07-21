@@ -698,9 +698,12 @@ class SearchService {
   }
 
   Future<Map<String, List<EnteFile>>> getClusterFilesForPersonID(
-    String personID,
-  ) async {
+    String personID, {
+    /// If true, returned data will not have the same file in multiple clusters.
+    bool dedupeFilesAcrossClusters = false,
+  }) async {
     _logger.info('getClusterFilesForPersonID $personID');
+    final fileTags = <String>{};
     final Map<int, Set<String>> fileIdToClusterID =
         await mlDataDB.getFileIdToClusterIDSet(personID);
     _logger.info('faceDbDone getClusterFilesForPersonID $personID');
@@ -710,12 +713,18 @@ class SearchService {
       if (!fileIdToClusterID.containsKey(f.uploadedFileID ?? -1)) {
         continue;
       }
-      final cluserIds = fileIdToClusterID[f.uploadedFileID ?? -1]!;
-      for (final cluster in cluserIds) {
+      final clusterIds = fileIdToClusterID[f.uploadedFileID ?? -1]!;
+      for (final cluster in clusterIds) {
+        if (dedupeFilesAcrossClusters && fileTags.contains(f.tag)) continue;
+
         if (clusterIDToFiles.containsKey(cluster)) {
           clusterIDToFiles[cluster]!.add(f);
         } else {
           clusterIDToFiles[cluster] = [f];
+        }
+
+        if (dedupeFilesAcrossClusters) {
+          fileTags.add(f.tag);
         }
       }
     }

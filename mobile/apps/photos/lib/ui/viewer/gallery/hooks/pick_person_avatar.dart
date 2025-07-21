@@ -51,8 +51,10 @@ class PickPersonCoverPhotoWidget extends StatelessWidget {
   });
 
   Future<FileLoadResult> loadPersonFiles() async {
-    final result = await SearchService.instance
-        .getClusterFilesForPersonID(personEntity.remoteID);
+    final result = await SearchService.instance.getClusterFilesForPersonID(
+      personEntity.remoteID,
+      dedupeFilesAcrossClusters: true,
+    );
 
     final List<EnteFile> resultFiles = [];
     for (final e in result.entries) {
