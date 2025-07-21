@@ -1,7 +1,7 @@
 import "dart:typed_data";
 
-import 'key_attributes.dart';
-import 'private_key_attributes.dart';
+import 'package:ente_base/models/key_attributes.dart';
+import 'package:ente_base/models/private_key_attributes.dart';
 
 class KeyGenResult {
   final KeyAttributes keyAttributes;
