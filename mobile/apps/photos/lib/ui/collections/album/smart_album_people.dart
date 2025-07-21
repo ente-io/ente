@@ -73,7 +73,6 @@ class _SmartAlbumPeopleState extends State<SmartAlbumPeople> {
                   S.of(context).pleaseWait,
                   isDismissible: true,
                 );
-                await dialog.show();
 
                 if (_selectedPeople.personIds.length ==
                         currentConfig?.personIDs.length &&
@@ -86,6 +85,7 @@ class _SmartAlbumPeopleState extends State<SmartAlbumPeople> {
                 }
 
                 try {
+                  await dialog.show();
                   SmartAlbumConfig newConfig;
 
                   if (currentConfig == null) {
@@ -112,14 +112,15 @@ class _SmartAlbumPeopleState extends State<SmartAlbumPeople> {
                           await SmartAlbumsService.instance.removeFilesDialog(
                         context,
                       );
+                      await dialog.show();
 
                       if (toDelete) {
                         for (final personId in removedPersonIds) {
                           final files =
                               currentConfig!.infoMap[personId]?.addedFiles;
 
-                          final enteFiles =
-                              await FilesDB.instance.getFilesFromIDs(
+                          final enteFiles = await FilesDB.instance
+                              .getAllFilesGroupByCollectionID(
                             files?.toList() ?? [],
                           );
 
@@ -131,7 +132,7 @@ class _SmartAlbumPeopleState extends State<SmartAlbumPeople> {
                                 .moveFilesFromCurrentCollection(
                               context,
                               collection!,
-                              enteFiles,
+                              enteFiles[widget.collectionId] ?? [],
                               isHidden: collection.isHidden(),
                             );
                           }
