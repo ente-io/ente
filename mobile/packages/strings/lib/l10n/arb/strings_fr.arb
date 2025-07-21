@@ -700,5 +700,25 @@
   "sorryTheCodeYouveEnteredIsIncorrect": "Le code que vous avez saisi est incorrect",
   "@sorryTheCodeYouveEnteredIsIncorrect": {
     "description": "Detailed error message when code is incorrect"
+  },
+  "developerSettings": "Paramètres du développeur",
+  "@developerSettings": {
+    "description": "Label for developerSettings"
+  },
+  "serverEndpoint": "Point de terminaison serveur",
+  "@serverEndpoint": {
+    "description": "Label for serverEndpoint"
+  },
+  "invalidEndpoint": "Point de terminaison non valide",
+  "@invalidEndpoint": {
+    "description": "Label for invalidEndpoint"
+  },
+  "invalidEndpointMessage": "Désolé, le point de terminaison que vous avez entré n'est pas valide. Veuillez en entrer un valide puis réessayez.",
+  "@invalidEndpointMessage": {
+    "description": "Label for invalidEndpointMessage"
+  },
+  "endpointUpdatedMessage": "Point de terminaison mis à jour avec succès",
+  "@endpointUpdatedMessage": {
+    "description": "Label for endpointUpdatedMessage"
   }
 }

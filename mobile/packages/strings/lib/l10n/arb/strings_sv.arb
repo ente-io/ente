@@ -692,5 +692,25 @@
   "sorryTheCodeYouveEnteredIsIncorrect": "Tyvärr, den kod som du har angett är felaktig",
   "@sorryTheCodeYouveEnteredIsIncorrect": {
     "description": "Detailed error message when code is incorrect"
+  },
+  "developerSettings": "Utvecklarinställningar",
+  "@developerSettings": {
+    "description": "Label for developerSettings"
+  },
+  "serverEndpoint": "Serverns slutpunkt",
+  "@serverEndpoint": {
+    "description": "Label for serverEndpoint"
+  },
+  "invalidEndpoint": "Ogiltig slutpunkt",
+  "@invalidEndpoint": {
+    "description": "Label for invalidEndpoint"
+  },
+  "invalidEndpointMessage": "Tyvärr, slutpunkten du angav är ogiltig. Ange en giltig slutpunkt och försök igen.",
+  "@invalidEndpointMessage": {
+    "description": "Label for invalidEndpointMessage"
+  },
+  "endpointUpdatedMessage": "Slutpunkten har uppdaterats",
+  "@endpointUpdatedMessage": {
+    "description": "Label for endpointUpdatedMessage"
   }
 }

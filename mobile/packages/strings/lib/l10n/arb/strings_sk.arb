@@ -688,5 +688,25 @@
   "sorryTheCodeYouveEnteredIsIncorrect": "Ľutujeme, zadaný kód je nesprávny",
   "@sorryTheCodeYouveEnteredIsIncorrect": {
     "description": "Detailed error message when code is incorrect"
+  },
+  "developerSettings": "Nastavenia pre vývojárov",
+  "@developerSettings": {
+    "description": "Label for developerSettings"
+  },
+  "serverEndpoint": "Endpoint servera",
+  "@serverEndpoint": {
+    "description": "Label for serverEndpoint"
+  },
+  "invalidEndpoint": "Neplatný endpoint",
+  "@invalidEndpoint": {
+    "description": "Label for invalidEndpoint"
+  },
+  "invalidEndpointMessage": "Ospravedlňujeme sa, endpoint, ktorý ste zadali, je neplatný. Zadajte platný endpoint a skúste to znova.",
+  "@invalidEndpointMessage": {
+    "description": "Label for invalidEndpointMessage"
+  },
+  "endpointUpdatedMessage": "Endpoint úspešne aktualizovaný",
+  "@endpointUpdatedMessage": {
+    "description": "Label for endpointUpdatedMessage"
   }
 }

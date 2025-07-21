@@ -14,40 +14,40 @@ class StringsLocalizationsTr extends StringsLocalizations {
 
   @override
   String get networkConnectionRefusedErr =>
-      'Unable to connect to Ente, please retry after sometime. If the error persists, please contact support.';
+      'Ente\'ye bağlanılamıyor, lütfen daha sonra tekrar deneyin. Hata devam ederse, lütfen desteğe başvurun.';
 
   @override
   String get itLooksLikeSomethingWentWrongPleaseRetryAfterSome =>
-      'It looks like something went wrong. Please retry after some time. If the error persists, please contact our support team.';
+      'Bir şeyler ters gitmiş gibi görünüyor. Lütfen bir süre sonra tekrar deneyin. Hata devam ederse, lütfen destek ekibimizle iletişime geçin.';
 
   @override
-  String get error => 'Error';
+  String get error => 'Hata';
 
   @override
-  String get ok => 'Ok';
+  String get ok => 'Tamam';
 
   @override
-  String get faq => 'FAQ';
+  String get faq => 'SSS';
 
   @override
-  String get contactSupport => 'Contact support';
+  String get contactSupport => 'Destek ekibiyle iletişime geçin';
 
   @override
-  String get emailYourLogs => 'Email your logs';
+  String get emailYourLogs => 'Kayıtlarınızı e-postayla gönderin';
 
   @override
   String pleaseSendTheLogsTo(String toEmail) {
-    return 'Please send the logs to \n$toEmail';
+    return 'Lütfen kayıtları şu adrese gönderin\n$toEmail';
   }
 
   @override
-  String get copyEmailAddress => 'Copy email address';
+  String get copyEmailAddress => 'E-posta adresini kopyala';
 
   @override
-  String get exportLogs => 'Export logs';
+  String get exportLogs => 'Kayıtları dışa aktar';
 
   @override
-  String get cancel => 'Cancel';
+  String get cancel => 'İptal Et';
 
   @override
   String pleaseEmailUsAt(String toEmail) {
@@ -77,19 +77,7 @@ class StringsLocalizationsTr extends StringsLocalizations {
   String get notAvailable => 'N/A';
 
   @override
-  String get enteLogsPrefix => 'ente-logs-';
-
-  @override
-  String get logsDirectoryName => 'logs';
-
-  @override
-  String get logsZipFileName => 'logs.zip';
-
-  @override
-  String get zipFileExtension => 'zip';
-
-  @override
-  String get reportABug => 'Report a bug';
+  String get reportABug => 'Hata bildirin';
 
   @override
   String get logsDialogBody =>
@@ -100,505 +88,511 @@ class StringsLocalizationsTr extends StringsLocalizations {
 
   @override
   String customEndpoint(String endpoint) {
-    return 'Connected to $endpoint';
+    return 'Bağlandı: $endpoint';
   }
 
   @override
-  String get save => 'Save';
+  String get save => 'Kaydet';
 
   @override
-  String get send => 'Send';
+  String get send => 'Gönder';
 
   @override
   String get saveOrSendDescription =>
-      'Do you want to save this to your storage (Downloads folder by default) or send it to other apps?';
+      'Bunu belleğinize mi kaydedeceksiniz (İndirilenler klasörü varsayılandır) yoksa diğer uygulamalara mı göndereceksiniz?';
 
   @override
   String get saveOnlyDescription =>
-      'Do you want to save this to your storage (Downloads folder by default)?';
+      'Bunu belleğinize kaydetmek ister misiniz? (İndirilenler klasörü varsayılandır)';
 
   @override
-  String get enterNewEmailHint => 'Enter your new email address';
+  String get enterNewEmailHint => 'Yeni e-posta adresinizi girin';
 
   @override
-  String get email => 'Email';
+  String get email => 'E-Posta';
 
   @override
-  String get verify => 'Verify';
+  String get verify => 'Doğrula';
 
   @override
-  String get invalidEmailTitle => 'Invalid email address';
+  String get invalidEmailTitle => 'Geçersiz e-posta adresi';
 
   @override
-  String get invalidEmailMessage => 'Please enter a valid email address.';
+  String get invalidEmailMessage => 'Lütfen geçerli bir e-posta adresi girin.';
 
   @override
-  String get pleaseWait => 'Please wait...';
+  String get pleaseWait => 'Lütfen bekleyin...';
 
   @override
-  String get verifyPassword => 'Verify password';
+  String get verifyPassword => 'Şifreyi doğrulayın';
 
   @override
-  String get incorrectPasswordTitle => 'Incorrect password';
+  String get incorrectPasswordTitle => 'Yanlış şifre';
 
   @override
-  String get pleaseTryAgain => 'Please try again';
+  String get pleaseTryAgain => 'Lütfen tekrar deneyin';
 
   @override
-  String get enterPassword => 'Enter password';
+  String get enterPassword => 'Şifreyi girin';
 
   @override
-  String get enterYourPasswordHint => 'Enter your password';
+  String get enterYourPasswordHint => 'Parolanızı girin';
 
   @override
-  String get activeSessions => 'Active sessions';
+  String get activeSessions => 'Aktif oturumlar';
 
   @override
-  String get oops => 'Oops';
+  String get oops => 'Hay aksi';
 
   @override
   String get somethingWentWrongPleaseTryAgain =>
-      'Something went wrong, please try again';
+      'Bir şeyler ters gitti, lütfen tekrar deneyin';
 
   @override
   String get thisWillLogYouOutOfThisDevice =>
-      'This will log you out of this device!';
+      'Bu sizin bu cihazdaki oturumunuzu kapatacaktır!';
 
   @override
   String get thisWillLogYouOutOfTheFollowingDevice =>
-      'This will log you out of the following device:';
+      'Bu, aşağıdaki cihazdan çıkış yapmanızı sağlayacaktır:';
 
   @override
-  String get terminateSession => 'Terminate session?';
+  String get terminateSession => 'Oturumu sonlandır?';
 
   @override
-  String get terminate => 'Terminate';
+  String get terminate => 'Sonlandır';
 
   @override
-  String get thisDevice => 'This device';
+  String get thisDevice => 'Bu cihaz';
 
   @override
-  String get createAccount => 'Create account';
+  String get createAccount => 'Hesap oluştur';
 
   @override
-  String get weakStrength => 'Weak';
+  String get weakStrength => 'Zayıf';
 
   @override
-  String get moderateStrength => 'Moderate';
+  String get moderateStrength => 'Orta';
 
   @override
-  String get strongStrength => 'Strong';
+  String get strongStrength => 'Güçlü';
 
   @override
-  String get deleteAccount => 'Delete account';
+  String get deleteAccount => 'Hesabı sil';
 
   @override
   String get deleteAccountQuery =>
-      'We\'ll be sorry to see you go. Are you facing some issue?';
+      'Sizin gittiğinizi görmekten üzüleceğiz. Bazı problemlerle mi karşılaşıyorsunuz?';
 
   @override
-  String get yesSendFeedbackAction => 'Yes, send feedback';
+  String get yesSendFeedbackAction => 'Evet, geri bildirimi gönder';
 
   @override
-  String get noDeleteAccountAction => 'No, delete account';
+  String get noDeleteAccountAction => 'Hayır, hesabı sil';
 
   @override
   String get initiateAccountDeleteTitle =>
-      'Please authenticate to initiate account deletion';
+      'Hesap silme işlemini yapabilmek için lütfen kimliğinizi doğrulayın';
 
   @override
-  String get confirmAccountDeleteTitle => 'Confirm account deletion';
+  String get confirmAccountDeleteTitle => 'Hesap silme işlemini onayla';
 
   @override
   String get confirmAccountDeleteMessage =>
-      'This account is linked to other Ente apps, if you use any.\n\nYour uploaded data, across all Ente apps, will be scheduled for deletion, and your account will be permanently deleted.';
+      'Kullandığınız Ente uygulamaları varsa bu hesap diğer Ente uygulamalarıyla bağlantılıdır.\n\nTüm Ente uygulamalarına yüklediğiniz veriler ve hesabınız kalıcı olarak silinecektir.';
 
   @override
-  String get delete => 'Delete';
+  String get delete => 'Sil';
 
   @override
-  String get createNewAccount => 'Create new account';
+  String get createNewAccount => 'Yeni hesap oluşturun';
 
   @override
-  String get password => 'Password';
+  String get password => 'Şifre';
 
   @override
-  String get confirmPassword => 'Confirm password';
+  String get confirmPassword => 'Şifreyi onayla';
 
   @override
   String passwordStrength(String passwordStrengthValue) {
-    return 'Password strength: $passwordStrengthValue';
+    return 'Şifre gücü: $passwordStrengthValue';
   }
 
   @override
-  String get hearUsWhereTitle => 'How did you hear about Ente? (optional)';
+  String get hearUsWhereTitle => 'Ente\'yi nereden duydunuz? (opsiyonel)';
 
   @override
   String get hearUsExplanation =>
-      'We don\'t track app installs. It\'d help if you told us where you found us!';
+      'Biz uygulama kurulumlarını takip etmiyoruz. Bizi nereden duyduğunuzdan bahsetmeniz bize çok yardımcı olacak!';
 
   @override
   String get signUpTerms =>
-      'I agree to the <u-terms>terms of service</u-terms> and <u-policy>privacy policy</u-policy>';
+      '<u-terms>Kullanım şartları</u-terms>nı ve <u-policy>gizlilik politikası</u-policy>nı kabul ediyorum';
 
   @override
-  String get termsOfServicesTitle => 'Terms';
+  String get termsOfServicesTitle => 'Şartlar';
 
   @override
-  String get privacyPolicyTitle => 'Privacy Policy';
+  String get privacyPolicyTitle => 'Gizlilik Politikası';
 
   @override
   String get ackPasswordLostWarning =>
-      'I understand that if I lose my password, I may lose my data since my data is <underline>end-to-end encrypted</underline>.';
+      'Eğer şifremi kaybedersem, verilerim <underline> uçtan uca şifrelendiğinden </underline> verilerimi kaybedebileceğimi anladım.';
 
   @override
-  String get encryption => 'Encryption';
+  String get encryption => 'Şifreleme';
 
   @override
-  String get logInLabel => 'Log in';
+  String get logInLabel => 'Giriş yapın';
 
   @override
-  String get welcomeBack => 'Welcome back!';
+  String get welcomeBack => 'Tekrar hoş geldiniz!';
 
   @override
   String get loginTerms =>
-      'By clicking log in, I agree to the <u-terms>terms of service</u-terms> and <u-policy>privacy policy</u-policy>';
+      'Giriş yaparak, <u-terms> kullanım şartları </u-terms>nı ve <u-policy> gizlilik politikası </u-policy>nı onaylıyorum';
 
   @override
-  String get noInternetConnection => 'No internet connection';
+  String get noInternetConnection => 'İnternet bağlantısı yok';
 
   @override
   String get pleaseCheckYourInternetConnectionAndTryAgain =>
-      'Please check your internet connection and try again.';
+      'Lütfen internet bağlantınızı kontrol edin ve yeniden deneyin.';
 
   @override
   String get verificationFailedPleaseTryAgain =>
-      'Verification failed, please try again';
+      'Doğrulama başarısız oldu, lütfen tekrar deneyin';
 
   @override
-  String get recreatePasswordTitle => 'Recreate password';
+  String get recreatePasswordTitle => 'Şifreyi yeniden oluştur';
 
   @override
   String get recreatePasswordBody =>
-      'The current device is not powerful enough to verify your password, but we can regenerate in a way that works with all devices.\n\nPlease login using your recovery key and regenerate your password (you can use the same one again if you wish).';
+      'Mevcut cihaz şifrenizi doğrulayacak kadar güçlü değil, ancak tüm cihazlarla çalışacak şekilde yeniden oluşturabiliriz.\n\nLütfen kurtarma anahtarınızı kullanarak giriş yapın ve şifrenizi yeniden oluşturun (isterseniz aynı şifreyi tekrar kullanabilirsiniz).';
 
   @override
-  String get useRecoveryKey => 'Use recovery key';
+  String get useRecoveryKey => 'Kurtarma anahtarını kullan';
 
   @override
-  String get forgotPassword => 'Forgot password';
+  String get forgotPassword => 'Şifremi unuttum';
 
   @override
-  String get changeEmail => 'Change email';
+  String get changeEmail => 'E-posta adresini değiştir';
 
   @override
-  String get verifyEmail => 'Verify email';
+  String get verifyEmail => 'E-posta adresini doğrulayın';
 
   @override
   String weHaveSendEmailTo(String email) {
-    return 'We have sent a mail to <green>$email</green>';
+    return '<green>$email</green> adresine bir posta gönderdik';
   }
 
   @override
   String get toResetVerifyEmail =>
-      'To reset your password, please verify your email first.';
+      'Şifrenizi sıfırlamak için lütfen önce e-postanızı doğrulayın.';
 
   @override
   String get checkInboxAndSpamFolder =>
-      'Please check your inbox (and spam) to complete verification';
+      'Doğrulamayı tamamlamak için lütfen gelen kutunuzu (ve spam kutunuzu) kontrol edin';
 
   @override
-  String get tapToEnterCode => 'Tap to enter code';
+  String get tapToEnterCode => 'Kodu girmek için dokunun';
 
   @override
-  String get sendEmail => 'Send email';
+  String get sendEmail => 'E-posta gönder';
 
   @override
-  String get resendEmail => 'Resend email';
+  String get resendEmail => 'E-postayı yeniden gönder';
 
   @override
-  String get passKeyPendingVerification => 'Verification is still pending';
+  String get passKeyPendingVerification => 'Doğrulama hala bekliyor';
 
   @override
-  String get loginSessionExpired => 'Session expired';
+  String get loginSessionExpired => 'Oturum süresi doldu';
 
   @override
   String get loginSessionExpiredDetails =>
-      'Your session has expired. Please login again.';
+      'Oturum süreniz doldu. Tekrar giriş yapın.';
 
   @override
-  String get passkeyAuthTitle => 'Passkey verification';
+  String get passkeyAuthTitle => 'Geçiş anahtarı doğrulaması';
 
   @override
-  String get waitingForVerification => 'Waiting for verification...';
+  String get waitingForVerification => 'Doğrulama bekleniyor...';
 
   @override
-  String get tryAgain => 'Try again';
+  String get tryAgain => 'Tekrar deneyin';
 
   @override
-  String get checkStatus => 'Check status';
+  String get checkStatus => 'Durumu kontrol et';
 
   @override
-  String get loginWithTOTP => 'Login with TOTP';
+  String get loginWithTOTP => 'TOTP ile giriş yap';
 
   @override
-  String get recoverAccount => 'Recover account';
+  String get recoverAccount => 'Hesap kurtarma';
 
   @override
-  String get setPasswordTitle => 'Set password';
+  String get setPasswordTitle => 'Şifre belirleyin';
 
   @override
-  String get changePasswordTitle => 'Change password';
+  String get changePasswordTitle => 'Şifreyi değiştirin';
 
   @override
-  String get resetPasswordTitle => 'Reset password';
+  String get resetPasswordTitle => 'Şifreyi sıfırlayın';
 
   @override
-  String get encryptionKeys => 'Encryption keys';
+  String get encryptionKeys => 'Şifreleme anahtarları';
 
   @override
   String get enterPasswordToEncrypt =>
-      'Enter a password we can use to encrypt your data';
+      'Verilerinizi şifrelemek için kullanabileceğimiz bir şifre girin';
 
   @override
   String get enterNewPasswordToEncrypt =>
-      'Enter a new password we can use to encrypt your data';
+      'Verilerinizi şifrelemek için kullanabileceğimiz yeni bir şifre girin';
 
   @override
   String get passwordWarning =>
-      'We don\'t store this password, so if you forget, <underline>we cannot decrypt your data</underline>';
+      'Bu şifreyi saklamıyoruz, bu nedenle unutursanız, <underline>verilerinizin şifresini çözemeyiz</underline>';
 
   @override
-  String get howItWorks => 'How it works';
+  String get howItWorks => 'Nasıl çalışır';
 
   @override
-  String get generatingEncryptionKeys => 'Generating encryption keys...';
+  String get generatingEncryptionKeys =>
+      'Şifreleme anahtarları oluşturuluyor...';
 
   @override
-  String get passwordChangedSuccessfully => 'Password changed successfully';
+  String get passwordChangedSuccessfully => 'Şifre başarıyla değiştirildi';
 
   @override
-  String get signOutFromOtherDevices => 'Sign out from other devices';
+  String get signOutFromOtherDevices => 'Diğer cihazlardan çıkış yap';
 
   @override
   String get signOutOtherBody =>
-      'If you think someone might know your password, you can force all other devices using your account to sign out.';
+      'Eğer başka birisinin parolanızı bildiğini düşünüyorsanız, diğer tüm cihazları hesabınızdan çıkışa zorlayabilirsiniz.';
 
   @override
-  String get signOutOtherDevices => 'Sign out other devices';
+  String get signOutOtherDevices => 'Diğer cihazlardan çıkış yap';
 
   @override
-  String get doNotSignOut => 'Do not sign out';
+  String get doNotSignOut => 'Çıkış yapma';
 
   @override
-  String get generatingEncryptionKeysTitle => 'Generating encryption keys...';
+  String get generatingEncryptionKeysTitle =>
+      'Şifreleme anahtarları üretiliyor...';
 
   @override
-  String get continueLabel => 'Continue';
+  String get continueLabel => 'Devam et';
 
   @override
-  String get insecureDevice => 'Insecure device';
+  String get insecureDevice => 'Güvenli olmayan cihaz';
 
   @override
   String get sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease =>
-      'Sorry, we could not generate secure keys on this device.\n\nplease sign up from a different device.';
+      'Üzgünüz, bu cihazda güvenli anahtarlar oluşturamadık.\n\nlütfen farklı bir cihazdan kaydolun.';
 
   @override
-  String get recoveryKeyCopiedToClipboard => 'Recovery key copied to clipboard';
+  String get recoveryKeyCopiedToClipboard =>
+      'Kurtarma anahtarı panoya kopyalandı';
 
   @override
-  String get recoveryKey => 'Recovery key';
+  String get recoveryKey => 'Kurtarma Anahtarı';
 
   @override
   String get recoveryKeyOnForgotPassword =>
-      'If you forget your password, the only way you can recover your data is with this key.';
+      'Eğer şifrenizi unutursanız, verilerinizi kurtarabileceğiniz tek yol bu anahtardır.';
 
   @override
   String get recoveryKeySaveDescription =>
-      'We don\'t store this key, please save this 24 word key in a safe place.';
+      'Biz bu anahtarı saklamıyoruz, lütfen. bu 24 kelimelik anahtarı güvenli bir yerde saklayın.';
 
   @override
-  String get doThisLater => 'Do this later';
+  String get doThisLater => 'Bunu daha sonra yap';
 
   @override
-  String get saveKey => 'Save key';
+  String get saveKey => 'Anahtarı kaydet';
 
   @override
-  String get recoveryKeySaved => 'Recovery key saved in Downloads folder!';
+  String get recoveryKeySaved =>
+      'Kurtarma anahtarı İndirilenler klasörüne kaydedildi!';
 
   @override
-  String get noRecoveryKeyTitle => 'No recovery key?';
+  String get noRecoveryKeyTitle => 'Kurtarma anahtarınız yok mu?';
 
   @override
-  String get twoFactorAuthTitle => 'Two-factor authentication';
+  String get twoFactorAuthTitle => 'İki faktörlü kimlik doğrulama';
 
   @override
   String get enterCodeHint =>
-      'Enter the 6-digit code from\nyour authenticator app';
+      'Kimlik doğrulayıcı uygulamanızdaki 6 haneli doğrulama kodunu girin';
 
   @override
-  String get lostDeviceTitle => 'Lost device?';
+  String get lostDeviceTitle => 'Cihazınızı mı kaybettiniz?';
 
   @override
-  String get enterRecoveryKeyHint => 'Enter your recovery key';
+  String get enterRecoveryKeyHint => 'Kurtarma anahtarınızı girin';
 
   @override
-  String get recover => 'Recover';
+  String get recover => 'Kurtar';
 
   @override
-  String get loggingOut => 'Logging out...';
+  String get loggingOut => 'Çıkış yapılıyor...';
 
   @override
-  String get immediately => 'Immediately';
+  String get immediately => 'Hemen';
 
   @override
-  String get appLock => 'App lock';
+  String get appLock => 'Uygulama kilidi';
 
   @override
-  String get autoLock => 'Auto lock';
+  String get autoLock => 'Otomatik Kilit';
 
   @override
-  String get noSystemLockFound => 'No system lock found';
+  String get noSystemLockFound => 'Sistem kilidi bulunamadı';
 
   @override
   String get deviceLockEnablePreSteps =>
-      'To enable device lock, please setup device passcode or screen lock in your system settings.';
+      'Cihaz kilidini etkinleştirmek için, lütfen cihaz şifresini veya ekran kilidini ayarlayın.';
 
   @override
   String get appLockDescription =>
-      'Choose between your device\'s default lock screen and a custom lock screen with a PIN or password.';
+      'Cihazınızın varsayılan kilit ekranı ile PIN veya parola içeren özel bir kilit ekranı arasında seçim yapın.';
 
   @override
-  String get deviceLock => 'Device lock';
+  String get deviceLock => 'Cihaz kilidi';
 
   @override
-  String get pinLock => 'Pin lock';
+  String get pinLock => 'Pin kilidi';
 
   @override
   String get autoLockFeatureDescription =>
-      'Time after which the app locks after being put in the background';
+      'Uygulamayı arka plana attıktan sonra kilitlendiği süre';
 
   @override
-  String get hideContent => 'Hide content';
+  String get hideContent => 'İçeriği gizle';
 
   @override
   String get hideContentDescriptionAndroid =>
-      'Hides app content in the app switcher and disables screenshots';
+      'Uygulama değiştiricide bulunan uygulama içeriğini gizler ve ekran görüntülerini devre dışı bırakır';
 
   @override
   String get hideContentDescriptioniOS =>
-      'Hides app content in the app switcher';
+      'Uygulama değiştiricideki uygulama içeriğini gizler';
 
   @override
-  String get tooManyIncorrectAttempts => 'Too many incorrect attempts';
+  String get tooManyIncorrectAttempts => 'Çok fazla hatalı deneme';
 
   @override
-  String get tapToUnlock => 'Tap to unlock';
+  String get tapToUnlock => 'Açmak için dokun';
 
   @override
-  String get areYouSureYouWantToLogout => 'Are you sure you want to logout?';
+  String get areYouSureYouWantToLogout =>
+      'Çıkış yapmak istediğinize emin misiniz?';
 
   @override
-  String get yesLogout => 'Yes, logout';
+  String get yesLogout => 'Evet, çıkış yap';
 
   @override
-  String get authToViewSecrets => 'Please authenticate to view your secrets';
+  String get authToViewSecrets =>
+      'Kodlarınızı görmek için lütfen kimlik doğrulaması yapın';
 
   @override
-  String get next => 'Next';
+  String get next => 'Sonraki';
 
   @override
-  String get setNewPassword => 'Set new password';
+  String get setNewPassword => 'Yeni şifre belirle';
 
   @override
-  String get enterPin => 'Enter PIN';
+  String get enterPin => 'PIN Girin';
 
   @override
-  String get setNewPin => 'Set new PIN';
+  String get setNewPin => 'Yeni PIN belirleyin';
 
   @override
-  String get confirm => 'Confirm';
+  String get confirm => 'Doğrula';
 
   @override
-  String get reEnterPassword => 'Re-enter password';
+  String get reEnterPassword => 'Şifrenizi tekrar girin';
 
   @override
-  String get reEnterPin => 'Re-enter PIN';
+  String get reEnterPin => 'PIN\'inizi tekrar girin';
 
   @override
-  String get androidBiometricHint => 'Verify identity';
+  String get androidBiometricHint => 'Kimliği doğrula';
 
   @override
-  String get androidBiometricNotRecognized => 'Not recognized. Try again.';
+  String get androidBiometricNotRecognized => 'Tanınmadı. Tekrar deneyin.';
 
   @override
-  String get androidBiometricSuccess => 'Success';
+  String get androidBiometricSuccess => 'Başarılı';
 
   @override
-  String get androidCancelButton => 'Cancel';
+  String get androidCancelButton => 'İptal et';
 
   @override
-  String get androidSignInTitle => 'Authentication required';
+  String get androidSignInTitle => 'Kimlik doğrulaması gerekli';
 
   @override
-  String get androidBiometricRequiredTitle => 'Biometric required';
+  String get androidBiometricRequiredTitle => 'Biyometrik gerekli';
 
   @override
   String get androidDeviceCredentialsRequiredTitle =>
-      'Device credentials required';
+      'Cihaz kimlik bilgileri gerekli';
 
   @override
   String get androidDeviceCredentialsSetupDescription =>
-      'Device credentials required';
+      'Cihaz kimlik bilgileri gerekmekte';
 
   @override
-  String get goToSettings => 'Go to settings';
+  String get goToSettings => 'Ayarlara git';
 
   @override
   String get androidGoToSettingsDescription =>
-      'Biometric authentication is not set up on your device. Go to \'Settings > Security\' to add biometric authentication.';
+      'Biyometrik kimlik doğrulama cihazınızda ayarlanmamış. Biyometrik kimlik doğrulama eklemek için \'Ayarlar > Güvenlik\' bölümüne gidin.';
 
   @override
   String get iOSLockOut =>
-      'Biometric authentication is disabled. Please lock and unlock your screen to enable it.';
+      'Biyometrik kimlik doğrulama devre dışı. Etkinleştirmek için lütfen ekranınızı kilitleyin ve kilidini açın.';
 
   @override
-  String get iOSOkButton => 'OK';
+  String get iOSOkButton => 'Tamam';
 
   @override
-  String get emailAlreadyRegistered => 'Email already registered.';
+  String get emailAlreadyRegistered => 'E-posta zaten kayıtlı.';
 
   @override
-  String get emailNotRegistered => 'Email not registered.';
+  String get emailNotRegistered => 'E-posta kayıtlı değil.';
 
   @override
-  String get thisEmailIsAlreadyInUse => 'This email is already in use';
+  String get thisEmailIsAlreadyInUse => 'Bu e-posta zaten kullanılıyor';
 
   @override
   String emailChangedTo(String newEmail) {
-    return 'Email changed to $newEmail';
+    return 'E-posta $newEmail olarak değiştirildi';
   }
 
   @override
   String get authenticationFailedPleaseTryAgain =>
-      'Authentication failed, please try again';
+      'Kimlik doğrulama başarısız oldu, lütfen tekrar deneyin';
 
   @override
-  String get authenticationSuccessful => 'Authentication successful!';
+  String get authenticationSuccessful => 'Kimlik doğrulama başarılı!';
 
   @override
-  String get sessionExpired => 'Session expired';
+  String get sessionExpired => 'Oturum süresi doldu';
 
   @override
-  String get incorrectRecoveryKey => 'Incorrect recovery key';
+  String get incorrectRecoveryKey => 'Yanlış kurtarma kodu';
 
   @override
   String get theRecoveryKeyYouEnteredIsIncorrect =>
-      'The recovery key you entered is incorrect';
+      'Girdiğiniz kurtarma kodu yanlış';
 
   @override
   String get twofactorAuthenticationSuccessfullyReset =>
-      'Two-factor authentication successfully reset';
+      'İki faktörlü kimlik doğrulama başarıyla sıfırlandı';
 
   @override
   String get noRecoveryKey => 'No recovery key';
@@ -611,12 +605,28 @@ class StringsLocalizationsTr extends StringsLocalizations {
 
   @override
   String get yourVerificationCodeHasExpired =>
-      'Your verification code has expired';
+      'Doğrulama kodunuzun süresi doldu';
 
   @override
-  String get incorrectCode => 'Incorrect code';
+  String get incorrectCode => 'Yanlış kod';
 
   @override
   String get sorryTheCodeYouveEnteredIsIncorrect =>
-      'Sorry, the code you\'ve entered is incorrect';
+      'Üzgünüz, girdiğiniz kod yanlış';
+
+  @override
+  String get developerSettings => 'Geliştirici ayarları';
+
+  @override
+  String get serverEndpoint => 'Sunucu uç noktası';
+
+  @override
+  String get invalidEndpoint => 'Geçersiz uç nokta';
+
+  @override
+  String get invalidEndpointMessage =>
+      'Üzgünüz, girdiğiniz uç nokta geçersiz. Lütfen geçerli bir uç nokta girin ve tekrar deneyin.';
+
+  @override
+  String get endpointUpdatedMessage => 'Uç nokta başarıyla güncellendi';
 }

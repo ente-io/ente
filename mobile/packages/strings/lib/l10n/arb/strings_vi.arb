@@ -696,5 +696,25 @@
   "sorryTheCodeYouveEnteredIsIncorrect": "Xin lỗi, mã bạn đã nhập không chính xác",
   "@sorryTheCodeYouveEnteredIsIncorrect": {
     "description": "Detailed error message when code is incorrect"
+  },
+  "developerSettings": "Cài đặt cho nhà phát triển",
+  "@developerSettings": {
+    "description": "Label for developerSettings"
+  },
+  "serverEndpoint": "Điểm cuối máy chủ",
+  "@serverEndpoint": {
+    "description": "Label for serverEndpoint"
+  },
+  "invalidEndpoint": "Điểm cuối không hợp lệ",
+  "@invalidEndpoint": {
+    "description": "Label for invalidEndpoint"
+  },
+  "invalidEndpointMessage": "Xin lỗi, điểm cuối bạn nhập không hợp lệ. Vui lòng nhập một điểm cuối hợp lệ và thử lại.",
+  "@invalidEndpointMessage": {
+    "description": "Label for invalidEndpointMessage"
+  },
+  "endpointUpdatedMessage": "Cập nhật điểm cuối thành công",
+  "@endpointUpdatedMessage": {
+    "description": "Label for endpointUpdatedMessage"
   }
 }

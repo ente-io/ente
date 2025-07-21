@@ -77,18 +77,6 @@ class StringsLocalizationsEn extends StringsLocalizations {
   String get notAvailable => 'N/A';
 
   @override
-  String get enteLogsPrefix => 'ente-logs-';
-
-  @override
-  String get logsDirectoryName => 'logs';
-
-  @override
-  String get logsZipFileName => 'logs.zip';
-
-  @override
-  String get zipFileExtension => 'zip';
-
-  @override
   String get reportABug => 'Report a bug';
 
   @override
@@ -619,4 +607,20 @@ class StringsLocalizationsEn extends StringsLocalizations {
   @override
   String get sorryTheCodeYouveEnteredIsIncorrect =>
       'Sorry, the code you\'ve entered is incorrect';
+
+  @override
+  String get developerSettings => 'Developer settings';
+
+  @override
+  String get serverEndpoint => 'Server endpoint';
+
+  @override
+  String get invalidEndpoint => 'Invalid endpoint';
+
+  @override
+  String get invalidEndpointMessage =>
+      'Sorry, the endpoint you entered is invalid. Please enter a valid endpoint and try again.';
+
+  @override
+  String get endpointUpdatedMessage => 'Endpoint updated successfully';
 }

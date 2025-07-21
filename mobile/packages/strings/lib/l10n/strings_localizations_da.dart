@@ -14,40 +14,40 @@ class StringsLocalizationsDa extends StringsLocalizations {
 
   @override
   String get networkConnectionRefusedErr =>
-      'Unable to connect to Ente, please retry after sometime. If the error persists, please contact support.';
+      'Ude af stand til at forbinde til Ente. Forsøg igen efter et stykke tid. Hvis fejlen varer ved, kontakt da venligst support.';
 
   @override
   String get itLooksLikeSomethingWentWrongPleaseRetryAfterSome =>
-      'It looks like something went wrong. Please retry after some time. If the error persists, please contact our support team.';
+      'Det ser ud til at noget gik galt. Forsøg venligst igen efter lidt tid. Hvis fejlen varer ved, kontakt da venligst support.';
 
   @override
-  String get error => 'Error';
+  String get error => 'Fejl';
 
   @override
-  String get ok => 'Ok';
+  String get ok => 'OK';
 
   @override
   String get faq => 'FAQ';
 
   @override
-  String get contactSupport => 'Contact support';
+  String get contactSupport => 'Kontakt support';
 
   @override
-  String get emailYourLogs => 'Email your logs';
+  String get emailYourLogs => 'Email dine logs';
 
   @override
   String pleaseSendTheLogsTo(String toEmail) {
-    return 'Please send the logs to \n$toEmail';
+    return 'Send venligst logs til $toEmail';
   }
 
   @override
-  String get copyEmailAddress => 'Copy email address';
+  String get copyEmailAddress => 'Kopier email adresse';
 
   @override
-  String get exportLogs => 'Export logs';
+  String get exportLogs => 'Eksporter logs';
 
   @override
-  String get cancel => 'Cancel';
+  String get cancel => 'Afbryd';
 
   @override
   String pleaseEmailUsAt(String toEmail) {
@@ -77,19 +77,7 @@ class StringsLocalizationsDa extends StringsLocalizations {
   String get notAvailable => 'N/A';
 
   @override
-  String get enteLogsPrefix => 'ente-logs-';
-
-  @override
-  String get logsDirectoryName => 'logs';
-
-  @override
-  String get logsZipFileName => 'logs.zip';
-
-  @override
-  String get zipFileExtension => 'zip';
-
-  @override
-  String get reportABug => 'Report a bug';
+  String get reportABug => 'Rapporter en fejl';
 
   @override
   String get logsDialogBody =>
@@ -100,22 +88,22 @@ class StringsLocalizationsDa extends StringsLocalizations {
 
   @override
   String customEndpoint(String endpoint) {
-    return 'Connected to $endpoint';
+    return 'Forbindelse oprettet til $endpoint';
   }
 
   @override
-  String get save => 'Save';
+  String get save => 'Gem';
 
   @override
   String get send => 'Send';
 
   @override
   String get saveOrSendDescription =>
-      'Do you want to save this to your storage (Downloads folder by default) or send it to other apps?';
+      'Vil du gemme på din enhed (Downloads mappe som udgangspunkt) eller sende til andre apps?';
 
   @override
   String get saveOnlyDescription =>
-      'Do you want to save this to your storage (Downloads folder by default)?';
+      'Vil du gemme på din enhed (Downloads mappe som udgangspunkt)?';
 
   @override
   String get enterNewEmailHint => 'Enter your new email address';
@@ -124,443 +112,445 @@ class StringsLocalizationsDa extends StringsLocalizations {
   String get email => 'Email';
 
   @override
-  String get verify => 'Verify';
+  String get verify => 'Bekræft';
 
   @override
-  String get invalidEmailTitle => 'Invalid email address';
+  String get invalidEmailTitle => 'Ugyldig email adresse';
 
   @override
-  String get invalidEmailMessage => 'Please enter a valid email address.';
+  String get invalidEmailMessage => 'Indtast en gyldig email adresse.';
 
   @override
-  String get pleaseWait => 'Please wait...';
+  String get pleaseWait => 'Vent venligst...';
 
   @override
-  String get verifyPassword => 'Verify password';
+  String get verifyPassword => 'Bekræft adgangskode';
 
   @override
-  String get incorrectPasswordTitle => 'Incorrect password';
+  String get incorrectPasswordTitle => 'Forkert adgangskode';
 
   @override
-  String get pleaseTryAgain => 'Please try again';
+  String get pleaseTryAgain => 'Forsøg venligst igen';
 
   @override
-  String get enterPassword => 'Enter password';
+  String get enterPassword => 'Indtast adgangskode';
 
   @override
-  String get enterYourPasswordHint => 'Enter your password';
+  String get enterYourPasswordHint => 'Indtast adgangskode';
 
   @override
-  String get activeSessions => 'Active sessions';
+  String get activeSessions => 'Aktive sessioner';
 
   @override
-  String get oops => 'Oops';
+  String get oops => 'Ups';
 
   @override
   String get somethingWentWrongPleaseTryAgain =>
-      'Something went wrong, please try again';
+      'Noget gik galt, forsøg venligst igen';
 
   @override
   String get thisWillLogYouOutOfThisDevice =>
-      'This will log you out of this device!';
+      'Dette vil logge dig ud af denne enhed!';
 
   @override
   String get thisWillLogYouOutOfTheFollowingDevice =>
-      'This will log you out of the following device:';
+      'Dette vil logge dig ud af den følgende enhed:';
 
   @override
-  String get terminateSession => 'Terminate session?';
+  String get terminateSession => 'Afslut session?';
 
   @override
-  String get terminate => 'Terminate';
+  String get terminate => 'Afslut';
 
   @override
-  String get thisDevice => 'This device';
+  String get thisDevice => 'Denne enhed';
 
   @override
-  String get createAccount => 'Create account';
+  String get createAccount => 'Opret konto';
 
   @override
-  String get weakStrength => 'Weak';
+  String get weakStrength => 'Svagt';
 
   @override
-  String get moderateStrength => 'Moderate';
+  String get moderateStrength => 'Middel';
 
   @override
-  String get strongStrength => 'Strong';
+  String get strongStrength => 'Stærkt';
 
   @override
-  String get deleteAccount => 'Delete account';
+  String get deleteAccount => 'Slet konto';
 
   @override
   String get deleteAccountQuery =>
-      'We\'ll be sorry to see you go. Are you facing some issue?';
+      'Vi er kede af at se dig gå. Er du stødt på et problem?';
 
   @override
-  String get yesSendFeedbackAction => 'Yes, send feedback';
+  String get yesSendFeedbackAction => 'Ja, send feedback';
 
   @override
-  String get noDeleteAccountAction => 'No, delete account';
+  String get noDeleteAccountAction => 'Nej, slet konto';
 
   @override
   String get initiateAccountDeleteTitle =>
-      'Please authenticate to initiate account deletion';
+      'Bekræft venligst for at påbegynde sletning af konto';
 
   @override
-  String get confirmAccountDeleteTitle => 'Confirm account deletion';
+  String get confirmAccountDeleteTitle => 'Bekræft sletning af konto';
 
   @override
   String get confirmAccountDeleteMessage =>
-      'This account is linked to other Ente apps, if you use any.\n\nYour uploaded data, across all Ente apps, will be scheduled for deletion, and your account will be permanently deleted.';
+      'Denne konto er forbundet til andre Ente apps, hvis du benytter nogle.\n\nDine uploadede data for alle Ente apps vil blive slettet, og din konto vil blive slettet permanent.';
 
   @override
-  String get delete => 'Delete';
+  String get delete => 'Slet';
 
   @override
-  String get createNewAccount => 'Create new account';
+  String get createNewAccount => 'Opret konto';
 
   @override
-  String get password => 'Password';
+  String get password => 'Kodeord';
 
   @override
-  String get confirmPassword => 'Confirm password';
+  String get confirmPassword => 'Bekræft kodeord';
 
   @override
   String passwordStrength(String passwordStrengthValue) {
-    return 'Password strength: $passwordStrengthValue';
+    return 'Kodeordets styrke: $passwordStrengthValue';
   }
 
   @override
-  String get hearUsWhereTitle => 'How did you hear about Ente? (optional)';
+  String get hearUsWhereTitle => 'Hvordan hørte du om Ente? (valgfrit)';
 
   @override
   String get hearUsExplanation =>
-      'We don\'t track app installs. It\'d help if you told us where you found us!';
+      'Vi tracker ikke app installeringer. Det ville hjælpe os at vide hvordan du fandt os!';
 
   @override
   String get signUpTerms =>
-      'I agree to the <u-terms>terms of service</u-terms> and <u-policy>privacy policy</u-policy>';
+      'Jeg er enig i <u-terms>betingelser for brug</u-terms> og <u-policy>privatlivspolitik</u-policy>';
 
   @override
-  String get termsOfServicesTitle => 'Terms';
+  String get termsOfServicesTitle => 'Betingelser';
 
   @override
-  String get privacyPolicyTitle => 'Privacy Policy';
+  String get privacyPolicyTitle => 'Privatlivspolitik';
 
   @override
   String get ackPasswordLostWarning =>
-      'I understand that if I lose my password, I may lose my data since my data is <underline>end-to-end encrypted</underline>.';
+      'Jeg forstår at hvis jeg mister min adgangskode kan jeg miste mine data, da mine data er <underline>end-to-end krypteret</underline>.';
 
   @override
-  String get encryption => 'Encryption';
+  String get encryption => 'Kryptering';
 
   @override
-  String get logInLabel => 'Log in';
+  String get logInLabel => 'Log ind';
 
   @override
-  String get welcomeBack => 'Welcome back!';
+  String get welcomeBack => 'Velkommen tilbage!';
 
   @override
   String get loginTerms =>
-      'By clicking log in, I agree to the <u-terms>terms of service</u-terms> and <u-policy>privacy policy</u-policy>';
+      'Ved at logge ind godkender jeg Ente\'s <u-terms>betingelser for brug</u-terms> og <u-policy>privatlivspolitik</u-policy>.';
 
   @override
-  String get noInternetConnection => 'No internet connection';
+  String get noInternetConnection => 'Ingen internetforbindelse';
 
   @override
   String get pleaseCheckYourInternetConnectionAndTryAgain =>
-      'Please check your internet connection and try again.';
+      'Tjek venligst din internetforbindelse og forsøg igen.';
 
   @override
   String get verificationFailedPleaseTryAgain =>
-      'Verification failed, please try again';
+      'Bekræftelse fejlede, forsøg venligst igen';
 
   @override
-  String get recreatePasswordTitle => 'Recreate password';
+  String get recreatePasswordTitle => 'Gendan adgangskode';
 
   @override
   String get recreatePasswordBody =>
-      'The current device is not powerful enough to verify your password, but we can regenerate in a way that works with all devices.\n\nPlease login using your recovery key and regenerate your password (you can use the same one again if you wish).';
+      'Denne enhed er ikke kraftfuld nok til at bekræfte adgangskoden, men vi kan gendanne den på en måde der fungerer for alle enheder.\n\nLog venligst ind med din gendannelsesnøgle og gendan din adgangskode (du kan bruge den samme adgangskode igen hvis du ønsker).';
 
   @override
-  String get useRecoveryKey => 'Use recovery key';
+  String get useRecoveryKey => 'Brug gendannelsesnøgle';
 
   @override
-  String get forgotPassword => 'Forgot password';
+  String get forgotPassword => 'Glemt adgangskode';
 
   @override
-  String get changeEmail => 'Change email';
+  String get changeEmail => 'Skift email adresse';
 
   @override
-  String get verifyEmail => 'Verify email';
+  String get verifyEmail => 'Bekræft email adresse';
 
   @override
   String weHaveSendEmailTo(String email) {
-    return 'We have sent a mail to <green>$email</green>';
+    return 'Vi har sendt en email til <green>$email</green>';
   }
 
   @override
   String get toResetVerifyEmail =>
-      'To reset your password, please verify your email first.';
+      'For at nulstille din adgangskode, bekræft venligst din email adresse.';
 
   @override
   String get checkInboxAndSpamFolder =>
-      'Please check your inbox (and spam) to complete verification';
+      'Tjek venligst din indboks (og spam) for at færdiggøre verificeringen';
 
   @override
-  String get tapToEnterCode => 'Tap to enter code';
+  String get tapToEnterCode => 'Tryk for at indtaste kode';
 
   @override
   String get sendEmail => 'Send email';
 
   @override
-  String get resendEmail => 'Resend email';
+  String get resendEmail => 'Send email igen';
 
   @override
-  String get passKeyPendingVerification => 'Verification is still pending';
+  String get passKeyPendingVerification => 'Bekræftelse afventes stadig';
 
   @override
-  String get loginSessionExpired => 'Session expired';
+  String get loginSessionExpired => 'Session udløbet';
 
   @override
   String get loginSessionExpiredDetails =>
-      'Your session has expired. Please login again.';
+      'Din session er udløbet. Log venligst på igen.';
 
   @override
-  String get passkeyAuthTitle => 'Passkey verification';
+  String get passkeyAuthTitle => 'Bekræftelse af adgangskode';
 
   @override
-  String get waitingForVerification => 'Waiting for verification...';
+  String get waitingForVerification => 'Venter på bekræftelse...';
 
   @override
-  String get tryAgain => 'Try again';
+  String get tryAgain => 'Forsøg igen';
 
   @override
-  String get checkStatus => 'Check status';
+  String get checkStatus => 'Tjek status';
 
   @override
   String get loginWithTOTP => 'Login with TOTP';
 
   @override
-  String get recoverAccount => 'Recover account';
+  String get recoverAccount => 'Gendan konto';
 
   @override
-  String get setPasswordTitle => 'Set password';
+  String get setPasswordTitle => 'Angiv adgangskode';
 
   @override
-  String get changePasswordTitle => 'Change password';
+  String get changePasswordTitle => 'Skift adgangskode';
 
   @override
-  String get resetPasswordTitle => 'Reset password';
+  String get resetPasswordTitle => 'Nulstil adgangskode';
 
   @override
-  String get encryptionKeys => 'Encryption keys';
+  String get encryptionKeys => 'Krypteringsnøgler';
 
   @override
   String get enterPasswordToEncrypt =>
-      'Enter a password we can use to encrypt your data';
+      'Indtast en adgangskode vi kan bruge til at kryptere dine data';
 
   @override
   String get enterNewPasswordToEncrypt =>
-      'Enter a new password we can use to encrypt your data';
+      'Indtast en ny adgangskode vi kan bruge til at kryptere dine data';
 
   @override
   String get passwordWarning =>
-      'We don\'t store this password, so if you forget, <underline>we cannot decrypt your data</underline>';
+      'Vi gemmer ikke denne adgangskode, så hvis du glemmer den <underline>kan vi ikke dekryptere dine data</underline>';
 
   @override
-  String get howItWorks => 'How it works';
+  String get howItWorks => 'Sådan fungerer det';
 
   @override
-  String get generatingEncryptionKeys => 'Generating encryption keys...';
+  String get generatingEncryptionKeys => 'Genererer krypteringsnøgler...';
 
   @override
-  String get passwordChangedSuccessfully => 'Password changed successfully';
+  String get passwordChangedSuccessfully => 'Adgangskoden er blevet ændret';
 
   @override
-  String get signOutFromOtherDevices => 'Sign out from other devices';
+  String get signOutFromOtherDevices => 'Log ud af andre enheder';
 
   @override
   String get signOutOtherBody =>
-      'If you think someone might know your password, you can force all other devices using your account to sign out.';
+      'Hvis du mistænker at nogen kender din adgangskode kan du tvinge alle enheder der benytter din konto til at logge ud.';
 
   @override
-  String get signOutOtherDevices => 'Sign out other devices';
+  String get signOutOtherDevices => 'Log ud af andre enheder';
 
   @override
-  String get doNotSignOut => 'Do not sign out';
+  String get doNotSignOut => 'Log ikke ud';
 
   @override
-  String get generatingEncryptionKeysTitle => 'Generating encryption keys...';
+  String get generatingEncryptionKeysTitle => 'Genererer krypteringsnøgler...';
 
   @override
-  String get continueLabel => 'Continue';
+  String get continueLabel => 'Fortsæt';
 
   @override
-  String get insecureDevice => 'Insecure device';
+  String get insecureDevice => 'Usikker enhed';
 
   @override
   String get sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease =>
-      'Sorry, we could not generate secure keys on this device.\n\nplease sign up from a different device.';
+      'Beklager, vi kunne ikke generere sikre krypteringsnøgler på denne enhed.\n\nForsøg venligst at oprette en konto fra en anden enhed.';
 
   @override
-  String get recoveryKeyCopiedToClipboard => 'Recovery key copied to clipboard';
+  String get recoveryKeyCopiedToClipboard =>
+      'Gendannelsesnøgle kopieret til udklipsholderen';
 
   @override
-  String get recoveryKey => 'Recovery key';
+  String get recoveryKey => 'Gendannelsesnøgle';
 
   @override
   String get recoveryKeyOnForgotPassword =>
-      'If you forget your password, the only way you can recover your data is with this key.';
+      'Hvis du glemmer dit kodeord er gendannelsesnøglen den eneste mulighed for at få adgang til dine data.';
 
   @override
   String get recoveryKeySaveDescription =>
-      'We don\'t store this key, please save this 24 word key in a safe place.';
+      'Vi gemmer ikke denne nøgle, gem venligst denne 24-ords nøgle et sikkert sted.';
 
   @override
-  String get doThisLater => 'Do this later';
+  String get doThisLater => 'Gør det senere';
 
   @override
-  String get saveKey => 'Save key';
+  String get saveKey => 'Gem nøgle';
 
   @override
-  String get recoveryKeySaved => 'Recovery key saved in Downloads folder!';
+  String get recoveryKeySaved =>
+      'Gendannelsesnøgle gemt i din Downloads mappe!';
 
   @override
-  String get noRecoveryKeyTitle => 'No recovery key?';
+  String get noRecoveryKeyTitle => 'Ingen gendannelsesnøgle?';
 
   @override
-  String get twoFactorAuthTitle => 'Two-factor authentication';
+  String get twoFactorAuthTitle => 'Tofaktorgodkendelse';
 
   @override
   String get enterCodeHint =>
-      'Enter the 6-digit code from\nyour authenticator app';
+      'Indtast den 6-cifrede kode fra din authenticator app';
 
   @override
-  String get lostDeviceTitle => 'Lost device?';
+  String get lostDeviceTitle => 'Mistet enhed?';
 
   @override
-  String get enterRecoveryKeyHint => 'Enter your recovery key';
+  String get enterRecoveryKeyHint => 'Indtast din gendannelsesnøgle';
 
   @override
-  String get recover => 'Recover';
+  String get recover => 'Gendan';
 
   @override
-  String get loggingOut => 'Logging out...';
+  String get loggingOut => 'Logger ud...';
 
   @override
-  String get immediately => 'Immediately';
+  String get immediately => 'Med det samme';
 
   @override
-  String get appLock => 'App lock';
+  String get appLock => 'Låsning af app';
 
   @override
-  String get autoLock => 'Auto lock';
+  String get autoLock => 'Automatisk lås';
 
   @override
-  String get noSystemLockFound => 'No system lock found';
+  String get noSystemLockFound => 'Ingen systemlås fundet';
 
   @override
   String get deviceLockEnablePreSteps =>
-      'To enable device lock, please setup device passcode or screen lock in your system settings.';
+      'For at aktivere enhedslås, indstil venligst kode eller skærmlås på din enhed i dine systemindstillinger.';
 
   @override
   String get appLockDescription =>
-      'Choose between your device\'s default lock screen and a custom lock screen with a PIN or password.';
+      'Vælg mellem din enheds standard skærmlås eller skærmlås med pinkode eller adgangskode.';
 
   @override
-  String get deviceLock => 'Device lock';
+  String get deviceLock => 'Enhedslås';
 
   @override
-  String get pinLock => 'Pin lock';
+  String get pinLock => 'Låsning med pinkode';
 
   @override
   String get autoLockFeatureDescription =>
-      'Time after which the app locks after being put in the background';
+      'Tid til låsning af app efter at være blevet placeret i baggrunden';
 
   @override
-  String get hideContent => 'Hide content';
+  String get hideContent => 'Skjul indhold';
 
   @override
   String get hideContentDescriptionAndroid =>
-      'Hides app content in the app switcher and disables screenshots';
+      'Skjul app indhold i app-vælger og deaktiver screenshots';
 
   @override
-  String get hideContentDescriptioniOS =>
-      'Hides app content in the app switcher';
+  String get hideContentDescriptioniOS => 'Skjul app indhold i app-vælger';
 
   @override
-  String get tooManyIncorrectAttempts => 'Too many incorrect attempts';
+  String get tooManyIncorrectAttempts => 'For mange forkerte forsøg';
 
   @override
-  String get tapToUnlock => 'Tap to unlock';
+  String get tapToUnlock => 'Tryk for at låse op';
 
   @override
-  String get areYouSureYouWantToLogout => 'Are you sure you want to logout?';
+  String get areYouSureYouWantToLogout => 'Er du sikker på at du vil logge ud?';
 
   @override
-  String get yesLogout => 'Yes, logout';
+  String get yesLogout => 'Ja, log ud';
 
   @override
-  String get authToViewSecrets => 'Please authenticate to view your secrets';
+  String get authToViewSecrets =>
+      'Bekræft venligst din identitet for at se dine hemmeligheder';
 
   @override
-  String get next => 'Next';
+  String get next => 'Næste';
 
   @override
-  String get setNewPassword => 'Set new password';
+  String get setNewPassword => 'Indstil ny adgangskode';
 
   @override
-  String get enterPin => 'Enter PIN';
+  String get enterPin => 'Indtast pinkode';
 
   @override
-  String get setNewPin => 'Set new PIN';
+  String get setNewPin => 'Indstil ny pinkode';
 
   @override
-  String get confirm => 'Confirm';
+  String get confirm => 'Bekræft';
 
   @override
-  String get reEnterPassword => 'Re-enter password';
+  String get reEnterPassword => 'Indtast adgangskode igen';
 
   @override
-  String get reEnterPin => 'Re-enter PIN';
+  String get reEnterPin => 'Indtast pinkode igen';
 
   @override
-  String get androidBiometricHint => 'Verify identity';
+  String get androidBiometricHint => 'Bekræft identitet';
 
   @override
-  String get androidBiometricNotRecognized => 'Not recognized. Try again.';
+  String get androidBiometricNotRecognized => 'Ikke genkendt. Forsøg igen.';
 
   @override
-  String get androidBiometricSuccess => 'Success';
+  String get androidBiometricSuccess => 'Succes';
 
   @override
-  String get androidCancelButton => 'Cancel';
+  String get androidCancelButton => 'Afbryd';
 
   @override
-  String get androidSignInTitle => 'Authentication required';
+  String get androidSignInTitle => 'Godkendelse påkrævet';
 
   @override
-  String get androidBiometricRequiredTitle => 'Biometric required';
+  String get androidBiometricRequiredTitle => 'Biometri påkrævet';
 
   @override
   String get androidDeviceCredentialsRequiredTitle =>
-      'Device credentials required';
+      'Enhedsoplysninger påkrævet';
 
   @override
   String get androidDeviceCredentialsSetupDescription =>
-      'Device credentials required';
+      'Enhedsoplysninger påkrævet';
 
   @override
-  String get goToSettings => 'Go to settings';
+  String get goToSettings => 'Gå til indstillinger';
 
   @override
   String get androidGoToSettingsDescription =>
-      'Biometric authentication is not set up on your device. Go to \'Settings > Security\' to add biometric authentication.';
+      'Biometrisk godkendelse er ikke indstillet på din enhed. Gå til \"Indstillinger > Sikkerhed\" for at indstille biometrisk godkendelse.';
 
   @override
   String get iOSLockOut =>
-      'Biometric authentication is disabled. Please lock and unlock your screen to enable it.';
+      'Biometrisk godkendelse er slået fra. Lås din skærm, og lås den derefter op for at aktivere det.';
 
   @override
   String get iOSOkButton => 'OK';
@@ -572,33 +562,34 @@ class StringsLocalizationsDa extends StringsLocalizations {
   String get emailNotRegistered => 'Email not registered.';
 
   @override
-  String get thisEmailIsAlreadyInUse => 'This email is already in use';
+  String get thisEmailIsAlreadyInUse =>
+      'Denne email adresse er allerede i brug';
 
   @override
   String emailChangedTo(String newEmail) {
-    return 'Email changed to $newEmail';
+    return 'Email adresse ændret til $newEmail';
   }
 
   @override
   String get authenticationFailedPleaseTryAgain =>
-      'Authentication failed, please try again';
+      'Bekræftelse af identitet fejlede, forsøg venligst igen';
 
   @override
-  String get authenticationSuccessful => 'Authentication successful!';
+  String get authenticationSuccessful => 'Bekræftelse af identitet lykkedes!';
 
   @override
-  String get sessionExpired => 'Session expired';
+  String get sessionExpired => 'Session udløbet';
 
   @override
-  String get incorrectRecoveryKey => 'Incorrect recovery key';
+  String get incorrectRecoveryKey => 'Forkert gendannelsesnøgle';
 
   @override
   String get theRecoveryKeyYouEnteredIsIncorrect =>
-      'The recovery key you entered is incorrect';
+      'Den indtastede gendannelsesnøgle er ikke korrekt';
 
   @override
   String get twofactorAuthenticationSuccessfullyReset =>
-      'Two-factor authentication successfully reset';
+      'Tofaktorgodkendelse nulstillet';
 
   @override
   String get noRecoveryKey => 'No recovery key';
@@ -611,12 +602,28 @@ class StringsLocalizationsDa extends StringsLocalizations {
 
   @override
   String get yourVerificationCodeHasExpired =>
-      'Your verification code has expired';
+      'Din bekræftelseskode er udløbet';
 
   @override
-  String get incorrectCode => 'Incorrect code';
+  String get incorrectCode => 'Forkert kode';
 
   @override
   String get sorryTheCodeYouveEnteredIsIncorrect =>
-      'Sorry, the code you\'ve entered is incorrect';
+      'Beklager, den indtastede kode er forkert';
+
+  @override
+  String get developerSettings => 'Udvikler-indstillinger';
+
+  @override
+  String get serverEndpoint => 'Server endpoint';
+
+  @override
+  String get invalidEndpoint => 'Ugyldigt endpoint';
+
+  @override
+  String get invalidEndpointMessage =>
+      'Beklager, det indtastede endpoint er ugyldigt. Indtast venligst et gyldigt endpoint og forsøg igen.';
+
+  @override
+  String get endpointUpdatedMessage => 'Endpoint opdateret';
 }

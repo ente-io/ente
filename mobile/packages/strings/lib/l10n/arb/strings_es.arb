@@ -694,7 +694,27 @@
     "description": "Error message when code is incorrect"
   },
   "sorryTheCodeYouveEnteredIsIncorrect": "Lo sentimos, el código que has introducido es incorrecto",
-  "@sorryTheCodeYouveEnteredIsIncorrect": {
+  "@sorryTheCodeYouveEnteredIsIncorrected": {
     "description": "Detailed error message when code is incorrect"
+  },
+  "developerSettings": "Ajustes de desarrollador",
+  "@developerSettings": {
+    "description": "Label for developerSettings"
+  },
+  "serverEndpoint": "Endpoint del servidor",
+  "@serverEndpoint": {
+    "description": "Label for serverEndpoint"
+  },
+  "invalidEndpoint": "Endpoint no válido",
+  "@invalidEndpoint": {
+    "description": "Label for invalidEndpoint"
+  },
+  "invalidEndpointMessage": "Lo sentimos, el endpoint introducido no es válido. Por favor, introduce un endpoint válido y vuelve a intentarlo.",
+  "@invalidEndpointMessage": {
+    "description": "Label for invalidEndpointMessage"
+  },
+  "endpointUpdatedMessage": "Endpoint actualizado con éxito",
+  "@endpointUpdatedMessage": {
+    "description": "Label for endpointUpdatedMessage"
   }
 }

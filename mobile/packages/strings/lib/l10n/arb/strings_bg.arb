@@ -696,5 +696,25 @@
   "sorryTheCodeYouveEnteredIsIncorrect": "За съжаление кодът, който сте въвели, е неправилен",
   "@sorryTheCodeYouveEnteredIsIncorrect": {
     "description": "Detailed error message when code is incorrect"
+  },
+  "developerSettings": "Настройки за програмисти",
+  "@developerSettings": {
+    "description": "Label for developerSettings"
+  },
+  "serverEndpoint": "Крайна точка на сървъра",
+  "@serverEndpoint": {
+    "description": "Label for serverEndpoint"
+  },
+  "invalidEndpoint": "Невалидна крайна точка",
+  "@invalidEndpoint": {
+    "description": "Label for invalidEndpoint"
+  },
+  "invalidEndpointMessage": "За съжаление въведената от Вас крайна точка е невалидна. Моля, въведете валидна крайна точка и опитайте отново.",
+  "@invalidEndpointMessage": {
+    "description": "Label for invalidEndpointMessage"
+  },
+  "endpointUpdatedMessage": "Крайната точка е актуализирана успешно",
+  "@endpointUpdatedMessage": {
+    "description": "Label for endpointUpdatedMessage"
   }
 }

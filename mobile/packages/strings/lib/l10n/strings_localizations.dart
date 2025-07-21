@@ -6,25 +6,44 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/intl.dart' as intl;
 
 import 'strings_localizations_ar.dart';
+import 'strings_localizations_be.dart';
 import 'strings_localizations_bg.dart';
+import 'strings_localizations_ca.dart';
 import 'strings_localizations_cs.dart';
 import 'strings_localizations_da.dart';
+import 'strings_localizations_de.dart';
 import 'strings_localizations_el.dart';
 import 'strings_localizations_en.dart';
 import 'strings_localizations_es.dart';
+import 'strings_localizations_et.dart';
+import 'strings_localizations_fa.dart';
+import 'strings_localizations_fi.dart';
 import 'strings_localizations_fr.dart';
+import 'strings_localizations_gu.dart';
+import 'strings_localizations_he.dart';
+import 'strings_localizations_hi.dart';
+import 'strings_localizations_hu.dart';
 import 'strings_localizations_id.dart';
+import 'strings_localizations_it.dart';
 import 'strings_localizations_ja.dart';
+import 'strings_localizations_ka.dart';
+import 'strings_localizations_km.dart';
 import 'strings_localizations_ko.dart';
 import 'strings_localizations_lt.dart';
+import 'strings_localizations_lv.dart';
+import 'strings_localizations_ml.dart';
 import 'strings_localizations_nl.dart';
 import 'strings_localizations_pl.dart';
 import 'strings_localizations_pt.dart';
+import 'strings_localizations_ro.dart';
 import 'strings_localizations_ru.dart';
 import 'strings_localizations_sk.dart';
+import 'strings_localizations_sl.dart';
 import 'strings_localizations_sr.dart';
 import 'strings_localizations_sv.dart';
+import 'strings_localizations_ti.dart';
 import 'strings_localizations_tr.dart';
+import 'strings_localizations_uk.dart';
 import 'strings_localizations_vi.dart';
 import 'strings_localizations_zh.dart';
 
@@ -116,27 +135,47 @@ abstract class StringsLocalizations {
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[
     Locale('ar'),
+    Locale('be'),
     Locale('bg'),
+    Locale('ca'),
     Locale('cs'),
     Locale('da'),
+    Locale('de'),
     Locale('el'),
     Locale('en'),
     Locale('es'),
+    Locale('et'),
+    Locale('fa'),
+    Locale('fi'),
     Locale('fr'),
+    Locale('gu'),
+    Locale('he'),
+    Locale('hi'),
+    Locale('hu'),
     Locale('id'),
+    Locale('it'),
     Locale('ja'),
+    Locale('ka'),
+    Locale('km'),
     Locale('ko'),
     Locale('lt'),
+    Locale('lv'),
+    Locale('ml'),
     Locale('nl'),
     Locale('pl'),
     Locale('pt'),
+    Locale('ro'),
     Locale('ru'),
     Locale('sk'),
+    Locale('sl'),
     Locale('sr'),
     Locale('sv'),
+    Locale('ti'),
     Locale('tr'),
+    Locale('uk'),
     Locale('vi'),
     Locale('zh'),
+    Locale('zh', 'CN'),
     Locale('zh', 'TW')
   ];
 
@@ -259,30 +298,6 @@ abstract class StringsLocalizations {
   /// In en, this message translates to:
   /// **'N/A'**
   String get notAvailable;
-
-  /// Prefix for log file names
-  ///
-  /// In en, this message translates to:
-  /// **'ente-logs-'**
-  String get enteLogsPrefix;
-
-  /// Name of logs directory
-  ///
-  /// In en, this message translates to:
-  /// **'logs'**
-  String get logsDirectoryName;
-
-  /// Name of zipped log file
-  ///
-  /// In en, this message translates to:
-  /// **'logs.zip'**
-  String get logsZipFileName;
-
-  /// File extension for zip files
-  ///
-  /// In en, this message translates to:
-  /// **'zip'**
-  String get zipFileExtension;
 
   /// Label for reporting a bug
   ///
@@ -1249,6 +1264,36 @@ abstract class StringsLocalizations {
   /// In en, this message translates to:
   /// **'Sorry, the code you\'ve entered is incorrect'**
   String get sorryTheCodeYouveEnteredIsIncorrect;
+
+  /// Label for developer settings
+  ///
+  /// In en, this message translates to:
+  /// **'Developer settings'**
+  String get developerSettings;
+
+  /// Label for server endpoint setting
+  ///
+  /// In en, this message translates to:
+  /// **'Server endpoint'**
+  String get serverEndpoint;
+
+  /// Error message when endpoint is invalid
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid endpoint'**
+  String get invalidEndpoint;
+
+  /// Detailed error message when endpoint is invalid
+  ///
+  /// In en, this message translates to:
+  /// **'Sorry, the endpoint you entered is invalid. Please enter a valid endpoint and try again.'**
+  String get invalidEndpointMessage;
+
+  /// Success message when endpoint is updated
+  ///
+  /// In en, this message translates to:
+  /// **'Endpoint updated successfully'**
+  String get endpointUpdatedMessage;
 }
 
 class _StringsLocalizationsDelegate
@@ -1264,25 +1309,44 @@ class _StringsLocalizationsDelegate
   @override
   bool isSupported(Locale locale) => <String>[
         'ar',
+        'be',
         'bg',
+        'ca',
         'cs',
         'da',
+        'de',
         'el',
         'en',
         'es',
+        'et',
+        'fa',
+        'fi',
         'fr',
+        'gu',
+        'he',
+        'hi',
+        'hu',
         'id',
+        'it',
         'ja',
+        'ka',
+        'km',
         'ko',
         'lt',
+        'lv',
+        'ml',
         'nl',
         'pl',
         'pt',
+        'ro',
         'ru',
         'sk',
+        'sl',
         'sr',
         'sv',
+        'ti',
         'tr',
+        'uk',
         'vi',
         'zh'
       ].contains(locale.languageCode);
@@ -1297,6 +1361,8 @@ StringsLocalizations lookupStringsLocalizations(Locale locale) {
     case 'zh':
       {
         switch (locale.countryCode) {
+          case 'CN':
+            return StringsLocalizationsZhCn();
           case 'TW':
             return StringsLocalizationsZhTw();
         }
@@ -1308,44 +1374,82 @@ StringsLocalizations lookupStringsLocalizations(Locale locale) {
   switch (locale.languageCode) {
     case 'ar':
       return StringsLocalizationsAr();
+    case 'be':
+      return StringsLocalizationsBe();
     case 'bg':
       return StringsLocalizationsBg();
+    case 'ca':
+      return StringsLocalizationsCa();
     case 'cs':
       return StringsLocalizationsCs();
     case 'da':
       return StringsLocalizationsDa();
+    case 'de':
+      return StringsLocalizationsDe();
     case 'el':
       return StringsLocalizationsEl();
     case 'en':
       return StringsLocalizationsEn();
     case 'es':
       return StringsLocalizationsEs();
+    case 'et':
+      return StringsLocalizationsEt();
+    case 'fa':
+      return StringsLocalizationsFa();
+    case 'fi':
+      return StringsLocalizationsFi();
     case 'fr':
       return StringsLocalizationsFr();
+    case 'gu':
+      return StringsLocalizationsGu();
+    case 'he':
+      return StringsLocalizationsHe();
+    case 'hi':
+      return StringsLocalizationsHi();
+    case 'hu':
+      return StringsLocalizationsHu();
     case 'id':
       return StringsLocalizationsId();
+    case 'it':
+      return StringsLocalizationsIt();
     case 'ja':
       return StringsLocalizationsJa();
+    case 'ka':
+      return StringsLocalizationsKa();
+    case 'km':
+      return StringsLocalizationsKm();
     case 'ko':
       return StringsLocalizationsKo();
     case 'lt':
       return StringsLocalizationsLt();
+    case 'lv':
+      return StringsLocalizationsLv();
+    case 'ml':
+      return StringsLocalizationsMl();
     case 'nl':
       return StringsLocalizationsNl();
     case 'pl':
       return StringsLocalizationsPl();
     case 'pt':
       return StringsLocalizationsPt();
+    case 'ro':
+      return StringsLocalizationsRo();
     case 'ru':
       return StringsLocalizationsRu();
     case 'sk':
       return StringsLocalizationsSk();
+    case 'sl':
+      return StringsLocalizationsSl();
     case 'sr':
       return StringsLocalizationsSr();
     case 'sv':
       return StringsLocalizationsSv();
+    case 'ti':
+      return StringsLocalizationsTi();
     case 'tr':
       return StringsLocalizationsTr();
+    case 'uk':
+      return StringsLocalizationsUk();
     case 'vi':
       return StringsLocalizationsVi();
     case 'zh':

@@ -700,5 +700,25 @@
   "sorryTheCodeYouveEnteredIsIncorrect": "Sorry, de ingevoerde code is onjuist",
   "@sorryTheCodeYouveEnteredIsIncorrect": {
     "description": "Detailed error message when code is incorrect"
+  },
+  "developerSettings": "Ontwikkelaarsinstellingen",
+  "@developerSettings": {
+    "description": "Label for developerSettings"
+  },
+  "serverEndpoint": "Server eindpunt",
+  "@serverEndpoint": {
+    "description": "Label for serverEndpoint"
+  },
+  "invalidEndpoint": "Ongeldig eindpunt",
+  "@invalidEndpoint": {
+    "description": "Label for invalidEndpoint"
+  },
+  "invalidEndpointMessage": "Sorry, het eindpunt dat u hebt ingevoerd is ongeldig. Voer een geldig eindpunt in en probeer het opnieuw.",
+  "@invalidEndpointMessage": {
+    "description": "Label for invalidEndpointMessage"
+  },
+  "endpointUpdatedMessage": "Eindpunt met succes bijgewerkt",
+  "@endpointUpdatedMessage": {
+    "description": "Label for endpointUpdatedMessage"
   }
 }

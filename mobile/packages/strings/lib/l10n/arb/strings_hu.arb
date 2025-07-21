@@ -700,5 +700,25 @@
   "sorryTheCodeYouveEnteredIsIncorrect": "Sajnáljuk, a megadott kód helytelen",
   "@sorryTheCodeYouveEnteredIsIncorrect": {
     "description": "Detailed error message when code is incorrect"
+  },
+  "developerSettings": "Fejlesztői beállítások",
+  "@developerSettings": {
+    "description": "Label for developerSettings"
+  },
+  "serverEndpoint": "Szerver végpont",
+  "@serverEndpoint": {
+    "description": "Label for serverEndpoint"
+  },
+  "invalidEndpoint": "Érvénytelen végpont",
+  "@invalidEndpoint": {
+    "description": "Label for invalidEndpoint"
+  },
+  "invalidEndpointMessage": "Sajnáljuk, a megadott végpont érvénytelen. Adjon meg egy érvényes végpontot, és próbálja újra.",
+  "@invalidEndpointMessage": {
+    "description": "Label for invalidEndpointMessage"
+  },
+  "endpointUpdatedMessage": "A végpont sikeresen frissítve",
+  "@endpointUpdatedMessage": {
+    "description": "Label for endpointUpdatedMessage"
   }
 }

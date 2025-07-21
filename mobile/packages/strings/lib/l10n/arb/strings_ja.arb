@@ -696,5 +696,25 @@
   "sorryTheCodeYouveEnteredIsIncorrect": "申し訳ありませんが、入力されたコードは正しくありません",
   "@sorryTheCodeYouveEnteredIsIncorrect": {
     "description": "Detailed error message when code is incorrect"
+  },
+  "developerSettings": "開発者向け設定",
+  "@developerSettings": {
+    "description": "Label for developerSettings"
+  },
+  "serverEndpoint": "サーバーエンドポイント",
+  "@serverEndpoint": {
+    "description": "Label for serverEndpoint"
+  },
+  "invalidEndpoint": "無効なエンドポイントです",
+  "@invalidEndpoint": {
+    "description": "Label for invalidEndpoint"
+  },
+  "invalidEndpointMessage": "入力されたエンドポイントは無効です。有効なエンドポイントを入力して再試行してください。",
+  "@invalidEndpointMessage": {
+    "description": "Label for invalidEndpointMessage"
+  },
+  "endpointUpdatedMessage": "エンドポイントの更新に成功しました",
+  "@endpointUpdatedMessage": {
+    "description": "Label for endpointUpdatedMessage"
   }
 }

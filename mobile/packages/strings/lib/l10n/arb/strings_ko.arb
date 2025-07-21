@@ -696,5 +696,25 @@
   "sorryTheCodeYouveEnteredIsIncorrect": "죄송합니다, 입력하신 코드가 맞지 않습니다",
   "@sorryTheCodeYouveEnteredIsIncorrect": {
     "description": "Detailed error message when code is incorrect"
+  },
+  "developerSettings": "개발자 설정",
+  "@developerSettings": {
+    "description": "Label for developerSettings"
+  },
+  "serverEndpoint": "서버 엔드포인트",
+  "@serverEndpoint": {
+    "description": "Label for serverEndpoint"
+  },
+  "invalidEndpoint": "유효하지 않은 엔드포인트",
+  "@invalidEndpoint": {
+    "description": "Label for invalidEndpoint"
+  },
+  "invalidEndpointMessage": "죄송합니다, 입력하신 엔드포인트가 유효하지 않습니다. 유효한 엔드포인트를 입력하시고 다시 시도해주세요.",
+  "@invalidEndpointMessage": {
+    "description": "Label for invalidEndpointMessage"
+  },
+  "endpointUpdatedMessage": "엔드포인트가 성공적으로 업데이트됨",
+  "@endpointUpdatedMessage": {
+    "description": "Label for endpointUpdatedMessage"
   }
 }
