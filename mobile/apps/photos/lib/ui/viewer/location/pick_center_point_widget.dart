@@ -122,6 +122,7 @@ class PickCenterPointWidget extends StatelessWidget {
                                   "You can also add a location centered on a photo from the photo's info screen",
                                 ),
                               ),
+                              disablePinnedGroupHeader: true,
                             ),
                           ),
                         ),

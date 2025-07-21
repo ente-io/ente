@@ -115,12 +115,13 @@ class PickCoverPhotoWidget extends StatelessWidget {
                                     (event) =>
                                         event.collectionID == collection.id,
                                   ),
-                              tagPrefix: "pick_center_point_gallery",
+                              tagPrefix: "pick_cover_photo_gallery",
                               selectedFiles: selectedFiles,
                               limitSelectionToOne: true,
                               showSelectAll: false,
                               sortAsyncFn: () =>
                                   collection.pubMagicMetadata.asc ?? false,
+                              disablePinnedGroupHeader: true,
                             ),
                           ),
                         ),

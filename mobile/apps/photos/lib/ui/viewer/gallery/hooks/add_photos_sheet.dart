@@ -311,6 +311,7 @@ class _DelayedGalleryState extends State<DelayedGallery> {
           selectedFiles: widget.selectedFiles,
           showSelectAll: true,
           sortAsyncFn: () => false,
+          disablePinnedGroupHeader: true,
         ).animate().fadeIn(
               duration: const Duration(milliseconds: 175),
               curve: Curves.easeOutCirc,

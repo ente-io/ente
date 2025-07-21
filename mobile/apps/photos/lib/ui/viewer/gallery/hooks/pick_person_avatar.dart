@@ -120,6 +120,7 @@ class PickPersonCoverPhotoWidget extends StatelessWidget {
                               selectedFiles: selectedFiles,
                               limitSelectionToOne: true,
                               showSelectAll: false,
+                              disablePinnedGroupHeader: true,
                             ),
                           ),
                         ),

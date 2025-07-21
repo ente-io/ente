@@ -74,6 +74,7 @@ class Gallery extends StatefulWidget {
   // add a Function variable to get sort value in bool
   final SortAscFn? sortAsyncFn;
   final GroupType groupType;
+  final bool disablePinnedGroupHeader;
 
   const Gallery({
     required this.asyncLoader,
@@ -98,6 +99,7 @@ class Gallery extends StatefulWidget {
     this.isScrollablePositionedList = true,
     this.reloadDebounceTime = const Duration(milliseconds: 500),
     this.reloadDebounceExecutionInterval = const Duration(seconds: 2),
+    this.disablePinnedGroupHeader = false,
     super.key,
   });
 
@@ -588,7 +590,8 @@ class GalleryState extends State<Gallery> {
                         ),
                       ],
                     ),
-                    galleryGroups.groupType.showGroupHeader()
+                    galleryGroups.groupType.showGroupHeader() &&
+                            !widget.disablePinnedGroupHeader
                         ? PinnedGroupHeader(
                             scrollController: _scrollController,
                             galleryGroups: galleryGroups,
