@@ -603,13 +603,6 @@ class StringsLocalizationsZh extends StringsLocalizations {
   String get noRecoveryKey => 'No recovery key';
 
   @override
-  String get waitingForWifi => 'Waiting for WiFi...';
-
-  @override
-  String get youCannotDeleteYourDefaultAccount =>
-      'You cannot delete your default account';
-
-  @override
   String get yourAccountHasBeenDeleted => 'Your account has been deleted';
 
   @override
