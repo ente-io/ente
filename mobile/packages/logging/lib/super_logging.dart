@@ -3,7 +3,7 @@ import 'dart:collection';
 import 'dart:core';
 import 'dart:io';
 
-import 'tunneled_transport.dart';
+import 'package:ente_logging/tunneled_transport.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
