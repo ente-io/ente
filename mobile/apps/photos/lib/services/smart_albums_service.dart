@@ -1,7 +1,6 @@
 import "dart:async";
 import "dart:convert";
 
-import "package:computer/computer.dart";
 import "package:flutter/widgets.dart" show BuildContext;
 import "package:logging/logging.dart";
 import "package:photos/generated/l10n.dart";
@@ -27,7 +26,6 @@ class SmartAlbumsService {
 
   int _lastCacheRefreshTime = 0;
 
-  Map<int, SmartAlbumConfig>? configs;
   Future<Map<int, SmartAlbumConfig>>? _cachedConfigsFuture;
 
   static const type = EntityType.person;
@@ -54,19 +52,17 @@ class SmartAlbumsService {
       _cachedConfigsFuture = null; // Invalidate cache
     }
     _cachedConfigsFuture ??= _fetchAndCacheSConfigs();
-    configs = await _cachedConfigsFuture!;
-    return configs!;
+    return await _cachedConfigsFuture!;
   }
 
   Future<Map<int, SmartAlbumConfig>> _fetchAndCacheSConfigs() async {
     _logger.finest("reading all smart configs from local db");
 
     final entities = await entityService.getEntities(type);
-    final result = await Computer.shared().compute(
-      _decodeSConfigEntities,
-      param: {"entity": entities},
-      taskName: "decode_sconfig_entities",
-    ) as Map<String, dynamic>;
+
+    final result = _decodeSConfigEntities(
+      {"entity": entities},
+    );
 
     final sconfigs = result["sconfigs"] as Map<int, SmartAlbumConfig>;
 
@@ -75,16 +71,28 @@ class SmartAlbumsService {
 
     // update the merged config to remote db
     for (final collectionid in collectionToUpdate) {
-      await _addOrUpdateEntity(
-        type,
-        sconfigs[collectionid]!.toJson(),
-        id: sconfigs[collectionid]!.remoteId,
-      );
+      try {
+        await saveConfig(sconfigs[collectionid]!);
+      } catch (error, stackTrace) {
+        _logger.severe(
+          "Failed to update smart album config for collection $collectionid",
+          error,
+          stackTrace,
+        );
+      }
     }
 
     // delete all remote ids that are merged into the config
     for (final remoteId in idToDelete) {
-      await _deleteEntry(id: remoteId);
+      try {
+        await _deleteEntry(id: remoteId);
+      } catch (error, stackTrace) {
+        _logger.severe(
+          "Failed to delete smart album config for remote id $remoteId",
+          error,
+          stackTrace,
+        );
+      }
     }
 
     return sconfigs;
@@ -93,7 +101,7 @@ class SmartAlbumsService {
   Map<String, dynamic> _decodeSConfigEntities(
     Map<String, dynamic> param,
   ) {
-    final entities = param["entity"] as List<LocalEntityData>;
+    final entities = (param["entity"] as List<LocalEntityData>);
 
     final Map<int, SmartAlbumConfig> sconfigs = {};
     final Set<int> collectionToUpdate = {};
@@ -116,7 +124,7 @@ class SmartAlbumsService {
               ? existingConfig.remoteId
               : config.remoteId;
 
-          config = sconfigs[config.collectionId]!.merge(config);
+          config = config.merge(sconfigs[config.collectionId]!);
 
           // Update the config to be updated and deleted list
           collectionToUpdate.add(collectionIdToKeep);
@@ -232,7 +240,7 @@ class SmartAlbumsService {
           },
         ),
         ButtonWidget(
-          labelText: S.of(context).cancel,
+          labelText: S.of(context).no,
           buttonType: ButtonType.secondary,
           buttonSize: ButtonSize.large,
           shouldStickToDarkTheme: true,
