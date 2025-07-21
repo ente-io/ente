@@ -696,5 +696,25 @@
   "sorryTheCodeYouveEnteredIsIncorrect": "Oprostite, koda ki ste jo vnesli ni pravilna",
   "@sorryTheCodeYouveEnteredIsIncorrect": {
     "description": "Detailed error message when code is incorrect"
+  },
+  "developerSettings": "Nastavitve za razvijalce",
+  "@developerSettings": {
+    "description": "Label for developerSettings"
+  },
+  "serverEndpoint": "Endpoint strežnika",
+  "@serverEndpoint": {
+    "description": "Label for serverEndpoint"
+  },
+  "invalidEndpoint": "Nepravilen endpoint",
+  "@invalidEndpoint": {
+    "description": "Label for invalidEndpoint"
+  },
+  "invalidEndpointMessage": "Oprostite endpoint, ki ste ga vnesli ni bil pravilen. Prosimo, vnesite pravilen endpoint in poskusite znova.",
+  "@invalidEndpointMessage": {
+    "description": "Label for invalidEndpointMessage"
+  },
+  "endpointUpdatedMessage": "Endpoint posodobljen uspešno",
+  "@endpointUpdatedMessage": {
+    "description": "Label for endpointUpdatedMessage"
   }
 }

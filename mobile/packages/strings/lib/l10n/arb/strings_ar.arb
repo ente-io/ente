@@ -700,5 +700,25 @@
   "sorryTheCodeYouveEnteredIsIncorrect": "عذراً، الرمز الذي أدخلته غير صحيح",
   "@sorryTheCodeYouveEnteredIsIncorrect": {
     "description": "Detailed error message when code is incorrect"
+  },
+  "developerSettings": "اعدادات المطور",
+  "@developerSettings": {
+    "description": "Label for developerSettings"
+  },
+  "serverEndpoint": "نقطة طرف الخادم",
+  "@serverEndpoint": {
+    "description": "Label for serverEndpoint"
+  },
+  "invalidEndpoint": "نقطة طرف غير صالحة",
+  "@invalidEndpoint": {
+    "description": "Label for invalidEndpoint"
+  },
+  "invalidEndpointMessage": "عذرا، نقطة الطرف التي أدخلتها غير صالحة. فضلا أدخل نقطة طرف صالحة وأعد المحاولة.",
+  "@invalidEndpointMessage": {
+    "description": "Label for invalidEndpointMessage"
+  },
+  "endpointUpdatedMessage": "حُدِّثَت نقطة الطرف بنجاح",
+  "@endpointUpdatedMessage": {
+    "description": "Label for endpointUpdatedMessage"
   }
 }

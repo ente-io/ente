@@ -14,11 +14,11 @@ class StringsLocalizationsJa extends StringsLocalizations {
 
   @override
   String get networkConnectionRefusedErr =>
-      'Enteに接続できません。しばらくしてから再試行してください。エラーが継続する場合は、サポートにお問い合わせください。';
+      'Enteに接続できませんでした。しばらくしてから再試行してください。エラーが解決しない場合は、サポートにお問い合わせください。';
 
   @override
   String get itLooksLikeSomethingWentWrongPleaseRetryAfterSome =>
-      '問題が発生したようです。しばらくしてから再試行してください。エラーが継続する場合は、サポートチームにお問い合わせください。';
+      '問題が発生したようです。しばらくしてから再試行してください。エラーが解決しない場合は、サポートチームにお問い合わせください。';
 
   @override
   String get error => 'エラー';
@@ -30,24 +30,24 @@ class StringsLocalizationsJa extends StringsLocalizations {
   String get faq => 'FAQ';
 
   @override
-  String get contactSupport => 'サポートに連絡する';
+  String get contactSupport => 'サポートに問い合わせ';
 
   @override
-  String get emailYourLogs => 'Email your logs';
+  String get emailYourLogs => 'ログをメールで送信';
 
   @override
   String pleaseSendTheLogsTo(String toEmail) {
-    return 'Please send the logs to \n$toEmail';
+    return 'ログを以下のアドレスに送信してください \n$toEmail';
   }
 
   @override
-  String get copyEmailAddress => 'Copy email address';
+  String get copyEmailAddress => 'メールアドレスをコピー';
 
   @override
-  String get exportLogs => 'Export logs';
+  String get exportLogs => 'ログのエクスポート';
 
   @override
-  String get cancel => 'Cancel';
+  String get cancel => 'キャンセル';
 
   @override
   String pleaseEmailUsAt(String toEmail) {
@@ -77,19 +77,7 @@ class StringsLocalizationsJa extends StringsLocalizations {
   String get notAvailable => 'N/A';
 
   @override
-  String get enteLogsPrefix => 'ente-logs-';
-
-  @override
-  String get logsDirectoryName => 'logs';
-
-  @override
-  String get logsZipFileName => 'logs.zip';
-
-  @override
-  String get zipFileExtension => 'zip';
-
-  @override
-  String get reportABug => 'Report a bug';
+  String get reportABug => 'バグを報告';
 
   @override
   String get logsDialogBody =>
@@ -100,505 +88,483 @@ class StringsLocalizationsJa extends StringsLocalizations {
 
   @override
   String customEndpoint(String endpoint) {
-    return 'Connected to $endpoint';
+    return '$endpoint に接続しました';
   }
 
   @override
-  String get save => 'Save';
+  String get save => '保存';
 
   @override
-  String get send => 'Send';
+  String get send => '送信';
 
   @override
   String get saveOrSendDescription =>
-      'Do you want to save this to your storage (Downloads folder by default) or send it to other apps?';
+      'これをストレージ (デフォルトではダウンロードフォルダ) に保存しますか、もしくは他のアプリに送信しますか？';
 
   @override
-  String get saveOnlyDescription =>
-      'Do you want to save this to your storage (Downloads folder by default)?';
+  String get saveOnlyDescription => 'これをストレージに保存しますか？ (デフォルトではダウンロードフォルダに保存)';
 
   @override
   String get enterNewEmailHint => 'Enter your new email address';
 
   @override
-  String get email => 'Email';
+  String get email => 'E メール';
 
   @override
-  String get verify => 'Verify';
+  String get verify => '認証';
 
   @override
-  String get invalidEmailTitle => 'Invalid email address';
+  String get invalidEmailTitle => 'メールアドレスが無効です';
 
   @override
-  String get invalidEmailMessage => 'Please enter a valid email address.';
+  String get invalidEmailMessage => '有効なメールアドレスを入力して下さい';
 
   @override
-  String get pleaseWait => 'Please wait...';
+  String get pleaseWait => 'お待ちください...';
 
   @override
-  String get verifyPassword => 'Verify password';
+  String get verifyPassword => 'パスワードを確認';
 
   @override
-  String get incorrectPasswordTitle => 'Incorrect password';
+  String get incorrectPasswordTitle => 'パスワードが正しくありません';
 
   @override
-  String get pleaseTryAgain => 'Please try again';
+  String get pleaseTryAgain => '再度お試しください';
 
   @override
-  String get enterPassword => 'Enter password';
+  String get enterPassword => 'パスワードを入力';
 
   @override
-  String get enterYourPasswordHint => 'Enter your password';
+  String get enterYourPasswordHint => 'パスワードを入力してください';
 
   @override
-  String get activeSessions => 'Active sessions';
+  String get activeSessions => 'アクティブセッション';
 
   @override
-  String get oops => 'Oops';
+  String get oops => 'おっと';
 
   @override
-  String get somethingWentWrongPleaseTryAgain =>
-      'Something went wrong, please try again';
+  String get somethingWentWrongPleaseTryAgain => '問題が発生しました、再試行してください';
 
   @override
-  String get thisWillLogYouOutOfThisDevice =>
-      'This will log you out of this device!';
+  String get thisWillLogYouOutOfThisDevice => 'このデバイスからログアウトします！';
 
   @override
-  String get thisWillLogYouOutOfTheFollowingDevice =>
-      'This will log you out of the following device:';
+  String get thisWillLogYouOutOfTheFollowingDevice => '以下のデバイスからログアウトします:';
 
   @override
-  String get terminateSession => 'Terminate session?';
+  String get terminateSession => 'セッションを終了しますか？';
 
   @override
-  String get terminate => 'Terminate';
+  String get terminate => '終了';
 
   @override
-  String get thisDevice => 'This device';
+  String get thisDevice => 'このデバイス';
 
   @override
-  String get createAccount => 'Create account';
+  String get createAccount => 'アカウント作成';
 
   @override
-  String get weakStrength => 'Weak';
+  String get weakStrength => '脆弱';
 
   @override
-  String get moderateStrength => 'Moderate';
+  String get moderateStrength => 'まあまあ';
 
   @override
-  String get strongStrength => 'Strong';
+  String get strongStrength => '強力';
 
   @override
-  String get deleteAccount => 'Delete account';
+  String get deleteAccount => 'アカウント削除';
 
   @override
-  String get deleteAccountQuery =>
-      'We\'ll be sorry to see you go. Are you facing some issue?';
+  String get deleteAccountQuery => 'ご不便をおかけして申し訳ありません。なにか問題が発生していますか？';
 
   @override
-  String get yesSendFeedbackAction => 'Yes, send feedback';
+  String get yesSendFeedbackAction => 'はい、フィードバックを送信します';
 
   @override
-  String get noDeleteAccountAction => 'No, delete account';
+  String get noDeleteAccountAction => 'いいえ、アカウントを削除します';
 
   @override
-  String get initiateAccountDeleteTitle =>
-      'Please authenticate to initiate account deletion';
+  String get initiateAccountDeleteTitle => 'アカウントの削除を開始するためには認証が必要です';
 
   @override
-  String get confirmAccountDeleteTitle => 'Confirm account deletion';
+  String get confirmAccountDeleteTitle => 'アカウントの削除に同意';
 
   @override
   String get confirmAccountDeleteMessage =>
-      'This account is linked to other Ente apps, if you use any.\n\nYour uploaded data, across all Ente apps, will be scheduled for deletion, and your account will be permanently deleted.';
+      'このアカウントは他のEnteアプリも使用している場合はそれらにも紐づけされています。\nすべてのEnteアプリでアップロードされたデータは削除され、アカウントは完全に削除されます。';
 
   @override
-  String get delete => 'Delete';
+  String get delete => '削除';
 
   @override
-  String get createNewAccount => 'Create new account';
+  String get createNewAccount => '新規アカウント作成';
 
   @override
-  String get password => 'Password';
+  String get password => 'パスワード';
 
   @override
-  String get confirmPassword => 'Confirm password';
+  String get confirmPassword => 'パスワードの確認';
 
   @override
   String passwordStrength(String passwordStrengthValue) {
-    return 'Password strength: $passwordStrengthValue';
+    return 'パスワードの強度: $passwordStrengthValue';
   }
 
   @override
-  String get hearUsWhereTitle => 'How did you hear about Ente? (optional)';
+  String get hearUsWhereTitle => 'Ente についてどのようにお聞きになりましたか？（任意）';
 
   @override
   String get hearUsExplanation =>
-      'We don\'t track app installs. It\'d help if you told us where you found us!';
+      '私たちはアプリのインストールを追跡していません。私たちをお知りになった場所を教えてください！';
 
   @override
   String get signUpTerms =>
-      'I agree to the <u-terms>terms of service</u-terms> and <u-policy>privacy policy</u-policy>';
+      '<u-terms>利用規約</u-terms>と<u-policy>プライバシー ポリシー</u-policy>に同意します';
 
   @override
-  String get termsOfServicesTitle => 'Terms';
+  String get termsOfServicesTitle => '利用規約';
 
   @override
-  String get privacyPolicyTitle => 'Privacy Policy';
+  String get privacyPolicyTitle => 'プライバシーポリシー';
 
   @override
   String get ackPasswordLostWarning =>
-      'I understand that if I lose my password, I may lose my data since my data is <underline>end-to-end encrypted</underline>.';
+      '私のデータは<underline>エンドツーエンドで暗号化される</underline>ため、パスワードを紛失した場合、データが失われる可能性があることを理解しています。';
 
   @override
-  String get encryption => 'Encryption';
+  String get encryption => '暗号化';
 
   @override
-  String get logInLabel => 'Log in';
+  String get logInLabel => 'ログイン';
 
   @override
-  String get welcomeBack => 'Welcome back!';
+  String get welcomeBack => 'おかえりなさい！';
 
   @override
   String get loginTerms =>
-      'By clicking log in, I agree to the <u-terms>terms of service</u-terms> and <u-policy>privacy policy</u-policy>';
+      'ログインをクリックする場合、<u-terms>利用規約</u-terms>および<u-policy>プライバシー ポリシー</u-policy>に同意するものとします。';
 
   @override
-  String get noInternetConnection => 'No internet connection';
+  String get noInternetConnection => 'インターネット接続なし';
 
   @override
   String get pleaseCheckYourInternetConnectionAndTryAgain =>
-      'Please check your internet connection and try again.';
+      'インターネット接続を確認して、再試行してください。';
 
   @override
-  String get verificationFailedPleaseTryAgain =>
-      'Verification failed, please try again';
+  String get verificationFailedPleaseTryAgain => '確認に失敗しました、再試行してください';
 
   @override
-  String get recreatePasswordTitle => 'Recreate password';
+  String get recreatePasswordTitle => 'パスワードを再設定';
 
   @override
   String get recreatePasswordBody =>
-      'The current device is not powerful enough to verify your password, but we can regenerate in a way that works with all devices.\n\nPlease login using your recovery key and regenerate your password (you can use the same one again if you wish).';
+      '現在のデバイスはパスワードを確認するのには不十分ですが、すべてのデバイスで動作するように再生成することはできます。\n\n回復キーを使用してログインし、パスワードを再生成してください（ご希望の場合は同じものを再度使用できます）。';
 
   @override
-  String get useRecoveryKey => 'Use recovery key';
+  String get useRecoveryKey => '回復キーを使用';
 
   @override
-  String get forgotPassword => 'Forgot password';
+  String get forgotPassword => 'パスワードを忘れた場合';
 
   @override
-  String get changeEmail => 'Change email';
+  String get changeEmail => 'メールアドレスを変更';
 
   @override
-  String get verifyEmail => 'Verify email';
+  String get verifyEmail => 'メールアドレス認証';
 
   @override
   String weHaveSendEmailTo(String email) {
-    return 'We have sent a mail to <green>$email</green>';
+    return '<green>$email</green> にメールを送信しました';
   }
 
   @override
-  String get toResetVerifyEmail =>
-      'To reset your password, please verify your email first.';
+  String get toResetVerifyEmail => 'パスワードをリセットするには、メールの確認を先に行ってください。';
 
   @override
-  String get checkInboxAndSpamFolder =>
-      'Please check your inbox (and spam) to complete verification';
+  String get checkInboxAndSpamFolder => '受信トレイ（および迷惑メール）を確認して認証を完了してください';
 
   @override
-  String get tapToEnterCode => 'Tap to enter code';
+  String get tapToEnterCode => 'タップしてコードを入力';
 
   @override
-  String get sendEmail => 'Send email';
+  String get sendEmail => 'メール送信';
 
   @override
-  String get resendEmail => 'Resend email';
+  String get resendEmail => 'メールを再送信';
 
   @override
-  String get passKeyPendingVerification => 'Verification is still pending';
+  String get passKeyPendingVerification => '認証はまだ保留中です';
 
   @override
-  String get loginSessionExpired => 'Session expired';
+  String get loginSessionExpired => 'セッションの有効期限が切れました';
 
   @override
-  String get loginSessionExpiredDetails =>
-      'Your session has expired. Please login again.';
+  String get loginSessionExpiredDetails => 'セッションの有効期限が切れました。再度ログインしてください。';
 
   @override
-  String get passkeyAuthTitle => 'Passkey verification';
+  String get passkeyAuthTitle => 'パスキー認証';
 
   @override
-  String get waitingForVerification => 'Waiting for verification...';
+  String get waitingForVerification => '認証を待っています...';
 
   @override
-  String get tryAgain => 'Try again';
+  String get tryAgain => '再試行';
 
   @override
-  String get checkStatus => 'Check status';
+  String get checkStatus => 'ステータスの確認';
 
   @override
-  String get loginWithTOTP => 'Login with TOTP';
+  String get loginWithTOTP => 'TOTPでログイン';
 
   @override
-  String get recoverAccount => 'Recover account';
+  String get recoverAccount => 'アカウントを回復';
 
   @override
-  String get setPasswordTitle => 'Set password';
+  String get setPasswordTitle => 'パスワードの設定';
 
   @override
-  String get changePasswordTitle => 'Change password';
+  String get changePasswordTitle => 'パスワードの変更';
 
   @override
-  String get resetPasswordTitle => 'Reset password';
+  String get resetPasswordTitle => 'パスワードのリセット';
 
   @override
-  String get encryptionKeys => 'Encryption keys';
+  String get encryptionKeys => '暗号鍵';
 
   @override
-  String get enterPasswordToEncrypt =>
-      'Enter a password we can use to encrypt your data';
+  String get enterPasswordToEncrypt => 'データの暗号化に使用するパスワードを入力してください';
 
   @override
-  String get enterNewPasswordToEncrypt =>
-      'Enter a new password we can use to encrypt your data';
+  String get enterNewPasswordToEncrypt => 'データの暗号化に使用する新しいパスワードを入力してください';
 
   @override
   String get passwordWarning =>
-      'We don\'t store this password, so if you forget, <underline>we cannot decrypt your data</underline>';
+      '私たちはこのパスワードを保存していないので、あなたがそれを忘れた場合に<underline>私たちがあなたのデータを代わりに復号することはできません</underline>';
 
   @override
-  String get howItWorks => 'How it works';
+  String get howItWorks => '動作の仕組み';
 
   @override
-  String get generatingEncryptionKeys => 'Generating encryption keys...';
+  String get generatingEncryptionKeys => '暗号鍵を生成中...';
 
   @override
-  String get passwordChangedSuccessfully => 'Password changed successfully';
+  String get passwordChangedSuccessfully => 'パスワードを変更しました';
 
   @override
-  String get signOutFromOtherDevices => 'Sign out from other devices';
+  String get signOutFromOtherDevices => '他のデバイスからサインアウトする';
 
   @override
   String get signOutOtherBody =>
-      'If you think someone might know your password, you can force all other devices using your account to sign out.';
+      '他の誰かがあなたのパスワードを知っている可能性があると判断した場合は、あなたのアカウントを使用している他のすべてのデバイスから強制的にサインアウトできます。';
 
   @override
-  String get signOutOtherDevices => 'Sign out other devices';
+  String get signOutOtherDevices => '他のデバイスからサインアウトする';
 
   @override
-  String get doNotSignOut => 'Do not sign out';
+  String get doNotSignOut => 'サインアウトしない';
 
   @override
-  String get generatingEncryptionKeysTitle => 'Generating encryption keys...';
+  String get generatingEncryptionKeysTitle => '暗号化鍵を生成中...';
 
   @override
-  String get continueLabel => 'Continue';
+  String get continueLabel => '続行';
 
   @override
-  String get insecureDevice => 'Insecure device';
+  String get insecureDevice => '安全ではないデバイス';
 
   @override
   String get sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease =>
-      'Sorry, we could not generate secure keys on this device.\n\nplease sign up from a different device.';
+      '申し訳ありませんが、このデバイスでは安全な鍵を生成できませんでした。\n\n別のデバイスから登録してください。';
 
   @override
-  String get recoveryKeyCopiedToClipboard => 'Recovery key copied to clipboard';
+  String get recoveryKeyCopiedToClipboard => '回復キーをクリップボードにコピーしました';
 
   @override
-  String get recoveryKey => 'Recovery key';
+  String get recoveryKey => '回復キー';
 
   @override
   String get recoveryKeyOnForgotPassword =>
-      'If you forget your password, the only way you can recover your data is with this key.';
+      'パスワードを忘れた場合、データを回復できる唯一の方法がこのキーです。';
 
   @override
   String get recoveryKeySaveDescription =>
-      'We don\'t store this key, please save this 24 word key in a safe place.';
+      '私たちはこのキーを保存しません。この 24 単語のキーを安全な場所に保存してください。';
 
   @override
-  String get doThisLater => 'Do this later';
+  String get doThisLater => '後で行う';
 
   @override
-  String get saveKey => 'Save key';
+  String get saveKey => 'キーを保存';
 
   @override
-  String get recoveryKeySaved => 'Recovery key saved in Downloads folder!';
+  String get recoveryKeySaved => 'リカバリキーをダウンロードフォルダに保存しました！';
 
   @override
-  String get noRecoveryKeyTitle => 'No recovery key?';
+  String get noRecoveryKeyTitle => '回復キーがありませんか？';
 
   @override
-  String get twoFactorAuthTitle => 'Two-factor authentication';
+  String get twoFactorAuthTitle => '2 要素認証';
 
   @override
-  String get enterCodeHint =>
-      'Enter the 6-digit code from\nyour authenticator app';
+  String get enterCodeHint => '認証アプリに表示された 6 桁のコードを入力してください';
 
   @override
-  String get lostDeviceTitle => 'Lost device?';
+  String get lostDeviceTitle => 'デバイスを紛失しましたか？';
 
   @override
-  String get enterRecoveryKeyHint => 'Enter your recovery key';
+  String get enterRecoveryKeyHint => '回復キーを入力';
 
   @override
-  String get recover => 'Recover';
+  String get recover => '回復';
 
   @override
-  String get loggingOut => 'Logging out...';
+  String get loggingOut => 'ログアウト中...';
 
   @override
-  String get immediately => 'Immediately';
+  String get immediately => 'すぐに';
 
   @override
-  String get appLock => 'App lock';
+  String get appLock => 'アプリのロック';
 
   @override
-  String get autoLock => 'Auto lock';
+  String get autoLock => '自動ロック';
 
   @override
-  String get noSystemLockFound => 'No system lock found';
+  String get noSystemLockFound => 'システムロックが見つかりませんでした';
 
   @override
   String get deviceLockEnablePreSteps =>
-      'To enable device lock, please setup device passcode or screen lock in your system settings.';
+      '端末のロックを有効にするには、システム設定で端末のパスコードまたは画面ロックを設定してください。';
 
   @override
   String get appLockDescription =>
-      'Choose between your device\'s default lock screen and a custom lock screen with a PIN or password.';
+      '端末のデフォルトのロック画面と、PINまたはパスワードを使用したカスタムロック画面を選択します。';
 
   @override
-  String get deviceLock => 'Device lock';
+  String get deviceLock => '生体認証';
 
   @override
-  String get pinLock => 'Pin lock';
+  String get pinLock => 'PIN';
 
   @override
-  String get autoLockFeatureDescription =>
-      'Time after which the app locks after being put in the background';
+  String get autoLockFeatureDescription => 'アプリをバックグラウンドでロックするまでの時間';
 
   @override
-  String get hideContent => 'Hide content';
+  String get hideContent => '内容を非表示';
 
   @override
-  String get hideContentDescriptionAndroid =>
-      'Hides app content in the app switcher and disables screenshots';
+  String get hideContentDescriptionAndroid => 'アプリの内容を非表示にし、スクリーンショットを無効にします';
 
   @override
-  String get hideContentDescriptioniOS =>
-      'Hides app content in the app switcher';
+  String get hideContentDescriptioniOS => 'アプリを切り替えた際に、アプリの内容を非表示にします';
 
   @override
-  String get tooManyIncorrectAttempts => 'Too many incorrect attempts';
+  String get tooManyIncorrectAttempts => '間違った回数が多すぎます';
 
   @override
-  String get tapToUnlock => 'Tap to unlock';
+  String get tapToUnlock => 'タップして解除';
 
   @override
-  String get areYouSureYouWantToLogout => 'Are you sure you want to logout?';
+  String get areYouSureYouWantToLogout => '本当にログアウトしてよろしいですか？';
 
   @override
-  String get yesLogout => 'Yes, logout';
+  String get yesLogout => 'はい、ログアウトします';
 
   @override
-  String get authToViewSecrets => 'Please authenticate to view your secrets';
+  String get authToViewSecrets => '秘密鍵を閲覧するためには認証が必要です';
 
   @override
-  String get next => 'Next';
+  String get next => '次へ';
 
   @override
-  String get setNewPassword => 'Set new password';
+  String get setNewPassword => '新しいパスワードを設定';
 
   @override
-  String get enterPin => 'Enter PIN';
+  String get enterPin => 'PINを入力してください';
 
   @override
-  String get setNewPin => 'Set new PIN';
+  String get setNewPin => '新しいPINを設定';
 
   @override
-  String get confirm => 'Confirm';
+  String get confirm => '確認';
 
   @override
-  String get reEnterPassword => 'Re-enter password';
+  String get reEnterPassword => 'パスワードを再入力してください';
 
   @override
-  String get reEnterPin => 'Re-enter PIN';
+  String get reEnterPin => 'PINを再入力してください';
 
   @override
-  String get androidBiometricHint => 'Verify identity';
+  String get androidBiometricHint => '本人を確認する';
 
   @override
-  String get androidBiometricNotRecognized => 'Not recognized. Try again.';
+  String get androidBiometricNotRecognized => '認識できません。再試行してください。';
 
   @override
-  String get androidBiometricSuccess => 'Success';
+  String get androidBiometricSuccess => '成功';
 
   @override
-  String get androidCancelButton => 'Cancel';
+  String get androidCancelButton => 'キャンセル';
 
   @override
-  String get androidSignInTitle => 'Authentication required';
+  String get androidSignInTitle => '認証が必要です';
 
   @override
-  String get androidBiometricRequiredTitle => 'Biometric required';
+  String get androidBiometricRequiredTitle => '生体認証が必要です';
 
   @override
-  String get androidDeviceCredentialsRequiredTitle =>
-      'Device credentials required';
+  String get androidDeviceCredentialsRequiredTitle => 'デバイスの認証情報が必要です';
 
   @override
-  String get androidDeviceCredentialsSetupDescription =>
-      'Device credentials required';
+  String get androidDeviceCredentialsSetupDescription => 'デバイスの認証情報が必要です';
 
   @override
-  String get goToSettings => 'Go to settings';
+  String get goToSettings => '設定を開く';
 
   @override
   String get androidGoToSettingsDescription =>
-      'Biometric authentication is not set up on your device. Go to \'Settings > Security\' to add biometric authentication.';
+      '生体認証がデバイスで設定されていません。生体認証を追加するには、\"設定 > セキュリティ\"を開いてください。';
 
   @override
-  String get iOSLockOut =>
-      'Biometric authentication is disabled. Please lock and unlock your screen to enable it.';
+  String get iOSLockOut => '生体認証が無効化されています。画面をロック・ロック解除して生体認証を有効化してください。';
 
   @override
   String get iOSOkButton => 'OK';
 
   @override
-  String get emailAlreadyRegistered => 'Email already registered.';
+  String get emailAlreadyRegistered => 'メールアドレスはすでに登録されています。';
 
   @override
-  String get emailNotRegistered => 'Email not registered.';
+  String get emailNotRegistered => 'メールアドレスはまだ登録されていません。';
 
   @override
-  String get thisEmailIsAlreadyInUse => 'This email is already in use';
+  String get thisEmailIsAlreadyInUse => 'このアドレスは既に使用されています';
 
   @override
   String emailChangedTo(String newEmail) {
-    return 'Email changed to $newEmail';
+    return 'メールアドレスが $newEmail に変更されました';
   }
 
   @override
-  String get authenticationFailedPleaseTryAgain =>
-      'Authentication failed, please try again';
+  String get authenticationFailedPleaseTryAgain => '認証に失敗しました、再試行してください';
 
   @override
-  String get authenticationSuccessful => 'Authentication successful!';
+  String get authenticationSuccessful => '認証に成功しました！';
 
   @override
-  String get sessionExpired => 'Session expired';
+  String get sessionExpired => 'セッションが失効しました';
 
   @override
-  String get incorrectRecoveryKey => 'Incorrect recovery key';
+  String get incorrectRecoveryKey => '不正な回復キー';
 
   @override
-  String get theRecoveryKeyYouEnteredIsIncorrect =>
-      'The recovery key you entered is incorrect';
+  String get theRecoveryKeyYouEnteredIsIncorrect => '入力された回復キーは正しくありません';
 
   @override
-  String get twofactorAuthenticationSuccessfullyReset =>
-      'Two-factor authentication successfully reset';
+  String get twofactorAuthenticationSuccessfullyReset => '2 要素認証は正常にリセットされました';
 
   @override
   String get noRecoveryKey => 'No recovery key';
@@ -610,13 +576,28 @@ class StringsLocalizationsJa extends StringsLocalizations {
   String get verificationId => 'Verification ID';
 
   @override
-  String get yourVerificationCodeHasExpired =>
-      'Your verification code has expired';
+  String get yourVerificationCodeHasExpired => '確認コードが失効しました';
 
   @override
-  String get incorrectCode => 'Incorrect code';
+  String get incorrectCode => '不正なコード';
 
   @override
   String get sorryTheCodeYouveEnteredIsIncorrect =>
-      'Sorry, the code you\'ve entered is incorrect';
+      '申し訳ありませんが、入力されたコードは正しくありません';
+
+  @override
+  String get developerSettings => '開発者向け設定';
+
+  @override
+  String get serverEndpoint => 'サーバーエンドポイント';
+
+  @override
+  String get invalidEndpoint => '無効なエンドポイントです';
+
+  @override
+  String get invalidEndpointMessage =>
+      '入力されたエンドポイントは無効です。有効なエンドポイントを入力して再試行してください。';
+
+  @override
+  String get endpointUpdatedMessage => 'エンドポイントの更新に成功しました';
 }

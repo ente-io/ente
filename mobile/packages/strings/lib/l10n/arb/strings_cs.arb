@@ -692,5 +692,25 @@
   "sorryTheCodeYouveEnteredIsIncorrect": "Omlouváme se, zadaný kód je nesprávný",
   "@sorryTheCodeYouveEnteredIsIncorrect": {
     "description": "Detailed error message when code is incorrect"
+  },
+  "developerSettings": "Nastavení pro vývojáře",
+  "@developerSettings": {
+    "description": "Label for developerSettings"
+  },
+  "serverEndpoint": "Koncový bod serveru",
+  "@serverEndpoint": {
+    "description": "Label for serverEndpoint"
+  },
+  "invalidEndpoint": "Neplatný koncový bod",
+  "@invalidEndpoint": {
+    "description": "Label for invalidEndpoint"
+  },
+  "invalidEndpointMessage": "Zadaný koncový bod je neplatný. Zadejte prosím platný koncový bod a zkuste to znovu.",
+  "@invalidEndpointMessage": {
+    "description": "Label for invalidEndpointMessage"
+  },
+  "endpointUpdatedMessage": "Koncový bod byl úspěšně aktualizován",
+  "@endpointUpdatedMessage": {
+    "description": "Label for endpointUpdatedMessage"
   }
 }

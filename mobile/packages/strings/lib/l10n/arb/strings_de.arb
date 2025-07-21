@@ -700,5 +700,25 @@
   "sorryTheCodeYouveEnteredIsIncorrect": "Leider ist der eingegebene Code falsch",
   "@sorryTheCodeYouveEnteredIsIncorrect": {
     "description": "Detailed error message when code is incorrect"
+  },
+  "developerSettings": "Entwicklereinstellungen",
+  "@developerSettings": {
+    "description": "Label for developerSettings"
+  },
+  "serverEndpoint": "Server Endpunkt",
+  "@serverEndpoint": {
+    "description": "Label for serverEndpoint"
+  },
+  "invalidEndpoint": "Ungültiger Endpunkt",
+  "@invalidEndpoint": {
+    "description": "Label for invalidEndpoint"
+  },
+  "invalidEndpointMessage": "Der eingegebene Endpunkt ist ungültig. Bitte geben Sie einen gültigen Endpunkt ein und versuchen Sie es erneut.",
+  "@invalidEndpointMessage": {
+    "description": "Label for invalidEndpointMessage"
+  },
+  "endpointUpdatedMessage": "Endpunkt erfolgreich aktualisiert",
+  "@endpointUpdatedMessage": {
+    "description": "Label for endpointUpdatedMessage"
   }
 }

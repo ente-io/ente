@@ -688,5 +688,25 @@
   "sorryTheCodeYouveEnteredIsIncorrect": "Λυπούμαστε, ο κωδικός που εισαγάγατε είναι εσφαλμένος",
   "@sorryTheCodeYouveEnteredIsIncorrect": {
     "description": "Detailed error message when code is incorrect"
+  },
+  "developerSettings": "Ρυθμίσεις προγραμματιστή",
+  "@developerSettings": {
+    "description": "Label for developerSettings"
+  },
+  "serverEndpoint": "Τερματικό σημείο διακομιστή",
+  "@serverEndpoint": {
+    "description": "Label for serverEndpoint"
+  },
+  "invalidEndpoint": "Μη έγκυρο τερματικό σημείο",
+  "@invalidEndpoint": {
+    "description": "Label for invalidEndpoint"
+  },
+  "invalidEndpointMessage": "Λυπούμαστε, το τερματικό σημείο που εισάγατε δεν είναι έγκυρο. Παρακαλώ εισάγετε ένα έγκυρο τερματικό σημείο και προσπαθήστε ξανά.",
+  "@invalidEndpointMessage": {
+    "description": "Label for invalidEndpointMessage"
+  },
+  "endpointUpdatedMessage": "Το τερματκό σημείο ενημερώθηκε επιτυχώς",
+  "@endpointUpdatedMessage": {
+    "description": "Label for endpointUpdatedMessage"
   }
 }

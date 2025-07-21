@@ -14,40 +14,40 @@ class StringsLocalizationsEl extends StringsLocalizations {
 
   @override
   String get networkConnectionRefusedErr =>
-      'Unable to connect to Ente, please retry after sometime. If the error persists, please contact support.';
+      'Δεν είναι δυνατή η σύνδεση με το Ente, παρακαλώ προσπαθήστε ξανά μετά από λίγο. Εάν το σφάλμα παραμένει, παρακαλούμε επικοινωνήστε με την υποστήριξη.';
 
   @override
   String get itLooksLikeSomethingWentWrongPleaseRetryAfterSome =>
-      'It looks like something went wrong. Please retry after some time. If the error persists, please contact our support team.';
+      'Φαίνεται ότι κάτι πήγε στραβά. Παρακαλώ προσπαθήστε ξανά μετά από λίγο. Αν το σφάλμα παραμένει, παρακαλούμε επικοινωνήστε με την ομάδα υποστήριξης μας.';
 
   @override
-  String get error => 'Error';
+  String get error => 'Σφάλμα';
 
   @override
-  String get ok => 'Ok';
+  String get ok => 'Οκ';
 
   @override
-  String get faq => 'FAQ';
+  String get faq => 'Συχνές Ερωτήσεις';
 
   @override
-  String get contactSupport => 'Contact support';
+  String get contactSupport => 'Επικοινωνήστε με την υποστήριξη';
 
   @override
-  String get emailYourLogs => 'Email your logs';
+  String get emailYourLogs => 'Στείλτε με email τα αρχεία καταγραφής σας';
 
   @override
   String pleaseSendTheLogsTo(String toEmail) {
-    return 'Please send the logs to \n$toEmail';
+    return 'Παρακαλώ στείλτε τα αρχεία καταγραφής σας στο \n$toEmail';
   }
 
   @override
-  String get copyEmailAddress => 'Copy email address';
+  String get copyEmailAddress => 'Αντιγραφή διεύθυνσης email';
 
   @override
-  String get exportLogs => 'Export logs';
+  String get exportLogs => 'Εξαγωγή αρχείων καταγραφής';
 
   @override
-  String get cancel => 'Cancel';
+  String get cancel => 'Ακύρωση';
 
   @override
   String pleaseEmailUsAt(String toEmail) {
@@ -77,19 +77,7 @@ class StringsLocalizationsEl extends StringsLocalizations {
   String get notAvailable => 'N/A';
 
   @override
-  String get enteLogsPrefix => 'ente-logs-';
-
-  @override
-  String get logsDirectoryName => 'logs';
-
-  @override
-  String get logsZipFileName => 'logs.zip';
-
-  @override
-  String get zipFileExtension => 'zip';
-
-  @override
-  String get reportABug => 'Report a bug';
+  String get reportABug => 'Αναφορά Σφάλματος';
 
   @override
   String get logsDialogBody =>
@@ -100,22 +88,22 @@ class StringsLocalizationsEl extends StringsLocalizations {
 
   @override
   String customEndpoint(String endpoint) {
-    return 'Connected to $endpoint';
+    return 'Συνδεδεμένο στο $endpoint';
   }
 
   @override
-  String get save => 'Save';
+  String get save => 'Αποθήκευση';
 
   @override
-  String get send => 'Send';
+  String get send => 'Αποστολή';
 
   @override
   String get saveOrSendDescription =>
-      'Do you want to save this to your storage (Downloads folder by default) or send it to other apps?';
+      'Θέλετε να το αποθηκεύσετε στον αποθηκευτικό σας χώρο (φάκελος Λήψεις από προεπιλογή) ή να το στείλετε σε άλλες εφαρμογές;';
 
   @override
   String get saveOnlyDescription =>
-      'Do you want to save this to your storage (Downloads folder by default)?';
+      'Θέλετε να το αποθηκεύσετε στον αποθηκευτικό σας χώρο (φάκελος Λήψεις από προεπιλογή);';
 
   @override
   String get enterNewEmailHint => 'Enter your new email address';
@@ -124,446 +112,456 @@ class StringsLocalizationsEl extends StringsLocalizations {
   String get email => 'Email';
 
   @override
-  String get verify => 'Verify';
+  String get verify => 'Επαλήθευση';
 
   @override
-  String get invalidEmailTitle => 'Invalid email address';
+  String get invalidEmailTitle => 'Μη έγκυρη διεύθυνση email';
 
   @override
-  String get invalidEmailMessage => 'Please enter a valid email address.';
+  String get invalidEmailMessage =>
+      'Παρακαλούμε εισάγετε μια έγκυρη διεύθυνση email.';
 
   @override
-  String get pleaseWait => 'Please wait...';
+  String get pleaseWait => 'Παρακαλώ περιμένετε…';
 
   @override
-  String get verifyPassword => 'Verify password';
+  String get verifyPassword => 'Επαλήθευση κωδικού πρόσβασης';
 
   @override
-  String get incorrectPasswordTitle => 'Incorrect password';
+  String get incorrectPasswordTitle => 'Λάθος κωδικός πρόσβασης';
 
   @override
-  String get pleaseTryAgain => 'Please try again';
+  String get pleaseTryAgain => 'Παρακαλώ δοκιμάστε ξανά';
 
   @override
-  String get enterPassword => 'Enter password';
+  String get enterPassword => 'Εισάγετε κωδικό πρόσβασης';
 
   @override
-  String get enterYourPasswordHint => 'Enter your password';
+  String get enterYourPasswordHint => 'Εισάγετε τον κωδικό πρόσβασης σας';
 
   @override
-  String get activeSessions => 'Active sessions';
+  String get activeSessions => 'Ενεργές συνεδρίες';
 
   @override
-  String get oops => 'Oops';
+  String get oops => 'Ουπς';
 
   @override
   String get somethingWentWrongPleaseTryAgain =>
-      'Something went wrong, please try again';
+      'Κάτι πήγε στραβά, παρακαλώ προσπαθήστε ξανά';
 
   @override
   String get thisWillLogYouOutOfThisDevice =>
-      'This will log you out of this device!';
+      'Αυτό θα σας αποσυνδέσει από αυτή τη συσκευή!';
 
   @override
   String get thisWillLogYouOutOfTheFollowingDevice =>
-      'This will log you out of the following device:';
+      'Αυτό θα σας αποσυνδέσει από την ακόλουθη συσκευή:';
 
   @override
-  String get terminateSession => 'Terminate session?';
+  String get terminateSession => 'Τερματισμός συνεδρίας;';
 
   @override
-  String get terminate => 'Terminate';
+  String get terminate => 'Τερματισμός';
 
   @override
-  String get thisDevice => 'This device';
+  String get thisDevice => 'Αυτή η συσκευή';
 
   @override
-  String get createAccount => 'Create account';
+  String get createAccount => 'Δημιουργία λογαριασμού';
 
   @override
-  String get weakStrength => 'Weak';
+  String get weakStrength => 'Αδύναμος';
 
   @override
-  String get moderateStrength => 'Moderate';
+  String get moderateStrength => 'Μέτριος';
 
   @override
-  String get strongStrength => 'Strong';
+  String get strongStrength => 'Δυνατός';
 
   @override
-  String get deleteAccount => 'Delete account';
+  String get deleteAccount => 'Διαγραφή λογαριασμού';
 
   @override
   String get deleteAccountQuery =>
-      'We\'ll be sorry to see you go. Are you facing some issue?';
+      'Λυπόμαστε που σας βλέπουμε να φεύγετε. Αντιμετωπίζετε κάποιο πρόβλημα;';
 
   @override
-  String get yesSendFeedbackAction => 'Yes, send feedback';
+  String get yesSendFeedbackAction => 'Ναι, αποστολή σχολίων';
 
   @override
-  String get noDeleteAccountAction => 'No, delete account';
+  String get noDeleteAccountAction => 'Όχι, διαγραφή λογαριασμού';
 
   @override
   String get initiateAccountDeleteTitle =>
-      'Please authenticate to initiate account deletion';
+      'Παρακαλώ πραγματοποιήστε έλεγχο ταυτότητας για να ξεκινήσετε τη διαγραφή λογαριασμού';
 
   @override
-  String get confirmAccountDeleteTitle => 'Confirm account deletion';
+  String get confirmAccountDeleteTitle => 'Επιβεβαίωση διαγραφής λογαριασμού';
 
   @override
   String get confirmAccountDeleteMessage =>
-      'This account is linked to other Ente apps, if you use any.\n\nYour uploaded data, across all Ente apps, will be scheduled for deletion, and your account will be permanently deleted.';
+      'Αυτός ο λογαριασμός είναι συνδεδεμένος με άλλες εφαρμογές Ente, εάν χρησιμοποιείτε κάποια.\n\nΤα δεδομένα σας, σε όλες τις εφαρμογές Ente, θα προγραμματιστούν για διαγραφή και ο λογαριασμός σας θα διαγραφεί οριστικά.';
 
   @override
-  String get delete => 'Delete';
+  String get delete => 'Διαγραφή';
 
   @override
-  String get createNewAccount => 'Create new account';
+  String get createNewAccount => 'Δημιουργία νέου λογαριασμού';
 
   @override
-  String get password => 'Password';
+  String get password => 'Κωδικόs πρόσβασης';
 
   @override
-  String get confirmPassword => 'Confirm password';
+  String get confirmPassword => 'Επιβεβαίωση κωδικού πρόσβασης';
 
   @override
   String passwordStrength(String passwordStrengthValue) {
-    return 'Password strength: $passwordStrengthValue';
+    return 'Ισχύς κωδικού πρόσβασης: $passwordStrengthValue';
   }
 
   @override
-  String get hearUsWhereTitle => 'How did you hear about Ente? (optional)';
+  String get hearUsWhereTitle => 'Πώς ακούσατε για το Ente; (προαιρετικό)';
 
   @override
   String get hearUsExplanation =>
-      'We don\'t track app installs. It\'d help if you told us where you found us!';
+      'Δεν παρακολουθούμε εγκαταστάσεις εφαρμογών. Θα βοηθούσε αν μας είπατε πού μας βρήκατε!';
 
   @override
   String get signUpTerms =>
-      'I agree to the <u-terms>terms of service</u-terms> and <u-policy>privacy policy</u-policy>';
+      'Συμφωνώ με τους <u-terms>όρους χρήσης</u-terms> και την <u-policy>πολιτική απορρήτου</u-policy>';
 
   @override
-  String get termsOfServicesTitle => 'Terms';
+  String get termsOfServicesTitle => 'Όροι';
 
   @override
-  String get privacyPolicyTitle => 'Privacy Policy';
+  String get privacyPolicyTitle => 'Πολιτική Απορρήτου';
 
   @override
   String get ackPasswordLostWarning =>
-      'I understand that if I lose my password, I may lose my data since my data is <underline>end-to-end encrypted</underline>.';
+      'Καταλαβαίνω ότι αν χάσω τον κωδικό μου μπορεί να χάσω τα δεδομένα μου αφού τα δεδομένα μου είναι από <underline>άκρο-σε-άκρο κρυπτογραφημένα</underline>.';
 
   @override
-  String get encryption => 'Encryption';
+  String get encryption => 'Kρυπτογράφηση';
 
   @override
-  String get logInLabel => 'Log in';
+  String get logInLabel => 'Σύνδεση';
 
   @override
-  String get welcomeBack => 'Welcome back!';
+  String get welcomeBack => 'Καλωσορίσατε και πάλι!';
 
   @override
   String get loginTerms =>
-      'By clicking log in, I agree to the <u-terms>terms of service</u-terms> and <u-policy>privacy policy</u-policy>';
+      'Κάνοντας κλικ στη σύνδεση, συμφωνώ με τους <u-terms>όρους χρήσης</u-terms> και την <u-policy>πολιτική απορρήτου</u-policy>';
 
   @override
-  String get noInternetConnection => 'No internet connection';
+  String get noInternetConnection => 'Χωρίς σύνδεση στο διαδίκτυο';
 
   @override
   String get pleaseCheckYourInternetConnectionAndTryAgain =>
-      'Please check your internet connection and try again.';
+      'Παρακαλούμε ελέγξτε τη σύνδεσή σας στο διαδίκτυο και προσπαθήστε ξανά.';
 
   @override
   String get verificationFailedPleaseTryAgain =>
-      'Verification failed, please try again';
+      'Η επαλήθευση απέτυχε, παρακαλώ προσπαθήστε ξανά';
 
   @override
-  String get recreatePasswordTitle => 'Recreate password';
+  String get recreatePasswordTitle => 'Επαναδημιουργία κωδικού πρόσβασης';
 
   @override
   String get recreatePasswordBody =>
-      'The current device is not powerful enough to verify your password, but we can regenerate in a way that works with all devices.\n\nPlease login using your recovery key and regenerate your password (you can use the same one again if you wish).';
+      'Η τρέχουσα συσκευή δεν είναι αρκετά ισχυρή για να επαληθεύσει τον κωδικό πρόσβασής σας, αλλά μπορούμε να τον αναδημιουργήσουμε με έναν τρόπο που λειτουργεί με όλες τις συσκευές.\n\nΠαρακαλούμε συνδεθείτε χρησιμοποιώντας το κλειδί ανάκτησης και αναδημιουργήστε τον κωδικό πρόσβασής σας (μπορείτε να χρησιμοποιήσετε ξανά τον ίδιο αν το επιθυμείτε).';
 
   @override
-  String get useRecoveryKey => 'Use recovery key';
+  String get useRecoveryKey => 'Χρήση κλειδιού ανάκτησης';
 
   @override
-  String get forgotPassword => 'Forgot password';
+  String get forgotPassword => 'Ξέχασα τον κωδικό πρόσβασης σας';
 
   @override
-  String get changeEmail => 'Change email';
+  String get changeEmail => 'Αλλαγή email';
 
   @override
-  String get verifyEmail => 'Verify email';
+  String get verifyEmail => 'Επαλήθευση email';
 
   @override
   String weHaveSendEmailTo(String email) {
-    return 'We have sent a mail to <green>$email</green>';
+    return 'Έχουμε στείλει ένα μήνυμα στο <green>$email</green>';
   }
 
   @override
   String get toResetVerifyEmail =>
-      'To reset your password, please verify your email first.';
+      'Για να επαναφέρετε τον κωδικό πρόσβασής σας, επαληθεύστε πρώτα το email σας.';
 
   @override
   String get checkInboxAndSpamFolder =>
-      'Please check your inbox (and spam) to complete verification';
+      'Παρακαλώ ελέγξτε τα εισερχόμενά σας (και τα ανεπιθύμητα) για να ολοκληρώσετε την επαλήθευση';
 
   @override
-  String get tapToEnterCode => 'Tap to enter code';
+  String get tapToEnterCode => 'Πατήστε για να εισάγετε τον κωδικό';
 
   @override
-  String get sendEmail => 'Send email';
+  String get sendEmail => 'Αποστολή email';
 
   @override
-  String get resendEmail => 'Resend email';
+  String get resendEmail => 'Επανάληψη αποστολής email';
 
   @override
-  String get passKeyPendingVerification => 'Verification is still pending';
+  String get passKeyPendingVerification =>
+      'Η επαλήθευση εξακολουθεί να εκκρεμεί';
 
   @override
-  String get loginSessionExpired => 'Session expired';
+  String get loginSessionExpired => 'Η συνεδρία έληξε';
 
   @override
   String get loginSessionExpiredDetails =>
-      'Your session has expired. Please login again.';
+      'Η συνεδρία σας έληξε. Παρακαλώ συνδεθείτε ξανά.';
 
   @override
-  String get passkeyAuthTitle => 'Passkey verification';
+  String get passkeyAuthTitle => 'Επιβεβαίωση κλειδιού πρόσβασης';
 
   @override
-  String get waitingForVerification => 'Waiting for verification...';
+  String get waitingForVerification => 'Αναμονή για επαλήθευση...';
 
   @override
-  String get tryAgain => 'Try again';
+  String get tryAgain => 'Προσπαθήστε ξανά';
 
   @override
-  String get checkStatus => 'Check status';
+  String get checkStatus => 'Έλεγχος κατάστασης';
 
   @override
-  String get loginWithTOTP => 'Login with TOTP';
+  String get loginWithTOTP => 'Είσοδος με TOTP';
 
   @override
-  String get recoverAccount => 'Recover account';
+  String get recoverAccount => 'Ανάκτηση λογαριασμού';
 
   @override
-  String get setPasswordTitle => 'Set password';
+  String get setPasswordTitle => 'Ορισμός κωδικού πρόσβασης';
 
   @override
-  String get changePasswordTitle => 'Change password';
+  String get changePasswordTitle => 'Αλλαγή κωδικού πρόσβασής';
 
   @override
-  String get resetPasswordTitle => 'Reset password';
+  String get resetPasswordTitle => 'Επαναφορά κωδικού πρόσβασης';
 
   @override
-  String get encryptionKeys => 'Encryption keys';
+  String get encryptionKeys => 'Κλειδιά κρυπτογράφησης';
 
   @override
   String get enterPasswordToEncrypt =>
-      'Enter a password we can use to encrypt your data';
+      'Εισάγετε έναν κωδικό πρόσβασης που μπορούμε να χρησιμοποιήσουμε για την κρυπτογράφηση των δεδομένων σας';
 
   @override
   String get enterNewPasswordToEncrypt =>
-      'Enter a new password we can use to encrypt your data';
+      'Εισάγετε ένα νέο κωδικό πρόσβασης που μπορούμε να χρησιμοποιήσουμε για να κρυπτογραφήσουμε τα δεδομένα σας';
 
   @override
   String get passwordWarning =>
-      'We don\'t store this password, so if you forget, <underline>we cannot decrypt your data</underline>';
+      'Δεν αποθηκεύουμε αυτόν τον κωδικό πρόσβασης, οπότε αν τον ξεχάσετε <underline>δεν μπορούμε να αποκρυπτογραφήσουμε τα δεδομένα σας</underline>';
 
   @override
-  String get howItWorks => 'How it works';
+  String get howItWorks => 'Πώς λειτουργεί';
 
   @override
-  String get generatingEncryptionKeys => 'Generating encryption keys...';
+  String get generatingEncryptionKeys =>
+      'Δημιουργία κλειδιών κρυπτογράφησης...';
 
   @override
-  String get passwordChangedSuccessfully => 'Password changed successfully';
+  String get passwordChangedSuccessfully =>
+      'Ο κωδικός πρόσβασης άλλαξε επιτυχώς';
 
   @override
-  String get signOutFromOtherDevices => 'Sign out from other devices';
+  String get signOutFromOtherDevices => 'Αποσύνδεση από άλλες συσκευές';
 
   @override
   String get signOutOtherBody =>
-      'If you think someone might know your password, you can force all other devices using your account to sign out.';
+      'Αν νομίζετε ότι κάποιος μπορεί να γνωρίζει τον κωδικό πρόσβασής σας, μπορείτε να αναγκάσετε όλες τις άλλες συσκευές που χρησιμοποιούν το λογαριασμό σας να αποσυνδεθούν.';
 
   @override
-  String get signOutOtherDevices => 'Sign out other devices';
+  String get signOutOtherDevices => 'Αποσύνδεση άλλων συσκευών';
 
   @override
-  String get doNotSignOut => 'Do not sign out';
+  String get doNotSignOut => 'Μην αποσυνδεθείτε';
 
   @override
-  String get generatingEncryptionKeysTitle => 'Generating encryption keys...';
+  String get generatingEncryptionKeysTitle =>
+      'Δημιουργία κλειδιών κρυπτογράφησης…';
 
   @override
-  String get continueLabel => 'Continue';
+  String get continueLabel => 'Συνέχεια';
 
   @override
-  String get insecureDevice => 'Insecure device';
+  String get insecureDevice => 'Μη ασφαλής συσκευή';
 
   @override
   String get sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease =>
-      'Sorry, we could not generate secure keys on this device.\n\nplease sign up from a different device.';
+      'Συγγνώμη, δεν μπορέσαμε να δημιουργήσουμε ασφαλή κλειδιά σε αυτήν τη συσκευή.\n\nπαρακαλώ εγγραφείτε από μια διαφορετική συσκευή.';
 
   @override
-  String get recoveryKeyCopiedToClipboard => 'Recovery key copied to clipboard';
+  String get recoveryKeyCopiedToClipboard =>
+      'Το κλειδί ανάκτησης αντιγράφηκε στο πρόχειρο';
 
   @override
-  String get recoveryKey => 'Recovery key';
+  String get recoveryKey => 'Κλειδί ανάκτησης';
 
   @override
   String get recoveryKeyOnForgotPassword =>
-      'If you forget your password, the only way you can recover your data is with this key.';
+      'Εάν ξεχάσετε τον κωδικό πρόσβασής σας, ο μόνος τρόπος για να ανακτήσετε τα δεδομένα σας είναι με αυτό το κλειδί.';
 
   @override
   String get recoveryKeySaveDescription =>
-      'We don\'t store this key, please save this 24 word key in a safe place.';
+      'Δεν αποθηκεύουμε αυτό το κλειδί, παρακαλώ αποθηκεύστε αυτό το κλειδί 24 λέξεων σε μια ασφαλή τοποθεσία.';
 
   @override
-  String get doThisLater => 'Do this later';
+  String get doThisLater => 'Κάντε το αργότερα';
 
   @override
-  String get saveKey => 'Save key';
+  String get saveKey => 'Αποθήκευση κλειδιού';
 
   @override
-  String get recoveryKeySaved => 'Recovery key saved in Downloads folder!';
+  String get recoveryKeySaved =>
+      'Το κλειδί ανάκτησης αποθηκεύτηκε στο φάκελο Λήψεις!';
 
   @override
-  String get noRecoveryKeyTitle => 'No recovery key?';
+  String get noRecoveryKeyTitle => 'Χωρίς κλειδί ανάκτησης;';
 
   @override
-  String get twoFactorAuthTitle => 'Two-factor authentication';
+  String get twoFactorAuthTitle => 'Αυθεντικοποίηση δύο παραγόντων';
 
   @override
   String get enterCodeHint =>
-      'Enter the 6-digit code from\nyour authenticator app';
+      'Εισάγετε τον 6ψήφιο κωδικό από \nτην εφαρμογή αυθεντικοποίησης';
 
   @override
-  String get lostDeviceTitle => 'Lost device?';
+  String get lostDeviceTitle => 'Χαμένη συσκευή;';
 
   @override
-  String get enterRecoveryKeyHint => 'Enter your recovery key';
+  String get enterRecoveryKeyHint => 'Εισάγετε το κλειδί ανάκτησης σας';
 
   @override
-  String get recover => 'Recover';
+  String get recover => 'Ανάκτηση';
 
   @override
-  String get loggingOut => 'Logging out...';
+  String get loggingOut => 'Αποσύνδεση…';
 
   @override
-  String get immediately => 'Immediately';
+  String get immediately => 'Άμεσα';
 
   @override
-  String get appLock => 'App lock';
+  String get appLock => 'Κλείδωμα εφαρμογής';
 
   @override
-  String get autoLock => 'Auto lock';
+  String get autoLock => 'Αυτόματο κλείδωμα';
 
   @override
-  String get noSystemLockFound => 'No system lock found';
+  String get noSystemLockFound => 'Δεν βρέθηκε κλείδωμα συστήματος';
 
   @override
   String get deviceLockEnablePreSteps =>
-      'To enable device lock, please setup device passcode or screen lock in your system settings.';
+      'Για να ενεργοποιήσετε το κλείδωμα της συσκευής, παρακαλώ ρυθμίστε τον κωδικό πρόσβασης της συσκευής ή το κλείδωμα οθόνης στις ρυθμίσεις του συστήματός σας.';
 
   @override
   String get appLockDescription =>
-      'Choose between your device\'s default lock screen and a custom lock screen with a PIN or password.';
+      'Επιλέξτε ανάμεσα στην προεπιλεγμένη οθόνη κλειδώματος της συσκευής σας και σε μια προσαρμοσμένη οθόνη κλειδώματος με ένα PIN ή έναν κωδικό πρόσβασης.';
 
   @override
-  String get deviceLock => 'Device lock';
+  String get deviceLock => 'Κλείδωμα συσκευής';
 
   @override
-  String get pinLock => 'Pin lock';
+  String get pinLock => 'Κλείδωμα καρφιτσωμάτων';
 
   @override
   String get autoLockFeatureDescription =>
-      'Time after which the app locks after being put in the background';
+      'Χρόνος μετά τον οποίο η εφαρμογή κλειδώνει μετά την τοποθέτηση στο παρασκήνιο';
 
   @override
-  String get hideContent => 'Hide content';
+  String get hideContent => 'Απόκρυψη περιεχομένου';
 
   @override
   String get hideContentDescriptionAndroid =>
-      'Hides app content in the app switcher and disables screenshots';
+      'Απόκρυψη περιεχομένου εφαρμογής στην εναλλαγή εφαρμογών και απενεργοποίηση στιγμιότυπων οθόνης';
 
   @override
   String get hideContentDescriptioniOS =>
-      'Hides app content in the app switcher';
+      'Απόκρυψη περιεχομένου εφαρμογών στην εναλλαγή εφαρμογών';
 
   @override
-  String get tooManyIncorrectAttempts => 'Too many incorrect attempts';
+  String get tooManyIncorrectAttempts => 'Πάρα πολλές εσφαλμένες προσπάθειες';
 
   @override
-  String get tapToUnlock => 'Tap to unlock';
+  String get tapToUnlock => 'Πατήστε για ξεκλείδωμα';
 
   @override
-  String get areYouSureYouWantToLogout => 'Are you sure you want to logout?';
+  String get areYouSureYouWantToLogout =>
+      'Είστε σίγουροι ότι θέλετε να αποσυνδεθείτε;';
 
   @override
-  String get yesLogout => 'Yes, logout';
+  String get yesLogout => 'Ναι, αποσύνδεση';
 
   @override
-  String get authToViewSecrets => 'Please authenticate to view your secrets';
+  String get authToViewSecrets =>
+      'Παρακαλώ πραγματοποιήστε έλεγχο ταυτότητας για να δείτε τα μυστικά σας';
 
   @override
-  String get next => 'Next';
+  String get next => 'Επόμενο';
 
   @override
-  String get setNewPassword => 'Set new password';
+  String get setNewPassword => 'Ορίστε νέο κωδικό πρόσβασης';
 
   @override
-  String get enterPin => 'Enter PIN';
+  String get enterPin => 'Εισαγωγή PIN';
 
   @override
-  String get setNewPin => 'Set new PIN';
+  String get setNewPin => 'Ορίστε νέο PIN';
 
   @override
-  String get confirm => 'Confirm';
+  String get confirm => 'Επιβεβαίωση';
 
   @override
-  String get reEnterPassword => 'Re-enter password';
+  String get reEnterPassword => 'Πληκτρολογήστε ξανά τον κωδικό πρόσβασης';
 
   @override
-  String get reEnterPin => 'Re-enter PIN';
+  String get reEnterPin => 'Πληκτρολογήστε ξανά το PIN';
 
   @override
-  String get androidBiometricHint => 'Verify identity';
+  String get androidBiometricHint => 'Επαλήθευση ταυτότητας';
 
   @override
-  String get androidBiometricNotRecognized => 'Not recognized. Try again.';
+  String get androidBiometricNotRecognized =>
+      'Δεν αναγνωρίζεται. Δοκιμάστε ξανά.';
 
   @override
-  String get androidBiometricSuccess => 'Success';
+  String get androidBiometricSuccess => 'Επιτυχία';
 
   @override
-  String get androidCancelButton => 'Cancel';
+  String get androidCancelButton => 'Ακύρωση';
 
   @override
-  String get androidSignInTitle => 'Authentication required';
+  String get androidSignInTitle => 'Απαιτείται έλεγχος ταυτότητας';
 
   @override
-  String get androidBiometricRequiredTitle => 'Biometric required';
+  String get androidBiometricRequiredTitle => 'Απαιτούνται βιομετρικά';
 
   @override
   String get androidDeviceCredentialsRequiredTitle =>
-      'Device credentials required';
+      'Απαιτούνται στοιχεία συσκευής';
 
   @override
   String get androidDeviceCredentialsSetupDescription =>
-      'Device credentials required';
+      'Απαιτούνται στοιχεία συσκευής';
 
   @override
-  String get goToSettings => 'Go to settings';
+  String get goToSettings => 'Μετάβαση στις ρυθμίσεις';
 
   @override
   String get androidGoToSettingsDescription =>
-      'Biometric authentication is not set up on your device. Go to \'Settings > Security\' to add biometric authentication.';
+      'Η βιομετρική πιστοποίηση δεν έχει ρυθμιστεί στη συσκευή σας. Μεταβείτε στις \'Ρυθμίσεις > Ασφάλεια\' για να προσθέσετε βιομετρική ταυτοποίηση.';
 
   @override
   String get iOSLockOut =>
-      'Biometric authentication is disabled. Please lock and unlock your screen to enable it.';
+      'Η βιομετρική ταυτοποίηση είναι απενεργοποιημένη. Παρακαλώ κλειδώστε και ξεκλειδώστε την οθόνη σας για να την ενεργοποιήσετε.';
 
   @override
-  String get iOSOkButton => 'OK';
+  String get iOSOkButton => 'ΟΚ';
 
   @override
   String get emailAlreadyRegistered => 'Email already registered.';
@@ -572,33 +570,33 @@ class StringsLocalizationsEl extends StringsLocalizations {
   String get emailNotRegistered => 'Email not registered.';
 
   @override
-  String get thisEmailIsAlreadyInUse => 'This email is already in use';
+  String get thisEmailIsAlreadyInUse => 'Αυτό το email είναι ήδη σε χρήση';
 
   @override
   String emailChangedTo(String newEmail) {
-    return 'Email changed to $newEmail';
+    return 'Το email άλλαξε σε $newEmail';
   }
 
   @override
   String get authenticationFailedPleaseTryAgain =>
-      'Authentication failed, please try again';
+      'Αποτυχία ελέγχου ταυτότητας, παρακαλώ προσπαθήστε ξανά';
 
   @override
-  String get authenticationSuccessful => 'Authentication successful!';
+  String get authenticationSuccessful => 'Επιτυχής έλεγχος ταυτότητας!';
 
   @override
-  String get sessionExpired => 'Session expired';
+  String get sessionExpired => 'Η συνεδρία έληξε';
 
   @override
-  String get incorrectRecoveryKey => 'Incorrect recovery key';
+  String get incorrectRecoveryKey => 'Εσφαλμένο κλειδί ανάκτησης';
 
   @override
   String get theRecoveryKeyYouEnteredIsIncorrect =>
-      'The recovery key you entered is incorrect';
+      'Το κλειδί ανάκτησης που εισάγατε είναι εσφαλμένο';
 
   @override
   String get twofactorAuthenticationSuccessfullyReset =>
-      'Two-factor authentication successfully reset';
+      'Η αυθεντικοποίηση δύο παραγόντων επαναφέρθηκε επιτυχώς';
 
   @override
   String get noRecoveryKey => 'No recovery key';
@@ -611,12 +609,29 @@ class StringsLocalizationsEl extends StringsLocalizations {
 
   @override
   String get yourVerificationCodeHasExpired =>
-      'Your verification code has expired';
+      'Ο κωδικός επαλήθευσης σας έχει λήξει';
 
   @override
-  String get incorrectCode => 'Incorrect code';
+  String get incorrectCode => 'Εσφαλμένος κωδικός';
 
   @override
   String get sorryTheCodeYouveEnteredIsIncorrect =>
-      'Sorry, the code you\'ve entered is incorrect';
+      'Λυπούμαστε, ο κωδικός που εισαγάγατε είναι εσφαλμένος';
+
+  @override
+  String get developerSettings => 'Ρυθμίσεις προγραμματιστή';
+
+  @override
+  String get serverEndpoint => 'Τερματικό σημείο διακομιστή';
+
+  @override
+  String get invalidEndpoint => 'Μη έγκυρο τερματικό σημείο';
+
+  @override
+  String get invalidEndpointMessage =>
+      'Λυπούμαστε, το τερματικό σημείο που εισάγατε δεν είναι έγκυρο. Παρακαλώ εισάγετε ένα έγκυρο τερματικό σημείο και προσπαθήστε ξανά.';
+
+  @override
+  String get endpointUpdatedMessage =>
+      'Το τερματκό σημείο ενημερώθηκε επιτυχώς';
 }
