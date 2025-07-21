@@ -312,6 +312,7 @@ class _DelayedGalleryState extends State<DelayedGallery> {
           showSelectAll: true,
           sortAsyncFn: () => false,
           disablePinnedGroupHeader: true,
+          disableVerticalPaddingForScrollbar: true,
         ).animate().fadeIn(
               duration: const Duration(milliseconds: 175),
               curve: Curves.easeOutCirc,

@@ -123,6 +123,7 @@ class PickCenterPointWidget extends StatelessWidget {
                                 ),
                               ),
                               disablePinnedGroupHeader: true,
+                              disableVerticalPaddingForScrollbar: true,
                             ),
                           ),
                         ),

@@ -122,6 +122,7 @@ class PickCoverPhotoWidget extends StatelessWidget {
                               sortAsyncFn: () =>
                                   collection.pubMagicMetadata.asc ?? false,
                               disablePinnedGroupHeader: true,
+                              disableVerticalPaddingForScrollbar: true,
                             ),
                           ),
                         ),

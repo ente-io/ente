@@ -121,6 +121,7 @@ class PickPersonCoverPhotoWidget extends StatelessWidget {
                               limitSelectionToOne: true,
                               showSelectAll: false,
                               disablePinnedGroupHeader: true,
+                              disableVerticalPaddingForScrollbar: true,
                             ),
                           ),
                         ),

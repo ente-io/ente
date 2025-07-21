@@ -78,6 +78,7 @@ class Gallery extends StatefulWidget {
   final SortAscFn? sortAsyncFn;
   final GroupType groupType;
   final bool disablePinnedGroupHeader;
+  final bool disableVerticalPaddingForScrollbar;
 
   const Gallery({
     required this.asyncLoader,
@@ -104,6 +105,7 @@ class Gallery extends StatefulWidget {
     this.reloadDebounceExecutionInterval = const Duration(seconds: 2),
     this.disablePinnedGroupHeader = false,
     this.galleryType,
+    this.disableVerticalPaddingForScrollbar = false,
     super.key,
   });
 
@@ -561,8 +563,12 @@ class GalleryState extends State<Gallery> {
               galleryGroups: galleryGroups,
               inUseNotifier: scrollBarInUseNotifier,
               heighOfViewport: MediaQuery.sizeOf(context).height,
-              topPadding: groupHeaderExtent!,
-              bottomPadding: scrollbarBottomPaddingNotifier,
+              topPadding: widget.disableVerticalPaddingForScrollbar
+                  ? 0.0
+                  : groupHeaderExtent!,
+              bottomPadding: widget.disableVerticalPaddingForScrollbar
+                  ? ValueNotifier(0.0)
+                  : scrollbarBottomPaddingNotifier,
               child: NotificationListener<SizeChangedLayoutNotification>(
                 onNotification: (notification) {
                   final renderBox = _headerKey.currentContext
