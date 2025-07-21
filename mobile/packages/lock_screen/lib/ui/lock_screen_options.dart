@@ -1,6 +1,12 @@
 import "dart:async";
 import "dart:io";
 
+import "package:ente_lock_screen/local_authentication_service.dart";
+import "package:ente_lock_screen/lock_screen_settings.dart";
+import "package:ente_lock_screen/ui/app_lock.dart";
+import "package:ente_lock_screen/ui/lock_screen_auto_lock.dart";
+import "package:ente_lock_screen/ui/lock_screen_password.dart";
+import "package:ente_lock_screen/ui/lock_screen_pin.dart";
 import "package:ente_strings/ente_strings.dart";
 import "package:ente_ui/components/buttons/button_widget.dart";
 import "package:ente_ui/components/buttons/models/button_type.dart";
@@ -14,12 +20,6 @@ import "package:ente_ui/components/toggle_switch_widget.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:ente_utils/platform_util.dart";
 import "package:flutter/material.dart";
-import "package:ente_lock_screen/local_authentication_service.dart";
-import "package:ente_lock_screen/lock_screen_settings.dart";
-import "package:ente_lock_screen/ui/app_lock.dart";
-import "package:ente_lock_screen/ui/lock_screen_auto_lock.dart";
-import "package:ente_lock_screen/ui/lock_screen_password.dart";
-import "package:ente_lock_screen/ui/lock_screen_pin.dart";
 
 class LockScreenOptions extends StatefulWidget {
   const LockScreenOptions({super.key});
