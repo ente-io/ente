@@ -1,6 +1,3 @@
-/// A Flutter package containing account-related functionality for Ente apps
-library ente_accounts;
-
 export 'models/bonus.dart';
 export 'models/delete_account.dart';
 export 'models/sessions.dart';
