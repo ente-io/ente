@@ -1,10 +1,5 @@
 import 'dart:io';
 
-import 'package:ente_lock_screen/auth_util.dart';
-import 'package:ente_lock_screen/lock_screen_settings.dart';
-import 'package:ente_lock_screen/ui/app_lock.dart';
-import 'package:ente_lock_screen/ui/lock_screen_password.dart';
-import 'package:ente_lock_screen/ui/lock_screen_pin.dart';
 import 'package:ente_ui/utils/dialog_util.dart';
 import 'package:ente_ui/utils/toast_util.dart';
 import 'package:flutter/foundation.dart';
@@ -12,6 +7,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_local_authentication/flutter_local_authentication.dart';
 import 'package:local_auth/local_auth.dart';
+import 'package:lock_screen/auth_util.dart';
+import 'package:lock_screen/lock_screen_settings.dart';
+import 'package:lock_screen/ui/app_lock.dart';
+import 'package:lock_screen/ui/lock_screen_password.dart';
+import 'package:lock_screen/ui/lock_screen_pin.dart';
 import 'package:logging/logging.dart';
 
 class LocalAuthenticationService {

@@ -1,4 +1,4 @@
-name: ente_lock_screen
+name: lock_screen
 description: A Flutter package containing lock screen UI components and services for Ente apps
 version: 1.0.0
 publish_to: none
@@ -8,6 +8,8 @@ environment:
   flutter: ">=1.17.0"
 
 dependencies:
+  flutter:
+    sdk: flutter
   ente_accounts:
     path: ../accounts
   ente_configuration:
@@ -23,13 +25,8 @@ dependencies:
     path: ../ui
   ente_utils:
     path: ../utils
-  flutter:
-    sdk: flutter
   flutter_animate: ^4.1.0
-  flutter_local_authentication:
-    git:
-      url: https://github.com/eaceto/flutter_local_authentication
-      ref: 1ac346a04592a05fd75acccf2e01fa3c7e955d96
+  flutter_local_authentication: ^1.1.11
   flutter_secure_storage: ^9.0.0
   local_auth: ^2.1.8
   logging: ^1.1.1
@@ -38,8 +35,8 @@ dependencies:
   shared_preferences: ^2.5.3
 
 dev_dependencies:
-  flutter_lints: ^5.0.0
   flutter_test:
     sdk: flutter
+  flutter_lints: ^5.0.0
 
 flutter:

@@ -1,17 +1,17 @@
 import "dart:convert";
 import "dart:io";
 
-import "package:ente_crypto_dart/ente_crypto_dart.dart";
-import "package:ente_lock_screen/lock_screen_settings.dart";
-import "package:ente_lock_screen/ui/custom_pin_keypad.dart";
-import "package:ente_lock_screen/ui/lock_screen_confirm_pin.dart";
-import "package:ente_lock_screen/ui/lock_screen_options.dart";
 import "package:ente_strings/ente_strings.dart";
 import "package:ente_ui/theme/colors.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:ente_ui/theme/text_style.dart";
+import "package:ente_crypto_dart/ente_crypto_dart.dart";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
+import "package:lock_screen/lock_screen_settings.dart";
+import "package:lock_screen/ui/custom_pin_keypad.dart";
+import "package:lock_screen/ui/lock_screen_confirm_pin.dart";
+import "package:lock_screen/ui/lock_screen_options.dart";
 import 'package:pinput/pinput.dart';
 
 /// [isChangingLockScreenSettings] Authentication required for changing lock screen settings.

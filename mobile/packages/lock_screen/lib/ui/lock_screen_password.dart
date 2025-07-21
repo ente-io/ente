@@ -1,16 +1,16 @@
 import "dart:convert";
 
-import "package:ente_crypto_dart/ente_crypto_dart.dart";
-import "package:ente_lock_screen/lock_screen_settings.dart";
-import "package:ente_lock_screen/ui/lock_screen_confirm_password.dart";
-import "package:ente_lock_screen/ui/lock_screen_options.dart";
 import "package:ente_strings/ente_strings.dart";
 import "package:ente_ui/components/buttons/dynamic_fab.dart";
 import "package:ente_ui/components/buttons/icon_button_widget.dart";
 import "package:ente_ui/components/text_input_widget.dart";
 import "package:ente_ui/theme/ente_theme.dart";
+import "package:ente_crypto_dart/ente_crypto_dart.dart";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
+import "package:lock_screen/lock_screen_settings.dart";
+import "package:lock_screen/ui/lock_screen_confirm_password.dart";
+import "package:lock_screen/ui/lock_screen_options.dart";
 
 /// [isChangingLockScreenSettings] Authentication required for changing lock screen settings.
 /// Set to true when the app requires the user to authenticate before allowing
