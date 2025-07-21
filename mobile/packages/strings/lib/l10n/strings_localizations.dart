@@ -331,6 +331,606 @@ abstract class StringsLocalizations {
   /// In en, this message translates to:
   /// **'Do you want to save this to your storage (Downloads folder by default)?'**
   String get saveOnlyDescription;
+
+  /// Hint text for entering new email address
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your new email address'**
+  String get enterNewEmailHint;
+
+  /// Email field label
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get email;
+
+  /// Verify button label
+  ///
+  /// In en, this message translates to:
+  /// **'Verify'**
+  String get verify;
+
+  /// Title for invalid email error dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid email address'**
+  String get invalidEmailTitle;
+
+  /// Message for invalid email error dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a valid email address.'**
+  String get invalidEmailMessage;
+
+  /// Please wait message
+  ///
+  /// In en, this message translates to:
+  /// **'Please wait...'**
+  String get pleaseWait;
+
+  /// Verify password button label
+  ///
+  /// In en, this message translates to:
+  /// **'Verify password'**
+  String get verifyPassword;
+
+  /// Title for incorrect password error
+  ///
+  /// In en, this message translates to:
+  /// **'Incorrect password'**
+  String get incorrectPasswordTitle;
+
+  /// Message asking user to try again
+  ///
+  /// In en, this message translates to:
+  /// **'Please try again'**
+  String get pleaseTryAgain;
+
+  /// Enter password field label
+  ///
+  /// In en, this message translates to:
+  /// **'Enter password'**
+  String get enterPassword;
+
+  /// Hint for password field
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your password'**
+  String get enterYourPasswordHint;
+
+  /// Title for active sessions page
+  ///
+  /// In en, this message translates to:
+  /// **'Active sessions'**
+  String get activeSessions;
+
+  /// Oops error title
+  ///
+  /// In en, this message translates to:
+  /// **'Oops'**
+  String get oops;
+
+  /// Generic error message
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong, please try again'**
+  String get somethingWentWrongPleaseTryAgain;
+
+  /// Warning message for logging out of current device
+  ///
+  /// In en, this message translates to:
+  /// **'This will log you out of this device!'**
+  String get thisWillLogYouOutOfThisDevice;
+
+  /// Warning message for logging out of another device
+  ///
+  /// In en, this message translates to:
+  /// **'This will log you out of the following device:'**
+  String get thisWillLogYouOutOfTheFollowingDevice;
+
+  /// Title for terminate session dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Terminate session?'**
+  String get terminateSession;
+
+  /// Terminate button label
+  ///
+  /// In en, this message translates to:
+  /// **'Terminate'**
+  String get terminate;
+
+  /// Label for current device
+  ///
+  /// In en, this message translates to:
+  /// **'This device'**
+  String get thisDevice;
+
+  /// Create account button label
+  ///
+  /// In en, this message translates to:
+  /// **'Create account'**
+  String get createAccount;
+
+  /// Weak password strength label
+  ///
+  /// In en, this message translates to:
+  /// **'Weak'**
+  String get weakStrength;
+
+  /// Moderate password strength label
+  ///
+  /// In en, this message translates to:
+  /// **'Moderate'**
+  String get moderateStrength;
+
+  /// Strong password strength label
+  ///
+  /// In en, this message translates to:
+  /// **'Strong'**
+  String get strongStrength;
+
+  /// Delete account button label
+  ///
+  /// In en, this message translates to:
+  /// **'Delete account'**
+  String get deleteAccount;
+
+  /// Message asking user why they want to delete account
+  ///
+  /// In en, this message translates to:
+  /// **'We\'ll be sorry to see you go. Are you facing some issue?'**
+  String get deleteAccountQuery;
+
+  /// Button to confirm sending feedback
+  ///
+  /// In en, this message translates to:
+  /// **'Yes, send feedback'**
+  String get yesSendFeedbackAction;
+
+  /// Button to proceed with account deletion
+  ///
+  /// In en, this message translates to:
+  /// **'No, delete account'**
+  String get noDeleteAccountAction;
+
+  /// Title for authentication dialog before account deletion
+  ///
+  /// In en, this message translates to:
+  /// **'Please authenticate to initiate account deletion'**
+  String get initiateAccountDeleteTitle;
+
+  /// Title for account deletion confirmation dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm account deletion'**
+  String get confirmAccountDeleteTitle;
+
+  /// Message warning about account deletion consequences
+  ///
+  /// In en, this message translates to:
+  /// **'This account is linked to other Ente apps, if you use any.\n\nYour uploaded data, across all Ente apps, will be scheduled for deletion, and your account will be permanently deleted.'**
+  String get confirmAccountDeleteMessage;
+
+  /// Delete button label
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get delete;
+
+  /// Create new account button label
+  ///
+  /// In en, this message translates to:
+  /// **'Create new account'**
+  String get createNewAccount;
+
+  /// Password field label
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get password;
+
+  /// Confirm password field label
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm password'**
+  String get confirmPassword;
+
+  /// Text to indicate the password strength
+  ///
+  /// In en, this message translates to:
+  /// **'Password strength: {passwordStrengthValue}'**
+  String passwordStrength(String passwordStrengthValue);
+
+  /// Title asking how user heard about Ente
+  ///
+  /// In en, this message translates to:
+  /// **'How did you hear about Ente? (optional)'**
+  String get hearUsWhereTitle;
+
+  /// Explanation for asking how user heard about Ente
+  ///
+  /// In en, this message translates to:
+  /// **'We don\'t track app installs. It\'d help if you told us where you found us!'**
+  String get hearUsExplanation;
+
+  /// Terms agreement text for sign up
+  ///
+  /// In en, this message translates to:
+  /// **'I agree to the <u-terms>terms of service</u-terms> and <u-policy>privacy policy</u-policy>'**
+  String get signUpTerms;
+
+  /// Terms of service title
+  ///
+  /// In en, this message translates to:
+  /// **'Terms'**
+  String get termsOfServicesTitle;
+
+  /// Privacy policy title
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy Policy'**
+  String get privacyPolicyTitle;
+
+  /// Warning about password loss
+  ///
+  /// In en, this message translates to:
+  /// **'I understand that if I lose my password, I may lose my data since my data is <underline>end-to-end encrypted</underline>.'**
+  String get ackPasswordLostWarning;
+
+  /// Encryption label
+  ///
+  /// In en, this message translates to:
+  /// **'Encryption'**
+  String get encryption;
+
+  /// Log in button label
+  ///
+  /// In en, this message translates to:
+  /// **'Log in'**
+  String get logInLabel;
+
+  /// Welcome back message
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome back!'**
+  String get welcomeBack;
+
+  /// Terms agreement text for login
+  ///
+  /// In en, this message translates to:
+  /// **'By clicking log in, I agree to the <u-terms>terms of service</u-terms> and <u-policy>privacy policy</u-policy>'**
+  String get loginTerms;
+
+  /// No internet connection error message
+  ///
+  /// In en, this message translates to:
+  /// **'No internet connection'**
+  String get noInternetConnection;
+
+  /// Message asking user to check internet connection
+  ///
+  /// In en, this message translates to:
+  /// **'Please check your internet connection and try again.'**
+  String get pleaseCheckYourInternetConnectionAndTryAgain;
+
+  /// Verification failed error message
+  ///
+  /// In en, this message translates to:
+  /// **'Verification failed, please try again'**
+  String get verificationFailedPleaseTryAgain;
+
+  /// Title for recreate password dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Recreate password'**
+  String get recreatePasswordTitle;
+
+  /// Body text for recreate password dialog
+  ///
+  /// In en, this message translates to:
+  /// **'The current device is not powerful enough to verify your password, but we can regenerate in a way that works with all devices.\n\nPlease login using your recovery key and regenerate your password (you can use the same one again if you wish).'**
+  String get recreatePasswordBody;
+
+  /// Use recovery key button label
+  ///
+  /// In en, this message translates to:
+  /// **'Use recovery key'**
+  String get useRecoveryKey;
+
+  /// Forgot password link label
+  ///
+  /// In en, this message translates to:
+  /// **'Forgot password'**
+  String get forgotPassword;
+
+  /// Change email button label
+  ///
+  /// In en, this message translates to:
+  /// **'Change email'**
+  String get changeEmail;
+
+  /// Verify email title
+  ///
+  /// In en, this message translates to:
+  /// **'Verify email'**
+  String get verifyEmail;
+
+  /// Text to indicate that we have sent a mail to the user
+  ///
+  /// In en, this message translates to:
+  /// **'We have sent a mail to <green>{email}</green>'**
+  String weHaveSendEmailTo(String email);
+
+  /// Message asking user to verify email before password reset
+  ///
+  /// In en, this message translates to:
+  /// **'To reset your password, please verify your email first.'**
+  String get toResetVerifyEmail;
+
+  /// Message asking user to check inbox and spam folder
+  ///
+  /// In en, this message translates to:
+  /// **'Please check your inbox (and spam) to complete verification'**
+  String get checkInboxAndSpamFolder;
+
+  /// Hint for entering verification code
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to enter code'**
+  String get tapToEnterCode;
+
+  /// No description provided for @sendEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Send email'**
+  String get sendEmail;
+
+  /// Resend email button label
+  ///
+  /// In en, this message translates to:
+  /// **'Resend email'**
+  String get resendEmail;
+
+  /// Message when passkey verification is pending
+  ///
+  /// In en, this message translates to:
+  /// **'Verification is still pending'**
+  String get passKeyPendingVerification;
+
+  /// Login session expired title
+  ///
+  /// In en, this message translates to:
+  /// **'Session expired'**
+  String get loginSessionExpired;
+
+  /// Login session expired details
+  ///
+  /// In en, this message translates to:
+  /// **'Your session has expired. Please login again.'**
+  String get loginSessionExpiredDetails;
+
+  /// Passkey authentication title
+  ///
+  /// In en, this message translates to:
+  /// **'Passkey verification'**
+  String get passkeyAuthTitle;
+
+  /// Waiting for verification message
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for verification...'**
+  String get waitingForVerification;
+
+  /// Try again button label
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get tryAgain;
+
+  /// Check status button label
+  ///
+  /// In en, this message translates to:
+  /// **'Check status'**
+  String get checkStatus;
+
+  /// Login with TOTP button label
+  ///
+  /// In en, this message translates to:
+  /// **'Login with TOTP'**
+  String get loginWithTOTP;
+
+  /// Recover account button label
+  ///
+  /// In en, this message translates to:
+  /// **'Recover account'**
+  String get recoverAccount;
+
+  /// Set password title
+  ///
+  /// In en, this message translates to:
+  /// **'Set password'**
+  String get setPasswordTitle;
+
+  /// Change password title
+  ///
+  /// In en, this message translates to:
+  /// **'Change password'**
+  String get changePasswordTitle;
+
+  /// Reset password title
+  ///
+  /// In en, this message translates to:
+  /// **'Reset password'**
+  String get resetPasswordTitle;
+
+  /// Encryption keys title
+  ///
+  /// In en, this message translates to:
+  /// **'Encryption keys'**
+  String get encryptionKeys;
+
+  /// Prompt to enter password for encryption
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a password we can use to encrypt your data'**
+  String get enterPasswordToEncrypt;
+
+  /// Prompt to enter new password for encryption
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a new password we can use to encrypt your data'**
+  String get enterNewPasswordToEncrypt;
+
+  /// Warning about password storage
+  ///
+  /// In en, this message translates to:
+  /// **'We don\'t store this password, so if you forget, <underline>we cannot decrypt your data</underline>'**
+  String get passwordWarning;
+
+  /// How it works button label
+  ///
+  /// In en, this message translates to:
+  /// **'How it works'**
+  String get howItWorks;
+
+  /// Generating encryption keys message
+  ///
+  /// In en, this message translates to:
+  /// **'Generating encryption keys...'**
+  String get generatingEncryptionKeys;
+
+  /// Password changed successfully message
+  ///
+  /// In en, this message translates to:
+  /// **'Password changed successfully'**
+  String get passwordChangedSuccessfully;
+
+  /// Sign out from other devices title
+  ///
+  /// In en, this message translates to:
+  /// **'Sign out from other devices'**
+  String get signOutFromOtherDevices;
+
+  /// Sign out other devices explanation
+  ///
+  /// In en, this message translates to:
+  /// **'If you think someone might know your password, you can force all other devices using your account to sign out.'**
+  String get signOutOtherBody;
+
+  /// Sign out other devices button label
+  ///
+  /// In en, this message translates to:
+  /// **'Sign out other devices'**
+  String get signOutOtherDevices;
+
+  /// Do not sign out button label
+  ///
+  /// In en, this message translates to:
+  /// **'Do not sign out'**
+  String get doNotSignOut;
+
+  /// Generating encryption keys title
+  ///
+  /// In en, this message translates to:
+  /// **'Generating encryption keys...'**
+  String get generatingEncryptionKeysTitle;
+
+  /// Continue button label
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get continueLabel;
+
+  /// Insecure device warning title
+  ///
+  /// In en, this message translates to:
+  /// **'Insecure device'**
+  String get insecureDevice;
+
+  /// Error message for insecure device
+  ///
+  /// In en, this message translates to:
+  /// **'Sorry, we could not generate secure keys on this device.\n\nplease sign up from a different device.'**
+  String get sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease;
+
+  /// Recovery key copied message
+  ///
+  /// In en, this message translates to:
+  /// **'Recovery key copied to clipboard'**
+  String get recoveryKeyCopiedToClipboard;
+
+  /// Recovery key label
+  ///
+  /// In en, this message translates to:
+  /// **'Recovery key'**
+  String get recoveryKey;
+
+  /// Recovery key importance explanation
+  ///
+  /// In en, this message translates to:
+  /// **'If you forget your password, the only way you can recover your data is with this key.'**
+  String get recoveryKeyOnForgotPassword;
+
+  /// Recovery key save description
+  ///
+  /// In en, this message translates to:
+  /// **'We don\'t store this key, please save this 24 word key in a safe place.'**
+  String get recoveryKeySaveDescription;
+
+  /// Do this later button label
+  ///
+  /// In en, this message translates to:
+  /// **'Do this later'**
+  String get doThisLater;
+
+  /// Save key button label
+  ///
+  /// In en, this message translates to:
+  /// **'Save key'**
+  String get saveKey;
+
+  /// Recovery key saved confirmation message
+  ///
+  /// In en, this message translates to:
+  /// **'Recovery key saved in Downloads folder!'**
+  String get recoveryKeySaved;
+
+  /// No recovery key title
+  ///
+  /// In en, this message translates to:
+  /// **'No recovery key?'**
+  String get noRecoveryKeyTitle;
+
+  /// Two-factor authentication title
+  ///
+  /// In en, this message translates to:
+  /// **'Two-factor authentication'**
+  String get twoFactorAuthTitle;
+
+  /// Hint for entering 2FA code
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the 6-digit code from\nyour authenticator app'**
+  String get enterCodeHint;
+
+  /// Lost device title
+  ///
+  /// In en, this message translates to:
+  /// **'Lost device?'**
+  String get lostDeviceTitle;
+
+  /// Hint for entering recovery key
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your recovery key'**
+  String get enterRecoveryKeyHint;
+
+  /// Recover button label
+  ///
+  /// In en, this message translates to:
+  /// **'Recover'**
+  String get recover;
 }
 
 class _StringsLocalizationsDelegate
