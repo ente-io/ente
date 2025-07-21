@@ -8,8 +8,6 @@ environment:
   flutter: ">=1.17.0"
 
 dependencies:
-  flutter:
-    sdk: flutter
   ente_accounts:
     path: ../accounts
   ente_configuration:
@@ -25,6 +23,8 @@ dependencies:
     path: ../ui
   ente_utils:
     path: ../utils
+  flutter:
+    sdk: flutter
   flutter_animate: ^4.1.0
   flutter_local_authentication:
     git:
@@ -38,8 +38,8 @@ dependencies:
   shared_preferences: ^2.5.3
 
 dev_dependencies:
+  flutter_lints: ^5.0.0
   flutter_test:
     sdk: flutter
-  flutter_lints: ^5.0.0
 
 flutter:
