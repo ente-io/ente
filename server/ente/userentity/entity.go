@@ -11,14 +11,18 @@ type EntityType string
 
 const (
 	Location EntityType = "location"
-	Person   EntityType = "person"
+	// Person entity is deprecated and will be removed in the future.
+	//Deprecated ..
+	Person EntityType = "person"
 	// CGroup is a new version of Person entity, where the data is gzipped before encryption
 	CGroup EntityType = "cgroup"
+	// SmartAlbum is a new entity type for storing smart album config data
+	SmartAlbum EntityType = "smart_album"
 )
 
 func (et EntityType) IsValid() error {
 	switch et {
-	case Location, Person, CGroup:
+	case Location, Person, CGroup, SmartAlbum:
 		return nil
 	}
 	return ente.NewBadRequestWithMessage(fmt.Sprintf("Invalid EntityType: %s", et))
@@ -65,6 +69,26 @@ type EntityDataRequest struct {
 	Type          EntityType `json:"type" binding:"required"`
 	EncryptedData string     `json:"encryptedData" binding:"required"`
 	Header        string     `json:"header" binding:"required"`
+	ID            *string    `json:"id"` // Optional ID, if not provided a new ID will be generated
+}
+
+func (edr *EntityDataRequest) IsValid(userID int64) error {
+	if err := edr.Type.IsValid(); err != nil {
+		return err
+	}
+	switch edr.Type {
+	case SmartAlbum:
+		if edr.ID == nil {
+			return ente.NewBadRequestWithMessage("ID is required for SmartAlbum entity type")
+		}
+		// check if ID starts with sa_userid_ or not
+		if !strings.HasPrefix(*edr.ID, fmt.Sprintf("sa_%d_", userID)) {
+			return ente.NewBadRequestWithMessage(fmt.Sprintf("ID %s is not valid for SmartAlbum entity type", *edr.ID))
+		}
+		return nil
+	default:
+		return nil
+	}
 }
 
 // UpdateEntityDataRequest updates the current entity
