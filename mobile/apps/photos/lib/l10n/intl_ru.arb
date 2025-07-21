@@ -477,7 +477,7 @@
     }
   },
   "showMemories": "Показывать воспоминания",
-  "yearsAgo": "{count, plural, one{{count} год назад} few{{count} года назад} other{{count} лет назад}}",
+  "yearsAgo": "{count, plural, one{{count} год назад} other{{count} лет назад}}",
   "backupSettings": "Настройки резервного копирования",
   "backupStatus": "Статус резервного копирования",
   "backupStatusDescription": "Элементы, сохранённые в резервной копии, появятся здесь",

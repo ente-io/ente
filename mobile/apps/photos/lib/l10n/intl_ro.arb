@@ -443,7 +443,7 @@
   "selectAll": "Selectare totală",
   "skip": "Omiteți",
   "updatingFolderSelection": "Se actualizează selecția dosarelor...",
-  "itemCount": "{count, plural, one{{count} articol} few {{count} articole} other{{count} de articole}}",
+  "itemCount": "{count, plural, one{{count} articol} other{{count} de articole}}",
   "deleteItemCount": "{count, plural, =1 {Ștergeți {count} articol} other {Ștergeți {count} de articole}}",
   "duplicateItemsGroup": "{count} fișiere, {formattedSize} fiecare",
   "@duplicateItemsGroup": {
@@ -461,7 +461,7 @@
     }
   },
   "showMemories": "Afișare amintiri",
-  "yearsAgo": "{count, plural, one{acum {count} an} few {acum {count} ani} other{acum {count} de ani}}",
+  "yearsAgo": "{count, plural, one{acum {count} an} other{acum {count} de ani}}",
   "backupSettings": "Setări copie de rezervă",
   "backupStatus": "Stare copie de rezervă",
   "backupStatusDescription": "Articolele care au fost salvate vor apărea aici",
@@ -526,7 +526,7 @@
   },
   "remindToEmptyEnteTrash": "De asemenea, goliți „Coșul de gunoi” pentru a revendica spațiul eliberat",
   "sparkleSuccess": "✨ Succes",
-  "duplicateFileCountWithStorageSaved": "Ați curățat {count, plural, one{{count} dublură} few {{count} dubluri} other{{count} de dubluri}}, economisind ({storageSaved}!)",
+  "duplicateFileCountWithStorageSaved": "Ați curățat {count, plural, one{{count} dublură} other{{count} de dubluri}}, economisind ({storageSaved}!)",
   "@duplicateFileCountWithStorageSaved": {
     "description": "The text to display when the user has successfully cleaned up duplicate files",
     "type": "text",
@@ -873,7 +873,7 @@
   "authToViewYourMemories": "Vă rugăm să vă autentificați pentru a vă vizualiza amintirile",
   "unlock": "Deblocare",
   "freeUpSpace": "Eliberați spațiu",
-  "filesBackedUpInAlbum": "{count, plural, one {Un fișier din acest album a fost deja salvat în siguranță} few {{formattedNumber} fișiere din acest album au fost deja salvate în siguranță} other {{formattedNumber} de fișiere din acest album au fost deja salvate în siguranță}}",
+  "filesBackedUpInAlbum": "{count, plural, one {Un fișier din acest album a fost deja salvat în siguranță} other {{formattedNumber} de fișiere din acest album au fost deja salvate în siguranță}}",
   "@filesBackedUpInAlbum": {
     "description": "Text to tell user how many files have been backed up in the album",
     "placeholders": {
@@ -888,7 +888,7 @@
       }
     }
   },
-  "filesBackedUpFromDevice": "{count, plural, one {Un fișier de pe acest dispozitiv a fost deja salvat în siguranță} few {{formattedNumber} fișiere de pe acest dispozitiv au fost deja salvate în siguranță} other {{formattedNumber} de fișiere de pe acest dispozitiv fost deja salvate în siguranță}}",
+  "filesBackedUpFromDevice": "{count, plural, one {Un fișier de pe acest dispozitiv a fost deja salvat în siguranță} other {{formattedNumber} de fișiere de pe acest dispozitiv fost deja salvate în siguranță}}",
   "@filesBackedUpFromDevice": {
     "description": "Text to tell user how many files have been backed up from this device",
     "placeholders": {
@@ -1177,7 +1177,7 @@
   "searchHint4": "Locație",
   "searchHint5": "În curând: chipuri și căutare magică ✨",
   "addYourPhotosNow": "Adăugați-vă fotografiile acum",
-  "searchResultCount": "{count, plural, one{{count} rezultat găsit} few {{count} rezultate găsite} other{{count} de rezultate găsite}}",
+  "searchResultCount": "{count, plural, one{{count} rezultat găsit} other{{count} de rezultate găsite}}",
   "@searchResultCount": {
     "description": "Text to tell user how many results were found for their search query",
     "placeholders": {

@@ -752,7 +752,7 @@ class FileUploader {
           _logger.info("File found to be deleted");
           remoteFile.localID = null;
         }
-        await FilesDB.instance.update(remoteFile);
+        // await FilesDB.instance.update(remoteFile);
       }
       await UploadLocksDB.instance.deleteMultipartTrack(lockKey);
 

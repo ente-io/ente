@@ -458,7 +458,7 @@
   "selectAll": "Összes kijelölése",
   "skip": "Kihagyás",
   "updatingFolderSelection": "Mappakijelölés frissítése...",
-  "itemCount": "{count, plural, one{{count} elem} other{{count} elem}}",
+  "itemCount": "{count, plural, other{{count} elem}}",
   "deleteItemCount": "{count, plural, =1 {Elem {count} törlése} other {Elemek {count} törlése}}",
   "duplicateItemsGroup": "{count} fájl, {formattedSize} mindegyik",
   "@duplicateItemsGroup": {

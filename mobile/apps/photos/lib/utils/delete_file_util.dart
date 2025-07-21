@@ -239,7 +239,8 @@ Future<void> deleteFilesOnDeviceOnly(
         await FilesDB.instance.deleteLocalFile(file);
       } else {
         file.localID = null;
-        await FilesDB.instance.update(file);
+        throw Exception("pending rewrite change");
+        // await FilesDB.instance.update(file);
       }
     }
   }
@@ -359,11 +360,11 @@ Future<bool> deleteLocalFiles(
           batchSize: largeCountThreshold,
           context: context,
           localIDs: localIDs,
-          deletedIDs: deletedIDs,
+          deletedIDs: delLocalIDs,
         );
       } else {
         _logger.info("Deleting in batches");
-        deletedIDs
+        delLocalIDs
             .addAll(await deleteLocalFilesInBatches(context, localAssetIDs));
       }
     } else {
