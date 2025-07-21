@@ -69,8 +69,10 @@ class SmartAlbumConfig {
   // toJson and fromJson methods
   Map<String, dynamic> toJson() {
     return {
+      "remote_id": remoteId,
       "collection_id": collectionId,
       "person_ids": personIDs.toList(),
+      "updated_at": updatedAt,
       "info_map": infoMap.map(
         (key, value) => MapEntry(
           key,
@@ -88,13 +90,14 @@ class SmartAlbumConfig {
     String? remoteId,
     int? updatedAt,
   ) {
-    final personIDs = Set<String>.from(json["person_ids"] as List);
+    final personIDs = Set<String>.from(json["person_ids"] as List? ?? []);
     final infoMap = (json["info_map"] as Map<String, dynamic>).map(
       (key, value) => MapEntry(
         key,
         (
-          updatedAt: value["updated_at"] as int,
-          addedFiles: Set<int>.from(value["added_files"] as List),
+          updatedAt: value["updated_at"] as int? ??
+              DateTime.now().millisecondsSinceEpoch,
+          addedFiles: Set<int>.from(value["added_files"] as List? ?? []),
         ),
       ),
     );
