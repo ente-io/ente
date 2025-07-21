@@ -13,10 +13,12 @@ import 'package:photos/events/tab_changed_event.dart';
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file_load_result.dart';
 import "package:photos/models/gallery/gallery_sections.dart";
+import "package:photos/models/gallery_type.dart";
 import 'package:photos/models/selected_files.dart';
 import "package:photos/service_locator.dart";
 import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/common/loading_widget.dart';
+import "package:photos/ui/viewer/actions/file_selection_overlay_bar.dart";
 import "package:photos/ui/viewer/gallery/component/gallery_file_widget.dart";
 import "package:photos/ui/viewer/gallery/component/group/group_header_widget.dart";
 import "package:photos/ui/viewer/gallery/component/group/type.dart";
@@ -58,6 +60,7 @@ class Gallery extends StatefulWidget {
   final bool disableScroll;
   final Duration reloadDebounceTime;
   final Duration reloadDebounceExecutionInterval;
+  final GalleryType? galleryType;
 
   /// When true, selection will be limited to one item. Tapping on any item
   /// will select even when no other item is selected.
@@ -100,6 +103,7 @@ class Gallery extends StatefulWidget {
     this.reloadDebounceTime = const Duration(milliseconds: 500),
     this.reloadDebounceExecutionInterval = const Duration(seconds: 2),
     this.disablePinnedGroupHeader = false,
+    this.galleryType,
     super.key,
   });
 
@@ -131,6 +135,7 @@ class GalleryState extends State<Gallery> {
   final miscUtil = MiscUtil();
   final scrollBarInUseNotifier = ValueNotifier<bool>(false);
   late GroupType _groupType;
+  final scrollbarBottomPaddingNotifier = ValueNotifier<double>(0);
 
   @override
   void initState() {
@@ -243,6 +248,8 @@ class GalleryState extends State<Gallery> {
     }
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      // To set the initial value of scrollbar bottom padding
+      _selectedFilesListener();
       try {
         final headerRenderBox = await miscUtil
             .getNonNullValueWithRetry(
@@ -258,6 +265,9 @@ class GalleryState extends State<Gallery> {
       }
       setState(() {});
     });
+
+    widget.selectedFiles?.addListener(_selectedFilesListener);
+    // To set the initial value of scrollbar bottom padding
   }
 
   @override
@@ -269,6 +279,15 @@ class GalleryState extends State<Gallery> {
         setState(() {});
       }
     }
+  }
+
+  void _selectedFilesListener() {
+    final bottomInset = MediaQuery.paddingOf(context).bottom;
+    final extra = widget.galleryType == GalleryType.homepage ? 76.0 : 0.0;
+    widget.selectedFiles?.files.isEmpty ?? true
+        ? scrollbarBottomPaddingNotifier.value = bottomInset + extra
+        : scrollbarBottomPaddingNotifier.value =
+            FileSelectionOverlayBar.roughHeight + bottomInset;
   }
 
   void _setGroupType() {
@@ -442,6 +461,8 @@ class GalleryState extends State<Gallery> {
     _scrollController.dispose();
     scrollBarInUseNotifier.dispose();
     _headerHeightNotifier.dispose();
+    widget.selectedFiles?.removeListener(_selectedFilesListener);
+    scrollbarBottomPaddingNotifier.dispose();
     super.dispose();
   }
 
@@ -486,8 +507,6 @@ class GalleryState extends State<Gallery> {
             )
           : const SizedBox.shrink();
     }
-
-    final double bottomPadding = MediaQuery.paddingOf(context).bottom + 180;
 
     final galleryGroups = GalleryGroups(
       allFiles: _allGalleryFiles,
@@ -544,7 +563,7 @@ class GalleryState extends State<Gallery> {
               inUseNotifier: scrollBarInUseNotifier,
               heighOfViewport: MediaQuery.sizeOf(context).height,
               topPadding: groupHeaderExtent!,
-              bottomPadding: bottomPadding,
+              bottomPadding: scrollbarBottomPaddingNotifier,
               child: NotificationListener<SizeChangedLayoutNotification>(
                 onNotification: (notification) {
                   final renderBox = _headerKey.currentContext

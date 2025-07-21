@@ -20,7 +20,7 @@ class ScrollbarDivision {
 
 class CustomScrollBar extends StatefulWidget {
   final Widget child;
-  final double bottomPadding;
+  final ValueNotifier<double> bottomPadding;
   final double topPadding;
   final ScrollController scrollController;
   final GalleryGroups galleryGroups;
@@ -74,12 +74,19 @@ class _CustomScrollBarState extends State<CustomScrollBar> {
   void initState() {
     super.initState();
     _init();
+    widget.bottomPadding.addListener(_computePositionToTitleMap);
   }
 
   @override
   void didUpdateWidget(covariant CustomScrollBar oldWidget) {
     super.didUpdateWidget(oldWidget);
     _init();
+  }
+
+  @override
+  void dispose() {
+    widget.bottomPadding.removeListener(_computePositionToTitleMap);
+    super.dispose();
   }
 
   void _init() {
@@ -116,6 +123,7 @@ class _CustomScrollBarState extends State<CustomScrollBar> {
   // if the scrollable is long enough, where the header and footer extents
   // are negligible compared to max extent of the scrollable.
   Future<void> _computePositionToTitleMap() async {
+    _logger.info("Computing position to title map");
     final result = <({double position, String title})>[];
     heightOfScrollTrack = await _getHeightOfScrollTrack();
     final maxScrollExtent = widget.scrollController.position.maxScrollExtent;
@@ -201,7 +209,9 @@ class _CustomScrollBarState extends State<CustomScrollBar> {
           () => renderBox!.size.height,
           id: "getHeightOfScrollTrack",
         )
-        .then((value) => value - widget.bottomPadding - widget.topPadding);
+        .then(
+          (value) => value - widget.bottomPadding.value - widget.topPadding,
+        );
   }
 
   @override
@@ -214,7 +224,7 @@ class _CustomScrollBarState extends State<CustomScrollBar> {
         MediaQuery(
           data: MediaQuery.of(context).copyWith(
             padding: EdgeInsets.only(
-              bottom: widget.bottomPadding,
+              bottom: widget.bottomPadding.value,
               top: widget.topPadding,
             ),
           ),
@@ -232,7 +242,7 @@ class _CustomScrollBarState extends State<CustomScrollBar> {
             : Padding(
                 padding: EdgeInsets.only(
                   top: widget.topPadding,
-                  bottom: widget.bottomPadding,
+                  bottom: widget.bottomPadding.value,
                 ),
                 child: ValueListenableBuilder<bool>(
                   valueListenable: widget.inUseNotifier,

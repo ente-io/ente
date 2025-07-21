@@ -73,7 +73,6 @@ class _HomeGalleryWidgetState extends State<HomeGalleryWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final double bottomSafeArea = MediaQuery.paddingOf(context).bottom;
     final gallery = Gallery(
       key: ValueKey(_shouldHideSharedItems),
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) async {
@@ -129,6 +128,7 @@ class _HomeGalleryWidgetState extends State<HomeGalleryWidget> {
       footer: widget.footer,
       reloadDebounceTime: const Duration(seconds: 2),
       reloadDebounceExecutionInterval: const Duration(seconds: 5),
+      galleryType: GalleryType.homepage,
     );
     return GalleryFilesState(
       child: SelectionState(
