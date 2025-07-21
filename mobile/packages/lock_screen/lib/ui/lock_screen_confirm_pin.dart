@@ -4,8 +4,8 @@ import "package:ente_strings/ente_strings.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
-import "package:lock_screen/lock_screen_settings.dart";
-import "package:lock_screen/ui/custom_pin_keypad.dart";
+import "package:ente_lock_screen/lock_screen_settings.dart";
+import "package:ente_lock_screen/ui/custom_pin_keypad.dart";
 import "package:pinput/pinput.dart";
 
 class LockScreenConfirmPin extends StatefulWidget {

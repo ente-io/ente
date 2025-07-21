@@ -5,7 +5,7 @@ import "package:ente_ui/components/text_input_widget.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
-import "package:lock_screen/lock_screen_settings.dart";
+import "package:ente_lock_screen/lock_screen_settings.dart";
 
 class LockScreenConfirmPassword extends StatefulWidget {
   const LockScreenConfirmPassword({
