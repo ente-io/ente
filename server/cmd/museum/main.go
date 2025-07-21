@@ -600,6 +600,7 @@ func main() {
 	}
 
 	fileLinkApi.GET("/info", fileHandler.LinkInfo)
+	fileLinkApi.GET("/pass-info", fileHandler.PasswordInfo)
 	fileLinkApi.GET("/thumbnail", fileHandler.LinkThumbnail)
 	fileLinkApi.GET("/file", fileHandler.LinkFile)
 	fileLinkApi.POST("/verify-password", fileHandler.VerifyPassword)

@@ -115,6 +115,11 @@ func (c *FileLinkController) Info(ctx *gin.Context) (*ente.File, error) {
 	return c.FileRepo.GetFileAttributes(accessContext.FileID)
 }
 
+func (c *FileLinkController) PassInfo(ctx *gin.Context) (*ente.FileLinkRow, error) {
+	accessContext := auth.MustGetFileLinkAccessContext(ctx)
+	return c.FileLinkRepo.GetFileUrlRowByFileID(ctx, accessContext.FileID)
+}
+
 // VerifyPassword verifies if the user has provided correct pw hash. If yes, it returns a signed jwt token which can be
 // used by the client to pass in other requests for public collection.
 // Having a separate endpoint for password validation allows us to easily rate-limit the attempts for brute-force

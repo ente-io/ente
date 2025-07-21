@@ -37,6 +37,19 @@ func (h *FileHandler) LinkInfo(c *gin.Context) {
 	})
 }
 
+func (h *FileHandler) PasswordInfo(c *gin.Context) {
+	resp, err := h.FileUrlCtrl.PassInfo(c)
+	if err != nil {
+		handler.Error(c, stacktrace.Propagate(err, ""))
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"nonce":    resp.Nonce,
+		"opsLimit": resp.OpsLimit,
+		"memLimit": resp.MemLimit,
+	})
+}
+
 func (h *FileHandler) LinkThumbnail(c *gin.Context) {
 	linkCtx := auth.MustGetFileLinkAccessContext(c)
 	url, err := h.Controller.GetThumbnailURL(c, linkCtx.OwnerID, linkCtx.FileID)
