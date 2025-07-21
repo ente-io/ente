@@ -17,10 +17,10 @@ import (
 
 	"github.com/ente-io/museum/ente"
 	emailCtrl "github.com/ente-io/museum/pkg/controller/email"
-	timeUtil "github.com/ente-io/museum/pkg/utils/time"
 	"github.com/ente-io/museum/pkg/repo"
 	"github.com/ente-io/museum/pkg/utils/billing"
 	"github.com/ente-io/museum/pkg/utils/email"
+	timeUtil "github.com/ente-io/museum/pkg/utils/time"
 	"github.com/ente-io/stacktrace"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
@@ -32,33 +32,35 @@ import (
 
 // StripeController provides abstractions for handling billing on Stripe
 type StripeController struct {
-	StripeClients          ente.StripeClientPerAccount
-	BillingPlansPerAccount ente.BillingPlansPerAccount
-	BillingRepo            *repo.BillingRepository
-	FileRepo               *repo.FileRepository
-	UserRepo               *repo.UserRepository
-	StorageBonusRepo       *storagebonus.Repository
-	DiscordController      *discord.DiscordController
-	EmailNotificationCtrl  *emailCtrl.EmailNotificationController
-	OfferController        *offer.OfferController
-	CommonBillCtrl         *commonbilling.Controller
+	StripeClients           ente.StripeClientPerAccount
+	BillingPlansPerAccount  ente.BillingPlansPerAccount
+	BillingRepo             *repo.BillingRepository
+	FileRepo                *repo.FileRepository
+	UserRepo                *repo.UserRepository
+	StorageBonusRepo        *storagebonus.Repository
+	NotificationHistoryRepo *repo.NotificationHistoryRepository
+	DiscordController       *discord.DiscordController
+	EmailNotificationCtrl   *emailCtrl.EmailNotificationController
+	OfferController         *offer.OfferController
+	CommonBillCtrl          *commonbilling.Controller
 }
 
 const BufferPeriodOnPaymentFailureInDays = 7
 
 // Return a new instance of StripeController
-func NewStripeController(plans ente.BillingPlansPerAccount, stripeClients ente.StripeClientPerAccount, billingRepo *repo.BillingRepository, fileRepo *repo.FileRepository, userRepo *repo.UserRepository, storageBonusRepo *storagebonus.Repository, discordController *discord.DiscordController, emailNotificationController *emailCtrl.EmailNotificationController, offerController *offer.OfferController, commonBillCtrl *commonbilling.Controller) *StripeController {
+func NewStripeController(plans ente.BillingPlansPerAccount, stripeClients ente.StripeClientPerAccount, billingRepo *repo.BillingRepository, fileRepo *repo.FileRepository, userRepo *repo.UserRepository, storageBonusRepo *storagebonus.Repository, notificationHistoryRepo *repo.NotificationHistoryRepository, discordController *discord.DiscordController, emailNotificationController *emailCtrl.EmailNotificationController, offerController *offer.OfferController, commonBillCtrl *commonbilling.Controller) *StripeController {
 	return &StripeController{
-		StripeClients:          stripeClients,
-		BillingRepo:            billingRepo,
-		FileRepo:               fileRepo,
-		UserRepo:               userRepo,
-		BillingPlansPerAccount: plans,
-		StorageBonusRepo:       storageBonusRepo,
-		DiscordController:      discordController,
-		EmailNotificationCtrl:  emailNotificationController,
-		OfferController:        offerController,
-		CommonBillCtrl:         commonBillCtrl,
+		StripeClients:           stripeClients,
+		BillingRepo:             billingRepo,
+		FileRepo:                fileRepo,
+		UserRepo:                userRepo,
+		BillingPlansPerAccount:  plans,
+		StorageBonusRepo:        storageBonusRepo,
+		NotificationHistoryRepo: notificationHistoryRepo,
+		DiscordController:       discordController,
+		EmailNotificationCtrl:   emailNotificationController,
+		OfferController:         offerController,
+		CommonBillCtrl:          commonBillCtrl,
 	}
 }
 
@@ -436,7 +438,9 @@ func (c *StripeController) UpdateSubscription(stripeID string, userID int64) (en
 	if subscription.PaymentProvider != ente.Stripe || subscription.ProductID == stripeID || subscription.Attributes.StripeAccountCountry != newStripeAccountCountry {
 		return ente.SubscriptionUpdateResponse{}, stacktrace.Propagate(ente.ErrBadRequest, "")
 	}
-	if newPlan.Storage < subscription.Storage { // Downgrade
+
+	// Downgrade
+	if newPlan.Storage < subscription.Storage {
 		canDowngrade, canDowngradeErr := c.CommonBillCtrl.CanDowngradeToGivenStorage(newPlan.Storage, userID)
 		if canDowngradeErr != nil {
 			return ente.SubscriptionUpdateResponse{}, stacktrace.Propagate(canDowngradeErr, "")
@@ -447,6 +451,7 @@ func (c *StripeController) UpdateSubscription(stripeID string, userID int64) (en
 		log.Info("Usage is good")
 
 	}
+
 	stripeSubscription, err := c.getStripeSubscriptionWithPaymentMethod(subscription)
 	if err != nil {
 		return ente.SubscriptionUpdateResponse{}, stacktrace.Propagate(err, "")
@@ -504,6 +509,8 @@ func (c *StripeController) UpdateSubscription(stripeID string, userID int64) (en
 			return ente.SubscriptionUpdateResponse{}, stacktrace.Propagate(ente.ErrBadRequest, "")
 		}
 	}
+	c.NotificationHistoryRepo.DeleteLastNotification(userID, emailCtrl.StorageLimitExceededTemplateID)
+	c.NotificationHistoryRepo.DeleteLastNotification(userID, emailCtrl.StorageLimitExceedingTemplateID)
 	return ente.SubscriptionUpdateResponse{Status: "success"}, nil
 }
 
