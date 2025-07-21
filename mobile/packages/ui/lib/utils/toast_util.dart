@@ -21,7 +21,7 @@ void showToast(
       fontSize: 16.0,
     );
   } on MissingPluginException catch (_) {
-    Widget toast = Container(
+    final toast = Container(
       padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(25.0),

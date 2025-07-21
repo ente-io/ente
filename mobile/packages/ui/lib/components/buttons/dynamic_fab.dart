@@ -64,10 +64,12 @@ class DynamicFAB extends StatelessWidget {
         child: OutlinedButton(
           onPressed:
               isFormValid! ? onPressedFunction as void Function()? : null,
-          child: Text(buttonText!,
-              style: isFormValid!
-                  ? getEnteTextTheme(context).body
-                  : getEnteTextTheme(context).bodyFaint),
+          child: Text(
+            buttonText!,
+            style: isFormValid!
+                ? getEnteTextTheme(context).body
+                : getEnteTextTheme(context).bodyFaint,
+          ),
         ),
       );
     }

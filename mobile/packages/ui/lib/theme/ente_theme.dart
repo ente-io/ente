@@ -1,7 +1,7 @@
+import 'package:ente_ui/theme/colors.dart';
+import 'package:ente_ui/theme/effects.dart';
+import 'package:ente_ui/theme/text_style.dart';
 import 'package:flutter/material.dart';
-import 'colors.dart';
-import 'effects.dart';
-import 'text_style.dart';
 
 class EnteTheme {
   final EnteTextTheme textTheme;
