@@ -103,528 +103,333 @@ class StringsLocalizationsLt extends StringsLocalizations {
 
   @override
   String get saveOnlyDescription =>
-      'Ar norite tai išsaugoti savo saugykloje (pagal numatytuosius nustatymus – atsisiuntimų aplanke)?';
+      'Do you want to save this to your storage (Downloads folder by default)?';
 
   @override
   String get enterNewEmailHint => 'Enter your new email address';
 
   @override
-  String get email => 'El. paštas';
+  String get email => 'Email';
 
   @override
-  String get verify => 'Patvirtinti';
+  String get verify => 'Verify';
 
   @override
-  String get invalidEmailTitle => 'Netinkamas el. pašto adresas';
+  String get invalidEmailTitle => 'Invalid email address';
 
   @override
-  String get invalidEmailMessage => 'Įveskite tinkamą el. pašto adresą.';
+  String get invalidEmailMessage => 'Please enter a valid email address.';
 
   @override
-  String get pleaseWait => 'Palaukite...';
+  String get pleaseWait => 'Please wait...';
 
   @override
-  String get verifyPassword => 'Patvirtinkite slaptažodį';
+  String get verifyPassword => 'Verify password';
 
   @override
-  String get incorrectPasswordTitle => 'Neteisingas slaptažodis.';
+  String get incorrectPasswordTitle => 'Incorrect password';
 
   @override
-  String get pleaseTryAgain => 'Bandykite dar kartą.';
+  String get pleaseTryAgain => 'Please try again';
 
   @override
-  String get enterPassword => 'Įveskite slaptažodį';
+  String get enterPassword => 'Enter password';
 
   @override
-  String get enterYourPasswordHint => 'Įveskite savo slaptažodį';
+  String get enterYourPasswordHint => 'Enter your password';
 
   @override
-  String get activeSessions => 'Aktyvūs seansai';
+  String get activeSessions => 'Active sessions';
 
   @override
-  String get oops => 'Ups';
+  String get oops => 'Oops';
 
   @override
   String get somethingWentWrongPleaseTryAgain =>
-      'Kažkas nutiko ne taip. Bandykite dar kartą.';
+      'Something went wrong, please try again';
 
   @override
   String get thisWillLogYouOutOfThisDevice =>
-      'Tai jus atjungs nuo šio įrenginio.';
+      'This will log you out of this device!';
 
   @override
   String get thisWillLogYouOutOfTheFollowingDevice =>
-      'Tai jus atjungs nuo toliau nurodyto įrenginio:';
+      'This will log you out of the following device:';
 
   @override
-  String get terminateSession => 'Baigti seansą?';
+  String get terminateSession => 'Terminate session?';
 
   @override
-  String get terminate => 'Baigti';
+  String get terminate => 'Terminate';
 
   @override
-  String get thisDevice => 'Šis įrenginys';
+  String get thisDevice => 'This device';
 
   @override
-  String get createAccount => 'Kurti paskyrą';
+  String get createAccount => 'Create account';
 
   @override
-  String get weakStrength => 'Silpna';
+  String get weakStrength => 'Weak';
 
   @override
-  String get moderateStrength => 'Vidutinė';
+  String get moderateStrength => 'Moderate';
 
   @override
-  String get strongStrength => 'Stipri';
+  String get strongStrength => 'Strong';
 
   @override
-  String get deleteAccount => 'Ištrinti paskyrą';
+  String get deleteAccount => 'Delete account';
 
   @override
   String get deleteAccountQuery =>
-      'Apgailestausime, kad išeinate. Ar susiduriate su kažkokiomis problemomis?';
+      'We\'ll be sorry to see you go. Are you facing some issue?';
 
   @override
-  String get yesSendFeedbackAction => 'Taip, siųsti atsiliepimą';
+  String get yesSendFeedbackAction => 'Yes, send feedback';
 
   @override
-  String get noDeleteAccountAction => 'Ne, ištrinti paskyrą';
+  String get noDeleteAccountAction => 'No, delete account';
 
   @override
   String get initiateAccountDeleteTitle =>
-      'Nustatykite tapatybę, kad pradėtumėte paskyros ištrynimą';
+      'Please authenticate to initiate account deletion';
 
   @override
-  String get confirmAccountDeleteTitle => 'Patvirtinkite paskyros ištrynimą';
+  String get confirmAccountDeleteTitle => 'Confirm account deletion';
 
   @override
   String get confirmAccountDeleteMessage =>
-      'Ši paskyra susieta su kitomis „Ente“ programomis, jei jas naudojate.\n\nJūsų įkelti duomenys per visas „Ente“ programas bus planuojama ištrinti, o jūsų paskyra bus ištrinta negrįžtamai.';
+      'This account is linked to other Ente apps, if you use any.\n\nYour uploaded data, across all Ente apps, will be scheduled for deletion, and your account will be permanently deleted.';
 
   @override
-  String get delete => 'Ištrinti';
+  String get delete => 'Delete';
 
   @override
-  String get createNewAccount => 'Kurti naują paskyrą';
+  String get createNewAccount => 'Create new account';
 
   @override
-  String get password => 'Slaptažodis';
+  String get password => 'Password';
 
   @override
-  String get confirmPassword => 'Patvirtinkite slaptažodį';
+  String get confirmPassword => 'Confirm password';
 
   @override
   String passwordStrength(String passwordStrengthValue) {
-    return 'Slaptažodžio stiprumas: $passwordStrengthValue';
+    return 'Password strength: $passwordStrengthValue';
   }
 
   @override
-  String get hearUsWhereTitle => 'Kaip išgirdote apie „Ente“? (nebūtina)';
+  String get hearUsWhereTitle => 'How did you hear about Ente? (optional)';
 
   @override
   String get hearUsExplanation =>
-      'Mes nesekame programų diegimų. Mums padėtų, jei pasakytumėte, kur mus radote.';
+      'We don\'t track app installs. It\'d help if you told us where you found us!';
 
   @override
   String get signUpTerms =>
-      'Sutinku su <u-terms>paslaugų sąlygomis</u-terms> ir <u-policy> privatumo politika</u-policy>';
+      'I agree to the <u-terms>terms of service</u-terms> and <u-policy>privacy policy</u-policy>';
 
   @override
-  String get termsOfServicesTitle => 'Sąlygos';
+  String get termsOfServicesTitle => 'Terms';
 
   @override
-  String get privacyPolicyTitle => 'Privatumo politika';
+  String get privacyPolicyTitle => 'Privacy Policy';
 
   @override
   String get ackPasswordLostWarning =>
-      'Suprantu, kad jei prarasiu slaptažodį, galiu prarasti savo duomenis, kadangi duomenys yra <underline>visapusiškai užšifruota</underline>.';
+      'I understand that if I lose my password, I may lose my data since my data is <underline>end-to-end encrypted</underline>.';
 
   @override
-  String get encryption => 'Šifravimas';
+  String get encryption => 'Encryption';
 
   @override
-  String get logInLabel => 'Prisijungti';
+  String get logInLabel => 'Log in';
 
   @override
-  String get welcomeBack => 'Sveiki sugrįžę!';
+  String get welcomeBack => 'Welcome back!';
 
   @override
   String get loginTerms =>
-      'Spustelėjus Prisijungti sutinku su <u-terms>paslaugų sąlygomis</u-terms> ir <u-policy> privatumo politika</u-policy>';
+      'By clicking log in, I agree to the <u-terms>terms of service</u-terms> and <u-policy>privacy policy</u-policy>';
 
   @override
-  String get noInternetConnection => 'Nėra interneto ryšio';
+  String get noInternetConnection => 'No internet connection';
 
   @override
   String get pleaseCheckYourInternetConnectionAndTryAgain =>
-      'Patikrinkite savo interneto ryšį ir bandykite dar kartą.';
+      'Please check your internet connection and try again.';
 
   @override
   String get verificationFailedPleaseTryAgain =>
-      'Patvirtinimas nepavyko. Bandykite dar kartą.';
+      'Verification failed, please try again';
 
   @override
-  String get recreatePasswordTitle => 'Iš naujo sukurti slaptažodį';
+  String get recreatePasswordTitle => 'Recreate password';
 
   @override
   String get recreatePasswordBody =>
-      'Dabartinis įrenginys nėra pakankamai galingas, kad patvirtintų jūsų slaptažodį, bet mes galime iš naujo sugeneruoti taip, kad jis veiktų su visais įrenginiais.\n\nPrisijunkite naudodami atkūrimo raktą ir sugeneruokite iš naujo slaptažodį (jei norite, galite vėl naudoti tą patį).';
+      'The current device is not powerful enough to verify your password, but we can regenerate in a way that works with all devices.\n\nPlease login using your recovery key and regenerate your password (you can use the same one again if you wish).';
 
   @override
-  String get useRecoveryKey => 'Naudoti atkūrimo raktą';
+  String get useRecoveryKey => 'Use recovery key';
 
   @override
-  String get forgotPassword => 'Pamiršau slaptažodį';
+  String get forgotPassword => 'Forgot password';
 
   @override
-  String get changeEmail => 'Keisti el. paštą';
+  String get changeEmail => 'Change email';
 
   @override
-  String get verifyEmail => 'Patvirtinti el. paštą';
+  String get verifyEmail => 'Verify email';
 
   @override
   String weHaveSendEmailTo(String email) {
-    return 'Išsiuntėme laišką adresu <green>$email</green>.';
+    return 'We have sent a mail to <green>$email</green>';
   }
 
   @override
   String get toResetVerifyEmail =>
-      'Kad iš naujo nustatytumėte slaptažodį, pirmiausia patvirtinkite savo el. paštą.';
+      'To reset your password, please verify your email first.';
 
   @override
   String get checkInboxAndSpamFolder =>
-      'Patikrinkite savo gautieją (ir šlamštą), kad užbaigtumėte patvirtinimą.';
+      'Please check your inbox (and spam) to complete verification';
 
   @override
-  String get tapToEnterCode => 'Palieskite, kad įvestumėte kodą';
+  String get tapToEnterCode => 'Tap to enter code';
 
   @override
-  String get sendEmail => 'Siųsti el. laišką';
+  String get sendEmail => 'Send email';
 
   @override
-  String get resendEmail => 'Iš naujo siųsti el. laišką';
+  String get resendEmail => 'Resend email';
 
   @override
-  String get passKeyPendingVerification => 'Vis dar laukiama patvirtinimo';
+  String get passKeyPendingVerification => 'Verification is still pending';
 
   @override
-  String get loginSessionExpired => 'Seansas baigėsi';
+  String get loginSessionExpired => 'Session expired';
 
   @override
   String get loginSessionExpiredDetails =>
-      'Jūsų seansas baigėsi. Prisijunkite iš naujo.';
+      'Your session has expired. Please login again.';
 
   @override
-  String get passkeyAuthTitle => 'Slaptarakčio patvirtinimas';
+  String get passkeyAuthTitle => 'Passkey verification';
 
   @override
-  String get waitingForVerification => 'Laukiama patvirtinimo...';
+  String get waitingForVerification => 'Waiting for verification...';
 
   @override
-  String get tryAgain => 'Bandyti dar kartą';
+  String get tryAgain => 'Try again';
 
   @override
-  String get checkStatus => 'Tikrinti būseną';
+  String get checkStatus => 'Check status';
 
   @override
-  String get loginWithTOTP => 'Prisijungti su TOTP';
+  String get loginWithTOTP => 'Login with TOTP';
 
   @override
-  String get recoverAccount => 'Atkurti paskyrą';
+  String get recoverAccount => 'Recover account';
 
   @override
-  String get setPasswordTitle => 'Nustatyti slaptažodį';
+  String get setPasswordTitle => 'Set password';
 
   @override
-  String get changePasswordTitle => 'Keisti slaptažodį';
+  String get changePasswordTitle => 'Change password';
 
   @override
-  String get resetPasswordTitle => 'Nustatyti slaptažodį iš naujo';
+  String get resetPasswordTitle => 'Reset password';
 
   @override
-  String get encryptionKeys => 'Šifravimo raktai';
+  String get encryptionKeys => 'Encryption keys';
 
   @override
   String get enterPasswordToEncrypt =>
-      'Įveskite slaptažodį, kurį galime naudoti jūsų duomenims užšifruoti';
+      'Enter a password we can use to encrypt your data';
 
   @override
   String get enterNewPasswordToEncrypt =>
-      'Įveskite naują slaptažodį, kurį galime naudoti jūsų duomenims užšifruoti';
+      'Enter a new password we can use to encrypt your data';
 
   @override
   String get passwordWarning =>
-      'Šio slaptažodžio nesaugome, todėl jei jį pamiršite, <underline>negalėsime iššifruoti jūsų duomenų</underline>';
+      'We don\'t store this password, so if you forget, <underline>we cannot decrypt your data</underline>';
 
   @override
-  String get howItWorks => 'Kaip tai veikia';
+  String get howItWorks => 'How it works';
 
   @override
-  String get generatingEncryptionKeys => 'Generuojami šifravimo raktai...';
+  String get generatingEncryptionKeys => 'Generating encryption keys...';
 
   @override
-  String get passwordChangedSuccessfully => 'Slaptažodis sėkmingai pakeistas';
+  String get passwordChangedSuccessfully => 'Password changed successfully';
 
   @override
-  String get signOutFromOtherDevices => 'Atsijungti iš kitų įrenginių';
+  String get signOutFromOtherDevices => 'Sign out from other devices';
 
   @override
   String get signOutOtherBody =>
-      'Jei manote, kad kas nors gali žinoti jūsų slaptažodį, galite priverstinai atsijungti iš visų kitų įrenginių, naudojančių jūsų paskyrą.';
+      'If you think someone might know your password, you can force all other devices using your account to sign out.';
 
   @override
-  String get signOutOtherDevices => 'Atsijungti kitus įrenginius';
+  String get signOutOtherDevices => 'Sign out other devices';
 
   @override
-  String get doNotSignOut => 'Neatsijungti';
+  String get doNotSignOut => 'Do not sign out';
 
   @override
-  String get generatingEncryptionKeysTitle => 'Generuojami šifravimo raktai...';
+  String get generatingEncryptionKeysTitle => 'Generating encryption keys...';
 
   @override
-  String get continueLabel => 'Tęsti';
+  String get continueLabel => 'Continue';
 
   @override
-  String get insecureDevice => 'Nesaugus įrenginys';
+  String get insecureDevice => 'Insecure device';
 
   @override
   String get sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease =>
-      'Atsiprašome, šiame įrenginyje nepavyko sugeneruoti saugių raktų.\n\nRegistruokitės iš kito įrenginio.';
+      'Sorry, we could not generate secure keys on this device.\n\nplease sign up from a different device.';
 
   @override
-  String get recoveryKeyCopiedToClipboard =>
-      'Nukopijuotas atkūrimo raktas į iškarpinę';
+  String get recoveryKeyCopiedToClipboard => 'Recovery key copied to clipboard';
 
   @override
-  String get recoveryKey => 'Atkūrimo raktas';
+  String get recoveryKey => 'Recovery key';
 
   @override
   String get recoveryKeyOnForgotPassword =>
-      'Jei pamiršote slaptažodį, vienintelis būdas atkurti duomenis – naudoti šį raktą.';
+      'If you forget your password, the only way you can recover your data is with this key.';
 
   @override
   String get recoveryKeySaveDescription =>
-      'Šio rakto nesaugome, todėl išsaugokite šį 24 žodžių raktą saugioje vietoje.';
+      'We don\'t store this key, please save this 24 word key in a safe place.';
 
   @override
-  String get doThisLater => 'Daryti tai vėliau';
+  String get doThisLater => 'Do this later';
 
   @override
-  String get saveKey => 'Išsaugoti raktą';
+  String get saveKey => 'Save key';
 
   @override
-  String get recoveryKeySaved =>
-      'Atkūrimo raktas išsaugotas atsisiuntimų aplanke.';
+  String get recoveryKeySaved => 'Recovery key saved in Downloads folder!';
 
   @override
-  String get noRecoveryKeyTitle => 'Neturite atkūrimo rakto?';
+  String get noRecoveryKeyTitle => 'No recovery key?';
 
   @override
-  String get twoFactorAuthTitle => 'Dvigubas tapatybės nustatymas';
+  String get twoFactorAuthTitle => 'Two-factor authentication';
 
   @override
   String get enterCodeHint =>
-      'Įveskite 6 skaitmenų kodą\niš autentifikatoriaus programos';
+      'Enter the 6-digit code from\nyour authenticator app';
 
   @override
-  String get lostDeviceTitle => 'Prarastas įrenginys?';
+  String get lostDeviceTitle => 'Lost device?';
 
   @override
-  String get enterRecoveryKeyHint => 'Įveskite atkūrimo raktą';
+  String get enterRecoveryKeyHint => 'Enter your recovery key';
 
   @override
-  String get recover => 'Atkurti';
-
-  @override
-  String get loggingOut => 'Atsijungiama...';
-
-  @override
-  String get immediately => 'Iš karto';
-
-  @override
-  String get appLock => 'Programos užraktas';
-
-  @override
-  String get autoLock => 'Automatinis užraktas';
-
-  @override
-  String get noSystemLockFound => 'Nerastas sistemos užraktas';
-
-  @override
-  String get deviceLockEnablePreSteps =>
-      'Kad įjungtumėte įrenginio užraktą, sistemos nustatymuose nustatykite įrenginio prieigos kodą arba ekrano užraktą.';
-
-  @override
-  String get appLockDescription =>
-      'Pasirinkite tarp numatytojo įrenginio užrakinimo ekrano ir pasirinktinio užrakinimo ekrano su PIN kodu arba slaptažodžiu.';
-
-  @override
-  String get deviceLock => 'Įrenginio užraktas';
-
-  @override
-  String get pinLock => 'PIN užraktas';
-
-  @override
-  String get autoLockFeatureDescription =>
-      'Laikas, po kurio programa užrakinama perkėlus ją į foną.';
-
-  @override
-  String get hideContent => 'Slėpti turinį';
-
-  @override
-  String get hideContentDescriptionAndroid =>
-      'Paslepia programų turinį programų perjungiklyje ir išjungia ekrano kopijas.';
-
-  @override
-  String get hideContentDescriptioniOS =>
-      'Paslepia programos turinį programos perjungiklyje.';
-
-  @override
-  String get tooManyIncorrectAttempts => 'Per daug neteisingų bandymų.';
-
-  @override
-  String get tapToUnlock => 'Palieskite, kad atrakintumėte';
-
-  @override
-  String get areYouSureYouWantToLogout => 'Ar tikrai norite atsijungti?';
-
-  @override
-  String get yesLogout => 'Taip, atsijungti';
-
-  @override
-  String get authToViewSecrets =>
-      'Nustatykite tapatybę, kad peržiūrėtumėte savo paslaptis';
-
-  @override
-  String get next => 'Toliau';
-
-  @override
-  String get setNewPassword => 'Nustatykite naują slaptažodį';
-
-  @override
-  String get enterPin => 'Įveskite PIN';
-
-  @override
-  String get setNewPin => 'Nustatykite naują PIN';
-
-  @override
-  String get confirm => 'Patvirtinti';
-
-  @override
-  String get reEnterPassword => 'Įveskite slaptažodį iš naujo';
-
-  @override
-  String get reEnterPin => 'Įveskite PIN iš naujo';
-
-  @override
-  String get androidBiometricHint => 'Patvirtinkite tapatybę';
-
-  @override
-  String get androidBiometricNotRecognized =>
-      'Neatpažinta. Bandykite dar kartą.';
-
-  @override
-  String get androidBiometricSuccess => 'Sėkmė';
-
-  @override
-  String get androidCancelButton => 'Atšaukti';
-
-  @override
-  String get androidSignInTitle => 'Privalomas tapatybės nustatymas';
-
-  @override
-  String get androidBiometricRequiredTitle => 'Privaloma biometrija';
-
-  @override
-  String get androidDeviceCredentialsRequiredTitle =>
-      'Privalomi įrenginio kredencialai';
-
-  @override
-  String get androidDeviceCredentialsSetupDescription =>
-      'Privalomi įrenginio kredencialai';
-
-  @override
-  String get goToSettings => 'Eiti į nustatymus';
-
-  @override
-  String get androidGoToSettingsDescription =>
-      'Biometrinis tapatybės nustatymas jūsų įrenginyje nenustatytas. Eikite į Nustatymai > Saugumas ir pridėkite biometrinį tapatybės nustatymą.';
-
-  @override
-  String get iOSLockOut =>
-      'Biometrinis tapatybės nustatymas išjungtas. Kad jį įjungtumėte, užrakinkite ir atrakinkite ekraną.';
-
-  @override
-  String get iOSOkButton => 'Gerai';
-
-  @override
-  String get emailAlreadyRegistered => 'El. paštas jau užregistruotas.';
-
-  @override
-  String get emailNotRegistered => 'El. paštas neregistruotas.';
-
-  @override
-  String get thisEmailIsAlreadyInUse => 'Šis el. paštas jau naudojamas.';
-
-  @override
-  String emailChangedTo(String newEmail) {
-    return 'El. paštas pakeistas į $newEmail';
-  }
-
-  @override
-  String get authenticationFailedPleaseTryAgain =>
-      'Tapatybės nustatymas nepavyko. Bandykite dar kartą.';
-
-  @override
-  String get authenticationSuccessful => 'Tapatybės nustatymas sėkmingas.';
-
-  @override
-  String get sessionExpired => 'Seansas baigėsi';
-
-  @override
-  String get incorrectRecoveryKey => 'Neteisingas atkūrimo raktas';
-
-  @override
-  String get theRecoveryKeyYouEnteredIsIncorrect =>
-      'Įvestas atkūrimo raktas yra neteisingas.';
-
-  @override
-  String get twofactorAuthenticationSuccessfullyReset =>
-      'Dvigubas tapatybės nustatymas sėkmingai iš naujo nustatytas.';
-
-  @override
-  String get noRecoveryKey => 'No recovery key';
-
-  @override
-  String get yourAccountHasBeenDeleted => 'Your account has been deleted';
-
-  @override
-  String get verificationId => 'Verification ID';
-
-  @override
-  String get yourVerificationCodeHasExpired =>
-      'Jūsų patvirtinimo kodas nebegaliojantis.';
-
-  @override
-  String get incorrectCode => 'Neteisingas kodas';
-
-  @override
-  String get sorryTheCodeYouveEnteredIsIncorrect =>
-      'Atsiprašome, įvestas kodas yra neteisingas.';
-
-  @override
-  String get developerSettings => 'Kūrėjo nustatymai';
-
-  @override
-  String get serverEndpoint => 'Serverio galutinis taškas';
-
-  @override
-  String get invalidEndpoint => 'Netinkamas galutinis taškas';
-
-  @override
-  String get invalidEndpointMessage =>
-      'Atsiprašome, įvestas galutinis taškas netinkamas. Įveskite tinkamą galutinį tašką ir bandykite dar kartą.';
-
-  @override
-  String get endpointUpdatedMessage => 'Galutinis taškas sėkmingai atnaujintas';
+  String get recover => 'Recover';
 }

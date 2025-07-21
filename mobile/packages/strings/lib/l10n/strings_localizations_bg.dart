@@ -103,531 +103,333 @@ class StringsLocalizationsBg extends StringsLocalizations {
 
   @override
   String get saveOnlyDescription =>
-      'Искате ли да запазите това в хранилището си (папка за Изтегляния по подразбиране)?';
+      'Do you want to save this to your storage (Downloads folder by default)?';
 
   @override
   String get enterNewEmailHint => 'Enter your new email address';
 
   @override
-  String get email => 'Имейл';
+  String get email => 'Email';
 
   @override
-  String get verify => 'Потвърждаване';
+  String get verify => 'Verify';
 
   @override
-  String get invalidEmailTitle => 'Невалиден имейл адрес';
+  String get invalidEmailTitle => 'Invalid email address';
 
   @override
-  String get invalidEmailMessage => 'Моля, въведете валиден имейл адрес.';
+  String get invalidEmailMessage => 'Please enter a valid email address.';
 
   @override
-  String get pleaseWait => 'Моля изчакайте...';
+  String get pleaseWait => 'Please wait...';
 
   @override
-  String get verifyPassword => 'Потвърдете паролата';
+  String get verifyPassword => 'Verify password';
 
   @override
-  String get incorrectPasswordTitle => 'Грешна парола';
+  String get incorrectPasswordTitle => 'Incorrect password';
 
   @override
-  String get pleaseTryAgain => 'Опитайте отново';
+  String get pleaseTryAgain => 'Please try again';
 
   @override
-  String get enterPassword => 'Въведете парола';
+  String get enterPassword => 'Enter password';
 
   @override
-  String get enterYourPasswordHint => 'Въведете паролата си';
+  String get enterYourPasswordHint => 'Enter your password';
 
   @override
-  String get activeSessions => 'Активни сесии';
+  String get activeSessions => 'Active sessions';
 
   @override
-  String get oops => 'Опа';
+  String get oops => 'Oops';
 
   @override
   String get somethingWentWrongPleaseTryAgain =>
-      'Нещо се обърка, моля опитайте отново';
+      'Something went wrong, please try again';
 
   @override
   String get thisWillLogYouOutOfThisDevice =>
-      'Това ще Ви изкара от профила на това устройство!';
+      'This will log you out of this device!';
 
   @override
   String get thisWillLogYouOutOfTheFollowingDevice =>
-      'Това ще Ви изкара от профила на следното устройство:';
+      'This will log you out of the following device:';
 
   @override
-  String get terminateSession => 'Прекратяване на сесията?';
+  String get terminateSession => 'Terminate session?';
 
   @override
-  String get terminate => 'Прекратяване';
+  String get terminate => 'Terminate';
 
   @override
-  String get thisDevice => 'Това устройство';
+  String get thisDevice => 'This device';
 
   @override
-  String get createAccount => 'Създаване на акаунт';
+  String get createAccount => 'Create account';
 
   @override
-  String get weakStrength => 'Слаба';
+  String get weakStrength => 'Weak';
 
   @override
-  String get moderateStrength => 'Умерена';
+  String get moderateStrength => 'Moderate';
 
   @override
-  String get strongStrength => 'Силна';
+  String get strongStrength => 'Strong';
 
   @override
-  String get deleteAccount => 'Изтриване на акаунта';
+  String get deleteAccount => 'Delete account';
 
   @override
   String get deleteAccountQuery =>
-      'Ще съжаляваме да си тръгнете. Изправени ли сте пред някакъв проблем?';
+      'We\'ll be sorry to see you go. Are you facing some issue?';
 
   @override
-  String get yesSendFeedbackAction => 'Да, изпращане на обратна връзка';
+  String get yesSendFeedbackAction => 'Yes, send feedback';
 
   @override
-  String get noDeleteAccountAction => 'Не, изтриване на акаунта';
+  String get noDeleteAccountAction => 'No, delete account';
 
   @override
   String get initiateAccountDeleteTitle =>
-      'Моля, удостоверете се, за да инициирате изтриването на акаунта';
+      'Please authenticate to initiate account deletion';
 
   @override
-  String get confirmAccountDeleteTitle => 'Потвърдете изтриването на акаунта';
+  String get confirmAccountDeleteTitle => 'Confirm account deletion';
 
   @override
   String get confirmAccountDeleteMessage =>
-      'Този акаунт е свързан с други приложения на Ente, ако използвате такива.\n\nВашите качени данни във всички приложения на Ente ще бъдат планирани за изтриване и акаунтът Ви ще бъде изтрит за постоянно.';
+      'This account is linked to other Ente apps, if you use any.\n\nYour uploaded data, across all Ente apps, will be scheduled for deletion, and your account will be permanently deleted.';
 
   @override
-  String get delete => 'Изтриване';
+  String get delete => 'Delete';
 
   @override
-  String get createNewAccount => 'Създаване на нов акаунт';
+  String get createNewAccount => 'Create new account';
 
   @override
-  String get password => 'Парола';
+  String get password => 'Password';
 
   @override
-  String get confirmPassword => 'Потвърждаване на паролата';
+  String get confirmPassword => 'Confirm password';
 
   @override
   String passwordStrength(String passwordStrengthValue) {
-    return 'Сила на паролата: $passwordStrengthValue';
+    return 'Password strength: $passwordStrengthValue';
   }
 
   @override
-  String get hearUsWhereTitle => 'Как научихте за Ente? (по избор)';
+  String get hearUsWhereTitle => 'How did you hear about Ente? (optional)';
 
   @override
   String get hearUsExplanation =>
-      'Ние не проследяваме инсталиранията на приложения. Ще помогне, ако ни кажете къде ни намерихте!';
+      'We don\'t track app installs. It\'d help if you told us where you found us!';
 
   @override
   String get signUpTerms =>
-      'Съгласявам се с <u-terms>условията за ползване</u-terms> и <u-policy>политиката за поверителност</u-policy>';
+      'I agree to the <u-terms>terms of service</u-terms> and <u-policy>privacy policy</u-policy>';
 
   @override
-  String get termsOfServicesTitle => 'Условия';
+  String get termsOfServicesTitle => 'Terms';
 
   @override
-  String get privacyPolicyTitle => 'Политика за поверителност';
+  String get privacyPolicyTitle => 'Privacy Policy';
 
   @override
   String get ackPasswordLostWarning =>
-      'Разбирам, че ако загубя паролата си, може да загубя данните си, тъй като данните ми са <underline>шифровани от край до край</underline>.';
+      'I understand that if I lose my password, I may lose my data since my data is <underline>end-to-end encrypted</underline>.';
 
   @override
-  String get encryption => 'Шифроване';
+  String get encryption => 'Encryption';
 
   @override
-  String get logInLabel => 'Вход';
+  String get logInLabel => 'Log in';
 
   @override
-  String get welcomeBack => 'Добре дошли отново!';
+  String get welcomeBack => 'Welcome back!';
 
   @override
   String get loginTerms =>
-      'С натискането на вход, се съгласявам с <u-terms>условията за ползване</u-terms> и <u-policy>политиката за поверителност</u-policy>';
+      'By clicking log in, I agree to the <u-terms>terms of service</u-terms> and <u-policy>privacy policy</u-policy>';
 
   @override
-  String get noInternetConnection => 'Няма връзка с интернет';
+  String get noInternetConnection => 'No internet connection';
 
   @override
   String get pleaseCheckYourInternetConnectionAndTryAgain =>
-      'Моля, проверете интернет връзката си и опитайте отново.';
+      'Please check your internet connection and try again.';
 
   @override
   String get verificationFailedPleaseTryAgain =>
-      'Неуспешно проверка, моля опитайте отново';
+      'Verification failed, please try again';
 
   @override
-  String get recreatePasswordTitle => 'Създайте отново парола';
+  String get recreatePasswordTitle => 'Recreate password';
 
   @override
   String get recreatePasswordBody =>
-      'Текущото устройство не е достатъчно мощно, за да потвърди паролата Ви, но можем да я регенерираме по начин, който работи с всички устройства.\n\nМоля, влезте с Вашия ключ за възстановяване и генерирайте отново паролата си (можете да използвате същата отново, ако желаете).';
+      'The current device is not powerful enough to verify your password, but we can regenerate in a way that works with all devices.\n\nPlease login using your recovery key and regenerate your password (you can use the same one again if you wish).';
 
   @override
-  String get useRecoveryKey => 'Използвайте ключ за възстановяване';
+  String get useRecoveryKey => 'Use recovery key';
 
   @override
-  String get forgotPassword => 'Забравена парола';
+  String get forgotPassword => 'Forgot password';
 
   @override
-  String get changeEmail => 'Промяна на имейл';
+  String get changeEmail => 'Change email';
 
   @override
-  String get verifyEmail => 'Потвърдете имейла';
+  String get verifyEmail => 'Verify email';
 
   @override
   String weHaveSendEmailTo(String email) {
-    return 'Изпратихме имейл до <green>$email</green>';
+    return 'We have sent a mail to <green>$email</green>';
   }
 
   @override
   String get toResetVerifyEmail =>
-      'За да нулирате паролата си, моля, първо потвърдете своя имейл.';
+      'To reset your password, please verify your email first.';
 
   @override
   String get checkInboxAndSpamFolder =>
-      'Моля, проверете входящата си поща (и спама), за да завършите проверката';
+      'Please check your inbox (and spam) to complete verification';
 
   @override
-  String get tapToEnterCode => 'Докоснете, за да въведете код';
+  String get tapToEnterCode => 'Tap to enter code';
 
   @override
-  String get sendEmail => 'Изпратете имейл';
+  String get sendEmail => 'Send email';
 
   @override
-  String get resendEmail => 'Повторно изпращане на имейл';
+  String get resendEmail => 'Resend email';
 
   @override
-  String get passKeyPendingVerification => 'Потвърждението все още се изчаква';
+  String get passKeyPendingVerification => 'Verification is still pending';
 
   @override
-  String get loginSessionExpired => 'Сесията изтече';
+  String get loginSessionExpired => 'Session expired';
 
   @override
   String get loginSessionExpiredDetails =>
-      'Вашата сесия изтече. Моля влезте отново.';
+      'Your session has expired. Please login again.';
 
   @override
-  String get passkeyAuthTitle => 'Удостоверяване с ключ за парола';
+  String get passkeyAuthTitle => 'Passkey verification';
 
   @override
-  String get waitingForVerification => 'Изчаква се потвърждение...';
+  String get waitingForVerification => 'Waiting for verification...';
 
   @override
-  String get tryAgain => 'Опитайте отново';
+  String get tryAgain => 'Try again';
 
   @override
-  String get checkStatus => 'Проверка на състоянието';
+  String get checkStatus => 'Check status';
 
   @override
-  String get loginWithTOTP => 'Влизане с еднократен код';
+  String get loginWithTOTP => 'Login with TOTP';
 
   @override
-  String get recoverAccount => 'Възстановяване на акаунт';
+  String get recoverAccount => 'Recover account';
 
   @override
-  String get setPasswordTitle => 'Задаване на парола';
+  String get setPasswordTitle => 'Set password';
 
   @override
-  String get changePasswordTitle => 'Промяна на паролата';
+  String get changePasswordTitle => 'Change password';
 
   @override
-  String get resetPasswordTitle => 'Нулиране на паролата';
+  String get resetPasswordTitle => 'Reset password';
 
   @override
-  String get encryptionKeys => 'Ключове за шифроване';
+  String get encryptionKeys => 'Encryption keys';
 
   @override
   String get enterPasswordToEncrypt =>
-      'Въведете парола, която да използваме за шифроване на Вашите данни';
+      'Enter a password we can use to encrypt your data';
 
   @override
   String get enterNewPasswordToEncrypt =>
-      'Въведете нова парола, която да използваме за шифроване на Вашите данни';
+      'Enter a new password we can use to encrypt your data';
 
   @override
   String get passwordWarning =>
-      'Ние не съхраняваме тази парола, така че ако я забравите, <underline>не можем да дешифрираме Вашите данни</underline>';
+      'We don\'t store this password, so if you forget, <underline>we cannot decrypt your data</underline>';
 
   @override
-  String get howItWorks => 'Как работи';
+  String get howItWorks => 'How it works';
 
   @override
-  String get generatingEncryptionKeys =>
-      'Генериране на ключове за шифроване...';
+  String get generatingEncryptionKeys => 'Generating encryption keys...';
 
   @override
-  String get passwordChangedSuccessfully => 'Паролата е променена успешно';
+  String get passwordChangedSuccessfully => 'Password changed successfully';
 
   @override
-  String get signOutFromOtherDevices => 'Излизане от други устройства';
+  String get signOutFromOtherDevices => 'Sign out from other devices';
 
   @override
   String get signOutOtherBody =>
-      'Ако смятате, че някой може да знае паролата Ви, можете да принудите всички други устройства, използващи Вашия акаунт, да излязат.';
+      'If you think someone might know your password, you can force all other devices using your account to sign out.';
 
   @override
-  String get signOutOtherDevices => 'Излизане от други устройства';
+  String get signOutOtherDevices => 'Sign out other devices';
 
   @override
-  String get doNotSignOut => 'Не излизайте';
+  String get doNotSignOut => 'Do not sign out';
 
   @override
-  String get generatingEncryptionKeysTitle =>
-      'Генерират се ключове за шифроване...';
+  String get generatingEncryptionKeysTitle => 'Generating encryption keys...';
 
   @override
-  String get continueLabel => 'Продължете';
+  String get continueLabel => 'Continue';
 
   @override
-  String get insecureDevice => 'Несигурно устройство';
+  String get insecureDevice => 'Insecure device';
 
   @override
   String get sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease =>
-      'За съжаление не можахме да генерираме защитени ключове на това устройство.\n\nМоля, регистрирайте се от друго устройство.';
+      'Sorry, we could not generate secure keys on this device.\n\nplease sign up from a different device.';
 
   @override
-  String get recoveryKeyCopiedToClipboard =>
-      'Ключът за възстановяване е копиран в буферната памет';
+  String get recoveryKeyCopiedToClipboard => 'Recovery key copied to clipboard';
 
   @override
-  String get recoveryKey => 'Ключ за възстановяване';
+  String get recoveryKey => 'Recovery key';
 
   @override
   String get recoveryKeyOnForgotPassword =>
-      'Ако забравите паролата си, единственият начин да възстановите данните си е с този ключ.';
+      'If you forget your password, the only way you can recover your data is with this key.';
 
   @override
   String get recoveryKeySaveDescription =>
-      'Ние не съхраняваме този ключ, моля, запазете този ключ от 24 думи на сигурно място.';
+      'We don\'t store this key, please save this 24 word key in a safe place.';
 
   @override
-  String get doThisLater => 'Направете това по-късно';
+  String get doThisLater => 'Do this later';
 
   @override
-  String get saveKey => 'Запазване на ключа';
+  String get saveKey => 'Save key';
 
   @override
-  String get recoveryKeySaved =>
-      'Ключът за възстановяване е запазен в папка за Изтегляния!';
+  String get recoveryKeySaved => 'Recovery key saved in Downloads folder!';
 
   @override
-  String get noRecoveryKeyTitle => 'Няма ключ за възстановяване?';
+  String get noRecoveryKeyTitle => 'No recovery key?';
 
   @override
-  String get twoFactorAuthTitle => 'Двуфакторно удостоверяване';
+  String get twoFactorAuthTitle => 'Two-factor authentication';
 
   @override
   String get enterCodeHint =>
-      'Въведете 6-цифрения код от\nВашето приложение за удостоверяване';
+      'Enter the 6-digit code from\nyour authenticator app';
 
   @override
-  String get lostDeviceTitle => 'Загубено устройство?';
+  String get lostDeviceTitle => 'Lost device?';
 
   @override
-  String get enterRecoveryKeyHint => 'Въведете Вашия ключ за възстановяване';
+  String get enterRecoveryKeyHint => 'Enter your recovery key';
 
   @override
-  String get recover => 'Възстановяване';
-
-  @override
-  String get loggingOut => 'Излизане от профила...';
-
-  @override
-  String get immediately => 'Незабавно';
-
-  @override
-  String get appLock => 'Заключване на приложението';
-
-  @override
-  String get autoLock => 'Автоматично заключване';
-
-  @override
-  String get noSystemLockFound => 'Не е намерено заключване на системата';
-
-  @override
-  String get deviceLockEnablePreSteps =>
-      'За да активирате заключването на устройството, моля, задайте парола за устройството или заключване на екрана в системните настройки.';
-
-  @override
-  String get appLockDescription =>
-      'Изберете между заключен екран по подразбиране на Вашето устройство и персонализиран заключен екран с ПИН код или парола.';
-
-  @override
-  String get deviceLock => 'Заключване на устройството';
-
-  @override
-  String get pinLock => 'Заключване с ПИН код';
-
-  @override
-  String get autoLockFeatureDescription =>
-      'Време, след което приложението се заключва, след като е поставено на заден план';
-
-  @override
-  String get hideContent => 'Скриване на съдържанието';
-
-  @override
-  String get hideContentDescriptionAndroid =>
-      'Скрива съдържанието на приложението в превключвателя на приложения и деактивира екранните снимки';
-
-  @override
-  String get hideContentDescriptioniOS =>
-      'Скрива съдържанието на приложението в превключвателя на приложения';
-
-  @override
-  String get tooManyIncorrectAttempts => 'Твърде много неуспешни опити';
-
-  @override
-  String get tapToUnlock => 'Докоснете, за да отключите';
-
-  @override
-  String get areYouSureYouWantToLogout =>
-      'Наистина ли искате да излезете от профила си?';
-
-  @override
-  String get yesLogout => 'Да, излез';
-
-  @override
-  String get authToViewSecrets =>
-      'Моля, удостоверете се, за да видите Вашите кодове';
-
-  @override
-  String get next => 'Следващ';
-
-  @override
-  String get setNewPassword => 'Задаване на нова парола';
-
-  @override
-  String get enterPin => 'Въведете ПИН код';
-
-  @override
-  String get setNewPin => 'Задаване на нов ПИН код';
-
-  @override
-  String get confirm => 'Потвърждаване';
-
-  @override
-  String get reEnterPassword => 'Въведете отново паролата';
-
-  @override
-  String get reEnterPin => 'Въведете отново ПИН кода';
-
-  @override
-  String get androidBiometricHint => 'Потвърждаване на самоличността';
-
-  @override
-  String get androidBiometricNotRecognized =>
-      'Не е разпознат. Опитайте отново.';
-
-  @override
-  String get androidBiometricSuccess => 'Успешно';
-
-  @override
-  String get androidCancelButton => 'Отказ';
-
-  @override
-  String get androidSignInTitle => 'Необходимо е удостоверяване';
-
-  @override
-  String get androidBiometricRequiredTitle => 'Изискват се биометрични данни';
-
-  @override
-  String get androidDeviceCredentialsRequiredTitle =>
-      'Изискват се идентификационни данни за устройството';
-
-  @override
-  String get androidDeviceCredentialsSetupDescription =>
-      'Изискват се идентификационни данни за устройството';
-
-  @override
-  String get goToSettings => 'Отваряне на настройките';
-
-  @override
-  String get androidGoToSettingsDescription =>
-      'Биометричното удостоверяване не е настроено на Вашето устройство. Отидете на „Настройки > Сигурност“, за да добавите биометрично удостоверяване.';
-
-  @override
-  String get iOSLockOut =>
-      'Биометричното удостоверяване е деактивирано. Моля, заключете и отключете екрана си, за да го активирате.';
-
-  @override
-  String get iOSOkButton => 'ОК';
-
-  @override
-  String get emailAlreadyRegistered => 'Имейлът вече е регистриран.';
-
-  @override
-  String get emailNotRegistered => 'Имейлът не е регистриран.';
-
-  @override
-  String get thisEmailIsAlreadyInUse => 'Този имейл вече се използва';
-
-  @override
-  String emailChangedTo(String newEmail) {
-    return 'Имейлът е променен на $newEmail';
-  }
-
-  @override
-  String get authenticationFailedPleaseTryAgain =>
-      'Неуспешно удостоверяване, моля опитайте отново';
-
-  @override
-  String get authenticationSuccessful => 'Успешно удостоверяване!';
-
-  @override
-  String get sessionExpired => 'Сесията е изтекла';
-
-  @override
-  String get incorrectRecoveryKey => 'Неправилен ключ за възстановяване';
-
-  @override
-  String get theRecoveryKeyYouEnteredIsIncorrect =>
-      'Въведеният от Вас ключ за възстановяване е неправилен';
-
-  @override
-  String get twofactorAuthenticationSuccessfullyReset =>
-      'Двуфакторното удостоверяване бе успешно нулирано';
-
-  @override
-  String get noRecoveryKey => 'No recovery key';
-
-  @override
-  String get yourAccountHasBeenDeleted => 'Your account has been deleted';
-
-  @override
-  String get verificationId => 'Verification ID';
-
-  @override
-  String get yourVerificationCodeHasExpired =>
-      'Вашият код за потвърждение е изтекъл';
-
-  @override
-  String get incorrectCode => 'Неправилен код';
-
-  @override
-  String get sorryTheCodeYouveEnteredIsIncorrect =>
-      'За съжаление кодът, който сте въвели, е неправилен';
-
-  @override
-  String get developerSettings => 'Настройки за програмисти';
-
-  @override
-  String get serverEndpoint => 'Крайна точка на сървъра';
-
-  @override
-  String get invalidEndpoint => 'Невалидна крайна точка';
-
-  @override
-  String get invalidEndpointMessage =>
-      'За съжаление въведената от Вас крайна точка е невалидна. Моля, въведете валидна крайна точка и опитайте отново.';
-
-  @override
-  String get endpointUpdatedMessage => 'Крайната точка е актуализирана успешно';
+  String get recover => 'Recover';
 }

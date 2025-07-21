@@ -103,7 +103,7 @@ class StringsLocalizationsSk extends StringsLocalizations {
 
   @override
   String get saveOnlyDescription =>
-      'Chcete to uložiť do svojho zariadenia (predvolený priečinok Stiahnuté súbory)?';
+      'Do you want to save this to your storage (Downloads folder by default)?';
 
   @override
   String get enterNewEmailHint => 'Enter your new email address';
@@ -112,518 +112,324 @@ class StringsLocalizationsSk extends StringsLocalizations {
   String get email => 'Email';
 
   @override
-  String get verify => 'Overiť';
+  String get verify => 'Verify';
 
   @override
-  String get invalidEmailTitle => 'Neplatná emailová adresa';
+  String get invalidEmailTitle => 'Invalid email address';
 
   @override
-  String get invalidEmailMessage => 'Zadajte platnú e-mailovú adresu.';
+  String get invalidEmailMessage => 'Please enter a valid email address.';
 
   @override
-  String get pleaseWait => 'Prosím počkajte...';
+  String get pleaseWait => 'Please wait...';
 
   @override
-  String get verifyPassword => 'Potvrďte heslo';
+  String get verifyPassword => 'Verify password';
 
   @override
-  String get incorrectPasswordTitle => 'Nesprávne heslo';
+  String get incorrectPasswordTitle => 'Incorrect password';
 
   @override
-  String get pleaseTryAgain => 'Prosím, skúste to znova';
+  String get pleaseTryAgain => 'Please try again';
 
   @override
-  String get enterPassword => 'Zadajte heslo';
+  String get enterPassword => 'Enter password';
 
   @override
-  String get enterYourPasswordHint => 'Zadajte vaše heslo';
+  String get enterYourPasswordHint => 'Enter your password';
 
   @override
-  String get activeSessions => 'Aktívne relácie';
+  String get activeSessions => 'Active sessions';
 
   @override
-  String get oops => 'Ups';
+  String get oops => 'Oops';
 
   @override
   String get somethingWentWrongPleaseTryAgain =>
-      'Niečo sa pokazilo, skúste to prosím znova';
+      'Something went wrong, please try again';
 
   @override
   String get thisWillLogYouOutOfThisDevice =>
-      'Toto vás odhlási z tohto zariadenia!';
+      'This will log you out of this device!';
 
   @override
   String get thisWillLogYouOutOfTheFollowingDevice =>
-      'Toto vás odhlási z následujúceho zariadenia:';
+      'This will log you out of the following device:';
 
   @override
-  String get terminateSession => 'Ukončiť reláciu?';
+  String get terminateSession => 'Terminate session?';
 
   @override
-  String get terminate => 'Ukončiť';
+  String get terminate => 'Terminate';
 
   @override
-  String get thisDevice => 'Toto zariadenie';
+  String get thisDevice => 'This device';
 
   @override
-  String get createAccount => 'Vytvoriť účet';
+  String get createAccount => 'Create account';
 
   @override
-  String get weakStrength => 'Slabé';
+  String get weakStrength => 'Weak';
 
   @override
-  String get moderateStrength => 'Mierne';
+  String get moderateStrength => 'Moderate';
 
   @override
-  String get strongStrength => 'Silné';
+  String get strongStrength => 'Strong';
 
   @override
-  String get deleteAccount => 'Odstrániť účet';
+  String get deleteAccount => 'Delete account';
 
   @override
   String get deleteAccountQuery =>
-      'Bude nám ľúto ak odídeš. Máš nejaký problém?';
+      'We\'ll be sorry to see you go. Are you facing some issue?';
 
   @override
-  String get yesSendFeedbackAction => 'Áno, odoslať spätnú väzbu';
+  String get yesSendFeedbackAction => 'Yes, send feedback';
 
   @override
-  String get noDeleteAccountAction => 'Nie, odstrániť účet';
+  String get noDeleteAccountAction => 'No, delete account';
 
   @override
   String get initiateAccountDeleteTitle =>
-      'Je potrebné overenie pre spustenie odstránenia účtu';
+      'Please authenticate to initiate account deletion';
 
   @override
-  String get confirmAccountDeleteTitle => 'Potvrď odstránenie účtu';
+  String get confirmAccountDeleteTitle => 'Confirm account deletion';
 
   @override
   String get confirmAccountDeleteMessage =>
-      'Tento účet je prepojený s inými aplikáciami Ente, ak nejaké používaš.\n\nTvoje nahrané údaje vo všetkých Ente aplikáciách budú naplánované na odstránenie a tvoj účet bude natrvalo odstránený.';
+      'This account is linked to other Ente apps, if you use any.\n\nYour uploaded data, across all Ente apps, will be scheduled for deletion, and your account will be permanently deleted.';
 
   @override
-  String get delete => 'Odstrániť';
+  String get delete => 'Delete';
 
   @override
-  String get createNewAccount => 'Vytvoriť nový účet';
+  String get createNewAccount => 'Create new account';
 
   @override
-  String get password => 'Heslo';
+  String get password => 'Password';
 
   @override
-  String get confirmPassword => 'Potvrdiť heslo';
+  String get confirmPassword => 'Confirm password';
 
   @override
   String passwordStrength(String passwordStrengthValue) {
-    return 'Sila hesla: $passwordStrengthValue';
+    return 'Password strength: $passwordStrengthValue';
   }
 
   @override
-  String get hearUsWhereTitle => 'Ako ste sa dozvedeli o Ente? (voliteľné)';
+  String get hearUsWhereTitle => 'How did you hear about Ente? (optional)';
 
   @override
   String get hearUsExplanation =>
-      'Nesledujeme inštalácie aplikácie. Veľmi by nám pomohlo, keby ste nám povedali, ako ste sa o nás dozvedeli!';
+      'We don\'t track app installs. It\'d help if you told us where you found us!';
 
   @override
   String get signUpTerms =>
-      'Súhlasím s <u-terms>podmienkami používania</u-terms> a <u-policy>zásadami ochrany osobných údajov</u-policy>';
+      'I agree to the <u-terms>terms of service</u-terms> and <u-policy>privacy policy</u-policy>';
 
   @override
-  String get termsOfServicesTitle => 'Podmienky používania';
+  String get termsOfServicesTitle => 'Terms';
 
   @override
-  String get privacyPolicyTitle => 'Zásady ochrany osobných údajov';
+  String get privacyPolicyTitle => 'Privacy Policy';
 
   @override
   String get ackPasswordLostWarning =>
-      'Rozumiem, že ak stratím alebo zabudnem heslo, môžem stratiť svoje údaje, pretože moje údaje sú <underline>šifrované end-to-end</underline>.';
+      'I understand that if I lose my password, I may lose my data since my data is <underline>end-to-end encrypted</underline>.';
 
   @override
-  String get encryption => 'Šifrovanie';
+  String get encryption => 'Encryption';
 
   @override
-  String get logInLabel => 'Prihlásenie';
+  String get logInLabel => 'Log in';
 
   @override
-  String get welcomeBack => 'Vitajte späť!';
+  String get welcomeBack => 'Welcome back!';
 
   @override
   String get loginTerms =>
-      'Kliknutím na prihlásenie, súhlasím s <u-terms>podmienkami používania</u-terms> a <u-policy>zásadami ochrany osobných údajov</u-policy>';
+      'By clicking log in, I agree to the <u-terms>terms of service</u-terms> and <u-policy>privacy policy</u-policy>';
 
   @override
-  String get noInternetConnection => 'Žiadne internetové pripojenie';
+  String get noInternetConnection => 'No internet connection';
 
   @override
   String get pleaseCheckYourInternetConnectionAndTryAgain =>
-      'Skontrolujte svoje internetové pripojenie a skúste to znova.';
+      'Please check your internet connection and try again.';
 
   @override
   String get verificationFailedPleaseTryAgain =>
-      'Overenie zlyhalo, skúste to znova';
+      'Verification failed, please try again';
 
   @override
-  String get recreatePasswordTitle => 'Resetovať heslo';
+  String get recreatePasswordTitle => 'Recreate password';
 
   @override
   String get recreatePasswordBody =>
-      'Aktuálne zariadenie nie je dostatočne výkonné na overenie vášho hesla, avšak vieme ho regenerovať spôsobom, ktorý funguje vo všetkých zariadeniach.\n\nPrihláste sa pomocou kľúča na obnovenie a znovu vygenerujte svoje heslo (ak si prajete, môžete znova použiť rovnaké).';
+      'The current device is not powerful enough to verify your password, but we can regenerate in a way that works with all devices.\n\nPlease login using your recovery key and regenerate your password (you can use the same one again if you wish).';
 
   @override
-  String get useRecoveryKey => 'Použiť kľúč na obnovenie';
+  String get useRecoveryKey => 'Use recovery key';
 
   @override
-  String get forgotPassword => 'Zabudnuté heslo';
+  String get forgotPassword => 'Forgot password';
 
   @override
-  String get changeEmail => 'Zmeniť e-mail';
+  String get changeEmail => 'Change email';
 
   @override
-  String get verifyEmail => 'Overiť email';
+  String get verifyEmail => 'Verify email';
 
   @override
   String weHaveSendEmailTo(String email) {
-    return 'Odoslali sme email na adresu <green>$email</green>';
+    return 'We have sent a mail to <green>$email</green>';
   }
 
   @override
   String get toResetVerifyEmail =>
-      'Ak chcete obnoviť svoje heslo, najskôr overte svoj email.';
+      'To reset your password, please verify your email first.';
 
   @override
   String get checkInboxAndSpamFolder =>
-      'Skontrolujte svoju doručenú poštu (a spam) pre dokončenie overenia';
+      'Please check your inbox (and spam) to complete verification';
 
   @override
-  String get tapToEnterCode => 'Klepnutím zadajte kód';
+  String get tapToEnterCode => 'Tap to enter code';
 
   @override
-  String get sendEmail => 'Odoslať email';
+  String get sendEmail => 'Send email';
 
   @override
-  String get resendEmail => 'Znovu odoslať email';
+  String get resendEmail => 'Resend email';
 
   @override
-  String get passKeyPendingVerification => 'Overenie stále prebieha';
+  String get passKeyPendingVerification => 'Verification is still pending';
 
   @override
-  String get loginSessionExpired => 'Relácia vypršala';
+  String get loginSessionExpired => 'Session expired';
 
   @override
   String get loginSessionExpiredDetails =>
-      'Vaša relácia vypršala. Prosím, prihláste sa znovu.';
+      'Your session has expired. Please login again.';
 
   @override
-  String get passkeyAuthTitle => 'Overenie pomocou passkey';
+  String get passkeyAuthTitle => 'Passkey verification';
 
   @override
-  String get waitingForVerification => 'Čakanie na overenie...';
+  String get waitingForVerification => 'Waiting for verification...';
 
   @override
-  String get tryAgain => 'Skúsiť znova';
+  String get tryAgain => 'Try again';
 
   @override
-  String get checkStatus => 'Overiť stav';
+  String get checkStatus => 'Check status';
 
   @override
-  String get loginWithTOTP => 'Prihlásenie pomocou TOTP';
+  String get loginWithTOTP => 'Login with TOTP';
 
   @override
-  String get recoverAccount => 'Obnoviť účet';
+  String get recoverAccount => 'Recover account';
 
   @override
-  String get setPasswordTitle => 'Nastaviť heslo';
+  String get setPasswordTitle => 'Set password';
 
   @override
-  String get changePasswordTitle => 'Zmeniť heslo';
+  String get changePasswordTitle => 'Change password';
 
   @override
-  String get resetPasswordTitle => 'Obnoviť heslo';
+  String get resetPasswordTitle => 'Reset password';
 
   @override
-  String get encryptionKeys => 'Šifrovacie kľúče';
+  String get encryptionKeys => 'Encryption keys';
 
   @override
   String get enterPasswordToEncrypt =>
-      'Zadajte heslo, ktoré môžeme použiť na šifrovanie vašich údajov';
+      'Enter a password we can use to encrypt your data';
 
   @override
   String get enterNewPasswordToEncrypt =>
-      'Zadajte nové heslo, ktoré môžeme použiť na šifrovanie vašich údajov';
+      'Enter a new password we can use to encrypt your data';
 
   @override
   String get passwordWarning =>
-      'Ente neukladá tohto heslo. V prípade, že ho zabudnete, <underline>nie sme schopní rozšifrovať vaše údaje</underline>';
+      'We don\'t store this password, so if you forget, <underline>we cannot decrypt your data</underline>';
 
   @override
-  String get howItWorks => 'Ako to funguje';
+  String get howItWorks => 'How it works';
 
   @override
-  String get generatingEncryptionKeys => 'Generovanie šifrovacích kľúčov...';
+  String get generatingEncryptionKeys => 'Generating encryption keys...';
 
   @override
-  String get passwordChangedSuccessfully => 'Heslo bolo úspešne zmenené';
+  String get passwordChangedSuccessfully => 'Password changed successfully';
 
   @override
-  String get signOutFromOtherDevices => 'Odhlásiť sa z iných zariadení';
+  String get signOutFromOtherDevices => 'Sign out from other devices';
 
   @override
   String get signOutOtherBody =>
-      'Ak si myslíš, že by niekto mohol poznať tvoje heslo, môžeš vynútiť odhlásenie všetkých ostatných zariadení používajúcich tvoj účet.';
+      'If you think someone might know your password, you can force all other devices using your account to sign out.';
 
   @override
-  String get signOutOtherDevices => 'Odhlásiť iné zariadenie';
+  String get signOutOtherDevices => 'Sign out other devices';
 
   @override
-  String get doNotSignOut => 'Neodhlasovať';
+  String get doNotSignOut => 'Do not sign out';
 
   @override
-  String get generatingEncryptionKeysTitle =>
-      'Generovanie šifrovacích kľúčov...';
+  String get generatingEncryptionKeysTitle => 'Generating encryption keys...';
 
   @override
-  String get continueLabel => 'Pokračovať';
+  String get continueLabel => 'Continue';
 
   @override
-  String get insecureDevice => 'Slabo zabezpečené zariadenie';
+  String get insecureDevice => 'Insecure device';
 
   @override
   String get sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease =>
-      'Ospravedlňujeme sa, v tomto zariadení sme nemohli generovať bezpečnostné kľúče.\n\nzaregistrujte sa z iného zariadenia.';
+      'Sorry, we could not generate secure keys on this device.\n\nplease sign up from a different device.';
 
   @override
-  String get recoveryKeyCopiedToClipboard =>
-      'Skopírovaný kód pre obnovenie do schránky';
+  String get recoveryKeyCopiedToClipboard => 'Recovery key copied to clipboard';
 
   @override
-  String get recoveryKey => 'Kľúč pre obnovenie';
+  String get recoveryKey => 'Recovery key';
 
   @override
   String get recoveryKeyOnForgotPassword =>
-      'Ak zabudnete heslo, jediným spôsobom, ako môžete obnoviť svoje údaje, je tento kľúč.';
+      'If you forget your password, the only way you can recover your data is with this key.';
 
   @override
   String get recoveryKeySaveDescription =>
-      'My tento kľúč neuchovávame, uložte si tento kľúč obsahujúci 24 slov na bezpečnom mieste.';
+      'We don\'t store this key, please save this 24 word key in a safe place.';
 
   @override
-  String get doThisLater => 'Urobiť to neskôr';
+  String get doThisLater => 'Do this later';
 
   @override
-  String get saveKey => 'Uložiť kľúč';
+  String get saveKey => 'Save key';
 
   @override
-  String get recoveryKeySaved =>
-      'Kľúč na obnovenie uložený v priečinku Stiahnutých súborov!';
+  String get recoveryKeySaved => 'Recovery key saved in Downloads folder!';
 
   @override
-  String get noRecoveryKeyTitle => 'Nemáte kľúč pre obnovenie?';
+  String get noRecoveryKeyTitle => 'No recovery key?';
 
   @override
-  String get twoFactorAuthTitle => 'Dvojfaktorové overovanie';
+  String get twoFactorAuthTitle => 'Two-factor authentication';
 
   @override
   String get enterCodeHint =>
-      'Zadajte 6-miestny kód z\nvašej overovacej aplikácie';
+      'Enter the 6-digit code from\nyour authenticator app';
 
   @override
-  String get lostDeviceTitle => 'Stratené zariadenie?';
+  String get lostDeviceTitle => 'Lost device?';
 
   @override
-  String get enterRecoveryKeyHint => 'Vložte váš kód pre obnovenie';
+  String get enterRecoveryKeyHint => 'Enter your recovery key';
 
   @override
-  String get recover => 'Obnoviť';
-
-  @override
-  String get loggingOut => 'Odhlasovanie...';
-
-  @override
-  String get immediately => 'Okamžite';
-
-  @override
-  String get appLock => 'Zámok aplikácie';
-
-  @override
-  String get autoLock => 'Automatické uzamknutie';
-
-  @override
-  String get noSystemLockFound => 'Nenájdená žiadna zámka obrazovky';
-
-  @override
-  String get deviceLockEnablePreSteps =>
-      'Pre povolenie zámku zariadenia, nastavte prístupový kód zariadenia alebo zámok obrazovky v nastaveniach systému.';
-
-  @override
-  String get appLockDescription =>
-      'Vyberte si medzi predvolenou zámkou obrazovky vášho zariadenia a vlastnou zámkou obrazovky s PIN kódom alebo heslom.';
-
-  @override
-  String get deviceLock => 'Zámok zariadenia';
-
-  @override
-  String get pinLock => 'Zámok PIN';
-
-  @override
-  String get autoLockFeatureDescription =>
-      'Čas, po ktorom sa aplikácia uzamkne po nečinnosti';
-
-  @override
-  String get hideContent => 'Skryť obsah';
-
-  @override
-  String get hideContentDescriptionAndroid =>
-      'Skrýva obsah v prepínači aplikácii a zakazuje snímky obrazovky';
-
-  @override
-  String get hideContentDescriptioniOS => 'Skrýva obsah v prepínači aplikácii';
-
-  @override
-  String get tooManyIncorrectAttempts => 'Príliš veľa chybných pokusov';
-
-  @override
-  String get tapToUnlock => 'Ťuknutím odomknete';
-
-  @override
-  String get areYouSureYouWantToLogout => 'Naozaj sa chcete odhlásiť?';
-
-  @override
-  String get yesLogout => 'Áno, odhlásiť sa';
-
-  @override
-  String get authToViewSecrets =>
-      'Pre zobrazenie vašich tajných údajov sa musíte overiť';
-
-  @override
-  String get next => 'Ďalej';
-
-  @override
-  String get setNewPassword => 'Nastaviť nové heslo';
-
-  @override
-  String get enterPin => 'Zadajte PIN';
-
-  @override
-  String get setNewPin => 'Nastaviť nový PIN';
-
-  @override
-  String get confirm => 'Potvrdiť';
-
-  @override
-  String get reEnterPassword => 'Zadajte heslo znova';
-
-  @override
-  String get reEnterPin => 'Zadajte PIN znova';
-
-  @override
-  String get androidBiometricHint => 'Overiť identitu';
-
-  @override
-  String get androidBiometricNotRecognized => 'Nerozpoznané. Skúste znova.';
-
-  @override
-  String get androidBiometricSuccess => 'Overenie úspešné';
-
-  @override
-  String get androidCancelButton => 'Zrušiť';
-
-  @override
-  String get androidSignInTitle => 'Vyžaduje sa overenie';
-
-  @override
-  String get androidBiometricRequiredTitle => 'Vyžaduje sa biometria';
-
-  @override
-  String get androidDeviceCredentialsRequiredTitle =>
-      'Vyžadujú sa poverenia zariadenia';
-
-  @override
-  String get androidDeviceCredentialsSetupDescription =>
-      'Vyžadujú sa poverenia zariadenia';
-
-  @override
-  String get goToSettings => 'Prejsť do nastavení';
-
-  @override
-  String get androidGoToSettingsDescription =>
-      'Overenie pomocou biometrie nie je na vašom zariadení nastavené. Prejdite na \'Nastavenie > Zabezpečenie\' a pridajte overenie pomocou biometrie.';
-
-  @override
-  String get iOSLockOut =>
-      'Overenie pomocou biometrie je zakázané. Zamknite a odomknite svoju obrazovku, aby ste ho povolili.';
-
-  @override
-  String get iOSOkButton => 'OK';
-
-  @override
-  String get emailAlreadyRegistered => 'Email already registered.';
-
-  @override
-  String get emailNotRegistered => 'Email not registered.';
-
-  @override
-  String get thisEmailIsAlreadyInUse => 'Tento e-mail sa už používa';
-
-  @override
-  String emailChangedTo(String newEmail) {
-    return 'Emailová adresa bola zmenená na $newEmail';
-  }
-
-  @override
-  String get authenticationFailedPleaseTryAgain =>
-      'Overenie zlyhalo. Skúste to znova';
-
-  @override
-  String get authenticationSuccessful => 'Overenie sa podarilo!';
-
-  @override
-  String get sessionExpired => 'Relácia vypršala';
-
-  @override
-  String get incorrectRecoveryKey => 'Nesprávny kľúč na obnovenie';
-
-  @override
-  String get theRecoveryKeyYouEnteredIsIncorrect =>
-      'Kľúč na obnovenie, ktorý ste zadali, je nesprávny';
-
-  @override
-  String get twofactorAuthenticationSuccessfullyReset =>
-      'Dvojfaktorové overovanie bolo úspešne obnovené';
-
-  @override
-  String get noRecoveryKey => 'No recovery key';
-
-  @override
-  String get yourAccountHasBeenDeleted => 'Your account has been deleted';
-
-  @override
-  String get verificationId => 'Verification ID';
-
-  @override
-  String get yourVerificationCodeHasExpired =>
-      'Platnosť overovacieho kódu uplynula';
-
-  @override
-  String get incorrectCode => 'Neplatný kód';
-
-  @override
-  String get sorryTheCodeYouveEnteredIsIncorrect =>
-      'Ľutujeme, zadaný kód je nesprávny';
-
-  @override
-  String get developerSettings => 'Nastavenia pre vývojárov';
-
-  @override
-  String get serverEndpoint => 'Endpoint servera';
-
-  @override
-  String get invalidEndpoint => 'Neplatný endpoint';
-
-  @override
-  String get invalidEndpointMessage =>
-      'Ospravedlňujeme sa, endpoint, ktorý ste zadali, je neplatný. Zadajte platný endpoint a skúste to znova.';
-
-  @override
-  String get endpointUpdatedMessage => 'Endpoint úspešne aktualizovaný';
+  String get recover => 'Recover';
 }

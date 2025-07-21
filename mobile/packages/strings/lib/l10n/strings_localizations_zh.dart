@@ -79,6 +79,18 @@ class StringsLocalizationsZh extends StringsLocalizations {
   String get reportABug => '报告错误';
 
   @override
+  String get logsDirectoryName => 'logs';
+
+  @override
+  String get logsZipFileName => 'logs.zip';
+
+  @override
+  String get zipFileExtension => 'zip';
+
+  @override
+  String get reportABug => 'Report a bug';
+
+  @override
   String get logsDialogBody =>
       'This will send across logs to help us debug your issue. Please note that file names will be included to help track issues with specific files.';
 
@@ -87,7 +99,7 @@ class StringsLocalizationsZh extends StringsLocalizations {
 
   @override
   String customEndpoint(String endpoint) {
-    return '已连接至 $endpoint';
+    return 'Connected to $endpoint';
   }
 
   @override
@@ -101,1040 +113,336 @@ class StringsLocalizationsZh extends StringsLocalizations {
       '您想将其保存到您的内置存储（默认情况下为“下载”文件夹）还是将其发送到其他应用程序？';
 
   @override
-  String get saveOnlyDescription => '您想将其保存到您的内置存储中（默认情况下为“下载”文件夹）吗？';
+  String get saveOnlyDescription =>
+      'Do you want to save this to your storage (Downloads folder by default)?';
 
   @override
   String get enterNewEmailHint => 'Enter your new email address';
 
   @override
-  String get email => '电子邮件地址';
+  String get email => 'Email';
 
   @override
-  String get verify => '验证';
+  String get verify => 'Verify';
 
   @override
-  String get invalidEmailTitle => '无效的电子邮件地址';
+  String get invalidEmailTitle => 'Invalid email address';
 
   @override
-  String get invalidEmailMessage => '请输入一个有效的电子邮件地址。';
+  String get invalidEmailMessage => 'Please enter a valid email address.';
 
   @override
-  String get pleaseWait => '请稍候...';
+  String get pleaseWait => 'Please wait...';
 
   @override
-  String get verifyPassword => '验证密码';
+  String get verifyPassword => 'Verify password';
 
   @override
-  String get incorrectPasswordTitle => '密码错误';
+  String get incorrectPasswordTitle => 'Incorrect password';
 
   @override
-  String get pleaseTryAgain => '请重试';
+  String get pleaseTryAgain => 'Please try again';
 
   @override
-  String get enterPassword => '输入密码';
+  String get enterPassword => 'Enter password';
 
   @override
-  String get enterYourPasswordHint => '输入您的密码';
+  String get enterYourPasswordHint => 'Enter your password';
 
   @override
-  String get activeSessions => '已登录的设备';
+  String get activeSessions => 'Active sessions';
 
   @override
-  String get oops => '哎呀';
+  String get oops => 'Oops';
 
   @override
-  String get somethingWentWrongPleaseTryAgain => '出了点问题，请重试';
+  String get somethingWentWrongPleaseTryAgain =>
+      'Something went wrong, please try again';
 
   @override
-  String get thisWillLogYouOutOfThisDevice => '这将使您登出该设备！';
+  String get thisWillLogYouOutOfThisDevice =>
+      'This will log you out of this device!';
 
   @override
-  String get thisWillLogYouOutOfTheFollowingDevice => '这将使您登出以下设备：';
+  String get thisWillLogYouOutOfTheFollowingDevice =>
+      'This will log you out of the following device:';
 
   @override
-  String get terminateSession => '是否终止会话？';
+  String get terminateSession => 'Terminate session?';
 
   @override
-  String get terminate => '终止';
+  String get terminate => 'Terminate';
 
   @override
-  String get thisDevice => '此设备';
+  String get thisDevice => 'This device';
 
   @override
-  String get createAccount => '创建账户';
+  String get createAccount => 'Create account';
 
   @override
-  String get weakStrength => '弱';
+  String get weakStrength => 'Weak';
 
   @override
-  String get moderateStrength => '中';
+  String get moderateStrength => 'Moderate';
 
   @override
-  String get strongStrength => '强';
+  String get strongStrength => 'Strong';
 
   @override
-  String get deleteAccount => '删除账户';
+  String get deleteAccount => 'Delete account';
 
   @override
-  String get deleteAccountQuery => '我们很抱歉看到您离开。您面临一些问题？';
+  String get deleteAccountQuery =>
+      'We\'ll be sorry to see you go. Are you facing some issue?';
 
   @override
-  String get yesSendFeedbackAction => '是，发送反馈';
+  String get yesSendFeedbackAction => 'Yes, send feedback';
 
   @override
-  String get noDeleteAccountAction => '否，删除账户';
+  String get noDeleteAccountAction => 'No, delete account';
 
   @override
-  String get initiateAccountDeleteTitle => '请进行身份验证以启动账户删除';
+  String get initiateAccountDeleteTitle =>
+      'Please authenticate to initiate account deletion';
 
   @override
-  String get confirmAccountDeleteTitle => '确认删除账户';
+  String get confirmAccountDeleteTitle => 'Confirm account deletion';
 
   @override
   String get confirmAccountDeleteMessage =>
-      '如果您使用其他 Ente 应用程序，该账户将会与其他应用程序链接。\n\n在所有 Ente 应用程序中，您上传的数据将被安排用于删除，并且您的账户将被永久删除。';
+      'This account is linked to other Ente apps, if you use any.\n\nYour uploaded data, across all Ente apps, will be scheduled for deletion, and your account will be permanently deleted.';
 
   @override
-  String get delete => '删除';
+  String get delete => 'Delete';
 
   @override
-  String get createNewAccount => '创建新账号';
+  String get createNewAccount => 'Create new account';
 
   @override
-  String get password => '密码';
+  String get password => 'Password';
 
   @override
-  String get confirmPassword => '请确认密码';
+  String get confirmPassword => 'Confirm password';
 
   @override
   String passwordStrength(String passwordStrengthValue) {
-    return '密码强度： $passwordStrengthValue';
+    return 'Password strength: $passwordStrengthValue';
   }
 
   @override
-  String get hearUsWhereTitle => '您是怎么知道 Ente 的？（可选）';
+  String get hearUsWhereTitle => 'How did you hear about Ente? (optional)';
 
   @override
-  String get hearUsExplanation => '我们不跟踪应用程序安装情况。如果您告诉我们您是在哪里找到我们的，将会有所帮助！';
+  String get hearUsExplanation =>
+      'We don\'t track app installs. It\'d help if you told us where you found us!';
 
   @override
   String get signUpTerms =>
-      '我同意 <u-terms>服务条款</u-terms> 和 <u-policy>隐私政策</u-policy>';
+      'I agree to the <u-terms>terms of service</u-terms> and <u-policy>privacy policy</u-policy>';
 
   @override
-  String get termsOfServicesTitle => '服务条款';
+  String get termsOfServicesTitle => 'Terms';
 
   @override
-  String get privacyPolicyTitle => '隐私政策';
+  String get privacyPolicyTitle => 'Privacy Policy';
 
   @override
   String get ackPasswordLostWarning =>
-      '我明白，如果我丢失密码，我可能会丢失我的数据，因为我的数据是 <underline>端到端加密的</underline>。';
+      'I understand that if I lose my password, I may lose my data since my data is <underline>end-to-end encrypted</underline>.';
 
   @override
-  String get encryption => '加密';
+  String get encryption => 'Encryption';
 
   @override
-  String get logInLabel => '登录';
+  String get logInLabel => 'Log in';
 
   @override
-  String get welcomeBack => '欢迎回来！';
+  String get welcomeBack => 'Welcome back!';
 
   @override
   String get loginTerms =>
-      '点击登录后，我同意 <u-terms>服务条款</u-terms> 和 <u-policy>隐私政策</u-policy>';
+      'By clicking log in, I agree to the <u-terms>terms of service</u-terms> and <u-policy>privacy policy</u-policy>';
 
   @override
-  String get noInternetConnection => '无互联网连接';
+  String get noInternetConnection => 'No internet connection';
 
   @override
-  String get pleaseCheckYourInternetConnectionAndTryAgain => '请检查您的互联网连接，然后重试。';
+  String get pleaseCheckYourInternetConnectionAndTryAgain =>
+      'Please check your internet connection and try again.';
 
   @override
-  String get verificationFailedPleaseTryAgain => '验证失败，请再试一次';
+  String get verificationFailedPleaseTryAgain =>
+      'Verification failed, please try again';
 
   @override
-  String get recreatePasswordTitle => '重新创建密码';
+  String get recreatePasswordTitle => 'Recreate password';
 
   @override
   String get recreatePasswordBody =>
-      '当前设备的功能不足以验证您的密码，但我们可以以适用于所有设备的方式重新生成。\n\n请使用您的恢复密钥登录并重新生成您的密码（如果您愿意，可以再次使用相同的密码）。';
+      'The current device is not powerful enough to verify your password, but we can regenerate in a way that works with all devices.\n\nPlease login using your recovery key and regenerate your password (you can use the same one again if you wish).';
 
   @override
-  String get useRecoveryKey => '使用恢复密钥';
+  String get useRecoveryKey => 'Use recovery key';
 
   @override
-  String get forgotPassword => '忘记密码';
+  String get forgotPassword => 'Forgot password';
 
   @override
-  String get changeEmail => '修改邮箱';
+  String get changeEmail => 'Change email';
 
   @override
-  String get verifyEmail => '验证电子邮件';
+  String get verifyEmail => 'Verify email';
 
   @override
   String weHaveSendEmailTo(String email) {
-    return '我们已经发送邮件到 <green>$email</green>';
+    return 'We have sent a mail to <green>$email</green>';
   }
 
   @override
-  String get toResetVerifyEmail => '要重置您的密码，请先验证您的电子邮件。';
+  String get toResetVerifyEmail =>
+      'To reset your password, please verify your email first.';
 
   @override
-  String get checkInboxAndSpamFolder => '请检查您的收件箱 (或者是在您的“垃圾邮件”列表内) 以完成验证';
+  String get checkInboxAndSpamFolder =>
+      'Please check your inbox (and spam) to complete verification';
 
   @override
-  String get tapToEnterCode => '点击以输入代码';
+  String get tapToEnterCode => 'Tap to enter code';
 
   @override
-  String get sendEmail => '发送电子邮件';
+  String get sendEmail => 'Send email';
 
   @override
-  String get resendEmail => '重新发送电子邮件';
+  String get resendEmail => 'Resend email';
 
   @override
-  String get passKeyPendingVerification => '仍需验证';
+  String get passKeyPendingVerification => 'Verification is still pending';
 
   @override
-  String get loginSessionExpired => '会话已过期';
+  String get loginSessionExpired => 'Session expired';
 
   @override
-  String get loginSessionExpiredDetails => '您的会话已过期。请重新登录。';
+  String get loginSessionExpiredDetails =>
+      'Your session has expired. Please login again.';
 
   @override
-  String get passkeyAuthTitle => '通行密钥验证';
+  String get passkeyAuthTitle => 'Passkey verification';
 
   @override
-  String get waitingForVerification => '等待验证...';
+  String get waitingForVerification => 'Waiting for verification...';
 
   @override
-  String get tryAgain => '请再试一次';
+  String get tryAgain => 'Try again';
 
   @override
-  String get checkStatus => '检查状态';
+  String get checkStatus => 'Check status';
 
   @override
-  String get loginWithTOTP => '使用 TOTP 登录';
+  String get loginWithTOTP => 'Login with TOTP';
 
   @override
-  String get recoverAccount => '恢复账户';
+  String get recoverAccount => 'Recover account';
 
   @override
-  String get setPasswordTitle => '设置密码';
+  String get setPasswordTitle => 'Set password';
 
   @override
-  String get changePasswordTitle => '修改密码';
+  String get changePasswordTitle => 'Change password';
 
   @override
-  String get resetPasswordTitle => '重置密码';
+  String get resetPasswordTitle => 'Reset password';
 
   @override
-  String get encryptionKeys => '加密密钥';
+  String get encryptionKeys => 'Encryption keys';
 
   @override
-  String get enterPasswordToEncrypt => '输入我们可以用来加密您的数据的密码';
+  String get enterPasswordToEncrypt =>
+      'Enter a password we can use to encrypt your data';
 
   @override
-  String get enterNewPasswordToEncrypt => '输入我们可以用来加密您的数据的新密码';
+  String get enterNewPasswordToEncrypt =>
+      'Enter a new password we can use to encrypt your data';
 
   @override
   String get passwordWarning =>
-      '我们不储存这个密码，所以如果忘记， <underline>我们不能解密您的数据</underline>';
+      'We don\'t store this password, so if you forget, <underline>we cannot decrypt your data</underline>';
 
   @override
-  String get howItWorks => '工作原理';
+  String get howItWorks => 'How it works';
 
   @override
-  String get generatingEncryptionKeys => '正在生成加密密钥...';
+  String get generatingEncryptionKeys => 'Generating encryption keys...';
 
   @override
-  String get passwordChangedSuccessfully => '密码修改成功';
+  String get passwordChangedSuccessfully => 'Password changed successfully';
 
   @override
-  String get signOutFromOtherDevices => '从其他设备登出';
+  String get signOutFromOtherDevices => 'Sign out from other devices';
 
   @override
-  String get signOutOtherBody => '如果您认为有人可能知道您的密码，您可以强制所有其他使用您账户的设备登出。';
+  String get signOutOtherBody =>
+      'If you think someone might know your password, you can force all other devices using your account to sign out.';
 
   @override
-  String get signOutOtherDevices => '登出其他设备';
+  String get signOutOtherDevices => 'Sign out other devices';
 
   @override
-  String get doNotSignOut => '不要登出';
+  String get doNotSignOut => 'Do not sign out';
 
   @override
-  String get generatingEncryptionKeysTitle => '正在生成加密密钥...';
+  String get generatingEncryptionKeysTitle => 'Generating encryption keys...';
 
   @override
-  String get continueLabel => '继续';
+  String get continueLabel => 'Continue';
 
   @override
-  String get insecureDevice => '设备不安全';
+  String get insecureDevice => 'Insecure device';
 
   @override
   String get sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease =>
-      '抱歉，我们无法在此设备上生成安全密钥。\n\n请使用其他设备注册。';
+      'Sorry, we could not generate secure keys on this device.\n\nplease sign up from a different device.';
 
   @override
-  String get recoveryKeyCopiedToClipboard => '恢复密钥已复制到剪贴板';
+  String get recoveryKeyCopiedToClipboard => 'Recovery key copied to clipboard';
 
   @override
-  String get recoveryKey => '恢复密钥';
+  String get recoveryKey => 'Recovery key';
 
   @override
-  String get recoveryKeyOnForgotPassword => '如果您忘记了密码，恢复数据的唯一方法就是使用此密钥。';
+  String get recoveryKeyOnForgotPassword =>
+      'If you forget your password, the only way you can recover your data is with this key.';
 
   @override
-  String get recoveryKeySaveDescription => '我们不会存储此密钥，请将此24个单词密钥保存在一个安全的地方。';
+  String get recoveryKeySaveDescription =>
+      'We don\'t store this key, please save this 24 word key in a safe place.';
 
   @override
-  String get doThisLater => '稍后再做';
+  String get doThisLater => 'Do this later';
 
   @override
-  String get saveKey => '保存密钥';
+  String get saveKey => 'Save key';
 
   @override
-  String get recoveryKeySaved => '恢复密钥已保存在下载文件夹中！';
+  String get recoveryKeySaved => 'Recovery key saved in Downloads folder!';
 
   @override
-  String get noRecoveryKeyTitle => '没有恢复密钥吗？';
+  String get noRecoveryKeyTitle => 'No recovery key?';
 
   @override
-  String get twoFactorAuthTitle => '两步验证';
+  String get twoFactorAuthTitle => 'Two-factor authentication';
 
   @override
-  String get enterCodeHint => '从你的身份验证器应用中\n输入6位数字代码';
+  String get enterCodeHint =>
+      'Enter the 6-digit code from\nyour authenticator app';
 
   @override
-  String get lostDeviceTitle => '丢失了设备吗？';
+  String get lostDeviceTitle => 'Lost device?';
 
   @override
-  String get enterRecoveryKeyHint => '输入您的恢复密钥';
+  String get enterRecoveryKeyHint => 'Enter your recovery key';
 
   @override
-  String get recover => '恢复';
-
-  @override
-  String get loggingOut => '正在登出...';
-
-  @override
-  String get immediately => '立即';
-
-  @override
-  String get appLock => '应用锁';
-
-  @override
-  String get autoLock => '自动锁定';
-
-  @override
-  String get noSystemLockFound => '未找到系统锁';
-
-  @override
-  String get deviceLockEnablePreSteps => '要启用设备锁，请在系统设置中设置设备密码或屏幕锁。';
-
-  @override
-  String get appLockDescription => '在设备的默认锁定屏幕和带有 PIN 或密码的自定义锁定屏幕之间进行选择。';
-
-  @override
-  String get deviceLock => '设备锁';
-
-  @override
-  String get pinLock => 'Pin 锁定';
-
-  @override
-  String get autoLockFeatureDescription => '应用程序进入后台后锁定的时间';
-
-  @override
-  String get hideContent => '隐藏内容';
-
-  @override
-  String get hideContentDescriptionAndroid => '在应用切换器中隐藏应用内容并禁用屏幕截图';
-
-  @override
-  String get hideContentDescriptioniOS => '在应用切换器中隐藏应用内容';
-
-  @override
-  String get tooManyIncorrectAttempts => '错误的尝试次数过多';
-
-  @override
-  String get tapToUnlock => '点击解锁';
-
-  @override
-  String get areYouSureYouWantToLogout => '您确定要登出吗？';
-
-  @override
-  String get yesLogout => '是的，登出';
-
-  @override
-  String get authToViewSecrets => '请进行身份验证以查看您的密钥';
-
-  @override
-  String get next => '下一步';
-
-  @override
-  String get setNewPassword => '设置新密码';
-
-  @override
-  String get enterPin => '输入 PIN 码';
-
-  @override
-  String get setNewPin => '设置新 PIN 码';
-
-  @override
-  String get confirm => '确认';
-
-  @override
-  String get reEnterPassword => '再次输入密码';
-
-  @override
-  String get reEnterPin => '再次输入 PIN 码';
-
-  @override
-  String get androidBiometricHint => '验证身份';
-
-  @override
-  String get androidBiometricNotRecognized => '未能识别，请重试。';
-
-  @override
-  String get androidBiometricSuccess => '成功';
-
-  @override
-  String get androidCancelButton => '取消';
-
-  @override
-  String get androidSignInTitle => '需要进行身份验证';
-
-  @override
-  String get androidBiometricRequiredTitle => '需要进行生物识别认证';
-
-  @override
-  String get androidDeviceCredentialsRequiredTitle => '需要设备凭据';
-
-  @override
-  String get androidDeviceCredentialsSetupDescription => '需要设备凭据';
-
-  @override
-  String get goToSettings => '前往设置';
-
-  @override
-  String get androidGoToSettingsDescription =>
-      '您的设备上未设置生物识别身份验证。转到“设置 > 安全”以添加生物识别身份验证。';
-
-  @override
-  String get iOSLockOut => '生物识别身份验证已禁用。请锁定并解锁屏幕以启用该功能。';
-
-  @override
-  String get iOSOkButton => '好';
-
-  @override
-  String get emailAlreadyRegistered => '电子邮件地址已被注册。';
-
-  @override
-  String get emailNotRegistered => '电子邮件地址未注册。';
-
-  @override
-  String get thisEmailIsAlreadyInUse => '该电子邮件已被使用';
-
-  @override
-  String emailChangedTo(String newEmail) {
-    return '电子邮件已更改为 $newEmail';
-  }
-
-  @override
-  String get authenticationFailedPleaseTryAgain => '认证失败，请重试';
-
-  @override
-  String get authenticationSuccessful => '认证成功！';
-
-  @override
-  String get sessionExpired => '会话已过期';
-
-  @override
-  String get incorrectRecoveryKey => '恢复密钥不正确';
-
-  @override
-  String get theRecoveryKeyYouEnteredIsIncorrect => '您输入的恢复密钥不正确';
-
-  @override
-  String get twofactorAuthenticationSuccessfullyReset => '两步验证已成功重置';
-
-  @override
-  String get noRecoveryKey => 'No recovery key';
-
-  @override
-  String get yourAccountHasBeenDeleted => 'Your account has been deleted';
-
-  @override
-  String get verificationId => 'Verification ID';
-
-  @override
-  String get yourVerificationCodeHasExpired => '您的验证码已过期';
-
-  @override
-  String get incorrectCode => '验证码错误';
-
-  @override
-  String get sorryTheCodeYouveEnteredIsIncorrect => '抱歉，您输入的验证码不正确';
-
-  @override
-  String get developerSettings => '开发者设置';
-
-  @override
-  String get serverEndpoint => '服务器端点';
-
-  @override
-  String get invalidEndpoint => '端点无效';
-
-  @override
-  String get invalidEndpointMessage => '抱歉，您输入的端点无效。请输入有效的端点，然后重试。';
-
-  @override
-  String get endpointUpdatedMessage => '端点更新成功';
-}
-
-/// The translations for Chinese, as used in China (`zh_CN`).
-class StringsLocalizationsZhCn extends StringsLocalizationsZh {
-  StringsLocalizationsZhCn() : super('zh_CN');
-
-  @override
-  String get networkHostLookUpErr => '无法连接到 Ente，请检查您的网络设置，如果错误仍然存​​在，请联系支持。';
-
-  @override
-  String get networkConnectionRefusedErr =>
-      '无法连接到 Ente，请稍后重试。如果错误仍然存​​在，请联系支持人员。';
-
-  @override
-  String get itLooksLikeSomethingWentWrongPleaseRetryAfterSome =>
-      '看起来出了点问题。 请稍后重试。 如果错误仍然存在，请联系我们的支持团队。';
-
-  @override
-  String get error => '错误';
-
-  @override
-  String get ok => '确定';
-
-  @override
-  String get faq => '常见问题';
-
-  @override
-  String get contactSupport => '联系支持';
-
-  @override
-  String get emailYourLogs => '通过电子邮件发送您的日志';
-
-  @override
-  String pleaseSendTheLogsTo(String toEmail) {
-    return '请将日志发送至 \n$toEmail';
-  }
-
-  @override
-  String get copyEmailAddress => '复制电子邮件地址';
-
-  @override
-  String get exportLogs => '导出日志';
-
-  @override
-  String get cancel => '取消';
-
-  @override
-  String get reportABug => '报告错误';
-
-  @override
-  String customEndpoint(String endpoint) {
-    return '已连接至 $endpoint';
-  }
-
-  @override
-  String get save => '保存';
-
-  @override
-  String get send => '发送';
-
-  @override
-  String get saveOrSendDescription =>
-      '您想将其保存到您的内置存储（默认情况下为“下载”文件夹）还是将其发送到其他应用程序？';
-
-  @override
-  String get saveOnlyDescription => '您想将其保存到您的内置存储中（默认情况下为“下载”文件夹）吗？';
-
-  @override
-  String get enterNewEmailHint => '请输入您的新电子邮件地址';
-
-  @override
-  String get email => '电子邮件地址';
-
-  @override
-  String get verify => '验证';
-
-  @override
-  String get invalidEmailTitle => '无效的电子邮件地址';
-
-  @override
-  String get invalidEmailMessage => '请输入一个有效的电子邮件地址。';
-
-  @override
-  String get pleaseWait => '请稍候...';
-
-  @override
-  String get verifyPassword => '验证密码';
-
-  @override
-  String get incorrectPasswordTitle => '密码错误';
-
-  @override
-  String get pleaseTryAgain => '请重试';
-
-  @override
-  String get enterPassword => '输入密码';
-
-  @override
-  String get enterYourPasswordHint => '输入您的密码';
-
-  @override
-  String get activeSessions => '已登录的设备';
-
-  @override
-  String get oops => '哎呀';
-
-  @override
-  String get somethingWentWrongPleaseTryAgain => '出了点问题，请重试';
-
-  @override
-  String get thisWillLogYouOutOfThisDevice => '这将使您登出该设备！';
-
-  @override
-  String get thisWillLogYouOutOfTheFollowingDevice => '这将使您登出以下设备：';
-
-  @override
-  String get terminateSession => '是否终止会话？';
-
-  @override
-  String get terminate => '终止';
-
-  @override
-  String get thisDevice => '此设备';
-
-  @override
-  String get createAccount => '创建账户';
-
-  @override
-  String get weakStrength => '弱';
-
-  @override
-  String get moderateStrength => '中';
-
-  @override
-  String get strongStrength => '强';
-
-  @override
-  String get deleteAccount => '删除账户';
-
-  @override
-  String get deleteAccountQuery => '我们很抱歉看到您离开。您面临一些问题？';
-
-  @override
-  String get yesSendFeedbackAction => '是，发送反馈';
-
-  @override
-  String get noDeleteAccountAction => '否，删除账户';
-
-  @override
-  String get initiateAccountDeleteTitle => '请进行身份验证以启动账户删除';
-
-  @override
-  String get confirmAccountDeleteTitle => '确认删除账户';
-
-  @override
-  String get confirmAccountDeleteMessage =>
-      '如果您使用其他 Ente 应用程序，该账户将会与其他应用程序链接。\n\n在所有 Ente 应用程序中，您上传的数据将被安排用于删除，并且您的账户将被永久删除。';
-
-  @override
-  String get delete => '删除';
-
-  @override
-  String get createNewAccount => '创建新账号';
-
-  @override
-  String get password => '密码';
-
-  @override
-  String get confirmPassword => '请确认密码';
-
-  @override
-  String passwordStrength(String passwordStrengthValue) {
-    return '密码强度： $passwordStrengthValue';
-  }
-
-  @override
-  String get hearUsWhereTitle => '您是怎么知道 Ente 的？（可选）';
-
-  @override
-  String get hearUsExplanation => '我们不跟踪应用程序安装情况。如果您告诉我们您是在哪里找到我们的，将会有所帮助！';
-
-  @override
-  String get signUpTerms =>
-      '我同意 <u-terms>服务条款</u-terms> 和 <u-policy>隐私政策</u-policy>';
-
-  @override
-  String get termsOfServicesTitle => '服务条款';
-
-  @override
-  String get privacyPolicyTitle => '隐私政策';
-
-  @override
-  String get ackPasswordLostWarning =>
-      '我明白，如果我丢失密码，我可能会丢失我的数据，因为我的数据是 <underline>端到端加密的</underline>。';
-
-  @override
-  String get encryption => '加密';
-
-  @override
-  String get logInLabel => '登录';
-
-  @override
-  String get welcomeBack => '欢迎回来！';
-
-  @override
-  String get loginTerms =>
-      '点击登录后，我同意 <u-terms>服务条款</u-terms> 和 <u-policy>隐私政策</u-policy>';
-
-  @override
-  String get noInternetConnection => '无互联网连接';
-
-  @override
-  String get pleaseCheckYourInternetConnectionAndTryAgain => '请检查您的互联网连接，然后重试。';
-
-  @override
-  String get verificationFailedPleaseTryAgain => '验证失败，请再试一次';
-
-  @override
-  String get recreatePasswordTitle => '重新创建密码';
-
-  @override
-  String get recreatePasswordBody =>
-      '当前设备的功能不足以验证您的密码，但我们可以以适用于所有设备的方式重新生成。\n\n请使用您的恢复密钥登录并重新生成您的密码（如果您愿意，可以再次使用相同的密码）。';
-
-  @override
-  String get useRecoveryKey => '使用恢复密钥';
-
-  @override
-  String get forgotPassword => '忘记密码';
-
-  @override
-  String get changeEmail => '修改邮箱';
-
-  @override
-  String get verifyEmail => '验证电子邮件';
-
-  @override
-  String weHaveSendEmailTo(String email) {
-    return '我们已经发送邮件到 <green>$email</green>';
-  }
-
-  @override
-  String get toResetVerifyEmail => '要重置您的密码，请先验证您的电子邮件。';
-
-  @override
-  String get checkInboxAndSpamFolder => '请检查您的收件箱 (或者是在您的“垃圾邮件”列表内) 以完成验证';
-
-  @override
-  String get tapToEnterCode => '点击以输入代码';
-
-  @override
-  String get sendEmail => '发送电子邮件';
-
-  @override
-  String get resendEmail => '重新发送电子邮件';
-
-  @override
-  String get passKeyPendingVerification => '仍需验证';
-
-  @override
-  String get loginSessionExpired => '会话已过期';
-
-  @override
-  String get loginSessionExpiredDetails => '您的会话已过期。请重新登录。';
-
-  @override
-  String get passkeyAuthTitle => '通行密钥验证';
-
-  @override
-  String get waitingForVerification => '等待验证...';
-
-  @override
-  String get tryAgain => '请再试一次';
-
-  @override
-  String get checkStatus => '检查状态';
-
-  @override
-  String get loginWithTOTP => '使用 TOTP 登录';
-
-  @override
-  String get recoverAccount => '恢复账户';
-
-  @override
-  String get setPasswordTitle => '设置密码';
-
-  @override
-  String get changePasswordTitle => '修改密码';
-
-  @override
-  String get resetPasswordTitle => '重置密码';
-
-  @override
-  String get encryptionKeys => '加密密钥';
-
-  @override
-  String get enterPasswordToEncrypt => '输入我们可以用来加密您的数据的密码';
-
-  @override
-  String get enterNewPasswordToEncrypt => '输入我们可以用来加密您的数据的新密码';
-
-  @override
-  String get passwordWarning =>
-      '我们不储存这个密码，所以如果忘记， <underline>我们不能解密您的数据</underline>';
-
-  @override
-  String get howItWorks => '工作原理';
-
-  @override
-  String get generatingEncryptionKeys => '正在生成加密密钥...';
-
-  @override
-  String get passwordChangedSuccessfully => '密码修改成功';
-
-  @override
-  String get signOutFromOtherDevices => '从其他设备登出';
-
-  @override
-  String get signOutOtherBody => '如果您认为有人可能知道您的密码，您可以强制所有其他使用您账户的设备登出。';
-
-  @override
-  String get signOutOtherDevices => '登出其他设备';
-
-  @override
-  String get doNotSignOut => '不要登出';
-
-  @override
-  String get generatingEncryptionKeysTitle => '正在生成加密密钥...';
-
-  @override
-  String get continueLabel => '继续';
-
-  @override
-  String get insecureDevice => '设备不安全';
-
-  @override
-  String get sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease =>
-      '抱歉，我们无法在此设备上生成安全密钥。\n\n请使用其他设备注册。';
-
-  @override
-  String get recoveryKeyCopiedToClipboard => '恢复密钥已复制到剪贴板';
-
-  @override
-  String get recoveryKey => '恢复密钥';
-
-  @override
-  String get recoveryKeyOnForgotPassword => '如果您忘记了密码，恢复数据的唯一方法就是使用此密钥。';
-
-  @override
-  String get recoveryKeySaveDescription => '我们不会存储此密钥，请将此24个单词密钥保存在一个安全的地方。';
-
-  @override
-  String get doThisLater => '稍后再做';
-
-  @override
-  String get saveKey => '保存密钥';
-
-  @override
-  String get recoveryKeySaved => '恢复密钥已保存在下载文件夹中！';
-
-  @override
-  String get noRecoveryKeyTitle => '没有恢复密钥吗？';
-
-  @override
-  String get twoFactorAuthTitle => '两步验证';
-
-  @override
-  String get enterCodeHint => '从你的身份验证器应用中\n输入6位数字代码';
-
-  @override
-  String get lostDeviceTitle => '丢失了设备吗？';
-
-  @override
-  String get enterRecoveryKeyHint => '输入您的恢复密钥';
-
-  @override
-  String get recover => '恢复';
-
-  @override
-  String get loggingOut => '正在登出...';
-
-  @override
-  String get immediately => '立即';
-
-  @override
-  String get appLock => '应用锁';
-
-  @override
-  String get autoLock => '自动锁定';
-
-  @override
-  String get noSystemLockFound => '未找到系统锁';
-
-  @override
-  String get deviceLockEnablePreSteps => '要启用设备锁，请在系统设置中设置设备密码或屏幕锁。';
-
-  @override
-  String get appLockDescription => '在设备的默认锁定屏幕和带有 PIN 或密码的自定义锁定屏幕之间进行选择。';
-
-  @override
-  String get deviceLock => '设备锁';
-
-  @override
-  String get pinLock => 'Pin 锁定';
-
-  @override
-  String get autoLockFeatureDescription => '应用程序进入后台后锁定的时间';
-
-  @override
-  String get hideContent => '隐藏内容';
-
-  @override
-  String get hideContentDescriptionAndroid => '在应用切换器中隐藏应用内容并禁用屏幕截图';
-
-  @override
-  String get hideContentDescriptioniOS => '在应用切换器中隐藏应用内容';
-
-  @override
-  String get tooManyIncorrectAttempts => '错误的尝试次数过多';
-
-  @override
-  String get tapToUnlock => '点击解锁';
-
-  @override
-  String get areYouSureYouWantToLogout => '您确定要登出吗？';
-
-  @override
-  String get yesLogout => '是的，登出';
-
-  @override
-  String get authToViewSecrets => '请进行身份验证以查看您的密钥';
-
-  @override
-  String get next => '下一步';
-
-  @override
-  String get setNewPassword => '设置新密码';
-
-  @override
-  String get enterPin => '输入 PIN 码';
-
-  @override
-  String get setNewPin => '设置新 PIN 码';
-
-  @override
-  String get confirm => '确认';
-
-  @override
-  String get reEnterPassword => '再次输入密码';
-
-  @override
-  String get reEnterPin => '再次输入 PIN 码';
-
-  @override
-  String get androidBiometricHint => '验证身份';
-
-  @override
-  String get androidBiometricNotRecognized => '未能识别，请重试。';
-
-  @override
-  String get androidBiometricSuccess => '成功';
-
-  @override
-  String get androidCancelButton => '取消';
-
-  @override
-  String get androidSignInTitle => '需要进行身份验证';
-
-  @override
-  String get androidBiometricRequiredTitle => '需要进行生物识别认证';
-
-  @override
-  String get androidDeviceCredentialsRequiredTitle => '需要设备凭据';
-
-  @override
-  String get androidDeviceCredentialsSetupDescription => '需要设备凭据';
-
-  @override
-  String get goToSettings => '前往设置';
-
-  @override
-  String get androidGoToSettingsDescription =>
-      '您的设备上未设置生物识别身份验证。转到“设置 > 安全”以添加生物识别身份验证。';
-
-  @override
-  String get iOSLockOut => '生物识别身份验证已禁用。请锁定并解锁屏幕以启用该功能。';
-
-  @override
-  String get iOSOkButton => '好';
-
-  @override
-  String get emailAlreadyRegistered => '电子邮件地址已被注册。';
-
-  @override
-  String get emailNotRegistered => '电子邮件地址未注册。';
-
-  @override
-  String get thisEmailIsAlreadyInUse => '该电子邮件已被使用';
-
-  @override
-  String emailChangedTo(String newEmail) {
-    return '电子邮件已更改为 $newEmail';
-  }
-
-  @override
-  String get authenticationFailedPleaseTryAgain => '认证失败，请重试';
-
-  @override
-  String get authenticationSuccessful => '认证成功！';
-
-  @override
-  String get sessionExpired => '会话已过期';
-
-  @override
-  String get incorrectRecoveryKey => '恢复密钥不正确';
-
-  @override
-  String get theRecoveryKeyYouEnteredIsIncorrect => '您输入的恢复密钥不正确';
-
-  @override
-  String get twofactorAuthenticationSuccessfullyReset => '两步验证已成功重置';
-
-  @override
-  String get yourVerificationCodeHasExpired => '您的验证码已过期';
-
-  @override
-  String get incorrectCode => '验证码错误';
-
-  @override
-  String get sorryTheCodeYouveEnteredIsIncorrect => '抱歉，您输入的验证码不正确';
-
-  @override
-  String get developerSettings => '开发者设置';
-
-  @override
-  String get serverEndpoint => '服务器端点';
-
-  @override
-  String get invalidEndpoint => '端点无效';
-
-  @override
-  String get invalidEndpointMessage => '抱歉，您输入的端点无效。请输入有效的端点，然后重试。';
-
-  @override
-  String get endpointUpdatedMessage => '端点更新成功';
+  String get recover => 'Recover';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).

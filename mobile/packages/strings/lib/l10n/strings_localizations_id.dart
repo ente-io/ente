@@ -103,528 +103,333 @@ class StringsLocalizationsId extends StringsLocalizations {
 
   @override
   String get saveOnlyDescription =>
-      'Anda ingin menyimpan kode ke penyimpanan Anda (folder pilihan bawaan adalah folder Downloads)';
+      'Do you want to save this to your storage (Downloads folder by default)?';
 
   @override
-  String get enterNewEmailHint => 'Masukkan alamat email baru anda';
+  String get enterNewEmailHint => 'Enter your new email address';
 
   @override
   String get email => 'Email';
 
   @override
-  String get verify => 'Verifikasi';
+  String get verify => 'Verify';
 
   @override
-  String get invalidEmailTitle => 'Alamat email tidak valid';
+  String get invalidEmailTitle => 'Invalid email address';
 
   @override
-  String get invalidEmailMessage => 'Harap masukkan alamat email yang valid.';
+  String get invalidEmailMessage => 'Please enter a valid email address.';
 
   @override
-  String get pleaseWait => 'Mohon tunggu...';
+  String get pleaseWait => 'Please wait...';
 
   @override
-  String get verifyPassword => 'Verifikasi kata sandi';
+  String get verifyPassword => 'Verify password';
 
   @override
-  String get incorrectPasswordTitle => 'Kata sandi salah';
+  String get incorrectPasswordTitle => 'Incorrect password';
 
   @override
-  String get pleaseTryAgain => 'Harap coba lagi';
+  String get pleaseTryAgain => 'Please try again';
 
   @override
-  String get enterPassword => 'Masukkan kata sandi';
+  String get enterPassword => 'Enter password';
 
   @override
-  String get enterYourPasswordHint => 'Masukkan kata sandi Anda';
+  String get enterYourPasswordHint => 'Enter your password';
 
   @override
-  String get activeSessions => 'Sesi aktif';
+  String get activeSessions => 'Active sessions';
 
   @override
-  String get oops => 'Ups';
+  String get oops => 'Oops';
 
   @override
   String get somethingWentWrongPleaseTryAgain =>
-      'Ada yang salah. Mohon coba kembali';
+      'Something went wrong, please try again';
 
   @override
   String get thisWillLogYouOutOfThisDevice =>
-      'Langkah ini akan mengeluarkan Anda dari gawai ini!';
+      'This will log you out of this device!';
 
   @override
   String get thisWillLogYouOutOfTheFollowingDevice =>
-      'Langkah ini akan mengeluarkan Anda dari gawai berikut:';
+      'This will log you out of the following device:';
 
   @override
-  String get terminateSession => 'Akhiri sesi?';
+  String get terminateSession => 'Terminate session?';
 
   @override
-  String get terminate => 'Akhiri';
+  String get terminate => 'Terminate';
 
   @override
-  String get thisDevice => 'Gawai ini';
+  String get thisDevice => 'This device';
 
   @override
-  String get createAccount => 'Buat akun';
+  String get createAccount => 'Create account';
 
   @override
-  String get weakStrength => 'Lemah';
+  String get weakStrength => 'Weak';
 
   @override
-  String get moderateStrength => 'Sedang';
+  String get moderateStrength => 'Moderate';
 
   @override
-  String get strongStrength => 'Kuat';
+  String get strongStrength => 'Strong';
 
   @override
-  String get deleteAccount => 'Hapus akun';
+  String get deleteAccount => 'Delete account';
 
   @override
   String get deleteAccountQuery =>
-      'Kami akan merasa kehilangan Anda. Apakah Anda menghadapi masalah?';
+      'We\'ll be sorry to see you go. Are you facing some issue?';
 
   @override
-  String get yesSendFeedbackAction => 'Ya, kirim umpan balik';
+  String get yesSendFeedbackAction => 'Yes, send feedback';
 
   @override
-  String get noDeleteAccountAction => 'Tidak, hapus akun';
+  String get noDeleteAccountAction => 'No, delete account';
 
   @override
   String get initiateAccountDeleteTitle =>
-      'Harap autentikasi untuk memulai penghapusan akun';
+      'Please authenticate to initiate account deletion';
 
   @override
-  String get confirmAccountDeleteTitle => 'Konfirmasikan penghapusan akun';
+  String get confirmAccountDeleteTitle => 'Confirm account deletion';
 
   @override
   String get confirmAccountDeleteMessage =>
-      'Akun ini terhubung dengan aplikasi Ente yang lain (jika Anda pakai).\n\nData yang Anda unggah di seluruh aplikasi Ente akan dijadwalkan untuk dihapus. Akun Anda juga akan dihapus secara permanen.';
+      'This account is linked to other Ente apps, if you use any.\n\nYour uploaded data, across all Ente apps, will be scheduled for deletion, and your account will be permanently deleted.';
 
   @override
-  String get delete => 'Hapus';
+  String get delete => 'Delete';
 
   @override
-  String get createNewAccount => 'Buat akun baru';
+  String get createNewAccount => 'Create new account';
 
   @override
-  String get password => 'Kata Sandi';
+  String get password => 'Password';
 
   @override
-  String get confirmPassword => 'Konfirmasi kata sandi';
+  String get confirmPassword => 'Confirm password';
 
   @override
   String passwordStrength(String passwordStrengthValue) {
-    return 'Tingkat kekuatan kata sandi: $passwordStrengthValue';
+    return 'Password strength: $passwordStrengthValue';
   }
 
   @override
-  String get hearUsWhereTitle => 'Dari mana Anda menemukan Ente? (opsional)';
+  String get hearUsWhereTitle => 'How did you hear about Ente? (optional)';
 
   @override
   String get hearUsExplanation =>
-      'Kami tidak melacak penginstalan aplikasi kami. Akan sangat membantu kami bila Anda memberitahu kami dari mana Anda mengetahui Ente!';
+      'We don\'t track app installs. It\'d help if you told us where you found us!';
 
   @override
   String get signUpTerms =>
-      'Saya menyetujui <u-terms>syarat dan ketentuan</u-terms> serta <u-policy>kebijakan privasi</u-policy> Ente';
+      'I agree to the <u-terms>terms of service</u-terms> and <u-policy>privacy policy</u-policy>';
 
   @override
-  String get termsOfServicesTitle => 'Ketentuan';
+  String get termsOfServicesTitle => 'Terms';
 
   @override
-  String get privacyPolicyTitle => 'Kebijakan Privasi';
+  String get privacyPolicyTitle => 'Privacy Policy';
 
   @override
   String get ackPasswordLostWarning =>
-      'Saya mengerti bahwa jika saya lupa kata sandi saya, data saya dapat hilang karena data saya <underline>terenkripsi secara end-to-end</underline>.';
+      'I understand that if I lose my password, I may lose my data since my data is <underline>end-to-end encrypted</underline>.';
 
   @override
-  String get encryption => 'Enkripsi';
+  String get encryption => 'Encryption';
 
   @override
-  String get logInLabel => 'Masuk akun';
+  String get logInLabel => 'Log in';
 
   @override
-  String get welcomeBack => 'Selamat datang kembali!';
+  String get welcomeBack => 'Welcome back!';
 
   @override
   String get loginTerms =>
-      'Dengan menekan masuk akun, saya menyetujui <u-terms>syarat dan ketentuan</u-terms> serta <u-policy>kebijakan privasi</u-policy> Ente';
+      'By clicking log in, I agree to the <u-terms>terms of service</u-terms> and <u-policy>privacy policy</u-policy>';
 
   @override
-  String get noInternetConnection => 'Tiada koneksi internet';
+  String get noInternetConnection => 'No internet connection';
 
   @override
   String get pleaseCheckYourInternetConnectionAndTryAgain =>
-      'Mohon periksa koneksi internet Anda dan coba kembali.';
+      'Please check your internet connection and try again.';
 
   @override
   String get verificationFailedPleaseTryAgain =>
-      'Gagal memverifikasi. Mohon coba lagi';
+      'Verification failed, please try again';
 
   @override
-  String get recreatePasswordTitle => 'Membuat kembali kata sandi';
+  String get recreatePasswordTitle => 'Recreate password';
 
   @override
   String get recreatePasswordBody =>
-      'Gawai Anda saat ini tidak dapat memverifikasi kata sandi Anda. Namun, kami dapat membuat ulang dengan cara yang dapat digunakan pada semua gawai.\n\nMohon masuk log dengan kunci pemulihan dan buat ulang kata sandi Anda (kata sandi yang sama diperbolehkan).';
+      'The current device is not powerful enough to verify your password, but we can regenerate in a way that works with all devices.\n\nPlease login using your recovery key and regenerate your password (you can use the same one again if you wish).';
 
   @override
-  String get useRecoveryKey => 'Gunakan kunci pemulihan';
+  String get useRecoveryKey => 'Use recovery key';
 
   @override
-  String get forgotPassword => 'Lupa kata sandi';
+  String get forgotPassword => 'Forgot password';
 
   @override
-  String get changeEmail => 'Ubah alamat email';
+  String get changeEmail => 'Change email';
 
   @override
-  String get verifyEmail => 'Verifikasi email';
+  String get verifyEmail => 'Verify email';
 
   @override
   String weHaveSendEmailTo(String email) {
-    return 'Kami telah mengirimkan sebuah posel ke <green>$email</green>';
+    return 'We have sent a mail to <green>$email</green>';
   }
 
   @override
   String get toResetVerifyEmail =>
-      'Untuk mengatur ulang kata sandi, mohon verifikasi surel Anda terlebih dahulu.';
+      'To reset your password, please verify your email first.';
 
   @override
-  String get checkInboxAndSpamFolder => 'Mohon cek';
+  String get checkInboxAndSpamFolder =>
+      'Please check your inbox (and spam) to complete verification';
 
   @override
-  String get tapToEnterCode => 'Ketuk untuk memasukkan kode';
+  String get tapToEnterCode => 'Tap to enter code';
 
   @override
-  String get sendEmail => 'Kirim surel';
+  String get sendEmail => 'Send email';
 
   @override
-  String get resendEmail => 'Kirim ulang surel';
+  String get resendEmail => 'Resend email';
 
   @override
-  String get passKeyPendingVerification => 'Verifikasi tertunda';
+  String get passKeyPendingVerification => 'Verification is still pending';
 
   @override
-  String get loginSessionExpired => 'Sesi sudah berakhir';
+  String get loginSessionExpired => 'Session expired';
 
   @override
   String get loginSessionExpiredDetails =>
-      'Sesi Anda sudah berakhir. Mohon masuk log kembali.';
+      'Your session has expired. Please login again.';
 
   @override
-  String get passkeyAuthTitle => 'Verifikasi passkey';
+  String get passkeyAuthTitle => 'Passkey verification';
 
   @override
-  String get waitingForVerification => 'Menantikan verifikasi...';
+  String get waitingForVerification => 'Waiting for verification...';
 
   @override
-  String get tryAgain => 'Coba lagi';
+  String get tryAgain => 'Try again';
 
   @override
-  String get checkStatus => 'Periksa status';
+  String get checkStatus => 'Check status';
 
   @override
-  String get loginWithTOTP => 'Masuk menggunakan TOTP';
+  String get loginWithTOTP => 'Login with TOTP';
 
   @override
-  String get recoverAccount => 'Pulihkan akun';
+  String get recoverAccount => 'Recover account';
 
   @override
-  String get setPasswordTitle => 'Atur kata sandi';
+  String get setPasswordTitle => 'Set password';
 
   @override
-  String get changePasswordTitle => 'Ubah kata sandi';
+  String get changePasswordTitle => 'Change password';
 
   @override
-  String get resetPasswordTitle => 'Atur ulang kata sandi';
+  String get resetPasswordTitle => 'Reset password';
 
   @override
-  String get encryptionKeys => 'Kunci enkripsi';
+  String get encryptionKeys => 'Encryption keys';
 
   @override
   String get enterPasswordToEncrypt =>
-      'Masukkan kata sandi yang dapat kami gunakan untuk mengenkripsi data Anda';
+      'Enter a password we can use to encrypt your data';
 
   @override
   String get enterNewPasswordToEncrypt =>
-      'Masukkan kata sandi baru yang dapat kami gunakan untuk mengenkripsi data Anda';
+      'Enter a new password we can use to encrypt your data';
 
   @override
   String get passwordWarning =>
-      'Kami tidak menyimpan kata sandi Anda. Jika Anda lupa, <underline>kami tidak dapat mendekripsi data Anda</underline>';
+      'We don\'t store this password, so if you forget, <underline>we cannot decrypt your data</underline>';
 
   @override
-  String get howItWorks => 'Cara kerjanya';
+  String get howItWorks => 'How it works';
 
   @override
-  String get generatingEncryptionKeys => 'Sedang membuat kunci enkripsi...';
+  String get generatingEncryptionKeys => 'Generating encryption keys...';
 
   @override
-  String get passwordChangedSuccessfully => 'Kata sandi sukses diubah';
+  String get passwordChangedSuccessfully => 'Password changed successfully';
 
   @override
-  String get signOutFromOtherDevices => 'Keluar dari gawai yang lain';
+  String get signOutFromOtherDevices => 'Sign out from other devices';
 
   @override
   String get signOutOtherBody =>
-      'Jika Anda pikir seseorang mungkin mengetahui kata sandi Anda, Anda dapat mengeluarkan akun Anda pada semua gawai';
+      'If you think someone might know your password, you can force all other devices using your account to sign out.';
 
   @override
-  String get signOutOtherDevices => 'Keluar akun pada gawai yang lain';
+  String get signOutOtherDevices => 'Sign out other devices';
 
   @override
-  String get doNotSignOut => 'Jangan keluar';
+  String get doNotSignOut => 'Do not sign out';
 
   @override
-  String get generatingEncryptionKeysTitle =>
-      'Sedang membuat kunci enkripsi...';
+  String get generatingEncryptionKeysTitle => 'Generating encryption keys...';
 
   @override
-  String get continueLabel => 'Lanjutkan';
+  String get continueLabel => 'Continue';
 
   @override
-  String get insecureDevice => 'Perangkat tidak aman';
+  String get insecureDevice => 'Insecure device';
 
   @override
   String get sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease =>
-      'Maaf, kami tidak dapat membuat kunci yang aman pada perangkat ini.\n\nHarap mendaftar dengan perangkat lain.';
+      'Sorry, we could not generate secure keys on this device.\n\nplease sign up from a different device.';
 
   @override
-  String get recoveryKeyCopiedToClipboard =>
-      'Kunci pemulihan disalin ke papan klip';
+  String get recoveryKeyCopiedToClipboard => 'Recovery key copied to clipboard';
 
   @override
-  String get recoveryKey => 'Kunci pemulihan';
+  String get recoveryKey => 'Recovery key';
 
   @override
   String get recoveryKeyOnForgotPassword =>
-      'Jika Anda lupa kata sandi, satu-satunya cara memulihkan data Anda adalah dengan kunci ini.';
+      'If you forget your password, the only way you can recover your data is with this key.';
 
   @override
   String get recoveryKeySaveDescription =>
-      'Kami tidak menyimpan kunci ini, jadi harap simpan kunci yang berisi 24 kata ini dengan aman.';
+      'We don\'t store this key, please save this 24 word key in a safe place.';
 
   @override
-  String get doThisLater => 'Lakukan lain kali';
+  String get doThisLater => 'Do this later';
 
   @override
-  String get saveKey => 'Simpan kunci';
+  String get saveKey => 'Save key';
 
   @override
-  String get recoveryKeySaved =>
-      'Kunci pemulihan sudah tersimpan di folder \'Downloads\'!';
+  String get recoveryKeySaved => 'Recovery key saved in Downloads folder!';
 
   @override
-  String get noRecoveryKeyTitle => 'Tidak punya kunci pemulihan?';
+  String get noRecoveryKeyTitle => 'No recovery key?';
 
   @override
-  String get twoFactorAuthTitle => 'Autentikasi dua langkah';
+  String get twoFactorAuthTitle => 'Two-factor authentication';
 
   @override
   String get enterCodeHint =>
-      'Masukkan kode 6 digit dari aplikasi autentikator Anda';
+      'Enter the 6-digit code from\nyour authenticator app';
 
   @override
-  String get lostDeviceTitle => 'Perangkat hilang?';
+  String get lostDeviceTitle => 'Lost device?';
 
   @override
-  String get enterRecoveryKeyHint => 'Masukkan kunci pemulihan Anda';
+  String get enterRecoveryKeyHint => 'Enter your recovery key';
 
   @override
-  String get recover => 'Pulihkan';
-
-  @override
-  String get loggingOut => 'Mengeluarkan akun...';
-
-  @override
-  String get immediately => 'Segera';
-
-  @override
-  String get appLock => 'Kunci aplikasi';
-
-  @override
-  String get autoLock => 'Kunci otomatis';
-
-  @override
-  String get noSystemLockFound => 'Tidak ditemukan kunci sistem';
-
-  @override
-  String get deviceLockEnablePreSteps =>
-      'Pasang kunci sandi atau kunci layar pada pengaturan sistem untuk menyalakan Pengunci Gawai.';
-
-  @override
-  String get appLockDescription =>
-      'Pilih layar kunci bawaan gawai Anda ATAU layar kunci kustom dengan PIN atau kata sandi.';
-
-  @override
-  String get deviceLock => 'Kunci perangkat';
-
-  @override
-  String get pinLock => 'PIN';
-
-  @override
-  String get autoLockFeatureDescription =>
-      'Durasi waktu aplikasi akan terkunci setelah aplikasi ditutup';
-
-  @override
-  String get hideContent => 'Sembunyikan isi';
-
-  @override
-  String get hideContentDescriptionAndroid =>
-      'Menyembunyikan konten aplikasi di pemilih aplikasi dan menonaktifkan tangkapan layar';
-
-  @override
-  String get hideContentDescriptioniOS =>
-      'Menyembunyikan konten aplikasi di pemilih aplikasi';
-
-  @override
-  String get tooManyIncorrectAttempts => 'Terlalu banyak percobaan yang salah';
-
-  @override
-  String get tapToUnlock => 'Ketuk untuk membuka';
-
-  @override
-  String get areYouSureYouWantToLogout =>
-      'Anda yakin ingin keluar dari akun ini?';
-
-  @override
-  String get yesLogout => 'Ya, keluar akun';
-
-  @override
-  String get authToViewSecrets =>
-      'Harap lakukan autentikasi untuk melihat rahasia Anda';
-
-  @override
-  String get next => 'Selanjutnya';
-
-  @override
-  String get setNewPassword => 'Pasang kata sandi baru';
-
-  @override
-  String get enterPin => 'Masukkan PIN';
-
-  @override
-  String get setNewPin => 'Pasang PIN yang baru';
-
-  @override
-  String get confirm => 'Konfirmasikan';
-
-  @override
-  String get reEnterPassword => 'Masukkan kembali kata sandi';
-
-  @override
-  String get reEnterPin => 'Masukkan kembali PIN';
-
-  @override
-  String get androidBiometricHint => 'Verifikasikan identitas Anda';
-
-  @override
-  String get androidBiometricNotRecognized => 'Tidak dikenal. Coba lagi.';
-
-  @override
-  String get androidBiometricSuccess => 'Sukses';
-
-  @override
-  String get androidCancelButton => 'Batalkan';
-
-  @override
-  String get androidSignInTitle => 'Autentikasi diperlukan';
-
-  @override
-  String get androidBiometricRequiredTitle => 'Biometrik diperlukan';
-
-  @override
-  String get androidDeviceCredentialsRequiredTitle =>
-      'Kredensial perangkat diperlukan';
-
-  @override
-  String get androidDeviceCredentialsSetupDescription =>
-      'Kredensial perangkat diperlukan';
-
-  @override
-  String get goToSettings => 'Pergi ke pengaturan';
-
-  @override
-  String get androidGoToSettingsDescription =>
-      'Tidak ada autentikasi biometrik pada gawai Anda. Buka \'Pengaturan > Keamanan\' untuk menambahkan autentikasi biometrik pada gawai Anda.';
-
-  @override
-  String get iOSLockOut =>
-      'Autentikasi biometrik dimatikan. Kunci dan buka layar Anda untuk menyalakan autentikasi biometrik.';
-
-  @override
-  String get iOSOkButton => 'Oke';
-
-  @override
-  String get emailAlreadyRegistered => 'Email sudah terdaftar.';
-
-  @override
-  String get emailNotRegistered => 'Email belum terdaftar.';
-
-  @override
-  String get thisEmailIsAlreadyInUse => 'Surel ini sudah dipakai!';
-
-  @override
-  String emailChangedTo(String newEmail) {
-    return 'Surel sudah diganti menjadi $newEmail';
-  }
-
-  @override
-  String get authenticationFailedPleaseTryAgain =>
-      'Gagal mengautentikasi. Mohon coba lagi';
-
-  @override
-  String get authenticationSuccessful => 'Sukses mengautentikasi!';
-
-  @override
-  String get sessionExpired => 'Sesi berakhir';
-
-  @override
-  String get incorrectRecoveryKey => 'Kunci pemulihan takbenar';
-
-  @override
-  String get theRecoveryKeyYouEnteredIsIncorrect =>
-      'Kunci pemulihan yang Anda masukkan takbenar';
-
-  @override
-  String get twofactorAuthenticationSuccessfullyReset =>
-      'Autentikasi dwifaktor sukses diatur ulang';
-
-  @override
-  String get noRecoveryKey => 'No recovery key';
-
-  @override
-  String get yourAccountHasBeenDeleted => 'Your account has been deleted';
-
-  @override
-  String get verificationId => 'Verification ID';
-
-  @override
-  String get yourVerificationCodeHasExpired =>
-      'Kode verifikasi Anda telah kedaluwarsa';
-
-  @override
-  String get incorrectCode => 'Kode takbenar';
-
-  @override
-  String get sorryTheCodeYouveEnteredIsIncorrect =>
-      'Maaf, kode yang Anda masukkan takbenar';
-
-  @override
-  String get developerSettings => 'Pengaturan Pengembang';
-
-  @override
-  String get serverEndpoint => 'Peladen endpoint';
-
-  @override
-  String get invalidEndpoint => 'Endpoint takvalid';
-
-  @override
-  String get invalidEndpointMessage =>
-      'Maaf, endpoint yang Anda masukkan takvalid. Mohon masukkan endpoint yang valid, lalu coba kembali.';
-
-  @override
-  String get endpointUpdatedMessage => 'Endpoint berhasil diubah';
+  String get recover => 'Recover';
 }

@@ -103,523 +103,333 @@ class StringsLocalizationsAr extends StringsLocalizations {
 
   @override
   String get saveOnlyDescription =>
-      'هل تريد حفظه إلى السعة التخزينية الخاصة بك (مجلد التنزيلات افتراضيا)؟';
+      'Do you want to save this to your storage (Downloads folder by default)?';
 
   @override
-  String get enterNewEmailHint => 'أدخل عنوان بريدك الإلكتروني الجديد';
+  String get enterNewEmailHint => 'Enter your new email address';
 
   @override
-  String get email => 'البريد الإلكتروني';
+  String get email => 'Email';
 
   @override
-  String get verify => 'التحقق';
+  String get verify => 'Verify';
 
   @override
-  String get invalidEmailTitle => 'عنوان البريد الإلكتروني غير صالح';
+  String get invalidEmailTitle => 'Invalid email address';
 
   @override
-  String get invalidEmailMessage => 'الرجاء إدخال بريد إلكتروني صالح.';
+  String get invalidEmailMessage => 'Please enter a valid email address.';
 
   @override
-  String get pleaseWait => 'انتظر قليلاً...';
+  String get pleaseWait => 'Please wait...';
 
   @override
-  String get verifyPassword => 'التحقق من كلمة المرور';
+  String get verifyPassword => 'Verify password';
 
   @override
-  String get incorrectPasswordTitle => 'كلمة المرور غير صحيحة';
+  String get incorrectPasswordTitle => 'Incorrect password';
 
   @override
-  String get pleaseTryAgain => 'يرجى المحاولة مرة أخرى';
+  String get pleaseTryAgain => 'Please try again';
 
   @override
-  String get enterPassword => 'أدخل كلمة المرور';
+  String get enterPassword => 'Enter password';
 
   @override
-  String get enterYourPasswordHint => 'أدخل كلمة المرور الخاصة بك';
+  String get enterYourPasswordHint => 'Enter your password';
 
   @override
-  String get activeSessions => 'الجلسات النشطة';
+  String get activeSessions => 'Active sessions';
 
   @override
-  String get oops => 'عذرًا';
+  String get oops => 'Oops';
 
   @override
   String get somethingWentWrongPleaseTryAgain =>
-      'حدث خطأ ما، يرجى المحاولة مرة أخرى';
+      'Something went wrong, please try again';
 
   @override
   String get thisWillLogYouOutOfThisDevice =>
-      'سيؤدي هذا إلى تسجيل خروجك من هذا الجهاز!';
+      'This will log you out of this device!';
 
   @override
   String get thisWillLogYouOutOfTheFollowingDevice =>
-      'سيؤدي هذا إلى تسجيل خروجك من هذا الجهاز:';
+      'This will log you out of the following device:';
 
   @override
-  String get terminateSession => 'إنهاء الجلسة؟';
+  String get terminateSession => 'Terminate session?';
 
   @override
-  String get terminate => 'إنهاء';
+  String get terminate => 'Terminate';
 
   @override
-  String get thisDevice => 'هذا الجهاز';
+  String get thisDevice => 'This device';
 
   @override
-  String get createAccount => 'إنشاء حساب';
+  String get createAccount => 'Create account';
 
   @override
-  String get weakStrength => 'ضعيف';
+  String get weakStrength => 'Weak';
 
   @override
-  String get moderateStrength => 'متوسط';
+  String get moderateStrength => 'Moderate';
 
   @override
-  String get strongStrength => 'قوي';
+  String get strongStrength => 'Strong';
 
   @override
-  String get deleteAccount => 'إزالة الحساب';
+  String get deleteAccount => 'Delete account';
 
   @override
   String get deleteAccountQuery =>
-      'سوف نأسف لرؤيتك تذهب. هل تواجه بعض المشاكل؟';
+      'We\'ll be sorry to see you go. Are you facing some issue?';
 
   @override
-  String get yesSendFeedbackAction => 'نعم، ارسل الملاحظات';
+  String get yesSendFeedbackAction => 'Yes, send feedback';
 
   @override
-  String get noDeleteAccountAction => 'لا، حذف الحساب';
+  String get noDeleteAccountAction => 'No, delete account';
 
   @override
-  String get initiateAccountDeleteTitle => 'الرجاء المصادقة لبدء حذف الحساب';
+  String get initiateAccountDeleteTitle =>
+      'Please authenticate to initiate account deletion';
 
   @override
-  String get confirmAccountDeleteTitle => 'تأكيد حذف الحساب';
+  String get confirmAccountDeleteTitle => 'Confirm account deletion';
 
   @override
   String get confirmAccountDeleteMessage =>
-      'هذا الحساب مرتبط بتطبيقات Ente أخرى، إذا كنت تستخدم أحدها.\n\nسنضع موعدا لحذف بياناتك المرفوعة عبر كل تطبيقات Ente، وسيتم حذف حسابك بصورة دائمة.';
+      'This account is linked to other Ente apps, if you use any.\n\nYour uploaded data, across all Ente apps, will be scheduled for deletion, and your account will be permanently deleted.';
 
   @override
-  String get delete => 'حذف';
+  String get delete => 'Delete';
 
   @override
-  String get createNewAccount => 'إنشاء حساب جديد';
+  String get createNewAccount => 'Create new account';
 
   @override
-  String get password => 'كلمة المرور';
+  String get password => 'Password';
 
   @override
-  String get confirmPassword => 'تأكيد كلمة المرور';
+  String get confirmPassword => 'Confirm password';
 
   @override
   String passwordStrength(String passwordStrengthValue) {
-    return 'قوة كلمة المرور: $passwordStrengthValue';
+    return 'Password strength: $passwordStrengthValue';
   }
 
   @override
-  String get hearUsWhereTitle => 'كيف سمعت عن Ente؟ (اختياري)';
+  String get hearUsWhereTitle => 'How did you hear about Ente? (optional)';
 
   @override
   String get hearUsExplanation =>
-      'نحن لا نتتبع تثبيت التطبيق. سيكون من المفيد إذا أخبرتنا أين وجدتنا!';
+      'We don\'t track app installs. It\'d help if you told us where you found us!';
 
   @override
   String get signUpTerms =>
-      'أوافق على <u-terms>شروط الخدمة</u-terms> و<u-policy>سياسة الخصوصية</u-policy>';
+      'I agree to the <u-terms>terms of service</u-terms> and <u-policy>privacy policy</u-policy>';
 
   @override
-  String get termsOfServicesTitle => 'الشروط';
+  String get termsOfServicesTitle => 'Terms';
 
   @override
-  String get privacyPolicyTitle => 'سياسة الخصوصية';
+  String get privacyPolicyTitle => 'Privacy Policy';
 
   @override
   String get ackPasswordLostWarning =>
-      'أنا أفهم أنه إذا فقدت كلمة المرور الخاصة بي، قد أفقد بياناتي لأن بياناتي هي <underline>مشفرة من الند للند</underline>.';
+      'I understand that if I lose my password, I may lose my data since my data is <underline>end-to-end encrypted</underline>.';
 
   @override
-  String get encryption => 'التشفير';
+  String get encryption => 'Encryption';
 
   @override
-  String get logInLabel => 'تسجيل الدخول';
+  String get logInLabel => 'Log in';
 
   @override
-  String get welcomeBack => 'مرحبًا مجددًا!';
+  String get welcomeBack => 'Welcome back!';
 
   @override
   String get loginTerms =>
-      'بالنقر على تسجيل الدخول، أوافق على شروط الخدمة <u-terms></u-terms> و <u-policy>سياسة الخصوصية</u-policy>';
+      'By clicking log in, I agree to the <u-terms>terms of service</u-terms> and <u-policy>privacy policy</u-policy>';
 
   @override
-  String get noInternetConnection => 'لا يوجد اتصال بالإنترنت';
+  String get noInternetConnection => 'No internet connection';
 
   @override
   String get pleaseCheckYourInternetConnectionAndTryAgain =>
-      'يرجى التحقق من اتصالك بالإنترنت ثم المحاولة من جديد.';
+      'Please check your internet connection and try again.';
 
   @override
   String get verificationFailedPleaseTryAgain =>
-      'فشل في المصادقة ، يرجى المحاولة مرة أخرى في وقت لاحق';
+      'Verification failed, please try again';
 
   @override
-  String get recreatePasswordTitle => 'إعادة كتابة كلمة المرور';
+  String get recreatePasswordTitle => 'Recreate password';
 
   @override
   String get recreatePasswordBody =>
-      'الجهاز الحالي ليس قويًا بما يكفي للتحقق من كلمة المرور الخاصة بك، لذا نحتاج إلى إعادة إنشائها مرة واحدة بطريقة تعمل مع جميع الأجهزة.\n\nالرجاء تسجيل الدخول باستخدام مفتاح الاسترداد وإعادة إنشاء كلمة المرور الخاصة بك (يمكنك استخدام نفس كلمة المرور مرة أخرى إذا كنت ترغب في ذلك).';
+      'The current device is not powerful enough to verify your password, but we can regenerate in a way that works with all devices.\n\nPlease login using your recovery key and regenerate your password (you can use the same one again if you wish).';
 
   @override
-  String get useRecoveryKey => 'استخدم مفتاح الاسترداد';
+  String get useRecoveryKey => 'Use recovery key';
 
   @override
-  String get forgotPassword => 'هل نسيت كلمة المرور';
+  String get forgotPassword => 'Forgot password';
 
   @override
-  String get changeEmail => 'غير البريد الإلكتروني';
+  String get changeEmail => 'Change email';
 
   @override
-  String get verifyEmail => 'تأكيد البريد الإلكتروني';
+  String get verifyEmail => 'Verify email';
 
   @override
   String weHaveSendEmailTo(String email) {
-    return 'لقد أرسلنا رسالة إلى <green>$email</green>';
+    return 'We have sent a mail to <green>$email</green>';
   }
 
   @override
   String get toResetVerifyEmail =>
-      'لإعادة تعيين كلمة المرور الخاصة بك، يرجى التحقق من بريدك الإلكتروني أولاً.';
+      'To reset your password, please verify your email first.';
 
   @override
   String get checkInboxAndSpamFolder =>
-      'الرجاء التحقق من صندوق الوارد (والرسائل غير المرغوب فيها) لإكمال التحقق';
+      'Please check your inbox (and spam) to complete verification';
 
   @override
-  String get tapToEnterCode => 'انقر لإدخال الرمز';
+  String get tapToEnterCode => 'Tap to enter code';
 
   @override
-  String get sendEmail => 'إرسال بريد إلكتروني';
+  String get sendEmail => 'Send email';
 
   @override
-  String get resendEmail => 'إعادة إرسال البريد الإلكتروني';
+  String get resendEmail => 'Resend email';
 
   @override
-  String get passKeyPendingVerification => 'التحقق ما زال جارٍ';
+  String get passKeyPendingVerification => 'Verification is still pending';
 
   @override
-  String get loginSessionExpired => 'انتهت صلاحية الجلسة';
+  String get loginSessionExpired => 'Session expired';
 
   @override
   String get loginSessionExpiredDetails =>
-      'انتهت صلاحية جلستك. فضلا أعد تسجيل الدخول.';
+      'Your session has expired. Please login again.';
 
   @override
-  String get passkeyAuthTitle => 'التحقق من مفتاح المرور';
+  String get passkeyAuthTitle => 'Passkey verification';
 
   @override
-  String get waitingForVerification => 'بانتظار التحقق...';
+  String get waitingForVerification => 'Waiting for verification...';
 
   @override
-  String get tryAgain => 'حاول مرة أخرى';
+  String get tryAgain => 'Try again';
 
   @override
-  String get checkStatus => 'تحقق من الحالة';
+  String get checkStatus => 'Check status';
 
   @override
-  String get loginWithTOTP => '';
+  String get loginWithTOTP => 'Login with TOTP';
 
   @override
-  String get recoverAccount => 'إسترجاع الحساب';
+  String get recoverAccount => 'Recover account';
 
   @override
-  String get setPasswordTitle => 'تعيين كلمة المرور';
+  String get setPasswordTitle => 'Set password';
 
   @override
-  String get changePasswordTitle => 'تغيير كلمة المرور';
+  String get changePasswordTitle => 'Change password';
 
   @override
-  String get resetPasswordTitle => 'إعادة تعيين كلمة المرور';
+  String get resetPasswordTitle => 'Reset password';
 
   @override
-  String get encryptionKeys => 'مفاتيح التشفير';
+  String get encryptionKeys => 'Encryption keys';
 
   @override
   String get enterPasswordToEncrypt =>
-      'أدخل كلمة المرور التي يمكننا استخدامها لتشفير بياناتك';
+      'Enter a password we can use to encrypt your data';
 
   @override
   String get enterNewPasswordToEncrypt =>
-      'أدخل كلمة مرور جديدة يمكننا استخدامها لتشفير بياناتك';
+      'Enter a new password we can use to encrypt your data';
 
   @override
   String get passwordWarning =>
-      'نحن لا نقوم بتخزين كلمة المرور هذه، لذا إذا نسيتها، <underline>لا يمكننا فك تشفير بياناتك</underline>';
+      'We don\'t store this password, so if you forget, <underline>we cannot decrypt your data</underline>';
 
   @override
-  String get howItWorks => 'كيف يعمل';
+  String get howItWorks => 'How it works';
 
   @override
-  String get generatingEncryptionKeys => 'توليد مفاتيح التشفير...';
+  String get generatingEncryptionKeys => 'Generating encryption keys...';
 
   @override
-  String get passwordChangedSuccessfully => 'تم تغيير كلمة المرور بنجاح';
+  String get passwordChangedSuccessfully => 'Password changed successfully';
 
   @override
-  String get signOutFromOtherDevices => 'تسجيل الخروج من الأجهزة الأخرى';
+  String get signOutFromOtherDevices => 'Sign out from other devices';
 
   @override
   String get signOutOtherBody =>
-      'إذا كنت تعتقد أن شخصا ما يعرف كلمة المرور الخاصة بك، يمكنك إجبار جميع الأجهزة الأخرى الستخدمة حاليا لحسابك على تسجيل الخروج.';
+      'If you think someone might know your password, you can force all other devices using your account to sign out.';
 
   @override
-  String get signOutOtherDevices => 'تسجيل الخروج من الأجهزة الأخرى';
+  String get signOutOtherDevices => 'Sign out other devices';
 
   @override
-  String get doNotSignOut => 'لا تقم بتسجيل الخروج';
+  String get doNotSignOut => 'Do not sign out';
 
   @override
-  String get generatingEncryptionKeysTitle => 'توليد مفاتيح التشفير...';
+  String get generatingEncryptionKeysTitle => 'Generating encryption keys...';
 
   @override
-  String get continueLabel => 'المتابعة';
+  String get continueLabel => 'Continue';
 
   @override
-  String get insecureDevice => 'جهاز غير آمن';
+  String get insecureDevice => 'Insecure device';
 
   @override
   String get sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease =>
-      'عذرًا، لم نتمكن من إنشاء مفاتيح آمنة على هذا الجهاز.\n\nيرجى التسجيل من جهاز مختلف.';
+      'Sorry, we could not generate secure keys on this device.\n\nplease sign up from a different device.';
 
   @override
-  String get recoveryKeyCopiedToClipboard => 'تم نسخ عبارة الاسترداد للحافظة';
+  String get recoveryKeyCopiedToClipboard => 'Recovery key copied to clipboard';
 
   @override
-  String get recoveryKey => 'مفتاح الاسترداد';
+  String get recoveryKey => 'Recovery key';
 
   @override
   String get recoveryKeyOnForgotPassword =>
-      'إذا نسيت كلمة المرور الخاصة بك، فالطريقة الوحيدة التي يمكنك بها استرداد بياناتك هي بهذا المفتاح.';
+      'If you forget your password, the only way you can recover your data is with this key.';
 
   @override
   String get recoveryKeySaveDescription =>
-      'نحن لا نخزن هذا المفتاح، يرجى حفظ مفتاح الـ 24 كلمة هذا في مكان آمن.';
+      'We don\'t store this key, please save this 24 word key in a safe place.';
 
   @override
-  String get doThisLater => 'قم بهذا لاحقاً';
+  String get doThisLater => 'Do this later';
 
   @override
-  String get saveKey => 'حفظ المفتاح';
+  String get saveKey => 'Save key';
 
   @override
-  String get recoveryKeySaved => 'حُفِظ مفتاح الاستعادة في مجلد التنزيلات!';
+  String get recoveryKeySaved => 'Recovery key saved in Downloads folder!';
 
   @override
-  String get noRecoveryKeyTitle => 'لا يوجد مفتاح استرجاع؟';
+  String get noRecoveryKeyTitle => 'No recovery key?';
 
   @override
-  String get twoFactorAuthTitle => 'المصادقة الثنائية';
+  String get twoFactorAuthTitle => 'Two-factor authentication';
 
   @override
-  String get enterCodeHint => 'أدخل الرمز المكون من 6 أرقام من\nتطبيق المصادقة';
+  String get enterCodeHint =>
+      'Enter the 6-digit code from\nyour authenticator app';
 
   @override
-  String get lostDeviceTitle => 'جهاز مفقود ؟';
+  String get lostDeviceTitle => 'Lost device?';
 
   @override
-  String get enterRecoveryKeyHint => 'أدخل رمز الاسترداد';
+  String get enterRecoveryKeyHint => 'Enter your recovery key';
 
   @override
-  String get recover => 'استرداد';
-
-  @override
-  String get loggingOut => 'جاري تسجيل الخروج...';
-
-  @override
-  String get immediately => 'فورًا';
-
-  @override
-  String get appLock => 'قُفْل التطبيق';
-
-  @override
-  String get autoLock => 'قفل تلقائي';
-
-  @override
-  String get noSystemLockFound => 'لا يوجد قفل نظام';
-
-  @override
-  String get deviceLockEnablePreSteps =>
-      'لتفعيل قُفْل الجهاز، اضبط رمز مرور أو قُفْل الشاشة من الإعدادات';
-
-  @override
-  String get appLockDescription => 'اختر نوع قُفْل الشاشة: افتراضي أو مخصص.';
-
-  @override
-  String get deviceLock => 'قفل الجهاز';
-
-  @override
-  String get pinLock => 'قفل رقم التعريف الشخصي';
-
-  @override
-  String get autoLockFeatureDescription =>
-      'الوقت الذي بعده ينقفل التطبيق بعدما يوضع في الخلفية';
-
-  @override
-  String get hideContent => 'أخفِ المحتوى';
-
-  @override
-  String get hideContentDescriptionAndroid =>
-      'يخفي محتوى التطبيق في مبدل التطبيقات ويمنع لقطات الشاشة';
-
-  @override
-  String get hideContentDescriptioniOS =>
-      'يخفي محتوى التطبيق في مبدل التطبيقات';
-
-  @override
-  String get tooManyIncorrectAttempts => 'محاولات خاطئة أكثر من المسموح';
-
-  @override
-  String get tapToUnlock => 'المس لإلغاء القفل';
-
-  @override
-  String get areYouSureYouWantToLogout =>
-      'هل أنت متأكد من أنك تريد تسجيل الخروج؟';
-
-  @override
-  String get yesLogout => 'نعم، تسجيل الخروج';
-
-  @override
-  String get authToViewSecrets =>
-      'الرجاء المصادقة لعرض مفتاح الاسترداد الخاص بك';
-
-  @override
-  String get next => 'التالي';
-
-  @override
-  String get setNewPassword => 'عين كلمة مرور جديدة';
-
-  @override
-  String get enterPin => 'أدخل رقم التعريف الشخصي';
-
-  @override
-  String get setNewPin => 'عين رقم تعريف شخصي جديد';
-
-  @override
-  String get confirm => 'تأكيد';
-
-  @override
-  String get reEnterPassword => 'أعد إدخال كلمة المرور';
-
-  @override
-  String get reEnterPin => 'أعد إدخال رقم التعريف الشخصي';
-
-  @override
-  String get androidBiometricHint => 'التحقق من الهوية';
-
-  @override
-  String get androidBiometricNotRecognized =>
-      'لم يتم التعرف عليه. حاول مرة أخرى.';
-
-  @override
-  String get androidBiometricSuccess => 'تم بنجاح';
-
-  @override
-  String get androidCancelButton => 'إلغاء';
-
-  @override
-  String get androidSignInTitle => 'المصادقة مطلوبة';
-
-  @override
-  String get androidBiometricRequiredTitle => 'البيومترية مطلوبة';
-
-  @override
-  String get androidDeviceCredentialsRequiredTitle =>
-      'بيانات اعتماد الجهاز مطلوبة';
-
-  @override
-  String get androidDeviceCredentialsSetupDescription =>
-      'بيانات اعتماد الجهاز مطلوبة';
-
-  @override
-  String get goToSettings => 'الانتقال إلى الإعدادات';
-
-  @override
-  String get androidGoToSettingsDescription =>
-      'لم يتم إعداد المصادقة الحيوية على جهازك. انتقل إلى \'الإعدادات > الأمن\' لإضافة المصادقة البيومترية.';
-
-  @override
-  String get iOSLockOut =>
-      'المصادقة البيومترية معطلة. الرجاء قفل الشاشة وفتح القفل لتفعيلها.';
-
-  @override
-  String get iOSOkButton => 'حسناً';
-
-  @override
-  String get emailAlreadyRegistered => 'البريد الإلكتروني مُسَجَّل من قبل.';
-
-  @override
-  String get emailNotRegistered => 'البريد الإلكتروني غير مُسَجَّل.';
-
-  @override
-  String get thisEmailIsAlreadyInUse => 'هذا البريد مستخدم مسبقاً';
-
-  @override
-  String emailChangedTo(String newEmail) {
-    return 'تم تغيير البريد الإلكتروني إلى $newEmail';
-  }
-
-  @override
-  String get authenticationFailedPleaseTryAgain =>
-      'فشلت المصادقة. الرجاء المحاولة مرة أخرى';
-
-  @override
-  String get authenticationSuccessful => 'تمت المصادقة بنجاح!';
-
-  @override
-  String get sessionExpired => 'انتهت صَلاحِيَة الجِلسة';
-
-  @override
-  String get incorrectRecoveryKey => 'مفتاح الاسترداد غير صحيح';
-
-  @override
-  String get theRecoveryKeyYouEnteredIsIncorrect =>
-      'مفتاح الاسترداد الذي أدخلته غير صحيح';
-
-  @override
-  String get twofactorAuthenticationSuccessfullyReset =>
-      'تم تحديث المصادقة الثنائية بنجاح';
-
-  @override
-  String get noRecoveryKey => 'No recovery key';
-
-  @override
-  String get yourAccountHasBeenDeleted => 'Your account has been deleted';
-
-  @override
-  String get verificationId => 'Verification ID';
-
-  @override
-  String get yourVerificationCodeHasExpired => 'انتهت صلاحية رمز التحقق';
-
-  @override
-  String get incorrectCode => 'رمز غير صحيح';
-
-  @override
-  String get sorryTheCodeYouveEnteredIsIncorrect =>
-      'عذراً، الرمز الذي أدخلته غير صحيح';
-
-  @override
-  String get developerSettings => 'اعدادات المطور';
-
-  @override
-  String get serverEndpoint => 'نقطة طرف الخادم';
-
-  @override
-  String get invalidEndpoint => 'نقطة طرف غير صالحة';
-
-  @override
-  String get invalidEndpointMessage =>
-      'عذرا، نقطة الطرف التي أدخلتها غير صالحة. فضلا أدخل نقطة طرف صالحة وأعد المحاولة.';
-
-  @override
-  String get endpointUpdatedMessage => 'حُدِّثَت نقطة الطرف بنجاح';
+  String get recover => 'Recover';
 }

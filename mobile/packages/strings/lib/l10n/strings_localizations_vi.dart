@@ -103,526 +103,333 @@ class StringsLocalizationsVi extends StringsLocalizations {
 
   @override
   String get saveOnlyDescription =>
-      'Bạn có muốn lưu vào bộ nhớ không (Mặc định lưu vào thư mục Tải về)?';
+      'Do you want to save this to your storage (Downloads folder by default)?';
 
   @override
   String get enterNewEmailHint => 'Enter your new email address';
 
   @override
-  String get email => 'Thư điện tử';
+  String get email => 'Email';
 
   @override
-  String get verify => 'Xác minh';
+  String get verify => 'Verify';
 
   @override
-  String get invalidEmailTitle => 'Địa chỉ email không hợp lệ';
+  String get invalidEmailTitle => 'Invalid email address';
 
   @override
-  String get invalidEmailMessage =>
-      'Xin vui lòng nhập một địa chỉ email hợp lệ.';
+  String get invalidEmailMessage => 'Please enter a valid email address.';
 
   @override
-  String get pleaseWait => 'Vui lòng chờ...';
+  String get pleaseWait => 'Please wait...';
 
   @override
-  String get verifyPassword => 'Xác nhận mật khẩu';
+  String get verifyPassword => 'Verify password';
 
   @override
-  String get incorrectPasswordTitle => 'Mật khẩu không đúng';
+  String get incorrectPasswordTitle => 'Incorrect password';
 
   @override
-  String get pleaseTryAgain => 'Vui lòng thử lại';
+  String get pleaseTryAgain => 'Please try again';
 
   @override
-  String get enterPassword => 'Nhập mật khẩu';
+  String get enterPassword => 'Enter password';
 
   @override
-  String get enterYourPasswordHint => 'Nhập mật khẩu của bạn';
+  String get enterYourPasswordHint => 'Enter your password';
 
   @override
-  String get activeSessions => 'Các phiên làm việc hiện tại';
+  String get activeSessions => 'Active sessions';
 
   @override
-  String get oops => 'Rất tiếc';
+  String get oops => 'Oops';
 
   @override
   String get somethingWentWrongPleaseTryAgain =>
-      'Phát hiện có lỗi, xin thử lại';
+      'Something went wrong, please try again';
 
   @override
   String get thisWillLogYouOutOfThisDevice =>
-      'Thao tác này sẽ đăng xuất bạn khỏi thiết bị này!';
+      'This will log you out of this device!';
 
   @override
   String get thisWillLogYouOutOfTheFollowingDevice =>
-      'Thao tác này sẽ đăng xuất bạn khỏi thiết bị sau:';
+      'This will log you out of the following device:';
 
   @override
-  String get terminateSession => 'Kết thúc phiên?';
+  String get terminateSession => 'Terminate session?';
 
   @override
-  String get terminate => 'Kết thúc';
+  String get terminate => 'Terminate';
 
   @override
-  String get thisDevice => 'Thiết bị này';
+  String get thisDevice => 'This device';
 
   @override
-  String get createAccount => 'Tạo tài khoản';
+  String get createAccount => 'Create account';
 
   @override
-  String get weakStrength => 'Yếu';
+  String get weakStrength => 'Weak';
 
   @override
-  String get moderateStrength => 'Trung bình';
+  String get moderateStrength => 'Moderate';
 
   @override
-  String get strongStrength => 'Mạnh';
+  String get strongStrength => 'Strong';
 
   @override
-  String get deleteAccount => 'Xoá tài khoản';
+  String get deleteAccount => 'Delete account';
 
   @override
   String get deleteAccountQuery =>
-      'Chúng tôi sẽ rất tiếc khi thấy bạn đi. Bạn đang phải đối mặt với một số vấn đề?';
+      'We\'ll be sorry to see you go. Are you facing some issue?';
 
   @override
-  String get yesSendFeedbackAction => 'Có, gửi phản hồi';
+  String get yesSendFeedbackAction => 'Yes, send feedback';
 
   @override
-  String get noDeleteAccountAction => 'Không, xóa tài khoản';
+  String get noDeleteAccountAction => 'No, delete account';
 
   @override
   String get initiateAccountDeleteTitle =>
-      'Vui lòng xác thực để bắt đầu xóa tài khoản';
+      'Please authenticate to initiate account deletion';
 
   @override
-  String get confirmAccountDeleteTitle => 'Xác nhận xóa tài khoản';
+  String get confirmAccountDeleteTitle => 'Confirm account deletion';
 
   @override
   String get confirmAccountDeleteMessage =>
-      'Tài khoản này được liên kết với các ứng dụng Ente trên các nền tảng khác, nếu bạn có sử dụng.\n\nDữ liệu đã tải lên của bạn, trên mọi nền tảng, sẽ bị lên lịch xóa và tài khoản của bạn sẽ bị xóa vĩnh viễn.';
+      'This account is linked to other Ente apps, if you use any.\n\nYour uploaded data, across all Ente apps, will be scheduled for deletion, and your account will be permanently deleted.';
 
   @override
-  String get delete => 'Xóa';
+  String get delete => 'Delete';
 
   @override
-  String get createNewAccount => 'Tạo tài khoản mới';
+  String get createNewAccount => 'Create new account';
 
   @override
-  String get password => 'Mật khẩu';
+  String get password => 'Password';
 
   @override
-  String get confirmPassword => 'Xác nhận mật khẩu';
+  String get confirmPassword => 'Confirm password';
 
   @override
   String passwordStrength(String passwordStrengthValue) {
-    return 'Độ mạnh mật khẩu: $passwordStrengthValue';
+    return 'Password strength: $passwordStrengthValue';
   }
 
   @override
-  String get hearUsWhereTitle =>
-      'Bạn biết đến Ente bằng cách nào? (không bắt buộc)';
+  String get hearUsWhereTitle => 'How did you hear about Ente? (optional)';
 
   @override
   String get hearUsExplanation =>
-      'Chúng tôi không theo dõi lượt cài đặt ứng dụng. Sẽ rất hữu ích nếu bạn cho chúng tôi biết nơi bạn tìm thấy chúng tôi!';
+      'We don\'t track app installs. It\'d help if you told us where you found us!';
 
   @override
   String get signUpTerms =>
-      'Tôi đồng ý với <u-terms>điều khoản dịch vụ</u-terms> và <u-policy>chính sách quyền riêng tư</u-policy>';
+      'I agree to the <u-terms>terms of service</u-terms> and <u-policy>privacy policy</u-policy>';
 
   @override
-  String get termsOfServicesTitle => 'Điều khoản';
+  String get termsOfServicesTitle => 'Terms';
 
   @override
-  String get privacyPolicyTitle => 'Chính sách bảo mật';
+  String get privacyPolicyTitle => 'Privacy Policy';
 
   @override
   String get ackPasswordLostWarning =>
-      'Tôi hiểu rằng việc mất mật khẩu có thể đồng nghĩa với việc mất dữ liệu của tôi vì dữ liệu của tôi được <underline>mã hóa hai đầu</underline>.';
+      'I understand that if I lose my password, I may lose my data since my data is <underline>end-to-end encrypted</underline>.';
 
   @override
-  String get encryption => 'Mã hóa';
+  String get encryption => 'Encryption';
 
   @override
-  String get logInLabel => 'Đăng nhập';
+  String get logInLabel => 'Log in';
 
   @override
-  String get welcomeBack => 'Chào mừng trở lại!';
+  String get welcomeBack => 'Welcome back!';
 
   @override
   String get loginTerms =>
-      'Bằng cách nhấp vào đăng nhập, tôi đồng ý với <u-terms>điều khoản dịch vụ</u-terms> và <u-policy>chính sách quyền riêng tư</u-policy>';
+      'By clicking log in, I agree to the <u-terms>terms of service</u-terms> and <u-policy>privacy policy</u-policy>';
 
   @override
-  String get noInternetConnection => 'Không có kết nối Internet';
+  String get noInternetConnection => 'No internet connection';
 
   @override
   String get pleaseCheckYourInternetConnectionAndTryAgain =>
-      'Vui lòng kiểm tra kết nối internet của bạn và thử lại.';
+      'Please check your internet connection and try again.';
 
   @override
   String get verificationFailedPleaseTryAgain =>
-      'Mã xác nhận thất bại. Vui lòng thử lại';
+      'Verification failed, please try again';
 
   @override
-  String get recreatePasswordTitle => 'Tạo lại mật khẩu';
+  String get recreatePasswordTitle => 'Recreate password';
 
   @override
   String get recreatePasswordBody =>
-      'Thiết bị hiện tại không đủ mạnh để xác minh mật khẩu của bạn nhưng chúng tôi có thể tạo lại mật khẩu theo cách hoạt động với tất cả các thiết bị.\n\nVui lòng đăng nhập bằng khóa khôi phục và tạo lại mật khẩu của bạn (bạn có thể sử dụng lại cùng một mật khẩu nếu muốn).';
+      'The current device is not powerful enough to verify your password, but we can regenerate in a way that works with all devices.\n\nPlease login using your recovery key and regenerate your password (you can use the same one again if you wish).';
 
   @override
-  String get useRecoveryKey => 'Dùng khóa khôi phục';
+  String get useRecoveryKey => 'Use recovery key';
 
   @override
-  String get forgotPassword => 'Quên mật khẩu';
+  String get forgotPassword => 'Forgot password';
 
   @override
-  String get changeEmail => 'Thay đổi email';
+  String get changeEmail => 'Change email';
 
   @override
-  String get verifyEmail => 'Xác nhận địa chỉ Email';
+  String get verifyEmail => 'Verify email';
 
   @override
   String weHaveSendEmailTo(String email) {
-    return 'Chúng tôi đã gửi thư đến <green>$email</green>';
+    return 'We have sent a mail to <green>$email</green>';
   }
 
   @override
   String get toResetVerifyEmail =>
-      'Để đặt lại mật khẩu, vui lòng xác minh email của bạn trước.';
+      'To reset your password, please verify your email first.';
 
   @override
   String get checkInboxAndSpamFolder =>
-      'Vui lòng kiểm tra hộp thư đến (và thư rác) của bạn để hoàn tất xác minh';
+      'Please check your inbox (and spam) to complete verification';
 
   @override
-  String get tapToEnterCode => 'Chạm để nhập mã';
+  String get tapToEnterCode => 'Tap to enter code';
 
   @override
-  String get sendEmail => 'Gửi email';
+  String get sendEmail => 'Send email';
 
   @override
-  String get resendEmail => 'Gửi lại email';
+  String get resendEmail => 'Resend email';
 
   @override
-  String get passKeyPendingVerification => 'Đang chờ xác thực';
+  String get passKeyPendingVerification => 'Verification is still pending';
 
   @override
-  String get loginSessionExpired => 'Phiên làm việc hết hạn';
+  String get loginSessionExpired => 'Session expired';
 
   @override
   String get loginSessionExpiredDetails =>
-      'Phiên làm việc hết hạn. Vui lòng đăng nhập lại.';
+      'Your session has expired. Please login again.';
 
   @override
-  String get passkeyAuthTitle => 'Xác minh mã khóa';
+  String get passkeyAuthTitle => 'Passkey verification';
 
   @override
-  String get waitingForVerification => 'Đang chờ xác thực';
+  String get waitingForVerification => 'Waiting for verification...';
 
   @override
-  String get tryAgain => 'Thử lại';
+  String get tryAgain => 'Try again';
 
   @override
-  String get checkStatus => 'Kiểm tra trạng thái';
+  String get checkStatus => 'Check status';
 
   @override
-  String get loginWithTOTP => 'Đăng nhập bằng TOTP';
+  String get loginWithTOTP => 'Login with TOTP';
 
   @override
-  String get recoverAccount => 'Khôi phục tài khoản';
+  String get recoverAccount => 'Recover account';
 
   @override
-  String get setPasswordTitle => 'Đặt mật khẩu';
+  String get setPasswordTitle => 'Set password';
 
   @override
-  String get changePasswordTitle => 'Thay đổi mật khẩu';
+  String get changePasswordTitle => 'Change password';
 
   @override
-  String get resetPasswordTitle => 'Đặt lại mật khẩu';
+  String get resetPasswordTitle => 'Reset password';
 
   @override
-  String get encryptionKeys => 'Khóa mã hóa';
+  String get encryptionKeys => 'Encryption keys';
 
   @override
   String get enterPasswordToEncrypt =>
-      'Nhập mật khẩu mà chúng tôi có thể sử dụng để mã hóa dữ liệu của bạn';
+      'Enter a password we can use to encrypt your data';
 
   @override
   String get enterNewPasswordToEncrypt =>
-      'Nhập một mật khẩu mới mà chúng tôi có thể sử dụng để mã hóa dữ liệu của bạn';
+      'Enter a new password we can use to encrypt your data';
 
   @override
   String get passwordWarning =>
-      'Chúng tôi không lưu trữ mật khẩu này, vì vậy nếu bạn quên, <underline>chúng tôi không thể giải mã dữ liệu của bạn</underline>';
+      'We don\'t store this password, so if you forget, <underline>we cannot decrypt your data</underline>';
 
   @override
-  String get howItWorks => 'Cách thức hoạt động';
+  String get howItWorks => 'How it works';
 
   @override
-  String get generatingEncryptionKeys => 'Đang tạo khóa mã hóa...';
+  String get generatingEncryptionKeys => 'Generating encryption keys...';
 
   @override
-  String get passwordChangedSuccessfully => 'Thay đổi mật khẩu thành công';
+  String get passwordChangedSuccessfully => 'Password changed successfully';
 
   @override
-  String get signOutFromOtherDevices => 'Đăng xuất khỏi các thiết bị khác';
+  String get signOutFromOtherDevices => 'Sign out from other devices';
 
   @override
   String get signOutOtherBody =>
-      'Nếu bạn cho rằng ai đó có thể biết mật khẩu của mình, bạn có thể buộc đăng xuất tất cả các thiết bị khác đang sử dụng tài khoản của mình.';
+      'If you think someone might know your password, you can force all other devices using your account to sign out.';
 
   @override
-  String get signOutOtherDevices => 'Đăng xuất khỏi các thiết bị khác';
+  String get signOutOtherDevices => 'Sign out other devices';
 
   @override
-  String get doNotSignOut => 'Không được đăng xuất';
+  String get doNotSignOut => 'Do not sign out';
 
   @override
-  String get generatingEncryptionKeysTitle => 'Đang tạo khóa mã hóa...';
+  String get generatingEncryptionKeysTitle => 'Generating encryption keys...';
 
   @override
-  String get continueLabel => 'Tiếp tục';
+  String get continueLabel => 'Continue';
 
   @override
-  String get insecureDevice => 'Thiết bị không an toàn';
+  String get insecureDevice => 'Insecure device';
 
   @override
   String get sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease =>
-      'Rất tiếc, chúng tôi không thể tạo khóa bảo mật trên thiết bị này.\n\nvui lòng đăng ký từ một thiết bị khác.';
+      'Sorry, we could not generate secure keys on this device.\n\nplease sign up from a different device.';
 
   @override
-  String get recoveryKeyCopiedToClipboard =>
-      'Đã sao chép khóa khôi phục vào bộ nhớ tạm';
+  String get recoveryKeyCopiedToClipboard => 'Recovery key copied to clipboard';
 
   @override
-  String get recoveryKey => 'Khóa khôi phục';
+  String get recoveryKey => 'Recovery key';
 
   @override
   String get recoveryKeyOnForgotPassword =>
-      'Nếu bạn quên mật khẩu, cách duy nhất bạn có thể khôi phục dữ liệu của mình là sử dụng khóa này.';
+      'If you forget your password, the only way you can recover your data is with this key.';
 
   @override
   String get recoveryKeySaveDescription =>
-      'Chúng tôi không lưu trữ khóa này, vui lòng lưu khóa 24 từ này ở nơi an toàn.';
+      'We don\'t store this key, please save this 24 word key in a safe place.';
 
   @override
-  String get doThisLater => 'Để sau';
+  String get doThisLater => 'Do this later';
 
   @override
-  String get saveKey => 'Lưu khóa';
+  String get saveKey => 'Save key';
 
   @override
-  String get recoveryKeySaved => 'Đã lưu khoá dự phòng vào thư mục Tải về!';
+  String get recoveryKeySaved => 'Recovery key saved in Downloads folder!';
 
   @override
-  String get noRecoveryKeyTitle => 'Không có khóa khôi phục?';
+  String get noRecoveryKeyTitle => 'No recovery key?';
 
   @override
-  String get twoFactorAuthTitle => 'Xác thực hai yếu tố';
+  String get twoFactorAuthTitle => 'Two-factor authentication';
 
   @override
   String get enterCodeHint =>
-      'Nhập mã gồm 6 chữ số từ ứng dụng xác thực của bạn';
+      'Enter the 6-digit code from\nyour authenticator app';
 
   @override
-  String get lostDeviceTitle => 'Mất thiết bị?';
+  String get lostDeviceTitle => 'Lost device?';
 
   @override
-  String get enterRecoveryKeyHint => 'Nhập khóa khôi phục của bạn';
+  String get enterRecoveryKeyHint => 'Enter your recovery key';
 
   @override
-  String get recover => 'Khôi phục';
-
-  @override
-  String get loggingOut => 'Đang đăng xuất...';
-
-  @override
-  String get immediately => 'Tức thì';
-
-  @override
-  String get appLock => 'Khóa ứng dụng';
-
-  @override
-  String get autoLock => 'Tự động khóa';
-
-  @override
-  String get noSystemLockFound => 'Không thấy khoá hệ thống';
-
-  @override
-  String get deviceLockEnablePreSteps =>
-      'Để bật khoá thiết bị, vui lòng thiết lập mật khẩu thiết bị hoặc khóa màn hình trong cài đặt hệ thống của bạn.';
-
-  @override
-  String get appLockDescription =>
-      'Chọn giữa màn hình khoá mặc định của thiết bị và màn hình khoá tự chọn dùng mã PIN hoặc mật khẩu.';
-
-  @override
-  String get deviceLock => 'Khóa thiết bị';
-
-  @override
-  String get pinLock => 'Mã PIN';
-
-  @override
-  String get autoLockFeatureDescription =>
-      'Thời gian ứng dụng tự khoá sau khi ở trạng thái nền';
-
-  @override
-  String get hideContent => 'Ẩn nội dung';
-
-  @override
-  String get hideContentDescriptionAndroid =>
-      'Ẩn nội dung khi chuyển ứng dụng và chặn chụp màn hình';
-
-  @override
-  String get hideContentDescriptioniOS => 'Ẩn nội dung khi chuyển ứng dụng';
-
-  @override
-  String get tooManyIncorrectAttempts => 'Quá nhiều lần thử không chính xác';
-
-  @override
-  String get tapToUnlock => 'Nhấn để mở khóa';
-
-  @override
-  String get areYouSureYouWantToLogout => 'Bạn có chắc chắn muốn đăng xuất?';
-
-  @override
-  String get yesLogout => 'Có, đăng xuất';
-
-  @override
-  String get authToViewSecrets => 'Vui lòng xác thực để xem bí mật của bạn';
-
-  @override
-  String get next => 'Tiếp theo';
-
-  @override
-  String get setNewPassword => 'Đặt lại mật khẩu';
-
-  @override
-  String get enterPin => 'Nhập mã PIN';
-
-  @override
-  String get setNewPin => 'Đổi mã PIN';
-
-  @override
-  String get confirm => 'Xác nhận';
-
-  @override
-  String get reEnterPassword => 'Nhập lại mật khẩu';
-
-  @override
-  String get reEnterPin => 'Nhập lại mã PIN';
-
-  @override
-  String get androidBiometricHint => 'Xác định danh tính';
-
-  @override
-  String get androidBiometricNotRecognized =>
-      'Không nhận dạng được. Vui lòng thử lại.';
-
-  @override
-  String get androidBiometricSuccess => 'Thành công';
-
-  @override
-  String get androidCancelButton => 'Hủy bỏ';
-
-  @override
-  String get androidSignInTitle => 'Yêu cầu xác thực';
-
-  @override
-  String get androidBiometricRequiredTitle => 'Yêu cầu sinh trắc học';
-
-  @override
-  String get androidDeviceCredentialsRequiredTitle =>
-      'Yêu cầu thông tin xác thực thiết bị';
-
-  @override
-  String get androidDeviceCredentialsSetupDescription =>
-      'Yêu cầu thông tin xác thực thiết bị';
-
-  @override
-  String get goToSettings => 'Chuyển đến cài đặt';
-
-  @override
-  String get androidGoToSettingsDescription =>
-      'Xác thực sinh trắc học chưa được thiết lập trên thiết bị của bạn. Đi tới \'Cài đặt > Bảo mật\' để thêm xác thực sinh trắc học.';
-
-  @override
-  String get iOSLockOut =>
-      'Xác thực sinh trắc học bị vô hiệu hóa. Vui lòng khóa và mở khóa màn hình của bạn để kích hoạt nó.';
-
-  @override
-  String get iOSOkButton => 'Đồng ý';
-
-  @override
-  String get emailAlreadyRegistered => 'Email đã được đăng kí.';
-
-  @override
-  String get emailNotRegistered => 'Email chưa được đăng kí.';
-
-  @override
-  String get thisEmailIsAlreadyInUse => 'Email này đã được sử dụng';
-
-  @override
-  String emailChangedTo(String newEmail) {
-    return 'Thay đổi email thành $newEmail';
-  }
-
-  @override
-  String get authenticationFailedPleaseTryAgain =>
-      'Xác thực lỗi, vui lòng thử lại';
-
-  @override
-  String get authenticationSuccessful => 'Xác thực thành công!';
-
-  @override
-  String get sessionExpired => 'Phiên làm việc đã hết hạn';
-
-  @override
-  String get incorrectRecoveryKey => 'Khóa khôi phục không chính xác';
-
-  @override
-  String get theRecoveryKeyYouEnteredIsIncorrect =>
-      'Khóa khôi phục bạn đã nhập không chính xác';
-
-  @override
-  String get twofactorAuthenticationSuccessfullyReset =>
-      'Xác thực hai bước được khôi phục thành công';
-
-  @override
-  String get noRecoveryKey => 'No recovery key';
-
-  @override
-  String get yourAccountHasBeenDeleted => 'Your account has been deleted';
-
-  @override
-  String get verificationId => 'Verification ID';
-
-  @override
-  String get yourVerificationCodeHasExpired => 'Mã xác minh của bạn đã hết hạn';
-
-  @override
-  String get incorrectCode => 'Mã không chính xác';
-
-  @override
-  String get sorryTheCodeYouveEnteredIsIncorrect =>
-      'Xin lỗi, mã bạn đã nhập không chính xác';
-
-  @override
-  String get developerSettings => 'Cài đặt cho nhà phát triển';
-
-  @override
-  String get serverEndpoint => 'Điểm cuối máy chủ';
-
-  @override
-  String get invalidEndpoint => 'Điểm cuối không hợp lệ';
-
-  @override
-  String get invalidEndpointMessage =>
-      'Xin lỗi, điểm cuối bạn nhập không hợp lệ. Vui lòng nhập một điểm cuối hợp lệ và thử lại.';
-
-  @override
-  String get endpointUpdatedMessage => 'Cập nhật điểm cuối thành công';
+  String get recover => 'Recover';
 }
