@@ -931,6 +931,228 @@ abstract class StringsLocalizations {
   /// In en, this message translates to:
   /// **'Recover'**
   String get recover;
+
+  /// Message shown while logging out
+  ///
+  /// In en, this message translates to:
+  /// **'Logging out...'**
+  String get loggingOut;
+
+  /// Immediately option for auto lock timing
+  ///
+  /// In en, this message translates to:
+  /// **'Immediately'**
+  String get immediately;
+
+  /// App lock setting title
+  ///
+  /// In en, this message translates to:
+  /// **'App lock'**
+  String get appLock;
+
+  /// Auto lock setting title
+  ///
+  /// In en, this message translates to:
+  /// **'Auto lock'**
+  String get autoLock;
+
+  /// Error when no system lock is found
+  ///
+  /// In en, this message translates to:
+  /// **'No system lock found'**
+  String get noSystemLockFound;
+
+  /// Instructions for enabling device lock
+  ///
+  /// In en, this message translates to:
+  /// **'To enable device lock, please setup device passcode or screen lock in your system settings.'**
+  String get deviceLockEnablePreSteps;
+
+  /// Description of app lock feature
+  ///
+  /// In en, this message translates to:
+  /// **'Choose between your device\'s default lock screen and a custom lock screen with a PIN or password.'**
+  String get appLockDescription;
+
+  /// Device lock option title
+  ///
+  /// In en, this message translates to:
+  /// **'Device lock'**
+  String get deviceLock;
+
+  /// PIN lock option title
+  ///
+  /// In en, this message translates to:
+  /// **'Pin lock'**
+  String get pinLock;
+
+  /// Description of auto lock feature
+  ///
+  /// In en, this message translates to:
+  /// **'Time after which the app locks after being put in the background'**
+  String get autoLockFeatureDescription;
+
+  /// Hide content setting title
+  ///
+  /// In en, this message translates to:
+  /// **'Hide content'**
+  String get hideContent;
+
+  /// Description of hide content feature on Android
+  ///
+  /// In en, this message translates to:
+  /// **'Hides app content in the app switcher and disables screenshots'**
+  String get hideContentDescriptionAndroid;
+
+  /// Description of hide content feature on iOS
+  ///
+  /// In en, this message translates to:
+  /// **'Hides app content in the app switcher'**
+  String get hideContentDescriptioniOS;
+
+  /// Message shown when too many incorrect attempts are made
+  ///
+  /// In en, this message translates to:
+  /// **'Too many incorrect attempts'**
+  String get tooManyIncorrectAttempts;
+
+  /// Message prompting user to tap to unlock
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to unlock'**
+  String get tapToUnlock;
+
+  /// Confirmation message before logout
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to logout?'**
+  String get areYouSureYouWantToLogout;
+
+  /// Confirmation button for logout
+  ///
+  /// In en, this message translates to:
+  /// **'Yes, logout'**
+  String get yesLogout;
+
+  /// Message prompting authentication to view secrets
+  ///
+  /// In en, this message translates to:
+  /// **'Please authenticate to view your secrets'**
+  String get authToViewSecrets;
+
+  /// Next button label
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get next;
+
+  /// Set new password title
+  ///
+  /// In en, this message translates to:
+  /// **'Set new password'**
+  String get setNewPassword;
+
+  /// Enter PIN prompt
+  ///
+  /// In en, this message translates to:
+  /// **'Enter PIN'**
+  String get enterPin;
+
+  /// Set new PIN title
+  ///
+  /// In en, this message translates to:
+  /// **'Set new PIN'**
+  String get setNewPin;
+
+  /// Confirm button label
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get confirm;
+
+  /// Re-enter password prompt
+  ///
+  /// In en, this message translates to:
+  /// **'Re-enter password'**
+  String get reEnterPassword;
+
+  /// Re-enter PIN prompt
+  ///
+  /// In en, this message translates to:
+  /// **'Re-enter PIN'**
+  String get reEnterPin;
+
+  /// Hint message advising the user how to authenticate with biometrics. It is used on Android side. Maximum 60 characters.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify identity'**
+  String get androidBiometricHint;
+
+  /// Message to let the user know that authentication was failed. It is used on Android side. Maximum 60 characters.
+  ///
+  /// In en, this message translates to:
+  /// **'Not recognized. Try again.'**
+  String get androidBiometricNotRecognized;
+
+  /// Message to let the user know that authentication was successful. It is used on Android side. Maximum 60 characters.
+  ///
+  /// In en, this message translates to:
+  /// **'Success'**
+  String get androidBiometricSuccess;
+
+  /// Message showed on a button that the user can click to leave the current dialog. It is used on Android side. Maximum 30 characters.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get androidCancelButton;
+
+  /// Message showed as a title in a dialog which indicates the user that they need to scan biometric to continue. It is used on Android side. Maximum 60 characters.
+  ///
+  /// In en, this message translates to:
+  /// **'Authentication required'**
+  String get androidSignInTitle;
+
+  /// Message showed as a title in a dialog which indicates the user has not set up biometric authentication on their device. It is used on Android side. Maximum 60 characters.
+  ///
+  /// In en, this message translates to:
+  /// **'Biometric required'**
+  String get androidBiometricRequiredTitle;
+
+  /// Message showed as a title in a dialog which indicates the user has not set up credentials authentication on their device. It is used on Android side. Maximum 60 characters.
+  ///
+  /// In en, this message translates to:
+  /// **'Device credentials required'**
+  String get androidDeviceCredentialsRequiredTitle;
+
+  /// Message advising the user to go to the settings and configure device credentials on their device. It shows in a dialog on Android side.
+  ///
+  /// In en, this message translates to:
+  /// **'Device credentials required'**
+  String get androidDeviceCredentialsSetupDescription;
+
+  /// Message showed on a button that the user can click to go to settings pages from the current dialog. It is used on both Android and iOS side. Maximum 30 characters.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to settings'**
+  String get goToSettings;
+
+  /// Message advising the user to go to the settings and configure biometric on their device. It shows in a dialog on Android side.
+  ///
+  /// In en, this message translates to:
+  /// **'Biometric authentication is not set up on your device. Go to \'Settings > Security\' to add biometric authentication.'**
+  String get androidGoToSettingsDescription;
+
+  /// Message advising the user to re-enable biometrics on their device. It shows in a dialog on iOS side.
+  ///
+  /// In en, this message translates to:
+  /// **'Biometric authentication is disabled. Please lock and unlock your screen to enable it.'**
+  String get iOSLockOut;
+
+  /// Message showed on a button that the user can click to leave the current dialog. It is used on iOS side. Maximum 30 characters.
+  ///
+  /// In en, this message translates to:
+  /// **'OK'**
+  String get iOSOkButton;
 }
 
 class _StringsLocalizationsDelegate
