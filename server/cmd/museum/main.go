@@ -308,6 +308,7 @@ func main() {
 		FileController:        fileController,
 		EmailNotificationCtrl: emailNotificationCtrl,
 		CollectionLinkRepo:    collectionLinkRepo,
+		FileLinkRepo:          fileLinkRepo,
 		CollectionRepo:        collectionRepo,
 		UserRepo:              userRepo,
 		JwtSecret:             jwtSecretBytes,

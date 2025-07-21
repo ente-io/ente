@@ -54,6 +54,7 @@ type CollectionLinkController struct {
 	FileController        *controller.FileController
 	EmailNotificationCtrl *emailCtrl.EmailNotificationController
 	CollectionLinkRepo    *public.CollectionLinkRepo
+	FileLinkRepo          *public.FileLinkRepository
 	CollectionRepo        *repo.CollectionRepository
 	UserRepo              *repo.UserRepository
 	JwtSecret             []byte
@@ -270,7 +271,7 @@ func (c *CollectionLinkController) HandleAccountDeletion(ctx context.Context, us
 			return stacktrace.Propagate(err, "")
 		}
 	}
-	return nil
+	return c.FileLinkRepo.DisableLinksForUser(ctx, userID)
 }
 
 // GetPublicCollection will return collection info for a public url.

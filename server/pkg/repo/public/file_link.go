@@ -124,8 +124,8 @@ func (pcr *FileLinkRepository) DisableLinkForFiles(ctx context.Context, fileIDs 
 }
 
 // DisableLinksForUser will disable all public file links for the given user
-func (pcr *FileLinkRepository) DisableLinksForUser(ctx context.Context, linkID string) error {
-	_, err := pcr.DB.ExecContext(ctx, `UPDATE public_file_tokens SET is_disabled = TRUE WHERE id = $1`, linkID)
+func (pcr *FileLinkRepository) DisableLinksForUser(ctx context.Context, userID int64) error {
+	_, err := pcr.DB.ExecContext(ctx, `UPDATE public_file_tokens SET is_disabled = TRUE WHERE owner_id = $1`, userID)
 	if err != nil {
 		return stacktrace.Propagate(err, "failed to disable public file link")
 	}
