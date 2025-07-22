@@ -360,6 +360,7 @@ class Configuration {
     await setToken(
       CryptoUtil.bin2base64(token, urlSafe: true),
     );
+    _logger.info('[DEBUG] decryptSecretsAndGetKeyEncKey: Token saved successfully.');
     return keyEncryptionKey;
   }
 
@@ -445,16 +446,20 @@ class Configuration {
 
   String? getToken() {
     _cachedToken ??= _preferences.getString(tokenKey);
+    _logger.info('[DEBUG] getToken: token read: '
+        '${_cachedToken != null ? _cachedToken!.substring(0, _cachedToken!.length > 8 ? 8 : _cachedToken!.length) + '...' : 'null'}');
     return _cachedToken;
   }
 
   bool isLoggedIn() {
+    _logger.info('[DEBUG] isLoggedIn: ${getToken() != null}');
     return getToken() != null;
   }
 
   Future<void> setToken(String token) async {
     _cachedToken = token;
     await _preferences.setString(tokenKey, token);
+    _logger.info('[DEBUG] setToken: token saved: ${token.substring(0, token.length > 8 ? 8 : token.length)}...');
     Bus.instance.fire(SignedInEvent());
   }
 
@@ -474,7 +479,7 @@ class Configuration {
     await _preferences.setString(emailKey, email);
   }
 
-  String? getUsername() {
+  Future<String?> getUsername() async {
     return _preferences.getString(usernameKey);
   }
 
@@ -678,5 +683,14 @@ class Configuration {
       await _preferences.setString(anonymousUserIDKey, Uuid().v4());
     }
     return _preferences.getString(anonymousUserIDKey)!;
+  }
+
+  Future<void> triggerLogoutToNative() async {
+    try {
+      await _loginChannel.invokeMethod('logout');
+      _logger.info('Logout request sent to native code');
+    } catch (e) {
+      _logger.warning('Failed to send logout request to native code', e);
+    }
   }
 }

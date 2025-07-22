@@ -92,6 +92,7 @@ class _HomeWidgetState extends State<HomeWidget> with WidgetsBindingObserver {
   );
 
   static const String _loginFlowActiveKey = "login_flow_active";
+  static const MethodChannel _logoutChannel = MethodChannel('ente_logout_channel');
 
   final _logger = Logger("HomeWidgetState");
   final _selectedFiles = SelectedFiles();
@@ -263,6 +264,16 @@ class _HomeWidgetState extends State<HomeWidget> with WidgetsBindingObserver {
     NotificationService.instance
         .initialize(_onDidReceiveNotificationResponse)
         .ignore();
+
+    // Add MethodChannel handler for native-triggered logout
+    _logoutChannel.setMethodCallHandler((call) async {
+      if (call.method == 'onLogoutRequested') {
+        _logger.info('[DEBUG] Received logout request from native');
+        await Configuration.instance.logout(autoLogout: true);
+        // Notify native that logout is complete
+        const MethodChannel('ente_logout_complete_channel').invokeMethod('logoutComplete');
+      }
+    });
 
     if (Platform.isAndroid &&
         !localSettings.hasConfiguredInAppLinkPermissions() &&

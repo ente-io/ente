@@ -12,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import android.accounts.AccountManager
 
 class LoginActivity : AppCompatActivity() {
 
@@ -24,6 +25,12 @@ class LoginActivity : AppCompatActivity() {
         private const val ACCOUNT_ACTIVITY_CLASS_NAME =
             "com.unplugged.account.ui.thirdparty.ThirdPartyCredentialsActivity"
         private const val ACCOUNT_PACKAGE_NAME = "com.unplugged.store.dev"
+
+        private fun isDebugBuild(context: android.content.Context): Boolean {
+            val isDebug = context.packageName.endsWith(".dev") || context.packageName.endsWith(".debug")
+            Log.d("UpEnte", "[DEBUG] isDebugBuild: packageName=${context.packageName}, isDebug=$isDebug")
+            return isDebug
+        }
     }
 
     private val accountLoginLauncher =
@@ -88,55 +95,56 @@ class LoginActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        
-        // Check if username is already saved
         val sharedPrefs: SharedPreferences = getSharedPreferences("ente_prefs", MODE_PRIVATE)
         val savedUsername = sharedPrefs.getString("username", null)
-        Log.d("UpEnte", "[DEBUG] Read username from native SharedPreferences: $savedUsername")
-        if (!savedUsername.isNullOrEmpty()) {
-            Log.d("UpEnte", "[DEBUG] Username already saved: $savedUsername, skipping account app call")
-            // Username exists, go directly to MainActivity
-            resultIntent.putExtra(EXTRA_LOGIN_STATUS, true)
-            setResult(Activity.RESULT_OK, resultIntent)
-            
+        Log.d("UpEnte", "[DEBUG] onCreate: savedUsername from SharedPreferences: $savedUsername")
+        val accountType = if (isDebugBuild(this)) "com.unplugged.account.dev" else "com.unplugged.account"
+        Log.d("UpEnte", "[DEBUG] onCreate: accountType used: $accountType")
+        val accountManager = AccountManager.get(this)
+        val account = accountManager.getAccountsByType(accountType).firstOrNull()
+        Log.d("UpEnte", "[DEBUG] onCreate: account fetched: $account, name: ${account?.name}, type: ${account?.type}")
+        val accountUsername = account?.let { accountManager.getUserData(it, "username") }
+        Log.d("UpEnte", "[DEBUG] onCreate: accountUsername from userData: $accountUsername")
+
+        Log.d("UpEnte", "[DEBUG] SharedPrefs username: $savedUsername, AccountManager username: $accountUsername")
+
+        if (savedUsername.isNullOrEmpty()) {
+            // No previous login, just start account app flow
+            Log.d("UpEnte", "[DEBUG] No saved username, starting account app flow")
+            val credentialsIntent = Intent().apply {
+                component = ComponentName(
+                    ACCOUNT_PACKAGE_NAME,
+                    ACCOUNT_ACTIVITY_CLASS_NAME
+                )
+                putExtra("action", "service_1")
+            }
+            try {
+                accountLoginLauncher.launch(credentialsIntent)
+            } catch (e: Exception) {
+                Log.d("UpEnte", "Failed to launch account app: $e")
+                finish()
+            }
+            return
+        }
+
+        val trimmedSavedUsername = savedUsername?.substringBefore('@')
+        Log.d("UpEnte", "[DEBUG] Comparing trimmedSavedUsername: $trimmedSavedUsername to accountUsername: $accountUsername")
+        if (accountUsername.isNullOrEmpty() || trimmedSavedUsername != accountUsername) {
+            // Username mismatch or missing in AccountManager, trigger forced logout
+            Log.d("UpEnte", "[DEBUG] Username missing or mismatch, triggering forced logout via MainActivity")
             val openFlutterIntent = Intent(this, MainActivity::class.java).apply {
-                putExtra("username", savedUsername)
-                // Note: service_password and up_token will be null, but that's okay
-                // since we're skipping the account app flow
+                putExtra("shouldLogout", true)
             }
             startActivity(openFlutterIntent)
             finish()
             return
-        }
-        
-        // No saved username, proceed with normal account app flow
-        var launchSuccessful = true
-        val credentialsIntent = Intent().apply {
-            component = ComponentName(
-                ACCOUNT_PACKAGE_NAME,
-                ACCOUNT_ACTIVITY_CLASS_NAME
-            )
-            putExtra("action", "service_1")
-        }
-
-        try {
-            accountLoginLauncher.launch(credentialsIntent)
-
-        } catch (e: ActivityNotFoundException) {
-            Log.d("UpEnte", "RESULT_CANCELED (due to $e)")
-            handleAccountLoginResponse()
-            launchSuccessful = false
-
-        } catch (e: Exception) {
-            Log.d("UpEnte", "RESULT_CANCELED (due to $e)")
-            handleAccountLoginResponse()
-            launchSuccessful = false
-        }
-
-        if (!launchSuccessful) {
-            Log.d("UpEnte", "RESULT_CANCELED (due to launch exception)")
-            resultIntent.putExtra(EXTRA_LOGIN_STATUS, true)
-            setResult(Activity.RESULT_OK, resultIntent)
+        } else {
+            // If both usernames exist and match, go to MainActivity
+            Log.d("UpEnte", "[DEBUG] Usernames match, proceeding to MainActivity")
+            val openFlutterIntent = Intent(this, MainActivity::class.java).apply {
+                putExtra("username", savedUsername)
+            }
+            startActivity(openFlutterIntent)
             finish()
         }
     }

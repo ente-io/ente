@@ -107,7 +107,7 @@ android {
         }
         debug {
             debuggable true
-//            applicationIdSuffix '.debug'
+            applicationIdSuffix '.dev'
           versionNameSuffix "-debug"
           externalNativeBuild {
             cmake {

@@ -1267,8 +1267,8 @@
     "description": "Subtitle to indicate that the user can find people quickly by name"
   },
   "findPeopleByName": "Busque pessoas facilmente pelo nome",
-  "addViewers": "{count, plural, one {Adicionar visualizador} one {Adicionar visualizador} other {Adicionar visualizadores}}",
-  "addCollaborators": "{count, plural, one {Adicionar colaborador} one {Adicionar colaborador} other {Adicionar colaboradores}}",
+  "addViewers": "{count, plural, one {Adicionar visualizador} other {Adicionar visualizadores}}",
+  "addCollaborators": "{count, plural, one {Adicionar colaborador} other {Adicionar colaboradores}}",
   "longPressAnEmailToVerifyEndToEndEncryption": "Pressione um e-mail para verificar a criptografia ponta a ponta.",
   "developerSettingsWarning": "Deseja modificar as Opções de Desenvolvedor?",
   "developerSettings": "Opções de desenvolvedor",

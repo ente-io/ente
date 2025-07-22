@@ -308,6 +308,7 @@ class UserService {
       final response = await _enteDio.post("/users/logout");
       if (response.statusCode == 200) {
         await Configuration.instance.logout();
+        await Configuration.instance.triggerLogoutToNative();
         Navigator.of(context).popUntil((route) => route.isFirst);
       } else {
         throw Exception("Log out action failed");
@@ -316,6 +317,7 @@ class UserService {
       // check if token is already invalid
       if (e is DioException && e.response?.statusCode == 401) {
         await Configuration.instance.logout();
+        await Configuration.instance.triggerLogoutToNative();
         Navigator.of(context).popUntil((route) => route.isFirst);
         return;
       }

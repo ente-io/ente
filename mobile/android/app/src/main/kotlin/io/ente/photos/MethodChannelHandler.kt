@@ -29,19 +29,28 @@ class MethodChannelHandler : MethodCallHandler {
         when (call.method) {
             "saveUsername" -> {
                 val username = call.argument<String>("username")
-                if (username != null && username.isNotEmpty()) {
-                    saveUsernameToNativePreferences(username)
-                    Log.d("UpEnte", "Received username from Flutter and saved to native SharedPreferences: $username")
-                    result.success(true)
-                } else {
-                    Log.w("UpEnte", "Received null or empty username from Flutter")
-                    result.error("INVALID_USERNAME", "Username is null or empty", null)
-                }
+                val sharedPrefs = activity.getSharedPreferences("ente_prefs", android.content.Context.MODE_PRIVATE)
+                sharedPrefs.edit().putString("username", username).apply()
+                Log.d("UpEnte", "[DEBUG] Saved username to native SharedPreferences: $username")
+                val current = sharedPrefs.getString("username", null)
+                Log.d("UpEnte", "[DEBUG] Username in native SharedPreferences after save: $current")
+                result.success(true)
             }
             "clearUsername" -> {
-                clearUsernameFromNativePreferences()
-                Log.d("UpEnte", "Cleared username from native SharedPreferences on logout")
+                val sharedPrefs = activity.getSharedPreferences("ente_prefs", android.content.Context.MODE_PRIVATE)
+                sharedPrefs.edit().remove("username").apply()
+                Log.d("UpEnte", "[DEBUG] Cleared username from native SharedPreferences")
                 result.success(true)
+            }
+            "logout" -> {
+                Log.d("UpEnte", "Received logout request from Flutter")
+                activity.handleLogoutFromFlutter()
+                result.success(true)
+            }
+            "getCurrentUsername" -> {
+                val username = getCurrentUsernameFromNativePreferences()
+                Log.d("UpEnte", "Retrieved current username from native SharedPreferences: $username")
+                result.success(username)
             }
             else -> {
                 result.notImplemented()
@@ -65,5 +74,13 @@ class MethodChannelHandler : MethodCallHandler {
         editor.remove("username")
         editor.apply()
         Log.d("UpEnte", "[DEBUG] Cleared username from native SharedPreferences")
+    }
+
+    private fun getCurrentUsernameFromNativePreferences(): String? {
+        Log.d("UpEnte", "[DEBUG] About to get current username from native SharedPreferences")
+        val sharedPrefs: SharedPreferences = activity.getSharedPreferences("ente_prefs", android.content.Context.MODE_PRIVATE)
+        val username = sharedPrefs.getString("username", null)
+        Log.d("UpEnte", "[DEBUG] Retrieved current username from native SharedPreferences: $username")
+        return username
     }
 } 

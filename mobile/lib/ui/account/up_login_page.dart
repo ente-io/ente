@@ -93,6 +93,7 @@ class _LoadingPageState extends State<LoadingPage> {
           account.servicePassword,
           keyAttributes,
         );
+        _logger.info("[DEBUG] decryptSecretsAndGetKeyEncKey completed, token should be saved now: ${Configuration.instance.getToken()}");
         _logger.info("Decryption succeeded");
       } catch (e, s) {
         _logger.info("Decryption failed", e, s);
@@ -166,13 +167,14 @@ class _LoadingPageState extends State<LoadingPage> {
       return;
     }
 
-    _logger.info("Saving configuration from response with keys: ${responseData.keys.toList()}");
+    _logger.info("Saving configuration from response with keys: "+responseData.keys.toList().toString());
     
     // Save username from account object (only in Flutter prefs, not native)
     final Account? account = accountNotifier.value;
     if (account != null && account.username.isNotEmpty) {
+      _logger.info("[DEBUG] Saving username to Flutter prefs: ${account.username}");
       await Configuration.instance.setUsername(account.username);
-      _logger.info("Saved username: ${account.username}");
+      _logger.info("[DEBUG] Saved username to Flutter prefs: ${account.username}");
     }
     
     if (responseData["id"] != null) {
@@ -218,7 +220,8 @@ class _LoadingPageState extends State<LoadingPage> {
     }
 
     // Save username to native SharedPreferences before navigation
-    final username = Configuration.instance.getUsername();
+    final username = await Configuration.instance.getUsername();
+    _logger.info("[DEBUG] Username to be saved to native: $username");
     if (username != null && username.isNotEmpty) {
       try {
         await _channel.invokeMethod('saveUsername', {'username': username});
@@ -242,6 +245,8 @@ class _LoadingPageState extends State<LoadingPage> {
   Future<void> _handleAutomatedLoginFailure(String message) async {
     _logger.warning("Login/Registration failed: $message");
     await Fluttertoast.showToast(msg: "Login failed: $message");
+    // Clear all configuration and sensitive data
+    await Configuration.instance.logout(autoLogout: true);
   }
 
   @override

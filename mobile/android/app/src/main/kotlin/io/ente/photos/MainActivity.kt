@@ -7,6 +7,7 @@ import io.flutter.embedding.android.FlutterFragmentActivity // Your existing bas
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugins.GeneratedPluginRegistrant // Keep this
+import android.accounts.AccountManager
 
 class MainActivity : FlutterFragmentActivity() {
     // Channel for receiving account details from LoginActivity
@@ -15,6 +16,17 @@ class MainActivity : FlutterFragmentActivity() {
     private lateinit var methodChannelHandler: MethodChannelHandler
 
     private var pendingAccountDetails: Map<String, String>? = null
+
+    private lateinit var accountManager: AccountManager
+
+    private var pendingLogoutRestart = false
+    private var pendingShouldLogout = false
+
+    companion object {
+        private const val LOGOUT_CHANNEL_NAME = "ente_logout_channel"
+    }
+
+    private var logoutChannel: MethodChannel? = null
 
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
@@ -29,6 +41,7 @@ class MainActivity : FlutterFragmentActivity() {
         methodChannelHandler.setActivity(this)
 
         methodChannel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, ACCOUNT_CHANNEL_NAME)
+        logoutChannel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, LOGOUT_CHANNEL_NAME)
 
         // Handle method calls from Dart
         methodChannel?.setMethodCallHandler { call, result ->
@@ -48,6 +61,29 @@ class MainActivity : FlutterFragmentActivity() {
                     result.notImplemented()
                 }
             }
+        }
+
+        // Add handler for logoutComplete from Flutter
+        val logoutCompleteChannel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "ente_logout_complete_channel")
+        logoutCompleteChannel.setMethodCallHandler { call, result ->
+            if (call.method == "logoutComplete") {
+                Log.d("UpEnte", "[DEBUG] Received logoutComplete from Flutter, restarting LoginActivity")
+                pendingLogoutRestart = false
+                val loginIntent = Intent(this, LoginActivity::class.java)
+                startActivity(loginIntent)
+                finish()
+                result.success(true)
+            } else {
+                result.notImplemented()
+            }
+        }
+
+        // After engine is ready, process any pending logout
+        if (pendingShouldLogout) {
+            Log.d("UpEnte", "[DEBUG] Sending pending logout to Flutter after engine ready")
+            val logoutChannel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "ente_logout_channel")
+            logoutChannel.invokeMethod("onLogoutRequested", null)
+            pendingShouldLogout = false
         }
 
         // If account details were pending before the methodChannel was initialized, send them now
@@ -95,6 +131,13 @@ class MainActivity : FlutterFragmentActivity() {
                 pendingAccountDetails = accountDetails
             }
         }
+
+        if (intent?.getBooleanExtra("shouldLogout", false) == true && !pendingLogoutRestart) {
+            Log.d("UpEnte", "[DEBUG] shouldLogout received, will send logout to Flutter after engine is ready")
+            pendingLogoutRestart = true
+            pendingShouldLogout = true
+            // Do NOT call MethodChannel here!
+        }
     }
 
     private fun sendAccountDetailsToFlutter(accountDetails: Map<String, String>) {
@@ -113,11 +156,78 @@ class MainActivity : FlutterFragmentActivity() {
         })
     }
 
+    fun handleLogoutFromFlutter() {
+        Log.d("UpEnte", "Handling logout from Flutter")
+        val sharedPrefs = getSharedPreferences("ente_prefs", MODE_PRIVATE)
+        val editor = sharedPrefs.edit()
+        editor.remove("username")
+        editor.apply()
+        Log.d("UpEnte", "Closing app after logout from Flutter")
+        finishAndRemoveTask()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        accountManager = AccountManager.get(this)
+        val packageName = applicationContext.packageName
+        val accountType = if (packageName.contains("dev") || packageName.contains("debug")) {
+            "com.unplugged.account.dev"
+        } else {
+            "com.unplugged.account"
+        }
+
+        val sharedPrefs = getSharedPreferences("ente_prefs", MODE_PRIVATE)
+        val savedUsername = sharedPrefs.getString("username", null)
+        val accountsInSystem = accountManager.accounts
+        // Only check account state, do not trigger logout to Flutter here
+        // If needed, start login flow or clear state, but do not send onLogoutRequested
+        // All forced logout is now handled via shouldLogout intent
+        Log.d("UpEnte", "[DEBUG] onStart: username in prefs: $savedUsername, accounts: ${accountsInSystem.map { it.name }}")
+        if (savedUsername != null && savedUsername.isNotEmpty()) {
+            if (accountsInSystem.none { it.type == accountType }) {
+                Log.d("UpEnte", "[DEBUG] No account found on start, requesting logout in Flutter")
+                val logoutChannel = MethodChannel(flutterEngine!!.dartExecutor.binaryMessenger, "ente_logout_channel")
+                logoutChannel.invokeMethod("onLogoutRequested", null)
+            } else {
+                val account = accountsInSystem.firstOrNull { it.type == accountType }
+                val username = account?.let { accountManager.getUserData(it, "username") }
+                val trimmedSavedUsername = savedUsername?.substringBefore('@')
+                Log.d("UpEnte", "[DEBUG] Comparing trimmedSavedUsername: $trimmedSavedUsername to accountUsername: $username")
+                if (username != trimmedSavedUsername) {
+                    Log.d("UpEnte", "[DEBUG] Username mismatch on start, requesting logout in Flutter")
+                    val logoutChannel = MethodChannel(flutterEngine!!.dartExecutor.binaryMessenger, "ente_logout_channel")
+                    logoutChannel.invokeMethod("onLogoutRequested", null)
+                }
+            }
+        } else {
+            Log.d("UpEnte", "[DEBUG] No saved username, not triggering logout")
+        }
+
+        // Register listener for future changes
+        accountManager.addOnAccountsUpdatedListener({ accountsInSystem ->
+            // Only check account state, do not trigger logout to Flutter here
+            // All forced logout is now handled via shouldLogout intent
+            Log.d("UpEnte", "[DEBUG] AccountManager listener: accounts: ${accountsInSystem.map { it.name }}")
+        }, null, false)
+        Log.d("UpEnte", "[DEBUG] Registered AccountManager listener for $accountType")
+    }
+
+    private fun triggerLogoutToFlutter() {
+        Log.d("UpEnte", "[DEBUG] Sending logout request to Flutter via MethodChannel")
+        val logoutChannel = MethodChannel(flutterEngine!!.dartExecutor.binaryMessenger, "ente_logout_channel")
+        logoutChannel.invokeMethod("onLogoutRequested", null)
+        val sharedPrefs = getSharedPreferences("ente_prefs", MODE_PRIVATE)
+        sharedPrefs.edit().remove("username").apply()
+        Log.d("UpEnte", "[DEBUG] Cleared username from native SharedPreferences")
+        finishAndRemoveTask()
+    }
+
     override fun onDestroy() {
         methodChannel = null // Clean up the channel
         if (::methodChannelHandler.isInitialized) {
             methodChannelHandler.onDetachedFromEngine()
         }
+        logoutChannel = null // Clean up the logout channel
         super.onDestroy()
     }
 }
