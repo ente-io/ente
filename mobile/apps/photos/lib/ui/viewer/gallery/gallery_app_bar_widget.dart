@@ -532,8 +532,8 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       if (widget.collection != null)
         EntePopupMenuItemAsync(
           (value) => (value?[widget.collection!.id]?.personIDs.isEmpty ?? true)
-              ? "Auto-add people"
-              : "Edit auto-add people",
+              ? S.of(context).autoAddPeople
+              : S.of(context).editAutoAddPeople,
           value: AlbumPopupAction.autoAddPhotos,
           future: SmartAlbumsService.instance.getSmartConfigs,
           icon: (value) => Icons.add,
