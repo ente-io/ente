@@ -130,8 +130,6 @@ class GalleryState extends State<Gallery> {
   bool _sortOrderAsc = false;
   List<EnteFile> _allGalleryFiles = [];
   final _scrollController = ScrollController();
-  final _sectionedListSliverKey = GlobalKey();
-  final _stackKey = GlobalKey();
   final _headerKey = GlobalKey();
   final _headerHeightNotifier = ValueNotifier<double?>(null);
   final miscUtil = MiscUtil();
@@ -584,7 +582,6 @@ class GalleryState extends State<Gallery> {
                   return true;
                 },
                 child: Stack(
-                  key: _stackKey,
                   clipBehavior: Clip.none,
                   children: [
                     CustomScrollView(
@@ -599,11 +596,6 @@ class GalleryState extends State<Gallery> {
                               key: _headerKey,
                               child: widget.header ?? const SizedBox.shrink(),
                             ),
-                          ),
-                        ),
-                        SliverToBoxAdapter(
-                          child: SizedBox.shrink(
-                            key: _sectionedListSliverKey,
                           ),
                         ),
                         SectionedListSliver(
