@@ -885,6 +885,9 @@
       "slug": "name_com"
     },
     {
+      "title": "nasdaq"
+    },
+    {
       "title": "Nextcloud",
       "slug": "nextcloud"
     },
@@ -967,6 +970,9 @@
     },
     {
       "title": "NuCommunity"
+    },
+    {
+      "title": "numerai"
     },
     {
       "title": "NVIDIA"
