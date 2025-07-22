@@ -751,6 +751,7 @@ class _PinnedGroupHeaderState extends State<PinnedGroupHeader> {
   }
 
   void _setCurrentGroupID() {
+    if (widget.headerHeightNotifier.value == null) return;
     final normalizedScrollOffset =
         widget.scrollController.offset - widget.headerHeightNotifier.value!;
     if (normalizedScrollOffset < 0) {
