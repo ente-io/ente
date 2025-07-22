@@ -225,7 +225,7 @@ class SmartAlbumsService {
     final completer = Completer<bool>();
     await showActionSheet(
       context: context,
-      body: "Should the files related to the person be removed?",
+      body: S.of(context).shouldRemoveFilesSmartAlbumsDesc,
       buttons: [
         ButtonWidget(
           labelText: S.of(context).yes,

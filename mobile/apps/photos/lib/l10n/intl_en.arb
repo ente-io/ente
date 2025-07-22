@@ -1792,5 +1792,6 @@
   "faceThumbnailGenerationFailed": "Unable to generate face thumbnails",
   "fileAnalysisFailed": "Unable to analyze file",
   "editAutoAddPeople": "Edit auto-add people",
-  "autoAddPeople": "Auto-add people"
+  "autoAddPeople": "Auto-add people",
+  "shouldRemoveFilesSmartAlbumsDesc": "Should the files related to the person that were previously selected in smart albums be removed?"
 }

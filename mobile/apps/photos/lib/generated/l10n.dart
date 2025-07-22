@@ -10795,6 +10795,16 @@ class S {
       args: [],
     );
   }
+
+  /// `Should the files related to the person that were previously selected in smart albums be removed?`
+  String get shouldRemoveFilesSmartAlbumsDesc {
+    return Intl.message(
+      'Should the files related to the person that were previously selected in smart albums be removed?',
+      name: 'shouldRemoveFilesSmartAlbumsDesc',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
