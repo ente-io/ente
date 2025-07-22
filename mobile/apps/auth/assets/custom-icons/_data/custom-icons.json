@@ -308,15 +308,17 @@
         "Colorado.gov",
         "Colorado Gov",
         "Colorado Government",
+        "Colorado Government Portal",
+        "Colorado COVES Death Certificates",
+        "Colorado COVES",
         "Colorado Official State Web Portal",
         "Colorado State Web Portal",
+        "Colorado State Portal",
         "Colorado Web Portal",
         "Colorado Portal",
         "Colorado State",
         "Colorado PEAK",
-        "myColorado",
-        "Colorado State Portal",
-        "Colorado Government Portal"
+        "myColorado"
       ]
     },
     {
@@ -1425,6 +1427,16 @@
     {
       "title": "Ubuntu One",
       "slug": "ubuntu_one"
+    },
+    {
+      "title": "unitedhealthgroup",
+      "altNames": [
+        "Unitedhealth Group",
+        "United Healthgroup",
+        "UHG",
+        "uhg.com",
+        "unitedhealthgroup.com"
+      ]
     },
     {
       "title": "Unity",
