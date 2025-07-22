@@ -72,6 +72,9 @@
       "hex": "fd4b2d"
     },
     {
+      "title": "availity"
+    },
+    {
       "title": "AzurHosts",
       "slug": "azurhosts",
       "altNames": [
@@ -120,6 +123,13 @@
     },
     {
       "title": "Belo"
+    },
+    {
+      "title": "bestbuy",
+      "altNames": [
+        "Best Buy",
+        "bestbuy.com"
+      ]
     },
     {
       "title": "Bethesda",
@@ -293,6 +303,23 @@
       "title": "CoinDCX"
     },
     {
+      "title": "colorado",
+      "altNames": [
+        "Colorado.gov",
+        "Colorado Gov",
+        "Colorado Government",
+        "Colorado Official State Web Portal",
+        "Colorado State Web Portal",
+        "Colorado Web Portal",
+        "Colorado Portal",
+        "Colorado State",
+        "Colorado PEAK",
+        "myColorado",
+        "Colorado State Portal",
+        "Colorado Government Portal"
+      ]
+    },
+    {
       "title": "ConfigCat"
     },
     {
@@ -401,6 +428,13 @@
       "title": "ecloud",
       "altNames": [
         "Murena"
+      ]
+    },
+    {
+      "title": "emeritihealth",
+      "altNames": [
+        "Emeriti Health",
+        "Emeriti Retirement Health",
       ]
     },
     {
@@ -707,6 +741,14 @@
       "title": "Letterboxd"
     },
     {
+      "title": "lincolnfinancial",
+      "altNames": [
+        "Lincoln Financial",
+        "Lincoln Financial Group",
+        "LFG"
+      ]
+    },
+    {
       "title": "LinkedIn",
       "slug": "linkedin"
     },
@@ -961,6 +1003,10 @@
     {
       "title": "Oracle Cloud",
       "slug": "oracle_cloud"
+    },
+    {
+      "title": "Pangolin",
+      "slug": "pangolin"
     },
     {
       "title": "Parqet",

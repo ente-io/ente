@@ -61,10 +61,6 @@ func (h *UserEntityHandler) CreateEntity(c *gin.Context) {
 			stacktrace.Propagate(ente.ErrBadRequest, fmt.Sprintf("Request binding failed %s", err)))
 		return
 	}
-	if err := request.Type.IsValid(); err != nil {
-		handler.Error(c, stacktrace.Propagate(err, "Invalid EntityType"))
-		return
-	}
 	resp, err := h.Controller.CreateEntity(c, request)
 	if err != nil {
 		handler.Error(c, stacktrace.Propagate(err, "Failed to create CreateEntityKey"))
