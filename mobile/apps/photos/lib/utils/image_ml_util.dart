@@ -575,7 +575,7 @@ Future<List<Uint8List>> compressFaceThumbnails(Map args) async {
     }
     return await Future.wait(compressedBytesList);
   } catch (e, s) {
-    _logger.warning(
+    _logger.severe(
       'Failed to compress face thumbnail, using original. Size: ${listPngBytes.map((e) => e.length).toList()} bytes',
       e,
       s,

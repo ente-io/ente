@@ -129,7 +129,7 @@ Future<Map<String, Uint8List>?> getCachedFaceCrops(
               );
               faceIdToCrop[face.faceID] = data;
             } else {
-              _logger.warning(
+              _logger.severe(
                 "Cached face crop for faceID ${face.faceID} is empty, deleting file ${faceCropCacheFile.path}",
               );
               await faceCropCacheFile.delete();
@@ -231,7 +231,7 @@ Future<Map<String, Uint8List>?> getCachedFaceCrops(
         s,
       );
     } else {
-      _logger.info(
+      _logger.severe(
         "Stopped getting face crops for faceIDs: ${faces.map((face) => face.faceID).toList()} due to $e",
       );
     }
@@ -334,12 +334,14 @@ Future<Map<String, Uint8List>?> _getFaceCrops(
   if (useFullFile && file.fileType != FileType.video) {
     final File? ioFile = await getFile(file);
     if (ioFile == null) {
+      _logger.severe("Failed to get file for face crop generation");
       return null;
     }
     imagePath = ioFile.path;
   } else {
     final thumbnail = await getThumbnailForUploadedFile(file);
     if (thumbnail == null) {
+      _logger.severe("Failed to get thumbnail for face crop generation");
       return null;
     }
     imagePath = thumbnail.path;
