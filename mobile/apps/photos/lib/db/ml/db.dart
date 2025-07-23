@@ -360,10 +360,6 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
         }
         return mapRowToFace(faceMaps.first);
       }
-    } else if (clusterID == null) {
-      _logger.severe(
-        "Didn't find any faces for personID $personID in `getCoverFaceForPerson`.",
-      );
     }
     if (clusterID != null) {
       const String queryFaceID = '''
@@ -384,10 +380,6 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
             return face;
           }
         }
-      } else {
-        _logger.severe(
-          "Didn't find any faces for clusterID $clusterID in `getCoverFaceForPerson`. faces: $faces",
-        );
       }
     }
     if (personID == null && clusterID == null) {

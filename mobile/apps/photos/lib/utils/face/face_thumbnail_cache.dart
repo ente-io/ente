@@ -129,14 +129,14 @@ Future<Map<String, Uint8List>?> getCachedFaceCrops(
               );
               faceIdToCrop[face.faceID] = data;
             } else {
-              _logger.severe(
+              _logger.warning(
                 "Cached face crop for faceID ${face.faceID} is empty, deleting file ${faceCropCacheFile.path}",
               );
               await faceCropCacheFile.delete();
               facesWithoutCrops[face.faceID] = face.detection.box;
             }
           } catch (e, s) {
-            _logger.severe(
+            _logger.warning(
               "Error reading cached face crop for faceID ${face.faceID} from file ${faceCropCacheFile.path}",
               e,
               s,
@@ -212,7 +212,7 @@ Future<Map<String, Uint8List>?> getCachedFaceCrops(
           milliseconds: 100 * pow(2, fetchAttempt + 1).toInt(),
         );
         await Future.delayed(backoff);
-        _logger.warning(
+        _logger.fine(
           "Error getting face crops for faceIDs: ${faces.map((face) => face.faceID).toList()}, retrying (attempt ${fetchAttempt + 1}) in ${backoff.inMilliseconds} ms",
           e,
           s,
@@ -225,7 +225,7 @@ Future<Map<String, Uint8List>?> getCachedFaceCrops(
           useTempCache: useTempCache,
         );
       }
-      _logger.severe(
+      _logger.warning(
         "Error getting face crops for faceIDs: ${faces.map((face) => face.faceID).toList()}",
         e,
         s,
