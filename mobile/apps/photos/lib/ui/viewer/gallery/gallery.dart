@@ -188,7 +188,6 @@ class GalleryState extends State<Gallery> {
           }
           if (!hasTriggeredSetState && mounted) {
             _updateGalleryGroups();
-            setState(() {});
           }
         });
       });
@@ -248,10 +247,12 @@ class GalleryState extends State<Gallery> {
       ).then((size) {
         setState(() {
           groupHeaderExtent = size.height;
+          _updateGalleryGroups(callSetState: false);
         });
       });
     } else {
       groupHeaderExtent = GalleryGroups.spacing;
+      _updateGalleryGroups();
     }
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
@@ -287,7 +288,8 @@ class GalleryState extends State<Gallery> {
     }
   }
 
-  void _updateGalleryGroups() {
+  void _updateGalleryGroups({bool callSetState = true}) {
+    if (groupHeaderExtent == null) return;
     galleryGroups = GalleryGroups(
       allFiles: _allGalleryFiles,
       groupType: _groupType,
@@ -295,9 +297,13 @@ class GalleryState extends State<Gallery> {
       widthAvailable: MediaQuery.sizeOf(context).width,
       selectedFiles: widget.selectedFiles,
       tagPrefix: widget.tagPrefix,
-      groupHeaderExtent: groupHeaderExtent,
+      groupHeaderExtent: groupHeaderExtent!,
       showSelectAll: widget.showSelectAll,
     );
+
+    if (callSetState) {
+      setState(() {});
+    }
   }
 
   void _selectedFilesListener() {
@@ -323,7 +329,6 @@ class GalleryState extends State<Gallery> {
     final hasReloaded = _onFilesLoaded(files);
     if (!hasReloaded && mounted) {
       _updateGalleryGroups();
-      setState(() {});
     }
   }
 
@@ -545,7 +550,8 @@ class GalleryState extends State<Gallery> {
       //       widget.showSelectAllByDefault && widget.groupType.showGroupHeader(),
       //   isScrollablePositionedList: widget.isScrollablePositionedList,
       // ),
-      child: _allGalleryFiles.isEmpty
+
+      child: _hasLoadedFiles && _allGalleryFiles.isEmpty
           ? Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -859,8 +865,8 @@ class _PinnedGroupHeaderState extends State<PinnedGroupHeader> {
                   child: ColoredBox(
                     color: getEnteColorScheme(context).backgroundBase,
                     child: GroupHeaderWidget(
-                      title: widget.galleryGroups
-                          .groupIdToGroupDataMap[currentGroupId!]!.groupType
+                      title: widget
+                          .galleryGroups.groupIdToGroupDataMap[currentGroupId!]!
                           .getTitle(
                         context,
                         widget.galleryGroups.groupIDToFilesMap[currentGroupId]!

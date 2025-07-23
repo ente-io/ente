@@ -59,7 +59,7 @@ class GalleryGroups {
 
   final List<String> _groupIds = [];
   final Map<String, List<EnteFile>> _groupIdToFilesMap = {};
-  final Map<String, GroupType> _groupIdToGroupTypeDataMap = {};
+  final Map<String, GroupType> _groupIdToGroupDataMap = {};
   final Map<double, String> _scrollOffsetToGroupIdMap = {};
   final Map<String, double> _groupIdToScrollOffsetMap = {};
   final List<double> _groupScrollOffsets = [];
@@ -69,8 +69,7 @@ class GalleryGroups {
 
   List<String> get groupIDs => _groupIds;
   Map<String, List<EnteFile>> get groupIDToFilesMap => _groupIdToFilesMap;
-  Map<String, GroupType> get groupIdToGroupTypeMap =>
-      _groupIdToGroupTypeDataMap;
+  Map<String, GroupType> get groupIdToGroupDataMap => _groupIdToGroupDataMap;
   Map<double, String> get scrollOffsetToGroupIdMap => _scrollOffsetToGroupIdMap;
   Map<String, double> get groupIdToScrollOffsetMap => _groupIdToScrollOffsetMap;
   List<FixedExtentSectionLayout> get groupLayouts => _groupLayouts;
@@ -83,7 +82,7 @@ class GalleryGroups {
     _buildGroups();
     _groupLayouts = _computeGroupLayouts();
     assert(groupIDs.length == _groupIdToFilesMap.length);
-    assert(groupIDs.length == _groupIdToGroupTypeDataMap.length);
+    assert(groupIDs.length == _groupIdToGroupDataMap.length);
     assert(
       groupIDs.length == _scrollOffsetToGroupIdMap.length,
     );
@@ -113,7 +112,7 @@ class GalleryGroups {
       final maxOffset = minOffset +
           (numberOfGridRows * tileHeight) +
           (numberOfGridRows - 1) * spacing +
-          groupHeaderExtent;
+          groupHeaderExtent!;
       final bodyFirstIndex = firstIndex + 1;
 
       groupLayouts.add(
@@ -122,14 +121,14 @@ class GalleryGroups {
           lastIndex: lastIndex,
           minOffset: minOffset,
           maxOffset: maxOffset,
-          headerExtent: groupHeaderExtent,
+          headerExtent: groupHeaderExtent!,
           tileHeight: tileHeight,
           spacing: spacing,
           builder: (context, rowIndex) {
             if (rowIndex == firstIndex) {
               if (showGroupHeader) {
                 return GroupHeaderWidget(
-                  title: _groupIdToGroupTypeDataMap[groupID]!
+                  title: _groupIdToGroupDataMap[groupID]!
                       .getTitle(context, groupIDToFilesMap[groupID]!.first),
                   gridSize: crossAxisCount,
                   filesInGroup: groupIDToFilesMap[groupID]!,
@@ -269,7 +268,7 @@ class GalleryGroups {
     final uuid = _uuid.v1();
     _groupIds.add(uuid);
     _groupIdToFilesMap[uuid] = groupFiles;
-    _groupIdToGroupTypeDataMap[uuid] = groupType;
+    _groupIdToGroupDataMap[uuid] = groupType;
 
     // For scrollbar divisions
     if (groupType.timeGrouping()) {
