@@ -16,8 +16,8 @@ EntityType typeFromString(String type) {
       return EntityType.location;
     case "cgroup":
       return EntityType.cgroup;
-    case "sconfig":
-      return EntityType.cgroup;
+    case "smart_album":
+      return EntityType.smartAlbum;
   }
   debugPrint("unexpected entity type $type");
   return EntityType.unknown;
