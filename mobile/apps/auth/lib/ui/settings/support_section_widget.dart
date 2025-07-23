@@ -43,7 +43,7 @@ class _SupportSectionWidgetState extends State<SupportSectionWidget> {
           trailingIconIsMuted: true,
           onTap: () async {
             try {
-              PlatformUtil.openWebView(
+              await PlatformUtil.openWebView(
                 context,
                 context.l10n.faq,
                 "https://help.ente.io/auth/faq",

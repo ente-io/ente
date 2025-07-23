@@ -1,14 +1,11 @@
 import 'dart:async';
 import 'dart:typed_data' show Uint8List;
 
-import "package:computer/computer.dart";
 import "package:logging/logging.dart";
 import "package:photos/models/ml/face/box.dart";
 import "package:photos/services/isolate_functions.dart";
 import "package:photos/services/isolate_service.dart";
 import "package:photos/utils/image_ml_util.dart";
-
-final Computer _computer = Computer.shared();
 
 class FaceThumbnailGenerator extends SuperIsolate {
   @override

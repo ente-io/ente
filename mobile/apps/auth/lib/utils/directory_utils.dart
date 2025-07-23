@@ -34,7 +34,7 @@ class DirectoryUtils {
   }
 
   static String migratedNamingChanges = "migrated_naming_changes.b5";
-  static migrateNamingChanges() async {
+  static Future<void> migrateNamingChanges() async {
     try {
       final sharedPrefs = await SharedPreferences.getInstance();
       if (sharedPrefs.containsKey(migratedNamingChanges)) {
@@ -57,7 +57,7 @@ class DirectoryUtils {
       Directory oldDataDir;
       Directory newDataDir = await getApplicationSupportDirectory();
       await newDataDir.create(recursive: true);
-      
+
       if (Platform.isLinux) {
         oldDataDir = Directory(
           p.join(dataHome.path, "ente_auth"),

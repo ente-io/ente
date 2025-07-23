@@ -147,12 +147,13 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
                           ),
                         ),
                         child: DottedBorder(
-                          padding: EdgeInsets.zero,
-                          borderType: BorderType.RRect,
-                          strokeWidth: 1,
-                          color: const Color(0xFF6B6B6B),
-                          dashPattern: const [6, 6],
-                          radius: const Radius.circular(8),
+                          options: const RoundedRectDottedBorderOptions(
+                            padding: EdgeInsets.zero,
+                            strokeWidth: 1,
+                            color: Color(0xFF6B6B6B),
+                            dashPattern: [6, 6],
+                            radius: Radius.circular(8),
+                          ),
                           child: SizedBox(
                             width: double.infinity,
                             child: Stack(
@@ -314,7 +315,13 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
       await _recoveryKeyFile.delete();
     }
     _recoveryKeyFile.writeAsStringSync(recoveryKey);
-    await Share.shareXFiles([XFile(_recoveryKeyFile.path)]);
+    await SharePlus.instance.share(
+      ShareParams(
+        files: [
+          XFile(_recoveryKeyFile.path),
+        ],
+      ),
+    );
     Future.delayed(const Duration(milliseconds: 500), () {
       if (mounted) {
         setState(() {

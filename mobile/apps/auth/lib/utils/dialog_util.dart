@@ -180,7 +180,7 @@ Future<ButtonResult?> showGenericErrorDialog({
               context,
               context.l10n.faq,
               "https://help.ente.io/auth/troubleshooting/windows-login",
-            );
+            ).ignore();
           },
         ),
       ButtonWidget(
