@@ -152,7 +152,7 @@ func (pcr *FileLinkRepository) GetFileUrlRowByToken(ctx context.Context, accessT
 
 func (pcr *FileLinkRepository) GetFileUrlRowByFileID(ctx context.Context, fileID int64) (*ente.FileLinkRow, error) {
 	row := pcr.DB.QueryRowContext(ctx,
-		`SELECT id, file_id, owner_id, is_disabled, valid_till, device_limit, enable_download, pw_hash, pw_nonce, mem_limit, ops_limit
+		`SELECT id, file_id, owner_id, is_disabled, enable_download, valid_till, device_limit, pw_hash, pw_nonce, mem_limit, ops_limit,
 	   created_at, updated_at
 		from public_file_tokens 
 		where file_id = $1 and is_disabled = FALSE`, fileID)
