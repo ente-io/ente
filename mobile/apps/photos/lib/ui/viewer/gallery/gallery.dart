@@ -861,8 +861,8 @@ class _PinnedGroupHeaderState extends State<PinnedGroupHeader> {
                   child: ColoredBox(
                     color: getEnteColorScheme(context).backgroundBase,
                     child: GroupHeaderWidget(
-                      title: widget.galleryGroups
-                          .groupIdToheaderDataMap[currentGroupId!]!.groupType
+                      title: widget
+                          .galleryGroups.groupIdToGroupTypeMap[currentGroupId!]!
                           .getTitle(
                         context,
                         widget.galleryGroups.groupIDToFilesMap[currentGroupId]!

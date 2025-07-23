@@ -59,7 +59,7 @@ class GalleryGroups {
 
   final List<String> _groupIds = [];
   final Map<String, List<EnteFile>> _groupIdToFilesMap = {};
-  final Map<String, GroupHeaderData> _groupIdToHeaderDataMap = {};
+  final Map<String, GroupType> _groupIdToGroupTypeDataMap = {};
   final Map<double, String> _scrollOffsetToGroupIdMap = {};
   final Map<String, double> _groupIdToScrollOffsetMap = {};
   final List<double> _groupScrollOffsets = [];
@@ -69,8 +69,8 @@ class GalleryGroups {
 
   List<String> get groupIDs => _groupIds;
   Map<String, List<EnteFile>> get groupIDToFilesMap => _groupIdToFilesMap;
-  Map<String, GroupHeaderData> get groupIdToheaderDataMap =>
-      _groupIdToHeaderDataMap;
+  Map<String, GroupType> get groupIdToGroupTypeMap =>
+      _groupIdToGroupTypeDataMap;
   Map<double, String> get scrollOffsetToGroupIdMap => _scrollOffsetToGroupIdMap;
   Map<String, double> get groupIdToScrollOffsetMap => _groupIdToScrollOffsetMap;
   List<FixedExtentSectionLayout> get groupLayouts => _groupLayouts;
@@ -83,7 +83,7 @@ class GalleryGroups {
     _buildGroups();
     _groupLayouts = _computeGroupLayouts();
     assert(groupIDs.length == _groupIdToFilesMap.length);
-    assert(groupIDs.length == _groupIdToHeaderDataMap.length);
+    assert(groupIDs.length == _groupIdToGroupTypeDataMap.length);
     assert(
       groupIDs.length == _scrollOffsetToGroupIdMap.length,
     );
@@ -129,8 +129,7 @@ class GalleryGroups {
             if (rowIndex == firstIndex) {
               if (showGroupHeader) {
                 return GroupHeaderWidget(
-                  title: _groupIdToHeaderDataMap[groupID]!
-                      .groupType
+                  title: _groupIdToGroupTypeDataMap[groupID]!
                       .getTitle(context, groupIDToFilesMap[groupID]!.first),
                   gridSize: crossAxisCount,
                   filesInGroup: groupIDToFilesMap[groupID]!,
@@ -270,9 +269,7 @@ class GalleryGroups {
     final uuid = _uuid.v1();
     _groupIds.add(uuid);
     _groupIdToFilesMap[uuid] = groupFiles;
-    _groupIdToHeaderDataMap[uuid] = GroupHeaderData(
-      groupType: groupType,
-    );
+    _groupIdToGroupTypeDataMap[uuid] = groupType;
 
     // For scrollbar divisions
     if (groupType.timeGrouping()) {
@@ -287,12 +284,4 @@ class GalleryGroups {
       }
     }
   }
-}
-
-class GroupHeaderData {
-  final GroupType groupType;
-
-  GroupHeaderData({
-    required this.groupType,
-  });
 }
