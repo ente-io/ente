@@ -2,6 +2,7 @@ import "dart:async";
 import "dart:convert";
 
 import "package:logging/logging.dart";
+import "package:photos/core/configuration.dart";
 import "package:photos/models/api/entity/type.dart";
 import "package:photos/models/collection/smart_album_config.dart";
 import "package:photos/models/local_entity_data.dart";
@@ -18,15 +19,13 @@ class SmartAlbumsService {
 
   Future<Map<int, SmartAlbumConfig>>? _cachedConfigsFuture;
 
-  static const type = EntityType.person;
-
   void clearCache() {
     _cachedConfigsFuture = null;
     _lastCacheRefreshTime = 0;
   }
 
   int lastRemoteSyncTime() {
-    return entityService.lastSyncTime(type);
+    return entityService.lastSyncTime(EntityType.smartAlbum);
   }
 
   Future<Map<int, SmartAlbumConfig>> getSmartConfigs() async {
@@ -42,78 +41,27 @@ class SmartAlbumsService {
   Future<Map<int, SmartAlbumConfig>> _fetchAndCacheSConfigs() async {
     _logger.finest("reading all smart configs from local db");
 
-    final entities = await entityService.getEntities(type);
+    final entities = await entityService.getEntities(EntityType.smartAlbum);
 
-    final result = _decodeSConfigEntities(
-      {"entity": entities},
-    );
+    final result = _decodeSConfigEntities({"entity": entities});
 
-    final sconfigs = result["sconfigs"] as Map<int, SmartAlbumConfig>;
-
-    final collectionToUpdate = result["collectionToUpdate"] as Set<int>;
-    final idToDelete = result["idToDelete"] as Set<String>;
-
-    // update the merged config to remote db
-    for (final collectionid in collectionToUpdate) {
-      try {
-        await saveConfig(sconfigs[collectionid]!);
-      } catch (error, stackTrace) {
-        _logger.severe(
-          "Failed to update smart album config for collection $collectionid",
-          error,
-          stackTrace,
-        );
-      }
-    }
-
-    // delete all remote ids that are merged into the config
-    for (final remoteId in idToDelete) {
-      try {
-        await _deleteEntry(id: remoteId);
-      } catch (error, stackTrace) {
-        _logger.severe(
-          "Failed to delete smart album config for remote id $remoteId",
-          error,
-          stackTrace,
-        );
-      }
-    }
-
-    return sconfigs;
+    return result;
   }
 
-  Map<String, dynamic> _decodeSConfigEntities(
+  Map<int, SmartAlbumConfig> _decodeSConfigEntities(
     Map<String, dynamic> param,
   ) {
     final entities = (param["entity"] as List<LocalEntityData>);
 
     final Map<int, SmartAlbumConfig> sconfigs = {};
-    final Set<int> collectionToUpdate = {};
-    final Set<String> idToDelete = {};
 
     for (final entity in entities) {
       try {
-        var config = SmartAlbumConfig.fromJson(
+        final config = SmartAlbumConfig.fromJson(
           json.decode(entity.data),
           entity.id,
           entity.updatedAt,
         );
-
-        if (sconfigs.containsKey(config.collectionId)) {
-          final existingConfig = sconfigs[config.collectionId]!;
-          final collectionIdToKeep = config.updatedAt < existingConfig.updatedAt
-              ? config.collectionId
-              : existingConfig.collectionId;
-          final remoteIdToDelete = config.updatedAt < existingConfig.updatedAt
-              ? existingConfig.id
-              : config.id;
-
-          config = config.merge(sconfigs[config.collectionId]!);
-
-          // Update the config to be updated and deleted list
-          collectionToUpdate.add(collectionIdToKeep);
-          idToDelete.add(remoteIdToDelete!);
-        }
 
         sconfigs[config.collectionId] = config;
       } catch (error, stackTrace) {
@@ -125,11 +73,7 @@ class SmartAlbumsService {
       }
     }
 
-    return {
-      "sconfigs": sconfigs,
-      "collectionToUpdate": collectionToUpdate,
-      "idToDelete": idToDelete,
-    };
+    return sconfigs;
   }
 
   Future<void> syncSmartAlbums() async {
@@ -191,10 +135,14 @@ class SmartAlbumsService {
   }
 
   Future<void> saveConfig(SmartAlbumConfig config) async {
+    final userId = Configuration.instance.getUserID();
+
     await _addOrUpdateEntity(
-      type,
+      EntityType.smartAlbum,
       config.toJson(),
-      id: config.id,
+      collectionId: config.collectionId,
+      addWithCustomID: config.id == null,
+      userId: userId,
     );
   }
 
@@ -207,13 +155,18 @@ class SmartAlbumsService {
   Future<LocalEntityData> _addOrUpdateEntity(
     EntityType type,
     Map<String, dynamic> jsonMap, {
-    String? id,
+    required int collectionId,
+    bool addWithCustomID = false,
+    int? userId,
   }) async {
+    final id = "sa_${userId!}_$collectionId";
     final result = await entityService.addOrUpdate(
       type,
       jsonMap,
       id: id,
+      addWithCustomID: addWithCustomID,
     );
+
     _lastCacheRefreshTime = 0; // Invalidate cache
     return result;
   }

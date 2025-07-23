@@ -60,6 +60,7 @@ class EntityService {
     EntityType type,
     Map<String, dynamic> jsonMap, {
     String? id,
+    bool addWithCustomID = false,
   }) async {
     final String plainText = jsonEncode(jsonMap);
     final key = await getOrCreateEntityKey(type);
@@ -81,7 +82,7 @@ class EntityService {
     );
     late LocalEntityData localData;
 
-    final EntityData data = id == null
+    final EntityData data = id == null || addWithCustomID
         ? await _gateway.createEntity(type, encryptedData, header)
         : await _gateway.updateEntity(type, id, encryptedData, header);
     localData = LocalEntityData(
@@ -106,8 +107,7 @@ class EntityService {
     try {
       await _remoteToLocalSync(EntityType.location);
       await _remoteToLocalSync(EntityType.cgroup);
-      // TODO: Change to smart config
-      await _remoteToLocalSync(EntityType.person);
+      await _remoteToLocalSync(EntityType.smartAlbum);
     } catch (e) {
       _logger.severe("Failed to sync entities", e);
     }

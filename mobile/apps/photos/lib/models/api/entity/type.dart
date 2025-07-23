@@ -5,7 +5,7 @@ enum EntityType {
   person,
   cgroup,
   unknown,
-  smartConfig,
+  smartAlbum,
 }
 
 EntityType typeFromString(String type) {
@@ -28,6 +28,7 @@ extension EntityTypeExtn on EntityType {
     switch (this) {
       case EntityType.location:
       case EntityType.person:
+      case EntityType.smartAlbum:
         return false;
       default:
         return true;
@@ -42,8 +43,8 @@ extension EntityTypeExtn on EntityType {
         return "person";
       case EntityType.cgroup:
         return "cgroup";
-      case EntityType.smartConfig:
-        return "sconfig";
+      case EntityType.smartAlbum:
+        return "smart_album";
       case EntityType.unknown:
         return "unknown";
     }

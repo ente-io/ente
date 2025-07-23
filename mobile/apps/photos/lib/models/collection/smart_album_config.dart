@@ -69,10 +69,8 @@ class SmartAlbumConfig {
   // toJson and fromJson methods
   Map<String, dynamic> toJson() {
     return {
-      "remote_id": id,
       "collection_id": collectionId,
       "person_ids": personIDs.toList(),
-      "updated_at": updatedAt,
       "info_map": infoMap.map(
         (key, value) => MapEntry(
           key,
@@ -108,36 +106,6 @@ class SmartAlbumConfig {
       personIDs: personIDs,
       infoMap: infoMap,
       updatedAt: updatedAt ?? DateTime.now().millisecondsSinceEpoch,
-    );
-  }
-
-  SmartAlbumConfig merge(SmartAlbumConfig b) {
-    if (id == b.id) {
-      if (updatedAt >= b.updatedAt) {
-        return this;
-      }
-      return b;
-    }
-    return SmartAlbumConfig(
-      id: b.updatedAt <= updatedAt ? b.id : id,
-      collectionId: b.collectionId,
-      personIDs: personIDs.union(b.personIDs),
-      infoMap: {
-        ...infoMap,
-        ...b.infoMap.map(
-          (key, value) => MapEntry(
-            key,
-            (
-              updatedAt: infoMap[key]?.updatedAt != null &&
-                      infoMap[key]!.updatedAt > value.updatedAt
-                  ? infoMap[key]!.updatedAt
-                  : value.updatedAt,
-              addedFiles: infoMap[key]?.addedFiles.union(value.addedFiles) ??
-                  value.addedFiles,
-            ),
-          ),
-        ),
-      },
     );
   }
 }
