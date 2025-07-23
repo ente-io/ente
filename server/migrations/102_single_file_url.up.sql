@@ -43,4 +43,4 @@ CREATE TABLE IF NOT EXISTS public_file_tokens_access_history
 
 CREATE UNIQUE INDEX IF NOT EXISTS public_file_token_unique_idx ON public_file_tokens (access_token) WHERE is_disabled = FALSE;
 CREATE INDEX IF NOT EXISTS public_file_tokens_owner_id_updated_at_idx ON public_file_tokens (owner_id, updated_at);
-
+CREATE UNIQUE INDEX IF NOT EXISTS public_active_file_link_unique_idx ON public_file_tokens (file_id, is_disabled) WHERE is_disabled = FALSE;

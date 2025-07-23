@@ -31,8 +31,9 @@ func NewFileLinkRepo(db *sql.DB) *FileLinkRepository {
 		lockerHost = "https://locker.ente.io"
 	}
 	return &FileLinkRepository{
-		DB:        db,
-		photoHost: albumHost,
+		DB:         db,
+		photoHost:  albumHost,
+		lockerHost: lockerHost,
 	}
 }
 
@@ -59,7 +60,7 @@ func (pcr *FileLinkRepository) Insert(
     (id, file_id, owner_id, access_token, app) VALUES ($1, $2, $3, $4, $5)`,
 		id, fileID, ownerID, token, string(app))
 	if err != nil {
-		if err.Error() == "pq: duplicate key value violates unique constraint \"public_file_token_unique_idx\"" {
+		if err.Error() == "pq: duplicate key value violates unique constraint \"public_active_file_link_unique_idx\"" {
 			return nil, ente.ErrActiveLinkAlreadyExists
 		}
 		return nil, stacktrace.Propagate(err, "failed to insert")
@@ -152,12 +153,12 @@ func (pcr *FileLinkRepository) GetFileUrlRowByToken(ctx context.Context, accessT
 
 func (pcr *FileLinkRepository) GetFileUrlRowByFileID(ctx context.Context, fileID int64) (*ente.FileLinkRow, error) {
 	row := pcr.DB.QueryRowContext(ctx,
-		`SELECT id, file_id, owner_id, is_disabled, enable_download, valid_till, device_limit, pw_hash, pw_nonce, mem_limit, ops_limit,
+		`SELECT id, file_id, access_token, owner_id, is_disabled, enable_download, valid_till, device_limit, pw_hash, pw_nonce, mem_limit, ops_limit,
 	   created_at, updated_at
 		from public_file_tokens 
 		where file_id = $1 and is_disabled = FALSE`, fileID)
 	var result = ente.FileLinkRow{}
-	err := row.Scan(&result.LinkID, &result.FileID, &result.OwnerID, &result.IsDisabled, &result.EnableDownload, &result.ValidTill, &result.DeviceLimit, &result.PassHash, &result.Nonce, &result.MemLimit, &result.OpsLimit, &result.CreatedAt, &result.UpdatedAt)
+	err := row.Scan(&result.LinkID, &result.FileID, &result.Token, &result.OwnerID, &result.IsDisabled, &result.EnableDownload, &result.ValidTill, &result.DeviceLimit, &result.PassHash, &result.Nonce, &result.MemLimit, &result.OpsLimit, &result.CreatedAt, &result.UpdatedAt)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, ente.ErrNotFound
