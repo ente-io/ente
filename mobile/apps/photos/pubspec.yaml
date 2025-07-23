@@ -109,6 +109,7 @@ dependencies:
   fluttertoast: ^8.0.6
   fraction: ^5.0.2
   freezed_annotation: ^2.4.1
+  google_fonts: ^6.2.1
   home_widget: ^0.7.0+1
   html_unescape: ^2.0.0
   http: ^1.1.0
@@ -343,6 +344,7 @@ flutter:
   assets:
     - assets/
     - assets/video-editor/
+    - assets/image-editor/
     - assets/icons/
     - assets/launcher_icon/
   fonts:
