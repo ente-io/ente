@@ -34,26 +34,26 @@ class SmartAlbumsService {
       _lastCacheRefreshTime = lastRemoteSyncTimeValue;
       _cachedConfigsFuture = null; // Invalidate cache
     }
-    _cachedConfigsFuture ??= _fetchAndCacheSConfigs();
+    _cachedConfigsFuture ??= _fetchAndCacheSaConfigs();
     return await _cachedConfigsFuture!;
   }
 
-  Future<Map<int, SmartAlbumConfig>> _fetchAndCacheSConfigs() async {
+  Future<Map<int, SmartAlbumConfig>> _fetchAndCacheSaConfigs() async {
     _logger.finest("reading all smart configs from local db");
 
     final entities = await entityService.getEntities(EntityType.smartAlbum);
 
-    final result = _decodeSConfigEntities({"entity": entities});
+    final result = _decodeSaConfigEntities({"entity": entities});
 
     return result;
   }
 
-  Map<int, SmartAlbumConfig> _decodeSConfigEntities(
+  Map<int, SmartAlbumConfig> _decodeSaConfigEntities(
     Map<String, dynamic> param,
   ) {
     final entities = (param["entity"] as List<LocalEntityData>);
 
-    final Map<int, SmartAlbumConfig> sconfigs = {};
+    final Map<int, SmartAlbumConfig> saConfigs = {};
 
     for (final entity in entities) {
       try {
@@ -63,7 +63,7 @@ class SmartAlbumsService {
           entity.updatedAt,
         );
 
-        sconfigs[config.collectionId] = config;
+        saConfigs[config.collectionId] = config;
       } catch (error, stackTrace) {
         _logger.severe(
           "Failed to decode smart album config",
@@ -73,7 +73,7 @@ class SmartAlbumsService {
       }
     }
 
-    return sconfigs;
+    return saConfigs;
   }
 
   Future<void> syncSmartAlbums() async {
