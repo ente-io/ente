@@ -1,7 +1,7 @@
-import log from "@/base/log";
-import { nullToUndefined } from "@/utils/transform";
+import log from "ente-base/log";
+import { nullToUndefined } from "ente-utils/transform";
 import { HOTP, TOTP } from "otpauth";
-import { z } from "zod";
+import { z } from "zod/v4";
 import { Steam } from "./steam";
 /**
  * A parsed representation of an *OTP code URI.
@@ -256,12 +256,19 @@ const parseCodeDisplay = (url: URL): CodeDisplay | undefined => {
  *
  * @param code The parsed code data, including the secret and code type.
  *
+ * @param timeOffset A millisecond delta that should be applied to Date.now when
+ * deriving the OTP.
+ *
  * @returns a pair of OTPs, the current one and the next one, using the given
  * {@link code}.
  */
-export const generateOTPs = (code: Code): [otp: string, nextOTP: string] => {
+export const generateOTPs = (
+    code: Code,
+    timeOffset: number,
+): [otp: string, nextOTP: string] => {
     let otp: string;
     let nextOTP: string;
+    const timestamp = Date.now() + timeOffset;
     switch (code.type) {
         case "totp": {
             const totp = new TOTP({
@@ -270,9 +277,9 @@ export const generateOTPs = (code: Code): [otp: string, nextOTP: string] => {
                 period: code.period,
                 digits: code.length,
             });
-            otp = totp.generate();
+            otp = totp.generate({ timestamp });
             nextOTP = totp.generate({
-                timestamp: Date.now() + code.period * 1000,
+                timestamp: timestamp + code.period * 1000,
             });
             break;
         }
@@ -290,12 +297,10 @@ export const generateOTPs = (code: Code): [otp: string, nextOTP: string] => {
         }
 
         case "steam": {
-            const steam = new Steam({
-                secret: code.secret,
-            });
-            otp = steam.generate();
+            const steam = new Steam({ secret: code.secret });
+            otp = steam.generate({ timestamp });
             nextOTP = steam.generate({
-                timestamp: Date.now() + code.period * 1000,
+                timestamp: timestamp + code.period * 1000,
             });
             break;
         }

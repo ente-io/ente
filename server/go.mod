@@ -5,11 +5,13 @@ go 1.23
 require (
 	firebase.google.com/go v3.13.0+incompatible
 	github.com/GoKillers/libsodium-go v0.0.0-20171022220152-dd733721c3cb
+	github.com/TwiN/go-away v1.6.13
 	github.com/avct/uasurfer v0.0.0-20191028135549-26b5daa857f1
 	github.com/awa/go-iap v1.3.16
 	github.com/aws/aws-sdk-go v1.34.13
 	github.com/bwmarrin/discordgo v0.25.0
 	github.com/dlmiddlecote/sqlstats v1.0.2
+	github.com/ente-io/go-srp v0.0.0-20250116115009-d52061067e78
 	github.com/ente-io/stacktrace v0.0.0-20210619050357-0af9fad4639c
 	github.com/gin-contrib/gzip v0.0.5
 	github.com/gin-contrib/requestid v0.0.2-0.20210619060739-3f23d9a07dc5
@@ -18,9 +20,7 @@ require (
 	github.com/go-playground/validator/v10 v10.14.0
 	github.com/golang-jwt/jwt v3.2.1+incompatible
 	github.com/golang-migrate/migrate/v4 v4.12.2
-	github.com/google/go-cmp v0.6.0
 	github.com/google/uuid v1.6.0
-	github.com/kong/go-srp v0.0.0-20191210190804-cde1efa3c083
 	github.com/lib/pq v1.8.0
 	github.com/lithammer/shortuuid/v3 v3.0.4
 	github.com/matoous/go-nanoid/v2 v2.1.0
@@ -31,9 +31,8 @@ require (
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/sirupsen/logrus v1.6.0
 	github.com/spf13/viper v1.8.1
-	github.com/stretchr/testify v1.9.0
+	github.com/stretchr/testify v1.10.0
 	github.com/stripe/stripe-go/v72 v72.37.0
-	github.com/TwiN/go-away v1.6.13
 	github.com/ua-parser/uap-go v0.0.0-20211112212520-00c877edfe0f
 	github.com/ulule/limiter/v3 v3.8.0
 	github.com/zsais/go-gin-prometheus v0.1.0
@@ -54,6 +53,7 @@ require (
 	github.com/go-webauthn/x v0.1.9 // indirect
 	github.com/goccy/go-json v0.10.2 // indirect
 	github.com/golang-jwt/jwt/v5 v5.2.1 // indirect
+	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/google/go-tpm v0.9.0 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.2.3 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.4 // indirect

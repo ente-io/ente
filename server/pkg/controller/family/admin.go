@@ -57,7 +57,7 @@ func (c *Controller) CreateFamily(ctx context.Context, adminUserID int64) error 
 }
 
 // InviteMember invites a user to join the family plan of admin User
-func (c *Controller) InviteMember(ctx *gin.Context, adminUserID int64, email string) error {
+func (c *Controller) InviteMember(ctx *gin.Context, adminUserID int64, email string, storageLimit *int64) error {
 	err := c.BillingCtrl.IsActivePayingSubscriber(adminUserID)
 	if err != nil {
 		return stacktrace.Propagate(ente.ErrNoActiveSubscription, "you must be on a paid plan")
@@ -114,7 +114,7 @@ func (c *Controller) InviteMember(ctx *gin.Context, adminUserID int64, email str
 		return stacktrace.Propagate(err, "")
 	}
 
-	activeInviteToken, err := c.FamilyRepo.AddMemberInvite(ctx, adminUserID, potentialMemberUser.ID, inviteToken)
+	activeInviteToken, err := c.FamilyRepo.AddMemberInvite(ctx, adminUserID, potentialMemberUser.ID, inviteToken, storageLimit)
 	if err != nil {
 		return stacktrace.Propagate(err, "")
 	}
@@ -190,6 +190,56 @@ func (c *Controller) CloseFamily(ctx context.Context, adminID int64) error {
 	return nil
 }
 
+// ModifyMemberStorage allows admin user to update the storageLimit for a member in the family
+func (c *Controller) ModifyMemberStorage(ctx context.Context, actorUserID int64, id uuid.UUID, storageLimit *int64) error {
+	member, err := c.FamilyRepo.GetMemberById(ctx, id)
+	if err != nil {
+		return stacktrace.Propagate(err, "Couldn't fetch Family Member")
+	}
+
+	if member.AdminUserID != actorUserID {
+		return stacktrace.Propagate(ente.ErrPermissionDenied, "you do not have sufficient permission")
+	}
+
+	if member.IsAdmin {
+		return stacktrace.Propagate(ente.NewBadRequestWithMessage("can not limit admin storage"), "cannot modify admin storage limit")
+	}
+
+	if member.Status != ente.ACCEPTED {
+		return stacktrace.Propagate(ente.ErrBadRequest, "user is not a part of family")
+	}
+
+	// gets admin subscription in order to get the size of total storage quota (including bonus)
+	if storageLimit != nil {
+		familyMembersData, err := c.FetchMembersForAdminID(ctx, member.AdminUserID)
+		if err != nil {
+			return stacktrace.Propagate(ente.ErrBadRequest, "couldn't get active subscription")
+		}
+		totalFamilyStorage := familyMembersData.Storage + familyMembersData.AdminBonus
+		if *storageLimit > totalFamilyStorage {
+			return stacktrace.Propagate(ente.ErrStorageLimitExceeded, "potential storage limit is more than subscription storage")
+		}
+
+		// Handle if the admin user tries reducing the storage Limit
+		// and the members Usage is more than the potential storage Limit
+		memberUsage, memUsageErr := c.UsageRepo.GetUsage(member.MemberUserID)
+		if memUsageErr != nil {
+			return stacktrace.Propagate(memUsageErr, "Couldn't find members storage usage")
+		}
+
+		if memberUsage > *storageLimit {
+			return stacktrace.Propagate(ente.NewBadRequestWithMessage("Failed to reduce storage"), "User's current usage is more")
+		}
+	}
+
+	modifyStorageErr := c.FamilyRepo.ModifyMemberStorage(ctx, actorUserID, member.ID, storageLimit)
+	if modifyStorageErr != nil {
+		return stacktrace.Propagate(modifyStorageErr, "Failed to modify members storage")
+	}
+
+	return nil
+}
+
 func (c *Controller) sendNotification(ctx context.Context, adminUserID int64, memberUserID int64, newStatus ente.MemberStatus, inviteToken *string) error {
 	adminUser, err := c.UserRepo.Get(adminUserID)
 	if err != nil {
@@ -239,7 +289,7 @@ func (c *Controller) sendNotification(ctx context.Context, adminUserID int64, me
 		return stacktrace.Propagate(fmt.Errorf("unsupported status %s", newStatus), "")
 	}
 	inlineImages = append(inlineImages, inlineImage)
-	err = emailUtil.SendTemplatedEmail([]string{emailTo}, "ente", "families@ente.io",
+	err = emailUtil.SendTemplatedEmail([]string{emailTo}, "ente", "team@ente.io",
 		title, templateName, templateData, inlineImages)
 	if err != nil {
 		return stacktrace.Propagate(err, "")

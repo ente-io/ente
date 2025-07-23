@@ -1,14 +1,16 @@
-import { isDesktop } from "@/base/app";
-import { authenticatedRequestHeaders, ensureOk } from "@/base/http";
-import { getKV, setKV } from "@/base/kv";
-import { apiURL } from "@/base/origins";
+import { updateSavedLocalUser } from "ente-accounts/services/accounts-db";
+import { ensureLocalUser } from "ente-accounts/services/user";
+import { isDesktop } from "ente-base/app";
+import { authenticatedRequestHeaders, ensureOk } from "ente-base/http";
+import { getKV, setKV } from "ente-base/kv";
+import log from "ente-base/log";
+import { apiURL } from "ente-base/origins";
 import {
     nullishToEmpty,
     nullishToZero,
     nullToUndefined,
-} from "@/utils/transform";
-import { getData, LS_KEYS, setLSUser } from "@ente/shared/storage/localStorage";
-import { z } from "zod";
+} from "ente-utils/transform";
+import { z } from "zod/v4";
 
 /**
  * Validity of the plan.
@@ -57,17 +59,25 @@ const FamilyMember = z.object({
      */
     email: z.string(),
     /**
+     * `true` if this is the admin.
+     *
+     * This field will not be sent for invited members until they accept.
+     */
+    isAdmin: z.boolean().nullish().transform(nullToUndefined),
+    /**
      * Storage used by the family member.
      *
      * This field will not be present for invited members until they accept.
      */
     usage: z.number().nullish().transform(nullToUndefined),
     /**
-     * `true` if this is the admin.
+     * Storage limit allocated to the family member.
      *
-     * This field will not be sent for invited members until they accept.
+     * This field will not be present unless the admin for the family plan has
+     * configured a member specific limit, in which case this will be the limit
+     * (in bytes) specifying the storage which this member can use.
      */
-    isAdmin: z.boolean().nullish().transform(nullToUndefined),
+    storageLimit: z.number().nullish().transform(nullToUndefined),
 });
 
 type FamilyMember = z.infer<typeof FamilyMember>;
@@ -167,18 +177,22 @@ export const logoutUserDetails = () => {
 };
 
 /**
- * Read in the locally persisted settings into memory, otherwise initate a
- * network requests to fetch the latest values (but don't wait for it to
- * complete).
+ * Read in the locally persisted user details into memory and return them.
+ *
+ * If there are no locally persisted values, initiate a network requests to
+ * fetch the latest values (but don't wait for it to complete).
  *
  * This assumes that the user is already logged in.
  */
-export const initUserDetailsOrTriggerSync = async () => {
+export const savedUserDetailsOrTriggerPull = async () => {
     const saved = await getKV("userDetails");
     if (saved) {
-        setUserDetailsSnapshot(UserDetails.parse(saved));
+        const userDetails = UserDetails.parse(saved);
+        setUserDetailsSnapshot(userDetails);
+        return userDetails;
     } else {
-        void syncUserDetails();
+        void pullUserDetails();
+        return undefined;
     }
 };
 
@@ -221,42 +235,49 @@ const setUserDetailsSnapshot = (snapshot: UserDetails) => {
  * Fetch the user's details from remote and save them in local storage for
  * subsequent lookup, and also update our in-memory snapshots.
  */
-export const syncUserDetails = async () => {
-    const userDetails = await getUserDetailsV2();
+export const pullUserDetails = async () => {
+    const userDetails = await getUserDetails();
     await setKV("userDetails", userDetails);
-    setUserDetailsSnapshot(userDetails);
 
-    // TODO: The existing code used to also set the email for the local storage
-    // user whenever it updated the user details. I don't see why this would be
-    // needed though.
+    // Update the email for the local storage user if needed (the user might've
+    // changed their email on a different client).
+    const { email } = userDetails;
+    if (ensureLocalUser().email != email) {
+        log.info("Updating user email to match fetched user details");
+        updateSavedLocalUser({ email });
+    }
+
+    // The gallery listens for updates to userDetails, so a special case, do a
+    // deep equality check so as to not rerender it on redundant updates.
     //
-    // Retaining the existing behaviour for now, except we throw. The intent is
-    // to remove this entire copy-over after a bit.
+    // [Note: Deep equal check]
     //
-    // Added Nov 2024, and can be removed after a while (tag: Migration).
+    // React uses `Object.is` to detect changes, which changes for arrays,
+    // objects and combinations thereof even if the underlying data is the same.
+    //
+    // In many cases, the code can be restructured to avoid this being a
+    // problem, or the rerender might be infrequent enough that it is not a
+    // problem.
+    //
+    // However, when used with useSyncExternalStore, there is an easy way to
+    // prevent this, by doing a preflight deep equality comparison.
+    //
+    // There are arguably faster libraries out there that'll do the deep
+    // equality check for us, but since it is an infrequent pattern in our code
+    // base currently, we just use the JSON serialization.
+    //
+    // Mark all cases that do this using this note's title so we can audit them
+    // if we move to a deep equality comparison library in the future.
 
-    const oldLSUser = getData(LS_KEYS.USER) as unknown;
-    const hasMatchingEmail =
-        oldLSUser &&
-        typeof oldLSUser == "object" &&
-        "email" in oldLSUser &&
-        typeof oldLSUser.email == "string" &&
-        oldLSUser.email == userDetails.email;
-
-    if (!hasMatchingEmail) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-        await setLSUser({
-            ...getData(LS_KEYS.USER),
-            email: userDetails.email,
-        });
-        throw new Error("Email in local storage did not match user details");
+    if (JSON.stringify(userDetails) != JSON.stringify(userDetailsSnapshot())) {
+        setUserDetailsSnapshot(userDetails);
     }
 };
 
 /**
- * Fetch user details from remote.
+ * Fetch the user details for the currently logged in user from remote.
  */
-export const getUserDetailsV2 = async () => {
+const getUserDetails = async () => {
     const res = await fetch(await apiURL("/users/details/v2"), {
         headers: await authenticatedRequestHeaders(),
     });
@@ -334,7 +355,7 @@ export const verifyStripeSubscription = async (
             }),
         }),
     );
-    await syncUserDetails();
+    await pullUserDetails();
     return userDetailsSnapshot()!.subscription;
 };
 
@@ -350,7 +371,7 @@ export const activateStripeSubscription = async () => {
             headers: await authenticatedRequestHeaders(),
         }),
     );
-    return syncUserDetails();
+    return pullUserDetails();
 };
 
 /**
@@ -364,7 +385,7 @@ export const cancelStripeSubscription = async () => {
             headers: await authenticatedRequestHeaders(),
         }),
     );
-    return syncUserDetails();
+    return pullUserDetails();
 };
 
 const paymentsAppOrigin = "https://payments.ente.io";
@@ -414,11 +435,10 @@ const getPaymentToken = async () => {
  */
 export const redirectToCustomerPortal = async () => {
     const redirectURL = paymentCompletionRedirectURL();
-    const url = await apiURL("/billing/stripe/customer-portal");
-    const params = new URLSearchParams({ redirectURL });
-    const res = await fetch(`${url}?${params.toString()}`, {
-        headers: await authenticatedRequestHeaders(),
-    });
+    const res = await fetch(
+        await apiURL("/billing/stripe/customer-portal", { redirectURL }),
+        { headers: await authenticatedRequestHeaders() },
+    );
     ensureOk(res);
     const portal = z.object({ url: z.string() }).parse(await res.json());
     window.location.href = portal.url;
@@ -485,6 +505,14 @@ export const isFamilyAdmin = (userDetails: UserDetails) =>
     userDetails.email == familyAdminEmail(userDetails);
 
 /**
+ * Return the member specific storage limit for the user (represented by the
+ * given {@link userDetails}).
+ */
+export const familyMemberStorageLimit = (userDetails: UserDetails) =>
+    userDetails.familyData?.members.find((m) => m.email == userDetails.email)
+        ?.storageLimit;
+
+/**
  * Return the email of the admin for the family plan, if any, that the user
  * (represented by the given {@link userDetails}) is a part of.
  */
@@ -539,7 +567,8 @@ const getFamiliesTokenAndURL = async () => {
 
 /**
  * Update remote to indicate that the user wants to leave the family plan that
- * they are part of, then our local sync user details with remote.
+ * they are part of, then update our local user details by pulling the latest
+ * ones from remote.
  */
 export const leaveFamily = async () => {
     ensureOk(
@@ -548,7 +577,7 @@ export const leaveFamily = async () => {
             headers: await authenticatedRequestHeaders(),
         }),
     );
-    return syncUserDetails();
+    return pullUserDetails();
 };
 
 /**

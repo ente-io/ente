@@ -1,26 +1,29 @@
-import { ensureElectron } from "@/base/electron";
-import log from "@/base/log";
-import type { Electron } from "@/base/types/ipc";
+import { ensureElectron } from "ente-base/electron";
+import log from "ente-base/log";
+import type { Electron } from "ente-base/types/ipc";
 import {
-    readConvertToMP4Done,
-    readConvertToMP4Stream,
-    writeConvertToMP4Stream,
-} from "@/gallery/utils/native-stream";
-import { parseMetadataDate, type ParsedMetadata } from "@/media/file-metadata";
-import {
-    toDataOrPathOrZipEntry,
-    type DesktopUploadItem,
+    toPathOrZipEntry,
+    type FileSystemUploadItem,
     type UploadItem,
-} from "@/new/photos/services/upload/types";
+} from "ente-gallery/services/upload";
+import {
+    initiateConvertToMP4,
+    readVideoStream,
+    videoStreamDone,
+} from "ente-gallery/utils/native-stream";
+import {
+    parseMetadataDate,
+    type ParsedMetadata,
+} from "ente-media/file-metadata";
 import {
     ffmpegPathPlaceholder,
     inputPathPlaceholder,
     outputPathPlaceholder,
 } from "./constants";
-import { ffmpegExecWeb } from "./web";
+import { determineVideoDurationWeb, ffmpegExecWeb } from "./web";
 
 /**
- * Generate a thumbnail for the given video using a wasm FFmpeg running in a web
+ * Generate a thumbnail for the given video using a Wasm FFmpeg running in a web
  * worker.
  *
  * This function is called during upload, when we need to generate thumbnails
@@ -66,42 +69,64 @@ const _generateVideoThumbnail = async (
  */
 export const generateVideoThumbnailNative = async (
     electron: Electron,
-    desktopUploadItem: DesktopUploadItem,
+    fsUploadItem: FileSystemUploadItem,
 ) =>
     _generateVideoThumbnail((seekTime: number) =>
         electron.ffmpegExec(
             makeGenThumbnailCommand(seekTime),
-            toDataOrPathOrZipEntry(desktopUploadItem),
+            toPathOrZipEntry(fsUploadItem),
             "jpeg",
         ),
     );
 
-const makeGenThumbnailCommand = (seekTime: number) => [
+const makeGenThumbnailCommand = (seekTime: number) => ({
+    default: _makeGenThumbnailCommand(seekTime, false),
+    hdr: _makeGenThumbnailCommand(seekTime, true),
+});
+
+const _makeGenThumbnailCommand = (seekTime: number, forHDR: boolean) => [
     ffmpegPathPlaceholder,
     "-i",
     inputPathPlaceholder,
+    // Seek to seekTime in the video.
     "-ss",
     `00:00:0${seekTime}`,
+    // Take the first frame
     "-vframes",
     "1",
+    // Apply a filter to this frame
     "-vf",
-    "scale=-1:720",
+    [
+        // Scale it to a maximum height of 720 keeping aspect ratio, ensuring
+        // that the dimensions are even (subsequent filters require this).
+        "scale=-2:720",
+        forHDR
+            ? // Apply a tonemap to ensure that thumbnails of HDR videos do
+              // not look washed out. See: [Note: Tonemapping HDR to HD].
+              [
+                  "zscale=transfer=linear",
+                  "tonemap=tonemap=hable:desat=0",
+                  "zscale=primaries=709:transfer=709:matrix=709",
+              ]
+            : [],
+    ]
+        .flat()
+        .join(","),
     outputPathPlaceholder,
 ];
 
 /**
- * Extract metadata from the given video
+ * Extract metadata from the given video.
  *
- * When we're running in the context of our desktop app _and_ we're passed a
- * file path , this uses the native FFmpeg bundled with our desktop app.
- * Otherwise it uses a wasm build of FFmpeg running in a web worker.
+ * When we're running in the context of our desktop app _and_ we're passed an
+ * upload item that resolves to a path of the user's file system, this uses the
+ * native FFmpeg bundled with our desktop app. Otherwise it uses a Wasm build of
+ * FFmpeg running in a web worker.
  *
- * This function is called during upload, when we need to extract the metadata
- * of videos that the user is uploading.
+ * This function is called during upload, when we need to extract the
+ * "ffmetadata" of videos that the user is uploading.
  *
- * @param uploadItem A {@link File}, or the absolute path to a file on the
- * user's local file sytem. A path can only be provided when we're running in
- * the context of our desktop app.
+ * @param uploadItem The video item being uploaded.
  */
 export const extractVideoMetadata = async (
     uploadItem: UploadItem,
@@ -112,7 +137,7 @@ export const extractVideoMetadata = async (
             ? await ffmpegExecWeb(command, uploadItem, "txt")
             : await ensureElectron().ffmpegExec(
                   command,
-                  toDataOrPathOrZipEntry(uploadItem),
+                  toPathOrZipEntry(uploadItem),
                   "txt",
               ),
     );
@@ -159,8 +184,13 @@ const parseFFmpegExtractedMetadata = (ffmpegOutput: Uint8Array) => {
     // with comments and newlines.
     //
     // https://ffmpeg.org/ffmpeg-formats.html#Metadata-2
+    //
+    // On Windows, while I couldn't find it documented anywhere, the generated
+    // ffmetadata file uses Unix line separators ("\n"). But for the sake of
+    // extra (albeit possibly unnecessary) safety, handle both \r\n and \n
+    // separators in the split. See: [Note: ffmpeg newlines]
 
-    const lines = new TextDecoder().decode(ffmpegOutput).split("\n");
+    const lines = new TextDecoder().decode(ffmpegOutput).split(/\r?\n/);
     const isPair = (xs: string[]): xs is [string, string] => xs.length == 2;
     const kvPairs = lines.map((property) => property.split("=")).filter(isPair);
 
@@ -235,6 +265,26 @@ const parseFFMetadataDate = (s: string | undefined) => {
 };
 
 /**
+ * Extract the duration (in seconds) from the given video
+ *
+ * This is a sibling of {@link extractVideoMetadata}, except it tries to
+ * determine the duration of the video. The duration is not part of the
+ * "ffmetadata", and is instead a property of the video itself.
+ *
+ * @param uploadItem The video item being uploaded.
+ *
+ * @return the duration of the video in seconds (a floating point number).
+ */
+export const determineVideoDuration = async (
+    uploadItem: UploadItem,
+): Promise<number> =>
+    uploadItem instanceof File
+        ? determineVideoDurationWeb(uploadItem)
+        : ensureElectron().ffmpegDetermineVideoDuration(
+              toPathOrZipEntry(uploadItem),
+          );
+
+/**
  * Convert a video from a format that is not supported in the browser to MP4.
  *
  * This function is called when the user views a video or a live photo, and we
@@ -263,65 +313,10 @@ export const convertToMP4 = async (blob: Blob): Promise<Blob | Uint8Array> => {
 };
 
 const convertToMP4Native = async (electron: Electron, blob: Blob) => {
-    const token = await writeConvertToMP4Stream(electron, blob);
-    const mp4Blob = await readConvertToMP4Stream(electron, token);
-    await readConvertToMP4Done(electron, token);
+    const token = await initiateConvertToMP4(electron, blob);
+    const mp4Blob = await readVideoStream(electron, token).then((res) =>
+        res.blob(),
+    );
+    await videoStreamDone(electron, token);
     return mp4Blob;
 };
-
-/**
- * Generate a preview variant of for the given video using a wasm FFmpeg running
- * in a web worker.
- *
- * See: [Note: Preview variant of videos].
- *
- * @param blob The input video blob.
- *
- * @returns The data of the generated preview variant.
- */
-export const generateVideoPreviewVariantWeb = async (blob: Blob) =>
-    ffmpegExecWeb(generateVideoPreviewMetadataCommand, blob, "mp4");
-
-/**
- * The FFmpeg command to use to create a preview variant of videos.
- *
- * Current parameters
- *
- * - 720p width
- * - 2000kbps bitrate
- * - 30fps frame rate
- *
- * See: [Note: Preview variant of videos]
- *
- * Options:
- *
- * - `-vf` creates a filter graph for the video stream
- *
- * - `-vf scale=720:-1` scales the video to 720p width, keeping aspect ratio.
- *
- * - `-r` sets the frame rate.
- *
- * - `-c:v libx264` sets the codec for the video stream to H264.
- *
- * - `-b:v 2000k` sets the bitrate for the video stream.
- *
- * - `-c:a aac -b:a 128k` converts the audio stream to 128k bit AAC.
- */
-const generateVideoPreviewMetadataCommand = [
-    ffmpegPathPlaceholder,
-    "-i",
-    inputPathPlaceholder,
-    "-vf",
-    "scale=720:-1",
-    "-r",
-    "30",
-    "-c:v",
-    "libx264",
-    "-b:v",
-    "2000k",
-    "-c:a",
-    "aac",
-    "-b:a",
-    "128k",
-    outputPathPlaceholder,
-];

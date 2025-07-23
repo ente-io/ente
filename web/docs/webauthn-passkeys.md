@@ -124,10 +124,7 @@ func (u *PasskeyUser) WebAuthnCredentials() []webauthn.Credential {
 {
     "options": {
         "publicKey": {
-            "rp": {
-                "name": "Ente",
-                "id": "ente.io"
-            },
+            "rp": { "name": "Ente", "id": "ente.io" },
             "user": {
                 "name": "james@example.org",
                 "displayName": "",
@@ -135,46 +132,16 @@ func (u *PasskeyUser) WebAuthnCredentials() []webauthn.Credential {
             },
             "challenge": "xYVv1V08dgrsU_4k5niEkFcfIGbwPauWKPBARS6C6Dg",
             "pubKeyCredParams": [
-                {
-                    "type": "public-key",
-                    "alg": -7
-                },
-                {
-                    "type": "public-key",
-                    "alg": -35
-                },
-                {
-                    "type": "public-key",
-                    "alg": -36
-                },
-                {
-                    "type": "public-key",
-                    "alg": -257
-                },
-                {
-                    "type": "public-key",
-                    "alg": -258
-                },
-                {
-                    "type": "public-key",
-                    "alg": -259
-                },
-                {
-                    "type": "public-key",
-                    "alg": -37
-                },
-                {
-                    "type": "public-key",
-                    "alg": -38
-                },
-                {
-                    "type": "public-key",
-                    "alg": -39
-                },
-                {
-                    "type": "public-key",
-                    "alg": -8
-                }
+                { "type": "public-key", "alg": -7 },
+                { "type": "public-key", "alg": -35 },
+                { "type": "public-key", "alg": -36 },
+                { "type": "public-key", "alg": -257 },
+                { "type": "public-key", "alg": -258 },
+                { "type": "public-key", "alg": -259 },
+                { "type": "public-key", "alg": -37 },
+                { "type": "public-key", "alg": -38 },
+                { "type": "public-key", "alg": -39 },
+                { "type": "public-key", "alg": -8 }
             ],
             "timeout": 300000,
             "authenticatorSelection": {
@@ -326,8 +293,7 @@ const {
     // ...
     twoFactorSessionID,
     passkeySessionID,
-} = await loginViaSRP(srpAttributes, kek);
-setIsFirstLogin(true);
+} = await verifySRP(srpAttributes, kek);
 if (passkeySessionID) {
     // ...
 }
@@ -406,9 +372,7 @@ publicKey.allowCredentials?.forEach(function (listItem: any) {
 ### Retrieving the credential
 
 ```ts
-const credential = await navigator.credentials.get({
-    publicKey: options,
-});
+const credential = await navigator.credentials.get({ publicKey: options });
 ```
 
 ### Pre-processing the credential metadata and signature before authentication

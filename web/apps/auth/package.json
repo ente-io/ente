@@ -3,13 +3,12 @@
     "version": "0.0.0",
     "private": true,
     "dependencies": {
-        "@/accounts": "*",
-        "@/base": "*",
-        "@ente/shared": "*",
+        "ente-accounts": "*",
+        "ente-base": "*",
         "jssha": "~3.3.1",
         "otpauth": "9.2.4"
     },
     "devDependencies": {
-        "@/build-config": "*"
+        "ente-build-config": "*"
     }
 }

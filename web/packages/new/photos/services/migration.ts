@@ -1,8 +1,9 @@
-import { isDesktop } from "@/base/app";
-import { getKVN, removeKV, setKV } from "@/base/kv";
-import log from "@/base/log";
-import localForage from "@ente/shared/storage/localForage";
+import { isDesktop } from "ente-base/app";
+import { getKVN, removeKV, setKV } from "ente-base/kv";
+import log from "ente-base/log";
+import { localForage } from "ente-gallery/services/files-db";
 import { deleteDB } from "idb";
+import { retryIndexingFailuresIfNeeded } from "./ml";
 
 /**
  * App specific migrations.
@@ -29,19 +30,22 @@ import { deleteDB } from "idb";
  */
 export const runMigrations = async () => {
     const m = (await getKVN("migrationLevel")) ?? 0;
-    const latest = 4;
+    const isNewInstall = m == 0;
+    const latest = 5;
     if (m < latest) {
         log.info(`Running migrations ${m} => ${latest}`);
         if (m < 1 && isDesktop) await m1();
         if (m < 2) await m2();
         if (m < 3) await m3();
         if (m < 4) m4();
+        if (m < 5) m5(isNewInstall);
         await setKV("migrationLevel", latest);
     }
 };
 
 // Some of these (indicated by "Prunable") can be no-oped in the future when
-// almost all clients would've migrated over.
+// almost all clients would've migrated over, and there wouldn't be any critical
+// impact if the few remaining outliers never ran that specific migration.
 
 // Added: Aug 2024 (v1.7.3). Prunable.
 const m1 = () =>
@@ -102,11 +106,23 @@ const m3 = () =>
         removeKV("latestUpdatedAt/location"),
     ]);
 
-// Added: Nov 2025 (v1.7.7-beta). Prunable.
+// Added: Nov 2024 (v1.7.7-beta). Prunable.
 const m4 = () => {
     // Delete old local storage keys that have been subsumed elsewhere.
     localStorage.removeItem("mapEnabled");
     localStorage.removeItem("userDetails");
     localStorage.removeItem("subscription");
     localStorage.removeItem("familyData");
+};
+
+// Added: Feb 2025 (v1.7.10). Prunable.
+const m5 = (isNewInstall: boolean) => {
+    // MUI now persists the color scheme (also in local storage). This was
+    // anyway never released, was only ever an internal user flag.
+    localStorage.removeItem("theme");
+    if (!isNewInstall) {
+        // Let the indexer have another go at the files, the new vips conversion
+        // logic added since 1.7.9 might be able to convert more outliers.
+        retryIndexingFailuresIfNeeded();
+    }
 };

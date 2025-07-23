@@ -3,32 +3,6 @@ title: Server admin
 description: Administering your custom self-hosted Ente instance using the CLI
 ---
 
-# Administering your custom server
-
-You can use
-[Ente's CLI](https://github.com/ente-io/ente/releases?q=tag%3Acli-v0) to
-administer your self hosted server.
-
-First we need to get your CLI to connect to your custom server. Define a
-config.yaml and put it either in the same directory as CLI or path defined in
-env variable `ENTE_CLI_CONFIG_PATH`
-
-```yaml
-endpoint:
-    api: "http://localhost:8080"
-```
-
-Now you should be able to
-[add an account](https://github.com/ente-io/ente/blob/main/cli/docs/generated/ente_account_add.md),
-and subsequently increase the
-[storage and account validity](https://github.com/ente-io/ente/blob/main/cli/docs/generated/ente_admin_update-subscription.md)
-using the CLI.
-
-> [!NOTE]
->
-> The CLI command to add an account does not create Ente accounts. It only adds
-> existing accounts to the list of (existing) accounts that the CLI can use.
-
 ## Becoming an admin
 
 By default, the first user (and only the first user) created on the system is
@@ -77,6 +51,37 @@ internal:
 You can use
 [account list](https://github.com/ente-io/ente/blob/main/cli/docs/generated/ente_account_list.md)
 command to find the user id of any account.
+
+# Administering your custom server
+
+> [!NOTE] For the first user (admin) to perform administrative actions using the
+> CLI, their userID must be whitelisted in the `museum.yaml` configuration file
+> under `internal.admins`. While the first user is automatically granted admin
+> privileges on the server, this additional step is required for CLI operations.
+
+You can use
+[Ente's CLI](https://github.com/ente-io/ente/releases?q=tag%3Acli-v0) to
+administer your self hosted server.
+
+First we need to get your CLI to connect to your custom server. Define a
+config.yaml and put it either in the same directory as CLI or path defined in
+env variable `ENTE_CLI_CONFIG_PATH`
+
+```yaml
+endpoint:
+    api: "http://localhost:8080"
+```
+
+Now you should be able to
+[add an account](https://github.com/ente-io/ente/blob/main/cli/docs/generated/ente_account_add.md),
+and subsequently increase the
+[storage and account validity](https://github.com/ente-io/ente/blob/main/cli/docs/generated/ente_admin_update-subscription.md)
+using the CLI.
+
+> [!NOTE]
+>
+> The CLI command to add an account does not create Ente accounts. It only adds
+> existing accounts to the list of (existing) accounts that the CLI can use.
 
 ## Backups
 

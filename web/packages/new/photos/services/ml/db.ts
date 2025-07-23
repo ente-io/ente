@@ -1,4 +1,4 @@
-import log from "@/base/log";
+import log from "ente-base/log";
 import { deleteDB, openDB, type DBSchema } from "idb";
 import type { LocalCLIPIndex } from "./clip";
 import type { FaceCluster } from "./cluster";
@@ -43,23 +43,11 @@ interface MLDBSchema extends DBSchema {
         value: FileStatus;
         indexes: { status: FileStatus["status"] };
     };
-    "face-index": {
-        key: number;
-        value: LocalFaceIndex;
-    };
-    "clip-index": {
-        key: number;
-        value: LocalCLIPIndex;
-    };
-    "face-cluster": {
-        key: string;
-        value: FaceCluster;
-    };
+    "face-index": { key: number; value: LocalFaceIndex };
+    "clip-index": { key: number; value: LocalCLIPIndex };
+    "face-cluster": { key: string; value: FaceCluster };
     /* Unused */
-    "cluster-group": {
-        key: string;
-        value: unknown;
-    };
+    "cluster-group": { key: string; value: unknown };
 }
 
 interface FileStatus {
@@ -182,11 +170,9 @@ export const saveIndexes = async (
     );
 
     await Promise.all([
-        tx.objectStore("file-status").put({
-            fileID,
-            status: "indexed",
-            failureCount: 0,
-        }),
+        tx
+            .objectStore("file-status")
+            .put({ fileID, status: "indexed", failureCount: 0 }),
         tx.objectStore("face-index").put(faceIndex),
         tx.objectStore("clip-index").put(clipIndex),
         tx.done,
@@ -269,7 +255,7 @@ export const addFileEntry = async (fileID: number) => {
  */
 export const updateAssumingLocalFiles = async (
     localFileIDs: number[],
-    localTrashFilesIDs: number[],
+    localTrashFilesIDs: Set<number>,
 ) => {
     const db = await mlDB();
     const tx = db.transaction(
@@ -282,14 +268,13 @@ export const updateAssumingLocalFiles = async (
         .getAllKeys(IDBKeyRange.only("indexed"));
 
     const local = new Set(localFileIDs);
-    const localTrash = new Set(localTrashFilesIDs);
     const fdb = new Set(fdbFileIDs);
     const fdbIndexed = new Set(fdbIndexedFileIDs);
 
     const newFileIDs = localFileIDs.filter((id) => !fdb.has(id));
     const removedFileIDs = fdbFileIDs.filter((id) => {
         if (local.has(id)) return false; // Still exists.
-        if (localTrash.has(id)) {
+        if (localTrashFilesIDs.has(id)) {
             // Exists in trash.
             if (fdbIndexed.has(id)) {
                 // But is already indexed, so let it be.
@@ -315,13 +300,27 @@ export const updateAssumingLocalFiles = async (
 };
 
 /**
- * Return the count of files that can be, and that have been, indexed.
- *
- * These counts are mutually exclusive. Thus the total number of files that are
- * fall within the purview of the indexer will be indexable + indexed (if we are
- * ignoring the "failed" ones).
+ * Remove all "failed" file status entries so that we again attempt to index
+ * those files the next time indexing happens.
  */
-export const getIndexableAndIndexedCounts = async () => {
+export const resetFailedFileStatuses = async () => {
+    const db = await mlDB();
+    const tx = db.transaction("file-status", "readwrite");
+    const ids = await tx.store
+        .index("status")
+        .getAllKeys(IDBKeyRange.only("failed"));
+
+    await Promise.all([ids.map((id) => tx.store.delete(id)), tx.done].flat());
+};
+
+/**
+ * Return the count of files that can be indexed, have been indexed, and which
+ * have been marked as having failed when attempting to index them.
+ *
+ * The total number of files that are within the purview of the indexer is
+ * indexable + indexed + failed.
+ */
+export const savedIndexCounts = async () => {
     const db = await mlDB();
     const tx = db.transaction("file-status", "readonly");
     const indexableCount = await tx.store
@@ -330,7 +329,10 @@ export const getIndexableAndIndexedCounts = async () => {
     const indexedCount = await tx.store
         .index("status")
         .count(IDBKeyRange.only("indexed"));
-    return { indexableCount, indexedCount };
+    const failedCount = await tx.store
+        .index("status")
+        .count(IDBKeyRange.only("failed"));
+    return { indexableCount, indexedCount, failedCount };
 };
 
 /**
@@ -345,7 +347,7 @@ export const getIndexableAndIndexedCounts = async () => {
  * than {@link count} items present, the files with the higher file IDs (which
  * can be taken as a approximate for their creation order) are preferred.
  */
-export const getIndexableFileIDs = async (count: number) => {
+export const readNextIndexableFileIDs = async (count: number) => {
     const db = await mlDB();
     const tx = db.transaction("file-status", "readonly");
     let cursor = await tx.store

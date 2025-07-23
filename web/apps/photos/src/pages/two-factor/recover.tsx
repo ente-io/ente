@@ -1,6 +1,5 @@
-import Page_ from "@/accounts/pages/two-factor/recover";
-import { useAppContext } from "@/new/photos/types/context";
+import Page_ from "ente-accounts/pages/two-factor/recover";
 
-const Page = () => <Page_ appContext={useAppContext()} twoFactorType="totp" />;
+const Page = () => <Page_ twoFactorType="totp" />;
 
 export default Page;

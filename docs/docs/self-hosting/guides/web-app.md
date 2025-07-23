@@ -5,14 +5,23 @@ description:
     server
 ---
 
+> [!WARNING] NOTE This page covers documentation around self-hosting the web app
+> manually. If you want to deploy Ente hassle free, please use the
+> [one line](https://ente.io/blog/self-hosting-quickstart/) command to setup
+> Ente. This guide might be deprecated in the near future.
+
 # Web app
 
 The getting started instructions mention using `yarn dev` (which is an alias of
 `yarn dev:photos`) to serve your web app.
 
+> [!IMPORTANT] Please note that Ente's Web App supports the Yarn version 1.22.xx
+> or 1.22.22 specifically. Make sure to install the right version or modify your
+> yarn installation to meet the requirements. The user might end up into unknown
+> version and dependency related errors if yarn is on different version.
+
 ```sh
 cd ente/web
-git submodule update --init --recursive
 yarn install
 NEXT_PUBLIC_ENTE_ENDPOINT=http://localhost:8080 yarn dev:photos
 ```
@@ -24,10 +33,6 @@ longer term, then it is recommended to follow the Docker approach.
 ## With Docker/Docker Compose (Recommended)
 
 > [!IMPORTANT]
->
-> This docker image is still in testing stage and it might show up with some
-> unknown variables in different scenarios. But this image has been tested on a
-> production Ente site.
 >
 > Recurring changes might be made by the team or from community if more
 > improvements can be made so that we are able to build a full-fledged docker
@@ -45,8 +50,8 @@ COPY apps/ .
 RUN corepack enable
 
 # Endpoint for Ente Server
-NEXT_PUBLIC_ENTE_ENDPOINT=https://your-ente-endpoint.com
-NEXT_PUBLIC_ENTE_ALBUMS_ENDPOINT=https://your-albums-endpoint.com
+ENV NEXT_PUBLIC_ENTE_ENDPOINT=https://changeme.com
+ENV NEXT_PUBLIC_ENTE_ALBUMS_ENDPOINT=https://changeme.com
 
 RUN yarn cache clean
 RUN yarn install --network-timeout 1000000000
@@ -137,85 +142,17 @@ docker compose up -d # --build
 docker compose logs <container-name>
 ```
 
-## Without Docker / Docker compose
+## Configure App Endpoints
 
-One way to run all the apps together without Docker is by using
-[PM2](https://pm2.keymetrics.io/) in this setup. The configuration and usage is
-very simple and just needs one configuration file for it. You can run the apps
-both in dev server mode as well as static files.
+> [!NOTE] Previously, this was dependent on the env variables
+> `NEXT_ENTE_PUBLIC_ACCOUNTS_ENDPOINT` and etc. Please check the below
+> documentation to update your setup configurations
 
-The below configuration will run the apps in dev server mode.
-
-
-
-### Install PM2
-
-```sh
-npm install pm2@latest
-```
-
-Copy the below contents to a file called `ecosystem.config.js` inside the
-`ente/web` directory.
-
-```js
-module.exports = {
-  apps: [
-    {
-      name: "photos",
-      script: "yarn workspace photos next dev",
-      env: {
-        NODE_ENV: "development",
-        PORT: "3000"
-      }
-    },
-    {
-      name: "accounts",
-      script: "yarn workspace accounts next dev",
-      env: {
-        NODE_ENV: "development",
-        PORT: "3001"
-      },
-    {
-      name: "auth",
-      script: "yarn workspace auth next dev",
-      env: {
-        NODE_ENV: "development",
-        PORT: "3002"
-      }
-    },
-    {
-      name: "cast",
-      script: "yarn workspace cast next dev",
-      env: {
-        NODE_ENV: "development",
-        PORT: "3003"
-      }
-    }
-  ]
-};
-
-```
-
-Finally, start pm2.
-
-```sh
-pm2 start
-
-# for logs
-pm2 logs all
-```
-
-## Configure App Endpoints 
-
-> [!NOTE] 
-> Previously, this was dependent on the env variables `NEXT_ENTE_PUBLIC_ACCOUNTS_ENDPOINT`
-> and etc. Please check the below documentation to update your setup configurations
-
-You can configure the web endpoints for the other apps including Accounts, Albums
-Family and Cast in your `museum.yaml` configuration file. Checkout 
+You can configure the web endpoints for the other apps including Accounts,
+Albums Family and Cast in your `museum.yaml` configuration file. Checkout
 [`local.yaml`](https://github.com/ente-io/ente/blob/543411254b2bb55bd00a0e515dcafa12d12d3b35/server/configurations/local.yaml#L76-L89)
-to configure the endpoints. Make sure to setup up your DNS Records accordingly to the 
-similar URL's you set up in `museum.yaml`.
+to configure the endpoints. Make sure to setup up your DNS Records accordingly
+to the similar URL's you set up in `museum.yaml`.
 
 Next part is to configure the web server.
 

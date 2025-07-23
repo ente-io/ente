@@ -4,7 +4,7 @@ on:
     schedule:
         # [Note: Run workflow every 24 hours]
         #
-        # Run everyday at ~8:00 AM IST (except Sundays).
+        # Run every weekday at ~8:00 AM IST.
         #
         # First field is minute, second is hour of the day. Last is day of week,
         # 0 being Sunday.
@@ -15,9 +15,12 @@ on:
         # https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#schedule
         # https://crontab.guru/
         #
-        - cron: "25 2 * * 1-6"
+        - cron: "25 2 * * 1-5"
     # Also allow manually running the workflow
     workflow_dispatch:
+
+permissions:
+    contents: read
 
 jobs:
     deploy:
@@ -30,13 +33,11 @@ jobs:
         steps:
             - name: Checkout code
               uses: actions/checkout@v4
-              with:
-                  submodules: recursive
 
             - name: Setup node and enable yarn caching
               uses: actions/setup-node@v4
               with:
-                  node-version: 20
+                  node-version: 22
                   cache: "yarn"
                   cache-dependency-path: "web/yarn.lock"
 
@@ -92,3 +93,13 @@ jobs:
                   accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
                   apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
                   command: pages deploy --project-name=ente --commit-dirty=true --branch=deploy/payments web/apps/payments/dist
+
+            - name: Build locker
+              run: yarn build:locker
+
+            - name: Publish locker
+              uses: cloudflare/wrangler-action@v3
+              with:
+                  accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+                  apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+                  command: pages deploy --project-name=ente --commit-dirty=true --branch=deploy/locker web/apps/locker/out

@@ -1,37 +1,3 @@
-import { CenteredFill, SpaceBetweenFlex } from "@/base/components/containers";
-import { ActivityErrorIndicator } from "@/base/components/ErrorIndicator";
-import { type ButtonishProps } from "@/base/components/mui";
-import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
-import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
-import { LoadingButton } from "@/base/components/mui/LoadingButton";
-import {
-    OverflowMenu,
-    OverflowMenuOption,
-} from "@/base/components/OverflowMenu";
-import { SingleInputDialog } from "@/base/components/SingleInputDialog";
-import { useIsSmallWidth } from "@/base/components/utils/hooks";
-import {
-    useModalVisibility,
-    type ModalVisibilityProps,
-} from "@/base/components/utils/modal";
-import log from "@/base/log";
-import {
-    addCGroup,
-    addClusterToCGroup,
-    applyPersonSuggestionUpdates,
-    deleteCGroup,
-    ignoreCluster,
-    renameCGroup,
-    suggestionsAndChoicesForPerson,
-} from "@/new/photos/services/ml";
-import {
-    type CGroupPerson,
-    type ClusterPerson,
-    type Person,
-    type PersonSuggestionsAndChoices,
-    type PersonSuggestionUpdates,
-    type PreviewableCluster,
-} from "@/new/photos/services/ml/people";
 import AddIcon from "@mui/icons-material/Add";
 import CheckIcon from "@mui/icons-material/Check";
 import ClearIcon from "@mui/icons-material/Clear";
@@ -56,16 +22,49 @@ import {
     Typography,
     useMediaQuery,
 } from "@mui/material";
+import { CenteredFill, SpacedRow } from "ente-base/components/containers";
+import { ActivityErrorIndicator } from "ente-base/components/ErrorIndicator";
+import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
+import { DialogCloseIconButton } from "ente-base/components/mui/DialogCloseIconButton";
+import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
+import { LoadingButton } from "ente-base/components/mui/LoadingButton";
+import {
+    OverflowMenu,
+    OverflowMenuOption,
+} from "ente-base/components/OverflowMenu";
+import { SingleInputDialog } from "ente-base/components/SingleInputDialog";
+import { useIsSmallWidth } from "ente-base/components/utils/hooks";
+import {
+    useModalVisibility,
+    type ModalVisibilityProps,
+} from "ente-base/components/utils/modal";
+import { useBaseContext } from "ente-base/context";
+import log from "ente-base/log";
+import {
+    addCGroup,
+    addClusterToCGroup,
+    applyPersonSuggestionUpdates,
+    deleteCGroup,
+    ignoreCluster,
+    renameCGroup,
+    suggestionsAndChoicesForPerson,
+} from "ente-new/photos/services/ml";
+import {
+    type CGroupPerson,
+    type ClusterPerson,
+    type Person,
+    type PersonSuggestionsAndChoices,
+    type PersonSuggestionUpdates,
+    type PreviewableCluster,
+} from "ente-new/photos/services/ml/people";
 import { t } from "i18next";
 import React, { useEffect, useReducer, useState } from "react";
 import type { FaceCluster } from "../../services/ml/cluster";
-import { useAppContext } from "../../types/context";
-import { DialogCloseIconButton } from "../mui/Dialog";
 import { SuggestionFaceList } from "../PeopleList";
 import {
     ItemCard,
     LargeTileButton,
-    LargeTilePlusOverlay,
+    LargeTileCreateNewButton,
     LargeTileTextOverlay,
 } from "../Tiles";
 import { useWrapAsyncOperation } from "../utils/use-wrap-async";
@@ -75,9 +74,7 @@ import { GalleryItemsHeaderAdapter, GalleryItemsSummary } from "./ListHeader";
 type PeopleHeaderProps = Pick<
     GalleryBarImplProps,
     "people" | "onSelectPerson"
-> & {
-    person: Person;
-};
+> & { person: Person };
 
 export const PeopleHeader: React.FC<PeopleHeaderProps> = ({
     people,
@@ -86,7 +83,7 @@ export const PeopleHeader: React.FC<PeopleHeaderProps> = ({
 }) => {
     return (
         <GalleryItemsHeaderAdapter>
-            <SpaceBetweenFlex>
+            <SpacedRow>
                 {person.type == "cgroup" ? (
                     person.isHidden ? (
                         <IgnoredPersonHeader person={person} />
@@ -99,7 +96,7 @@ export const PeopleHeader: React.FC<PeopleHeaderProps> = ({
                         {...{ people, onSelectPerson }}
                     />
                 )}
-            </SpaceBetweenFlex>
+            </SpacedRow>
         </GalleryItemsHeaderAdapter>
     );
 };
@@ -111,7 +108,7 @@ interface CGroupPersonHeaderProps {
 const CGroupPersonHeader: React.FC<CGroupPersonHeaderProps> = ({ person }) => {
     const cgroup = person.cgroup;
 
-    const { showMiniDialog } = useAppContext();
+    const { showMiniDialog } = useBaseContext();
 
     const { show: showNameInput, props: nameInputVisibilityProps } =
         useModalVisibility();
@@ -169,8 +166,8 @@ const CGroupPersonHeader: React.FC<CGroupPersonHeaderProps> = ({ person }) => {
                 label={t("name")}
                 placeholder={t("enter_name")}
                 autoComplete="name"
-                autoFocus
                 initialValue={name}
+                submitButtonColor="primary"
                 submitButtonTitle={t("rename")}
                 onSubmit={handleRename}
             />
@@ -215,9 +212,7 @@ const IgnoredPersonHeader: React.FC<IgnoredPersonHeaderProps> = ({
 type ClusterPersonHeaderProps = Pick<
     PeopleHeaderProps,
     "people" | "onSelectPerson"
-> & {
-    person: ClusterPerson;
-};
+> & { person: ClusterPerson };
 
 const ClusterPersonHeader: React.FC<ClusterPersonHeaderProps> = ({
     people,
@@ -226,7 +221,7 @@ const ClusterPersonHeader: React.FC<ClusterPersonHeaderProps> = ({
 }) => {
     const cluster = person.cluster;
 
-    const { showMiniDialog } = useAppContext();
+    const { showMiniDialog } = useBaseContext();
 
     const { show: showAddPerson, props: addPersonVisibilityProps } =
         useModalVisibility();
@@ -350,14 +345,16 @@ const AddPersonDialog: React.FC<AddPersonDialogProps> = ({
                 {...{ open, onClose }}
                 fullWidth
                 fullScreen={isFullScreen}
-                PaperProps={{ sx: { maxWidth: "490px" } }}
+                slotProps={{ paper: { sx: { maxWidth: "490px" } } }}
             >
-                <SpaceBetweenFlex sx={{ padding: "10px 8px 6px 0" }}>
+                <SpacedRow sx={{ padding: "10px 8px 6px 0" }}>
                     <DialogTitle variant="h3">{t("add_name")}</DialogTitle>
                     <DialogCloseIconButton {...{ onClose }} />
-                </SpaceBetweenFlex>
+                </SpacedRow>
                 <DialogContent_>
-                    <AddPerson onClick={handleAddPerson} />
+                    <LargeTileCreateNewButton onClick={handleAddPerson}>
+                        {t("new_person")}
+                    </LargeTileCreateNewButton>
                     {cgroupPeople.map((person) => (
                         <PersonButton
                             key={person.id}
@@ -375,7 +372,7 @@ const AddPersonDialog: React.FC<AddPersonDialogProps> = ({
                 label={t("add_name")}
                 placeholder={t("enter_name")}
                 autoComplete="name"
-                autoFocus
+                submitButtonColor="primary"
                 submitButtonTitle={t("add")}
                 onSubmit={handleAddPersonWithName}
             />
@@ -410,16 +407,7 @@ const PersonButton: React.FC<PersonButtonProps> = ({
     </ItemCard>
 );
 
-const AddPerson: React.FC<ButtonishProps> = ({ onClick }) => (
-    <ItemCard TileComponent={LargeTileButton} onClick={onClick}>
-        <LargeTileTextOverlay>{t("new_person")}</LargeTileTextOverlay>
-        <LargeTilePlusOverlay>+</LargeTilePlusOverlay>
-    </ItemCard>
-);
-
-type SuggestionsDialogProps = ModalVisibilityProps & {
-    person: CGroupPerson;
-};
+type SuggestionsDialogProps = ModalVisibilityProps & { person: CGroupPerson };
 
 interface SuggestionsDialogState {
     activity: "fetching" | "saving" | undefined;
@@ -551,7 +539,7 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
     onClose,
     person,
 }) => {
-    const { showMiniDialog, onGenericError } = useAppContext();
+    const { showMiniDialog, onGenericError } = useBaseContext();
 
     const [state, dispatch] = useReducer(
         suggestionsDialogReducer,
@@ -630,15 +618,15 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
             maxWidth="sm"
             fullWidth
             fullScreen={isSmallWidth}
-            PaperProps={{ sx: { minHeight: "80svh" } }}
+            slotProps={{ paper: { sx: { minHeight: "80svh" } } }}
         >
-            <SpaceBetweenFlex
-                sx={{
-                    padding: "20px 16px 16px 16px",
-                    backgroundColor: state.showChoices
-                        ? (theme) => theme.colors.fill.faint
-                        : "transparent",
-                }}
+            <SpacedRow
+                sx={[
+                    { padding: "20px 16px 16px 16px" },
+                    state.showChoices
+                        ? { backgroundColor: "fill.faint" }
+                        : { backgroundColor: "transparent" },
+                ]}
             >
                 <Stack sx={{ gap: "8px" }}>
                     <DialogTitle sx={{ "&&&": { p: 0 } }}>
@@ -659,16 +647,16 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
                                 ? t("saved_choices")
                                 : t("review_suggestions")
                         }
-                        sx={{
-                            backgroundColor: state.showChoices
-                                ? (theme) => theme.colors.fill.muted
-                                : "transparent",
-                        }}
+                        sx={[
+                            state.showChoices
+                                ? { backgroundColor: "fill.muted" }
+                                : { backgroundColor: "transparent" },
+                        ]}
                     >
                         <RestoreIcon />
                     </IconButton>
                 )}
-            </SpaceBetweenFlex>
+            </SpacedRow>
             <DialogContent
                 /* Reset scroll position on switching view */
                 key={`${state.showChoices}`}
@@ -693,10 +681,7 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
                 ) : state.suggestions.length == 0 ? (
                     <CenteredFill>
                         <Typography
-                            sx={{
-                                color: "text.muted",
-                                textAlign: "center",
-                            }}
+                            sx={{ color: "text.muted", textAlign: "center" }}
                         >
                             {t("people_suggestions_empty")}
                         </Typography>
@@ -721,7 +706,7 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
                     fullWidth
                     disabled={!hasUnsavedChanges}
                     loading={state.activity == "saving"}
-                    color={"accent"}
+                    color="accent"
                     onClick={handleSave}
                 >
                     {t("save")}
@@ -750,11 +735,7 @@ const SuggestionOrChoiceList: React.FC<SuggestionOrChoiceListProps> = ({
         {items.map((item) => (
             <ListItem
                 key={item.id}
-                sx={{
-                    paddingInline: 0,
-                    paddingBlockEnd: "24px",
-                    justifyContent: "space-between",
-                }}
+                sx={{ px: 0, pb: "24px", justifyContent: "space-between" }}
             >
                 <Stack sx={{ gap: "10px" }}>
                     <Typography variant="small" sx={{ color: "text.muted" }}>

@@ -12,15 +12,18 @@ on:
                 description: "Branch (ente-io/ente) to build"
                 type: string
     schedule:
-        # Run everyday at ~8:00 AM IST (except Sundays).
+        # Run every weekday at ~8:00 AM IST.
         # See: [Note: Run workflow every 24 hours]
         #
-        - cron: "45 2 * * 1-6"
+        - cron: "45 2 * * 1-5"
     push:
         # Run when a tag matching the pattern "vd.d.d" is pushed. In particular,
         # this excludes the "-beta" tags.
         tags:
             - "v[0-9]+.[0-9]+.[0-9]+"
+
+permissions:
+    contents: write
 
 jobs:
     release:
@@ -45,12 +48,11 @@ jobs:
                       "${{ startsWith(github.ref, 'refs/tags/v') &&
                       format('photosd-{0}', github.ref_name) || ( inputs.source
                       || 'main' ) }}"
-                  submodules: recursive
 
             - name: Setup node
               uses: actions/setup-node@v4
               with:
-                  node-version: 20
+                  node-version: 22
 
             - name: Increase yarn timeout
               # `yarn install` times out sometimes on the Windows runner,
@@ -111,6 +113,11 @@ jobs:
                   APPLE_APP_SPECIFIC_PASSWORD:
                       ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
                   APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+                  # Windows Azure Trusted Signing related values
+                  # https://www.electron.build/code-signing-win#using-azure-trusted-signing-beta
+                  AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+                  AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+                  AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
                   # Default is "draft", but since our nightly builds update
                   # existing pre-releases, set this to "prerelease".
                   EP_PRE_RELEASE: true

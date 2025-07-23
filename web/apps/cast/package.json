@@ -3,13 +3,12 @@
     "version": "0.0.0",
     "private": true,
     "dependencies": {
-        "@/accounts": "*",
-        "@/base": "*",
-        "@/media": "*",
-        "@ente/shared": "*"
+        "ente-accounts": "*",
+        "ente-base": "*",
+        "ente-media": "*"
     },
     "devDependencies": {
-        "@/build-config": "*",
-        "@types/chromecast-caf-receiver": "^6.0.17"
+        "@types/chromecast-caf-receiver": "^6.0.22",
+        "ente-build-config": "*"
     }
 }

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   viewBox="0 0 399.76401 400"
+   preserveAspectRatio="xMinYMid"
+   aria-labelledby="navbar-fanatical-logo"
+   version="1.1"
+   id="svg2"
+   sodipodi:docname="Untitled.svg"
+   width="399.76401"
+   height="400"
+   inkscape:version="1.4 (e7c3feb100, 2024-10-09)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs2" />
+  <sodipodi:namedview
+     id="namedview2"
+     pagecolor="#505050"
+     bordercolor="#ffffff"
+     borderopacity="1"
+     inkscape:showpageshadow="0"
+     inkscape:pageopacity="0"
+     inkscape:pagecheckerboard="1"
+     inkscape:deskcolor="#505050"
+     inkscape:zoom="0.69295302"
+     inkscape:cx="205.64165"
+     inkscape:cy="207.08475"
+     inkscape:window-width="1920"
+     inkscape:window-height="938"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg2" />
+  <g
+     fill="none"
+     id="g2">
+    <path
+       fill="#ff9800"
+       d="m 2.8756,166.0056 h 284.671 a 2.9981,2.9981 0 0 0 2.7221,-1.7424 l 25.8632,-56.0452 c 0.6946,-1.504 0.0391,-3.2867 -1.464,-3.9817 a 2.9968,2.9968 0 0 0 -1.258,-0.2767 L 24.4917,103.9952 C 58.4482,42.0187 124.261,0 199.882,0 c 110.3917,0 199.882,89.543 199.882,200 0,110.457 -89.4903,200 -199.882,200 C 89.4902,400 0,310.457 0,200 0,188.412 0.985,177.054 2.8756,166.0056 Z M 125.9256,328 c 0,2.2091 1.7898,4 3.9977,4 h 5.1722 l 62.8312,-79.0111 h 49.4291 a 2.9981,2.9981 0 0 0 2.722,-1.7422 l 25.835,-55.976 a 3.0015,3.0015 0 0 0 0.2761,-1.2577 c 0,-1.6569 -1.3423,-3 -2.9982,-3 H 125.9257 V 328 Z"
+       id="path1" />
+  </g>
+</svg>

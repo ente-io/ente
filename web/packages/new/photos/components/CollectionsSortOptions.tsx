@@ -1,11 +1,11 @@
-import {
-    OverflowMenu,
-    OverflowMenuOption,
-} from "@/base/components/OverflowMenu";
-import type { CollectionsSortBy } from "@/new/photos/services/collection/ui";
 import TickIcon from "@mui/icons-material/Done";
 import SortIcon from "@mui/icons-material/Sort";
 import SvgIcon from "@mui/material/SvgIcon";
+import {
+    OverflowMenu,
+    OverflowMenuOption,
+} from "ente-base/components/OverflowMenu";
+import type { CollectionsSortBy } from "ente-new/photos/services/collection-summary";
 import { t } from "i18next";
 import React from "react";
 
@@ -43,26 +43,20 @@ export const CollectionsSortOptions: React.FC<CollectionsSortOptionsProps> = ({
     <OverflowMenu
         ariaID="collection-sort"
         triggerButtonIcon={<SortIcon />}
-        menuPaperProps={{
-            sx: {
+        menuPaperSxProps={[
+            {
                 // The trigger button has a colored background, so add some
                 // vertical margin to avoid showing the menu squat under the
                 // trigger button.
                 marginBlock: 1,
-                backgroundColor: (theme) =>
-                    nestedInDialog
-                        ? theme.colors.background.elevated2
-                        : undefined,
             },
-        }}
-        triggerButtonProps={{
-            sx: {
-                backgroundColor: (theme) =>
-                    transparentTriggerButtonBackground
-                        ? undefined
-                        : theme.colors.fill.faint,
-            },
-        }}
+            nestedInDialog ? { backgroundColor: "background.paper2" } : {},
+        ]}
+        triggerButtonSxProps={[
+            transparentTriggerButtonBackground
+                ? {}
+                : { backgroundColor: "fill.faint" },
+        ]}
     >
         <SortByOption {...optProps} sortBy="name">
             {t("name")}
@@ -79,9 +73,7 @@ export const CollectionsSortOptions: React.FC<CollectionsSortOptionsProps> = ({
 type SortByOptionProps = Pick<
     CollectionsSortOptionsProps,
     "activeSortBy" | "onChangeSortBy"
-> & {
-    sortBy: CollectionsSortBy;
-};
+> & { sortBy: CollectionsSortBy };
 
 const SortByOption: React.FC<React.PropsWithChildren<SortByOptionProps>> = ({
     sortBy,

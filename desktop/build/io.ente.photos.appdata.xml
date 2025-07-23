@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.ente.photos</id>
+
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>AGPL-3.0</project_license>
+
+  <name>Ente Photos</name>
+  <summary>Safe home for your photos</summary>
+
+  <developer id="io.github.ente-io.ente">
+    <name>Ente.io Developers</name>
+  </developer>
+
+  <description>
+    <p>
+      Ente is an open-source, end-to-end encrypted (E2EE) photo storage app, that provides a secure way to backup your photos.
+    </p>
+  </description>
+
+  <launchable type="desktop-id">ente.desktop</launchable>
+
+  <content_rating type="oars-1.0" />
+
+  <url type="bugtracker">https://github.com/ente-io/ente/issues</url>
+  <url type="homepage">https://ente.io</url>
+  <url type="vcs-browser">https://github.com/ente-io/ente</url>
+
+  <screenshots>
+    <screenshot type="default">
+      <image>https://raw.githubusercontent.com/ente-io/ente/main/.github/assets/photos.png</image>
+    </screenshot>
+  </screenshots>
+
+  <branding>
+    <color type="primary" scheme_preference="light">#1db954</color>
+    <color type="primary" scheme_preference="dark">#1db954</color>
+  </branding>
+
+  <releases>
+    <release version="1.7" date="2025-01-13">
+      <url type="details">https://github.com/ente-io/photos-desktop/releases</url>
+    </release>
+  </releases>
+</component>

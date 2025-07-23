@@ -27,7 +27,7 @@ const writeNodeStream = async (filePath: string, fileStream: Readable) => {
 
     fileStream.pipe(writeable);
 
-    await new Promise((resolve, reject) => {
+    await new Promise<void>((resolve, reject) => {
         writeable.on("finish", resolve);
         writeable.on("error", (err) => {
             if (existsSync(filePath)) {

@@ -23,12 +23,7 @@ interface UserPreferences {
      * the app is not maximized (when the app was maximized when it was being
      * quit then {@link isWindowMaximized} will be set instead).
      */
-    windowBounds?: {
-        x: number;
-        y: number;
-        width: number;
-        height: number;
-    };
+    windowBounds?: { x: number; y: number; width: number; height: number };
     /**
      * `true` if the app's main window is maximized the last time it was closed.
      */

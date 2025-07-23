@@ -9,14 +9,14 @@
  *   assigns development when running the `next dev` command, or production for
  *   all other commands.
  */
-export const isDevBuild = process.env.NODE_ENV === "development";
+export const isDevBuild = process.env.NODE_ENV == "development";
 
 /**
  * `true` if we're running in the default global context (aka the main thread)
  * of a web browser.
  *
  * In particular, this is `false` when we're running in a web worker,
- * irrespecitve of whether the worker is running in a Node.js context or a web
+ * irrespective of whether the worker is running in a Node.js context or a web
  * browser context.
  *
  * > We can be running in a browser context either if the user has the page open
@@ -25,7 +25,7 @@ export const isDevBuild = process.env.NODE_ENV === "development";
  * Note that this cannot be a constant, otherwise it'll get inlined during SSR
  * with the wrong value.
  */
-export const haveWindow = () => typeof window !== "undefined";
+export const haveWindow = () => typeof window != "undefined";
 
 /**
  * Return true if we are running in a [Web
@@ -34,4 +34,4 @@ export const haveWindow = () => typeof window !== "undefined";
  * Note that this cannot be a constant, otherwise it'll get inlined during SSR
  * with the wrong value.
  */
-export const inWorker = () => typeof importScripts === "function";
+export const inWorker = () => typeof importScripts == "function";

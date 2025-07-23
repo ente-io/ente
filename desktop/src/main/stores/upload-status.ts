@@ -22,30 +22,13 @@ export interface UploadStatusStore {
 }
 
 const uploadStatusSchema: Schema<UploadStatusStore> = {
-    collectionName: {
-        type: "string",
-    },
-    filePaths: {
-        type: "array",
-        items: {
-            type: "string",
-        },
-    },
+    collectionName: { type: "string" },
+    filePaths: { type: "array", items: { type: "string" } },
     zipItems: {
         type: "array",
-        items: {
-            type: "array",
-            items: {
-                type: "string",
-            },
-        },
+        items: { type: "array", items: { type: "string" } },
     },
-    zipPaths: {
-        type: "array",
-        items: {
-            type: "string",
-        },
-    },
+    zipPaths: { type: "array", items: { type: "string" } },
 };
 
 export const uploadStatusStore = new Store({

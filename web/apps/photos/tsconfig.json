@@ -1,21 +1,8 @@
 {
-    "extends": "@/build-config/tsconfig-next.json",
+    "extends": "ente-build-config/tsconfig-next.json",
     "compilerOptions": {
         /* Set the base directory from which to resolve bare module names. */
-        "baseUrl": "./src",
-        /* MUI doesn't work with exactOptionalPropertyTypes yet. */
-        "exactOptionalPropertyTypes": false,
-
-        /* Override tsconfig-next.json (TODO: Remove me) */
-        "verbatimModuleSyntax": false,
-        /* Override tsconfig-next.json (TODO: Remove me) */
-        "noImplicitAny": false,
-        "noUnusedLocals": false,
-        "noUnusedParameters": false,
-        "noImplicitReturns": false,
-        "noUncheckedIndexedAccess": false,
-        "strictNullChecks": false,
-        "useUnknownInCatchVariables": false
+        "baseUrl": "./src"
     },
     "include": [
         "next-env.d.ts",
@@ -25,5 +12,5 @@
         "../../packages/base/components/utils/mui-theme.d.ts",
         "../../packages/base/global-electron.d.ts"
     ],
-    "exclude": ["node_modules", "out", ".next", "thirdparty"]
+    "exclude": ["node_modules", "out", ".next", ".next-desktop"]
 }

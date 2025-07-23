@@ -3,9 +3,9 @@
  * needs to be in a separate file to allow fast refresh.
  */
 
-import { useModalVisibility } from "@/base/components/utils/modal";
+import type { EmailOrSRPVerificationResponse } from "ente-accounts/services/user";
+import { useModalVisibility } from "ente-base/components/utils/modal";
 import { useCallback, useMemo, useRef } from "react";
-import type { UserVerificationResponse } from "../../services/user";
 import type { SecondFactorType } from "../SecondFactorChoice";
 
 /**
@@ -39,7 +39,7 @@ export const useSecondFactorChoiceIfNeeded = () => {
     );
 
     const userVerificationResultAfterResolvingSecondFactorChoice = useCallback(
-        async (response: UserVerificationResponse) => {
+        async (response: EmailOrSRPVerificationResponse) => {
             const {
                 twoFactorSessionID: _twoFactorSessionIDV1,
                 twoFactorSessionIDV2: _twoFactorSessionIDV2,
@@ -51,9 +51,7 @@ export const useSecondFactorChoiceIfNeeded = () => {
             // ID will be in a V2 attribute during a transient migration period.
             //
             // Note the use of || instead of ?? since _twoFactorSessionIDV1 will
-            // be an empty string, not undefined, if it is unset. We might need
-            // to add a `xxx-eslint-disable
-            // @typescript-eslint/prefer-nullish-coalescing` here too later.
+            // be an empty string, not undefined, if it is unset.
             const _twoFactorSessionID =
                 _twoFactorSessionIDV1 || _twoFactorSessionIDV2;
 

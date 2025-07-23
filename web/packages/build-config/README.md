@@ -1,4 +1,4 @@
-## @/build-config
+## ente-build-config
 
 Build time configuration files. This can be thought of as a `devDependency` that
 exports various config files that our packages use at build time.
@@ -10,11 +10,11 @@ transpiled, it just exports static files that can be included verbatim.
 
 ### Debugging
 
-Too see what tsc is seeing (say when it is trying to type-check `@/utils`), use
-`yarn workspace @/utils tsc --showConfig`.
+Too see what tsc is seeing (e.g. when it is trying to type-check `ente-utils`),
+use `yarn workspace ente-utils tsc --showConfig`.
 
 Similarly, to verify what ESLint is trying to do, use
-`yarn workspace @/utils eslint --debug .`
+`yarn workspace ente-utils eslint --debug .`
 
 If the issue is in VSCode, open the output window of the corresponding plugin,
 it might be telling us what's going wrong there. In particular, when changing

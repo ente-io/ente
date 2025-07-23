@@ -1,7 +1,8 @@
-import { EnteLogo } from "@/base/components/EnteLogo";
-import { decryptMetadataJSON_New } from "@/base/crypto";
-import { Box, Button, Stack, Typography } from "@mui/material";
+import { Box, Button, Stack, Typography, useTheme } from "@mui/material";
+import { EnteLogo } from "ente-base/components/EnteLogo";
+import { decryptMetadataJSON } from "ente-base/crypto";
 import React, { useEffect, useMemo, useState } from "react";
+import { prettyFormatCode } from "utils/format";
 
 interface SharedCode {
     startTime: number;
@@ -18,6 +19,8 @@ const Page: React.FC = () => {
         nextCode: "",
         progress: 0,
     });
+
+    const theme = useTheme();
 
     const getTimeStatus = (
         currentTime: number,
@@ -44,12 +47,12 @@ const Page: React.FC = () => {
             }
 
             try {
-                const decryptedCode = (await decryptMetadataJSON_New(
+                const decryptedCode = (await decryptMetadataJSON(
                     {
-                        encryptedData: base64UrlToBytes(data),
-                        decryptionHeader: base64UrlToBytes(header),
+                        encryptedData: base64URLToBytes(data),
+                        decryptionHeader: base64URLToBytes(header),
                     },
-                    base64UrlToBytes(key),
+                    base64URLToBytes(key),
                 )) as SharedCode;
                 setSharedCode(decryptedCode);
             } catch (error) {
@@ -65,7 +68,11 @@ const Page: React.FC = () => {
     useEffect(() => {
         if (!sharedCode) return;
 
+        let done = false;
+
         const updateCode = () => {
+            if (done) return;
+
             const currentTime = Date.now();
             const codes = sharedCode.codes.split(",");
             const status = getTimeStatus(
@@ -85,15 +92,23 @@ const Page: React.FC = () => {
                     ),
                 );
             }
+
+            requestAnimationFrame(updateCode);
         };
 
-        const interval = setInterval(updateCode, 100);
-        return () => clearInterval(interval);
+        updateCode();
+
+        return () => {
+            done = true;
+        };
     }, [sharedCode]);
 
     const progressBarColor = useMemo(
-        () => (100 - codeDisplay.progress > 40 ? "#8E2DE2" : "#FFC107"),
-        [codeDisplay.progress],
+        () =>
+            100 - codeDisplay.progress > 40
+                ? theme.vars.palette.accent.light
+                : theme.vars.palette.warning.main,
+        [theme, codeDisplay.progress],
     );
 
     return (
@@ -127,20 +142,26 @@ const Page: React.FC = () => {
                 {timeStatus === 1 && <Message>The code has expired.</Message>}
                 {timeStatus === 0 && (
                     <Box
-                        sx={{
-                            backgroundColor: "#1C1C1E",
+                        sx={(theme) => ({
+                            backgroundColor: "background.elevatedPaper",
+                            ...theme.applyStyles("dark", {
+                                backgroundColor: "#1c1c1e",
+                            }),
                             borderRadius: "10px",
-                            paddingBottom: "20px",
+                            pb: "20px",
                             position: "relative",
-                        }}
+                        })}
                     >
-                        <div
-                            style={{
+                        <Box
+                            sx={(theme) => ({
                                 width: "100%",
                                 height: "4px",
-                                backgroundColor: "#333333",
+                                backgroundColor: "#eee",
+                                ...theme.applyStyles("dark", {
+                                    backgroundColor: "#333",
+                                }),
                                 borderRadius: "2px",
-                            }}
+                            })}
                         >
                             <div
                                 style={{
@@ -150,7 +171,7 @@ const Page: React.FC = () => {
                                     borderRadius: "2px",
                                 }}
                             />
-                        </div>
+                        </Box>
                         <div
                             style={{
                                 fontSize: "36px",
@@ -191,7 +212,7 @@ const Page: React.FC = () => {
             <Button
                 color="accent"
                 sx={{
-                    backgroundColor: "#8E2DE2",
+                    backgroundColor: "accent.light",
                     borderRadius: "25px",
                     padding: "15px 30px",
                     marginBottom: "42px",
@@ -207,8 +228,8 @@ const Page: React.FC = () => {
 
 export default Page;
 
-const base64UrlToBytes = (base64Url: string): Uint8Array => {
-    const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+const base64URLToBytes = (base64URL: string): Uint8Array => {
+    const base64 = base64URL.replace(/-/g, "+").replace(/_/g, "/");
     return Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
 };
 
@@ -229,13 +250,11 @@ const parseCodeDisplay = (
     const progress = ((elapsedTime % stepDuration) / stepDuration) * 100;
 
     return {
-        currentCode: formatCode(codes[index] ?? ""),
-        nextCode: formatCode(codes[index + 1] ?? ""),
+        currentCode: prettyFormatCode(codes[index] ?? ""),
+        nextCode: prettyFormatCode(codes[index + 1] ?? ""),
         progress,
     };
 };
-
-const formatCode = (code: string) => code.replace(/(.{3})/g, "$1 ").trim();
 
 const Message: React.FC<React.PropsWithChildren> = ({ children }) => (
     <Typography variant="h4" style={{ textAlign: "center" }}>

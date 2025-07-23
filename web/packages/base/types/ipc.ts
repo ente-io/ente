@@ -90,15 +90,15 @@ export interface Electron {
      *
      * If the key is not found, return `undefined`.
      *
-     * See also: {@link saveMasterKeyB64}.
+     * See also: {@link saveMasterKeyInSafeStorage}.
      */
-    masterKeyB64: () => Promise<string | undefined>;
+    masterKeyFromSafeStorage: () => Promise<string | undefined>;
 
     /**
-     * Save the given {@link masterKeyB64} (encoded as a base64 string) to the
+     * Save the given {@link masterKey} (encoded as a base64 string) to the
      * persistent safe storage accessible to the desktop app.
      */
-    saveMasterKeyB64: (masterKeyB64: string) => Promise<void>;
+    saveMasterKeyInSafeStorage: (masterKey: string) => Promise<void>;
 
     /**
      * Set or clear the callback {@link cb} to invoke whenever the app comes
@@ -114,9 +114,9 @@ export interface Electron {
 
     /**
      * Set or clear the callback {@link cb} to invoke whenever the app gets
-     * asked to open a deeplink. This allows the Node.js layer to ask the
-     * renderer to handle deeplinks and redirect itself to a new location if
-     * needed.
+     * asked to open a deeplink that begins with "ente://". This allows the
+     * Node.js layer to ask the renderer to handle deeplinks and redirect itself
+     * to a new location if needed.
      *
      * In particular, this is necessary for handling passkey authentication.
      * See: [Note: Passkey verification in the desktop app]
@@ -127,7 +127,36 @@ export interface Electron {
      * "ente://" URL. The URL string (a.k.a. "deeplink") we were asked to open
      * is passed to the function verbatim.
      */
-    onOpenURL: (cb: ((url: string) => void) | undefined) => void;
+    onOpenEnteURL: (cb: ((url: string) => void) | undefined) => void;
+
+    /**
+     * Get the persisted version for the last shown changelog.
+     *
+     * See: [Note: Conditions for showing "What's new"]
+     */
+    lastShownChangelogVersion: () => Promise<number | undefined>;
+
+    /**
+     * Save the given {@link version} to disk as the version of the last shown
+     * changelog.
+     *
+     * The value is saved to a store which is not cleared during logout.
+     *
+     * @see {@link lastShownChangelogVersion}
+     */
+    setLastShownChangelogVersion: (version: number) => Promise<void>;
+
+    /**
+     * Return true if the auto launch on system startup is enabled.
+     */
+    isAutoLaunchEnabled: () => Promise<boolean>;
+
+    /**
+     * Toggle the auto launch on system startup behaviour.
+     *
+     * @see {@link isAutoLaunchEnabled}
+     */
+    toggleAutoLaunch: () => Promise<void>;
 
     // - App update
 
@@ -165,23 +194,6 @@ export interface Electron {
      * been marked as skipped so that we don't prompt the user again.
      */
     skipAppUpdate: (version: string) => void;
-
-    /**
-     * Get the persisted version for the last shown changelog.
-     *
-     * See: [Note: Conditions for showing "What's new"]
-     */
-    lastShownChangelogVersion: () => Promise<number | undefined>;
-
-    /**
-     * Save the given {@link version} to disk as the version of the last shown
-     * changelog.
-     *
-     * The value is saved to a store which is not cleared during logout.
-     *
-     * @see {@link lastShownChangelogVersion}
-     */
-    setLastShownChangelogVersion: (version: number) => Promise<void>;
 
     // - FS
 
@@ -248,10 +260,28 @@ export interface Electron {
         writeFile: (path: string, contents: string) => Promise<void>;
 
         /**
+         * A variant of {@link writeFile} that first writes the file to a backup
+         * file, and then renames the backup file to the actual path. This both
+         * makes the write atomic (as far as the node's fs.rename guarantees
+         * atomicity), and also keeps the backup file around for recovery if
+         * something goes wrong during the rename.
+         *
+         * This behaviour of this function is tailored around for writes to the
+         * "export_status.json" during exports.
+         */
+        writeFileViaBackup: (path: string, contents: string) => Promise<void>;
+
+        /**
          * Return true if there is an item at {@link dirPath}, and it is as
          * directory.
          */
         isDir: (dirPath: string) => Promise<boolean>;
+
+        /**
+         * Return the last modified time (integral epoch milliseconds) of the
+         * file system entry at {@link path}.
+         */
+        statMtime: (path: string) => Promise<number>;
 
         /**
          * Return the paths of all the files under the given folder.
@@ -271,13 +301,8 @@ export interface Electron {
     /**
      * Try to convert an arbitrary image into JPEG using native layer tools.
      *
-     * The behaviour is OS dependent. On macOS we use the `sips` utility, and on
-     * some Linux architectures we use an ImageMagick executable bundled with
-     * our desktop app.
-     *
-     * In other cases (primarily Windows), where native JPEG conversion is not
-     * yet possible, this function will throw an error with the
-     * {@link CustomErrorMessage.NotAvailable} message.
+     * The behaviour is OS dependent. On macOS we use the `sips` utility, while
+     * on Linux and Windows we use a `vips` bundled with our desktop app.
      *
      * @param imageData The raw image data (the contents of the image file).
      *
@@ -288,18 +313,13 @@ export interface Electron {
     /**
      * Generate a JPEG thumbnail for the given image.
      *
-     * The behaviour is OS dependent. On macOS we use the `sips` utility, and on
-     * some Linux architectures we use an ImageMagick executable bundled with
-     * our desktop app.
+     * The behaviour is OS dependent. On macOS we use the `sips` utility, while
+     * on Linux and Windows we use a `vips` bundled with our desktop app.
      *
-     * In other cases (primarily Windows), where native thumbnail generation is
-     * not yet possible, this function will throw an error with the
-     * {@link CustomErrorMessage.NotAvailable} message.
-     *
-     * @param dataOrPathOrZipItem The file whose thumbnail we want to generate.
-     * It can be provided as raw image data (the contents of the image file), or
-     * the path to the image file, or a tuple containing the path of the zip
-     * file along with the name of an entry in it.
+     * @param pathOrZipItem The file whose thumbnail we want to generate. It can
+     * be provided as raw image data (the contents of the image file), or the
+     * path to the image file, or a tuple containing the path of the zip file
+     * along with the name of an entry in it.
      *
      * @param maxDimension The maximum width or height of the generated
      * thumbnail.
@@ -309,18 +329,17 @@ export interface Electron {
      * @returns JPEG data of the generated thumbnail.
      */
     generateImageThumbnail: (
-        dataOrPathOrZipItem: Uint8Array | string | ZipItem,
+        pathOrZipItem: string | ZipItem,
         maxDimension: number,
         maxSize: number,
     ) => Promise<Uint8Array>;
 
     /**
-     * Execute a FFmpeg {@link command} on the given
-     * {@link dataOrPathOrZipItem}.
+     * Execute a FFmpeg {@link command} on the given {@link pathOrZipItem}.
      *
      * This executes the command using a FFmpeg executable we bundle with our
-     * desktop app. We also have a wasm FFmpeg wasm implementation that we use
-     * when running on the web, which has a sibling function with the same
+     * desktop app. We also have a Wasm FFmpeg implementation that we use when
+     * running on the web, which has a sibling function with the same
      * parameters. See [Note:FFmpeg in Electron].
      *
      * @param command An array of strings, each representing one positional
@@ -329,11 +348,11 @@ export interface Electron {
      * (respectively {@link inputPathPlaceholder},
      * {@link outputPathPlaceholder}, {@link ffmpegPathPlaceholder}).
      *
-     * @param dataOrPathOrZipItem The bytes of the input file, or the path to
-     * the input file on the user's local disk, or the path to a zip file on the
-     * user's disk and the name of an entry in it. In all three cases, the data
-     * gets serialized to a temporary file, and then that path gets substituted
-     * in the FFmpeg {@link command} in lieu of {@link inputPathPlaceholder}.
+     * @param pathOrZipItem The path to the input file on the user's local disk,
+     * or the path to a zip file on the user's disk and the name of an entry in
+     * it. In the second case, the data gets serialized to a temporary file, and
+     * then that path (or if it was already a path) gets substituted in the
+     * FFmpeg {@link command} in lieu of {@link inputPathPlaceholder}.
      *
      * @param outputFileExtension The extension (without the dot, e.g. "jpeg")
      * to use for the output file that we ask FFmpeg to create in
@@ -345,29 +364,53 @@ export interface Electron {
      * (specified as {@link outputPathPlaceholder} in {@link command}).
      */
     ffmpegExec: (
-        command: string[],
-        dataOrPathOrZipItem: Uint8Array | string | ZipItem,
+        command: FFmpegCommand,
+        pathOrZipItem: string | ZipItem,
         outputFileExtension: string,
     ) => Promise<Uint8Array>;
 
-    // - ML
+    /**
+     * Determine the duration (in seconds) of the video  present at
+     * {@link pathOrZipItem} using ffmpeg.
+     *
+     * This is a bespoke variant of {@link ffmpegExec} for the sole purpose of
+     * retrieving the video duration.
+     *
+     * @param pathOrZipItem The input file whose duration we want to determine.
+     * For more details, see the documentation of the {@link ffmpegExec}
+     * parameter with the same name.
+     *
+     * @returns The duration (in seconds) of the video referred to by
+     * {@link pathOrZipItem}.
+     */
+    ffmpegDetermineVideoDuration: (
+        pathOrZipItem: string | ZipItem,
+    ) => Promise<number>;
+
+    // - Utility process
 
     /**
-     * Create a new ML worker, terminating the older ones (if any).
+     * Trigger the creation of a new utility process of the given {@link type},
+     * terminating the older ones (if any).
      *
      * This creates a new Node.js utility process, and sets things up so that we
      * can communicate directly with that utility process using a
-     * {@link MessagePort} that gets posted using "createMLWorker/port".
+     * {@link MessagePort} that gets posted on the "utilityProcessPort/<type>"
+     * channel.
      *
-     * At the other end of that port will be an object that conforms to the
-     * {@link ElectronMLWorker} interface.
+     * The code running in the utility process is determined by the specific
+     * value of {@link type}. Thus, att the other end of that port will be an
+     * object that conforms to:
+     *
+     * - {@link ElectronMLWorker} interface, when type is "ml".
      *
      * For more details about the IPC flow, see: [Note: ML IPC].
      *
      * Note: For simplicity of implementation, we assume that there is at most
-     * one outstanding call to {@link createMLWorker}.
+     * one outstanding call to {@link triggerCreateUtilityProcess} for a given
+     * {@link type}.
      */
-    createMLWorker: () => void;
+    triggerCreateUtilityProcess: (type: UtilityProcessType) => void;
 
     // - Watch
 
@@ -389,7 +432,7 @@ export interface Electron {
         /**
          * Return the list of folder watches, pruning non-existing directories.
          *
-         * The list of folder paths (and auxillary details) is persisted in the
+         * The list of folder paths (and auxiliary details) is persisted in the
          * Node.js layer. The implementation of this function goes through the
          * list, permanently removes any watches whose on-disk directory is no
          * longer present, and returns this pruned list of watches.
@@ -517,7 +560,7 @@ export interface Electron {
      * - Typically, this would be called at the start of an upload.
      *
      * - Thereafter, as each item gets uploaded one by one, we'd call
-     *   {@link markUploadedFiles} or {@link markUploadedZipItems}.
+     *   {@link markUploadedFile} or {@link markUploadedZipItem}.
      *
      * - Finally, once the upload completes (or gets cancelled), we'd call
      *   {@link clearPendingUploads} to complete the circle.
@@ -525,15 +568,41 @@ export interface Electron {
     setPendingUploads: (pendingUploads: PendingUploads) => Promise<void>;
 
     /**
-     * Mark the given files (given by their {@link paths}) as having been
+     * Mark the given files (specified by their disk paths) as having been
      * uploaded.
+     *
+     * @param {@link path} The path to the file system file which was uploaded.
+     *
+     * @param {@link associatedPath} The path file (if any) of the file
+     * associated with the file which was uploaded. This will be present only in
+     * the case of live photos, where this will be set to the path of the video
+     * component of the live photo on disk.
+     *
+     * @returns The last modified time (epoch milliseconds) of the file at
+     * {@link path}.
      */
-    markUploadedFiles: (paths: PendingUploads["filePaths"]) => Promise<void>;
+    markUploadedFile: (
+        path: string,
+        associatedPath?: string,
+    ) => Promise<number>;
 
     /**
      * Mark the given {@link ZipItem}s as having been uploaded.
+     *
+     * @param {@link item} The {@link ZipItem} which was uploaded.
+     *
+     * @param {@link associatedItem} An optional extra {@link ZipItem}
+     * associated with the {@link item} which was uploaded. This will be present
+     * only in case of live photos, where this'll be set to the {@link ZipItem}
+     * representing the video component of the live photo on disk.
+     *
+     * @returns The last modified time (epoch milliseconds) of the zip file
+     * containing {@link item}.
      */
-    markUploadedZipItems: (items: PendingUploads["zipItems"]) => Promise<void>;
+    markUploadedZipItem: (
+        item: ZipItem,
+        associatedItem?: ZipItem,
+    ) => Promise<number>;
 
     /**
      * Clear any pending uploads.
@@ -544,11 +613,20 @@ export interface Electron {
     clearPendingUploads: () => Promise<void>;
 }
 
+export type UtilityProcessType = "ml";
+
 /**
- * The shape of the object exposed by the Node.js ML worker process on the
- * message port that the web layer obtains by doing {@link createMLWorker}.
+ * The shape of the object exposed by the Node.js utility process listening on
+ * the other side message port that the web layer obtains by doing
+ * {@link triggerCreateUtilityProcess} with type "ml".
  */
 export interface ElectronMLWorker {
+    /**
+     * Return the last modified time (epoch milliseconds) for the file at the
+     * given {@link path} on the user's file system.
+     */
+    fsStatMtime: (path: string) => Promise<number>;
+
     /**
      * Return a CLIP embedding of the given image.
      *
@@ -609,26 +687,6 @@ export interface ElectronMLWorker {
      */
     computeFaceEmbeddings: (input: Float32Array) => Promise<Float32Array>;
 }
-
-/**
- * Errors that have special semantics on the web side.
- *
- * [Note: Custom errors across Electron/Renderer boundary]
- *
- * If we need to identify errors thrown by the main process when invoked from
- * the renderer process, we can only use the `message` field because:
- *
- * > Errors thrown throw `handle` in the main process are not transparent as
- * > they are serialized and only the `message` property from the original error
- * > is provided to the renderer process.
- * >
- * > - https://www.electronjs.org/docs/latest/tutorial/ipc
- * >
- * > Ref: https://github.com/electron/electron/issues/24427
- */
-export const CustomErrorMessage = {
-    NotAvailable: "This feature in not available on the current OS/arch",
-};
 
 /**
  * Data passed across the IPC bridge when an app update is available.
@@ -746,3 +804,15 @@ export interface PendingUploads {
      */
     zipItems: ZipItem[];
 }
+
+/**
+ * A command that we can ask FFmpeg to run for us.
+ *
+ * [Note: Alternative FFmpeg command for HDR videos]
+ *
+ * Usually, this is a single command (specified as an array of strings
+ * containing the "words" of the command). However, we can also provide two
+ * alternative commands - one to run when the input is (heuristically) detected
+ * as a HDR video, and one otherwise.
+ */
+export type FFmpegCommand = string[] | { default: string[]; hdr: string[] };

@@ -11,13 +11,16 @@ on:
 env:
     FLUTTER_VERSION: "3.24.3"
 
+permissions:
+    contents: write
+
 jobs:
     build:
         runs-on: ubuntu-latest
 
         defaults:
             run:
-                working-directory: mobile
+                working-directory: mobile/apps/photos
 
         steps:
             - name: Checkout code and submodules
@@ -45,7 +48,7 @@ jobs:
 
             - name: Build independent APK
               run: |
-                flutter build apk --release --flavor independent
+                flutter build apk --dart-define=cronetHttpNoPlay=true --release --flavor independent
                 mv build/app/outputs/flutter-apk/app-independent-release.apk build/app/outputs/flutter-apk/ente-${{ github.ref_name }}.apk
               env:
                   SIGNING_KEY_PATH: "/home/runner/work/_temp/keystore/ente_photos_key.jks"
@@ -59,5 +62,5 @@ jobs:
             - name: Create a draft GitHub release
               uses: ncipollo/release-action@v1
               with:
-                  artifacts: "mobile/build/app/outputs/flutter-apk/ente-${{ github.ref_name }}.apk,mobile/build/app/outputs/flutter-apk/sha256sum"
+                  artifacts: "mobile/apps/photos/build/app/outputs/flutter-apk/ente-${{ github.ref_name }}.apk,mobile/apps/photos/build/app/outputs/flutter-apk/sha256sum"
                   draft: true

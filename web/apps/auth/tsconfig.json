@@ -1,10 +1,8 @@
 {
-    "extends": "@/build-config/tsconfig-next.json",
+    "extends": "ente-build-config/tsconfig-next.json",
     "compilerOptions": {
         /* Set the base directory from which to resolve bare module names. */
-        "baseUrl": "./src",
-        /* MUI doesn't work with exactOptionalPropertyTypes yet. */
-        "exactOptionalPropertyTypes": false
+        "baseUrl": "./src"
     },
     "include": [
         "src",

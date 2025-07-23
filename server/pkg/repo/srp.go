@@ -135,6 +135,9 @@ func (repo *UserAuthRepository) InsertOrUpdateSRPAuthAndKeyAttr(ctx context.Cont
 		return stacktrace.Propagate(err, "")
 	}
 	updateKeyAttr := *req.UpdateAttributes
+	if validErr := updateKeyAttr.Validate(); validErr != nil {
+		return stacktrace.Propagate(validErr, "")
+	}
 	_, err = tx.ExecContext(ctx, `UPDATE key_attributes SET kek_salt = $1, encrypted_key = $2, key_decryption_nonce = $3, mem_limit = $4, ops_limit = $5 WHERE user_id = $6`,
 		updateKeyAttr.KEKSalt, updateKeyAttr.EncryptedKey, updateKeyAttr.KeyDecryptionNonce, updateKeyAttr.MemLimit, updateKeyAttr.OpsLimit, userID)
 	if err != nil {

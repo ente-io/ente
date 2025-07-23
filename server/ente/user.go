@@ -10,6 +10,8 @@ const (
 	ChangeEmailOTTPurpose = "change"
 	SignUpOTTPurpose      = "signup"
 	LoginOTTPurpose       = "login"
+
+	ExpectedKDFStrength = 1073741824 * 4
 )
 
 // User represents a user in the system
@@ -88,6 +90,14 @@ type SetUserAttributesRequest struct {
 	KeyAttributes KeyAttributes `json:"keyAttributes" binding:"required"`
 }
 
+func (sk *SetUserAttributesRequest) Validate() error {
+	strength := sk.KeyAttributes.MemLimit * sk.KeyAttributes.OpsLimit
+	if strength != ExpectedKDFStrength {
+		return NewBadRequestWithMessage("Unexpected KDF strength")
+	}
+	return nil
+}
+
 // UpdateEmailMFA ..
 type UpdateEmailMFA struct {
 	IsEnabled *bool `json:"isEnabled" binding:"required"`
@@ -100,6 +110,14 @@ type UpdateKeysRequest struct {
 	KeyDecryptionNonce string `json:"keyDecryptionNonce" binding:"required"`
 	MemLimit           int    `json:"memLimit" binding:"required"`
 	OpsLimit           int    `json:"opsLimit" binding:"required"`
+}
+
+func (u *UpdateKeysRequest) Validate() error {
+	strength := u.MemLimit * u.OpsLimit
+	if strength != ExpectedKDFStrength {
+		return NewBadRequestWithMessage("Unexpected KDF strength")
+	}
+	return nil
 }
 
 type SetRecoveryKeyRequest struct {

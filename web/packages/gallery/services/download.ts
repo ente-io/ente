@@ -1,77 +1,98 @@
-import { isDesktop } from "@/base/app";
-import { blobCache, type BlobCache } from "@/base/blob-cache";
+import { blobCache, type BlobCache } from "ente-base/blob-cache";
 import {
+    decryptBlobBytes,
     decryptStreamBytes,
     decryptStreamChunk,
-    decryptThumbnail,
     initChunkDecryption,
-} from "@/base/crypto";
+} from "ente-base/crypto";
 import {
     authenticatedPublicAlbumsRequestHeaders,
     authenticatedRequestHeaders,
     publicRequestHeaders,
     retryEnsuringHTTPOk,
     type PublicAlbumsCredentials,
-} from "@/base/http";
-import { ensureAuthToken } from "@/base/local-user";
-import log from "@/base/log";
-import { customAPIOrigin } from "@/base/origins";
-import {
-    playableVideoBlob,
-    renderableImageBlob,
-} from "@/gallery/utils/convert";
-import type { EnteFile } from "@/media/file";
-import { FileType } from "@/media/file-type";
-import { decodeLivePhoto } from "@/media/live-photo";
-
-export interface LivePhotoSourceURL {
-    image: () => Promise<string | undefined>;
-    video: () => Promise<string | undefined>;
-}
-
-export interface LoadedLivePhotoSourceURL {
-    image: string;
-    video: string;
-}
+} from "ente-base/http";
+import log from "ente-base/log";
+import { apiURL, customAPIOrigin } from "ente-base/origins";
+import { ensureAuthToken } from "ente-base/token";
+import type { EnteFile } from "ente-media/file";
+import { fileFileName } from "ente-media/file-metadata";
+import { FileType } from "ente-media/file-type";
+import { decodeLivePhoto } from "ente-media/live-photo";
+import { playableVideoURL, renderableImageBlob } from "./convert";
 
 /**
- * URL for the original image or video, but with potential conversions applied
- * to make it more likely that the browser (or desktop app) will be able to
- * render (or play) it.
+ * URL(s) for the original image or video, alongwith with potential conversions
+ * applied to make it more likely that the browser (or desktop app) will be able
+ * to render (or play) it.
  *
- * This structure originally arose as the source object URL, and a bunch of
- * associated metadata, that the file viewer needs when the user wants to see
- * the original file (as opposed to say, the thumbnail which we were showing
- * them earlier as the file is getting downloaded). It is now also used in other
- * places that need an as-close access to the original file as possible whilst
- * still applying almost necessary conversions to be able to use that data.
- *
- * The word "renderable" is not a guarantee, but rather a best effort indicator
- * as we might not always be able to convert all formats to something that the
- * browser (or desktop app) can show.
+ * The word "renderable" or "playable" is not a guarantee, but rather a best
+ * effort indicator as we might not always be able to convert all formats to
+ * something that the browser (or desktop app) can show.
  */
-export interface RenderableSourceURLs {
-    url: string | LivePhotoSourceURL | LoadedLivePhotoSourceURL;
-    type: "normal" | "livePhoto";
-    /**
-     * `true` if there is potential conversion that can still be applied.
-     *
-     * See: [Note: Forcing conversion of playable videos]
-     */
-    canForceConvert?: boolean;
-    /**
-     * Best effort attempt at obtaining the MIME type.
-     *
-     * It will only be present for images generally, which is also the only
-     * scenario where it is needed currently (by the image editor).
-     *
-     * Known cases where it is missing:
-     *
-     * - Live photos (these have a different code path for obtaining the URL).
-     * - A video that is passes the isPlayable test in the browser.
-     */
-    mimeType?: string;
-}
+export type RenderableSourceURLs =
+    | {
+          type: "image";
+          /**
+           * An object URL that can be directly provided to the browser to get
+           * it to render the image.
+           *
+           * This is a best effort basis. Not all images will be renderable in
+           * all browsers, so the file might still not be previewable.
+           *
+           * In cases where we detect that the browser can natively render this
+           * image, this can be just the an object URL created from
+           * {@link originalImageBlob}. In other cases, this will point to a
+           * separate, converted blob.
+           */
+          imageURL: string;
+          /**
+           * A {@link Blob} from the original image.
+           *
+           * This is useful for extracting the Exif.
+           */
+          originalImageBlob: Blob;
+          /**
+           * Best effort attempt at obtaining the MIME type.
+           *
+           * It should usually be present, but it is not guaranteed that we'll
+           * be able to detect the MIME type for all images. However, the only
+           * scenario where it is needed currently is by the image editor, where
+           * if we can't detect the MIME type, then the image can't be shown (or
+           * edited) in the current browser anyway.
+           */
+          mimeType?: string;
+      }
+    | {
+          type: "video";
+          /**
+           * An object URL that can be directly provided to the browser to get
+           * it to render the image.
+           *
+           * This is a best effort basis. Not all videos will be playable in all
+           * browsers, so the file might still not be previewable.
+           */
+          videoURL: string;
+      }
+    | {
+          type: "livePhoto";
+          /**
+           * Similar to the {@link imageURL} for type "image", except
+           * as a promise since we might want to operate on the different
+           * components of a live image in a staggered order.
+           */
+          imageURL: () => Promise<string>;
+          /**
+           * Similar to the {@link originalImageBlob} for type "image".
+           */
+          originalImageBlob: Blob;
+          /**
+           * Similar to the {@link videoURL} for type "video", except as
+           * a promise since we might want to operate on the different
+           * components of a live image in a staggered order.
+           */
+          videoURL: () => Promise<string>;
+      };
 
 /**
  * A class that tracks the state of in-progress downloads and conversions,
@@ -86,7 +107,7 @@ class DownloadManager {
      * Credentials that should be used to download files when we're in the
      * context of the public albums app.
      */
-    private publicAlbumsCredentials: PublicAlbumsCredentials | undefined;
+    publicAlbumsCredentials: PublicAlbumsCredentials | undefined;
     /**
      * Local cache for thumbnail blobs.
      *
@@ -111,7 +132,7 @@ class DownloadManager {
      * Unlike {@link thumbnailURLPromises}, there is no guarantee that the
      * browser will be able to render the original file (e.g. it might be in an
      * unsupported format). If a renderable URL is needed for the file,
-     * {@link renderableSourceURL} should be used instead.
+     * {@link renderableSourceURLs} should be used instead.
      *
      * The entries are keyed by the file ID.
      */
@@ -119,10 +140,11 @@ class DownloadManager {
     /**
      * An in-memory cache for {@link RenderableSourceURLs} for a file.
      *
-     * These are saved as a result of invocation of {@link renderableSourceURL},
-     * which goes one step beyond {@link fileURLPromises}, and also attempts to
-     * convert the downloaded file into a URL that the browser (or the desktop
-     * app) is likely to be able to render or play.
+     * These are saved as a result of invocation of
+     * {@link renderableSourceURLs}, which goes one step beyond
+     * {@link fileURLPromises}, and also attempts to convert the downloaded file
+     * into a URL that the browser (or the desktop app) is likely to be able to
+     * render or play.
      *
      * The entries are keyed by file ID.
      */
@@ -176,7 +198,9 @@ class DownloadManager {
      * Set the credentials that should be used for download files when we're
      * running in the context of the public albums app.
      */
-    setPublicAlbumsCredentials(credentials: PublicAlbumsCredentials) {
+    setPublicAlbumsCredentials(
+        credentials: PublicAlbumsCredentials | undefined,
+    ) {
         this.publicAlbumsCredentials = credentials;
     }
 
@@ -217,6 +241,9 @@ class DownloadManager {
      *
      * The returned URL is actually an object URL, but it should not be revoked
      * since the download manager caches it for future use.
+     *
+     * If {@link cachedOnly} is false (the default), then this method will
+     * indicate errors by throwing but will never return `undefined`.
      */
     async renderableThumbnailURL(
         file: EnteFile,
@@ -267,9 +294,11 @@ class DownloadManager {
     }
 
     private downloadThumbnail = async (file: EnteFile) => {
-        const encryptedData = await this._downloadThumbnail(file);
+        const encryptedData = await wrapErrors(() =>
+            this._downloadThumbnail(file),
+        );
         const decryptionHeader = file.thumbnail.decryptionHeader;
-        return decryptThumbnail({ encryptedData, decryptionHeader }, file.key);
+        return decryptBlobBytes({ encryptedData, decryptionHeader }, file.key);
     };
 
     private async _downloadThumbnail(file: EnteFile) {
@@ -289,28 +318,21 @@ class DownloadManager {
      * (if possible).
      *
      * See the documentation of {@link RenderableSourceURLs} for more details.
-     *
-     * The `forceConvert` option is true when the user presses the "Convert"
-     * button. See: [Note: Forcing conversion of playable videos].
      */
     renderableSourceURLs = async (
         file: EnteFile,
-        opts?: { forceConvert?: boolean },
     ): Promise<RenderableSourceURLs> => {
-        const forceConvert = opts?.forceConvert ?? false;
-        if (forceConvert || !this.renderableSourceURLPromises.has(file.id)) {
-            this.renderableSourceURLPromises.set(
-                file.id,
-                createRenderableSourceURLs(
-                    file,
-                    this.fileURLDownloadAndCacheIfNeeded(file),
-                    forceConvert,
-                ),
+        let promise = this.renderableSourceURLPromises.get(file.id);
+        if (!promise) {
+            promise = createRenderableSourceURLs(
+                file,
+                this.fileURLDownloadAndCacheIfNeeded(file),
             );
+            this.renderableSourceURLPromises.set(file.id, promise);
         }
 
         try {
-            return await this.renderableSourceURLPromises.get(file.id)!;
+            return await promise;
         } catch (e) {
             log.error("Failed to obtain renderableSourceURLs", e);
             this.renderableSourceURLPromises.delete(file.id);
@@ -324,8 +346,8 @@ class DownloadManager {
      * This is a convenience abstraction over {@link fileStream} that converts
      * it into a {@link Blob}.
      */
-    async fileBlob(file: EnteFile) {
-        return this.fileStream(file).then((s) => new Response(s).blob());
+    async fileBlob(file: EnteFile, opts?: FileDownloadOpts) {
+        return this.fileStream(file, opts).then((s) => new Response(s).blob());
     }
 
     /**
@@ -337,9 +359,12 @@ class DownloadManager {
      * cached for subsequent use.
      *
      * @param file The {@link EnteFile} whose data we want.
+     *
+     * @param opts Optional options to modify the download.
      */
     async fileStream(
         file: EnteFile,
+        opts?: FileDownloadOpts,
     ): Promise<ReadableStream<Uint8Array> | null> {
         const cachedURL = this.fileURLPromises.get(file.id);
         if (cachedURL) {
@@ -353,7 +378,7 @@ class DownloadManager {
             }
         }
 
-        return this.downloadFile(file);
+        return this.downloadFile(file, opts);
     }
 
     /**
@@ -378,22 +403,22 @@ class DownloadManager {
 
     private async downloadFile(
         file: EnteFile,
+        opts?: FileDownloadOpts,
     ): Promise<ReadableStream<Uint8Array> | null> {
         log.info(`download attempted for file id ${file.id}`);
 
-        const res = await this._downloadFile(file);
+        const res = await wrapErrors(() => this._downloadFile(file, opts));
 
         if (
-            file.metadata.fileType === FileType.image ||
-            file.metadata.fileType === FileType.livePhoto
+            file.metadata.fileType == FileType.image ||
+            file.metadata.fileType == FileType.livePhoto
         ) {
-            const encryptedData = new Uint8Array(await res.arrayBuffer());
+            const encryptedData = new Uint8Array(
+                await wrapErrors(() => res.arrayBuffer()),
+            );
 
             const decrypted = await decryptStreamBytes(
-                {
-                    encryptedData,
-                    decryptionHeader: file.file.decryptionHeader,
-                },
+                { encryptedData, decryptionHeader: file.file.decryptionHeader },
                 file.key,
             );
             return new Response(decrypted).body;
@@ -405,8 +430,7 @@ class DownloadManager {
 
         const onDownloadProgress = this.trackDownloadProgress(
             file.id,
-            // TODO: Is info supposed to be optional though?
-            file.info?.fileSize ?? 0,
+            file.info?.fileSize,
         );
 
         const contentLength =
@@ -427,7 +451,9 @@ class DownloadManager {
                 do {
                     // done is a boolean and value is an Uint8Array. When done
                     // is true value will be empty.
-                    const { done, value } = await reader.read();
+                    const { done, value } = await wrapErrors(() =>
+                        reader.read(),
+                    );
 
                     let data: Uint8Array;
                     if (done) {
@@ -473,6 +499,12 @@ class DownloadManager {
                         controller.close();
                     } else {
                         // Save it for the next pull.
+
+                        // See: [Note: Revisit some Node.js types errors post 22
+                        // upgrade]
+                        //
+                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                        // @ts-ignore
                         leftoverBytes = data;
                     }
                 } while (!didEnqueue);
@@ -480,18 +512,26 @@ class DownloadManager {
         });
     }
 
-    private async _downloadFile(file: EnteFile) {
+    /**
+     * Download the full contents of {@link file}, automatically choosing the
+     * credentials for the logged in user or the public albums depending on the
+     * current app context we are in.
+     */
+    private async _downloadFile(file: EnteFile, opts?: FileDownloadOpts) {
         if (this.publicAlbumsCredentials) {
             return publicAlbums_downloadFile(
                 file,
                 this.publicAlbumsCredentials,
             );
         } else {
-            return photos_downloadFile(file);
+            return photos_downloadFile(file, opts);
         }
     }
 
-    private trackDownloadProgress(fileID: number, fileSize: number) {
+    private trackDownloadProgress(
+        fileID: number,
+        fileSize: number | undefined,
+    ) {
         return (event: { loaded: number; total: number }) => {
             if (isNaN(event.total) || event.total === 0) {
                 if (!fileSize) {
@@ -519,120 +559,109 @@ class DownloadManager {
 export const downloadManager = new DownloadManager();
 
 /**
+ * A custom Error that is thrown if a download fails during network I/O.
+ *
+ * [Note: Identifying network related errors during download]
+ *
+ * We dealing with code that touches the network, we often don't specifically
+ * care about the specific error - there is a lot that can go wrong when a
+ * network is involved - but need to identify if an error was in the network
+ * related phase of an action, since these are usually transient and can be
+ * dealt with more softly than other errors.
+ *
+ * To that end, network related phases of download operations are wrapped in
+ * catches that intercept the error and wrap it in our custom
+ * {@link NetworkDownloadError} whose presence can be checked using the
+ * {@link isNetworkDownloadError} predicate.
+ */
+export class NetworkDownloadError extends Error {
+    error: unknown;
+
+    constructor(e: unknown) {
+        super(
+            `NetworkDownloadError: ${e instanceof Error ? e.message : String(e)}`,
+        );
+
+        // Cargo culted from
+        // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error#custom_error_types
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+        if (Error.captureStackTrace)
+            Error.captureStackTrace(this, NetworkDownloadError);
+
+        this.error = e;
+    }
+}
+
+export const isNetworkDownloadError = (e: unknown) =>
+    e instanceof NetworkDownloadError;
+
+/**
+ * A helper function to convert all rejections of the given promise {@link op}
+ * into {@link NetworkDownloadError}s.
+ */
+const wrapErrors = <T>(op: () => Promise<T>) =>
+    op().catch((e: unknown) => {
+        throw new NetworkDownloadError(e);
+    });
+
+/**
  * Create and return a {@link RenderableSourceURLs} for the given {@link file},
  * where {@link originalFileURLPromise} is a promise that resolves with an
  * (object) URL to the contents of the original file.
- *
- * @param forceConvert `true` when the user presses the "Convert" button. See:
- * [Note: Forcing conversion of playable videos].
  */
 const createRenderableSourceURLs = async (
     file: EnteFile,
     originalFileURLPromise: Promise<string>,
-    forceConvert: boolean,
 ): Promise<RenderableSourceURLs> => {
     const originalFileURL = await originalFileURLPromise;
     const fileBlob = await fetch(originalFileURL).then((res) => res.blob());
+    const fileName = fileFileName(file);
+    const fileType = file.metadata.fileType;
 
-    const existingOrNewObjectURL = (convertedBlob: Blob | null | undefined) =>
-        convertedBlob
-            ? convertedBlob === fileBlob
-                ? originalFileURL
-                : URL.createObjectURL(convertedBlob)
-            : undefined;
-
-    let url: RenderableSourceURLs["url"] | undefined;
-    let type: RenderableSourceURLs["type"] = "normal";
-    let mimeType: string | undefined;
-    let canForceConvert = false;
-
-    const fileName = file.metadata.title;
-    switch (file.metadata.fileType) {
+    switch (fileType) {
         case FileType.image: {
             const convertedBlob = await renderableImageBlob(fileBlob, fileName);
-            const convertedURL = existingOrNewObjectURL(convertedBlob);
-            url = convertedURL;
-            mimeType = convertedBlob.type;
-            break;
+            const imageURL =
+                convertedBlob === fileBlob
+                    ? originalFileURL
+                    : URL.createObjectURL(convertedBlob);
+            const originalImageBlob = fileBlob;
+            const mimeType = convertedBlob.type;
+            return { type: "image", imageURL, originalImageBlob, mimeType };
         }
+
         case FileType.livePhoto: {
-            url = await getRenderableLivePhotoURL(file, fileBlob);
-            type = "livePhoto";
-            break;
+            const livePhoto = await decodeLivePhoto(fileName, fileBlob);
+            const originalImageBlob = new Blob([livePhoto.imageData]);
+
+            const imageURL = async () =>
+                URL.createObjectURL(
+                    await renderableImageBlob(
+                        originalImageBlob,
+                        livePhoto.imageFileName,
+                    ),
+                );
+
+            const videoURL = () =>
+                playableVideoURL(
+                    file,
+                    livePhoto.videoFileName,
+                    new Blob([livePhoto.videoData]),
+                );
+
+            return { type: "livePhoto", imageURL, originalImageBlob, videoURL };
         }
+
         case FileType.video: {
-            const convertedBlob = await playableVideoBlob(
-                fileName,
-                fileBlob,
-                forceConvert,
-            );
-            const convertedURL = existingOrNewObjectURL(convertedBlob);
-            url = convertedURL;
-            mimeType = convertedBlob?.type;
-
-            const isOriginal = convertedURL === originalFileURL;
-            const isRenderable = !!convertedURL;
-            canForceConvert =
-                isDesktop && !forceConvert && isOriginal && isRenderable;
-
-            break;
+            const videoURL = await playableVideoURL(file, fileName, fileBlob);
+            return { type: "video", videoURL };
         }
+
         default: {
-            url = originalFileURL;
-            break;
+            throw new Error(`Unsupported file type ${fileType}`);
         }
     }
-
-    // TODO: Can we remove this non-null assertion and reflect it in the types?
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    return {
-        url: url!,
-        type,
-        mimeType,
-        canForceConvert,
-    };
 };
-
-async function getRenderableLivePhotoURL(
-    file: EnteFile,
-    fileBlob: Blob,
-): Promise<LivePhotoSourceURL | undefined> {
-    const livePhoto = await decodeLivePhoto(file.metadata.title, fileBlob);
-
-    const getRenderableLivePhotoImageURL = async () => {
-        try {
-            const imageBlob = new Blob([livePhoto.imageData]);
-            return URL.createObjectURL(
-                await renderableImageBlob(imageBlob, livePhoto.imageFileName),
-            );
-        } catch {
-            //ignore and return null
-            return undefined;
-        }
-    };
-
-    const getRenderableLivePhotoVideoURL = async () => {
-        try {
-            const videoBlob = new Blob([livePhoto.videoData]);
-            const convertedVideoBlob = await playableVideoBlob(
-                livePhoto.videoFileName,
-                videoBlob,
-                false,
-            );
-            if (!convertedVideoBlob) return undefined;
-            return URL.createObjectURL(convertedVideoBlob);
-        } catch {
-            //ignore and return null
-            return undefined;
-        }
-    };
-
-    return {
-        image: getRenderableLivePhotoImageURL,
-        video: getRenderableLivePhotoVideoURL,
-    };
-}
 
 /**
  * The various photos_* functions are used for the actual downloads when
@@ -648,9 +677,7 @@ const photos_downloadThumbnail = async (file: EnteFile) => {
             const params = new URLSearchParams({ token });
             return fetch(
                 `${customOrigin}/files/preview/${file.id}?${params.toString()}`,
-                {
-                    headers: publicRequestHeaders(),
-                },
+                { headers: publicRequestHeaders() },
             );
         } else {
             return fetch(`https://thumbnails.ente.io/?fileID=${file.id}`, {
@@ -663,7 +690,28 @@ const photos_downloadThumbnail = async (file: EnteFile) => {
     return new Uint8Array(await res.arrayBuffer());
 };
 
-const photos_downloadFile = async (file: EnteFile): Promise<Response> => {
+interface FileDownloadOpts {
+    /**
+     * `true` if the request is for a background task. These are considered less
+     * latency sensitive than user initiated interactive requests.
+     *
+     * See: [Note: User initiated vs background downloads of files].
+     *
+     * This parameter is ignored for requests made when using public albums
+     * credentials to download files; those are always considered interactive.
+     */
+    background?: boolean;
+}
+
+/**
+ * Download the full contents of the given {@link EnteFile}
+ */
+const photos_downloadFile = async (
+    file: EnteFile,
+    opts?: FileDownloadOpts,
+): Promise<Response> => {
+    const { background } = opts ?? {};
+
     const customOrigin = await customAPIOrigin();
 
     // [Note: Passing credentials for self-hosted file fetches]
@@ -698,19 +746,24 @@ const photos_downloadFile = async (file: EnteFile): Promise<Response> => {
     //    credentials in the "X-Auth-Token".
     //
     // 2. The proxy then does both the original steps: (a). Use the credentials
-    //    to get the pre signed URL, and (b) fetch that pre signed URL and
+    //    to get the pre-signed URL, and (b) fetch that pre-signed URL and
     //    stream back the response.
+    //
+    // [Note: User initiated vs background downloads of files]
+    //
+    // The faster proxy approach is used for interactive requests to reduce the
+    // latency for the user (e.g. when the user is waiting to see a full
+    // resolution file). It can be faster than a direct connection as the proxy
+    // is network-nearer to the user (See: [Note: Faster uploads via workers])
+    //
+    // For background processing (e.g., ML indexing, HLS generation), the direct
+    // S3 connection (as what'd happen when self hosting) gets used.
 
     const getFile = async () => {
-        if (customOrigin) {
+        if (customOrigin || background) {
             const token = await ensureAuthToken();
-            const params = new URLSearchParams({ token });
-            return fetch(
-                `${customOrigin}/files/download/${file.id}?${params.toString()}`,
-                {
-                    headers: publicRequestHeaders(),
-                },
-            );
+            const url = await apiURL(`/files/download/${file.id}`, { token });
+            return fetch(url, { headers: publicRequestHeaders() });
         } else {
             return fetch(`https://files.ente.io/?fileID=${file.id}`, {
                 headers: await authenticatedRequestHeaders(),
@@ -737,13 +790,11 @@ const publicAlbums_downloadThumbnail = async (
             const { accessToken, accessTokenJWT } = credentials;
             const params = new URLSearchParams({
                 accessToken,
-                ...(accessTokenJWT ? { accessTokenJWT } : {}),
+                ...(accessTokenJWT && { accessTokenJWT }),
             });
             return fetch(
                 `${customOrigin}/public-collection/files/preview/${file.id}?${params.toString()}`,
-                {
-                    headers: publicRequestHeaders(),
-                },
+                { headers: publicRequestHeaders() },
             );
         } else {
             return fetch(
@@ -772,7 +823,7 @@ const publicAlbums_downloadFile = async (
             const { accessToken, accessTokenJWT } = credentials;
             const params = new URLSearchParams({
                 accessToken,
-                ...(accessTokenJWT ? { accessTokenJWT } : {}),
+                ...(accessTokenJWT && { accessTokenJWT }),
             });
             return fetch(
                 `${customOrigin}/public-collection/files/download/${file.id}?${params.toString()}`,

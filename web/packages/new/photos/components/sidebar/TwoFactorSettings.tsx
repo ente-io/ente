@@ -1,17 +1,22 @@
-import { MenuItemGroup, MenuSectionTitle } from "@/base/components/Menu";
-import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
-import {
-    NestedSidebarDrawer,
-    SidebarDrawerTitlebar,
-    type NestedSidebarDrawerVisibilityProps,
-} from "@/base/components/mui/SidebarDrawer";
-import { disable2FA, get2FAStatus } from "@/new/photos/services/user";
-import { useAppContext } from "@/new/photos/types/context";
-import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
-import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
-import { LS_KEYS, getData, setLSUser } from "@ente/shared/storage/localStorage";
 import LockIcon from "@mui/icons-material/Lock";
 import { Stack, Typography } from "@mui/material";
+import {
+    savedPartialLocalUser,
+    updateSavedLocalUser,
+} from "ente-accounts/services/accounts-db";
+import {
+    RowButton,
+    RowButtonGroup,
+    RowButtonGroupHint,
+    RowSwitch,
+} from "ente-base/components/RowButton";
+import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
+import {
+    TitledNestedSidebarDrawer,
+    type NestedSidebarDrawerVisibilityProps,
+} from "ente-base/components/mui/SidebarDrawer";
+import { useBaseContext } from "ente-base/context";
+import { disable2FA, get2FAStatus } from "ente-new/photos/services/user";
 import { t } from "i18next";
 import router, { useRouter } from "next/router";
 import { useEffect, useState } from "react";
@@ -22,12 +27,9 @@ export const TwoFactorSettings: React.FC<
     const [isTwoFactorEnabled, setIsTwoFactorEnabled] = useState(false);
 
     useEffect(() => {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        const isTwoFactorEnabled =
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-            getData(LS_KEYS.USER).isTwoFactorEnabled ?? false;
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-        setIsTwoFactorEnabled(isTwoFactorEnabled);
+        if (savedPartialLocalUser()?.isTwoFactorEnabled) {
+            setIsTwoFactorEnabled(true);
+        }
     }, []);
 
     useEffect(() => {
@@ -35,11 +37,7 @@ export const TwoFactorSettings: React.FC<
         void (async () => {
             const isEnabled = await get2FAStatus();
             setIsTwoFactorEnabled(isEnabled);
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-            await setLSUser({
-                ...getData(LS_KEYS.USER),
-                isTwoFactorEnabled: isEnabled,
-            });
+            updateSavedLocalUser({ isTwoFactorEnabled: isEnabled });
         })();
     }, [open]);
 
@@ -49,24 +47,17 @@ export const TwoFactorSettings: React.FC<
     };
 
     return (
-        <NestedSidebarDrawer
+        <TitledNestedSidebarDrawer
             {...{ open, onClose }}
             onRootClose={handleRootClose}
+            title={t("two_factor_authentication")}
         >
-            <Stack sx={{ gap: "4px", py: "12px" }}>
-                <SidebarDrawerTitlebar
-                    onClose={onClose}
-                    onRootClose={handleRootClose}
-                    title={t("two_factor_authentication")}
-                />
-
-                {isTwoFactorEnabled ? (
-                    <ManageDrawerContents onRootClose={handleRootClose} />
-                ) : (
-                    <SetupDrawerContents onRootClose={handleRootClose} />
-                )}
-            </Stack>
-        </NestedSidebarDrawer>
+            {isTwoFactorEnabled ? (
+                <ManageDrawerContents onRootClose={handleRootClose} />
+            ) : (
+                <SetupDrawerContents onRootClose={handleRootClose} />
+            )}
+        </TitledNestedSidebarDrawer>
     );
 };
 
@@ -79,17 +70,12 @@ const SetupDrawerContents: React.FC<ContentsProps> = ({ onRootClose }) => {
 
     const configure = () => {
         onRootClose();
-        void router.push(PAGES.TWO_FACTOR_SETUP);
+        void router.push("/two-factor/setup");
     };
 
     return (
         <Stack sx={{ px: "16px", py: "20px", alignItems: "center" }}>
-            <LockIcon
-                sx={(theme) => ({
-                    fontSize: "40px",
-                    color: theme.colors.text.muted,
-                })}
-            />
+            <LockIcon sx={{ fontSize: "40px", color: "text.muted" }} />
             <Typography
                 sx={{
                     color: "text.muted",
@@ -107,7 +93,7 @@ const SetupDrawerContents: React.FC<ContentsProps> = ({ onRootClose }) => {
 };
 
 const ManageDrawerContents: React.FC<ContentsProps> = ({ onRootClose }) => {
-    const { showMiniDialog } = useAppContext();
+    const { showMiniDialog } = useBaseContext();
 
     const confirmDisable = () =>
         showMiniDialog({
@@ -122,11 +108,7 @@ const ManageDrawerContents: React.FC<ContentsProps> = ({ onRootClose }) => {
 
     const disable = async () => {
         await disable2FA();
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-        await setLSUser({
-            ...getData(LS_KEYS.USER),
-            isTwoFactorEnabled: false,
-        });
+        updateSavedLocalUser({ isTwoFactorEnabled: undefined });
         onRootClose();
     };
 
@@ -143,30 +125,29 @@ const ManageDrawerContents: React.FC<ContentsProps> = ({ onRootClose }) => {
 
     const reconfigure = async () => {
         onRootClose();
-        await router.push(PAGES.TWO_FACTOR_SETUP);
+        await router.push("/two-factor/setup");
     };
 
     return (
         <Stack sx={{ px: "16px", py: "20px", gap: "24px" }}>
-            <MenuItemGroup>
-                <EnteMenuItem
-                    onClick={confirmDisable}
-                    variant="toggle"
-                    checked={true}
+            <RowButtonGroup>
+                <RowSwitch
                     label={t("enabled")}
+                    checked={true}
+                    onClick={confirmDisable}
                 />
-            </MenuItemGroup>
+            </RowButtonGroup>
 
-            <Stack sx={{ gap: "4px" }}>
-                <MenuItemGroup>
-                    <EnteMenuItem
-                        onClick={confirmReconfigure}
-                        variant="primary"
-                        checked={true}
+            <Stack>
+                <RowButtonGroup>
+                    <RowButton
                         label={t("reconfigure")}
+                        onClick={confirmReconfigure}
                     />
-                </MenuItemGroup>
-                <MenuSectionTitle title={t("reconfigure_two_factor_hint")} />
+                </RowButtonGroup>
+                <RowButtonGroupHint>
+                    {t("reconfigure_two_factor_hint")}
+                </RowButtonGroupHint>
             </Stack>
         </Stack>
     );

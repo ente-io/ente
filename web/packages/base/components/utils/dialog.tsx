@@ -15,10 +15,15 @@ export const useAttributedMiniDialog = () => {
 
     const [open, setOpen] = useState(false);
 
-    const showMiniDialog = useCallback((attributes: MiniDialogAttributes) => {
-        setAttributes(attributes);
-        setOpen(true);
-    }, []);
+    const showMiniDialog = useCallback(
+        (newAttributes: MiniDialogAttributes) => {
+            setAttributes((attributes) =>
+                attributes?.nonReplaceable ? attributes : newAttributes,
+            );
+            setOpen(true);
+        },
+        [],
+    );
 
     const handleClose = useCallback(() => setOpen(false), []);
 
@@ -44,7 +49,7 @@ export const errorDialogAttributes = (
     optionalMessage?: string,
 ): MiniDialogAttributes => {
     const title = optionalMessage ? messageOrTitle : t("error");
-    const message = optionalMessage ? optionalMessage : messageOrTitle;
+    const message = optionalMessage ?? messageOrTitle;
 
     return {
         title,

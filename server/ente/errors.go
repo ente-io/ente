@@ -24,6 +24,12 @@ var ErrIncorrectTOTP = errors.New("incorrect TOTP")
 // ErrNotFound is returned when the requested resource was not found
 var ErrNotFound = errors.New("not found")
 
+var ErrCollectionDeleted = &ApiError{
+	Code:           "COLLECTION_DELETED",
+	Message:        "",
+	HttpStatusCode: http.StatusNotFound,
+}
+
 var ErrFileLimitReached = errors.New("file limit reached")
 
 // ErrBadRequest is returned when a bad request is encountered
@@ -153,6 +159,12 @@ var ErrNotFoundError = ApiError{
 	HttpStatusCode: http.StatusNotFound,
 }
 
+var ErrObjSizeFetchFailed = &ApiError{
+	Code:           "OBJECT_SIZE_FETCH_FAILED",
+	Message:        "",
+	HttpStatusCode: http.StatusServiceUnavailable,
+}
+
 var ErrUserNotFound = &ApiError{
 	Code:           "USER_NOT_FOUND",
 	Message:        "User is either deleted or not found",
@@ -263,6 +275,14 @@ func NewBadRequestWithMessage(message string) *ApiError {
 	return &ApiError{
 		Code:           BadRequest,
 		HttpStatusCode: http.StatusBadRequest,
+		Message:        message,
+	}
+}
+
+func NewPermissionDeniedError(message string) *ApiError {
+	return &ApiError{
+		Code:           "PERMISSION_DENIED",
+		HttpStatusCode: http.StatusForbidden,
 		Message:        message,
 	}
 }

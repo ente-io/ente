@@ -1,0 +1,1596 @@
+{
+  "icons": [
+    {
+      "title": "1xBet",
+      "slug": "1x_bet"
+    },
+    {
+      "title": "23andme"
+    },
+    {
+      "title": "3Commas"
+    },
+    {
+      "title": "Addy.io",
+      "slug": "addy_io"
+    },
+    {
+      "title": "Airtable"
+    },
+    {
+      "title": "airtm",
+      "hex": "000000"
+    },
+    {
+      "title": "AJ Bell",
+      "slug": "aj_bell",
+      "hex": "c41230"
+    },
+    {
+      "title": "aliyun",
+      "altNames": [
+        "阿里云"
+      ]
+    },
+    {
+      "title": "Amazon"
+    },
+    {
+      "title": "Ankama",
+      "slug": "ankama"
+    },
+    {
+      "title": "Ankara University",
+      "slug": "ankara_university",
+      "altNames": [
+        "Ankara Üniversitesi"
+      ]
+    },
+    {
+      "title": "Anycoin Direct",
+      "slug": "anycoindirect"
+    },
+    {
+      "title": "AR24",
+      "altNames": [
+        "Docaposte AR24"
+      ]
+    },
+    {
+      "title": "Aruba",
+      "slug": "aruba",
+      "hex": "ef8a33"
+    },
+    {
+      "title": "AscendEX"
+    },
+    {
+      "title": "authentik",
+      "altNames": [
+        "goauthentik"
+      ],
+      "hex": "fd4b2d"
+    },
+    {
+      "title": "availity"
+    },
+    {
+      "title": "AzurHosts",
+      "slug": "azurhosts",
+      "altNames": [
+        "minenode"
+      ]
+    },
+    {
+      "title": "AzurWare",
+      "slug": "azuware"
+    },
+    {
+      "title": "Badlion",
+      "slug": "badlion",
+      "altNames": [
+        "Badlion Client",
+        "BadlionClient"
+      ]
+    },
+    {
+      "title": "BaiduCloud",
+      "slug": "baidu_cloud",
+      "altNames": [
+        "百度云",
+        "baiduyun"
+      ]
+    },
+    {
+      "title": "Band",
+      "slug": "band"
+    },
+    {
+      "title": "Battle.net",
+      "slug": "battlenet",
+      "altNames": [
+        "Battle net",
+        "Blizzard"
+      ]
+    },
+    {
+      "title": "BBS.NGA",
+      "slug": "bbs_nga",
+      "altNames": [
+        "NGA玩家社区",
+        "NGA社区"
+      ]
+    },
+    {
+      "title": "Belo"
+    },
+    {
+      "title": "bestbuy",
+      "altNames": [
+        "Best Buy",
+        "bestbuy.com"
+      ]
+    },
+    {
+      "title": "Bethesda",
+      "altNames": [
+        "Bethesda Softworks"
+      ]
+    },
+    {
+      "title": "Binance",
+      "slug": "binance_exchange",
+      "altNames": [
+        "币安"
+      ]
+    },
+    {
+      "title": "Binance TR",
+      "slug": "binance_tr"
+    },
+    {
+      "title": "BinanceUS",
+      "slug": "binance_us",
+      "altNames": [
+        "Binance US"
+      ]
+    },
+    {
+      "title": "Bitazza",
+      "slug": "bitazza"
+    },
+    {
+      "title": "Bitkub",
+      "slug": "bitkub"
+    },
+    {
+      "title": "Bitfinex"
+    },
+    {
+      "title": "bitget"
+    },
+    {
+      "title": "bitget wallet",
+      "slug": "bitget_wallet"
+    },
+    {
+      "title": "Bitmart",
+      "hex": "000000"
+    },
+    {
+      "title": "BitMEX"
+    },
+    {
+      "title": "BitOasis"
+    },
+    {
+      "title": "BitSkins"
+    },
+    {
+      "title": "Bitstamp"
+    },
+    {
+      "title": "Bitvavo"
+    },
+    {
+      "title": "Bitwarden"
+    },
+    {
+      "title": "Blockchain",
+      "altNames": [
+        "blockchain.com",
+        "blockchain.com Wallet",
+        "blockchain.com Exchange"
+      ]
+    },
+    {
+      "title": "Bloom Host",
+      "slug": "bloom_host",
+      "altNames": [
+        "Bloom Host Billing"
+      ]
+    },
+    {
+      "title": "Bluesky",
+      "slug": "blue_sky"
+    },
+    {
+      "title": "bonify",
+      "slug": "bonify",
+      "altNames": [
+        "bonify.de"
+      ]
+    },
+    {
+      "title": "Booking",
+      "altNames": [
+        "Booking.com"
+      ]
+    },
+    {
+      "title": "BorgBase",
+      "slug": "borg_base",
+      "altNames": [
+        "borg"
+      ]
+    },
+    {
+      "title": "Brave Creators",
+      "slug": "brave_creators",
+      "altNames": [
+        "Brave",
+        "Brave Rewards",
+        "Brave Browser"
+      ]
+    },
+    {
+      "title": "Bugzilla"
+    },
+    {
+      "title": "Bundesagentur für Arbeit",
+      "slug": "bundesagentur_fur_arbeit",
+      "altNames": [
+        "Agentur für Arbeit"
+      ]
+    },
+    {
+      "title": "ButterflyMX",
+      "slug": "butterflymx"
+    },
+    {
+      "title": "Bybit"
+    },
+    {
+      "title": "Caixa"
+    },
+    {
+      "title": "Canva"
+    },
+    {
+      "title": "Capacities"
+    },
+    {
+      "title": "Carta",
+      "altNames": [
+        "Carta.com"
+      ]
+    },
+    {
+      "title": "CERN",
+      "slug": "cern"
+    },
+    {
+      "title": "ChangeNOW"
+    },
+    {
+      "title": "Channel Island Hosting",
+      "slug": "cih",
+      "hex": "D14633"
+    },
+    {
+      "title": "CloudAMQP"
+    },
+    {
+      "title": "ClouDNS"
+    },
+    {
+      "title": "Cloudflare"
+    },
+    {
+      "title": "Coinbase"
+    },
+    {
+      "title": "CoinDCX"
+    },
+    {
+      "title": "colorado",
+      "altNames": [
+        "Colorado.gov",
+        "Colorado Gov",
+        "Colorado Government",
+        "Colorado Government Portal",
+        "Colorado COVES Death Certificates",
+        "Colorado COVES",
+        "Colorado Official State Web Portal",
+        "Colorado State Web Portal",
+        "Colorado State Portal",
+        "Colorado Web Portal",
+        "Colorado Portal",
+        "Colorado State",
+        "Colorado PEAK",
+        "myColorado"
+      ]
+    },
+    {
+      "title": "ConfigCat"
+    },
+    {
+      "title": "Control D",
+      "slug": "controld"
+    },
+    {
+      "title": "Crowdpear"
+    },
+    {
+      "title": "Crypto.com",
+      "slug": "crypto",
+      "altNames": [
+        "crypto",
+        "Crypto com"
+      ]
+    },
+    {
+      "title": "CSAM"
+    },
+    {
+      "title": "CSSBuy",
+      "slug": "cssbuy",
+      "altNames": [
+        "CSS Buy",
+        "CSS-Buy",
+        "cssbuy.com"
+      ]
+    },
+    {
+      "title": "CSFloat"
+    },
+    {
+      "title": "CSGORoll",
+      "slug": "csgoroll"
+    },
+    {
+      "title": "Cryptee",
+      "slug": "cryptee"
+    },
+    {
+      "title": "Cwallet",
+      "altNames": [
+        "cwallet",
+        "c-wallet",
+        "c wallet",
+        "cwallet.com"
+      ]
+    },
+    {
+      "title": "DCS",
+      "altNames": [
+        "Digital Combat Simulator"
+      ]
+    },
+    {
+      "title": "DEGIRO"
+    },
+    {
+      "title": "deriv"
+    },
+    {
+      "title": "DigiFinex",
+      "altNames": [
+        "Digi Finex",
+        "Digifinex.com"
+      ]
+    },
+    {
+      "title": "DirectAdmin"
+    },
+    {
+      "title": "Discourse"
+    },
+    {
+      "title": "Deloitte"
+    },
+    {
+      "title": "DMarket"
+    },
+    {
+      "title": "DocuSeal"
+    },
+    {
+      "title": "Doppler"
+    },
+    {
+      "title": "Dropbox"
+    },
+    {
+      "title": "DreamHost Panel",
+      "slug": "dreamhost_panel"
+    },
+    {
+      "title": "dus.net",
+      "slug": "dusnet"
+    },
+    {
+      "title": "eBay"
+    },
+    {
+      "title": "ecitizen kenya",
+      "slug": "ecitizen_kenya"
+    },
+    {
+      "title": "ecloud",
+      "altNames": [
+        "Murena"
+      ]
+    },
+    {
+      "title": "emeritihealth",
+      "altNames": [
+        "Emeriti Health",
+        "Emeriti Retirement Health",
+      ]
+    },
+    {
+      "title": "eneba"
+    },
+    {
+      "title": "ente",
+      "hex": "1DB954"
+    },
+    {
+      "title": "enom",
+      "slug": "enom"
+    },
+    {
+      "title": "Epic Games",
+      "slug": "epic_games",
+      "hex": "000000"
+    },
+    {
+      "title": "Esketit"
+    },
+    {
+      "title": "Estateguru"
+    },
+    {
+      "title": "EVEOnline",
+      "slug": "eve_online",
+      "altNames": [
+        "EVE Online"
+      ],
+      "hex": "858585"
+    },
+    {
+      "title": "Fanatical",
+      "slug": "fanatical",
+      "altNames": [
+        "FANATICAL"
+      ]
+    },
+    {
+      "title": "Fastmail"
+    },
+    {
+      "title": "Federal Student Aid",
+      "slug": "federal_student_aid",
+      "altNames": [
+        "FSA",
+        "FAFSA"
+      ]
+    },
+    {
+      "title": "Fidelity",
+      "slug": "fidelity",
+      "altNames": [
+        "Fidelity Investments"
+      ]
+    },
+    {
+      "title": "Filen"
+    },
+    {
+      "title": "Finanzfluss",
+      "slug": "finanzfluss"
+    },
+    {
+      "title": "Finary"
+    },
+    {
+      "title": "Firefox",
+      "slug": "mozilla"
+    },
+    {
+      "title": "fortrabbit"
+    },
+    {
+      "title": "ForUsAll"
+    },
+    {
+      "title": "FreeTaxUSA",
+      "slug": "freetaxusa"
+    },
+    {
+      "title": "FZJ",
+      "slug": "fzj",
+      "hex": "023d6b",
+      "altNames": [
+        "Forschungszentrum Jülich",
+        "FZJ IdP",
+        "iffLogin"
+      ]
+    },
+    {
+      "title": "G2A"
+    },
+    {
+      "title": "Gate.io",
+      "slug": "gateio.svg"
+    },
+    {
+      "title": "GERID"
+    },
+    {
+      "title": "GitHub"
+    },
+    {
+      "title": "GitLab"
+    },
+    {
+      "title": "GMX"
+    },
+    {
+      "title": "GommeHD.net",
+      "slug": "gommehd",
+      "altNames": [
+        "GommeHD",
+        "GommeHDnet"
+      ]
+    },
+    {
+      "title": "Google"
+    },
+    {
+      "title": "Gosuslugi",
+      "slug": "gosuslugi",
+      "altNames": [
+        "Госуслуги"
+      ]
+    },
+    {
+      "title": "GOV.UK",
+      "slug": "gov_uk",
+      "altNames": [
+        "Government Gateway"
+      ]
+    },
+    {
+      "title": "Government of Canada",
+      "slug": "canada_flag",
+      "altNames": [
+        "CRA",
+        "CRA/ARC",
+        "Canada Revenue Agency"
+      ]
+    },
+    {
+      "title": "Guideline"
+    },
+    {
+      "title": "Gusto"
+    },
+    {
+      "title": "Habbo"
+    },
+    {
+      "title": "Healthchecks.io",
+      "slug": "healthchecks"
+    },
+    {
+      "title": "Hivelocity"
+    },
+    {
+      "title": "HTX"
+    },
+    {
+      "title": "HuggingFace",
+      "altNames": [
+        "Hugging Face"
+      ]
+    },
+    {
+      "title": "IBKR",
+      "slug": "ibkr",
+      "altNames": [
+        "Interactive Brokers",
+        "IB"
+      ]
+    },
+    {
+      "title": "IceDrive",
+      "slug": "ice_drive"
+    },
+    {
+      "title": "ICONOMI"
+    },
+    {
+      "title": "ID.me",
+      "slug": "id_me"
+    },
+    {
+      "title": "ImmoScout24",
+      "slug": "immo_scout_24",
+      "altNames": [
+        "ImmobilienScout24"
+      ]
+    },
+    {
+      "title": "Impact.com",
+      "slug": "impact"
+    },
+    {
+      "title": "Infomaniak"
+    },
+    {
+      "title": "ING"
+    },
+    {
+      "title": "Instant Gaming",
+      "slug": "instant_gaming"
+    },
+    {
+      "title": "Instagram"
+    },
+    {
+      "title": "INWX"
+    },
+    {
+      "title": "Itch",
+      "slug": "itch_io",
+      "hex": "000000"
+    },
+    {
+      "title": "IVPN",
+      "slug": "ivpn"
+    },
+    {
+      "title": "Jagex",
+      "hex": "D3D800"
+    },
+    {
+      "title": "jianguoyun",
+      "altNames": [
+        "坚果云"
+      ]
+    },
+    {
+      "title": "Kagi"
+    },
+    {
+      "title": "Keygen",
+      "altNames": [
+        "keygen.sh"
+      ]
+    },
+    {
+      "title": "Kick"
+    },
+    {
+      "title": "Kite"
+    },
+    {
+      "title": "Kotas"
+    },
+    {
+      "title": "KnownHost",
+      "altNames": [
+        "Known Host",
+        "KnownHost.com"
+      ]
+    },
+    {
+      "title": "Ko-fi",
+      "slug": "ko_fi",
+      "altNames": [
+        "Ko fi",
+        "Kofi"
+      ]
+    },
+    {
+      "title": "Koofr"
+    },
+    {
+      "title": "KPN",
+      "color": "00CC00"
+    },
+    {
+      "title": "Kraken"
+    },
+    {
+      "title": "Kronos"
+    },
+    {
+      "title": "KuCoin"
+    },
+    {
+      "title": "La Poste",
+      "slug": "laposte"
+    },
+    {
+      "title": "LabyMod",
+      "slug": "labymod"
+    },
+    {
+      "title": "Lark",
+      "slug": "lark",
+      "altNames": [
+        "飞书"
+      ]
+    },
+    {
+      "title": "LaunchDarkly",
+      "hex": "858585"
+    },
+    {
+      "title": "Letterboxd"
+    },
+    {
+      "title": "lincolnfinancial",
+      "altNames": [
+        "Lincoln Financial",
+        "Lincoln Financial Group",
+        "LFG"
+      ]
+    },
+    {
+      "title": "LinkedIn",
+      "slug": "linkedin"
+    },
+    {
+      "title": "Linux.Do",
+      "slug": "linux_do",
+      "altNames": [
+        "LINUX DO",
+        "LinxDo"
+      ]
+    },
+    {
+      "title": "Local",
+      "slug": "local_wp",
+      "altNames": [
+        "LocalWP",
+        "Local WP",
+        "Local Wordpress"
+      ]
+    },
+    {
+      "title": "Login.gov",
+      "slug": "login_gov"
+    },
+    {
+      "title": "Luma",
+      "slug": "luma",
+      "altNames": [
+        "luma",
+        "lu.ma"
+      ]
+    },
+    {
+      "title": "MangaDex",
+      "slug": "mangadex"
+    },
+    {
+      "title": "Marketplace.tf",
+      "slug": "marketplacedottf"
+    },
+    {
+      "title": "Mastodon",
+      "altNames": [
+        "mstdn",
+        "fediscience",
+        "mathstodon",
+        "fosstodon"
+      ],
+      "hex": "6364FF"
+    },
+    {
+      "title": "matlab",
+      "altNames": [
+        "mathworks"
+      ]
+    },
+    {
+      "title": "Mbin",
+      "altNames": [
+        "kbin",
+        "thebrainbin",
+        "gehirneimer"
+      ]
+    },
+    {
+      "title": "Memed"
+    },
+    {
+      "title": "Mercado Libre",
+      "slug": "mercado_libre",
+      "altNames": [
+        "Mercado Libre",
+        "MercadoLibre",
+        "MercadoLivre"
+      ]
+    },
+    {
+      "title": "MEXC"
+    },
+    {
+      "title": "microsoft"
+    },
+    {
+      "title": "Microsoft 365",
+      "slug": "microsoft365"
+    },
+    {
+      "title": "Migros"
+    },
+    {
+      "title": "Mintos"
+    },
+    {
+      "title": "Mistral",
+      "altNames": [
+        "Le Chat",
+        "Mistral AI",
+        "MistralAI"
+      ]
+    },
+    {
+      "title": "Mozilla"
+    },
+    {
+      "title": "MyFRITZ!Net",
+      "slug": "myfritz",
+      "altNames": [
+        "MyFRITZ!",
+        "FritzBox",
+        "Fritz!Box",
+        "FritzBox 7590",
+        "FritzBox 7590 AX",
+        "FritzBox 7530",
+        "FritzBox 7530 AX",
+        "FritzBox 4040",
+        "FritzBox 4060",
+        "FritzBox 5530 Fiber",
+        "FritzBox 6490 Cable",
+        "FritzBox 6590 Cable",
+        "FritzBox 6591 Cable",
+        "FritzBox 6660 Cable",
+        "FritzBox 6820 LTE",
+        "FritzBox 6850 LTE",
+        "FritzBox 6850 5G",
+        "FritzBox 6890 LTE",
+        "FritzBox 7583",
+        "FritzBox 7520",
+        "FritzBox 7490",
+        "FritzBox 7583"
+      ]
+    },
+    {
+      "title": "Name.com",
+      "slug": "name_com"
+    },
+    {
+      "title": "nasdaq"
+    },
+    {
+      "title": "Nextcloud",
+      "slug": "nextcloud"
+    },
+    {
+      "title": "NeteaseMail",
+      "slug": "netease_mail",
+      "altNames": [
+        "网易邮箱",
+        "Mail.163"
+      ]
+    },
+    {
+      "title": "NextDNS"
+    },
+    {
+      "title": "Newgrounds",
+      "slug": "newgrounds"
+    },
+    {
+      "title": "Newton",
+      "altNames": [
+        "Newton Crypto"
+      ]
+    },
+    {
+      "title": "ngrok",
+      "hex": "858585"
+    },
+    {
+      "title": "NekoHosting",
+      "slug": "nekohosting",
+      "altNames": [
+        "NekoHosting Billing",
+        "NekoHosting Dashboard"
+      ]
+    },
+    {
+      "title": "NekoHosting Gaming Panel",
+      "slug": "nekohosting_gp",
+      "altNames": [
+        "NekoHosting Game Panel",
+        "NekoHosting GamePanel"
+      ]
+    },
+    {
+      "title": "Nelnet"
+    },
+    {
+      "title": "nintendo",
+      "altNames": [
+        "任天堂",
+        "Nintendo Account"
+      ]
+    },
+    {
+      "title": "Njalla"
+    },
+    {
+      "title": "nordvpn",
+      "slug": "nordaccount",
+      "hex": "4687FF",
+      "altNames": [
+        "Nord Account"
+      ]
+    },
+    {
+      "title": "Notesnook"
+    },
+    {
+      "title": "NoIp",
+      "slug": "noip",
+      "altNames": [
+        "No IP",
+        "No-IP",
+        "noip.com"
+      ]
+    },
+    {
+      "title": "Notion"
+    },
+    {
+      "title": "NuCommunity"
+    },
+    {
+      "title": "numerai"
+    },
+    {
+      "title": "NVIDIA"
+    },
+    {
+      "title": "Odido"
+    },
+    {
+      "title": "OpenObserve",
+      "slug": "open_observe",
+      "altNames": [
+        "openobserve.ai",
+        "openobserve ai"
+      ]
+    },
+    {
+      "title": "okx",
+      "hex": "000000",
+      "altNames": [
+        "欧易"
+      ]
+    },
+    {
+      "title": "OnShape",
+      "slug": "onshape",
+      "hex": "7abb5e"
+    },
+    {
+      "title": "Oracle Cloud",
+      "slug": "oracle_cloud"
+    },
+    {
+      "title": "Pangolin",
+      "slug": "pangolin"
+    },
+    {
+      "title": "Parqet",
+      "slug": "parqet"
+    },
+    {
+      "title": "Parsec"
+    },
+    {
+      "title": "Patient Access",
+      "slug": "patient_access"
+    },
+    {
+      "title": "PayPal"
+    },
+    {
+      "title": "PBTech",
+      "slug": "pbtech",
+      "hex": "f08222"
+    },
+    {
+      "title": "pCloud",
+      "slug": "pcloud"
+    },
+    {
+      "title": "PebbleHost",
+      "slug": "pebble_host",
+      "altNames": [
+        "Pebble Host"
+      ]
+    },
+    {
+      "title": "Peerberry"
+    },
+    {
+      "title": "Pingvin Share"
+    },
+    {
+      "title": "Pionex",
+      "slug": "pionex"
+    },
+    {
+      "title": "Plutus",
+      "hex": "DEC685"
+    },
+    {
+      "title": "Poloniex"
+    },
+    {
+      "title": "Porkbun"
+    },
+    {
+      "title": "PostNL"
+    },
+    {
+      "title": "Postmark",
+      "slug": "postmarkapp",
+      "altNames": [
+        "postmarkapp"
+      ]
+    },
+    {
+      "title": "PostScan Mail",
+      "slug": "postscanmail",
+      "altNames": [
+        "Post Scan Mail",
+        "PostScanMail"
+      ]
+    },
+    {
+      "title": "Prey Project",
+      "slug": "prey_project",
+      "altNames": [
+        "PreyProject"
+      ]
+    },
+    {
+      "title": "Privacy Guides",
+      "slug": "privacyguides"
+    },
+    {
+      "title": "Privacy.com",
+      "slug": "privacy"
+    },
+    {
+      "title": "Proton"
+    },
+    {
+      "title": "Proton Calendar",
+      "slug": "proton_calendar"
+    },
+    {
+      "title": "Proton Drive",
+      "slug": "proton_drive"
+    },
+    {
+      "title": "Proton Mail",
+      "slug": "proton_mail"
+    },
+    {
+      "title": "Proton Pass",
+      "slug": "proton_pass"
+    },
+    {
+      "title": "Proton VPN",
+      "slug": "proton_vpn"
+    },
+    {
+      "title": "Proton Wallet",
+      "slug": "proton_wallet"
+    },
+    {
+      "title": "Proxmox"
+    },
+    {
+      "title": "Pushover",
+      "slug": "pushover"
+    },
+    {
+      "title": "qiniuyun",
+      "altNames": [
+        "七牛云",
+        "qiniu"
+      ]
+    },
+    {
+      "title": "R10.net",
+      "slug": "r10",
+      "altNames": [
+        "R10",
+        "r10.net"
+      ]
+    },
+    {
+      "title": "Raindrop.io",
+      "slug": "raindrop_io",
+      "altNames": [
+        "Raindrop"
+      ]
+    },
+    {
+      "title": "randstad",
+      "hex": "2175D9"
+    },
+    {
+      "title": "Real-Debrid",
+      "slug": "real_debrid"
+    },
+    {
+      "title": "RealMe",
+      "slug": "realme"
+    },
+    {
+      "title": "RealVNC",
+      "slug": "realvnc",
+      "hex": "488aec"
+    },
+    {
+      "title": "RedotPay",
+      "altNames": [
+        "redotpay",
+        "redot pay",
+        "redot-pay",
+        "redotpay.com"
+      ]
+    },
+    {
+      "title": "Registro br",
+      "slug": "registro_br",
+      "altNames": [
+        "registrobr",
+        "Registro.br"
+      ]
+    },
+    {
+      "title": "reMarkable"
+    },
+    {
+      "title": "Restorecord"
+    },
+    {
+      "title": "Restream",
+      "slug": "restream",
+      "altNames": [
+        "restream.io"
+      ]
+    },
+    {
+      "title": "Revolt",
+      "hex": "858585"
+    },
+    {
+      "title": "RippleMatch"
+    },
+    {
+      "title": "Rockstar Games",
+      "slug": "rockstar_games"
+    },
+    {
+      "title": "RuneMate"
+    },
+    {
+      "title": "RuneScape Wiki",
+      "slug": "runescape_wiki"
+    },
+    {
+      "title": "Rust Language Forum",
+      "slug": "rust_language_forum",
+      "hex": "000000"
+    },
+    {
+      "title": "Samsung"
+    },
+    {
+      "title": "Seafile",
+      "slug": "seafile"
+    },
+    {
+      "title": "SEI",
+      "altNames": [
+        "sei",
+        "sei!",
+        "SEI!",
+        "Sistema Eletrônico de Informações",
+        "SEI/SEDE"
+      ]
+    },
+    {
+      "title": "Sendgrid"
+    },
+    {
+      "title": "service-bw"
+    },
+    {
+      "title": "Shakepay"
+    },
+    {
+      "title": "SimpleLogin"
+    },
+    {
+      "title": "Simplicity",
+      "altNames": [
+        "simplicitynz",
+        "simplicity.kiwi"
+      ]
+    },
+    {
+      "title": "Sipgate"
+    },
+    {
+      "title": "Skiff",
+      "hex": "EF5A3C"
+    },
+    {
+      "title": "Skinport"
+    },
+    {
+      "title": "SMSPool",
+      "slug": "sms_pool_net",
+      "altNames": [
+        "smspool.net",
+        "smspool net"
+      ]
+    },
+    {
+      "title": "SMTP2GO"
+    },
+    {
+      "title": "Snapchat"
+    },
+    {
+      "title": "SpaceHey"
+    },
+    {
+      "title": "Standard Notes",
+      "slug": "standardnotes"
+    },
+    {
+      "title": "Starbreeze",
+      "altNames": [
+        "Starbreeze Nebula",
+        "Starbreeze Account",
+        "PAYDAY",
+        "PAYDAY 3"
+      ]
+    },
+    {
+      "title": "Startmail",
+      "slug": "startmail"
+    },
+    {
+      "title": "STRATO",
+      "hex": "FF8800"
+    },
+    {
+      "title": "Surfshark"
+    },
+    {
+      "title": "Synology DSM",
+      "slug": "synology_dsm"
+    },
+    {
+      "title": "T-Mobile",
+      "altNames": [
+        "T Mobile",
+        "T-Mobile ID"
+      ]
+    },
+    {
+      "title": "TCPShield"
+    },
+    {
+      "title": "tencent cloud",
+      "slug": "tencent_cloud",
+      "altNames": [
+        "腾讯云",
+        "tencentcloud"
+      ]
+    },
+    {
+      "title": "Techlore",
+      "altNames": [
+        "Techlore Courses",
+        "Techlore Forums"
+      ]
+    },
+    {
+      "title": "Teleport",
+      "altNames": [
+        "Gravitational Teleport",
+        "GoTeleport"
+      ]
+    },
+    {
+      "title": "tencent cloud",
+      "slug": "tencent_cloud",
+      "altNames": [
+        "腾讯云",
+        "tencentcloud"
+      ]
+    },
+    {
+      "title": "Terabit",
+      "slug": "terabit",
+      "altNames": [
+        "Terabit Hosting",
+        "terabit.io"
+      ]
+    },
+    {
+      "title": "Termius",
+      "hex": "858585"
+    },
+    {
+      "title": "Temu",
+      "slug": "temu"
+    },
+    {
+      "title": "tianyiyun",
+      "altNames": [
+        "天翼云"
+      ]
+    },
+    {
+      "title": "TikTok"
+    },
+    {
+      "title": "Titan"
+    },
+    {
+      "title": "TorGuard"
+    },
+    {
+      "title": "Trading 212"
+    },
+    {
+      "title": "TradingView"
+    },
+    {
+      "title": "TransIP"
+    },
+    {
+      "title": "Tresorit"
+    },
+    {
+      "title": "TRowePrice",
+      "altNames": [
+        "T Rowe Price",
+        "TRowe Price",
+        "T Rowe Price Group",
+        "T Rowe Price Group, Inc"
+      ]
+    },
+    {
+      "title": "Tweakers"
+    },
+    {
+      "title": "Twingate",
+      "hex": "858585"
+    },
+    {
+      "title": "Twitch",
+      "altNames": [
+        "Twitch.tv",
+        "Twitch tv"
+      ]
+    },
+    {
+      "title": "Ubiquiti",
+      "slug": "ubiquiti",
+      "altNames": [
+        "Unifi SSO",
+        "Unifi",
+        "Ubiquiti SSO"
+      ]
+    },
+    {
+      "title": "Ubisoft"
+    },
+    {
+      "title": "Ubuntu One",
+      "slug": "ubuntu_one"
+    },
+    {
+      "title": "unitedhealthgroup",
+      "altNames": [
+        "Unitedhealth Group",
+        "United Healthgroup",
+        "UHG",
+        "uhg.com",
+        "unitedhealthgroup.com"
+      ]
+    },
+    {
+      "title": "Unity",
+      "hex": "858585"
+    },
+    {
+      "title": "Uphold"
+    },
+    {
+      "title": "Upstox"
+    },
+    {
+      "title": "US Mobile",
+      "slug": "us_mobile"
+    },
+    {
+      "title": "uollet",
+      "slug": "uollet",
+      "altNames": [
+        "UOLLET",
+        "uollet.com.br"
+      ]
+    },
+    {
+      "title": "Vikunja"
+    },
+    {
+      "title": "volcengine",
+      "altNames": [
+        "火山引擎"
+      ]
+    },
+    {
+      "title": "WARGAMING.NET",
+      "slug": "wargamingnet"
+    },
+    {
+      "title": "Warner Bros.",
+      "slug": "warner_bros",
+      "altNames": [
+          "Warner Brothers"
+      ]
+    },
+    {
+      "title": "Wealthfront"
+    },
+    {
+      "title": "Wealthsimple"
+    },
+    {
+      "title": "WEB.DE",
+      "slug": "web_de"
+    },
+    {
+      "title": "WHMCS"
+    },
+    {
+      "title": "Windscribe"
+    },
+    {
+      "title": "Wise"
+    },
+    {
+      "title": "Wolvesville"
+    },
+    {
+      "title": "Workflowy"
+    },
+    {
+      "title": "WorkOS",
+      "altNames": [
+        "Work OS"
+      ]
+    },
+    {
+      "title": "World Cube Association",
+      "slug": "wca",
+      "altNames": [
+        "WCA",
+        "worldcubeassociation"
+      ]
+    },
+    {
+      "title": "WYZE"
+    },
+    {
+      "title": "Xbox",
+      "hex": "107C10"
+    },
+    {
+      "title": "Yahoo",
+      "hex": "5F01D2"
+    },
+    {
+      "title": "Yandex",
+      "slug": "yandex",
+      "altNames": [
+        "Ya",
+        "Яндекс"
+      ]
+    },
+    {
+      "title": "YNAB",
+      "altNames": [
+        "You Need A Budget"
+      ]
+    },
+    {
+      "title": "Zoom"
+    },
+    {
+      "title": "BingX"
+    },
+    {
+      "title": "CoinSpot"
+    },
+    {
+      "title": "Aternos",
+      "slug": "aternos"
+    },
+    {
+      "title": "Toshl Finance",
+      "slug": "toshl_finance",
+      "altNames": [
+        "Toshl"
+      ]
+    },
+    {
+      "title": "Tebex",
+      "slug": "tebex",
+      "altNames": [
+        "tebex",
+        "tebex.io",
+        "buycraft"
+      ]
+    },
+    {
+      "title": "xAI",
+      "slug": "xai"
+    },
+    {
+      "title": "Cronometer",
+      "slug": "cronometer"
+    },
+    {
+      "title": "Zitadel"
+    },
+    {
+      "title": "Co-Wheels",
+      "slug": "cowheels"
+    }
+  ]
+}

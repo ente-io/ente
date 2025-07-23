@@ -1,1 +1,1 @@
-export { default } from "@/new/photos/pages/duplicates";
+export { default } from "ente-new/photos/pages/duplicates";

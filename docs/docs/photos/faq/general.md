@@ -26,10 +26,6 @@ unsupported file format and we will do our best to help you out.
 
 Yes, we currently do not support files larger than 4 GB.
 
-If this constraint is a concern for you, please write to
-[support@ente.io](mailto:support@ente.io) with your use case and we will do our
-best to help you.
-
 ## Does Ente support videos?
 
 Ente supports backing up and downloading of videos in their original format and
@@ -86,22 +82,11 @@ On Ente's mobile apps, you can add photos from an album that's shared with you,
 into one of your own albums. This will create a copy of the item that you fully
 own, and will count against your storage quota.
 
-## How do I ensure that the Ente desktop app stays up to date on my system?
-
-Ente desktop includes an auto-update feature, ensuring that whenever updates are
-deployed, the app will automatically download and install them. You don't need
-to manually update the software.
-
 ## Can I sync a folder containing multiple subfolders, each representing an album?
 
 Yes, when you drag and drop the folder onto the desktop app, the app will detect
 the multiple folders and prompt you to choose whether you want to create a
 single album or separate albums for each folder.
-
-## How do I identify which files experienced upload issues within the desktop app?
-
-Check the sections within the upload progress bar for "Failed Uploads," "Ignored
-Uploads," and "Unsuccessful Uploads."
 
 ## How do I keep NAS and Ente photos synced?
 
@@ -112,3 +97,56 @@ https://github.com/ente-io/ente/tree/main/cli#readme.
 
 Currently, the Ente mobile app allows you to see a map view of all the albums by
 clicking on "Your map" under "Locations" on the search screen.
+
+## How to reset my password if I lost it?
+
+On the login page, enter your email and click on Forgot Password. Then, enter
+your recovery key and create a new password.
+
+## Can I search for photos using the descriptions I’ve added?
+
+Yes, descriptions are searchable, making it easier to find specific photos
+later. To do this, open the photo, tap the (i) button, and enter your
+description.
+
+## How does the deduplication feature work on the desktop app?
+
+If the app finds exact duplicates, it will show them in the deduplication. When
+you delete a duplicate, the app keeps one copy and creates a symlink for the
+other duplicate. This helps save storage space.
+
+## What happens if I lose access to my email address? Can I use my recovery key to bypass email verification?
+
+No, the recovery key does not bypass email verification. For security reasons,
+we do not disable or bypass email verification unless the account owner reaches
+out to us and successfully verifies their identity by providing details about
+their account.
+
+If you lose access to your email, please contact our support team at
+support@ente.io
+
+---
+
+# iOS Album Backup and Organization in Ente
+
+## How does Ente handle photos that are part of multiple iOS albums?
+
+When you select multiple albums for backup, Ente prioritizes uploading each
+photo to the album with the fewest photos. This means a photo will only be
+uploaded once, even if it exists in multiple albums on your device. If you
+create new albums on your device after the initial backup, those photos may not
+appear in the corresponding Ente album if they were already uploaded to a
+different album.
+
+## Why don’t all photos from a new iOS album appear in the corresponding Ente album?
+
+If you create a new album on your device after the initial backup, the photos in
+that album may have already been uploaded to another album in Ente. To fix this,
+go to the "On Device" album in Ente, select all photos, and manually add them to
+the corresponding album in Ente.
+
+## What happens if I reorganize my photos in the iOS Photos app after backing up?
+
+Reorganizing photos in the iOS Photos app (e.g., moving photos to new albums)
+won’t automatically reflect in Ente. You’ll need to manually add those photos to
+the corresponding albums in Ente to maintain consistency.

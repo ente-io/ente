@@ -1,3 +1,1 @@
-import Page from "@/base/components/pages/404";
-
-export default Page;
+export { default } from "ente-base/components/pages/404";

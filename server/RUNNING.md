@@ -1,27 +1,33 @@
 # Running Museum
 
-You can run a Docker compose cluster containing museum and the essential
-auxiliary services it requires (database and object storage). This is the
-easiest and simplest way to get started, and also provides an isolated
+You can run a Docker compose cluster containing museum, the web app, and the
+essential auxiliary services it requires (database and object storage). This is
+the easiest and simplest way to get started, and also provides an isolated
 environment that doesn't clutter your machine.
 
 You can also run museum directly on your machine if you wish - it is a single
 static go binary.
 
-This document describes these approaches, and also outlines configuration.
+This document describes these different approaches (you can choose any one), and
+also outlines configuration.
 
--   [Run using Docker using a pre-built Docker image](docs/docker.md)
--   [Run using Docker but build an image from source](#build-and-run-using-docker)
--   [Running without Docker](#running-without-docker)
+-   [Run using pre-built Docker images](quickstart/README.md)
+-   [Run using Docker, building image from source](#build-and-run-using-docker)
+-   [Run with Docker, à la carte](#pre-built-images)
+-   [Run without Docker](#running-without-docker)
 -   [Configuration](#configuration)
 
-If your mobile app is able to connect to your self hosted instance but is not
-able to view or upload images, see
-[help.ente.io/self-hosting/guides/configuring-s3](https://help.ente.io/self-hosting/guides/configuring-s3).
+## Run using pre-built Docker images
+
+```sh
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/ente-io/ente/main/server/quickstart.sh)"
+```
+
+For more details, see [docs/quickstart.md](docs/quickstart.md).
 
 ## Build and run using Docker
 
-Start the cluster
+Start the cluster (in the `ente/server` directory)
 
     docker compose up --build
 
@@ -43,23 +49,26 @@ Or interact with the other services in the cluster, e.g. connect to the DB
 
 Or interact with the MinIO S3 API
 
-    AWS_ACCESS_KEY_ID=test AWS_SECRET_ACCESS_KEY=testtest \
-        aws s3 --endpoint-url http://localhost:3200 ls s3://test
+    AWS_ACCESS_KEY_ID=changeme AWS_SECRET_ACCESS_KEY=changeme1234 \
+        aws s3 --endpoint-url http://localhost:3200 ls s3://b2-eu-cen
 
-Or open the MinIO dashboard at <http://localhost:3201> (user: test/password: testtest).
+Or open the MinIO dashboard at http://localhost:3201
+
+> [!NOTE]
+>
+> To avoid exposing unnecessary services, this port is not exposed by default.
+> You'll need to uncomment the corresponding port in your `compose.yaml` first.
+
+> [!WARNING]
+>
+> The default credentials are user changeme / password changeme1234. Goes
+> without saying, but remember to change them!
 
 > [!NOTE]
 >
 > While we've provided a MinIO based Docker compose file to make it easy for
 > people to get started, if you're running it in production we recommend using
 > an external S3.
-
-> [!NOTE]
->
-> If something seems amiss, ensure that Docker has read access to the parent
-> folder so that it can access credentials.yaml and other local files. On macOS,
-> you can do this by going to System Settings > Security & Privacy > Files and
-> Folders > Docker.
 
 ### Cleanup
 
@@ -80,6 +89,30 @@ You can spin up independent clusters, each with its own volumes, by using the
 Each time museum gets rebuilt from source, a new image gets created but the old
 one is retained as a dangling image. You can use `docker image prune --force`,
 or `docker system prune` if that's fine with you, to remove these.
+
+## Pre-built images
+
+## server
+
+If you have setup the database and object storage externally and only want to
+run Ente's server, you can just pull and run the image from
+**`ghcr.io/ente-io/server`**.
+
+```sh
+docker pull ghcr.io/ente-io/server
+```
+
+## web
+
+Similarly, there is a pre-built Docker image containing all the web apps which
+you can just pull and run the from **`ghcr.io/ente-io/web`**.
+
+```sh
+docker pull ghcr.io/ente-io/web
+```
+
+For details about configuring the web image, see
+[web/docs/docker.md](../web/docs/docker.md).
 
 ## Running without Docker
 
@@ -193,3 +226,9 @@ a config file later on.
 
 The keys and values supported by this configuration file are documented in
 [configurations/local.yaml](configurations/local.yaml).
+
+> [!TIP]
+>
+> If your mobile app is able to connect to your self hosted instance but is not
+able to view or upload images, see
+[help.ente.io/self-hosting/guides/configuring-s3](https://help.ente.io/self-hosting/guides/configuring-s3).

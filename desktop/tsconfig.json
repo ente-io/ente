@@ -7,10 +7,10 @@
      * Recommended target, lib and other settings for code running in the
      * version of Node.js bundled with Electron.
      *
-     * Currently, with Electron 30, this is Node.js 20.11.1.
-     * https://www.electronjs.org/blog/electron-30-0
+     * Currently, with Electron 35, this is Node.js 22.14.0.
+     * https://www.electronjs.org/blog/electron-35-0
      */
-    "extends": "@tsconfig/node20/tsconfig.json",
+    "extends": "@tsconfig/node22/tsconfig.json",
 
     /* TSConfig docs: https://aka.ms/tsconfig.json */
     "compilerOptions": {

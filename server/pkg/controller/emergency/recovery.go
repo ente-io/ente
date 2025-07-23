@@ -1,12 +1,19 @@
 package emergency
 
 import (
+	"context"
+	"fmt"
 	"github.com/ente-io/museum/ente"
 	"github.com/ente-io/museum/pkg/repo/emergency"
+	"github.com/ente-io/museum/pkg/utils/time"
 	"github.com/ente-io/stacktrace"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	log "github.com/sirupsen/logrus"
+)
+
+const (
+	_recoveryReminderLock = "recoveryReminderLock"
 )
 
 func (c *Controller) GetRecoveryInfo(ctx *gin.Context,
@@ -67,7 +74,7 @@ func (c *Controller) ChangePassword(ctx *gin.Context, userID int64, request ente
 		log.WithField("userID", userID).WithField("req", request).
 			Warn("no row updated while rejecting recovery")
 	} else {
-		go c.sendRecoveryNotification(ctx, contact.UserID, contact.EmergencyContactID, ente.RecoveryStatusRecovered)
+		go c.sendRecoveryNotification(ctx, contact.UserID, contact.EmergencyContactID, ente.RecoveryStatusRecovered, nil)
 	}
 
 	return resp, nil
@@ -94,4 +101,76 @@ func (c *Controller) checkRecoveryAndGetContact(ctx *gin.Context,
 		return nil, stacktrace.Propagate(ente.ErrNotFound, "no encrypted key found")
 	}
 	return contact, nil
+}
+
+func (c *Controller) SendRecoveryReminder() {
+	if c.isReminderCronRunning {
+		return
+	}
+	c.isReminderCronRunning = true
+	defer func() {
+		c.isReminderCronRunning = false
+	}()
+	lockStatus := c.LockCtrl.TryLock(_recoveryReminderLock, time.MicrosecondsAfterHours(1))
+	if !lockStatus {
+		log.Error("Could not acquire lock to send storage limit exceeded mails")
+		return
+	}
+	defer c.LockCtrl.ReleaseLock(_recoveryReminderLock)
+
+	rows, err := c.Repo.GetActiveRecoveryForNotification()
+	if err != nil {
+		log.WithError(err).Error("failed to get recovery rows")
+		return
+	}
+
+	if len(*rows) == 0 {
+		return
+	}
+	log.Info(fmt.Sprintf("Found %d recovery rows", len(*rows)))
+	microsecondsInDay := 1000 * 1000 * 24 * 60 * 60
+	for _, row := range *rows {
+		logger := log.WithFields(log.Fields{
+			"userID":         row.UserID,
+			"contactID":      row.EmergencyContactID,
+			"status":         row.Status,
+			"waitTill":       row.WaitTill,
+			"nextReminderAt": row.NextReminderAt,
+			"sessionID":      row.ID,
+		})
+
+		daysLeft := (row.WaitTill - row.NextReminderAt) / int64(microsecondsInDay)
+		logger.Infof("Days left: %d", daysLeft)
+		if row.WaitTill < time.Microseconds() && row.Status == ente.RecoveryStatusWaiting {
+			_, updateErr := c.Repo.UpdateRecoveryStatusForID(context.Background(), row.ID, ente.RecoveryStatusReady)
+			if updateErr != nil {
+				logger.WithError(updateErr).Error("failed to update recovery status")
+				continue
+			}
+
+			go c.sendRecoveryNotification(context.Background(), row.UserID, row.EmergencyContactID, ente.RecoveryStatusReady, nil)
+		} else if daysLeft >= 2 && row.Status == ente.RecoveryStatusWaiting {
+			if daysLeft > 9 {
+				// set another reminder after 7 days
+				newNextReminderAt := row.NextReminderAt + int64(microsecondsInDay*7)
+				if err := c.Repo.UpdateNextReminder(context.Background(), row.ID, newNextReminderAt); err != nil {
+					logger.WithError(err).Error("failed to update next reminder")
+					continue
+				}
+			} else if daysLeft > 2 {
+				// send a reminder two days before the waitTill date
+				newNextReminderAt := row.WaitTill - int64(microsecondsInDay*2)
+				if err := c.Repo.UpdateNextReminder(context.Background(), row.ID, newNextReminderAt); err != nil {
+					logger.WithError(err).Error("failed to update next reminder")
+					continue
+				}
+			}
+
+			if row.Status == ente.RecoveryStatusWaiting {
+				go c.sendRecoveryNotification(context.Background(), row.UserID, row.EmergencyContactID, ente.RecoveryStatusWaiting, &daysLeft)
+			} else {
+				logger.Warnf("No need to send email with status %v", row.Status)
+			}
+		}
+	}
 }

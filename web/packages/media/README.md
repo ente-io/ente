@@ -1,4 +1,4 @@
-## @/media
+## ente-media
 
 A package for sharing code between our apps that show media (photos, videos).
 

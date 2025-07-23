@@ -1,11 +1,11 @@
 import {
-    decryptBoxB64,
-    encryptBlobB64,
-    encryptBoxB64,
+    decryptBox,
+    encryptBlob,
+    encryptBox,
     generateBlobOrStreamKey,
-} from "@/base/crypto";
-import { nullishToEmpty, nullToUndefined } from "@/utils/transform";
-import { z } from "zod";
+} from "ente-base/crypto";
+import { nullishToEmpty, nullToUndefined } from "ente-utils/transform";
+import { z } from "zod/v4";
 import { gunzip, gzip } from "../../utils/gzip";
 import type { CGroupUserEntityData } from "../ml/people";
 import {
@@ -50,13 +50,10 @@ export type EntityType =
  * Zod schema for the fields of interest in the location tag that we get from
  * remote.
  */
-const RemoteLocationTagData = z.object({
+const RemoteLocationTagData = z.looseObject({
     name: z.string(),
     radius: z.number(),
-    centerPoint: z.object({
-        latitude: z.number(),
-        longitude: z.number(),
-    }),
+    centerPoint: z.object({ latitude: z.number(), longitude: z.number() }),
 });
 
 /**
@@ -72,7 +69,7 @@ export const savedLocationTags = (): Promise<LocationTag[]> =>
         es.map((e) => RemoteLocationTagData.parse(e.data)),
     );
 
-const RemoteFaceCluster = z.object({
+const RemoteFaceCluster = z.looseObject({
     id: z.string(),
     faces: z.string().array(),
 });
@@ -81,10 +78,12 @@ const RemoteFaceCluster = z.object({
  * Zod schema for the fields of interest in the cgroup that we get from remote.
  *
  * See also: {@link CGroupUserEntityData}.
+ *
+ * See: [Note: Use looseObject for metadata Zod schemas].
  */
-const RemoteCGroupData = z.object({
+const RemoteCGroupData = z.looseObject({
     name: z.string().nullish().transform(nullToUndefined),
-    assigned: z.array(RemoteFaceCluster),
+    assigned: z.array(RemoteFaceCluster).nullish().transform(nullishToEmpty),
     rejectedFaceIDs: z.array(z.string()).nullish().transform(nullishToEmpty),
     isHidden: z.boolean(),
     avatarFaceID: z.string().nullish().transform(nullToUndefined),
@@ -103,10 +102,6 @@ export type CGroup = Omit<LocalUserEntity, "data"> & {
  * Return the list of locally available cgroup user entities.
  */
 export const savedCGroups = (): Promise<CGroup[]> =>
-    // See: [Note: strict mode migration]
-    //
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
     savedEntities("cgroup").then((es) =>
         es.map((e) => ({ ...e, data: RemoteCGroupData.parse(e.data) })),
     );
@@ -124,18 +119,15 @@ export const savedCGroups = (): Promise<CGroup[]> =>
  * It uses local state to remember the latest entry the last time it did a pull,
  * so each subsequent pull is a lightweight diff.
  *
- * @param masterKey The user's masterKey, which is is used to encrypt and
- * decrypt the entity key.
+ * @param masterKey The user's masterKey (as a base64 string), which is is used
+ * to encrypt and decrypt the entity key.
  */
-export const pullUserEntities = async (
-    type: EntityType,
-    masterKey: Uint8Array,
-) => {
-    const entityKeyB64 = await getOrCreateEntityKeyB64(type, masterKey);
+export const pullUserEntities = async (type: EntityType, masterKey: string) => {
+    const entityKey = await getOrCreateEntityKey(type, masterKey);
 
     let sinceTime = (await savedLatestUpdatedAt(type)) ?? 0;
     while (true) {
-        const diff = await userEntityDiff(type, sinceTime, entityKeyB64);
+        const diff = await userEntityDiff(type, sinceTime, entityKey);
         if (diff.length == 0) break;
 
         const entityByID = new Map(
@@ -177,38 +169,38 @@ const isGzipped = (type: EntityType) => type == "cgroup";
 export const addUserEntity = async (
     type: EntityType,
     data: unknown,
-    masterKey: Uint8Array,
+    masterKey: string,
 ) =>
     await postUserEntity(
         type,
         await encryptedUserEntityData(type, data, masterKey),
     );
 
-export const encryptedUserEntityData = async (
+const encryptedUserEntityData = async (
     type: EntityType,
     data: unknown,
-    masterKey: Uint8Array,
+    masterKey: string,
 ) => {
-    const entityKeyB64 = await getOrCreateEntityKeyB64(type, masterKey);
+    const entityKey = await getOrCreateEntityKey(type, masterKey);
 
     const json = JSON.stringify(data);
     const bytes = isGzipped(type)
         ? await gzip(json)
         : new TextEncoder().encode(json);
-    return encryptBlobB64(bytes, entityKeyB64);
+    return encryptBlob(bytes, entityKey);
 };
 
 /**
  * Update the given user entities (both on remote and locally), creating them if
  * they don't exist.
  *
- * @param masterKey The user's masterKey, which is is used to encrypt and
- * decrypt the entity key.
+ * @param masterKey The user's masterKey (as a base64 string), which is is used
+ * to encrypt and decrypt the entity key.
  */
 export const updateOrCreateUserEntities = async (
     type: EntityType,
     entities: LocalUserEntity[],
-    masterKey: Uint8Array,
+    masterKey: string,
 ) =>
     await Promise.all(
         entities.map(({ id, data }) =>
@@ -219,8 +211,8 @@ export const updateOrCreateUserEntities = async (
     );
 
 /**
- * Return the entity key that can be used to decrypt the encrypted contents of
- * user entities of the given {@link type}.
+ * Return the entity key (base64 string) that can be used to decrypt the
+ * encrypted contents of user entities of the given {@link type}.
  *
  * 1. See if we have the encrypted entity key present locally. If so, return the
  *    entity key by decrypting it using with the user's master key.
@@ -235,10 +227,7 @@ export const updateOrCreateUserEntities = async (
  *
  * See also, [Note: User entity keys].
  */
-const getOrCreateEntityKeyB64 = async (
-    type: EntityType,
-    masterKey: Uint8Array,
-) => {
+const getOrCreateEntityKey = async (type: EntityType, masterKey: string) => {
     // See if we already have it locally.
     const saved = await savedRemoteUserEntityKey(type);
     if (saved) return decryptEntityKey(saved, masterKey);
@@ -255,7 +244,7 @@ const getOrCreateEntityKeyB64 = async (
 
     // Nada. Create a new one, put it to remote, save it locally, and return.
 
-    // As a sanity check, genarate the key but immediately encrypt it as if it
+    // As a sanity check, generate the key but immediately encrypt it as if it
     // were fetched from remote and then try to decrypt it before doing anything
     // with it.
     const generated = await generateEncryptedEntityKey(masterKey);
@@ -265,8 +254,8 @@ const getOrCreateEntityKeyB64 = async (
     return result;
 };
 
-const generateEncryptedEntityKey = async (masterKey: Uint8Array) => {
-    const { encryptedData, nonce } = await encryptBoxB64(
+const generateEncryptedEntityKey = async (masterKey: string) => {
+    const { encryptedData, nonce } = await encryptBox(
         await generateBlobOrStreamKey(),
         masterKey,
     );
@@ -275,13 +264,14 @@ const generateEncryptedEntityKey = async (masterKey: Uint8Array) => {
 };
 
 /**
- * Decrypt an encrypted entity key using the user's master key.
+ * Decrypt an encrypted entity key (as a base64 string) using the provided
+ * user's {@link masterKey}.
  */
 const decryptEntityKey = async (
     remote: RemoteUserEntityKey,
-    masterKey: Uint8Array,
+    masterKey: string,
 ) =>
-    decryptBoxB64(
+    decryptBox(
         {
             encryptedData: remote.encryptedKey,
             // Remote calls it the header, but it really is the nonce.

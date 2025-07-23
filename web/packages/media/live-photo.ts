@@ -2,7 +2,7 @@ import {
     fileNameFromComponents,
     lowercaseExtension,
     nameAndExtension,
-} from "@/base/file-name";
+} from "ente-base/file-name";
 import JSZip from "jszip";
 import { FileType } from "./file-type";
 

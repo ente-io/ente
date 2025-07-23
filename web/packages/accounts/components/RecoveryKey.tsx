@@ -1,28 +1,27 @@
-import { type MiniDialogAttributes } from "@/base/components/MiniDialog";
-import { SpaceBetweenFlex } from "@/base/components/containers";
-import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
-import { errorDialogAttributes } from "@/base/components/utils/dialog";
-import { useIsSmallWidth } from "@/base/components/utils/hooks";
-import type { ModalVisibilityProps } from "@/base/components/utils/modal";
-import log from "@/base/log";
-import { downloadString } from "@/base/utils/web";
-import { DialogCloseIconButton } from "@/new/photos/components/mui/Dialog";
-import CodeBlock from "@ente/shared/components/CodeBlock";
-import { getRecoveryKey } from "@ente/shared/crypto/helpers";
 import {
     Dialog,
     DialogActions,
     DialogContent,
     DialogTitle,
+    Stack,
     Typography,
-    styled,
 } from "@mui/material";
-import * as bip39 from "bip39";
+import { type MiniDialogAttributes } from "ente-base/components/MiniDialog";
+import { SpacedRow } from "ente-base/components/containers";
+import { DialogCloseIconButton } from "ente-base/components/mui/DialogCloseIconButton";
+import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
+import { errorDialogAttributes } from "ente-base/components/utils/dialog";
+import { useIsSmallWidth } from "ente-base/components/utils/hooks";
+import type { ModalVisibilityProps } from "ente-base/components/utils/modal";
+import log from "ente-base/log";
+import { saveStringAsFile } from "ente-base/utils/web";
 import { t } from "i18next";
 import { useCallback, useEffect, useState } from "react";
-
-// mobile client library only supports english.
-bip39.setDefaultWordlist("english");
+import {
+    getUserRecoveryKey,
+    recoveryKeyToMnemonic,
+} from "../services/recovery-key";
+import { CodeBlock } from "./CodeBlock";
 
 type RecoveryKeyProps = ModalVisibilityProps & {
     showMiniDialog: (attributes: MiniDialogAttributes) => void;
@@ -50,13 +49,13 @@ export const RecoveryKey: React.FC<RecoveryKeyProps> = ({
     useEffect(() => {
         if (!open) return;
 
-        void getRecoveryKeyMnemonic()
+        void getUserRecoveryKeyMnemonic()
             .then((key) => setRecoveryKey(key))
             .catch(handleLoadError);
     }, [open, handleLoadError]);
 
     const handleSaveClick = () => {
-        downloadRecoveryKeyMnemonic(recoveryKey!);
+        saveRecoveryKeyMnemonicAsFile(recoveryKey!);
         onClose();
     };
 
@@ -74,20 +73,26 @@ export const RecoveryKey: React.FC<RecoveryKeyProps> = ({
             maxWidth="xs"
             fullWidth
         >
-            <SpaceBetweenFlex sx={{ p: "8px 4px 8px 0" }}>
+            <SpacedRow sx={{ p: "8px 4px 8px 0" }}>
                 <DialogTitle variant="h3">{t("recovery_key")}</DialogTitle>
                 <DialogCloseIconButton {...{ onClose }} />
-            </SpaceBetweenFlex>
+            </SpacedRow>
             <DialogContent>
                 <Typography sx={{ mb: 3 }}>
                     {t("recovery_key_description")}
                 </Typography>
-                <DashedBorderWrapper>
+                <Stack
+                    sx={{
+                        border: "1px dashed",
+                        borderColor: "stroke.muted",
+                        borderRadius: 1,
+                    }}
+                >
                     <CodeBlock code={recoveryKey} />
                     <Typography sx={{ m: 2 }}>
                         {t("key_not_stored_note")}
                     </Typography>
-                </DashedBorderWrapper>
+                </Stack>
             </DialogContent>
             <DialogActions>
                 <FocusVisibleButton
@@ -109,13 +114,8 @@ export const RecoveryKey: React.FC<RecoveryKeyProps> = ({
     );
 };
 
-const DashedBorderWrapper = styled("div")(({ theme }) => ({
-    border: `1px dashed ${theme.palette.grey.A400}`,
-    borderRadius: theme.spacing(1),
-}));
+const getUserRecoveryKeyMnemonic = async () =>
+    recoveryKeyToMnemonic(await getUserRecoveryKey());
 
-const getRecoveryKeyMnemonic = async () =>
-    bip39.entropyToMnemonic(await getRecoveryKey());
-
-const downloadRecoveryKeyMnemonic = (key: string) =>
-    downloadString(key, "ente-recovery-key.txt");
+const saveRecoveryKeyMnemonicAsFile = (key: string) =>
+    saveStringAsFile(key, "ente-recovery-key.txt");

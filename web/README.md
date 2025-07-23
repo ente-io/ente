@@ -12,12 +12,6 @@ To know more about Ente, see [our main README](../README.md) or visit
 
 ## Building from source
 
-Fetch submodules
-
-```sh
-git submodule update --init --recursive
-```
-
 Install dependencies
 
 ```sh
@@ -73,6 +67,11 @@ The apps take use various `packages/` to share code amongst themselves.
 
 You might also find this [overview of dependencies](docs/dependencies.md)
 useful.
+
+## Docker images
+
+A Docker image containing all the web apps are available from
+`ghcr.io/ente-io/web`. See [docs/docker.md](docs/docker.md) for more details.
 
 ## Attributions
 

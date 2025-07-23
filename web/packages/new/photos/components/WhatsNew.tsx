@@ -1,7 +1,3 @@
-import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
-import { useIsSmallWidth } from "@/base/components/utils/hooks";
-import { ensureElectron } from "@/base/electron";
-import { ut } from "@/base/i18n";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import {
     Box,
@@ -10,9 +6,14 @@ import {
     DialogContent,
     DialogContentText,
     DialogTitle,
+    Stack,
     Typography,
     styled,
 } from "@mui/material";
+import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
+import { useIsSmallWidth } from "ente-base/components/utils/hooks";
+import { ensureElectron } from "ente-base/electron";
+import { ut } from "ente-base/i18n";
 import React, { useEffect } from "react";
 import { didShowWhatsNew } from "../services/changelog";
 import { SlideUpTransition } from "./mui/SlideUpTransition";
@@ -38,13 +39,16 @@ export const WhatsNew: React.FC<WhatsNewProps> = ({ open, onClose }) => {
     return (
         <Dialog
             {...{ open, fullScreen }}
-            TransitionComponent={SlideUpTransition}
+            slots={{ transition: SlideUpTransition }}
             maxWidth="xs"
             fullWidth
         >
             <Box sx={{ m: 1 }}>
-                <DialogTitle mt={2}>
-                    <Typography variant="h4" sx={{ color: "text.muted" }}>
+                <DialogTitle sx={{ mt: 2, mb: 0 }}>
+                    <Typography
+                        variant="body"
+                        sx={{ color: "text.faint", fontWeight: "regular" }}
+                    >
                         {ut("What's new")}
                     </Typography>
                 </DialogTitle>
@@ -73,39 +77,16 @@ const ChangelogContent: React.FC = () => {
     // below.
 
     return (
-        <StyledUL>
-            <li>
-                <Typography color="primary">
-                    {ut("Improved date search")}
-                </Typography>
-                <Typography>
-                    Search for photos by day of week (<i>Wednesday</i>) or hour
-                    of day (<i>8 pm</i>) in addition to the existing search by
-                    partial dates (<i>20 July</i>, or even <i>2021</i>) and
-                    relative dates (<i>Last month</i>,<i>Yesterday</i>).
-                </Typography>
-            </li>
-            <li>
-                <Typography color="primary">
-                    {ut("Faster magic search")}
-                </Typography>
-                <Typography>
-                    {ut(
-                        "The magic search beta, where you can search for photos just by typing whatever is in them, just got faster.",
-                    )}
-                </Typography>
-            </li>
-        </StyledUL>
+        <Stack sx={{ gap: 2, mb: 1 }}>
+            <Typography variant="h6">{ut("Light mode ✨")}</Typography>
+            <Typography sx={{ color: "text.muted" }}>
+                {ut(
+                    "The much requested light mode is here. The app will automatically switch between the light and dark theme based on your OS settings. You can manually override this is Preferences.",
+                )}
+            </Typography>
+        </Stack>
     );
 };
-
-const StyledUL = styled("ul")`
-    padding-inline: 1rem;
-
-    li {
-        margin-block: 2rem;
-    }
-`;
 
 const ButtonContents = styled("div")`
     /* Make the button text fill the entire space so the endIcon shows at the

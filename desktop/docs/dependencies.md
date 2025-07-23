@@ -3,6 +3,7 @@
 - [Electron](#electron)
 - [Dev dependencies](#dev)
 - [Functionality](#functionality)
+- [Pinned](#pinned)
 
 ## Electron
 
@@ -103,18 +104,20 @@ Some extra ones specific to the code here are:
 
 ### Format conversion
 
-The main tool we use is for arbitrary conversions is ffmpeg. To bundle a
+For video conversions and metadata extraction, we use ffmpeg. To bundle a
 (platform specific) static binary of ffmpeg with our app, we use
 [ffmpeg-static](https://github.com/eugeneware/ffmpeg-static).
 
 > There is a significant (~20x) speed difference between using the compiled
-> ffmpeg binary and using the wasm one (that our renderer process already has).
+> FFmpeg binary and using the Wasm one (that our renderer process already has).
 > Which is why we bundle it to speed up operations on the desktop app.
 
-In addition, we also bundle a static Linux binary of imagemagick in our extra
-resources (`build`) folder. This is used for thumbnail generation on Linux.
+On Linux and Windows, we use `vips` for thumbnail generation and JPEG conversion
+of unpreviewable images. A static OS/architecture specific binary of this is
+bundled in our extra resources (`build`) folder by `scripts/vips.sh` and/or
+`scripts/beforeBuild.js`. See "[Note: vips]" for more details.
 
-On macOS, we use the `sips` CLI tool for conversion, but that is already
+On macOS, we use the `sips` CLI tool for these tasks, but that is already
 available on the host machine, and is not bundled with our app.
 
 ### ML
@@ -138,3 +141,13 @@ handles to avoid reopening them for every operation.
 
 [chokidar](https://github.com/paulmillr/chokidar) is used as a file system
 watcher for the watch folders functionality.
+
+## Pinned
+
+- `electron-builder` is pinned to 26.0.14 because of
+  https://github.com/electron-userland/electron-builder/issues/9161
+
+    To reproduce this locally, add `x64ArchFiles: "ffmpeg"` to
+    `electron-builder.yml`, then run `node_modules/.bin/electron-builder --mac`.
+
+- `electron-store` is pinned to 8.2.0 because subsequent versions are ESM only.

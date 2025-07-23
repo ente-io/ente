@@ -8,23 +8,54 @@
  * then we sort by this key. Since the key is random, the sorted array will have
  * the original elements in a random order.
  */
-export const shuffled = <T>(xs: T[]) =>
+export const shuffled = <T>(xs: T[]): T[] =>
     xs
         .map((x) => [Math.random(), x])
         .sort()
         .map(([, x]) => x) as T[];
 
 /**
+ * Return a random sample of {@link n} elements from the given {@link items}.
+ *
+ * Functionally this is equivalent to `shuffled(items).slice(0, n)`, except it
+ * tries to be a bit faster for long arrays when we need only a small sample
+ * from it. In a few tests, this indeed makes a substantial difference.
+ *
+ * If {@link n} is less than the number of {@link items} then a random shuffle
+ * of the {@link items} is returned.
+ */
+export const randomSample = <T>(items: T[], n: number) => {
+    if (items.length <= n) return shuffled(items);
+    if (n == 0) return [];
+
+    if (n > items.length / 3) {
+        // Avoid using the random sampling without replacement method if a
+        // significant proportion of the original items are needed, otherwise we
+        // might run into long retry loop at the tail end (hitting the same
+        // indexes again an again).
+        return shuffled(items).slice(0, n);
+    }
+
+    const ix = new Set<number>();
+    while (ix.size < n) {
+        ix.add(Math.floor(Math.random() * items.length));
+    }
+    return [...ix].map((i) => items[i]!);
+};
+
+/**
  * Return the first non-empty string from the given list of strings.
  *
  * This function is needed because the `a ?? b` idiom doesn't do what you'd
- * expect when a is "". Perhaps the behaviour is wrong, perhaps the expecation
+ * expect when a is "". Perhaps the behaviour is wrong, perhaps the expectation
  * is wrong; this function papers over the differences.
  *
  * If none of the strings are non-empty, or if there are no strings in the given
  * array, return undefined.
  */
-export const firstNonEmpty = (ss: (string | undefined)[]) => {
+export const firstNonEmpty = (
+    ss: (string | undefined)[],
+): string | undefined => {
     for (const s of ss) if (s && s.length > 0) return s;
     return undefined;
 };
@@ -35,7 +66,7 @@ export const firstNonEmpty = (ss: (string | undefined)[]) => {
  *
  * @param as An array of {@link Uint8Array}.
  */
-export const mergeUint8Arrays = (as: Uint8Array[]) => {
+export const mergeUint8Arrays = (as: Uint8Array[]): Uint8Array => {
     // A longer but better performing replacement of
     //
     //     new Uint8Array(as.reduce((acc, x) => acc.concat(...x), []))
@@ -61,7 +92,7 @@ export const batch = <T>(xs: T[], batchSize: number): T[][] => {
 };
 
 /**
- * Split an array into two arrays - those that satisify the given
+ * Split an array into two arrays - those that satisfy the given
  * {@link predicate}, and those that don't.
  *
  * @param xs The array to split.

@@ -8,7 +8,7 @@ import { useEffect, useState } from "react";
  */
 export const useIsOffline = () => {
     const [offline, setOffline] = useState(
-        typeof window !== "undefined" && !window.navigator.onLine,
+        typeof window != "undefined" && !window.navigator.onLine,
     );
 
     useEffect(() => {

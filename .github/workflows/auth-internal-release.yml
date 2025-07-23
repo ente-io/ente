@@ -6,13 +6,16 @@ on:
 env:
     FLUTTER_VERSION: "3.24.3"
 
+permissions:
+    contents: write
+
 jobs:
     build:
         runs-on: ubuntu-latest
 
         defaults:
             run:
-                working-directory: auth
+                working-directory: mobile/apps/auth
 
         steps:
             - name: Checkout code and submodules
@@ -40,7 +43,7 @@ jobs:
 
             - name: Build PlayStore AAB
               run: |
-                  flutter build appbundle --release --flavor playstore --dart-define=app.flavor=playstore
+                  flutter build appbundle --dart-define=cronetHttpNoPlay=true --release --flavor playstore
               env:
                   SIGNING_KEY_PATH: "/home/runner/work/_temp/keystore/ente_auth_key.jks"
                   SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
@@ -52,5 +55,14 @@ jobs:
               with:
                   serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
                   packageName: io.ente.auth
-                  releaseFiles: auth/build/app/outputs/bundle/playstoreRelease/app-playstore-release.aab
+                  releaseFiles: mobile/apps/auth/build/app/outputs/bundle/playstoreRelease/app-playstore-release.aab
                   track: internal
+
+            - name: Notify Discord
+              uses: sarisia/actions-status-discord@v1
+              with:
+                  webhook: ${{ secrets.DISCORD_INTERNAL_RELEASE_WEBHOOK }}
+                  nodetail: true
+                  title: "🏆 Internal release available for Auth"
+                  description: "[Download](https://play.google.com/store/apps/details?id=io.ente.auth)"
+                  color: 0x800080

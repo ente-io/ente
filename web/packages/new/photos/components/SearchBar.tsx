@@ -1,11 +1,3 @@
-import { assertionFailed } from "@/base/assert";
-import type { ButtonishProps } from "@/base/components/mui";
-import { useIsSmallWidth } from "@/base/components/utils/hooks";
-import { ItemCard, PreviewItemTile } from "@/new/photos/components/Tiles";
-import { isMLSupported, mlStatusSnapshot } from "@/new/photos/services/ml";
-import { searchOptionsForString } from "@/new/photos/services/search";
-import type { SearchOption } from "@/new/photos/services/search/types";
-import { nullToUndefined } from "@/utils/transform";
 import CalendarIcon from "@mui/icons-material/CalendarMonth";
 import CloseIcon from "@mui/icons-material/Close";
 import ImageIcon from "@mui/icons-material/Image";
@@ -21,6 +13,18 @@ import {
     useTheme,
     type Theme,
 } from "@mui/material";
+import { EnteLogo, EnteLogoBox } from "ente-base/components/EnteLogo";
+import type { ButtonishProps } from "ente-base/components/mui";
+import { useIsSmallWidth } from "ente-base/components/utils/hooks";
+import {
+    hlsGenerationStatusSnapshot,
+    isHLSGenerationSupported,
+} from "ente-gallery/services/video";
+import { ItemCard, PreviewItemTile } from "ente-new/photos/components/Tiles";
+import { isMLSupported, mlStatusSnapshot } from "ente-new/photos/services/ml";
+import { searchOptionsForString } from "ente-new/photos/services/search";
+import type { SearchOption } from "ente-new/photos/services/search/types";
+import { nullToUndefined } from "ente-utils/transform";
 import { t } from "i18next";
 import pDebounce from "p-debounce";
 import React, { useMemo, useRef, useState } from "react";
@@ -37,6 +41,7 @@ import AsyncSelect from "react-select/async";
 import { SearchPeopleList } from "./PeopleList";
 import { UnstyledButton } from "./UnstyledButton";
 import {
+    useHLSGenerationStatusSnapshot,
     useMLStatusSnapshot,
     usePeopleStateSnapshot,
 } from "./utils/use-snapshot";
@@ -78,7 +83,7 @@ export interface SearchBarProps {
     /**
      * Called when the user selects a person shown in the empty state view.
      */
-    onSelectPerson: (personID: string | undefined) => void;
+    onSelectPerson: (personID: string) => void;
 }
 
 /**
@@ -120,7 +125,18 @@ interface MobileSearchAreaProps {
 }
 
 const MobileSearchArea: React.FC<MobileSearchAreaProps> = ({ onSearch }) => (
-    <Stack direction="row" sx={{ justifyContent: "flex-end" }}>
+    <Stack direction="row" sx={{ alignItems: "center" }}>
+        <EnteLogoBox
+            sx={{
+                // Move to the center.
+                mx: "auto",
+                // Offset on the left by the visual size of the search icon to
+                // make it look visually centered.
+                pl: "24px",
+            }}
+        >
+            <EnteLogo height={15} />
+        </EnteLogoBox>
         <IconButton onClick={onSearch}>
             <SearchIcon />
         </IconButton>
@@ -194,7 +210,7 @@ const SearchInput: React.FC<Omit<SearchBarProps, "onShowSearchInput">> = ({
         onSelectPeople();
     };
 
-    const handleSelectPerson = (personID: string | undefined) => {
+    const handleSelectPerson = (personID: string) => {
         resetSearch();
         onSelectPerson(personID);
     };
@@ -251,55 +267,54 @@ const SearchInputWrapper = styled("div")`
     align-items: center;
     justify-content: center;
     gap: 8px;
-    background: ${({ theme }) => theme.colors.background.base};
+    background: transparent;
     max-width: 484px;
     margin: auto;
 `;
 
 const loadOptions = pDebounce(searchOptionsForString, 250);
 
-const createSelectStyles = ({
-    colors,
-}: Theme): StylesConfig<SearchOption, false> => ({
+const createSelectStyles = (
+    theme: Theme,
+): StylesConfig<SearchOption, false> => ({
     container: (style) => ({ ...style, flex: 1 }),
     control: (style, { isFocused }) => ({
         ...style,
-        backgroundColor: colors.background.elevated,
-        borderColor: isFocused ? colors.accent.A500 : "transparent",
+        backgroundColor: theme.vars.palette.background.searchInput,
+        borderColor: isFocused ? theme.vars.palette.accent.main : "transparent",
         boxShadow: "none",
         ":hover": {
-            borderColor: colors.accent.A300,
+            borderColor: theme.vars.palette.accent.light,
             cursor: "text",
         },
     }),
     input: (styles) => ({
         ...styles,
-        color: colors.text.base,
+        color: theme.vars.palette.text.base,
         overflowX: "hidden",
     }),
     menu: (style) => ({
         ...style,
         // Suppress the default margin at the top.
         marginTop: "1px",
-        backgroundColor: colors.background.elevated,
+        // Give an opaque and elevated surface color to the menu to override the
+        // default (transparent).
+        backgroundColor: theme.vars.palette.background.elevatedPaper,
     }),
     option: (style, { isFocused }) => ({
         ...style,
         padding: 0,
         backgroundColor: "transparent !important",
-        "& :hover": {
-            cursor: "pointer",
-        },
+        "& :hover": { cursor: "pointer" },
+        // Elevate the focused option further.
         "& .option-contents": isFocused
-            ? { backgroundColor: colors.background.elevated2 }
+            ? { backgroundColor: theme.vars.palette.fill.fainter }
             : {},
-        "&:last-child .MuiDivider-root": {
-            display: "none",
-        },
+        "&:last-child .MuiDivider-root": { display: "none" },
     }),
     placeholder: (style) => ({
         ...style,
-        color: colors.text.muted,
+        color: theme.vars.palette.text.muted,
         whiteSpace: "nowrap",
         overflowX: "hidden",
     }),
@@ -320,13 +335,13 @@ const Control = ({ children, ...props }: ControlProps<SearchOption, false>) => (
             }}
         >
             <Box
-                sx={(theme) => ({
+                sx={{
                     display: "inline-flex",
                     // Match the default padding of the ValueContainer to make
                     // the icon look properly spaced and aligned.
                     pl: "8px",
-                    color: theme.colors.stroke.muted,
-                })}
+                    color: "stroke.muted",
+                }}
             >
                 {iconForOption(props.getValue()[0])}
             </Box>
@@ -371,12 +386,26 @@ const shouldShowEmptyState = (inputValue: string) => {
     // Don't show empty state if the user has entered search input.
     if (inputValue) return false;
 
-    // Don't show empty state if there is no ML related information.
-    if (!isMLSupported) return false;
+    // Don't show empty state if there is no ML related information AND we're
+    // not processing videos.
 
-    const status = mlStatusSnapshot();
-    if (!status || status.phase == "disabled" || status.phase == "done")
+    if (!isMLSupported && !isHLSGenerationSupported) {
+        // Neither of ML or HLS generation is supported on current client. This
+        // is the code path for web.
         return false;
+    }
+
+    const mlStatus = mlStatusSnapshot();
+    const vpStatus = hlsGenerationStatusSnapshot();
+    if (
+        (!mlStatus || mlStatus.phase == "disabled") &&
+        (!vpStatus?.enabled || vpStatus.status != "processing")
+    ) {
+        // ML is either not supported or currently disabled AND video processing
+        // is either not supported or currently not happening. Don't show the
+        // empty state.
+        return false;
+    }
 
     // Show it otherwise.
     return true;
@@ -391,15 +420,18 @@ const EmptyState: React.FC<
 > = ({ onSelectPeople, onSelectPerson }) => {
     const mlStatus = useMLStatusSnapshot();
     const people = usePeopleStateSnapshot()?.visiblePeople;
+    const vpStatus = useHLSGenerationStatusSnapshot();
 
-    if (!mlStatus || mlStatus.phase == "disabled" || mlStatus.phase == "done") {
-        // The preflight check should've prevented us from coming here.
-        assertionFailed();
-        return <></>;
-    }
-
-    let label: string;
-    switch (mlStatus.phase) {
+    let label: string | undefined;
+    switch (mlStatus?.phase) {
+        case undefined:
+        case "disabled":
+        case "done":
+            // If ML is not running, see if video processing is.
+            if (vpStatus?.enabled && vpStatus.status == "processing") {
+                label = t("processing_videos_status");
+            }
+            break;
         case "scheduled":
             label = t("indexing_scheduled");
             break;
@@ -414,6 +446,12 @@ const EmptyState: React.FC<
             break;
     }
 
+    // If ML is disabled and we're not video processing, then don't show the
+    // empty state content.
+    if ((!mlStatus || mlStatus.phase == "disabled") && !label) {
+        return <></>;
+    }
+
     return (
         <Box sx={{ textAlign: "left" }}>
             {people && people.length > 0 && (
@@ -422,28 +460,23 @@ const EmptyState: React.FC<
                     <SearchPeopleList {...{ people, onSelectPerson }} />
                 </>
             )}
-            <Typography variant="mini" sx={{ mt: "5px", mb: "4px" }}>
-                {label}
-            </Typography>
+            {label && (
+                <Typography variant="mini" sx={{ mt: "5px", mb: "4px" }}>
+                    {label}
+                </Typography>
+            )}
         </Box>
     );
 };
 
 const SearchPeopleHeader: React.FC<ButtonishProps> = ({ onClick }) => (
-    <SearchPeopleHeaderButton {...{ onClick }}>
-        <Typography sx={{ color: "text.muted" }}>{t("people")}</Typography>
-    </SearchPeopleHeaderButton>
-);
-
-const SearchPeopleHeaderButton = styled(UnstyledButton)(
-    ({ theme }) => `
-    /* The color for the chevron */
-    color: ${theme.colors.stroke.muted};
-    /* Hover indication */
-    && :hover {
-        color: ${theme.colors.stroke.base};
-    }
-`,
+    <UnstyledButton {...{ onClick }}>
+        <Typography
+            sx={{ color: "text.muted", ":hover": { color: "text.base" } }}
+        >
+            {t("people")}
+        </Typography>
+    </UnstyledButton>
 );
 
 const Option: React.FC<OptionProps<SearchOption, false>> = (props) => (
@@ -468,7 +501,11 @@ const OptionContents = ({ data: option }: { data: SearchOption }) => (
         >
             <Box>
                 <Typography
-                    sx={{ fontWeight: "medium", wordBreak: "break-word" }}
+                    sx={{
+                        color: "text.base",
+                        fontWeight: "medium",
+                        wordBreak: "break-word",
+                    }}
                 >
                     {option.suggestion.label}
                 </Typography>
@@ -477,7 +514,7 @@ const OptionContents = ({ data: option }: { data: SearchOption }) => (
                 </Typography>
             </Box>
 
-            <Stack direction={"row"} sx={{ gap: 1 }}>
+            <Stack direction="row" sx={{ gap: 1 }}>
                 {option.previewFiles.map((file) => (
                     <ItemCard
                         key={file.id}

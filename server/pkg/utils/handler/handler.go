@@ -37,6 +37,9 @@ func Error(c *gin.Context, err error) {
 		isClientError = true
 	}
 	unWrappedErr := errors.Unwrap(err)
+	if unWrappedErr == nil {
+		unWrappedErr = err
+	}
 	enteApiErr, isEnteApiErr := unWrappedErr.(*ente.ApiError)
 	if isEnteApiErr && enteApiErr.HttpStatusCode >= 400 && enteApiErr.HttpStatusCode < 500 {
 		isClientError = true

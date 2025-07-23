@@ -1,36 +1,72 @@
-import { TitledMiniDialog } from "@/base/components/MiniDialog";
-import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
-import log from "@/base/log";
-import type { Collection } from "@/media/collection";
-import { useSettingsSnapshot } from "@/new/photos/components/utils/use-snapshot";
-import { photosDialogZIndex } from "@/new/photos/components/utils/z-index";
+import { Link, Stack, Typography } from "@mui/material";
+import { TitledMiniDialog } from "ente-base/components/MiniDialog";
+import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
+import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
+import {
+    SingleInputForm,
+    type SingleInputFormProps,
+} from "ente-base/components/SingleInputForm";
+import type { ModalVisibilityProps } from "ente-base/components/utils/modal";
+import { ut } from "ente-base/i18n";
+import log from "ente-base/log";
+import type { Collection } from "ente-media/collection";
+import { useSettingsSnapshot } from "ente-new/photos/components/utils/use-snapshot";
 import {
     publishCastPayload,
     revokeAllCastTokens,
     unknownDeviceCodeErrorMessage,
-} from "@/new/photos/services/cast";
-import { loadCast } from "@/new/photos/utils/chromecast-sender";
-import SingleInputForm, {
-    type SingleInputFormProps,
-} from "@ente/shared/components/SingleInputForm";
-import { Button, Link, Stack, Typography } from "@mui/material";
+} from "ente-new/photos/services/cast";
+import { loadCast } from "ente-new/photos/utils/chromecast-sender";
 import { t } from "i18next";
-import { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Trans } from "react-i18next";
+import { z } from "zod/v4";
 
-interface AlbumCastDialogProps {
-    /** If `true`, the dialog is shown. */
-    open: boolean;
-    /** Callback fired when the dialog wants to be closed. */
-    onClose: () => void;
+type AlbumCastDialogProps = ModalVisibilityProps & {
     /** The collection that we want to cast. */
     collection: Collection;
-}
+};
 
 /**
  * A dialog that shows various options that the user has for casting an album.
  */
 export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
+    open,
+    onClose,
+    collection,
+}) => (
+    <TitledMiniDialog {...{ open, onClose }} title={t("cast_album_to_tv")}>
+        <AlbumCastDialogContents {...{ open, onClose, collection }} />
+    </TitledMiniDialog>
+);
+
+/**
+ * [Note: MUI dialog state]
+ *
+ * In some cases we keep the dialog contents in a separate component so that (a)
+ * they get rendered only when the dialog is shown, and (b) they get rendered
+ * afresh when the dialog is unmounted and then shown again.
+ *
+ * Keeping it separate both resets the state of the component, and also ensures
+ * that the effects run again when the dialog is shown.
+ *
+ * Details:
+ *
+ * Any state we keep inside the React component that a MUI Dialog as a child
+ * gets retained across visibility changes. For example, if the
+ * {@link AlbumCastDialogContents} were inlined into {@link AlbumCastDialog},
+ * then if we were to open the dialog, switch over to the "pin" view, then close
+ * the dialog by clicking on the backdrop, and then reopen it again, then we'd
+ * still remain on the "pin" view.
+ *
+ * This behaviour might be desirable or undesirable, depending on the
+ * circumstance. If it is undesirable, there are multiple approaches:
+ * https://github.com/mui/material-ui/issues/16325
+ *
+ * One of those approaches is to keep the dialog contents in a separate
+ * component.
+ */
+export const AlbumCastDialogContents: React.FC<AlbumCastDialogProps> = ({
     open,
     onClose,
     collection,
@@ -52,33 +88,34 @@ export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
         // (effectively, only Chrome).
         //
         // Override, otherwise tsc complains about unknown property `chrome`.
+        // @ts-expect-error TODO: why is this needed
         // eslint-disable-next-line @typescript-eslint/dot-notation
-        setBrowserCanCast(typeof window["chrome"] !== "undefined");
+        setBrowserCanCast(typeof window["chrome"] != "undefined");
     }, []);
 
-    const onSubmit: SingleInputFormProps["callback"] = async (
-        value,
-        setFieldError,
-    ) => {
-        try {
-            await publishCastPayload(value.trim(), collection);
-            onClose();
-        } catch (e) {
-            log.error("Failed to cast", e);
-            if (
-                e instanceof Error &&
-                e.message == unknownDeviceCodeErrorMessage
-            ) {
-                setFieldError(t("tv_not_found"));
-            } else {
-                setFieldError(t("generic_error_retry"));
+    const onSubmit: SingleInputFormProps["onSubmit"] = useCallback(
+        async (value, setFieldError) => {
+            try {
+                await publishCastPayload(value.trim(), collection);
+                onClose();
+            } catch (e) {
+                log.error("Failed to cast", e);
+                if (
+                    e instanceof Error &&
+                    e.message == unknownDeviceCodeErrorMessage
+                ) {
+                    setFieldError(t("tv_not_found"));
+                } else {
+                    throw e;
+                }
             }
-        }
-    };
+        },
+        [onClose, collection],
+    );
 
     useEffect(() => {
-        if (view === "auto") {
-            loadCast().then(async (cast) => {
+        if (view == "auto") {
+            void loadCast().then(async (cast) => {
                 const instance = cast.framework.CastContext.getInstance();
                 try {
                     await instance.requestSession();
@@ -87,37 +124,35 @@ export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
                     log.error("Error requesting session", e);
                     return;
                 }
-                const session = instance.getCurrentSession();
+                const session = instance.getCurrentSession()!;
                 session.addMessageListener(
                     "urn:x-cast:pair-request",
                     (_, message) => {
-                        const data = message;
-                        const obj = JSON.parse(data);
-                        const code = obj.code;
+                        const { code } = CastPairRequest.parse(
+                            JSON.parse(message),
+                        );
 
-                        if (code) {
-                            publishCastPayload(`${code}`, collection)
-                                .then(() => {
-                                    setView("choose");
-                                    onClose();
-                                })
-                                .catch((e: unknown) => {
-                                    log.error("Error casting to TV", e);
-                                    setView("auto-cast-error");
-                                });
-                        }
+                        void publishCastPayload(code, collection)
+                            .then(() => {
+                                setView("choose");
+                                onClose();
+                            })
+                            .catch((e: unknown) => {
+                                log.error("Error casting to TV", e);
+                                setView("auto-cast-error");
+                            });
                     },
                 );
 
                 const collectionID = collection.id;
-                session
+                void session
                     .sendMessage("urn:x-cast:pair-request", { collectionID })
                     .then(() => {
                         log.debug(() => "urn:x-cast:pair-request sent");
                     });
             });
         }
-    }, [view, collection]);
+    }, [onClose, view, collection]);
 
     useEffect(() => {
         // Make API call to clear all previous sessions (if any) whenever the
@@ -129,12 +164,7 @@ export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
     }, [open]);
 
     return (
-        <TitledMiniDialog
-            open={open}
-            onClose={onClose}
-            title={t("cast_album_to_tv")}
-            sx={{ zIndex: photosDialogZIndex }}
-        >
+        <>
             {view == "choose" && (
                 <Stack sx={{ py: 1, gap: 4 }}>
                     {browserCanCast && (
@@ -143,18 +173,18 @@ export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
                                 {t("cast_auto_pair_description")}
                             </Typography>
 
-                            <Button onClick={() => setView("auto")}>
+                            <FocusVisibleButton onClick={() => setView("auto")}>
                                 {t("cast_auto_pair")}
-                            </Button>
+                            </FocusVisibleButton>
                         </Stack>
                     )}
                     <Stack sx={{ gap: 2 }}>
                         <Typography sx={{ color: "text.muted" }}>
                             {t("pair_with_pin_description")}
                         </Typography>
-                        <Button onClick={() => setView("pin")}>
+                        <FocusVisibleButton onClick={() => setView("pin")}>
                             {t("pair_with_pin")}
-                        </Button>
+                        </FocusVisibleButton>
                     </Stack>
                 </Stack>
             )}
@@ -164,23 +194,29 @@ export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
                         <ActivityIndicator />
                     </div>
                     <Typography>{t("choose_device_from_browser")}</Typography>
-                    <Button color="secondary" onClick={() => setView("choose")}>
+                    <FocusVisibleButton
+                        color="secondary"
+                        onClick={() => setView("choose")}
+                    >
                         {t("go_back")}
-                    </Button>
+                    </FocusVisibleButton>
                 </Stack>
             )}
             {view == "auto-cast-error" && (
                 <Stack sx={{ pt: 1, gap: 3, textAlign: "center" }}>
                     <Typography>{t("cast_auto_pair_failed")}</Typography>
-                    <Button color="secondary" onClick={() => setView("choose")}>
+                    <FocusVisibleButton
+                        color="secondary"
+                        onClick={() => setView("choose")}
+                    >
                         {t("go_back")}
-                    </Button>
+                    </FocusVisibleButton>
                 </Stack>
             )}
             {view == "pin" && (
                 <>
                     <Stack sx={{ gap: 2, mb: 2 }}>
-                        <Typography>
+                        <Typography sx={{ color: "text.muted" }}>
                             <Trans
                                 i18nKey="visit_cast_url"
                                 components={{
@@ -189,25 +225,31 @@ export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
                                 values={{ url: castHost }}
                             />
                         </Typography>
-                        <Typography>{t("enter_cast_pin_code")}</Typography>
+                        <Typography sx={{ color: "text.muted" }}>
+                            {t("enter_cast_pin_code")}
+                        </Typography>
                     </Stack>
                     <SingleInputForm
-                        callback={onSubmit}
-                        fieldType="text"
-                        realLabel={t("code")}
-                        realPlaceholder={"123456"}
-                        buttonText={t("pair_device_to_tv")}
-                        submitButtonProps={{ sx: { mt: 1, mb: 2 } }}
+                        label={t("code")}
+                        placeholder={ut("123456")}
+                        submitButtonTitle={t("pair_device_to_tv")}
+                        onSubmit={onSubmit}
                     />
-                    <Button
+                    <FocusVisibleButton
                         variant="text"
                         fullWidth
                         onClick={() => setView("choose")}
+                        sx={{ mt: 1 }}
                     >
                         {t("go_back")}
-                    </Button>
+                    </FocusVisibleButton>
                 </>
             )}
-        </TitledMiniDialog>
+        </>
     );
 };
+
+/**
+ * Zod schema for the "x-cast:pair-request" payload sent by the cast app.
+ */
+const CastPairRequest = z.object({ code: z.string() });

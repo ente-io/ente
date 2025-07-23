@@ -5,6 +5,8 @@
  * See [Note: types.ts <-> preload.ts <-> ipc.ts]
  */
 
+export type UtilityProcessType = "ml";
+
 export interface AppUpdate {
     autoUpdatable: boolean;
     version: string;
@@ -33,12 +35,4 @@ export interface PendingUploads {
     zipItems: ZipItem[];
 }
 
-/**
- * See: [Note: Custom errors across Electron/Renderer boundary]
- *
- * Note: this is not a type, and cannot be used in preload.js; it is only meant
- * for use in the main process code.
- */
-export const CustomErrorMessage = {
-    NotAvailable: "This feature in not available on the current OS/arch",
-};
+export type FFmpegCommand = string[] | { default: string[]; hdr: string[] };

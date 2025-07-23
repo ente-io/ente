@@ -207,9 +207,7 @@ const openOPFSCacheWeb = async (name: BlobCacheNamespace) => {
             }
         },
         put: async (key: string, blob: Blob) => {
-            const fileHandle = await cache.getFileHandle(key, {
-                create: true,
-            });
+            const fileHandle = await cache.getFileHandle(key, { create: true });
             const writable = await fileHandle.createWritable();
             await writable.write(blob);
             await writable.close();

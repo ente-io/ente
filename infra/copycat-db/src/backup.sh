@@ -36,7 +36,7 @@ else
     BACKUP_ID=$(scw rdb backup create instance-id=$SCW_RDB_INSTANCE_ID \
         name=$BACKUP_NAME expires-at=$EXPIRY \
         database-name=ente_db -o json | jq -r '.id')
-    scw rdb backup wait $BACKUP_ID timeout=5h
+    scw rdb backup wait $BACKUP_ID timeout=8h
     scw rdb backup download output=$BACKUP_FILE \
         $(scw rdb backup export $BACKUP_ID --wait -o json | jq -r '.id')
 fi

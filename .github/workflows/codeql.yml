@@ -1,0 +1,53 @@
+# The only reason we're making a custom CodeQL configuration is because the
+# default setup does not have an option to run daily / weekly instead of per
+# push, which is too slow.
+#
+# In the future, it might become faster. Then just delete this file, and revert
+# to the default configuration.
+#
+# References:
+# https://docs.github.com/en/code-security/code-scanning/creating-an-advanced-setup-for-code-scanning/
+
+name: "CodeQL"
+
+on:
+    workflow_dispatch: # Allow running manually
+    schedule:
+        - cron: "22 1 * * 1"
+
+jobs:
+    analyze:
+        name: Analyze (${{ matrix.language }})
+        runs-on: 'ubuntu-latest'
+        permissions:
+            contents: read
+            # Required for all workflows.
+            security-events: write
+            # Required to fetch internal or private CodeQL packs.
+            packages: read
+
+        strategy:
+            fail-fast: false
+            matrix:
+                include:
+                    - language: actions
+                      build-mode: none
+                    - language: go
+                      build-mode: autobuild
+                    - language: javascript-typescript
+                      build-mode: none
+
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+
+            - name: Initialize CodeQL
+              uses: github/codeql-action/init@v3
+              with:
+                  languages: ${{ matrix.language }}
+                  build-mode: ${{ matrix.build-mode }}
+
+            - name: Perform CodeQL Analysis
+              uses: github/codeql-action/analyze@v3
+              with:
+                  category: "/language:${{matrix.language}}"

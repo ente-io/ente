@@ -60,7 +60,7 @@ yarn dev:payments
 1. Install the [stripe-cli](https://docs.stripe.com/stripe-cli) and capture the
    webhook signing secret.
 
-2. Define this secret within your `musuem.yaml`
+2. Define this secret within your `museum.yaml`
 
 3. Update the `whitelisted-redirect-urls` so that it supports redirecting to the
    locally running payments app.

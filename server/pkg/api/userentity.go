@@ -47,7 +47,7 @@ func (h *UserEntityHandler) GetKey(c *gin.Context) {
 	}
 	resp, err := h.Controller.GetKey(c, request)
 	if err != nil {
-		handler.Error(c, stacktrace.Propagate(err, "Failed to create CreateKey"))
+		handler.Error(c, stacktrace.Propagate(err, "Failed to Get EntityKey"))
 		return
 	}
 	c.JSON(http.StatusOK, resp)
@@ -61,13 +61,9 @@ func (h *UserEntityHandler) CreateEntity(c *gin.Context) {
 			stacktrace.Propagate(ente.ErrBadRequest, fmt.Sprintf("Request binding failed %s", err)))
 		return
 	}
-	if err := request.Type.IsValid(); err != nil {
-		handler.Error(c, stacktrace.Propagate(err, "Invalid EntityType"))
-		return
-	}
 	resp, err := h.Controller.CreateEntity(c, request)
 	if err != nil {
-		handler.Error(c, stacktrace.Propagate(err, "Failed to create CreateEntity"))
+		handler.Error(c, stacktrace.Propagate(err, "Failed to create CreateEntityKey"))
 		return
 	}
 	c.JSON(http.StatusOK, resp)
@@ -83,7 +79,7 @@ func (h *UserEntityHandler) UpdateEntity(c *gin.Context) {
 	}
 	resp, err := h.Controller.UpdateEntity(c, request)
 	if err != nil {
-		handler.Error(c, stacktrace.Propagate(err, "Failed to update UpdateEntity"))
+		handler.Error(c, stacktrace.Propagate(err, "Failed to update EntityKey"))
 		return
 	}
 	c.JSON(http.StatusOK, resp)
@@ -94,7 +90,7 @@ func (h *UserEntityHandler) DeleteEntity(c *gin.Context) {
 	id := c.Query("id")
 	_, err := h.Controller.Delete(c, id)
 	if err != nil {
-		handler.Error(c, stacktrace.Propagate(err, "Failed to delete DeleteEntity"))
+		handler.Error(c, stacktrace.Propagate(err, "Failed to delete EntityKey"))
 		return
 	}
 	c.Status(http.StatusOK)

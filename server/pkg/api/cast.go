@@ -5,6 +5,8 @@ import (
 	entity "github.com/ente-io/museum/ente/cast"
 	"github.com/ente-io/museum/pkg/controller"
 	"github.com/ente-io/museum/pkg/controller/cast"
+	"github.com/ente-io/museum/pkg/controller/collections"
+	"github.com/ente-io/museum/pkg/utils/auth"
 	"github.com/ente-io/museum/pkg/utils/handler"
 	"github.com/ente-io/stacktrace"
 	"github.com/gin-gonic/gin"
@@ -16,7 +18,7 @@ import (
 // CastHandler exposes request handlers for publicly accessible collections
 type CastHandler struct {
 	FileCtrl       *controller.FileController
-	CollectionCtrl *controller.CollectionController
+	CollectionCtrl *collections.CollectionController
 	Ctrl           *cast.Controller
 }
 
@@ -135,7 +137,8 @@ func (h *CastHandler) getFileForType(c *gin.Context, objectType ente.ObjectType)
 		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, ""))
 		return
 	}
-	url, err := h.FileCtrl.GetCastFileUrl(c, fileID, objectType)
+	castCtx := auth.GetCastCtx(c)
+	url, err := h.FileCtrl.GetPublicOrCastFileURL(c, fileID, objectType, castCtx.CollectionID)
 	if err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return

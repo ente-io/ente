@@ -28,6 +28,13 @@ export const createWatcher = (mainWindow: BrowserWindow) => {
         // Ask the watcher to wait for a the file size to stabilize before
         // telling us about a new file. By default, it waits for 2 seconds.
         awaitWriteFinish: true,
+        // On macOS we start getting "EMFILE: too many open files" when watching
+        // large folders. This is a known regression in Chokidar v4:
+        // https://github.com/paulmillr/chokidar/issues/1385
+        //
+        // The recommended workaround for now is to enable usePolling. Since it
+        // comes at a performance cost, we only do it where needed (macOS).
+        ...(process.platform == "darwin" ? { usePolling: true } : {}),
     });
 
     watcher

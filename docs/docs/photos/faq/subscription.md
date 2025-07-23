@@ -157,6 +157,21 @@ The same applies to monthly plans.
 If you prefer to have this credit refunded to your original payment method,
 please contact support@ente.io, and we'll assist you.
 
+## How can I update my payment method?
+
+You can view and manage your payment method by clicking on the green
+subscription card within the Ente app, and selecting the "Manage payment method"
+button.
+
+You will be able to see all of your previous invoices, with details regarding
+their payment status. In case of failed payments, you will also have an option
+to retry those charges.
+
+## How can I cancel my subscription?
+
+You can cancel your subscription by clicking on the green subscription card
+within the Ente app, and selecting the "Cancel subscription" button.
+
 ## Is there an x GB plan?
 
 We have experimented quite a bit and have found it hard to design a single
@@ -172,7 +187,7 @@ you can gain more value out of a single subscription.
 
 ## Is there a forever-free plan?
 
-Yes, we offer 5 GB of storage for free.
+Yes, we offer 10 GB of storage for free.
 
 ## What are the limitations of the free plan?
 

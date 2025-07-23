@@ -1,7 +1,3 @@
-import { EllipsizedTypography } from "@/base/components/Typography";
-import { RippleDisabledButton } from "@/base/components/mui/FocusVisibleButton";
-import type { ModalVisibilityProps } from "@/base/components/utils/modal";
-import { isSxArray } from "@/base/components/utils/sx";
 import CloseIcon from "@mui/icons-material/Close";
 import InfoIcon from "@mui/icons-material/InfoOutlined";
 import {
@@ -13,6 +9,10 @@ import {
     type SxProps,
     type Theme,
 } from "@mui/material";
+import { EllipsizedTypography } from "ente-base/components/Typography";
+import { RippleDisabledButton } from "ente-base/components/mui/FocusVisibleButton";
+import type { ModalVisibilityProps } from "ente-base/components/utils/modal";
+import { isSxArray } from "ente-base/components/utils/sx";
 import React from "react";
 
 /**
@@ -120,7 +120,6 @@ export const Notification: React.FC<NotificationProps> = ({
 }) => {
     if (!attributes) return <></>;
 
-    console.log(attributes);
     const { captionFirst, color, startIcon, title, caption, endIcon, onClick } =
         attributes;
 
@@ -142,14 +141,15 @@ export const Notification: React.FC<NotificationProps> = ({
                 vertical: vertical ?? "bottom",
             }}
             sx={[
-                {
+                (theme) => ({
                     width: "min(320px, 100vw)",
                     // If the `color` of the button is a translucent one, e.g.
                     // "secondary", then the notification becomes opaque, which
                     // is not what we want. So give the entire snackbar a solid
                     // background color.
-                    backgroundColor: "#000",
-                },
+                    backgroundColor: "background.default",
+                    boxShadow: theme.vars.palette.boxShadow.menu,
+                }),
                 ...(sx ? (isSxArray(sx) ? sx : [sx]) : []),
             ]}
         >
@@ -223,6 +223,9 @@ export const Notification: React.FC<NotificationProps> = ({
                             // Buttons cannot be nested in buttons, so we use a div
                             // here instead.
                             component="div"
+                            // Inherit the color of the parent button instead of
+                            // using the IconButton defaults.
+                            color="inherit"
                             onClick={handleClose}
                             sx={{ bgcolor: "fill.faint" }}
                         >

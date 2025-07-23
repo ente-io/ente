@@ -1,8 +1,12 @@
-import { decryptBlob } from "@/base/crypto";
-import type { EncryptedBlobB64 } from "@/base/crypto/types";
-import { authenticatedRequestHeaders, ensureOk, HTTPError } from "@/base/http";
-import { apiURL } from "@/base/origins";
-import { z } from "zod";
+import { decryptBlobBytes } from "ente-base/crypto";
+import type { EncryptedBlobB64 } from "ente-base/crypto/types";
+import {
+    authenticatedRequestHeaders,
+    ensureOk,
+    HTTPError,
+} from "ente-base/http";
+import { apiURL } from "ente-base/origins";
+import { z } from "zod/v4";
 import type { EntityType } from ".";
 
 /**
@@ -83,7 +87,7 @@ const RemoteUserEntityChange = z.object({
      */
     isDeleted: z.boolean(),
     /**
-     * Epoch milliseconds when this entity was last updated.
+     * Epoch microseconds when this entity was last updated.
      *
      * This value is suitable for being passed as the `sinceTime` in the diff
      * requests to implement pagination.
@@ -97,12 +101,12 @@ const RemoteUserEntityChange = z.object({
  *
  * @param type The type of the entities to fetch.
  *
- * @param sinceTime Epoch milliseconds. This is used to ask remote to provide us
+ * @param sinceTime Epoch microseconds. This is used to ask remote to provide us
  * only entities whose {@link updatedAt} is more than the given value. Set this
  * to zero to start from the beginning.
  *
- * @param entityKeyB64 The base64 encoded key to use for decrypting the
- * encrypted contents of the user entity.
+ * @param entityKey The base64 encoded key to use for decrypting the encrypted
+ * contents of the user entity.
  *
  * [Note: Diff response will have at most one entry for an id]
  *
@@ -125,20 +129,19 @@ const RemoteUserEntityChange = z.object({
 export const userEntityDiff = async (
     type: EntityType,
     sinceTime: number,
-    entityKeyB64: string,
+    entityKey: string,
 ): Promise<UserEntityChange[]> => {
     const decrypt = (encryptedData: string, decryptionHeader: string) =>
-        decryptBlob({ encryptedData, decryptionHeader }, entityKeyB64);
+        decryptBlobBytes({ encryptedData, decryptionHeader }, entityKey);
 
-    const params = new URLSearchParams({
-        type,
-        sinceTime: sinceTime.toString(),
-        limit: defaultDiffLimit.toString(),
-    });
-    const url = await apiURL(`/user-entity/entity/diff`);
-    const res = await fetch(`${url}?${params.toString()}`, {
-        headers: await authenticatedRequestHeaders(),
-    });
+    const res = await fetch(
+        await apiURL("/user-entity/entity/diff", {
+            type,
+            sinceTime,
+            limit: defaultDiffLimit,
+        }),
+        { headers: await authenticatedRequestHeaders() },
+    );
     ensureOk(res);
     const diff = z
         .object({ diff: z.array(RemoteUserEntityChange) })
@@ -233,9 +236,7 @@ export type RemoteUserEntityKey = z.infer<typeof RemoteUserEntityKey>;
 export const getUserEntityKey = async (
     type: EntityType,
 ): Promise<RemoteUserEntityKey | undefined> => {
-    const params = new URLSearchParams({ type });
-    const url = await apiURL("/user-entity/key");
-    const res = await fetch(`${url}?${params.toString()}`, {
+    const res = await fetch(await apiURL("/user-entity/key", { type }), {
         headers: await authenticatedRequestHeaders(),
     });
     if (!res.ok) {

@@ -1,84 +1,81 @@
-import { PAGES } from "@/accounts/constants/pages";
-import { verifyTwoFactor } from "@/accounts/services/user";
-import LinkButton from "@ente/shared/components/LinkButton";
-import { ApiError } from "@ente/shared/error";
+import { Verify2FACodeForm } from "ente-accounts/components/Verify2FACodeForm";
 import {
-    LS_KEYS,
-    getData,
-    setData,
-    setLSUser,
-} from "@ente/shared/storage/localStorage";
-import type { User } from "@ente/shared/user/types";
-import { HttpStatusCode } from "axios";
+    savedPartialLocalUser,
+    saveKeyAttributes,
+    updateSavedLocalUser,
+} from "ente-accounts/services/accounts-db";
+import {
+    resetSavedLocalUserTokens,
+    verifyTwoFactor,
+} from "ente-accounts/services/user";
+import { LinkButton } from "ente-base/components/LinkButton";
+import { useBaseContext } from "ente-base/context";
+import { isHTTPErrorWithStatus } from "ente-base/http";
 import { t } from "i18next";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
     AccountsPageContents,
     AccountsPageFooter,
     AccountsPageTitle,
 } from "../../components/layouts/centered-paper";
-import {
-    VerifyTwoFactor,
-    type VerifyTwoFactorCallback,
-} from "../../components/two-factor/VerifyTwoFactor";
 import { unstashRedirect } from "../../services/redirect";
-import type { PageProps } from "../../types/page";
 
-const Page: React.FC<PageProps> = ({ appContext }) => {
-    const { logout } = appContext;
+/**
+ * A page that allows the user to verify their TOTP based second factor.
+ *
+ * See: [Note: Login pages]
+ */
+const Page: React.FC = () => {
+    const { logout } = useBaseContext();
 
-    const [sessionID, setSessionID] = useState("");
+    const [twoFactorSessionID, setTwoFactorSessionID] = useState("");
 
     const router = useRouter();
 
     useEffect(() => {
-        const user: User = getData(LS_KEYS.USER);
+        const user = savedPartialLocalUser();
         if (!user?.email || !user.twoFactorSessionID) {
-            void router.push("/");
+            void router.replace("/");
         } else if (
             !user.isTwoFactorEnabled &&
             (user.encryptedToken || user.token)
         ) {
-            void router.push(PAGES.CREDENTIALS);
+            void router.replace("/credentials");
         } else {
-            setSessionID(user.twoFactorSessionID);
+            setTwoFactorSessionID(user.twoFactorSessionID);
         }
-    }, []);
+    }, [router]);
 
-    const onSubmit: VerifyTwoFactorCallback = async (otp) => {
-        try {
-            const resp = await verifyTwoFactor(otp, sessionID);
-            const { keyAttributes, encryptedToken, token, id } = resp;
-            await setLSUser({
-                ...getData(LS_KEYS.USER),
-                token,
-                encryptedToken,
-                id,
-            });
-            setData(LS_KEYS.KEY_ATTRIBUTES, keyAttributes!);
-            void router.push(unstashRedirect() ?? PAGES.CREDENTIALS);
-        } catch (e) {
-            if (
-                e instanceof ApiError &&
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
-                e.httpStatusCode === HttpStatusCode.NotFound
-            ) {
-                logout();
-            } else {
-                throw e;
+    const handleSubmit = useCallback(
+        async (otp: string) => {
+            try {
+                const { keyAttributes, encryptedToken, id } =
+                    await verifyTwoFactor(otp, twoFactorSessionID);
+                await resetSavedLocalUserTokens(id, encryptedToken);
+                updateSavedLocalUser({ twoFactorSessionID: undefined });
+                saveKeyAttributes(keyAttributes);
+                await router.push(unstashRedirect() ?? "/credentials");
+            } catch (e) {
+                if (isHTTPErrorWithStatus(e, 404)) {
+                    logout();
+                } else {
+                    throw e;
+                }
             }
-        }
-    };
+        },
+        [logout, router, twoFactorSessionID],
+    );
 
     return (
         <AccountsPageContents>
             <AccountsPageTitle>{t("two_factor")}</AccountsPageTitle>
-            <VerifyTwoFactor onSubmit={onSubmit} buttonText={t("verify")} />
+            <Verify2FACodeForm
+                onSubmit={handleSubmit}
+                submitButtonText={t("verify")}
+            />
             <AccountsPageFooter>
-                <LinkButton
-                    onClick={() => router.push(PAGES.TWO_FACTOR_RECOVER)}
-                >
+                <LinkButton onClick={() => router.push("/two-factor/recover")}>
                     {t("lost_2fa_device")}
                 </LinkButton>
                 <LinkButton onClick={logout}>{t("change_email")}</LinkButton>

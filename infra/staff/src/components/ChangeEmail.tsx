@@ -10,10 +10,10 @@ import {
 import React, { useEffect, useState } from "react";
 import { getEmail, getToken } from "../App";
 import { apiOrigin } from "../services/support";
-interface ErrorResponse {
-    message: string;
-}
+import type { ErrorResponse } from "../types";
 
+// The below interfaces will only be used in this file
+// hence not including them into a sub-merged types file
 interface ChangeEmailProps {
     open: boolean;
     onClose: () => void;

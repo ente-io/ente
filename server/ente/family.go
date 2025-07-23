@@ -18,7 +18,8 @@ const (
 )
 
 type InviteMemberRequest struct {
-	Email string `json:"email" binding:"required"`
+	Email        string `json:"email" binding:"required"`
+	StorageLimit *int64 `json:"storageLimit" binding:"omitempty"`
 }
 
 type InviteInfoResponse struct {
@@ -37,14 +38,20 @@ type AcceptInviteRequest struct {
 }
 
 type FamilyMember struct {
-	ID     uuid.UUID    `json:"id" binding:"required"`
-	Email  string       `json:"email" binding:"required"`
-	Status MemberStatus `json:"status" binding:"required"`
+	ID           uuid.UUID    `json:"id" binding:"required"`
+	Email        string       `json:"email" binding:"required"`
+	Status       MemberStatus `json:"status" binding:"required"`
+	StorageLimit *int64       `json:"storageLimit" binding:"omitempty"`
 	// This information should not be sent back in the response if the membership status is `INVITED`
 	Usage        int64 `json:"usage"`
 	IsAdmin      bool  `json:"isAdmin"`
 	MemberUserID int64 `json:"-"` // for internal use only, ignore from json response
 	AdminUserID  int64 `json:"-"` // for internal use only, ignore from json response
+}
+
+type ModifyMemberStorage struct {
+	ID           uuid.UUID `json:"id" binding:"required"`
+	StorageLimit *int64    `json:"storageLimit"`
 }
 
 type FamilyMemberResponse struct {

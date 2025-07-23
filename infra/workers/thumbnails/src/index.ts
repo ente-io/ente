@@ -21,7 +21,8 @@ const handleOPTIONS = (request: Request) => {
         headers: {
             "Access-Control-Allow-Origin": "*",
             "Access-Control-Allow-Methods": "GET, OPTIONS",
-            "Access-Control-Allow-Headers": "X-Auth-Token, X-Client-Package",
+            "Access-Control-Allow-Headers":
+                "X-Auth-Token, X-Client-Package, X-Client-Version",
             "Access-Control-Max-Age": "86400",
         },
     });
@@ -64,8 +65,15 @@ const handleGET = async (request: Request) => {
     const params = new URLSearchParams();
     if (token) params.set("token", token);
 
+    const headers = {
+        "X-Client-Package": request.headers.get("X-Client-Package") ?? "",
+        "X-Client-Version": request.headers.get("X-Client-Version") ?? "",
+        "User-Agent": request.headers.get("User-Agent") ?? "",
+    };
+
     let response = await fetch(
         `https://api.ente.io/files/preview/${fileID}?${params.toString()}`,
+        { headers },
     );
 
     if (!response.ok) console.log("Upstream error", response.status);

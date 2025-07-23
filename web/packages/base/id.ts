@@ -3,7 +3,7 @@ import { customAlphabet } from "nanoid";
 /**
  * Remove _ and - from the default set to have better looking IDs that can also
  * be selected in the editor quickly ("-" prevents this), and which we can
- * prefix unambigously ("_" is used for that).
+ * prefix unambiguously ("_" is used for that).
  *
  * To compensate, increase length from the default of 21 to 22.
  *

@@ -22,6 +22,10 @@ interface Subscription {
     originalTransactionID: string;
     expiryTime: number;
     userID: string;
+    attributes: {
+        customerID: string;
+        stripeAccountCountry: string;
+    };
 }
 
 interface UserDataResponse {
@@ -40,6 +44,10 @@ interface FormValues {
     transactionId: string;
     expiryTime: string | Date | null;
     userId: string;
+    attributes: {
+        customerID: string;
+        stripeAccountCountry: string;
+    };
 }
 
 const UpdateSubscription: React.FC<UpdateSubscriptionProps> = ({
@@ -53,6 +61,10 @@ const UpdateSubscription: React.FC<UpdateSubscriptionProps> = ({
         transactionId: "",
         expiryTime: "",
         userId: "",
+        attributes: {
+            customerID: "",
+            stripeAccountCountry: "",
+        },
     });
 
     const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
@@ -95,6 +107,14 @@ const UpdateSubscription: React.FC<UpdateSubscriptionProps> = ({
                         "",
                     expiryTime: expiryTime,
                     userId: userDataResponse.subscription.userID || "",
+                    attributes: {
+                        customerID:
+                            userDataResponse.subscription.attributes
+                                .customerID || "",
+                        stripeAccountCountry:
+                            userDataResponse.subscription.attributes
+                                .stripeAccountCountry || "",
+                    },
                 });
             } catch (error) {
                 console.error("Error fetching data:", error);
@@ -156,6 +176,11 @@ const UpdateSubscription: React.FC<UpdateSubscriptionProps> = ({
                 productId: values.productId,
                 paymentProvider: values.provider,
                 transactionId: values.transactionId,
+                attributes: {
+                    customerID: values.attributes.customerID,
+                    stripeAccountCountry:
+                        values.attributes.stripeAccountCountry,
+                },
             };
 
             try {

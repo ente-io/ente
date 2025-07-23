@@ -12,6 +12,10 @@ on:
     # `gh workflow run web-crowdin-push-both.yml --ref <my-branch>`
     workflow_dispatch:
 
+permissions:
+    contents: write
+    pull-requests: write
+
 jobs:
     push-both-to-crowdin:
         runs-on: ubuntu-latest

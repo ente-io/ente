@@ -1,8 +1,11 @@
-import { useIsSmallWidth } from "@/base/components/utils/hooks";
-import type { EnteFile } from "@/media/file";
-import { faceCrop, type AnnotatedFaceID } from "@/new/photos/services/ml";
-import type { Person, PreviewableFace } from "@/new/photos/services/ml/people";
-import { Skeleton, styled } from "@mui/material";
+import { Skeleton, styled, Typography } from "@mui/material";
+import { useIsSmallWidth } from "ente-base/components/utils/hooks";
+import type { EnteFile } from "ente-media/file";
+import { faceCrop, type AnnotatedFaceID } from "ente-new/photos/services/ml";
+import type {
+    Person,
+    PreviewableFace,
+} from "ente-new/photos/services/ml/people";
 import React, { useEffect, useState } from "react";
 import { UnstyledButton } from "./UnstyledButton";
 
@@ -63,7 +66,7 @@ const SearchPersonButton = styled(UnstyledButton)(
         height: 100%;
     }
     :hover {
-        outline: 1px solid ${theme.colors.stroke.faint};
+        outline: 1px solid ${theme.vars.palette.stroke.faint};
         outline-offset: 2px;
     }
 `,
@@ -104,6 +107,9 @@ export const FilePeopleList: React.FC<FilePeopleListProps> = ({
                     file={file}
                     placeholderDimension={65}
                 />
+                <Typography variant="small" sx={{ color: "text.muted" }}>
+                    {annotatedFaceID.personName}
+                </Typography>
             </AnnotatedFaceButton>
         ))}
     </FilePeopleList_>
@@ -119,15 +125,17 @@ const FilePeopleList_ = styled("div")`
 const AnnotatedFaceButton = styled(UnstyledButton)(
     ({ theme }) => `
     width: 65px;
-    height: 65px;
-    border-radius: 50%;
-    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
     & > img {
         width: 100%;
-        height: 100%;
+        aspect-ratio: 1;
+        border-radius: 50%;
+        overflow: hidden;
     }
-    :hover {
-        outline: 1px solid ${theme.colors.stroke.faint};
+    & > img:hover {
+        outline: 1px solid ${theme.vars.palette.stroke.faint};
         outline-offset: 2px;
     }
 `,
@@ -216,9 +224,7 @@ const FaceCropImageView: React.FC<FaceCropImageViewProps> = ({
         <Skeleton
             variant="circular"
             animation="wave"
-            sx={(theme) => ({
-                backgroundColor: theme.colors.background.elevated2,
-            })}
+            sx={{ backgroundColor: "background.paper2" }}
             width={placeholderDimension}
             height={placeholderDimension}
         />

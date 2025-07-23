@@ -1,8 +1,9 @@
-import { assertionFailed } from "@/base/assert";
-import { newNonSecureID } from "@/base/id-worker";
-import log from "@/base/log";
-import type { EnteFile } from "@/media/file";
-import { wait } from "@/utils/promise";
+import { assertionFailed } from "ente-base/assert";
+import { newNonSecureID } from "ente-base/id-worker";
+import log from "ente-base/log";
+import type { EnteFile } from "ente-media/file";
+import { fileCreationTime } from "ente-media/file-metadata";
+import { wait } from "ente-utils/promise";
 import {
     pullUserEntities,
     savedCGroups,
@@ -53,7 +54,7 @@ export type ClusterFace = Omit<Face, "embedding"> & {
  * clustering, with a bit of lookback (and a dollop of heuristics) to get the
  * clusters to merge across batches.
  *
- * The same logic is used for both the inital clustering and subsequent
+ * The same logic is used for both the initial clustering and subsequent
  * incremental updates, just that the incremental updates will be much faster
  * since most of the files will be skipped (as they already have a cluster
  * assigned to them).
@@ -229,7 +230,7 @@ const sortFacesNewestOnesFirst = (
             assertionFailed(`Did not find a local file for faceID ${faceID}`);
             return 0;
         }
-        return file.metadata.creationTime;
+        return fileCreationTime(file);
     };
 
     return faces.sort((a, b) => sortTimeForFace(b) - sortTimeForFace(a));
@@ -360,13 +361,13 @@ const clusterBatchLinear = async (
  * Use the output of the clustering phase to (a) update any remote cgroups that
  * have changed, and (b) update our locally persisted clusters.
  *
- * @param masterKey The user's master key, required for updating the cgroups on
- * remote if needed.
+ * @param masterKey The user's master key (as a base64 string), required for
+ * updating the cgroups on remote if needed.
  */
 export const reconcileClusters = async (
     clusters: FaceCluster[],
     modifiedClusterIDs: Set<string>,
-    masterKey: Uint8Array,
+    masterKey: string,
 ) => {
     // Index clusters by their ID for fast lookup.
     const clusterByID = new Map(clusters.map((c) => [c.id, c]));

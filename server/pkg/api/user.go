@@ -82,6 +82,10 @@ func (h *UserHandler) SetAttributes(c *gin.Context) {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
 	}
+	if err := request.Validate(); err != nil {
+		handler.Error(c, stacktrace.Propagate(err, ""))
+		return
+	}
 	err := h.UserController.SetAttributes(userID, request)
 	if err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
@@ -98,23 +102,6 @@ func (h *UserHandler) UpdateEmailMFA(c *gin.Context) {
 		return
 	}
 	err := h.UserController.UpdateEmailMFA(c, userID, *request.IsEnabled)
-	if err != nil {
-		handler.Error(c, stacktrace.Propagate(err, ""))
-		return
-	}
-	c.Status(http.StatusOK)
-}
-
-// UpdateKeys updates the user key attributes on password change
-func (h *UserHandler) UpdateKeys(c *gin.Context) {
-	userID := auth.GetUserID(c.Request.Header)
-	var request ente.UpdateKeysRequest
-	if err := c.ShouldBindJSON(&request); err != nil {
-		handler.Error(c, stacktrace.Propagate(err, ""))
-		return
-	}
-	token := auth.GetToken(c)
-	err := h.UserController.UpdateKeys(c, userID, request, token)
 	if err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
@@ -553,6 +540,24 @@ func (h *UserHandler) DeleteUser(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
+func (h *UserHandler) SelfAccountRecovery(c *gin.Context) {
+	token := c.Query("token")
+	if token == "" {
+		handler.Error(c, stacktrace.Propagate(ente.NewBadRequestWithMessage("token missing"), "token is required"))
+		return
+	}
+	err := h.UserController.HandleSelfAccountRecovery(c, token)
+	if err != nil {
+		logrus.WithError(err).
+			WithFields(logrus.Fields{
+				"req_id": requestid.Get(c),
+			}).Warning("Failed to handle self account recovery")
+		c.HTML(http.StatusOK, "account_recovery_error.html", gin.H{})
+		return
+	}
+	c.HTML(http.StatusOK, "account_recovered.html", gin.H{})
+}
+
 // GetSRPAttributes returns the SRP attributes for a user
 func (h *UserHandler) GetSRPAttributes(c *gin.Context) {
 	var request ente.GetSRPAttributesRequest
@@ -566,6 +571,10 @@ func (h *UserHandler) GetSRPAttributes(c *gin.Context) {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
 	}
+	logrus.WithFields(logrus.Fields{
+		"email":       request.Email,
+		"srp_user_id": response.SRPUserID,
+	}).Info("Sending SRP attributes")
 	c.JSON(http.StatusOK, gin.H{"attributes": response})
 }
 

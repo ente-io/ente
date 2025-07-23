@@ -28,7 +28,7 @@ const handleOPTIONS = (request: Request) => {
             "Access-Control-Allow-Origin": "*",
             "Access-Control-Allow-Methods": "POST, PUT, OPTIONS",
             "Access-Control-Allow-Headers":
-                "Content-Type, UPLOAD-URL, X-Client-Package",
+                "Content-Type, UPLOAD-URL, X-Client-Package, X-Client-Version",
             "Access-Control-Expose-Headers": "X-Request-Id, CF-Ray",
             "Access-Control-Max-Age": "86400",
         },

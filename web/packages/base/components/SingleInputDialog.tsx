@@ -1,6 +1,6 @@
-import type { ModalVisibilityProps } from "@/base/components/utils/modal";
 import { Dialog, DialogContent, DialogTitle } from "@mui/material";
-import React from "react";
+import type { ModalVisibilityProps } from "ente-base/components/utils/modal";
+import React, { useCallback } from "react";
 import { SingleInputForm, type SingleInputFormProps } from "./SingleInputForm";
 
 type SingleInputDialogProps = ModalVisibilityProps &
@@ -13,8 +13,8 @@ type SingleInputDialogProps = ModalVisibilityProps &
  * A dialog that can be used to ask for a single text input using a
  * {@link SingleInputForm}.
  *
- * If the submission handler provided to this component resolves successfully,
- * then the dialog is closed.
+ * The dialog closes when the promise returned by the {@link onSubmit} callback
+ * fulfills.
  *
  * See also: {@link CollectionNamer}, its older sibling.
  */
@@ -25,10 +25,13 @@ export const SingleInputDialog: React.FC<SingleInputDialogProps> = ({
     title,
     ...rest
 }) => {
-    const handleSubmit = async (value: string) => {
-        await onSubmit(value);
-        onClose();
-    };
+    const handleSubmit: SingleInputFormProps["onSubmit"] = useCallback(
+        async (value, setFieldError) => {
+            await onSubmit(value, setFieldError);
+            onClose();
+        },
+        [onClose, onSubmit],
+    );
 
     return (
         <Dialog
@@ -36,10 +39,10 @@ export const SingleInputDialog: React.FC<SingleInputDialogProps> = ({
             onClose={onClose}
             maxWidth="xs"
             fullWidth
-            PaperProps={{ sx: { padding: "8px 4px 4px 4px" } }}
+            slotProps={{ paper: { sx: { p: "8px 4px 4px 4px" } } }}
         >
             <DialogTitle>{title}</DialogTitle>
-            <DialogContent sx={{ "&&&": { paddingBlockStart: 0 } }}>
+            <DialogContent sx={{ "&&&": { pt: 0 } }}>
                 <SingleInputForm
                     onCancel={onClose}
                     onSubmit={handleSubmit}

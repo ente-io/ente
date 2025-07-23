@@ -26,6 +26,9 @@
 # be specified (or be overridden) by setting an environment variable named
 # ENTE_DB_USER.
 #
+# Hyphens "-" will also be be replaced with underscores, so a string like "s3.b2-eu-cen"
+# can be specified by the environment variable named "S3_B2_EU_CEN".
+#
 #
 # Empty strings
 # -------------
@@ -195,18 +198,24 @@ s3:
 
 # Key used for encrypting customer emails before storing them in DB
 #
-# To make it easy to get started, some randomly generated values are provided
-# here. But if you're really going to be using museum, please generate new keys.
-# You can use `go run tools/gen-random-keys/main.go` for that.
+# [Note: Self hosting credentials]
+#
+# To make it easy to get started, some randomly generated (but fixed) values are
+# provided here. But if you're really going to be using museum, please generate
+# new keys. You can use `go run tools/gen-random-keys/main.go` for that.
+#
+# If you used the quickstart.sh script to prepare your compose.yaml, it would've
+# already generated new random credentials for you in your `museum.yaml`. Those
+# will override these defaults; those are the values for your instance would
+# use, and what you need to backup.
 key:
     encryption: yvmG/RnzKrbCb9L3mgsmoxXr9H7i2Z4qlbT0mL3ln4w=
     hash: KXYiG07wC7GIgvCSdg+WmyWdXDAn6XKYJtp/wkEU7x573+byBRAYtpTP0wwvi8i/4l37uicX1dVTUzwH3sLZyw==
 
 # JWT secrets
 #
-# To make it easy to get started, a randomly generated values is provided here.
-# But if you're really going to be using museum, please generate new keys. You
-# can use `go run tools/gen-random-keys/main.go` for that.
+# See: [Note: Self hosting credentials] above.
+#
 jwt:
     secret: i2DecQmfGreG6q1vBj5tCokhlN41gcfS2cjOs9Po-u8=
 
@@ -228,6 +237,9 @@ smtp:
     # The email address from which to send the email. Set this to an email
     # address whose credentials you're providing.
     email:
+    # Optional override for the sender name in the emails. If specified, it will
+    # be used for all emails sent by the instance (default is email specific).
+    sender-name:
 
 # Zoho Zeptomail config (optional)
 #

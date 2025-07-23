@@ -1,0 +1,9 @@
+name = "csp-reporter"
+main = "src/index.ts"
+compatibility_date = "2025-05-19"
+
+routes = [
+    { pattern = "csp-reporter.ente.io", custom_domain = true }
+]
+
+tail_consumers = [{ service = "tail" }]

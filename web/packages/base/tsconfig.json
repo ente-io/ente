@@ -1,9 +1,5 @@
 {
-    "extends": "@/build-config/tsconfig-next.json",
-    "compilerOptions": {
-        /* MUI doesn't work with exactOptionalPropertyTypes yet. */
-        "exactOptionalPropertyTypes": false
-    },
+    "extends": "ente-build-config/tsconfig-next.json",
     "include": [
         ".",
         "../base/global-electron.d.ts",

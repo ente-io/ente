@@ -1,4 +1,0 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools"
-    package="io.ente.photos">
-    <uses-permission android:name="com.android.vending.BILLING"  tools:node="remove"/>
-</manifest>

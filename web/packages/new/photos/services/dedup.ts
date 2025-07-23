@@ -1,17 +1,16 @@
-import { assertionFailed } from "@/base/assert";
-import { newID } from "@/base/id";
-import { ensureLocalUser } from "@/base/local-user";
-import type { EnteFile } from "@/media/file";
-import { metadataHash } from "@/media/file-metadata";
-import { getPublicMagicMetadataSync } from "@ente/shared/file-metadata";
+import { ensureLocalUser } from "ente-accounts/services/user";
+import { assertionFailed } from "ente-base/assert";
+import { newID } from "ente-base/id";
+import type { EnteFile } from "ente-media/file";
+import { metadataHash } from "ente-media/file-metadata";
 import {
     addToCollection,
     createCollectionNameByID,
     moveToTrash,
+    savedNormalCollections,
 } from "./collection";
-import { getLocalCollections } from "./collections";
-import { getLocalFiles } from "./files";
-import { syncFilesAndCollections } from "./sync";
+import { savedCollectionFiles } from "./photos-fdb";
+import { pullFiles } from "./pull";
 
 /**
  * A group of duplicates as shown in the UI.
@@ -106,21 +105,18 @@ export const deduceDuplicates = async () => {
 
     // Find all non-hidden collections owned by the user, and also use that to
     // keep a map of their names (we'll attach this info to the result later).
-    const nonHiddenCollections = await getLocalCollections("normal");
-    const nonHiddenOwnedCollections = nonHiddenCollections.filter(
+    const normalCollections = await savedNormalCollections();
+    const normalOwnedCollections = normalCollections.filter(
         ({ owner }) => owner.id == userID,
     );
     const allowedCollectionIDs = new Set(
-        nonHiddenOwnedCollections.map(({ id }) => id),
+        normalOwnedCollections.map(({ id }) => id),
     );
-    const collectionNameByID = createCollectionNameByID(
-        nonHiddenOwnedCollections,
-    );
+    const collectionNameByID = createCollectionNameByID(normalOwnedCollections);
 
-    // Final all non-hidden collection files owned by the user that are in a
-    // non-hidden owned collection.
-    const nonHiddenCollectionFiles = await getLocalFiles("normal");
-    const filteredCollectionFiles = nonHiddenCollectionFiles.filter((f) =>
+    // Find all eligible collection files.
+    const collectionFiles = await savedCollectionFiles();
+    const filteredCollectionFiles = collectionFiles.filter((f) =>
         allowedCollectionIDs.has(f.collectionID),
     );
 
@@ -130,6 +126,10 @@ export const deduceDuplicates = async () => {
     const collectionIDsByFileID = new Map<number, Set<number>>();
     const filesByHash = new Map<string, EnteFile[]>();
     for (const file of filteredCollectionFiles) {
+        // User cannot delete files that are not owned by the user even if they
+        // are in an album owned by the user.
+        if (file.ownerID != userID) continue;
+
         const hash = metadataHash(file.metadata);
         if (!hash) {
             // Some very old files uploaded by ancient versions of Ente might
@@ -276,7 +276,7 @@ export const removeSelectedDuplicateGroups = async (
     const tickProgress = () => onProgress((np++ / ntotal) * 100);
 
     // Process the adds.
-    const collections = await getLocalCollections("normal");
+    const collections = await savedNormalCollections();
     const collectionsByID = new Map(collections.map((c) => [c.id, c]));
     for (const [collectionID, files] of filesToAdd.entries()) {
         await addToCollection(collectionsByID.get(collectionID)!, files);
@@ -290,7 +290,7 @@ export const removeSelectedDuplicateGroups = async (
     }
 
     // Sync our local state.
-    await syncFilesAndCollections();
+    await pullFiles();
     tickProgress();
 
     return new Set(selectedDuplicateGroups.map((g) => g.id));
@@ -306,7 +306,7 @@ const duplicateGroupItemToRetain = (duplicateGroup: DuplicateGroup) => {
     const itemsWithCaption: DuplicateGroup["items"] = [];
     const itemsWithOtherEdits: DuplicateGroup["items"] = [];
     for (const item of duplicateGroup.items) {
-        const pubMM = getPublicMagicMetadataSync(item.file);
+        const pubMM = item.file.pubMagicMetadata?.data;
         if (!pubMM) continue;
         if (pubMM.caption) itemsWithCaption.push(item);
         if (pubMM.editedName ?? pubMM.editedTime)

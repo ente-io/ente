@@ -12,6 +12,10 @@ on:
         tags:
             - "cli-v*"
 
+permissions:
+    contents: write
+    packages: write
+
 jobs:
     draft-release:
         runs-on: ubuntu-latest

@@ -1,6 +1,6 @@
-import { isDevBuild } from "@/base/env";
-import log from "@/base/log";
-import { includes } from "@/utils/type-guards";
+import { isDevBuild } from "ente-base/env";
+import log from "ente-base/log";
+import { includes } from "ente-utils/type-guards";
 import { getUserLocales } from "get-user-locale";
 import i18n from "i18next";
 import resourcesToBackend from "i18next-resources-to-backend";
@@ -33,6 +33,9 @@ export const supportedLocales = [
     "lt-LT" /* Lithuanian */,
     "uk-UA" /* Ukrainian */,
     "vi-VN" /* Vietnamese */,
+    "ja-JP" /* Japanese */,
+    "ar-SA" /* Arabic */,
+    "tr-TR" /* Turkish */,
 ] as const;
 
 /** The type of {@link supportedLocales}. */
@@ -48,7 +51,7 @@ const defaultLocale: SupportedLocale = "en-US";
  *
  * In addition to the base i18next package, we use two of its plugins:
  *
- * - i18next-http-backend, for loading the JSON files containin the translations
+ * - i18next-http-backend, for loading the JSON files containing the translations
  *   at runtime, and
  *
  * - react-i18next, which adds React specific APIs
@@ -134,6 +137,8 @@ export const setupI18n = async () => {
         // Value is an epoch microsecond so that we can directly pass the
         // timestamps we get from our API responses. The formatter expects
         // milliseconds, so divide by 1000.
+        //
+        // See [Note: Remote timestamps are epoch microseconds].
         return (val) => formatter.format(val / 1000);
     });
 };
@@ -190,6 +195,12 @@ const closestSupportedLocale = (
             return "uk-UA";
         } else if (ls.startsWith("vi")) {
             return "vi-VN";
+        } else if (ls.startsWith("ja")) {
+            return "ja-JP";
+        } else if (ls.startsWith("ar")) {
+            return "ar-SA";
+        } else if (ls.startsWith("tr")) {
+            return "tr-TR";
         }
     }
 
@@ -228,7 +239,16 @@ export const setLocaleInUse = async (locale: SupportedLocale) => {
     return i18n.changeLanguage(locale);
 };
 
-const numberFormatter = new Intl.NumberFormat(i18n.language);
+let _numberFormat: Intl.NumberFormat | undefined;
+
+/**
+ * Lazily created, cached, instance of NumberFormat used by
+ * {@link formattedNumber}.
+ *
+ * See: [Note: Changing locale causes a full reload].
+ */
+const numberFormat = () =>
+    (_numberFormat ??= new Intl.NumberFormat(i18n.language));
 
 /**
  * Return the given {@link value} formatted for the current language and locale.
@@ -238,7 +258,32 @@ const numberFormatter = new Intl.NumberFormat(i18n.language);
  * However, in some rare cases, we need to format a standalone number. For such
  * scenarios, this function can be used.
  */
-export const formattedNumber = (value: number) => numberFormatter.format(value);
+export const formattedNumber = (value: number) => numberFormat().format(value);
+
+let _listJoinFormat: Intl.ListFormat | undefined;
+
+/**
+ * Lazily created, cached, instance of NumberFormat used by
+ * {@link formattedListJoin}.
+ *
+ * See: [Note: Changing locale causes a full reload].
+ */
+const listJoinFormat = () =>
+    (_listJoinFormat ??= new Intl.ListFormat(i18n.language, {
+        style: "narrow",
+    }));
+
+/**
+ * Return the given {@link items} joined together into a single string using an
+ * locale specific "comma like" separator.
+ *
+ * Usually this will just use a comma (plus space) as the list item separator,
+ * but depending on the locale it might use a different separator too.
+ *
+ * e.g. ["Foo", "Bar"] becomes "Foo, Bar" in "en-US" and  "Foo、Bar" in "zh".
+ */
+export const formattedListJoin = (value: string[]) =>
+    listJoinFormat().format(value);
 
 /**
  * A no-op marker for strings that, for various reasons, pending addition to the

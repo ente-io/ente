@@ -12,7 +12,7 @@ ExecStartPre=-docker stop museum
 ExecStartPre=-docker rm museum
 ExecStart=docker run --name museum \
      -e ENVIRONMENT=production \
-     -e ENTE_HTTP_USE-TLS=0 \
+     -e ENTE_HTTP_USE_TLS=0 \
      --hostname "%H" \
      -p 8080:8080 \
      -p 2112:2112 \

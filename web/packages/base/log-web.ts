@@ -1,5 +1,5 @@
-import { isDevBuild } from "@/base/env";
-import log from "@/base/log";
+import { isDevBuild } from "ente-base/env";
+import log from "ente-base/log";
 import { appName, appNames } from "./app";
 
 /**
@@ -31,7 +31,20 @@ export const logStartupBanner = (userID?: number) => {
  */
 export const logUnhandledErrorsAndRejections = (attach: boolean) => {
     const handleError = (event: ErrorEvent) => {
-        log.error("Unhandled error", event.error);
+        // [Note: Spurious media chrome resize observer errors]
+        //
+        // When attaching media chrome controls to the DOM, we get an (AFAICT)
+        // spurious error in the log. Ignore it. FWIW, the media control tests
+        // themselves do the same.
+        // https://github.com/muxinc/elements/blob/f602519f544509f15add8fcc8cbbf7379843dcd3/packages/mux-player/test/player.test.js#L6-L12C5
+        if (
+            event.message ==
+            "ResizeObserver loop completed with undelivered notifications."
+        ) {
+            return;
+        }
+
+        log.error("Unhandled error", event.error ?? event.message);
     };
 
     const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
@@ -48,6 +61,31 @@ export const logUnhandledErrorsAndRejections = (attach: boolean) => {
             handleUnhandledRejection,
         );
     }
+};
+
+/**
+ * Attach handlers to log any unhandled exceptions and promise rejections in web
+ * workers.
+ *
+ * This is a variant of {@link logUnhandledErrorsAndRejections} that works in
+ * web workers. It should be called at the top level of the main worker script.
+ *
+ * Note: When I tested this, attaching the onerror handler to the worker outside
+ * the worker (e.g. when creating it in comlink-worker.ts) worked, but attaching
+ * the "unhandledrejection" event there did not work. Attaching them to `self`
+ * (the {@link WorkerGlobal}) worked.
+ */
+export const logUnhandledErrorsAndRejectionsInWorker = () => {
+    const handleError = (event: ErrorEvent) => {
+        log.error("Unhandled error", event.error);
+    };
+
+    const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
+        log.error("Unhandled promise rejection", event.reason);
+    };
+
+    self.addEventListener("error", handleError);
+    self.addEventListener("unhandledrejection", handleUnhandledRejection);
 };
 
 interface LogEntry {
@@ -77,7 +115,7 @@ export const logToDisk = (message: string) => {
         localStorage.setItem(lsKey, JSON.stringify({ logs }));
     } catch (e) {
         console.error("Failed to persist log", e);
-        if (e instanceof Error && e.name === "QuotaExceededError") {
+        if (e instanceof Error && e.name == "QuotaExceededError") {
             localStorage.removeItem(lsKey);
         }
     }

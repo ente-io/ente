@@ -1,26 +1,14 @@
 [
     {
-        "relation": [
-            "delegate_permission/common.get_login_creds"
-        ],
-        "target": {
-            "namespace": "photos-web",
-            "site": "https://web.ente.io"
-        }
+        "relation": ["delegate_permission/common.get_login_creds"],
+        "target": { "namespace": "photos-web", "site": "https://web.ente.io" }
     },
     {
-        "relation": [
-            "delegate_permission/common.get_login_creds"
-        ],
-        "target": {
-            "namespace": "auth-web",
-            "site": "https://auth.ente.io"
-        }
+        "relation": ["delegate_permission/common.get_login_creds"],
+        "target": { "namespace": "auth-web", "site": "https://auth.ente.io" }
     },
     {
-        "relation": [
-            "delegate_permission/common.get_login_creds"
-        ],
+        "relation": ["delegate_permission/common.get_login_creds"],
         "target": {
             "namespace": "android_app",
             "package_name": "io.ente.photos.independent",
@@ -30,9 +18,7 @@
         }
     },
     {
-        "relation": [
-            "delegate_permission/common.get_login_creds"
-        ],
+        "relation": ["delegate_permission/common.get_login_creds"],
         "target": {
             "namespace": "android_app",
             "package_name": "io.ente.photos",
@@ -42,9 +28,7 @@
         }
     },
     {
-        "relation": [
-            "delegate_permission/common.get_login_creds"
-        ],
+        "relation": ["delegate_permission/common.get_login_creds"],
         "target": {
             "namespace": "android_app",
             "package_name": "io.ente.auth",

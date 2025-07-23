@@ -1,8 +1,5 @@
-import Page_ from "@/accounts/pages/two-factor/recover";
-import { useAppContext } from "types/context";
+import Page_ from "ente-accounts/pages/two-factor/recover";
 
-const Page = () => (
-    <Page_ appContext={useAppContext()} twoFactorType="passkey" />
-);
+const Page = () => <Page_ twoFactorType="passkey" />;
 
 export default Page;

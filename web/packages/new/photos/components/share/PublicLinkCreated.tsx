@@ -1,7 +1,7 @@
-import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
-import type { ModalVisibilityProps } from "@/base/components/utils/modal";
 import CheckIcon from "@mui/icons-material/Check";
 import { Box, Dialog, DialogContent, DialogTitle, Stack } from "@mui/material";
+import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
+import type { ModalVisibilityProps } from "ente-base/components/utils/modal";
 import { t } from "i18next";
 
 type PublicLinkCreatedProps = ModalVisibilityProps & {
@@ -24,6 +24,7 @@ export const PublicLinkCreated: React.FC<PublicLinkCreatedProps> = ({
     <Dialog
         {...{ open, onClose }}
         disablePortal
+        fullWidth
         slotProps={{ backdrop: { sx: { position: "absolute" } } }}
         sx={{ position: "absolute" }}
     >
@@ -40,7 +41,6 @@ export const PublicLinkCreated: React.FC<PublicLinkCreatedProps> = ({
                         onCopyLink();
                         onClose();
                     }}
-                    color="primary"
                     fullWidth
                 >
                     {t("copy_link")}

@@ -7,108 +7,61 @@ import {
 } from "electron";
 import { allowWindowClose } from "../main";
 import { forceCheckForAppUpdates } from "./services/app-update";
-import autoLauncher from "./services/auto-launcher";
-import { openLogDirectory } from "./services/dir";
-import { userPreferences } from "./stores/user-preferences";
+import { setShouldHideDockIcon, shouldHideDockIcon } from "./services/store";
 
 /** Create and return the entries in the app's main menu bar */
-export const createApplicationMenu = async (mainWindow: BrowserWindow) => {
+export const createApplicationMenu = (mainWindow: BrowserWindow) => {
     // The state of checkboxes
     //
     // Whenever the menu is redrawn the current value of these variables is used
     // to set the checked state for the various settings checkboxes.
-    let isAutoLaunchEnabled = await autoLauncher.isEnabled();
-    let shouldHideDockIcon = !!userPreferences.get("hideDockIcon");
+    let hideDockIcon = shouldHideDockIcon();
 
     const macOSOnly = (options: MenuItemConstructorOptions[]) =>
         process.platform == "darwin" ? options : [];
 
     const handleCheckForUpdates = () => forceCheckForAppUpdates(mainWindow);
 
-    const handleViewChangelog = () =>
-        void shell.openExternal(
-            "https://github.com/ente-io/ente/blob/main/desktop/CHANGELOG.md",
-        );
-
-    const toggleAutoLaunch = () => {
-        void autoLauncher.toggleAutoLaunch();
-        isAutoLaunchEnabled = !isAutoLaunchEnabled;
-    };
-
     const toggleHideDockIcon = () => {
         // Persist
-        userPreferences.set("hideDockIcon", !shouldHideDockIcon);
+        setShouldHideDockIcon(!hideDockIcon);
         // And update the in-memory state
-        shouldHideDockIcon = !shouldHideDockIcon;
+        hideDockIcon = !hideDockIcon;
     };
 
     const handleHelp = () =>
         void shell.openExternal("https://help.ente.io/photos/");
 
-    const handleSupport = () =>
-        void shell.openExternal("mailto:support@ente.io");
-
-    const handleBlog = () => void shell.openExternal("https://ente.io/blog/");
-
-    const handleViewLogs = () => void openLogDirectory();
-
     return Menu.buildFromTemplate([
         {
             label: "Ente Photos",
             submenu: [
-                ...macOSOnly([
-                    {
-                        label: "About Ente",
-                        role: "about",
-                    },
-                ]),
+                ...macOSOnly([{ label: "About Ente", role: "about" }]),
                 { type: "separator" },
-                {
-                    label: "Check for Updates...",
-                    click: handleCheckForUpdates,
-                },
-                {
-                    label: "View Changelog",
-                    click: handleViewChangelog,
-                },
+                { label: "Check for Updates...", click: handleCheckForUpdates },
                 { type: "separator" },
 
-                {
-                    label: "Preferences",
-                    submenu: [
-                        {
-                            label: "Open Ente on Startup",
-                            type: "checkbox",
-                            checked: isAutoLaunchEnabled,
-                            click: toggleAutoLaunch,
-                        },
-                        ...macOSOnly([
+                ...macOSOnly([
+                    {
+                        label: "Preferences",
+                        submenu: [
                             {
                                 label: "Hide Dock Icon",
                                 type: "checkbox",
-                                checked: shouldHideDockIcon,
+                                checked: hideDockIcon,
                                 click: toggleHideDockIcon,
                             },
-                        ]),
-                    ],
-                },
+                        ],
+                    },
+                ]),
 
                 { type: "separator" },
                 ...macOSOnly([
-                    {
-                        label: "Hide Ente",
-                        role: "hide",
-                    },
-                    {
-                        label: "Hide Others",
-                        role: "hideOthers",
-                    },
+                    { label: "Hide Ente", role: "hide" },
+                    { label: "Hide Others", role: "hideOthers" },
                     { type: "separator" },
                 ]),
-                {
-                    label: "Quit",
-                    role: "quit",
-                },
+                { label: "Quit", role: "quit" },
             ],
         },
         {
@@ -126,14 +79,8 @@ export const createApplicationMenu = async (mainWindow: BrowserWindow) => {
                     {
                         label: "Speech",
                         submenu: [
-                            {
-                                role: "startSpeaking",
-                                label: "Start Speaking",
-                            },
-                            {
-                                role: "stopSpeaking",
-                                label: "Stop Speaking",
-                            },
+                            { role: "startSpeaking", label: "Start Speaking" },
+                            { role: "stopSpeaking", label: "Stop Speaking" },
                         ],
                     },
                 ]),
@@ -162,29 +109,7 @@ export const createApplicationMenu = async (mainWindow: BrowserWindow) => {
                 ]),
             ],
         },
-        {
-            label: "Help",
-            submenu: [
-                {
-                    label: "Ente Help",
-                    click: handleHelp,
-                },
-                { type: "separator" },
-                {
-                    label: "Support",
-                    click: handleSupport,
-                },
-                {
-                    label: "Product Updates",
-                    click: handleBlog,
-                },
-                { type: "separator" },
-                {
-                    label: "View Logs",
-                    click: handleViewLogs,
-                },
-            ],
-        },
+        { label: "Help", submenu: [{ label: "Ente Help", click: handleHelp }] },
     ]);
 };
 
@@ -194,7 +119,6 @@ export const createApplicationMenu = async (mainWindow: BrowserWindow) => {
  */
 export const createTrayContextMenu = (mainWindow: BrowserWindow) => {
     const handleOpen = () => {
-        mainWindow.maximize();
         mainWindow.show();
     };
 
@@ -204,13 +128,7 @@ export const createTrayContextMenu = (mainWindow: BrowserWindow) => {
     };
 
     return Menu.buildFromTemplate([
-        {
-            label: "Open Ente",
-            click: handleOpen,
-        },
-        {
-            label: "Quit Ente",
-            click: handleClose,
-        },
+        { label: "Open Ente", click: handleOpen },
+        { label: "Quit Ente", click: handleClose },
     ]);
 };

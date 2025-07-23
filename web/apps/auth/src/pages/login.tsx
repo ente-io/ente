@@ -1,3 +1,1 @@
-import Page from "@/accounts/pages/login";
-
-export default Page;
+export { default } from "ente-accounts/pages/login";

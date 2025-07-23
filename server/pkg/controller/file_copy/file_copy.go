@@ -5,6 +5,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/ente-io/museum/ente"
 	"github.com/ente-io/museum/pkg/controller"
+	"github.com/ente-io/museum/pkg/controller/collections"
 	"github.com/ente-io/museum/pkg/repo"
 	"github.com/ente-io/museum/pkg/utils/auth"
 	"github.com/ente-io/museum/pkg/utils/s3config"
@@ -23,7 +24,7 @@ type FileCopyController struct {
 	S3Config       *s3config.S3Config
 	FileController *controller.FileController
 	FileRepo       *repo.FileRepository
-	CollectionCtrl *controller.CollectionController
+	CollectionCtrl *collections.CollectionController
 	ObjectRepo     *repo.ObjectRepository
 }
 

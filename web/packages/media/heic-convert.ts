@@ -1,10 +1,10 @@
-import { ComlinkWorker } from "@/base/worker/comlink-worker";
+import { ComlinkWorker } from "ente-base/worker/comlink-worker";
 import type { HEICConvertWorker } from "./heic-convert.worker";
 
 /**
  * Convert a HEIC image to a JPEG.
  *
- * Behind the scenes, it uses a web worker to do the conversion using a WASM
+ * Behind the scenes, it uses a web worker to do the conversion using a Wasm
  * HEIC conversion package.
  *
  * @param heicBlob The HEIC blob to convert.

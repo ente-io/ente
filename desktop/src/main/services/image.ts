@@ -2,11 +2,11 @@
 
 import fs from "node:fs/promises";
 import path from "node:path";
-import { CustomErrorMessage, type ZipItem } from "../../types/ipc";
+import { type ZipItem } from "../../types/ipc";
 import { execAsync, isDev } from "../utils/electron";
 import {
     deleteTempFileIgnoringErrors,
-    makeFileForDataOrPathOrZipItem,
+    makeFileForStreamOrPathOrZipItem,
     makeTempFilePath,
 } from "../utils/temp";
 
@@ -14,7 +14,6 @@ export const convertToJPEG = async (imageData: Uint8Array) => {
     const inputFilePath = await makeTempFilePath();
     const outputFilePath = await makeTempFilePath("jpeg");
 
-    // Construct the command first, it may throw NotAvailable on win32.
     const command = convertToJPEGCommand(inputFilePath, outputFilePath);
 
     try {
@@ -44,28 +43,25 @@ const convertToJPEGCommand = (
             ];
 
         case "linux":
-            // The bundled binary is an ELF x86-64 executable.
-            if (process.arch != "x64")
-                throw new Error(CustomErrorMessage.NotAvailable);
-            return [
-                imageMagickPath(),
-                inputFilePath,
-                "-quality",
-                "100%",
-                outputFilePath,
-            ];
+        case "win32":
+            return [vipsPath(), "copy", inputFilePath, outputFilePath];
 
-        default: // "win32"
-            throw new Error(CustomErrorMessage.NotAvailable);
+        default:
+            throw new Error("Not available on the current OS/arch");
     }
 };
 
-/** Path to the Linux image-magick executable bundled with our app */
-const imageMagickPath = () =>
-    path.join(isDev ? "build" : process.resourcesPath, "image-magick");
+/**
+ * Path to the vips executable bundled with our app on Linux and Windows.
+ */
+const vipsPath = () =>
+    path.join(
+        isDev ? "build" : process.resourcesPath,
+        process.platform == "win32" ? "vips.exe" : "vips",
+    );
 
 export const generateImageThumbnail = async (
-    dataOrPathOrZipItem: Uint8Array | string | ZipItem,
+    pathOrZipItem: string | ZipItem,
     maxDimension: number,
     maxSize: number,
 ): Promise<Uint8Array> => {
@@ -73,7 +69,7 @@ export const generateImageThumbnail = async (
         path: inputFilePath,
         isFileTemporary: isInputFileTemporary,
         writeToTemporaryFile: writeToTemporaryInputFile,
-    } = await makeFileForDataOrPathOrZipItem(dataOrPathOrZipItem);
+    } = await makeFileForStreamOrPathOrZipItem(pathOrZipItem);
 
     const outputFilePath = await makeTempFilePath("jpeg");
 
@@ -133,25 +129,16 @@ const generateImageThumbnailCommand = (
             ];
 
         case "linux":
-            // The bundled binary is an ELF x86-64 executable.
-            if (process.arch != "x64")
-                throw new Error(CustomErrorMessage.NotAvailable);
+        case "win32":
             return [
-                imageMagickPath(),
-                "-define",
-                `jpeg:size=${2 * maxDimension}x${2 * maxDimension}`,
+                vipsPath(),
+                "thumbnail",
                 inputFilePath,
-                "-auto-orient",
-                "-thumbnail",
-                `${maxDimension}x${maxDimension}`,
-                "-unsharp",
-                "0x.5",
-                "-quality",
-                `${quality}`,
-                outputFilePath,
+                `${outputFilePath}[Q=${quality}]`,
+                `${maxDimension}`,
             ];
 
-        default: // "win32"
-            throw new Error(CustomErrorMessage.NotAvailable);
+        default:
+            throw new Error("Not available on the current OS/arch");
     }
 };

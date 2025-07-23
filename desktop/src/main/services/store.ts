@@ -24,17 +24,17 @@ export const clearStores = () => {
  * On macOS, `safeStorage` stores our data under a Keychain entry named
  * "<app-name> Safe Storage". In our case, "ente Safe Storage".
  */
-export const saveMasterKeyB64 = (masterKeyB64: string) => {
-    const encryptedKey = safeStorage.encryptString(masterKeyB64);
-    const b64EncryptedKey = Buffer.from(encryptedKey).toString("base64");
-    safeStorageStore.set("encryptionKey", b64EncryptedKey);
+export const saveMasterKeyInSafeStorage = (masterKey: string) => {
+    const encryptedKeyBuffer = safeStorage.encryptString(masterKey);
+    const encryptedKey = Buffer.from(encryptedKeyBuffer).toString("base64");
+    safeStorageStore.set("encryptionKey", encryptedKey);
 };
 
-export const masterKeyB64 = (): string | undefined => {
-    const b64EncryptedKey = safeStorageStore.get("encryptionKey");
-    if (!b64EncryptedKey) return undefined;
-    const keyBuffer = Buffer.from(b64EncryptedKey, "base64");
-    return safeStorage.decryptString(keyBuffer);
+export const masterKeyFromSafeStorage = (): string | undefined => {
+    const encryptedKey = safeStorageStore.get("encryptionKey");
+    if (!encryptedKey) return undefined;
+    const encryptedKeyBuffer = Buffer.from(encryptedKey, "base64");
+    return safeStorage.decryptString(encryptedKeyBuffer);
 };
 
 export const lastShownChangelogVersion = (): number | undefined =>
@@ -42,3 +42,31 @@ export const lastShownChangelogVersion = (): number | undefined =>
 
 export const setLastShownChangelogVersion = (version: number) =>
     userPreferences.set("lastShownChangelogVersion", version);
+
+/**
+ * Return true if the dock icon should be hidden when the window is closed
+ * [macOS only].
+ *
+ * On macOS, if this function returns true then when hiding ("closing" it with
+ * the x traffic light) the window we also hide the app's icon in the dock. The
+ * user can modify their preference using the Menu bar > ente > Settings > Hide
+ * dock icon checkbox.
+ *
+ * If the user has not set a value for this preference (i.e., the value is
+ * `undefined`), we use the default `true`. This is confusing, but this way we
+ * can retain the preexisting preference key instead of doing a migration.
+ *
+ *     Value     | Behaviour
+ *     ----------|--------------
+ *     undefined |  default (hide)
+ *     false     |  show
+ *     true      |  hide
+ *
+ * On non-macOS platforms, it always returns false.
+ */
+export const shouldHideDockIcon = (): boolean =>
+    process.platform == "darwin" &&
+    userPreferences.get("hideDockIcon") !== false;
+
+export const setShouldHideDockIcon = (hide: boolean) =>
+    userPreferences.set("hideDockIcon", hide);

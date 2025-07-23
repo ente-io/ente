@@ -1,30 +1,31 @@
-import { LoginContents } from "@/accounts/components/LoginContents";
-import { SignUpContents } from "@/accounts/components/SignUpContents";
-import { EnteLogo } from "@/base/components/EnteLogo";
-import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
-import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
-import log from "@/base/log";
-import { albumsAppOrigin, customAPIHost } from "@/base/origins";
-import { DevSettings } from "@/new/photos/components/DevSettings";
-import { useAppContext } from "@/new/photos/types/context";
-import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
-import { saveKeyInSessionStore } from "@ente/shared/crypto/helpers";
-import localForage from "@ente/shared/storage/localForage";
-import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
-import { getToken } from "@ente/shared/storage/localStorage/helpers";
-import { SESSION_KEYS, getKey } from "@ente/shared/storage/sessionStorage";
 import { Box, Stack, Typography, styled } from "@mui/material";
+import { LoginContents } from "ente-accounts/components/LoginContents";
+import { SignUpContents } from "ente-accounts/components/SignUpContents";
+import { savedPartialLocalUser } from "ente-accounts/services/accounts-db";
+import { CenteredFill, CenteredRow } from "ente-base/components/containers";
+import { EnteLogo } from "ente-base/components/EnteLogo";
+import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
+import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
+import { useBaseContext } from "ente-base/context";
+import { albumsAppOrigin, customAPIHost } from "ente-base/origins";
+import {
+    masterKeyFromSession,
+    updateSessionFromElectronSafeStorageIfNeeded,
+} from "ente-base/session";
+import { savedAuthToken } from "ente-base/token";
+import { canAccessIndexedDB } from "ente-gallery/services/files-db";
+import { DevSettings } from "ente-new/photos/components/DevSettings";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Trans } from "react-i18next";
 
 const Page: React.FC = () => {
-    const { showMiniDialog } = useAppContext();
+    const { showMiniDialog } = useBaseContext();
 
     const [loading, setLoading] = useState(true);
     const [showLogin, setShowLogin] = useState(true);
-    const [host, setHost] = useState<string | undefined>();
+    const [host, setHost] = useState<string | undefined>(undefined);
 
     const router = useRouter();
 
@@ -34,80 +35,47 @@ const Page: React.FC = () => {
     );
 
     useEffect(() => {
-        refreshHost();
-        const currentURL = new URL(window.location.href);
-        const albumsURL = new URL(albumsAppOrigin());
-        currentURL.pathname = router.pathname;
-        if (
-            currentURL.host === albumsURL.host &&
-            currentURL.pathname !== PAGES.SHARED_ALBUMS
-        ) {
-            handleAlbumsRedirect(currentURL);
-        } else {
-            handleNormalRedirect();
-        }
-    }, [refreshHost]);
-
-    const handleAlbumsRedirect = async (currentURL: URL) => {
-        const end = currentURL.hash.lastIndexOf("&");
-        const hash = currentURL.hash.slice(1, end !== -1 ? end : undefined);
-        await router.replace({
-            pathname: PAGES.SHARED_ALBUMS,
-            search: currentURL.search,
-            hash: hash,
-        });
-        await initLocalForage();
-    };
-
-    const handleNormalRedirect = async () => {
-        const user = getData(LS_KEYS.USER);
-        let key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
-        const electron = globalThis.electron;
-        if (!key && electron) {
-            try {
-                key = await electron.masterKeyB64();
-            } catch (e) {
-                log.error("Failed to read master key from safe storage", e);
-            }
-            if (key) {
-                await saveKeyInSessionStore(
-                    SESSION_KEYS.ENCRYPTION_KEY,
-                    key,
-                    true,
+        void (async () => {
+            refreshHost();
+            const currentURL = new URL(window.location.href);
+            const albumsURL = new URL(albumsAppOrigin());
+            currentURL.pathname = router.pathname;
+            if (
+                currentURL.host == albumsURL.host &&
+                currentURL.pathname != "/shared-albums"
+            ) {
+                const end = currentURL.hash.lastIndexOf("&");
+                const hash = currentURL.hash.slice(
+                    1,
+                    end !== -1 ? end : undefined,
                 );
+                await router.replace({
+                    pathname: "/shared-albums",
+                    search: currentURL.search,
+                    hash: hash,
+                });
+            } else {
+                await updateSessionFromElectronSafeStorageIfNeeded();
+                if (
+                    (await masterKeyFromSession()) &&
+                    (await savedAuthToken())
+                ) {
+                    await router.push("/gallery");
+                } else if (savedPartialLocalUser()?.email) {
+                    await router.push("/verify");
+                }
             }
-        }
-        const token = getToken();
-        if (key && token) {
-            await router.push(PAGES.GALLERY);
-        } else if (user?.email) {
-            await router.push(PAGES.VERIFY);
-        }
-        await initLocalForage();
-        setLoading(false);
-    };
-
-    const initLocalForage = async () => {
-        try {
-            await localForage.ready();
-        } catch (e) {
-            log.error("Local storage is not accessible", e);
-            showMiniDialog({
-                title: t("error"),
-                message: t("LOCAL_STORAGE_NOT_ACCESSIBLE_MESSAGE"),
-                nonClosable: true,
-                cancel: false,
-            });
-        } finally {
+            if (!(await canAccessIndexedDB())) {
+                showMiniDialog({
+                    title: t("error"),
+                    message: t("local_storage_not_accessible"),
+                    nonClosable: true,
+                    cancel: false,
+                });
+            }
             setLoading(false);
-        }
-    };
-
-    const signUp = () => setShowLogin(false);
-    const login = () => setShowLogin(true);
-
-    const redirectToSignupPage = () => router.push(PAGES.SIGNUP);
-    const redirectToLoginPage = () => router.push(PAGES.LOGIN);
+        })();
+    }, [showMiniDialog, router, refreshHost]);
 
     return (
         <TappableContainer onMaybeChangeHost={refreshHost}>
@@ -124,24 +92,36 @@ const Page: React.FC = () => {
                     <MobileBox>
                         <FocusVisibleButton
                             color="accent"
-                            onClick={redirectToSignupPage}
+                            onClick={() => router.push("/signup")}
                         >
                             {t("new_to_ente")}
                         </FocusVisibleButton>
-                        <FocusVisibleButton onClick={redirectToLoginPage}>
+                        <FocusVisibleButton
+                            onClick={() => router.push("/login")}
+                        >
                             {t("existing_user")}
                         </FocusVisibleButton>
                         <MobileBoxFooter {...{ host }} />
                     </MobileBox>
-                    <DesktopBox>
+                    <DesktopBox
+                        sx={[
+                            { bgcolor: "background.default" },
+                            (theme) =>
+                                theme.applyStyles("dark", {
+                                    bgcolor: "background.paper2",
+                                }),
+                        ]}
+                    >
                         <Stack sx={{ width: "320px", py: 4, gap: 4 }}>
                             {showLogin ? (
                                 <LoginContents
-                                    {...{ onSignUp: signUp, host }}
+                                    {...{ host }}
+                                    onSignUp={() => setShowLogin(false)}
                                 />
                             ) : (
                                 <SignUpContents
-                                    {...{ router, onLogin: login, host }}
+                                    {...{ router, host }}
+                                    onLogin={() => setShowLogin(true)}
                                 />
                             )}
                         </Stack>
@@ -202,27 +182,24 @@ const TappableContainer: React.FC<
     };
 
     return (
-        <TappableContainer_ onClick={handleClick}>
-            <>
-                <DevSettings open={showDevSettings} onClose={handleClose} />
-                {children}
-            </>
-        </TappableContainer_>
+        <CenteredFill
+            sx={[
+                {
+                    bgcolor: "background.paper2",
+                    "@media (width <= 1024px)": { flexDirection: "column" },
+                },
+                (theme) =>
+                    theme.applyStyles("dark", {
+                        bgcolor: "background.default",
+                    }),
+            ]}
+            onClick={handleClick}
+        >
+            <DevSettings open={showDevSettings} onClose={handleClose} />
+            {children}
+        </CenteredFill>
     );
 };
-
-const TappableContainer_ = styled("div")`
-    flex: 1;
-    display: flex;
-
-    align-items: center;
-    justify-content: center;
-    background-color: #000;
-
-    @media (width <= 1024px) {
-        flex-direction: column;
-    }
-`;
 
 /**
  * Disable the ability to set the custom server when we're running on our own
@@ -292,17 +269,13 @@ const MobileBoxFooter: React.FC<MobileBoxFooterProps> = ({ host }) => {
     );
 };
 
-const DesktopBox = styled("div")`
+const DesktopBox = styled(CenteredRow)`
     flex-shrink: 0;
     flex-grow: 2;
     flex-basis: auto;
 
     height: 100%;
     padding-inline: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: #242424;
 
     @media (width <= 1024px) {
         display: none;
@@ -311,7 +284,7 @@ const DesktopBox = styled("div")`
 
 const Slideshow: React.FC = () => {
     const [selectedIndex, setSelectedIndex] = useState(0);
-    const containerRef = useRef<HTMLDivElement | undefined>(undefined);
+    const containerRef = useRef<HTMLDivElement | null>(null);
 
     useEffect(() => {
         const intervalID = setInterval(() => {

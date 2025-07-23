@@ -3,6 +3,7 @@ package emergency
 import (
 	"fmt"
 	"github.com/ente-io/museum/pkg/controller"
+	"github.com/ente-io/museum/pkg/controller/lock"
 
 	"github.com/ente-io/museum/ente"
 	"github.com/ente-io/museum/pkg/controller/user"
@@ -14,10 +15,12 @@ import (
 )
 
 type Controller struct {
-	Repo              *emergency.Repository
-	UserRepo          *repo.UserRepository
-	UserCtrl          *user.UserController
-	PasskeyController *controller.PasskeyController
+	Repo                  *emergency.Repository
+	UserRepo              *repo.UserRepository
+	UserCtrl              *user.UserController
+	PasskeyController     *controller.PasskeyController
+	LockCtrl              *lock.LockController
+	isReminderCronRunning bool
 }
 
 func (c *Controller) UpdateContact(ctx *gin.Context,

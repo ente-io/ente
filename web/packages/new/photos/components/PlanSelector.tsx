@@ -1,43 +1,3 @@
-import type { ButtonishProps } from "@/base/components/mui";
-import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
-import {
-    errorDialogAttributes,
-    genericRetriableErrorDialogAttributes,
-} from "@/base/components/utils/dialog";
-import type { ModalVisibilityProps } from "@/base/components/utils/modal";
-import log from "@/base/log";
-import { useUserDetailsSnapshot } from "@/new/photos/components/utils/use-snapshot";
-import { useWrapAsyncOperation } from "@/new/photos/components/utils/use-wrap-async";
-import type {
-    Bonus,
-    Plan,
-    PlanPeriod,
-    PlansData,
-    Subscription,
-} from "@/new/photos/services/user-details";
-import {
-    activateStripeSubscription,
-    cancelStripeSubscription,
-    getFamilyPortalRedirectURL,
-    getPlansData,
-    isSubscriptionActive,
-    isSubscriptionActivePaid,
-    isSubscriptionCancelled,
-    isSubscriptionForPlan,
-    isSubscriptionFree,
-    isSubscriptionStripe,
-    planUsage,
-    redirectToCustomerPortal,
-    redirectToPaymentsApp,
-    userDetailsAddOnBonuses,
-} from "@/new/photos/services/user-details";
-import { useAppContext } from "@/new/photos/types/context";
-import { bytesInGB, formattedStorageByteSize } from "@/new/photos/utils/units";
-import { openURL } from "@/new/photos/utils/web";
-import {
-    FlexWrapper,
-    SpaceBetweenFlex,
-} from "@ente/shared/components/Container";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import CloseIcon from "@mui/icons-material/Close";
@@ -57,6 +17,43 @@ import {
 } from "@mui/material";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
+import { SpacedRow } from "ente-base/components/containers";
+import type { ButtonishProps } from "ente-base/components/mui";
+import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
+import {
+    errorDialogAttributes,
+    genericRetriableErrorDialogAttributes,
+} from "ente-base/components/utils/dialog";
+import type { ModalVisibilityProps } from "ente-base/components/utils/modal";
+import { useBaseContext } from "ente-base/context";
+import log from "ente-base/log";
+import { bytesInGB, formattedStorageByteSize } from "ente-gallery/utils/units";
+import { useUserDetailsSnapshot } from "ente-new/photos/components/utils/use-snapshot";
+import { useWrapAsyncOperation } from "ente-new/photos/components/utils/use-wrap-async";
+import type {
+    Bonus,
+    Plan,
+    PlanPeriod,
+    PlansData,
+    Subscription,
+} from "ente-new/photos/services/user-details";
+import {
+    activateStripeSubscription,
+    cancelStripeSubscription,
+    getFamilyPortalRedirectURL,
+    getPlansData,
+    isSubscriptionActive,
+    isSubscriptionActivePaid,
+    isSubscriptionCancelled,
+    isSubscriptionForPlan,
+    isSubscriptionFree,
+    isSubscriptionStripe,
+    planUsage,
+    redirectToCustomerPortal,
+    redirectToPaymentsApp,
+    userDetailsAddOnBonuses,
+} from "ente-new/photos/services/user-details";
+import { openURL } from "ente-new/photos/utils/web";
 import { t } from "i18next";
 import React, { useCallback, useEffect, useState } from "react";
 import { Trans } from "react-i18next";
@@ -79,12 +76,26 @@ export const PlanSelector: React.FC<PlanSelectorProps> = ({
     return (
         <Dialog
             {...{ open, onClose, fullScreen }}
-            PaperProps={{
-                sx: (theme) => ({
-                    width: { sm: "391px" },
-                    p: 1,
-                    [theme.breakpoints.down(360)]: { p: 0 },
-                }),
+            slotProps={{
+                paper: {
+                    sx: (theme) => ({
+                        width: { sm: "391px" },
+                        p: 1,
+                        [theme.breakpoints.down(360)]: { p: 0 },
+                    }),
+                },
+                // [Note: Backdrop variant blur]
+                //
+                // What we wish for is creating a variant of Backdrop that
+                // instead of specifying the backdrop filter each time. But as
+                // of MUI v6.4, the TypeScript definition for Backdrop does not
+                // contain a variant, causing tsc to show an error when we try
+                // to specify a variant.
+                //
+                // Since the styling is trivial and used only infrequently, for
+                // now we copy paste it. If it gets needed more often, we can
+                // also make it into a palette var.
+                backdrop: { sx: { backdropFilter: "blur(30px) opacity(95%)" } },
             }}
         >
             <PlanSelectorCard {...{ onClose, setLoading }} />
@@ -98,7 +109,7 @@ const PlanSelectorCard: React.FC<PlanSelectorCardProps> = ({
     onClose,
     setLoading,
 }) => {
-    const { showMiniDialog } = useAppContext();
+    const { showMiniDialog } = useBaseContext();
 
     const userDetails = useUserDetailsSnapshot();
 
@@ -310,42 +321,39 @@ const FreeSubscriptionPlanSelectorCard: React.FC<
 }) => (
     <>
         <Typography variant="h3">{t("choose_plan")}</Typography>
-        <Box>
-            <Stack spacing={3}>
-                <Box>
-                    <PeriodToggler
-                        planPeriod={planPeriod}
-                        togglePeriod={togglePeriod}
-                    />
-                    <Typography
-                        variant="small"
-                        sx={{ mt: 0.5, color: "text.muted" }}
-                    >
-                        {t("two_months_free")}
-                    </Typography>
-                </Box>
-                {children}
-                {subscription && addOnBonuses.length > 0 && (
-                    <>
+        <Stack sx={{ gap: 3 }}>
+            <Box>
+                <PeriodToggler
+                    planPeriod={planPeriod}
+                    togglePeriod={togglePeriod}
+                />
+                <Typography
+                    variant="small"
+                    sx={{ p: "8px 2px 0px 2px", color: "text.muted" }}
+                >
+                    {t("two_months_free")}
+                </Typography>
+            </Box>
+            {children}
+            {subscription && addOnBonuses.length > 0 && (
+                <Stack sx={{ gap: 2 }}>
+                    <Stack sx={{ gap: 1.5, p: 0.5 }}>
                         <AddOnBonusRows addOnBonuses={addOnBonuses} />
-                        <ManageSubscription
-                            {...{ onClose, setLoading, subscription }}
-                            hasAddOnBonus={true}
-                        />
-                    </>
-                )}
-            </Stack>
-        </Box>
+                    </Stack>
+                    <ManageSubscription
+                        {...{ onClose, setLoading, subscription }}
+                        hasAddOnBonus={true}
+                    />
+                </Stack>
+            )}
+        </Stack>
     </>
 );
 
 type PaidSubscriptionPlanSelectorCardProps = Omit<
     FreeSubscriptionPlanSelectorCardProps,
     "subscription"
-> & {
-    subscription: Subscription;
-    usage: number;
-};
+> & { subscription: Subscription; usage: number };
 
 const PaidSubscriptionPlanSelectorCard: React.FC<
     React.PropsWithChildren<PaidSubscriptionPlanSelectorCardProps>
@@ -360,8 +368,11 @@ const PaidSubscriptionPlanSelectorCard: React.FC<
     children,
 }) => (
     <>
-        <Box sx={{ pl: 1.5, py: 0.5 }}>
-            <SpaceBetweenFlex>
+        <Stack sx={{ gap: 2 }}>
+            <Stack
+                direction="row"
+                sx={{ pl: 0.5, pt: 0.5, justifyContent: "space-between" }}
+            >
                 <Box>
                     <Typography variant="h5" sx={{ fontWeight: "medium" }}>
                         {t("subscription")}
@@ -374,11 +385,11 @@ const PaidSubscriptionPlanSelectorCard: React.FC<
                 <IconButton onClick={onClose} color="secondary">
                     <CloseIcon />
                 </IconButton>
-            </SpaceBetweenFlex>
-        </Box>
+            </Stack>
 
-        <Box sx={{ px: 1.5 }}>
-            <Typography sx={{ color: "text.muted", fontWeight: "medium" }}>
+            <Typography
+                sx={{ color: "text.muted", px: 0.5, fontWeight: "medium" }}
+            >
                 <Trans
                     i18nKey="current_usage"
                     values={{
@@ -386,13 +397,13 @@ const PaidSubscriptionPlanSelectorCard: React.FC<
                     }}
                 />
             </Typography>
-        </Box>
+        </Stack>
 
         <Box>
             <Stack
                 sx={(theme) => ({
-                    border: `1px solid ${theme.palette.divider}`,
-                    borderRadius: `${theme.shape.borderRadius}px`,
+                    border: `1px solid ${theme.vars.palette.divider}`,
+                    borderRadius: 1,
                     gap: 3,
                     p: 1.5,
                 })}
@@ -404,7 +415,7 @@ const PaidSubscriptionPlanSelectorCard: React.FC<
                     />
                     <Typography
                         variant="small"
-                        sx={{ mt: 0.5, color: "text.muted" }}
+                        sx={{ p: "8px 2px 0px 2px", color: "text.muted" }}
                     >
                         {t("two_months_free")}
                     </Typography>
@@ -412,7 +423,7 @@ const PaidSubscriptionPlanSelectorCard: React.FC<
                 {children}
             </Stack>
 
-            <Box sx={{ py: 1, px: 1.5 }}>
+            <Stack sx={{ padding: "20px 8px 0px 8px", gap: 2 }}>
                 <Typography sx={{ color: "text.muted" }}>
                     {!isSubscriptionCancelled(subscription)
                         ? t("subscription_status_renewal_active", {
@@ -425,7 +436,7 @@ const PaidSubscriptionPlanSelectorCard: React.FC<
                 {addOnBonuses.length > 0 && (
                     <AddOnBonusRows addOnBonuses={addOnBonuses} />
                 )}
-            </Box>
+            </Stack>
         </Box>
 
         <ManageSubscription
@@ -452,7 +463,6 @@ const PeriodToggler: React.FC<PeriodTogglerProps> = ({
         onChange={(_, newPeriod) => {
             if (newPeriod && newPeriod != planPeriod) togglePeriod();
         }}
-        color="primary"
     >
         <CustomToggleButton value={"month"}>{t("monthly")}</CustomToggleButton>
         <CustomToggleButton value={"year"}>{t("yearly")}</CustomToggleButton>
@@ -463,18 +473,18 @@ const CustomToggleButton = styled(ToggleButton)(({ theme }) => ({
     textTransform: "none",
     padding: "12px 16px",
     borderRadius: "4px",
-    backgroundColor: theme.colors.fill.faint,
-    border: `1px solid transparent`,
-    color: theme.colors.text.faint,
+    minWidth: "98px",
+    backgroundColor: theme.vars.palette.fill.faint,
+    borderColor: "transparent",
+    color: theme.vars.palette.text.faint,
     "&.Mui-selected": {
-        backgroundColor: theme.colors.accent.A500,
-        color: theme.colors.text.base,
+        backgroundColor: theme.vars.palette.accent.main,
+        color: theme.vars.palette.accent.contrastText,
     },
     "&.Mui-selected:hover": {
-        backgroundColor: theme.colors.accent.A500,
-        color: theme.colors.text.base,
+        backgroundColor: theme.vars.palette.accent.main,
+        color: theme.vars.palette.accent.contrastText,
     },
-    width: "97.433px",
 }));
 
 interface PlansProps {
@@ -494,7 +504,7 @@ const Plans: React.FC<PlansProps> = ({
     hasAddOnBonus,
     onPlanSelect,
 }) => (
-    <Stack spacing={2}>
+    <Stack sx={{ gap: 2 }}>
         {plansData?.plans
             .filter((plan) => plan.period === planPeriod)
             .map((plan) => (
@@ -555,12 +565,9 @@ const PlanRow: React.FC<PlanRowProps> = ({ plan, onPlanSelect, disabled }) => {
                 >
                     <Box sx={{ textAlign: "right" }}>
                         <Typography variant="h6">{plan.price}</Typography>
-                        <Typography
-                            variant="small"
-                            sx={{ color: "text.muted" }}
-                        >
+                        <Typography variant="small" sx={{ opacity: 0.7 }}>
                             {`/ ${
-                                plan.period === "month"
+                                plan.period == "month"
                                     ? t("month_short")
                                     : t("year")
                             }`}
@@ -572,9 +579,14 @@ const PlanRow: React.FC<PlanRowProps> = ({ plan, onPlanSelect, disabled }) => {
     );
 };
 
-const PlanRowContainer = styled(FlexWrapper)(() => ({
+const PlanRowContainer = styled("div")(({ theme }) => ({
+    display: "flex",
     background:
-        "linear-gradient(268.22deg, rgba(256, 256, 256, 0.08) -3.72%, rgba(256, 256, 256, 0) 85.73%)",
+        "linear-gradient(270deg, transparent, rgba(0 0 0 / 0.02), transparent)",
+    ...theme.applyStyles("dark", {
+        background:
+            "linear-gradient(270deg, rgba(255 255 255 / 0.08) -3.72%, transparent 85.73%)",
+    }),
 }));
 
 const PlanStorage = styled("div")`
@@ -588,19 +600,15 @@ const DisabledPlanButton = styled((props: ButtonProps) => (
 ))(({ theme }) => ({
     "&.Mui-disabled": {
         backgroundColor: "transparent",
-        color: theme.colors.text.base,
+        color: theme.vars.palette.text.muted,
     },
 }));
 
 const ActivePlanButton = styled((props: ButtonProps) => (
     <Button color="accent" {...props} endIcon={<ArrowForwardIcon />} />
 ))(() => ({
-    ".MuiButton-endIcon": {
-        transition: "transform .2s ease-in-out",
-    },
-    "&:hover .MuiButton-endIcon": {
-        transform: "translateX(4px)",
-    },
+    ".MuiButton-endIcon": { transition: "transform .2s ease-in-out" },
+    "&:hover .MuiButton-endIcon": { transform: "translateX(4px)" },
 }));
 
 interface FreePlanRowProps {
@@ -624,13 +632,10 @@ const FreePlanRow: React.FC<FreePlanRowProps> = ({ onClose, storage }) => (
     </FreePlanRow_>
 );
 
-const FreePlanRow_ = styled(SpaceBetweenFlex)(({ theme }) => ({
+const FreePlanRow_ = styled(SpacedRow)(({ theme }) => ({
     gap: theme.spacing(1.5),
     padding: theme.spacing(1.5, 1),
     cursor: "pointer",
-    "&:hover .endIcon": {
-        backgroundColor: "rgba(255,255,255,0.08)",
-    },
 }));
 
 interface AddOnBonusRowsProps {
@@ -640,7 +645,7 @@ interface AddOnBonusRowsProps {
 const AddOnBonusRows: React.FC<AddOnBonusRowsProps> = ({ addOnBonuses }) => (
     <>
         {addOnBonuses.map((bonus, i) => (
-            <Typography key={i} sx={{ color: "text.muted", pt: 1 }}>
+            <Typography key={i} variant="small" sx={{ color: "text.muted" }}>
                 <Trans
                     i18nKey={"add_on_valid_till"}
                     values={{
@@ -656,10 +661,7 @@ const AddOnBonusRows: React.FC<AddOnBonusRowsProps> = ({ addOnBonuses }) => (
 type ManageSubscriptionProps = Pick<
     PlanSelectorProps,
     "onClose" | "setLoading"
-> & {
-    subscription: Subscription;
-    hasAddOnBonus: boolean;
-};
+> & { subscription: Subscription; hasAddOnBonus: boolean };
 
 function ManageSubscription({
     onClose,
@@ -667,7 +669,7 @@ function ManageSubscription({
     subscription,
     hasAddOnBonus,
 }: ManageSubscriptionProps) {
-    const { onGenericError } = useAppContext();
+    const { onGenericError } = useBaseContext();
 
     const openFamilyPortal = async () => {
         setLoading(true);
@@ -680,7 +682,7 @@ function ManageSubscription({
     };
 
     return (
-        <Stack spacing={1}>
+        <Stack sx={{ gap: 1 }}>
             {isSubscriptionStripe(subscription) && (
                 <StripeSubscriptionOptions
                     {...{ onClose, subscription, hasAddOnBonus }}
@@ -703,7 +705,7 @@ const StripeSubscriptionOptions: React.FC<StripeSubscriptionOptionsProps> = ({
     subscription,
     hasAddOnBonus,
 }) => {
-    const { showMiniDialog } = useAppContext();
+    const { showMiniDialog } = useBaseContext();
 
     const confirmReactivation = () =>
         showMiniDialog({

@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/widget_container">
+
+    <!-- Main Image (if available) -->
+    <ImageView
+        android:id="@+id/widget_img"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop"
+        android:visibility="gone" />  <!-- Initially hidden -->
+
+    <!-- Gradient Overlay for Text Readability -->
+    <LinearLayout
+        android:id="@+id/widget_overlay"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:orientation="vertical"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="16dp"
+        android:paddingTop="4dp"
+        android:background="@layout/gradient_overlay"
+        android:visibility="gone"> <!-- Initially hidden, shown when image is available -->
+
+        <!-- Title -->
+        <TextView
+            android:id="@+id/widget_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:textColor="@android:color/white"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:visibility="gone"/>
+
+        <!-- Subtitle -->
+        <TextView
+            android:id="@+id/widget_subtitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:textColor="@android:color/white"
+            android:textSize="12sp"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:visibility="gone"/>
+    </LinearLayout>
+
+    <!-- Placeholder View (when no image available) -->
+    <LinearLayout
+        android:id="@+id/widget_placeholder_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:background="@color/widget_placeholder_bg">
+
+        <ImageView
+            android:id="@+id/widget_placeholder"
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:src="@drawable/ic_memories_widget"
+            android:scaleType="fitCenter" />
+
+        <TextView
+            android:id="@+id/widget_placeholder_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Go to Settings -> General to customise the widget"
+            android:textSize="12sp"
+            android:gravity="center_horizontal"
+            android:textColor="@color/widget_text_color"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:layout_marginTop="12dp"/>
+    </LinearLayout>
+
+</FrameLayout>

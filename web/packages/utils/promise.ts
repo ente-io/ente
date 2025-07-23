@@ -4,7 +4,7 @@
  * This function is a promisified `setTimeout`. It returns a promise that
  * resolves after {@link ms} milliseconds.
  */
-export const wait = (ms: number) =>
+export const wait = (ms: number): Promise<void> =>
     new Promise((resolve) => setTimeout(resolve, ms));
 
 /**
@@ -65,7 +65,10 @@ export const wait = (ms: number) =>
  *   scratch for now. Indeed, I've spent more time writing about the function
  *   than the function itself.
  */
-export const throttled = (underlying: () => Promise<void>, period: number) => {
+export const throttled = (
+    underlying: () => Promise<void>,
+    period: number,
+): (() => void) => {
     let pending = 0;
 
     const f = () => {
@@ -88,10 +91,13 @@ export const throttled = (underlying: () => Promise<void>, period: number) => {
  * does not resolve within {@link timeoutMS}, then reject with a timeout error.
  *
  * Note that this does not abort {@link promise} itself - it will still get
- * settled, just its eventual state will be ignored if it gets fullfilled or
+ * settled, just its eventual state will be ignored if it gets fulfilled or
  * rejected after we've already timed out.
  */
-export const withTimeout = async <T>(promise: Promise<T>, ms: number) => {
+export const withTimeout = async <T>(
+    promise: Promise<T>,
+    ms: number,
+): Promise<T> => {
     let timeoutId: ReturnType<typeof setTimeout>;
     const rejectOnTimeout = new Promise<T>((_, reject) => {
         timeoutId = setTimeout(
@@ -108,42 +114,6 @@ export const withTimeout = async <T>(promise: Promise<T>, ms: number) => {
 };
 
 /**
- * Retry a async operation like a HTTP request 3 (+ 1 original) times with
- * exponential backoff.
- *
- * @param op A function that performs the operation, returning the promise for
- * its completion.
- *
- * @param abortIfNeeded An optional function that is called with the
- * corresponding error whenever {@link op} rejects. It should throw the error if
- * the retries should immediately be aborted.
- *
- * @returns A promise that fulfills with to the result of a first successfully
- * fulfilled promise of the 4 (1 + 3) attempts, or rejects with the error
- * obtained either when {@link abortIfNeeded} throws, or with the error from the
- * last attempt otherwise.
- */
-export const retryAsyncOperation = async <T>(
-    op: () => Promise<T>,
-    abortIfNeeded?: (error: unknown) => void,
-): Promise<T> => {
-    const waitTimeBeforeNextTry = [2000, 5000, 10000];
-
-    while (true) {
-        try {
-            return await op();
-        } catch (e) {
-            if (abortIfNeeded) {
-                abortIfNeeded(e);
-            }
-            const t = waitTimeBeforeNextTry.shift();
-            if (!t) throw e;
-            await wait(t);
-        }
-    }
-};
-
-/**
  * A promise queue to serialize execution of bunch of promises.
  *
  * Promises can be added to the queue with the {@link add} function, which
@@ -153,10 +123,7 @@ export const retryAsyncOperation = async <T>(
  * the order which they are added.
  */
 export class PromiseQueue<T> {
-    private q: {
-        task: () => Promise<T>;
-        handlers: unknown;
-    }[] = [];
+    private q: { task: () => Promise<T>; handlers: unknown }[] = [];
 
     /**
      * Add a promise to the queue, and return a new promise that will resolve to

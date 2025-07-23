@@ -1,12 +1,12 @@
-import { TwoFactorAuthorizationResponse } from "@/accounts/services/user";
-import { Stack100vhCenter } from "@/base/components/containers";
-import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
-import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
-import log from "@/base/log";
-import { nullToUndefined } from "@/utils/transform";
 import InfoIcon from "@mui/icons-material/Info";
 import KeyIcon from "@mui/icons-material/Key";
 import { Paper, Typography, styled } from "@mui/material";
+import { TwoFactorAuthorizationResponse } from "ente-accounts/services/user";
+import { Stack100vhCenter } from "ente-base/components/containers";
+import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
+import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
+import log from "ente-base/log";
+import { nullToUndefined } from "ente-utils/transform";
 import { t } from "i18next";
 import React, { useCallback, useEffect, useState } from "react";
 import {
@@ -127,12 +127,7 @@ const Page = () => {
             return;
         }
 
-        return {
-            redirectURL,
-            passkeySessionID,
-            clientPackage,
-            beginResponse,
-        };
+        return { redirectURL, passkeySessionID, clientPackage, beginResponse };
     }, []);
 
     /**
@@ -389,7 +384,6 @@ const RetriableFailed: React.FC<RetriableFailedProps> = ({
                 <FocusVisibleButton
                     onClick={onRecover}
                     fullWidth
-                    color="primary"
                     variant="text"
                 >
                     {t("recover_two_factor")}

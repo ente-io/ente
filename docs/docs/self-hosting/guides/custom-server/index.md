@@ -8,6 +8,8 @@ description: Using a custom self-hosted server with Ente client apps and CLI
 You can modify various Ente client apps and CLI to connect to a self hosted
 custom server endpoint.
 
+[[toc]]
+
 ## Mobile
 
 The pre-built Ente apps from GitHub / App Store / Play Store / F-Droid can be
@@ -77,3 +79,37 @@ endpoint:
 
 (Another
 [example](https://github.com/ente-io/ente/blob/main/cli/config.yaml.example))
+
+## Find the hostname of your server
+
+If you want to access your museum within your own network, you can use the
+`hostname` command to find a addressable local network hostname or IP for your
+computer, and then use it by suffixing it with the port number.
+
+First, run
+
+```sh
+hostname
+```
+
+The result will look something like this
+
+```sh
+my-computer.local
+```
+
+You will need to replace the server endpoint with an address that uses your
+server's hostname and the port number. Here's an example:
+
+```
+http://my-computer.local:8080
+```
+
+Note that this will only work within your network. To access it from outside the
+network, you need to use the public IP or hostname.
+
+> [!TIP]
+>
+> If you're having trouble uploading from your mobile app, it is likely that
+> museum is not able to connect to your S3 storage. See the
+> [Configuring S3](/self-hosting/guides/configuring-s3) guide for more details.

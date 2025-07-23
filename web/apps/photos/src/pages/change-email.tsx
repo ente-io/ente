@@ -1,3 +1,1 @@
-import Page from "@/accounts/pages/change-email";
-
-export default Page;
+export { default } from "ente-accounts/pages/change-email";

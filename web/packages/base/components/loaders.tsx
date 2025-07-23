@@ -1,5 +1,6 @@
-import { Overlay, Stack100vhCenter } from "@/base/components/containers";
-import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
+import { Backdrop } from "@mui/material";
+import { Stack100vhCenter } from "ente-base/components/containers";
+import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
 import React from "react";
 
 /**
@@ -15,21 +16,27 @@ export const LoadingIndicator: React.FC = () => (
 );
 
 /**
- * An opaque overlay that covers the entire viewport and shows an activity
+ * An translucent overlay that covers the entire viewport and shows an activity
  * indicator in its center.
  *
- * Useful as a top level "blocking" overscreen while the app is being loaded.
+ * Used as a overlay during blocking actions. The use of this component is not
+ * recommended for new code.
  */
-export const LoadingOverlay: React.FC = () => (
-    <Overlay
-        sx={(theme) => ({
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            zIndex: 2000,
-            backgroundColor: theme.colors.background.base,
-        })}
+export const TranslucentLoadingOverlay: React.FC = () => (
+    <Backdrop
+        // Specifying open here causes us to lose animations. This is not
+        // optimal, but fine for now since this the use of this is limited to a
+        // few interstitial overlays, and if refactoring consider replacing this
+        // entirely with a more localized activity indicator.
+        open={true}
+        sx={{
+            backgroundColor: "var(--mui-palette-backdrop-muted)",
+            backdropFilter: "blur(30px) opacity(95%)",
+            /* Above the highest possible MUI z-index, that of the MUI tooltip
+               See: https://mui.com/material-ui/customization/default-theme/ */
+            zIndex: "calc(var(--mui-zIndex-tooltip) + 1)",
+        }}
     >
         <ActivityIndicator />
-    </Overlay>
+    </Backdrop>
 );

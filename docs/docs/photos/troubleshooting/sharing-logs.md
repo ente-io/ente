@@ -20,23 +20,25 @@ the logs just make the process a bit faster and easier.
 - Select for the option to _Report a Bug_.
 - Tap on _Report a bug_.
 
+## Desktop and Web
+
+- Open settings (click on the three horizontal lines button located at the top
+  left corner of the screen).
+- Click on the _Help_ option towards the bottom of settings.
+- Click on _View logs_. This will show you the location of the logs on your
+  system (desktop), or download them from the browser onto your computer (web).
+- Go back to settings.
+- Click on _Support_. This will open your email client where you can attach the
+  logs in the email and describe the issue.
+
 ## Desktop
 
-- Click on _Help_ menu at the top of your screen, and select the _View logs_
-  option.
-- Open settings (click on the three horizontal lines button located at the top
-  left corner of the screen).
-- Click on _Support_. This will open your email client where you can attach the
-  logs in the email and describe the issue.
+On the desktop app, you can also directly view the logs on your computer at the
+following locations:
 
-## Web
-
-- Open settings (click on the three horizontal lines button located at the top
-  left corner of the screen).
-- Click on _Debug Logs_ towards the bottom of settings.
-- Click on _Download logs_
-- Click on _Support_. This will open your email client where you can attach the
-  logs in the email and describe the issue.
+- macOS: `~/Library/Logs/ente/ente.log`
+- Linux: `~/.config/ente/logs/ente.log`
+- Windows: `%USERPROFILE%\AppData\Roaming\ente\logs\ente.log`
 
 ## Send email manually
 

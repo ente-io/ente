@@ -1,10 +1,10 @@
-import { boxSealOpen, generateKeyPair } from "@/base/crypto";
-import { ensureOk, publicRequestHeaders } from "@/base/http";
-import log from "@/base/log";
-import { apiURL } from "@/base/origins";
-import { wait } from "@/utils/promise";
-import { nullToUndefined } from "@/utils/transform";
-import { z } from "zod";
+import { boxSealOpenBytes, generateKeyPair } from "ente-base/crypto";
+import { ensureOk, publicRequestHeaders } from "ente-base/http";
+import log from "ente-base/log";
+import { apiURL } from "ente-base/origins";
+import { wait } from "ente-utils/promise";
+import { nullToUndefined } from "ente-utils/transform";
+import { z } from "zod/v4";
 
 export interface Registration {
     /** A pairing code shown on the screen. A client can use this to connect. */
@@ -110,9 +110,7 @@ const registerDevice = async (publicKey: string) => {
     const res = await fetch(await apiURL("/cast/device-info"), {
         method: "POST",
         headers: publicRequestHeaders(),
-        body: JSON.stringify({
-            publicKey,
-        }),
+        body: JSON.stringify({ publicKey }),
     });
     ensureOk(res);
     return z.object({ deviceCode: z.string() }).parse(await res.json())
@@ -153,13 +151,10 @@ export const getCastPayload = async (
     // Decrypt it using the private key of the pair and return the plaintext
     // payload, which'll be a JSON object containing the data we need to start a
     // slideshow for some collection.
-    const decryptedCastData = await boxSealOpen(
-        encryptedCastData,
-        publicKey,
-        privateKey,
+    const jsonString = new TextDecoder().decode(
+        await boxSealOpenBytes(encryptedCastData, { publicKey, privateKey }),
     );
-
-    return CastPayload.parse(JSON.parse(atob(decryptedCastData)));
+    return CastPayload.parse(JSON.parse(jsonString));
 };
 
 /**

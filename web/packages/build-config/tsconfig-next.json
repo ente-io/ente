@@ -1,10 +1,13 @@
 {
     /* A base TSConfig for typechecking our Next.js apps and packages. */
-    "extends": "@/build-config/tsconfig-typecheck.json",
+    "extends": "ente-build-config/tsconfig-typecheck.json",
     "compilerOptions": {
-        /* Next.js insists on adding these. Sigh. */
+        /* Next.js forcefully insists on adding these, which prevents us from
+           enabling the isolatedDeclarations option. Sigh. */
         "allowJs": true,
-        "incremental": true
+        "incremental": true,
+        /* MUI doesn't work with exactOptionalPropertyTypes yet. */
+        "exactOptionalPropertyTypes": false
     },
     /* Next.js insists on adding this, even though we don't need it. */
     "exclude": ["node_modules"]

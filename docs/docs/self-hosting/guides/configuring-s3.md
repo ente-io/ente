@@ -5,88 +5,113 @@ description:
     from outside localhost
 ---
 
-# Configuring S3
+# Architecture
 
-There are three components involved in uploading:
+![Client, Museum, S3](/client-museum-s3.png)
+
+There are three components involved in uploading a file:
 
 1.  The client (e.g. the web app or the mobile app)
 2.  Ente's server (museum)
-3.  The S3-compatible object storage (e.g. minio in the default starter)
+3.  The S3-compatible object storage (e.g. MinIO in the default starter)
 
 For the uploads to work, all three of them need to be able to reach each other.
-This is because the client uploads directly to the object storage. The
-interaction goes something like this:
+This is because the client uploads directly to the object storage.
 
-1.  Client wants to upload, it asks museum where it should upload to.
-2.  Museum creates pre-signed URLs for the S3 bucket that was configured.
-3.  Client directly uploads to the S3 buckets these URLs.
+A file upload flows as follows:
+
+1.  Client that wants to upload a file asks museum where it should upload the
+    file to
+2.  museum creates pre-signed URLs for the S3 bucket that was configured
+3.  Client directly uploads to the S3 buckets these URLs
+4.  Client finally informs museum that a file has been uploaded to this URL
 
 The upshot of this is that _both_ the client and museum should be able to reach
 your S3 bucket.
 
+## Configuring S3
+
 The URL for the S3 bucket is configured in
 [scripts/compose/credentials.yaml](https://github.com/ente-io/ente/blob/main/server/scripts/compose/credentials.yaml#L10).
-You can edit this file directly when testing, though it is just simpler and more
-robust to create a `museum.yaml` (in the same folder as the Docker compose file)
-and put your custom configuration there (in your case, you can put an entire
-`s3` config object in your `museum.yaml`).
 
-> [!TIP]
->
-> For more details about these configuration objects, see the documentation for
-> the `s3` object in
+You can edit this file directly while testing, though it is more robust to
+create a `museum.yaml` (in the same folder as the Docker compose file) and to
+setup your custom configuration there.
+
+> [!TIP] For more details about these configuration objects, see the
+> documentation for the `s3` object in
 > [configurations/local.yaml](https://github.com/ente-io/ente/blob/main/server/configurations/local.yaml).
 
 By default, you only need to configure the endpoint for the first bucket.
 
-> [!NOTE]
->
-> If you're wondering why there are 3 buckets - that's because our production
-> instance uses these to perform replication.
->
-> However, in a self hosted setup replication is off by default (you can turn it
-> on if you want). When replication is turned off, only the first bucket (it
-> must be named `b2-eu-cen`) is used, and you can ignore the other two. Use the
-> `hot_bucket` option if you'd like to set one of the other predefined buckets
-> as the "first" bucket.
+The Docker compose file is shipped with MinIO as the self hosted S3 compatible
+storage. By default, MinIO server is served on `localhost:3200` and the MinIO UI
+on `localhost:3201`.
 
-The `endpoint` for the first bucket in the starter `credentials.yaml` is
-`localhost:3200`. The way this works then is that both museum (`2`) and minio
-(`3`) are running within the same Docker compose cluster, so are able to reach
-each other. If at this point we were to run the web app (`1`) on localhost (say
-using `yarn dev:photos`), it would also run on localhost and thus would be able
-to reach `3`.
-
-If you were to try and connect from a mobile app, this would not work since
-`localhost:3200` would not resolve on your mobile. So you'll need to modify this
-endpoint to a value, say `yourserverip:3200`, so that the mobile app can also
-reach it.
+For example, in a localhost network situation, the way this connection works is,
+museum (`1`) and MinIO (`2`) run on the same Docker network and the web app
+(`3`) will also be hosted on your localhost. This enables all the three
+components of the setup to communicate with each other seamlessly.
 
 The same principle applies if you're deploying to your custom domain.
 
+## Replication
+
+![Replication](/replication.png)
+
+<p align="center">Community contributed diagram of Ente's replication process</p>
+
+> [!IMPORTANT]
+>
+> As of now, replication works only if all the 3 storage type needs are
+> fulfilled (1 hot, 1 cold and 1 glacier storage).
+>
+> [Reference](https://github.com/ente-io/ente/discussions/3167#discussioncomment-10585970)
+
+If you're wondering why there are 3 buckets on the MinIO UI - that's because our
+production instance uses these to perform
+[replication](https://ente.io/reliability/).
+
+If you're also wondering about why the bucket names are specifically what they
+are, it's because that is exactly what we are using on our production instance.
+We use `b2-eu-cen` as hot, `wasabi-eu-central-2-v3` as cold (also the secondary
+hot) and `scw-eu-fr-v3` as glacier storage. As of now, all of this is hardcoded.
+Hence, the same hardcoded configuration is applied when you self host Ente.
+
+In a self hosted Ente instance replication is turned off by default. When
+replication is turned off, only the first bucket (`b2-eu-cen`) is used, and the
+other two are ignored. Only the names here are specifically fixed, but in the
+configuration body you can put any other keys. It does not have any relation
+with `b2`, `wasabi` or even `scaleway`.
+
+Use the `s3.hot_storage.primary` option if you'd like to set one of the other
+predefined buckets as the primary bucket.
+
+## SSL Configuration
+
 > [!NOTE]
 >
-> If you need to configure SSL, for example if you're running over the internet,
-> you'll need to turn off `s3.are_local_buckets` (which disables SSL in the
-> default starter compose template).
->
-> Disabling `s3.are_local_buckets` also switches to the subdomain style URLs for
-> the buckets. However, not all S3 providers support these, in particular, minio
-> does not work with these in default configuration. So in such cases you'll
-> also need to then enable `s3.use_path_style_urls`.
+> If you need to configure SSL, you'll need to turn off `s3.are_local_buckets`
+> (which disables SSL in the default starter compose template).
 
-To summarize:
+Disabling `s3.are_local_buckets` also switches to the subdomain style URLs for
+the buckets. However, not all S3 providers support these. In particular, MinIO
+does not work with these in default configuration. So in such cases you'll also
+need to enable `s3.use_path_style_urls`.
+
+## Summary
 
 Set the S3 bucket `endpoint` in `credentials.yaml` to a `yourserverip:3200` or
-some such IP/hostname that accessible from both where you are running the Ente
-clients (e.g. the mobile app) and also from within the Docker compose cluster.
+some such IP / hostname that is accessible from both where you are running the
+Ente clients (e.g. the mobile app) and also from within the Docker compose
+cluster.
 
 ### Example
 
 An example `museum.yaml` when you're trying to connect to museum running on your
 computer from your phone on the same WiFi network:
 
-```
+```yaml
 s3:
     are_local_buckets: true
     b2-eu-cen:
@@ -96,23 +121,3 @@ s3:
         region: eu-central-2
         bucket: b2-eu-cen
 ```
-
-### 403 Forbidden
-
-If museum (`2`) is able to make a network connection to your S3 bucket (`3`) but
-uploads are still failing, it could be a credentials or permissions issue. A
-telltale sign of this is that in the museum logs you can see `403 Forbidden`
-errors about it not able to find the size of a file even though the
-corresponding object exists in the S3 bucket.
-
-To fix these, you should ensure the following:
-
-1.  The bucket CORS rules do not allow museum to access these objects.
-
-    > For uploading files from the browser, you will need to currently set
-    > allowedOrigins to "\*", and allow the "X-Auth-Token", "X-Client-Package"
-    > headers configuration too.
-    > [Here is an example of a working configuration](https://github.com/ente-io/ente/discussions/1764#discussioncomment-9478204).
-
-2.  The credentials are not being picked up (you might be setting the correct
-    creds, but not in the place where museum picks them from).

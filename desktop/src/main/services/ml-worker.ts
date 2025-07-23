@@ -15,46 +15,16 @@ import { existsSync } from "fs";
 import fs from "node:fs/promises";
 import path from "node:path";
 import * as ort from "onnxruntime-node";
+import { z } from "zod/v4";
+import log from "../log-worker";
 import { messagePortMainEndpoint } from "../utils/comlink";
-import { ensure, wait } from "../utils/common";
+import { wait } from "../utils/common";
 import { writeStream } from "../utils/stream";
+import { fsStatMtime } from "./fs";
 
-/**
- * We cannot do
- *
- *     import log from "../log";
- *
- * because that requires the Electron APIs that are not available to a utility
- * process (See: [Note: Using Electron APIs in UtilityProcess]). But even if
- * that were to work, logging will still be problematic since we'd try opening
- * the log file from two different Node.js processes (this one, and the main
- * one), and I didn't find any indication in the electron-log repository that
- * the log file's integrity would be maintained in such cases.
- *
- * So instead we create this proxy log object that uses `process.parentPort` to
- * transport the logs over to the main process.
- */
-const log = {
-    /**
-     * Unlike the real {@link log.error}, this accepts only the first string
-     * argument, not the second optional error one.
-     */
-    errorString: (s: string) => mainProcess("log.errorString", s),
-    info: (...ms: unknown[]) => mainProcess("log.info", ms),
-    /**
-     * Unlike the real {@link log.debug}, this is (a) eagerly evaluated, and (b)
-     * accepts only strings.
-     */
-    debugString: (s: string) => mainProcess("log.debugString", s),
-};
+log.debugString("Started ML utility process");
 
-/**
- * Send a message to the main process using a barebones RPC protocol.
- */
-const mainProcess = (method: string, param: unknown) =>
-    process.parentPort.postMessage({ method, p: param });
-
-log.debugString(`Started ML worker process`);
+process.on("uncaughtException", (e, origin) => log.error(origin, e));
 
 process.parentPort.once("message", (e) => {
     // Initialize ourselves with the data we got from our parent.
@@ -63,12 +33,13 @@ process.parentPort.once("message", (e) => {
     // parent.
     expose(
         {
+            fsStatMtime,
             computeCLIPImageEmbedding,
             computeCLIPTextEmbeddingIfAvailable,
             detectFaces,
             computeFaceEmbeddings,
         },
-        messagePortMainEndpoint(ensure(e.ports[0])),
+        messagePortMainEndpoint(e.ports[0]!),
     );
 });
 
@@ -80,19 +51,12 @@ process.parentPort.once("message", (e) => {
 let _userDataPath: string | undefined;
 
 /** Equivalent to app.getPath("userData") */
-const userDataPath = () => ensure(_userDataPath);
+const userDataPath = () => _userDataPath!;
+
+const MLWorkerInitData = z.object({ userDataPath: z.string() });
 
 const parseInitData = (data: unknown) => {
-    if (
-        data &&
-        typeof data == "object" &&
-        "userDataPath" in data &&
-        typeof data.userDataPath == "string"
-    ) {
-        _userDataPath = data.userDataPath;
-    } else {
-        log.errorString("Unparseable initialization data");
-    }
+    _userDataPath = MLWorkerInitData.parse(data).userDataPath;
 };
 
 /**
@@ -131,10 +95,8 @@ const makeCachedInferenceSession = (
     const createSession = (modelPath: string) =>
         createInferenceSession(modelPath);
 
-    const cachedInferenceSession = () => {
-        if (!session) session = download().then(createSession);
-        return session;
-    };
+    const cachedInferenceSession = () =>
+        (session ??= download().then(createSession));
 
     return cachedInferenceSession;
 };
@@ -161,7 +123,7 @@ const modelPathDownloadingIfNeeded = async (
     } else {
         const size = (await fs.stat(modelPath)).size;
         if (size !== expectedByteSize) {
-            log.errorString(
+            log.error(
                 `The size ${size} of model ${modelName} does not match the expected size, downloading again`,
             );
             await downloadModel(modelPath, modelName);
@@ -222,14 +184,13 @@ const downloadModel = async (saveLocation: string, name: string) => {
 /**
  * Create an ONNX {@link InferenceSession} with some defaults.
  */
-const createInferenceSession = async (modelPath: string) => {
-    return await ort.InferenceSession.create(modelPath, {
+const createInferenceSession = (modelPath: string) =>
+    ort.InferenceSession.create(modelPath, {
         // Restrict the number of threads to 1.
         intraOpNumThreads: 1,
         // Be more conservative with RAM usage.
         enableCpuMemArena: false,
     });
-};
 
 const cachedCLIPImageSession = makeCachedInferenceSession(
     "mobileclip_s2_image_opset18_rgba_opt.onnx",
@@ -247,14 +208,12 @@ export const computeCLIPImageEmbedding = async (
 ) => {
     const session = await cachedCLIPImageSession();
     const inputArray = new Uint8Array(input.buffer);
-    const feeds = {
-        input: new ort.Tensor("uint8", inputArray, inputShape),
-    };
+    const feeds = { input: new ort.Tensor("uint8", inputArray, inputShape) };
     const t = Date.now();
     const results = await session.run(feeds);
     log.debugString(`ONNX/CLIP image embedding took ${Date.now() - t} ms`);
     /* Need these model specific casts to type the result */
-    return ensure(results.output).data as Float32Array;
+    return results.output!.data as Float32Array;
 };
 
 const cachedCLIPTextSession = makeCachedInferenceSession(
@@ -263,10 +222,7 @@ const cachedCLIPTextSession = makeCachedInferenceSession(
 );
 
 let _tokenizer: Tokenizer | undefined;
-const getTokenizer = () => {
-    if (!_tokenizer) _tokenizer = new Tokenizer();
-    return _tokenizer;
-};
+const getTokenizer = () => (_tokenizer ??= new Tokenizer());
 
 /**
  * Compute CLIP embeddings for an text snippet.
@@ -276,9 +232,11 @@ const getTokenizer = () => {
 export const computeCLIPTextEmbeddingIfAvailable = async (text: string) => {
     const sessionOrSkip = await Promise.race([
         cachedCLIPTextSession(),
-        // Wait for a tick to get the session promise to resolved the first time
-        // this code runs on each app start (and the model has been downloaded).
-        wait(0).then(() => 1),
+        // Wait a bit to get the session promise to resolved the first time this
+        // code runs on each app start (in these cases the model will already be
+        // downloaded, so session creation should take only a 1 or 2 ticks: file
+        // system stat, and ort.InferenceSession.create).
+        wait(50).then(() => 1),
     ]);
 
     // Don't wait for the download to complete.
@@ -292,14 +250,12 @@ export const computeCLIPTextEmbeddingIfAvailable = async (text: string) => {
     const session = sessionOrSkip;
     const tokenizer = getTokenizer();
     const tokenizedText = Int32Array.from(tokenizer.encodeForCLIP(text));
-    const feeds = {
-        input: new ort.Tensor("int32", tokenizedText, [1, 77]),
-    };
+    const feeds = { input: new ort.Tensor("int32", tokenizedText, [1, 77]) };
 
     const t = Date.now();
     const results = await session.run(feeds);
     log.debugString(`ONNX/CLIP text embedding took ${Date.now() - t} ms`);
-    return ensure(results.output).data as Float32Array;
+    return results.output!.data as Float32Array;
 };
 
 const cachedFaceDetectionSession = makeCachedInferenceSession(
@@ -316,13 +272,11 @@ export const detectFaces = async (
 ) => {
     const session = await cachedFaceDetectionSession();
     const inputArray = new Uint8Array(input.buffer);
-    const feeds = {
-        input: new ort.Tensor("uint8", inputArray, inputShape),
-    };
+    const feeds = { input: new ort.Tensor("uint8", inputArray, inputShape) };
     const t = Date.now();
     const results = await session.run(feeds);
     log.debugString(`ONNX/YOLO face detection took ${Date.now() - t} ms`);
-    return ensure(results.output).data;
+    return results.output!.data;
 };
 
 const cachedFaceEmbeddingSession = makeCachedInferenceSession(

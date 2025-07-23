@@ -32,12 +32,12 @@ interface OverflowMenuProps {
     /**
      * Optional additional properties for the trigger icon button.
      */
-    triggerButtonProps?: Partial<IconButtonProps>;
+    triggerButtonSxProps?: IconButtonProps["sx"];
     /**
-     * Optional additional properties for the MUI {@link Paper} that underlies
-     * the {@link Menu}.
+     * Optional additional sx props for the MUI {@link Paper} that underlies the
+     * {@link Menu}.
      */
-    menuPaperProps?: Partial<PaperProps>;
+    menuPaperSxProps?: PaperProps["sx"];
 }
 
 /**
@@ -49,8 +49,8 @@ export const OverflowMenu: React.FC<
 > = ({
     ariaID,
     triggerButtonIcon,
-    triggerButtonProps,
-    menuPaperProps,
+    triggerButtonSxProps,
+    menuPaperSxProps,
     children,
 }) => {
     const [anchorEl, setAnchorEl] = useState<MenuProps["anchorEl"]>();
@@ -59,33 +59,35 @@ export const OverflowMenu: React.FC<
         [],
     );
     return (
-        <OverflowMenuContext.Provider value={context}>
+        <OverflowMenuContext value={context}>
             <IconButton
                 onClick={(event) => setAnchorEl(event.currentTarget)}
                 aria-controls={anchorEl ? ariaID : undefined}
                 aria-haspopup="true"
                 aria-expanded={anchorEl ? "true" : undefined}
-                {...triggerButtonProps}
+                sx={triggerButtonSxProps}
             >
                 {triggerButtonIcon ?? <MoreHorizIcon />}
             </IconButton>
             <Menu
                 id={ariaID}
-                {...(anchorEl ? { anchorEl } : {})}
+                {...(anchorEl && { anchorEl })}
                 open={!!anchorEl}
                 onClose={() => setAnchorEl(undefined)}
-                MenuListProps={{
-                    // Disable padding at the top and bottom of the menu list.
-                    disablePadding: true,
-                    "aria-labelledby": ariaID,
+                slotProps={{
+                    paper: { sx: menuPaperSxProps },
+                    list: {
+                        // Disable padding at the top and bottom of the menu list.
+                        disablePadding: true,
+                        "aria-labelledby": ariaID,
+                    },
                 }}
-                slotProps={{ paper: menuPaperProps }}
                 anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
                 transformOrigin={{ vertical: "top", horizontal: "right" }}
             >
                 {children}
             </Menu>
-        </OverflowMenuContext.Provider>
+        </OverflowMenuContext>
     );
 };
 
@@ -116,11 +118,16 @@ interface OverflowMenuOptionProps {
 export const OverflowMenuOption: React.FC<
     React.PropsWithChildren<OverflowMenuOptionProps>
 > = ({ onClick, color = "primary", startIcon, endIcon, children }) => {
-    const menuContext = useContext(OverflowMenuContext)!;
+    const menuContext = useContext(OverflowMenuContext);
 
     const handleClick = () => {
         onClick();
-        menuContext.close();
+        // We might've already been closed as a result of our containing menu
+        // getting closed. An example of this is the "Sort by" option in the
+        // album options overflow menu, where the `onClick` above will result in
+        // `onClose` being called on our parent menu, so `menuContext` will be
+        // undefined when we get here.
+        menuContext?.close();
     };
 
     return (
@@ -128,12 +135,10 @@ export const OverflowMenuOption: React.FC<
             onClick={handleClick}
             sx={(theme) => ({
                 minWidth: 220,
-                color: theme.palette[color].main,
+                color: theme.vars.palette[color].main,
                 // Reduce the size of the icons a bit to make it fit better with
                 // the text.
-                "& .MuiSvgIcon-root": {
-                    fontSize: "20px",
-                },
+                "& .MuiSvgIcon-root": { fontSize: "20px" },
             })}
         >
             <Stack
@@ -144,7 +149,7 @@ export const OverflowMenuOption: React.FC<
                     // Fill our container.
                     width: "100%",
                     // MUI has responsive padding, use a static value instead.
-                    paddingBlock: 1,
+                    py: 1,
                 }}
             >
                 {startIcon}

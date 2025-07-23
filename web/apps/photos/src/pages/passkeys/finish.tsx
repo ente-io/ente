@@ -1,3 +1,1 @@
-import Page from "@/accounts/pages/passkeys/finish";
-
-export default Page;
+export { default } from "ente-accounts/pages/passkeys/finish";

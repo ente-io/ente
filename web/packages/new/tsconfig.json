@@ -1,5 +1,5 @@
 {
-    "extends": "@/build-config/tsconfig-typecheck.json",
+    "extends": "ente-build-config/tsconfig-typecheck.json",
     "compilerOptions": {
         /* MUI doesn't work with exactOptionalPropertyTypes yet. */
         "exactOptionalPropertyTypes": false

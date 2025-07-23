@@ -1,4 +1,0 @@
-flutter_launcher_icons:
-  android: "launcher_icon"
-  ios: true
-  image_path: "assets/launcher_icon/ente-icon-dev.png"

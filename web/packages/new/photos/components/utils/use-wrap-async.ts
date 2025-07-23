@@ -1,5 +1,6 @@
+import { useBaseContext } from "ente-base/context";
 import { useCallback } from "react";
-import { useAppContext } from "../../types/context";
+import { usePhotosAppContext } from "../../types/context";
 
 /**
  * Wrap a function returning a promise in a loading bar and error handler.
@@ -19,7 +20,8 @@ import { useAppContext } from "../../types/context";
 export const useWrapAsyncOperation = <T extends unknown[]>(
     f: (...args: T) => Promise<void>,
 ) => {
-    const { showLoadingBar, hideLoadingBar, onGenericError } = useAppContext();
+    const { onGenericError } = useBaseContext();
+    const { showLoadingBar, hideLoadingBar } = usePhotosAppContext();
     return useCallback(
         async (...args: T) => {
             showLoadingBar();

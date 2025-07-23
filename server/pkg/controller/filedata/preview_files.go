@@ -8,11 +8,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func (c *Controller) GetPreviewUrl(ctx *gin.Context, request filedata.GetPreviewURLRequest) (*string, error) {
+func (c *Controller) GetPreviewUrl(ctx *gin.Context, actorUser int64, request filedata.GetPreviewURLRequest) (*string, error) {
 	if err := request.Validate(); err != nil {
 		return nil, err
 	}
-	actorUser := auth.GetUserID(ctx.Request.Header)
 	if err := c._checkMetadataReadOrWritePerm(ctx, actorUser, []int64{request.FileID}); err != nil {
 		return nil, err
 	}
@@ -46,12 +45,23 @@ func (c *Controller) PreviewUploadURL(ctx *gin.Context, request filedata.Preview
 	// note: instead of the final url, give a temp url for upload purpose.
 	objectKey := filedata.ObjectKey(request.FileID, fileOwnerID, request.Type, &id)
 	bucketID := c.S3Config.GetBucketID(request.Type)
+	if request.IsMultiPart {
+		multiPartUploadURLs, err2 := c.getMultiPartUploadURL(bucketID, objectKey, request.Count)
+		if err2 != nil {
+			return nil, stacktrace.Propagate(err2, "")
+		}
+		return &filedata.PreviewUploadUrl{
+			ObjectID:    id,
+			PartURLs:    &multiPartUploadURLs.PartURLs,
+			CompleteURL: &multiPartUploadURLs.CompleteURL,
+		}, nil
+	}
 	enteUrl, err := c.getUploadURL(bucketID, objectKey)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "")
 	}
 	return &filedata.PreviewUploadUrl{
 		ObjectID: id,
-		Url:      enteUrl.URL,
+		Url:      &enteUrl.URL,
 	}, nil
 }

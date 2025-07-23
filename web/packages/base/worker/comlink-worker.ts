@@ -1,11 +1,11 @@
-import { ensureElectron } from "@/base/electron";
-import log, { logToDisk } from "@/base/log";
 import { expose, wrap, type Remote } from "comlink";
+import { ensureElectron } from "ente-base/electron";
+import log, { logToDisk } from "ente-base/log";
 
 /**
  * A minimal wrapper for a web {@link Worker}, proxying a class of type T.
  *
- * `comlink` is a library that simplies working with web workers by
+ * `comlink` is a library that simplifies working with web workers by
  * transparently proxying objects across the boundary instead of us needing to
  * work directly with the raw postMessage interface.
  *

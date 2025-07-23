@@ -1,5 +1,3 @@
-import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
-import { LoadingButton } from "@/base/components/mui/LoadingButton";
 import type { ButtonProps, ModalProps } from "@mui/material";
 import {
     Box,
@@ -10,6 +8,8 @@ import {
     Typography,
     type DialogProps,
 } from "@mui/material";
+import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
+import { LoadingButton } from "ente-base/components/mui/LoadingButton";
 import { t } from "i18next";
 import React, { useState } from "react";
 import log from "../log";
@@ -44,6 +44,22 @@ export interface MiniDialogAttributes {
      */
     nonClosable?: boolean;
     /**
+     * If `true`, then the dialog cannot be replaced by another dialog while it
+     * is being displayed.
+     *
+     * The app uses a single component to render mini dialogs, and it is
+     * possible that new dialog contents might preempt and replace contents in a
+     * dialog that is already being shown. Usually if such preemption is
+     * expected then both dialogs use differing mechanisms, but it can happen in
+     * rare unforeseen cases.
+     *
+     * This flag allow a dialog to indicate that it should not be preempted, as
+     * it contains some critical information.
+     *
+     * Use this flag sparingly.
+     */
+    nonReplaceable?: boolean;
+    /**
      * Customize the primary action button shown in the dialog.
      *
      * This is provided by boxes which serve as some sort of confirmation. If
@@ -75,7 +91,7 @@ export interface MiniDialogAttributes {
          * be shown on the button until the promise settles.
          *
          * If this function is not provided, or if the function completes /
-         * fullfills, then then the dialog is automatically closed.
+         * fulfills, then then the dialog is automatically closed.
          *
          * Otherwise (that is, if the provided function throws), the dialog
          * remains open, showing a generic error.
@@ -132,18 +148,12 @@ export interface MiniDialogAttributes {
      * The object form allows providing both the button title and the action
      * handler (synchronous). The dialog is always closed on clicks.
      */
-    cancel?:
-        | string
-        | false
-        | {
-              text: string;
-              action: () => void;
-          };
+    cancel?: string | false | { text: string; action: () => void };
     /** The direction in which the buttons are stacked. Default is "column". */
     buttonDirection?: "row" | "column";
 }
 
-type MiniDialogProps = Omit<DialogProps, "onClose"> & {
+type MiniDialogProps = Pick<DialogProps, "open"> & {
     onClose: () => void;
     attributes?: MiniDialogAttributes;
 };
@@ -158,7 +168,7 @@ type MiniDialogProps = Omit<DialogProps, "onClose"> & {
  */
 export const AttributedMiniDialog: React.FC<
     React.PropsWithChildren<MiniDialogProps>
-> = ({ open, onClose, attributes, children, ...props }) => {
+> = ({ open, onClose, attributes, children }) => {
     const [phase, setPhase] = useState<
         "loading" | "secondary-loading" | "failed" | undefined
     >();
@@ -198,8 +208,6 @@ export const AttributedMiniDialog: React.FC<
             },
         ];
     })(attributes.cancel);
-
-    const { PaperProps, ...rest } = props;
 
     const loadingButton = attributes.continue && (
         <LoadingButton
@@ -260,33 +268,27 @@ export const AttributedMiniDialog: React.FC<
 
     return (
         <Dialog
-            open={open}
-            fullWidth
-            PaperProps={{
-                ...PaperProps,
-                sx: {
-                    maxWidth: "360px",
-                    ...PaperProps?.sx,
-                },
-            }}
+            {...{ open }}
             onClose={handleClose}
-            {...rest}
+            fullWidth
+            slotProps={{ paper: { sx: { maxWidth: "360px" } } }}
         >
             {(attributes.icon ?? attributes.title) ? (
                 <Stack
                     direction="row"
-                    sx={(theme) => ({
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        "& > svg": {
-                            fontSize: "32px",
-                            color: theme.colors.stroke.faint,
+                    sx={[
+                        {
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                            "& > svg": {
+                                fontSize: "32px",
+                                color: "stroke.faint",
+                            },
                         },
-                        padding:
-                            attributes.icon && attributes.title
-                                ? "20px 16px 0px 16px"
-                                : "24px 16px 4px 16px",
-                    })}
+                        attributes.icon && attributes.title
+                            ? { padding: "20px 16px 0px 16px" }
+                            : { padding: "24px 16px 4px 16px" },
+                    ]}
                 >
                     {attributes.title && (
                         <DialogTitle
@@ -311,16 +313,14 @@ export const AttributedMiniDialog: React.FC<
                         component={
                             typeof attributes.message == "string" ? "p" : "div"
                         }
-                        sx={{
-                            color: "text.muted",
-                        }}
+                        sx={{ color: "text.muted" }}
                     >
                         {attributes.message}
                     </Typography>
                 )}
                 {children}
                 <Stack
-                    sx={{ paddingBlockStart: "24px", gap: "8px" }}
+                    sx={{ pt: 3, gap: 1 }}
                     direction={attributes.buttonDirection ?? "column"}
                 >
                     {phase == "failed" && <InlineErrorIndicator />}
@@ -342,12 +342,17 @@ export const AttributedMiniDialog: React.FC<
     );
 };
 
-type TitledMiniDialogProps = Omit<DialogProps, "onClose"> & {
-    onClose: () => void;
+type TitledMiniDialogProps = Pick<DialogProps, "open" | "onClose" | "sx"> & {
     /**
      * The dialog's title.
      */
     title?: React.ReactNode;
+    /**
+     * Optional max width of the underlying MUI {@link Paper}.
+     *
+     * Default: 360px (same as {@link AttributedMiniDialog}).
+     */
+    paperMaxWidth?: string;
 };
 
 /**
@@ -365,27 +370,16 @@ type TitledMiniDialogProps = Omit<DialogProps, "onClose"> & {
  */
 export const TitledMiniDialog: React.FC<
     React.PropsWithChildren<TitledMiniDialogProps>
-> = ({ open, onClose, title, children, ...props }) => {
-    const { PaperProps, ...rest } = props;
-
-    return (
-        <Dialog
-            open={open}
-            onClose={onClose}
-            fullWidth
-            PaperProps={{
-                ...PaperProps,
-                sx: {
-                    maxWidth: "360px",
-                    ...PaperProps?.sx,
-                },
-            }}
-            {...rest}
-        >
-            <DialogTitle sx={{ "&&&": { paddingBlock: "24px 16px" } }}>
-                {title}
-            </DialogTitle>
-            <DialogContent>{children}</DialogContent>
-        </Dialog>
-    );
-};
+> = ({ open, onClose, sx, paperMaxWidth, title, children }) => (
+    <Dialog
+        {...{ open, sx }}
+        onClose={onClose}
+        fullWidth
+        slotProps={{ paper: { sx: { maxWidth: paperMaxWidth ?? "360px" } } }}
+    >
+        <DialogTitle sx={{ "&&&": { paddingBlock: "24px 16px" } }}>
+            {title}
+        </DialogTitle>
+        <DialogContent>{children}</DialogContent>
+    </Dialog>
+);

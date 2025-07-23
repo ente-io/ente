@@ -1,3 +1,5 @@
+# Sample docker compose file, not meant for production use.
+
 services:
   museum:
     build:
@@ -6,88 +8,103 @@ services:
         GIT_COMMIT: development-cluster
     ports:
       - 8080:8080 # API
-      - 2112:2112 # Prometheus metrics
+      # - 2112:2112 # Prometheus metrics (uncomment to access externally)
     depends_on:
       postgres:
         condition: service_healthy
     environment:
-      # Pass-in the config to connect to the DB and MinIO
       ENTE_CREDENTIALS_FILE: /credentials.yaml
+    configs:
+      - source: credentials_yaml
+        target: /credentials.yaml
     volumes:
-      - custom-logs:/var/logs
       - ./museum.yaml:/museum.yaml:ro
-      - ./scripts/compose/credentials.yaml:/credentials.yaml:ro
       - ./data:/data:ro
-    networks:
-      - internal
 
   # Resolve "localhost:3200" in the museum container to the minio container.
   socat:
     image: alpine/socat
     network_mode: service:museum
-    depends_on:
-      - museum
+    depends_on: [museum]
     command: "TCP-LISTEN:3200,fork,reuseaddr TCP:minio:3200"
 
   postgres:
     image: postgres:15
-    ports:
-      - 5432:5432
     environment:
       POSTGRES_USER: pguser
       POSTGRES_PASSWORD: pgpass
       POSTGRES_DB: ente_db
     # Wait for postgres to accept connections before starting museum.
     healthcheck:
-      test:
-        [
-          "CMD",
-          "pg_isready",
-          "-q",
-          "-d",
-          "ente_db",
-          "-U",
-          "pguser"
-        ]
+      test: pg_isready -q -d ente_db -U pguser
       start_period: 40s
       start_interval: 1s
     volumes:
       - postgres-data:/var/lib/postgresql/data
-    networks:
-      - internal
 
   minio:
     image: minio/minio
-    # Use different ports than the minio defaults to avoid conflicting
-    # with the ports used by Prometheus.
     ports:
-      - 3200:3200 # API
-      - 3201:3201 # Console
+      - 3200:3200 # MinIO API
+      # - 3201:3201 # MinIO Console (uncomment to access externally)
     environment:
-      MINIO_ROOT_USER: test
-      MINIO_ROOT_PASSWORD: testtest
+      MINIO_ROOT_USER: changeme
+      MINIO_ROOT_PASSWORD: changeme1234
     command: server /data --address ":3200" --console-address ":3201"
     volumes:
       - minio-data:/data
-    networks:
-      - internal
+    post_start:
+      - command: |
+          sh -c '
+          #!/bin/sh
 
-  minio-provision:
-    image: minio/mc
-    depends_on:
-      - minio
-    volumes:
-      - ./scripts/compose/minio-provision.sh:/provision.sh:ro
-      - minio-data:/data
-    networks:
-      - internal
-    entrypoint: sh /provision.sh
+          while ! mc config host add h0 http://minio:3200 changeme changeme1234 2>/dev/null
+          do
+            echo "Waiting for minio..."
+            sleep 0.5
+          done
+
+          cd /data
+
+          mc mb -p b2-eu-cen
+          mc mb -p wasabi-eu-central-2-v3
+          mc mb -p scw-eu-fr-v3
+          '
+
+configs:
+  credentials_yaml:
+    # You'll need to recreate the containers (docker compose down && docker
+    # compose up) when changing this inline config for the changes to apply.
+    content: |
+      db:
+          host: postgres
+          port: 5432
+          name: ente_db
+          user: pguser
+          password: pgpass
+
+      s3:
+          are_local_buckets: true
+          b2-eu-cen:
+              key: changeme
+              secret: changeme1234
+              endpoint: localhost:3200
+              region: eu-central-2
+              bucket: b2-eu-cen
+          wasabi-eu-central-2-v3:
+              key: changeme
+              secret: changeme1234
+              endpoint: localhost:3200
+              region: eu-central-2
+              bucket: wasabi-eu-central-2-v3
+              compliance: false
+          scw-eu-fr-v3:
+              key: changeme
+              secret: changeme1234
+              endpoint: localhost:3200
+              region: eu-central-2
+              bucket: scw-eu-fr-v3
 
 volumes:
-  custom-logs:
   postgres-data:
   minio-data:
-
-
-networks:
-  internal:

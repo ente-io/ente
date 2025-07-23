@@ -1,4 +1,4 @@
-## @/utils
+## ente-utils
 
 Utility functions, types and assortments.
 

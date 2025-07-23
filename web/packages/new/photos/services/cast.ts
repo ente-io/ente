@@ -1,9 +1,9 @@
-import { boxSeal } from "@/base/crypto";
-import { authenticatedRequestHeaders, ensureOk } from "@/base/http";
-import { newID } from "@/base/id";
-import { apiURL } from "@/base/origins";
-import type { Collection } from "@/media/collection";
-import { z } from "zod";
+import { boxSeal } from "ente-base/crypto";
+import { authenticatedRequestHeaders, ensureOk } from "ente-base/http";
+import { newID } from "ente-base/id";
+import { apiURL } from "ente-base/origins";
+import type { Collection } from "ente-media/collection";
+import { z } from "zod/v4";
 
 /**
  * Revoke all existing outstanding cast tokens for the current user on remote.

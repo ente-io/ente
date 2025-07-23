@@ -34,10 +34,7 @@ const watchStoreSchema: Schema<WatchStore> = {
                         },
                     },
                 },
-                ignoredFiles: {
-                    type: "array",
-                    items: { type: "string" },
-                },
+                ignoredFiles: { type: "array", items: { type: "string" } },
             },
         },
     },

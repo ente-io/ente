@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+
 	"github.com/ente-io/museum/pkg/controller/usercache"
 	"github.com/ente-io/museum/pkg/utils/time"
 
@@ -26,6 +27,7 @@ type Controller struct {
 	UserRepo      *repo.UserRepository
 	FamilyRepo    *repo.FamilyRepository
 	UserCacheCtrl *usercache.Controller
+	UsageRepo     *repo.UsageRepository
 }
 
 // FetchMembers return list of members who are part of a family plan

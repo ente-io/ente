@@ -11,8 +11,8 @@ baseline for how our code be in all the workspaces in this (yarn) monorepo.
 
 - [typescript](https://www.typescriptlang.org/) - Type checker
 
-They also need some support packages, which come from the leaf `@/build-config`
-package:
+They also need some support packages, which come from the leaf
+`ente-build-config` package:
 
 - [@eslint/js](https://eslint.org/) provides JavaScript ESLint functionality,
   and provides the configuration recommended the by ESLint team.
@@ -45,6 +45,20 @@ The root `package.json` also has a convenience dev dependency:
 
 - [concurrently](https://github.com/open-cli-tools/concurrently) for spawning
   parallel tasks when we invoke various yarn scripts.
+
+> [!NOTE]
+>
+> We need to repeat some of the dependencies in multiple `package.json`s to
+> avoid spurious missing peer dependency warnings.
+>
+> For example, ideally we'd just have specified the react dependencies in
+> _ente-base_, but that leads to missing peer dependency warnings in our other
+> packages, so we need to need to repeat them. For now, we manually ensure that
+> all of them use the same version.
+>
+> Additionally, we pin the versions of the react types using the resolutions
+> field in the top level `package.json`, to avoid type errors because of
+> multiple versions of react types being in scope.
 
 ## Cryptography
 
@@ -87,17 +101,13 @@ is our core framework. We also import its a sibling
 [react-dom](https://github.com/facebook/react) package that renders JSX to the
 DOM.
 
-> [!NOTE]
->
-> We need to repeat the dependency on react and its siblings in multiple
-> package.jsons to avoid the unmet peer dependency warnings printed by yarn.
-> Ideally, the react dependencies can be specified just in the _@/base_ package.
-
 ### MUI and Material Icons
 
 We use [MUI](https://mui.com)'s
 [@mui/material](https://mui.com/material-ui/getting-started/installation/) as
-our base React component library.
+our base React component library (In our code and documentation, we use the name
+"MUI" to refer to the the combination of both MUI's "Material UI" and "System"
+packages that we use).
 
 MUI uses [Emotion](https://emotion.sh/) as its preferred CSS-in-JS library, for
 which we need to install install two Emotion packages (`@emotion/react` and
@@ -112,9 +122,9 @@ which provides Material icons exported as React components (a `SvgIcon`).
 > For a similar reason as with react,
 >
 > - the `@mui/material` dependency is also repeated at more places - the one in
->   _@/base_ is the canonical one.
-> - we need to add an explicit dependency to `mui/system` in _@/new_ even though
->   we don't directly depend on it.
+>   _ente-base_ is the canonical one.
+> - we need to add an explicit dependency to `mui/system` in _ente-new_ even
+>   though we don't directly depend on it.
 
 ### Date pickers
 
@@ -131,14 +141,19 @@ For showing the app's UI in multiple languages, we use the
 [i18next](https://www.i18next.com), specifically its three components
 
 - [i18next](https://github.com/i18next/i18next): The core `i18next` library.
+
 - [react-i18next](https://github.com/i18next/react-i18next): React specific
   support in `i18next`.
+
 - [i18next-http-backend](https://github.com/i18next/i18next-http-backend): Adds
   support for initializing `i18next` with JSON file containing the translation
   in a particular language, fetched at runtime.
 
 Note that inspite of the "next" in the name of the library, it has nothing to do
 with Next.js.
+
+[get-user-locale](https://github.com/wojtekmaj/get-user-locale) is used for
+enumerating the user's locale's to find the best match.
 
 For more details, see [translations.md](translations.md).
 
@@ -171,7 +186,9 @@ via [@fontsource-variable/inter](https://fontsource.org/fonts/inter/install).
   layer on top of web workers to make them more easier to use.
 
 - [idb](https://github.com/jakearchibald/idb) provides a promise API over the
-  browser-native IndexedDB APIs.
+  browser-native IndexedDB APIs. Older code (the file and collection store),
+  uses [localForage](https://github.com/localForage/localForage) for IndexedDB
+  access.
 
     > For more details about IDB and its role, see [storage.md](storage.md).
 
@@ -187,20 +204,26 @@ via [@fontsource-variable/inter](https://fontsource.org/fonts/inter/install).
 
 - [debounce](https://github.com/sindresorhus/debounce) and its
   promise-supporting sibling
-  [pDebounce](https://github.com/sindresorhus/p-debounce) are used for
+  [p-debounce](https://github.com/sindresorhus/p-debounce) are used for
   debouncing operations (See also: `[Note: Throttle and debounce]`).
+
+- [bip39](https://github.com/bitcoinjs/bip39) is used for generating the 24-word
+  recovery key mnemonic.
 
 - [zxcvbn](https://github.com/dropbox/zxcvbn) is used for password strength
   estimation.
 
+- [fast-srp-hap](https://github.com/homebridge/fast-srp) is used for the maths
+  underlying the SRP protocol.
+
 ## Media
 
-- [ffmpeg.wasm](https://github.com/ffmpegwasm/ffmpeg.wasm) is used to run FFmpeg
-  in the browser using WASM. Note that this is substantially slower than native
-  ffmpeg (the desktop app can, and does, bundle the faster native ffmpeg
-  implementation too).
+- [@ffmpeg/ffmpeg](https://github.com/ffmpegwasm/ffmpeg.wasm) is used to run
+  FFmpeg in the browser using WebAssembly (Wasm). Note that this is
+  substantially slower than native ffmpeg (the desktop app can, and does, bundle
+  the faster native ffmpeg implementation too).
 
-- [ExifReader](https://github.com/mattiasw/ExifReader) is used for Exif parsing.
+- [exifreader](https://github.com/mattiasw/ExifReader) is used for Exif parsing.
 
 - [jszip](https://github.com/Stuk/jszip) is used for reading zip files in the
   web code (Live photos are zip files under the hood). Note that the desktop app
@@ -212,15 +235,31 @@ via [@fontsource-variable/inter](https://fontsource.org/fonts/inter/install).
   that it'd entail is not worth the upgrade.
 
 - [heic-convert](https://github.com/catdad-experiments/heic-convert) is used for
-  converting HEIC files (which browsers don't natively support) into JPEG.
+  converting HEIC files (which browsers don't natively support) into JPEG. For
+  (much more) details, see [heic.md](heic.md).
 
 ## Photos app specific
 
+- [photoswipe](https://photoswipe.com) provides the base image viewer on top of
+  which we've built our file viewer.
+
+- For streaming video (HLS), we use three libraries:
+    1. [media-chrome](https://github.com/muxinc/media-chrome) provides custom
+       video controls which we use when playing HLS playlists (we use custom
+       controls to provide a standardized UX across browsers, but really the
+       main reason is that Safari's default video controls are on the verge of
+       unusable, especially for streaming playback),
+
+    2. [hls-video-element](https://github.com/muxinc/media-elements/tree/main/packages/hls-video-element)
+       provides a custom web component element that glues media-chrome and
+       hls.js together, and
+
+    3. [hls.js](https://github.com/video-dev/hls.js/) (indirect dependency via
+       hls-video-element) is needed on HLS playback on Chrome and Firefox (which
+       do not have native support for HLS playlists).
+
 - [react-dropzone](https://github.com/react-dropzone/react-dropzone/) is a React
-  hook to create a drag-and-drop input zone. Note that we pin to the last
-  version in the 14.2 series, since if we use 14.3 onwards (I tested till
-  14.3.5) then we are unable to get back a path from the file by using the
-  `webUtils.getPathForFile` function provided by Electron.
+  hook to create a drag-and-drop input zone.
 
 - [sanitize-filename](https://github.com/parshap/node-sanitize-filename) is for
   converting arbitrary strings into strings that are suitable for being used as
@@ -229,8 +268,8 @@ via [@fontsource-variable/inter](https://fontsource.org/fonts/inter/install).
 - [chrono-node](https://github.com/wanasit/chrono) is used for parsing natural
   language queries into dates for showing search results.
 
-- [matrix](https://github.com/mljs/matrix) is mathematical matrix abstraction by
-  the machine learning code. It is used alongwith
+- [ml-matrix](https://github.com/mljs/matrix) is mathematical matrix abstraction
+  by the machine learning code. It is used alongwith
   [similarity-transformation](https://github.com/shaileshpandit/similarity-transformation-js)
   during face alignment.
 
@@ -247,3 +286,20 @@ via [@fontsource-variable/inter](https://fontsource.org/fonts/inter/install).
 - However, otpauth doesn't support steam OTPs. For these, we need to compute the
   SHA-1, and we use the same library, `jssha` that `otpauth` uses since it is
   already part of our bundle (transitively).
+
+## Pinned
+
+- `otpauth` is pinned to 9.2.4 since subsequent versions changed the underlying
+  hash library, which requires a change in the steam OTP generation code.
+
+- `react-dropzone` is pinned to the 14.2.10, the last version in the 14.2
+  series, since if we use 14.3 onwards (I tested till 14.3.5) then we are unable
+  to get back a path from the file by using the `webUtils.getPathForFile`
+  function provided by Electron. See:
+  https://github.com/react-dropzone/react-dropzone/issues/1411
+
+- `@stripe/stripe-js` is pinned to the latest 1.x (it works as it is currently,
+  migrating to newer major versions requires headspace since it _might_ also
+  require museum changes).
+
+- `file-type` is pinned to 16.5.4 since subsequent versions are ESM only.

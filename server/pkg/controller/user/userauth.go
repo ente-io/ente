@@ -83,23 +83,8 @@ func hardcodedOTTForEmail(hardCodedOTT HardCodedOTT, email string) string {
 
 // SendEmailOTT generates and sends an OTT to the provided email address
 func (c *UserController) SendEmailOTT(context *gin.Context, email string, purpose string) error {
-	if purpose == ente.ChangeEmailOTTPurpose {
-		if err := c.isEmailAlreadyUsed(email); err != nil {
-			return err
-		}
-	}
-	if purpose == ente.SignUpOTTPurpose || purpose == ente.LoginOTTPurpose {
-		isComplete, err := c.isSignUpComplete(email)
-		if err != nil {
-			return stacktrace.Propagate(err, "")
-		}
-		if isComplete && purpose == ente.SignUpOTTPurpose {
-			return stacktrace.Propagate(ente.ErrUserAlreadyRegistered, "user has already completed sign up process")
-		}
-
-		if !isComplete && purpose == ente.LoginOTTPurpose {
-			return stacktrace.Propagate(ente.ErrUserNotRegistered, "user has not completed sign up process")
-		}
+	if err := c.validateSendOTT(context, email, purpose); err != nil {
+		return err
 	}
 	ott, err := random.GenerateSixDigitOtp()
 	if err != nil {
@@ -155,6 +140,42 @@ func (c *UserController) isEmailAlreadyUsed(email string) error {
 		return stacktrace.Propagate(err, "")
 	}
 	return nil
+}
+
+func (c *UserController) validateSendOTT(ctx *gin.Context, email string, purpose string) error {
+	if purpose == ente.ChangeEmailOTTPurpose {
+		if err := c.isEmailAlreadyUsed(email); err != nil {
+			return err
+		}
+	}
+	isSignUpComplete, err := c.isSignUpComplete(email)
+	if err != nil {
+		return stacktrace.Propagate(err, "")
+	}
+	if purpose == ente.SignUpOTTPurpose && viper.GetBool("internal.disable-registration") && !isSignUpComplete {
+		return stacktrace.Propagate(ente.ErrPermissionDenied, "registration is disabled")
+	}
+	//
+	var registrationErr error
+	if purpose == ente.SignUpOTTPurpose && isSignUpComplete {
+		registrationErr = stacktrace.Propagate(ente.ErrUserAlreadyRegistered, "user has already completed sign up process")
+	}
+	if purpose == ente.LoginOTTPurpose && !isSignUpComplete {
+		registrationErr = stacktrace.Propagate(ente.ErrUserNotRegistered, "user has not completed sign up process")
+	}
+	// if no registration error, return
+	if registrationErr == nil {
+		return registrationErr
+	}
+	// check & swallow registration information error if too many such
+	// errors are generated in a short time
+	if limiter, limitErr := c.OTTLimiter.Get(ctx, "send-ott"); limitErr != nil {
+		if limiter.Reached {
+			go c.DiscordController.NotifyPotentialAbuse("swallowing send-ott registration error")
+			return nil
+		}
+	}
+	return registrationErr
 }
 
 // isSignUpComplete checks if the user has completed the entire signup process.
@@ -346,7 +367,7 @@ func (c *UserController) AddTokenAndNotify(userID int64, app ente.App, token str
 			return
 		}
 		emailSendErr := emailUtil.SendTemplatedEmail([]string{user.Email}, "Ente", "team@ente.io", emailCtrl.LoginSuccessSubject, emailCtrl.LoginSuccessTemplate, map[string]interface{}{
-      "Date":    t.Now().UTC().Format("02 Jan, 2006 15:04"),
+			"Date": t.Now().UTC().Format("02 Jan, 2006 15:04"),
 		}, nil)
 		if emailSendErr != nil {
 			log.WithError(emailSendErr).Error("Failed to send email")
@@ -479,7 +500,7 @@ func (c *UserController) onVerificationSuccess(context *gin.Context, email strin
 func convertStringToBytes(s string) []byte {
 	b, err := base64.StdEncoding.DecodeString(s)
 	if err != nil {
-		log.Fatal(err)
+		panic(fmt.Sprintf("failed to base64dDecode string %s", s))
 	}
 	return b
 }

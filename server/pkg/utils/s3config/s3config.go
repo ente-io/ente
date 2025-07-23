@@ -136,12 +136,11 @@ func (config *S3Config) initialize() {
 			Endpoint: aws.String(viper.GetString("s3." + dc + ".endpoint")),
 			Region:   aws.String(viper.GetString("s3." + dc + ".region")),
 		}
-		if usePathStyleURLs {
+		if usePathStyleURLs || viper.GetBool("s3." + dc + ".use_path_style_urls") || areLocalBuckets {
 			s3Config.S3ForcePathStyle = aws.Bool(true)
 		}
-		if areLocalBuckets {
+		if areLocalBuckets || viper.GetBool("s3." + dc + ".disable_ssl") {
 			s3Config.DisableSSL = aws.Bool(true)
-			s3Config.S3ForcePathStyle = aws.Bool(true)
 		}
 		s3Session, err := session.NewSession(&s3Config)
 		if err != nil {

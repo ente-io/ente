@@ -1,4 +1,4 @@
-## @/gallery
+## ente-gallery
 
 A package for sharing code between our apps that show media (photos, videos) in
 a gallery like view.

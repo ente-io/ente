@@ -1,16 +1,16 @@
-import { sessionExpiredDialogAttributes } from "@/accounts/components/utils/dialog";
+import { CircularProgress, Stack, Typography, styled } from "@mui/material";
+import { sessionExpiredDialogAttributes } from "ente-accounts/components/utils/dialog";
 import {
     checkPasskeyVerificationStatus,
     passkeySessionExpiredErrorMessage,
     saveCredentialsAndNavigateTo,
-} from "@/accounts/services/passkey";
-import type { MiniDialogAttributes } from "@/base/components/MiniDialog";
-import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
-import { genericErrorDialogAttributes } from "@/base/components/utils/dialog";
-import log from "@/base/log";
-import { customAPIHost } from "@/base/origins";
-import LinkButton from "@ente/shared/components/LinkButton";
-import { CircularProgress, Stack, Typography, styled } from "@mui/material";
+} from "ente-accounts/services/passkey";
+import { LinkButton } from "ente-base/components/LinkButton";
+import type { MiniDialogAttributes } from "ente-base/components/MiniDialog";
+import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
+import { genericErrorDialogAttributes } from "ente-base/components/utils/dialog";
+import log from "ente-base/log";
+import { customAPIHost } from "ente-base/origins";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
@@ -19,22 +19,40 @@ import {
     AccountsPageFooter,
 } from "./layouts/centered-paper";
 
-export const PasswordHeader: React.FC<React.PropsWithChildren> = ({
-    children,
-}) => {
-    return (
-        <Header_>
-            <Typography variant="h3">{t("password")}</Typography>
-            <Typography sx={{ color: "text.faint" }}>{children}</Typography>
-        </Header_>
-    );
-};
+interface HeaderCaptionProps {
+    /**
+     * If specified, then a caption to display below the title (which is
+     * expected to be passed as the `children`).
+     *
+     * The components which use the {@link HeaderCaptionProps} that they'll have
+     * the same height irrespective of whether or not the caption is provided.
+     * This allows us to use this component to get a similar look across various
+     * pages in the login flow (some of which have a caption, some which not).
+     */
+    caption?: string;
+}
 
-const PasskeyHeader: React.FC<React.PropsWithChildren> = ({ children }) => {
+export const PasswordHeader: React.FC<HeaderCaptionProps> = (props) => (
+    <AccountsPageTitleWithCaption {...props}>
+        {t("password")}
+    </AccountsPageTitleWithCaption>
+);
+
+const PasskeyHeader: React.FC<HeaderCaptionProps> = (props) => (
+    <AccountsPageTitleWithCaption {...props}>
+        {t("passkey")}
+    </AccountsPageTitleWithCaption>
+);
+
+export const AccountsPageTitleWithCaption: React.FC<
+    React.PropsWithChildren<HeaderCaptionProps>
+> = ({ caption, children }) => {
     return (
         <Header_>
-            <Typography variant="h3">{t("passkey")}</Typography>
-            <Typography sx={{ color: "text.faint" }}>{children}</Typography>
+            <Typography variant="h3">{children}</Typography>
+            <Typography sx={{ color: "text.faint" }}>
+                {caption ?? ""}
+            </Typography>
         </Header_>
     );
 };
@@ -54,7 +72,7 @@ export const AccountsPageFooterWithHost: React.FC<React.PropsWithChildren> = ({
     useEffect(() => void customAPIHost().then(setHost), []);
 
     return (
-        <Stack sx={{ gap: 2 }}>
+        <Stack sx={{ gap: 3 }}>
             <AccountsPageFooter>{children}</AccountsPageFooter>
             {host && (
                 <Typography
@@ -123,7 +141,7 @@ export const VerifyingPasskey: React.FC<VerifyingPasskeyProps> = ({
 
     return (
         <AccountsPageContents>
-            <PasskeyHeader>{email ?? ""}</PasskeyHeader>
+            <PasskeyHeader caption={email} />
 
             <VerifyingPasskeyMiddle>
                 <VerifyingPasskeyStatus>

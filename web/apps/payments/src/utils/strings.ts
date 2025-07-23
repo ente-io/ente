@@ -5,8 +5,6 @@
  * localize the corresponding pages. Right now, these are just the values in the
  * default language, English.
  */
-const S = {
-    error_generic: "Oops, something went wrong.",
-};
+const S = { error_generic: "Oops, something went wrong." };
 
 export default S;

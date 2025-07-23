@@ -1,1 +1,1 @@
-export { default } from "@/build-config/eslintrc-react.mjs";
+export { default } from "ente-build-config/eslintrc-react.mjs";

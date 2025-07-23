@@ -3,11 +3,10 @@
     "version": "0.0.0",
     "private": true,
     "dependencies": {
-        "@/accounts": "*",
-        "@/base": "*",
-        "@ente/shared": "*"
+        "ente-accounts": "*",
+        "ente-base": "*"
     },
     "devDependencies": {
-        "@/build-config": "*"
+        "ente-build-config": "*"
     }
 }

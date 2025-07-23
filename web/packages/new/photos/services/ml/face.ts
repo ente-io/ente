@@ -1,6 +1,6 @@
-import { assertionFailed } from "@/base/assert";
-import type { ElectronMLWorker } from "@/base/types/ipc";
-import type { EnteFile } from "@/media/file";
+import { assertionFailed } from "ente-base/assert";
+import type { ElectronMLWorker } from "ente-base/types/ipc";
+import type { EnteFile } from "ente-media/file";
 import { Matrix } from "ml-matrix";
 import { getSimilarityTransformation } from "similarity-transformation";
 import type { ImageBitmapAndData } from "./blob";
@@ -204,7 +204,7 @@ export interface Dimensions {
 export interface Box {
     /** The x coordinate of the the top left (xMin). */
     x: number;
-    /** The y coodinate of the top left (yMin). */
+    /** The y coordinate of the top left (yMin). */
     y: number;
     /** The width of the box. */
     width: number;
@@ -328,7 +328,7 @@ const detectFaces = async (
 ): Promise<YOLOFaceDetection[]> => {
     // The image pre-preprocessing happens within the model itself, using ONNX
     // primitives. This is more performant and also saves us from having to
-    // reinvent (say) the antialising wheels.
+    // reinvent (say) the antialiasing wheels.
     const {
         height: imageHeight,
         width: imageWidth,
@@ -492,7 +492,7 @@ interface FaceAlignment {
      * The bounding box of the transformed box.
      *
      * The affine transformation shifts the original detection box a new,
-     * transformed, box (possibily rotated). This property is the bounding box
+     * transformed, box (possibly rotated). This property is the bounding box
      * of that transformed box. It is in the coordinate system of the original,
      * full, image on which the detection occurred.
      */

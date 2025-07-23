@@ -1,26 +1,17 @@
 name: Report a bug
-description: Let us know if something's not working the way you expected.
-labels: ["triage"]
+description: Things that were working earlier but don't anymore
+labels: []
 body:
     - type: markdown
       attributes:
           value: |
-              Before opening a new bug report, please ensure
-              1. you are on the latest version (it might've already been fixed),
-              2. you've searched for existing issues (please add your observations as a comment there instead of creating a duplicate).
-
-              If you are self hosting, please create a community [Q&A](https://github.com/ente-io/ente/discussions/categories/q-a) instead.
+              **Checklist**
+              1. You've searched existing [issues](https://github.com/search?q=repo%3Aente-io%2Fente+&type=issues) and [discussions](https://github.com/search?q=repo%3Aente-io%2Fente+&type=discussions)
+              2. It was working earlier (otherwise use [enhancements](https://github.com/ente-io/ente/discussions/categories/enhancements))
+              3. It is not about self hosting (for those use [this](https://github.com/ente-io/ente/discussions/categories/q-a))
     - type: textarea
       attributes:
           label: Description
-          description: >
-              Please describe the bug. If possible, also include the steps to
-              reproduce the behaviour, and the expected behaviour (sometimes
-              bugs are just expectation mismatches, in which case this would be
-              a good fit for [feature
-              requests](https://github.com/ente-io/ente/discussions/categories/feature-requests)).
-      validations:
-          required: true
     - type: input
       attributes:
           label: Version

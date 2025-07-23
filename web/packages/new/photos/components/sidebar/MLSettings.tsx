@@ -1,13 +1,3 @@
-import { MenuItemGroup } from "@/base/components/Menu";
-import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
-import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
-import {
-    NestedSidebarDrawer,
-    SidebarDrawerTitlebar,
-    type NestedSidebarDrawerVisibilityProps,
-} from "@/base/components/mui/SidebarDrawer";
-import { disableML, enableML, type MLStatus } from "@/new/photos/services/ml";
-import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import {
     Box,
     Button,
@@ -16,14 +6,25 @@ import {
     FormControlLabel,
     FormGroup,
     Link,
-    Paper,
     Stack,
     Typography,
 } from "@mui/material";
+import { RowButtonGroup, RowSwitch } from "ente-base/components/RowButton";
+import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
+import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
+import {
+    TitledNestedSidebarDrawer,
+    type NestedSidebarDrawerVisibilityProps,
+} from "ente-base/components/mui/SidebarDrawer";
+import { useBaseContext } from "ente-base/context";
+import {
+    disableML,
+    enableML,
+    type MLStatus,
+} from "ente-new/photos/services/ml";
 import { t } from "i18next";
 import React, { useEffect, useState } from "react";
 import { Trans } from "react-i18next";
-import { useAppContext } from "../../types/context";
 import { openURL } from "../../utils/web";
 import { useMLStatusSnapshot } from "../utils/use-snapshot";
 import { useWrapAsyncOperation } from "../utils/use-wrap-async";
@@ -64,19 +65,13 @@ export const MLSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
 
     return (
         <>
-            <NestedSidebarDrawer
+            <TitledNestedSidebarDrawer
                 {...{ open, onClose }}
                 onRootClose={handleRootClose}
+                title={t("ml_search")}
             >
-                <Stack sx={{ gap: "4px", py: "12px" }}>
-                    <SidebarDrawerTitlebar
-                        onClose={onClose}
-                        onRootClose={handleRootClose}
-                        title={t("ml_search")}
-                    />
-                    {component}
-                </Stack>
-            </NestedSidebarDrawer>
+                {component}
+            </TitledNestedSidebarDrawer>
 
             <FaceConsentDrawer
                 open={openFaceConsent}
@@ -113,7 +108,7 @@ export const EnableML: React.FC<EnableMLProps> = ({
         openURL("https://help.ente.io/photos/features/machine-learning");
 
     return (
-        <Stack sx={{ gap: "32px", py: "20px", px: "16px" }}>
+        <Stack sx={{ gap: "32px", py: "20px", px: 2 }}>
             <Typography sx={{ color: "text.muted" }}>
                 {t("ml_search_description")}
             </Typography>
@@ -149,19 +144,13 @@ const FaceConsentDrawer: React.FC<FaceConsentDrawerProps> = ({
     };
 
     return (
-        <NestedSidebarDrawer
+        <TitledNestedSidebarDrawer
             {...{ open, onClose }}
             onRootClose={handleRootClose}
+            title={t("ml_consent_title")}
         >
-            <Stack sx={{ gap: "4px", py: "12px" }}>
-                <SidebarDrawerTitlebar
-                    onClose={onClose}
-                    onRootClose={handleRootClose}
-                    title={t("ml_consent_title")}
-                />
-                <FaceConsent onConsent={onConsent} onCancel={onClose} />
-            </Stack>
-        </NestedSidebarDrawer>
+            <FaceConsent onConsent={onConsent} onCancel={onClose} />
+        </TitledNestedSidebarDrawer>
     );
 };
 
@@ -241,9 +230,9 @@ interface ManageMLProps {
 }
 
 const ManageML: React.FC<ManageMLProps> = ({ mlStatus, onDisableML }) => {
-    const { showMiniDialog } = useAppContext();
+    const { showMiniDialog } = useBaseContext();
 
-    const { phase, nSyncedFiles, nTotalFiles } = mlStatus;
+    const { phase, phaseFailed, nSyncedFiles, nTotalFiles } = mlStatus;
 
     let status: string;
     switch (phase) {
@@ -260,12 +249,12 @@ const ManageML: React.FC<ManageMLProps> = ({ mlStatus, onDisableML }) => {
             status = t("people");
             break;
         default:
-            status = t("indexing_status_done");
+            status = phaseFailed ? t("error") : t("indexing_status_done");
             break;
     }
 
     // Show processed as percentages instead of potentially confusing counts.
-    const processed = `${Math.round((100 * nSyncedFiles) / nTotalFiles)}%`;
+    const processed = `${nTotalFiles ? Math.round((100 * nSyncedFiles) / nTotalFiles) : 100}%`;
 
     const confirmDisableML = () =>
         showMiniDialog({
@@ -281,52 +270,50 @@ const ManageML: React.FC<ManageMLProps> = ({ mlStatus, onDisableML }) => {
     return (
         <Stack sx={{ px: "16px", py: "20px", gap: 4 }}>
             <Stack sx={{ gap: 3 }}>
-                <MenuItemGroup>
-                    <EnteMenuItem
+                <RowButtonGroup>
+                    <RowSwitch
                         label={t("enabled")}
-                        variant="toggle"
                         checked={true}
                         onClick={confirmDisableML}
                     />
-                </MenuItemGroup>
+                </RowButtonGroup>
             </Stack>
-            <Paper variant="outlined">
-                <Stack>
-                    <Stack
-                        direction="row"
-                        sx={{
-                            gap: 2,
-                            px: 2,
-                            pt: 1,
-                            pb: 2,
-                            justifyContent: "space-between",
-                        }}
-                    >
-                        <Typography sx={{ color: "text.faint" }}>
-                            {t("indexing")}
-                        </Typography>
-                        <Typography>{status}</Typography>
-                    </Stack>
-                    <Divider sx={{ marginInlineStart: 2 }} />
-                    <Stack
-                        direction="row"
-                        sx={{
-                            gap: 2,
-                            px: 2,
-                            pt: 2,
-                            pb: 1,
-                            justifyContent: "space-between",
-                        }}
-                    >
-                        <Typography sx={{ color: "text.faint" }}>
-                            {t("processed")}
-                        </Typography>
-                        <Typography sx={{ textAlign: "right" }}>
-                            {processed}
-                        </Typography>
-                    </Stack>
+
+            <Stack>
+                <Stack
+                    direction="row"
+                    sx={{
+                        gap: 2,
+                        px: 2,
+                        pt: 1,
+                        pb: 2,
+                        justifyContent: "space-between",
+                    }}
+                >
+                    <Typography sx={{ color: "text.faint" }}>
+                        {t("indexing")}
+                    </Typography>
+                    <Typography>{status}</Typography>
                 </Stack>
-            </Paper>
+                <Divider sx={{ mx: 1.5 }} />
+                <Stack
+                    direction="row"
+                    sx={{
+                        gap: 2,
+                        px: 2,
+                        pt: 2,
+                        pb: 1,
+                        justifyContent: "space-between",
+                    }}
+                >
+                    <Typography sx={{ color: "text.faint" }}>
+                        {t("processed")}
+                    </Typography>
+                    <Typography sx={{ textAlign: "right" }}>
+                        {processed}
+                    </Typography>
+                </Stack>
+            </Stack>
         </Stack>
     );
 };

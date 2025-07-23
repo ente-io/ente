@@ -1,6 +1,7 @@
-import { CenteredFill } from "@/base/components/containers";
-import { AppNavbarNormalFlow } from "@/base/components/Navbar";
 import { Paper, Stack, styled, Typography } from "@mui/material";
+import { CenteredFill } from "ente-base/components/containers";
+import { EnteLogo } from "ente-base/components/EnteLogo";
+import { NavbarBase } from "ente-base/components/Navbar";
 
 /**
  * An ad-hoc component that abstracts the layout common to many of the pages
@@ -19,8 +20,25 @@ export const AccountsPageContents: React.FC<React.PropsWithChildren> = ({
     children,
 }) => (
     <Stack sx={{ minHeight: "100svh" }}>
-        <AppNavbarNormalFlow />
-        <CenteredFill>
+        <NavbarBase
+            sx={[
+                (theme) =>
+                    theme.applyStyles("light", {
+                        borderBottomColor: "stroke.base",
+                    }),
+            ]}
+        >
+            <EnteLogo />
+        </NavbarBase>
+        <CenteredFill
+            sx={[
+                { bgcolor: "accent.main" },
+                (theme) =>
+                    theme.applyStyles("dark", {
+                        bgcolor: "background.default",
+                    }),
+            ]}
+        >
             <AccountsPagePaper>{children}</AccountsPagePaper>
         </CenteredFill>
     </Stack>

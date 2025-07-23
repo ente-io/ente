@@ -38,7 +38,7 @@ func (pcr *PublicCollectionRepository) GetAlbumUrl(token string) string {
 func (pcr *PublicCollectionRepository) Insert(ctx context.Context,
 	cID int64, token string, validTill int64, deviceLimit int, enableCollect bool, enableJoin *bool) error {
 	// default value for enableJoin is true
-	join := false
+	join := true
 	if enableJoin != nil {
 		join = *enableJoin
 	}

@@ -60,7 +60,7 @@ ente account list
 #### Change export directory
 
 ```shell
-ente account update --email email@domain.com --dir ~/photos
+ente account update --app auth/photos --email email@domain.com --dir ~/photos
 ```
 
 ### Export

@@ -24,3 +24,22 @@ export const UnstyledButton = styled("button")`
     /* Default cursor on mouse over of a button is not a hand pointer */
     cursor: pointer;
 `;
+
+/**
+ * A variant of {@link UnstyledButton} that modifying the keyboard focus and
+ * activation states to match the styling of {@link FocusVisibleButton}.
+ */
+export const FocusVisibleUnstyledButton = styled(UnstyledButton)(
+    ({ theme }) => `
+    &:focus-visible {
+        outline: 1px solid ${theme.vars.palette.stroke.base};
+        outline-offset: 2px;
+        border-radius: 2px;
+    }
+    &:active {
+        outline: 1px solid ${theme.vars.palette.stroke.faint};
+        outline-offset: 1px;
+        border-radius: 2px;
+    }
+`,
+);

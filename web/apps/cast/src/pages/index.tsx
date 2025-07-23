@@ -1,7 +1,8 @@
-import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
-import log from "@/base/log";
 import { Box, Stack, styled, Typography } from "@mui/material";
 import { PairingCode } from "components/PairingCode";
+import { EnteLogo } from "ente-base/components/EnteLogo";
+import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
+import log from "ente-base/log";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 import { readCastData, storeCastData } from "services/cast-data";
@@ -63,7 +64,7 @@ const Page: React.FC = () => {
 
     return (
         <Container>
-            <img width={150} src="/images/ente.svg" />
+            <EnteLogo height={45} />
             <Typography variant="h2" sx={{ marginBlock: "2rem" }}>
                 Enter this code on <b>Ente Photos</b> to pair this screen
             </Typography>

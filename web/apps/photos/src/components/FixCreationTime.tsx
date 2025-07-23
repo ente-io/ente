@@ -1,17 +1,3 @@
-import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
-import type { ModalVisibilityProps } from "@/base/components/utils/modal";
-import log from "@/base/log";
-import { downloadManager } from "@/gallery/services/download";
-import { fileLogID, type EnteFile } from "@/media/file";
-import {
-    decryptPublicMagicMetadata,
-    fileCreationPhotoDate,
-    updateRemotePublicMagicMetadata,
-    type ParsedMetadataDate,
-} from "@/media/file-metadata";
-import { FileType } from "@/media/file-type";
-import { PhotoDateTimePicker } from "@/new/photos/components/PhotoDateTimePicker";
-import { extractExifDates } from "@/new/photos/services/exif";
 import {
     Dialog,
     DialogContent,
@@ -25,16 +11,34 @@ import {
     Stack,
     Typography,
 } from "@mui/material";
+import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
+import type { ModalVisibilityProps } from "ente-base/components/utils/modal";
+import log from "ente-base/log";
+import { downloadManager } from "ente-gallery/services/download";
+import { extractExifDates } from "ente-gallery/services/exif";
+import { fileLogID, type EnteFile } from "ente-media/file";
+import {
+    fileCreationPhotoDate,
+    fileFileName,
+    type ParsedMetadataDate,
+} from "ente-media/file-metadata";
+import { FileType } from "ente-media/file-type";
+import { FileDateTimePicker } from "ente-new/photos/components/FileDateTimePicker";
+import { updateFilePublicMagicMetadata } from "ente-new/photos/services/file";
 import { useFormik } from "formik";
 import { t } from "i18next";
-import { GalleryContext } from "pages/gallery";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 type FixCreationTimeProps = ModalVisibilityProps & {
     /**
-     * The {@link EnteFile}s whose creation time the user wishes to modify.
+     * The {@link EnteFile}s whose creation time should be modified.
      */
     files: EnteFile[];
+    /**
+     * Called after the creation times have been updated, to perform a full
+     * remote pull.
+     */
+    onRemotePull: () => Promise<void>;
 };
 
 /**
@@ -44,11 +48,10 @@ export const FixCreationTime: React.FC<FixCreationTimeProps> = ({
     open,
     onClose,
     files,
+    onRemotePull,
 }) => {
     const [step, setStep] = useState<Step | undefined>();
     const [progress, setProgress] = useState({ completed: 0, total: 0 });
-
-    const galleryContext = useContext(GalleryContext);
 
     useEffect(() => {
         // Reset the step whenever the dialog is reopened.
@@ -64,7 +67,7 @@ export const FixCreationTime: React.FC<FixCreationTimeProps> = ({
             setProgress,
         );
         setStep(completedWithErrors ? "completed-with-errors" : "completed");
-        await galleryContext.syncWithRemote();
+        await onRemotePull();
     };
 
     const title =
@@ -82,18 +85,18 @@ export const FixCreationTime: React.FC<FixCreationTimeProps> = ({
                 onClose();
             }}
         >
-            <DialogTitle sx={{ marginBlockStart: "4px" }}>{title}</DialogTitle>
+            <DialogTitle sx={{ mt: "4px" }}>{title}</DialogTitle>
             <DialogContent
-                style={{
+                sx={{
                     minWidth: "310px",
-                    paddingBlockStart: "6px",
+                    pt: "6px",
                     display: "flex",
                     flexDirection: "column",
-                    ...(step == "running" ? { alignItems: "center" } : {}),
+                    ...(step == "running" && { alignItems: "center" }),
                 }}
             >
                 {message && <Typography>{message}</Typography>}
-                {step === "running" && <Progress {...progress} />}
+                {step == "running" && <Progress {...progress} />}
                 <OptionsForm {...{ step: step, onSubmit, onClose }} />
             </DialogContent>
         </Dialog>
@@ -150,7 +153,7 @@ const Progress: React.FC<FixProgress> = ({ completed, total }) => (
 );
 
 interface OptionsFormProps {
-    step: Step;
+    step: Step | undefined;
     onSubmit: (values: FormValues) => Promise<void>;
     onClose: () => void;
 }
@@ -172,7 +175,7 @@ const OptionsForm: React.FC<OptionsFormProps> = ({
 
     return (
         <>
-            {(step === undefined || step === "completed-with-errors") && (
+            {(step === undefined || step == "completed-with-errors") && (
                 <form onSubmit={handleSubmit}>
                     <FormControl>
                         <FormLabel>{t("fix_creation_time_options")}</FormLabel>
@@ -181,7 +184,7 @@ const OptionsForm: React.FC<OptionsFormProps> = ({
                         name={"option"}
                         value={values.option}
                         onChange={handleChange}
-                        sx={{ paddingBlockStart: 1 }}
+                        sx={{ pt: 1 }}
                     >
                         <FormControlLabel
                             value={"date-time-original"}
@@ -205,7 +208,7 @@ const OptionsForm: React.FC<OptionsFormProps> = ({
                         />
                     </RadioGroup>
                     {values.option == "custom" && (
-                        <PhotoDateTimePicker
+                        <FileDateTimePicker
                             onAccept={(customDate) =>
                                 setValues({ option: "custom", customDate })
                             }
@@ -223,7 +226,7 @@ const OptionsForm: React.FC<OptionsFormProps> = ({
 };
 
 interface FooterProps {
-    step: Step;
+    step: Step | undefined;
     onSubmit: () => void;
     onClose: () => void;
 }
@@ -248,7 +251,7 @@ const Footer: React.FC<FooterProps> = ({ step, onSubmit, onClose }) =>
                 </FocusVisibleButton>
             )}
             {step == "completed" && (
-                <FocusVisibleButton color="primary" fullWidth onClick={onClose}>
+                <FocusVisibleButton fullWidth onClick={onClose}>
                     {t("close")}
                 </FocusVisibleButton>
             )}
@@ -278,7 +281,7 @@ const updateFiles = async (
     let hadErrors = false;
     for (const [i, file] of files.entries()) {
         try {
-            await updateEnteFileDate(file, fixOption, customDate);
+            await updateFileDate(file, fixOption, customDate);
         } catch (e) {
             log.error(`Failed to update date of ${fileLogID(file)}`, e);
             hadErrors = true;
@@ -290,7 +293,7 @@ const updateFiles = async (
 };
 
 /**
- * Update the date associated with a given {@link enteFile}.
+ * Update the date associated with a given {@link EnteFile}.
  *
  * This is generally treated as the creation date of the underlying asset
  * (photo, video, live photo) that this file stores.
@@ -304,11 +307,11 @@ const updateFiles = async (
  * If an Exif-involving {@link fixOption} is passed for an non-image file, then
  * that file is just skipped over. Similarly, if an Exif-involving
  * {@link fixOption} is provided, but the given underlying image for the given
- * {@link enteFile} does not have a corresponding Exif (or related) value, then
- * that file is skipped.
+ * {@link file} does not have a corresponding Exif (or related) value, then that
+ * file is skipped.
  */
-const updateEnteFileDate = async (
-    enteFile: EnteFile,
+const updateFileDate = async (
+    file: EnteFile,
     fixOption: FixOption,
     customDate: ParsedMetadataDate | undefined,
 ) => {
@@ -322,11 +325,10 @@ const updateEnteFileDate = async (
             offset: undefined,
             timestamp: customDate!.timestamp,
         };
-    } else if (enteFile.metadata.fileType == FileType.image) {
-        const blob = await downloadManager.fileBlob(enteFile);
-        const file = new File([blob], enteFile.metadata.title);
+    } else if (file.metadata.fileType == FileType.image) {
+        const blob = await downloadManager.fileBlob(file);
         const { DateTimeOriginal, DateTimeDigitized, MetadataDate, DateTime } =
-            await extractExifDates(file);
+            await extractExifDates(new File([blob], fileFileName(file)));
 
         switch (fixOption) {
             case "date-time-original":
@@ -343,13 +345,10 @@ const updateEnteFileDate = async (
 
     if (!newDate) return;
 
-    const existingDate = fileCreationPhotoDate(
-        enteFile,
-        await decryptPublicMagicMetadata(enteFile),
-    );
+    const existingDate = fileCreationPhotoDate(file);
     if (newDate.timestamp == existingDate.getTime()) return;
 
-    await updateRemotePublicMagicMetadata(enteFile, {
+    await updateFilePublicMagicMetadata(file, {
         dateTime: newDate.dateTime,
         offsetTime: newDate.offset,
         editedTime: newDate.timestamp,

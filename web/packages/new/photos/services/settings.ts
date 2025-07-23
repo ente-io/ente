@@ -2,17 +2,12 @@
  * @file Storage (in-memory, local, remote) and update of various settings.
  */
 
-// We want to map falsey values like empty strings to the default, for which
-// `||` is the appropriate operator, so turn off the eslint suggestion to use
-// `??` instead for this file.
-//
-/* eslint-disable @typescript-eslint/prefer-nullish-coalescing */
-
-import { localUser } from "@/base/local-user";
-import log from "@/base/log";
-import { updateShouldDisableCFUploadProxy } from "@/gallery/services/upload";
-import { nullToUndefined } from "@/utils/transform";
-import { z } from "zod";
+import { savedPartialLocalUser } from "ente-accounts/services/accounts-db";
+import { isDevBuild } from "ente-base/env";
+import log from "ente-base/log";
+import { updateShouldDisableCFUploadProxy } from "ente-gallery/services/upload";
+import { nullToUndefined } from "ente-utils/transform";
+import { z } from "zod/v4";
 import { fetchFeatureFlags, updateRemoteFlag } from "./remote-store";
 
 /**
@@ -27,12 +22,12 @@ import { fetchFeatureFlags, updateRemoteFlag } from "./remote-store";
  * 1. On app start, the initial are read from local storage in
  *    {@link initSettings}.
  *
- * 2. During the remote sync, remote flags are fetched and saved in local
+ * 2. During the remote pull, remote flags are fetched and saved in local
  *    storage, and the in-memory state updated to reflect the latest values
- *    ({@link syncSettings}).
+ *    ({@link pullSettings}).
  *
  * 3. Updating a value also cause an unconditional fetch and update
- *    ({@link syncSettings}).
+ *    ({@link pullSettings}).
  *
  * 4. The individual getter functions for the flags (e.g.
  *    {@link isInternalUser}) return the in-memory values, and so are suitable
@@ -125,8 +120,10 @@ export const logoutSettings = () => {
  * Fetch remote flags from remote and save them in local storage for subsequent
  * lookup. Then use the results to update our in memory state if needed.
  */
-export const syncSettings = async () => {
+export const pullSettings = async () => {
     const jsonString = await fetchFeatureFlags().then((res) => res.text());
+    // Do a parse as a sanity check before saving the string contents.
+    FeatureFlags.parse(JSON.parse(jsonString));
     saveRemoteFeatureFlagsJSONString(jsonString);
     syncSettingsSnapshotWithLocalStorage();
 };
@@ -137,7 +134,12 @@ const saveRemoteFeatureFlagsJSONString = (s: string) =>
 const savedRemoteFeatureFlags = () => {
     const s = localStorage.getItem("remoteFeatureFlags");
     if (!s) return undefined;
-    return FeatureFlags.parse(JSON.parse(s));
+    try {
+        return FeatureFlags.parse(JSON.parse(s));
+    } catch (e) {
+        log.warn("Ignoring unparseable saved remoteFeatureFlags", e);
+        return undefined;
+    }
 };
 
 const FeatureFlags = z.object({
@@ -152,7 +154,7 @@ type FeatureFlags = z.infer<typeof FeatureFlags>;
 const syncSettingsSnapshotWithLocalStorage = () => {
     const flags = savedRemoteFeatureFlags();
     const settings = createDefaultSettings();
-    settings.isInternalUser = flags?.internalUser || isInternalUserViaEmail();
+    settings.isInternalUser = flags?.internalUser || false;
     settings.mapEnabled = flags?.mapEnabled || false;
     settings.cfUploadProxyDisabled = savedCFProxyDisabled();
     if (flags?.castUrl) settings.castURL = flags.castUrl;
@@ -185,26 +187,23 @@ const setSettingsSnapshot = (snapshot: Settings) => {
     _state.settingsListeners.forEach((l) => l());
 };
 
-const isInternalUserViaEmail = () => {
-    const user = localUser();
-    return !!user?.email.endsWith("@ente.io");
-};
-
 /**
- * Return `true` if the current user is marked as an "internal" user.
+ * Return `true` if this is a development build, and the current user (if any)
+ * is marked as an "development" user.
  *
- * 1. Emails that end in `@ente.io` are considered as internal users.
- * 2. If the "internalUser" remote feature flag is set, the user is internal.
- * 3. Otherwise false.
+ * Emails that end in "@ente.io" are considered as dev users.
  */
-export const isInternalUser = () => settingsSnapshot().isInternalUser;
+export const isDevBuildAndUser = () => isDevBuild && isDevUserViaEmail();
+
+const isDevUserViaEmail = () =>
+    !!savedPartialLocalUser()?.email?.endsWith("@ente.io");
 
 /**
  * Persist the user's map enabled preference both locally and on remote.
  */
 export const updateMapEnabled = async (isEnabled: boolean) => {
     await updateRemoteFlag("mapEnabled", isEnabled);
-    return syncSettings();
+    return pullSettings();
 };
 
 const cfProxyDisabledKey = "cfProxyDisabled";

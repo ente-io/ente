@@ -1,8 +1,43 @@
 # CHANGELOG
 
-## v1.7.9 (Unreleased)
+## v1.7.15 (Unreleased)
 
 - .
+
+## v1.7.14
+
+- Increase file size limit to 10 GB.
+
+## v1.7.13
+
+- Generate streams for videos (beta)
+
+    > Streamable videos can be enabled in Preferences. For more details, see the
+    > [video streaming FAQ](https://help.ente.io/photos/faq/video-streaming).
+
+- Support Turkish translations.
+
+## v1.7.12
+
+- Improved video player with streaming support (for already processed videos).
+- Support Arabic translations.
+
+## v1.7.11
+
+- Improved file viewer.
+- Improved live photo experience.
+
+## v1.7.10
+
+- Speed up selection for large libraries.
+- Support Japanese translations.
+- Fix video thumbnail generation on drag and drop.
+
+## v1.7.9
+
+- Light mode.
+- Faster and more stable thumbnail generation.
+- Support `.supplemental-metadata` JSON files in Google Takeout.
 
 ## v1.7.8
 
