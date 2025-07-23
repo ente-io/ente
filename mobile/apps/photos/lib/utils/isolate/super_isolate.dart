@@ -81,6 +81,8 @@ abstract class SuperIsolate {
     if (rootToken != null) {
       BackgroundIsolateBinaryMessenger.ensureInitialized(rootToken);
     }
+    final logger = Logger('SuperIsolate');
+    logger.info('IsolateMain started');
 
     receivePort.listen((message) async {
       final taskID = message[0] as String;
@@ -88,6 +90,7 @@ abstract class SuperIsolate {
       final function = IsolateOperation.values[functionIndex];
       final args = message[2] as Map<String, dynamic>;
       final sendPort = message[3] as SendPort;
+      logger.info("Starting isolate operation $function in isolate");
 
       late final Object data;
       try {
