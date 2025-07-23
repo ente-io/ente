@@ -86,7 +86,7 @@ android {
     productFlavors {
         independent {
             dimension "default"
-            applicationIdSuffix ".independent"
+//            applicationIdSuffix ".independent"
         }
         dev {
             dimension "default"
