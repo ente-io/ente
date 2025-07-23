@@ -193,6 +193,8 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
                                       icon: const Icon(Icons.edit),
                                       iconSize:
                                           16, // specify the size of the icon
+                                      padding: EdgeInsets.zero,
+                                      constraints: const BoxConstraints(),
                                       onPressed: () async {
                                         final result =
                                             await showPersonAvatarPhotoSheet(

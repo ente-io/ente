@@ -136,7 +136,7 @@ export const GalleryBarAndListHeader: React.FC<
         if (shouldHide) return;
 
         setFileListHeader({
-            item:
+            component:
                 mode != "people" ? (
                     <CollectionHeader
                         {...{

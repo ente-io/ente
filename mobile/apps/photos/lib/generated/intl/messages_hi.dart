@@ -20,8 +20,6 @@ typedef String MessageIfAbsent(String messageStr, List<dynamic> args);
 class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'hi';
 
-  static String m115(name) => "Wish \$${name} a happy birthday! 🎉";
-
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
         "accountWelcomeBack":
@@ -107,7 +105,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "verify": MessageLookupByLibrary.simpleMessage("सत्यापित करें"),
         "verifyEmail":
             MessageLookupByLibrary.simpleMessage("ईमेल सत्यापित करें"),
-        "wishThemAHappyBirthday": m115,
         "yourAccountHasBeenDeleted": MessageLookupByLibrary.simpleMessage(
             "आपका अकाउंट डिलीट कर दिया गया है")
       };

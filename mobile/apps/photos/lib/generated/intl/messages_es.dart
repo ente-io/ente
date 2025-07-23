@@ -313,8 +313,6 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m114(email) =>
       "Hemos enviado un correo a <green>${email}</green>";
 
-  static String m115(name) => "Wish \$${name} a happy birthday! 🎉";
-
   static String m116(count) =>
       "${Intl.plural(count, one: 'Hace ${count} año', other: 'Hace ${count} años')}";
 
@@ -554,30 +552,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "blackFridaySale":
             MessageLookupByLibrary.simpleMessage("Oferta del Black Friday"),
         "blog": MessageLookupByLibrary.simpleMessage("Blog"),
-        "cLDesc1": MessageLookupByLibrary.simpleMessage(
-            "Tras el lanzamiento de la versión beta de transmisión de video y el trabajo en subidas y descargas reanudables, ahora hemos aumentado el límite de subida de archivos a 10GB. Esto ya está disponible tanto en aplicaciones de escritorio como móviles."),
-        "cLDesc2": MessageLookupByLibrary.simpleMessage(
-            "Las subidas en segundo plano ahora también son compatibles con iOS, además de dispositivos Android. No necesitas abrir la aplicación para hacer una copia de seguridad de tus fotos y videos más recientes."),
-        "cLDesc3": MessageLookupByLibrary.simpleMessage(
-            "Hemos hecho mejoras significativas en nuestra experiencia de recuerdos, incluyendo reproducción automática, deslizar al siguiente recuerdo y mucho más."),
-        "cLDesc4": MessageLookupByLibrary.simpleMessage(
-            "Junto con un montón de mejoras internas, ahora es mucho más fácil ver todas las caras detectadas, proporcionar comentarios sobre caras similares y agregar/eliminar caras de una sola foto."),
-        "cLDesc5": MessageLookupByLibrary.simpleMessage(
-            "Ahora recibirás una notificación opcional para todos los cumpleaños que hayas guardado en Ente, junto con una colección de sus mejores fotos."),
-        "cLDesc6": MessageLookupByLibrary.simpleMessage(
-            "No más esperas para que se completen las subidas/descargas antes de poder cerrar la aplicación. Todas las subidas y descargas ahora tienen la capacidad de pausarse a mitad de camino y reanudarse desde donde lo dejaste."),
-        "cLTitle1": MessageLookupByLibrary.simpleMessage(
-            "Subida de archivos de video grandes"),
-        "cLTitle2":
-            MessageLookupByLibrary.simpleMessage("Subida en segundo plano"),
-        "cLTitle3": MessageLookupByLibrary.simpleMessage(
-            "Reproducción automática de recuerdos"),
-        "cLTitle4": MessageLookupByLibrary.simpleMessage(
-            "Reconocimiento facial mejorado"),
-        "cLTitle5": MessageLookupByLibrary.simpleMessage(
-            "Notificaciones de cumpleaños"),
-        "cLTitle6": MessageLookupByLibrary.simpleMessage(
-            "Subidas y descargas reanudables"),
         "cachedData":
             MessageLookupByLibrary.simpleMessage("Datos almacenados en caché"),
         "calculating": MessageLookupByLibrary.simpleMessage("Calculando..."),
@@ -2199,7 +2173,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "whatsNew": MessageLookupByLibrary.simpleMessage("Qué hay de nuevo"),
         "whyAddTrustContact": MessageLookupByLibrary.simpleMessage(
             "Un contacto de confianza puede ayudar a recuperar sus datos."),
-        "wishThemAHappyBirthday": m115,
         "yearShort": MessageLookupByLibrary.simpleMessage("año"),
         "yearly": MessageLookupByLibrary.simpleMessage("Anualmente"),
         "yearsAgo": m116,

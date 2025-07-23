@@ -161,7 +161,11 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
       _isLoading = true;
       _fetchSubData();
     }
-    _dialog = createProgressDialog(context, S.of(context).pleaseWait);
+    _dialog = createProgressDialog(
+      context,
+      S.of(context).pleaseWait,
+      isDismissible: true,
+    );
     return Scaffold(
       appBar: AppBar(),
       body: Column(
@@ -200,8 +204,9 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
   }
 
   Future<void> _fetchSubData() async {
-    // ignore: unawaited_futures
-    _userService.getUserDetailsV2(memoryCount: false).then((userDetails) async {
+    try {
+      final userDetails =
+          await _userService.getUserDetailsV2(memoryCount: false);
       _userDetails = userDetails;
       _currentSubscription = userDetails.subscription;
 
@@ -232,7 +237,14 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
       if (mounted) {
         setState(() {});
       }
-    });
+    } catch (e, s) {
+      _logger.severe("Error fetching subscription data", e, s);
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   Widget _getBody() {

@@ -181,8 +181,6 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m114(email) =>
       "Kami telah mengirimkan email ke <green>${email}</green>";
 
-  static String m115(name) => "Wish \$${name} a happy birthday! 🎉";
-
   static String m116(count) =>
       "${Intl.plural(count, other: '${count} tahun lalu')}";
 
@@ -1482,7 +1480,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "welcomeBack":
             MessageLookupByLibrary.simpleMessage("Selamat datang kembali!"),
         "whatsNew": MessageLookupByLibrary.simpleMessage("Hal yang baru"),
-        "wishThemAHappyBirthday": m115,
         "yearly": MessageLookupByLibrary.simpleMessage("Tahunan"),
         "yearsAgo": m116,
         "yes": MessageLookupByLibrary.simpleMessage("Ya"),

@@ -242,7 +242,7 @@
   "publicLinkEnabled": "Link público ativado",
   "shareALink": "Partilhar um link",
   "sharedAlbumSectionDescription": "Criar álbuns compartilhados e colaborativos com outros usuários da Ente, incluindo usuários em planos gratuitos.",
-  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, =0 {Compartilhe com pessoas específicas} =1 {Compartilhado com 1 pessoa} other {Compartilhado com {numberOfPeople} pessoas}}",
+  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, one {}=0 {Compartilhe com pessoas específicas} =1 {Compartilhado com 1 pessoa} other {Compartilhado com {numberOfPeople} pessoas}}",
   "@shareWithPeopleSectionTitle": {
     "placeholders": {
       "numberOfPeople": {
@@ -899,7 +899,7 @@
   "authToViewYourMemories": "Por favor, autentique-se para ver suas memórias",
   "unlock": "Desbloquear",
   "freeUpSpace": "Libertar espaço",
-  "freeUpSpaceSaving": "{count, plural, =1 {Pode eliminá-lo do aparelho para esvaziar {formattedSize}} other {Pode eliminá-los do aparelho para esvaziar {formattedSize}}}",
+  "freeUpSpaceSaving": "{count, plural, one {}=1 {Pode eliminá-lo do aparelho para esvaziar {formattedSize}} other {Pode eliminá-los do aparelho para esvaziar {formattedSize}}}",
   "filesBackedUpInAlbum": "{count, plural, one {1 arquivo} other {{formattedNumber} arquivos}} neste álbum teve um backup seguro",
   "@filesBackedUpInAlbum": {
     "description": "Text to tell user how many files have been backed up in the album",
@@ -1788,5 +1788,7 @@
   "cLDesc5": "Ganhará uma notificação para todos os aniversários que salvaste no Ente, além de uma coleção das melhores fotos.",
   "cLTitle6": "Envios e transferências retomáveis",
   "cLDesc6": "Sem mais aguardar até que os envios e transferências sejam concluídos para fechar a aplicação. Todos os envios e transferências podem ser pausados a qualquer momento, e retomar onde parou.",
-  "indexingPausedStatusDescription": "A indexação foi interrompida. Ele será retomado se o dispositivo estiver pronto. O dispositivo é considerado pronto se o nível de bateria, saúde da bateria, e estado térmico esteja num estado saudável."
+  "indexingPausedStatusDescription": "A indexação foi interrompida. Ele será retomado se o dispositivo estiver pronto. O dispositivo é considerado pronto se o nível de bateria, saúde da bateria, e estado térmico esteja num estado saudável.",
+  "faceThumbnailGenerationFailed": "Impossível gerar thumbnails de rosto",
+  "fileAnalysisFailed": "Impossível analisar arquivo"
 }

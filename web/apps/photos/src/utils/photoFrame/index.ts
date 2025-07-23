@@ -11,18 +11,15 @@ export const handleSelectCreator =
         userID: number | undefined,
         activeCollectionID: number,
         activePersonID: string | undefined,
-        // @ts-expect-error Need to add types
-        setRangeStart?,
+        setRangeStartIndex: (index: number | undefined) => void,
     ) =>
     ({ id, ownerID }: { id: number; ownerID: number }, index?: number) =>
     (checked: boolean) => {
         if (typeof index != "undefined") {
             if (checked) {
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-                setRangeStart(index);
+                setRangeStartIndex(index);
             } else {
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-                setRangeStart(undefined);
+                setRangeStartIndex(undefined);
             }
         }
         setSelected((_selected) => {
