@@ -1790,7 +1790,10 @@
   "cLDesc6": "No more waiting for uploads/downloads to complete before you can close the app. All uploads and downloads now have the ability to be paused midway, and resume from where you left off.",
   "indexingPausedStatusDescription": "Indexing is paused. It will automatically resume when the device is ready. The device is considered ready when its battery level, battery health, and thermal status are within a healthy range.",
   "thisWeek": "This week",
+  "lastWeek": "Last week",
   "thisMonth": "This month",
+  "lastMonth": "Last month",
   "thisYear": "This year",
+  "lastYear": "Last year",
   "groupBy": "Group by"
 }

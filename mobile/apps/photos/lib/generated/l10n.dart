@@ -12306,6 +12306,16 @@ class S {
     );
   }
 
+  /// `Last week`
+  String get lastWeek {
+    return Intl.message(
+      'Last week',
+      name: 'lastWeek',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `This month`
   String get thisMonth {
     return Intl.message(
@@ -12316,11 +12326,31 @@ class S {
     );
   }
 
+  /// `Last month`
+  String get lastMonth {
+    return Intl.message(
+      'Last month',
+      name: 'lastMonth',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `This year`
   String get thisYear {
     return Intl.message(
       'This year',
       name: 'thisYear',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Last year`
+  String get lastYear {
+    return Intl.message(
+      'Last year',
+      name: 'lastYear',
       desc: '',
       args: [],
     );

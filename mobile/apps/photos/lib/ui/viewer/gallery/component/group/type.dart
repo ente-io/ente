@@ -199,7 +199,15 @@ extension GroupTypeExtension on GroupType {
     if (startOfWeek.year == nowStartOfWeek.year &&
         startOfWeek.month == nowStartOfWeek.month &&
         startOfWeek.day == nowStartOfWeek.day) {
-      return "This week";
+      return S.of(context).thisWeek;
+    }
+
+    // Check if it's the previous week
+    final lastWeekStart = nowStartOfWeek.subtract(const Duration(days: 7));
+    if (startOfWeek.year == lastWeekStart.year &&
+        startOfWeek.month == lastWeekStart.month &&
+        startOfWeek.day == lastWeekStart.day) {
+      return S.of(context).lastWeek;
     }
 
     // Return formatted week range
@@ -212,7 +220,13 @@ extension GroupTypeExtension on GroupType {
     final now = DateTime.now();
 
     if (date.year == now.year && date.month == now.month) {
-      return "This month";
+      return S.of(context).thisMonth;
+    }
+
+    // Check if it's the previous month
+    final lastMonth = DateTime(now.year, now.month - 1);
+    if (date.year == lastMonth.year && date.month == lastMonth.month) {
+      return S.of(context).lastMonth;
     }
 
     return DateFormat.yMMM(Localizations.localeOf(context).languageCode)
@@ -224,7 +238,12 @@ extension GroupTypeExtension on GroupType {
     final now = DateTime.now();
 
     if (date.year == now.year) {
-      return "This year";
+      return S.of(context).thisYear;
+    }
+
+    // Check if it's the previous year
+    if (date.year == now.year - 1) {
+      return S.of(context).lastYear;
     }
 
     return DateFormat.y(Localizations.localeOf(context).languageCode)

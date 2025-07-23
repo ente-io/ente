@@ -1195,8 +1195,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "kindlyHelpUsWithThisInformation": MessageLookupByLibrary.simpleMessage(
             "Kindly help us with this information"),
         "language": MessageLookupByLibrary.simpleMessage("Language"),
+        "lastMonth": MessageLookupByLibrary.simpleMessage("Last month"),
         "lastTimeWithThem": m45,
         "lastUpdated": MessageLookupByLibrary.simpleMessage("Last updated"),
+        "lastWeek": MessageLookupByLibrary.simpleMessage("Last week"),
+        "lastYear": MessageLookupByLibrary.simpleMessage("Last year"),
         "lastYearsTrip":
             MessageLookupByLibrary.simpleMessage("Last year\'s trip"),
         "leave": MessageLookupByLibrary.simpleMessage("Leave"),
