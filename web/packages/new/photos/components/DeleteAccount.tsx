@@ -17,11 +17,11 @@ import {
     type DropdownOption,
 } from "ente-new/photos/components/DropdownInput";
 import {
+    decryptDeleteAccountChallenge,
     deleteAccount,
     getAccountDeleteChallenge,
 } from "ente-new/photos/services/user";
 import { initiateEmail } from "ente-new/photos/utils/web";
-import { decryptDeleteAccountChallenge } from "ente-shared/crypto/helpers";
 import { useFormik } from "formik";
 import { t } from "i18next";
 import React, { useState } from "react";
@@ -40,14 +40,27 @@ type DeleteAccountProps = ModalVisibilityProps & {
 export const DeleteAccount: React.FC<DeleteAccountProps> = ({
     open,
     onClose,
-    onAuthenticateUser,
-}) => {
+    ...rest
+}) => (
+    <TitledMiniDialog open={open} onClose={onClose} title={t("delete_account")}>
+        <DeleteAccountDialogContents {...{ open, onClose }} {...rest} />
+    </TitledMiniDialog>
+);
+
+/**
+ * The contents of the {@link DeleteAccount} dialog.
+ *
+ * See: [Note: MUI dialog state] for why this is a separate component.
+ */
+const DeleteAccountDialogContents: React.FC<
+    Omit<DeleteAccountProps, "open">
+> = ({ onClose, onAuthenticateUser }) => {
     const { logout, showMiniDialog, onGenericError } = useBaseContext();
 
     const [acceptDataDeletion, setAcceptDataDeletion] = useState(false);
     const [loading, setLoading] = useState(false);
 
-    const { values, touched, errors, handleChange, handleSubmit } = useFormik({
+    const formik = useFormik({
         initialValues: { reason: "", feedback: "" },
         validate: ({ reason, feedback }) => {
             if (!reason) return { reason: t("required") };
@@ -63,10 +76,12 @@ export const DeleteAccount: React.FC<DeleteAccountProps> = ({
         },
         onSubmit: async ({ reason, feedback }) => {
             feedback = feedback.trim();
-            setLoading(true);
             try {
+                setLoading(true);
                 const { allowDelete, encryptedChallenge } =
                     await getAccountDeleteChallenge();
+                setLoading(false);
+
                 if (allowDelete && encryptedChallenge) {
                     await onAuthenticateUser()
                         .then(confirmAccountDeletion)
@@ -82,8 +97,8 @@ export const DeleteAccount: React.FC<DeleteAccountProps> = ({
                 }
             } catch (e) {
                 onGenericError(e);
+                setLoading(false);
             }
-            setLoading(false);
         },
     });
 
@@ -125,6 +140,7 @@ export const DeleteAccount: React.FC<DeleteAccountProps> = ({
         reason: string,
         feedback: string,
     ) => {
+        setLoading(true);
         const decryptedChallenge =
             await decryptDeleteAccountChallenge(encryptedChallenge);
         await deleteAccount(decryptedChallenge, reason, feedback);
@@ -132,64 +148,58 @@ export const DeleteAccount: React.FC<DeleteAccountProps> = ({
     };
 
     return (
-        <TitledMiniDialog
-            open={open}
-            onClose={onClose}
-            title={t("delete_account")}
-        >
-            <form onSubmit={handleSubmit}>
-                <Stack sx={{ gap: "24px" }}>
-                    <Stack sx={{ gap: "4px" }}>
-                        <Typography>
-                            {t("delete_account_reason_label")}
+        <form onSubmit={formik.handleSubmit}>
+            <Stack sx={{ gap: "24px" }}>
+                <Stack sx={{ gap: "4px" }}>
+                    <Typography>{t("delete_account_reason_label")}</Typography>
+                    <DropdownInput
+                        options={deleteReasonOptions()}
+                        placeholder={t("delete_account_reason_placeholder")}
+                        selected={formik.values.reason}
+                        onSelect={formik.handleChange("reason")}
+                    />
+                    {formik.touched.reason && formik.errors.reason && (
+                        <Typography
+                            variant="small"
+                            sx={{ px: 1, color: "critical.main" }}
+                        >
+                            {formik.errors.reason}
                         </Typography>
-                        <DropdownInput
-                            options={deleteReasonOptions()}
-                            placeholder={t("delete_account_reason_placeholder")}
-                            selected={values.reason}
-                            onSelect={handleChange("reason")}
-                        />
-                        {touched.reason && errors.reason && (
-                            <Typography
-                                variant="small"
-                                sx={{ px: 1, color: "critical.main" }}
-                            >
-                                {errors.reason}
-                            </Typography>
-                        )}
-                    </Stack>
-                    <FeedbackInput
-                        value={values.feedback}
-                        onChange={handleChange("feedback")}
-                        errorMessage={
-                            touched.feedback ? errors.feedback : undefined
-                        }
-                    />
-                    <ConfirmationCheckboxInput
-                        checked={acceptDataDeletion}
-                        onChange={setAcceptDataDeletion}
-                    />
-                    <Stack sx={{ gap: "8px" }}>
-                        <LoadingButton
-                            type="submit"
-                            fullWidth
-                            color="critical"
-                            disabled={!acceptDataDeletion}
-                            loading={loading}
-                        >
-                            {t("delete_account_confirm")}
-                        </LoadingButton>
-                        <FocusVisibleButton
-                            fullWidth
-                            color="secondary"
-                            onClick={onClose}
-                        >
-                            {t("cancel")}
-                        </FocusVisibleButton>
-                    </Stack>
+                    )}
                 </Stack>
-            </form>
-        </TitledMiniDialog>
+                <FeedbackInput
+                    value={formik.values.feedback}
+                    onChange={formik.handleChange("feedback")}
+                    errorMessage={
+                        formik.touched.feedback
+                            ? formik.errors.feedback
+                            : undefined
+                    }
+                />
+                <ConfirmationCheckboxInput
+                    checked={acceptDataDeletion}
+                    onChange={setAcceptDataDeletion}
+                />
+                <Stack sx={{ gap: "8px" }}>
+                    <LoadingButton
+                        type="submit"
+                        fullWidth
+                        color="critical"
+                        disabled={!acceptDataDeletion}
+                        loading={loading}
+                    >
+                        {t("delete_account_confirm")}
+                    </LoadingButton>
+                    <FocusVisibleButton
+                        fullWidth
+                        color="secondary"
+                        onClick={onClose}
+                    >
+                        {t("cancel")}
+                    </FocusVisibleButton>
+                </Stack>
+            </Stack>
+        </form>
     );
 };
 

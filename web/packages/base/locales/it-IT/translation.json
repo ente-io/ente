@@ -162,6 +162,7 @@
     "ok": "OK",
     "success": "Operazione riuscita",
     "error": "Errore",
+    "note": "",
     "offline_message": "Sei offline, i ricordi memorizzati nella cache vengono mostrati",
     "install": "Installa",
     "install_mobile_app": "Installa la nostra app <a>Android</a> o <b>iOS</b> per eseguire il backup automatico di tutte le tue foto",
@@ -531,9 +532,9 @@
     "ml_consent_description": "<p>Se abiliti l'apprendimento automatico, Ente estrarrà informazioni come la geometria del volto dai file, inclusi quelli condivisi con te.</p><p>Questo sarà fatto sul tuo dispositivo e qualsiasi informazione biometrica generata sarà crittografata end-to-end.</p><p><a>Clicca qui per maggiori dettagli su questa funzione nella nostra informativa sulla privacy</a></p>",
     "ml_consent_confirmation": "Comprendo e desidero abilitare l'apprendimento automatico",
     "labs": "Laboratori",
-    "passphrase_strength_weak": "Sicurezza password: Debole",
-    "passphrase_strength_moderate": "Sicurezza password: Moderata",
-    "passphrase_strength_strong": "Sicurezza password: Forte",
+    "password_strength_weak": "Sicurezza password: Debole",
+    "password_strength_moderate": "Sicurezza password: Moderata",
+    "password_strength_strong": "Sicurezza password: Forte",
     "preferences": "Preferenze",
     "language": "Lingua",
     "advanced": "Avanzate",
@@ -683,5 +684,6 @@
     "share_favorites": "",
     "person_favorites": "",
     "shared_favorites": "",
-    "added_by_name": ""
+    "added_by_name": "",
+    "unowned_files_not_processed": ""
 }

@@ -134,15 +134,14 @@ export const userEntityDiff = async (
     const decrypt = (encryptedData: string, decryptionHeader: string) =>
         decryptBlobBytes({ encryptedData, decryptionHeader }, entityKey);
 
-    const params = new URLSearchParams({
-        type,
-        sinceTime: sinceTime.toString(),
-        limit: defaultDiffLimit.toString(),
-    });
-    const url = await apiURL("/user-entity/entity/diff");
-    const res = await fetch(`${url}?${params.toString()}`, {
-        headers: await authenticatedRequestHeaders(),
-    });
+    const res = await fetch(
+        await apiURL("/user-entity/entity/diff", {
+            type,
+            sinceTime,
+            limit: defaultDiffLimit,
+        }),
+        { headers: await authenticatedRequestHeaders() },
+    );
     ensureOk(res);
     const diff = z
         .object({ diff: z.array(RemoteUserEntityChange) })
@@ -237,9 +236,7 @@ export type RemoteUserEntityKey = z.infer<typeof RemoteUserEntityKey>;
 export const getUserEntityKey = async (
     type: EntityType,
 ): Promise<RemoteUserEntityKey | undefined> => {
-    const params = new URLSearchParams({ type });
-    const url = await apiURL("/user-entity/key");
-    const res = await fetch(`${url}?${params.toString()}`, {
+    const res = await fetch(await apiURL("/user-entity/key", { type }), {
         headers: await authenticatedRequestHeaders(),
     });
     if (!res.ok) {

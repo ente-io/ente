@@ -15,25 +15,34 @@ import {
 import { downloadManager } from "ente-gallery/services/download";
 import { writeStream } from "ente-gallery/utils/native-stream";
 import type { Collection } from "ente-media/collection";
-import { mergeMetadata, type EnteFile } from "ente-media/file";
-import { fileLocation, type Metadata } from "ente-media/file-metadata";
+import { fileLogID, type EnteFile } from "ente-media/file";
+import {
+    fileCreationTime,
+    fileFileName,
+    fileLocation,
+} from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
 import { decodeLivePhoto } from "ente-media/live-photo";
 import {
+    collectionUserFacingName,
     createCollectionNameByID,
-    getCollectionUserFacingName,
 } from "ente-new/photos/services/collection";
-import { getAllLocalCollections } from "ente-new/photos/services/collections";
-import { getAllLocalFiles } from "ente-new/photos/services/files";
 import {
     safeDirectoryName,
     safeFileName,
 } from "ente-new/photos/utils/native-fs";
-import { CustomError } from "ente-shared/error";
-import { getData, setData } from "ente-shared/storage/localStorage";
 import { PromiseQueue } from "ente-utils/promise";
+import { nullToUndefined } from "ente-utils/transform";
 import i18n from "i18next";
-import { migrateExport, type ExportRecord } from "./export-migration";
+import { z } from "zod/v4";
+import { savedCollectionFiles, savedCollections } from "./photos-fdb";
+
+// TODO: Audit the uses of these constants
+export const CustomError = {
+    UPDATE_EXPORTED_RECORD_FAILED: "update file exported record failed",
+    EXPORT_STOPPED: "export stopped",
+    EXPORT_FOLDER_DOES_NOT_EXIST: "export folder does not exist",
+};
 
 /** Name of the JSON file in which we keep the state of the export. */
 const exportRecordFileName = "export_status.json";
@@ -63,22 +72,74 @@ export interface ExportProgress {
     total: number;
 }
 
+/**
+ * The export related settings that are persisted to local storage.
+ */
 export interface ExportSettings {
-    folder: string;
-    continuousExport: boolean;
+    /**
+     * The parent folder where the "Ente Photos" folder containing the export
+     * will be placed.
+     */
+    folder?: string;
+    /**
+     * If `true`, the app will automatically export new or pending files.
+     */
+    continuousExport?: boolean;
 }
 
-export type CollectionExportNames = Record<number, string>;
+/**
+ * Zod schema for the {@link ExportSettings} TypeScript type.
+ */
+const ExportSettings = z.object({
+    folder: z.string().nullish().transform(nullToUndefined),
+    continuousExport: z.boolean().nullish().transform(nullToUndefined),
+});
 
-export type FileExportNames = Record<string, string>;
+/**
+ * Return the previously saved export settings, if any, present in local storage.
+ *
+ * Use {@link saveExportSettings} to update the settings in local storage.
+ */
+export const savedExportSettings = () => {
+    const jsonString = localStorage.getItem("export");
+    const json = jsonString ? JSON.parse(jsonString) : undefined;
+    return json ? ExportSettings.parse(json) : undefined;
+};
+
+/**
+ * Update the export settings saved in local storage.
+ *
+ * This is the setter corresponding to {@link savedExportSettings}.
+ * @param exportSettings
+ */
+export const saveExportSettings = (exportSettings: ExportSettings) => {
+    localStorage.setItem("export", JSON.stringify(exportSettings));
+};
+
+type CollectionExportNames = Record<number, string>;
+
+type FileExportNames = Record<string, string>;
+
+export interface ExportRecord {
+    /**
+     * The version of the export record.
+     *
+     * Current version: 5
+     */
+    version: number;
+    stage: ExportStage;
+    lastAttemptTimestamp: number;
+    collectionExportNames: CollectionExportNames;
+    fileExportNames: FileExportNames;
+}
 
 export const NULL_EXPORT_RECORD: ExportRecord = {
-    version: 3,
+    version: 5,
+    stage: ExportStage.init,
     // @ts-ignore
     lastAttemptTimestamp: null,
-    stage: ExportStage.init,
-    fileExportNames: {},
     collectionExportNames: {},
+    fileExportNames: {},
 };
 
 export interface ExportOpts {
@@ -109,10 +170,9 @@ interface CancellationStatus {
 }
 
 class ExportService {
+    private exportSettings: ExportSettings | undefined;
     // @ts-ignore
-    private exportSettings: ExportSettings;
-    // @ts-ignore
-    private exportInProgress: RequestCanceller = null;
+    private exportInProgress: RequestCanceller | null = null;
     private resync = true;
     private reRunNeeded = false;
     private exportRecordUpdater = new PromiseQueue<ExportRecord>();
@@ -132,12 +192,12 @@ class ExportService {
     // @ts-ignore
     private cachedMetadataDateTimeFormatter: Intl.DateTimeFormat;
 
-    getExportSettings(): ExportSettings {
+    getExportSettings(): ExportSettings | undefined {
         try {
             if (this.exportSettings) {
                 return this.exportSettings;
             }
-            const exportSettings = getData("export");
+            const exportSettings = savedExportSettings();
             this.exportSettings = exportSettings;
             return exportSettings;
         } catch (e) {
@@ -151,24 +211,9 @@ class ExportService {
             const exportSettings = this.getExportSettings();
             const newSettings = { ...exportSettings, ...newData };
             this.exportSettings = newSettings;
-            setData("export", newSettings);
+            saveExportSettings(newSettings);
         } catch (e) {
             log.error("updateExportSettings failed", e);
-            throw e;
-        }
-    }
-
-    async runMigration(
-        exportDir: string,
-        exportRecord: ExportRecord,
-        updateProgress: (progress: ExportProgress) => void,
-    ) {
-        try {
-            log.info("running migration");
-            await migrateExport(exportDir, exportRecord, updateProgress);
-            log.info("migration completed");
-        } catch (e) {
-            log.error("migration failed", e);
             throw e;
         }
     }
@@ -184,13 +229,17 @@ class ExportService {
     }
 
     private async updateExportStage(stage: ExportStage) {
-        const exportFolder = this.getExportSettings()?.folder;
+        // TODO: Retain the existing behaviour of this code but needs rework.
+        // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
+        const exportFolder = this.getExportSettings()?.folder!;
         await this.updateExportRecord(exportFolder, { stage });
         this.uiUpdater.setExportStage(stage);
     }
 
     private async updateLastExportTime(exportTime: number) {
-        const exportFolder = this.getExportSettings()?.folder;
+        // TODO: Retain the existing behaviour of this code but needs rework.
+        // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
+        const exportFolder = this.getExportSettings()?.folder!;
         await this.updateExportRecord(exportFolder, {
             lastAttemptTimestamp: exportTime,
         });
@@ -249,7 +298,7 @@ class ExportService {
      */
     pendingFiles = async (exportRecord?: ExportRecord): Promise<EnteFile[]> => {
         return getUnExportedFiles(
-            await getAllLocalFiles(),
+            await savedCollectionFiles(),
             exportRecord,
             undefined,
         );
@@ -259,17 +308,15 @@ class ExportService {
         await this.verifyExportFolderExists(exportFolder);
         const exportRecord = await this.getExportRecord(exportFolder);
         await this.updateExportStage(ExportStage.migration);
-        await this.runMigration(
-            exportFolder,
-            exportRecord,
-            this.updateExportProgress.bind(this),
-        );
+        await migrateExportRecordIfNeeded(exportFolder, exportRecord);
         await this.updateExportStage(ExportStage.starting);
     }
 
     async postExport() {
         try {
-            const exportFolder = this.getExportSettings()?.folder;
+            // TODO: Retain the existing behaviour of this code but needs rework.
+            // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
+            const exportFolder = this.getExportSettings()?.folder!;
             if (!(await this.exportFolderExists(exportFolder))) {
                 this.uiUpdater.setExportStage(ExportStage.init);
                 return;
@@ -289,7 +336,7 @@ class ExportService {
     async stopRunningExport() {
         try {
             log.info("user requested export cancellation");
-            this.exportInProgress.exec();
+            this.exportInProgress?.exec();
             // @ts-ignore
             this.exportInProgress = null;
             this.reRunNeeded = false;
@@ -317,7 +364,9 @@ class ExportService {
             };
             this.exportInProgress = canceller;
             try {
-                const exportFolder = this.getExportSettings()?.folder;
+                // TODO: Retain the existing behaviour of this code but needs rework.
+                // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
+                const exportFolder = this.getExportSettings()?.folder!;
                 await this.preExport(exportFolder);
                 log.info("export started");
                 await this.runExport(exportFolder, isCanceled, exportOpts);
@@ -358,8 +407,8 @@ class ExportService {
         { resync }: ExportOpts,
     ) {
         try {
-            const files = mergeMetadata(await getAllLocalFiles());
-            const collections = await getAllLocalCollections();
+            const files = await savedCollectionFiles();
+            const collections = await savedCollections();
 
             const exportRecord = await this.getExportRecord(exportFolder);
             const collectionIDExportNameMap =
@@ -504,7 +553,7 @@ class ExportService {
                     );
                     const newCollectionExportName = await safeDirectoryName(
                         exportFolder,
-                        getCollectionUserFacingName(collection),
+                        collectionUserFacingName(collection),
                         fs.exists,
                     );
                     log.info(
@@ -680,9 +729,7 @@ class ExportService {
         try {
             for (const file of files) {
                 log.info(
-                    `exporting file ${file.metadata.title} with id ${
-                        file.id
-                    } from collection ${collectionIDNameMap.get(
+                    `exporting ${fileLogID(file)} from collection ${collectionIDNameMap.get(
                         file.collectionID,
                     )}`,
                 );
@@ -726,15 +773,13 @@ class ExportService {
                     );
                     incrementSuccess();
                     log.info(
-                        `exporting file ${file.metadata.title} with id ${
-                            file.id
-                        } from collection ${collectionIDNameMap.get(
+                        `exporting ${fileLogID(file)} from collection ${collectionIDNameMap.get(
                             file.collectionID,
                         )} successful`,
                     );
                 } catch (e) {
                     incrementFailed();
-                    log.error("export failed for a file", e);
+                    log.error(`export failed for a ${fileLogID(file)}`, e);
                     if (
                         // @ts-ignore
                         e.message ===
@@ -1017,7 +1062,7 @@ class ExportService {
             const originalFileStream = await downloadManager.fileStream(file, {
                 background: true,
             });
-            if (file.metadata.fileType === FileType.livePhoto) {
+            if (file.metadata.fileType == FileType.livePhoto) {
                 await this.exportLivePhoto(
                     exportDir,
                     fileUID,
@@ -1029,7 +1074,7 @@ class ExportService {
             } else {
                 const fileExportName = await safeFileName(
                     collectionExportPath,
-                    file.metadata.title,
+                    fileFileName(file),
                     electron.fs.exists,
                 );
                 await this.saveMetadataFile(
@@ -1064,7 +1109,7 @@ class ExportService {
     ) {
         const fs = ensureElectron().fs;
         const fileBlob = await new Response(fileStream).blob();
-        const livePhoto = await decodeLivePhoto(file.metadata.title, fileBlob);
+        const livePhoto = await decodeLivePhoto(fileFileName(file), fileBlob);
         const imageExportName = await safeFileName(
             collectionExportPath,
             livePhoto.imageFileName,
@@ -1158,7 +1203,7 @@ class ExportService {
         return this.exportInProgress;
     };
 
-    exportFolderExists = async (exportFolder: string) => {
+    exportFolderExists = async (exportFolder: string | undefined) => {
         return exportFolder && (await ensureElectron().fs.exists(exportFolder));
     };
 
@@ -1200,9 +1245,10 @@ export const resumeExportsIfNeeded = async () => {
         return;
     }
     const exportRecord = await exportService.getExportRecord(
-        exportSettings.folder,
+        // TODO: Retain existing behaviour of code. Needs rework.
+        exportSettings!.folder!,
     );
-    if (exportSettings.continuousExport) {
+    if (exportSettings!.continuousExport) {
         exportService.enableContinuousExport();
     }
     if (isExportInProgress(exportRecord.stage)) {
@@ -1229,10 +1275,39 @@ export const selectAndPrepareExportDirectory = async (): Promise<
     return exportDir;
 };
 
-export const getExportRecordFileUID = (file: EnteFile) =>
+const migrateExportRecordIfNeeded = async (
+    exportFolder: string,
+    exportRecord: Partial<ExportRecord>,
+) => {
+    const version = exportRecord.version;
+    // The last migration from versions prior to version 5 of the export record
+    // was added in Sep 2023 (commit 1fe4d0443b29e77a91981d5800d2c4231118cb83)
+    // and released as part of app version 1.6.41:
+    // https://github.com/ente-io/photos-desktop/releases/tag/v1.6.41.
+    //
+    // There is no traffic from older versions anymore. Still, as an extra
+    // precaution, do not proceed if the migration prior to 5 hasn't run by now.
+    if (version === 0 || version === 1 || version === 2) {
+        throw new Error(`Unsupported export record version ${version}`);
+    }
+    if (version === 3 || version === 4) {
+        // The version number in the empty export record was 3 when it should've
+        // been 5. Special case for these by ensuring the record is empty.
+        if (Object.entries(exportRecord.collectionExportNames ?? {}).length) {
+            throw new Error(`Unsupported export record version ${version}`);
+        } else {
+            await exportService.updateExportRecord(exportFolder, {
+                ...exportRecord,
+                version: 5,
+            });
+        }
+    }
+};
+
+const getExportRecordFileUID = (file: EnteFile) =>
     `${file.id}_${file.collectionID}_${file.updationTime}`;
 
-export const getCollectionIDFromFileUID = (fileUID: string) =>
+const getCollectionIDFromFileUID = (fileUID: string) =>
     Number(fileUID.split("_")[1]);
 
 const convertCollectionIDExportNameObjectToMap = (
@@ -1271,8 +1346,7 @@ const getRenamedExportedCollections = (
                 collection.id,
             );
 
-            const collectionExportName =
-                getCollectionUserFacingName(collection);
+            const collectionExportName = collectionUserFacingName(collection);
 
             if (currentExportName === collectionExportName) {
                 return false;
@@ -1456,14 +1530,9 @@ const getGoogleLikeMetadataFile = (
     file: EnteFile,
     dateTimeFormatter: Intl.DateTimeFormat,
 ) => {
-    const metadata: Metadata = file.metadata;
-    const publicMagicMetadata = file.pubMagicMetadata?.data;
-    const creationTime = Math.floor(
-        (publicMagicMetadata?.editedTime ?? metadata.creationTime) / 1e6,
-    );
-    const modificationTime = Math.floor(
-        (metadata.modificationTime ?? metadata.creationTime) / 1e6,
-    );
+    const metadata = file.metadata;
+    const creationTime = Math.floor(fileCreationTime(file) / 1e6);
+    const modificationTime = Math.floor(metadata.modificationTime / 1e6);
     const result: Record<string, unknown> = {
         title: fileExportName,
         creationTime: {
@@ -1482,7 +1551,7 @@ const getGoogleLikeMetadataFile = (
     return JSON.stringify(result, null, 2);
 };
 
-export const getMetadataFolderExportPath = (collectionExportPath: string) =>
+const getMetadataFolderExportPath = (collectionExportPath: string) =>
     joinPath(collectionExportPath, exportMetadataDirectoryName);
 
 // if filepath is /home/user/Ente/Export/Collection1/1.jpg
@@ -1496,7 +1565,7 @@ const getFileMetadataExportPath = (
         joinPath(exportMetadataDirectoryName, `${fileExportName}.json`),
     );
 
-export const getLivePhotoExportName = (
+const getLivePhotoExportName = (
     imageExportName: string,
     videoExportName: string,
 ) => JSON.stringify({ image: imageExportName, video: videoExportName });

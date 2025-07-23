@@ -5,6 +5,7 @@ import {
 import log from "ente-base/log";
 import { logoutFileViewerDataSource } from "ente-gallery/components/viewer/data-source";
 import { downloadManager } from "ente-gallery/services/download";
+import { clearFilesDB } from "ente-gallery/services/files-db";
 import { resetUploadState } from "ente-gallery/services/upload";
 import { resetVideoState } from "ente-gallery/services/video";
 import exportService from "ente-new/photos/services/export";
@@ -43,6 +44,12 @@ export const photosLogout = async () => {
     // - Photos specific logout
 
     log.info("logout (photos)");
+
+    try {
+        await clearFilesDB();
+    } catch (e) {
+        ignoreError("Files DB", e);
+    }
 
     try {
         logoutSettings();
@@ -119,6 +126,12 @@ export const photosLogout = async () => {
     // happened since we started.
 
     await logoutClearStateAgain();
+
+    try {
+        await clearFilesDB();
+    } catch (e) {
+        ignoreError("Files DB", e);
+    }
 
     // [Note: Full reload on logout]
     //

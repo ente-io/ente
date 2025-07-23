@@ -79,7 +79,7 @@ const RemoteFaceCluster = z.looseObject({
  *
  * See also: {@link CGroupUserEntityData}.
  *
- * See: [Note: Use passthrough for metadata Zod schemas].
+ * See: [Note: Use looseObject for metadata Zod schemas].
  */
 const RemoteCGroupData = z.looseObject({
     name: z.string().nullish().transform(nullToUndefined),
@@ -102,10 +102,6 @@ export type CGroup = Omit<LocalUserEntity, "data"> & {
  * Return the list of locally available cgroup user entities.
  */
 export const savedCGroups = (): Promise<CGroup[]> =>
-    // See: [Note: strict mode migration]
-    //
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
     savedEntities("cgroup").then((es) =>
         es.map((e) => ({ ...e, data: RemoteCGroupData.parse(e.data) })),
     );

@@ -1,14 +1,15 @@
 import * as bip39 from "bip39";
-import type { KeyAttributes } from "ente-accounts/services/user";
+import { savedKeyAttributes } from "ente-accounts/services/accounts-db";
 import {
     decryptBox,
+    encryptBox,
     fromHex,
-    sharedCryptoWorker,
+    generateKey,
     toHex,
 } from "ente-base/crypto";
 import { ensureMasterKeyFromSession } from "ente-base/session";
-import { getData, setData } from "ente-shared/storage/localStorage";
-import { putUserRecoveryKeyAttributes } from "./user";
+import { saveKeyAttributes } from "./accounts-db";
+import { putUserRecoveryKeyAttributes, type KeyAttributes } from "./user";
 
 // Mobile client library only supports English.
 bip39.setDefaultWordlist("english");
@@ -66,7 +67,7 @@ export const recoveryKeyToMnemonic = async (recoveryKey: string) =>
 export const getUserRecoveryKey = async () => {
     const masterKey = await ensureMasterKeyFromSession();
 
-    const keyAttributes: KeyAttributes = getData("keyAttributes");
+    const keyAttributes = savedKeyAttributes()!;
     const { recoveryKeyEncryptedWithMasterKey, recoveryKeyDecryptionNonce } =
         keyAttributes;
 
@@ -79,7 +80,7 @@ export const getUserRecoveryKey = async () => {
             masterKey,
         );
     } else {
-        return createNewRecoveryKey(masterKey);
+        return createNewRecoveryKey(masterKey, keyAttributes);
     }
 };
 
@@ -92,19 +93,13 @@ export const getUserRecoveryKey = async () => {
  *
  * @returns a new base64 encoded recovery key.
  */
-const createNewRecoveryKey = async (masterKey: string) => {
-    const existingAttributes = getData("keyAttributes");
-
-    const cryptoWorker = await sharedCryptoWorker();
-    const recoveryKey = await cryptoWorker.generateKey();
-    const encryptedMasterKey = await cryptoWorker.encryptBox(
-        masterKey,
-        recoveryKey,
-    );
-    const encryptedRecoveryKey = await cryptoWorker.encryptBox(
-        recoveryKey,
-        masterKey,
-    );
+const createNewRecoveryKey = async (
+    masterKey: string,
+    existingKeyAttributes: KeyAttributes,
+) => {
+    const recoveryKey = await generateKey();
+    const encryptedMasterKey = await encryptBox(masterKey, recoveryKey);
+    const encryptedRecoveryKey = await encryptBox(recoveryKey, masterKey);
 
     const recoveryKeyAttributes = {
         masterKeyEncryptedWithRecoveryKey: encryptedMasterKey.encryptedData,
@@ -115,10 +110,7 @@ const createNewRecoveryKey = async (masterKey: string) => {
 
     await putUserRecoveryKeyAttributes(recoveryKeyAttributes);
 
-    setData("keyAttributes", {
-        ...existingAttributes,
-        ...recoveryKeyAttributes,
-    });
+    saveKeyAttributes({ ...existingKeyAttributes, ...recoveryKeyAttributes });
 
     return recoveryKey;
 };

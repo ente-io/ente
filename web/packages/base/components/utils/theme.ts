@@ -125,7 +125,12 @@ const getColors = (appName: AppName) => ({
         },
     },
     ...{
-        accent: appName == "auth" ? _colors.accentAuth : _colors.accentPhotos,
+        accent:
+            appName == "auth"
+                ? _colors.accentAuth
+                : appName == "locker"
+                  ? _colors.accentLocker
+                  : _colors.accentPhotos,
     },
 });
 
@@ -139,6 +144,7 @@ const getColors = (appName: AppName) => ({
 const _colors = {
     accentPhotos: { dark: "#00b33c", main: "#1db954", light: "#01de4d" },
     accentAuth: { dark: "#8e0fcb", main: "#9610d6", light: "#8e2de2" },
+    accentLocker: { dark: "#615bff", main: "#5ba8ff", light: "#5bf9ff" },
     fixed: {
         white: "#fff",
         black: "#000",
@@ -499,13 +505,26 @@ const components: Components = {
 
     MuiDialog: {
         defaultProps: {
-            // [Note: Overzealous Chrome? Complicated ARIA?]
+            // [Note: Workarounds for unactionable ARIA warnings]
             //
-            // This is required to prevent console errors about aria-hiding a
-            // focused button when the dialog is closed.
+            // This is required to prevent console warnings about aria-hiding a
+            // focused button when the dialog is closed. e.g. Select a file,
+            // delete it. On closing the confirmation dialog, the error appears.
             //
-            // - https://github.com/mui/material-ui/issues/43106#issuecomment-2314809028
+            // The default is supposed to already be false, but setting this
+            // again seems to help. But sometimes we need to set this to `true`
+            // to prevent the warning. And sometimes neither helps, and we need
+            // to add random setTimeouts.
+            //
+            // Angular, Bootstrap, MUI, shadcn: all seem to be emitting these
+            // warning (just search the web). I'm don't know if this is just
+            // someone at Chrome deciding to emit spurious warnings without
+            // understanding the flow, or if none of these libraries have
+            // managed to implement the ARIA spec properly yet (which says more
+            // about the spec than about the libraries).
+            //
             // - https://issues.chromium.org/issues/392121909
+            // - https://github.com/mui/material-ui/issues/43106#issuecomment-2314809028
             closeAfterTransition: false,
         },
         styleOverrides: {
@@ -751,3 +770,8 @@ export const authTheme = getTheme("auth");
  * This is the same as the dark theme for the photos app.
  */
 export const castTheme = getTheme("cast");
+
+/**
+ * The MUI {@link Theme} to use for the locker app.
+ */
+export const lockerTheme = getTheme("locker");

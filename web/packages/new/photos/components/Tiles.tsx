@@ -66,7 +66,7 @@ export const ItemCard: React.FC<React.PropsWithChildren<ItemCardProps>> = ({
     const [coverImageURL, setCoverImageURL] = useState<string | undefined>();
 
     useEffect(() => {
-        if (!coverFile) return;
+        if (!coverFile) return undefined;
 
         let didCancel = false;
 

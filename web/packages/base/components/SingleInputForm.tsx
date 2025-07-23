@@ -91,10 +91,14 @@ export type SingleInputFormProps = Pick<
  * Submission is handled as an async function, during which the input is
  * disabled and a loading indicator is shown. Errors during submission are shown
  * as the helper text associated with the text field.
+ *
+ * The input field in the form takes autoFocus automatically on mount. Turn off
+ * the {@link autoFocus} to disable this behaviour if needed.
  */
 export const SingleInputForm: React.FC<SingleInputFormProps> = ({
     inputType,
     initialValue,
+    autoFocus,
     submitButtonTitle,
     submitButtonColor,
     onCancel,
@@ -139,7 +143,7 @@ export const SingleInputForm: React.FC<SingleInputFormProps> = ({
         </LoadingButton>
     );
 
-    // Note: [Use space as default TextField helperText]
+    // [Note: Use space as default TextField helperText]
     //
     // For MUI text fields that use a conditional helperText, e.g. in case of
     // errors, use an space as the default helperText in the other cases to
@@ -153,6 +157,7 @@ export const SingleInputForm: React.FC<SingleInputFormProps> = ({
                 onChange={formik.handleChange}
                 type={showPassword ? "text" : (inputType ?? "text")}
                 fullWidth
+                autoFocus={autoFocus ?? true}
                 margin="normal"
                 disabled={formik.isSubmitting}
                 error={!!formik.errors.value}

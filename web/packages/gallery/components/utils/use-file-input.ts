@@ -62,7 +62,7 @@ export const useFileInput = ({
     onSelect,
     onCancel,
 }: UseFileInputParams): UseFileInputResult => {
-    const inputRef = useRef<HTMLInputElement | undefined>(undefined);
+    const inputRef = useRef<HTMLInputElement | null>(null);
 
     useEffect(() => {
         // React (as of 19) doesn't support attaching the onCancel event handler
@@ -115,7 +115,7 @@ export const useFileInput = ({
             ...directoryOpts,
             ref: inputRef,
             onChange: handleChange,
-            ...(accept ? { accept } : {}),
+            ...(accept && { accept }),
         }),
         [directoryOpts, accept, handleChange],
     );

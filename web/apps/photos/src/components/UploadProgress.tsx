@@ -1,3 +1,5 @@
+// TODO: Audit this file
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 import CloseIcon from "@mui/icons-material/Close";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import UnfoldLessIcon from "@mui/icons-material/UnfoldLess";
@@ -32,20 +34,21 @@ import { t } from "i18next";
 import memoize from "memoize-one";
 import React, {
     createContext,
-    ReactElement,
+    useCallback,
     useContext,
     useEffect,
     useState,
+    type ReactElement,
 } from "react";
 import { Trans } from "react-i18next";
 import {
     areEqual,
     FixedSizeList as List,
-    ListChildComponentProps,
-    ListItemKeySelector,
+    type ListChildComponentProps,
+    type ListItemKeySelector,
 } from "react-window";
 import type {
-    FinishedUploadResult,
+    FinishedUploadType,
     InProgressUpload,
     SegregatedFinishedUploads,
     UploadCounter,
@@ -87,7 +90,7 @@ export const UploadProgress: React.FC<UploadProgressProps> = ({
         if (open) setExpanded(false);
     }, [open]);
 
-    const handleClose = () => {
+    const handleClose = useCallback(() => {
         if (uploadPhase == "done") {
             onClose();
         } else {
@@ -102,7 +105,7 @@ export const UploadProgress: React.FC<UploadProgressProps> = ({
                 cancel: t("no"),
             });
         }
-    };
+    }, [uploadPhase, onClose, cancelUploads, showMiniDialog]);
 
     if (!open) {
         return <></>;
@@ -130,6 +133,9 @@ export const UploadProgress: React.FC<UploadProgressProps> = ({
     );
 };
 
+/**
+ * A context internal to the components of this file.
+ */
 interface UploadProgressContextT {
     open: boolean;
     onClose: () => void;
@@ -145,20 +151,19 @@ interface UploadProgressContextT {
     setExpanded: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const UploadProgressContext = createContext<UploadProgressContextT>({
-    open: null,
-    onClose: () => null,
-    uploadCounter: null,
-    uploadPhase: undefined,
-    percentComplete: null,
-    retryFailed: () => null,
-    inProgressUploads: null,
-    uploadFileNames: null,
-    finishedUploads: null,
-    hasLivePhotos: null,
-    expanded: null,
-    setExpanded: () => null,
-});
+const UploadProgressContext = createContext<UploadProgressContextT | undefined>(
+    undefined,
+);
+
+/**
+ * Convenience hook to obtain the non-null asserted
+ * {@link UploadProgressContext}.
+ *
+ * The non-null assertion is reasonable since we provide it to the tree always
+ * in an invariant that is local to this file (and thus has less chance of being
+ * invalid in the future).
+ */
+const useUploadProgressContext = () => useContext(UploadProgressContext)!;
 
 const MinimizedUploadProgress: React.FC = () => (
     <Snackbar open anchorOrigin={{ horizontal: "right", vertical: "bottom" }}>
@@ -176,9 +181,7 @@ const UploadProgressHeader: React.FC = () => (
 );
 
 const UploadProgressTitle: React.FC = () => {
-    const { setExpanded, onClose, expanded } = useContext(
-        UploadProgressContext,
-    );
+    const { setExpanded, onClose, expanded } = useUploadProgressContext();
     const toggleExpanded = () => setExpanded((expanded) => !expanded);
 
     return (
@@ -202,9 +205,8 @@ const UploadProgressTitle: React.FC = () => {
 };
 
 const UploadProgressSubtitleText: React.FC = () => {
-    const { uploadPhase, uploadCounter, finishedUploads } = useContext(
-        UploadProgressContext,
-    );
+    const { uploadPhase, uploadCounter, finishedUploads } =
+        useUploadProgressContext();
 
     return (
         <Typography
@@ -280,7 +282,7 @@ const notUploadedFileCount = (
 };
 
 const UploadProgressBar: React.FC = () => {
-    const { uploadPhase, percentComplete } = useContext(UploadProgressContext);
+    const { uploadPhase, percentComplete } = useUploadProgressContext();
 
     return (
         <Box>
@@ -300,9 +302,8 @@ const UploadProgressBar: React.FC = () => {
 };
 
 function UploadProgressDialog() {
-    const { open, onClose, uploadPhase, finishedUploads } = useContext(
-        UploadProgressContext,
-    );
+    const { open, onClose, uploadPhase, finishedUploads } =
+        useUploadProgressContext();
 
     const [hasUnUploadedFiles, setHasUnUploadedFiles] = useState(false);
 
@@ -321,11 +322,11 @@ function UploadProgressDialog() {
                 <DialogContent sx={{ "&&&": { px: 0 } }}>
                     {uploadPhase == "uploading" && <InProgressSection />}
                     <ResultSection
-                        uploadResult="uploaded"
+                        resultType="uploaded"
                         sectionTitle={t("successful_uploads")}
                     />
                     <ResultSection
-                        uploadResult="uploadedWithStaticThumbnail"
+                        resultType="uploadedWithStaticThumbnail"
                         sectionTitle={t("thumbnail_generation_failed")}
                         sectionInfo={t("thumbnail_generation_failed_hint")}
                     />
@@ -335,12 +336,12 @@ function UploadProgressDialog() {
                         </NotUploadSectionHeader>
                     )}
                     <ResultSection
-                        uploadResult="blocked"
+                        resultType="blocked"
                         sectionTitle={t("blocked_uploads")}
                         sectionInfo={<Trans i18nKey={"blocked_uploads_hint"} />}
                     />
                     <ResultSection
-                        uploadResult="failed"
+                        resultType="failed"
                         sectionTitle={t("failed_uploads")}
                         sectionInfo={
                             uploadPhase == "done"
@@ -349,22 +350,22 @@ function UploadProgressDialog() {
                         }
                     />
                     <ResultSection
-                        uploadResult="alreadyUploaded"
+                        resultType="alreadyUploaded"
                         sectionTitle={t("ignored_uploads")}
                         sectionInfo={t("ignored_uploads_hint")}
                     />
                     <ResultSection
-                        uploadResult="largerThanAvailableStorage"
+                        resultType="largerThanAvailableStorage"
                         sectionTitle={t("insufficient_storage")}
                         sectionInfo={t("insufficient_storage_hint")}
                     />
                     <ResultSection
-                        uploadResult="unsupported"
+                        resultType="unsupported"
                         sectionTitle={t("unsupported_files")}
                         sectionInfo={t("unsupported_files_hint")}
                     />
                     <ResultSection
-                        uploadResult="tooLarge"
+                        resultType="tooLarge"
                         sectionTitle={t("large_files")}
                         sectionInfo={t("large_files_hint")}
                     />
@@ -377,11 +378,14 @@ function UploadProgressDialog() {
 
 const InProgressSection: React.FC = () => {
     const { inProgressUploads, hasLivePhotos, uploadFileNames, uploadPhase } =
-        useContext(UploadProgressContext);
-    const fileList = inProgressUploads ?? [];
+        useUploadProgressContext();
 
+    const fileList = inProgressUploads;
+
+    // @ts-expect-error Need to add types
     const renderListItem = ({ localFileID, progress }) => {
         return (
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             <InProgressItemContainer key={localFileID}>
                 <span>{uploadFileNames.get(localFileID)}</span>
                 {uploadPhase == "uploading" && (
@@ -395,10 +399,12 @@ const InProgressSection: React.FC = () => {
         );
     };
 
+    // @ts-expect-error Need to add types
     const getItemTitle = ({ localFileID, progress }) => {
         return `${uploadFileNames.get(localFileID)} - ${progress}%`;
     };
 
+    // @ts-expect-error Need to add types
     const generateItemKey = ({ localFileID, progress }) => {
         return `${localFileID}-${progress}`;
     };
@@ -408,7 +414,7 @@ const InProgressSection: React.FC = () => {
             <SectionAccordionSummary expandIcon={<ExpandMoreIcon />}>
                 <TitleText
                     title={t("uploads_in_progress")}
-                    count={inProgressUploads?.length}
+                    count={inProgressUploads.length}
                 />
             </SectionAccordionSummary>
             <SectionAccordionDetails>
@@ -482,45 +488,49 @@ const NotUploadSectionHeader = styled("div")(
 );
 
 interface ResultSectionProps {
-    uploadResult: FinishedUploadResult;
+    resultType: FinishedUploadType;
     sectionTitle: string;
     sectionInfo?: React.ReactNode;
 }
 
 const ResultSection: React.FC<ResultSectionProps> = ({
-    uploadResult,
+    resultType,
     sectionTitle,
     sectionInfo,
 }) => {
-    const { finishedUploads, uploadFileNames } = useContext(
-        UploadProgressContext,
-    );
-    const fileList = finishedUploads.get(uploadResult);
+    const { finishedUploads, uploadFileNames } = useUploadProgressContext();
+
+    const fileList = finishedUploads.get(resultType);
 
     if (!fileList?.length) {
         return <></>;
     }
 
+    // @ts-expect-error Need to add types
     const renderListItem = (fileID) => {
         return (
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             <ResultItemContainer key={fileID}>
                 {uploadFileNames.get(fileID)}
             </ResultItemContainer>
         );
     };
 
+    // @ts-expect-error Need to add types
     const getItemTitle = (fileID) => {
-        return uploadFileNames.get(fileID);
+        return uploadFileNames.get(fileID)!;
     };
 
+    // @ts-expect-error Need to add types
     const generateItemKey = (fileID) => {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
         return fileID;
     };
 
     return (
         <SectionAccordion>
             <SectionAccordionSummary expandIcon={<ExpandMoreIcon />}>
-                <TitleText title={sectionTitle} count={fileList?.length} />
+                <TitleText title={sectionTitle} count={fileList.length} />
             </SectionAccordionSummary>
             <SectionAccordionDetails>
                 {sectionInfo && <SectionInfo>{sectionInfo}</SectionInfo>}
@@ -589,12 +599,18 @@ const createItemData: <T>(
     getItemTitle: (item: T) => string,
     items: T[],
 ) => ItemData<T> = memoize((renderListItem, getItemTitle, items) => ({
+    // TODO
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     renderListItem,
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     getItemTitle,
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     items,
 }));
 
-// @ts-expect-error "TODO(MR): Understand and fix the type error here"
+// TODO: Too many non-null assertions
+
+// @ts-expect-error "TODO: Understand and fix the type error here"
 const Row: <T>({
     index,
     style,
@@ -613,12 +629,12 @@ const Row: <T>({
                         ],
                     },
                 }}
-                title={getItemTitle(items[index])}
+                title={getItemTitle(items[index]!)}
                 placement="bottom-start"
                 enterDelay={300}
                 enterNextDelay={100}
             >
-                <div style={style}>{renderListItem(items[index])}</div>
+                <div style={style}>{renderListItem(items[index]!)}</div>
             </Tooltip>
         );
     },
@@ -634,7 +650,7 @@ function ItemList<T>(props: ItemListProps<T>) {
 
     const getItemKey: ListItemKeySelector<ItemData<T>> = (index, data) => {
         const { items } = data;
-        return props.generateItemKey(items[index]);
+        return props.generateItemKey(items[index]!);
     };
 
     return (
@@ -642,11 +658,11 @@ function ItemList<T>(props: ItemListProps<T>) {
             <List
                 itemData={itemData}
                 height={Math.min(
-                    props.itemSize * props.items.length,
-                    props.maxHeight,
+                    props.itemSize! * props.items.length,
+                    props.maxHeight!,
                 )}
                 width={"100%"}
-                itemSize={props.itemSize}
+                itemSize={props.itemSize!}
                 itemCount={props.items.length}
                 itemKey={getItemKey}
             >
@@ -657,15 +673,14 @@ function ItemList<T>(props: ItemListProps<T>) {
 }
 
 const DoneFooter: React.FC = () => {
-    const { uploadPhase, finishedUploads, retryFailed, onClose } = useContext(
-        UploadProgressContext,
-    );
+    const { uploadPhase, finishedUploads, retryFailed, onClose } =
+        useUploadProgressContext();
 
     return (
         <DialogActions>
             {uploadPhase == "done" &&
-                (finishedUploads?.get("failed")?.length > 0 ||
-                finishedUploads?.get("blocked")?.length > 0 ? (
+                ((finishedUploads.get("failed")?.length ?? 0) > 0 ||
+                (finishedUploads.get("blocked")?.length ?? 0) > 0 ? (
                     <Button fullWidth onClick={retryFailed}>
                         {t("retry_failed_uploads")}
                     </Button>

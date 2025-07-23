@@ -15,7 +15,7 @@ import { ensureAuthToken } from "./token";
 export const authenticatedRequestHeaders = async () => ({
     "X-Auth-Token": await ensureAuthToken(),
     "X-Client-Package": clientPackageName,
-    ...(isDesktop ? { "X-Client-Version": desktopAppVersion } : {}),
+    ...(isDesktop && { "X-Client-Version": desktopAppVersion }),
 });
 
 /**
@@ -27,7 +27,7 @@ export const authenticatedRequestHeaders = async () => ({
  */
 export const publicRequestHeaders = () => ({
     "X-Client-Package": clientPackageName,
-    ...(isDesktop ? { "X-Client-Version": desktopAppVersion } : {}),
+    ...(isDesktop && { "X-Client-Version": desktopAppVersion }),
 });
 
 /**
@@ -35,9 +35,24 @@ export const publicRequestHeaders = () => ({
  */
 export interface PublicAlbumsCredentials {
     /**
-     * An access token that does the same job as the "X-Auth-Token" for usual
-     * authenticated API requests, except it will be passed as the
-     * ""X-Auth-Access-Token" header.
+     * [Note: Public album access token]
+     *
+     * The public album access is a token that serves a similar purpose as the
+     * "X-Auth-Token" for usual authenticated API requests that happen for a
+     * logged in user, except:
+     *
+     * - It will be passed as the "X-Auth-Access-Token" header, and
+     * - It also tells remote about the public album under consideration.
+     *
+     * This access token is variously referred to as the album token, or the
+     * auth token, when the context is clear. The client obtains this from the
+     * "t" query parameter of a public album URL, and then uses it both to:
+     *
+     * 1. Identify and authenticate itself with remote (this header).
+     *
+     * 2. Scope local storage per public album by using this access token as a
+     *    part of the local storage key. In this context it is sometimes also
+     *    referred to as a "collectionUID" by old code.
      */
     accessToken: string;
     /**
@@ -87,7 +102,7 @@ export class HTTPError extends Error {
         super(`HTTP ${res.status} ${res.statusText} (${url.pathname})`);
 
         const requestID = res.headers.get("x-request-id");
-        const details = { url: url.href, ...(requestID ? { requestID } : {}) };
+        const details = { url: url.href, ...(requestID && { requestID }) };
 
         // Cargo culted from
         // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error#custom_error_types
@@ -140,6 +155,8 @@ export const isHTTP401Error = (e: unknown) =>
 /**
  * Return `true` if this is an error because of a HTTP failure response returned
  * by museum with the given "code" and HTTP status.
+ *
+ * > The function is async because it needs to parse the payload.
  *
  * For some known set of errors, museum returns a payload of the form
  *

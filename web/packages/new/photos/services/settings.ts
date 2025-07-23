@@ -2,7 +2,7 @@
  * @file Storage (in-memory, local, remote) and update of various settings.
  */
 
-import { localUser } from "ente-accounts/services/user";
+import { savedPartialLocalUser } from "ente-accounts/services/accounts-db";
 import { isDevBuild } from "ente-base/env";
 import log from "ente-base/log";
 import { updateShouldDisableCFUploadProxy } from "ente-gallery/services/upload";
@@ -22,12 +22,12 @@ import { fetchFeatureFlags, updateRemoteFlag } from "./remote-store";
  * 1. On app start, the initial are read from local storage in
  *    {@link initSettings}.
  *
- * 2. During the remote sync, remote flags are fetched and saved in local
+ * 2. During the remote pull, remote flags are fetched and saved in local
  *    storage, and the in-memory state updated to reflect the latest values
- *    ({@link syncSettings}).
+ *    ({@link pullSettings}).
  *
  * 3. Updating a value also cause an unconditional fetch and update
- *    ({@link syncSettings}).
+ *    ({@link pullSettings}).
  *
  * 4. The individual getter functions for the flags (e.g.
  *    {@link isInternalUser}) return the in-memory values, and so are suitable
@@ -120,7 +120,7 @@ export const logoutSettings = () => {
  * Fetch remote flags from remote and save them in local storage for subsequent
  * lookup. Then use the results to update our in memory state if needed.
  */
-export const syncSettings = async () => {
+export const pullSettings = async () => {
     const jsonString = await fetchFeatureFlags().then((res) => res.text());
     // Do a parse as a sanity check before saving the string contents.
     FeatureFlags.parse(JSON.parse(jsonString));
@@ -188,24 +188,22 @@ const setSettingsSnapshot = (snapshot: Settings) => {
 };
 
 /**
- * Return `true` if this is a development build, and the current user is marked
- * as an "development" user.
+ * Return `true` if this is a development build, and the current user (if any)
+ * is marked as an "development" user.
  *
  * Emails that end in "@ente.io" are considered as dev users.
  */
 export const isDevBuildAndUser = () => isDevBuild && isDevUserViaEmail();
 
-const isDevUserViaEmail = () => {
-    const user = localUser();
-    return !!user?.email.endsWith("@ente.io");
-};
+const isDevUserViaEmail = () =>
+    !!savedPartialLocalUser()?.email?.endsWith("@ente.io");
 
 /**
  * Persist the user's map enabled preference both locally and on remote.
  */
 export const updateMapEnabled = async (isEnabled: boolean) => {
     await updateRemoteFlag("mapEnabled", isEnabled);
-    return syncSettings();
+    return pullSettings();
 };
 
 const cfProxyDisabledKey = "cfProxyDisabled";

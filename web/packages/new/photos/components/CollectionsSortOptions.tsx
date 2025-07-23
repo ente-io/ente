@@ -5,7 +5,7 @@ import {
     OverflowMenu,
     OverflowMenuOption,
 } from "ente-base/components/OverflowMenu";
-import type { CollectionsSortBy } from "ente-new/photos/services/collection/ui";
+import type { CollectionsSortBy } from "ente-new/photos/services/collection-summary";
 import { t } from "i18next";
 import React from "react";
 

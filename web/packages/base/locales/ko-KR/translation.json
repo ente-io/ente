@@ -162,6 +162,7 @@
     "ok": "확인",
     "success": "성공",
     "error": "",
+    "note": "",
     "offline_message": "",
     "install": "",
     "install_mobile_app": "",
@@ -531,9 +532,9 @@
     "ml_consent_description": "",
     "ml_consent_confirmation": "",
     "labs": "",
-    "passphrase_strength_weak": "",
-    "passphrase_strength_moderate": "",
-    "passphrase_strength_strong": "",
+    "password_strength_weak": "",
+    "password_strength_moderate": "",
+    "password_strength_strong": "",
     "preferences": "",
     "language": "",
     "advanced": "",
@@ -683,5 +684,6 @@
     "share_favorites": "",
     "person_favorites": "",
     "shared_favorites": "",
-    "added_by_name": ""
+    "added_by_name": "",
+    "unowned_files_not_processed": ""
 }

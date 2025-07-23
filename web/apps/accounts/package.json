@@ -4,8 +4,7 @@
     "private": true,
     "dependencies": {
         "ente-accounts": "*",
-        "ente-base": "*",
-        "ente-shared": "*"
+        "ente-base": "*"
     },
     "devDependencies": {
         "ente-build-config": "*"

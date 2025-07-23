@@ -1,6 +1,7 @@
+// TODO: Audit this file
 import type { SelectionContext } from "ente-new/photos/components/gallery";
 import type { GalleryBarMode } from "ente-new/photos/components/gallery/reducer";
-import { SetSelectedState, type SelectedState } from "types/gallery";
+import type { SelectedState, SetSelectedState } from "utils/file";
 
 // TODO: All this is unnecessarily complex, and needs reworking.
 export const handleSelectCreator =
@@ -10,15 +11,15 @@ export const handleSelectCreator =
         userID: number | undefined,
         activeCollectionID: number,
         activePersonID: string | undefined,
-        setRangeStart?,
+        setRangeStartIndex: (index: number | undefined) => void,
     ) =>
     ({ id, ownerID }: { id: number; ownerID: number }, index?: number) =>
     (checked: boolean) => {
         if (typeof index != "undefined") {
             if (checked) {
-                setRangeStart(index);
+                setRangeStartIndex(index);
             } else {
-                setRangeStart(undefined);
+                setRangeStartIndex(undefined);
             }
         }
         setSelected((_selected) => {
@@ -135,7 +136,7 @@ const createSelectedAndContext = (
             context:
                 mode == "people"
                     ? { mode, personID: activePersonID! }
-                    : { mode, collectionID: activeCollectionID! },
+                    : { mode, collectionID: activeCollectionID },
         };
     } else {
         // Both mode and context are defined.
@@ -148,10 +149,10 @@ const createSelectedAndContext = (
                 context:
                     mode == "people"
                         ? { mode, personID: activePersonID! }
-                        : { mode, collectionID: activeCollectionID! },
+                        : { mode, collectionID: activeCollectionID },
             };
         } else {
-            if (selected.context?.mode == "people") {
+            if (selected.context.mode == "people") {
                 if (selected.context.personID != activePersonID) {
                     // Clear selection if person has changed.
                     selected = {
@@ -159,7 +160,7 @@ const createSelectedAndContext = (
                         count: 0,
                         collectionID: 0,
                         context: {
-                            mode: selected.context?.mode,
+                            mode: selected.context.mode,
                             personID: activePersonID!,
                         },
                     };
@@ -172,8 +173,8 @@ const createSelectedAndContext = (
                         count: 0,
                         collectionID: 0,
                         context: {
-                            mode: selected.context?.mode,
-                            collectionID: activeCollectionID!,
+                            mode: selected.context.mode,
+                            collectionID: activeCollectionID,
                         },
                     };
                 }
@@ -185,7 +186,7 @@ const createSelectedAndContext = (
         ? undefined
         : mode == "people"
           ? { mode, personID: activePersonID! }
-          : { mode, collectionID: activeCollectionID! };
+          : { mode, collectionID: activeCollectionID };
 
     return { selected, newContext };
 };

@@ -96,9 +96,10 @@ services:
       - 3002:3002 # Public albums
       # - 3003:3003 # Auth
       # - 3004:3004 # Cast
-    # environment:
-    #   ENTE_API_ORIGIN: http://localhost:8080
-    #   ENTE_ALBUMS_ORIGIN: https://localhost:3002
+    # Modify these values to your custom subdomains, if using any
+    environment:
+      ENTE_API_ORIGIN: http://localhost:8080
+      ENTE_ALBUMS_ORIGIN: https://localhost:3002
 
   postgres:
     image: postgres:15
@@ -117,6 +118,8 @@ services:
     image: minio/minio
     ports:
       - 3200:3200 # MinIO API
+      # Uncomment to enable MinIO Web UI      
+      # - 3201:3201
     environment:
       MINIO_ROOT_USER: $minio_user
       MINIO_ROOT_PASSWORD: $minio_pass
@@ -128,7 +131,7 @@ services:
           sh -c '
           #!/bin/sh
 
-          while ! mc config host add h0 http://minio:3200 $minio_user $minio_pass 2>/dev/null
+          while ! mc alias set h0 http://minio:3200 $minio_user $minio_pass 2>/dev/null
           do
             echo "Waiting for minio..."
             sleep 0.5
@@ -190,10 +193,18 @@ EOF
 printf " \033[1;32mT\033[0m   Created \033[1mmuseum.yaml\033[0m\n"
 sleep 1
 
-printf " \033[1;32mE\033[0m   Starting docker compose\n"
-printf "\nAfter the cluster has started, open web app at \033[1mhttp://localhost:3000\033[0m\n"
-printf "(Verification code will be in the logs here)\n\n"
+printf " \033[1;32mE\033[0m   Do you want to start Ente? (y/n): "
+read choice
 
-sleep 1
-
-docker compose up
+if [[ "$choice" == "y" || "$choice" == "Y" ]]; then
+    printf "\nStarting docker compose\n"
+    printf "\nAfter the cluster has started, open web app at \033[1mhttp://localhost:3000\033[0m\n"
+    printf "(Verification code will be in the logs here)\n\n"
+    docker compose up
+else
+    printf "\nTo start the cluster:\n"
+    printf " \033[1;32m$\033[0m   cd my-ente\n"
+    printf " \033[1;32m$\033[0m   docker compose up\n"
+    printf "\nAfter the cluster has started, open web app at \033[1mhttp://localhost:3000\033[0m\n"
+    printf "(Verification code will be in the logs here)\n\n"
+fi

@@ -4,6 +4,8 @@ import log from "./log";
 /**
  * Key value store schema.
  *
+ * [Note: KV DB]
+ *
  * The use IndexedDB to store arbitrary key-value pairs. The functional
  * motivation is to allow these to also be accessed from web workers (local
  * storage is limited to the main thread).

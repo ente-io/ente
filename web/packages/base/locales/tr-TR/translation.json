@@ -162,6 +162,7 @@
     "ok": "Tamam",
     "success": "Başarılı",
     "error": "Hata",
+    "note": "",
     "offline_message": "Çevrimdışısın, önbelleğe alınmış anılar gösteriliyor",
     "install": "Kur",
     "install_mobile_app": "Tüm fotoğraflarını otomatik olarak yedeklemek için <a>Android</a> veya <b>iOS</b> uygulamamızı yükle",
@@ -531,9 +532,9 @@
     "ml_consent_description": "<p>Makine öğrenimini etkinleştirirseniz, Ente dosyalardan yüz geometrisi gibi bilgiler çıkaracaktır, buna sizinle paylaşılanlar da dahildir. </p><p>Bu işlemler cihazınızda gerçekleşir ve oluşturulan tüm biyometrik veriler uçtan uca şifrelenir.</p><p><a> Bu özellikle ilgili daha fazla bilgi için lütfen gizlilik politikamıza göz atın.</a></p>",
     "ml_consent_confirmation": "Anladım ve makine öğrenimini etkinleştirmek istiyorum",
     "labs": "Deneysel özellikler",
-    "passphrase_strength_weak": "Parola gücü: Zayıf",
-    "passphrase_strength_moderate": "Parola gücü: Orta",
-    "passphrase_strength_strong": "Parola gücü: Güçlü",
+    "password_strength_weak": "Parola gücü: Zayıf",
+    "password_strength_moderate": "Parola gücü: Orta",
+    "password_strength_strong": "Parola gücü: Güçlü",
     "preferences": "Tercihler",
     "language": "Dil",
     "advanced": "Gelişmiş",
@@ -626,7 +627,7 @@
     "faster_upload_description": "Yüklemeleri yakındaki sunucular üzerinden yönlendir",
     "open_ente_on_startup": "Başlangıçta Ente’yi aç",
     "cast_album_to_tv": "Albümü TV'de oynat",
-    "cast_to_tv": "",
+    "cast_to_tv": "TV de oynat",
     "enter_cast_pin_code": "Bu cihazı eşleştirmek için TV ekranında gördüğünüz kodu girin.",
     "code": "Kod",
     "pair_device_to_tv": "Cihazları eşleştir",
@@ -683,5 +684,6 @@
     "share_favorites": "Favorileri paylaş",
     "person_favorites": "{{name}}'in favorileri",
     "shared_favorites": "Paylaşılan favoriler",
-    "added_by_name": "{{name}} tarafından eklendi"
+    "added_by_name": "{{name}} tarafından eklendi",
+    "unowned_files_not_processed": ""
 }

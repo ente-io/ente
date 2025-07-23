@@ -1,22 +1,43 @@
 import { Input, TextField } from "@mui/material";
-import type { SRPAttributes } from "ente-accounts/services/srp-remote";
-import type { KeyAttributes, User } from "ente-accounts/services/user";
+import {
+    srpVerificationUnauthorizedErrorMessage,
+    type SRPAttributes,
+} from "ente-accounts/services/srp";
+import type { KeyAttributes } from "ente-accounts/services/user";
 import { LoadingButton } from "ente-base/components/mui/LoadingButton";
 import { ShowHidePasswordInputAdornment } from "ente-base/components/mui/PasswordInputAdornment";
-import { sharedCryptoWorker } from "ente-base/crypto";
+import { decryptBox, deriveKey } from "ente-base/crypto";
 import log from "ente-base/log";
-import { CustomError } from "ente-shared/error";
 import { useFormik } from "formik";
 import { t } from "i18next";
 import { useCallback, useState } from "react";
 
 export interface VerifyMasterPasswordFormProps {
     /**
-     * The user whose password we're trying to verify.
+     * The email of the user whose password we're trying to verify.
      */
-    user: User | undefined;
+    userEmail: string;
+    /**
+     * The user's SRP attributes.
+     *
+     * The SRP attributes are used to derive the KEK from the user's password.
+     * If they are not present, the {@link keyAttributes} will be used instead.
+     *
+     * At least one of {@link srpAttributes} and {@link keyAttributes} must be
+     * present, otherwise the verification will fail.
+     */
+    srpAttributes?: SRPAttributes;
     /**
      * The user's key attributes.
+     *
+     * If they are present, they are used to derive the KEK from the user's
+     * password when {@link srpAttributes} are not present. This is the case
+     * when the user has already logged in (or signed up) on this client before,
+     * and is now doing a reauthentication.
+     *
+     * If they are not present, then {@link getKeyAttributes} must be present
+     * and will be used to obtain the user's key attributes. This is the case
+     * when the user is logging into a new client.
      */
     keyAttributes: KeyAttributes | undefined;
     /**
@@ -27,21 +48,21 @@ export interface VerifyMasterPasswordFormProps {
      * used for reauthenticating the user after they've already logged in, then
      * this function will not be provided.
      *
-     * This function can throw an `CustomError.TWO_FACTOR_ENABLED` to signal to
-     * the form that some other form of second factor is enabled and the user
-     * has been redirected to a two factor verification page.
+     * @returns The user's key attributes obtained from remote, or
+     * "redirecting-second-factor" if the user has an additional second factor
+     * verification required and the app is redirecting there.
      *
-     * This function can throw an `CustomError.INCORRECT_PASSWORD_OR_NO_ACCOUNT`
-     * to signal that either that the password is incorrect, or no account with
-     * the provided email exists.
+     * @throws A Error with message
+     * {@link srpVerificationUnauthorizedErrorMessage} to signal that either
+     * that the password is incorrect, or no account with the provided email
+     * exists.
      */
-    getKeyAttributes?: (kek: string) => Promise<KeyAttributes | undefined>;
+    getKeyAttributes?: (
+        srpAttributes: SRPAttributes,
+        kek: string,
+    ) => Promise<KeyAttributes | "redirecting-second-factor" | undefined>;
     /**
-     * The user's SRP attributes.
-     */
-    srpAttributes?: SRPAttributes;
-    /**
-     * The title of the submit button no the form.
+     * The title of the submit button on the form.
      */
     submitButtonTitle: string;
     /**
@@ -49,7 +70,7 @@ export interface VerifyMasterPasswordFormProps {
      * auxillary information that was ascertained when verifying it.
      *
      * @param key The user's master key obtained after decrypting it by using
-     * the kek derived from their passphrase.
+     * the KEK derived from their password.
      *
      * @param kek The key used for encrypting the user's master key.
      *
@@ -57,26 +78,31 @@ export interface VerifyMasterPasswordFormProps {
      * started with, or those that we fetched on the way using
      * {@link getKeyAttributes}).
      *
-     * @param passphrase The plaintext passphrase. This can be used during login
-     * to derive another encrypted key using interactive mem/ops limits for
-     * faster reauthentication after the initial login.
+     * @param password The plaintext password. This can be used during login to
+     * derive another encrypted key using interactive mem/ops limits for faster
+     * reauthentication after the initial login.
      */
     onVerify: (
         key: string,
         kek: string,
         keyAttributes: KeyAttributes,
-        passphrase: string,
+        password: string,
     ) => void;
 }
 
 /**
  * A form with a text field that can be used to ask the user to verify their
  * password.
+ *
+ * We use it both during the initial authentication (the "/credentials" page,
+ * shown when logging in, or reopening the web app in a new tab), and when the
+ * user is trying to perform a sensitive action when already logged in and
+ * having a session (the {@link AuthenticateUser} component).
  */
 export const VerifyMasterPasswordForm: React.FC<
     VerifyMasterPasswordFormProps
 > = ({
-    user,
+    userEmail,
     keyAttributes,
     srpAttributes,
     getKeyAttributes,
@@ -102,24 +128,23 @@ export const VerifyMasterPasswordForm: React.FC<
             }
 
             try {
-                await verifyPassphrase(password, setPasswordFieldError);
+                await verifyPassword(password, setPasswordFieldError);
             } catch (e) {
-                log.error("Failed to to verify passphrase", e);
+                log.error("Failed to to verify password", e);
                 setPasswordFieldError(t("generic_error"));
             }
         },
     });
 
-    const verifyPassphrase = async (
-        passphrase: string,
+    const verifyPassword = async (
+        password: string,
         setFieldError: (message: string) => void,
     ) => {
-        const cryptoWorker = await sharedCryptoWorker();
         let kek: string;
         if (srpAttributes) {
             try {
-                kek = await cryptoWorker.deriveKey(
-                    passphrase,
+                kek = await deriveKey(
+                    password,
                     srpAttributes.kekSalt,
                     srpAttributes.opsLimit,
                     srpAttributes.memLimit,
@@ -131,8 +156,8 @@ export const VerifyMasterPasswordForm: React.FC<
             }
         } else if (keyAttributes) {
             try {
-                kek = await cryptoWorker.deriveKey(
-                    passphrase,
+                kek = await deriveKey(
+                    password,
                     keyAttributes.kekSalt,
                     keyAttributes.opsLimit,
                     keyAttributes.memLimit,
@@ -144,24 +169,24 @@ export const VerifyMasterPasswordForm: React.FC<
             }
         } else throw new Error("Both SRP and key attributes are missing");
 
-        if (!keyAttributes && typeof getKeyAttributes == "function") {
+        if (!keyAttributes && getKeyAttributes && srpAttributes) {
             try {
-                keyAttributes = await getKeyAttributes(kek);
+                const result = await getKeyAttributes(srpAttributes, kek);
+                if (result == "redirecting-second-factor") {
+                    // Two factor enabled, user has been redirected to the
+                    // corresponding second factor verification page.
+                    return;
+                } else {
+                    keyAttributes = result;
+                }
             } catch (e) {
-                if (e instanceof Error) {
-                    switch (e.message) {
-                        case CustomError.TWO_FACTOR_ENABLED:
-                            // Two factor enabled, user has been redirected to
-                            // the two-factor verification page.
-                            return;
-
-                        case CustomError.INCORRECT_PASSWORD_OR_NO_ACCOUNT:
-                            log.error("Incorrect password or no account", e);
-                            setFieldError(
-                                t("incorrect_password_or_no_account"),
-                            );
-                            return;
-                    }
+                if (
+                    e instanceof Error &&
+                    e.message == srpVerificationUnauthorizedErrorMessage
+                ) {
+                    log.error("Incorrect password or no account", e);
+                    setFieldError(t("incorrect_password_or_no_account"));
+                    return;
                 }
                 throw e;
             }
@@ -171,20 +196,19 @@ export const VerifyMasterPasswordForm: React.FC<
 
         let key: string;
         try {
-            key = await cryptoWorker.decryptBox(
+            key = await decryptBox(
                 {
                     encryptedData: keyAttributes.encryptedKey,
                     nonce: keyAttributes.keyDecryptionNonce,
                 },
                 kek,
             );
-        } catch (e) {
-            log.warn("Incorrect password", e);
+        } catch {
             setFieldError(t("incorrect_password"));
             return;
         }
 
-        onVerify(key, kek, keyAttributes, passphrase);
+        onVerify(key, kek, keyAttributes, password);
     };
 
     return (
@@ -194,7 +218,7 @@ export const VerifyMasterPasswordForm: React.FC<
                 name="email"
                 autoComplete="username"
                 type="email"
-                value={user?.email}
+                value={userEmail}
             />
             <TextField
                 name="password"
@@ -204,6 +228,7 @@ export const VerifyMasterPasswordForm: React.FC<
                 autoComplete="current-password"
                 label={t("password")}
                 fullWidth
+                autoFocus
                 margin="normal"
                 disabled={formik.isSubmitting}
                 error={!!formik.errors.password}

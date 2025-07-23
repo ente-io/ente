@@ -7,7 +7,6 @@ import {
     type HLSPlaylistDataForFile,
 } from "ente-gallery/services/video";
 import type { EnteFile } from "ente-media/file";
-import { fileCaption, filePublicMagicMetadata } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
 import { ensureString } from "ente-utils/ensure";
 
@@ -69,8 +68,10 @@ export type ItemData = PhotoSwipeSlideData & {
     fileID: number;
     /**
      * The {@link EnteFile} type of the file whose data we are.
+     *
+     * Expected to be one of {@link FileType}.
      */
-    fileType: FileType;
+    fileType: number;
     /**
      * The renderable object URL of the image associated with the file.
      *
@@ -402,12 +403,15 @@ export const forgetItemDataForFileIDIfNeeded = (fileID: number) => {
  * Update the alt attribute of the {@link ItemData}, if any, associated with the
  * given {@link EnteFile}.
  *
- * @param updatedFile The file whose caption was updated.
+ * @param fileID The ID of the file whose {@link alt} attribute we want to
+ * update.
+ *
+ * @param newAlt The new value of the {@link alt} attribute.
  */
-export const updateItemDataAlt = (updatedFile: EnteFile) => {
-    const itemData = _state.itemDataByFileID.get(updatedFile.id);
+export const updateItemDataAlt = (fileID: number, newAlt: string) => {
+    const itemData = _state.itemDataByFileID.get(fileID);
     if (itemData) {
-        itemData.alt = fileCaption(updatedFile);
+        itemData.alt = newAlt;
     }
 };
 
@@ -434,7 +438,7 @@ const enqueueUpdates = async (
     const update = (itemData: Partial<ItemData>, validTill?: Date) => {
         // Use the file's caption as its alt text (in addition to using it as
         // the visible caption).
-        const alt = fileCaption(file);
+        const alt = file.pubMagicMetadata?.data.caption;
 
         _state.itemDataByFileID.set(file.id, {
             ...itemData,
@@ -642,8 +646,7 @@ const thumbnailDimensions = (
     { width: thumbnailWidth, height: thumbnailHeight }: Partial<ItemData>,
     file: EnteFile,
 ) => {
-    const { w: imageWidth, h: imageHeight } =
-        filePublicMagicMetadata(file) ?? {};
+    const { w: imageWidth, h: imageHeight } = file.pubMagicMetadata?.data ?? {};
     if (thumbnailWidth && thumbnailHeight && imageWidth && imageHeight) {
         const arThumb = thumbnailWidth / thumbnailHeight;
         const arImage = imageWidth / imageHeight;
@@ -720,15 +723,15 @@ export const updateFileInfoExifIfNeeded = async (itemData: ItemData) => {
     // We already have it available.
     if (_state.fileInfoExifByFileID.has(fileID)) return;
 
-    const updateNotifyAndReturn = (exifData: FileInfoExif) => {
+    const update = (exifData: FileInfoExif) => {
         _state.fileInfoExifByFileID.set(fileID, exifData);
         _state.exifObserverByFileID.get(fileID)?.(exifData);
-        return exifData;
     };
 
     // For videos, insert a placeholder.
-    if (fileType === FileType.video) {
-        return updateNotifyAndReturn(createPlaceholderFileInfoExif());
+    if (fileType == FileType.video) {
+        update(createPlaceholderFileInfoExif());
+        return;
     }
 
     // This is not a video, but the original image is not available yet.
@@ -738,12 +741,12 @@ export const updateFileInfoExifIfNeeded = async (itemData: ItemData) => {
         const file = new File([originalImageBlob], "");
         const tags = await extractRawExif(file);
         const parsed = parseExif(tags);
-        return updateNotifyAndReturn({ tags, parsed });
+        update({ tags, parsed });
     } catch (e) {
         log.error("Failed to extract exif", e);
         // Save the empty placeholder exif corresponding to the file, no point
         // in unnecessarily retrying this, it will deterministically fail again.
-        return updateNotifyAndReturn(createPlaceholderFileInfoExif());
+        update(createPlaceholderFileInfoExif());
     }
 };
 

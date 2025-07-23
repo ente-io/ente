@@ -53,10 +53,6 @@ export const saveEntities = (type: EntityType, items: LocalUserEntity[]) =>
 export const savedEntities = async (
     type: EntityType,
 ): Promise<LocalUserEntity[]> =>
-    // See: [Note: strict mode migration]
-    //
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
     LocalUserEntity.array().parse((await getKV(entitiesKey(type))) ?? []);
 
 /**

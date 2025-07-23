@@ -108,7 +108,7 @@ export const EnableML: React.FC<EnableMLProps> = ({
         openURL("https://help.ente.io/photos/features/machine-learning");
 
     return (
-        <Stack sx={{ gap: "32px", py: "20px", px: "16px" }}>
+        <Stack sx={{ gap: "32px", py: "20px", px: 2 }}>
             <Typography sx={{ color: "text.muted" }}>
                 {t("ml_search_description")}
             </Typography>
@@ -232,7 +232,7 @@ interface ManageMLProps {
 const ManageML: React.FC<ManageMLProps> = ({ mlStatus, onDisableML }) => {
     const { showMiniDialog } = useBaseContext();
 
-    const { phase, nSyncedFiles, nTotalFiles } = mlStatus;
+    const { phase, phaseFailed, nSyncedFiles, nTotalFiles } = mlStatus;
 
     let status: string;
     switch (phase) {
@@ -249,7 +249,7 @@ const ManageML: React.FC<ManageMLProps> = ({ mlStatus, onDisableML }) => {
             status = t("people");
             break;
         default:
-            status = t("indexing_status_done");
+            status = phaseFailed ? t("error") : t("indexing_status_done");
             break;
     }
 

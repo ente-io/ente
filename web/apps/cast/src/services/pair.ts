@@ -1,4 +1,4 @@
-import { boxSealOpen, generateKeyPair } from "ente-base/crypto";
+import { boxSealOpenBytes, generateKeyPair } from "ente-base/crypto";
 import { ensureOk, publicRequestHeaders } from "ente-base/http";
 import log from "ente-base/log";
 import { apiURL } from "ente-base/origins";
@@ -151,13 +151,10 @@ export const getCastPayload = async (
     // Decrypt it using the private key of the pair and return the plaintext
     // payload, which'll be a JSON object containing the data we need to start a
     // slideshow for some collection.
-    const decryptedCastData = await boxSealOpen(
-        encryptedCastData,
-        publicKey,
-        privateKey,
+    const jsonString = new TextDecoder().decode(
+        await boxSealOpenBytes(encryptedCastData, { publicKey, privateKey }),
     );
-
-    return CastPayload.parse(JSON.parse(atob(decryptedCastData)));
+    return CastPayload.parse(JSON.parse(jsonString));
 };
 
 /**

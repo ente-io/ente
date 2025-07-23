@@ -1,13 +1,26 @@
+import {
+    saveKeyAttributes,
+    updateSavedLocalUser,
+} from "ente-accounts/services/accounts-db";
+import { clearInflightPasskeySessionID } from "ente-accounts/services/passkey";
 import { unstashRedirect } from "ente-accounts/services/redirect";
+import {
+    resetSavedLocalUserTokens,
+    TwoFactorAuthorizationResponse,
+} from "ente-accounts/services/user";
 import { LoadingIndicator } from "ente-base/components/loaders";
-import { fromB64URLSafeNoPaddingString } from "ente-base/crypto/libsodium";
+import { fromB64URLSafeNoPadding } from "ente-base/crypto";
 import log from "ente-base/log";
-import { getData, setData, setLSUser } from "ente-shared/storage/localStorage";
 import { nullToUndefined } from "ente-utils/transform";
 import { useRouter } from "next/router";
 import React, { useEffect } from "react";
 
 /**
+ * The page where the accounts app hands back control to us once the passkey has
+ * been verified.
+ *
+ * See: [Note: Login pages]
+ *
  * [Note: Finish passkey flow in the requesting app]
  *
  * The passkey finish step needs to happen in the context of the client which
@@ -18,14 +31,14 @@ const Page: React.FC = () => {
     const router = useRouter();
 
     useEffect(() => {
-        // Extract response from query params
+        // Extract response from query params.
         const searchParams = new URLSearchParams(window.location.search);
         const passkeySessionID = searchParams.get("passkeySessionID");
         const response = searchParams.get("response");
         if (!passkeySessionID || !response) return;
 
-        void saveCredentialsAndNavigateTo(passkeySessionID, response).then(
-            (slug: string) => router.push(slug),
+        void saveQueryCredentialsAndNavigateTo(passkeySessionID, response).then(
+            (slug) => router.replace(slug),
         );
     }, [router]);
 
@@ -47,13 +60,19 @@ export default Page;
  *
  * @returns the slug that we should navigate to now.
  */
-const saveCredentialsAndNavigateTo = async (
+const saveQueryCredentialsAndNavigateTo = async (
     passkeySessionID: string,
     response: string,
 ) => {
+    // This function's implementation is on the same lines as that of the
+    // `saveCredentialsAndNavigateTo` function in passkey utilities.
+    //
+    // See: [Note: Ending the passkey flow]
+
     const inflightPasskeySessionID = nullToUndefined(
         sessionStorage.getItem("inflightPasskeySessionID"),
     );
+
     if (
         !inflightPasskeySessionID ||
         passkeySessionID != inflightPasskeySessionID
@@ -67,31 +86,21 @@ const saveCredentialsAndNavigateTo = async (
         return "/";
     }
 
-    sessionStorage.removeItem("inflightPasskeySessionID");
+    clearInflightPasskeySessionID();
 
     // Decode response string (inverse of the steps we perform in
     // `passkeyAuthenticationSuccessRedirectURL`).
-    const decodedResponse = JSON.parse(
-        await fromB64URLSafeNoPaddingString(response),
+    const decodedResponse = TwoFactorAuthorizationResponse.parse(
+        JSON.parse(
+            new TextDecoder().decode(await fromB64URLSafeNoPadding(response)),
+        ),
     );
 
-    // Only one of `encryptedToken` or `token` will be present depending on the
-    // account's lifetime:
-    //
-    // - The plaintext "token" will be passed during fresh signups, where we
-    //   don't yet have keys to encrypt it, the account itself is being created
-    //   as we go through this flow.
-    //   TODO(MR): Conceptually this cannot happen. During a _real_ fresh signup
-    //   we'll never enter the passkey verification flow. Remove this code after
-    //   making sure that it doesn't get triggered in cases where an existing
-    //   user goes through the new user flow.
-    //
-    // - The encrypted `encryptedToken` will be present otherwise (i.e. if the
-    //   user is signing into an existing account).
-    const { keyAttributes, encryptedToken, token, id } = decodedResponse;
+    const { id, keyAttributes, encryptedToken } = decodedResponse;
 
-    await setLSUser({ ...getData("user"), token, encryptedToken, id });
-    setData("keyAttributes", keyAttributes);
+    await resetSavedLocalUserTokens(id, encryptedToken);
+    updateSavedLocalUser({ passkeySessionID: undefined });
+    saveKeyAttributes(keyAttributes);
 
     return unstashRedirect() ?? "/credentials";
 };

@@ -12,7 +12,7 @@ import { type LoadingBarRef } from "react-top-loading-bar";
  * loading bar. This hook returns these functions (and the ref).
  */
 export const useLoadingBar = () => {
-    const loadingBarRef = useRef<LoadingBarRef | undefined>(undefined);
+    const loadingBarRef = useRef<LoadingBarRef | null>(null);
 
     const showLoadingBar = useCallback(() => {
         loadingBarRef.current?.continuousStart();

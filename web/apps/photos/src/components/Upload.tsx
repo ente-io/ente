@@ -1,3 +1,8 @@
+// TODO: Audit this file
+// TODO: Too many null assertions in this file. The types need reworking.
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable @typescript-eslint/no-misused-promises */
+/* eslint-disable @typescript-eslint/no-floating-promises */
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import DiscFullIcon from "@mui/icons-material/DiscFull";
 import GoogleIcon from "@mui/icons-material/Google";
@@ -13,6 +18,7 @@ import {
     Typography,
     type DialogProps,
 } from "@mui/material";
+import type { LocalUser } from "ente-accounts/services/user";
 import { isDesktop } from "ente-base/app";
 import { SpacedRow } from "ente-base/components/containers";
 import { DialogCloseIconButton } from "ente-base/components/mui/DialogCloseIconButton";
@@ -26,6 +32,7 @@ import {
 } from "ente-base/components/utils/modal";
 import { useBaseContext } from "ente-base/context";
 import { basename, dirname, joinPath } from "ente-base/file-name";
+import type { PublicAlbumsCredentials } from "ente-base/http";
 import log from "ente-base/log";
 import type { CollectionMapping, Electron, ZipItem } from "ente-base/types/ipc";
 import { type UploadTypeSelectorIntent } from "ente-gallery/components/Upload";
@@ -39,31 +46,32 @@ import {
     type UploadPhase,
 } from "ente-gallery/services/upload";
 import type { ParsedMetadataJSON } from "ente-gallery/services/upload/metadata-json";
-import type { Collection } from "ente-media/collection";
+import {
+    sessionExpiredErrorMessage,
+    storageLimitExceededErrorMessage,
+    subscriptionExpiredErrorMessage,
+} from "ente-gallery/services/upload/upload-service";
+import { CollectionSubType, type Collection } from "ente-media/collection";
 import type { EnteFile } from "ente-media/file";
 import { UploaderNameInput } from "ente-new/albums/components/UploaderNameInput";
+import {
+    savedPublicCollectionUploaderName,
+    savePublicCollectionUploaderName,
+} from "ente-new/albums/services/public-albums-fdb";
 import { CollectionMappingChoice } from "ente-new/photos/components/CollectionMappingChoice";
 import type { CollectionSelectorAttributes } from "ente-new/photos/components/CollectionSelector";
+import type { RemotePullOpts } from "ente-new/photos/components/gallery";
 import { downloadAppDialogAttributes } from "ente-new/photos/components/utils/download";
-import { getLatestCollections } from "ente-new/photos/services/collections";
+import {
+    createAlbum,
+    isHiddenCollection,
+    savedNormalCollections,
+} from "ente-new/photos/services/collection";
 import { redirectToCustomerPortal } from "ente-new/photos/services/user-details";
 import { usePhotosAppContext } from "ente-new/photos/types/context";
-import { CustomError } from "ente-shared/error";
 import { firstNonEmpty } from "ente-utils/array";
 import { t } from "i18next";
-import { GalleryContext } from "pages/gallery";
-import React, {
-    useCallback,
-    useContext,
-    useEffect,
-    useRef,
-    useState,
-} from "react";
-import {
-    getPublicCollectionUID,
-    getPublicCollectionUploaderName,
-    savePublicCollectionUploaderName,
-} from "services/publicCollectionService";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import type {
     InProgressUpload,
     SegregatedFinishedUploads,
@@ -73,14 +81,55 @@ import type {
 } from "services/upload-manager";
 import { uploadManager } from "services/upload-manager";
 import watcher from "services/watch";
-import { SetLoading } from "types/gallery";
-import { getOrCreateAlbum } from "utils/collection";
-import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
 import { UploadProgress } from "./UploadProgress";
 
 interface UploadProps {
-    syncWithRemote: (force?: boolean, silent?: boolean) => Promise<void>;
+    /**
+     * The logged in user, if any.
+     *
+     * This is only expected to be present when we're running it the context of
+     * the photos app, where there is a logged in user. When used by the public
+     * albums app, this prop can be omitted.
+     */
+    user?: LocalUser;
+    /**
+     * The {@link PublicAlbumsCredentials} to use, if any.
+     *
+     * These are expected to be set if we are in the context of the public
+     * albums app, and should be undefined when we're in the photos app context.
+     */
+    publicAlbumsCredentials?: PublicAlbumsCredentials;
+    isFirstUpload?: boolean;
+    uploadTypeSelectorView: boolean;
+    dragAndDropFiles: File[];
+    uploadCollection?: Collection;
+    uploadTypeSelectorIntent: UploadTypeSelectorIntent;
+    activeCollection?: Collection;
     closeUploadTypeSelector: () => void;
+    setLoading: (loading: boolean) => void;
+    setShouldDisableDropzone: (value: boolean) => void;
+    showCollectionSelector?: () => void;
+    /**
+     * Called when the uploader (or the file watcher) wants to perform a full
+     * remote pull.
+     *
+     * See also {@link onRemoteFilesPull}.
+     */
+    onRemotePull: (opts?: RemotePullOpts) => Promise<void>;
+    /**
+     * Called when an action in the uploader requires us to first pull the
+     * latest files and collections from remote.
+     *
+     * See: [Note: Full remote pull vs files pull]
+     *
+     * Specifically, this is used prior to creating a new album, to obtain
+     * (potential) existing albums from remote so that they can be matched by
+     * name if needed.
+     *
+     * This functionality is not needed during uploads to a public album, so
+     * this property is optional; the public albums code need not provide it.
+     */
+    onRemoteFilesPull?: () => Promise<void>;
     /**
      * Show the collection selector with the given {@link attributes}.
      */
@@ -91,9 +140,6 @@ interface UploadProps {
      * Close the collection selector if it is open.
      */
     onCloseCollectionSelector?: () => void;
-    setLoading: SetLoading;
-    setShouldDisableDropzone: (value: boolean) => void;
-    showCollectionSelector?: () => void;
     /**
      * Callback invoked when a file is uploaded.
      *
@@ -107,14 +153,11 @@ interface UploadProps {
      * app, where the scenario requiring this will not arise.
      */
     onShowPlanSelector?: () => void;
-    setCollections?: (cs: Collection[]) => void;
-    isFirstUpload?: boolean;
-    uploadTypeSelectorView: boolean;
-    showSessionExpiredMessage: () => void;
-    dragAndDropFiles: File[];
-    uploadCollection?: Collection;
-    uploadTypeSelectorIntent: UploadTypeSelectorIntent;
-    activeCollection?: Collection;
+    /**
+     * Called when the upload failed because the user's session has expired, and
+     * the Upload component wants to prompt the user to log in again.
+     */
+    onShowSessionExpiredDialog: () => void;
 }
 
 type UploadType = "files" | "folders" | "zips";
@@ -123,19 +166,21 @@ type UploadType = "files" | "folders" | "zips";
  * Top level component that houses the infrastructure for handling uploads.
  */
 export const Upload: React.FC<UploadProps> = ({
+    user,
+    publicAlbumsCredentials,
     isFirstUpload,
     dragAndDropFiles,
+    onRemotePull,
+    onRemoteFilesPull,
+    onOpenCollectionSelector,
+    onCloseCollectionSelector,
     onUploadFile,
     onShowPlanSelector,
-    showSessionExpiredMessage,
+    onShowSessionExpiredDialog,
     ...props
 }) => {
     const { showMiniDialog, onGenericError } = useBaseContext();
     const { showNotification, watchFolderView } = usePhotosAppContext();
-    const galleryContext = useContext(GalleryContext);
-    const publicCollectionGalleryContext = useContext(
-        PublicCollectionGalleryContext,
-    );
 
     const [uploadProgressView, setUploadProgressView] = useState(false);
     const [uploadPhase, setUploadPhase] = useState<UploadPhase>("preparing");
@@ -144,14 +189,15 @@ export const Upload: React.FC<UploadProps> = ({
         finished: 0,
         total: 0,
     });
-    const [inProgressUploads, setInProgressUploads] = useState<
-        InProgressUpload[]
-    >([]);
+    const [inProgressUploads, setInProgressUploads] = useState(
+        new Array<InProgressUpload>(),
+    );
     const [finishedUploads, setFinishedUploads] =
         useState<SegregatedFinishedUploads>(new Map());
     const [percentComplete, setPercentComplete] = useState(0);
     const [hasLivePhotos, setHasLivePhotos] = useState(false);
     const [prefilledNewAlbumName, setPrefilledNewAlbumName] = useState("");
+    const [uploaderName, setUploaderName] = useState("");
 
     const [openCollectionMappingChoice, setOpenCollectionMappingChoice] =
         useState(false);
@@ -228,7 +274,9 @@ export const Upload: React.FC<UploadProps> = ({
      * If set, this will be the name of the collection that our desktop app
      * wishes for us to upload into.
      */
-    const pendingDesktopUploadCollectionName = useRef<string>("");
+    const pendingDesktopUploadCollectionName = useRef<string | undefined>(
+        undefined,
+    );
 
     /**
      * This is set to thue user's choice when the user chooses one of the
@@ -238,7 +286,6 @@ export const Upload: React.FC<UploadProps> = ({
 
     const currentUploadPromise = useRef<Promise<void> | undefined>(undefined);
     const uploadRunning = useRef(false);
-    const uploaderNameRef = useRef("");
     const isDragAndDrop = useRef(false);
 
     /**
@@ -325,12 +372,14 @@ export const Upload: React.FC<UploadProps> = ({
                 setInProgressUploads,
                 setFinishedUploads,
                 setUploadPhase,
+                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                // @ts-ignore
                 setUploadFilenames: setUploadFileNames,
                 setHasLivePhotos,
                 setUploadProgressView,
             },
             onUploadFile,
-            publicCollectionGalleryContext.credentials,
+            publicAlbumsCredentials,
         );
 
         if (uploadManager.isUploadRunning()) {
@@ -344,16 +393,7 @@ export const Upload: React.FC<UploadProps> = ({
                 setDesktopFilePaths(filePaths);
             };
 
-            const requestSyncWithRemote = () => {
-                props.syncWithRemote().catch((e: unknown) => {
-                    log.error(
-                        "Ignoring error when syncing trash changes with remote",
-                        e,
-                    );
-                });
-            };
-
-            watcher.init(upload, requestSyncWithRemote);
+            watcher.init(upload, () => void onRemotePull());
 
             electron.pendingUploads().then((pending) => {
                 if (!pending) return;
@@ -369,7 +409,7 @@ export const Upload: React.FC<UploadProps> = ({
                 setDesktopZipItems(zipItems);
             });
         }
-    }, [publicCollectionGalleryContext.credentials]);
+    }, [publicAlbumsCredentials]);
 
     // Handle selected files when user selects files for upload through the open
     // file / open folder selection dialog, or drag-and-drops them.
@@ -463,13 +503,13 @@ export const Upload: React.FC<UploadProps> = ({
         setDesktopFilePaths([]);
         setDesktopZipItems([]);
 
-        // Remove hidden files (files whose names begins with a ".").
+        // Filter out files whose names begins with a ".".
         const prunedItemAndPaths = allItemAndPaths.filter(
             ([, p]) => !basename(p).startsWith("."),
         );
 
         uploadItemsAndPaths.current = prunedItemAndPaths;
-        if (uploadItemsAndPaths.current.length === 0) {
+        if (uploadItemsAndPaths.current.length == 0) {
             props.setLoading(false);
             return;
         }
@@ -484,17 +524,16 @@ export const Upload: React.FC<UploadProps> = ({
         log.debug(() => ["Import suggestion", importSuggestion]);
 
         const _selectedUploadType = selectedUploadType.current;
-        selectedUploadType.current = null;
+        selectedUploadType.current = undefined;
         props.setLoading(false);
 
         (async () => {
-            if (publicCollectionGalleryContext.credentials) {
-                const uploaderName = await getPublicCollectionUploaderName(
-                    getPublicCollectionUID(
-                        publicCollectionGalleryContext.credentials.accessToken,
-                    ),
+            if (publicAlbumsCredentials) {
+                setUploaderName(
+                    (await savedPublicCollectionUploaderName(
+                        publicAlbumsCredentials.accessToken,
+                    )) ?? "",
                 );
-                uploaderNameRef.current = uploaderName ?? "";
                 showUploaderNameInput();
                 return;
             }
@@ -506,7 +545,7 @@ export const Upload: React.FC<UploadProps> = ({
                         "root",
                         pendingDesktopUploadCollectionName.current,
                     );
-                    pendingDesktopUploadCollectionName.current = null;
+                    pendingDesktopUploadCollectionName.current = undefined;
                 } else {
                     uploadFilesToNewCollections("parent");
                 }
@@ -528,13 +567,14 @@ export const Upload: React.FC<UploadProps> = ({
                 isDragAndDrop.current = false;
                 if (
                     props.activeCollection &&
-                    props.activeCollection.owner.id === galleryContext.user?.id
+                    props.activeCollection.owner.id == user?.id
                 ) {
                     uploadFilesToExistingCollection(props.activeCollection);
                     return;
                 }
             }
 
+            // eslint-disable-next-line @typescript-eslint/no-empty-function
             let showNextModal = () => {};
             if (importSuggestion.hasNestedFolders) {
                 showNextModal = () => setOpenCollectionMappingChoice(true);
@@ -545,17 +585,23 @@ export const Upload: React.FC<UploadProps> = ({
                 };
             }
 
-            props.onOpenCollectionSelector({
+            onOpenCollectionSelector?.({
                 action: "upload",
                 onSelectCollection: uploadFilesToExistingCollection,
                 onCreateCollection: showNextModal,
                 onCancel: handleCollectionSelectorCancel,
             });
         })();
-    }, [webFiles, desktopFiles, desktopFilePaths, desktopZipItems]);
+    }, [
+        publicAlbumsCredentials,
+        webFiles,
+        desktopFiles,
+        desktopFilePaths,
+        desktopZipItems,
+    ]);
 
-    const preCollectionCreationAction = async () => {
-        props.onCloseCollectionSelector?.();
+    const preCollectionCreationAction = () => {
+        onCloseCollectionSelector?.();
         props.setShouldDisableDropzone(uploadManager.isUploadInProgress());
         setUploadPhase("preparing");
         setUploadProgressView(true);
@@ -565,7 +611,7 @@ export const Upload: React.FC<UploadProps> = ({
         collection: Collection,
         uploaderName?: string,
     ) => {
-        await preCollectionCreationAction();
+        preCollectionCreationAction();
         const uploadItemsWithCollection = uploadItemsAndPaths.current.map(
             ([uploadItem, path], index) => ({
                 uploadItem,
@@ -579,23 +625,24 @@ export const Upload: React.FC<UploadProps> = ({
             [collection],
             uploaderName,
         );
-        uploadItemsAndPaths.current = null;
+        uploadItemsAndPaths.current = [];
     };
 
     const uploadFilesToNewCollections = async (
         mapping: CollectionMapping,
         collectionName?: string,
     ) => {
-        await preCollectionCreationAction();
+        preCollectionCreationAction();
         let uploadItemsWithCollection: UploadItemWithCollection[] = [];
-        const collections: Collection[] = [];
         let collectionNameToUploadItems = new Map<
             string,
             UploadItemAndPath[]
         >();
         if (mapping == "root") {
             collectionNameToUploadItems.set(
-                collectionName,
+                // Un-enforced convention is that collectionName is always set
+                // when mapping is "root". TODO: Reflect this in types.
+                collectionName!,
                 uploadItemsAndPaths.current,
             );
         } else {
@@ -604,19 +651,21 @@ export const Upload: React.FC<UploadProps> = ({
                 collectionName,
             );
         }
+        const collections: Collection[] = [];
         try {
-            const existingCollections = await getLatestCollections();
+            await onRemoteFilesPull!();
+            const existingCollections = await savedNormalCollections();
             let index = 0;
             for (const [
                 collectionName,
                 uploadItems,
             ] of collectionNameToUploadItems) {
-                const collection = await getOrCreateAlbum(
+                const collection = await matchExistingOrCreateAlbum(
                     collectionName,
+                    user!,
                     existingCollections,
                 );
                 collections.push(collection);
-                props.setCollections([...existingCollections, ...collections]);
                 uploadItemsWithCollection = [
                     ...uploadItemsWithCollection,
                     ...uploadItems.map(([uploadItem, path]) => ({
@@ -633,7 +682,7 @@ export const Upload: React.FC<UploadProps> = ({
             return;
         }
         await waitInQueueAndUploadFiles(uploadItemsWithCollection, collections);
-        uploadItemsAndPaths.current = null;
+        uploadItemsAndPaths.current = [];
     };
 
     const waitInQueueAndUploadFiles = async (
@@ -658,13 +707,13 @@ export const Upload: React.FC<UploadProps> = ({
     ) => {
         uploadManager.prepareForNewUpload(parsedMetadataJSONMap);
         setUploadProgressView(true);
-        await props.syncWithRemote(true, true);
+        await onRemotePull({ silent: true });
     };
 
     function postUploadAction() {
         props.setShouldDisableDropzone(false);
         uploadRunning.current = false;
-        props.syncWithRemote();
+        void onRemotePull();
     }
 
     const uploadFiles = async (
@@ -684,7 +733,7 @@ export const Upload: React.FC<UploadProps> = ({
                     collections,
                     uploadItemsWithCollection
                         .map(({ uploadItem }) => uploadItem)
-                        .filter((x) => x),
+                        .filter((x) => x !== undefined),
                 );
             }
             const wereFilesProcessed = await uploadManager.uploadItems(
@@ -695,10 +744,7 @@ export const Upload: React.FC<UploadProps> = ({
             if (!wereFilesProcessed) closeUploadProgress();
             if (isDesktop) {
                 if (watcher.isUploadRunning()) {
-                    await watcher.allFileUploadsDone(
-                        uploadItemsWithCollection,
-                        collections,
-                    );
+                    await watcher.allFileUploadsDone(uploadItemsWithCollection);
                 } else if (watcher.isSyncPaused()) {
                     // Resume folder watch after the user upload that
                     // interrupted it is done.
@@ -707,8 +753,8 @@ export const Upload: React.FC<UploadProps> = ({
             }
         } catch (e) {
             log.error("Failed to upload files", e);
-            showUserFacingError(e.message);
             closeUploadProgress();
+            notifyUser(e);
         } finally {
             postUploadAction();
         }
@@ -724,19 +770,19 @@ export const Upload: React.FC<UploadProps> = ({
             await uploadManager.uploadItems(items, collections, uploaderName);
         } catch (e) {
             log.error("Retrying failed uploads failed", e);
-            showUserFacingError(e.message);
             closeUploadProgress();
+            notifyUser(e);
         } finally {
             postUploadAction();
         }
     };
 
-    function showUserFacingError(err: string) {
-        switch (err) {
-            case CustomError.SESSION_EXPIRED:
-                showSessionExpiredMessage();
+    const notifyUser = (e: unknown) => {
+        switch (e instanceof Error && e.message) {
+            case sessionExpiredErrorMessage:
+                onShowSessionExpiredDialog();
                 break;
-            case CustomError.SUBSCRIPTION_EXPIRED:
+            case subscriptionExpiredErrorMessage:
                 showNotification({
                     color: "critical",
                     captionFirst: true,
@@ -745,7 +791,7 @@ export const Upload: React.FC<UploadProps> = ({
                     onClick: redirectToCustomerPortal,
                 });
                 break;
-            case CustomError.STORAGE_QUOTA_EXCEEDED:
+            case storageLimitExceededErrorMessage:
                 showNotification({
                     color: "critical",
                     captionFirst: true,
@@ -761,7 +807,7 @@ export const Upload: React.FC<UploadProps> = ({
                     title: t("generic_error_retry"),
                 });
         }
-    }
+    };
 
     const uploadToSingleNewCollection = (collectionName: string) => {
         uploadFilesToNewCollections("root", collectionName);
@@ -791,16 +837,16 @@ export const Upload: React.FC<UploadProps> = ({
         }
     };
 
-    const handlePublicUpload = async (uploaderName: string) => {
+    const handlePublicUpload = (uploaderName: string) => {
         savePublicCollectionUploaderName(
-            getPublicCollectionUID(
-                publicCollectionGalleryContext.credentials.accessToken,
-            ),
+            publicAlbumsCredentials!.accessToken,
             uploaderName,
         );
 
-        await uploadFilesToExistingCollection(
-            props.uploadCollection,
+        // Do not keep the uploader name input dialog open while the upload is
+        // progressing (the upload progress indicator will take out now).
+        void uploadFilesToExistingCollection(
+            props.uploadCollection!,
             uploaderName,
         );
     };
@@ -808,7 +854,7 @@ export const Upload: React.FC<UploadProps> = ({
     const handleCollectionMappingSelect = (mapping: CollectionMapping) =>
         uploadFilesToNewCollections(
             mapping,
-            importSuggestion.rootFolderName ??
+            importSuggestion.rootFolderName ||
                 t("autogenerated_default_album_name"),
         );
 
@@ -829,6 +875,7 @@ export const Upload: React.FC<UploadProps> = ({
             <UploadTypeSelector
                 open={props.uploadTypeSelectorView}
                 onClose={props.closeUploadTypeSelector}
+                publicAlbumsCredentials={publicAlbumsCredentials}
                 intent={props.uploadTypeSelectorIntent}
                 pendingUploadType={
                     isInputPending ? selectedUploadType.current : undefined
@@ -839,7 +886,7 @@ export const Upload: React.FC<UploadProps> = ({
                 open={uploadProgressView}
                 onClose={closeUploadProgress}
                 percentComplete={percentComplete}
-                uploadFileNames={uploadFileNames}
+                uploadFileNames={uploadFileNames!}
                 uploadCounter={uploadCounter}
                 uploadPhase={uploadPhase}
                 inProgressUploads={inProgressUploads}
@@ -852,7 +899,6 @@ export const Upload: React.FC<UploadProps> = ({
                 {...newAlbumNameInputVisibilityProps}
                 title={t("new_album")}
                 label={t("album_name")}
-                autoFocus
                 initialValue={prefilledNewAlbumName}
                 submitButtonTitle={t("create")}
                 onSubmit={uploadToSingleNewCollection}
@@ -860,8 +906,8 @@ export const Upload: React.FC<UploadProps> = ({
             <UploaderNameInput
                 open={uploaderNameInputVisibilityProps.open}
                 onClose={handleUploaderNameInputClose}
-                uploaderName={uploaderNameRef.current}
-                uploadFileCount={uploadItemsAndPaths.current?.length ?? 0}
+                uploaderName={uploaderName}
+                uploadFileCount={uploadItemsAndPaths.current.length}
                 onSubmit={handlePublicUpload}
             />
         </>
@@ -953,7 +999,7 @@ const defaultImportSuggestion: ImportSuggestion = {
 };
 
 const deriveImportSuggestion = (
-    uploadType: UploadType,
+    uploadType: UploadType | undefined,
     paths: string[],
 ): ImportSuggestion => {
     if (isDesktop && uploadType == "files") {
@@ -965,8 +1011,8 @@ const deriveImportSuggestion = (
     );
     const separatorCount = (s: string) => separatorCounts.get(s)!;
     paths.sort((path1, path2) => separatorCount(path1) - separatorCount(path2));
-    const firstPath = paths[0];
-    const lastPath = paths[paths.length - 1];
+    const firstPath = paths[0]!;
+    const lastPath = paths[paths.length - 1]!;
 
     const L = firstPath.length;
     let i = 0;
@@ -989,9 +1035,42 @@ const deriveImportSuggestion = (
     }
 
     return {
-        rootFolderName: commonPathPrefix || null,
+        rootFolderName: commonPathPrefix || "",
         hasNestedFolders: firstFileFolder !== lastFileFolder,
     };
+};
+
+const matchExistingOrCreateAlbum = async (
+    albumName: string,
+    user: LocalUser,
+    existingCollections: Collection[],
+) => {
+    for (const collection of existingCollections) {
+        if (
+            // Name matches
+            collection.name == albumName &&
+            // Valid types
+            (collection.type == "album" ||
+                collection.type == "folder" ||
+                collection.type == "uncategorized") &&
+            // Not hidden
+            !isHiddenCollection(collection) &&
+            // Not a quicklink
+            collection.magicMetadata?.data.subType !=
+                CollectionSubType.quicklink &&
+            // Owned by user
+            collection.owner.id == user.id
+        ) {
+            log.info(
+                `Found existing album ${albumName} with id ${collection.id}`,
+            );
+            return collection;
+        }
+    }
+
+    const collection = await createAlbum(albumName);
+    log.info(`Created new album ${albumName} with id ${collection.id}`);
+    return collection;
 };
 
 const setPendingUploads = async (
@@ -1010,7 +1089,7 @@ const setPendingUploads = async (
         and on next upload we can directly start uploading to this collection
     */
     if (collections.length == 1) {
-        collectionName = collections[0].name;
+        collectionName = collections[0]!.name;
     }
 
     const filePaths: string[] = [];
@@ -1044,7 +1123,7 @@ type UploadTypeSelectorProps = ModalVisibilityProps & {
      * Called when the user selects one of the options.
      */
     onSelect: (type: UploadType) => void;
-};
+} & Pick<UploadProps, "publicAlbumsCredentials">;
 
 /**
  * Request the user to specify which type of file / folder / zip it is that they
@@ -1058,38 +1137,26 @@ type UploadTypeSelectorProps = ModalVisibilityProps & {
 const UploadTypeSelector: React.FC<UploadTypeSelectorProps> = ({
     open,
     onClose,
+    publicAlbumsCredentials,
     intent,
     pendingUploadType,
     onSelect,
 }) => {
-    const publicCollectionGalleryContext = useContext(
-        PublicCollectionGalleryContext,
-    );
-
     // Directly show the file selector for the public albums app on likely
     // mobile devices.
     const directlyShowUploadFiles = useIsTouchscreen();
 
     useEffect(() => {
-        if (
-            open &&
-            directlyShowUploadFiles &&
-            publicCollectionGalleryContext.credentials
-        ) {
+        if (open && directlyShowUploadFiles && publicAlbumsCredentials) {
             onSelect("files");
             onClose();
         }
-    }, [open]);
+    }, [open, publicAlbumsCredentials]);
 
-    const handleClose: DialogProps["onClose"] = (_, reason) => {
+    const handleClose: DialogProps["onClose"] = () => {
         // Disable backdrop clicks and esc keypresses if a selection is pending
         // processing so that the user doesn't inadvertently close the dialog.
-        if (
-            pendingUploadType &&
-            (reason == "backdropClick" || reason == "escapeKeyDown")
-        ) {
-            return;
-        }
+        if (pendingUploadType) return;
         onClose();
     };
 
@@ -1148,20 +1215,22 @@ const UploadOptions: React.FC<UploadOptionsProps> = ({
                 onSelect("folders");
                 break;
             case "zips":
-                !showTakeoutOptions
-                    ? setShowTakeoutOptions(true)
-                    : onSelect("zips");
+                if (!showTakeoutOptions) {
+                    setShowTakeoutOptions(true);
+                } else {
+                    onSelect("zips");
+                }
                 break;
         }
     };
 
-    return !showTakeoutOptions ? (
+    return showTakeoutOptions ? (
+        <TakeoutOptions onSelect={handleSelect} onClose={handleTakeoutClose} />
+    ) : (
         <DefaultOptions
             {...{ intent, pendingUploadType, onClose }}
             onSelect={handleSelect}
         />
-    ) : (
-        <TakeoutOptions onSelect={handleSelect} onClose={handleTakeoutClose} />
     );
 };
 
