@@ -2,7 +2,7 @@ import AVFoundation
 import Flutter
 import UIKit
 import app_links
-import workmanager_apple
+import workmanager
 
 @main
 @objc class AppDelegate: FlutterAppDelegate {

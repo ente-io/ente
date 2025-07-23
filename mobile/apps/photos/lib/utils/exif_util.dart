@@ -1,13 +1,8 @@
 import "dart:async";
-import "dart:developer";
 import "dart:io";
 
 import "package:computer/computer.dart";
 import 'package:exif_reader/exif_reader.dart';
-import "package:ffmpeg_kit_flutter/ffprobe_kit.dart";
-import "package:ffmpeg_kit_flutter/media_information.dart";
-import "package:ffmpeg_kit_flutter/media_information_session.dart";
-import "package:flutter/foundation.dart";
 import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
 // ignore: implementation_imports
@@ -15,8 +10,8 @@ import "package:motion_photos/src/xmp_extractor.dart";
 import "package:photos/models/ffmpeg/ffprobe_props.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/location/location.dart";
+import "package:photos/services/isolated_ffmpeg_service.dart";
 import "package:photos/services/location_service.dart";
-import "package:photos/utils/ffprobe_util.dart";
 import 'package:photos/utils/file_util.dart';
 
 const kDateTimeOriginal = "EXIF DateTimeOriginal";
@@ -74,45 +69,16 @@ Map<String, dynamic> _getXMPComputer(Map<String, dynamic> args) {
 Future<FFProbeProps?> getVideoPropsAsync(File originalFile) async {
   try {
     final stopwatch = Stopwatch()..start();
-    final Map<int, StringBuffer> logs = {};
-    final completer = Completer<MediaInformation?>();
 
-    final session = await FFprobeKit.getMediaInformationAsync(
-      originalFile.path,
-      (MediaInformationSession session) async {
-        // This callback is called when the session is complete
-        final mediaInfo = session.getMediaInformation();
-        if (mediaInfo == null) {
-          _logger.warning("Failed to get video metadata");
-          final failStackTrace = await session.getFailStackTrace();
-          final output = await session.getOutput();
-          _logger.warning(
-            'Failed to get video metadata. failStackTrace=$failStackTrace, output=$output',
-          );
-        }
-        completer.complete(mediaInfo);
-      },
-      (log) {
-        // put log messages into a map
-        logs.putIfAbsent(log.getSessionId(), () => StringBuffer());
-        logs[log.getSessionId()]!.write(log.getMessage());
-      },
-    );
-
-    // Wait for the session to complete
-    await session.getReturnCode();
-    final mediaInfo = await completer.future;
-    if (kDebugMode) {
-      log("uncomment below line to see ffprobe logs");
-      // logs.forEach((key, value) {
-      //   log("log for session $key: $value", name: "FFprobeKit");
-      // });
-    }
-    if (mediaInfo == null) {
+    final mediaInfo =
+        await IsolatedFfmpegService.getVideoInfo(originalFile.path);
+    if (mediaInfo.isEmpty) {
       return null;
     }
-    final properties = await FFProbeUtil.getProperties(mediaInfo);
+
+    final properties = await FFProbeProps.parseData(mediaInfo);
     _logger.info("getVideoPropsAsync took ${stopwatch.elapsedMilliseconds}ms");
+
     stopwatch.stop();
     return properties;
   } catch (e, s) {
