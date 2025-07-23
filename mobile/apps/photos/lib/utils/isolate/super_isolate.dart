@@ -10,6 +10,7 @@ import "package:photos/models/base/id.dart";
 import "package:photos/utils/isolate/isolate_operations.dart";
 import "package:synchronized/synchronized.dart";
 
+@pragma('vm:entry-point')
 abstract class SuperIsolate {
   Logger get logger;
 
