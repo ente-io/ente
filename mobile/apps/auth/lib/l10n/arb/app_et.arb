@@ -11,6 +11,7 @@
   "setupFirstAccount": "Lisa oma esimene kasutajakonto",
   "importScanQrCode": "Skanneeri QR-koodi",
   "qrCode": "QR-kood",
+  "importEnterSetupKey": "Sisesta seadistusvõti",
   "importAccountPageTitle": "Sisesta kasutajakonto üksikasjad",
   "secretCanNotBeEmpty": "Saladus ei tohi jääda tühjaks",
   "bothIssuerAndAccountCanNotBeEmpty": "Nii kasutajakonto kui väljaandja ei tohi tühjaks jääda",
@@ -32,6 +33,7 @@
       }
     }
   },
+  "codeAccountHint": "Kasutajakonto (sina@domeen.com)",
   "codeTagHint": "Silt",
   "accountKeyType": "Võtme tüüp",
   "sessionExpired": "Sessioon on aegunud",
@@ -40,7 +42,12 @@
   },
   "pleaseLoginAgain": "Palun logi uuesti sisse",
   "loggingOut": "Väljalogimine...",
+  "timeBasedKeyType": "Ajapõhine (TOTP)",
+  "counterBasedKeyType": "Loenduripõhine (HOTP)",
   "saveAction": "Salvesta",
+  "nextTotpTitle": "järgmine",
+  "deleteCodeTitle": "Kas kustutame koodi?",
+  "deleteCodeMessage": "Kas sa oled kindel, et soovid selle koodi kustutada? Seda tegevust ei saa tagasi pöörata.",
   "trash": "Prügikast",
   "viewLogsAction": "Vaata logisid",
   "preparingLogsTitle": "Valmistan logisid ette...",
@@ -56,7 +63,18 @@
   "copyEmailAction": "Kopeeri e-posti aadress",
   "exportLogsAction": "Ekspordi logid",
   "reportABug": "Teata veast",
-  "contactSupport": "Võtke ühendust klienditoega",
+  "crashAndErrorReporting": "Teatamine vigadest ja kokkujooksmistest",
+  "reportBug": "Teata veast",
+  "emailUsMessage": "Saada meile e-kiri aadressile {email}",
+  "@emailUsMessage": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "contactSupport": "Võta ühendust klienditoega",
+  "rateUsOnStore": "Arvusta meid rakendustepoes: {storeName}",
   "blog": "Blogi",
   "verifyPassword": "Korda salasõna",
   "pleaseWait": "Palun oota...",
@@ -70,8 +88,13 @@
   "changeEmail": "Muuda e-posti aadressi",
   "changePassword": "Muuda salasõna",
   "data": "Andmed",
+  "importCodes": "Impordi koode",
+  "importTypePlainText": "Votmindamata tekstina",
+  "importTypeEnteEncrypted": "Ente krüptitud ekspordina",
   "passwordForDecryptingExport": "Salasõna eksporditud andmete dekrüptimiseks",
   "passwordEmptyError": "Salasõna väli ei saa olla tühi",
+  "importFromApp": "Impordi koodid rakendusest {appName}",
+  "selectFile": "Vali fail",
   "ok": "Sobib",
   "cancel": "Katkesta",
   "yes": "Jah",

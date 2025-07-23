@@ -1427,12 +1427,20 @@ class CollectionsService {
       }
       // group files by collectionID
       final Map<int, List<EnteFile>> filesByCollection = {};
+      final Map<int, Set<int>> fileSeenByCollection = {};
       for (final file in filesToCopy) {
-        if (filesByCollection.containsKey(file.collectionID!)) {
-          filesByCollection[file.collectionID!]!.add(file.copyWith());
-        } else {
-          filesByCollection[file.collectionID!] = [file.copyWith()];
+        fileSeenByCollection.putIfAbsent(file.collectionID!, () => <int>{});
+        if (fileSeenByCollection[file.collectionID]!
+            .contains(file.uploadedFileID)) {
+          _logger.warning(
+            "skip copy, duplicate ID: ${file.uploadedFileID} in collection "
+            "${file.collectionID}",
+          );
+          continue;
         }
+        filesByCollection
+            .putIfAbsent(file.collectionID!, () => [])
+            .add(file.copyWith());
       }
       for (final entry in filesByCollection.entries) {
         final srcCollectionID = entry.key;
@@ -1579,9 +1587,6 @@ class CollectionsService {
       params["files"] = [];
       for (final batchFile in batch) {
         final fileKey = getFileKey(batchFile);
-        _logger.info(
-          "srcCollection : $srcCollectionID  file: ${batchFile.uploadedFileID}  key: ${CryptoUtil.bin2base64(fileKey)} ",
-        );
         final encryptedKeyData =
             CryptoUtil.encryptSync(fileKey, getCollectionKey(dstCollectionID));
         batchFile.encryptedKey =
@@ -1643,17 +1648,27 @@ class CollectionsService {
     );
     final List<EnteFile> filesToCopy = [];
     final List<EnteFile> filesToAdd = [];
+    final Set<int> seenForAdd = {};
+    final Set<int> seenForCopy = {};
+
     for (final EnteFile file in othersFile) {
-      if (hashToUserFile.containsKey(file.hash ?? '')) {
-        final userFile = hashToUserFile[file.hash]!;
-        if (userFile.fileType == file.fileType) {
-          filesToAdd.add(userFile);
-        } else {
-          filesToCopy.add(file);
-        }
-      } else {
-        filesToCopy.add(file);
+      final userFile = hashToUserFile[file.hash ?? ''];
+      final bool shouldAdd =
+          userFile != null && userFile.fileType == file.fileType;
+      final targetList = shouldAdd ? filesToAdd : filesToCopy;
+      final seenSet = shouldAdd ? seenForAdd : seenForCopy;
+      final fileToProcess = shouldAdd ? userFile : file;
+      final uploadID = fileToProcess.uploadedFileID;
+
+      if (seenSet.contains(uploadID)) {
+        final action = shouldAdd ? "adding" : "copying";
+        _logger.warning(
+          "skip $action file $uploadID as it is already ${action}ed",
+        );
+        continue;
       }
+      targetList.add(fileToProcess);
+      seenSet.add(uploadID!);
     }
     return (filesToAdd, filesToCopy);
   }

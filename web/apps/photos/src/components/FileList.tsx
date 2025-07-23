@@ -1,4 +1,3 @@
-// TODO: Audit this file
 import AlbumOutlinedIcon from "@mui/icons-material/AlbumOutlined";
 import FavoriteRoundedIcon from "@mui/icons-material/FavoriteRounded";
 import PlayCircleOutlineOutlinedIcon from "@mui/icons-material/PlayCircleOutlineOutlined";
@@ -13,7 +12,6 @@ import { downloadManager } from "ente-gallery/services/download";
 import type { EnteFile } from "ente-media/file";
 import { fileDurationString } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
-import { GAP_BTW_TILES } from "ente-new/photos/components/FileList";
 import type { GalleryBarMode } from "ente-new/photos/components/gallery/reducer";
 import {
     LoadingThumbnail,
@@ -22,6 +20,7 @@ import {
 import { TileBottomTextOverlay } from "ente-new/photos/components/Tiles";
 import {
     computeThumbnailGridLayoutParams,
+    thumbnailGap,
     type ThumbnailGridLayoutParams,
 } from "ente-new/photos/components/utils/thumbnail-grid-layout";
 import { PseudoCollectionID } from "ente-new/photos/services/collection-summary";
@@ -74,54 +73,55 @@ export interface FileListHeaderOrFooter {
  * Data needed to render each row in the variable size list that comprises the
  * file list.
  */
-type FileListItem = {
-    /**
-     * The height of the row that will render this item.
-     */
-    height: number;
-    /**
-     * An optional tag that can be used to identify item types for conditional
-     * behaviour.
-     */
-    tag?: "date" | "file" | "span";
-    /**
-     * Groups of items that are shown in the row.
-     *
-     * Each group spans multiple columns (the number of columns being given by
-     * the length of {@link annotatedFiles} or the {@link span}). Groups are
-     * separated by gaps.
-     */
-    fGroups?: {
-        /**
-         * The annotated files in this group.
-         */
-        annotatedFiles: FileListAnnotatedFile[];
-        /**
-         * The index of the first annotated file in the component's global list
-         * of annotated files.
-         */
-        annotatedFilesStartIndex: number;
-    }[];
-    dGroups?: {
-        /**
-         * The date string to show.
-         */
-        date: string;
-        /**
-         * The number of columns to span.
-         */
-        dateSpan: number;
-    }[];
-    items?: FileListAnnotatedFile[];
-    itemStartIndex?: number;
-    date?: string | null;
-    dates?: { date: string; span: number }[];
-    groups?: number[];
-    /**
-     * The React component that is the rendered representation of the item.
-     */
-    component?: React.ReactNode;
-} & Pick<FileListHeaderOrFooter, "extendToInlineEdges">;
+type FileListItem =
+    | {
+          type: "file";
+          /**
+           * The height of the row that will render this item.
+           */
+          height: number;
+          /**
+           * Groups of items that are shown in the row.
+           *
+           * Each group spans multiple columns (the number of columns being given by
+           * the length of {@link annotatedFiles} or the {@link span}). Groups are
+           * separated by gaps.
+           */
+          groups: {
+              /**
+               * The annotated files in this group.
+               */
+              annotatedFiles: FileListAnnotatedFile[];
+              /**
+               * The index of the first annotated file in the component's global list
+               * of annotated files.
+               */
+              annotatedFilesStartIndex: number;
+          }[];
+      }
+    | {
+          type: "date";
+          height: number;
+          groups: {
+              /**
+               * The date string to show.
+               */
+              date: string;
+              /**
+               * The number of columns to span.
+               */
+              dateSpan: number;
+          }[];
+      }
+    | {
+          type: "span";
+          height: number;
+          /**
+           * The React component that is the rendered representation of the item.
+           */
+          component: React.ReactNode;
+          extendToInlineEdges?: boolean;
+      };
 
 export interface FileListAnnotatedFile {
     file: EnteFile;
@@ -297,8 +297,8 @@ export const FileList: React.FC<FileListProps> = ({
                 batch(annotatedFiles, columns).map(
                     (batchFiles, batchIndex) => ({
                         height: fileItemHeight,
-                        tag: "file",
-                        fGroups: [
+                        type: "file",
+                        groups: [
                             {
                                 annotatedFiles: batchFiles,
                                 annotatedFilesStartIndex: batchIndex * columns,
@@ -314,8 +314,8 @@ export const FileList: React.FC<FileListProps> = ({
             const createFileItem = (splits: FileListAnnotatedFile[][]) =>
                 ({
                     height: fileItemHeight,
-                    tag: "file",
-                    fGroups: splits.map((split) => {
+                    type: "file",
+                    groups: splits.map((split) => {
                         const group = {
                             annotatedFiles: split,
                             annotatedFilesStartIndex: fileIndex,
@@ -331,8 +331,8 @@ export const FileList: React.FC<FileListProps> = ({
                     // splits is less than the number of columns.
                     items.push({
                         height: dateListItemHeight,
-                        tag: "date",
-                        dGroups: splits.map((s) => ({
+                        type: "date",
+                        groups: splits.map((s) => ({
                             date: s[0]!.timelineDateString,
                             dateSpan: s.length,
                         })),
@@ -343,8 +343,8 @@ export const FileList: React.FC<FileListProps> = ({
                     // might be more than what fits a single row.
                     items.push({
                         height: dateListItemHeight,
-                        tag: "date",
-                        dGroups: splits.map((s) => ({
+                        type: "date",
+                        groups: splits.map((s) => ({
                             date: s[0]!.timelineDateString,
                             dateSpan: columns,
                         })),
@@ -391,7 +391,7 @@ export const FileList: React.FC<FileListProps> = ({
         if (!annotatedFiles.length) {
             items.push({
                 height: height - 48,
-                tag: "span",
+                type: "span",
                 component: (
                     <NoFilesListItem>
                         <Typography sx={{ color: "text.faint" }}>
@@ -410,7 +410,7 @@ export const FileList: React.FC<FileListProps> = ({
         if (leftoverHeight > 0) {
             items.push({
                 height: leftoverHeight,
-                tag: "span",
+                type: "span",
                 component: <></>,
             });
         }
@@ -432,8 +432,6 @@ export const FileList: React.FC<FileListProps> = ({
         // Refresh list
         listRef.current?.resetAfterIndex(0);
     }, [items]);
-
-    // TODO: Too many non-null assertions
 
     useEffect(() => {
         const notSelectedFiles = annotatedFiles.filter(
@@ -570,10 +568,10 @@ export const FileList: React.FC<FileListProps> = ({
     const renderListItem = useCallback(
         (item: FileListItem, isScrolling: boolean) => {
             const haveSelection = selected.count > 0;
-            switch (item.tag) {
+            switch (item.type) {
                 case "date":
                     return intersperseWithGaps(
-                        item.dGroups!,
+                        item.groups,
                         ({ date, dateSpan }) => [
                             <DateListItem key={date} span={dateSpan}>
                                 {haveSelection && (
@@ -597,7 +595,7 @@ export const FileList: React.FC<FileListProps> = ({
                     );
                 case "file":
                     return intersperseWithGaps(
-                        item.fGroups!,
+                        item.groups,
                         ({ annotatedFiles, annotatedFilesStartIndex }) =>
                             annotatedFiles.map((annotatedFile, j) => {
                                 const file = annotatedFile.file;
@@ -656,7 +654,7 @@ export const FileList: React.FC<FileListProps> = ({
                             <div key={`${annotatedFilesStartIndex}-gap`} />
                         ),
                     );
-                default:
+                case "span":
                     return item.component;
             }
         },
@@ -692,12 +690,12 @@ export const FileList: React.FC<FileListProps> = ({
 
     const itemKey = useCallback((index: number, itemData: FileListItemData) => {
         const item = itemData.items[index]!;
-        switch (item.tag) {
+        switch (item.type) {
             case "date":
-                return `date-${item.dGroups![0]!.date}-${index}`;
+                return `date-${item.groups[0]!.date}-${index}`;
             case "file":
-                return `file-${item.fGroups![0]!.annotatedFilesStartIndex}-${index}`;
-            default:
+                return `file-${item.groups[0]!.annotatedFilesStartIndex}-${index}`;
+            case "span":
                 return `span-${index}`;
         }
     }, []);
@@ -723,9 +721,6 @@ export const FileList: React.FC<FileListProps> = ({
     }
 
     return (
-        // TODO(RE):
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
         <VariableSizeList
             key={key}
             ref={listRef}
@@ -791,7 +786,7 @@ const asFullSpanFileListItem = ({
     ...rest
 }: FileListHeaderOrFooter): FileListItem => ({
     ...rest,
-    tag: "span",
+    type: "span",
     component: <FullSpanListItem>{component}</FullSpanListItem>,
 });
 
@@ -840,24 +835,23 @@ const FileListRow = memo(
 
         const item = items[index]!;
         const itemSpans = (() => {
-            switch (item.tag) {
+            switch (item.type) {
                 case "date":
-                    return item.dGroups!.map((g) => g.dateSpan);
+                    return item.groups.map((g) => g.dateSpan);
                 case "file":
-                    return item.fGroups!.map((g) => g.annotatedFiles.length);
-                default:
+                    return item.groups.map((g) => g.annotatedFiles.length);
+                case "span":
                     return [];
             }
         })();
+        const px =
+            item.type == "span" && item.extendToInlineEdges ? 0 : paddingInline;
 
         return (
             <Box
                 style={style}
                 sx={[
-                    {
-                        width: "100%",
-                        paddingInline: `${item.extendToInlineEdges ? 0 : paddingInline}px`,
-                    },
+                    { width: "100%", paddingInline: `${px}px` },
                     itemSpans.length > 0 && {
                         display: "grid",
                         gridTemplateColumns: itemSpans
@@ -1040,7 +1034,7 @@ const FileThumbnail: React.FC<FileThumbnailProps> = ({
 const FileThumbnail_ = styled("div")<{ disabled: boolean }>`
     display: flex;
     width: fit-content;
-    margin-bottom: ${GAP_BTW_TILES}px;
+    margin-bottom: ${thumbnailGap}px;
     min-width: 100%;
     overflow: hidden;
     position: relative;
