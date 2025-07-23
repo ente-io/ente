@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/ente-io/museum/ente/base"
+	"github.com/lib/pq"
 	"github.com/spf13/viper"
 
 	"github.com/ente-io/museum/ente"
@@ -117,7 +118,7 @@ func (pcr *FileLinkRepository) DisableLinkForFiles(ctx context.Context, fileIDs 
 		return nil
 	}
 	query := `UPDATE public_file_tokens SET is_disabled = TRUE WHERE file_id = ANY($1)`
-	_, err := pcr.DB.ExecContext(ctx, query, fileIDs)
+	_, err := pcr.DB.ExecContext(ctx, query, pq.Array(fileIDs))
 	if err != nil {
 		return stacktrace.Propagate(err, "failed to disable public file links")
 	}
