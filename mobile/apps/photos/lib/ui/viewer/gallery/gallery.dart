@@ -231,8 +231,8 @@ class GalleryState extends State<Gallery> {
       _setFilesAndReload(result.files);
       if (result.hasMore) {
         final result = await _loadFiles();
-        _setScrollController(allFilesLoaded: true);
         _setFilesAndReload(result.files);
+        _setScrollController(allFilesLoaded: true);
       } else {
         _setScrollController(allFilesLoaded: true);
       }
@@ -324,6 +324,7 @@ class GalleryState extends State<Gallery> {
     } else {
       _scrollController = ScrollController();
     }
+    setState(() {});
   }
 
   void _selectedFilesListener() {
