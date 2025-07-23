@@ -28,7 +28,6 @@ extension EntityTypeExtn on EntityType {
     switch (this) {
       case EntityType.location:
       case EntityType.person:
-      case EntityType.smartAlbum:
         return false;
       default:
         return true;
