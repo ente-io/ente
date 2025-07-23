@@ -163,7 +163,7 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget> {
           }
         }
         if (fileForFaceCrop == null) {
-          _logger.warning(
+          _logger.severe(
             "No suitable file found for face crop for person: ${widget.personId} or cluster: ${widget.clusterID}",
           );
           return null;
@@ -176,7 +176,7 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget> {
         clusterID: widget.clusterID,
       );
       if (face == null) {
-        debugPrint(
+        _logger.severe(
           "No cover face for person: ${widget.personId} or cluster ${widget.clusterID} and fileID ${fileForFaceCrop.uploadedFileID!}",
         );
         return null;
@@ -188,7 +188,13 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget> {
         personOrClusterID: personOrClusterId,
         useTempCache: false,
       );
-      return cropMap?[face.faceID];
+      final result = cropMap?[face.faceID];
+      if (result == null) {
+        _logger.severe(
+          "Null cover face crop for person: ${widget.personId} or cluster ${widget.clusterID} and fileID ${fileForFaceCrop.uploadedFileID!}",
+        );
+      }
+      return result;
     } catch (e, s) {
       _logger.severe(
         "Error getting cover face for person: ${widget.personId} or cluster ${widget.clusterID}",

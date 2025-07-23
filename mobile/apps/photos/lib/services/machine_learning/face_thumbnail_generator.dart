@@ -35,20 +35,30 @@ class FaceThumbnailGenerator extends SuperIsolate {
     String imagePath,
     List<FaceBox> faceBoxes,
   ) async {
-    final List<Map<String, dynamic>> faceBoxesJson =
-        faceBoxes.map((box) => box.toJson()).toList();
-    final List<Uint8List> faces = await runInIsolate(
-      IsolateOperation.generateFaceThumbnails,
-      {
-        'imagePath': imagePath,
-        'faceBoxesList': faceBoxesJson,
-      },
-    ).then((value) => value.cast<Uint8List>());
-    final compressedFaces =
-        await compressFaceThumbnails({'listPngBytes': faces});
-    _logger.fine(
-      "Compressed face thumbnails from sizes ${faces.map((e) => e.length / 1024).toList()} to ${compressedFaces.map((e) => e.length / 1024).toList()} kilobytes",
-    );
-    return compressedFaces;
+    try {
+      _logger.info(
+        "Generating face thumbnails for ${faceBoxes.length} face boxes in $imagePath",
+      );
+      final List<Map<String, dynamic>> faceBoxesJson =
+          faceBoxes.map((box) => box.toJson()).toList();
+      final List<Uint8List> faces = await runInIsolate(
+        IsolateOperation.generateFaceThumbnails,
+        {
+          'imagePath': imagePath,
+          'faceBoxesList': faceBoxesJson,
+        },
+      ).then((value) => value.cast<Uint8List>());
+      _logger.info("Generated face thumbnails");
+      final compressedFaces =
+          await compressFaceThumbnails({'listPngBytes': faces});
+      _logger.fine(
+        "Compressed face thumbnails from sizes ${faces.map((e) => e.length / 1024).toList()} to ${compressedFaces.map((e) => e.length / 1024).toList()} kilobytes",
+      );
+      return compressedFaces;
+    } catch (e, s) {
+      _logger.severe("Failed to generate face thumbnails", e, s);
+
+      rethrow;
+    }
   }
 }
