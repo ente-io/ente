@@ -647,6 +647,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.0"
+  ffigen:
+    dependency: "direct dev"
+    description:
+      name: ffigen
+      sha256: a0ca4853028c6a9e4d9a0a40bb744fceb898c89d75931d08e87b3987d0087060
+      url: "https://pub.dev"
+    source: hosted
+    version: "15.0.0"
   ffmpeg_kit_flutter:
     dependency: "direct main"
     description:
@@ -782,7 +790,7 @@ packages:
     source: hosted
     version: "0.6.0"
   flutter_driver:
-    dependency: "direct dev"
+    dependency: transitive
     description: flutter
     source: sdk
     version: "0.0.0"
@@ -914,14 +922,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.6.0"
-  flutter_launcher_icons:
-    dependency: "direct dev"
-    description:
-      name: flutter_launcher_icons
-      sha256: "526faf84284b86a4cb36d20a5e45147747b7563d921373d4ee0559c54fcdbcea"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.13.1"
   flutter_lints:
     dependency: "direct dev"
     description:
@@ -1019,10 +1019,10 @@ packages:
     dependency: "direct main"
     description:
       name: flutter_rust_bridge
-      sha256: "5fe868d3cb8cbc4d83091748552e03f00ccfa41b8e44691bc382611f831d5f8b"
+      sha256: "37ef40bc6f863652e865f0b2563ea07f0d3c58d8efad803cc01933a4b2ee067e"
       url: "https://pub.dev"
     source: hosted
-    version: "2.5.1"
+    version: "2.11.1"
   flutter_secure_storage:
     dependency: "direct main"
     description:
@@ -2064,7 +2064,7 @@ packages:
     source: hosted
     version: "1.0.1"
   pool:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: pool
       sha256: "20fe868b6314b322ea036ba325e6fc0711a22948856475e2c2b6306e8ab39c2a"
@@ -2097,7 +2097,7 @@ packages:
     source: hosted
     version: "2.1.0"
   protobuf:
-    dependency: "direct overridden"
+    dependency: "direct main"
     description:
       name: protobuf
       sha256: "68645b24e0716782e58948f8467fd42a880f255096a821f9e7d0ec625b00c84d"
@@ -2105,7 +2105,7 @@ packages:
     source: hosted
     version: "3.1.0"
   provider:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: provider
       sha256: c8a055ee5ce3fd98d6fc872478b03823ffdb448699c6ebdbbc71d59b596fd48c
@@ -2129,7 +2129,7 @@ packages:
     source: hosted
     version: "1.4.0"
   quiver:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: quiver
       sha256: ea0b925899e64ecdfbf9c7becb60d5b50e706ade44a85b2363be2a22d88117d2
@@ -2153,6 +2153,13 @@ packages:
       url: "https://github.com/KasemJaffer/receive_sharing_intent.git"
     source: git
     version: "1.8.1"
+  rust_lib_photos:
+    dependency: "direct main"
+    description:
+      path: rust_builder
+      relative: true
+    source: path
+    version: "0.0.1"
   rxdart:
     dependency: transitive
     description:
@@ -2993,6 +3000,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.1.3"
+  yaml_edit:
+    dependency: transitive
+    description:
+      name: yaml_edit
+      sha256: fb38626579fb345ad00e674e2af3a5c9b0cc4b9bfb8fd7f7ff322c7c9e62aef5
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.2.2"
 sdks:
   dart: ">=3.7.0-0 <4.0.0"
   flutter: ">=3.24.0"
