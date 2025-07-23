@@ -405,7 +405,7 @@ const Footer: React.FC = () => {
         <Stack sx={{ my: "4rem", gap: 2, alignItems: "center" }}>
             <Typography>{t("auth_download_mobile_app")}</Typography>
             <a
-                href="https://github.com/ente-io/ente/tree/main/auth#-download"
+                href="https://ente.io/auth/#download-auth"
                 download
             >
                 <Button color="accent">{t("download")}</Button>
