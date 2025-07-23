@@ -12295,6 +12295,46 @@ class S {
       args: [],
     );
   }
+
+  /// `This week`
+  String get thisWeek {
+    return Intl.message(
+      'This week',
+      name: 'thisWeek',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This month`
+  String get thisMonth {
+    return Intl.message(
+      'This month',
+      name: 'thisMonth',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This year`
+  String get thisYear {
+    return Intl.message(
+      'This year',
+      name: 'thisYear',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Group by`
+  String get groupBy {
+    return Intl.message(
+      'Group by',
+      name: 'groupBy',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

@@ -1,4 +1,5 @@
 import 'package:photos/core/constants.dart';
+import 'package:photos/ui/viewer/gallery/component/group/type.dart';
 import "package:photos/utils/ram_check_util.dart";
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -20,6 +21,7 @@ enum AlbumViewType {
 
 class LocalSettings {
   static const kCollectionSortPref = "collection_sort_pref";
+  static const kGalleryGroupType = "gallery_group_type";
   static const kPhotoGridSize = "photo_grid_size";
   static const _kisMLLocalIndexingEnabled = "ls.ml_local_indexing";
   static const _kHasSeenMLEnablingBanner = "ls.has_seen_ml_enabling_banner";
@@ -68,6 +70,21 @@ class LocalSettings {
 
   Future<bool> setAlbumSortDirection(AlbumSortDirection direction) {
     return _prefs.setInt(kCollectionSortDirection, direction.index);
+  }
+
+  GroupType getGalleryGroupType() {
+    final groupTypeString = _prefs.getString(kGalleryGroupType);
+    if (groupTypeString != null) {
+      return GroupType.values.firstWhere(
+        (type) => type.toString() == groupTypeString,
+        orElse: () => GroupType.values[0],
+      );
+    }
+    return GroupType.values[0];
+  }
+
+  Future<void> setGalleryGroupType(GroupType groupType) async {
+    await _prefs.setString(kGalleryGroupType, groupType.toString());
   }
 
   int getPhotoGridSize() {

@@ -70,7 +70,10 @@ class _GroupHeaderWidgetState extends State<GroupHeaderWidget> {
               alignment: Alignment.centerLeft,
               child: Text(
                 widget.title,
-                style: (widget.title == S.of(context).dayToday)
+                style: (widget.title == S.of(context).dayToday ||
+                        widget.title == S.of(context).thisWeek ||
+                        widget.title == S.of(context).thisMonth ||
+                        widget.title == S.of(context).thisYear)
                     ? textStyle
                     : textStyle.copyWith(color: colorScheme.textMuted),
                 maxLines: 1,

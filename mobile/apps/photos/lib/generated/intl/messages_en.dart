@@ -1096,6 +1096,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "grantPermission":
             MessageLookupByLibrary.simpleMessage("Grant permission"),
         "greenery": MessageLookupByLibrary.simpleMessage("The green life"),
+        "groupBy": MessageLookupByLibrary.simpleMessage("Group by"),
         "groupNearbyPhotos":
             MessageLookupByLibrary.simpleMessage("Group nearby photos"),
         "guestView": MessageLookupByLibrary.simpleMessage("Guest view"),
@@ -2036,6 +2037,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "thisIsPersonVerificationId": m100,
         "thisIsYourVerificationId": MessageLookupByLibrary.simpleMessage(
             "This is your Verification ID"),
+        "thisMonth": MessageLookupByLibrary.simpleMessage("This month"),
+        "thisWeek": MessageLookupByLibrary.simpleMessage("This week"),
         "thisWeekThroughTheYears":
             MessageLookupByLibrary.simpleMessage("This week through the years"),
         "thisWeekXYearsAgo": m101,
@@ -2050,6 +2053,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "thisWillRemovePublicLinksOfAllSelectedQuickLinks":
             MessageLookupByLibrary.simpleMessage(
                 "This will remove public links of all selected quick links."),
+        "thisYear": MessageLookupByLibrary.simpleMessage("This year"),
         "throughTheYears": m102,
         "toEnableAppLockPleaseSetupDevicePasscodeOrScreen":
             MessageLookupByLibrary.simpleMessage(

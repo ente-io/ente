@@ -76,7 +76,9 @@ class Gallery extends StatefulWidget {
 
   // add a Function variable to get sort value in bool
   final SortAscFn? sortAsyncFn;
-  final GroupType groupType;
+
+  /// Pass value to override default group type.
+  final GroupType? groupType;
   final bool disablePinnedGroupHeader;
   final bool disableVerticalPaddingForScrollbar;
 
@@ -92,7 +94,7 @@ class Gallery extends StatefulWidget {
     this.footer = const SizedBox(height: 212),
     this.emptyState = const EmptyState(),
     this.albumName = '',
-    this.groupType = GroupType.day,
+    this.groupType,
     this.enableFileGrouping = true,
     this.loadingWidget = const EnteLoadingWidget(),
     this.disableScroll = false,
@@ -210,6 +212,7 @@ class GalleryState extends State<Gallery> {
               _logger.info("Force refresh all files on ${event.reason}");
               _sortOrderAsc =
                   widget.sortAsyncFn != null ? widget.sortAsyncFn!() : false;
+              _setGroupType();
               final result = await _loadFiles();
               _setFilesAndReload(result.files);
             });
@@ -290,7 +293,13 @@ class GalleryState extends State<Gallery> {
   }
 
   void _setGroupType() {
-    _groupType = widget.enableFileGrouping ? widget.groupType : GroupType.none;
+    if (!widget.enableFileGrouping) {
+      _groupType = GroupType.none;
+    } else if (widget.groupType != null) {
+      _groupType = widget.groupType!;
+    } else {
+      _groupType = localSettings.getGalleryGroupType();
+    }
   }
 
   void _setFilesAndReload(List<EnteFile> files) {
@@ -667,7 +676,7 @@ class GalleryState extends State<Gallery> {
     final List<List<EnteFile>> resultGroupedFiles = [];
     for (int index = 0; index < files.length; index++) {
       if (index > 0 &&
-          !widget.groupType.areFromSameGroup(files[index - 1], files[index])) {
+          !_groupType.areFromSameGroup(files[index - 1], files[index])) {
         resultGroupedFiles.add(dailyFiles);
         dailyFiles = [];
       }
