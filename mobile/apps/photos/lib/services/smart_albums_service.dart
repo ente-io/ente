@@ -25,12 +25,6 @@ class SmartAlbumsService {
     _lastCacheRefreshTime = 0;
   }
 
-  Future<void> refreshSmartConfigCache() async {
-    _lastCacheRefreshTime = 0;
-    // wait to ensure cache is refreshed
-    final _ = await getSmartConfigs();
-  }
-
   int lastRemoteSyncTime() {
     return entityService.lastSyncTime(type);
   }
