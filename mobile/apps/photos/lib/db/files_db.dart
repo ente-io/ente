@@ -1479,7 +1479,6 @@ class FilesDB with SqlDbBase {
 
     final inParam = ids.map((id) => "'$id'").join(',');
     final db = await instance.sqliteAsyncDB;
-
     final results = await db.getAll(
       'SELECT * FROM $filesTable WHERE $columnUploadedFileID IN ($inParam) ORDER BY $columnCreationTime $order',
     );

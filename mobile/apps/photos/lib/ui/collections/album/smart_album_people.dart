@@ -5,9 +5,10 @@ import "package:photos/db/files_db.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/collection/smart_album_config.dart";
 import "package:photos/models/selected_people.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
-import "package:photos/services/smart_albums_service.dart";
 import "package:photos/ui/actions/collection/collection_sharing_actions.dart";
+import "package:photos/ui/components/action_sheet_widget.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
 import 'package:photos/ui/components/title_bar_title_widget.dart';
@@ -39,8 +40,7 @@ class _SmartAlbumPeopleState extends State<SmartAlbumPeople> {
   }
 
   Future<void> getSelections() async {
-    currentConfig =
-        await SmartAlbumsService.instance.getConfig(widget.collectionId);
+    currentConfig = await smartAlbumsService.getConfig(widget.collectionId);
 
     if (currentConfig != null &&
         currentConfig!.personIDs.isNotEmpty &&
@@ -108,10 +108,7 @@ class _SmartAlbumPeopleState extends State<SmartAlbumPeople> {
                         .toList();
 
                     if (removedPersonIds.isNotEmpty) {
-                      final toDelete =
-                          await SmartAlbumsService.instance.removeFilesDialog(
-                        context,
-                      );
+                      final toDelete = await removeFilesDialog(context);
                       await dialog.show();
 
                       if (toDelete) {
@@ -139,13 +136,13 @@ class _SmartAlbumPeopleState extends State<SmartAlbumPeople> {
                         }
                       }
                     }
-                    newConfig = await currentConfig!.getUpdatedConfig(
+                    newConfig = currentConfig!.getUpdatedConfig(
                       _selectedPeople.personIds,
                     );
                   }
 
-                  await SmartAlbumsService.instance.saveConfig(newConfig);
-                  SmartAlbumsService.instance.syncSmartAlbums().ignore();
+                  await smartAlbumsService.saveConfig(newConfig);
+                  smartAlbumsService.syncSmartAlbums().ignore();
 
                   await dialog.hide();
                   Navigator.pop(context);
@@ -179,4 +176,41 @@ class _SmartAlbumPeopleState extends State<SmartAlbumPeople> {
       ),
     );
   }
+}
+
+Future<bool> removeFilesDialog(
+  BuildContext context,
+) async {
+  final completer = Completer<bool>();
+  await showActionSheet(
+    context: context,
+    body: S.of(context).shouldRemoveFilesSmartAlbumsDesc,
+    buttons: [
+      ButtonWidget(
+        labelText: S.of(context).yes,
+        buttonType: ButtonType.neutral,
+        buttonSize: ButtonSize.large,
+        shouldStickToDarkTheme: true,
+        buttonAction: ButtonAction.first,
+        shouldSurfaceExecutionStates: true,
+        isInAlert: true,
+        onTap: () async {
+          completer.complete(true);
+        },
+      ),
+      ButtonWidget(
+        labelText: S.of(context).no,
+        buttonType: ButtonType.secondary,
+        buttonSize: ButtonSize.large,
+        shouldStickToDarkTheme: true,
+        buttonAction: ButtonAction.cancel,
+        isInAlert: true,
+        onTap: () async {
+          completer.complete(false);
+        },
+      ),
+    ],
+  );
+
+  return completer.future;
 }

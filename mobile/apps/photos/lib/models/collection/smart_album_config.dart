@@ -2,7 +2,7 @@ typedef PersonInfo = ({int updatedAt, Set<int> addedFiles});
 
 class SmartAlbumConfig {
   // A nullable remote ID for syncing purposes
-  final String? remoteId;
+  final String? id;
 
   final int collectionId;
   // person ids
@@ -12,14 +12,14 @@ class SmartAlbumConfig {
   final int updatedAt;
 
   SmartAlbumConfig({
-    this.remoteId,
+    this.id,
     required this.collectionId,
     required this.personIDs,
     required this.infoMap,
     this.updatedAt = 0,
   });
 
-  Future<SmartAlbumConfig> getUpdatedConfig(Set<String> newPersonsIds) async {
+  SmartAlbumConfig getUpdatedConfig(Set<String> newPersonsIds) {
     final toAdd = newPersonsIds.difference(personIDs);
     final toRemove = personIDs.difference(newPersonsIds);
     final newInfoMap = Map<String, PersonInfo>.from(infoMap);
@@ -35,7 +35,7 @@ class SmartAlbumConfig {
     }
 
     return SmartAlbumConfig(
-      remoteId: remoteId,
+      id: id,
       collectionId: collectionId,
       personIDs: newPersonsIds,
       infoMap: newInfoMap,
@@ -58,7 +58,7 @@ class SmartAlbumConfig {
       addedFiles: newInfoMap[personId]!.addedFiles.union(fileId),
     );
     return SmartAlbumConfig(
-      remoteId: remoteId,
+      id: id,
       collectionId: collectionId,
       personIDs: personIDs,
       infoMap: newInfoMap,
@@ -69,7 +69,7 @@ class SmartAlbumConfig {
   // toJson and fromJson methods
   Map<String, dynamic> toJson() {
     return {
-      "remote_id": remoteId,
+      "remote_id": id,
       "collection_id": collectionId,
       "person_ids": personIDs.toList(),
       "updated_at": updatedAt,
@@ -103,7 +103,7 @@ class SmartAlbumConfig {
     );
 
     return SmartAlbumConfig(
-      remoteId: remoteId,
+      id: remoteId,
       collectionId: json["collection_id"] as int,
       personIDs: personIDs,
       infoMap: infoMap,
@@ -112,14 +112,14 @@ class SmartAlbumConfig {
   }
 
   SmartAlbumConfig merge(SmartAlbumConfig b) {
-    if (remoteId == b.remoteId) {
+    if (id == b.id) {
       if (updatedAt >= b.updatedAt) {
         return this;
       }
       return b;
     }
     return SmartAlbumConfig(
-      remoteId: b.updatedAt <= updatedAt ? b.remoteId : remoteId,
+      id: b.updatedAt <= updatedAt ? b.id : id,
       collectionId: b.collectionId,
       personIDs: personIDs.union(b.personIDs),
       infoMap: {

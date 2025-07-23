@@ -27,7 +27,6 @@ import 'package:photos/models/selected_files.dart';
 import 'package:photos/service_locator.dart';
 import 'package:photos/services/collections_service.dart';
 import "package:photos/services/files_service.dart";
-import "package:photos/services/smart_albums_service.dart";
 import "package:photos/states/location_screen_state.dart";
 import "package:photos/theme/colors.dart";
 import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
@@ -535,7 +534,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
               ? S.of(context).autoAddPeople
               : S.of(context).editAutoAddPeople,
           value: AlbumPopupAction.autoAddPhotos,
-          future: SmartAlbumsService.instance.getSmartConfigs,
+          future: smartAlbumsService.getSmartConfigs,
           icon: (value) => Icons.add,
         ),
       if (galleryType.canDelete())
