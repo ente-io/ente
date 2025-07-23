@@ -125,7 +125,12 @@ const getColors = (appName: AppName) => ({
         },
     },
     ...{
-        accent: appName == "auth" ? _colors.accentAuth : _colors.accentPhotos,
+        accent:
+            appName == "auth"
+                ? _colors.accentAuth
+                : appName == "locker"
+                  ? _colors.accentLocker
+                  : _colors.accentPhotos,
     },
 });
 
@@ -139,6 +144,7 @@ const getColors = (appName: AppName) => ({
 const _colors = {
     accentPhotos: { dark: "#00b33c", main: "#1db954", light: "#01de4d" },
     accentAuth: { dark: "#8e0fcb", main: "#9610d6", light: "#8e2de2" },
+    accentLocker: { dark: "#615bff", main: "#5ba8ff", light: "#5bf9ff" },
     fixed: {
         white: "#fff",
         black: "#000",
@@ -764,3 +770,8 @@ export const authTheme = getTheme("auth");
  * This is the same as the dark theme for the photos app.
  */
 export const castTheme = getTheme("cast");
+
+/**
+ * The MUI {@link Theme} to use for the locker app.
+ */
+export const lockerTheme = getTheme("locker");

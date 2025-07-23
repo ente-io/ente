@@ -12295,6 +12295,26 @@ class S {
       args: [],
     );
   }
+
+  /// `Unable to generate face thumbnails`
+  String get faceThumbnailGenerationFailed {
+    return Intl.message(
+      'Unable to generate face thumbnails',
+      name: 'faceThumbnailGenerationFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Unable to analyze file`
+  String get fileAnalysisFailed {
+    return Intl.message(
+      'Unable to analyze file',
+      name: 'fileAnalysisFailed',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

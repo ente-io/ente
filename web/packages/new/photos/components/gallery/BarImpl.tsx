@@ -12,15 +12,15 @@ import { Ellipsized2LineTypography } from "ente-base/components/Typography";
 import { useIsSmallWidth } from "ente-base/components/utils/hooks";
 import { CollectionsSortOptions } from "ente-new/photos/components/CollectionsSortOptions";
 import {
-    IMAGE_CONTAINER_MAX_WIDTH,
-    MIN_COLUMNS,
-} from "ente-new/photos/components/FileList";
-import {
     BarItemTile,
     ItemCard,
     TileTextOverlay,
 } from "ente-new/photos/components/Tiles";
 import { FocusVisibleUnstyledButton } from "ente-new/photos/components/UnstyledButton";
+import {
+    thumbnailLayoutMinColumns,
+    thumbnailMaxWidth,
+} from "ente-new/photos/components/utils/thumbnail-grid-layout";
 import type {
     CollectionSummary,
     CollectionSummaryAttribute,
@@ -300,7 +300,7 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
 
 const BarWrapper = styled("div")`
     padding-inline: 24px;
-    @media (max-width: ${IMAGE_CONTAINER_MAX_WIDTH * MIN_COLUMNS}px) {
+    @media (max-width: ${thumbnailMaxWidth * thumbnailLayoutMinColumns}px) {
         padding-inline: 4px;
     }
     margin-block-end: 16px;

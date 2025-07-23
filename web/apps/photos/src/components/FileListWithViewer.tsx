@@ -59,7 +59,7 @@ export type FileListWithViewerProps = {
     | "header"
     | "footer"
     | "disableGrouping"
-    | "selectable"
+    | "enableSelect"
     | "selected"
     | "setSelected"
     | "activeCollectionID"
@@ -98,7 +98,7 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
     files,
     enableDownload,
     disableGrouping,
-    selectable,
+    enableSelect,
     selected,
     setSelected,
     activeCollectionID,
@@ -188,7 +188,7 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
                             footer,
                             user,
                             disableGrouping,
-                            selectable,
+                            enableSelect,
                             selected,
                             setSelected,
                             activeCollectionID,

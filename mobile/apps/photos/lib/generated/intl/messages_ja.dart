@@ -265,8 +265,6 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m114(email) => "<green>${email}</green>にメールを送りました";
 
-  static String m115(name) => "Wish \$${name} a happy birthday! 🎉";
-
   static String m116(count) => "${Intl.plural(count, other: '${count} 年前')}";
 
   static String m117(name) => "あなたと${name}";
@@ -461,24 +459,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "birthday": MessageLookupByLibrary.simpleMessage("誕生日"),
         "blackFridaySale": MessageLookupByLibrary.simpleMessage("ブラックフライデーセール"),
         "blog": MessageLookupByLibrary.simpleMessage("ブログ"),
-        "cLDesc1": MessageLookupByLibrary.simpleMessage(
-            "動画ストリーミングベータ版と再開可能なアップロード・ダウンロードの作業により、ファイルアップロード制限を10GBに増加しました。これはデスクトップとモバイルアプリの両方で利用可能です。"),
-        "cLDesc2": MessageLookupByLibrary.simpleMessage(
-            "バックグラウンドアップロードがAndroidデバイスに加えてiOSでもサポートされるようになりました。最新の写真や動画をバックアップするためにアプリを開く必要がありません。"),
-        "cLDesc3": MessageLookupByLibrary.simpleMessage(
-            "自動再生、次のメモリーへのスワイプなど、メモリー体験に大幅な改善を加えました。"),
-        "cLDesc4": MessageLookupByLibrary.simpleMessage(
-            "多くの内部改善とともに、検出されたすべての顔を確認し、類似した顔にフィードバックを提供し、1枚の写真から顔を追加/削除することがはるかに簡単になりました。"),
-        "cLDesc5": MessageLookupByLibrary.simpleMessage(
-            "Enteに保存したすべての誕生日について、その人のベスト写真のコレクションとともに、オプトアウト通知を受け取るようになります。"),
-        "cLDesc6": MessageLookupByLibrary.simpleMessage(
-            "アプリを閉じる前にアップロード/ダウンロードの完了を待つ必要がなくなりました。すべてのアップロードとダウンロードは途中で一時停止し、中断したところから再開できるようになりました。"),
-        "cLTitle1": MessageLookupByLibrary.simpleMessage("大きな動画ファイルのアップロード"),
-        "cLTitle2": MessageLookupByLibrary.simpleMessage("バックグラウンドアップロード"),
-        "cLTitle3": MessageLookupByLibrary.simpleMessage("メモリーの自動再生"),
-        "cLTitle4": MessageLookupByLibrary.simpleMessage("顔認識の改善"),
-        "cLTitle5": MessageLookupByLibrary.simpleMessage("誕生日通知"),
-        "cLTitle6": MessageLookupByLibrary.simpleMessage("再開可能なアップロードとダウンロード"),
         "cachedData": MessageLookupByLibrary.simpleMessage("キャッシュデータ"),
         "calculating": MessageLookupByLibrary.simpleMessage("計算中..."),
         "canNotOpenBody": MessageLookupByLibrary.simpleMessage(
@@ -1824,7 +1804,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "whatsNew": MessageLookupByLibrary.simpleMessage("最新情報"),
         "whyAddTrustContact":
             MessageLookupByLibrary.simpleMessage("信頼する連絡先は、データの復旧が必要な際に役立ちます。"),
-        "wishThemAHappyBirthday": m115,
         "yearShort": MessageLookupByLibrary.simpleMessage("年"),
         "yearly": MessageLookupByLibrary.simpleMessage("年額"),
         "yearsAgo": m116,

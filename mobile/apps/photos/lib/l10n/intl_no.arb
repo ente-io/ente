@@ -476,7 +476,7 @@
     }
   },
   "showMemories": "Vis minner",
-  "yearsAgo": "{count, plural, other{{count} år siden}}",
+  "yearsAgo": "{count, plural, one{{count} år siden} other{{count} år siden}}",
   "backupSettings": "Sikkerhetskopier innstillinger",
   "backupStatus": "Status for sikkerhetskopi",
   "backupStatusDescription": "Elementer som har blitt sikkerhetskopiert vil vises her",
