@@ -1427,12 +1427,20 @@ class CollectionsService {
       }
       // group files by collectionID
       final Map<int, List<EnteFile>> filesByCollection = {};
+      final Map<int, Set<int>> fileSeenByCollection = {};
       for (final file in filesToCopy) {
-        if (filesByCollection.containsKey(file.collectionID!)) {
-          filesByCollection[file.collectionID!]!.add(file.copyWith());
-        } else {
-          filesByCollection[file.collectionID!] = [file.copyWith()];
+        fileSeenByCollection.putIfAbsent(file.collectionID!, () => <int>{});
+        if (fileSeenByCollection[file.collectionID]!
+            .contains(file.uploadedFileID)) {
+          _logger.warning(
+            "skip copy, duplicate ID: ${file.uploadedFileID} in collection "
+            "${file.collectionID}",
+          );
+          continue;
         }
+        filesByCollection
+            .putIfAbsent(file.collectionID!, () => [])
+            .add(file.copyWith());
       }
       for (final entry in filesByCollection.entries) {
         final srcCollectionID = entry.key;
@@ -1579,9 +1587,6 @@ class CollectionsService {
       params["files"] = [];
       for (final batchFile in batch) {
         final fileKey = getFileKey(batchFile);
-        _logger.info(
-          "srcCollection : $srcCollectionID  file: ${batchFile.uploadedFileID}  key: ${CryptoUtil.bin2base64(fileKey)} ",
-        );
         final encryptedKeyData =
             CryptoUtil.encryptSync(fileKey, getCollectionKey(dstCollectionID));
         batchFile.encryptedKey =
