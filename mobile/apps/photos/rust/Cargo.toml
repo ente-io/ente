@@ -7,7 +7,7 @@ edition = "2021"
 crate-type = ["cdylib", "staticlib"]
 
 [dependencies]
-flutter_rust_bridge = "=2.9.0"
+flutter_rust_bridge = "=2.11.1"
 usearch = "2.17.11"
 
 [lints.rust]
